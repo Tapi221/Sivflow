@@ -243,7 +243,6 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       scrollContainerEl,
       currentPage,
       handleScroll,
-      handleVisibilityChange,
       notifyLayoutChanged,
       resetNavigation,
       scrollToPage,
@@ -587,14 +586,12 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
                       pageNumber={pageNumber}
                       scale={scale}
                       baseSize={pageSizes[pageNumber]}
-                      rootEl={scrollContainerEl}
                       opaqueCanvas={resolvedOpaqueCanvas}
                       searchMatches={pageSearchMatches}
                       activeSearchMatchIndex={activeSearchMatchIndexForPage}
                       getPage={getPage}
                       getPageTextContent={getPageTextContent}
                       onPageSize={setPageSize}
-                      onVisibilityChange={handleVisibilityChange}
                     />
                   </div>
                 );

@@ -1,9 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { pdfjsLib } from "@/lib/pdfjs";
-import {
-  PDF_PAGE_OBSERVER_ROOT_MARGIN,
-  PDF_PAGE_OBSERVER_THRESHOLDS,
-} from "@/components/pdf/pdfViewerConstants";
 import type {
   PageSize,
   PdfJsDocument,
@@ -23,13 +19,11 @@ interface PdfPageProps {
   scale: number;
   opaqueCanvas: boolean;
   baseSize?: PageSize;
-  rootEl: HTMLDivElement | null;
   searchMatches?: PdfPageSearchMatch[];
   activeSearchMatchIndex?: number;
   getPage: (pageNumber: number) => Promise<PdfJsPage>;
   getPageTextContent: (pageNumber: number) => Promise<PdfJsTextContent>;
   onPageSize?: (pageNumber: number, size: PageSize) => void;
-  onVisibilityChange?: (pageNumber: number, ratio: number) => void;
 }
 
 type MeasuredPageState = {
@@ -179,20 +173,15 @@ const PdfPageComponent = ({
   scale,
   opaqueCanvas,
   baseSize,
-  rootEl,
   searchMatches = [],
   activeSearchMatchIndex,
   getPage,
   getPageTextContent,
   onPageSize,
-  onVisibilityChange,
 }: PdfPageProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textLayerRef = useRef<HTMLDivElement>(null);
   const searchLayerRef = useRef<HTMLDivElement>(null);
-
-  const [shouldRender, setShouldRender] = useState(false);
 
   const pageIdentity = useMemo(
     () => buildPageIdentity(pdf, pageNumber),
@@ -287,40 +276,11 @@ const PdfPageComponent = ({
   ]);
 
   useEffect(() => {
-    const target = containerRef.current;
-    if (!rootEl || !target) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        const ratio = entry.intersectionRatio;
-
-        onVisibilityChange?.(pageNumber, ratio);
-
-        if (entry.isIntersecting || ratio > 0) {
-          setShouldRender(true);
-        }
-      },
-      {
-        root: rootEl,
-        rootMargin: PDF_PAGE_OBSERVER_ROOT_MARGIN,
-        threshold: PDF_PAGE_OBSERVER_THRESHOLDS,
-      },
-    );
-
-    observer.observe(target);
-
-    return () => {
-      onVisibilityChange?.(pageNumber, 0);
-      observer.disconnect();
-    };
-  }, [onVisibilityChange, pageNumber, rootEl]);
-
-  useEffect(() => {
-    if (!shouldRender || scale <= 0) return;
+    if (scale <= 0) return;
 
     let cancelled = false;
     let renderTask: PdfJsRenderTask | null = null;
+    let renderStartRafId: number | null = null;
 
     const run = async () => {
       try {
@@ -455,10 +415,17 @@ const PdfPageComponent = ({
       }
     };
 
-    void run();
+    renderStartRafId = window.requestAnimationFrame(() => {
+      renderStartRafId = null;
+      void run();
+    });
 
     return () => {
       cancelled = true;
+
+      if (renderStartRafId !== null) {
+        window.cancelAnimationFrame(renderStartRafId);
+      }
 
       try {
         renderTask?.cancel?.();
@@ -469,15 +436,7 @@ const PdfPageComponent = ({
       clearElement(textLayerRef.current);
       clearElement(searchLayerRef.current);
     };
-  }, [
-    getPage,
-    getPageTextContent,
-    opaqueCanvas,
-    pageNumber,
-    renderIdentity,
-    scale,
-    shouldRender,
-  ]);
+  }, [getPage, getPageTextContent, opaqueCanvas, pageNumber, renderIdentity, scale]);
 
   useEffect(() => {
     const searchLayerEl = searchLayerRef.current;
@@ -523,7 +482,6 @@ const PdfPageComponent = ({
 
   return (
     <div
-      ref={containerRef}
       className="flex w-full justify-center"
       style={
         placeholderHeight > 0
@@ -567,12 +525,10 @@ const arePdfPagePropsEqual = (left: PdfPageProps, right: PdfPageProps) =>
   left.scale === right.scale &&
   left.opaqueCanvas === right.opaqueCanvas &&
   arePageSizesEqual(left.baseSize, right.baseSize) &&
-  left.rootEl === right.rootEl &&
   left.searchMatches === right.searchMatches &&
   left.activeSearchMatchIndex === right.activeSearchMatchIndex &&
   left.getPage === right.getPage &&
   left.getPageTextContent === right.getPageTextContent &&
-  left.onPageSize === right.onPageSize &&
-  left.onVisibilityChange === right.onVisibilityChange;
+  left.onPageSize === right.onPageSize;
 
 export const PdfPage = memo(PdfPageComponent, arePdfPagePropsEqual);
