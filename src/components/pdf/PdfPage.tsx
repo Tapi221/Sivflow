@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { pdfjsLib } from "@/lib/pdfjs";
 import {
   PDF_PAGE_OBSERVER_ROOT_MARGIN,
@@ -7,7 +7,9 @@ import {
 import type {
   PageSize,
   PdfJsDocument,
+  PdfJsPage,
   PdfJsRenderTask,
+  PdfJsTextContent,
   PdfPageSearchMatch,
 } from "@/components/pdf/pdfViewerTypes";
 import { getErrorMessage } from "@/components/pdf/pdfViewerTypes";
@@ -21,6 +23,8 @@ interface PdfPageProps {
   rootEl: HTMLDivElement | null;
   searchMatches?: PdfPageSearchMatch[];
   activeSearchMatchIndex?: number;
+  getPage: (pageNumber: number) => Promise<PdfJsPage>;
+  getPageTextContent: (pageNumber: number) => Promise<PdfJsTextContent>;
   onPageSize?: (pageNumber: number, size: PageSize) => void;
   onVisibilityChange?: (pageNumber: number, ratio: number) => void;
 }
@@ -73,6 +77,21 @@ const getTextLayerCtor = () => {
 
 const clearElement = (element: HTMLElement | null) => {
   element?.replaceChildren();
+};
+
+const arePageSizesEqual = (
+  left: PageSize | undefined,
+  right: PageSize | undefined,
+) => {
+  if (left === right) {
+    return true;
+  }
+
+  if (!left || !right) {
+    return !left && !right;
+  }
+
+  return left.width === right.width && left.height === right.height;
 };
 
 const renderSearchHighlights = ({
@@ -148,7 +167,7 @@ const renderSearchHighlights = ({
   });
 };
 
-export const PdfPage = ({
+const PdfPageComponent = ({
   pdf,
   pageNumber,
   scale,
@@ -157,6 +176,8 @@ export const PdfPage = ({
   rootEl,
   searchMatches = [],
   activeSearchMatchIndex,
+  getPage,
+  getPageTextContent,
   onPageSize,
   onVisibilityChange,
 }: PdfPageProps) => {
@@ -220,8 +241,7 @@ export const PdfPage = ({
 
     let cancelled = false;
 
-    void pdf
-      .getPage(pageNumber)
+    void getPage(pageNumber)
       .then((page) => {
         if (cancelled) return;
 
@@ -250,12 +270,12 @@ export const PdfPage = ({
     };
   }, [
     baseSize,
+    getPage,
     measuredPageState.pageIdentity,
     measuredPageState.size,
     onPageSize,
     pageIdentity,
     pageNumber,
-    pdf,
   ]);
 
   useEffect(() => {
@@ -296,7 +316,10 @@ export const PdfPage = ({
 
     const run = async () => {
       try {
-        const page = await pdf.getPage(pageNumber);
+        const [page, textContent] = await Promise.all([
+          getPage(pageNumber),
+          getPageTextContent(pageNumber),
+        ]);
         if (cancelled) return;
 
         const viewport = page.getViewport({ scale });
@@ -335,8 +358,6 @@ export const PdfPage = ({
         searchLayerEl.style.width = `${viewport.width}px`;
         searchLayerEl.style.height = `${viewport.height}px`;
 
-        const textContentPromise = page.getTextContent();
-
         renderTask = page.render({
           canvasContext: context,
           viewport,
@@ -344,9 +365,6 @@ export const PdfPage = ({
         });
 
         await renderTask.promise;
-        if (cancelled) return;
-
-        const textContent = await textContentPromise;
         if (cancelled) return;
 
         const TextLayerCtor = getTextLayerCtor();
@@ -401,7 +419,15 @@ export const PdfPage = ({
       clearElement(textLayerRef.current);
       clearElement(searchLayerRef.current);
     };
-  }, [opaqueCanvas, pageNumber, pdf, renderIdentity, scale, shouldRender]);
+  }, [
+    getPage,
+    getPageTextContent,
+    opaqueCanvas,
+    pageNumber,
+    renderIdentity,
+    scale,
+    shouldRender,
+  ]);
 
   useEffect(() => {
     const searchLayerEl = searchLayerRef.current;
@@ -478,3 +504,19 @@ export const PdfPage = ({
     </div>
   );
 };
+
+const arePdfPagePropsEqual = (left: PdfPageProps, right: PdfPageProps) =>
+  left.pdf === right.pdf &&
+  left.pageNumber === right.pageNumber &&
+  left.scale === right.scale &&
+  left.opaqueCanvas === right.opaqueCanvas &&
+  arePageSizesEqual(left.baseSize, right.baseSize) &&
+  left.rootEl === right.rootEl &&
+  left.searchMatches === right.searchMatches &&
+  left.activeSearchMatchIndex === right.activeSearchMatchIndex &&
+  left.getPage === right.getPage &&
+  left.getPageTextContent === right.getPageTextContent &&
+  left.onPageSize === right.onPageSize &&
+  left.onVisibilityChange === right.onVisibilityChange;
+
+export const PdfPage = memo(PdfPageComponent, arePdfPagePropsEqual);

@@ -1,4 +1,5 @@
 import React, {
+  useCallback,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -14,7 +15,11 @@ import {
 import { usePdfCurrentPage } from "./hooks/usePdfCurrentPage";
 import { usePdfDocument } from "./hooks/usePdfDocument";
 import { usePdfZoom } from "./hooks/usePdfZoom";
-import { extractTextItems, findPageSearchMatches } from "./pdfTextSearch";
+import {
+  buildPageSearchIndex,
+  findPageSearchMatches,
+  type PdfPageSearchIndex,
+} from "./pdfTextSearch";
 import type {
   PageSize,
   PdfPageSearchMatch,
@@ -59,6 +64,47 @@ interface PdfViewerProps {
   viewerOptions?: PdfViewerOptions;
 }
 
+const EMPTY_SEARCH_MATCHES: PdfPageSearchMatch[] = [];
+const SEARCH_INDEX_CONCURRENCY = 6;
+
+const buildSearchIndexMap = async ({
+  pageNumbers,
+  getPageSearchIndex,
+  concurrency,
+}: {
+  pageNumbers: number[];
+  getPageSearchIndex: (pageNumber: number) => Promise<PdfPageSearchIndex>;
+  concurrency: number;
+}) => {
+  const limitedConcurrency = Math.max(
+    1,
+    Math.min(concurrency, pageNumbers.length || 1),
+  );
+  const searchIndexMap = new Map<number, PdfPageSearchIndex>();
+  let cursor = 0;
+
+  const worker = async () => {
+    while (cursor < pageNumbers.length) {
+      const currentIndex = cursor;
+      cursor += 1;
+
+      const pageNumber = pageNumbers[currentIndex];
+      if (typeof pageNumber !== "number") {
+        return;
+      }
+
+      const searchIndex = await getPageSearchIndex(pageNumber);
+      searchIndexMap.set(pageNumber, searchIndex);
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: limitedConcurrency }, () => worker()),
+  );
+
+  return searchIndexMap;
+};
+
 export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
   (
     {
@@ -83,15 +129,23 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
     }: PdfViewerProps,
     ref,
   ) => {
-    const { doc, numPages, pageSizes, loading, error, setPageSize } =
-      usePdfDocument({
-        source,
-        viewerOptions,
-        sourceMeta,
-        onNumPages,
-        onFirstPageSize,
-        onSourceLoadError,
-      });
+    const {
+      doc,
+      numPages,
+      pageSizes,
+      loading,
+      error,
+      setPageSize,
+      getPage,
+      getPageTextContent,
+    } = usePdfDocument({
+      source,
+      viewerOptions,
+      sourceMeta,
+      onNumPages,
+      onFirstPageSize,
+      onSourceLoadError,
+    });
 
     const {
       containerRef,
@@ -122,9 +176,15 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
     const [pageMatches, setPageMatches] = useState<
       Record<number, PdfPageSearchMatch[]>
     >({});
+    const [flattenedMatches, setFlattenedMatches] = useState<
+      PdfPageSearchMatch[]
+    >([]);
     const [activeMatchIndex, setActiveMatchIndex] = useState(-1);
     const normalizedSearchQuery = searchQuery.trim();
     const lastSearchNavTokenRef = useRef(searchNavToken);
+    const searchIndexPromiseCacheRef = useRef<
+      Map<number, Promise<PdfPageSearchIndex>>
+    >(new Map());
 
     const normalizedSourceUrl =
       typeof source?.url === "string" ? source.url.trim() : "";
@@ -138,6 +198,38 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       localFileId: string | null;
     } | null>(null);
 
+    const pageNumbers = useMemo(
+      () => Array.from({ length: numPages }, (_, index) => index + 1),
+      [numPages],
+    );
+    const resolvedOpaqueCanvas = viewerOptions?.opaqueCanvas ?? false;
+
+    const resetSearchIndexCache = useCallback(() => {
+      searchIndexPromiseCacheRef.current.clear();
+    }, []);
+
+    const getPageSearchIndex = useCallback(
+      (pageNumber: number): Promise<PdfPageSearchIndex> => {
+        const safePageNumber = Math.max(1, Math.floor(pageNumber));
+        const existingPromise =
+          searchIndexPromiseCacheRef.current.get(safePageNumber);
+        if (existingPromise) {
+          return existingPromise;
+        }
+
+        const nextPromise = getPageTextContent(safePageNumber)
+          .then((textContent) => buildPageSearchIndex(textContent))
+          .catch((errorValue) => {
+            searchIndexPromiseCacheRef.current.delete(safePageNumber);
+            throw errorValue;
+          });
+
+        searchIndexPromiseCacheRef.current.set(safePageNumber, nextPromise);
+        return nextPromise;
+      },
+      [getPageTextContent],
+    );
+
     useEffect(() => {
       const nextIdentity = {
         url: normalizedSourceUrl,
@@ -149,6 +241,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       previousSourceIdentityRef.current = nextIdentity;
 
       if (!previousIdentity) {
+        resetSearchIndexCache();
         return;
       }
 
@@ -161,25 +254,31 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
         return;
       }
 
+      resetSearchIndexCache();
       resetNavigation();
       setPageMatches({});
+      setFlattenedMatches([]);
       setActiveMatchIndex(-1);
     }, [
       normalizedLocalFileId,
       normalizedSourceData,
       normalizedSourceUrl,
       resetNavigation,
+      resetSearchIndexCache,
     ]);
 
     useEffect(() => {
       if (!doc) {
+        resetSearchIndexCache();
         setPageMatches({});
+        setFlattenedMatches([]);
         setActiveMatchIndex(-1);
         return;
       }
 
       if (!normalizedSearchQuery) {
         setPageMatches({});
+        setFlattenedMatches([]);
         setActiveMatchIndex(-1);
         return;
       }
@@ -187,25 +286,37 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       let cancelled = false;
 
       const run = async () => {
+        const searchIndexMap = await buildSearchIndexMap({
+          pageNumbers,
+          getPageSearchIndex,
+          concurrency: SEARCH_INDEX_CONCURRENCY,
+        });
+
+        if (cancelled) {
+          return;
+        }
+
         const nextMatches: Record<number, PdfPageSearchMatch[]> = {};
+        const nextFlattenedMatches: PdfPageSearchMatch[] = [];
         let globalOffset = 0;
 
-        for (let pageNumber = 1; pageNumber <= doc.numPages; pageNumber += 1) {
-          const page = await doc.getPage(pageNumber);
-          const textContent = await page.getTextContent();
-          if (cancelled) {
-            return;
+        for (const pageNumber of pageNumbers) {
+          const searchIndex = searchIndexMap.get(pageNumber);
+          if (!searchIndex) {
+            nextMatches[pageNumber] = EMPTY_SEARCH_MATCHES;
+            continue;
           }
 
           const matches = findPageSearchMatches({
             pageNumber,
-            textItems: extractTextItems(textContent),
+            searchIndex,
             query: normalizedSearchQuery,
             globalOffset,
           });
 
           globalOffset += matches.length;
           nextMatches[pageNumber] = matches;
+          nextFlattenedMatches.push(...matches);
         }
 
         if (cancelled) {
@@ -213,7 +324,8 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
         }
 
         setPageMatches(nextMatches);
-        setActiveMatchIndex(globalOffset > 0 ? 0 : -1);
+        setFlattenedMatches(nextFlattenedMatches);
+        setActiveMatchIndex(nextFlattenedMatches.length > 0 ? 0 : -1);
       };
 
       void run();
@@ -221,15 +333,15 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       return () => {
         cancelled = true;
       };
-    }, [doc, normalizedSearchQuery]);
+    }, [doc, getPageSearchIndex, normalizedSearchQuery, pageNumbers, resetSearchIndexCache]);
 
-    const flattenedMatches = useMemo(
-      () =>
-        Object.values(pageMatches)
-          .flat()
-          .sort((left, right) => left.globalIndex - right.globalIndex),
-      [pageMatches],
-    );
+    const activeMatchPageNumber = useMemo(() => {
+      if (activeMatchIndex < 0 || activeMatchIndex >= flattenedMatches.length) {
+        return null;
+      }
+
+      return flattenedMatches[activeMatchIndex]?.pageNumber ?? null;
+    }, [activeMatchIndex, flattenedMatches]);
 
     useEffect(() => {
       if (flattenedMatches.length === 0) {
@@ -324,8 +436,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
               className="flex flex-col items-center"
               style={{ gap: `${pageGap}px` }}
             >
-              {Array.from({ length: numPages }).map((_, index) => {
-                const pageNumber = index + 1;
+              {pageNumbers.map((pageNumber) => {
                 const inWindow =
                   Math.abs(pageNumber - currentPage) <= PDF_PAGE_WINDOW_SIZE;
 
@@ -334,6 +445,12 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
                   baseSize && baseSize.height > 0
                     ? Math.max(1, Math.floor(baseSize.height * scale))
                     : PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT;
+                const pageSearchMatches =
+                  pageMatches[pageNumber] ?? EMPTY_SEARCH_MATCHES;
+                const activeSearchMatchIndexForPage =
+                  activeMatchPageNumber === pageNumber
+                    ? activeMatchIndex
+                    : undefined;
 
                 return (
                   <div
@@ -351,9 +468,11 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
                         scale={scale}
                         baseSize={pageSizes[pageNumber]}
                         rootEl={scrollContainerEl}
-                        opaqueCanvas={viewerOptions?.opaqueCanvas ?? false}
-                        searchMatches={pageMatches[pageNumber] ?? []}
-                        activeSearchMatchIndex={activeMatchIndex}
+                        opaqueCanvas={resolvedOpaqueCanvas}
+                        searchMatches={pageSearchMatches}
+                        activeSearchMatchIndex={activeSearchMatchIndexForPage}
+                        getPage={getPage}
+                        getPageTextContent={getPageTextContent}
                         onPageSize={setPageSize}
                         onVisibilityChange={handleVisibilityChange}
                       />

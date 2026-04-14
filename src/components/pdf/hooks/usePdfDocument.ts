@@ -4,6 +4,8 @@ import type {
   PdfJsDocument,
   PdfJsGetDocumentParams,
   PdfJsLoadingTask,
+  PdfJsPage,
+  PdfJsTextContent,
   PdfViewerOptions,
   PdfViewerSourceMeta,
   SourceLoadErrorKind,
@@ -37,6 +39,8 @@ interface UsePdfDocumentResult {
   loading: boolean;
   error: string | null;
   setPageSize: (pageNumber: number, size: PageSize) => void;
+  getPage: (pageNumber: number) => Promise<PdfJsPage>;
+  getPageTextContent: (pageNumber: number) => Promise<PdfJsTextContent>;
 }
 
 export const usePdfDocument = ({
@@ -52,6 +56,12 @@ export const usePdfDocument = ({
   const onFirstPageSizeRef = useRef(onFirstPageSize);
   const onSourceLoadErrorRef = useRef(onSourceLoadError);
   const sourceMetaRef = useRef(sourceMeta);
+  const pagePromiseCacheRef = useRef<Map<number, Promise<PdfJsPage>>>(new Map());
+  const textContentPromiseCacheRef = useRef<
+    Map<number, Promise<PdfJsTextContent>>
+  >(new Map());
+  const pendingPageSizesRef = useRef<Map<number, PageSize>>(new Map());
+  const pageSizeFlushRafRef = useRef<number | null>(null);
 
   const [doc, setDoc] = useState<PdfJsDocument | null>(null);
   const [numPages, setNumPages] = useState(0);
@@ -87,20 +97,124 @@ export const usePdfDocument = ({
     sourceMetaRef.current = sourceMeta;
   }, [sourceMeta]);
 
-  const setPageSize = useCallback((pageNumber: number, size: PageSize) => {
-    setPageSizes((prev) => {
-      const existing = prev[pageNumber];
-      if (
-        existing &&
-        existing.width === size.width &&
-        existing.height === size.height
-      ) {
-        return prev;
+  const cancelScheduledPageSizeFlush = useCallback(() => {
+    if (pageSizeFlushRafRef.current !== null) {
+      cancelAnimationFrame(pageSizeFlushRafRef.current);
+      pageSizeFlushRafRef.current = null;
+    }
+  }, []);
+
+  const flushPendingPageSizes = useCallback(() => {
+    cancelScheduledPageSizeFlush();
+
+    if (pendingPageSizesRef.current.size === 0) {
+      return;
+    }
+
+    const nextEntries = Array.from(pendingPageSizesRef.current.entries());
+    pendingPageSizesRef.current.clear();
+
+    setPageSizes((previous) => {
+      let changed = false;
+      const nextState = { ...previous };
+
+      nextEntries.forEach(([pageNumber, size]) => {
+        const existing = nextState[pageNumber];
+        if (
+          existing &&
+          existing.width === size.width &&
+          existing.height === size.height
+        ) {
+          return;
+        }
+
+        nextState[pageNumber] = size;
+        changed = true;
+      });
+
+      return changed ? nextState : previous;
+    });
+  }, [cancelScheduledPageSizeFlush]);
+
+  const schedulePageSizeFlush = useCallback(() => {
+    if (pageSizeFlushRafRef.current !== null) {
+      return;
+    }
+
+    pageSizeFlushRafRef.current = window.requestAnimationFrame(() => {
+      pageSizeFlushRafRef.current = null;
+      flushPendingPageSizes();
+    });
+  }, [flushPendingPageSizes]);
+
+  const resetResourceCaches = useCallback(() => {
+    pagePromiseCacheRef.current.clear();
+    textContentPromiseCacheRef.current.clear();
+    pendingPageSizesRef.current.clear();
+    cancelScheduledPageSizeFlush();
+  }, [cancelScheduledPageSizeFlush]);
+
+  const getPage = useCallback((pageNumber: number): Promise<PdfJsPage> => {
+    const pdf = docRef.current;
+    if (!pdf) {
+      return Promise.reject(new Error("PDF document is not loaded"));
+    }
+
+    const safePageNumber = Math.max(1, Math.floor(pageNumber));
+    const existingPromise = pagePromiseCacheRef.current.get(safePageNumber);
+    if (existingPromise) {
+      return existingPromise;
+    }
+
+    const nextPromise = pdf.getPage(safePageNumber).catch((errorValue) => {
+      pagePromiseCacheRef.current.delete(safePageNumber);
+      throw errorValue;
+    });
+
+    pagePromiseCacheRef.current.set(safePageNumber, nextPromise);
+    return nextPromise;
+  }, []);
+
+  const getPageTextContent = useCallback(
+    (pageNumber: number): Promise<PdfJsTextContent> => {
+      const safePageNumber = Math.max(1, Math.floor(pageNumber));
+      const existingPromise =
+        textContentPromiseCacheRef.current.get(safePageNumber);
+
+      if (existingPromise) {
+        return existingPromise;
       }
 
-      return { ...prev, [pageNumber]: size };
-    });
-  }, []);
+      const nextPromise = getPage(safePageNumber)
+        .then((page) => page.getTextContent())
+        .catch((errorValue) => {
+          textContentPromiseCacheRef.current.delete(safePageNumber);
+          throw errorValue;
+        });
+
+      textContentPromiseCacheRef.current.set(safePageNumber, nextPromise);
+      return nextPromise;
+    },
+    [getPage],
+  );
+
+  const setPageSize = useCallback(
+    (pageNumber: number, size: PageSize) => {
+      const safePageNumber = Math.max(1, Math.floor(pageNumber));
+      const pendingSize = pendingPageSizesRef.current.get(safePageNumber);
+      if (
+        pendingSize &&
+        pendingSize.width === size.width &&
+        pendingSize.height === size.height
+      ) {
+        return;
+      }
+
+      pendingPageSizesRef.current.set(safePageNumber, size);
+      schedulePageSizeFlush();
+    },
+    [schedulePageSizeFlush],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -108,6 +222,7 @@ export const usePdfDocument = ({
 
     destroyPdfResource(docRef.current);
     docRef.current = null;
+    resetResourceCaches();
 
     setDoc(null);
     setNumPages(0);
@@ -127,7 +242,7 @@ export const usePdfDocument = ({
       };
     }
 
-    const loadFirstPageSize = async (pdf: PdfJsDocument, pageCount: number) => {
+    const loadFirstPageSize = async (pageCount: number) => {
       if (pageCount <= 0) {
         setPageSizes({});
         onFirstPageSizeRef.current?.(null);
@@ -135,18 +250,20 @@ export const usePdfDocument = ({
       }
 
       try {
-        const firstPage = await pdf.getPage(1);
+        const firstPage = await getPage(1);
         if (cancelled) return;
 
         const viewport = firstPage.getViewport({ scale: 1 });
         const size = { width: viewport.width, height: viewport.height };
-        setPageSizes({ 1: size });
+        pendingPageSizesRef.current.set(1, size);
+        flushPendingPageSizes();
         onFirstPageSizeRef.current?.(size);
       } catch {
         if (cancelled) return;
 
         const fallback = { width: 1, height: 1 };
-        setPageSizes({ 1: fallback });
+        pendingPageSizesRef.current.set(1, fallback);
+        flushPendingPageSizes();
         onFirstPageSizeRef.current?.(fallback);
       }
     };
@@ -215,6 +332,7 @@ export const usePdfDocument = ({
 
         destroyPdfResource(docRef.current);
         docRef.current = pdf;
+        resetResourceCaches();
 
         const pageCount = Math.max(0, pdf.numPages || 0);
 
@@ -223,7 +341,7 @@ export const usePdfDocument = ({
         onNumPagesRef.current(pageCount);
         setError(null);
 
-        await loadFirstPageSize(pdf, pageCount);
+        await loadFirstPageSize(pageCount);
       } catch (errorValue: unknown) {
         if (cancelled) return;
 
@@ -281,12 +399,16 @@ export const usePdfDocument = ({
       destroyPdfResource(loadingTask);
       destroyPdfResource(docRef.current);
       docRef.current = null;
+      resetResourceCaches();
     };
   }, [
     cMapUrl,
     cMapPacked,
     disableFontFace,
     enableXfa,
+    flushPendingPageSizes,
+    getPage,
+    resetResourceCaches,
     sourceData,
     sourceDataLength,
     sourceUrl,
@@ -295,6 +417,12 @@ export const usePdfDocument = ({
     verbosity,
   ]);
 
+  useEffect(() => {
+    return () => {
+      cancelScheduledPageSizeFlush();
+    };
+  }, [cancelScheduledPageSizeFlush]);
+
   return {
     doc,
     numPages,
@@ -302,5 +430,7 @@ export const usePdfDocument = ({
     loading,
     error,
     setPageSize,
+    getPage,
+    getPageTextContent,
   };
 };
