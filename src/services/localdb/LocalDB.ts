@@ -30,10 +30,7 @@ import type {
   DeleteEntity,
   UpsertEntity,
 } from "@/application/usecases/syncQueuePayloadGuards";
-import type {
-  SyncPayloadByEntity,
-  SyncPriority,
-} from "@/types/domain/sync";
+import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 import { Dexie } from "dexie";
 import { nanoid } from "nanoid";
 import * as crud from "./crud";

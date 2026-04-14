@@ -629,7 +629,9 @@ const collectUnresolvedAssetIds = async ({
   const unresolvedAssetIds: string[] = [];
 
   for (const assetId of assetIds) {
-    const record = (await db.images.get(assetId)) as ImageRecordLike | undefined;
+    const record = (await db.images.get(assetId)) as
+      | ImageRecordLike
+      | undefined;
     const remoteUrl = readRemoteUrl(record?.remoteUrlCache, record?.remoteUrl);
     const remoteKey = readFirstString(record?.remoteKey, record?.storagePath);
     const remoteReady =
