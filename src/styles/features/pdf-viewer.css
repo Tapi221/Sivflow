@@ -1,0 +1,36 @@
+.pdf-text-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  line-height: 1;
+  text-size-adjust: none;
+  transform-origin: 0 0;
+  z-index: 2;
+}
+
+.pdf-text-layer span,
+.pdf-text-layer br {
+  position: absolute;
+  color: transparent;
+  white-space: pre;
+  transform-origin: 0 0;
+  cursor: text;
+}
+
+.pdf-search-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.pdf-search-highlight {
+  position: absolute;
+  border-radius: 2px;
+  background: rgba(255, 235, 59, 0.45);
+}
+
+.pdf-search-highlight.is-active {
+  background: rgba(255, 152, 0, 0.5);
+}
