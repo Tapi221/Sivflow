@@ -27,6 +27,28 @@ const FolderIcon = () => (
   </svg>
 );
 
+const TagMapIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M4.25 4.25H8M8 4.25L11.75 2.75M8 4.25L11.75 7.25M4.25 4.25V11.75"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <circle cx="4.25" cy="4.25" r="1.75" stroke="currentColor" strokeWidth="1.2" />
+    <circle cx="11.75" cy="2.75" r="1.75" stroke="currentColor" strokeWidth="1.2" />
+    <circle cx="11.75" cy="7.25" r="1.75" stroke="currentColor" strokeWidth="1.2" />
+    <circle cx="4.25" cy="11.75" r="1.75" stroke="currentColor" strokeWidth="1.2" />
+  </svg>
+);
+
 const DictionaryIcon = () => (
   <svg
     width="16"
@@ -217,6 +239,7 @@ const SettingsIcon = () => (
 
 const NAV_ITEMS: NavItem[] = [
   { to: "/folders", label: "フォルダ", icon: <FolderIcon /> },
+  { to: "/tag-map", label: "タグマップ", icon: <TagMapIcon /> },
   { to: "/dictionary", label: "辞書", icon: <DictionaryIcon /> },
   { to: "/questions", label: "疑問集", icon: <QuestionIcon /> },
   { to: "/calendar", label: "カレンダー", icon: <CalendarIcon /> },
