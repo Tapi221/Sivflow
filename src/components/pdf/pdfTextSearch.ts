@@ -11,38 +11,33 @@ type SearchSegment = {
   end: number;
 };
 
+export type PdfPageSearchIndex = {
+  textItems: PdfJsTextItem[];
+  combinedText: string;
+  searchableCombinedText: string;
+  segments: SearchSegment[];
+};
+
 const toSearchableText = (value: string) => value.toLocaleLowerCase();
 
 export const extractTextItems = (content: PdfJsTextContent): PdfJsTextItem[] =>
   content.items.filter(isPdfTextItem);
 
-export const findPageSearchMatches = ({
-  pageNumber,
-  textItems,
-  query,
-  globalOffset,
-}: {
-  pageNumber: number;
-  textItems: PdfJsTextItem[];
-  query: string;
-  globalOffset: number;
-}): PdfPageSearchMatch[] => {
-  const normalizedQuery = toSearchableText(query.trim());
-  if (!normalizedQuery) {
-    return [];
-  }
-
-  let combined = "";
+export const buildPageSearchIndex = (
+  content: PdfJsTextContent,
+): PdfPageSearchIndex => {
+  const textItems = extractTextItems(content);
+  let combinedText = "";
   const segments: SearchSegment[] = [];
 
   textItems.forEach((item, itemIndex) => {
-    if (combined.length > 0) {
-      combined += item.hasEOL ? "\n" : " ";
+    if (combinedText.length > 0) {
+      combinedText += item.hasEOL ? "\n" : " ";
     }
 
-    const start = combined.length;
-    combined += item.str;
-    const end = combined.length;
+    const start = combinedText.length;
+    combinedText += item.str;
+    const end = combinedText.length;
 
     segments.push({
       itemIndex,
@@ -51,19 +46,45 @@ export const findPageSearchMatches = ({
     });
   });
 
-  const searchableCombined = toSearchableText(combined);
-  const matches: PdfPageSearchMatch[] = [];
+  return {
+    textItems,
+    combinedText,
+    searchableCombinedText: toSearchableText(combinedText),
+    segments,
+  };
+};
 
+export const findPageSearchMatches = ({
+  pageNumber,
+  searchIndex,
+  query,
+  globalOffset,
+}: {
+  pageNumber: number;
+  searchIndex: PdfPageSearchIndex;
+  query: string;
+  globalOffset: number;
+}): PdfPageSearchMatch[] => {
+  const normalizedQuery = toSearchableText(query.trim());
+  if (!normalizedQuery) {
+    return [];
+  }
+
+  const matches: PdfPageSearchMatch[] = [];
   let cursor = 0;
-  while (cursor < searchableCombined.length) {
-    const foundAt = searchableCombined.indexOf(normalizedQuery, cursor);
+
+  while (cursor < searchIndex.searchableCombinedText.length) {
+    const foundAt = searchIndex.searchableCombinedText.indexOf(
+      normalizedQuery,
+      cursor,
+    );
     if (foundAt < 0) {
       break;
     }
 
     const matchEnd = foundAt + normalizedQuery.length;
 
-    for (const segment of segments) {
+    for (const segment of searchIndex.segments) {
       if (segment.end <= foundAt || segment.start >= matchEnd) {
         continue;
       }
