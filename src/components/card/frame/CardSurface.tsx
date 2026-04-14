@@ -8,20 +8,11 @@ type CardSurfaceProps = {
   className?: string;
   style?: React.CSSProperties;
   overlay?: React.ReactNode;
-  /** 罫線背景を使う */
   ruled?: boolean;
-  /** 背景レイヤのopacity */
   ruledOpacity?: number;
-  /** 罫線の行間(px) */
   ruledRowPx?: number;
-  /**
-   * 罫線の開始Yオフセット(px)。
-   * BlockEditorのtop paddingと合わせることでコンテンツと罫線を整合させる。
-   */
   ruledOffsetPx?: number;
-  /** カード下端から最後の罫線までのオフセット(px) */
   ruledBottomOffsetPx?: number;
-  /** 罫線の位相オフセット(px)。未指定時は従来どおり 0。 */
   ruledPhasePx?: number;
 };
 
@@ -32,14 +23,13 @@ export const CardSurface = ({
   className,
   style,
   overlay,
-  ruled: _ruled = true,
+  ruled = true,
   ruledOpacity = 1,
   ruledRowPx = 24,
   ruledOffsetPx = 0,
   ruledBottomOffsetPx = 0,
   ruledPhasePx: _ruledPhasePx = 0,
 }: CardSurfaceProps) => {
-  void _ruled;
   void _ruledPhasePx;
 
   const rowPx = Math.max(8, ruledRowPx);
@@ -52,7 +42,7 @@ export const CardSurface = ({
       "--card-font-size": "16px",
       "--card-line-height": `${rowPx}px`,
       "--card-ruled-color": "rgba(0,0,0,0.05)",
-      "--card-ruled-line-px": "1px",
+      "--card-ruled-line-px": ruled ? "1px" : "0px",
       "--card-ruled-opacity": String(clamp01(ruledOpacity)),
       "--card-surface": "hsl(var(--background))",
       "--card-padding-x": "12px",
@@ -62,7 +52,7 @@ export const CardSurface = ({
       "--card-content-padding-top": `${topPx}px`,
     };
     return { ...vars, ...(style ?? {}) } as CSSVars;
-  }, [rowPx, topPx, bottomPx, ruledOpacity, style]);
+  }, [bottomPx, rowPx, ruled, ruledOpacity, style, topPx]);
 
   const opacity = clamp01(ruledOpacity);
 
@@ -77,18 +67,20 @@ export const CardSurface = ({
         paddingRight: "var(--card-padding-x)",
       }}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute z-10"
-        style={{
-          top: "var(--ruled-offset-px, 44px)",
-          left: "var(--card-padding-x, 12px)",
-          right: "var(--card-padding-x, 12px)",
-          height: 1,
-          background: "var(--card-ruled-color, rgba(0,0,0,0.05))",
-          opacity,
-        }}
-      />
+      {ruled ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute z-10"
+          style={{
+            top: "var(--ruled-offset-px, 44px)",
+            left: "var(--card-padding-x, 12px)",
+            right: "var(--card-padding-x, 12px)",
+            height: 1,
+            background: "var(--card-ruled-color, rgba(0,0,0,0.05))",
+            opacity,
+          }}
+        />
+      ) : null}
 
       <div
         className="relative z-10 flex min-h-0 flex-1 flex-col"

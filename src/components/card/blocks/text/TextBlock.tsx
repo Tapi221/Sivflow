@@ -23,6 +23,7 @@ interface TextBlockProps {
   onMoveDown?: () => void;
   onMoveDragStart?: () => void;
   onMoveDragEnd?: () => void;
+  zoom?: number;
 }
 
 const TextBlockInner = ({
@@ -44,6 +45,7 @@ const TextBlockInner = ({
   onMoveDown,
   onMoveDragStart,
   onMoveDragEnd,
+  zoom,
 }: TextBlockProps) => {
   const isContentEmpty =
     content.replace(/[\u200B-\u200D\uFEFF]/g, "").trim().length === 0;
@@ -75,6 +77,7 @@ const TextBlockInner = ({
         onChange={onChange}
         placeholder={placeholder}
         autoFocus={autoFocus}
+        zoom={zoom}
       />
     </BlockWrapper>
   );
@@ -90,7 +93,8 @@ const areTextBlockPropsEqual = (prev: TextBlockProps, next: TextBlockProps) =>
   prev.isActive === next.isActive &&
   prev.showDelete === next.showDelete &&
   prev.canMoveUp === next.canMoveUp &&
-  prev.canMoveDown === next.canMoveDown;
+  prev.canMoveDown === next.canMoveDown &&
+  prev.zoom === next.zoom;
 
 export const TextBlock = React.memo(TextBlockInner, areTextBlockPropsEqual);
 TextBlock.displayName = "TextBlock";

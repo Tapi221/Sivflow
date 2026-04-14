@@ -3,6 +3,7 @@ import { BlockRenderer } from "@/components/card/blocks/render/BlockRenderer";
 import { cn } from "@/lib/utils";
 import { CONTENT_TYPO } from "@/styles/tokens/typography";
 import type { CardBlock } from "@/types/domain/card";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 import React from "react";
 import { CARD_CONTENT_TOP_PX } from "./constants";
 
@@ -14,7 +15,7 @@ type SharedCardContentBaseProps = {
 type SharedCardContentViewProps = SharedCardContentBaseProps & {
   mode: "view";
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
-  displayMode?: "fixed" | "fluid";
+  displayMode?: CardDisplayMode;
   zoom?: number;
 };
 
@@ -39,6 +40,8 @@ type SharedCardContentEditProps = SharedCardContentBaseProps & {
   toolbarDesktopLayout?: "horizontal" | "vertical";
   enableBlockActiveState?: boolean;
   settings?: unknown;
+  displayMode?: CardDisplayMode;
+  zoom?: number;
 };
 
 export type SharedCardContentProps =
@@ -78,6 +81,8 @@ const SharedCardContentInner = (props: SharedCardContentProps) => {
           toolbarDesktopLayout={props.toolbarDesktopLayout}
           enableBlockActiveState={props.enableBlockActiveState}
           settings={props.settings}
+          displayMode={props.displayMode}
+          zoom={props.zoom}
         />
       ) : (
         <BlockRenderer

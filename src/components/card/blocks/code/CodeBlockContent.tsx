@@ -2,6 +2,7 @@ import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import {
   buildTypographyStyle,
   mergeStyles,
+  scaleTypographyNumberPx,
 } from "@/components/card/common/cardSetViewZoom";
 import { cn } from "@/lib/utils";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
@@ -58,6 +59,7 @@ type CodeBlockContentProps =
       className?: string;
       headerLeft?: React.ReactNode;
       onCodeChange: (nextCode: string) => void;
+      zoom?: number;
     };
 
 export const CodeBlockContent = (props: CodeBlockContentProps) => {
@@ -215,6 +217,17 @@ export const CodeBlockContent = (props: CodeBlockContentProps) => {
   const highlightCode = (src: string) =>
     Prism.highlight(src, editorGrammar, editorLanguage);
 
+  const editorTypographyStyle = buildTypographyStyle({
+    fontSizePx: 13,
+    lineHeightPx: 20,
+    zoom: props.zoom,
+  });
+
+  const editorMinHeightPx = Math.max(
+    56,
+    scaleTypographyNumberPx(56, props.zoom),
+  );
+
   return (
     <div ref={editorHostRef} className={props.className}>
       <BlockInset variant="code">
@@ -228,7 +241,10 @@ export const CodeBlockContent = (props: CodeBlockContentProps) => {
             onValueChange={props.onCodeChange}
             highlight={highlightCode}
             padding={0}
-            style={{ minHeight: 56 }}
+            style={mergeStyles(
+              { minHeight: editorMinHeightPx },
+              editorTypographyStyle,
+            )}
             className="code-editor-no-scroll code-no-wrap"
             textareaClassName="code-no-wrap focus:outline-none"
           />

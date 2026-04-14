@@ -11,7 +11,10 @@ test.describe("PDF text selection", () => {
     });
 
     const textLayer = page.locator(".pdf-text-layer").first();
-    await expect(textLayer).toHaveAttribute("data-text-layer-expected-text", "true");
+    await expect(textLayer).toHaveAttribute(
+      "data-text-layer-expected-text",
+      "true",
+    );
     await expect(textLayer).toHaveAttribute("data-text-layer-ready", "true");
 
     const textSpan = page

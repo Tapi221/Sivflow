@@ -41,8 +41,16 @@ import {
   useCardEditorPaneWidth,
 } from "@/components/folder/panes/useCardEditorPaneWidth";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
+import {
+  buildCardRenderSpec,
+  resolveCardContentZoom,
+  resolveCardDisablesFrameScale,
+  resolveCardSurfaceScale,
+  resolveCardUsesStretchWidth,
+} from "@/features/cardrender/domain/cardRenderSpec";
 import { cn } from "@/lib/utils";
 import type { Card, CardBlock } from "@/types/domain/card";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type CardEditorPaneSettings = {
   accentColor?: string;
@@ -72,6 +80,8 @@ interface CardEditorPaneProps {
   showResizeHandle?: boolean;
   onSyncStatusChange?: (status: CardSyncStatus | null) => void;
   overlayTopInsetPx?: number;
+  displayMode?: CardDisplayMode;
+  zoom?: number;
 }
 
 type FlashcardCardLike = Record<string, unknown> & {
@@ -139,8 +149,14 @@ type EditorSidePaneProps = {
   presentationState: CardPresentationState;
   enableBlockActiveState: boolean;
   showResizeHandle: boolean;
-  editorCardFixedScale?: number;
-  editorCardHeightPx: number;
+  displayMode: CardDisplayMode;
+  frameFixedScale?: number;
+  frameDisableScale: boolean;
+  frameStretchWidth: boolean;
+  frameRuled: boolean;
+  contentZoom: number;
+  editorCardHeightPx: number | null;
+  enableHeightResize: boolean;
   onHeightChange: (heightPx: number) => void;
   onMinHeightChange: (minHeightPx: number) => void;
   onResizeStart: () => void;
@@ -171,8 +187,14 @@ const EditorSidePaneInner = ({
   presentationState,
   enableBlockActiveState,
   showResizeHandle,
-  editorCardFixedScale,
+  displayMode,
+  frameFixedScale,
+  frameDisableScale,
+  frameStretchWidth,
+  frameRuled,
+  contentZoom,
   editorCardHeightPx,
+  enableHeightResize,
   onHeightChange,
   onMinHeightChange,
   onResizeStart,
@@ -181,6 +203,12 @@ const EditorSidePaneInner = ({
   actionsTopRight,
 }: EditorSidePaneProps) => {
   void _hideCardShellHeader;
+
+  const frameClassName = cn(
+    buildCardShellClassName(presentationState),
+    displayMode === "fluid" &&
+      "rounded-none border-none bg-transparent shadow-none",
+  );
 
   return (
     <div
@@ -206,7 +234,9 @@ const EditorSidePaneInner = ({
             allowUpscale
             maxScale={CARD_PANE_AUTO_MAX_SCALE}
             scaleMultiplier={1}
-            fixedScale={editorCardFixedScale}
+            fixedScale={frameFixedScale}
+            disableScale={frameDisableScale}
+            stretchWidth={frameStretchWidth}
             topAttachment={
               shouldDockToolbarToCardTop ? (
                 <div className="relative h-0 w-full overflow-visible pointer-events-none">
@@ -230,12 +260,13 @@ const EditorSidePaneInner = ({
                 </div>
               ) : undefined
             }
-            className={buildCardShellClassName(presentationState)}
-            resizable
-            showResizeHandle={showResizeHandle}
-            resizeStepPx={CARD_ROW_PX}
-            heightPx={editorCardHeightPx}
-            lockHeight
+            className={frameClassName}
+            ruled={frameRuled}
+            resizable={enableHeightResize}
+            showResizeHandle={enableHeightResize && showResizeHandle}
+            resizeStepPx={enableHeightResize ? CARD_ROW_PX : undefined}
+            heightPx={enableHeightResize ? editorCardHeightPx : null}
+            lockHeight={enableHeightResize}
             onHeightChange={onHeightChange}
             onMinHeightChange={onMinHeightChange}
             onResizeStart={onResizeStart}
@@ -259,6 +290,8 @@ const EditorSidePaneInner = ({
               toolbarDesktopLayout="vertical"
               enableBlockActiveState={enableBlockActiveState}
               settings={settings}
+              displayMode={displayMode}
+              zoom={contentZoom}
             />
           </CardFrame>
         </div>
@@ -295,8 +328,14 @@ const areEditorSidePanePropsEqual = (
     next.presentationState.showActiveChrome &&
   prev.enableBlockActiveState === next.enableBlockActiveState &&
   prev.showResizeHandle === next.showResizeHandle &&
-  prev.editorCardFixedScale === next.editorCardFixedScale &&
+  prev.displayMode === next.displayMode &&
+  prev.frameFixedScale === next.frameFixedScale &&
+  prev.frameDisableScale === next.frameDisableScale &&
+  prev.frameStretchWidth === next.frameStretchWidth &&
+  prev.frameRuled === next.frameRuled &&
+  prev.contentZoom === next.contentZoom &&
   prev.editorCardHeightPx === next.editorCardHeightPx &&
+  prev.enableHeightResize === next.enableHeightResize &&
   prev.actionsTopLeft === next.actionsTopLeft &&
   prev.actionsTopRight === next.actionsTopRight;
 
@@ -324,6 +363,8 @@ export const CardEditorPane = ({
   showResizeHandle: showResizeHandleProp = true,
   onSyncStatusChange,
   overlayTopInsetPx = 0,
+  displayMode = "fixed",
+  zoom = 1,
 }: CardEditorPaneProps) => {
   const controller = useCardEditorPaneController({
     selectedCardId,
@@ -395,6 +436,23 @@ export const CardEditorPane = ({
     [cardPresentationContext],
   );
 
+  const editorRenderSpec = useMemo(
+    () =>
+      buildCardRenderSpec({
+        displayMode,
+        interactionMode: "edit",
+        zoomScale: zoom,
+        showInk: false,
+      }),
+    [displayMode, zoom],
+  );
+
+  const isFluidEditor = editorRenderSpec.surfaceMode === "fluid";
+  const editorContentZoom = resolveCardContentZoom(editorRenderSpec);
+  const editorFrameDisableScale =
+    resolveCardDisablesFrameScale(editorRenderSpec);
+  const editorFrameStretchWidth = resolveCardUsesStretchWidth(editorRenderSpec);
+
   const {
     manualResizeInProgressRef,
     scheduleLayoutRowsFromHeight,
@@ -449,8 +507,11 @@ export const CardEditorPane = ({
   const backBlocks = draft?.backBlocks ?? EMPTY_BLOCKS;
 
   const editorCardHeightPx = useMemo(
-    () => layoutRowsToCardHeightPx(normalizeLayoutRows(draft?.layoutRows)),
-    [draft?.layoutRows],
+    () =>
+      isFluidEditor
+        ? null
+        : layoutRowsToCardHeightPx(normalizeLayoutRows(draft?.layoutRows)),
+    [draft?.layoutRows, isFluidEditor],
   );
 
   const handleEditorHeightChange = useCallback(
@@ -481,7 +542,7 @@ export const CardEditorPane = ({
     shouldDockToolbarToCardTop,
     shouldShowInlineToolbarMount,
     useTwoColumnEditorLayout,
-    editorCardFixedScale,
+    editorCardFitScale,
     activePaneWidthStyle,
     persistPaneWidth,
     previewPaneWidth,
@@ -511,6 +572,18 @@ export const CardEditorPane = ({
   const selectedCardEntity = isCardEntity(selectedCard) ? selectedCard : null;
   const panelCardEntity = isCardEntity(panelCard) ? panelCard : null;
   const flashcardCard = selectedCard ? toFlashcardCardLike(selectedCard) : null;
+
+  const editorFrameFixedScale = useMemo(() => {
+    if (isFluidEditor) return undefined;
+
+    return Math.max(
+      0.1,
+      Math.min(
+        CARD_PANE_AUTO_MAX_SCALE,
+        editorCardFitScale * resolveCardSurfaceScale(editorRenderSpec),
+      ),
+    );
+  }, [editorCardFitScale, editorRenderSpec, isFluidEditor]);
 
   const fallbackLastSyncedAtMs = useMemo(() => {
     return (
@@ -806,8 +879,14 @@ export const CardEditorPane = ({
                     cardPresentationState.isInteractiveCard
                   }
                   showResizeHandle={showResizeHandleProp}
-                  editorCardFixedScale={editorCardFixedScale}
+                  displayMode={displayMode}
+                  frameFixedScale={editorFrameFixedScale}
+                  frameDisableScale={editorFrameDisableScale}
+                  frameStretchWidth={editorFrameStretchWidth}
+                  frameRuled={!isFluidEditor}
+                  contentZoom={editorContentZoom}
                   editorCardHeightPx={editorCardHeightPx}
+                  enableHeightResize={!isFluidEditor}
                   onHeightChange={handleEditorHeightChange}
                   onMinHeightChange={handleQuestionMinHeightChange}
                   onResizeStart={handleResizeStart}
@@ -840,8 +919,14 @@ export const CardEditorPane = ({
                     cardPresentationState.isInteractiveCard
                   }
                   showResizeHandle={showResizeHandleProp}
-                  editorCardFixedScale={editorCardFixedScale}
+                  displayMode={displayMode}
+                  frameFixedScale={editorFrameFixedScale}
+                  frameDisableScale={editorFrameDisableScale}
+                  frameStretchWidth={editorFrameStretchWidth}
+                  frameRuled={!isFluidEditor}
+                  contentZoom={editorContentZoom}
                   editorCardHeightPx={editorCardHeightPx}
+                  enableHeightResize={!isFluidEditor}
                   onHeightChange={handleEditorHeightChange}
                   onMinHeightChange={handleAnswerMinHeightChange}
                   onResizeStart={handleResizeStart}
@@ -873,10 +958,17 @@ export const CardEditorPane = ({
                       setIsFlipped(false);
                       setIsEditing(true);
                     }}
+                    displayMode={displayMode}
                     allowUpscale
                     maxScale={CARD_PANE_AUTO_MAX_SCALE}
                     scaleMultiplier={1}
-                    fixedScale={editorCardFixedScale}
+                    fixedScale={editorFrameFixedScale}
+                    contentZoom={editorContentZoom}
+                    cardShellClassName={
+                      displayMode === "fluid"
+                        ? "border-none bg-transparent shadow-none"
+                        : undefined
+                    }
                   />
                 </div>
               </div>

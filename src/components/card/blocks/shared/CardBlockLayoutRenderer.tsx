@@ -60,6 +60,7 @@ type EditorProps = {
   onConsumePendingUpload?: () => void;
   onFilesExcess?: (files: File[]) => void;
   onReplaceMarkdownWithBlocks?: (blocks: CardBlockLayoutReplaceBlock[]) => void;
+  zoom?: number;
 };
 
 type CardBlockLayoutRendererProps =
@@ -123,6 +124,7 @@ export const CardBlockLayoutRenderer = (
         onConsumePendingUpload,
         onFilesExcess,
         onReplaceMarkdownWithBlocks,
+        zoom,
       },
     } = props;
 
@@ -147,6 +149,7 @@ export const CardBlockLayoutRenderer = (
             isActive={isActive}
             placeholder={customPlaceholder || "文章を入力..."}
             autoFocus={autoFocus}
+            zoom={zoom}
           />
         );
       case "code":
@@ -171,6 +174,7 @@ export const CardBlockLayoutRenderer = (
               dragHandleClassName="js-block-drag-handle"
               accentColor={accentColor}
               isActive={isActive}
+              zoom={zoom}
             />
           </div>
         );
@@ -215,6 +219,7 @@ export const CardBlockLayoutRenderer = (
               onMoveDragEnd={onMoveDragEnd}
               canMoveUp={canMoveUp}
               canMoveDown={canMoveDown}
+              zoom={zoom}
             />
           </div>
         );
@@ -236,6 +241,7 @@ export const CardBlockLayoutRenderer = (
             dragHandleClassName="js-block-drag-handle"
             accentColor={accentColor}
             isActive={isActive}
+            zoom={zoom}
           />
         );
       case "markdown":
@@ -256,6 +262,7 @@ export const CardBlockLayoutRenderer = (
             canMoveUp={canMoveUp}
             canMoveDown={canMoveDown}
             onReplaceWithBlocks={onReplaceMarkdownWithBlocks}
+            zoom={zoom}
           />
         );
       default:

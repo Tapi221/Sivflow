@@ -24,6 +24,7 @@ type TextBlockContentProps =
       onChange: (content: string) => void;
       placeholder?: string;
       autoFocus?: boolean;
+      zoom?: number;
     };
 
 export const TextBlockContent = (props: TextBlockContentProps) => {
@@ -58,6 +59,12 @@ export const TextBlockContent = (props: TextBlockContentProps) => {
     );
   }
 
+  const textStyle = buildTypographyStyle({
+    fontSizePx: 16,
+    lineHeightPx: TEXT_BLOCK_LINE_HEIGHT_PX,
+    zoom: props.zoom,
+  });
+
   return (
     <AutoResizeTextarea
       value={normalizedContent}
@@ -66,9 +73,13 @@ export const TextBlockContent = (props: TextBlockContentProps) => {
       }
       placeholder={props.placeholder || "テキストを入力..."}
       minRows={1}
-      lineHeight={TEXT_BLOCK_LINE_HEIGHT_PX}
+      lineHeight={scaleTypographyNumberPx(
+        TEXT_BLOCK_LINE_HEIGHT_PX,
+        props.zoom,
+      )}
       allowInternalScroll={false}
       autoFocus={props.autoFocus}
+      style={textStyle}
       className={`${TEXT_BLOCK_CONTENT_CLASS} placeholder:text-slate-300 focus-visible:ring-0 focus-visible:ring-offset-0`}
     />
   );

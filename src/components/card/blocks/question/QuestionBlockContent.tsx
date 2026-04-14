@@ -7,6 +7,7 @@ import {
 import {
   buildTypographyStyle,
   mergeStyles,
+  scaleTypographyNumberPx,
 } from "@/components/card/common/cardSetViewZoom";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import React, { useMemo, useState } from "react";
@@ -31,6 +32,7 @@ type QuestionBlockContentProps =
       containerProps?: React.HTMLAttributes<HTMLDivElement>;
       onContainerFocus?: () => void;
       onContainerBlur?: (e: React.FocusEvent<HTMLDivElement>) => void;
+      zoom?: number;
     };
 
 const buildViewResetKey = ({
@@ -64,6 +66,17 @@ export const QuestionBlockContent = (props: QuestionBlockContentProps) => {
     );
   }
 
+  const textareaStyle = buildTypographyStyle({
+    fontSizePx: 12,
+    lineHeightPx: QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
+    zoom: props.zoom,
+  });
+
+  const scaledLineHeight = scaleTypographyNumberPx(
+    QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
+    props.zoom,
+  );
+
   return (
     <QuestionBlockLayout
       containerRef={props.containerRef}
@@ -80,9 +93,10 @@ export const QuestionBlockContent = (props: QuestionBlockContentProps) => {
           onChange={(e) => props.onChangeQuestionTitle(e.target.value)}
           placeholder="疑問・質問を入力..."
           minRows={1}
-          lineHeight={QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX}
+          lineHeight={scaledLineHeight}
           allowInternalScroll={false}
           className="flex-1"
+          style={textareaStyle}
           textareaClassName={`${QUESTION_BLOCK_TITLE_TEXT_CLASS} placeholder:text-slate-400 bg-transparent border-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full resize-none p-0`}
         />
       }
@@ -92,9 +106,10 @@ export const QuestionBlockContent = (props: QuestionBlockContentProps) => {
           onChange={(e) => props.onChangeQuestionAnswer(e.target.value)}
           placeholder="答え・メモを入力..."
           minRows={1}
-          lineHeight={QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX}
+          lineHeight={scaledLineHeight}
           allowInternalScroll={false}
           className="flex-1"
+          style={textareaStyle}
           textareaClassName={`${QUESTION_BLOCK_ANSWER_TEXT_CLASS} placeholder:text-slate-400 bg-transparent border-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full resize-none p-0`}
         />
       }

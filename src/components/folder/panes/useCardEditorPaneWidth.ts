@@ -182,7 +182,7 @@ export const useCardEditorPaneWidth = ({
     ? Math.max(1, (effectivePaneWidthPx - CARD_EDITOR_PAIR_GAP_PX) / 2)
     : Math.max(1, effectivePaneWidthPx);
 
-  const editorCardFixedScale = Math.max(
+  const editorCardFitScale = Math.max(
     0.1,
     Math.min(
       CARD_PANE_AUTO_MAX_SCALE,
@@ -210,7 +210,7 @@ export const useCardEditorPaneWidth = ({
     shouldDockToolbarToCardTop,
     shouldShowInlineToolbarMount,
     useTwoColumnEditorLayout,
-    editorCardFixedScale,
+    editorCardFitScale,
     activePaneWidthStyle,
     persistPaneWidth,
     previewPaneWidth,

@@ -22,6 +22,7 @@ interface CodeBlockItemProps {
   onMoveDown?: () => void;
   onMoveDragStart?: () => void;
   onMoveDragEnd?: () => void;
+  zoom?: number;
 }
 
 const CodeBlockItemInner = ({
@@ -41,6 +42,7 @@ const CodeBlockItemInner = ({
   onMoveDown,
   onMoveDragStart,
   onMoveDragEnd,
+  zoom,
 }: CodeBlockItemProps) => {
   const isCodeEmpty = (data?.code ?? "").trim().length === 0;
 
@@ -69,6 +71,7 @@ const CodeBlockItemInner = ({
         value={data}
         onChange={onChange}
         className="border-none shadow-none"
+        zoom={zoom}
       />
     </BlockWrapper>
   );
@@ -85,7 +88,8 @@ const areCodeBlockItemPropsEqual = (
   prev.isActive === next.isActive &&
   prev.showDelete === next.showDelete &&
   prev.canMoveUp === next.canMoveUp &&
-  prev.canMoveDown === next.canMoveDown;
+  prev.canMoveDown === next.canMoveDown &&
+  prev.zoom === next.zoom;
 
 export const CodeBlockItem = React.memo(
   CodeBlockItemInner,

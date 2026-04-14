@@ -79,12 +79,14 @@ interface CodeBlockEditorProps {
   value?: CodeBlockData;
   onChange: (value: CodeBlockData) => void;
   className?: string;
+  zoom?: number;
 }
 
 export const CodeBlockEditor = ({
   value,
   onChange,
   className,
+  zoom,
 }: CodeBlockEditorProps) => {
   const [recentLangs, setRecentLangs] = useState<string[]>(() =>
     getRecentLangs(),
@@ -186,6 +188,7 @@ export const CodeBlockEditor = ({
       }
       headerLeft={languageSelector}
       className={className}
+      zoom={zoom}
     />
   );
 };

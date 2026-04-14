@@ -22,6 +22,7 @@ interface QuestionBlockProps {
   isActive?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
+  zoom?: number;
 }
 
 const QuestionBlockInner: React.FC<QuestionBlockProps> = ({
@@ -42,6 +43,7 @@ const QuestionBlockInner: React.FC<QuestionBlockProps> = ({
   isActive,
   onFocus,
   onBlur,
+  zoom,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -94,6 +96,7 @@ const QuestionBlockInner: React.FC<QuestionBlockProps> = ({
         containerRef={containerRef}
         onContainerFocus={handleContainerFocus}
         onContainerBlur={handleContainerBlur}
+        zoom={zoom}
       />
     </BlockWrapper>
   );
@@ -109,7 +112,8 @@ const areQuestionBlockPropsEqual = (
   prev.accentColor === next.accentColor &&
   prev.isActive === next.isActive &&
   prev.canMoveUp === next.canMoveUp &&
-  prev.canMoveDown === next.canMoveDown;
+  prev.canMoveDown === next.canMoveDown &&
+  prev.zoom === next.zoom;
 
 export const QuestionBlock = React.memo(
   QuestionBlockInner,

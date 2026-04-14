@@ -145,6 +145,8 @@ const DesktopCardSurfaceInner = ({
           pairGapClassName="gap-4"
           showResizeHandle={canInteractWithEditor}
           onSyncStatusChange={handleSyncStatusForward}
+          displayMode={currentDisplayMode}
+          zoom={viewZoomScale}
         />
       </div>
     );

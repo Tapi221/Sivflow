@@ -378,11 +378,14 @@ const PdfPageComponent = ({
           textItemCount > 0 ? "true" : "false";
 
         if (!textLayerReady) {
-          console.warn("[PdfViewer] text layer rendered without selectable text", {
-            pageNumber,
-            textItemCount,
-            textSpanCount,
-          });
+          console.warn(
+            "[PdfViewer] text layer rendered without selectable text",
+            {
+              pageNumber,
+              textItemCount,
+              textSpanCount,
+            },
+          );
         }
 
         setRenderState({
@@ -436,7 +439,14 @@ const PdfPageComponent = ({
       clearElement(textLayerRef.current);
       clearElement(searchLayerRef.current);
     };
-  }, [getPage, getPageTextContent, opaqueCanvas, pageNumber, renderIdentity, scale]);
+  }, [
+    getPage,
+    getPageTextContent,
+    opaqueCanvas,
+    pageNumber,
+    renderIdentity,
+    scale,
+  ]);
 
   useEffect(() => {
     const searchLayerEl = searchLayerRef.current;

@@ -17,10 +17,6 @@ type EditorBlock =
   | { type: "code"; code: { language: string; code: string } };
 
 type ReplaceFocus = {
-  /**
-   * 置き換え後 blocks の中で、フォーカスさせたいブロック index（0起点）
-   * - “境界ちょうど” は次（後ろ）ブロックになるように決定される
-   */
   relativeIndex: number;
 };
 
@@ -34,15 +30,14 @@ interface MarkdownBlockProps {
   accentColor?: string;
   isActive?: boolean;
   showDelete?: boolean;
-
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   onMoveDragStart?: () => void;
   onMoveDragEnd?: () => void;
-
   onReplaceWithBlocks?: (blocks: EditorBlock[], focus?: ReplaceFocus) => void;
+  zoom?: number;
 }
 
 const MAX_LENGTH = 50000;
@@ -225,6 +220,7 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
   onMoveDragStart,
   onMoveDragEnd,
   onReplaceWithBlocks,
+  zoom,
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -395,7 +391,9 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
 
         const mdRaw = await sanitizeAndConvertToMarkdown(html);
         const overEscaped =
-          /className=\\"/.test(mdRaw) || /\\_/.test(mdRaw) || /\\</.test(mdRaw);
+          /className=\\\"/.test(mdRaw) ||
+          /\\_/.test(mdRaw) ||
+          /\\</.test(mdRaw);
 
         const fallbackText = plain || htmlToPlainText(html);
         let insertText =
@@ -552,6 +550,7 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
           event.preventDefault();
           setIsEditorOpen(true);
         }}
+        zoom={zoom}
       />
 
       <MarkdownEditorDialog
@@ -578,7 +577,8 @@ const areMarkdownBlockPropsEqual = (
   prev.isActive === next.isActive &&
   prev.showDelete === next.showDelete &&
   prev.canMoveUp === next.canMoveUp &&
-  prev.canMoveDown === next.canMoveDown;
+  prev.canMoveDown === next.canMoveDown &&
+  prev.zoom === next.zoom;
 
 export const MarkdownBlock = React.memo(
   MarkdownBlockInner,

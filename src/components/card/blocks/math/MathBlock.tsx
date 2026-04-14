@@ -19,20 +19,15 @@ interface MathBlockProps {
   accentColor?: string;
   isActive?: boolean;
   showDelete?: boolean;
-
-  // ---- 1行移動（rowOffset）用 ----
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   onMoveDragStart?: () => void;
   onMoveDragEnd?: () => void;
+  zoom?: number;
 }
 
-/**
- * 数式ブロックコンポーネント
- * KaTeX入力、リアルタイムプレビュー、入力バリデーションを提供
- */
 const MathBlockInner: React.FC<MathBlockProps> = ({
   data,
   onChange,
@@ -49,6 +44,7 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
   onMoveDown,
   onMoveDragStart,
   onMoveDragEnd,
+  zoom,
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -100,6 +96,7 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
           showPlaceholder
           placeholder="数式を入力..."
           className={cn("rounded-lg transition-colors", "hover:bg-slate-50")}
+          zoom={zoom}
         />
 
         <MathEditorDialog
@@ -122,7 +119,8 @@ const areMathBlockPropsEqual = (prev: MathBlockProps, next: MathBlockProps) =>
   prev.isActive === next.isActive &&
   prev.showDelete === next.showDelete &&
   prev.canMoveUp === next.canMoveUp &&
-  prev.canMoveDown === next.canMoveDown;
+  prev.canMoveDown === next.canMoveDown &&
+  prev.zoom === next.zoom;
 
 export const MathBlock = React.memo(MathBlockInner, areMathBlockPropsEqual);
 MathBlock.displayName = "MathBlock";

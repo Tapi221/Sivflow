@@ -25,6 +25,7 @@ import {
 } from "@/components/card/frame/rowOffset";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type CssVars = React.CSSProperties & Record<`--${string}`, string>;
 
@@ -58,6 +59,8 @@ interface BlockEditorProps {
   toolbarMount?: HTMLDivElement | null;
   toolbarDesktopLayout?: "horizontal" | "vertical";
   enableBlockActiveState?: boolean;
+  displayMode?: CardDisplayMode;
+  zoom?: number;
 }
 
 const ROW_STEP_PX = CARD_ROW_PX;
@@ -88,6 +91,8 @@ export const BlockEditor = React.forwardRef<
       toolbarMount = null,
       toolbarDesktopLayout = "horizontal",
       enableBlockActiveState = true,
+      displayMode = "fixed",
+      zoom = 1,
     },
     ref,
   ) => {
@@ -537,6 +542,7 @@ export const BlockEditor = React.forwardRef<
     );
 
     const inlineToolbar = toolbarNode && !toolbarMount ? toolbarNode : null;
+    const resolvedEditorZoom = displayMode === "fluid" ? zoom : 1;
 
     return (
       <div
@@ -673,6 +679,7 @@ export const BlockEditor = React.forwardRef<
                       block.type === "markdown"
                         ? handleReplaceMarkdownWithBlocks
                         : undefined,
+                    zoom: resolvedEditorZoom,
                   }}
                 />
               );
