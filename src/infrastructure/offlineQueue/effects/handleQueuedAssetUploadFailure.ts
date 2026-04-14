@@ -14,7 +14,8 @@ export const handleQueuedAssetUploadFailure = async (
     const localDb = await getLocalDb();
     const existingAsset = toAssetLikeRecord(await localDb.images.get(item.id));
 
-    await localDb.images.put(
+    await localDb.upsert(
+      "images",
       makeAssetRecord({
         existing: existingAsset,
         itemId: item.id,

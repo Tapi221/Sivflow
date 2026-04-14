@@ -297,7 +297,7 @@ const upsertAssetRecord = async ({
     retryCount: snapshot.retryCount,
   };
 
-  await db.images.put(assetRecord);
+  await db.upsert("images", assetRecord);
 };
 
 const buildCanonicalImageRef = ({
@@ -753,7 +753,7 @@ export const migrateLegacyImagesToAssets = async ({
         JSON.stringify(card.front) !== JSON.stringify(migratedCard.front) ||
         JSON.stringify(card.back) !== JSON.stringify(migratedCard.back)
       ) {
-        await db.cards.update(card.id, {
+        await db.updateItem("cards", card.id, {
           front: migratedCard.front,
           back: migratedCard.back,
           updatedAt: new Date(),

@@ -19,7 +19,8 @@ export const handleQueuedAssetUploadSuccess = async (
     await localDb.images.get(updatedImage.id),
   );
 
-  await localDb.images.put(
+  await localDb.upsert(
+    "images",
     makeAssetRecord({
       existing: existingAsset,
       itemId: updatedImage.id,
