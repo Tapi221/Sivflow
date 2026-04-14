@@ -18,10 +18,7 @@ import type {
   DeleteEntity,
   UpsertEntity,
 } from "@/application/usecases/syncQueuePayloadGuards";
-import type {
-  SyncPayloadByEntity,
-  SyncPriority,
-} from "@/types/domain/sync";
+import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 import type { LocalDB } from "./LocalDB";
 
 export type CardRelation = {

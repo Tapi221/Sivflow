@@ -477,14 +477,16 @@ export const useTags = () => {
       .equals([currentUser.uid, nameLower])
       .toArray();
 
-    const existing = existingCandidates
-      .slice()
-      .sort((left, right) => {
-        if (Boolean(left.isDeleted) !== Boolean(right.isDeleted)) {
-          return Number(Boolean(left.isDeleted)) - Number(Boolean(right.isDeleted));
-        }
-        return new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
-      })[0];
+    const existing = existingCandidates.slice().sort((left, right) => {
+      if (Boolean(left.isDeleted) !== Boolean(right.isDeleted)) {
+        return (
+          Number(Boolean(left.isDeleted)) - Number(Boolean(right.isDeleted))
+        );
+      }
+      return (
+        new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime()
+      );
+    })[0];
 
     if (existing) {
       const patch: Partial<Tag> = {};
@@ -866,7 +868,11 @@ export const useTags = () => {
         .where("[userId+parentId]")
         .equals([currentUser.uid, tagId])
         .modify((raw: unknown) => {
-          const childTag = raw as { id?: string; parentId?: string; updatedAt?: Date };
+          const childTag = raw as {
+            id?: string;
+            parentId?: string;
+            updatedAt?: Date;
+          };
           childTag.parentId = undefined;
           childTag.updatedAt = now;
 

@@ -134,6 +134,13 @@ const DesktopCardSurfaceInner = ({
     );
   }
 
+  const headerIconVisualScale =
+    currentDisplayMode === "fixed" &&
+    Number.isFinite(viewZoomScale) &&
+    viewZoomScale > 0
+      ? viewZoomScale
+      : 1;
+
   return (
     <div className="w-full min-w-0 max-w-full overflow-visible">
       <Flashcard
@@ -162,6 +169,7 @@ const DesktopCardSurfaceInner = ({
         scaleMultiplier={1}
         fixedScale={currentDisplayMode === "fixed" ? viewZoomScale : undefined}
         contentZoom={currentDisplayMode === "fluid" ? viewZoomScale : 1}
+        headerIconVisualScale={headerIconVisualScale}
         cardShellClassName={
           currentDisplayMode === "fluid"
             ? "border-none bg-transparent shadow-none"
