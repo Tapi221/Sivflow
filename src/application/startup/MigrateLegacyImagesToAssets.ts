@@ -88,7 +88,9 @@ const readFirstNumber = (...values: unknown[]): number | null => {
   return null;
 };
 
-const parseAssetIdFromStoragePath = (storagePath: string | null): string | null => {
+const parseAssetIdFromStoragePath = (
+  storagePath: string | null,
+): string | null => {
   if (!storagePath) return null;
 
   const trimmed = storagePath.trim();
@@ -157,7 +159,11 @@ const resolveRemoteStatus = (
   if (remoteUrl) return "ready";
   if (status === "ready" || status === "completed") return "ready";
   if (status === "failed") return "failed";
-  if (status === "uploading" || status === "pending" || status === "inProgress") {
+  if (
+    status === "uploading" ||
+    status === "pending" ||
+    status === "inProgress"
+  ) {
     return "uploading";
   }
 
@@ -181,16 +187,9 @@ const buildAssetSnapshot = (
     image.storagePath,
   );
   const mime =
-    readFirstString(
-      source?.mime,
-      source?.contentType,
-      image.contentType,
-    ) ?? "application/octet-stream";
-  const size = readFirstNumber(
-    source?.size,
-    image.size,
-    image.sizeBytes,
-  );
+    readFirstString(source?.mime, source?.contentType, image.contentType) ??
+    "application/octet-stream";
+  const size = readFirstNumber(source?.size, image.size, image.sizeBytes);
   const width = readFirstNumber(
     source?.width,
     source?.naturalW,
@@ -232,7 +231,9 @@ const upsertAssetRecord = async ({
   snapshot: AssetSnapshot;
 }): Promise<void> => {
   const db = await getLocalDb(userId);
-  const existing = (await db.images.get(snapshot.assetId)) as ImageRecordLike | undefined;
+  const existing = (await db.images.get(snapshot.assetId)) as
+    | ImageRecordLike
+    | undefined;
   const now = new Date();
 
   const assetRecord: AssetRecord = {
@@ -280,7 +281,11 @@ const buildCanonicalImageRef = ({
   localFileId: source.localFileId?.trim() || assetId,
   remoteUrl: remoteUrl as UploadedImage["remoteUrl"],
   localUrl: null,
-  status: remoteUrl ? "ready" : source.status === "failed" ? "failed" : "uploading",
+  status: remoteUrl
+    ? "ready"
+    : source.status === "failed"
+      ? "failed"
+      : "uploading",
   storagePath: remoteKey,
   contentType: mime,
   size: size ?? source.size ?? source.sizeBytes ?? null,
@@ -357,11 +362,12 @@ const migrateSingleImageRef = async ({
   summary: MigrationSummary;
 }): Promise<UploadedImage> => {
   const db = await getLocalDb(userId);
-  const existing = (await db.images.get(image.assetId?.trim() || image.id.trim())) as
-    | ImageRecordLike
-    | undefined;
+  const existing = (await db.images.get(
+    image.assetId?.trim() || image.id.trim(),
+  )) as ImageRecordLike | undefined;
 
-  const provisionalAssetId = resolveAssetId(image, existing) ?? crypto.randomUUID();
+  const provisionalAssetId =
+    resolveAssetId(image, existing) ?? crypto.randomUUID();
 
   let firestoreImage: UploadedImage | null = null;
   try {
@@ -511,7 +517,8 @@ const migrateFace = async ({
   });
 
   const nextAttachmentImages =
-    Array.isArray(face.attachments?.images) && face.attachments.images.length > 0
+    Array.isArray(face.attachments?.images) &&
+    face.attachments.images.length > 0
       ? await migrateImageArray({
           userId,
           images: face.attachments.images,

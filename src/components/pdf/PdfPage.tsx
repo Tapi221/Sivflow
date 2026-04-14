@@ -177,10 +177,12 @@ export const PdfPage = ({
     [opaqueCanvas, pageNumber, pdf, scale],
   );
 
-  const [measuredPageState, setMeasuredPageState] = useState<MeasuredPageState>({
-    pageIdentity: "",
-    size: null,
-  });
+  const [measuredPageState, setMeasuredPageState] = useState<MeasuredPageState>(
+    {
+      pageIdentity: "",
+      size: null,
+    },
+  );
 
   const [renderState, setRenderState] = useState<RenderState>({
     renderIdentity: "",

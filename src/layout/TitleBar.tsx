@@ -100,10 +100,7 @@ export const TitleBar: React.FC = () => {
     window.addEventListener("cardsetview:editing-change", onEditingChange);
 
     return () => {
-      window.removeEventListener(
-        "cardsetview:editing-change",
-        onEditingChange,
-      );
+      window.removeEventListener("cardsetview:editing-change", onEditingChange);
     };
   }, []);
 
