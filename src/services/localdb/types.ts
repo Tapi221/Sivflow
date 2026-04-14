@@ -14,6 +14,14 @@ import type {
   UserStats,
 } from "@/types";
 import type { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
+import type {
+  DeleteEntity,
+  UpsertEntity,
+} from "@/application/usecases/syncQueuePayloadGuards";
+import type {
+  SyncPayloadByEntity,
+  SyncPriority,
+} from "@/types/domain/sync";
 import type { LocalDB } from "./LocalDB";
 
 export type CardRelation = {
@@ -88,6 +96,17 @@ export interface LocalDBSyncApi {
     data: LocalDBTableMap[TTable],
     skipSync?: boolean,
   ): Promise<void>;
+  queueUpsertSync<TEntity extends UpsertEntity>(args: {
+    entity: TEntity;
+    operationType: "create" | "update";
+    payload: SyncPayloadByEntity[TEntity];
+    priority?: SyncPriority;
+  }): Promise<void>;
+  queueDeleteSync(args: {
+    entity: DeleteEntity;
+    targetId: string;
+    priority?: SyncPriority;
+  }): Promise<void>;
 
   getLastSyncTime(userId: string): Promise<Date | null>;
   updateLastSyncTime(userId: string, syncTime: Date): Promise<void>;

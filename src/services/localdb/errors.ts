@@ -1,5 +1,8 @@
 import type { LocalDBFallbackReasonCode } from "@/services/localDBRuntimeState";
+import { applyInMemorySyncCompat } from "./applyInMemorySyncCompat";
 import { LOCALDB_ERROR_MESSAGE_LIMIT } from "./constants";
+
+applyInMemorySyncCompat();
 
 const MAX_ERROR_NESTING_DEPTH = 4;
 
