@@ -107,8 +107,6 @@ const UPLOAD_VALIDATION_RULES: Record<string, UploadValidationRule> = {
   },
 };
 
-const UNSUPPORTED_UPLOAD_TYPES = new Set(["pptx"]);
-
 const isContextObject = (
   value: UploadMetadata["context"] | undefined,
 ): value is Extract<UploadMetadata["context"], { type: string }> =>
