@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PDF_PAGE_VISIBILITY_THRESHOLD } from "@/components/pdf/pdfViewerConstants";
 import type { PdfScrollDiagnostics } from "@/components/pdf/pdfViewerTypes";
 
 interface UsePdfCurrentPageOptions {
   numPages: number;
+  pageTopOffsets: number[];
   onPageChange?: (page: number) => void;
 }
 
@@ -12,8 +12,6 @@ interface UsePdfCurrentPageResult {
   scrollContainerEl: HTMLDivElement | null;
   currentPage: number;
   handleScroll: () => void;
-  handleVisibilityChange: (pageNumber: number, ratio: number) => void;
-  registerPageRef: (pageNumber: number, el: HTMLDivElement | null) => void;
   notifyLayoutChanged: () => void;
   resetNavigation: () => void;
   scrollToPage: (page: number) => void;
@@ -21,27 +19,68 @@ interface UsePdfCurrentPageResult {
   logScrollDiagnostics: () => void;
 }
 
+const VIEWPORT_PAGE_ANCHOR_RATIO = 0.35;
+
 const clampPage = (page: number, numPages: number) => {
   const safeMax = Math.max(numPages, 1);
   return Math.min(Math.max(page, 1), safeMax);
 };
 
+const findNearestPageFromOffsets = ({
+  scrollTop,
+  pageTopOffsets,
+  numPages,
+}: {
+  scrollTop: number;
+  pageTopOffsets: number[];
+  numPages: number;
+}) => {
+  if (numPages <= 0 || pageTopOffsets.length === 0) {
+    return 1;
+  }
+
+  let lo = 0;
+  let hi = Math.min(numPages, pageTopOffsets.length) - 1;
+
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const midTop = pageTopOffsets[mid] ?? Number.MAX_SAFE_INTEGER;
+
+    if (midTop < scrollTop) {
+      lo = mid + 1;
+    } else {
+      hi = mid;
+    }
+  }
+
+  const rightIndex = lo;
+  const leftIndex = Math.max(0, rightIndex - 1);
+  const leftTop = pageTopOffsets[leftIndex] ?? 0;
+  const rightTop = pageTopOffsets[rightIndex] ?? Number.MAX_SAFE_INTEGER;
+
+  const nearestIndex =
+    Math.abs(leftTop - scrollTop) <= Math.abs(rightTop - scrollTop)
+      ? leftIndex
+      : rightIndex;
+
+  return clampPage(nearestIndex + 1, numPages);
+};
+
 export const usePdfCurrentPage = ({
   numPages,
+  pageTopOffsets,
   onPageChange,
 }: UsePdfCurrentPageOptions): UsePdfCurrentPageResult => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [scrollContainerEl, setScrollContainerEl] =
     useState<HTMLDivElement | null>(null);
 
-  const pageRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const visibilityRatiosRef = useRef<Record<number, number>>({});
   const currentPageRef = useRef(1);
   const onPageChangeRef = useRef(onPageChange);
+  const pageTopOffsetsRef = useRef(pageTopOffsets);
 
   const scrollRafRef = useRef<number | null>(null);
   const pageChangeRafRef = useRef<number | null>(null);
-  const pageUpdateRafRef = useRef<number | null>(null);
   const stateSyncRafRef = useRef<number | null>(null);
   const pendingPageForCallbackRef = useRef<number | null>(null);
 
@@ -50,6 +89,10 @@ export const usePdfCurrentPage = ({
   useEffect(() => {
     onPageChangeRef.current = onPageChange;
   }, [onPageChange]);
+
+  useEffect(() => {
+    pageTopOffsetsRef.current = pageTopOffsets;
+  }, [pageTopOffsets]);
 
   const cancelPendingRafs = useCallback(() => {
     if (scrollRafRef.current !== null) {
@@ -60,11 +103,6 @@ export const usePdfCurrentPage = ({
     if (pageChangeRafRef.current !== null) {
       cancelAnimationFrame(pageChangeRafRef.current);
       pageChangeRafRef.current = null;
-    }
-
-    if (pageUpdateRafRef.current !== null) {
-      cancelAnimationFrame(pageUpdateRafRef.current);
-      pageUpdateRafRef.current = null;
     }
 
     if (stateSyncRafRef.current !== null) {
@@ -117,65 +155,16 @@ export const usePdfCurrentPage = ({
     const container = scrollContainerRef.current;
     if (!container || numPages <= 0) return;
 
-    const targetTop = container.scrollTop;
-    let lo = 0;
-    let hi = numPages - 1;
-
-    while (lo < hi) {
-      const mid = Math.floor((lo + hi) / 2);
-      const midTop =
-        pageRefs.current[mid]?.offsetTop ?? Number.MAX_SAFE_INTEGER;
-
-      if (midTop < targetTop) {
-        lo = mid + 1;
-      } else {
-        hi = mid;
-      }
-    }
-
-    const rightIndex = lo;
-    const leftIndex = Math.max(0, rightIndex - 1);
-    const leftTop = pageRefs.current[leftIndex]?.offsetTop ?? 0;
-    const rightTop =
-      pageRefs.current[rightIndex]?.offsetTop ?? Number.MAX_SAFE_INTEGER;
-
-    const nearestIndex =
-      Math.abs(leftTop - targetTop) <= Math.abs(rightTop - targetTop)
-        ? leftIndex
-        : rightIndex;
-
-    commitCurrentPage(nearestIndex + 1);
-  }, [commitCurrentPage, numPages]);
-
-  const schedulePageUpdate = useCallback(() => {
-    if (pageUpdateRafRef.current !== null) return;
-
-    pageUpdateRafRef.current = requestAnimationFrame(() => {
-      pageUpdateRafRef.current = null;
-
-      let maxPage: number | null = null;
-      let maxRatio = -1;
-
-      for (const [key, ratio] of Object.entries(visibilityRatiosRef.current)) {
-        const page = Number(key);
-        if (!Number.isFinite(page) || !Number.isFinite(ratio)) continue;
-        if (ratio <= maxRatio) continue;
-
-        maxRatio = ratio;
-        maxPage = page;
-      }
-
-      if (
-        typeof maxPage === "number" &&
-        maxRatio >= PDF_PAGE_VISIBILITY_THRESHOLD
-      ) {
-        commitCurrentPage(maxPage);
-        return;
-      }
-
-      estimateCurrentPageFromScroll();
+    const viewportAnchorTop =
+      container.scrollTop + container.clientHeight * VIEWPORT_PAGE_ANCHOR_RATIO;
+    const nextPage = findNearestPageFromOffsets({
+      scrollTop: viewportAnchorTop,
+      pageTopOffsets: pageTopOffsetsRef.current,
+      numPages,
     });
-  }, [commitCurrentPage, estimateCurrentPageFromScroll]);
+
+    commitCurrentPage(nextPage);
+  }, [commitCurrentPage, numPages]);
 
   const handleScroll = useCallback(() => {
     if (scrollRafRef.current !== null) return;
@@ -186,35 +175,13 @@ export const usePdfCurrentPage = ({
     });
   }, [estimateCurrentPageFromScroll]);
 
-  const handleVisibilityChange = useCallback(
-    (pageNumber: number, ratio: number) => {
-      if (ratio < PDF_PAGE_VISIBILITY_THRESHOLD) {
-        delete visibilityRatiosRef.current[pageNumber];
-      } else {
-        visibilityRatiosRef.current[pageNumber] = ratio;
-      }
-
-      schedulePageUpdate();
-    },
-    [schedulePageUpdate],
-  );
-
-  const registerPageRef = useCallback(
-    (pageNumber: number, el: HTMLDivElement | null) => {
-      pageRefs.current[pageNumber - 1] = el;
-    },
-    [],
-  );
-
   const notifyLayoutChanged = useCallback(() => {
-    schedulePageUpdate();
-  }, [schedulePageUpdate]);
+    estimateCurrentPageFromScroll();
+  }, [estimateCurrentPageFromScroll]);
 
   const resetNavigation = useCallback(() => {
     cancelPendingRafs();
     pendingPageForCallbackRef.current = null;
-    visibilityRatiosRef.current = {};
-    pageRefs.current = [];
     currentPageRef.current = 1;
     scheduleCurrentPageStateSync(1);
     scheduleOnPageChange(1);
@@ -231,10 +198,8 @@ export const usePdfCurrentPage = ({
       if (!container) return;
 
       const clamped = clampPage(page, numPages);
-      const target = pageRefs.current[clamped - 1];
-      if (!target) return;
-
-      container.scrollTo({ top: target.offsetTop, behavior: "smooth" });
+      const targetTop = pageTopOffsetsRef.current[clamped - 1] ?? 0;
+      container.scrollTo({ top: targetTop, behavior: "smooth" });
     },
     [numPages],
   );
@@ -288,15 +253,11 @@ export const usePdfCurrentPage = ({
 
   const containerRef = useCallback((el: HTMLDivElement | null) => {
     scrollContainerRef.current = el;
-    setScrollContainerEl((prev) => (prev === el ? prev : el));
+    setScrollContainerEl((previous) => (previous === el ? previous : el));
   }, []);
 
   useEffect(() => {
-    pageRefs.current.length = numPages;
-
     if (numPages <= 0) {
-      visibilityRatiosRef.current = {};
-
       if (currentPageRef.current !== 1) {
         currentPageRef.current = 1;
         scheduleCurrentPageStateSync(1);
@@ -305,16 +266,6 @@ export const usePdfCurrentPage = ({
 
       return;
     }
-
-    const nextRatios: Record<number, number> = {};
-
-    for (const [key, ratio] of Object.entries(visibilityRatiosRef.current)) {
-      const page = Number(key);
-      if (!Number.isFinite(page) || page < 1 || page > numPages) continue;
-      nextRatios[page] = ratio;
-    }
-
-    visibilityRatiosRef.current = nextRatios;
 
     const clamped = clampPage(currentPageRef.current, numPages);
 
@@ -336,6 +287,10 @@ export const usePdfCurrentPage = ({
   ]);
 
   useEffect(() => {
+    estimateCurrentPageFromScroll();
+  }, [estimateCurrentPageFromScroll, pageTopOffsets]);
+
+  useEffect(() => {
     return () => {
       cancelPendingRafs();
       pendingPageForCallbackRef.current = null;
@@ -347,8 +302,6 @@ export const usePdfCurrentPage = ({
     scrollContainerEl,
     currentPage,
     handleScroll,
-    handleVisibilityChange,
-    registerPageRef,
     notifyLayoutChanged,
     resetNavigation,
     scrollToPage,

@@ -104,9 +104,7 @@ const buildSearchIndexMap = async ({
     }
   };
 
-  await Promise.all(
-    Array.from({ length: limitedConcurrency }, () => worker()),
-  );
+  await Promise.all(Array.from({ length: limitedConcurrency }, () => worker()));
 
   return searchIndexMap;
 };
@@ -245,7 +243,6 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       scrollContainerEl,
       currentPage,
       handleScroll,
-      handleVisibilityChange,
       notifyLayoutChanged,
       resetNavigation,
       scrollToPage,
@@ -439,7 +436,13 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       return () => {
         cancelled = true;
       };
-    }, [doc, getPageSearchIndex, normalizedSearchQuery, pageNumbers, resetSearchIndexCache]);
+    }, [
+      doc,
+      getPageSearchIndex,
+      normalizedSearchQuery,
+      pageNumbers,
+      resetSearchIndexCache,
+    ]);
 
     const activeMatchPageNumber = useMemo(() => {
       if (activeMatchIndex < 0 || activeMatchIndex >= flattenedMatches.length) {
@@ -580,14 +583,12 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
                       pageNumber={pageNumber}
                       scale={scale}
                       baseSize={pageSizes[pageNumber]}
-                      rootEl={scrollContainerEl}
                       opaqueCanvas={resolvedOpaqueCanvas}
                       searchMatches={pageSearchMatches}
                       activeSearchMatchIndex={activeSearchMatchIndexForPage}
                       getPage={getPage}
                       getPageTextContent={getPageTextContent}
                       onPageSize={setPageSize}
-                      onVisibilityChange={handleVisibilityChange}
                     />
                   </div>
                 );
