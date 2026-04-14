@@ -679,6 +679,17 @@ export const FolderTreeWithCards = ({
     else rowRefs.current.delete(id);
   }, []);
 
+  const {
+    fileInputRef,
+    handlePdfDropped,
+    handleToolbarAddDocument,
+    currentFileAccept,
+    handleToolbarFileInputChange,
+  } = useFolderDocumentUpload({
+    actionFolderId: headerFolderId,
+    getNextOrderIndex,
+    setExpandedFolders,
+  });
 
   useExplorerKeyboardNavigation({
     selectedFolderId,
@@ -921,7 +932,6 @@ export const FolderTreeWithCards = ({
     fileDragFolderId,
     setFileDragFolderId,
     handlePdfDropped,
-    handlePptxDropped,
     openRowMenuId: dialogs.openRowMenuId,
     setOpenRowMenuId: dialogs.setOpenRowMenuId,
     onFolderSelect: handleFolderNodeSelect,
@@ -962,7 +972,6 @@ export const FolderTreeWithCards = ({
       fileDragFolderId,
       setFileDragFolderId,
       handlePdfDropped,
-      handlePptxDropped,
       handleFolderNodeSelect,
       onItemSelect,
       actions.handleCreateFolderAction,
