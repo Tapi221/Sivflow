@@ -3,20 +3,7 @@ import type {
   DesktopBridgeApi,
   DesktopOauthCallbackPayload,
 } from "../src/types/externals/desktop-api";
-
-const IPC_CHANNELS = {
-  appGetVersion: "desktop:app:getVersion",
-  shellOpenExternal: "desktop:shell:openExternal",
-  oauthStart: "oauth:start",
-  oauthCancel: "oauth:cancel",
-  oauthExchangeIdToken: "oauth:exchangeIdToken",
-  oauthCallback: "oauth:callback",
-  windowMinimize: "window:minimize",
-  windowMaximizeToggle: "window:maximizeToggle",
-  windowClose: "window:close",
-  windowIsMaximized: "window:isMaximized",
-  windowMaximizedState: "window:maximizedState",
-} as const;
+import { IPC_CHANNELS } from "./ipcChannels";
 
 const desktopApi: DesktopBridgeApi = {
   app: {
@@ -37,7 +24,9 @@ const desktopApi: DesktopBridgeApi = {
         _event: Electron.IpcRendererEvent,
         payload: DesktopOauthCallbackPayload,
       ) => handler(payload);
+
       ipcRenderer.on(IPC_CHANNELS.oauthCallback, listener);
+
       return () => {
         ipcRenderer.removeListener(IPC_CHANNELS.oauthCallback, listener);
       };
@@ -53,7 +42,9 @@ const desktopApi: DesktopBridgeApi = {
         _event: Electron.IpcRendererEvent,
         isMaximized: boolean,
       ) => handler(isMaximized);
+
       ipcRenderer.on(IPC_CHANNELS.windowMaximizedState, listener);
+
       return () => {
         ipcRenderer.removeListener(IPC_CHANNELS.windowMaximizedState, listener);
       };

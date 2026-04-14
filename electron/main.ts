@@ -2,25 +2,12 @@ import { app, BrowserWindow, ipcMain, Menu, shell } from "electron";
 import * as http from "node:http";
 import * as path from "node:path";
 import { URL } from "node:url";
+import { IPC_CHANNELS } from "./ipcChannels";
 
 if (process.platform === "win32") {
   // 非最大化復帰時に発生するGPU合成起因の白飛び/薄化を回避
   app.disableHardwareAcceleration();
 }
-
-const IPC_CHANNELS = {
-  appGetVersion: "desktop:app:getVersion",
-  shellOpenExternal: "desktop:shell:openExternal",
-  oauthStart: "oauth:start",
-  oauthCancel: "oauth:cancel",
-  oauthExchangeIdToken: "oauth:exchangeIdToken",
-  oauthCallback: "oauth:callback",
-  windowMinimize: "window:minimize",
-  windowMaximizeToggle: "window:maximizeToggle",
-  windowClose: "window:close",
-  windowIsMaximized: "window:isMaximized",
-  windowMaximizedState: "window:maximizedState",
-} as const;
 
 const ALLOWED_EXTERNAL_PROTOCOLS = new Set(["http:", "https:", "mailto:"]);
 const OAUTH_LOOPBACK_HOST = "127.0.0.1";
@@ -38,14 +25,17 @@ app.commandLine.appendSwitch("disable-renderer-backgrounding");
 app.commandLine.appendSwitch("disable-background-timer-throttling");
 app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion");
 
-function toOauthCallbackPayload(url: string): {
+const toOauthCallbackPayload = (
+  url: string,
+): {
   url: string;
   code?: string;
   state?: string;
   error?: string;
   errorDescription?: string;
-} {
+} => {
   const parsed = new URL(url);
+
   return {
     url,
     code: parsed.searchParams.get("code") ?? undefined,
@@ -53,54 +43,60 @@ function toOauthCallbackPayload(url: string): {
     error: parsed.searchParams.get("error") ?? undefined,
     errorDescription: parsed.searchParams.get("error_description") ?? undefined,
   };
-}
+};
 
-function getRendererUrlFromArgv(): string | null {
+const getRendererUrlFromArgv = (): string | null => {
   const arg = process.argv.find((value) => value.startsWith("--renderer-url="));
   if (!arg) return null;
+
   const [, rawUrl] = arg.split("=");
   return rawUrl || null;
-}
+};
 
-function canOpenExternal(rawUrl: string): boolean {
+const canOpenExternal = (rawUrl: string): boolean => {
   try {
     const parsed = new URL(rawUrl);
     return ALLOWED_EXTERNAL_PROTOCOLS.has(parsed.protocol);
   } catch {
     return false;
   }
-}
+};
 
-async function openExternal(rawUrl: string): Promise<void> {
+const openExternal = async (rawUrl: string): Promise<void> => {
   if (!canOpenExternal(rawUrl)) {
     throw new Error("Blocked non-external URL");
   }
-  await shell.openExternal(rawUrl);
-}
 
-function focusMainWindow(): void {
+  await shell.openExternal(rawUrl);
+};
+
+const focusMainWindow = (): void => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
+
   if (mainWindow.isMinimized()) {
     mainWindow.restore();
   }
+
   mainWindow.setOpacity(1);
   mainWindow.focus();
+
   if (!mainWindow.webContents.isDestroyed()) {
     mainWindow.webContents.invalidate();
   }
-}
+};
 
-function flushPendingOauthCallback(): void {
+const flushPendingOauthCallback = (): void => {
   if (!pendingOauthCallbackUrl) return;
   if (!mainWindow || mainWindow.isDestroyed()) return;
+
   mainWindow.webContents.send(
     IPC_CHANNELS.oauthCallback,
     toOauthCallbackPayload(pendingOauthCallbackUrl),
   );
   pendingOauthCallbackUrl = null;
-}
+};
 
-function handleOauthCallback(rawUrl: string): void {
+const handleOauthCallback = (rawUrl: string): void => {
   if (
     !mainWindow ||
     mainWindow.isDestroyed() ||
@@ -114,18 +110,19 @@ function handleOauthCallback(rawUrl: string): void {
     IPC_CHANNELS.oauthCallback,
     toOauthCallbackPayload(rawUrl),
   );
-}
+};
 
-function stopOauthLoopbackServer(): void {
+const stopOauthLoopbackServer = (): void => {
   if (!oauthLoopbackServer) return;
+
   oauthLoopbackServer.close(() => {
     console.info("[electron][oauth] loopback server closed");
   });
   oauthLoopbackServer = null;
-}
+};
 
-function startOauthLoopbackServer(): Promise<void> {
-  return new Promise((resolve, reject) => {
+const startOauthLoopbackServer = (): Promise<void> =>
+  new Promise((resolve, reject) => {
     stopOauthLoopbackServer();
 
     const server = http.createServer((req, res) => {
@@ -134,6 +131,7 @@ function startOauthLoopbackServer(): Promise<void> {
         `http://${OAUTH_LOOPBACK_HOST}:${OAUTH_LOOPBACK_PORT}`,
       );
       const fullUrl = requestUrl.toString();
+
       console.info("[electron][oauth] callback received", { url: fullUrl });
 
       if (req.method !== "GET" || requestUrl.pathname !== OAUTH_LOOPBACK_PATH) {
@@ -143,10 +141,12 @@ function startOauthLoopbackServer(): Promise<void> {
       }
 
       handleOauthCallback(fullUrl);
+
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       res.end(
         "<!doctype html><html><body><h1>ログイン完了。アプリに戻ってください。</h1></body></html>",
       );
+
       stopOauthLoopbackServer();
     });
 
@@ -157,41 +157,45 @@ function startOauthLoopbackServer(): Promise<void> {
 
     server.listen(OAUTH_LOOPBACK_PORT, OAUTH_LOOPBACK_HOST, () => {
       oauthLoopbackServer = server;
+
       console.info("[electron][oauth] loopback listen started", {
         host: OAUTH_LOOPBACK_HOST,
         port: OAUTH_LOOPBACK_PORT,
         path: OAUTH_LOOPBACK_PATH,
       });
+
       resolve();
     });
   });
-}
 
-function ensureOauthLoopbackRedirect(authorizeUrl: string): void {
+const ensureOauthLoopbackRedirect = (authorizeUrl: string): void => {
   const parsed = new URL(authorizeUrl);
   const redirectUri = parsed.searchParams.get("redirect_uri");
   const expectedRedirectUri = `http://${OAUTH_LOOPBACK_HOST}:${OAUTH_LOOPBACK_PORT}${OAUTH_LOOPBACK_PATH}`;
+
   if (!redirectUri || redirectUri !== expectedRedirectUri) {
     throw new Error(
       `OAuth redirect URI mismatch. expected=${expectedRedirectUri}, actual=${redirectUri ?? "missing"}`,
     );
   }
-}
+};
 
-function getDesktopOauthClientSecret(): string {
+const getDesktopOauthClientSecret = (): string => {
   const secret =
     process.env.GOOGLE_OAUTH_WEB_CLIENT_SECRET?.trim() ||
     process.env.GOOGLE_OAUTH_CLIENT_SECRET?.trim() ||
     process.env.DESKTOP_GOOGLE_OAUTH_CLIENT_SECRET?.trim();
+
   if (!secret) {
     throw new Error(
       "GOOGLE_OAUTH_WEB_CLIENT_SECRET is not configured in main process environment",
     );
   }
-  return secret;
-}
 
-function createMainWindow() {
+  return secret;
+};
+
+const createMainWindow = (): BrowserWindow => {
   const windowRef = new BrowserWindow({
     width: 1280,
     height: 820,
@@ -211,9 +215,11 @@ function createMainWindow() {
       backgroundThrottling: false,
     },
   });
+
   mainWindow = windowRef;
 
   const rendererUrl = getRendererUrlFromArgv();
+
   if (rendererUrl) {
     void windowRef.loadURL(rendererUrl);
     windowRef.webContents.openDevTools({ mode: "detach" });
@@ -225,17 +231,22 @@ function createMainWindow() {
     if (url.startsWith("blob:")) {
       return { action: "allow" };
     }
+
     void openExternal(url).catch((error) => {
       console.error("[electron] failed to open external URL", { url, error });
     });
+
     return { action: "deny" };
   });
 
   windowRef.webContents.on("will-navigate", (event, targetUrl) => {
     const currentUrl = windowRef.webContents.getURL();
+
     if (targetUrl === currentUrl) return;
     if (targetUrl.startsWith("blob:")) return;
+
     event.preventDefault();
+
     void openExternal(targetUrl).catch((error) => {
       console.error("[electron] blocked navigation URL", {
         targetUrl,
@@ -252,9 +263,11 @@ function createMainWindow() {
     if (!windowRef.isDestroyed()) {
       windowRef.setOpacity(1);
       windowRef.show();
+
       if (!windowRef.isFocused()) {
         windowRef.focus();
       }
+
       if (!windowRef.webContents.isDestroyed()) {
         windowRef.webContents.invalidate();
       }
@@ -268,26 +281,32 @@ function createMainWindow() {
   windowRef.on("maximize", () => {
     windowRef.webContents.send(IPC_CHANNELS.windowMaximizedState, true);
     windowRef.setOpacity(1);
+
     if (!windowRef.isFocused()) {
       windowRef.focus();
     }
+
     windowRef.webContents.invalidate();
   });
 
   windowRef.on("unmaximize", () => {
     windowRef.webContents.send(IPC_CHANNELS.windowMaximizedState, false);
     windowRef.setOpacity(1);
+
     if (!windowRef.isFocused()) {
       windowRef.focus();
     }
+
     windowRef.webContents.invalidate();
   });
 
   windowRef.on("restore", () => {
     windowRef.setOpacity(1);
+
     if (!windowRef.isFocused()) {
       windowRef.focus();
     }
+
     windowRef.webContents.invalidate();
   });
 
@@ -298,23 +317,27 @@ function createMainWindow() {
 
   windowRef.on("show", () => {
     windowRef.setOpacity(1);
+
     if (!windowRef.isFocused()) {
       windowRef.focus();
     }
+
     windowRef.webContents.invalidate();
   });
 
   return windowRef;
-}
+};
 
-function registerIpcHandlers(): void {
+const registerIpcHandlers = (): void => {
   ipcMain.handle(IPC_CHANNELS.appGetVersion, () => app.getVersion());
+
   ipcMain.handle(
     IPC_CHANNELS.shellOpenExternal,
     async (_event, rawUrl: string) => {
       await openExternal(rawUrl);
     },
   );
+
   ipcMain.handle(
     IPC_CHANNELS.oauthStart,
     async (_event, authorizeUrl: string) => {
@@ -323,10 +346,12 @@ function registerIpcHandlers(): void {
       await openExternal(authorizeUrl);
     },
   );
+
   ipcMain.handle(IPC_CHANNELS.oauthCancel, async () => {
     pendingOauthCallbackUrl = null;
     stopOauthLoopbackServer();
   });
+
   ipcMain.handle(
     IPC_CHANNELS.oauthExchangeIdToken,
     async (
@@ -347,6 +372,7 @@ function registerIpcHandlers(): void {
         grant_type: "authorization_code",
         redirect_uri: input.redirectUri,
       });
+
       console.info("[electron][oauth] token request", {
         client_id: input.clientId,
         redirect_uri: input.redirectUri,
@@ -365,6 +391,7 @@ function registerIpcHandlers(): void {
       });
 
       const responseText = await response.text();
+
       console.info("[electron][oauth] token response", {
         status: response.status,
         ok: response.ok,
@@ -376,6 +403,7 @@ function registerIpcHandlers(): void {
         error_description?: string;
         id_token?: string;
       } = {};
+
       try {
         payload = JSON.parse(responseText) as {
           error?: string;
@@ -401,23 +429,27 @@ function registerIpcHandlers(): void {
       return payload.id_token;
     },
   );
+
   ipcMain.handle(IPC_CHANNELS.windowMinimize, () => {
     mainWindow?.minimize();
   });
+
   ipcMain.handle(IPC_CHANNELS.windowMaximizeToggle, () => {
     if (mainWindow?.isMaximized()) {
-      mainWindow?.restore();
+      mainWindow.restore();
     } else {
       mainWindow?.maximize();
     }
   });
+
   ipcMain.handle(IPC_CHANNELS.windowClose, () => {
     mainWindow?.close();
   });
+
   ipcMain.handle(IPC_CHANNELS.windowIsMaximized, () => {
     return mainWindow?.isMaximized() ?? false;
   });
-}
+};
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
 
@@ -443,6 +475,7 @@ if (!gotSingleInstanceLock) {
 
 app.on("window-all-closed", () => {
   stopOauthLoopbackServer();
+
   if (process.platform !== "darwin") {
     app.quit();
   }

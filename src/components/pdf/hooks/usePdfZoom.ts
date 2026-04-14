@@ -115,7 +115,11 @@ export const usePdfZoom = ({
 
       previewScaleRef.current = nextScale;
 
-      if (!previewTarget || !Number.isFinite(scaleRef.current) || scaleRef.current <= 0) {
+      if (
+        !previewTarget ||
+        !Number.isFinite(scaleRef.current) ||
+        scaleRef.current <= 0
+      ) {
         return;
       }
 
