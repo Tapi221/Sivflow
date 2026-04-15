@@ -80,20 +80,12 @@ const toDateFromTimestampMethods = (value: TimestampLike): Date | null => {
 
 const toDateFromTimestampFields = (value: TimestampLike): Date | null => {
   const secondsCandidate = value.seconds ?? value._seconds ?? null;
-  const nanosecondsCandidate = value.nanoseconds ?? value._nanoseconds ?? 0;
+  const nanosecondsRaw = value.nanoseconds ?? value._nanoseconds ?? 0;
 
   if (!isFiniteNumber(secondsCandidate)) return null;
-  if (
-    nanosecondsCandidate !== undefined &&
-    !isFiniteNumber(nanosecondsCandidate)
-  ) {
-    return null;
-  }
 
   const seconds = secondsCandidate;
-  const nanoseconds = isFiniteNumber(nanosecondsCandidate)
-    ? nanosecondsCandidate
-    : 0;
+  const nanoseconds = isFiniteNumber(nanosecondsRaw) ? nanosecondsRaw : 0;
   const millis = seconds * 1000 + Math.floor(nanoseconds / 1_000_000);
 
   return toDateFromMillis(millis);
