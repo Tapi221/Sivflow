@@ -1007,17 +1007,32 @@ export class InMemoryLocalDB {
   }
 
   async getQueuedItemsOldestFirst(): Promise<SyncQueueItem[]> {
-    return this.syncQueue.orderBy("createdAt").toArray();
+    const items = await this.syncQueue.toArray();
+
+    const getCreatedAt = (item: SyncQueueItem): number =>
+      typeof item.createdAt === "number" && Number.isFinite(item.createdAt)
+        ? item.createdAt
+        : 0;
+
+    const getUpdatedAt = (item: SyncQueueItem): number =>
+      typeof item.updatedAt === "number" && Number.isFinite(item.updatedAt)
+        ? item.updatedAt
+        : 0;
+
+    return items.sort((left, right) => {
+      const createdAtDiff = getCreatedAt(left) - getCreatedAt(right);
+      if (createdAtDiff !== 0) return createdAtDiff;
+      return getUpdatedAt(left) - getUpdatedAt(right);
+    });
   }
 
   async trimSyncQueueToLimit(limit: number): Promise<void> {
     const count = await this.syncQueue.count();
     if (count <= limit) return;
-    const oldest = await this.syncQueue
-      .orderBy("createdAt")
-      .limit(count - limit)
-      .toArray();
-    await this.syncQueue.bulkDelete(oldest.map((item) => item.id));
+    const oldest = await this.getQueuedItemsOldestFirst();
+    await this.syncQueue.bulkDelete(
+      oldest.slice(0, count - limit).map((item) => item.id),
+    );
   }
 
   async putSyncQueueItem(item: SyncQueueItem): Promise<void> {
