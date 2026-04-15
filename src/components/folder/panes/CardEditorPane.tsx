@@ -94,7 +94,7 @@ type FlashcardCardLike = Record<string, unknown> & {
 };
 
 const CARD_PANE_AUTO_MAX_SCALE = 4;
-const CARD_EDITOR_PAIR_GAP_PX = 16;
+const CARD_EDITOR_PAIR_GAP_PX = 0;
 const EMPTY_BLOCKS: CardBlock[] = [];
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -360,7 +360,7 @@ export const CardEditorPane = ({
   externalToolbarMountA = null,
   settingsOverride = null,
   embeddedInPager = false,
-  pairGapClassName = "gap-6",
+  pairGapClassName = "gap-0",
   presentationContext,
   showResizeHandle: showResizeHandleProp = true,
   onSyncStatusChange,

@@ -212,8 +212,8 @@ const DesktopCardSurfaceInner = ({
           className={cn(
             "w-full min-w-0 max-w-full",
             currentCardLayoutMode === "split"
-              ? "grid grid-cols-1 gap-4 lg:grid-cols-2"
-              : "flex flex-col gap-4",
+              ? "grid grid-cols-1 gap-0 lg:grid-cols-2"
+              : "flex flex-col gap-0",
           )}
         >
           <div className="min-w-0">
