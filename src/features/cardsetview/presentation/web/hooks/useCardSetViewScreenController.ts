@@ -58,6 +58,7 @@ export const useCardSetViewScreenController = () => {
   });
 
   const interactionMode = state.isGlobalEditing ? "edit" : "view";
+  const layoutInteractionMode = "view" as const;
   const splitFallbackLayoutMode = useMemo(
     () => resolveSplitFallbackLayoutModePreference(presentationTarget),
     [presentationTarget],
@@ -71,11 +72,11 @@ export const useCardSetViewScreenController = () => {
       state.selectedCard?.id ?? "",
       state.currentDisplayMode,
       state.currentCardLayoutMode,
-      interactionMode,
+      layoutInteractionMode,
       state.isMetaOpen ? "meta-open" : "meta-closed",
     ].join(":"),
     displayMode: state.currentDisplayMode,
-    interactionMode,
+    interactionMode: layoutInteractionMode,
     requestedCardLayoutMode: state.currentCardLayoutMode,
     splitFallbackLayoutMode,
   });

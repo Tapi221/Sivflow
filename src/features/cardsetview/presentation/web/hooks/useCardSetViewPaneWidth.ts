@@ -2,8 +2,6 @@ import { useMemo } from "react";
 
 import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthState";
 import {
-  CARD_PANE_EDIT_DEFAULT_WIDTH_PX,
-  CARD_PANE_EDIT_MIN_WIDTH_PX,
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_PANE_VIEW_MIN_WIDTH_PX,
   clampPaneWidthPx,
@@ -57,54 +55,45 @@ export const useCardSetViewPaneWidth = ({
     [isDesktop],
   );
 
-  const viewPreferenceKey = `${cardSetId ?? ""}:${settings?.cardViewPaneWidthPx ?? ""}`;
-  const editPreferenceKey = `${cardSetId ?? ""}:${settings?.cardEditPaneWidthPx ?? ""}`;
+  const sharedPreferenceKey = `${cardSetId ?? ""}:${settings?.cardViewPaneWidthPx ?? ""}:${settings?.cardEditPaneWidthPx ?? ""}`;
 
-  const preferredViewPaneWidthPx = useMemo(() => {
-    const localStored = cardSetId
+  const preferredSharedPaneWidthPx = useMemo(() => {
+    const storedViewWidth = cardSetId
       ? getCardSetWidthPreference(cardSetId, "view")
       : undefined;
-
-    return clampPaneWidthPx(
-      localStored ??
-        settings?.cardViewPaneWidthPx ??
-        CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
-      CARD_PANE_VIEW_MIN_WIDTH_PX,
-    );
-  }, [cardSetId, settings?.cardViewPaneWidthPx]);
-
-  const preferredEditPaneWidthPx = useMemo(() => {
-    const localStored = cardSetId
+    const storedEditWidth = cardSetId
       ? getCardSetWidthPreference(cardSetId, "edit")
       : undefined;
 
     return clampPaneWidthPx(
-      localStored ??
+      storedViewWidth ??
+        storedEditWidth ??
+        settings?.cardViewPaneWidthPx ??
         settings?.cardEditPaneWidthPx ??
-        CARD_PANE_EDIT_DEFAULT_WIDTH_PX,
-      CARD_PANE_EDIT_MIN_WIDTH_PX,
+        CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
+      CARD_PANE_VIEW_MIN_WIDTH_PX,
     );
-  }, [cardSetId, settings?.cardEditPaneWidthPx]);
+  }, [cardSetId, settings?.cardEditPaneWidthPx, settings?.cardViewPaneWidthPx]);
 
-  const paneWidth = useCardPaneWidthState({
+  return useCardPaneWidthState({
     isEditMode: isGlobalEditing,
     preferredWidths: {
       view: {
-        key: viewPreferenceKey,
-        width: preferredViewPaneWidthPx,
+        key: `${sharedPreferenceKey}:shared`,
+        width: preferredSharedPaneWidthPx,
       },
       edit: {
-        key: editPreferenceKey,
-        width: preferredEditPaneWidthPx,
+        key: `${sharedPreferenceKey}:shared`,
+        width: preferredSharedPaneWidthPx,
       },
     },
     defaultWidths: {
       view: CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
-      edit: CARD_PANE_EDIT_DEFAULT_WIDTH_PX,
+      edit: CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
     },
     minWidths: {
       view: CARD_PANE_VIEW_MIN_WIDTH_PX,
-      edit: CARD_PANE_EDIT_MIN_WIDTH_PX,
+      edit: CARD_PANE_VIEW_MIN_WIDTH_PX,
     },
     measureViewportWidth,
     viewportObserverDeps: [
@@ -115,15 +104,12 @@ export const useCardSetViewPaneWidth = ({
     ],
     reservedViewportInsetPx: reservedScrollbarGutterWidthPx,
     allowStoredWidthBeyondViewport: false,
-    previewBehavior: "active-only",
-    persistBehavior: "active-only",
-    onPersist: (mode, widthPx) => {
+    previewBehavior: "both",
+    persistBehavior: "both",
+    onPersist: (_mode, widthPx) => {
       if (!cardSetId) return;
-      setCardSetWidthPreference(cardSetId, mode, widthPx);
+      setCardSetWidthPreference(cardSetId, "view", widthPx);
+      setCardSetWidthPreference(cardSetId, "edit", widthPx);
     },
   });
-
-  return {
-    ...paneWidth,
-  };
 };

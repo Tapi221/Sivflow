@@ -3,14 +3,10 @@ import {
   Flashcard,
   type FlashcardCardLike,
 } from "@/components/card/frame/Flashcard";
-import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
+import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
+import { DesktopEmbeddedCardEditorSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopEmbeddedCardEditorSurface";
+import { buildSharedCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import {
-  buildCardRenderSpec,
-  resolveCardContentZoom,
-  resolveCardSurfaceScale,
-} from "@/features/cardrender/domain/cardRenderSpec";
-import { cn } from "@/lib/utils";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import React from "react";
@@ -110,15 +106,14 @@ const DesktopCardSurfaceInner = ({
     return toFlashcardCardLike(card);
   }, [card]);
 
-  const viewRenderSpec = React.useMemo(
+  const metrics = React.useMemo(
     () =>
-      buildCardRenderSpec({
+      buildSharedCardSurfaceMetrics({
         displayMode: currentDisplayMode,
-        interactionMode: "view",
+        cardLayoutMode: currentCardLayoutMode,
         zoomScale: viewZoomScale,
-        showInk: currentDisplayMode === "fixed",
       }),
-    [currentDisplayMode, viewZoomScale],
+    [currentCardLayoutMode, currentDisplayMode, viewZoomScale],
   );
 
   const handleEditorFocusCapture = React.useCallback(() => {
@@ -142,19 +137,6 @@ const DesktopCardSurfaceInner = ({
 
   const canInteractWithEditor = isGlobalEditing && (isActive || hasFocusWithin);
 
-  const handleSyncStatusForward = React.useCallback(
-    (status: CardSyncStatus | null) => {
-      if (!canInteractWithEditor) return;
-      onSyncStatusChange(status);
-    },
-    [canInteractWithEditor, onSyncStatusChange],
-  );
-
-  React.useEffect(() => {
-    if (canInteractWithEditor) return;
-    onSyncStatusChange(null);
-  }, [canInteractWithEditor, onSyncStatusChange]);
-
   if (isGlobalEditing) {
     return (
       <div
@@ -167,96 +149,48 @@ const DesktopCardSurfaceInner = ({
             : undefined
         }
       >
-        <CardEditorPane
+        <DesktopEmbeddedCardEditorSurface
           selectedCardId={card.id}
-          folderId={folderId || undefined}
-          cardSetId={cardSetId || undefined}
-          forcedPaneWidthPx={editPaneWidthPx}
+          folderId={folderId}
+          cardSetId={cardSetId}
           cardsOverride={cardsOverride}
-          autoEdit
-          hideMetaPanel
-          dockToolbarsToTop
-          hideBlockToolbars={!canInteractWithEditor}
-          embeddedInPager
-          presentationContext={{
-            isCurrentCard: isActive,
-            isStandaloneEditor: false,
-            hasFocusWithin,
-          }}
-          settingsOverride={settings}
-          pairGapClassName="gap-0"
-          showResizeHandle={canInteractWithEditor}
-          onSyncStatusChange={handleSyncStatusForward}
+          settings={settings}
           displayMode={currentDisplayMode}
           cardLayoutMode={currentCardLayoutMode}
-          zoom={viewZoomScale}
+          zoomScale={viewZoomScale}
+          isInteractive={canInteractWithEditor}
+          onSyncStatusChange={onSyncStatusChange}
         />
       </div>
     );
   }
 
-  const isSplitLayout = currentCardLayoutMode === "split";
-  const baseHeaderIconVisualScale =
-    viewRenderSpec.surfaceMode === "card" &&
-    Number.isFinite(viewRenderSpec.zoomScale) &&
-    viewRenderSpec.zoomScale > 0
-      ? viewRenderSpec.zoomScale
-      : 1;
-
-  const staticHeaderIconVisualScale = isSplitLayout
-    ? Math.max(0.1, baseHeaderIconVisualScale / 2)
-    : baseHeaderIconVisualScale;
-
   if (currentCardLayoutMode !== "flip") {
-    const baseFixedScale =
-      currentDisplayMode === "fixed"
-        ? resolveCardSurfaceScale(viewRenderSpec)
-        : undefined;
-    const baseContentZoom = resolveCardContentZoom(viewRenderSpec);
-
-    const staticFixedScale =
-      typeof baseFixedScale === "number"
-        ? isSplitLayout
-          ? Math.max(0.1, baseFixedScale / 2)
-          : baseFixedScale
-        : undefined;
-
-    const staticContentZoom =
-      currentDisplayMode === "fluid" && isSplitLayout
-        ? Math.max(0.1, baseContentZoom / 2)
-        : baseContentZoom;
-
     return (
       <div className="w-full min-w-0 max-w-full overflow-visible">
-        <div
-          className={cn(
-            "w-full min-w-0 max-w-full",
-            currentCardLayoutMode === "split"
-              ? "grid grid-cols-2 gap-0"
-              : "flex flex-col gap-0",
-          )}
-        >
-          <div className="min-w-0">
+        <CardSurfaceLayout
+          cardLayoutMode={currentCardLayoutMode}
+          questionNode={
             <StaticCardSide
               card={card}
               currentDisplayMode={currentDisplayMode}
-              fixedScale={staticFixedScale}
-              contentZoom={staticContentZoom}
-              headerIconVisualScale={staticHeaderIconVisualScale}
+              fixedScale={metrics.sideFixedScale}
+              contentZoom={metrics.sideContentZoom}
+              headerIconVisualScale={metrics.sideHeaderIconVisualScale}
               side="question"
             />
-          </div>
-          <div className="min-w-0">
+          }
+          answerNode={
             <StaticCardSide
               card={card}
               currentDisplayMode={currentDisplayMode}
-              fixedScale={staticFixedScale}
-              contentZoom={staticContentZoom}
-              headerIconVisualScale={staticHeaderIconVisualScale}
+              fixedScale={metrics.sideFixedScale}
+              contentZoom={metrics.sideContentZoom}
+              headerIconVisualScale={metrics.sideHeaderIconVisualScale}
               side="answer"
             />
-          </div>
-        </div>
+          }
+        />
       </div>
     );
   }
@@ -268,8 +202,8 @@ const DesktopCardSurfaceInner = ({
         isFlipped={isFlipped}
         previewMode={!isActive}
         displayMode={currentDisplayMode}
-        showInkLayer={viewRenderSpec.showInk}
-        inkEditingEnabled={viewRenderSpec.showInk && isActive}
+        showInkLayer={metrics.renderSpec.showInk}
+        inkEditingEnabled={metrics.renderSpec.showInk && isActive}
         onFlip={isActive ? onFlip : undefined}
         onToggleUncertainty={
           isActive
@@ -287,9 +221,9 @@ const DesktopCardSurfaceInner = ({
         }
         allowUpscale={false}
         scaleMultiplier={1}
-        fixedScale={resolveCardSurfaceScale(viewRenderSpec)}
-        contentZoom={resolveCardContentZoom(viewRenderSpec)}
-        headerIconVisualScale={baseHeaderIconVisualScale}
+        fixedScale={metrics.baseFixedScale}
+        contentZoom={metrics.baseContentZoom}
+        headerIconVisualScale={metrics.baseHeaderIconVisualScale}
         cardShellClassName={
           currentDisplayMode === "fluid"
             ? "border-none bg-transparent shadow-none"
