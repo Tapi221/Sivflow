@@ -8,7 +8,7 @@ import {
 } from "@/features/cardsetview/domain/cardLayoutMode";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { Eye, Maximize2, Pencil, Square } from "@/ui/icons";
+import { BookOpen, Circle, Layers, Pencil } from "@/ui/icons";
 
 type CardModeToolbarProps = {
   interactionMode: "view" | "edit";
@@ -87,7 +87,7 @@ export const CardModeToolbar = ({
           onClick={() => onChangeInteractionMode("view")}
           label="閲覧モード"
         >
-          <Eye className="h-3.5 w-3.5" />
+          <BookOpen className="h-3.5 w-3.5" />
         </ModeButton>
         <ModeButton
           isActive={interactionMode === "edit"}
@@ -106,14 +106,14 @@ export const CardModeToolbar = ({
           onClick={() => onChangeDisplayMode("fixed")}
           label="カード表示"
         >
-          <Square className="h-3.5 w-3.5" />
+          <Circle className="h-3.5 w-3.5" />
         </ModeButton>
         <ModeButton
           isActive={displayMode === "fluid"}
           onClick={() => onChangeDisplayMode("fluid")}
           label="最大表示"
         >
-          <Maximize2 className="h-3.5 w-3.5" />
+          <Layers className="h-3.5 w-3.5" />
         </ModeButton>
       </div>
 
