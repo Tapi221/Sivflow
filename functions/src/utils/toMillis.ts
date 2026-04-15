@@ -45,7 +45,7 @@ const toDateFromMillis = (value: number): Date | null => {
 };
 
 const toDateFromNumericString = (value: string): Date | null => {
-  if (!/^-?\d{10,13}$/.test(value)) return null;
+  if (!/^-?\\d{10,13}$/.test(value)) return null;
 
   const numeric = Number(value);
   return toDateFromMillis(numeric);
@@ -135,9 +135,4 @@ export const toMillisOrNull = (value: unknown): number | null => {
 
 export const toMillis = (value: unknown, fallback = 0): number => {
   return toMillisOrNull(value) ?? fallback;
-};
-
-export const toIsoStringOrNull = (value: unknown): string | null => {
-  const date = toDateOrNull(value);
-  return date ? date.toISOString() : null;
 };

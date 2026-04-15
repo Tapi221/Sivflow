@@ -12,6 +12,7 @@ import {
 } from "@/domain/card/extraRows";
 import { getCardBlocks } from "@/domain/card/content";
 import { resolveCardTagNames } from "@/hooks/settings/useTags";
+export { toDateOrNull } from "@/utils/toMillis";
 import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 
 import type { UploadedImage } from "@/types/domain/assets";
@@ -177,27 +178,6 @@ export const extractCreatedCardId = (created: unknown) => {
     (created as { cardId: string }).cardId.trim().length > 0
   ) {
     return (created as { cardId: string }).cardId;
-  }
-
-  return null;
-};
-
-export const toDateOrNull = (value: unknown) => {
-  if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
-
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "toDate" in value &&
-    typeof (value as { toDate?: unknown }).toDate === "function"
-  ) {
-    const date = (value as { toDate: () => Date }).toDate();
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-
-  if (typeof value === "string" || typeof value === "number") {
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? null : date;
   }
 
   return null;

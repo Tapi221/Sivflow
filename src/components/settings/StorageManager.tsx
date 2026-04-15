@@ -24,6 +24,26 @@ import {
 } from "@/ui/icons";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import type { UploadMetadata } from "@/types";
+import { toDateOrNull } from "@/utils/toMillis";
+
+type StorageErrorLike = {
+  code?: unknown;
+};
+
+const getErrorMessage = (error: unknown): string => {
+  return error instanceof Error ? error.message : "不明なエラーが発生しました";
+};
+
+const getStorageErrorCode = (error: unknown): string | null => {
+  if (typeof error !== "object" || error === null) return null;
+  const record = error as StorageErrorLike;
+  return typeof record.code === "string" ? record.code : null;
+};
+
+const formatUploadDate = (value: unknown): string => {
+  const date = toDateOrNull(value);
+  return date ? date.toLocaleDateString() : "N/A";
+};
 
 export const StorageManager = () => {
   const { currentUser } = useAuthSession();
@@ -90,9 +110,9 @@ export const StorageManager = () => {
       if (result.errors.length > 0) {
         console.warn("Cleanup errors:", result.errors);
       }
-    } catch (e: unknown) {
-      console.error("Cleanup failed", e);
-      setError(e.message);
+    } catch (error: unknown) {
+      console.error("Cleanup failed", error);
+      setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -114,9 +134,9 @@ export const StorageManager = () => {
         try {
           const storageRef = ref(storage, file.storagePath);
           await deleteObject(storageRef);
-        } catch (e: unknown) {
-          if (e.code !== "storage/object-not-found") {
-            console.warn("Storage delete failed", e);
+        } catch (error: unknown) {
+          if (getStorageErrorCode(error) !== "storage/object-not-found") {
+            console.warn("Storage delete failed", error);
             // Continue to delete metadata record even if storage fails (orphan cleanup)
           }
         }
@@ -132,8 +152,8 @@ export const StorageManager = () => {
           "[StorageManager] firestoreDb not initialized. Metadata remains.",
         );
       }
-    } catch (e) {
-      console.error("Delete failed", e);
+    } catch (error: unknown) {
+      console.error("Delete failed", error);
       setError("削除に失敗しました");
     } finally {
       setDeletingId(null);
@@ -229,18 +249,7 @@ export const StorageManager = () => {
                       <div className="flex items-center gap-2 text-[10px] text-slate-400">
                         <span>{formatBytes(file.sizeBytes)}</span>
                         <span>•</span>
-                        <span>
-                          {(() => {
-                            const d = file.uploadedAt;
-                            const date =
-                              d && typeof (d as unknown).toDate === "function"
-                                ? (d as unknown).toDate()
-                                : d;
-                            return date
-                              ? new Date(date).toLocaleDateString()
-                              : "N/A";
-                          })()}
-                        </span>
+                        <span>{formatUploadDate(file.uploadedAt)}</span>
                       </div>
                     </div>
                   </div>
@@ -268,7 +277,7 @@ export const StorageManager = () => {
   );
 };
 
-const getFileIcon = (mimeType) => {
+const getFileIcon = (mimeType: string): React.ReactNode => {
   if (mimeType.startsWith("image/")) return <ImageIcon className="w-4 h-4" />;
   if (mimeType.startsWith("audio/")) return <FileAudio className="w-4 h-4" />;
   if (mimeType === "application/pdf") return <FileText className="w-4 h-4" />;

@@ -44,6 +44,7 @@ import {
 } from "@/services/reviewAlgorithm";
 import type { Card, ReviewLog } from "@/types";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
+import { toDateOrNull as toValidDate, toMillisOrNull } from "@/utils/toMillis";
 
 type Period = "7d" | "30d" | "all";
 type MetaRating = ReviewLog["rating"] | null;
@@ -174,26 +175,6 @@ const toFiniteNumber = (value: unknown) => {
   return null;
 };
 
-const toValidDate = (value: unknown) => {
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value;
-  }
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "toDate" in value &&
-    typeof (value as { toDate?: unknown }).toDate === "function"
-  ) {
-    const date = (value as { toDate: () => Date }).toDate();
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-  if (typeof value === "string") {
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-  return null;
-};
-
 const formatDateLabel = (value: unknown) => {
   const date = toValidDate(value);
   if (!date) return "未設定";
@@ -209,8 +190,7 @@ const toDateTimeLocalValue = (value: unknown) => {
 
 const fromDateTimeLocalValue = (value: string) => {
   if (!value) return null;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
+  return toValidDate(value);
 };
 
 const toRatingValue = (value: unknown) => {
@@ -367,8 +347,7 @@ const cardMetaLastSubjectiveScore = (card: Card | null): number | null => {
 };
 
 const cardMetaDateTimeMs = (value: unknown): number | null => {
-  const date = toValidDate(value);
-  return date ? date.getTime() : null;
+  return toMillisOrNull(value);
 };
 
 const areCardMetaCardsEqual = (

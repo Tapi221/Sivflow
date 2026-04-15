@@ -1,6 +1,8 @@
 import type { ReviewLog } from "@/types/domain/base";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import type { SubjectiveScore } from "@/utils/reviewUtils";
+import { normalizeDate as toDate } from "@/shared/codec/date";
+import { toMillis } from "@/utils/toMillis";
 import type { Timestamp } from "firebase/firestore";
 
 export type ReviewAlgorithmInput = {
@@ -65,58 +67,6 @@ const readNumber = (
 const readArray = (value: Record<string, unknown>, key: string): unknown[] => {
   const candidate = value[key];
   return Array.isArray(candidate) ? candidate : [];
-};
-
-const toDate = (
-  value?: Date | Timestamp | string | number | null,
-): Date | null => {
-  if (value == null) return null;
-  if (value instanceof Date) return value;
-
-  if (typeof value === "string" || typeof value === "number") {
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  }
-
-  if (typeof value === "object") {
-    const timestampLike = value as {
-      toDate?: () => Date;
-      seconds?: number;
-      _seconds?: number;
-      nanoseconds?: number;
-      _nanoseconds?: number;
-    };
-
-    if (typeof timestampLike.toDate === "function") {
-      const date = timestampLike.toDate();
-      return date instanceof Date && !Number.isNaN(date.getTime())
-        ? date
-        : null;
-    }
-
-    const seconds =
-      typeof timestampLike.seconds === "number"
-        ? timestampLike.seconds
-        : typeof timestampLike._seconds === "number"
-          ? timestampLike._seconds
-          : null;
-
-    const nanoseconds =
-      typeof timestampLike.nanoseconds === "number"
-        ? timestampLike.nanoseconds
-        : typeof timestampLike._nanoseconds === "number"
-          ? timestampLike._nanoseconds
-          : 0;
-
-    if (seconds !== null) {
-      const parsed = new Date(
-        seconds * 1000 + Math.floor(nanoseconds / 1_000_000),
-      );
-      return Number.isNaN(parsed.getTime()) ? null : parsed;
-    }
-  }
-
-  return null;
 };
 
 const diffDays = (a: Date, b: Date): number => {
@@ -616,8 +566,7 @@ export const createLatestReviewLogPatch = (
   params: LatestReviewLogPatchParams,
 ) => {
   const reviewLogs = [...(params.reviewLogs ?? [])].sort(
-    (a, b) =>
-      new Date(a.reviewedAt).getTime() - new Date(b.reviewedAt).getTime(),
+    (left, right) => toMillis(left.reviewedAt) - toMillis(right.reviewedAt),
   );
 
   if (reviewLogs.length === 0) {

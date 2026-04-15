@@ -16,6 +16,7 @@ import type {
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
+import { toDateOrNull, toMillis } from "@/utils/toMillis";
 import { nanoid } from "nanoid";
 import type { LocalDBTableMap, SyncableEntityTable } from "./localdb/types";
 import {
@@ -28,15 +29,28 @@ import {
 type KeyPath = string | string[];
 type Predicate<T> = (value: T) => boolean;
 
-type TimestampLike = {
-  toDate: () => Date;
+type TimestampLikeObject = {
+  toDate?: () => unknown;
+  toMillis?: () => unknown;
+  seconds?: unknown;
+  _seconds?: unknown;
+  nanoseconds?: unknown;
+  _nanoseconds?: unknown;
 };
 
-const isTimestampLike = (value: unknown): value is TimestampLike =>
-  typeof value === "object" &&
-  value !== null &&
-  "toDate" in value &&
-  typeof (value as { toDate?: unknown }).toDate === "function";
+const isTimestampLikeObject = (
+  value: unknown,
+): value is TimestampLikeObject => {
+  if (typeof value !== "object" || value === null) return false;
+
+  const record = value as TimestampLikeObject;
+  return (
+    typeof record.toDate === "function" ||
+    typeof record.toMillis === "function" ||
+    typeof record.seconds === "number" ||
+    typeof record._seconds === "number"
+  );
+};
 
 const asRecord = (value: object): Record<string, unknown> =>
   value as Record<string, unknown>;
@@ -44,21 +58,18 @@ const asRecord = (value: object): Record<string, unknown> =>
 const getField = (value: object, key: string): unknown => asRecord(value)[key];
 
 const toTimestamp = (value: unknown): number => {
-  if (value instanceof Date) return value.getTime();
-  if (isTimestampLike(value)) {
-    const date = value.toDate();
-    return date instanceof Date ? date.getTime() : Number(date) || 0;
-  }
-  if (typeof value === "number") return value;
+  if (value instanceof Date) return toMillis(value);
+  if (isTimestampLikeObject(value)) return toMillis(value);
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
   if (typeof value === "string") {
-    const parsed = Date.parse(value);
-    return Number.isFinite(parsed) ? parsed : 0;
+    const parsed = toDateOrNull(value);
+    return parsed ? parsed.getTime() : 0;
   }
   return 0;
 };
 
 const normalizeComparable = (value: unknown): unknown => {
-  if (value instanceof Date || isTimestampLike(value)) {
+  if (value instanceof Date || isTimestampLikeObject(value)) {
     return toTimestamp(value);
   }
   if (Array.isArray(value)) return value.map((v) => normalizeComparable(v));
@@ -813,10 +824,7 @@ export class InMemoryLocalDB {
   async getLastSyncTime(userId: string): Promise<Date | null> {
     const meta = await this.syncMetadata.get(userId);
     if (!meta?.lastSyncTime) return null;
-    const value = meta.lastSyncTime;
-    if (value instanceof Date) return value;
-    if (isTimestampLike(value)) return value.toDate();
-    return new Date(value);
+    return toDateOrNull(meta.lastSyncTime);
   }
 
   async updateLastSyncTime(userId: string, syncTime: Date): Promise<void> {

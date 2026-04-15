@@ -1,6 +1,11 @@
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { toMillis } from "../utils/toMillis";
+
+const toFiniteNumber = (value: unknown, fallback = 0): number => {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+};
 
 // 他のトリガーと共有するために初期化済みインスタンスを使う場合は調整
 if (admin.apps.length === 0) {
@@ -105,7 +110,7 @@ const DETECTION_RULES: DetectionRule[] = [
   },
 ];
 
-async function detectAbnormalPatterns(
+const detectAbnormalPatterns = async (
   userId: string,
   logData: SecurityLogData,
 ): Promise<boolean> {
@@ -143,9 +148,9 @@ async function detectAbnormalPatterns(
     }
   }
   return isAbnormal;
-}
+};
 
-async function calculateRiskScore(
+const calculateRiskScore = async (
   userId: string,
   logData: SecurityLogData,
 ): Promise<number> {
@@ -158,9 +163,9 @@ async function calculateRiskScore(
     let lastUpdate = Date.now();
 
     if (doc.exists) {
-      const data = doc.data() || {};
-      currentScore = data.riskScore || 0;
-      lastUpdate = data.lastUpdate ? data.lastUpdate.toMillis() : Date.now();
+      const data = (doc.data() ?? {}) as Record<string, unknown>;
+      currentScore = toFiniteNumber(data.riskScore, 0);
+      lastUpdate = toMillis(data.lastUpdate, Date.now());
     }
 
     // 1. 減衰処理 (1時間につき3点)
@@ -199,9 +204,9 @@ async function calculateRiskScore(
 
     return currentScore;
   });
-}
+};
 
-async function handleRiskActions(
+const handleRiskActions = async (
   userId: string,
   deviceId: string,
   riskScore: number,
@@ -270,4 +275,4 @@ async function handleRiskActions(
       `[Action] ALL DEVICES REVOKED and ACCOUNT LOCKED for user ${userId}`,
     );
   }
-}
+};

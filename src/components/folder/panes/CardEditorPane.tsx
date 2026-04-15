@@ -52,6 +52,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { Card, CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+import { toMillisOrNull } from "@/utils/toMillis";
 
 type CardEditorPaneSettings = {
   accentColor?: string;
@@ -106,27 +107,8 @@ const isCardEntity = (value: unknown): value is Card =>
 const toFlashcardCardLike = (card: unknown): FlashcardCardLike =>
   (isRecord(card) ? card : {}) as FlashcardCardLike;
 
-const toTimeMs = (value: unknown) => {
-  if (value instanceof Date && !Number.isNaN(value.getTime())) {
-    return value.getTime();
-  }
-
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "toDate" in value &&
-    typeof (value as { toDate?: unknown }).toDate === "function"
-  ) {
-    const nextDate = (value as { toDate: () => Date }).toDate();
-    return Number.isNaN(nextDate.getTime()) ? null : nextDate.getTime();
-  }
-
-  if (typeof value === "string" || typeof value === "number") {
-    const nextDate = new Date(value);
-    return Number.isNaN(nextDate.getTime()) ? null : nextDate.getTime();
-  }
-
-  return null;
+const toTimeMs = (value: unknown): number | null => {
+  return toMillisOrNull(value);
 };
 
 type EditorSidePaneProps = {
