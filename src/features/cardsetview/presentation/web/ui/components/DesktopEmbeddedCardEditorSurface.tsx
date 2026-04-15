@@ -13,7 +13,6 @@ import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMod
 import { buildSharedCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
 import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
-import { cn } from "@/lib/utils";
 import type { Card, UserSettings } from "@/types";
 import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
@@ -49,7 +48,6 @@ type EmbeddedEditorFaceProps = Readonly<{
   side: Side;
   blocks: CardBlock[];
   onBlocksChange: (nextBlocks: CardBlock[]) => void;
-  selectionScopeKey: string | null;
   accentColor?: string;
   duplicateToOpposite?: boolean;
   settings: EditorSettings;
@@ -100,10 +98,6 @@ const toTimeMs = (value: unknown) => {
 
 const resolveFaceLabel = (side: Side) =>
   side === "question" ? "問題" : "解答";
-const resolveFaceColorClassName = (side: Side) =>
-  side === "question" ? "text-indigo-500" : "text-emerald-500";
-const resolveFaceDroppableId = (side: Side) =>
-  side === "question" ? "question-blocks" : "answer-blocks";
 
 const EmbeddedEditorHeaderRight = ({
   mediaActions,
@@ -126,7 +120,6 @@ const EmbeddedEditorFace = ({
   side,
   blocks,
   onBlocksChange,
-  selectionScopeKey,
   accentColor,
   duplicateToOpposite,
   settings,
@@ -170,11 +163,8 @@ const EmbeddedEditorFace = ({
         mode: "edit",
         blocks,
         onChange: onBlocksChange,
-        selectionScopeKey,
         prefix: side,
         label: resolveFaceLabel(side),
-        color: resolveFaceColorClassName(side),
-        droppableId: resolveFaceDroppableId(side),
         accentColor,
         duplicateToOpposite,
         hideToolbar: !showToolbar,
@@ -446,7 +436,6 @@ export const DesktopEmbeddedCardEditorSurface = ({
       side="question"
       blocks={frontBlocks}
       onBlocksChange={handleQuestionBlocksChange}
-      selectionScopeKey={normalizedSelectedCardId}
       accentColor={controllerSettings?.accentColor}
       duplicateToOpposite={controllerSettings?.duplicateToOpposite}
       settings={controllerSettings}
@@ -473,7 +462,6 @@ export const DesktopEmbeddedCardEditorSurface = ({
       side="answer"
       blocks={backBlocks}
       onBlocksChange={handleAnswerBlocksChange}
-      selectionScopeKey={normalizedSelectedCardId}
       accentColor={controllerSettings?.accentColor}
       duplicateToOpposite={controllerSettings?.duplicateToOpposite}
       settings={controllerSettings}
@@ -513,7 +501,6 @@ export const DesktopEmbeddedCardEditorSurface = ({
       side={activeFlipSide}
       blocks={flipBlocks}
       onBlocksChange={handleFlipBlocksChange}
-      selectionScopeKey={normalizedSelectedCardId}
       accentColor={controllerSettings?.accentColor}
       duplicateToOpposite={controllerSettings?.duplicateToOpposite}
       settings={controllerSettings}

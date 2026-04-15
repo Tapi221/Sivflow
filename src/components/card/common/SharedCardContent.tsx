@@ -22,15 +22,19 @@ type SharedCardContentViewProps = SharedCardContentBaseProps &
     zoom?: number;
   }>;
 
+type SharedCardContentEditCompatProps = Readonly<{
+  selectionScopeKey?: string | null;
+  color?: string;
+  droppableId?: string;
+}>;
+
 type SharedCardContentEditProps = SharedCardContentBaseProps &
+  SharedCardContentEditCompatProps &
   Readonly<{
     mode: "edit";
     onChange: (blocks: CardBlock[]) => void;
-    selectionScopeKey?: string | null;
     prefix: "question" | "answer";
     label: string;
-    color: string;
-    droppableId: string;
     accentColor?: string;
     duplicateToOpposite?: boolean;
     onCrossDuplicate?: (block: CardBlock) => void;
@@ -117,11 +121,8 @@ const SharedCardContentEditBody = React.memo(
   ({
     blocks,
     onChange,
-    selectionScopeKey,
     prefix,
     label,
-    color,
-    droppableId,
     accentColor,
     duplicateToOpposite,
     onCrossDuplicate,
@@ -138,10 +139,6 @@ const SharedCardContentEditBody = React.memo(
     displayMode,
     zoom,
   }: SharedCardContentEditProps) => {
-    void selectionScopeKey;
-    void color;
-    void droppableId;
-
     return (
       <BlockEditor
         blocks={blocks}
