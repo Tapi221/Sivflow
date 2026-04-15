@@ -19,7 +19,6 @@ import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { CardBlock } from "@/types/domain/card";
-import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 export type CardBlockLayoutReplaceBlock =
   | { type: "markdown"; markdown: string }
@@ -39,7 +38,7 @@ type ViewerProps = {
       | null
       | undefined,
   ) => string | null;
-  displayMode: CardDisplayMode;
+  displayMode: "fixed" | "fluid";
   zoom: number;
 };
 
@@ -61,7 +60,7 @@ type EditorProps = {
   onConsumePendingUpload?: () => void;
   onFilesExcess?: (files: File[]) => void;
   onReplaceMarkdownWithBlocks?: (blocks: CardBlockLayoutReplaceBlock[]) => void;
-  displayMode?: CardDisplayMode;
+  displayMode?: "fixed" | "fluid";
   zoom?: number;
 };
 
@@ -126,7 +125,7 @@ export const CardBlockLayoutRenderer = (
         onConsumePendingUpload,
         onFilesExcess,
         onReplaceMarkdownWithBlocks,
-        displayMode = "fixed",
+        displayMode,
         zoom,
       },
     } = props;

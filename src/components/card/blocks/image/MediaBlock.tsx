@@ -5,7 +5,6 @@ import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockCont
 import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
 import { cn } from "@/lib/utils";
 import type { UploadedImage } from "@/types/domain/assets";
-import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 interface MediaBlockProps {
   data: UploadedImage[];
@@ -26,7 +25,7 @@ interface MediaBlockProps {
   onMoveDown?: () => void;
   onMoveDragStart?: () => void;
   onMoveDragEnd?: () => void;
-  displayMode?: CardDisplayMode;
+  displayMode?: "fixed" | "fluid";
   zoom?: number;
 }
 

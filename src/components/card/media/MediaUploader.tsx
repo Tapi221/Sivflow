@@ -19,7 +19,6 @@ import {
   type ResolvedCardImage,
 } from "@/services/cardImageResolver";
 import type { AssetRecord, UploadedImage } from "@/types";
-import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { Check, RotateCcw, Upload, X } from "@/ui/icons";
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize";
 import React, { useCallback, useEffect, useId, useRef, useState } from "react";
@@ -150,7 +149,7 @@ type ImageItemProps = {
   onRemove: (index: number) => void;
   onRetry: (index: number) => void;
   onUpdate: (index: number, patch: Partial<UploadedImage>) => void;
-  displayMode: CardDisplayMode;
+  displayMode: "fixed" | "fluid";
   zoom: number;
 };
 
@@ -164,8 +163,18 @@ const ImageItem = ({
   zoom,
 }: ImageItemProps) => {
   const [loadFailed, setLoadFailed] = useState(false);
-  const persistedScale = clamp(Number(item.scale ?? 1), 0.2, 1);
-  const persistedX = clamp(Number(item.x ?? 0), -1, 1);
+  const persistedScale = clamp(
+    typeof item.layout?.baseWidthPx === "number" && item.layout.baseWidthPx > 0
+      ? item.layout.baseWidthPx / FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX
+      : Number(item.scale ?? 1),
+    0.2,
+    1,
+  );
+  const persistedX = clamp(
+    Number(item.layout?.cropX ?? item.x ?? 0),
+    -1,
+    1,
+  );
 
   return (
     <div className="relative group w-full">
@@ -191,12 +200,14 @@ const ImageItem = ({
               onUpdate(index, { naturalW, naturalH });
             }}
             onTransformCommit={({ scale, x, layout }) => {
+              const resolvedScale = scale >= 0.98 ? 1 : clamp(scale, 0.2, 1);
+              const resolvedCropX = resolvedScale >= 0.98 ? 0 : clamp(x, -1, 1);
               onUpdate(index, {
-                scale: scale >= 0.98 ? 1 : clamp(scale, 0.2, 1),
-                x: scale >= 0.98 ? 0 : clamp(x, -1, 1),
+                scale: resolvedScale,
+                x: resolvedCropX,
                 layout: {
                   baseWidthPx: Math.max(1, layout.baseWidthPx),
-                  cropX: scale >= 0.98 ? 0 : clamp(layout.cropX, -1, 1),
+                  cropX: resolvedCropX,
                 },
               });
             }}
@@ -245,13 +256,22 @@ const ImageItem = ({
                 min={20}
                 max={100}
                 step={1}
-                value={[Math.round((item.scale ?? 1) * 100)]}
+                value={[Math.round(persistedScale * 100)]}
                 onValueCommit={(values) => {
                   const nextScaleRaw = clamp((values[0] ?? 100) / 100, 0.2, 1);
                   const nextScale = nextScaleRaw >= 0.98 ? 1 : nextScaleRaw;
+                  const nextCropX =
+                    nextScale >= 0.999 ? 0 : clamp(persistedX, -1, 1);
                   onUpdate(index, {
                     scale: nextScale,
-                    x: nextScale >= 0.999 ? 0 : (item.x ?? 0),
+                    x: nextCropX,
+                    layout: {
+                      baseWidthPx: Math.max(
+                        1,
+                        FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX * nextScale,
+                      ),
+                      cropX: nextCropX,
+                    },
                   });
                 }}
                 className="w-full"
@@ -274,7 +294,7 @@ type ImageMediaUploaderProps = {
   onConsumeInitialFile?: () => void;
   onFilesExcess?: (files: File[]) => void;
   autoOpenPicker?: boolean;
-  displayMode?: CardDisplayMode;
+  displayMode?: "fixed" | "fluid";
   zoom?: number;
 };
 
@@ -287,8 +307,6 @@ type AudioMediaUploaderProps = {
   onConsumeInitialFile?: () => void;
   onFilesExcess?: (files: File[]) => void;
   autoOpenPicker?: boolean;
-  displayMode?: CardDisplayMode;
-  zoom?: number;
 };
 
 type MediaUploaderProps = ImageMediaUploaderProps | AudioMediaUploaderProps;

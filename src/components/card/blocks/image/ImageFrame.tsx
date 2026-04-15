@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import React from "react";
-import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
@@ -30,7 +29,7 @@ type ImageFrameProps = {
   alt: string;
   className?: string;
   imgClassName?: string;
-  displayMode?: CardDisplayMode;
+  displayMode?: "fixed" | "fluid";
   zoom?: number;
   scale?: number | null;
   x?: number | null;
@@ -70,7 +69,7 @@ export const ImageFrame = ({
   onNaturalSize,
   onError,
 }: ImageFrameProps) => {
-  const outerRef = React.useRef<HTMLDivElement | null>(null);
+  const frameRef = React.useRef<HTMLDivElement | null>(null);
   const imgRef = React.useRef<HTMLImageElement | null>(null);
   const dragRef = React.useRef<{
     pointerId: number;
@@ -81,7 +80,7 @@ export const ImageFrame = ({
   } | null>(null);
   const suppressClickRef = React.useRef(false);
 
-  const [availableWidthPx, setAvailableWidthPx] = React.useState(0);
+  const [frameW, setFrameW] = React.useState(0);
   const [frameScaleX, setFrameScaleX] = React.useState(1);
   const frameMetricsRef = React.useRef({ width: 0, scaleX: 1 });
   const [isDragging, setIsDragging] = React.useState(false);
@@ -94,7 +93,7 @@ export const ImageFrame = ({
   const safeZoom =
     typeof zoom === "number" && Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
 
-  const safeScale = clamp(Number(scale ?? 1), 0.2, 1);
+  const safeLegacyScale = clamp(Number(scale ?? 1), 0.2, 1);
   const safeCropX = clamp(Number(cropX ?? x ?? 0), -1, 1);
   const activeX = clamp(Number(dragX ?? safeCropX), -1, 1);
 
@@ -108,18 +107,24 @@ export const ImageFrame = ({
     Number.isFinite(fixedReferenceFrameWidthPx) &&
     fixedReferenceFrameWidthPx > 0
       ? fixedReferenceFrameWidthPx
-      : availableWidthPx;
+      : frameW;
 
   const resolvedBaseWidthPx =
     typeof layoutBaseWidthPx === "number" &&
     Number.isFinite(layoutBaseWidthPx) &&
     layoutBaseWidthPx > 0
       ? layoutBaseWidthPx
-      : inferBaseWidthFromLegacyScale(resolvedReferenceWidthPx, scale);
+      : inferBaseWidthFromLegacyScale(resolvedReferenceWidthPx, safeLegacyScale);
 
-  const measuredAvailableWidthPx = Math.max(
+  const normalizedScale = clamp(
+    resolvedBaseWidthPx / Math.max(1, resolvedReferenceWidthPx),
+    0.2,
     1,
-    availableWidthPx || resolvedReferenceWidthPx || resolvedBaseWidthPx || 1,
+  );
+
+  const measuredFrameWidthPx = Math.max(
+    1,
+    frameW || resolvedReferenceWidthPx || resolvedBaseWidthPx || 1,
   );
 
   const resolvedAvailableWidthPx =
@@ -127,58 +132,47 @@ export const ImageFrame = ({
     Number.isFinite(fluidAvailableWidthPx) &&
     fluidAvailableWidthPx > 0
       ? fluidAvailableWidthPx
-      : measuredAvailableWidthPx;
+      : measuredFrameWidthPx;
 
-  const renderWidthPx =
+  const slotWidthPx =
     displayMode === "fluid"
-      ? Math.min(
-          Math.max(1, resolvedBaseWidthPx * safeZoom),
-          Math.max(1, resolvedAvailableWidthPx),
-        )
+      ? Math.max(1, resolvedAvailableWidthPx)
       : Math.min(
-          Math.max(1, resolvedBaseWidthPx),
+          Math.max(1, resolvedReferenceWidthPx),
           Math.max(1, resolvedAvailableWidthPx),
         );
 
-  const editableFrameWidthPx =
-    editable && displayMode === "fluid"
-      ? Math.max(1, renderWidthPx)
-      : Math.max(1, measuredAvailableWidthPx);
+  const imageWidthPx =
+    displayMode === "fluid"
+      ? Math.min(
+          Math.max(1, resolvedBaseWidthPx * safeZoom),
+          Math.max(1, slotWidthPx),
+        )
+      : Math.min(Math.max(1, resolvedBaseWidthPx), Math.max(1, slotWidthPx));
 
-  const frameHeightPx = Math.max(
-    1,
-    (editable ? editableFrameWidthPx : renderWidthPx) * ratio,
-  );
-
-  const imgW = editableFrameWidthPx * safeScale;
-  const empty = Math.max(0, editableFrameWidthPx - imgW);
+  const imageHeightPx = Math.max(1, imageWidthPx * ratio);
+  const empty = Math.max(0, slotWidthPx - imageWidthPx);
   const leftPx = clamp(((activeX + 1) / 2) * empty, 0, empty);
 
   const emitTransform = React.useCallback(
     (nextX: number): ImageTransform => ({
-      scale: safeScale,
+      scale: normalizedScale,
       x: nextX,
       layout: {
-        baseWidthPx: inferBaseWidthFromLegacyScale(
-          resolvedReferenceWidthPx,
-          safeScale,
-        ),
+        baseWidthPx: Math.max(1, resolvedBaseWidthPx),
         cropX: nextX,
       },
     }),
-    [resolvedReferenceWidthPx, safeScale],
+    [normalizedScale, resolvedBaseWidthPx],
   );
 
   const transformCallback = onTransformCommit ?? onTransformChange ?? undefined;
 
   const dragEnabled =
-    editable &&
-    safeScale < 0.999 &&
-    empty > 0 &&
-    typeof transformCallback === "function";
+    editable && empty > 0 && typeof transformCallback === "function";
 
   React.useEffect(() => {
-    const node = outerRef.current;
+    const node = frameRef.current;
     if (!node || typeof ResizeObserver === "undefined") return;
 
     const update = () => {
@@ -197,7 +191,7 @@ export const ImageFrame = ({
       }
 
       frameMetricsRef.current = { width: layoutW, scaleX: safeNextScaleX };
-      setAvailableWidthPx(layoutW);
+      setFrameW(layoutW);
       setFrameScaleX(safeNextScaleX);
     };
 
@@ -233,18 +227,17 @@ export const ImageFrame = ({
 
   return (
     <div
-      ref={outerRef}
+      ref={frameRef}
       className={cn("relative w-full", className)}
       style={{
-        height: `${frameHeightPx}px`,
+        height: `${imageHeightPx}px`,
       }}
     >
       <div
         className="relative mx-auto overflow-hidden"
         style={{
-          width: editable ? `${editableFrameWidthPx}px` : `${renderWidthPx}px`,
-          maxWidth: "100%",
-          height: `${frameHeightPx}px`,
+          width: `${slotWidthPx}px`,
+          height: `${imageHeightPx}px`,
           touchAction: dragEnabled ? "none" : "auto",
           cursor: dragEnabled ? (isDragging ? "grabbing" : "grab") : undefined,
         }}
@@ -331,86 +324,50 @@ export const ImageFrame = ({
           }
         }}
       >
-        {editable ? (
-          <img
-            ref={imgRef}
-            src={src}
-            alt={alt}
-            className={cn("absolute top-0 h-auto max-w-none", imgClassName)}
-            style={{ width: `${safeScale * 100}%`, left: `${leftPx}px` }}
-            decoding="async"
-            draggable={false}
-            onClick={() => {
-              if (suppressClickRef.current) {
-                suppressClickRef.current = false;
-                return;
+        <img
+          ref={imgRef}
+          src={src}
+          alt={alt}
+          className={cn(
+            editable ? "absolute top-0 h-auto max-w-none" : "absolute top-0 h-auto max-w-none",
+            imgClassName,
+          )}
+          style={{
+            width: `${imageWidthPx}px`,
+            left: `${leftPx}px`,
+            maxWidth: "none",
+          }}
+          decoding="async"
+          draggable={false}
+          onClick={() => {
+            if (suppressClickRef.current) {
+              suppressClickRef.current = false;
+              return;
+            }
+            onImageClick?.();
+          }}
+          onLoad={(event) => {
+            const target = event.currentTarget;
+            setLoadedNaturalSize((prev) => {
+              if (
+                prev?.naturalW === target.naturalWidth &&
+                prev?.naturalH === target.naturalHeight
+              ) {
+                return prev;
               }
-              onImageClick?.();
-            }}
-            onLoad={(event) => {
-              const target = event.currentTarget;
-              setLoadedNaturalSize((prev) => {
-                if (
-                  prev?.naturalW === target.naturalWidth &&
-                  prev?.naturalH === target.naturalHeight
-                ) {
-                  return prev;
-                }
 
-                return {
-                  naturalW: target.naturalWidth,
-                  naturalH: target.naturalHeight,
-                };
-              });
-              onNaturalSize?.({
+              return {
                 naturalW: target.naturalWidth,
                 naturalH: target.naturalHeight,
-              });
-            }}
-            onError={() => onError?.()}
-          />
-        ) : (
-          <img
-            ref={imgRef}
-            src={src}
-            alt={alt}
-            className={cn("block h-auto", imgClassName)}
-            style={{
-              width: `${Math.max(1, renderWidthPx)}px`,
-              maxWidth: "100%",
-            }}
-            decoding="async"
-            draggable={false}
-            onClick={() => {
-              if (suppressClickRef.current) {
-                suppressClickRef.current = false;
-                return;
-              }
-              onImageClick?.();
-            }}
-            onLoad={(event) => {
-              const target = event.currentTarget;
-              setLoadedNaturalSize((prev) => {
-                if (
-                  prev?.naturalW === target.naturalWidth &&
-                  prev?.naturalH === target.naturalHeight
-                ) {
-                  return prev;
-                }
-
-                return {
-                  naturalW: target.naturalWidth,
-                  naturalH: target.naturalHeight,
-                };
-              });
-              onNaturalSize?.({
-                naturalW: target.naturalWidth,
-                naturalH: target.naturalHeight,
-              });
-            }}
-            onError={() => onError?.()}
-          />
-        )}
+              };
+            });
+            onNaturalSize?.({
+              naturalW: target.naturalWidth,
+              naturalH: target.naturalHeight,
+            });
+          }}
+          onError={() => onError?.()}
+        />
       </div>
     </div>
   );
