@@ -116,9 +116,7 @@ const getSettingsAccentColor = (value: unknown): string | undefined =>
     ? value.accentColor
     : undefined;
 
-const getSettingsDuplicateToOpposite = (
-  value: unknown,
-): boolean | undefined =>
+const getSettingsDuplicateToOpposite = (value: unknown): boolean | undefined =>
   isRecord(value) && typeof value.duplicateToOpposite === "boolean"
     ? value.duplicateToOpposite
     : undefined;
@@ -607,8 +605,7 @@ export const CardEditorPane = ({
   const flashcardCard = selectedCard ? toFlashcardCardLike(selectedCard) : null;
 
   const editorAccentColor = getSettingsAccentColor(settings);
-  const editorDuplicateToOpposite =
-    getSettingsDuplicateToOpposite(settings);
+  const editorDuplicateToOpposite = getSettingsDuplicateToOpposite(settings);
 
   const getDialogAudioUrls = useCallback(
     (side: "question" | "answer") =>

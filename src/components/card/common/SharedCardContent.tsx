@@ -53,13 +53,11 @@ export type SharedCardContentProps =
 const SHARED_CARD_CONTENT_ROOT_CLASS_NAME =
   "card-content-root flex min-h-0 flex-1 w-full max-w-full flex-col overflow-x-clip overflow-y-visible";
 
-type SharedCardContentRootProps = Readonly<{
-  className?: string;
-  children: React.ReactNode;
-}>;
-
 const SharedCardContentRoot = React.memo(
-  ({ className, children }: SharedCardContentRootProps) => (
+  ({
+    className,
+    children,
+  }: Readonly<{ className?: string; children: React.ReactNode }>) => (
     <div
       className={cn(
         SHARED_CARD_CONTENT_ROOT_CLASS_NAME,
@@ -77,49 +75,84 @@ const SharedCardContentRoot = React.memo(
 
 SharedCardContentRoot.displayName = "SharedCardContentRoot";
 
+const SharedCardContentViewBody = React.memo(
+  ({
+    blocks,
+    onGalleryFullscreenChange,
+    displayMode,
+    zoom,
+  }: SharedCardContentViewProps) => (
+    <BlockRenderer
+      blocks={blocks}
+      onGalleryFullscreenChange={onGalleryFullscreenChange}
+      displayMode={displayMode}
+      zoom={zoom}
+    />
+  ),
+);
+
+SharedCardContentViewBody.displayName = "SharedCardContentViewBody";
+
+const SharedCardContentEditBody = React.memo(
+  ({
+    blocks,
+    onChange,
+    selectionScopeKey,
+    prefix,
+    label,
+    color,
+    droppableId,
+    accentColor,
+    duplicateToOpposite,
+    onCrossDuplicate,
+    autoFocus,
+    customPlaceholders,
+    hideToolbar,
+    onDelete,
+    minDeletableIndex,
+    hiddenBlockTypes,
+    toolbarMount,
+    toolbarDesktopLayout,
+    enableBlockActiveState,
+    settings,
+    displayMode,
+    zoom,
+  }: SharedCardContentEditProps) => (
+    <BlockEditor
+      blocks={blocks}
+      onChange={onChange}
+      selectionScopeKey={selectionScopeKey}
+      prefix={prefix}
+      label={label}
+      color={color}
+      droppableId={droppableId}
+      accentColor={accentColor}
+      duplicateToOpposite={duplicateToOpposite}
+      onCrossDuplicate={onCrossDuplicate}
+      autoFocus={autoFocus}
+      customPlaceholders={customPlaceholders}
+      hideToolbar={hideToolbar}
+      onDelete={onDelete}
+      minDeletableIndex={minDeletableIndex}
+      hiddenBlockTypes={hiddenBlockTypes}
+      toolbarMount={toolbarMount}
+      toolbarDesktopLayout={toolbarDesktopLayout}
+      enableBlockActiveState={enableBlockActiveState}
+      settings={settings}
+      displayMode={displayMode}
+      zoom={zoom}
+    />
+  ),
+);
+
+SharedCardContentEditBody.displayName = "SharedCardContentEditBody";
+
 const SharedCardContentBody = React.memo((props: SharedCardContentProps) => {
-  switch (props.mode) {
-    case "edit":
-      return (
-        <BlockEditor
-          blocks={props.blocks}
-          onChange={props.onChange}
-          selectionScopeKey={props.selectionScopeKey}
-          prefix={props.prefix}
-          label={props.label}
-          color={props.color}
-          droppableId={props.droppableId}
-          accentColor={props.accentColor}
-          duplicateToOpposite={props.duplicateToOpposite}
-          onCrossDuplicate={props.onCrossDuplicate}
-          autoFocus={props.autoFocus}
-          customPlaceholders={props.customPlaceholders}
-          hideToolbar={props.hideToolbar}
-          onDelete={props.onDelete}
-          minDeletableIndex={props.minDeletableIndex}
-          hiddenBlockTypes={props.hiddenBlockTypes}
-          toolbarMount={props.toolbarMount}
-          toolbarDesktopLayout={props.toolbarDesktopLayout}
-          enableBlockActiveState={props.enableBlockActiveState}
-          settings={props.settings}
-          displayMode={props.displayMode}
-          zoom={props.zoom}
-        />
-      );
-    case "view":
-      return (
-        <BlockRenderer
-          blocks={props.blocks}
-          onGalleryFullscreenChange={props.onGalleryFullscreenChange}
-          displayMode={props.displayMode}
-          zoom={props.zoom}
-        />
-      );
-    default: {
-      const exhaustiveCheck: never = props;
-      return exhaustiveCheck;
-    }
-  }
+  return props.mode === "view" ? (
+    <SharedCardContentViewBody {...props} />
+  ) : (
+    <SharedCardContentEditBody {...props} />
+  );
 });
 
 SharedCardContentBody.displayName = "SharedCardContentBody";

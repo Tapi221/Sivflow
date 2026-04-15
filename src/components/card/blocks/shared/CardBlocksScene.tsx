@@ -47,18 +47,14 @@ export type CardBlocksSceneProps =
 const CardBlocksSceneInner = (props: CardBlocksSceneProps) => {
   const renderBlock = React.useCallback(
     (block: CardBlock, meta: BlockListRowMeta) => {
-      if (props.mode === "view") {
-        return (
-          <CardBlockLayoutRenderer
-            mode="view"
-            block={block}
-            meta={meta}
-            viewerProps={props.viewerProps}
-          />
-        );
-      }
-
-      return (
+      return props.mode === "view" ? (
+        <CardBlockLayoutRenderer
+          mode="view"
+          block={block}
+          meta={meta}
+          viewerProps={props.viewerProps}
+        />
+      ) : (
         <CardBlockLayoutRenderer
           mode="edit"
           block={block}

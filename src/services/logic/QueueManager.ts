@@ -89,14 +89,16 @@ export class QueueManager implements IQueueManager {
         queuedItems.filter((item) => this.isReadyForProcessing(item, now)),
       );
 
-      const claimedItems = readyItems.slice(0, constraint.maxSize).map((item) => {
-        return {
-          ...item,
-          status: "processing" as const,
-          processingStartedAt: now,
-          updatedAt: now,
-        };
-      });
+      const claimedItems = readyItems
+        .slice(0, constraint.maxSize)
+        .map((item) => {
+          return {
+            ...item,
+            status: "processing" as const,
+            processingStartedAt: now,
+            updatedAt: now,
+          };
+        });
 
       if (claimedItems.length === 0) return [];
 
@@ -125,7 +127,9 @@ export class QueueManager implements IQueueManager {
 
     await this.localDB.runSyncTransaction(async () => {
       const queuedItems = await this.localDB.getQueuedItemsOldestFirst();
-      const queuedItemById = new Map(queuedItems.map((item) => [item.id, item]));
+      const queuedItemById = new Map(
+        queuedItems.map((item) => [item.id, item]),
+      );
       const retryItems: SyncQueueItem[] = [];
       const deleteIds: string[] = [];
 

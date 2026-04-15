@@ -430,7 +430,13 @@ export const updateItem: UpdateItem = async (
   if (!skipSync) {
     const fullItem = await tableApi.get(id);
     if (fullItem) {
-      await enqueueThroughSyncQueueApi(db, table, "update", fullItem, enqueueSync);
+      await enqueueThroughSyncQueueApi(
+        db,
+        table,
+        "update",
+        fullItem,
+        enqueueSync,
+      );
     }
   }
 
