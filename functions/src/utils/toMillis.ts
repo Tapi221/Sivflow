@@ -45,7 +45,7 @@ const toDateFromMillis = (value: number): Date | null => {
 };
 
 const toDateFromNumericString = (value: string): Date | null => {
-  if (!/^-?\\d{10,13}$/.test(value)) return null;
+  if (!/^-?\d{10,13}$/.test(value)) return null;
 
   const numeric = Number(value);
   return toDateFromMillis(numeric);
