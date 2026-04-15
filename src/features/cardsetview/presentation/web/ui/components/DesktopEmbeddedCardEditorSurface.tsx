@@ -4,6 +4,7 @@ import {
   layoutRowsToCardHeightPx,
 } from "@/components/card/common/constants";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
+import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
 import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
 import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
@@ -38,12 +39,6 @@ export interface DesktopEmbeddedCardEditorSurfaceProps {
   isInteractive: boolean;
   onSyncStatusChange: (status: CardSyncStatus | null) => void;
 }
-
-type FaceSwitchBadgeProps = Readonly<{
-  isFlipped: boolean;
-  onShowFront: () => void;
-  onShowBack: () => void;
-}>;
 
 type OverlayTopRightProps = Readonly<{
   children?: React.ReactNode;
@@ -113,68 +108,11 @@ const resolveFaceColorClassName = (side: Side) =>
 const resolveFaceDroppableId = (side: Side) =>
   side === "question" ? "question-blocks" : "answer-blocks";
 
-const FaceSwitchBadge = ({
-  isFlipped,
-  onShowFront,
-  onShowBack,
-}: FaceSwitchBadgeProps) => {
-  const itemClassName =
-    "inline-flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-[10px] font-semibold leading-none transition";
-
-  return (
-    <div
-      className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/90 p-1 shadow-sm backdrop-blur-[2px]"
-      data-card-no-flip="true"
-      onClick={(event) => event.stopPropagation()}
-      onPointerDown={(event) => event.stopPropagation()}
-    >
-      <button
-        type="button"
-        data-card-no-flip="true"
-        aria-label="表面を表示"
-        aria-pressed={!isFlipped}
-        className={cn(
-          itemClassName,
-          !isFlipped
-            ? "bg-slate-900 text-white"
-            : "text-slate-600 hover:bg-slate-100",
-        )}
-        onClick={(event) => {
-          event.stopPropagation();
-          if (!isFlipped) return;
-          onShowFront();
-        }}
-      >
-        表
-      </button>
-      <button
-        type="button"
-        data-card-no-flip="true"
-        aria-label="裏面を表示"
-        aria-pressed={isFlipped}
-        className={cn(
-          itemClassName,
-          isFlipped
-            ? "bg-slate-900 text-white"
-            : "text-slate-600 hover:bg-slate-100",
-        )}
-        onClick={(event) => {
-          event.stopPropagation();
-          if (isFlipped) return;
-          onShowBack();
-        }}
-      >
-        裏
-      </button>
-    </div>
-  );
-};
-
 const OverlayTopRight = ({ children }: OverlayTopRightProps) => {
   if (!children) return null;
 
   return (
-    <div className="absolute right-2 top-2 z-30 pointer-events-none">
+    <div className="pointer-events-none absolute right-2 top-2 z-30">
       <div
         className="pointer-events-auto flex max-w-full flex-col items-end gap-2"
         data-card-no-flip="true"
@@ -230,10 +168,10 @@ const EmbeddedEditorFace = ({
   const [toolbarMount, setToolbarMount] = useState<HTMLDivElement | null>(null);
 
   const topAttachment = showToolbar ? (
-    <div className="relative h-0 w-full overflow-visible pointer-events-none">
+    <div className="pointer-events-none relative h-0 w-full overflow-visible">
       <div
         ref={setToolbarMount}
-        className="absolute right-0 top-0 z-20 pointer-events-auto"
+        className="pointer-events-auto absolute right-0 top-0 z-20"
         style={{ transform: "translate(calc(-100% - 12px), 16px)" }}
       />
     </div>

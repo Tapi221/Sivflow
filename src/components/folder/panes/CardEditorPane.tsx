@@ -19,7 +19,7 @@ import {
   NewCardIdleState,
 } from "@/components/card/editor/CardEditorPaneStates";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
-import { CardFrame } from "@/components/card/frame/CardFrame";
+import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
 import {
@@ -49,6 +49,8 @@ import {
   resolveCardSurfaceScale,
   resolveCardUsesStretchWidth,
 } from "@/features/cardrender/domain/cardRenderSpec";
+import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
+import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
 import { cn } from "@/lib/utils";
 import type { Card, CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
@@ -95,7 +97,6 @@ type FlashcardCardLike = Record<string, unknown> & {
 };
 
 const CARD_PANE_AUTO_MAX_SCALE = 4;
-const CARD_EDITOR_PAIR_GAP_PX = 0;
 const EMPTY_BLOCKS: CardBlock[] = [];
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -111,11 +112,31 @@ const toTimeMs = (value: unknown): number | null => {
   return toMillisOrNull(value);
 };
 
+type OverlayTopRightProps = Readonly<{
+  children?: React.ReactNode;
+}>;
+
+const OverlayTopRight = ({ children }: OverlayTopRightProps) => {
+  if (!children) return null;
+
+  return (
+    <div className="pointer-events-none absolute right-2 top-2 z-30">
+      <div
+        className="pointer-events-auto flex max-w-full flex-col items-end gap-2"
+        data-card-no-flip="true"
+        onClick={(event) => event.stopPropagation()}
+        onPointerDown={(event) => event.stopPropagation()}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
 type EditorSidePaneProps = {
   side: "question" | "answer";
   blocks: CardBlock[];
   onBlocksChange: (blocks: CardBlock[]) => void;
-  selectionScopeKey: string | null;
   label: string;
   color: string;
   droppableId: string;
@@ -126,7 +147,6 @@ type EditorSidePaneProps = {
   settings: unknown;
   shouldShowInlineToolbarMount: boolean;
   setInlineToolbarMount: (value: HTMLDivElement | null) => void;
-  hideCardShellHeader: boolean;
   shouldDockToolbarToCardTop: boolean;
   dockToolbarInsideCardEdge: boolean;
   setDockedToolbarMount: (value: HTMLDivElement | null) => void;
@@ -147,13 +167,13 @@ type EditorSidePaneProps = {
   onResizeEnd: () => void;
   actionsTopLeft?: React.ReactNode;
   actionsTopRight?: React.ReactNode;
+  overlayTopRight?: React.ReactNode;
 };
 
 const EditorSidePaneInner = ({
   side,
   blocks,
   onBlocksChange,
-  selectionScopeKey,
   label,
   color,
   droppableId,
@@ -164,7 +184,6 @@ const EditorSidePaneInner = ({
   settings,
   shouldShowInlineToolbarMount,
   setInlineToolbarMount,
-  hideCardShellHeader: _hideCardShellHeader,
   shouldDockToolbarToCardTop,
   dockToolbarInsideCardEdge,
   setDockedToolbarMount,
@@ -173,9 +192,9 @@ const EditorSidePaneInner = ({
   showResizeHandle,
   displayMode,
   frameFixedScale,
-  frameDisableScale,
-  frameStretchWidth,
-  frameRuled,
+  frameDisableScale: _frameDisableScale,
+  frameStretchWidth: _frameStretchWidth,
+  frameRuled: _frameRuled,
   contentZoom,
   editorCardHeightPx,
   enableHeightResize,
@@ -185,14 +204,44 @@ const EditorSidePaneInner = ({
   onResizeEnd,
   actionsTopLeft,
   actionsTopRight,
+  overlayTopRight,
 }: EditorSidePaneProps) => {
-  void _hideCardShellHeader;
+  void _frameDisableScale;
+  void _frameStretchWidth;
+  void _frameRuled;
 
   const frameClassName = cn(
     buildCardShellClassName(presentationState),
     displayMode === "fluid" &&
       "rounded-none border-none bg-transparent shadow-none",
   );
+
+  const [internalToolbarMount, setInternalToolbarMount] =
+    useState<HTMLDivElement | null>(null);
+
+  const resolvedToolbarMount = toolbarMount ?? internalToolbarMount;
+
+  const topAttachment = shouldDockToolbarToCardTop ? (
+    <div className="pointer-events-none relative h-0 w-full overflow-visible">
+      <div
+        ref={setDockedToolbarMount}
+        className={cn(
+          "pointer-events-auto absolute top-0 z-20",
+          side === "question" ? "left-0" : "right-0",
+        )}
+        style={{
+          transform:
+            side === "question"
+              ? dockToolbarInsideCardEdge
+                ? "translate(12px, 16px)"
+                : "translate(calc(-100% - 12px), 16px)"
+              : dockToolbarInsideCardEdge
+                ? "translate(calc(-100% - 12px), 16px)"
+                : "translate(calc(100% + 12px), 16px)",
+        }}
+      />
+    </div>
+  ) : undefined;
 
   return (
     <div
@@ -212,40 +261,19 @@ const EditorSidePaneInner = ({
             "inline-block max-w-full align-top text-left",
           )}
         >
-          <CardFrame
-            baseWidth={CANONICAL_CARD_WIDTH}
-            contentPaddingPx={0}
-            allowUpscale
-            maxScale={CARD_PANE_AUTO_MAX_SCALE}
-            scaleMultiplier={1}
+          <CardFaceScene
+            displayMode={displayMode}
             fixedScale={frameFixedScale}
-            disableScale={frameDisableScale}
-            stretchWidth={frameStretchWidth}
-            topAttachment={
-              shouldDockToolbarToCardTop ? (
-                <div className="relative h-0 w-full overflow-visible pointer-events-none">
-                  <div
-                    ref={setDockedToolbarMount}
-                    className={cn(
-                      "absolute top-0 z-20 pointer-events-auto",
-                      side === "question" ? "left-0" : "right-0",
-                    )}
-                    style={{
-                      transform:
-                        side === "question"
-                          ? dockToolbarInsideCardEdge
-                            ? "translate(12px, 16px)"
-                            : "translate(calc(-100% - 12px), 16px)"
-                          : dockToolbarInsideCardEdge
-                            ? "translate(calc(-100% - 12px), 16px)"
-                            : "translate(calc(100% + 12px), 16px)",
-                    }}
-                  />
-                </div>
+            contentZoom={contentZoom}
+            frameClassName={frameClassName}
+            topAttachment={topAttachment}
+            actionsTopLeft={actionsTopLeft}
+            actionsTopRight={actionsTopRight}
+            overlay={
+              overlayTopRight ? (
+                <OverlayTopRight>{overlayTopRight}</OverlayTopRight>
               ) : undefined
             }
-            className={frameClassName}
-            ruled={frameRuled}
             resizable={enableHeightResize}
             showResizeHandle={enableHeightResize && showResizeHandle}
             resizeStepPx={enableHeightResize ? CARD_ROW_PX : undefined}
@@ -255,29 +283,23 @@ const EditorSidePaneInner = ({
             onMinHeightChange={onMinHeightChange}
             onResizeStart={onResizeStart}
             onResizeEnd={onResizeEnd}
-            actionsTopLeft={actionsTopLeft}
-            actionsTopRight={actionsTopRight}
-          >
-            <SharedCardContent
-              mode="edit"
-              blocks={blocks}
-              onChange={onBlocksChange}
-              selectionScopeKey={selectionScopeKey}
-              prefix={side}
-              label={label}
-              color={color}
-              droppableId={droppableId}
-              accentColor={accentColor}
-              duplicateToOpposite={duplicateToOpposite}
-              hideToolbar={hideToolbar}
-              toolbarMount={toolbarMount}
-              toolbarDesktopLayout="vertical"
-              enableBlockActiveState={enableBlockActiveState}
-              settings={settings}
-              displayMode={displayMode}
-              zoom={contentZoom}
-            />
-          </CardFrame>
+            contentProps={{
+              mode: "edit",
+              blocks,
+              onChange: onBlocksChange,
+              prefix: side,
+              label,
+              color,
+              droppableId,
+              accentColor,
+              duplicateToOpposite,
+              hideToolbar,
+              toolbarMount: resolvedToolbarMount,
+              toolbarDesktopLayout: "vertical",
+              enableBlockActiveState,
+              settings,
+            }}
+          />
         </div>
       </div>
     </div>
@@ -290,7 +312,6 @@ const areEditorSidePanePropsEqual = (
 ) =>
   prev.side === next.side &&
   prev.blocks === next.blocks &&
-  prev.selectionScopeKey === next.selectionScopeKey &&
   prev.label === next.label &&
   prev.color === next.color &&
   prev.droppableId === next.droppableId &&
@@ -300,7 +321,6 @@ const areEditorSidePanePropsEqual = (
   prev.toolbarMount === next.toolbarMount &&
   prev.settings === next.settings &&
   prev.shouldShowInlineToolbarMount === next.shouldShowInlineToolbarMount &&
-  prev.hideCardShellHeader === next.hideCardShellHeader &&
   prev.shouldDockToolbarToCardTop === next.shouldDockToolbarToCardTop &&
   prev.dockToolbarInsideCardEdge === next.dockToolbarInsideCardEdge &&
   prev.presentationState.isActiveCard === next.presentationState.isActiveCard &&
@@ -321,7 +341,8 @@ const areEditorSidePanePropsEqual = (
   prev.editorCardHeightPx === next.editorCardHeightPx &&
   prev.enableHeightResize === next.enableHeightResize &&
   prev.actionsTopLeft === next.actionsTopLeft &&
-  prev.actionsTopRight === next.actionsTopRight;
+  prev.actionsTopRight === next.actionsTopRight &&
+  prev.overlayTopRight === next.overlayTopRight;
 
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 EditorSidePane.displayName = "EditorSidePane";
@@ -385,9 +406,6 @@ export const CardEditorPane = ({
 
   const [isRetryingSync, setIsRetryingSync] = useState(false);
   const [showRetryErrorState, setShowRetryErrorState] = useState(false);
-  const [flipEditingSide, setFlipEditingSide] = useState<"question" | "answer">(
-    "question",
-  );
 
   useEffect(() => {
     if (saveError) {
@@ -399,10 +417,6 @@ export const CardEditorPane = ({
       setShowRetryErrorState(false);
     }
   }, [isRetryingSync, saveError]);
-
-  useEffect(() => {
-    setFlipEditingSide("question");
-  }, [cardLayoutMode, normalizedSelectedCardId]);
 
   const cardPresentationContext = useMemo<CardPresentationContext>(() => {
     const isCurrentCard =
@@ -530,7 +544,6 @@ export const CardEditorPane = ({
     activePaneWidthPx,
     activePaneDisplayedDefaultWidthPx,
     shouldReserveWidthControlSpace,
-    hideCardShellHeader,
     shouldDockToolbarToCardTop,
     shouldShowInlineToolbarMount,
     useTwoColumnEditorLayout,
@@ -797,7 +810,6 @@ export const CardEditorPane = ({
       side="question"
       blocks={frontBlocks}
       onBlocksChange={handleQuestionBlocksChange}
-      selectionScopeKey={normalizedSelectedCardId}
       label="問題"
       color="text-indigo-500"
       droppableId="question-blocks"
@@ -808,7 +820,6 @@ export const CardEditorPane = ({
       settings={settings}
       shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
       setInlineToolbarMount={setToolbarMountQInternal}
-      hideCardShellHeader={hideCardShellHeader}
       shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
       dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
       setDockedToolbarMount={setToolbarMountQInternal}
@@ -837,7 +848,6 @@ export const CardEditorPane = ({
       side="answer"
       blocks={backBlocks}
       onBlocksChange={handleAnswerBlocksChange}
-      selectionScopeKey={normalizedSelectedCardId}
       label="解答"
       color="text-emerald-500"
       droppableId="answer-blocks"
@@ -848,7 +858,6 @@ export const CardEditorPane = ({
       settings={settings}
       shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
       setInlineToolbarMount={setToolbarMountAInternal}
-      hideCardShellHeader={hideCardShellHeader}
       shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
       dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
       setDockedToolbarMount={setToolbarMountAInternal}
@@ -872,69 +881,113 @@ export const CardEditorPane = ({
     />
   );
 
-  const splitEditorColumnsClassName = isSplitEditorLayout
-    ? "grid-cols-2"
-    : "grid-cols-1";
+  const activeFlipSide: "question" | "answer" = isFlipped
+    ? "answer"
+    : "question";
+  const flipBlocks = activeFlipSide === "question" ? frontBlocks : backBlocks;
+  const flipActionsTopRight =
+    activeFlipSide === "question"
+      ? questionActionsTopRight
+      : answerActionsTopRight;
+  const handleFlipBlocksChange =
+    activeFlipSide === "question"
+      ? handleQuestionBlocksChange
+      : handleAnswerBlocksChange;
+  const handleFlipMinHeightChange =
+    activeFlipSide === "question"
+      ? handleQuestionMinHeightChange
+      : handleAnswerMinHeightChange;
 
-  const editorPanelsNode =
-    cardLayoutMode === "flip" ? (
-      <div className="flex w-full flex-col items-center gap-3">
-        <div className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/85 p-1 shadow-sm">
-          <button
-            type="button"
-            className={cn(
-              "rounded-full px-3 py-1 text-xs font-semibold transition",
-              flipEditingSide === "question"
-                ? "bg-slate-900 text-white"
-                : "text-slate-600 hover:bg-slate-100",
-            )}
-            onClick={() => setFlipEditingSide("question")}
-          >
-            問題
-          </button>
-          <button
-            type="button"
-            className={cn(
-              "rounded-full px-3 py-1 text-xs font-semibold transition",
-              flipEditingSide === "answer"
-                ? "bg-slate-900 text-white"
-                : "text-slate-600 hover:bg-slate-100",
-            )}
-            onClick={() => setFlipEditingSide("answer")}
-          >
-            解答
-          </button>
-        </div>
+  const flipEditorPane = (
+    <EditorSidePane
+      side={activeFlipSide}
+      blocks={flipBlocks}
+      onBlocksChange={handleFlipBlocksChange}
+      label={activeFlipSide === "question" ? "問題" : "解答"}
+      color={
+        activeFlipSide === "question" ? "text-indigo-500" : "text-emerald-500"
+      }
+      droppableId={
+        activeFlipSide === "question" ? "question-blocks" : "answer-blocks"
+      }
+      accentColor={settings?.accentColor}
+      duplicateToOpposite={settings?.duplicateToOpposite}
+      hideToolbar={hideBlockToolbars}
+      toolbarMount={
+        activeFlipSide === "question" ? toolbarMountQ : toolbarMountA
+      }
+      settings={settings}
+      shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
+      setInlineToolbarMount={
+        activeFlipSide === "question"
+          ? setToolbarMountQInternal
+          : setToolbarMountAInternal
+      }
+      shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
+      dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
+      setDockedToolbarMount={
+        activeFlipSide === "question"
+          ? setToolbarMountQInternal
+          : setToolbarMountAInternal
+      }
+      presentationState={cardPresentationState}
+      enableBlockActiveState={cardPresentationState.isInteractiveCard}
+      showResizeHandle={showResizeHandleProp}
+      displayMode={displayMode}
+      frameFixedScale={editorFrameFixedScale}
+      frameDisableScale={editorFrameDisableScale}
+      frameStretchWidth={editorFrameStretchWidth}
+      frameRuled={!isFluidEditor}
+      contentZoom={editorContentZoom}
+      editorCardHeightPx={editorCardHeightPx}
+      enableHeightResize={!isFluidEditor}
+      onHeightChange={handleEditorHeightChange}
+      onMinHeightChange={handleFlipMinHeightChange}
+      onResizeStart={handleResizeStart}
+      onResizeEnd={handleResizeEnd}
+      actionsTopLeft={editorActionsTopLeft}
+      overlayTopRight={
+        <>
+          <FaceSwitchBadge
+            isFlipped={Boolean(isFlipped)}
+            onShowFront={() => setIsFlipped(false)}
+            onShowBack={() => setIsFlipped(true)}
+          />
+          {flipActionsTopRight ? (
+            <div
+              className="flex max-w-full justify-end"
+              data-card-no-flip="true"
+            >
+              {flipActionsTopRight}
+            </div>
+          ) : null}
+        </>
+      }
+    />
+  );
 
-        <div
-          className={cn("grid w-full max-w-full grid-cols-1", pairGapClassName)}
-          style={{ columnGap: `${CARD_EDITOR_PAIR_GAP_PX}px` }}
-        >
-          {flipEditingSide === "question"
-            ? questionEditorPane
-            : answerEditorPane}
-        </div>
-      </div>
-    ) : (
-      <div
-        className={cn(
-          "grid w-full max-w-full",
-          splitEditorColumnsClassName,
-          pairGapClassName,
-        )}
-        style={{ columnGap: `${CARD_EDITOR_PAIR_GAP_PX}px` }}
-      >
-        {questionEditorPane}
-        {answerEditorPane}
-      </div>
-    );
+  const editorPanelsNode = (
+    <CardSurfaceLayout
+      cardLayoutMode={
+        cardLayoutMode === "flip"
+          ? "flip"
+          : isSplitEditorLayout
+            ? "split"
+            : "stack"
+      }
+      questionNode={questionEditorPane}
+      answerNode={answerEditorPane}
+      flipNode={flipEditorPane}
+      className={pairGapClassName}
+    />
+  );
 
   return (
     <BlockEditModeContext.Provider value={true}>
       <>
         <CardWorkspaceShell
           containerClassName={cn(
-            "pt-0 card-editor-right-pane-font",
+            "card-editor-right-pane-font pt-0",
             embeddedInPager ? "bg-transparent" : "bg-sidebar",
             embeddedInPager ? "pb-0" : "pb-4",
             embeddedInPager ? "h-auto" : "h-full",
@@ -952,7 +1005,7 @@ export const CardEditorPane = ({
           hideMetaToggle={hideMetaPanel}
           viewportRef={contentViewportRef}
           viewportClassName={cn(
-            "min-w-0 flex-1 flex flex-col items-center",
+            "flex min-w-0 flex-1 flex-col items-center",
             dockToolbarsToTop ? "overflow-x-visible" : "overflow-x-clip",
             embeddedInPager ? "overflow-y-visible" : "overflow-y-auto",
             isEditing
@@ -1006,7 +1059,6 @@ export const CardEditorPane = ({
                       void handleToggleUncertainty(selectedCardEntity);
                     }}
                     onEdit={() => {
-                      setIsFlipped(false);
                       setIsEditing(true);
                     }}
                     displayMode={displayMode}
