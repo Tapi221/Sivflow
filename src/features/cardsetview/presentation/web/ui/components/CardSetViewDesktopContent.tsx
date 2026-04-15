@@ -4,8 +4,16 @@ import type { CardSetViewContentProps } from "@/features/cardsetview/presentatio
 export const CardSetViewDesktopContent = ({
   controller,
 }: CardSetViewContentProps) => {
-  const { folderId, cardSetId, settings, data, state, paneWidth, zoom } =
-    controller;
+  const {
+    folderId,
+    cardSetId,
+    settings,
+    data,
+    state,
+    paneWidth,
+    zoom,
+    effectiveCardLayoutMode,
+  } = controller;
 
   return (
     <CardSetViewDesktop
@@ -18,7 +26,7 @@ export const CardSetViewDesktopContent = ({
       settings={settings}
       editPaneWidthPx={paneWidth.activePaneRenderWidthPx}
       currentDisplayMode={state.currentDisplayMode}
-      currentCardLayoutMode={state.currentCardLayoutMode}
+      currentCardLayoutMode={effectiveCardLayoutMode}
       folderId={folderId}
       cardSetId={cardSetId}
       viewZoomScale={zoom.zoomScale}

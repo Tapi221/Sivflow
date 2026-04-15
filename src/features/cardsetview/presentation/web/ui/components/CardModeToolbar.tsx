@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import {
   overlayGlassActionButtonClassName,
   overlayGlassToolbarClassName,
@@ -14,22 +16,27 @@ type CardModeToolbarProps = {
   interactionMode: "view" | "edit";
   displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
+  disabledCardLayoutModes?: Partial<Record<CardLayoutMode, boolean>>;
   onChangeInteractionMode: (mode: "view" | "edit") => void;
   onChangeDisplayMode: (mode: CardDisplayMode) => void;
   onChangeCardLayoutMode: (mode: CardLayoutMode) => void;
+};
+
+type ModeButtonProps = {
+  isActive: boolean;
+  onClick: () => void;
+  label: string;
+  disabled?: boolean;
+  children: ReactNode;
 };
 
 const ModeButton = ({
   isActive,
   onClick,
   label,
+  disabled = false,
   children,
-}: {
-  isActive: boolean;
-  onClick: () => void;
-  label: string;
-  children: React.ReactNode;
-}) => {
+}: ModeButtonProps) => {
   return (
     <button
       type="button"
@@ -37,12 +44,17 @@ const ModeButton = ({
         overlayGlassActionButtonClassName,
         "relative",
         isActive &&
+          !disabled &&
           "border-slate-300 bg-white text-slate-900 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.06)]",
+        disabled &&
+          "border-slate-200/60 bg-white/35 text-slate-300 hover:bg-white/35 hover:text-slate-300",
       )}
       onClick={onClick}
       aria-label={label}
       title={label}
       aria-pressed={isActive}
+      aria-disabled={disabled}
+      disabled={disabled}
     >
       {children}
     </button>
@@ -75,6 +87,7 @@ export const CardModeToolbar = ({
   interactionMode,
   displayMode,
   cardLayoutMode,
+  disabledCardLayoutModes,
   onChangeInteractionMode,
   onChangeDisplayMode,
   onChangeCardLayoutMode,
@@ -124,6 +137,7 @@ export const CardModeToolbar = ({
           isActive={cardLayoutMode === "stack"}
           onClick={() => onChangeCardLayoutMode("stack")}
           label={CARD_LAYOUT_MODE_LABELS.stack}
+          disabled={disabledCardLayoutModes?.stack}
         >
           <StackGlyph />
         </ModeButton>
@@ -131,6 +145,7 @@ export const CardModeToolbar = ({
           isActive={cardLayoutMode === "flip"}
           onClick={() => onChangeCardLayoutMode("flip")}
           label={CARD_LAYOUT_MODE_LABELS.flip}
+          disabled={disabledCardLayoutModes?.flip}
         >
           <FlipGlyph />
         </ModeButton>
@@ -138,6 +153,7 @@ export const CardModeToolbar = ({
           isActive={cardLayoutMode === "split"}
           onClick={() => onChangeCardLayoutMode("split")}
           label={CARD_LAYOUT_MODE_LABELS.split}
+          disabled={disabledCardLayoutModes?.split}
         >
           <SplitGlyph />
         </ModeButton>

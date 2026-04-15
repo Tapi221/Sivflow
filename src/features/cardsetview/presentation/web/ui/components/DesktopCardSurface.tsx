@@ -58,7 +58,7 @@ const StaticCardSide = ({
 }: {
   card: Card;
   currentDisplayMode: CardDisplayMode;
-  fixedScale: number;
+  fixedScale?: number;
   contentZoom: number;
   headerIconVisualScale: number;
   side: "question" | "answer";
@@ -184,7 +184,7 @@ const DesktopCardSurfaceInner = ({
             hasFocusWithin,
           }}
           settingsOverride={settings}
-          pairGapClassName="gap-4"
+          pairGapClassName="gap-0"
           showResizeHandle={canInteractWithEditor}
           onSyncStatusChange={handleSyncStatusForward}
           displayMode={currentDisplayMode}
@@ -195,16 +195,36 @@ const DesktopCardSurfaceInner = ({
     );
   }
 
-  const headerIconVisualScale =
+  const isSplitLayout = currentCardLayoutMode === "split";
+  const baseHeaderIconVisualScale =
     viewRenderSpec.surfaceMode === "card" &&
     Number.isFinite(viewRenderSpec.zoomScale) &&
     viewRenderSpec.zoomScale > 0
       ? viewRenderSpec.zoomScale
       : 1;
 
+  const staticHeaderIconVisualScale = isSplitLayout
+    ? Math.max(0.1, baseHeaderIconVisualScale / 2)
+    : baseHeaderIconVisualScale;
+
   if (currentCardLayoutMode !== "flip") {
-    const staticFixedScale = resolveCardSurfaceScale(viewRenderSpec);
-    const staticContentZoom = resolveCardContentZoom(viewRenderSpec);
+    const baseFixedScale =
+      currentDisplayMode === "fixed"
+        ? resolveCardSurfaceScale(viewRenderSpec)
+        : undefined;
+    const baseContentZoom = resolveCardContentZoom(viewRenderSpec);
+
+    const staticFixedScale =
+      typeof baseFixedScale === "number"
+        ? isSplitLayout
+          ? Math.max(0.1, baseFixedScale / 2)
+          : baseFixedScale
+        : undefined;
+
+    const staticContentZoom =
+      currentDisplayMode === "fluid" && isSplitLayout
+        ? Math.max(0.1, baseContentZoom / 2)
+        : baseContentZoom;
 
     return (
       <div className="w-full min-w-0 max-w-full overflow-visible">
@@ -212,7 +232,7 @@ const DesktopCardSurfaceInner = ({
           className={cn(
             "w-full min-w-0 max-w-full",
             currentCardLayoutMode === "split"
-              ? "grid grid-cols-1 gap-0 lg:grid-cols-2"
+              ? "grid grid-cols-2 gap-0"
               : "flex flex-col gap-0",
           )}
         >
@@ -222,7 +242,7 @@ const DesktopCardSurfaceInner = ({
               currentDisplayMode={currentDisplayMode}
               fixedScale={staticFixedScale}
               contentZoom={staticContentZoom}
-              headerIconVisualScale={headerIconVisualScale}
+              headerIconVisualScale={staticHeaderIconVisualScale}
               side="question"
             />
           </div>
@@ -232,7 +252,7 @@ const DesktopCardSurfaceInner = ({
               currentDisplayMode={currentDisplayMode}
               fixedScale={staticFixedScale}
               contentZoom={staticContentZoom}
-              headerIconVisualScale={headerIconVisualScale}
+              headerIconVisualScale={staticHeaderIconVisualScale}
               side="answer"
             />
           </div>
@@ -269,7 +289,7 @@ const DesktopCardSurfaceInner = ({
         scaleMultiplier={1}
         fixedScale={resolveCardSurfaceScale(viewRenderSpec)}
         contentZoom={resolveCardContentZoom(viewRenderSpec)}
-        headerIconVisualScale={headerIconVisualScale}
+        headerIconVisualScale={baseHeaderIconVisualScale}
         cardShellClassName={
           currentDisplayMode === "fluid"
             ? "border-none bg-transparent shadow-none"

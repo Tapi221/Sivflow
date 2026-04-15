@@ -30,7 +30,7 @@ const sanitizeVerticalCardPagerItemWidthSpec = (
   };
 };
 
-export const resolveVerticalCardPagerItemWidthSpec = <T,>({
+export const resolveVerticalCardPagerItemWidthSpec = <T>({
   card,
   idx,
   isActive,

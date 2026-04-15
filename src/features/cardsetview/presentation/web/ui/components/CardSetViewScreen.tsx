@@ -1,4 +1,5 @@
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
+import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
 import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
 import { CardModeToolbar } from "@/features/cardsetview/presentation/web/ui/components/CardModeToolbar";
 import { CardZoomControl } from "@/features/cardsetview/presentation/web/ui/components/CardZoomControl";
@@ -10,6 +11,7 @@ import type { CardSetViewContentProps } from "@/features/cardsetview/presentatio
 import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
+import { cn } from "@/lib/utils";
 
 const CARD_SET_VIEW_CONTENT_COMPONENTS = {
   desktop: CardSetViewDesktopContent,
@@ -32,6 +34,10 @@ export const CardSetViewScreen = () => {
     overlayRight,
     resolvedLastSyncedAtMs,
     topLeftZoomControl,
+    interactionMode,
+    effectiveCardLayoutMode,
+    disabledCardLayoutModes,
+    layoutConstraintIndicatorLabel,
   } = controller;
 
   const presentationTarget = usePresentationTarget();
@@ -49,7 +55,6 @@ export const CardSetViewScreen = () => {
   const isDesktopPresentation = presentationTarget === "desktop";
   const Content = CARD_SET_VIEW_CONTENT_COMPONENTS[presentationTarget];
   const desktopOverlayTopInsetPx = getAppTopInsetPx({ presentationTarget });
-  const interactionMode = state.isGlobalEditing ? "edit" : "view";
 
   const overlayChildren = (
     <CardSetViewOverlayControls
@@ -66,7 +71,8 @@ export const CardSetViewScreen = () => {
     <CardModeToolbar
       interactionMode={interactionMode}
       displayMode={state.currentDisplayMode}
-      cardLayoutMode={state.currentCardLayoutMode}
+      cardLayoutMode={effectiveCardLayoutMode}
+      disabledCardLayoutModes={disabledCardLayoutModes}
       onChangeInteractionMode={state.setInteractionMode}
       onChangeDisplayMode={state.setCurrentDisplayMode}
       onChangeCardLayoutMode={state.setCurrentCardLayoutMode}
@@ -88,6 +94,16 @@ export const CardSetViewScreen = () => {
           onStepUp={topLeftZoomControl.onStepUp}
           onReset={topLeftZoomControl.onReset}
         />
+      ) : null}
+      {layoutConstraintIndicatorLabel ? (
+        <div
+          className={cn(
+            overlayGlassPillClassName,
+            "text-[11px] font-semibold text-slate-600",
+          )}
+        >
+          {layoutConstraintIndicatorLabel}
+        </div>
       ) : null}
     </div>
   );

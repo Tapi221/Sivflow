@@ -1,8 +1,9 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { useToast } from "@/contexts/ToastContext";
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
+import { CARD_LAYOUT_MODE_LABELS } from "@/features/cardsetview/domain/cardLayoutMode";
 import { useCardSetViewData } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewData";
 import { useCardSetViewPaneWidth } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewPaneWidth";
 import { useCardSetViewState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewState";
@@ -18,6 +19,7 @@ import {
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { CARD_PANE_WIDTH_STEP_PX } from "@/routes/constants";
+import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutFallbackPreferences";
 
 export const useCardSetViewScreenController = () => {
   const { setExtraCrumbs } = useBreadcrumbContext();
@@ -55,10 +57,27 @@ export const useCardSetViewScreenController = () => {
     cardSetId,
   });
 
+  const interactionMode = state.isGlobalEditing ? "edit" : "view";
+  const splitFallbackLayoutMode = useMemo(
+    () => resolveSplitFallbackLayoutModePreference(presentationTarget),
+    [presentationTarget],
+  );
+
   const zoom = useCardSetViewZoom({
+    deviceScope: presentationTarget,
     cardSetId,
     viewportRef: paneWidth.contentViewportRef,
-    activeCardKey: `${state.selectedCard?.id ?? ""}:${state.currentDisplayMode}`,
+    activeCardKey: [
+      state.selectedCard?.id ?? "",
+      state.currentDisplayMode,
+      state.currentCardLayoutMode,
+      interactionMode,
+      state.isMetaOpen ? "meta-open" : "meta-closed",
+    ].join(":"),
+    displayMode: state.currentDisplayMode,
+    interactionMode,
+    requestedCardLayoutMode: state.currentCardLayoutMode,
+    splitFallbackLayoutMode,
   });
 
   useCardSetViewBreadcrumbs({
@@ -120,6 +139,34 @@ export const useCardSetViewScreenController = () => {
         }
       : null;
 
+  const disabledCardLayoutModes = useMemo(
+    () => ({
+      stack: false,
+      flip: false,
+      split: !zoom.canUseSplit,
+    }),
+    [zoom.canUseSplit],
+  );
+
+  const layoutConstraintIndicatorLabel = useMemo(() => {
+    if (!zoom.showConstraintIndicator) {
+      return null;
+    }
+
+    if (
+      state.currentCardLayoutMode === "split" &&
+      zoom.effectiveCardLayoutMode !== "split"
+    ) {
+      return `画面制約で${CARD_LAYOUT_MODE_LABELS[zoom.effectiveCardLayoutMode]}表示中`;
+    }
+
+    return "画面制約で縮小中";
+  }, [
+    state.currentCardLayoutMode,
+    zoom.effectiveCardLayoutMode,
+    zoom.showConstraintIndicator,
+  ]);
+
   const handleSaveCurrentDisplayMode = useCallback(async () => {
     if (!cardSetId) {
       return;
@@ -152,5 +199,10 @@ export const useCardSetViewScreenController = () => {
     resolvedLastSyncedAtMs,
     topLeftZoomControl,
     handleSaveCurrentDisplayMode,
+    interactionMode,
+    effectiveCardLayoutMode: zoom.effectiveCardLayoutMode,
+    disabledCardLayoutModes,
+    layoutConstraintIndicatorLabel,
+    splitFallbackLayoutMode,
   };
 };

@@ -10,14 +10,16 @@ import {
   clampPaneWidthPx,
 } from "@/components/card/shell/cardPaneWidthConstants";
 import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthState";
+import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+import { ZOOM_MIN_BASE_WIDTH_PX } from "@/features/cardsetview/domain/cardSetViewPresentationDefaults";
 import {
   getCardSetWidthPreference,
   setCardSetWidthPreference,
 } from "@/services/cardWidthPreferences";
 import type { UserSettings } from "@/types";
 
-const CARD_EDITOR_PAIR_GAP_PX = 16;
-const CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX = CARD_PANE_EDIT_MIN_WIDTH_PX;
+const CARD_EDITOR_PAIR_GAP_PX = 0;
+const CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX = ZOOM_MIN_BASE_WIDTH_PX.edit.split;
 
 interface UseCardEditorPaneWidthParams {
   settings?: Partial<UserSettings> | null;
@@ -32,6 +34,7 @@ interface UseCardEditorPaneWidthParams {
   selectedCardId?: string;
   canonicalCardWidth: number;
   cardSetId?: string | null;
+  cardLayoutMode: CardLayoutMode;
 }
 
 const measureViewportWidth = (element: HTMLDivElement) =>
@@ -55,6 +58,7 @@ export const useCardEditorPaneWidth = ({
   selectedCardId,
   canonicalCardWidth,
   cardSetId,
+  cardLayoutMode,
 }: UseCardEditorPaneWidthParams) => {
   const defaultSharedPaneWidthPx = dockToolbarsToTop
     ? CARD_PANE_EDITOR_DOCKED_DEFAULT_WIDTH_PX
@@ -126,6 +130,7 @@ export const useCardEditorPaneWidth = ({
       isMetaOpen,
       normalizedSelectedCardId,
       selectedCardId,
+      cardLayoutMode,
     ],
     allowStoredWidthBeyondViewport: true,
     previewBehavior: "both",
@@ -175,7 +180,7 @@ export const useCardEditorPaneWidth = ({
       : Math.max(1, availablePaneWidthPx || activePaneMinWidthPx);
 
   const useTwoColumnEditorLayout =
-    (embeddedInPager && isEditing) ||
+    cardLayoutMode === "split" &&
     effectivePaneWidthPx >= CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX;
 
   const editorCardTargetWidthPx = useTwoColumnEditorLayout

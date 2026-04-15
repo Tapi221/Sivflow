@@ -180,11 +180,7 @@ const ImageItem = ({
     0.2,
     1,
   );
-  const persistedX = clamp(
-    Number(item.layout?.cropX ?? item.x ?? 0),
-    -1,
-    1,
-  );
+  const persistedX = clamp(Number(item.layout?.cropX ?? item.x ?? 0), -1, 1);
 
   return (
     <div className="relative group w-full">

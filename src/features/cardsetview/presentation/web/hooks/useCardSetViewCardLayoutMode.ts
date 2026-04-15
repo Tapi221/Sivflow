@@ -52,8 +52,7 @@ export const useCardSetViewCardLayoutMode = ({
           displayMode,
           interactionMode,
         },
-        defaultCardLayoutMode ??
-          resolveDefaultCardLayoutMode(interactionMode),
+        defaultCardLayoutMode ?? resolveDefaultCardLayoutMode(interactionMode),
       ),
     [
       cardSetId,

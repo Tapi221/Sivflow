@@ -403,8 +403,9 @@ export const CardEditorPane = ({
 
   const [isRetryingSync, setIsRetryingSync] = useState(false);
   const [showRetryErrorState, setShowRetryErrorState] = useState(false);
-  const [flipEditingSide, setFlipEditingSide] =
-    useState<"question" | "answer">("question");
+  const [flipEditingSide, setFlipEditingSide] = useState<"question" | "answer">(
+    "question",
+  );
 
   useEffect(() => {
     if (saveError) {
@@ -457,7 +458,7 @@ export const CardEditorPane = ({
   );
 
   const isFluidEditor = editorRenderSpec.surfaceMode === "fluid";
-  const editorContentZoom = resolveCardContentZoom(editorRenderSpec);
+  const baseEditorContentZoom = resolveCardContentZoom(editorRenderSpec);
   const editorFrameDisableScale =
     resolveCardDisablesFrameScale(editorRenderSpec);
   const editorFrameStretchWidth = resolveCardUsesStretchWidth(editorRenderSpec);
@@ -570,6 +571,7 @@ export const CardEditorPane = ({
     selectedCardId: selectedCardId ?? undefined,
     canonicalCardWidth: CANONICAL_CARD_WIDTH,
     cardSetId,
+    cardLayoutMode,
   });
 
   const activePaneModeValue: "edit" | "view" =
@@ -593,6 +595,14 @@ export const CardEditorPane = ({
       ),
     );
   }, [editorCardFitScale, editorRenderSpec, isFluidEditor]);
+
+  const isSplitEditorLayout =
+    cardLayoutMode === "split" && useTwoColumnEditorLayout;
+
+  const editorContentZoom =
+    isSplitEditorLayout && displayMode === "fluid"
+      ? Math.max(0.1, baseEditorContentZoom / 2)
+      : baseEditorContentZoom;
 
   const fallbackLastSyncedAtMs = useMemo(() => {
     return (
@@ -880,10 +890,9 @@ export const CardEditorPane = ({
     />
   );
 
-  const splitEditorColumnsClassName =
-    useTwoColumnEditorLayout && cardLayoutMode === "split"
-      ? "grid-cols-2"
-      : "grid-cols-1";
+  const splitEditorColumnsClassName = isSplitEditorLayout
+    ? "grid-cols-2"
+    : "grid-cols-1";
 
   const editorPanelsNode =
     cardLayoutMode === "flip" ? (

@@ -114,7 +114,10 @@ export const ImageFrame = ({
     Number.isFinite(layoutBaseWidthPx) &&
     layoutBaseWidthPx > 0
       ? layoutBaseWidthPx
-      : inferBaseWidthFromLegacyScale(resolvedReferenceWidthPx, safeLegacyScale);
+      : inferBaseWidthFromLegacyScale(
+          resolvedReferenceWidthPx,
+          safeLegacyScale,
+        );
 
   const normalizedScale = clamp(
     resolvedBaseWidthPx / Math.max(1, resolvedReferenceWidthPx),
@@ -280,14 +283,20 @@ export const ImageFrame = ({
           onTransformChange?.(emitTransform(nextX));
         }}
         onPointerUp={(event) => {
-          if (!dragRef.current || event.pointerId !== dragRef.current.pointerId) {
+          if (
+            !dragRef.current ||
+            event.pointerId !== dragRef.current.pointerId
+          ) {
             return;
           }
 
           const started = dragRef.current.started;
           const finalX = dragRef.current.currentNormalizedX;
 
-          if (started && event.currentTarget.hasPointerCapture(event.pointerId)) {
+          if (
+            started &&
+            event.currentTarget.hasPointerCapture(event.pointerId)
+          ) {
             event.currentTarget.releasePointerCapture(event.pointerId);
           }
 
@@ -303,13 +312,19 @@ export const ImageFrame = ({
           }
         }}
         onPointerCancel={(event) => {
-          if (!dragRef.current || event.pointerId !== dragRef.current.pointerId) {
+          if (
+            !dragRef.current ||
+            event.pointerId !== dragRef.current.pointerId
+          ) {
             return;
           }
 
           const started = dragRef.current.started;
 
-          if (started && event.currentTarget.hasPointerCapture(event.pointerId)) {
+          if (
+            started &&
+            event.currentTarget.hasPointerCapture(event.pointerId)
+          ) {
             event.currentTarget.releasePointerCapture(event.pointerId);
           }
 
@@ -329,7 +344,9 @@ export const ImageFrame = ({
           src={src}
           alt={alt}
           className={cn(
-            editable ? "absolute top-0 h-auto max-w-none" : "absolute top-0 h-auto max-w-none",
+            editable
+              ? "absolute top-0 h-auto max-w-none"
+              : "absolute top-0 h-auto max-w-none",
             imgClassName,
           )}
           style={{

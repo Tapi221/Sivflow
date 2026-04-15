@@ -44,23 +44,20 @@ describe("platform/index", () => {
     );
   });
 
-  it(
-    "uses desktop platform when desktop bridge is available even without Electron in userAgent",
-    async () => {
-      defineNavigatorUserAgent("Mozilla/5.0");
+  it("uses desktop platform when desktop bridge is available even without Electron in userAgent", async () => {
+    defineNavigatorUserAgent("Mozilla/5.0");
 
-      const bridge = createDesktopBridgeStub();
-      Object.defineProperty(window, "desktop", {
-        value: bridge,
-        configurable: true,
-      });
+    const bridge = createDesktopBridgeStub();
+    Object.defineProperty(window, "desktop", {
+      value: bridge,
+      configurable: true,
+    });
 
-      vi.resetModules();
-      const { default: platform } = await import("@/platform");
+    vi.resetModules();
+    const { default: platform } = await import("@/platform");
 
-      const result = platform.oauth.start("https://example.com");
-      expect(result).toBe("started");
-      expect(bridge.oauth.start).toHaveBeenCalledWith("https://example.com");
-    },
-  );
+    const result = platform.oauth.start("https://example.com");
+    expect(result).toBe("started");
+    expect(bridge.oauth.start).toHaveBeenCalledWith("https://example.com");
+  });
 });
