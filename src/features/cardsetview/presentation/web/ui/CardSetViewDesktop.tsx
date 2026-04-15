@@ -2,6 +2,7 @@ import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getCardText } from "@/domain/card/content";
+import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import {
   CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS,
   CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
@@ -77,6 +78,7 @@ interface CardSetViewDesktopProps {
   settings?: Partial<UserSettings> | null;
   editPaneWidthPx: number;
   currentDisplayMode: CardDisplayMode;
+  currentCardLayoutMode: CardLayoutMode;
   folderId: string | null;
   cardSetId: string | null;
   viewZoomScale: number;
@@ -99,6 +101,7 @@ export const CardSetViewDesktop = ({
   settings = null,
   editPaneWidthPx,
   currentDisplayMode,
+  currentCardLayoutMode,
   folderId,
   cardSetId,
   viewZoomScale,
@@ -174,6 +177,7 @@ export const CardSetViewDesktop = ({
           settings={settings}
           isFlipped={flippedCardIds.has(card.id ?? "")}
           currentDisplayMode={currentDisplayMode}
+          currentCardLayoutMode={currentCardLayoutMode}
           viewZoomScale={viewZoomScale}
           folderId={folderId}
           cardSetId={cardSetId}
@@ -187,6 +191,7 @@ export const CardSetViewDesktop = ({
     },
     [
       cardSetId,
+      currentCardLayoutMode,
       currentDisplayMode,
       editingCardsOverride,
       effectiveEditPaneWidthPx,

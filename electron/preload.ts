@@ -41,6 +41,7 @@ const desktopApi: DesktopBridgeApi = {
       const listener = (
         _event: Electron.IpcRendererEvent,
         isMaximized: boolean,
+        
       ) => handler(isMaximized);
 
       ipcRenderer.on(IPC_CHANNELS.windowMaximizedState, listener);

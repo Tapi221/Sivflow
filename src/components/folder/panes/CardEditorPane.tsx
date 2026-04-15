@@ -41,6 +41,7 @@ import {
   useCardEditorPaneWidth,
 } from "@/components/folder/panes/useCardEditorPaneWidth";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
+import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import {
   buildCardRenderSpec,
   resolveCardContentZoom,
@@ -81,6 +82,7 @@ interface CardEditorPaneProps {
   onSyncStatusChange?: (status: CardSyncStatus | null) => void;
   overlayTopInsetPx?: number;
   displayMode?: CardDisplayMode;
+  cardLayoutMode?: CardLayoutMode;
   zoom?: number;
 }
 
@@ -364,6 +366,7 @@ export const CardEditorPane = ({
   onSyncStatusChange,
   overlayTopInsetPx = 0,
   displayMode = "fixed",
+  cardLayoutMode = "split",
   zoom = 1,
 }: CardEditorPaneProps) => {
   const controller = useCardEditorPaneController({
@@ -400,6 +403,8 @@ export const CardEditorPane = ({
 
   const [isRetryingSync, setIsRetryingSync] = useState(false);
   const [showRetryErrorState, setShowRetryErrorState] = useState(false);
+  const [flipEditingSide, setFlipEditingSide] =
+    useState<"question" | "answer">("question");
 
   useEffect(() => {
     if (saveError) {
@@ -411,6 +416,10 @@ export const CardEditorPane = ({
       setShowRetryErrorState(false);
     }
   }, [isRetryingSync, saveError]);
+
+  useEffect(() => {
+    setFlipEditingSide("question");
+  }, [cardLayoutMode, normalizedSelectedCardId]);
 
   const cardPresentationContext = useMemo<CardPresentationContext>(() => {
     const isCurrentCard =
@@ -791,6 +800,144 @@ export const CardEditorPane = ({
     </div>
   ) : null;
 
+  const questionEditorPane = (
+    <EditorSidePane
+      side="question"
+      blocks={frontBlocks}
+      onBlocksChange={handleQuestionBlocksChange}
+      selectionScopeKey={normalizedSelectedCardId}
+      label="問題"
+      color="text-indigo-500"
+      droppableId="question-blocks"
+      accentColor={settings?.accentColor}
+      duplicateToOpposite={settings?.duplicateToOpposite}
+      hideToolbar={hideBlockToolbars}
+      toolbarMount={toolbarMountQ}
+      settings={settings}
+      shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
+      setInlineToolbarMount={setToolbarMountQInternal}
+      hideCardShellHeader={hideCardShellHeader}
+      shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
+      dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
+      setDockedToolbarMount={setToolbarMountQInternal}
+      presentationState={cardPresentationState}
+      enableBlockActiveState={cardPresentationState.isInteractiveCard}
+      showResizeHandle={showResizeHandleProp}
+      displayMode={displayMode}
+      frameFixedScale={editorFrameFixedScale}
+      frameDisableScale={editorFrameDisableScale}
+      frameStretchWidth={editorFrameStretchWidth}
+      frameRuled={!isFluidEditor}
+      contentZoom={editorContentZoom}
+      editorCardHeightPx={editorCardHeightPx}
+      enableHeightResize={!isFluidEditor}
+      onHeightChange={handleEditorHeightChange}
+      onMinHeightChange={handleQuestionMinHeightChange}
+      onResizeStart={handleResizeStart}
+      onResizeEnd={handleResizeEnd}
+      actionsTopLeft={editorActionsTopLeft}
+      actionsTopRight={questionActionsTopRight}
+    />
+  );
+
+  const answerEditorPane = (
+    <EditorSidePane
+      side="answer"
+      blocks={backBlocks}
+      onBlocksChange={handleAnswerBlocksChange}
+      selectionScopeKey={normalizedSelectedCardId}
+      label="解答"
+      color="text-emerald-500"
+      droppableId="answer-blocks"
+      accentColor={settings?.accentColor}
+      duplicateToOpposite={settings?.duplicateToOpposite}
+      hideToolbar={hideBlockToolbars}
+      toolbarMount={toolbarMountA}
+      settings={settings}
+      shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
+      setInlineToolbarMount={setToolbarMountAInternal}
+      hideCardShellHeader={hideCardShellHeader}
+      shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
+      dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
+      setDockedToolbarMount={setToolbarMountAInternal}
+      presentationState={cardPresentationState}
+      enableBlockActiveState={cardPresentationState.isInteractiveCard}
+      showResizeHandle={showResizeHandleProp}
+      displayMode={displayMode}
+      frameFixedScale={editorFrameFixedScale}
+      frameDisableScale={editorFrameDisableScale}
+      frameStretchWidth={editorFrameStretchWidth}
+      frameRuled={!isFluidEditor}
+      contentZoom={editorContentZoom}
+      editorCardHeightPx={editorCardHeightPx}
+      enableHeightResize={!isFluidEditor}
+      onHeightChange={handleEditorHeightChange}
+      onMinHeightChange={handleAnswerMinHeightChange}
+      onResizeStart={handleResizeStart}
+      onResizeEnd={handleResizeEnd}
+      actionsTopLeft={editorActionsTopLeft}
+      actionsTopRight={answerActionsTopRight}
+    />
+  );
+
+  const splitEditorColumnsClassName =
+    useTwoColumnEditorLayout && cardLayoutMode === "split"
+      ? "grid-cols-2"
+      : "grid-cols-1";
+
+  const editorPanelsNode =
+    cardLayoutMode === "flip" ? (
+      <div className="flex w-full flex-col items-center gap-3">
+        <div className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/85 p-1 shadow-sm">
+          <button
+            type="button"
+            className={cn(
+              "rounded-full px-3 py-1 text-xs font-semibold transition",
+              flipEditingSide === "question"
+                ? "bg-slate-900 text-white"
+                : "text-slate-600 hover:bg-slate-100",
+            )}
+            onClick={() => setFlipEditingSide("question")}
+          >
+            問題
+          </button>
+          <button
+            type="button"
+            className={cn(
+              "rounded-full px-3 py-1 text-xs font-semibold transition",
+              flipEditingSide === "answer"
+                ? "bg-slate-900 text-white"
+                : "text-slate-600 hover:bg-slate-100",
+            )}
+            onClick={() => setFlipEditingSide("answer")}
+          >
+            解答
+          </button>
+        </div>
+
+        <div
+          className={cn("grid w-full max-w-full grid-cols-1", pairGapClassName)}
+          style={{ columnGap: `${CARD_EDITOR_PAIR_GAP_PX}px` }}
+        >
+          {flipEditingSide === "question"
+            ? questionEditorPane
+            : answerEditorPane}
+        </div>
+      </div>
+    ) : (
+      <div
+        className={cn(
+          "grid w-full max-w-full",
+          splitEditorColumnsClassName,
+          pairGapClassName,
+        )}
+        style={{ columnGap: `${CARD_EDITOR_PAIR_GAP_PX}px` }}
+      >
+        {questionEditorPane}
+        {answerEditorPane}
+      </div>
+    );
+
   return (
     <BlockEditModeContext.Provider value={true}>
       <>
@@ -847,94 +994,7 @@ export const CardEditorPane = ({
                   : {}),
               }}
             >
-              <div
-                className={cn(
-                  "grid w-full max-w-full",
-                  useTwoColumnEditorLayout ? "grid-cols-2" : "grid-cols-1",
-                  pairGapClassName,
-                )}
-                style={{ columnGap: `${CARD_EDITOR_PAIR_GAP_PX}px` }}
-              >
-                <EditorSidePane
-                  side="question"
-                  blocks={frontBlocks}
-                  onBlocksChange={handleQuestionBlocksChange}
-                  selectionScopeKey={normalizedSelectedCardId}
-                  label="問題"
-                  color="text-indigo-500"
-                  droppableId="question-blocks"
-                  accentColor={settings?.accentColor}
-                  duplicateToOpposite={settings?.duplicateToOpposite}
-                  hideToolbar={hideBlockToolbars}
-                  toolbarMount={toolbarMountQ}
-                  settings={settings}
-                  shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
-                  setInlineToolbarMount={setToolbarMountQInternal}
-                  hideCardShellHeader={hideCardShellHeader}
-                  shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
-                  dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
-                  setDockedToolbarMount={setToolbarMountQInternal}
-                  presentationState={cardPresentationState}
-                  enableBlockActiveState={
-                    cardPresentationState.isInteractiveCard
-                  }
-                  showResizeHandle={showResizeHandleProp}
-                  displayMode={displayMode}
-                  frameFixedScale={editorFrameFixedScale}
-                  frameDisableScale={editorFrameDisableScale}
-                  frameStretchWidth={editorFrameStretchWidth}
-                  frameRuled={!isFluidEditor}
-                  contentZoom={editorContentZoom}
-                  editorCardHeightPx={editorCardHeightPx}
-                  enableHeightResize={!isFluidEditor}
-                  onHeightChange={handleEditorHeightChange}
-                  onMinHeightChange={handleQuestionMinHeightChange}
-                  onResizeStart={handleResizeStart}
-                  onResizeEnd={handleResizeEnd}
-                  actionsTopLeft={editorActionsTopLeft}
-                  actionsTopRight={questionActionsTopRight}
-                />
-
-                <EditorSidePane
-                  side="answer"
-                  blocks={backBlocks}
-                  onBlocksChange={handleAnswerBlocksChange}
-                  selectionScopeKey={normalizedSelectedCardId}
-                  label="解答"
-                  color="text-emerald-500"
-                  droppableId="answer-blocks"
-                  accentColor={settings?.accentColor}
-                  duplicateToOpposite={settings?.duplicateToOpposite}
-                  hideToolbar={hideBlockToolbars}
-                  toolbarMount={toolbarMountA}
-                  settings={settings}
-                  shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
-                  setInlineToolbarMount={setToolbarMountAInternal}
-                  hideCardShellHeader={hideCardShellHeader}
-                  shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
-                  dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
-                  setDockedToolbarMount={setToolbarMountAInternal}
-                  presentationState={cardPresentationState}
-                  enableBlockActiveState={
-                    cardPresentationState.isInteractiveCard
-                  }
-                  showResizeHandle={showResizeHandleProp}
-                  displayMode={displayMode}
-                  frameFixedScale={editorFrameFixedScale}
-                  frameDisableScale={editorFrameDisableScale}
-                  frameStretchWidth={editorFrameStretchWidth}
-                  frameRuled={!isFluidEditor}
-                  contentZoom={editorContentZoom}
-                  editorCardHeightPx={editorCardHeightPx}
-                  enableHeightResize={!isFluidEditor}
-                  onHeightChange={handleEditorHeightChange}
-                  onMinHeightChange={handleAnswerMinHeightChange}
-                  onResizeStart={handleResizeStart}
-                  onResizeEnd={handleResizeEnd}
-                  actionsTopLeft={editorActionsTopLeft}
-                  actionsTopRight={answerActionsTopRight}
-                />
-              </div>
+              {editorPanelsNode}
             </div>
           ) : (
             flashcardCard && (

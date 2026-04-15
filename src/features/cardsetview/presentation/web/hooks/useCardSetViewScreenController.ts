@@ -43,6 +43,7 @@ export const useCardSetViewScreenController = () => {
     selectedCardSet: data.selectedCardSet,
     isLoading: data.isLoading,
     toastError,
+    deviceScope: presentationTarget,
   });
 
   const paneWidth = useCardSetViewPaneWidth({
@@ -139,6 +140,7 @@ export const useCardSetViewScreenController = () => {
   return {
     folderId,
     cardSetId,
+    presentationTarget,
     isDesktop,
     settings,
     data,

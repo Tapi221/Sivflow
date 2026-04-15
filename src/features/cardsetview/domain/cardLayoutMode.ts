@@ -1,0 +1,45 @@
+import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+export type CardLayoutMode = "stack" | "flip" | "split";
+export type CardSetInteractionMode = "view" | "edit";
+
+export const DEFAULT_CARD_LAYOUT_MODE: CardLayoutMode = "flip";
+
+export const resolveDefaultCardLayoutMode = (
+  interactionMode: CardSetInteractionMode,
+): CardLayoutMode => {
+  return interactionMode === "edit" ? "split" : "flip";
+};
+
+export const normalizeCardLayoutMode = (value: unknown): CardLayoutMode => {
+  if (value === "stack" || value === "split") {
+    return value;
+  }
+
+  return "flip";
+};
+
+export const buildCardLayoutPreferenceScopeKey = ({
+  deviceScope,
+  cardSetId,
+  displayMode,
+  interactionMode,
+}: {
+  deviceScope: string;
+  cardSetId: string | null | undefined;
+  displayMode: CardDisplayMode;
+  interactionMode: CardSetInteractionMode;
+}) => {
+  return [
+    deviceScope || "unknown",
+    cardSetId || "__no_card_set__",
+    displayMode,
+    interactionMode,
+  ].join("::");
+};
+
+export const CARD_LAYOUT_MODE_LABELS: Record<CardLayoutMode, string> = {
+  stack: "縦並び",
+  flip: "裏表",
+  split: "2カラム",
+};

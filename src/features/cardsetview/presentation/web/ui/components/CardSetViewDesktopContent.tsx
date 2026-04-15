@@ -18,6 +18,7 @@ export const CardSetViewDesktopContent = ({
       settings={settings}
       editPaneWidthPx={paneWidth.activePaneRenderWidthPx}
       currentDisplayMode={state.currentDisplayMode}
+      currentCardLayoutMode={state.currentCardLayoutMode}
       folderId={folderId}
       cardSetId={cardSetId}
       viewZoomScale={zoom.zoomScale}

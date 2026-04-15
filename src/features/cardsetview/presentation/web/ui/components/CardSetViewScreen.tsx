@@ -1,5 +1,6 @@
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
+import { CardModeToolbar } from "@/features/cardsetview/presentation/web/ui/components/CardModeToolbar";
 import { CardZoomControl } from "@/features/cardsetview/presentation/web/ui/components/CardZoomControl";
 import { CardSetViewDesktopContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewDesktopContent";
 import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMetaPanel";
@@ -31,7 +32,6 @@ export const CardSetViewScreen = () => {
     overlayRight,
     resolvedLastSyncedAtMs,
     topLeftZoomControl,
-    handleSaveCurrentDisplayMode,
   } = controller;
 
   const presentationTarget = usePresentationTarget();
@@ -49,35 +49,48 @@ export const CardSetViewScreen = () => {
   const isDesktopPresentation = presentationTarget === "desktop";
   const Content = CARD_SET_VIEW_CONTENT_COMPONENTS[presentationTarget];
   const desktopOverlayTopInsetPx = getAppTopInsetPx({ presentationTarget });
+  const interactionMode = state.isGlobalEditing ? "edit" : "view";
 
   const overlayChildren = (
     <CardSetViewOverlayControls
       isDesktop={isDesktopPresentation}
       overlayRight={overlayRight}
-      currentDisplayMode={state.currentDisplayMode}
-      cardSetId={cardSetId}
       resolvedLastSyncedAtMs={resolvedLastSyncedAtMs}
       activeSyncStatus={state.activeSyncStatus}
       onRetryActiveSync={state.handleRetryActiveSync}
-      onChangeDisplayMode={state.setCurrentDisplayMode}
-      onSaveCurrentDisplayMode={handleSaveCurrentDisplayMode}
       topInsetPx={desktopOverlayTopInsetPx}
     />
   );
 
-  const topLeftControl = topLeftZoomControl ? (
-    <CardZoomControl
-      value={topLeftZoomControl.value}
-      min={topLeftZoomControl.min}
-      max={topLeftZoomControl.max}
-      step={topLeftZoomControl.step}
-      defaultValue={topLeftZoomControl.defaultValue}
-      onChange={topLeftZoomControl.onChange}
-      onStepDown={topLeftZoomControl.onStepDown}
-      onStepUp={topLeftZoomControl.onStepUp}
-      onReset={topLeftZoomControl.onReset}
+  const modeToolbar = (
+    <CardModeToolbar
+      interactionMode={interactionMode}
+      displayMode={state.currentDisplayMode}
+      cardLayoutMode={state.currentCardLayoutMode}
+      onChangeInteractionMode={state.setInteractionMode}
+      onChangeDisplayMode={state.setCurrentDisplayMode}
+      onChangeCardLayoutMode={state.setCurrentCardLayoutMode}
     />
-  ) : null;
+  );
+
+  const topLeftControl = (
+    <div className="flex items-center gap-2">
+      {modeToolbar}
+      {topLeftZoomControl ? (
+        <CardZoomControl
+          value={topLeftZoomControl.value}
+          min={topLeftZoomControl.min}
+          max={topLeftZoomControl.max}
+          step={topLeftZoomControl.step}
+          defaultValue={topLeftZoomControl.defaultValue}
+          onChange={topLeftZoomControl.onChange}
+          onStepDown={topLeftZoomControl.onStepDown}
+          onStepUp={topLeftZoomControl.onStepUp}
+          onReset={topLeftZoomControl.onReset}
+        />
+      ) : null}
+    </div>
+  );
 
   return (
     <CardWorkspaceShell

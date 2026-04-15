@@ -222,11 +222,22 @@ export const useCardSetViewSelectionState = ({
     setIsGlobalEditing(true);
   }, []);
 
+  const setInteractionMode = useCallback(
+    (mode: "view" | "edit") => {
+      if ((mode === "edit") === isGlobalEditing) {
+        return;
+      }
+
+      setPendingFocusCardId(selectedCard?.id ?? null);
+      clearFlippedCards();
+      setIsGlobalEditing(mode === "edit");
+    },
+    [clearFlippedCards, isGlobalEditing, selectedCard?.id, setPendingFocusCardId],
+  );
+
   const handleToggleViewMode = useCallback(() => {
-    setPendingFocusCardId(selectedCard?.id ?? null);
-    clearFlippedCards();
-    setIsGlobalEditing((prev) => !prev);
-  }, [clearFlippedCards, selectedCard?.id, setPendingFocusCardId]);
+    setInteractionMode(isGlobalEditing ? "view" : "edit");
+  }, [isGlobalEditing, setInteractionMode]);
 
   const handlePagerIndexChange = useCallback(
     (idx: number) => {
@@ -258,6 +269,7 @@ export const useCardSetViewSelectionState = ({
     isGlobalEditing,
     setIsGlobalEditing,
     beginGlobalEditing,
+    setInteractionMode,
     setCurrentIndex,
     handleToggleViewMode,
     handlePagerIndexChange,

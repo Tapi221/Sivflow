@@ -1,6 +1,7 @@
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
+import { useCardSetViewCardLayoutMode } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewCardLayoutMode";
 import { useCardSetViewDisplayMode } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewDisplayMode";
 import { useCardSetViewEditingBridge } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewEditingBridge";
 import { useCardSetViewMetaPanelState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewMetaPanelState";
@@ -15,6 +16,7 @@ interface UseCardSetViewViewStateOptions {
   sortedCards: Card[];
   cardIndexById: Map<string, number>;
   selectedCardSet: CardSet | null;
+  deviceScope: string;
 }
 
 export const useCardSetViewViewState = ({
@@ -25,6 +27,7 @@ export const useCardSetViewViewState = ({
   sortedCards,
   cardIndexById,
   selectedCardSet,
+  deviceScope,
 }: UseCardSetViewViewStateOptions) => {
   const selectionState = useCardSetViewSelectionState({
     initialIndex,
@@ -42,6 +45,15 @@ export const useCardSetViewViewState = ({
     defaultDisplayMode: selectedCardSet?.defaultDisplayMode,
   });
 
+  const interactionMode = selectionState.isGlobalEditing ? "edit" : "view";
+
+  const cardLayoutModeState = useCardSetViewCardLayoutMode({
+    deviceScope,
+    cardSetId,
+    displayMode: displayModeState.currentDisplayMode,
+    interactionMode,
+  });
+
   useCardSetViewEditingBridge(selectionState.isGlobalEditing);
 
   const syncState = useCardSetViewSyncState({
@@ -54,6 +66,7 @@ export const useCardSetViewViewState = ({
     ...selectionState,
     ...metaPanelState,
     ...displayModeState,
+    ...cardLayoutModeState,
     ...syncState,
   };
 };

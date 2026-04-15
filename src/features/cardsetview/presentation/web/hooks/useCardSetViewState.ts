@@ -18,6 +18,7 @@ interface UseCardSetViewStateOptions {
   selectedCardSet: CardSet | null;
   isLoading: boolean;
   toastError: (msg: string) => void;
+  deviceScope: string;
 }
 
 export const useCardSetViewState = ({
@@ -32,6 +33,7 @@ export const useCardSetViewState = ({
   selectedCardSet,
   isLoading,
   toastError,
+  deviceScope,
 }: UseCardSetViewStateOptions) => {
   const viewState = useCardSetViewViewState({
     initialIndex,
@@ -41,6 +43,7 @@ export const useCardSetViewState = ({
     sortedCards,
     cardIndexById,
     selectedCardSet,
+    deviceScope,
   });
 
   const actions = useCardSetViewActions({
@@ -63,12 +66,15 @@ export const useCardSetViewState = ({
     currentIndex: viewState.currentIndex,
     currentDisplayMode: viewState.currentDisplayMode,
     setCurrentDisplayMode: viewState.setCurrentDisplayMode,
+    currentCardLayoutMode: viewState.currentCardLayoutMode,
+    setCurrentCardLayoutMode: viewState.setCurrentCardLayoutMode,
     setCurrentIndex: viewState.setCurrentIndex,
     safeCurrentIndex: viewState.safeCurrentIndex,
     isFlipped: viewState.isFlipped,
     flippedCardIds: viewState.flippedCardIds,
     isGlobalEditing: viewState.isGlobalEditing,
     setIsGlobalEditing: viewState.setIsGlobalEditing,
+    setInteractionMode: viewState.setInteractionMode,
     isMetaOpen: viewState.isMetaOpen,
     setIsMetaOpen: viewState.setIsMetaOpen,
     activeSyncStatus: viewState.activeSyncStatus,

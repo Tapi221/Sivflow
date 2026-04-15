@@ -4,11 +4,13 @@ import {
   type FlashcardCardLike,
 } from "@/components/card/frame/Flashcard";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
+import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import {
   buildCardRenderSpec,
   resolveCardContentZoom,
   resolveCardSurfaceScale,
 } from "@/features/cardrender/domain/cardRenderSpec";
+import { cn } from "@/lib/utils";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import React from "react";
@@ -21,6 +23,7 @@ export interface DesktopCardSurfaceProps {
   settings?: Partial<UserSettings> | null;
   isFlipped: boolean;
   currentDisplayMode: CardDisplayMode;
+  currentCardLayoutMode: CardLayoutMode;
   viewZoomScale: number;
   folderId: string | null;
   cardSetId: string | null;
@@ -45,6 +48,44 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkAnswer: card.back.ink ?? null,
 });
 
+const StaticCardSide = ({
+  card,
+  currentDisplayMode,
+  fixedScale,
+  contentZoom,
+  headerIconVisualScale,
+  side,
+}: {
+  card: Card;
+  currentDisplayMode: CardDisplayMode;
+  fixedScale: number;
+  contentZoom: number;
+  headerIconVisualScale: number;
+  side: "question" | "answer";
+}) => {
+  const flashcardCard = React.useMemo(() => toFlashcardCardLike(card), [card]);
+
+  return (
+    <Flashcard
+      card={flashcardCard}
+      isFlipped={side === "answer"}
+      previewMode={true}
+      displayMode={currentDisplayMode}
+      showInkLayer={currentDisplayMode === "fixed"}
+      allowUpscale={false}
+      scaleMultiplier={1}
+      fixedScale={fixedScale}
+      contentZoom={contentZoom}
+      headerIconVisualScale={headerIconVisualScale}
+      cardShellClassName={
+        currentDisplayMode === "fluid"
+          ? "border-none bg-transparent shadow-none"
+          : undefined
+      }
+    />
+  );
+};
+
 const DesktopCardSurfaceInner = ({
   card,
   isActive,
@@ -53,6 +94,7 @@ const DesktopCardSurfaceInner = ({
   settings = null,
   isFlipped,
   currentDisplayMode,
+  currentCardLayoutMode,
   viewZoomScale,
   folderId,
   cardSetId,
@@ -146,6 +188,7 @@ const DesktopCardSurfaceInner = ({
           showResizeHandle={canInteractWithEditor}
           onSyncStatusChange={handleSyncStatusForward}
           displayMode={currentDisplayMode}
+          cardLayoutMode={currentCardLayoutMode}
           zoom={viewZoomScale}
         />
       </div>
@@ -158,6 +201,45 @@ const DesktopCardSurfaceInner = ({
     viewRenderSpec.zoomScale > 0
       ? viewRenderSpec.zoomScale
       : 1;
+
+  if (currentCardLayoutMode !== "flip") {
+    const staticFixedScale = resolveCardSurfaceScale(viewRenderSpec);
+    const staticContentZoom = resolveCardContentZoom(viewRenderSpec);
+
+    return (
+      <div className="w-full min-w-0 max-w-full overflow-visible">
+        <div
+          className={cn(
+            "w-full min-w-0 max-w-full",
+            currentCardLayoutMode === "split"
+              ? "grid grid-cols-1 gap-4 lg:grid-cols-2"
+              : "flex flex-col gap-4",
+          )}
+        >
+          <div className="min-w-0">
+            <StaticCardSide
+              card={card}
+              currentDisplayMode={currentDisplayMode}
+              fixedScale={staticFixedScale}
+              contentZoom={staticContentZoom}
+              headerIconVisualScale={headerIconVisualScale}
+              side="question"
+            />
+          </div>
+          <div className="min-w-0">
+            <StaticCardSide
+              card={card}
+              currentDisplayMode={currentDisplayMode}
+              fixedScale={staticFixedScale}
+              contentZoom={staticContentZoom}
+              headerIconVisualScale={headerIconVisualScale}
+              side="answer"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-w-0 max-w-full overflow-visible">
@@ -208,6 +290,7 @@ const areDesktopCardSurfacePropsEqual = (
   if (prev.editPaneWidthPx !== next.editPaneWidthPx) return false;
   if (prev.settings !== next.settings) return false;
   if (prev.currentDisplayMode !== next.currentDisplayMode) return false;
+  if (prev.currentCardLayoutMode !== next.currentCardLayoutMode) return false;
   if (prev.viewZoomScale !== next.viewZoomScale) return false;
   if (prev.folderId !== next.folderId) return false;
   if (prev.cardSetId !== next.cardSetId) return false;
@@ -220,8 +303,14 @@ const areDesktopCardSurfacePropsEqual = (
     return false;
   }
 
-  const prevNeedsFlip = !prev.isGlobalEditing && prev.isActive;
-  const nextNeedsFlip = !next.isGlobalEditing && next.isActive;
+  const prevNeedsFlip =
+    !prev.isGlobalEditing &&
+    prev.isActive &&
+    prev.currentCardLayoutMode === "flip";
+  const nextNeedsFlip =
+    !next.isGlobalEditing &&
+    next.isActive &&
+    next.currentCardLayoutMode === "flip";
 
   if (prevNeedsFlip !== nextNeedsFlip) return false;
   if (nextNeedsFlip && prev.isFlipped !== next.isFlipped) return false;
