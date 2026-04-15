@@ -44,19 +44,23 @@ describe("platform/index", () => {
     );
   });
 
-  it("uses desktop platform when desktop bridge is available", async () => {
-    defineNavigatorUserAgent("Electron/30.0.0 (FlashCard-Master)");
-    const bridge = createDesktopBridgeStub();
-    Object.defineProperty(window, "desktop", {
-      value: bridge,
-      configurable: true,
-    });
+  it(
+    "uses desktop platform when desktop bridge is available even without Electron in userAgent",
+    async () => {
+      defineNavigatorUserAgent("Mozilla/5.0");
 
-    vi.resetModules();
-    const { default: platform } = await import("@/platform");
+      const bridge = createDesktopBridgeStub();
+      Object.defineProperty(window, "desktop", {
+        value: bridge,
+        configurable: true,
+      });
 
-    const result = platform.oauth.start("https://example.com");
-    expect(result).toBe("started");
-    expect(bridge.oauth.start).toHaveBeenCalledWith("https://example.com");
-  });
+      vi.resetModules();
+      const { default: platform } = await import("@/platform");
+
+      const result = platform.oauth.start("https://example.com");
+      expect(result).toBe("started");
+      expect(bridge.oauth.start).toHaveBeenCalledWith("https://example.com");
+    },
+  );
 });
