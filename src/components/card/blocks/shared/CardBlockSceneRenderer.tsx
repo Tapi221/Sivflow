@@ -1,22 +1,30 @@
 import React from "react";
 
-import { CodeBlockItem } from "@/components/card/blocks/code/CodeBlockItem";
-import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
+import { CodeBlockContent } from "@/components/card/blocks/code/CodeBlockContent";
+import { normalizeEditorLanguage } from "@/components/card/blocks/code/codeBlockLanguage";
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
 import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
 import { MarkdownBlock } from "@/components/card/blocks/markdown/MarkdownBlock";
 import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
-import { MathBlock } from "@/components/card/blocks/math/MathBlock";
+import { MathEditorDialog } from "@/components/card/blocks/math/MathEditorDialog";
 import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
-import { QuestionBlock } from "@/components/card/blocks/question/QuestionBlock";
 import { QuestionBlockContent } from "@/components/card/blocks/question/QuestionBlockContent";
 import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent";
 import { AudioPlayer } from "@/components/card/media/CardMedia";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
 import type { UploadedImage } from "@/types/domain/assets";
+import type { MathBlockData } from "@/types/domain/base";
 import type { CardBlock } from "@/types/domain/card";
 import { Code, HelpCircle, NotebookPen, Sigma, Type } from "@/ui/icons";
 
@@ -100,6 +108,26 @@ type SharedShellProps = Readonly<{
 
 const NOOP = () => {};
 
+const SUPPORTED_LANGUAGES = [
+  { value: "javascript", label: "JavaScript" },
+  { value: "typescript", label: "TypeScript" },
+  { value: "python", label: "Python" },
+  { value: "java", label: "Java" },
+  { value: "c", label: "C" },
+  { value: "cpp", label: "C++" },
+  { value: "csharp", label: "C#" },
+  { value: "go", label: "Go" },
+  { value: "rust", label: "Rust" },
+  { value: "sql", label: "SQL" },
+  { value: "markup", label: "HTML" },
+  { value: "css", label: "CSS" },
+  { value: "json", label: "JSON" },
+  { value: "bash", label: "Bash" },
+  { value: "markdown", label: "Markdown" },
+] as const;
+
+const MAX_MATH_LATEX_LENGTH = 10000;
+
 const renderGridOffsetSpacer = (gridOffsetPx: number) =>
   gridOffsetPx > 0 ? (
     <div
@@ -170,6 +198,47 @@ const SharedBlockShell = ({
   );
 };
 
+const CodeLanguageSelector = ({
+  value,
+  onChange,
+}: Readonly<{
+  value: string;
+  onChange: (next: string) => void;
+}>) => {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger
+        className="
+          h-5 w-auto min-w-0 min-h-0
+          rounded-md px-1.5 py-0
+          bg-zinc-900/5 border-none shadow-none
+          text-[10px] font-bold text-zinc-500
+          tracking-wider uppercase
+          hover:text-zinc-700 hover:bg-zinc-900/10
+          focus:ring-0
+          gap-1
+        "
+      >
+        <SelectValue placeholder="Language" />
+      </SelectTrigger>
+
+      <SelectContent className="bg-white">
+        <SelectGroup>
+          {SUPPORTED_LANGUAGES.map((language) => (
+            <SelectItem
+              key={language.value}
+              value={language.value}
+              className="text-xs"
+            >
+              {language.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+};
+
 const TextBlockScene = ({
   mode,
   block,
@@ -235,40 +304,48 @@ const QuestionBlockScene = ({
   editorProps?: EditorProps;
   viewerProps?: ViewerProps;
 }>) => {
-  if (mode === "edit" && editorProps) {
-    return (
-      <QuestionBlock
-        block={block}
-        onUpdateBlock={editorProps.onUpdateBlock}
-        onDelete={editorProps.onDelete}
-        onDuplicate={editorProps.onDuplicate}
-        onMoveUp={editorProps.onMoveUp}
-        onMoveDown={editorProps.onMoveDown}
-        onMoveDragStart={editorProps.onMoveDragStart}
-        onMoveDragEnd={editorProps.onMoveDragEnd}
-        canMoveUp={editorProps.canMoveUp}
-        canMoveDown={editorProps.canMoveDown}
-        dragHandleClassName="js-block-drag-handle"
-        accentColor={editorProps.accentColor}
-        isActive={editorProps.isActive}
-        zoom={editorProps.zoom}
-      />
-    );
-  }
-
   return (
     <SharedBlockShell
-      mode="view"
+      mode={mode}
       className="bg-transparent px-0 py-0"
       contentClassName="px-0"
+      label="Question"
+      icon={HelpCircle}
+      accentColor={editorProps?.accentColor}
+      isActive={editorProps?.isActive}
+      onDelete={editorProps?.onDelete}
+      onDuplicate={editorProps?.onDuplicate}
+      onMoveUp={editorProps?.onMoveUp}
+      onMoveDown={editorProps?.onMoveDown}
+      onMoveDragStart={editorProps?.onMoveDragStart}
+      onMoveDragEnd={editorProps?.onMoveDragEnd}
+      canMoveUp={editorProps?.canMoveUp}
+      canMoveDown={editorProps?.canMoveDown}
+      dragHandleClassName="js-block-drag-handle"
     >
-      <QuestionBlockContent
-        mode="view"
-        questionTitle={block.questionTitle}
-        questionAnswer={block.questionAnswer}
-        answerDisplayMode={viewerProps?.questionDisplayMode}
-        zoom={viewerProps?.zoom}
-      />
+      {mode === "edit" && editorProps ? (
+        <QuestionBlockContent
+          mode="edit"
+          blockId={block.id}
+          questionTitle={block.questionTitle}
+          questionAnswer={block.questionAnswer}
+          onChangeQuestionTitle={(questionTitle) =>
+            editorProps.onUpdateBlock(block.id, { questionTitle })
+          }
+          onChangeQuestionAnswer={(questionAnswer) =>
+            editorProps.onUpdateBlock(block.id, { questionAnswer })
+          }
+          zoom={editorProps.zoom}
+        />
+      ) : (
+        <QuestionBlockContent
+          mode="view"
+          questionTitle={block.questionTitle}
+          questionAnswer={block.questionAnswer}
+          answerDisplayMode={viewerProps?.questionDisplayMode}
+          zoom={viewerProps?.zoom}
+        />
+      )}
     </SharedBlockShell>
   );
 };
@@ -286,50 +363,74 @@ const CodeBlockScene = ({
   editorProps?: EditorProps;
   viewerProps?: ViewerProps;
 }>) => {
-  if (mode === "edit" && editorProps) {
-    return (
-      <div className="w-full max-w-full overflow-visible">
-        {renderGridOffsetSpacer(meta.gridOffsetPx)}
-        <CodeBlockItem
-          data={block.code || { language: "javascript", code: "" }}
-          onChange={(data) =>
-            editorProps.onUpdateBlock(block.id, { code: data as CodeBlockData })
-          }
-          onDelete={editorProps.onDelete}
-          onDuplicate={editorProps.onDuplicate}
-          onMoveUp={editorProps.onMoveUp}
-          onMoveDown={editorProps.onMoveDown}
-          onMoveDragStart={editorProps.onMoveDragStart}
-          onMoveDragEnd={editorProps.onMoveDragEnd}
-          canMoveUp={editorProps.canMoveUp}
-          canMoveDown={editorProps.canMoveDown}
-          dragHandleClassName="js-block-drag-handle"
-          accentColor={editorProps.accentColor}
-          isActive={editorProps.isActive}
-          zoom={editorProps.zoom}
-        />
-      </div>
+  const codeData = block.code || { language: "javascript", code: "" };
+  const normalizedLanguage = normalizeEditorLanguage(codeData.language);
+
+  const contentNode =
+    mode === "edit" && editorProps ? (
+      <CodeBlockContent
+        mode="editor"
+        code={codeData.code}
+        language={normalizedLanguage}
+        onCodeChange={(code) =>
+          editorProps.onUpdateBlock(block.id, {
+            code: {
+              language: normalizedLanguage,
+              code,
+            } satisfies CodeBlockData,
+          })
+        }
+        headerLeft={
+          <CodeLanguageSelector
+            value={normalizedLanguage}
+            onChange={(language) =>
+              editorProps.onUpdateBlock(block.id, {
+                code: {
+                  language: normalizeEditorLanguage(language),
+                  code: codeData.code ?? "",
+                } satisfies CodeBlockData,
+              })
+            }
+          />
+        }
+        zoom={editorProps.zoom}
+      />
+    ) : (
+      <CodeBlockContent
+        mode="viewer"
+        code={codeData.code ?? ""}
+        language={codeData.language}
+        zoom={viewerProps?.zoom}
+      />
     );
-  }
 
   return (
-    <SharedBlockShell
-      mode="view"
-      className={cn(
-        "bg-transparent px-0 py-0",
-        (block.code?.code ?? "").trim().length > 0 && "border-0",
-      )}
-      contentClassName="relative px-0"
-    >
-      <div className="w-full max-w-full overflow-visible">
-        {renderGridOffsetSpacer(meta.gridOffsetPx)}
-        <CodeRenderer
-          code={block.code?.code ?? ""}
-          language={block.code?.language}
-          zoom={viewerProps?.zoom}
-        />
-      </div>
-    </SharedBlockShell>
+    <div className="w-full max-w-full overflow-visible">
+      {renderGridOffsetSpacer(meta.gridOffsetPx)}
+      <SharedBlockShell
+        mode={mode}
+        className={cn(
+          "bg-transparent px-0 py-0",
+          (codeData.code ?? "").trim().length > 0 && "border-0",
+        )}
+        contentClassName="relative px-0"
+        label="Code"
+        icon={Code}
+        accentColor={editorProps?.accentColor}
+        isActive={editorProps?.isActive}
+        onDelete={editorProps?.onDelete}
+        onDuplicate={editorProps?.onDuplicate}
+        onMoveUp={editorProps?.onMoveUp}
+        onMoveDown={editorProps?.onMoveDown}
+        onMoveDragStart={editorProps?.onMoveDragStart}
+        onMoveDragEnd={editorProps?.onMoveDragEnd}
+        canMoveUp={editorProps?.canMoveUp}
+        canMoveDown={editorProps?.canMoveDown}
+        dragHandleClassName="js-block-drag-handle"
+      >
+        {contentNode}
+      </SharedBlockShell>
+    </div>
   );
 };
 
@@ -424,48 +525,73 @@ const MathBlockScene = ({
   editorProps?: EditorProps;
   viewerProps?: ViewerProps;
 }>) => {
-  if (mode === "edit" && editorProps) {
-    return (
-      <div className="w-full max-w-full overflow-visible">
-        {renderGridOffsetSpacer(meta.gridOffsetPx)}
-        <MathBlock
-          data={block.math || { latex: "", displayMode: "block" }}
-          onChange={(data) =>
-            editorProps.onUpdateBlock(block.id, { math: data })
-          }
-          onDelete={editorProps.onDelete}
-          onDuplicate={editorProps.onDuplicate}
-          dragHandleClassName="js-block-drag-handle"
+  const [error, setError] = React.useState<string | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = React.useState(false);
+  const mathData = block.math || { latex: "", displayMode: "block" };
+  const latex = mathData.latex ?? "";
+
+  const handleMathChange = React.useCallback(
+    (next: MathBlockData) => {
+      if (next.latex.length > MAX_MATH_LATEX_LENGTH) {
+        setError(
+          `KaTeX文字列は最大 ${MAX_MATH_LATEX_LENGTH.toLocaleString()} 文字までです`,
+        );
+        return;
+      }
+      setError(null);
+      editorProps?.onUpdateBlock(block.id, { math: next });
+    },
+    [block.id, editorProps],
+  );
+
+  const preview = (
+    <div className="w-full max-w-full overflow-visible space-y-1.5 px-2 py-0.5">
+      {renderGridOffsetSpacer(meta.gridOffsetPx)}
+      <MathBlockPreviewPane
+        latex={latex}
+        displayMode={mathData.displayMode || "block"}
+        className={cn(
+          "rounded-lg",
+          mode === "edit" && "transition-colors hover:bg-slate-50",
+        )}
+        interactive={mode === "edit"}
+        onActivate={mode === "edit" ? () => setIsEditorOpen(true) : undefined}
+        showPlaceholder={mode === "edit"}
+        placeholder={mode === "edit" ? "数式を入力..." : undefined}
+        zoom={mode === "edit" ? editorProps?.zoom : viewerProps?.zoom}
+      />
+      {mode === "edit" && editorProps ? (
+        <MathEditorDialog
+          open={isEditorOpen}
+          onOpenChange={setIsEditorOpen}
+          data={mathData}
+          onChange={handleMathChange}
           accentColor={editorProps.accentColor}
-          isActive={editorProps.isActive}
-          onMoveUp={editorProps.onMoveUp}
-          onMoveDown={editorProps.onMoveDown}
-          onMoveDragStart={editorProps.onMoveDragStart}
-          onMoveDragEnd={editorProps.onMoveDragEnd}
-          canMoveUp={editorProps.canMoveUp}
-          canMoveDown={editorProps.canMoveDown}
-          zoom={editorProps.zoom}
+          error={error}
         />
-      </div>
-    );
-  }
+      ) : null}
+    </div>
+  );
 
   return (
     <SharedBlockShell
-      mode="view"
-      className={cn(
-        (block.math?.latex ?? "").trim().length > 0 && "border-transparent",
-      )}
+      mode={mode}
+      className={cn(latex.trim().length > 0 && "border-transparent")}
+      label="Math"
+      icon={Sigma}
+      accentColor={editorProps?.accentColor}
+      isActive={Boolean(editorProps?.isActive || isEditorOpen)}
+      onDelete={editorProps?.onDelete}
+      onDuplicate={editorProps?.onDuplicate}
+      onMoveUp={editorProps?.onMoveUp}
+      onMoveDown={editorProps?.onMoveDown}
+      onMoveDragStart={editorProps?.onMoveDragStart}
+      onMoveDragEnd={editorProps?.onMoveDragEnd}
+      canMoveUp={editorProps?.canMoveUp}
+      canMoveDown={editorProps?.canMoveDown}
+      dragHandleClassName="js-block-drag-handle"
     >
-      <div className="w-full max-w-full overflow-visible space-y-1.5 px-2 py-0.5">
-        {renderGridOffsetSpacer(meta.gridOffsetPx)}
-        <MathBlockPreviewPane
-          latex={block.math?.latex || ""}
-          displayMode={block.math?.displayMode || "block"}
-          className="rounded-lg"
-          zoom={viewerProps?.zoom}
-        />
-      </div>
+      {preview}
     </SharedBlockShell>
   );
 };
