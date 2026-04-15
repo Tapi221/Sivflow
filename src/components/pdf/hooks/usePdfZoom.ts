@@ -17,6 +17,25 @@ interface UsePdfZoomOptions {
 
 const WHEEL_COMMIT_DELAY_MS = 90;
 
+const resetPreviewTargetStyle = (targetEl: HTMLDivElement | null) => {
+  if (!targetEl) return;
+
+  targetEl.style.transform = "";
+  targetEl.style.transformOrigin = "";
+  targetEl.style.willChange = "";
+};
+
+const applyPreviewTargetStyle = (
+  targetEl: HTMLDivElement | null,
+  ratio: number,
+) => {
+  if (!targetEl) return;
+
+  targetEl.style.transformOrigin = "top center";
+  targetEl.style.transform = `scale(${ratio})`;
+  targetEl.style.willChange = "transform";
+};
+
 export const usePdfZoom = ({
   container,
   previewTarget,
@@ -40,6 +59,7 @@ export const usePdfZoom = ({
 
   useEffect(() => {
     scaleRef.current = scale;
+    const targetEl = previewTarget;
 
     const previewScale = previewScaleRef.current;
     if (previewScale === null) {
@@ -48,30 +68,20 @@ export const usePdfZoom = ({
 
     if (awaitingCommittedScaleRef.current) {
       if (Math.abs(previewScale - scale) < 0.0005) {
-        if (previewTarget) {
-          previewTarget.style.transform = "";
-          previewTarget.style.transformOrigin = "";
-          previewTarget.style.willChange = "";
-        }
+        resetPreviewTargetStyle(targetEl);
         previewScaleRef.current = null;
         awaitingCommittedScaleRef.current = false;
         return;
       }
 
-      if (previewTarget && Number.isFinite(scale) && scale > 0) {
+      if (targetEl && Number.isFinite(scale) && scale > 0) {
         const ratio = previewScale / scale;
-        previewTarget.style.transformOrigin = "top center";
-        previewTarget.style.transform = `scale(${ratio})`;
-        previewTarget.style.willChange = "transform";
+        applyPreviewTargetStyle(targetEl, ratio);
       }
       return;
     }
 
-    if (previewTarget) {
-      previewTarget.style.transform = "";
-      previewTarget.style.transformOrigin = "";
-      previewTarget.style.willChange = "";
-    }
+    resetPreviewTargetStyle(targetEl);
     previewScaleRef.current = null;
   }, [previewTarget, scale]);
 
@@ -89,11 +99,8 @@ export const usePdfZoom = ({
   }, [onScaleChange]);
 
   const clearPreviewTransform = useCallback(() => {
-    if (previewTarget) {
-      previewTarget.style.transform = "";
-      previewTarget.style.transformOrigin = "";
-      previewTarget.style.willChange = "";
-    }
+    const targetEl = previewTarget;
+    resetPreviewTargetStyle(targetEl);
 
     previewScaleRef.current = null;
     awaitingCommittedScaleRef.current = false;
@@ -114,9 +121,10 @@ export const usePdfZoom = ({
       }
 
       previewScaleRef.current = nextScale;
+      const targetEl = previewTarget;
 
       if (
-        !previewTarget ||
+        !targetEl ||
         !Number.isFinite(scaleRef.current) ||
         scaleRef.current <= 0
       ) {
@@ -131,9 +139,7 @@ export const usePdfZoom = ({
         return;
       }
 
-      previewTarget.style.transformOrigin = "top center";
-      previewTarget.style.transform = `scale(${ratio})`;
-      previewTarget.style.willChange = "transform";
+      applyPreviewTargetStyle(targetEl, ratio);
     },
     [clearPreviewTransform, previewTarget],
   );

@@ -391,7 +391,7 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
 
         const mdRaw = await sanitizeAndConvertToMarkdown(html);
         const overEscaped =
-          /className=\\\"/.test(mdRaw) ||
+          /className=\\"/.test(mdRaw) ||
           /\\_/.test(mdRaw) ||
           /\\</.test(mdRaw);
 

@@ -552,10 +552,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
 
           {!error && doc && (
             <div
-<<<<<<< HEAD
-=======
               ref={handleContentViewportRef}
->>>>>>> 08d451c55de9c3ec7b1a8ea03c18fd5e63f237c8
               className="relative w-full"
               style={{ height: `${pageLayoutMetrics.totalContentHeight}px` }}
             >

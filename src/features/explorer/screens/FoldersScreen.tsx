@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
@@ -22,14 +22,12 @@ type FoldersScreenProps = {
 };
 
 export const FoldersScreen = ({ route }: FoldersScreenProps) => {
-  const initialRouteStateRef = useRef<ExplorerRouteState | null>(null);
-
-  if (initialRouteStateRef.current === null) {
-    initialRouteStateRef.current = route.readRouteState();
-  }
+  const [initialRouteState] = useState<ExplorerRouteState | null>(() =>
+    route.readRouteState(),
+  );
 
   const controller = useExplorerController({
-    initialRouteState: initialRouteStateRef.current,
+    initialRouteState,
     onOpenSettings: route.openSettings,
   });
 

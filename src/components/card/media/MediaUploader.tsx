@@ -21,13 +21,23 @@ import {
 import type { AssetRecord, UploadedImage } from "@/types";
 import { Check, RotateCcw, Upload, X } from "@/ui/icons";
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize";
-import React, { useCallback, useEffect, useId, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
 const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
+
+const EMPTY_IMAGE_URLS: UploadedImage[] = [];
+const EMPTY_AUDIO_URLS: string[] = [];
 
 type ResolvedEditableImageStatus = "pending" | "uploading" | "ready" | "failed";
 
@@ -332,9 +342,17 @@ const MediaUploader = ({
     [],
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const consumedInitialFileRef = useRef<File | null>(null);
   const autoOpenedRef = useRef(false);
-  const imageUrls = type === "image" ? (urls as UploadedImage[]) : [];
-  const audioUrls = type === "audio" ? (urls as string[]) : [];
+  const currentUserId = currentUser?.uid ?? null;
+  const imageUrls = useMemo(
+    () => (type === "image" ? (urls as UploadedImage[]) : EMPTY_IMAGE_URLS),
+    [type, urls],
+  );
+  const audioUrls = useMemo(
+    () => (type === "audio" ? (urls as string[]) : EMPTY_AUDIO_URLS),
+    [type, urls],
+  );
   const imageOnChange = onChange as (urls: UploadedImage[]) => void;
   const audioOnChange = onChange as (urls: string[]) => void;
   const uniqueId = useId();
@@ -348,7 +366,10 @@ const MediaUploader = ({
     const run = async () => {
       const next = await Promise.all(
         imageUrls.map(async (image) => {
-          const resolved = await resolveCardImageUrl(image, currentUser?.uid);
+          const resolved = await resolveCardImageUrl(
+            image,
+            currentUserId ?? undefined,
+          );
           const statusKey = getImageStatusKey(image);
           const overrideStatus = statusKey ? statusByAssetId[statusKey] : null;
 
@@ -369,7 +390,7 @@ const MediaUploader = ({
     return () => {
       cancelled = true;
     };
-  }, [currentUser?.uid, imageUrls, statusByAssetId, type]);
+  }, [currentUserId, imageUrls, statusByAssetId, type]);
 
   useEffect(() => {
     if (!autoOpenPicker) {
@@ -394,9 +415,9 @@ const MediaUploader = ({
 
   const refreshAssetStatus = useCallback(
     async (assetId: string) => {
-      if (!currentUser?.uid || !assetId.trim()) return;
+      if (!currentUserId || !assetId.trim()) return;
 
-      const db = await getLocalDb(currentUser.uid);
+      const db = await getLocalDb(currentUserId);
       const record = (await db.images.get(assetId)) as ImageRecordLike;
 
       setStatusByAssetId((prev) => ({
@@ -404,7 +425,7 @@ const MediaUploader = ({
         [assetId]: getResolvedStatusFromRecord(record),
       }));
     },
-    [currentUser?.uid],
+    [currentUserId],
   );
 
   const enqueueAsset = useCallback(
