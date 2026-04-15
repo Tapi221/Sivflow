@@ -1,4 +1,8 @@
 import type { Card, Folder } from "@/types";
+import type {
+  DeleteEntity,
+  UpsertEntity,
+} from "@/application/usecases/syncQueuePayloadGuards";
 import { assertNoBlobUrlInCardPayload } from "./blobUrl";
 import {
   cleanupBeforeDocumentDelete,
@@ -6,6 +10,7 @@ import {
   cleanupBeforeDocumentUpdate,
 } from "./documentsLifecycle";
 import type { DocDbCtx } from "./documentsLifecycle";
+import { CURRENT_TAG_STORE } from "./tagStoreNames";
 
 export type EnqueueSync = (
   table: string,
@@ -27,6 +32,20 @@ export interface DbLike {
   name?: string;
 }
 
+type QueueSyncApi = {
+  queueUpsertSync?: <TEntity extends UpsertEntity>(args: {
+    entity: TEntity;
+    operationType: "create" | "update";
+    payload: unknown;
+    priority?: "critical" | "high" | "medium" | "low";
+  }) => Promise<void>;
+  queueDeleteSync?: (args: {
+    entity: DeleteEntity;
+    targetId: string;
+    priority?: "critical" | "high" | "medium" | "low";
+  }) => Promise<void>;
+};
+
 type CardInput = Card;
 type FolderInput = Folder;
 type AnyRow = Record<string, unknown> & { id?: string };
@@ -37,6 +56,25 @@ type CardStorageRow = AnyRow & {
 };
 
 type DocumentUpdateChanges = Parameters<typeof cleanupBeforeDocumentUpdate>[2];
+
+const ENTITY_BY_TABLE = {
+  cards: "card",
+  folders: "folder",
+  cardSets: "cardSet",
+  documents: "document",
+  [CURRENT_TAG_STORE]: "tag",
+  images: "asset",
+  userSettings: "userSetting",
+} as const;
+
+const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>([
+  "card",
+  "folder",
+  "cardSet",
+  "document",
+  "tag",
+  "asset",
+]);
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
@@ -109,6 +147,48 @@ const isDocDbCtx = (db: DbLike): db is DbLike & DocDbCtx => {
 const toStorageRow = (value: unknown): AnyRow => {
   if (!isRecord(value)) return {};
   return { ...value } as AnyRow;
+};
+
+const enqueueThroughSyncQueueApi = async (
+  db: DbLike,
+  table: string,
+  operationType: "create" | "update",
+  payload: AnyRow,
+  fallbackEnqueue: EnqueueSync,
+): Promise<void> => {
+  const queueDb = db as DbLike & QueueSyncApi;
+  const entity = ENTITY_BY_TABLE[table as keyof typeof ENTITY_BY_TABLE];
+
+  if (!entity || typeof queueDb.queueUpsertSync !== "function") {
+    await fallbackEnqueue(table, "upload", payload);
+    return;
+  }
+
+  const targetId = getId(payload);
+  if (!targetId) {
+    await fallbackEnqueue(table, "upload", payload);
+    return;
+  }
+
+  if (
+    payload.isDeleted === true &&
+    DELETE_CAPABLE_ENTITIES.has(entity as DeleteEntity) &&
+    typeof queueDb.queueDeleteSync === "function"
+  ) {
+    await queueDb.queueDeleteSync({
+      entity: entity as DeleteEntity,
+      targetId,
+      priority: "high",
+    });
+    return;
+  }
+
+  await queueDb.queueUpsertSync({
+    entity: entity as UpsertEntity,
+    operationType,
+    payload,
+    priority: "high",
+  });
 };
 
 type AddItem = {
@@ -228,7 +308,13 @@ export const addItem: AddItem = async (
 
     if (!skipSync) {
       try {
-        await enqueueSync(table, "upload", savedItem);
+        await enqueueThroughSyncQueueApi(
+          db,
+          table,
+          "create",
+          savedItem,
+          enqueueSync,
+        );
         console.log(
           `[LocalDB] addItem ENQUEUED_SYNC -> table=${table} id=${resolvedId}`,
         );
@@ -344,7 +430,7 @@ export const updateItem: UpdateItem = async (
   if (!skipSync) {
     const fullItem = await tableApi.get(id);
     if (fullItem) {
-      await enqueueSync(table, "upload", fullItem);
+      await enqueueThroughSyncQueueApi(db, table, "update", fullItem, enqueueSync);
     }
   }
 
@@ -470,7 +556,7 @@ export const bulkUpsert: BulkUpsert = async (
 
   if (!skipSync) {
     for (const item of payload) {
-      await enqueueSync(table, "upload", item);
+      await enqueueThroughSyncQueueApi(db, table, "update", item, enqueueSync);
     }
   }
 };
@@ -526,6 +612,12 @@ export const upsert: Upsert = async (
   await tableApi.put(payload);
 
   if (!skipSync) {
-    await enqueueSync(tableName, "upload", payload);
+    await enqueueThroughSyncQueueApi(
+      db,
+      tableName,
+      "update",
+      payload,
+      enqueueSync,
+    );
   }
 };

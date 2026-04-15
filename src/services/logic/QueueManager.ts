@@ -10,44 +10,104 @@ import {
 } from "@/application/usecases/syncQueueItemFactory";
 import type { SyncQueueItem } from "@/types/domain/sync";
 
+const PRIORITY_ORDER: Record<SyncTask["priority"], number> = {
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3,
+};
+
 export class QueueManager implements IQueueManager {
   private readonly MAX_RETRY_COUNT = 3;
+  private readonly BASE_RETRY_DELAY_MS = 5_000;
+  private readonly MAX_RETRY_DELAY_MS = 5 * 60_000;
 
   constructor(private readonly localDB: LocalDBLike) {}
 
+  private readonly isReadyForProcessing = (
+    item: SyncQueueItem,
+    now: number,
+  ): boolean => {
+    if (item.status !== "pending") return false;
+
+    const nextRetryAt =
+      typeof item.nextRetryAt === "number" ? item.nextRetryAt : item.createdAt;
+
+    return nextRetryAt <= now;
+  };
+
+  private readonly sortQueueItems = (
+    items: ReadonlyArray<SyncQueueItem>,
+  ): SyncQueueItem[] => {
+    return [...items].sort((left, right) => {
+      const priorityDiff =
+        PRIORITY_ORDER[left.priority] - PRIORITY_ORDER[right.priority];
+      if (priorityDiff !== 0) return priorityDiff;
+      return left.createdAt - right.createdAt;
+    });
+  };
+
+  private readonly computeRetryDelayMs = (retryCount: number): number => {
+    const exponent = Math.max(0, retryCount - 1);
+    const delay = this.BASE_RETRY_DELAY_MS * 2 ** exponent;
+    return Math.min(delay, this.MAX_RETRY_DELAY_MS);
+  };
+
+  private readonly putQueueItems = async (
+    items: ReadonlyArray<SyncQueueItem>,
+  ): Promise<void> => {
+    await Promise.all(items.map((item) => this.localDB.putSyncQueueItem(item)));
+  };
+
+  private readonly removeQueueItems = async (
+    ids: ReadonlyArray<string>,
+  ): Promise<void> => {
+    await Promise.all(ids.map((id) => this.localDB.removeSyncQueueItem(id)));
+  };
+
   public enqueue = async (task: SyncTask): Promise<void> => {
-    await this.localDB.syncQueue.add(createQueueItemFromSyncTask(task));
+    const queueItem = createQueueItemFromSyncTask(task);
+    const queuedItems = await this.localDB.getQueuedItemsOldestFirst();
+
+    const duplicate = queuedItems.some(
+      (item) => item.idempotencyKey === queueItem.idempotencyKey,
+    );
+
+    if (duplicate) return;
+
+    await this.localDB.putSyncQueueItem(queueItem);
   };
 
   public peekBatch = async (
     constraint: BatchConstraint,
   ): Promise<SyncTask[]> => {
-    const allPending = await this.getPendingQueue()
-      .where("status")
-      .equals("pending")
-      .toArray();
+    const now = Date.now();
 
-    const priorityOrder: Record<SyncTask["priority"], number> = {
-      critical: 0,
-      high: 1,
-      medium: 2,
-      low: 3,
-    };
+    return this.localDB.runSyncTransaction(async () => {
+      const queuedItems = await this.localDB.getQueuedItemsOldestFirst();
+      const readyItems = this.sortQueueItems(
+        queuedItems.filter((item) => this.isReadyForProcessing(item, now)),
+      );
 
-    allPending.sort((a: SyncQueueItem, b: SyncQueueItem) => {
-      const priorityDiff =
-        priorityOrder[a.priority] - priorityOrder[b.priority];
-      if (priorityDiff !== 0) return priorityDiff;
-      return a.createdAt - b.createdAt;
+      const claimedItems = readyItems.slice(0, constraint.maxSize).map((item) => {
+        return {
+          ...item,
+          status: "processing" as const,
+          processingStartedAt: now,
+          updatedAt: now,
+        };
+      });
+
+      if (claimedItems.length === 0) return [];
+
+      await this.putQueueItems(claimedItems);
+
+      return claimedItems.map((item) => queueItemToSyncTask(item));
     });
-
-    return allPending
-      .slice(0, constraint.maxSize)
-      .map((item: SyncQueueItem) => queueItemToSyncTask(item));
   };
 
   public complete = async (taskIds: string[]): Promise<void> => {
-    await this.localDB.syncQueue.bulkDelete(taskIds);
+    await this.removeQueueItems(taskIds);
   };
 
   public fail = async (
@@ -56,52 +116,56 @@ export class QueueManager implements IQueueManager {
     retryable: boolean,
   ): Promise<void> => {
     if (!retryable) {
-      await this.localDB.syncQueue.bulkDelete(taskIds);
+      await this.removeQueueItems(taskIds);
       console.error("[QueueManager] Non-retryable failure:", reason, taskIds);
       return;
     }
 
-    for (const id of taskIds) {
-      const item = await this.localDB.syncQueue.get(id);
-      if (!item) continue;
+    const now = Date.now();
 
-      const newRetryCount = (item.retryCount || 0) + 1;
+    await this.localDB.runSyncTransaction(async () => {
+      const queuedItems = await this.localDB.getQueuedItemsOldestFirst();
+      const queuedItemById = new Map(queuedItems.map((item) => [item.id, item]));
+      const retryItems: SyncQueueItem[] = [];
+      const deleteIds: string[] = [];
 
-      if (newRetryCount >= this.MAX_RETRY_COUNT) {
-        await this.localDB.syncQueue.delete(id);
-        console.error("[QueueManager] Max retry exceeded:", id);
-        continue;
+      for (const id of taskIds) {
+        const currentItem = queuedItemById.get(id);
+        if (!currentItem) continue;
+
+        const nextRetryCount = (currentItem.retryCount ?? 0) + 1;
+
+        if (nextRetryCount >= this.MAX_RETRY_COUNT) {
+          deleteIds.push(id);
+          console.error("[QueueManager] Max retry exceeded:", id);
+          continue;
+        }
+
+        retryItems.push({
+          ...currentItem,
+          status: "pending",
+          retryCount: nextRetryCount,
+          lastError: reason,
+          lastRetryAt: now,
+          nextRetryAt: now + this.computeRetryDelayMs(nextRetryCount),
+          processingStartedAt: undefined,
+          updatedAt: now,
+        });
       }
 
-      await this.localDB.syncQueue.update(id, {
-        retryCount: newRetryCount,
-        lastError: reason,
-        lastRetryAt: Date.now(),
-      });
-    }
+      if (retryItems.length > 0) {
+        await this.putQueueItems(retryItems);
+      }
+
+      if (deleteIds.length > 0) {
+        await this.removeQueueItems(deleteIds);
+      }
+    });
   };
 
   public getQueueDepth = async (): Promise<number> => {
-    return await this.getPendingQueue()
-      .where("status")
-      .equals("pending")
-      .count();
-  };
+    const queuedItems = await this.localDB.getQueuedItemsOldestFirst();
 
-  private getPendingQueue = (): {
-    where: (index: string) => {
-      equals: (value: string) => {
-        toArray: () => Promise<SyncQueueItem[]>;
-        count: () => Promise<number>;
-      };
-    };
-  } =>
-    this.localDB.syncQueue as unknown as {
-      where: (index: string) => {
-        equals: (value: string) => {
-          toArray: () => Promise<SyncQueueItem[]>;
-          count: () => Promise<number>;
-        };
-      };
-    };
+    return queuedItems.filter((item) => item.status === "pending").length;
+  };
 }

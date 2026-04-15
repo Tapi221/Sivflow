@@ -16,28 +16,67 @@ import {
   assertUpsertPayload,
 } from "./syncQueuePayloadGuards";
 
-const createBaseQueueFields = ({
+const normalizeForStableHash = (value: unknown): unknown => {
+  if (value instanceof Date) {
+    return { $date: value.toISOString() };
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((entry) => normalizeForStableHash(entry));
+  }
+
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    return Object.keys(record)
+      .sort()
+      .reduce<Record<string, unknown>>((accumulator, key) => {
+        const entryValue = record[key];
+        if (entryValue === undefined) return accumulator;
+        accumulator[key] = normalizeForStableHash(entryValue);
+        return accumulator;
+      }, {});
+  }
+
+  return value;
+};
+
+const stableStringify = (value: unknown): string => {
+  return JSON.stringify(normalizeForStableHash(value));
+};
+
+const hashString = (input: string): string => {
+  let hash = 0x811c9dc5;
+
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+
+  return hash.toString(16).padStart(8, "0");
+};
+
+const buildDeterministicQueueId = ({
+  entity,
+  operationType,
   targetId,
-  priority,
+  payload,
   type,
 }: {
+  entity: string;
+  operationType: SyncOperationType;
   targetId: string;
-  priority: SyncPriority;
+  payload: unknown;
   type: SyncDirection;
-}) => {
-  const now = Date.now();
-
-  return {
-    id: crypto.randomUUID(),
-    idempotencyKey: crypto.randomUUID(),
+}): string => {
+  const identitySource = stableStringify({
+    entity,
+    operationType,
     targetId,
-    priority,
     type,
-    createdAt: now,
-    updatedAt: now,
-    status: "pending" as const,
-    retryCount: 0,
-  };
+    payload,
+  });
+
+  return `sync_${hashString(identitySource)}`;
 };
 
 const getTaskPayloadId = (payload: unknown): string | null => {
@@ -46,6 +85,44 @@ const getTaskPayloadId = (payload: unknown): string | null => {
   return typeof record.id === "string" && record.id.length > 0
     ? record.id
     : null;
+};
+
+const createBaseQueueFields = ({
+  entity,
+  operationType,
+  payload,
+  priority,
+  targetId,
+  type,
+}: {
+  entity: string;
+  operationType: SyncOperationType;
+  payload: unknown;
+  priority: SyncPriority;
+  targetId: string;
+  type: SyncDirection;
+}) => {
+  const now = Date.now();
+  const deterministicId = buildDeterministicQueueId({
+    entity,
+    operationType,
+    payload,
+    targetId,
+    type,
+  });
+
+  return {
+    id: deterministicId,
+    idempotencyKey: deterministicId,
+    targetId,
+    priority,
+    type,
+    createdAt: now,
+    updatedAt: now,
+    status: "pending" as const,
+    retryCount: 0,
+    nextRetryAt: now,
+  };
 };
 
 export const createUpsertQueueItem = <TEntity extends UpsertEntity>({
@@ -65,8 +142,11 @@ export const createUpsertQueueItem = <TEntity extends UpsertEntity>({
 
   return {
     ...createBaseQueueFields({
-      targetId: checkedPayload.id,
+      entity,
+      operationType,
+      payload: checkedPayload,
       priority,
+      targetId: checkedPayload.id,
       type,
     }),
     entity,
@@ -91,8 +171,11 @@ export const createDeleteQueueItem = ({
 
   return {
     ...createBaseQueueFields({
-      targetId,
+      entity,
+      operationType: "delete",
+      payload: deletePayload,
       priority,
+      targetId,
       type,
     }),
     entity,
@@ -102,19 +185,32 @@ export const createDeleteQueueItem = ({
   };
 };
 
-export const createQueueItemFromSyncTask = (task: SyncTask): SyncQueueItem =>
-  ({
-    id: task.id || crypto.randomUUID(),
-    idempotencyKey: task.idempotencyKey || crypto.randomUUID(),
-    targetId: task.targetId || getTaskPayloadId(task.payload) || "unknown",
-    operationType:
-      task.operationType || (task.type === "upload" ? "update" : "create"),
+export const createQueueItemFromSyncTask = (task: SyncTask): SyncQueueItem => {
+  const targetId = task.targetId || getTaskPayloadId(task.payload) || "unknown";
+  const operationType =
+    task.operationType || (task.type === "upload" ? "update" : "create");
+  const deterministicId = buildDeterministicQueueId({
+    entity: task.entity,
+    operationType,
+    payload: task.payload,
+    targetId,
+    type: task.type,
+  });
+  const createdAt = task.createdAt || Date.now();
+
+  return {
+    id: task.id || deterministicId,
+    idempotencyKey: task.idempotencyKey || deterministicId,
+    targetId,
+    operationType,
     type: task.type,
     entity: task.entity,
     payload: task.payload,
     priority: task.priority,
-    createdAt: task.createdAt || Date.now(),
+    createdAt,
     updatedAt: Date.now(),
     retryCount: 0,
     status: "pending",
-  }) as SyncQueueItem;
+    nextRetryAt: createdAt,
+  } as SyncQueueItem;
+};
