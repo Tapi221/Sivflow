@@ -1,7 +1,7 @@
 import { createPerformAutoBackupUseCase } from "@/application/backup/PerformAutoBackup";
 import { createCheckDataIntegrityUseCase } from "@/application/integrity/CheckDataIntegrity";
-import { localStorageBackupStore } from "@/infrastructure/browser-storage/LocalStorageBackupStore";
 import { flags } from "@/features/flags";
+import { localStorageBackupStore } from "@/infrastructure/browser-storage/LocalStorageBackupStore";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
@@ -18,6 +18,26 @@ const performAutoBackupUseCase = createPerformAutoBackupUseCase({
 
 const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
 
+const configureStartupQueue = async (
+  userId: string,
+  useSyncV2: boolean,
+): Promise<void> => {
+  const { initializeOperationQueue, resetOperationQueue } =
+    await import("@/utils/queueUtils");
+
+  if (useSyncV2) {
+    resetOperationQueue();
+    console.log(
+      "[Queue] Legacy Operation Queue disabled because Sync V2 owns syncQueue",
+      { userId },
+    );
+    return;
+  }
+
+  await initializeOperationQueue(userId);
+  console.log("[Queue] Operation Queue initialized", { userId });
+};
+
 export const resetStartupTasks = async (): Promise<void> => {
   const { resetOperationQueue } = await import("@/utils/queueUtils");
   resetOperationQueue();
@@ -28,17 +48,15 @@ export const runStartupTasks = async ({
   isDisposed = isDisposedDefault,
 }: RunStartupTasksParams): Promise<void> => {
   try {
-    const { initializeOperationQueue } = await import("@/utils/queueUtils");
+    const useSyncV2 = flags.isEnabled("USE_SYNC_V2");
     const { migrateLegacyImagesToAssets } =
       await import("@/application/startup/MigrateLegacyImagesToAssets");
 
-    await initializeOperationQueue(userId);
+    await configureStartupQueue(userId, useSyncV2);
 
     if (isDisposed()) {
       return;
     }
-
-    console.log("[Queue] Operation Queue initialized", { userId });
 
     const migrationSummary = await migrateLegacyImagesToAssets({ userId });
 
@@ -91,7 +109,7 @@ export const runStartupTasks = async ({
       );
     }
 
-    if (flags.isEnabled("USE_SYNC_V2")) {
+    if (useSyncV2) {
       console.log("[Sync] Startup sync initiated");
       const syncService = await SyncServiceFactory.getInstance(userId);
 

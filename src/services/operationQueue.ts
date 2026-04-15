@@ -1,9 +1,9 @@
 import type { SyncQueueItem } from "@/types/domain/sync";
-import { getLocalDb } from "./localDB";
 import {
   createDeleteQueueItem,
   createUpsertQueueItem,
 } from "@/services/sync/queueItemFactory";
+import { getLocalDb } from "./localDB";
 
 export type QueuePriority = "critical" | "high" | "medium" | "low";
 export type OperationType = "create" | "update" | "delete";
@@ -33,7 +33,7 @@ const OPERATION_MATRIX: Record<
   },
 };
 
-const isDatabaseClosedError = (error: unknown) => {
+const isDatabaseClosedError = (error: unknown): boolean => {
   if (!error || typeof error !== "object") {
     return false;
   }
@@ -60,11 +60,11 @@ class OperationQueueService {
   private scheduledTimer: number | null = null;
   private isProcessing = false;
 
-  public bindUser = (userId: string | null) => {
+  public bindUser = (userId: string | null): void => {
     this.activeUserId = userId;
   };
 
-  public reset = () => {
+  public reset = (): void => {
     this.activeUserId = null;
 
     if (this.scheduledTimer !== null && typeof window !== "undefined") {
@@ -126,7 +126,7 @@ class OperationQueueService {
     op: OperationType,
     data: unknown,
     priority: QueuePriority,
-  ) => {
+  ): Promise<void> => {
     const db = await this.getBoundDb();
     const newItem = this.buildQueueItem(entity, targetId, op, data, priority);
     await db.syncQueue.add(newItem);
@@ -203,7 +203,10 @@ class OperationQueueService {
     this.triggerProcess();
   };
 
-  private moveToDLQ = async (item: SyncQueueItem, error: unknown) => {
+  private moveToDLQ = async (
+    item: SyncQueueItem,
+    error: unknown,
+  ): Promise<void> => {
     const db = await this.getBoundDb();
 
     console.error(
@@ -234,7 +237,10 @@ class OperationQueueService {
     await db.syncQueue.delete(item.id);
   };
 
-  private handleFailure = async (item: SyncQueueItem, error: unknown) => {
+  private handleFailure = async (
+    item: SyncQueueItem,
+    error: unknown,
+  ): Promise<void> => {
     const db = await this.getBoundDb();
     const newRetryCount = (item.retryCount || 0) + 1;
 
@@ -261,16 +267,18 @@ class OperationQueueService {
     await db.syncQueue.put(updatedItem);
   };
 
-  private performSyncOperation = async (item: SyncQueueItem) => {
+  private performSyncOperation = async (item: SyncQueueItem): Promise<void> => {
     console.log(
       `[Queue] Executing ${item.operationType} on ${item.entity}:${item.targetId}`,
       item.idempotencyKey,
     );
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 500);
+    });
   };
 
-  private cleanupStaleProcessing = async () => {
+  private cleanupStaleProcessing = async (): Promise<void> => {
     const db = await this.getBoundDb();
     const now = Date.now();
     const staleThreshold = now - this.STALE_TIMEOUT_MS;
@@ -437,7 +445,7 @@ class OperationQueueService {
     }
   };
 
-  public triggerProcess = (delayMs = 100) => {
+  public triggerProcess = (delayMs = 100): void => {
     if (!this.activeUserId || typeof window === "undefined") {
       return;
     }
@@ -448,7 +456,9 @@ class OperationQueueService {
 
     this.scheduledTimer = window.setTimeout(() => {
       this.scheduledTimer = null;
-      void this.processQueue();
+      void this.processQueue().catch((error) => {
+        console.error("[Queue] Scheduled processQueue failed", error);
+      });
     }, delayMs);
   };
 }
