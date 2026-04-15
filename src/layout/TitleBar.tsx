@@ -269,51 +269,6 @@ export const TitleBar: React.FC = () => {
               </button>
             )}
 
-            {isCardSetViewEditing && (
-              <button
-                type="button"
-                onClick={() =>
-                  window.dispatchEvent(
-                    new CustomEvent("cardsetview:save-request"),
-                  )
-                }
-                className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
-                title="保存"
-                aria-label="保存"
-                tabIndex={-1}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M5 4H17L20 7V20H5V4Z"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M8 4V10H16V4"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M9 20V14H15V20"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            )}
-
             <button
               type="button"
               onClick={() =>
