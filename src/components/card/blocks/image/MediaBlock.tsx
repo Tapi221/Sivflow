@@ -5,6 +5,7 @@ import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockCont
 import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
 import { cn } from "@/lib/utils";
 import type { UploadedImage } from "@/types/domain/assets";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 interface MediaBlockProps {
   data: UploadedImage[];
@@ -25,6 +26,8 @@ interface MediaBlockProps {
   onMoveDown?: () => void;
   onMoveDragStart?: () => void;
   onMoveDragEnd?: () => void;
+  displayMode?: CardDisplayMode;
+  zoom?: number;
 }
 
 const MediaBlockInner = ({
@@ -46,6 +49,8 @@ const MediaBlockInner = ({
   onMoveDown,
   onMoveDragStart,
   onMoveDragEnd,
+  displayMode = "fixed",
+  zoom = 1,
 }: MediaBlockProps) => {
   const isMediaEmpty = data.length === 0 && !initialFile;
 
@@ -79,6 +84,8 @@ const MediaBlockInner = ({
           initialFile={initialFile}
           onConsumeInitialFile={onConsumeInitialFile}
           onFilesExcess={onFilesExcess}
+          displayMode={displayMode}
+          zoom={zoom}
         />
       </ImageBlockShell>
     </BlockWrapper>
@@ -96,7 +103,9 @@ const areMediaBlockPropsEqual = (
   prev.isActive === next.isActive &&
   prev.showDelete === next.showDelete &&
   prev.canMoveUp === next.canMoveUp &&
-  prev.canMoveDown === next.canMoveDown;
+  prev.canMoveDown === next.canMoveDown &&
+  prev.displayMode === next.displayMode &&
+  prev.zoom === next.zoom;
 
 export const MediaBlock = React.memo(MediaBlockInner, areMediaBlockPropsEqual);
 MediaBlock.displayName = "MediaBlock";

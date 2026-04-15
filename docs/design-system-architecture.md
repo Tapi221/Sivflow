@@ -1,64 +1,64 @@
-# Design System Architecture
+# デザインシステムアーキテクチャ
 
-## Goal
+## 目的
 
-This repository keeps UI implementation platform-specific while introducing a shared design contract for React, SwiftUI, and Jetpack Compose.
+このリポジトリでは、UI の実装は各プラットフォームに閉じたまま維持しつつ、React、SwiftUI、Jetpack Compose で共通利用できるデザイン契約を導入します。
 
-## Shared vs not shared
+## 共有対象と非共有対象
 
-### Shared
+### 共有対象
 
-- `design/tokens/*.json`: source-of-truth primitives and semantic aliases.
-- `design/components/*.md`: component-level contracts for state names and token usage.
-- `design/patterns/*.md`: layout and composition guidance for the same product structure across platforms.
-- Generated outputs:
+- `design/tokens/*.json`: プリミティブトークンとセマンティックエイリアスのソースオブトゥルース
+- `design/components/*.md`: 状態名とトークン利用方針を定義するコンポーネント契約
+- `design/patterns/*.md`: 各プラットフォームで同一のプロダクト構造を保つためのレイアウトおよび構成ガイド
+- 生成物:
   - `src/presentation/react/theme/`
   - `ios/App/DesignSystem/Tokens/`
   - `android/app/src/main/java/com/akari221/flashcardmaster/designsystem/tokens/`
 
-### Not shared
+### 非共有対象
 
-- React JSX, hooks, routes, and feature wiring.
-- Future SwiftUI view trees and Jetpack Compose composables.
-- Electron-specific chrome such as `src/layout/TitleBar.tsx`.
-- Platform navigation, gestures, focus handling, accessibility APIs, and window management.
+- React の JSX、hooks、ルーティング、機能接続
+- 将来的な SwiftUI の View ツリーおよび Jetpack Compose の Composable 実装
+- `src/layout/TitleBar.tsx` のような Electron 固有 UI
+- プラットフォームごとのナビゲーション、ジェスチャー、フォーカス制御、アクセシビリティ API、ウィンドウ管理
 
-## Token flow
+## トークンフロー
 
-1. Edit design tokens in `design/tokens/*.json`.
-2. Run `npm run design-tokens:build`.
-3. `tools/design-tokens/build-tokens.ts` resolves semantic references.
-4. The build writes platform outputs:
-   - React CSS variables and a typed token export
-   - Swift token constants
-   - Compose token constants
-5. Each platform consumes its own generated output without sharing screen code.
+1. `design/tokens/*.json` を編集する
+2. `npm run design-tokens:build` を実行する
+3. `tools/design-tokens/build-tokens.ts` がセマンティック参照を解決する
+4. ビルド結果として、各プラットフォーム向け出力を生成する
+   - React: CSS 変数と型付きトークンエクスポート
+   - Swift: トークン定数
+   - Compose: トークン定数
+5. 各プラットフォームは自身向けの生成結果を利用し、画面コードは共有しない
 
-## Current extraction baseline
+## 現在の抽出ベースライン
 
-The initial token values were copied from the current React app so behavior stays stable:
+既存挙動を維持するため、初期トークン値は現在の React アプリから抽出しています。
 
-- primary color ramp and UI spacing from `src/styles/tokens/tokens.css`
-- surface elevation and floating surface values from `src/styles/tokens/tokens.css` and `src/styles/base/utilities.css`
-- base shadows and radii from `tailwind.config.js`
-- typography family roles from `src/styles/tokens/typography.ts` and `src/styles/components/common.css`
+- プライマリカラーの階調と UI スペーシング: `src/styles/tokens/tokens.css`
+- サーフェスのエレベーションおよびフローティングサーフェス値: `src/styles/tokens/tokens.css`, `src/styles/base/utilities.css`
+- 基本シャドウと角丸: `tailwind.config.js`
+- タイポグラフィのフォントファミリ定義: `src/styles/tokens/typography.ts`, `src/styles/components/common.css`
 
-## React direction
+## React 方針
 
-- `src/presentation/react/theme/` now exists as the generated theme output target.
-- Current React UI stays on existing classes and CSS variables for now.
-- Future React migration should move component-by-component to generated theme consumption instead of doing a broad rewrite.
+- `src/presentation/react/theme/` は、生成テーマの出力先としてすでに用意されている
+- 現在の React UI は当面、既存クラスと CSS 変数を継続利用する
+- React の移行は全面書き換えではなく、コンポーネント単位で生成テーマ利用へ段階的に進める
 
-## Native direction
+## ネイティブ方針
 
-- `ios/App/DesignSystem/` is reserved for SwiftUI-native token, component, and pattern adoption.
-- `android/app/src/main/java/com/akari221/flashcardmaster/designsystem/` is reserved for Compose-native token, component, and pattern adoption.
-- Native UI code should map shared tokens to native APIs, not attempt to reuse React markup or styling primitives directly.
+- `ios/App/DesignSystem/` は、SwiftUI ネイティブなトークン、コンポーネント、パターン導入のための領域とする
+- `android/app/src/main/java/com/akari221/flashcardmaster/designsystem/` は、Compose ネイティブなトークン、コンポーネント、パターン導入のための領域とする
+- ネイティブ UI は共有トークンを各ネイティブ API にマッピングして利用し、React のマークアップやスタイル表現を直接再利用しない
 
-## Migration plan
+## 移行計画
 
-1. Adopt generated React tokens in one low-risk primitive such as button or dialog.
-2. Add SwiftUI token wrappers that convert generated values into `Color`, `Font`, and spacing helpers.
-3. Add Compose token wrappers that convert generated values into `Color`, `TextStyle`, and spacing helpers.
-4. Port one narrow shared pattern such as a dialog or list row per platform.
-5. Expand component coverage only after each platform proves the contract is sufficient.
+1. button や dialog など、低リスクなプリミティブ 1 つに生成 React トークンを適用する
+2. 生成値を `Color`、`Font`、spacing helper に変換する SwiftUI 用トークンラッパーを追加する
+3. 生成値を `Color`、`TextStyle`、spacing helper に変換する Compose 用トークンラッパーを追加する
+4. dialog や list row など、限定的な共有パターンを各プラットフォームで 1 つ移植する
+5. 各プラットフォームで契約の妥当性を確認したうえで、コンポーネント適用範囲を拡大する

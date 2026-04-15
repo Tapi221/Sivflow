@@ -679,6 +679,7 @@ export const BlockEditor = React.forwardRef<
                       block.type === "markdown"
                         ? handleReplaceMarkdownWithBlocks
                         : undefined,
+                    displayMode,
                     zoom: resolvedEditorZoom,
                   }}
                 />

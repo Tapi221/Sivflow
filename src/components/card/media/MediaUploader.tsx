@@ -19,6 +19,7 @@ import {
   type ResolvedCardImage,
 } from "@/services/cardImageResolver";
 import type { AssetRecord, UploadedImage } from "@/types";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { Check, RotateCcw, Upload, X } from "@/ui/icons";
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize";
 import React, { useCallback, useEffect, useId, useRef, useState } from "react";
@@ -149,6 +150,8 @@ type ImageItemProps = {
   onRemove: (index: number) => void;
   onRetry: (index: number) => void;
   onUpdate: (index: number, patch: Partial<UploadedImage>) => void;
+  displayMode: CardDisplayMode;
+  zoom: number;
 };
 
 const ImageItem = ({
@@ -157,6 +160,8 @@ const ImageItem = ({
   onRemove,
   onRetry,
   onUpdate,
+  displayMode,
+  zoom,
 }: ImageItemProps) => {
   const [loadFailed, setLoadFailed] = useState(false);
   const persistedScale = clamp(Number(item.scale ?? 1), 0.2, 1);
@@ -171,6 +176,8 @@ const ImageItem = ({
             alt={`Image ${index + 1}`}
             className="bg-transparent"
             imgClassName="cursor-pointer"
+            displayMode={displayMode}
+            zoom={zoom}
             scale={persistedScale}
             x={persistedX}
             fixedReferenceFrameWidthPx={FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX}
@@ -267,6 +274,8 @@ type ImageMediaUploaderProps = {
   onConsumeInitialFile?: () => void;
   onFilesExcess?: (files: File[]) => void;
   autoOpenPicker?: boolean;
+  displayMode?: CardDisplayMode;
+  zoom?: number;
 };
 
 type AudioMediaUploaderProps = {
@@ -278,6 +287,8 @@ type AudioMediaUploaderProps = {
   onConsumeInitialFile?: () => void;
   onFilesExcess?: (files: File[]) => void;
   autoOpenPicker?: boolean;
+  displayMode?: CardDisplayMode;
+  zoom?: number;
 };
 
 type MediaUploaderProps = ImageMediaUploaderProps | AudioMediaUploaderProps;
@@ -291,6 +302,8 @@ const MediaUploader = ({
   onConsumeInitialFile,
   onFilesExcess,
   autoOpenPicker = false,
+  displayMode = "fixed",
+  zoom = 1,
 }: MediaUploaderProps) => {
   const { currentUser } = useAuthSession();
   const [dragOver, setDragOver] = useState(false);
@@ -698,6 +711,8 @@ const MediaUploader = ({
                 onRemove={handleRemove}
                 onRetry={handleRetry}
                 onUpdate={handleUpdateImage}
+                displayMode={displayMode}
+                zoom={zoom}
               />
             ))}
             {imageUrls.length < maxFiles && renderUploadDropzone(false)}
