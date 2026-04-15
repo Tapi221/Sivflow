@@ -42,11 +42,8 @@ export interface BlockEditorHandle {
 interface BlockEditorProps {
   blocks: CardBlock[];
   onChange: (blocks: CardBlock[]) => void;
-  selectionScopeKey?: string | null;
   prefix: "question" | "answer";
   label: string;
-  color: string;
-  droppableId: string;
   accentColor?: string;
   duplicateToOpposite?: boolean;
   onCrossDuplicate?: (block: CardBlock) => void;
@@ -75,11 +72,8 @@ export const BlockEditor = React.forwardRef<
     {
       blocks = [],
       onChange,
-      selectionScopeKey = null,
       prefix,
       label,
-      color: _color,
-      droppableId,
       accentColor,
       duplicateToOpposite = false,
       onCrossDuplicate,
@@ -98,10 +92,6 @@ export const BlockEditor = React.forwardRef<
     },
     ref,
   ) => {
-    void droppableId;
-    void selectionScopeKey;
-    void _color;
-
     const [activeContainerBlockId, setActiveContainerBlockId] = useState<
       string | null
     >(null);
@@ -637,12 +627,6 @@ export const BlockEditor = React.forwardRef<
         emitChange,
         handleBlockOverflow,
         handleConsumeInitialFile,
-        handleDeleteBlock,
-        handleDuplicateBlock,
-        handleMoveDragEnd,
-        handleMoveDragStart,
-        handleShiftBlockRow,
-        handleUpdateBlock,
         pendingUploads,
         prefix,
         resolvedActiveBlockId,
@@ -696,7 +680,6 @@ export const BlockEditor = React.forwardRef<
 
         <div className="space-y-0 overflow-x-visible overflow-y-visible">
           <CardBlocksScene
-            mode="edit"
             blocks={bodyBlocks}
             getRowRef={(block) => (element) => {
               registerRowEl(block.id, element);
@@ -709,7 +692,10 @@ export const BlockEditor = React.forwardRef<
                 : "non-ruled",
               "data-row-offset-applied": meta.rowOffsetPx ? "true" : undefined,
             })}
-            resolveEditorProps={resolveEditorProps}
+            resolveSceneProps={(block, meta) => ({
+              mode: "edit",
+              editorProps: resolveEditorProps(block, meta),
+            })}
           />
         </div>
       </div>

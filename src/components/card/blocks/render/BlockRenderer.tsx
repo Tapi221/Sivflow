@@ -59,19 +59,32 @@ export const BlockRenderer = ({
     return blocks.filter(isRenderableBlock);
   }, [blocks, isRenderableBlock]);
 
+  const viewerProps = useMemo(
+    () => ({
+      questionDisplayMode,
+      onGalleryFullscreenChange,
+      toMediaUrl,
+      displayMode,
+      zoom,
+    }),
+    [
+      displayMode,
+      onGalleryFullscreenChange,
+      questionDisplayMode,
+      toMediaUrl,
+      zoom,
+    ],
+  );
+
   if (!renderableBlocks.length) return null;
 
   return (
     <CardBlocksScene
-      mode="view"
       blocks={renderableBlocks}
-      viewerProps={{
-        questionDisplayMode,
-        onGalleryFullscreenChange,
-        toMediaUrl,
-        displayMode,
-        zoom,
-      }}
+      resolveSceneProps={() => ({
+        mode: "view",
+        viewerProps,
+      })}
     />
   );
 };

@@ -53,11 +53,13 @@ export type SharedCardContentProps =
 const SHARED_CARD_CONTENT_ROOT_CLASS_NAME =
   "card-content-root flex min-h-0 flex-1 w-full max-w-full flex-col overflow-x-clip overflow-y-visible";
 
+type SharedCardContentRootProps = Readonly<{
+  className?: string;
+  children: React.ReactNode;
+}>;
+
 const SharedCardContentRoot = React.memo(
-  ({
-    className,
-    children,
-  }: Readonly<{ className?: string; children: React.ReactNode }>) => (
+  ({ className, children }: SharedCardContentRootProps) => (
     <div
       className={cn(
         SHARED_CARD_CONTENT_ROOT_CLASS_NAME,
@@ -117,32 +119,35 @@ const SharedCardContentEditBody = React.memo(
     settings,
     displayMode,
     zoom,
-  }: SharedCardContentEditProps) => (
-    <BlockEditor
-      blocks={blocks}
-      onChange={onChange}
-      selectionScopeKey={selectionScopeKey}
-      prefix={prefix}
-      label={label}
-      color={color}
-      droppableId={droppableId}
-      accentColor={accentColor}
-      duplicateToOpposite={duplicateToOpposite}
-      onCrossDuplicate={onCrossDuplicate}
-      autoFocus={autoFocus}
-      customPlaceholders={customPlaceholders}
-      hideToolbar={hideToolbar}
-      onDelete={onDelete}
-      minDeletableIndex={minDeletableIndex}
-      hiddenBlockTypes={hiddenBlockTypes}
-      toolbarMount={toolbarMount}
-      toolbarDesktopLayout={toolbarDesktopLayout}
-      enableBlockActiveState={enableBlockActiveState}
-      settings={settings}
-      displayMode={displayMode}
-      zoom={zoom}
-    />
-  ),
+  }: SharedCardContentEditProps) => {
+    void selectionScopeKey;
+    void color;
+    void droppableId;
+
+    return (
+      <BlockEditor
+        blocks={blocks}
+        onChange={onChange}
+        prefix={prefix}
+        label={label}
+        accentColor={accentColor}
+        duplicateToOpposite={duplicateToOpposite}
+        onCrossDuplicate={onCrossDuplicate}
+        autoFocus={autoFocus}
+        customPlaceholders={customPlaceholders}
+        hideToolbar={hideToolbar}
+        onDelete={onDelete}
+        minDeletableIndex={minDeletableIndex}
+        hiddenBlockTypes={hiddenBlockTypes}
+        toolbarMount={toolbarMount}
+        toolbarDesktopLayout={toolbarDesktopLayout}
+        enableBlockActiveState={enableBlockActiveState}
+        settings={settings}
+        displayMode={displayMode}
+        zoom={zoom}
+      />
+    );
+  },
 );
 
 SharedCardContentEditBody.displayName = "SharedCardContentEditBody";

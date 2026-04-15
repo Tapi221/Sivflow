@@ -25,52 +25,46 @@ type SharedSceneProps = Readonly<{
   getRowContainerProps?: GetRowContainerProps;
 }>;
 
-type ViewCardBlocksSceneProps = SharedSceneProps &
-  Readonly<{
-    mode: "view";
-    viewerProps: ViewerProps;
-  }>;
+export type CardBlocksSceneResolvedProps =
+  | Readonly<{
+      mode: "view";
+      viewerProps: ViewerProps;
+    }>
+  | Readonly<{
+      mode: "edit";
+      editorProps: EditorProps;
+    }>;
 
-type EditCardBlocksSceneProps = SharedSceneProps &
+export type CardBlocksSceneProps = SharedSceneProps &
   Readonly<{
-    mode: "edit";
-    resolveEditorProps: (
+    resolveSceneProps: (
       block: CardBlock,
       meta: BlockListRowMeta,
-    ) => EditorProps;
+    ) => CardBlocksSceneResolvedProps;
   }>;
 
-export type CardBlocksSceneProps =
-  | ViewCardBlocksSceneProps
-  | EditCardBlocksSceneProps;
-
-const CardBlocksSceneInner = (props: CardBlocksSceneProps) => {
+const CardBlocksSceneInner = ({
+  blocks,
+  getRowRef,
+  getRowContainerProps,
+  resolveSceneProps,
+}: CardBlocksSceneProps) => {
   const renderBlock = React.useCallback(
     (block: CardBlock, meta: BlockListRowMeta) => {
-      return props.mode === "view" ? (
-        <CardBlockLayoutRenderer
-          mode="view"
-          block={block}
-          meta={meta}
-          viewerProps={props.viewerProps}
-        />
-      ) : (
-        <CardBlockLayoutRenderer
-          mode="edit"
-          block={block}
-          meta={meta}
-          editorProps={props.resolveEditorProps(block, meta)}
-        />
+      const sceneProps = resolveSceneProps(block, meta);
+
+      return (
+        <CardBlockLayoutRenderer block={block} meta={meta} {...sceneProps} />
       );
     },
-    [props],
+    [resolveSceneProps],
   );
 
   return (
     <BlockList
-      blocks={props.blocks}
-      getRowRef={props.getRowRef}
-      getRowContainerProps={props.getRowContainerProps}
+      blocks={blocks}
+      getRowRef={getRowRef}
+      getRowContainerProps={getRowContainerProps}
       renderBlock={renderBlock}
     />
   );
