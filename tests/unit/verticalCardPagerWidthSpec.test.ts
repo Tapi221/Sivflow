@@ -1,7 +1,7 @@
 import {
   buildVerticalCardPagerItemStyle,
   resolveVerticalCardPagerItemWidthSpec,
-} from "@/features/review/VerticalCardPager";
+} from "@/features/review/verticalCardPagerWidthSpec";
 import { describe, expect, it } from "vitest";
 
 describe("resolveVerticalCardPagerItemWidthSpec", () => {
@@ -59,6 +59,7 @@ describe("buildVerticalCardPagerItemStyle", () => {
     ).toEqual({
       width: 640,
       maxWidth: "100%",
+      minWidth: 0,
       alignSelf: "center",
     });
   });
@@ -71,6 +72,7 @@ describe("buildVerticalCardPagerItemStyle", () => {
     ).toEqual({
       width: "100%",
       maxWidth: "100%",
+      minWidth: 0,
       alignSelf: "stretch",
     });
   });

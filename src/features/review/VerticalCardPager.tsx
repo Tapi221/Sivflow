@@ -7,6 +7,11 @@ import React, {
 } from "react";
 import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import { useVerticalCardPager } from "@/hooks/study/useVerticalCardPager";
+import {
+  buildVerticalCardPagerItemStyle,
+  resolveVerticalCardPagerItemWidthSpec,
+  type VerticalCardPagerItemWidthSpec,
+} from "./verticalCardPagerWidthSpec";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;
@@ -47,80 +52,6 @@ const cardBorderRadius = () => {
   const result = `${Math.round(Math.max(0, resolveCardBaseRadius()))}px`;
   borderRadiusCache.set(cacheKey, result);
   return result;
-};
-
-export type VerticalCardPagerItemWidthSpec =
-  | { mode: "fixed"; widthPx: number }
-  | { mode: "stretch" };
-
-type ResolveVerticalCardPagerItemWidthSpecOptions<T> = {
-  card: T;
-  idx: number;
-  isActive: boolean;
-  cardWidth: number;
-  getCardWidth?: (card: T, idx: number, isActive: boolean) => number;
-  getCardWidthSpec?: (
-    card: T,
-    idx: number,
-    isActive: boolean,
-  ) => VerticalCardPagerItemWidthSpec;
-};
-
-const sanitizeVerticalCardPagerItemWidthSpec = (
-  widthSpec: VerticalCardPagerItemWidthSpec,
-): VerticalCardPagerItemWidthSpec => {
-  if (widthSpec.mode === "stretch") {
-    return { mode: "stretch" };
-  }
-
-  return {
-    mode: "fixed",
-    widthPx: Math.max(1, Math.round(widthSpec.widthPx)),
-  };
-};
-
-const resolveVerticalCardPagerItemWidthSpec = <T,>({
-  card,
-  idx,
-  isActive,
-  cardWidth,
-  getCardWidth,
-  getCardWidthSpec,
-}: ResolveVerticalCardPagerItemWidthSpecOptions<T>): VerticalCardPagerItemWidthSpec => {
-  if (getCardWidthSpec) {
-    return sanitizeVerticalCardPagerItemWidthSpec(
-      getCardWidthSpec(card, idx, isActive),
-    );
-  }
-
-  const resolvedWidthPx = getCardWidth
-    ? getCardWidth(card, idx, isActive)
-    : cardWidth;
-
-  return sanitizeVerticalCardPagerItemWidthSpec({
-    mode: "fixed",
-    widthPx: resolvedWidthPx,
-  });
-};
-
-const buildVerticalCardPagerItemStyle = (
-  widthSpec: VerticalCardPagerItemWidthSpec,
-): React.CSSProperties => {
-  if (widthSpec.mode === "stretch") {
-    return {
-      width: "100%",
-      maxWidth: "100%",
-      minWidth: 0,
-      alignSelf: "stretch",
-    };
-  }
-
-  return {
-    width: widthSpec.widthPx,
-    maxWidth: "100%",
-    minWidth: 0,
-    alignSelf: "center",
-  };
 };
 
 export type VerticalCardPagerProps<T> = {
@@ -577,7 +508,4 @@ export const VerticalCardPager = React.memo(
   VerticalCardPagerFn,
 ) as typeof VerticalCardPagerFn;
 
-export {
-  buildVerticalCardPagerItemStyle,
-  resolveVerticalCardPagerItemWidthSpec,
-};
+export type { VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";

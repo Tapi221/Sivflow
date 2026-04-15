@@ -430,24 +430,25 @@ const MediaUploader = ({
 
   const enqueueAsset = useCallback(
     async (file: File) => {
-      if (!currentUser?.uid) {
+      if (!currentUserId) {
         throw new Error("ログインが必要です");
       }
 
+      const uid = currentUserId;
       const assetId = crypto.randomUUID();
       const blobRecord = await putImageBlob(file, {
-        userId: currentUser.uid,
+        userId: uid,
         assetId,
       });
       const previewUrl = await getOrCreateImageBlobUrl(blobRecord.localBlobId, {
-        userId: currentUser.uid,
+        userId: uid,
       });
       const naturalSize = await loadImageNaturalSize(String(previewUrl ?? ""));
-      const remoteKey = buildAssetRemoteKey(currentUser.uid, assetId);
+      const remoteKey = buildAssetRemoteKey(uid, assetId);
 
       const assetRecord: AssetRecord = {
         id: assetId,
-        userId: currentUser.uid,
+        userId: uid,
         mime: blobRecord.mime,
         size: blobRecord.size,
         localBlobId: blobRecord.localBlobId,
@@ -462,13 +463,13 @@ const MediaUploader = ({
         retryCount: 0,
       };
 
-      const db = await getLocalDb(currentUser.uid);
+      const db = await getLocalDb(uid);
       await db.upsert("images", assetRecord);
 
       await persistentQueue.enqueueAssetUpload(
         {
           assetId,
-          userId: currentUser.uid,
+          userId: uid,
           remoteKey,
           mime: blobRecord.mime,
           size: blobRecord.size,
@@ -499,7 +500,7 @@ const MediaUploader = ({
         layout: null,
       } satisfies UploadedImage;
     },
-    [buildAssetRemoteKey, currentUser?.uid],
+    [buildAssetRemoteKey, currentUserId],
   );
 
   const handleUpload = useCallback(
@@ -532,9 +533,9 @@ const MediaUploader = ({
     },
     [
       enqueueAsset,
+      imageOnChange,
       imageUrls,
       maxFiles,
-      onChange,
       onFilesExcess,
       refreshAssetStatus,
       type,
@@ -544,8 +545,20 @@ const MediaUploader = ({
   useEffect(() => {
     if (!initialFile || type !== "image") return;
 
-    void handleUpload([initialFile]);
-    onConsumeInitialFile?.();
+    if (consumedInitialFileRef.current === initialFile) return;
+
+    consumedInitialFileRef.current = initialFile;
+    let cancelled = false;
+
+    void Promise.resolve().then(() => {
+      if (cancelled) return;
+      void handleUpload([initialFile]);
+      onConsumeInitialFile?.();
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [handleUpload, initialFile, onConsumeInitialFile, type]);
 
   const handleFileInputChange = (
@@ -578,14 +591,14 @@ const MediaUploader = ({
 
     const assetId = target.assetId?.trim() || target.id.trim();
 
-    if (currentUser?.uid && assetId) {
-      const db = await getLocalDb(currentUser.uid);
+    if (currentUserId && assetId) {
+      const db = await getLocalDb(currentUserId);
       const record = (await db.images.get(assetId)) as ImageRecordLike;
       const localBlobId = getLocalBlobIdFromRecord(record);
 
       if (localBlobId) {
-        removeImageBlobUrl(localBlobId, { userId: currentUser.uid });
-        void deleteImageBlob(localBlobId, { userId: currentUser.uid });
+        removeImageBlobUrl(localBlobId, { userId: currentUserId });
+        void deleteImageBlob(localBlobId, { userId: currentUserId });
       }
     }
 
@@ -596,16 +609,16 @@ const MediaUploader = ({
     const target = imageUrls[index];
     const assetId = target?.assetId?.trim() || target?.id.trim() || "";
 
-    if (!assetId || !currentUser?.uid) return;
+    if (!assetId || !currentUserId) return;
 
     setStatusByAssetId((prev) => ({ ...prev, [assetId]: "uploading" }));
 
-    const db = await getLocalDb(currentUser.uid);
+    const db = await getLocalDb(currentUserId);
     const record = (await db.images.get(assetId)) as ImageRecordLike;
 
     const localBlobId = getLocalBlobIdFromRecord(record);
     const blob = localBlobId
-      ? await getImageBlob(localBlobId, { userId: currentUser.uid })
+      ? await getImageBlob(localBlobId, { userId: currentUserId })
       : null;
 
     if (!blob) {
@@ -617,7 +630,7 @@ const MediaUploader = ({
       getMimeFromRecord(record) || blob.type || "application/octet-stream";
     const remoteKey =
       getRemoteKeyFromRecord(record) ??
-      buildAssetRemoteKey(currentUser.uid, assetId);
+      buildAssetRemoteKey(currentUserId, assetId);
     const retryFile = new File([blob], getRetryFileName(assetId, mime), {
       type: mime,
     });
@@ -626,7 +639,7 @@ const MediaUploader = ({
       id: assetId,
       userId:
         (isNonEmptyString(record?.userId) ? record.userId.trim() : "") ||
-        currentUser.uid,
+        currentUserId,
       mime,
       size: blob.size,
       localBlobId: localBlobId ?? assetId,
@@ -656,7 +669,7 @@ const MediaUploader = ({
     await persistentQueue.enqueueAssetUpload(
       {
         assetId,
-        userId: currentUser.uid,
+        userId: currentUserId,
         remoteKey,
         mime,
         size: blob.size,
