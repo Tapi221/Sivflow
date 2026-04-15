@@ -1,3 +1,4 @@
+import { layoutRowsToCardHeightPx } from "@/components/card/common/constants";
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { buildSharedCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
@@ -54,6 +55,11 @@ const DesktopCardSurfaceInner = ({
       }),
     [currentCardLayoutMode, currentDisplayMode, viewZoomScale],
   );
+
+  const fixedHeightPx = React.useMemo<number | null>(() => {
+    if (currentDisplayMode !== "fixed") return null;
+    return layoutRowsToCardHeightPx(card.layoutRows);
+  }, [card.layoutRows, currentDisplayMode]);
 
   const handleEditorFocusCapture = React.useCallback(() => {
     setHasFocusWithin(true);
@@ -115,6 +121,7 @@ const DesktopCardSurfaceInner = ({
               side="question"
               displayMode={currentDisplayMode}
               fixedScale={metrics.sideFixedScale}
+              fixedHeightPx={fixedHeightPx}
               contentZoom={metrics.sideContentZoom}
               headerIconVisualScale={metrics.sideHeaderIconVisualScale}
               previewMode={true}
@@ -129,6 +136,7 @@ const DesktopCardSurfaceInner = ({
               side="answer"
               displayMode={currentDisplayMode}
               fixedScale={metrics.sideFixedScale}
+              fixedHeightPx={fixedHeightPx}
               contentZoom={metrics.sideContentZoom}
               headerIconVisualScale={metrics.sideHeaderIconVisualScale}
               previewMode={true}
@@ -149,6 +157,7 @@ const DesktopCardSurfaceInner = ({
         side={isFlipped ? "answer" : "question"}
         displayMode={currentDisplayMode}
         fixedScale={metrics.baseFixedScale}
+        fixedHeightPx={fixedHeightPx}
         contentZoom={metrics.baseContentZoom}
         headerIconVisualScale={metrics.baseHeaderIconVisualScale}
         previewMode={!isActive}

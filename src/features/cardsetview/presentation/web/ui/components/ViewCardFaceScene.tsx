@@ -18,6 +18,7 @@ export type ViewCardFaceSceneProps = Readonly<{
   side: Side;
   displayMode: CardDisplayMode;
   fixedScale?: number;
+  fixedHeightPx?: number | null;
   contentZoom: number;
   headerIconVisualScale: number;
   previewMode: boolean;
@@ -48,6 +49,7 @@ export const ViewCardFaceScene = ({
   side,
   displayMode,
   fixedScale,
+  fixedHeightPx = null,
   contentZoom,
   headerIconVisualScale,
   previewMode,
@@ -69,6 +71,13 @@ export const ViewCardFaceScene = ({
   const allowInkEditing = Boolean(inkEditingEnabled && drawMode);
   const shouldShowInkLayer = Boolean(showInkLayer && isFixedDisplay);
   const shouldEnableInkEditing = Boolean(allowInkEditing && isFixedDisplay);
+  const resolvedFixedHeightPx =
+    isFixedDisplay &&
+    typeof fixedHeightPx === "number" &&
+    Number.isFinite(fixedHeightPx) &&
+    fixedHeightPx > 0
+      ? fixedHeightPx
+      : null;
 
   const derived = useFlashcardDerived(flashcardCard, effectiveIsFlipped);
   const media = useFlashcardMediaState();
@@ -192,6 +201,8 @@ export const ViewCardFaceScene = ({
         frameClassName={isCardClickable ? "cursor-pointer" : undefined}
         role={isCardClickable ? "button" : undefined}
         tabIndex={isCardClickable ? 0 : undefined}
+        heightPx={resolvedFixedHeightPx}
+        lockHeight={resolvedFixedHeightPx !== null}
         onClick={shouldBindFlipHandlers ? handleFlip : undefined}
         onKeyDown={shouldBindFlipHandlers ? handleKeyDown : undefined}
         onPointerDownCapture={
