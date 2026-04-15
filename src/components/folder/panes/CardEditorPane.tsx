@@ -46,9 +46,7 @@ import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/co
 import {
   buildCardRenderSpec,
   resolveCardContentZoom,
-  resolveCardDisablesFrameScale,
   resolveCardSurfaceScale,
-  resolveCardUsesStretchWidth,
 } from "@/features/cardrender/domain/cardRenderSpec";
 import { cn } from "@/lib/utils";
 import type { Card, CardBlock } from "@/types/domain/card";
@@ -163,8 +161,6 @@ type EditorSidePaneProps = {
   blocks: CardBlock[];
   onBlocksChange: (blocks: CardBlock[]) => void;
   label: string;
-  color: string;
-  droppableId: string;
   accentColor?: string;
   duplicateToOpposite?: boolean;
   hideToolbar: boolean;
@@ -180,9 +176,6 @@ type EditorSidePaneProps = {
   showResizeHandle: boolean;
   displayMode: CardDisplayMode;
   frameFixedScale?: number;
-  frameDisableScale: boolean;
-  frameStretchWidth: boolean;
-  frameRuled: boolean;
   contentZoom: number;
   editorCardHeightPx: number | null;
   enableHeightResize: boolean;
@@ -200,8 +193,6 @@ const EditorSidePaneInner = ({
   blocks,
   onBlocksChange,
   label,
-  color,
-  droppableId,
   accentColor,
   duplicateToOpposite,
   hideToolbar,
@@ -217,9 +208,6 @@ const EditorSidePaneInner = ({
   showResizeHandle,
   displayMode,
   frameFixedScale,
-  frameDisableScale: _frameDisableScale,
-  frameStretchWidth: _frameStretchWidth,
-  frameRuled: _frameRuled,
   contentZoom,
   editorCardHeightPx,
   enableHeightResize,
@@ -231,10 +219,6 @@ const EditorSidePaneInner = ({
   actionsTopRight,
   overlayTopRight,
 }: EditorSidePaneProps) => {
-  void _frameDisableScale;
-  void _frameStretchWidth;
-  void _frameRuled;
-
   const frameClassName = cn(
     buildCardShellClassName(presentationState),
     displayMode === "fluid" &&
@@ -314,8 +298,6 @@ const EditorSidePaneInner = ({
               onChange: onBlocksChange,
               prefix: side,
               label,
-              color,
-              droppableId,
               accentColor,
               duplicateToOpposite,
               hideToolbar,
@@ -338,8 +320,6 @@ const areEditorSidePanePropsEqual = (
   prev.side === next.side &&
   prev.blocks === next.blocks &&
   prev.label === next.label &&
-  prev.color === next.color &&
-  prev.droppableId === next.droppableId &&
   prev.accentColor === next.accentColor &&
   prev.duplicateToOpposite === next.duplicateToOpposite &&
   prev.hideToolbar === next.hideToolbar &&
@@ -359,9 +339,6 @@ const areEditorSidePanePropsEqual = (
   prev.showResizeHandle === next.showResizeHandle &&
   prev.displayMode === next.displayMode &&
   prev.frameFixedScale === next.frameFixedScale &&
-  prev.frameDisableScale === next.frameDisableScale &&
-  prev.frameStretchWidth === next.frameStretchWidth &&
-  prev.frameRuled === next.frameRuled &&
   prev.contentZoom === next.contentZoom &&
   prev.editorCardHeightPx === next.editorCardHeightPx &&
   prev.enableHeightResize === next.enableHeightResize &&
@@ -480,9 +457,6 @@ export const CardEditorPane = ({
 
   const isFluidEditor = editorRenderSpec.surfaceMode === "fluid";
   const baseEditorContentZoom = resolveCardContentZoom(editorRenderSpec);
-  const editorFrameDisableScale =
-    resolveCardDisablesFrameScale(editorRenderSpec);
-  const editorFrameStretchWidth = resolveCardUsesStretchWidth(editorRenderSpec);
 
   const {
     manualResizeInProgressRef,
@@ -849,8 +823,6 @@ export const CardEditorPane = ({
       blocks={frontBlocks}
       onBlocksChange={handleQuestionBlocksChange}
       label="問題"
-      color="text-indigo-500"
-      droppableId="question-blocks"
       accentColor={editorAccentColor}
       duplicateToOpposite={editorDuplicateToOpposite}
       hideToolbar={hideBlockToolbars}
@@ -866,9 +838,6 @@ export const CardEditorPane = ({
       showResizeHandle={showResizeHandleProp}
       displayMode={displayMode}
       frameFixedScale={editorFrameFixedScale}
-      frameDisableScale={editorFrameDisableScale}
-      frameStretchWidth={editorFrameStretchWidth}
-      frameRuled={!isFluidEditor}
       contentZoom={editorContentZoom}
       editorCardHeightPx={editorCardHeightPx}
       enableHeightResize={!isFluidEditor}
@@ -887,8 +856,6 @@ export const CardEditorPane = ({
       blocks={backBlocks}
       onBlocksChange={handleAnswerBlocksChange}
       label="解答"
-      color="text-emerald-500"
-      droppableId="answer-blocks"
       accentColor={editorAccentColor}
       duplicateToOpposite={editorDuplicateToOpposite}
       hideToolbar={hideBlockToolbars}
@@ -904,9 +871,6 @@ export const CardEditorPane = ({
       showResizeHandle={showResizeHandleProp}
       displayMode={displayMode}
       frameFixedScale={editorFrameFixedScale}
-      frameDisableScale={editorFrameDisableScale}
-      frameStretchWidth={editorFrameStretchWidth}
-      frameRuled={!isFluidEditor}
       contentZoom={editorContentZoom}
       editorCardHeightPx={editorCardHeightPx}
       enableHeightResize={!isFluidEditor}
@@ -942,12 +906,6 @@ export const CardEditorPane = ({
       blocks={flipBlocks}
       onBlocksChange={handleFlipBlocksChange}
       label={activeFlipSide === "question" ? "問題" : "解答"}
-      color={
-        activeFlipSide === "question" ? "text-indigo-500" : "text-emerald-500"
-      }
-      droppableId={
-        activeFlipSide === "question" ? "question-blocks" : "answer-blocks"
-      }
       accentColor={editorAccentColor}
       duplicateToOpposite={editorDuplicateToOpposite}
       hideToolbar={hideBlockToolbars}
@@ -973,9 +931,6 @@ export const CardEditorPane = ({
       showResizeHandle={showResizeHandleProp}
       displayMode={displayMode}
       frameFixedScale={editorFrameFixedScale}
-      frameDisableScale={editorFrameDisableScale}
-      frameStretchWidth={editorFrameStretchWidth}
-      frameRuled={!isFluidEditor}
       contentZoom={editorContentZoom}
       editorCardHeightPx={editorCardHeightPx}
       enableHeightResize={!isFluidEditor}

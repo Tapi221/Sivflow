@@ -22,14 +22,7 @@ type SharedCardContentViewProps = SharedCardContentBaseProps &
     zoom?: number;
   }>;
 
-type SharedCardContentEditCompatProps = Readonly<{
-  selectionScopeKey?: string | null;
-  color?: string;
-  droppableId?: string;
-}>;
-
 type SharedCardContentEditProps = SharedCardContentBaseProps &
-  SharedCardContentEditCompatProps &
   Readonly<{
     mode: "edit";
     onChange: (blocks: CardBlock[]) => void;
