@@ -76,7 +76,6 @@ interface CardSetViewDesktopProps {
   selectedCardId: string | null;
   safeCurrentIndex: number;
   settings?: Partial<UserSettings> | null;
-  editPaneWidthPx: number;
   currentDisplayMode: CardDisplayMode;
   currentCardLayoutMode: CardLayoutMode;
   folderId: string | null;
@@ -99,7 +98,6 @@ export const CardSetViewDesktop = ({
   selectedCardId,
   safeCurrentIndex,
   settings = null,
-  editPaneWidthPx,
   currentDisplayMode,
   currentCardLayoutMode,
   folderId,
@@ -115,7 +113,6 @@ export const CardSetViewDesktop = ({
 }: CardSetViewDesktopProps) => {
   const { currentUser } = useAuthSession();
 
-  const effectiveEditPaneWidthPx = editPaneWidthPx;
   const effectiveCardWidthPx =
     currentDisplayMode === "fluid"
       ? Math.max(1, Math.floor(fluidAvailableWidthPx))
@@ -173,7 +170,6 @@ export const CardSetViewDesktop = ({
           card={card}
           isActive={isActive}
           isGlobalEditing={isGlobalEditing}
-          editPaneWidthPx={effectiveEditPaneWidthPx}
           settings={settings}
           isFlipped={flippedCardIds.has(card.id ?? "")}
           currentDisplayMode={currentDisplayMode}
@@ -194,7 +190,6 @@ export const CardSetViewDesktop = ({
       currentCardLayoutMode,
       currentDisplayMode,
       editingCardsOverride,
-      effectiveEditPaneWidthPx,
       flippedCardIds,
       folderId,
       isGlobalEditing,

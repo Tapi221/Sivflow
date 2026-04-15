@@ -1,18 +1,16 @@
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
-import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import {
-  CANONICAL_CARD_WIDTH,
   CARD_ROW_PX,
   layoutRowsToCardHeightPx,
 } from "@/components/card/common/constants";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
-import { CardFrame } from "@/components/card/frame/CardFrame";
 import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
 import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
 import { buildSharedCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
+import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
+import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
 import { cn } from "@/lib/utils";
 import type { Card, UserSettings } from "@/types";
 import type { CardBlock } from "@/types/domain/card";
@@ -230,7 +228,6 @@ const EmbeddedEditorFace = ({
   onResizeEnd,
 }: EmbeddedEditorFaceProps) => {
   const [toolbarMount, setToolbarMount] = useState<HTMLDivElement | null>(null);
-  const isFluidDisplay = displayMode === "fluid";
 
   const topAttachment = showToolbar ? (
     <div className="relative h-0 w-full overflow-visible pointer-events-none">
@@ -247,64 +244,41 @@ const EmbeddedEditorFace = ({
   ) : undefined;
 
   return (
-    <div className="w-full min-w-0 max-w-full overflow-visible">
-      <CardFrame
-        baseWidth={CANONICAL_CARD_WIDTH}
-        contentPaddingPx={0}
-        allowUpscale={false}
-        maxScale={4}
-        scaleMultiplier={1}
-        fixedScale={fixedScale}
-        disableScale={isFluidDisplay}
-        stretchWidth={isFluidDisplay}
-        className={
-          isFluidDisplay
-            ? "rounded-none border-none bg-transparent shadow-none"
-            : undefined
-        }
-        ruled={!isFluidDisplay}
-        topAttachment={topAttachment}
-        overlay={overlay}
-        resizable={enableHeightResize}
-        showResizeHandle={enableHeightResize && showResizeHandle}
-        resizeStepPx={enableHeightResize ? CARD_ROW_PX : undefined}
-        heightPx={enableHeightResize ? editorCardHeightPx : null}
-        lockHeight={enableHeightResize}
-        onHeightChange={onHeightChange}
-        onMinHeightChange={onMinHeightChange}
-        onResizeStart={onResizeStart}
-        onResizeEnd={onResizeEnd}
-        actionsTopLeft={actionsTopLeft}
-        actionsTopRight={actionsTopRight}
-      >
-        <div
-          className={cn(
-            "w-full min-w-0 max-w-full",
-            isFluidDisplay ? "min-h-0" : "flex min-h-0 flex-1",
-          )}
-        >
-          <SharedCardContent
-            mode="edit"
-            blocks={blocks}
-            onChange={onBlocksChange}
-            selectionScopeKey={selectionScopeKey}
-            prefix={side}
-            label={resolveFaceLabel(side)}
-            color={resolveFaceColorClassName(side)}
-            droppableId={resolveFaceDroppableId(side)}
-            accentColor={accentColor}
-            duplicateToOpposite={duplicateToOpposite}
-            hideToolbar={!showToolbar}
-            toolbarMount={toolbarMount}
-            toolbarDesktopLayout="vertical"
-            enableBlockActiveState={showToolbar}
-            settings={settings}
-            displayMode={displayMode}
-            zoom={contentZoom}
-          />
-        </div>
-      </CardFrame>
-    </div>
+    <CardFaceScene
+      displayMode={displayMode}
+      fixedScale={fixedScale}
+      contentZoom={contentZoom}
+      contentProps={{
+        mode: "edit",
+        blocks,
+        onChange: onBlocksChange,
+        selectionScopeKey,
+        prefix: side,
+        label: resolveFaceLabel(side),
+        color: resolveFaceColorClassName(side),
+        droppableId: resolveFaceDroppableId(side),
+        accentColor,
+        duplicateToOpposite,
+        hideToolbar: !showToolbar,
+        toolbarMount,
+        toolbarDesktopLayout: "vertical",
+        enableBlockActiveState: showToolbar,
+        settings,
+      }}
+      actionsTopLeft={actionsTopLeft}
+      actionsTopRight={actionsTopRight}
+      overlay={overlay}
+      topAttachment={topAttachment}
+      resizable={enableHeightResize}
+      showResizeHandle={enableHeightResize && showResizeHandle}
+      resizeStepPx={enableHeightResize ? CARD_ROW_PX : undefined}
+      heightPx={enableHeightResize ? editorCardHeightPx : null}
+      lockHeight={enableHeightResize}
+      onHeightChange={onHeightChange}
+      onMinHeightChange={onMinHeightChange}
+      onResizeStart={onResizeStart}
+      onResizeEnd={onResizeEnd}
+    />
   );
 };
 

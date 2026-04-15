@@ -1,12 +1,9 @@
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
-import {
-  Flashcard,
-  type FlashcardCardLike,
-} from "@/components/card/frame/Flashcard";
+import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+import { buildSharedCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
 import { DesktopEmbeddedCardEditorSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopEmbeddedCardEditorSurface";
-import { buildSharedCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
-import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+import { ViewCardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/ViewCardFaceScene";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import React from "react";
@@ -15,7 +12,6 @@ export interface DesktopCardSurfaceProps {
   card: Card;
   isActive: boolean;
   isGlobalEditing: boolean;
-  editPaneWidthPx: number;
   settings?: Partial<UserSettings> | null;
   isFlipped: boolean;
   currentDisplayMode: CardDisplayMode;
@@ -30,68 +26,10 @@ export interface DesktopCardSurfaceProps {
   onSyncStatusChange: (status: CardSyncStatus | null) => void;
 }
 
-const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
-  id: card.id,
-  cardId: card.cardId,
-  hasUncertainty: card.hasUncertainty,
-  has_uncertainty: card.hasUncertainty,
-  isBookmarked: card.isBookmarked ?? false,
-  is_bookmarked: card.isBookmarked ?? false,
-  front: card.front,
-  back: card.back,
-  layoutRows: card.layoutRows,
-  inkQuestion: card.front.ink ?? null,
-  inkAnswer: card.back.ink ?? null,
-});
-
-type StaticCardSideProps = {
-  card: Card;
-  currentDisplayMode: CardDisplayMode;
-  fixedScale?: number;
-  contentZoom: number;
-  headerIconVisualScale: number;
-  side: "question" | "answer";
-};
-
-const StaticCardSide = ({
-  card,
-  currentDisplayMode,
-  fixedScale,
-  contentZoom,
-  headerIconVisualScale,
-  side,
-}: StaticCardSideProps) => {
-  const flashcardCard = React.useMemo<FlashcardCardLike>(
-    () => toFlashcardCardLike(card),
-    [card],
-  );
-
-  return (
-    <Flashcard
-      card={flashcardCard}
-      isFlipped={side === "answer"}
-      previewMode={true}
-      displayMode={currentDisplayMode}
-      showInkLayer={currentDisplayMode === "fixed"}
-      allowUpscale={false}
-      scaleMultiplier={1}
-      fixedScale={fixedScale}
-      contentZoom={contentZoom}
-      headerIconVisualScale={headerIconVisualScale}
-      cardShellClassName={
-        currentDisplayMode === "fluid"
-          ? "border-none bg-transparent shadow-none"
-          : undefined
-      }
-    />
-  );
-};
-
 const DesktopCardSurfaceInner = ({
   card,
   isActive,
   isGlobalEditing,
-  editPaneWidthPx: _editPaneWidthPx,
   settings = null,
   isFlipped,
   currentDisplayMode,
@@ -105,14 +43,7 @@ const DesktopCardSurfaceInner = ({
   onToggleBookmark,
   onSyncStatusChange,
 }: DesktopCardSurfaceProps) => {
-  void _editPaneWidthPx;
-
   const [hasFocusWithin, setHasFocusWithin] = React.useState(false);
-
-  const flashcardCard = React.useMemo<FlashcardCardLike>(
-    () => toFlashcardCardLike(card),
-    [card],
-  );
 
   const metrics = React.useMemo(
     () =>
@@ -179,23 +110,29 @@ const DesktopCardSurfaceInner = ({
         <CardSurfaceLayout
           cardLayoutMode={currentCardLayoutMode}
           questionNode={
-            <StaticCardSide
+            <ViewCardFaceScene
               card={card}
-              currentDisplayMode={currentDisplayMode}
+              side="question"
+              displayMode={currentDisplayMode}
               fixedScale={metrics.sideFixedScale}
               contentZoom={metrics.sideContentZoom}
               headerIconVisualScale={metrics.sideHeaderIconVisualScale}
-              side="question"
+              previewMode={true}
+              showInkLayer={currentDisplayMode === "fixed"}
+              inkEditingEnabled={false}
             />
           }
           answerNode={
-            <StaticCardSide
+            <ViewCardFaceScene
               card={card}
-              currentDisplayMode={currentDisplayMode}
+              side="answer"
+              displayMode={currentDisplayMode}
               fixedScale={metrics.sideFixedScale}
               contentZoom={metrics.sideContentZoom}
               headerIconVisualScale={metrics.sideHeaderIconVisualScale}
-              side="answer"
+              previewMode={true}
+              showInkLayer={currentDisplayMode === "fixed"}
+              inkEditingEnabled={false}
             />
           }
         />
@@ -205,38 +142,19 @@ const DesktopCardSurfaceInner = ({
 
   return (
     <div className="w-full min-w-0 max-w-full overflow-visible">
-      <Flashcard
-        card={flashcardCard}
-        isFlipped={isFlipped}
-        previewMode={!isActive}
+      <ViewCardFaceScene
+        card={card}
+        side={isFlipped ? "answer" : "question"}
         displayMode={currentDisplayMode}
-        showInkLayer={metrics.renderSpec.showInk}
-        inkEditingEnabled={metrics.renderSpec.showInk && isActive}
-        onFlip={isActive ? onFlip : undefined}
-        onToggleUncertainty={
-          isActive
-            ? () => {
-                void onToggleUncertainty(card);
-              }
-            : undefined
-        }
-        onToggleBookmark={
-          isActive
-            ? () => {
-                void onToggleBookmark(card);
-              }
-            : undefined
-        }
-        allowUpscale={false}
-        scaleMultiplier={1}
         fixedScale={metrics.baseFixedScale}
         contentZoom={metrics.baseContentZoom}
         headerIconVisualScale={metrics.baseHeaderIconVisualScale}
-        cardShellClassName={
-          currentDisplayMode === "fluid"
-            ? "border-none bg-transparent shadow-none"
-            : undefined
-        }
+        previewMode={!isActive}
+        showInkLayer={metrics.renderSpec.showInk}
+        inkEditingEnabled={metrics.renderSpec.showInk && isActive}
+        onFlip={isActive ? onFlip : undefined}
+        onToggleUncertainty={isActive ? onToggleUncertainty : undefined}
+        onToggleBookmark={isActive ? onToggleBookmark : undefined}
       />
     </div>
   );

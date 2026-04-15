@@ -10,7 +10,6 @@ export const CardSetViewDesktopContent = ({
     settings,
     data,
     state,
-    paneWidth,
     zoom,
     effectiveCardLayoutMode,
   } = controller;
@@ -24,7 +23,6 @@ export const CardSetViewDesktopContent = ({
       selectedCardId={state.selectedCard?.id ?? null}
       safeCurrentIndex={state.safeCurrentIndex}
       settings={settings}
-      editPaneWidthPx={paneWidth.activePaneRenderWidthPx}
       currentDisplayMode={state.currentDisplayMode}
       currentCardLayoutMode={effectiveCardLayoutMode}
       folderId={folderId}
