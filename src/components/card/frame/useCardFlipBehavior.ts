@@ -53,11 +53,12 @@ export const useCardFlipBehavior = ({
   isModalBlockingFlip,
   isInkEditingActive,
 }: UseCardFlipBehaviorParams): UseCardFlipBehaviorResult => {
-  const flipSuppressedUntilRef = React.useRef(0);
   const suppressNextFlipRef = React.useRef(false);
   const pointerGestureRef = React.useRef<PointerGestureState>(
     createInitialPointerGestureState(),
   );
+
+  const shouldHandleFlip = previewMode || (isCardClickable && Boolean(onFlip));
 
   const resetPointerGesture = React.useCallback(() => {
     pointerGestureRef.current = createInitialPointerGestureState();
@@ -67,7 +68,7 @@ export const useCardFlipBehavior = ({
     (pointerId: number | null) => {
       const state = pointerGestureRef.current;
       if (state.pointerId == null) return;
-      if (pointerId != null && state.pointerId != pointerId) return;
+      if (pointerId != null && state.pointerId !== pointerId) return;
 
       if (state.moved) {
         suppressNextFlipRef.current = true;
@@ -80,12 +81,13 @@ export const useCardFlipBehavior = ({
 
   const handleFlip = React.useCallback(
     (event?: React.MouseEvent<HTMLDivElement>) => {
+      if (!shouldHandleFlip) return;
+
       if (suppressNextFlipRef.current) {
         suppressNextFlipRef.current = false;
         return;
       }
 
-      if (Date.now() < flipSuppressedUntilRef.current) return;
       if (event && shouldIgnoreFlipTarget(event.target)) return;
       if (isModalBlockingFlip) return;
       if (isInkEditingActive) return;
@@ -96,18 +98,18 @@ export const useCardFlipBehavior = ({
         return;
       }
 
-      if (!isCardClickable || !onFlip) return;
+      if (!onFlip) return;
 
       event?.stopPropagation();
       onFlip();
     },
     [
-      isCardClickable,
       isInkEditingActive,
       isModalBlockingFlip,
       onFlip,
       onPreviewFlip,
       previewMode,
+      shouldHandleFlip,
     ],
   );
 

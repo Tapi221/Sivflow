@@ -8,13 +8,16 @@ import {
 import type { CardBlock } from "@/types/domain/card";
 import React from "react";
 
+type RowContainerProps = Readonly<Record<string, unknown>>;
+
 type GetRowRef = (
   block: CardBlock,
 ) => ((element: HTMLElement | null) => void) | undefined;
+
 type GetRowContainerProps = (
   block: CardBlock,
   meta: BlockListRowMeta,
-) => Record<string, unknown> | undefined;
+) => RowContainerProps | undefined;
 
 type SharedSceneProps = Readonly<{
   blocks: CardBlock[];
@@ -41,33 +44,41 @@ export type CardBlocksSceneProps =
   | ViewCardBlocksSceneProps
   | EditCardBlocksSceneProps;
 
-export const CardBlocksScene = (props: CardBlocksSceneProps) => {
+const CardBlocksSceneInner = (props: CardBlocksSceneProps) => {
+  const renderBlock = React.useCallback(
+    (block: CardBlock, meta: BlockListRowMeta) => {
+      if (props.mode === "view") {
+        return (
+          <CardBlockLayoutRenderer
+            mode="view"
+            block={block}
+            meta={meta}
+            viewerProps={props.viewerProps}
+          />
+        );
+      }
+
+      return (
+        <CardBlockLayoutRenderer
+          mode="edit"
+          block={block}
+          meta={meta}
+          editorProps={props.resolveEditorProps(block, meta)}
+        />
+      );
+    },
+    [props],
+  );
+
   return (
     <BlockList
       blocks={props.blocks}
       getRowRef={props.getRowRef}
       getRowContainerProps={props.getRowContainerProps}
-      renderBlock={(block, meta) => {
-        if (props.mode === "view") {
-          return (
-            <CardBlockLayoutRenderer
-              mode="view"
-              block={block}
-              meta={meta}
-              viewerProps={props.viewerProps}
-            />
-          );
-        }
-
-        return (
-          <CardBlockLayoutRenderer
-            mode="edit"
-            block={block}
-            meta={meta}
-            editorProps={props.resolveEditorProps(block, meta)}
-          />
-        );
-      }}
+      renderBlock={renderBlock}
     />
   );
 };
+
+export const CardBlocksScene = React.memo(CardBlocksSceneInner);
+CardBlocksScene.displayName = "CardBlocksScene";

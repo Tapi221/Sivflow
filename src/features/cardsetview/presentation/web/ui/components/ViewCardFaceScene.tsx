@@ -82,6 +82,8 @@ export const ViewCardFaceScene = ({
   });
 
   const isInkEditingActive = Boolean(allowInkEditing && ink.previewInkTool);
+  const isCardClickable = Boolean(!previewMode && onFlip);
+  const shouldBindFlipHandlers = previewMode || isCardClickable;
 
   const {
     handleFlip,
@@ -91,7 +93,7 @@ export const ViewCardFaceScene = ({
     handlePointerUpCapture,
     handlePointerCancelCapture,
   } = useCardFlipBehavior({
-    isCardClickable: Boolean(!previewMode && onFlip),
+    isCardClickable,
     previewMode,
     onFlip,
     isModalBlockingFlip: media.isModalBlockingFlip,
@@ -132,28 +134,45 @@ export const ViewCardFaceScene = ({
     headerIconVisualScale,
   });
 
-  const overlay = (
-    <FlashcardInkOverlay
-      extraHeaderRight={undefined}
-      extraFooter={undefined}
-      previewMode={previewMode}
-      showInkLayer={shouldShowInkLayer}
-      inkEditingEnabled={shouldEnableInkEditing}
-      cardId={derived.cardId}
-      activeInkSide={effectiveIsFlipped ? "answer" : "question"}
-      activeInkDocument={derived.activeInkDocument}
-      layoutStable={ink.layoutStable}
-      shouldMountInkLayer={Boolean(ink.shouldMountInkLayer && isFixedDisplay)}
-      previewInkRef={ink.previewInkRef}
-      previewInkTool={ink.previewInkTool}
-      previewInkHistory={ink.previewInkHistory}
-      onInkDocumentChange={ink.handleInkDocumentChange}
-      setPreviewInkTool={ink.setPreviewInkTool}
-      setPreviewInkHistory={ink.setPreviewInkHistory}
-    />
+  const overlay = React.useMemo(
+    () => (
+      <FlashcardInkOverlay
+        extraHeaderRight={undefined}
+        extraFooter={undefined}
+        previewMode={previewMode}
+        showInkLayer={shouldShowInkLayer}
+        inkEditingEnabled={shouldEnableInkEditing}
+        cardId={derived.cardId}
+        activeInkSide={effectiveIsFlipped ? "answer" : "question"}
+        activeInkDocument={derived.activeInkDocument}
+        layoutStable={ink.layoutStable}
+        shouldMountInkLayer={Boolean(ink.shouldMountInkLayer && isFixedDisplay)}
+        previewInkRef={ink.previewInkRef}
+        previewInkTool={ink.previewInkTool}
+        previewInkHistory={ink.previewInkHistory}
+        onInkDocumentChange={ink.handleInkDocumentChange}
+        setPreviewInkTool={ink.setPreviewInkTool}
+        setPreviewInkHistory={ink.setPreviewInkHistory}
+      />
+    ),
+    [
+      derived.activeInkDocument,
+      derived.cardId,
+      effectiveIsFlipped,
+      ink.handleInkDocumentChange,
+      ink.layoutStable,
+      ink.previewInkHistory,
+      ink.previewInkRef,
+      ink.previewInkTool,
+      ink.setPreviewInkHistory,
+      ink.setPreviewInkTool,
+      ink.shouldMountInkLayer,
+      isFixedDisplay,
+      previewMode,
+      shouldEnableInkEditing,
+      shouldShowInkLayer,
+    ],
   );
-
-  const isCardClickable = Boolean(!previewMode && onFlip);
 
   return (
     <>
@@ -173,12 +192,20 @@ export const ViewCardFaceScene = ({
         frameClassName={isCardClickable ? "cursor-pointer" : undefined}
         role={isCardClickable ? "button" : undefined}
         tabIndex={isCardClickable ? 0 : undefined}
-        onClick={handleFlip}
-        onKeyDown={handleKeyDown}
-        onPointerDownCapture={handlePointerDownCapture}
-        onPointerMoveCapture={handlePointerMoveCapture}
-        onPointerUpCapture={handlePointerUpCapture}
-        onPointerCancelCapture={handlePointerCancelCapture}
+        onClick={shouldBindFlipHandlers ? handleFlip : undefined}
+        onKeyDown={shouldBindFlipHandlers ? handleKeyDown : undefined}
+        onPointerDownCapture={
+          shouldBindFlipHandlers ? handlePointerDownCapture : undefined
+        }
+        onPointerMoveCapture={
+          shouldBindFlipHandlers ? handlePointerMoveCapture : undefined
+        }
+        onPointerUpCapture={
+          shouldBindFlipHandlers ? handlePointerUpCapture : undefined
+        }
+        onPointerCancelCapture={
+          shouldBindFlipHandlers ? handlePointerCancelCapture : undefined
+        }
       />
 
       <FlashcardMediaDialogs
