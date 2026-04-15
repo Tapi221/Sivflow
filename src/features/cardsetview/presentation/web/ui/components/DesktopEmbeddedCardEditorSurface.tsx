@@ -53,6 +53,7 @@ type EmbeddedEditorFaceProps = {
   contentZoom: number;
   actionsTopLeft?: React.ReactNode;
   actionsTopRight?: React.ReactNode;
+  overlayTopRight?: React.ReactNode;
   editorCardHeightPx: number | null;
   enableHeightResize: boolean;
   showResizeHandle: boolean;
@@ -86,6 +87,12 @@ const toTimeMs = (value: unknown) => {
   return null;
 };
 
+const isCardEntity = (value: unknown): value is Card =>
+  typeof value === "object" &&
+  value !== null &&
+  "id" in value &&
+  typeof (value as { id?: unknown }).id === "string";
+
 const FaceSwitchBadge = ({
   isFlipped,
   onShowFront,
@@ -100,12 +107,15 @@ const FaceSwitchBadge = ({
 
   return (
     <div
-      className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/90 p-1 shadow-sm"
+      className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/90 p-1 shadow-sm backdrop-blur-[2px]"
       data-card-no-flip="true"
+      onClick={(event) => event.stopPropagation()}
+      onPointerDown={(event) => event.stopPropagation()}
     >
       <button
         type="button"
         data-card-no-flip="true"
+        aria-pressed={!isFlipped}
         className={cn(
           itemClassName,
           !isFlipped
@@ -114,6 +124,7 @@ const FaceSwitchBadge = ({
         )}
         onClick={(event) => {
           event.stopPropagation();
+          if (!isFlipped) return;
           onShowFront();
         }}
       >
@@ -122,6 +133,7 @@ const FaceSwitchBadge = ({
       <button
         type="button"
         data-card-no-flip="true"
+        aria-pressed={isFlipped}
         className={cn(
           itemClassName,
           isFlipped
@@ -130,6 +142,7 @@ const FaceSwitchBadge = ({
         )}
         onClick={(event) => {
           event.stopPropagation();
+          if (isFlipped) return;
           onShowBack();
         }}
       >
@@ -139,22 +152,37 @@ const FaceSwitchBadge = ({
   );
 };
 
+const OverlayTopRight = ({ children }: { children: React.ReactNode }) => {
+  if (!children) return null;
+
+  return (
+    <div className="absolute right-2 top-2 z-30 pointer-events-none">
+      <div
+        className="pointer-events-auto flex flex-col items-end gap-2"
+        data-card-no-flip="true"
+        onClick={(event) => event.stopPropagation()}
+        onPointerDown={(event) => event.stopPropagation()}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
 const EmbeddedEditorHeaderRight = ({
-  faceSwitch,
   mediaActions,
 }: {
-  faceSwitch?: React.ReactNode;
   mediaActions?: React.ReactNode;
 }) => {
-  if (!faceSwitch && !mediaActions) return null;
+  if (!mediaActions) return null;
 
   return (
     <div
       className="flex items-center gap-2"
       data-card-no-flip="true"
       onClick={(event) => event.stopPropagation()}
+      onPointerDown={(event) => event.stopPropagation()}
     >
-      {faceSwitch}
       {mediaActions}
     </div>
   );
@@ -173,6 +201,7 @@ const EmbeddedEditorFace = ({
   contentZoom,
   actionsTopLeft,
   actionsTopRight,
+  overlayTopRight,
   editorCardHeightPx,
   enableHeightResize,
   showResizeHandle,
@@ -198,6 +227,10 @@ const EmbeddedEditorFace = ({
     </div>
   ) : undefined;
 
+  const overlay = overlayTopRight ? (
+    <OverlayTopRight>{overlayTopRight}</OverlayTopRight>
+  ) : undefined;
+
   return (
     <div className="w-full min-w-0 max-w-full overflow-visible">
       <CardFrame
@@ -216,6 +249,7 @@ const EmbeddedEditorFace = ({
         }
         ruled={!isFluidDisplay}
         topAttachment={topAttachment}
+        overlay={overlay}
         resizable={enableHeightResize}
         showResizeHandle={enableHeightResize && showResizeHandle}
         resizeStepPx={enableHeightResize ? CARD_ROW_PX : undefined}
@@ -356,7 +390,7 @@ export const DesktopEmbeddedCardEditorSurface = ({
     [content],
   );
 
-  const selectedCardEntity = selectedCard as Card | null;
+  const selectedCardEntity = isCardEntity(selectedCard) ? selectedCard : null;
   const frontBlocks = draft?.frontBlocks ?? [];
   const backBlocks = draft?.backBlocks ?? [];
 
@@ -369,7 +403,7 @@ export const DesktopEmbeddedCardEditorSurface = ({
     return 14 / safeScale;
   }, []);
 
-  const questionCornerActions = useMemo(
+  const sharedCornerActions = useMemo(
     () =>
       selectedCardEntity ? (
         <CardCornerActions
@@ -416,12 +450,15 @@ export const DesktopEmbeddedCardEditorSurface = ({
   const questionMediaActions = content.renderMediaDialogButtons("question");
   const answerMediaActions = content.renderMediaDialogButtons("answer");
 
-  const faceSwitchBadge = (
-    <FaceSwitchBadge
-      isFlipped={Boolean(isFlipped)}
-      onShowFront={() => setIsFlipped(false)}
-      onShowBack={() => setIsFlipped(true)}
-    />
+  const faceSwitchBadge = useMemo(
+    () => (
+      <FaceSwitchBadge
+        isFlipped={Boolean(isFlipped)}
+        onShowFront={() => setIsFlipped(false)}
+        onShowBack={() => setIsFlipped(true)}
+      />
+    ),
+    [isFlipped, setIsFlipped],
   );
 
   const handleRetrySync = useCallback(async () => {
@@ -509,7 +546,7 @@ export const DesktopEmbeddedCardEditorSurface = ({
       displayMode={displayMode}
       fixedScale={metrics.sideFixedScale}
       contentZoom={metrics.sideContentZoom}
-      actionsTopLeft={questionCornerActions}
+      actionsTopLeft={sharedCornerActions}
       actionsTopRight={
         <EmbeddedEditorHeaderRight mediaActions={questionMediaActions} />
       }
@@ -536,7 +573,7 @@ export const DesktopEmbeddedCardEditorSurface = ({
       displayMode={displayMode}
       fixedScale={metrics.sideFixedScale}
       contentZoom={metrics.sideContentZoom}
-      actionsTopLeft={questionCornerActions}
+      actionsTopLeft={sharedCornerActions}
       actionsTopRight={
         <EmbeddedEditorHeaderRight mediaActions={answerMediaActions} />
       }
@@ -552,6 +589,9 @@ export const DesktopEmbeddedCardEditorSurface = ({
   );
 
   const activeFlipSide: Side = isFlipped ? "answer" : "question";
+  const flipMediaActions =
+    activeFlipSide === "question" ? questionMediaActions : answerMediaActions;
+
   const flipFace = (
     <EmbeddedEditorFace
       side={activeFlipSide}
@@ -569,20 +609,23 @@ export const DesktopEmbeddedCardEditorSurface = ({
       fixedScale={metrics.baseFixedScale}
       contentZoom={metrics.baseContentZoom}
       actionsTopLeft={flipCornerActions}
-      actionsTopRight={
-        <EmbeddedEditorHeaderRight
-          faceSwitch={faceSwitchBadge}
-          mediaActions={
-            activeFlipSide === "question"
-              ? questionMediaActions
-              : answerMediaActions
-          }
-        />
-      }
       editorCardHeightPx={editorCardHeightPx}
       enableHeightResize={displayMode !== "fluid"}
       showResizeHandle={isInteractive}
       showToolbar={isInteractive}
+      overlayTopRight={
+        <>
+          {faceSwitchBadge}
+          {flipMediaActions ? (
+            <div
+              className="flex max-w-full justify-end"
+              data-card-no-flip="true"
+            >
+              {flipMediaActions}
+            </div>
+          ) : null}
+        </>
+      }
       onHeightChange={handleEditorHeightChange}
       onMinHeightChange={
         activeFlipSide === "question"

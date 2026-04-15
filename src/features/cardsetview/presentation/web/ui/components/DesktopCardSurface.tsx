@@ -86,7 +86,7 @@ const DesktopCardSurfaceInner = ({
   card,
   isActive,
   isGlobalEditing,
-  editPaneWidthPx,
+  editPaneWidthPx: _editPaneWidthPx,
   settings = null,
   isFlipped,
   currentDisplayMode,
@@ -100,6 +100,8 @@ const DesktopCardSurfaceInner = ({
   onToggleBookmark,
   onSyncStatusChange,
 }: DesktopCardSurfaceProps) => {
+  void _editPaneWidthPx;
+
   const [hasFocusWithin, setHasFocusWithin] = React.useState(false);
 
   const flashcardCard = React.useMemo(() => {
@@ -241,7 +243,6 @@ const areDesktopCardSurfacePropsEqual = (
   if (prev.card !== next.card) return false;
   if (prev.isActive !== next.isActive) return false;
   if (prev.isGlobalEditing !== next.isGlobalEditing) return false;
-  if (prev.editPaneWidthPx !== next.editPaneWidthPx) return false;
   if (prev.settings !== next.settings) return false;
   if (prev.currentDisplayMode !== next.currentDisplayMode) return false;
   if (prev.currentCardLayoutMode !== next.currentCardLayoutMode) return false;
