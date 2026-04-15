@@ -44,6 +44,15 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkAnswer: card.back.ink ?? null,
 });
 
+type StaticCardSideProps = {
+  card: Card;
+  currentDisplayMode: CardDisplayMode;
+  fixedScale?: number;
+  contentZoom: number;
+  headerIconVisualScale: number;
+  side: "question" | "answer";
+};
+
 const StaticCardSide = ({
   card,
   currentDisplayMode,
@@ -51,15 +60,11 @@ const StaticCardSide = ({
   contentZoom,
   headerIconVisualScale,
   side,
-}: {
-  card: Card;
-  currentDisplayMode: CardDisplayMode;
-  fixedScale?: number;
-  contentZoom: number;
-  headerIconVisualScale: number;
-  side: "question" | "answer";
-}) => {
-  const flashcardCard = React.useMemo(() => toFlashcardCardLike(card), [card]);
+}: StaticCardSideProps) => {
+  const flashcardCard = React.useMemo<FlashcardCardLike>(
+    () => toFlashcardCardLike(card),
+    [card],
+  );
 
   return (
     <Flashcard
@@ -104,9 +109,10 @@ const DesktopCardSurfaceInner = ({
 
   const [hasFocusWithin, setHasFocusWithin] = React.useState(false);
 
-  const flashcardCard = React.useMemo(() => {
-    return toFlashcardCardLike(card);
-  }, [card]);
+  const flashcardCard = React.useMemo<FlashcardCardLike>(
+    () => toFlashcardCardLike(card),
+    [card],
+  );
 
   const metrics = React.useMemo(
     () =>

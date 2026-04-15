@@ -26,6 +26,7 @@ import React, {
 } from "react";
 
 type Side = "question" | "answer";
+type EditorSettings = Partial<UserSettings> | null | undefined;
 
 export interface DesktopEmbeddedCardEditorSurfaceProps {
   selectedCardId: string;
@@ -40,14 +41,28 @@ export interface DesktopEmbeddedCardEditorSurfaceProps {
   onSyncStatusChange: (status: CardSyncStatus | null) => void;
 }
 
-type EmbeddedEditorFaceProps = {
+type FaceSwitchBadgeProps = Readonly<{
+  isFlipped: boolean;
+  onShowFront: () => void;
+  onShowBack: () => void;
+}>;
+
+type OverlayTopRightProps = Readonly<{
+  children?: React.ReactNode;
+}>;
+
+type EmbeddedEditorHeaderRightProps = Readonly<{
+  mediaActions?: React.ReactNode;
+}>;
+
+type EmbeddedEditorFaceProps = Readonly<{
   side: Side;
   blocks: CardBlock[];
   onBlocksChange: (nextBlocks: CardBlock[]) => void;
   selectionScopeKey: string | null;
   accentColor?: string;
   duplicateToOpposite?: boolean;
-  settings: unknown;
+  settings: EditorSettings;
   displayMode: CardDisplayMode;
   fixedScale?: number;
   contentZoom: number;
@@ -62,7 +77,13 @@ type EmbeddedEditorFaceProps = {
   onMinHeightChange: (heightPx: number) => void;
   onResizeStart: () => void;
   onResizeEnd: () => void;
-};
+}>;
+
+const isCardEntity = (value: unknown): value is Card =>
+  typeof value === "object" &&
+  value !== null &&
+  "id" in value &&
+  typeof (value as { id?: unknown }).id === "string";
 
 const toTimeMs = (value: unknown) => {
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
@@ -87,21 +108,18 @@ const toTimeMs = (value: unknown) => {
   return null;
 };
 
-const isCardEntity = (value: unknown): value is Card =>
-  typeof value === "object" &&
-  value !== null &&
-  "id" in value &&
-  typeof (value as { id?: unknown }).id === "string";
+const resolveFaceLabel = (side: Side) =>
+  side === "question" ? "問題" : "解答";
+const resolveFaceColorClassName = (side: Side) =>
+  side === "question" ? "text-indigo-500" : "text-emerald-500";
+const resolveFaceDroppableId = (side: Side) =>
+  side === "question" ? "question-blocks" : "answer-blocks";
 
 const FaceSwitchBadge = ({
   isFlipped,
   onShowFront,
   onShowBack,
-}: {
-  isFlipped: boolean;
-  onShowFront: () => void;
-  onShowBack: () => void;
-}) => {
+}: FaceSwitchBadgeProps) => {
   const itemClassName =
     "inline-flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-[10px] font-semibold leading-none transition";
 
@@ -115,6 +133,7 @@ const FaceSwitchBadge = ({
       <button
         type="button"
         data-card-no-flip="true"
+        aria-label="表面を表示"
         aria-pressed={!isFlipped}
         className={cn(
           itemClassName,
@@ -133,6 +152,7 @@ const FaceSwitchBadge = ({
       <button
         type="button"
         data-card-no-flip="true"
+        aria-label="裏面を表示"
         aria-pressed={isFlipped}
         className={cn(
           itemClassName,
@@ -152,13 +172,13 @@ const FaceSwitchBadge = ({
   );
 };
 
-const OverlayTopRight = ({ children }: { children: React.ReactNode }) => {
+const OverlayTopRight = ({ children }: OverlayTopRightProps) => {
   if (!children) return null;
 
   return (
     <div className="absolute right-2 top-2 z-30 pointer-events-none">
       <div
-        className="pointer-events-auto flex flex-col items-end gap-2"
+        className="pointer-events-auto flex max-w-full flex-col items-end gap-2"
         data-card-no-flip="true"
         onClick={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
@@ -171,9 +191,7 @@ const OverlayTopRight = ({ children }: { children: React.ReactNode }) => {
 
 const EmbeddedEditorHeaderRight = ({
   mediaActions,
-}: {
-  mediaActions?: React.ReactNode;
-}) => {
+}: EmbeddedEditorHeaderRightProps) => {
   if (!mediaActions) return null;
 
   return (
@@ -213,9 +231,6 @@ const EmbeddedEditorFace = ({
 }: EmbeddedEditorFaceProps) => {
   const [toolbarMount, setToolbarMount] = useState<HTMLDivElement | null>(null);
   const isFluidDisplay = displayMode === "fluid";
-  const label = side === "question" ? "問題" : "解答";
-  const color = side === "question" ? "text-indigo-500" : "text-emerald-500";
-  const droppableId = side === "question" ? "question-blocks" : "answer-blocks";
 
   const topAttachment = showToolbar ? (
     <div className="relative h-0 w-full overflow-visible pointer-events-none">
@@ -274,9 +289,9 @@ const EmbeddedEditorFace = ({
             onChange={onBlocksChange}
             selectionScopeKey={selectionScopeKey}
             prefix={side}
-            label={label}
-            color={color}
-            droppableId={droppableId}
+            label={resolveFaceLabel(side)}
+            color={resolveFaceColorClassName(side)}
+            droppableId={resolveFaceDroppableId(side)}
             accentColor={accentColor}
             duplicateToOpposite={duplicateToOpposite}
             hideToolbar={!showToolbar}
@@ -403,7 +418,7 @@ export const DesktopEmbeddedCardEditorSurface = ({
     return 14 / safeScale;
   }, []);
 
-  const sharedCornerActions = useMemo(
+  const splitCornerActions = useMemo(
     () =>
       selectedCardEntity ? (
         <CardCornerActions
@@ -546,7 +561,7 @@ export const DesktopEmbeddedCardEditorSurface = ({
       displayMode={displayMode}
       fixedScale={metrics.sideFixedScale}
       contentZoom={metrics.sideContentZoom}
-      actionsTopLeft={sharedCornerActions}
+      actionsTopLeft={splitCornerActions}
       actionsTopRight={
         <EmbeddedEditorHeaderRight mediaActions={questionMediaActions} />
       }
@@ -573,7 +588,7 @@ export const DesktopEmbeddedCardEditorSurface = ({
       displayMode={displayMode}
       fixedScale={metrics.sideFixedScale}
       contentZoom={metrics.sideContentZoom}
-      actionsTopLeft={sharedCornerActions}
+      actionsTopLeft={splitCornerActions}
       actionsTopRight={
         <EmbeddedEditorHeaderRight mediaActions={answerMediaActions} />
       }
@@ -589,18 +604,23 @@ export const DesktopEmbeddedCardEditorSurface = ({
   );
 
   const activeFlipSide: Side = isFlipped ? "answer" : "question";
+  const flipBlocks = activeFlipSide === "question" ? frontBlocks : backBlocks;
   const flipMediaActions =
     activeFlipSide === "question" ? questionMediaActions : answerMediaActions;
+  const handleFlipBlocksChange =
+    activeFlipSide === "question"
+      ? handleQuestionBlocksChange
+      : handleAnswerBlocksChange;
+  const handleFlipMinHeightChange =
+    activeFlipSide === "question"
+      ? layout.handleQuestionMinHeightChange
+      : layout.handleAnswerMinHeightChange;
 
   const flipFace = (
     <EmbeddedEditorFace
       side={activeFlipSide}
-      blocks={activeFlipSide === "question" ? frontBlocks : backBlocks}
-      onBlocksChange={
-        activeFlipSide === "question"
-          ? handleQuestionBlocksChange
-          : handleAnswerBlocksChange
-      }
+      blocks={flipBlocks}
+      onBlocksChange={handleFlipBlocksChange}
       selectionScopeKey={normalizedSelectedCardId}
       accentColor={controllerSettings?.accentColor}
       duplicateToOpposite={controllerSettings?.duplicateToOpposite}
@@ -627,11 +647,7 @@ export const DesktopEmbeddedCardEditorSurface = ({
         </>
       }
       onHeightChange={handleEditorHeightChange}
-      onMinHeightChange={
-        activeFlipSide === "question"
-          ? layout.handleQuestionMinHeightChange
-          : layout.handleAnswerMinHeightChange
-      }
+      onMinHeightChange={handleFlipMinHeightChange}
       onResizeStart={handleResizeStart}
       onResizeEnd={handleResizeEnd}
     />
