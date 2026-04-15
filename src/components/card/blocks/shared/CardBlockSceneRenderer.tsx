@@ -6,8 +6,10 @@ import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
 import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
-import { MarkdownBlock } from "@/components/card/blocks/markdown/MarkdownBlock";
-import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
+import {
+  MarkdownBlockContent,
+  type MarkdownReplaceBlock,
+} from "@/components/card/blocks/markdown/MarkdownBlockContent";
 import { MathEditorDialog } from "@/components/card/blocks/math/MathEditorDialog";
 import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
 import { QuestionBlockContent } from "@/components/card/blocks/question/QuestionBlockContent";
@@ -28,9 +30,7 @@ import type { MathBlockData } from "@/types/domain/base";
 import type { CardBlock } from "@/types/domain/card";
 import { Code, HelpCircle, NotebookPen, Sigma, Type } from "@/ui/icons";
 
-export type CardBlockLayoutReplaceBlock =
-  | { type: "markdown"; markdown: string }
-  | { type: "code"; code: { language: string; code: string } };
+export type CardBlockLayoutReplaceBlock = MarkdownReplaceBlock;
 
 export type ViewerProps = Readonly<{
   questionDisplayMode: "always" | "tap_to_reveal";
@@ -544,35 +544,6 @@ const MathBlockScene = ({
     [block.id, editorProps],
   );
 
-  const preview = (
-    <div className="w-full max-w-full overflow-visible space-y-1.5 px-2 py-0.5">
-      {renderGridOffsetSpacer(meta.gridOffsetPx)}
-      <MathBlockPreviewPane
-        latex={latex}
-        displayMode={mathData.displayMode || "block"}
-        className={cn(
-          "rounded-lg",
-          mode === "edit" && "transition-colors hover:bg-slate-50",
-        )}
-        interactive={mode === "edit"}
-        onActivate={mode === "edit" ? () => setIsEditorOpen(true) : undefined}
-        showPlaceholder={mode === "edit"}
-        placeholder={mode === "edit" ? "数式を入力..." : undefined}
-        zoom={mode === "edit" ? editorProps?.zoom : viewerProps?.zoom}
-      />
-      {mode === "edit" && editorProps ? (
-        <MathEditorDialog
-          open={isEditorOpen}
-          onOpenChange={setIsEditorOpen}
-          data={mathData}
-          onChange={handleMathChange}
-          accentColor={editorProps.accentColor}
-          error={error}
-        />
-      ) : null}
-    </div>
-  );
-
   return (
     <SharedBlockShell
       mode={mode}
@@ -591,7 +562,32 @@ const MathBlockScene = ({
       canMoveDown={editorProps?.canMoveDown}
       dragHandleClassName="js-block-drag-handle"
     >
-      {preview}
+      <div className="w-full max-w-full overflow-visible space-y-1.5 px-2 py-0.5">
+        {renderGridOffsetSpacer(meta.gridOffsetPx)}
+        <MathBlockPreviewPane
+          latex={latex}
+          displayMode={mathData.displayMode || "block"}
+          className={cn(
+            "rounded-lg",
+            mode === "edit" && "transition-colors hover:bg-slate-50",
+          )}
+          interactive={mode === "edit"}
+          onActivate={mode === "edit" ? () => setIsEditorOpen(true) : undefined}
+          showPlaceholder={mode === "edit"}
+          placeholder={mode === "edit" ? "数式を入力..." : undefined}
+          zoom={mode === "edit" ? editorProps?.zoom : viewerProps?.zoom}
+        />
+        {mode === "edit" && editorProps ? (
+          <MathEditorDialog
+            open={isEditorOpen}
+            onOpenChange={setIsEditorOpen}
+            data={mathData}
+            onChange={handleMathChange}
+            accentColor={editorProps.accentColor}
+            error={error}
+          />
+        ) : null}
+      </div>
     </SharedBlockShell>
   );
 };
@@ -607,43 +603,49 @@ const MarkdownBlockScene = ({
   editorProps?: EditorProps;
   viewerProps?: ViewerProps;
 }>) => {
-  if (mode === "edit" && editorProps) {
-    return (
-      <MarkdownBlock
-        markdown={block.markdown || ""}
-        onChange={(markdown) =>
-          editorProps.onUpdateBlock(block.id, { markdown })
-        }
-        onDelete={editorProps.onDelete}
-        onDuplicate={editorProps.onDuplicate}
-        dragHandleClassName="js-block-drag-handle"
-        accentColor={editorProps.accentColor}
-        isActive={editorProps.isActive}
-        onMoveUp={editorProps.onMoveUp}
-        onMoveDown={editorProps.onMoveDown}
-        onMoveDragStart={editorProps.onMoveDragStart}
-        onMoveDragEnd={editorProps.onMoveDragEnd}
-        canMoveUp={editorProps.canMoveUp}
-        canMoveDown={editorProps.canMoveDown}
-        onReplaceWithBlocks={editorProps.onReplaceMarkdownWithBlocks}
-        zoom={editorProps.zoom}
-      />
-    );
-  }
+  const [isEditorOpen, setIsEditorOpen] = React.useState(false);
+  const markdown = block.markdown ?? "";
+  const isEmpty = markdown.trim().length === 0;
 
   return (
     <SharedBlockShell
-      mode="view"
-      className={cn(
-        "bg-transparent px-0 py-0",
-        (block.markdown ?? "").trim().length > 0 && "border-0",
-      )}
+      mode={mode}
+      className={cn("bg-transparent px-0 py-0", !isEmpty && "border-0")}
       contentClassName="px-0"
+      label="Markdown"
+      icon={NotebookPen}
+      accentColor={editorProps?.accentColor}
+      isActive={Boolean(editorProps?.isActive || isEditorOpen)}
+      onDelete={editorProps?.onDelete}
+      onDuplicate={editorProps?.onDuplicate}
+      onMoveUp={editorProps?.onMoveUp}
+      onMoveDown={editorProps?.onMoveDown}
+      onMoveDragStart={editorProps?.onMoveDragStart}
+      onMoveDragEnd={editorProps?.onMoveDragEnd}
+      canMoveUp={editorProps?.canMoveUp}
+      canMoveDown={editorProps?.canMoveDown}
+      dragHandleClassName="js-block-drag-handle"
     >
-      <MarkdownBlockDisplay
-        markdown={block.markdown ?? ""}
-        zoom={viewerProps?.zoom}
-      />
+      {mode === "edit" && editorProps ? (
+        <MarkdownBlockContent
+          mode="edit"
+          markdown={markdown}
+          open={isEditorOpen}
+          onOpenChange={setIsEditorOpen}
+          onChange={(nextMarkdown) =>
+            editorProps.onUpdateBlock(block.id, { markdown: nextMarkdown })
+          }
+          onReplaceWithBlocks={editorProps.onReplaceMarkdownWithBlocks}
+          accentColor={editorProps.accentColor}
+          zoom={editorProps.zoom}
+        />
+      ) : (
+        <MarkdownBlockContent
+          mode="view"
+          markdown={markdown}
+          zoom={viewerProps?.zoom}
+        />
+      )}
     </SharedBlockShell>
   );
 };

@@ -1,688 +1,688 @@
-import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
-import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
-import { BLOCK_BODY_TEXT_COLOR_CLASS } from "@/components/card/blocks/text/textBlockStyles";
+import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
+import { MarkdownEditorDialog } from "@/components/card/blocks/markdown/MarkdownEditorDialog";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import {
-  buildTypographyStyle,
-  mergeStyles,
-  scaleTypographyNumberPx,
-} from "@/components/card/common/cardSetViewZoom";
-import { cn } from "@/lib/utils";
-import React, { useMemo } from "react";
-import ReactMarkdown, { type Components } from "react-markdown";
-import remarkBreaks from "remark-breaks";
-import remarkGfm from "remark-gfm";
+  clampMarkdownTabSize,
+  normalizeMarkdownEditorValue,
+  normalizeMarkdownInsertionText,
+  resolveMarkdownTabKeyText,
+} from "@/utils/markdownWhitespace";
+import React from "react";
 
-const TYPE = {
-  body: { fontSize: 16, lineHeight: 24 },
-  h1: { fontSize: 40, lineHeight: 52 },
-  h2: { fontSize: 32, lineHeight: 44 },
-  h3: { fontSize: 26, lineHeight: 36 },
-  h4: { fontSize: 20, lineHeight: 30 },
-  code: { fontSize: 14, lineHeight: 22 },
-} as const;
+export type MarkdownReplaceBlock =
+  | { type: "markdown"; markdown: string }
+  | { type: "code"; code: { language: string; code: string } };
 
-const ALLOW_MARKDOWN_IMAGES = false;
+export type MarkdownReplaceFocus = Readonly<{
+  relativeIndex: number;
+}>;
 
-const ALLOWED_IMAGE_HOSTS = new Set<string>([
-  // "cdn.yourapp.com",
-]);
+type MarkdownBlockContentProps =
+  | Readonly<{
+      mode: "view";
+      markdown: string;
+      zoom?: number;
+    }>
+  | Readonly<{
+      mode: "edit";
+      markdown: string;
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
+      onChange: (next: string) => void;
+      onReplaceWithBlocks?: (
+        blocks: MarkdownReplaceBlock[],
+        focus?: MarkdownReplaceFocus,
+      ) => void;
+      accentColor?: string;
+      zoom?: number;
+    }>;
 
-const ALLOWED_IMAGE_PATH_PREFIXES = ["/uploads/"] as const;
+const MAX_LENGTH = 50000;
 
-const BLANK_LINE_PLACEHOLDER = "__MD_BLANK_LINE_PLACEHOLDER__";
-
-const extractTextDeep = (node: React.ReactNode): string => {
-  if (node == null || typeof node === "boolean") return "";
-  if (typeof node === "string" || typeof node === "number") return String(node);
-  if (Array.isArray(node)) return node.map(extractTextDeep).join("");
-  if (React.isValidElement(node)) {
-    const element = node as React.ReactElement<{ children?: React.ReactNode }>;
-    return extractTextDeep(element.props.children);
+const validateBlocksLength = (blocks: MarkdownReplaceBlock[]) => {
+  for (const block of blocks) {
+    const length =
+      block.type === "markdown"
+        ? block.markdown.length
+        : block.code.code.length;
+    if (length > MAX_LENGTH) return false;
   }
-  return "";
+  return true;
 };
 
-const preserveExtraBlankLines = (input: string): string => {
-  const normalized = input.replace(/\r\n/g, "\n");
+const htmlToPlainText = (html: string) => {
+  if (typeof document === "undefined") return "";
+  try {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || "";
+  } catch {
+    return "";
+  }
+};
+
+const restoreCaret = (textarea: HTMLTextAreaElement, pos: number) => {
+  requestAnimationFrame(() => {
+    try {
+      textarea.focus();
+      textarea.setSelectionRange(pos, pos);
+    } catch (error) {
+      void error;
+    }
+  });
+};
+
+const isProbablyCode = (value: string) => {
+  const source = String(value ?? "").trim();
+  if (!source) return false;
+
+  if (/```|~~~/.test(source)) return true;
+  if (/^\s*<\w+[\s>]/m.test(source)) return true;
+  if (
+    /\b(className|function|const|let|var|import|export|return)\b/.test(source)
+  ) {
+    return true;
+  }
+  if (/[{}();]|=>/.test(source)) return true;
+
+  return false;
+};
+
+const looksLikeHtmlBlockCandidate = (value: string) => {
+  return /^\s*<\w+[\s>]/.test(String(value ?? ""));
+};
+
+const detectLang = (plain: string, html: string) => {
+  const match = html?.match(/language-([a-z0-9_+-]+)/i);
+  if (match?.[1]) return match[1];
+
+  if (/\bclassName=/.test(plain) || /^\s*</m.test(plain)) return "tsx";
+  if (/\binterface\b|\btype\b|\bimplements\b/.test(plain)) return "ts";
+  return "text";
+};
+
+const isFenceStart = (text: string) => {
+  const normalized = String(text ?? "").replace(/\r\n/g, "\n");
+  const lines = normalized.split("\n");
+  let index = 0;
+
+  while (index < lines.length && (lines[index]?.trim().length ?? 0) === 0) {
+    index += 1;
+  }
+
+  if (index >= lines.length) return false;
+  return /^( {0,3})(`{3,}|~{3,})/.test(lines[index] ?? "");
+};
+
+const computeFocusOffsetInInsertText = (insertText: string) => {
+  const normalized = String(insertText ?? "").replace(/\r\n/g, "\n");
   const lines = normalized.split("\n");
 
-  const out: string[] = [];
-  let blankRun = 0;
-  let inFence = false;
-  let fenceChar: "`" | "~" | "" = "";
+  let offset = 0;
 
-  const flushBlankRun = () => {
-    if (blankRun === 0) return;
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index] ?? "";
+    const isLast = index === lines.length - 1;
 
-    out.push("");
-
-    for (let index = 1; index < blankRun; index += 1) {
-      out.push(BLANK_LINE_PLACEHOLDER);
-      out.push("");
+    if (line.trim().length === 0) {
+      offset += line.length + (isLast ? 0 : 1);
+      continue;
     }
 
-    blankRun = 0;
+    const match = line.match(/^( {0,3})(`{3,}|~{3,})/);
+    if (match) {
+      return offset + (match[1]?.length ?? 0);
+    }
+
+    return offset;
+  }
+
+  return 0;
+};
+
+const normalizeFenceBoundaries = (
+  insertText: string,
+  ctx: { atLineStart: boolean; atLineEnd: boolean },
+): { text: string; focusOffset: number } => {
+  if (!isFenceStart(insertText)) {
+    return { text: insertText, focusOffset: 0 };
+  }
+
+  let nextText = insertText;
+
+  if (!ctx.atLineStart && !/^\r?\n/.test(nextText)) {
+    nextText = `\n${nextText}`;
+  }
+
+  if (!ctx.atLineEnd && !/\r?\n$/.test(nextText)) {
+    nextText = `${nextText}\n`;
+  }
+
+  return {
+    text: nextText,
+    focusOffset: computeFocusOffsetInInsertText(nextText),
+  };
+};
+
+const wrapFence = (code: string, lang: string) => {
+  const normalized = String(code ?? "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\n+$/g, "");
+  return `\`\`\`${lang}\n${normalized}\n\`\`\`\n`;
+};
+
+const extractPreTextFromHtml = (html: string) => {
+  if (typeof document === "undefined") return "";
+  try {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+
+    const pre = div.querySelector("pre");
+    const code = pre?.querySelector("code");
+
+    if (code?.textContent) return code.textContent;
+    if (pre?.textContent) return pre.textContent;
+
+    return div.textContent || div.innerText || "";
+  } catch {
+    return "";
+  }
+};
+
+type BlockRange = Readonly<{
+  start: number;
+  end: number;
+  type: MarkdownReplaceBlock["type"];
+}>;
+
+const pickBlockIndexByPos = (ranges: BlockRange[], pos: number) => {
+  for (let index = 0; index < ranges.length; index += 1) {
+    const range = ranges[index];
+    if (!range) continue;
+    if (pos >= range.start && pos < range.end) return index;
+  }
+  return Math.max(0, ranges.length - 1);
+};
+
+const parseAndSplitFencesWithRanges = (
+  markdown: string,
+): { blocks: MarkdownReplaceBlock[]; ranges: BlockRange[] } => {
+  const normalizedMarkdown = markdown.replace(/\r\n/g, "\n");
+  const lines = normalizedMarkdown.split("\n");
+
+  const blocks: MarkdownReplaceBlock[] = [];
+  const ranges: BlockRange[] = [];
+
+  let markdownBuffer: string[] = [];
+  let markdownStart: number | null = null;
+
+  let insideFence = false;
+  let fenceIndent = "";
+  let markerChar: "`" | "~" | "" = "";
+  let markerLen = 0;
+  let lang = "";
+  let codeBuffer: string[] = [];
+  let fenceStart: number | null = null;
+
+  const openRe = /^( {0,3})(`{3,}|~{3,})([^\n]*)$/;
+
+  const flushMarkdown = (end: number) => {
+    if (markdownStart === null) return;
+
+    const text = markdownBuffer.join("\n").replace(/\n{3,}$/g, "\n\n");
+    if (text.trim().length > 0) {
+      blocks.push({ type: "markdown", markdown: text });
+      ranges.push({ start: markdownStart, end, type: "markdown" });
+    }
+
+    markdownBuffer = [];
+    markdownStart = null;
   };
 
-  for (const line of lines) {
-    const fenceMatch = line.match(/^\s*(`{3,}|~{3,})/);
+  let pos = 0;
 
-    if (fenceMatch) {
-      flushBlankRun();
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index] ?? "";
+    const lineStart = pos;
+    const lineEnd = pos + line.length;
+    const hasNewline = index < lines.length - 1;
+    const lineEndWithNewline = lineEnd + (hasNewline ? 1 : 0);
 
-      const currentFenceChar = fenceMatch[1]?.[0] as "`" | "~";
-      if (!inFence) {
-        inFence = true;
-        fenceChar = currentFenceChar;
-      } else if (fenceChar === currentFenceChar) {
-        inFence = false;
-        fenceChar = "";
+    if (!insideFence) {
+      const match = line.match(openRe);
+      if (!match) {
+        if (markdownStart === null) markdownStart = lineStart;
+        markdownBuffer.push(line);
+        pos = lineEndWithNewline;
+        continue;
       }
 
-      out.push(line);
+      const indent = match[1] ?? "";
+      const marker = match[2] ?? "";
+      const infoRaw = (match[3] ?? "").trim();
+      const ch = marker[0] as "`" | "~";
+
+      if (ch === "`" && infoRaw.includes("`")) {
+        if (markdownStart === null) markdownStart = lineStart;
+        markdownBuffer.push(line);
+        pos = lineEndWithNewline;
+        continue;
+      }
+
+      flushMarkdown(lineStart);
+
+      insideFence = true;
+      fenceIndent = indent;
+      markerChar = ch;
+      markerLen = marker.length;
+      lang = infoRaw.split(/\s+/)[0] ?? "";
+      codeBuffer = [];
+      fenceStart = lineStart;
+
+      pos = lineEndWithNewline;
       continue;
     }
 
-    if (!inFence && line.trim() === "") {
-      blankRun += 1;
-      continue;
-    }
+    const closeRe = new RegExp(`^ {0,3}${markerChar}{${markerLen},}[ \t]*$`);
+    if (markerChar && closeRe.test(line)) {
+      const raw = codeBuffer.join("\n");
+      const dedented =
+        fenceIndent.length > 0
+          ? raw
+              .split("\n")
+              .map((value) =>
+                value.startsWith(fenceIndent)
+                  ? value.slice(fenceIndent.length)
+                  : value,
+              )
+              .join("\n")
+          : raw;
 
-    flushBlankRun();
-    out.push(line);
-  }
-
-  flushBlankRun();
-  return out.join("\n");
-};
-
-const hasControlChars = (s: string) => /\p{Cc}/u.test(s);
-const hasWhitespace = (s: string) => /\s/.test(s);
-
-const rebuildMailtoQuery = (rawQuery: string): string => {
-  const safe = rawQuery.replace(/#/g, "%23");
-  const pairs = safe.split("&");
-  const out: string[] = [];
-
-  for (const pair of pairs) {
-    if (!pair) continue;
-
-    const eq = pair.indexOf("=");
-    const keyRaw = eq >= 0 ? pair.slice(0, eq) : pair;
-    const valueRaw = eq >= 0 ? pair.slice(eq + 1) : "";
-
-    const safeDecode = (value: string) => {
-      try {
-        return decodeURIComponent(value);
-      } catch {
-        return value;
-      }
-    };
-
-    const key = safeDecode(keyRaw);
-    const value = safeDecode(valueRaw);
-    const encode = (source: string) => encodeURIComponent(source);
-
-    if (eq >= 0) {
-      out.push(`${encode(key)}=${encode(value)}`);
-    } else {
-      out.push(encode(key));
-    }
-  }
-
-  return out.join("&");
-};
-
-const sanitizeLinkHref = (href: string | undefined): string | null => {
-  if (!href) return null;
-
-  const raw = href.trim();
-  if (!raw || hasControlChars(raw)) return null;
-  if (raw.startsWith("//")) return null;
-
-  if (raw.startsWith("/") || raw.startsWith("#")) {
-    return hasWhitespace(raw) ? null : raw;
-  }
-
-  const lower = raw.toLowerCase();
-
-  if (lower.startsWith("tel:")) {
-    const after = raw.slice(4);
-    if (/[?#]/.test(after)) return null;
-
-    const semi = after.indexOf(";");
-    const numPart = semi >= 0 ? after.slice(0, semi) : after;
-    const paramPartRaw = semi >= 0 ? after.slice(semi) : "";
-
-    const normalizedNum = numPart.replace(/[\s().-]+/g, "");
-    if (!normalizedNum) return null;
-    if (!/^\+?[0-9*#]+$/.test(normalizedNum)) return null;
-
-    const paramPart = paramPartRaw.replace(/\s+/g, "");
-    if (paramPart && !/^([;][A-Za-z0-9=._-]+)*$/.test(paramPart)) return null;
-
-    return `tel:${normalizedNum}${paramPart}`;
-  }
-
-  if (lower.startsWith("mailto:")) {
-    const after = raw.slice(7);
-    const qIndex = after.indexOf("?");
-    const address = qIndex >= 0 ? after.slice(0, qIndex) : after;
-    const rawQuery = qIndex >= 0 ? after.slice(qIndex + 1) : "";
-
-    if (hasControlChars(address) || hasWhitespace(address)) return null;
-    if (address && /[#?]/.test(address)) return null;
-
-    if (rawQuery) {
-      const rebuilt = rebuildMailtoQuery(rawQuery);
-      return `mailto:${address}?${rebuilt}`;
-    }
-
-    return `mailto:${address}`;
-  }
-
-  if (hasWhitespace(raw)) return null;
-
-  try {
-    const url = new URL(raw);
-    const isAllowedProtocol = ["http:", "https:"].includes(url.protocol);
-    return isAllowedProtocol ? url.toString() : null;
-  } catch {
-    return null;
-  }
-};
-
-const sanitizeImageSrc = (src: string): string | null => {
-  if (!src) return null;
-
-  const normalized = src.trim();
-  if (!normalized || hasControlChars(normalized) || hasWhitespace(normalized)) {
-    return null;
-  }
-
-  if (normalized.startsWith("//")) return null;
-
-  if (normalized.startsWith("/")) {
-    const isAllowedPath = ALLOWED_IMAGE_PATH_PREFIXES.some((prefix) =>
-      normalized.startsWith(prefix),
-    );
-    return isAllowedPath ? normalized : null;
-  }
-
-  try {
-    const url = new URL(normalized);
-
-    if (url.protocol !== "https:") return null;
-    if (!ALLOWED_IMAGE_HOSTS.has(url.hostname)) return null;
-
-    return url.toString();
-  } catch {
-    return null;
-  }
-};
-
-interface MarkdownBlockContentProps {
-  markdown: string;
-  align?: "left" | "center";
-  className?: string;
-  bleedX?: boolean;
-  zoom?: number;
-}
-
-export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
-  markdown,
-  align: _align,
-  className,
-  bleedX = false,
-  zoom,
-}) => {
-  void _align;
-
-  const bodyStyle = useMemo<React.CSSProperties>(
-    () =>
-      buildTypographyStyle({
-        fontSizePx: TYPE.body.fontSize,
-        lineHeightPx: TYPE.body.lineHeight,
-        zoom,
-      }),
-    [zoom],
-  );
-
-  const h1Style = useMemo<React.CSSProperties>(
-    () =>
-      buildTypographyStyle({
-        fontSizePx: TYPE.h1.fontSize,
-        lineHeightPx: TYPE.h1.lineHeight,
-        zoom,
-      }),
-    [zoom],
-  );
-
-  const h2Style = useMemo<React.CSSProperties>(
-    () =>
-      buildTypographyStyle({
-        fontSizePx: TYPE.h2.fontSize,
-        lineHeightPx: TYPE.h2.lineHeight,
-        zoom,
-      }),
-    [zoom],
-  );
-
-  const h3Style = useMemo<React.CSSProperties>(
-    () =>
-      buildTypographyStyle({
-        fontSizePx: TYPE.h3.fontSize,
-        lineHeightPx: TYPE.h3.lineHeight,
-        zoom,
-      }),
-    [zoom],
-  );
-
-  const h4Style = useMemo<React.CSSProperties>(
-    () =>
-      buildTypographyStyle({
-        fontSizePx: TYPE.h4.fontSize,
-        lineHeightPx: TYPE.h4.lineHeight,
-        zoom,
-      }),
-    [zoom],
-  );
-
-  const inlineCodeStyle = useMemo<React.CSSProperties>(
-    () =>
-      mergeStyles(
-        buildTypographyStyle({
-          fontSizePx: TYPE.code.fontSize,
-          lineHeightPx: TYPE.body.lineHeight,
-          zoom,
-        }),
-        {
-          whiteSpace: "normal",
+      blocks.push({
+        type: "code",
+        code: {
+          language: lang || "text",
+          code: dedented.replace(/\n+$/g, ""),
         },
-      ),
-    [zoom],
+      });
+      ranges.push({
+        start: fenceStart ?? lineStart,
+        end: lineEndWithNewline,
+        type: "code",
+      });
+
+      insideFence = false;
+      fenceIndent = "";
+      markerChar = "";
+      markerLen = 0;
+      lang = "";
+      codeBuffer = [];
+      fenceStart = null;
+
+      pos = lineEndWithNewline;
+      continue;
+    }
+
+    codeBuffer.push(line);
+    pos = lineEndWithNewline;
+  }
+
+  if (insideFence) {
+    return {
+      blocks: [{ type: "markdown", markdown: normalizedMarkdown }],
+      ranges: [{ start: 0, end: normalizedMarkdown.length, type: "markdown" }],
+    };
+  }
+
+  flushMarkdown(normalizedMarkdown.length);
+
+  if (blocks.length === 0) {
+    blocks.push({ type: "markdown", markdown: "" });
+    ranges.push({ start: 0, end: normalizedMarkdown.length, type: "markdown" });
+  }
+
+  return { blocks, ranges };
+};
+
+export const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
+  if (props.mode === "view") {
+    return (
+      <MarkdownBlockDisplay markdown={props.markdown ?? ""} zoom={props.zoom} />
+    );
+  }
+
+  const { settings } = useUserSettings();
+  const [error, setError] = React.useState<string | null>(null);
+
+  const markdownTabSize = clampMarkdownTabSize(settings?.markdownTabSize);
+  const normalizedMarkdown = React.useMemo(
+    () => normalizeMarkdownEditorValue(props.markdown, markdownTabSize),
+    [markdownTabSize, props.markdown],
   );
 
-  const renderedMarkdown = useMemo(
-    () => preserveExtraBlankLines(markdown),
-    [markdown],
+  const handleChange = React.useCallback(
+    (value: string) => {
+      const normalizedValue = normalizeMarkdownEditorValue(
+        value,
+        markdownTabSize,
+      );
+
+      if (normalizedValue.length > MAX_LENGTH) {
+        setError("Markdown文字列が長すぎます（最大50,000文字）");
+        return;
+      }
+
+      setError(null);
+      props.onChange(normalizedValue);
+    },
+    [markdownTabSize, props],
   );
 
-  const components = useMemo<Components>(
-    () => ({
-      h1: ({ children }) => (
-        <BlockSurface
-          ruled
-          ruledRowPx={scaleTypographyNumberPx(TYPE.h1.lineHeight, zoom)}
-          bleedX={bleedX}
-          padTopRows={1}
-          padBottomRows={1}
-        >
-          <h1 className="m-0 font-serif font-medium text-left" style={h1Style}>
-            {children}
-          </h1>
-        </BlockSurface>
-      ),
-      h2: ({ children }) => (
-        <BlockSurface
-          ruled
-          ruledRowPx={scaleTypographyNumberPx(TYPE.h2.lineHeight, zoom)}
-          bleedX={bleedX}
-          padTopRows={1}
-          padBottomRows={1}
-        >
-          <h2 className="m-0 font-serif font-medium text-left" style={h2Style}>
-            {children}
-          </h2>
-        </BlockSurface>
-      ),
-      h3: ({ children }) => (
-        <BlockSurface
-          ruled
-          ruledRowPx={scaleTypographyNumberPx(TYPE.h3.lineHeight, zoom)}
-          bleedX={bleedX}
-          padTopRows={1}
-          padBottomRows={1}
-        >
-          <h3 className="m-0 font-serif font-medium text-left" style={h3Style}>
-            {children}
-          </h3>
-        </BlockSurface>
-      ),
-      h4: ({ children }) => (
-        <BlockSurface
-          ruled
-          ruledRowPx={scaleTypographyNumberPx(TYPE.h4.lineHeight, zoom)}
-          bleedX={bleedX}
-          padTopRows={1}
-          padBottomRows={1}
-        >
-          <h4 className="m-0 font-serif font-medium text-left" style={h4Style}>
-            {children}
-          </h4>
-        </BlockSurface>
-      ),
-
-      p: ({ children }) => {
-        return (
-          <ParagraphRenderer
-            children={children}
-            bodyStyle={bodyStyle}
-            zoom={zoom}
-          />
-        );
+  const applyInsert = React.useCallback(
+    (
+      textarea: HTMLTextAreaElement,
+      insertText: string,
+      selectionStart: number,
+      selectionEnd: number,
+      {
+        attemptSplitFences,
+        focusPos,
+      }: {
+        attemptSplitFences: boolean;
+        focusPos?: number;
       },
+    ) => {
+      const merged =
+        props.markdown.slice(0, selectionStart) +
+        insertText +
+        props.markdown.slice(selectionEnd);
 
-      del: ({ children }) => <del className="line-through">{children}</del>,
-      hr: () => <HrRenderer />,
+      if (attemptSplitFences && props.onReplaceWithBlocks) {
+        const { blocks, ranges } = parseAndSplitFencesWithRanges(merged);
+        const hasCode = blocks.some((block) => block.type === "code");
 
-      a: ({ href, children, ...props }) => {
-        const safeHref = sanitizeLinkHref(
-          typeof href === "string" ? href : undefined,
+        if (hasCode) {
+          if (!validateBlocksLength(blocks)) {
+            setError("貼り付け内容が長すぎます（各ブロック最大50,000文字）");
+            return;
+          }
+
+          setError(null);
+
+          const pos = focusPos ?? selectionStart;
+          const relativeIndex = pickBlockIndexByPos(ranges, pos);
+          props.onReplaceWithBlocks(blocks, { relativeIndex });
+          return;
+        }
+      }
+
+      const normalizedMerged = normalizeMarkdownEditorValue(
+        merged,
+        markdownTabSize,
+      );
+      if (normalizedMerged.length > MAX_LENGTH) {
+        setError("貼り付け内容が長すぎます（1ブロック最大50,000文字）");
+        return;
+      }
+
+      handleChange(merged);
+      restoreCaret(textarea, selectionStart + insertText.length);
+    },
+    [handleChange, markdownTabSize, props],
+  );
+
+  const handlePasteCapture = React.useCallback(
+    async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      const clipboardData = event.clipboardData;
+      const html = clipboardData.getData("text/html");
+      const plain = clipboardData.getData("text/plain");
+
+      const textarea = event.currentTarget;
+      const baseLen = props.markdown.length;
+      const rawStart = Math.min(textarea.selectionStart ?? 0, baseLen);
+      const rawEnd = Math.min(textarea.selectionEnd ?? 0, baseLen);
+      const selectionStart = Math.min(rawStart, rawEnd);
+      const selectionEnd = Math.max(rawStart, rawEnd);
+
+      const prevChar =
+        selectionStart > 0 ? props.markdown[selectionStart - 1] : "";
+      const nextChar =
+        selectionEnd < props.markdown.length
+          ? props.markdown[selectionEnd]
+          : "";
+
+      const atLineStart =
+        selectionStart === 0 || prevChar === "\n" || prevChar === "\r";
+      const atLineEnd =
+        selectionEnd === props.markdown.length ||
+        nextChar === "\n" ||
+        nextChar === "\r";
+
+      if (plain && isProbablyCode(plain)) {
+        event.preventDefault();
+
+        const lang = detectLang(plain, html);
+        let insertText =
+          looksLikeHtmlBlockCandidate(plain) && !/```|~~~/.test(plain)
+            ? wrapFence(plain, lang)
+            : plain;
+
+        insertText = normalizeMarkdownInsertionText(
+          insertText,
+          markdownTabSize,
         );
+        const normalizedFence = normalizeFenceBoundaries(insertText, {
+          atLineStart,
+          atLineEnd,
+        });
 
-        if (!safeHref) {
-          return <span className="break-words">{children}</span>;
+        applyInsert(
+          textarea,
+          normalizedFence.text,
+          selectionStart,
+          selectionEnd,
+          {
+            attemptSplitFences: true,
+            focusPos: selectionStart + normalizedFence.focusOffset,
+          },
+        );
+        return;
+      }
+
+      if (html && html.trim()) {
+        event.preventDefault();
+
+        if (/<pre[\s>]/i.test(html)) {
+          const raw = plain || extractPreTextFromHtml(html);
+          const preText = normalizeMarkdownInsertionText(raw, markdownTabSize);
+          const lang = detectLang(preText, html);
+          const insertText = isFenceStart(preText)
+            ? preText
+            : wrapFence(preText, lang);
+
+          const normalizedFence = normalizeFenceBoundaries(insertText, {
+            atLineStart,
+            atLineEnd,
+          });
+
+          applyInsert(
+            textarea,
+            normalizedFence.text,
+            selectionStart,
+            selectionEnd,
+            {
+              attemptSplitFences: true,
+              focusPos: selectionStart + normalizedFence.focusOffset,
+            },
+          );
+          return;
         }
 
-        const isInternal = safeHref.startsWith("/") || safeHref.startsWith("#");
-        const isHttp =
-          safeHref.startsWith("http://") || safeHref.startsWith("https://");
+        try {
+          const { sanitizeAndConvertToMarkdown } =
+            await import("@/utils/markdownPaste");
 
-        return (
-          <a
-            {...props}
-            href={safeHref}
-            target={!isInternal && isHttp ? "_blank" : undefined}
-            rel={
-              !isInternal && isHttp
-                ? "noopener noreferrer nofollow ugc"
-                : undefined
-            }
-            className="break-words underline text-primary-600 hover:text-primary-800"
-          >
-            {children}
-          </a>
-        );
-      },
+          const markdownRaw = await sanitizeAndConvertToMarkdown(html);
+          const overEscaped =
+            /className=\\\"/.test(markdownRaw) ||
+            /\\_/.test(markdownRaw) ||
+            /\\</.test(markdownRaw);
 
-      img: ({ src = "", alt = "", title }) => {
-        if (!ALLOW_MARKDOWN_IMAGES) {
-          return (
-            <span className="text-slate-500">
-              [画像は画像ブロックで追加してください{alt ? `: ${alt}` : ""}]
-            </span>
+          const fallbackText = plain || htmlToPlainText(html);
+          let insertText =
+            markdownRaw && markdownRaw.trim().length > 0
+              ? markdownRaw
+              : fallbackText;
+
+          if (plain && overEscaped) {
+            insertText = fallbackText;
+          }
+
+          if (
+            looksLikeHtmlBlockCandidate(insertText) &&
+            !/```|~~~/.test(insertText)
+          ) {
+            insertText = wrapFence(insertText, detectLang(insertText, html));
+          }
+
+          insertText = normalizeMarkdownInsertionText(
+            insertText,
+            markdownTabSize,
+          );
+          const normalizedFence = normalizeFenceBoundaries(insertText, {
+            atLineStart,
+            atLineEnd,
+          });
+
+          applyInsert(
+            textarea,
+            normalizedFence.text,
+            selectionStart,
+            selectionEnd,
+            {
+              attemptSplitFences: true,
+              focusPos: selectionStart + normalizedFence.focusOffset,
+            },
+          );
+        } catch {
+          const fallbackText = plain || htmlToPlainText(html);
+          let insertText =
+            looksLikeHtmlBlockCandidate(fallbackText) &&
+            !/```|~~~/.test(fallbackText)
+              ? wrapFence(fallbackText, detectLang(fallbackText, html))
+              : fallbackText;
+
+          insertText = normalizeMarkdownInsertionText(
+            insertText,
+            markdownTabSize,
+          );
+          const normalizedFence = normalizeFenceBoundaries(insertText, {
+            atLineStart,
+            atLineEnd,
+          });
+
+          applyInsert(
+            textarea,
+            normalizedFence.text,
+            selectionStart,
+            selectionEnd,
+            {
+              attemptSplitFences: true,
+              focusPos: selectionStart + normalizedFence.focusOffset,
+            },
           );
         }
+        return;
+      }
 
-        const safeSrc = sanitizeImageSrc(src);
-        if (!safeSrc) {
-          return (
-            <span className="text-slate-500">
-              [許可されていない画像URLです]
-            </span>
+      if (plain) {
+        event.preventDefault();
+
+        const insertText = normalizeMarkdownInsertionText(
+          plain,
+          markdownTabSize,
+        );
+        if (/```|~~~/.test(insertText) && props.onReplaceWithBlocks) {
+          const normalizedFence = normalizeFenceBoundaries(insertText, {
+            atLineStart,
+            atLineEnd,
+          });
+
+          applyInsert(
+            textarea,
+            normalizedFence.text,
+            selectionStart,
+            selectionEnd,
+            {
+              attemptSplitFences: true,
+              focusPos: selectionStart + normalizedFence.focusOffset,
+            },
           );
+          return;
         }
 
-        return (
-          <img
-            src={safeSrc}
-            alt={alt}
-            title={title}
-            loading="lazy"
-            decoding="async"
-            referrerPolicy="no-referrer"
-            className="max-w-full rounded-lg"
-          />
-        );
-      },
+        applyInsert(textarea, insertText, selectionStart, selectionEnd, {
+          attemptSplitFences: false,
+        });
+      }
+    },
+    [applyInsert, markdownTabSize, props],
+  );
 
-      blockquote: ({ children }) => (
-        <BlockSurface
-          className="blockquoteNoRuled"
-          ruled={false}
-          bleedX={false}
-          background="var(--card-surface)"
-          contentClassName="blockquoteNoRuled"
-          padTopRows={1}
-          padBottomRows={1}
-          padLeftRows={0}
-          padRightRows={0}
-        >
-          <blockquote
-            className="markdownBlockquote m-0 border-l-4 border-slate-300 text-left italic"
-            style={mergeStyles(bodyStyle, {
-              paddingLeft: "var(--card-row-px)",
-            })}
-          >
-            {children}
-          </blockquote>
-        </BlockSurface>
-      ),
+  const handleKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (event.key !== "Tab") return;
 
-      ul: ({ children }) => (
-        <ListRenderer ordered={false}>{children}</ListRenderer>
-      ),
-      ol: ({ children }) => <ListRenderer ordered>{children}</ListRenderer>,
-      li: ({ children }) => (
-        <li className="m-0 text-left" style={bodyStyle}>
-          {children}
-        </li>
-      ),
+      event.preventDefault();
 
-      table: ({ children }) => (
-        <TableRenderer style={bodyStyle}>{children}</TableRenderer>
-      ),
-      thead: ({ children }) => (
-        <thead className="bg-slate-50">{children}</thead>
-      ),
-      tbody: ({ children }) => <tbody>{children}</tbody>,
-      tr: ({ children }) => (
-        <tr className="border-b border-slate-200">{children}</tr>
-      ),
-      th: ({ children }) => (
-        <th
-          className="whitespace-nowrap border border-slate-200 px-2 py-1 text-left font-semibold"
-          style={bodyStyle}
-        >
-          {children}
-        </th>
-      ),
-      td: ({ children }) => (
-        <td
-          className="align-top border border-slate-200 px-2 py-1 text-left"
-          style={bodyStyle}
-        >
-          {children}
-        </td>
-      ),
+      const textarea = event.currentTarget;
+      const baseLen = props.markdown.length;
+      const rawStart = Math.min(textarea.selectionStart ?? 0, baseLen);
+      const rawEnd = Math.min(textarea.selectionEnd ?? 0, baseLen);
+      const selectionStart = Math.min(rawStart, rawEnd);
+      const selectionEnd = Math.max(rawStart, rawEnd);
 
-      code: ({ className: codeClassName, children }) => {
-        const classStr = typeof codeClassName === "string" ? codeClassName : "";
-        const isBlockCode = classStr.includes("language-");
+      const insertText = resolveMarkdownTabKeyText(
+        props.markdown,
+        selectionStart,
+        markdownTabSize,
+      );
 
-        if (isBlockCode) {
-          return <code className={codeClassName}>{children}</code>;
-        }
-
-        return (
-          <code
-            className="inline rounded bg-red-50 px-1 py-0 align-baseline font-mono text-red-600 ring-1 ring-inset ring-red-100"
-            style={inlineCodeStyle}
-          >
-            {children}
-          </code>
-        );
-      },
-
-      pre: ({ children }) => {
-        const nodes = React.Children.toArray(children);
-        const firstElement = nodes.find((node): node is React.ReactElement =>
-          React.isValidElement(node),
-        );
-
-        if (!firstElement) {
-          const raw = extractTextDeep(children)
-            .replace(/\r\n/g, "\n")
-            .replace(/(?:\n)+$/, "");
-
-          return (
-            <MarkdownFencedCodeBlock
-              code={raw}
-              language="clike"
-              bleedX={bleedX}
-              zoom={zoom}
-            />
-          );
-        }
-
-        const childProps = firstElement.props as {
-          className?: string;
-          children?: React.ReactNode;
-        };
-
-        const classStr =
-          typeof childProps.className === "string" ? childProps.className : "";
-        const langMatch = /language-([^\s]+)/.exec(classStr);
-        const language = langMatch?.[1] ?? "clike";
-
-        const rawCode = extractTextDeep(childProps.children)
-          .replace(/\r\n/g, "\n")
-          .replace(/(?:\n)+$/, "");
-
-        return (
-          <MarkdownFencedCodeBlock
-            code={rawCode}
-            language={language}
-            bleedX={bleedX}
-            zoom={zoom}
-          />
-        );
-      },
-    }),
-    [
-      bleedX,
-      bodyStyle,
-      h1Style,
-      h2Style,
-      h3Style,
-      h4Style,
-      inlineCodeStyle,
-      zoom,
-    ],
+      applyInsert(textarea, insertText, selectionStart, selectionEnd, {
+        attemptSplitFences: false,
+      });
+    },
+    [applyInsert, markdownTabSize, props.markdown],
   );
 
   return (
-    <div
-      className={cn(
-        `markdown-block-view markdownBlockPreview markdownBlockCardView max-w-none font-serif font-medium ${BLOCK_BODY_TEXT_COLOR_CLASS} [font-variant-numeric:lining-nums_tabular-nums] [font-feature-settings:"lnum"_1]`,
-        "text-left",
-        "[&_*]:text-left",
-        "[&>*+*]:mt-[var(--card-row-px)]",
-        className,
-      )}
-      style={bodyStyle}
-    >
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkBreaks]}
-        components={components}
-      >
-        {renderedMarkdown}
-      </ReactMarkdown>
-    </div>
-  );
-};
+    <>
+      <MarkdownBlockDisplay
+        markdown={normalizedMarkdown}
+        interactive={true}
+        data-testid="markdown-preview"
+        tabIndex={0}
+        role="button"
+        ariaLabel="Markdownを編集"
+        onClick={() => props.onOpenChange(true)}
+        onKeyDown={(event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          props.onOpenChange(true);
+        }}
+        zoom={props.zoom}
+      />
 
-const ParagraphRenderer = ({
-  children,
-  bodyStyle,
-  zoom,
-}: {
-  children: React.ReactNode;
-  bodyStyle: React.CSSProperties;
-  zoom?: number;
-}) => {
-  const text = extractTextDeep(children);
-  const isBlankSpacer = text === BLANK_LINE_PLACEHOLDER;
-
-  return (
-    <BlockSurface
-      ruled
-      ruledRowPx={scaleTypographyNumberPx(TYPE.body.lineHeight, zoom)}
-    >
-      <p
-        data-markdown-paragraph="true"
-        aria-hidden={isBlankSpacer ? true : undefined}
-        className={cn(
-          "markdownParagraph m-0 border-none bg-transparent p-0 font-serif font-medium text-left break-words [overflow-wrap:anywhere]",
-          BLOCK_BODY_TEXT_COLOR_CLASS,
-          isBlankSpacer && "select-none text-transparent",
-        )}
-        style={bodyStyle}
-      >
-        {isBlankSpacer ? " " : children}
-      </p>
-    </BlockSurface>
-  );
-};
-
-const MarkdownFencedCodeBlock = ({
-  code,
-  language,
-  bleedX,
-  zoom,
-}: {
-  code: string;
-  language: string;
-  bleedX: boolean;
-  zoom?: number;
-}) => {
-  return (
-    <BlockSurface
-      ruled={false}
-      bleedX={bleedX}
-      background="var(--card-surface)"
-      className="m-0"
-    >
-      <CodeRenderer code={code} language={language} zoom={zoom} />
-    </BlockSurface>
-  );
-};
-
-const HrRenderer = () => {
-  return <hr className="m-0 border-slate-200" />;
-};
-
-const ListRenderer = ({
-  ordered,
-  children,
-}: {
-  ordered: boolean;
-  children: React.ReactNode;
-}) => {
-  const Tag = ordered ? "ol" : "ul";
-  const listClass = cn(
-    ordered ? "list-decimal list-outside" : "list-disc list-outside",
-    "m-0 pl-6 text-left space-y-0",
-    ordered ? "[&>li>ol]:pl-5 [&>li>ul]:pl-5" : "[&>li>ul]:pl-5 [&>li>ol]:pl-5",
-    ordered ? "[&>li>ol]:mt-0 [&>li>ul]:mt-0" : "[&>li>ul]:mt-0 [&>li>ol]:mt-0",
-  );
-
-  return <Tag className={listClass}>{children}</Tag>;
-};
-
-const TableRenderer = ({
-  children,
-  style,
-}: {
-  children: React.ReactNode;
-  style: React.CSSProperties;
-}) => {
-  return (
-    <div className="m-0 overflow-x-auto">
-      <table className="w-full border-collapse text-left" style={style}>
-        {children}
-      </table>
-    </div>
+      <MarkdownEditorDialog
+        open={props.open}
+        onOpenChange={props.onOpenChange}
+        value={normalizedMarkdown}
+        onChange={handleChange}
+        onPasteCapture={handlePasteCapture}
+        onKeyDown={handleKeyDown}
+        accentColor={props.accentColor}
+        error={error}
+      />
+    </>
   );
 };
