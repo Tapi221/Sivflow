@@ -19,7 +19,7 @@ import {
 } from "@/components/card/editor/CardEditorPaneStates";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
-import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";
+import { Flashcard } from "@/components/card/frame/Flashcard";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
 import {
   buildCardChromeClassName,
@@ -41,14 +41,15 @@ import {
 } from "@/components/folder/panes/useCardEditorPaneWidth";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
+import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
 import {
   buildCardRenderSpec,
   resolveCardContentZoom,
+  resolveCardDisablesFrameScale,
   resolveCardSurfaceScale,
+  resolveCardUsesStretchWidth,
 } from "@/features/cardrender/domain/cardRenderSpec";
-import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
-import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
-import { ViewCardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/ViewCardFaceScene";
 import { cn } from "@/lib/utils";
 import type { Card, CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
@@ -87,9 +88,12 @@ interface CardEditorPaneProps {
   zoom?: number;
 }
 
-type CardEditorViewOverlayProps = Readonly<{
-  onEdit: () => void;
-}>;
+type FlashcardCardLike = Record<string, unknown> & {
+  id?: string;
+  title?: string;
+  hasUncertainty?: boolean;
+  isBookmarked?: boolean;
+};
 
 const CARD_PANE_AUTO_MAX_SCALE = 4;
 const EMPTY_BLOCKS: CardBlock[] = [];
@@ -100,25 +104,59 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const isCardEntity = (value: unknown): value is Card =>
   isRecord(value) && typeof value.id === "string";
 
+const toFlashcardCardLike = (card: unknown): FlashcardCardLike =>
+  (isRecord(card) ? card : {}) as FlashcardCardLike;
+
 const toTimeMs = (value: unknown): number | null => {
   return toMillisOrNull(value);
 };
 
-const CardEditorViewOverlay = ({ onEdit }: CardEditorViewOverlayProps) => {
+const getSettingsAccentColor = (value: unknown): string | undefined =>
+  isRecord(value) && typeof value.accentColor === "string"
+    ? value.accentColor
+    : undefined;
+
+const getSettingsDuplicateToOpposite = (
+  value: unknown,
+): boolean | undefined =>
+  isRecord(value) && typeof value.duplicateToOpposite === "boolean"
+    ? value.duplicateToOpposite
+    : undefined;
+
+const toAudioDialogUrl = (value: unknown): string | null => {
+  if (typeof value === "string") {
+    return value.trim() === "" ? null : value;
+  }
+
+  if (!isRecord(value)) return null;
+
+  const candidates = [value.url, value.remoteUrl, value.localUrl];
+  const resolved = candidates.find(
+    (candidate): candidate is string =>
+      typeof candidate === "string" && candidate.trim() !== "",
+  );
+
+  return resolved ?? null;
+};
+
+type OverlayTopRightProps = Readonly<{
+  children?: React.ReactNode;
+}>;
+
+const OverlayTopRight = ({ children }: OverlayTopRightProps) => {
+  if (!children) return null;
+
   return (
-    <CardOverlayTopRight>
-      <button
-        type="button"
-        className="inline-flex h-8 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 px-3 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur-[2px] transition hover:bg-white"
+    <div className="pointer-events-none absolute right-2 top-2 z-30">
+      <div
+        className="pointer-events-auto flex max-w-full flex-col items-end gap-2"
         data-card-no-flip="true"
-        onClick={(event) => {
-          event.stopPropagation();
-          onEdit();
-        }}
+        onClick={(event) => event.stopPropagation()}
+        onPointerDown={(event) => event.stopPropagation()}
       >
-        編集
-      </button>
-    </CardOverlayTopRight>
+        {children}
+      </div>
+    </div>
   );
 };
 
@@ -144,6 +182,9 @@ type EditorSidePaneProps = {
   showResizeHandle: boolean;
   displayMode: CardDisplayMode;
   frameFixedScale?: number;
+  frameDisableScale: boolean;
+  frameStretchWidth: boolean;
+  frameRuled: boolean;
   contentZoom: number;
   editorCardHeightPx: number | null;
   enableHeightResize: boolean;
@@ -178,6 +219,9 @@ const EditorSidePaneInner = ({
   showResizeHandle,
   displayMode,
   frameFixedScale,
+  frameDisableScale: _frameDisableScale,
+  frameStretchWidth: _frameStretchWidth,
+  frameRuled: _frameRuled,
   contentZoom,
   editorCardHeightPx,
   enableHeightResize,
@@ -189,6 +233,10 @@ const EditorSidePaneInner = ({
   actionsTopRight,
   overlayTopRight,
 }: EditorSidePaneProps) => {
+  void _frameDisableScale;
+  void _frameStretchWidth;
+  void _frameRuled;
+
   const frameClassName = cn(
     buildCardShellClassName(presentationState),
     displayMode === "fluid" &&
@@ -250,7 +298,7 @@ const EditorSidePaneInner = ({
             actionsTopRight={actionsTopRight}
             overlay={
               overlayTopRight ? (
-                <CardOverlayTopRight>{overlayTopRight}</CardOverlayTopRight>
+                <OverlayTopRight>{overlayTopRight}</OverlayTopRight>
               ) : undefined
             }
             resizable={enableHeightResize}
@@ -313,6 +361,9 @@ const areEditorSidePanePropsEqual = (
   prev.showResizeHandle === next.showResizeHandle &&
   prev.displayMode === next.displayMode &&
   prev.frameFixedScale === next.frameFixedScale &&
+  prev.frameDisableScale === next.frameDisableScale &&
+  prev.frameStretchWidth === next.frameStretchWidth &&
+  prev.frameRuled === next.frameRuled &&
   prev.contentZoom === next.contentZoom &&
   prev.editorCardHeightPx === next.editorCardHeightPx &&
   prev.enableHeightResize === next.enableHeightResize &&
@@ -431,6 +482,9 @@ export const CardEditorPane = ({
 
   const isFluidEditor = editorRenderSpec.surfaceMode === "fluid";
   const baseEditorContentZoom = resolveCardContentZoom(editorRenderSpec);
+  const editorFrameDisableScale =
+    resolveCardDisablesFrameScale(editorRenderSpec);
+  const editorFrameStretchWidth = resolveCardUsesStretchWidth(editorRenderSpec);
 
   const {
     manualResizeInProgressRef,
@@ -519,6 +573,7 @@ export const CardEditorPane = ({
     shouldReserveWidthControlSpace,
     shouldDockToolbarToCardTop,
     shouldShowInlineToolbarMount,
+    useTwoColumnEditorLayout,
     editorCardFitScale,
     activePaneWidthStyle,
     persistPaneWidth,
@@ -549,6 +604,19 @@ export const CardEditorPane = ({
 
   const selectedCardEntity = isCardEntity(selectedCard) ? selectedCard : null;
   const panelCardEntity = isCardEntity(panelCard) ? panelCard : null;
+  const flashcardCard = selectedCard ? toFlashcardCardLike(selectedCard) : null;
+
+  const editorAccentColor = getSettingsAccentColor(settings);
+  const editorDuplicateToOpposite =
+    getSettingsDuplicateToOpposite(settings);
+
+  const getDialogAudioUrls = useCallback(
+    (side: "question" | "answer") =>
+      getDialogAudios(side)
+        .map((item) => toAudioDialogUrl(item))
+        .filter((item): item is string => item !== null),
+    [getDialogAudios],
+  );
 
   const editorFrameFixedScale = useMemo(() => {
     if (isFluidEditor) return undefined;
@@ -562,7 +630,13 @@ export const CardEditorPane = ({
     );
   }, [editorCardFitScale, editorRenderSpec, isFluidEditor]);
 
-  const editorContentZoom = baseEditorContentZoom;
+  const isSplitEditorLayout =
+    cardLayoutMode === "split" && useTwoColumnEditorLayout;
+
+  const editorContentZoom =
+    isSplitEditorLayout && displayMode === "fluid"
+      ? Math.max(0.1, baseEditorContentZoom / 2)
+      : baseEditorContentZoom;
 
   const fallbackLastSyncedAtMs = useMemo(() => {
     return (
@@ -656,15 +730,17 @@ export const CardEditorPane = ({
     [handleToggleBookmark, handleToggleUncertainty, selectedCardEntity],
   );
 
-  const questionActionsTopRight = useMemo(
-    () => renderMediaDialogButtons("question"),
-    [renderMediaDialogButtons],
-  );
+  const questionBlocksForToolbar = draft?.frontBlocks;
+  const questionActionsTopRight = useMemo(() => {
+    void questionBlocksForToolbar;
+    return renderMediaDialogButtons("question");
+  }, [questionBlocksForToolbar, renderMediaDialogButtons]);
 
-  const answerActionsTopRight = useMemo(
-    () => renderMediaDialogButtons("answer"),
-    [renderMediaDialogButtons],
-  );
+  const answerBlocksForToolbar = draft?.backBlocks;
+  const answerActionsTopRight = useMemo(() => {
+    void answerBlocksForToolbar;
+    return renderMediaDialogButtons("answer");
+  }, [answerBlocksForToolbar, renderMediaDialogButtons]);
 
   if (!normalizedSelectedCardId && !isEditing) {
     return null;
@@ -733,7 +809,9 @@ export const CardEditorPane = ({
         }
         onDeleteLatestReviewLog={metaPanel.onDeleteLatestReviewLog}
         onUpdateReviewLogDuration={metaPanel.onUpdateReviewLogDuration}
-        onFlushAutosave={metaPanel.onFlushAutosave}
+        onFlushAutosave={() => {
+          void metaPanel.onFlushAutosave();
+        }}
         onTitleInputChange={metaPanel.onTitleInputChange}
         onUpdateTags={metaPanel.onUpdateTags}
         onToggleDraft={metaPanel.onToggleDraft}
@@ -776,8 +854,8 @@ export const CardEditorPane = ({
       label="問題"
       color="text-indigo-500"
       droppableId="question-blocks"
-      accentColor={settings?.accentColor}
-      duplicateToOpposite={settings?.duplicateToOpposite}
+      accentColor={editorAccentColor}
+      duplicateToOpposite={editorDuplicateToOpposite}
       hideToolbar={hideBlockToolbars}
       toolbarMount={toolbarMountQ}
       settings={settings}
@@ -791,6 +869,9 @@ export const CardEditorPane = ({
       showResizeHandle={showResizeHandleProp}
       displayMode={displayMode}
       frameFixedScale={editorFrameFixedScale}
+      frameDisableScale={editorFrameDisableScale}
+      frameStretchWidth={editorFrameStretchWidth}
+      frameRuled={!isFluidEditor}
       contentZoom={editorContentZoom}
       editorCardHeightPx={editorCardHeightPx}
       enableHeightResize={!isFluidEditor}
@@ -811,8 +892,8 @@ export const CardEditorPane = ({
       label="解答"
       color="text-emerald-500"
       droppableId="answer-blocks"
-      accentColor={settings?.accentColor}
-      duplicateToOpposite={settings?.duplicateToOpposite}
+      accentColor={editorAccentColor}
+      duplicateToOpposite={editorDuplicateToOpposite}
       hideToolbar={hideBlockToolbars}
       toolbarMount={toolbarMountA}
       settings={settings}
@@ -826,6 +907,9 @@ export const CardEditorPane = ({
       showResizeHandle={showResizeHandleProp}
       displayMode={displayMode}
       frameFixedScale={editorFrameFixedScale}
+      frameDisableScale={editorFrameDisableScale}
+      frameStretchWidth={editorFrameStretchWidth}
+      frameRuled={!isFluidEditor}
       contentZoom={editorContentZoom}
       editorCardHeightPx={editorCardHeightPx}
       enableHeightResize={!isFluidEditor}
@@ -867,8 +951,8 @@ export const CardEditorPane = ({
       droppableId={
         activeFlipSide === "question" ? "question-blocks" : "answer-blocks"
       }
-      accentColor={settings?.accentColor}
-      duplicateToOpposite={settings?.duplicateToOpposite}
+      accentColor={editorAccentColor}
+      duplicateToOpposite={editorDuplicateToOpposite}
       hideToolbar={hideBlockToolbars}
       toolbarMount={
         activeFlipSide === "question" ? toolbarMountQ : toolbarMountA
@@ -892,6 +976,9 @@ export const CardEditorPane = ({
       showResizeHandle={showResizeHandleProp}
       displayMode={displayMode}
       frameFixedScale={editorFrameFixedScale}
+      frameDisableScale={editorFrameDisableScale}
+      frameStretchWidth={editorFrameStretchWidth}
+      frameRuled={!isFluidEditor}
       contentZoom={editorContentZoom}
       editorCardHeightPx={editorCardHeightPx}
       enableHeightResize={!isFluidEditor}
@@ -922,7 +1009,13 @@ export const CardEditorPane = ({
 
   const editorPanelsNode = (
     <CardSurfaceLayout
-      cardLayoutMode={cardLayoutMode}
+      cardLayoutMode={
+        cardLayoutMode === "flip"
+          ? "flip"
+          : isSplitEditorLayout
+            ? "split"
+            : "stack"
+      }
       questionNode={questionEditorPane}
       answerNode={answerEditorPane}
       flipNode={flipEditorPane}
@@ -930,55 +1023,20 @@ export const CardEditorPane = ({
     />
   );
 
-  const readonlyQuestionNode = selectedCardEntity ? (
-    <ViewCardFaceScene
-      card={selectedCardEntity}
-      side="question"
-      displayMode={displayMode}
-      fixedScale={editorFrameFixedScale}
-      contentZoom={editorContentZoom}
-      headerIconVisualScale={1}
-      previewMode={true}
-      showInkLayer={displayMode === "fixed"}
-      drawMode={false}
-      inkEditingEnabled={false}
-    />
-  ) : null;
-
-  const readonlyAnswerNode = selectedCardEntity ? (
-    <ViewCardFaceScene
-      card={selectedCardEntity}
-      side="answer"
-      displayMode={displayMode}
-      fixedScale={editorFrameFixedScale}
-      contentZoom={editorContentZoom}
-      headerIconVisualScale={1}
-      previewMode={true}
-      showInkLayer={displayMode === "fixed"}
-      drawMode={false}
-      inkEditingEnabled={false}
-    />
-  ) : null;
-
-  const readonlyFlipNode = selectedCardEntity ? (
-    <ViewCardFaceScene
-      card={selectedCardEntity}
-      side={isFlipped ? "answer" : "question"}
-      displayMode={displayMode}
-      fixedScale={editorFrameFixedScale}
-      contentZoom={editorContentZoom}
-      headerIconVisualScale={1}
-      previewMode={false}
-      showInkLayer={displayMode === "fixed"}
-      drawMode={false}
-      inkEditingEnabled={false}
-      onFlip={() => setIsFlipped((prev) => !prev)}
-      onToggleBookmark={() => void handleToggleBookmark(selectedCardEntity)}
-      onToggleUncertainty={() =>
-        void handleToggleUncertainty(selectedCardEntity)
-      }
-    />
-  ) : null;
+  const readonlyEditButton = (
+    <button
+      type="button"
+      data-card-no-flip="true"
+      className="inline-flex h-7 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 px-2 text-[10px] font-semibold leading-none text-slate-700 shadow-sm backdrop-blur-[2px] hover:bg-white"
+      onClick={(event) => {
+        event.stopPropagation();
+        setIsEditing(true);
+      }}
+      onPointerDown={(event) => event.stopPropagation()}
+    >
+      編集
+    </button>
+  );
 
   return (
     <BlockEditModeContext.Provider value={true}>
@@ -1039,16 +1097,35 @@ export const CardEditorPane = ({
               {editorPanelsNode}
             </div>
           ) : (
-            selectedCardEntity && (
+            flashcardCard && (
               <div className="flex w-full justify-center">
-                <div className="relative w-full" style={activePaneWidthStyle}>
-                  <CardEditorViewOverlay onEdit={() => setIsEditing(true)} />
-                  <CardSurfaceLayout
-                    cardLayoutMode={cardLayoutMode}
-                    questionNode={readonlyQuestionNode}
-                    answerNode={readonlyAnswerNode}
-                    flipNode={readonlyFlipNode}
-                    className={pairGapClassName}
+                <div className="w-full" style={activePaneWidthStyle}>
+                  <Flashcard
+                    card={flashcardCard}
+                    isFlipped={isFlipped}
+                    onFlip={() => setIsFlipped((prev) => !prev)}
+                    onToggleBookmark={(cardLike) => {
+                      void cardLike;
+                      if (!selectedCardEntity) return;
+                      void handleToggleBookmark(selectedCardEntity);
+                    }}
+                    onToggleUncertainty={(cardLike) => {
+                      void cardLike;
+                      if (!selectedCardEntity) return;
+                      void handleToggleUncertainty(selectedCardEntity);
+                    }}
+                    extraHeaderRight={readonlyEditButton}
+                    displayMode={displayMode}
+                    allowUpscale
+                    maxScale={CARD_PANE_AUTO_MAX_SCALE}
+                    scaleMultiplier={1}
+                    fixedScale={editorFrameFixedScale}
+                    contentZoom={editorContentZoom}
+                    cardShellClassName={
+                      displayMode === "fluid"
+                        ? "border-none bg-transparent shadow-none"
+                        : undefined
+                    }
                   />
                 </div>
               </div>
@@ -1065,7 +1142,7 @@ export const CardEditorPane = ({
           setLinkDialogSide={setLinkDialogSide}
           getDialogImages={getDialogImages}
           setDialogImages={setDialogImages}
-          getDialogAudios={getDialogAudios}
+          getDialogAudios={getDialogAudioUrls}
           setDialogAudios={setDialogAudios}
           getReferenceItems={getReferenceItems}
           setReferenceItems={setReferenceItems}
