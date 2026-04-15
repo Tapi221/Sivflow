@@ -5,6 +5,7 @@ import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFolders } from "@/hooks/folder/useFolders";
 import type { Card, Folder } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
+import { toMillis } from "@/utils/toMillis";
 
 interface UseCardSetViewQueryOptions {
   folderId: string | null;
@@ -32,34 +33,11 @@ interface UseCardSetViewQueryResult {
   isLoading: boolean;
 }
 
-const toTime = (value: unknown) => {
-  if (value instanceof Date) {
-    return value.getTime();
-  }
-
-  if (typeof value === "number") {
-    return Number.isFinite(value) ? value : 0;
-  }
-
-  if (typeof value === "string") {
-    const parsed = new Date(value).getTime();
-    return Number.isFinite(parsed) ? parsed : 0;
-  }
-
-  if (
-    value &&
-    typeof value === "object" &&
-    "toMillis" in value &&
-    typeof (value as { toMillis?: unknown }).toMillis === "function"
-  ) {
-    const millis = (value as { toMillis: () => unknown }).toMillis();
-    return typeof millis === "number" && Number.isFinite(millis) ? millis : 0;
-  }
-
-  return 0;
+const toTime = (value: unknown): number => {
+  return toMillis(value);
 };
 
-const compareCards = (left: Card, right: Card) => {
+const compareCards = (left: Card, right: Card): number => {
   const leftOrder = left.orderIndex ?? 0;
   const rightOrder = right.orderIndex ?? 0;
 

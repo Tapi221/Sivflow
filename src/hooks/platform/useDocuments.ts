@@ -1,6 +1,7 @@
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
 import type { DocumentItem } from "@/types";
+import { normalizeDate } from "@/shared/codec/date";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useMemo, useState } from "react";
 
@@ -17,30 +18,10 @@ type UpdateDocumentOptions = {
   touchUpdatedAt?: boolean;
 };
 
-type TimestampLike = {
-  toDate: () => Date;
-};
-
-const isTimestampLike = (value: unknown): value is TimestampLike =>
-  typeof value === "object" &&
-  value !== null &&
-  "toDate" in value &&
-  typeof (value as { toDate?: unknown }).toDate === "function";
-
 const normalizeUpdatedAt = (
   value: DocumentItem["updatedAt"] | undefined,
 ): Date | undefined => {
-  if (!value) return undefined;
-  if (value instanceof Date) return value;
-  if (isTimestampLike(value)) {
-    const nextDate = value.toDate();
-    return nextDate instanceof Date ? nextDate : undefined;
-  }
-  if (typeof value === "string" || typeof value === "number") {
-    const nextDate = new Date(value);
-    return Number.isNaN(nextDate.getTime()) ? undefined : nextDate;
-  }
-  return undefined;
+  return normalizeDate(value) ?? undefined;
 };
 
 /**
@@ -67,17 +48,18 @@ export const useDocuments = (folderId?: string) => {
   const documents = useMemo(() => {
     if (!rawDocuments) return [];
 
-    let filtered = rawDocuments.filter((d) => {
-      const document = d as DocumentWithLegacyDelete;
-      return !(document.isDeleted ?? document.is_deleted ?? false);
+    let filtered = rawDocuments.filter((document) => {
+      const nextDocument = document as DocumentWithLegacyDelete;
+      return !(nextDocument.isDeleted ?? nextDocument.is_deleted ?? false);
     });
 
     if (folderId) {
-      filtered = filtered.filter((d) => d.folderId === folderId);
+      filtered = filtered.filter((document) => document.folderId === folderId);
     }
 
     return filtered.sort(
-      (a, b) => (Number(a.orderIndex) || 0) - (Number(b.orderIndex) || 0),
+      (left, right) =>
+        (Number(left.orderIndex) || 0) - (Number(right.orderIndex) || 0),
     );
   }, [rawDocuments, folderId]);
 

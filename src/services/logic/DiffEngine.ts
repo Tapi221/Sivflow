@@ -2,12 +2,7 @@ import type {
   FolderLike,
   IDiffEngine,
 } from "@/services/interfaces/ISyncService";
-
-type TimestampLike = {
-  toMillis?: () => number;
-  seconds?: number;
-  nanoseconds?: number;
-};
+import { toMillis } from "@/utils/toMillis";
 
 type PlainObject = Record<string, unknown>;
 
@@ -27,47 +22,6 @@ const isPlainObject = (value: unknown): value is PlainObject => {
 
 const asDiffableEntity = (value: unknown): DiffableEntity | null => {
   return isPlainObject(value) ? (value as DiffableEntity) : null;
-};
-
-/**
- * Firestore Timestamp / Date / number(ms or sec) / string(ISO) が混ざっても
- * 時刻比較が壊れないように number(ms) に正規化する。
- */
-const toMillis = (value: unknown): number => {
-  if (value == null) return 0;
-
-  if (typeof value === "number") {
-    if (!Number.isFinite(value)) return 0;
-    return value < 100_000_000_000
-      ? Math.floor(value * 1000)
-      : Math.floor(value);
-  }
-
-  if (value instanceof Date) {
-    const t = value.getTime();
-    return Number.isFinite(t) ? t : 0;
-  }
-
-  if (typeof value === "string") {
-    const t = Date.parse(value);
-    return Number.isFinite(t) ? t : 0;
-  }
-
-  if (typeof value === "object") {
-    const ts = value as TimestampLike;
-
-    if (typeof ts.toMillis === "function") {
-      const t = ts.toMillis();
-      return Number.isFinite(t) ? t : 0;
-    }
-
-    if (typeof ts.seconds === "number") {
-      const nanos = typeof ts.nanoseconds === "number" ? ts.nanoseconds : 0;
-      return Math.floor(ts.seconds * 1000 + nanos / 1_000_000);
-    }
-  }
-
-  return 0;
 };
 
 /**
@@ -209,9 +163,9 @@ export class DiffEngine implements IDiffEngine {
       if (visited.has(currentId)) return true;
       visited.add(currentId);
 
-      const parent = allFolders.find((f) => {
-        const id = "id" in f ? f.id : undefined;
-        const folderId = "folderId" in f ? f.folderId : undefined;
+      const parent = allFolders.find((folder) => {
+        const id = "id" in folder ? folder.id : undefined;
+        const folderId = "folderId" in folder ? folder.folderId : undefined;
         return id === currentId || folderId === currentId;
       });
 

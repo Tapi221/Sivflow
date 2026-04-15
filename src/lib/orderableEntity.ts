@@ -1,55 +1,52 @@
+import { toMillis } from "@/utils/toMillis";
+
 type OrderableEntitySelectors<T> = {
   getOrderIndex: (entity: T) => number | null | undefined;
-  getUpdatedAt: (entity: T) => Date | string | number | null | undefined;
-  getCreatedAt: (entity: T) => Date | string | number | null | undefined;
+  getUpdatedAt: (entity: T) => unknown;
+  getCreatedAt: (entity: T) => unknown;
   getName: (entity: T) => string | null | undefined;
   getId: (entity: T) => string | null | undefined;
 };
 
-const toTimestamp = (value: Date | string | number | null | undefined) => {
-  if (value instanceof Date) return value.getTime();
-  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
-  if (typeof value === "string") {
-    const parsed = new Date(value).getTime();
-    return Number.isNaN(parsed) ? 0 : parsed;
-  }
-  return 0;
+const toTimestamp = (value: unknown): number => {
+  return toMillis(value);
 };
 
-export const getOrderableOrderIndex = (
+export const getOrderableOrderIndex = <T>(
   entity: T,
   selectors: Pick<OrderableEntitySelectors<T>, "getOrderIndex">,
-) => {
+): number => {
   return selectors.getOrderIndex(entity) ?? 0;
 };
 
-export const compareOrderableEntities = (
-  a: T,
-  b: T,
+export const compareOrderableEntities = <T>(
+  left: T,
+  right: T,
   selectors: OrderableEntitySelectors<T>,
-) => {
+): number => {
   const orderCompare =
-    getOrderableOrderIndex(a, selectors) - getOrderableOrderIndex(b, selectors);
+    getOrderableOrderIndex(left, selectors) -
+    getOrderableOrderIndex(right, selectors);
   if (orderCompare !== 0) return orderCompare;
 
   const updatedCompare =
-    toTimestamp(selectors.getUpdatedAt(b)) -
-    toTimestamp(selectors.getUpdatedAt(a));
+    toTimestamp(selectors.getUpdatedAt(right)) -
+    toTimestamp(selectors.getUpdatedAt(left));
   if (updatedCompare !== 0) return updatedCompare;
 
   const createdCompare =
-    toTimestamp(selectors.getCreatedAt(b)) -
-    toTimestamp(selectors.getCreatedAt(a));
+    toTimestamp(selectors.getCreatedAt(right)) -
+    toTimestamp(selectors.getCreatedAt(left));
   if (createdCompare !== 0) return createdCompare;
 
-  const nameCompare = (selectors.getName(a) ?? "").localeCompare(
-    selectors.getName(b) ?? "",
+  const nameCompare = (selectors.getName(left) ?? "").localeCompare(
+    selectors.getName(right) ?? "",
     "ja",
   );
   if (nameCompare !== 0) return nameCompare;
 
-  return (selectors.getId(a) ?? "").localeCompare(
-    selectors.getId(b) ?? "",
+  return (selectors.getId(left) ?? "").localeCompare(
+    selectors.getId(right) ?? "",
     "ja",
   );
 };

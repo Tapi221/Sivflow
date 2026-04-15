@@ -4,31 +4,8 @@ import {
   type Folder,
   type SelectedExplorerItem,
 } from "@/types";
+import { normalizeDate } from "@/shared/codec/date";
 import { useCallback, useMemo } from "react";
-
-const toDate = (value: unknown): Date | null => {
-  if (value == null) return null;
-
-  if (
-    typeof value === "object" &&
-    "toDate" in value &&
-    typeof (value as { toDate: () => unknown }).toDate === "function"
-  ) {
-    const raw = (value as { toDate: () => unknown }).toDate();
-    return raw instanceof Date && !Number.isNaN(raw.getTime()) ? raw : null;
-  }
-
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value;
-  }
-
-  if (typeof value === "number" || typeof value === "string") {
-    const d = new Date(value);
-    return Number.isNaN(d.getTime()) ? null : d;
-  }
-
-  return null;
-};
 
 interface UseTreeViewDerivedStateParams {
   folders: Folder[];
@@ -101,8 +78,8 @@ export const useTreeViewDerivedState = ({
   const folderCards = useMemo(() => {
     if (!selectedFolderId) return [];
     return cards.filter((card) => {
-      const fid = card.folderId ?? card.folderId;
-      if (fid !== selectedFolderId) return false;
+      const folderId = card.folderId ?? card.folderId;
+      if (folderId !== selectedFolderId) return false;
       const isDeleted = card.isDeleted ?? card.isDeleted;
       return !isDeleted;
     });
@@ -110,7 +87,7 @@ export const useTreeViewDerivedState = ({
 
   const folderStats = useMemo(() => {
     const today = new Date();
-    const tDate = new Date(
+    const todayDate = new Date(
       today.getFullYear(),
       today.getMonth(),
       today.getDate(),
@@ -124,15 +101,19 @@ export const useTreeViewDerivedState = ({
       const isDraft = card.isDraft ?? card.isDraft;
 
       if (!isDraft) {
-        const reviewDate = toDate(card.nextReviewDate ?? card.nextReviewDate);
+        const reviewDate = normalizeDate(
+          card.nextReviewDate ?? card.nextReviewDate,
+        );
         if (reviewDate) {
-          const rDate = new Date(
+          const normalizedReviewDate = new Date(
             reviewDate.getFullYear(),
             reviewDate.getMonth(),
             reviewDate.getDate(),
           );
           if (
-            autoCarryOver ? rDate <= tDate : rDate.getTime() === tDate.getTime()
+            autoCarryOver
+              ? normalizedReviewDate <= todayDate
+              : normalizedReviewDate.getTime() === todayDate.getTime()
           ) {
             dueCount += 1;
           }
@@ -144,7 +125,7 @@ export const useTreeViewDerivedState = ({
         unlearnedCount += 1;
       }
 
-      const lastReview = toDate(card.lastReviewAt ?? card.lastReviewAt);
+      const lastReview = normalizeDate(card.lastReviewAt ?? card.lastReviewAt);
       if (lastReview && (!lastReviewedAt || lastReview > lastReviewedAt)) {
         lastReviewedAt = lastReview;
       }

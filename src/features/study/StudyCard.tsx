@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Volume2 } from "@/ui/icons";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import type { Card } from "@/types";
+import { toIsoStringOrNull } from "@/utils/toMillis";
 
 type FlashcardCardLike = ComponentProps<typeof Flashcard>["card"];
 
@@ -52,23 +53,20 @@ type Keyable = {
   createdAt?: unknown;
 };
 
-const stableKeyPart = (value: unknown) => {
+const stableKeyPart = (value: unknown): string => {
   if (typeof value === "string") return value;
   if (typeof value === "number") return String(value);
-  if (value instanceof Date) return value.toISOString();
-
-  if (typeof value === "object" && value) {
-    const obj = value as { toMillis?: () => number; toDate?: () => Date };
-    if (typeof obj.toMillis === "function") return String(obj.toMillis());
-    if (typeof obj.toDate === "function") return obj.toDate().toISOString();
-  }
-  return "";
+  return toIsoStringOrNull(value) ?? "";
 };
 
-const getCardKey = (card: Card) => {
-  const k = card as unknown as Keyable;
+const getCardKey = (card: Card): string => {
+  const keyable = card as unknown as Keyable;
   const direct =
-    k.id ?? k.cardId ?? k.docId ?? k.uid ?? stableKeyPart(k.createdAt);
+    keyable.id ??
+    keyable.cardId ??
+    keyable.docId ??
+    keyable.uid ??
+    stableKeyPart(keyable.createdAt);
   return direct && direct.length > 0 ? direct : "card";
 };
 
@@ -83,7 +81,6 @@ const StudyCard = (props: StudyCardProps) => {
     );
   }
 
-  // card が切り替わるたびに remount して state を初期化（setState in effect を避ける）
   return <StudyCardInner key={getCardKey(card)} {...props} card={card} />;
 };
 
@@ -125,11 +122,9 @@ const StudyCardInner = ({
     }, 100);
   };
 
-  // mount/unmount: 外部(タイマー)だけ管理。effect 本体で setState はしない。
   useEffect(() => {
     startTiming();
     return () => stopTiming();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const emitResult = (score: PracticeScore | ReviewScore) => {
@@ -159,25 +154,22 @@ const StudyCardInner = ({
       return;
     }
 
-    // answer -> timing: イベント内でリセット（effect 内 setState を避ける）
     setStudyPhase("timing");
     setElapsedTime(0);
     startTiming();
   };
 
-  // 縦ページャから Space/Enter でカードをめくるための外部トリガー
   useEffect(() => {
     if (!flipTrigger) return;
     handleFlip();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flipTrigger]);
 
   const renderPracticeButtons = () => (
     <div className="reviewRatingBar flex items-center justify-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <button
         className="w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
-        onClick={(e) => {
-          e.stopPropagation();
+        onClick={(event) => {
+          event.stopPropagation();
           emitResult("anxious");
         }}
       >
@@ -205,8 +197,8 @@ const StudyCardInner = ({
 
       <button
         className="w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
-        onClick={(e) => {
-          e.stopPropagation();
+        onClick={(event) => {
+          event.stopPropagation();
           emitResult("ok");
         }}
       >
@@ -238,8 +230,8 @@ const StudyCardInner = ({
     <div className="reviewRatingBar flex items-center justify-center gap-2 md:gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <button
         className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
-        onClick={(e) => {
-          e.stopPropagation();
+        onClick={(event) => {
+          event.stopPropagation();
           emitResult(0);
         }}
       >
@@ -269,8 +261,8 @@ const StudyCardInner = ({
       {showHard && (
         <button
           className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex hover:bg-[#FFFBF0] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={(event) => {
+            event.stopPropagation();
             emitResult(1);
           }}
         >
@@ -299,8 +291,8 @@ const StudyCardInner = ({
 
       <button
         className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
-        onClick={(e) => {
-          e.stopPropagation();
+        onClick={(event) => {
+          event.stopPropagation();
           emitResult(2);
         }}
       >
@@ -329,8 +321,8 @@ const StudyCardInner = ({
       {showEasy && (
         <button
           className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex hover:bg-[#EEFDF6] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={(event) => {
+            event.stopPropagation();
             emitResult(3);
           }}
         >
@@ -400,7 +392,6 @@ const StudyCardInner = ({
                     {reviewCount + 1}回目の復習
                   </Badge>
                 )}
-                {/* 「次回学習日」バッジは削除 */}
               </div>
             }
             extraFooter={

@@ -10,54 +10,12 @@ import {
   CALENDAR_WEEK_DAYS_MONDAY,
   CALENDAR_WEEK_DAYS_SUNDAY,
 } from "./calendarConstants";
+import { normalizeDate } from "@/shared/codec/date";
 
 type CalendarArrowKey = keyof typeof CALENDAR_ARROW_DIFF_MAP;
 
 export const toDate = (value: CalendarTimestampLike): Date | null => {
-  if (!value) return null;
-
-  if (
-    typeof value === "object" &&
-    "toDate" in value &&
-    typeof value.toDate === "function"
-  ) {
-    const nextDate = value.toDate();
-    return nextDate instanceof Date && !Number.isNaN(nextDate.getTime())
-      ? nextDate
-      : null;
-  }
-
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value;
-  }
-
-  if (typeof value === "object") {
-    const seconds =
-      typeof value.seconds === "number"
-        ? value.seconds
-        : typeof value._seconds === "number"
-          ? value._seconds
-          : null;
-
-    const nanoseconds =
-      typeof value.nanoseconds === "number"
-        ? value.nanoseconds
-        : typeof value._nanoseconds === "number"
-          ? value._nanoseconds
-          : 0;
-
-    if (seconds !== null) {
-      const nextDate = new Date(seconds * 1000 + Math.floor(nanoseconds / 1e6));
-      return Number.isNaN(nextDate.getTime()) ? null : nextDate;
-    }
-  }
-
-  if (typeof value === "string" || typeof value === "number") {
-    const nextDate = new Date(value);
-    return Number.isNaN(nextDate.getTime()) ? null : nextDate;
-  }
-
-  return null;
+  return normalizeDate(value);
 };
 
 export const toDateKey = (value: Date) => {
@@ -126,16 +84,16 @@ export const getStreakFromLogs = (logs: CalendarStudyLogLike[]) => {
 
   let count = 0;
 
-  for (let i = 0; i < 365; i += 1) {
+  for (let index = 0; index < 365; index += 1) {
     const cursor = new Date(today);
-    cursor.setDate(today.getDate() - i);
+    cursor.setDate(today.getDate() - index);
 
     if (dateSet.has(cursor.toDateString())) {
       count += 1;
       continue;
     }
 
-    if (i !== 0) {
+    if (index !== 0) {
       break;
     }
   }

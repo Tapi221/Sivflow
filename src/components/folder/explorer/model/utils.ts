@@ -1,4 +1,5 @@
 import type { Card, DocumentItem } from "@/types";
+import { toMillis } from "@/utils/toMillis";
 
 export type { Card, DocumentItem };
 
@@ -38,43 +39,44 @@ export const normalizeFolderId = (
 export const isSameFolder = (
   left: string | null | undefined,
   right: string | null | undefined,
-) => normalizeFolderId(left) === normalizeFolderId(right);
+): boolean => normalizeFolderId(left) === normalizeFolderId(right);
 
 export const getEntityTime = (value: unknown): number => {
-  if (!value) return 0;
-  if (value instanceof Date) return value.getTime();
-  if (typeof value?.toDate === "function") {
-    return value.toDate()?.getTime?.() ?? 0;
-  }
-  return 0;
+  return toMillis(value);
 };
 
-export const createOptimisticId = (prefix: "folder" | "card") =>
+export const createOptimisticId = (prefix: "folder" | "card"): string =>
   `tmp-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-export const createDocumentId = () =>
+export const createDocumentId = (): string =>
   typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
     ? crypto.randomUUID()
     : `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
-export const buildStoragePath = (uid: string, docId: string, ext: "pdf") =>
-  `users/${uid}/documents/${docId}/source.${ext}`;
+export const buildStoragePath = (
+  uid: string,
+  docId: string,
+  ext: "pdf",
+): string => `users/${uid}/documents/${docId}/source.${ext}`;
 
-export const isTextInputTarget = (target: HTMLElement | null) => {
+export const isTextInputTarget = (target: HTMLElement | null): boolean => {
   if (!target) return false;
   if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return true;
   if (target.isContentEditable) return true;
   return Boolean(target.closest('[contenteditable="true"]'));
 };
 
-export const isFileDragEvent = (e: React.DragEvent | DragEvent) => {
+export const isFileDragEvent = (
+  event: React.DragEvent | DragEvent,
+): boolean => {
   const dataTransfer =
-    (e as React.DragEvent).dataTransfer || (e as DragEvent).dataTransfer;
+    (event as React.DragEvent).dataTransfer ||
+    (event as DragEvent).dataTransfer;
   const types = Array.from(dataTransfer?.types ?? []);
   return types.includes("Files");
 };
 
-export const hasOpenModalDialog = () =>
+export const hasOpenModalDialog = (): boolean =>
   Boolean(
     document.querySelector('[role="dialog"][data-state="open"]') ||
     document.querySelector('[role="dialog"][aria-modal="true"]') ||

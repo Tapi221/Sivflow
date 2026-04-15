@@ -6,10 +6,18 @@ import { getLocalDb, initializeDB } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import type { SyncMetadata, UserStats } from "@/types";
 import { Check, Pencil, RefreshCw, Smartphone, Trash2, X } from "@/ui/icons";
+import { toDateOrNull, toMillis } from "@/utils/toMillis";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { collection, getDocs, query, Timestamp } from "firebase/firestore";
+import { collection, getDocs, query } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
+
+const sortByLastSyncDesc = (
+  left: SyncMetadata,
+  right: SyncMetadata,
+): number => {
+  return toMillis(right.lastSyncTime) - toMillis(left.lastSyncTime);
+};
 
 export const DeviceSyncSettings: React.FC = () => {
   const { currentUser } = useAuthSession();
@@ -28,33 +36,22 @@ export const DeviceSyncSettings: React.FC = () => {
     if (!currentUser) return;
     initializeDB(currentUser.uid);
     const db = await getLocalDb();
-    const s =
+    const nextStats =
       (await db.userStats.get("current")) ||
       (await db.userStats.toCollection().first());
-    setStats(s || null);
+    setStats(nextStats || null);
   }, [currentUser]);
 
   const fetchDevices = useCallback(async () => {
     if (!currentUser) return;
     setLoading(true);
     try {
-      const q = query(
+      const devicesQuery = query(
         collection(firestoreDb, `sync_metadata/${currentUser.uid}/devices`),
       );
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocs(devicesQuery);
       const deviceList = snapshot.docs.map((doc) => doc.data() as SyncMetadata);
-      // 最終同期時刻で降順ソート（新しい順）
-      deviceList.sort((a, b) => {
-        const timeA =
-          a.lastSyncTime instanceof Timestamp
-            ? a.lastSyncTime.toMillis()
-            : new Date(a.lastSyncTime || 0).getTime();
-        const timeB =
-          b.lastSyncTime instanceof Timestamp
-            ? b.lastSyncTime.toMillis()
-            : new Date(b.lastSyncTime || 0).getTime();
-        return timeB - timeA;
-      });
+      deviceList.sort(sortByLastSyncDesc);
       setDevices(deviceList);
     } catch (error) {
       console.error("[DeviceSyncSettings] Failed to fetch devices:", error);
@@ -85,8 +82,9 @@ export const DeviceSyncSettings: React.FC = () => {
       !window.confirm(
         "60日以上同期がない古いセッションを一括解除しますか？\n(シークレットモード等の残骸を掃除します)",
       )
-    )
+    ) {
       return;
+    }
 
     setCleaning(true);
     try {
@@ -127,30 +125,30 @@ export const DeviceSyncSettings: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchDevices();
-    fetchStats();
+    void fetchDevices();
+    void fetchStats();
   }, [fetchDevices, fetchStats]);
 
-  const formatDate = (date: unknown) => {
+  const formatDate = (value: unknown): string => {
+    const date = toDateOrNull(value);
     if (!date) return "未同期";
-    const d = date instanceof Timestamp ? date.toDate() : new Date(date);
-    return format(d, "yyyy/MM/dd HH:mm", { locale: ja });
+    return format(date, "yyyy/MM/dd HH:mm", { locale: ja });
   };
 
   const totalUsed = stats?.totalStorageUsedBytes || 0;
   const highResUsed = stats?.totalHighResBytes || 0;
   const thumbnailUsed = stats?.totalThumbnailBytes || 0;
-  const MAX_QUOTA = 500 * 1024 * 1024; // 500MB
-  const quotaPercent = Math.min((totalUsed / MAX_QUOTA) * 100, 100);
-  const highResPercent = (highResUsed / MAX_QUOTA) * 100;
-  const thumbnailPercent = (thumbnailUsed / MAX_QUOTA) * 100;
+  const maxQuota = 500 * 1024 * 1024;
+  const quotaPercent = Math.min((totalUsed / maxQuota) * 100, 100);
+  const highResPercent = (highResUsed / maxQuota) * 100;
+  const thumbnailPercent = (thumbnailUsed / maxQuota) * 100;
 
-  const formatSize = (bytes: number) => {
+  const formatSize = (bytes: number): string => {
     if (bytes === 0) return "0 B";
-    const k = 1024;
+    const kilo = 1024;
     const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    const index = Math.floor(Math.log(bytes) / Math.log(kilo));
+    return `${parseFloat((bytes / Math.pow(kilo, index)).toFixed(2))} ${sizes[index]}`;
   };
 
   return (
@@ -162,7 +160,6 @@ export const DeviceSyncSettings: React.FC = () => {
         同期・ストレージ管理
       </h2>
 
-      {/* Sync Settings Toggles */}
       <div className="p-6 bg-white/5 border border-white/10 rounded-2xl shadow-sm mb-6">
         <div className="flex items-center justify-between">
           <div>
@@ -182,7 +179,6 @@ export const DeviceSyncSettings: React.FC = () => {
         </div>
       </div>
 
-      {/* Storage Usage Bar */}
       <div className="p-6 bg-white/5 border border-white/10 rounded-2xl shadow-sm">
         <div className="flex justify-between items-end mb-3">
           <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
@@ -191,7 +187,7 @@ export const DeviceSyncSettings: React.FC = () => {
           <span
             className={`text-[10px] font-bold ${quotaPercent > 90 ? "text-red-400 animate-pulse" : "text-slate-400"}`}
           >
-            {formatSize(totalUsed)} / {formatSize(MAX_QUOTA)}
+            {formatSize(totalUsed)} / {formatSize(maxQuota)}
             {quotaPercent > 90 && " (残りわずか!)"}
           </span>
         </div>
@@ -236,7 +232,8 @@ export const DeviceSyncSettings: React.FC = () => {
         <div className="space-y-4">
           <div className="flex justify-between items-center px-1">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
-              登録デバイス ({devices.filter((d) => d.isActive).length})
+              登録デバイス ({devices.filter((device) => device.isActive).length}
+              )
             </h3>
             <div className="flex items-center gap-3">
               {cleanupMessage && (
@@ -272,10 +269,10 @@ export const DeviceSyncSettings: React.FC = () => {
                   key={device.deviceId}
                   className={`p-5 rounded-2xl border transition-all ${
                     isRevoked
-                      ? "bg-white/5 border-white/10 opacity-60" // Revoked style (glass)
+                      ? "bg-white/5 border-white/10 opacity-60"
                       : device.isActive
                         ? "bg-white/5 border-white/10 shadow-sm hover:shadow-md hover:border-white/20 hover:bg-white/10"
-                        : "bg-white/5 border-white/5 grayscale opacity-70" // Disconnected style
+                        : "bg-white/5 border-white/5 grayscale opacity-70"
                   } ${isCurrentDevice ? "ring-1 ring-primary-400/30" : ""}`}
                 >
                   <div
@@ -296,9 +293,11 @@ export const DeviceSyncSettings: React.FC = () => {
                             type="text"
                             title="デバイス名を編集"
                             value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            onKeyDown={(e) =>
-                              e.key === "Enter" &&
+                            onChange={(event) =>
+                              setEditName(event.target.value)
+                            }
+                            onKeyDown={(event) =>
+                              event.key === "Enter" &&
                               handleUpdateName(device.deviceId)
                             }
                             className="text-sm font-bold text-white bg-black/40 border border-primary-500/30 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-primary-500/20 flex-1"
@@ -414,7 +413,7 @@ export const DeviceSyncSettings: React.FC = () => {
       )}
 
       <button
-        onClick={fetchDevices}
+        onClick={() => void fetchDevices()}
         className="mt-6 w-full py-4 bg-white/5 text-slate-400 border border-white/10 rounded-2xl font-bold hover:bg-white/10 hover:shadow-lg hover:border-white/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group hover:text-white"
       >
         <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />

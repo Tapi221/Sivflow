@@ -7,6 +7,7 @@ import type {
   IntegrityReport,
 } from "@/services/dataIntegrityTypes";
 import { sanitizeForLog } from "@/utils/logSanitizer";
+import { normalizeDate } from "@/shared/codec/date";
 
 const TIMESTAMP_KEYS = [
   "createdAt",
@@ -26,37 +27,6 @@ const isMissingFolderId = (folderId: unknown): boolean => {
 
 const readDeletedState = (entity: Record<string, unknown>): boolean => {
   return Boolean(entity.isDeleted ?? entity.is_deleted ?? entity.deleted);
-};
-
-const normalizeTimestampValue = (value: unknown): Date | null => {
-  if (value == null || value === "") {
-    return null;
-  }
-
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value;
-  }
-
-  if (typeof value === "string" || typeof value === "number") {
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  }
-
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "toDate" in value &&
-    typeof (value as { toDate?: unknown }).toDate === "function"
-  ) {
-    try {
-      const dt = (value as { toDate: () => unknown }).toDate();
-      return dt instanceof Date && !Number.isNaN(dt.getTime()) ? dt : null;
-    } catch {
-      return null;
-    }
-  }
-
-  return null;
 };
 
 export const createCheckDataIntegrityUseCase = () => {
@@ -94,7 +64,7 @@ export const createCheckDataIntegrityUseCase = () => {
             continue;
           }
 
-          const normalized = normalizeTimestampValue(raw);
+          const normalized = normalizeDate(raw);
 
           if (!normalized || !(raw instanceof Date)) {
             issues.push({

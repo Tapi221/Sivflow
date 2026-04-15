@@ -1,8 +1,8 @@
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
+import { normalizeDate } from "@/shared/codec/date";
 import { Dexie, type Table } from "dexie";
-import { Timestamp } from "firebase/firestore";
 import { normalizeFolderWithSilent } from "./transforms";
 
 /** queries.ts が必要とする LocalDB プロパティの最小インターフェース */
@@ -33,7 +33,6 @@ export const getAllItems = async (db: QueryDb, table: string) => {
 };
 
 export const getAllCards = async (db: QueryDb) => {
-  // Return raw objects to preserve _rescueRaw and other fields for integrity repair
   return await db.cards.toArray();
 };
 
@@ -63,13 +62,9 @@ export const getUpdatedCards = (
   return db.cards
     .where("folderId")
     .equals(folderId)
-    .and((c: unknown) => {
-      const updatedAt = (c as Record<string, unknown>).updatedAt;
-      const updated =
-        updatedAt instanceof Date
-          ? updatedAt
-          : ((updatedAt as { toDate?(): Date } | null)?.toDate?.() ??
-            new Date(0));
+    .and((card: unknown) => {
+      const updatedAt = (card as Record<string, unknown>).updatedAt;
+      const updated = normalizeDate(updatedAt) ?? new Date(0);
       return updated > lastSyncTime;
     })
     .toArray();
@@ -78,9 +73,7 @@ export const getUpdatedCards = (
 export const getLastSyncTime = async (db: QueryDb, userId: string) => {
   const meta = await db.syncMetadata.get(userId);
   if (!meta || !meta.lastSyncTime) return null;
-  return meta.lastSyncTime instanceof Timestamp
-    ? meta.lastSyncTime.toDate()
-    : meta.lastSyncTime;
+  return normalizeDate(meta.lastSyncTime);
 };
 
 export const updateLastSyncTime = async (
@@ -89,7 +82,7 @@ export const updateLastSyncTime = async (
   syncTime: Date,
 ) => {
   await db.syncMetadata.put({
-    userId: userId,
+    userId,
     deviceId: getOrCreateDeviceId(),
     deviceName: getDeviceName(),
     lastSyncTime: syncTime,
@@ -100,8 +93,8 @@ export const updateLastSyncTime = async (
 
 export const normalizeDocumentBlobUrlsForSession = async (db: QueryDb) => {
   try {
-    await db.documents.toCollection().modify((d: unknown) => {
-      const record = d as MutableDocumentBlobFields;
+    await db.documents.toCollection().modify((document: unknown) => {
+      const record = document as MutableDocumentBlobFields;
 
       if (
         typeof record.localUrl === "string" &&
