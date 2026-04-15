@@ -5,6 +5,7 @@ import {
 } from "@/components/card/common/constants";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
+import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";
 import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
 import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
@@ -39,10 +40,6 @@ export interface DesktopEmbeddedCardEditorSurfaceProps {
   isInteractive: boolean;
   onSyncStatusChange: (status: CardSyncStatus | null) => void;
 }
-
-type OverlayTopRightProps = Readonly<{
-  children?: React.ReactNode;
-}>;
 
 type EmbeddedEditorHeaderRightProps = Readonly<{
   mediaActions?: React.ReactNode;
@@ -108,23 +105,6 @@ const resolveFaceColorClassName = (side: Side) =>
 const resolveFaceDroppableId = (side: Side) =>
   side === "question" ? "question-blocks" : "answer-blocks";
 
-const OverlayTopRight = ({ children }: OverlayTopRightProps) => {
-  if (!children) return null;
-
-  return (
-    <div className="pointer-events-none absolute right-2 top-2 z-30">
-      <div
-        className="pointer-events-auto flex max-w-full flex-col items-end gap-2"
-        data-card-no-flip="true"
-        onClick={(event) => event.stopPropagation()}
-        onPointerDown={(event) => event.stopPropagation()}
-      >
-        {children}
-      </div>
-    </div>
-  );
-};
-
 const EmbeddedEditorHeaderRight = ({
   mediaActions,
 }: EmbeddedEditorHeaderRightProps) => {
@@ -168,17 +148,17 @@ const EmbeddedEditorFace = ({
   const [toolbarMount, setToolbarMount] = useState<HTMLDivElement | null>(null);
 
   const topAttachment = showToolbar ? (
-    <div className="pointer-events-none relative h-0 w-full overflow-visible">
+    <div className="relative h-0 w-full overflow-visible pointer-events-none">
       <div
         ref={setToolbarMount}
-        className="pointer-events-auto absolute right-0 top-0 z-20"
+        className="absolute right-0 top-0 z-20 pointer-events-auto"
         style={{ transform: "translate(calc(-100% - 12px), 16px)" }}
       />
     </div>
   ) : undefined;
 
   const overlay = overlayTopRight ? (
-    <OverlayTopRight>{overlayTopRight}</OverlayTopRight>
+    <CardOverlayTopRight>{overlayTopRight}</CardOverlayTopRight>
   ) : undefined;
 
   return (
