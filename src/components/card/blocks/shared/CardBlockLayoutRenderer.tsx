@@ -24,7 +24,7 @@ export type CardBlockLayoutReplaceBlock =
   | { type: "markdown"; markdown: string }
   | { type: "code"; code: { language: string; code: string } };
 
-type ViewerProps = {
+export type ViewerProps = {
   questionDisplayMode: "always" | "tap_to_reveal";
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
   toMediaUrl: (
@@ -42,7 +42,7 @@ type ViewerProps = {
   zoom: number;
 };
 
-type EditorProps = {
+export type EditorProps = {
   onUpdateBlock: (id: string, updates: Partial<CardBlock>) => void;
   onDelete: () => void;
   onDuplicate: () => void;

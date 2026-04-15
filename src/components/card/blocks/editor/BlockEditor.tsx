@@ -8,13 +8,14 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 
-import { BlockList } from "@/components/card/blocks/core/BlockList";
+import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
 import { BlockToolbar } from "@/components/card/blocks/core/BlockToolbar";
 import { hasRuledLine } from "@/components/card/blocks/core/blockDisplayPolicy";
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
+import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
 import {
-  CardBlockLayoutRenderer,
   type CardBlockLayoutReplaceBlock,
+  type EditorProps,
 } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
 import { CARD_ROW_PX } from "@/components/card/common/constants";
 import {
@@ -77,6 +78,7 @@ export const BlockEditor = React.forwardRef<
       selectionScopeKey = null,
       prefix,
       label,
+      color: _color,
       droppableId,
       accentColor,
       duplicateToOpposite = false,
@@ -98,6 +100,7 @@ export const BlockEditor = React.forwardRef<
   ) => {
     void droppableId;
     void selectionScopeKey;
+    void _color;
 
     const [activeContainerBlockId, setActiveContainerBlockId] = useState<
       string | null
@@ -189,13 +192,13 @@ export const BlockEditor = React.forwardRef<
 
     const rowElMapRef = useRef<Map<string, HTMLElement>>(new Map());
     const registerRowEl = useCallback(
-      (blockId: string, el: HTMLElement | null) => {
+      (blockId: string, element: HTMLElement | null) => {
         const map = rowElMapRef.current;
-        if (!el) {
+        if (!element) {
           map.delete(blockId);
           return;
         }
-        map.set(blockId, el);
+        map.set(blockId, element);
       },
       [],
     );
@@ -278,7 +281,7 @@ export const BlockEditor = React.forwardRef<
 
     const handleBlockOverflow = (blockId: string, files: File[]) => {
       const source = blocksRef.current;
-      const index = source.findIndex((b) => b.id === blockId);
+      const index = source.findIndex((block) => block.id === blockId);
       if (index === -1) return;
 
       const baseOffset = getBlockOffsetRows(source[index]);
@@ -337,23 +340,26 @@ export const BlockEditor = React.forwardRef<
               : resolvedActiveContainerBlockId;
 
         const tailRowOffset = (() => {
-          for (let i = source.length - 1; i >= 0; i -= 1) {
-            const b = source[i];
-            if (!isRowPositionableType(b.type) || isGridOffsetType(b.type)) {
+          for (let index = source.length - 1; index >= 0; index -= 1) {
+            const block = source[index];
+            if (
+              !isRowPositionableType(block.type) ||
+              isGridOffsetType(block.type)
+            ) {
               continue;
             }
-            if (b.rowOffset !== undefined) {
-              return Math.round(Number(b.rowOffset ?? 0));
+            if (block.rowOffset !== undefined) {
+              return Math.round(Number(block.rowOffset ?? 0));
             }
           }
           return 0;
         })();
 
         const tailGridOffsetRows = (() => {
-          for (let i = source.length - 1; i >= 0; i -= 1) {
-            const b = source[i];
-            if (!isGridOffsetType(b.type)) continue;
-            return getNormalizedGridOffsetRows(b);
+          for (let index = source.length - 1; index >= 0; index -= 1) {
+            const block = source[index];
+            if (!isGridOffsetType(block.type)) continue;
+            return getNormalizedGridOffsetRows(block);
           }
           return 0;
         })();
@@ -397,7 +403,9 @@ export const BlockEditor = React.forwardRef<
 
     const handleUpdateBlock = (id: string, updates: Partial<CardBlock>) => {
       const source = blocksRef.current;
-      const next = source.map((b) => (b.id === id ? { ...b, ...updates } : b));
+      const next = source.map((block) =>
+        block.id === id ? { ...block, ...updates } : block,
+      );
       blocksRef.current = next;
       emitChange(next);
     };
@@ -410,14 +418,16 @@ export const BlockEditor = React.forwardRef<
       }
 
       const source = blocksRef.current;
-      const next = source.filter((b) => b.id !== id && b.parentBlockId !== id);
+      const next = source.filter(
+        (block) => block.id !== id && block.parentBlockId !== id,
+      );
       blocksRef.current = next;
       emitChange(next, { reindex: true });
     };
 
     const handleDuplicateBlock = (id: string) => {
       const source = blocksRef.current;
-      const index = source.findIndex((b) => b.id === id);
+      const index = source.findIndex((block) => block.id === id);
       if (index === -1) return;
 
       const original = source[index];
@@ -442,7 +452,7 @@ export const BlockEditor = React.forwardRef<
     const handleShiftBlockRow = (blockId: string, direction: "up" | "down") => {
       const delta = direction === "up" ? -1 : 1;
       const source = blocksRef.current;
-      const currentBlock = source.find((b) => b.id === blockId);
+      const currentBlock = source.find((block) => block.id === blockId);
       if (!currentBlock) return;
       if (!isRowPositionableType(currentBlock.type)) return;
 
@@ -462,12 +472,12 @@ export const BlockEditor = React.forwardRef<
       );
       if (nextOffsetRows === currentOffsetRows) return;
 
-      const next = source.map((b) => {
-        if (b.id !== blockId) return b;
-        if (isGridOffsetType(b.type)) {
-          return { ...b, offsetRows: nextOffsetRows, rowOffset: undefined };
+      const next = source.map((block) => {
+        if (block.id !== blockId) return block;
+        if (isGridOffsetType(block.type)) {
+          return { ...block, offsetRows: nextOffsetRows, rowOffset: undefined };
         }
-        return { ...b, rowOffset: nextOffsetRows };
+        return { ...block, rowOffset: nextOffsetRows };
       });
       blocksRef.current = next;
       emitChange(next);
@@ -475,7 +485,7 @@ export const BlockEditor = React.forwardRef<
 
     const handleMoveDragStart = (blockId: string) => {
       const source = blocksRef.current;
-      const currentBlock = source.find((b) => b.id === blockId);
+      const currentBlock = source.find((block) => block.id === blockId);
       if (!currentBlock) return;
       if (!isRowPositionableType(currentBlock.type)) return;
 
@@ -494,7 +504,7 @@ export const BlockEditor = React.forwardRef<
       if (!session || session.blockId !== blockId) return;
 
       const source = blocksRef.current;
-      const movedBlock = source.find((b) => b.id === blockId);
+      const movedBlock = source.find((block) => block.id === blockId);
       if (!movedBlock) return;
       if (!isRowPositionableType(movedBlock.type)) return;
 
@@ -504,9 +514,9 @@ export const BlockEditor = React.forwardRef<
       const movedRect = movedEl.getBoundingClientRect();
       const candidates = session.candidates;
 
-      const hasCollision = candidates.some((el) => {
-        if (el === movedEl) return false;
-        const rect = el.getBoundingClientRect();
+      const hasCollision = candidates.some((element) => {
+        if (element === movedEl) return false;
+        const rect = element.getBoundingClientRect();
         const horizontalOverlap =
           movedRect.left < rect.right && movedRect.right > rect.left;
         const verticalOverlap =
@@ -516,16 +526,16 @@ export const BlockEditor = React.forwardRef<
 
       if (!hasCollision) return;
 
-      const reverted = source.map((b) => {
-        if (b.id !== blockId) return b;
-        if (isGridOffsetType(b.type)) {
+      const reverted = source.map((block) => {
+        if (block.id !== blockId) return block;
+        if (isGridOffsetType(block.type)) {
           return {
-            ...b,
+            ...block,
             offsetRows: session.originOffsetRows,
             rowOffset: undefined,
           };
         }
-        return { ...b, rowOffset: session.originOffsetRows };
+        return { ...block, rowOffset: session.originOffsetRows };
       });
       blocksRef.current = reverted;
       emitChange(reverted);
@@ -544,6 +554,102 @@ export const BlockEditor = React.forwardRef<
     const inlineToolbar = toolbarNode && !toolbarMount ? toolbarNode : null;
     const resolvedEditorZoom = displayMode === "fluid" ? zoom : 1;
 
+    const resolveEditorProps = useCallback(
+      (block: CardBlock, meta: BlockListRowMeta): EditorProps => {
+        const isBlockActive = resolvedActiveBlockId === block.id;
+        const canMoveUp = meta.isLinePositionable;
+        const canMoveDown = meta.isLinePositionable;
+
+        const handleReplaceMarkdownWithBlocks = (
+          parsed: CardBlockLayoutReplaceBlock[],
+        ) => {
+          if (block.type !== "markdown") return;
+
+          const baseOffset = getBlockOffsetRows(block);
+
+          const newBlocks = parsed.map((item) => {
+            const newId = `${prefix}-${item.type}-${uid()}`;
+            if (item.type === "code") {
+              return {
+                id: newId,
+                type: "code" as const,
+                code: item.code,
+                content: "",
+                images: [],
+                audios: [],
+                offsetRows: Math.max(0, baseOffset),
+                rowOffset: undefined,
+                orderIndex: 0,
+              } satisfies CardBlock;
+            }
+
+            return {
+              id: newId,
+              type: "markdown" as const,
+              markdown: item.markdown,
+              content: "",
+              images: [],
+              audios: [],
+              rowOffset: baseOffset,
+              orderIndex: 0,
+            } satisfies CardBlock;
+          });
+
+          const source = blocksRef.current;
+          const updated = [...source];
+          updated.splice(meta.index, 1, ...newBlocks);
+
+          blocksRef.current = updated;
+          emitChange(updated, { reindex: true });
+        };
+
+        return {
+          onUpdateBlock: handleUpdateBlock,
+          onDelete: () => handleDeleteBlock(block.id, meta.index),
+          onDuplicate: () => handleDuplicateBlock(block.id),
+          onMoveUp: () => handleShiftBlockRow(block.id, "up"),
+          onMoveDown: () => handleShiftBlockRow(block.id, "down"),
+          onMoveDragStart: () => handleMoveDragStart(block.id),
+          onMoveDragEnd: () => handleMoveDragEnd(block.id),
+          canMoveUp,
+          canMoveDown,
+          accentColor,
+          isActive: isBlockActive,
+          autoFocus: autoFocus && meta.index === bodyBlocks.length - 1,
+          customPlaceholder: customPlaceholders?.[meta.index],
+          pendingUploadFile: pendingUploads[block.id],
+          onConsumePendingUpload: () => handleConsumeInitialFile(block.id),
+          onFilesExcess: (files) => handleBlockOverflow(block.id, files),
+          onReplaceMarkdownWithBlocks:
+            block.type === "markdown"
+              ? handleReplaceMarkdownWithBlocks
+              : undefined,
+          displayMode,
+          zoom: resolvedEditorZoom,
+        };
+      },
+      [
+        accentColor,
+        autoFocus,
+        bodyBlocks.length,
+        customPlaceholders,
+        displayMode,
+        emitChange,
+        handleBlockOverflow,
+        handleConsumeInitialFile,
+        handleDeleteBlock,
+        handleDuplicateBlock,
+        handleMoveDragEnd,
+        handleMoveDragStart,
+        handleShiftBlockRow,
+        handleUpdateBlock,
+        pendingUploads,
+        prefix,
+        resolvedActiveBlockId,
+        resolvedEditorZoom,
+      ],
+    );
+
     return (
       <div
         ref={rootRef}
@@ -552,9 +658,9 @@ export const BlockEditor = React.forwardRef<
           "space-y-0",
           prefix === "question" ? "js-question-editor" : "js-answer-editor",
         )}
-        onPointerDownCapture={(e) => {
+        onPointerDownCapture={(event) => {
           if (!enableBlockActiveState) return;
-          const target = e.target;
+          const target = event.target;
           if (!(target instanceof HTMLElement)) return;
           const nextActiveBlockId =
             target.closest<HTMLElement>("[data-block-id]")?.dataset.blockId ??
@@ -563,9 +669,9 @@ export const BlockEditor = React.forwardRef<
             prev === nextActiveBlockId ? prev : nextActiveBlockId,
           );
         }}
-        onFocusCapture={(e) => {
+        onFocusCapture={(event) => {
           if (!enableBlockActiveState) return;
-          const target = e.target;
+          const target = event.target;
           if (!(target instanceof HTMLElement)) return;
           const nextActiveBlockId =
             target.closest<HTMLElement>("[data-block-id]")?.dataset.blockId ??
@@ -576,9 +682,9 @@ export const BlockEditor = React.forwardRef<
             );
           }
         }}
-        onClick={(e) => {
+        onClick={(event) => {
           if (!enableBlockActiveState) return;
-          const target = e.target as HTMLElement;
+          const target = event.target as HTMLElement;
           if (!target.closest("[data-block-type='question']")) {
             setActiveContainerBlockId((prev) => (prev === null ? prev : null));
           }
@@ -589,10 +695,11 @@ export const BlockEditor = React.forwardRef<
           : inlineToolbar}
 
         <div className="space-y-0 overflow-x-visible overflow-y-visible">
-          <BlockList
+          <CardBlocksScene
+            mode="edit"
             blocks={bodyBlocks}
-            getRowRef={(block) => (el) => {
-              registerRowEl(block.id, el);
+            getRowRef={(block) => (element) => {
+              registerRowEl(block.id, element);
             }}
             getRowContainerProps={(block, meta) => ({
               className: "relative",
@@ -602,89 +709,7 @@ export const BlockEditor = React.forwardRef<
                 : "non-ruled",
               "data-row-offset-applied": meta.rowOffsetPx ? "true" : undefined,
             })}
-            renderBlock={(block, meta) => {
-              const isBlockActive = resolvedActiveBlockId === block.id;
-              const canMoveUp = meta.isLinePositionable;
-              const canMoveDown = meta.isLinePositionable;
-
-              const handleReplaceMarkdownWithBlocks = (
-                parsed: CardBlockLayoutReplaceBlock[],
-              ) => {
-                if (block.type !== "markdown") return;
-
-                const baseOffset = getBlockOffsetRows(block);
-
-                const newBlocks = parsed.map((p) => {
-                  const newId = `${prefix}-${p.type}-${uid()}`;
-                  if (p.type === "code") {
-                    return {
-                      id: newId,
-                      type: "code" as const,
-                      code: p.code,
-                      content: "",
-                      images: [],
-                      audios: [],
-                      offsetRows: Math.max(0, baseOffset),
-                      rowOffset: undefined,
-                      orderIndex: 0,
-                    } satisfies CardBlock;
-                  }
-
-                  return {
-                    id: newId,
-                    type: "markdown" as const,
-                    markdown: p.markdown,
-                    content: "",
-                    images: [],
-                    audios: [],
-                    rowOffset: baseOffset,
-                    orderIndex: 0,
-                  } satisfies CardBlock;
-                });
-
-                const source = blocksRef.current;
-                const updated = [...source];
-                updated.splice(meta.index, 1, ...newBlocks);
-
-                blocksRef.current = updated;
-                emitChange(updated, { reindex: true });
-              };
-
-              return (
-                <CardBlockLayoutRenderer
-                  mode="edit"
-                  block={block}
-                  meta={meta}
-                  editorProps={{
-                    onUpdateBlock: handleUpdateBlock,
-                    onDelete: () => handleDeleteBlock(block.id, meta.index),
-                    onDuplicate: () => handleDuplicateBlock(block.id),
-                    onMoveUp: () => handleShiftBlockRow(block.id, "up"),
-                    onMoveDown: () => handleShiftBlockRow(block.id, "down"),
-                    onMoveDragStart: () => handleMoveDragStart(block.id),
-                    onMoveDragEnd: () => handleMoveDragEnd(block.id),
-                    canMoveUp,
-                    canMoveDown,
-                    accentColor,
-                    isActive: isBlockActive,
-                    autoFocus:
-                      autoFocus && meta.index === bodyBlocks.length - 1,
-                    customPlaceholder: customPlaceholders?.[meta.index],
-                    pendingUploadFile: pendingUploads[block.id],
-                    onConsumePendingUpload: () =>
-                      handleConsumeInitialFile(block.id),
-                    onFilesExcess: (files) =>
-                      handleBlockOverflow(block.id, files),
-                    onReplaceMarkdownWithBlocks:
-                      block.type === "markdown"
-                        ? handleReplaceMarkdownWithBlocks
-                        : undefined,
-                    displayMode,
-                    zoom: resolvedEditorZoom,
-                  }}
-                />
-              );
-            }}
+            resolveEditorProps={resolveEditorProps}
           />
         </div>
       </div>

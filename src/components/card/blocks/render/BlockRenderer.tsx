@@ -1,5 +1,4 @@
-import { BlockList } from "@/components/card/blocks/core/BlockList";
-import { CardBlockLayoutRenderer } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
+import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { CardBlock } from "@/types/domain/card";
 import { useCallback, useMemo } from "react";
@@ -63,22 +62,16 @@ export const BlockRenderer = ({
   if (!renderableBlocks.length) return null;
 
   return (
-    <BlockList
+    <CardBlocksScene
+      mode="view"
       blocks={renderableBlocks}
-      renderBlock={(block, meta) => (
-        <CardBlockLayoutRenderer
-          mode="view"
-          block={block}
-          meta={meta}
-          viewerProps={{
-            questionDisplayMode,
-            onGalleryFullscreenChange,
-            toMediaUrl,
-            displayMode,
-            zoom,
-          }}
-        />
-      )}
+      viewerProps={{
+        questionDisplayMode,
+        onGalleryFullscreenChange,
+        toMediaUrl,
+        displayMode,
+        zoom,
+      }}
     />
   );
 };

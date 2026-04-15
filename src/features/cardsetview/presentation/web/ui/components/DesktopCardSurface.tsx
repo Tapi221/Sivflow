@@ -119,6 +119,7 @@ const DesktopCardSurfaceInner = ({
               headerIconVisualScale={metrics.sideHeaderIconVisualScale}
               previewMode={true}
               showInkLayer={currentDisplayMode === "fixed"}
+              drawMode={false}
               inkEditingEnabled={false}
             />
           }
@@ -132,6 +133,7 @@ const DesktopCardSurfaceInner = ({
               headerIconVisualScale={metrics.sideHeaderIconVisualScale}
               previewMode={true}
               showInkLayer={currentDisplayMode === "fixed"}
+              drawMode={false}
               inkEditingEnabled={false}
             />
           }
@@ -151,6 +153,7 @@ const DesktopCardSurfaceInner = ({
         headerIconVisualScale={metrics.baseHeaderIconVisualScale}
         previewMode={!isActive}
         showInkLayer={metrics.renderSpec.showInk}
+        drawMode={false}
         inkEditingEnabled={metrics.renderSpec.showInk && isActive}
         onFlip={isActive ? onFlip : undefined}
         onToggleUncertainty={isActive ? onToggleUncertainty : undefined}

@@ -15,6 +15,7 @@ import { FlashcardInkOverlay } from "./FlashcardInkOverlay";
 import { FlashcardMediaDialogs } from "./FlashcardMediaDialogs";
 import { FlashcardNavigation } from "./FlashcardNavigation";
 import { type FlashcardCardLike } from "./flashcardDerived";
+import { useCardFlipBehavior } from "./useCardFlipBehavior";
 import { useFlashcardDerived } from "./useFlashcardDerived";
 import { useFlashcardInk } from "./useFlashcardInk";
 import { useFlashcardMediaState } from "./useFlashcardMediaState";
@@ -56,19 +57,6 @@ interface FlashcardProps {
   headerIconVisualScale?: number;
 }
 
-const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
-
-const shouldIgnoreFlipTarget = (target: EventTarget | null) => {
-  const element = target as HTMLElement | null;
-  if (!element) return false;
-
-  return Boolean(
-    element.closest(
-      'button, a, input, textarea, select, label, [data-card-no-flip="true"]',
-    ),
-  );
-};
-
 const FlashcardInner = ({
   card,
   isFlipped,
@@ -101,20 +89,6 @@ const FlashcardInner = ({
   headerIconVisualScale = 1,
 }: FlashcardProps) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
-  const flipSuppressedUntilRef = useRef(0);
-  const suppressNextFlipRef = useRef(false);
-  const pointerGestureRef = useRef<{
-    pointerId: number | null;
-    startX: number;
-    startY: number;
-    moved: boolean;
-  }>({
-    pointerId: null,
-    startX: 0,
-    startY: 0,
-    moved: false,
-  });
-
   const [previewFlipped, setPreviewFlipped] = useState(false);
 
   const enableDrawMode = drawMode ?? false;
@@ -149,31 +123,25 @@ const FlashcardInner = ({
 
   const isInkEditingActive = Boolean(allowInkEditing && ink.previewInkTool);
 
-  const handleFlip = React.useCallback(
-    (e?: React.MouseEvent) => {
-      if (suppressNextFlipRef.current) {
-        suppressNextFlipRef.current = false;
-        return;
-      }
-
-      if (Date.now() < flipSuppressedUntilRef.current) return;
-      if (e && shouldIgnoreFlipTarget(e.target)) return;
-      if (media.isModalBlockingFlip) return;
-      if (isInkEditingActive) return;
-
-      if (previewMode) {
-        e?.stopPropagation();
-        setPreviewFlipped((prev) => !prev);
-        return;
-      }
-
-      if (onFlip) {
-        e?.stopPropagation();
-        onFlip();
-      }
-    },
-    [isInkEditingActive, media.isModalBlockingFlip, onFlip, previewMode],
-  );
+  const {
+    handleFlip,
+    handleKeyDown,
+    handlePointerDownCapture,
+    handlePointerMoveCapture,
+    handlePointerUpCapture,
+    handlePointerCancelCapture,
+  } = useCardFlipBehavior({
+    isCardClickable: !previewMode,
+    previewMode: Boolean(previewMode),
+    onFlip,
+    onPreviewFlip: previewMode
+      ? () => {
+          setPreviewFlipped((prev) => !prev);
+        }
+      : undefined,
+    isModalBlockingFlip: media.isModalBlockingFlip,
+    isInkEditingActive,
+  });
 
   const { actionsTopLeft, actionsTopRight } = useFlashcardCornerControls({
     card: card ?? ({} as FlashcardCardLike),
@@ -190,23 +158,6 @@ const FlashcardInner = ({
     onOpenReferencePopup: () => media.setIsReferencePopupOpen(true),
     headerIconVisualScale,
   });
-
-  const resetPointerGesture = () => {
-    pointerGestureRef.current = {
-      pointerId: null,
-      startX: 0,
-      startY: 0,
-      moved: false,
-    };
-  };
-
-  const finishPointerGesture = (pointerId: number | null) => {
-    const state = pointerGestureRef.current;
-    if (state.pointerId == null) return;
-    if (pointerId != null && state.pointerId !== pointerId) return;
-    if (state.moved) suppressNextFlipRef.current = true;
-    resetPointerGesture();
-  };
 
   if (!card) {
     return <div className="py-12 text-center text-gray-500">No Card Data</div>;
@@ -266,55 +217,12 @@ const FlashcardInner = ({
             !isFixedDisplay &&
               "rounded-none border-none bg-transparent shadow-none",
           )}
-          onPointerDownCapture={(event) => {
-            if (!isCardClickable) return;
-
-            if (shouldIgnoreFlipTarget(event.target)) {
-              resetPointerGesture();
-              return;
-            }
-
-            pointerGestureRef.current = {
-              pointerId: event.pointerId,
-              startX: event.clientX,
-              startY: event.clientY,
-              moved: false,
-            };
-          }}
-          onPointerMoveCapture={(event) => {
-            if (!isCardClickable) return;
-
-            const state = pointerGestureRef.current;
-            if (state.pointerId !== event.pointerId) return;
-            if (state.moved) return;
-
-            const dx = Math.abs(event.clientX - state.startX);
-            const dy = Math.abs(event.clientY - state.startY);
-
-            if (
-              dx > TAP_MOVE_CANCEL_THRESHOLD_PX ||
-              dy > TAP_MOVE_CANCEL_THRESHOLD_PX
-            ) {
-              state.moved = true;
-            }
-          }}
-          onPointerUpCapture={(event) => {
-            if (!isCardClickable) return;
-            finishPointerGesture(event.pointerId);
-          }}
-          onPointerCancelCapture={(event) => {
-            if (!isCardClickable) return;
-            finishPointerGesture(event.pointerId);
-          }}
+          onPointerDownCapture={handlePointerDownCapture}
+          onPointerMoveCapture={handlePointerMoveCapture}
+          onPointerUpCapture={handlePointerUpCapture}
+          onPointerCancelCapture={handlePointerCancelCapture}
           onClick={handleFlip}
-          onKeyDown={(event) => {
-            if (!isCardClickable) return;
-            if (event.target !== event.currentTarget) return;
-            if (event.key !== "Enter" && event.key !== " ") return;
-
-            event.preventDefault();
-            handleFlip();
-          }}
+          onKeyDown={handleKeyDown}
           resizable={false}
           resizeStepPx={undefined}
           showResizeHandle={false}
