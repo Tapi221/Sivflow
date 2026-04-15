@@ -1,5 +1,7 @@
 import { BlockEditor } from "@/components/card/blocks/editor/BlockEditor";
-import { BlockRenderer } from "@/components/card/blocks/render/BlockRenderer";
+import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
+import { filterRenderableCardBlocks } from "@/components/card/blocks/shared/isRenderableCardBlock";
+import { useViewerSceneProps } from "@/components/card/blocks/shared/useViewerSceneProps";
 import { cn } from "@/lib/utils";
 import { CONTENT_TYPO } from "@/styles/tokens/typography";
 import type { CardBlock } from "@/types/domain/card";
@@ -83,14 +85,30 @@ const SharedCardContentViewBody = React.memo(
     onGalleryFullscreenChange,
     displayMode,
     zoom,
-  }: SharedCardContentViewProps) => (
-    <BlockRenderer
-      blocks={blocks}
-      onGalleryFullscreenChange={onGalleryFullscreenChange}
-      displayMode={displayMode}
-      zoom={zoom}
-    />
-  ),
+  }: SharedCardContentViewProps) => {
+    const viewerProps = useViewerSceneProps({
+      onGalleryFullscreenChange,
+      displayMode,
+      zoom,
+    });
+
+    const renderableBlocks = React.useMemo(
+      () => filterRenderableCardBlocks(blocks),
+      [blocks],
+    );
+
+    if (!renderableBlocks.length) return null;
+
+    return (
+      <CardBlocksScene
+        blocks={renderableBlocks}
+        resolveSceneProps={() => ({
+          mode: "view",
+          viewerProps,
+        })}
+      />
+    );
+  },
 );
 
 SharedCardContentViewBody.displayName = "SharedCardContentViewBody";
