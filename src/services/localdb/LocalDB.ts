@@ -588,6 +588,7 @@ export class LocalDB extends Dexie {
         this.documents,
         this.tagRecords,
         this.userSettings,
+        this.syncQueue,
         this.images,
       ],
       async () => scope(),
