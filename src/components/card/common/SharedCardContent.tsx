@@ -54,9 +54,4 @@ const SharedCardContentInner = (props: SharedCardContentProps) => {
 export const SharedCardContent = React.memo(SharedCardContentInner);
 SharedCardContent.displayName = "SharedCardContent";
 
-export type {
-  SharedCardContentBaseProps,
-  SharedCardContentEditProps,
-  SharedCardContentProps,
-  SharedCardContentViewProps,
-} from "./SharedCardContent.types";
+export type { SharedCardContentProps } from "./SharedCardContent.types";
