@@ -11,7 +11,6 @@ type IntegrityReport = {
 
 const state = vi.hoisted(() => {
   return {
-    useSyncV2: false,
     backupResult: false,
     integrityReport: {
       checkedAt: "2026-01-01T00:00:00.000Z",
@@ -20,8 +19,6 @@ const state = vi.hoisted(() => {
       issues: [],
       isHealthy: true,
     } as IntegrityReport,
-    initializeOperationQueue: vi.fn(async (_userId: string) => {}),
-    resetOperationQueue: vi.fn(() => {}),
     migrateLegacyImagesToAssets: vi.fn(async (_params: { userId: string }) => ({
       scannedCards: 0,
       scannedImages: 0,
@@ -43,22 +40,6 @@ const state = vi.hoisted(() => {
     })),
   };
 });
-
-vi.mock("@/features/flags", () => ({
-  flags: {
-    isEnabled: (name: "USE_SYNC_V2") => {
-      if (name !== "USE_SYNC_V2") {
-        throw new Error(`Unexpected flag request: ${name}`);
-      }
-      return state.useSyncV2;
-    },
-  },
-}));
-
-vi.mock("@/utils/queueUtils", () => ({
-  initializeOperationQueue: state.initializeOperationQueue,
-  resetOperationQueue: state.resetOperationQueue,
-}));
 
 vi.mock("@/application/startup/MigrateLegacyImagesToAssets", () => ({
   migrateLegacyImagesToAssets: state.migrateLegacyImagesToAssets,
@@ -97,7 +78,6 @@ import {
 
 describe("RunStartupTasks", () => {
   beforeEach(() => {
-    state.useSyncV2 = false;
     state.backupResult = false;
     state.integrityReport = {
       checkedAt: "2026-01-01T00:00:00.000Z",
@@ -107,8 +87,6 @@ describe("RunStartupTasks", () => {
       isHealthy: true,
     };
 
-    state.initializeOperationQueue.mockReset().mockResolvedValue(undefined);
-    state.resetOperationQueue.mockReset();
     state.migrateLegacyImagesToAssets.mockReset().mockResolvedValue({
       scannedCards: 0,
       scannedImages: 0,
@@ -125,31 +103,28 @@ describe("RunStartupTasks", () => {
     });
   });
 
-  it("disables the legacy operation queue when Sync V2 is enabled", async () => {
-    state.useSyncV2 = true;
-
+  it("always performs startup sync via SyncServiceFactory", async () => {
     await runStartupTasks({ userId: "user-1" });
 
-    expect(state.resetOperationQueue).toHaveBeenCalledTimes(1);
-    expect(state.initializeOperationQueue).not.toHaveBeenCalled();
     expect(state.getInstance).toHaveBeenCalledWith("user-1");
     expect(state.performStartupSync).toHaveBeenCalledTimes(1);
   });
 
-  it("initializes the legacy operation queue when Sync V2 is disabled", async () => {
-    state.useSyncV2 = false;
+  it("does not start sync when disposed before the startup sync step", async () => {
+    const isDisposed = vi.fn(() => true);
 
-    await runStartupTasks({ userId: "user-2" });
+    await runStartupTasks({
+      userId: "user-2",
+      isDisposed,
+    });
 
-    expect(state.initializeOperationQueue).toHaveBeenCalledWith("user-2");
-    expect(state.resetOperationQueue).not.toHaveBeenCalled();
-    expect(state.getInstance).not.toHaveBeenCalled();
+    expect(state.getInstance).toHaveBeenCalledWith("user-2");
     expect(state.performStartupSync).not.toHaveBeenCalled();
   });
 
-  it("resets startup tasks by resetting the legacy operation queue", async () => {
-    await resetStartupTasks();
-
-    expect(state.resetOperationQueue).toHaveBeenCalledTimes(1);
+  it("keeps resetStartupTasks as a no-op for API compatibility", async () => {
+    await expect(resetStartupTasks()).resolves.toBeUndefined();
+    expect(state.getInstance).not.toHaveBeenCalled();
+    expect(state.performStartupSync).not.toHaveBeenCalled();
   });
 });

@@ -1,23 +1,15 @@
 import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
 import { filterRenderableCardBlocks } from "@/components/card/blocks/shared/isRenderableCardBlock";
 import { useViewerSceneProps } from "@/components/card/blocks/shared/useViewerSceneProps";
-import type { CardBlock } from "@/types/domain/card";
-import type { CardDisplayMode } from "@/types/domain/cardSet";
 import React from "react";
-
-type SharedCardViewSceneProps = Readonly<{
-  blocks: CardBlock[];
-  onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
-  displayMode?: CardDisplayMode;
-  zoom?: number;
-}>;
+import type { SharedCardContentViewProps } from "./SharedCardContent.types";
 
 export const SharedCardViewScene = ({
   blocks,
   onGalleryFullscreenChange,
   displayMode,
   zoom,
-}: SharedCardViewSceneProps) => {
+}: SharedCardContentViewProps) => {
   const viewerProps = useViewerSceneProps({
     onGalleryFullscreenChange,
     displayMode,

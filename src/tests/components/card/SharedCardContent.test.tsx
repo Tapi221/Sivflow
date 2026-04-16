@@ -1,16 +1,15 @@
 // @vitest-environment jsdom
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import type { CardBlock } from "@/types/domain/card";
-import { DragDropContext } from "@hello-pangea/dnd";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("../blocks/BlockRenderer", () => ({
-  BlockRenderer: () => <div data-testid="mock-block-renderer" />,
+vi.mock("@/components/card/common/SharedCardViewScene", () => ({
+  SharedCardViewScene: () => <div data-testid="shared-card-view-scene" />,
 }));
 
-vi.mock("../blocks/BlockEditor", () => ({
-  BlockEditor: () => <div data-testid="mock-block-editor" />,
+vi.mock("@/components/card/common/SharedCardEditScene", () => ({
+  SharedCardEditScene: () => <div data-testid="shared-card-edit-scene" />,
 }));
 
 describe("SharedCardContent", () => {
@@ -18,35 +17,27 @@ describe("SharedCardContent", () => {
     { id: "b-1", type: "text", orderIndex: 0, content: "hello" },
   ];
 
-  it("renders view mode with shared root", () => {
+  it("renders the shared root and view scene in view mode", () => {
     const { container } = render(
       <SharedCardContent mode="view" blocks={blocks} />,
     );
 
-    const root = container.querySelector(".card-content-root");
-
-    expect(root).toBeTruthy();
-    expect(screen.getByTestId("mock-block-renderer")).toBeTruthy();
+    expect(container.querySelector(".card-content-root")).toBeTruthy();
+    expect(screen.getByTestId("shared-card-view-scene")).toBeTruthy();
   });
 
-  it("renders edit mode with the same shared root", () => {
+  it("renders the shared root and edit scene in edit mode", () => {
     const { container } = render(
-      <DragDropContext onDragEnd={() => {}}>
-        <SharedCardContent
-          mode="edit"
-          blocks={blocks}
-          onChange={() => {}}
-          prefix="question"
-          label="問題"
-          color="text-indigo-500"
-          droppableId="question-blocks"
-        />
-      </DragDropContext>,
+      <SharedCardContent
+        mode="edit"
+        blocks={blocks}
+        onChange={() => {}}
+        prefix="question"
+        label="問題"
+      />,
     );
 
-    const root = container.querySelector(".card-content-root");
-
-    expect(root).toBeTruthy();
-    expect(screen.getByTestId("mock-block-editor")).toBeTruthy();
+    expect(container.querySelector(".card-content-root")).toBeTruthy();
+    expect(screen.getByTestId("shared-card-edit-scene")).toBeTruthy();
   });
 });
