@@ -1,8 +1,13 @@
 import { createPerformAutoBackupUseCase } from "@/application/backup/PerformAutoBackup";
 import { createCheckDataIntegrityUseCase } from "@/application/integrity/CheckDataIntegrity";
-import { flags } from "@/features/flags";
+import { createHardDeleteOrphanedCardsUseCase } from "@/application/integrity/HardDeleteOrphanedCards";
 import { localStorageBackupStore } from "@/infrastructure/browser-storage/LocalStorageBackupStore";
+import { flags } from "@/features/flags";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
+import type {
+  IntegrityIssue,
+  IntegrityReport,
+} from "@/services/dataIntegrityTypes";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
 export interface RunStartupTasksParams {
@@ -17,25 +22,41 @@ const performAutoBackupUseCase = createPerformAutoBackupUseCase({
 });
 
 const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
+const hardDeleteOrphanedCardsUseCase = createHardDeleteOrphanedCardsUseCase();
 
-const configureStartupQueue = async (
-  userId: string,
-  useSyncV2: boolean,
-): Promise<void> => {
-  const { initializeOperationQueue, resetOperationQueue } =
-    await import("@/utils/queueUtils");
+const summarizeIssueCodes = (
+  issues: readonly IntegrityIssue[],
+): Record<string, number> => {
+  return issues.reduce<Record<string, number>>((accumulator, issue) => {
+    accumulator[issue.code] = (accumulator[issue.code] || 0) + 1;
+    return accumulator;
+  }, {});
+};
 
-  if (useSyncV2) {
-    resetOperationQueue();
-    console.log(
-      "[Queue] Legacy Operation Queue disabled because Sync V2 owns syncQueue",
-      { userId },
+const countInvalidFolderRefCards = (report: IntegrityReport): number => {
+  return report.issues.filter(
+    (issue) =>
+      issue.code === "INVALID_FOLDER_REF" && issue.entityType === "card",
+  ).length;
+};
+
+const logIntegrityReport = (report: IntegrityReport): void => {
+  if (!report.isHealthy) {
+    console.error(
+      "[Critical] Data integrity issues found:",
+      report.issues.length,
+      sanitizeForLog(summarizeIssueCodes(report.issues)),
     );
     return;
   }
 
-  await initializeOperationQueue(userId);
-  console.log("[Queue] Operation Queue initialized", { userId });
+  console.log(
+    "[Safe] Data integrity check passed (0 errors). Healthy items:",
+    report.totalCards,
+    "cards,",
+    report.totalFolders,
+    "folders.",
+  );
 };
 
 export const resetStartupTasks = async (): Promise<void> => {
@@ -48,14 +69,18 @@ export const runStartupTasks = async ({
   isDisposed = isDisposedDefault,
 }: RunStartupTasksParams): Promise<void> => {
   try {
-    const useSyncV2 = flags.isEnabled("USE_SYNC_V2");
     const { migrateLegacyImagesToAssets } =
       await import("@/application/startup/MigrateLegacyImagesToAssets");
 
-    await configureStartupQueue(userId, useSyncV2);
+    if (!flags.isEnabled("USE_SYNC_V2")) {
+      const { initializeOperationQueue } = await import("@/utils/queueUtils");
+      await initializeOperationQueue(userId);
 
-    if (isDisposed()) {
-      return;
+      if (isDisposed()) {
+        return;
+      }
+
+      console.log("[Queue] Operation Queue initialized", { userId });
     }
 
     const migrationSummary = await migrateLegacyImagesToAssets({ userId });
@@ -79,37 +104,39 @@ export const runStartupTasks = async ({
       console.log("Auto backup completed on startup");
     }
 
-    const report = await checkDataIntegrityUseCase.execute();
+    let report = await checkDataIntegrityUseCase.execute();
 
     if (isDisposed()) {
       return;
     }
 
-    if (!report.isHealthy) {
-      const issueSummary = report.issues.reduce<Record<string, number>>(
-        (accumulator, issue) => {
-          accumulator[issue.code] = (accumulator[issue.code] || 0) + 1;
-          return accumulator;
-        },
-        {},
+    const invalidFolderRefCount = countInvalidFolderRefCards(report);
+
+    if (invalidFolderRefCount > 0) {
+      const cleanupResult = await hardDeleteOrphanedCardsUseCase.execute(
+        userId,
+        report,
       );
 
-      console.error(
-        "[Critical] Data integrity issues found:",
-        report.issues.length,
-        sanitizeForLog(issueSummary),
+      if (isDisposed()) {
+        return;
+      }
+
+      console.warn(
+        "[Integrity] Hard-deleted orphaned cards with invalid folder references",
+        sanitizeForLog(cleanupResult),
       );
-    } else {
-      console.log(
-        "[Safe] Data integrity check passed (0 errors). Healthy items:",
-        report.totalCards,
-        "cards,",
-        report.totalFolders,
-        "folders.",
-      );
+
+      report = await checkDataIntegrityUseCase.execute();
+
+      if (isDisposed()) {
+        return;
+      }
     }
 
-    if (useSyncV2) {
+    logIntegrityReport(report);
+
+    if (flags.isEnabled("USE_SYNC_V2")) {
       console.log("[Sync] Startup sync initiated");
       const syncService = await SyncServiceFactory.getInstance(userId);
 
