@@ -34,7 +34,6 @@ export const CardSetViewScreen = () => {
     overlayRight,
     resolvedLastSyncedAtMs,
     topLeftZoomControl,
-    interactionMode,
     effectiveCardLayoutMode,
     disabledCardLayoutModes,
     layoutConstraintIndicatorLabel,
@@ -69,11 +68,9 @@ export const CardSetViewScreen = () => {
 
   const modeToolbar = (
     <CardModeToolbar
-      interactionMode={interactionMode}
       displayMode={state.currentDisplayMode}
       cardLayoutMode={effectiveCardLayoutMode}
       disabledCardLayoutModes={disabledCardLayoutModes}
-      onChangeInteractionMode={state.setInteractionMode}
       onChangeDisplayMode={state.setCurrentDisplayMode}
       onChangeCardLayoutMode={state.setCurrentCardLayoutMode}
     />
