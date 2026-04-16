@@ -138,23 +138,18 @@ const SettingsDialog = ({
   const { settings: syncPrefs, updateSettings: updateSyncPrefs } =
     useSyncSettings();
 
-  const storedProfileImageUrl = settings?.profileImage?.remoteUrl;
-  const googleProfileImageUrl =
+  const resolvedProfileImageUrl =
     typeof currentUser?.photoURL === "string" &&
     currentUser.photoURL.trim().length > 0
       ? currentUser.photoURL
       : null;
-  const hasStoredProfileImage =
-    typeof storedProfileImageUrl === "string" &&
-    storedProfileImageUrl.length > 0 &&
-    !storedProfileImageUrl.startsWith("blob:");
-  const resolvedProfileImageUrl = hasStoredProfileImage
-    ? storedProfileImageUrl
-    : googleProfileImageUrl;
   const hasResolvedProfileImage = !!resolvedProfileImageUrl && !imgError;
 
   const footerDisplayName =
-    currentUser?.displayName?.trim() || settings?.displayName || "User";
+    typeof currentUser?.displayName === "string" &&
+    currentUser.displayName.trim().length > 0
+      ? currentUser.displayName.trim()
+      : "User";
   const { bg: footerAvatarBg, text: footerAvatarText } =
     getAvatarColors(footerDisplayName);
 

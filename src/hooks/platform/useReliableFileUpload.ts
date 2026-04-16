@@ -36,7 +36,7 @@ interface UseReliableFileUploadReturn {
   reset: () => void;
 }
 
-type UploadKind = "card_image" | "card_audio" | "profile" | "pdf" | string;
+type UploadKind = "card_image" | "card_audio" | "pdf" | string;
 
 type UploadValidationRule = {
   label: string;
@@ -84,18 +84,6 @@ const UPLOAD_VALIDATION_RULES: Record<string, UploadValidationRule> = {
       "audio/x-m4a",
     ],
     allowedExtensions: [".mp3", ".wav", ".ogg", ".m4a", ".mp4"],
-    maxFileSize: DEFAULT_MAX_FILE_SIZE,
-  },
-  profile: {
-    label: "プロフィール画像",
-    allowedMimeTypes: [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "image/heic",
-      "image/heif",
-    ],
-    allowedExtensions: [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"],
     maxFileSize: DEFAULT_MAX_FILE_SIZE,
   },
   pdf: {

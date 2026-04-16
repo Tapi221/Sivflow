@@ -1,5 +1,4 @@
 import { Timestamp } from "firebase/firestore";
-import type { ProfileImage } from "./assets";
 import type { BaseEntity, BlockConfig } from "./base";
 
 export interface User {
@@ -21,8 +20,6 @@ export interface User {
 }
 
 export interface UserSettings extends BaseEntity {
-  displayName?: string;
-  profileImage?: ProfileImage | null;
   weekStartDay: "sunday" | "monday";
   language: "ja" | "en" | "zh";
   levelColors: { [level: number]: string };

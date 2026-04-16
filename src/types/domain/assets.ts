@@ -58,11 +58,6 @@ export type ResolvableImageRef = {
   naturalH?: number | null;
 };
 
-export interface ProfileImage {
-  remoteUrl: string | null;
-  updatedAt: number;
-}
-
 export interface ImageBlockLayout {
   /** fixed 本文座標系での画像論理幅。fixed / fluid 共通の正本。 */
   baseWidthPx?: number | null;
@@ -117,7 +112,6 @@ export interface UploadMetadata {
   sizeBytes: number;
   context:
     | "card_image"
-    | "profile"
     | "card_audio"
     | "pdf"
     | { type: string; [key: string]: unknown };

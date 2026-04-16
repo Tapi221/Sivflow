@@ -5,9 +5,8 @@ import {
   writeCachedFolderSidebarDisplayMode,
 } from "@/services/folderSidebarDisplayModePreference";
 import type { UserSettings } from "@/types";
-import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 type LegacyFolderSidebarDisplayMode =
   | UserSettings["folderSidebarDisplayMode"]
@@ -20,8 +19,6 @@ const normalizeFolderSidebarDisplayMode = (
 };
 
 export const DEFAULT_SETTINGS: Partial<UserSettings> = {
-  displayName: "UserName",
-  profileImage: null,
   language: "ja",
   weekStartDay: "monday",
   notificationsEnabled: false,
@@ -92,18 +89,27 @@ const buildBootSettingsSnapshot = (): Partial<UserSettings> => ({
   folderSidebarDisplayMode: readCachedFolderSidebarDisplayMode(),
 });
 
+const removeLegacyProfileFields = (
+  input: Record<string, unknown> | undefined,
+): Record<string, unknown> => {
+  if (!input) return {};
+
+  const {
+    displayName: _displayName,
+    profileImage: _profileImage,
+    ...rest
+  } = input;
+
+  return rest;
+};
+
 export const useUserSettings = () => {
   const { currentUser } = useAuthSession();
-  const repairedBlobRef = useRef(false);
 
   const bootSettings = useMemo(
     () => buildBootSettingsSnapshot(),
     [currentUser?.uid],
   );
-
-  useEffect(() => {
-    repairedBlobRef.current = false;
-  }, [currentUser?.uid]);
 
   const settings = useLiveQuery(
     async () => {
@@ -111,9 +117,12 @@ export const useUserSettings = () => {
 
       const db = await getLocalDb(currentUser.uid);
       const userSettings = await db.userSettings.get(currentUser.uid);
-
-      const merged = { ...bootSettings, ...(userSettings || {}) };
-      const sanitizedProfile = sanitizeProfileImage(merged.profileImage);
+      const merged = {
+        ...bootSettings,
+        ...removeLegacyProfileFields(
+          userSettings as Record<string, unknown> | undefined,
+        ),
+      };
       const folderSidebarDisplayMode = normalizeFolderSidebarDisplayMode(
         (
           merged as {
@@ -126,7 +135,6 @@ export const useUserSettings = () => {
 
       return {
         ...merged,
-        profileImage: sanitizedProfile.profileImage,
         folderSidebarDisplayMode,
       };
     },
@@ -135,47 +143,44 @@ export const useUserSettings = () => {
   );
 
   useEffect(() => {
-    if (!currentUser || !settings) return;
-    if (repairedBlobRef.current) return;
+    if (!currentUser) return;
 
-    const sanitizedProfile = sanitizeProfileImage(settings.profileImage);
-    if (!sanitizedProfile.wasBlobRemoteUrl) return;
+    let cancelled = false;
 
-    repairedBlobRef.current = true;
-    if (import.meta.env.DEV) {
-      console.warn(
-        "[Settings] blob remoteUrl detected during hydrate; repairing profileImage",
-      );
-    }
-
-    if (typeof window === "undefined") return;
-
-    const timerId = window.setTimeout(async () => {
+    const cleanupLegacyProfileFields = async () => {
       const db = await getLocalDb(currentUser.uid);
       const current = await db.userSettings.get(currentUser.uid);
 
-      const currentSanitized = sanitizeProfileImage(current?.profileImage);
-      if (!currentSanitized.wasBlobRemoteUrl) return;
+      if (cancelled || !current) return;
+
+      const currentRecord = current as Record<string, unknown>;
+      const hasLegacyDisplayName = Object.prototype.hasOwnProperty.call(
+        currentRecord,
+        "displayName",
+      );
+      const hasLegacyProfileImage = Object.prototype.hasOwnProperty.call(
+        currentRecord,
+        "profileImage",
+      );
+
+      if (!hasLegacyDisplayName && !hasLegacyProfileImage) return;
+
+      const cleaned = removeLegacyProfileFields(currentRecord);
 
       await db.userSettings.put({
-        ...current,
+        ...cleaned,
         userId: currentUser.uid,
         id: currentUser.uid,
         updatedAt: new Date(),
-        profileImage: currentSanitized.profileImage,
-      });
+      } as UserSettings);
+    };
 
-      if (import.meta.env.DEV) {
-        const repaired = await db.userSettings.get(currentUser.uid);
-        console.log(
-          "[Settings][RepairCheck] profileImage after repair:",
-          repaired?.profileImage ?? null,
-        );
-      }
-    }, 0);
+    void cleanupLegacyProfileFields();
 
-    return () => window.clearTimeout(timerId);
-  }, [currentUser, settings]);
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser?.uid]);
 
   const updateSettings = useCallback(
     async (newSettings: Partial<UserSettings>) => {
@@ -183,26 +188,9 @@ export const useUserSettings = () => {
 
       const db = await getLocalDb(currentUser.uid);
       const current = await db.userSettings.get(currentUser.uid);
-
-      const hasProfileImageUpdate = Object.prototype.hasOwnProperty.call(
-        newSettings,
-        "profileImage",
+      const currentWithoutLegacy = removeLegacyProfileFields(
+        current as Record<string, unknown> | undefined,
       );
-
-      let sanitizedProfile = current?.profileImage ?? null;
-
-      if (hasProfileImageUpdate) {
-        const profileSanitizeResult = sanitizeProfileImage(
-          newSettings.profileImage,
-        );
-        sanitizedProfile = profileSanitizeResult.profileImage;
-
-        if (import.meta.env.DEV && profileSanitizeResult.wasBlobRemoteUrl) {
-          console.warn(
-            "[Settings] blocked blob remoteUrl on save; forcing profileImage.remoteUrl=null",
-          );
-        }
-      }
 
       const normalizedSettings: Partial<UserSettings> = {
         ...newSettings,
@@ -230,15 +218,14 @@ export const useUserSettings = () => {
       }
 
       const updated = {
-        ...current,
+        ...currentWithoutLegacy,
         ...normalizedSettings,
-        profileImage: sanitizedProfile,
         userId: currentUser.uid,
         updatedAt: new Date(),
         id: currentUser.uid,
       };
 
-      if (JSON.stringify(current) === JSON.stringify(updated)) return;
+      if (JSON.stringify(currentWithoutLegacy) === JSON.stringify(updated)) return;
 
       await db.userSettings.put(updated as UserSettings);
     },
