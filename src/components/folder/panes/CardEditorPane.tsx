@@ -19,7 +19,6 @@ import {
 } from "@/components/card/editor/CardEditorPaneStates";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
-import { Flashcard } from "@/components/card/frame/Flashcard";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
 import {
   buildCardChromeClassName,
@@ -33,6 +32,7 @@ import { CardSyncStatusPill } from "@/components/card/shell/CardSyncStatusPill";
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
+import { CardEditorPaneReadonlySurface } from "@/components/folder/panes/CardEditorPaneReadonlySurface";
 import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
 import {
   CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX,
@@ -86,13 +86,6 @@ interface CardEditorPaneProps {
   zoom?: number;
 }
 
-type FlashcardCardLike = Record<string, unknown> & {
-  id?: string;
-  title?: string;
-  hasUncertainty?: boolean;
-  isBookmarked?: boolean;
-};
-
 const CARD_PANE_AUTO_MAX_SCALE = 4;
 const EMPTY_BLOCKS: CardBlock[] = [];
 
@@ -101,9 +94,6 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const isCardEntity = (value: unknown): value is Card =>
   isRecord(value) && typeof value.id === "string";
-
-const toFlashcardCardLike = (card: unknown): FlashcardCardLike =>
-  (isRecord(card) ? card : {}) as FlashcardCardLike;
 
 const toTimeMs = (value: unknown): number | null => {
   return toMillisOrNull(value);
@@ -576,7 +566,6 @@ export const CardEditorPane = ({
 
   const selectedCardEntity = isCardEntity(selectedCard) ? selectedCard : null;
   const panelCardEntity = isCardEntity(panelCard) ? panelCard : null;
-  const flashcardCard = selectedCard ? toFlashcardCardLike(selectedCard) : null;
 
   const editorAccentColor = getSettingsAccentColor(settings);
   const editorDuplicateToOpposite = getSettingsDuplicateToOpposite(settings);
@@ -1049,35 +1038,19 @@ export const CardEditorPane = ({
               {editorPanelsNode}
             </div>
           ) : (
-            flashcardCard && (
+            selectedCardEntity && (
               <div className="flex w-full justify-center">
-                <div className="w-full" style={activePaneWidthStyle}>
-                  <Flashcard
-                    card={flashcardCard}
-                    isFlipped={isFlipped}
+                <div className="w-full space-y-2" style={activePaneWidthStyle}>
+                  <div className="flex justify-end">{readonlyEditButton}</div>
+                  <CardEditorPaneReadonlySurface
+                    card={selectedCardEntity}
+                    isFlipped={Boolean(isFlipped)}
                     onFlip={() => setIsFlipped((prev) => !prev)}
-                    onToggleBookmark={(cardLike) => {
-                      void cardLike;
-                      if (!selectedCardEntity) return;
-                      void handleToggleBookmark(selectedCardEntity);
-                    }}
-                    onToggleUncertainty={(cardLike) => {
-                      void cardLike;
-                      if (!selectedCardEntity) return;
-                      void handleToggleUncertainty(selectedCardEntity);
-                    }}
-                    extraHeaderRight={readonlyEditButton}
+                    onToggleBookmark={handleToggleBookmark}
+                    onToggleUncertainty={handleToggleUncertainty}
                     displayMode={displayMode}
-                    allowUpscale
-                    maxScale={CARD_PANE_AUTO_MAX_SCALE}
-                    scaleMultiplier={1}
-                    fixedScale={editorFrameFixedScale}
-                    contentZoom={editorContentZoom}
-                    cardShellClassName={
-                      displayMode === "fluid"
-                        ? "border-none bg-transparent shadow-none"
-                        : undefined
-                    }
+                    cardLayoutMode={cardLayoutMode}
+                    zoomScale={zoom}
                   />
                 </div>
               </div>
