@@ -20,7 +20,7 @@ export const MetaPanelShell = ({
   return (
     <aside
       className={cn(
-        `meta-panel ds-editor-pane h-full w-80 shrink-0 border-l font-serif text-sm ${UI_TYPO} ${NUMERIC_TYPO}`,
+        `meta-panel ds-editor-pane h-full w-80 shrink-0 border-l text-sm ${UI_TYPO} ${NUMERIC_TYPO}`,
         className,
       )}
       style={

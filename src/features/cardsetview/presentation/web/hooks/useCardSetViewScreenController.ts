@@ -57,7 +57,6 @@ export const useCardSetViewScreenController = () => {
     cardSetId,
   });
 
-  const interactionMode = state.isGlobalEditing ? "edit" : "view";
   const layoutInteractionMode = "view" as const;
   const splitFallbackLayoutMode = useMemo(
     () => resolveSplitFallbackLayoutModePreference(presentationTarget),
@@ -200,7 +199,6 @@ export const useCardSetViewScreenController = () => {
     resolvedLastSyncedAtMs,
     topLeftZoomControl,
     handleSaveCurrentDisplayMode,
-    interactionMode,
     effectiveCardLayoutMode: zoom.effectiveCardLayoutMode,
     disabledCardLayoutModes,
     layoutConstraintIndicatorLabel,

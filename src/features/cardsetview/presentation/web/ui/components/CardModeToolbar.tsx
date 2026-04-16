@@ -10,14 +10,12 @@ import {
 } from "@/features/cardsetview/domain/cardLayoutMode";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { BookOpen, Circle, Layers, Pencil } from "@/ui/icons";
+import { Circle, Layers } from "@/ui/icons";
 
 type CardModeToolbarProps = {
-  interactionMode: "view" | "edit";
   displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
   disabledCardLayoutModes?: Partial<Record<CardLayoutMode, boolean>>;
-  onChangeInteractionMode: (mode: "view" | "edit") => void;
   onChangeDisplayMode: (mode: CardDisplayMode) => void;
   onChangeCardLayoutMode: (mode: CardLayoutMode) => void;
 };
@@ -84,35 +82,14 @@ const SplitGlyph = () => (
 );
 
 export const CardModeToolbar = ({
-  interactionMode,
   displayMode,
   cardLayoutMode,
   disabledCardLayoutModes,
-  onChangeInteractionMode,
   onChangeDisplayMode,
   onChangeCardLayoutMode,
 }: CardModeToolbarProps) => {
   return (
     <div className={cn(overlayGlassToolbarClassName, "gap-2 px-2.5")}>
-      <div className="flex items-center gap-1">
-        <ModeButton
-          isActive={interactionMode === "view"}
-          onClick={() => onChangeInteractionMode("view")}
-          label="閲覧モード"
-        >
-          <BookOpen className="h-3.5 w-3.5" />
-        </ModeButton>
-        <ModeButton
-          isActive={interactionMode === "edit"}
-          onClick={() => onChangeInteractionMode("edit")}
-          label="編集モード"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </ModeButton>
-      </div>
-
-      <span className="h-5 w-px bg-slate-200/80" />
-
       <div className="flex items-center gap-1">
         <ModeButton
           isActive={displayMode === "fixed"}

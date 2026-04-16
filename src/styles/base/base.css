@@ -24,7 +24,7 @@
   }
 
   body {
-    @apply bg-background-light select-none font-serif lining-nums tabular-nums;
+    @apply bg-background-light select-none lining-nums tabular-nums;
     color: #4a4a4a;
     font-feature-settings:
       "palt" 1,
