@@ -192,12 +192,11 @@ export const FolderRow: React.FC<FolderRowProps> = ({
         depth={depth}
         selected={isSelected}
         className={cn(
-          "cursor-pointer",
           rowBaseClassName,
           isFileDraggingOver && "ds-list-item__drag-over",
           EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS,
         )}
-        contentClassName={cn(EXPLORER_ROW_CONTENT_CLASS, "cursor-pointer")}
+        contentClassName={EXPLORER_ROW_CONTENT_CLASS}
         leading={
           hasExpandableContent ? (
             <button

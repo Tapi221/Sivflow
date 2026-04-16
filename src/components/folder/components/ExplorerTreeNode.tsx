@@ -4,12 +4,16 @@ import {
 } from "@/components/folder/explorer/model/utils";
 import { CardSetRow } from "@/components/folder/explorer/rows/CardSetRow";
 import { DocumentRow } from "@/components/folder/explorer/rows/DocumentRow";
-import { ExplorerRow } from "@/components/folder/explorer/rows/ExplorerRow";
-import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
 import { FolderRow } from "@/components/folder/explorer/rows/FolderRow";
+import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
 import {
   EXPLORER_ROW_CONTENT_CLASS,
+  EXPLORER_ROW_ICON_SLOT_CLASS,
+  EXPLORER_ROW_LEADING_SLOT_CLASS,
   EXPLORER_ROW_TITLE_SLOT_CLASS,
+  FOLDER_ROW_ICON_ACTIVE_CLASS,
+  FOLDER_ROW_ICON_MUTED_CLASS,
+  FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
 import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
@@ -212,38 +216,39 @@ export const ExplorerTreeNodeRenderer = React.memo(
     }
 
     return (
-      <div style={style}>
-        <ExplorerRow
-          rowRef={(el) => setRowRef(treeNode.rawId, el)}
-          depth={depth}
-          selected={isSelected}
-          className="sidebar-row--card"
-          onClick={() => {
-            if (treeNode.kind === "card") {
-              onItemSelect({ type: "card", id: treeNode.rawId });
-            }
-          }}
-        >
-          <div className={EXPLORER_ROW_CONTENT_CLASS}>
-            <span className="mr-1 size-4 shrink-0" />
-            <FileText
-              className="mr-2 h-4 w-4 shrink-0 text-[var(--sidebar-text-muted,#6e6e80)]"
-              style={{ transform: "translateY(-1px)" }}
-            />
-            <div
-              className={cn(EXPLORER_ROW_TITLE_SLOT_CLASS, "overflow-hidden")}
-            >
-              <ExplorerRowContent
-                title={treeNode.name}
-                titleClassName={cn(
-                  FOLDER_ROW_TITLE_CLASS,
-                  isSelected ? "font-medium" : "font-normal",
-                )}
-              />
-            </div>
-          </div>
-        </ExplorerRow>
-      </div>
+      <SidebarEntityRow
+        containerStyle={style}
+        rowRef={(el) => setRowRef(treeNode.rawId, el)}
+        depth={depth}
+        selected={isSelected}
+        contentClassName={EXPLORER_ROW_CONTENT_CLASS}
+        leading={<></>}
+        leadingClassName={EXPLORER_ROW_LEADING_SLOT_CLASS}
+        iconClassName={EXPLORER_ROW_ICON_SLOT_CLASS}
+        titleSlotClassName={cn(
+          EXPLORER_ROW_TITLE_SLOT_CLASS,
+          "overflow-hidden",
+        )}
+        title={treeNode.name}
+        titleClassName={cn(
+          FOLDER_ROW_TITLE_CLASS,
+          isSelected ? "font-medium" : "font-normal",
+        )}
+        icon={
+          <FileText
+            className={cn(
+              FOLDER_ROW_ICON_SIZE_CLASS,
+              FOLDER_ROW_ICON_MUTED_CLASS,
+              isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
+            )}
+          />
+        }
+        onClick={() => {
+          if (treeNode.kind === "card") {
+            onItemSelect({ type: "card", id: treeNode.rawId });
+          }
+        }}
+      />
     );
   },
 );
