@@ -4,14 +4,18 @@ import React from "react";
 import { ExplorerRow } from "./ExplorerRow";
 import { ExplorerRowContent } from "./ExplorerRowContent";
 import { SidebarTreeRow } from "./SidebarTreeRow";
-import { EXPLORER_ENTITY_ROW_INTERACTIVE_CLASS } from "./shared";
+import {
+  EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS,
+  EXPLORER_ENTITY_ROW_INTERACTIVE_CLASS,
+  EXPLORER_ENTITY_ROW_SHELL_BASE_CLASS,
+} from "./shared";
 
 interface SidebarEntityRowProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
   "children"
 > {
-  menuOpen: boolean;
-  onMenuOpenChange: (open: boolean) => void;
+  menuOpen?: boolean;
+  onMenuOpenChange?: (open: boolean) => void;
   menuActions?: MenuAction[];
   hasContextMenu?: boolean;
   isEditing?: boolean;
@@ -36,10 +40,12 @@ interface SidebarEntityRowProps extends Omit<
   input?: React.ReactNode;
   onContextMenuSelect?: () => void;
   children?: React.ReactNode;
+  density?: "compact";
+  selected?: boolean;
 }
 
-export const SidebarEntityRow = React.memo(function SidebarEntityRow({
-  menuOpen,
+const SidebarEntityRowBase = ({
+  menuOpen = false,
   onMenuOpenChange,
   menuActions,
   hasContextMenu = false,
@@ -68,12 +74,18 @@ export const SidebarEntityRow = React.memo(function SidebarEntityRow({
   className,
   selected,
   style,
+  density = "compact",
   ...props
-}: SidebarEntityRowProps & { selected?: boolean }) {
+}: SidebarEntityRowProps) => {
+  const handleMenuOpenChange = onMenuOpenChange ?? (() => {});
+
+  const densityClassName =
+    density === "compact" ? EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS : "";
+
   return (
     <SidebarTreeRow
       menuOpen={menuOpen}
-      onMenuOpenChange={onMenuOpenChange}
+      onMenuOpenChange={handleMenuOpenChange}
       menuActions={menuActions}
       hasContextMenu={hasContextMenu}
       isEditing={isEditing}
@@ -90,6 +102,8 @@ export const SidebarEntityRow = React.memo(function SidebarEntityRow({
         selected={selected}
         className={cn(
           EXPLORER_ENTITY_ROW_INTERACTIVE_CLASS,
+          EXPLORER_ENTITY_ROW_SHELL_BASE_CLASS,
+          densityClassName,
           selected && "ds-list-item--selected",
           className,
         )}
@@ -125,4 +139,6 @@ export const SidebarEntityRow = React.memo(function SidebarEntityRow({
       </ExplorerRow>
     </SidebarTreeRow>
   );
-});
+};
+
+export const SidebarEntityRow = React.memo(SidebarEntityRowBase);

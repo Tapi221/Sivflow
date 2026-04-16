@@ -139,8 +139,7 @@ export const DocumentRow = ({
       rowRef={(el) => setRowRef(treeNode.rawId, el)}
       depth={depth}
       selected={isSelected}
-      className="cursor-pointer"
-      contentClassName={cn(EXPLORER_ROW_CONTENT_CLASS, "cursor-pointer")}
+      contentClassName={EXPLORER_ROW_CONTENT_CLASS}
       leading={<></>}
       leadingClassName={EXPLORER_ROW_LEADING_SLOT_CLASS}
       iconClassName={EXPLORER_ROW_ICON_SLOT_CLASS}

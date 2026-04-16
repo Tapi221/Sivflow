@@ -130,8 +130,7 @@ export const CardSetRow = ({
       rowRef={(el) => setRowRef(treeNode.rawId, el)}
       depth={depth}
       selected={isSelected}
-      className="cursor-pointer"
-      contentClassName={cn(EXPLORER_ROW_CONTENT_CLASS, "cursor-pointer")}
+      contentClassName={EXPLORER_ROW_CONTENT_CLASS}
       leading={
         hasChildren ? (
           <button

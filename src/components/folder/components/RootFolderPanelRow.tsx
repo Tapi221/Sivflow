@@ -226,7 +226,6 @@ export const RootFolderPanelRow = ({
       onContextMenuSelect={handleContextMenuSelect}
       rowRef={(node) => setRowRef(entry.id, node)}
       selected={isSelected}
-      className="relative flex h-8 w-full cursor-pointer items-center rounded-[4px] px-2"
       contentClassName={EXPLORER_ROW_CONTENT_CLASS}
       iconClassName={EXPLORER_ROW_ICON_SLOT_CLASS}
       titleSlotClassName={EXPLORER_ROW_TITLE_SLOT_CLASS}
