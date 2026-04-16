@@ -1,17 +1,22 @@
+import {
+  buildCardSetById,
+  resolveCardFolderId,
+} from "@/domain/card/selectors/cardFolder";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import {
   getFolderId,
   getParentFolderId,
   normalizeFolderId,
 } from "@/components/folder/explorer/model/utils";
-import type { Card, SelectedExplorerItem } from "@/types";
-import React, { useEffect } from "react";
+import type { Card, CardSet, SelectedExplorerItem } from "@/types";
+import React, { useEffect, useMemo } from "react";
 
 interface UseEnsureAncestorFoldersExpandedParams {
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
   treeFolders: FolderTreeNode[];
   treeCards: Card[];
+  treeCardSets?: CardSet[];
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
 
@@ -52,8 +57,14 @@ export const useEnsureAncestorFoldersExpanded = ({
   selectedItem,
   treeFolders,
   treeCards,
+  treeCardSets = [],
   setExpandedFolders,
 }: UseEnsureAncestorFoldersExpandedParams) => {
+  const cardSetById = useMemo(() => {
+    const activeCardSets = treeCardSets.filter((cardSet) => !cardSet.isDeleted);
+    return buildCardSetById(activeCardSets);
+  }, [treeCardSets]);
+
   useEffect(() => {
     if (!selectedFolderId) return;
     const ancestorIds = getAncestorFolderIds(selectedFolderId, treeFolders);
@@ -63,8 +74,10 @@ export const useEnsureAncestorFoldersExpanded = ({
   useEffect(() => {
     if (!selectedItem || selectedItem.type !== "card") return;
     const card = treeCards.find((c) => c.id === selectedItem.id);
-    if (!card || !card.folderId) return;
-    const ancestorIds = getAncestorFolderIds(card.folderId, treeFolders);
+    if (!card) return;
+    const resolvedFolderId = resolveCardFolderId(card, cardSetById);
+    if (!resolvedFolderId) return;
+    const ancestorIds = getAncestorFolderIds(resolvedFolderId, treeFolders);
     expandFolderIds(ancestorIds, setExpandedFolders);
-  }, [selectedItem, treeCards, treeFolders, setExpandedFolders]);
+  }, [selectedItem, treeCards, treeFolders, setExpandedFolders, cardSetById]);
 };

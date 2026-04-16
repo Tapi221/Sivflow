@@ -13,16 +13,22 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { getCardText } from "@/domain/card/content";
+import {
+  buildCardSetById,
+  resolveCardFolderId,
+} from "@/domain/card/selectors/cardFolder";
+import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
-import type { Card, DocumentItem, Folder } from "@/types";
+import type { Card, CardSet, DocumentItem, Folder } from "@/types";
 import { HelpCircle, Settings2, Star, Tag as TagIcon } from "@/ui/icons";
 import { useMemo, useState } from "react";
 
 interface DirectoryDiagramPaneProps {
   folders: Folder[];
   cards: Card[];
+  cardSets?: CardSet[];
   documents: DocumentItem[];
 }
 
@@ -189,8 +195,15 @@ const DirectoryTreeNode = ({
 export const DirectoryDiagramPane = ({
   folders,
   cards,
+  cardSets: cardSetsProp,
   documents,
 }: DirectoryDiagramPaneProps) => {
+  const { cardSets: cardSetsFromHook = [] } = useCardSets();
+  const cardSets = (cardSetsProp ?? cardSetsFromHook) as CardSet[];
+  const cardSetById = useMemo(
+    () => buildCardSetById(cardSets.filter((cardSet) => !cardSet.isDeleted)),
+    [cardSets],
+  );
   const { tagById, getTagColor } = useTags();
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
 
@@ -309,7 +322,7 @@ export const DirectoryDiagramPane = ({
     for (const card of filteredCards) {
       if (card.isDeleted) continue;
 
-      const folderId = String(card.folderId || "");
+      const folderId = resolveCardFolderId(card, cardSetById) ?? "";
       if (!folderId) continue;
 
       const items = itemMap.get(folderId) ?? [];
@@ -394,7 +407,14 @@ export const DirectoryDiagramPane = ({
     return (childFolderMap.get(ROOT_KEY) ?? [])
       .map(buildNode)
       .filter((node): node is TreeNode => node !== null);
-  }, [filteredDocuments, filteredCards, folders, isFilterActive, tagById]);
+  }, [
+    filteredDocuments,
+    filteredCards,
+    folders,
+    isFilterActive,
+    tagById,
+    cardSetById,
+  ]);
 
   const previewCard = useMemo(
     () =>

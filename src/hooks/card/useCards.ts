@@ -18,6 +18,10 @@ import {
   DEFAULT_LAYOUT_ROWS,
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
+import {
+  buildCardSetById,
+  filterCardsByFolderId,
+} from "@/domain/card/selectors/cardFolder";
 
 const isCardDeleted = (
   card: Partial<Card> & {
@@ -48,6 +52,11 @@ export const useCards = (
 
   // Use settings to determine init schedule
   const { settings } = useUserSettings();
+  const normalizeFolderId = (value: string | null | undefined) => {
+    if (typeof value !== "string") return null;
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  };
 
   // useLiveQueryでリアクティブにカードを取得
   const rawCards = useLiveQuery(
@@ -71,10 +80,28 @@ export const useCards = (
           }
         } else if (folderId) {
           try {
-            return await db.cards.where("folderId").equals(folderId).toArray();
+            const targetFolderId = normalizeFolderId(
+              normalizeCardFolderId(folderId),
+            );
+            const siblingSets = (
+              await db.cardSets
+                .where("userId")
+                .equals(currentUser.uid)
+                .toArray()
+            ).filter(
+              (set) =>
+                !set.isDeleted &&
+                normalizeFolderId(set.folderId ?? null) === targetFolderId,
+            );
+            const siblingSetIds = siblingSets.map((set) => set.id);
+            if (siblingSetIds.length === 0) return [];
+            return await db.cards
+              .where("cardSetId")
+              .anyOf(siblingSetIds)
+              .toArray();
           } catch (indexError) {
             console.warn(
-              "[useCards] folderId index query failed. Falling back to full scan.",
+              "[useCards] folder/cardSet index query failed. Falling back to full scan.",
               indexError,
             );
           }
@@ -91,6 +118,25 @@ export const useCards = (
     [currentUser?.uid, folderId, cardSetId, enabled], // localDb.name is removed as dependency because it's now internal to liveQuery
   );
 
+  const rawCardSets = useLiveQuery(
+    async () => {
+      if (!enabled) return [];
+      if (!currentUser) return [];
+      const db = await getLocalDb(currentUser.uid);
+      return await db.cardSets
+        .where("userId")
+        .equals(currentUser.uid)
+        .toArray();
+    },
+    [currentUser?.uid, enabled],
+    [],
+  );
+
+  const cardSetById = useMemo(() => {
+    const activeSets = (rawCardSets ?? []).filter((set) => !set.isDeleted);
+    return buildCardSetById(activeSets);
+  }, [rawCardSets]);
+
   // 正規化・フィルタ・ソートはuseMemoで処理
   const cards = useMemo(() => {
     if (!rawCards || rawCards.length === 0) return [];
@@ -106,15 +152,14 @@ export const useCards = (
     if (cardSetId) {
       normalized = normalized.filter((c) => c.cardSetId === cardSetId);
     } else if (folderId) {
-      // 後方互換: cardSetId がない場合は folderId でフィルタ
-      normalized = normalized.filter((c) => c.folderId === folderId);
+      normalized = filterCardsByFolderId(normalized, folderId, cardSetById);
     }
 
     // orderIndex でソート
     normalized.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
 
     return normalized;
-  }, [rawCards, folderId, cardSetId]);
+  }, [rawCards, folderId, cardSetId, cardSetById]);
 
   // useLiveQueryはundefinedを返すことがあるのでloadingを判定
   const loading = enabled && rawCards === undefined;
@@ -216,12 +261,13 @@ export const useCards = (
       cardData.orderIndex ??
       Date.now() * 10000 + Math.floor(Math.random() * 10000);
 
-    // 表示用のQ番号は既存のカード数+1とする（orderIndexが巨大な数値になるため）
-    const folderCards = cards.filter(
-      (c) => (c.folderId ?? "") === resolvedFolderId,
-    );
+    // 表示用のQ番号は同一 CardSet の既存カード数+1とする
+    const cardSetCardCount = await db.cards
+      .where("cardSetId")
+      .equals(resolvedCardSet.cardSetId)
+      .count();
     const questionNumber =
-      cardData.questionNumber ?? `Q${folderCards.length + 1}`;
+      cardData.questionNumber ?? `Q${cardSetCardCount + 1}`;
     const id = crypto.randomUUID();
 
     const nextReviewDate = (() => {

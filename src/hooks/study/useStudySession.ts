@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Timestamp } from "firebase/firestore";
 import {
   computeNextReview,
@@ -9,7 +9,11 @@ import { getDebugStreak } from "@/utils/debugStreak";
 import { sanitizeStreak } from "@/utils/streak";
 import { getLocalDb } from "@/services/localDB";
 import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
-import type { Card, CardPatch, UserSettings } from "@/types";
+import {
+  buildCardSetById,
+  resolveCardFolderId,
+} from "@/domain/card/selectors/cardFolder";
+import type { Card, CardPatch, CardSet, UserSettings } from "@/types";
 import type { PracticeFilterRating } from "./usePracticeMode";
 
 export type StudySessionRating = PracticeFilterRating;
@@ -50,6 +54,7 @@ const SCORE_TO_RATING: Record<number, StudySessionRating> = {
 
 type Params = {
   studyCards: Card[];
+  cardSets?: CardSet[];
   updateCard?: ((id: string, patch: CardPatch) => Promise<unknown>) | null;
   currentUser: AuthUserLike;
   settings: Pick<UserSettings, "delayBonusEnabled"> | null | undefined;
@@ -76,6 +81,7 @@ const createSessionId = () => {
 
 export const useStudySession = ({
   studyCards,
+  cardSets = [],
   updateCard,
   currentUser,
   settings,
@@ -97,6 +103,10 @@ export const useStudySession = ({
   const [sourceSessionId] = useState(createSessionId);
 
   const safeSessionResults = sessionResults;
+  const cardSetById = useMemo(() => {
+    const activeCardSets = cardSets.filter((cardSet) => !cardSet.isDeleted);
+    return buildCardSetById(activeCardSets);
+  }, [cardSets]);
   const debugStreak = getDebugStreak();
   const effectiveStreak = debugStreak ?? sanitizeStreak(results?.streak);
   const stampRallyStreak =
@@ -145,10 +155,12 @@ export const useStudySession = ({
       }
 
       if (currentUser) {
+        const resolvedFolderId =
+          resolveCardFolderId(card, cardSetById) ?? undefined;
         createStudyLogMutation.mutate({
           userId: currentUser.uid,
           cardId: card.id,
-          folderId: card.folderId,
+          folderId: resolvedFolderId,
           subjectiveScore,
           responseTime,
           createdAt: Timestamp.now(),
@@ -160,7 +172,7 @@ export const useStudySession = ({
           await localDb.addItem("studyLogs", {
             userId: currentUser.uid,
             cardId: card.id,
-            folderId: card.folderId,
+            folderId: resolvedFolderId,
             subjectiveScore,
             responseTime,
             createdAt: reviewedAt,
@@ -228,6 +240,7 @@ export const useStudySession = ({
       fetchStreak,
       settings?.delayBonusEnabled,
       studyCards,
+      cardSetById,
       updateCard,
     ],
   );

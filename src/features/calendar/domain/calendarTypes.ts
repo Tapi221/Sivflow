@@ -23,6 +23,8 @@ export type CalendarFolderLike = {
 
 export type CalendarCardLike = {
   id: string;
+  cardSetId?: string | null;
+  card_set_id?: string | null;
   folderId?: string | null;
   folder_id?: string | null;
   next_review_date?: CalendarTimestampLike;
@@ -42,6 +44,12 @@ export type CalendarCardLike = {
   currentLevel?: number | null;
   memoryStability?: number | null;
   title?: string;
+};
+
+export type CalendarCardSetLike = {
+  id: string;
+  folderId?: string | null;
+  isDeleted?: boolean;
 };
 
 export type CalendarDisplayCard = CalendarCardLike & {

@@ -77,7 +77,7 @@ const TreeViewLayout = ({
   const toast = useToast();
   const { settings } = useUserSettings();
   const { createFolder, updateFolder, deleteFolder } = useFolders();
-  const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } =
+  const { createCard, updateCard, deleteCard, moveCardToSet, reorderCards } =
     useCards();
 
   const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(
@@ -160,6 +160,7 @@ const TreeViewLayout = ({
   } = useTreeViewDerivedState({
     folders,
     cards,
+    cardSets,
     documents,
     selectedFolderId,
     selectedItem,
@@ -445,7 +446,7 @@ const TreeViewLayout = ({
       onDeleteCard={deleteCard}
       onUpdateDocument={handleUpdateDocumentForTree}
       onDeleteDocument={deleteDocument}
-      moveCardToFolder={moveCardToFolder}
+      moveCardToSet={moveCardToSet}
       moveCardSetToFolder={moveCardSetToFolder}
       moveDocumentToFolder={handleMoveDocumentToFolder}
       reorderCards={reorderCards}
