@@ -42,6 +42,7 @@ import {
   cardDocPathSegments,
 } from "@/services/firestorePaths";
 import { getCardImages, getCardText } from "@/domain/card/content";
+import type { Card as CardEntity } from "@/types";
 
 const Trash = () => {
   const { currentUser } = useAuthSession();
@@ -146,11 +147,17 @@ const Trash = () => {
   console.log("isLoading:", isLoading);
   console.log("isEmpty:", deletedFolders.length === 0 && cards.length === 0);
 
-  const [selectedIds, setSelectedIds] = useState({ folders: [], cards: [] });
+  const [selectedIds, setSelectedIds] = useState<{
+    folders: string[];
+    cards: string[];
+  }>({
+    folders: [],
+    cards: [],
+  });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const [previewCard, setPreviewCard] = useState(null);
+  const [previewCard, setPreviewCard] = useState<CardEntity | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("all"); // 'all', 'today', 'week', 'month'
 
@@ -944,7 +951,6 @@ const Trash = () => {
           open={deleteDialogOpen}
           onOpenChange={(open) => {
             setDeleteDialogOpen(open);
-            if (!open) setConfirmationText("");
           }}
         >
           <AlertDialogContent className="max-w-lg">
@@ -981,10 +987,7 @@ const Trash = () => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel
-                disabled={isProcessing}
-                onClick={() => setConfirmationText("")}
-              >
+              <AlertDialogCancel disabled={isProcessing}>
                 キャンセル
               </AlertDialogCancel>
               <AlertDialogAction

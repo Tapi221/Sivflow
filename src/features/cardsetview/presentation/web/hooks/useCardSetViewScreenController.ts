@@ -38,6 +38,7 @@ export const useCardSetViewScreenController = () => {
     targetCardId,
     folderId,
     cardSetId,
+    cardSetById: data.cardSetById,
     sortedCards: data.sortedCards,
     cardIndexById: data.cardIndexById,
     createCard: data.createCard,
