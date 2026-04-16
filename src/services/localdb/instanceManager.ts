@@ -12,7 +12,6 @@ import {
 } from "@/services/localDBRuntimeState";
 import type { LocalDB } from "./LocalDB";
 import { createLocalDBInternal } from "./LocalDB";
-import { registerSchemaV32DropLegacyTags } from "./registerSchemaV32DropLegacyTags";
 import {
   classifyFallbackReasonCode,
   isBackingStoreOpenError,
@@ -144,7 +143,6 @@ export const getInstance = async (userId?: string) => {
     }
 
     const persistentDb = createLocalDBInternal(nextUserId);
-    registerSchemaV32DropLegacyTags(persistentDb);
 
     try {
       await openPersistentDbWithRetry(persistentDb);

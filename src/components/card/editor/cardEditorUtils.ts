@@ -93,7 +93,7 @@ export const shouldAutoOpenEditorForCard = (card: unknown) => {
     } | null;
   };
   if (String(safeCard.title ?? "").trim().length > 0) return false;
-  if ((safeCard.tagIds ?? safeCard.tags ?? []).length > 0) return false;
+  if ((safeCard.tagIds ?? []).length > 0) return false;
   const frontBlocks = Array.isArray(safeCard.front?.blocks)
     ? safeCard.front.blocks
     : Array.isArray(safeCard.frontBlocks)

@@ -17,17 +17,14 @@ type SaveDocumentWithBlobParams = {
   blob: Blob;
 };
 
-const getDocumentFilesTable = (
-  db: Awaited<ReturnType<typeof getLocalDb>>,
-) => db.table<StoredDocumentFile, string>("documentFiles");
+const getDocumentFilesTable = (db: Awaited<ReturnType<typeof getLocalDb>>) =>
+  db.table<StoredDocumentFile, string>("documentFiles");
 
 const resolveDocumentFileId = (
   document: Pick<DocumentItem, "id" | "localFileId">,
 ): string => {
   const localFileId =
-    typeof document.localFileId === "string"
-      ? document.localFileId.trim()
-      : "";
+    typeof document.localFileId === "string" ? document.localFileId.trim() : "";
 
   return localFileId.length > 0 ? localFileId : document.id;
 };

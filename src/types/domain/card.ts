@@ -67,7 +67,6 @@ export type Card = BaseEntity & {
   orderIndex: number;
   questionNumber: string;
   title?: string;
-  tags?: string[];
   tagIds?: string[];
   front: CardFace;
   back: CardFace;

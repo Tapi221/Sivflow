@@ -19,12 +19,7 @@ import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 import { toDateOrNull, toMillis } from "@/utils/toMillis";
 import { nanoid } from "nanoid";
 import type { LocalDBTableMap, SyncableEntityTable } from "./localdb/types";
-import {
-  CURRENT_TAG_STORE,
-  LEGACY_TAG_STORE_V1,
-  LEGACY_TAG_STORE_V2,
-  LEGACY_TAG_STORE_V3,
-} from "./localdb/tagStoreNames";
+import { CURRENT_TAG_STORE } from "./localdb/tagStoreNames";
 
 type KeyPath = string | string[];
 type Predicate<T> = (value: T) => boolean;
@@ -572,18 +567,6 @@ export class InMemoryLocalDB {
     return this.table(CURRENT_TAG_STORE);
   }
 
-  get legacyTagsV1() {
-    return this.table(LEGACY_TAG_STORE_V1);
-  }
-
-  get legacyTagsV2() {
-    return this.table(LEGACY_TAG_STORE_V2);
-  }
-
-  get legacyTagsV3() {
-    return this.table(LEGACY_TAG_STORE_V3);
-  }
-
   constructor(userId?: string, name?: string) {
     this.userId = userId;
     this.name = name ?? `FlashcardMasterDB_mem_${userId ?? "anonymous"}`;
@@ -607,9 +590,6 @@ export class InMemoryLocalDB {
     this.images = this.registerTable("images", "id");
     this.cardRelations = this.registerTable("cardRelations", "id");
     this.projectMaps = this.registerTable("projectMaps", "id");
-    this.registerTable(LEGACY_TAG_STORE_V1, ["rootFolderId", "name"]);
-    this.registerTable(LEGACY_TAG_STORE_V2, ["userId", "name"]);
-    this.registerTable(LEGACY_TAG_STORE_V3, "id");
     this.registerTable(CURRENT_TAG_STORE, "id");
     this.registerTable("studyLogs", "id");
   }

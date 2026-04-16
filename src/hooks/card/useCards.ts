@@ -300,11 +300,7 @@ export const useCards = (
       nextReviewDate,
       createdAt: now,
       updatedAt: now,
-      ...(Array.isArray(cardData.tagIds)
-        ? { tagIds: cardData.tagIds }
-        : Array.isArray(cardData.tags)
-          ? { tags: cardData.tags }
-          : {}),
+      ...(Array.isArray(cardData.tagIds) ? { tagIds: cardData.tagIds } : {}),
       reviewLogs: normalizedReviewLogs,
     };
 
@@ -375,10 +371,6 @@ export const useCards = (
           new Date(a.reviewedAt).getTime() - new Date(b.reviewedAt).getTime(),
       );
     }
-    if (Array.isArray(patch.tagIds)) {
-      delete (patch as Partial<Card> & { tags?: unknown }).tags;
-    }
-
     // 通常の更新処理
     await db.updateItem("cards", id, {
       ...patch,

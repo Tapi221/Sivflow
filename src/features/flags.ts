@@ -97,9 +97,7 @@ class FeatureFlagService {
 
 const featureFlags = new FeatureFlagService();
 
-export type LegacyFlagName =
-  | "postReviewPractice"
-  | "ENABLE_ADVANCED_TELEMETRY";
+export type LegacyFlagName = "postReviewPractice" | "ENABLE_ADVANCED_TELEMETRY";
 
 const legacyToKey: Record<LegacyFlagName, keyof FeatureFlags> = {
   postReviewPractice: "postReviewPractice",

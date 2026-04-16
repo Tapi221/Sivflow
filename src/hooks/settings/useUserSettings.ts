@@ -225,7 +225,8 @@ export const useUserSettings = () => {
         id: currentUser.uid,
       };
 
-      if (JSON.stringify(currentWithoutLegacy) === JSON.stringify(updated)) return;
+      if (JSON.stringify(currentWithoutLegacy) === JSON.stringify(updated))
+        return;
 
       await db.userSettings.put(updated as UserSettings);
     },

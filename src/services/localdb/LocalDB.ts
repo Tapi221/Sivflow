@@ -39,12 +39,7 @@ import { attachHooks } from "./hooks";
 import * as maintenance from "./maintenance";
 import * as queries from "./queries";
 import { defineSchema } from "./schema";
-import {
-  CURRENT_TAG_STORE,
-  LEGACY_TAG_STORE_V1,
-  LEGACY_TAG_STORE_V2,
-  LEGACY_TAG_STORE_V3,
-} from "./tagStoreNames";
+import { CURRENT_TAG_STORE } from "./tagStoreNames";
 
 // NOTE: creates a circular dependency with instanceManager.ts; safe in ESM (all usages inside function bodies)
 import {
@@ -157,27 +152,6 @@ export class LocalDB extends Dexie {
 
   get tagRecords(): Dexie.Table<TagRecord, string> {
     return this.table(CURRENT_TAG_STORE) as Dexie.Table<TagRecord, string>;
-  }
-
-  get legacyTagsV1(): Dexie.Table<Record<string, unknown>, [string, string]> {
-    return this.table(LEGACY_TAG_STORE_V1) as Dexie.Table<
-      Record<string, unknown>,
-      [string, string]
-    >;
-  }
-
-  get legacyTagsV2(): Dexie.Table<Record<string, unknown>, [string, string]> {
-    return this.table(LEGACY_TAG_STORE_V2) as Dexie.Table<
-      Record<string, unknown>,
-      [string, string]
-    >;
-  }
-
-  get legacyTagsV3(): Dexie.Table<Record<string, unknown>, string> {
-    return this.table(LEGACY_TAG_STORE_V3) as Dexie.Table<
-      Record<string, unknown>,
-      string
-    >;
   }
 
   private constructor(userId?: string) {

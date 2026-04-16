@@ -491,7 +491,6 @@ export const normalizeCard = (raw: unknown): Card => {
     completedDate: normalizeDate(
       pick(record.completedDate, record.completed_date),
     ),
-    tags: toArrayOr(record.tags, []),
     ...(Array.isArray(record.tagIds)
       ? {
           tagIds: record.tagIds.filter(

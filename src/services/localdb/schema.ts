@@ -2000,10 +2000,6 @@ export const defineSchema = (db: LocalDB): void => {
       syncQueue:
         "id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey",
       conflicts: "id, entityId",
-      tags: "[rootFolderId+name], rootFolderId, userId, updatedAt",
-      tags_v2: "[userId+name], userId, updatedAt",
-      tags_v3:
-        "id, userId, parentId, [userId+parentId], [userId+nameLower], updatedAt",
       tagRecords:
         "id, userId, parentId, [userId+parentId], [userId+nameLower], updatedAt",
       studyLogs: "id, userId, cardId, studiedAt",
@@ -2029,5 +2025,4 @@ export const defineSchema = (db: LocalDB): void => {
         "[Migration v32] cleared legacy PDF metadata and removed legacy document_file_store",
       );
     });
-
 };
