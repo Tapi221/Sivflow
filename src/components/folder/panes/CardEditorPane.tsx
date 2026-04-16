@@ -967,13 +967,8 @@ export const CardEditorPane = ({
   const readonlyEditButton = (
     <button
       type="button"
-      data-card-no-flip="true"
       className="inline-flex h-7 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 px-2 text-[10px] font-semibold leading-none text-slate-700 shadow-sm backdrop-blur-[2px] hover:bg-white"
-      onClick={(event) => {
-        event.stopPropagation();
-        setIsEditing(true);
-      }}
-      onPointerDown={(event) => event.stopPropagation()}
+      onClick={() => setIsEditing(true)}
     >
       編集
     </button>
