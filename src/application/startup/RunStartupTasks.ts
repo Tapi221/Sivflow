@@ -19,7 +19,8 @@ const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
 
 /**
  * Sync V2 移行完了後の startup reset。
- * 旧 OperationQueue の初期化/破棄は廃止したため、現在は no-op とする。
+ * 起動時の追加タスクを実行する。
+ * 同期は常に SyncServiceFactory 経由の現行実装を使用する。
  *
  * App.tsx からの既存呼び出し互換を維持するため関数自体は残す。
  */

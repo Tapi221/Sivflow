@@ -208,7 +208,7 @@ export const defineSchema = (db: LocalDB): void => {
     projectMaps: "id, userId, folderId, updatedAt, [userId+updatedAt]",
   });
 
-  // Version 15: Enhance SyncQueue for OperationQueueService (Rev.5)
+  // Version 15: Enhance syncQueue schema and migration metadata (Rev.5)
   db.version(15).stores({
     folders:
       "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
