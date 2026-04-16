@@ -60,7 +60,7 @@ interface BlockEditorProps {
   settings?: unknown;
   toolbarMount?: HTMLDivElement | null;
   toolbarDesktopLayout?: "horizontal" | "vertical";
-  enableBlockActiveState?: boolean;
+  enableBlockSelectionState?: boolean;
   displayMode?: CardDisplayMode;
   zoom?: number;
 }
@@ -90,24 +90,24 @@ export const BlockEditor = React.forwardRef<
       settings = undefined,
       toolbarMount = null,
       toolbarDesktopLayout = "horizontal",
-      enableBlockActiveState = true,
+      enableBlockSelectionState = true,
       displayMode = "fixed",
       zoom = 1,
     },
     ref,
   ) => {
-    const [activeContainerBlockId, setActiveContainerBlockId] = useState<
+    const [selectedContainerBlockId, setSelectedContainerBlockId] = useState<
       string | null
     >(null);
-    const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+    const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
     const rootRef = useRef<HTMLDivElement | null>(null);
 
     const editorRootStyle = useMemo<CssVars | undefined>(() => {
-      if (enableBlockActiveState) return undefined;
+      if (enableBlockSelectionState) return undefined;
       return {
         "--card-ruled-line-px": "0px",
       };
-    }, [enableBlockActiveState]);
+    }, [enableBlockSelectionState]);
 
     const orderedBlocks = useMemo(
       () => sortBlocksByOrderIndex(blocks),
@@ -119,24 +119,24 @@ export const BlockEditor = React.forwardRef<
       [orderedBlocks],
     );
 
-    const resolvedActiveBlockId = useMemo(() => {
-      if (!enableBlockActiveState) return null;
-      if (!activeBlockId) return null;
-      return sceneBlocks.some((block) => block.id === activeBlockId)
-        ? activeBlockId
+    const resolvedSelectedBlockId = useMemo(() => {
+      if (!enableBlockSelectionState) return null;
+      if (!selectedBlockId) return null;
+      return sceneBlocks.some((block) => block.id === selectedBlockId)
+        ? selectedBlockId
         : null;
-    }, [activeBlockId, sceneBlocks, enableBlockActiveState]);
+    }, [selectedBlockId, sceneBlocks, enableBlockSelectionState]);
 
-    const resolvedActiveContainerBlockId = useMemo(() => {
-      if (!enableBlockActiveState) return null;
-      if (!activeContainerBlockId) return null;
+    const resolvedSelectedContainerBlockId = useMemo(() => {
+      if (!enableBlockSelectionState) return null;
+      if (!selectedContainerBlockId) return null;
       return sceneBlocks.some(
         (block) =>
-          block.id === activeContainerBlockId && block.type === "question",
+          block.id === selectedContainerBlockId && block.type === "question",
       )
-        ? activeContainerBlockId
+        ? selectedContainerBlockId
         : null;
-    }, [activeContainerBlockId, sceneBlocks, enableBlockActiveState]);
+    }, [selectedContainerBlockId, sceneBlocks, enableBlockSelectionState]);
 
     const reindexBlocks = useCallback(
       (arr: CardBlock[]) =>
@@ -311,7 +311,7 @@ export const BlockEditor = React.forwardRef<
             ? null
             : overrideContainerId !== undefined
               ? overrideContainerId
-              : resolvedActiveContainerBlockId;
+              : resolvedSelectedContainerBlockId;
 
         const tailRowOffset = (() => {
           for (let index = source.length - 1; index >= 0; index -= 1) {
@@ -353,7 +353,7 @@ export const BlockEditor = React.forwardRef<
         blocksRef.current = next;
         emitChange(next, { reindex: true });
       },
-      [emitChange, prefix, resolvedActiveContainerBlockId],
+      [emitChange, prefix, resolvedSelectedContainerBlockId],
     );
 
     useImperativeHandle(ref, () => ({
@@ -517,7 +517,7 @@ export const BlockEditor = React.forwardRef<
 
     const resolveEditorProps = useCallback(
       (block: CardBlock, meta: BlockListRowMeta): EditorProps => {
-        const isBlockActive = resolvedActiveBlockId === block.id;
+        const isBlockSelected = resolvedSelectedBlockId === block.id;
         const canMoveUp = meta.isLinePositionable;
         const canMoveDown = meta.isLinePositionable;
 
@@ -575,7 +575,7 @@ export const BlockEditor = React.forwardRef<
           canMoveUp,
           canMoveDown,
           accentColor,
-          isActive: isBlockActive,
+          isBlockSelected,
           autoFocus: autoFocus && meta.index === sceneBlocks.length - 1,
           customPlaceholder: customPlaceholders?.[meta.index],
           pendingUploadFile: pendingUploads[block.id],
@@ -597,7 +597,7 @@ export const BlockEditor = React.forwardRef<
         emitChange,
         pendingUploads,
         prefix,
-        resolvedActiveBlockId,
+        resolvedSelectedBlockId,
         resolvedEditorZoom,
         sceneBlocks.length,
       ],
@@ -612,34 +612,34 @@ export const BlockEditor = React.forwardRef<
           prefix === "question" ? "js-question-editor" : "js-answer-editor",
         )}
         onPointerDownCapture={(event) => {
-          if (!enableBlockActiveState) return;
+          if (!enableBlockSelectionState) return;
           const target = event.target;
           if (!(target instanceof HTMLElement)) return;
-          const nextActiveBlockId =
+          const nextSelectedBlockId =
             target.closest<HTMLElement>("[data-block-id]")?.dataset.blockId ??
             null;
-          setActiveBlockId((prev) =>
-            prev === nextActiveBlockId ? prev : nextActiveBlockId,
+          setSelectedBlockId((prev) =>
+            prev === nextSelectedBlockId ? prev : nextSelectedBlockId,
           );
         }}
         onFocusCapture={(event) => {
-          if (!enableBlockActiveState) return;
+          if (!enableBlockSelectionState) return;
           const target = event.target;
           if (!(target instanceof HTMLElement)) return;
-          const nextActiveBlockId =
+          const nextSelectedBlockId =
             target.closest<HTMLElement>("[data-block-id]")?.dataset.blockId ??
             null;
-          if (nextActiveBlockId) {
-            setActiveBlockId((prev) =>
-              prev === nextActiveBlockId ? prev : nextActiveBlockId,
+          if (nextSelectedBlockId) {
+            setSelectedBlockId((prev) =>
+              prev === nextSelectedBlockId ? prev : nextSelectedBlockId,
             );
           }
         }}
         onClick={(event) => {
-          if (!enableBlockActiveState) return;
+          if (!enableBlockSelectionState) return;
           const target = event.target as HTMLElement;
           if (!target.closest("[data-block-type='question']")) {
-            setActiveContainerBlockId((prev) => (prev === null ? prev : null));
+            setSelectedContainerBlockId((prev) => (prev === null ? prev : null));
           }
         }}
       >

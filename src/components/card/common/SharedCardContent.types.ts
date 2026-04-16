@@ -31,7 +31,7 @@ export type SharedCardContentEditProps = SharedCardContentBaseProps &
     hiddenBlockTypes?: CardBlock["type"][];
     toolbarMount?: HTMLDivElement | null;
     toolbarDesktopLayout?: "horizontal" | "vertical";
-    enableBlockActiveState?: boolean;
+    enableBlockSelectionState?: boolean;
     settings?: unknown;
     displayMode?: CardDisplayMode;
     zoom?: number;

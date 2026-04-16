@@ -70,7 +70,7 @@ export type EditorProps = Readonly<{
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   accentColor?: string;
-  isActive?: boolean;
+  isBlockSelected?: boolean;
   autoFocus?: boolean;
   customPlaceholder?: string;
   pendingUploadFile?: File;
@@ -102,7 +102,7 @@ type SharedShellProps = Readonly<{
   label?: string;
   icon?: React.ElementType;
   accentColor?: string;
-  isActive?: boolean;
+  isBlockSelected?: boolean;
   onDelete?: () => void;
   onDuplicate?: () => void;
   onMoveUp?: () => void;
@@ -153,7 +153,7 @@ const SharedBlockShell = ({
   label,
   icon,
   accentColor,
-  isActive,
+  isBlockSelected,
   onDelete,
   onDuplicate,
   onMoveUp,
@@ -193,7 +193,7 @@ const SharedBlockShell = ({
       label={label}
       icon={icon}
       accentColor={accentColor}
-      isActive={isActive}
+      isBlockSelected={isBlockSelected}
       canMoveUp={Boolean(canMoveUp)}
       canMoveDown={Boolean(canMoveDown)}
       onMoveUp={onMoveUp}
@@ -269,7 +269,7 @@ const TextBlockScene = ({
       label="Text"
       icon={Type}
       accentColor={editorProps?.accentColor}
-      isActive={editorProps?.isActive}
+      isBlockSelected={editorProps?.isBlockSelected}
       onDelete={editorProps?.onDelete}
       onDuplicate={editorProps?.onDuplicate}
       onMoveUp={editorProps?.onMoveUp}
@@ -321,7 +321,7 @@ const QuestionBlockScene = ({
       label="Question"
       icon={HelpCircle}
       accentColor={editorProps?.accentColor}
-      isActive={editorProps?.isActive}
+      isBlockSelected={editorProps?.isBlockSelected}
       onDelete={editorProps?.onDelete}
       onDuplicate={editorProps?.onDuplicate}
       onMoveUp={editorProps?.onMoveUp}
@@ -426,7 +426,7 @@ const CodeBlockScene = ({
         label="Code"
         icon={Code}
         accentColor={editorProps?.accentColor}
-        isActive={editorProps?.isActive}
+        isBlockSelected={editorProps?.isBlockSelected}
         onDelete={editorProps?.onDelete}
         onDuplicate={editorProps?.onDuplicate}
         onMoveUp={editorProps?.onMoveUp}
@@ -463,7 +463,7 @@ const ImageBlockScene = ({
       contentClassName="px-0"
       label="Image"
       accentColor={editorProps?.accentColor}
-      isActive={editorProps?.isActive}
+      isBlockSelected={editorProps?.isBlockSelected}
       onDelete={editorProps?.onDelete}
       onDuplicate={editorProps?.onDuplicate}
       onMoveUp={editorProps?.onMoveUp}
@@ -535,7 +535,7 @@ const AudioBlockScene = ({
       label="Audio"
       icon={Volume2}
       accentColor={editorProps?.accentColor}
-      isActive={editorProps?.isActive}
+      isBlockSelected={editorProps?.isBlockSelected}
       onDelete={editorProps?.onDelete}
       onDuplicate={editorProps?.onDuplicate}
       onMoveUp={editorProps?.onMoveUp}
@@ -574,7 +574,7 @@ const ReferenceBlockScene = ({
       label="Reference"
       icon={Link}
       accentColor={editorProps?.accentColor}
-      isActive={editorProps?.isActive}
+      isBlockSelected={editorProps?.isBlockSelected}
       onDelete={editorProps?.onDelete}
       onDuplicate={editorProps?.onDuplicate}
       onMoveUp={editorProps?.onMoveUp}
@@ -662,7 +662,7 @@ const MathBlockScene = ({
       label="Math"
       icon={Sigma}
       accentColor={editorProps?.accentColor}
-      isActive={Boolean(editorProps?.isActive || isEditorOpen)}
+      isBlockSelected={Boolean(editorProps?.isBlockSelected || isEditorOpen)}
       onDelete={editorProps?.onDelete}
       onDuplicate={editorProps?.onDuplicate}
       onMoveUp={editorProps?.onMoveUp}
@@ -726,7 +726,7 @@ const MarkdownBlockScene = ({
       label="Markdown"
       icon={NotebookPen}
       accentColor={editorProps?.accentColor}
-      isActive={Boolean(editorProps?.isActive || isEditorOpen)}
+      isBlockSelected={Boolean(editorProps?.isBlockSelected || isEditorOpen)}
       onDelete={editorProps?.onDelete}
       onDuplicate={editorProps?.onDuplicate}
       onMoveUp={editorProps?.onMoveUp}

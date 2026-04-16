@@ -165,7 +165,7 @@ type EditorSidePaneProps = {
   dockToolbarInsideCardEdge: boolean;
   setDockedToolbarMount: (value: HTMLDivElement | null) => void;
   presentationState: CardPresentationState;
-  enableBlockActiveState: boolean;
+  enableBlockSelectionState: boolean;
   showResizeHandle: boolean;
   displayMode: CardDisplayMode;
   frameFixedScale?: number;
@@ -198,7 +198,7 @@ const EditorSidePaneInner = ({
   dockToolbarInsideCardEdge,
   setDockedToolbarMount,
   presentationState,
-  enableBlockActiveState,
+  enableBlockSelectionState,
   showResizeHandle,
   displayMode,
   frameFixedScale,
@@ -286,7 +286,7 @@ const EditorSidePaneInner = ({
           hideToolbar,
           toolbarMount: resolvedToolbarMount,
           toolbarDesktopLayout: "vertical",
-          enableBlockActiveState,
+          enableBlockSelectionState,
           settings,
         }}
       />
@@ -338,7 +338,7 @@ const areEditorSidePanePropsEqual = (
     next.presentationState.showEditingOutline &&
   prev.presentationState.showActiveChrome ===
     next.presentationState.showActiveChrome &&
-  prev.enableBlockActiveState === next.enableBlockActiveState &&
+  prev.enableBlockSelectionState === next.enableBlockSelectionState &&
   prev.showResizeHandle === next.showResizeHandle &&
   prev.displayMode === next.displayMode &&
   prev.frameFixedScale === next.frameFixedScale &&
@@ -839,7 +839,7 @@ export const CardEditorPane = ({
       dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
       setDockedToolbarMount={setToolbarMountQInternal}
       presentationState={cardPresentationState}
-      enableBlockActiveState={cardPresentationState.isInteractiveCard}
+      enableBlockSelectionState={cardPresentationState.isInteractiveCard}
       showResizeHandle={showResizeHandleProp}
       displayMode={displayMode}
       frameFixedScale={editorFrameFixedScale}
@@ -873,7 +873,7 @@ export const CardEditorPane = ({
       dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
       setDockedToolbarMount={setToolbarMountAInternal}
       presentationState={cardPresentationState}
-      enableBlockActiveState={cardPresentationState.isInteractiveCard}
+      enableBlockSelectionState={cardPresentationState.isInteractiveCard}
       showResizeHandle={showResizeHandleProp}
       displayMode={displayMode}
       frameFixedScale={editorFrameFixedScale}
@@ -936,7 +936,7 @@ export const CardEditorPane = ({
           : setToolbarMountAInternal
       }
       presentationState={cardPresentationState}
-      enableBlockActiveState={cardPresentationState.isInteractiveCard}
+      enableBlockSelectionState={cardPresentationState.isInteractiveCard}
       showResizeHandle={showResizeHandleProp}
       displayMode={displayMode}
       frameFixedScale={editorFrameFixedScale}

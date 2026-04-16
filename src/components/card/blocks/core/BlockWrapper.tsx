@@ -14,7 +14,7 @@ interface BlockWrapperProps {
   label?: string;
   icon?: React.ElementType;
   accentColor?: string;
-  isActive?: boolean;
+  isBlockSelected?: boolean;
   showDelete?: boolean;
   showDuplicate?: boolean;
   showDragHandle?: boolean;
@@ -42,7 +42,7 @@ export const BlockWrapper = ({
   dragHandleClassName,
   className,
   accentColor,
-  isActive,
+  isBlockSelected,
   showDelete = true,
   showDuplicate = true,
   showDragHandle = true,
@@ -161,7 +161,7 @@ export const BlockWrapper = ({
 
   const overlay = showOverlay ? (
     <div
-      data-active={isActive ? "true" : "false"}
+      data-active={isBlockSelected ? "true" : "false"}
       className="absolute -right-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-0 -space-y-px opacity-0 pointer-events-none
         group-hover:opacity-100 group-hover:pointer-events-auto
         group-focus-within:opacity-100 group-focus-within:pointer-events-auto
@@ -208,7 +208,7 @@ export const BlockWrapper = ({
     mode === "viewer"
       ? "none"
       : mode === "editor" &&
-          (inEditMode || Boolean(isActive || isEditingWithin))
+          (inEditMode || Boolean(isBlockSelected || isEditingWithin))
         ? "editor"
         : "neutral";
 

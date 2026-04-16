@@ -14,7 +14,7 @@ interface CodeBlockItemProps {
   dragEnabled?: boolean;
   dragHandleClassName?: string;
   accentColor?: string;
-  isActive?: boolean;
+  isBlockSelected?: boolean;
   showDelete?: boolean;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
@@ -34,7 +34,7 @@ const CodeBlockItemInner = ({
   dragEnabled = true,
   dragHandleClassName,
   accentColor,
-  isActive,
+  isBlockSelected,
   showDelete,
   canMoveUp,
   canMoveDown,
@@ -57,7 +57,7 @@ const CodeBlockItemInner = ({
       label="Code"
       icon={Code}
       accentColor={accentColor}
-      isActive={isActive}
+      isBlockSelected={isBlockSelected}
       showDelete={showDelete}
       canMoveUp={!!canMoveUp}
       canMoveDown={!!canMoveDown}
@@ -85,7 +85,7 @@ const areCodeBlockItemPropsEqual = (
   prev.dragEnabled === next.dragEnabled &&
   prev.dragHandleClassName === next.dragHandleClassName &&
   prev.accentColor === next.accentColor &&
-  prev.isActive === next.isActive &&
+  prev.isBlockSelected === next.isBlockSelected &&
   prev.showDelete === next.showDelete &&
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&

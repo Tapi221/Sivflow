@@ -170,7 +170,7 @@ const EmbeddedEditorFace = ({
         hideToolbar: !showToolbar,
         toolbarMount,
         toolbarDesktopLayout: "vertical",
-        enableBlockActiveState: showToolbar,
+        enableBlockSelectionState: showToolbar,
         settings,
       }}
       actionsTopLeft={actionsTopLeft}

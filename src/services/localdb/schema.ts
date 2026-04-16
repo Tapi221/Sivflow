@@ -1978,4 +1978,6 @@ export const defineSchema = (db: LocalDB): void => {
 
       console.log("[Migration v31] folderSidebarDisplayMode auto -> tree");
     });
+
+
 };

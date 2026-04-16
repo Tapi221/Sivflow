@@ -16,7 +16,7 @@ interface MarkdownBlockProps {
   dragHandleProps?: unknown;
   dragHandleClassName?: string;
   accentColor?: string;
-  isActive?: boolean;
+  isBlockSelected?: boolean;
   showDelete?: boolean;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
@@ -39,7 +39,7 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
   dragHandleProps,
   dragHandleClassName,
   accentColor,
-  isActive,
+  isBlockSelected,
   showDelete,
   canMoveUp,
   canMoveDown,
@@ -64,7 +64,7 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
       label="Markdown"
       icon={NotebookPen}
       accentColor={accentColor}
-      isActive={Boolean(isActive || isEditorOpen)}
+      isBlockSelected={Boolean(isBlockSelected || isEditorOpen)}
       showDelete={showDelete}
       canMoveUp={canMoveUp}
       canMoveDown={canMoveDown}
@@ -94,7 +94,7 @@ const areMarkdownBlockPropsEqual = (
   prev.markdown === next.markdown &&
   prev.dragHandleClassName === next.dragHandleClassName &&
   prev.accentColor === next.accentColor &&
-  prev.isActive === next.isActive &&
+  prev.isBlockSelected === next.isBlockSelected &&
   prev.showDelete === next.showDelete &&
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&

@@ -17,7 +17,7 @@ interface MathBlockProps {
   dragHandleProps?: Record<string, unknown> | null;
   dragHandleClassName?: string;
   accentColor?: string;
-  isActive?: boolean;
+  isBlockSelected?: boolean;
   showDelete?: boolean;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
@@ -36,7 +36,7 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
   dragHandleProps,
   dragHandleClassName,
   accentColor,
-  isActive,
+  isBlockSelected,
   showDelete,
   canMoveUp,
   canMoveDown,
@@ -78,7 +78,7 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
       label="Math"
       icon={Sigma}
       accentColor={accentColor}
-      isActive={Boolean(isActive || isEditorOpen)}
+      isBlockSelected={Boolean(isBlockSelected || isEditorOpen)}
       showDelete={showDelete}
       canMoveUp={canMoveUp}
       canMoveDown={canMoveDown}
@@ -116,7 +116,7 @@ const areMathBlockPropsEqual = (prev: MathBlockProps, next: MathBlockProps) =>
   prev.data === next.data &&
   prev.dragHandleClassName === next.dragHandleClassName &&
   prev.accentColor === next.accentColor &&
-  prev.isActive === next.isActive &&
+  prev.isBlockSelected === next.isBlockSelected &&
   prev.showDelete === next.showDelete &&
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&

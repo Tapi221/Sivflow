@@ -17,7 +17,7 @@ interface MediaBlockProps {
   initialFile?: File;
   onConsumeInitialFile?: () => void;
   onFilesExcess?: (files: File[]) => void;
-  isActive?: boolean;
+  isBlockSelected?: boolean;
   showDelete?: boolean;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
@@ -40,7 +40,7 @@ const MediaBlockInner = ({
   initialFile,
   onConsumeInitialFile,
   onFilesExcess,
-  isActive,
+  isBlockSelected,
   showDelete,
   canMoveUp,
   canMoveDown,
@@ -64,7 +64,7 @@ const MediaBlockInner = ({
       label="Images"
       icon={ImageIcon}
       accentColor={accentColor}
-      isActive={isActive}
+      isBlockSelected={isBlockSelected}
       showDuplicate
       showDragHandle
       showDelete={showDelete}
@@ -99,7 +99,7 @@ const areMediaBlockPropsEqual = (
   prev.dragHandleClassName === next.dragHandleClassName &&
   prev.accentColor === next.accentColor &&
   prev.initialFile === next.initialFile &&
-  prev.isActive === next.isActive &&
+  prev.isBlockSelected === next.isBlockSelected &&
   prev.showDelete === next.showDelete &&
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&

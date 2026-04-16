@@ -18,7 +18,7 @@ const SharedCardEditSceneInner = ({
   hiddenBlockTypes,
   toolbarMount,
   toolbarDesktopLayout,
-  enableBlockActiveState,
+  enableBlockSelectionState,
   settings,
   displayMode,
   zoom,
@@ -40,7 +40,7 @@ const SharedCardEditSceneInner = ({
       hiddenBlockTypes={hiddenBlockTypes}
       toolbarMount={toolbarMount}
       toolbarDesktopLayout={toolbarDesktopLayout}
-      enableBlockActiveState={enableBlockActiveState}
+      enableBlockSelectionState={enableBlockSelectionState}
       settings={settings}
       displayMode={displayMode}
       zoom={zoom}

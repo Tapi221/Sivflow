@@ -15,7 +15,7 @@ interface TextBlockProps {
   accentColor?: string;
   autoFocus?: boolean;
   placeholder?: string;
-  isActive?: boolean;
+  isBlockSelected?: boolean;
   showDelete?: boolean;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
@@ -37,7 +37,7 @@ const TextBlockInner = ({
   accentColor,
   autoFocus,
   placeholder,
-  isActive,
+  isBlockSelected,
   showDelete,
   canMoveUp,
   canMoveDown,
@@ -62,7 +62,7 @@ const TextBlockInner = ({
       label="Text"
       icon={Type}
       accentColor={accentColor}
-      isActive={isActive}
+      isBlockSelected={isBlockSelected}
       showDelete={showDelete}
       canMoveUp={!!canMoveUp}
       canMoveDown={!!canMoveDown}
@@ -90,7 +90,7 @@ const areTextBlockPropsEqual = (prev: TextBlockProps, next: TextBlockProps) =>
   prev.accentColor === next.accentColor &&
   prev.autoFocus === next.autoFocus &&
   prev.placeholder === next.placeholder &&
-  prev.isActive === next.isActive &&
+  prev.isBlockSelected === next.isBlockSelected &&
   prev.showDelete === next.showDelete &&
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&

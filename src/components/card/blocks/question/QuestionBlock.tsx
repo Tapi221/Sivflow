@@ -19,7 +19,7 @@ interface QuestionBlockProps {
   dragEnabled?: boolean;
   dragHandleClassName?: string;
   accentColor?: string;
-  isActive?: boolean;
+  isBlockSelected?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
   zoom?: number;
@@ -40,7 +40,7 @@ const QuestionBlockInner: React.FC<QuestionBlockProps> = ({
   dragEnabled = true,
   dragHandleClassName,
   accentColor,
-  isActive,
+  isBlockSelected,
   onFocus,
   onBlur,
   zoom,
@@ -72,7 +72,7 @@ const QuestionBlockInner: React.FC<QuestionBlockProps> = ({
       dragHandleClassName={dragHandleClassName}
       icon={HelpCircle}
       accentColor={accentColor}
-      isActive={isActive}
+      isBlockSelected={isBlockSelected}
       canMoveUp={!!canMoveUp}
       canMoveDown={!!canMoveDown}
       onMoveUp={onMoveUp}
@@ -110,7 +110,7 @@ const areQuestionBlockPropsEqual = (
   prev.dragEnabled === next.dragEnabled &&
   prev.dragHandleClassName === next.dragHandleClassName &&
   prev.accentColor === next.accentColor &&
-  prev.isActive === next.isActive &&
+  prev.isBlockSelected === next.isBlockSelected &&
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
