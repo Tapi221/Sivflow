@@ -410,47 +410,27 @@ export const useCards = (
   const moveCardToSet = async (cardId: string, targetCardSetId: string) => {
     if (!currentUser) throw new Error("認証が必要です");
     const db = await getLocalDb(currentUser.uid);
+
+    const targetSet = await db.cardSets.get(targetCardSetId);
+    if (!targetSet || targetSet.isDeleted) {
+      throw new Error("移動先のカードセットが見つかりません");
+    }
+
     const allCards = await db.getAllCards();
-    const targetSetCards = allCards.filter(
-      (c) =>
-        c.cardSetId === targetCardSetId &&
-        !isCardDeleted(c as Partial<Card> & { is_deleted?: boolean }),
+    const targetCards = allCards.filter(
+      (card) =>
+        card.cardSetId === targetCardSetId &&
+        !isCardDeleted(card as Partial<Card> & { is_deleted?: boolean }),
     );
-    const maxOrderIndex = targetSetCards.reduce(
-      (max, c) => Math.max(max, c.orderIndex || 0),
+
+    const maxOrderIndex = targetCards.reduce(
+      (max, card) => Math.max(max, card.orderIndex || 0),
       0,
     );
+
     await db.updateItem("cards", cardId, {
       cardSetId: targetCardSetId,
-      orderIndex: maxOrderIndex + 1,
-      updatedAt: new Date(),
-    });
-  };
-
-  /**
-   * カードを別フォルダへ移動 (後方互換)
-   * @deprecated moveCardToSet を使用してください
-   */
-  const moveCardToFolder = async (cardId: string, targetFolderId: string) => {
-    if (!currentUser) throw new Error("認証が必要です");
-
-    const db = await getLocalDb(currentUser.uid);
-
-    // 移動先フォルダ内の最大 orderIndex を取得
-    const allCards = await db.getAllCards();
-    const targetFolderCards = allCards.filter(
-      (c) =>
-        c.folderId === targetFolderId &&
-        !isCardDeleted(c as Partial<Card> & { is_deleted?: boolean }),
-    );
-    const maxOrderIndex = targetFolderCards.reduce(
-      (max, c) => Math.max(max, c.orderIndex || 0),
-      0,
-    );
-
-    // カードを更新
-    await db.updateItem("cards", cardId, {
-      folderId: targetFolderId,
+      folderId: targetSet.folderId ?? "",
       orderIndex: maxOrderIndex + 1,
       updatedAt: new Date(),
     });
@@ -485,7 +465,6 @@ export const useCards = (
     deleteCard,
     toggleFlag,
     moveCardToSet,
-    moveCardToFolder,
     reorderCards,
   };
 };
