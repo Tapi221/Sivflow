@@ -76,24 +76,25 @@ const SharedCardContentRoot = React.memo(
 
 SharedCardContentRoot.displayName = "SharedCardContentRoot";
 
-const SharedCardContentViewBody = React.memo(
-  ({
-    blocks,
-    onGalleryFullscreenChange,
-    displayMode,
-    zoom,
-  }: SharedCardContentViewProps) => {
-    const viewerProps = useViewerSceneProps({
-      onGalleryFullscreenChange,
-      displayMode,
-      zoom,
-    });
+const EMPTY_RENDERABLE_BLOCKS: CardBlock[] = [];
 
-    const renderableBlocks = React.useMemo(
-      () => filterRenderableCardBlocks(blocks),
-      [blocks],
-    );
+const SharedCardContentBody = React.memo((props: SharedCardContentProps) => {
+  const viewerProps = useViewerSceneProps({
+    onGalleryFullscreenChange:
+      props.mode === "view" ? props.onGalleryFullscreenChange : undefined,
+    displayMode: props.displayMode,
+    zoom: props.zoom,
+  });
 
+  const renderableBlocks = React.useMemo(
+    () =>
+      props.mode === "view"
+        ? filterRenderableCardBlocks(props.blocks)
+        : EMPTY_RENDERABLE_BLOCKS,
+    [props.blocks, props.mode],
+  );
+
+  if (props.mode === "view") {
     if (!renderableBlocks.length) {
       return null;
     }
@@ -107,69 +108,39 @@ const SharedCardContentViewBody = React.memo(
         })}
       />
     );
-  },
-);
+  }
 
-SharedCardContentViewBody.displayName = "SharedCardContentViewBody";
+  return (
+    <BlockEditor
+      blocks={props.blocks}
+      onChange={props.onChange}
+      prefix={props.prefix}
+      label={props.label}
+      accentColor={props.accentColor}
+      duplicateToOpposite={props.duplicateToOpposite}
+      onCrossDuplicate={props.onCrossDuplicate}
+      autoFocus={props.autoFocus}
+      customPlaceholders={props.customPlaceholders}
+      hideToolbar={props.hideToolbar}
+      onDelete={props.onDelete}
+      minDeletableIndex={props.minDeletableIndex}
+      hiddenBlockTypes={props.hiddenBlockTypes}
+      toolbarMount={props.toolbarMount}
+      toolbarDesktopLayout={props.toolbarDesktopLayout}
+      enableBlockActiveState={props.enableBlockActiveState}
+      settings={props.settings}
+      displayMode={props.displayMode}
+      zoom={props.zoom}
+    />
+  );
+});
 
-const SharedCardContentEditBody = React.memo(
-  ({
-    blocks,
-    onChange,
-    prefix,
-    label,
-    accentColor,
-    duplicateToOpposite,
-    onCrossDuplicate,
-    autoFocus,
-    customPlaceholders,
-    hideToolbar,
-    onDelete,
-    minDeletableIndex,
-    hiddenBlockTypes,
-    toolbarMount,
-    toolbarDesktopLayout,
-    enableBlockActiveState,
-    settings,
-    displayMode,
-    zoom,
-  }: SharedCardContentEditProps) => {
-    return (
-      <BlockEditor
-        blocks={blocks}
-        onChange={onChange}
-        prefix={prefix}
-        label={label}
-        accentColor={accentColor}
-        duplicateToOpposite={duplicateToOpposite}
-        onCrossDuplicate={onCrossDuplicate}
-        autoFocus={autoFocus}
-        customPlaceholders={customPlaceholders}
-        hideToolbar={hideToolbar}
-        onDelete={onDelete}
-        minDeletableIndex={minDeletableIndex}
-        hiddenBlockTypes={hiddenBlockTypes}
-        toolbarMount={toolbarMount}
-        toolbarDesktopLayout={toolbarDesktopLayout}
-        enableBlockActiveState={enableBlockActiveState}
-        settings={settings}
-        displayMode={displayMode}
-        zoom={zoom}
-      />
-    );
-  },
-);
-
-SharedCardContentEditBody.displayName = "SharedCardContentEditBody";
+SharedCardContentBody.displayName = "SharedCardContentBody";
 
 const SharedCardContentInner = (props: SharedCardContentProps) => {
   return (
     <SharedCardContentRoot className={props.className}>
-      {props.mode === "view" ? (
-        <SharedCardContentViewBody {...props} />
-      ) : (
-        <SharedCardContentEditBody {...props} />
-      )}
+      <SharedCardContentBody {...props} />
     </SharedCardContentRoot>
   );
 };

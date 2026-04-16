@@ -1,5 +1,6 @@
 import React from "react";
 
+import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import { CodeBlockContent } from "@/components/card/blocks/code/CodeBlockContent";
 import { normalizeEditorLanguage } from "@/components/card/blocks/code/codeBlockLanguage";
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
@@ -26,9 +27,17 @@ import {
 import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
 import type { UploadedImage } from "@/types/domain/assets";
-import type { MathBlockData } from "@/types/domain/base";
+import type { MathBlockData, ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock } from "@/types/domain/card";
-import { Code, HelpCircle, NotebookPen, Sigma, Type } from "@/ui/icons";
+import {
+  Code,
+  HelpCircle,
+  Link,
+  NotebookPen,
+  Sigma,
+  Type,
+  Volume2,
+} from "@/ui/icons";
 
 export type CardBlockLayoutReplaceBlock = MarkdownReplaceBlock;
 
@@ -495,20 +504,122 @@ const ImageBlockScene = ({
 };
 
 const AudioBlockScene = ({
+  mode,
   block,
+  editorProps,
   viewerProps,
 }: Readonly<{
+  mode: "edit" | "view";
   block: CardBlock;
-  viewerProps: ViewerProps;
+  editorProps?: EditorProps;
+  viewerProps?: ViewerProps;
 }>) => {
+  const audioUrls =
+    mode === "view"
+      ? (block.audios ?? [])
+          .map(
+            viewerProps?.toMediaUrl ??
+              ((item) =>
+                typeof item === "string" ? item : (item?.url ?? null)),
+          )
+          .filter((item): item is string => Boolean(item))
+      : (block.audios ?? [])
+          .map((item) => item?.url?.trim() ?? "")
+          .filter((item): item is string => item.length > 0);
+
   return (
-    <div className="flex justify-center">
-      <AudioPlayer
-        urls={(block.audios ?? [])
-          .map(viewerProps.toMediaUrl)
-          .filter((url): url is string => Boolean(url))}
-      />
-    </div>
+    <SharedBlockShell
+      mode={mode}
+      className="bg-transparent px-0 py-0"
+      contentClassName="px-0"
+      label="Audio"
+      icon={Volume2}
+      accentColor={editorProps?.accentColor}
+      isActive={editorProps?.isActive}
+      onDelete={editorProps?.onDelete}
+      onDuplicate={editorProps?.onDuplicate}
+      onMoveUp={editorProps?.onMoveUp}
+      onMoveDown={editorProps?.onMoveDown}
+      onMoveDragStart={editorProps?.onMoveDragStart}
+      onMoveDragEnd={editorProps?.onMoveDragEnd}
+      canMoveUp={editorProps?.canMoveUp}
+      canMoveDown={editorProps?.canMoveDown}
+      dragHandleClassName="js-block-drag-handle"
+    >
+      <div className="rounded-xl border border-slate-200/80 bg-white/70 px-3 py-3 shadow-sm">
+        <AudioPlayer urls={audioUrls} />
+      </div>
+    </SharedBlockShell>
+  );
+};
+
+const ReferenceBlockScene = ({
+  mode,
+  block,
+  editorProps,
+}: Readonly<{
+  mode: "edit" | "view";
+  block: CardBlock;
+  editorProps?: EditorProps;
+}>) => {
+  const references: ReferenceBlockData[] = sanitizeReferences(
+    block.references ?? [],
+  );
+
+  return (
+    <SharedBlockShell
+      mode={mode}
+      className="bg-transparent px-0 py-0"
+      contentClassName="px-0"
+      label="Reference"
+      icon={Link}
+      accentColor={editorProps?.accentColor}
+      isActive={editorProps?.isActive}
+      onDelete={editorProps?.onDelete}
+      onDuplicate={editorProps?.onDuplicate}
+      onMoveUp={editorProps?.onMoveUp}
+      onMoveDown={editorProps?.onMoveDown}
+      onMoveDragStart={editorProps?.onMoveDragStart}
+      onMoveDragEnd={editorProps?.onMoveDragEnd}
+      canMoveUp={editorProps?.canMoveUp}
+      canMoveDown={editorProps?.canMoveDown}
+      dragHandleClassName="js-block-drag-handle"
+    >
+      <section className="rounded-xl border border-slate-200/80 bg-white/70 px-3 py-3 shadow-sm">
+        <div className="mb-2 text-[11px] font-semibold tracking-wide text-slate-500">
+          References
+        </div>
+        {references.length > 0 ? (
+          <ul className="space-y-1.5">
+            {references.map((reference, index) => {
+              const href = reference.url?.trim() ?? "";
+              const label = reference.name?.trim() || href;
+
+              return (
+                <li key={`${href}-${index}`} className="min-w-0">
+                  {href ? (
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block truncate text-sm text-sky-700 underline underline-offset-2 hover:text-sky-800"
+                    >
+                      {label}
+                    </a>
+                  ) : (
+                    <span className="block truncate text-sm text-slate-600">
+                      {label}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className="text-sm text-slate-400">リンクがありません</div>
+        )}
+      </section>
+    </SharedBlockShell>
   );
 };
 
@@ -692,9 +803,22 @@ export const CardBlockSceneRenderer = (props: CardBlockSceneRendererProps) => {
         />
       );
     case "audio":
-      return props.mode === "view" ? (
-        <AudioBlockScene block={block} viewerProps={props.viewerProps} />
-      ) : null;
+      return (
+        <AudioBlockScene
+          mode={props.mode}
+          block={block}
+          editorProps={props.mode === "edit" ? props.editorProps : undefined}
+          viewerProps={props.mode === "view" ? props.viewerProps : undefined}
+        />
+      );
+    case "reference":
+      return (
+        <ReferenceBlockScene
+          mode={props.mode}
+          block={block}
+          editorProps={props.mode === "edit" ? props.editorProps : undefined}
+        />
+      );
     case "math":
       return (
         <MathBlockScene

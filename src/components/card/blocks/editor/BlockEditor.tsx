@@ -110,59 +110,39 @@ export const BlockEditor = React.forwardRef<
       [blocks],
     );
 
-    const { bodyBlocks, nonBodyBlocks } = useMemo(() => {
-      const nextBodyBlocks: CardBlock[] = [];
-      const nextNonBodyBlocks: CardBlock[] = [];
-
-      for (const block of orderedBlocks) {
-        if (block.type === "reference" || block.type === "audio") {
-          nextNonBodyBlocks.push(block);
-          continue;
-        }
-        if (!block.parentBlockId) {
-          nextBodyBlocks.push(block);
-        }
-      }
-
-      return {
-        bodyBlocks: nextBodyBlocks,
-        nonBodyBlocks: nextNonBodyBlocks,
-      };
-    }, [orderedBlocks]);
-
-    const nonBodyBlocksRef = useRef<CardBlock[]>(nonBodyBlocks);
-    useEffect(() => {
-      nonBodyBlocksRef.current = nonBodyBlocks;
-    }, [nonBodyBlocks]);
+    const sceneBlocks = useMemo(
+      () => orderedBlocks.filter((block) => !block.parentBlockId),
+      [orderedBlocks],
+    );
 
     const resolvedActiveBlockId = useMemo(() => {
       if (!enableBlockActiveState) return null;
       if (!activeBlockId) return null;
-      return bodyBlocks.some((block) => block.id === activeBlockId)
+      return sceneBlocks.some((block) => block.id === activeBlockId)
         ? activeBlockId
         : null;
-    }, [activeBlockId, bodyBlocks, enableBlockActiveState]);
+    }, [activeBlockId, sceneBlocks, enableBlockActiveState]);
 
     const resolvedActiveContainerBlockId = useMemo(() => {
       if (!enableBlockActiveState) return null;
       if (!activeContainerBlockId) return null;
-      return bodyBlocks.some(
+      return sceneBlocks.some(
         (block) =>
           block.id === activeContainerBlockId && block.type === "question",
       )
         ? activeContainerBlockId
         : null;
-    }, [activeContainerBlockId, bodyBlocks, enableBlockActiveState]);
+    }, [activeContainerBlockId, sceneBlocks, enableBlockActiveState]);
 
     const reindexBlocks = useCallback(
-      (arr: CardBlock[]) => arr.map((b, i) => ({ ...b, orderIndex: i })),
+      (arr: CardBlock[]) =>
+        arr.map((block, index) => ({ ...block, orderIndex: index })),
       [],
     );
 
     const emitChange = useCallback(
-      (nextBodyBlocks: CardBlock[], opts?: { reindex?: boolean }) => {
-        const merged = [...nextBodyBlocks, ...nonBodyBlocksRef.current];
-        onChange(opts?.reindex ? reindexBlocks(merged) : merged);
+      (nextBlocks: CardBlock[], opts?: { reindex?: boolean }) => {
+        onChange(opts?.reindex ? reindexBlocks(nextBlocks) : nextBlocks);
       },
       [onChange, reindexBlocks],
     );
@@ -175,10 +155,10 @@ export const BlockEditor = React.forwardRef<
       pendingUploadsRef.current = pendingUploads;
     }, [pendingUploads]);
 
-    const blocksRef = useRef<CardBlock[]>(bodyBlocks);
+    const blocksRef = useRef<CardBlock[]>(sceneBlocks);
     useEffect(() => {
-      blocksRef.current = bodyBlocks;
-    }, [bodyBlocks]);
+      blocksRef.current = sceneBlocks;
+    }, [sceneBlocks]);
 
     const rowElMapRef = useRef<Map<string, HTMLElement>>(new Map());
     const registerRowEl = useCallback(
@@ -605,7 +585,7 @@ export const BlockEditor = React.forwardRef<
           canMoveDown,
           accentColor,
           isActive: isBlockActive,
-          autoFocus: autoFocus && meta.index === bodyBlocks.length - 1,
+          autoFocus: autoFocus && meta.index === sceneBlocks.length - 1,
           customPlaceholder: customPlaceholders?.[meta.index],
           pendingUploadFile: pendingUploads[block.id],
           onConsumePendingUpload: () => handleConsumeInitialFile(block.id),
@@ -621,16 +601,14 @@ export const BlockEditor = React.forwardRef<
       [
         accentColor,
         autoFocus,
-        bodyBlocks.length,
         customPlaceholders,
         displayMode,
         emitChange,
-        handleBlockOverflow,
-        handleConsumeInitialFile,
         pendingUploads,
         prefix,
         resolvedActiveBlockId,
         resolvedEditorZoom,
+        sceneBlocks.length,
       ],
     );
 
@@ -680,7 +658,7 @@ export const BlockEditor = React.forwardRef<
 
         <div className="space-y-0 overflow-x-visible overflow-y-visible">
           <CardBlocksScene
-            blocks={bodyBlocks}
+            blocks={sceneBlocks}
             getRowRef={(block) => (element) => {
               registerRowEl(block.id, element);
             }}
