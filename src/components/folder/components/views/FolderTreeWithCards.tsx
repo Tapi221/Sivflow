@@ -78,7 +78,7 @@ interface FolderTreeWithCardsProps {
   onDeleteCard?: (cardId: string) => Promise<void>;
   onUpdateDocument?: (documentId: string, data: unknown) => Promise<void>;
   onDeleteDocument?: (documentId: string) => Promise<void>;
-  moveCardToFolder?: (cardId: string, targetFolderId: string) => Promise<void>;
+  moveCardToSet?: (cardId: string, targetCardSetId: string) => Promise<void>;
   moveCardSetToFolder?: (
     cardSetId: string,
     targetFolderId: string,
@@ -128,7 +128,7 @@ export const FolderTreeWithCards = ({
   onDeleteCard,
   onUpdateDocument,
   onDeleteDocument,
-  moveCardToFolder,
+  moveCardToSet,
   moveCardSetToFolder,
   moveDocumentToFolder,
   selectedCardSetId = null,
@@ -461,6 +461,7 @@ export const FolderTreeWithCards = ({
     selectedItem,
     treeFolders,
     treeCards,
+    treeCardSets,
     setExpandedFolders,
   });
 
@@ -830,6 +831,8 @@ export const FolderTreeWithCards = ({
         parentId !== null ? parseSelectedTreeId(parentId) : null;
       const targetFolderId =
         parsedParent?.type === "folder" ? parsedParent.id : null;
+      const targetCardSetId =
+        parsedParent?.type === "cardSet" ? parsedParent.id : null;
 
       for (const dragId of dragIds) {
         const parsed = parseSelectedTreeId(dragId);
@@ -849,8 +852,8 @@ export const FolderTreeWithCards = ({
         }
 
         if (parsed.type === "card") {
-          if (!targetFolderId) continue;
-          await moveCardToFolder?.(parsed.id, targetFolderId);
+          if (!targetCardSetId) continue;
+          await moveCardToSet?.(parsed.id, targetCardSetId);
           continue;
         }
 
@@ -860,12 +863,7 @@ export const FolderTreeWithCards = ({
         }
       }
     },
-    [
-      onUpdateFolder,
-      moveCardSetToFolder,
-      moveCardToFolder,
-      moveDocumentToFolder,
-    ],
+    [onUpdateFolder, moveCardSetToFolder, moveCardToSet, moveDocumentToFolder],
   );
 
   const arboristDisableDrag = useCallback(
@@ -883,12 +881,12 @@ export const FolderTreeWithCards = ({
       index: number;
     }) => {
       const parentKind = parentNode?.data?.kind;
-      if (
-        parentKind === "card" ||
-        parentKind === "document" ||
-        parentKind === "cardSet"
-      ) {
+      if (parentKind === "card" || parentKind === "document") {
         return true;
+      }
+
+      if (parentKind === "cardSet") {
+        return dragNodes.some((dragNode) => dragNode.data?.kind !== "card");
       }
 
       const isDropToRoot =
@@ -912,6 +910,10 @@ export const FolderTreeWithCards = ({
             dragKind === "card" ||
             dragKind === "document")
         ) {
+          return true;
+        }
+
+        if (parentKind === "folder" && dragKind === "card") {
           return true;
         }
       }

@@ -27,6 +27,10 @@ import {
   ChevronDown,
 } from "@/ui/icons";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+import {
+  buildCardSetById,
+  resolveCardFolderId,
+} from "@/domain/card/selectors/cardFolder";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
@@ -77,6 +81,24 @@ const Trash = () => {
     [],
   );
 
+  const allCardSets = useLiveQuery(
+    async () => {
+      if (!currentUser) return [];
+      try {
+        const db = await getLocalDb(currentUser.uid);
+        return await db.cardSets
+          .where("userId")
+          .equals(currentUser.uid)
+          .toArray();
+      } catch (err) {
+        console.error("Failed to load cardSets:", err);
+        return [];
+      }
+    },
+    [currentUser?.uid],
+    [],
+  );
+
   // 削除されたフォルダのみ（normalize済みなので isDeleted のみチェック）
   const deletedFolders = useMemo(
     () => (allFolders || []).filter((f) => f.isDeleted === true),
@@ -86,22 +108,39 @@ const Trash = () => {
   // すべてのフォルダ（削除済み・未削除を含む）
   const folders = useMemo(() => allFolders ?? [], [allFolders]);
   const allCardsData = useMemo(() => allCards ?? [], [allCards]);
+  const cardSetById = useMemo(
+    () => buildCardSetById((allCardSets ?? []).filter((set) => !set.isDeleted)),
+    [allCardSets],
+  );
+  const cardFolderIdByCardId = useMemo(() => {
+    const map = new Map<string, string | null>();
+    for (const card of allCardsData) {
+      map.set(card.id, resolveCardFolderId(card, cardSetById));
+    }
+    return map;
+  }, [allCardsData, cardSetById]);
 
   // 削除されたカード、または削除されたフォルダに属するカード
   // normalize済みなので isDeleted のみチェック
   const cards = useMemo(() => {
     const deletedFolderIds = deletedFolders.map((f) => f.id);
     return allCardsData.filter(
-      (c) => c.isDeleted === true || deletedFolderIds.includes(c.folderId),
+      (c) =>
+        c.isDeleted === true ||
+        deletedFolderIds.includes(cardFolderIdByCardId.get(c.id) ?? ""),
     );
-  }, [allCardsData, deletedFolders]);
+  }, [allCardsData, deletedFolders, cardFolderIdByCardId]);
 
-  const isLoading = allFolders === undefined || allCards === undefined;
+  const isLoading =
+    allFolders === undefined ||
+    allCards === undefined ||
+    allCardSets === undefined;
 
   // デバッグ情報
   console.log("=== Trash Debug ===");
   console.log("allFolders:", allFolders);
   console.log("allCards:", allCards);
+  console.log("allCardSets:", allCardSets);
   console.log("deletedFolders:", deletedFolders);
   console.log("cards:", cards);
   console.log("isLoading:", isLoading);
@@ -207,8 +246,11 @@ const Trash = () => {
       const parentFolderIds = new Set();
       for (const cardId of selectedIds.cards) {
         const card = cards.find((c) => c.id === cardId);
-        if (card && card.folderId) {
-          parentFolderIds.add(card.folderId);
+        const resolvedFolderId = card
+          ? (cardFolderIdByCardId.get(card.id) ?? null)
+          : null;
+        if (resolvedFolderId) {
+          parentFolderIds.add(resolvedFolderId);
         }
       }
 
@@ -537,8 +579,9 @@ const Trash = () => {
               // このフォルダに属するすべてのカード（削除済み・未削除を含む）
               const folderCards = allCardsData.filter(
                 (c) =>
-                  c.folderId &&
-                  c.folderId.toLowerCase() === folder.id.toLowerCase(),
+                  (cardFolderIdByCardId.get(c.id) ?? "")
+                    .toLowerCase()
+                    .trim() === folder.id.toLowerCase(),
               );
 
               return (
@@ -688,14 +731,15 @@ const Trash = () => {
               // フォルダIDでグループ化（削除されたフォルダ以外）
               const cardsByFolder = {};
               cards.forEach((card) => {
+                const folderId = cardFolderIdByCardId.get(card.id) ?? null;
                 if (
-                  card.folderId &&
-                  !deletedFolderIds.includes(card.folderId.toLowerCase())
+                  folderId &&
+                  !deletedFolderIds.includes(folderId.toLowerCase())
                 ) {
-                  if (!cardsByFolder[card.folderId]) {
-                    cardsByFolder[card.folderId] = [];
+                  if (!cardsByFolder[folderId]) {
+                    cardsByFolder[folderId] = [];
                   }
-                  cardsByFolder[card.folderId].push(card);
+                  cardsByFolder[folderId].push(card);
                 }
               });
 
@@ -834,13 +878,17 @@ const Trash = () => {
             })()}
 
             {/* フォルダIDがないカード（エラー状態） */}
-            {cards.filter((c) => !c.folderId).length > 0 && (
+            {cards.filter((c) => !cardFolderIdByCardId.get(c.id)).length >
+              0 && (
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2 select-none text-red-600">
                     <AlertTriangle className="w-4 h-4" />
                     フォルダなしカード (
-                    {cards.filter((c) => !c.folderId).length})
+                    {
+                      cards.filter((c) => !cardFolderIdByCardId.get(c.id))
+                        .length
+                    }
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -849,7 +897,7 @@ const Trash = () => {
                   </p>
                   <div className="space-y-2">
                     {cards
-                      .filter((c) => !c.folderId)
+                      .filter((c) => !cardFolderIdByCardId.get(c.id))
                       .map((card) => (
                         <div
                           key={card.id}

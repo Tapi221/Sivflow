@@ -1,4 +1,8 @@
 import {
+  buildCardSetById,
+  resolveCardFolderId,
+} from "@/domain/card/selectors/cardFolder";
+import {
   addDays,
   endOfMonth,
   endOfWeek,
@@ -13,6 +17,7 @@ import {
 import type {
   CalendarCardLike,
   CalendarCardsByDate,
+  CalendarCardSetLike,
   CalendarDayCell,
   CalendarDisplayCard,
   CalendarFolderLike,
@@ -50,14 +55,6 @@ const isSilentCard = (card: CalendarCardLike) => {
   return Boolean(card.isSilent ?? card.is_silent);
 };
 
-const resolveFolderId = (value: CalendarCardLike | CalendarFolderLike) => {
-  const raw = value.folderId ?? value.id;
-  if (typeof raw !== "string") return null;
-
-  const trimmed = raw.trim();
-  return trimmed === "" ? null : trimmed;
-};
-
 const buildFolderMap = (folders: CalendarFolderLike[]) => {
   const folderMap = new Map<string, CalendarFolderLike>();
 
@@ -73,17 +70,22 @@ const buildFolderMap = (folders: CalendarFolderLike[]) => {
 
 export const buildCardsByDate = ({
   cards,
+  cardSets,
   folders,
   foldersLoading,
   autoCarryOver,
 }: {
   cards: CalendarCardLike[];
+  cardSets: CalendarCardSetLike[];
   folders: CalendarFolderLike[];
   foldersLoading: boolean;
   autoCarryOver: boolean;
 }): CalendarCardsByDate => {
   const grouped: CalendarCardsByDate = {};
   const folderMap = buildFolderMap(folders);
+  const cardSetById = buildCardSetById(
+    cardSets.filter((cardSet) => !cardSet.isDeleted),
+  );
   const today = normalizeDateOnly(new Date());
   const todayKey = toDateKey(today);
 
@@ -96,10 +98,7 @@ export const buildCardsByDate = ({
       const dateValue = card.next_review_date ?? card.nextReviewDate;
       if (!dateValue) return false;
 
-      const folderId =
-        typeof (card.folderId ?? card.folder_id) === "string"
-          ? String(card.folderId ?? card.folder_id)
-          : null;
+      const folderId = resolveCardFolderId(card, cardSetById);
 
       if (!folderId) return true;
       if (foldersLoading) return true;

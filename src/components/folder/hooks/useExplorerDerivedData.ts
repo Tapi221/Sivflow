@@ -7,6 +7,10 @@ import {
   isSameFolder,
   normalizeFolderId,
 } from "@/components/folder/explorer/model/utils";
+import {
+  buildCardSetById,
+  resolveCardFolderId,
+} from "@/domain/card/selectors/cardFolder";
 import { compareOrderableEntities } from "@/lib/orderableEntity";
 import type { Card, CardSet, DocumentItem, ExplorerItem } from "@/types";
 import { useCallback, useMemo } from "react";
@@ -68,6 +72,11 @@ export const useExplorerDerivedData = ({
   documents,
   isFiltering,
 }: Params) => {
+  const cardSetById = useMemo(() => {
+    const activeCardSets = cardSets.filter((cardSet) => !cardSet.isDeleted);
+    return buildCardSetById(activeCardSets);
+  }, [cardSets]);
+
   const childFoldersByParentId = useMemo(() => {
     const map = new Map<string, FolderTreeNode[]>();
     for (const folder of treeFolders) {
@@ -131,16 +140,15 @@ export const useExplorerDerivedData = ({
     const map = new Map<string, number>();
     for (const card of treeCards) {
       if (isSoftDeleted(withLegacy(card))) continue;
-      if (!hasValidFolderBinding(card.folderId ?? withLegacy(card).folder_id)) {
+      const cardFolderId = resolveCardFolderId(card, cardSetById);
+      if (!hasValidFolderBinding(cardFolderId)) {
         continue;
       }
-      const folderId = resolveTreeFolderId(
-        card.folderId ?? withLegacy(card).folder_id,
-      );
+      const folderId = resolveTreeFolderId(cardFolderId);
       map.set(folderId, (map.get(folderId) ?? 0) + 1);
     }
     return map;
-  }, [treeCards, resolveTreeFolderId, hasValidFolderBinding]);
+  }, [treeCards, resolveTreeFolderId, hasValidFolderBinding, cardSetById]);
 
   const itemsByFolderId = useMemo(() => {
     const map = new Map<string, ExplorerItem[]>();
@@ -156,16 +164,14 @@ export const useExplorerDerivedData = ({
 
     for (const card of treeCards) {
       if (isSoftDeleted(withLegacy(card))) continue;
-      if (!hasValidFolderBinding(card.folderId ?? withLegacy(card).folder_id)) {
+      const cardFolderId = resolveCardFolderId(card, cardSetById);
+      if (!hasValidFolderBinding(cardFolderId)) {
         continue;
       }
-      pushItem(
-        resolveTreeFolderId(card.folderId ?? withLegacy(card).folder_id),
-        {
-          type: "card",
-          data: card,
-        },
-      );
+      pushItem(resolveTreeFolderId(cardFolderId), {
+        type: "card",
+        data: card,
+      });
     }
 
     for (const doc of documents) {
@@ -195,7 +201,13 @@ export const useExplorerDerivedData = ({
       });
     }
     return map;
-  }, [treeCards, documents, resolveTreeFolderId, hasValidFolderBinding]);
+  }, [
+    treeCards,
+    documents,
+    resolveTreeFolderId,
+    hasValidFolderBinding,
+    cardSetById,
+  ]);
 
   const getFolderItems = useCallback(
     (folderId: string | null): ExplorerItem[] =>
@@ -250,7 +262,7 @@ export const useExplorerDerivedData = ({
       for (const card of treeCards) {
         if (isSoftDeleted(withLegacy(card))) continue;
         const cardFolderId = resolveTreeFolderId(
-          card.folderId ?? withLegacy(card).folder_id,
+          resolveCardFolderId(card, cardSetById),
         );
         if (!isSameFolder(cardFolderId, targetFolderId)) continue;
         const order = withLegacy(card).orderIndex ?? -1;
@@ -267,7 +279,7 @@ export const useExplorerDerivedData = ({
       }
       return maxOrder + 1;
     },
-    [treeCards, documents, resolveTreeFolderId],
+    [treeCards, documents, resolveTreeFolderId, cardSetById],
   );
 
   const cardSetsByFolderId = useMemo(() => {

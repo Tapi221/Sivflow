@@ -1,3 +1,7 @@
+import {
+  buildCardSetById,
+  filterCardsByFolderId,
+} from "@/domain/card/selectors/cardFolder";
 import type { JsonFileExportPort } from "@/application/ports/JsonFileExportPort";
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
 import type { AppSnapshot } from "@/types/domain/snapshot";
@@ -65,8 +69,13 @@ export const createExportFolderSnapshotUseCase = ({
       throw new Error("Folder not found");
     }
 
-    const cards = fullSnapshot.data.cards.filter(
-      (card) => card.folderId === folderId,
+    const cardSetById = buildCardSetById(
+      fullSnapshot.data.cardSets.filter((cardSet) => !cardSet.isDeleted),
+    );
+    const cards = filterCardsByFolderId(
+      fullSnapshot.data.cards,
+      folderId,
+      cardSetById,
     );
 
     const cardSetIds = new Set(
@@ -93,10 +102,12 @@ export const createExportFolderSnapshotUseCase = ({
       },
     };
 
+    const folderRecord = folder as unknown as {
+      folderName?: string;
+      folder_name?: string;
+    };
     const folderName =
-      (folder as Record<string, unknown>).folderName ||
-      (folder as Record<string, unknown>).folder_name ||
-      "unknown";
+      folderRecord.folderName || folderRecord.folder_name || "unknown";
     const date = new Date().toISOString().split("T")[0];
     const generationCounter = partialSnapshot.metadata.generationCounter;
     const filename = `flashcard_${folderName}_${date}_gen${generationCounter}.json`;

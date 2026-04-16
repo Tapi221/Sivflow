@@ -639,7 +639,9 @@ export const BlockEditor = React.forwardRef<
           if (!enableBlockSelectionState) return;
           const target = event.target as HTMLElement;
           if (!target.closest("[data-block-type='question']")) {
-            setSelectedContainerBlockId((prev) => (prev === null ? prev : null));
+            setSelectedContainerBlockId((prev) =>
+              prev === null ? prev : null,
+            );
           }
         }}
       >

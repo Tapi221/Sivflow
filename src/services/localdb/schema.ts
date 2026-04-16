@@ -2029,5 +2029,4 @@ export const defineSchema = (db: LocalDB): void => {
         "[Migration v32] cleared legacy PDF metadata and removed legacy document_file_store",
       );
     });
-
 };

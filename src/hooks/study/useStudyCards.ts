@@ -1,5 +1,10 @@
 import { useMemo } from "react";
-import type { Card, Folder, UserSettings } from "@/types";
+import {
+  buildCardSetById,
+  filterCardsByFolderId,
+  resolveCardFolderId,
+} from "@/domain/card/selectors/cardFolder";
+import type { Card, CardSet, Folder, UserSettings } from "@/types";
 import { normalizeDate } from "@/shared/codec/date";
 
 type StudyCard = Card;
@@ -7,6 +12,7 @@ type StudyCard = Card;
 type Params = {
   folderId: string | null;
   allCards: StudyCard[];
+  cardSets: CardSet[];
   folders: Folder[];
   foldersLoading: boolean;
   settings: Partial<UserSettings> | null | undefined;
@@ -15,10 +21,16 @@ type Params = {
 export const useStudyCards = ({
   folderId,
   allCards,
+  cardSets,
   folders,
   foldersLoading,
   settings,
 }: Params) => {
+  const cardSetById = useMemo(
+    () => buildCardSetById(cardSets.filter((cardSet) => !cardSet.isDeleted)),
+    [cardSets],
+  );
+
   const studyCards = useMemo(() => {
     let cards = (allCards ?? []).filter(
       (card) => !card.isDraft && !card.isDeleted,
@@ -32,12 +44,13 @@ export const useStudyCards = ({
           .filter(Boolean),
       );
       cards = cards.filter((card) => {
-        return !card.folderId || activeFolderIds.has(card.folderId);
+        const resolvedFolderId = resolveCardFolderId(card, cardSetById);
+        return !resolvedFolderId || activeFolderIds.has(resolvedFolderId);
       });
     }
 
     if (folderId) {
-      cards = cards.filter((card) => card.folderId === folderId);
+      cards = filterCardsByFolderId(cards, folderId, cardSetById);
     } else {
       const today = new Date();
       const todayDate = new Date(
@@ -65,7 +78,7 @@ export const useStudyCards = ({
     return cards.sort(
       (left, right) => (left.orderIndex || 0) - (right.orderIndex || 0),
     );
-  }, [allCards, folderId, folders, foldersLoading, settings]);
+  }, [allCards, folderId, folders, foldersLoading, settings, cardSetById]);
 
   const cardById = useMemo(() => {
     const map = new Map<string, StudyCard>();

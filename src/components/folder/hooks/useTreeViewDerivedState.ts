@@ -1,15 +1,21 @@
 import {
   type Card,
+  type CardSet,
   type DocumentItem,
   type Folder,
   type SelectedExplorerItem,
 } from "@/types";
 import { normalizeDate } from "@/shared/codec/date";
 import { useCallback, useMemo } from "react";
+import {
+  buildCardSetById,
+  isCardInFolder,
+} from "@/domain/card/selectors/cardFolder";
 
 interface UseTreeViewDerivedStateParams {
   folders: Folder[];
   cards: Card[];
+  cardSets?: CardSet[];
   documents: DocumentItem[];
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
@@ -22,6 +28,7 @@ interface UseTreeViewDerivedStateParams {
 export const useTreeViewDerivedState = ({
   folders,
   cards,
+  cardSets = [],
   documents,
   selectedFolderId,
   selectedItem,
@@ -77,13 +84,15 @@ export const useTreeViewDerivedState = ({
 
   const folderCards = useMemo(() => {
     if (!selectedFolderId) return [];
+    const cardSetById = buildCardSetById(
+      cardSets.filter((cardSet) => !cardSet.isDeleted),
+    );
     return cards.filter((card) => {
-      const folderId = card.folderId ?? card.folderId;
-      if (folderId !== selectedFolderId) return false;
+      if (!isCardInFolder(card, selectedFolderId, cardSetById)) return false;
       const isDeleted = card.isDeleted ?? card.isDeleted;
       return !isDeleted;
     });
-  }, [cards, selectedFolderId]);
+  }, [cards, selectedFolderId, cardSets]);
 
   const folderStats = useMemo(() => {
     const today = new Date();

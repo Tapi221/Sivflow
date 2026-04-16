@@ -49,7 +49,7 @@ interface TreeViewTabContentProps {
   onDeleteCard: FolderTreeWithCardsProps["onDeleteCard"];
   onUpdateDocument: FolderTreeWithCardsProps["onUpdateDocument"];
   onDeleteDocument: FolderTreeWithCardsProps["onDeleteDocument"];
-  moveCardToFolder: FolderTreeWithCardsProps["moveCardToFolder"];
+  moveCardToSet: FolderTreeWithCardsProps["moveCardToSet"];
   moveCardSetToFolder: FolderTreeWithCardsProps["moveCardSetToFolder"];
   moveDocumentToFolder: FolderTreeWithCardsProps["moveDocumentToFolder"];
   reorderCards: FolderTreeWithCardsProps["reorderCards"];
@@ -91,7 +91,7 @@ export const TreeViewTabContent = ({
   onDeleteCard,
   onUpdateDocument,
   onDeleteDocument,
-  moveCardToFolder,
+  moveCardToSet,
   moveCardSetToFolder,
   moveDocumentToFolder,
   reorderCards,
@@ -136,7 +136,7 @@ export const TreeViewTabContent = ({
           onDeleteCard={onDeleteCard}
           onUpdateDocument={onUpdateDocument}
           onDeleteDocument={onDeleteDocument}
-          moveCardToFolder={moveCardToFolder}
+          moveCardToSet={moveCardToSet}
           moveCardSetToFolder={moveCardSetToFolder}
           moveDocumentToFolder={moveDocumentToFolder}
           reorderCards={reorderCards}

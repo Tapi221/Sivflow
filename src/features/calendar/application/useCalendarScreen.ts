@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useCards } from "@/hooks/card/useCards";
+import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { firestoreDb } from "@/services/firebase";
@@ -34,6 +35,7 @@ export const useCalendarScreen = () => {
   const [isMetaOpen, setIsMetaOpen] = useState(true);
 
   const { cards = [] } = useCards();
+  const { cardSets = [] } = useCardSets();
   const { folders = [], loading: foldersLoading } = useFolders();
   const { settings } = useUserSettings();
   const { ratings } = useTodayStudyStore();
@@ -73,11 +75,12 @@ export const useCalendarScreen = () => {
   const cardsByDate = useMemo(() => {
     return buildCardsByDate({
       cards,
+      cardSets,
       folders,
       foldersLoading,
       autoCarryOver: settings?.autoCarryOver ?? true,
     });
-  }, [cards, folders, foldersLoading, settings?.autoCarryOver]);
+  }, [cards, cardSets, folders, foldersLoading, settings?.autoCarryOver]);
 
   const viewModel = useMemo(() => {
     return buildCalendarScreenViewModel({

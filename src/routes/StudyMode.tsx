@@ -3,6 +3,7 @@ import type { Card } from "@/types";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { useCards } from "@/hooks/card/useCards";
+import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useMutation } from "@tanstack/react-query";
 import { addDoc, collection } from "firebase/firestore";
@@ -92,6 +93,7 @@ const StudyMode = () => {
     loading: isLoading,
     updateCard,
   } = useCards(folderId);
+  const { cardSets = [] } = useCardSets();
   const { folders = [], loading: foldersLoading } = useFolders();
   const { updateFolder } = useFolders();
 
@@ -104,6 +106,7 @@ const StudyMode = () => {
   const { studyCards: dueStudyCards } = useStudyCards({
     folderId,
     allCards,
+    cardSets,
     folders,
     foldersLoading,
     settings,
@@ -211,6 +214,7 @@ const StudyMode = () => {
     handleResult,
   } = useStudySession({
     studyCards,
+    cardSets,
     updateCard,
     currentUser,
     settings,
