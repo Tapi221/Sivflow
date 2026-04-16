@@ -1,6 +1,7 @@
 import { deleteDoc, doc } from "firebase/firestore";
 
 import { firestoreDb } from "@/services/firebase";
+import type { SyncError } from "@/types";
 import { cardDocPathSegments } from "@/services/firestorePaths";
 import { getLocalDb } from "@/services/localDB";
 import type {
@@ -30,6 +31,11 @@ type LocalCleanupTotals = HardDeleteOrphanedCardsResult["localCleanupTotals"];
 type CardRelationRecord = {
   fromCardId?: unknown;
   toCardId?: unknown;
+  id?: unknown;
+};
+
+type IdRecord = {
+  id?: unknown;
 };
 
 const isInvalidFolderRefCardIssue = (
@@ -79,17 +85,9 @@ const deleteRemoteCard = async (
 };
 
 const cleanupLocalCardReferences = async (
-  userId: string,
+  db: Awaited<ReturnType<typeof getLocalDb>>,
   cardId: string,
 ): Promise<LocalCleanupTotals> => {
-  const db = await getLocalDb(userId);
-  const syncErrors = await db.findQueueProcessingErrorsByTargetId(cardId);
-  const syncErrorIds = dedupe(
-    syncErrors
-      .map((error) => error.id)
-      .filter((id): id is string => typeof id === "string" && id.length > 0),
-  );
-
   return await db.transaction(
     "rw",
     [
@@ -98,7 +96,6 @@ const cleanupLocalCardReferences = async (
       db.conflicts,
       db.levelHistories,
       db.cardRelations,
-      db.syncErrors,
       db.table("studyLogs"),
     ],
     async () => {
@@ -115,12 +112,12 @@ const cleanupLocalCardReferences = async (
       const deletedStudyLogs = await db
         .table("studyLogs")
         .where("cardId")
-        .equals(cardId)
+        .equals(cardId as never)
         .delete();
 
       const deletedLevelHistories = await db.levelHistories
         .where("cardId")
-        .equals(cardId)
+        .equals(cardId as never)
         .delete();
 
       const deletedCardRelations = await db.cardRelations
@@ -131,10 +128,6 @@ const cleanupLocalCardReferences = async (
         })
         .delete();
 
-      if (syncErrorIds.length > 0) {
-        await db.syncErrors.bulkDelete(syncErrorIds);
-      }
-
       await db.purge("cards", cardId);
 
       return {
@@ -143,10 +136,43 @@ const cleanupLocalCardReferences = async (
         studyLogs: deletedStudyLogs,
         levelHistories: deletedLevelHistories,
         cardRelations: deletedCardRelations,
-        syncErrors: syncErrorIds.length,
+        syncErrors: 0,
       };
     },
   );
+};
+
+const cleanupSyncErrorsBestEffort = async (
+  db: Awaited<ReturnType<typeof getLocalDb>>,
+  cardId: string,
+): Promise<number> => {
+  try {
+    const syncErrorIds = dedupe(
+      (await db.syncErrors.toArray())
+        .filter((error: SyncError) => {
+          return (
+            typeof error.message === "string" &&
+            error.message.startsWith("Queue processing failed") &&
+            error.message.includes(cardId)
+          );
+        })
+        .map((error: SyncError) => error.id)
+        .filter((id): id is string => typeof id === "string" && id.length > 0),
+    );
+
+    if (syncErrorIds.length === 0) {
+      return 0;
+    }
+
+    await db.syncErrors.bulkDelete(syncErrorIds);
+    return syncErrorIds.length;
+  } catch (error) {
+    console.warn(
+      "[Integrity] sync error cleanup skipped during orphan hard delete",
+      sanitizeForLog({ cardId, error }),
+    );
+    return 0;
+  }
 };
 
 export const createHardDeleteOrphanedCardsUseCase = () => {
@@ -191,8 +217,14 @@ export const createHardDeleteOrphanedCardsUseCase = () => {
         await deleteRemoteCard(userId, cardId);
         deletedRemoteCardIds.push(cardId);
 
-        const cleanupTotals = await cleanupLocalCardReferences(userId, cardId);
-        localCleanupTotals = mergeTotals(localCleanupTotals, cleanupTotals);
+        const cleanupTotals = await cleanupLocalCardReferences(db, cardId);
+        const deletedSyncErrors = await cleanupSyncErrorsBestEffort(db, cardId);
+
+        localCleanupTotals = mergeTotals(localCleanupTotals, {
+          ...cleanupTotals,
+          syncErrors: deletedSyncErrors,
+        });
+
         deletedCardIds.push(cardId);
       } catch (error) {
         failedCardIds.push(cardId);

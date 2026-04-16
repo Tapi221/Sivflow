@@ -453,11 +453,15 @@ export class LocalDB extends Dexie {
   async findQueueProcessingErrorsByTargetId(
     targetId: string,
   ): Promise<SyncError[]> {
-    const errors = await this.syncErrors
-      .where("message")
-      .startsWith("Queue processing failed")
-      .toArray();
-    return errors.filter((error) => error.message.includes(targetId));
+    const errors = await this.syncErrors.toArray();
+
+    return errors.filter((error) => {
+      return (
+        typeof error.message === "string" &&
+        error.message.startsWith("Queue processing failed") &&
+        error.message.includes(targetId)
+      );
+    });
   }
 
   async putSyncHistory(history: SyncHistory): Promise<void> {
