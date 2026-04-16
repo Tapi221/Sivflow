@@ -6,7 +6,7 @@ import {
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { useReliableFileUpload } from "@/hooks/platform/useReliableFileUpload";
-import { saveDocumentBlob } from "@/services/documentFileStore";
+import { saveDocumentWithBlob } from "@/services/documentFileStore";
 import { getLocalDb } from "@/services/localDB";
 import type { DocumentItem } from "@/types";
 import { getOrCreateDeviceId } from "@/utils/device";
@@ -19,6 +19,7 @@ interface UseFolderDocumentUploadParams {
 }
 
 type LegacyEntityFields = { blobUrl?: string | null };
+
 const withLegacyFields = <T extends object>(value: T): T & LegacyEntityFields =>
   value as T & LegacyEntityFields;
 
@@ -73,6 +74,7 @@ export const useFolderDocumentUpload = ({
         const docId = createDocumentId();
         const storagePath = buildStoragePath(currentUser.uid, docId, "pdf");
         const mimeType = file.type || "application/pdf";
+
         const baseDoc: DocumentItem = {
           id: docId,
           userId: currentUser.uid,
@@ -97,14 +99,15 @@ export const useFolderDocumentUpload = ({
         };
 
         try {
-          await saveDocumentBlob(docId, file, { userId: currentUser.uid });
-          await db.documents.put(
-            baseDoc as DocumentItem & Record<string, unknown>,
-          );
+          await saveDocumentWithBlob({
+            db,
+            document: baseDoc,
+            blob: file,
+          });
           nextOrderIndex += 1;
         } catch (localErr: unknown) {
           console.error(
-            "[useFolderDocumentUpload] Failed to prepare local PDF source",
+            "[useFolderDocumentUpload] Failed to persist PDF locally",
             {
               error: localErr,
               docId,
@@ -125,6 +128,7 @@ export const useFolderDocumentUpload = ({
           });
 
           const remoteDownloadUrl = result.metadata?.downloadUrl ?? null;
+
           await db.updateItem("documents", docId, {
             storagePath: result.storagePath || storagePath,
             remoteUrl: remoteDownloadUrl,

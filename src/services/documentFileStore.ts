@@ -1,6 +1,5 @@
-const DB_NAME = "document_file_store";
-const STORE_NAME = "document_files";
-const DB_VERSION = 1;
+import { getLocalDb } from "@/services/localDB";
+import type { DocumentItem } from "@/types";
 
 type BlobScopeOptions = {
   userId?: string | null;
@@ -12,63 +11,57 @@ type StoredDocumentFile = {
   updatedAt: number;
 };
 
-const makeScopedId = (id: string, options?: BlobScopeOptions): string => {
-  const userId = options?.userId?.trim();
-  if (!userId) return id;
-  return `${userId}:${id}`;
+type SaveDocumentWithBlobParams = {
+  db: Awaited<ReturnType<typeof getLocalDb>>;
+  document: DocumentItem;
+  blob: Blob;
 };
 
-const openDocumentFileDb = async (): Promise<IDBDatabase> =>
-  new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: "id" });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () =>
-      reject(request.error ?? new Error("Failed to open document file store"));
+const getDocumentFilesTable = (
+  db: Awaited<ReturnType<typeof getLocalDb>>,
+) => db.table<StoredDocumentFile, string>("documentFiles");
+
+const resolveDocumentFileId = (
+  document: Pick<DocumentItem, "id" | "localFileId">,
+): string => {
+  const localFileId =
+    typeof document.localFileId === "string"
+      ? document.localFileId.trim()
+      : "";
+
+  return localFileId.length > 0 ? localFileId : document.id;
+};
+
+export const saveDocumentWithBlob = async ({
+  db,
+  document,
+  blob,
+}: SaveDocumentWithBlobParams): Promise<void> => {
+  const documentFiles = getDocumentFilesTable(db);
+  const localFileId = resolveDocumentFileId(document);
+
+  await db.transaction("rw", db.documents, documentFiles, async () => {
+    await documentFiles.put({
+      id: localFileId,
+      blob,
+      updatedAt: Date.now(),
+    });
+
+    await db.documents.put(document as DocumentItem & Record<string, unknown>);
   });
+};
 
 export const saveDocumentBlob = async (
   id: string,
   blob: Blob,
   options?: BlobScopeOptions,
 ): Promise<void> => {
-  const db = await openDocumentFileDb();
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const payload: StoredDocumentFile = {
-      id: makeScopedId(id, options),
-      blob,
-      updatedAt: Date.now(),
-    };
-    store.put(payload);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () =>
-      reject(tx.error ?? new Error("Failed to save document blob"));
-    tx.onabort = () =>
-      reject(tx.error ?? new Error("Document blob save aborted"));
-  });
-};
+  const db = await getLocalDb(options?.userId ?? undefined);
 
-const getStoredDocumentFile = async (
-  id: string,
-): Promise<StoredDocumentFile | null> => {
-  const db = await openDocumentFileDb();
-  return new Promise<StoredDocumentFile | null>((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readonly");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.get(id);
-    request.onsuccess = () => {
-      const result = request.result as StoredDocumentFile | undefined;
-      resolve(result ?? null);
-    };
-    request.onerror = () =>
-      reject(request.error ?? new Error("Failed to read document blob"));
+  await getDocumentFilesTable(db).put({
+    id,
+    blob,
+    updatedAt: Date.now(),
   });
 };
 
@@ -76,73 +69,25 @@ export const getDocumentBlob = async (
   id: string,
   options?: BlobScopeOptions,
 ): Promise<Blob | null> => {
-  const scopedId = makeScopedId(id, options);
-  const scoped = await getStoredDocumentFile(scopedId);
-  if (scoped?.blob) return scoped.blob;
+  const db = await getLocalDb(options?.userId ?? undefined);
+  const stored = await getDocumentFilesTable(db).get(id);
 
-  // Backward compatibility for legacy records saved without user scope.
-  const legacy = await getStoredDocumentFile(id);
-  if (!legacy?.blob) return null;
-
-  if (scopedId !== id) {
-    // Migrate legacy key -> scoped key lazily when possible.
-    await saveDocumentBlob(id, legacy.blob, options);
-    await deleteDocumentBlob(id);
-  }
-  return legacy.blob;
+  return stored?.blob ?? null;
 };
 
 export const deleteDocumentBlob = async (
   id: string,
   options?: BlobScopeOptions,
 ): Promise<void> => {
-  const db = await openDocumentFileDb();
-  const scopedId = makeScopedId(id, options);
-
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    store.delete(scopedId);
-    if (scopedId !== id) {
-      // Also try removing legacy unscoped key.
-      store.delete(id);
-    }
-    tx.oncomplete = () => resolve();
-    tx.onerror = () =>
-      reject(tx.error ?? new Error("Failed to delete document blob"));
-    tx.onabort = () =>
-      reject(tx.error ?? new Error("Document blob delete aborted"));
-  });
+  const db = await getLocalDb(options?.userId ?? undefined);
+  await getDocumentFilesTable(db).delete(id);
 };
 
 export const deleteDocumentBlobsByUser = async (
   userId: string,
 ): Promise<void> => {
   if (!userId) return;
-  const db = await openDocumentFileDb();
-  const prefix = `${userId}:`;
 
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.openCursor();
-
-    request.onsuccess = () => {
-      const cursor = request.result;
-      if (!cursor) return;
-      const key = String(cursor.primaryKey ?? "");
-      if (key.startsWith(prefix)) {
-        cursor.delete();
-      }
-      cursor.continue();
-    };
-
-    request.onerror = () =>
-      reject(request.error ?? new Error("Failed to iterate document blobs"));
-    tx.oncomplete = () => resolve();
-    tx.onerror = () =>
-      reject(tx.error ?? new Error("Failed to delete user document blobs"));
-    tx.onabort = () =>
-      reject(tx.error ?? new Error("Delete user document blobs aborted"));
-  });
+  const db = await getLocalDb(userId);
+  await getDocumentFilesTable(db).clear();
 };
