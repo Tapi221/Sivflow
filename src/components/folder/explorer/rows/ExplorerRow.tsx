@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { EXPLORER_ROW_BASE_CLASS_NAME, getExplorerRowStyle } from "./shared";
 
 interface ExplorerRowProps extends React.HTMLAttributes<HTMLDivElement> {
-  depth: number;
+  depth?: number;
   selected?: boolean;
   className?: string;
   rowRef?: React.Ref<HTMLDivElement>;
@@ -24,7 +24,10 @@ export const ExplorerRow = React.memo(function ExplorerRow({
       ref={rowRef}
       className={cn(EXPLORER_ROW_BASE_CLASS_NAME, className)}
       data-selected={selected ? "true" : undefined}
-      style={{ ...getExplorerRowStyle(depth), ...style }}
+      style={{
+        ...(depth === undefined ? {} : getExplorerRowStyle(depth)),
+        ...style,
+      }}
       {...props}
     >
       {children}

@@ -1,5 +1,7 @@
 export const EXPLORER_ROW_BASE_CLASS_NAME =
   "sidebar-row ds-list-item group box-border py-0 relative w-full text-left";
+export const EXPLORER_ENTITY_ROW_INTERACTIVE_CLASS =
+  "sidebar-row--folder ds-list-item--interactive";
 export const EXPLORER_ROW_CONTENT_CLASS =
   "ds-list-item__content flex h-full min-w-0 flex-1 items-center pr-1";
 export const EXPLORER_ROW_LEADING_SLOT_CLASS =

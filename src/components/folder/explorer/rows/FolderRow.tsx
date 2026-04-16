@@ -14,9 +14,7 @@ import {
   FolderOutlineIcon,
 } from "@/ui/icons";
 import React from "react";
-import { ExplorerRow } from "./ExplorerRow";
-import { ExplorerRowContent } from "./ExplorerRowContent";
-import { SidebarTreeRow } from "./SidebarTreeRow";
+import { SidebarEntityRow } from "./SidebarEntityRow";
 import {
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
@@ -181,7 +179,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
 
   return (
     <div>
-      <SidebarTreeRow
+      <SidebarEntityRow
         menuOpen={menuOpen}
         onMenuOpenChange={onMenuOpenChange}
         menuActions={menuActions}
@@ -190,149 +188,143 @@ export const FolderRow: React.FC<FolderRowProps> = ({
         isDimmed={isDimmed}
         isDraggingOver={isFileDraggingOver}
         onContextMenuSelect={onSelect}
-      >
-        <ExplorerRow
-          rowRef={(node) => setRowRef(folderId, node)}
-          depth={depth}
-          selected={isSelected}
-          className={cn(
-            rowBaseClassName,
-            isFileDraggingOver && "ds-list-item__drag-over",
-            "group sidebar-row--folder ds-list-item--interactive",
-            isSelected && "ds-list-item--selected",
-            EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS,
-          )}
-          onClick={(event) => {
-            if (event.defaultPrevented) return;
-            onSelect();
-          }}
-          onDragEnterCapture={onDragEnterCapture}
-          onDragOverCapture={onDragOverCapture}
-          onDragLeaveCapture={onDragLeaveCapture}
-          onDropCapture={onDropCapture}
-        >
-          <div className={cn(EXPLORER_ROW_CONTENT_CLASS, "cursor-pointer")}>
-            <div
-              className={EXPLORER_ROW_LEADING_SLOT_CLASS}
-              style={nestedToggleOffsetStyle}
+        rowRef={(node) => setRowRef(folderId, node)}
+        depth={depth}
+        selected={isSelected}
+        className={cn(
+          "cursor-pointer",
+          rowBaseClassName,
+          isFileDraggingOver && "ds-list-item__drag-over",
+          EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS,
+        )}
+        contentClassName={cn(EXPLORER_ROW_CONTENT_CLASS, "cursor-pointer")}
+        leading={
+          hasExpandableContent ? (
+            <button
+              type="button"
+              className="grid h-4 w-4 place-items-center"
               onClick={(e) => {
                 e.stopPropagation();
                 onToggle();
               }}
+              aria-label={
+                isExpanded ? "フォルダを折りたたむ" : "フォルダを展開する"
+              }
             >
-              {hasExpandableContent ? (
-                isExpanded ? (
-                  <ChevronDown
-                    className={cn(
-                      "sidebar-icon ds-list-item__icon",
-                      FOLDER_ROW_ICON_SIZE_CLASS,
-                      FOLDER_ROW_ICON_MUTED_CLASS,
-                      isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
-                    )}
-                  />
-                ) : (
-                  <ChevronRight
-                    className={cn(
-                      "sidebar-icon ds-list-item__icon",
-                      FOLDER_ROW_ICON_SIZE_CLASS,
-                      FOLDER_ROW_ICON_MUTED_CLASS,
-                      isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
-                    )}
-                  />
-                )
-              ) : null}
-            </div>
-
-            <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
-              <FolderGlyph
-                className={cn(
-                  "sidebar-icon ds-list-item__icon",
-                  FOLDER_ROW_ICON_SIZE_CLASS,
-                  FOLDER_ROW_ICON_MUTED_CLASS,
-                  isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
-                )}
-              />
-            </span>
-
-            {isEditing ? (
-              <input
-                ref={attachEditInputRef}
-                aria-label="フォルダ名の編集"
-                className={cn(EXPLORER_ROW_INPUT_CLASS, "z-10")}
-                style={{ userSelect: "text", WebkitUserSelect: "text" }}
-                defaultValue={editingName}
-                onFocus={(e) => {
-                  e.currentTarget.select();
-                }}
-                onMouseUp={(e) => {
-                  e.preventDefault();
-                }}
-                onChange={(e) => {
-                  setEditingName(e.target.value);
-                }}
-                onKeyDown={(e) => {
-                  const isComposing =
-                    e.nativeEvent.isComposing || e.keyCode === 229;
-                  if (e.key === "Enter" && isComposing) return;
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    setEditingName(e.currentTarget.value);
-                    e.currentTarget.blur();
-                  }
-                  if (e.key === "Escape") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    renameCancelledRef.current = true;
-                    e.currentTarget.blur();
-                  }
-                }}
-                onBlur={(e) => {
-                  setEditingName(e.currentTarget.value);
-                  void handleRenameConfirm();
-                }}
-                onClick={(e) => e.stopPropagation()}
-              />
-            ) : (
-              <div
-                className={cn(EXPLORER_ROW_TITLE_SLOT_CLASS, "overflow-hidden")}
-              >
-                <ExplorerRowContent
-                  left={null}
-                  title={folderName}
-                  titleClassName={cn(
-                    "lining-nums tabular-nums",
-                    FOLDER_ROW_TITLE_CLASS,
-                    isSelected ? "font-medium" : "font-normal",
+              {isExpanded ? (
+                <ChevronDown
+                  className={cn(
+                    "sidebar-icon ds-list-item__icon",
+                    FOLDER_ROW_ICON_SIZE_CLASS,
+                    FOLDER_ROW_ICON_MUTED_CLASS,
+                    isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
                   )}
-                  right={
-                    isFiltering && matchCount === 0 ? (
-                      <span className="ds-list-item__subtitle text-xs">
-                        (0)
-                      </span>
-                    ) : null
-                  }
                 />
-              </div>
+              ) : (
+                <ChevronRight
+                  className={cn(
+                    "sidebar-icon ds-list-item__icon",
+                    FOLDER_ROW_ICON_SIZE_CLASS,
+                    FOLDER_ROW_ICON_MUTED_CLASS,
+                    isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
+                  )}
+                />
+              )}
+            </button>
+          ) : null
+        }
+        leadingClassName={EXPLORER_ROW_LEADING_SLOT_CLASS}
+        leadingStyle={nestedToggleOffsetStyle}
+        iconClassName={EXPLORER_ROW_ICON_SLOT_CLASS}
+        titleSlotClassName={cn(
+          EXPLORER_ROW_TITLE_SLOT_CLASS,
+          "overflow-hidden",
+        )}
+        title={folderName}
+        titleClassName={cn(
+          "lining-nums tabular-nums",
+          FOLDER_ROW_TITLE_CLASS,
+          isSelected ? "font-medium" : "font-normal",
+        )}
+        trailing={
+          isFiltering && matchCount === 0 ? (
+            <span className="ds-list-item__subtitle text-xs">(0)</span>
+          ) : null
+        }
+        icon={
+          <FolderGlyph
+            className={cn(
+              "sidebar-icon ds-list-item__icon",
+              FOLDER_ROW_ICON_SIZE_CLASS,
+              FOLDER_ROW_ICON_MUTED_CLASS,
+              isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
             )}
+          />
+        }
+        input={
+          <input
+            ref={attachEditInputRef}
+            aria-label="フォルダ名の編集"
+            className={cn(EXPLORER_ROW_INPUT_CLASS, "z-10")}
+            style={{ userSelect: "text", WebkitUserSelect: "text" }}
+            defaultValue={editingName}
+            onFocus={(e) => {
+              e.currentTarget.select();
+            }}
+            onMouseUp={(e) => {
+              e.preventDefault();
+            }}
+            onChange={(e) => {
+              setEditingName(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              const isComposing =
+                e.nativeEvent.isComposing || e.keyCode === 229;
+              if (e.key === "Enter" && isComposing) return;
+              if (e.key === "Enter") {
+                e.preventDefault();
+                setEditingName(e.currentTarget.value);
+                e.currentTarget.blur();
+              }
+              if (e.key === "Escape") {
+                e.preventDefault();
+                e.stopPropagation();
+                renameCancelledRef.current = true;
+                e.currentTarget.blur();
+              }
+            }}
+            onBlur={(e) => {
+              setEditingName(e.currentTarget.value);
+              void handleRenameConfirm();
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        }
+        onClick={(event) => {
+          if (event.defaultPrevented) return;
+          onSelect();
+        }}
+        onDragEnterCapture={onDragEnterCapture}
+        onDragOverCapture={onDragOverCapture}
+        onDragLeaveCapture={onDragLeaveCapture}
+        onDropCapture={onDropCapture}
+      >
+        {!isEditing ? (
+          <div className="absolute right-1 top-0 h-full flex items-center pointer-events-none">
+            <button
+              type="button"
+              aria-label="このフォルダを開く"
+              className="sidebar-action ds-list-item__action md:hidden h-6 w-6 p-0 grid place-items-center rounded-md outline-none pointer-events-auto shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                (onNavigate ?? onSelect)();
+              }}
+            >
+              <ChevronRight className="sidebar-icon ds-list-item__icon h-4 w-4" />
+            </button>
           </div>
-
-          {!isEditing && (
-            <div className="absolute right-1 top-0 h-full flex items-center pointer-events-none">
-              <button
-                type="button"
-                aria-label="このフォルダを開く"
-                className="sidebar-action ds-list-item__action md:hidden h-6 w-6 p-0 grid place-items-center rounded-md outline-none pointer-events-auto shrink-0"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  (onNavigate ?? onSelect)();
-                }}
-              >
-                <ChevronRight className="sidebar-icon ds-list-item__icon h-4 w-4" />
-              </button>
-            </div>
-          )}
-        </ExplorerRow>
-      </SidebarTreeRow>
+        ) : null}
+      </SidebarEntityRow>
 
       {isExpanded && children}
     </div>

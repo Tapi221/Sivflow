@@ -3,9 +3,7 @@ import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, Layers } from "@/ui/icons";
 import React from "react";
-import { ExplorerRow } from "./ExplorerRow";
-import { ExplorerRowContent } from "./ExplorerRowContent";
-import { SidebarTreeRow } from "./SidebarTreeRow";
+import { SidebarEntityRow } from "./SidebarEntityRow";
 import {
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
@@ -117,8 +115,8 @@ export const CardSetRow = ({
   );
 
   return (
-    <SidebarTreeRow
-      style={style}
+    <SidebarEntityRow
+      containerStyle={style}
       menuOpen={isRowMenuOpen}
       onMenuOpenChange={(open) => {
         setOpenRowMenuId(open ? rowMenuId : null);
@@ -129,50 +127,25 @@ export const CardSetRow = ({
       onContextMenuSelect={() => {
         onItemSelect({ type: "cardSet", id: treeNode.rawId });
       }}
-    >
-      <ExplorerRow
-        rowRef={(el) => setRowRef(treeNode.rawId, el)}
-        depth={depth}
-        selected={isSelected}
-        className={cn(
-          "cursor-pointer sidebar-row--folder ds-list-item--interactive",
-          isSelected
-            ? "ds-list-item--selected"
-            : "text-[var(--ds-semantic-color-text-primary)]",
-        )}
-        onClick={(event) => {
-          if (event.defaultPrevented) return;
-          onItemSelect({ type: "cardSet", id: treeNode.rawId });
-        }}
-      >
-        <div className={cn(EXPLORER_ROW_CONTENT_CLASS, "cursor-pointer")}>
-          <div className={EXPLORER_ROW_LEADING_SLOT_CLASS}>
-            {hasChildren ? (
-              <button
-                type="button"
-                className="grid h-4 w-4 place-items-center"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  toggle();
-                }}
-                aria-label={
-                  isOpen ? "カードセットを折りたたむ" : "カードセットを展開する"
-                }
-              >
-                <Chevron
-                  className={cn(
-                    "sidebar-icon ds-list-item__icon",
-                    FOLDER_ROW_ICON_SIZE_CLASS,
-                    FOLDER_ROW_ICON_MUTED_CLASS,
-                    isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
-                  )}
-                />
-              </button>
-            ) : null}
-          </div>
-
-          <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
-            <Layers
+      rowRef={(el) => setRowRef(treeNode.rawId, el)}
+      depth={depth}
+      selected={isSelected}
+      className="cursor-pointer"
+      contentClassName={cn(EXPLORER_ROW_CONTENT_CLASS, "cursor-pointer")}
+      leading={
+        hasChildren ? (
+          <button
+            type="button"
+            className="grid h-4 w-4 place-items-center"
+            onClick={(event) => {
+              event.stopPropagation();
+              toggle();
+            }}
+            aria-label={
+              isOpen ? "カードセットを折りたたむ" : "カードセットを展開する"
+            }
+          >
+            <Chevron
               className={cn(
                 "sidebar-icon ds-list-item__icon",
                 FOLDER_ROW_ICON_SIZE_CLASS,
@@ -180,72 +153,82 @@ export const CardSetRow = ({
                 isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
               )}
             />
+          </button>
+        ) : null
+      }
+      leadingClassName={EXPLORER_ROW_LEADING_SLOT_CLASS}
+      iconClassName={EXPLORER_ROW_ICON_SLOT_CLASS}
+      titleSlotClassName={EXPLORER_ROW_TITLE_SLOT_CLASS}
+      title={treeNode.name}
+      titleClassName={cn(
+        "lining-nums tabular-nums",
+        FOLDER_ROW_TITLE_CLASS,
+        isSelected ? "font-medium" : "font-normal",
+      )}
+      trailing={
+        hasChildren ? (
+          <span className="ds-list-item__subtitle ml-auto text-[10px] tabular-nums">
+            {treeNode.children!.length}
           </span>
-
-          {isEditing ? (
-            <input
-              ref={attachEditInputRef}
-              aria-label="カードセット名の編集"
-              className={EXPLORER_ROW_INPUT_CLASS}
-              defaultValue={editingName}
-              onFocus={(e) => {
-                e.currentTarget.select();
-              }}
-              onMouseUp={(e) => {
-                e.preventDefault();
-              }}
-              onChange={(e) => {
-                setEditingName(e.target.value);
-              }}
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => {
-                const isComposing =
-                  e.nativeEvent.isComposing || e.keyCode === 229;
-
-                if (e.key === "Enter" && isComposing) return;
-
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  setEditingName(e.currentTarget.value);
-                  e.currentTarget.blur();
-                }
-
-                if (e.key === "Escape") {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  renameCancelledRef.current = true;
-                  e.currentTarget.blur();
-                }
-              }}
-              onBlur={(e) => {
-                setEditingName(e.currentTarget.value);
-                void handleRenameConfirm({
-                  id: treeNode.rawId,
-                  type: "cardSet",
-                });
-              }}
-            />
-          ) : (
-            <div className={EXPLORER_ROW_TITLE_SLOT_CLASS}>
-              <ExplorerRowContent
-                title={treeNode.name}
-                titleClassName={cn(
-                  "lining-nums tabular-nums",
-                  FOLDER_ROW_TITLE_CLASS,
-                  isSelected ? "font-medium" : "font-normal",
-                )}
-                right={
-                  hasChildren ? (
-                    <span className="ds-list-item__subtitle ml-auto text-[10px] tabular-nums">
-                      {treeNode.children!.length}
-                    </span>
-                  ) : null
-                }
-              />
-            </div>
+        ) : null
+      }
+      icon={
+        <Layers
+          className={cn(
+            "sidebar-icon ds-list-item__icon",
+            FOLDER_ROW_ICON_SIZE_CLASS,
+            FOLDER_ROW_ICON_MUTED_CLASS,
+            isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
           )}
-        </div>
-      </ExplorerRow>
-    </SidebarTreeRow>
+        />
+      }
+      input={
+        <input
+          ref={attachEditInputRef}
+          aria-label="カードセット名の編集"
+          className={EXPLORER_ROW_INPUT_CLASS}
+          defaultValue={editingName}
+          onFocus={(e) => {
+            e.currentTarget.select();
+          }}
+          onMouseUp={(e) => {
+            e.preventDefault();
+          }}
+          onChange={(e) => {
+            setEditingName(e.target.value);
+          }}
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => {
+            const isComposing = e.nativeEvent.isComposing || e.keyCode === 229;
+
+            if (e.key === "Enter" && isComposing) return;
+
+            if (e.key === "Enter") {
+              e.preventDefault();
+              setEditingName(e.currentTarget.value);
+              e.currentTarget.blur();
+            }
+
+            if (e.key === "Escape") {
+              e.preventDefault();
+              e.stopPropagation();
+              renameCancelledRef.current = true;
+              e.currentTarget.blur();
+            }
+          }}
+          onBlur={(e) => {
+            setEditingName(e.currentTarget.value);
+            void handleRenameConfirm({
+              id: treeNode.rawId,
+              type: "cardSet",
+            });
+          }}
+        />
+      }
+      onClick={(event) => {
+        if (event.defaultPrevented) return;
+        onItemSelect({ type: "cardSet", id: treeNode.rawId });
+      }}
+    />
   );
 };

@@ -3,10 +3,8 @@ import {
   buildFolderMenuActions,
 } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
-import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
-import { SidebarTreeRow } from "@/components/folder/explorer/rows/SidebarTreeRow";
+import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
 import {
-  EXPLORER_ROW_BASE_CLASS_NAME,
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
   EXPLORER_ROW_INPUT_CLASS,
@@ -217,7 +215,7 @@ export const RootFolderPanelRow = ({
   ]);
 
   return (
-    <SidebarTreeRow
+    <SidebarEntityRow
       menuOpen={isMenuOpen}
       onMenuOpenChange={(open) => {
         setOpenRowMenuId(open && menuId ? menuId : null);
@@ -226,106 +224,92 @@ export const RootFolderPanelRow = ({
       hasContextMenu={supportsContextMenu}
       isEditing={isEditing}
       onContextMenuSelect={handleContextMenuSelect}
-    >
-      <div
-        ref={(node) => setRowRef(entry.id, node)}
-        className={cn(
-          EXPLORER_ROW_BASE_CLASS_NAME,
-          "group relative flex h-8 w-full cursor-pointer items-center rounded-[4px] px-2 text-left",
-          "hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
-          isSelected && "bg-[var(--sidebar-active-bg,#e7ebef)]",
-        )}
-        role="button"
-        tabIndex={0}
-        onClick={(e) => {
-          if (e.defaultPrevented) return;
-          handleSelect();
-        }}
-        onKeyDown={(e) => {
-          if (isEditing || isMenuOpen) return;
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleSelect();
-          }
-        }}
-      >
-        <div className={EXPLORER_ROW_CONTENT_CLASS}>
-          <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
-            <Icon
-              className={cn(
-                "sidebar-icon",
-                FOLDER_ROW_ICON_SIZE_CLASS,
-                isSelected
-                  ? FOLDER_ROW_ICON_ACTIVE_CLASS
-                  : FOLDER_ROW_ICON_MUTED_CLASS,
-              )}
-            />
-          </span>
-
-          {isEditing ? (
-            <input
-              ref={attachInputRef}
-              className={EXPLORER_ROW_INPUT_CLASS}
-              style={{ userSelect: "text", WebkitUserSelect: "text" }}
-              value={editingName}
-              onFocus={(e) => {
-                e.currentTarget.select();
-              }}
-              onMouseUp={(e) => {
-                e.preventDefault();
-              }}
-              onChange={(e) => {
-                const nextName = e.target.value;
-                editingNameRef.current = nextName;
-                setEditingName(nextName);
-              }}
-              onClick={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              onKeyDown={(e) => {
-                e.stopPropagation();
-                const isComposing =
-                  e.nativeEvent.isComposing || e.keyCode === 229;
-
-                if (e.key === "Enter" && isComposing) return;
-
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  editingNameRef.current = e.currentTarget.value;
-                  void handleRenameConfirm({
-                    id: entry.id,
-                    type: entry.kind,
-                  });
-                  return;
-                }
-
-                if (e.key === "Escape") {
-                  e.preventDefault();
-                  renameCancelledRef.current = true;
-                  setEditingId(null);
-                  setEditingName("");
-                }
-              }}
-              onBlur={(e) => {
-                editingNameRef.current = e.currentTarget.value;
-                void handleRenameConfirm({
-                  id: entry.id,
-                  type: entry.kind,
-                });
-              }}
-            />
-          ) : (
-            <div className={EXPLORER_ROW_TITLE_SLOT_CLASS}>
-              <ExplorerRowContent
-                title={entry.name}
-                titleClassName={cn(
-                  FOLDER_ROW_TITLE_CLASS,
-                  isSelected ? "font-medium" : "font-normal",
-                )}
-              />
-            </div>
+      rowRef={(node) => setRowRef(entry.id, node)}
+      selected={isSelected}
+      className="relative flex h-8 w-full cursor-pointer items-center rounded-[4px] px-2"
+      contentClassName={EXPLORER_ROW_CONTENT_CLASS}
+      iconClassName={EXPLORER_ROW_ICON_SLOT_CLASS}
+      titleSlotClassName={EXPLORER_ROW_TITLE_SLOT_CLASS}
+      title={entry.name}
+      titleClassName={cn(
+        FOLDER_ROW_TITLE_CLASS,
+        isSelected ? "font-medium" : "font-normal",
+      )}
+      icon={
+        <Icon
+          className={cn(
+            "sidebar-icon",
+            FOLDER_ROW_ICON_SIZE_CLASS,
+            isSelected
+              ? FOLDER_ROW_ICON_ACTIVE_CLASS
+              : FOLDER_ROW_ICON_MUTED_CLASS,
           )}
-        </div>
-      </div>
-    </SidebarTreeRow>
+        />
+      }
+      input={
+        <input
+          ref={attachInputRef}
+          className={EXPLORER_ROW_INPUT_CLASS}
+          style={{ userSelect: "text", WebkitUserSelect: "text" }}
+          value={editingName}
+          onFocus={(e) => {
+            e.currentTarget.select();
+          }}
+          onMouseUp={(e) => {
+            e.preventDefault();
+          }}
+          onChange={(e) => {
+            const nextName = e.target.value;
+            editingNameRef.current = nextName;
+            setEditingName(nextName);
+          }}
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          onKeyDown={(e) => {
+            e.stopPropagation();
+            const isComposing = e.nativeEvent.isComposing || e.keyCode === 229;
+
+            if (e.key === "Enter" && isComposing) return;
+
+            if (e.key === "Enter") {
+              e.preventDefault();
+              editingNameRef.current = e.currentTarget.value;
+              void handleRenameConfirm({
+                id: entry.id,
+                type: entry.kind,
+              });
+              return;
+            }
+
+            if (e.key === "Escape") {
+              e.preventDefault();
+              renameCancelledRef.current = true;
+              setEditingId(null);
+              setEditingName("");
+            }
+          }}
+          onBlur={(e) => {
+            editingNameRef.current = e.currentTarget.value;
+            void handleRenameConfirm({
+              id: entry.id,
+              type: entry.kind,
+            });
+          }}
+        />
+      }
+      role="button"
+      tabIndex={0}
+      onClick={(e) => {
+        if (e.defaultPrevented) return;
+        handleSelect();
+      }}
+      onKeyDown={(e) => {
+        if (isEditing || isMenuOpen) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleSelect();
+        }
+      }}
+    />
   );
 };
