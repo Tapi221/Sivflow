@@ -8,7 +8,7 @@ import React, {
 } from "react";
 
 import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
-import { SharedCardAttachments } from "@/components/card/common/SharedCardAttachments";
+import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
 import {
   CANONICAL_CARD_WIDTH,
   CARD_ROW_PX,
@@ -245,6 +245,53 @@ const EditorSidePaneInner = ({
     </div>
   ) : undefined;
 
+  const faceNode = (
+    <div
+      className={cn(
+        buildCardChromeClassName(presentationState),
+        "inline-block max-w-full align-top text-left",
+      )}
+    >
+      <CardFaceScene
+        displayMode={displayMode}
+        fixedScale={frameFixedScale}
+        contentZoom={contentZoom}
+        frameClassName={frameClassName}
+        topAttachment={topAttachment}
+        actionsTopLeft={actionsTopLeft}
+        actionsTopRight={actionsTopRight}
+        overlay={
+          overlayTopRight ? (
+            <OverlayTopRight>{overlayTopRight}</OverlayTopRight>
+          ) : undefined
+        }
+        resizable={enableHeightResize}
+        showResizeHandle={enableHeightResize && showResizeHandle}
+        resizeStepPx={enableHeightResize ? CARD_ROW_PX : undefined}
+        heightPx={enableHeightResize ? editorCardHeightPx : null}
+        lockHeight={enableHeightResize}
+        onHeightChange={onHeightChange}
+        onMinHeightChange={onMinHeightChange}
+        onResizeStart={onResizeStart}
+        onResizeEnd={onResizeEnd}
+        contentProps={{
+          mode: "edit",
+          blocks,
+          onChange: onBlocksChange,
+          prefix: side,
+          label,
+          accentColor,
+          duplicateToOpposite,
+          hideToolbar,
+          toolbarMount: resolvedToolbarMount,
+          toolbarDesktopLayout: "vertical",
+          enableBlockActiveState,
+          settings,
+        }}
+      />
+    </div>
+  );
+
   return (
     <div
       className={cn(
@@ -257,51 +304,11 @@ const EditorSidePaneInner = ({
       )}
 
       <div className="w-full text-center">
-        <div
-          className={cn(
-            buildCardChromeClassName(presentationState),
-            "inline-block max-w-full align-top text-left",
-          )}
-        >
-          <CardFaceScene
-            displayMode={displayMode}
-            fixedScale={frameFixedScale}
-            contentZoom={contentZoom}
-            frameClassName={frameClassName}
-            topAttachment={topAttachment}
-            actionsTopLeft={actionsTopLeft}
-            actionsTopRight={actionsTopRight}
-            overlay={
-              overlayTopRight ? (
-                <OverlayTopRight>{overlayTopRight}</OverlayTopRight>
-              ) : undefined
-            }
-            resizable={enableHeightResize}
-            showResizeHandle={enableHeightResize && showResizeHandle}
-            resizeStepPx={enableHeightResize ? CARD_ROW_PX : undefined}
-            heightPx={enableHeightResize ? editorCardHeightPx : null}
-            lockHeight={enableHeightResize}
-            onHeightChange={onHeightChange}
-            onMinHeightChange={onMinHeightChange}
-            onResizeStart={onResizeStart}
-            onResizeEnd={onResizeEnd}
-            contentProps={{
-              mode: "edit",
-              blocks,
-              onChange: onBlocksChange,
-              prefix: side,
-              label,
-              accentColor,
-              duplicateToOpposite,
-              hideToolbar,
-              toolbarMount: resolvedToolbarMount,
-              toolbarDesktopLayout: "vertical",
-              enableBlockActiveState,
-              settings,
-            }}
-          />
-          <SharedCardAttachments attachments={attachments} />
-        </div>
+        <CardFaceWithAttachments
+          faceNode={faceNode}
+          attachments={attachments}
+          className="inline-block max-w-full align-top text-left"
+        />
       </div>
     </div>
   );

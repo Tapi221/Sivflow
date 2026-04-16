@@ -1,4 +1,4 @@
-import { SharedCardAttachments } from "@/components/card/common/SharedCardAttachments";
+import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
 import { layoutRowsToCardHeightPx } from "@/components/card/common/constants";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
@@ -21,21 +21,6 @@ export type CardEditorPaneReadonlySurfaceProps = Readonly<{
   cardLayoutMode: CardLayoutMode;
   zoomScale: number;
 }>;
-
-const ReadonlyFaceWithAttachments = ({
-  faceNode,
-  attachments,
-}: Readonly<{
-  faceNode: React.ReactNode;
-  attachments: Card["front"]["attachments"] | Card["back"]["attachments"];
-}>) => {
-  return (
-    <div className="w-full min-w-0">
-      {faceNode}
-      <SharedCardAttachments attachments={attachments} />
-    </div>
-  );
-};
 
 export const CardEditorPaneReadonlySurface = ({
   card,
@@ -130,19 +115,19 @@ export const CardEditorPaneReadonlySurface = ({
     <CardSurfaceLayout
       cardLayoutMode={cardLayoutMode}
       questionNode={
-        <ReadonlyFaceWithAttachments
+        <CardFaceWithAttachments
           faceNode={questionFace}
           attachments={card.front.attachments}
         />
       }
       answerNode={
-        <ReadonlyFaceWithAttachments
+        <CardFaceWithAttachments
           faceNode={answerFace}
           attachments={card.back.attachments}
         />
       }
       flipNode={
-        <ReadonlyFaceWithAttachments
+        <CardFaceWithAttachments
           faceNode={flipFace}
           attachments={activeFlipAttachments}
         />
