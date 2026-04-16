@@ -20,6 +20,7 @@ import {
 } from "@/components/card/editor/CardEditorPaneStates";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
+import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
 import {
   buildCardChromeClassName,
@@ -262,7 +263,7 @@ const EditorSidePaneInner = ({
         actionsTopRight={actionsTopRight}
         overlay={
           overlayTopRight ? (
-            <OverlayTopRight>{overlayTopRight}</OverlayTopRight>
+            <CardOverlayTopRight>{overlayTopRight}</CardOverlayTopRight>
           ) : undefined
         }
         resizable={enableHeightResize}
