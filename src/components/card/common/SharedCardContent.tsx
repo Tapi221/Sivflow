@@ -1,12 +1,10 @@
 import { BlockEditor } from "@/components/card/blocks/editor/BlockEditor";
-import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
-import { filterRenderableCardBlocks } from "@/components/card/blocks/shared/isRenderableCardBlock";
-import { useViewerSceneProps } from "@/components/card/blocks/shared/useViewerSceneProps";
 import { cn } from "@/lib/utils";
 import { CONTENT_TYPO } from "@/styles/tokens/typography";
 import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import React from "react";
+import { SharedCardViewScene } from "./SharedCardViewScene";
 import { CARD_CONTENT_TOP_PX } from "./constants";
 
 type SharedCardContentBaseProps = Readonly<{
@@ -76,71 +74,69 @@ const SharedCardContentRoot = React.memo(
 
 SharedCardContentRoot.displayName = "SharedCardContentRoot";
 
-const EMPTY_RENDERABLE_BLOCKS: CardBlock[] = [];
-
-const SharedCardContentBody = React.memo((props: SharedCardContentProps) => {
-  const viewerProps = useViewerSceneProps({
-    onGalleryFullscreenChange:
-      props.mode === "view" ? props.onGalleryFullscreenChange : undefined,
-    displayMode: props.displayMode,
-    zoom: props.zoom,
-  });
-
-  const renderableBlocks = React.useMemo(
-    () =>
-      props.mode === "view"
-        ? filterRenderableCardBlocks(props.blocks)
-        : EMPTY_RENDERABLE_BLOCKS,
-    [props.blocks, props.mode],
-  );
-
-  if (props.mode === "view") {
-    if (!renderableBlocks.length) {
-      return null;
-    }
-
+const SharedCardContentEditScene = React.memo(
+  ({
+    blocks,
+    onChange,
+    prefix,
+    label,
+    accentColor,
+    duplicateToOpposite,
+    onCrossDuplicate,
+    autoFocus,
+    customPlaceholders,
+    hideToolbar,
+    onDelete,
+    minDeletableIndex,
+    hiddenBlockTypes,
+    toolbarMount,
+    toolbarDesktopLayout,
+    enableBlockActiveState,
+    settings,
+    displayMode,
+    zoom,
+  }: SharedCardContentEditProps) => {
     return (
-      <CardBlocksScene
-        blocks={renderableBlocks}
-        resolveSceneProps={() => ({
-          mode: "view",
-          viewerProps,
-        })}
+      <BlockEditor
+        blocks={blocks}
+        onChange={onChange}
+        prefix={prefix}
+        label={label}
+        accentColor={accentColor}
+        duplicateToOpposite={duplicateToOpposite}
+        onCrossDuplicate={onCrossDuplicate}
+        autoFocus={autoFocus}
+        customPlaceholders={customPlaceholders}
+        hideToolbar={hideToolbar}
+        onDelete={onDelete}
+        minDeletableIndex={minDeletableIndex}
+        hiddenBlockTypes={hiddenBlockTypes}
+        toolbarMount={toolbarMount}
+        toolbarDesktopLayout={toolbarDesktopLayout}
+        enableBlockActiveState={enableBlockActiveState}
+        settings={settings}
+        displayMode={displayMode}
+        zoom={zoom}
       />
     );
-  }
+  },
+);
 
-  return (
-    <BlockEditor
-      blocks={props.blocks}
-      onChange={props.onChange}
-      prefix={props.prefix}
-      label={props.label}
-      accentColor={props.accentColor}
-      duplicateToOpposite={props.duplicateToOpposite}
-      onCrossDuplicate={props.onCrossDuplicate}
-      autoFocus={props.autoFocus}
-      customPlaceholders={props.customPlaceholders}
-      hideToolbar={props.hideToolbar}
-      onDelete={props.onDelete}
-      minDeletableIndex={props.minDeletableIndex}
-      hiddenBlockTypes={props.hiddenBlockTypes}
-      toolbarMount={props.toolbarMount}
-      toolbarDesktopLayout={props.toolbarDesktopLayout}
-      enableBlockActiveState={props.enableBlockActiveState}
-      settings={props.settings}
-      displayMode={props.displayMode}
-      zoom={props.zoom}
-    />
-  );
-});
-
-SharedCardContentBody.displayName = "SharedCardContentBody";
+SharedCardContentEditScene.displayName = "SharedCardContentEditScene";
 
 const SharedCardContentInner = (props: SharedCardContentProps) => {
   return (
     <SharedCardContentRoot className={props.className}>
-      <SharedCardContentBody {...props} />
+      {props.mode === "view" ? (
+        <SharedCardViewScene
+          blocks={props.blocks}
+          onGalleryFullscreenChange={props.onGalleryFullscreenChange}
+          displayMode={props.displayMode}
+          zoom={props.zoom}
+        />
+      ) : (
+        <SharedCardContentEditScene {...props} />
+      )}
     </SharedCardContentRoot>
   );
 };

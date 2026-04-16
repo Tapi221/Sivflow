@@ -12,6 +12,10 @@ import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
 import { BlockToolbar } from "@/components/card/blocks/core/BlockToolbar";
 import { hasRuledLine } from "@/components/card/blocks/core/blockDisplayPolicy";
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
+import {
+  createEditorBlock,
+  isEditorInsertableBlockType,
+} from "@/components/card/blocks/editor/blockEditorInsertPolicy";
 import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
 import {
   type CardBlockLayoutReplaceBlock,
@@ -298,7 +302,7 @@ export const BlockEditor = React.forwardRef<
 
     const handleAddBlock = useCallback(
       (type: CardBlock["type"], overrideContainerId?: string | null) => {
-        if (type === "reference" || type === "audio") return;
+        if (!isEditorInsertableBlockType(type)) return;
 
         const source = blocksRef.current;
 
@@ -334,31 +338,18 @@ export const BlockEditor = React.forwardRef<
           return 0;
         })();
 
-        const newBlock: CardBlock = {
-          id: `${prefix}-${type}-${uid()}`,
-          type,
-          content: "",
-          images: [],
-          audios: [],
-          code:
-            type === "code" ? { language: "javascript", code: "" } : undefined,
-          math:
-            type === "math" ? { latex: "", displayMode: "block" } : undefined,
-          markdown: type === "markdown" ? "" : undefined,
-          questionTitle: type === "question" ? "" : undefined,
-          questionAnswer: type === "question" ? "" : undefined,
-          rowOffset:
-            isRowPositionableType(type) && !isGridOffsetType(type)
-              ? tailRowOffset
-              : undefined,
-          offsetRows: isGridOffsetType(type)
-            ? Math.max(0, tailGridOffsetRows)
-            : undefined,
-          parentBlockId: resolvedContainerId ?? undefined,
-          orderIndex: 0,
-        };
+        const next = [
+          ...source,
+          createEditorBlock({
+            prefix,
+            type,
+            id: `${prefix}-${type}-${uid()}`,
+            rowOffset: tailRowOffset,
+            offsetRows: tailGridOffsetRows,
+            parentBlockId: resolvedContainerId ?? undefined,
+          }),
+        ];
 
-        const next = [...source, newBlock];
         blocksRef.current = next;
         emitChange(next, { reindex: true });
       },
