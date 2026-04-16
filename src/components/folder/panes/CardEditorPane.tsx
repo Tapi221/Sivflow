@@ -8,6 +8,7 @@ import React, {
 } from "react";
 
 import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
+import { SharedCardAttachments } from "@/components/card/common/SharedCardAttachments";
 import {
   CANONICAL_CARD_WIDTH,
   CARD_ROW_PX,
@@ -49,7 +50,7 @@ import {
   resolveCardSurfaceScale,
 } from "@/features/cardrender/domain/cardRenderSpec";
 import { cn } from "@/lib/utils";
-import type { Card, CardBlock } from "@/types/domain/card";
+import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { toMillisOrNull } from "@/utils/toMillis";
 
@@ -149,6 +150,7 @@ const OverlayTopRight = ({ children }: OverlayTopRightProps) => {
 type EditorSidePaneProps = {
   side: "question" | "answer";
   blocks: CardBlock[];
+  attachments?: CardFaceAttachments;
   onBlocksChange: (blocks: CardBlock[]) => void;
   label: string;
   accentColor?: string;
@@ -181,6 +183,7 @@ type EditorSidePaneProps = {
 const EditorSidePaneInner = ({
   side,
   blocks,
+  attachments,
   onBlocksChange,
   label,
   accentColor,
@@ -297,6 +300,7 @@ const EditorSidePaneInner = ({
               settings,
             }}
           />
+          <SharedCardAttachments attachments={attachments} />
         </div>
       </div>
     </div>
@@ -309,6 +313,7 @@ const areEditorSidePanePropsEqual = (
 ) =>
   prev.side === next.side &&
   prev.blocks === next.blocks &&
+  prev.attachments === next.attachments &&
   prev.label === next.label &&
   prev.accentColor === next.accentColor &&
   prev.duplicateToOpposite === next.duplicateToOpposite &&
@@ -500,6 +505,8 @@ export const CardEditorPane = ({
 
   const frontBlocks = draft?.frontBlocks ?? EMPTY_BLOCKS;
   const backBlocks = draft?.backBlocks ?? EMPTY_BLOCKS;
+  const frontAttachments = draft?.frontAttachments;
+  const backAttachments = draft?.backAttachments;
 
   const editorCardHeightPx = useMemo(
     () =>
@@ -810,6 +817,7 @@ export const CardEditorPane = ({
     <EditorSidePane
       side="question"
       blocks={frontBlocks}
+      attachments={frontAttachments}
       onBlocksChange={handleQuestionBlocksChange}
       label="問題"
       accentColor={editorAccentColor}
@@ -843,6 +851,7 @@ export const CardEditorPane = ({
     <EditorSidePane
       side="answer"
       blocks={backBlocks}
+      attachments={backAttachments}
       onBlocksChange={handleAnswerBlocksChange}
       label="解答"
       accentColor={editorAccentColor}
@@ -876,6 +885,8 @@ export const CardEditorPane = ({
     ? "answer"
     : "question";
   const flipBlocks = activeFlipSide === "question" ? frontBlocks : backBlocks;
+  const flipAttachments =
+    activeFlipSide === "question" ? frontAttachments : backAttachments;
   const flipActionsTopRight =
     activeFlipSide === "question"
       ? questionActionsTopRight
@@ -893,6 +904,7 @@ export const CardEditorPane = ({
     <EditorSidePane
       side={activeFlipSide}
       blocks={flipBlocks}
+      attachments={flipAttachments}
       onBlocksChange={handleFlipBlocksChange}
       label={activeFlipSide === "question" ? "問題" : "解答"}
       accentColor={editorAccentColor}

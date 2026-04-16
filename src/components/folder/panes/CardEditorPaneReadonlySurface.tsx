@@ -1,3 +1,4 @@
+import { SharedCardAttachments } from "@/components/card/common/SharedCardAttachments";
 import { layoutRowsToCardHeightPx } from "@/components/card/common/constants";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
@@ -20,6 +21,21 @@ export type CardEditorPaneReadonlySurfaceProps = Readonly<{
   cardLayoutMode: CardLayoutMode;
   zoomScale: number;
 }>;
+
+const ReadonlyFaceWithAttachments = ({
+  faceNode,
+  attachments,
+}: Readonly<{
+  faceNode: React.ReactNode;
+  attachments: Card["front"]["attachments"] | Card["back"]["attachments"];
+}>) => {
+  return (
+    <div className="w-full min-w-0">
+      {faceNode}
+      <SharedCardAttachments attachments={attachments} />
+    </div>
+  );
+};
 
 export const CardEditorPaneReadonlySurface = ({
   card,
@@ -49,7 +65,7 @@ export const CardEditorPaneReadonlySurface = ({
     [card.layoutRows, displayMode],
   );
 
-  const questionNode = (
+  const questionFace = (
     <ViewCardFaceScene
       card={card}
       side="question"
@@ -67,7 +83,7 @@ export const CardEditorPaneReadonlySurface = ({
     />
   );
 
-  const answerNode = (
+  const answerFace = (
     <ViewCardFaceScene
       card={card}
       side="answer"
@@ -86,8 +102,12 @@ export const CardEditorPaneReadonlySurface = ({
   );
 
   const activeFlipSide: Side = isFlipped ? "answer" : "question";
+  const activeFlipAttachments =
+    activeFlipSide === "question"
+      ? card.front.attachments
+      : card.back.attachments;
 
-  const flipNode = (
+  const flipFace = (
     <ViewCardFaceScene
       card={card}
       side={activeFlipSide}
@@ -109,9 +129,24 @@ export const CardEditorPaneReadonlySurface = ({
   return (
     <CardSurfaceLayout
       cardLayoutMode={cardLayoutMode}
-      questionNode={questionNode}
-      answerNode={answerNode}
-      flipNode={flipNode}
+      questionNode={
+        <ReadonlyFaceWithAttachments
+          faceNode={questionFace}
+          attachments={card.front.attachments}
+        />
+      }
+      answerNode={
+        <ReadonlyFaceWithAttachments
+          faceNode={answerFace}
+          attachments={card.back.attachments}
+        />
+      }
+      flipNode={
+        <ReadonlyFaceWithAttachments
+          faceNode={flipFace}
+          attachments={activeFlipAttachments}
+        />
+      }
     />
   );
 };
