@@ -3,7 +3,7 @@ import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 import { normalizeDate } from "@/shared/codec/date";
 import { Dexie, type Table } from "dexie";
-import { normalizeFolderWithSilent } from "./transforms";
+import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
 
 /** queries.ts が必要とする LocalDB プロパティの最小インターフェース */
 type QueryDb = Dexie & {
