@@ -38,9 +38,25 @@ describe("Image Invariants", () => {
       );
     });
 
-    it("should accept valid Blob URL in localUrl", () => {
+    it("should reject embedded base64 marker in thumbnailUrl", () => {
       const image: UploadedImage = {
         id: "test-3",
+        thumbnailUrl:
+          "https://firebasestorage.googleapis.com/v0/b/bucket/o/image.jpg?token=base64,abc123" as unknown,
+        status: "ready",
+      };
+
+      expect(() => assertNoBase64InImage(image)).toThrow(
+        ImageInvariantViolation,
+      );
+      expect(() => assertNoBase64InImage(image)).toThrow(
+        /Base64 detected in thumbnailUrl/,
+      );
+    });
+
+    it("should accept valid Blob URL in localUrl", () => {
+      const image: UploadedImage = {
+        id: "test-4",
         localUrl: "blob:http://localhost:5173/abc-123" as unknown,
         status: "uploading",
       };
@@ -48,11 +64,13 @@ describe("Image Invariants", () => {
       expect(() => assertNoBase64InImage(image)).not.toThrow();
     });
 
-    it("should accept valid Storage URL in remoteUrl", () => {
+    it("should accept valid Storage URL in remoteUrl and thumbnailUrl", () => {
       const image: UploadedImage = {
-        id: "test-4",
+        id: "test-5",
         remoteUrl:
           "https://firebasestorage.googleapis.com/v0/b/bucket/o/image.jpg" as unknown,
+        thumbnailUrl:
+          "https://storage.googleapis.com/bucket/thumb.jpg" as unknown,
         status: "ready",
       };
 
@@ -63,7 +81,7 @@ describe("Image Invariants", () => {
   describe("assertImageInvariant", () => {
     it("should pass for valid image with Storage URL", () => {
       const image: UploadedImage = {
-        id: "test-5",
+        id: "test-6",
         remoteUrl:
           "https://firebasestorage.googleapis.com/v0/b/bucket/o/image.jpg" as unknown,
         status: "ready",
@@ -74,7 +92,7 @@ describe("Image Invariants", () => {
 
     it("should pass for valid image with Blob URL", () => {
       const image: UploadedImage = {
-        id: "test-6",
+        id: "test-7",
         localUrl: "blob:http://localhost:5173/abc-123" as unknown,
         status: "uploading",
       };
@@ -82,11 +100,48 @@ describe("Image Invariants", () => {
       expect(() => assertImageInvariant(image)).not.toThrow();
     });
 
-    it("should reject invalid remoteUrl (not HTTPS)", () => {
+    it("should pass for valid thumbnail Storage URL", () => {
       const image: UploadedImage = {
-        id: "test-7",
-        remoteUrl: "http://example.com/image.jpg" as unknown,
+        id: "test-8",
+        thumbnailUrl:
+          "https://storage.googleapis.com/bucket/thumb.jpg" as unknown,
         status: "ready",
+      };
+
+      expect(() => assertImageInvariant(image)).not.toThrow();
+    });
+
+    it("should reject invalid remoteUrl even when it is https", () => {
+      const image: UploadedImage = {
+        id: "test-9",
+        remoteUrl: "https://example.com/image.jpg" as unknown,
+        status: "ready",
+      };
+
+      expect(() => assertImageInvariant(image)).toThrow(
+        ImageInvariantViolation,
+      );
+      expect(() => assertImageInvariant(image)).toThrow(/Invalid remoteUrl/);
+    });
+
+    it("should reject invalid thumbnailUrl even when it is https", () => {
+      const image: UploadedImage = {
+        id: "test-10",
+        thumbnailUrl: "https://example.com/thumb.jpg" as unknown,
+        status: "ready",
+      };
+
+      expect(() => assertImageInvariant(image)).toThrow(
+        ImageInvariantViolation,
+      );
+      expect(() => assertImageInvariant(image)).toThrow(/Invalid thumbnailUrl/);
+    });
+
+    it("should reject invalid localUrl (not Blob URL)", () => {
+      const image: UploadedImage = {
+        id: "test-11",
+        localUrl: "file:///C:/Users/image.jpg" as unknown,
+        status: "uploading",
       };
 
       expect(() => assertImageInvariant(image)).toThrow(
@@ -94,15 +149,19 @@ describe("Image Invariants", () => {
       );
     });
 
-    it("should reject invalid localUrl (not Blob URL)", () => {
+    it("should reject embedded base64 marker in remoteUrl", () => {
       const image: UploadedImage = {
-        id: "test-8",
-        localUrl: "file:///C:/Users/image.jpg" as unknown,
-        status: "uploading",
+        id: "test-12",
+        remoteUrl:
+          "https://firebasestorage.googleapis.com/v0/b/bucket/o/image.jpg?payload=base64,abc123" as unknown,
+        status: "ready",
       };
 
       expect(() => assertImageInvariant(image)).toThrow(
         ImageInvariantViolation,
+      );
+      expect(() => assertImageInvariant(image)).toThrow(
+        /Base64 detected in remoteUrl/,
       );
     });
   });

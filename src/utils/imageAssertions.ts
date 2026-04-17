@@ -1,6 +1,8 @@
 import type { UploadedImage } from "@/types";
 import { isBase64DataUrl, isBlobUrl, isStorageUrl } from "@/types/core/branded";
 
+type ImageUrlField = "remoteUrl" | "localUrl" | "thumbnailUrl";
+
 /**
  * 画像ドメインの不変条件違反を示すエラー
  * このエラーが発生した場合、設計上の重大な問題がある
@@ -13,43 +15,71 @@ export class ImageInvariantViolation extends Error {
     super(`[ImageInvariant] ${message}`);
     this.name = "ImageInvariantViolation";
   }
-}
+};
 
-/**
- * 不変条件1: DBに保存されるデータに Base64 文字列は存在してはならない
- *
- * @throws {ImageInvariantViolation} Base64 が検出された場合
- */
-export const assertNoBase64InImage = (image: UploadedImage): void => {
-  if (image.remoteUrl && isBase64DataUrl(image.remoteUrl as string)) {
+const assertNoBase64Url = (
+  value: string | null | undefined,
+  field: ImageUrlField,
+  imageId?: string,
+): void => {
+  if (!value) return;
+
+  if (isBase64DataUrl(value) || value.includes("base64,")) {
     throw new ImageInvariantViolation(
-      `Base64 detected in remoteUrl (MUST be Storage URL only)`,
-      image.id,
+      `Base64 detected in ${field} (MUST NOT be persisted)`,
+      imageId,
     );
   }
+};
 
-  if (image.localUrl && isBase64DataUrl(image.localUrl as string)) {
+const assertStorageUrlField = (
+  value: string | null | undefined,
+  field: "remoteUrl" | "thumbnailUrl",
+  imageId?: string,
+): void => {
+  if (!value) return;
+
+  if (!isStorageUrl(value)) {
     throw new ImageInvariantViolation(
-      `Base64 detected in localUrl (MUST be Blob URL only)`,
-      image.id,
+      `Invalid ${field}: must be Firebase Storage HTTPS URL, got: ${value}`,
+      imageId,
+    );
+  }
+};
+
+const assertBlobUrlField = (
+  value: string | null | undefined,
+  imageId?: string,
+): void => {
+  if (!value) return;
+
+  if (!isBlobUrl(value)) {
+    throw new ImageInvariantViolation(
+      `Invalid localUrl: must be Blob URL (blob:), got: ${value}`,
+      imageId,
     );
   }
 };
 
 /**
- * 不変条件2: remoteUrl は Storage由来の https URL のみ
+ * 不変条件1: DBに保存される URL に Base64 文字列は存在してはならない
+ *
+ * @throws {ImageInvariantViolation} Base64 が検出された場合
+ */
+export const assertNoBase64InImage = (image: UploadedImage): void => {
+  assertNoBase64Url(image.remoteUrl ?? null, "remoteUrl", image.id);
+  assertNoBase64Url(image.localUrl ?? null, "localUrl", image.id);
+  assertNoBase64Url(image.thumbnailUrl ?? null, "thumbnailUrl", image.id);
+};
+
+/**
+ * 不変条件2: remoteUrl / thumbnailUrl は Storage 由来の https URL のみ
  *
  * @throws {ImageInvariantViolation} 不正な URL の場合
  */
-const assertValidRemoteUrl = (image: UploadedImage): void => {
-  if (!image.remoteUrl) return; // null/undefined は許可
-
-  if (!isStorageUrl(image.remoteUrl as string)) {
-    throw new ImageInvariantViolation(
-      `Invalid remoteUrl: must be Firebase Storage HTTPS URL, got: ${image.remoteUrl}`,
-      image.id,
-    );
-  }
+const assertValidRemoteUrls = (image: UploadedImage): void => {
+  assertStorageUrlField(image.remoteUrl ?? null, "remoteUrl", image.id);
+  assertStorageUrlField(image.thumbnailUrl ?? null, "thumbnailUrl", image.id);
 };
 
 /**
@@ -58,14 +88,7 @@ const assertValidRemoteUrl = (image: UploadedImage): void => {
  * @throws {ImageInvariantViolation} 不正な URL の場合
  */
 const assertValidLocalUrl = (image: UploadedImage): void => {
-  if (!image.localUrl) return; // null/undefined は許可
-
-  if (!isBlobUrl(image.localUrl as string)) {
-    throw new ImageInvariantViolation(
-      `Invalid localUrl: must be Blob URL (blob:), got: ${image.localUrl}`,
-      image.id,
-    );
-  }
+  assertBlobUrlField(image.localUrl ?? null, image.id);
 };
 
 /**
@@ -76,7 +99,7 @@ const assertValidLocalUrl = (image: UploadedImage): void => {
  */
 export const assertImageInvariant = (image: UploadedImage): void => {
   assertNoBase64InImage(image);
-  assertValidRemoteUrl(image);
+  assertValidRemoteUrls(image);
   assertValidLocalUrl(image);
 };
 

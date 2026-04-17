@@ -1,5 +1,5 @@
 import type { UploadedImage } from "@/types";
-import { strictValidateBeforeSave } from "@/utils/imageValidation";
+import { assertImageInvariant } from "@/utils/imageAssertions";
 
 import type { QueueItem } from "./persistentOfflineQueueModels";
 
@@ -44,7 +44,7 @@ export const processPersistentOfflineQueue = async (
         throw new Error("[PersistentQueue] Upload finished without remoteUrl");
       }
 
-      strictValidateBeforeSave(updatedImage);
+      assertImageInvariant(updatedImage);
       await deps.handleSuccess(item, updatedImage);
       await deps.dequeue(item.id);
 

@@ -1,7 +1,7 @@
 import { auth, requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { imageDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
 import type { UploadedImage } from "@/types";
-import { strictValidateBeforeSave } from "@/utils/imageValidation";
+import { assertImageInvariant } from "@/utils/imageAssertions";
 import type { Firestore } from "firebase/firestore";
 import { doc, setDoc, writeBatch } from "firebase/firestore";
 
@@ -87,7 +87,7 @@ export const resolveImageFirestoreTarget = (
 export const saveImageToFirestore = async (
   image: UploadedImage,
 ): Promise<void> => {
-  strictValidateBeforeSave(image);
+  assertImageInvariant(image);
 
   const target = resolveImageFirestoreTarget(image);
   const db = requireFirestoreDb();
@@ -121,20 +121,13 @@ export const saveImageToFirestore = async (
     }
     throw error;
   }
-
-  if (
-    import.meta.env.PROD &&
-    (image.remoteUrl?.includes("base64") || image.localUrl?.includes("base64"))
-  ) {
-    console.error("[CRITICAL] Base64 detected in production", { image });
-  }
 };
 
 export const saveImageBatchToFirestore = async (
   images: UploadedImage[],
 ): Promise<void> => {
   for (const image of images) {
-    strictValidateBeforeSave(image);
+    assertImageInvariant(image);
   }
 
   try {

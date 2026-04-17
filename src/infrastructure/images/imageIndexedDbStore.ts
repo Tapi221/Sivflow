@@ -1,11 +1,11 @@
 import { getLocalDb } from "@/infrastructure/localdb/client";
 import type { UploadedImage } from "@/types";
-import { strictValidateBeforeSave } from "@/utils/imageValidation";
+import { assertImageInvariant } from "@/utils/imageAssertions";
 
 export const saveImageToIndexedDb = async (
   image: UploadedImage,
 ): Promise<void> => {
-  strictValidateBeforeSave(image);
+  assertImageInvariant(image);
 
   try {
     const db = await getLocalDb();
