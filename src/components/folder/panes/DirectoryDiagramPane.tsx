@@ -15,7 +15,7 @@ import {
 import { getCardText } from "@/domain/card/content";
 import {
   buildCardSetById,
-  resolveCardFolderId,
+  resolveCardFolderIdStrict,
 } from "@/domain/card/selectors/cardFolder";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
@@ -322,7 +322,7 @@ export const DirectoryDiagramPane = ({
     for (const card of filteredCards) {
       if (card.isDeleted) continue;
 
-      const folderId = resolveCardFolderId(card, cardSetById) ?? "";
+      const folderId = resolveCardFolderIdStrict(card, cardSetById) ?? "";
       if (!folderId) continue;
 
       const items = itemMap.get(folderId) ?? [];

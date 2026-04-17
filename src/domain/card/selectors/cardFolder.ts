@@ -114,7 +114,7 @@ export const isCardInFolder = (
   cardSetById: ReadonlyMap<string, CardSetLike>,
 ) => {
   const targetFolderId = normalizeFolderId(folderId);
-  return resolveCardFolderId(card, cardSetById) === targetFolderId;
+  return resolveCardFolderIdStrict(card, cardSetById) === targetFolderId;
 };
 
 export const filterCardsByFolderId = <T extends CardLike>(
@@ -124,6 +124,6 @@ export const filterCardsByFolderId = <T extends CardLike>(
 ) => {
   const targetFolderId = normalizeFolderId(folderId);
   return cards.filter(
-    (card) => resolveCardFolderId(card, cardSetById) === targetFolderId,
+    (card) => resolveCardFolderIdStrict(card, cardSetById) === targetFolderId,
   );
 };

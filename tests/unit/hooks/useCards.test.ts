@@ -5,7 +5,6 @@ import { useCards } from "@/hooks/card/useCards";
 
 const useLiveQueryMock = vi.fn();
 const getLocalDbMock = vi.fn();
-const ensureLegacyCardsBackfilledMock = vi.fn();
 
 vi.mock("dexie-react-hooks", () => ({
   useLiveQuery: (...args: unknown[]) => useLiveQueryMock(...args),
@@ -13,11 +12,6 @@ vi.mock("dexie-react-hooks", () => ({
 
 vi.mock("@/services/localDB", () => ({
   getLocalDb: (...args: unknown[]) => getLocalDbMock(...args),
-}));
-
-vi.mock("@/services/legacyCardSetMigrationBackfill", () => ({
-  ensureLegacyCardsBackfilled: (...args: unknown[]) =>
-    ensureLegacyCardsBackfilledMock(...args),
 }));
 
 vi.mock("@/contexts/AuthContext", () => ({
@@ -45,11 +39,10 @@ describe("useCards", () => {
       (_query: unknown, _deps: unknown, defaultValue?: unknown) =>
         defaultValue ?? [],
     );
-    ensureLegacyCardsBackfilledMock.mockResolvedValue(undefined);
     getLocalDbMock.mockReset();
   });
 
-  it("createCard は cardSet 単位の questionNumber と legacy folderId を揃える", async () => {
+  it("createCard は cardSet 単位の questionNumber を採番する", async () => {
     const addItem = vi.fn(async () => undefined);
     getLocalDbMock.mockResolvedValue({
       cardSets: {
@@ -80,11 +73,11 @@ describe("useCards", () => {
 
     const payload = addItem.mock.calls[0]?.[1] as Record<string, unknown>;
     expect(payload.cardSetId).toBe("set-1");
-    expect(payload.folderId).toBe("folder-a");
+    expect(payload.folderId).toBeUndefined();
     expect(payload.questionNumber).toBe("Q3");
   });
 
-  it("moveCardToSet は cardSetId/folderId/orderIndex を同期する", async () => {
+  it("moveCardToSet は cardSetId/orderIndex を同期する", async () => {
     const updateItem = vi.fn(async () => undefined);
     getLocalDbMock.mockResolvedValue({
       cardSets: {
@@ -112,7 +105,6 @@ describe("useCards", () => {
       "card-target",
       expect.objectContaining({
         cardSetId: "set-2",
-        folderId: "folder-b",
         orderIndex: 6,
       }),
     );

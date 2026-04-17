@@ -11,7 +11,7 @@ import { getLocalDb } from "@/services/localDB";
 import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 import {
   buildCardSetById,
-  resolveCardFolderId,
+  resolveCardFolderIdStrict,
 } from "@/domain/card/selectors/cardFolder";
 import type { Card, CardPatch, CardSet, UserSettings } from "@/types";
 import type { PracticeFilterRating } from "./usePracticeMode";
@@ -156,7 +156,7 @@ export const useStudySession = ({
 
       if (currentUser) {
         const resolvedFolderId =
-          resolveCardFolderId(card, cardSetById) ?? undefined;
+          resolveCardFolderIdStrict(card, cardSetById) ?? undefined;
         createStudyLogMutation.mutate({
           userId: currentUser.uid,
           cardId: card.id,

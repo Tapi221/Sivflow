@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
-import { syncLegacyCardFolderIdFromCardSet } from "@/domain/card/legacyFolderSync";
 import {
   normalizeCardFolderId,
   resolveBlocksFromCardData,
@@ -9,7 +8,6 @@ import {
   resolveInkFromCardData,
 } from "@/domain/card/normalizers/cardShape";
 import { getLocalDb } from "@/services/localDB";
-import { ensureLegacyCardsBackfilled } from "@/services/legacyCardSetMigrationBackfill";
 import { useAuthSession } from "@/contexts/AuthContext";
 import {
   useUserSettings,
@@ -23,7 +21,6 @@ import {
 import {
   buildCardSetById,
   filterCardsByFolderId,
-  getLegacyFolderFallbackUsage,
 } from "@/domain/card/selectors/cardFolder";
 
 const isCardDeleted = (
@@ -67,7 +64,6 @@ export const useCards = (
       try {
         if (!enabled) return [];
         if (!currentUser) return [];
-        await ensureLegacyCardsBackfilled(currentUser.uid);
         const db = await getLocalDb(currentUser.uid);
 
         if (cardSetId) {
@@ -167,25 +163,6 @@ export const useCards = (
 
   // useLiveQueryはundefinedを返すことがあるのでloadingを判定
   const loading = enabled && rawCards === undefined;
-  const fallbackUsageCursorRef = useRef(0);
-
-  useEffect(() => {
-    if (!import.meta.env.DEV) return;
-    const usage = getLegacyFolderFallbackUsage();
-    if (usage.total <= fallbackUsageCursorRef.current) return;
-    const delta = usage.total - fallbackUsageCursorRef.current;
-    fallbackUsageCursorRef.current = usage.total;
-    console.warn("[useCards] legacy folder fallback detected", {
-      scope: {
-        folderId: folderId ?? null,
-        cardSetId: cardSetId ?? null,
-      },
-      delta,
-      total: usage.total,
-      missingCardSetId: usage.missingCardSetId,
-      unresolvedCardSetId: usage.unresolvedCardSetId,
-    });
-  }, [cards, folderId, cardSetId]);
 
   const createCard = async (
     cardData: Partial<Card> & { cardSetId?: string },
@@ -277,10 +254,6 @@ export const useCards = (
     };
 
     const resolvedCardSet = await resolveCardSetForCreate();
-    const resolvedFolderIdPatch = syncLegacyCardFolderIdFromCardSet(
-      {},
-      resolvedCardSet,
-    );
 
     // orderIndex: 既存カードとの競合を避け、時間軸での並びを保証するタイムスタンプベース
     const orderIndex =
@@ -329,7 +302,6 @@ export const useCards = (
       userId: currentUser.uid,
       deviceId: cardData.deviceId || "web",
       cardSetId: resolvedCardSet.cardSetId,
-      folderId: resolvedFolderIdPatch.folderId,
       orderIndex,
       questionNumber,
       title: cardData.title || "",
@@ -502,14 +474,11 @@ export const useCards = (
     await db.updateItem(
       "cards",
       cardId,
-      syncLegacyCardFolderIdFromCardSet(
-        {
-          cardSetId: targetCardSetId,
-          orderIndex: maxOrderIndex + 1,
-          updatedAt: new Date(),
-        },
-        targetSet,
-      ),
+      {
+        cardSetId: targetCardSetId,
+        orderIndex: maxOrderIndex + 1,
+        updatedAt: new Date(),
+      },
     );
   };
 

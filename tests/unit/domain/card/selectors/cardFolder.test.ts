@@ -73,7 +73,8 @@ describe("cardFolder selectors", () => {
 
     const inFolderA = filterCardsByFolderId(cards, "folder-a", cardSetById);
 
-    expect(inFolderA.map((card) => card.id)).toEqual(["card-1", "card-3"]);
+    expect(inFolderA.map((card) => card.id)).toEqual(["card-1"]);
     expect(isCardInFolder(cards[1], "folder-a", cardSetById)).toBe(false);
+    expect(isCardInFolder(cards[2], "folder-a", cardSetById)).toBe(false);
   });
 });
