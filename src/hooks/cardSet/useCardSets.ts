@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { syncLegacyCardFolderIdFromCardSet } from "@/domain/card/legacyFolderSync";
 import { compareOrderableEntities } from "@/lib/orderableEntity";
 import { getLocalDb } from "@/services/localDB";
 import { useAuthSession } from "@/contexts/AuthContext";
@@ -144,6 +145,22 @@ export const useCardSets = (folderId?: string | null) => {
       orderIndex: maxOrder + 1,
       updatedAt: new Date(),
     });
+
+    const cardsInSet = await db.cards
+      .where("cardSetId")
+      .equals(cardSetId)
+      .toArray();
+    await Promise.all(
+      cardsInSet.map((card) =>
+        db.cards.update(
+          card.id,
+          syncLegacyCardFolderIdFromCardSet(
+            { updatedAt: new Date() },
+            { folderId: targetFolderId },
+          ),
+        ),
+      ),
+    );
   };
 
   const deleteCardSet = async (id: string): Promise<void> => {

@@ -1,6 +1,8 @@
 import { getLocalDb } from "./localDB";
 import type { CardSet } from "@/types";
 
+const backfillPromiseByUserId = new Map<string, Promise<void>>();
+
 export const backfillLegacyCardsToCardSets = async (
   userId: string,
 ): Promise<void> => {
@@ -143,4 +145,17 @@ export const backfillLegacyCardsToCardSets = async (
   console.info(
     `[AppInit:${userId}] CardSet backfill repaired ${legacyCards.length} legacy cards and ${danglingCardsBySetId.size} missing sets.`,
   );
+};
+
+export const ensureLegacyCardsBackfilled = async (userId: string) => {
+  const existing = backfillPromiseByUserId.get(userId);
+  if (existing) return existing;
+
+  const promise = backfillLegacyCardsToCardSets(userId).catch((error) => {
+    backfillPromiseByUserId.delete(userId);
+    throw error;
+  });
+
+  backfillPromiseByUserId.set(userId, promise);
+  await promise;
 };

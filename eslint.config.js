@@ -79,6 +79,36 @@ export default defineConfig([
     },
   },
 
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: [
+      "src/domain/card/selectors/cardFolder.ts",
+      "src/services/legacyCardSetMigrationBackfill.ts",
+      "src/services/SyncServiceV2.ts",
+      "src/services/localdb/schema.ts",
+    ],
+    rules: {
+      "no-restricted-properties": [
+        "error",
+        {
+          object: "card",
+          property: "folderId",
+          message:
+            "Do not read card.folderId directly. Resolve via cardSetId + resolveCardFolderId.",
+        },
+      ],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "MemberExpression[object.name='card'][property.name='folderId']",
+          message:
+            "Do not read card.folderId directly. Resolve via cardSetId + resolveCardFolderId.",
+        },
+      ],
+    },
+  },
+
   // Guardrails: enforce stable dependency direction (UI -> application/platform, not infrastructure/electron).
   {
     files: [

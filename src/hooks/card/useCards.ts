@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+import { syncLegacyCardFolderIdFromCardSet } from "@/domain/card/legacyFolderSync";
 import {
   normalizeCardFolderId,
   resolveBlocksFromCardData,
@@ -8,6 +9,7 @@ import {
   resolveInkFromCardData,
 } from "@/domain/card/normalizers/cardShape";
 import { getLocalDb } from "@/services/localDB";
+import { ensureLegacyCardsBackfilled } from "@/services/legacyCardSetMigrationBackfill";
 import { useAuthSession } from "@/contexts/AuthContext";
 import {
   useUserSettings,
@@ -21,6 +23,7 @@ import {
 import {
   buildCardSetById,
   filterCardsByFolderId,
+  getLegacyFolderFallbackUsage,
 } from "@/domain/card/selectors/cardFolder";
 
 const isCardDeleted = (
@@ -64,6 +67,7 @@ export const useCards = (
       try {
         if (!enabled) return [];
         if (!currentUser) return [];
+        await ensureLegacyCardsBackfilled(currentUser.uid);
         const db = await getLocalDb(currentUser.uid);
 
         if (cardSetId) {
@@ -163,6 +167,25 @@ export const useCards = (
 
   // useLiveQueryはundefinedを返すことがあるのでloadingを判定
   const loading = enabled && rawCards === undefined;
+  const fallbackUsageCursorRef = useRef(0);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const usage = getLegacyFolderFallbackUsage();
+    if (usage.total <= fallbackUsageCursorRef.current) return;
+    const delta = usage.total - fallbackUsageCursorRef.current;
+    fallbackUsageCursorRef.current = usage.total;
+    console.warn("[useCards] legacy folder fallback detected", {
+      scope: {
+        folderId: folderId ?? null,
+        cardSetId: cardSetId ?? null,
+      },
+      delta,
+      total: usage.total,
+      missingCardSetId: usage.missingCardSetId,
+      unresolvedCardSetId: usage.unresolvedCardSetId,
+    });
+  }, [cards, folderId, cardSetId]);
 
   const createCard = async (
     cardData: Partial<Card> & { cardSetId?: string },
@@ -254,7 +277,10 @@ export const useCards = (
     };
 
     const resolvedCardSet = await resolveCardSetForCreate();
-    const resolvedFolderId = resolvedCardSet.folderId ?? "";
+    const resolvedFolderIdPatch = syncLegacyCardFolderIdFromCardSet(
+      {},
+      resolvedCardSet,
+    );
 
     // orderIndex: 既存カードとの競合を避け、時間軸での並びを保証するタイムスタンプベース
     const orderIndex =
@@ -303,7 +329,7 @@ export const useCards = (
       userId: currentUser.uid,
       deviceId: cardData.deviceId || "web",
       cardSetId: resolvedCardSet.cardSetId,
-      folderId: resolvedFolderId,
+      folderId: resolvedFolderIdPatch.folderId,
       orderIndex,
       questionNumber,
       title: cardData.title || "",
@@ -466,22 +492,47 @@ export const useCards = (
       0,
     );
 
-    await db.updateItem("cards", cardId, {
-      cardSetId: targetCardSetId,
-      folderId: targetSet.folderId ?? "",
-      orderIndex: maxOrderIndex + 1,
-      updatedAt: new Date(),
-    });
+    await db.updateItem(
+      "cards",
+      cardId,
+      syncLegacyCardFolderIdFromCardSet(
+        {
+          cardSetId: targetCardSetId,
+          orderIndex: maxOrderIndex + 1,
+          updatedAt: new Date(),
+        },
+        targetSet,
+      ),
+    );
   };
 
   /**
-   * フォルダ内のカードを並び替え
+   * CardSet 内のカードを並び替え
    * - cardIds の順序で orderIndex を 0, 1, 2, ... n-1 に振り直す
    */
-  const reorderCards = async (folderId: string, cardIds: string[]) => {
+  const reorderCardsInCardSet = async (
+    cardSetId: string,
+    cardIds: string[],
+  ) => {
     if (!currentUser) throw new Error("認証が必要です");
+    if (!cardSetId) throw new Error("カードセットIDが必要です");
 
     const db = await getLocalDb(currentUser.uid);
+    const targetCards = await db.cards.bulkGet(cardIds);
+    const missingCardId = targetCards.findIndex((card) => !card);
+    if (missingCardId >= 0) {
+      throw new Error(
+        `並び替え対象カードが見つかりません: ${cardIds[missingCardId]}`,
+      );
+    }
+    const outOfScopeCard = targetCards.find(
+      (card) => card?.cardSetId !== cardSetId,
+    );
+    if (outOfScopeCard) {
+      throw new Error(
+        `CardSet スコープ外カードが混入しています: ${outOfScopeCard.id}`,
+      );
+    }
 
     // 各カードの orderIndex を更新
     const updates = cardIds.map((cardId, index) =>
@@ -503,6 +554,6 @@ export const useCards = (
     deleteCard,
     toggleFlag,
     moveCardToSet,
-    reorderCards,
+    reorderCardsInCardSet,
   };
 };
