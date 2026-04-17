@@ -7,6 +7,12 @@
     "types": ["node", "electron"],
     "strict": true,
     "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@constants/*": ["constants/*"],
+      "@config/*": ["config/*"]
+    },
     "rootDir": ".",
     "outDir": "dist-electron",
     "sourceMap": true

@@ -2,7 +2,7 @@ import { contextBridge, ipcRenderer } from "electron";
 import type {
   DesktopBridgeApi,
   DesktopOauthCallbackPayload,
-} from "../src/types/externals/desktop-api";
+} from "@/types/externals/desktop-api";
 
 // sandboxed preload では相対モジュール解決で落ちることがあるため、
 // preload 実行時に必要な IPC チャンネル定義は単一ファイルに閉じ込める。
