@@ -1,7 +1,5 @@
-import type {
-  CardLayoutMode,
-  CardSetInteractionMode,
-} from "@/features/cardsetview/domain/cardLayoutMode";
+type CardLayoutMode = "stack" | "flip" | "split";
+type CardSetInteractionMode = "view" | "edit";
 
 type CardSetViewLayoutWidthThresholds = Record<
   CardSetInteractionMode,

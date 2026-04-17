@@ -2,7 +2,7 @@ import {
   SharedCardContent,
   type SharedCardContentProps,
 } from "@/components/card/common/SharedCardContent";
-import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
+import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
 import { CardFrame } from "@/components/card/frame/CardFrame";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";

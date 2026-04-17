@@ -1,4 +1,4 @@
-import { BOOTSTRAP_RELOAD_KEYS } from "@constants/shared/bootstrap";
+import { BOOTSTRAP_RELOAD_KEYS } from "@constants/shared/app";
 import { logBootstrapFault } from "./logBootstrapFault";
 import { toErrorText } from "./errorUtils";
 import { hardReloadOnce } from "./reloadGuard";

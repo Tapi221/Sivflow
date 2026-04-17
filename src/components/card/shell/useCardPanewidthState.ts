@@ -9,7 +9,7 @@ import {
 import {
   clampPaneWidthPx,
   type CardPaneMode,
-} from "@/components/card/shell/cardPaneWidthConstants";
+} from "@constants/shared/flashcard";
 
 type PaneWidthMap<T> = {
   view: T;

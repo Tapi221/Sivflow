@@ -1,4 +1,4 @@
-import { CHUNK_ERROR_PATTERNS } from "@constants/shared/bootstrap";
+import { CHUNK_ERROR_PATTERNS } from "@constants/shared/app";
 
 export const toErrorText = (input: unknown) => {
   if (typeof input === "string") return input;

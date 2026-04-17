@@ -1,5 +1,5 @@
 import React from "react";
-import { CARD_ROW_PX } from "@constants/shared/cardGeometry";
+import { CARD_ROW_PX } from "@constants/shared/flashcard";
 import { RowSnappedRoot } from "@/components/card/frame/RowSnappedRoot";
 
 type MathBlockFrameProps = {

@@ -1,4 +1,4 @@
-import { CARD_EDITOR_EVENTS } from "@constants/shared/cardEditor";
+import { CARD_EDITOR_EVENTS } from "@constants/shared/flashcard";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 import {
   createLatestReviewLogPatch,

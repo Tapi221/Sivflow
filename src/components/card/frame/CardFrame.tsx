@@ -10,7 +10,7 @@ import {
   CARD_RULED_OFFSET_BOTTOM_PX,
   CARD_ROW_PX,
   CARD_RULED_OFFSET_TOP_PX,
-} from "@constants/shared/cardGeometry";
+} from "@constants/shared/flashcard";
 
 type CardShellProps = React.ComponentProps<typeof CardShell>;
 

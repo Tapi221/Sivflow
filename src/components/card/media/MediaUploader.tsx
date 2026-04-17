@@ -1,5 +1,5 @@
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
-import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
+import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useAuthSession } from "@/contexts/AuthContext";

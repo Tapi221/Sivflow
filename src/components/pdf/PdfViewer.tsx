@@ -11,7 +11,7 @@ import { PdfPage } from "./PdfPage";
 import {
   PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT,
   PDF_PAGE_WINDOW_SIZE,
-} from "./pdfViewerConstants";
+} from "@constants/web/pdf";
 import { usePdfCurrentPage } from "./hooks/usePdfCurrentPage";
 import { usePdfDocument } from "./hooks/usePdfDocument";
 import { usePdfZoom } from "./hooks/usePdfZoom";

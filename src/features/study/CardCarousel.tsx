@@ -2,7 +2,7 @@ import {
   CARD_BASE_WIDTH,
   CARD_DISPLAY_SCALE,
   CARD_SAFE_PADDING_PX,
-} from "@constants/shared/cardGeometry";
+} from "@constants/shared/flashcard";
 import type { ComponentProps } from "react";
 import {
   Flashcard,

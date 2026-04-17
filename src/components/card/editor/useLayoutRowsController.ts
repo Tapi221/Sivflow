@@ -7,7 +7,7 @@ import {
   cardHeightPxToLayoutRows,
   layoutRowsToCardHeightPx,
   minCardHeightPxToLayoutRows,
-} from "@constants/shared/cardGeometry";
+} from "@constants/shared/flashcard";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 
 type Side = "question" | "answer";

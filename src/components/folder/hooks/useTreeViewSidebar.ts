@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SIDEBAR_WIDTH_LIMITS } from "@constants/web/sidebar";
+import { SIDEBAR_WIDTH_LIMITS } from "@constants/web/app";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 
 const clamp = (w: number) =>

@@ -7,7 +7,7 @@
 import {
   CARD_IMAGE_PRELOAD,
   CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY,
-} from "@constants/web/preload";
+} from "@constants/web/app";
 import { getCardImages } from "@/domain/card/content";
 import { storage } from "@/services/firebase";
 import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";

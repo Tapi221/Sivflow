@@ -2,7 +2,7 @@ import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import {
   CARD_ROW_PX,
   layoutRowsToCardHeightPx,
-} from "@constants/shared/cardGeometry";
+} from "@constants/shared/flashcard";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
 import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";

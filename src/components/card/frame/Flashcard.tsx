@@ -3,7 +3,7 @@ import {
   CANONICAL_CARD_WIDTH,
   CARD_DISPLAY_SCALE,
   layoutRowsToCardHeightPx,
-} from "@constants/shared/cardGeometry";
+} from "@constants/shared/flashcard";
 import type { InkDocument } from "@/components/ink/inkTypes";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";

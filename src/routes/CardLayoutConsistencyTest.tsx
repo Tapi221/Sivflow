@@ -2,7 +2,7 @@ import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import {
   CANONICAL_CARD_WIDTH,
   CARD_SAFE_PADDING_PX,
-} from "@constants/shared/cardGeometry";
+} from "@constants/shared/flashcard";
 import { CardFrame } from "@/components/card/frame/CardFrame";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";

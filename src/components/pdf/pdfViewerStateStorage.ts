@@ -3,13 +3,23 @@
  * キーは docId 単位で分離しているため、複数 PDF を跨いで状態が混ざらない。
  */
 import type { PdfViewerState } from "@/types";
+import {
+  EPSILON,
+  FIT_MAX_SCALE,
+  FIT_MIN_SCALE,
+  FIT_PADDING_X,
+  VIEWER_STATE_DEBOUNCE_MS,
+  ZOOM_STEP,
+} from "@constants/web/pdf";
 
-export const FIT_MIN_SCALE = 0.5;
-export const FIT_MAX_SCALE = 3.0;
-export const ZOOM_STEP = 0.1;
-export const FIT_PADDING_X = 24;
-export const EPSILON = 0.001;
-export const VIEWER_STATE_DEBOUNCE_MS = 800;
+export {
+  EPSILON,
+  FIT_MAX_SCALE,
+  FIT_MIN_SCALE,
+  FIT_PADDING_X,
+  VIEWER_STATE_DEBOUNCE_MS,
+  ZOOM_STEP,
+};
 
 // ✅ ドキュメント切替保護：呼び出し側で docId を指定する
 export const getViewerStateFromSession = (

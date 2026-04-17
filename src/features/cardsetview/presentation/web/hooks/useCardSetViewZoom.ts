@@ -7,8 +7,8 @@ import {
   type RefObject,
 } from "react";
 
-import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
-import { CARD_SET_VIEW_LAYOUT_CONSTRAINT_INDICATOR_DURATION_MS } from "@/constants/shared/cardSetViewPresentation";
+import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
+import { CARD_SET_VIEW_LAYOUT_CONSTRAINT_INDICATOR_DURATION_MS } from "@constants/shared/flashcard";
 import type {
   CardLayoutMode,
   CardSetInteractionMode,
@@ -27,7 +27,7 @@ import {
 import {
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_VIEW_ZOOM_STEP_PERCENT,
-} from "@constants/shared/cardSetView";
+} from "@constants/shared/flashcard";
 import {
   buildCardSetViewZoomPreferenceScopeKey,
   getCardSetViewZoomPreference,

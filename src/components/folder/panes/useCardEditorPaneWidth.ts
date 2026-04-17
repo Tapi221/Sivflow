@@ -8,9 +8,9 @@ import {
   CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX,
   CARD_PANE_WIDTH_STEP_PX,
   clampPaneWidthPx,
-} from "@/components/card/shell/cardPaneWidthConstants";
+} from "@constants/shared/flashcard";
 import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthState";
-import { CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX } from "@/constants/shared/cardSetViewPresentation";
+import { CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX } from "@constants/shared/flashcard";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import {
   getCardSetWidthPreference,

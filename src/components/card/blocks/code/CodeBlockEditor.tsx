@@ -4,7 +4,7 @@ import {
   CODE_BLOCK_RECENT_LANGUAGE_STORAGE_KEY,
   CODE_BLOCK_SUPPORTED_LANGUAGES,
   CODE_BLOCK_SUPPORTED_LANGUAGE_VALUES,
-} from "@constants/web/codeBlock";
+} from "@constants/web/flashcard";
 import {
   Select,
   SelectContent,

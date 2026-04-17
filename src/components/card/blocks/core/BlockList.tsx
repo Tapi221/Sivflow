@@ -1,4 +1,4 @@
-import { CARD_ROW_PX } from "@constants/shared/cardGeometry";
+import { CARD_ROW_PX } from "@constants/shared/flashcard";
 import {
   getNormalizedGridOffsetRows,
   getNormalizedRowOffset,

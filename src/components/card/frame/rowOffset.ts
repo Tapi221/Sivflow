@@ -1,4 +1,4 @@
-import { CARD_ROW_PX } from "@constants/shared/cardGeometry";
+import { CARD_ROW_PX } from "@constants/shared/flashcard";
 import type { CardBlock } from "@/types/domain/card";
 import type { CSSProperties } from "react";
 

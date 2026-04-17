@@ -1,4 +1,4 @@
-import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
+import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
 import {
   Flashcard,
   type FlashcardCardLike,

@@ -21,7 +21,7 @@ import {
 } from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { CARD_PANE_WIDTH_STEP_PX } from "@/routes/constants";
+import { CARD_PANE_WIDTH_STEP_PX } from "@constants/shared/flashcard";
 import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutFallbackPreferences";
 
 export const useCardSetViewScreenController = () => {

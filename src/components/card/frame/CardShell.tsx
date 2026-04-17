@@ -5,7 +5,7 @@ import {
   cardHeightPxToLayoutRows,
   layoutRowsToCardHeightPx,
   snapMinCardHeightPx,
-} from "@constants/shared/cardGeometry";
+} from "@constants/shared/flashcard";
 import {
   DropdownMenu,
   DropdownMenuContent,

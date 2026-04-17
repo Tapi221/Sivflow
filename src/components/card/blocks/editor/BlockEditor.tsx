@@ -21,7 +21,7 @@ import {
   type CardBlockLayoutReplaceBlock,
   type EditorProps,
 } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
-import { CARD_ROW_PX } from "@constants/shared/cardGeometry";
+import { CARD_ROW_PX } from "@constants/shared/flashcard";
 import {
   getNormalizedGridOffsetRows,
   getNormalizedRowOffset,

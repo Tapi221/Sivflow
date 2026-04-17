@@ -13,7 +13,7 @@ import {
   CANONICAL_CARD_WIDTH,
   CARD_ROW_PX,
   layoutRowsToCardHeightPx,
-} from "@constants/shared/cardGeometry";
+} from "@constants/shared/flashcard";
 import {
   CardEditorLoadingState,
   NewCardIdleState,
@@ -51,7 +51,7 @@ import {
   resolveCardSurfaceScale,
 } from "@/features/cardrender/domain/cardRenderSpec";
 import { cn } from "@/lib/utils";
-import { CARD_PANE_AUTO_MAX_SCALE } from "@constants/shared/cardSetView";
+import { CARD_PANE_AUTO_MAX_SCALE } from "@constants/shared/flashcard";
 import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { toMillisOrNull } from "@/utils/toMillis";

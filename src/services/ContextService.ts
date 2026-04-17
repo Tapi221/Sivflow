@@ -1,7 +1,7 @@
 import {
   CONTEXT_STORAGE_KEY_PREFIXES,
   CONTEXT_SYNC_THRESHOLDS,
-} from "@constants/web/context";
+} from "@constants/web/app";
 
 /**
  * コンテキストサービス

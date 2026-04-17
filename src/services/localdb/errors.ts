@@ -1,5 +1,5 @@
 import type { LocalDBFallbackReasonCode } from "@/services/localDBRuntimeState";
-import { LOCALDB_ERROR_MESSAGE_LIMIT } from "@constants/shared/localdb";
+import { LOCALDB_ERROR_MESSAGE_LIMIT } from "@constants/shared/storage";
 import { applyInMemorySyncCompat } from "./applyInMemorySyncCompat";
 
 applyInMemorySyncCompat();

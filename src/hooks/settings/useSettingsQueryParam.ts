@@ -3,7 +3,7 @@ import type { SetURLSearchParams } from "react-router-dom";
 import {
   isSettingsTabParam,
   type SettingsTabParam,
-} from "@constants/shared/settings";
+} from "@constants/shared/app";
 
 export const useSettingsQueryParam = (
   searchParams: URLSearchParams,

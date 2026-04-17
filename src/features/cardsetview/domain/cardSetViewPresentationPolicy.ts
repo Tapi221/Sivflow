@@ -1,4 +1,4 @@
-import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
+import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
 import type {
   CardLayoutMode,
   CardSetInteractionMode,
@@ -10,8 +10,8 @@ import {
   CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX,
   CARD_SET_VIEW_SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX,
   CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX,
-} from "@/constants/shared/cardSetViewPresentation";
-import { CARD_VIEW_ZOOM_STEP_PERCENT } from "@constants/shared/cardSetView";
+} from "@constants/shared/flashcard";
+import { CARD_VIEW_ZOOM_STEP_PERCENT } from "@constants/shared/flashcard";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type ResolveZoomWidthArgs = {

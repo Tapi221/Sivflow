@@ -2,7 +2,7 @@ import {
   CARD_ACTION_BG_CLASS,
   CARD_ACTION_COLOR_IDLE_CLASS,
   CARD_ACTION_ICON_CLASS,
-} from "@constants/shared/cardActionUi";
+} from "@constants/shared/flashcard";
 import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
 import { Image as ImageIcon, Link, Volume2 } from "@/ui/icons";

@@ -1,8 +1,8 @@
-import type { CardPaneMode } from "@/components/card/shell/cardPaneWidthConstants";
+import type { CardPaneMode } from "@constants/shared/flashcard";
 import {
   DISPLAY_MODE_LABELS,
   DISPLAY_MODE_TRIGGER_LABELS,
-} from "@/features/cardsetview/domain/cardSetViewConstants";
+} from "@constants/shared/flashcard";
 import { toTimeMs } from "@/features/cardsetview/domain/cardSetViewUtils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 

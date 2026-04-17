@@ -5,7 +5,7 @@ import {
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_PANE_VIEW_MIN_WIDTH_PX,
   clampPaneWidthPx,
-} from "@constants/shared/cardSetView";
+} from "@constants/shared/flashcard";
 import {
   getCardSetWidthPreference,
   setCardSetWidthPreference,

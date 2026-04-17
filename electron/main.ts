@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, Menu, shell } from "electron";
 import * as http from "node:http";
 import * as path from "node:path";
 import { URL } from "node:url";
-import { IPC_CHANNELS } from "@constants/electron/ipc";
+import { IPC_CHANNELS } from "@constants/electron/app";
 
 if (process.platform === "win32") {
   app.disableHardwareAcceleration();

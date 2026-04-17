@@ -20,7 +20,7 @@ import {
   DEFAULT_SETTINGS_TAB,
   type SettingsTab,
   type SettingsTabParam,
-} from "@constants/shared/settings";
+} from "@constants/shared/app";
 import { cn } from "@/lib/utils";
 import { auth } from "@/services/firebase";
 import { getLocalDb } from "@/services/localDB";

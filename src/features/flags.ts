@@ -3,7 +3,7 @@ import {
   LEGACY_FEATURE_FLAG_MAP,
   type FeatureFlags,
   type LegacyFlagName,
-} from "@constants/shared/featureFlags";
+} from "@constants/shared/app";
 import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 
 class FeatureFlagService {
