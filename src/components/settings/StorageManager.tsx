@@ -1,29 +1,33 @@
 import React, { useEffect, useState } from "react";
-import { useAuthSession } from "@/contexts/AuthContext";
-import { firestoreDb, storage } from "@/infrastructure/firebase/client";
 import {
   collection,
-  query,
-  orderBy,
-  onSnapshot,
   deleteDoc,
   doc,
+  onSnapshot,
+  orderBy,
+  query,
 } from "firebase/firestore";
-import { ref, deleteObject } from "firebase/storage";
+import { deleteObject, ref } from "firebase/storage";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { formatBytes } from "@/utils/fileUtils";
+import { useAuthSession } from "@/contexts/AuthContext";
 import {
-  Trash2,
+  getFirebaseStorage,
+  getFirestoreDb,
+} from "@/services/firebaseGateway";
+import type { UploadMetadata } from "@/types";
+import {
+  AlertCircle,
+  Database,
+  FileAudio,
   FileText,
   Image as ImageIcon,
-  AlertCircle,
   Loader2,
-  FileAudio,
-  Database,
+  Trash2,
 } from "@/ui/icons";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import type { UploadMetadata } from "@/types";
+import { formatBytes } from "@/utils/fileUtils";
 import { toDateOrNull } from "@/utils/toMillis";
 
 type StorageErrorLike = {
@@ -53,34 +57,35 @@ export const StorageManager = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!currentUser || !firestoreDb) {
-      if (!firestoreDb) {
+    const db = getFirestoreDb();
+    if (!currentUser || !db) {
+      if (!db) {
         console.warn("[StorageManager] firestoreDb is not initialized.");
         setLoading(false);
       }
       return;
     }
 
-    const q = query(
-      collection(firestoreDb, `users/${currentUser.uid}/uploads`),
+    const uploadsQuery = query(
+      collection(db, `users/${currentUser.uid}/uploads`),
       orderBy("uploadedAt", "desc"),
     );
 
     const unsubscribe = onSnapshot(
-      q,
+      uploadsQuery,
       (snapshot) => {
         const docs = snapshot.docs.map(
-          (doc) =>
+          (docItem) =>
             ({
-              id: doc.id,
-              ...doc.data(),
+              id: docItem.id,
+              ...docItem.data(),
             }) as UploadMetadata,
         );
         setUploads(docs);
         setLoading(false);
       },
-      (err) => {
-        console.error("Failed to fetch uploads", err);
+      (snapshotError) => {
+        console.error("Failed to fetch uploads", snapshotError);
         setError("ファイル情報の取得に失敗しました");
         setLoading(false);
       },
@@ -110,9 +115,9 @@ export const StorageManager = () => {
       if (result.errors.length > 0) {
         console.warn("Cleanup errors:", result.errors);
       }
-    } catch (error: unknown) {
-      console.error("Cleanup failed", error);
-      setError(getErrorMessage(error));
+    } catch (cleanupError: unknown) {
+      console.error("Cleanup failed", cleanupError);
+      setError(getErrorMessage(cleanupError));
     } finally {
       setLoading(false);
     }
@@ -129,31 +134,27 @@ export const StorageManager = () => {
 
     setDeletingId(file.id);
     try {
-      // 1. Delete from Storage (if path exists)
       if (file.storagePath) {
         try {
-          const storageRef = ref(storage, file.storagePath);
+          const storageRef = ref(getFirebaseStorage(), file.storagePath);
           await deleteObject(storageRef);
-        } catch (error: unknown) {
-          if (getStorageErrorCode(error) !== "storage/object-not-found") {
-            console.warn("Storage delete failed", error);
-            // Continue to delete metadata record even if storage fails (orphan cleanup)
+        } catch (storageError: unknown) {
+          if (getStorageErrorCode(storageError) !== "storage/object-not-found") {
+            console.warn("Storage delete failed", storageError);
           }
         }
       }
 
-      // 2. Delete metadata from Firestore
-      if (firestoreDb) {
-        await deleteDoc(
-          doc(firestoreDb, `users/${currentUser.uid}/uploads`, file.id),
-        );
+      const db = getFirestoreDb();
+      if (db) {
+        await deleteDoc(doc(db, `users/${currentUser.uid}/uploads`, file.id));
       } else {
         console.warn(
           "[StorageManager] firestoreDb not initialized. Metadata remains.",
         );
       }
-    } catch (error: unknown) {
-      console.error("Delete failed", error);
+    } catch (deleteError: unknown) {
+      console.error("Delete failed", deleteError);
       setError("削除に失敗しました");
     } finally {
       setDeletingId(null);

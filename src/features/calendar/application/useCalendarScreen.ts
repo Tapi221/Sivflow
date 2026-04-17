@@ -5,14 +5,6 @@ import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
 
 import { useAuthSession } from "@/contexts/AuthContext";
-import { useCards } from "@/hooks/card/useCards";
-import { useCardSets } from "@/hooks/cardSet/useCardSets";
-import { useFolders } from "@/hooks/folder/useFolders";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { firestoreDb } from "@/infrastructure/firebase/client";
-import { getLocalDb } from "@/services/localDB";
-import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
-
 import type {
   CalendarDisplayCard,
   CalendarStudyLogLike,
@@ -22,6 +14,14 @@ import {
   getArrowDayDiff,
   isFocusableInputTarget,
 } from "@/features/calendar/domain/calendarUtils";
+import { useCards } from "@/hooks/card/useCards";
+import { useCardSets } from "@/hooks/cardSet/useCardSets";
+import { useFolders } from "@/hooks/folder/useFolders";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { getFirestoreDb } from "@/services/firebaseGateway";
+import { getLocalDb } from "@/services/localDB";
+import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
+
 import {
   buildCalendarScreenViewModel,
   buildCardsByDate,
@@ -43,20 +43,21 @@ export const useCalendarScreen = () => {
   const { data: remoteStudyLogs = [] } = useQuery<CalendarStudyLogLike[]>({
     queryKey: ["studyLogs", currentUser?.uid],
     queryFn: async () => {
-      if (!currentUser || !firestoreDb) return [];
+      const db = getFirestoreDb();
+      if (!currentUser || !db) return [];
 
-      const q = query(
-        collection(firestoreDb, "studyLogs"),
+      const studyLogsQuery = query(
+        collection(db, "studyLogs"),
         where("userId", "==", currentUser.uid),
         orderBy("createdAt", "desc"),
       );
 
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocs(studyLogsQuery);
 
       return snapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
+        .map((docItem) => ({
+          id: docItem.id,
+          ...docItem.data(),
         }))
         .slice(0, 100) as CalendarStudyLogLike[];
     },

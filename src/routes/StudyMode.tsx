@@ -1,33 +1,34 @@
 import React, { useMemo, useEffect, useCallback, useState } from "react";
-import type { Card } from "@/types";
+import { useMutation } from "@tanstack/react-query";
+import { addDoc, collection } from "firebase/firestore";
+import confetti from "canvas-confetti";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
+
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthSession } from "@/contexts/AuthContext";
+import { getCardText } from "@/domain/card/content";
+import { flags } from "@/features/flags";
+import { PracticeCards } from "@/features/study/PracticeCards";
+import { PracticeSummary } from "@/features/study/PracticeSummary";
+import { StudyComplete } from "@/features/study/StudyComplete";
+import { StudyEmpty } from "@/features/study/StudyEmpty";
+import { StudyReview } from "@/features/study/StudyReview";
 import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFolders } from "@/hooks/folder/useFolders";
-import { useMutation } from "@tanstack/react-query";
-import { addDoc, collection } from "firebase/firestore";
-import { getLocalDb } from "@/services/localDB";
-import { firestoreDb } from "@/infrastructure/firebase/client";
-import { useAuthSession } from "@/contexts/AuthContext";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft } from "@/ui/icons";
-import { createPageUrl } from "@/platform/web/navigation/toWebPath";
-import { getDebugStreak } from "@/utils/debugStreak";
-import { sanitizeStreak } from "@/utils/streak";
-import { flags } from "@/features/flags";
-import { TelemetryService } from "@/services/logic/TelemetryService";
-import confetti from "canvas-confetti";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { usePracticeMode } from "@/hooks/study/usePracticeMode";
+import type { PracticeFilterRating } from "@/hooks/study/usePracticeMode";
 import { useStudyCards } from "@/hooks/study/useStudyCards";
 import { useStudySession } from "@/hooks/study/useStudySession";
-import { usePracticeMode } from "@/hooks/study/usePracticeMode";
-import { StudyEmpty } from "@/features/study/StudyEmpty";
-import { StudyReview } from "@/features/study/StudyReview";
-import { StudyComplete } from "@/features/study/StudyComplete";
-import { PracticeCards } from "@/features/study/PracticeCards";
-import { PracticeSummary } from "@/features/study/PracticeSummary";
-import { getCardText } from "@/domain/card/content";
-import type { PracticeFilterRating } from "@/hooks/study/usePracticeMode";
+import { createPageUrl } from "@/platform/web/navigation/toWebPath";
+import { getFirestoreDb } from "@/services/firebaseGateway";
+import { TelemetryService } from "@/services/logic/TelemetryService";
+import { getLocalDb } from "@/services/localDB";
+import type { Card } from "@/types";
+import { ArrowLeft } from "@/ui/icons";
+import { getDebugStreak } from "@/utils/debugStreak";
+import { sanitizeStreak } from "@/utils/streak";
 
 type StudyLogPayload = {
   userId: string;
@@ -70,8 +71,6 @@ const StudyMode = () => {
   const SESSION_KEY = folderId ? `manifolmia_session_${folderId}` : null;
 
   useEffect(() => {
-    // StudyMode は集中フローなので「ページスクロール」を殺す。
-    // 大規模アプリ想定で ref-counting（他画面と競合しても剥がしすぎない）。
     const root = document.documentElement;
     const prev = Number(root.dataset.noPageScrollCount || "0");
     const next = prev + 1;
@@ -144,7 +143,6 @@ const StudyMode = () => {
               const remaining = data.cardIds
                 .map((id: string) => dueById.get(id))
                 .filter((card): card is Card => Boolean(card));
-              // 一部のカードが既にレビュー済み（残りが元より少ない）場合のみ復元
               if (
                 remaining.length > 0 &&
                 remaining.length < data.cardIds.length
@@ -193,8 +191,9 @@ const StudyMode = () => {
 
   const createStudyLogMutation = useMutation<unknown, Error, StudyLogPayload>({
     mutationFn: (data: StudyLogPayload) => {
-      if (!firestoreDb) return Promise.resolve(null);
-      return addDoc(collection(firestoreDb, "studyLogs"), data);
+      const db = getFirestoreDb();
+      if (!db) return Promise.resolve(null);
+      return addDoc(collection(db, "studyLogs"), data);
     },
   });
 
@@ -222,8 +221,6 @@ const StudyMode = () => {
     createLevelHistoryMutation,
   });
 
-  // カードを1枚以上レビューしたら進捗を保存（currentIndex が進むたびに更新）
-  // 復元時は cardIds のうち dueStudyCards に残っているものだけを使う（自動的に続きになる）
   useEffect(() => {
     if (
       !SESSION_KEY ||
@@ -241,7 +238,6 @@ const StudyMode = () => {
     );
   }, [currentIndex, SESSION_KEY, sessionSeedCards, studyComplete]);
 
-  // セッション完了時にクリア
   useEffect(() => {
     if (studyComplete && SESSION_KEY) localStorage.removeItem(SESSION_KEY);
   }, [studyComplete, SESSION_KEY]);
@@ -275,7 +271,7 @@ const StudyMode = () => {
   }, [finalRatingByCardId]);
 
   const logPracticeEvent = useCallback(
-    (eventName, context = {}) => {
+    (eventName: string, context: Record<string, unknown> = {}) => {
       if (!isAdvancedTelemetryEnabled) return;
       telemetry.log("info", eventName, {
         event: eventName,
@@ -306,7 +302,7 @@ const StudyMode = () => {
       if (!folderId || !updateFolder) return;
       await updateFolder(folderId, { lastAccessAt: new Date() });
     };
-    updateLastAccess();
+    void updateLastAccess();
   }, [folderId, updateFolder]);
 
   useEffect(() => {
@@ -322,7 +318,7 @@ const StudyMode = () => {
     await updateCard(card.id, { hasUncertainty: !card.hasUncertainty });
   };
 
-  const handleToggleBookmark = async (card) => {
+  const handleToggleBookmark = async (card: Card) => {
     if (!updateCard || !card?.id) return;
     const current = Boolean(card.isBookmarked ?? card.is_bookmarked);
     await updateCard(card.id, { isBookmarked: !current });
@@ -388,7 +384,7 @@ const StudyMode = () => {
     : currentIndex + 1;
 
   const counterTotal = isPracticeMode
-    ? (practiceState?.roundTotal ?? 0)
+    ? practiceState?.roundTotal ?? 0
     : studyCards.length;
   const isCompletionView =
     !isPracticeMode && studyComplete && studyCards.length > 0;
@@ -463,7 +459,6 @@ const StudyMode = () => {
         <div
           className={[
             "flex-1 min-h-0",
-            // 画面全体が長くなる系（空/サマリー）はここでスクロールさせる
             studyCards.length === 0 ||
             studyComplete ||
             (isPracticeMode && practiceState?.phase === "summary")

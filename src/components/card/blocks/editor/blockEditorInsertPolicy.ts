@@ -21,7 +21,7 @@ export const isEditorInsertableBlockType = (
 };
 
 export const createEditorBlock = ({
-  prefix,
+  prefix: _prefix,
   type,
   id,
   rowOffset,

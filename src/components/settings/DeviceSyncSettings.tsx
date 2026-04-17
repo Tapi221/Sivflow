@@ -1,16 +1,17 @@
+import React, { useCallback, useEffect, useState } from "react";
+import { collection, getDocs, query } from "firebase/firestore";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+
 import { Switch } from "@/components/ui/switch";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useSyncSettings } from "@/hooks/sync/useSyncSettings";
-import { requireFirestoreDb } from "@/infrastructure/firebase/client";
+import { requireAppFirestoreDb } from "@/services/firebaseGateway";
 import { getLocalDb, initializeDB } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import type { SyncMetadata, UserStats } from "@/types";
 import { Check, Pencil, RefreshCw, Smartphone, Trash2, X } from "@/ui/icons";
 import { toDateOrNull, toMillis } from "@/utils/toMillis";
-import { format } from "date-fns";
-import { ja } from "date-fns/locale";
-import { collection, getDocs, query } from "firebase/firestore";
-import React, { useCallback, useEffect, useState } from "react";
 
 const sortByLastSyncDesc = (
   left: SyncMetadata,
@@ -45,7 +46,7 @@ export const DeviceSyncSettings: React.FC = () => {
   const fetchDevices = useCallback(async () => {
     if (!currentUser) return;
     setLoading(true);
-    const db = requireFirestoreDb();
+    const db = requireAppFirestoreDb();
     try {
       const devicesQuery = query(
         collection(db, `sync_metadata/${currentUser.uid}/devices`),

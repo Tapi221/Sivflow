@@ -283,7 +283,7 @@ const parseAndSplitFencesWithRanges = (
       continue;
     }
 
-    const closeRe = new RegExp(`^ {0,3}${markerChar}{${markerLen},}[ \t]*$`);
+    const closeRe = new RegExp(`^ {0,3}${markerChar}{${markerLen},}[ \\t]*$`);
     if (markerChar && closeRe.test(line)) {
       const raw = codeBuffer.join("\n");
       const dedented =
@@ -345,12 +345,6 @@ const parseAndSplitFencesWithRanges = (
 };
 
 export const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
-  if (props.mode === "view") {
-    return (
-      <MarkdownBlockDisplay markdown={props.markdown ?? ""} zoom={props.zoom} />
-    );
-  }
-
   const { settings } = useUserSettings();
   const [error, setError] = React.useState<string | null>(null);
 
@@ -362,6 +356,8 @@ export const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
 
   const handleChange = React.useCallback(
     (value: string) => {
+      if (props.mode !== "edit") return;
+
       const normalizedValue = normalizeMarkdownEditorValue(
         value,
         markdownTabSize,
@@ -392,6 +388,8 @@ export const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
         focusPos?: number;
       },
     ) => {
+      if (props.mode !== "edit") return;
+
       const merged =
         props.markdown.slice(0, selectionStart) +
         insertText +
@@ -433,6 +431,8 @@ export const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
 
   const handlePasteCapture = React.useCallback(
     async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      if (props.mode !== "edit") return;
+
       const clipboardData = event.clipboardData;
       const html = clipboardData.getData("text/html");
       const plain = clipboardData.getData("text/plain");
@@ -524,7 +524,7 @@ export const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
 
           const markdownRaw = await sanitizeAndConvertToMarkdown(html);
           const overEscaped =
-            /className=\\\"/.test(markdownRaw) ||
+            /className=\\+"/.test(markdownRaw) ||
             /\\_/.test(markdownRaw) ||
             /\\</.test(markdownRaw);
 
@@ -631,6 +631,7 @@ export const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (props.mode !== "edit") return;
       if (event.key !== "Tab") return;
 
       event.preventDefault();
@@ -652,8 +653,14 @@ export const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
         attemptSplitFences: false,
       });
     },
-    [applyInsert, markdownTabSize, props.markdown],
+    [applyInsert, markdownTabSize, props],
   );
+
+  if (props.mode === "view") {
+    return (
+      <MarkdownBlockDisplay markdown={props.markdown ?? ""} zoom={props.zoom} />
+    );
+  }
 
   return (
     <>

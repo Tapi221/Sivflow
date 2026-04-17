@@ -1,4 +1,11 @@
 import React from "react";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import type { CssVars } from "@/types/style";
 import {
@@ -6,12 +13,6 @@ import {
   layoutRowsToCardHeightPx,
   snapMinCardHeightPx,
 } from "@constants/shared/flashcard";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
   actions?: React.ReactNode;
@@ -46,7 +47,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       resizeStorageKey,
       heightPx,
       onHeightChange,
-      onMinHeightChange,
+      onMinHeightChange: _onMinHeightChange,
       onResizeStart,
       onResizeEnd,
       showResizeHandle = true,
@@ -114,9 +115,9 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
             (row.querySelector(
               '[data-block-measure-root="true"]',
             ) as HTMLElement | null) ?? row;
-          const style = window.getComputedStyle(row);
+          const rowStyle = window.getComputedStyle(row);
           const marginBottom =
-            Number.parseFloat(style.marginBottom || "0") || 0;
+            Number.parseFloat(rowStyle.marginBottom || "0") || 0;
           const targetOffsetTop =
             measureTarget === row ? 0 : measureTarget.offsetTop;
           const layoutBottom =
@@ -326,7 +327,9 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
               const target = event.currentTarget;
               try {
                 target.setPointerCapture(pointerId);
-              } catch {}
+              } catch (error) {
+                void error;
+              }
 
               const onMove = (moveEvent: PointerEvent) => {
                 if (
