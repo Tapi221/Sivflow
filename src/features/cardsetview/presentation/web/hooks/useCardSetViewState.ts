@@ -9,6 +9,7 @@ interface UseCardSetViewStateOptions {
   targetCardId: string | null;
   folderId: string | null;
   cardSetId: string | null;
+  cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>;
   sortedCards: Card[];
   cardIndexById: Map<string, number>;
   createCard: (
@@ -26,6 +27,7 @@ export const useCardSetViewState = ({
   targetCardId,
   folderId,
   cardSetId,
+  cardSetById,
   sortedCards,
   cardIndexById,
   createCard,
@@ -49,6 +51,7 @@ export const useCardSetViewState = ({
   const actions = useCardSetViewActions({
     cardSetId,
     folderId,
+    cardSetById,
     selectedCardSet,
     selectedCard: viewState.selectedCard,
     currentCard: viewState.currentCard,

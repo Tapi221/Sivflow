@@ -13,6 +13,7 @@ import type { CardSet } from "@/types/domain/cardSet";
 interface UseCardSetViewActionsOptions {
   cardSetId: string | null;
   folderId: string | null;
+  cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>;
   selectedCardSet: CardSet | null;
   selectedCard: Card | null;
   currentCard: Card | null;
@@ -31,6 +32,7 @@ interface UseCardSetViewActionsOptions {
 export const useCardSetViewActions = ({
   cardSetId,
   folderId,
+  cardSetById,
   selectedCardSet,
   selectedCard,
   currentCard,
@@ -93,6 +95,7 @@ export const useCardSetViewActions = ({
     const { targetCardSetId, targetFolderId } = resolveCardMutationTarget({
       cardSetId,
       folderId,
+      cardSetById,
       selectedCardSet,
       selectedCard,
       currentCard,
@@ -136,6 +139,7 @@ export const useCardSetViewActions = ({
     clearFlippedCards,
     createCard,
     currentCard,
+    cardSetById,
     folderId,
     selectedCard,
     selectedCardSet,

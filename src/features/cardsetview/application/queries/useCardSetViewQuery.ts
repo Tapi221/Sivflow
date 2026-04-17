@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import { buildCardSetById } from "@/domain/card/selectors/cardFolder";
 import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFolders } from "@/hooks/folder/useFolders";
@@ -14,6 +15,7 @@ interface UseCardSetViewQueryOptions {
 
 interface UseCardSetViewQueryResult {
   folders: Folder[];
+  cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>;
   selectedCardSet: CardSet | null;
   sortedCards: Card[];
   cardIndexById: Map<string, number>;
@@ -73,6 +75,10 @@ export const useCardSetViewQuery = ({
     loading: cardSetsLoading,
     updateCardSet,
   } = useCardSets(folderId ?? undefined);
+  const cardSetById = useMemo(() => {
+    const activeCardSets = cardSets.filter((cardSet) => !cardSet.isDeleted);
+    return buildCardSetById(activeCardSets);
+  }, [cardSets]);
 
   const {
     cards,
@@ -114,6 +120,7 @@ export const useCardSetViewQuery = ({
 
   return {
     folders: folders as Folder[],
+    cardSetById,
     selectedCardSet,
     sortedCards,
     cardIndexById,
