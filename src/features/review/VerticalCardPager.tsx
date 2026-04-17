@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
+import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
 import { useVerticalCardPager } from "@/hooks/study/useVerticalCardPager";
 import {
   buildVerticalCardPagerItemStyle,

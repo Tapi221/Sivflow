@@ -2,7 +2,7 @@ import {
   CARD_BASE_WIDTH,
   CARD_DISPLAY_SCALE,
   CARD_SAFE_PADDING_PX,
-} from "@/components/card/common/constants";
+} from "@constants/shared/cardGeometry";
 import type { ComponentProps } from "react";
 import {
   Flashcard,
@@ -19,7 +19,6 @@ const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
 
 type BaseCardCarouselProps = {
   cards: Card[];
-  /** Study session's authoritative index — syncs carousel when a rating is submitted */
   sessionCurrentIndex: number;
   onToggleUncertainty?: (card: Card) => void;
   onToggleBookmark?: (card: Card) => void;

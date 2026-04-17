@@ -7,7 +7,7 @@ import {
   type RefObject,
 } from "react";
 
-import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
+import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
 import type {
   CardLayoutMode,
   CardSetInteractionMode,
@@ -26,7 +26,7 @@ import {
 import {
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_VIEW_ZOOM_STEP_PERCENT,
-} from "@constants/shared/cardSetView";
+} from "@/features/cardsetview/constants";
 import {
   buildCardSetViewZoomPreferenceScopeKey,
   getCardSetViewZoomPreference,
