@@ -44,6 +44,73 @@ import {
 import { getCardImages, getCardText } from "@/domain/card/content";
 import type { Card as CardEntity } from "@/types";
 
+const normalizeCaseFold = (value: string | null | undefined) =>
+  typeof value === "string" ? value.trim().toLowerCase() : "";
+
+const groupCardsByFolderId = (
+  cards: readonly CardEntity[],
+  cardFolderIdByCardId: ReadonlyMap<string, string | null>,
+  deletedFolders: readonly { id: string }[],
+) => {
+  const deletedFolderIdSet = new Set(
+    deletedFolders.map((folder) => normalizeCaseFold(folder.id)),
+  );
+  const grouped = new Map<string, CardEntity[]>();
+  for (const card of cards) {
+    const folderId = cardFolderIdByCardId.get(card.id) ?? null;
+    const normalizedFolderId = normalizeCaseFold(folderId);
+    if (!normalizedFolderId || deletedFolderIdSet.has(normalizedFolderId))
+      continue;
+    const existing = grouped.get(normalizedFolderId);
+    if (existing) {
+      existing.push(card);
+      continue;
+    }
+    grouped.set(normalizedFolderId, [card]);
+  }
+  return grouped;
+};
+
+const restoreFolderWithParents = async ({
+  userId,
+  folderId,
+}: {
+  userId: string;
+  folderId: string;
+}) => {
+  const db = await getLocalDb(userId);
+  const rawFolder = await db.getItem("folders", folderId);
+  if (!rawFolder) {
+    console.error("Folder not found:", folderId);
+    return;
+  }
+
+  const folder = normalizeFolder(rawFolder);
+  if (folder.parentFolderId) {
+    const rawParentFolder = await db.getItem("folders", folder.parentFolderId);
+    if (rawParentFolder) {
+      const parentFolder = normalizeFolder(rawParentFolder);
+      if (parentFolder.isDeleted) {
+        await restoreFolderWithParents({
+          userId,
+          folderId: folder.parentFolderId,
+        });
+      }
+    }
+  }
+
+  await db.restore("folders", folderId);
+  const folderRef = doc(
+    firestoreDb,
+    ...folderDocPathSegments(userId, folderId),
+  );
+  await updateDoc(folderRef, {
+    isDeleted: false,
+    deletedAt: null,
+    updatedAt: Timestamp.now(),
+  });
+};
+
 const Trash = () => {
   const { currentUser } = useAuthSession();
 
@@ -137,16 +204,6 @@ const Trash = () => {
     allCards === undefined ||
     allCardSets === undefined;
 
-  // デバッグ情報
-  console.log("=== Trash Debug ===");
-  console.log("allFolders:", allFolders);
-  console.log("allCards:", allCards);
-  console.log("allCardSets:", allCardSets);
-  console.log("deletedFolders:", deletedFolders);
-  console.log("cards:", cards);
-  console.log("isLoading:", isLoading);
-  console.log("isEmpty:", deletedFolders.length === 0 && cards.length === 0);
-
   const [selectedIds, setSelectedIds] = useState<{
     folders: string[];
     cards: string[];
@@ -189,15 +246,15 @@ const Trash = () => {
   // 検索フィルタロジック
   const matchesSearch = (item) => {
     if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-    const name = (
+    const query = normalizeCaseFold(searchQuery);
+    const name = normalizeCaseFold(
       item.folderName ||
-      item.folder_name ||
-      (item.front ? getCardText(item, "question") : "") ||
-      item.question_text ||
-      item.title ||
-      ""
-    ).toLowerCase();
+        item.folder_name ||
+        (item.front ? getCardText(item, "question") : "") ||
+        item.question_text ||
+        item.title ||
+        "",
+    );
     return name.includes(query);
   };
 
@@ -207,6 +264,10 @@ const Trash = () => {
   );
   const filteredCards = cards.filter(
     (c) => matchesSearch(c) && filterByDate(c.deletedAt),
+  );
+  const cardsWithoutResolvedFolder = useMemo(
+    () => cards.filter((card) => !cardFolderIdByCardId.get(card.id)),
+    [cards, cardFolderIdByCardId],
   );
 
   // カードまたはフォルダが1つでも削除されていればごみ箱は空ではない
@@ -266,7 +327,10 @@ const Trash = () => {
         const folder = deletedFolders.find((f) => f.id === folderId);
         if (folder && folder.isDeleted) {
           // 親フォルダの親フォルダも再帰的に復元
-          await restoreFolderWithParents(folderId);
+          await restoreFolderWithParents({
+            userId: currentUser.uid,
+            folderId,
+          });
         }
       }
 
@@ -311,60 +375,6 @@ const Trash = () => {
       alert(`復元に失敗しました: ${error.message}`);
     } finally {
       setIsProcessing(false);
-    }
-  };
-
-  // フォルダとその親フォルダを再帰的に復元
-  const restoreFolderWithParents = async (folderId) => {
-    try {
-      if (!currentUser) return;
-      const db = await getLocalDb(currentUser.uid);
-      const rawFolder = await db.getItem("folders", folderId);
-      if (!rawFolder) {
-        console.error("Folder not found:", folderId);
-        return;
-      }
-
-      // 正規化してから判定
-      const folder = normalizeFolder(rawFolder);
-      console.log("Restoring folder:", folder);
-
-      // 親フォルダが存在し、削除されている場合は先に復元
-      if (folder.parentFolderId) {
-        const rawParentFolder = await db.getItem(
-          "folders",
-          folder.parentFolderId,
-        );
-        if (rawParentFolder) {
-          const parentFolder = normalizeFolder(rawParentFolder);
-          if (parentFolder.isDeleted) {
-            console.log(
-              "Restoring parent folder first:",
-              folder.parentFolderId,
-            );
-            await restoreFolderWithParents(folder.parentFolderId);
-          }
-        }
-      }
-
-      // 自身を復元（IndexedDB → Firestore）ローカルファースト
-      await db.restore("folders", folderId);
-
-      // Firestore も更新
-      const folderRef = doc(
-        firestoreDb,
-        ...folderDocPathSegments(currentUser.uid, folderId),
-      );
-      await updateDoc(folderRef, {
-        isDeleted: false,
-        deletedAt: null,
-        updatedAt: Timestamp.now(),
-      });
-
-      console.log("Folder restored:", folderId);
-    } catch (error) {
-      console.error("Error restoring folder:", folderId, error);
-      throw error;
     }
   };
 
@@ -585,10 +595,9 @@ const Trash = () => {
             {deletedFolders.map((folder) => {
               // このフォルダに属するすべてのカード（削除済み・未削除を含む）
               const folderCards = allCardsData.filter(
-                (c) =>
-                  (cardFolderIdByCardId.get(c.id) ?? "")
-                    .toLowerCase()
-                    .trim() === folder.id.toLowerCase(),
+                (card) =>
+                  normalizeCaseFold(cardFolderIdByCardId.get(card.id)) ===
+                  normalizeCaseFold(folder.id),
               );
 
               return (
@@ -624,18 +633,13 @@ const Trash = () => {
                           onClick={async () => {
                             setIsProcessing(true);
                             try {
-                              console.log(
-                                "Restoring folder with cards:",
-                                folder.id,
-                              );
-                              await restoreFolderWithParents(folder.id);
+                              await restoreFolderWithParents({
+                                userId: currentUser.uid,
+                                folderId: folder.id,
+                              });
 
                               // フォルダ内のカードも自動復元（カード自体が isDeleted=true の場合のみ）
                               // 親フォルダ削除により不可視になっていたカードは状態変更不要
-                              console.log(
-                                "Restoring cards:",
-                                folderCards.length,
-                              );
                               const db = await getLocalDb(currentUser.uid);
                               for (const card of folderCards) {
                                 if (card.isDeleted) {
@@ -662,10 +666,6 @@ const Trash = () => {
                                   }
                                 }
                               }
-
-                              console.log(
-                                "Folder and cards restored successfully",
-                              );
                               alert(
                                 `フォルダとカード${folderCards.length}枚を復元しました`,
                               );
@@ -730,49 +730,22 @@ const Trash = () => {
 
             {/* フォルダごとにグループ化して表示（親フォルダが存在し未削除のカード） */}
             {(() => {
-              // 削除されたフォルダのIDリスト
-              const deletedFolderIds = deletedFolders.map((f) =>
-                f.id.toLowerCase(),
+              const cardsByFolder = groupCardsByFolderId(
+                cards,
+                cardFolderIdByCardId,
+                deletedFolders,
               );
 
-              // フォルダIDでグループ化（削除されたフォルダ以外）
-              const cardsByFolder = {};
-              cards.forEach((card) => {
-                const folderId = cardFolderIdByCardId.get(card.id) ?? null;
-                if (
-                  folderId &&
-                  !deletedFolderIds.includes(folderId.toLowerCase())
-                ) {
-                  if (!cardsByFolder[folderId]) {
-                    cardsByFolder[folderId] = [];
-                  }
-                  cardsByFolder[folderId].push(card);
-                }
-              });
-
-              console.log("Cards by folder:", cardsByFolder);
-              console.log("Folder IDs:", Object.keys(cardsByFolder));
-
-              return Object.entries(cardsByFolder).map(
-                ([folderId, folderCards]) => {
-                  // 大文字小文字を区別しない検索
+              return Array.from(cardsByFolder.entries()).map(
+                ([normalizedFolderId, folderCards]) => {
                   const folder = folders.find(
-                    (f) => f.id.toLowerCase() === folderId.toLowerCase(),
+                    (candidate) =>
+                      normalizeCaseFold(candidate.id) === normalizedFolderId,
                   );
-
-                  console.log(`Folder ${folderId}:`, {
-                    folder,
-                    cardsCount: folderCards.length,
-                  });
-
-                  // フォルダが見つからない場合はスキップ
-                  if (!folder) {
-                    console.log(`Folder ${folderId} not found!`);
-                    return null;
-                  }
+                  if (!folder) return null;
 
                   return (
-                    <Card key={folderId}>
+                    <Card key={normalizedFolderId}>
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -885,17 +858,12 @@ const Trash = () => {
             })()}
 
             {/* フォルダIDがないカード（エラー状態） */}
-            {cards.filter((c) => !cardFolderIdByCardId.get(c.id)).length >
-              0 && (
+            {cardsWithoutResolvedFolder.length > 0 && (
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2 select-none text-red-600">
                     <AlertTriangle className="w-4 h-4" />
-                    フォルダなしカード (
-                    {
-                      cards.filter((c) => !cardFolderIdByCardId.get(c.id))
-                        .length
-                    }
+                    フォルダなしカード ({cardsWithoutResolvedFolder.length})
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -903,42 +871,37 @@ const Trash = () => {
                     これらのカードにはフォルダIDが設定されていません。復元するには手動で修正が必要です。
                   </p>
                   <div className="space-y-2">
-                    {cards
-                      .filter((c) => !cardFolderIdByCardId.get(c.id))
-                      .map((card) => (
-                        <div
-                          key={card.id}
-                          className="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-200 cursor-pointer hover:bg-red-100 transition-colors"
-                          onClick={() => setPreviewCard(card)}
-                        >
-                          <Checkbox
-                            checked={selectedIds.cards.includes(card.id)}
-                            onCheckedChange={() => toggleCard(card.id)}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                          <FileText className="w-4 h-4 text-red-400" />
-                          <div className="flex-1">
-                            <p className="font-medium">
-                              {card.title ||
-                                getCardText(card, "question").substring(
-                                  0,
-                                  30,
-                                ) ||
-                                "(無題)"}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              削除日:{" "}
-                              {card.deletedAt
-                                ? format(
-                                    new Date(card.deletedAt),
-                                    "yyyy/MM/dd HH:mm",
-                                    { locale: ja },
-                                  )
-                                : "-"}
-                            </p>
-                          </div>
+                    {cardsWithoutResolvedFolder.map((card) => (
+                      <div
+                        key={card.id}
+                        className="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-200 cursor-pointer hover:bg-red-100 transition-colors"
+                        onClick={() => setPreviewCard(card)}
+                      >
+                        <Checkbox
+                          checked={selectedIds.cards.includes(card.id)}
+                          onCheckedChange={() => toggleCard(card.id)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <FileText className="w-4 h-4 text-red-400" />
+                        <div className="flex-1">
+                          <p className="font-medium">
+                            {card.title ||
+                              getCardText(card, "question").substring(0, 30) ||
+                              "(無題)"}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            削除日:{" "}
+                            {card.deletedAt
+                              ? format(
+                                  new Date(card.deletedAt),
+                                  "yyyy/MM/dd HH:mm",
+                                  { locale: ja },
+                                )
+                              : "-"}
+                          </p>
                         </div>
-                      ))}
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>

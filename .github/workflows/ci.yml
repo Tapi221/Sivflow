@@ -21,6 +21,23 @@ jobs:
 
       - run: npm run verify:design-tokens
 
+      - name: Guard legacy card-folder usage
+        run: |
+          set -euo pipefail
+          if rg -n "moveCardToFolder" src; then
+            echo "Unexpected moveCardToFolder usage found."
+            exit 1
+          fi
+
+          DISALLOWED_CARD_FOLDER="$(rg -n "card\\.folderId" src | rg -v "cardFolder\\.ts|legacyFolderSync\\.ts|legacyCardSetMigrationBackfill\\.ts|SyncServiceV2\\.ts|localdb[\\\\/]schema\\.ts" || true)"
+          if [ -n "$DISALLOWED_CARD_FOLDER" ]; then
+            echo "Disallowed card.folderId direct access detected:"
+            echo "$DISALLOWED_CARD_FOLDER"
+            exit 1
+          fi
+
+          rg -n "folderId: targetSet\\.folderId" src || true
+
       - run: npm run lint
 
       - run: npm run preflight

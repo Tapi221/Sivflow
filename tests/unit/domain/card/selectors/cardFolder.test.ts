@@ -1,16 +1,24 @@
 import {
   buildCardSetById,
+  didUseLegacyFolderFallback,
   filterCardsByFolderId,
+  getLegacyFolderFallbackUsage,
   isCardInFolder,
+  resetLegacyFolderFallbackUsage,
   resolveCardFolderId,
+  resolveCardFolderIdStrict,
 } from "@/domain/card/selectors/cardFolder";
 import type { Card, CardSet } from "@/types";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 type CardLike = Pick<Card, "id" | "cardSetId" | "folderId">;
 type CardSetLike = Pick<CardSet, "id" | "folderId">;
 
 describe("cardFolder selectors", () => {
+  beforeEach(() => {
+    resetLegacyFolderFallbackUsage();
+  });
+
   it("resolveCardFolderId は CardSet.folderId を優先する", () => {
     const cardSets: CardSetLike[] = [{ id: "set-1", folderId: "folder-a" }];
     const card: CardLike = {
@@ -34,6 +42,21 @@ describe("cardFolder selectors", () => {
     const folderId = resolveCardFolderId(card, buildCardSetById([]));
 
     expect(folderId).toBe("legacy-folder");
+    expect(didUseLegacyFolderFallback(card, buildCardSetById([]))).toBe(true);
+    expect(getLegacyFolderFallbackUsage().total).toBe(1);
+  });
+
+  it("resolveCardFolderIdStrict は CardSet が解決できない場合は null を返す", () => {
+    const card: CardLike = {
+      id: "card-legacy",
+      cardSetId: "missing-set",
+      folderId: "legacy-folder",
+    };
+
+    const folderId = resolveCardFolderIdStrict(card, buildCardSetById([]));
+
+    expect(folderId).toBeNull();
+    expect(didUseLegacyFolderFallback(card, buildCardSetById([]))).toBe(true);
   });
 
   it("filterCardsByFolderId は CardSet ベースでカードを絞り込む", () => {

@@ -13,7 +13,7 @@ import {
   notifyStartupDegraded,
 } from "./appInitStartupNotifier";
 import { rebuildIndexedDb } from "./indexedDbRebuildCoordinator";
-import { backfillLegacyCardsToCardSets } from "./legacyCardSetMigrationBackfill";
+import { ensureLegacyCardsBackfilled } from "./legacyCardSetMigrationBackfill";
 
 /**
  * アプリ起動時の初期化処理
@@ -134,7 +134,7 @@ export class AppInitializer {
     // 🔥 Phase 4: CardSet 移行補完（cardSetId 未設定カードの救済）
     console.log(`[AppInit:${userId}] Phase4: CardSet migration backfill...`);
     try {
-      await backfillLegacyCardsToCardSets(userId);
+      await ensureLegacyCardsBackfilled(userId);
       console.log(
         `[AppInit:${userId}] Phase4: CardSet migration backfill complete ✓`,
       );

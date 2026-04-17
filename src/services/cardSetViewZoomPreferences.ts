@@ -243,7 +243,7 @@ export const getCardSetViewZoomPreference = (
     if (
       canResolveLegacyScopedKey(scope) &&
       buildCardSetViewZoomPreferenceScopeKey(scope) !==
-      buildLegacyZoomPreferenceScopeKey(scope)
+        buildLegacyZoomPreferenceScopeKey(scope)
     ) {
       migrateLegacyScopedZoomPreference({
         store,

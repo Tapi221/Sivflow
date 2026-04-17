@@ -52,7 +52,7 @@ interface TreeViewTabContentProps {
   moveCardToSet: FolderTreeWithCardsProps["moveCardToSet"];
   moveCardSetToFolder: FolderTreeWithCardsProps["moveCardSetToFolder"];
   moveDocumentToFolder: FolderTreeWithCardsProps["moveDocumentToFolder"];
-  reorderCards: FolderTreeWithCardsProps["reorderCards"];
+  reorderCardsInCardSet: FolderTreeWithCardsProps["reorderCardsInCardSet"];
   selectedCardSetId?: string | null;
   onSelectCardSet?: FolderTreeWithCardsProps["onSelectCardSet"];
 }
@@ -94,7 +94,7 @@ export const TreeViewTabContent = ({
   moveCardToSet,
   moveCardSetToFolder,
   moveDocumentToFolder,
-  reorderCards,
+  reorderCardsInCardSet,
   selectedCardSetId,
   onSelectCardSet,
 }: TreeViewTabContentProps) => {
@@ -139,7 +139,7 @@ export const TreeViewTabContent = ({
           moveCardToSet={moveCardToSet}
           moveCardSetToFolder={moveCardSetToFolder}
           moveDocumentToFolder={moveDocumentToFolder}
-          reorderCards={reorderCards}
+          reorderCardsInCardSet={reorderCardsInCardSet}
           selectedCardSetId={selectedCardSetId}
           onSelectCardSet={onSelectCardSet}
           isFiltering={isFiltering}

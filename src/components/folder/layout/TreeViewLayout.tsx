@@ -77,8 +77,13 @@ const TreeViewLayout = ({
   const toast = useToast();
   const { settings } = useUserSettings();
   const { createFolder, updateFolder, deleteFolder } = useFolders();
-  const { createCard, updateCard, deleteCard, moveCardToSet, reorderCards } =
-    useCards();
+  const {
+    createCard,
+    updateCard,
+    deleteCard,
+    moveCardToSet,
+    reorderCardsInCardSet,
+  } = useCards();
 
   const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(
     null,
@@ -449,7 +454,7 @@ const TreeViewLayout = ({
       moveCardToSet={moveCardToSet}
       moveCardSetToFolder={moveCardSetToFolder}
       moveDocumentToFolder={handleMoveDocumentToFolder}
-      reorderCards={reorderCards}
+      reorderCardsInCardSet={reorderCardsInCardSet}
       selectedCardSetId={selectedCardSetId}
       onSelectCardSet={handleCardSetSelectWithoutNavigation}
     />

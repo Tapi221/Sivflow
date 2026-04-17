@@ -21,6 +21,7 @@ import { useExplorerDialogs } from "@/components/folder/hooks/useExplorerDialogs
 import { useExplorerKeyboardNavigation } from "@/components/folder/hooks/useExplorerKeyboardNavigation";
 import { useFolderActions } from "@/components/folder/hooks/useFolderActions";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+import { shouldDisableExplorerDrop } from "@/components/folder/components/views/explorerDropRules";
 import { FolderTreeArborist } from "@/components/sidebar/FolderTreeArborist";
 import BulkTagDialog from "@/components/tag/BulkTagDialog";
 import { cn } from "@/lib/utils";
@@ -87,7 +88,10 @@ interface FolderTreeWithCardsProps {
     documentId: string,
     targetFolderId: string,
   ) => Promise<void>;
-  reorderCards?: (folderId: string, cardIds: string[]) => Promise<void>;
+  reorderCardsInCardSet?: (
+    cardSetId: string,
+    cardIds: string[],
+  ) => Promise<void>;
   selectedCardSetId?: string | null;
   onSelectCardSet?: (
     cardSetId: string,
@@ -879,47 +883,7 @@ export const FolderTreeWithCards = ({
       parentNode: NodeApi<ExplorerTreeNode>;
       dragNodes: NodeApi<ExplorerTreeNode>[];
       index: number;
-    }) => {
-      const parentKind = parentNode?.data?.kind;
-      if (parentKind === "card" || parentKind === "document") {
-        return true;
-      }
-
-      if (parentKind === "cardSet") {
-        return dragNodes.some((dragNode) => dragNode.data?.kind !== "card");
-      }
-
-      const isDropToRoot =
-        !parentNode?.data || parentNode.data.kind !== "folder";
-
-      for (const dragNode of dragNodes) {
-        const dragKind = dragNode.data?.kind;
-
-        if (dragKind === "folder") {
-          let check: NodeApi<ExplorerTreeNode> | null = parentNode;
-          while (check) {
-            if (check.id === dragNode.id) return true;
-            check = check.parent;
-          }
-          continue;
-        }
-
-        if (
-          isDropToRoot &&
-          (dragKind === "cardSet" ||
-            dragKind === "card" ||
-            dragKind === "document")
-        ) {
-          return true;
-        }
-
-        if (parentKind === "folder" && dragKind === "card") {
-          return true;
-        }
-      }
-
-      return false;
-    },
+    }) => shouldDisableExplorerDrop({ parentNode, dragNodes }),
     [],
   );
 
