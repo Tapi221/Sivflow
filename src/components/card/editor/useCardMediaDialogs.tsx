@@ -2,7 +2,7 @@ import {
   CARD_ACTION_BG_CLASS,
   CARD_ACTION_COLOR_IDLE_CLASS,
   CARD_ACTION_ICON_CLASS,
-} from "@/components/card/common/constants";
+} from "@constants/shared/cardActionUi";
 import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import { cn } from "@/lib/utils";
 import { Image as ImageIcon, Link as LinkIcon } from "@/ui/icons";

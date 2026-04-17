@@ -51,19 +51,6 @@ export const CARD_ROW_PX = 24;
 const CARD_TOP_PADDING_PX = 10;
 
 /**
- * カード上アクションアイコンの共通スタイル。
- * - 右上の edit アイコン基準でサイズ/線幅を統一
- * - card 上に載る操作アイコンはこれを参照する
- */
-export const CARD_ACTION_ICON_CLASS = "w-4 h-4 md:w-5 md:h-5 stroke-[1.6]";
-export const CARD_ACTION_COLOR_IDLE_CLASS =
-  "text-[rgba(0,0,0,0.18)] hover:text-[rgba(0,0,0,0.50)]";
-export const CARD_ACTION_COLOR_ACTIVE_CLASS =
-  "text-[rgba(0,0,0,0.50)] hover:text-[rgba(0,0,0,0.18)]";
-export const CARD_ACTION_BG_CLASS =
-  "bg-transparent hover:bg-transparent shadow-none";
-
-/**
  * カード本文の開始Y(px)。
  * - 本文コンテンツ（BlockEditor/BlockRenderer）の開始位置用
  * - 罫線開始位置は CARD_RULED_OFFSET_TOP_PX を参照する

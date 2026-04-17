@@ -7,7 +7,7 @@ import {
   CARD_ACTION_COLOR_ACTIVE_CLASS,
   CARD_ACTION_COLOR_IDLE_CLASS,
   CARD_ACTION_ICON_CLASS,
-} from "@/components/card/common/constants";
+} from "@constants/shared/cardActionUi";
 
 interface CardCornerActionsProps {
   onHelp?: () => void;
