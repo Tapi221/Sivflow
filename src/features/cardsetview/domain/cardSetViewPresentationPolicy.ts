@@ -3,12 +3,12 @@ import type {
   CardSetInteractionMode,
 } from "@/features/cardsetview/domain/cardLayoutMode";
 import {
-  FIXED_LAYOUT_SAFETY_ALLOWANCE_PX,
-  SCROLLBAR_RESERVE_PX,
-  SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX,
-  ZOOM_MIN_BASE_WIDTH_PX,
-} from "@/constants/desktop/cardSetViewThresholds";
-import { ZOOM_DEFAULT_PERCENT } from "@/features/cardsetview/domain/cardSetViewPresentationDefaults";
+  CARD_SET_VIEW_FIXED_LAYOUT_SAFETY_ALLOWANCE_PX,
+  CARD_SET_VIEW_SCROLLBAR_RESERVE_PX,
+  CARD_SET_VIEW_SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX,
+  CARD_SET_VIEW_ZOOM_DEFAULT_PERCENT,
+  CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX,
+} from "@/constants/shared/cardSetViewPresentation";
 import { CARD_VIEW_ZOOM_STEP_PERCENT } from "@constants/shared/cardSetView";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
@@ -36,7 +36,7 @@ export const resolveZoomMinBaseWidthPx = ({
   interactionMode,
   cardLayoutMode,
 }: ResolveZoomWidthArgs) => {
-  return ZOOM_MIN_BASE_WIDTH_PX[interactionMode][cardLayoutMode];
+  return CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX[interactionMode][cardLayoutMode];
 };
 
 export const resolveZoomDefaultPercent = ({
@@ -44,13 +44,13 @@ export const resolveZoomDefaultPercent = ({
   cardLayoutMode,
 }: ResolveZoomWidthArgs) => {
   return clampNormalizedZoomPercent(
-    ZOOM_DEFAULT_PERCENT[interactionMode][cardLayoutMode],
+    CARD_SET_VIEW_ZOOM_DEFAULT_PERCENT[interactionMode][cardLayoutMode],
   );
 };
 
 export const resolveUsablePresentationWidthPx = ({
   viewportWidthPx,
-  scrollbarReservePx = SCROLLBAR_RESERVE_PX,
+  scrollbarReservePx = CARD_SET_VIEW_SCROLLBAR_RESERVE_PX,
 }: {
   viewportWidthPx: number;
   scrollbarReservePx?: number;
@@ -72,9 +72,13 @@ export const resolvePresentationMaxWidthPx = ({
   cardLayoutMode: CardLayoutMode;
 }) => {
   const fixedAllowancePx =
-    displayMode === "fixed" ? FIXED_LAYOUT_SAFETY_ALLOWANCE_PX : 0;
+    displayMode === "fixed"
+      ? CARD_SET_VIEW_FIXED_LAYOUT_SAFETY_ALLOWANCE_PX
+      : 0;
   const splitAllowancePx =
-    cardLayoutMode === "split" ? SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX : 0;
+    cardLayoutMode === "split"
+      ? CARD_SET_VIEW_SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX
+      : 0;
 
   return Math.max(
     1,
@@ -95,9 +99,15 @@ export const resolveSplitMinimumRequiredWidthPx = ({
   });
 
   const fixedAllowancePx =
-    displayMode === "fixed" ? FIXED_LAYOUT_SAFETY_ALLOWANCE_PX : 0;
+    displayMode === "fixed"
+      ? CARD_SET_VIEW_FIXED_LAYOUT_SAFETY_ALLOWANCE_PX
+      : 0;
 
-  return baseMinWidthPx + SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX + fixedAllowancePx;
+  return (
+    baseMinWidthPx +
+    CARD_SET_VIEW_SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX +
+    fixedAllowancePx
+  );
 };
 
 export const resolveCanUseSplitLayout = ({

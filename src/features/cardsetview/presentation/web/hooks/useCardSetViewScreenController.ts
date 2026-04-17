@@ -3,7 +3,10 @@ import { useCallback, useMemo } from "react";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { useToast } from "@/contexts/ToastContext";
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
-import { CARD_LAYOUT_MODE_LABELS } from "@/features/cardsetview/domain/cardLayoutMode";
+import {
+  CARD_LAYOUT_MODE_LABELS,
+  type CardSetInteractionMode,
+} from "@/features/cardsetview/domain/cardLayoutMode";
 import { useCardSetViewData } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewData";
 import { useCardSetViewPaneWidth } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewPaneWidth";
 import { useCardSetViewState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewState";
@@ -58,7 +61,9 @@ export const useCardSetViewScreenController = () => {
     cardSetId,
   });
 
-  const layoutInteractionMode = "view" as const;
+  const layoutInteractionMode: CardSetInteractionMode = state.isGlobalEditing
+    ? "edit"
+    : "view";
   const splitFallbackLayoutMode = useMemo(
     () => resolveSplitFallbackLayoutModePreference(presentationTarget),
     [presentationTarget],

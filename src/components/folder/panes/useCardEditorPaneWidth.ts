@@ -10,8 +10,10 @@ import {
   clampPaneWidthPx,
 } from "@/components/card/shell/cardPaneWidthConstants";
 import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthState";
+import {
+  CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX,
+} from "@/constants/shared/cardSetViewPresentation";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import { ZOOM_MIN_BASE_WIDTH_PX } from "@/features/cardsetview/domain/cardSetViewPresentationDefaults";
 import {
   getCardSetWidthPreference,
   setCardSetWidthPreference,
@@ -19,7 +21,8 @@ import {
 import type { UserSettings } from "@/types";
 
 const CARD_EDITOR_PAIR_GAP_PX = 0;
-const CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX = ZOOM_MIN_BASE_WIDTH_PX.edit.split;
+const CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX =
+  CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX.edit.split;
 
 interface UseCardEditorPaneWidthParams {
   settings?: Partial<UserSettings> | null;

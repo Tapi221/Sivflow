@@ -8,12 +8,14 @@ import {
 } from "react";
 
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
+import {
+  CARD_SET_VIEW_LAYOUT_CONSTRAINT_INDICATOR_DURATION_MS,
+} from "@/constants/shared/cardSetViewPresentation";
 import type {
   CardLayoutMode,
   CardSetInteractionMode,
   SplitFallbackCardLayoutMode,
 } from "@/features/cardsetview/domain/cardLayoutMode";
-import { LAYOUT_CONSTRAINT_INDICATOR_DURATION_MS } from "@/features/cardsetview/domain/cardSetViewPresentationDefaults";
 import {
   clampNormalizedZoomPercent,
   resolveCanUseSplitLayout,
@@ -90,14 +92,15 @@ export const useCardSetViewZoom = ({
   const [viewportWidthPx, setViewportWidthPx] = useState<number>(
     CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   );
-  const [showConstraintIndicator, setShowConstraintIndicator] = useState(false);
+  const [showConstraintIndicator, setShowConstraintIndicator] =
+    useState<boolean>(false);
   const [zoomPreferenceState, setZoomPreferenceState] =
     useState<ZoomPreferenceState>({
       scopeKey: DEFAULT_SOURCE_KEY,
       preferredPercent: null,
     });
 
-  const initialMeasurementCompleteRef = useRef(false);
+  const initialMeasurementCompleteRef = useRef<boolean>(false);
   const indicatorTimeoutRef = useRef<number | null>(null);
 
   const triggerConstraintIndicator = useCallback(() => {
@@ -114,7 +117,7 @@ export const useCardSetViewZoom = ({
     indicatorTimeoutRef.current = window.setTimeout(() => {
       setShowConstraintIndicator(false);
       indicatorTimeoutRef.current = null;
-    }, LAYOUT_CONSTRAINT_INDICATOR_DURATION_MS);
+    }, CARD_SET_VIEW_LAYOUT_CONSTRAINT_INDICATOR_DURATION_MS);
   }, []);
 
   useEffect(() => {
@@ -172,16 +175,12 @@ export const useCardSetViewZoom = ({
   }, []);
 
   const canUseSplit = useMemo(() => {
-    if (requestedCardLayoutMode !== "split") {
-      return true;
-    }
-
     return resolveCanUseSplitLayout({
       viewportWidthPx,
       interactionMode,
       displayMode,
     });
-  }, [displayMode, interactionMode, requestedCardLayoutMode, viewportWidthPx]);
+  }, [displayMode, interactionMode, viewportWidthPx]);
 
   const effectiveCardLayoutMode = useMemo<CardLayoutMode>(() => {
     if (requestedCardLayoutMode === "split" && !canUseSplit) {
@@ -191,6 +190,8 @@ export const useCardSetViewZoom = ({
     return requestedCardLayoutMode;
   }, [canUseSplit, requestedCardLayoutMode, splitFallbackLayoutMode]);
 
+  const zoomPreferenceCardLayoutMode = requestedCardLayoutMode;
+
   const zoomScope = useMemo(
     () =>
       buildZoomScope({
@@ -198,14 +199,14 @@ export const useCardSetViewZoom = ({
         cardSetId,
         displayMode,
         interactionMode,
-        cardLayoutMode: effectiveCardLayoutMode,
+        cardLayoutMode: zoomPreferenceCardLayoutMode,
       }),
     [
       cardSetId,
       deviceScope,
       displayMode,
-      effectiveCardLayoutMode,
       interactionMode,
+      zoomPreferenceCardLayoutMode,
     ],
   );
 
@@ -218,9 +219,9 @@ export const useCardSetViewZoom = ({
     () =>
       resolveZoomDefaultPercent({
         interactionMode,
-        cardLayoutMode: effectiveCardLayoutMode,
+        cardLayoutMode: zoomPreferenceCardLayoutMode,
       }),
-    [effectiveCardLayoutMode, interactionMode],
+    [interactionMode, zoomPreferenceCardLayoutMode],
   );
 
   const storedPreferredPercent = useMemo(() => {
