@@ -15,6 +15,7 @@
     "paths": {
       "@/*": ["src/*"],
       "@constants/*": ["constants/*"],
+      "@security-contract": ["functions/src/security/contract.ts"],
       "@config/*": ["config/*"]
     }
   },
@@ -25,6 +26,7 @@
     "src/tests/**/*.tsx",
     "tests/**/*.ts",
     "tests/**/*.tsx",
+    "functions/src/**/*.ts",
     "constants/**/*.ts",
     "config/**/*.ts"
   ]

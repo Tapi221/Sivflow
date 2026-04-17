@@ -1,4 +1,4 @@
-import { firestoreDb, storage } from "@/services/firebase";
+import { firestoreDb, storage } from "@/infrastructure/firebase/client";
 import type { UploadMetadata } from "@/types";
 import { normalizeDate } from "@/shared/codec/date";
 import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";

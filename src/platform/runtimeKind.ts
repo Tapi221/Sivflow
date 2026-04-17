@@ -14,5 +14,7 @@ export const isDesktopLikeRuntime = (): boolean =>
 
 export const isHandheldNativeRuntime = (): boolean => {
   const runtimeKind = getRuntimeKind();
-  return runtimeKind === RUNTIME_KINDS.ios || runtimeKind === RUNTIME_KINDS.android;
+  return (
+    runtimeKind === RUNTIME_KINDS.ios || runtimeKind === RUNTIME_KINDS.android
+  );
 };

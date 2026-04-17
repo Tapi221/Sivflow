@@ -16,8 +16,7 @@ import {
   type Query,
 } from "firebase/firestore";
 
-export const requireCloudSyncFirestore = (): Firestore =>
-  requireFirestoreDb();
+export const requireCloudSyncFirestore = (): Firestore => requireFirestoreDb();
 
 export const getPullableCollectionRef = (
   firestore: Firestore,

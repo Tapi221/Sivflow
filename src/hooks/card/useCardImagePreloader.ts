@@ -52,7 +52,11 @@ const cardImageSignature = (card: Card) => {
 
 const resolveImageUrl = async (img: UploadedImage, userId: string | null) => {
   for (const value of [img.remoteUrl, img.localUrl]) {
-    if (typeof value === "string" && value.length > 0 && !value.startsWith("blob:")) {
+    if (
+      typeof value === "string" &&
+      value.length > 0 &&
+      !value.startsWith("blob:")
+    ) {
       return value;
     }
   }
@@ -207,10 +211,19 @@ export const useCardImagePreloader = (
       ? Math.max(0, currentRenderRange.start - CARD_IMAGE_PRELOAD.eagerBuffer)
       : Math.max(0, activeIndex - CARD_IMAGE_PRELOAD.eagerRadiusFallback);
     const eagerEnd = currentRenderRange
-      ? Math.min(cards.length - 1, currentRenderRange.end + CARD_IMAGE_PRELOAD.eagerBuffer)
-      : Math.min(cards.length - 1, activeIndex + CARD_IMAGE_PRELOAD.eagerRadiusFallback);
+      ? Math.min(
+          cards.length - 1,
+          currentRenderRange.end + CARD_IMAGE_PRELOAD.eagerBuffer,
+        )
+      : Math.min(
+          cards.length - 1,
+          activeIndex + CARD_IMAGE_PRELOAD.eagerRadiusFallback,
+        );
     const idleStart = Math.max(0, eagerStart - CARD_IMAGE_PRELOAD.idleExtra);
-    const idleEnd = Math.min(cards.length - 1, eagerEnd + CARD_IMAGE_PRELOAD.idleExtra);
+    const idleEnd = Math.min(
+      cards.length - 1,
+      eagerEnd + CARD_IMAGE_PRELOAD.idleExtra,
+    );
 
     const markReady = (cardId: string) => {
       if (signal.aborted) return;

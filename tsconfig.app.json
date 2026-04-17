@@ -14,10 +14,16 @@
     "paths": {
       "@/*": ["src/*"],
       "@constants/*": ["constants/*"],
+      "@security-contract": ["functions/src/security/contract.ts"],
       "@config/*": ["config/*"]
     }
   },
-  "include": ["src", "constants", "config"],
+  "include": [
+    "src",
+    "constants",
+    "config",
+    "functions/src/security/contract.ts"
+  ],
   "exclude": [
     "src/**/*.test.ts",
     "src/**/*.test.tsx",

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuthSession } from "@/contexts/AuthContext";
-import { firestoreDb, storage } from "@/services/firebase";
+import { firestoreDb, storage } from "@/infrastructure/firebase/client";
 import {
   collection,
   query,

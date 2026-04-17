@@ -46,7 +46,8 @@ class FeatureFlagService {
 
     if (import.meta.env.DEV && typeof window !== "undefined") {
       try {
-        const raw = localStorage.getItem(SHARED_STORAGE_KEYS.featureFlags) || "{}";
+        const raw =
+          localStorage.getItem(SHARED_STORAGE_KEYS.featureFlags) || "{}";
         const parsed: unknown = JSON.parse(raw);
         const current: Record<string, unknown> =
           parsed != null && typeof parsed === "object"

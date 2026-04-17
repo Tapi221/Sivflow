@@ -59,7 +59,10 @@ const pushRecentLang = (lang: string) => {
   try {
     const normalized = normalizeEditorLanguage(lang);
     const prev = getRecentLangs().filter((value) => value !== normalized);
-    const next = [normalized, ...prev].slice(0, CODE_BLOCK_MAX_RECENT_LANGUAGES);
+    const next = [normalized, ...prev].slice(
+      0,
+      CODE_BLOCK_MAX_RECENT_LANGUAGES,
+    );
 
     window.localStorage.setItem(
       CODE_BLOCK_RECENT_LANGUAGE_STORAGE_KEY,
@@ -83,7 +86,9 @@ export const CodeBlockEditor = ({
   className,
   zoom,
 }: CodeBlockEditorProps) => {
-  const [recentLangs, setRecentLangs] = useState<string[]>(() => getRecentLangs());
+  const [recentLangs, setRecentLangs] = useState<string[]>(() =>
+    getRecentLangs(),
+  );
 
   const code = value?.code ?? "";
   const normalizedLanguage = normalizeEditorLanguage(
@@ -103,10 +108,14 @@ export const CodeBlockEditor = ({
   const recentLangItems = useMemo(() => {
     return recentLangs
       .map((value) =>
-        CODE_BLOCK_SUPPORTED_LANGUAGES.find((language) => language.value === value),
+        CODE_BLOCK_SUPPORTED_LANGUAGES.find(
+          (language) => language.value === value,
+        ),
       )
       .filter(
-        (language): language is (typeof CODE_BLOCK_SUPPORTED_LANGUAGES)[number] =>
+        (
+          language,
+        ): language is (typeof CODE_BLOCK_SUPPORTED_LANGUAGES)[number] =>
           language !== undefined,
       );
   }, [recentLangs]);

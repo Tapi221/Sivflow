@@ -8,7 +8,7 @@ import { useFolders } from "@/hooks/folder/useFolders";
 import { useMutation } from "@tanstack/react-query";
 import { addDoc, collection } from "firebase/firestore";
 import { getLocalDb } from "@/services/localDB";
-import { firestoreDb } from "@/services/firebase";
+import { firestoreDb } from "@/infrastructure/firebase/client";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft } from "@/ui/icons";

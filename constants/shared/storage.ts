@@ -2,7 +2,8 @@ export const SHARED_STORAGE_KEYS = {
   featureFlags: "FEATURE_FLAGS",
   deviceId: "deviceId",
   cardZoomPreferences: "card-zoom-preferences",
-  cardSetViewZoomPreferences: "flashcard-master:cardsetview-zoom-preferences:v2",
+  cardSetViewZoomPreferences:
+    "flashcard-master:cardsetview-zoom-preferences:v2",
   cardSetViewZoomPreferencesLegacy: [
     "cardsetview-zoom-preferences",
     "card-view-zoom-preferences",

@@ -1,4 +1,7 @@
-import { firestoreDb } from "@/services/firebase";
+import {
+  firestoreDb,
+  requireFirestoreDb,
+} from "@/infrastructure/firebase/client";
 import type {
   SecurityEventType,
   SecurityLog,
@@ -74,8 +77,9 @@ export class SecurityMonitor {
     type: SecurityEventType,
     metadata: SecurityMetadata,
   ): Promise<void> {
+    const db = firestoreDb;
     try {
-      if (!firestoreDb) {
+      if (!db) {
         console.warn(
           "[Security] firestoreDb is undefined. Skipping security log.",
         );
@@ -96,7 +100,7 @@ export class SecurityMonitor {
       };
 
       await addDoc(
-        collection(firestoreDb, `users/${this.userId}/securityLogs`),
+        collection(db, `users/${this.userId}/securityLogs`),
         logData,
       );
     } catch (error) {
@@ -110,8 +114,9 @@ export class SecurityMonitor {
    * - セキュリティ通知
    */
   startMonitoring(onStateChange: (state: SecurityState) => void): void {
-    if (!firestoreDb) {
-      console.error(
+    const db = firestoreDb;
+    if (!db) {
+      console.warn(
         "[Security] firestoreDb is undefined. Cannot start monitoring.",
       );
       return;
@@ -120,7 +125,7 @@ export class SecurityMonitor {
     this.stopMonitoring();
 
     this.unsubscribeMetadata = onSnapshot(
-      doc(firestoreDb, `users/${this.userId}`),
+      doc(db, `users/${this.userId}`),
       (snapshot) => {
         if (!snapshot.exists()) return;
 
@@ -140,7 +145,7 @@ export class SecurityMonitor {
     );
 
     const notificationQuery = query(
-      collection(firestoreDb, `users/${this.userId}/notifications`),
+      collection(db, `users/${this.userId}/notifications`),
       where("type", "==", "SECURITY_ALERT"),
       where("read", "==", false),
     );
@@ -173,15 +178,8 @@ export class SecurityMonitor {
    */
   async dismissAlert(alertId: string): Promise<void> {
     try {
-      if (!firestoreDb) {
-        throw new Error("Firebase Firestore is not initialized.");
-      }
-
-      const alertRef = doc(
-        firestoreDb,
-        `users/${this.userId}/notifications`,
-        alertId,
-      );
+      const db = requireFirestoreDb();
+      const alertRef = doc(db, `users/${this.userId}/notifications`, alertId);
 
       await updateDoc(alertRef, { read: true });
     } catch (error) {

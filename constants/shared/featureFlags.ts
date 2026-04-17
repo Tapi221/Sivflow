@@ -16,7 +16,10 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
 
 export type LegacyFlagName = "postReviewPractice" | "ENABLE_ADVANCED_TELEMETRY";
 
-export const LEGACY_FEATURE_FLAG_MAP: Record<LegacyFlagName, keyof FeatureFlags> = {
+export const LEGACY_FEATURE_FLAG_MAP: Record<
+  LegacyFlagName,
+  keyof FeatureFlags
+> = {
   postReviewPractice: "postReviewPractice",
   ENABLE_ADVANCED_TELEMETRY: "enableAdvancedTelemetry",
 };

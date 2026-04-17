@@ -10,7 +10,10 @@ export const setLastSelectedFolderId = (folderId: string | null) => {
   if (typeof window === "undefined") return;
 
   if (folderId) {
-    window.localStorage.setItem(WEB_STORAGE_KEYS.lastSelectedFolderId, folderId);
+    window.localStorage.setItem(
+      WEB_STORAGE_KEYS.lastSelectedFolderId,
+      folderId,
+    );
     return;
   }
 

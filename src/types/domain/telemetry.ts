@@ -1,4 +1,4 @@
-import type { SecurityEventType } from "@security-contract";
+export type SecurityEventType = import("@security-contract").SecurityEventType;
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
 

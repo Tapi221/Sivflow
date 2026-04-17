@@ -43,10 +43,7 @@ export class FirebaseCloudProvider implements ICloudProvider {
   async upsertFolder(folder: Folder): Promise<void> {
     const db = requireFirestoreDb();
     if (!folder.userId) throw new Error("userId is required for upsertFolder");
-    const docRef = doc(
-      db,
-      ...folderDocPathSegments(folder.userId, folder.id),
-    );
+    const docRef = doc(db, ...folderDocPathSegments(folder.userId, folder.id));
     const data = {
       ...folder,
       updatedAt: Timestamp.now(),
@@ -57,10 +54,7 @@ export class FirebaseCloudProvider implements ICloudProvider {
   async upsertCard(card: Card): Promise<void> {
     const db = requireFirestoreDb();
     if (!card.userId) throw new Error("userId is required for upsertCard");
-    const docRef = doc(
-      db,
-      ...cardDocPathSegments(card.userId, card.id),
-    );
+    const docRef = doc(db, ...cardDocPathSegments(card.userId, card.id));
     const data = {
       ...denormalizeCardForCloud(card),
       updatedAt: Timestamp.now(),

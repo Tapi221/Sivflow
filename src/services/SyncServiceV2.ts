@@ -16,7 +16,7 @@ import {
   where,
 } from "firebase/firestore";
 import { nanoid } from "nanoid";
-import { firestoreDb } from "./firebase";
+import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import type {
   ICloudSyncAdapter,
   IDiffEngine,
@@ -684,15 +684,9 @@ export class SyncServiceV2 implements ISyncService {
 
   async removeDevice(deviceId: string): Promise<void> {
     this.telemetry.log("info", "Revoking device access", { deviceId });
-    if (!firestoreDb) {
-      this.telemetry.log(
-        "error",
-        "Security Alert: firestoreDb is undefined during removeDevice",
-      );
-      return;
-    }
+    const db = requireFirestoreDb();
     const deviceRef = doc(
-      firestoreDb,
+      db,
       `sync_metadata/${this.userId}/devices/${deviceId}`,
     );
 
@@ -710,20 +704,11 @@ export class SyncServiceV2 implements ISyncService {
   private async checkDeviceStatus(): Promise<void> {
     const currentDeviceId = localStorage.getItem("deviceId");
     if (!currentDeviceId) return;
-
-    if (!firestoreDb) {
-      this.telemetry.log(
-        "error",
-        "Security Alert: firestoreDb is undefined during checkDeviceStatus",
-      );
-      throw new Error(
-        "Firebase Firestore is not initialized during security check.",
-      );
-    }
+    const db = requireFirestoreDb();
 
     try {
       const deviceRef = doc(
-        firestoreDb,
+        db,
         `sync_metadata/${this.userId}/devices/${currentDeviceId}`,
       );
       const snapshot = await getDoc(deviceRef);
@@ -754,14 +739,9 @@ export class SyncServiceV2 implements ISyncService {
 
   async updateDeviceName(deviceId: string, newName: string): Promise<void> {
     this.telemetry.log("info", "Updating device name", { deviceId, newName });
-    if (!firestoreDb) {
-      console.warn(
-        "[SyncServiceV2] firestoreDb is not initialized. Skipping updateDeviceName.",
-      );
-      return;
-    }
+    const db = requireFirestoreDb();
     const deviceRef = doc(
-      firestoreDb,
+      db,
       `sync_metadata/${this.userId}/devices/${deviceId}`,
     );
     await updateDoc(deviceRef, { deviceName: newName });
@@ -769,15 +749,10 @@ export class SyncServiceV2 implements ISyncService {
 
   async cleanupInactiveDevices(): Promise<number> {
     this.telemetry.log("info", "Cleaning up inactive devices");
-    if (!firestoreDb) {
-      console.warn(
-        "[SyncServiceV2] firestoreDb is not initialized. Skipping cleanup.",
-      );
-      return 0;
-    }
+    const db = requireFirestoreDb();
     const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
     const q = query(
-      collection(firestoreDb, `sync_metadata/${this.userId}/devices`),
+      collection(db, `sync_metadata/${this.userId}/devices`),
       where("lastSyncTime", "<", Timestamp.fromDate(sixtyDaysAgo)),
     );
 

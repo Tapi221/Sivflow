@@ -9,7 +9,7 @@ import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { firestoreDb } from "@/services/firebase";
+import { firestoreDb } from "@/infrastructure/firebase/client";
 import { getLocalDb } from "@/services/localDB";
 import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 

@@ -1,5 +1,8 @@
 import type { Firestore } from "firebase-admin/firestore";
-import { isSupportedSecurityEventType, type SecurityEventType } from "./contract";
+import {
+  isSupportedSecurityEventType,
+  type SecurityEventType,
+} from "./contract";
 
 export type RiskLevel = "normal" | "warning" | "high" | "critical";
 
