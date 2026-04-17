@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
 
 export const useCardSetViewEditingBridge = (isGlobalEditing: boolean) => {
   useEffect(() => {
@@ -7,7 +8,7 @@ export const useCardSetViewEditingBridge = (isGlobalEditing: boolean) => {
     }
 
     window.dispatchEvent(
-      new CustomEvent("cardsetview:editing-change", {
+      new CustomEvent(CARD_SET_VIEW_EVENTS.editingChange, {
         detail: isGlobalEditing,
       }),
     );

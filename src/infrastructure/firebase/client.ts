@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
+import { FIREBASE_EMULATORS } from "@constants/shared/firebase";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -75,17 +76,29 @@ if (typeof window !== "undefined") {
 
   if (useEmulators && isLocalhost) {
     try {
-      connectAuthEmulator(auth, "http://localhost:9099");
+      connectAuthEmulator(auth, FIREBASE_EMULATORS.auth.url);
 
       if (firestoreDbInternal) {
-        connectFirestoreEmulator(firestoreDbInternal, "localhost", 8080);
+        connectFirestoreEmulator(
+          firestoreDbInternal,
+          FIREBASE_EMULATORS.firestore.host,
+          FIREBASE_EMULATORS.firestore.port,
+        );
       }
 
-      connectStorageEmulator(storage, "localhost", 9199);
-      connectFunctionsEmulator(functions, "localhost", 5001);
+      connectStorageEmulator(
+        storage,
+        FIREBASE_EMULATORS.storage.host,
+        FIREBASE_EMULATORS.storage.port,
+      );
+      connectFunctionsEmulator(
+        functions,
+        FIREBASE_EMULATORS.functions.host,
+        FIREBASE_EMULATORS.functions.port,
+      );
 
       console.log(
-        "Firebase Emulators: Connected (Auth:9099, Firestore:8080, Storage:9199, Functions:5001)",
+        `Firebase Emulators: Connected (Auth:${FIREBASE_EMULATORS.auth.port}, Firestore:${FIREBASE_EMULATORS.firestore.port}, Storage:${FIREBASE_EMULATORS.storage.port}, Functions:${FIREBASE_EMULATORS.functions.port})`,
       );
     } catch (error) {
       console.error("Firebase Emulators connection error:", error);

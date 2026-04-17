@@ -5,9 +5,7 @@ import {
   createReviewPatchFromRating,
 } from "@/services/reviewAlgorithm";
 import type { Card, ReviewLog, UserSettings } from "@/types";
-
-const CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT =
-  "cardsetview:editing-draft-patch";
+import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
 
 type EditingDraftPatch = Partial<Pick<Card, "title" | "isDraft">> & {
   tags?: string[];
@@ -42,7 +40,7 @@ export const useCardSetViewMetaPanelActions = ({
       }
 
       window.dispatchEvent(
-        new CustomEvent(CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT, {
+        new CustomEvent(CARD_SET_VIEW_EVENTS.editingDraftPatch, {
           detail: {
             cardId: selectedCardId,
             patch,

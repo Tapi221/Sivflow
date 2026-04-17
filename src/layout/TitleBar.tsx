@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { windowControls } from "@/platform/capabilities/windowControls";
 import { APP_DESKTOP_TOP_INSET_PX } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
+import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -97,10 +98,16 @@ export const TitleBar: React.FC = () => {
       setIsCardSetViewEditing(Boolean(next));
     };
 
-    window.addEventListener("cardsetview:editing-change", onEditingChange);
+    window.addEventListener(
+      CARD_SET_VIEW_EVENTS.editingChange,
+      onEditingChange,
+    );
 
     return () => {
-      window.removeEventListener("cardsetview:editing-change", onEditingChange);
+      window.removeEventListener(
+        CARD_SET_VIEW_EVENTS.editingChange,
+        onEditingChange,
+      );
     };
   }, []);
 
@@ -219,7 +226,7 @@ export const TitleBar: React.FC = () => {
                 type="button"
                 onClick={() =>
                   window.dispatchEvent(
-                    new CustomEvent("cardsetview:create-card-request"),
+                    new CustomEvent(CARD_SET_VIEW_EVENTS.createCardRequest),
                   )
                 }
                 className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
@@ -273,7 +280,7 @@ export const TitleBar: React.FC = () => {
               type="button"
               onClick={() =>
                 window.dispatchEvent(
-                  new CustomEvent("cardsetview:toggle-editing-request"),
+                  new CustomEvent(CARD_SET_VIEW_EVENTS.toggleEditingRequest),
                 )
               }
               className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"

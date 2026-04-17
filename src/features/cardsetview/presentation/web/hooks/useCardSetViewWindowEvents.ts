@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
 
 interface UseCardSetViewWindowEventsOptions {
   handleToggleViewMode: () => void;
@@ -11,12 +12,12 @@ export const useCardSetViewWindowEvents = ({
 }: UseCardSetViewWindowEventsOptions) => {
   useEffect(() => {
     window.addEventListener(
-      "cardsetview:toggle-editing-request",
+      CARD_SET_VIEW_EVENTS.toggleEditingRequest,
       handleToggleViewMode,
     );
     return () =>
       window.removeEventListener(
-        "cardsetview:toggle-editing-request",
+        CARD_SET_VIEW_EVENTS.toggleEditingRequest,
         handleToggleViewMode,
       );
   }, [handleToggleViewMode]);
@@ -26,8 +27,11 @@ export const useCardSetViewWindowEvents = ({
       void createAndFocusCard();
     };
 
-    window.addEventListener("cardsetview:create-card-request", handler);
+    window.addEventListener(CARD_SET_VIEW_EVENTS.createCardRequest, handler);
     return () =>
-      window.removeEventListener("cardsetview:create-card-request", handler);
+      window.removeEventListener(
+        CARD_SET_VIEW_EVENTS.createCardRequest,
+        handler,
+      );
   }, [createAndFocusCard]);
 };

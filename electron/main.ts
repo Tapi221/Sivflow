@@ -2,16 +2,17 @@ import { app, BrowserWindow, ipcMain, Menu, shell } from "electron";
 import * as http from "node:http";
 import * as path from "node:path";
 import { URL } from "node:url";
-import { IPC_CHANNELS } from "@constants/electron/app";
+import {
+  DESKTOP_GOOGLE_OAUTH_REDIRECT_URI,
+  DESKTOP_OAUTH_LOOPBACK,
+  IPC_CHANNELS,
+} from "@constants/electron/app";
 
 if (process.platform === "win32") {
   app.disableHardwareAcceleration();
 }
 
 const ALLOWED_EXTERNAL_PROTOCOLS = new Set(["http:", "https:", "mailto:"]);
-const OAUTH_LOOPBACK_HOST = "127.0.0.1";
-const OAUTH_LOOPBACK_PORT = 42813;
-const OAUTH_LOOPBACK_PATH = "/auth/google/callback";
 const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 
 let mainWindow: BrowserWindow | null = null;
@@ -126,13 +127,16 @@ const startOauthLoopbackServer = (): Promise<void> =>
     const server = http.createServer((req, res) => {
       const requestUrl = new URL(
         req.url || "/",
-        `http://${OAUTH_LOOPBACK_HOST}:${OAUTH_LOOPBACK_PORT}`,
+        DESKTOP_GOOGLE_OAUTH_REDIRECT_URI,
       );
       const fullUrl = requestUrl.toString();
 
       console.info("[electron][oauth] callback received", { url: fullUrl });
 
-      if (req.method !== "GET" || requestUrl.pathname !== OAUTH_LOOPBACK_PATH) {
+      if (
+        req.method !== "GET" ||
+        requestUrl.pathname !== DESKTOP_OAUTH_LOOPBACK.path
+      ) {
         res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
         res.end("Not found");
         return;
@@ -153,23 +157,27 @@ const startOauthLoopbackServer = (): Promise<void> =>
       reject(error);
     });
 
-    server.listen(OAUTH_LOOPBACK_PORT, OAUTH_LOOPBACK_HOST, () => {
-      oauthLoopbackServer = server;
+    server.listen(
+      DESKTOP_OAUTH_LOOPBACK.port,
+      DESKTOP_OAUTH_LOOPBACK.host,
+      () => {
+        oauthLoopbackServer = server;
 
-      console.info("[electron][oauth] loopback listen started", {
-        host: OAUTH_LOOPBACK_HOST,
-        port: OAUTH_LOOPBACK_PORT,
-        path: OAUTH_LOOPBACK_PATH,
-      });
+        console.info("[electron][oauth] loopback listen started", {
+          host: DESKTOP_OAUTH_LOOPBACK.host,
+          port: DESKTOP_OAUTH_LOOPBACK.port,
+          path: DESKTOP_OAUTH_LOOPBACK.path,
+        });
 
-      resolve();
-    });
+        resolve();
+      },
+    );
   });
 
 const ensureOauthLoopbackRedirect = (authorizeUrl: string): void => {
   const parsed = new URL(authorizeUrl);
   const redirectUri = parsed.searchParams.get("redirect_uri");
-  const expectedRedirectUri = `http://${OAUTH_LOOPBACK_HOST}:${OAUTH_LOOPBACK_PORT}${OAUTH_LOOPBACK_PATH}`;
+  const expectedRedirectUri = DESKTOP_GOOGLE_OAUTH_REDIRECT_URI;
 
   if (!redirectUri || redirectUri !== expectedRedirectUri) {
     throw new Error(

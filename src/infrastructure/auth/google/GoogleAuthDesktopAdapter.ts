@@ -3,9 +3,8 @@ import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import type { DesktopOauthCallbackPayload } from "@/types/externals/desktop-api";
 import { auth } from "@/infrastructure/firebase/client";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
+import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/electron/app";
 
-const DEFAULT_DESKTOP_REDIRECT_URI =
-  "http://127.0.0.1:42813/auth/google/callback";
 const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT =
   "https://accounts.google.com/o/oauth2/v2/auth";
 const CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
@@ -51,7 +50,14 @@ const getDesktopOauthScope = (): string => {
 const getDesktopRedirectUri = (): string => {
   const configuredUri =
     import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_REDIRECT_URI?.trim();
-  return configuredUri || DEFAULT_DESKTOP_REDIRECT_URI;
+
+  if (configuredUri && configuredUri !== DESKTOP_GOOGLE_OAUTH_REDIRECT_URI) {
+    throw new Error(
+      `Desktop OAuth redirect URI mismatch. expected=${DESKTOP_GOOGLE_OAUTH_REDIRECT_URI}, actual=${configuredUri}`,
+    );
+  }
+
+  return DESKTOP_GOOGLE_OAUTH_REDIRECT_URI;
 };
 
 const buildAuthorizeUrl = ({

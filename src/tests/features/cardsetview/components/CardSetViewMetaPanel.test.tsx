@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMetaPanel";
 import type { Card } from "@/types";
+import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
 
 const cardMetaPanelPropsSpy = vi.hoisted(() => vi.fn());
 
@@ -47,7 +48,7 @@ describe("CardSetViewMetaPanel", () => {
     const listener = vi.fn();
 
     window.addEventListener(
-      "cardsetview:editing-draft-patch",
+      CARD_SET_VIEW_EVENTS.editingDraftPatch,
       listener as EventListener,
     );
 
@@ -68,7 +69,7 @@ describe("CardSetViewMetaPanel", () => {
     });
 
     window.removeEventListener(
-      "cardsetview:editing-draft-patch",
+      CARD_SET_VIEW_EVENTS.editingDraftPatch,
       listener as EventListener,
     );
   });
@@ -94,7 +95,7 @@ describe("CardSetViewMetaPanel", () => {
     const listener = vi.fn();
 
     window.addEventListener(
-      "cardsetview:editing-draft-patch",
+      CARD_SET_VIEW_EVENTS.editingDraftPatch,
       listener as EventListener,
     );
 
@@ -105,7 +106,7 @@ describe("CardSetViewMetaPanel", () => {
     expect(listener).not.toHaveBeenCalled();
 
     window.removeEventListener(
-      "cardsetview:editing-draft-patch",
+      CARD_SET_VIEW_EVENTS.editingDraftPatch,
       listener as EventListener,
     );
   });
