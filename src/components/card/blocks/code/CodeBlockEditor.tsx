@@ -1,5 +1,11 @@
 import { useCallback, useMemo, useState } from "react";
 import {
+  CODE_BLOCK_MAX_RECENT_LANGUAGES,
+  CODE_BLOCK_RECENT_LANGUAGE_STORAGE_KEY,
+  CODE_BLOCK_SUPPORTED_LANGUAGES,
+  CODE_BLOCK_SUPPORTED_LANGUAGE_VALUES,
+} from "@constants/web/codeBlock";
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -12,28 +18,6 @@ import {
 import type { CodeBlockData } from "@/types/core/code-block";
 import { CodeBlockContent } from "./CodeBlockContent";
 import { normalizeEditorLanguage } from "./codeBlockLanguage";
-
-const STORAGE_KEY = "codeblock_recent_langs";
-const MAX_RECENT = 3;
-
-const SUPPORTED_LANGUAGES = [
-  { value: "javascript", label: "JavaScript" },
-  { value: "typescript", label: "TypeScript" },
-  { value: "python", label: "Python" },
-  { value: "java", label: "Java" },
-  { value: "c", label: "C" },
-  { value: "cpp", label: "C++" },
-  { value: "csharp", label: "C#" },
-  { value: "go", label: "Go" },
-  { value: "rust", label: "Rust" },
-  { value: "sql", label: "SQL" },
-  { value: "markup", label: "HTML" },
-  { value: "css", label: "CSS" },
-  { value: "json", label: "JSON" },
-  { value: "bash", label: "Bash" },
-  { value: "markdown", label: "Markdown" },
-];
-const SUPPORTED_LANGUAGE_SET = new Set(SUPPORTED_LANGUAGES.map((l) => l.value));
 
 const canUseLocalStorage = () => {
   try {
@@ -49,15 +33,21 @@ const canUseLocalStorage = () => {
 
 const getRecentLangs = () => {
   if (!canUseLocalStorage()) return [];
+
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(
+      CODE_BLOCK_RECENT_LANGUAGE_STORAGE_KEY,
+    );
+
     if (!raw) return [];
+
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
+
     return parsed
-      .filter((v): v is string => typeof v === "string")
+      .filter((value): value is string => typeof value === "string")
       .map(normalizeEditorLanguage)
-      .filter((v) => SUPPORTED_LANGUAGE_SET.has(v));
+      .filter((value) => CODE_BLOCK_SUPPORTED_LANGUAGE_VALUES.has(value));
   } catch {
     return [];
   }
@@ -65,11 +55,16 @@ const getRecentLangs = () => {
 
 const pushRecentLang = (lang: string) => {
   if (!canUseLocalStorage()) return;
+
   try {
     const normalized = normalizeEditorLanguage(lang);
-    const prev = getRecentLangs().filter((l) => l !== normalized);
-    const next = [normalized, ...prev].slice(0, MAX_RECENT);
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    const prev = getRecentLangs().filter((value) => value !== normalized);
+    const next = [normalized, ...prev].slice(0, CODE_BLOCK_MAX_RECENT_LANGUAGES);
+
+    window.localStorage.setItem(
+      CODE_BLOCK_RECENT_LANGUAGE_STORAGE_KEY,
+      JSON.stringify(next),
+    );
   } catch {
     // noop
   }
@@ -88,9 +83,7 @@ export const CodeBlockEditor = ({
   className,
   zoom,
 }: CodeBlockEditorProps) => {
-  const [recentLangs, setRecentLangs] = useState<string[]>(() =>
-    getRecentLangs(),
-  );
+  const [recentLangs, setRecentLangs] = useState<string[]>(() => getRecentLangs());
 
   const code = value?.code ?? "";
   const normalizedLanguage = normalizeEditorLanguage(
@@ -109,13 +102,20 @@ export const CodeBlockEditor = ({
 
   const recentLangItems = useMemo(() => {
     return recentLangs
-      .map((val) => SUPPORTED_LANGUAGES.find((l) => l.value === val))
-      .filter((l): l is { value: string; label: string } => l !== undefined);
+      .map((value) =>
+        CODE_BLOCK_SUPPORTED_LANGUAGES.find((language) => language.value === value),
+      )
+      .filter(
+        (language): language is (typeof CODE_BLOCK_SUPPORTED_LANGUAGES)[number] =>
+          language !== undefined,
+      );
   }, [recentLangs]);
 
   const remainingLangItems = useMemo(() => {
     const recentSet = new Set(recentLangs);
-    return SUPPORTED_LANGUAGES.filter((l) => !recentSet.has(l.value));
+    return CODE_BLOCK_SUPPORTED_LANGUAGES.filter(
+      (language) => !recentSet.has(language.value),
+    );
   }, [recentLangs]);
 
   const languageSelector = (
@@ -123,7 +123,9 @@ export const CodeBlockEditor = ({
       value={normalizedLanguage}
       onValueChange={handleLanguageChange}
       onOpenChange={(open) => {
-        if (open) setRecentLangs(getRecentLangs());
+        if (open) {
+          setRecentLangs(getRecentLangs());
+        }
       }}
     >
       <SelectTrigger
@@ -148,13 +150,13 @@ export const CodeBlockEditor = ({
               <SelectLabel className="text-[10px] text-slate-400 uppercase tracking-widest px-2 py-1">
                 最近使った言語
               </SelectLabel>
-              {recentLangItems.map((lang) => (
+              {recentLangItems.map((language) => (
                 <SelectItem
-                  key={`recent-${lang.value}`}
-                  value={lang.value}
+                  key={`recent-${language.value}`}
+                  value={language.value}
                   className="text-xs"
                 >
-                  {lang.label}
+                  {language.label}
                 </SelectItem>
               ))}
             </SelectGroup>
@@ -168,9 +170,13 @@ export const CodeBlockEditor = ({
               すべての言語
             </SelectLabel>
           )}
-          {remainingLangItems.map((lang) => (
-            <SelectItem key={lang.value} value={lang.value} className="text-xs">
-              {lang.label}
+          {remainingLangItems.map((language) => (
+            <SelectItem
+              key={language.value}
+              value={language.value}
+              className="text-xs"
+            >
+              {language.label}
             </SelectItem>
           ))}
         </SelectGroup>

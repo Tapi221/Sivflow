@@ -1,3 +1,5 @@
+import { CARD_EDITOR_EVENTS } from "@constants/shared/cardEditor";
+import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 import {
   createLatestReviewLogPatch,
   createReviewPatchFromRating,
@@ -10,9 +12,10 @@ export type EditingDraftPatchDetail = {
 };
 
 export const CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT =
-  "cardsetview:editing-draft-patch";
+  CARD_EDITOR_EVENTS.cardSetViewEditingDraftPatch;
 
-export const META_PANEL_OPEN_STORAGE_KEY = "card-editor.meta-panel-open";
+export const META_PANEL_OPEN_STORAGE_KEY =
+  WEB_STORAGE_KEYS.cardEditorMetaPanelOpen;
 
 export const buildCardsById = (cards: Card[]) => {
   const map = new Map<string, Card>();
