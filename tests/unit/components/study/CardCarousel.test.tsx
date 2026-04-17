@@ -35,7 +35,7 @@ vi.mock("@/components/card/frame/MobileScalableCard", () => ({
   ),
 }));
 
-vi.mock("@constants/shared/cardGeometry", () => ({
+vi.mock("@constants/shared/flashcard", () => ({
   CARD_BASE_WIDTH: 480,
   CARD_DISPLAY_SCALE: 1,
   CARD_SAFE_PADDING_PX: 24,
