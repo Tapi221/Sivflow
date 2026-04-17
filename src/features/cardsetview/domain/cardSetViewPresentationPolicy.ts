@@ -6,8 +6,10 @@ import {
   FIXED_LAYOUT_SAFETY_ALLOWANCE_PX,
   SCROLLBAR_RESERVE_PX,
   SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX,
-  ZOOM_DEFAULT_PERCENT,
   ZOOM_MIN_BASE_WIDTH_PX,
+} from "@/constants/desktop/cardSetViewThresholds";
+import {
+  ZOOM_DEFAULT_PERCENT,
 } from "@/features/cardsetview/domain/cardSetViewPresentationDefaults";
 import { CARD_VIEW_ZOOM_STEP_PERCENT } from "@/features/cardsetview/constants";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
