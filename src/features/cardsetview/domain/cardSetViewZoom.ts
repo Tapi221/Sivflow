@@ -1,7 +1,7 @@
 import {
   CARD_VIEW_ZOOM_DEFAULT_PERCENT,
   CARD_VIEW_ZOOM_STEP_PERCENT,
-} from "@/features/cardsetview/constants";
+} from "@constants/shared/cardSetView";
 
 type ClampZoomPercentOptions = {
   minPercent: number;

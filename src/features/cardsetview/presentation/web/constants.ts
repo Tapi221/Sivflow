@@ -15,4 +15,4 @@ export {
   CARD_VIEW_ZOOM_MIN_PERCENT,
   CARD_VIEW_ZOOM_STEP_PERCENT,
   clampPaneWidthPx,
-} from "@/features/cardsetview/constants";
+} from "@constants/shared/cardSetView";

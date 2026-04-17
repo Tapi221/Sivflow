@@ -8,7 +8,7 @@ import {
   CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
   CARD_SET_VIEW_PAGER_PADDING_BLOCK,
   CARD_SET_VIEW_PAGER_PADDING_INLINE,
-} from "@/features/cardsetview/constants";
+} from "@constants/shared/cardSetView";
 import { DesktopCardSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopCardSurface";
 import {
   ACTIVE_INDEX_RENDER_RADIUS,

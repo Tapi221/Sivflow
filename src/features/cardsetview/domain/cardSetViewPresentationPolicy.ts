@@ -8,10 +8,8 @@ import {
   SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX,
   ZOOM_MIN_BASE_WIDTH_PX,
 } from "@/constants/desktop/cardSetViewThresholds";
-import {
-  ZOOM_DEFAULT_PERCENT,
-} from "@/features/cardsetview/domain/cardSetViewPresentationDefaults";
-import { CARD_VIEW_ZOOM_STEP_PERCENT } from "@/features/cardsetview/constants";
+import { ZOOM_DEFAULT_PERCENT } from "@/features/cardsetview/domain/cardSetViewPresentationDefaults";
+import { CARD_VIEW_ZOOM_STEP_PERCENT } from "@constants/shared/cardSetView";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type ResolveZoomWidthArgs = {

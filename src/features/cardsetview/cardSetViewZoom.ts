@@ -5,7 +5,7 @@ import {
   CARD_VIEW_DEFAULT_ZOOM_PERCENT,
   CARD_VIEW_MIN_ZOOM_PERCENT,
   CARD_VIEW_ZOOM_STEP_PERCENT,
-} from "@/features/cardsetview/constants";
+} from "@constants/shared/cardSetView";
 
 const sanitizePositiveNumber = (value: number, fallback: number) => {
   return typeof value === "number" && Number.isFinite(value) && value > 0

@@ -26,7 +26,7 @@ import {
 import {
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_VIEW_ZOOM_STEP_PERCENT,
-} from "@/features/cardsetview/constants";
+} from "@constants/shared/cardSetView";
 import {
   buildCardSetViewZoomPreferenceScopeKey,
   getCardSetViewZoomPreference,

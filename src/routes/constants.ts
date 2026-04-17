@@ -1,4 +1,4 @@
-// TODO: migrate all cardsetview imports to "@/features/cardsetview/constants"
+// TODO: migrate all cardsetview imports to "@constants/shared/cardSetView"
 export {
   CARD_PANE_AUTO_MAX_SCALE,
   CARD_PANE_EDIT_DEFAULT_WIDTH_PX,
@@ -16,4 +16,4 @@ export {
   CARD_VIEW_ZOOM_MIN_PERCENT,
   CARD_VIEW_ZOOM_STEP_PERCENT,
   clampPaneWidthPx,
-} from "@/features/cardsetview/constants";
+} from "@constants/shared/cardSetView";
