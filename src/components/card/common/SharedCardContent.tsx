@@ -4,7 +4,7 @@ import React from "react";
 import { SharedCardEditScene } from "./SharedCardEditScene";
 import type { SharedCardContentProps } from "./SharedCardContent.types";
 import { SharedCardViewScene } from "./SharedCardViewScene";
-import { CARD_CONTENT_TOP_PX } from "@constants/shared/cardGeometry";
+import { CARD_CONTENT_TOP_PX } from "@constants/shared/flashcard";
 
 const SHARED_CARD_CONTENT_ROOT_CLASS_NAME =
   "card-content-root flex min-h-0 flex-1 w-full max-w-full flex-col overflow-x-clip overflow-y-visible";
