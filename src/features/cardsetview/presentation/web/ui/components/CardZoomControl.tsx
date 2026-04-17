@@ -3,7 +3,7 @@ import {
   overlayGlassActionButtonClassName,
   overlayGlassToolbarClassName,
 } from "@/components/card/shell/overlaySurfaceClassNames";
-import { Minus, Plus, RefreshCw } from "@/ui/icons";
+import { Minus, Plus } from "@/ui/icons";
 import React from "react";
 
 interface CardZoomControlProps {
@@ -11,11 +11,9 @@ interface CardZoomControlProps {
   min: number;
   max: number;
   step?: number;
-  defaultValue: number;
   onChange: (nextValue: number) => void;
   onStepDown: () => void;
   onStepUp: () => void;
-  onReset: () => void;
 }
 
 export const CardZoomControl = ({
@@ -23,14 +21,11 @@ export const CardZoomControl = ({
   min,
   max,
   step = 5,
-  defaultValue,
   onChange,
   onStepDown,
   onStepUp,
-  onReset,
 }: CardZoomControlProps) => {
   const sliderValue = React.useMemo(() => [value], [value]);
-  const resetDisabled = value === defaultValue;
 
   const handleSliderChange = React.useCallback(
     (next: number[]) => {
@@ -78,17 +73,6 @@ export const CardZoomControl = ({
         aria-label="ズームを拡大"
       >
         <Plus className="h-3.5 w-3.5" />
-      </button>
-
-      <button
-        type="button"
-        className={overlayGlassActionButtonClassName}
-        onClick={onReset}
-        disabled={resetDisabled}
-        aria-label="ズームを既定値に戻す"
-        title="既定値に戻す"
-      >
-        <RefreshCw className="h-3.5 w-3.5" />
       </button>
     </div>
   );

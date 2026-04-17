@@ -4,6 +4,8 @@ import type { RefObject } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { useCardSetViewZoom } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoom";
+import { buildCardSetViewZoomPreferenceScopeKey } from "@/services/cardSetViewZoomPreferences";
+import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 
 const createViewportRef = (width: number): RefObject<HTMLDivElement> => {
   const element = document.createElement("div");
@@ -22,8 +24,21 @@ describe("useCardSetViewZoom", () => {
     window.localStorage.clear();
   });
 
+  const readCurrentZoomStore = () => {
+    const raw = window.localStorage.getItem(
+      SHARED_STORAGE_KEYS.cardSetViewZoomPreferences,
+    );
+    return raw
+      ? (JSON.parse(raw) as { version: number; byScope: Record<string, number> })
+      : null;
+  };
+
   it("shares persisted zoom across display mode, interaction mode, and layout mode", () => {
     const viewportRef = createViewportRef(1400);
+    const unifiedKey = buildCardSetViewZoomPreferenceScopeKey({
+      deviceScope: "desktop",
+      cardSetId: "card-set-1",
+    });
 
     const { result, rerender } = renderHook(
       ({
@@ -63,6 +78,7 @@ describe("useCardSetViewZoom", () => {
     });
 
     expect(result.current.zoomPercent).toBe(75);
+    expect(readCurrentZoomStore()?.byScope[unifiedKey]).toBe(75);
 
     rerender({
       displayMode: "fixed",
@@ -82,6 +98,7 @@ describe("useCardSetViewZoom", () => {
     expect(result.current.canUseSplit).toBe(true);
     expect(result.current.effectiveCardLayoutMode).toBe("split");
     expect(result.current.zoomPercent).toBe(75);
+    expect(readCurrentZoomStore()?.byScope[unifiedKey]).toBe(75);
 
     rerender({
       displayMode: "fixed",
@@ -90,6 +107,61 @@ describe("useCardSetViewZoom", () => {
     });
 
     expect(result.current.zoomPercent).toBe(75);
+    expect(readCurrentZoomStore()?.byScope[unifiedKey]).toBe(75);
+
+    act(() => {
+      Object.defineProperty(viewportRef.current, "clientWidth", {
+        configurable: true,
+        value: 820,
+      });
+      window.dispatchEvent(new Event("resize"));
+    });
+
+    rerender({
+      displayMode: "fixed",
+      interactionMode: "view",
+      requestedCardLayoutMode: "split",
+    });
+
+    expect(result.current.canUseSplit).toBe(false);
+    expect(result.current.effectiveCardLayoutMode).toBe("flip");
+    expect(result.current.zoomPercent).toBe(75);
+    expect(readCurrentZoomStore()?.byScope[unifiedKey]).toBe(75);
+  });
+
+  it("migrates a legacy scoped key into the unified key", () => {
+    const viewportRef = createViewportRef(1400);
+    const unifiedKey = buildCardSetViewZoomPreferenceScopeKey({
+      deviceScope: "desktop",
+      cardSetId: "card-set-legacy",
+    });
+    const legacyScopedKey = "desktop::card-set-legacy::fixed::view::flip";
+
+    window.localStorage.setItem(
+      SHARED_STORAGE_KEYS.cardSetViewZoomPreferences,
+      JSON.stringify({
+        version: 2,
+        byScope: {
+          [legacyScopedKey]: 63,
+        },
+      }),
+    );
+
+    const { result } = renderHook(() =>
+      useCardSetViewZoom({
+        deviceScope: "desktop",
+        cardSetId: "card-set-legacy",
+        viewportRef,
+        activeCardKey: "card-1:fixed:flip:view",
+        displayMode: "fixed",
+        interactionMode: "view",
+        requestedCardLayoutMode: "flip",
+        splitFallbackLayoutMode: "flip",
+      }),
+    );
+
+    expect(result.current.zoomPercent).toBe(63);
+    expect(readCurrentZoomStore()?.byScope[unifiedKey]).toBe(63);
   });
 
   it("evaluates split availability independently from the requested layout mode", () => {

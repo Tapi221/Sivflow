@@ -57,21 +57,26 @@ const DEFAULT_SOURCE_KEY = "__cardsetview_zoom_default__";
 export const clampZoomPercent = (value: number) => clampZoomPercentRange(value);
 export const computeDynamicMaxZoomPercent = () => 100;
 
-const buildZoomScope = ({
+const buildCurrentZoomScope = ({
   deviceScope,
   cardSetId,
+}: {
+  deviceScope: string;
+  cardSetId: string | null;
+}): CardSetViewZoomPreferenceScope => ({
+  deviceScope,
+  cardSetId,
+});
+
+const buildLegacyZoomMigrationHint = ({
   displayMode,
   interactionMode,
   cardLayoutMode,
 }: {
-  deviceScope: string;
-  cardSetId: string | null;
   displayMode: CardDisplayMode;
   interactionMode: CardSetInteractionMode;
   cardLayoutMode: CardLayoutMode;
 }): CardSetViewZoomPreferenceScope => ({
-  deviceScope,
-  cardSetId,
   displayMode,
   interactionMode,
   cardLayoutMode,
@@ -188,31 +193,37 @@ export const useCardSetViewZoom = ({
     return requestedCardLayoutMode;
   }, [canUseSplit, requestedCardLayoutMode, splitFallbackLayoutMode]);
 
-  // 現在の mode 情報は旧 scoped key からの移行にだけ使う。
-  // 現行の保存キー自体は deviceScope + cardSetId のみ。
-  const legacyZoomPreferenceCardLayoutMode = requestedCardLayoutMode;
-
-  const zoomScope = useMemo(
+  const currentZoomScope = useMemo(
     () =>
-      buildZoomScope({
+      buildCurrentZoomScope({
         deviceScope,
         cardSetId,
+      }),
+    [cardSetId, deviceScope],
+  );
+
+  // mode は legacy scoped key から unified key へ移行するときだけ利用する。
+  const legacyZoomMigrationHint = useMemo(
+    () =>
+      buildLegacyZoomMigrationHint({
         displayMode,
         interactionMode,
-        cardLayoutMode: legacyZoomPreferenceCardLayoutMode,
+        cardLayoutMode: requestedCardLayoutMode,
       }),
-    [
-      cardSetId,
-      deviceScope,
-      displayMode,
-      interactionMode,
-      legacyZoomPreferenceCardLayoutMode,
-    ],
+    [displayMode, interactionMode, requestedCardLayoutMode],
+  );
+
+  const zoomPreferenceLookupScope = useMemo(
+    () => ({
+      ...currentZoomScope,
+      ...legacyZoomMigrationHint,
+    }),
+    [currentZoomScope, legacyZoomMigrationHint],
   );
 
   const zoomSourceKey = useMemo(
-    () => buildCardSetViewZoomPreferenceScopeKey(zoomScope),
-    [zoomScope],
+    () => buildCardSetViewZoomPreferenceScopeKey(currentZoomScope),
+    [currentZoomScope],
   );
 
   const usableWidthPx = useMemo(
@@ -246,8 +257,8 @@ export const useCardSetViewZoom = ({
       return null;
     }
 
-    return getCardSetViewZoomPreference(zoomScope) ?? null;
-  }, [cardSetId, zoomScope]);
+    return getCardSetViewZoomPreference(zoomPreferenceLookupScope) ?? null;
+  }, [cardSetId, zoomPreferenceLookupScope]);
 
   const preferredZoomPercent =
     zoomPreferenceState.scopeKey === zoomSourceKey &&
@@ -269,13 +280,13 @@ export const useCardSetViewZoom = ({
       return;
     }
 
-    setCardSetViewZoomPreference(zoomScope, zoomPercent);
+    setCardSetViewZoomPreference(currentZoomScope, zoomPercent);
   }, [
     cardSetId,
+    currentZoomScope,
     zoomPercent,
     zoomPreferenceState.preferredPercent,
     zoomPreferenceState.scopeKey,
-    zoomScope,
     zoomSourceKey,
   ]);
 
@@ -326,10 +337,6 @@ export const useCardSetViewZoom = ({
     );
   }, [setZoomPercent, zoomPercent]);
 
-  const reset = useCallback(() => {
-    setZoomPercent(defaultZoomPercent);
-  }, [defaultZoomPercent, setZoomPercent]);
-
   return {
     zoomPercent,
     zoomScale,
@@ -342,7 +349,6 @@ export const useCardSetViewZoom = ({
     setZoomPercent,
     stepUp,
     stepDown,
-    reset,
     canUseSplit,
     effectiveCardLayoutMode,
     showConstraintIndicator,

@@ -85,11 +85,9 @@ export const CardSetViewScreen = () => {
           min={topLeftZoomControl.min}
           max={topLeftZoomControl.max}
           step={topLeftZoomControl.step}
-          defaultValue={topLeftZoomControl.defaultValue}
           onChange={topLeftZoomControl.onChange}
           onStepDown={topLeftZoomControl.onStepDown}
           onStepUp={topLeftZoomControl.onStepUp}
-          onReset={topLeftZoomControl.onReset}
         />
       ) : null}
       {layoutConstraintIndicatorLabel ? (

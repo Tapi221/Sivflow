@@ -137,11 +137,9 @@ export const useCardSetViewScreenController = () => {
           min: zoom.minZoomPercent,
           max: zoom.maxZoomPercent,
           step: 5,
-          defaultValue: zoom.defaultZoomPercent,
           onChange: zoom.setZoomPercent,
           onStepDown: zoom.stepDown,
           onStepUp: zoom.stepUp,
-          onReset: zoom.reset,
         }
       : null;
 
