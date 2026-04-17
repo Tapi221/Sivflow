@@ -7,7 +7,7 @@ import {
   cardHeightPxToLayoutRows,
   layoutRowsToCardHeightPx,
   minCardHeightPxToLayoutRows,
-} from "@/components/card/common/constants";
+} from "@constants/shared/cardGeometry";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 
 type Side = "question" | "answer";

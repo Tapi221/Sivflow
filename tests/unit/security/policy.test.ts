@@ -6,8 +6,19 @@ import {
   getRiskLevel,
   resolveDetectionOutcome,
 } from "../../../functions/src/security/policy";
+import {
+  SECURITY_EVENT_TYPES,
+  isSupportedSecurityEventType,
+} from "../../../functions/src/security/contract";
 
 describe("security policy", () => {
+  it("exposes a single authoritative set of security event types", () => {
+    expect(SECURITY_EVENT_TYPES).toContain("ACCESS_DENIED_REVOKED");
+    expect(SECURITY_EVENT_TYPES).toContain("ADMIN_LOG_EXPORT");
+    expect(isSupportedSecurityEventType("LOGIN_FAILED")).toBe(true);
+    expect(isSupportedSecurityEventType("NOT_A_REAL_EVENT")).toBe(false);
+  });
+
   it("windowed rule does not add score before threshold", () => {
     const outcome = resolveDetectionOutcome({
       eventType: "SYNC_CONFLICT_EXCESS",

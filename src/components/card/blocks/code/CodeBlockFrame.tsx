@@ -1,12 +1,10 @@
 import React from "react";
-import { CARD_ROW_PX } from "@/components/card/common/constants";
+import { CARD_ROW_PX } from "@constants/shared/cardGeometry";
 import { RowSnappedRoot } from "@/components/card/frame/RowSnappedRoot";
 
 type CodeBlockFrameProps = {
   variant?: "viewer" | "editor";
-  /** Notion風: 表示は短縮(例: JS/TS/PY) */
   languageLabel?: string;
-  /** hover / a11y 用のフル名(例: JavaScript/TypeScript) */
   languageTitle?: string;
 
   headerLeft?: React.ReactNode;
@@ -14,14 +12,6 @@ type CodeBlockFrameProps = {
   children: React.ReactNode;
 };
 
-/**
- * 全画面統一のコードブロックフレーム
- *
- * - 外枠: codeBlockRoot
- * - 言語ラベル左上配置: codeBlockLang
- * - ヘッダ: headerLeft / headerRight
- * - 内容領域: codeBlockBody（横スクロール責務を一元化）
- */
 export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
   variant = "viewer",
   languageLabel,
@@ -30,7 +20,7 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
   headerRight,
   children,
 }) => {
-  const showLangLabel = !!languageLabel && !headerLeft; // 左側ヘッダがあると被るので抑止
+  const showLangLabel = !!languageLabel && !headerLeft;
 
   return (
     <div className="codeBlockOuter">
@@ -45,7 +35,6 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
               left: "var(--code-header-inset-x, 10px)",
               top: "var(--code-header-inset-y, 6px)",
             }}
-            // ラベルクリックで親のカード選択やD&Dに干渉しにくくする
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
             aria-label={`Language: ${languageTitle ?? languageLabel}`}

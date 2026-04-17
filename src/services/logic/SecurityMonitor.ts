@@ -38,7 +38,7 @@ export interface SecurityState {
 }
 
 /**
- * SecurityMonitor: セキュリティイベントの監視と異常検知を行うクラス
+ * SecurityMonitor: セキュリティログ送信とサーバー状態監視を行うクラス
  */
 export class SecurityMonitor {
   private userId: string;
@@ -58,7 +58,7 @@ export class SecurityMonitor {
   }
 
   /**
-   * イベントを記録し、異常検知を実行する
+   * セキュリティイベントを記録する
    */
   async logEvent(
     type: SecurityEventType,
@@ -203,5 +203,4 @@ export class SecurityMonitor {
       this.unsubscribeNotifications = null;
     }
   }
-
 }

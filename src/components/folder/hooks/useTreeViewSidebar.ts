@@ -84,10 +84,7 @@ export const useTreeViewSidebar = () => {
         e.preventDefault();
         setIsSidebarOpen((prev) => {
           const next = !prev;
-          window.localStorage.setItem(
-            WEB_STORAGE_KEYS.sidebarOpen,
-            String(next),
-          );
+          window.localStorage.setItem(WEB_STORAGE_KEYS.sidebarOpen, String(next));
           return next;
         });
       }

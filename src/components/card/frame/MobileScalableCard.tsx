@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   CARD_BASE_WIDTH,
   CARD_DISPLAY_SCALE,
-} from "@/components/card/common/constants";
+} from "@constants/shared/cardGeometry";
 
 const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
 
@@ -39,7 +39,6 @@ export const MobileScalableCard = ({
   const [contentHeight, setContentHeight] = useState<number | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  // スケール計算と適用
   useEffect(() => {
     const updateScale = () => {
       if (typeof window === "undefined") return;
@@ -50,20 +49,14 @@ export const MobileScalableCard = ({
         host?.getBoundingClientRect?.().width ??
         window.innerWidth;
       const availableWidth = Math.max(0, parentWidth - safePadding);
-
-      // カードが画面幅を超える場合のみ縮小
       const calculatedScale = Math.min(1, availableWidth / cardDesignWidth);
 
       setScale(calculatedScale);
     };
 
-    // 初回実行
     updateScale();
-
-    // リサイズ監視
     window.addEventListener("resize", updateScale);
 
-    // モダンブラウザ向けのResizeObserver（より正確なタイミングで検知）
     let resizeObserver: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined" && containerRef.current) {
       resizeObserver = new ResizeObserver(updateScale);
@@ -95,7 +88,6 @@ export const MobileScalableCard = ({
     return () => observer.disconnect();
   }, []);
 
-  // 編集モード制御（将来の拡張用）
   useEffect(() => {
     if (!enableEditMode) return;
 
@@ -109,7 +101,6 @@ export const MobileScalableCard = ({
     const handleFocusOut = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
-        // 少し遅延させて、次のフォーカスがない場合のみ解除
         setTimeout(() => {
           const activeElement = document.activeElement;
           if (
@@ -131,14 +122,12 @@ export const MobileScalableCard = ({
     };
   }, [enableEditMode]);
 
-  // 編集モード時のESCキーで終了
   useEffect(() => {
     if (!isEditMode) return;
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setIsEditMode(false);
-        // フォーカスを外す
         if (document.activeElement instanceof HTMLElement) {
           document.activeElement.blur();
         }
@@ -151,7 +140,6 @@ export const MobileScalableCard = ({
 
   return (
     <>
-      {/* 編集モード時の背景オーバーレイ */}
       {isEditMode && enableEditMode && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 animate-in fade-in duration-200"
@@ -160,7 +148,6 @@ export const MobileScalableCard = ({
         />
       )}
 
-      {/* カードコンテナ */}
       <div
         ref={containerRef}
         className={cn(

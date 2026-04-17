@@ -6,13 +6,25 @@ import {
   RISK_SCORE_THRESHOLDS,
   calculateNextRiskScore,
   evaluateDetectionRule,
-  isSupportedSecurityEventType,
   type RiskLevel,
-  type SecurityEventType,
 } from "./policy";
+import { isSupportedSecurityEventType, type SecurityEventType } from "./contract";
 
 const toFiniteNumber = (value: unknown, fallback = 0): number => {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+};
+
+const toUserSecurityAlertLevel = (
+  riskLevel: RiskLevel,
+): "normal" | "high" | "critical" => {
+  switch (riskLevel) {
+    case "critical":
+      return "critical";
+    case "high":
+      return "high";
+    default:
+      return "normal";
+  }
 };
 
 // 他のトリガーと共有するために初期化済みインスタンスを使う場合は調整
@@ -146,7 +158,7 @@ const calculateRiskScore = async (
         riskLevel,
         lastUpdate: FieldValue.serverTimestamp(),
         lastEvent: eventType,
-        lastTriggeredRule: scoreAdded > 0 ? eventType : null,
+        ...(scoreAdded > 0 ? { lastTriggeredRule: eventType } : {}),
       },
       { merge: true },
     );
@@ -180,8 +192,6 @@ const handleRiskActions = async (
     previousScore < RISK_SCORE_THRESHOLDS.accountLock &&
     nextScore >= RISK_SCORE_THRESHOLDS.accountLock;
 
-  // 1. レベル別アクション
-
   if (crossedWarning) {
     await db.collection(`users/${userId}/notifications`).add({
       type: "SECURITY_ALERT",
@@ -197,7 +207,7 @@ const handleRiskActions = async (
     await db.doc(`users/${userId}`).set(
       {
         requires2FA: true,
-        securityAlertLevel: "high",
+        securityAlertLevel: toUserSecurityAlertLevel(riskLevel),
       },
       { merge: true },
     );
@@ -226,6 +236,7 @@ const handleRiskActions = async (
       {
         isAccountLocked: true,
         lockedAt: FieldValue.serverTimestamp(),
+        securityAlertLevel: toUserSecurityAlertLevel(riskLevel),
       },
       { merge: true },
     );

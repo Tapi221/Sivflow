@@ -1,3 +1,5 @@
+import type { SecurityEventType } from "@security-contract";
+
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export type SyncContextSource =
@@ -78,21 +80,6 @@ export interface ITelemetryService {
     end: (status: "success" | "failure") => void;
   };
 }
-
-export type SecurityEventType =
-  | "LOGIN_SUCCESS" // ログイン成功
-  | "LOGIN_FAILED" // ログイン失敗
-  | "DEVICE_REVOKED" // デバイスの登録解除（自分/他端末操作）
-  | "ACCESS_DENIED_REVOKED" // 無効化端末からのアクセス拒否
-  | "SYNC_AUTH_ERROR" // 同期時の認証エラー
-  | "SENSITIVE_OP_REVOKED" // 重要な操作（削除等）の失敗
-  | "DEVICE_NEW_REGISTER" // 新規デバイス登録
-  | "LOCK_CONTENTION_EXCESS" // ロック奪取過多
-  | "SYNC_CONFLICT_EXCESS" // 競合過多
-  // Admin Ops
-  | "ADMIN_DEVICE_REVOKE" // 管理者による端末解除
-  | "ADMIN_ACCOUNT_LOCK" // 管理者によるアカウントロック
-  | "ADMIN_LOG_EXPORT"; // 監査ログのエクスポート
 
 export interface SecurityMetadata {
   ipAddress?: string; // (serverのみ信頼可能)

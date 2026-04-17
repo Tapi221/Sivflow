@@ -1,16 +1,5 @@
-export type SecurityEventType =
-  | "LOGIN_SUCCESS"
-  | "LOGIN_FAILED"
-  | "DEVICE_REVOKED"
-  | "ACCESS_DENIED_REVOKED"
-  | "SYNC_AUTH_ERROR"
-  | "SENSITIVE_OP_REVOKED"
-  | "DEVICE_NEW_REGISTER"
-  | "LOCK_CONTENTION_EXCESS"
-  | "SYNC_CONFLICT_EXCESS"
-  | "ADMIN_DEVICE_REVOKE"
-  | "ADMIN_ACCOUNT_LOCK"
-  | "ADMIN_LOG_EXPORT";
+import type { Firestore } from "firebase-admin/firestore";
+import { isSupportedSecurityEventType, type SecurityEventType } from "./contract";
 
 export type RiskLevel = "normal" | "warning" | "high" | "critical";
 
@@ -28,21 +17,6 @@ export type DetectionOutcome = {
   scoreAdded: number;
   windowCount: number | null;
 };
-
-export const SUPPORTED_SECURITY_EVENT_TYPES: readonly SecurityEventType[] = [
-  "LOGIN_SUCCESS",
-  "LOGIN_FAILED",
-  "DEVICE_REVOKED",
-  "ACCESS_DENIED_REVOKED",
-  "SYNC_AUTH_ERROR",
-  "SENSITIVE_OP_REVOKED",
-  "DEVICE_NEW_REGISTER",
-  "LOCK_CONTENTION_EXCESS",
-  "SYNC_CONFLICT_EXCESS",
-  "ADMIN_DEVICE_REVOKE",
-  "ADMIN_ACCOUNT_LOCK",
-  "ADMIN_LOG_EXPORT",
-] as const;
 
 export const DETECTION_RULES: readonly DetectionRule[] = [
   {
@@ -81,14 +55,6 @@ export const MAX_RISK_SCORE = 100;
 
 const clampRiskScore = (score: number) => {
   return Math.min(MAX_RISK_SCORE, Math.max(0, score));
-};
-
-export const isSupportedSecurityEventType = (
-  value: string,
-): value is SecurityEventType => {
-  return (
-    SUPPORTED_SECURITY_EVENT_TYPES as readonly string[]
-  ).includes(value);
 };
 
 export const getRiskLevel = (riskScore: number): RiskLevel => {
@@ -200,7 +166,7 @@ export const evaluateDetectionRule = async ({
   eventType,
   occurredAtMs,
 }: {
-  db: FirebaseFirestore.Firestore;
+  db: Firestore;
   userId: string;
   eventType: SecurityEventType;
   occurredAtMs: number;

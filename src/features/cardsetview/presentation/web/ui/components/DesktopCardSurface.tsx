@@ -1,4 +1,4 @@
-import { layoutRowsToCardHeightPx } from "@/components/card/common/constants";
+import { layoutRowsToCardHeightPx } from "@constants/shared/cardGeometry";
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { buildSharedCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";

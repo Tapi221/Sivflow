@@ -73,5 +73,7 @@ export const SECURITY_EVENT_CATALOG: Record<
 };
 
 export const getSecurityEventCatalogEntry = (type: SecurityEventType) => {
-  return SECURITY_EVENT_CATALOG[type];
+  const entry = SECURITY_EVENT_CATALOG[type];
+  if (!entry) throw new Error(`Unknown security event type: ${type}`);
+  return entry;
 };

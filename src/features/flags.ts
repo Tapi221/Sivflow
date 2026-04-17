@@ -1,33 +1,19 @@
+import {
+  DEFAULT_FEATURE_FLAGS,
+  LEGACY_FEATURE_FLAG_MAP,
+  type FeatureFlags,
+  type LegacyFlagName,
+} from "@constants/shared/featureFlags";
 import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 
-export type FeatureFlags = {
-  newEditor: boolean;
-  enableMarkdownImages: boolean;
-  experimentalPasteSplit: boolean;
-  postReviewPractice: boolean;
-  enableAdvancedTelemetry: boolean;
-};
-
-const DEFAULT_FLAGS: FeatureFlags = {
-  newEditor: false,
-  enableMarkdownImages: false,
-  experimentalPasteSplit: false,
-  postReviewPractice: false,
-  enableAdvancedTelemetry: false,
-};
-
 class FeatureFlagService {
-  private flags: FeatureFlags = { ...DEFAULT_FLAGS };
+  private flags: FeatureFlags = { ...DEFAULT_FEATURE_FLAGS };
 
   constructor() {
     this.loadOverrides();
   }
 
-  /**
-   * 開発環境のみ localStorage から override を読み込む
-   * 本番では完全に無視（安全優先）
-   */
-  private loadOverrides() {
+  private loadOverrides = () => {
     if (typeof window === "undefined") return;
     if (!import.meta.env.DEV) return;
 
@@ -49,23 +35,18 @@ class FeatureFlagService {
     } catch (err) {
       console.warn("[FeatureFlags] Failed to load overrides:", err);
     }
-  }
+  };
 
-  public getFlag(flag: keyof FeatureFlags): boolean {
+  public getFlag = (flag: keyof FeatureFlags): boolean => {
     return this.flags[flag];
-  }
+  };
 
-  /**
-   * 開発環境のみ localStorage に保存
-   * 本番ではメモリ上のみ変更
-   */
-  public setFlag(flag: keyof FeatureFlags, value: boolean) {
+  public setFlag = (flag: keyof FeatureFlags, value: boolean) => {
     this.flags[flag] = value;
 
     if (import.meta.env.DEV && typeof window !== "undefined") {
       try {
-        const raw =
-          localStorage.getItem(SHARED_STORAGE_KEYS.featureFlags) || "{}";
+        const raw = localStorage.getItem(SHARED_STORAGE_KEYS.featureFlags) || "{}";
         const parsed: unknown = JSON.parse(raw);
         const current: Record<string, unknown> =
           parsed != null && typeof parsed === "object"
@@ -81,35 +62,25 @@ class FeatureFlagService {
         console.warn("[FeatureFlags] Failed to persist override:", err);
       }
     }
-  }
+  };
 
-  /**
-   * 本番では常に DEFAULT を使う
-   */
-  public resetToDefaults() {
-    this.flags = { ...DEFAULT_FLAGS };
+  public resetToDefaults = () => {
+    this.flags = { ...DEFAULT_FEATURE_FLAGS };
 
     if (import.meta.env.DEV && typeof window !== "undefined") {
       localStorage.removeItem(SHARED_STORAGE_KEYS.featureFlags);
     }
-  }
+  };
 
-  public getAll(): FeatureFlags {
+  public getAll = (): FeatureFlags => {
     return { ...this.flags };
-  }
+  };
 }
 
 const featureFlags = new FeatureFlagService();
 
-export type LegacyFlagName = "postReviewPractice" | "ENABLE_ADVANCED_TELEMETRY";
-
-const legacyToKey: Record<LegacyFlagName, keyof FeatureFlags> = {
-  postReviewPractice: "postReviewPractice",
-  ENABLE_ADVANCED_TELEMETRY: "enableAdvancedTelemetry",
-};
-
 export const flags = {
-  isEnabled(name: LegacyFlagName): boolean {
-    return featureFlags.getFlag(legacyToKey[name]);
+  isEnabled: (name: LegacyFlagName): boolean => {
+    return featureFlags.getFlag(LEGACY_FEATURE_FLAG_MAP[name]);
   },
 };
