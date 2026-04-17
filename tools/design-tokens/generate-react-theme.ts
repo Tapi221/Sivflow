@@ -1,5 +1,7 @@
 type TokenBundle = Record<string, unknown>;
 
+type CssVariableEntry = { name: string; value: string; path: string[] };
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -12,15 +14,53 @@ const toKebabCase = (value: string) =>
 const escapeFontFamily = (value: string) =>
   /\s/.test(value) ? `"${value.replaceAll('"', '\\"')}"` : value;
 
+const unitlessNumberPatterns = [/^typography\.(lineHeight|fontWeight)\./];
+
+const millisecondNumberPatterns = [/^motion\.durationMs\./];
+
+const hexColorPattern = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+
+const serializeCssScalar = (value: number, path: string[]) => {
+  const tokenPath = path.join(".");
+
+  if (unitlessNumberPatterns.some((pattern) => pattern.test(tokenPath))) {
+    return String(value);
+  }
+
+  if (millisecondNumberPatterns.some((pattern) => pattern.test(tokenPath))) {
+    return `${value}ms`;
+  }
+
+  return `${value}px`;
+};
+
+const hexToRgbChannels = (value: string) => {
+  if (!hexColorPattern.test(value)) {
+    return null;
+  }
+
+  const normalized =
+    value.length === 4
+      ? `#${value[1]}${value[1]}${value[2]}${value[2]}${value[3]}${value[3]}`
+      : value;
+
+  const red = Number.parseInt(normalized.slice(1, 3), 16);
+  const green = Number.parseInt(normalized.slice(3, 5), 16);
+  const blue = Number.parseInt(normalized.slice(5, 7), 16);
+
+  return `${red} ${green} ${blue}`;
+};
+
 const flattenCssVariables = (
   value: unknown,
   path: string[] = [],
-  output: Array<{ name: string; value: string }> = [],
+  output: CssVariableEntry[] = [],
 ) => {
   if (Array.isArray(value)) {
     output.push({
       name: path.map(toKebabCase).join("-"),
       value: value.map((entry) => escapeFontFamily(String(entry))).join(", "),
+      path,
     });
     return output;
   }
@@ -34,18 +74,34 @@ const flattenCssVariables = (
 
   const normalized =
     typeof value === "number"
-      ? Number.isInteger(value)
-        ? `${value}px`
-        : `${value}px`
+      ? serializeCssScalar(value, path)
       : String(value);
 
   output.push({
     name: path.map(toKebabCase).join("-"),
     value: normalized,
+    path,
   });
 
   return output;
 };
+
+const addDerivedColorChannels = (entries: CssVariableEntry[]) =>
+  entries.flatMap((entry) => {
+    const rgbChannels = hexToRgbChannels(entry.value);
+    if (rgbChannels === null) {
+      return [entry];
+    }
+
+    return [
+      entry,
+      {
+        name: `${entry.name}-rgb`,
+        value: rgbChannels,
+        path: [...entry.path, "rgb"],
+      },
+    ];
+  });
 
 const serializeTsObject = (value: unknown, indent = 0): string => {
   const spacing = "  ".repeat(indent);
@@ -73,8 +129,8 @@ export interface ReactThemeOutput {
 }
 
 export const generateReactTheme = (tokens: TokenBundle): ReactThemeOutput => {
-  const cssVariables = flattenCssVariables(tokens).sort((left, right) =>
-    left.name.localeCompare(right.name),
+  const cssVariables = addDerivedColorChannels(flattenCssVariables(tokens)).sort(
+    (left, right) => left.name.localeCompare(right.name),
   );
 
   const css = [

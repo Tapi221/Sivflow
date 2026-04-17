@@ -39,5 +39,17 @@
     "background": "#f7f8f9",
     "foreground": "#24292f",
     "border": "rgba(0, 0, 0, 0.06)"
+  },
+  "tag": {
+    "slate": { "bg": "#f3f4f6", "fg": "#4b5563", "border": "#d1d5db" },
+    "red": { "bg": "#fef2f2", "fg": "#b42318", "border": "#f3b5b5" },
+    "orange": { "bg": "#fff7ed", "fg": "#c2410c", "border": "#fdba74" },
+    "amber": { "bg": "#fffbeb", "fg": "#b45309", "border": "#fcd34d" },
+    "lime": { "bg": "#f7fee7", "fg": "#4d7c0f", "border": "#bef264" },
+    "green": { "bg": "#f0fdf4", "fg": "#15803d", "border": "#86efac" },
+    "teal": { "bg": "#f0fdfa", "fg": "#0f766e", "border": "#5eead4" },
+    "sky": { "bg": "#f0f9ff", "fg": "#0369a1", "border": "#7dd3fc" },
+    "blue": { "bg": "#eff6ff", "fg": "#1d4ed8", "border": "#93c5fd" },
+    "violet": { "bg": "#f5f3ff", "fg": "#6d28d9", "border": "#c4b5fd" }
   }
 }

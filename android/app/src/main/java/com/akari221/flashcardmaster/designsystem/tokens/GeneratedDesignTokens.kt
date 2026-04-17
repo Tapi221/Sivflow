@@ -44,6 +44,58 @@ object DesignTokens {
             const val Foreground = "#24292f"
             const val Border = "rgba(0, 0, 0, 0.06)"
         }
+        object Tag {
+            object Slate {
+                const val Bg = "#f3f4f6"
+                const val Fg = "#4b5563"
+                const val Border = "#d1d5db"
+            }
+            object Red {
+                const val Bg = "#fef2f2"
+                const val Fg = "#b42318"
+                const val Border = "#f3b5b5"
+            }
+            object Orange {
+                const val Bg = "#fff7ed"
+                const val Fg = "#c2410c"
+                const val Border = "#fdba74"
+            }
+            object Amber {
+                const val Bg = "#fffbeb"
+                const val Fg = "#b45309"
+                const val Border = "#fcd34d"
+            }
+            object Lime {
+                const val Bg = "#f7fee7"
+                const val Fg = "#4d7c0f"
+                const val Border = "#bef264"
+            }
+            object Green {
+                const val Bg = "#f0fdf4"
+                const val Fg = "#15803d"
+                const val Border = "#86efac"
+            }
+            object Teal {
+                const val Bg = "#f0fdfa"
+                const val Fg = "#0f766e"
+                const val Border = "#5eead4"
+            }
+            object Sky {
+                const val Bg = "#f0f9ff"
+                const val Fg = "#0369a1"
+                const val Border = "#7dd3fc"
+            }
+            object Blue {
+                const val Bg = "#eff6ff"
+                const val Fg = "#1d4ed8"
+                const val Border = "#93c5fd"
+            }
+            object Violet {
+                const val Bg = "#f5f3ff"
+                const val Fg = "#6d28d9"
+                const val Border = "#c4b5fd"
+            }
+        }
     }
     object Spacing {
         const val Value0 = 0
@@ -135,6 +187,33 @@ object DesignTokens {
         }
         object Blur {
             const val Floating = 12
+        }
+    }
+    object Layout {
+        object Card {
+            const val BaseWidth = 480
+            const val DisplayMaxHeight = "min(70vh, 560px)"
+            const val RowPx = 24
+            const val SelectedOutlineWidth = 1.6
+        }
+        object Tree {
+            const val Indent = 12
+        }
+        object Content {
+            const val MaxWidth = 760
+        }
+        object RowHeight {
+            const val Dense = 28
+            const val Normal = 32
+        }
+        object FontSize {
+            const val PageTitle = 22
+            const val Section = 13
+            const val Body = 13
+            const val Meta = 12
+        }
+        object Scrollbar {
+            const val Size = 6
         }
     }
     object Semantic {

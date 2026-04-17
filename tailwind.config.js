@@ -5,67 +5,82 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: "hsl(var(--border) / <alpha-value>)",
-        input: "hsl(var(--input) / <alpha-value>)",
-        ring: "hsl(var(--ring) / <alpha-value>)",
-        foreground: "hsl(var(--foreground) / <alpha-value>)",
+        border:
+          "rgb(var(--ds-semantic-color-border-default-rgb) / <alpha-value>)",
+        input:
+          "rgb(var(--ds-semantic-color-border-default-rgb) / <alpha-value>)",
+        ring:
+          "rgb(var(--ds-semantic-color-action-primary-rgb) / <alpha-value>)",
+        foreground: "rgb(var(--ds-semantic-color-text-primary-rgb) / <alpha-value>)",
         popover: {
-          DEFAULT: "hsl(var(--popover) / <alpha-value>)",
-          foreground: "hsl(var(--popover-foreground) / <alpha-value>)",
+          DEFAULT:
+            "rgb(var(--ds-semantic-color-background-app-rgb) / <alpha-value>)",
+          foreground: "rgb(var(--ds-semantic-color-text-primary-rgb) / <alpha-value>)",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted) / <alpha-value>)",
-          foreground: "hsl(var(--muted-foreground) / <alpha-value>)",
+          DEFAULT: "rgb(var(--ds-color-neutral-100-rgb) / <alpha-value>)",
+          foreground:
+            "rgb(var(--ds-semantic-color-text-secondary-rgb) / <alpha-value>)",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent) / <alpha-value>)",
-          foreground: "hsl(var(--accent-foreground) / <alpha-value>)",
+          DEFAULT:
+            "rgb(var(--ds-semantic-color-background-sidebar-active-rgb) / <alpha-value>)",
+          foreground: "rgb(var(--ds-semantic-color-text-strong-rgb) / <alpha-value>)",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary) / <alpha-value>)",
-          foreground: "hsl(var(--secondary-foreground) / <alpha-value>)",
+          DEFAULT:
+            "rgb(var(--ds-semantic-color-action-primary-soft-rgb) / <alpha-value>)",
+          foreground:
+            "rgb(var(--ds-semantic-color-action-primary-rgb) / <alpha-value>)",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
-          foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
+          DEFAULT: "rgb(var(--ds-color-status-danger-rgb) / <alpha-value>)",
+          foreground:
+            "rgb(var(--ds-semantic-color-text-on-primary-rgb) / <alpha-value>)",
         },
-        // メインカラー（ティールグリーン系）
         primary: {
-          DEFAULT: "var(--color-primary-500)", // Default to 500
-          50: "var(--color-primary-50)",
-          100: "var(--color-primary-100)",
-          200: "var(--color-primary-200)",
-          300: "var(--color-primary-300)",
-          400: "var(--color-primary-400)",
-          500: "var(--color-primary-500)",
-          600: "rgb(var(--color-primary-600) / <alpha-value>)", // Main accent with opacity support
-          700: "var(--color-primary-700)",
-          800: "var(--color-primary-800)",
-          900: "var(--color-primary-900)",
+          DEFAULT: "rgb(var(--ds-color-primary-500-rgb) / <alpha-value>)",
+          50: "rgb(var(--ds-color-primary-50-rgb) / <alpha-value>)",
+          100: "rgb(var(--ds-color-primary-100-rgb) / <alpha-value>)",
+          200: "rgb(var(--ds-color-primary-200-rgb) / <alpha-value>)",
+          300: "rgb(var(--ds-color-primary-300-rgb) / <alpha-value>)",
+          400: "rgb(var(--ds-color-primary-400-rgb) / <alpha-value>)",
+          500: "rgb(var(--ds-color-primary-500-rgb) / <alpha-value>)",
+          600: "rgb(var(--ds-color-primary-600-rgb) / <alpha-value>)",
+          700: "rgb(var(--ds-color-primary-700-rgb) / <alpha-value>)",
+          800: "rgb(var(--ds-color-primary-800-rgb) / <alpha-value>)",
+          900: "rgb(var(--ds-color-primary-900-rgb) / <alpha-value>)",
         },
-        // ニュートラル（グレー）
         neutral: {
-          DEFAULT: "#8B8B8B",
-          100: "#F5F5F5",
-          200: "#E0E0E0",
-          300: "#C6C6C6",
-          400: "#A0A0A0",
-          500: "#8B8B8B",
-          600: "#757575",
-          700: "#616161",
+          DEFAULT: "rgb(var(--ds-color-neutral-500-rgb) / <alpha-value>)",
+          0: "rgb(var(--ds-color-neutral-0-rgb) / <alpha-value>)",
+          50: "rgb(var(--ds-color-neutral-50-rgb) / <alpha-value>)",
+          100: "rgb(var(--ds-color-neutral-100-rgb) / <alpha-value>)",
+          150: "rgb(var(--ds-color-neutral-150-rgb) / <alpha-value>)",
+          200: "rgb(var(--ds-color-neutral-200-rgb) / <alpha-value>)",
+          300: "rgb(var(--ds-color-neutral-300-rgb) / <alpha-value>)",
+          400: "rgb(var(--ds-color-neutral-400-rgb) / <alpha-value>)",
+          500: "rgb(var(--ds-color-neutral-500-rgb) / <alpha-value>)",
+          600: "rgb(var(--ds-color-neutral-600-rgb) / <alpha-value>)",
+          700: "rgb(var(--ds-color-neutral-700-rgb) / <alpha-value>)",
+          800: "rgb(var(--ds-color-neutral-800-rgb) / <alpha-value>)",
+          900: "rgb(var(--ds-color-neutral-900-rgb) / <alpha-value>)",
         },
-        // 背景
         background: {
-          DEFAULT: "hsl(var(--background) / <alpha-value>)",
-          light: "#FFFFFF",
-          subtle: "#F5F5F5",
+          DEFAULT:
+            "rgb(var(--ds-semantic-color-background-app-rgb) / <alpha-value>)",
+          light:
+            "rgb(var(--ds-semantic-color-background-app-rgb) / <alpha-value>)",
+          subtle: "rgb(var(--ds-color-neutral-100-rgb) / <alpha-value>)",
         },
-        // テキスト
         text: {
-          DEFAULT: "#2C2C2C",
-          strong: "#2C2C2C",
-          body: "#4A4A4A",
-          weak: "#8B8B8B",
+          DEFAULT:
+            "rgb(var(--ds-semantic-color-text-primary-rgb) / <alpha-value>)",
+          strong:
+            "rgb(var(--ds-semantic-color-text-strong-rgb) / <alpha-value>)",
+          body:
+            "rgb(var(--ds-semantic-color-text-secondary-rgb) / <alpha-value>)",
+          weak: "rgb(var(--ds-color-neutral-500-rgb) / <alpha-value>)",
         },
       },
       fontFamily: {
@@ -78,28 +93,32 @@ export default {
           "Roboto",
           "sans-serif",
         ],
+        serif: ["var(--ds-semantic-typography-content)"],
+        mono: ["var(--ds-semantic-typography-code)"],
       },
       backgroundImage: {
-        "gradient-primary": "linear-gradient(135deg, #689A98 0%, #90B8B6 100%)",
+        "gradient-primary":
+          "linear-gradient(135deg, var(--ds-color-primary-600) 0%, var(--ds-color-primary-400) 100%)",
         "gradient-secondary":
-          "linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)",
-        "gradient-accent": "linear-gradient(135deg, #FFE66D 0%, #FFB347 100%)",
-        "gradient-purple": "linear-gradient(135deg, #A78BFA 0%, #EC4899 100%)",
-        "gradient-warm": "linear-gradient(135deg, #FFF8F5 0%, #E6F0EF 100%)",
+          "linear-gradient(135deg, var(--ds-color-primary-500) 0%, var(--ds-color-primary-700) 100%)",
+        "gradient-accent":
+          "linear-gradient(135deg, var(--ds-color-status-warning) 0%, var(--ds-color-status-danger) 100%)",
+        "gradient-purple":
+          "linear-gradient(135deg, var(--ds-color-tag-violet-border) 0%, var(--ds-color-tag-violet-fg) 100%)",
+        "gradient-warm":
+          "linear-gradient(135deg, var(--ds-semantic-color-background-app) 0%, var(--ds-semantic-color-action-primary-soft) 100%)",
         "gradient-hero":
-          "linear-gradient(135deg, #689A98 0%, #90B8B6 50%, #FFE66D 100%)",
+          "linear-gradient(135deg, var(--ds-color-primary-600) 0%, var(--ds-color-primary-400) 50%, var(--ds-color-status-warning) 100%)",
       },
       boxShadow: {
-        soft: "0 2px 15px -3px rgba(104, 154, 152, 0.15), 0 10px 20px -2px rgba(104, 154, 152, 0.08)",
-        glow: "0 0 20px rgba(104, 154, 152, 0.3)",
-        card: "0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.04)",
-        "card-hover":
-          "0 8px 30px -4px rgba(104, 154, 152, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)",
+        soft: "var(--ds-elevation-shadow-soft)",
+        card: "var(--ds-elevation-shadow-card)",
+        "card-hover": "var(--ds-elevation-shadow-card-hover)",
       },
       borderRadius: {
-        "2xl": "1rem",
-        "3xl": "1.5rem",
-        "4xl": "2rem",
+        "2xl": "var(--ds-radius-xl)",
+        "3xl": "var(--ds-radius-2xl)",
+        "4xl": "var(--ds-radius-3xl)",
       },
       animation: {
         float: "float 3s ease-in-out infinite",

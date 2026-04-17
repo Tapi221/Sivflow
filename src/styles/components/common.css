@@ -7,7 +7,11 @@
 
   .card-gradient {
     @apply rounded-2xl p-5 text-white shadow-soft;
-    background: var(--color-primary-600-hex, #689a98);
+    background: linear-gradient(
+      135deg,
+      var(--ds-color-primary-600) 0%,
+      var(--ds-color-primary-400) 100%
+    );
   }
 
   .card-outline {
@@ -52,8 +56,8 @@
       --progress-color,
       linear-gradient(
         135deg,
-        var(--color-primary-600-hex, #689a98) 0%,
-        #86b4b2 100%
+        var(--ds-color-primary-600) 0%,
+        var(--ds-color-primary-400) 100%
       )
     );
   }
@@ -71,8 +75,8 @@
     @apply fixed bottom-24 right-6 w-14 h-14 rounded-full shadow-glow flex items-center justify-center text-white text-2xl transition-all duration-300;
     background: linear-gradient(
       135deg,
-      var(--color-primary-600-hex, #689a98) 0%,
-      #86b4b2 100%
+      var(--ds-color-primary-600) 0%,
+      var(--ds-color-primary-400) 100%
     );
   }
 
@@ -81,15 +85,20 @@
   }
 
   .tag {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-md;
+    @apply inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-md;
+    background: var(--ds-color-neutral-100);
+    color: var(--ds-semantic-color-text-secondary);
   }
 
   .dropdown-menu {
-    @apply absolute z-50 mt-2 bg-background-light border border-neutral-100 rounded-xl shadow-lg overflow-hidden;
+    @apply absolute z-50 mt-2 rounded-xl shadow-lg overflow-hidden;
+    background: var(--ds-semantic-color-background-app);
+    border: 1px solid var(--ds-semantic-color-border-default);
   }
 
   .dropdown-item {
-    @apply w-full px-4 py-2.5 text-left text-sm text-gray-700 transition-colors;
+    @apply w-full px-4 py-2.5 text-left text-sm transition-colors;
+    color: var(--ds-semantic-color-text-secondary);
     @apply hover:bg-primary-50 hover:text-primary;
   }
 
@@ -106,13 +115,19 @@
   }
 
   .restore-notification {
-    background-color: var(--accent-bg, transparent);
-    border-color: var(--accent-border, transparent);
+    background-color: var(
+      --accent-bg,
+      var(--ds-semantic-color-action-primary-soft)
+    );
+    border-color: var(
+      --accent-border,
+      var(--ds-semantic-color-action-primary)
+    );
   }
 
   .restore-notification-icon,
   .restore-notification-text {
-    color: var(--accent-main, var(--primary-color));
+    color: var(--accent-main, var(--ds-semantic-color-action-primary));
   }
 
   button,

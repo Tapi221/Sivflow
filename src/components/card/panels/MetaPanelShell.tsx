@@ -25,9 +25,9 @@ export const MetaPanelShell = ({
       )}
       style={
         {
-          "--meta-row-px": "var(--app-row-px)",
-          "--meta-font-size": "var(--ui-font-size-sm)",
-          "--meta-action-min-h": "var(--meta-row-px)",
+          "--meta-row-px": "var(--ds-layout-card-row-px)",
+          "--meta-font-size": "var(--ds-typography-font-size-sm)",
+          "--meta-action-min-h": "var(--ds-layout-card-row-px)",
           backgroundColor: "var(--ds-semantic-color-background-sidebar)",
           ...style,
         } as CSSProperties
