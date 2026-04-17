@@ -5,6 +5,7 @@ import type {
 import {
   CARD_SET_VIEW_FIXED_LAYOUT_SAFETY_ALLOWANCE_PX,
   CARD_SET_VIEW_SCROLLBAR_RESERVE_PX,
+  CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX,
   CARD_SET_VIEW_SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX,
   CARD_SET_VIEW_ZOOM_DEFAULT_PERCENT,
   CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX,
@@ -93,10 +94,8 @@ export const resolveSplitMinimumRequiredWidthPx = ({
   interactionMode: CardSetInteractionMode;
   displayMode: CardDisplayMode;
 }) => {
-  const baseMinWidthPx = resolveZoomMinBaseWidthPx({
-    interactionMode,
-    cardLayoutMode: "split",
-  });
+  const baseMinPresentationWidthPx =
+    CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX[interactionMode];
 
   const fixedAllowancePx =
     displayMode === "fixed"
@@ -104,7 +103,7 @@ export const resolveSplitMinimumRequiredWidthPx = ({
       : 0;
 
   return (
-    baseMinWidthPx +
+    baseMinPresentationWidthPx +
     CARD_SET_VIEW_SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX +
     fixedAllowancePx
   );
