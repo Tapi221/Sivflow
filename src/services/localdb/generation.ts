@@ -39,6 +39,7 @@ const writeGenerationToStorage = (userId: string, generation: number): void => {
 const makeGenerationDbPrefix = (userId: string): string =>
   `${LOCALDB_NAME_PREFIX}${userId}_v${LOCALDB_SCHEMA_VERSION_FOR_NAME}_g`;
 
+// Module-level set replacing LocalDB.generationBumpedUsers
 const generationBumpedUsers = new Set<string>();
 
 const getGenerationForUser = (userId: string) => {

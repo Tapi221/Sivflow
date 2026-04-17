@@ -30,14 +30,17 @@ const getErrorNameMessage = (
 ): { name?: string; message?: string; inner?: unknown; cause?: unknown } => {
   if (!error) return {};
 
+  // まずは正統派
   if (error instanceof Error) {
     return {
       name: typeof error.name === "string" ? error.name : undefined,
       message: typeof error.message === "string" ? error.message : undefined,
+      // Error.cause は unknown になり得る
       cause: (error as { cause?: unknown }).cause,
     };
   }
 
+  // それっぽいオブジェクト（Dexie などもここに落ちる）
   if (isObject(error)) {
     return {
       name: getStringProp(error, "name"),
@@ -47,6 +50,7 @@ const getErrorNameMessage = (
     };
   }
 
+  // string / number / boolean / symbol など
   if (typeof error === "string") return { message: error };
 
   return { message: String(error) };
@@ -60,6 +64,7 @@ export const safeStringifyError = (error: unknown): string => {
 
     const maybeName = name ? `${name}: ` : "";
 
+    // message が取れない場合は JSON.stringify → String の順で諦める
     const fallback =
       safeJsonStringify(error) ??
       (typeof error === "string" ? error : String(error));
