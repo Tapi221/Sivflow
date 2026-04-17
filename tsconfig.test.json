@@ -22,8 +22,6 @@
   "include": [
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
-    "src/tests/**/*.ts",
-    "src/tests/**/*.tsx",
     "tests/**/*.ts",
     "tests/**/*.tsx",
     "functions/src/**/*.ts",

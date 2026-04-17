@@ -21,6 +21,14 @@ jobs:
 
       - run: npm run verify:design-tokens
 
+      - name: Guard legacy src/tests path
+        run: |
+          set -euo pipefail
+          if [ -d "src/tests" ]; then
+            echo "Legacy test directory detected: src/tests"
+            exit 1
+          fi
+
       - name: Guard legacy card-folder usage
         run: |
           set -euo pipefail
