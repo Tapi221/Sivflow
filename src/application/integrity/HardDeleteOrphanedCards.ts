@@ -1,6 +1,6 @@
 import { deleteDoc, doc } from "firebase/firestore";
 
-import { firestoreDb } from "@/services/firebase";
+import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import type { SyncError } from "@/types";
 import { cardDocPathSegments } from "@/services/firestorePaths";
 import { getLocalDb } from "@/services/localDB";
@@ -76,11 +76,8 @@ const deleteRemoteCard = async (
   userId: string,
   cardId: string,
 ): Promise<void> => {
-  if (!firestoreDb) {
-    throw new Error("[Integrity] Firestore is unavailable.");
-  }
-
-  const cardRef = doc(firestoreDb, ...cardDocPathSegments(userId, cardId));
+  const db = requireFirestoreDb();
+  const cardRef = doc(db, ...cardDocPathSegments(userId, cardId));
   await deleteDoc(cardRef);
 };
 
