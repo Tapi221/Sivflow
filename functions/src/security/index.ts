@@ -27,14 +27,10 @@ const toUserSecurityAlertLevel = (
   }
 };
 
-// 他のトリガーと共有するために初期化済みインスタンスを使う場合は調整
 if (admin.apps.length === 0) {
   admin.initializeApp();
 }
 
-/**
- * セキュリティログ生成時のトリガー
- */
 export const onSecurityLogCreated = functions.firestore
   .document("users/{userId}/securityLogs/{logId}")
   .onCreate(
@@ -48,7 +44,6 @@ export const onSecurityLogCreated = functions.firestore
       if (!logData) return;
 
       try {
-        // 1. 異常検知 (過去ログ集計・ルール判定)
         const detectionOutcome = await evaluateDetectionRule({
           db: admin.firestore(),
           userId,
@@ -68,7 +63,6 @@ export const onSecurityLogCreated = functions.firestore
           );
         }
 
-        // 2. リスクスコア計算
         const scoreUpdate = await calculateRiskScore({
           userId,
           eventType: logData.eventType,
@@ -76,7 +70,6 @@ export const onSecurityLogCreated = functions.firestore
           scoreAdded: detectionOutcome.scoreAdded,
         });
 
-        // 3. 自動対処
         await handleRiskActions(userId, scoreUpdate);
       } catch (e) {
         console.error("[SecurityFn] Error:", e);
@@ -116,19 +109,17 @@ type SecurityScoreUpdate = {
   riskLevel: RiskLevel;
 };
 
-const calculateRiskScore = async (
-  {
-    userId,
-    eventType,
-    occurredAtMs,
-    scoreAdded,
-  }: {
-    userId: string;
-    eventType: SecurityEventType;
-    occurredAtMs: number;
-    scoreAdded: number;
-  },
-): Promise<SecurityScoreUpdate> => {
+const calculateRiskScore = async ({
+  userId,
+  eventType,
+  occurredAtMs,
+  scoreAdded,
+}: {
+  userId: string;
+  eventType: SecurityEventType;
+  occurredAtMs: number;
+  scoreAdded: number;
+}): Promise<SecurityScoreUpdate> => {
   const db = admin.firestore();
   const statusRef = db.doc(`users/${userId}/security/status`);
 
@@ -150,7 +141,6 @@ const calculateRiskScore = async (
       scoreAdded,
     });
 
-    // 保存
     t.set(
       statusRef,
       {
@@ -174,7 +164,7 @@ const calculateRiskScore = async (
 const handleRiskActions = async (
   userId: string,
   scoreUpdate: SecurityScoreUpdate,
-) {
+) => {
   const db = admin.firestore();
   const { previousScore, nextScore, riskLevel } = scoreUpdate;
 
@@ -230,7 +220,6 @@ const handleRiskActions = async (
       });
     });
 
-    // アカウント自体もロック
     batch.set(
       db.doc(`users/${userId}`),
       {
