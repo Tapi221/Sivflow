@@ -5,7 +5,7 @@ import {
   cardHeightPxToLayoutRows,
   layoutRowsToCardHeightPx,
   snapMinCardHeightPx,
-} from "@/components/card/common/constants";
+} from "@constants/shared/cardGeometry";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,26 +56,6 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     ref,
   ) => {
     const shellRef = React.useRef<HTMLDivElement | null>(null);
-    const [panZoom, setPanZoom] = React.useState({ x: 0, y: 0, scale: 1 });
-    const pointersRef = React.useRef(
-      new Map<number, { x: number; y: number }>(),
-    );
-    const panRef = React.useRef<{
-      pointerId: number;
-      startX: number;
-      startY: number;
-      originX: number;
-      originY: number;
-    } | null>(null);
-    const pinchRef = React.useRef<{
-      distance: number;
-      center: { x: number; y: number };
-      startScale: number;
-      startTranslate: { x: number; y: number };
-    } | null>(null);
-
-    const clamp = (value: number, min: number, max: number) =>
-      Math.min(max, Math.max(min, value));
     const [customHeightPx, setCustomHeightPx] = React.useState<number | null>(
       null,
     );
@@ -87,6 +67,9 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     } | null>(null);
     const resizeRafRef = React.useRef<number | null>(null);
     const resizePendingHeightRef = React.useRef<number | null>(null);
+
+    const clamp = (value: number, min: number, max: number) =>
+      Math.min(max, Math.max(min, value));
 
     const computeMinHeight = React.useCallback(() => {
       const element = shellRef.current;
@@ -120,10 +103,6 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
             surfaceStyle?.getPropertyValue("--ruled-bottom-offset-px") || "0",
           ) || 0,
         );
-        // NOTE:
-        // getBoundingClientRect() is affected by parent transforms (ScaleToFitFrame).
-        // Using offset metrics keeps min-height calculation in layout space and
-        // prevents underestimation when scaled down.
         const bodyRect = body.getBoundingClientRect();
         const bodyScaleY =
           body.offsetHeight > 0 ? bodyRect.height / body.offsetHeight : 1;
@@ -160,9 +139,6 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         const requiredHeight = hasVerticalOverflow
           ? Math.max(contentHeight + ruledBottomOffsetPx, scrollContentHeight)
           : contentHeight + ruledBottomOffsetPx;
-        // Subtract sub-pixel tolerance: getBoundingClientRect() can return fractional
-        // CSS pixels (esp. on high-DPI screens), causing requiredHeight to land just
-        // above a grid boundary and snapMinCardHeightPx (Math.ceil) to add an extra row.
         const snappedContentHeight = snapMinCardHeightPx(requiredHeight - 0.9);
         return Math.max(baseMin, snappedContentHeight || baseMin);
       }
@@ -196,44 +172,6 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       [isControlledResize, onHeightChange],
     );
 
-    const isInteractiveTarget = (target: EventTarget | null) => {
-      const element = target as HTMLElement | null;
-      if (!element) return false;
-      return Boolean(
-        element.closest(
-          'button, a, input, textarea, select, [role="button"], [data-card-no-pan="true"]',
-        ),
-      );
-    };
-
-    React.useEffect(() => {
-      const element = shellRef.current;
-      if (!element || typeof ResizeObserver === "undefined") return;
-
-      const updateWidth = () => {
-        const width = element.clientWidth || element.offsetWidth;
-        if (!width) return;
-
-        element.style.setProperty("--card-w", `${width}px`);
-
-        setCustomHeightPx((prev) => {
-          if (prev == null) return prev;
-          if (resizeRef.current) return prev;
-          return clampHeight(prev);
-        });
-
-        if (onMinHeightChange && !resizeRef.current) {
-          onMinHeightChange(computeMinHeight());
-        }
-      };
-
-      updateWidth();
-      const observer = new ResizeObserver(updateWidth);
-      observer.observe(element);
-
-      return () => observer.disconnect();
-    }, [clampHeight, computeMinHeight, onMinHeightChange]);
-
     React.useEffect(() => {
       if (!resizable || !resizeStorageKey || typeof window === "undefined")
         return;
@@ -257,87 +195,6 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       window.localStorage.setItem(resizeStorageKey, String(customHeightPx));
     }, [customHeightPx, resizeStorageKey, resizable]);
 
-    React.useEffect(() => {
-      if (!onMinHeightChange || typeof ResizeObserver === "undefined") return;
-
-      const element = shellRef.current;
-      if (!element) return;
-
-      const body = element.querySelector(
-        ".card-shell-body",
-      ) as HTMLElement | null;
-      if (!body) return;
-
-      let rafId: number | null = null;
-      const scheduleNotify = () => {
-        if (rafId != null || typeof window === "undefined") return;
-        rafId = window.requestAnimationFrame(() => {
-          rafId = null;
-          if (resizeRef.current) return;
-          onMinHeightChange(computeMinHeight());
-        });
-      };
-
-      const rowElements = new Set<HTMLElement>();
-      const rowObserver = new ResizeObserver(() => scheduleNotify());
-
-      const syncRowObservers = () => {
-        const nextRows = new Set(
-          Array.from(
-            body.querySelectorAll('[data-block-row="true"]'),
-          ) as HTMLElement[],
-        );
-
-        rowElements.forEach((row) => {
-          if (!nextRows.has(row)) {
-            rowObserver.unobserve(row);
-            rowElements.delete(row);
-          }
-        });
-
-        nextRows.forEach((row) => {
-          if (!rowElements.has(row)) {
-            rowObserver.observe(row);
-            rowElements.add(row);
-          }
-        });
-      };
-
-      scheduleNotify();
-      const bodyObserver = new ResizeObserver(() => scheduleNotify());
-      bodyObserver.observe(body);
-      syncRowObservers();
-
-      const mutationObserver = new MutationObserver(() => {
-        syncRowObservers();
-        scheduleNotify();
-      });
-
-      mutationObserver.observe(body, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-      });
-
-      body.addEventListener("input", scheduleNotify, true);
-
-      return () => {
-        body.removeEventListener("input", scheduleNotify, true);
-        mutationObserver.disconnect();
-        bodyObserver.disconnect();
-        rowObserver.disconnect();
-        if (rafId != null && typeof window !== "undefined") {
-          window.cancelAnimationFrame(rafId);
-        }
-      };
-    }, [computeMinHeight, onMinHeightChange]);
-
-    React.useEffect(() => {
-      if (!drawMode) {
-        setPanZoom({ x: 0, y: 0, scale: 1 });
-      }
-    }, [drawMode]);
-
     const setRefs = React.useCallback(
       (node: HTMLDivElement | null) => {
         shellRef.current = node;
@@ -357,104 +214,6 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     ).filter(Boolean);
     const primaryTopRight = topRightItems.slice(0, 2);
     const overflowTopRight = topRightItems.slice(2);
-
-    const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-      if (!drawMode) return;
-      if (isInteractiveTarget(event.target)) return;
-
-      pointersRef.current.set(event.pointerId, {
-        x: event.clientX,
-        y: event.clientY,
-      });
-
-      panRef.current = {
-        pointerId: event.pointerId,
-        startX: event.clientX,
-        startY: event.clientY,
-        originX: panZoom.x,
-        originY: panZoom.y,
-      };
-
-      if (pointersRef.current.size === 2) {
-        const points = Array.from(pointersRef.current.values());
-        const distance = Math.hypot(
-          points[1].x - points[0].x,
-          points[1].y - points[0].y,
-        );
-        const center = {
-          x: (points[0].x + points[1].x) / 2,
-          y: (points[0].y + points[1].y) / 2,
-        };
-        panRef.current = null;
-
-        pinchRef.current = {
-          distance,
-          center,
-          startScale: panZoom.scale,
-          startTranslate: { x: panZoom.x, y: panZoom.y },
-        };
-      }
-    };
-
-    const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-      if (!drawMode) return;
-      if (!pointersRef.current.has(event.pointerId)) return;
-
-      pointersRef.current.set(event.pointerId, {
-        x: event.clientX,
-        y: event.clientY,
-      });
-
-      if (pointersRef.current.size >= 2 && pinchRef.current) {
-        event.preventDefault();
-        const points = Array.from(pointersRef.current.values());
-        const distance = Math.hypot(
-          points[1].x - points[0].x,
-          points[1].y - points[0].y,
-        );
-        const center = {
-          x: (points[0].x + points[1].x) / 2,
-          y: (points[0].y + points[1].y) / 2,
-        };
-
-        const nextScale = clamp(
-          pinchRef.current.startScale * (distance / pinchRef.current.distance),
-          0.5,
-          3,
-        );
-        const nextX =
-          center.x -
-          ((pinchRef.current.center.x - pinchRef.current.startTranslate.x) /
-            pinchRef.current.startScale) *
-            nextScale;
-        const nextY =
-          center.y -
-          ((pinchRef.current.center.y - pinchRef.current.startTranslate.y) /
-            pinchRef.current.startScale) *
-            nextScale;
-
-        setPanZoom({ x: nextX, y: nextY, scale: nextScale });
-        return;
-      }
-
-      if (panRef.current?.pointerId === event.pointerId) {
-        event.preventDefault();
-        const deltaX = event.clientX - panRef.current.startX;
-        const deltaY = event.clientY - panRef.current.startY;
-        setPanZoom({
-          x: panRef.current.originX + deltaX,
-          y: panRef.current.originY + deltaY,
-          scale: panZoom.scale,
-        });
-      }
-    };
-
-    const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-      if (!drawMode) return;
-      pointersRef.current.delete(event.pointerId);
-      if (panRef.current?.pointerId === event.pointerId) panRef.current = null;
-      if (pointersRef.current.size < 2) pinchRef.current = null;
-    };
 
     const enforcedShellOverflowStyle: React.CSSProperties = {
       overflow: "hidden",
@@ -479,7 +238,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
             ...enforcedShellOverflowStyle,
           };
 
-    const shell = (
+    return (
       <div
         ref={setRefs}
         className={cn(
@@ -490,17 +249,6 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         )}
         style={resolvedShellStyle}
         {...props}
-        onClick={(e) => {
-          // ★ card-shell-actions 内のボタン等からのバブリングは無視する
-          // overflow:hidden によるクリッピングで stopPropagation が効かない場合の保険
-          if (
-            (e.target as HTMLElement).closest(
-              ".card-shell-header, .card-shell-footer, .card-shell-action, .card-shell-overflow",
-            )
-          )
-            return;
-          props.onClick?.(e);
-        }}
       >
         {(topLeftItems.length > 0 || topRightItems.length > 0) && (
           <div className="card-shell-header">
@@ -578,10 +326,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
               const target = event.currentTarget;
               try {
                 target.setPointerCapture(pointerId);
-              } catch {
-                // Pointer capture may fail on some scaled/embedded contexts.
-                // Continue with window-level listeners as a safe fallback.
-              }
+              } catch {}
 
               const onMove = (moveEvent: PointerEvent) => {
                 if (
@@ -666,29 +411,6 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
             <span className="card-shell-resize-knob" />
           </button>
         )}
-      </div>
-    );
-
-    if (!drawMode) {
-      return shell;
-    }
-
-    return (
-      <div
-        className="card-shell-viewport"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerEnd}
-        onPointerCancel={handlePointerEnd}
-      >
-        <div
-          className="card-shell-panzoom"
-          style={{
-            transform: `translate(${panZoom.x}px, ${panZoom.y}px) scale(${panZoom.scale})`,
-          }}
-        >
-          {shell}
-        </div>
       </div>
     );
   },

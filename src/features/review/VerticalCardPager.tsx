@@ -243,17 +243,6 @@ const VerticalCardPagerFn = <T,>({
       }
     }
 
-    if (nextRange != null) {
-      const sampleElement =
-        itemRefs.current[Math.min(nextRange.end, activeIndexRef.current)];
-
-      if (sampleElement) {
-        const extent = Math.max(1, sampleElement.offsetHeight + CARD_GAP);
-        avgItemExtentRef.current =
-          avgItemExtentRef.current * 0.8 + extent * 0.2;
-      }
-    }
-
     const currentActiveIndex = activeIndexRef.current;
     const radiusStart = Math.max(
       0,
@@ -273,19 +262,6 @@ const VerticalCardPagerFn = <T,>({
       : radiusEnd;
 
     const nextEffective = { start: effectiveStart, end: effectiveEnd };
-
-    const prevRange = visibleRangeRef.current;
-    const prevEffective = effectiveRenderRangeRef.current;
-
-    if (
-      prevRange?.start === nextRange?.start &&
-      prevRange?.end === nextRange?.end &&
-      prevEffective?.start === nextEffective.start &&
-      prevEffective?.end === nextEffective.end
-    ) {
-      return;
-    }
-
     visibleRangeRef.current = nextRange;
     effectiveRenderRangeRef.current = nextEffective;
     setVisibleRange(nextRange);
@@ -307,24 +283,7 @@ const VerticalCardPagerFn = <T,>({
   }, [disableVirtualization, scheduleVisibleRangeUpdate]);
 
   useEffect(() => {
-    if (disableVirtualization) {
-      visibleRangeRef.current = null;
-      effectiveRenderRangeRef.current = null;
-
-      if (visibleRangeRafRef.current != null) {
-        window.cancelAnimationFrame(visibleRangeRafRef.current);
-        visibleRangeRafRef.current = null;
-      }
-
-      window.requestAnimationFrame(() => {
-        onRenderRangeChangeRef.current?.(null);
-      });
-
-      return;
-    }
-
-    scheduleVisibleRangeUpdate();
-
+    if (disableVirtualization) return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -338,77 +297,15 @@ const VerticalCardPagerFn = <T,>({
       passive: true,
     });
 
-    const observer =
-      typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(() => {
-            captureScrollAnchor();
-            scheduleVisibleRangeUpdate();
-          })
-        : null;
-
-    observer?.observe(container);
-
     return () => {
       container.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", scheduleVisibleRangeUpdate);
-      observer?.disconnect();
-
-      if (visibleRangeRafRef.current != null) {
-        window.cancelAnimationFrame(visibleRangeRafRef.current);
-        visibleRangeRafRef.current = null;
-      }
     };
-  }, [
-    cards.length,
-    captureScrollAnchor,
-    disableVirtualization,
-    scheduleVisibleRangeUpdate,
-  ]);
+  }, [captureScrollAnchor, disableVirtualization, scheduleVisibleRangeUpdate]);
 
   useLayoutEffect(() => {
     captureScrollAnchor();
   }, [captureScrollAnchor, activeIndex]);
-
-  useLayoutEffect(() => {
-    const previousKey = previousPreserveKeyRef.current;
-    previousPreserveKeyRef.current = preserveKey;
-
-    if (previousKey == null || preserveKey == null) return;
-    if (previousKey === preserveKey) return;
-
-    const container = containerRef.current;
-    if (!container) return;
-
-    const activeElement = itemRefs.current[activeIndex];
-    if (!activeElement) return;
-
-    const previousSnapshot = scrollAnchorSnapshotRef.current;
-
-    const offsetWithinCardPx =
-      previousSnapshot?.activeIndex === activeIndex
-        ? previousSnapshot.offsetWithinCardPx
-        : Math.max(0, container.scrollTop - activeElement.offsetTop);
-
-    const nextScrollTop = Math.max(
-      0,
-      activeElement.offsetTop + offsetWithinCardPx,
-    );
-
-    if (Math.abs(container.scrollTop - nextScrollTop) > 1) {
-      container.scrollTop = nextScrollTop;
-    }
-
-    window.requestAnimationFrame(() => {
-      captureScrollAnchor();
-      scheduleVisibleRangeUpdate();
-    });
-  }, [
-    activeIndex,
-    captureScrollAnchor,
-    itemRefs,
-    preserveKey,
-    scheduleVisibleRangeUpdate,
-  ]);
 
   return (
     <div

@@ -1,9 +1,3 @@
-/**
- * Flashcard のコーナーアクション（uncertainty/bookmark/edit/media/extraHeader）を組み立てるコンポーネント。
- *
- * - actionsTopLeft / actionsTopRight / mediaActionNodes の組み立てロジックを Flashcard.tsx から分離
- * - CardFrame の actionsTopLeft / actionsTopRight props へ渡す ReactNode 配列を返す
- */
 import {
   CARD_ACTION_BG_CLASS,
   CARD_ACTION_COLOR_IDLE_CLASS,

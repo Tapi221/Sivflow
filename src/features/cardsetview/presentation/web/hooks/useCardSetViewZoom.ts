@@ -8,6 +8,10 @@ import {
 } from "react";
 
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
+import {
+  CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
+  CARD_VIEW_ZOOM_STEP_PERCENT,
+} from "@constants/shared/cardSetView";
 import type {
   CardLayoutMode,
   CardSetInteractionMode,
@@ -23,10 +27,6 @@ import {
   resolveZoomDefaultPercent,
   resolveZoomScaleFromPresentationWidthPx,
 } from "@/features/cardsetview/domain/cardSetViewPresentationPolicy";
-import {
-  CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
-  CARD_VIEW_ZOOM_STEP_PERCENT,
-} from "@/features/cardsetview/constants";
 import {
   buildCardSetViewZoomPreferenceScopeKey,
   getCardSetViewZoomPreference,
@@ -160,37 +160,6 @@ export const useCardSetViewZoom = ({
     };
   }, [activeCardKey, triggerConstraintIndicator, viewportRef]);
 
-  useEffect(() => {
-    return () => {
-      if (
-        typeof window !== "undefined" &&
-        indicatorTimeoutRef.current != null
-      ) {
-        window.clearTimeout(indicatorTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const canUseSplit = useMemo(() => {
-    if (requestedCardLayoutMode !== "split") {
-      return true;
-    }
-
-    return resolveCanUseSplitLayout({
-      viewportWidthPx,
-      interactionMode,
-      displayMode,
-    });
-  }, [displayMode, interactionMode, requestedCardLayoutMode, viewportWidthPx]);
-
-  const effectiveCardLayoutMode = useMemo<CardLayoutMode>(() => {
-    if (requestedCardLayoutMode === "split" && !canUseSplit) {
-      return splitFallbackLayoutMode;
-    }
-
-    return requestedCardLayoutMode;
-  }, [canUseSplit, requestedCardLayoutMode, splitFallbackLayoutMode]);
-
   const zoomScope = useMemo(
     () =>
       buildZoomScope({
@@ -198,15 +167,9 @@ export const useCardSetViewZoom = ({
         cardSetId,
         displayMode,
         interactionMode,
-        cardLayoutMode: effectiveCardLayoutMode,
+        cardLayoutMode: requestedCardLayoutMode,
       }),
-    [
-      cardSetId,
-      deviceScope,
-      displayMode,
-      effectiveCardLayoutMode,
-      interactionMode,
-    ],
+    [cardSetId, deviceScope, displayMode, interactionMode, requestedCardLayoutMode],
   );
 
   const zoomSourceKey = useMemo(
@@ -218,9 +181,9 @@ export const useCardSetViewZoom = ({
     () =>
       resolveZoomDefaultPercent({
         interactionMode,
-        cardLayoutMode: effectiveCardLayoutMode,
+        cardLayoutMode: requestedCardLayoutMode,
       }),
-    [effectiveCardLayoutMode, interactionMode],
+    [interactionMode, requestedCardLayoutMode],
   );
 
   const storedPreferredPercent = useMemo(() => {
@@ -260,9 +223,9 @@ export const useCardSetViewZoom = ({
       resolvePresentationMaxWidthPx({
         usableWidthPx,
         displayMode,
-        cardLayoutMode: effectiveCardLayoutMode,
+        cardLayoutMode: requestedCardLayoutMode,
       }),
-    [displayMode, effectiveCardLayoutMode, usableWidthPx],
+    [displayMode, requestedCardLayoutMode, usableWidthPx],
   );
 
   const presentationWidthPx = useMemo(
@@ -270,15 +233,10 @@ export const useCardSetViewZoom = ({
       resolvePresentationWidthPx({
         zoomPercent,
         interactionMode,
-        cardLayoutMode: effectiveCardLayoutMode,
+        cardLayoutMode: requestedCardLayoutMode,
         maxPresentationWidthPx,
       }),
-    [
-      effectiveCardLayoutMode,
-      interactionMode,
-      maxPresentationWidthPx,
-      zoomPercent,
-    ],
+    [interactionMode, maxPresentationWidthPx, requestedCardLayoutMode, zoomPercent],
   );
 
   const zoomScale = useMemo(
@@ -325,8 +283,8 @@ export const useCardSetViewZoom = ({
     stepUp,
     stepDown,
     reset,
-    canUseSplit,
-    effectiveCardLayoutMode,
+    canUseSplit: true,
+    effectiveCardLayoutMode: requestedCardLayoutMode,
     showConstraintIndicator,
     presentationWidthPx,
     maxPresentationWidthPx,

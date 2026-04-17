@@ -1,4 +1,4 @@
-import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
+import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
 
 export const CARD_SET_VIEW_PAGER_PADDING_INLINE = 0;
 export const CARD_SET_VIEW_PAGER_PADDING_BLOCK = "50vh";
@@ -20,7 +20,6 @@ export const CARD_VIEW_ZOOM_MIN_PERCENT = Math.round(
   (CARD_PANE_VIEW_MIN_WIDTH_PX / CANONICAL_CARD_WIDTH) * 100,
 );
 
-// backward compatibility aliases
 export const CARD_VIEW_DEFAULT_ZOOM_PERCENT = CARD_VIEW_ZOOM_DEFAULT_PERCENT;
 export const CARD_VIEW_MIN_ZOOM_PERCENT = CARD_VIEW_ZOOM_MIN_PERCENT;
 
