@@ -25,6 +25,7 @@
     "src/tests/**/*.tsx",
     "tests/**/*.ts",
     "tests/**/*.tsx",
+    "functions/src/**/*.ts",
     "constants/**/*.ts",
     "config/**/*.ts"
   ]

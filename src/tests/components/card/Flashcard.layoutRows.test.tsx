@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { CARD_ROW_PX } from "@/components/card/common/constants";
+import { layoutRowsToCardHeightPx } from "@constants/shared/cardGeometry";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { render, screen } from "@testing-library/react";
 import React from "react";
@@ -55,7 +55,7 @@ describe("Flashcard layoutRows height behavior", () => {
       .getByTestId("mock-card-frame")
       .getAttribute("data-height");
 
-    expect(before).toBe(String(22 * CARD_ROW_PX));
-    expect(after).toBe(String(22 * CARD_ROW_PX));
+    expect(before).toBe(String(layoutRowsToCardHeightPx(22)));
+    expect(after).toBe(String(layoutRowsToCardHeightPx(22)));
   });
 });

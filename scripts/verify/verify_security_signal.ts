@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import type { SecurityEventType } from "../../functions/src/security/policy";
 
 // Initialize Admin SDK
 process.env.FIRESTORE_EMULATOR_HOST = "localhost:8080";
@@ -14,7 +15,37 @@ if (!admin.apps.length) {
 
 const db = getFirestore();
 
-async function verifySecuritySignal() {
+const CRITICAL_LOCK_SEQUENCE: readonly SecurityEventType[] = [
+  "ACCESS_DENIED_REVOKED",
+  "ACCESS_DENIED_REVOKED",
+  "ACCESS_DENIED_REVOKED",
+] as const;
+
+const wait = async (ms: number) => {
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+};
+
+const writeSecurityLog = async (
+  userId: string,
+  eventType: SecurityEventType,
+  attempt: number,
+) => {
+  await db.collection(`users/${userId}/securityLogs`).add({
+    userId,
+    deviceId: "device_test",
+    eventType,
+    severity: "critical",
+    source: "server",
+    isUserVisible: false,
+    description: `Verification event ${attempt}: ${eventType}`,
+    metadata: { reason: "verify-security-signal" },
+    occurredAt: Timestamp.now(),
+  });
+};
+
+const verifySecuritySignal = async () => {
   const testUserId = "test_signal_user_" + Date.now();
   console.log(`[Verify] Starting verification for User: ${testUserId}`);
 
@@ -39,56 +70,20 @@ async function verifySecuritySignal() {
     }
   });
 
-  // 3. Trigger High Risk Event (simulating client-side log)
-  // We send enough events to trigger a lock.
-  // Assuming threshold is > 80 or something.
-  // Let's send a CRITICAL event if logic handles it, or multiple high events.
-  // Based on `functions/src/security/index.ts`:
-  // Risk Score += log.severity * 10.
-  // Thresholds: Critical (80) -> Lock.
-
-  // So 1 Critical event (severity 5? or just manual score?)
-  // Logic: score += (5 - 1) * 10 ? No, let's look at logic.
-  // calculateRiskScore adds based on new logs.
-  // Let's inject a log with high severity.
-
-  // Actually, the `security_logs` trigger updates the score.
-  // Let's add a "concurrent_login" detected event.
-
-  const highRiskLog = {
-    userId: testUserId,
-    eventType: "abnormal_pattern", // This might trigger detection
-    details: { reason: "Test High Risk" },
-    timestamp: Timestamp.now(),
-    userAgent: "TestScript",
-    ipAddress: "127.0.0.1",
-    deviceId: "device_test",
-    severity: "critical", // severity: 'critical' usually implies high score impact
-  };
-
-  console.log("[Verify] Writing critical security log...");
-  await db.collection(`users/${testUserId}/securityLogs`).add(highRiskLog);
-
-  // Also manually boost score if the function logic relies on previous score?
-  // The function `onLogCreated` calculates score.
-  // If severity is 'critical', it should add significant score.
-
-  // Wait for a bit
-  setTimeout(async () => {
-    console.log("[Verify] Waiting for lock...");
-    // If single log isn't enough, add more.
-    await db.collection(`users/${testUserId}/securityLogs`).add({
-      ...highRiskLog,
-      timestamp: Timestamp.now(),
-      details: { reason: "Second Hit" },
-    });
-  }, 2000);
+  for (const [index, eventType] of CRITICAL_LOCK_SEQUENCE.entries()) {
+    const attempt = index + 1;
+    console.log(
+      `[Verify] Writing ${eventType} (${attempt}/${CRITICAL_LOCK_SEQUENCE.length})...`,
+    );
+    await writeSecurityLog(testUserId, eventType, attempt);
+    await wait(500);
+  }
 
   setTimeout(() => {
     console.error("❌ [TIMEOUT] Account was not locked in time.");
     process.exit(1);
   }, 10000);
-}
+};
 
 verifySecuritySignal().catch((err) => {
   console.error("Error:", err);

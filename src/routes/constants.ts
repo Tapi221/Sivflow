@@ -1,4 +1,3 @@
-// TODO: migrate all cardsetview imports to "@constants/shared/cardSetView"
 export {
   CARD_PANE_AUTO_MAX_SCALE,
   CARD_PANE_EDIT_DEFAULT_WIDTH_PX,

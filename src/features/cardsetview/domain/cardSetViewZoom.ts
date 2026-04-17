@@ -1,114 +1,125 @@
+import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
 import {
-  CARD_VIEW_ZOOM_DEFAULT_PERCENT,
+  CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
+  CARD_PANE_VIEW_MIN_WIDTH_PX,
+  CARD_VIEW_DEFAULT_ZOOM_PERCENT,
+  CARD_VIEW_MIN_ZOOM_PERCENT,
   CARD_VIEW_ZOOM_STEP_PERCENT,
 } from "@constants/shared/cardSetView";
 
-type ClampZoomPercentOptions = {
-  minPercent: number;
-  maxPercent: number;
-  stepPercent?: number;
+const sanitizePositiveNumber = (value: number, fallback: number) => {
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? value
+    : fallback;
 };
 
-type ResolveZoomBoundsArgs = {
-  viewportWidthPx: number;
-  canonicalCardWidthPx: number;
-  minPercent: number;
-  defaultPercent?: number;
-  stepPercent?: number;
+const roundDownToStep = (value: number, step: number) => {
+  const safeStep = sanitizePositiveNumber(step, CARD_VIEW_ZOOM_STEP_PERCENT);
+  return Math.floor(value / safeStep) * safeStep;
 };
 
-const roundToStep = (value: number, stepPercent: number) => {
-  return Math.round(value / stepPercent) * stepPercent;
-};
-
-export const computeDynamicMaxZoomPercent = ({
-  viewportWidthPx,
-  canonicalCardWidthPx,
-  stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
-  fallbackPercent = CARD_VIEW_ZOOM_DEFAULT_PERCENT,
-}: {
-  viewportWidthPx: number;
-  canonicalCardWidthPx: number;
-  stepPercent?: number;
-  fallbackPercent?: number;
-}) => {
-  if (
-    !Number.isFinite(viewportWidthPx) ||
-    viewportWidthPx <= 0 ||
-    !Number.isFinite(canonicalCardWidthPx) ||
-    canonicalCardWidthPx <= 0
-  ) {
-    return fallbackPercent;
-  }
-
-  const rawPercent = (viewportWidthPx / canonicalCardWidthPx) * 100;
-  const snapped = Math.floor(rawPercent / stepPercent) * stepPercent;
-
-  return Math.max(stepPercent, snapped);
-};
-
-export const clampZoomPercent = (
-  value: number,
-  {
-    minPercent,
-    maxPercent,
-    stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
-  }: ClampZoomPercentOptions,
-) => {
-  const resolvedMax = Math.max(stepPercent, maxPercent);
-  const resolvedMin = Math.min(minPercent, resolvedMax);
-  const safeValue = Number.isFinite(value) ? value : resolvedMin;
-  const snapped = roundToStep(safeValue, stepPercent);
-
-  return Math.min(resolvedMax, Math.max(resolvedMin, snapped));
-};
-
-export const resolveZoomBounds = ({
-  viewportWidthPx,
-  canonicalCardWidthPx,
-  minPercent,
-  defaultPercent = CARD_VIEW_ZOOM_DEFAULT_PERCENT,
-  stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
-}: ResolveZoomBoundsArgs) => {
-  const maxZoomPercent = computeDynamicMaxZoomPercent({
-    viewportWidthPx,
-    canonicalCardWidthPx,
-    stepPercent,
-    fallbackPercent: defaultPercent,
-  });
-
-  const effectiveMinZoomPercent = Math.min(minPercent, maxZoomPercent);
-
-  const defaultZoomPercent = clampZoomPercent(defaultPercent, {
-    minPercent: effectiveMinZoomPercent,
-    maxPercent: maxZoomPercent,
-    stepPercent,
-  });
-
-  return {
-    minZoomPercent: effectiveMinZoomPercent,
-    maxZoomPercent,
-    defaultZoomPercent,
-  };
-};
-
-export const resolveZoomScale = (zoomPercent: number) => {
-  return zoomPercent / 100;
-};
-
-export const resolveFixedCardWidthPx = ({
-  canonicalCardWidthPx,
-  zoomPercent,
-}: {
-  canonicalCardWidthPx: number;
-  zoomPercent: number;
-}) => {
-  return Math.max(
-    1,
-    Math.round(canonicalCardWidthPx * resolveZoomScale(zoomPercent)),
+export const zoomPercentToFactor = (zoomPercent: number) => {
+  return (
+    sanitizePositiveNumber(zoomPercent, CARD_VIEW_DEFAULT_ZOOM_PERCENT) / 100
   );
 };
 
-export const resolveAvailableWidthPx = (viewportWidthPx: number) => {
-  return Math.max(1, Math.floor(viewportWidthPx));
+export const zoomPercentToFixedCardWidthPx = (zoomPercent: number) => {
+  return Math.max(
+    1,
+    Math.round(CANONICAL_CARD_WIDTH * zoomPercentToFactor(zoomPercent)),
+  );
 };
+
+export const computeDynamicMaxZoomPercent = ({
+  availableWidthPx,
+  baseCardWidthPx = CANONICAL_CARD_WIDTH,
+  stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
+}: {
+  availableWidthPx: number;
+  baseCardWidthPx?: number;
+  stepPercent?: number;
+}) => {
+  const safeAvailableWidthPx = sanitizePositiveNumber(
+    availableWidthPx,
+    CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
+  );
+  const safeBaseCardWidthPx = sanitizePositiveNumber(
+    baseCardWidthPx,
+    CANONICAL_CARD_WIDTH,
+  );
+  const rawPercent = (safeAvailableWidthPx / safeBaseCardWidthPx) * 100;
+  const steppedPercent = roundDownToStep(rawPercent, stepPercent);
+
+  return Math.max(stepPercent, steppedPercent);
+};
+
+export const clampZoomPercent = ({
+  value,
+  minZoomPercent,
+  maxZoomPercent,
+}: {
+  value: number;
+  minZoomPercent: number;
+  maxZoomPercent: number;
+}) => {
+  const safeMin = sanitizePositiveNumber(
+    minZoomPercent,
+    CARD_VIEW_MIN_ZOOM_PERCENT,
+  );
+  const safeMax = Math.max(
+    safeMin,
+    sanitizePositiveNumber(maxZoomPercent, CARD_VIEW_DEFAULT_ZOOM_PERCENT),
+  );
+  const safeValue = sanitizePositiveNumber(
+    value,
+    CARD_VIEW_DEFAULT_ZOOM_PERCENT,
+  );
+
+  return Math.min(safeMax, Math.max(safeMin, safeValue));
+};
+
+export const snapZoomPercent = ({
+  value,
+  stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
+}: {
+  value: number;
+  stepPercent?: number;
+}) => {
+  const safeStep = sanitizePositiveNumber(
+    stepPercent,
+    CARD_VIEW_ZOOM_STEP_PERCENT,
+  );
+  const safeValue = sanitizePositiveNumber(
+    value,
+    CARD_VIEW_DEFAULT_ZOOM_PERCENT,
+  );
+
+  return Math.round(safeValue / safeStep) * safeStep;
+};
+
+export const normalizeZoomPercent = ({
+  value,
+  minZoomPercent,
+  maxZoomPercent,
+  stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
+}: {
+  value: number;
+  minZoomPercent: number;
+  maxZoomPercent: number;
+  stepPercent?: number;
+}) => {
+  const snapped = snapZoomPercent({ value, stepPercent });
+
+  return clampZoomPercent({
+    value: snapped,
+    minZoomPercent,
+    maxZoomPercent,
+  });
+};
+
+export { CARD_VIEW_DEFAULT_ZOOM_PERCENT, CARD_VIEW_MIN_ZOOM_PERCENT };
+export { CARD_VIEW_ZOOM_STEP_PERCENT };
+
+export const CARD_VIEW_DEFAULT_WIDTH_PX = CARD_PANE_VIEW_DEFAULT_WIDTH_PX;
+export const CARD_VIEW_MIN_WIDTH_PX = CARD_PANE_VIEW_MIN_WIDTH_PX;

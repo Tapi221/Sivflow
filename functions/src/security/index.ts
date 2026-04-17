@@ -2,6 +2,14 @@ import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { toMillis } from "../utils/toMillis";
+import {
+  RISK_SCORE_THRESHOLDS,
+  calculateNextRiskScore,
+  evaluateDetectionRule,
+  isSupportedSecurityEventType,
+  type RiskLevel,
+  type SecurityEventType,
+} from "./policy";
 
 const toFiniteNumber = (value: unknown, fallback = 0): number => {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
@@ -24,201 +32,157 @@ export const onSecurityLogCreated = functions.firestore
     ) => {
       const logData = parseSecurityLogData(snap.data());
       const userId = context.params.userId;
-      // const logId = context.params.logId;
 
       if (!logData) return;
 
       try {
         // 1. 異常検知 (過去ログ集計・ルール判定)
-        await detectAbnormalPatterns(userId, logData);
+        const detectionOutcome = await evaluateDetectionRule({
+          db: admin.firestore(),
+          userId,
+          eventType: logData.eventType,
+          occurredAtMs: logData.occurredAtMs,
+        });
+
+        if (detectionOutcome.triggered) {
+          console.warn(
+            "[Abnormal Detect]",
+            JSON.stringify({
+              userId,
+              type: logData.eventType,
+              windowCount: detectionOutcome.windowCount,
+              scoreAdded: detectionOutcome.scoreAdded,
+            }),
+          );
+        }
 
         // 2. リスクスコア計算
-        const riskScore = await calculateRiskScore(userId, logData);
+        const scoreUpdate = await calculateRiskScore({
+          userId,
+          eventType: logData.eventType,
+          occurredAtMs: logData.occurredAtMs,
+          scoreAdded: detectionOutcome.scoreAdded,
+        });
 
         // 3. 自動対処
-        const deviceId = logData.deviceId || "unknown";
-        await handleRiskActions(userId, deviceId, riskScore);
+        await handleRiskActions(userId, scoreUpdate);
       } catch (e) {
         console.error("[SecurityFn] Error:", e);
       }
     },
   );
 
-// --- 実装ロジック ---
-
-interface DetectionRule {
-  type: string; // SecurityEventType
-  riskScore: number;
-  timeWindowMs?: number;
-  countThreshold?: number;
-  alwaysTrigger?: boolean;
-}
-
 type SecurityLogData = {
-  eventType: string;
-  deviceId?: string;
+  eventType: SecurityEventType;
+  occurredAtMs: number;
 };
 
 const parseSecurityLogData = (value: unknown): SecurityLogData | null => {
   if (typeof value !== "object" || value === null) return null;
 
-  const { eventType, deviceId } = value as {
+  const { eventType, occurredAt } = value as {
     eventType?: unknown;
-    deviceId?: unknown;
+    occurredAt?: unknown;
   };
 
-  if (typeof eventType !== "string" || eventType.length === 0) return null;
+  if (
+    typeof eventType !== "string" ||
+    !isSupportedSecurityEventType(eventType)
+  ) {
+    return null;
+  }
 
   return {
     eventType,
-    deviceId: typeof deviceId === "string" ? deviceId : undefined,
+    occurredAtMs: toMillis(occurredAt, Date.now()),
   };
 };
 
-const DETECTION_RULES: DetectionRule[] = [
-  // 認証異常
-  {
-    type: "LOGIN_FAILED",
-    riskScore: 5,
-    timeWindowMs: 5 * 60 * 1000,
-    countThreshold: 1,
-  },
-  { type: "SYNC_AUTH_ERROR", riskScore: 10, alwaysTrigger: true },
-
-  // 端末異常
-  { type: "ACCESS_DENIED_REVOKED", riskScore: 30, alwaysTrigger: true },
-
-  // 重要操作失敗
-  { type: "SENSITIVE_OP_REVOKED", riskScore: 20, alwaysTrigger: true },
-
-  // 管理操作
-  { type: "ADMIN_DEVICE_REVOKE", riskScore: 10, alwaysTrigger: true },
-  { type: "ADMIN_ACCOUNT_LOCK", riskScore: 50, alwaysTrigger: true },
-
-  // 技術的異常
-  {
-    type: "LOCK_CONTENTION_EXCESS",
-    riskScore: 7,
-    timeWindowMs: 5 * 60 * 1000,
-    countThreshold: 10,
-  },
-  {
-    type: "SYNC_CONFLICT_EXCESS",
-    riskScore: 3,
-    timeWindowMs: 5 * 60 * 1000,
-    countThreshold: 10,
-  },
-];
-
-const detectAbnormalPatterns = async (
-  userId: string,
-  logData: SecurityLogData,
-): Promise<boolean> {
-  const db = admin.firestore();
-  const now = Date.now();
-  let isAbnormal = false;
-
-  for (const rule of DETECTION_RULES) {
-    if (rule.type !== logData.eventType) continue;
-
-    if (rule.alwaysTrigger) {
-      isAbnormal = true;
-      continue;
-    }
-
-    if (rule.timeWindowMs && rule.countThreshold) {
-      const windowStart = new Date(now - rule.timeWindowMs);
-      const snapshot = await db
-        .collection(`users/${userId}/securityLogs`)
-        .where("eventType", "==", rule.type)
-        .where("occurredAt", ">=", windowStart)
-        .count()
-        .get();
-
-      const count = snapshot.data().count;
-
-      // count() はクエリ時点のものを含むかタイミングによるが、
-      // ここでは「直近の頻度」を見るため、閾値を超えていれば異常とする
-      if (count >= rule.countThreshold) {
-        console.warn(
-          `[Abnormal Detect] User=${userId}, Type=${rule.type}, Count=${count}`,
-        );
-        isAbnormal = true;
-      }
-    }
-  }
-  return isAbnormal;
+type SecurityScoreUpdate = {
+  previousScore: number;
+  nextScore: number;
+  riskLevel: RiskLevel;
 };
 
 const calculateRiskScore = async (
-  userId: string,
-  logData: SecurityLogData,
-): Promise<number> {
+  {
+    userId,
+    eventType,
+    occurredAtMs,
+    scoreAdded,
+  }: {
+    userId: string;
+    eventType: SecurityEventType;
+    occurredAtMs: number;
+    scoreAdded: number;
+  },
+): Promise<SecurityScoreUpdate> => {
   const db = admin.firestore();
   const statusRef = db.doc(`users/${userId}/security/status`);
 
-  return db.runTransaction(async (t) => {
+  return await db.runTransaction(async (t) => {
     const doc = await t.get(statusRef);
-    let currentScore = 0;
-    let lastUpdate = Date.now();
+    let persistedScore = 0;
+    let lastUpdateMs = occurredAtMs;
 
     if (doc.exists) {
       const data = (doc.data() ?? {}) as Record<string, unknown>;
-      currentScore = toFiniteNumber(data.riskScore, 0);
-      lastUpdate = toMillis(data.lastUpdate, Date.now());
+      persistedScore = toFiniteNumber(data.riskScore, 0);
+      lastUpdateMs = toMillis(data.lastUpdate, occurredAtMs);
     }
 
-    // 1. 減衰処理 (1時間につき3点)
-    const now = Date.now();
-    const hoursElapsed = (now - lastUpdate) / (1000 * 60 * 60);
-    if (hoursElapsed > 0) {
-      const decay = Math.floor(hoursElapsed * 3);
-      currentScore = Math.max(0, currentScore - decay);
-    }
-
-    // 2. 加算処理
-    let scoreAdded = 0;
-    // 今回のイベントがどのルールに該当するか（複数ヒットありうるが簡易的にマッチした最大または合計を加算）
-    // 本来は detectAbnormalPatterns の結果を引き回すべきだが、ここでは再判定または単一イベント評価
-    const matchedRule = DETECTION_RULES.find(
-      (r) => r.type === logData.eventType,
-    );
-    if (matchedRule) {
-      scoreAdded = matchedRule.riskScore;
-      currentScore += scoreAdded;
-    }
-
-    // 上限キャップ
-    currentScore = Math.min(100, currentScore);
+    const { previousScore, nextScore, riskLevel } = calculateNextRiskScore({
+      persistedScore,
+      lastUpdateMs,
+      nowMs: occurredAtMs,
+      scoreAdded,
+    });
 
     // 保存
     t.set(
       statusRef,
       {
-        riskScore: currentScore,
+        riskScore: nextScore,
+        riskLevel,
         lastUpdate: FieldValue.serverTimestamp(),
-        lastEvent: logData.eventType,
+        lastEvent: eventType,
+        lastTriggeredRule: scoreAdded > 0 ? eventType : null,
       },
       { merge: true },
     );
 
-    return currentScore;
+    return {
+      previousScore,
+      nextScore,
+      riskLevel,
+    };
   });
 };
 
 const handleRiskActions = async (
   userId: string,
-  deviceId: string,
-  riskScore: number,
+  scoreUpdate: SecurityScoreUpdate,
 ) {
   const db = admin.firestore();
-  console.log(`[Action] User=${userId}, Risk=${riskScore}`);
+  const { previousScore, nextScore, riskLevel } = scoreUpdate;
+
+  console.log(
+    `[Action] User=${userId}, PrevRisk=${previousScore}, Risk=${nextScore}, Level=${riskLevel}`,
+  );
+
+  const crossedWarning =
+    previousScore < RISK_SCORE_THRESHOLDS.warning &&
+    nextScore >= RISK_SCORE_THRESHOLDS.warning;
+  const crossedRequire2FA =
+    previousScore < RISK_SCORE_THRESHOLDS.require2FA &&
+    nextScore >= RISK_SCORE_THRESHOLDS.require2FA;
+  const crossedAccountLock =
+    previousScore < RISK_SCORE_THRESHOLDS.accountLock &&
+    nextScore >= RISK_SCORE_THRESHOLDS.accountLock;
 
   // 1. レベル別アクション
 
-  // Level 1: Warning (21-50)
-  if (riskScore >= 21) {
-    // UI通知を追加 (Mock)
+  if (crossedWarning) {
     await db.collection(`users/${userId}/notifications`).add({
       type: "SECURITY_ALERT",
       level: "warning",
@@ -229,9 +193,7 @@ const handleRiskActions = async (
     });
   }
 
-  // Level 2: 2FA Required (51-80)
-  if (riskScore >= 51) {
-    // ユーザーメタデータ更新 -> クライアント側でログイン時にチェック
+  if (crossedRequire2FA) {
     await db.doc(`users/${userId}`).set(
       {
         requires2FA: true,
@@ -243,9 +205,7 @@ const handleRiskActions = async (
     console.log(`[Action] 2FA Requirement set for user ${userId}`);
   }
 
-  // Level 3: Critical / Force Logout (81+)
-  if (riskScore >= 81) {
-    // 全デバイスを Revoke
+  if (crossedAccountLock) {
     const devicesRef = db.collection(`sync_metadata/${userId}/devices`);
     const activeDevices = await devicesRef
       .where("status", "==", "active")

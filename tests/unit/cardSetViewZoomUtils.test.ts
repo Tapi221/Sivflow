@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
+import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
 import {
   CARD_VIEW_DEFAULT_ZOOM_PERCENT,
   CARD_VIEW_MIN_ZOOM_PERCENT,
   CARD_VIEW_ZOOM_STEP_PERCENT,
+} from "@constants/shared/cardSetView";
+import {
   clampZoomPercent,
   computeDynamicMaxZoomPercent,
   normalizeZoomPercent,

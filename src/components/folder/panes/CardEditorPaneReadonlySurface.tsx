@@ -1,5 +1,5 @@
 import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
-import { layoutRowsToCardHeightPx } from "@/components/card/common/constants";
+import { layoutRowsToCardHeightPx } from "@constants/shared/cardGeometry";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { buildSharedCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";

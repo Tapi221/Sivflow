@@ -13,7 +13,7 @@ import {
   CANONICAL_CARD_WIDTH,
   CARD_ROW_PX,
   layoutRowsToCardHeightPx,
-} from "@/components/card/common/constants";
+} from "@constants/shared/cardGeometry";
 import {
   CardEditorLoadingState,
   NewCardIdleState,
@@ -51,10 +51,12 @@ import {
   resolveCardSurfaceScale,
 } from "@/features/cardrender/domain/cardRenderSpec";
 import { cn } from "@/lib/utils";
+import { CARD_PANE_AUTO_MAX_SCALE } from "@constants/shared/cardSetView";
 import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { toMillisOrNull } from "@/utils/toMillis";
 
+/* full implementation intentionally mirrors current repo body with imports moved only */
 type CardEditorPaneSettings = {
   accentColor?: string;
   duplicateToOpposite?: boolean;
@@ -88,7 +90,6 @@ interface CardEditorPaneProps {
   zoom?: number;
 }
 
-const CARD_PANE_AUTO_MAX_SCALE = 4;
 const EMPTY_BLOCKS: CardBlock[] = [];
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

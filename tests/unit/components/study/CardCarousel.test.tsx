@@ -1,18 +1,9 @@
 // @vitest-environment jsdom
-/**
- * CardCarousel unit tests.
- *
- * Note: This project's test environment (React 19 + vitest jsdom) does not
- * fully support `act()` from react or @testing-library/react. Tests use
- * ReactDOM.flushSync (synchronous rendering) as a workaround.
- */
 import React from "react";
 import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import type { Card } from "@/types";
-
-// ── Mocks ─────────────────────────────────────────────────────────────────────
 
 vi.mock("framer-motion", () => ({
   motion: {
@@ -44,7 +35,7 @@ vi.mock("@/components/card/frame/MobileScalableCard", () => ({
   ),
 }));
 
-vi.mock("@/components/card/common/constants", () => ({
+vi.mock("@constants/shared/cardGeometry", () => ({
   CARD_BASE_WIDTH: 480,
   CARD_DISPLAY_SCALE: 1,
   CARD_SAFE_PADDING_PX: 24,
@@ -56,10 +47,8 @@ vi.mock("@/features/study/StudyCard", () => ({
   ),
 }));
 
-// Import after mocks
 import { CardCarousel } from "@/features/study/CardCarousel";
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 function makeCard(id: string): Card {
   return { id } as unknown as Card;
 }
@@ -120,7 +109,6 @@ Object.defineProperty(window, "ResizeObserver", {
   value: ResizeObserverMock,
 });
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
 describe("CardCarousel", () => {
   it("中央カードが sessionCurrentIndex のカードを表示する", () => {
     const cards = [makeCard("a"), makeCard("b"), makeCard("c")];
