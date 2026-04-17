@@ -1,4 +1,4 @@
-import type { CalendarResistanceLegendItem } from "./calendarTypes";
+import type { CalendarResistanceLegendItem } from "@/features/calendar/domain/calendarTypes";
 
 export const CALENDAR_RESISTANCE_LEGEND: CalendarResistanceLegendItem[] = [
   { label: "要復習 (Unstable)", min: 0, max: 20, color: "bg-red-400" },

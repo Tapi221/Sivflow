@@ -1,6 +1,5 @@
+import { CALENDAR_RESISTANCE_LEGEND } from "@constants/shared/calendar";
 import { cn } from "@/lib/utils";
-
-import { CALENDAR_RESISTANCE_LEGEND } from "@/features/calendar/domain/calendarConstants";
 
 export const CalendarLegend = () => {
   return (

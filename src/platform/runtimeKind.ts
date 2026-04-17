@@ -1,19 +1,18 @@
+import { RUNTIME_KINDS, type RuntimeKind } from "@constants/shared/runtime";
 import { hasDesktopBridge } from "./detectDesktopBridge";
-
-export type RuntimeKind = "web" | "desktop" | "ios" | "android";
 
 export const getRuntimeKind = (): RuntimeKind => {
   if (hasDesktopBridge()) {
-    return "desktop";
+    return RUNTIME_KINDS.desktop;
   }
 
-  return "web";
+  return RUNTIME_KINDS.web;
 };
 
 export const isDesktopLikeRuntime = (): boolean =>
-  getRuntimeKind() === "desktop";
+  getRuntimeKind() === RUNTIME_KINDS.desktop;
 
 export const isHandheldNativeRuntime = (): boolean => {
   const runtimeKind = getRuntimeKind();
-  return runtimeKind === "ios" || runtimeKind === "android";
+  return runtimeKind === RUNTIME_KINDS.ios || runtimeKind === RUNTIME_KINDS.android;
 };
