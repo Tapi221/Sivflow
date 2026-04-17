@@ -22,24 +22,34 @@ describe("useCardSetViewZoom", () => {
     window.localStorage.clear();
   });
 
-  it("separates persisted zoom by interaction mode", () => {
+  it("shares persisted zoom across display mode, interaction mode, and layout mode", () => {
     const viewportRef = createViewportRef(1400);
 
     const { result, rerender } = renderHook(
-      ({ interactionMode }: { interactionMode: "view" | "edit" }) =>
+      ({
+        displayMode,
+        interactionMode,
+        requestedCardLayoutMode,
+      }: {
+        displayMode: "fixed" | "fluid";
+        interactionMode: "view" | "edit";
+        requestedCardLayoutMode: "flip" | "stack" | "split";
+      }) =>
         useCardSetViewZoom({
           deviceScope: "desktop",
           cardSetId: "card-set-1",
           viewportRef,
-          activeCardKey: `card-1:fixed:flip:${interactionMode}`,
-          displayMode: "fixed",
+          activeCardKey: `card-1:${displayMode}:${requestedCardLayoutMode}:${interactionMode}`,
+          displayMode,
           interactionMode,
-          requestedCardLayoutMode: "flip",
+          requestedCardLayoutMode,
           splitFallbackLayoutMode: "flip",
         }),
       {
         initialProps: {
+          displayMode: "fixed" as const,
           interactionMode: "view" as const,
+          requestedCardLayoutMode: "flip" as const,
         },
       },
     );
@@ -55,22 +65,28 @@ describe("useCardSetViewZoom", () => {
     expect(result.current.zoomPercent).toBe(75);
 
     rerender({
+      displayMode: "fixed",
       interactionMode: "edit",
+      requestedCardLayoutMode: "stack",
     });
 
-    expect(result.current.defaultZoomPercent).toBeCloseTo(8.333333, 5);
-    expect(result.current.zoomPercent).toBeCloseTo(8.333333, 5);
-    expect(result.current.zoomScale).toBe(1);
-    expect(result.current.fixedCardWidthPx).toBe(480);
-
-    act(() => {
-      result.current.setZoomPercent(35);
-    });
-
-    expect(result.current.zoomPercent).toBe(35);
+    expect(result.current.zoomPercent).toBe(75);
+    expect(result.current.effectiveCardLayoutMode).toBe("stack");
 
     rerender({
+      displayMode: "fluid",
       interactionMode: "view",
+      requestedCardLayoutMode: "split",
+    });
+
+    expect(result.current.canUseSplit).toBe(true);
+    expect(result.current.effectiveCardLayoutMode).toBe("split");
+    expect(result.current.zoomPercent).toBe(75);
+
+    rerender({
+      displayMode: "fixed",
+      interactionMode: "view",
+      requestedCardLayoutMode: "flip",
     });
 
     expect(result.current.zoomPercent).toBe(75);

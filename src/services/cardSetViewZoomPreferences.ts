@@ -18,10 +18,18 @@ interface LegacyCardSetViewZoomPreferencesStore {
 export interface CardSetViewZoomPreferenceScope {
   deviceScope: string;
   cardSetId: string | null | undefined;
+  displayMode?: CardDisplayMode;
+  interactionMode?: CardSetInteractionMode;
+  cardLayoutMode?: CardLayoutMode;
+}
+
+type LegacyCardSetViewZoomPreferenceScope = {
+  deviceScope: string;
+  cardSetId: string | null | undefined;
   displayMode: CardDisplayMode;
   interactionMode: CardSetInteractionMode;
   cardLayoutMode: CardLayoutMode;
-}
+};
 
 const emptyStore = (): CardSetViewZoomPreferencesStore => ({
   version: 2,
@@ -33,17 +41,13 @@ const normalizeDeviceScope = (value: string | null | undefined) => {
   return trimmed.length > 0 ? trimmed : "unknown";
 };
 
-const resolveZoomPreferenceLayoutBucket = (cardLayoutMode: CardLayoutMode) => {
-  return cardLayoutMode === "split" ? "split" : "single";
-};
-
 const buildLegacyZoomPreferenceScopeKey = ({
   deviceScope,
   cardSetId,
   displayMode,
   interactionMode,
   cardLayoutMode,
-}: CardSetViewZoomPreferenceScope) => {
+}: LegacyCardSetViewZoomPreferenceScope) => {
   return [
     normalizeDeviceScope(deviceScope),
     cardSetId ?? "__no_card_set__",
@@ -56,17 +60,21 @@ const buildLegacyZoomPreferenceScopeKey = ({
 export const buildCardSetViewZoomPreferenceScopeKey = ({
   deviceScope,
   cardSetId,
-  displayMode,
-  interactionMode,
-  cardLayoutMode,
 }: CardSetViewZoomPreferenceScope) => {
   return [
     normalizeDeviceScope(deviceScope),
     cardSetId ?? "__no_card_set__",
-    displayMode,
-    interactionMode,
-    resolveZoomPreferenceLayoutBucket(cardLayoutMode),
   ].join("::");
+};
+
+const canResolveLegacyScopedKey = (
+  scope: CardSetViewZoomPreferenceScope,
+): scope is LegacyCardSetViewZoomPreferenceScope => {
+  return (
+    scope.displayMode != null &&
+    scope.interactionMode != null &&
+    scope.cardLayoutMode != null
+  );
 };
 
 const parseCurrentStore = (raw: string | null) => {
@@ -173,16 +181,18 @@ const readStoredZoomPercent = ({
     return currentValue;
   }
 
-  const legacyScopedValue =
-    store.byScope[buildLegacyZoomPreferenceScopeKey(scope)];
+  if (canResolveLegacyScopedKey(scope)) {
+    const legacyScopedValue =
+      store.byScope[buildLegacyZoomPreferenceScopeKey(scope)];
 
-  if (
-    typeof legacyScopedValue === "number" &&
-    Number.isFinite(legacyScopedValue) &&
-    legacyScopedValue >= 0 &&
-    legacyScopedValue <= 100
-  ) {
-    return legacyScopedValue;
+    if (
+      typeof legacyScopedValue === "number" &&
+      Number.isFinite(legacyScopedValue) &&
+      legacyScopedValue >= 0 &&
+      legacyScopedValue <= 100
+    ) {
+      return legacyScopedValue;
+    }
   }
 
   return undefined;
@@ -231,6 +241,7 @@ export const getCardSetViewZoomPreference = (
 
   if (storedZoomPercent != null) {
     if (
+      canResolveLegacyScopedKey(scope) &&
       buildCardSetViewZoomPreferenceScopeKey(scope) !==
       buildLegacyZoomPreferenceScopeKey(scope)
     ) {

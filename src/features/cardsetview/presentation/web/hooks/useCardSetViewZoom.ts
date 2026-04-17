@@ -188,7 +188,9 @@ export const useCardSetViewZoom = ({
     return requestedCardLayoutMode;
   }, [canUseSplit, requestedCardLayoutMode, splitFallbackLayoutMode]);
 
-  const zoomPreferenceCardLayoutMode = requestedCardLayoutMode;
+  // 現在の mode 情報は旧 scoped key からの移行にだけ使う。
+  // 現行の保存キー自体は deviceScope + cardSetId のみ。
+  const legacyZoomPreferenceCardLayoutMode = requestedCardLayoutMode;
 
   const zoomScope = useMemo(
     () =>
@@ -197,14 +199,14 @@ export const useCardSetViewZoom = ({
         cardSetId,
         displayMode,
         interactionMode,
-        cardLayoutMode: zoomPreferenceCardLayoutMode,
+        cardLayoutMode: legacyZoomPreferenceCardLayoutMode,
       }),
     [
       cardSetId,
       deviceScope,
       displayMode,
       interactionMode,
-      zoomPreferenceCardLayoutMode,
+      legacyZoomPreferenceCardLayoutMode,
     ],
   );
 
