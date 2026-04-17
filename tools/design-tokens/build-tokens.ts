@@ -26,6 +26,7 @@ const tokenFiles = [
   "typography.json",
   "motion.json",
   "elevation.json",
+  "layout.json",
   "semantic.json",
 ] as const;
 

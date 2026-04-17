@@ -44,6 +44,58 @@ enum DesignTokens {
             static let Foreground = "#24292f"
             static let Border = "rgba(0, 0, 0, 0.06)"
         }
+        enum Tag {
+            enum Slate {
+                static let Bg = "#f3f4f6"
+                static let Fg = "#4b5563"
+                static let Border = "#d1d5db"
+            }
+            enum Red {
+                static let Bg = "#fef2f2"
+                static let Fg = "#b42318"
+                static let Border = "#f3b5b5"
+            }
+            enum Orange {
+                static let Bg = "#fff7ed"
+                static let Fg = "#c2410c"
+                static let Border = "#fdba74"
+            }
+            enum Amber {
+                static let Bg = "#fffbeb"
+                static let Fg = "#b45309"
+                static let Border = "#fcd34d"
+            }
+            enum Lime {
+                static let Bg = "#f7fee7"
+                static let Fg = "#4d7c0f"
+                static let Border = "#bef264"
+            }
+            enum Green {
+                static let Bg = "#f0fdf4"
+                static let Fg = "#15803d"
+                static let Border = "#86efac"
+            }
+            enum Teal {
+                static let Bg = "#f0fdfa"
+                static let Fg = "#0f766e"
+                static let Border = "#5eead4"
+            }
+            enum Sky {
+                static let Bg = "#f0f9ff"
+                static let Fg = "#0369a1"
+                static let Border = "#7dd3fc"
+            }
+            enum Blue {
+                static let Bg = "#eff6ff"
+                static let Fg = "#1d4ed8"
+                static let Border = "#93c5fd"
+            }
+            enum Violet {
+                static let Bg = "#f5f3ff"
+                static let Fg = "#6d28d9"
+                static let Border = "#c4b5fd"
+            }
+        }
     }
     enum Spacing {
         static let Value0 = 0
@@ -135,6 +187,33 @@ enum DesignTokens {
         }
         enum Blur {
             static let Floating = 12
+        }
+    }
+    enum Layout {
+        enum Card {
+            static let BaseWidth = 480
+            static let DisplayMaxHeight = "min(70vh, 560px)"
+            static let RowPx = 24
+            static let SelectedOutlineWidth = 1.6
+        }
+        enum Tree {
+            static let Indent = 12
+        }
+        enum Content {
+            static let MaxWidth = 760
+        }
+        enum RowHeight {
+            static let Dense = 28
+            static let Normal = 32
+        }
+        enum FontSize {
+            static let PageTitle = 22
+            static let Section = 13
+            static let Body = 13
+            static let Meta = 12
+        }
+        enum Scrollbar {
+            static let Size = 6
         }
     }
     enum Semantic {

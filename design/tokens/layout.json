@@ -1,0 +1,27 @@
+{
+  "card": {
+    "baseWidth": 480,
+    "displayMaxHeight": "min(70vh, 560px)",
+    "rowPx": 24,
+    "selectedOutlineWidth": 1.6
+  },
+  "tree": {
+    "indent": 12
+  },
+  "content": {
+    "maxWidth": 760
+  },
+  "rowHeight": {
+    "dense": 28,
+    "normal": 32
+  },
+  "fontSize": {
+    "pageTitle": 22,
+    "section": 13,
+    "body": 13,
+    "meta": 12
+  },
+  "scrollbar": {
+    "size": 6
+  }
+}
