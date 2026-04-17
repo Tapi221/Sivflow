@@ -1,4 +1,4 @@
-import { firestoreDb } from "@/infrastructure/firebase/client";
+import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import {
   COLLECTION_BY_TYPE,
   type CloudEntityType,
@@ -16,13 +16,8 @@ import {
   type Query,
 } from "firebase/firestore";
 
-export const requireCloudSyncFirestore = (): Firestore => {
-  if (!firestoreDb) {
-    throw new Error("Firebase Firestore is not initialized.");
-  }
-
-  return firestoreDb;
-};
+export const requireCloudSyncFirestore = (): Firestore =>
+  requireFirestoreDb();
 
 export const getPullableCollectionRef = (
   firestore: Firestore,

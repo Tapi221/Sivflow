@@ -27,10 +27,10 @@ export const auth = getAuth(app);
 export const storage = getStorage(app);
 const functions = getFunctions(app, "asia-northeast1");
 
-let _firestoreDb: Firestore | null = null;
+let firestoreDbInternal: Firestore | null = null;
 
 try {
-  _firestoreDb = initializeFirestore(app, {
+  firestoreDbInternal = initializeFirestore(app, {
     localCache: persistentLocalCache({
       tabManager: persistentMultipleTabManager(),
     }),
@@ -45,7 +45,7 @@ try {
   );
 
   try {
-    _firestoreDb = getFirestore(app);
+    firestoreDbInternal = getFirestore(app);
     console.log("[Firebase] Fallback to getFirestore() successful");
   } catch (fallbackError: unknown) {
     console.error(
@@ -55,7 +55,17 @@ try {
   }
 }
 
-export const firestoreDb: Firestore | null = _firestoreDb;
+export const firestoreDb: Firestore | null = firestoreDbInternal;
+
+export const requireFirestoreDb = (): Firestore => {
+  if (firestoreDb) {
+    return firestoreDb;
+  }
+
+  throw new Error(
+    "[Firebase] Firestore initialization failed. Firestore-dependent flow cannot continue.",
+  );
+};
 
 if (typeof window !== "undefined") {
   const useEmulators = import.meta.env.VITE_USE_FIREBASE_EMULATOR === "true";
@@ -67,8 +77,8 @@ if (typeof window !== "undefined") {
     try {
       connectAuthEmulator(auth, "http://localhost:9099");
 
-      if (firestoreDb) {
-        connectFirestoreEmulator(firestoreDb, "localhost", 8080);
+      if (firestoreDbInternal) {
+        connectFirestoreEmulator(firestoreDbInternal, "localhost", 8080);
       }
 
       connectStorageEmulator(storage, "localhost", 9199);
@@ -90,10 +100,10 @@ const debugFirebase = (): void => {
 
   try {
     console.log("App name:", app.name);
-    console.log("DB instance:", _firestoreDb ? "exists" : "MISSING");
+    console.log("DB instance:", firestoreDbInternal ? "exists" : "MISSING");
 
-    if (firestoreDb) {
-      const testRef = collection(firestoreDb, "test_connection");
+    if (firestoreDbInternal) {
+      const testRef = collection(firestoreDbInternal, "test_connection");
       console.log("collection() basic check passed:", testRef.path);
     }
   } catch (error) {

@@ -1,6 +1,6 @@
 import type { SnapshotRepositoryPort } from "@/application/ports/SnapshotRepositoryPort";
 import type { AppSnapshot } from "@/types/domain/snapshot";
-import { firestoreDb } from "@/infrastructure/firebase/client";
+import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import {
   addDoc,
   collection,
@@ -13,14 +13,6 @@ import {
 
 const MAX_STORED_SNAPSHOTS = 7;
 
-const assertFirestore = () => {
-  if (!firestoreDb) {
-    throw new Error("Firestore is not initialized");
-  }
-
-  return firestoreDb;
-};
-
 const save: SnapshotRepositoryPort["save"] = async (snapshot) => {
   const userId = snapshot.metadata.userId;
 
@@ -28,7 +20,7 @@ const save: SnapshotRepositoryPort["save"] = async (snapshot) => {
     throw new Error("userId is required for saving snapshot");
   }
 
-  const db = assertFirestore();
+  const db = requireFirestoreDb();
   const snapshotsRef = collection(db, `users/${userId}/snapshots`);
 
   await addDoc(snapshotsRef, {
@@ -52,7 +44,7 @@ const save: SnapshotRepositoryPort["save"] = async (snapshot) => {
 };
 
 const list: SnapshotRepositoryPort["list"] = async (userId) => {
-  const db = assertFirestore();
+  const db = requireFirestoreDb();
   const snapshotsRef = collection(db, `users/${userId}/snapshots`);
   const snapshotsQuery = query(
     snapshotsRef,

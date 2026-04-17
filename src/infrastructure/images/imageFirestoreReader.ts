@@ -1,4 +1,4 @@
-import { auth } from "@/infrastructure/firebase/client";
+import { auth, requireFirestoreDb } from "@/infrastructure/firebase/client";
 import type { UploadedImage } from "@/types";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -6,7 +6,6 @@ import { imageDocPathSegments } from "@/infrastructure/firebase/firestore/paths"
 import {
   createImageDocRef,
   isImageFirestoreDiagnosticsEnabled,
-  requireFirestoreDb,
 } from "./imageFirestoreWriter";
 import { touchMigrateLegacyImageToUserScope } from "./imageLegacyTouchMigration";
 

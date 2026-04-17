@@ -1,4 +1,4 @@
-import { auth, firestoreDb } from "@/infrastructure/firebase/client";
+import { auth, requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { imageDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
 import type { UploadedImage } from "@/types";
 import { strictValidateBeforeSave } from "@/utils/imageValidation";
@@ -35,14 +35,6 @@ export const isImageFirestoreDiagnosticsEnabled = (): boolean => {
   } catch {
     return false;
   }
-};
-
-export const requireFirestoreDb = (): Firestore => {
-  if (!firestoreDb) {
-    throw new Error("[ImageDB] Firestore is unavailable");
-  }
-
-  return firestoreDb;
 };
 
 export const createImageDocRef = (db: Firestore, pathSegments: string[]) =>
