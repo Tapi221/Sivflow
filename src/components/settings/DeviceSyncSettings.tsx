@@ -1,7 +1,7 @@
 import { Switch } from "@/components/ui/switch";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useSyncSettings } from "@/hooks/sync/useSyncSettings";
-import { firestoreDb } from "@/services/firebase";
+import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { getLocalDb, initializeDB } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import type { SyncMetadata, UserStats } from "@/types";
@@ -45,9 +45,10 @@ export const DeviceSyncSettings: React.FC = () => {
   const fetchDevices = useCallback(async () => {
     if (!currentUser) return;
     setLoading(true);
+    const db = requireFirestoreDb();
     try {
       const devicesQuery = query(
-        collection(firestoreDb, `sync_metadata/${currentUser.uid}/devices`),
+        collection(db, `sync_metadata/${currentUser.uid}/devices`),
       );
       const snapshot = await getDocs(devicesQuery);
       const deviceList = snapshot.docs.map((doc) => doc.data() as SyncMetadata);

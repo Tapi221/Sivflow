@@ -9,7 +9,7 @@ import {
   Timestamp,
   where,
 } from "firebase/firestore";
-import { firestoreDb } from "./firebase";
+import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import {
   cardDocPathSegments,
   cardsPathSegments,
@@ -41,9 +41,10 @@ export interface ICloudProvider {
  */
 export class FirebaseCloudProvider implements ICloudProvider {
   async upsertFolder(folder: Folder): Promise<void> {
+    const db = requireFirestoreDb();
     if (!folder.userId) throw new Error("userId is required for upsertFolder");
     const docRef = doc(
-      firestoreDb,
+      db,
       ...folderDocPathSegments(folder.userId, folder.id),
     );
     const data = {
@@ -54,9 +55,10 @@ export class FirebaseCloudProvider implements ICloudProvider {
   }
 
   async upsertCard(card: Card): Promise<void> {
+    const db = requireFirestoreDb();
     if (!card.userId) throw new Error("userId is required for upsertCard");
     const docRef = doc(
-      firestoreDb,
+      db,
       ...cardDocPathSegments(card.userId, card.id),
     );
     const data = {
@@ -70,6 +72,7 @@ export class FirebaseCloudProvider implements ICloudProvider {
     lastSyncTime: Date,
     userId: string,
   ): Promise<{ folders: Folder[]; cards: Card[] }> {
+    const db = requireFirestoreDb();
     if (!userId)
       throw new Error("userId is required for fetchUpdatedDataSince");
 
@@ -117,14 +120,14 @@ export class FirebaseCloudProvider implements ICloudProvider {
     };
 
     // フォルダの取得
-    const foldersCol = collection(firestoreDb, ...foldersPathSegments(userId));
+    const foldersCol = collection(db, ...foldersPathSegments(userId));
     const folderDocs = await fetchPagedDocs(foldersCol);
     const folders = folderDocs.map(
       (d: unknown) => ({ id: d.id, ...d.data() }) as unknown as Folder,
     );
 
     // カードの取得（フォルダに関わらずユーザー単位で取得）
-    const cardsCol = collection(firestoreDb, ...cardsPathSegments(userId));
+    const cardsCol = collection(db, ...cardsPathSegments(userId));
     const cardDocs = await fetchPagedDocs(cardsCol);
     const cards = cardDocs.map(
       (d: unknown) => ({ id: d.id, ...d.data() }) as unknown as Card,
@@ -134,8 +137,9 @@ export class FirebaseCloudProvider implements ICloudProvider {
   }
 
   async deleteFolder(folderId: string, userId: string): Promise<void> {
+    const db = requireFirestoreDb();
     if (!userId) throw new Error("userId is required for deleteFolder");
-    const docRef = doc(firestoreDb, ...folderDocPathSegments(userId, folderId));
+    const docRef = doc(db, ...folderDocPathSegments(userId, folderId));
     await setDoc(
       docRef,
       { isDeleted: true, updatedAt: Timestamp.now() },
@@ -144,8 +148,9 @@ export class FirebaseCloudProvider implements ICloudProvider {
   }
 
   async deleteCard(cardId: string, userId: string): Promise<void> {
+    const db = requireFirestoreDb();
     if (!userId) throw new Error("userId is required for deleteCard");
-    const docRef = doc(firestoreDb, ...cardDocPathSegments(userId, cardId));
+    const docRef = doc(db, ...cardDocPathSegments(userId, cardId));
     await setDoc(
       docRef,
       { isDeleted: true, updatedAt: Timestamp.now() },
