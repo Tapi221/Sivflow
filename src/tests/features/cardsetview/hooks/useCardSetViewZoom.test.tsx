@@ -26,11 +26,7 @@ describe("useCardSetViewZoom", () => {
     const viewportRef = createViewportRef(1400);
 
     const { result, rerender } = renderHook(
-      ({
-        interactionMode,
-      }: {
-        interactionMode: "view" | "edit";
-      }) =>
+      ({ interactionMode }: { interactionMode: "view" | "edit" }) =>
         useCardSetViewZoom({
           deviceScope: "desktop",
           cardSetId: "card-set-1",
@@ -48,7 +44,9 @@ describe("useCardSetViewZoom", () => {
       },
     );
 
-    expect(result.current.defaultZoomPercent).toBe(62);
+    expect(result.current.defaultZoomPercent).toBeCloseTo(12, 5);
+    expect(result.current.zoomScale).toBe(1);
+    expect(result.current.fixedCardWidthPx).toBe(480);
 
     act(() => {
       result.current.setZoomPercent(75);
@@ -60,8 +58,10 @@ describe("useCardSetViewZoom", () => {
       interactionMode: "edit",
     });
 
-    expect(result.current.defaultZoomPercent).toBe(52);
-    expect(result.current.zoomPercent).toBe(52);
+    expect(result.current.defaultZoomPercent).toBeCloseTo(8.333333, 5);
+    expect(result.current.zoomPercent).toBeCloseTo(8.333333, 5);
+    expect(result.current.zoomScale).toBe(1);
+    expect(result.current.fixedCardWidthPx).toBe(480);
 
     act(() => {
       result.current.setZoomPercent(35);
@@ -94,5 +94,38 @@ describe("useCardSetViewZoom", () => {
 
     expect(result.current.canUseSplit).toBe(false);
     expect(result.current.effectiveCardLayoutMode).toBe("flip");
+  });
+
+  it("recomputes the viewport-derived default until the user changes it", () => {
+    const viewportRef = createViewportRef(1400);
+
+    const { result } = renderHook(() =>
+      useCardSetViewZoom({
+        deviceScope: "desktop",
+        cardSetId: "card-set-3",
+        viewportRef,
+        activeCardKey: "card-1:fixed:flip:view",
+        displayMode: "fixed",
+        interactionMode: "view",
+        requestedCardLayoutMode: "flip",
+        splitFallbackLayoutMode: "flip",
+      }),
+    );
+
+    expect(result.current.defaultZoomPercent).toBeCloseTo(12, 5);
+    expect(result.current.fixedCardWidthPx).toBe(480);
+
+    act(() => {
+      Object.defineProperty(viewportRef.current, "clientWidth", {
+        configurable: true,
+        value: 1000,
+      });
+      window.dispatchEvent(new Event("resize"));
+    });
+
+    expect(result.current.defaultZoomPercent).toBeCloseTo(20, 5);
+    expect(result.current.zoomPercent).toBeCloseTo(20, 5);
+    expect(result.current.zoomScale).toBe(1);
+    expect(result.current.fixedCardWidthPx).toBe(480);
   });
 });

@@ -119,10 +119,7 @@
       --accent-bg,
       var(--ds-semantic-color-action-primary-soft)
     );
-    border-color: var(
-      --accent-border,
-      var(--ds-semantic-color-action-primary)
-    );
+    border-color: var(--accent-border, var(--ds-semantic-color-action-primary));
   }
 
   .restore-notification-icon,

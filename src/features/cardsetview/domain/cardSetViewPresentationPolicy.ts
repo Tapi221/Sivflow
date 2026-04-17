@@ -1,13 +1,14 @@
+import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
 import type {
   CardLayoutMode,
   CardSetInteractionMode,
 } from "@/features/cardsetview/domain/cardLayoutMode";
 import {
+  CARD_SET_VIEW_DEFAULT_ZOOM_SCALE,
   CARD_SET_VIEW_FIXED_LAYOUT_SAFETY_ALLOWANCE_PX,
   CARD_SET_VIEW_SCROLLBAR_RESERVE_PX,
   CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX,
   CARD_SET_VIEW_SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX,
-  CARD_SET_VIEW_ZOOM_DEFAULT_PERCENT,
   CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX,
 } from "@/constants/shared/cardSetViewPresentation";
 import { CARD_VIEW_ZOOM_STEP_PERCENT } from "@constants/shared/cardSetView";
@@ -18,20 +19,21 @@ type ResolveZoomWidthArgs = {
   cardLayoutMode: CardLayoutMode;
 };
 
+const clampZoomPercentRange = (value: number) => {
+  const safeValue = Number.isFinite(value) ? value : 0;
+  return Math.max(0, Math.min(100, safeValue));
+};
+
 const roundToStep = (value: number, stepPercent: number) => {
-  if (!Number.isFinite(value)) return 0;
-  if (stepPercent <= 0) return Math.round(value);
-  return Math.round(value / stepPercent) * stepPercent;
+  const safeValue = clampZoomPercentRange(value);
+  if (stepPercent <= 0) return safeValue;
+  return Math.round(safeValue / stepPercent) * stepPercent;
 };
 
 export const clampNormalizedZoomPercent = (
   value: number,
   stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
-) => {
-  const safeValue = Number.isFinite(value) ? value : 0;
-  const snapped = roundToStep(safeValue, stepPercent);
-  return Math.max(0, Math.min(100, snapped));
-};
+) => roundToStep(value, stepPercent);
 
 export const resolveZoomMinBaseWidthPx = ({
   interactionMode,
@@ -40,13 +42,74 @@ export const resolveZoomMinBaseWidthPx = ({
   return CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX[interactionMode][cardLayoutMode];
 };
 
+export const clampZoomPercent = (value: number) => clampZoomPercentRange(value);
+
+export const resolveZoomPercentForPresentationWidthPx = ({
+  targetPresentationWidthPx,
+  interactionMode,
+  cardLayoutMode,
+  maxPresentationWidthPx,
+}: {
+  targetPresentationWidthPx: number;
+  interactionMode: CardSetInteractionMode;
+  cardLayoutMode: CardLayoutMode;
+  maxPresentationWidthPx: number;
+}) => {
+  const normalizedMaxWidthPx = Math.max(1, Math.floor(maxPresentationWidthPx));
+  const configuredMinWidthPx = resolveZoomMinBaseWidthPx({
+    interactionMode,
+    cardLayoutMode,
+  });
+  const effectiveMinWidthPx = Math.min(
+    configuredMinWidthPx,
+    normalizedMaxWidthPx,
+  );
+  const safeTargetWidthPx =
+    Number.isFinite(targetPresentationWidthPx) && targetPresentationWidthPx > 0
+      ? targetPresentationWidthPx
+      : effectiveMinWidthPx;
+  const clampedTargetWidthPx = Math.max(
+    effectiveMinWidthPx,
+    Math.min(normalizedMaxWidthPx, safeTargetWidthPx),
+  );
+
+  if (normalizedMaxWidthPx <= effectiveMinWidthPx) {
+    return 0;
+  }
+
+  return clampZoomPercent(
+    ((clampedTargetWidthPx - effectiveMinWidthPx) /
+      (normalizedMaxWidthPx - effectiveMinWidthPx)) *
+      100,
+  );
+};
+
 export const resolveZoomDefaultPercent = ({
   interactionMode,
   cardLayoutMode,
-}: ResolveZoomWidthArgs) => {
-  return clampNormalizedZoomPercent(
-    CARD_SET_VIEW_ZOOM_DEFAULT_PERCENT[interactionMode][cardLayoutMode],
-  );
+  maxPresentationWidthPx,
+  canonicalCardWidthPx = CANONICAL_CARD_WIDTH,
+  targetZoomScale = CARD_SET_VIEW_DEFAULT_ZOOM_SCALE,
+}: ResolveZoomWidthArgs & {
+  maxPresentationWidthPx: number;
+  canonicalCardWidthPx?: number;
+  targetZoomScale?: number;
+}) => {
+  const safeCanonicalCardWidthPx =
+    Number.isFinite(canonicalCardWidthPx) && canonicalCardWidthPx > 0
+      ? canonicalCardWidthPx
+      : CANONICAL_CARD_WIDTH;
+  const safeTargetZoomScale =
+    Number.isFinite(targetZoomScale) && targetZoomScale > 0
+      ? targetZoomScale
+      : CARD_SET_VIEW_DEFAULT_ZOOM_SCALE;
+
+  return resolveZoomPercentForPresentationWidthPx({
+    targetPresentationWidthPx: safeCanonicalCardWidthPx * safeTargetZoomScale,
+    interactionMode,
+    cardLayoutMode,
+    maxPresentationWidthPx,
+  });
 };
 
 export const resolveUsablePresentationWidthPx = ({
@@ -149,7 +212,7 @@ export const resolvePresentationWidthPx = ({
     configuredMinWidthPx,
     normalizedMaxWidthPx,
   );
-  const ratio = clampNormalizedZoomPercent(zoomPercent) / 100;
+  const ratio = clampZoomPercent(zoomPercent) / 100;
   const resolvedWidthPx =
     effectiveMinWidthPx + (normalizedMaxWidthPx - effectiveMinWidthPx) * ratio;
 

@@ -9,13 +9,14 @@ export default {
           "rgb(var(--ds-semantic-color-border-default-rgb) / <alpha-value>)",
         input:
           "rgb(var(--ds-semantic-color-border-default-rgb) / <alpha-value>)",
-        ring:
-          "rgb(var(--ds-semantic-color-action-primary-rgb) / <alpha-value>)",
-        foreground: "rgb(var(--ds-semantic-color-text-primary-rgb) / <alpha-value>)",
+        ring: "rgb(var(--ds-semantic-color-action-primary-rgb) / <alpha-value>)",
+        foreground:
+          "rgb(var(--ds-semantic-color-text-primary-rgb) / <alpha-value>)",
         popover: {
           DEFAULT:
             "rgb(var(--ds-semantic-color-background-app-rgb) / <alpha-value>)",
-          foreground: "rgb(var(--ds-semantic-color-text-primary-rgb) / <alpha-value>)",
+          foreground:
+            "rgb(var(--ds-semantic-color-text-primary-rgb) / <alpha-value>)",
         },
         muted: {
           DEFAULT: "rgb(var(--ds-color-neutral-100-rgb) / <alpha-value>)",
@@ -25,7 +26,8 @@ export default {
         accent: {
           DEFAULT:
             "rgb(var(--ds-semantic-color-background-sidebar-active-rgb) / <alpha-value>)",
-          foreground: "rgb(var(--ds-semantic-color-text-strong-rgb) / <alpha-value>)",
+          foreground:
+            "rgb(var(--ds-semantic-color-text-strong-rgb) / <alpha-value>)",
         },
         secondary: {
           DEFAULT:
@@ -78,8 +80,7 @@ export default {
             "rgb(var(--ds-semantic-color-text-primary-rgb) / <alpha-value>)",
           strong:
             "rgb(var(--ds-semantic-color-text-strong-rgb) / <alpha-value>)",
-          body:
-            "rgb(var(--ds-semantic-color-text-secondary-rgb) / <alpha-value>)",
+          body: "rgb(var(--ds-semantic-color-text-secondary-rgb) / <alpha-value>)",
           weak: "rgb(var(--ds-color-neutral-500-rgb) / <alpha-value>)",
         },
       },

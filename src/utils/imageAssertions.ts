@@ -15,7 +15,7 @@ export class ImageInvariantViolation extends Error {
     super(`[ImageInvariant] ${message}`);
     this.name = "ImageInvariantViolation";
   }
-};
+}
 
 const assertNoBase64Url = (
   value: string | null | undefined,

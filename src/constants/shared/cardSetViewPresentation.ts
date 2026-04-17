@@ -13,11 +13,6 @@ type CardSetViewInteractionModeWidthThresholds = Record<
   number
 >;
 
-type CardSetViewLayoutZoomDefaults = Record<
-  CardSetInteractionMode,
-  Record<CardLayoutMode, number>
->;
-
 export const CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX: CardSetViewLayoutWidthThresholds =
   {
     view: {
@@ -38,19 +33,7 @@ export const CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX: CardSetViewInteracti
     edit: 840,
   };
 
-export const CARD_SET_VIEW_ZOOM_DEFAULT_PERCENT: CardSetViewLayoutZoomDefaults =
-  {
-    view: {
-      flip: 62,
-      stack: 58,
-      split: 42,
-    },
-    edit: {
-      flip: 52,
-      stack: 48,
-      split: 30,
-    },
-  };
+export const CARD_SET_VIEW_DEFAULT_ZOOM_SCALE = 1;
 
 export const CARD_SET_VIEW_SCROLLBAR_RESERVE_PX = 16;
 export const CARD_SET_VIEW_FIXED_LAYOUT_SAFETY_ALLOWANCE_PX = 24;

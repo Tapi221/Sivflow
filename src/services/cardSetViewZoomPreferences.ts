@@ -56,11 +56,15 @@ const buildLegacyZoomPreferenceScopeKey = ({
 export const buildCardSetViewZoomPreferenceScopeKey = ({
   deviceScope,
   cardSetId,
+  displayMode,
+  interactionMode,
   cardLayoutMode,
 }: CardSetViewZoomPreferenceScope) => {
   return [
     normalizeDeviceScope(deviceScope),
     cardSetId ?? "__no_card_set__",
+    displayMode,
+    interactionMode,
     resolveZoomPreferenceLayoutBucket(cardLayoutMode),
   ].join("::");
 };

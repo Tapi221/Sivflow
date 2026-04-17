@@ -10,9 +10,7 @@ import {
   clampPaneWidthPx,
 } from "@/components/card/shell/cardPaneWidthConstants";
 import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthState";
-import {
-  CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX,
-} from "@/constants/shared/cardSetViewPresentation";
+import { CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX } from "@/constants/shared/cardSetViewPresentation";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import {
   getCardSetWidthPreference,

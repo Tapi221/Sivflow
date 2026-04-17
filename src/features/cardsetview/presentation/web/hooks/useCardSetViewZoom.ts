@@ -8,15 +8,14 @@ import {
 } from "react";
 
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/cardGeometry";
-import {
-  CARD_SET_VIEW_LAYOUT_CONSTRAINT_INDICATOR_DURATION_MS,
-} from "@/constants/shared/cardSetViewPresentation";
+import { CARD_SET_VIEW_LAYOUT_CONSTRAINT_INDICATOR_DURATION_MS } from "@/constants/shared/cardSetViewPresentation";
 import type {
   CardLayoutMode,
   CardSetInteractionMode,
   SplitFallbackCardLayoutMode,
 } from "@/features/cardsetview/domain/cardLayoutMode";
 import {
+  clampZoomPercent as clampZoomPercentRange,
   clampNormalizedZoomPercent,
   resolveCanUseSplitLayout,
   resolvePresentationMaxWidthPx,
@@ -55,8 +54,7 @@ type ZoomPreferenceState = {
 
 const DEFAULT_SOURCE_KEY = "__cardsetview_zoom_default__";
 
-export const clampZoomPercent = (value: number) =>
-  clampNormalizedZoomPercent(value);
+export const clampZoomPercent = (value: number) => clampZoomPercentRange(value);
 export const computeDynamicMaxZoomPercent = () => 100;
 
 const buildZoomScope = ({
@@ -215,42 +213,6 @@ export const useCardSetViewZoom = ({
     [zoomScope],
   );
 
-  const defaultZoomPercent = useMemo(
-    () =>
-      resolveZoomDefaultPercent({
-        interactionMode,
-        cardLayoutMode: zoomPreferenceCardLayoutMode,
-      }),
-    [interactionMode, zoomPreferenceCardLayoutMode],
-  );
-
-  const storedPreferredPercent = useMemo(() => {
-    if (!cardSetId) {
-      return defaultZoomPercent;
-    }
-
-    return getCardSetViewZoomPreference(zoomScope) ?? defaultZoomPercent;
-  }, [cardSetId, defaultZoomPercent, zoomScope]);
-
-  const preferredZoomPercent =
-    zoomPreferenceState.scopeKey === zoomSourceKey &&
-    zoomPreferenceState.preferredPercent != null
-      ? zoomPreferenceState.preferredPercent
-      : storedPreferredPercent;
-
-  const zoomPercent = useMemo(
-    () => clampNormalizedZoomPercent(preferredZoomPercent),
-    [preferredZoomPercent],
-  );
-
-  useEffect(() => {
-    if (!cardSetId) {
-      return;
-    }
-
-    setCardSetViewZoomPreference(zoomScope, zoomPercent);
-  }, [cardSetId, zoomPercent, zoomScope]);
-
   const usableWidthPx = useMemo(
     () => resolveUsablePresentationWidthPx({ viewportWidthPx }),
     [viewportWidthPx],
@@ -265,6 +227,55 @@ export const useCardSetViewZoom = ({
       }),
     [displayMode, effectiveCardLayoutMode, usableWidthPx],
   );
+
+  const defaultZoomPercent = useMemo(
+    () =>
+      resolveZoomDefaultPercent({
+        interactionMode,
+        cardLayoutMode: effectiveCardLayoutMode,
+        maxPresentationWidthPx,
+        canonicalCardWidthPx: CANONICAL_CARD_WIDTH,
+      }),
+    [effectiveCardLayoutMode, interactionMode, maxPresentationWidthPx],
+  );
+
+  const storedPreferredPercent = useMemo(() => {
+    if (!cardSetId) {
+      return null;
+    }
+
+    return getCardSetViewZoomPreference(zoomScope) ?? null;
+  }, [cardSetId, zoomScope]);
+
+  const preferredZoomPercent =
+    zoomPreferenceState.scopeKey === zoomSourceKey &&
+    zoomPreferenceState.preferredPercent != null
+      ? zoomPreferenceState.preferredPercent
+      : (storedPreferredPercent ?? defaultZoomPercent);
+
+  const zoomPercent = useMemo(
+    () => clampZoomPercentRange(preferredZoomPercent),
+    [preferredZoomPercent],
+  );
+
+  useEffect(() => {
+    if (
+      !cardSetId ||
+      zoomPreferenceState.scopeKey !== zoomSourceKey ||
+      zoomPreferenceState.preferredPercent == null
+    ) {
+      return;
+    }
+
+    setCardSetViewZoomPreference(zoomScope, zoomPercent);
+  }, [
+    cardSetId,
+    zoomPercent,
+    zoomPreferenceState.preferredPercent,
+    zoomPreferenceState.scopeKey,
+    zoomScope,
+    zoomSourceKey,
+  ]);
 
   const presentationWidthPx = useMemo(
     () =>
@@ -295,18 +306,22 @@ export const useCardSetViewZoom = ({
     (nextPercent: number) => {
       setZoomPreferenceState({
         scopeKey: zoomSourceKey,
-        preferredPercent: clampNormalizedZoomPercent(nextPercent),
+        preferredPercent: clampZoomPercentRange(nextPercent),
       });
     },
     [zoomSourceKey],
   );
 
   const stepUp = useCallback(() => {
-    setZoomPercent(zoomPercent + CARD_VIEW_ZOOM_STEP_PERCENT);
+    setZoomPercent(
+      clampNormalizedZoomPercent(zoomPercent + CARD_VIEW_ZOOM_STEP_PERCENT),
+    );
   }, [setZoomPercent, zoomPercent]);
 
   const stepDown = useCallback(() => {
-    setZoomPercent(zoomPercent - CARD_VIEW_ZOOM_STEP_PERCENT);
+    setZoomPercent(
+      clampNormalizedZoomPercent(zoomPercent - CARD_VIEW_ZOOM_STEP_PERCENT),
+    );
   }, [setZoomPercent, zoomPercent]);
 
   const reset = useCallback(() => {
