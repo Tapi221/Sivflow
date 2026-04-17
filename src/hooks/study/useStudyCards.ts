@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import {
   buildCardSetById,
   filterCardsByFolderId,
-  resolveCardFolderId,
+  resolveCardFolderIdStrict,
 } from "@/domain/card/selectors/cardFolder";
 import type { Card, CardSet, Folder, UserSettings } from "@/types";
 import { normalizeDate } from "@/shared/codec/date";
@@ -44,8 +44,8 @@ export const useStudyCards = ({
           .filter(Boolean),
       );
       cards = cards.filter((card) => {
-        const resolvedFolderId = resolveCardFolderId(card, cardSetById);
-        return !resolvedFolderId || activeFolderIds.has(resolvedFolderId);
+        const resolvedFolderId = resolveCardFolderIdStrict(card, cardSetById);
+        return Boolean(resolvedFolderId && activeFolderIds.has(resolvedFolderId));
       });
     }
 

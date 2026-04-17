@@ -1,6 +1,6 @@
 import {
   buildCardSetById,
-  resolveCardFolderId,
+  resolveCardFolderIdStrict,
 } from "@/domain/card/selectors/cardFolder";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import {
@@ -75,7 +75,7 @@ export const useEnsureAncestorFoldersExpanded = ({
     if (!selectedItem || selectedItem.type !== "card") return;
     const card = treeCards.find((c) => c.id === selectedItem.id);
     if (!card) return;
-    const resolvedFolderId = resolveCardFolderId(card, cardSetById);
+    const resolvedFolderId = resolveCardFolderIdStrict(card, cardSetById);
     if (!resolvedFolderId) return;
     const ancestorIds = getAncestorFolderIds(resolvedFolderId, treeFolders);
     expandFolderIds(ancestorIds, setExpandedFolders);

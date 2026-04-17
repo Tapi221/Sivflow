@@ -1,6 +1,6 @@
 import {
   buildCardSetById,
-  resolveCardFolderId,
+  resolveCardFolderIdStrict,
 } from "@/domain/card/selectors/cardFolder";
 import {
   addDays,
@@ -98,9 +98,9 @@ export const buildCardsByDate = ({
       const dateValue = card.next_review_date ?? card.nextReviewDate;
       if (!dateValue) return false;
 
-      const folderId = resolveCardFolderId(card, cardSetById);
+      const folderId = resolveCardFolderIdStrict(card, cardSetById);
 
-      if (!folderId) return true;
+      if (!folderId) return false;
       if (foldersLoading) return true;
 
       const folder = folderMap.get(folderId);

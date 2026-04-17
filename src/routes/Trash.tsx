@@ -29,7 +29,7 @@ import {
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import {
   buildCardSetById,
-  resolveCardFolderId,
+  resolveCardFolderIdStrict,
 } from "@/domain/card/selectors/cardFolder";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { format } from "date-fns";
@@ -183,7 +183,7 @@ const Trash = () => {
   const cardFolderIdByCardId = useMemo(() => {
     const map = new Map<string, string | null>();
     for (const card of allCardsData) {
-      map.set(card.id, resolveCardFolderId(card, cardSetById));
+      map.set(card.id, resolveCardFolderIdStrict(card, cardSetById));
     }
     return map;
   }, [allCardsData, cardSetById]);

@@ -9,7 +9,7 @@ import {
 } from "@/components/folder/explorer/model/utils";
 import {
   buildCardSetById,
-  resolveCardFolderId,
+  resolveCardFolderIdStrict,
 } from "@/domain/card/selectors/cardFolder";
 import { compareOrderableEntities } from "@/lib/orderableEntity";
 import type { Card, CardSet, DocumentItem, ExplorerItem } from "@/types";
@@ -140,7 +140,7 @@ export const useExplorerDerivedData = ({
     const map = new Map<string, number>();
     for (const card of treeCards) {
       if (isSoftDeleted(withLegacy(card))) continue;
-      const cardFolderId = resolveCardFolderId(card, cardSetById);
+      const cardFolderId = resolveCardFolderIdStrict(card, cardSetById);
       if (!hasValidFolderBinding(cardFolderId)) {
         continue;
       }
@@ -164,7 +164,7 @@ export const useExplorerDerivedData = ({
 
     for (const card of treeCards) {
       if (isSoftDeleted(withLegacy(card))) continue;
-      const cardFolderId = resolveCardFolderId(card, cardSetById);
+      const cardFolderId = resolveCardFolderIdStrict(card, cardSetById);
       if (!hasValidFolderBinding(cardFolderId)) {
         continue;
       }
@@ -262,7 +262,7 @@ export const useExplorerDerivedData = ({
       for (const card of treeCards) {
         if (isSoftDeleted(withLegacy(card))) continue;
         const cardFolderId = resolveTreeFolderId(
-          resolveCardFolderId(card, cardSetById),
+          resolveCardFolderIdStrict(card, cardSetById),
         );
         if (!isSameFolder(cardFolderId, targetFolderId)) continue;
         const order = withLegacy(card).orderIndex ?? -1;
