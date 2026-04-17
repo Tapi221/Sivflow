@@ -1,18 +1,10 @@
-import { CARD_EDITOR_EVENTS } from "@constants/shared/flashcard";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
+import type { CardSetViewEditingDraftPatch } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import {
   createLatestReviewLogPatch,
   createReviewPatchFromRating,
 } from "@/services/reviewAlgorithm";
 import type { Card, UserSettings } from "@/types";
-
-export type EditingDraftPatchDetail = {
-  cardId: string;
-  patch: Partial<Pick<Card, "title" | "isDraft">> & { tags?: string[] };
-};
-
-export const CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT =
-  CARD_EDITOR_EVENTS.cardSetViewEditingDraftPatch;
 
 export const META_PANEL_OPEN_STORAGE_KEY =
   WEB_STORAGE_KEYS.cardEditorMetaPanelOpen;
@@ -47,7 +39,7 @@ export const applyEditingDraftPatch = ({
     isDraft: boolean;
     tags: string[];
   } | null;
-  detail: EditingDraftPatchDetail | null | undefined;
+  detail: CardSetViewEditingDraftPatch | null | undefined;
   selectedCardId: string | null;
   isEditing: boolean;
 }) => {

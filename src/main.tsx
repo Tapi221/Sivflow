@@ -6,13 +6,11 @@ import "katex/dist/katex.min.css";
 import "./styles/index.css";
 
 import App from "./App";
+import { bootstrapApp } from "./bootstrap/bootstrapApp";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
-import { initAppRuntime } from "./bootstrap/initAppRuntime";
 import { queryClient } from "./bootstrap/queryClient";
-import { bootstrapPersistentQueue } from "@/platform/web/bootstrapPersistentQueue";
 
-initAppRuntime();
-bootstrapPersistentQueue();
+bootstrapApp();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

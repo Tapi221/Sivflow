@@ -9,6 +9,10 @@ import { windowControls } from "@/platform/capabilities/windowControls";
 import { APP_DESKTOP_TOP_INSET_PX } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
+import {
+  dispatchCardSetViewWindowEvent,
+  subscribeCardSetViewWindowEvent,
+} from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -93,22 +97,12 @@ export const TitleBar: React.FC = () => {
   }, [hasDesktopBridge]);
 
   useEffect(() => {
-    const onEditingChange = (event: Event) => {
-      const next = (event as CustomEvent<boolean>).detail;
-      setIsCardSetViewEditing(Boolean(next));
-    };
-
-    window.addEventListener(
+    return subscribeCardSetViewWindowEvent(
       CARD_SET_VIEW_EVENTS.editingChange,
-      onEditingChange,
+      (isEditing) => {
+        setIsCardSetViewEditing(Boolean(isEditing));
+      },
     );
-
-    return () => {
-      window.removeEventListener(
-        CARD_SET_VIEW_EVENTS.editingChange,
-        onEditingChange,
-      );
-    };
   }, []);
 
   const allCrumbs = useMemo(
@@ -225,8 +219,9 @@ export const TitleBar: React.FC = () => {
               <button
                 type="button"
                 onClick={() =>
-                  window.dispatchEvent(
-                    new CustomEvent(CARD_SET_VIEW_EVENTS.createCardRequest),
+                  dispatchCardSetViewWindowEvent(
+                    CARD_SET_VIEW_EVENTS.createCardRequest,
+                    undefined,
                   )
                 }
                 className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
@@ -279,8 +274,9 @@ export const TitleBar: React.FC = () => {
             <button
               type="button"
               onClick={() =>
-                window.dispatchEvent(
-                  new CustomEvent(CARD_SET_VIEW_EVENTS.toggleEditingRequest),
+                dispatchCardSetViewWindowEvent(
+                  CARD_SET_VIEW_EVENTS.toggleEditingRequest,
+                  undefined,
                 )
               }
               className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"

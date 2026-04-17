@@ -22,6 +22,8 @@
     "electron:start": "node scripts/electron/run-electron.cjs dist-electron/electron/main.js",
     "verify:icons": "node scripts/verify-icons-entry.mjs",
     "verify:sw": "node scripts/verify/verify-sw.mjs",
+    "sync:firebase-emulators": "npm exec tsx -- tools/firebase/sync-firebase-emulators.ts",
+    "verify:firebase-emulators": "npx vitest run tests/unit/firebaseEmulatorConfigConsistency.test.ts",
     "verify:design-tokens": "node scripts/verify/verify-design-tokens.mjs",
     "build:verify-sw": "npm run build && npm run verify:sw",
     "typecheck": "npm exec tsc -- -p tsconfig.app.json --noEmit --pretty false && npm exec tsc -- -p tsconfig.node.json --noEmit --pretty false",

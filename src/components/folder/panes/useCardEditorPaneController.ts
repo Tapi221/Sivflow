@@ -4,17 +4,20 @@ import { useCardEditorContentController } from "@/components/card/editor/useCard
 import { useCardEditorSession } from "@/components/card/editor/useCardEditorSession";
 import { useLayoutRowsController } from "@/components/card/editor/useLayoutRowsController";
 import {
-  CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT,
   applyEditingDraftPatch,
   buildCardsById,
   createMetaPanelActions,
   readStoredMetaPanelOpen,
   resolveSelectedCardSnapshot,
   writeStoredMetaPanelOpen,
-  type EditingDraftPatchDetail,
 } from "@/components/folder/panes/cardEditorPaneControllerCore";
 import { useToast } from "@/contexts/ToastContext";
 import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
+import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
+import {
+  subscribeCardSetViewWindowEvent,
+  type CardSetViewEditingDraftPatch,
+} from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { useCards } from "@/hooks/card/useCards";
 import { useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
@@ -126,11 +129,9 @@ export const useCardEditorPaneController = ({
   } = session;
 
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const handler = (event: Event) => {
-      const detail = (event as CustomEvent<EditingDraftPatchDetail>)?.detail;
-
+    return subscribeCardSetViewWindowEvent(
+      CARD_SET_VIEW_EVENTS.editingDraftPatch,
+      (detail: CardSetViewEditingDraftPatch) => {
       setSessionDraft((prev) => {
         const nextDraft = applyEditingDraftPatch({
           currentDraft: prev
@@ -153,14 +154,8 @@ export const useCardEditorPaneController = ({
           tags: nextDraft.tags,
         };
       });
-    };
-
-    window.addEventListener(CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT, handler);
-    return () =>
-      window.removeEventListener(
-        CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT,
-        handler,
-      );
+      },
+    );
   }, [sessionIsEditing, sessionSelectedCard, setSessionDraft]);
 
   const layout = useLayoutRowsController({
