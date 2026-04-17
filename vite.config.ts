@@ -23,7 +23,7 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },
       devOptions: {
-        enabled: false, // 開発環境ではPWA無効化（manifest生成は行われる）
+        enabled: false,
         type: "module",
       },
       manifest: {
@@ -58,6 +58,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@constants": path.resolve(__dirname, "./constants"),
+      "@config": path.resolve(__dirname, "./config"),
     },
   },
   server: {
@@ -71,16 +73,11 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
-    // チャンクサイズ警告の閾値を緩和（実用的なライン）
     chunkSizeWarningLimit: 1000,
-
     rollupOptions: {
-      output: {
-        // Vite のデフォルトのチャンク分割戦略を使用する（ビルドエラー回避のため）
-      },
+      output: {},
     },
   },
-  // Fix case-sensitivity issues on Windows
   define: {
     "process.env.FORCE_COLOR": true,
   },

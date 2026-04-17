@@ -2,10 +2,9 @@ import { app, BrowserWindow, ipcMain, Menu, shell } from "electron";
 import * as http from "node:http";
 import * as path from "node:path";
 import { URL } from "node:url";
-import { IPC_CHANNELS } from "./ipcChannels";
+import { IPC_CHANNELS } from "../constants/electron/ipc";
 
 if (process.platform === "win32") {
-  // 非最大化復帰時に発生するGPU合成起因の白飛び/薄化を回避
   app.disableHardwareAcceleration();
 }
 
@@ -19,7 +18,6 @@ let mainWindow: BrowserWindow | null = null;
 let pendingOauthCallbackUrl: string | null = null;
 let oauthLoopbackServer: http.Server | null = null;
 
-// 復帰時の白飛び/描画遅延を抑える（Chromiumのバックグラウンド最適化を無効化）
 app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
 app.commandLine.appendSwitch("disable-renderer-backgrounding");
 app.commandLine.appendSwitch("disable-background-timer-throttling");
@@ -224,7 +222,7 @@ const createMainWindow = (): BrowserWindow => {
     void windowRef.loadURL(rendererUrl);
     windowRef.webContents.openDevTools({ mode: "detach" });
   } else {
-    void windowRef.loadFile(path.resolve(__dirname, "../dist/index.html"));
+    void windowRef.loadFile(path.resolve(__dirname, "../../dist/index.html"));
   }
 
   windowRef.webContents.setWindowOpenHandler(({ url }) => {

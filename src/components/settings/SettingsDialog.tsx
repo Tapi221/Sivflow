@@ -16,10 +16,11 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import type {
-  SettingsTab,
-  SettingsTabParam,
-} from "@/hooks/settings/settingsTabs";
+import {
+  DEFAULT_SETTINGS_TAB,
+  type SettingsTab,
+  type SettingsTabParam,
+} from "@constants/shared/settings";
 import { cn } from "@/lib/utils";
 import { auth } from "@/services/firebase";
 import { getLocalDb } from "@/services/localDB";
@@ -67,7 +68,6 @@ const sidebarItems = [
   { id: "sync", label: "同期設定", icon: RefreshCw },
 ] as const;
 
-const DEFAULT_SETTINGS_TAB: SettingsTab = "study";
 type FolderSidebarDisplayMode = NonNullable<
   UserSettings["folderSidebarDisplayMode"]
 >;

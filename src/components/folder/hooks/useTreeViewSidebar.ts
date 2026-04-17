@@ -1,22 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-
-const MIN_SIDEBAR_W = 200;
-const MAX_SIDEBAR_W = 600;
-const DEFAULT_SIDEBAR_W = 320;
+import { SIDEBAR_WIDTH_LIMITS } from "@constants/web/sidebar";
+import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 
 const clamp = (w: number) =>
-  Math.min(Math.max(w, MIN_SIDEBAR_W), MAX_SIDEBAR_W);
+  Math.min(Math.max(w, SIDEBAR_WIDTH_LIMITS.min), SIDEBAR_WIDTH_LIMITS.max);
 
 export const useTreeViewSidebar = () => {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
-    if (typeof window === "undefined") return DEFAULT_SIDEBAR_W;
-    const saved = localStorage.getItem("ui.sidebarWidth");
-    return saved ? parseInt(saved, 10) : DEFAULT_SIDEBAR_W;
+    if (typeof window === "undefined") return SIDEBAR_WIDTH_LIMITS.default;
+    const saved = window.localStorage.getItem(WEB_STORAGE_KEYS.sidebarWidth);
+    return saved ? parseInt(saved, 10) : SIDEBAR_WIDTH_LIMITS.default;
   });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     if (typeof window === "undefined") return true;
-    const saved = localStorage.getItem("ui.sidebarOpen");
+    const saved = window.localStorage.getItem(WEB_STORAGE_KEYS.sidebarOpen);
     return saved !== null ? saved === "true" : true;
   });
 
@@ -86,7 +84,10 @@ export const useTreeViewSidebar = () => {
         e.preventDefault();
         setIsSidebarOpen((prev) => {
           const next = !prev;
-          localStorage.setItem("ui.sidebarOpen", String(next));
+          window.localStorage.setItem(
+            WEB_STORAGE_KEYS.sidebarOpen,
+            String(next),
+          );
           return next;
         });
       }
@@ -126,7 +127,7 @@ export const useTreeViewSidebar = () => {
 
     const finalW = pendingWRef.current;
     setSidebarWidth(finalW);
-    localStorage.setItem("ui.sidebarWidth", String(finalW));
+    window.localStorage.setItem(WEB_STORAGE_KEYS.sidebarWidth, String(finalW));
   }, []);
 
   const onResizeMove = useCallback(

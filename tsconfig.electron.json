@@ -7,9 +7,9 @@
     "types": ["node", "electron"],
     "strict": true,
     "skipLibCheck": true,
-    "rootDir": "electron",
+    "rootDir": ".",
     "outDir": "dist-electron",
     "sourceMap": true
   },
-  "include": ["electron/**/*.ts"]
+  "include": ["electron/**/*.ts", "constants/**/*.ts"]
 }

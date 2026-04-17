@@ -1,10 +1,9 @@
+import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 import type { UserSettings } from "@/types";
 
 type FolderSidebarDisplayMode = NonNullable<
   UserSettings["folderSidebarDisplayMode"]
 >;
-
-const STORAGE_KEY = "flashcard-master:folder-sidebar-display-mode";
 
 const normalizeFolderSidebarDisplayModePreference = (
   value: unknown,
@@ -18,7 +17,9 @@ export const readCachedFolderSidebarDisplayMode =
 
     try {
       return normalizeFolderSidebarDisplayModePreference(
-        window.localStorage.getItem(STORAGE_KEY),
+        window.localStorage.getItem(
+          SHARED_STORAGE_KEYS.folderSidebarDisplayMode,
+        ),
       );
     } catch {
       return "tree";
@@ -30,7 +31,7 @@ export const writeCachedFolderSidebarDisplayMode = (value: unknown): void => {
 
   try {
     window.localStorage.setItem(
-      STORAGE_KEY,
+      SHARED_STORAGE_KEYS.folderSidebarDisplayMode,
       normalizeFolderSidebarDisplayModePreference(value),
     );
   } catch {

@@ -1,18 +1,21 @@
-const LAST_SELECTED_FOLDER_KEY = "folder_selectedFolderId_work";
+import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 
 export const getLastSelectedFolderId = (): string | null => {
   if (typeof window === "undefined") return null;
 
-  return window.localStorage.getItem(LAST_SELECTED_FOLDER_KEY);
+  return window.localStorage.getItem(WEB_STORAGE_KEYS.lastSelectedFolderId);
 };
 
 export const setLastSelectedFolderId = (folderId: string | null) => {
   if (typeof window === "undefined") return;
 
   if (folderId) {
-    window.localStorage.setItem(LAST_SELECTED_FOLDER_KEY, folderId);
+    window.localStorage.setItem(
+      WEB_STORAGE_KEYS.lastSelectedFolderId,
+      folderId,
+    );
     return;
   }
 
-  window.localStorage.removeItem(LAST_SELECTED_FOLDER_KEY);
+  window.localStorage.removeItem(WEB_STORAGE_KEYS.lastSelectedFolderId);
 };

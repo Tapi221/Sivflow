@@ -1,4 +1,4 @@
-import { BUILD_VERSION } from "./constants";
+import { BUILD_VERSION } from "@config/build";
 
 export const logBootstrapFault = (
   kind: string,

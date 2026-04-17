@@ -1,10 +1,9 @@
+import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 import {
   DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE,
   normalizeSplitFallbackCardLayoutMode,
   type SplitFallbackCardLayoutMode,
 } from "@/features/cardsetview/domain/cardLayoutMode";
-
-const STORAGE_KEY = "flashcard-master:card-layout-split-fallback";
 
 interface SplitFallbackPreferencesStore {
   version: 1;
@@ -51,7 +50,13 @@ const readStore = () => {
   }
 
   try {
-    return parseStore(window.localStorage.getItem(STORAGE_KEY)) ?? emptyStore();
+    return (
+      parseStore(
+        window.localStorage.getItem(
+          SHARED_STORAGE_KEYS.cardLayoutSplitFallback,
+        ),
+      ) ?? emptyStore()
+    );
   } catch {
     return emptyStore();
   }
@@ -63,7 +68,10 @@ const writeStore = (store: SplitFallbackPreferencesStore) => {
   }
 
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    window.localStorage.setItem(
+      SHARED_STORAGE_KEYS.cardLayoutSplitFallback,
+      JSON.stringify(store),
+    );
   } catch {
     // ignore local persistence failures
   }

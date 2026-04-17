@@ -1,3 +1,4 @@
+import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import {
   normalizeCardLayoutMode,
@@ -5,8 +6,6 @@ import {
   type CardLayoutMode,
   type CardSetInteractionMode,
 } from "@/features/cardsetview/domain/cardLayoutMode";
-
-const STORAGE_KEY_PREFIX = "flashcard-master:card-layout-mode";
 
 export interface CardLayoutModePreferenceScope {
   deviceScope: string;
@@ -27,7 +26,7 @@ const buildStorageKey = ({
   interactionMode,
 }: CardLayoutModePreferenceScope) => {
   return [
-    STORAGE_KEY_PREFIX,
+    SHARED_STORAGE_KEYS.cardLayoutModePrefix,
     normalizeDeviceScope(deviceScope),
     cardSetId ?? "__no_card_set__",
     displayMode,

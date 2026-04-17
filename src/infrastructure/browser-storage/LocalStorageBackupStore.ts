@@ -2,9 +2,7 @@ import type {
   AutoBackupRecord,
   BackupStorePort,
 } from "@/application/ports/BackupStorePort";
-
-const BACKUP_STORAGE_KEY = "app:autoBackups";
-const LAST_BACKUP_KEY = "app:lastBackupAt";
+import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 
 const isStorageAvailable = (): boolean => {
   if (typeof window === "undefined") {
@@ -35,7 +33,7 @@ const loadBackups = (): AutoBackupRecord[] => {
   }
 
   try {
-    const raw = localStorage.getItem(BACKUP_STORAGE_KEY);
+    const raw = localStorage.getItem(WEB_STORAGE_KEYS.autoBackups);
     if (!raw) {
       return [];
     }
@@ -53,7 +51,7 @@ const saveBackups = (backups: AutoBackupRecord[]): void => {
   }
 
   try {
-    localStorage.setItem(BACKUP_STORAGE_KEY, JSON.stringify(backups));
+    localStorage.setItem(WEB_STORAGE_KEYS.autoBackups, JSON.stringify(backups));
     return;
   } catch (error) {
     const isQuotaExceeded =
@@ -69,7 +67,7 @@ const saveBackups = (backups: AutoBackupRecord[]): void => {
 
     try {
       localStorage.setItem(
-        BACKUP_STORAGE_KEY,
+        WEB_STORAGE_KEYS.autoBackups,
         JSON.stringify(backups.slice(0, 1)),
       );
     } catch (fallbackError) {
@@ -79,7 +77,7 @@ const saveBackups = (backups: AutoBackupRecord[]): void => {
       );
 
       try {
-        localStorage.removeItem(BACKUP_STORAGE_KEY);
+        localStorage.removeItem(WEB_STORAGE_KEYS.autoBackups);
       } catch {
         // noop
       }
@@ -93,7 +91,7 @@ const saveLastBackupAt = (value: string): void => {
   }
 
   try {
-    localStorage.setItem(LAST_BACKUP_KEY, value);
+    localStorage.setItem(WEB_STORAGE_KEYS.lastBackupAt, value);
   } catch {
     // noop
   }
@@ -105,7 +103,7 @@ const getLastBackupAt = (): string | null => {
   }
 
   try {
-    return localStorage.getItem(LAST_BACKUP_KEY);
+    return localStorage.getItem(WEB_STORAGE_KEYS.lastBackupAt);
   } catch {
     return null;
   }
@@ -117,7 +115,7 @@ const clearBackups = (): void => {
   }
 
   try {
-    localStorage.removeItem(BACKUP_STORAGE_KEY);
+    localStorage.removeItem(WEB_STORAGE_KEYS.autoBackups);
   } catch {
     // noop
   }

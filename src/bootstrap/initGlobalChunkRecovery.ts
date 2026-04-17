@@ -1,4 +1,4 @@
-import { BOOTSTRAP_RELOAD_KEYS } from "./constants";
+import { BOOTSTRAP_RELOAD_KEYS } from "@constants/shared/bootstrap";
 import { isChunkLoadError, toErrorText } from "./errorUtils";
 import { logBootstrapFault } from "./logBootstrapFault";
 import { hardReloadOnce } from "./reloadGuard";

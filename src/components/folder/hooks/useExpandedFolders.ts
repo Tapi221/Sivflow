@@ -1,23 +1,32 @@
-import { useState, useEffect, useCallback } from "react";
-
-const STORAGE_KEY = "folder_expandedFolders";
+import { useCallback, useEffect, useState } from "react";
+import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 
 const loadFromStorage = (storageKey: string) => {
+  if (typeof window === "undefined") {
+    return new Set<string>();
+  }
+
   try {
-    const saved = localStorage.getItem(storageKey);
+    const saved = window.localStorage.getItem(storageKey);
     return saved ? new Set<string>(JSON.parse(saved) as string[]) : new Set();
   } catch {
     return new Set();
   }
 };
 
-export const useExpandedFolders = (storageKey = STORAGE_KEY) => {
+export const useExpandedFolders = (
+  storageKey = WEB_STORAGE_KEYS.expandedFolders,
+) => {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() =>
     loadFromStorage(storageKey),
   );
 
   useEffect(() => {
-    localStorage.setItem(
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(
       storageKey,
       JSON.stringify(Array.from(expandedFolders)),
     );

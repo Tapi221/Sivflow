@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-
-const CARD_SET_VIEW_META_PANEL_OPEN_STORAGE_KEY = "cardsetview.meta-panel-open";
-const LEGACY_CARD_VIEW_META_PANEL_OPEN_STORAGE_KEY =
-  "card-view.meta-panel-open";
+import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 
 const resolveInitialMetaOpen = () => {
   if (typeof window === "undefined") {
@@ -10,7 +7,7 @@ const resolveInitialMetaOpen = () => {
   }
 
   const nextValue = window.localStorage.getItem(
-    CARD_SET_VIEW_META_PANEL_OPEN_STORAGE_KEY,
+    WEB_STORAGE_KEYS.cardSetViewMetaPanelOpen,
   );
 
   if (nextValue != null) {
@@ -18,7 +15,7 @@ const resolveInitialMetaOpen = () => {
   }
 
   const legacyValue = window.localStorage.getItem(
-    LEGACY_CARD_VIEW_META_PANEL_OPEN_STORAGE_KEY,
+    WEB_STORAGE_KEYS.legacyCardViewMetaPanelOpen,
   );
 
   if (legacyValue != null) {
@@ -37,7 +34,7 @@ export const useCardSetViewMetaPanelState = () => {
     }
 
     window.localStorage.setItem(
-      CARD_SET_VIEW_META_PANEL_OPEN_STORAGE_KEY,
+      WEB_STORAGE_KEYS.cardSetViewMetaPanelOpen,
       String(isMetaOpen),
     );
   }, [isMetaOpen]);

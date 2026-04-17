@@ -1,4 +1,4 @@
-// src/features/flags.ts
+import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 
 export type FeatureFlags = {
   newEditor: boolean;
@@ -32,7 +32,7 @@ class FeatureFlagService {
     if (!import.meta.env.DEV) return;
 
     try {
-      const raw = localStorage.getItem("FEATURE_FLAGS");
+      const raw = localStorage.getItem(SHARED_STORAGE_KEYS.featureFlags);
       if (!raw) return;
 
       const parsed: unknown = JSON.parse(raw);
@@ -64,7 +64,8 @@ class FeatureFlagService {
 
     if (import.meta.env.DEV && typeof window !== "undefined") {
       try {
-        const raw = localStorage.getItem("FEATURE_FLAGS") || "{}";
+        const raw =
+          localStorage.getItem(SHARED_STORAGE_KEYS.featureFlags) || "{}";
         const parsed: unknown = JSON.parse(raw);
         const current: Record<string, unknown> =
           parsed != null && typeof parsed === "object"
@@ -72,7 +73,10 @@ class FeatureFlagService {
             : {};
 
         current[flag] = value;
-        localStorage.setItem("FEATURE_FLAGS", JSON.stringify(current));
+        localStorage.setItem(
+          SHARED_STORAGE_KEYS.featureFlags,
+          JSON.stringify(current),
+        );
       } catch (err) {
         console.warn("[FeatureFlags] Failed to persist override:", err);
       }
@@ -86,7 +90,7 @@ class FeatureFlagService {
     this.flags = { ...DEFAULT_FLAGS };
 
     if (import.meta.env.DEV && typeof window !== "undefined") {
-      localStorage.removeItem("FEATURE_FLAGS");
+      localStorage.removeItem(SHARED_STORAGE_KEYS.featureFlags);
     }
   }
 

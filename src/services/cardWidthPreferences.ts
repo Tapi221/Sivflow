@@ -1,3 +1,5 @@
+import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
+
 /**
  * Device-local persistence for per-card-set pane width preferences.
  *
@@ -14,8 +16,6 @@
  *   }
  */
 
-const STORAGE_KEY = "card-width-preferences";
-
 export type CardWidthPaneMode = "view" | "edit";
 
 interface CardWidthEntry {
@@ -25,14 +25,13 @@ interface CardWidthEntry {
 
 interface CardWidthPreferencesStore {
   version: 1;
-  /** Future: could add deviceKey as a nesting level here. */
   byCardSet: Record<string, CardWidthEntry>;
 }
 
 const readStore = () => {
   try {
     if (typeof window === "undefined") return empty();
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(SHARED_STORAGE_KEYS.cardWidthPreferences);
     if (!raw) return empty();
     const parsed: unknown = JSON.parse(raw);
     if (
@@ -56,7 +55,10 @@ const empty = () => {
 const writeStore = (store: CardWidthPreferencesStore) => {
   try {
     if (typeof window === "undefined") return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    localStorage.setItem(
+      SHARED_STORAGE_KEYS.cardWidthPreferences,
+      JSON.stringify(store),
+    );
   } catch {
     // Ignore write failures (e.g. private browsing quota exceeded).
   }

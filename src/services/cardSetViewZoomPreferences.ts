@@ -1,14 +1,9 @@
+import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 import type {
   CardLayoutMode,
   CardSetInteractionMode,
 } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-
-const STORAGE_KEY = "flashcard-master:cardsetview-zoom-preferences:v2";
-const LEGACY_STORAGE_KEYS = [
-  "cardsetview-zoom-preferences",
-  "card-view-zoom-preferences",
-] as const;
 
 interface CardSetViewZoomPreferencesStore {
   version: 2;
@@ -111,8 +106,11 @@ const readStore = (): CardSetViewZoomPreferencesStore => {
 
   try {
     return (
-      parseCurrentStore(window.localStorage.getItem(STORAGE_KEY)) ??
-      emptyStore()
+      parseCurrentStore(
+        window.localStorage.getItem(
+          SHARED_STORAGE_KEYS.cardSetViewZoomPreferences,
+        ),
+      ) ?? emptyStore()
     );
   } catch {
     return emptyStore();
@@ -124,7 +122,7 @@ const readLegacyCardSetValue = (cardSetId: string) => {
     return undefined;
   }
 
-  for (const legacyKey of LEGACY_STORAGE_KEYS) {
+  for (const legacyKey of SHARED_STORAGE_KEYS.cardSetViewZoomPreferencesLegacy) {
     const store = parseLegacyStore(window.localStorage.getItem(legacyKey));
     const value = store?.byCardSet?.[cardSetId];
 
@@ -142,8 +140,11 @@ const writeStore = (store: CardSetViewZoomPreferencesStore) => {
   }
 
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-    for (const legacyKey of LEGACY_STORAGE_KEYS) {
+    window.localStorage.setItem(
+      SHARED_STORAGE_KEYS.cardSetViewZoomPreferences,
+      JSON.stringify(store),
+    );
+    for (const legacyKey of SHARED_STORAGE_KEYS.cardSetViewZoomPreferencesLegacy) {
       window.localStorage.removeItem(legacyKey);
     }
   } catch {

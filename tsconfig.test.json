@@ -13,7 +13,9 @@
     "baseUrl": ".",
     "types": ["vitest/globals", "node", "vite/client"],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@constants/*": ["constants/*"],
+      "@config/*": ["config/*"]
     }
   },
   "include": [
@@ -22,6 +24,8 @@
     "src/tests/**/*.ts",
     "src/tests/**/*.tsx",
     "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "tests/**/*.tsx",
+    "constants/**/*.ts",
+    "config/**/*.ts"
   ]
 }

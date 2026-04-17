@@ -12,10 +12,12 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@constants/*": ["constants/*"],
+      "@config/*": ["config/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "constants", "config"],
   "exclude": [
     "src/**/*.test.ts",
     "src/**/*.test.tsx",

@@ -1,4 +1,4 @@
-const STORAGE_KEY = "card-zoom-preferences";
+import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 
 interface CardZoomPreferencesStore {
   version: 1;
@@ -16,7 +16,9 @@ const readStore = () => {
   try {
     if (typeof window === "undefined") return empty();
 
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(
+      SHARED_STORAGE_KEYS.cardZoomPreferences,
+    );
     if (!raw) return empty();
 
     const parsed: unknown = JSON.parse(raw);
@@ -38,7 +40,10 @@ const readStore = () => {
 const writeStore = (store: CardZoomPreferencesStore) => {
   try {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    window.localStorage.setItem(
+      SHARED_STORAGE_KEYS.cardZoomPreferences,
+      JSON.stringify(store),
+    );
   } catch {
     // localStorage 失敗は黙殺
   }

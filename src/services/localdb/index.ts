@@ -17,7 +17,7 @@ export { LocalDB } from "./LocalDB";
 
 export { isBackingStoreOpenError } from "./errors";
 
-export { LOCALDB_RECOVERY_GUIDE_URL } from "./constants";
+export { LOCALDB_RECOVERY_GUIDE_URL } from "@constants/shared/localdb";
 
 export {
   clearLocalDBResetFailureReason,

@@ -1,9 +1,11 @@
+import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
+
 export const getOrCreateDeviceId = () => {
   if (typeof window === "undefined") return "server";
-  let deviceId = localStorage.getItem("deviceId");
+  let deviceId = localStorage.getItem(SHARED_STORAGE_KEYS.deviceId);
   if (!deviceId) {
     deviceId = `device_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    localStorage.setItem("deviceId", deviceId);
+    localStorage.setItem(SHARED_STORAGE_KEYS.deviceId, deviceId);
   }
   return deviceId;
 };
@@ -12,7 +14,6 @@ export const getDeviceName = () => {
   if (typeof window === "undefined") return "Server";
   const ua = navigator.userAgent;
 
-  // 実行環境のOSを判定
   let os = "Web Browser";
   if (/Android/i.test(ua)) os = "Android";
   else if (/iPhone|iPad|iPod/i.test(ua)) os = "iOS";
@@ -20,9 +21,7 @@ export const getDeviceName = () => {
   else if (/Macintosh/i.test(ua)) os = "Mac";
   else if (/Linux/i.test(ua)) os = "Linux PC";
 
-  // ブラウザ
   let client = "";
-  // PWA standalone mode check
   const nav = navigator as Navigator & { standalone?: boolean };
   const isStandalone =
     window.matchMedia("(display-mode: standalone)").matches || nav.standalone;
