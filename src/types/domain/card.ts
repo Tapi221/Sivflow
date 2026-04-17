@@ -95,7 +95,10 @@ export type Card = BaseEntity & {
   _rescueRaw?: unknown;
 };
 
-export type CardPatch = Omit<Partial<Card>, "front" | "back"> & {
+export type CardPatch = Omit<
+  Partial<Card>,
+  "front" | "back" | "cardSetId" | "folderId"
+> & {
   front?: Partial<CardFace>;
   back?: Partial<CardFace>;
 };

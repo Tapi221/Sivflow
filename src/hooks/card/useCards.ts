@@ -404,6 +404,13 @@ export const useCards = (
       return;
     }
 
+    const rawPatch = data as Record<string, unknown>;
+    if (rawPatch.cardSetId !== undefined || rawPatch.folderId !== undefined) {
+      throw new Error(
+        "updateCard では cardSetId / folderId を直接更新できません。moveCardToSet を使用してください。",
+      );
+    }
+
     const patch = { ...data } as Partial<Card> & Record<string, unknown>;
     const nextFront = {
       ...currentCard.front,

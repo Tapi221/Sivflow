@@ -135,4 +135,43 @@ describe("useCards", () => {
       result.current.reorderCardsInCardSet("set-1", ["card-1", "card-2"]),
     ).rejects.toThrow("CardSet スコープ外カードが混入しています");
   });
+
+  it("updateCard は cardSetId / folderId の直接更新を reject する", async () => {
+    const updateItem = vi.fn(async () => undefined);
+    getLocalDbMock.mockResolvedValue({
+      cards: {
+        get: async () => ({
+          id: "card-1",
+          userId: "user-1",
+          cardSetId: "set-1",
+          folderId: "folder-a",
+          front: { blocks: [] },
+          back: { blocks: [] },
+          orderIndex: 0,
+          questionNumber: "Q1",
+          isDraft: false,
+          hasUncertainty: false,
+          isCompleted: false,
+          isSilent: false,
+          memoryStability: 0,
+          nextReviewDate: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+      },
+      updateItem,
+    });
+
+    const { result } = renderHook(() => useCards());
+    const unsafePatch = {
+      cardSetId: "set-2",
+    } as unknown as Parameters<typeof result.current.updateCard>[1];
+
+    await expect(
+      result.current.updateCard("card-1", unsafePatch),
+    ).rejects.toThrow(
+      "updateCard では cardSetId / folderId を直接更新できません。moveCardToSet を使用してください。",
+    );
+    expect(updateItem).not.toHaveBeenCalled();
+  });
 });
