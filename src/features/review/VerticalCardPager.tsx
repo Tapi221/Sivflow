@@ -157,6 +157,36 @@ const VerticalCardPagerFn = <T,>({
     };
   }, [activeIndex, itemRefs]);
 
+  const restoreScrollAnchor = useCallback(() => {
+    const container = containerRef.current;
+    const snapshot = scrollAnchorSnapshotRef.current;
+    const activeElement = itemRefs.current[activeIndex];
+
+    if (!container || !snapshot || !activeElement) {
+      return;
+    }
+
+    if (snapshot.activeIndex !== activeIndex) {
+      return;
+    }
+
+    const maxScrollTop = Math.max(
+      0,
+      container.scrollHeight - container.clientHeight,
+    );
+
+    const nextTop = Math.min(
+      Math.max(0, activeElement.offsetTop + snapshot.offsetWithinCardPx),
+      maxScrollTop,
+    );
+
+    container.scrollTop = nextTop;
+    scrollAnchorSnapshotRef.current = {
+      activeIndex,
+      offsetWithinCardPx: Math.max(0, nextTop - activeElement.offsetTop),
+    };
+  }, [activeIndex, itemRefs]);
+
   const updateVisibleRange = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -306,6 +336,22 @@ const VerticalCardPagerFn = <T,>({
   useLayoutEffect(() => {
     captureScrollAnchor();
   }, [captureScrollAnchor, activeIndex]);
+
+  useLayoutEffect(() => {
+    const previousPreserveKey = previousPreserveKeyRef.current;
+    previousPreserveKeyRef.current = preserveKey;
+
+    if (
+      preserveKey == null ||
+      previousPreserveKey == null ||
+      previousPreserveKey === preserveKey
+    ) {
+      return;
+    }
+
+    restoreScrollAnchor();
+    updateVisibleRange();
+  }, [preserveKey, restoreScrollAnchor, updateVisibleRange]);
 
   return (
     <div

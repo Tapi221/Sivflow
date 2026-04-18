@@ -275,32 +275,27 @@ export const useVerticalCardPager = ({
         computeNearestIndex();
       });
     };
+
     const handleWheel = () => {
       schedule();
     };
 
-    container.addEventListener("scroll", schedule, { passive: true });
-    container.addEventListener("wheel", handleWheel, { passive: true });
-    window.addEventListener("scroll", schedule, {
-      passive: true,
-      capture: true,
-    });
-    window.addEventListener("resize", schedule, { passive: true });
+    const handleScroll = () => {
+      schedule();
+    };
 
-    schedule();
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    container.addEventListener("wheel", handleWheel, { passive: true });
 
     return () => {
-      container.removeEventListener("scroll", schedule);
+      container.removeEventListener("scroll", handleScroll);
       container.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("scroll", schedule, { capture: true });
-      window.removeEventListener("resize", schedule);
 
       clearNaturalIndexTimer();
       clearComputeNearestRaf();
       clearIdleCommitTimer();
     };
   }, [
-    count,
     clearComputeNearestRaf,
     clearIdleCommitTimer,
     clearNaturalIndexTimer,

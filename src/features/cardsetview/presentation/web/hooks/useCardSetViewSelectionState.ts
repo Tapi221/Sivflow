@@ -12,7 +12,6 @@ import {
   createCardSetViewSourceKey,
   resolveCardIndexById,
   resolveCardsForPager,
-  resolveCurrentIndexBase,
   toggleFlippedCardId,
 } from "@/features/cardsetview/domain/cardSetViewState";
 import { useCardEntity } from "@/hooks/card/useCardEntity";
@@ -66,6 +65,12 @@ export const useCardSetViewSelectionState = ({
     }),
   );
 
+  const [selectedCardIdState, setSelectedCardIdState] =
+    useState<KeyedStringState>(() => ({
+      sourceKey,
+      value: null,
+    }));
+
   const [pendingFocusState, setPendingFocusState] = useState<KeyedStringState>(
     () => ({
       sourceKey,
@@ -85,6 +90,11 @@ export const useCardSetViewSelectionState = ({
   const currentIndex =
     currentIndexState.sourceKey === sourceKey ? currentIndexState.value : null;
 
+  const selectedCardId =
+    selectedCardIdState.sourceKey === sourceKey
+      ? selectedCardIdState.value
+      : null;
+
   const pendingFocusCardId =
     pendingFocusState.sourceKey === sourceKey ? pendingFocusState.value : null;
 
@@ -95,24 +105,23 @@ export const useCardSetViewSelectionState = ({
     });
   }, [pendingFocusCardId, cardIndexById]);
 
-  const currentIndexBase = resolveCurrentIndexBase({
-    pendingFocusIndex,
-    currentIndex,
-    targetResolvedIndex,
-    initialIndex,
-  });
+  const selectedCardIndex = useMemo(() => {
+    return resolveCardIndexById({
+      cardId: selectedCardId,
+      cardIndexById,
+    });
+  }, [selectedCardId, cardIndexById]);
+
+  const currentIndexBase =
+    pendingFocusIndex ??
+    selectedCardIndex ??
+    targetResolvedIndex ??
+    currentIndex ??
+    initialIndex;
 
   const safeCurrentIndex = useMemo(() => {
     return clampCardIndex(currentIndexBase, sortedCards.length);
   }, [currentIndexBase, sortedCards.length]);
-
-  const flippedCardIds = useMemo(() => {
-    if (flippedState.sourceKey === sourceKey) {
-      return flippedState.ids;
-    }
-
-    return new Set<string>();
-  }, [flippedState, sourceKey]);
 
   const currentCard = sortedCards[safeCurrentIndex] ?? null;
 
@@ -138,6 +147,30 @@ export const useCardSetViewSelectionState = ({
     currentCardIdRef.current = currentCardId;
   }, [currentCardId]);
 
+  useEffect(() => {
+    setCurrentIndexState((prev) => {
+      if (prev.sourceKey === sourceKey && prev.value === safeCurrentIndex) {
+        return prev;
+      }
+
+      return {
+        sourceKey,
+        value: safeCurrentIndex,
+      };
+    });
+
+    setSelectedCardIdState((prev) => {
+      if (prev.sourceKey === sourceKey && prev.value === currentCardId) {
+        return prev;
+      }
+
+      return {
+        sourceKey,
+        value: currentCardId,
+      };
+    });
+  }, [currentCardId, safeCurrentIndex, sourceKey]);
+
   const cardsForPager = useMemo(() => {
     return resolveCardsForPager({
       sortedCards,
@@ -146,31 +179,40 @@ export const useCardSetViewSelectionState = ({
     });
   }, [cardIndexById, selectedCard, sortedCards]);
 
-  const setCurrentIndex = useCallback(
-    (next: SetStateAction<number>) => {
+  const selectCardIndex = useCallback(
+    (index: number) => {
+      const nextIndex = clampCardIndex(index, sortedCards.length);
+      const nextCard = sortedCards[nextIndex] ?? null;
+
       setPendingFocusState({
         sourceKey,
         value: null,
       });
 
-      setCurrentIndexState((prev) => {
-        const prevValue =
-          prev.sourceKey === sourceKey && typeof prev.value === "number"
-            ? prev.value
-            : (targetResolvedIndex ?? initialIndex);
+      setCurrentIndexState({
+        sourceKey,
+        value: nextIndex,
+      });
 
-        const resolved =
-          typeof next === "function"
-            ? (next as (prevState: number) => number)(prevValue)
-            : next;
-
-        return {
-          sourceKey,
-          value: resolved,
-        };
+      setSelectedCardIdState({
+        sourceKey,
+        value: nextCard?.id ?? null,
       });
     },
-    [initialIndex, sourceKey, targetResolvedIndex],
+    [sortedCards, sourceKey],
+  );
+
+  const setCurrentIndex = useCallback(
+    (next: SetStateAction<number>) => {
+      const prevValue = safeCurrentIndex;
+      const resolved =
+        typeof next === "function"
+          ? (next as (prevState: number) => number)(prevValue)
+          : next;
+
+      selectCardIndex(resolved);
+    },
+    [safeCurrentIndex, selectCardIndex],
   );
 
   const setPendingFocusCardId = useCallback(
@@ -246,19 +288,22 @@ export const useCardSetViewSelectionState = ({
 
   const handlePagerIndexChange = useCallback(
     (idx: number) => {
-      clearPendingFocusCardId();
-
-      setCurrentIndexState({
-        sourceKey,
-        value: idx,
-      });
+      selectCardIndex(idx);
     },
-    [clearPendingFocusCardId, sourceKey],
+    [selectCardIndex],
   );
+
+  const flippedCardIds = useMemo(() => {
+    if (flippedState.sourceKey === sourceKey) {
+      return flippedState.ids;
+    }
+
+    return new Set<string>();
+  }, [flippedState, sourceKey]);
 
   return {
     sourceKey,
-    currentIndex: currentIndexBase,
+    currentIndex: safeCurrentIndex,
     safeCurrentIndex,
     currentCard,
     currentCardId,

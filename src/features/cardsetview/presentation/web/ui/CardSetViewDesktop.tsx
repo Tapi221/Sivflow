@@ -118,6 +118,26 @@ export const CardSetViewDesktop = ({
       ? Math.max(1, Math.floor(fluidAvailableWidthPx))
       : Math.max(1, fixedCardWidthPx);
 
+  const preserveScrollAnchorKey = useMemo(
+    () =>
+      [
+        currentDisplayMode,
+        currentCardLayoutMode,
+        isGlobalEditing ? "edit" : "view",
+        Math.round(viewZoomScale * 1000),
+        effectiveCardWidthPx,
+        Math.round(fluidAvailableWidthPx),
+      ].join(":"),
+    [
+      currentCardLayoutMode,
+      currentDisplayMode,
+      effectiveCardWidthPx,
+      fluidAvailableWidthPx,
+      isGlobalEditing,
+      viewZoomScale,
+    ],
+  );
+
   const [renderRange, setRenderRange] = useState<{
     start: number;
     end: number;
@@ -235,6 +255,7 @@ export const CardSetViewDesktop = ({
       getKey={(card) => card.id}
       disableVirtualization={false}
       onRenderRangeChange={setRenderRange}
+      preserveScrollAnchorKey={preserveScrollAnchorKey}
       renderCard={renderCard}
     />
   );
