@@ -83,15 +83,3 @@ export const startTabPresence = () => {
     }
   });
 };
-
-export const getActiveTabCountEstimate = () => {
-  try {
-    const now = Date.now();
-    const map = readMap();
-    prune(map, now);
-    writeMap(map);
-    return Object.keys(map).length;
-  } catch {
-    return null;
-  }
-};
