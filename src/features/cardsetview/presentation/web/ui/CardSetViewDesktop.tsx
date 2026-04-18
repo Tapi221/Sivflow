@@ -124,14 +124,12 @@ export const CardSetViewDesktop = ({
     () =>
       [
         currentDisplayMode,
-        currentCardLayoutMode,
         isGlobalEditing ? "edit" : "view",
         Math.round(viewZoomScale * 1000),
         effectiveCardWidthPx,
         Math.round(fluidAvailableWidthPx),
       ].join(":"),
     [
-      currentCardLayoutMode,
       currentDisplayMode,
       effectiveCardWidthPx,
       fluidAvailableWidthPx,
