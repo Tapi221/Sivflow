@@ -27,6 +27,7 @@ export interface CardFrameProps extends Omit<
   fixedScale?: number;
   disableScale?: boolean;
   stretchWidth?: boolean;
+  fitHeight?: boolean;
   className?: string;
   ruled?: boolean;
   ruledRowPx?: number;
@@ -50,6 +51,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
       fixedScale,
       disableScale = false,
       stretchWidth = false,
+      fitHeight = false,
       className,
       ruled = true,
       ruledRowPx = CARD_ROW_PX,
@@ -73,13 +75,19 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
         scaleMultiplier={scaleMultiplier}
         fixedScale={fixedScale}
         disableScale={disableScale}
+        fitHeight={fitHeight}
       >
         <div
-          className={cn("mx-auto", stretchWidth && "min-w-0")}
+          className={cn(
+            "mx-auto",
+            stretchWidth && "min-w-0",
+            fitHeight && "h-full",
+          )}
           style={{
             width: stretchWidth ? "100%" : `${Math.max(1, baseWidth)}px`,
             maxWidth: stretchWidth ? "100%" : undefined,
             minWidth: stretchWidth ? 0 : undefined,
+            height: fitHeight ? "100%" : undefined,
           }}
         >
           {topAttachment ? (
@@ -95,6 +103,11 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
                     minWidth: 0,
                   }
                 : {}),
+              ...(fitHeight
+                ? {
+                    height: "100%",
+                  }
+                : {}),
               "--card-base-width": `${Math.max(1, baseWidth)}px`,
             };
 
@@ -104,6 +117,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
                 className={cn(
                   "mx-auto border-none rounded-[24px] md:rounded-[28px]",
                   stretchWidth && "min-w-0 max-w-full",
+                  fitHeight && "h-full",
                   className,
                 )}
                 style={shellStyle}

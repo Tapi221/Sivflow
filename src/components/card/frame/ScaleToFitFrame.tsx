@@ -151,26 +151,38 @@ export const ScaleToFitFrame = ({
           fitHeight && centerContent
             ? "h-full flex items-center justify-center"
             : "flex justify-center",
+          fitHeight && !centerContent && "h-full",
         )}
       >
         <div
+          className={cn(fitHeight && "h-full")}
           style={
             disableScale
               ? {
                   width: "100%",
                   maxWidth: "100%",
                   minWidth: 0,
+                  height: fitHeight ? "100%" : undefined,
                 }
               : visualWidthPx != null
-                ? { width: `${visualWidthPx.toFixed(3)}px` }
-                : undefined
+                ? {
+                    width: `${visualWidthPx.toFixed(3)}px`,
+                    height: fitHeight ? "100%" : undefined,
+                  }
+                : fitHeight
+                  ? {
+                      height: "100%",
+                    }
+                  : undefined
           }
         >
           <div
+            className={cn(fitHeight && "h-full")}
             style={{
               width: disableScale ? "100%" : `${safeBaseWidth}px`,
               maxWidth: disableScale ? "100%" : undefined,
               minWidth: disableScale ? 0 : undefined,
+              height: fitHeight ? "100%" : undefined,
               transform: shouldUseTransformScale
                 ? `scale(${effectiveScale})`
                 : "none",
@@ -188,7 +200,7 @@ export const ScaleToFitFrame = ({
           >
             <div
               ref={contentRef}
-              className="flow-root"
+              className={cn("flow-root", fitHeight && "h-full")}
               style={{ padding: safePaddingPx }}
             >
               {children}

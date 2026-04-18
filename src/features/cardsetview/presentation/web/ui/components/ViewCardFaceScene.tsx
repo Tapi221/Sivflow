@@ -1,6 +1,6 @@
 import { FlashcardInkOverlay } from "@/components/card/frame/FlashcardInkOverlay";
 import { FlashcardMediaDialogs } from "@/components/card/frame/FlashcardMediaDialogs";
-import { useFlashcardCornerControls } from "@/components/card/frame/FlashcardCornerControls";
+import { useFlashcardCornerControls } from "@/components/card/frame/useFlashcardCornerControls";
 import type { FlashcardCardLike } from "@/components/card/frame/Flashcard";
 import { useCardFlipBehavior } from "@/components/card/frame/useCardFlipBehavior";
 import { useFlashcardDerived } from "@/components/card/frame/useFlashcardDerived";
@@ -25,6 +25,7 @@ export type ViewCardFaceSceneProps = Readonly<{
   showInkLayer: boolean;
   drawMode?: boolean;
   inkEditingEnabled: boolean;
+  fillHeight?: boolean;
   onFlip?: () => void;
   onToggleUncertainty?: (card: Card) => void | Promise<void>;
   onToggleBookmark?: (card: Card) => void | Promise<void>;
@@ -56,6 +57,7 @@ export const ViewCardFaceScene = ({
   showInkLayer,
   drawMode = false,
   inkEditingEnabled,
+  fillHeight = false,
   onFlip,
   onToggleUncertainty,
   onToggleBookmark,
@@ -203,6 +205,7 @@ export const ViewCardFaceScene = ({
         tabIndex={isCardClickable ? 0 : undefined}
         heightPx={resolvedFixedHeightPx}
         lockHeight={resolvedFixedHeightPx !== null}
+        fillHeight={fillHeight}
         onClick={shouldBindFlipHandlers ? handleFlip : undefined}
         onKeyDown={shouldBindFlipHandlers ? handleKeyDown : undefined}
         onPointerDownCapture={
