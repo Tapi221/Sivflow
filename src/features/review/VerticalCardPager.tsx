@@ -60,6 +60,14 @@ const resolveNowMs = () => {
     : Date.now();
 };
 
+type ScrollAnchorFace = "question" | "answer";
+
+type ResolvedScrollAnchorTarget = {
+  element: HTMLElement;
+  selector: string | null;
+  face: ScrollAnchorFace | null;
+};
+
 export type VerticalCardPagerProps<T> = {
   cards: T[];
   activeIndex: number;
@@ -74,6 +82,7 @@ export type VerticalCardPagerProps<T> = {
     idx: number,
     isActive: boolean,
   ) => string | null;
+  onActiveScrollAnchorFaceChange?: (face: ScrollAnchorFace | null) => void;
   getCardWidthSpec?: (
     card: T,
     idx: number,
@@ -115,6 +124,63 @@ const resolveScrollAnchorElement = (
   );
 };
 
+const resolveScrollAnchorFaceFromElement = (
+  element: HTMLElement | null,
+): ScrollAnchorFace | null => {
+  if (!element) {
+    return null;
+  }
+
+  const face = element.getAttribute("data-card-face");
+  return face === "question" || face === "answer" ? face : null;
+};
+
+const buildScrollAnchorFaceSelector = (
+  face: ScrollAnchorFace | null,
+): string | null => {
+  return face ? `[data-card-face=\"${face}\"]` : null;
+};
+
+const resolveAutoScrollAnchorTarget = ({
+  container,
+  itemElement,
+}: {
+  container: HTMLDivElement;
+  itemElement: HTMLDivElement;
+}): ResolvedScrollAnchorTarget => {
+  const faceElements = Array.from(
+    itemElement.querySelectorAll<HTMLElement>("[data-card-face]"),
+  );
+
+  if (faceElements.length === 0) {
+    return {
+      element: itemElement,
+      selector: null,
+      face: null,
+    };
+  }
+
+  const viewportTop = container.scrollTop + 1;
+  let selectedElement = faceElements[0];
+
+  for (const faceElement of faceElements) {
+    const faceTop = resolveElementTopWithinContainer(container, faceElement);
+    if (faceTop <= viewportTop) {
+      selectedElement = faceElement;
+      continue;
+    }
+
+    break;
+  }
+
+  const face = resolveScrollAnchorFaceFromElement(selectedElement);
+  return {
+    element: selectedElement,
+    selector: buildScrollAnchorFaceSelector(face),
+    face,
+  };
+};
+
 const VerticalCardPagerFn = <T,>({
   cards,
   activeIndex,
@@ -123,6 +189,7 @@ const VerticalCardPagerFn = <T,>({
   onFlip,
   cardWidth = DEFAULT_CARD_WIDTH,
   getCardWidth,
+  onActiveScrollAnchorFaceChange,
   getScrollAnchorSelector,
   getCardWidthSpec,
   paddingInlinePx = 16,
@@ -182,6 +249,35 @@ const VerticalCardPagerFn = <T,>({
     onRenderRangeChangeRef.current = onRenderRangeChange;
   }, [onRenderRangeChange]);
 
+  const resolveScrollAnchorTarget = useCallback(
+    ({
+      container,
+      itemElement,
+      selector,
+    }: {
+      container: HTMLDivElement;
+      itemElement: HTMLDivElement;
+      selector: string | null;
+    }): ResolvedScrollAnchorTarget | null => {
+      if (selector) {
+        const anchorElement = resolveScrollAnchorElement(itemElement, selector);
+        if (!anchorElement) {
+          return null;
+        }
+
+        const face = resolveScrollAnchorFaceFromElement(anchorElement);
+        return {
+          element: anchorElement,
+          selector: buildScrollAnchorFaceSelector(face) ?? selector,
+          face,
+        };
+      }
+
+      return resolveAutoScrollAnchorTarget({ container, itemElement });
+    },
+    [],
+  );
+
   const captureScrollAnchor = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -193,27 +289,45 @@ const VerticalCardPagerFn = <T,>({
     const anchorSelector =
       getScrollAnchorSelector?.(activeCard, activeIndex, true) ?? null;
 
-    const anchorElement = resolveScrollAnchorElement(
-      activeElement,
-      anchorSelector,
-    );
+    const resolvedAnchorTarget = resolveScrollAnchorTarget({
+      container,
+      itemElement: activeElement,
+      selector: anchorSelector,
+    });
 
-    if (!anchorElement) return;
+    if (!resolvedAnchorTarget) {
+      onActiveScrollAnchorFaceChange?.(null);
+      return;
+    }
+
+    const {
+      element: anchorElement,
+      selector: resolvedAnchorSelector,
+      face: anchorFace,
+    } = resolvedAnchorTarget;
 
     const anchorTopWithinContainerPx = resolveElementTopWithinContainer(
       container,
       anchorElement,
     );
 
+    onActiveScrollAnchorFaceChange?.(anchorFace);
     scrollAnchorSnapshotRef.current = {
       activeIndex,
-      anchorSelector,
+      anchorSelector: resolvedAnchorSelector,
       offsetWithinAnchorPx: Math.max(
         0,
         container.scrollTop - anchorTopWithinContainerPx,
       ),
     };
-  }, [activeIndex, cards, getScrollAnchorSelector, itemRefs]);
+  }, [
+    activeIndex,
+    cards,
+    getScrollAnchorSelector,
+    itemRefs,
+    onActiveScrollAnchorFaceChange,
+    resolveScrollAnchorTarget,
+  ]);
 
   const restoreScrollAnchor = useCallback(() => {
     const container = containerRef.current;
@@ -447,14 +561,17 @@ const VerticalCardPagerFn = <T,>({
     const anchorSelector =
       getScrollAnchorSelector?.(activeCard, activeIndex, true) ?? null;
 
-    const anchorElement = resolveScrollAnchorElement(
-      activeElement,
-      anchorSelector,
-    );
+    const resolvedAnchorTarget = resolveScrollAnchorTarget({
+      container: containerRef.current ?? document.createElement("div"),
+      itemElement: activeElement,
+      selector: anchorSelector,
+    });
 
-    if (!anchorElement) {
+    if (!resolvedAnchorTarget) {
       return;
     }
+
+    const anchorElement = resolvedAnchorTarget.element;
 
     const observer = new ResizeObserver(() => {
       if (resolveNowMs() > anchorStabilizationUntilRef.current) {
@@ -478,6 +595,7 @@ const VerticalCardPagerFn = <T,>({
     cards,
     getScrollAnchorSelector,
     itemRefs,
+    resolveScrollAnchorTarget,
     scheduleAnchorCorrection,
   ]);
 

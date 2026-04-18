@@ -85,6 +85,7 @@ interface CardSetViewDesktopProps {
   fluidAvailableWidthPx: number;
   onActiveIndexChange: (idx: number) => void;
   onFlip: () => void;
+  onActiveScrollAnchorFaceChange?: (face: "question" | "answer" | null) => void;
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
   onSyncStatusChange: (status: CardSyncStatus | null) => void;
@@ -107,6 +108,7 @@ export const CardSetViewDesktop = ({
   fluidAvailableWidthPx,
   onActiveIndexChange,
   onFlip,
+  onActiveScrollAnchorFaceChange,
   onToggleUncertainty,
   onToggleBookmark,
   onSyncStatusChange,
@@ -269,6 +271,7 @@ export const CardSetViewDesktop = ({
       getKey={(card) => card.id}
       disableVirtualization={false}
       onRenderRangeChange={setRenderRange}
+      onActiveScrollAnchorFaceChange={onActiveScrollAnchorFaceChange}
       getScrollAnchorSelector={getScrollAnchorSelector}
       preserveScrollAnchorKey={preserveScrollAnchorKey}
       renderCard={renderCard}

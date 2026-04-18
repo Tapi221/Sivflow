@@ -1,10 +1,11 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { useToast } from "@/contexts/ToastContext";
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
 import {
   CARD_LAYOUT_MODE_LABELS,
+  type CardLayoutMode,
   type CardSetInteractionMode,
 } from "@/features/cardsetview/domain/cardLayoutMode";
 import { useCardSetViewData } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewData";
@@ -23,6 +24,8 @@ import { usePresentationTarget } from "@/platform/presentation/usePresentationTa
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { CARD_PANE_WIDTH_STEP_PX } from "@constants/shared/flashcard";
 import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutFallbackPreferences";
+
+type ScrollAnchorFace = "question" | "answer";
 
 export const useCardSetViewScreenController = () => {
   const { setExtraCrumbs } = useBreadcrumbContext();
@@ -51,6 +54,9 @@ export const useCardSetViewScreenController = () => {
     toastError,
     deviceScope: presentationTarget,
   });
+
+  const [activeScrollAnchorFace, setActiveScrollAnchorFace] =
+    useState<ScrollAnchorFace | null>(null);
 
   const paneWidth = useCardSetViewPaneWidth({
     isGlobalEditing: state.isGlobalEditing,
@@ -188,6 +194,36 @@ export const useCardSetViewScreenController = () => {
     }
   }, [cardSetId, data.updateCardSet, state.currentDisplayMode, toastError]);
 
+  const handleActiveScrollAnchorFaceChange = useCallback(
+    (face: ScrollAnchorFace | null) => {
+      setActiveScrollAnchorFace(face);
+    },
+    [],
+  );
+
+  const handleChangeCardLayoutMode = useCallback(
+    (nextMode: CardLayoutMode) => {
+      if (nextMode === state.currentCardLayoutMode) {
+        return;
+      }
+
+      if (nextMode === "flip" && state.currentCardLayoutMode !== "flip") {
+        state.setCurrentCardFace(
+          activeScrollAnchorFace ?? (state.isFlipped ? "answer" : "question"),
+        );
+      }
+
+      state.setCurrentCardLayoutMode(nextMode);
+    },
+    [
+      activeScrollAnchorFace,
+      state.currentCardLayoutMode,
+      state.isFlipped,
+      state.setCurrentCardFace,
+      state.setCurrentCardLayoutMode,
+    ],
+  );
+
   return {
     folderId,
     cardSetId,
@@ -202,6 +238,8 @@ export const useCardSetViewScreenController = () => {
     overlayRight,
     resolvedLastSyncedAtMs,
     topLeftZoomControl,
+    handleActiveScrollAnchorFaceChange,
+    handleChangeCardLayoutMode,
     handleSaveCurrentDisplayMode,
     effectiveCardLayoutMode: zoom.effectiveCardLayoutMode,
     disabledCardLayoutModes,

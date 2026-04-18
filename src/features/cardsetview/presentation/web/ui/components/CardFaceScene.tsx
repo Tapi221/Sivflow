@@ -69,7 +69,8 @@ export const CardFaceScene = ({
 }: CardFaceSceneProps) => {
   const isFluidDisplay = displayMode === "fluid";
   const resolvedFrameClassName = cn(
-    isFluidDisplay && "rounded-none border-none bg-transparent shadow-none",
+    isFluidDisplay &&
+      "rounded-none md:rounded-none border-none bg-transparent shadow-none",
     frameClassName,
   );
 

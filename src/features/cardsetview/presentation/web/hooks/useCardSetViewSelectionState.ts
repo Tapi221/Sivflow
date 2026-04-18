@@ -32,6 +32,8 @@ type KeyedFlipState = {
   ids: Set<string>;
 };
 
+type CardFace = "question" | "answer";
+
 interface UseCardSetViewSelectionStateOptions {
   initialIndex: number;
   targetCardId: string | null;
@@ -239,6 +241,28 @@ export const useCardSetViewSelectionState = ({
     });
   }, [sourceKey]);
 
+  const setCurrentCardFace = useCallback(
+    (face: CardFace) => {
+      const id = currentCardIdRef.current;
+
+      if (!id) {
+        return;
+      }
+
+      setFlippedState((prev) => {
+        const baseIds =
+          prev.sourceKey === sourceKey ? prev.ids : new Set<string>();
+        const nextIds = new Set(baseIds);
+
+        if (face === "answer") nextIds.add(id);
+        else nextIds.delete(id);
+
+        return { sourceKey, ids: nextIds };
+      });
+    },
+    [sourceKey],
+  );
+
   const handleFlip = useCallback(() => {
     const id = currentCardIdRef.current;
 
@@ -312,6 +336,7 @@ export const useCardSetViewSelectionState = ({
     isFlipped: flippedCardIds.has(currentCardId ?? ""),
     flippedCardIds,
     clearFlippedCards,
+    setCurrentCardFace,
     handleFlip,
     pendingFocusCardId,
     setPendingFocusCardId,

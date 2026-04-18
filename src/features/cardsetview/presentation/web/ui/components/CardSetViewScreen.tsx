@@ -37,6 +37,7 @@ export const CardSetViewScreen = () => {
     effectiveCardLayoutMode,
     disabledCardLayoutModes,
     layoutConstraintIndicatorLabel,
+    handleChangeCardLayoutMode,
   } = controller;
 
   const presentationTarget = usePresentationTarget();
@@ -72,7 +73,7 @@ export const CardSetViewScreen = () => {
       cardLayoutMode={effectiveCardLayoutMode}
       disabledCardLayoutModes={disabledCardLayoutModes}
       onChangeDisplayMode={state.setCurrentDisplayMode}
-      onChangeCardLayoutMode={state.setCurrentCardLayoutMode}
+      onChangeCardLayoutMode={handleChangeCardLayoutMode}
     />
   );
 

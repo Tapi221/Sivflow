@@ -86,6 +86,7 @@ export const useCardSetViewState = ({
     selectedCard: viewState.selectedCard,
     cardsForPager: viewState.cardsForPager,
     createAndFocusCard: actions.createAndFocusCard,
+    setCurrentCardFace: viewState.setCurrentCardFace,
     handleEdit: actions.handleEdit,
     handleFlip: viewState.handleFlip,
     handleToggleUncertainty: actions.handleToggleUncertainty,

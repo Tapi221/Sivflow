@@ -215,7 +215,7 @@ const FlashcardInner = ({
             cardShellClassName,
             isCardClickable && "cursor-pointer",
             !isFixedDisplay &&
-              "rounded-none border-none bg-transparent shadow-none",
+              "rounded-none md:rounded-none border-none bg-transparent shadow-none",
           )}
           onPointerDownCapture={handlePointerDownCapture}
           onPointerMoveCapture={handlePointerMoveCapture}

@@ -32,6 +32,9 @@ export const CardSetViewDesktopContent = ({
       fluidAvailableWidthPx={zoom.availableWidthPx}
       onActiveIndexChange={state.handlePagerIndexChange}
       onFlip={state.handleFlip}
+      onActiveScrollAnchorFaceChange={
+        controller.handleActiveScrollAnchorFaceChange
+      }
       onToggleUncertainty={state.handleToggleUncertainty}
       onToggleBookmark={state.handleToggleBookmark}
       onSyncStatusChange={state.handleActiveSyncStatusChange}
