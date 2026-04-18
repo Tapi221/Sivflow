@@ -1,12 +1,18 @@
 @layer components {
   .ds-editor-pane {
-    background: var(--ds-semantic-color-background-sidebar);
+    background: var(
+      --meta-panel-shell-bg,
+      var(--ds-semantic-color-background-sidebar)
+    );
     color: var(--ds-semantic-color-text-primary);
-    border-color: var(--ds-semantic-color-border-default);
+    border-color: var(
+      --meta-panel-border,
+      var(--ds-semantic-color-border-default)
+    );
   }
 
   .ds-editor-pane__body {
-    background: var(--ds-semantic-color-background-sidebar);
+    background: transparent;
     color: var(--ds-semantic-color-text-primary);
   }
 
@@ -16,7 +22,7 @@
 
   .ds-editor-pane__lead {
     margin-top: 0.5rem;
-    gap: var(--ds-spacing-2);
+    gap: var(--ds-spacing-3);
     color: var(--ds-semantic-color-text-primary);
   }
 
@@ -25,44 +31,95 @@
   }
 
   .ds-editor-pane__section-title {
-    color: var(--ds-semantic-color-text-secondary);
+    color: var(
+      --meta-panel-text-muted,
+      var(--ds-semantic-color-text-secondary)
+    );
+    letter-spacing: 0.08em;
   }
 
   .ds-editor-pane__surface {
-    border: 1px solid var(--ds-semantic-color-border-default);
-    background: var(--ds-semantic-color-background-app);
+    border: 1px solid
+      var(--meta-panel-border, var(--ds-semantic-color-border-default));
+    background: var(
+      --meta-panel-surface,
+      var(--ds-semantic-color-background-app)
+    );
     color: var(--ds-semantic-color-text-primary);
     border-radius: var(--ds-semantic-radius-control);
-    box-shadow: var(--ds-semantic-elevation-control-inset);
+    box-shadow: var(
+      --meta-panel-shadow-soft,
+      var(--ds-semantic-elevation-control-inset)
+    );
   }
 
   .ds-editor-pane__surface--muted {
-    background: var(--ds-semantic-color-background-sidebar-active);
+    background: var(
+      --meta-panel-surface-muted,
+      var(--ds-semantic-color-background-sidebar-active)
+    );
   }
 
   .ds-editor-pane__chart,
   .ds-editor-pane__history,
   .ds-editor-pane__toolbar,
   .ds-editor-pane__stats {
-    border: 1px solid var(--ds-semantic-color-border-default);
-    background: color-mix(
-      in srgb,
-      var(--ds-semantic-color-background-app) 78%,
-      var(--ds-semantic-color-background-sidebar) 22%
+    border: 1px solid
+      var(--meta-panel-border, var(--ds-semantic-color-border-default));
+    background: var(
+      --meta-panel-surface-elevated,
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-background-app) 78%,
+        var(--ds-semantic-color-background-sidebar) 22%
+      )
     );
     border-radius: var(--ds-semantic-radius-control);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    box-shadow: var(
+      --meta-panel-shadow-soft,
+      inset 0 1px 0 rgba(255, 255, 255, 0.6)
+    );
+  }
+
+  .meta-panel .ds-editor-pane__stats {
+    border-color: var(
+      --meta-panel-border-strong,
+      var(--ds-semantic-color-border-strong)
+    );
+    background: linear-gradient(
+      180deg,
+      var(
+          --meta-panel-accent-soft,
+          var(--ds-semantic-color-action-primary-soft)
+        )
+        0%,
+      var(
+          --meta-panel-surface-elevated,
+          var(--ds-semantic-color-background-app)
+        )
+        100%
+    );
   }
 
   .ds-editor-pane__history-empty,
   .ds-editor-pane__muted-text {
-    color: var(--ds-semantic-color-text-secondary);
+    color: var(
+      --meta-panel-text-muted,
+      var(--ds-semantic-color-text-secondary)
+    );
   }
 
   .ds-surface-button {
-    border: 1px solid var(--ds-semantic-color-border-default);
-    background: var(--ds-semantic-color-background-app);
-    color: var(--ds-semantic-color-text-secondary);
+    border: 1px solid
+      var(--meta-panel-border, var(--ds-semantic-color-border-default));
+    background: var(
+      --meta-panel-surface,
+      var(--ds-semantic-color-background-app)
+    );
+    color: var(
+      --meta-panel-text-muted,
+      var(--ds-semantic-color-text-secondary)
+    );
     border-radius: var(--ds-semantic-radius-control);
     transition:
       background-color var(--ds-semantic-motion-interactive),
@@ -82,18 +139,36 @@
 
   .ds-surface-button--active,
   .ds-surface-button--convexActive {
-    border-color: var(--ds-semantic-color-border-strong);
-    background: color-mix(
-      in srgb,
-      var(--ds-semantic-color-action-primary-soft) 85%,
-      var(--ds-semantic-color-background-app) 15%
+    border-color: var(
+      --meta-panel-border-strong,
+      var(--ds-semantic-color-border-strong)
+    );
+    background: var(
+      --meta-panel-accent-soft,
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-action-primary-soft) 85%,
+        var(--ds-semantic-color-background-app) 15%
+      )
     );
     color: var(--ds-semantic-color-text-strong);
-    box-shadow: var(--ds-semantic-elevation-control-raised);
+    box-shadow: var(
+      --meta-panel-shadow-soft,
+      var(--ds-semantic-elevation-control-raised)
+    );
   }
 
   .ds-surface-button:hover:not(:disabled) {
     color: var(--ds-semantic-color-text-strong);
+    border-color: var(
+      --meta-panel-border-strong,
+      var(--ds-semantic-color-border-strong)
+    );
+    background: color-mix(
+      in srgb,
+      var(--meta-panel-surface, var(--ds-semantic-color-background-app)) 88%,
+      var(--meta-panel-accent-soft, var(--ds-semantic-color-action-primary-soft)) 12%
+    );
   }
 
   .ds-surface-button:active:not(:disabled) {
