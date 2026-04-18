@@ -1,11 +1,39 @@
 import type { WindowControlsPort } from "@/application/ports/WindowControlsPort";
-import platform from "@/platform";
+import { getDesktopBridge } from "@/platform/desktop/bridge";
+import { hasDesktopBridge } from "@/platform/runtime";
+
+const getDesktopWindowApi = () => {
+  if (!hasDesktopBridge()) {
+    return null;
+  }
+
+  return getDesktopBridge().window;
+};
 
 export const windowControls: WindowControlsPort = {
-  minimize: () => platform.window.minimize(),
-  maximizeToggle: () => platform.window.maximizeToggle(),
-  close: () => platform.window.close(),
-  isMaximized: () => platform.window.isMaximized(),
+  minimize: async () => {
+    const api = getDesktopWindowApi();
+    if (!api) return;
+    await api.minimize();
+  },
+  maximizeToggle: async () => {
+    const api = getDesktopWindowApi();
+    if (!api) return;
+    await api.maximizeToggle();
+  },
+  close: async () => {
+    const api = getDesktopWindowApi();
+    if (!api) return;
+    await api.close();
+  },
+  isMaximized: async () => {
+    const api = getDesktopWindowApi();
+    if (!api) return false;
+    return api.isMaximized();
+  },
   onMaximizedStateChange: (handler: (isMaximized: boolean) => void) =>
-    platform.window.onMaximizedStateChange(handler),
+    getDesktopWindowApi()?.onMaximizedStateChange(handler) ??
+    (() => {
+      // no-op on web
+    }),
 };
