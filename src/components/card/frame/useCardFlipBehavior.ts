@@ -27,6 +27,11 @@ const createInitialPointerGestureState = (): PointerGestureState => ({
   moved: false,
 });
 
+type FlipTriggerEvent = Readonly<{
+  target: EventTarget | null;
+  stopPropagation?: () => void;
+}>;
+
 export type UseCardFlipBehaviorParams = Readonly<{
   isCardClickable: boolean;
   previewMode: boolean;
@@ -64,6 +69,35 @@ export const useCardFlipBehavior = ({
     pointerGestureRef.current = createInitialPointerGestureState();
   }, []);
 
+  const invokeFlip = React.useCallback(
+    (event?: FlipTriggerEvent): boolean => {
+      if (!shouldHandleFlip) return false;
+      if (event && shouldIgnoreFlipTarget(event.target)) return false;
+      if (isModalBlockingFlip) return false;
+      if (isInkEditingActive) return false;
+
+      event?.stopPropagation?.();
+
+      if (previewMode) {
+        onPreviewFlip?.();
+        return true;
+      }
+
+      if (!onFlip) return false;
+
+      onFlip();
+      return true;
+    },
+    [
+      isInkEditingActive,
+      isModalBlockingFlip,
+      onFlip,
+      onPreviewFlip,
+      previewMode,
+      shouldHandleFlip,
+    ],
+  );
+
   const finishPointerGesture = React.useCallback(
     (pointerId: number | null) => {
       const state = pointerGestureRef.current;
@@ -88,29 +122,9 @@ export const useCardFlipBehavior = ({
         return;
       }
 
-      if (event && shouldIgnoreFlipTarget(event.target)) return;
-      if (isModalBlockingFlip) return;
-      if (isInkEditingActive) return;
-
-      if (previewMode) {
-        event?.stopPropagation();
-        onPreviewFlip?.();
-        return;
-      }
-
-      if (!onFlip) return;
-
-      event?.stopPropagation();
-      onFlip();
+      void invokeFlip(event);
     },
-    [
-      isInkEditingActive,
-      isModalBlockingFlip,
-      onFlip,
-      onPreviewFlip,
-      previewMode,
-      shouldHandleFlip,
-    ],
+    [invokeFlip, shouldHandleFlip],
   );
 
   const handleKeyDown = React.useCallback<
@@ -131,7 +145,7 @@ export const useCardFlipBehavior = ({
     React.PointerEventHandler<HTMLDivElement>
   >(
     (event) => {
-      if (!isCardClickable) return;
+      if (!shouldHandleFlip) return;
 
       if (shouldIgnoreFlipTarget(event.target)) {
         resetPointerGesture();
@@ -145,14 +159,14 @@ export const useCardFlipBehavior = ({
         moved: false,
       };
     },
-    [isCardClickable, resetPointerGesture],
+    [resetPointerGesture, shouldHandleFlip],
   );
 
   const handlePointerMoveCapture = React.useCallback<
     React.PointerEventHandler<HTMLDivElement>
   >(
     (event) => {
-      if (!isCardClickable) return;
+      if (!shouldHandleFlip) return;
 
       const state = pointerGestureRef.current;
       if (state.pointerId !== event.pointerId) return;
@@ -171,27 +185,52 @@ export const useCardFlipBehavior = ({
         };
       }
     },
-    [isCardClickable],
+    [shouldHandleFlip],
   );
 
   const handlePointerUpCapture = React.useCallback<
     React.PointerEventHandler<HTMLDivElement>
   >(
     (event) => {
-      if (!isCardClickable) return;
-      finishPointerGesture(event.pointerId);
+      if (!shouldHandleFlip) return;
+
+      const state = pointerGestureRef.current;
+      if (state.pointerId !== event.pointerId) return;
+
+      const canFlipFromPointer =
+        !state.moved &&
+        !shouldIgnoreFlipTarget(event.target) &&
+        !isModalBlockingFlip &&
+        !isInkEditingActive;
+
+      resetPointerGesture();
+
+      if (!canFlipFromPointer) {
+        if (state.moved) {
+          suppressNextFlipRef.current = true;
+        }
+        return;
+      }
+
+      suppressNextFlipRef.current = true;
+      void invokeFlip(event);
     },
-    [finishPointerGesture, isCardClickable],
+    [
+      invokeFlip,
+      isInkEditingActive,
+      isModalBlockingFlip,
+      resetPointerGesture,
+      shouldHandleFlip,
+    ],
   );
 
   const handlePointerCancelCapture = React.useCallback<
     React.PointerEventHandler<HTMLDivElement>
   >(
-    (event) => {
-      if (!isCardClickable) return;
-      finishPointerGesture(event.pointerId);
+    () => {
+      resetPointerGesture();
     },
-    [finishPointerGesture, isCardClickable],
+    [resetPointerGesture],
   );
 
   return {
