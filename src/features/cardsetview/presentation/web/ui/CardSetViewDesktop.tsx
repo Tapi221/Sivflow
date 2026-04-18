@@ -175,6 +175,20 @@ export const CardSetViewDesktop = ({
     onActiveIndexChange(selectedIndex);
   }, [onActiveIndexChange, safeCurrentIndex, selectedIndex]);
 
+  const getScrollAnchorSelector = useCallback(
+    (card: Card, _idx: number, isActive: boolean) => {
+      if (!isActive || currentCardLayoutMode !== "flip") {
+        return null;
+      }
+
+      const cardId = card.id ?? "";
+      return flippedCardIds.has(cardId)
+        ? '[data-card-face="answer"]'
+        : '[data-card-face="question"]';
+    },
+    [currentCardLayoutMode, flippedCardIds],
+  );
+
   const renderCard = useCallback(
     (_card: Card, _idx: number, isActive: boolean) => {
       const card = _card;
@@ -255,6 +269,7 @@ export const CardSetViewDesktop = ({
       getKey={(card) => card.id}
       disableVirtualization={false}
       onRenderRangeChange={setRenderRange}
+      getScrollAnchorSelector={getScrollAnchorSelector}
       preserveScrollAnchorKey={preserveScrollAnchorKey}
       renderCard={renderCard}
     />

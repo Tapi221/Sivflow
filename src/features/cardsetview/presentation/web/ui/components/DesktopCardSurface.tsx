@@ -82,6 +82,42 @@ const DesktopCardSurfaceInner = ({
 
   const canInteractWithEditor = isGlobalEditing && (isActive || hasFocusWithin);
 
+  const questionNode = (
+    <div data-card-face="question" className="min-w-0">
+      <ViewCardFaceScene
+        card={card}
+        side="question"
+        displayMode={currentDisplayMode}
+        fixedScale={metrics.sideFixedScale}
+        fixedHeightPx={fixedHeightPx}
+        contentZoom={metrics.sideContentZoom}
+        headerIconVisualScale={metrics.sideHeaderIconVisualScale}
+        previewMode={true}
+        showInkLayer={currentDisplayMode === "fixed"}
+        drawMode={false}
+        inkEditingEnabled={false}
+      />
+    </div>
+  );
+
+  const answerNode = (
+    <div data-card-face="answer" className="min-w-0">
+      <ViewCardFaceScene
+        card={card}
+        side="answer"
+        displayMode={currentDisplayMode}
+        fixedScale={metrics.sideFixedScale}
+        fixedHeightPx={fixedHeightPx}
+        contentZoom={metrics.sideContentZoom}
+        headerIconVisualScale={metrics.sideHeaderIconVisualScale}
+        previewMode={true}
+        showInkLayer={currentDisplayMode === "fixed"}
+        drawMode={false}
+        inkEditingEnabled={false}
+      />
+    </div>
+  );
+
   if (isGlobalEditing) {
     return (
       <div
@@ -115,36 +151,8 @@ const DesktopCardSurfaceInner = ({
       <div className="w-full min-w-0 max-w-full overflow-visible">
         <CardSurfaceLayout
           cardLayoutMode={currentCardLayoutMode}
-          questionNode={
-            <ViewCardFaceScene
-              card={card}
-              side="question"
-              displayMode={currentDisplayMode}
-              fixedScale={metrics.sideFixedScale}
-              fixedHeightPx={fixedHeightPx}
-              contentZoom={metrics.sideContentZoom}
-              headerIconVisualScale={metrics.sideHeaderIconVisualScale}
-              previewMode={true}
-              showInkLayer={currentDisplayMode === "fixed"}
-              drawMode={false}
-              inkEditingEnabled={false}
-            />
-          }
-          answerNode={
-            <ViewCardFaceScene
-              card={card}
-              side="answer"
-              displayMode={currentDisplayMode}
-              fixedScale={metrics.sideFixedScale}
-              fixedHeightPx={fixedHeightPx}
-              contentZoom={metrics.sideContentZoom}
-              headerIconVisualScale={metrics.sideHeaderIconVisualScale}
-              previewMode={true}
-              showInkLayer={currentDisplayMode === "fixed"}
-              drawMode={false}
-              inkEditingEnabled={false}
-            />
-          }
+          questionNode={questionNode}
+          answerNode={answerNode}
         />
       </div>
     );
@@ -152,22 +160,24 @@ const DesktopCardSurfaceInner = ({
 
   return (
     <div className="w-full min-w-0 max-w-full overflow-visible">
-      <ViewCardFaceScene
-        card={card}
-        side={isFlipped ? "answer" : "question"}
-        displayMode={currentDisplayMode}
-        fixedScale={metrics.baseFixedScale}
-        fixedHeightPx={fixedHeightPx}
-        contentZoom={metrics.baseContentZoom}
-        headerIconVisualScale={metrics.baseHeaderIconVisualScale}
-        previewMode={!isActive}
-        showInkLayer={metrics.renderSpec.showInk}
-        drawMode={false}
-        inkEditingEnabled={metrics.renderSpec.showInk && isActive}
-        onFlip={isActive ? onFlip : undefined}
-        onToggleUncertainty={isActive ? onToggleUncertainty : undefined}
-        onToggleBookmark={isActive ? onToggleBookmark : undefined}
-      />
+      <div data-card-face={isFlipped ? "answer" : "question"} className="min-w-0">
+        <ViewCardFaceScene
+          card={card}
+          side={isFlipped ? "answer" : "question"}
+          displayMode={currentDisplayMode}
+          fixedScale={metrics.baseFixedScale}
+          fixedHeightPx={fixedHeightPx}
+          contentZoom={metrics.baseContentZoom}
+          headerIconVisualScale={metrics.baseHeaderIconVisualScale}
+          previewMode={!isActive}
+          showInkLayer={metrics.renderSpec.showInk}
+          drawMode={false}
+          inkEditingEnabled={metrics.renderSpec.showInk && isActive}
+          onFlip={isActive ? onFlip : undefined}
+          onToggleUncertainty={isActive ? onToggleUncertainty : undefined}
+          onToggleBookmark={isActive ? onToggleBookmark : undefined}
+        />
+      </div>
     </div>
   );
 };
