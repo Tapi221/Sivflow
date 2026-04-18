@@ -3,7 +3,7 @@ import type {
   DesktopBridgeApi,
   DesktopOauthCallbackPayload,
 } from "@/types/externals/desktop-api";
-import { IPC_CHANNELS } from "@constants/electron/app";
+import { IPC_CHANNELS } from "../constants/electron/app";
 
 const desktopApi: DesktopBridgeApi = {
   app: {

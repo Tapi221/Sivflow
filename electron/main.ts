@@ -6,7 +6,7 @@ import {
   DESKTOP_GOOGLE_OAUTH_REDIRECT_URI,
   DESKTOP_OAUTH_LOOPBACK,
   IPC_CHANNELS,
-} from "@constants/electron/app";
+} from "../constants/electron/app";
 
 if (process.platform === "win32") {
   app.disableHardwareAcceleration();
