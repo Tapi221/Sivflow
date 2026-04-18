@@ -6,7 +6,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { createPortal } from "react-dom";
 
 import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
 import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
@@ -181,7 +180,6 @@ type EditorSidePaneProps = {
   actionsTopLeft?: React.ReactNode;
   actionsTopRight?: React.ReactNode;
   overlayTopRight?: React.ReactNode;
-  onActivate: () => void;
 };
 
 const EditorSidePaneInner = ({
@@ -215,7 +213,6 @@ const EditorSidePaneInner = ({
   actionsTopLeft,
   actionsTopRight,
   overlayTopRight,
-  onActivate,
 }: EditorSidePaneProps) => {
   const frameClassName = cn(
     buildCardShellClassName(presentationState),
@@ -303,8 +300,6 @@ const EditorSidePaneInner = ({
         "flex min-h-0 w-full flex-col",
         shouldShowInlineToolbarMount ? "gap-2" : "gap-0",
       )}
-      onPointerDownCapture={onActivate}
-      onFocusCapture={onActivate}
     >
       {shouldShowInlineToolbarMount && (
         <div ref={setInlineToolbarMount} className="w-full" />
@@ -497,28 +492,11 @@ export const CardEditorPane = ({
     useState<HTMLDivElement | null>(null);
   const [toolbarMountAInternal, setToolbarMountAInternal] =
     useState<HTMLDivElement | null>(null);
-  const [globalBottomToolbarMount, setGlobalBottomToolbarMount] =
-    useState<HTMLDivElement | null>(null);
-  const [activeToolbarSide, setActiveToolbarSide] = useState<
-    "question" | "answer"
-  >("question");
 
   const toolbarMountQ = externalToolbarMountQ ?? toolbarMountQInternal;
   const toolbarMountA = externalToolbarMountA ?? toolbarMountAInternal;
   const usesExternalToolbarMount =
     Boolean(externalToolbarMountQ) && Boolean(externalToolbarMountA);
-
-  const shouldUseGlobalBottomToolbar =
-    isEditing &&
-    !hideBlockToolbars;
-
-  const shouldDockToolbarToCardTop = shouldUseGlobalBottomToolbar
-    ? false
-    : shouldDockToolbarToCardTopBase;
-
-  const shouldShowInlineToolbarMount = shouldUseGlobalBottomToolbar
-    ? false
-    : shouldShowInlineToolbarMountBase;
 
   const handleQuestionBlocksChange = useCallback(
     (blocks: CardBlock[]) => {
@@ -571,8 +549,8 @@ export const CardEditorPane = ({
     activePaneWidthPx,
     activePaneDisplayedDefaultWidthPx,
     shouldReserveWidthControlSpace,
-    shouldDockToolbarToCardTop: shouldDockToolbarToCardTopBase,
-    shouldShowInlineToolbarMount: shouldShowInlineToolbarMountBase,
+    shouldDockToolbarToCardTop,
+    shouldShowInlineToolbarMount,
     useTwoColumnEditorLayout,
     editorCardFitScale,
     activePaneWidthStyle,
@@ -630,12 +608,6 @@ export const CardEditorPane = ({
 
   const isSplitEditorLayout =
     cardLayoutMode === "split" && useTwoColumnEditorLayout;
-
-  useEffect(() => {
-    if (cardLayoutMode !== "flip") return;
-
-    setActiveToolbarSide(isFlipped ? "answer" : "question");
-  }, [cardLayoutMode, isFlipped]);
 
   const editorContentZoom =
     isSplitEditorLayout && displayMode === "fluid"
@@ -859,15 +831,8 @@ export const CardEditorPane = ({
       label="問題"
       accentColor={editorAccentColor}
       duplicateToOpposite={editorDuplicateToOpposite}
-      hideToolbar={
-        hideBlockToolbars ||
-        (shouldUseGlobalBottomToolbar && activeToolbarSide !== "question")
-      }
-      toolbarMount={
-        shouldUseGlobalBottomToolbar && activeToolbarSide === "question"
-          ? globalBottomToolbarMount
-          : toolbarMountQ
-      }
+      hideToolbar={hideBlockToolbars}
+      toolbarMount={toolbarMountQ}
       settings={settings}
       shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
       setInlineToolbarMount={setToolbarMountQInternal}
@@ -888,7 +853,6 @@ export const CardEditorPane = ({
       onResizeEnd={handleResizeEnd}
       actionsTopLeft={editorActionsTopLeft}
       actionsTopRight={questionActionsTopRight}
-      onActivate={() => setActiveToolbarSide("question")}
     />
   );
 
@@ -901,15 +865,8 @@ export const CardEditorPane = ({
       label="解答"
       accentColor={editorAccentColor}
       duplicateToOpposite={editorDuplicateToOpposite}
-      hideToolbar={
-        hideBlockToolbars ||
-        (shouldUseGlobalBottomToolbar && activeToolbarSide !== "answer")
-      }
-      toolbarMount={
-        shouldUseGlobalBottomToolbar && activeToolbarSide === "answer"
-          ? globalBottomToolbarMount
-          : toolbarMountA
-      }
+      hideToolbar={hideBlockToolbars}
+      toolbarMount={toolbarMountA}
       settings={settings}
       shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
       setInlineToolbarMount={setToolbarMountAInternal}
@@ -930,7 +887,6 @@ export const CardEditorPane = ({
       onResizeEnd={handleResizeEnd}
       actionsTopLeft={editorActionsTopLeft}
       actionsTopRight={answerActionsTopRight}
-      onActivate={() => setActiveToolbarSide("answer")}
     />
   );
 
@@ -964,11 +920,7 @@ export const CardEditorPane = ({
       duplicateToOpposite={editorDuplicateToOpposite}
       hideToolbar={hideBlockToolbars}
       toolbarMount={
-        shouldUseGlobalBottomToolbar
-          ? globalBottomToolbarMount
-          : activeFlipSide === "question"
-            ? toolbarMountQ
-            : toolbarMountA
+        activeFlipSide === "question" ? toolbarMountQ : toolbarMountA
       }
       settings={settings}
       shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
@@ -1014,7 +966,6 @@ export const CardEditorPane = ({
           ) : null}
         </>
       }
-      onActivate={() => setActiveToolbarSide(activeFlipSide)}
     />
   );
 
@@ -1089,7 +1040,6 @@ export const CardEditorPane = ({
             <div
               className={cn(
                 "flex w-full flex-col items-center gap-4",
-                shouldUseGlobalBottomToolbar && "pb-28 md:pb-32",
                 embeddedInPager &&
                   forcedPaneWidthPx == null &&
                   (dockToolbarsToTop ? "max-w-[1000px]" : "max-w-[820px]"),
@@ -1123,75 +1073,6 @@ export const CardEditorPane = ({
             )
           )}
         </CardWorkspaceShell>
-
-        {shouldUseGlobalBottomToolbar && typeof document !== "undefined"
-          ? createPortal(
-              <div className="pointer-events-none fixed left-1/2 bottom-[calc(env(safe-area-inset-bottom,0px)+16px)] z-[999] w-[min(720px,calc(100vw-24px))] -translate-x-1/2 px-0">
-                <div
-                  className={cn(
-                    "pointer-events-auto flex items-center gap-3 rounded-[28px] border",
-                    "border-[rgba(148,163,184,0.24)]",
-                    "bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(247,249,252,0.90))]",
-                    "px-3 py-3 shadow-[0_20px_48px_rgba(15,23,42,0.16)] backdrop-blur-xl",
-                  )}
-                >
-                  {cardLayoutMode !== "flip" ? (
-                    <div
-                      className={cn(
-                        "inline-flex shrink-0 items-center gap-1 rounded-[20px] border p-1",
-                        "border-[rgba(148,163,184,0.18)] bg-white/72",
-                      )}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setActiveToolbarSide("question")}
-                        className={cn(
-                          "inline-flex h-11 items-center rounded-2xl px-4 text-sm font-semibold transition-all",
-                          activeToolbarSide === "question"
-                            ? "bg-slate-900 text-white shadow-[0_8px_18px_rgba(15,23,42,0.22)]"
-                            : "text-slate-500 hover:bg-white hover:text-slate-900",
-                        )}
-                      >
-                        問題
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setActiveToolbarSide("answer")}
-                        className={cn(
-                          "inline-flex h-11 items-center rounded-2xl px-4 text-sm font-semibold transition-all",
-                          activeToolbarSide === "answer"
-                            ? "bg-slate-900 text-white shadow-[0_8px_18px_rgba(15,23,42,0.22)]"
-                            : "text-slate-500 hover:bg-white hover:text-slate-900",
-                        )}
-                      >
-                        解答
-                      </button>
-                    </div>
-                  ) : (
-                    <div
-                      className={cn(
-                        "inline-flex h-11 shrink-0 items-center rounded-2xl border px-4 text-sm font-semibold",
-                        "border-[rgba(148,163,184,0.18)] bg-white/72 text-slate-700",
-                      )}
-                    >
-                      {activeFlipSide === "question" ? "問題" : "解答"}
-                    </div>
-                  )}
-
-                  <div
-                    className="h-8 w-px shrink-0 bg-slate-200/80"
-                    aria-hidden
-                  />
-                  <div
-                    ref={setGlobalBottomToolbarMount}
-                    className="flex min-w-0 flex-1 items-center overflow-hidden"
-                  />
-                </div>
-              </div>,
-              document.body,
-            )
-          : null}
 
         <CardEditorPaneMediaDialogs
           imageDialogSide={imageDialogSide}
