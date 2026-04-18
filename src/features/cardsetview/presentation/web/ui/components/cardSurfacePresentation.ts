@@ -60,9 +60,12 @@ export const buildSharedCardSurfaceMetrics = ({
       ? Math.max(0.1, baseContentZoom / 2)
       : baseContentZoom;
 
-  const sideHeaderIconVisualScale = isSplitLayout
-    ? Math.max(0.1, baseHeaderIconVisualScale / 2)
-    : baseHeaderIconVisualScale;
+  const sideHeaderIconVisualScale =
+    displayMode === "fluid"
+      ? 1
+      : isSplitLayout
+        ? Math.max(0.1, baseHeaderIconVisualScale / 2)
+        : baseHeaderIconVisualScale;
 
   return {
     renderSpec,

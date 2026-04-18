@@ -168,7 +168,11 @@ export const useCardSetViewSelectionState = ({
 
   useEffect(() => {
     if (flippedState.sourceKey !== sourceKey) return;
-    setCardSetViewFlippedCardIds({ cardSetId, folderId, ids: flippedState.ids });
+    setCardSetViewFlippedCardIds({
+      cardSetId,
+      folderId,
+      ids: flippedState.ids,
+    });
   }, [cardSetId, flippedState, folderId, sourceKey]);
 
   useEffect(() => {

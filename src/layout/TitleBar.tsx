@@ -30,6 +30,7 @@ type WindowControlButtonProps = {
   onClick?: () => void;
   disabled?: boolean;
   danger?: boolean;
+  noDragStyle?: React.CSSProperties;
   children: React.ReactNode;
 };
 
@@ -38,6 +39,7 @@ const WindowControlButton: React.FC<WindowControlButtonProps> = ({
   onClick,
   disabled = false,
   danger = false,
+  noDragStyle,
   children,
 }) => {
   const disabledClassName = disabled
@@ -50,7 +52,9 @@ const WindowControlButton: React.FC<WindowControlButtonProps> = ({
     <button
       type="button"
       onClick={disabled ? undefined : onClick}
+      onMouseDown={(event) => event.stopPropagation()}
       disabled={disabled}
+      style={noDragStyle}
       className={cn(
         "flex h-full w-[46px] items-center justify-center transition-colors",
         disabledClassName,
@@ -228,6 +232,7 @@ export const TitleBar: React.FC = () => {
                 title="新規カードを追加"
                 aria-label="新規カードを追加"
                 tabIndex={-1}
+                style={noDragStyle}
               >
                 <svg
                   width="14"
@@ -286,6 +291,7 @@ export const TitleBar: React.FC = () => {
                   : "編集モードに切り替え"
               }
               tabIndex={-1}
+              style={noDragStyle}
             >
               {isCardSetViewEditing ? (
                 <svg
@@ -341,6 +347,7 @@ export const TitleBar: React.FC = () => {
           title={hasDesktopBridge ? "最小化" : "ブラウザでは最小化できません"}
           onClick={() => void windowControls.minimize()}
           disabled={!hasDesktopBridge}
+          noDragStyle={noDragStyle}
         >
           <svg
             width="10"
@@ -368,6 +375,7 @@ export const TitleBar: React.FC = () => {
           }
           onClick={() => void windowControls.maximizeToggle()}
           disabled={!hasDesktopBridge}
+          noDragStyle={noDragStyle}
         >
           {isMaximized ? (
             <svg
@@ -406,6 +414,7 @@ export const TitleBar: React.FC = () => {
           }
           onClick={() => void windowControls.close()}
           disabled={!hasDesktopBridge}
+          noDragStyle={noDragStyle}
           danger
         >
           <svg

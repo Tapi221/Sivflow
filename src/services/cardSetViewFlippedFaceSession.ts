@@ -85,4 +85,3 @@ export const setCardSetViewFlippedCardIds = ({
     normalizedIds.length > 0 ? JSON.stringify(normalizedIds) : null,
   );
 };
-
