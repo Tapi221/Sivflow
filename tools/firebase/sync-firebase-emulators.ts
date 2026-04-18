@@ -70,7 +70,11 @@ const syncFirebaseEmulators = () => {
     emulators,
   };
 
-  writeFileSync(FIREBASE_JSON_PATH, `${JSON.stringify(next, null, 2)}\n`, "utf8");
+  writeFileSync(
+    FIREBASE_JSON_PATH,
+    `${JSON.stringify(next, null, 2)}\n`,
+    "utf8",
+  );
   console.log("[sync-firebase-emulators] firebase.json emulators synchronized");
 };
 

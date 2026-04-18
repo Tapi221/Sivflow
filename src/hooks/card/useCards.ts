@@ -471,15 +471,11 @@ export const useCards = (
       0,
     );
 
-    await db.updateItem(
-      "cards",
-      cardId,
-      {
-        cardSetId: targetCardSetId,
-        orderIndex: maxOrderIndex + 1,
-        updatedAt: new Date(),
-      },
-    );
+    await db.updateItem("cards", cardId, {
+      cardSetId: targetCardSetId,
+      orderIndex: maxOrderIndex + 1,
+      updatedAt: new Date(),
+    });
   };
 
   /**

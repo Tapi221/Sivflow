@@ -226,12 +226,9 @@ export const useCardFlipBehavior = ({
 
   const handlePointerCancelCapture = React.useCallback<
     React.PointerEventHandler<HTMLDivElement>
-  >(
-    () => {
-      resetPointerGesture();
-    },
-    [resetPointerGesture],
-  );
+  >(() => {
+    resetPointerGesture();
+  }, [resetPointerGesture]);
 
   return {
     handleFlip,

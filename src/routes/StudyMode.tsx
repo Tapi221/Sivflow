@@ -384,7 +384,7 @@ const StudyMode = () => {
     : currentIndex + 1;
 
   const counterTotal = isPracticeMode
-    ? practiceState?.roundTotal ?? 0
+    ? (practiceState?.roundTotal ?? 0)
     : studyCards.length;
   const isCompletionView =
     !isPracticeMode && studyComplete && studyCards.length > 0;

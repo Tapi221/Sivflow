@@ -24,9 +24,5 @@
     "config",
     "functions/src/security/contract.ts"
   ],
-  "exclude": [
-    "src/**/*.test.ts",
-    "src/**/*.test.tsx",
-    "tests/**"
-  ]
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "tests/**"]
 }

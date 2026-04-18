@@ -45,7 +45,9 @@ export const useStudyCards = ({
       );
       cards = cards.filter((card) => {
         const resolvedFolderId = resolveCardFolderIdStrict(card, cardSetById);
-        return Boolean(resolvedFolderId && activeFolderIds.has(resolvedFolderId));
+        return Boolean(
+          resolvedFolderId && activeFolderIds.has(resolvedFolderId),
+        );
       });
     }
 

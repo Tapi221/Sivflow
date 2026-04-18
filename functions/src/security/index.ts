@@ -8,7 +8,10 @@ import {
   evaluateDetectionRule,
   type RiskLevel,
 } from "./policy";
-import { isSupportedSecurityEventType, type SecurityEventType } from "./contract";
+import {
+  isSupportedSecurityEventType,
+  type SecurityEventType,
+} from "./contract";
 
 const toFiniteNumber = (value: unknown, fallback = 0): number => {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;

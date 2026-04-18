@@ -82,19 +82,26 @@ describe("useExplorerDerivedData", () => {
     );
 
     expect(result.current.directCardCountByFolderId.get("folder-a")).toBe(1);
-    expect(result.current.directCardCountByFolderId.get("folder-b")).toBeUndefined();
+    expect(
+      result.current.directCardCountByFolderId.get("folder-b"),
+    ).toBeUndefined();
 
     rerender({
       cardSets: [buildCardSet("set-1", "folder-b")],
     });
 
-    expect(result.current.directCardCountByFolderId.get("folder-a")).toBeUndefined();
+    expect(
+      result.current.directCardCountByFolderId.get("folder-a"),
+    ).toBeUndefined();
     expect(result.current.directCardCountByFolderId.get("folder-b")).toBe(1);
   });
 
   it("カードを別 CardSet へ移すと Explorer の所属フォルダ集計が追従する", () => {
     const folders = [buildFolder("folder-a"), buildFolder("folder-b")];
-    const cardSets = [buildCardSet("set-1", "folder-a"), buildCardSet("set-2", "folder-b")];
+    const cardSets = [
+      buildCardSet("set-1", "folder-a"),
+      buildCardSet("set-2", "folder-b"),
+    ];
     const { result, rerender } = renderHook(
       ({ cards }: { cards: Card[] }) =>
         useExplorerDerivedData({
@@ -112,13 +119,17 @@ describe("useExplorerDerivedData", () => {
     );
 
     expect(result.current.directCardCountByFolderId.get("folder-a")).toBe(1);
-    expect(result.current.directCardCountByFolderId.get("folder-b")).toBeUndefined();
+    expect(
+      result.current.directCardCountByFolderId.get("folder-b"),
+    ).toBeUndefined();
 
     rerender({
       cards: [buildCard("card-1", "set-2", "stale-folder-a", 0)],
     });
 
-    expect(result.current.directCardCountByFolderId.get("folder-a")).toBeUndefined();
+    expect(
+      result.current.directCardCountByFolderId.get("folder-a"),
+    ).toBeUndefined();
     expect(result.current.directCardCountByFolderId.get("folder-b")).toBe(1);
   });
 });

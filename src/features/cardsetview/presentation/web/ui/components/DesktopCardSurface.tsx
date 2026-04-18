@@ -160,7 +160,10 @@ const DesktopCardSurfaceInner = ({
 
   return (
     <div className="w-full min-w-0 max-w-full overflow-visible">
-      <div data-card-face={isFlipped ? "answer" : "question"} className="min-w-0">
+      <div
+        data-card-face={isFlipped ? "answer" : "question"}
+        className="min-w-0"
+      >
         <ViewCardFaceScene
           card={card}
           side={isFlipped ? "answer" : "question"}

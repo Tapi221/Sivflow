@@ -132,28 +132,28 @@ export const useCardEditorPaneController = ({
     return subscribeCardSetViewWindowEvent(
       CARD_SET_VIEW_EVENTS.editingDraftPatch,
       (detail: CardSetViewEditingDraftPatch) => {
-      setSessionDraft((prev) => {
-        const nextDraft = applyEditingDraftPatch({
-          currentDraft: prev
-            ? {
-                title: prev.title,
-                isDraft: prev.isDraft,
-                tags: prev.tags,
-              }
-            : null,
-          detail,
-          selectedCardId: sessionSelectedCard?.id ?? null,
-          isEditing: sessionIsEditing,
-        });
+        setSessionDraft((prev) => {
+          const nextDraft = applyEditingDraftPatch({
+            currentDraft: prev
+              ? {
+                  title: prev.title,
+                  isDraft: prev.isDraft,
+                  tags: prev.tags,
+                }
+              : null,
+            detail,
+            selectedCardId: sessionSelectedCard?.id ?? null,
+            isEditing: sessionIsEditing,
+          });
 
-        if (!prev || !nextDraft) return prev;
-        return {
-          ...prev,
-          title: nextDraft.title,
-          isDraft: nextDraft.isDraft,
-          tags: nextDraft.tags,
-        };
-      });
+          if (!prev || !nextDraft) return prev;
+          return {
+            ...prev,
+            title: nextDraft.title,
+            isDraft: nextDraft.isDraft,
+            tags: nextDraft.tags,
+          };
+        });
       },
     );
   }, [sessionIsEditing, sessionSelectedCard, setSessionDraft]);

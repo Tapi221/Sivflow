@@ -13,10 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuthSession } from "@/contexts/AuthContext";
-import {
-  getFirebaseStorage,
-  getFirestoreDb,
-} from "@/services/firebaseGateway";
+import { getFirebaseStorage, getFirestoreDb } from "@/services/firebaseGateway";
 import type { UploadMetadata } from "@/types";
 import {
   AlertCircle,
@@ -139,7 +136,9 @@ export const StorageManager = () => {
           const storageRef = ref(getFirebaseStorage(), file.storagePath);
           await deleteObject(storageRef);
         } catch (storageError: unknown) {
-          if (getStorageErrorCode(storageError) !== "storage/object-not-found") {
+          if (
+            getStorageErrorCode(storageError) !== "storage/object-not-found"
+          ) {
             console.warn("Storage delete failed", storageError);
           }
         }

@@ -29,7 +29,10 @@ describe("useCardSetViewZoom", () => {
       SHARED_STORAGE_KEYS.cardSetViewZoomPreferences,
     );
     return raw
-      ? (JSON.parse(raw) as { version: number; byScope: Record<string, number> })
+      ? (JSON.parse(raw) as {
+          version: number;
+          byScope: Record<string, number>;
+        })
       : null;
   };
 

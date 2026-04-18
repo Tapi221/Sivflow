@@ -57,13 +57,18 @@ describe("useStudyCards", () => {
       }),
     );
 
-    expect(result.current.studyCards.map((card) => card.id)).toEqual(["card-1"]);
+    expect(result.current.studyCards.map((card) => card.id)).toEqual([
+      "card-1",
+    ]);
   });
 
   it("moveCardToSet 後は Study 側の所属フォルダが CardSet 変更に追従する", () => {
     const today = new Date();
     const allCards = [buildCard("card-1", "set-1", "legacy-folder", today)];
-    const cardSets = [buildCardSet("set-1", "folder-a"), buildCardSet("set-2", "folder-b")];
+    const cardSets = [
+      buildCardSet("set-1", "folder-a"),
+      buildCardSet("set-2", "folder-b"),
+    ];
 
     const { result, rerender } = renderHook(
       ({ cards }: { cards: Card[] }) =>
@@ -83,9 +88,17 @@ describe("useStudyCards", () => {
     expect(result.current.studyCards).toHaveLength(0);
 
     rerender({
-      cards: [{ ...allCards[0], cardSetId: "set-2", folderId: "stale-folder-a" } as Card],
+      cards: [
+        {
+          ...allCards[0],
+          cardSetId: "set-2",
+          folderId: "stale-folder-a",
+        } as Card,
+      ],
     });
 
-    expect(result.current.studyCards.map((card) => card.id)).toEqual(["card-1"]);
+    expect(result.current.studyCards.map((card) => card.id)).toEqual([
+      "card-1",
+    ]);
   });
 });
