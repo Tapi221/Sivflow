@@ -1,6 +1,25 @@
 @layer components {
+  .card-surface-layout--stack > .card-surface-layout__slot {
+    --card-stack-shell-clip: none;
+  }
+
+  .card-surface-layout--stack > .card-surface-layout__slot .card-shell {
+    clip-path: var(--card-stack-shell-clip);
+  }
+
+  .card-surface-layout--stack
+    > .card-surface-layout__slot
+    .card-active-chrome::before {
+    clip-path: var(--card-stack-shell-clip);
+  }
+
   .card-shell {
     @apply relative flex flex-col;
+
+    border-radius: var(
+      --ds-semantic-radius-flashcard,
+      var(--ds-semantic-radius-card, 12px)
+    );
 
     --card-w: var(--card-base-width);
 

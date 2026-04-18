@@ -43,6 +43,7 @@
   "radius": {
     "control": "{radius.md}",
     "card": "{radius.xl}",
+    "flashcard": "{radius.lg}",
     "dialog": "{radius.floating}",
     "panel": "{radius.2xl}",
     "hero": "{radius.3xl}",
