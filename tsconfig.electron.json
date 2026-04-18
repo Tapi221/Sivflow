@@ -17,6 +17,12 @@
     "outDir": "dist-electron",
     "sourceMap": true
   },
+  "watchOptions": {
+    "watchFile": "useFsEvents",
+    "watchDirectory": "useFsEvents",
+    "fallbackPolling": "dynamicPriority",
+    "excludeDirectories": ["**/node_modules", "dist-electron", "dist"]
+  },
   "include": ["electron/main.ts", "constants/**/*.ts"],
   "tsc-alias": {
     "replacers": {

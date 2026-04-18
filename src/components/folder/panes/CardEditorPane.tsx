@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 
 import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
 import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
@@ -509,9 +510,15 @@ export const CardEditorPane = ({
 
   const shouldUseGlobalBottomToolbar =
     isEditing &&
-    !hideBlockToolbars &&
-    !dockToolbarsToTop &&
-    !usesExternalToolbarMount;
+    !hideBlockToolbars;
+
+  const shouldDockToolbarToCardTop = shouldUseGlobalBottomToolbar
+    ? false
+    : shouldDockToolbarToCardTopBase;
+
+  const shouldShowInlineToolbarMount = shouldUseGlobalBottomToolbar
+    ? false
+    : shouldShowInlineToolbarMountBase;
 
   const handleQuestionBlocksChange = useCallback(
     (blocks: CardBlock[]) => {
@@ -564,8 +571,8 @@ export const CardEditorPane = ({
     activePaneWidthPx,
     activePaneDisplayedDefaultWidthPx,
     shouldReserveWidthControlSpace,
-    shouldDockToolbarToCardTop,
-    shouldShowInlineToolbarMount,
+    shouldDockToolbarToCardTop: shouldDockToolbarToCardTopBase,
+    shouldShowInlineToolbarMount: shouldShowInlineToolbarMountBase,
     useTwoColumnEditorLayout,
     editorCardFitScale,
     activePaneWidthStyle,
@@ -1117,68 +1124,74 @@ export const CardEditorPane = ({
           )}
         </CardWorkspaceShell>
 
-        {shouldUseGlobalBottomToolbar ? (
-          <div className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom,0px)+16px)] z-[70] flex justify-center px-4">
-            <div
-              className={cn(
-                "pointer-events-auto flex w-full max-w-[720px] items-center gap-3 rounded-[28px] border",
-                "border-[rgba(148,163,184,0.24)]",
-                "bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(247,249,252,0.90))]",
-                "px-3 py-3 shadow-[0_20px_48px_rgba(15,23,42,0.16)] backdrop-blur-xl",
-              )}
-            >
-              {cardLayoutMode !== "flip" ? (
+        {shouldUseGlobalBottomToolbar && typeof document !== "undefined"
+          ? createPortal(
+              <div className="pointer-events-none fixed left-1/2 bottom-[calc(env(safe-area-inset-bottom,0px)+16px)] z-[999] w-[min(720px,calc(100vw-24px))] -translate-x-1/2 px-0">
                 <div
                   className={cn(
-                    "inline-flex shrink-0 items-center gap-1 rounded-[20px] border p-1",
-                    "border-[rgba(148,163,184,0.18)] bg-white/72",
+                    "pointer-events-auto flex items-center gap-3 rounded-[28px] border",
+                    "border-[rgba(148,163,184,0.24)]",
+                    "bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(247,249,252,0.90))]",
+                    "px-3 py-3 shadow-[0_20px_48px_rgba(15,23,42,0.16)] backdrop-blur-xl",
                   )}
                 >
-                  <button
-                    type="button"
-                    onClick={() => setActiveToolbarSide("question")}
-                    className={cn(
-                      "inline-flex h-11 items-center rounded-2xl px-4 text-sm font-semibold transition-all",
-                      activeToolbarSide === "question"
-                        ? "bg-slate-900 text-white shadow-[0_8px_18px_rgba(15,23,42,0.22)]"
-                        : "text-slate-500 hover:bg-white hover:text-slate-900",
-                    )}
-                  >
-                    問題
-                  </button>
+                  {cardLayoutMode !== "flip" ? (
+                    <div
+                      className={cn(
+                        "inline-flex shrink-0 items-center gap-1 rounded-[20px] border p-1",
+                        "border-[rgba(148,163,184,0.18)] bg-white/72",
+                      )}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setActiveToolbarSide("question")}
+                        className={cn(
+                          "inline-flex h-11 items-center rounded-2xl px-4 text-sm font-semibold transition-all",
+                          activeToolbarSide === "question"
+                            ? "bg-slate-900 text-white shadow-[0_8px_18px_rgba(15,23,42,0.22)]"
+                            : "text-slate-500 hover:bg-white hover:text-slate-900",
+                        )}
+                      >
+                        問題
+                      </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setActiveToolbarSide("answer")}
-                    className={cn(
-                      "inline-flex h-11 items-center rounded-2xl px-4 text-sm font-semibold transition-all",
-                      activeToolbarSide === "answer"
-                        ? "bg-slate-900 text-white shadow-[0_8px_18px_rgba(15,23,42,0.22)]"
-                        : "text-slate-500 hover:bg-white hover:text-slate-900",
-                    )}
-                  >
-                    解答
-                  </button>
-                </div>
-              ) : (
-                <div
-                  className={cn(
-                    "inline-flex h-11 shrink-0 items-center rounded-2xl border px-4 text-sm font-semibold",
-                    "border-[rgba(148,163,184,0.18)] bg-white/72 text-slate-700",
+                      <button
+                        type="button"
+                        onClick={() => setActiveToolbarSide("answer")}
+                        className={cn(
+                          "inline-flex h-11 items-center rounded-2xl px-4 text-sm font-semibold transition-all",
+                          activeToolbarSide === "answer"
+                            ? "bg-slate-900 text-white shadow-[0_8px_18px_rgba(15,23,42,0.22)]"
+                            : "text-slate-500 hover:bg-white hover:text-slate-900",
+                        )}
+                      >
+                        解答
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      className={cn(
+                        "inline-flex h-11 shrink-0 items-center rounded-2xl border px-4 text-sm font-semibold",
+                        "border-[rgba(148,163,184,0.18)] bg-white/72 text-slate-700",
+                      )}
+                    >
+                      {activeFlipSide === "question" ? "問題" : "解答"}
+                    </div>
                   )}
-                >
-                  {activeFlipSide === "question" ? "問題" : "解答"}
-                </div>
-              )}
 
-              <div className="h-8 w-px shrink-0 bg-slate-200/80" aria-hidden />
-              <div
-                ref={setGlobalBottomToolbarMount}
-                className="flex min-w-0 flex-1 items-center overflow-hidden"
-              />
-            </div>
-          </div>
-        ) : null}
+                  <div
+                    className="h-8 w-px shrink-0 bg-slate-200/80"
+                    aria-hidden
+                  />
+                  <div
+                    ref={setGlobalBottomToolbarMount}
+                    className="flex min-w-0 flex-1 items-center overflow-hidden"
+                  />
+                </div>
+              </div>,
+              document.body,
+            )
+          : null}
 
         <CardEditorPaneMediaDialogs
           imageDialogSide={imageDialogSide}

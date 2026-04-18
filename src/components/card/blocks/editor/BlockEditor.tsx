@@ -512,7 +512,12 @@ export const BlockEditor = React.forwardRef<
       />
     );
 
-    const inlineToolbar = toolbarNode && !toolbarMount ? toolbarNode : null;
+    const inlineToolbar =
+      toolbarNode &&
+      !toolbarMount &&
+      toolbarDesktopLayout !== "vertical"
+        ? toolbarNode
+        : null;
     const resolvedEditorZoom = displayMode === "fluid" ? zoom : 1;
 
     const resolveEditorProps = useCallback(
