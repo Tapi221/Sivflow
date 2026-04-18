@@ -4,16 +4,16 @@ package com.akari221.flashcardmaster.designsystem.tokens
 object DesignTokens {
     object Color {
         object Primary {
-            const val Value50 = "#f5f5f5"
-            const val Value100 = "#e6f0ef"
-            const val Value200 = "#cfe0df"
-            const val Value300 = "#b8d0cf"
-            const val Value400 = "#90b8b6"
-            const val Value500 = "#7bacaa"
-            const val Value600 = "#689a98"
-            const val Value700 = "#5a8684"
-            const val Value800 = "#4d7270"
-            const val Value900 = "#324a48"
+            const val Value50 = "#f7f8ef"
+            const val Value100 = "#edf0df"
+            const val Value200 = "#dce3c2"
+            const val Value300 = "#c3cc99"
+            const val Value400 = "#a7b275"
+            const val Value500 = "#96a867"
+            const val Value600 = "#8a9a5b"
+            const val Value700 = "#6d7d48"
+            const val Value800 = "#586539"
+            const val Value900 = "#374023"
         }
         object Neutral {
             const val Value0 = "#ffffff"
@@ -238,10 +238,10 @@ object DesignTokens {
                 const val OnPrimary = "#ffffff"
             }
             object Action {
-                const val Primary = "#689a98"
-                const val PrimaryHover = "#5a8684"
-                const val PrimarySoft = "#e6f0ef"
-                const val Accent = "#7bacaa"
+                const val Primary = "#8a9a5b"
+                const val PrimaryHover = "#6d7d48"
+                const val PrimarySoft = "#edf0df"
+                const val Accent = "#96a867"
             }
             object Status {
                 const val Danger = "#e11d48"

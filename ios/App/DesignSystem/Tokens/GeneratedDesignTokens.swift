@@ -4,16 +4,16 @@ import Foundation
 enum DesignTokens {
     enum Color {
         enum Primary {
-            static let Value50 = "#f5f5f5"
-            static let Value100 = "#e6f0ef"
-            static let Value200 = "#cfe0df"
-            static let Value300 = "#b8d0cf"
-            static let Value400 = "#90b8b6"
-            static let Value500 = "#7bacaa"
-            static let Value600 = "#689a98"
-            static let Value700 = "#5a8684"
-            static let Value800 = "#4d7270"
-            static let Value900 = "#324a48"
+            static let Value50 = "#f7f8ef"
+            static let Value100 = "#edf0df"
+            static let Value200 = "#dce3c2"
+            static let Value300 = "#c3cc99"
+            static let Value400 = "#a7b275"
+            static let Value500 = "#96a867"
+            static let Value600 = "#8a9a5b"
+            static let Value700 = "#6d7d48"
+            static let Value800 = "#586539"
+            static let Value900 = "#374023"
         }
         enum Neutral {
             static let Value0 = "#ffffff"
@@ -238,10 +238,10 @@ enum DesignTokens {
                 static let OnPrimary = "#ffffff"
             }
             enum Action {
-                static let Primary = "#689a98"
-                static let PrimaryHover = "#5a8684"
-                static let PrimarySoft = "#e6f0ef"
-                static let Accent = "#7bacaa"
+                static let Primary = "#8a9a5b"
+                static let PrimaryHover = "#6d7d48"
+                static let PrimarySoft = "#edf0df"
+                static let Accent = "#96a867"
             }
             enum Status {
                 static let Danger = "#e11d48"
