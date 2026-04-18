@@ -139,7 +139,7 @@ export const useCardSetViewScreenController = () => {
   });
 
   const topLeftZoomControl =
-    isDesktop && !state.isGlobalEditing
+    isDesktop
       ? {
           value: zoom.zoomPercent,
           min: zoom.minZoomPercent,

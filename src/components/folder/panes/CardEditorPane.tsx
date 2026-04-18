@@ -444,19 +444,6 @@ export const CardEditorPane = ({
     [cardPresentationContext],
   );
 
-  const editorMetrics = useMemo(
-    () =>
-      buildCardSurfaceMetrics({
-        displayMode,
-        cardLayoutMode,
-        interactionMode: "edit",
-        zoomScale: zoom,
-        showInk: false,
-        fitScale: editorCardFitScale,
-      }),
-    [cardLayoutMode, displayMode, editorCardFitScale, zoom],
-  );
-
   const isFluidEditor = displayMode === "fluid";
 
   const {
@@ -570,6 +557,19 @@ export const CardEditorPane = ({
     cardSetId,
     cardLayoutMode,
   });
+
+  const editorMetrics = useMemo(
+    () =>
+      buildCardSurfaceMetrics({
+        displayMode,
+        cardLayoutMode,
+        interactionMode: "edit",
+        zoomScale: zoom,
+        showInk: false,
+        fitScale: editorCardFitScale,
+      }),
+    [cardLayoutMode, displayMode, editorCardFitScale, zoom],
+  );
 
   const activePaneModeValue: "edit" | "view" =
     activePaneMode === "edit" ? "edit" : "view";
@@ -972,7 +972,7 @@ export const CardEditorPane = ({
       cardLayoutMode={
         cardLayoutMode === "flip"
           ? "flip"
-          : isSplitEditorLayout
+          : useTwoColumnEditorLayout
             ? "split"
             : "stack"
       }

@@ -57,7 +57,7 @@ export const CardZoomControl = ({
           value={sliderValue}
           onValueChange={handleSliderChange}
           onValueCommit={handleSliderChange}
-          aria-label="閲覧ズーム"
+          aria-label="カードズーム"
         />
       </div>
 
