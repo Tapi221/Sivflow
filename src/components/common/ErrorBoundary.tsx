@@ -179,19 +179,15 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-          {/* @ts-expect-error shadcn card props widening mismatch */}
           <Card className="max-w-md w-full rounded-[32px] border-none shadow-xl overflow-hidden">
-            {/* @ts-expect-error shadcn card header props widening mismatch */}
             <CardHeader className="bg-red-50 pb-6 pt-8">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle className="w-8 h-8 text-red-500" />
               </div>
-              {/* @ts-expect-error shadcn card title props widening mismatch */}
               <CardTitle className="text-center text-red-800">
                 問題が発生しました
               </CardTitle>
             </CardHeader>
-            {/* @ts-expect-error shadcn card content props widening mismatch */}
             <CardContent className="p-8 pt-6">
               <p className="text-sm text-slate-600 text-center mb-6 leading-relaxed">
                 アプリケーションの実行中に予期せぬエラーが発生しました。

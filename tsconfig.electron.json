@@ -17,5 +17,12 @@
     "outDir": "dist-electron",
     "sourceMap": true
   },
-  "include": ["electron/**/*.ts", "constants/**/*.ts"]
+  "include": ["electron/**/*.ts", "constants/**/*.ts"],
+  "tsc-alias": {
+    "replacers": {
+      "base-url": {
+        "enabled": false
+      }
+    }
+  }
 }
