@@ -98,11 +98,11 @@
   }
 
   ::selection {
-    background-color: #e6e6eb;
+    background-color: rgba(236, 225, 212, 0.92);
   }
 
   ::-moz-selection {
-    background-color: #e6e6eb;
+    background-color: rgba(236, 225, 212, 0.92);
   }
 
   html.no-page-scroll,

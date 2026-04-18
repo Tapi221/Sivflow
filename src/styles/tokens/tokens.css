@@ -62,7 +62,11 @@
     --tree-indent-px: calc(var(--ds-layout-tree-indent) * var(--ui-scale));
 
     --sidebar-bg: var(--ds-semantic-color-background-sidebar);
-    --sidebar-border: var(--ds-semantic-color-border-default);
+    --sidebar-border: color-mix(
+      in srgb,
+      var(--ds-semantic-color-border-default) 76%,
+      #d8c7b7 24%
+    );
     --sidebar-text: var(--ds-semantic-color-text-primary);
     --sidebar-text-muted: var(--ds-semantic-color-text-secondary);
     --sidebar-active-bg: var(--ds-semantic-color-background-sidebar-active);
@@ -157,10 +161,22 @@
     --font-size-body: var(--ds-layout-font-size-body);
     --font-size-meta: var(--ds-layout-font-size-meta);
 
-    --scrollbar-track: var(--ds-color-neutral-150);
-    --scrollbar-thumb: var(--ds-color-neutral-400);
-    --scrollbar-thumb-hover: var(--ds-color-neutral-500);
-    --card-resize-handle-active: #9e9eaa;
+    --scrollbar-track: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-sidebar) 86%,
+      white 14%
+    );
+    --scrollbar-thumb: color-mix(
+      in srgb,
+      var(--sidebar-border) 68%,
+      #c7b19c 32%
+    );
+    --scrollbar-thumb-hover: color-mix(
+      in srgb,
+      var(--scrollbar-thumb) 78%,
+      #b0967f 22%
+    );
+    --card-resize-handle-active: #a78f79;
     --scrollbar-thumb-active: var(--card-resize-handle-active);
     --scrollbar-size: calc(var(--ds-layout-scrollbar-size) * var(--ui-scale));
 
