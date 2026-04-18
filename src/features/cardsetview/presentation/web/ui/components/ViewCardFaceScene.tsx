@@ -1,6 +1,6 @@
 import { FlashcardInkOverlay } from "@/components/card/frame/FlashcardInkOverlay";
 import { FlashcardMediaDialogs } from "@/components/card/frame/FlashcardMediaDialogs";
-import { useFlashcardCornerControls } from "@/components/card/frame/useFlashcardCornerControls";
+import { useFlashcardCornerControls } from "@/components/card/frame/FlashcardCornerControls";
 import type { FlashcardCardLike } from "@/components/card/frame/Flashcard";
 import { useCardFlipBehavior } from "@/components/card/frame/useCardFlipBehavior";
 import { useFlashcardDerived } from "@/components/card/frame/useFlashcardDerived";
