@@ -1,6 +1,12 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
-import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
+import {
+  areCardSyncStatusSnapshotsEqual,
+  toCardSyncStatusSnapshot,
+  type CardSyncRetry,
+  type CardSyncStatus,
+  type CardSyncStatusSnapshot,
+} from "@/components/card/shell/cardSyncStatus";
 
 interface UseCardSetViewSyncStateOptions {
   currentCardId: string | null;
@@ -8,16 +14,27 @@ interface UseCardSetViewSyncStateOptions {
   sourceKey: string;
 }
 
-type SyncStateScope = {
+type SyncStateScope = Readonly<{
   scopeKey: string;
-  status: CardSyncStatus | null;
-};
+  status: CardSyncStatusSnapshot | null;
+}>;
+
+type RetryStateScope = Readonly<{
+  scopeKey: string;
+  retry: CardSyncRetry | null;
+}>;
+
+type UseCardSetViewSyncStateResult = Readonly<{
+  activeSyncStatus: CardSyncStatusSnapshot | null;
+  handleActiveSyncStatusChange: (status: CardSyncStatus | null) => void;
+  handleRetryActiveSync: () => Promise<void>;
+}>;
 
 export const useCardSetViewSyncState = ({
   currentCardId,
   isGlobalEditing,
   sourceKey,
-}: UseCardSetViewSyncStateOptions) => {
+}: UseCardSetViewSyncStateOptions): UseCardSetViewSyncStateResult => {
   const scopeKey = useMemo(() => {
     return [
       currentCardId ?? "__no-card__",
@@ -30,23 +47,45 @@ export const useCardSetViewSyncState = ({
     scopeKey,
     status: null,
   });
+  const retryStateRef = useRef<RetryStateScope>({
+    scopeKey,
+    retry: null,
+  });
 
   const activeSyncStatus =
     syncState.scopeKey === scopeKey ? syncState.status : null;
 
   const handleActiveSyncStatusChange = useCallback(
     (status: CardSyncStatus | null) => {
-      setSyncState({
+      const nextStatus = toCardSyncStatusSnapshot(status);
+
+      retryStateRef.current = {
         scopeKey,
-        status,
+        retry: status?.retry ?? null,
+      };
+
+      setSyncState((prev) => {
+        if (
+          prev.scopeKey === scopeKey &&
+          areCardSyncStatusSnapshotsEqual(prev.status, nextStatus)
+        ) {
+          return prev;
+        }
+
+        return {
+          scopeKey,
+          status: nextStatus,
+        };
       });
     },
     [scopeKey],
   );
 
   const handleRetryActiveSync = useCallback(async () => {
-    await activeSyncStatus?.retry?.();
-  }, [activeSyncStatus]);
+    const retryState = retryStateRef.current;
+    if (retryState.scopeKey !== scopeKey) return;
+    await retryState.retry?.();
+  }, [scopeKey]);
 
   return {
     activeSyncStatus,

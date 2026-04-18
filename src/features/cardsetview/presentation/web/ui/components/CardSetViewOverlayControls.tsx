@@ -1,15 +1,12 @@
+import type { CardSyncStatusSnapshot } from "@/components/card/shell/cardSyncStatus";
 import { CardSyncStatusPill } from "@/components/card/shell/CardSyncStatusPill";
 
 type CardSetViewOverlayControlsProps = {
   isDesktop: boolean;
   overlayRight: string;
   resolvedLastSyncedAtMs: number | null;
-  activeSyncStatus: {
-    hasError?: boolean;
-    isRetrying?: boolean;
-    retry?: (() => void | Promise<void>) | null;
-  } | null;
-  onRetryActiveSync: () => void;
+  activeSyncStatus: CardSyncStatusSnapshot | null;
+  onRetryActiveSync: () => Promise<void>;
   topInsetPx?: number;
 };
 
@@ -38,7 +35,7 @@ export const CardSetViewOverlayControls = ({
         lastSyncedAtMs={resolvedLastSyncedAtMs}
         hasError={activeSyncStatus?.hasError ?? false}
         isRetrying={activeSyncStatus?.isRetrying ?? false}
-        canRetry={activeSyncStatus?.retry != null}
+        canRetry={activeSyncStatus?.canRetry ?? false}
         onRetry={onRetryActiveSync}
       />
     </div>

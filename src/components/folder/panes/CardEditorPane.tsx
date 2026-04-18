@@ -32,6 +32,7 @@ import {
 } from "@/components/card/presentation/cardPresentation";
 import { CardSyncStatusPill } from "@/components/card/shell/CardSyncStatusPill";
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
+import { useCardSyncStatusReporter } from "@/components/card/shell/useCardSyncStatusReporter";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
 import { CardEditorPaneReadonlySurface } from "@/components/folder/panes/CardEditorPaneReadonlySurface";
@@ -660,14 +661,10 @@ export const CardEditorPane = ({
     ],
   );
 
-  useEffect(() => {
-    if (!onSyncStatusChange) return;
-    onSyncStatusChange(syncStatus);
-
-    return () => {
-      onSyncStatusChange(null);
-    };
-  }, [onSyncStatusChange, syncStatus]);
+  useCardSyncStatusReporter({
+    status: syncStatus,
+    onSyncStatusChange,
+  });
 
   const previousIsCurrentCardRef = useRef(
     cardPresentationContext.isCurrentCard,
