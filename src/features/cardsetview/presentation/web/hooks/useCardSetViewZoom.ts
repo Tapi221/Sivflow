@@ -180,10 +180,9 @@ export const useCardSetViewZoom = ({
   const canUseSplit = useMemo(() => {
     return resolveCanUseSplitLayout({
       viewportWidthPx,
-      interactionMode,
       displayMode,
     });
-  }, [displayMode, interactionMode, viewportWidthPx]);
+  }, [displayMode, viewportWidthPx]);
 
   const effectiveCardLayoutMode = useMemo<CardLayoutMode>(() => {
     if (requestedCardLayoutMode === "split" && !canUseSplit) {
@@ -202,7 +201,8 @@ export const useCardSetViewZoom = ({
     [cardSetId, deviceScope],
   );
 
-  // mode は legacy scoped key から unified key へ移行するときだけ利用する。
+  // interactionMode は legacy scoped key から unified key へ移行するときだけ利用する。
+  // 現行の zoom/presentation policy は view/edit 非依存でなければならない。
   const legacyZoomMigrationHint = useMemo(
     () =>
       buildLegacyZoomMigrationHint({
@@ -244,12 +244,11 @@ export const useCardSetViewZoom = ({
   const defaultZoomPercent = useMemo(
     () =>
       resolveZoomDefaultPercent({
-        interactionMode,
         cardLayoutMode: effectiveCardLayoutMode,
         maxPresentationWidthPx,
         canonicalCardWidthPx: CANONICAL_CARD_WIDTH,
       }),
-    [effectiveCardLayoutMode, interactionMode, maxPresentationWidthPx],
+    [effectiveCardLayoutMode, maxPresentationWidthPx],
   );
 
   const storedPreferredPercent = useMemo(() => {
@@ -294,16 +293,10 @@ export const useCardSetViewZoom = ({
     () =>
       resolvePresentationWidthPx({
         zoomPercent,
-        interactionMode,
         cardLayoutMode: effectiveCardLayoutMode,
         maxPresentationWidthPx,
       }),
-    [
-      effectiveCardLayoutMode,
-      interactionMode,
-      maxPresentationWidthPx,
-      zoomPercent,
-    ],
+    [effectiveCardLayoutMode, maxPresentationWidthPx, zoomPercent],
   );
 
   const zoomScale = useMemo(

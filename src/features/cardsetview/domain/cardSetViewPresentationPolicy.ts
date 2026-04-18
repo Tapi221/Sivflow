@@ -1,8 +1,5 @@
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
-import type {
-  CardLayoutMode,
-  CardSetInteractionMode,
-} from "@/features/cardsetview/domain/cardLayoutMode";
+import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import {
   CARD_SET_VIEW_DEFAULT_ZOOM_SCALE,
   CARD_SET_VIEW_FIXED_LAYOUT_SAFETY_ALLOWANCE_PX,
@@ -15,10 +12,11 @@ import { CARD_VIEW_ZOOM_STEP_PERCENT } from "@constants/shared/flashcard";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type ResolveZoomWidthArgs = {
-  interactionMode: CardSetInteractionMode;
   cardLayoutMode: CardLayoutMode;
 };
 
+// zoom semantics must remain identical between view/edit.
+// interactionMode-dependent behavior belongs outside this policy layer.
 const clampZoomPercentRange = (value: number) => {
   const safeValue = Number.isFinite(value) ? value : 0;
   return Math.max(0, Math.min(100, safeValue));
@@ -36,28 +34,24 @@ export const clampNormalizedZoomPercent = (
 ) => roundToStep(value, stepPercent);
 
 export const resolveZoomMinBaseWidthPx = ({
-  interactionMode,
   cardLayoutMode,
 }: ResolveZoomWidthArgs) => {
-  return CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX[interactionMode][cardLayoutMode];
+  return CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX[cardLayoutMode];
 };
 
 export const clampZoomPercent = (value: number) => clampZoomPercentRange(value);
 
 export const resolveZoomPercentForPresentationWidthPx = ({
   targetPresentationWidthPx,
-  interactionMode,
   cardLayoutMode,
   maxPresentationWidthPx,
 }: {
   targetPresentationWidthPx: number;
-  interactionMode: CardSetInteractionMode;
   cardLayoutMode: CardLayoutMode;
   maxPresentationWidthPx: number;
 }) => {
   const normalizedMaxWidthPx = Math.max(1, Math.floor(maxPresentationWidthPx));
   const configuredMinWidthPx = resolveZoomMinBaseWidthPx({
-    interactionMode,
     cardLayoutMode,
   });
   const effectiveMinWidthPx = Math.min(
@@ -85,7 +79,6 @@ export const resolveZoomPercentForPresentationWidthPx = ({
 };
 
 export const resolveZoomDefaultPercent = ({
-  interactionMode,
   cardLayoutMode,
   maxPresentationWidthPx,
   canonicalCardWidthPx = CANONICAL_CARD_WIDTH,
@@ -106,7 +99,6 @@ export const resolveZoomDefaultPercent = ({
 
   return resolveZoomPercentForPresentationWidthPx({
     targetPresentationWidthPx: safeCanonicalCardWidthPx * safeTargetZoomScale,
-    interactionMode,
     cardLayoutMode,
     maxPresentationWidthPx,
   });
@@ -151,22 +143,17 @@ export const resolvePresentationMaxWidthPx = ({
 };
 
 export const resolveSplitMinimumRequiredWidthPx = ({
-  interactionMode,
   displayMode,
 }: {
-  interactionMode: CardSetInteractionMode;
   displayMode: CardDisplayMode;
 }) => {
-  const baseMinPresentationWidthPx =
-    CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX[interactionMode];
-
   const fixedAllowancePx =
     displayMode === "fixed"
       ? CARD_SET_VIEW_FIXED_LAYOUT_SAFETY_ALLOWANCE_PX
       : 0;
 
   return (
-    baseMinPresentationWidthPx +
+    CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX +
     CARD_SET_VIEW_SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX +
     fixedAllowancePx
   );
@@ -174,37 +161,26 @@ export const resolveSplitMinimumRequiredWidthPx = ({
 
 export const resolveCanUseSplitLayout = ({
   viewportWidthPx,
-  interactionMode,
   displayMode,
 }: {
   viewportWidthPx: number;
-  interactionMode: CardSetInteractionMode;
   displayMode: CardDisplayMode;
 }) => {
   const usableWidthPx = resolveUsablePresentationWidthPx({ viewportWidthPx });
-  return (
-    usableWidthPx >=
-    resolveSplitMinimumRequiredWidthPx({
-      interactionMode,
-      displayMode,
-    })
-  );
+  return usableWidthPx >= resolveSplitMinimumRequiredWidthPx({ displayMode });
 };
 
 export const resolvePresentationWidthPx = ({
   zoomPercent,
-  interactionMode,
   cardLayoutMode,
   maxPresentationWidthPx,
 }: {
   zoomPercent: number;
-  interactionMode: CardSetInteractionMode;
   cardLayoutMode: CardLayoutMode;
   maxPresentationWidthPx: number;
 }) => {
   const normalizedMaxWidthPx = Math.max(1, Math.floor(maxPresentationWidthPx));
   const configuredMinWidthPx = resolveZoomMinBaseWidthPx({
-    interactionMode,
     cardLayoutMode,
   });
 
