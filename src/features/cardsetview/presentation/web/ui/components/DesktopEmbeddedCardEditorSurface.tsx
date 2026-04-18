@@ -1,6 +1,7 @@
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { useCardSyncStatusReporter } from "@/components/card/shell/useCardSyncStatusReporter";
 import {
+  CANONICAL_CARD_WIDTH,
   CARD_ROW_PX,
   layoutRowsToCardHeightPx,
 } from "@constants/shared/flashcard";
@@ -8,6 +9,7 @@ import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
 import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";
 import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
+import { resolveEditorCardFitScale } from "@/domain/card/resolveEditorCardFitScale";
 import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
@@ -99,6 +101,14 @@ const toTimeMs = (value: unknown) => {
 
 const resolveFaceLabel = (side: Side) =>
   side === "question" ? "問題" : "解答";
+
+const measureSurfaceViewportWidth = (element: HTMLDivElement) =>
+  Math.max(
+    0,
+    Math.round(
+      Math.max(element.clientWidth, element.parentElement?.clientWidth ?? 0),
+    ),
+  );
 
 const EmbeddedEditorHeaderRight = ({
   mediaActions,
@@ -229,6 +239,8 @@ export const DesktopEmbeddedCardEditorSurface = ({
 
   const [isRetryingSync, setIsRetryingSync] = useState(false);
   const [showRetryErrorState, setShowRetryErrorState] = useState(false);
+  const surfaceViewportRef = useRef<HTMLDivElement | null>(null);
+  const [surfaceViewportWidth, setSurfaceViewportWidth] = useState(0);
 
   useEffect(() => {
     if (saveError) {
@@ -240,6 +252,33 @@ export const DesktopEmbeddedCardEditorSurface = ({
       setShowRetryErrorState(false);
     }
   }, [isRetryingSync, saveError]);
+
+  useEffect(() => {
+    const element = surfaceViewportRef.current;
+    if (!element || typeof ResizeObserver === "undefined") return;
+
+    const updateWidth = () => {
+      const nextWidth = measureSurfaceViewportWidth(element);
+      setSurfaceViewportWidth((prev) => (prev === nextWidth ? prev : nextWidth));
+    };
+
+    updateWidth();
+
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, []);
+
+  const editorCardFitScale = useMemo(
+    () =>
+      resolveEditorCardFitScale({
+        availablePaneWidthPx: surfaceViewportWidth,
+        canonicalCardWidth: CANONICAL_CARD_WIDTH,
+        cardLayoutMode,
+      }),
+    [cardLayoutMode, surfaceViewportWidth],
+  );
 
   const metrics = useMemo(
     () =>
@@ -531,7 +570,10 @@ export const DesktopEmbeddedCardEditorSurface = ({
 
   return (
     <>
-      <div className="w-full min-w-0 max-w-full overflow-visible">
+      <div
+        ref={surfaceViewportRef}
+        className="w-full min-w-0 max-w-full overflow-visible"
+      >
         <CardSurfaceLayout
           cardLayoutMode={cardLayoutMode}
           questionNode={questionFace}
