@@ -11,9 +11,10 @@ import {
 } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
+  Area,
   CartesianGrid,
+  ComposedChart,
   Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -796,12 +797,75 @@ const CardMetaPanelInner = ({
     return all.slice(-count);
   }, [safeLogs, period]);
 
+  const chartGradientId = useMemo(() => {
+    return `card-meta-resistance-gradient-${card?.id ?? "empty"}`;
+  }, [card?.id]);
+
   const xTicks = useMemo(() => {
-    if (chartData.length <= 1) return chartData.map((d) => d.reviewIndex);
-    return chartData
-      .filter((_, idx) => idx % 5 === 0 || idx === chartData.length - 1)
-      .map((d) => d.reviewIndex);
+    if (chartData.length <= 3) return chartData.map((d) => d.reviewIndex);
+
+    const middleIndex = Math.floor((chartData.length - 1) / 2);
+
+    return [
+      chartData[0]?.reviewIndex,
+      chartData[middleIndex]?.reviewIndex,
+      chartData.at(-1)?.reviewIndex,
+    ].filter((value, index, values): value is number => {
+      return typeof value === "number" && values.indexOf(value) === index;
+    });
   }, [chartData]);
+
+  const chartSummary = useMemo(() => {
+    if (chartData.length === 0) return null;
+
+    const scores = chartData.map((item) => item.resistanceScore);
+    const minScore = Math.min(...scores);
+    const maxScore = Math.max(...scores);
+    const latestScore = scores.at(-1) ?? minScore;
+    const previousScore = scores.length > 1 ? (scores.at(-2) ?? null) : null;
+    const delta = previousScore === null ? null : latestScore - previousScore;
+
+    let domainMin = Math.max(0, Math.floor((minScore - 6) / 5) * 5);
+    let domainMax = Math.min(100, Math.ceil((maxScore + 6) / 5) * 5);
+
+    if (domainMax - domainMin < 20) {
+      const shortfall = 20 - (domainMax - domainMin);
+      domainMin = Math.max(
+        0,
+        Math.floor((domainMin - shortfall / 2) / 5) * 5,
+      );
+      domainMax = Math.min(
+        100,
+        Math.ceil((domainMax + shortfall / 2) / 5) * 5,
+      );
+    }
+
+    if (domainMax <= domainMin) {
+      domainMin = Math.max(0, minScore - 10);
+      domainMax = Math.min(100, maxScore + 10);
+    }
+
+    const midpoint = Math.round(((domainMin + domainMax) / 2) / 5) * 5;
+    const ticks = [domainMin, midpoint, domainMax].filter(
+      (value, index, values) => values.indexOf(value) === index,
+    );
+
+    return {
+      minScore,
+      maxScore,
+      latestScore,
+      delta,
+      domain: [domainMin, domainMax] as [number, number],
+      ticks,
+    };
+  }, [chartData]);
+
+  const chartTrendLabel = useMemo(() => {
+    if (!chartSummary || chartSummary.delta === null) return "初回計測";
+    if (chartSummary.delta > 0) return `前回比 +${chartSummary.delta}%`;
+    if (chartSummary.delta < 0) return `前回比 ${chartSummary.delta}%`;
+    return "前回比 ±0%";
+  }, [chartSummary]);
 
   const historyRows = useMemo(
     () =>
@@ -1323,103 +1387,198 @@ const CardMetaPanelInner = ({
                   size="xs"
                   onClick={() => setPeriod(p)}
                 >
-                  {p === "all" ? "全期間" : p === "7d" ? "直近7" : "直近30"}
+                  {p === "all" ? "全期間" : p === "7d" ? "直近7件" : "直近30件"}
                 </SurfaceButton>
               ))}
             </div>
           </div>
-          <div className="ds-editor-pane__chart mt-3 h-40 w-full p-1.5">
-            {chartData.length === 0 ? (
+          <div className="ds-editor-pane__chart relative mt-3 overflow-hidden p-0">
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 h-24 opacity-90"
+              style={{
+                background:
+                  "linear-gradient(180deg, color-mix(in srgb, var(--meta-panel-accent-soft) 72%, white 28%) 0%, transparent 100%)",
+              }}
+            />
+            {chartSummary && (
               <div
-                className={`flex h-full items-center justify-center text-sm ${mutedTextClass}`}
+                className="relative z-10 flex items-start justify-between gap-3 border-b px-3 pb-2 pt-3"
+                style={{
+                  borderColor:
+                    "color-mix(in srgb, var(--meta-panel-border) 72%, transparent)",
+                }}
               >
-                データなし
-              </div>
-            ) : (
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-                minWidth={0}
-                minHeight={0}
-                debounce={1}
-              >
-                <LineChart
-                  data={chartData}
-                  margin={{ top: 8, right: 10, left: 2, bottom: 4 }}
+                <div className="min-w-0">
+                  <p
+                    className={`text-[10px] font-semibold tracking-[0.16em] ${mutedTextClass}`}
+                  >
+                    推移サマリー
+                  </p>
+                  <div className="mt-1 flex items-end gap-2">
+                    <span className="text-[22px] font-semibold leading-none tabular-nums">
+                      {chartSummary.latestScore}%
+                    </span>
+                    <span
+                      className="rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums"
+                      style={{
+                        background:
+                          chartSummary.delta === null
+                            ? "color-mix(in srgb, var(--meta-panel-surface) 88%, white 12%)"
+                            : chartSummary.delta >= 0
+                              ? "color-mix(in srgb, var(--meta-panel-accent) 14%, white 86%)"
+                              : "color-mix(in srgb, var(--ds-semantic-color-status-danger) 12%, white 88%)",
+                        color:
+                          chartSummary.delta !== null && chartSummary.delta < 0
+                            ? "var(--ds-semantic-color-status-danger)"
+                            : "var(--meta-panel-accent, #0f766e)",
+                      }}
+                    >
+                      {chartTrendLabel}
+                    </span>
+                  </div>
+                </div>
+                <div
+                  className={`shrink-0 text-right text-[10px] leading-4 ${mutedTextClass}`}
                 >
-                  <CartesianGrid
-                    stroke="color-mix(in srgb, var(--ds-semantic-color-text-secondary) 24%, transparent)"
-                    strokeDasharray="3 5"
-                    vertical={false}
-                  />
-                  <XAxis
-                    dataKey="reviewIndex"
-                    ticks={xTicks}
-                    tick={{
-                      fontSize: 10,
-                      fill: "var(--meta-panel-text-muted, var(--sidebar-text-muted))",
-                    }}
-                    tickLine={{
-                      stroke: "var(--ds-semantic-color-border-default)",
-                    }}
-                    axisLine={{
-                      stroke: "var(--ds-semantic-color-border-default)",
-                    }}
-                    minTickGap={12}
-                  />
-                  <YAxis
-                    domain={[0, 100]}
-                    ticks={[0, 20, 40, 60, 80, 100]}
-                    allowDecimals={false}
-                    width={36}
-                    tick={{
-                      fontSize: 10,
-                      fill: "var(--meta-panel-text-muted, var(--sidebar-text-muted))",
-                    }}
-                    tickLine={{
-                      stroke: "var(--ds-semantic-color-border-default)",
-                    }}
-                    axisLine={{
-                      stroke: "var(--ds-semantic-color-border-default)",
-                    }}
-                  />
-                  <Tooltip
-                    cursor={{
-                      stroke: "var(--ds-semantic-color-border-default)",
-                      strokeWidth: 1,
-                    }}
-                    formatter={(value) => [`${value}%`, "耐性スコア"]}
-                    labelFormatter={(label) => `復習 ${label} 回目`}
-                    contentStyle={{
-                      borderRadius: 8,
-                      border:
-                        "1px solid var(--meta-panel-border, var(--ds-semantic-color-border-floating))",
-                      background:
-                        "var(--meta-panel-surface-elevated, var(--ds-semantic-color-background-app))",
-                      boxShadow:
-                        "var(--meta-panel-shadow-soft, var(--ds-semantic-elevation-floating))",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="resistanceScore"
-                    stroke="var(--meta-panel-accent, #0f766e)"
-                    strokeWidth={2.5}
-                    isAnimationActive={false}
-                    dot={{
-                      r: chartData.length === 1 ? 5 : 2.5,
-                      fill: "var(--meta-panel-accent, #0f766e)",
-                    }}
-                    activeDot={{
-                      r: 6,
-                      strokeWidth: 0,
-                      fill: "var(--meta-panel-accent, #0f766e)",
-                    }}
-                    connectNulls
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+                  <div>
+                    {chartSummary.minScore === chartSummary.maxScore
+                      ? `スコア ${chartSummary.maxScore}%`
+                      : `${chartSummary.minScore}% - ${chartSummary.maxScore}%`}
+                  </div>
+                  <div>
+                    {period === "all"
+                      ? "全期間"
+                      : period === "7d"
+                        ? "直近7件"
+                        : "直近30件"}
+                  </div>
+                </div>
+              </div>
             )}
+            <div className="relative z-10 h-44 w-full px-2 pb-2 pt-2">
+              {chartData.length === 0 ? (
+                <div
+                  className={`flex h-full items-center justify-center text-sm ${mutedTextClass}`}
+                >
+                  データなし
+                </div>
+              ) : (
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                  minWidth={0}
+                  minHeight={0}
+                  debounce={1}
+                >
+                  <ComposedChart
+                    data={chartData}
+                    margin={{ top: 8, right: 8, left: -12, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient
+                        id={chartGradientId}
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor="var(--meta-panel-accent, #0f766e)"
+                          stopOpacity={0.28}
+                        />
+                        <stop
+                          offset="65%"
+                          stopColor="var(--meta-panel-accent, #0f766e)"
+                          stopOpacity={0.1}
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor="var(--meta-panel-accent, #0f766e)"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      stroke="color-mix(in srgb, var(--meta-panel-border) 54%, transparent)"
+                      strokeDasharray="4 6"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="reviewIndex"
+                      ticks={xTicks}
+                      tick={{
+                        fontSize: 10,
+                        fill: "var(--meta-panel-text-muted, var(--sidebar-text-muted))",
+                      }}
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                    />
+                    <YAxis
+                      domain={chartSummary?.domain ?? [0, 100]}
+                      ticks={chartSummary?.ticks ?? [0, 50, 100]}
+                      allowDecimals={false}
+                      width={30}
+                      tick={{
+                        fontSize: 10,
+                        fill: "var(--meta-panel-text-muted, var(--sidebar-text-muted))",
+                      }}
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                    />
+                    <Tooltip
+                      cursor={{
+                        stroke:
+                          "color-mix(in srgb, var(--meta-panel-accent) 36%, white 64%)",
+                        strokeWidth: 1,
+                        strokeDasharray: "3 3",
+                      }}
+                      formatter={(value) => [`${value}%`, "耐性スコア"]}
+                      labelFormatter={(label) => `復習 ${label} 回目`}
+                      contentStyle={{
+                        borderRadius: 12,
+                        border:
+                          "1px solid var(--meta-panel-border, var(--ds-semantic-color-border-floating))",
+                        background:
+                          "var(--meta-panel-surface-elevated, var(--ds-semantic-color-background-app))",
+                        boxShadow:
+                          "var(--meta-panel-shadow-strong, var(--ds-semantic-elevation-floating))",
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="resistanceScore"
+                      stroke="none"
+                      fill={`url(#${chartGradientId})`}
+                      fillOpacity={1}
+                      isAnimationActive={false}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="resistanceScore"
+                      stroke="var(--meta-panel-accent, #0f766e)"
+                      strokeWidth={3}
+                      isAnimationActive={false}
+                      dot={{
+                        r: chartData.length === 1 ? 4.5 : 3,
+                        fill: "var(--meta-panel-accent, #0f766e)",
+                        stroke: "rgba(255,255,255,0.92)",
+                        strokeWidth: 2,
+                      }}
+                      activeDot={{
+                        r: 6,
+                        fill: "var(--meta-panel-accent, #0f766e)",
+                        stroke: "rgba(255,255,255,0.96)",
+                        strokeWidth: 2,
+                      }}
+                      connectNulls
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
         </section>
       )}

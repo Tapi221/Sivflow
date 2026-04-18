@@ -48,7 +48,6 @@ export const useCardSetViewScreenController = () => {
     createCard: data.createCard,
     updateCard: data.updateCard,
     selectedCardSet: data.selectedCardSet,
-    isLoading: data.isLoading,
     toastError,
     deviceScope: presentationTarget,
   });

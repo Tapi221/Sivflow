@@ -16,7 +16,6 @@ interface UseCardSetViewStateOptions {
   ) => Promise<unknown>;
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
   selectedCardSet: CardSet | null;
-  isLoading: boolean;
   toastError: (msg: string) => void;
   deviceScope: string;
 }
@@ -31,7 +30,6 @@ export const useCardSetViewState = ({
   createCard,
   updateCard,
   selectedCardSet,
-  isLoading,
   toastError,
   deviceScope,
 }: UseCardSetViewStateOptions) => {
@@ -51,8 +49,6 @@ export const useCardSetViewState = ({
     selectedCardSet,
     selectedCard: viewState.selectedCard,
     currentCard: viewState.currentCard,
-    isLoading,
-    sortedCardsLength: sortedCards.length,
     createCard,
     updateCard,
     toastError,
