@@ -146,24 +146,102 @@
 
   .ds-segmented-control,
   .ds-filter-toggle-group {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.125rem;
-    padding: 0.125rem;
-    border: 1px solid
-      var(--meta-panel-border, var(--ds-semantic-color-border-default));
-    border-radius: calc(var(--ds-semantic-radius-control) + 2px);
-    background: var(
+    --segmented-control-border: var(
+      --meta-panel-border,
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-border-default) 72%,
+        var(--ds-semantic-color-action-primary) 28%
+      )
+    );
+    --segmented-control-border-strong: var(
+      --meta-panel-border-strong,
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-border-strong) 58%,
+        var(--ds-semantic-color-action-primary) 42%
+      )
+    );
+    --segmented-control-surface: var(
+      --meta-panel-surface,
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-background-app) 94%,
+        var(--ds-semantic-color-action-primary-soft) 6%
+      )
+    );
+    --segmented-control-surface-elevated: var(
       --meta-panel-surface-elevated,
       color-mix(
         in srgb,
-        var(--ds-semantic-color-background-app) 78%,
-        var(--ds-semantic-color-background-sidebar) 22%
+        white 90%,
+        var(--ds-semantic-color-action-primary-soft) 10%
       )
     );
-    box-shadow: var(
+    --segmented-control-text-muted: var(
+      --meta-panel-text-muted,
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-text-secondary) 86%,
+        var(--ds-semantic-color-text-primary) 14%
+      )
+    );
+    --segmented-control-accent-soft: var(
+      --meta-panel-accent-soft,
+      color-mix(in srgb, var(--ds-semantic-color-action-primary-soft) 64%, white
+            36%)
+    );
+    --segmented-control-shadow-soft: var(
       --meta-panel-shadow-soft,
-      inset 0 1px 0 rgba(255, 255, 255, 0.6)
+      0 10px 24px rgba(15, 23, 42, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.88)
+    );
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    padding: 0.125rem;
+    border: 1px solid var(--segmented-control-border);
+    border-radius: var(--ds-semantic-radius-control);
+    background: var(--segmented-control-surface-elevated);
+    box-shadow: var(--segmented-control-shadow-soft);
+  }
+
+  .ds-segmented-control > .ds-surface-button,
+  .ds-filter-toggle-group > .ds-surface-button {
+    border-color: var(--segmented-control-border);
+    background: var(--segmented-control-surface);
+    color: var(--segmented-control-text-muted);
+  }
+
+  .ds-segmented-control > .ds-surface-button--convex,
+  .ds-filter-toggle-group > .ds-surface-button--convex {
+    box-shadow: var(--ds-semantic-elevation-control-raised);
+  }
+
+  .ds-segmented-control > .ds-surface-button--concave,
+  .ds-filter-toggle-group > .ds-surface-button--concave {
+    box-shadow: var(--ds-semantic-elevation-control-inset);
+  }
+
+  .ds-segmented-control > .ds-surface-button--active,
+  .ds-segmented-control > .ds-surface-button--convexActive,
+  .ds-filter-toggle-group > .ds-surface-button--active,
+  .ds-filter-toggle-group > .ds-surface-button--convexActive {
+    border-color: var(--segmented-control-border-strong);
+    background: var(--segmented-control-accent-soft);
+    color: var(--ds-semantic-color-text-strong);
+    box-shadow: var(--segmented-control-shadow-soft);
+  }
+
+  .ds-segmented-control > .ds-surface-button:hover:not(:disabled),
+  .ds-filter-toggle-group > .ds-surface-button:hover:not(:disabled) {
+    color: var(--ds-semantic-color-text-strong);
+    border-color: var(--segmented-control-border-strong);
+    background: color-mix(
+      in srgb,
+      var(--segmented-control-surface) 88%,
+      var(--segmented-control-accent-soft) 12%
     );
   }
 
