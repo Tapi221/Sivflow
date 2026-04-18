@@ -54,7 +54,9 @@
   }
 
   .sidebar .sidebar__nav-item.ds-nav-action.ds-nav-action--active,
-  .sidebar .sidebar__nav-item.ds-nav-action.ds-nav-action--active .ds-nav-action__icon {
+  .sidebar
+    .sidebar__nav-item.ds-nav-action.ds-nav-action--active
+    .ds-nav-action__icon {
     background: var(--sidebar-active-bg, rgba(236, 226, 215, 0.98));
     color: var(--sidebar-text, #403731);
   }

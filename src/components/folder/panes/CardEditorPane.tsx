@@ -1001,7 +1001,6 @@ export const CardEditorPane = ({
         <CardWorkspaceShell
           containerClassName={cn(
             "card-editor-right-pane-font pt-0",
-            embeddedInPager ? "bg-transparent" : "bg-sidebar",
             embeddedInPager ? "pb-0" : "pb-4",
             embeddedInPager ? "h-auto" : "h-full",
           )}
@@ -1031,7 +1030,9 @@ export const CardEditorPane = ({
                   : "px-0 pt-0 pb-4"
               : "px-0 py-4",
           )}
-          viewportStyle={embeddedInPager ? undefined : { background: "transparent" }}
+          viewportStyle={
+            embeddedInPager ? undefined : { background: "transparent" }
+          }
           metaPanel={metaPanelNode}
         >
           {isEditing ? (

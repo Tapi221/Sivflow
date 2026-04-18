@@ -65,8 +65,9 @@ export const useFlashcardCornerControls = ({
       CARD_ACTION_COLOR_IDLE_CLASS,
     );
 
-    const safeHeaderIconVisualScale =
-      resolveSafeVisualScale(headerIconVisualScale);
+    const safeHeaderIconVisualScale = resolveSafeVisualScale(
+      headerIconVisualScale,
+    );
     const resolvedButtonPx = 28 / safeHeaderIconVisualScale;
     const resolvedIconPx = 14 / safeHeaderIconVisualScale;
     const resolvedBadgePx = 16 / safeHeaderIconVisualScale;
@@ -174,10 +175,7 @@ export const useFlashcardCornerControls = ({
           style={mediaButtonStyle}
           aria-label={`音声 ${activeAudioUrls.length} 件`}
         >
-          <Volume2
-            className={CARD_ACTION_ICON_CLASS}
-            style={mediaIconStyle}
-          />
+          <Volume2 className={CARD_ACTION_ICON_CLASS} style={mediaIconStyle} />
           <span
             className="pointer-events-none absolute -right-1 -top-1 inline-flex items-center justify-center rounded-full border border-white bg-slate-100 px-1 font-semibold leading-none text-slate-500"
             style={badgeStyle}

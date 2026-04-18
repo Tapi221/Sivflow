@@ -167,7 +167,11 @@
     background: color-mix(
       in srgb,
       var(--meta-panel-surface, var(--ds-semantic-color-background-app)) 88%,
-      var(--meta-panel-accent-soft, var(--ds-semantic-color-action-primary-soft)) 12%
+      var(
+          --meta-panel-accent-soft,
+          var(--ds-semantic-color-action-primary-soft)
+        )
+        12%
     );
   }
 

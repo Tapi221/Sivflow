@@ -51,17 +51,11 @@ export const CardSurfaceLayout = ({
         className,
       )}
     >
-      <div
-        className="relative min-w-0 overflow-visible"
-        style={leftSlotStyle}
-      >
+      <div className="relative min-w-0 overflow-visible" style={leftSlotStyle}>
         {questionNode}
       </div>
 
-      <div
-        className="relative min-w-0 overflow-visible"
-        style={rightSlotStyle}
-      >
+      <div className="relative min-w-0 overflow-visible" style={rightSlotStyle}>
         {answerNode}
       </div>
     </div>

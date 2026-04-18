@@ -202,7 +202,11 @@
       var(--ds-color-neutral-500) 70%,
       #a09183 30%
     );
-    --titlebar-divider: color-mix(in srgb, var(--titlebar-border) 64%, transparent);
+    --titlebar-divider: color-mix(
+      in srgb,
+      var(--titlebar-border) 64%,
+      transparent
+    );
     --titlebar-hover-bg: color-mix(in srgb, #e9dfd4 54%, transparent);
     border-color: var(--titlebar-border);
     background: linear-gradient(

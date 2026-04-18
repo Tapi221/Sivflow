@@ -10,8 +10,10 @@ import {
   EXPLORER_ENTITY_ROW_SHELL_BASE_CLASS,
 } from "./shared";
 
-interface SidebarEntityRowProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "title"> {
+interface SidebarEntityRowProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  "children" | "title"
+> {
   menuOpen?: boolean;
   onMenuOpenChange?: (open: boolean) => void;
   menuActions?: MenuAction[];

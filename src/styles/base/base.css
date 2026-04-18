@@ -1,14 +1,10 @@
 @layer base {
   :root {
     --app-top-inset: 0px;
-    --app-bg: #f7f3ee;
-    --app-bg-dot: rgba(148, 163, 184, 0.38);
-    --app-bg-dot-size: 1.5px;
-    --app-bg-dot-gap: 20px;
-    --workspace-surface-bg: #fcfbf7;
-    --workspace-surface-dot-color: #d1d1d1;
-    --workspace-surface-dot-radius: 0.75px;
-    --workspace-surface-dot-gap: 14px;
+    --app-bg: #fcfbf7;
+    --app-bg-dot: #d1d1d1;
+    --app-bg-dot-size: 0.75px;
+    --app-bg-dot-gap: 14px;
   }
 
   *,
@@ -48,7 +44,7 @@
     text-rendering: geometricPrecision;
     background-color: var(--app-bg);
     background-image: radial-gradient(
-      circle at 1px 1px,
+      circle at var(--app-bg-dot-size) var(--app-bg-dot-size),
       var(--app-bg-dot) var(--app-bg-dot-size),
       transparent var(--app-bg-dot-size)
     );
@@ -61,16 +57,13 @@
   }
 
   .workspace-surface--dotted {
-    background-color: var(--workspace-surface-bg);
+    background-color: var(--app-bg);
     background-image: radial-gradient(
-      circle at var(--workspace-surface-dot-radius)
-        var(--workspace-surface-dot-radius),
-      var(--workspace-surface-dot-color)
-        var(--workspace-surface-dot-radius),
-      transparent var(--workspace-surface-dot-radius)
+      circle at var(--app-bg-dot-size) var(--app-bg-dot-size),
+      var(--app-bg-dot) var(--app-bg-dot-size),
+      transparent var(--app-bg-dot-size)
     );
-    background-size: var(--workspace-surface-dot-gap)
-      var(--workspace-surface-dot-gap);
+    background-size: var(--app-bg-dot-gap) var(--app-bg-dot-gap);
     background-position: 0 0;
   }
 

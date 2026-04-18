@@ -68,11 +68,7 @@ export const useCardSetViewQuery = ({
 }: UseCardSetViewQueryOptions): UseCardSetViewQueryResult => {
   const { folders, loading: foldersLoading } = useFolders();
 
-  const {
-    cardSets,
-    loading: cardSetsLoading,
-    updateCardSet,
-  } = useCardSets();
+  const { cardSets, loading: cardSetsLoading, updateCardSet } = useCardSets();
 
   const activeCardSets = useMemo(
     () => cardSets.filter((cardSet) => !cardSet.isDeleted),

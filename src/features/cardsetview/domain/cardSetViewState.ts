@@ -15,9 +15,7 @@ type ResolveCardsForPagerArgs = {
   cardIndexById: CardIndexMap;
 };
 
-export const createCardSetViewSourceKey = (
-  cardSetId: string | null,
-) => {
+export const createCardSetViewSourceKey = (cardSetId: string | null) => {
   return `${cardSetId ?? ""}`;
 };
 
