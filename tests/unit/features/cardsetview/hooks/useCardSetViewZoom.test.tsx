@@ -132,6 +132,54 @@ describe("useCardSetViewZoom", () => {
     expect(readCurrentZoomStore()?.byScope[unifiedKey]).toBe(75);
   });
 
+  it("keeps zoom semantics identical between view and edit", () => {
+    const viewportRef = createViewportRef(1400);
+
+    const { result, rerender } = renderHook(
+      ({ interactionMode }: { interactionMode: "view" | "edit" }) =>
+        useCardSetViewZoom({
+          deviceScope: "desktop",
+          cardSetId: "card-set-parity",
+          viewportRef,
+          activeCardKey: `card-1:fixed:flip:${interactionMode}`,
+          displayMode: "fixed",
+          interactionMode,
+          requestedCardLayoutMode: "flip",
+          splitFallbackLayoutMode: "flip",
+        }),
+      {
+        initialProps: {
+          interactionMode: "view" as const,
+        },
+      },
+    );
+
+    act(() => {
+      result.current.setZoomPercent(75);
+    });
+
+    const viewSnapshot = {
+      defaultZoomPercent: result.current.defaultZoomPercent,
+      presentationWidthPx: result.current.presentationWidthPx,
+      zoomScale: result.current.zoomScale,
+      canUseSplit: result.current.canUseSplit,
+    };
+
+    rerender({
+      interactionMode: "edit",
+    });
+
+    expect(result.current.defaultZoomPercent).toBeCloseTo(
+      viewSnapshot.defaultZoomPercent,
+      5,
+    );
+    expect(result.current.presentationWidthPx).toBe(
+      viewSnapshot.presentationWidthPx,
+    );
+    expect(result.current.zoomScale).toBe(viewSnapshot.zoomScale);
+    expect(result.current.canUseSplit).toBe(viewSnapshot.canUseSplit);
+  });
+
   it("migrates a legacy scoped key into the unified key", () => {
     const viewportRef = createViewportRef(1400);
     const unifiedKey = buildCardSetViewZoomPreferenceScopeKey({

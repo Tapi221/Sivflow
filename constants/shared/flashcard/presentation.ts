@@ -1,35 +1,15 @@
 type CardLayoutMode = "stack" | "flip" | "split";
-type CardSetInteractionMode = "view" | "edit";
 
-type CardSetViewLayoutWidthThresholds = Record<
-  CardSetInteractionMode,
-  Record<CardLayoutMode, number>
->;
-
-type CardSetViewInteractionModeWidthThresholds = Record<
-  CardSetInteractionMode,
-  number
->;
+type CardSetViewLayoutWidthThresholds = Record<CardLayoutMode, number>;
 
 export const CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX: CardSetViewLayoutWidthThresholds =
   {
-    view: {
-      flip: 360,
-      stack: 360,
-      split: 360,
-    },
-    edit: {
-      flip: 400,
-      stack: 400,
-      split: 400,
-    },
+    flip: 360,
+    stack: 360,
+    split: 360,
   };
 
-export const CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX: CardSetViewInteractionModeWidthThresholds =
-  {
-    view: 760,
-    edit: 840,
-  };
+export const CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX = 760;
 
 export const CARD_SET_VIEW_DEFAULT_ZOOM_SCALE = 1;
 
