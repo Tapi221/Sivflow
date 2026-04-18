@@ -282,7 +282,7 @@ const EditorSidePaneInner = ({
           duplicateToOpposite,
           hideToolbar,
           toolbarMount: resolvedToolbarMount,
-          toolbarDesktopLayout: "vertical",
+          toolbarDesktopLayout: "horizontal",
           enableBlockSelectionState,
           settings,
         }}

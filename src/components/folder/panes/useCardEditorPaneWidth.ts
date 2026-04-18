@@ -20,7 +20,7 @@ import type { UserSettings } from "@/types";
 
 const CARD_EDITOR_PAIR_GAP_PX = 0;
 const CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX =
-  CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX.edit;
+  CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX;
 
 interface UseCardEditorPaneWidthParams {
   settings?: Partial<UserSettings> | null;
