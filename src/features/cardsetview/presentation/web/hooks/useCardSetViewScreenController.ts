@@ -58,6 +58,11 @@ export const useCardSetViewScreenController = () => {
   const [activeScrollAnchorFace, setActiveScrollAnchorFace] =
     useState<ScrollAnchorFace | null>(null);
 
+  const [
+    layoutTransitionScrollAnchorRevision,
+    setLayoutTransitionScrollAnchorRevision,
+  ] = useState(0);
+
   const paneWidth = useCardSetViewPaneWidth({
     isGlobalEditing: state.isGlobalEditing,
     isDesktop,
@@ -211,12 +216,14 @@ export const useCardSetViewScreenController = () => {
         state.setCurrentCardFace(
           activeScrollAnchorFace ?? (state.isFlipped ? "answer" : "question"),
         );
+        setLayoutTransitionScrollAnchorRevision((prev) => prev + 1);
       }
 
       state.setCurrentCardLayoutMode(nextMode);
     },
     [
       activeScrollAnchorFace,
+      setLayoutTransitionScrollAnchorRevision,
       state.currentCardLayoutMode,
       state.isFlipped,
       state.setCurrentCardFace,
@@ -240,6 +247,7 @@ export const useCardSetViewScreenController = () => {
     topLeftZoomControl,
     handleActiveScrollAnchorFaceChange,
     handleChangeCardLayoutMode,
+    layoutTransitionScrollAnchorRevision,
     handleSaveCurrentDisplayMode,
     effectiveCardLayoutMode: zoom.effectiveCardLayoutMode,
     disabledCardLayoutModes,

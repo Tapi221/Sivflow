@@ -79,6 +79,7 @@ interface CardSetViewDesktopProps {
   currentDisplayMode: CardDisplayMode;
   currentCardLayoutMode: CardLayoutMode;
   folderId: string | null;
+  layoutTransitionScrollAnchorRevision: number;
   cardSetId: string | null;
   viewZoomScale: number;
   fixedCardWidthPx: number;
@@ -102,6 +103,7 @@ export const CardSetViewDesktop = ({
   currentDisplayMode,
   currentCardLayoutMode,
   folderId,
+  layoutTransitionScrollAnchorRevision,
   cardSetId,
   viewZoomScale,
   fixedCardWidthPx,
@@ -128,12 +130,14 @@ export const CardSetViewDesktop = ({
         Math.round(viewZoomScale * 1000),
         effectiveCardWidthPx,
         Math.round(fluidAvailableWidthPx),
+        layoutTransitionScrollAnchorRevision,
       ].join(":"),
     [
       currentDisplayMode,
       effectiveCardWidthPx,
       fluidAvailableWidthPx,
       isGlobalEditing,
+      layoutTransitionScrollAnchorRevision,
       viewZoomScale,
     ],
   );

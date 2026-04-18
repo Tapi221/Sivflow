@@ -26,6 +26,9 @@ export const CardSetViewDesktopContent = ({
       currentDisplayMode={state.currentDisplayMode}
       currentCardLayoutMode={effectiveCardLayoutMode}
       folderId={folderId}
+      layoutTransitionScrollAnchorRevision={
+        controller.layoutTransitionScrollAnchorRevision
+      }
       cardSetId={cardSetId}
       viewZoomScale={zoom.zoomScale}
       fixedCardWidthPx={zoom.fixedCardWidthPx}

@@ -295,15 +295,9 @@ export const useCardSetViewSelectionState = ({
       }
 
       setPendingFocusCardId(selectedCard?.id ?? null);
-      clearFlippedCards();
       setIsGlobalEditing(mode === "edit");
     },
-    [
-      clearFlippedCards,
-      isGlobalEditing,
-      selectedCard?.id,
-      setPendingFocusCardId,
-    ],
+    [isGlobalEditing, selectedCard?.id, setPendingFocusCardId],
   );
 
   const handleToggleViewMode = useCallback(() => {
