@@ -23,7 +23,6 @@ import {
 import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
 import { MetaPanelLeadSection } from "@/components/card/panels/MetaPanelShell";
 import { SurfaceButton } from "@/components/ui/surface-button";
-import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -447,7 +446,7 @@ const CardMetaPanelInner = ({
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
   const legacyCard = asRecord(card);
   const draftFlag = Boolean(card?.isDraft ?? legacyCard?.is_draft);
-  const [draftChecked, setDraftChecked] = useState(draftFlag);
+  const [isDraftTogglePending, setIsDraftTogglePending] = useState(false);
   const [isSavingPendingReview, setIsSavingPendingReview] = useState(false);
   const [pendingReviewTimestamp, setPendingReviewTimestamp] = useState<
     string | null
@@ -492,10 +491,6 @@ const CardMetaPanelInner = ({
   useEffect(() => {
     queueMicrotask(() => setTitleInput(card?.title ?? ""));
   }, [card?.id, card?.title]);
-
-  useEffect(() => {
-    queueMicrotask(() => setDraftChecked(draftFlag));
-  }, [card?.id, draftFlag]);
 
   useEffect(() => {
     let cancelled = false;
@@ -899,6 +894,15 @@ const CardMetaPanelInner = ({
     void Promise.resolve(onTitleInputChange(next)).catch(() => {});
   };
 
+  const handleToggleDraft = () => {
+    if (!card || isDraftTogglePending) return;
+    const nextDraftFlag = !draftFlag;
+    setIsDraftTogglePending(true);
+    void Promise.resolve(onToggleDraft(nextDraftFlag)).finally(() => {
+      setIsDraftTogglePending(false);
+    });
+  };
+
   const openTagSettings = () => {
     setSearchParams(
       (prev) => {
@@ -1191,19 +1195,26 @@ const CardMetaPanelInner = ({
               />
             </div>
             <div className={`${actionRowClass} justify-start gap-2`}>
-              <Switch
-                checked={draftChecked}
-                onCheckedChange={(next) => {
-                  setDraftChecked(next);
-                  if (!card) return;
-                  void Promise.resolve(onToggleDraft(next)).catch(() => {
-                    setDraftChecked(
-                      Boolean(card?.isDraft ?? asRecord(card)?.is_draft),
-                    );
-                  });
-                }}
-                disabled={!card}
-              />
+              <button
+                type="button"
+                role="switch"
+                aria-checked={draftFlag}
+                aria-label="下書き"
+                onClick={handleToggleDraft}
+                disabled={!card || isDraftTogglePending}
+                className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors ${
+                  draftFlag
+                    ? "border-transparent bg-[var(--meta-panel-accent,#0f766e)]"
+                    : "border-[var(--ds-semantic-color-border-default)] bg-[var(--ds-semantic-color-surface-subtle,rgba(127,127,127,0.16))]"
+                } ${!card || isDraftTogglePending ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                    draftFlag ? "translate-x-4" : "translate-x-0.5"
+                  }`}
+                />
+              </button>
               <span
                 className={`${mutedTextClass} text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)]`}
               >
