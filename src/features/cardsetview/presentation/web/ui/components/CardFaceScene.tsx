@@ -32,6 +32,7 @@ export type CardFaceSceneProps = Readonly<{
   resizeStepPx?: number;
   heightPx?: number | null;
   lockHeight?: boolean;
+  fillHeight?: boolean;
   onHeightChange?: (heightPx: number) => void;
   onMinHeightChange?: (heightPx: number) => void;
   onResizeStart?: () => void;
@@ -62,20 +63,28 @@ export const CardFaceScene = ({
   resizeStepPx,
   heightPx = null,
   lockHeight = false,
+  fillHeight = false,
   onHeightChange,
   onMinHeightChange,
   onResizeStart,
   onResizeEnd,
 }: CardFaceSceneProps) => {
   const isFluidDisplay = displayMode === "fluid";
+  const shouldFillHeight = isFluidDisplay && fillHeight;
   const resolvedFrameClassName = cn(
     isFluidDisplay &&
       "rounded-none md:rounded-none border-none bg-transparent shadow-none",
+    shouldFillHeight && "h-full",
     frameClassName,
   );
 
   return (
-    <div className="w-full min-w-0 max-w-full overflow-visible">
+    <div
+      className={cn(
+        "w-full min-w-0 max-w-full overflow-visible",
+        shouldFillHeight && "h-full",
+      )}
+    >
       <CardFrame
         baseWidth={CANONICAL_CARD_WIDTH}
         contentPaddingPx={0}
@@ -85,6 +94,7 @@ export const CardFaceScene = ({
         fixedScale={fixedScale}
         disableScale={isFluidDisplay}
         stretchWidth={isFluidDisplay}
+        fitHeight={shouldFillHeight}
         className={resolvedFrameClassName}
         ruled={!isFluidDisplay}
         topAttachment={topAttachment}
@@ -113,7 +123,11 @@ export const CardFaceScene = ({
           ref={contentWrapperRef}
           className={cn(
             "w-full min-w-0 max-w-full",
-            isFluidDisplay ? "min-h-0" : "flex min-h-0 flex-1",
+            shouldFillHeight
+              ? "flex h-full min-h-0 flex-1 flex-col"
+              : isFluidDisplay
+                ? "min-h-0"
+                : "flex min-h-0 flex-1",
           )}
         >
           <SharedCardContent

@@ -61,6 +61,9 @@ const DesktopCardSurfaceInner = ({
     return layoutRowsToCardHeightPx(card.layoutRows);
   }, [card.layoutRows, currentDisplayMode]);
 
+  const shouldFillFaceHeight =
+    currentDisplayMode === "fluid" && currentCardLayoutMode === "split";
+
   const handleEditorFocusCapture = React.useCallback(() => {
     setHasFocusWithin(true);
   }, []);
@@ -83,7 +86,10 @@ const DesktopCardSurfaceInner = ({
   const canInteractWithEditor = isGlobalEditing && (isActive || hasFocusWithin);
 
   const questionNode = (
-    <div data-card-face="question" className="min-w-0">
+    <div
+      data-card-face="question"
+      className={shouldFillFaceHeight ? "min-w-0 h-full" : "min-w-0"}
+    >
       <ViewCardFaceScene
         card={card}
         side="question"
@@ -96,12 +102,16 @@ const DesktopCardSurfaceInner = ({
         showInkLayer={currentDisplayMode === "fixed"}
         drawMode={false}
         inkEditingEnabled={false}
+        fillHeight={shouldFillFaceHeight}
       />
     </div>
   );
 
   const answerNode = (
-    <div data-card-face="answer" className="min-w-0">
+    <div
+      data-card-face="answer"
+      className={shouldFillFaceHeight ? "min-w-0 h-full" : "min-w-0"}
+    >
       <ViewCardFaceScene
         card={card}
         side="answer"
@@ -114,6 +124,7 @@ const DesktopCardSurfaceInner = ({
         showInkLayer={currentDisplayMode === "fixed"}
         drawMode={false}
         inkEditingEnabled={false}
+        fillHeight={shouldFillFaceHeight}
       />
     </div>
   );
