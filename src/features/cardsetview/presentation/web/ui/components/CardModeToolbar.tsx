@@ -42,9 +42,9 @@ const ModeButton = ({
         "relative",
         isActive &&
           !disabled &&
-          "border-slate-300 bg-white text-slate-900 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.06)]",
+          "border-[rgba(214,198,182,0.96)] bg-[rgba(255,252,247,0.98)] text-[#3d342d] shadow-[inset_0_0_0_1px_rgba(107,95,85,0.08)]",
         disabled &&
-          "border-slate-200/60 bg-white/35 text-slate-300 hover:bg-white/35 hover:text-slate-300",
+          "border-[rgba(233,224,216,0.88)] bg-[rgba(255,250,245,0.56)] text-[#baaea4] hover:bg-[rgba(255,250,245,0.56)] hover:text-[#baaea4]",
       )}
       onClick={onClick}
       aria-label={label}
@@ -161,7 +161,7 @@ export const CardModeToolbar = ({
         </ModeButton>
       </div>
 
-      <span className="h-5 w-px bg-slate-200/80" />
+      <span className="h-5 w-px bg-[rgba(218,207,197,0.92)]" />
 
       <div className="flex items-center gap-1">
         <ModeButton

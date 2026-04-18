@@ -338,7 +338,7 @@ const StudyMode = () => {
 
   if (isLoading) {
     return (
-      <div className="h-[100dvh] overflow-hidden bg-[#F5F7F8] p-4 md:p-8">
+      <div className="h-[100dvh] overflow-hidden p-4 md:p-8">
         <div className="max-w-[1400px] mx-auto space-y-4">
           <Skeleton className="h-10 w-48" />
           <Skeleton className="h-[600px] w-full" />
@@ -396,7 +396,7 @@ const StudyMode = () => {
   return (
     <div
       data-page="review"
-      className="reviewPage bg-[#F5F7F8] text-slate-800 h-[100dvh] overflow-hidden flex flex-col"
+      className="reviewPage text-slate-800 h-[100dvh] overflow-hidden flex flex-col"
       style={reviewPageStyle}
     >
       <div className="reviewShell max-w-[1600px] mx-auto w-full p-3 md:py-4 md:px-8 h-full flex flex-col min-h-0">

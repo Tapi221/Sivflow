@@ -449,7 +449,7 @@ const Trash = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFB] text-slate-800 selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
+    <div className="min-h-screen text-slate-800 selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto p-6 md:p-14">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-12">

@@ -1031,9 +1031,7 @@ export const CardEditorPane = ({
                   : "px-0 pt-0 pb-4"
               : "px-0 py-4",
           )}
-          viewportStyle={
-            embeddedInPager ? undefined : { background: "#fafafa" }
-          }
+          viewportStyle={embeddedInPager ? undefined : { background: "transparent" }}
           metaPanel={metaPanelNode}
         >
           {isEditing ? (

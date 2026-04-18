@@ -61,7 +61,7 @@ export const CardZoomControl = ({
         />
       </div>
 
-      <div className="min-w-[3.25rem] text-center text-[11px] font-semibold tabular-nums text-slate-600">
+      <div className="min-w-[3.25rem] text-center text-[11px] font-semibold tabular-nums text-[#6b5f55]">
         {value}%
       </div>
 
