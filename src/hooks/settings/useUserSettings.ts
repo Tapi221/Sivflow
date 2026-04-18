@@ -105,18 +105,16 @@ const removeLegacyProfileFields = (
 
 export const useUserSettings = () => {
   const { currentUser } = useAuthSession();
+  const currentUserId = currentUser?.uid ?? null;
 
-  const bootSettings = useMemo(
-    () => buildBootSettingsSnapshot(),
-    [currentUser?.uid],
-  );
+  const bootSettings = useMemo(() => buildBootSettingsSnapshot(), []);
 
   const settings = useLiveQuery(
     async () => {
-      if (!currentUser) return bootSettings;
+      if (!currentUserId) return bootSettings;
 
-      const db = await getLocalDb(currentUser.uid);
-      const userSettings = await db.userSettings.get(currentUser.uid);
+      const db = await getLocalDb(currentUserId);
+      const userSettings = await db.userSettings.get(currentUserId);
       const merged = {
         ...bootSettings,
         ...removeLegacyProfileFields(
@@ -138,18 +136,18 @@ export const useUserSettings = () => {
         folderSidebarDisplayMode,
       };
     },
-    [bootSettings, currentUser?.uid],
+    [bootSettings, currentUserId],
     bootSettings,
   );
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUserId) return;
 
     let cancelled = false;
 
     const cleanupLegacyProfileFields = async () => {
-      const db = await getLocalDb(currentUser.uid);
-      const current = await db.userSettings.get(currentUser.uid);
+      const db = await getLocalDb(currentUserId);
+      const current = await db.userSettings.get(currentUserId);
 
       if (cancelled || !current) return;
 
@@ -169,8 +167,8 @@ export const useUserSettings = () => {
 
       await db.userSettings.put({
         ...cleaned,
-        userId: currentUser.uid,
-        id: currentUser.uid,
+        userId: currentUserId,
+        id: currentUserId,
         updatedAt: new Date(),
       } as UserSettings);
     };
@@ -180,14 +178,14 @@ export const useUserSettings = () => {
     return () => {
       cancelled = true;
     };
-  }, [currentUser?.uid]);
+  }, [currentUserId]);
 
   const updateSettings = useCallback(
     async (newSettings: Partial<UserSettings>) => {
-      if (!currentUser) return;
+      if (!currentUserId) return;
 
-      const db = await getLocalDb(currentUser.uid);
-      const current = await db.userSettings.get(currentUser.uid);
+      const db = await getLocalDb(currentUserId);
+      const current = await db.userSettings.get(currentUserId);
       const currentWithoutLegacy = removeLegacyProfileFields(
         current as Record<string, unknown> | undefined,
       );
@@ -220,9 +218,9 @@ export const useUserSettings = () => {
       const updated = {
         ...currentWithoutLegacy,
         ...normalizedSettings,
-        userId: currentUser.uid,
+        userId: currentUserId,
         updatedAt: new Date(),
-        id: currentUser.uid,
+        id: currentUserId,
       };
 
       if (JSON.stringify(currentWithoutLegacy) === JSON.stringify(updated))
@@ -230,7 +228,7 @@ export const useUserSettings = () => {
 
       await db.userSettings.put(updated as UserSettings);
     },
-    [currentUser],
+    [currentUserId],
   );
 
   return {

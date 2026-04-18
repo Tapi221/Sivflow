@@ -221,7 +221,7 @@ object DesignTokens {
             object Background {
                 const val App = "#ffffff"
                 const val Sidebar = "#f6f1eb"
-                const val SidebarActive = "#e7ebef"
+                const val SidebarActive = "#ece2d7"
                 const val Floating = "rgba(255, 255, 255, 0.82)"
                 const val Code = "#f7f8f9"
             }

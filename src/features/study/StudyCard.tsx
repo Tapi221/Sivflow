@@ -1,9 +1,15 @@
-import { useEffect, useRef, useState, type ComponentProps } from "react";
-import { Button } from "@/components/ui/button";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+} from "react";
 import { Badge } from "@/components/ui/badge";
-import { Volume2 } from "@/ui/icons";
+import { Button } from "@/components/ui/button";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import type { Card } from "@/types";
+import { Volume2 } from "@/ui/icons";
 import { toIsoStringOrNull } from "@/utils/toMillis";
 
 type FlashcardCardLike = ComponentProps<typeof Flashcard>["card"];
@@ -67,6 +73,7 @@ const getCardKey = (card: Card): string => {
     keyable.docId ??
     keyable.uid ??
     stableKeyPart(keyable.createdAt);
+
   return direct && direct.length > 0 ? direct : "card";
 };
 
@@ -75,7 +82,7 @@ const StudyCard = (props: StudyCardProps) => {
 
   if (!card) {
     return (
-      <div className="text-center py-12">
+      <div className="py-12 text-center">
         <p className="text-gray-500">学習するカードがありません</p>
       </div>
     );
@@ -104,15 +111,16 @@ const StudyCardInner = ({
 
   const startTimeRef = useRef<number>(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const handleFlipRef = useRef<() => void>(() => {});
 
-  const stopTiming = () => {
+  const stopTiming = useCallback(() => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-  };
+  }, []);
 
-  const startTiming = () => {
+  const startTiming = useCallback(() => {
     startTimeRef.current = Date.now();
     stopTiming();
     timerRef.current = setInterval(() => {
@@ -120,35 +128,41 @@ const StudyCardInner = ({
       if (!started) return;
       setElapsedTime(Math.floor((Date.now() - started) / 1000));
     }, 100);
-  };
+  }, [stopTiming]);
 
   useEffect(() => {
     startTiming();
-    return () => stopTiming();
-  }, []);
 
-  const emitResult = (score: PracticeScore | ReviewScore) => {
-    const responseTime = elapsedTime;
+    return () => {
+      stopTiming();
+    };
+  }, [startTiming, stopTiming]);
 
-    if (isPracticeMode) {
-      (onResult as PracticeProps["onResult"])?.(
-        score as PracticeScore,
-        responseTime,
-      );
-    } else {
-      (onResult as ReviewProps["onResult"])?.(
-        score as ReviewScore,
-        responseTime,
-      );
-    }
-  };
+  const emitResult = useCallback(
+    (score: PracticeScore | ReviewScore) => {
+      const responseTime = elapsedTime;
 
-  const handleShowAnswer = () => {
+      if (isPracticeMode) {
+        (onResult as PracticeProps["onResult"])?.(
+          score as PracticeScore,
+          responseTime,
+        );
+      } else {
+        (onResult as ReviewProps["onResult"])?.(
+          score as ReviewScore,
+          responseTime,
+        );
+      }
+    },
+    [elapsedTime, isPracticeMode, onResult],
+  );
+
+  const handleShowAnswer = useCallback(() => {
     setStudyPhase("answer");
     stopTiming();
-  };
+  }, [stopTiming]);
 
-  const handleFlip = () => {
+  const handleFlip = useCallback(() => {
     if (studyPhase === "timing") {
       handleShowAnswer();
       return;
@@ -157,27 +171,38 @@ const StudyCardInner = ({
     setStudyPhase("timing");
     setElapsedTime(0);
     startTiming();
-  };
+  }, [handleShowAnswer, startTiming, studyPhase]);
+
+  useEffect(() => {
+    handleFlipRef.current = handleFlip;
+  }, [handleFlip]);
 
   useEffect(() => {
     if (!flipTrigger) return;
-    handleFlip();
+
+    const rafId = window.requestAnimationFrame(() => {
+      handleFlipRef.current();
+    });
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+    };
   }, [flipTrigger]);
 
   const renderPracticeButtons = () => (
-    <div className="reviewRatingBar flex items-center justify-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
+    <div className="reviewRatingBar flex animate-in items-center justify-center gap-3 fade-in slide-in-from-bottom-4 duration-300">
       <button
-        className="w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+        className="group flex h-20 w-24 flex-col items-center justify-center gap-2 rounded-2xl border border-[var(--surface-border)] bg-white surface-convex transition-all hover:-translate-y-1 active:scale-95 md:h-24 md:w-28"
         onClick={(event) => {
           event.stopPropagation();
           emitResult("anxious");
         }}
       >
-        <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-red-50 face-badge-convex flex items-center justify-center text-[#FF5A65] group-hover:scale-110 transition-transform">
+        <div className="face-badge-convex flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-[#FF5A65] transition-transform group-hover:scale-110 md:h-10 md:w-10">
           <svg
             width="18"
             height="18"
-            className="md:w-5 md:h-5"
+            className="md:h-5 md:w-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -190,23 +215,23 @@ const StudyCardInner = ({
             <line x1="15" y1="9" x2="15.01" y2="9" />
           </svg>
         </div>
-        <span className="text-xs md:text-sm font-bold text-slate-600 group-hover:text-[#FF5A65]">
+        <span className="text-xs font-bold text-slate-600 group-hover:text-[#FF5A65] md:text-sm">
           不安
         </span>
       </button>
 
       <button
-        className="w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+        className="group flex h-20 w-24 flex-col items-center justify-center gap-2 rounded-2xl border border-[var(--surface-border)] bg-white surface-convex transition-all hover:-translate-y-1 active:scale-95 md:h-24 md:w-28"
         onClick={(event) => {
           event.stopPropagation();
           emitResult("ok");
         }}
       >
-        <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-blue-50 face-badge-convex flex items-center justify-center text-[#00A3FF] group-hover:scale-110 transition-transform">
+        <div className="face-badge-convex flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-[#00A3FF] transition-transform group-hover:scale-110 md:h-10 md:w-10">
           <svg
             width="18"
             height="18"
-            className="md:w-5 md:h-5"
+            className="md:h-5 md:w-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -219,7 +244,7 @@ const StudyCardInner = ({
             <line x1="15" y1="9" x2="15.01" y2="9" />
           </svg>
         </div>
-        <span className="text-xs md:text-sm font-bold text-slate-600 group-hover:text-[#00A3FF]">
+        <span className="text-xs font-bold text-slate-600 group-hover:text-[#00A3FF] md:text-sm">
           OK
         </span>
       </button>
@@ -227,19 +252,19 @@ const StudyCardInner = ({
   );
 
   const renderReviewButtons = () => (
-    <div className="reviewRatingBar flex items-center justify-center gap-2 md:gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
+    <div className="reviewRatingBar flex animate-in items-center justify-center gap-2 fade-in slide-in-from-bottom-4 duration-300 md:gap-3">
       <button
-        className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+        className="group flex h-20 w-16 flex-col items-center justify-center gap-1 rounded-2xl border border-[var(--surface-border)] bg-white surface-convex transition-all hover:-translate-y-1 active:scale-95 md:h-24 md:w-20 md:gap-2"
         onClick={(event) => {
           event.stopPropagation();
           emitResult(0);
         }}
       >
-        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-50 face-badge-convex flex items-center justify-center text-[#FF5A65] group-hover:scale-110 transition-transform">
+        <div className="face-badge-convex flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-[#FF5A65] transition-transform group-hover:scale-110 md:h-10 md:w-10">
           <svg
             width="18"
             height="18"
-            className="md:w-5 md:h-5"
+            className="md:h-5 md:w-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -253,24 +278,24 @@ const StudyCardInner = ({
             <line x1="15" y1="9" x2="15.01" y2="9" />
           </svg>
         </div>
-        <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#FF5A65]">
+        <span className="text-[10px] font-bold text-slate-600 group-hover:text-[#FF5A65] md:text-xs">
           忘れた
         </span>
       </button>
 
       {showHard && (
         <button
-          className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex hover:bg-[#FFFBF0] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+          className="group flex h-20 w-16 flex-col items-center justify-center gap-1 rounded-2xl border border-[var(--surface-border)] bg-white surface-convex transition-all hover:-translate-y-1 hover:bg-[#FFFBF0] active:scale-95 md:h-24 md:w-20 md:gap-2"
           onClick={(event) => {
             event.stopPropagation();
             emitResult(1);
           }}
         >
-          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-50 face-badge-convex flex items-center justify-center text-[#F9A825] group-hover:scale-110 transition-transform">
+          <div className="face-badge-convex flex h-8 w-8 items-center justify-center rounded-full bg-amber-50 text-[#F9A825] transition-transform group-hover:scale-110 md:h-10 md:w-10">
             <svg
               width="18"
               height="18"
-              className="md:w-5 md:h-5"
+              className="md:h-5 md:w-5"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -283,24 +308,24 @@ const StudyCardInner = ({
               <line x1="15" y1="9" x2="15.01" y2="9" />
             </svg>
           </div>
-          <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#F9A825]">
+          <span className="text-[10px] font-bold text-slate-600 group-hover:text-[#F9A825] md:text-xs">
             あいまい
           </span>
         </button>
       )}
 
       <button
-        className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+        className="group flex h-20 w-16 flex-col items-center justify-center gap-1 rounded-2xl border border-[var(--surface-border)] bg-white surface-convex transition-all hover:-translate-y-1 active:scale-95 md:h-24 md:w-20 md:gap-2"
         onClick={(event) => {
           event.stopPropagation();
           emitResult(2);
         }}
       >
-        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-50 face-badge-convex flex items-center justify-center text-[#00A3FF] group-hover:scale-110 transition-transform">
+        <div className="face-badge-convex flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-[#00A3FF] transition-transform group-hover:scale-110 md:h-10 md:w-10">
           <svg
             width="18"
             height="18"
-            className="md:w-5 md:h-5"
+            className="md:h-5 md:w-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -313,24 +338,24 @@ const StudyCardInner = ({
             <line x1="15" y1="9" x2="15.01" y2="9" />
           </svg>
         </div>
-        <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#00A3FF]">
+        <span className="text-[10px] font-bold text-slate-600 group-hover:text-[#00A3FF] md:text-xs">
           覚えた
         </span>
       </button>
 
       {showEasy && (
         <button
-          className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex hover:bg-[#EEFDF6] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+          className="group flex h-20 w-16 flex-col items-center justify-center gap-1 rounded-2xl border border-[var(--surface-border)] bg-white surface-convex transition-all hover:-translate-y-1 hover:bg-[#EEFDF6] active:scale-95 md:h-24 md:w-20 md:gap-2"
           onClick={(event) => {
             event.stopPropagation();
             emitResult(3);
           }}
         >
-          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-50 face-badge-convex flex items-center justify-center text-[#00B67A] group-hover:scale-110 transition-transform">
+          <div className="face-badge-convex flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-[#00B67A] transition-transform group-hover:scale-110 md:h-10 md:w-10">
             <svg
               width="18"
               height="18"
-              className="md:w-5 md:h-5"
+              className="md:h-5 md:w-5"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -343,7 +368,7 @@ const StudyCardInner = ({
               <line x1="15" y1="9" x2="15.01" y2="9" />
             </svg>
           </div>
-          <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#00B67A]">
+          <span className="text-[10px] font-bold text-slate-600 group-hover:text-[#00B67A] md:text-xs">
             余裕
           </span>
         </button>
@@ -356,17 +381,18 @@ const StudyCardInner = ({
   const handleToggleUncertainty = onToggleUncertainty
     ? () => onToggleUncertainty(card)
     : undefined;
+
   const handleToggleBookmark = onToggleBookmark
     ? () => onToggleBookmark(card)
     : undefined;
+
   const handleEdit = onEdit ? () => onEdit(card) : undefined;
 
-  const reviewCount = (card as unknown as { reviewCount?: unknown })
-    .reviewCount;
+  const reviewCount = (card as unknown as { reviewCount?: unknown }).reviewCount;
   const showReviewCount = typeof reviewCount === "number" && reviewCount >= 0;
 
   return (
-    <div className="reviewStudyCard flex flex-col gap-6 w-full mx-auto max-w-[520px]">
+    <div className="reviewStudyCard mx-auto flex w-full max-w-[520px] flex-col gap-6">
       <div className="reviewCardViewport">
         <div>
           <Flashcard
@@ -377,17 +403,17 @@ const StudyCardInner = ({
               <Button
                 size="icon"
                 variant="ghost"
-                className="rounded-full w-8 h-8 md:w-9 md:h-9 min-w-0 min-h-0 bg-slate-50 text-primary-600 hover:bg-primary-50 hover:text-primary-700"
+                className="h-8 min-h-0 w-8 min-w-0 rounded-full bg-slate-50 text-primary-600 hover:bg-primary-50 hover:text-primary-700 md:h-9 md:w-9"
               >
-                <Volume2 className="w-4 h-4 md:w-5 h-5" />
+                <Volume2 className="h-4 w-4 md:h-5 md:w-5" />
               </Button>
             }
             extraHeaderRight={
-              <div className="flex flex-col items-end pointer-events-none mb-2">
+              <div className="pointer-events-none mb-2 flex flex-col items-end">
                 {showReviewCount && (
                   <Badge
                     variant="outline"
-                    className="text-[10px] text-slate-400 border-slate-200 bg-slate-50/50 backdrop-blur-sm whitespace-nowrap tabular-nums font-bold"
+                    className="whitespace-nowrap bg-slate-50/50 text-[10px] font-bold tabular-nums text-slate-400 backdrop-blur-sm border-slate-200"
                   >
                     {reviewCount + 1}回目の復習
                   </Badge>
@@ -397,7 +423,7 @@ const StudyCardInner = ({
             extraFooter={
               studyPhase === "timing" && (
                 <div className="text-center">
-                  <p className="text-sm text-slate-400 animate-pulse">
+                  <p className="animate-pulse text-sm text-slate-400">
                     カードをクリックまたはスワイプして解答を表示
                   </p>
                 </div>

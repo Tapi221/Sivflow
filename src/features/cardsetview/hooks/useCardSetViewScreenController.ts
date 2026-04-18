@@ -1,1 +1,268 @@
-export * from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
+import { useCallback, useMemo, useState } from "react";
+
+import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
+import { useToast } from "@/contexts/ToastContext";
+import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
+import {
+  CARD_LAYOUT_MODE_LABELS,
+  type CardLayoutMode,
+  type CardSetInteractionMode,
+} from "@/features/cardsetview/domain/cardLayoutMode";
+import { useCardSetViewData } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewData";
+import { useCardSetViewPaneWidth } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewPaneWidth";
+import { useCardSetViewState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewState";
+import { useCardSetViewWindowEvents } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewWindowEvents";
+import { useCardSetViewZoom } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoom";
+import { useCardSetViewBreadcrumbs } from "@/features/cardsetview/presentation/web/infra/useCardSetViewBreadcrumbs";
+import { useCardSetViewParams } from "@/features/cardsetview/presentation/web/infra/useCardSetViewParams";
+import {
+  buildWidthControl,
+  resolveLastSyncedAtMs,
+  resolveOverlayRight,
+} from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
+import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutFallbackPreferences";
+import { CARD_PANE_WIDTH_STEP_PX } from "@constants/shared/flashcard";
+
+type ScrollAnchorFace = "question" | "answer";
+
+export const useCardSetViewScreenController = () => {
+  const { setExtraCrumbs } = useBreadcrumbContext();
+  const { error: toastError } = useToast();
+  const presentationTarget = usePresentationTarget();
+  const isDesktop = presentationTarget === "desktop";
+  const { settings } = useUserSettings();
+
+  const { cardSetId, initialIndex, targetCardId } = useCardSetViewParams();
+
+  const data = useCardSetViewData({ cardSetId });
+
+  const state = useCardSetViewState({
+    initialIndex,
+    targetCardId,
+    cardSetId,
+    cardSetById: data.cardSetById,
+    sortedCards: data.sortedCards,
+    cardIndexById: data.cardIndexById,
+    createCard: data.createCard,
+    updateCard: data.updateCard,
+    selectedCardSet: data.selectedCardSet,
+    isLoading: data.isLoading,
+    toastError,
+    deviceScope: presentationTarget,
+  });
+
+  const {
+    isGlobalEditing,
+    isMetaOpen,
+    currentIndex,
+    selectedCard,
+    currentDisplayMode,
+    currentCardLayoutMode,
+    activeSyncStatus,
+    handleToggleViewMode,
+    createAndFocusCard,
+    isFlipped,
+    setCurrentCardFace,
+    setCurrentCardLayoutMode,
+  } = state;
+
+  const [activeScrollAnchorFace, setActiveScrollAnchorFace] =
+    useState<ScrollAnchorFace | null>(null);
+
+  const [
+    layoutTransitionScrollAnchorRevision,
+    setLayoutTransitionScrollAnchorRevision,
+  ] = useState(0);
+
+  const paneWidth = useCardSetViewPaneWidth({
+    isGlobalEditing,
+    isDesktop,
+    isMetaOpen,
+    currentIndex,
+    settings,
+    cardSetId,
+  });
+
+  const layoutInteractionMode: CardSetInteractionMode = isGlobalEditing
+    ? "edit"
+    : "view";
+
+  const splitFallbackLayoutMode = useMemo(
+    () => resolveSplitFallbackLayoutModePreference(presentationTarget),
+    [presentationTarget],
+  );
+
+  const zoom = useCardSetViewZoom({
+    deviceScope: presentationTarget,
+    cardSetId,
+    viewportRef: paneWidth.contentViewportRef,
+    activeCardKey: [
+      selectedCard?.id ?? "",
+      currentDisplayMode,
+      currentCardLayoutMode,
+      layoutInteractionMode,
+      isMetaOpen ? "meta-open" : "meta-closed",
+    ].join(":"),
+    displayMode: currentDisplayMode,
+    interactionMode: layoutInteractionMode,
+    requestedCardLayoutMode: currentCardLayoutMode,
+    splitFallbackLayoutMode,
+  });
+
+  useCardSetViewBreadcrumbs({
+    selectedCardSet: data.selectedCardSet,
+    selectedCard,
+    sortedCards: data.sortedCards,
+    folders: data.folders,
+    setExtraCrumbs,
+  });
+
+  useCardSetViewWindowEvents({
+    handleToggleViewMode,
+    createAndFocusCard,
+  });
+
+  const widthControl = buildWidthControl({
+    isDesktop,
+    isGlobalEditing,
+    activePaneWidthPx: paneWidth.activePaneWidthPx,
+    activePaneMinWidthPx: paneWidth.activePaneMinWidthPx,
+    activePaneMaxWidthPx: paneWidth.activePaneMaxWidthPx,
+    activePaneDisplayedDefaultWidthPx:
+      paneWidth.activePaneDisplayedDefaultWidthPx,
+    previewPaneWidth: paneWidth.previewPaneWidth,
+    persistPaneWidth: paneWidth.persistPaneWidth,
+    stepPaneWidth: paneWidth.stepPaneWidth,
+    resetActivePaneWidth: paneWidth.resetActivePaneWidth,
+    activePaneMode: paneWidth.activePaneMode,
+    widthStepPx: CARD_PANE_WIDTH_STEP_PX,
+  });
+
+  const overlayRight = resolveOverlayRight({
+    isDesktop,
+    isMetaOpen,
+  });
+
+  const resolvedLastSyncedAtMs = resolveLastSyncedAtMs({
+    activeSyncStatus,
+    selectedCard: selectedCard as {
+      id?: string | null;
+      updatedAt?: unknown;
+      createdAt?: unknown;
+    } | null,
+  });
+
+  const topLeftZoomControl =
+    isDesktop && !isGlobalEditing
+      ? {
+          value: zoom.zoomPercent,
+          min: zoom.minZoomPercent,
+          max: zoom.maxZoomPercent,
+          step: 5,
+          onChange: zoom.setZoomPercent,
+          onStepDown: zoom.stepDown,
+          onStepUp: zoom.stepUp,
+        }
+      : null;
+
+  const disabledCardLayoutModes = useMemo(
+    () => ({
+      stack: false,
+      flip: false,
+      split: !zoom.canUseSplit,
+    }),
+    [zoom.canUseSplit],
+  );
+
+  const layoutConstraintIndicatorLabel = useMemo(() => {
+    if (!zoom.showConstraintIndicator) {
+      return null;
+    }
+
+    if (
+      currentCardLayoutMode === "split" &&
+      zoom.effectiveCardLayoutMode !== "split"
+    ) {
+      return `画面制約で${CARD_LAYOUT_MODE_LABELS[zoom.effectiveCardLayoutMode]}表示中`;
+    }
+
+    return "画面制約で縮小中";
+  }, [
+    currentCardLayoutMode,
+    zoom.effectiveCardLayoutMode,
+    zoom.showConstraintIndicator,
+  ]);
+
+  const handleSaveCurrentDisplayMode = useCallback(async () => {
+    if (!cardSetId) {
+      return;
+    }
+
+    try {
+      await saveDefaultDisplayMode({
+        cardSetId,
+        currentDisplayMode,
+        updateCardSet: data.updateCardSet,
+      });
+    } catch (error) {
+      console.error("[CardSetView] Failed to save default display mode", error);
+      toastError("表示モードの保存に失敗しました");
+    }
+  }, [cardSetId, currentDisplayMode, data.updateCardSet, toastError]);
+
+  const handleActiveScrollAnchorFaceChange = useCallback(
+    (face: ScrollAnchorFace | null) => {
+      setActiveScrollAnchorFace(face);
+    },
+    [],
+  );
+
+  const handleChangeCardLayoutMode = useCallback(
+    (nextMode: CardLayoutMode) => {
+      if (nextMode === currentCardLayoutMode) {
+        return;
+      }
+
+      if (nextMode === "flip" && currentCardLayoutMode !== "flip") {
+        setCurrentCardFace(
+          activeScrollAnchorFace ?? (isFlipped ? "answer" : "question"),
+        );
+        setLayoutTransitionScrollAnchorRevision((prev) => prev + 1);
+      }
+
+      setCurrentCardLayoutMode(nextMode);
+    },
+    [
+      activeScrollAnchorFace,
+      currentCardLayoutMode,
+      isFlipped,
+      setCurrentCardFace,
+      setCurrentCardLayoutMode,
+    ],
+  );
+
+  return {
+    cardSetId,
+    presentationTarget,
+    isDesktop,
+    settings,
+    data,
+    state,
+    paneWidth,
+    zoom,
+    widthControl,
+    overlayRight,
+    resolvedLastSyncedAtMs,
+    topLeftZoomControl,
+    handleActiveScrollAnchorFaceChange,
+    handleChangeCardLayoutMode,
+    layoutTransitionScrollAnchorRevision,
+    handleSaveCurrentDisplayMode,
+    effectiveCardLayoutMode: zoom.effectiveCardLayoutMode,
+    disabledCardLayoutModes,
+    layoutConstraintIndicatorLabel,
+    splitFallbackLayoutMode,
+  };
+};
