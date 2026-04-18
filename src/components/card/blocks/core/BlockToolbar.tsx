@@ -1,4 +1,9 @@
 import { cn } from "@/lib/utils";
+import {
+  overlayGlassActionButtonClassName,
+  overlayGlassPillClassName,
+  overlayGlassToolbarClassName,
+} from "@/components/card/shell/overlaySurfaceClassNames";
 import type { CardBlock } from "@/types/domain/card";
 import type { IconProps } from "@/ui/icons";
 import {
@@ -187,15 +192,15 @@ const ActionButton = ({
         onClick={onClick}
         aria-label={`${label}を追加`}
         className={cn(
-          "group/toolbar inline-flex shrink-0 items-center justify-center w-8 h-8 rounded-md",
-          "text-[var(--sidebar-text-muted,#6e6e80)] transition-colors duration-100 select-none",
-          "hover:text-[var(--sidebar-text,#202123)] hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
-          "active:bg-[var(--sidebar-active-bg,#e7ebef)] active:text-[var(--sidebar-text,#202123)]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sidebar-active-accent,#7aa6a1)]",
+          overlayGlassActionButtonClassName,
+          "group/toolbar inline-flex h-10 w-10 shrink-0 items-center justify-center select-none",
+          "text-[#6b5f55] transition-colors duration-150",
+          "hover:text-[#463c35]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sidebar-active-accent,#7aa6a1)]/35",
         )}
       >
         <Icon
-          className="w-4 h-4 shrink-0 opacity-70 transition-opacity duration-100 group-hover/toolbar:opacity-100 group-active/toolbar:opacity-100"
+          className="h-5 w-5 shrink-0 opacity-80 transition-opacity duration-150 group-hover/toolbar:opacity-100 group-active/toolbar:opacity-100"
           style={{ strokeWidth: 1.2 }}
         />
       </button>
@@ -275,7 +280,7 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
     let rafId: number | null = null;
     let resizeObserver: ResizeObserver | null = null;
-    const VERTICAL_TOOLBAR_WIDTH_PX = 44; // w-11
+    const VERTICAL_TOOLBAR_WIDTH_PX = 58;
     const update = () => {
       const el = verticalAnchorRef.current;
       if (!el) return;
@@ -324,11 +329,9 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
     <div
       className={cn(
         desktopLayout === "vertical"
-          ? "flex w-11 min-h-[220px] flex-col items-center gap-1 px-1.5 py-2 rounded-2xl"
-          : "flex w-full items-center gap-0 px-2.5 h-8 min-h-[32px] rounded-xl",
-        "border border-[rgba(148,163,184,0.3)]",
-        "bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(243,246,250,0.9))]",
-        "shadow-[0_5px_14px_rgba(15,23,42,0.08)] backdrop-blur-[2px]",
+          ? "flex w-[58px] min-h-[248px] flex-col items-center gap-2 rounded-[28px] px-1.5 py-2"
+          : "flex w-auto max-w-full items-center gap-2 rounded-[28px] px-3 py-1.5",
+        overlayGlassToolbarClassName,
         className,
       )}
     >
@@ -339,10 +342,9 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
             <button
               type="button"
               className={cn(
-                "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md",
-                "text-[11px] font-medium text-[var(--sidebar-text-muted,#6e6e80)] transition-colors duration-100",
-                "hover:text-[var(--sidebar-text,#202123)] hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
-                "active:bg-[var(--sidebar-active-bg,#e7ebef)] active:text-[var(--sidebar-text,#202123)]",
+                overlayGlassPillClassName,
+                "h-10 gap-2 px-3 text-[12px] font-semibold text-[#5f554d]",
+                "hover:text-[#433a33]",
               )}
               aria-label={`${label} にブロックを追加`}
             >
@@ -384,10 +386,10 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
       {/* デスクトップ: アイコン only ボタン（横/縦） */}
       <div
         className={cn(
-          "hidden md:flex items-center gap-1",
+          "hidden md:flex items-center",
           desktopLayout === "vertical"
-            ? "flex-col overflow-y-hidden"
-            : "flex-nowrap overflow-x-hidden",
+            ? "flex-col gap-2 overflow-y-hidden"
+            : "flex-nowrap gap-2 overflow-x-hidden",
         )}
       >
         {visibleConfigs.map((config) => {

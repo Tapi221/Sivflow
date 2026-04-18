@@ -27,43 +27,38 @@ type TextBlockContentProps =
       zoom?: number;
     };
 
+const buildTextBlockPresentation = (zoom?: number) => ({
+  textStyle: buildTypographyStyle({
+    fontSizePx: 16,
+    lineHeightPx: TEXT_BLOCK_LINE_HEIGHT_PX,
+    zoom,
+  }),
+  ruledRowPx: scaleTypographyNumberPx(TEXT_BLOCK_LINE_HEIGHT_PX, zoom),
+});
+
 export const TextBlockContent = (props: TextBlockContentProps) => {
   const normalizedContent = normalizeTextBlockContent(props.content);
+  const presentation = buildTextBlockPresentation(props.zoom);
 
   if (props.mode === "view") {
     const displayText =
       normalizedContent.length === 0 ? "\u00A0" : normalizedContent;
 
-    const textStyle = buildTypographyStyle({
-      fontSizePx: 16,
-      lineHeightPx: TEXT_BLOCK_LINE_HEIGHT_PX,
-      zoom: props.zoom,
-    });
-
     return (
       <BlockSurface
         ruled={true}
-        ruledRowPx={scaleTypographyNumberPx(
-          TEXT_BLOCK_LINE_HEIGHT_PX,
-          props.zoom,
-        )}
+        ruledRowPx={presentation.ruledRowPx}
         className="flex-1"
       >
         <div
           className={`${TEXT_BLOCK_CONTENT_CLASS} whitespace-pre-wrap`}
-          style={textStyle}
+          style={presentation.textStyle}
         >
           {displayText}
         </div>
       </BlockSurface>
     );
   }
-
-  const textStyle = buildTypographyStyle({
-    fontSizePx: 16,
-    lineHeightPx: TEXT_BLOCK_LINE_HEIGHT_PX,
-    zoom: props.zoom,
-  });
 
   return (
     <AutoResizeTextarea
@@ -73,13 +68,10 @@ export const TextBlockContent = (props: TextBlockContentProps) => {
       }
       placeholder={props.placeholder || "テキストを入力..."}
       minRows={1}
-      lineHeight={scaleTypographyNumberPx(
-        TEXT_BLOCK_LINE_HEIGHT_PX,
-        props.zoom,
-      )}
+      lineHeight={presentation.ruledRowPx}
       allowInternalScroll={false}
       autoFocus={props.autoFocus}
-      style={textStyle}
+      style={presentation.textStyle}
       className={`${TEXT_BLOCK_CONTENT_CLASS} placeholder:text-slate-300 focus-visible:ring-0 focus-visible:ring-offset-0`}
     />
   );

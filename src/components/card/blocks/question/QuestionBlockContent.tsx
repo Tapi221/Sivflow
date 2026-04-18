@@ -35,6 +35,64 @@ type QuestionBlockContentProps =
       zoom?: number;
     };
 
+const buildQuestionFieldStyle = (zoom?: number) =>
+  buildTypographyStyle({
+    fontSizePx: 12,
+    lineHeightPx: QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
+    zoom,
+  });
+
+const resolveQuestionFieldLineHeight = (zoom?: number) =>
+  scaleTypographyNumberPx(QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX, zoom);
+
+type QuestionFieldProps =
+  | Readonly<{
+      mode: "view";
+      value?: string;
+      className: string;
+      zoom?: number;
+      fallbackText?: string;
+    }>
+  | Readonly<{
+      mode: "edit";
+      value?: string;
+      onChange: (value: string) => void;
+      className: string;
+      placeholder: string;
+      zoom?: number;
+    }>;
+
+const QuestionField = (props: QuestionFieldProps) => {
+  const style = buildQuestionFieldStyle(props.zoom);
+
+  if (props.mode === "view") {
+    const resolvedText =
+      props.value && props.value.length > 0
+        ? props.value
+        : (props.fallbackText ?? "\u00a0");
+
+    return (
+      <p className={`flex-1 ${props.className}`} style={style}>
+        {resolvedText}
+      </p>
+    );
+  }
+
+  return (
+    <AutoResizeTextarea
+      value={props.value ?? ""}
+      onChange={(event) => props.onChange(event.target.value)}
+      placeholder={props.placeholder}
+      minRows={1}
+      lineHeight={resolveQuestionFieldLineHeight(props.zoom)}
+      allowInternalScroll={false}
+      className="flex-1"
+      style={style}
+      textareaClassName={`${props.className} placeholder:text-slate-400 bg-transparent border-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full resize-none p-0`}
+    />
+  );
+};
+
 const buildViewResetKey = ({
   questionTitle,
   questionAnswer,
@@ -66,17 +124,6 @@ export const QuestionBlockContent = (props: QuestionBlockContentProps) => {
     );
   }
 
-  const textareaStyle = buildTypographyStyle({
-    fontSizePx: 12,
-    lineHeightPx: QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
-    zoom: props.zoom,
-  });
-
-  const scaledLineHeight = scaleTypographyNumberPx(
-    QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
-    props.zoom,
-  );
-
   return (
     <QuestionBlockLayout
       containerRef={props.containerRef}
@@ -88,29 +135,23 @@ export const QuestionBlockContent = (props: QuestionBlockContentProps) => {
         "data-block-id": props.blockId,
       }}
       questionContent={
-        <AutoResizeTextarea
+        <QuestionField
+          mode="edit"
           value={props.questionTitle ?? ""}
-          onChange={(e) => props.onChangeQuestionTitle(e.target.value)}
+          onChange={props.onChangeQuestionTitle}
+          className={QUESTION_BLOCK_TITLE_TEXT_CLASS}
           placeholder="疑問・質問を入力..."
-          minRows={1}
-          lineHeight={scaledLineHeight}
-          allowInternalScroll={false}
-          className="flex-1"
-          style={textareaStyle}
-          textareaClassName={`${QUESTION_BLOCK_TITLE_TEXT_CLASS} placeholder:text-slate-400 bg-transparent border-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full resize-none p-0`}
+          zoom={props.zoom}
         />
       }
       answerContent={
-        <AutoResizeTextarea
+        <QuestionField
+          mode="edit"
           value={props.questionAnswer ?? ""}
-          onChange={(e) => props.onChangeQuestionAnswer(e.target.value)}
+          onChange={props.onChangeQuestionAnswer}
+          className={QUESTION_BLOCK_ANSWER_TEXT_CLASS}
           placeholder="答え・メモを入力..."
-          minRows={1}
-          lineHeight={scaledLineHeight}
-          allowInternalScroll={false}
-          className="flex-1"
-          style={textareaStyle}
-          textareaClassName={`${QUESTION_BLOCK_ANSWER_TEXT_CLASS} placeholder:text-slate-400 bg-transparent border-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full resize-none p-0`}
+          zoom={props.zoom}
         />
       }
     />
@@ -134,37 +175,18 @@ const QuestionBlockViewContent = ({
 }: QuestionBlockViewContentProps) => {
   const [revealed, setRevealed] = useState(answerDisplayMode === "always");
 
-  const titleStyle = useMemo(
-    () =>
-      buildTypographyStyle({
-        fontSizePx: 12,
-        lineHeightPx: QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
-        zoom,
-      }),
-    [zoom],
-  );
-
-  const answerBaseStyle = useMemo(
-    () =>
-      buildTypographyStyle({
-        fontSizePx: 12,
-        lineHeightPx: QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
-        zoom,
-      }),
-    [zoom],
-  );
-
-  const answerStyle = useMemo(() => {
+  const answerStyle = useMemo<React.CSSProperties>(() => {
+    const baseStyle = buildQuestionFieldStyle(zoom);
     if (revealed) {
-      return answerBaseStyle;
+      return baseStyle;
     }
 
-    return mergeStyles(answerBaseStyle, {
+    return mergeStyles(baseStyle, {
       filter: "blur(5px)",
       userSelect: "none",
       pointerEvents: "none",
     });
-  }, [answerBaseStyle, revealed]);
+  }, [revealed, zoom]);
 
   const overlayStyle = useMemo(
     () =>
@@ -186,12 +208,13 @@ const QuestionBlockViewContent = ({
         },
       }}
       questionContent={
-        <p
-          className={`flex-1 ${QUESTION_BLOCK_TITLE_TEXT_CLASS}`}
-          style={titleStyle}
-        >
-          {questionTitle || ""}
-        </p>
+        <QuestionField
+          mode="view"
+          value={questionTitle}
+          className={QUESTION_BLOCK_TITLE_TEXT_CLASS}
+          fallbackText=""
+          zoom={zoom}
+        />
       }
       answerContent={
         <p

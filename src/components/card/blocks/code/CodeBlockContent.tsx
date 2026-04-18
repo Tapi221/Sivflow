@@ -232,7 +232,7 @@ export const CodeBlockContent = (props: CodeBlockContentProps) => {
     <div ref={editorHostRef} className={props.className}>
       <BlockInset variant="code">
         <CodeBlockFrame
-          variant="editor"
+          variant="viewer"
           headerLeft={props.headerLeft}
           headerRight={copyButton}
         >
