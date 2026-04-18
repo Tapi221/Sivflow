@@ -6,23 +6,27 @@
   "engines": {
     "node": ">=20.19.0"
   },
-"scripts": {
+  "scripts": {
   "dev": "npm run dev:web",
   "dev:web": "npm run design-tokens:build && vite",
   "design-tokens:build": "npm exec tsx -- tools/design-tokens/build-tokens.ts",
 
   "dev:electron": "concurrently -k \"npm run dev:web\" \"npm run electron:watch\" \"npm run electron:dev\"",
+  "electron:build:main": "npm exec tsc -- -p tsconfig.electron.json && npm exec tsc-alias -- -p tsconfig.electron.json",
+  "electron:build:preload": "node scripts/electron/bundle-preload.mjs",
   "electron:compile": "npm exec tsc -- -p tsconfig.electron.json && npm exec tsc-alias -- -p tsconfig.electron.json && npm run electron:prepare-dist",
   "electron:dev": "npm run electron:compile && wait-on tcp:5173 && node scripts/electron/run-electron.cjs dist-electron/electron/main.js --renderer-url=http://localhost:5173",
   "electron:prepare-dist": "node -e \"const fs=require('node:fs');fs.mkdirSync('dist-electron',{recursive:true});fs.writeFileSync('dist-electron/package.json', JSON.stringify({ type: 'commonjs' }, null, 2));\"",
-  "electron:watch": "concurrently -k \"npm exec tsc -- -p tsconfig.electron.json --watch --preserveWatchOutput\" \"npm exec tsc-alias -- -p tsconfig.electron.json --watch\"",
+  "electron:watch": "concurrently -k \"npm run electron:watch:main\" \"npm run electron:watch:preload\"",
+  "electron:watch:main": "concurrently -k \"npm exec tsc -- -p tsconfig.electron.json --watch --preserveWatchOutput\" \"npm exec tsc-alias -- -p tsconfig.electron.json --watch\"",
+  "electron:watch:preload": "node scripts/electron/bundle-preload.mjs --watch",
 
   "generate:icons:stratis": "node scripts/generate-stratis-icons.mjs",
 
   "build": "npm run build:web",
   "build:web": "npm run design-tokens:build && node scripts/copy-pdfjs-assets.mjs && vite build",
   "build:electron": "npm run build:web && npm run electron:build",
-  "electron:build": "npm run electron:compile",
+  "electron:build": "npm run electron:build:main && npm run electron:build:preload && npm run electron:prepare-dist",
   "electron:start": "node scripts/electron/run-electron.cjs dist-electron/electron/main.js",
 
   "verify:icons": "node scripts/verify-icons-entry.mjs",
@@ -124,6 +128,7 @@
     "@vitejs/plugin-react": "^5.1.1",
     "concurrently": "^9.2.1",
     "electron": "^40.8.0",
+    "esbuild": "^0.25.3",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",

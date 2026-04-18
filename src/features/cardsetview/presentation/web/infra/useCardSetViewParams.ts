@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
 
 export type ParsedCardSetViewParams = {
-  folderId: string | null;
   cardSetId: string | null;
   initialIndex: number;
   targetCardId: string | null;
@@ -10,13 +9,11 @@ export type ParsedCardSetViewParams = {
 
 const parseCardSetViewParams = (search: string): ParsedCardSetViewParams => {
   const urlParams = new URLSearchParams(search);
-  const folderId = urlParams.get("folderId");
   const cardSetId = urlParams.get("cardSetId");
   const initialIndexRaw = Number.parseInt(urlParams.get("index") || "0", 10);
   const targetCardId = urlParams.get("cardId");
 
   return {
-    folderId,
     cardSetId,
     initialIndex:
       Number.isFinite(initialIndexRaw) && initialIndexRaw >= 0

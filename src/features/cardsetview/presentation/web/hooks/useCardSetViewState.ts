@@ -7,7 +7,6 @@ import { useCardSetViewViewState } from "@/features/cardsetview/presentation/web
 interface UseCardSetViewStateOptions {
   initialIndex: number;
   targetCardId: string | null;
-  folderId: string | null;
   cardSetId: string | null;
   cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>;
   sortedCards: Card[];
@@ -25,7 +24,6 @@ interface UseCardSetViewStateOptions {
 export const useCardSetViewState = ({
   initialIndex,
   targetCardId,
-  folderId,
   cardSetId,
   cardSetById,
   sortedCards,
@@ -40,7 +38,6 @@ export const useCardSetViewState = ({
   const viewState = useCardSetViewViewState({
     initialIndex,
     targetCardId,
-    legacyFolderId: folderId,
     cardSetId,
     sortedCards,
     cardIndexById,
@@ -50,7 +47,6 @@ export const useCardSetViewState = ({
 
   const actions = useCardSetViewActions({
     cardSetId,
-    folderId,
     cardSetById,
     selectedCardSet,
     selectedCard: viewState.selectedCard,

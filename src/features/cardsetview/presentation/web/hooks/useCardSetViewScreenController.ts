@@ -34,15 +34,13 @@ export const useCardSetViewScreenController = () => {
   const isDesktop = presentationTarget === "desktop";
   const { settings } = useUserSettings();
 
-  const { folderId, cardSetId, initialIndex, targetCardId } =
-    useCardSetViewParams();
+  const { cardSetId, initialIndex, targetCardId } = useCardSetViewParams();
 
-  const data = useCardSetViewData({ folderId, cardSetId });
+  const data = useCardSetViewData({ cardSetId });
 
   const state = useCardSetViewState({
     initialIndex,
     targetCardId,
-    folderId,
     cardSetId,
     cardSetById: data.cardSetById,
     sortedCards: data.sortedCards,
@@ -98,7 +96,6 @@ export const useCardSetViewScreenController = () => {
   });
 
   useCardSetViewBreadcrumbs({
-    folderId,
     selectedCardSet: data.selectedCardSet,
     selectedCard: state.selectedCard,
     sortedCards: data.sortedCards,
@@ -232,7 +229,6 @@ export const useCardSetViewScreenController = () => {
   );
 
   return {
-    folderId,
     cardSetId,
     presentationTarget,
     isDesktop,

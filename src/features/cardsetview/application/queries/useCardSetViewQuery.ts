@@ -9,7 +9,6 @@ import type { CardSet } from "@/types/domain/cardSet";
 import { toMillis } from "@/utils/toMillis";
 
 interface UseCardSetViewQueryOptions {
-  folderId: string | null;
   cardSetId: string | null;
 }
 
@@ -65,7 +64,6 @@ const compareCards = (left: Card, right: Card): number => {
 };
 
 export const useCardSetViewQuery = ({
-  folderId,
   cardSetId,
 }: UseCardSetViewQueryOptions): UseCardSetViewQueryResult => {
   const { folders, loading: foldersLoading } = useFolders();
@@ -74,20 +72,16 @@ export const useCardSetViewQuery = ({
     cardSets,
     loading: cardSetsLoading,
     updateCardSet,
-  } = useCardSets(folderId ?? undefined);
-  const cardSetById = useMemo(() => {
-    const activeCardSets = cardSets.filter((cardSet) => !cardSet.isDeleted);
-    return buildCardSetById(activeCardSets);
-  }, [cardSets]);
+  } = useCardSets();
 
-  const {
-    cards,
-    loading: cardsLoading,
-    createCard,
-    updateCard,
-  } = useCards(folderId ?? undefined, cardSetId ?? undefined, {
-    enabled: Boolean(folderId || cardSetId),
-  });
+  const activeCardSets = useMemo(
+    () => cardSets.filter((cardSet) => !cardSet.isDeleted),
+    [cardSets],
+  );
+
+  const cardSetById = useMemo(() => {
+    return buildCardSetById(activeCardSets);
+  }, [activeCardSets]);
 
   const selectedCardSet = useMemo<CardSet | null>(() => {
     if (!cardSetId) {
@@ -95,9 +89,19 @@ export const useCardSetViewQuery = ({
     }
 
     return (
-      cardSets.find((cardSet: CardSet) => cardSet.id === cardSetId) ?? null
+      activeCardSets.find((cardSet: CardSet) => cardSet.id === cardSetId) ??
+      null
     );
-  }, [cardSetId, cardSets]);
+  }, [activeCardSets, cardSetId]);
+
+  const {
+    cards,
+    loading: cardsLoading,
+    createCard,
+    updateCard,
+  } = useCards(selectedCardSet?.folderId ?? undefined, cardSetId ?? undefined, {
+    enabled: Boolean(cardSetId && selectedCardSet),
+  });
 
   const sortedCards = useMemo<Card[]>(() => {
     return [...cards].sort(compareCards);

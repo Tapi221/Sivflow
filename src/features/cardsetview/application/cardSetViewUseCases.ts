@@ -25,7 +25,7 @@ interface CreateAndFocusCardOptions {
 
 interface BootstrapEmptyCardSetOptions {
   cardSetId: string;
-  folderId: string;
+  targetFolderId: string | null;
   createCard: (cardData: CreateCardInput) => Promise<unknown>;
 }
 
@@ -36,14 +36,14 @@ interface ToggleCardFlagOptions {
 
 const buildNewCardPayload = ({
   cardSetId,
-  folderId,
+  targetFolderId,
 }: {
   cardSetId: string;
-  folderId: string | null;
+  targetFolderId: string | null;
 }): CreateCardInput => {
   return {
     cardSetId,
-    ...(folderId ? { folderId } : {}),
+    ...(targetFolderId ? { folderId: targetFolderId } : {}),
     title: "",
     isDraft: true,
     hasUncertainty: false,
@@ -87,7 +87,7 @@ export const createAndFocusCard = async ({
   const created = await createCard(
     buildNewCardPayload({
       cardSetId: targetCardSetId,
-      folderId: targetFolderId,
+      targetFolderId,
     }),
   );
 
@@ -96,12 +96,12 @@ export const createAndFocusCard = async ({
 
 export const bootstrapEmptyCardSet = async ({
   cardSetId,
-  folderId,
+  targetFolderId,
   createCard,
 }: BootstrapEmptyCardSetOptions): Promise<string | null> => {
   return createAndFocusCard({
     targetCardSetId: cardSetId,
-    targetFolderId: folderId || null,
+    targetFolderId,
     createCard,
   });
 };

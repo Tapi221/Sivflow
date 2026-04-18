@@ -5,11 +5,6 @@ type CardSetViewFlippedFaceScope = {
   cardSetId: string | null | undefined;
 };
 
-type LegacyCardSetViewFlippedFaceScopeHint = {
-  cardSetId: string | null | undefined;
-  folderId: string | null | undefined;
-};
-
 const normalizeDeviceScope = (value: string | null | undefined) => {
   const trimmed = typeof value === "string" ? value.trim() : "";
   return trimmed.length > 0 ? trimmed : "unknown";
@@ -24,17 +19,6 @@ export const buildCardSetViewFlippedFaceScopeKey = ({
     normalizeDeviceScope(deviceScope),
     cardSetId ?? "__no_card_set__",
   ].join("::");
-};
-
-const buildLegacySessionStorageKey = ({
-  cardSetId,
-  folderId,
-}: LegacyCardSetViewFlippedFaceScopeHint) => {
-  return [
-    SHARED_STORAGE_KEYS.cardSetViewFlippedFacePrefix,
-    cardSetId ?? "__no_card_set__",
-    folderId ?? "__no_folder__",
-  ].join(":");
 };
 
 const readLocalValue = (key: string) => {
@@ -62,36 +46,6 @@ const writeLocalValue = (key: string, value: string | null) => {
   }
 };
 
-const readLegacySessionValue = (
-  legacyScopeHint: LegacyCardSetViewFlippedFaceScopeHint | null,
-) => {
-  if (typeof window === "undefined" || !legacyScopeHint?.cardSetId) {
-    return null;
-  }
-
-  const keys = [
-    buildLegacySessionStorageKey(legacyScopeHint),
-    buildLegacySessionStorageKey({
-      cardSetId: legacyScopeHint.cardSetId,
-      folderId: null,
-    }),
-  ];
-
-  try {
-    for (const key of keys) {
-      const value = window.sessionStorage.getItem(key);
-      if (value) {
-        window.sessionStorage.removeItem(key);
-        return value;
-      }
-    }
-  } catch {
-    return null;
-  }
-
-  return null;
-};
-
 const normalizeCardIdList = (value: unknown) => {
   if (!Array.isArray(value)) return [];
 
@@ -104,26 +58,18 @@ const normalizeCardIdList = (value: unknown) => {
 export const getCardSetViewFlippedCardIds = ({
   deviceScope,
   cardSetId,
-  legacyScopeHint,
-}: CardSetViewFlippedFaceScope & {
-  legacyScopeHint?: LegacyCardSetViewFlippedFaceScopeHint | null;
-}) => {
+}: CardSetViewFlippedFaceScope) => {
   if (!cardSetId) return new Set<string>();
 
-  const currentScope = { deviceScope, cardSetId };
-  const currentStorageKey = buildCardSetViewFlippedFaceScopeKey(currentScope);
-  const raw =
-    readLocalValue(currentStorageKey) ??
-    readLegacySessionValue(legacyScopeHint ?? null);
+  const currentStorageKey = buildCardSetViewFlippedFaceScopeKey({
+    deviceScope,
+    cardSetId,
+  });
+  const raw = readLocalValue(currentStorageKey);
   if (!raw) return new Set<string>();
 
   try {
-    const parsedIds = new Set<string>(normalizeCardIdList(JSON.parse(raw)));
-    writeLocalValue(
-      currentStorageKey,
-      parsedIds.size > 0 ? JSON.stringify(Array.from(parsedIds)) : null,
-    );
-    return parsedIds;
+    return new Set<string>(normalizeCardIdList(JSON.parse(raw)));
   } catch {
     return new Set<string>();
   }

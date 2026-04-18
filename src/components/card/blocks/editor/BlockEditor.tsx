@@ -609,6 +609,7 @@ export const BlockEditor = React.forwardRef<
         style={editorRootStyle}
         className={cn(
           "space-y-0",
+          !hideToolbar && toolbarDesktopLayout === "vertical" && "pb-28 md:pb-32",
           prefix === "question" ? "js-question-editor" : "js-answer-editor",
         )}
         onPointerDownCapture={(event) => {
