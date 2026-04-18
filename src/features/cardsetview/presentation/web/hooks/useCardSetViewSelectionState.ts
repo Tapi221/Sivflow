@@ -18,7 +18,7 @@ import { useCardEntity } from "@/hooks/card/useCardEntity";
 import {
   getCardSetViewFlippedCardIds,
   setCardSetViewFlippedCardIds,
-} from "@/services/cardSetViewFlippedFaceSession";
+} from "@/services/cardSetViewFlippedFacePreferences";
 import type { Card } from "@/types";
 
 type KeyedNumberState = {
@@ -42,7 +42,6 @@ interface UseCardSetViewSelectionStateOptions {
   initialIndex: number;
   targetCardId: string | null;
   deviceScope: string;
-  legacyFolderId: string | null;
   cardSetId: string | null;
   sortedCards: Card[];
   cardIndexById: Map<string, number>;
@@ -52,7 +51,6 @@ export const useCardSetViewSelectionState = ({
   initialIndex,
   targetCardId,
   deviceScope,
-  legacyFolderId,
   cardSetId,
   sortedCards,
   cardIndexById,
@@ -91,7 +89,6 @@ export const useCardSetViewSelectionState = ({
     ids: getCardSetViewFlippedCardIds({
       deviceScope,
       cardSetId,
-      legacyScopeHint: { cardSetId, folderId: legacyFolderId },
     }),
   }));
 
@@ -170,11 +167,10 @@ export const useCardSetViewSelectionState = ({
         ids: getCardSetViewFlippedCardIds({
           deviceScope,
           cardSetId,
-          legacyScopeHint: { cardSetId, folderId: legacyFolderId },
         }),
       };
     });
-  }, [cardSetId, deviceScope, legacyFolderId, sourceKey]);
+  }, [cardSetId, deviceScope, sourceKey]);
 
   useEffect(() => {
     if (flippedState.sourceKey !== sourceKey) return;

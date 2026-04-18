@@ -4,7 +4,6 @@ import type { CardSet } from "@/types/domain/cardSet";
 
 interface ResolveCardMutationTargetOptions {
   cardSetId: string | null;
-  folderId: string | null;
   cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>;
   selectedCardSet: CardSet | null;
   selectedCard: Card | null;
@@ -18,7 +17,6 @@ interface CardMutationTarget {
 
 export const resolveCardMutationTarget = ({
   cardSetId,
-  folderId,
   cardSetById,
   selectedCardSet,
   selectedCard,
@@ -40,7 +38,6 @@ export const resolveCardMutationTarget = ({
     resolveTargetFolderId(selectedCard) ??
     resolveTargetFolderId(currentCard) ??
     selectedCardSet?.folderId ??
-    folderId ??
     null;
 
   return {

@@ -5,13 +5,12 @@ import {
   buildCardSetViewFlippedFaceScopeKey,
   getCardSetViewFlippedCardIds,
   setCardSetViewFlippedCardIds,
-} from "@/services/cardSetViewFlippedFaceSession";
+} from "@/services/cardSetViewFlippedFacePreferences";
 import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 
-describe("cardSetViewFlippedFaceSession", () => {
+describe("cardSetViewFlippedFacePreferences", () => {
   beforeEach(() => {
     window.localStorage.clear();
-    window.sessionStorage.clear();
   });
 
   it("uses deviceScope + cardSetId as the current persistence key", () => {
@@ -73,49 +72,30 @@ describe("cardSetViewFlippedFaceSession", () => {
     ).toEqual(new Set(["card-mobile"]));
   });
 
-  it("shares state across folder changes for the same cardSetId", () => {
+  it("removes the persistence entry when ids become empty", () => {
+    const currentKey = buildCardSetViewFlippedFaceScopeKey({
+      deviceScope: "desktop",
+      cardSetId: "set-4",
+    });
+
     setCardSetViewFlippedCardIds({
       deviceScope: "desktop",
       cardSetId: "set-4",
-      ids: new Set(["card-shared"]),
+      ids: new Set(["card-a"]),
     });
 
+    setCardSetViewFlippedCardIds({
+      deviceScope: "desktop",
+      cardSetId: "set-4",
+      ids: new Set(),
+    });
+
+    expect(window.localStorage.getItem(currentKey)).toBeNull();
     expect(
       getCardSetViewFlippedCardIds({
         deviceScope: "desktop",
         cardSetId: "set-4",
-        legacyScopeHint: { cardSetId: "set-4", folderId: "folder-a" },
       }),
-    ).toEqual(new Set(["card-shared"]));
-    expect(
-      getCardSetViewFlippedCardIds({
-        deviceScope: "desktop",
-        cardSetId: "set-4",
-        legacyScopeHint: { cardSetId: "set-4", folderId: "folder-b" },
-      }),
-    ).toEqual(new Set(["card-shared"]));
-  });
-
-  it("migrates legacy folder/session state to the current localStorage key", () => {
-    const legacySessionKey = `${SHARED_STORAGE_KEYS.cardSetViewFlippedFacePrefix}:set-legacy:folder-1`;
-    const currentKey = buildCardSetViewFlippedFaceScopeKey({
-      deviceScope: "desktop",
-      cardSetId: "set-legacy",
-    });
-
-    window.sessionStorage.setItem(
-      legacySessionKey,
-      JSON.stringify(["card-legacy"]),
-    );
-
-    const ids = getCardSetViewFlippedCardIds({
-      deviceScope: "desktop",
-      cardSetId: "set-legacy",
-      legacyScopeHint: { cardSetId: "set-legacy", folderId: "folder-1" },
-    });
-
-    expect(ids).toEqual(new Set(["card-legacy"]));
-    expect(window.localStorage.getItem(currentKey)).toBe('["card-legacy"]');
-    expect(window.sessionStorage.getItem(legacySessionKey)).toBeNull();
+    ).toEqual(new Set());
   });
 });

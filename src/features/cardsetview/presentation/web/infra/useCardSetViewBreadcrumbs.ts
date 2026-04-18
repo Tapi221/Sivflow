@@ -17,7 +17,6 @@ interface Crumb {
 }
 
 interface UseCardSetViewBreadcrumbsOptions {
-  folderId: string | null;
   selectedCardSet: CardSet | null;
   selectedCard: Card | null;
   sortedCards: Card[];
@@ -26,7 +25,6 @@ interface UseCardSetViewBreadcrumbsOptions {
 }
 
 export const useCardSetViewBreadcrumbs = ({
-  folderId,
   selectedCardSet,
   selectedCard,
   sortedCards,
@@ -38,10 +36,12 @@ export const useCardSetViewBreadcrumbs = ({
     [folders],
   );
 
+  const resolvedFolderId = selectedCardSet?.folderId ?? null;
+
   useEffect(() => {
     setExtraCrumbs(
       buildCardSetViewBreadcrumbs({
-        folderId,
+        folderId: resolvedFolderId,
         selectedCardSet,
         selectedCard,
         sortedCards,
@@ -49,7 +49,7 @@ export const useCardSetViewBreadcrumbs = ({
       }),
     );
   }, [
-    folderId,
+    resolvedFolderId,
     selectedCardSet,
     selectedCard,
     sortedCards,

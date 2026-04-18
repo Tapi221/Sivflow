@@ -13,13 +13,6 @@ import {
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
 interface BlockToolbarProps {
   label: string;
   onAddBlock: (type: CardBlock["type"]) => void;
@@ -39,6 +32,11 @@ type BlockConfig = {
   orderIndex?: number;
 };
 
+type TooltipPosition = {
+  x: number;
+  y: number;
+};
+
 const ALLOWED_TYPES: readonly CardBlock["type"][] = [
   "text",
   "question",
@@ -54,21 +52,26 @@ const DEFAULT_CONFIGS: BlockConfig[] = [
   { type: "code", label: "コード", icon: "Code", isVisible: true },
   { type: "image", label: "画像", icon: "Image", isVisible: true },
   { type: "math", label: "数式", icon: "Sigma", isVisible: true },
-  { type: "markdown", label: "Markdown", icon: "NotebookPen", isVisible: true },
+  {
+    type: "markdown",
+    label: "Markdown",
+    icon: "NotebookPen",
+    isVisible: true,
+  },
 ];
 
 const DEFAULT_ORDER_INDEX_BY_TYPE = DEFAULT_CONFIGS.reduce<
   Record<CardBlock["type"], number>
->(
-  (acc, config, index) => {
-    acc[config.type] = index;
-    return acc;
-  },
-  {} as Record<CardBlock["type"], number>,
-);
+>((acc, config, index) => {
+  acc[config.type] = index;
+  return acc;
+}, {} as Record<CardBlock["type"], number>);
 
-const getIcon = (iconName: string | undefined, type: CardBlock["type"]) => {
-  const map: Record<string, React.ComponentType<IconProps>> = {
+const getIcon = (
+  iconName: string | undefined,
+  type: CardBlock["type"],
+) => {
+  const iconMap: Record<string, React.ComponentType<IconProps>> = {
     Type: Type,
     Image: ImageIcon,
     Sigma: StratisFormulaIcon,
@@ -76,7 +79,11 @@ const getIcon = (iconName: string | undefined, type: CardBlock["type"]) => {
     NotebookPen: StratisMarkdownIcon,
     HelpCircle: HelpCircle,
   };
-  if (iconName && map[iconName]) return map[iconName];
+
+  if (iconName && iconMap[iconName]) {
+    return iconMap[iconName];
+  }
+
   const typeMap: Record<string, React.ComponentType<IconProps>> = {
     text: Type,
     question: HelpCircle,
@@ -85,7 +92,16 @@ const getIcon = (iconName: string | undefined, type: CardBlock["type"]) => {
     markdown: StratisMarkdownIcon,
     math: StratisFormulaIcon,
   };
+
   return typeMap[type] ?? Plus;
+};
+
+const canShowHoverTooltip = () => {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return false;
+  }
+
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 };
 
 const Tooltip = ({
@@ -95,22 +111,37 @@ const Tooltip = ({
   label: string;
   children: React.ReactNode;
 }) => {
-  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<TooltipPosition | null>(null);
 
   const show = () => {
+    if (!canShowHoverTooltip()) return;
     if (!anchorRef.current) return;
-    const r = anchorRef.current.getBoundingClientRect();
-    setPos({ x: r.left + r.width / 2, y: r.top - 6 });
+
+    const rect = anchorRef.current.getBoundingClientRect();
+    setPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.top - 10,
+    });
   };
-  const hide = () => setPos(null);
+
+  const hide = () => {
+    setPosition(null);
+  };
 
   useEffect(() => {
-    if (!pos) return;
-    const onScroll = () => setPos(null);
-    window.addEventListener("scroll", onScroll, true);
-    return () => window.removeEventListener("scroll", onScroll, true);
-  }, [pos]);
+    if (!position || typeof window === "undefined") return;
+
+    const handleScroll = () => {
+      setPosition(null);
+    };
+
+    window.addEventListener("scroll", handleScroll, true);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll, true);
+    };
+  }, [position]);
 
   return (
     <>
@@ -124,49 +155,59 @@ const Tooltip = ({
       >
         {children}
       </div>
-      {pos &&
-        createPortal(
-          <>
-            <style>{`
-            @keyframes bt-tooltip-in {
-              from { opacity: 0; transform: translate(-50%, -4px); }
-              to   { opacity: 1; transform: translate(-50%, 0); }
-            }
-          `}</style>
-            <div
-              role="tooltip"
-              style={{
-                position: "fixed",
-                left: pos.x,
-                top: pos.y,
-                transform: "translate(-50%, -100%)",
-                zIndex: 9999,
-                pointerEvents: "none",
-                animation: "bt-tooltip-in 0.15s ease forwards",
-              }}
-            >
-              <span
+
+      {position && typeof document !== "undefined"
+        ? createPortal(
+            <>
+              <style>{`
+              @keyframes block-toolbar-tooltip-in {
+                from {
+                  opacity: 0;
+                  transform: translate(-50%, -4px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translate(-50%, 0);
+                }
+              }
+            `}</style>
+
+              <div
+                role="tooltip"
                 style={{
-                  display: "inline-block",
-                  whiteSpace: "nowrap",
-                  background: "rgba(22,27,34,0.92)",
-                  color: "#e6edf3",
-                  fontSize: "11px",
-                  fontWeight: 500,
-                  lineHeight: 1,
-                  padding: "4px 8px",
-                  borderRadius: "6px",
-                  backdropFilter: "blur(4px)",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.28)",
-                  letterSpacing: "0.01em",
+                  position: "fixed",
+                  left: position.x,
+                  top: position.y,
+                  transform: "translate(-50%, -100%)",
+                  zIndex: 100,
+                  pointerEvents: "none",
+                  animation:
+                    "block-toolbar-tooltip-in 0.14s ease-out forwards",
                 }}
               >
-                {label}
-              </span>
-            </div>
-          </>,
-          document.body,
-        )}
+                <span
+                  style={{
+                    display: "inline-block",
+                    whiteSpace: "nowrap",
+                    background: "rgba(15, 23, 42, 0.92)",
+                    color: "#f8fafc",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    lineHeight: 1,
+                    padding: "6px 8px",
+                    borderRadius: "8px",
+                    boxShadow: "0 10px 24px rgba(15, 23, 42, 0.18)",
+                    letterSpacing: "0.01em",
+                    backdropFilter: "blur(8px)",
+                  }}
+                >
+                  {label}
+                </span>
+              </div>
+            </>,
+            document.body,
+          )
+        : null}
     </>
   );
 };
@@ -180,22 +221,27 @@ const ActionButton = ({
   icon: React.ComponentType<IconProps>;
   label: string;
 }) => {
+  const ariaLabel = `${label}を追加`;
+
   return (
-    <Tooltip label={`${label}を追加`}>
+    <Tooltip label={ariaLabel}>
       <button
         type="button"
         onClick={onClick}
-        aria-label={`${label}を追加`}
+        aria-label={ariaLabel}
+        title={ariaLabel}
         className={cn(
-          "group/toolbar inline-flex shrink-0 items-center justify-center w-8 h-8 rounded-md",
-          "text-[var(--sidebar-text-muted,#6e6e80)] transition-colors duration-100 select-none",
-          "hover:text-[var(--sidebar-text,#202123)] hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
-          "active:bg-[var(--sidebar-active-bg,#e7ebef)] active:text-[var(--sidebar-text,#202123)]",
+          "group/toolbar relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl",
+          "border border-transparent bg-transparent text-slate-500",
+          "transition-all duration-150 ease-out select-none",
+          "hover:-translate-y-0.5 hover:border-[rgba(148,163,184,0.24)] hover:bg-white hover:text-slate-900",
+          "hover:shadow-[0_12px_28px_rgba(15,23,42,0.12)]",
+          "active:translate-y-0 active:scale-[0.98]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sidebar-active-accent,#7aa6a1)]",
         )}
       >
         <Icon
-          className="w-4 h-4 shrink-0 opacity-70 transition-opacity duration-100 group-hover/toolbar:opacity-100 group-active/toolbar:opacity-100"
+          className="h-[18px] w-[18px] shrink-0 opacity-80 transition-opacity duration-150 group-hover/toolbar:opacity-100"
           style={{ strokeWidth: 1.2 }}
         />
       </button>
@@ -211,45 +257,40 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
   desktopLayout = "horizontal",
   className,
 }) => {
-  const verticalAnchorRef = useRef<HTMLDivElement | null>(null);
-  const [verticalFixedLeft, setVerticalFixedLeft] = useState<number | null>(
-    null,
-  );
-
   type RawSettings = { editorBlockSettings?: Record<string, unknown>[] };
-  const rawSettings = (settings as RawSettings | undefined)
-    ?.editorBlockSettings;
+  const rawSettings = (settings as RawSettings | undefined)?.editorBlockSettings;
 
   const blockSettings: BlockConfig[] = useMemo(() => {
     if (!rawSettings || rawSettings.length === 0) return DEFAULT_CONFIGS;
 
     const fromSettings = rawSettings
-      .map((x) => ({
-        type: x["type"] as CardBlock["type"],
-        label: (x["label"] as string | undefined) ?? String(x["type"]),
-        icon: x["icon"] as string | undefined,
-        isVisible: x["isVisible"] as boolean | undefined,
-        enabled: x["enabled"] as boolean | undefined,
-        color: x["color"] as string | undefined,
+      .map((item) => ({
+        type: item["type"] as CardBlock["type"],
+        label: (item["label"] as string | undefined) ?? String(item["type"]),
+        icon: item["icon"] as string | undefined,
+        isVisible: item["isVisible"] as boolean | undefined,
+        enabled: item["enabled"] as boolean | undefined,
+        color: item["color"] as string | undefined,
         orderIndex:
-          typeof x["orderIndex"] === "number"
-            ? (x["orderIndex"] as number)
+          typeof item["orderIndex"] === "number"
+            ? (item["orderIndex"] as number)
             : undefined,
       }))
-      .filter((x) => ALLOWED_TYPES.includes(x.type));
+      .filter((item) => ALLOWED_TYPES.includes(item.type));
 
-    // DB に保存されていない新しいブロック型をデフォルト設定から補完する
     const missingDefaults = DEFAULT_CONFIGS.filter(
-      (d) => !fromSettings.some((s) => s.type === d.type),
+      (defaultConfig) =>
+        !fromSettings.some(
+          (settingConfig) => settingConfig.type === defaultConfig.type,
+        ),
     );
-
     const merged = [...fromSettings, ...missingDefaults];
 
-    // 順序は配列の自然順ではなく orderIndex を優先し、UI の並びを安定化する。
     return merged.sort((a, b) => {
       const aOrder = a.orderIndex ?? DEFAULT_ORDER_INDEX_BY_TYPE[a.type] ?? 999;
       const bOrder = b.orderIndex ?? DEFAULT_ORDER_INDEX_BY_TYPE[b.type] ?? 999;
       if (aOrder !== bOrder) return aOrder - bOrder;
+
       return (
         (DEFAULT_ORDER_INDEX_BY_TYPE[a.type] ?? 999) -
         (DEFAULT_ORDER_INDEX_BY_TYPE[b.type] ?? 999)
@@ -257,199 +298,87 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
     });
   }, [rawSettings]);
 
-  const visibleConfigs = useMemo(
-    () =>
-      blockSettings.filter((config) => {
-        if (!(config.isVisible ?? config.enabled ?? true)) return false;
-        if (hiddenBlockTypes.includes(config.type)) return false;
-        return true;
-      }),
-    [blockSettings, hiddenBlockTypes],
-  );
+  const visibleConfigs = useMemo(() => {
+    return blockSettings.filter((config) => {
+      if (!ALLOWED_TYPES.includes(config.type)) return false;
+      if (config.isVisible === false) return false;
+      if (config.enabled === false) return false;
+      if (hiddenBlockTypes.includes(config.type)) return false;
+      return true;
+    });
+  }, [blockSettings, hiddenBlockTypes]);
 
-  useEffect(() => {
-    if (desktopLayout !== "vertical") {
-      return;
-    }
-    if (typeof window === "undefined") return;
-
-    let rafId: number | null = null;
-    let resizeObserver: ResizeObserver | null = null;
-    const VERTICAL_TOOLBAR_WIDTH_PX = 44; // w-11
-    const update = () => {
-      const el = verticalAnchorRef.current;
-      if (!el) return;
-      const anchorLeft = el.getBoundingClientRect().left;
-      const mountTransform = (el.parentElement as HTMLElement | null)?.style
-        ?.transform;
-      // transform に "-100%" が含まれる配置では、アンカーがツールバー右端基準になる。
-      const shouldShiftByToolbarWidth =
-        typeof mountTransform === "string" && mountTransform.includes("-100%");
-      const nextLeft = shouldShiftByToolbarWidth
-        ? anchorLeft - VERTICAL_TOOLBAR_WIDTH_PX
-        : anchorLeft;
-      setVerticalFixedLeft((prev) =>
-        prev !== null && Math.abs(prev - nextLeft) < 0.5 ? prev : nextLeft,
-      );
-    };
-    const scheduleUpdate = () => {
-      if (rafId !== null) return;
-      rafId = window.requestAnimationFrame(() => {
-        rafId = null;
-        update();
-      });
-    };
-
-    update();
-    window.addEventListener("resize", scheduleUpdate);
-    const anchorEl = verticalAnchorRef.current;
-    if (anchorEl && typeof ResizeObserver !== "undefined") {
-      resizeObserver = new ResizeObserver(scheduleUpdate);
-      resizeObserver.observe(anchorEl);
-      if (anchorEl.parentElement) {
-        resizeObserver.observe(anchorEl.parentElement);
-      }
-    }
-
-    return () => {
-      if (rafId !== null) {
-        window.cancelAnimationFrame(rafId);
-      }
-      resizeObserver?.disconnect();
-      window.removeEventListener("resize", scheduleUpdate);
-    };
-  }, [desktopLayout]);
-
-  const renderToolbarShell = () => (
-    <div
-      className={cn(
-        desktopLayout === "vertical"
-          ? "flex w-11 min-h-[220px] flex-col items-center gap-1 px-1.5 py-2 rounded-2xl"
-          : "flex w-full items-center gap-0 px-2.5 h-8 min-h-[32px] rounded-xl",
-        "border border-[rgba(148,163,184,0.3)]",
-        "bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(243,246,250,0.9))]",
-        "shadow-[0_5px_14px_rgba(15,23,42,0.08)] backdrop-blur-[2px]",
-        className,
-      )}
-    >
-      {/* モバイル: ドロップダウン */}
-      <div className="flex md:hidden">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className={cn(
-                "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md",
-                "text-[11px] font-medium text-[var(--sidebar-text-muted,#6e6e80)] transition-colors duration-100",
-                "hover:text-[var(--sidebar-text,#202123)] hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
-                "active:bg-[var(--sidebar-active-bg,#e7ebef)] active:text-[var(--sidebar-text,#202123)]",
-              )}
-              aria-label={`${label} にブロックを追加`}
-            >
-              <Plus className="w-3 h-3" />
-              <span>ブロックを追加</span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            className="rounded-xl border-slate-100 shadow-lg p-1.5 min-w-[200px]"
-          >
-            {visibleConfigs.length === 0 ? (
-              <div className="px-2 py-2 text-xs text-slate-400">
-                追加できるブロックがありません
-              </div>
-            ) : (
-              visibleConfigs.map((config) => {
-                const Icon = getIcon(config.icon, config.type);
-                return (
-                  <DropdownMenuItem
-                    key={config.type}
-                    onClick={() => onAddBlock(config.type)}
-                    className="rounded-lg flex items-center gap-2.5 py-2 px-2 text-[var(--sidebar-text-muted,#6e6e80)] focus:text-[var(--sidebar-text,#202123)] focus:bg-[var(--sidebar-active-bg,#e7ebef)]"
-                  >
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-100 border border-slate-200/70">
-                      <Icon className="w-3.5 h-3.5" />
-                    </span>
-                    <span className="text-[12px] font-medium">
-                      {config.label}
-                    </span>
-                  </DropdownMenuItem>
-                );
-              })
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+  const buttons =
+    visibleConfigs.length === 0 ? (
+      <div className="inline-flex h-11 items-center rounded-2xl px-3 text-[11px] font-medium text-slate-400">
+        追加できるブロックがありません
       </div>
+    ) : (
+      visibleConfigs.map((config) => {
+        const Icon = getIcon(config.icon, config.type);
 
-      {/* デスクトップ: アイコン only ボタン（横/縦） */}
-      <div
-        className={cn(
-          "hidden md:flex items-center gap-1",
-          desktopLayout === "vertical"
-            ? "flex-col overflow-y-hidden"
-            : "flex-nowrap overflow-x-hidden",
-        )}
-      >
-        {visibleConfigs.map((config) => {
-          const Icon = getIcon(config.icon, config.type);
-          return (
-            <ActionButton
-              key={config.type}
-              onClick={() => onAddBlock(config.type)}
-              icon={Icon}
-              label={config.label}
-            />
-          );
-        })}
-      </div>
-    </div>
-  );
+        return (
+          <ActionButton
+            key={config.type}
+            onClick={() => onAddBlock(config.type)}
+            icon={Icon}
+            label={config.label}
+          />
+        );
+      })
+    );
 
   if (desktopLayout === "vertical") {
     return (
-      <>
-        <div
-          ref={verticalAnchorRef}
-          className="hidden md:block h-0 w-0"
-          aria-hidden
-        />
-        <div className="md:hidden">{renderToolbarShell()}</div>
-        {typeof document !== "undefined" &&
-          createPortal(
-            <div
-              className="hidden md:block"
-              style={{
-                position: "fixed",
-                top: "50dvh",
-                left: verticalFixedLeft ?? -9999,
-                transform: "translateY(-50%)",
-                zIndex: 30,
-              }}
-            >
-              {renderToolbarShell()}
-            </div>,
-            document.body,
-          )}
-      </>
+      <div className={cn("flex items-center gap-1.5 overflow-x-auto", className)}>
+        {buttons}
+      </div>
     );
   }
 
-  return renderToolbarShell();
+  return (
+    <div
+      className={cn(
+        "flex w-full items-center gap-1 rounded-[22px] border border-[rgba(148,163,184,0.24)]",
+        "bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(247,249,252,0.94))]",
+        "px-2 py-2 shadow-[0_10px_24px_rgba(15,23,42,0.08)] backdrop-blur-[8px]",
+        className,
+      )}
+    >
+      <span
+        className={cn(
+          "inline-flex h-9 shrink-0 items-center rounded-2xl border px-3",
+          "border-[rgba(148,163,184,0.16)] bg-white/84",
+          "text-[11px] font-semibold tracking-[0.01em] text-slate-600",
+        )}
+      >
+        {label}
+      </span>
+
+      <div className="h-7 w-px shrink-0 bg-slate-200/80" aria-hidden />
+
+      {buttons}
+    </div>
+  );
 };
 
 const areBlockToolbarPropsEqual = (
   prev: BlockToolbarProps,
   next: BlockToolbarProps,
-) =>
-  prev.label === next.label &&
-  prev.onAddBlock === next.onAddBlock &&
-  prev.settings === next.settings &&
-  prev.hiddenBlockTypes === next.hiddenBlockTypes &&
-  prev.desktopLayout === next.desktopLayout &&
-  prev.className === next.className;
+) => {
+  if (prev.label !== next.label) return false;
+  if (prev.onAddBlock !== next.onAddBlock) return false;
+  if (prev.settings !== next.settings) return false;
+  if (prev.hiddenBlockTypes !== next.hiddenBlockTypes) return false;
+  if (prev.desktopLayout !== next.desktopLayout) return false;
+  if (prev.className !== next.className) return false;
+  return true;
+};
 
 export const BlockToolbar = React.memo(
   BlockToolbarInner,
   areBlockToolbarPropsEqual,
 );
+
 BlockToolbar.displayName = "BlockToolbar";
+

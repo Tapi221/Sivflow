@@ -12,7 +12,6 @@ import type { CardSet } from "@/types/domain/cardSet";
 
 interface UseCardSetViewActionsOptions {
   cardSetId: string | null;
-  folderId: string | null;
   cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>;
   selectedCardSet: CardSet | null;
   selectedCard: Card | null;
@@ -31,7 +30,6 @@ interface UseCardSetViewActionsOptions {
 
 export const useCardSetViewActions = ({
   cardSetId,
-  folderId,
   cardSetById,
   selectedCardSet,
   selectedCard,
@@ -48,7 +46,7 @@ export const useCardSetViewActions = ({
   const autoInitializedCardSetIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!cardSetId || isLoading || sortedCardsLength > 0) {
+    if (!cardSetId || !selectedCardSet || isLoading || sortedCardsLength > 0) {
       return;
     }
 
@@ -64,7 +62,7 @@ export const useCardSetViewActions = ({
 
         const createdId = await bootstrapEmptyCardSet({
           cardSetId,
-          folderId: folderId ?? selectedCardSet?.folderId ?? "",
+          targetFolderId: selectedCardSet.folderId ?? null,
           createCard,
         });
 
@@ -83,9 +81,8 @@ export const useCardSetViewActions = ({
     beginGlobalEditing,
     cardSetId,
     createCard,
-    folderId,
     isLoading,
-    selectedCardSet?.folderId,
+    selectedCardSet,
     setPendingFocusCardId,
     sortedCardsLength,
     toastError,
@@ -94,7 +91,6 @@ export const useCardSetViewActions = ({
   const createAndFocusCard = useCallback(async (): Promise<boolean> => {
     const { targetCardSetId, targetFolderId } = resolveCardMutationTarget({
       cardSetId,
-      folderId,
       cardSetById,
       selectedCardSet,
       selectedCard,
@@ -140,7 +136,6 @@ export const useCardSetViewActions = ({
     createCard,
     currentCard,
     cardSetById,
-    folderId,
     selectedCard,
     selectedCardSet,
     setPendingFocusCardId,

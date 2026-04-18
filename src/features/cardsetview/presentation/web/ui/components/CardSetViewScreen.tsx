@@ -24,7 +24,6 @@ const CARD_SET_VIEW_CONTENT_COMPONENTS = {
 export const CardSetViewScreen = () => {
   const controller = useCardSetViewScreenController();
   const {
-    folderId,
     cardSetId,
     settings,
     data,
@@ -42,12 +41,10 @@ export const CardSetViewScreen = () => {
 
   const presentationTarget = usePresentationTarget();
 
-  if (!folderId && !cardSetId) {
+  if (!cardSetId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">
-          フォルダまたはカードセットが指定されていません
-        </p>
+        <p className="text-gray-500">カードセットが指定されていません</p>
       </div>
     );
   }
