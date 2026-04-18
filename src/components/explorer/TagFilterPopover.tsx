@@ -119,7 +119,7 @@ export const TagFilterPopover = ({
 
           <div className="ds-filter-section flex items-center gap-2 bg-transparent px-3 py-2 text-[11px]">
             <span className="ds-filter-section__label">条件:</span>
-            <div className="ds-filter-toggle-group flex p-0.5 shadow-sm">
+            <div className="ds-segmented-control">
               <SurfaceButton
                 onClick={() => setTagMatchMode("any")}
                 surface={tagMatchMode === "any" ? "convexActive" : "concave"}
@@ -140,7 +140,7 @@ export const TagFilterPopover = ({
           <div className="ds-filter-section space-y-2 bg-transparent px-3 py-2">
             <div className="flex items-center justify-between gap-2 text-[11px]">
               <span className="ds-filter-section__label">表示:</span>
-              <div className="ds-filter-toggle-group flex p-0.5 shadow-sm">
+              <div className="ds-segmented-control">
                 {[
                   { label: "カード", value: "card" as const },
                   { label: "PDF", value: "pdf" as const },
@@ -182,7 +182,7 @@ export const TagFilterPopover = ({
                 className="flex items-center justify-between gap-2 text-[11px]"
               >
                 <span className="ds-filter-section__label">{item.label}:</span>
-                <div className="ds-filter-toggle-group flex p-0.5 shadow-sm">
+                <div className="ds-segmented-control">
                   <SurfaceButton
                     onClick={() => item.onChange("any")}
                     surface={item.value === "any" ? "convexActive" : "concave"}
