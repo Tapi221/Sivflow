@@ -22,8 +22,10 @@
   }
 
   .ds-input::placeholder,
+  .ds-textarea::placeholder,
+  .ds-placeholder,
   .ds-select__trigger[data-placeholder] {
-    color: var(--ds-semantic-color-text-secondary);
+    color: var(--ds-semantic-color-text-placeholder);
   }
 
   .ds-input:focus-visible,

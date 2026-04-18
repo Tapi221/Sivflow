@@ -1,7 +1,7 @@
 import { layoutRowsToCardHeightPx } from "@constants/shared/flashcard";
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import { buildSharedCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
+import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
 import { DesktopEmbeddedCardEditorSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopEmbeddedCardEditorSurface";
 import { ViewCardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/ViewCardFaceScene";
@@ -48,10 +48,13 @@ const DesktopCardSurfaceInner = ({
 
   const metrics = React.useMemo(
     () =>
-      buildSharedCardSurfaceMetrics({
+      buildCardSurfaceMetrics({
         displayMode: currentDisplayMode,
         cardLayoutMode: currentCardLayoutMode,
+        interactionMode: "view",
         zoomScale: viewZoomScale,
+        fitScale: 1,
+        showInk: currentDisplayMode === "fixed",
       }),
     [currentCardLayoutMode, currentDisplayMode, viewZoomScale],
   );

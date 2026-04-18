@@ -3,6 +3,7 @@ import {
   buildCardRenderSpec,
   resolveCardContentZoom,
   resolveCardSurfaceScale,
+  type CardInteractionMode,
   type CardRenderSpec,
 } from "@/features/cardrender/domain/cardRenderSpec";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
@@ -19,33 +20,49 @@ export type SharedCardSurfaceMetrics = {
   sideHeaderIconVisualScale: number;
 };
 
-export const buildSharedCardSurfaceMetrics = ({
-  displayMode,
-  cardLayoutMode,
-  zoomScale,
-}: {
+export type BuildCardSurfaceMetricsArgs = Readonly<{
   displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
+  interactionMode?: CardInteractionMode;
   zoomScale: number;
-}): SharedCardSurfaceMetrics => {
+  fitScale?: number;
+  showInk?: boolean;
+}>;
+
+const resolveSafeFitScale = (value?: number) => {
+  if (typeof value !== "number") return 1;
+  if (!Number.isFinite(value)) return 1;
+  if (value <= 0) return 1;
+  return value;
+};
+
+export const buildCardSurfaceMetrics = ({
+  displayMode,
+  cardLayoutMode,
+  interactionMode = "view",
+  zoomScale,
+  fitScale = 1,
+  showInk = interactionMode === "view" && displayMode === "fixed",
+}: BuildCardSurfaceMetricsArgs): SharedCardSurfaceMetrics => {
+  const safeFitScale = resolveSafeFitScale(fitScale);
   const renderSpec = buildCardRenderSpec({
     displayMode,
-    interactionMode: "view",
+    interactionMode,
     zoomScale,
-    showInk: displayMode === "fixed",
+    showInk,
   });
 
   const isSplitLayout = cardLayoutMode === "split";
   const isFlipLayout = cardLayoutMode === "flip";
 
   const baseFixedScale =
-    displayMode === "fixed" ? resolveCardSurfaceScale(renderSpec) : undefined;
+    displayMode === "fixed"
+      ? resolveCardSurfaceScale(renderSpec) * safeFitScale
+      : undefined;
   const baseContentZoom = resolveCardContentZoom(renderSpec);
   const baseHeaderIconVisualScale =
-    renderSpec.surfaceMode === "card" &&
-    Number.isFinite(renderSpec.zoomScale) &&
-    renderSpec.zoomScale > 0
-      ? renderSpec.zoomScale
+    typeof baseFixedScale === "number" && Number.isFinite(baseFixedScale)
+      ? Math.max(0.1, baseFixedScale)
       : 1;
 
   const sideFixedScale =
@@ -63,9 +80,11 @@ export const buildSharedCardSurfaceMetrics = ({
   const sideHeaderIconVisualScale =
     displayMode === "fluid"
       ? 1
-      : isSplitLayout
-        ? Math.max(0.1, baseHeaderIconVisualScale / 2)
-        : baseHeaderIconVisualScale;
+      : typeof sideFixedScale === "number"
+        ? Math.max(0.1, sideFixedScale)
+        : isSplitLayout
+          ? Math.max(0.1, baseHeaderIconVisualScale / 2)
+          : baseHeaderIconVisualScale;
 
   return {
     renderSpec,
@@ -79,3 +98,14 @@ export const buildSharedCardSurfaceMetrics = ({
     sideHeaderIconVisualScale,
   };
 };
+
+export const buildSharedCardSurfaceMetrics = ({
+  displayMode,
+  cardLayoutMode,
+  zoomScale,
+}: {
+  displayMode: CardDisplayMode;
+  cardLayoutMode: CardLayoutMode;
+  zoomScale: number;
+}) => buildCardSurfaceMetrics({ displayMode, cardLayoutMode, zoomScale });
+

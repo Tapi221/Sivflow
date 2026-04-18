@@ -46,13 +46,8 @@ import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
-import {
-  buildCardRenderSpec,
-  resolveCardContentZoom,
-  resolveCardSurfaceScale,
-} from "@/features/cardrender/domain/cardRenderSpec";
+import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 import { cn } from "@/lib/utils";
-import { CARD_PANE_AUTO_MAX_SCALE } from "@constants/shared/flashcard";
 import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { toMillisOrNull } from "@/utils/toMillis";
@@ -449,19 +444,20 @@ export const CardEditorPane = ({
     [cardPresentationContext],
   );
 
-  const editorRenderSpec = useMemo(
+  const editorMetrics = useMemo(
     () =>
-      buildCardRenderSpec({
+      buildCardSurfaceMetrics({
         displayMode,
+        cardLayoutMode,
         interactionMode: "edit",
         zoomScale: zoom,
         showInk: false,
+        fitScale: editorCardFitScale,
       }),
-    [displayMode, zoom],
+    [cardLayoutMode, displayMode, editorCardFitScale, zoom],
   );
 
-  const isFluidEditor = editorRenderSpec.surfaceMode === "fluid";
-  const baseEditorContentZoom = resolveCardContentZoom(editorRenderSpec);
+  const isFluidEditor = displayMode === "fluid";
 
   const {
     manualResizeInProgressRef,
@@ -595,26 +591,6 @@ export const CardEditorPane = ({
     [getDialogAudios],
   );
 
-  const editorFrameFixedScale = useMemo(() => {
-    if (isFluidEditor) return undefined;
-
-    return Math.max(
-      0.1,
-      Math.min(
-        CARD_PANE_AUTO_MAX_SCALE,
-        editorCardFitScale * resolveCardSurfaceScale(editorRenderSpec),
-      ),
-    );
-  }, [editorCardFitScale, editorRenderSpec, isFluidEditor]);
-
-  const isSplitEditorLayout =
-    cardLayoutMode === "split" && useTwoColumnEditorLayout;
-
-  const editorContentZoom =
-    isSplitEditorLayout && displayMode === "fluid"
-      ? Math.max(0.1, baseEditorContentZoom / 2)
-      : baseEditorContentZoom;
-
   const fallbackLastSyncedAtMs = useMemo(() => {
     return (
       lastSavedAt?.getTime() ??
@@ -690,7 +666,7 @@ export const CardEditorPane = ({
     isEditing,
   ]);
 
-  const editorActionsTopLeft = useMemo(
+  const sideEditorActionsTopLeft = useMemo(
     () =>
       selectedCardEntity ? (
         <CardCornerActions
@@ -698,9 +674,34 @@ export const CardEditorPane = ({
           onStar={() => handleToggleBookmark(selectedCardEntity)}
           helpActive={selectedCardEntity.hasUncertainty ?? false}
           starActive={selectedCardEntity.isBookmarked ?? false}
+          visualScale={editorMetrics.sideHeaderIconVisualScale}
         />
       ) : undefined,
-    [handleToggleBookmark, handleToggleUncertainty, selectedCardEntity],
+    [
+      editorMetrics.sideHeaderIconVisualScale,
+      handleToggleBookmark,
+      handleToggleUncertainty,
+      selectedCardEntity,
+    ],
+  );
+
+  const baseEditorActionsTopLeft = useMemo(
+    () =>
+      selectedCardEntity ? (
+        <CardCornerActions
+          onHelp={() => handleToggleUncertainty(selectedCardEntity)}
+          onStar={() => handleToggleBookmark(selectedCardEntity)}
+          helpActive={selectedCardEntity.hasUncertainty ?? false}
+          starActive={selectedCardEntity.isBookmarked ?? false}
+          visualScale={editorMetrics.baseHeaderIconVisualScale}
+        />
+      ) : undefined,
+    [
+      editorMetrics.baseHeaderIconVisualScale,
+      handleToggleBookmark,
+      handleToggleUncertainty,
+      selectedCardEntity,
+    ],
   );
 
   const questionBlocksForToolbar = draft?.frontBlocks;
@@ -840,15 +841,15 @@ export const CardEditorPane = ({
       enableBlockSelectionState={cardPresentationState.isInteractiveCard}
       showResizeHandle={showResizeHandleProp}
       displayMode={displayMode}
-      frameFixedScale={editorFrameFixedScale}
-      contentZoom={editorContentZoom}
+      frameFixedScale={editorMetrics.sideFixedScale}
+      contentZoom={editorMetrics.sideContentZoom}
       editorCardHeightPx={editorCardHeightPx}
       enableHeightResize={!isFluidEditor}
       onHeightChange={handleEditorHeightChange}
       onMinHeightChange={handleQuestionMinHeightChange}
       onResizeStart={handleResizeStart}
       onResizeEnd={handleResizeEnd}
-      actionsTopLeft={editorActionsTopLeft}
+      actionsTopLeft={sideEditorActionsTopLeft}
       actionsTopRight={questionActionsTopRight}
     />
   );
@@ -874,15 +875,15 @@ export const CardEditorPane = ({
       enableBlockSelectionState={cardPresentationState.isInteractiveCard}
       showResizeHandle={showResizeHandleProp}
       displayMode={displayMode}
-      frameFixedScale={editorFrameFixedScale}
-      contentZoom={editorContentZoom}
+      frameFixedScale={editorMetrics.sideFixedScale}
+      contentZoom={editorMetrics.sideContentZoom}
       editorCardHeightPx={editorCardHeightPx}
       enableHeightResize={!isFluidEditor}
       onHeightChange={handleEditorHeightChange}
       onMinHeightChange={handleAnswerMinHeightChange}
       onResizeStart={handleResizeStart}
       onResizeEnd={handleResizeEnd}
-      actionsTopLeft={editorActionsTopLeft}
+      actionsTopLeft={sideEditorActionsTopLeft}
       actionsTopRight={answerActionsTopRight}
     />
   );
@@ -937,15 +938,15 @@ export const CardEditorPane = ({
       enableBlockSelectionState={cardPresentationState.isInteractiveCard}
       showResizeHandle={showResizeHandleProp}
       displayMode={displayMode}
-      frameFixedScale={editorFrameFixedScale}
-      contentZoom={editorContentZoom}
+      frameFixedScale={editorMetrics.baseFixedScale}
+      contentZoom={editorMetrics.baseContentZoom}
       editorCardHeightPx={editorCardHeightPx}
       enableHeightResize={!isFluidEditor}
       onHeightChange={handleEditorHeightChange}
       onMinHeightChange={handleFlipMinHeightChange}
       onResizeStart={handleResizeStart}
       onResizeEnd={handleResizeEnd}
-      actionsTopLeft={editorActionsTopLeft}
+      actionsTopLeft={baseEditorActionsTopLeft}
       overlayTopRight={
         <>
           <FaceSwitchBadge
@@ -1063,6 +1064,7 @@ export const CardEditorPane = ({
                     displayMode={displayMode}
                     cardLayoutMode={cardLayoutMode}
                     zoomScale={zoom}
+                    fitScale={editorCardFitScale}
                   />
                 </div>
               </div>

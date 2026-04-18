@@ -88,7 +88,7 @@ const AutoResizeTextarea = ({
       placeholder={placeholder}
       readOnly={readOnly}
       className={cn(
-        "flex w-full focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none transition-all py-0",
+        "ds-textarea flex w-full focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none transition-all py-0",
         readOnly && "bg-gray-50/50 cursor-default",
         className,
         textareaClassName,

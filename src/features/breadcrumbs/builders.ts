@@ -87,12 +87,12 @@ export const mergeTitleBarBreadcrumbs = ({
   const normalizedPathname = pathname.toLowerCase();
   const baseCrumbsForMerge =
     normalizedPathname.startsWith("/cardsetview") && baseCrumbs.length > 1
-      ? [baseCrumbs[0], { label: "フォルダ一覧", to: "/folders" }]
+      ? [baseCrumbs[0], { label: "フォルダ一覧", to: "/folders?home=1" }]
       : baseCrumbs;
 
   const clickableBaseCrumbs = baseCrumbsForMerge.map((crumb, index) =>
     index === baseCrumbsForMerge.length - 1
-      ? { ...crumb, to: "/folders" }
+      ? { ...crumb, to: "/folders?home=1" }
       : crumb,
   );
 

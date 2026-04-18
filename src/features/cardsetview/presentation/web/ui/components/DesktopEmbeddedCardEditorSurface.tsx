@@ -11,7 +11,7 @@ import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditor
 import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import { buildSharedCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
+import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
 import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
 import type { Card, UserSettings } from "@/types";
@@ -243,12 +243,15 @@ export const DesktopEmbeddedCardEditorSurface = ({
 
   const metrics = useMemo(
     () =>
-      buildSharedCardSurfaceMetrics({
+      buildCardSurfaceMetrics({
         displayMode,
         cardLayoutMode,
+        interactionMode: isInteractive ? "edit" : "view",
         zoomScale,
+        fitScale: editorCardFitScale,
+        showInk: displayMode === "fixed" && !isInteractive,
       }),
-    [cardLayoutMode, displayMode, zoomScale],
+    [cardLayoutMode, displayMode, editorCardFitScale, isInteractive, zoomScale],
   );
 
   const editorCardHeightPx = useMemo(

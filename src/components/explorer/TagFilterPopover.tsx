@@ -4,6 +4,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import { SurfaceButton } from "@/components/ui/surface-button";
 import { Switch } from "@/components/ui/switch";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
@@ -103,11 +104,11 @@ export const TagFilterPopover = ({
 
             <div className="relative">
               <Search className="ds-filter-search-icon absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5" />
-              <input
+              <Input
                 ref={inputRef}
                 type="text"
                 className={cn(
-                  "ds-input ds-filter-search w-full",
+                  "ds-filter-search w-full",
                   "surface-concave",
                 )}
                 placeholder="タグを検索..."
