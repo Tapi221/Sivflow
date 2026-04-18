@@ -193,14 +193,13 @@ const ActionButton = ({
         aria-label={`${label}を追加`}
         className={cn(
           overlayGlassActionButtonClassName,
-          "group/toolbar inline-flex shrink-0 select-none",
-          "text-[#6b5f55] transition-colors duration-150",
-          "hover:text-[#463c35]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sidebar-active-accent,#7aa6a1)]/35",
+          "group/toolbar shrink-0",
+          "focus-visible:outline-none focus-visible:ring-2",
+          "focus-visible:ring-[var(--sidebar-active-accent,#7aa6a1)]/35",
         )}
       >
         <Icon
-          className="h-4 w-4 shrink-0 opacity-80 transition-opacity duration-150 group-hover/toolbar:opacity-100 group-active/toolbar:opacity-100"
+          className="h-3.5 w-3.5 shrink-0 opacity-80 transition-opacity duration-150 group-hover/toolbar:opacity-100 group-active/toolbar:opacity-100"
           style={{ strokeWidth: 1.2 }}
         />
       </button>
@@ -280,7 +279,7 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
     let rafId: number | null = null;
     let resizeObserver: ResizeObserver | null = null;
-    const VERTICAL_TOOLBAR_WIDTH_PX = 48;
+    const VERTICAL_TOOLBAR_WIDTH_PX = 47;
     const update = () => {
       const el = verticalAnchorRef.current;
       if (!el) return;
@@ -329,8 +328,9 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
     <div
       className={cn(
         desktopLayout === "vertical"
-          ? "flex w-[48px] flex-col items-center rounded-[20px]"
-          : "flex w-auto max-w-full items-center rounded-[20px]",
+          ? "w-fit flex-col"
+          : "w-auto max-w-full",
+        "gap-2 px-2.5",
         overlayGlassToolbarClassName,
         className,
       )}
@@ -344,7 +344,6 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
               className={cn(
                 overlayGlassPillClassName,
                 "text-[12px] font-semibold text-[#5f554d]",
-                "hover:text-[#433a33]",
               )}
               aria-label={`${label} にブロックを追加`}
             >
@@ -388,8 +387,8 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
         className={cn(
           "hidden md:flex items-center",
           desktopLayout === "vertical"
-            ? "flex-col overflow-y-hidden"
-            : "flex-nowrap overflow-x-hidden",
+            ? "flex-col gap-2 overflow-y-hidden"
+            : "flex-nowrap gap-2 overflow-x-hidden",
         )}
       >
         {visibleConfigs.map((config) => {
