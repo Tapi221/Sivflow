@@ -16,5 +16,5 @@ interface FolderDashboardProps {
 }
 
 export const FolderDashboard = (_: FolderDashboardProps) => {
-  return <div style={{ height: "100%", background: "#ffffff" }} />;
+  return <div className="h-full bg-transparent" />;
 };

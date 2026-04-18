@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
 import { useCards } from "@/hooks/card/useCards";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
@@ -79,24 +78,18 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   const isLoading = foldersLoading || cardsLoading;
 
   if (controller.state.isHomeOnlyMode) {
-    return <div className="flex min-h-0 h-full w-full bg-[#F8FAFB]" />;
+    return <div className="flex min-h-0 h-full w-full bg-transparent" />;
   }
 
   return (
     <div
       className={cn(
-        "bg-[#F8FAFB] relative flex min-h-0 h-full flex-col",
+        "relative flex min-h-0 h-full flex-col bg-transparent",
         route.isDesktop
           ? "overflow-hidden"
           : "overflow-x-hidden overflow-y-auto",
       )}
     >
-      <div
-        className="absolute inset-0 opacity-100 pointer-events-none z-0"
-        style={{
-          ...getPageRuledBg(),
-        }}
-      />
       <div className="relative z-10 w-full mx-auto h-full min-h-0 flex">
         {isLoading ? (
           <div className="space-y-3 p-4">

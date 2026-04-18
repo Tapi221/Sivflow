@@ -425,7 +425,7 @@ export const DirectoryDiagramPane = ({
   );
 
   return (
-    <div className="h-full overflow-auto bg-background">
+    <div className="h-full overflow-auto bg-transparent">
       <div className="border-b border-slate-200 px-5 py-4">
         <div className="flex items-start justify-between gap-3">
           <div>

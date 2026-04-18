@@ -55,7 +55,16 @@ const isTestBypassEnabled = () => {
 
 const LoadingFallback = () => {
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-[#EEF3F6] animate-in fade-in duration-300">
+    <div
+      className="fixed inset-0 z-[999] flex items-center justify-center animate-in fade-in duration-300"
+      style={{
+        backgroundColor: "var(--app-bg)",
+        backgroundImage:
+          "radial-gradient(circle at var(--app-bg-dot-size) var(--app-bg-dot-size), var(--app-bg-dot) var(--app-bg-dot-size), transparent var(--app-bg-dot-size))",
+        backgroundSize: "var(--app-bg-dot-gap) var(--app-bg-dot-gap)",
+        backgroundPosition: "0 0",
+      }}
+    >
       <div className="relative h-16 w-16">
         <div className="absolute inset-0 rounded-full border-4 border-emerald-600/15" />
         <div className="absolute inset-0 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
