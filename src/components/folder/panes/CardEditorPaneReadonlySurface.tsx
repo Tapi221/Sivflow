@@ -2,7 +2,7 @@ import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAt
 import { layoutRowsToCardHeightPx } from "@constants/shared/flashcard";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import { buildSharedCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
+import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
 import { ViewCardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/ViewCardFaceScene";
 import type { Card } from "@/types/domain/card";
@@ -20,6 +20,7 @@ export type CardEditorPaneReadonlySurfaceProps = Readonly<{
   displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
   zoomScale: number;
+  fitScale?: number;
 }>;
 
 export const CardEditorPaneReadonlySurface = ({
@@ -31,15 +32,19 @@ export const CardEditorPaneReadonlySurface = ({
   displayMode,
   cardLayoutMode,
   zoomScale,
+  fitScale = 1,
 }: CardEditorPaneReadonlySurfaceProps) => {
   const metrics = React.useMemo(
     () =>
-      buildSharedCardSurfaceMetrics({
+      buildCardSurfaceMetrics({
         displayMode,
         cardLayoutMode,
+        interactionMode: "view",
         zoomScale,
+        fitScale,
+        showInk: displayMode === "fixed",
       }),
-    [cardLayoutMode, displayMode, zoomScale],
+    [cardLayoutMode, displayMode, fitScale, zoomScale],
   );
 
   const fixedHeightPx = React.useMemo(

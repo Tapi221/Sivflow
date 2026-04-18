@@ -63,7 +63,7 @@ export const LinkEditor = ({ items, onChange }: LinkEditorProps) => {
                 spellCheck={false}
                 data-lpignore="true"
                 data-1p-ignore
-                className="h-8 flex-[3] rounded-lg border border-[var(--surface-border)] bg-white text-[11px] text-[#202123] surface-concave placeholder:text-[var(--surface-placeholder-text)] focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
+                className="h-8 flex-[3] bg-white text-[11px] text-[#202123] surface-concave focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
                 autoFocus={index === refs.length - 1}
               />
               <Input
@@ -74,7 +74,7 @@ export const LinkEditor = ({ items, onChange }: LinkEditorProps) => {
                 spellCheck={false}
                 data-lpignore="true"
                 data-1p-ignore
-                className="h-8 flex-[2] rounded-lg border border-[var(--surface-border)] bg-white text-[11px] text-[#202123] surface-concave placeholder:text-[var(--surface-placeholder-text)] focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
+                className="h-8 flex-[2] bg-white text-[11px] text-[#202123] surface-concave focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
               />
             </div>
           </div>

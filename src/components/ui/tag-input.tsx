@@ -15,6 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { PlaceholderText } from "@/components/ui/placeholder-text";
 import { useTags } from "@/hooks/settings/useTags";
 import { TagBadge } from "@/components/tag/TagBadge";
 import { TagChip } from "@/components/tag/TagChip";
@@ -146,9 +147,9 @@ export const TagInput = ({
               onClick={() => setOpen(true)}
             >
               {tags.length === 0 && (
-                <span className="text-[length:var(--surface-placeholder-font-size)] font-normal normal-case tracking-normal text-[var(--surface-placeholder-text)]">
+                <PlaceholderText className="text-[length:var(--surface-placeholder-font-size)] font-normal normal-case tracking-normal">
                   {placeholder}
-                </span>
+                </PlaceholderText>
               )}
               {tags.length > 0 && <Plus className="w-3.5 h-3.5" />}
             </button>
