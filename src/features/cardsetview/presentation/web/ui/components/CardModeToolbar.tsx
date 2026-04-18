@@ -142,24 +142,26 @@ export const CardModeToolbar = ({
   onChangeDisplayMode,
   onChangeCardLayoutMode,
 }: CardModeToolbarProps) => {
+  const nextDisplayMode: CardDisplayMode =
+    displayMode === "fixed" ? "fluid" : "fixed";
+  const displayModeToggleLabel =
+    displayMode === "fixed"
+      ? "カード表示。タップで最大表示に切り替え"
+      : "最大表示。タップでカード表示に切り替え";
+
   return (
     <div className={cn(overlayGlassToolbarClassName, "gap-2 px-2.5")}>
-      <div className="flex items-center gap-1">
-        <ModeButton
-          isActive={displayMode === "fixed"}
-          onClick={() => onChangeDisplayMode("fixed")}
-          label="カード表示"
-        >
+      <ModeButton
+        isActive={displayMode === "fluid"}
+        onClick={() => onChangeDisplayMode(nextDisplayMode)}
+        label={displayModeToggleLabel}
+      >
+        {displayMode === "fixed" ? (
           <FixedDisplayGlyph />
-        </ModeButton>
-        <ModeButton
-          isActive={displayMode === "fluid"}
-          onClick={() => onChangeDisplayMode("fluid")}
-          label="最大表示"
-        >
+        ) : (
           <FluidDisplayGlyph />
-        </ModeButton>
-      </div>
+        )}
+      </ModeButton>
 
       <span className="h-5 w-px bg-[rgba(218,207,197,0.92)]" />
 
