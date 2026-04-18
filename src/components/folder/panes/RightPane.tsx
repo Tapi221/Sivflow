@@ -43,7 +43,7 @@ interface RightPaneProps {
 
 const UnsupportedDocumentPane = () => {
   return (
-    <div className="flex h-full items-center justify-center bg-slate-50 p-6">
+    <div className="flex h-full items-center justify-center bg-transparent p-6">
       <div className="max-w-md rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600 shadow-sm">
         <div className="mb-2 text-base font-semibold text-slate-800">
           この形式は現在サポート対象外です
