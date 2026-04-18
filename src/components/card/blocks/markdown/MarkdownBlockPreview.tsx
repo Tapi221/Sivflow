@@ -1,7 +1,7 @@
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
 import { cn } from "@/lib/utils";
 import React from "react";
-import { MarkdownBlockContent } from "./MarkdownBlockContent";
+import { MarkdownBlockDisplay } from "./MarkdownBlockDisplay";
 
 interface MarkdownBlockViewProps {
   md: string;
@@ -21,13 +21,15 @@ export type MarkdownBlockPreviewProps = {
   zoom?: number;
 };
 
-interface MarkdownBlockDisplayProps extends MarkdownBlockPreviewProps {
+interface MarkdownBlockPreviewSurfaceProps extends MarkdownBlockPreviewProps {
   contentClassName?: string;
 }
 
-const MarkdownBlockDisplay: React.FC<MarkdownBlockDisplayProps> = ({
+const MarkdownBlockPreviewSurface: React.FC<
+  MarkdownBlockPreviewSurfaceProps
+> = ({
   markdown,
-  align,
+  align: _align,
   className,
   contentClassName,
   bleedX,
@@ -41,9 +43,8 @@ const MarkdownBlockDisplay: React.FC<MarkdownBlockDisplayProps> = ({
         style={style}
       >
         <div className={cn("w-full max-w-full px-0 py-0", contentClassName)}>
-          <MarkdownBlockContent
+          <MarkdownBlockDisplay
             markdown={markdown}
-            align={align}
             className={className}
             bleedX={bleedX}
             zoom={zoom}
@@ -58,5 +59,5 @@ export const MarkdownBlockView: React.FC<MarkdownBlockViewProps> = ({
   md,
   ...rest
 }) => {
-  return <MarkdownBlockDisplay markdown={md} {...rest} />;
+  return <MarkdownBlockPreviewSurface markdown={md} {...rest} />;
 };

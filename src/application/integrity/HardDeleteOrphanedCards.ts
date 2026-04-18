@@ -34,10 +34,6 @@ type CardRelationRecord = {
   id?: unknown;
 };
 
-type IdRecord = {
-  id?: unknown;
-};
-
 const isInvalidFolderRefCardIssue = (
   issue: IntegrityIssue,
 ): issue is IntegrityIssue & {
@@ -85,58 +81,48 @@ const cleanupLocalCardReferences = async (
   db: Awaited<ReturnType<typeof getLocalDb>>,
   cardId: string,
 ): Promise<LocalCleanupTotals> => {
-  return await db.transaction(
-    "rw",
-    [
-      db.cards,
-      db.syncQueue,
-      db.conflicts,
-      db.levelHistories,
-      db.cardRelations,
-      db.table("studyLogs"),
-    ],
-    async () => {
-      const deletedSyncQueue = await db.syncQueue
-        .where("targetId")
-        .equals(cardId)
-        .delete();
+  return await db.runSyncTransaction(async () => {
+    const studyLogsTable = db.table("studyLogs");
 
-      const deletedConflicts = await db.conflicts
-        .where("entityId")
-        .equals(cardId)
-        .delete();
+    const deletedSyncQueue = await db.syncQueue
+      .where("targetId")
+      .equals(cardId)
+      .delete();
 
-      const deletedStudyLogs = await db
-        .table("studyLogs")
-        .where("cardId")
-        .equals(cardId as never)
-        .delete();
+    const deletedConflicts = await db.conflicts
+      .where("entityId")
+      .equals(cardId)
+      .delete();
 
-      const deletedLevelHistories = await db.levelHistories
-        .where("cardId")
-        .equals(cardId as never)
-        .delete();
+    const deletedStudyLogs = await studyLogsTable
+      .where("cardId")
+      .equals(cardId)
+      .delete();
 
-      const deletedCardRelations = await db.cardRelations
-        .toCollection()
-        .filter((record) => {
-          const relation = record as CardRelationRecord;
-          return relation.fromCardId === cardId || relation.toCardId === cardId;
-        })
-        .delete();
+    const deletedLevelHistories = await db.levelHistories
+      .where("cardId")
+      .equals(cardId)
+      .delete();
 
-      await db.purge("cards", cardId);
+    const deletedCardRelations = await db.cardRelations
+      .toCollection()
+      .filter((record) => {
+        const relation = record as CardRelationRecord;
+        return relation.fromCardId === cardId || relation.toCardId === cardId;
+      })
+      .delete();
 
-      return {
-        syncQueue: deletedSyncQueue,
-        conflicts: deletedConflicts,
-        studyLogs: deletedStudyLogs,
-        levelHistories: deletedLevelHistories,
-        cardRelations: deletedCardRelations,
-        syncErrors: 0,
-      };
-    },
-  );
+    await db.purge("cards", cardId);
+
+    return {
+      syncQueue: deletedSyncQueue,
+      conflicts: deletedConflicts,
+      studyLogs: deletedStudyLogs,
+      levelHistories: deletedLevelHistories,
+      cardRelations: deletedCardRelations,
+      syncErrors: 0,
+    };
+  });
 };
 
 const cleanupSyncErrorsBestEffort = async (
