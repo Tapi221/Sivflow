@@ -1,14 +1,35 @@
 import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 
 type CardSetViewFlippedFaceScope = {
+  deviceScope: string;
+  cardSetId: string | null | undefined;
+};
+
+type LegacyCardSetViewFlippedFaceScopeHint = {
   cardSetId: string | null | undefined;
   folderId: string | null | undefined;
 };
 
-const buildStorageKey = ({
+const normalizeDeviceScope = (value: string | null | undefined) => {
+  const trimmed = typeof value === "string" ? value.trim() : "";
+  return trimmed.length > 0 ? trimmed : "unknown";
+};
+
+export const buildCardSetViewFlippedFaceScopeKey = ({
+  deviceScope,
+  cardSetId,
+}: CardSetViewFlippedFaceScope) => {
+  return [
+    SHARED_STORAGE_KEYS.cardSetViewFlippedFacePrefix,
+    normalizeDeviceScope(deviceScope),
+    cardSetId ?? "__no_card_set__",
+  ].join("::");
+};
+
+const buildLegacySessionStorageKey = ({
   cardSetId,
   folderId,
-}: CardSetViewFlippedFaceScope) => {
+}: LegacyCardSetViewFlippedFaceScopeHint) => {
   return [
     SHARED_STORAGE_KEYS.cardSetViewFlippedFacePrefix,
     cardSetId ?? "__no_card_set__",
@@ -16,29 +37,59 @@ const buildStorageKey = ({
   ].join(":");
 };
 
-const readSessionValue = (key: string) => {
+const readLocalValue = (key: string) => {
   if (typeof window === "undefined") return null;
 
   try {
-    return window.sessionStorage.getItem(key);
+    return window.localStorage.getItem(key);
   } catch {
     return null;
   }
 };
 
-const writeSessionValue = (key: string, value: string | null) => {
+const writeLocalValue = (key: string, value: string | null) => {
   if (typeof window === "undefined") return;
 
   try {
     if (value == null) {
-      window.sessionStorage.removeItem(key);
+      window.localStorage.removeItem(key);
       return;
     }
 
-    window.sessionStorage.setItem(key, value);
+    window.localStorage.setItem(key, value);
   } catch {
-    // Ignore session persistence failures and keep in-memory state working.
+    // Ignore local persistence failures and keep in-memory state working.
   }
+};
+
+const readLegacySessionValue = (
+  legacyScopeHint: LegacyCardSetViewFlippedFaceScopeHint | null,
+) => {
+  if (typeof window === "undefined" || !legacyScopeHint?.cardSetId) {
+    return null;
+  }
+
+  const keys = [
+    buildLegacySessionStorageKey(legacyScopeHint),
+    buildLegacySessionStorageKey({
+      cardSetId: legacyScopeHint.cardSetId,
+      folderId: null,
+    }),
+  ];
+
+  try {
+    for (const key of keys) {
+      const value = window.sessionStorage.getItem(key);
+      if (value) {
+        window.sessionStorage.removeItem(key);
+        return value;
+      }
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
 };
 
 const normalizeCardIdList = (value: unknown) => {
@@ -51,37 +102,49 @@ const normalizeCardIdList = (value: unknown) => {
 };
 
 export const getCardSetViewFlippedCardIds = ({
+  deviceScope,
   cardSetId,
-  folderId,
-}: CardSetViewFlippedFaceScope) => {
-  if (!cardSetId && !folderId) return new Set<string>();
+  legacyScopeHint,
+}: CardSetViewFlippedFaceScope & {
+  legacyScopeHint?: LegacyCardSetViewFlippedFaceScopeHint | null;
+}) => {
+  if (!cardSetId) return new Set<string>();
 
-  const raw = readSessionValue(buildStorageKey({ cardSetId, folderId }));
+  const currentScope = { deviceScope, cardSetId };
+  const currentStorageKey = buildCardSetViewFlippedFaceScopeKey(currentScope);
+  const raw =
+    readLocalValue(currentStorageKey) ??
+    readLegacySessionValue(legacyScopeHint ?? null);
   if (!raw) return new Set<string>();
 
   try {
-    return new Set<string>(normalizeCardIdList(JSON.parse(raw)));
+    const parsedIds = new Set<string>(normalizeCardIdList(JSON.parse(raw)));
+    writeLocalValue(
+      currentStorageKey,
+      parsedIds.size > 0 ? JSON.stringify(Array.from(parsedIds)) : null,
+    );
+    return parsedIds;
   } catch {
     return new Set<string>();
   }
 };
 
 export const setCardSetViewFlippedCardIds = ({
+  deviceScope,
   cardSetId,
-  folderId,
   ids,
 }: CardSetViewFlippedFaceScope & {
   ids: ReadonlySet<string>;
 }) => {
-  if (!cardSetId && !folderId) return;
+  if (!cardSetId) return;
 
   const normalizedIds = Array.from(ids).filter(
     (entry): entry is string =>
       typeof entry === "string" && entry.trim().length > 0,
   );
 
-  writeSessionValue(
-    buildStorageKey({ cardSetId, folderId }),
+  writeLocalValue(
+    buildCardSetViewFlippedFaceScopeKey({ deviceScope, cardSetId }),
     normalizedIds.length > 0 ? JSON.stringify(normalizedIds) : null,
   );
 };

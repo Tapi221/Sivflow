@@ -17,9 +17,8 @@ type ResolveCardsForPagerArgs = {
 
 export const createCardSetViewSourceKey = (
   cardSetId: string | null,
-  folderId: string | null,
 ) => {
-  return `${cardSetId ?? ""}::${folderId ?? ""}`;
+  return `${cardSetId ?? ""}`;
 };
 
 export const resolveCardIndexById = ({

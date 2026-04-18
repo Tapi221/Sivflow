@@ -11,7 +11,7 @@ import { useCardSetViewSyncState } from "@/features/cardsetview/presentation/web
 interface UseCardSetViewViewStateOptions {
   initialIndex: number;
   targetCardId: string | null;
-  folderId: string | null;
+  legacyFolderId: string | null;
   cardSetId: string | null;
   sortedCards: Card[];
   cardIndexById: Map<string, number>;
@@ -22,7 +22,7 @@ interface UseCardSetViewViewStateOptions {
 export const useCardSetViewViewState = ({
   initialIndex,
   targetCardId,
-  folderId,
+  legacyFolderId,
   cardSetId,
   sortedCards,
   cardIndexById,
@@ -32,7 +32,8 @@ export const useCardSetViewViewState = ({
   const selectionState = useCardSetViewSelectionState({
     initialIndex,
     targetCardId,
-    folderId,
+    deviceScope,
+    legacyFolderId,
     cardSetId,
     sortedCards,
     cardIndexById,

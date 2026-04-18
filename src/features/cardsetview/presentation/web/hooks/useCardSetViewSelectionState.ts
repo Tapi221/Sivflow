@@ -41,7 +41,8 @@ type CardFace = "question" | "answer";
 interface UseCardSetViewSelectionStateOptions {
   initialIndex: number;
   targetCardId: string | null;
-  folderId: string | null;
+  deviceScope: string;
+  legacyFolderId: string | null;
   cardSetId: string | null;
   sortedCards: Card[];
   cardIndexById: Map<string, number>;
@@ -50,12 +51,13 @@ interface UseCardSetViewSelectionStateOptions {
 export const useCardSetViewSelectionState = ({
   initialIndex,
   targetCardId,
-  folderId,
+  deviceScope,
+  legacyFolderId,
   cardSetId,
   sortedCards,
   cardIndexById,
 }: UseCardSetViewSelectionStateOptions) => {
-  const sourceKey = createCardSetViewSourceKey(cardSetId, folderId);
+  const sourceKey = createCardSetViewSourceKey(cardSetId);
 
   const targetResolvedIndex = useMemo(() => {
     return resolveCardIndexById({
@@ -86,7 +88,11 @@ export const useCardSetViewSelectionState = ({
 
   const [flippedState, setFlippedState] = useState<KeyedFlipState>(() => ({
     sourceKey,
-    ids: getCardSetViewFlippedCardIds({ cardSetId, folderId }),
+    ids: getCardSetViewFlippedCardIds({
+      deviceScope,
+      cardSetId,
+      legacyScopeHint: { cardSetId, folderId: legacyFolderId },
+    }),
   }));
 
   const [isGlobalEditing, setIsGlobalEditing] = useState(false);
@@ -161,19 +167,23 @@ export const useCardSetViewSelectionState = ({
 
       return {
         sourceKey,
-        ids: getCardSetViewFlippedCardIds({ cardSetId, folderId }),
+        ids: getCardSetViewFlippedCardIds({
+          deviceScope,
+          cardSetId,
+          legacyScopeHint: { cardSetId, folderId: legacyFolderId },
+        }),
       };
     });
-  }, [cardSetId, folderId, sourceKey]);
+  }, [cardSetId, deviceScope, legacyFolderId, sourceKey]);
 
   useEffect(() => {
     if (flippedState.sourceKey !== sourceKey) return;
     setCardSetViewFlippedCardIds({
+      deviceScope,
       cardSetId,
-      folderId,
       ids: flippedState.ids,
     });
-  }, [cardSetId, flippedState, folderId, sourceKey]);
+  }, [cardSetId, deviceScope, flippedState, sourceKey]);
 
   useEffect(() => {
     setCurrentIndexState((prev) => {

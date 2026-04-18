@@ -40,7 +40,7 @@ export const useCardSetViewState = ({
   const viewState = useCardSetViewViewState({
     initialIndex,
     targetCardId,
-    folderId,
+    legacyFolderId: folderId,
     cardSetId,
     sortedCards,
     cardIndexById,
