@@ -220,7 +220,7 @@ enum DesignTokens {
         enum Color {
             enum Background {
                 static let App = "#ffffff"
-                static let Sidebar = "#f7f7f8"
+                static let Sidebar = "#f6f1eb"
                 static let SidebarActive = "#e7ebef"
                 static let Floating = "rgba(255, 255, 255, 0.82)"
                 static let Code = "#f7f8f9"

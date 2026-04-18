@@ -1286,7 +1286,13 @@ const CardMetaPanelInner = ({
         <section>
           {currentResistanceScore !== null && (
             <div className="ds-editor-pane__stats mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between px-2">
-              <span className="text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">
+              <span
+                className="text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)]"
+                style={{
+                  color:
+                    "var(--meta-panel-text-muted, var(--sidebar-text-muted))",
+                }}
+              >
                 現在の耐性スコア
               </span>
               <span className="text-[length:var(--meta-font-size)] font-semibold leading-[var(--meta-row-px)] tabular-nums">
@@ -1339,7 +1345,10 @@ const CardMetaPanelInner = ({
                   <XAxis
                     dataKey="reviewIndex"
                     ticks={xTicks}
-                    tick={{ fontSize: 10, fill: "var(--sidebar-text-muted)" }}
+                    tick={{
+                      fontSize: 10,
+                      fill: "var(--meta-panel-text-muted, var(--sidebar-text-muted))",
+                    }}
                     tickLine={{
                       stroke: "var(--ds-semantic-color-border-default)",
                     }}
@@ -1353,7 +1362,10 @@ const CardMetaPanelInner = ({
                     ticks={[0, 20, 40, 60, 80, 100]}
                     allowDecimals={false}
                     width={36}
-                    tick={{ fontSize: 10, fill: "var(--sidebar-text-muted)" }}
+                    tick={{
+                      fontSize: 10,
+                      fill: "var(--meta-panel-text-muted, var(--sidebar-text-muted))",
+                    }}
                     tickLine={{
                       stroke: "var(--ds-semantic-color-border-default)",
                     }}
@@ -1371,21 +1383,28 @@ const CardMetaPanelInner = ({
                     contentStyle={{
                       borderRadius: 8,
                       border:
-                        "1px solid var(--ds-semantic-color-border-floating)",
-                      boxShadow: "var(--ds-semantic-elevation-floating)",
+                        "1px solid var(--meta-panel-border, var(--ds-semantic-color-border-floating))",
+                      background:
+                        "var(--meta-panel-surface-elevated, var(--ds-semantic-color-background-app))",
+                      boxShadow:
+                        "var(--meta-panel-shadow-soft, var(--ds-semantic-elevation-floating))",
                     }}
                   />
                   <Line
                     type="monotone"
                     dataKey="resistanceScore"
-                    stroke="#0f766e"
+                    stroke="var(--meta-panel-accent, #0f766e)"
                     strokeWidth={2.5}
                     isAnimationActive={false}
                     dot={{
                       r: chartData.length === 1 ? 5 : 2.5,
-                      fill: "#0f766e",
+                      fill: "var(--meta-panel-accent, #0f766e)",
                     }}
-                    activeDot={{ r: 6, strokeWidth: 0 }}
+                    activeDot={{
+                      r: 6,
+                      strokeWidth: 0,
+                      fill: "var(--meta-panel-accent, #0f766e)",
+                    }}
                     connectNulls
                   />
                 </LineChart>

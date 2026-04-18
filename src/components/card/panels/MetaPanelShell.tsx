@@ -28,7 +28,30 @@ export const MetaPanelShell = ({
           "--meta-row-px": "var(--ds-layout-card-row-px)",
           "--meta-font-size": "var(--ds-typography-font-size-sm)",
           "--meta-action-min-h": "var(--ds-layout-card-row-px)",
-          backgroundColor: "var(--ds-semantic-color-background-sidebar)",
+          "--meta-panel-shell-bg":
+            "linear-gradient(180deg, color-mix(in srgb, var(--ds-semantic-color-background-sidebar) 82%, white 18%) 0%, color-mix(in srgb, var(--ds-semantic-color-background-sidebar) 94%, var(--ds-semantic-color-background-app) 6%) 100%)",
+          "--meta-panel-surface":
+            "color-mix(in srgb, var(--ds-semantic-color-background-app) 94%, var(--ds-semantic-color-action-primary-soft) 6%)",
+          "--meta-panel-surface-muted":
+            "color-mix(in srgb, var(--ds-semantic-color-background-sidebar-active) 58%, white 42%)",
+          "--meta-panel-surface-elevated":
+            "color-mix(in srgb, white 90%, var(--ds-semantic-color-action-primary-soft) 10%)",
+          "--meta-panel-border":
+            "color-mix(in srgb, var(--ds-semantic-color-border-default) 72%, var(--ds-semantic-color-action-primary) 28%)",
+          "--meta-panel-border-strong":
+            "color-mix(in srgb, var(--ds-semantic-color-border-strong) 58%, var(--ds-semantic-color-action-primary) 42%)",
+          "--meta-panel-text-muted":
+            "color-mix(in srgb, var(--ds-semantic-color-text-secondary) 86%, var(--ds-semantic-color-text-primary) 14%)",
+          "--meta-panel-accent":
+            "color-mix(in srgb, #0f766e 82%, var(--ds-semantic-color-action-primary) 18%)",
+          "--meta-panel-accent-soft":
+            "color-mix(in srgb, var(--ds-semantic-color-action-primary-soft) 64%, white 36%)",
+          "--meta-panel-shadow-soft":
+            "0 10px 24px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.88)",
+          "--meta-panel-shadow-strong":
+            "0 16px 30px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.92)",
+          background: "var(--meta-panel-shell-bg)",
+          borderColor: "var(--meta-panel-border)",
           ...style,
         } as CSSProperties
       }
