@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 
 import {
-  CARD_PANE_AUTO_MAX_SCALE,
   CARD_PANE_EDIT_MIN_WIDTH_PX,
   CARD_PANE_EDITOR_DEFAULT_WIDTH_PX,
   CARD_PANE_EDITOR_DOCKED_DEFAULT_WIDTH_PX,
@@ -9,6 +8,7 @@ import {
   CARD_PANE_WIDTH_STEP_PX,
   clampPaneWidthPx,
 } from "@constants/shared/flashcard";
+import { resolveEditorCardFitScale } from "@/domain/card/resolveEditorCardFitScale";
 import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthState";
 import { CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX } from "@constants/shared/flashcard";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
@@ -184,17 +184,12 @@ export const useCardEditorPaneWidth = ({
     cardLayoutMode === "split" &&
     effectivePaneWidthPx >= CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX;
 
-  const editorCardTargetWidthPx = useTwoColumnEditorLayout
-    ? Math.max(1, (effectivePaneWidthPx - CARD_EDITOR_PAIR_GAP_PX) / 2)
-    : Math.max(1, effectivePaneWidthPx);
-
-  const editorCardFitScale = Math.max(
-    0.1,
-    Math.min(
-      CARD_PANE_AUTO_MAX_SCALE,
-      editorCardTargetWidthPx / Math.max(1, canonicalCardWidth),
-    ),
-  );
+  const editorCardFitScale = resolveEditorCardFitScale({
+    availablePaneWidthPx: effectivePaneWidthPx,
+    canonicalCardWidth,
+    cardLayoutMode,
+    splitGapPx: CARD_EDITOR_PAIR_GAP_PX,
+  });
 
   const activePaneWidthStyle = shouldApplyPaneWidth
     ? {
