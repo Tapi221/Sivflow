@@ -218,8 +218,8 @@ export const designTokens = {
     "color": {
       "background": {
         "app": "#ffffff",
-        "sidebar": "#f7f7f8",
-        "sidebarActive": "#e7ebef",
+        "sidebar": "#f6f1eb",
+        "sidebarActive": "#ece2d7",
         "floating": "rgba(255, 255, 255, 0.82)",
         "code": "#f7f8f9"
       },

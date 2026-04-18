@@ -28,6 +28,11 @@
       opacity var(--ds-semantic-motion-interactive);
   }
 
+  .sidebar .sidebar__nav-item.ds-nav-action,
+  .sidebar .sidebar__nav-item.ds-nav-action .ds-nav-action__icon {
+    color: inherit;
+  }
+
   .ds-nav-action:hover,
   .sidebar__nav-item.ds-nav-action:hover,
   .ds-nav-tab:hover {
@@ -35,11 +40,23 @@
     color: var(--ds-semantic-color-text-primary);
   }
 
+  .sidebar .sidebar__nav-item.ds-nav-action:hover,
+  .sidebar .sidebar__nav-item.ds-nav-action:hover .ds-nav-action__icon {
+    background: var(--sidebar-hover-bg, rgba(241, 232, 222, 0.92));
+    color: var(--sidebar-text, #403731);
+  }
+
   .ds-nav-action--active,
   .sidebar__nav-item.ds-nav-action.ds-nav-action--active,
   .ds-nav-tab.ds-nav-action--active {
     background: var(--ds-semantic-color-background-sidebar-active);
     color: var(--ds-semantic-color-text-strong);
+  }
+
+  .sidebar .sidebar__nav-item.ds-nav-action.ds-nav-action--active,
+  .sidebar .sidebar__nav-item.ds-nav-action.ds-nav-action--active .ds-nav-action__icon {
+    background: var(--sidebar-active-bg, rgba(236, 226, 215, 0.98));
+    color: var(--sidebar-text, #403731);
   }
 
   .ds-nav-action__icon,

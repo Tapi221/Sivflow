@@ -180,10 +180,10 @@
   --ds-semantic-color-background-code: #f7f8f9;
   --ds-semantic-color-background-code-rgb: 247 248 249;
   --ds-semantic-color-background-floating: rgba(255, 255, 255, 0.82);
-  --ds-semantic-color-background-sidebar: #f7f7f8;
-  --ds-semantic-color-background-sidebar-active: #e7ebef;
-  --ds-semantic-color-background-sidebar-active-rgb: 231 235 239;
-  --ds-semantic-color-background-sidebar-rgb: 247 247 248;
+  --ds-semantic-color-background-sidebar: #f6f1eb;
+  --ds-semantic-color-background-sidebar-active: #ece2d7;
+  --ds-semantic-color-background-sidebar-active-rgb: 236 226 215;
+  --ds-semantic-color-background-sidebar-rgb: 246 241 235;
   --ds-semantic-color-border-default: #d9d9d9;
   --ds-semantic-color-border-default-rgb: 217 217 217;
   --ds-semantic-color-border-floating: rgba(226, 232, 240, 0.8);
