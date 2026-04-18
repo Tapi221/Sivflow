@@ -6,9 +6,13 @@
   flex: 1;
   width: 100%;
   overflow: hidden;
-  background-color: #fcfbf7;
-  background-image: radial-gradient(#d1d1d1 0.75px, transparent 0.75px);
-  background-size: 14px 14px;
+  background-color: var(--app-bg);
+  background-image: radial-gradient(
+    circle at var(--app-bg-dot-size) var(--app-bg-dot-size),
+    var(--app-bg-dot) var(--app-bg-dot-size),
+    transparent var(--app-bg-dot-size)
+  );
+  background-size: var(--app-bg-dot-gap) var(--app-bg-dot-gap);
 }
 
 .app-layout--sidebar-hidden {

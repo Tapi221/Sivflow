@@ -27,9 +27,7 @@ export const BreadcrumbProvider = ({
   }, []);
 
   return (
-    <BreadcrumbContext.Provider
-      value={{ extraCrumbs, setExtraCrumbs }}
-    >
+    <BreadcrumbContext.Provider value={{ extraCrumbs, setExtraCrumbs }}>
       {children}
     </BreadcrumbContext.Provider>
   );

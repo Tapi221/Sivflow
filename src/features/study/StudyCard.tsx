@@ -388,7 +388,8 @@ const StudyCardInner = ({
 
   const handleEdit = onEdit ? () => onEdit(card) : undefined;
 
-  const reviewCount = (card as unknown as { reviewCount?: unknown }).reviewCount;
+  const reviewCount = (card as unknown as { reviewCount?: unknown })
+    .reviewCount;
   const showReviewCount = typeof reviewCount === "number" && reviewCount >= 0;
 
   return (

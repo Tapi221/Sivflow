@@ -46,4 +46,3 @@ if (isWatch) {
   await build(buildOptions);
   console.info("[electron] preload bundle built");
 }
-
