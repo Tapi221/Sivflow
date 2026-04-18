@@ -53,10 +53,32 @@ const isTestBypassEnabled = () => {
   return isLocalHost(window.location.hostname);
 };
 
+const LoadingFallbackSpinner = () => {
+  return (
+    <div className="relative h-12 w-12" aria-hidden="true">
+      <div
+        className="absolute inset-0 rounded-full"
+        style={{
+          border: "3px solid var(--app-loading-spinner-track)",
+        }}
+      />
+      <div
+        className="absolute inset-0 rounded-full animate-spin motion-reduce:animate-none"
+        style={{
+          border: "3px solid var(--app-loading-spinner-indicator)",
+          borderTopColor: "transparent",
+        }}
+      />
+    </div>
+  );
+};
+
 const LoadingFallback = () => {
   return (
     <div
       className="fixed inset-0 z-[999] flex items-center justify-center animate-in fade-in duration-300"
+      role="status"
+      aria-live="polite"
       style={{
         backgroundColor: "var(--app-bg)",
         backgroundImage:
@@ -65,10 +87,8 @@ const LoadingFallback = () => {
         backgroundPosition: "0 0",
       }}
     >
-      <div className="relative h-16 w-16">
-        <div className="absolute inset-0 rounded-full border-4 border-emerald-600/15" />
-        <div className="absolute inset-0 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
-      </div>
+      <LoadingFallbackSpinner />
+      <span className="sr-only">読み込み中</span>
     </div>
   );
 };
