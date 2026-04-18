@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import React from "react";
@@ -11,6 +12,7 @@ export type CardSurfaceLayoutProps = {
 };
 
 const SPLIT_INNER_SHADOW_CLIP_PX = 120;
+const STACK_INNER_SHADOW_CLIP_PX = 120;
 
 export const CardSurfaceLayout = ({
   cardLayoutMode,
@@ -35,27 +37,41 @@ export const CardSurfaceLayout = ({
     ? {
         clipPath: `inset(-${SPLIT_INNER_SHADOW_CLIP_PX}px 0 -${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px)`,
       }
-    : undefined;
+    : ({
+        ["--card-stack-shell-clip" as string]:
+          `inset(-${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px 0 -${STACK_INNER_SHADOW_CLIP_PX}px)`,
+      } as CSSProperties);
 
   const rightSlotStyle = isSplitLayout
     ? {
         clipPath: `inset(-${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px 0)`,
       }
-    : undefined;
+    : ({
+        ["--card-stack-shell-clip" as string]:
+          `inset(0 -${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px)`,
+      } as CSSProperties);
 
   return (
     <div
       className={cn(
-        "w-full min-w-0 max-w-full overflow-visible",
-        isSplitLayout ? "grid grid-cols-2 gap-0" : "flex flex-col gap-0",
+        "card-surface-layout w-full min-w-0 max-w-full overflow-visible",
+        isSplitLayout
+          ? "card-surface-layout--split grid grid-cols-2 gap-0"
+          : "card-surface-layout--stack flex flex-col gap-0",
         className,
       )}
     >
-      <div className="relative min-w-0 overflow-visible" style={leftSlotStyle}>
+      <div
+        className="card-surface-layout__slot card-surface-layout__slot--question relative min-w-0 overflow-visible"
+        style={leftSlotStyle}
+      >
         {questionNode}
       </div>
 
-      <div className="relative min-w-0 overflow-visible" style={rightSlotStyle}>
+      <div
+        className="card-surface-layout__slot card-surface-layout__slot--answer relative min-w-0 overflow-visible"
+        style={rightSlotStyle}
+      >
         {answerNode}
       </div>
     </div>

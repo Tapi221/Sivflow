@@ -259,6 +259,7 @@ export const designTokens = {
     "radius": {
       "control": 10,
       "card": 16,
+      "flashcard": 12,
       "dialog": 12,
       "panel": 24,
       "hero": 32,
