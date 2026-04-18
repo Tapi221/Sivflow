@@ -138,16 +138,12 @@ export const CodeBlockEditor = ({
       }}
     >
       <SelectTrigger
-        className="
-          h-5 w-auto min-w-0 min-h-0
-          rounded-md px-1.5 py-0
-          bg-zinc-900/5 border-none shadow-none
-          text-[10px] font-bold text-zinc-500
-          tracking-wider uppercase
-          hover:text-zinc-700 hover:bg-zinc-900/10
-          focus:ring-0
-          gap-1
-        "
+        className={cn(
+          "codeBlockLang",
+          "h-auto w-auto min-w-0 min-h-0 gap-1 shadow-none",
+          "focus:ring-0 focus:ring-offset-0",
+          "[&_svg]:h-3 [&_svg]:w-3",
+        )}
       >
         <SelectValue placeholder="Language" />
       </SelectTrigger>

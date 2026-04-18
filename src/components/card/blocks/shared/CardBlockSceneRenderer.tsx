@@ -169,6 +169,7 @@ const SharedBlockShell = ({
     return (
       <BlockWrapper
         mode="viewer"
+        visualMode="viewer"
         showOverlay={false}
         showDelete={false}
         showDuplicate={false}
@@ -201,6 +202,7 @@ const SharedBlockShell = ({
       onMoveDragStart={onMoveDragStart}
       onMoveDragEnd={onMoveDragEnd}
       dragHandleClassName={dragHandleClassName}
+      visualMode="viewer"
     >
       {children}
     </BlockWrapper>
@@ -474,7 +476,7 @@ const ImageBlockScene = ({
       canMoveDown={editorProps?.canMoveDown}
       dragHandleClassName="js-block-drag-handle"
     >
-      <ImageBlockShell showBorderOverlay={mode === "edit"}>
+      <ImageBlockShell>
         {mode === "edit" && editorProps ? (
           <ImageBlockContent
             mode="edit"
@@ -678,10 +680,7 @@ const MathBlockScene = ({
         <MathBlockPreviewPane
           latex={latex}
           displayMode={mathData.displayMode || "block"}
-          className={cn(
-            "rounded-lg",
-            mode === "edit" && "transition-colors hover:bg-slate-50",
-          )}
+          className="rounded-lg"
           interactive={mode === "edit"}
           onActivate={mode === "edit" ? () => setIsEditorOpen(true) : undefined}
           showPlaceholder={mode === "edit"}

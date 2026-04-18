@@ -30,6 +30,7 @@ interface BlockWrapperProps {
   contentClassName?: string;
   mode?: "viewer" | "editor";
   showOverlay?: boolean;
+  visualMode?: "viewer" | "editor";
 }
 
 const STEP_PX = 24;
@@ -56,6 +57,7 @@ export const BlockWrapper = ({
   contentClassName,
   mode = "editor",
   showOverlay = mode === "editor",
+  visualMode = mode,
 }: BlockWrapperProps) => {
   const [isEditingWithin, setIsEditingWithin] = React.useState(false);
 
@@ -204,11 +206,16 @@ export const BlockWrapper = ({
     </div>
   ) : null;
 
+  const shouldHighlightSelection =
+    mode === "editor" &&
+    (inEditMode || Boolean(isBlockSelected || isEditingWithin));
+
   const frameVariant =
-    mode === "viewer"
-      ? "none"
-      : mode === "editor" &&
-          (inEditMode || Boolean(isBlockSelected || isEditingWithin))
+    visualMode === "viewer"
+      ? shouldHighlightSelection
+        ? "editor"
+        : "none"
+      : shouldHighlightSelection
         ? "editor"
         : "neutral";
 
