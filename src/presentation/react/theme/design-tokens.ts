@@ -2,16 +2,16 @@
 export const designTokens = {
   "color": {
     "primary": {
-      "50": "#f5f5f5",
-      "100": "#e6f0ef",
-      "200": "#cfe0df",
-      "300": "#b8d0cf",
-      "400": "#90b8b6",
-      "500": "#7bacaa",
-      "600": "#689a98",
-      "700": "#5a8684",
-      "800": "#4d7270",
-      "900": "#324a48"
+      "50": "#f7f8ef",
+      "100": "#edf0df",
+      "200": "#dce3c2",
+      "300": "#c3cc99",
+      "400": "#a7b275",
+      "500": "#96a867",
+      "600": "#8a9a5b",
+      "700": "#6d7d48",
+      "800": "#586539",
+      "900": "#374023"
     },
     "neutral": {
       "0": "#ffffff",
@@ -236,10 +236,10 @@ export const designTokens = {
         "onPrimary": "#ffffff"
       },
       "action": {
-        "primary": "#689a98",
-        "primaryHover": "#5a8684",
-        "primarySoft": "#e6f0ef",
-        "accent": "#7bacaa"
+        "primary": "#8a9a5b",
+        "primaryHover": "#6d7d48",
+        "primarySoft": "#edf0df",
+        "accent": "#96a867"
       },
       "status": {
         "danger": "#e11d48",
