@@ -1,3 +1,4 @@
+import type { CardSyncStatusSnapshot } from "@/components/card/shell/cardSyncStatus";
 import type { CardPaneMode } from "@constants/shared/flashcard";
 import {
   DISPLAY_MODE_LABELS,
@@ -6,12 +7,7 @@ import {
 import { toTimeMs } from "@/features/cardsetview/domain/cardSetViewUtils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-type ActiveSyncStatusLike = {
-  lastSyncedAtMs?: number | null;
-  hasError?: boolean;
-  isRetrying?: boolean;
-  retry?: (() => void | Promise<void>) | null;
-} | null;
+type ActiveSyncStatusLike = CardSyncStatusSnapshot | null;
 
 type SelectedCardLike = {
   id?: string | null;

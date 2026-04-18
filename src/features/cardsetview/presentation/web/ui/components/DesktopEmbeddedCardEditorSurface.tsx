@@ -1,4 +1,5 @@
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
+import { useCardSyncStatusReporter } from "@/components/card/shell/useCardSyncStatusReporter";
 import {
   CARD_ROW_PX,
   layoutRowsToCardHeightPx,
@@ -400,18 +401,11 @@ export const DesktopEmbeddedCardEditorSurface = ({
     ],
   );
 
-  useEffect(() => {
-    if (!isInteractive) {
-      onSyncStatusChange(null);
-      return;
-    }
-
-    onSyncStatusChange(syncStatus);
-
-    return () => {
-      onSyncStatusChange(null);
-    };
-  }, [isInteractive, onSyncStatusChange, syncStatus]);
+  useCardSyncStatusReporter({
+    status: syncStatus,
+    onSyncStatusChange,
+    isEnabled: isInteractive,
+  });
 
   const previousInteractiveRef = useRef(isInteractive);
   useEffect(() => {
