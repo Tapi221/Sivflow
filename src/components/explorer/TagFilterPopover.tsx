@@ -103,12 +103,12 @@ export const TagFilterPopover = ({
             </div>
 
             <div className="relative">
-              <Search className="ds-filter-search-icon absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5" />
+              <Search className="ds-filter-search-icon pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5" />
               <Input
                 ref={inputRef}
                 type="text"
                 className={cn(
-                  "ds-filter-search w-full",
+                  "ds-filter-search w-full pl-10 pr-3",
                   "surface-concave",
                 )}
                 placeholder="タグを検索..."
