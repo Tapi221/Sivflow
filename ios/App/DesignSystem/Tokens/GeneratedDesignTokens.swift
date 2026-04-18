@@ -261,6 +261,7 @@ enum DesignTokens {
         enum Radius {
             static let Control = 10
             static let Card = 16
+            static let Flashcard = 12
             static let Dialog = 12
             static let Panel = 24
             static let Hero = 32

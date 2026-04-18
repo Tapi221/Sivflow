@@ -261,6 +261,7 @@ object DesignTokens {
         object Radius {
             const val Control = 10
             const val Card = 16
+            const val Flashcard = 12
             const val Dialog = 12
             const val Panel = 24
             const val Hero = 32
