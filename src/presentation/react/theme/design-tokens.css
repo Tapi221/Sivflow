@@ -217,9 +217,9 @@
   --ds-semantic-motion-progress: 500ms ease-out;
   --ds-semantic-motion-screen-enter: 300ms ease-out;
   --ds-semantic-radius-card: 16px;
-  --ds-semantic-radius-flashcard: 12px;
   --ds-semantic-radius-control: 10px;
   --ds-semantic-radius-dialog: 12px;
+  --ds-semantic-radius-flashcard: 12px;
   --ds-semantic-radius-hero: 32px;
   --ds-semantic-radius-panel: 24px;
   --ds-semantic-radius-pill: 999px;
