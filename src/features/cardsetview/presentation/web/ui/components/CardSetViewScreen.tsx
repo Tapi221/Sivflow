@@ -53,17 +53,6 @@ export const CardSetViewScreen = () => {
   const Content = CARD_SET_VIEW_CONTENT_COMPONENTS[presentationTarget];
   const desktopOverlayTopInsetPx = getAppTopInsetPx({ presentationTarget });
 
-  const overlayChildren = (
-    <CardSetViewOverlayControls
-      isDesktop={isDesktopPresentation}
-      overlayRight={overlayRight}
-      resolvedLastSyncedAtMs={resolvedLastSyncedAtMs}
-      activeSyncStatus={state.activeSyncStatus}
-      onRetryActiveSync={state.handleRetryActiveSync}
-      topInsetPx={desktopOverlayTopInsetPx}
-    />
-  );
-
   const modeToolbar = (
     <CardModeToolbar
       displayMode={state.currentDisplayMode}
@@ -74,9 +63,38 @@ export const CardSetViewScreen = () => {
     />
   );
 
-  const topLeftControl = (
+  const overlayChildren = (
+    <>
+      <CardSetViewOverlayControls
+        isDesktop={isDesktopPresentation}
+        overlayRight={overlayRight}
+        resolvedLastSyncedAtMs={resolvedLastSyncedAtMs}
+        activeSyncStatus={state.activeSyncStatus}
+        onRetryActiveSync={state.handleRetryActiveSync}
+        topInsetPx={desktopOverlayTopInsetPx}
+      />
+      {isDesktopPresentation ? (
+        <div
+          className="pointer-events-auto absolute bottom-3 z-20 flex"
+          style={{
+            right: state.isMetaOpen ? overlayRight : 12,
+            transform: "none",
+          }}
+        >
+          {modeToolbar}
+        </div>
+      ) : null}
+    </>
+  );
+
+  const showTopLeftControl =
+    !isDesktopPresentation ||
+    Boolean(topLeftZoomControl) ||
+    Boolean(layoutConstraintIndicatorLabel);
+
+  const topLeftControl = showTopLeftControl ? (
     <div className="flex items-center gap-2">
-      {modeToolbar}
+      {!isDesktopPresentation ? modeToolbar : null}
       {topLeftZoomControl ? (
         <CardZoomControl
           value={topLeftZoomControl.value}
@@ -99,7 +117,7 @@ export const CardSetViewScreen = () => {
         </div>
       ) : null}
     </div>
-  );
+  ) : null;
 
   return (
     <CardWorkspaceShell

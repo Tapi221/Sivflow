@@ -115,7 +115,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
               <CardShell
                 ref={ref}
                 className={cn(
-                  "mx-auto border-none rounded-[24px] md:rounded-[28px]",
+                  "mx-auto border-none rounded-[12px]",
                   stretchWidth && "min-w-0 max-w-full",
                   fitHeight && "h-full",
                   className,
