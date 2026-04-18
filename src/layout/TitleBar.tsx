@@ -78,7 +78,7 @@ export const TitleBar: React.FC = () => {
   const isDesktopPresentation = presentationTarget === "desktop";
   const { pathname } = useLocation();
   const crumbs = useBreadcrumbs();
-  const { extraCrumbs, notifyFolderSelect } = useBreadcrumbContext();
+  const { extraCrumbs } = useBreadcrumbContext();
   const isCardSetViewPage = pathname.toLowerCase().startsWith("/cardsetview");
 
   useEffect(() => {
@@ -151,9 +151,6 @@ export const TitleBar: React.FC = () => {
 
         <nav className="titlebar-text flex min-w-0 items-center gap-1 overflow-hidden text-xs">
           {allCrumbs.map((crumb, index) => {
-            const hasFolderId = "folderId" in crumb;
-            const isSectionListCrumb = crumb.to === "/folders" && !hasFolderId;
-            const isHomeCrumb = index === 0;
             const isClickable = Boolean(crumb.to);
 
             const handleBreadcrumbClick = (
@@ -164,17 +161,6 @@ export const TitleBar: React.FC = () => {
 
               if (!crumb.to) {
                 return;
-              }
-
-              if (isHomeCrumb) {
-                navigate(crumb.to);
-                return;
-              }
-
-              if (hasFolderId) {
-                notifyFolderSelect(crumb.folderId ?? null);
-              } else if (isSectionListCrumb) {
-                notifyFolderSelect(null);
               }
 
               navigate(crumb.to);

@@ -13,7 +13,6 @@ import { useWorkspaceScrollController } from "@/features/explorer/adapters/web/u
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { useExplorerController } from "@/features/explorer/controller/useExplorerController";
 import { useExplorerBreadcrumbSync } from "@/features/explorer/hooks/useExplorerBreadcrumbSync";
-import { useExplorerFolderSelectionBridge } from "@/features/explorer/hooks/useExplorerFolderSelectionBridge";
 import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups";
 import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
 
@@ -52,12 +51,6 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     selectedFolderId: controller.state.selectedFolderId,
     selectedItem: controller.state.selectedItem,
     applyRouteState: controller.actions.applyRouteState,
-  });
-
-  useExplorerFolderSelectionBridge({
-    folders: lookups.normalizedFolders,
-    onSelectFolder: controller.actions.selectFolder,
-    onNavigateToSectionList: controller.actions.navigateToSectionList,
   });
 
   useExplorerBreadcrumbSync({
