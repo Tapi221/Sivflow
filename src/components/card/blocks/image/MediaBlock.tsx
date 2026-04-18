@@ -75,7 +75,7 @@ const MediaBlockInner = ({
       onMoveDragStart={onMoveDragStart}
       onMoveDragEnd={onMoveDragEnd}
     >
-      <ImageBlockShell showBorderOverlay>
+      <ImageBlockShell>
         <ImageBlockContent
           mode="edit"
           urls={data}

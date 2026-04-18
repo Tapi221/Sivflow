@@ -1315,13 +1315,12 @@ const CardMetaPanelInner = ({
             <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
               耐性スコア推移
             </h3>
-            <div className="ds-segmented-control text-[length:var(--meta-font-size)]">
+            <div className="ds-segmented-control">
               {(["7d", "30d", "all"] as const).map((p) => (
                 <SurfaceButton
                   key={p}
                   surface={period === p ? "convexActive" : "concave"}
                   size="xs"
-                  className="h-[var(--meta-row-px)] leading-[var(--meta-row-px)]"
                   onClick={() => setPeriod(p)}
                 >
                   {p === "all" ? "全期間" : p === "7d" ? "直近7" : "直近30"}
