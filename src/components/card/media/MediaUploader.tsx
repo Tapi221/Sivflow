@@ -317,18 +317,22 @@ type AudioMediaUploaderProps = {
 
 type MediaUploaderProps = ImageMediaUploaderProps | AudioMediaUploaderProps;
 
-const MediaUploader = ({
-  type = "image",
-  urls = [],
-  onChange,
-  maxFiles = 10,
-  initialFile,
-  onConsumeInitialFile,
-  onFilesExcess,
-  autoOpenPicker = false,
-  displayMode = "fixed",
-  zoom = 1,
-}: MediaUploaderProps) => {
+const MediaUploader = (props: MediaUploaderProps) => {
+  const {
+    type = "image",
+    urls = [],
+    onChange,
+    maxFiles = 10,
+    initialFile,
+    onConsumeInitialFile,
+    onFilesExcess,
+    autoOpenPicker = false,
+  } = props;
+
+  const displayMode =
+    props.type === "audio" ? "fixed" : (props.displayMode ?? "fixed");
+  const zoom = props.type === "audio" ? 1 : (props.zoom ?? 1);
+
   const { currentUser } = useAuthSession();
   const [dragOver, setDragOver] = useState(false);
   const [statusByAssetId, setStatusByAssetId] = useState<

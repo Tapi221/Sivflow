@@ -15,7 +15,7 @@ const loadFromStorage = (storageKey: string) => {
 };
 
 export const useExpandedFolders = (
-  storageKey = WEB_STORAGE_KEYS.expandedFolders,
+  storageKey: string = WEB_STORAGE_KEYS.expandedFolders,
 ) => {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() =>
     loadFromStorage(storageKey),

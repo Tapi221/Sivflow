@@ -129,17 +129,10 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
       return;
     }
 
-    // replace: インポートしたデータで上書き
     setStep("processing");
 
     try {
-      // 全データをクリアして新しいデータをインポート
-      // 注意: これは危険な操作なので、事前にバックアップを推奨
       const db = await getLocalDb(currentUser.uid);
-      const imagesTable = db.table("images");
-      const cardSetsTable = db.table("cardSets");
-      const cardsTable = db.table("cards");
-      const foldersTable = db.table("folders");
       const normalizedCards = parsedSnapshot.data.cards.map((card) =>
         normalizeImportedCard(card, currentUser.uid),
       );
@@ -153,42 +146,35 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
         toAssetRecordFromSnapshotAsset(asset, currentUser.uid),
       );
 
-      await db.transaction(
-        "rw",
-        imagesTable,
-        cardSetsTable,
-        cardsTable,
-        foldersTable,
-        async () => {
-          await imagesTable.clear();
-          await cardSetsTable.clear();
-          await cardsTable.clear();
-          await foldersTable.clear();
+      await db.runSyncTransaction(async () => {
+        await db.images.clear();
+        await db.cardSets.clear();
+        await db.cards.clear();
+        await db.folders.clear();
 
-          if (assetRows.length > 0) {
-            await imagesTable.bulkPut(assetRows);
-          }
+        if (assetRows.length > 0) {
+          await db.images.bulkPut(assetRows);
+        }
 
-          if (normalizedCardSets.length > 0) {
-            await cardSetsTable.bulkPut(normalizedCardSets);
-          }
+        if (normalizedCardSets.length > 0) {
+          await db.cardSets.bulkPut(normalizedCardSets);
+        }
 
-          if (normalizedFolders.length > 0) {
-            await foldersTable.bulkPut(normalizedFolders);
-          }
+        if (normalizedFolders.length > 0) {
+          await db.folders.bulkPut(normalizedFolders);
+        }
 
-          if (normalizedCards.length > 0) {
-            await cardsTable.bulkPut(normalizedCards);
-          }
-        },
-      );
+        if (normalizedCards.length > 0) {
+          await db.cards.bulkPut(normalizedCards);
+        }
+      });
 
       setStep("complete");
 
       setTimeout(() => {
         onOpenChange(false);
         resetState();
-        window.location.reload(); // データを反映するためにリロード
+        window.location.reload();
       }, 2000);
     } catch (err: unknown) {
       const message =
@@ -217,7 +203,6 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
           </DialogDescription>
         </DialogHeader>
 
-        {/* Step: Select File */}
         {step === "select" && (
           <div className="py-6">
             {isFallbackMode && (
@@ -263,16 +248,13 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
           </div>
         )}
 
-        {/* Step: Preview */}
         {step === "preview" && parsedSnapshot && comparison && (
           <div className="py-4 space-y-4">
-            {/* ファイル情報 */}
             <div className="bg-gray-50 rounded-lg p-3">
               <p className="text-xs text-gray-500 mb-1">選択したファイル</p>
               <p className="text-sm font-medium">{selectedFile?.name}</p>
             </div>
 
-            {/* 比較結果 */}
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                 <div>
@@ -334,7 +316,6 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
               </div>
             </div>
 
-            {/* アクション選択 */}
             <div className="space-y-2">
               <p className="text-sm font-medium text-gray-700">
                 どうしますか？
@@ -374,7 +355,6 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
           </div>
         )}
 
-        {/* Step: Processing */}
         {step === "processing" && (
           <div className="py-8 text-center">
             <Loader2 className="w-12 h-12 mx-auto mb-4 text-primary-600 animate-spin" />
@@ -382,7 +362,6 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
           </div>
         )}
 
-        {/* Step: Complete */}
         {step === "complete" && (
           <div className="py-8 text-center">
             <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />

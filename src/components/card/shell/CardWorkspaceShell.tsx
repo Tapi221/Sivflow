@@ -4,6 +4,16 @@ import { ChevronLeft, ChevronRight } from "@/ui/icons";
 import { overlayGlassIconButtonClassName } from "@/components/card/shell/overlaySurfaceClassNames";
 import type { CSSProperties, ReactNode, Ref } from "react";
 
+export type CardWorkspaceSurfaceVariant = "plain" | "dotted";
+
+const WORKSPACE_SURFACE_CLASS_NAMES: Record<
+  CardWorkspaceSurfaceVariant,
+  string
+> = {
+  plain: "workspace-surface--plain",
+  dotted: "workspace-surface--dotted",
+};
+
 export type CardWorkspaceWidthControlProps = {
   modeLabel: string;
   value: number;
@@ -34,6 +44,7 @@ export type CardWorkspaceShellProps = {
   contentAreaClassName?: string;
   viewportClassName?: string;
   viewportStyle?: CSSProperties;
+  surfaceVariant?: CardWorkspaceSurfaceVariant;
   viewportRef?: Ref<HTMLDivElement>;
   widthControl?: CardWorkspaceWidthControlProps | null;
   widthControlClassName?: string;
@@ -56,6 +67,7 @@ export const CardWorkspaceShell = ({
   contentAreaClassName,
   viewportClassName,
   viewportStyle,
+  surfaceVariant = "plain",
   viewportRef,
   widthControl = null,
   widthControlClassName,
@@ -81,8 +93,10 @@ export const CardWorkspaceShell = ({
   const topLeftOffsetPx = overlayTopInsetPx + 8;
   const topRightOffsetPx = overlayTopInsetPx + 12;
 
+  const surfaceClassName = WORKSPACE_SURFACE_CLASS_NAMES[surfaceVariant];
+
   return (
-    <div className={cn(containerClassName)}>
+    <div className={cn(surfaceClassName, containerClassName)}>
       <div
         className={cn(
           "relative flex h-full min-h-0 overflow-hidden",

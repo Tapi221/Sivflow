@@ -5,6 +5,10 @@
     --app-bg-dot: rgba(148, 163, 184, 0.38);
     --app-bg-dot-size: 1.5px;
     --app-bg-dot-gap: 20px;
+    --workspace-surface-bg: #fcfbf7;
+    --workspace-surface-dot-color: #d1d1d1;
+    --workspace-surface-dot-radius: 0.75px;
+    --workspace-surface-dot-gap: 14px;
   }
 
   *,
@@ -49,6 +53,24 @@
       transparent var(--app-bg-dot-size)
     );
     background-size: var(--app-bg-dot-gap) var(--app-bg-dot-gap);
+    background-position: 0 0;
+  }
+
+  .workspace-surface--plain {
+    background: transparent;
+  }
+
+  .workspace-surface--dotted {
+    background-color: var(--workspace-surface-bg);
+    background-image: radial-gradient(
+      circle at var(--workspace-surface-dot-radius)
+        var(--workspace-surface-dot-radius),
+      var(--workspace-surface-dot-color)
+        var(--workspace-surface-dot-radius),
+      transparent var(--workspace-surface-dot-radius)
+    );
+    background-size: var(--workspace-surface-dot-gap)
+      var(--workspace-surface-dot-gap);
     background-position: 0 0;
   }
 
