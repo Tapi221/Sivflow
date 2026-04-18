@@ -15,6 +15,10 @@ import {
   toggleFlippedCardId,
 } from "@/features/cardsetview/domain/cardSetViewState";
 import { useCardEntity } from "@/hooks/card/useCardEntity";
+import {
+  getCardSetViewFlippedCardIds,
+  setCardSetViewFlippedCardIds,
+} from "@/services/cardSetViewFlippedFaceSession";
 import type { Card } from "@/types";
 
 type KeyedNumberState = {
@@ -82,7 +86,7 @@ export const useCardSetViewSelectionState = ({
 
   const [flippedState, setFlippedState] = useState<KeyedFlipState>(() => ({
     sourceKey,
-    ids: new Set<string>(),
+    ids: getCardSetViewFlippedCardIds({ cardSetId, folderId }),
   }));
 
   const [isGlobalEditing, setIsGlobalEditing] = useState(false);
@@ -148,6 +152,24 @@ export const useCardSetViewSelectionState = ({
   useEffect(() => {
     currentCardIdRef.current = currentCardId;
   }, [currentCardId]);
+
+  useEffect(() => {
+    setFlippedState((prev) => {
+      if (prev.sourceKey === sourceKey) {
+        return prev;
+      }
+
+      return {
+        sourceKey,
+        ids: getCardSetViewFlippedCardIds({ cardSetId, folderId }),
+      };
+    });
+  }, [cardSetId, folderId, sourceKey]);
+
+  useEffect(() => {
+    if (flippedState.sourceKey !== sourceKey) return;
+    setCardSetViewFlippedCardIds({ cardSetId, folderId, ids: flippedState.ids });
+  }, [cardSetId, flippedState, folderId, sourceKey]);
 
   useEffect(() => {
     setCurrentIndexState((prev) => {
