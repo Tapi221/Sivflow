@@ -46,7 +46,7 @@ const WindowControlButton: React.FC<WindowControlButtonProps> = ({
     ? "cursor-default opacity-60 hover:bg-transparent hover:text-current"
     : danger
       ? "hover:bg-[#E81123] hover:text-white"
-      : "hover:bg-black/5";
+      : "titlebar-hover";
 
   return (
     <button
@@ -56,7 +56,7 @@ const WindowControlButton: React.FC<WindowControlButtonProps> = ({
       disabled={disabled}
       style={noDragStyle}
       className={cn(
-        "flex h-full w-[46px] items-center justify-center transition-colors",
+        "titlebar-text flex h-full w-[46px] items-center justify-center transition-colors",
         disabledClassName,
       )}
       title={title}
@@ -133,7 +133,7 @@ export const TitleBar: React.FC = () => {
       className={cn(
         "surface-glass-base surface-glass-titlebar",
         "flex w-full shrink-0 select-none items-center justify-between",
-        "border-x-0 border-t-0 rounded-none text-sm text-slate-700",
+        "border-x-0 border-t-0 rounded-none text-sm titlebar-text",
       )}
       style={{
         ...dragStyle,
@@ -145,11 +145,11 @@ export const TitleBar: React.FC = () => {
         className="flex h-full min-w-0 items-center gap-2 px-4"
         style={noDragStyle}
       >
-        <span className="mr-2 shrink-0 text-xs font-semibold tracking-wide text-slate-600">
+        <span className="titlebar-text-strong mr-2 shrink-0 text-xs font-semibold tracking-wide">
           Manifolia
         </span>
 
-        <nav className="flex min-w-0 items-center gap-1 overflow-hidden text-xs text-slate-500">
+        <nav className="titlebar-text flex min-w-0 items-center gap-1 overflow-hidden text-xs">
           {allCrumbs.map((crumb, index) => {
             const hasFolderId = "folderId" in crumb;
             const isSectionListCrumb = crumb.to === "/folders" && !hasFolderId;
@@ -189,13 +189,13 @@ export const TitleBar: React.FC = () => {
                 }:${index}`}
               >
                 {index > 0 && (
-                  <span className="select-none text-slate-300">/</span>
+                  <span className="titlebar-divider select-none">/</span>
                 )}
 
                 {isClickable ? (
                   <button
                     type="button"
-                    className="truncate transition-colors hover:text-slate-700"
+                    className="titlebar-hover titlebar-text truncate rounded-sm px-1 py-0.5 transition-colors"
                     style={noDragStyle}
                     onMouseDown={(event) => event.stopPropagation()}
                     onClick={handleBreadcrumbClick}
@@ -203,7 +203,7 @@ export const TitleBar: React.FC = () => {
                     {crumb.label}
                   </button>
                 ) : (
-                  <span className="truncate font-medium text-slate-700">
+                  <span className="titlebar-text-strong truncate font-medium">
                     {crumb.label}
                   </span>
                 )}
@@ -214,7 +214,7 @@ export const TitleBar: React.FC = () => {
       </div>
 
       <div
-        className="flex h-full items-center text-slate-500"
+        className="titlebar-text flex h-full items-center"
         style={noDragStyle}
       >
         {isCardSetViewPage && (
@@ -228,7 +228,7 @@ export const TitleBar: React.FC = () => {
                     undefined,
                   )
                 }
-                className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
+                className="titlebar-hover titlebar-text flex h-full w-[46px] items-center justify-center transition-colors"
                 title="新規カードを追加"
                 aria-label="新規カードを追加"
                 tabIndex={-1}
@@ -284,7 +284,7 @@ export const TitleBar: React.FC = () => {
                   undefined,
                 )
               }
-              className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
+              className="titlebar-hover titlebar-text flex h-full w-[46px] items-center justify-center transition-colors"
               title={
                 isCardSetViewEditing
                   ? "閲覧モードに切り替え"
