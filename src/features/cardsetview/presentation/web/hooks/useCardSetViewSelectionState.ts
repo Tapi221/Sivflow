@@ -156,54 +156,32 @@ export const useCardSetViewSelectionState = ({
     currentCardIdRef.current = currentCardId;
   }, [currentCardId]);
 
-  useEffect(() => {
-    setFlippedState((prev) => {
-      if (prev.sourceKey === sourceKey) {
-        return prev;
-      }
-
-      return {
-        sourceKey,
-        ids: getCardSetViewFlippedCardIds({
-          deviceScope,
-          cardSetId,
-        }),
-      };
+  const persistedFlippedCardIds = useMemo(() => {
+    return getCardSetViewFlippedCardIds({
+      deviceScope,
+      cardSetId,
     });
-  }, [cardSetId, deviceScope, sourceKey]);
+  }, [cardSetId, deviceScope]);
+
+  const flippedCardIds = useMemo(() => {
+    if (flippedState.sourceKey === sourceKey) {
+      return flippedState.ids;
+    }
+
+    return persistedFlippedCardIds;
+  }, [flippedState, persistedFlippedCardIds, sourceKey]);
 
   useEffect(() => {
-    if (flippedState.sourceKey !== sourceKey) return;
+    if (flippedState.sourceKey !== sourceKey) {
+      return;
+    }
+
     setCardSetViewFlippedCardIds({
       deviceScope,
       cardSetId,
       ids: flippedState.ids,
     });
   }, [cardSetId, deviceScope, flippedState, sourceKey]);
-
-  useEffect(() => {
-    setCurrentIndexState((prev) => {
-      if (prev.sourceKey === sourceKey && prev.value === safeCurrentIndex) {
-        return prev;
-      }
-
-      return {
-        sourceKey,
-        value: safeCurrentIndex,
-      };
-    });
-
-    setSelectedCardIdState((prev) => {
-      if (prev.sourceKey === sourceKey && prev.value === currentCardId) {
-        return prev;
-      }
-
-      return {
-        sourceKey,
-        value: currentCardId,
-      };
-    });
-  }, [currentCardId, safeCurrentIndex, sourceKey]);
 
   const cardsForPager = useMemo(() => {
     return resolveCardsForPager({
@@ -283,16 +261,22 @@ export const useCardSetViewSelectionState = ({
 
       setFlippedState((prev) => {
         const baseIds =
-          prev.sourceKey === sourceKey ? prev.ids : new Set<string>();
+          prev.sourceKey === sourceKey ? prev.ids : persistedFlippedCardIds;
         const nextIds = new Set(baseIds);
 
-        if (face === "answer") nextIds.add(id);
-        else nextIds.delete(id);
+        if (face === "answer") {
+          nextIds.add(id);
+        } else {
+          nextIds.delete(id);
+        }
 
-        return { sourceKey, ids: nextIds };
+        return {
+          sourceKey,
+          ids: nextIds,
+        };
       });
     },
-    [sourceKey],
+    [persistedFlippedCardIds, sourceKey],
   );
 
   const handleFlip = useCallback(() => {
@@ -304,7 +288,7 @@ export const useCardSetViewSelectionState = ({
 
     setFlippedState((prev) => {
       const baseIds =
-        prev.sourceKey === sourceKey ? prev.ids : new Set<string>();
+        prev.sourceKey === sourceKey ? prev.ids : persistedFlippedCardIds;
 
       return {
         sourceKey,
@@ -314,7 +298,7 @@ export const useCardSetViewSelectionState = ({
         }),
       };
     });
-  }, [sourceKey]);
+  }, [persistedFlippedCardIds, sourceKey]);
 
   const beginGlobalEditing = useCallback(() => {
     setIsGlobalEditing(true);
@@ -342,14 +326,6 @@ export const useCardSetViewSelectionState = ({
     },
     [selectCardIndex],
   );
-
-  const flippedCardIds = useMemo(() => {
-    if (flippedState.sourceKey === sourceKey) {
-      return flippedState.ids;
-    }
-
-    return new Set<string>();
-  }, [flippedState, sourceKey]);
 
   return {
     sourceKey,

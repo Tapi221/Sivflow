@@ -179,6 +179,14 @@ export const useCardSetViewScreenController = () => {
     zoom.showConstraintIndicator,
   ]);
 
+  const {
+    currentCardLayoutMode,
+    currentDisplayMode,
+    isFlipped,
+    setCurrentCardFace,
+    setCurrentCardLayoutMode,
+  } = state;
+
   const handleSaveCurrentDisplayMode = useCallback(async () => {
     if (!cardSetId) {
       return;
@@ -187,14 +195,14 @@ export const useCardSetViewScreenController = () => {
     try {
       await saveDefaultDisplayMode({
         cardSetId,
-        currentDisplayMode: state.currentDisplayMode,
+        currentDisplayMode,
         updateCardSet: data.updateCardSet,
       });
     } catch (error) {
       console.error("[CardSetView] Failed to save default display mode", error);
       toastError("表示モードの保存に失敗しました");
     }
-  }, [cardSetId, data.updateCardSet, state.currentDisplayMode, toastError]);
+  }, [cardSetId, currentDisplayMode, data.updateCardSet, toastError]);
 
   const handleActiveScrollAnchorFaceChange = useCallback(
     (face: ScrollAnchorFace | null) => {
@@ -205,26 +213,26 @@ export const useCardSetViewScreenController = () => {
 
   const handleChangeCardLayoutMode = useCallback(
     (nextMode: CardLayoutMode) => {
-      if (nextMode === state.currentCardLayoutMode) {
+      if (nextMode === currentCardLayoutMode) {
         return;
       }
 
-      if (nextMode === "flip" && state.currentCardLayoutMode !== "flip") {
-        state.setCurrentCardFace(
-          activeScrollAnchorFace ?? (state.isFlipped ? "answer" : "question"),
+      if (nextMode === "flip" && currentCardLayoutMode !== "flip") {
+        setCurrentCardFace(
+          activeScrollAnchorFace ?? (isFlipped ? "answer" : "question"),
         );
         setLayoutTransitionScrollAnchorRevision((prev) => prev + 1);
       }
 
-      state.setCurrentCardLayoutMode(nextMode);
+      setCurrentCardLayoutMode(nextMode);
     },
     [
       activeScrollAnchorFace,
+      currentCardLayoutMode,
+      isFlipped,
+      setCurrentCardFace,
+      setCurrentCardLayoutMode,
       setLayoutTransitionScrollAnchorRevision,
-      state.currentCardLayoutMode,
-      state.isFlipped,
-      state.setCurrentCardFace,
-      state.setCurrentCardLayoutMode,
     ],
   );
 

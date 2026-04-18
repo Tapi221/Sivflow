@@ -70,7 +70,7 @@ const WindowControlButton: React.FC<WindowControlButtonProps> = ({
 };
 
 export const TitleBar: React.FC = () => {
-  const [isMaximized, setIsMaximized] = useState(false);
+  const [bridgeIsMaximized, setBridgeIsMaximized] = useState(false);
   const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
   const navigate = useNavigate();
   const hasDesktopBridge = useHasDesktopBridge();
@@ -82,16 +82,13 @@ export const TitleBar: React.FC = () => {
   const isCardSetViewPage = pathname.toLowerCase().startsWith("/cardsetview");
 
   useEffect(() => {
-    if (!hasDesktopBridge) {
-      setIsMaximized(false);
-      return;
-    }
+    if (!hasDesktopBridge) return;
 
-    void windowControls.isMaximized().then(setIsMaximized);
+    void windowControls.isMaximized().then(setBridgeIsMaximized);
 
     const cleanup = windowControls.onMaximizedStateChange(
       (maximized: boolean) => {
-        setIsMaximized(maximized);
+        setBridgeIsMaximized(maximized);
       },
     );
 
@@ -99,6 +96,8 @@ export const TitleBar: React.FC = () => {
       cleanup();
     };
   }, [hasDesktopBridge]);
+
+  const isMaximized = hasDesktopBridge && bridgeIsMaximized;
 
   useEffect(() => {
     return subscribeCardSetViewWindowEvent(
