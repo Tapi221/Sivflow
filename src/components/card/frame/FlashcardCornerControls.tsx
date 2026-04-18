@@ -31,6 +31,13 @@ export interface FlashcardCornerControlsResult {
   actionsTopRight: React.ReactNode[] | undefined;
 }
 
+const resolveSafeVisualScale = (value?: number) => {
+  if (typeof value !== "number") return 1;
+  if (!Number.isFinite(value)) return 1;
+  if (value <= 0) return 1;
+  return value;
+};
+
 export const useFlashcardCornerControls = ({
   card,
   hasUncertainty,
@@ -50,20 +57,38 @@ export const useFlashcardCornerControls = ({
     const actionsTopLeft: React.ReactNode[] = [];
     const actionsTopRight: React.ReactNode[] = [];
     const mediaActionNodes: React.ReactNode[] = [];
+
     const mediaButtonClass = cn(
-      "relative inline-flex h-7 w-7 min-h-0 min-w-0 items-center justify-center rounded-full transition-colors",
+      "relative inline-flex min-h-0 min-w-0 items-center justify-center rounded-full transition-colors",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
       CARD_ACTION_BG_CLASS,
       CARD_ACTION_COLOR_IDLE_CLASS,
     );
 
     const safeHeaderIconVisualScale =
-      typeof headerIconVisualScale === "number" &&
-      Number.isFinite(headerIconVisualScale) &&
-      headerIconVisualScale > 0
-        ? headerIconVisualScale
-        : 1;
+      resolveSafeVisualScale(headerIconVisualScale);
+    const resolvedButtonPx = 28 / safeHeaderIconVisualScale;
     const resolvedIconPx = 14 / safeHeaderIconVisualScale;
+    const resolvedBadgePx = 16 / safeHeaderIconVisualScale;
+    const resolvedBadgeFontPx = 9 / safeHeaderIconVisualScale;
+
+    const mediaButtonStyle: React.CSSProperties = {
+      width: `${resolvedButtonPx}px`,
+      height: `${resolvedButtonPx}px`,
+      minWidth: `${resolvedButtonPx}px`,
+      minHeight: `${resolvedButtonPx}px`,
+    };
+
+    const mediaIconStyle: React.CSSProperties = {
+      width: `${resolvedIconPx}px`,
+      height: `${resolvedIconPx}px`,
+    };
+
+    const badgeStyle: React.CSSProperties = {
+      height: `${resolvedBadgePx}px`,
+      minWidth: `${resolvedBadgePx}px`,
+      fontSize: `${resolvedBadgeFontPx}px`,
+    };
 
     const mediaCountLabel = (count: number) =>
       count > 9 ? "9+" : String(count);
@@ -73,7 +98,7 @@ export const useFlashcardCornerControls = ({
         <div
           key="extra-header-left"
           className="flex"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
         >
           {extraHeaderLeft}
         </div>,
@@ -106,7 +131,7 @@ export const useFlashcardCornerControls = ({
           helpActive={hasUncertainty}
           starActive={isBookmarked}
           disabled={!onToggleUncertainty && !onToggleBookmark}
-          iconPx={resolvedIconPx}
+          visualScale={safeHeaderIconVisualScale}
         />,
       );
     }
@@ -115,21 +140,22 @@ export const useFlashcardCornerControls = ({
       mediaActionNodes.push(
         <button
           key="images"
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={(event) => {
+            event.stopPropagation();
             onOpenImagePopup();
           }}
           className={mediaButtonClass}
+          style={mediaButtonStyle}
           aria-label={`画像 ${activeImageItems.length} 件`}
         >
           <ImageIcon
             className={CARD_ACTION_ICON_CLASS}
-            style={{
-              width: `${resolvedIconPx}px`,
-              height: `${resolvedIconPx}px`,
-            }}
+            style={mediaIconStyle}
           />
-          <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
+          <span
+            className="pointer-events-none absolute -right-1 -top-1 inline-flex items-center justify-center rounded-full border border-white bg-slate-100 px-1 font-semibold leading-none text-slate-500"
+            style={badgeStyle}
+          >
             {mediaCountLabel(activeImageItems.length)}
           </span>
         </button>,
@@ -140,21 +166,22 @@ export const useFlashcardCornerControls = ({
       mediaActionNodes.push(
         <button
           key="audios"
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={(event) => {
+            event.stopPropagation();
             onOpenAudioPopup();
           }}
           className={mediaButtonClass}
+          style={mediaButtonStyle}
           aria-label={`音声 ${activeAudioUrls.length} 件`}
         >
           <Volume2
             className={CARD_ACTION_ICON_CLASS}
-            style={{
-              width: `${resolvedIconPx}px`,
-              height: `${resolvedIconPx}px`,
-            }}
+            style={mediaIconStyle}
           />
-          <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
+          <span
+            className="pointer-events-none absolute -right-1 -top-1 inline-flex items-center justify-center rounded-full border border-white bg-slate-100 px-1 font-semibold leading-none text-slate-500"
+            style={badgeStyle}
+          >
             {mediaCountLabel(activeAudioUrls.length)}
           </span>
         </button>,
@@ -165,21 +192,19 @@ export const useFlashcardCornerControls = ({
       mediaActionNodes.push(
         <button
           key="references"
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={(event) => {
+            event.stopPropagation();
             onOpenReferencePopup();
           }}
           className={mediaButtonClass}
+          style={mediaButtonStyle}
           aria-label={`リンク ${activeReferences.length} 件`}
         >
-          <Link
-            className={CARD_ACTION_ICON_CLASS}
-            style={{
-              width: `${resolvedIconPx}px`,
-              height: `${resolvedIconPx}px`,
-            }}
-          />
-          <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
+          <Link className={CARD_ACTION_ICON_CLASS} style={mediaIconStyle} />
+          <span
+            className="pointer-events-none absolute -right-1 -top-1 inline-flex items-center justify-center rounded-full border border-white bg-slate-100 px-1 font-semibold leading-none text-slate-500"
+            style={badgeStyle}
+          >
             {mediaCountLabel(activeReferences.length)}
           </span>
         </button>,
@@ -191,7 +216,7 @@ export const useFlashcardCornerControls = ({
         <div
           key="media-actions"
           className="flex items-center gap-2"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
         >
           {mediaActionNodes}
         </div>,
