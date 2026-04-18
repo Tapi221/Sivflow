@@ -25,11 +25,4 @@ export const webPlatform: PlatformApi = {
     },
     onCallback: () => () => {},
   },
-  window: {
-    minimize: async () => {},
-    maximizeToggle: async () => {},
-    close: async () => {},
-    isMaximized: async () => false,
-    onMaximizedStateChange: () => () => {},
-  },
 };

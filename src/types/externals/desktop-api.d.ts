@@ -18,7 +18,7 @@ export interface PlatformOauthApi {
   onCallback(handler: DesktopOauthCallbackHandler): () => void;
 }
 
-export interface PlatformWindowApi {
+export interface DesktopWindowApi {
   minimize(): Promise<void>;
   maximizeToggle(): Promise<void>;
   close(): Promise<void>;
@@ -30,7 +30,6 @@ export interface PlatformApi {
   app: PlatformAppApi;
   shell: PlatformShellApi;
   oauth: PlatformOauthApi;
-  window: PlatformWindowApi;
 }
 
 export interface DesktopOauthCallbackPayload {
@@ -46,8 +45,6 @@ export type DesktopOauthCallbackHandler = (
 ) => void;
 
 export type DesktopOauthApi = PlatformOauthApi;
-
-export type DesktopWindowApi = PlatformWindowApi;
 
 export interface DesktopBridgeApi extends PlatformApi {
   oauth: DesktopOauthApi;

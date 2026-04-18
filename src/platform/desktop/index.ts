@@ -28,12 +28,4 @@ export const desktopPlatform: PlatformApi = {
     exchangeIdToken: (input) => getDesktopBridge().oauth.exchangeIdToken(input),
     onCallback: (handler) => getDesktopBridge().oauth.onCallback(handler),
   },
-  window: {
-    minimize: () => getDesktopBridge().window.minimize(),
-    maximizeToggle: () => getDesktopBridge().window.maximizeToggle(),
-    close: () => getDesktopBridge().window.close(),
-    isMaximized: () => getDesktopBridge().window.isMaximized(),
-    onMaximizedStateChange: (handler) =>
-      getDesktopBridge().window.onMaximizedStateChange(handler),
-  },
 };
