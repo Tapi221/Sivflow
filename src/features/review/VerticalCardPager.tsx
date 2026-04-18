@@ -266,22 +266,6 @@ const VerticalCardPagerFn = <T,>({
     };
   }, [activeIndex, itemRefs]);
 
-  const scheduleAnchorCorrection = useCallback(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    if (anchorCorrectionRafRef.current != null) {
-      return;
-    }
-
-    anchorCorrectionRafRef.current = window.requestAnimationFrame(() => {
-      anchorCorrectionRafRef.current = null;
-      restoreScrollAnchor();
-      updateVisibleRange();
-    });
-  }, [restoreScrollAnchor, updateVisibleRange]);
-
   const updateVisibleRange = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -392,6 +376,22 @@ const VerticalCardPagerFn = <T,>({
     setVisibleRange(nextRange);
     onRenderRangeChangeRef.current?.(nextEffective);
   }, [cards.length, disableVirtualization, itemRefs]);
+
+  const scheduleAnchorCorrection = useCallback(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (anchorCorrectionRafRef.current != null) {
+      return;
+    }
+
+    anchorCorrectionRafRef.current = window.requestAnimationFrame(() => {
+      anchorCorrectionRafRef.current = null;
+      restoreScrollAnchor();
+      updateVisibleRange();
+    });
+  }, [restoreScrollAnchor, updateVisibleRange]);
 
   const scheduleVisibleRangeUpdate = useCallback(() => {
     if (visibleRangeRafRef.current != null) return;
