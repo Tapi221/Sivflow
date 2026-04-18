@@ -129,7 +129,7 @@ export const CardSetViewScreen = () => {
     <CardWorkspaceShell
       containerClassName="h-full overflow-hidden pt-0 card-editor-right-pane-font"
       shellClassName="h-full"
-      widthControl={widthControl}
+      widthControl={null}
       widthControlClassName="hidden md:flex"
       topLeftControl={topLeftControl}
       overlayChildren={overlayChildren}
