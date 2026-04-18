@@ -63,6 +63,12 @@ export const CardSetViewScreen = () => {
     />
   );
 
+  const modeToolbarRight = isDesktopPresentation
+    ? state.isMetaOpen
+      ? "calc(var(--ui-panel-width) + 0.75rem)"
+      : "0.75rem"
+    : "0.75rem";
+
   const overlayChildren = (
     <>
       <CardSetViewOverlayControls
@@ -75,9 +81,9 @@ export const CardSetViewScreen = () => {
       />
       {isDesktopPresentation ? (
         <div
-          className="pointer-events-auto absolute bottom-3 z-20 flex"
+          className="pointer-events-auto absolute bottom-4 z-20 flex"
           style={{
-            right: state.isMetaOpen ? overlayRight : 12,
+            right: modeToolbarRight,
             transform: "none",
           }}
         >
