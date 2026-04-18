@@ -1315,7 +1315,7 @@ const CardMetaPanelInner = ({
             <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
               耐性スコア推移
             </h3>
-            <div className="ds-editor-pane__toolbar flex p-0.5 text-[length:var(--meta-font-size)]">
+            <div className="ds-segmented-control text-[length:var(--meta-font-size)]">
               {(["7d", "30d", "all"] as const).map((p) => (
                 <SurfaceButton
                   key={p}
