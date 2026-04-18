@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback } from "react";
 
 import {
-  bootstrapEmptyCardSet,
   createAndFocusCard as createAndFocusCardUseCase,
   toggleCardBookmark,
   toggleCardUncertainty,
@@ -16,8 +15,6 @@ interface UseCardSetViewActionsOptions {
   selectedCardSet: CardSet | null;
   selectedCard: Card | null;
   currentCard: Card | null;
-  isLoading: boolean;
-  sortedCardsLength: number;
   createCard: (
     cardData: Partial<Card> & { cardSetId: string },
   ) => Promise<unknown>;
@@ -34,8 +31,6 @@ export const useCardSetViewActions = ({
   selectedCardSet,
   selectedCard,
   currentCard,
-  isLoading,
-  sortedCardsLength,
   createCard,
   updateCard,
   toastError,
@@ -43,51 +38,6 @@ export const useCardSetViewActions = ({
   setPendingFocusCardId,
   clearFlippedCards,
 }: UseCardSetViewActionsOptions) => {
-  const autoInitializedCardSetIdsRef = useRef<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (!cardSetId || !selectedCardSet || isLoading || sortedCardsLength > 0) {
-      return;
-    }
-
-    if (autoInitializedCardSetIdsRef.current.has(cardSetId)) {
-      return;
-    }
-
-    autoInitializedCardSetIdsRef.current.add(cardSetId);
-
-    void (async () => {
-      try {
-        beginGlobalEditing();
-
-        const createdId = await bootstrapEmptyCardSet({
-          cardSetId,
-          targetFolderId: selectedCardSet.folderId ?? null,
-          createCard,
-        });
-
-        if (createdId) {
-          setPendingFocusCardId(createdId);
-        }
-      } catch (error) {
-        console.error(
-          "[CardSetView] Failed to bootstrap empty card set:",
-          error,
-        );
-        toastError("空のカードセット初期化に失敗しました");
-      }
-    })();
-  }, [
-    beginGlobalEditing,
-    cardSetId,
-    createCard,
-    isLoading,
-    selectedCardSet,
-    setPendingFocusCardId,
-    sortedCardsLength,
-    toastError,
-  ]);
-
   const createAndFocusCard = useCallback(async (): Promise<boolean> => {
     const { targetCardSetId, targetFolderId } = resolveCardMutationTarget({
       cardSetId,

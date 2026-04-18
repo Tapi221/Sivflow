@@ -23,12 +23,6 @@ interface CreateAndFocusCardOptions {
   createCard: (cardData: CreateCardInput) => Promise<unknown>;
 }
 
-interface BootstrapEmptyCardSetOptions {
-  cardSetId: string;
-  targetFolderId: string | null;
-  createCard: (cardData: CreateCardInput) => Promise<unknown>;
-}
-
 interface ToggleCardFlagOptions {
   card: Card;
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
@@ -92,18 +86,6 @@ export const createAndFocusCard = async ({
   );
 
   return extractCreatedCardId(created);
-};
-
-export const bootstrapEmptyCardSet = async ({
-  cardSetId,
-  targetFolderId,
-  createCard,
-}: BootstrapEmptyCardSetOptions): Promise<string | null> => {
-  return createAndFocusCard({
-    targetCardSetId: cardSetId,
-    targetFolderId,
-    createCard,
-  });
 };
 
 export const toggleCardUncertainty = async ({
