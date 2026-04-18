@@ -103,7 +103,7 @@ export const CardSetViewScreen = () => {
 
   return (
     <CardWorkspaceShell
-      containerClassName="h-full overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font"
+      containerClassName="h-full overflow-hidden bg-[#FCFBF7] bg-[radial-gradient(#D1D1D1_0.75px,transparent_0.75px)] [background-size:14px_14px] pt-0 card-editor-right-pane-font"
       shellClassName="h-full"
       widthControl={widthControl}
       widthControlClassName="hidden md:flex"
