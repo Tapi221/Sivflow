@@ -10,6 +10,8 @@ export type CardSurfaceLayoutProps = {
   className?: string;
 };
 
+const SPLIT_INNER_SHADOW_CLIP_PX = 120;
+
 export const CardSurfaceLayout = ({
   cardLayoutMode,
   questionNode,
@@ -27,18 +29,41 @@ export const CardSurfaceLayout = ({
     );
   }
 
+  const isSplitLayout = cardLayoutMode === "split";
+
+  const leftSlotStyle = isSplitLayout
+    ? {
+        clipPath: `inset(-${SPLIT_INNER_SHADOW_CLIP_PX}px 0 -${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px)`,
+      }
+    : undefined;
+
+  const rightSlotStyle = isSplitLayout
+    ? {
+        clipPath: `inset(-${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px 0)`,
+      }
+    : undefined;
+
   return (
     <div
       className={cn(
         "w-full min-w-0 max-w-full overflow-visible",
-        cardLayoutMode === "split"
-          ? "grid grid-cols-2 gap-0"
-          : "flex flex-col gap-0",
+        isSplitLayout ? "grid grid-cols-2 gap-0" : "flex flex-col gap-0",
         className,
       )}
     >
-      <div className="min-w-0">{questionNode}</div>
-      <div className="min-w-0">{answerNode}</div>
+      <div
+        className="relative min-w-0 overflow-visible"
+        style={leftSlotStyle}
+      >
+        {questionNode}
+      </div>
+
+      <div
+        className="relative min-w-0 overflow-visible"
+        style={rightSlotStyle}
+      >
+        {answerNode}
+      </div>
     </div>
   );
 };
