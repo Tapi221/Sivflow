@@ -2,8 +2,8 @@
   "color": {
     "background": {
       "app": "{color.neutral.0}",
-      "sidebar": "{color.neutral.150}",
-      "sidebarActive": "{color.neutral.200}",
+      "sidebar": "#f6f1eb",
+      "sidebarActive": "#ece2d7",
       "floating": "rgba(255, 255, 255, 0.82)",
       "code": "{color.code.background}"
     },
