@@ -5,6 +5,10 @@
     --app-bg-dot: #d1d1d1;
     --app-bg-dot-size: 0.75px;
     --app-bg-dot-gap: 14px;
+    --app-loading-spinner-track: rgb(var(--ds-color-neutral-300-rgb) / 0.34);
+    --app-loading-spinner-indicator: rgb(
+      var(--ds-semantic-color-action-primary-rgb) / 0.58
+    );
   }
 
   *,
