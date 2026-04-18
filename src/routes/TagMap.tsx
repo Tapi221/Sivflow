@@ -455,7 +455,7 @@ const TagMap = () => {
   }, [effectiveLayout, tagById, tags]);
 
   return (
-    <div className="h-full min-h-full w-full bg-[#F6F8FA] px-6 py-6 md:px-8 md:py-8">
+    <div className="h-full min-h-full w-full px-6 py-6 md:px-8 md:py-8">
       <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6">
         <header className="rounded-[28px] border border-slate-200 bg-white px-6 py-5 shadow-sm">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">

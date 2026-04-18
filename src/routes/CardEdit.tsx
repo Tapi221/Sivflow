@@ -93,7 +93,7 @@ const CardEdit = () => {
   ]);
 
   return (
-    <div className="relative h-full min-h-0 bg-[#F5F7F8] text-slate-800">
+    <div className="relative h-full min-h-0 bg-transparent text-slate-800">
       <div
         className="pointer-events-none absolute inset-x-0 z-30 hidden md:block"
         style={{ top: `${TITLEBAR_HEIGHT_PX + 12}px` }}

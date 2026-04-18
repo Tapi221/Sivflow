@@ -25,7 +25,7 @@ export const CalendarScreen = () => {
   } = useCalendarScreen();
 
   return (
-    <div className="relative min-h-screen bg-[#F5F7F8] text-slate-800 selection:bg-indigo-100 selection:text-indigo-900 flex">
+    <div className="relative min-h-screen bg-transparent text-slate-800 selection:bg-indigo-100 selection:text-indigo-900 flex">
       <Button
         type="button"
         variant="ghost"

@@ -6,7 +6,9 @@
   flex: 1;
   width: 100%;
   overflow: hidden;
-  background: transparent;
+  background-color: #fcfbf7;
+  background-image: radial-gradient(#d1d1d1 0.75px, transparent 0.75px);
+  background-size: 14px 14px;
 }
 
 .app-layout--sidebar-hidden {

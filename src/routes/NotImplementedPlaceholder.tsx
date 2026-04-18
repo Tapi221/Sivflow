@@ -7,7 +7,7 @@ const NotImplementedPlaceholder = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#F5F7F8] flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-3xl p-8 text-center shadow-sm border border-slate-100">
         <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-400">
           <Construction className="w-10 h-10" />
