@@ -80,6 +80,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   useExplorerRouteSync({
     route,
     isHomeOnlyMode: controller.state.isHomeOnlyMode,
+    isSectionListMode: controller.state.isSectionListMode,
     selectedFolderId: controller.state.selectedFolderId,
     selectedItem: controller.state.selectedItem,
     applyRouteState: controller.actions.applyRouteState,

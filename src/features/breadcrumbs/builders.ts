@@ -5,9 +5,6 @@ import type { BreadcrumbCrumb, ExplorerBreadcrumbContext } from "./types";
 
 type FolderLike = Pick<Folder, "id" | "folderName" | "parentFolderId">;
 
-const HOME_ROUTE = "/folders?home=1";
-const FOLDER_LIST_ROUTE = "/folders?view=section-list";
-
 const PAGE_LABELS: Record<string, string> = {
   folders: "フォルダ一覧",
   calendar: "カレンダー",
@@ -20,6 +17,9 @@ const PAGE_LABELS: Record<string, string> = {
   dictionary: "辞書",
   questions: "疑問集",
 };
+
+const HOME_ROUTE = "/folders?home=1";
+const FOLDER_LIST_ROUTE = "/folders?view=section-list";
 
 export const areBreadcrumbCrumbsEqual = (
   a: BreadcrumbCrumb[],
@@ -86,23 +86,19 @@ export const mergeTitleBarBreadcrumbs = ({
   }
 
   const normalizedPathname = pathname.toLowerCase();
+  const isCardSetViewPath = normalizedPathname.startsWith("/cardsetview");
   const baseCrumbsForMerge =
-    normalizedPathname.startsWith("/cardsetview") && baseCrumbs.length > 1
+    isCardSetViewPath && baseCrumbs.length > 1
       ? [baseCrumbs[0], { label: "フォルダ一覧", to: FOLDER_LIST_ROUTE }]
       : baseCrumbs;
 
-  const clickableBaseCrumbs = baseCrumbsForMerge.map((crumb, index) => {
-    if (index !== baseCrumbsForMerge.length - 1) {
-      return crumb;
-    }
+  const defaultLastBaseRoute = isCardSetViewPath ? FOLDER_LIST_ROUTE : HOME_ROUTE;
 
-    return {
-      ...crumb,
-      to: normalizedPathname.startsWith("/folders")
-        ? FOLDER_LIST_ROUTE
-        : (crumb.to ?? FOLDER_LIST_ROUTE),
-    };
-  });
+  const clickableBaseCrumbs = baseCrumbsForMerge.map((crumb, index) =>
+    index === baseCrumbsForMerge.length - 1
+      ? { ...crumb, to: crumb.to ?? defaultLastBaseRoute }
+      : crumb,
+  );
 
   const normalizedExtraCrumbs = extraCrumbs.map((crumb, index) =>
     index === extraCrumbs.length - 1 ? { ...crumb, to: undefined } : crumb,

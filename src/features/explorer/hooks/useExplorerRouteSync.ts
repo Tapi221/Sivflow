@@ -8,6 +8,7 @@ import { isSameSelectedExplorerItem } from "@/features/explorer/utils/isSameSele
 type Params = {
   route: FoldersRouteAdapter;
   isHomeOnlyMode: boolean;
+  isSectionListMode: boolean;
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
   applyRouteState: (next: ExplorerRouteState) => void;
@@ -18,12 +19,14 @@ const areRouteStatesEqual = (
   b: ExplorerRouteState,
 ): boolean =>
   a.isHomeOnlyMode === b.isHomeOnlyMode &&
+  a.isSectionListMode === b.isSectionListMode &&
   a.selectedFolderId === b.selectedFolderId &&
   isSameSelectedExplorerItem(a.selectedItem, b.selectedItem);
 
 export const useExplorerRouteSync = ({
   route,
   isHomeOnlyMode,
+  isSectionListMode,
   selectedFolderId,
   selectedItem,
   applyRouteState,
@@ -54,6 +57,7 @@ export const useExplorerRouteSync = ({
 
     const nextRouteState: ExplorerRouteState = {
       isHomeOnlyMode,
+      isSectionListMode,
       selectedFolderId,
       selectedItem,
     };
@@ -72,6 +76,7 @@ export const useExplorerRouteSync = ({
 
     const nextSearchParams = mapExplorerSelectionToSearchParams({
       isHomeOnlyMode,
+      isSectionListMode,
       selectedFolderId,
       selectedItem,
     });
@@ -102,7 +107,13 @@ export const useExplorerRouteSync = ({
         timerRef.current = 0;
       }
     };
-  }, [isHomeOnlyMode, route, selectedFolderId, selectedItem]);
+  }, [
+    isHomeOnlyMode,
+    isSectionListMode,
+    route,
+    selectedFolderId,
+    selectedItem,
+  ]);
 
   useEffect(() => {
     previousRouteKeyRef.current = route.routeKey;
@@ -129,6 +140,7 @@ export const useExplorerRouteSync = ({
       const externalRouteState = route.readRouteState();
       const localRouteState: ExplorerRouteState = {
         isHomeOnlyMode,
+        isSectionListMode,
         selectedFolderId,
         selectedItem,
       };
@@ -146,6 +158,7 @@ export const useExplorerRouteSync = ({
   }, [
     applyRouteState,
     isHomeOnlyMode,
+    isSectionListMode,
     route,
     route.routeKey,
     selectedFolderId,
