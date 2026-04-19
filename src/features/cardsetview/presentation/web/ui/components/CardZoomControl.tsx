@@ -38,7 +38,10 @@ export const CardZoomControl = ({
   );
 
   return (
-    <div className={overlayGlassToolbarClassName}>
+    <div
+      className={overlayGlassToolbarClassName}
+      data-card-zoom-input-ignore="true"
+    >
       <button
         type="button"
         className={overlayGlassActionButtonClassName}
