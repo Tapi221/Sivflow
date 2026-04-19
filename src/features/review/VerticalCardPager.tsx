@@ -103,6 +103,12 @@ type VirtualLayoutSnapshot = {
   totalHeight: number;
 };
 
+type ScrollAnchorSnapshot = {
+  activeIndex: number;
+  anchorSelector: string | null;
+  offsetWithinAnchorPx: number;
+};
+
 const resolveElementTopWithinContainer = (
   container: HTMLDivElement,
   element: HTMLElement,
@@ -326,10 +332,12 @@ const resolveVisibleRenderRange = ({
   };
 };
 
-type ScrollAnchorSnapshot = {
-  activeIndex: number;
-  anchorSelector: string | null;
-  offsetWithinAnchorPx: number;
+const buildStableCardKey = <T,>(
+  card: T,
+  idx: number,
+  getKey?: (card: T, idx: number) => string | number,
+) => {
+  return String(getKey ? getKey(card, idx) : idx);
 };
 
 const VerticalCardPagerFn = <T,>({
@@ -354,9 +362,9 @@ const VerticalCardPagerFn = <T,>({
   preserveScrollAnchorKey = null,
 }: VerticalCardPagerProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const itemCleanupMapRef = useRef<Map<number, () => void>>(new Map());
-  const measuredHeightsRef = useRef<Map<number, number>>(new Map());
+  const itemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
+  const itemCleanupMapRef = useRef<Map<string, () => void>>(new Map());
+  const measuredHeightsRef = useRef<Map<string, number>>(new Map());
   const avgItemExtentRef = useRef(PLACEHOLDER_HEIGHT_PX);
   const activeIndexRef = useRef(activeIndex);
   const onRenderRangeChangeRef = useRef(onRenderRangeChange);
@@ -369,11 +377,6 @@ const VerticalCardPagerFn = <T,>({
   const naturalIndexTimerRef = useRef<number | null>(null);
   const queuedNaturalIndexRef = useRef<number | null>(null);
   const lastNearestIndexRef = useRef(Math.max(0, activeIndex));
-
-  const visibleRangeRef = useRef<{ start: number; end: number } | null>(null);
-  const effectiveRenderRangeRef = useRef<{ start: number; end: number } | null>(
-    null,
-  );
 
   const [viewportState, setViewportState] = useState({
     scrollTop: 0,
@@ -397,11 +400,21 @@ const VerticalCardPagerFn = <T,>({
     onRenderRangeChangeRef.current = onRenderRangeChange;
   }, [onRenderRangeChange]);
 
+  const stableCardKeys = useMemo(
+    () => cards.map((card, idx) => buildStableCardKey(card, idx, getKey)),
+    [cards, getKey],
+  );
+
   const getEstimatedHeight = useCallback(
     (index: number) => {
-      return measuredHeightsRef.current.get(index) ?? avgItemExtentRef.current;
+      const stableKey = stableCardKeys[index];
+      if (!stableKey) {
+        return avgItemExtentRef.current;
+      }
+
+      return measuredHeightsRef.current.get(stableKey) ?? avgItemExtentRef.current;
     },
-    [],
+    [stableCardKeys],
   );
 
   const layoutSnapshot = useMemo(
@@ -580,8 +593,12 @@ const VerticalCardPagerFn = <T,>({
     const container = containerRef.current;
     if (!container) return;
 
-    const activeElement = itemRefs.current[activeIndex];
     const activeCard = cards[activeIndex];
+    const activeStableKey = stableCardKeys[activeIndex];
+    const activeElement = activeStableKey
+      ? itemRefs.current.get(activeStableKey) ?? null
+      : null;
+
     if (!activeElement || !activeCard) return;
 
     const anchorSelector =
@@ -623,12 +640,16 @@ const VerticalCardPagerFn = <T,>({
     cards,
     getScrollAnchorSelector,
     onActiveScrollAnchorFaceChange,
+    stableCardKeys,
   ]);
 
   const restoreScrollAnchor = useCallback(() => {
     const container = containerRef.current;
     const snapshot = scrollAnchorSnapshotRef.current;
-    const activeElement = itemRefs.current[activeIndex];
+    const activeStableKey = stableCardKeys[activeIndex];
+    const activeElement = activeStableKey
+      ? itemRefs.current.get(activeStableKey) ?? null
+      : null;
 
     if (!container || !snapshot || !activeElement) {
       return;
@@ -674,7 +695,7 @@ const VerticalCardPagerFn = <T,>({
         nextTop - resolveElementTopWithinContainer(container, anchorElement),
       ),
     };
-  }, [activeIndex, layoutSnapshot.totalHeight]);
+  }, [activeIndex, layoutSnapshot.totalHeight, stableCardKeys]);
 
   const scheduleAnchorCorrection = useCallback(() => {
     if (typeof window === "undefined") {
@@ -700,17 +721,6 @@ const VerticalCardPagerFn = <T,>({
             start: renderRange.start,
             end: renderRange.end,
           };
-
-    const currentVisibleRange =
-      renderRange == null
-        ? null
-        : {
-            start: renderRange.visibleStart,
-            end: renderRange.visibleEnd,
-          };
-
-    visibleRangeRef.current = currentVisibleRange;
-    effectiveRenderRangeRef.current = nextEffectiveRange;
 
     onRenderRangeChangeRef.current?.(nextEffectiveRange);
   }, [renderRange]);
@@ -816,6 +826,12 @@ const VerticalCardPagerFn = <T,>({
         clearIdleCommitTimer();
         clearNaturalIndexTimer();
       }
+
+      itemCleanupMapRef.current.forEach((cleanup) => {
+        cleanup();
+      });
+      itemCleanupMapRef.current.clear();
+      itemRefs.current.clear();
     };
   }, [clearComputeNearestRaf, clearIdleCommitTimer, clearNaturalIndexTimer]);
 
@@ -864,15 +880,15 @@ const VerticalCardPagerFn = <T,>({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [cards.length, clearNaturalIndexTimer, freezeActiveIndex, onFlip, scrollToIndex]);
 
-  const handleMeasuredHeight = useCallback((index: number, nextHeight: number) => {
+  const handleMeasuredHeight = useCallback((stableKey: string, nextHeight: number) => {
     const safeHeight = Math.max(1, Math.round(nextHeight));
-    const previousHeight = measuredHeightsRef.current.get(index);
+    const previousHeight = measuredHeightsRef.current.get(stableKey);
 
     if (previousHeight === safeHeight) {
       return;
     }
 
-    measuredHeightsRef.current.set(index, safeHeight);
+    measuredHeightsRef.current.set(stableKey, safeHeight);
     avgItemExtentRef.current = Math.round(
       (avgItemExtentRef.current + safeHeight) / 2,
     );
@@ -880,17 +896,17 @@ const VerticalCardPagerFn = <T,>({
   }, []);
 
   const attachMeasuredRef = useCallback(
-    (index: number, element: HTMLDivElement | null) => {
-      itemCleanupMapRef.current.get(index)?.();
-      itemCleanupMapRef.current.delete(index);
-      itemRefs.current[index] = element;
+    (stableKey: string, element: HTMLDivElement | null) => {
+      itemCleanupMapRef.current.get(stableKey)?.();
+      itemCleanupMapRef.current.delete(stableKey);
+      itemRefs.current.set(stableKey, element);
 
       if (!element || typeof ResizeObserver === "undefined") {
         return;
       }
 
       const update = () => {
-        handleMeasuredHeight(index, element.offsetHeight);
+        handleMeasuredHeight(stableKey, element.offsetHeight);
         if (resolveNowMs() <= anchorStabilizationUntilRef.current) {
           scheduleAnchorCorrection();
         }
@@ -901,9 +917,9 @@ const VerticalCardPagerFn = <T,>({
       const observer = new ResizeObserver(update);
       observer.observe(element);
 
-      itemCleanupMapRef.current.set(index, () => {
+      itemCleanupMapRef.current.set(stableKey, () => {
         observer.disconnect();
-        itemRefs.current[index] = null;
+        itemRefs.current.delete(stableKey);
       });
     },
     [handleMeasuredHeight, scheduleAnchorCorrection],
@@ -914,7 +930,7 @@ const VerticalCardPagerFn = <T,>({
       return [] as Array<{
         card: T;
         idx: number;
-        key: string | number;
+        key: string;
         isActive: boolean;
         style: React.CSSProperties;
       }>;
@@ -923,7 +939,7 @@ const VerticalCardPagerFn = <T,>({
     const items: Array<{
       card: T;
       idx: number;
-      key: string | number;
+      key: string;
       isActive: boolean;
       style: React.CSSProperties;
     }> = [];
@@ -931,7 +947,7 @@ const VerticalCardPagerFn = <T,>({
     for (let idx = renderRange.start; idx <= renderRange.end; idx += 1) {
       const card = cards[idx];
       const isActive = idx === activeIndex;
-      const key = getKey ? getKey(card, idx) : idx;
+      const stableKey = stableCardKeys[idx];
       const widthSpec = resolveVerticalCardPagerItemWidthSpec({
         card,
         idx,
@@ -944,7 +960,7 @@ const VerticalCardPagerFn = <T,>({
       items.push({
         card,
         idx,
-        key,
+        key: stableKey,
         isActive,
         style: buildVerticalCardPagerItemStyle(widthSpec),
       });
@@ -957,8 +973,8 @@ const VerticalCardPagerFn = <T,>({
     cards,
     getCardWidth,
     getCardWidthSpec,
-    getKey,
     renderRange,
+    stableCardKeys,
   ]);
 
   return (
@@ -999,7 +1015,7 @@ const VerticalCardPagerFn = <T,>({
           <div
             key={key}
             ref={(element) => {
-              attachMeasuredRef(idx, element);
+              attachMeasuredRef(key, element);
             }}
             aria-current={isActive ? "true" : undefined}
             data-card-active={isActive ? "true" : undefined}

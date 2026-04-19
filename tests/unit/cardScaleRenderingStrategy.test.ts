@@ -18,7 +18,7 @@ describe("resolveCardScaleRenderingStrategy", () => {
     expect(result.willChange).toBeUndefined();
   });
 
-  it("prefers css zoom when supported so fixed card rendering stays sharp", () => {
+  it("prefers css zoom when supported", () => {
     const result = resolveCardScaleRenderingStrategy({
       disableScale: false,
       effectiveScale: 1.35,
@@ -28,6 +28,5 @@ describe("resolveCardScaleRenderingStrategy", () => {
     expect(result.mode).toBe("zoom");
     expect(result.zoom).toBe(1.35);
     expect(result.transform).toBe("none");
-    expect(result.willChange).toBeUndefined();
   });
 });

@@ -2,13 +2,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   buildPageSearchIndex,
   findPageSearchMatches,
-  type PdfPageSearchIndex,
 } from "@/components/pdf/pdfTextSearch";
 import type {
   PdfJsDocument,
   PdfJsTextContent,
   PdfPageSearchMatch,
 } from "@/components/pdf/pdfViewerTypes";
+import type {
+  PdfSearchWorkerRequest,
+  PdfSearchWorkerResponse,
+} from "@/components/pdf/pdfSearchWorkerProtocol";
 
 type SearchState = {
   pageMatches: Record<number, PdfPageSearchMatch[]>;
@@ -152,24 +155,32 @@ const buildFlattenedMatches = ({
   return flattenedMatches;
 };
 
-const buildMatchesForPage = ({
+const buildFallbackMatchesForPage = ({
   pageNumber,
-  searchIndex,
+  content,
   query,
 }: {
   pageNumber: number;
-  searchIndex: PdfPageSearchIndex;
+  content: PdfJsTextContent;
   query: string;
 }) => {
   return findPageSearchMatches({
     pageNumber,
-    searchIndex,
+    searchIndex: buildPageSearchIndex(content),
     query,
     globalOffset: 0,
   }).map((match) => ({
     ...match,
     globalIndex: 0,
   }));
+};
+
+const createRequestId = () =>
+  `req:${Math.random().toString(36).slice(2)}:${Date.now()}`;
+
+type WorkerRequestResolver = {
+  resolve: (message: PdfSearchWorkerResponse) => void;
+  reject: (error: Error) => void;
 };
 
 export const usePdfSearch = ({
@@ -197,44 +208,140 @@ export const usePdfSearch = ({
     [currentPage, numPages, normalizedSearchQuery, renderedPageNumbers],
   );
 
-  const searchIndexCacheRef = useRef<Map<number, PdfPageSearchIndex>>(new Map());
-  const searchIndexPromiseCacheRef = useRef<Map<number, Promise<PdfPageSearchIndex>>>(
-    new Map(),
-  );
   const activeRunIdRef = useRef(0);
   const lastSearchNavTokenRef = useRef(searchNavToken);
+  const indexedPagesRef = useRef<Set<number>>(new Set());
+  const pendingResolversRef = useRef<Map<string, WorkerRequestResolver>>(new Map());
+  const workerRef = useRef<Worker | null>(null);
 
-  const getPageSearchIndex = async (pageNumber: number) => {
-    const cachedIndex = searchIndexCacheRef.current.get(pageNumber);
-    if (cachedIndex) {
-      return cachedIndex;
+  useEffect(() => {
+    if (typeof Worker === "undefined") {
+      workerRef.current = null;
+      return;
     }
 
-    const existingPromise = searchIndexPromiseCacheRef.current.get(pageNumber);
-    if (existingPromise) {
-      return existingPromise;
-    }
+    const worker = new Worker(
+      new URL("../pdfSearch.worker.ts", import.meta.url),
+      { type: "module" },
+    );
+    workerRef.current = worker;
 
-    const nextPromise = getPageTextContent(pageNumber)
-      .then((textContent) => {
-        const searchIndex = buildPageSearchIndex(textContent);
-        searchIndexCacheRef.current.set(pageNumber, searchIndex);
-        searchIndexPromiseCacheRef.current.delete(pageNumber);
-        return searchIndex;
-      })
-      .catch((errorValue) => {
-        searchIndexPromiseCacheRef.current.delete(pageNumber);
-        throw errorValue;
+    const handleMessage = (event: MessageEvent<PdfSearchWorkerResponse>) => {
+      const response = event.data;
+      const resolver = pendingResolversRef.current.get(response.requestId);
+
+      if (!resolver) {
+        return;
+      }
+
+      pendingResolversRef.current.delete(response.requestId);
+
+      if (response.type === "error") {
+        resolver.reject(new Error(response.message));
+        return;
+      }
+
+      resolver.resolve(response);
+    };
+
+    const handleError = () => {
+      pendingResolversRef.current.forEach(({ reject }) => {
+        reject(new Error("pdf search worker failed"));
       });
+      pendingResolversRef.current.clear();
+      workerRef.current = null;
+    };
 
-    searchIndexPromiseCacheRef.current.set(pageNumber, nextPromise);
-    return nextPromise;
+    worker.addEventListener("message", handleMessage);
+    worker.addEventListener("error", handleError);
+
+    return () => {
+      worker.removeEventListener("message", handleMessage);
+      worker.removeEventListener("error", handleError);
+      worker.terminate();
+      workerRef.current = null;
+      pendingResolversRef.current.clear();
+    };
+  }, []);
+
+  const postWorkerRequest = async (request: PdfSearchWorkerRequest) => {
+    const worker = workerRef.current;
+    if (!worker || request.type === "reset") {
+      worker?.postMessage(request);
+      return null;
+    }
+
+    return new Promise<PdfSearchWorkerResponse>((resolve, reject) => {
+      pendingResolversRef.current.set(request.requestId, {
+        resolve,
+        reject,
+      });
+      worker.postMessage(request);
+    });
+  };
+
+  const ensurePageIndexed = async (pageNumber: number) => {
+    if (indexedPagesRef.current.has(pageNumber)) {
+      return true;
+    }
+
+    const content = await getPageTextContent(pageNumber);
+
+    const indexPageRequest: PdfSearchWorkerRequest = {
+      type: "index-page",
+      requestId: createRequestId(),
+      pageNumber,
+      content,
+    };
+
+    try {
+      const response = await postWorkerRequest(indexPageRequest);
+      if (response && response.type !== "index-page:done") {
+        return false;
+      }
+      indexedPagesRef.current.add(pageNumber);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const searchPage = async ({
+    pageNumber,
+    query,
+  }: {
+    pageNumber: number;
+    query: string;
+  }) => {
+    const isWorkerIndexed = await ensurePageIndexed(pageNumber);
+
+    if (isWorkerIndexed && workerRef.current) {
+      const searchRequest: PdfSearchWorkerRequest = {
+        type: "search-page",
+        requestId: createRequestId(),
+        pageNumber,
+        query,
+      };
+
+      const response = await postWorkerRequest(searchRequest);
+      if (response && response.type === "search-page:done") {
+        return response.matches;
+      }
+    }
+
+    const content = await getPageTextContent(pageNumber);
+    return buildFallbackMatchesForPage({
+      pageNumber,
+      content,
+      query,
+    });
   };
 
   useEffect(() => {
     activeRunIdRef.current += 1;
-    searchIndexCacheRef.current.clear();
-    searchIndexPromiseCacheRef.current.clear();
+    indexedPagesRef.current.clear();
+    pendingResolversRef.current.clear();
+    void postWorkerRequest({ type: "reset" });
     setSearchState(INITIAL_SEARCH_STATE);
   }, [doc]);
 
@@ -261,16 +368,16 @@ export const usePdfSearch = ({
       await Promise.all(
         nextBatch.map(async (pageNumber) => {
           try {
-            const searchIndex = await getPageSearchIndex(pageNumber);
+            const matches = await searchPage({
+              pageNumber,
+              query: normalizedSearchQuery,
+            });
+
             if (cancelled || runId !== activeRunIdRef.current) {
               return;
             }
 
-            pageMatches[pageNumber] = buildMatchesForPage({
-              pageNumber,
-              searchIndex,
-              query: normalizedSearchQuery,
-            });
+            pageMatches[pageNumber] = matches;
           } catch {
             if (!cancelled && runId === activeRunIdRef.current) {
               pageMatches[pageNumber] = [];

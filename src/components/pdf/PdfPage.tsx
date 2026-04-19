@@ -459,17 +459,6 @@ const PdfPageComponent = ({
         textLayerEl.dataset.textLayerExpectedText =
           textItemCount > 0 ? "true" : "false";
 
-        if (!textLayerReady) {
-          console.warn(
-            "[PdfViewer] text layer rendered without selectable text",
-            {
-              pageNumber,
-              textItemCount,
-              textSpanCount,
-            },
-          );
-        }
-
         setRenderState({
           renderIdentity,
           rendered: true,
