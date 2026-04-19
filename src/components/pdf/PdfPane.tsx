@@ -48,6 +48,8 @@ interface PdfPaneProps {
   onDocumentUpdate?: (updates: Partial<PdfPaneDoc>) => Promise<void>;
 }
 
+const SEARCH_INPUT_DEBOUNCE_MS = 300;
+
 export const PdfPane = ({
   doc,
   className,
@@ -58,6 +60,7 @@ export const PdfPane = ({
   const viewerRef = useRef<PdfViewerHandle>(null);
   const [numPages, setNumPages] = useState(0);
   const [basePageWidth, setBasePageWidth] = useState<number | null>(null);
+  const [searchInputValue, setSearchInputValue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchNavToken, setSearchNavToken] = useState(0);
   const [searchNavDirection, setSearchNavDirection] = useState<"next" | "prev">(
@@ -69,7 +72,10 @@ export const PdfPane = ({
   const { containerRef, containerWidth } = usePdfContainerWidth();
 
   const fitScale = useMemo(() => {
-    if (!containerWidth || !basePageWidth) return 1;
+    if (!containerWidth || !basePageWidth) {
+      return 1;
+    }
+
     const usableWidth = Math.max(1, containerWidth - FIT_PADDING_X);
     return clampScale(Number((usableWidth / basePageWidth).toFixed(3)));
   }, [containerWidth, basePageWidth]);
@@ -111,8 +117,23 @@ export const PdfPane = ({
   } = usePdfSourceResolver(doc, currentUser?.uid);
 
   useEffect(() => {
-    if (!numPages) return;
-    if (currentPage > numPages) queueMicrotask(() => setCurrentPage(numPages));
+    const timeoutId = window.setTimeout(() => {
+      setSearchQuery(searchInputValue);
+    }, SEARCH_INPUT_DEBOUNCE_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [searchInputValue]);
+
+  useEffect(() => {
+    if (!numPages) {
+      return;
+    }
+
+    if (currentPage > numPages) {
+      queueMicrotask(() => setCurrentPage(numPages));
+    }
   }, [numPages, currentPage, setCurrentPage]);
 
   const handlePrev = useCallback(() => {
@@ -125,15 +146,23 @@ export const PdfPane = ({
     viewerRef.current?.scrollToPage(nextPage);
   }, [currentPage, numPages]);
 
+  const commitSearchQuery = useCallback(() => {
+    setSearchQuery((previous) =>
+      previous === searchInputValue ? previous : searchInputValue,
+    );
+  }, [searchInputValue]);
+
   const handlePrevMatch = useCallback(() => {
+    commitSearchQuery();
     setSearchNavDirection("prev");
     setSearchNavToken((previous) => previous + 1);
-  }, []);
+  }, [commitSearchQuery]);
 
   const handleNextMatch = useCallback(() => {
+    commitSearchQuery();
     setSearchNavDirection("next");
     setSearchNavToken((previous) => previous + 1);
-  }, []);
+  }, [commitSearchQuery]);
 
   const handleOpenNewTab = useCallback(async () => {
     if (effectiveRemoteUrl) {
@@ -169,14 +198,19 @@ export const PdfPane = ({
   const handleFirstPageSize = useCallback(
     (size: { width: number; height: number } | null) => {
       const nextWidth = size?.width ?? null;
-      setBasePageWidth((prev) => (prev === nextWidth ? prev : nextWidth));
+      setBasePageWidth((previous) => (previous === nextWidth ? previous : nextWidth));
     },
     [],
   );
 
   useEffect(() => {
-    if (!DEV_MODE) return;
-    if (!isLocalHost(window.location.hostname)) return;
+    if (!DEV_MODE) {
+      return;
+    }
+
+    if (!isLocalHost(window.location.hostname)) {
+      return;
+    }
 
     const debugWindow = window as Window & {
       __logPdfScrollDiagnostics?: () => void;
@@ -209,10 +243,10 @@ export const PdfPane = ({
         fitMode={fitMode}
         sourceUnavailable={sourceUnavailable}
         canOpenExternal={!!effectiveRemoteUrl || !!localSourceBytes}
-        searchQuery={searchQuery}
+        searchQuery={searchInputValue}
         totalMatches={totalMatches}
         activeMatchIndex={activeMatchIndex}
-        onSearchQueryChange={setSearchQuery}
+        onSearchQueryChange={setSearchInputValue}
         onPrevMatch={handlePrevMatch}
         onNextMatch={handleNextMatch}
         onPrev={handlePrev}

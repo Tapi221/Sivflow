@@ -73,6 +73,7 @@ export interface PdfJsTextContent {
 export interface PdfJsPage {
   getViewport: (params: { scale: number }) => PdfJsViewport;
   getTextContent: () => Promise<PdfJsTextContent>;
+  cleanup?: (resetStats?: boolean) => boolean;
   render: (params: {
     canvasContext: CanvasRenderingContext2D;
     viewport: PdfJsViewport;
@@ -82,7 +83,9 @@ export interface PdfJsPage {
 
 export interface PdfJsDocument {
   numPages: number;
+  fingerprints?: Array<string | null>;
   getPage: (pageNumber: number) => Promise<PdfJsPage>;
+  cleanup?: (keepLoadedFonts?: boolean) => Promise<void>;
   destroy?: () => void | Promise<void>;
 }
 
@@ -134,7 +137,9 @@ export const getPdfDocument = (
 ): PdfJsLoadingTask => pdfjsLib.getDocument(params) as PdfJsLoadingTask;
 
 export const getErrorMessage = (error: unknown): string => {
-  if (error instanceof Error && error.message) return error.message;
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
 
   if (
     typeof error === "object" &&

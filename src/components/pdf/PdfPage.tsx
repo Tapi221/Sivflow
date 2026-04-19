@@ -19,10 +19,12 @@ import {
 } from "@/components/pdf/pdfPageBitmapCache";
 
 interface PdfPageProps {
+  documentKey: string;
   pdf: PdfJsDocument;
   pageNumber: number;
   scale: number;
   opaqueCanvas: boolean;
+  renderTextLayer: boolean;
   baseSize?: PageSize;
   searchMatches?: PdfPageSearchMatch[];
   activeSearchMatchIndex?: number;
@@ -36,10 +38,15 @@ type MeasuredPageState = {
   size: PageSize | null;
 };
 
-type RenderState = {
+type CanvasRenderState = {
   renderIdentity: string;
   rendered: boolean;
   error: string | null;
+};
+
+type TextLayerState = {
+  textLayerIdentity: string;
+  ready: boolean;
   warning: string | null;
 };
 
@@ -57,17 +64,25 @@ type PdfJsLibWithTextLayer = {
   TextLayer?: PdfJsTextLayerCtor;
 };
 
-const buildPageIdentity = (pdf: PdfJsDocument, pageNumber: number) =>
-  `${pageNumber}::${String(pdf)}`;
+const buildPageIdentity = (documentKey: string, pageNumber: number) =>
+  `${documentKey}::${pageNumber}`;
 
 const buildRenderIdentity = (
-  pdf: PdfJsDocument,
+  documentKey: string,
   pageNumber: number,
   scale: number,
   opaqueCanvas: boolean,
   devicePixelRatio: number,
 ) =>
-  `${pageNumber}::${scale}::${opaqueCanvas ? "opaque" : "alpha"}::${devicePixelRatio.toFixed(3)}::${String(pdf)}`;
+  `${documentKey}::${pageNumber}::${scale}::${
+    opaqueCanvas ? "opaque" : "alpha"
+  }::${devicePixelRatio.toFixed(3)}`;
+
+const buildTextLayerIdentity = (
+  documentKey: string,
+  pageNumber: number,
+  scale: number,
+) => `${documentKey}::${pageNumber}::text::${scale}`;
 
 const getTextLayerCtor = () => {
   const ctor = (pdfjsLib as unknown as PdfJsLibWithTextLayer).TextLayer;
@@ -185,10 +200,12 @@ const readWindowDevicePixelRatio = () => {
 };
 
 const PdfPageComponent = ({
+  documentKey,
   pdf,
   pageNumber,
   scale,
   opaqueCanvas,
+  renderTextLayer,
   baseSize,
   searchMatches = [],
   activeSearchMatchIndex,
@@ -201,8 +218,8 @@ const PdfPageComponent = ({
   const searchLayerRef = useRef<HTMLDivElement>(null);
 
   const pageIdentity = useMemo(
-    () => buildPageIdentity(pdf, pageNumber),
-    [pageNumber, pdf],
+    () => buildPageIdentity(documentKey, pageNumber),
+    [documentKey, pageNumber],
   );
 
   const [renderDevicePixelRatio, setRenderDevicePixelRatio] = useState<number>(
@@ -212,26 +229,34 @@ const PdfPageComponent = ({
   const renderIdentity = useMemo(
     () =>
       buildRenderIdentity(
-        pdf,
+        documentKey,
         pageNumber,
         scale,
         opaqueCanvas,
         renderDevicePixelRatio,
       ),
-    [opaqueCanvas, pageNumber, pdf, renderDevicePixelRatio, scale],
+    [documentKey, opaqueCanvas, pageNumber, renderDevicePixelRatio, scale],
   );
 
-  const [measuredPageState, setMeasuredPageState] = useState<MeasuredPageState>(
-    {
-      pageIdentity: "",
-      size: null,
-    },
+  const textLayerIdentity = useMemo(
+    () => buildTextLayerIdentity(documentKey, pageNumber, scale),
+    [documentKey, pageNumber, scale],
   );
 
-  const [renderState, setRenderState] = useState<RenderState>({
+  const [measuredPageState, setMeasuredPageState] = useState<MeasuredPageState>({
+    pageIdentity: "",
+    size: null,
+  });
+
+  const [canvasRenderState, setCanvasRenderState] = useState<CanvasRenderState>({
     renderIdentity: "",
     rendered: false,
     error: null,
+  });
+
+  const [textLayerState, setTextLayerState] = useState<TextLayerState>({
+    textLayerIdentity: "",
+    ready: false,
     warning: null,
   });
 
@@ -241,13 +266,21 @@ const PdfPageComponent = ({
       ? measuredPageState.size
       : null);
 
-  const activeRenderState =
-    renderState.renderIdentity === renderIdentity
-      ? renderState
+  const activeCanvasRenderState =
+    canvasRenderState.renderIdentity === renderIdentity
+      ? canvasRenderState
       : {
           renderIdentity,
           rendered: false,
           error: null,
+        };
+
+  const activeTextLayerState =
+    textLayerState.textLayerIdentity === textLayerIdentity
+      ? textLayerState
+      : {
+          textLayerIdentity,
+          ready: false,
           warning: null,
         };
 
@@ -315,7 +348,9 @@ const PdfPageComponent = ({
 
     void getPage(pageNumber)
       .then((page) => {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         const viewport = page.getViewport({ scale: 1 });
         const nextSize = { width: viewport.width, height: viewport.height };
@@ -327,7 +362,9 @@ const PdfPageComponent = ({
         onPageSize?.(pageNumber, nextSize);
       })
       .catch(() => {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         const fallback = { width: 1, height: 1 };
         setMeasuredPageState({
@@ -351,26 +388,28 @@ const PdfPageComponent = ({
   ]);
 
   useEffect(() => {
-    if (scale <= 0) return;
+    if (scale <= 0) {
+      return;
+    }
 
     let cancelled = false;
     let renderTask: PdfJsRenderTask | null = null;
     let renderStartRafId: number | null = null;
+    let pageForCleanup: PdfJsPage | null = null;
 
     const run = async () => {
       try {
-        const [page, textContent] = await Promise.all([
-          getPage(pageNumber),
-          getPageTextContent(pageNumber),
-        ]);
-        if (cancelled) return;
+        const page = await getPage(pageNumber);
+        pageForCleanup = page;
+
+        if (cancelled) {
+          return;
+        }
 
         const viewport = page.getViewport({ scale });
         const canvas = canvasRef.current;
-        const textLayerEl = textLayerRef.current;
-        const searchLayerEl = searchLayerRef.current;
 
-        if (!canvas || !textLayerEl || !searchLayerEl) {
+        if (!canvas) {
           return;
         }
 
@@ -392,18 +431,6 @@ const PdfPageComponent = ({
         canvas.height = renderBackingStore.canvasHeightPx;
         canvas.style.width = `${viewport.width}px`;
         canvas.style.height = `${viewport.height}px`;
-
-        textLayerEl.replaceChildren();
-        searchLayerEl.replaceChildren();
-        textLayerEl.dataset.textLayerReady = "pending";
-        textLayerEl.dataset.textLayerExpectedText = "false";
-
-        textLayerEl.style.width = `${viewport.width}px`;
-        textLayerEl.style.height = `${viewport.height}px`;
-        textLayerEl.style.setProperty("--scale-factor", String(viewport.scale));
-
-        searchLayerEl.style.width = `${viewport.width}px`;
-        searchLayerEl.style.height = `${viewport.height}px`;
 
         const cacheKey = renderIdentity;
         const cachedBitmap = getCachedPdfPageBitmap(cacheKey);
@@ -434,42 +461,22 @@ const PdfPageComponent = ({
           });
 
           await renderTask.promise;
-          if (cancelled) return;
+          if (cancelled) {
+            return;
+          }
 
-          setCachedPdfPageBitmap(cacheKey, canvas);
+          await setCachedPdfPageBitmap(cacheKey, documentKey, canvas);
         }
 
-        const TextLayerCtor = getTextLayerCtor();
-        const textLayer = new TextLayerCtor({
-          container: textLayerEl,
-          textContentSource: textContent,
-          viewport,
-        });
-
-        await textLayer.render();
-        if (cancelled) return;
-
-        const textItemCount = textContent.items.filter(
-          (item) => isPdfTextItem(item) && item.str.trim().length > 0,
-        ).length;
-        const textSpanCount = textLayerEl.querySelectorAll("span").length;
-        const textLayerReady = textItemCount === 0 || textSpanCount > 0;
-        const warning = textLayerReady
-          ? null
-          : "PDFテキストレイヤーの構築に失敗した可能性があります";
-
-        textLayerEl.dataset.textLayerReady = textLayerReady ? "true" : "false";
-        textLayerEl.dataset.textLayerExpectedText =
-          textItemCount > 0 ? "true" : "false";
-
-        setRenderState({
+        setCanvasRenderState({
           renderIdentity,
           rendered: true,
           error: null,
-          warning,
         });
       } catch (errorValue: unknown) {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         const message = getErrorMessage(errorValue);
         if (
@@ -480,14 +487,11 @@ const PdfPageComponent = ({
         }
 
         console.error("[PdfViewer] render error", errorValue);
-        clearElement(textLayerRef.current);
-        clearElement(searchLayerRef.current);
 
-        setRenderState({
+        setCanvasRenderState({
           renderIdentity,
           rendered: false,
           error: "PDFの描画に失敗しました",
-          warning: null,
         });
       }
     };
@@ -510,17 +514,145 @@ const PdfPageComponent = ({
         // noop
       }
 
+      pageForCleanup?.cleanup?.();
+    };
+  }, [
+    documentKey,
+    getPage,
+    opaqueCanvas,
+    pageNumber,
+    renderDevicePixelRatio,
+    renderIdentity,
+    scale,
+  ]);
+
+  useEffect(() => {
+    const textLayerEl = textLayerRef.current;
+    const searchLayerEl = searchLayerRef.current;
+
+    if (!renderTextLayer) {
+      clearElement(textLayerEl);
+      clearElement(searchLayerEl);
+      setTextLayerState({
+        textLayerIdentity,
+        ready: false,
+        warning: null,
+      });
+      return;
+    }
+
+    let cancelled = false;
+    let rafId: number | null = null;
+
+    const run = async () => {
+      try {
+        const [page, textContent] = await Promise.all([
+          getPage(pageNumber),
+          getPageTextContent(pageNumber),
+        ]);
+        if (cancelled) {
+          return;
+        }
+
+        const nextTextLayerEl = textLayerRef.current;
+        const nextSearchLayerEl = searchLayerRef.current;
+        const canvas = canvasRef.current;
+        if (!nextTextLayerEl || !nextSearchLayerEl || !canvas) {
+          return;
+        }
+
+        const viewport = page.getViewport({ scale });
+
+        nextTextLayerEl.replaceChildren();
+        nextSearchLayerEl.replaceChildren();
+        nextTextLayerEl.dataset.textLayerReady = "pending";
+        nextTextLayerEl.dataset.textLayerExpectedText = "false";
+
+        nextTextLayerEl.style.width = `${viewport.width}px`;
+        nextTextLayerEl.style.height = `${viewport.height}px`;
+        nextTextLayerEl.style.setProperty(
+          "--scale-factor",
+          String(viewport.scale),
+        );
+
+        nextSearchLayerEl.style.width = `${viewport.width}px`;
+        nextSearchLayerEl.style.height = `${viewport.height}px`;
+
+        const TextLayerCtor = getTextLayerCtor();
+        const textLayer = new TextLayerCtor({
+          container: nextTextLayerEl,
+          textContentSource: textContent,
+          viewport,
+        });
+
+        await textLayer.render();
+        if (cancelled) {
+          return;
+        }
+
+        const textItemCount = textContent.items.filter(
+          (item) => isPdfTextItem(item) && item.str.trim().length > 0,
+        ).length;
+        const textSpanCount = nextTextLayerEl.querySelectorAll("span").length;
+        const textLayerReady = textItemCount === 0 || textSpanCount > 0;
+        const warning = textLayerReady
+          ? null
+          : "PDFテキストレイヤーの構築に失敗した可能性があります";
+
+        nextTextLayerEl.dataset.textLayerReady = textLayerReady ? "true" : "false";
+        nextTextLayerEl.dataset.textLayerExpectedText =
+          textItemCount > 0 ? "true" : "false";
+
+        setTextLayerState({
+          textLayerIdentity,
+          ready: textLayerReady,
+          warning,
+        });
+      } catch (errorValue: unknown) {
+        if (cancelled) {
+          return;
+        }
+
+        const message = getErrorMessage(errorValue);
+        if (
+          message.includes("cancelled") ||
+          message.includes("Rendering cancelled")
+        ) {
+          return;
+        }
+
+        console.error("[PdfViewer] text layer error", errorValue);
+        clearElement(textLayerRef.current);
+        clearElement(searchLayerRef.current);
+
+        setTextLayerState({
+          textLayerIdentity,
+          ready: false,
+          warning: "PDFテキストレイヤーの構築に失敗しました",
+        });
+      }
+    };
+
+    rafId = window.requestAnimationFrame(() => {
+      rafId = null;
+      void run();
+    });
+
+    return () => {
+      cancelled = true;
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
       clearElement(textLayerRef.current);
       clearElement(searchLayerRef.current);
     };
   }, [
     getPage,
     getPageTextContent,
-    opaqueCanvas,
     pageNumber,
-    renderDevicePixelRatio,
-    renderIdentity,
+    renderTextLayer,
     scale,
+    textLayerIdentity,
   ]);
 
   useEffect(() => {
@@ -530,7 +662,11 @@ const PdfPageComponent = ({
       return;
     }
 
-    if (!activeRenderState.rendered) {
+    if (
+      !renderTextLayer ||
+      !activeCanvasRenderState.rendered ||
+      !activeTextLayerState.ready
+    ) {
       clearElement(searchLayerEl);
       return;
     }
@@ -554,10 +690,12 @@ const PdfPageComponent = ({
       window.cancelAnimationFrame(rafId);
     };
   }, [
-    activeRenderState.rendered,
+    activeCanvasRenderState.rendered,
     activeSearchMatchIndex,
-    renderIdentity,
+    activeTextLayerState.ready,
+    renderTextLayer,
     searchMatches,
+    textLayerIdentity,
   ]);
 
   const placeholderHeight =
@@ -575,15 +713,15 @@ const PdfPageComponent = ({
       }
     >
       <div className="relative inline-block rounded-lg border border-slate-200 bg-white shadow-sm">
-        {activeRenderState.error && !activeRenderState.rendered && (
+        {activeCanvasRenderState.error && !activeCanvasRenderState.rendered && (
           <div className="px-3 py-2 text-xs text-rose-500">
-            {activeRenderState.error}
+            {activeCanvasRenderState.error}
           </div>
         )}
 
-        {activeRenderState.warning && activeRenderState.rendered && (
+        {activeTextLayerState.warning && renderTextLayer && (
           <div className="px-3 py-2 text-xs text-amber-600">
-            {activeRenderState.warning}
+            {activeTextLayerState.warning}
           </div>
         )}
 
@@ -605,10 +743,12 @@ const PdfPageComponent = ({
 };
 
 const arePdfPagePropsEqual = (left: PdfPageProps, right: PdfPageProps) =>
+  left.documentKey === right.documentKey &&
   left.pdf === right.pdf &&
   left.pageNumber === right.pageNumber &&
   left.scale === right.scale &&
   left.opaqueCanvas === right.opaqueCanvas &&
+  left.renderTextLayer === right.renderTextLayer &&
   arePageSizesEqual(left.baseSize, right.baseSize) &&
   left.searchMatches === right.searchMatches &&
   left.activeSearchMatchIndex === right.activeSearchMatchIndex &&
