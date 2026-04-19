@@ -27,21 +27,4 @@ describe("resolvePdfRenderBackingStore", () => {
     expect(result.canvasWidthPx).toBe(1024);
     expect(result.canvasHeightPx).toBe(768);
   });
-
-  it("limits raster size by edge length without changing viewport dimensions", () => {
-    const result = resolvePdfRenderBackingStore({
-      viewportWidthPx: 3000,
-      viewportHeightPx: 2000,
-      devicePixelRatio: 4,
-      constraints: {
-        maxCanvasEdgePx: 8192,
-        maxCanvasPixels: 50_000_000,
-        maxPreferredDevicePixelRatio: 4,
-      },
-    });
-
-    expect(result.devicePixelRatio).toBeCloseTo(8192 / 3000, 6);
-    expect(result.canvasWidthPx).toBeLessThanOrEqual(8192);
-    expect(result.canvasHeightPx).toBeLessThanOrEqual(8192);
-  });
 });

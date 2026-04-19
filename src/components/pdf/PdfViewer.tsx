@@ -140,6 +140,40 @@ const buildRenderedPageNumbers = ({
   return Array.from(renderedPageSet).sort((left, right) => left - right);
 };
 
+const buildPrefetchPageNumbers = ({
+  currentPage,
+  activeMatchPageNumber,
+  numPages,
+}: {
+  currentPage: number;
+  activeMatchPageNumber: number | null;
+  numPages: number;
+}) => {
+  if (numPages <= 0) {
+    return [];
+  }
+
+  const pageNumbers = new Set<number>();
+
+  for (let offset = -3; offset <= 3; offset += 1) {
+    const pageNumber = currentPage + offset;
+    if (pageNumber >= 1 && pageNumber <= numPages) {
+      pageNumbers.add(pageNumber);
+    }
+  }
+
+  if (typeof activeMatchPageNumber === "number") {
+    for (let offset = -2; offset <= 2; offset += 1) {
+      const pageNumber = activeMatchPageNumber + offset;
+      if (pageNumber >= 1 && pageNumber <= numPages) {
+        pageNumbers.add(pageNumber);
+      }
+    }
+  }
+
+  return Array.from(pageNumbers).sort((left, right) => left - right);
+};
+
 export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
   (
     {
@@ -173,6 +207,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       setPageSize,
       getPage,
       getPageTextContent,
+      prefetchPageResources,
     } = usePdfDocument({
       source,
       viewerOptions,
@@ -231,16 +266,15 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       onScaleChange,
     });
 
-    const emptyRenderedPageNumbers = useMemo(() => [] as number[], []);
-    const {
-      pageMatches,
-      flattenedMatches,
-      activeMatchIndex,
-    } = usePdfSearch({
+    const searchState = usePdfSearch({
       doc,
       numPages,
       currentPage,
-      renderedPageNumbers: emptyRenderedPageNumbers,
+      renderedPageNumbers: buildRenderedPageNumbers({
+        currentPage,
+        activeMatchPageNumber: null,
+        numPages,
+      }),
       searchQuery,
       searchNavToken,
       searchNavDirection,
@@ -248,12 +282,17 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
     });
 
     const activeMatchPageNumber = useMemo(() => {
-      if (activeMatchIndex < 0 || activeMatchIndex >= flattenedMatches.length) {
+      if (
+        searchState.activeMatchIndex < 0 ||
+        searchState.activeMatchIndex >= searchState.flattenedMatches.length
+      ) {
         return null;
       }
 
-      return flattenedMatches[activeMatchIndex]?.pageNumber ?? null;
-    }, [activeMatchIndex, flattenedMatches]);
+      return (
+        searchState.flattenedMatches[searchState.activeMatchIndex]?.pageNumber ?? null
+      );
+    }, [searchState.activeMatchIndex, searchState.flattenedMatches]);
 
     const renderedPageNumbers = useMemo(
       () =>
@@ -265,59 +304,55 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       [activeMatchPageNumber, currentPage, numPages],
     );
 
-    const {
-      pageMatches: prioritizedPageMatches,
-      flattenedMatches: prioritizedFlattenedMatches,
-      activeMatchIndex: prioritizedActiveMatchIndex,
-    } = usePdfSearch({
-      doc,
-      numPages,
-      currentPage,
-      renderedPageNumbers,
-      searchQuery,
-      searchNavToken,
-      searchNavDirection,
-      getPageTextContent,
-    });
-
-    const effectivePageMatches =
-      Object.keys(prioritizedPageMatches).length > 0 || !searchQuery.trim()
-        ? prioritizedPageMatches
-        : pageMatches;
-
-    const effectiveFlattenedMatches =
-      prioritizedFlattenedMatches.length > 0 || !searchQuery.trim()
-        ? prioritizedFlattenedMatches
-        : flattenedMatches;
-
-    const effectiveActiveMatchIndex =
-      prioritizedFlattenedMatches.length > 0 || !searchQuery.trim()
-        ? prioritizedActiveMatchIndex
-        : activeMatchIndex;
-
-    const effectiveActiveMatchPageNumber = useMemo(() => {
-      if (
-        effectiveActiveMatchIndex < 0 ||
-        effectiveActiveMatchIndex >= effectiveFlattenedMatches.length
-      ) {
-        return null;
-      }
-
-      return effectiveFlattenedMatches[effectiveActiveMatchIndex]?.pageNumber ?? null;
-    }, [effectiveActiveMatchIndex, effectiveFlattenedMatches]);
-
-    const resolvedRenderedPageNumbers = useMemo(
+    const prefetchPageNumbers = useMemo(
       () =>
-        buildRenderedPageNumbers({
+        buildPrefetchPageNumbers({
           currentPage,
-          activeMatchPageNumber: effectiveActiveMatchPageNumber,
+          activeMatchPageNumber,
           numPages,
         }),
-      [currentPage, effectiveActiveMatchPageNumber, numPages],
+      [activeMatchPageNumber, currentPage, numPages],
     );
 
     useEffect(() => {
-      if (effectiveFlattenedMatches.length === 0) {
+      if (!doc || prefetchPageNumbers.length === 0) {
+        return;
+      }
+
+      let cancelled = false;
+
+      const schedulePrefetch = () => {
+        if (cancelled) {
+          return;
+        }
+
+        prefetchPageResources(prefetchPageNumbers);
+      };
+
+      if (
+        "requestIdleCallback" in window &&
+        typeof window.requestIdleCallback === "function"
+      ) {
+        const idleHandle = window.requestIdleCallback(schedulePrefetch, {
+          timeout: 100,
+        });
+
+        return () => {
+          cancelled = true;
+          window.cancelIdleCallback(idleHandle);
+        };
+      }
+
+      const timeoutId = window.setTimeout(schedulePrefetch, 16);
+
+      return () => {
+        cancelled = true;
+        window.clearTimeout(timeoutId);
+      };
+    }, [doc, prefetchPageNumbers, prefetchPageResources]);
+
+    useEffect(() => {
+      if (searchState.flattenedMatches.length === 0) {
         onSearchStateChange?.({
           totalMatches: 0,
           activeMatchIndex: -1,
@@ -327,20 +362,20 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       }
 
       const clampedIndex = Math.min(
-        Math.max(effectiveActiveMatchIndex, 0),
-        effectiveFlattenedMatches.length - 1,
+        Math.max(searchState.activeMatchIndex, 0),
+        searchState.flattenedMatches.length - 1,
       );
-      const activeMatch = effectiveFlattenedMatches[clampedIndex] ?? null;
+      const activeMatch = searchState.flattenedMatches[clampedIndex] ?? null;
 
       onSearchStateChange?.({
-        totalMatches: effectiveFlattenedMatches.length,
+        totalMatches: searchState.flattenedMatches.length,
         activeMatchIndex: clampedIndex,
         activeMatchPage: activeMatch?.pageNumber ?? null,
       });
     }, [
-      effectiveActiveMatchIndex,
-      effectiveFlattenedMatches,
       onSearchStateChange,
+      searchState.activeMatchIndex,
+      searchState.flattenedMatches,
     ]);
 
     useEffect(() => {
@@ -350,15 +385,19 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
 
     useEffect(() => {
       if (
-        effectiveActiveMatchIndex < 0 ||
-        effectiveActiveMatchIndex >= effectiveFlattenedMatches.length
+        searchState.activeMatchIndex < 0 ||
+        searchState.activeMatchIndex >= searchState.flattenedMatches.length
       ) {
         return;
       }
 
-      const match = effectiveFlattenedMatches[effectiveActiveMatchIndex];
+      const match = searchState.flattenedMatches[searchState.activeMatchIndex];
       scrollToPage(match.pageNumber);
-    }, [effectiveActiveMatchIndex, effectiveFlattenedMatches, scrollToPage]);
+    }, [
+      scrollToPage,
+      searchState.activeMatchIndex,
+      searchState.flattenedMatches,
+    ]);
 
     const previousSourceIdentityRef = useRef<{
       url: string;
@@ -428,7 +467,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       >
         <div className="min-w-0 p-2">
           {loading && (
-            <div className="mb-2 text-xs text-slate-400">試み込み中...</div>
+            <div className="mb-2 text-xs text-slate-400">読み込み中...</div>
           )}
 
           {error && <div className="text-sm text-rose-500">{error}</div>}
@@ -439,15 +478,16 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
               className="relative w-full"
               style={{ height: `${pageLayoutMetrics.totalContentHeight}px` }}
             >
-              {resolvedRenderedPageNumbers.map((pageNumber) => {
+              {renderedPageNumbers.map((pageNumber) => {
                 const pageTop = pageLayoutMetrics.pageTopOffsets[pageNumber - 1] ?? 0;
                 const placeholderHeight =
                   pageLayoutMetrics.pageHeights[pageNumber - 1] ??
                   PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT;
-                const pageSearchMatches = effectivePageMatches[pageNumber] ?? [];
+                const pageSearchMatches =
+                  searchState.pageMatches[pageNumber] ?? [];
                 const activeSearchMatchIndexForPage =
-                  effectiveActiveMatchPageNumber === pageNumber
-                    ? effectiveActiveMatchIndex
+                  activeMatchPageNumber === pageNumber
+                    ? searchState.activeMatchIndex
                     : undefined;
 
                 return (

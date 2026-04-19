@@ -41,6 +41,7 @@ interface UsePdfDocumentResult {
   setPageSize: (pageNumber: number, size: PageSize) => void;
   getPage: (pageNumber: number) => Promise<PdfJsPage>;
   getPageTextContent: (pageNumber: number) => Promise<PdfJsTextContent>;
+  prefetchPageResources: (pageNumbers: number[]) => void;
 }
 
 export const usePdfDocument = ({
@@ -198,6 +199,29 @@ export const usePdfDocument = ({
       return nextPromise;
     },
     [getPage],
+  );
+
+  const prefetchPageResources = useCallback(
+    (pageNumbers: number[]) => {
+      const pdf = docRef.current;
+      if (!pdf || pageNumbers.length === 0) {
+        return;
+      }
+
+      const uniquePageNumbers = Array.from(
+        new Set(
+          pageNumbers
+            .filter((pageNumber) => Number.isFinite(pageNumber))
+            .map((pageNumber) => Math.max(1, Math.floor(pageNumber))),
+        ),
+      ).filter((pageNumber) => pageNumber <= pdf.numPages);
+
+      uniquePageNumbers.forEach((pageNumber) => {
+        void getPage(pageNumber);
+        void getPageTextContent(pageNumber);
+      });
+    },
+    [getPage, getPageTextContent],
   );
 
   const setPageSize = useCallback(
@@ -404,8 +428,8 @@ export const usePdfDocument = ({
       resetResourceCaches();
     };
   }, [
-    cMapUrl,
     cMapPacked,
+    cMapUrl,
     disableFontFace,
     enableXfa,
     flushPendingPageSizes,
@@ -434,5 +458,6 @@ export const usePdfDocument = ({
     setPageSize,
     getPage,
     getPageTextContent,
+    prefetchPageResources,
   };
 };

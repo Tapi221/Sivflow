@@ -14,8 +14,6 @@ import type { Card } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import React from "react";
 
-type Side = "question" | "answer";
-
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
   cardId: card.cardId,

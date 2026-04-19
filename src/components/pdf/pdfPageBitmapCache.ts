@@ -1,5 +1,5 @@
-const MAX_CACHE_ENTRIES = 24;
-const MAX_CACHE_PIXELS = 40_000_000;
+const MAX_CACHE_ENTRIES = 32;
+const MAX_CACHE_PIXELS = 48_000_000;
 
 type PdfPageBitmapCacheEntry = {
   canvas: HTMLCanvasElement;
