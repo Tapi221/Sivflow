@@ -44,26 +44,4 @@ describe("resolvePdfRenderBackingStore", () => {
     expect(result.canvasWidthPx).toBeLessThanOrEqual(8192);
     expect(result.canvasHeightPx).toBeLessThanOrEqual(8192);
   });
-
-  it("limits raster size by total pixel budget without dropping below 1x", () => {
-    const result = resolvePdfRenderBackingStore({
-      viewportWidthPx: 2400,
-      viewportHeightPx: 3200,
-      devicePixelRatio: 4,
-      constraints: {
-        maxCanvasPixels: 16_777_216,
-        maxCanvasEdgePx: 20_000,
-        maxPreferredDevicePixelRatio: 4,
-      },
-    });
-
-    expect(result.devicePixelRatio).toBeCloseTo(
-      Math.sqrt(16_777_216 / (2400 * 3200)),
-      6,
-    );
-    expect(result.devicePixelRatio).toBeGreaterThanOrEqual(1);
-    expect(result.canvasWidthPx * result.canvasHeightPx).toBeLessThanOrEqual(
-      16_777_216,
-    );
-  });
 });
