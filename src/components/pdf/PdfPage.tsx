@@ -12,6 +12,7 @@ import {
   getErrorMessage,
   isPdfTextItem,
 } from "@/components/pdf/pdfViewerTypes";
+import { resolvePdfRenderBackingStore } from "@/components/pdf/pdfRenderQuality";
 
 interface PdfPageProps {
   pdf: PdfJsDocument;
@@ -52,8 +53,6 @@ type PdfJsLibWithTextLayer = {
   TextLayer?: PdfJsTextLayerCtor;
 };
 
-const MAX_RENDER_DEVICE_PIXEL_RATIO = 2;
-
 const buildPageIdentity = (pdf: PdfJsDocument, pageNumber: number) =>
   `${pageNumber}::${String(pdf)}`;
 
@@ -62,8 +61,9 @@ const buildRenderIdentity = (
   pageNumber: number,
   scale: number,
   opaqueCanvas: boolean,
+  devicePixelRatio: number,
 ) =>
-  `${pageNumber}::${scale}::${opaqueCanvas ? "opaque" : "alpha"}::${MAX_RENDER_DEVICE_PIXEL_RATIO}::${String(pdf)}`;
+  `${pageNumber}::${scale}::${opaqueCanvas ? "opaque" : "alpha"}::${devicePixelRatio.toFixed(3)}::${String(pdf)}`;
 
 const getTextLayerCtor = () => {
   const ctor = (pdfjsLib as unknown as PdfJsLibWithTextLayer).TextLayer;
@@ -167,6 +167,19 @@ const renderSearchHighlights = ({
   });
 };
 
+const readWindowDevicePixelRatio = () => {
+  if (typeof window === "undefined") {
+    return 1;
+  }
+
+  const rawDevicePixelRatio = window.devicePixelRatio;
+  if (!Number.isFinite(rawDevicePixelRatio) || rawDevicePixelRatio <= 0) {
+    return 1;
+  }
+
+  return rawDevicePixelRatio;
+};
+
 const PdfPageComponent = ({
   pdf,
   pageNumber,
@@ -188,9 +201,20 @@ const PdfPageComponent = ({
     [pageNumber, pdf],
   );
 
+  const [renderDevicePixelRatio, setRenderDevicePixelRatio] = useState<number>(
+    () => readWindowDevicePixelRatio(),
+  );
+
   const renderIdentity = useMemo(
-    () => buildRenderIdentity(pdf, pageNumber, scale, opaqueCanvas),
-    [opaqueCanvas, pageNumber, pdf, scale],
+    () =>
+      buildRenderIdentity(
+        pdf,
+        pageNumber,
+        scale,
+        opaqueCanvas,
+        renderDevicePixelRatio,
+      ),
+    [opaqueCanvas, pageNumber, pdf, renderDevicePixelRatio, scale],
   );
 
   const [measuredPageState, setMeasuredPageState] = useState<MeasuredPageState>(
@@ -222,6 +246,50 @@ const PdfPageComponent = ({
           error: null,
           warning: null,
         };
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    let animationFrameId: number | null = null;
+
+    const syncRenderDevicePixelRatio = () => {
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+
+      animationFrameId = window.requestAnimationFrame(() => {
+        animationFrameId = null;
+
+        const nextDevicePixelRatio = readWindowDevicePixelRatio();
+        setRenderDevicePixelRatio((previousDevicePixelRatio) =>
+          Math.abs(previousDevicePixelRatio - nextDevicePixelRatio) < 0.001
+            ? previousDevicePixelRatio
+            : nextDevicePixelRatio,
+        );
+      });
+    };
+
+    syncRenderDevicePixelRatio();
+
+    window.addEventListener("resize", syncRenderDevicePixelRatio, {
+      passive: true,
+    });
+    window.visualViewport?.addEventListener("resize", syncRenderDevicePixelRatio);
+
+    return () => {
+      window.removeEventListener("resize", syncRenderDevicePixelRatio);
+      window.visualViewport?.removeEventListener(
+        "resize",
+        syncRenderDevicePixelRatio,
+      );
+
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (baseSize) {
@@ -307,28 +375,22 @@ const PdfPageComponent = ({
           return;
         }
 
-        const rawDevicePixelRatio = window.devicePixelRatio || 1;
-        const cappedDevicePixelRatio = Math.max(
-          1,
-          Math.min(rawDevicePixelRatio, MAX_RENDER_DEVICE_PIXEL_RATIO),
-        );
+        const renderBackingStore = resolvePdfRenderBackingStore({
+          viewportWidthPx: viewport.width,
+          viewportHeightPx: viewport.height,
+          devicePixelRatio: renderDevicePixelRatio,
+        });
 
-        canvas.width = Math.max(
-          1,
-          Math.floor(viewport.width * cappedDevicePixelRatio),
-        );
-        canvas.height = Math.max(
-          1,
-          Math.floor(viewport.height * cappedDevicePixelRatio),
-        );
+        canvas.width = renderBackingStore.canvasWidthPx;
+        canvas.height = renderBackingStore.canvasHeightPx;
         canvas.style.width = `${viewport.width}px`;
         canvas.style.height = `${viewport.height}px`;
 
         context.setTransform(
-          cappedDevicePixelRatio,
+          renderBackingStore.scaleX,
           0,
           0,
-          cappedDevicePixelRatio,
+          renderBackingStore.scaleY,
           0,
           0,
         );
@@ -444,6 +506,7 @@ const PdfPageComponent = ({
     getPageTextContent,
     opaqueCanvas,
     pageNumber,
+    renderDevicePixelRatio,
     renderIdentity,
     scale,
   ]);
