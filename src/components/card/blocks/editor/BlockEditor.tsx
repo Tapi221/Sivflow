@@ -515,93 +515,82 @@ export const BlockEditor = React.forwardRef<
     const inlineToolbar = toolbarNode && !toolbarMount ? toolbarNode : null;
     const resolvedEditorZoom = displayMode === "fluid" ? zoom : 1;
 
-    const resolveEditorProps = useCallback(
-      (block: CardBlock, meta: BlockListRowMeta): EditorProps => {
-        const isBlockSelected = resolvedSelectedBlockId === block.id;
-        const canMoveUp = meta.isLinePositionable;
-        const canMoveDown = meta.isLinePositionable;
+    const resolveEditorProps = (
+      block: CardBlock,
+      meta: BlockListRowMeta,
+    ): EditorProps => {
+      const isBlockSelected = resolvedSelectedBlockId === block.id;
+      const canMoveUp = meta.isLinePositionable;
+      const canMoveDown = meta.isLinePositionable;
 
-        const handleReplaceMarkdownWithBlocks = (
-          parsed: CardBlockLayoutReplaceBlock[],
-        ) => {
-          if (block.type !== "markdown") return;
+      const handleReplaceMarkdownWithBlocks = (
+        parsed: CardBlockLayoutReplaceBlock[],
+      ) => {
+        if (block.type !== "markdown") return;
 
-          const baseOffset = getBlockOffsetRows(block);
+        const baseOffset = getBlockOffsetRows(block);
 
-          const newBlocks = parsed.map((item) => {
-            const newId = `${prefix}-${item.type}-${uid()}`;
-            if (item.type === "code") {
-              return {
-                id: newId,
-                type: "code" as const,
-                code: item.code,
-                content: "",
-                images: [],
-                audios: [],
-                offsetRows: Math.max(0, baseOffset),
-                rowOffset: undefined,
-                orderIndex: 0,
-              } satisfies CardBlock;
-            }
-
+        const newBlocks = parsed.map((item) => {
+          const newId = `${prefix}-${item.type}-${uid()}`;
+          if (item.type === "code") {
             return {
               id: newId,
-              type: "markdown" as const,
-              markdown: item.markdown,
+              type: "code" as const,
+              code: item.code,
               content: "",
               images: [],
               audios: [],
-              rowOffset: baseOffset,
+              offsetRows: Math.max(0, baseOffset),
+              rowOffset: undefined,
               orderIndex: 0,
             } satisfies CardBlock;
-          });
+          }
 
-          const source = blocksRef.current;
-          const updated = [...source];
-          updated.splice(meta.index, 1, ...newBlocks);
+          return {
+            id: newId,
+            type: "markdown" as const,
+            markdown: item.markdown,
+            content: "",
+            images: [],
+            audios: [],
+            rowOffset: baseOffset,
+            orderIndex: 0,
+          } satisfies CardBlock;
+        });
 
-          blocksRef.current = updated;
-          emitChange(updated, { reindex: true });
-        };
+        const source = blocksRef.current;
+        const updated = [...source];
+        updated.splice(meta.index, 1, ...newBlocks);
 
-        return {
-          onUpdateBlock: handleUpdateBlock,
-          onDelete: () => handleDeleteBlock(block.id, meta.index),
-          onDuplicate: () => handleDuplicateBlock(block.id),
-          onMoveUp: () => handleShiftBlockRow(block.id, "up"),
-          onMoveDown: () => handleShiftBlockRow(block.id, "down"),
-          onMoveDragStart: () => handleMoveDragStart(block.id),
-          onMoveDragEnd: () => handleMoveDragEnd(block.id),
-          canMoveUp,
-          canMoveDown,
-          accentColor,
-          isBlockSelected,
-          autoFocus: autoFocus && meta.index === sceneBlocks.length - 1,
-          customPlaceholder: customPlaceholders?.[meta.index],
-          pendingUploadFile: pendingUploads[block.id],
-          onConsumePendingUpload: () => handleConsumeInitialFile(block.id),
-          onFilesExcess: (files) => handleBlockOverflow(block.id, files),
-          onReplaceMarkdownWithBlocks:
-            block.type === "markdown"
-              ? handleReplaceMarkdownWithBlocks
-              : undefined,
-          displayMode,
-          zoom: resolvedEditorZoom,
-        };
-      },
-      [
+        blocksRef.current = updated;
+        emitChange(updated, { reindex: true });
+      };
+
+      return {
+        onUpdateBlock: handleUpdateBlock,
+        onDelete: () => handleDeleteBlock(block.id, meta.index),
+        onDuplicate: () => handleDuplicateBlock(block.id),
+        onMoveUp: () => handleShiftBlockRow(block.id, "up"),
+        onMoveDown: () => handleShiftBlockRow(block.id, "down"),
+        onMoveDragStart: () => handleMoveDragStart(block.id),
+        onMoveDragEnd: () => handleMoveDragEnd(block.id),
+        canMoveUp,
+        canMoveDown,
         accentColor,
-        autoFocus,
-        customPlaceholders,
+        isBlockSelected,
+        autoFocus: autoFocus && meta.index === sceneBlocks.length - 1,
+        customPlaceholder: customPlaceholders?.[meta.index],
+        pendingUploadFile: pendingUploads[block.id],
+        onConsumePendingUpload: () => handleConsumeInitialFile(block.id),
+        onFilesExcess: (files) => handleBlockOverflow(block.id, files),
+        onReplaceMarkdownWithBlocks:
+          block.type === "markdown"
+            ? handleReplaceMarkdownWithBlocks
+            : undefined,
         displayMode,
-        emitChange,
-        pendingUploads,
-        prefix,
-        resolvedSelectedBlockId,
-        resolvedEditorZoom,
-        sceneBlocks.length,
-      ],
-    );
+        zoom: resolvedEditorZoom,
+      };
+    };
 
     return (
       <div
