@@ -13,6 +13,7 @@ import { useCardSetViewPaneWidth } from "@/features/cardsetview/presentation/web
 import { useCardSetViewState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewState";
 import { useCardSetViewWindowEvents } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewWindowEvents";
 import { useCardSetViewZoom } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoom";
+import { useCardSetViewZoomInput } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoomInput";
 import { useCardSetViewBreadcrumbs } from "@/features/cardsetview/presentation/web/infra/useCardSetViewBreadcrumbs";
 import { useCardSetViewParams } from "@/features/cardsetview/presentation/web/infra/useCardSetViewParams";
 import {
@@ -22,7 +23,10 @@ import {
 } from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { CARD_PANE_WIDTH_STEP_PX } from "@constants/shared/flashcard";
+import {
+  CARD_PANE_WIDTH_STEP_PX,
+  CARD_VIEW_ZOOM_STEP_PERCENT,
+} from "@constants/shared/flashcard";
 import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutFallbackPreferences";
 
 type ScrollAnchorFace = "question" | "answer";
@@ -92,6 +96,19 @@ export const useCardSetViewScreenController = () => {
     interactionMode: layoutInteractionMode,
     requestedCardLayoutMode: state.currentCardLayoutMode,
     splitFallbackLayoutMode,
+  });
+
+  useCardSetViewZoomInput({
+    containerRef: paneWidth.contentViewportRef,
+    enabled: isDesktop,
+    zoomPercent: zoom.zoomPercent,
+    minZoomPercent: zoom.minZoomPercent,
+    maxZoomPercent: zoom.maxZoomPercent,
+    zoomStepPercent: CARD_VIEW_ZOOM_STEP_PERCENT,
+    presentationWidthPx: zoom.presentationWidthPx,
+    maxPresentationWidthPx: zoom.maxPresentationWidthPx,
+    cardLayoutMode: zoom.effectiveCardLayoutMode,
+    onZoomPercentChange: zoom.setZoomPercent,
   });
 
   useCardSetViewBreadcrumbs({
