@@ -22,7 +22,7 @@ import {
 import { getLocalDb } from "@/services/localDB";
 import type { Card, UploadedImage } from "@/types/domain/card";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const isDebug = (): boolean =>
   typeof localStorage !== "undefined" &&
@@ -42,6 +42,7 @@ export const cardHasImages = (card: Card) => {
 const cardImageSignature = (card: Card) => {
   const imgs = extractImages(card);
   if (imgs.length === 0) return "";
+
   return imgs
     .map(
       (img) =>
@@ -127,34 +128,105 @@ const preloadCard = async (
 
 type IdleHandle = ReturnType<typeof setTimeout>;
 
+type CardCatalogEntry = {
+  id: string;
+  signature: string;
+  hasImages: boolean;
+};
+
+const buildCardCatalog = (cards: Card[]): CardCatalogEntry[] => {
+  return cards.map((card) => ({
+    id: card.id ?? "",
+    signature: cardImageSignature(card),
+    hasImages: cardHasImages(card),
+  }));
+};
+
+const buildCatalogSignature = (catalog: CardCatalogEntry[]) => {
+  return catalog.map((entry) => `${entry.id}:${entry.signature}`).join("|");
+};
+
+const resolvePreloadWindow = ({
+  cardsLength,
+  activeIndex,
+  renderRange,
+}: {
+  cardsLength: number;
+  activeIndex: number;
+  renderRange?: { start: number; end: number } | null;
+}) => {
+  const eagerStart = renderRange
+    ? Math.max(0, renderRange.start - CARD_IMAGE_PRELOAD.eagerBuffer)
+    : Math.max(0, activeIndex - CARD_IMAGE_PRELOAD.eagerRadiusFallback);
+
+  const eagerEnd = renderRange
+    ? Math.min(
+        cardsLength - 1,
+        renderRange.end + CARD_IMAGE_PRELOAD.eagerBuffer,
+      )
+    : Math.min(
+        cardsLength - 1,
+        activeIndex + CARD_IMAGE_PRELOAD.eagerRadiusFallback,
+      );
+
+  const idleStart = Math.max(0, eagerStart - CARD_IMAGE_PRELOAD.idleExtra);
+  const idleEnd = Math.min(
+    cardsLength - 1,
+    eagerEnd + CARD_IMAGE_PRELOAD.idleExtra,
+  );
+
+  return {
+    eagerStart,
+    eagerEnd,
+    idleStart,
+    idleEnd,
+  };
+};
+
 export const useCardImagePreloader = (
   cards: Card[],
   activeIndex: number,
   userId: string | null,
   renderRange?: { start: number; end: number } | null,
 ) => {
-  const renderRangeRef = useRef(renderRange);
-  renderRangeRef.current = renderRange;
-
   const [readySet, setReadySet] = useState<Set<string>>(() => {
     const next = new Set<string>();
+
     for (const card of cards) {
       if (!card.id) continue;
       if (!cardHasImages(card)) next.add(card.id);
     }
+
     return next;
   });
 
   const signatureMapRef = useRef<Map<string, string>>(new Map());
 
-  const prevCardsRef = useRef(cards);
-  useEffect(() => {
-    if (prevCardsRef.current === cards) return;
-    prevCardsRef.current = cards;
+  const cardCatalog = useMemo(() => buildCardCatalog(cards), [cards]);
 
+  const cardCatalogSignature = useMemo(
+    () => buildCatalogSignature(cardCatalog),
+    [cardCatalog],
+  );
+
+  const preloadPlanSignature = useMemo(() => {
+    if (cardCatalog.length === 0) {
+      return "";
+    }
+
+    const { idleStart, idleEnd } = resolvePreloadWindow({
+      cardsLength: cardCatalog.length,
+      activeIndex,
+      renderRange,
+    });
+
+    return buildCatalogSignature(cardCatalog.slice(idleStart, idleEnd + 1));
+  }, [activeIndex, cardCatalog, renderRange]);
+
+  useEffect(() => {
     const sigMap = signatureMapRef.current;
     const currentIds = new Set(
-      cards.map((card) => card.id).filter(Boolean) as string[],
+      cardCatalog.map((entry) => entry.id).filter(Boolean),
     );
 
     setReadySet((prev) => {
@@ -169,20 +241,23 @@ export const useCardImagePreloader = (
         }
       }
 
-      for (const card of cards) {
-        if (!card.id) continue;
-        const newSig = cardImageSignature(card);
-        const oldSig = sigMap.get(card.id);
+      for (const entry of cardCatalog) {
+        if (!entry.id) continue;
 
-        if (oldSig !== undefined && oldSig !== newSig) {
-          next.delete(card.id);
+        const previousSignature = sigMap.get(entry.id);
+
+        if (
+          previousSignature !== undefined &&
+          previousSignature !== entry.signature
+        ) {
+          next.delete(entry.id);
           changed = true;
         }
 
-        sigMap.set(card.id, newSig);
+        sigMap.set(entry.id, entry.signature);
 
-        if (!next.has(card.id) && newSig === "") {
-          next.add(card.id);
+        if (!entry.hasImages && !next.has(entry.id)) {
+          next.add(entry.id);
           changed = true;
         }
       }
@@ -198,37 +273,26 @@ export const useCardImagePreloader = (
 
       return changed ? next : prev;
     });
-  }, [cards]);
+  }, [cardCatalogSignature, cards.length]);
 
   useEffect(() => {
     if (cards.length === 0) return;
 
     const controller = new AbortController();
     const { signal } = controller;
-    const currentRenderRange = renderRangeRef.current;
 
-    const eagerStart = currentRenderRange
-      ? Math.max(0, currentRenderRange.start - CARD_IMAGE_PRELOAD.eagerBuffer)
-      : Math.max(0, activeIndex - CARD_IMAGE_PRELOAD.eagerRadiusFallback);
-    const eagerEnd = currentRenderRange
-      ? Math.min(
-          cards.length - 1,
-          currentRenderRange.end + CARD_IMAGE_PRELOAD.eagerBuffer,
-        )
-      : Math.min(
-          cards.length - 1,
-          activeIndex + CARD_IMAGE_PRELOAD.eagerRadiusFallback,
-        );
-    const idleStart = Math.max(0, eagerStart - CARD_IMAGE_PRELOAD.idleExtra);
-    const idleEnd = Math.min(
-      cards.length - 1,
-      eagerEnd + CARD_IMAGE_PRELOAD.idleExtra,
-    );
+    const { eagerStart, eagerEnd, idleStart, idleEnd } = resolvePreloadWindow({
+      cardsLength: cards.length,
+      activeIndex,
+      renderRange,
+    });
 
     const markReady = (cardId: string) => {
       if (signal.aborted) return;
+
       setReadySet((prev) => {
         if (prev.has(cardId)) return prev;
+
         const next = new Set(prev);
         next.add(cardId);
         return next;
@@ -238,17 +302,20 @@ export const useCardImagePreloader = (
     const preload = async (idx: number): Promise<void> => {
       const card = cards[idx];
       if (!card?.id) return;
+
       if (!cardHasImages(card)) {
         markReady(card.id);
         return;
       }
 
       await preloadCard(card, userId, signal);
+
       if (!signal.aborted) {
         if (isDebug()) {
           const stats = getPreloadCacheStats();
           console.debug(`[preloader] ready idx=${idx} id=${card.id}`, stats);
         }
+
         markReady(card.id);
       }
     };
@@ -268,13 +335,17 @@ export const useCardImagePreloader = (
     }
 
     const eagerIndices: number[] = [];
-    for (let i = eagerStart; i <= eagerEnd; i += 1) eagerIndices.push(i);
+    for (let index = eagerStart; index <= eagerEnd; index += 1) {
+      eagerIndices.push(index);
+    }
+
     eagerIndices.sort(
-      (a, b) => Math.abs(a - activeIndex) - Math.abs(b - activeIndex),
+      (left, right) => Math.abs(left - activeIndex) - Math.abs(right - activeIndex),
     );
 
     let running = 0;
     let queuePos = 0;
+
     const runNextEager = () => {
       while (
         running < CARD_IMAGE_PRELOAD.maxEagerConcurrent &&
@@ -282,12 +353,14 @@ export const useCardImagePreloader = (
       ) {
         const idx = eagerIndices[queuePos++];
         running += 1;
+
         void preload(idx).finally(() => {
           running -= 1;
           runNextEager();
         });
       }
     };
+
     runNextEager();
 
     const ric =
@@ -301,6 +374,7 @@ export const useCardImagePreloader = (
             }
           ).requestIdleCallback
         : null;
+
     const cic =
       typeof window !== "undefined" && "cancelIdleCallback" in window
         ? (
@@ -311,26 +385,34 @@ export const useCardImagePreloader = (
         : null;
 
     const idleHandles: IdleHandle[] = [];
-    for (let i = idleStart; i <= idleEnd; i += 1) {
-      if (i >= eagerStart && i <= eagerEnd) continue;
-      const idx = i;
+
+    for (let index = idleStart; index <= idleEnd; index += 1) {
+      if (index >= eagerStart && index <= eagerEnd) continue;
+
       if (ric) {
-        idleHandles.push(ric(() => void preload(idx), { timeout: 3000 }));
+        idleHandles.push(ric(() => void preload(index), { timeout: 3000 }));
       } else {
         idleHandles.push(
-          setTimeout(() => void preload(idx), 80 + (idx - idleStart) * 10),
+          setTimeout(
+            () => void preload(index),
+            80 + (index - idleStart) * 10,
+          ),
         );
       }
     }
 
     return () => {
       controller.abort();
+
       for (const handle of idleHandles) {
-        if (cic) cic(handle);
-        else clearTimeout(handle as ReturnType<typeof setTimeout>);
+        if (cic) {
+          cic(handle);
+        } else {
+          clearTimeout(handle as ReturnType<typeof setTimeout>);
+        }
       }
     };
-  }, [cards, activeIndex, userId]);
+  }, [activeIndex, preloadPlanSignature, userId]);
 
   return readySet;
 };

@@ -77,6 +77,7 @@ export const useCardSetViewScreenController = () => {
   const layoutInteractionMode: CardSetInteractionMode = state.isGlobalEditing
     ? "edit"
     : "view";
+
   const splitFallbackLayoutMode = useMemo(
     () => resolveSplitFallbackLayoutModePreference(presentationTarget),
     [presentationTarget],
@@ -255,6 +256,7 @@ export const useCardSetViewScreenController = () => {
 
   return {
     cardSetId,
+    folderId: data.selectedCardSet?.folderId ?? null,
     presentationTarget,
     isDesktop,
     settings,

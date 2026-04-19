@@ -1,12 +1,10 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
-import { buildCardSetById } from "@/domain/card/selectors/cardFolder";
 import { useCards } from "@/hooks/card/useCards";
-import { useCardSets } from "@/hooks/cardSet/useCardSets";
-import { useFolders } from "@/hooks/folder/useFolders";
+import { useCardSetById } from "@/hooks/cardSet/useCardSetById";
+import { useFolderLineage } from "@/hooks/folder/useFolderLineage";
 import type { Card, Folder } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
-import { toMillis } from "@/utils/toMillis";
 
 interface UseCardSetViewQueryOptions {
   cardSetId: string | null;
@@ -34,61 +32,36 @@ interface UseCardSetViewQueryResult {
   isLoading: boolean;
 }
 
-const toTime = (value: unknown): number => {
-  return toMillis(value);
-};
-
-const compareCards = (left: Card, right: Card): number => {
-  const leftOrder = left.orderIndex ?? 0;
-  const rightOrder = right.orderIndex ?? 0;
-
-  if (leftOrder !== rightOrder) {
-    return leftOrder - rightOrder;
-  }
-
-  const leftUpdatedAt = toTime(left.updatedAt);
-  const rightUpdatedAt = toTime(right.updatedAt);
-
-  if (leftUpdatedAt !== rightUpdatedAt) {
-    return leftUpdatedAt - rightUpdatedAt;
-  }
-
-  const leftCreatedAt = toTime(left.createdAt);
-  const rightCreatedAt = toTime(right.createdAt);
-
-  if (leftCreatedAt !== rightCreatedAt) {
-    return leftCreatedAt - rightCreatedAt;
-  }
-
-  return left.id.localeCompare(right.id);
-};
-
 export const useCardSetViewQuery = ({
   cardSetId,
 }: UseCardSetViewQueryOptions): UseCardSetViewQueryResult => {
-  const { folders, loading: foldersLoading } = useFolders();
+  const {
+    cardSet: selectedCardSet,
+    loading: cardSetLoading,
+    updateCardSet,
+  } = useCardSetById(cardSetId);
 
-  const { cardSets, loading: cardSetsLoading, updateCardSet } = useCardSets();
-
-  const activeCardSets = useMemo(
-    () => cardSets.filter((cardSet) => !cardSet.isDeleted),
-    [cardSets],
+  const { folders, loading: foldersLoading } = useFolderLineage(
+    selectedCardSet?.folderId ?? null,
   );
 
-  const cardSetById = useMemo(() => {
-    return buildCardSetById(activeCardSets);
-  }, [activeCardSets]);
-
-  const selectedCardSet = useMemo<CardSet | null>(() => {
-    if (!cardSetId) {
-      return null;
+  const cardSetById = useMemo<
+    ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>
+  >(() => {
+    if (!selectedCardSet) {
+      return new Map();
     }
 
-    return (
-      activeCardSets.find((cardSet: CardSet) => cardSet.id === cardSetId) ??
-      null
-    );
-  }, [activeCardSets, cardSetId]);
+    return new Map([
+      [
+        selectedCardSet.id,
+        {
+          id: selectedCardSet.id,
+          folderId: selectedCardSet.folderId,
+        },
+      ],
+    ]);
+  }, [selectedCardSet]);
 
   const {
     cards,
@@ -99,9 +72,7 @@ export const useCardSetViewQuery = ({
     enabled: Boolean(cardSetId && selectedCardSet),
   });
 
-  const sortedCards = useMemo<Card[]>(() => {
-    return [...cards].sort(compareCards);
-  }, [cards]);
+  const sortedCards = cards;
 
   const cardIndexById = useMemo<Map<string, number>>(() => {
     return new Map(
@@ -112,11 +83,12 @@ export const useCardSetViewQuery = ({
     );
   }, [sortedCards]);
 
-  const createCardForView = async (
-    cardData: Partial<Card> & { cardSetId: string },
-  ) => {
-    return createCard(cardData);
-  };
+  const createCardForView = useCallback(
+    async (cardData: Partial<Card> & { cardSetId: string }) => {
+      return createCard(cardData);
+    },
+    [createCard],
+  );
 
   return {
     folders: folders as Folder[],
@@ -127,6 +99,6 @@ export const useCardSetViewQuery = ({
     createCard: createCardForView,
     updateCard,
     updateCardSet,
-    isLoading: foldersLoading || cardSetsLoading || cardsLoading,
+    isLoading: cardSetLoading || foldersLoading || cardsLoading,
   };
 };
