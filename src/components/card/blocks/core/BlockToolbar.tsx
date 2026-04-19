@@ -6,15 +6,7 @@ import {
 } from "@/components/card/shell/overlaySurfaceClassNames";
 import type { CardBlock } from "@/types/domain/card";
 import type { IconProps } from "@/ui/icons";
-import {
-  Code,
-  HelpCircle,
-  ImageIcon,
-  Plus,
-  StratisFormulaIcon,
-  StratisMarkdownIcon,
-  Type,
-} from "@/ui/icons";
+import { Plus } from "@/ui/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -59,7 +51,12 @@ const DEFAULT_CONFIGS: BlockConfig[] = [
   { type: "code", label: "コード", icon: "Code", isVisible: true },
   { type: "image", label: "画像", icon: "Image", isVisible: true },
   { type: "math", label: "数式", icon: "Sigma", isVisible: true },
-  { type: "markdown", label: "Markdown", icon: "NotebookPen", isVisible: true },
+  {
+    type: "markdown",
+    label: "Markdown",
+    icon: "NotebookPen",
+    isVisible: true,
+  },
 ];
 
 const DEFAULT_ORDER_INDEX_BY_TYPE = DEFAULT_CONFIGS.reduce<
@@ -72,23 +69,266 @@ const DEFAULT_ORDER_INDEX_BY_TYPE = DEFAULT_CONFIGS.reduce<
   {} as Record<CardBlock["type"], number>,
 );
 
+const TextBlockGlyph = ({
+  size = 16,
+  className,
+  label,
+  title,
+  style,
+  ...rest
+}: IconProps) => {
+  const resolvedLabel = label ?? rest["aria-label"];
+  const decorative = resolvedLabel == null;
+  const pixelSize = typeof size === "number" ? `${size}px` : size;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 16 16"
+      width={pixelSize}
+      height={pixelSize}
+      className={className}
+      style={{ display: "block", flexShrink: 0, ...style }}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.35}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role={decorative ? "presentation" : "img"}
+      aria-label={resolvedLabel}
+      aria-hidden={decorative ? true : undefined}
+      {...rest}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M3.5 4.25h9" />
+      <path d="M5 8h6" opacity="0.82" />
+      <path d="M3.5 11.75h9" opacity="0.64" />
+    </svg>
+  );
+};
+
+const QuestionBlockGlyph = ({
+  size = 16,
+  className,
+  label,
+  title,
+  style,
+  ...rest
+}: IconProps) => {
+  const resolvedLabel = label ?? rest["aria-label"];
+  const decorative = resolvedLabel == null;
+  const pixelSize = typeof size === "number" ? `${size}px` : size;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 16 16"
+      width={pixelSize}
+      height={pixelSize}
+      className={className}
+      style={{ display: "block", flexShrink: 0, ...style }}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role={decorative ? "presentation" : "img"}
+      aria-label={resolvedLabel}
+      aria-hidden={decorative ? true : undefined}
+      {...rest}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        d="M8 3.25c-2.62 0-4.75 1.66-4.75 3.92 0 1.27.67 2.34 1.82 3.06l-.23 2.02 1.98-1.16c.39.08.79.12 1.18.12 2.62 0 4.75-1.66 4.75-4.04S10.62 3.25 8 3.25Z"
+        opacity="0.92"
+      />
+      <path d="M6.9 6.35a1.33 1.33 0 1 1 2.38.82c-.45.52-.98.83-.98 1.58" />
+      <circle cx="8" cy="10.8" r="0.55" fill="currentColor" stroke="none" />
+    </svg>
+  );
+};
+
+const CodeBlockGlyph = ({
+  size = 16,
+  className,
+  label,
+  title,
+  style,
+  ...rest
+}: IconProps) => {
+  const resolvedLabel = label ?? rest["aria-label"];
+  const decorative = resolvedLabel == null;
+  const pixelSize = typeof size === "number" ? `${size}px` : size;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 16 16"
+      width={pixelSize}
+      height={pixelSize}
+      className={className}
+      style={{ display: "block", flexShrink: 0, ...style }}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.35}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role={decorative ? "presentation" : "img"}
+      aria-label={resolvedLabel}
+      aria-hidden={decorative ? true : undefined}
+      {...rest}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M5.75 4.25 2.9 8l2.85 3.75" opacity="0.88" />
+      <path d="m10.25 4.25 2.85 3.75-2.85 3.75" opacity="0.88" />
+      <path d="M8.9 3.5 7.1 12.5" />
+    </svg>
+  );
+};
+
+const ImageBlockGlyph = ({
+  size = 16,
+  className,
+  label,
+  title,
+  style,
+  ...rest
+}: IconProps) => {
+  const resolvedLabel = label ?? rest["aria-label"];
+  const decorative = resolvedLabel == null;
+  const pixelSize = typeof size === "number" ? `${size}px` : size;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 16 16"
+      width={pixelSize}
+      height={pixelSize}
+      className={className}
+      style={{ display: "block", flexShrink: 0, ...style }}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role={decorative ? "presentation" : "img"}
+      aria-label={resolvedLabel}
+      aria-hidden={decorative ? true : undefined}
+      {...rest}
+    >
+      {title ? <title>{title}</title> : null}
+      <rect x="2.5" y="3.25" width="11" height="9.5" rx="2" opacity="0.92" />
+      <circle
+        cx="5.4"
+        cy="6.1"
+        r="1.05"
+        fill="currentColor"
+        stroke="none"
+        opacity="0.82"
+      />
+      <path d="m4.1 11 2.15-2.25 1.85 1.7 2.1-2.55 1.7 3.1" opacity="0.78" />
+    </svg>
+  );
+};
+
+const MathBlockGlyph = ({
+  size = 16,
+  className,
+  label,
+  title,
+  style,
+  ...rest
+}: IconProps) => {
+  const resolvedLabel = label ?? rest["aria-label"];
+  const decorative = resolvedLabel == null;
+  const pixelSize = typeof size === "number" ? `${size}px` : size;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 16 16"
+      width={pixelSize}
+      height={pixelSize}
+      className={className}
+      style={{ display: "block", flexShrink: 0, ...style }}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.25}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role={decorative ? "presentation" : "img"}
+      aria-label={resolvedLabel}
+      aria-hidden={decorative ? true : undefined}
+      {...rest}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M2.8 8.55h1.35l1.2 2.75L7.9 4.7h5.3" opacity="0.92" />
+      <path d="M10.15 9.1h3" opacity="0.82" />
+      <path d="M11.65 7.6v3" opacity="0.82" />
+    </svg>
+  );
+};
+
+const MarkdownBlockGlyph = ({
+  size = 16,
+  className,
+  label,
+  title,
+  style,
+  ...rest
+}: IconProps) => {
+  const resolvedLabel = label ?? rest["aria-label"];
+  const decorative = resolvedLabel == null;
+  const pixelSize = typeof size === "number" ? `${size}px` : size;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 16 16"
+      width={pixelSize}
+      height={pixelSize}
+      className={className}
+      style={{ display: "block", flexShrink: 0, ...style }}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role={decorative ? "presentation" : "img"}
+      aria-label={resolvedLabel}
+      aria-hidden={decorative ? true : undefined}
+      {...rest}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        d="M5 3.1h4.55l2.2 2.2v7.6a1.7 1.7 0 0 1-1.7 1.7H5A1.7 1.7 0 0 1 3.3 12.9V4.8A1.7 1.7 0 0 1 5 3.1Z"
+        opacity="0.92"
+      />
+      <path d="M9.55 3.1v2.2h2.2" opacity="0.58" />
+      <path d="M5.45 7.25h4.7" opacity="0.84" />
+      <path d="M5.45 9.35h3.8" opacity="0.68" />
+      <path d="M5.45 11.45h4.2" opacity="0.52" />
+    </svg>
+  );
+};
+
 const getIcon = (iconName: string | undefined, type: CardBlock["type"]) => {
   const map: Record<string, React.ComponentType<IconProps>> = {
-    Type: Type,
-    Image: ImageIcon,
-    Sigma: StratisFormulaIcon,
-    Code: Code,
-    NotebookPen: StratisMarkdownIcon,
-    HelpCircle: HelpCircle,
+    Type: TextBlockGlyph,
+    Image: ImageBlockGlyph,
+    Sigma: MathBlockGlyph,
+    Code: CodeBlockGlyph,
+    NotebookPen: MarkdownBlockGlyph,
+    HelpCircle: QuestionBlockGlyph,
   };
   if (iconName && map[iconName]) return map[iconName];
   const typeMap: Record<string, React.ComponentType<IconProps>> = {
-    text: Type,
-    question: HelpCircle,
-    code: Code,
-    image: ImageIcon,
-    markdown: StratisMarkdownIcon,
-    math: StratisFormulaIcon,
+    text: TextBlockGlyph,
+    question: QuestionBlockGlyph,
+    code: CodeBlockGlyph,
+    image: ImageBlockGlyph,
+    markdown: MarkdownBlockGlyph,
+    math: MathBlockGlyph,
   };
   return typeMap[type] ?? Plus;
 };
