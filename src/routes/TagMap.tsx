@@ -16,6 +16,22 @@ type DragState = {
   offsetY: number;
 };
 
+type TagEditPanelProps = {
+  selectedTag: Tag;
+  selectableParentTags: Tag[];
+  categoryIds: string[];
+  availableColors: string[];
+  getCategoryName: (categoryId: string) => string;
+  getTagPathString: (tagId: string) => string;
+  onAddChild: (name: string) => Promise<void>;
+  onRename: (name: string) => Promise<void>;
+  onParentChange: (nextParentId: string) => Promise<void>;
+  onCategoryChange: (nextCategoryId: string) => Promise<void>;
+  onCreateCategory: (name: string) => Promise<void>;
+  onUpdateColor: (colorKey: string) => Promise<void> | void;
+  onDelete: () => Promise<void>;
+};
+
 const NODE_WIDTH = 196;
 const NODE_HEIGHT = 84;
 const HORIZONTAL_GAP = 132;
@@ -57,6 +73,14 @@ const parseStoredLayout = (raw: string | null): LayoutMap => {
   } catch {
     return {};
   }
+};
+
+const loadStoredLayout = (userId?: string | null): LayoutMap => {
+  if (typeof window === "undefined") {
+    return {};
+  }
+
+  return parseStoredLayout(localStorage.getItem(createStorageKey(userId ?? undefined)));
 };
 
 const sortTagsByName = (tags: Tag[]): Tag[] => {
@@ -129,8 +153,192 @@ const buildAutoLayout = (tags: Tag[]): LayoutMap => {
 
 const clamp = (value: number, min: number): number => Math.max(min, value);
 
-const TagMap = () => {
-  const { currentUser } = useAuthSession();
+const TagEditPanel = ({
+  selectedTag,
+  selectableParentTags,
+  categoryIds,
+  availableColors,
+  getCategoryName,
+  getTagPathString,
+  onAddChild,
+  onRename,
+  onParentChange,
+  onCategoryChange,
+  onCreateCategory,
+  onUpdateColor,
+  onDelete,
+}: TagEditPanelProps) => {
+  const [childDraft, setChildDraft] = useState("");
+  const [renameDraft, setRenameDraft] = useState(selectedTag.name);
+  const [newCategoryDraft, setNewCategoryDraft] = useState("");
+
+  return (
+    <div className="mt-4 space-y-5">
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <div className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
+          選択中
+        </div>
+        <div className="mt-2 text-lg font-black text-slate-800">
+          {selectedTag.name}
+        </div>
+        <div className="mt-2 text-xs leading-relaxed text-slate-500">
+          {getTagPathString(selectedTag.id) || "ルートタグ"}
+        </div>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
+          名前
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            value={renameDraft}
+            onChange={(event) => setRenameDraft(event.target.value)}
+            className="h-11 flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              void onRename(renameDraft);
+            }}
+            className="h-11 rounded-2xl bg-slate-900 px-4 text-sm font-bold text-white transition hover:bg-slate-800"
+          >
+            保存
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
+          子タグ追加
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            value={childDraft}
+            onChange={(event) => setChildDraft(event.target.value)}
+            placeholder="子タグ名"
+            className="h-11 flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
+          />
+          <button
+            type="button"
+            onClick={async () => {
+              await onAddChild(childDraft);
+              setChildDraft("");
+            }}
+            className="h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+          >
+            追加
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
+          親タグ
+        </label>
+        <select
+          value={selectedTag.parentId ?? "__root__"}
+          onChange={(event) => {
+            void onParentChange(event.target.value);
+          }}
+          className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
+        >
+          <option value="__root__">ルート</option>
+          {selectableParentTags.map((tag) => (
+            <option key={tag.id} value={tag.id}>
+              {getTagPathString(tag.id)}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
+          カテゴリ
+        </label>
+        <select
+          value={selectedTag.categoryId ?? "__none__"}
+          onChange={(event) => {
+            void onCategoryChange(event.target.value);
+          }}
+          className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
+        >
+          <option value="__none__">未設定</option>
+          {categoryIds.map((categoryId) => (
+            <option key={categoryId} value={categoryId}>
+              {getCategoryName(categoryId)}
+            </option>
+          ))}
+        </select>
+
+        <div className="mt-2 flex items-center gap-2">
+          <input
+            value={newCategoryDraft}
+            onChange={(event) => setNewCategoryDraft(event.target.value)}
+            placeholder="新しいカテゴリ名"
+            className="h-11 flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
+          />
+          <button
+            type="button"
+            onClick={async () => {
+              await onCreateCategory(newCategoryDraft);
+              setNewCategoryDraft("");
+            }}
+            className="h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+          >
+            作成
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
+          色
+        </label>
+        <div className="grid grid-cols-4 gap-2">
+          {availableColors.map((colorKey) => {
+            const isActive = colorKey === selectedTag.color;
+            return (
+              <button
+                key={colorKey}
+                type="button"
+                onClick={() => {
+                  void onUpdateColor(colorKey);
+                }}
+                className={[
+                  "flex h-11 items-center justify-center rounded-2xl border transition",
+                  isActive
+                    ? "ring-2 ring-slate-900/15"
+                    : "hover:scale-[1.02]",
+                ].join(" ")}
+                style={getTagColorSwatchStyle(colorKey)}
+                title={colorKey}
+              >
+                <span className="text-[11px] font-bold uppercase">
+                  {colorKey.slice(0, 3)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="border-t border-slate-200 pt-5">
+        <button
+          type="button"
+          onClick={() => {
+            void onDelete();
+          }}
+          className="w-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700 transition hover:bg-rose-100"
+        >
+          このタグを削除
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const TagMapContent = ({ currentUserId }: { currentUserId: string | null }) => {
   const {
     tags,
     tagById,
@@ -148,11 +356,10 @@ const TagMap = () => {
   } = useTags();
 
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
-  const [layoutOverrides, setLayoutOverrides] = useState<LayoutMap>({});
+  const [layoutOverrides, setLayoutOverrides] = useState<LayoutMap>(() =>
+    loadStoredLayout(currentUserId),
+  );
   const [rootDraft, setRootDraft] = useState("");
-  const [childDraft, setChildDraft] = useState("");
-  const [renameDraft, setRenameDraft] = useState("");
-  const [newCategoryDraft, setNewCategoryDraft] = useState("");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [draggingTagId, setDraggingTagId] = useState<string | null>(null);
 
@@ -162,32 +369,47 @@ const TagMap = () => {
   const autoLayout = useMemo(() => buildAutoLayout(tags), [tags]);
   const childrenMap = useMemo(() => buildChildrenMap(tags), [tags]);
 
+  const filteredLayoutOverrides = useMemo(() => {
+    const tagIds = new Set(tags.map((tag) => tag.id));
+    return Object.fromEntries(
+      Object.entries(layoutOverrides).filter(([tagId]) => tagIds.has(tagId)),
+    ) as LayoutMap;
+  }, [layoutOverrides, tags]);
+
   const effectiveLayout = useMemo(() => {
     const next: LayoutMap = { ...autoLayout };
 
     for (const tag of tags) {
-      const override = layoutOverrides[tag.id];
+      const override = filteredLayoutOverrides[tag.id];
       if (override) {
         next[tag.id] = override;
       }
     }
 
     return next;
-  }, [autoLayout, layoutOverrides, tags]);
+  }, [autoLayout, filteredLayoutOverrides, tags]);
+
+  const resolvedSelectedTagId = useMemo(() => {
+    if (selectedTagId && tagById.has(selectedTagId)) {
+      return selectedTagId;
+    }
+
+    return tags[0]?.id ?? null;
+  }, [selectedTagId, tagById, tags]);
 
   const orderedTags = useMemo(() => {
     return [...tags].sort((left, right) => {
-      if (left.id === selectedTagId) return 1;
-      if (right.id === selectedTagId) return -1;
+      if (left.id === resolvedSelectedTagId) return 1;
+      if (right.id === resolvedSelectedTagId) return -1;
       const leftPos = effectiveLayout[left.id] ?? { x: 0, y: 0 };
       const rightPos = effectiveLayout[right.id] ?? { x: 0, y: 0 };
       if (leftPos.x !== rightPos.x) return leftPos.x - rightPos.x;
       return leftPos.y - rightPos.y;
     });
-  }, [effectiveLayout, selectedTagId, tags]);
+  }, [effectiveLayout, resolvedSelectedTagId, tags]);
 
-  const selectedTag = selectedTagId
-    ? (tagById.get(selectedTagId) ?? null)
+  const selectedTag = resolvedSelectedTagId
+    ? (tagById.get(resolvedSelectedTagId) ?? null)
     : null;
   const categoryIds = listCategoryIdsInUse();
 
@@ -237,47 +459,17 @@ const TagMap = () => {
   }, [effectiveLayout]);
 
   useEffect(() => {
-    const nextSelected = selectedTagId ? tagById.get(selectedTagId) : null;
-    if (nextSelected) return;
-    setSelectedTagId(tags[0]?.id ?? null);
-  }, [selectedTagId, tagById, tags]);
+    if (!currentUserId) return;
 
-  useEffect(() => {
-    setRenameDraft(selectedTag?.name ?? "");
-    setChildDraft("");
-    setNewCategoryDraft("");
-  }, [selectedTag?.id, selectedTag?.name]);
-
-  useEffect(() => {
-    const storageKey = createStorageKey(currentUser?.uid);
-    setLayoutOverrides(parseStoredLayout(localStorage.getItem(storageKey)));
-  }, [currentUser?.uid]);
-
-  useEffect(() => {
-    setLayoutOverrides((previous) => {
-      const tagIds = new Set(tags.map((tag) => tag.id));
-      const next = Object.fromEntries(
-        Object.entries(previous).filter(([tagId]) => tagIds.has(tagId)),
-      ) as LayoutMap;
-
-      const sameLength =
-        Object.keys(next).length === Object.keys(previous).length;
-      return sameLength ? previous : next;
-    });
-  }, [tags]);
-
-  useEffect(() => {
-    if (!currentUser?.uid) return;
-
-    const storageKey = createStorageKey(currentUser.uid);
+    const storageKey = createStorageKey(currentUserId);
     const timer = window.setTimeout(() => {
-      localStorage.setItem(storageKey, JSON.stringify(layoutOverrides));
+      localStorage.setItem(storageKey, JSON.stringify(filteredLayoutOverrides));
     }, 180);
 
     return () => {
       window.clearTimeout(timer);
     };
-  }, [currentUser?.uid, layoutOverrides]);
+  }, [currentUserId, filteredLayoutOverrides]);
 
   useEffect(() => {
     if (!statusMessage) return;
@@ -340,23 +532,22 @@ const TagMap = () => {
     setStatusMessage(`「${created.name}」を追加しました。`);
   };
 
-  const handleAddChild = async () => {
+  const handleAddChild = async (draft: string) => {
     if (!selectedTag) return;
-    const name = childDraft.trim() || "新しいタグ";
+    const name = draft.trim() || "新しいタグ";
     const created = await addTag(
       name,
       selectedTag.color,
       selectedTag.categoryId,
       selectedTag.id,
     );
-    setChildDraft("");
     setSelectedTagId(created.id);
     setStatusMessage(`「${created.name}」を追加しました。`);
   };
 
-  const handleRename = async () => {
+  const handleRename = async (draft: string) => {
     if (!selectedTag) return;
-    const result = await renameTag(selectedTag.id, renameDraft);
+    const result = await renameTag(selectedTag.id, draft);
     if (setMessageFromResult(result)) return;
     setStatusMessage("タグ名を更新しました。");
   };
@@ -390,14 +581,16 @@ const TagMap = () => {
     setStatusMessage("カテゴリを更新しました。");
   };
 
-  const handleCreateCategory = async () => {
+  const handleCreateCategory = async (draft: string) => {
     if (!selectedTag) return;
-    const categoryId = await ensureCategory(
-      newCategoryDraft.trim() || undefined,
-    );
+    const categoryId = await ensureCategory(draft.trim() || undefined);
     await setTagCategory(selectedTag.id, categoryId);
-    setNewCategoryDraft("");
     setStatusMessage("カテゴリを作成しました。");
+  };
+
+  const handleUpdateColor = async (colorKey: string) => {
+    if (!selectedTag) return;
+    await updateTagColor(selectedTag.id, colorKey);
   };
 
   const handleResetLayout = () => {
@@ -481,7 +674,9 @@ const TagMap = () => {
                 />
                 <button
                   type="button"
-                  onClick={handleAddRoot}
+                  onClick={() => {
+                    void handleAddRoot();
+                  }}
                   className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white transition hover:bg-slate-800"
                 >
                   追加
@@ -561,7 +756,7 @@ const TagMap = () => {
                   const point = effectiveLayout[tag.id] ?? autoLayout[tag.id];
                   if (!point) return null;
                   const childCount = (childrenMap.get(tag.id) ?? []).length;
-                  const isSelected = selectedTagId === tag.id;
+                  const isSelected = resolvedSelectedTagId === tag.id;
                   const isDragging = draggingTagId === tag.id;
 
                   return (
@@ -621,160 +816,22 @@ const TagMap = () => {
             <h2 className="text-sm font-bold text-slate-800">タグ編集</h2>
 
             {selectedTag ? (
-              <div className="mt-4 space-y-5">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
-                    選択中
-                  </div>
-                  <div className="mt-2 text-lg font-black text-slate-800">
-                    {selectedTag.name}
-                  </div>
-                  <div className="mt-2 text-xs leading-relaxed text-slate-500">
-                    {getTagPathString(selectedTag.id) || "ルートタグ"}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-                    名前
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      value={renameDraft}
-                      onChange={(event) => setRenameDraft(event.target.value)}
-                      className="h-11 flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleRename}
-                      className="h-11 rounded-2xl bg-slate-900 px-4 text-sm font-bold text-white transition hover:bg-slate-800"
-                    >
-                      保存
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-                    子タグ追加
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      value={childDraft}
-                      onChange={(event) => setChildDraft(event.target.value)}
-                      placeholder="子タグ名"
-                      className="h-11 flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddChild}
-                      className="h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
-                    >
-                      追加
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-                    親タグ
-                  </label>
-                  <select
-                    value={selectedTag.parentId ?? "__root__"}
-                    onChange={(event) =>
-                      void handleParentChange(event.target.value)
-                    }
-                    className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
-                  >
-                    <option value="__root__">ルート</option>
-                    {selectableParentTags.map((tag) => (
-                      <option key={tag.id} value={tag.id}>
-                        {getTagPathString(tag.id)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-                    カテゴリ
-                  </label>
-                  <select
-                    value={selectedTag.categoryId ?? "__none__"}
-                    onChange={(event) =>
-                      void handleCategoryChange(event.target.value)
-                    }
-                    className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
-                  >
-                    <option value="__none__">未設定</option>
-                    {categoryIds.map((categoryId) => (
-                      <option key={categoryId} value={categoryId}>
-                        {getCategoryName(categoryId)}
-                      </option>
-                    ))}
-                  </select>
-
-                  <div className="mt-2 flex items-center gap-2">
-                    <input
-                      value={newCategoryDraft}
-                      onChange={(event) =>
-                        setNewCategoryDraft(event.target.value)
-                      }
-                      placeholder="新しいカテゴリ名"
-                      className="h-11 flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleCreateCategory}
-                      className="h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
-                    >
-                      作成
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-                    色
-                  </label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {availableColors.map((colorKey) => {
-                      const isActive = colorKey === selectedTag.color;
-                      return (
-                        <button
-                          key={colorKey}
-                          type="button"
-                          onClick={() =>
-                            void updateTagColor(selectedTag.id, colorKey)
-                          }
-                          className={[
-                            "flex h-11 items-center justify-center rounded-2xl border transition",
-                            isActive
-                              ? "ring-2 ring-slate-900/15"
-                              : "hover:scale-[1.02]",
-                          ].join(" ")}
-                          style={getTagColorSwatchStyle(colorKey)}
-                          title={colorKey}
-                        >
-                          <span className="text-[11px] font-bold uppercase">
-                            {colorKey.slice(0, 3)}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="border-t border-slate-200 pt-5">
-                  <button
-                    type="button"
-                    onClick={handleDelete}
-                    className="w-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700 transition hover:bg-rose-100"
-                  >
-                    このタグを削除
-                  </button>
-                </div>
-              </div>
+              <TagEditPanel
+                key={selectedTag.id}
+                selectedTag={selectedTag}
+                selectableParentTags={selectableParentTags}
+                categoryIds={categoryIds}
+                availableColors={availableColors}
+                getCategoryName={getCategoryName}
+                getTagPathString={getTagPathString}
+                onAddChild={handleAddChild}
+                onRename={handleRename}
+                onParentChange={handleParentChange}
+                onCategoryChange={handleCategoryChange}
+                onCreateCategory={handleCreateCategory}
+                onUpdateColor={handleUpdateColor}
+                onDelete={handleDelete}
+              />
             ) : (
               <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm leading-relaxed text-slate-500">
                 左のキャンバスでタグを選ぶと、ここで編集できます。
@@ -784,6 +841,18 @@ const TagMap = () => {
         </section>
       </div>
     </div>
+  );
+};
+
+const TagMap = () => {
+  const { currentUser } = useAuthSession();
+  const currentUserId = currentUser?.uid ?? null;
+
+  return (
+    <TagMapContent
+      key={currentUserId ?? "anonymous"}
+      currentUserId={currentUserId}
+    />
   );
 };
 

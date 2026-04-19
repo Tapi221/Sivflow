@@ -265,10 +265,6 @@ const VerticalCardPagerFn = <T,>({
 
   const previousPreserveKeyRef = useRef<string | null>(preserveKey);
 
-  const captureScrollAnchorRef = useRef<() => void>(() => {});
-  const restoreScrollAnchorRef = useRef<() => void>(() => {});
-  const updateVisibleRangeRef = useRef<() => void>(() => {});
-
   useEffect(() => {
     activeIndexRef.current = activeIndex;
   }, [activeIndex]);
@@ -277,7 +273,7 @@ const VerticalCardPagerFn = <T,>({
     onRenderRangeChangeRef.current = onRenderRangeChange;
   }, [onRenderRangeChange]);
 
-  const captureScrollAnchor = () => {
+  const captureScrollAnchor = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
 
@@ -319,9 +315,15 @@ const VerticalCardPagerFn = <T,>({
         container.scrollTop - anchorTopWithinContainerPx,
       ),
     };
-  };
+  }, [
+    activeIndex,
+    cards,
+    getScrollAnchorSelector,
+    itemRefs,
+    onActiveScrollAnchorFaceChange,
+  ]);
 
-  const restoreScrollAnchor = () => {
+  const restoreScrollAnchor = useCallback(() => {
     const container = containerRef.current;
     const snapshot = scrollAnchorSnapshotRef.current;
     const activeElement = itemRefs.current[activeIndex];
@@ -370,9 +372,9 @@ const VerticalCardPagerFn = <T,>({
         nextTop - resolveElementTopWithinContainer(container, anchorElement),
       ),
     };
-  };
+  }, [activeIndex, itemRefs]);
 
-  const updateVisibleRange = () => {
+  const updateVisibleRange = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
 
@@ -481,11 +483,7 @@ const VerticalCardPagerFn = <T,>({
     effectiveRenderRangeRef.current = nextEffective;
     setVisibleRange(nextRange);
     onRenderRangeChangeRef.current?.(nextEffective);
-  };
-
-  captureScrollAnchorRef.current = captureScrollAnchor;
-  restoreScrollAnchorRef.current = restoreScrollAnchor;
-  updateVisibleRangeRef.current = updateVisibleRange;
+  }, [cards.length, disableVirtualization, itemRefs]);
 
   const scheduleAnchorCorrection = useCallback(() => {
     if (typeof window === "undefined") {
@@ -498,10 +496,10 @@ const VerticalCardPagerFn = <T,>({
 
     anchorCorrectionRafRef.current = window.requestAnimationFrame(() => {
       anchorCorrectionRafRef.current = null;
-      restoreScrollAnchorRef.current();
-      updateVisibleRangeRef.current();
+      restoreScrollAnchor();
+      updateVisibleRange();
     });
-  }, []);
+  }, [restoreScrollAnchor, updateVisibleRange]);
 
   const scheduleVisibleRangeUpdate = useCallback(() => {
     if (typeof window === "undefined") {
@@ -514,9 +512,9 @@ const VerticalCardPagerFn = <T,>({
 
     visibleRangeRafRef.current = window.requestAnimationFrame(() => {
       visibleRangeRafRef.current = null;
-      updateVisibleRangeRef.current();
+      updateVisibleRange();
     });
-  }, []);
+  }, [updateVisibleRange]);
 
   useEffect(() => {
     if (disableVirtualization) return;
@@ -529,7 +527,7 @@ const VerticalCardPagerFn = <T,>({
     if (!container) return;
 
     const handleScroll = () => {
-      captureScrollAnchorRef.current();
+      captureScrollAnchor();
       scheduleVisibleRangeUpdate();
     };
 
@@ -542,11 +540,15 @@ const VerticalCardPagerFn = <T,>({
       container.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", scheduleVisibleRangeUpdate);
     };
-  }, [disableVirtualization, scheduleVisibleRangeUpdate]);
+  }, [
+    captureScrollAnchor,
+    disableVirtualization,
+    scheduleVisibleRangeUpdate,
+  ]);
 
   useLayoutEffect(() => {
-    captureScrollAnchorRef.current();
-  }, [activeIndex]);
+    captureScrollAnchor();
+  }, [activeIndex, captureScrollAnchor]);
 
   useEffect(() => {
     if (typeof ResizeObserver === "undefined") {
@@ -555,8 +557,9 @@ const VerticalCardPagerFn = <T,>({
 
     const activeElement = itemRefs.current[activeIndex];
     const activeCard = cards[activeIndex];
+    const container = containerRef.current;
 
-    if (!activeElement || !activeCard) {
+    if (!activeElement || !activeCard || !container) {
       return;
     }
 
@@ -564,7 +567,7 @@ const VerticalCardPagerFn = <T,>({
       getScrollAnchorSelector?.(activeCard, activeIndex, true) ?? null;
 
     const resolvedAnchorTarget = resolveScrollAnchorTarget({
-      container: containerRef.current ?? document.createElement("div"),
+      container,
       itemElement: activeElement,
       selector: anchorSelector,
     });
@@ -592,7 +595,13 @@ const VerticalCardPagerFn = <T,>({
     return () => {
       observer.disconnect();
     };
-  }, [activeIndex, cards, getScrollAnchorSelector, scheduleAnchorCorrection]);
+  }, [
+    activeIndex,
+    cards,
+    getScrollAnchorSelector,
+    itemRefs,
+    scheduleAnchorCorrection,
+  ]);
 
   useLayoutEffect(() => {
     const previousPreserveKey = previousPreserveKeyRef.current;
@@ -607,10 +616,15 @@ const VerticalCardPagerFn = <T,>({
     }
 
     anchorStabilizationUntilRef.current = resolveNowMs() + 400;
-    restoreScrollAnchorRef.current();
+    restoreScrollAnchor();
     scheduleVisibleRangeUpdate();
     scheduleAnchorCorrection();
-  }, [preserveKey, scheduleAnchorCorrection, scheduleVisibleRangeUpdate]);
+  }, [
+    preserveKey,
+    restoreScrollAnchor,
+    scheduleAnchorCorrection,
+    scheduleVisibleRangeUpdate,
+  ]);
 
   useEffect(() => {
     return () => {

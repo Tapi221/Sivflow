@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useReducer,
   useRef,
   useState,
 } from "react";
@@ -70,8 +71,80 @@ type PageLayoutMetrics = {
   totalContentHeight: number;
 };
 
+type SearchState = {
+  pageMatches: Record<number, PdfPageSearchMatch[]>;
+  flattenedMatches: PdfPageSearchMatch[];
+  activeMatchIndex: number;
+};
+
+type SearchAction =
+  | { type: "reset" }
+  | {
+      type: "replace-results";
+      pageMatches: Record<number, PdfPageSearchMatch[]>;
+      flattenedMatches: PdfPageSearchMatch[];
+    }
+  | { type: "navigate"; direction: "next" | "prev" };
+
 const EMPTY_SEARCH_MATCHES: PdfPageSearchMatch[] = [];
 const SEARCH_INDEX_CONCURRENCY = 6;
+const INITIAL_SEARCH_STATE: SearchState = {
+  pageMatches: {},
+  flattenedMatches: [],
+  activeMatchIndex: -1,
+};
+
+const reduceSearchState = (
+  state: SearchState,
+  action: SearchAction,
+): SearchState => {
+  switch (action.type) {
+    case "reset": {
+      if (
+        state.activeMatchIndex === -1 &&
+        state.flattenedMatches.length === 0 &&
+        Object.keys(state.pageMatches).length === 0
+      ) {
+        return state;
+      }
+
+      return INITIAL_SEARCH_STATE;
+    }
+
+    case "replace-results": {
+      return {
+        pageMatches: action.pageMatches,
+        flattenedMatches: action.flattenedMatches,
+        activeMatchIndex: action.flattenedMatches.length > 0 ? 0 : -1,
+      };
+    }
+
+    case "navigate": {
+      if (state.flattenedMatches.length === 0) {
+        return state;
+      }
+
+      const baseIndex = state.activeMatchIndex < 0 ? 0 : state.activeMatchIndex;
+      const delta = action.direction === "prev" ? -1 : 1;
+      const nextIndex =
+        (baseIndex + delta + state.flattenedMatches.length) %
+        state.flattenedMatches.length;
+
+      if (nextIndex === state.activeMatchIndex) {
+        return state;
+      }
+
+      return {
+        ...state,
+        activeMatchIndex: nextIndex,
+      };
+    }
+
+    default: {
+      return state;
+    }
+  }
+};
 
 const buildSearchIndexMap = async ({
   pageNumbers,
@@ -276,13 +349,11 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       onScaleChange,
     });
 
-    const [pageMatches, setPageMatches] = useState<
-      Record<number, PdfPageSearchMatch[]>
-    >({});
-    const [flattenedMatches, setFlattenedMatches] = useState<
-      PdfPageSearchMatch[]
-    >([]);
-    const [activeMatchIndex, setActiveMatchIndex] = useState(-1);
+    const [searchState, dispatchSearch] = useReducer(
+      reduceSearchState,
+      INITIAL_SEARCH_STATE,
+    );
+    const { pageMatches, flattenedMatches, activeMatchIndex } = searchState;
     const normalizedSearchQuery = searchQuery.trim();
     const lastSearchNavTokenRef = useRef(searchNavToken);
     const searchIndexPromiseCacheRef = useRef<
@@ -359,9 +430,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
 
       resetSearchIndexCache();
       resetNavigation();
-      setPageMatches({});
-      setFlattenedMatches([]);
-      setActiveMatchIndex(-1);
+      dispatchSearch({ type: "reset" });
     }, [
       normalizedLocalFileId,
       normalizedSourceData,
@@ -373,16 +442,12 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
     useEffect(() => {
       if (!doc) {
         resetSearchIndexCache();
-        setPageMatches({});
-        setFlattenedMatches([]);
-        setActiveMatchIndex(-1);
+        dispatchSearch({ type: "reset" });
         return;
       }
 
       if (!normalizedSearchQuery) {
-        setPageMatches({});
-        setFlattenedMatches([]);
-        setActiveMatchIndex(-1);
+        dispatchSearch({ type: "reset" });
         return;
       }
 
@@ -426,9 +491,11 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
           return;
         }
 
-        setPageMatches(nextMatches);
-        setFlattenedMatches(nextFlattenedMatches);
-        setActiveMatchIndex(nextFlattenedMatches.length > 0 ? 0 : -1);
+        dispatchSearch({
+          type: "replace-results",
+          pageMatches: nextMatches,
+          flattenedMatches: nextFlattenedMatches,
+        });
       };
 
       void run();
@@ -496,13 +563,9 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
         return;
       }
 
-      setActiveMatchIndex((previous) => {
-        const baseIndex = previous < 0 ? 0 : previous;
-        const delta = searchNavDirection === "prev" ? -1 : 1;
-        const nextIndex =
-          (baseIndex + delta + flattenedMatches.length) %
-          flattenedMatches.length;
-        return nextIndex;
+      dispatchSearch({
+        type: "navigate",
+        direction: searchNavDirection,
       });
     }, [flattenedMatches.length, searchNavDirection, searchNavToken]);
 
