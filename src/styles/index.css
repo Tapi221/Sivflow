@@ -8,6 +8,7 @@
 @import "../presentation/react/theme/menu-surfaces.css";
 @import "../presentation/react/theme/navigation-surfaces.css";
 @import "../presentation/react/theme/editor-pane.css";
+@import "../presentation/react/theme/settings-panel.css";
 @import "../presentation/react/theme/tag-and-status.css";
 @import "./tokens/tokens.css";
 @import "./base/base.css";
