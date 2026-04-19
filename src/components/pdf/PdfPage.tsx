@@ -13,6 +13,10 @@ import {
   isPdfTextItem,
 } from "@/components/pdf/pdfViewerTypes";
 import { resolvePdfRenderBackingStore } from "@/components/pdf/pdfRenderQuality";
+import {
+  getCachedPdfPageBitmap,
+  setCachedPdfPageBitmap,
+} from "@/components/pdf/pdfPageBitmapCache";
 
 interface PdfPageProps {
   pdf: PdfJsDocument;
@@ -386,15 +390,6 @@ const PdfPageComponent = ({
         canvas.style.width = `${viewport.width}px`;
         canvas.style.height = `${viewport.height}px`;
 
-        context.setTransform(
-          renderBackingStore.scaleX,
-          0,
-          0,
-          renderBackingStore.scaleY,
-          0,
-          0,
-        );
-
         textLayerEl.replaceChildren();
         searchLayerEl.replaceChildren();
         textLayerEl.dataset.textLayerReady = "pending";
@@ -407,14 +402,39 @@ const PdfPageComponent = ({
         searchLayerEl.style.width = `${viewport.width}px`;
         searchLayerEl.style.height = `${viewport.height}px`;
 
-        renderTask = page.render({
-          canvasContext: context,
-          viewport,
-          intent: "display",
-        });
+        const cacheKey = renderIdentity;
+        const cachedBitmap = getCachedPdfPageBitmap(cacheKey);
 
-        await renderTask.promise;
-        if (cancelled) return;
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (
+          cachedBitmap &&
+          cachedBitmap.width === canvas.width &&
+          cachedBitmap.height === canvas.height
+        ) {
+          context.drawImage(cachedBitmap, 0, 0);
+        } else {
+          context.setTransform(
+            renderBackingStore.scaleX,
+            0,
+            0,
+            renderBackingStore.scaleY,
+            0,
+            0,
+          );
+
+          renderTask = page.render({
+            canvasContext: context,
+            viewport,
+            intent: "display",
+          });
+
+          await renderTask.promise;
+          if (cancelled) return;
+
+          setCachedPdfPageBitmap(cacheKey, canvas);
+        }
 
         const TextLayerCtor = getTextLayerCtor();
         const textLayer = new TextLayerCtor({

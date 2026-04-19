@@ -2,17 +2,18 @@ import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
-import { useVerticalCardPager } from "@/hooks/study/useVerticalCardPager";
 import {
   buildVerticalCardPagerItemStyle,
   resolveVerticalCardPagerItemWidthSpec,
   type VerticalCardPagerItemWidthSpec,
 } from "./verticalCardPagerWidthSpec";
 import { cn } from "@/lib/utils";
+import { isTypingTarget } from "@/utils/isTypingTarget";
 
 const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;
 const CARD_GAP = 16;
@@ -22,6 +23,7 @@ export const ACTIVE_INDEX_RENDER_RADIUS = 6;
 const PLACEHOLDER_HEIGHT_PX = 900;
 const CARD_RADIUS_SM = 32;
 const CARD_RADIUS_MD = 40;
+const SCROLL_IDLE_COMMIT_DELAY_MS = 110;
 
 const resolveCardBaseRadius = () => {
   if (
@@ -94,6 +96,11 @@ export type VerticalCardPagerProps<T> = {
   disableItemChrome?: boolean;
   disableVirtualization?: boolean;
   preserveScrollAnchorKey?: string | number | null;
+};
+
+type VirtualLayoutSnapshot = {
+  offsets: number[];
+  totalHeight: number;
 };
 
 const resolveElementTopWithinContainer = (
@@ -205,6 +212,126 @@ const resolveScrollAnchorTarget = ({
   return resolveAutoScrollAnchorTarget({ container, itemElement });
 };
 
+const buildVirtualLayoutSnapshot = ({
+  count,
+  getEstimatedHeight,
+}: {
+  count: number;
+  getEstimatedHeight: (index: number) => number;
+}): VirtualLayoutSnapshot => {
+  const offsets = new Array<number>(count + 1);
+  offsets[0] = 0;
+
+  for (let index = 0; index < count; index += 1) {
+    const itemHeight = getEstimatedHeight(index);
+    offsets[index + 1] = offsets[index] + itemHeight + CARD_GAP;
+  }
+
+  const totalHeight =
+    count === 0 ? 0 : Math.max(0, offsets[count] - CARD_GAP);
+
+  return {
+    offsets,
+    totalHeight,
+  };
+};
+
+const binarySearchIndexForOffset = (
+  layout: VirtualLayoutSnapshot,
+  offset: number,
+  count: number,
+) => {
+  if (count <= 0) {
+    return -1;
+  }
+
+  let low = 0;
+  let high = count - 1;
+  let answer = 0;
+
+  while (low <= high) {
+    const mid = (low + high) >> 1;
+    const itemTop = layout.offsets[mid] ?? 0;
+    const itemBottom = layout.offsets[mid + 1] ?? itemTop;
+
+    if (offset < itemTop) {
+      high = mid - 1;
+      continue;
+    }
+
+    answer = mid;
+
+    if (offset >= itemBottom) {
+      low = mid + 1;
+      continue;
+    }
+
+    return mid;
+  }
+
+  return Math.max(0, Math.min(count - 1, answer));
+};
+
+const clampIndex = (idx: number, count: number) => {
+  if (count <= 0) return -1;
+  if (!Number.isFinite(idx)) return 0;
+  return Math.max(0, Math.min(count - 1, Math.trunc(idx)));
+};
+
+const resolveVisibleRenderRange = ({
+  count,
+  activeIndex,
+  disableVirtualization,
+  layout,
+  scrollTop,
+  viewportHeight,
+}: {
+  count: number;
+  activeIndex: number;
+  disableVirtualization: boolean;
+  layout: VirtualLayoutSnapshot;
+  scrollTop: number;
+  viewportHeight: number;
+}) => {
+  if (count === 0) {
+    return null;
+  }
+
+  if (disableVirtualization) {
+    return {
+      start: 0,
+      end: count - 1,
+      visibleStart: 0,
+      visibleEnd: count - 1,
+    };
+  }
+
+  const rangeTop = Math.max(0, scrollTop - VISIBLE_RANGE_OVERSCAN_PX);
+  const rangeBottom = Math.max(
+    rangeTop,
+    scrollTop + viewportHeight + VISIBLE_RANGE_OVERSCAN_PX,
+  );
+
+  const visibleStart = binarySearchIndexForOffset(layout, rangeTop, count);
+  const visibleEnd = binarySearchIndexForOffset(layout, rangeBottom, count);
+
+  const radiusStart = Math.max(0, activeIndex - ACTIVE_INDEX_RENDER_RADIUS);
+  const radiusEnd = Math.min(count - 1, activeIndex + ACTIVE_INDEX_RENDER_RADIUS);
+
+  return {
+    start: Math.min(visibleStart, radiusStart),
+    end: Math.max(visibleEnd, radiusEnd),
+    visibleStart,
+    visibleEnd,
+  };
+};
+
+type ScrollAnchorSnapshot = {
+  activeIndex: number;
+  anchorSelector: string | null;
+  offsetWithinAnchorPx: number;
+};
+
 const VerticalCardPagerFn = <T,>({
   cards,
   activeIndex,
@@ -227,51 +354,227 @@ const VerticalCardPagerFn = <T,>({
   preserveScrollAnchorKey = null,
 }: VerticalCardPagerProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const avgItemExtentRef = useRef(900);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const itemCleanupMapRef = useRef<Map<number, () => void>>(new Map());
+  const measuredHeightsRef = useRef<Map<number, number>>(new Map());
+  const avgItemExtentRef = useRef(PLACEHOLDER_HEIGHT_PX);
+  const activeIndexRef = useRef(activeIndex);
+  const onRenderRangeChangeRef = useRef(onRenderRangeChange);
+
   const anchorCorrectionRafRef = useRef<number | null>(null);
   const anchorStabilizationUntilRef = useRef<number>(0);
   const visibleRangeRafRef = useRef<number | null>(null);
+  const computeNearestRafRef = useRef<number | null>(null);
+  const idleCommitTimerRef = useRef<number | null>(null);
+  const naturalIndexTimerRef = useRef<number | null>(null);
+  const queuedNaturalIndexRef = useRef<number | null>(null);
+  const lastNearestIndexRef = useRef(Math.max(0, activeIndex));
+
   const visibleRangeRef = useRef<{ start: number; end: number } | null>(null);
-  const effectiveRenderRangeRef = useRef<{
-    start: number;
-    end: number;
-  } | null>(null);
+  const effectiveRenderRangeRef = useRef<{ start: number; end: number } | null>(
+    null,
+  );
 
-  const [visibleRange, setVisibleRange] = useState<{
-    start: number;
-    end: number;
-  } | null>(null);
-
-  const { itemRefs } = useVerticalCardPager({
-    count: cards.length,
-    activeIndex,
-    onActiveIndexChange,
-    scrollContainerRef: containerRef,
-    onFlip,
-    naturalIndexCommitDelayMs,
-    freezeActiveIndex,
+  const [viewportState, setViewportState] = useState({
+    scrollTop: 0,
+    clientHeight: 0,
   });
-
-  const activeIndexRef = useRef(activeIndex);
-  const onRenderRangeChangeRef = useRef(onRenderRangeChange);
+  const [layoutVersion, setLayoutVersion] = useState(0);
   const preserveKey =
     preserveScrollAnchorKey == null ? null : String(preserveScrollAnchorKey);
 
-  const scrollAnchorSnapshotRef = useRef<{
-    activeIndex: number;
-    anchorSelector: string | null;
-    offsetWithinAnchorPx: number;
-  } | null>(null);
-
+  const scrollAnchorSnapshotRef = useRef<ScrollAnchorSnapshot | null>(null);
   const previousPreserveKeyRef = useRef<string | null>(preserveKey);
 
   useEffect(() => {
     activeIndexRef.current = activeIndex;
+    if (Number.isFinite(activeIndex) && activeIndex >= 0) {
+      lastNearestIndexRef.current = activeIndex;
+    }
   }, [activeIndex]);
 
   useEffect(() => {
     onRenderRangeChangeRef.current = onRenderRangeChange;
   }, [onRenderRangeChange]);
+
+  const getEstimatedHeight = useCallback(
+    (index: number) => {
+      return measuredHeightsRef.current.get(index) ?? avgItemExtentRef.current;
+    },
+    [],
+  );
+
+  const layoutSnapshot = useMemo(
+    () =>
+      buildVirtualLayoutSnapshot({
+        count: cards.length,
+        getEstimatedHeight,
+      }),
+    [cards.length, getEstimatedHeight, layoutVersion],
+  );
+
+  const renderRange = useMemo(
+    () =>
+      resolveVisibleRenderRange({
+        count: cards.length,
+        activeIndex,
+        disableVirtualization,
+        layout: layoutSnapshot,
+        scrollTop: viewportState.scrollTop,
+        viewportHeight: viewportState.clientHeight,
+      }),
+    [
+      activeIndex,
+      cards.length,
+      disableVirtualization,
+      layoutSnapshot,
+      viewportState.clientHeight,
+      viewportState.scrollTop,
+    ],
+  );
+
+  const topSpacerHeight =
+    renderRange && renderRange.start > 0
+      ? layoutSnapshot.offsets[renderRange.start] ?? 0
+      : 0;
+  const bottomSpacerHeight =
+    renderRange && renderRange.end < cards.length - 1
+      ? Math.max(
+          0,
+          layoutSnapshot.totalHeight - (layoutSnapshot.offsets[renderRange.end + 1] ?? 0),
+        )
+      : 0;
+
+  const scrollToIndex = useCallback(
+    (idx: number, behavior: ScrollBehavior = "smooth") => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const clampedIndex = clampIndex(idx, cards.length);
+      if (clampedIndex < 0) return;
+
+      const itemTop = layoutSnapshot.offsets[clampedIndex] ?? 0;
+      const itemHeight = getEstimatedHeight(clampedIndex);
+      const targetTop = itemTop - container.clientHeight / 2 + itemHeight / 2;
+
+      const maxScrollTop = Math.max(
+        0,
+        layoutSnapshot.totalHeight - container.clientHeight,
+      );
+      const nextTop = Math.min(Math.max(0, targetTop), maxScrollTop);
+
+      container.scrollTo({
+        top: nextTop,
+        behavior,
+      });
+    },
+    [cards.length, getEstimatedHeight, layoutSnapshot],
+  );
+
+  const clearNaturalIndexTimer = useCallback(() => {
+    if (naturalIndexTimerRef.current != null) {
+      window.clearTimeout(naturalIndexTimerRef.current);
+      naturalIndexTimerRef.current = null;
+    }
+  }, []);
+
+  const clearIdleCommitTimer = useCallback(() => {
+    if (idleCommitTimerRef.current != null) {
+      window.clearTimeout(idleCommitTimerRef.current);
+      idleCommitTimerRef.current = null;
+    }
+  }, []);
+
+  const clearComputeNearestRaf = useCallback(() => {
+    if (computeNearestRafRef.current != null) {
+      window.cancelAnimationFrame(computeNearestRafRef.current);
+      computeNearestRafRef.current = null;
+    }
+  }, []);
+
+  const flushQueuedNaturalIndex = useCallback(() => {
+    const nearestIdx = queuedNaturalIndexRef.current;
+    queuedNaturalIndexRef.current = null;
+    clearNaturalIndexTimer();
+
+    if (nearestIdx == null || nearestIdx === activeIndexRef.current) return;
+    onActiveIndexChange(nearestIdx);
+  }, [clearNaturalIndexTimer, onActiveIndexChange]);
+
+  const queueNaturalIndexCommit = useCallback(
+    (nearestIdx: number) => {
+      queuedNaturalIndexRef.current = nearestIdx;
+      clearNaturalIndexTimer();
+
+      if (naturalIndexCommitDelayMs <= 0) {
+        flushQueuedNaturalIndex();
+        return;
+      }
+
+      naturalIndexTimerRef.current = window.setTimeout(() => {
+        flushQueuedNaturalIndex();
+      }, naturalIndexCommitDelayMs);
+    },
+    [clearNaturalIndexTimer, flushQueuedNaturalIndex, naturalIndexCommitDelayMs],
+  );
+
+  const computeNearestIndex = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    if (cards.length <= 0) return;
+    if (freezeActiveIndex) return;
+
+    const centerOffset = container.scrollTop + container.clientHeight / 2;
+    const nearestIdx = binarySearchIndexForOffset(
+      layoutSnapshot,
+      centerOffset,
+      cards.length,
+    );
+    if (nearestIdx < 0) {
+      return;
+    }
+
+    lastNearestIndexRef.current = nearestIdx;
+    if (nearestIdx === activeIndexRef.current) {
+      return;
+    }
+
+    queueNaturalIndexCommit(nearestIdx);
+  }, [cards.length, freezeActiveIndex, layoutSnapshot, queueNaturalIndexCommit]);
+
+  const scheduleVisibleRangeUpdate = useCallback(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (visibleRangeRafRef.current != null) {
+      return;
+    }
+
+    visibleRangeRafRef.current = window.requestAnimationFrame(() => {
+      visibleRangeRafRef.current = null;
+      const container = containerRef.current;
+      if (!container) {
+        return;
+      }
+
+      setViewportState((previousState) => {
+        const nextState = {
+          scrollTop: container.scrollTop,
+          clientHeight: container.clientHeight,
+        };
+
+        if (
+          previousState.scrollTop === nextState.scrollTop &&
+          previousState.clientHeight === nextState.clientHeight
+        ) {
+          return previousState;
+        }
+
+        return nextState;
+      });
+    });
+  }, []);
 
   const captureScrollAnchor = useCallback(() => {
     const container = containerRef.current;
@@ -319,7 +622,6 @@ const VerticalCardPagerFn = <T,>({
     activeIndex,
     cards,
     getScrollAnchorSelector,
-    itemRefs,
     onActiveScrollAnchorFaceChange,
   ]);
 
@@ -352,7 +654,7 @@ const VerticalCardPagerFn = <T,>({
 
     const maxScrollTop = Math.max(
       0,
-      container.scrollHeight - container.clientHeight,
+      layoutSnapshot.totalHeight - container.clientHeight,
     );
 
     const nextTop = Math.min(
@@ -372,118 +674,7 @@ const VerticalCardPagerFn = <T,>({
         nextTop - resolveElementTopWithinContainer(container, anchorElement),
       ),
     };
-  }, [activeIndex, itemRefs]);
-
-  const updateVisibleRange = useCallback(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    if (disableVirtualization) {
-      visibleRangeRef.current = null;
-      effectiveRenderRangeRef.current = null;
-      setVisibleRange(null);
-      onRenderRangeChangeRef.current?.(null);
-      return;
-    }
-
-    if (cards.length === 0) {
-      visibleRangeRef.current = null;
-      effectiveRenderRangeRef.current = null;
-      setVisibleRange(null);
-      onRenderRangeChangeRef.current?.(null);
-      return;
-    }
-
-    const top = container.scrollTop - VISIBLE_RANGE_OVERSCAN_PX;
-    const bottom =
-      container.scrollTop + container.clientHeight + VISIBLE_RANGE_OVERSCAN_PX;
-
-    const estimatedIndex = Math.max(
-      0,
-      Math.min(
-        cards.length - 1,
-        Math.round(container.scrollTop / Math.max(1, avgItemExtentRef.current)),
-      ),
-    );
-
-    const getItemTop = (idx: number): number | null => {
-      const element = itemRefs.current[idx];
-      if (!element) return null;
-      return element.offsetTop;
-    };
-
-    const getItemBottom = (idx: number): number | null => {
-      const element = itemRefs.current[idx];
-      if (!element) return null;
-      return element.offsetTop + element.offsetHeight;
-    };
-
-    let start = Math.max(0, estimatedIndex - ACTIVE_INDEX_RENDER_RADIUS);
-
-    while (start > 0) {
-      const prevBottom = getItemBottom(start - 1);
-      if (prevBottom == null || prevBottom < top) break;
-      start -= 1;
-    }
-
-    while (start < cards.length) {
-      const currentBottom = getItemBottom(start);
-      if (currentBottom == null) {
-        start += 1;
-        continue;
-      }
-
-      if (currentBottom >= top) break;
-      start += 1;
-    }
-
-    let nextRange: { start: number; end: number } | null = null;
-
-    if (start < cards.length) {
-      let end = Math.max(start, estimatedIndex + ACTIVE_INDEX_RENDER_RADIUS);
-      if (end >= cards.length) end = cards.length - 1;
-
-      while (end + 1 < cards.length) {
-        const nextTop = getItemTop(end + 1);
-        if (nextTop == null || nextTop > bottom) break;
-        end += 1;
-      }
-
-      while (end >= start) {
-        const endTop = getItemTop(end);
-        if (endTop != null && endTop <= bottom) break;
-        end -= 1;
-      }
-
-      if (end >= start) {
-        nextRange = { start, end };
-      }
-    }
-
-    const currentActiveIndex = activeIndexRef.current;
-    const radiusStart = Math.max(
-      0,
-      currentActiveIndex - ACTIVE_INDEX_RENDER_RADIUS,
-    );
-    const radiusEnd = Math.min(
-      cards.length - 1,
-      currentActiveIndex + ACTIVE_INDEX_RENDER_RADIUS,
-    );
-
-    const effectiveStart = nextRange
-      ? Math.min(nextRange.start, radiusStart)
-      : radiusStart;
-
-    const effectiveEnd = nextRange
-      ? Math.max(nextRange.end, radiusEnd)
-      : radiusEnd;
-
-    const nextEffective = { start: effectiveStart, end: effectiveEnd };
-    visibleRangeRef.current = nextRange;
-    effectiveRenderRangeRef.current = nextEffective;
-    setVisibleRange(nextRange);
-    onRenderRangeChangeRef.current?.(nextEffective);
-  }, [cards.length, disableVirtualization, itemRefs]);
+  }, [activeIndex, layoutSnapshot.totalHeight]);
 
   const scheduleAnchorCorrection = useCallback(() => {
     if (typeof window === "undefined") {
@@ -497,111 +688,95 @@ const VerticalCardPagerFn = <T,>({
     anchorCorrectionRafRef.current = window.requestAnimationFrame(() => {
       anchorCorrectionRafRef.current = null;
       restoreScrollAnchor();
-      updateVisibleRange();
+      scheduleVisibleRangeUpdate();
     });
-  }, [restoreScrollAnchor, updateVisibleRange]);
-
-  const scheduleVisibleRangeUpdate = useCallback(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    if (visibleRangeRafRef.current != null) {
-      return;
-    }
-
-    visibleRangeRafRef.current = window.requestAnimationFrame(() => {
-      visibleRangeRafRef.current = null;
-      updateVisibleRange();
-    });
-  }, [updateVisibleRange]);
+  }, [restoreScrollAnchor, scheduleVisibleRangeUpdate]);
 
   useEffect(() => {
-    if (disableVirtualization) return;
-    scheduleVisibleRangeUpdate();
-  }, [disableVirtualization, scheduleVisibleRangeUpdate, cards.length]);
+    const nextEffectiveRange =
+      renderRange == null
+        ? null
+        : {
+            start: renderRange.start,
+            end: renderRange.end,
+          };
+
+    const currentVisibleRange =
+      renderRange == null
+        ? null
+        : {
+            start: renderRange.visibleStart,
+            end: renderRange.visibleEnd,
+          };
+
+    visibleRangeRef.current = currentVisibleRange;
+    effectiveRenderRangeRef.current = nextEffectiveRange;
+
+    onRenderRangeChangeRef.current?.(nextEffectiveRange);
+  }, [renderRange]);
 
   useEffect(() => {
-    if (disableVirtualization) return;
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
+
+    const syncViewportState = () => {
+      setViewportState((previousState) => {
+        const nextState = {
+          scrollTop: container.scrollTop,
+          clientHeight: container.clientHeight,
+        };
+
+        if (
+          previousState.scrollTop === nextState.scrollTop &&
+          previousState.clientHeight === nextState.clientHeight
+        ) {
+          return previousState;
+        }
+
+        return nextState;
+      });
+    };
+
+    syncViewportState();
 
     const handleScroll = () => {
       captureScrollAnchor();
       scheduleVisibleRangeUpdate();
+      clearIdleCommitTimer();
+      idleCommitTimerRef.current = window.setTimeout(() => {
+        idleCommitTimerRef.current = null;
+        computeNearestIndex();
+      }, SCROLL_IDLE_COMMIT_DELAY_MS);
+
+      if (computeNearestRafRef.current != null) {
+        return;
+      }
+
+      computeNearestRafRef.current = window.requestAnimationFrame(() => {
+        computeNearestRafRef.current = null;
+        computeNearestIndex();
+      });
     };
 
     container.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", scheduleVisibleRangeUpdate, {
-      passive: true,
-    });
+    window.addEventListener("resize", syncViewportState, { passive: true });
 
     return () => {
       container.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", scheduleVisibleRangeUpdate);
+      window.removeEventListener("resize", syncViewportState);
     };
   }, [
     captureScrollAnchor,
-    disableVirtualization,
+    clearIdleCommitTimer,
+    computeNearestIndex,
     scheduleVisibleRangeUpdate,
   ]);
 
   useLayoutEffect(() => {
     captureScrollAnchor();
-  }, [activeIndex, captureScrollAnchor]);
-
-  useEffect(() => {
-    if (typeof ResizeObserver === "undefined") {
-      return;
-    }
-
-    const activeElement = itemRefs.current[activeIndex];
-    const activeCard = cards[activeIndex];
-    const container = containerRef.current;
-
-    if (!activeElement || !activeCard || !container) {
-      return;
-    }
-
-    const anchorSelector =
-      getScrollAnchorSelector?.(activeCard, activeIndex, true) ?? null;
-
-    const resolvedAnchorTarget = resolveScrollAnchorTarget({
-      container,
-      itemElement: activeElement,
-      selector: anchorSelector,
-    });
-
-    if (!resolvedAnchorTarget) {
-      return;
-    }
-
-    const anchorElement = resolvedAnchorTarget.element;
-
-    const observer = new ResizeObserver(() => {
-      if (resolveNowMs() > anchorStabilizationUntilRef.current) {
-        return;
-      }
-
-      scheduleAnchorCorrection();
-    });
-
-    observer.observe(activeElement);
-
-    if (anchorElement !== activeElement) {
-      observer.observe(anchorElement);
-    }
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [
-    activeIndex,
-    cards,
-    getScrollAnchorSelector,
-    itemRefs,
-    scheduleAnchorCorrection,
-  ]);
+  }, [activeIndex, captureScrollAnchor, renderRange?.start, renderRange?.end]);
 
   useLayoutEffect(() => {
     const previousPreserveKey = previousPreserveKeyRef.current;
@@ -636,9 +811,155 @@ const VerticalCardPagerFn = <T,>({
         if (visibleRangeRafRef.current != null) {
           window.cancelAnimationFrame(visibleRangeRafRef.current);
         }
+
+        clearComputeNearestRaf();
+        clearIdleCommitTimer();
+        clearNaturalIndexTimer();
       }
     };
+  }, [clearComputeNearestRaf, clearIdleCommitTimer, clearNaturalIndexTimer]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isTypingTarget(event.target)) return;
+      if (event.ctrlKey || event.metaKey) return;
+
+      switch (event.key) {
+        case " ":
+          if (event.shiftKey) return;
+          event.preventDefault();
+          onFlip?.();
+          break;
+        case "Enter":
+          onFlip?.();
+          break;
+        case "ArrowDown": {
+          event.preventDefault();
+          if (freezeActiveIndex) return;
+          const nextIndex = Math.min(activeIndexRef.current + 1, cards.length - 1);
+          if (nextIndex !== activeIndexRef.current) {
+            clearNaturalIndexTimer();
+            queuedNaturalIndexRef.current = null;
+            scrollToIndex(nextIndex, "smooth");
+          }
+          break;
+        }
+        case "ArrowUp": {
+          event.preventDefault();
+          if (freezeActiveIndex) return;
+          const previousIndex = Math.max(activeIndexRef.current - 1, 0);
+          if (previousIndex !== activeIndexRef.current) {
+            clearNaturalIndexTimer();
+            queuedNaturalIndexRef.current = null;
+            scrollToIndex(previousIndex, "smooth");
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [cards.length, clearNaturalIndexTimer, freezeActiveIndex, onFlip, scrollToIndex]);
+
+  const handleMeasuredHeight = useCallback((index: number, nextHeight: number) => {
+    const safeHeight = Math.max(1, Math.round(nextHeight));
+    const previousHeight = measuredHeightsRef.current.get(index);
+
+    if (previousHeight === safeHeight) {
+      return;
+    }
+
+    measuredHeightsRef.current.set(index, safeHeight);
+    avgItemExtentRef.current = Math.round(
+      (avgItemExtentRef.current + safeHeight) / 2,
+    );
+    setLayoutVersion((previousVersion) => previousVersion + 1);
   }, []);
+
+  const attachMeasuredRef = useCallback(
+    (index: number, element: HTMLDivElement | null) => {
+      itemCleanupMapRef.current.get(index)?.();
+      itemCleanupMapRef.current.delete(index);
+      itemRefs.current[index] = element;
+
+      if (!element || typeof ResizeObserver === "undefined") {
+        return;
+      }
+
+      const update = () => {
+        handleMeasuredHeight(index, element.offsetHeight);
+        if (resolveNowMs() <= anchorStabilizationUntilRef.current) {
+          scheduleAnchorCorrection();
+        }
+      };
+
+      update();
+
+      const observer = new ResizeObserver(update);
+      observer.observe(element);
+
+      itemCleanupMapRef.current.set(index, () => {
+        observer.disconnect();
+        itemRefs.current[index] = null;
+      });
+    },
+    [handleMeasuredHeight, scheduleAnchorCorrection],
+  );
+
+  const renderedItems = useMemo(() => {
+    if (!renderRange) {
+      return [] as Array<{
+        card: T;
+        idx: number;
+        key: string | number;
+        isActive: boolean;
+        style: React.CSSProperties;
+      }>;
+    }
+
+    const items: Array<{
+      card: T;
+      idx: number;
+      key: string | number;
+      isActive: boolean;
+      style: React.CSSProperties;
+    }> = [];
+
+    for (let idx = renderRange.start; idx <= renderRange.end; idx += 1) {
+      const card = cards[idx];
+      const isActive = idx === activeIndex;
+      const key = getKey ? getKey(card, idx) : idx;
+      const widthSpec = resolveVerticalCardPagerItemWidthSpec({
+        card,
+        idx,
+        isActive,
+        cardWidth,
+        getCardWidth,
+        getCardWidthSpec,
+      });
+
+      items.push({
+        card,
+        idx,
+        key,
+        isActive,
+        style: buildVerticalCardPagerItemStyle(widthSpec),
+      });
+    }
+
+    return items;
+  }, [
+    activeIndex,
+    cardWidth,
+    cards,
+    getCardWidth,
+    getCardWidthSpec,
+    getKey,
+    renderRange,
+  ]);
 
   return (
     <div
@@ -663,77 +984,53 @@ const VerticalCardPagerFn = <T,>({
           minWidth: 0,
         }}
       >
-        {cards.map((card, idx) => {
-          const isActive = idx === activeIndex;
-          const isVisibleInViewport =
-            visibleRange != null &&
-            idx >= visibleRange.start &&
-            idx <= visibleRange.end;
+        {topSpacerHeight > 0 ? (
+          <div
+            aria-hidden
+            style={{
+              width: "100%",
+              height: `${topSpacerHeight}px`,
+              flex: "0 0 auto",
+            }}
+          />
+        ) : null}
 
-          const shouldRenderCard =
-            disableVirtualization ||
-            isVisibleInViewport ||
-            Math.abs(idx - activeIndex) <= ACTIVE_INDEX_RENDER_RADIUS;
+        {renderedItems.map(({ card, idx, key, isActive, style }) => (
+          <div
+            key={key}
+            ref={(element) => {
+              attachMeasuredRef(idx, element);
+            }}
+            aria-current={isActive ? "true" : undefined}
+            data-card-active={isActive ? "true" : undefined}
+            data-card-hoverable={disableItemChrome ? undefined : "true"}
+            className={cn(
+              "card-active-chrome",
+              "card-pager-item",
+              isActive && "card-active-chrome--active",
+              !disableItemChrome && "card-active-chrome--hoverable",
+              disableItemChrome &&
+                "card-active-chrome--plain card-pager-item--plain",
+            )}
+            style={{
+              ...style,
+              borderRadius: cardBorderRadius(),
+            }}
+          >
+            {renderCard(card, idx, isActive)}
+          </div>
+        ))}
 
-          const key = getKey ? getKey(card, idx) : idx;
-
-          const widthSpec = resolveVerticalCardPagerItemWidthSpec({
-            card,
-            idx,
-            isActive,
-            cardWidth,
-            getCardWidth,
-            getCardWidthSpec,
-          });
-
-          const itemLayoutStyle = buildVerticalCardPagerItemStyle(widthSpec);
-
-          return (
-            <div
-              key={key}
-              ref={(element) => {
-                itemRefs.current[idx] = element;
-                if (element) {
-                  avgItemExtentRef.current = Math.round(
-                    (avgItemExtentRef.current + element.offsetHeight) / 2,
-                  );
-                }
-              }}
-              aria-current={isActive ? "true" : undefined}
-              data-card-active={isActive ? "true" : undefined}
-              data-card-hoverable={disableItemChrome ? undefined : "true"}
-              className={cn(
-                "card-active-chrome",
-                "card-pager-item",
-                isActive && "card-active-chrome--active",
-                !disableItemChrome && "card-active-chrome--hoverable",
-                disableItemChrome &&
-                  "card-active-chrome--plain card-pager-item--plain",
-              )}
-              style={{
-                ...itemLayoutStyle,
-                borderRadius: cardBorderRadius(),
-              }}
-            >
-              {shouldRenderCard ? (
-                renderCard(card, idx, isActive)
-              ) : (
-                <div
-                  aria-hidden
-                  className="w-full"
-                  style={{
-                    height: `${Math.max(
-                      1,
-                      Math.round(PLACEHOLDER_HEIGHT_PX),
-                    )}px`,
-                    contentVisibility: "auto",
-                    containIntrinsicSize: `auto ${PLACEHOLDER_HEIGHT_PX}px`,
-                  }}
-                />
-              )}
-            </div>
-          );
-        })}
+        {bottomSpacerHeight > 0 ? (
+          <div
+            aria-hidden
+            style={{
+              width: "100%",
+              height: `${bottomSpacerHeight}px`,
+              flex: "0 0 auto",
+            }}
+          />
+        ) : null}
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 import { layoutRowsToCardHeightPx } from "@constants/shared/flashcard";
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
+import { useFlashcardDualDerived } from "@/components/card/frame/useFlashcardDualDerived";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
+import { PreparedViewCardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/PreparedViewCardFaceScene";
 import { DesktopEmbeddedCardEditorSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopEmbeddedCardEditorSurface";
-import { ViewCardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/ViewCardFaceScene";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import React from "react";
@@ -59,10 +60,12 @@ const DesktopCardSurfaceInner = ({
     [currentCardLayoutMode, currentDisplayMode, viewZoomScale],
   );
 
+  const dualDerived = useFlashcardDualDerived(card);
+
   const fixedHeightPx = React.useMemo<number | null>(() => {
     if (currentDisplayMode !== "fixed") return null;
-    return layoutRowsToCardHeightPx(card.layoutRows);
-  }, [card.layoutRows, currentDisplayMode]);
+    return layoutRowsToCardHeightPx(dualDerived.layoutRows);
+  }, [currentDisplayMode, dualDerived.layoutRows]);
 
   const shouldFillFaceHeight =
     currentDisplayMode === "fluid" && currentCardLayoutMode === "split";
@@ -93,9 +96,10 @@ const DesktopCardSurfaceInner = ({
       data-card-face="question"
       className={shouldFillFaceHeight ? "min-w-0 h-full" : "min-w-0"}
     >
-      <ViewCardFaceScene
+      <PreparedViewCardFaceScene
         card={card}
-        side="question"
+        sharedDerived={dualDerived}
+        sideDerived={dualDerived.question}
         displayMode={currentDisplayMode}
         fixedScale={metrics.sideFixedScale}
         fixedHeightPx={fixedHeightPx}
@@ -115,9 +119,10 @@ const DesktopCardSurfaceInner = ({
       data-card-face="answer"
       className={shouldFillFaceHeight ? "min-w-0 h-full" : "min-w-0"}
     >
-      <ViewCardFaceScene
+      <PreparedViewCardFaceScene
         card={card}
-        side="answer"
+        sharedDerived={dualDerived}
+        sideDerived={dualDerived.answer}
         displayMode={currentDisplayMode}
         fixedScale={metrics.sideFixedScale}
         fixedHeightPx={fixedHeightPx}
@@ -178,9 +183,10 @@ const DesktopCardSurfaceInner = ({
         data-card-face={isFlipped ? "answer" : "question"}
         className="min-w-0"
       >
-        <ViewCardFaceScene
+        <PreparedViewCardFaceScene
           card={card}
-          side={isFlipped ? "answer" : "question"}
+          sharedDerived={dualDerived}
+          sideDerived={isFlipped ? dualDerived.answer : dualDerived.question}
           displayMode={currentDisplayMode}
           fixedScale={metrics.baseFixedScale}
           fixedHeightPx={fixedHeightPx}

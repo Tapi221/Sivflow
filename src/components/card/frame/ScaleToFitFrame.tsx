@@ -4,6 +4,7 @@ import {
   detectCssZoomSupport,
   resolveCardScaleRenderingStrategy,
 } from "@/components/card/frame/cardScaleRenderingStrategy";
+import { observeElementRect } from "@/components/card/frame/elementRectObserver";
 
 export interface ScaleToFitFrameProps {
   children: React.ReactNode;
@@ -86,11 +87,16 @@ export const ScaleToFitFrame = ({
       setScale(1);
       return;
     }
-    if (hasFixedScale) return;
-    if (typeof ResizeObserver === "undefined") return;
-    if (!frameRef.current) return;
+
+    if (hasFixedScale) {
+      return;
+    }
 
     const frame = frameRef.current;
+    if (!frame) {
+      return;
+    }
+
     const observeTarget = frame.parentElement ?? frame;
 
     const calcScale = () => {
@@ -100,7 +106,9 @@ export const ScaleToFitFrame = ({
           ? measuredWidth
           : frame.clientWidth;
 
-      if (!availableWidth) return;
+      if (!availableWidth) {
+        return;
+      }
 
       const safeBase = Math.max(1, baseWidth);
       const fitByWidth = availableWidth / safeBase;
@@ -116,49 +124,47 @@ export const ScaleToFitFrame = ({
         Math.min(upperBound, fitScale * scaleMultiplier),
       );
 
-      setScale((prev) =>
-        Math.abs(prev - nextScale) < 0.0001 ? prev : nextScale,
+      setScale((previousScale) =>
+        Math.abs(previousScale - nextScale) < 0.0001
+          ? previousScale
+          : nextScale,
       );
     };
 
     calcScale();
 
-    const observer = new ResizeObserver(calcScale);
-    observer.observe(observeTarget);
-
-    return () => observer.disconnect();
+    return observeElementRect(observeTarget, calcScale);
   }, [
+    allowUpscale,
     baseWidth,
-    scaleMultiplier,
-    hasFixedScale,
+    contentHeight,
     disableScale,
     fitHeight,
-    contentHeight,
-    allowUpscale,
+    hasFixedScale,
     maxScale,
+    scaleMultiplier,
   ]);
 
   React.useLayoutEffect(() => {
-    if (typeof ResizeObserver === "undefined") return;
-    if (!contentRef.current) return;
-
     const content = contentRef.current;
+    if (!content) {
+      return;
+    }
 
     const updateHeight = () => {
       const logicalHeight = resolveLogicalHeight({
         contentElement: content,
         measurementScale,
       });
-      const next = Math.max(0, Math.ceil(logicalHeight));
-      setContentHeight((prev) => (prev === next ? prev : next));
+      const nextHeight = Math.max(0, Math.ceil(logicalHeight));
+      setContentHeight((previousHeight) =>
+        previousHeight === nextHeight ? previousHeight : nextHeight,
+      );
     };
 
     updateHeight();
 
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(content);
-
-    return () => observer.disconnect();
+    return observeElementRect(content, updateHeight);
   }, [measurementScale]);
 
   const scaledHeight =
