@@ -1,7 +1,4 @@
-// @vitest-environment jsdom
-
 import { describe, expect, it } from "vitest";
-
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import {
   clampNormalizedZoomPercent,
@@ -16,16 +13,16 @@ import {
 
 describe("cardSetViewZoomInputUtils", () => {
   describe("computeNextCardSetViewZoomPercentFromWheel", () => {
-    it("increments and decrements zoom by the configured step", () => {
+    it("increments and decrements zoom by 1 percent for fine-grained wheel zoom", () => {
       expect(
         computeNextCardSetViewZoomPercentFromWheel({
           currentZoomPercent: 45,
           deltaY: -10,
           minZoomPercent: 0,
           maxZoomPercent: 100,
-          stepPercent: 5,
+          stepPercent: 1,
         }),
-      ).toBe(50);
+      ).toBe(46);
 
       expect(
         computeNextCardSetViewZoomPercentFromWheel({
@@ -33,9 +30,9 @@ describe("cardSetViewZoomInputUtils", () => {
           deltaY: 10,
           minZoomPercent: 0,
           maxZoomPercent: 100,
-          stepPercent: 5,
+          stepPercent: 1,
         }),
-      ).toBe(40);
+      ).toBe(44);
     });
 
     it("applies larger step counts for larger trackpad deltas", () => {
@@ -45,29 +42,29 @@ describe("cardSetViewZoomInputUtils", () => {
           deltaY: -170,
           minZoomPercent: 0,
           maxZoomPercent: 100,
-          stepPercent: 5,
+          stepPercent: 1,
         }),
-      ).toBe(55);
+      ).toBe(47);
     });
 
     it("clamps to min and max bounds", () => {
       expect(
         computeNextCardSetViewZoomPercentFromWheel({
-          currentZoomPercent: 5,
+          currentZoomPercent: 0,
           deltaY: 120,
           minZoomPercent: 0,
           maxZoomPercent: 100,
-          stepPercent: 5,
+          stepPercent: 1,
         }),
       ).toBe(0);
 
       expect(
         computeNextCardSetViewZoomPercentFromWheel({
-          currentZoomPercent: 95,
+          currentZoomPercent: 100,
           deltaY: -120,
           minZoomPercent: 0,
           maxZoomPercent: 100,
-          stepPercent: 5,
+          stepPercent: 1,
         }),
       ).toBe(100);
     });
@@ -77,7 +74,7 @@ describe("cardSetViewZoomInputUtils", () => {
     const cardLayoutMode: CardLayoutMode = "flip";
     const maxPresentationWidthPx = 1200;
 
-    it("maps Safari gesture scale through presentation width semantics", () => {
+    it("maps Safari gesture scale through presentation width semantics with 1 percent precision", () => {
       const currentZoomPercent = 45;
       const basePresentationWidthPx = resolvePresentationWidthPx({
         zoomPercent: currentZoomPercent,
@@ -91,7 +88,7 @@ describe("cardSetViewZoomInputUtils", () => {
           cardLayoutMode,
           maxPresentationWidthPx,
         }),
-        5,
+        1,
       );
 
       expect(
@@ -103,7 +100,7 @@ describe("cardSetViewZoomInputUtils", () => {
           maxPresentationWidthPx,
           minZoomPercent: 0,
           maxZoomPercent: 100,
-          stepPercent: 5,
+          stepPercent: 1,
         }),
       ).toBe(expectedPercent);
     });
@@ -118,7 +115,7 @@ describe("cardSetViewZoomInputUtils", () => {
           maxPresentationWidthPx,
           minZoomPercent: 0,
           maxZoomPercent: 100,
-          stepPercent: 5,
+          stepPercent: 1,
         }),
       ).toBe(45);
     });

@@ -3,6 +3,7 @@ import {
   overlayGlassActionButtonClassName,
   overlayGlassToolbarClassName,
 } from "@/components/card/shell/overlaySurfaceClassNames";
+import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@constants/shared/flashcard";
 import { Minus, Plus } from "@/ui/icons";
 import React from "react";
 
@@ -20,12 +21,20 @@ export const CardZoomControl = ({
   value,
   min,
   max,
-  step = 5,
+  step = CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT,
   onChange,
   onStepDown,
   onStepUp,
 }: CardZoomControlProps) => {
-  const sliderValue = React.useMemo(() => [value], [value]);
+  const sliderValue = React.useMemo<readonly [number]>(() => [value] as const, [value]);
+
+  const resolvedStep = React.useMemo(() => {
+    if (!Number.isFinite(step) || step <= 0) {
+      return CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT;
+    }
+
+    return step;
+  }, [step]);
 
   const handleSliderChange = React.useCallback(
     (next: number[]) => {
@@ -56,7 +65,7 @@ export const CardZoomControl = ({
         <Slider
           min={min}
           max={max}
-          step={step}
+          step={resolvedStep}
           value={sliderValue}
           onValueChange={handleSliderChange}
           onValueCommit={handleSliderChange}

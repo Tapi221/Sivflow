@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from "react";
-
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { useToast } from "@/contexts/ToastContext";
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
@@ -25,7 +24,9 @@ import { usePresentationTarget } from "@/platform/presentation/usePresentationTa
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import {
   CARD_PANE_WIDTH_STEP_PX,
-  CARD_VIEW_ZOOM_STEP_PERCENT,
+  CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT,
+  CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT,
+  CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT,
 } from "@constants/shared/flashcard";
 import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutFallbackPreferences";
 
@@ -104,10 +105,11 @@ export const useCardSetViewScreenController = () => {
     zoomPercent: zoom.zoomPercent,
     minZoomPercent: zoom.minZoomPercent,
     maxZoomPercent: zoom.maxZoomPercent,
-    zoomStepPercent: CARD_VIEW_ZOOM_STEP_PERCENT,
     presentationWidthPx: zoom.presentationWidthPx,
     maxPresentationWidthPx: zoom.maxPresentationWidthPx,
     cardLayoutMode: zoom.effectiveCardLayoutMode,
+    wheelZoomStepPercent: CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT,
+    gestureZoomStepPercent: CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT,
     onZoomPercentChange: zoom.setZoomPercent,
   });
 
@@ -160,7 +162,7 @@ export const useCardSetViewScreenController = () => {
           value: zoom.zoomPercent,
           min: zoom.minZoomPercent,
           max: zoom.maxZoomPercent,
-          step: 5,
+          step: CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT,
           onChange: zoom.setZoomPercent,
           onStepDown: zoom.stepDown,
           onStepUp: zoom.stepUp,
