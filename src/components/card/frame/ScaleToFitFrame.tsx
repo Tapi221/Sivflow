@@ -1,5 +1,9 @@
 import React from "react";
 import { cn } from "@/lib/utils";
+import {
+  detectCssZoomSupport,
+  resolveCardScaleRenderingStrategy,
+} from "@/components/card/frame/cardScaleRenderingStrategy";
 
 export interface ScaleToFitFrameProps {
   children: React.ReactNode;
@@ -14,6 +18,22 @@ export interface ScaleToFitFrameProps {
   maxScale?: number;
   contentPaddingPx?: number;
 }
+
+const resolveLogicalHeight = ({
+  contentElement,
+  measurementScale,
+}: {
+  readonly contentElement: HTMLDivElement;
+  readonly measurementScale: number;
+}) => {
+  const visualHeight = contentElement.getBoundingClientRect().height;
+  const safeMeasurementScale =
+    Number.isFinite(measurementScale) && measurementScale > 0
+      ? measurementScale
+      : 1;
+
+  return Math.max(0, visualHeight / safeMeasurementScale);
+};
 
 export const ScaleToFitFrame = ({
   children,
@@ -34,6 +54,8 @@ export const ScaleToFitFrame = ({
   const [scale, setScale] = React.useState(1);
   const [contentHeight, setContentHeight] = React.useState<number | null>(null);
 
+  const supportsCssZoom = React.useMemo(() => detectCssZoomSupport(), []);
+
   const hasFixedScale =
     typeof fixedScale === "number" &&
     Number.isFinite(fixedScale) &&
@@ -44,6 +66,20 @@ export const ScaleToFitFrame = ({
     : hasFixedScale
       ? Math.max(0.1, fixedScale)
       : scale;
+
+  const renderingStrategy = React.useMemo(
+    () =>
+      resolveCardScaleRenderingStrategy({
+        disableScale,
+        effectiveScale,
+        supportsCssZoom,
+      }),
+    [disableScale, effectiveScale, supportsCssZoom],
+  );
+
+  const measurementScale = renderingStrategy.shouldApplyScale
+    ? effectiveScale
+    : 1;
 
   React.useLayoutEffect(() => {
     if (disableScale) {
@@ -109,8 +145,11 @@ export const ScaleToFitFrame = ({
     const content = contentRef.current;
 
     const updateHeight = () => {
-      const h = content.offsetHeight;
-      const next = Math.max(0, Math.ceil(h));
+      const logicalHeight = resolveLogicalHeight({
+        contentElement: content,
+        measurementScale,
+      });
+      const next = Math.max(0, Math.ceil(logicalHeight));
       setContentHeight((prev) => (prev === next ? prev : next));
     };
 
@@ -120,16 +159,13 @@ export const ScaleToFitFrame = ({
     observer.observe(content);
 
     return () => observer.disconnect();
-  }, []);
+  }, [measurementScale]);
 
   const scaledHeight =
     contentHeight != null ? Math.ceil(contentHeight * effectiveScale) : null;
 
   const safePaddingPx = Math.max(0, contentPaddingPx);
   const safeBaseWidth = Math.max(1, baseWidth);
-  const shouldUseZoomScale =
-    !disableScale && Math.abs(effectiveScale - 1) > 0.0001;
-  const shouldUseTransformScale = hasFixedScale && shouldUseZoomScale;
   const visualWidthPx = disableScale ? null : safeBaseWidth * effectiveScale;
 
   return (
@@ -183,19 +219,14 @@ export const ScaleToFitFrame = ({
               maxWidth: disableScale ? "100%" : undefined,
               minWidth: disableScale ? 0 : undefined,
               height: fitHeight ? "100%" : undefined,
-              transform: shouldUseTransformScale
-                ? `scale(${effectiveScale})`
-                : "none",
+              transform: renderingStrategy.transform,
               transformOrigin: disableScale
                 ? "initial"
                 : fitHeight && centerContent
                   ? "center center"
                   : "top left",
-              willChange: shouldUseTransformScale ? "transform" : undefined,
-              zoom:
-                shouldUseZoomScale && !shouldUseTransformScale
-                  ? effectiveScale
-                  : undefined,
+              willChange: renderingStrategy.willChange,
+              zoom: renderingStrategy.zoom,
             }}
           >
             <div
