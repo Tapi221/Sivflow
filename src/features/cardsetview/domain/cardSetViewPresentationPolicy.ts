@@ -8,7 +8,7 @@ import {
   CARD_SET_VIEW_SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX,
   CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX,
 } from "@constants/shared/flashcard";
-import { CARD_VIEW_ZOOM_STEP_PERCENT } from "@constants/shared/flashcard";
+import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@constants/shared/flashcard";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type ResolveZoomWidthArgs = {
@@ -22,15 +22,26 @@ const clampZoomPercentRange = (value: number) => {
   return Math.max(0, Math.min(100, safeValue));
 };
 
+const resolveSafeStepPercent = (stepPercent: number) => {
+  if (!Number.isFinite(stepPercent) || stepPercent <= 0) {
+    return CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT;
+  }
+
+  return stepPercent;
+};
+
 const roundToStep = (value: number, stepPercent: number) => {
   const safeValue = clampZoomPercentRange(value);
-  if (stepPercent <= 0) return safeValue;
-  return Math.round(safeValue / stepPercent) * stepPercent;
+  const safeStepPercent = resolveSafeStepPercent(stepPercent);
+  const roundedValue =
+    Math.round(safeValue / safeStepPercent) * safeStepPercent;
+
+  return Number(roundedValue.toFixed(4));
 };
 
 export const clampNormalizedZoomPercent = (
   value: number,
-  stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
+  stepPercent = CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT,
 ) => roundToStep(value, stepPercent);
 
 export const resolveZoomMinBaseWidthPx = ({

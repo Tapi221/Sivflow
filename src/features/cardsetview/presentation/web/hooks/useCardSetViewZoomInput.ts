@@ -1,4 +1,7 @@
-import { CARD_VIEW_ZOOM_STEP_PERCENT } from "@constants/shared/flashcard";
+import {
+  CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT,
+  CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT,
+} from "@constants/shared/flashcard";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { useCallback, useEffect, useRef, type RefObject } from "react";
 
@@ -17,7 +20,8 @@ interface UseCardSetViewZoomInputOptions {
   presentationWidthPx: number;
   maxPresentationWidthPx: number;
   cardLayoutMode: CardLayoutMode;
-  zoomStepPercent?: number;
+  wheelZoomStepPercent?: number;
+  gestureZoomStepPercent?: number;
   onZoomPercentChange: (nextZoomPercent: number) => void;
 }
 
@@ -30,7 +34,8 @@ export const useCardSetViewZoomInput = ({
   presentationWidthPx,
   maxPresentationWidthPx,
   cardLayoutMode,
-  zoomStepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
+  wheelZoomStepPercent = CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT,
+  gestureZoomStepPercent = CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT,
   onZoomPercentChange,
 }: UseCardSetViewZoomInputOptions) => {
   const zoomPercentRef = useRef(zoomPercent);
@@ -39,7 +44,8 @@ export const useCardSetViewZoomInput = ({
   const presentationWidthPxRef = useRef(presentationWidthPx);
   const maxPresentationWidthPxRef = useRef(maxPresentationWidthPx);
   const cardLayoutModeRef = useRef(cardLayoutMode);
-  const zoomStepPercentRef = useRef(zoomStepPercent);
+  const wheelZoomStepPercentRef = useRef(wheelZoomStepPercent);
+  const gestureZoomStepPercentRef = useRef(gestureZoomStepPercent);
   const onZoomPercentChangeRef = useRef(onZoomPercentChange);
 
   const gestureStartPresentationWidthRef = useRef<number | null>(null);
@@ -65,8 +71,12 @@ export const useCardSetViewZoomInput = ({
   }, [cardLayoutMode]);
 
   useEffect(() => {
-    zoomStepPercentRef.current = zoomStepPercent;
-  }, [zoomStepPercent]);
+    wheelZoomStepPercentRef.current = wheelZoomStepPercent;
+  }, [wheelZoomStepPercent]);
+
+  useEffect(() => {
+    gestureZoomStepPercentRef.current = gestureZoomStepPercent;
+  }, [gestureZoomStepPercent]);
 
   useEffect(() => {
     onZoomPercentChangeRef.current = onZoomPercentChange;
@@ -124,7 +134,7 @@ export const useCardSetViewZoomInput = ({
         deltaY,
         minZoomPercent: minZoomPercentRef.current,
         maxZoomPercent: maxZoomPercentRef.current,
-        stepPercent: zoomStepPercentRef.current,
+        stepPercent: wheelZoomStepPercentRef.current,
       });
 
       commitZoomPercent(nextZoomPercent);
@@ -182,7 +192,7 @@ export const useCardSetViewZoomInput = ({
         maxPresentationWidthPx: maxPresentationWidthPxRef.current,
         minZoomPercent: minZoomPercentRef.current,
         maxZoomPercent: maxZoomPercentRef.current,
-        stepPercent: zoomStepPercentRef.current,
+        stepPercent: gestureZoomStepPercentRef.current,
       });
 
       commitZoomPercent(nextZoomPercent);

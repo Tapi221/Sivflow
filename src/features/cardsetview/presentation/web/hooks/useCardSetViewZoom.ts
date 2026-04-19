@@ -16,7 +16,6 @@ import type {
 } from "@/features/cardsetview/domain/cardLayoutMode";
 import {
   clampZoomPercent as clampZoomPercentRange,
-  clampNormalizedZoomPercent,
   resolveCanUseSplitLayout,
   resolvePresentationMaxWidthPx,
   resolvePresentationWidthPx,
@@ -26,7 +25,7 @@ import {
 } from "@/features/cardsetview/domain/cardSetViewPresentationPolicy";
 import {
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
-  CARD_VIEW_ZOOM_STEP_PERCENT,
+  CARD_VIEW_ZOOM_BUTTON_STEP_PERCENT,
 } from "@constants/shared/flashcard";
 import {
   buildCardSetViewZoomPreferenceScopeKey,
@@ -319,15 +318,11 @@ export const useCardSetViewZoom = ({
   );
 
   const stepUp = useCallback(() => {
-    setZoomPercent(
-      clampNormalizedZoomPercent(zoomPercent + CARD_VIEW_ZOOM_STEP_PERCENT),
-    );
+    setZoomPercent(zoomPercent + CARD_VIEW_ZOOM_BUTTON_STEP_PERCENT);
   }, [setZoomPercent, zoomPercent]);
 
   const stepDown = useCallback(() => {
-    setZoomPercent(
-      clampNormalizedZoomPercent(zoomPercent - CARD_VIEW_ZOOM_STEP_PERCENT),
-    );
+    setZoomPercent(zoomPercent - CARD_VIEW_ZOOM_BUTTON_STEP_PERCENT);
   }, [setZoomPercent, zoomPercent]);
 
   return {

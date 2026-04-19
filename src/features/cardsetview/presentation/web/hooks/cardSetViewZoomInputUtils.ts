@@ -1,4 +1,8 @@
-import { CARD_VIEW_ZOOM_STEP_PERCENT } from "@constants/shared/flashcard";
+// src/features/cardsetview/presentation/web/hooks/cardSetViewZoomInputUtils.ts
+import {
+  CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT,
+  CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT,
+} from "@constants/shared/flashcard";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import {
   clampNormalizedZoomPercent,
@@ -42,12 +46,12 @@ const clampZoomPercentToBounds = (
 
 const normalizeZoomPercentWithinBounds = ({
   value,
-  stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
+  stepPercent,
   minZoomPercent,
   maxZoomPercent,
 }: {
   value: number;
-  stepPercent?: number;
+  stepPercent: number;
   minZoomPercent: number;
   maxZoomPercent: number;
 }) =>
@@ -100,7 +104,7 @@ export const computeNextCardSetViewZoomPercentFromWheel = ({
   deltaY,
   minZoomPercent,
   maxZoomPercent,
-  stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
+  stepPercent = CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT,
   deltaPerStep = 80,
 }: {
   currentZoomPercent: number;
@@ -141,7 +145,7 @@ export const computeNextCardSetViewZoomPercentFromGesture = ({
   maxPresentationWidthPx,
   minZoomPercent,
   maxZoomPercent,
-  stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
+  stepPercent = CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT,
 }: {
   currentZoomPercent: number;
   basePresentationWidthPx: number;
