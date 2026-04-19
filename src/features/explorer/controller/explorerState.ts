@@ -9,10 +9,15 @@ export const createInitialExplorerState = (
   routeState: ExplorerRouteState,
 ): ExplorerControllerState => ({
   isHomeOnlyMode: routeState.isHomeOnlyMode,
-  selectedFolderId: routeState.isHomeOnlyMode
-    ? null
-    : routeState.selectedFolderId,
-  selectedItem: routeState.isHomeOnlyMode ? null : routeState.selectedItem,
+  isSectionListMode: routeState.isSectionListMode,
+  selectedFolderId:
+    routeState.isHomeOnlyMode || routeState.isSectionListMode
+      ? null
+      : routeState.selectedFolderId,
+  selectedItem:
+    routeState.isHomeOnlyMode || routeState.isSectionListMode
+      ? null
+      : routeState.selectedItem,
   folderSelectionNonce: 0,
   navigateToSectionListToken: 0,
   explorerBreadcrumbContext: EMPTY_EXPLORER_BREADCRUMB_CONTEXT,

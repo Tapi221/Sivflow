@@ -115,17 +115,39 @@ const TreeViewLayout = ({
   const routeSelectedCardSet = useMemo(
     () =>
       selectedItem?.type === "cardSet"
-        ? (cardSets.find((cardSet: CardSet) => cardSet.id === selectedItem.id) ??
-          null)
+        ? (cardSets.find((set: CardSet) => set.id === selectedItem.id) ?? null)
         : null,
     [cardSets, selectedItem],
   );
 
-  const activeSelectedCardSetId = routeSelectedCardSet?.id ?? selectedCardSetId;
-  const activeSelectedCardSetLabel =
-    routeSelectedCardSet?.name?.trim() ||
-    routeSelectedCardSet?.name ||
-    selectedCardSetLabel;
+  useEffect(() => {
+    if (selectedItem?.type === "cardSet") {
+      return;
+    }
+
+    setSelectedCardSetId(null);
+    setSelectedCardSetLabel(null);
+  }, [selectedItem]);
+
+  const activeSelectedCardSetId =
+    routeSelectedCardSet?.id ?? selectedCardSetId ?? null;
+
+  const activeSelectedCardSetLabel = useMemo(() => {
+    if (!activeSelectedCardSetId) return null;
+
+    return (
+      cardSets.find((cardSet: CardSet) => cardSet.id === activeSelectedCardSetId)
+        ?.name ??
+      (routeSelectedCardSet?.id === activeSelectedCardSetId
+        ? routeSelectedCardSet.name
+        : selectedCardSetLabel)
+    );
+  }, [
+    activeSelectedCardSetId,
+    cardSets,
+    routeSelectedCardSet,
+    selectedCardSetLabel,
+  ]);
 
   const handleItemSelect = useCallback(
     (item: SelectedExplorerItem) => {
@@ -133,6 +155,8 @@ const TreeViewLayout = ({
         const cardSet = cardSets.find((set: CardSet) => set.id === item.id);
         if (cardSet) {
           onFolderSelect(cardSet.folderId ?? null);
+          setSelectedCardSetId(item.id);
+          setSelectedCardSetLabel(cardSet.name || "無題のセット");
 
           navigate(
             createPageUrl(
@@ -256,40 +280,41 @@ const TreeViewLayout = ({
 
   const currentHeaderFolderId = useMemo(() => {
     if (selectedFolderId) return selectedFolderId;
-    if (explorerHeaderFolderId) return explorerHeaderFolderId;
 
-    if (selectedItem?.type === "cardSet") {
+    if (activeSelectedCardSetId) {
       return (
-        cardSets.find((set: CardSet) => set.id === selectedItem.id)?.folderId ??
+        cardSets.find((cardSet: CardSet) => cardSet.id === activeSelectedCardSetId)
+          ?.folderId ??
+        routeSelectedCardSet?.folderId ??
         null
       );
     }
 
-    return null;
-  }, [cardSets, explorerHeaderFolderId, selectedFolderId, selectedItem]);
+    if (explorerHeaderFolderId) return explorerHeaderFolderId;
 
-  const currentCardSetLabel = useMemo(() => {
-    if (!activeSelectedCardSetId) return null;
-    return (
-      cardSets.find((cardSet: CardSet) => cardSet.id === activeSelectedCardSetId)
-        ?.name ?? activeSelectedCardSetLabel
-    );
-  }, [activeSelectedCardSetId, activeSelectedCardSetLabel, cardSets]);
+    return null;
+  }, [
+    activeSelectedCardSetId,
+    cardSets,
+    explorerHeaderFolderId,
+    routeSelectedCardSet,
+    selectedFolderId,
+  ]);
 
   useLayoutEffect(() => {
     onBreadcrumbContextChange?.({
       folderId: currentHeaderFolderId,
       cardSet:
-        activeSelectedCardSetId && currentCardSetLabel
+        activeSelectedCardSetId && activeSelectedCardSetLabel
           ? {
               id: activeSelectedCardSetId,
-              label: currentCardSetLabel,
+              label: activeSelectedCardSetLabel,
             }
           : null,
     });
   }, [
     activeSelectedCardSetId,
-    currentCardSetLabel,
+    activeSelectedCardSetLabel,
     currentHeaderFolderId,
     onBreadcrumbContextChange,
   ]);

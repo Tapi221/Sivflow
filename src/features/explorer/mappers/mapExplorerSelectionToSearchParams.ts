@@ -2,12 +2,14 @@ import type { SelectedExplorerItem } from "@/types";
 
 type Params = {
   isHomeOnlyMode: boolean;
+  isSectionListMode: boolean;
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
 };
 
 export const mapExplorerSelectionToSearchParams = ({
   isHomeOnlyMode,
+  isSectionListMode,
   selectedFolderId,
   selectedItem,
 }: Params): URLSearchParams => {
@@ -15,6 +17,11 @@ export const mapExplorerSelectionToSearchParams = ({
 
   if (isHomeOnlyMode) {
     next.set("home", "1");
+    return next;
+  }
+
+  if (isSectionListMode) {
+    next.set("view", "section-list");
     return next;
   }
 
