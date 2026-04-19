@@ -290,7 +290,11 @@ export const useCardSetViewZoom = ({
     }
 
     return zoomPreviewState.previewPercent;
-  }, [zoomPreviewState.previewPercent, zoomPreviewState.scopeKey, zoomSourceKey]);
+  }, [
+    zoomPreviewState.previewPercent,
+    zoomPreviewState.scopeKey,
+    zoomSourceKey,
+  ]);
 
   const zoomPercent = previewZoomPercent ?? committedZoomPercent;
 

@@ -80,4 +80,3 @@ describe("cardSetViewPresentationPolicy", () => {
     expect(zoomPercent).toBe(100);
   });
 });
-

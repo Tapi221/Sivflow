@@ -156,18 +156,17 @@ export const useCardSetViewScreenController = () => {
     } | null,
   });
 
-  const topLeftZoomControl =
-    isDesktop
-      ? {
-          value: zoom.zoomPercent,
-          min: zoom.minZoomPercent,
-          max: zoom.maxZoomPercent,
-          step: CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT,
-          onChange: zoom.setZoomPercent,
-          onStepDown: zoom.stepDown,
-          onStepUp: zoom.stepUp,
-        }
-      : null;
+  const topLeftZoomControl = isDesktop
+    ? {
+        value: zoom.zoomPercent,
+        min: zoom.minZoomPercent,
+        max: zoom.maxZoomPercent,
+        step: CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT,
+        onChange: zoom.setZoomPercent,
+        onStepDown: zoom.stepDown,
+        onStepUp: zoom.stepUp,
+      }
+    : null;
 
   const disabledCardLayoutModes = useMemo(
     () => ({

@@ -567,9 +567,7 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
   const renderToolbarShell = () => (
     <div
       className={cn(
-        desktopLayout === "vertical"
-          ? "w-fit flex-col"
-          : "w-auto max-w-full",
+        desktopLayout === "vertical" ? "w-fit flex-col" : "w-auto max-w-full",
         "gap-2 px-2.5",
         overlayGlassToolbarClassName,
         className,

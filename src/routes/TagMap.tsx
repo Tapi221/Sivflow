@@ -80,7 +80,9 @@ const loadStoredLayout = (userId?: string | null): LayoutMap => {
     return {};
   }
 
-  return parseStoredLayout(localStorage.getItem(createStorageKey(userId ?? undefined)));
+  return parseStoredLayout(
+    localStorage.getItem(createStorageKey(userId ?? undefined)),
+  );
 };
 
 const sortTagsByName = (tags: Tag[]): Tag[] => {
@@ -307,9 +309,7 @@ const TagEditPanel = ({
                 }}
                 className={[
                   "flex h-11 items-center justify-center rounded-2xl border transition",
-                  isActive
-                    ? "ring-2 ring-slate-900/15"
-                    : "hover:scale-[1.02]",
+                  isActive ? "ring-2 ring-slate-900/15" : "hover:scale-[1.02]",
                 ].join(" ")}
                 style={getTagColorSwatchStyle(colorKey)}
                 title={colorKey}

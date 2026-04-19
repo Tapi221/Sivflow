@@ -60,7 +60,11 @@
     color: var(--sidebar-text, #202123);
     box-shadow:
       inset 0 0 0 1px
-        color-mix(in srgb, var(--sidebar-active-accent, #7aa6a1) 20%, transparent),
+        color-mix(
+          in srgb,
+          var(--sidebar-active-accent, #7aa6a1) 20%,
+          transparent
+        ),
       0 1px 2px rgba(0, 0, 0, 0.04);
   }
 
@@ -86,9 +90,17 @@
     outline: none;
     box-shadow:
       inset 0 0 0 1px
-        color-mix(in srgb, var(--sidebar-active-accent, #7aa6a1) 38%, transparent),
+        color-mix(
+          in srgb,
+          var(--sidebar-active-accent, #7aa6a1) 38%,
+          transparent
+        ),
       0 0 0 3px
-        color-mix(in srgb, var(--sidebar-active-accent, #7aa6a1) 14%, transparent);
+        color-mix(
+          in srgb,
+          var(--sidebar-active-accent, #7aa6a1) 14%,
+          transparent
+        );
   }
 
   .sidebar-row .sidebar-label {
@@ -101,7 +113,9 @@
     font-size: var(--font-size-body, 13px);
     font-weight: 400;
     letter-spacing: 0;
-    transition: font-weight 140ms ease, color 140ms ease;
+    transition:
+      font-weight 140ms ease,
+      color 140ms ease;
   }
 
   .sidebar-row .sidebar-icon {

@@ -19,10 +19,16 @@ const isCardDeleted = (
     deleted_at?: unknown;
   },
 ) => {
-  const deletedAt = (card as unknown as { deletedAt?: unknown; deleted_at?: unknown })
-    .deletedAt ?? (card as unknown as { deletedAt?: unknown; deleted_at?: unknown }).deleted_at;
+  const deletedAt =
+    (card as unknown as { deletedAt?: unknown; deleted_at?: unknown })
+      .deletedAt ??
+    (card as unknown as { deletedAt?: unknown; deleted_at?: unknown })
+      .deleted_at;
   return Boolean(
-    card.isDeleted ?? card.is_deleted ?? (card as unknown as { deleted?: boolean }).deleted ?? deletedAt,
+    card.isDeleted ??
+    card.is_deleted ??
+    (card as unknown as { deleted?: boolean }).deleted ??
+    deletedAt,
   );
 };
 
@@ -45,61 +51,64 @@ export const useCardsRead = (
     return trimmed.length > 0 ? trimmed : null;
   };
 
-  const rawCards = useLiveQuery(
-    async () => {
-      try {
-        if (!enabled) return [];
-        if (!currentUser) return [];
-        const db = await getLocalDb(currentUser.uid);
+  const rawCards = useLiveQuery(async () => {
+    try {
+      if (!enabled) return [];
+      if (!currentUser) return [];
+      const db = await getLocalDb(currentUser.uid);
 
-        if (cardSetId) {
-          try {
-            return await db.cards.where("cardSetId").equals(cardSetId).toArray();
-          } catch (indexError) {
-            console.warn(
-              "[useCardsRead] cardSetId index query failed. Falling back to full scan.",
-              indexError,
-            );
-          }
-        } else if (folderId) {
-          try {
-            const targetFolderId = normalizeFolderId(
-              normalizeCardFolderId(folderId),
-            );
-            const siblingSets = (
-              await db.cardSets.where("userId").equals(currentUser.uid).toArray()
-            ).filter(
-              (set) =>
-                !set.isDeleted &&
-                normalizeFolderId(set.folderId ?? null) === targetFolderId,
-            );
-            const siblingSetIds = siblingSets.map((set) => set.id);
-            if (siblingSetIds.length === 0) return [];
-            return await db.cards.where("cardSetId").anyOf(siblingSetIds).toArray();
-          } catch (indexError) {
-            console.warn(
-              "[useCardsRead] folder/cardSet index query failed. Falling back to full scan.",
-              indexError,
-            );
-          }
+      if (cardSetId) {
+        try {
+          return await db.cards.where("cardSetId").equals(cardSetId).toArray();
+        } catch (indexError) {
+          console.warn(
+            "[useCardsRead] cardSetId index query failed. Falling back to full scan.",
+            indexError,
+          );
         }
-
-        return await db.getAllCards();
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        console.error(`[useCardsRead] Error: ${message}`);
-        return [];
+      } else if (folderId) {
+        try {
+          const targetFolderId = normalizeFolderId(
+            normalizeCardFolderId(folderId),
+          );
+          const siblingSets = (
+            await db.cardSets.where("userId").equals(currentUser.uid).toArray()
+          ).filter(
+            (set) =>
+              !set.isDeleted &&
+              normalizeFolderId(set.folderId ?? null) === targetFolderId,
+          );
+          const siblingSetIds = siblingSets.map((set) => set.id);
+          if (siblingSetIds.length === 0) return [];
+          return await db.cards
+            .where("cardSetId")
+            .anyOf(siblingSetIds)
+            .toArray();
+        } catch (indexError) {
+          console.warn(
+            "[useCardsRead] folder/cardSet index query failed. Falling back to full scan.",
+            indexError,
+          );
+        }
       }
-    },
-    [currentUser?.uid, folderId, cardSetId, enabled],
-  );
+
+      return await db.getAllCards();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`[useCardsRead] Error: ${message}`);
+      return [];
+    }
+  }, [currentUser?.uid, folderId, cardSetId, enabled]);
 
   const rawCardSets = useLiveQuery(
     async () => {
       if (!enabled) return [];
       if (!currentUser) return [];
       const db = await getLocalDb(currentUser.uid);
-      return await db.cardSets.where("userId").equals(currentUser.uid).toArray();
+      return await db.cardSets
+        .where("userId")
+        .equals(currentUser.uid)
+        .toArray();
     },
     [currentUser?.uid, enabled],
     [],
@@ -116,7 +125,8 @@ export const useCardsRead = (
     let normalized = rawCards.map(normalizeCard);
 
     normalized = normalized.filter(
-      (card) => !isCardDeleted(card as Partial<Card> & { is_deleted?: boolean }),
+      (card) =>
+        !isCardDeleted(card as Partial<Card> & { is_deleted?: boolean }),
     );
 
     if (cardSetId) {

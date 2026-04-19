@@ -280,7 +280,10 @@ const PdfPageComponent = ({
     window.addEventListener("resize", syncRenderDevicePixelRatio, {
       passive: true,
     });
-    window.visualViewport?.addEventListener("resize", syncRenderDevicePixelRatio);
+    window.visualViewport?.addEventListener(
+      "resize",
+      syncRenderDevicePixelRatio,
+    );
 
     return () => {
       window.removeEventListener("resize", syncRenderDevicePixelRatio);

@@ -129,10 +129,7 @@ export const useCardSetViewZoomInput = ({
     cancelScheduledCommit();
 
     const previewZoomPercent = previewZoomPercentRef.current;
-    if (
-      previewZoomPercent === null ||
-      !Number.isFinite(previewZoomPercent)
-    ) {
+    if (previewZoomPercent === null || !Number.isFinite(previewZoomPercent)) {
       clearPreviewZoom();
       return;
     }
@@ -294,7 +291,11 @@ export const useCardSetViewZoomInput = ({
         handleGestureChange,
         listenerOptions,
       );
-      container.addEventListener("gestureend", handleGestureEnd, listenerOptions);
+      container.addEventListener(
+        "gestureend",
+        handleGestureEnd,
+        listenerOptions,
+      );
     }
 
     return () => {
@@ -302,7 +303,11 @@ export const useCardSetViewZoomInput = ({
 
       if (supportsGestureEvents) {
         container.removeEventListener("gesturestart", handleGestureStart, true);
-        container.removeEventListener("gesturechange", handleGestureChange, true);
+        container.removeEventListener(
+          "gesturechange",
+          handleGestureChange,
+          true,
+        );
         container.removeEventListener("gestureend", handleGestureEnd, true);
       }
 

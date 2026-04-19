@@ -10,4 +10,3 @@ export const PlaceholderText = ({
 }: PlaceholderTextProps) => (
   <span className={cn("ds-placeholder", className)} {...props} />
 );
-

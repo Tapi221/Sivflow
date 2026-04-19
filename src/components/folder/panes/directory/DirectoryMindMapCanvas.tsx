@@ -60,15 +60,17 @@ const DirectoryMindMapChip = ({
       ) : null}
 
       {badgeVisibility.tags && chip.showTags
-        ? chip.tags.slice(0, 2).map((tag) => (
-            <TagBadge
-              key={`${chip.id}:${tag}`}
-              label={tag}
-              size="xs"
-              colorClass={getTagColor(tag)}
-              className="shrink-0 align-middle"
-            />
-          ))
+        ? chip.tags
+            .slice(0, 2)
+            .map((tag) => (
+              <TagBadge
+                key={`${chip.id}:${tag}`}
+                label={tag}
+                size="xs"
+                colorClass={getTagColor(tag)}
+                className="shrink-0 align-middle"
+              />
+            ))
         : null}
 
       {badgeVisibility.tags && chip.showTags && chip.tags.length > 2 ? (
@@ -248,7 +250,11 @@ export const DirectoryMindMapCanvas = ({
         }}
       >
         <Background gap={24} size={1} color="rgba(148, 163, 184, 0.22)" />
-        <Controls position="bottom-right" showInteractive={false} className="!shadow-sm" />
+        <Controls
+          position="bottom-right"
+          showInteractive={false}
+          className="!shadow-sm"
+        />
       </ReactFlow>
     </div>
   );

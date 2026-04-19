@@ -95,7 +95,9 @@ const DesktopCardSurfaceInner = ({
 
   const canInteractWithEditor = isGlobalEditing && (isActive || hasFocusWithin);
 
-  const zoomPreviewStyle = React.useMemo<React.CSSProperties | undefined>(() => {
+  const zoomPreviewStyle = React.useMemo<
+    React.CSSProperties | undefined
+  >(() => {
     if (!isActive || isGlobalEditing || !isZoomPreviewActive) {
       return undefined;
     }

@@ -290,7 +290,8 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       }
 
       return (
-        searchState.flattenedMatches[searchState.activeMatchIndex]?.pageNumber ?? null
+        searchState.flattenedMatches[searchState.activeMatchIndex]
+          ?.pageNumber ?? null
       );
     }, [searchState.activeMatchIndex, searchState.flattenedMatches]);
 
@@ -479,7 +480,8 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
               style={{ height: `${pageLayoutMetrics.totalContentHeight}px` }}
             >
               {renderedPageNumbers.map((pageNumber) => {
-                const pageTop = pageLayoutMetrics.pageTopOffsets[pageNumber - 1] ?? 0;
+                const pageTop =
+                  pageLayoutMetrics.pageTopOffsets[pageNumber - 1] ?? 0;
                 const placeholderHeight =
                   pageLayoutMetrics.pageHeights[pageNumber - 1] ??
                   PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT;

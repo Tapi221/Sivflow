@@ -84,7 +84,10 @@ export const useTreeViewDerivedState = ({
 
     documents.forEach((document) => {
       nextMap.set(document.id, document);
-      if (typeof document.documentId === "string" && document.documentId.length > 0) {
+      if (
+        typeof document.documentId === "string" &&
+        document.documentId.length > 0
+      ) {
         nextMap.set(document.documentId, document);
       }
     });
@@ -197,7 +200,8 @@ export const useTreeViewDerivedState = ({
   const folderStats = useMemo(() => {
     if (!selectedFolderId) return EMPTY_FOLDER_STATS;
     return (
-      folderCardIndex.statsByFolderId.get(selectedFolderId) ?? EMPTY_FOLDER_STATS
+      folderCardIndex.statsByFolderId.get(selectedFolderId) ??
+      EMPTY_FOLDER_STATS
     );
   }, [folderCardIndex.statsByFolderId, selectedFolderId]);
 

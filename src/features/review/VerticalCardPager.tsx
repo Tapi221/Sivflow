@@ -233,8 +233,7 @@ const buildVirtualLayoutSnapshot = ({
     offsets[index + 1] = offsets[index] + itemHeight + CARD_GAP;
   }
 
-  const totalHeight =
-    count === 0 ? 0 : Math.max(0, offsets[count] - CARD_GAP);
+  const totalHeight = count === 0 ? 0 : Math.max(0, offsets[count] - CARD_GAP);
 
   return {
     offsets,
@@ -322,7 +321,10 @@ const resolveVisibleRenderRange = ({
   const visibleEnd = binarySearchIndexForOffset(layout, rangeBottom, count);
 
   const radiusStart = Math.max(0, activeIndex - ACTIVE_INDEX_RENDER_RADIUS);
-  const radiusEnd = Math.min(count - 1, activeIndex + ACTIVE_INDEX_RENDER_RADIUS);
+  const radiusEnd = Math.min(
+    count - 1,
+    activeIndex + ACTIVE_INDEX_RENDER_RADIUS,
+  );
 
   return {
     start: Math.min(visibleStart, radiusStart),
@@ -412,7 +414,9 @@ const VerticalCardPagerFn = <T,>({
         return avgItemExtentRef.current;
       }
 
-      return measuredHeightsRef.current.get(stableKey) ?? avgItemExtentRef.current;
+      return (
+        measuredHeightsRef.current.get(stableKey) ?? avgItemExtentRef.current
+      );
     },
     [stableCardKeys],
   );
@@ -448,13 +452,14 @@ const VerticalCardPagerFn = <T,>({
 
   const topSpacerHeight =
     renderRange && renderRange.start > 0
-      ? layoutSnapshot.offsets[renderRange.start] ?? 0
+      ? (layoutSnapshot.offsets[renderRange.start] ?? 0)
       : 0;
   const bottomSpacerHeight =
     renderRange && renderRange.end < cards.length - 1
       ? Math.max(
           0,
-          layoutSnapshot.totalHeight - (layoutSnapshot.offsets[renderRange.end + 1] ?? 0),
+          layoutSnapshot.totalHeight -
+            (layoutSnapshot.offsets[renderRange.end + 1] ?? 0),
         )
       : 0;
 
@@ -528,7 +533,11 @@ const VerticalCardPagerFn = <T,>({
         flushQueuedNaturalIndex();
       }, naturalIndexCommitDelayMs);
     },
-    [clearNaturalIndexTimer, flushQueuedNaturalIndex, naturalIndexCommitDelayMs],
+    [
+      clearNaturalIndexTimer,
+      flushQueuedNaturalIndex,
+      naturalIndexCommitDelayMs,
+    ],
   );
 
   const computeNearestIndex = useCallback(() => {
@@ -553,7 +562,12 @@ const VerticalCardPagerFn = <T,>({
     }
 
     queueNaturalIndexCommit(nearestIdx);
-  }, [cards.length, freezeActiveIndex, layoutSnapshot, queueNaturalIndexCommit]);
+  }, [
+    cards.length,
+    freezeActiveIndex,
+    layoutSnapshot,
+    queueNaturalIndexCommit,
+  ]);
 
   const scheduleVisibleRangeUpdate = useCallback(() => {
     if (typeof window === "undefined") {
@@ -596,7 +610,7 @@ const VerticalCardPagerFn = <T,>({
     const activeCard = cards[activeIndex];
     const activeStableKey = stableCardKeys[activeIndex];
     const activeElement = activeStableKey
-      ? itemRefs.current.get(activeStableKey) ?? null
+      ? (itemRefs.current.get(activeStableKey) ?? null)
       : null;
 
     if (!activeElement || !activeCard) return;
@@ -648,7 +662,7 @@ const VerticalCardPagerFn = <T,>({
     const snapshot = scrollAnchorSnapshotRef.current;
     const activeStableKey = stableCardKeys[activeIndex];
     const activeElement = activeStableKey
-      ? itemRefs.current.get(activeStableKey) ?? null
+      ? (itemRefs.current.get(activeStableKey) ?? null)
       : null;
 
     if (!container || !snapshot || !activeElement) {
@@ -852,7 +866,10 @@ const VerticalCardPagerFn = <T,>({
         case "ArrowDown": {
           event.preventDefault();
           if (freezeActiveIndex) return;
-          const nextIndex = Math.min(activeIndexRef.current + 1, cards.length - 1);
+          const nextIndex = Math.min(
+            activeIndexRef.current + 1,
+            cards.length - 1,
+          );
           if (nextIndex !== activeIndexRef.current) {
             clearNaturalIndexTimer();
             queuedNaturalIndexRef.current = null;
@@ -878,22 +895,31 @@ const VerticalCardPagerFn = <T,>({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [cards.length, clearNaturalIndexTimer, freezeActiveIndex, onFlip, scrollToIndex]);
+  }, [
+    cards.length,
+    clearNaturalIndexTimer,
+    freezeActiveIndex,
+    onFlip,
+    scrollToIndex,
+  ]);
 
-  const handleMeasuredHeight = useCallback((stableKey: string, nextHeight: number) => {
-    const safeHeight = Math.max(1, Math.round(nextHeight));
-    const previousHeight = measuredHeightsRef.current.get(stableKey);
+  const handleMeasuredHeight = useCallback(
+    (stableKey: string, nextHeight: number) => {
+      const safeHeight = Math.max(1, Math.round(nextHeight));
+      const previousHeight = measuredHeightsRef.current.get(stableKey);
 
-    if (previousHeight === safeHeight) {
-      return;
-    }
+      if (previousHeight === safeHeight) {
+        return;
+      }
 
-    measuredHeightsRef.current.set(stableKey, safeHeight);
-    avgItemExtentRef.current = Math.round(
-      (avgItemExtentRef.current + safeHeight) / 2,
-    );
-    setLayoutVersion((previousVersion) => previousVersion + 1);
-  }, []);
+      measuredHeightsRef.current.set(stableKey, safeHeight);
+      avgItemExtentRef.current = Math.round(
+        (avgItemExtentRef.current + safeHeight) / 2,
+      );
+      setLayoutVersion((previousVersion) => previousVersion + 1);
+    },
+    [],
+  );
 
   const attachMeasuredRef = useCallback(
     (stableKey: string, element: HTMLDivElement | null) => {

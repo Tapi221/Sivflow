@@ -838,14 +838,8 @@ const CardMetaPanelInner = ({
 
     if (domainMax - domainMin < 20) {
       const shortfall = 20 - (domainMax - domainMin);
-      domainMin = Math.max(
-        0,
-        Math.floor((domainMin - shortfall / 2) / 5) * 5,
-      );
-      domainMax = Math.min(
-        100,
-        Math.ceil((domainMax + shortfall / 2) / 5) * 5,
-      );
+      domainMin = Math.max(0, Math.floor((domainMin - shortfall / 2) / 5) * 5);
+      domainMax = Math.min(100, Math.ceil((domainMax + shortfall / 2) / 5) * 5);
     }
 
     if (domainMax <= domainMin) {
@@ -853,7 +847,7 @@ const CardMetaPanelInner = ({
       domainMax = Math.min(100, maxScore + 10);
     }
 
-    const midpoint = Math.round(((domainMin + domainMax) / 2) / 5) * 5;
+    const midpoint = Math.round((domainMin + domainMax) / 2 / 5) * 5;
     const ticks = [domainMin, midpoint, domainMax].filter(
       (value, index, values) => values.indexOf(value) === index,
     );

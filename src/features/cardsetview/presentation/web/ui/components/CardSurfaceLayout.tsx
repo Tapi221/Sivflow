@@ -38,8 +38,7 @@ export const CardSurfaceLayout = ({
         clipPath: `inset(-${SPLIT_INNER_SHADOW_CLIP_PX}px 0 -${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px)`,
       }
     : ({
-        ["--card-stack-shell-clip" as string]:
-          `inset(-${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px 0 -${STACK_INNER_SHADOW_CLIP_PX}px)`,
+        ["--card-stack-shell-clip" as string]: `inset(-${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px 0 -${STACK_INNER_SHADOW_CLIP_PX}px)`,
       } as CSSProperties);
 
   const rightSlotStyle = isSplitLayout
@@ -47,8 +46,7 @@ export const CardSurfaceLayout = ({
         clipPath: `inset(-${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px 0)`,
       }
     : ({
-        ["--card-stack-shell-clip" as string]:
-          `inset(0 -${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px)`,
+        ["--card-stack-shell-clip" as string]: `inset(0 -${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px)`,
       } as CSSProperties);
 
   return (

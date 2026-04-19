@@ -187,8 +187,11 @@
     );
     --segmented-control-accent-soft: var(
       --meta-panel-accent-soft,
-      color-mix(in srgb, var(--ds-semantic-color-action-primary-soft) 64%, white
-            36%)
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-action-primary-soft) 64%,
+        white 36%
+      )
     );
     --segmented-control-shadow-soft: var(
       --meta-panel-shadow-soft,
