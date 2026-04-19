@@ -44,16 +44,6 @@ import { signOut } from "firebase/auth";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { SyncSettings, UserSettings } from "@/types";
-
-import {
-  EXPLORER_ROW_BASE_CLASS_NAME,
-  EXPLORER_ROW_CONTENT_CLASS,
-  EXPLORER_ROW_ICON_SLOT_CLASS,
-  FOLDER_ROW_ICON_ACTIVE_CLASS,
-  FOLDER_ROW_ICON_MUTED_CLASS,
-  FOLDER_ROW_ICON_SIZE_CLASS,
-  FOLDER_ROW_TITLE_CLASS,
-} from "@/components/folder/explorer/rows/shared";
 import { BlockOrdering } from "@/components/settings/BlockOrdering";
 import { DeviceSyncSettings } from "@/components/settings/DeviceSyncSettings";
 import { TagManagerPanel } from "@/components/tag/TagManagerPanel";
@@ -116,6 +106,34 @@ const folderSidebarDisplayModeOptions = [
   label: string;
   description: string;
 }>;
+
+type SettingsNavButtonProps = {
+  icon: (typeof sidebarItems)[number]["icon"];
+  label: string;
+  active: boolean;
+  onSelect: () => void;
+};
+
+const SettingsNavButton = ({
+  icon: Icon,
+  label,
+  active,
+  onSelect,
+}: SettingsNavButtonProps) => {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={cn(
+        "ds-nav-action ds-settings-panel__nav-item",
+        active && "ds-nav-action--active",
+      )}
+    >
+      <Icon className="h-4 w-4 shrink-0 ds-nav-action__icon" strokeWidth={2.1} />
+      <span className="ds-settings-panel__nav-label truncate">{label}</span>
+    </button>
+  );
+};
 
 const SettingsDialog = ({
   open,
@@ -1073,59 +1091,34 @@ const SettingsDialog = ({
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent
         surface="panel"
-        className="w-full max-w-none h-[100dvh] md:max-w-[1120px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 flex flex-col overflow-hidden data-[state=open]:duration-300 ring-0 outline-none rounded-none md:rounded-[10px]"
+        className="ds-settings-panel w-full max-w-none h-[100dvh] md:max-w-[1120px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 flex flex-col overflow-hidden data-[state=open]:duration-300 ring-0 outline-none rounded-none md:rounded-[24px]"
       >
         <DialogDescription className="sr-only">
           学習、同期、データ管理などの設定を行うダイアログです。
         </DialogDescription>
-        <div className="flex flex-1 h-full overflow-hidden bg-transparent">
+        <div className="ds-settings-panel__shell flex flex-1 h-full overflow-hidden">
           <div
             className={`
-              md:w-[248px] flex-shrink-0 flex flex-col border-r border-slate-200/80
-              ${isMobileMenuOpen ? "absolute inset-0 z-50 w-full bg-white" : "hidden md:flex bg-white"}
+              ds-settings-panel__sidebar md:w-[248px] flex-shrink-0 flex flex-col border-r
+              ${isMobileMenuOpen ? "absolute inset-0 z-50 w-full" : "hidden md:flex"}
               transition-all duration-300
             `}
           >
             <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 custom-scrollbar">
-              {sidebarItems.map((item) => (
-                <div
-                  key={item.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => {
-                    handleSelectTab(item.id);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      handleSelectTab(item.id);
-                    }
-                  }}
-                  data-selected={activeTab === item.id ? "true" : undefined}
-                  className={cn(
-                    EXPLORER_ROW_BASE_CLASS_NAME,
-                    "sidebar-row--folder cursor-pointer rounded-[4px] px-2 snap-start",
-                  )}
-                >
-                  <div className={EXPLORER_ROW_ICON_SLOT_CLASS}>
-                    <item.icon
-                      className={cn(
-                        FOLDER_ROW_ICON_SIZE_CLASS,
-                        activeTab === item.id
-                          ? FOLDER_ROW_ICON_ACTIVE_CLASS
-                          : FOLDER_ROW_ICON_MUTED_CLASS,
-                      )}
-                      strokeWidth={2.2}
-                    />
-                  </div>
-                  <div className={EXPLORER_ROW_CONTENT_CLASS}>
-                    <span className={FOLDER_ROW_TITLE_CLASS}>{item.label}</span>
-                  </div>
-                </div>
-              ))}
+              <div className="ds-settings-panel__nav">
+                {sidebarItems.map((item) => (
+                  <SettingsNavButton
+                    key={item.id}
+                    icon={item.icon}
+                    label={item.label}
+                    active={activeTab === item.id}
+                    onSelect={() => handleSelectTab(item.id)}
+                  />
+                ))}
+              </div>
             </div>
 
-            <div className="border-t border-slate-200 px-4 py-4">
+            <div className="ds-settings-panel__footer border-t px-4 py-4">
               <div className="mb-3 flex items-center gap-3 px-2">
                 <div
                   className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-xs font-bold text-white shadow-sm"
@@ -1173,10 +1166,10 @@ const SettingsDialog = ({
             </div>
           </div>
 
-          <div className="relative flex-1 overflow-x-hidden overflow-y-auto bg-transparent">
-            <div className="md:hidden sticky top-0 z-20 flex items-center justify-between p-3 bg-white/70 border-b border-slate-200/80 backdrop-blur-md">
+          <div className="ds-settings-panel__content relative flex-1 overflow-x-hidden overflow-y-auto">
+            <div className="ds-settings-panel__mobile-header md:hidden sticky top-0 z-20 flex items-center justify-between border-b p-3">
               <div className="flex items-center gap-2">
-                <DialogTitle className="text-lg font-bold text-slate-800">
+                <DialogTitle className="text-lg font-bold text-[var(--ds-semantic-color-text-strong)]">
                   設定
                 </DialogTitle>
               </div>
@@ -1206,7 +1199,7 @@ const SettingsDialog = ({
 
             <div
               className={cn(
-                "w-full space-y-6 p-4 pb-[var(--ui-safe-area-bottom-padding)] md:px-8 md:py-6 lg:px-10 lg:py-8",
+                "w-full space-y-4 p-4 pb-[var(--ui-safe-area-bottom-padding)] md:px-8 md:py-6 lg:px-10 lg:py-8",
                 activeTab === "tags" && "space-y-4",
               )}
             >

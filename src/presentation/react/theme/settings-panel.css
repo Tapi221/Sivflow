@@ -1,0 +1,225 @@
+@layer components {
+  .ds-settings-panel {
+    --meta-panel-shell-bg:
+      linear-gradient(
+        180deg,
+        color-mix(
+            in srgb,
+            var(--ds-semantic-color-background-sidebar) 82%,
+            white 18%
+          )
+          0%,
+        color-mix(
+            in srgb,
+            var(--ds-semantic-color-background-sidebar) 94%,
+            var(--ds-semantic-color-background-app) 6%
+          )
+          100%
+      );
+    --meta-panel-surface:
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-background-app) 94%,
+        var(--ds-semantic-color-action-primary-soft) 6%
+      );
+    --meta-panel-surface-muted:
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-background-sidebar-active) 58%,
+        white 42%
+      );
+    --meta-panel-surface-elevated:
+      color-mix(
+        in srgb,
+        white 90%,
+        var(--ds-semantic-color-action-primary-soft) 10%
+      );
+    --meta-panel-border:
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-border-default) 72%,
+        var(--ds-semantic-color-action-primary) 28%
+      );
+    --meta-panel-border-strong:
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-border-strong) 58%,
+        var(--ds-semantic-color-action-primary) 42%
+      );
+    --meta-panel-text-muted:
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-text-secondary) 86%,
+        var(--ds-semantic-color-text-primary) 14%
+      );
+    --meta-panel-accent:
+      color-mix(
+        in srgb,
+        #0f766e 82%,
+        var(--ds-semantic-color-action-primary) 18%
+      );
+    --meta-panel-accent-soft:
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-action-primary-soft) 64%,
+        white 36%
+      );
+    --meta-panel-shadow-soft:
+      0 10px 24px rgba(15, 23, 42, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.88);
+    --meta-panel-shadow-strong:
+      0 16px 30px rgba(15, 23, 42, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    color: var(--ds-semantic-color-text-primary);
+  }
+
+  .ds-settings-panel__shell {
+    background: var(--meta-panel-shell-bg);
+  }
+
+  .ds-settings-panel__sidebar {
+    background: var(--meta-panel-shell-bg);
+    border-color: var(--meta-panel-border);
+  }
+
+  .ds-settings-panel__content {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--meta-panel-shell-bg) 16%, white 84%) 0%,
+        color-mix(in srgb, var(--meta-panel-shell-bg) 28%, white 72%) 100%
+      );
+  }
+
+  .ds-settings-panel__mobile-header {
+    background: color-mix(
+      in srgb,
+      var(--meta-panel-surface-elevated) 88%,
+      white 12%
+    );
+    border-color: var(--meta-panel-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .ds-settings-panel__nav {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .ds-settings-panel__nav-item {
+    width: 100%;
+    min-height: 2.25rem;
+    justify-content: flex-start;
+    gap: 0.625rem;
+    padding-inline: 0.625rem;
+    border: 1px solid transparent;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36);
+  }
+
+  .ds-settings-panel__nav-item.ds-nav-action--active {
+    border-color: var(--meta-panel-border-strong);
+    box-shadow: var(--meta-panel-shadow-soft);
+  }
+
+  .ds-settings-panel__nav-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .ds-settings-panel__footer {
+    border-color: var(--meta-panel-border);
+  }
+
+  .ds-settings-panel__section {
+    padding: 1rem;
+  }
+
+  .ds-settings-panel__section-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .ds-settings-panel__section-title {
+    color: var(--ds-semantic-color-text-strong);
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+  }
+
+  .ds-settings-panel__section-description {
+    margin-top: 0.25rem;
+    color: var(--meta-panel-text-muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .ds-settings-panel__row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.875rem;
+  }
+
+  .ds-settings-panel__row + .ds-settings-panel__row {
+    border-top: 1px solid
+      color-mix(in srgb, var(--meta-panel-border) 76%, transparent);
+  }
+
+  .ds-settings-panel__row-copy {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .ds-settings-panel__row-title {
+    color: var(--ds-semantic-color-text-primary);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1.45;
+    letter-spacing: 0.01em;
+  }
+
+  .ds-settings-panel__row-description {
+    margin-top: 0.2rem;
+    color: var(--meta-panel-text-muted);
+    font-size: 0.6875rem;
+    line-height: 1.55;
+  }
+
+  .ds-settings-panel__row-action {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .ds-settings-panel__status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 1.5rem;
+    padding-inline: 0.625rem;
+    border-radius: 999px;
+    background: var(--meta-panel-accent-soft);
+    color: var(--meta-panel-accent);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .ds-settings-panel__status-pill--off {
+    background: color-mix(
+      in srgb,
+      var(--meta-panel-surface-muted) 84%,
+      white 16%
+    );
+    color: var(--meta-panel-text-muted);
+  }
+}
+
