@@ -179,8 +179,8 @@
       var(
         --card-shadow-default,
         0 0 2px rgba(15, 23, 42, 0.04),
-        0 0 24px rgba(15, 23, 42, 0.08),
-        0 0 72px rgba(15, 23, 42, 0.08)
+        0 0 16px rgba(15, 23, 42, 0.07),
+        0 0 44px rgba(15, 23, 42, 0.07)
       ),
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
     transition:
@@ -195,8 +195,8 @@
       var(
         --card-shadow-hover,
         0 0 3px rgba(15, 23, 42, 0.05),
-        0 0 30px rgba(15, 23, 42, 0.1),
-        0 0 90px rgba(15, 23, 42, 0.1)
+        0 0 20px rgba(15, 23, 42, 0.08),
+        0 0 56px rgba(15, 23, 42, 0.08)
       ),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
@@ -224,8 +224,8 @@
       var(
         --card-shadow-hover,
         0 0 3px rgba(15, 23, 42, 0.05),
-        0 0 30px rgba(15, 23, 42, 0.1),
-        0 0 90px rgba(15, 23, 42, 0.1)
+        0 0 20px rgba(15, 23, 42, 0.08),
+        0 0 56px rgba(15, 23, 42, 0.08)
       ),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
@@ -239,9 +239,9 @@
     box-shadow:
       var(
         --card-shadow-selected,
-        0 0 4px rgba(15, 23, 42, 0.06),
-        0 0 36px rgba(15, 23, 42, 0.12),
-        0 0 96px rgba(15, 23, 42, 0.12)
+        0 0 3px rgba(15, 23, 42, 0.05),
+        0 0 20px rgba(15, 23, 42, 0.1),
+        0 0 52px rgba(15, 23, 42, 0.1)
       ),
       inset 0 0 0 var(--card-selected-outline-width, 1.6px)
         var(--card-selected-outline-neutral, rgba(84, 95, 105, 0.42)),
@@ -292,24 +292,24 @@
     box-shadow:
       var(
         --card-shadow-selected,
-        0 0 4px rgba(15, 23, 42, 0.06),
-        0 0 36px rgba(15, 23, 42, 0.12),
-        0 0 96px rgba(15, 23, 42, 0.12)
+        0 0 3px rgba(15, 23, 42, 0.05),
+        0 0 20px rgba(15, 23, 42, 0.1),
+        0 0 52px rgba(15, 23, 42, 0.1)
       ),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
   .card-shell--interactive:focus-visible,
-  .card-shell--interactive:has(:focus-visible) {
+  .card-shell--interactive:focus-within {
     outline: none;
     border-color: var(--card-border-selected, rgba(15, 23, 42, 0.2));
     box-shadow:
       var(--card-focus-ring-shadow, 0 0 0 2px rgba(122, 166, 161, 0.25)),
       var(
         --card-shadow-selected,
-        0 0 4px rgba(15, 23, 42, 0.06),
-        0 0 36px rgba(15, 23, 42, 0.12),
-        0 0 96px rgba(15, 23, 42, 0.12)
+        0 0 3px rgba(15, 23, 42, 0.05),
+        0 0 20px rgba(15, 23, 42, 0.1),
+        0 0 52px rgba(15, 23, 42, 0.1)
       ),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
@@ -338,9 +338,9 @@
     pointer-events: none;
     box-shadow: var(
       --card-shadow-selected,
-      0 0 4px rgba(15, 23, 42, 0.06),
-      0 0 36px rgba(15, 23, 42, 0.12),
-      0 0 96px rgba(15, 23, 42, 0.12)
+      0 0 3px rgba(15, 23, 42, 0.05),
+      0 0 20px rgba(15, 23, 42, 0.1),
+      0 0 52px rgba(15, 23, 42, 0.1)
     );
     opacity: 0;
     transition: opacity 110ms ease;
@@ -370,8 +370,8 @@
     display: none;
   }
 
-  .card-active-chrome:has(:focus-visible),
-  .card-pager-item:has(:focus-visible) {
+  .card-active-chrome:focus-within,
+  .card-pager-item:focus-within {
     box-shadow: var(
       --card-focus-ring-shadow,
       0 0 0 2px rgba(122, 166, 161, 0.25)
@@ -379,8 +379,8 @@
     opacity: 1;
   }
 
-  .card-active-chrome:has(:focus-visible)::before,
-  .card-pager-item:has(:focus-visible)::before {
+  .card-active-chrome:focus-within::before,
+  .card-pager-item:focus-within::before {
     opacity: 1;
   }
 
@@ -400,8 +400,8 @@
     box-shadow: none;
   }
 
-  .card-active-chrome--plain:has(:focus-visible),
-  .card-pager-item--plain:has(:focus-visible) {
+  .card-active-chrome--plain:focus-within,
+  .card-pager-item--plain:focus-within {
     box-shadow: none;
   }
 
@@ -431,7 +431,7 @@
   }
 
   .card-list-card:focus-visible,
-  .card-list-card:has(:focus-visible) {
+  .card-list-card:focus-within {
     outline: none;
     border-color: var(--card-border-selected, rgba(15, 23, 42, 0.2));
     box-shadow:

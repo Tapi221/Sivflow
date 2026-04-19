@@ -24,6 +24,8 @@ export const mapExplorerSelectionToSearchParams = ({
 
   if (selectedItem?.type === "card") {
     next.set("cardId", selectedItem.id);
+  } else if (selectedItem?.type === "cardSet") {
+    next.set("cardSetId", selectedItem.id);
   } else if (selectedItem?.type === "document") {
     next.set("docId", selectedItem.id);
   }

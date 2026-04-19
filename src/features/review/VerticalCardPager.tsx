@@ -374,6 +374,7 @@ const VerticalCardPagerFn = <T,>({
   const anchorCorrectionRafRef = useRef<number | null>(null);
   const anchorStabilizationUntilRef = useRef<number>(0);
   const visibleRangeRafRef = useRef<number | null>(null);
+  const scrollAnchorCaptureRafRef = useRef<number | null>(null);
   const computeNearestRafRef = useRef<number | null>(null);
   const idleCommitTimerRef = useRef<number | null>(null);
   const naturalIndexTimerRef = useRef<number | null>(null);
@@ -507,6 +508,13 @@ const VerticalCardPagerFn = <T,>({
     if (computeNearestRafRef.current != null) {
       window.cancelAnimationFrame(computeNearestRafRef.current);
       computeNearestRafRef.current = null;
+    }
+  }, []);
+
+  const clearScrollAnchorCaptureRaf = useCallback(() => {
+    if (scrollAnchorCaptureRafRef.current != null) {
+      window.cancelAnimationFrame(scrollAnchorCaptureRafRef.current);
+      scrollAnchorCaptureRafRef.current = null;
     }
   }, []);
 
@@ -657,6 +665,21 @@ const VerticalCardPagerFn = <T,>({
     stableCardKeys,
   ]);
 
+  const scheduleScrollAnchorCapture = useCallback(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (scrollAnchorCaptureRafRef.current != null) {
+      return;
+    }
+
+    scrollAnchorCaptureRafRef.current = window.requestAnimationFrame(() => {
+      scrollAnchorCaptureRafRef.current = null;
+      captureScrollAnchor();
+    });
+  }, [captureScrollAnchor]);
+
   const restoreScrollAnchor = useCallback(() => {
     const container = containerRef.current;
     const snapshot = scrollAnchorSnapshotRef.current;
@@ -766,7 +789,7 @@ const VerticalCardPagerFn = <T,>({
     syncViewportState();
 
     const handleScroll = () => {
-      captureScrollAnchor();
+      scheduleScrollAnchorCapture();
       scheduleVisibleRangeUpdate();
       clearIdleCommitTimer();
       idleCommitTimerRef.current = window.setTimeout(() => {
@@ -792,9 +815,9 @@ const VerticalCardPagerFn = <T,>({
       window.removeEventListener("resize", syncViewportState);
     };
   }, [
-    captureScrollAnchor,
     clearIdleCommitTimer,
     computeNearestIndex,
+    scheduleScrollAnchorCapture,
     scheduleVisibleRangeUpdate,
   ]);
 
@@ -836,6 +859,7 @@ const VerticalCardPagerFn = <T,>({
           window.cancelAnimationFrame(visibleRangeRafRef.current);
         }
 
+        clearScrollAnchorCaptureRaf();
         clearComputeNearestRaf();
         clearIdleCommitTimer();
         clearNaturalIndexTimer();
@@ -847,7 +871,12 @@ const VerticalCardPagerFn = <T,>({
       itemCleanupMapRef.current.clear();
       itemRefs.current.clear();
     };
-  }, [clearComputeNearestRaf, clearIdleCommitTimer, clearNaturalIndexTimer]);
+  }, [
+    clearComputeNearestRaf,
+    clearIdleCommitTimer,
+    clearNaturalIndexTimer,
+    clearScrollAnchorCaptureRaf,
+  ]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

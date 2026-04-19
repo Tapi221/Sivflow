@@ -16,7 +16,6 @@ interface UseCardSetViewPaneWidthOptions {
   isGlobalEditing: boolean;
   isDesktop: boolean;
   isMetaOpen: boolean;
-  currentIndex: number;
   settings: UserSettings | undefined;
   cardSetId?: string | null;
 }
@@ -46,7 +45,6 @@ export const useCardSetViewPaneWidth = ({
   isGlobalEditing,
   isDesktop,
   isMetaOpen,
-  currentIndex,
   settings,
   cardSetId,
 }: UseCardSetViewPaneWidthOptions) => {
@@ -100,8 +98,7 @@ export const useCardSetViewPaneWidth = ({
       isDesktop,
       isGlobalEditing,
       isMetaOpen,
-      currentIndex,
-    ],
+        ],
     reservedViewportInsetPx: reservedScrollbarGutterWidthPx,
     allowStoredWidthBeyondViewport: false,
     previewBehavior: "both",

@@ -7,6 +7,13 @@ export const createCardSelectedItem = (
   id: cardId,
 });
 
+export const createCardSetSelectedItem = (
+  cardSetId: string,
+): Extract<SelectedExplorerItem, { type: "cardSet" }> => ({
+  type: "cardSet",
+  id: cardSetId,
+});
+
 export const createDocumentSelectedItem = (
   documentId: string,
 ): Extract<SelectedExplorerItem, { type: "document" }> => ({

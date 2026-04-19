@@ -39,7 +39,6 @@ interface UseCardSetViewZoomOptions {
   deviceScope: string;
   cardSetId: string | null;
   viewportRef: RefObject<HTMLDivElement | null>;
-  activeCardKey: string;
   displayMode: CardDisplayMode;
   interactionMode: CardSetInteractionMode;
   requestedCardLayoutMode: CardLayoutMode;
@@ -85,7 +84,6 @@ export const useCardSetViewZoom = ({
   deviceScope,
   cardSetId,
   viewportRef,
-  activeCardKey,
   displayMode,
   interactionMode,
   requestedCardLayoutMode,
@@ -163,7 +161,7 @@ export const useCardSetViewZoom = ({
       observer.disconnect();
       window.removeEventListener("resize", update);
     };
-  }, [activeCardKey, triggerConstraintIndicator, viewportRef]);
+  }, [triggerConstraintIndicator, viewportRef]);
 
   useEffect(() => {
     return () => {
