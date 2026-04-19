@@ -1,4 +1,4 @@
-import { Flashcard } from "@/components/card/frame/Flashcard";
+﻿import { Flashcard } from "@/components/card/frame/Flashcard";
 import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
 import { TagBadge } from "@/components/tag/TagBadge";
 import {
@@ -21,6 +21,12 @@ import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
+// eslint-disable-next-line unused-imports/no-unused-imports
+import { DirectoryMindMapCanvas } from "./directory/DirectoryMindMapCanvas";
+import type {
+  DirectoryBadgeVisibility,
+  DirectoryTreeNode,
+} from "./directory/directoryTypes";
 import type { Card, CardSet, DocumentItem, Folder } from "@/types";
 import { HelpCircle, Settings2, Star, Tag as TagIcon } from "@/ui/icons";
 import { useMemo, useState } from "react";
@@ -32,19 +38,9 @@ interface DirectoryDiagramPaneProps {
   documents: DocumentItem[];
 }
 
-type TreeNode = {
-  id: string;
-  kind: "folder" | "card" | "pdf";
-  name: string;
-  sourceCardId?: string;
-  tags: string[];
-  hasUncertainty: boolean;
-  isBookmarked: boolean;
-  showTags: boolean;
-  children: TreeNode[];
-};
-
 const ROOT_KEY = "__root__";
+
+type DirectoryLayoutMode = "map" | "tree";
 
 const getCardLabel = (card: Card): string => {
   if (typeof card.title === "string" && card.title.trim()) {
@@ -57,11 +53,12 @@ const getCardLabel = (card: Card): string => {
     .replace(/\s+/g, " ")
     .trim();
 
-  if (!plain) return "無題のカード";
+  if (!plain) return "カード";
   return plain.length > 10 ? `${plain.slice(0, 10)}...` : plain;
 };
 
-const DirectoryTreeNode = ({
+// eslint-disable-next-line unused-imports/no-unused-vars
+const DirectoryOutlineNode = ({
   node,
   hasParent,
   isLast,
@@ -69,15 +66,11 @@ const DirectoryTreeNode = ({
   badgeVisibility,
   onCardClick,
 }: {
-  node: TreeNode;
+  node: DirectoryTreeNode;
   hasParent: boolean;
   isLast: boolean;
   getTagColor: (tagNameOrId: string) => string;
-  badgeVisibility: {
-    uncertainty: boolean;
-    bookmarked: boolean;
-    tags: boolean;
-  };
+  badgeVisibility: DirectoryBadgeVisibility;
   onCardClick: (cardId: string) => void;
 }) => {
   const isFolderNode = node.kind === "folder";
@@ -164,7 +157,7 @@ const DirectoryTreeNode = ({
               labelClassName,
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60",
             )}
-            aria-label={`${node.name} をプレビュー`}
+            aria-label={`${node.name} 繧偵・繝ｬ繝薙Η繝ｼ`}
           >
             {labelContent}
           </button>
@@ -176,7 +169,7 @@ const DirectoryTreeNode = ({
       {node.children.length > 0 ? (
         <div className="ml-4">
           {node.children.map((child, index) => (
-            <DirectoryTreeNode
+            <DirectoryOutlineNode
               key={child.id}
               node={child}
               hasParent
@@ -205,6 +198,8 @@ export const DirectoryDiagramPane = ({
     [cardSets],
   );
   const { tagById, getTagColor } = useTags();
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  const [layoutMode, setLayoutMode] = useState<DirectoryLayoutMode>("map");
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
 
   const {
@@ -301,13 +296,13 @@ export const DirectoryDiagramPane = ({
     uncertaintyFilter,
   ]);
 
-  const rootNodes = useMemo(() => {
+  const rootNodes = useMemo<DirectoryTreeNode[]>(() => {
     const visibleFolders = folders.filter(
       (folder) => !folder.isDeleted && !folder.isHidden,
     );
 
     const childFolderMap = new Map<string, Folder[]>();
-    const itemMap = new Map<string, TreeNode[]>();
+    const itemMap = new Map<string, DirectoryTreeNode[]>();
 
     for (const folder of visibleFolders) {
       const folderId = String(folder.id || folder.folderId || "");
@@ -348,14 +343,14 @@ export const DirectoryDiagramPane = ({
       if (!folderId) continue;
 
       const items = itemMap.get(folderId) ?? [];
-      items.push({
-        id: `${document.kind}:${document.id}`,
-        kind: "pdf",
-        name:
-          document.title?.trim() || document.fileName || "無題のドキュメント",
-        tags: [],
-        hasUncertainty: false,
-        isBookmarked: false,
+        items.push({
+         id: `${document.kind}:${document.id}`,
+         kind: "pdf",
+         name:
+          document.title?.trim() || document.fileName || "PDF",
+          tags: [],
+          hasUncertainty: false,
+          isBookmarked: false,
         showTags: false,
         children: [],
       });
@@ -375,12 +370,12 @@ export const DirectoryDiagramPane = ({
       items.sort((a, b) => a.name.localeCompare(b.name, "ja"));
     }
 
-    const buildNode = (folder: Folder): TreeNode | null => {
+    const buildNode = (folder: Folder): DirectoryTreeNode | null => {
       const id = String(folder.id || folder.folderId || "");
 
       const folderChildren = (childFolderMap.get(id) ?? [])
         .map(buildNode)
-        .filter((child): child is TreeNode => child !== null);
+        .filter((child): child is DirectoryTreeNode => child !== null);
 
       const itemChildren = itemMap.get(id) ?? [];
 
@@ -395,7 +390,7 @@ export const DirectoryDiagramPane = ({
       return {
         id,
         kind: "folder",
-        name: folder.folderName || "無題のフォルダ",
+        name: folder.folderName || "辟｡鬘後・繝輔か繝ｫ繝",
         tags: [],
         hasUncertainty: false,
         isBookmarked: false,
@@ -406,7 +401,7 @@ export const DirectoryDiagramPane = ({
 
     return (childFolderMap.get(ROOT_KEY) ?? [])
       .map(buildNode)
-      .filter((node): node is TreeNode => node !== null);
+      .filter((node): node is DirectoryTreeNode => node !== null);
   }, [
     filteredDocuments,
     filteredCards,
@@ -430,11 +425,36 @@ export const DirectoryDiagramPane = ({
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold text-slate-800">
-              ディレクトリ
+              繝・ぅ繝ｬ繧ｯ繝医Μ
             </h2>
+             <p className="mt-1 text-xs text-slate-500"> 
+               ドラッグで移動、ホイールで拡大縮小 
+             </p> 
           </div>
 
           <div className="flex items-center gap-2">
+            <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1">
+              {[
+                { id: "map", label: "マップ" },
+                { id: "tree", label: "ツリー" },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setLayoutMode(item.id as DirectoryLayoutMode)}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                    layoutMode === item.id
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-600 hover:bg-slate-100",
+                  )}
+                  aria-pressed={layoutMode === item.id}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
             <Popover>
               <PopoverTrigger asChild>
                 <button
@@ -451,15 +471,15 @@ export const DirectoryDiagramPane = ({
                   {[
                     {
                       key: "uncertainty" as const,
-                      label: "はてなマーク",
+                      label: "縺ｯ縺ｦ縺ｪ繝槭・繧ｯ",
                       icon: HelpCircle,
                     },
                     {
                       key: "bookmarked" as const,
-                      label: "星マーク",
+                      label: "譏溘・繝ｼ繧ｯ",
                       icon: Star,
                     },
-                    { key: "tags" as const, label: "タグ", icon: TagIcon },
+                    { key: "tags" as const, label: "繧ｿ繧ｰ", icon: TagIcon },
                   ].map((item) => {
                     const Icon = item.icon;
                     const checked = directoryBadgeVisibility[item.key];
@@ -491,7 +511,7 @@ export const DirectoryDiagramPane = ({
                             checked ? "text-primary-700" : "text-slate-400",
                           )}
                         >
-                          {checked ? "表示" : "非表示"}
+                          {checked ? "陦ｨ遉ｺ" : "髱櫁｡ｨ遉ｺ"}
                         </span>
                       </button>
                     );
@@ -511,21 +531,30 @@ export const DirectoryDiagramPane = ({
       <div className="p-3">
         {rootNodes.length > 0 ? (
           <div className="relative">
-            {rootNodes.map((node, index) => (
-              <DirectoryTreeNode
-                key={node.id}
-                node={node}
-                hasParent={false}
-                isLast={index === rootNodes.length - 1}
+            {layoutMode === "map" ? (
+              <DirectoryMindMapCanvas
+                rootNodes={rootNodes}
                 getTagColor={getTagColor}
                 badgeVisibility={directoryBadgeVisibility}
                 onCardClick={setPreviewCardId}
               />
-            ))}
+            ) : (
+              rootNodes.map((node, index) => (
+                <DirectoryOutlineNode
+                  key={node.id}
+                  node={node}
+                  hasParent={false}
+                  isLast={index === rootNodes.length - 1}
+                  getTagColor={getTagColor}
+                  badgeVisibility={directoryBadgeVisibility}
+                  onCardClick={setPreviewCardId}
+                />
+              ))
+            )}
           </div>
         ) : (
           <div className="mt-3 rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
-            表示できるフォルダがありません。
+            陦ｨ遉ｺ縺ｧ縺阪ｋ繝輔か繝ｫ繝縺後≠繧翫∪縺帙ｓ縲・
           </div>
         )}
       </div>
