@@ -334,6 +334,53 @@ const resolveVisibleRenderRange = ({
   };
 };
 
+const findNearestRenderedIndexByCenterY = ({
+  container,
+  itemRefs,
+  stableCardKeys,
+  renderRange,
+  targetCenterY,
+  fallbackIndex,
+}: {
+  container: HTMLDivElement;
+  itemRefs: React.MutableRefObject<Map<string, HTMLDivElement | null>>;
+  stableCardKeys: string[];
+  renderRange:
+    | {
+        start: number;
+        end: number;
+        visibleStart: number;
+        visibleEnd: number;
+      }
+    | null;
+  targetCenterY: number;
+  fallbackIndex: number;
+}) => {
+  if (!renderRange) {
+    return fallbackIndex;
+  }
+
+  let nearestIndex = fallbackIndex;
+  let nearestDistance = Number.POSITIVE_INFINITY;
+
+  for (let index = renderRange.start; index <= renderRange.end; index += 1) {
+    const stableKey = stableCardKeys[index];
+    const element = stableKey ? itemRefs.current.get(stableKey) ?? null : null;
+    if (!element) continue;
+
+    const elementTop = resolveElementTopWithinContainer(container, element);
+    const elementCenterY = elementTop + element.offsetHeight / 2;
+    const distance = Math.abs(elementCenterY - targetCenterY);
+
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      nearestIndex = index;
+    }
+  }
+
+  return nearestIndex;
+};
+
 const buildStableCardKey = <T,>(
   card: T,
   idx: number,
@@ -555,11 +602,19 @@ const VerticalCardPagerFn = <T,>({
     if (freezeActiveIndex) return;
 
     const centerOffset = container.scrollTop + container.clientHeight / 2;
-    const nearestIdx = binarySearchIndexForOffset(
+    const fallbackNearestIdx = binarySearchIndexForOffset(
       layoutSnapshot,
       centerOffset,
       cards.length,
     );
+    const nearestIdx = findNearestRenderedIndexByCenterY({
+      container,
+      itemRefs,
+      stableCardKeys,
+      renderRange,
+      targetCenterY: centerOffset,
+      fallbackIndex: fallbackNearestIdx,
+    });
     if (nearestIdx < 0) {
       return;
     }
@@ -573,8 +628,11 @@ const VerticalCardPagerFn = <T,>({
   }, [
     cards.length,
     freezeActiveIndex,
+    itemRefs,
     layoutSnapshot,
     queueNaturalIndexCommit,
+    renderRange,
+    stableCardKeys,
   ]);
 
   const scheduleVisibleRangeUpdate = useCallback(() => {
