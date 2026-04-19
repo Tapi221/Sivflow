@@ -27,7 +27,10 @@ const DEFAULT_CONSTRAINTS: PdfRenderBackingStoreConstraints = {
   maxCanvasEdgePx: 8192,
 };
 
-const normalizePositiveFinite = (value: number | null | undefined, fallback: number) => {
+const normalizePositiveFinite = (
+  value: number | null | undefined,
+  fallback: number,
+) => {
   if (typeof value !== "number") {
     return fallback;
   }
@@ -110,12 +113,12 @@ export const resolvePdfRenderBackingStore = ({
 }: ResolvePdfRenderBackingStoreArgs): PdfRenderBackingStore => {
   const safeViewportWidthPx = normalizePositiveFinite(viewportWidthPx, 1);
   const safeViewportHeightPx = normalizePositiveFinite(viewportHeightPx, 1);
+  const effectiveConstraints = resolveEffectiveConstraints(constraints);
   const safeDevicePixelRatio = clamp(
     normalizePositiveFinite(devicePixelRatio, 1),
     1,
-    resolveEffectiveConstraints(constraints).maxPreferredDevicePixelRatio,
+    effectiveConstraints.maxPreferredDevicePixelRatio,
   );
-  const effectiveConstraints = resolveEffectiveConstraints(constraints);
 
   const scaleLimitByEdge = resolveScaleLimitByEdge({
     viewportWidthPx: safeViewportWidthPx,
