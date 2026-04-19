@@ -1,11 +1,14 @@
-const MAX_CACHE_ENTRIES = 32;
-const MAX_CACHE_PIXELS = 48_000_000;
+export type PdfPageBitmap = HTMLCanvasElement | ImageBitmap;
 
 type PdfPageBitmapCacheEntry = {
-  canvas: HTMLCanvasElement;
+  bitmap: PdfPageBitmap;
+  documentKey: string;
   pixelCost: number;
   lastUsedAt: number;
 };
+
+const MAX_CACHE_ENTRIES = 6;
+const MAX_CACHE_PIXELS = 12_000_000;
 
 const cache = new Map<string, PdfPageBitmapCacheEntry>();
 
@@ -22,26 +25,49 @@ const computeTotalPixels = () => {
   return totalPixels;
 };
 
+const disposeBitmap = (bitmap: PdfPageBitmap) => {
+  if (typeof ImageBitmap !== "undefined" && bitmap instanceof ImageBitmap) {
+    bitmap.close();
+    return;
+  }
+
+  if (
+    typeof HTMLCanvasElement !== "undefined" &&
+    bitmap instanceof HTMLCanvasElement
+  ) {
+    bitmap.width = 0;
+    bitmap.height = 0;
+  }
+};
+
+const evictOldestEntry = () => {
+  let oldestKey: string | null = null;
+  let oldestTimestamp = Number.POSITIVE_INFINITY;
+
+  cache.forEach((entry, key) => {
+    if (entry.lastUsedAt < oldestTimestamp) {
+      oldestTimestamp = entry.lastUsedAt;
+      oldestKey = key;
+    }
+  });
+
+  if (!oldestKey) {
+    return;
+  }
+
+  const entry = cache.get(oldestKey);
+  if (entry) {
+    disposeBitmap(entry.bitmap);
+  }
+  cache.delete(oldestKey);
+};
+
 const evictIfNeeded = () => {
   while (
     cache.size > MAX_CACHE_ENTRIES ||
     computeTotalPixels() > MAX_CACHE_PIXELS
   ) {
-    let oldestKey: string | null = null;
-    let oldestTimestamp = Number.POSITIVE_INFINITY;
-
-    cache.forEach((entry, key) => {
-      if (entry.lastUsedAt < oldestTimestamp) {
-        oldestTimestamp = entry.lastUsedAt;
-        oldestKey = key;
-      }
-    });
-
-    if (!oldestKey) {
-      return;
-    }
-
-    cache.delete(oldestKey);
+    evictOldestEntry();
   }
 };
 
@@ -54,13 +80,25 @@ const cloneCanvas = (sourceCanvas: HTMLCanvasElement) => {
   canvas.width = sourceCanvas.width;
   canvas.height = sourceCanvas.height;
 
-  const context = canvas.getContext("2d");
+  const context = canvas.getContext("2d", { alpha: true });
   if (!context) {
     return null;
   }
 
   context.drawImage(sourceCanvas, 0, 0);
   return canvas;
+};
+
+const createBitmapFromCanvas = async (sourceCanvas: HTMLCanvasElement) => {
+  if (typeof createImageBitmap === "function") {
+    try {
+      return await createImageBitmap(sourceCanvas);
+    } catch {
+      // fall through to canvas clone
+    }
+  }
+
+  return cloneCanvas(sourceCanvas);
 };
 
 export const getCachedPdfPageBitmap = (cacheKey: string) => {
@@ -70,22 +108,29 @@ export const getCachedPdfPageBitmap = (cacheKey: string) => {
   }
 
   existing.lastUsedAt = nowMs();
-  return existing.canvas;
+  return existing.bitmap;
 };
 
-export const setCachedPdfPageBitmap = (
+export const setCachedPdfPageBitmap = async (
   cacheKey: string,
+  documentKey: string,
   sourceCanvas: HTMLCanvasElement,
 ) => {
-  const clonedCanvas = cloneCanvas(sourceCanvas);
-  if (!clonedCanvas) {
+  const bitmap = await createBitmapFromCanvas(sourceCanvas);
+  if (!bitmap) {
     return;
   }
 
-  const pixelCost = Math.max(1, clonedCanvas.width * clonedCanvas.height);
+  const existing = cache.get(cacheKey);
+  if (existing) {
+    disposeBitmap(existing.bitmap);
+  }
+
+  const pixelCost = Math.max(1, bitmap.width * bitmap.height);
 
   cache.set(cacheKey, {
-    canvas: clonedCanvas,
+    bitmap,
+    documentKey,
     pixelCost,
     lastUsedAt: nowMs(),
   });
@@ -93,6 +138,24 @@ export const setCachedPdfPageBitmap = (
   evictIfNeeded();
 };
 
+export const clearPdfPageBitmapCacheForDocument = (documentKey: string) => {
+  const keysToDelete: string[] = [];
+
+  cache.forEach((entry, key) => {
+    if (entry.documentKey === documentKey) {
+      disposeBitmap(entry.bitmap);
+      keysToDelete.push(key);
+    }
+  });
+
+  keysToDelete.forEach((key) => {
+    cache.delete(key);
+  });
+};
+
 export const clearPdfPageBitmapCache = () => {
+  cache.forEach((entry) => {
+    disposeBitmap(entry.bitmap);
+  });
   cache.clear();
 };
