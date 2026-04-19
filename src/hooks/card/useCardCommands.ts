@@ -58,7 +58,8 @@ export const useCardCommands = (folderId?: string) => {
       )
         .filter(
           (cardSet) =>
-            !cardSet.isDeleted && (cardSet.folderId ?? null) === targetFolderOrNull,
+            !cardSet.isDeleted &&
+            (cardSet.folderId ?? null) === targetFolderOrNull,
         )
         .sort((left, right) => {
           const orderLeft = left.orderIndex ?? 0;
@@ -111,7 +112,8 @@ export const useCardCommands = (folderId?: string) => {
       .where("cardSetId")
       .equals(resolvedCardSet.cardSetId)
       .count();
-    const questionNumber = cardData.questionNumber ?? `Q${cardSetCardCount + 1}`;
+    const questionNumber =
+      cardData.questionNumber ?? `Q${cardSetCardCount + 1}`;
     const id = crypto.randomUUID();
 
     const nextReviewDate = (() => {
@@ -181,8 +183,12 @@ export const useCardCommands = (folderId?: string) => {
       layoutRows: normalizeLayoutRows(
         (cardData as unknown as { layoutRows?: unknown; layout_rows?: unknown })
           .layoutRows ??
-          (cardData as unknown as { layoutRows?: unknown; layout_rows?: unknown })
-            .layout_rows ??
+          (
+            cardData as unknown as {
+              layoutRows?: unknown;
+              layout_rows?: unknown;
+            }
+          ).layout_rows ??
           DEFAULT_LAYOUT_ROWS,
       ),
       memoryStability: 0,

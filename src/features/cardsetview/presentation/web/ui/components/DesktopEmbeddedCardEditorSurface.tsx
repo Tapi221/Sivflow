@@ -259,7 +259,9 @@ export const DesktopEmbeddedCardEditorSurface = ({
 
     const updateWidth = () => {
       const nextWidth = measureSurfaceViewportWidth(element);
-      setSurfaceViewportWidth((prev) => (prev === nextWidth ? prev : nextWidth));
+      setSurfaceViewportWidth((prev) =>
+        prev === nextWidth ? prev : nextWidth,
+      );
     };
 
     updateWidth();

@@ -28,7 +28,10 @@ export const CardZoomControl = ({
   onStepDown,
   onStepUp,
 }: CardZoomControlProps) => {
-  const sliderValue = React.useMemo<readonly [number]>(() => [value] as const, [value]);
+  const sliderValue = React.useMemo<readonly [number]>(
+    () => [value] as const,
+    [value],
+  );
 
   const resolvedStep = React.useMemo(() => {
     if (!Number.isFinite(step) || step <= 0) {

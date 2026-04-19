@@ -23,7 +23,10 @@ const computeTotalPixels = () => {
 };
 
 const evictIfNeeded = () => {
-  while (cache.size > MAX_CACHE_ENTRIES || computeTotalPixels() > MAX_CACHE_PIXELS) {
+  while (
+    cache.size > MAX_CACHE_ENTRIES ||
+    computeTotalPixels() > MAX_CACHE_PIXELS
+  ) {
     let oldestKey: string | null = null;
     let oldestTimestamp = Number.POSITIVE_INFINITY;
 

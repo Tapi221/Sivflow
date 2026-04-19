@@ -22,7 +22,9 @@ const CARD_SET_VIEW_ZOOM_INPUT_IGNORE_SELECTOR = [
   "[data-card-zoom-input-ignore='true']",
 ].join(",");
 
-const resolveEventTargetElement = (target: EventTarget | null): Element | null => {
+const resolveEventTargetElement = (
+  target: EventTarget | null,
+): Element | null => {
   if (typeof Element !== "undefined" && target instanceof Element) {
     return target;
   }

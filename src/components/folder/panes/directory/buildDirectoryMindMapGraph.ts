@@ -198,7 +198,8 @@ const appendSubtree = ({
       : startY + ((leafCount - 1) * VERTICAL_GAP) / 2;
 
   const flowNodeId = `folder:${node.id}`;
-  const x = side === "left" ? -(depth * HORIZONTAL_GAP) : depth * HORIZONTAL_GAP;
+  const x =
+    side === "left" ? -(depth * HORIZONTAL_GAP) : depth * HORIZONTAL_GAP;
 
   nodes.push(
     createFolderFlowNode({
@@ -273,7 +274,8 @@ export const buildDirectoryMindMapGraph = ({
 
   const assignedRoots = compressedRoots.map((node) => {
     const leafCount = countSubtreeLeaves(node);
-    const side: MindMapSide = rightLeafTotal <= leftLeafTotal ? "right" : "left";
+    const side: MindMapSide =
+      rightLeafTotal <= leftLeafTotal ? "right" : "left";
 
     if (side === "right") {
       rightLeafTotal += leafCount;
@@ -324,4 +326,3 @@ export const buildDirectoryMindMapGraph = ({
 
   return { nodes, edges };
 };
-

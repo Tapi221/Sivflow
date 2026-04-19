@@ -54,7 +54,9 @@ const scheduleIdle = (callback: IdleCallback): IdleHandle => {
     "requestIdleCallback" in globalWindow &&
     typeof globalWindow.requestIdleCallback === "function"
   ) {
-    return globalWindow.requestIdleCallback(callback, { timeout: 120 }) as number;
+    return globalWindow.requestIdleCallback(callback, {
+      timeout: 120,
+    }) as number;
   }
 
   return window.setTimeout(() => {
@@ -193,7 +195,8 @@ export const usePdfSearch = ({
   searchNavDirection,
   getPageTextContent,
 }: UsePdfSearchOptions) => {
-  const [searchState, setSearchState] = useState<SearchState>(INITIAL_SEARCH_STATE);
+  const [searchState, setSearchState] =
+    useState<SearchState>(INITIAL_SEARCH_STATE);
 
   const normalizedSearchQuery = searchQuery.trim();
   const orderedPageNumbers = useMemo(
@@ -211,7 +214,9 @@ export const usePdfSearch = ({
   const activeRunIdRef = useRef(0);
   const lastSearchNavTokenRef = useRef(searchNavToken);
   const indexedPagesRef = useRef<Set<number>>(new Set());
-  const pendingResolversRef = useRef<Map<string, WorkerRequestResolver>>(new Map());
+  const pendingResolversRef = useRef<Map<string, WorkerRequestResolver>>(
+    new Map(),
+  );
   const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
@@ -363,7 +368,10 @@ export const usePdfSearch = ({
         return;
       }
 
-      const nextBatch = orderedPageNumbers.slice(cursor, cursor + SEARCH_BATCH_SIZE);
+      const nextBatch = orderedPageNumbers.slice(
+        cursor,
+        cursor + SEARCH_BATCH_SIZE,
+      );
 
       await Promise.all(
         nextBatch.map(async (pageNumber) => {

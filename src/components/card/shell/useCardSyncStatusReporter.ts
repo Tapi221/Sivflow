@@ -37,4 +37,3 @@ export const useCardSyncStatusReporter = ({
     return () => onSyncStatusChange(null);
   }, [onSyncStatusChange]);
 };
-

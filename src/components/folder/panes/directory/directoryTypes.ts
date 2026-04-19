@@ -39,4 +39,3 @@ export type DirectoryMindMapNodeData = {
   getTagColor: (tagNameOrId: string) => string;
   onCardClick: (cardId: string) => void;
 };
-

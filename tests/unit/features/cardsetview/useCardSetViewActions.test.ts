@@ -54,7 +54,9 @@ describe("useCardSetViewActions", () => {
     renderHook(() =>
       useCardSetViewActions({
         cardSetId: "set-1",
-        cardSetById: new Map([["set-1", { id: "set-1", folderId: "folder-1" }]]),
+        cardSetById: new Map([
+          ["set-1", { id: "set-1", folderId: "folder-1" }],
+        ]),
         selectedCardSet: makeCardSet(),
         selectedCard: null,
         currentCard: null,
@@ -88,7 +90,9 @@ describe("useCardSetViewActions", () => {
     const { result } = renderHook(() =>
       useCardSetViewActions({
         cardSetId: "set-1",
-        cardSetById: new Map([["set-1", { id: "set-1", folderId: "folder-1" }]]),
+        cardSetById: new Map([
+          ["set-1", { id: "set-1", folderId: "folder-1" }],
+        ]),
         selectedCardSet: makeCardSet(),
         selectedCard: null,
         currentCard: null,
@@ -152,7 +156,10 @@ describe("useCardSetViewActions", () => {
       await result.current.handleToggleBookmark(card);
     });
 
-    expect(toggleCardUncertaintyMock).toHaveBeenCalledWith({ card, updateCard });
+    expect(toggleCardUncertaintyMock).toHaveBeenCalledWith({
+      card,
+      updateCard,
+    });
     expect(toggleCardBookmarkMock).toHaveBeenCalledWith({ card, updateCard });
   });
 });

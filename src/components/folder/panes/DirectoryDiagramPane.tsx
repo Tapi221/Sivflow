@@ -343,14 +343,13 @@ export const DirectoryDiagramPane = ({
       if (!folderId) continue;
 
       const items = itemMap.get(folderId) ?? [];
-        items.push({
-         id: `${document.kind}:${document.id}`,
-         kind: "pdf",
-         name:
-          document.title?.trim() || document.fileName || "PDF",
-          tags: [],
-          hasUncertainty: false,
-          isBookmarked: false,
+      items.push({
+        id: `${document.kind}:${document.id}`,
+        kind: "pdf",
+        name: document.title?.trim() || document.fileName || "PDF",
+        tags: [],
+        hasUncertainty: false,
+        isBookmarked: false,
         showTags: false,
         children: [],
       });
@@ -427,9 +426,9 @@ export const DirectoryDiagramPane = ({
             <h2 className="text-sm font-semibold text-slate-800">
               繝・ぅ繝ｬ繧ｯ繝医Μ
             </h2>
-             <p className="mt-1 text-xs text-slate-500"> 
-               ドラッグで移動、ホイールで拡大縮小 
-             </p> 
+            <p className="mt-1 text-xs text-slate-500">
+              ドラッグで移動、ホイールで拡大縮小
+            </p>
           </div>
 
           <div className="flex items-center gap-2">

@@ -144,64 +144,70 @@ const postResponse = (response: PdfSearchWorkerResponse) => {
   self.postMessage(response);
 };
 
-self.addEventListener("message", (event: MessageEvent<PdfSearchWorkerRequest>) => {
-  const payload = event.data;
+self.addEventListener(
+  "message",
+  (event: MessageEvent<PdfSearchWorkerRequest>) => {
+    const payload = event.data;
 
-  switch (payload.type) {
-    case "reset": {
-      searchIndexCache.clear();
-      return;
-    }
-
-    case "index-page": {
-      try {
-        searchIndexCache.set(payload.pageNumber, buildPageSearchIndex(payload.content));
-        postResponse({
-          type: "index-page:done",
-          requestId: payload.requestId,
-          pageNumber: payload.pageNumber,
-        });
-      } catch (errorValue: unknown) {
-        postResponse({
-          type: "error",
-          requestId: payload.requestId,
-          message: getErrorMessage(errorValue),
-        });
+    switch (payload.type) {
+      case "reset": {
+        searchIndexCache.clear();
+        return;
       }
-      return;
-    }
 
-    case "search-page": {
-      try {
-        const searchIndex = searchIndexCache.get(payload.pageNumber);
-
-        if (!searchIndex) {
-          throw new Error(`page ${payload.pageNumber} is not indexed`);
-        }
-
-        postResponse({
-          type: "search-page:done",
-          requestId: payload.requestId,
-          pageNumber: payload.pageNumber,
-          matches: findPageSearchMatches({
+      case "index-page": {
+        try {
+          searchIndexCache.set(
+            payload.pageNumber,
+            buildPageSearchIndex(payload.content),
+          );
+          postResponse({
+            type: "index-page:done",
+            requestId: payload.requestId,
             pageNumber: payload.pageNumber,
-            searchIndex,
-            query: payload.query,
-          }),
-        });
-      } catch (errorValue: unknown) {
-        postResponse({
-          type: "error",
-          requestId: payload.requestId,
-          message: getErrorMessage(errorValue),
-        });
+          });
+        } catch (errorValue: unknown) {
+          postResponse({
+            type: "error",
+            requestId: payload.requestId,
+            message: getErrorMessage(errorValue),
+          });
+        }
+        return;
       }
-      return;
-    }
 
-    default: {
-      const exhaustiveCheck: never = payload;
-      return exhaustiveCheck;
+      case "search-page": {
+        try {
+          const searchIndex = searchIndexCache.get(payload.pageNumber);
+
+          if (!searchIndex) {
+            throw new Error(`page ${payload.pageNumber} is not indexed`);
+          }
+
+          postResponse({
+            type: "search-page:done",
+            requestId: payload.requestId,
+            pageNumber: payload.pageNumber,
+            matches: findPageSearchMatches({
+              pageNumber: payload.pageNumber,
+              searchIndex,
+              query: payload.query,
+            }),
+          });
+        } catch (errorValue: unknown) {
+          postResponse({
+            type: "error",
+            requestId: payload.requestId,
+            message: getErrorMessage(errorValue),
+          });
+        }
+        return;
+      }
+
+      default: {
+        const exhaustiveCheck: never = payload;
+        return exhaustiveCheck;
+      }
     }
-  }
-});
+  },
+);

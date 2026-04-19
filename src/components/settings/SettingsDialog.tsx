@@ -129,7 +129,10 @@ const SettingsNavButton = ({
         active && "ds-nav-action--active",
       )}
     >
-      <Icon className="h-4 w-4 shrink-0 ds-nav-action__icon" strokeWidth={2.1} />
+      <Icon
+        className="h-4 w-4 shrink-0 ds-nav-action__icon"
+        strokeWidth={2.1}
+      />
       <span className="ds-settings-panel__nav-label truncate">{label}</span>
     </button>
   );
