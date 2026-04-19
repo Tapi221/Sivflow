@@ -15,6 +15,7 @@
 
   .ds-popover-surface--filter {
     min-width: 16rem;
+    border: 1px solid var(--ds-semantic-color-border-strong);
   }
 
   .ds-nav-action,
