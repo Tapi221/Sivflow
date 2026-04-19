@@ -69,7 +69,6 @@ export const useCardSetViewScreenController = () => {
     isGlobalEditing: state.isGlobalEditing,
     isDesktop,
     isMetaOpen: state.isMetaOpen,
-    currentIndex: state.currentIndex,
     settings,
     cardSetId,
   });
@@ -87,13 +86,6 @@ export const useCardSetViewScreenController = () => {
     deviceScope: presentationTarget,
     cardSetId,
     viewportRef: paneWidth.contentViewportRef,
-    activeCardKey: [
-      state.selectedCard?.id ?? "",
-      state.currentDisplayMode,
-      state.currentCardLayoutMode,
-      layoutInteractionMode,
-      state.isMetaOpen ? "meta-open" : "meta-closed",
-    ].join(":"),
     displayMode: state.currentDisplayMode,
     interactionMode: layoutInteractionMode,
     requestedCardLayoutMode: state.currentCardLayoutMode,

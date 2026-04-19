@@ -112,14 +112,27 @@ const TreeViewLayout = ({
     moveCardSetToFolder,
   } = useCardSets();
 
+  const routeSelectedCardSet = useMemo(
+    () =>
+      selectedItem?.type === "cardSet"
+        ? (cardSets.find((cardSet: CardSet) => cardSet.id === selectedItem.id) ??
+          null)
+        : null,
+    [cardSets, selectedItem],
+  );
+
+  const activeSelectedCardSetId = routeSelectedCardSet?.id ?? selectedCardSetId;
+  const activeSelectedCardSetLabel =
+    routeSelectedCardSet?.name?.trim() ||
+    routeSelectedCardSet?.name ||
+    selectedCardSetLabel;
+
   const handleItemSelect = useCallback(
     (item: SelectedExplorerItem) => {
       if (item?.type === "cardSet") {
         const cardSet = cardSets.find((set: CardSet) => set.id === item.id);
         if (cardSet) {
           onFolderSelect(cardSet.folderId ?? null);
-          setSelectedCardSetId(item.id);
-          setSelectedCardSetLabel(cardSet.name || "無題のセット");
 
           navigate(
             createPageUrl(
@@ -256,29 +269,29 @@ const TreeViewLayout = ({
   }, [cardSets, explorerHeaderFolderId, selectedFolderId, selectedItem]);
 
   const currentCardSetLabel = useMemo(() => {
-    if (!selectedCardSetId) return null;
+    if (!activeSelectedCardSetId) return null;
     return (
-      cardSets.find((cardSet: CardSet) => cardSet.id === selectedCardSetId)
-        ?.name ?? selectedCardSetLabel
+      cardSets.find((cardSet: CardSet) => cardSet.id === activeSelectedCardSetId)
+        ?.name ?? activeSelectedCardSetLabel
     );
-  }, [cardSets, selectedCardSetId, selectedCardSetLabel]);
+  }, [activeSelectedCardSetId, activeSelectedCardSetLabel, cardSets]);
 
   useLayoutEffect(() => {
     onBreadcrumbContextChange?.({
       folderId: currentHeaderFolderId,
       cardSet:
-        selectedCardSetId && currentCardSetLabel
+        activeSelectedCardSetId && currentCardSetLabel
           ? {
-              id: selectedCardSetId,
+              id: activeSelectedCardSetId,
               label: currentCardSetLabel,
             }
           : null,
     });
   }, [
+    activeSelectedCardSetId,
     currentCardSetLabel,
     currentHeaderFolderId,
     onBreadcrumbContextChange,
-    selectedCardSetId,
   ]);
 
   const handleCreateRootFolder = useCallback(() => {
@@ -470,7 +483,7 @@ const TreeViewLayout = ({
       moveCardSetToFolder={moveCardSetToFolder}
       moveDocumentToFolder={handleMoveDocumentToFolder}
       reorderCardsInCardSet={reorderCardsInCardSet}
-      selectedCardSetId={selectedCardSetId}
+      selectedCardSetId={activeSelectedCardSetId}
       onSelectCardSet={handleCardSetSelectWithoutNavigation}
     />
   );
