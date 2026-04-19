@@ -9,7 +9,7 @@ import { normalizeDate } from "@/shared/codec/date";
 import { useCallback, useMemo } from "react";
 import {
   buildCardSetById,
-  isCardInFolder,
+  resolveCardFolderIdStrict,
 } from "@/domain/card/selectors/cardFolder";
 
 interface UseTreeViewDerivedStateParams {
@@ -24,6 +24,24 @@ interface UseTreeViewDerivedStateParams {
   autoCarryOver?: boolean;
   isMobile: boolean;
 }
+
+type FolderStats = {
+  dueCount: number;
+  unlearnedCount: number;
+  lastReviewedAt: Date | null;
+};
+
+const EMPTY_FOLDER_STATS: FolderStats = {
+  dueCount: 0,
+  unlearnedCount: 0,
+  lastReviewedAt: null,
+};
+
+const createEmptyFolderStats = (): FolderStats => ({
+  dueCount: 0,
+  unlearnedCount: 0,
+  lastReviewedAt: null,
+});
 
 export const useTreeViewDerivedState = ({
   folders,
@@ -61,15 +79,23 @@ export const useTreeViewDerivedState = ({
     return folders.find((folder) => folder.id === selectedFolderId) ?? null;
   }, [folders, selectedFolderId]);
 
+  const documentById = useMemo(() => {
+    const nextMap = new Map<string, DocumentItem>();
+
+    documents.forEach((document) => {
+      nextMap.set(document.id, document);
+      if (typeof document.documentId === "string" && document.documentId.length > 0) {
+        nextMap.set(document.documentId, document);
+      }
+    });
+
+    return nextMap;
+  }, [documents]);
+
   const selectedDocument = useMemo(() => {
     if (!selectedDocumentId) return null;
-    return (
-      documents.find(
-        (document) =>
-          (document.id || document.documentId) === selectedDocumentId,
-      ) ?? null
-    );
-  }, [documents, selectedDocumentId]);
+    return documentById.get(selectedDocumentId) ?? null;
+  }, [documentById, selectedDocumentId]);
 
   const mobileDetailTitle = useMemo(() => {
     if (selectedItem?.type === "directory") return "ディレクトリ";
@@ -82,19 +108,20 @@ export const useTreeViewDerivedState = ({
     return selectedFolder?.folderName ?? "フォルダ";
   }, [selectedItem, selectedFolder]);
 
-  const folderCards = useMemo(() => {
-    if (!selectedFolderId) return [];
-    const cardSetById = buildCardSetById(
-      cardSets.filter((cardSet) => !cardSet.isDeleted),
-    );
-    return cards.filter((card) => {
-      if (!isCardInFolder(card, selectedFolderId, cardSetById)) return false;
-      const isDeleted = card.isDeleted ?? card.isDeleted;
-      return !isDeleted;
-    });
-  }, [cards, selectedFolderId, cardSets]);
+  const activeCardSets = useMemo(
+    () => cardSets.filter((cardSet) => !cardSet.isDeleted),
+    [cardSets],
+  );
 
-  const folderStats = useMemo(() => {
+  const cardSetById = useMemo(
+    () => buildCardSetById(activeCardSets),
+    [activeCardSets],
+  );
+
+  const folderCardIndex = useMemo(() => {
+    const cardsByFolderId = new Map<string, Card[]>();
+    const statsByFolderId = new Map<string, FolderStats>();
+
     const today = new Date();
     const todayDate = new Date(
       today.getFullYear(),
@@ -102,17 +129,27 @@ export const useTreeViewDerivedState = ({
       today.getDate(),
     );
 
-    let dueCount = 0;
-    let unlearnedCount = 0;
-    let lastReviewedAt: Date | null = null;
+    cards.forEach((card) => {
+      if (card.isDeleted) {
+        return;
+      }
 
-    for (const card of folderCards) {
-      const isDraft = card.isDraft ?? card.isDraft;
+      const resolvedFolderId = resolveCardFolderIdStrict(card, cardSetById);
+      if (!resolvedFolderId) {
+        return;
+      }
+
+      const nextFolderCards = cardsByFolderId.get(resolvedFolderId) ?? [];
+      nextFolderCards.push(card);
+      cardsByFolderId.set(resolvedFolderId, nextFolderCards);
+
+      const nextFolderStats =
+        statsByFolderId.get(resolvedFolderId) ?? createEmptyFolderStats();
+
+      const isDraft = Boolean(card.isDraft);
 
       if (!isDraft) {
-        const reviewDate = normalizeDate(
-          card.nextReviewDate ?? card.nextReviewDate,
-        );
+        const reviewDate = normalizeDate(card.nextReviewDate);
         if (reviewDate) {
           const normalizedReviewDate = new Date(
             reviewDate.getFullYear(),
@@ -124,28 +161,45 @@ export const useTreeViewDerivedState = ({
               ? normalizedReviewDate <= todayDate
               : normalizedReviewDate.getTime() === todayDate.getTime()
           ) {
-            dueCount += 1;
+            nextFolderStats.dueCount += 1;
           }
         }
       }
 
-      const reviewCount = card.reviewCount ?? card.reviewCount ?? 0;
+      const reviewCount = card.reviewCount ?? 0;
       if (!isDraft && reviewCount === 0) {
-        unlearnedCount += 1;
+        nextFolderStats.unlearnedCount += 1;
       }
 
-      const lastReview = normalizeDate(card.lastReviewAt ?? card.lastReviewAt);
-      if (lastReview && (!lastReviewedAt || lastReview > lastReviewedAt)) {
-        lastReviewedAt = lastReview;
+      const lastReview = normalizeDate(card.lastReviewAt);
+      if (
+        lastReview &&
+        (!nextFolderStats.lastReviewedAt ||
+          lastReview > nextFolderStats.lastReviewedAt)
+      ) {
+        nextFolderStats.lastReviewedAt = lastReview;
       }
-    }
+
+      statsByFolderId.set(resolvedFolderId, nextFolderStats);
+    });
 
     return {
-      dueCount,
-      unlearnedCount,
-      lastReviewedAt,
+      cardsByFolderId,
+      statsByFolderId,
     };
-  }, [autoCarryOver, folderCards]);
+  }, [autoCarryOver, cardSetById, cards]);
+
+  const folderCards = useMemo(() => {
+    if (!selectedFolderId) return [];
+    return folderCardIndex.cardsByFolderId.get(selectedFolderId) ?? [];
+  }, [folderCardIndex.cardsByFolderId, selectedFolderId]);
+
+  const folderStats = useMemo(() => {
+    if (!selectedFolderId) return EMPTY_FOLDER_STATS;
+    return (
+      folderCardIndex.statsByFolderId.get(selectedFolderId) ?? EMPTY_FOLDER_STATS
+    );
+  }, [folderCardIndex.statsByFolderId, selectedFolderId]);
 
   const showMobileDetail =
     isMobile &&

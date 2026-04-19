@@ -1,7 +1,8 @@
 import React, { Suspense, useEffect, useRef } from "react";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
-import { Sidebar } from "./Sidebar";
+
 import "./AppLayout.css";
+import { Sidebar } from "./Sidebar";
 
 const LoadingFallback = () => {
   return (
@@ -14,6 +15,26 @@ const LoadingFallback = () => {
   );
 };
 
+const resetWorkspaceScroll = (mainElement: HTMLElement | null) => {
+  const containers = document.querySelectorAll<HTMLElement>(
+    ".app-layout, .app-layout__content, .app-layout__main",
+  );
+
+  containers.forEach((element) => {
+    element.scrollTop = 0;
+    element.scrollLeft = 0;
+  });
+
+  if (mainElement) {
+    mainElement.scrollTop = 0;
+    mainElement.scrollLeft = 0;
+  }
+
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+};
+
 export const AppLayout = () => {
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
@@ -24,31 +45,9 @@ export const AppLayout = () => {
   );
   const isCardEditRoute = /^\/cardedit(?:\/|$)/i.test(pathname);
   const isHomeOnlyMode = searchParams.get("home") === "1";
-  const selectedFolderId = searchParams.get("folderId");
   const selectedCardSetId = searchParams.get("cardSetId");
 
   const mainRef = useRef<HTMLElement | null>(null);
-
-  const resetWorkspaceScroll = () => {
-    const containers = document.querySelectorAll<HTMLElement>(
-      ".app-layout, .app-layout__content, .app-layout__main",
-    );
-
-    containers.forEach((el) => {
-      el.scrollTop = 0;
-      el.scrollLeft = 0;
-    });
-
-    const main = mainRef.current;
-    if (main) {
-      main.scrollTop = 0;
-      main.scrollLeft = 0;
-    }
-
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  };
 
   const shouldHideMainSidebar =
     (isFoldersRoute && !isHomeOnlyMode) ||
@@ -61,15 +60,8 @@ export const AppLayout = () => {
     /^\/study(?:\/|$)/i.test(pathname);
 
   useEffect(() => {
-    resetWorkspaceScroll();
-
-    const raf1 = window.requestAnimationFrame(() => {
-      resetWorkspaceScroll();
-      window.requestAnimationFrame(resetWorkspaceScroll);
-    });
-
-    return () => window.cancelAnimationFrame(raf1);
-  }, [pathname, isScrollLocked, selectedFolderId, selectedCardSetId]);
+    resetWorkspaceScroll(mainRef.current);
+  }, [pathname]);
 
   return (
     <div

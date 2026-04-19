@@ -27,5 +27,8 @@ export {
   telemetryOncePerSession,
 } from "@/services/localDBRuntimeState";
 
-// 本番でも読み込む。実際の機能露出は devtools 側の UID allowlist で制限する。
-import("./devtools").then((m) => m.installLocalDbDevtools());
+if (import.meta.env.DEV) {
+  void import("./devtools").then((module) => {
+    module.installLocalDbDevtools();
+  });
+}

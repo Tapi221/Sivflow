@@ -1,11 +1,13 @@
 import { useToast } from "@/contexts/ToastContext";
 import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/types";
 import { XlsxImportDialog } from "@/features/import/presentation/web/XlsxImportDialog";
-import { useCards } from "@/hooks/card/useCards";
+import { useCardCommands } from "@/hooks/card/useCardCommands";
+import { useCardsRead } from "@/hooks/card/useCardsRead";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
-import { useFolders } from "@/hooks/folder/useFolders";
-import { useDocuments } from "@/hooks/platform/useDocuments";
+import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
+import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
+import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
@@ -34,6 +36,7 @@ import { useNavigate } from "react-router-dom";
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
 import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
 import { TreeViewTabContent } from "@/components/folder/components/TreeViewTabContent";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions";
 import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
@@ -42,8 +45,6 @@ import { useTreeViewSidebar } from "@/components/folder/hooks/useTreeViewSidebar
 
 interface TreeViewLayoutProps {
   folders: Folder[];
-  cards: Card[];
-  documents: DocumentItem[];
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
@@ -60,8 +61,6 @@ type TreeViewTabContentProps = ComponentProps<typeof TreeViewTabContent>;
 
 const TreeViewLayout = ({
   folders,
-  cards,
-  documents,
   selectedFolderId,
   selectedItem,
   selectedCardId,
@@ -76,14 +75,16 @@ const TreeViewLayout = ({
   const navigate = useNavigate();
   const toast = useToast();
   const { settings } = useUserSettings();
-  const { createFolder, updateFolder, deleteFolder } = useFolders();
+  const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
+  const { cards = [], loading: cardsLoading } = useCardsRead();
   const {
     createCard,
     updateCard,
     deleteCard,
     moveCardToSet,
     reorderCardsInCardSet,
-  } = useCards();
+  } = useCardCommands();
+  const { documents = [], loading: documentsLoading } = useDocumentsRead();
 
   const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(
     null,
@@ -104,6 +105,7 @@ const TreeViewLayout = ({
 
   const {
     cardSets,
+    loading: cardSetsLoading,
     createCardSet,
     updateCardSet,
     deleteCardSet,
@@ -138,7 +140,7 @@ const TreeViewLayout = ({
     [cardSets, navigate, onFolderSelect, onItemSelect],
   );
 
-  const { updateDocument, deleteDocument } = useDocuments();
+  const { updateDocument, deleteDocument } = useDocumentCommands();
   const { getTagColor, tagById } = useTags();
 
   const {
@@ -410,6 +412,19 @@ const TreeViewLayout = ({
   const resolvedSidebarDisplayMode =
     settings?.folderSidebarDisplayMode === "navigation" ? "navigation" : "tree";
 
+  const isExplorerDataLoading =
+    cardsLoading || documentsLoading || cardSetsLoading;
+
+  if (isExplorerDataLoading) {
+    return (
+      <div className="space-y-3 p-4">
+        {[...Array(3)].map((_, index) => (
+          <Skeleton key={index} className="h-16 w-full rounded-2xl" />
+        ))}
+      </div>
+    );
+  }
+
   const tabContent = (
     <TreeViewTabContent
       explorerTab={explorerTab}
@@ -512,9 +527,13 @@ const TreeViewLayout = ({
         folderStats={folderStats}
         onCardUpdated={onCardUpdated}
         onDocumentUpdated={updateDocument}
-        onRenameFolder={async (folderId, newName) => {
-          await updateFolder(folderId, { folderName: newName });
-        }}
+        onRenameFolder={
+          selectedFolderId
+            ? async (newName: string) => {
+                await updateFolder(selectedFolderId, { folderName: newName });
+              }
+            : undefined
+        }
         onItemSelect={onItemSelect}
         onFolderSelect={onFolderSelect}
         handlers={{
