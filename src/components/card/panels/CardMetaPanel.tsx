@@ -22,6 +22,7 @@ import {
 } from "recharts";
 
 import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
+import { CardMetaPanelSkeleton } from "@/components/card/panels/CardMetaPanelSkeleton";
 import { MetaPanelLeadSection } from "@/components/card/panels/MetaPanelShell";
 import { SurfaceButton } from "@/components/ui/surface-button";
 import {
@@ -57,6 +58,7 @@ type MetaReviewLog = {
 };
 
 type CardMetaPanelProps = {
+  isLoading?: boolean;
   card: Card | null;
   isEditingCard?: boolean;
   reviewLogs?: ReviewLog[];
@@ -391,6 +393,7 @@ const areCardMetaPanelPropsEqual = (
   prev: CardMetaPanelProps,
   next: CardMetaPanelProps,
 ): boolean =>
+  prev.isLoading === next.isLoading &&
   areCardMetaCardsEqual(prev.card, next.card) &&
   prev.isEditingCard === next.isEditingCard &&
   prev.reviewLogs === next.reviewLogs &&
@@ -409,6 +412,7 @@ const areCardMetaPanelPropsEqual = (
   prev.tagNamesOverride === next.tagNamesOverride;
 
 const CardMetaPanelInner = ({
+  isLoading = false,
   card,
   isEditingCard = false,
   reviewLogs = [],
@@ -426,6 +430,10 @@ const CardMetaPanelInner = ({
   mode = "full",
   tagNamesOverride,
 }: CardMetaPanelProps) => {
+  if (isLoading) {
+    return <CardMetaPanelSkeleton />;
+  }
+
   const isCalendarMode = mode === "calendar";
   const infoRowClass =
     "ds-editor-pane__info-row h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-[length:var(--meta-font-size)]";

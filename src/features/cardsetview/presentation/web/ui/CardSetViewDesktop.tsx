@@ -68,6 +68,58 @@ const CardLoadingPreview = ({ card }: { card: Card }) => {
   );
 };
 
+const CardSetViewDesktopLoading = () => {
+  return (
+    <div className="flex h-full items-center justify-center px-4 py-10 md:px-8">
+      <div className="w-full max-w-[860px]">
+        <div
+          className="rounded-[36px] border p-4 md:p-5"
+          style={{
+            background: "var(--skeleton-shell-surface)",
+            borderColor: "var(--skeleton-shell-border)",
+            boxShadow: "0 24px 64px rgba(15, 23, 42, 0.06)",
+          }}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-10 w-40 rounded-full" />
+              <Skeleton className="h-8 w-28 rounded-full" />
+            </div>
+            <Skeleton className="h-8 w-36 rounded-full" />
+          </div>
+
+          <div className="mt-6 space-y-4">
+            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-4 w-72 max-w-[70%]" />
+
+            <div
+              className="rounded-[30px] border p-5 md:p-6"
+              style={{
+                background: "rgba(255, 255, 255, 0.72)",
+                borderColor: "rgba(148, 163, 184, 0.14)",
+              }}
+            >
+              <Skeleton className="h-6 w-44" />
+              <div className="mt-8 space-y-3">
+                <Skeleton className="h-4 w-[82%]" />
+                <Skeleton className="h-4 w-[74%]" />
+                <Skeleton className="h-4 w-[88%]" />
+                <Skeleton className="h-4 w-[67%]" />
+                <Skeleton className="h-4 w-[56%]" />
+              </div>
+
+              <div className="mt-10 grid grid-cols-2 gap-3">
+                <Skeleton className="h-10 rounded-2xl" />
+                <Skeleton className="h-10 rounded-2xl" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface CardSetViewDesktopProps {
   isLoading: boolean;
   isGlobalEditing: boolean;
@@ -241,14 +293,7 @@ export const CardSetViewDesktop = ({
   );
 
   if (isLoading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <div className="w-full max-w-md space-y-4 px-4">
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-[400px] w-full" />
-        </div>
-      </div>
-    );
+    return <CardSetViewDesktopLoading />;
   }
 
   return (

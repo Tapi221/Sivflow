@@ -1,14 +1,25 @@
 @layer base {
   :root {
     --app-top-inset: 0px;
-    --app-bg: #fcfbf7;
-    --app-bg-dot: #d1d1d1;
+    --app-bg: #f7f5f1;
+    --app-bg-dot: rgba(148, 163, 184, 0.18);
     --app-bg-dot-size: 0.75px;
     --app-bg-dot-gap: 14px;
-    --app-loading-spinner-track: rgb(var(--ds-color-neutral-300-rgb) / 0.34);
-    --app-loading-spinner-indicator: rgb(
-      var(--ds-semantic-color-action-primary-rgb) / 0.58
-    );
+    --app-loading-spinner-track: rgba(148, 163, 184, 0.18);
+    --app-loading-spinner-indicator: rgba(100, 116, 139, 0.64);
+    --skeleton-base: #ece7de;
+    --skeleton-highlight: rgba(255, 255, 255, 0.7);
+    --skeleton-shell-surface: rgba(253, 252, 249, 0.88);
+    --skeleton-shell-border: rgba(148, 163, 184, 0.16);
+  }
+
+  @keyframes skeleton-shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
   }
 
   *,

@@ -3,6 +3,7 @@ import { useCardSetViewMetaPanelActions } from "@/features/cardsetview/presentat
 import type { Card, UserSettings } from "@/types";
 
 interface CardSetViewMetaPanelProps {
+  isLoading?: boolean;
   selectedCard: Card | null;
   isGlobalEditing: boolean;
   settings: UserSettings | undefined;
@@ -10,6 +11,7 @@ interface CardSetViewMetaPanelProps {
 }
 
 export const CardSetViewMetaPanel = ({
+  isLoading = false,
   selectedCard,
   isGlobalEditing,
   settings,
@@ -36,6 +38,7 @@ export const CardSetViewMetaPanel = ({
 
   return (
     <CardMetaPanel
+      isLoading={isLoading}
       card={selectedCard}
       reviewLogs={reviewLogs}
       onAddReviewLog={onAddReviewLog}

@@ -145,6 +145,7 @@ export const CardSetViewScreen = () => {
       }
       metaPanel={
         <CardSetViewMetaPanel
+          isLoading={data.isLoading}
           selectedCard={state.selectedCard}
           isGlobalEditing={state.isGlobalEditing}
           settings={settings}
