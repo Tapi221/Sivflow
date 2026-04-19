@@ -1475,6 +1475,7 @@ const CardMetaPanelInner = ({
                   <ComposedChart
                     data={chartData}
                     margin={{ top: 8, right: 8, left: -12, bottom: 0 }}
+                    accessibilityLayer={false}
                   >
                     <defs>
                       <linearGradient

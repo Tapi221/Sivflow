@@ -125,7 +125,7 @@ interface CardSetViewDesktopProps {
   isGlobalEditing: boolean;
   flippedCardIds: Set<string>;
   cardsForPager: Card[];
-  selectedCardId: string | null;
+  selectedCardIndex: number;
   safeCurrentIndex: number;
   settings?: Partial<UserSettings> | null;
   currentDisplayMode: CardDisplayMode;
@@ -149,7 +149,7 @@ export const CardSetViewDesktop = ({
   isGlobalEditing,
   flippedCardIds,
   cardsForPager,
-  selectedCardId,
+  selectedCardIndex,
   safeCurrentIndex,
   settings = null,
   currentDisplayMode,
@@ -220,16 +220,12 @@ export const CardSetViewDesktop = ({
 
   const editingCardsOverride = isGlobalEditing ? cardsForPager : undefined;
 
-  const selectedIndex = useMemo(() => {
-    if (!selectedCardId) return -1;
-    return cardsForPager.findIndex((card) => card.id === selectedCardId);
-  }, [cardsForPager, selectedCardId]);
-
   useEffect(() => {
-    if (selectedIndex < 0) return;
-    if (selectedIndex === safeCurrentIndex) return;
-    onActiveIndexChange(selectedIndex);
-  }, [onActiveIndexChange, safeCurrentIndex, selectedIndex]);
+    if (selectedCardIndex < 0) return;
+    if (selectedCardIndex === safeCurrentIndex) return;
+
+    onActiveIndexChange(selectedCardIndex);
+  }, [onActiveIndexChange, safeCurrentIndex, selectedCardIndex]);
 
   const getScrollAnchorSelector = useCallback(
     (card: Card, _idx: number, isActive: boolean) => {
