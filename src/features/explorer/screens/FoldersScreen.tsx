@@ -1,11 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCards } from "@/hooks/card/useCards";
-import { useFolders } from "@/hooks/folder/useFolders";
-import { useDocuments } from "@/hooks/platform/useDocuments";
-import { cn } from "@/lib/utils";
-import type { SelectedExplorerItem } from "@/types";
 import { notifySelectedFolderChanged } from "@/features/explorer/adapters/web/explorerSelectionNotifier";
 import type { FoldersRouteAdapter } from "@/features/explorer/adapters/web/useFoldersRouteAdapter";
 import { useWorkspaceScrollController } from "@/features/explorer/adapters/web/useWorkspaceScrollController";
@@ -14,9 +10,30 @@ import { useExplorerController } from "@/features/explorer/controller/useExplore
 import { useExplorerBreadcrumbSync } from "@/features/explorer/hooks/useExplorerBreadcrumbSync";
 import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups";
 import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
+import { useSelectedExplorerCard } from "@/features/explorer/hooks/useSelectedExplorerCard";
+import { useSelectedExplorerDocument } from "@/features/explorer/hooks/useSelectedExplorerDocument";
+import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
+import { cn } from "@/lib/utils";
+import type { SelectedExplorerItem } from "@/types";
 
 type FoldersScreenProps = {
   route: FoldersRouteAdapter;
+};
+
+const resolveSelectedCardId = (selectedItem: SelectedExplorerItem) => {
+  if (selectedItem?.type !== "card") {
+    return null;
+  }
+
+  return selectedItem.id;
+};
+
+const resolveSelectedDocumentId = (selectedItem: SelectedExplorerItem) => {
+  if (selectedItem?.type !== "document") {
+    return null;
+  }
+
+  return selectedItem.id;
 };
 
 export const FoldersScreen = ({ route }: FoldersScreenProps) => {
@@ -33,14 +50,30 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     isDesktop: route.isDesktop,
   });
 
-  const { folders = [], loading: foldersLoading } = useFolders();
-  const { cards = [], loading: cardsLoading } = useCards();
-  const { documents = [] } = useDocuments();
+  const { folders = [], loading: foldersLoading } = useFoldersRead();
+
+  const selectedCardId = resolveSelectedCardId(controller.state.selectedItem);
+  const selectedDocumentId = resolveSelectedDocumentId(
+    controller.state.selectedItem,
+  );
+
+  const { card: selectedCard } = useSelectedExplorerCard(selectedCardId);
+  const { document: selectedDocument } =
+    useSelectedExplorerDocument(selectedDocumentId);
+
+  const breadcrumbCards = useMemo(
+    () => (selectedCard ? [selectedCard] : []),
+    [selectedCard],
+  );
+  const breadcrumbDocuments = useMemo(
+    () => (selectedDocument ? [selectedDocument] : []),
+    [selectedDocument],
+  );
 
   const lookups = useExplorerLookups({
     folders,
-    cards,
-    documents,
+    cards: breadcrumbCards,
+    documents: breadcrumbDocuments,
     selectedItem: controller.state.selectedItem,
   });
 
@@ -75,8 +108,6 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     controller.actions.selectItem(item);
   };
 
-  const isLoading = foldersLoading || cardsLoading;
-
   if (controller.state.isHomeOnlyMode) {
     return <div className="flex min-h-0 h-full w-full bg-transparent" />;
   }
@@ -91,7 +122,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
       )}
     >
       <div className="relative z-10 w-full mx-auto h-full min-h-0 flex">
-        {isLoading ? (
+        {foldersLoading ? (
           <div className="space-y-3 p-4">
             {[...Array(3)].map((_, index) => (
               <Skeleton key={index} className="h-16 w-full rounded-2xl" />
@@ -100,8 +131,6 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
         ) : (
           <TreeViewLayout
             folders={lookups.normalizedFolders}
-            cards={cards}
-            documents={documents}
             selectedFolderId={controller.state.selectedFolderId}
             selectedItem={controller.state.selectedItem}
             selectedCardId={lookups.selectedCardId}
