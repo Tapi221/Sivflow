@@ -301,13 +301,14 @@ export const Sidebar = () => {
             }
           >
             <SidebarNavIcon>{icon}</SidebarNavIcon>
-            {label}
+            <span className="sidebar__nav-label">{label}</span>
           </NavLink>
         ))}
       </nav>
 
       <div className="sidebar__footer">
         <button
+          type="button"
           className={getSidebarNavItemClassName({
             className: "sidebar__settings-btn",
           })}
@@ -316,7 +317,7 @@ export const Sidebar = () => {
           <SidebarNavIcon>
             <SettingsIcon />
           </SidebarNavIcon>
-          設定
+          <span className="sidebar__nav-label">設定</span>
         </button>
       </div>
     </aside>
