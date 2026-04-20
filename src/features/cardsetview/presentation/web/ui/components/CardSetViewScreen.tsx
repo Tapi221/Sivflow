@@ -35,6 +35,7 @@ export const CardSetViewScreen = () => {
     disabledCardLayoutModes,
     layoutConstraintIndicatorLabel,
     handleChangeCardLayoutMode,
+    handleJumpToCard,
   } = controller;
 
   const presentationTarget = usePresentationTarget();
@@ -50,6 +51,14 @@ export const CardSetViewScreen = () => {
   const isDesktopPresentation = presentationTarget === "desktop";
   const Content = CARD_SET_VIEW_CONTENT_COMPONENTS[presentationTarget];
   const desktopOverlayTopInsetPx = getAppTopInsetPx({ presentationTarget });
+  const indexNavigator =
+    state.cardsForPager.length > 0
+      ? {
+          current: state.safeCurrentIndex + 1,
+          total: state.cardsForPager.length,
+          onCommit: handleJumpToCard,
+        }
+      : null;
 
   const compactToolbar = (
     <CardViewCompactToolbar
@@ -58,6 +67,7 @@ export const CardSetViewScreen = () => {
       disabledCardLayoutModes={disabledCardLayoutModes}
       onChangeDisplayMode={state.setCurrentDisplayMode}
       onChangeCardLayoutMode={handleChangeCardLayoutMode}
+      indexNavigator={indexNavigator}
       zoom={
         topLeftZoomControl
           ? {
@@ -109,6 +119,8 @@ export const CardSetViewScreen = () => {
     </>
   );
 
+  const topLeftControl = null;
+
   useEffect(() => {
     dispatchCardSetViewWindowEvent(
       CARD_SET_VIEW_EVENTS.metaOpenChange,
@@ -129,6 +141,7 @@ export const CardSetViewScreen = () => {
       shellClassName="h-full"
       widthControl={null}
       widthControlClassName="hidden md:flex"
+      topLeftControl={topLeftControl}
       overlayChildren={overlayChildren}
       overlayTopInsetPx={desktopOverlayTopInsetPx}
       isMetaOpen={state.isMetaOpen}

@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { useToast } from "@/contexts/ToastContext";
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
+import { clampCardIndex } from "@/features/cardsetview/domain/cardSetViewState";
 import {
   CARD_LAYOUT_MODE_LABELS,
   type CardLayoutMode,
@@ -60,6 +61,8 @@ export const useCardSetViewScreenController = () => {
     layoutTransitionScrollAnchorRevision,
     setLayoutTransitionScrollAnchorRevision,
   ] = useState(0);
+  const [scrollToActiveIndexRequestKey, setScrollToActiveIndexRequestKey] =
+    useState(0);
 
   const paneWidth = useCardSetViewPaneWidth({
     isGlobalEditing: state.isGlobalEditing,
@@ -204,6 +207,24 @@ export const useCardSetViewScreenController = () => {
     [],
   );
 
+  const handleJumpToCard = useCallback(
+    (nextOneBasedIndex: number) => {
+      const totalCards = state.cardsForPager.length;
+      if (totalCards <= 0) {
+        return;
+      }
+
+      const nextZeroBasedIndex = clampCardIndex(
+        nextOneBasedIndex - 1,
+        totalCards,
+      );
+
+      state.setCurrentIndex(nextZeroBasedIndex);
+      setScrollToActiveIndexRequestKey((currentKey) => currentKey + 1);
+    },
+    [state.cardsForPager.length, state.setCurrentIndex],
+  );
+
   const handleChangeCardLayoutMode = useCallback(
     (nextMode: CardLayoutMode) => {
       if (nextMode === currentCardLayoutMode) {
@@ -242,8 +263,10 @@ export const useCardSetViewScreenController = () => {
     widthControl,
     topLeftZoomControl,
     handleActiveScrollAnchorFaceChange,
+    handleJumpToCard,
     handleChangeCardLayoutMode,
     layoutTransitionScrollAnchorRevision,
+    scrollToActiveIndexRequestKey,
     handleSaveCurrentDisplayMode,
     effectiveCardLayoutMode: zoom.effectiveCardLayoutMode,
     disabledCardLayoutModes,

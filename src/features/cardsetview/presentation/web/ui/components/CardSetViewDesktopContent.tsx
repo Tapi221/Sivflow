@@ -29,6 +29,7 @@ export const CardSetViewDesktopContent = ({
       layoutTransitionScrollAnchorRevision={
         controller.layoutTransitionScrollAnchorRevision
       }
+      scrollToActiveIndexRequestKey={controller.scrollToActiveIndexRequestKey}
       cardSetId={cardSetId}
       viewZoomScale={zoom.zoomScale}
       fixedCardWidthPx={zoom.fixedCardWidthPx}

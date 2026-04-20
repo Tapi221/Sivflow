@@ -23,6 +23,12 @@ type ZoomControlProps = {
   onStepUp: () => void;
 };
 
+type CardIndexNavigatorProps = {
+  current: number;
+  total: number;
+  onCommit: (nextOneBasedIndex: number) => void;
+};
+
 type CardViewCompactToolbarProps = {
   displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
@@ -30,6 +36,7 @@ type CardViewCompactToolbarProps = {
   onChangeDisplayMode: (mode: CardDisplayMode) => void;
   onChangeCardLayoutMode: (mode: CardLayoutMode) => void;
   zoom?: ZoomControlProps | null;
+  indexNavigator?: CardIndexNavigatorProps | null;
 };
 
 type ModeButtonProps = {
@@ -38,6 +45,28 @@ type ModeButtonProps = {
   label: string;
   disabled?: boolean;
   children: React.ReactNode;
+};
+
+const normalizeCommittedCardIndex = ({
+  draftValue,
+  fallbackValue,
+  total,
+}: {
+  draftValue: string;
+  fallbackValue: number;
+  total: number;
+}) => {
+  const trimmedDraftValue = draftValue.trim();
+  if (trimmedDraftValue.length === 0) {
+    return fallbackValue;
+  }
+
+  const parsedValue = Number(trimmedDraftValue);
+  if (!Number.isFinite(parsedValue)) {
+    return fallbackValue;
+  }
+
+  return Math.min(total, Math.max(1, Math.trunc(parsedValue)));
 };
 
 const ModeButton = ({
@@ -251,6 +280,7 @@ export const CardViewCompactToolbar = ({
   onChangeDisplayMode,
   onChangeCardLayoutMode,
   zoom = null,
+  indexNavigator = null,
 }: CardViewCompactToolbarProps) => {
   const nextDisplayMode: CardDisplayMode =
     displayMode === "fixed" ? "fluid" : "fixed";
@@ -288,6 +318,93 @@ export const CardViewCompactToolbar = ({
       }
     },
     [zoom],
+  );
+
+  const indexNavigatorCurrent = indexNavigator?.current ?? null;
+  const indexNavigatorTotal = indexNavigator?.total ?? null;
+  const skipNextBlurCommitRef = React.useRef(false);
+  const [draftIndexValue, setDraftIndexValue] = React.useState(() => {
+    if (indexNavigatorCurrent == null) {
+      return "";
+    }
+
+    return String(indexNavigatorCurrent);
+  });
+
+  React.useEffect(() => {
+    if (indexNavigatorCurrent == null || indexNavigatorTotal == null) {
+      setDraftIndexValue("");
+      return;
+    }
+
+    setDraftIndexValue(String(indexNavigatorCurrent));
+  }, [indexNavigatorCurrent, indexNavigatorTotal]);
+
+  const commitIndexInput = React.useCallback(() => {
+    if (
+      !indexNavigator ||
+      indexNavigatorCurrent == null ||
+      indexNavigatorTotal == null
+    ) {
+      return;
+    }
+
+    const nextCommittedValue = normalizeCommittedCardIndex({
+      draftValue: draftIndexValue,
+      fallbackValue: indexNavigatorCurrent,
+      total: indexNavigatorTotal,
+    });
+
+    setDraftIndexValue(String(nextCommittedValue));
+    indexNavigator.onCommit(nextCommittedValue);
+  }, [
+    draftIndexValue,
+    indexNavigator,
+    indexNavigatorCurrent,
+    indexNavigatorTotal,
+  ]);
+
+  const handleIndexInputChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const sanitizedValue = event.currentTarget.value.replace(/\D+/g, "");
+      setDraftIndexValue(sanitizedValue);
+    },
+    [],
+  );
+
+  const handleIndexInputBlur = React.useCallback(() => {
+    if (skipNextBlurCommitRef.current) {
+      skipNextBlurCommitRef.current = false;
+      return;
+    }
+
+    commitIndexInput();
+  }, [commitIndexInput]);
+
+  const handleIndexInputKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.nativeEvent.isComposing) {
+        return;
+      }
+
+      if (event.key === "Enter") {
+        event.preventDefault();
+        skipNextBlurCommitRef.current = true;
+        commitIndexInput();
+        event.currentTarget.blur();
+        return;
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        if (indexNavigatorCurrent == null) {
+          return;
+        }
+
+        setDraftIndexValue(String(indexNavigatorCurrent));
+      }
+    },
+    [commitIndexInput, indexNavigatorCurrent],
   );
 
   return (
@@ -333,6 +450,30 @@ export const CardViewCompactToolbar = ({
           <SplitGlyph />
         </ModeButton>
       </div>
+
+      {indexNavigator ? (
+        <>
+          <ToolbarDivider />
+
+          <div className="flex items-center gap-1 text-[10px] font-semibold tabular-nums text-[#6b5f55]">
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={draftIndexValue}
+              onChange={handleIndexInputChange}
+              onBlur={handleIndexInputBlur}
+              onKeyDown={handleIndexInputKeyDown}
+              className={cn(
+                "h-6 w-12 rounded-full border border-[rgba(225,214,203,0.9)] bg-[rgba(255,250,244,0.84)] px-2 text-center text-[10px] font-semibold text-[#463c35] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none transition focus:border-[rgba(189,166,144,0.92)] focus:bg-[rgba(255,252,247,0.98)] sm:w-14",
+              )}
+              aria-label="カード番号"
+              data-card-zoom-input-ignore="true"
+            />
+            <span className="shrink-0">/ {indexNavigator.total}</span>
+          </div>
+        </>
+      ) : null}
 
       {zoom && sliderValue ? (
         <>

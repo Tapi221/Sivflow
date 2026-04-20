@@ -148,6 +148,7 @@ interface CardSetViewDesktopProps {
   currentCardLayoutMode: CardLayoutMode;
   folderId: string | null;
   layoutTransitionScrollAnchorRevision: number;
+  scrollToActiveIndexRequestKey: number;
   cardSetId: string | null;
   viewZoomScale: number;
   fixedCardWidthPx: number;
@@ -171,6 +172,7 @@ export const CardSetViewDesktop = ({
   currentCardLayoutMode,
   folderId,
   layoutTransitionScrollAnchorRevision,
+  scrollToActiveIndexRequestKey,
   cardSetId,
   viewZoomScale,
   fixedCardWidthPx,
@@ -309,6 +311,8 @@ export const CardSetViewDesktop = ({
     ],
   );
 
+  void selectedCardIndex;
+
   if (isLoading) {
     return <CardSetViewDesktopLoading />;
   }
@@ -338,6 +342,8 @@ export const CardSetViewDesktop = ({
       onActiveScrollAnchorFaceChange={onActiveScrollAnchorFaceChange}
       getScrollAnchorSelector={getScrollAnchorSelector}
       preserveScrollAnchorKey={preserveScrollAnchorKey}
+      scrollToActiveIndexRequestKey={scrollToActiveIndexRequestKey}
+      scrollToActiveIndexBehavior="auto"
       renderCard={renderCard}
     />
   );
