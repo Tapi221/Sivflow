@@ -16,6 +16,19 @@
     color: var(--ds-semantic-color-text-primary);
   }
 
+  .meta-panel .ds-editor-pane__body {
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+
+  .meta-panel .ds-editor-pane__body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .meta-panel .ds-editor-pane__body::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
   .ds-editor-pane__content {
     gap: var(--ds-spacing-6);
   }
