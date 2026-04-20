@@ -92,6 +92,24 @@ export type Card = BaseEntity & {
   cardId?: string;
   uncertaintyMarkedDate?: Date | Timestamp;
   completedDate?: Date | Timestamp;
+  /**
+   * このデバイスで、そのカードの同期が最後に完了した時刻。
+   * ローカル専用メタデータであり、クラウドへは送らない。
+   */
+  lastSyncedAt?: Date | Timestamp | null;
+  /**
+   * このデバイスにおけるカードの同期状態。
+   * pending: ローカル変更あり / 未反映
+   * synced: 同期済み
+   * error: 同期失敗
+   * conflict: 競合あり
+   */
+  syncState?: "pending" | "synced" | "error" | "conflict";
+  /**
+   * lastSyncedAt を記録したデバイスID。
+   * ローカル専用メタデータであり、クラウドへは送らない。
+   */
+  lastSyncedByDeviceId?: string | null;
   _rescueRaw?: unknown;
 };
 

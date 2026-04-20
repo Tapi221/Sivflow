@@ -193,6 +193,21 @@ const formatDateLabel = (value: unknown) => {
   return META_DATE_FORMATTER.format(date);
 };
 
+const formatCardSyncStateLabel = (value: unknown) => {
+  switch (value) {
+    case "pending":
+      return "未反映";
+    case "synced":
+      return "同期済み";
+    case "error":
+      return "同期エラー";
+    case "conflict":
+      return "競合";
+    default:
+      return "未同期";
+  }
+};
+
 const toDateTimeLocalValue = (value: unknown) => {
   const date = toValidDate(value);
   if (!date) return "";
@@ -393,6 +408,18 @@ const areCardMetaCardsEqual = (
     next.lastReviewAt ?? nextLegacy?.last_review_at,
   );
   if (prevLastReviewAt !== nextLastReviewAt) return false;
+
+  const prevLastSyncedAt = cardMetaDateTimeMs(
+    prev.lastSyncedAt ?? prevLegacy?.last_synced_at,
+  );
+  const nextLastSyncedAt = cardMetaDateTimeMs(
+    next.lastSyncedAt ?? nextLegacy?.last_synced_at,
+  );
+  if (prevLastSyncedAt !== nextLastSyncedAt) return false;
+
+  const prevSyncState = prev.syncState ?? prevLegacy?.sync_state ?? null;
+  const nextSyncState = next.syncState ?? nextLegacy?.sync_state ?? null;
+  if (prevSyncState !== nextSyncState) return false;
 
   if (prev.tagIds !== next.tagIds) return false;
 
@@ -1342,6 +1369,18 @@ const CardMetaPanelInner = ({
             <p className={infoRowClass}>
               更新日:{" "}
               {formatDateLabel(card?.updatedAt ?? asRecord(card)?.updated_at)}
+            </p>
+            <p className={infoRowClass}>
+              カード同期:{" "}
+              {formatDateLabel(
+                card?.lastSyncedAt ?? asRecord(card)?.last_synced_at,
+              )}
+            </p>
+            <p className={infoRowClass}>
+              同期状態:{" "}
+              {formatCardSyncStateLabel(
+                card?.syncState ?? asRecord(card)?.sync_state,
+              )}
             </p>
             <p className={infoRowClass}>最終同期: {syncStatusText}</p>
             {syncStatus?.hasError && syncStatus.onRetry ? (
