@@ -233,6 +233,43 @@ export const FoldersScreenSkeleton = () => {
   );
 };
 
+export const CardSetViewDesktopContentSkeleton = () => {
+  return (
+    <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col px-4 py-4 md:px-6 md:py-6">
+      <ScreenSkeletonCard className="relative flex min-h-0 flex-1 flex-col overflow-hidden p-4 md:p-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-10 w-40 rounded-full" />
+            <Skeleton className="h-8 w-24 rounded-full" />
+          </div>
+          <Skeleton className="h-10 w-36 rounded-full" />
+        </div>
+
+        <div className="flex flex-1 min-h-0 items-center justify-center py-4 md:py-8">
+          <div className="relative w-full max-w-[980px]">
+            <ScreenSkeletonCard className="overflow-hidden rounded-[32px] md:rounded-[40px] p-4 md:p-5">
+              <div className="space-y-4">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-[78%]" />
+                <Skeleton className="h-[420px] md:h-[560px] w-full rounded-[28px]" />
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Skeleton className="h-12 rounded-2xl" />
+                  <Skeleton className="h-12 rounded-2xl" />
+                </div>
+              </div>
+            </ScreenSkeletonCard>
+          </div>
+        </div>
+
+        <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 md:bottom-5 md:right-5">
+          <Skeleton className="h-9 w-28 rounded-full" />
+          <Skeleton className="h-12 w-[220px] rounded-full" />
+        </div>
+      </ScreenSkeletonCard>
+    </div>
+  );
+};
+
 export const CardSetViewScreenSkeleton = () => {
   return (
     <ScreenSkeletonSurface className="h-full">
@@ -240,38 +277,7 @@ export const CardSetViewScreenSkeleton = () => {
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="relative flex min-h-0 flex-1 overflow-hidden">
             <div className="flex min-h-0 min-w-0 flex-1 p-0 md:p-0">
-              <div className="flex min-h-0 min-w-0 flex-1 flex-col px-4 py-4 md:px-6 md:py-6">
-                <ScreenSkeletonCard className="relative flex min-h-0 flex-1 flex-col overflow-hidden p-4 md:p-6">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-10 w-40 rounded-full" />
-                      <Skeleton className="h-8 w-24 rounded-full" />
-                    </div>
-                    <Skeleton className="h-10 w-36 rounded-full" />
-                  </div>
-
-                  <div className="flex flex-1 min-h-0 items-center justify-center py-4 md:py-8">
-                    <div className="relative w-full max-w-[980px]">
-                      <ScreenSkeletonCard className="overflow-hidden rounded-[32px] md:rounded-[40px] p-4 md:p-5">
-                        <div className="space-y-4">
-                          <Skeleton className="h-5 w-40" />
-                          <Skeleton className="h-4 w-[78%]" />
-                          <Skeleton className="h-[420px] md:h-[560px] w-full rounded-[28px]" />
-                          <div className="grid gap-3 md:grid-cols-2">
-                            <Skeleton className="h-12 rounded-2xl" />
-                            <Skeleton className="h-12 rounded-2xl" />
-                          </div>
-                        </div>
-                      </ScreenSkeletonCard>
-                    </div>
-                  </div>
-
-                  <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 md:bottom-5 md:right-5">
-                    <Skeleton className="h-9 w-28 rounded-full" />
-                    <Skeleton className="h-12 w-[220px] rounded-full" />
-                  </div>
-                </ScreenSkeletonCard>
-              </div>
+              <CardSetViewDesktopContentSkeleton />
             </div>
 
             <aside className="hidden h-full w-[var(--ui-panel-width)] shrink-0 border-l border-slate-200/80 bg-white/80 md:block">
@@ -540,7 +546,7 @@ export const DirectoryScreenSkeleton = () => {
             </div>
           </div>
 
-          <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px] flex-1 min-h-0">
+          <div className="mt-6 grid flex-1 min-h-0 gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
             <ScreenSkeletonCard className="relative min-h-[560px] overflow-hidden p-4 md:p-5">
               <Skeleton className="absolute left-10 top-10 h-14 w-36 rounded-2xl" />
               <Skeleton className="absolute left-56 top-24 h-14 w-44 rounded-2xl" />
@@ -578,7 +584,10 @@ export const GalleryScreenSkeleton = () => {
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, index) => (
-              <ScreenSkeletonCard key={`gallery-${index}`} className="overflow-hidden p-3">
+              <ScreenSkeletonCard
+                key={`gallery-${index}`}
+                className="overflow-hidden p-3"
+              >
                 <Skeleton className="aspect-[4/3] w-full rounded-[24px]" />
                 <div className="space-y-3 p-2 pt-4">
                   <Skeleton className="h-5 w-[70%]" />
