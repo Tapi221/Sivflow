@@ -92,7 +92,9 @@ export const mergeTitleBarBreadcrumbs = ({
       ? [baseCrumbs[0], { label: "フォルダ一覧", to: FOLDER_LIST_ROUTE }]
       : baseCrumbs;
 
-  const defaultLastBaseRoute = isCardSetViewPath ? FOLDER_LIST_ROUTE : HOME_ROUTE;
+  const defaultLastBaseRoute = isCardSetViewPath
+    ? FOLDER_LIST_ROUTE
+    : HOME_ROUTE;
 
   const clickableBaseCrumbs = baseCrumbsForMerge.map((crumb, index) =>
     index === baseCrumbsForMerge.length - 1

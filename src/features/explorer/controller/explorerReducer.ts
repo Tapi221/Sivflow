@@ -18,7 +18,8 @@ export const explorerReducer = (
   switch (action.type) {
     case "APPLY_ROUTE_STATE": {
       const next = action.payload;
-      const didSelectedFolderChange = state.selectedFolderId !== next.selectedFolderId;
+      const didSelectedFolderChange =
+        state.selectedFolderId !== next.selectedFolderId;
       const didSelectedItemChange = !isSameSelectedExplorerItem(
         state.selectedItem,
         next.selectedItem,

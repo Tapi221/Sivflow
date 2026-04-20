@@ -41,7 +41,10 @@ const isSameRenderRange = (
 const CardLoadingPreview = ({
   card,
   heightPx,
-}: { card: Card; heightPx?: number }) => {
+}: {
+  card: Card;
+  heightPx?: number;
+}) => {
   return (
     <div
       aria-hidden

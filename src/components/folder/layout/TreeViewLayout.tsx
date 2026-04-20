@@ -136,8 +136,9 @@ const TreeViewLayout = ({
     if (!activeSelectedCardSetId) return null;
 
     return (
-      cardSets.find((cardSet: CardSet) => cardSet.id === activeSelectedCardSetId)
-        ?.name ??
+      cardSets.find(
+        (cardSet: CardSet) => cardSet.id === activeSelectedCardSetId,
+      )?.name ??
       (routeSelectedCardSet?.id === activeSelectedCardSetId
         ? routeSelectedCardSet.name
         : selectedCardSetLabel)
@@ -283,8 +284,9 @@ const TreeViewLayout = ({
 
     if (activeSelectedCardSetId) {
       return (
-        cardSets.find((cardSet: CardSet) => cardSet.id === activeSelectedCardSetId)
-          ?.folderId ??
+        cardSets.find(
+          (cardSet: CardSet) => cardSet.id === activeSelectedCardSetId,
+        )?.folderId ??
         routeSelectedCardSet?.folderId ??
         null
       );

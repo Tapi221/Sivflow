@@ -217,7 +217,11 @@ const buildPageNumbersInWindow = ({
   windowTop: number;
   windowBottom: number;
 }) => {
-  if (numPages <= 0 || pageTopOffsets.length === 0 || pageBottomOffsets.length === 0) {
+  if (
+    numPages <= 0 ||
+    pageTopOffsets.length === 0 ||
+    pageBottomOffsets.length === 0
+  ) {
     return [];
   }
 
@@ -337,9 +341,10 @@ const buildVisibleTextLayerPageNumbers = ({
     windowBottom: scrollTop + viewportHeight,
   });
 
-  const stickyPages = typeof activeMatchPageNumber === "number"
-    ? [activeMatchPageNumber]
-    : [currentPage];
+  const stickyPages =
+    typeof activeMatchPageNumber === "number"
+      ? [activeMatchPageNumber]
+      : [currentPage];
 
   return mergePageNumbers(visiblePages, stickyPages);
 };
@@ -804,7 +809,8 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
                   activeMatchPageNumber === pageNumber
                     ? searchState.activeMatchIndex
                     : undefined;
-                const renderTextLayer = textLayerPageNumbers.includes(pageNumber);
+                const renderTextLayer =
+                  textLayerPageNumbers.includes(pageNumber);
 
                 return (
                   <div

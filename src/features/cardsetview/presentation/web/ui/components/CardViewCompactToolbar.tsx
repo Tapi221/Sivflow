@@ -292,10 +292,7 @@ export const CardViewCompactToolbar = ({
 
   return (
     <div
-      className={cn(
-        overlayGlassToolbarClassName,
-        "gap-1.5 px-2 py-1",
-      )}
+      className={cn(overlayGlassToolbarClassName, "gap-1.5 px-2 py-1")}
       data-card-zoom-input-ignore="true"
     >
       <ModeButton

@@ -322,10 +322,7 @@ export const useCardImagePreloader = (
 
   useEffect(() => {
     return () => {
-      if (
-        typeof window !== "undefined" &&
-        flushReadyRafRef.current != null
-      ) {
+      if (typeof window !== "undefined" && flushReadyRafRef.current != null) {
         window.cancelAnimationFrame(flushReadyRafRef.current);
         flushReadyRafRef.current = null;
       }
@@ -403,7 +400,8 @@ export const useCardImagePreloader = (
     }
 
     eagerIndices.sort(
-      (left, right) => Math.abs(left - activeIndex) - Math.abs(right - activeIndex),
+      (left, right) =>
+        Math.abs(left - activeIndex) - Math.abs(right - activeIndex),
     );
 
     let running = 0;
@@ -456,10 +454,7 @@ export const useCardImagePreloader = (
         idleHandles.push(ric(() => void preload(index), { timeout: 3000 }));
       } else {
         idleHandles.push(
-          setTimeout(
-            () => void preload(index),
-            80 + (index - idleStart) * 10,
-          ),
+          setTimeout(() => void preload(index), 80 + (index - idleStart) * 10),
         );
       }
     }
@@ -467,10 +462,7 @@ export const useCardImagePreloader = (
     return () => {
       controller.abort();
 
-      if (
-        typeof window !== "undefined" &&
-        flushReadyRafRef.current != null
-      ) {
+      if (typeof window !== "undefined" && flushReadyRafRef.current != null) {
         window.cancelAnimationFrame(flushReadyRafRef.current);
         flushReadyRafRef.current = null;
       }

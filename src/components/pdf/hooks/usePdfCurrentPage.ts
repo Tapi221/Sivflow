@@ -171,7 +171,10 @@ export const usePdfCurrentPage = ({
     const container = scrollContainerRef.current;
     if (!container) {
       setScrollViewport((previous) =>
-        areScrollViewportStatesEqual(previous, { scrollTop: 0, clientHeight: 0 })
+        areScrollViewportStatesEqual(previous, {
+          scrollTop: 0,
+          clientHeight: 0,
+        })
           ? previous
           : { scrollTop: 0, clientHeight: 0 },
       );
@@ -410,7 +413,11 @@ export const usePdfCurrentPage = ({
   useEffect(() => {
     scheduleScrollViewportSync();
     estimateCurrentPageFromScroll();
-  }, [estimateCurrentPageFromScroll, pageTopOffsets, scheduleScrollViewportSync]);
+  }, [
+    estimateCurrentPageFromScroll,
+    pageTopOffsets,
+    scheduleScrollViewportSync,
+  ]);
 
   useEffect(() => {
     return () => {

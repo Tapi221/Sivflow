@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  clearPdfPageBitmapCacheForDocument,
-} from "@/components/pdf/pdfPageBitmapCache";
+import { clearPdfPageBitmapCacheForDocument } from "@/components/pdf/pdfPageBitmapCache";
 import type {
   PageSize,
   PdfJsDocument,

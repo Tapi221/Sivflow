@@ -52,7 +52,10 @@ export const useCardSetById = (cardSetId: string | null) => {
     async (
       id: string,
       data: Partial<
-        Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode">
+        Pick<
+          CardSet,
+          "name" | "description" | "orderIndex" | "defaultDisplayMode"
+        >
       >,
     ): Promise<void> => {
       if (!currentUserId) {
