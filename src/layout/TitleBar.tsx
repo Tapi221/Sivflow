@@ -1,31 +1,23 @@
-import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
+import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
 import { APP_CHROME } from "@/config/appChrome";
+import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 import {
   buildRouteBreadcrumbs,
   mergeTitleBarBreadcrumbs,
 } from "@/features/breadcrumbs/builders";
+import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
+import {
+  dispatchCardSetViewWindowEvent,
+  subscribeCardSetViewWindowEvent,
+} from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { useHasDesktopBridge } from "@/hooks/platform/useHasDesktopBridge";
 import { cn } from "@/lib/utils";
 import { windowControls } from "@/platform/capabilities/windowControls";
 import { APP_DESKTOP_TOP_INSET_PX } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
-import {
-  dispatchCardSetViewWindowEvent,
-  subscribeCardSetViewWindowEvent,
-} from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
-import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
-const useBreadcrumbs = () => {
-  const { pathname, search } = useLocation();
-
-  return useMemo(
-    () => buildRouteBreadcrumbs({ pathname, search }),
-    [pathname, search],
-  );
-};
 
 type WindowControlButtonProps = {
   title: string;
@@ -34,6 +26,21 @@ type WindowControlButtonProps = {
   danger?: boolean;
   noDragStyle?: React.CSSProperties;
   children: React.ReactNode;
+};
+
+type TitleBarBreadcrumbsProps = {
+  pathname: string;
+  baseCrumbs: BreadcrumbCrumb[];
+  extraCrumbs: BreadcrumbCrumb[];
+  noDragStyle?: React.CSSProperties;
+};
+
+const TITLE_BAR_DRAG_STYLE: React.CSSProperties = {
+  WebkitAppRegion: "drag",
+};
+
+const TITLE_BAR_NO_DRAG_STYLE: React.CSSProperties = {
+  WebkitAppRegion: "no-drag",
 };
 
 const WindowControlButton: React.FC<WindowControlButtonProps> = ({
@@ -98,17 +105,107 @@ const HomeBreadcrumbIcon: React.FC = () => (
   </svg>
 );
 
+const TitleBarBreadcrumbs = React.memo(
+  ({
+    pathname,
+    baseCrumbs,
+    extraCrumbs,
+    noDragStyle,
+  }: TitleBarBreadcrumbsProps) => {
+    const navigate = useNavigate();
+
+    const allCrumbs = useMemo(
+      () =>
+        mergeTitleBarBreadcrumbs({
+          pathname,
+          baseCrumbs,
+          extraCrumbs,
+        }),
+      [baseCrumbs, extraCrumbs, pathname],
+    );
+
+    return (
+      <nav className="titlebar-text flex min-w-0 flex-1 items-center gap-1 overflow-hidden text-xs">
+        {allCrumbs.map((crumb, index) => {
+          const isClickable = Boolean(crumb.to);
+          const isHomeCrumb = index === 0 && crumb.label === "ホーム";
+          const breadcrumbContent = isHomeCrumb ? (
+            <>
+              <HomeBreadcrumbIcon />
+              <span className="sr-only">{crumb.label}</span>
+            </>
+          ) : (
+            crumb.label
+          );
+
+          const handleBreadcrumbClick = (
+            event: React.MouseEvent<HTMLButtonElement>,
+          ) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (!crumb.to) {
+              return;
+            }
+
+            navigate(crumb.to);
+          };
+
+          return (
+            <React.Fragment
+              key={`${crumb.label}:${crumb.to ?? "no-to"}:${
+                crumb.folderId ?? "no-folder"
+              }:${index}`}
+            >
+              {index > 0 && (
+                <span className="titlebar-divider select-none">/</span>
+              )}
+
+              {isClickable ? (
+                <button
+                  type="button"
+                  className="titlebar-hover titlebar-text inline-flex items-center truncate rounded-sm px-1 py-0.5 transition-colors"
+                  style={noDragStyle}
+                  onMouseDown={(event) => event.stopPropagation()}
+                  onClick={handleBreadcrumbClick}
+                  title={crumb.label}
+                >
+                  {breadcrumbContent}
+                </button>
+              ) : (
+                <span
+                  className={cn(
+                    "titlebar-text-strong truncate font-medium",
+                    isHomeCrumb && "inline-flex items-center",
+                  )}
+                  title={crumb.label}
+                >
+                  {breadcrumbContent}
+                </span>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </nav>
+    );
+  },
+);
+
+TitleBarBreadcrumbs.displayName = "TitleBarBreadcrumbs";
+
 export const TitleBar: React.FC = () => {
   const [bridgeIsMaximized, setBridgeIsMaximized] = useState(false);
   const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
   const [isCardSetViewMetaOpen, setIsCardSetViewMetaOpen] = useState(false);
-  const navigate = useNavigate();
   const hasDesktopBridge = useHasDesktopBridge();
   const presentationTarget = usePresentationTarget();
   const isDesktopPresentation = presentationTarget === "desktop";
-  const { pathname } = useLocation();
-  const crumbs = useBreadcrumbs();
-  const { extraCrumbs } = useBreadcrumbContext();
+  const { pathname, search } = useLocation();
+  const baseCrumbs = useMemo(
+    () => buildRouteBreadcrumbs({ pathname, search }),
+    [pathname, search],
+  );
+  const extraCrumbs = useBreadcrumbExtraCrumbs();
   const isCardSetViewPage = pathname.toLowerCase().startsWith("/cardsetview");
   const shouldShowBrandLabel = APP_CHROME.desktopTitleBar.showBrandLabel;
 
@@ -148,24 +245,10 @@ export const TitleBar: React.FC = () => {
     );
   }, []);
 
-  const allCrumbs = useMemo(
-    () =>
-      mergeTitleBarBreadcrumbs({
-        pathname,
-        baseCrumbs: crumbs,
-        extraCrumbs,
-      }),
-    [crumbs, extraCrumbs, pathname],
-  );
-
   if (!isDesktopPresentation) return null;
 
-  const dragStyle = hasDesktopBridge
-    ? ({ WebkitAppRegion: "drag" } as React.CSSProperties)
-    : undefined;
-  const noDragStyle = hasDesktopBridge
-    ? ({ WebkitAppRegion: "no-drag" } as React.CSSProperties)
-    : undefined;
+  const dragStyle = hasDesktopBridge ? TITLE_BAR_DRAG_STYLE : undefined;
+  const noDragStyle = hasDesktopBridge ? TITLE_BAR_NO_DRAG_STYLE : undefined;
 
   return (
     <div
@@ -193,70 +276,12 @@ export const TitleBar: React.FC = () => {
           </span>
         ) : null}
 
-        <nav className="titlebar-text flex min-w-0 flex-1 items-center gap-1 overflow-hidden text-xs">
-          {allCrumbs.map((crumb, index) => {
-            const isClickable = Boolean(crumb.to);
-            const isHomeCrumb = index === 0 && crumb.label === "ホーム";
-            const breadcrumbContent = isHomeCrumb ? (
-              <>
-                <HomeBreadcrumbIcon />
-                <span className="sr-only">{crumb.label}</span>
-              </>
-            ) : (
-              crumb.label
-            );
-
-            const handleBreadcrumbClick = (
-              event: React.MouseEvent<HTMLButtonElement>,
-            ) => {
-              event.preventDefault();
-              event.stopPropagation();
-
-              if (!crumb.to) {
-                return;
-              }
-
-              navigate(crumb.to);
-            };
-
-            return (
-              <React.Fragment
-                key={`${crumb.label}:${crumb.to ?? "no-to"}:${
-                  "folderId" in crumb
-                    ? (crumb.folderId ?? "no-folder")
-                    : "no-folder"
-                }:${index}`}
-              >
-                {index > 0 && (
-                  <span className="titlebar-divider select-none">/</span>
-                )}
-
-                {isClickable ? (
-                  <button
-                    type="button"
-                    className="titlebar-hover titlebar-text inline-flex items-center truncate rounded-sm px-1 py-0.5 transition-colors"
-                    style={noDragStyle}
-                    onMouseDown={(event) => event.stopPropagation()}
-                    onClick={handleBreadcrumbClick}
-                    title={crumb.label}
-                  >
-                    {breadcrumbContent}
-                  </button>
-                ) : (
-                  <span
-                    className={cn(
-                      "titlebar-text-strong truncate font-medium",
-                      isHomeCrumb && "inline-flex items-center",
-                    )}
-                    title={crumb.label}
-                  >
-                    {breadcrumbContent}
-                  </span>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </nav>
+        <TitleBarBreadcrumbs
+          pathname={pathname}
+          baseCrumbs={baseCrumbs}
+          extraCrumbs={extraCrumbs}
+          noDragStyle={noDragStyle}
+        />
       </div>
 
       <div

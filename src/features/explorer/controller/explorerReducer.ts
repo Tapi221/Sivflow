@@ -46,61 +46,119 @@ export const explorerReducer = (
         didSelectedFolderChange ||
         didSelectedItemChange;
 
+      const nextSelectedFolderId =
+        next.isHomeOnlyMode || next.isSectionListMode
+          ? null
+          : next.selectedFolderId;
+      const nextSelectedItem =
+        next.isHomeOnlyMode || next.isSectionListMode ? null : next.selectedItem;
+      const nextFolderSelectionNonce = shouldIncrementFolderSelectionNonce
+        ? state.folderSelectionNonce + 1
+        : state.folderSelectionNonce;
+      const nextNavigateToSectionListToken = shouldIncrementSectionListToken
+        ? state.navigateToSectionListToken + 1
+        : state.navigateToSectionListToken;
+      const nextExplorerBreadcrumbContext = shouldResetBreadcrumbs
+        ? resetBreadcrumbContext()
+        : state.explorerBreadcrumbContext;
+
+      const isStateUnchanged =
+        state.isHomeOnlyMode === next.isHomeOnlyMode &&
+        state.isSectionListMode === next.isSectionListMode &&
+        state.selectedFolderId === nextSelectedFolderId &&
+        isSameSelectedExplorerItem(state.selectedItem, nextSelectedItem) &&
+        state.folderSelectionNonce === nextFolderSelectionNonce &&
+        state.navigateToSectionListToken === nextNavigateToSectionListToken &&
+        areExplorerBreadcrumbContextsEqual(
+          state.explorerBreadcrumbContext,
+          nextExplorerBreadcrumbContext,
+        );
+
+      if (isStateUnchanged) {
+        return state;
+      }
+
       return {
         ...state,
         isHomeOnlyMode: next.isHomeOnlyMode,
         isSectionListMode: next.isSectionListMode,
-        selectedFolderId:
-          next.isHomeOnlyMode || next.isSectionListMode
-            ? null
-            : next.selectedFolderId,
-        selectedItem:
-          next.isHomeOnlyMode || next.isSectionListMode
-            ? null
-            : next.selectedItem,
-        folderSelectionNonce: shouldIncrementFolderSelectionNonce
-          ? state.folderSelectionNonce + 1
-          : state.folderSelectionNonce,
-        navigateToSectionListToken: shouldIncrementSectionListToken
-          ? state.navigateToSectionListToken + 1
-          : state.navigateToSectionListToken,
-        explorerBreadcrumbContext: shouldResetBreadcrumbs
-          ? resetBreadcrumbContext()
-          : state.explorerBreadcrumbContext,
+        selectedFolderId: nextSelectedFolderId,
+        selectedItem: nextSelectedItem,
+        folderSelectionNonce: nextFolderSelectionNonce,
+        navigateToSectionListToken: nextNavigateToSectionListToken,
+        explorerBreadcrumbContext: nextExplorerBreadcrumbContext,
       };
     }
 
     case "SELECT_FOLDER": {
       const isSectionListMode = action.payload.folderId === null;
+      const nextSelectedFolderId = isSectionListMode
+        ? null
+        : action.payload.folderId;
+      const nextFolderSelectionNonce = isSectionListMode
+        ? state.folderSelectionNonce
+        : state.folderSelectionNonce + 1;
+      const nextNavigateToSectionListToken = isSectionListMode
+        ? state.navigateToSectionListToken + 1
+        : state.navigateToSectionListToken;
+      const nextExplorerBreadcrumbContext = resetBreadcrumbContext();
+
+      const isStateUnchanged =
+        state.isHomeOnlyMode === false &&
+        state.isSectionListMode === isSectionListMode &&
+        state.selectedFolderId === nextSelectedFolderId &&
+        state.selectedItem === null &&
+        state.folderSelectionNonce === nextFolderSelectionNonce &&
+        state.navigateToSectionListToken === nextNavigateToSectionListToken &&
+        areExplorerBreadcrumbContextsEqual(
+          state.explorerBreadcrumbContext,
+          nextExplorerBreadcrumbContext,
+        );
+
+      if (isStateUnchanged) {
+        return state;
+      }
 
       return {
         ...state,
         isHomeOnlyMode: false,
         isSectionListMode,
-        selectedFolderId: isSectionListMode ? null : action.payload.folderId,
+        selectedFolderId: nextSelectedFolderId,
         selectedItem: null,
-        folderSelectionNonce: isSectionListMode
-          ? state.folderSelectionNonce
-          : state.folderSelectionNonce + 1,
-        navigateToSectionListToken: isSectionListMode
-          ? state.navigateToSectionListToken + 1
-          : state.navigateToSectionListToken,
-        explorerBreadcrumbContext: resetBreadcrumbContext(),
+        folderSelectionNonce: nextFolderSelectionNonce,
+        navigateToSectionListToken: nextNavigateToSectionListToken,
+        explorerBreadcrumbContext: nextExplorerBreadcrumbContext,
       };
     }
 
     case "SELECT_ITEM": {
       const shouldResetFolder = shouldClearSelectionFolder(action.payload.item);
+      const nextSelectedFolderId = shouldResetFolder ? null : state.selectedFolderId;
+      const nextExplorerBreadcrumbContext = shouldResetFolder
+        ? resetBreadcrumbContext()
+        : state.explorerBreadcrumbContext;
+
+      const isStateUnchanged =
+        state.isHomeOnlyMode === false &&
+        state.isSectionListMode === false &&
+        isSameSelectedExplorerItem(state.selectedItem, action.payload.item) &&
+        state.selectedFolderId === nextSelectedFolderId &&
+        areExplorerBreadcrumbContextsEqual(
+          state.explorerBreadcrumbContext,
+          nextExplorerBreadcrumbContext,
+        );
+
+      if (isStateUnchanged) {
+        return state;
+      }
 
       return {
         ...state,
         isHomeOnlyMode: false,
         isSectionListMode: false,
         selectedItem: action.payload.item,
-        selectedFolderId: shouldResetFolder ? null : state.selectedFolderId,
-        explorerBreadcrumbContext: shouldResetFolder
-          ? resetBreadcrumbContext()
-          : state.explorerBreadcrumbContext,
+        selectedFolderId: nextSelectedFolderId,
+        explorerBreadcrumbContext: nextExplorerBreadcrumbContext,
       };
     }
 

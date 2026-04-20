@@ -161,6 +161,12 @@ export const FolderTreeWithCards = ({
   );
   const [optimisticCards] = useState<Card[]>([]);
   const [optimisticCardSets, setOptimisticCardSets] = useState<CardSet[]>([]);
+  const [hiddenFolderIds, setHiddenFolderIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [hiddenCardSetIds, setHiddenCardSetIds] = useState<Set<string>>(
+    new Set(),
+  );
   const [newlyCreatedCardId, setNewlyCreatedCardId] = useState<string | null>(
     null,
   );
@@ -228,16 +234,21 @@ export const FolderTreeWithCards = ({
 
   const treeFolders = useMemo(() => {
     const map = new Map<string, FolderTreeNode>();
+
     for (const f of optimisticFolders) {
       const id = getFolderId(f);
-      if (id) map.set(id, f);
+      if (!id || hiddenFolderIds.has(id)) continue;
+      map.set(id, f);
     }
+
     for (const f of folders) {
       const id = getFolderId(f);
-      if (id && !map.has(id)) map.set(id, f);
+      if (!id || hiddenFolderIds.has(id)) continue;
+      if (!map.has(id)) map.set(id, f);
     }
+
     return Array.from(map.values());
-  }, [folders, optimisticFolders]);
+  }, [folders, optimisticFolders, hiddenFolderIds]);
 
   const treeCards = useMemo(() => {
     const map = new Map<string, Card>();
@@ -250,14 +261,19 @@ export const FolderTreeWithCards = ({
 
   const treeCardSets = useMemo(() => {
     const map = new Map<string, CardSet>();
+
     for (const cs of optimisticCardSets) {
+      if (hiddenCardSetIds.has(cs.id)) continue;
       map.set(cs.id, cs);
     }
+
     for (const cs of cardSets) {
+      if (hiddenCardSetIds.has(cs.id)) continue;
       if (!map.has(cs.id)) map.set(cs.id, cs);
     }
+
     return Array.from(map.values());
-  }, [cardSets, optimisticCardSets]);
+  }, [cardSets, optimisticCardSets, hiddenCardSetIds]);
 
   const derived = useExplorerDerivedData({
     treeFolders,
@@ -458,6 +474,9 @@ export const FolderTreeWithCards = ({
 
     setOptimisticFolders,
     setOptimisticCardSets,
+    setHiddenFolderIds,
+    setHiddenCardSetIds,
+
     optimisticFolders,
     optimisticCardSets,
     setExpandedFolders,

@@ -1,27 +1,22 @@
-import { useEffect, useMemo } from "react";
+import { useLayoutEffect, useMemo } from "react";
 
 import { buildCardSetViewBreadcrumbs } from "@/features/breadcrumbs/builders";
+import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
-interface Folder {
+type FolderLike = {
   id: string;
   folderName: string;
   parentFolderId?: string | null;
-}
-
-interface Crumb {
-  label: string;
-  to?: string;
-  folderId?: string | null;
-}
+};
 
 interface UseCardSetViewBreadcrumbsOptions {
   selectedCardSet: CardSet | null;
   selectedCard: Card | null;
   sortedCards: Card[];
-  folders: Folder[];
-  setExtraCrumbs: (crumbs: Crumb[]) => void;
+  folders: FolderLike[];
+  setExtraCrumbs: (crumbs: BreadcrumbCrumb[]) => void;
 }
 
 export const useCardSetViewBreadcrumbs = ({
@@ -32,14 +27,17 @@ export const useCardSetViewBreadcrumbs = ({
   setExtraCrumbs,
 }: UseCardSetViewBreadcrumbsOptions) => {
   const folderById = useMemo(
-    () => new Map(folders.map((folder) => [folder.id, folder])),
+    () =>
+      new Map<string, FolderLike>(
+        folders.map((folder) => [folder.id, folder]),
+      ),
     [folders],
   );
 
   const resolvedFolderId = selectedCardSet?.folderId ?? null;
 
-  useEffect(() => {
-    setExtraCrumbs(
+  const extraCrumbs = useMemo<BreadcrumbCrumb[]>(
+    () =>
       buildCardSetViewBreadcrumbs({
         folderId: resolvedFolderId,
         selectedCardSet,
@@ -47,17 +45,20 @@ export const useCardSetViewBreadcrumbs = ({
         sortedCards,
         folderById,
       }),
-    );
-  }, [
-    resolvedFolderId,
-    selectedCardSet,
-    selectedCard,
-    sortedCards,
-    folderById,
-    setExtraCrumbs,
-  ]);
+    [
+      folderById,
+      resolvedFolderId,
+      selectedCard,
+      selectedCardSet,
+      sortedCards,
+    ],
+  );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    setExtraCrumbs(extraCrumbs);
+  }, [extraCrumbs, setExtraCrumbs]);
+
+  useLayoutEffect(() => {
     return () => {
       setExtraCrumbs([]);
     };
