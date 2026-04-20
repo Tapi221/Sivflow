@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { Folder, Plus } from "@/ui/icons";
+import { Plus } from "@/ui/icons";
 import { TagFilterPopover } from "./TagFilterPopover";
 import {
   DropdownMenu,
@@ -64,16 +64,9 @@ export const ExplorerSidebarHeader = ({
 
   return (
     <div
-      className="ds-nav-tabs flex items-center justify-between px-2"
+      className="ds-nav-tabs flex items-center justify-end px-2"
       style={{ height: 36 }}
     >
-      <div className="flex min-w-0 items-center gap-2 px-2">
-        <Folder className="h-3.5 w-3.5 text-[var(--sidebar-text-muted,#6e6e80)]" />
-        <span className="truncate text-xs font-medium text-[var(--sidebar-text-muted,#6e6e80)]">
-          フォルダ
-        </span>
-      </div>
-
       <div className="flex shrink-0 items-center gap-0.5">
         {shouldUseDirectRootFolderCreate ? (
           <button
