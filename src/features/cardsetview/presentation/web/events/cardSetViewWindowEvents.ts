@@ -11,9 +11,11 @@ export type CardSetViewEditingDraftPatch = {
 
 export type CardSetViewWindowEventMap = {
   [CARD_SET_VIEW_EVENTS.editingChange]: boolean;
+  [CARD_SET_VIEW_EVENTS.metaOpenChange]: boolean;
   [CARD_SET_VIEW_EVENTS.editingDraftPatch]: CardSetViewEditingDraftPatch;
   [CARD_SET_VIEW_EVENTS.createCardRequest]: undefined;
   [CARD_SET_VIEW_EVENTS.toggleEditingRequest]: undefined;
+  [CARD_SET_VIEW_EVENTS.toggleMetaPanelRequest]: undefined;
 };
 
 type CardSetViewWindowEventName = keyof CardSetViewWindowEventMap;

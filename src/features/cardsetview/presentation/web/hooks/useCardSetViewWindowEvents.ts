@@ -4,11 +4,13 @@ import { subscribeCardSetViewWindowEvent } from "@/features/cardsetview/presenta
 
 interface UseCardSetViewWindowEventsOptions {
   handleToggleViewMode: () => void;
+  handleToggleMetaPanel: () => void;
   createAndFocusCard: () => Promise<boolean>;
 }
 
 export const useCardSetViewWindowEvents = ({
   handleToggleViewMode,
+  handleToggleMetaPanel,
   createAndFocusCard,
 }: UseCardSetViewWindowEventsOptions) => {
   useEffect(() => {
@@ -19,6 +21,15 @@ export const useCardSetViewWindowEvents = ({
       },
     );
   }, [handleToggleViewMode]);
+
+  useEffect(() => {
+    return subscribeCardSetViewWindowEvent(
+      CARD_SET_VIEW_EVENTS.toggleMetaPanelRequest,
+      () => {
+        handleToggleMetaPanel();
+      },
+    );
+  }, [handleToggleMetaPanel]);
 
   useEffect(() => {
     return subscribeCardSetViewWindowEvent(

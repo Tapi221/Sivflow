@@ -112,6 +112,7 @@ export const useCardSetViewScreenController = () => {
 
   useCardSetViewWindowEvents({
     handleToggleViewMode: state.handleToggleViewMode,
+    handleToggleMetaPanel: () => state.setIsMetaOpen((prev) => !prev),
     createAndFocusCard: state.createAndFocusCard,
   });
 
