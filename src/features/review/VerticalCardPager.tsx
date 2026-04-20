@@ -97,6 +97,8 @@ export type VerticalCardPagerProps<T> = {
   disableItemChrome?: boolean;
   disableVirtualization?: boolean;
   preserveScrollAnchorKey?: string | number | null;
+  scrollToActiveIndexRequestKey?: string | number | null;
+  scrollToActiveIndexBehavior?: ScrollBehavior;
 };
 
 type VirtualLayoutSnapshot = {
@@ -420,6 +422,8 @@ const VerticalCardPagerFn = <T,>({
   disableVirtualization = false,
   onRenderRangeChange,
   preserveScrollAnchorKey = null,
+  scrollToActiveIndexRequestKey = null,
+  scrollToActiveIndexBehavior = "auto",
 }: VerticalCardPagerProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
@@ -442,6 +446,9 @@ const VerticalCardPagerFn = <T,>({
   const naturalIndexTimerRef = useRef<number | null>(null);
   const queuedNaturalIndexRef = useRef<number | null>(null);
   const lastNearestIndexRef = useRef(Math.max(0, activeIndex));
+  const lastScrollToActiveIndexRequestKeyRef = useRef<string | number | null>(
+    scrollToActiveIndexRequestKey,
+  );
 
   const [viewportState, setViewportState] = useState({
     scrollTop: 0,
@@ -534,8 +541,15 @@ const VerticalCardPagerFn = <T,>({
       const clampedIndex = clampIndex(idx, cards.length);
       if (clampedIndex < 0) return;
 
-      const itemTop = layoutSnapshot.offsets[clampedIndex] ?? 0;
-      const itemHeight = getEstimatedHeight(clampedIndex);
+      const stableKey = stableCardKeys[clampedIndex];
+      const measuredElement = stableKey
+        ? (itemRefs.current.get(stableKey) ?? null)
+        : null;
+      const itemTop = measuredElement
+        ? resolveElementTopWithinContainer(container, measuredElement)
+        : (layoutSnapshot.offsets[clampedIndex] ?? 0);
+      const itemHeight =
+        measuredElement?.offsetHeight ?? getEstimatedHeight(clampedIndex);
       const targetTop = itemTop - container.clientHeight / 2 + itemHeight / 2;
 
       const maxScrollTop = Math.max(
@@ -549,7 +563,7 @@ const VerticalCardPagerFn = <T,>({
         behavior,
       });
     },
-    [cards.length, getEstimatedHeight, layoutSnapshot],
+    [cards.length, getEstimatedHeight, layoutSnapshot, stableCardKeys],
   );
 
   const isAnchorStabilizing = useCallback(() => {
@@ -931,6 +945,39 @@ const VerticalCardPagerFn = <T,>({
   useLayoutEffect(() => {
     captureScrollAnchor();
   }, [activeIndex, captureScrollAnchor, renderRange?.start, renderRange?.end]);
+
+  useEffect(() => {
+    if (scrollToActiveIndexRequestKey == null) {
+      return;
+    }
+
+    if (
+      lastScrollToActiveIndexRequestKeyRef.current ===
+      scrollToActiveIndexRequestKey
+    ) {
+      return;
+    }
+
+    lastScrollToActiveIndexRequestKeyRef.current =
+      scrollToActiveIndexRequestKey;
+    queuedNaturalIndexRef.current = null;
+    lastNearestIndexRef.current = activeIndex;
+    anchorStabilizationUntilRef.current = resolveNowMs() + 280;
+    clearComputeNearestRaf();
+    clearIdleCommitTimer();
+    clearNaturalIndexTimer();
+    scrollToIndex(activeIndex, scrollToActiveIndexBehavior);
+    scheduleVisibleRangeUpdate();
+  }, [
+    activeIndex,
+    clearComputeNearestRaf,
+    clearIdleCommitTimer,
+    clearNaturalIndexTimer,
+    scheduleVisibleRangeUpdate,
+    scrollToActiveIndexBehavior,
+    scrollToActiveIndexRequestKey,
+    scrollToIndex,
+  ]);
 
   useLayoutEffect(() => {
     const previousPreserveKey = previousPreserveKeyRef.current;
