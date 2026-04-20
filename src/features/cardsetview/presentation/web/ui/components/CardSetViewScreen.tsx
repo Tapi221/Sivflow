@@ -40,6 +40,24 @@ export const CardSetViewScreen = () => {
 
   const presentationTarget = usePresentationTarget();
 
+  useEffect(() => {
+    if (!cardSetId) {
+      return;
+    }
+
+    dispatchCardSetViewWindowEvent(
+      CARD_SET_VIEW_EVENTS.metaOpenChange,
+      state.isMetaOpen,
+    );
+
+    return () => {
+      dispatchCardSetViewWindowEvent(
+        CARD_SET_VIEW_EVENTS.metaOpenChange,
+        false,
+      );
+    };
+  }, [cardSetId, state.isMetaOpen]);
+
   if (!cardSetId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -118,20 +136,6 @@ export const CardSetViewScreen = () => {
   );
 
   const topLeftControl = null;
-
-  useEffect(() => {
-    dispatchCardSetViewWindowEvent(
-      CARD_SET_VIEW_EVENTS.metaOpenChange,
-      state.isMetaOpen,
-    );
-
-    return () => {
-      dispatchCardSetViewWindowEvent(
-        CARD_SET_VIEW_EVENTS.metaOpenChange,
-        false,
-      );
-    };
-  }, [state.isMetaOpen]);
 
   return (
     <CardWorkspaceShell

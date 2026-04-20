@@ -103,7 +103,9 @@ export const RootFolderPanelRow = ({
     entry.kind === "cardSet" ||
     entry.kind === "document";
 
-  const menuId = supportsContextMenuKind ? `${entry.kind}:${entry.id}:panel` : null;
+  const menuId = supportsContextMenuKind
+    ? `${entry.kind}:${entry.id}:panel`
+    : null;
   const isEditing = supportsContextMenuKind && editingId === entry.id;
   const isMenuOpen = menuId !== null && openRowMenuId === menuId;
 

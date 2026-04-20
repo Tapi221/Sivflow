@@ -447,7 +447,7 @@ export const CardEditorPane = ({
   const isFluidEditor = displayMode === "fluid";
 
   const {
-    manualResizeInProgressRef,
+    setManualResizeInProgress,
     scheduleLayoutRowsFromHeight,
     handleQuestionMinHeightChange,
     handleAnswerMinHeightChange,
@@ -517,12 +517,12 @@ export const CardEditorPane = ({
   );
 
   const handleResizeStart = useCallback(() => {
-    manualResizeInProgressRef.current = true;
-  }, [manualResizeInProgressRef]);
+    setManualResizeInProgress(true);
+  }, [setManualResizeInProgress]);
 
   const handleResizeEnd = useCallback(() => {
-    manualResizeInProgressRef.current = false;
-  }, [manualResizeInProgressRef]);
+    setManualResizeInProgress(false);
+  }, [setManualResizeInProgress]);
 
   const {
     contentViewportRef,

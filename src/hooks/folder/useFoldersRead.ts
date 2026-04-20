@@ -3,7 +3,6 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { getLocalDb } from "@/services/localDB";
-import type { Folder } from "@/types";
 
 const isDatabaseClosedError = (error: unknown) => {
   if (!error || typeof error !== "object") {

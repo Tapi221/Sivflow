@@ -28,9 +28,7 @@ export const useCardSetViewBreadcrumbs = ({
 }: UseCardSetViewBreadcrumbsOptions) => {
   const folderById = useMemo(
     () =>
-      new Map<string, FolderLike>(
-        folders.map((folder) => [folder.id, folder]),
-      ),
+      new Map<string, FolderLike>(folders.map((folder) => [folder.id, folder])),
     [folders],
   );
 
@@ -45,13 +43,7 @@ export const useCardSetViewBreadcrumbs = ({
         sortedCards,
         folderById,
       }),
-    [
-      folderById,
-      resolvedFolderId,
-      selectedCard,
-      selectedCardSet,
-      sortedCards,
-    ],
+    [folderById, resolvedFolderId, selectedCard, selectedCardSet, sortedCards],
   );
 
   useLayoutEffect(() => {

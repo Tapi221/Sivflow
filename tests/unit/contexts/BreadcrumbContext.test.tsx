@@ -30,7 +30,9 @@ const ReaderConsumer = () => {
   readerRenderCount += 1;
   const extraCrumbs = useBreadcrumbExtraCrumbs();
 
-  return <div>{extraCrumbs.map(({ label }) => label).join(" / ") || "empty"}</div>;
+  return (
+    <div>{extraCrumbs.map(({ label }) => label).join(" / ") || "empty"}</div>
+  );
 };
 
 describe("BreadcrumbContext", () => {

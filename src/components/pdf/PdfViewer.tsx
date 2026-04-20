@@ -65,7 +65,6 @@ interface PdfViewerProps {
 
 type PageLayoutMetrics = {
   pageTopOffsets: number[];
-  pageHeights: number[];
   pageBottomOffsets: number[];
   pageAnchorPageNumbers: number[];
   rowTopOffsets: number[];
@@ -120,7 +119,6 @@ const buildPageLayoutMetrics = ({
   pageLayoutMode: PdfPageLayoutMode;
 }): PageLayoutMetrics => {
   const pageTopOffsets = Array.from({ length: numPages }, () => 0);
-  const pageHeights = Array.from({ length: numPages }, () => 0);
   const pageBottomOffsets = Array.from({ length: numPages }, () => 0);
   const pageAnchorPageNumbers = Array.from({ length: numPages }, (_, index) => {
     return index + 1;
@@ -149,12 +147,10 @@ const buildPageLayoutMetrics = ({
     rowHeights.push(rowHeight);
 
     currentRowPageNumbers.forEach((pageNumber, pageIndexInRow) => {
-      const nextPageHeight =
-        measuredPageHeights[pageIndexInRow] ?? rowHeight;
+      const nextPageHeight = measuredPageHeights[pageIndexInRow] ?? rowHeight;
       const pageOffsetIndex = pageNumber - 1;
 
       pageTopOffsets[pageOffsetIndex] = runningTop;
-      pageHeights[pageOffsetIndex] = nextPageHeight;
       pageBottomOffsets[pageOffsetIndex] = runningTop + rowHeight;
       pageAnchorPageNumbers[pageOffsetIndex] = rowAnchorPageNumber;
     });
@@ -168,7 +164,6 @@ const buildPageLayoutMetrics = ({
 
   return {
     pageTopOffsets,
-    pageHeights,
     pageBottomOffsets,
     pageAnchorPageNumbers,
     rowTopOffsets,
@@ -703,7 +698,9 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
           rowPageNumbers,
         }))
         .filter(({ rowPageNumbers }) =>
-          rowPageNumbers.some((pageNumber) => renderedPageNumberSet.has(pageNumber)),
+          rowPageNumbers.some((pageNumber) =>
+            renderedPageNumberSet.has(pageNumber),
+          ),
         );
     }, [pageLayoutMetrics.rowPageNumbers, renderedPageNumbers]);
 

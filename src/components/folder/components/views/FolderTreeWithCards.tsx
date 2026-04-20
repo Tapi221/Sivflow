@@ -330,7 +330,9 @@ export const FolderTreeWithCards = ({
   }, [forceSectionListRoot, sidebarDisplayMode]);
 
   const activeNavigationParentFolderId =
-    effectiveSidebarDisplayMode === "navigation" ? navigationParentFolderId : null;
+    effectiveSidebarDisplayMode === "navigation"
+      ? navigationParentFolderId
+      : null;
 
   const navigationFolderId = activeNavigationParentFolderId ?? null;
 

@@ -76,9 +76,7 @@ export const PdfPaneToolbar = ({
             ))}
           </div>
         ) : (
-          <div className="text-[11px] text-slate-400">
-            PDF表示コントロール
-          </div>
+          <div className="text-[11px] text-slate-400">PDF表示コントロール</div>
         )}
       </div>
 

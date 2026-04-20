@@ -269,12 +269,12 @@ export const DesktopEmbeddedCardEditorSurface = ({
   );
 
   const handleResizeStart = useCallback(() => {
-    layout.manualResizeInProgressRef.current = true;
-  }, [layout.manualResizeInProgressRef]);
+    layout.setManualResizeInProgress(true);
+  }, [layout]);
 
   const handleResizeEnd = useCallback(() => {
-    layout.manualResizeInProgressRef.current = false;
-  }, [layout.manualResizeInProgressRef]);
+    layout.setManualResizeInProgress(false);
+  }, [layout]);
 
   const handleQuestionBlocksChange = useCallback(
     (nextBlocks: CardBlock[]) => {

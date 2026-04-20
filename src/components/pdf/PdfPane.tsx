@@ -211,7 +211,10 @@ export const PdfPane = ({
   }, [alignedCurrentPage, pageStep]);
 
   const handleNext = useCallback(() => {
-    const nextPage = Math.min(numPages || alignedCurrentPage, alignedCurrentPage + pageStep);
+    const nextPage = Math.min(
+      numPages || alignedCurrentPage,
+      alignedCurrentPage + pageStep,
+    );
     viewerRef.current?.scrollToPage(nextPage);
   }, [alignedCurrentPage, numPages, pageStep]);
 
@@ -388,7 +391,8 @@ export const PdfPane = ({
                 className="pointer-events-none absolute z-20 flex items-end gap-2"
                 style={{
                   right: "max(1rem, env(safe-area-inset-right))",
-                  bottom: "max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))",
+                  bottom:
+                    "max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))",
                 }}
               >
                 <div className="pointer-events-auto">
