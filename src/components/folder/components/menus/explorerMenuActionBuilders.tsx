@@ -25,10 +25,8 @@ interface BuildEntityRenameDeleteMenuActionsParams {
   closeMenu?: () => void;
   setEditingId: (id: string | null) => void;
   setEditingName: (name: string) => void;
-  handleDelete: (
-    id: string,
-    type: "folder" | "cardSet" | "card" | "document",
-  ) => void;
+  canRename?: boolean;
+  onDelete?: (id: string, type: "cardSet" | "document") => void;
   renameLabel?: string;
   deleteLabel?: string;
 }
@@ -81,26 +79,31 @@ export const buildEntityRenameDeleteMenuActions = ({
   closeMenu,
   setEditingId,
   setEditingName,
-  handleDelete,
+  canRename = true,
+  onDelete,
   renameLabel = "名前を変更",
   deleteLabel = "削除",
 }: BuildEntityRenameDeleteMenuActionsParams): MenuAction[] =>
   buildRenameDeleteMenuActions({
     renameLabel,
     deleteLabel,
-    onRename: () => {
-      beginInlineRename({
-        id,
-        name,
-        closeMenu,
-        setEditingId,
-        setEditingName,
-        beforeStart: beforeRename,
-      });
-    },
-    onDelete: () => {
-      handleDelete(id, type);
-    },
+    onRename: canRename
+      ? () => {
+          beginInlineRename({
+            id,
+            name,
+            closeMenu,
+            setEditingId,
+            setEditingName,
+            beforeStart: beforeRename,
+          });
+        }
+      : undefined,
+    onDelete: onDelete
+      ? () => {
+          onDelete(id, type);
+        }
+      : undefined,
   });
 
 /**

@@ -35,6 +35,8 @@ interface CardSetRowProps {
     type: "card" | "cardSet" | "document";
     id: string;
   }) => void;
+  canRename: boolean;
+  canDelete: boolean;
   handleDelete: (
     id: string,
     type: "folder" | "cardSet" | "card" | "document",
@@ -62,6 +64,8 @@ export const CardSetRow = ({
   openRowMenuId,
   setOpenRowMenuId,
   onItemSelect,
+  canRename,
+  canDelete,
   handleDelete,
   handleRenameConfirm,
   setRowRef,
@@ -86,9 +90,16 @@ export const CardSetRow = ({
         },
         setEditingId,
         setEditingName,
-        handleDelete,
+        canRename,
+        onDelete: canDelete
+          ? (id, type) => {
+              handleDelete(id, type);
+            }
+          : undefined,
       }),
     [
+      canDelete,
+      canRename,
       handleDelete,
       onItemSelect,
       setEditingId,
@@ -122,7 +133,7 @@ export const CardSetRow = ({
         setOpenRowMenuId(open ? rowMenuId : null);
       }}
       menuActions={rowMenuActions}
-      hasContextMenu
+      hasContextMenu={rowMenuActions.length > 0}
       isEditing={isEditing}
       onContextMenuSelect={() => {
         onItemSelect({ type: "cardSet", id: treeNode.rawId });

@@ -35,6 +35,14 @@ interface RootFolderPanelListProps {
     type: "card" | "cardSet" | "document";
     id: string;
   }) => void;
+  canCreateFolder: boolean;
+  canCreateCardSet: boolean;
+  canRenameFolder: boolean;
+  canDeleteFolder: boolean;
+  canRenameCardSet: boolean;
+  canDeleteCardSet: boolean;
+  canRenameDocument: boolean;
+  canDeleteDocument: boolean;
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
   handleDelete: (
@@ -64,6 +72,14 @@ export const RootFolderPanelList = ({
   setOpenRowMenuId,
   onSelectFolder,
   onItemSelect,
+  canCreateFolder,
+  canCreateCardSet,
+  canRenameFolder,
+  canDeleteFolder,
+  canRenameCardSet,
+  canDeleteCardSet,
+  canRenameDocument,
+  canDeleteDocument,
   handleCreateFolderAction,
   handleCreateCardSetAction,
   handleDelete,
@@ -108,6 +124,14 @@ export const RootFolderPanelList = ({
           setOpenRowMenuId={setOpenRowMenuId}
           onSelectFolder={onSelectFolder}
           onItemSelect={onItemSelect}
+          canCreateFolder={canCreateFolder}
+          canCreateCardSet={canCreateCardSet}
+          canRenameFolder={canRenameFolder}
+          canDeleteFolder={canDeleteFolder}
+          canRenameCardSet={canRenameCardSet}
+          canDeleteCardSet={canDeleteCardSet}
+          canRenameDocument={canRenameDocument}
+          canDeleteDocument={canDeleteDocument}
           handleCreateFolderAction={handleCreateFolderAction}
           handleCreateCardSetAction={handleCreateCardSetAction}
           handleDelete={handleDelete}

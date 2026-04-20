@@ -48,6 +48,14 @@ interface ExplorerTreeNodeProps {
     type: "card" | "cardSet" | "document";
     id: string;
   }) => void;
+  canCreateFolder: boolean;
+  canCreateCardSet: boolean;
+  canRenameFolder: boolean;
+  canDeleteFolder: boolean;
+  canRenameCardSet: boolean;
+  canDeleteCardSet: boolean;
+  canRenameDocument: boolean;
+  canDeleteDocument: boolean;
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
   handleDelete: (
@@ -57,7 +65,6 @@ interface ExplorerTreeNodeProps {
   handleRenameConfirm: (target?: RenameTarget) => Promise<void>;
   setRowRef: (id: string, node: HTMLElement | null) => void;
   isFiltering: boolean;
-  hasUpdateOrDelete: boolean;
   setBulkTagFolderId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
@@ -81,13 +88,20 @@ export const ExplorerTreeNodeRenderer = React.memo(
     setOpenRowMenuId,
     onFolderSelect,
     onItemSelect,
+    canCreateFolder,
+    canCreateCardSet,
+    canRenameFolder,
+    canDeleteFolder,
+    canRenameCardSet,
+    canDeleteCardSet,
+    canRenameDocument,
+    canDeleteDocument,
     handleCreateFolderAction,
     handleCreateCardSetAction,
     handleDelete,
     handleRenameConfirm,
     setRowRef,
     isFiltering,
-    hasUpdateOrDelete,
     setBulkTagFolderId,
   }: ExplorerTreeNodeProps) => {
     const treeNode = node.data;
@@ -112,6 +126,10 @@ export const ExplorerTreeNodeRenderer = React.memo(
             onToggle={toggle}
             onSelect={() => onFolderSelect(folderId)}
             onNavigate={() => onFolderSelect(folderId)}
+            canCreateFolder={canCreateFolder}
+            canCreateCardSet={canCreateCardSet}
+            canRename={canRenameFolder}
+            canDelete={canDeleteFolder}
             handleCreateFolderAction={handleCreateFolderAction}
             handleCreateCardSetAction={handleCreateCardSetAction}
             handleDelete={handleDelete}
@@ -120,7 +138,6 @@ export const ExplorerTreeNodeRenderer = React.memo(
             isFiltering={isFiltering}
             matchCount={treeNode.matchCount ?? -1}
             rowBaseClassName=""
-            hasUpdateOrDelete={hasUpdateOrDelete}
             menuOpen={openRowMenuId === `folder:${folderId}`}
             onMenuOpenChange={(open) =>
               setOpenRowMenuId(open ? `folder:${folderId}` : null)
@@ -184,6 +201,8 @@ export const ExplorerTreeNodeRenderer = React.memo(
           openRowMenuId={openRowMenuId}
           setOpenRowMenuId={setOpenRowMenuId}
           onItemSelect={onItemSelect}
+          canRename={canRenameCardSet}
+          canDelete={canDeleteCardSet}
           handleDelete={handleDelete}
           handleRenameConfirm={handleRenameConfirm}
           setRowRef={setRowRef}
@@ -208,6 +227,8 @@ export const ExplorerTreeNodeRenderer = React.memo(
           openRowMenuId={openRowMenuId}
           setOpenRowMenuId={setOpenRowMenuId}
           onItemSelect={onItemSelect}
+          canRename={canRenameDocument}
+          canDelete={canDeleteDocument}
           handleDelete={handleDelete}
           handleRenameConfirm={handleRenameConfirm}
           setRowRef={setRowRef}
