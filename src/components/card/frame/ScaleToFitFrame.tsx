@@ -18,6 +18,7 @@ export interface ScaleToFitFrameProps {
   allowUpscale?: boolean;
   maxScale?: number;
   contentPaddingPx?: number;
+  intrinsicHeightPx?: number | null;
 }
 
 const resolveLogicalHeight = ({
@@ -48,6 +49,7 @@ export const ScaleToFitFrame = ({
   allowUpscale = false,
   maxScale = 1.6,
   contentPaddingPx = 0,
+  intrinsicHeightPx = null,
 }: ScaleToFitFrameProps) => {
   const frameRef = React.useRef<HTMLDivElement | null>(null);
   const contentRef = React.useRef<HTMLDivElement | null>(null);
@@ -82,6 +84,15 @@ export const ScaleToFitFrame = ({
     ? effectiveScale
     : 1;
 
+  const resolvedIntrinsicHeightPx =
+    typeof intrinsicHeightPx === "number" &&
+    Number.isFinite(intrinsicHeightPx) &&
+    intrinsicHeightPx > 0
+      ? intrinsicHeightPx
+      : null;
+
+  const resolvedContentHeight = resolvedIntrinsicHeightPx ?? contentHeight;
+
   React.useLayoutEffect(() => {
     if (disableScale) {
       setScale(1);
@@ -113,8 +124,8 @@ export const ScaleToFitFrame = ({
       const safeBase = Math.max(1, baseWidth);
       const fitByWidth = availableWidth / safeBase;
       const fitByHeight =
-        fitHeight && contentHeight && frame.clientHeight
-          ? frame.clientHeight / Math.max(1, contentHeight)
+        fitHeight && resolvedContentHeight && frame.clientHeight
+          ? frame.clientHeight / Math.max(1, resolvedContentHeight)
           : Number.POSITIVE_INFINITY;
 
       const fitScale = Math.min(fitByWidth, fitByHeight);
@@ -137,7 +148,7 @@ export const ScaleToFitFrame = ({
   }, [
     allowUpscale,
     baseWidth,
-    contentHeight,
+    resolvedContentHeight,
     disableScale,
     fitHeight,
     hasFixedScale,
@@ -148,6 +159,10 @@ export const ScaleToFitFrame = ({
   React.useLayoutEffect(() => {
     const content = contentRef.current;
     if (!content) {
+      return;
+    }
+
+    if (resolvedIntrinsicHeightPx != null) {
       return;
     }
 
@@ -165,10 +180,12 @@ export const ScaleToFitFrame = ({
     updateHeight();
 
     return observeElementRect(content, updateHeight);
-  }, [measurementScale]);
+  }, [measurementScale, resolvedIntrinsicHeightPx]);
 
   const scaledHeight =
-    contentHeight != null ? Math.ceil(contentHeight * effectiveScale) : null;
+    resolvedContentHeight != null
+      ? Math.ceil(resolvedContentHeight * effectiveScale)
+      : null;
 
   const safePaddingPx = Math.max(0, contentPaddingPx);
   const safeBaseWidth = Math.max(1, baseWidth);
