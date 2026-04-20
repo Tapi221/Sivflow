@@ -10,7 +10,8 @@ import type {
   PdfPageSearchMatch,
 } from "@/components/pdf/pdfViewerTypes";
 import {
-  getErrorMessage,
+  getPdfErrorDetails,
+  isPdfAbortError,
   isPdfTextItem,
 } from "@/components/pdf/pdfViewerTypes";
 import { resolvePdfRenderBackingStore } from "@/components/pdf/pdfRenderQuality";
@@ -37,7 +38,10 @@ interface PdfPageProps {
   baseSize?: PageSize;
   searchMatches?: PdfPageSearchMatch[];
   activeSearchMatchIndex?: number;
-  getPage: (pageNumber: number) => Promise<PdfJsPage>;
+  acquirePage: (pageNumber: number) => Promise<{
+    page: PdfJsPage;
+    release: () => void;
+  }>;
   getPageTextContent: (pageNumber: number) => Promise<PdfJsTextContent>;
   onPageSize?: (pageNumber: number, size: PageSize) => void;
 }
@@ -219,13 +223,22 @@ const PdfPageComponent = ({
   baseSize,
   searchMatches = [],
   activeSearchMatchIndex,
-  getPage,
+  acquirePage,
   getPageTextContent,
   onPageSize,
 }: PdfPageProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textLayerRef = useRef<HTMLDivElement>(null);
   const searchLayerRef = useRef<HTMLDivElement>(null);
+  const canvasRenderPassIdRef = useRef(0);
+  const textLayerPassIdRef = useRef(0);
+
+  const documentFingerprint = useMemo(() => {
+    const fingerprint = pdf.fingerprints?.[0] ?? null;
+    return typeof fingerprint === "string" && fingerprint.length > 0
+      ? fingerprint
+      : null;
+  }, [pdf]);
 
   const pageIdentity = useMemo(
     () => buildPageIdentity(documentKey, pageNumber),
@@ -360,20 +373,25 @@ const PdfPageComponent = ({
 
     let cancelled = false;
 
-    void getPage(pageNumber)
-      .then((page) => {
+    void acquirePage(pageNumber)
+      .then(({ page, release }) => {
         if (cancelled) {
+          release();
           return;
         }
 
-        const viewport = page.getViewport({ scale: 1 });
-        const nextSize = { width: viewport.width, height: viewport.height };
+        try {
+          const viewport = page.getViewport({ scale: 1 });
+          const nextSize = { width: viewport.width, height: viewport.height };
 
-        setMeasuredPageState({
-          pageIdentity,
-          size: nextSize,
-        });
-        onPageSize?.(pageNumber, nextSize);
+          setMeasuredPageState({
+            pageIdentity,
+            size: nextSize,
+          });
+          onPageSize?.(pageNumber, nextSize);
+        } finally {
+          release();
+        }
       })
       .catch(() => {
         if (cancelled) {
@@ -392,8 +410,8 @@ const PdfPageComponent = ({
       cancelled = true;
     };
   }, [
+    acquirePage,
     baseSize,
-    getPage,
     measuredPageState.pageIdentity,
     measuredPageState.size,
     onPageSize,
@@ -406,10 +424,26 @@ const PdfPageComponent = ({
       return;
     }
 
-    let cancelled = false;
+    const renderPassId = canvasRenderPassIdRef.current + 1;
+    canvasRenderPassIdRef.current = renderPassId;
+
+    let disposed = false;
     let renderTask: PdfJsRenderTask | null = null;
     let renderStartRafId: number | null = null;
-    let pageForCleanup: PdfJsPage | null = null;
+    let activePageRelease: (() => void) | null = null;
+
+    const releasePage = () => {
+      if (!activePageRelease) {
+        return;
+      }
+
+      const release = activePageRelease;
+      activePageRelease = null;
+      release();
+    };
+
+    const isStale = () =>
+      disposed || canvasRenderPassIdRef.current !== renderPassId;
 
     const commitBitmap = ({
       bitmap,
@@ -420,6 +454,10 @@ const PdfPageComponent = ({
       viewport: ReturnType<PdfJsPage["getViewport"]>;
       renderBackingStore: ReturnType<typeof resolvePdfRenderBackingStore>;
     }) => {
+      if (isStale()) {
+        return;
+      }
+
       const canvas = canvasRef.current;
       if (!canvas) {
         throw new Error("PDF の描画先 canvas を取得できません");
@@ -437,6 +475,10 @@ const PdfPageComponent = ({
         throw new Error("PDF の描画先 canvas を初期化できません");
       }
 
+      if (isStale()) {
+        return;
+      }
+
       setCanvasRenderState({
         renderIdentity,
         rendered: true,
@@ -446,13 +488,14 @@ const PdfPageComponent = ({
 
     const run = async () => {
       try {
-        const page = await getPage(pageNumber);
-        pageForCleanup = page;
-
-        if (cancelled) {
+        const pageLease = await acquirePage(pageNumber);
+        if (isStale()) {
+          pageLease.release();
           return;
         }
 
+        activePageRelease = pageLease.release;
+        const page = pageLease.page;
         const viewport = page.getViewport({ scale });
         const visibleCanvas = canvasRef.current;
         if (visibleCanvas) {
@@ -504,7 +547,7 @@ const PdfPageComponent = ({
         });
 
         await renderTask.promise;
-        if (cancelled) {
+        if (isStale()) {
           return;
         }
 
@@ -514,6 +557,10 @@ const PdfPageComponent = ({
           renderBackingStore,
         });
 
+        if (isStale()) {
+          return;
+        }
+
         void setCachedPdfPageBitmap(
           cacheKey,
           documentKey,
@@ -522,35 +569,53 @@ const PdfPageComponent = ({
           // noop
         });
       } catch (errorValue: unknown) {
-        if (cancelled) {
+        if (isStale() || isPdfAbortError(errorValue)) {
           return;
         }
 
-        const message = getErrorMessage(errorValue);
-        if (
-          message.includes("cancelled") ||
-          message.includes("Rendering cancelled")
-        ) {
+        const errorDetails = getPdfErrorDetails(errorValue);
+
+        console.error("[PdfViewer] render error", {
+          pageNumber,
+          scale,
+          opaqueCanvas,
+          renderIdentity,
+          documentKey,
+          documentFingerprint,
+          devicePixelRatio: renderDevicePixelRatio,
+          error: errorDetails,
+          rawError: errorValue,
+        });
+
+        if (isStale()) {
           return;
         }
-
-        console.error("[PdfViewer] render error", errorValue);
 
         setCanvasRenderState({
           renderIdentity,
           rendered: false,
           error: "PDFの描画に失敗しました",
         });
+      } finally {
+        releasePage();
       }
     };
 
     renderStartRafId = window.requestAnimationFrame(() => {
+      if (isStale()) {
+        return;
+      }
+
       renderStartRafId = null;
       void run();
     });
 
     return () => {
-      cancelled = true;
+      disposed = true;
+
+      if (canvasRenderPassIdRef.current === renderPassId) {
+        canvasRenderPassIdRef.current += 1;
+      }
 
       if (renderStartRafId !== null) {
         window.cancelAnimationFrame(renderStartRafId);
@@ -562,11 +627,12 @@ const PdfPageComponent = ({
         // noop
       }
 
-      pageForCleanup?.cleanup?.();
+      releasePage();
     };
   }, [
+    acquirePage,
+    documentFingerprint,
     documentKey,
-    getPage,
     opaqueCanvas,
     pageNumber,
     renderDevicePixelRatio,
@@ -589,19 +655,39 @@ const PdfPageComponent = ({
       return;
     }
 
-    let cancelled = false;
+    const textLayerPassId = textLayerPassIdRef.current + 1;
+    textLayerPassIdRef.current = textLayerPassId;
+
+    let disposed = false;
     let rafId: number | null = null;
+    let activePageRelease: (() => void) | null = null;
+
+    const releasePage = () => {
+      if (!activePageRelease) {
+        return;
+      }
+
+      const release = activePageRelease;
+      activePageRelease = null;
+      release();
+    };
+
+    const isStale = () =>
+      disposed || textLayerPassIdRef.current !== textLayerPassId;
 
     const run = async () => {
       try {
-        const [page, textContent] = await Promise.all([
-          getPage(pageNumber),
+        const [pageLease, textContent] = await Promise.all([
+          acquirePage(pageNumber),
           getPageTextContent(pageNumber),
         ]);
-        if (cancelled) {
+
+        if (isStale()) {
+          pageLease.release();
           return;
         }
 
+        activePageRelease = pageLease.release;
         const nextTextLayerEl = textLayerRef.current;
         const nextSearchLayerEl = searchLayerRef.current;
         const canvas = canvasRef.current;
@@ -609,7 +695,7 @@ const PdfPageComponent = ({
           return;
         }
 
-        const viewport = page.getViewport({ scale });
+        const viewport = pageLease.page.getViewport({ scale });
 
         const stagedTextLayerEl = document.createElement("div");
         applyPdfTextLayerViewportStyles({
@@ -625,7 +711,7 @@ const PdfPageComponent = ({
         });
 
         await textLayer.render();
-        if (cancelled) {
+        if (isStale()) {
           return;
         }
 
@@ -657,47 +743,72 @@ const PdfPageComponent = ({
         });
         nextSearchLayerEl.replaceChildren();
 
+        if (isStale()) {
+          return;
+        }
+
         setTextLayerState({
           textLayerIdentity,
           ready: textLayerReady,
           warning,
         });
       } catch (errorValue: unknown) {
-        if (cancelled) {
+        if (isStale() || isPdfAbortError(errorValue)) {
           return;
         }
 
-        const message = getErrorMessage(errorValue);
-        if (
-          message.includes("cancelled") ||
-          message.includes("Rendering cancelled")
-        ) {
+        const errorDetails = getPdfErrorDetails(errorValue);
+
+        console.error("[PdfViewer] text layer error", {
+          pageNumber,
+          scale,
+          textLayerIdentity,
+          documentKey,
+          documentFingerprint,
+          error: errorDetails,
+          rawError: errorValue,
+        });
+
+        if (isStale()) {
           return;
         }
-
-        console.error("[PdfViewer] text layer error", errorValue);
 
         setTextLayerState({
           textLayerIdentity,
           ready: false,
           warning: "PDFテキストレイヤーの構築に失敗しました",
         });
+      } finally {
+        releasePage();
       }
     };
 
     rafId = window.requestAnimationFrame(() => {
+      if (isStale()) {
+        return;
+      }
+
       rafId = null;
       void run();
     });
 
     return () => {
-      cancelled = true;
+      disposed = true;
+
+      if (textLayerPassIdRef.current === textLayerPassId) {
+        textLayerPassIdRef.current += 1;
+      }
+
       if (rafId !== null) {
         window.cancelAnimationFrame(rafId);
       }
+
+      releasePage();
     };
   }, [
-    getPage,
+    acquirePage,
+    documentFingerprint,
+    documentKey,
     getPageTextContent,
     pageNumber,
     renderTextLayer,
@@ -803,7 +914,7 @@ const arePdfPagePropsEqual = (left: PdfPageProps, right: PdfPageProps) =>
   arePageSizesEqual(left.baseSize, right.baseSize) &&
   left.searchMatches === right.searchMatches &&
   left.activeSearchMatchIndex === right.activeSearchMatchIndex &&
-  left.getPage === right.getPage &&
+  left.acquirePage === right.acquirePage &&
   left.getPageTextContent === right.getPageTextContent &&
   left.onPageSize === right.onPageSize;
 
