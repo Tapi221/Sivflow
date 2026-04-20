@@ -22,7 +22,7 @@ import {
 import { getLocalDb } from "@/services/localDB";
 import type { Card, UploadedImage } from "@/types/domain/card";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const isDebug = (): boolean =>
   typeof localStorage !== "undefined" &&
@@ -201,6 +201,9 @@ export const useCardImagePreloader = (
   });
 
   const signatureMapRef = useRef<Map<string, string>>(new Map());
+  const readySetRef = useRef<Set<string>>(readySet);
+  const pendingReadyIdsRef = useRef<Set<string>>(new Set());
+  const flushReadyRafRef = useRef<number | null>(null);
 
   const cardCatalog = useMemo(() => buildCardCatalog(cards), [cards]);
 
@@ -222,6 +225,48 @@ export const useCardImagePreloader = (
 
     return buildCatalogSignature(cardCatalog.slice(idleStart, idleEnd + 1));
   }, [activeIndex, cardCatalog, renderRange]);
+
+  useEffect(() => {
+    readySetRef.current = readySet;
+  }, [readySet]);
+
+  const flushPendingReadyIds = useCallback(() => {
+    const pendingIds = pendingReadyIdsRef.current;
+    if (pendingIds.size === 0) {
+      return;
+    }
+
+    pendingReadyIdsRef.current = new Set<string>();
+
+    setReadySet((prev) => {
+      let changed = false;
+      const next = new Set(prev);
+
+      for (const id of pendingIds) {
+        if (next.has(id)) continue;
+        next.add(id);
+        changed = true;
+      }
+
+      return changed ? next : prev;
+    });
+  }, []);
+
+  const scheduleReadyCommit = useCallback(() => {
+    if (typeof window === "undefined") {
+      flushPendingReadyIds();
+      return;
+    }
+
+    if (flushReadyRafRef.current != null) {
+      return;
+    }
+
+    flushReadyRafRef.current = window.requestAnimationFrame(() => {
+      flushReadyRafRef.current = null;
+      flushPendingReadyIds();
+    });
+  }, [flushPendingReadyIds]);
 
   useEffect(() => {
     const sigMap = signatureMapRef.current;
@@ -276,6 +321,20 @@ export const useCardImagePreloader = (
   }, [cardCatalogSignature, cards.length]);
 
   useEffect(() => {
+    return () => {
+      if (
+        typeof window !== "undefined" &&
+        flushReadyRafRef.current != null
+      ) {
+        window.cancelAnimationFrame(flushReadyRafRef.current);
+        flushReadyRafRef.current = null;
+      }
+
+      pendingReadyIdsRef.current.clear();
+    };
+  }, []);
+
+  useEffect(() => {
     if (cards.length === 0) return;
 
     const controller = new AbortController();
@@ -290,13 +349,17 @@ export const useCardImagePreloader = (
     const markReady = (cardId: string) => {
       if (signal.aborted) return;
 
-      setReadySet((prev) => {
-        if (prev.has(cardId)) return prev;
+      if (readySetRef.current.has(cardId)) {
+        return;
+      }
 
-        const next = new Set(prev);
-        next.add(cardId);
-        return next;
-      });
+      const pendingIds = pendingReadyIdsRef.current;
+      if (pendingIds.has(cardId)) {
+        return;
+      }
+
+      pendingIds.add(cardId);
+      scheduleReadyCommit();
     };
 
     const preload = async (idx: number): Promise<void> => {
@@ -404,6 +467,14 @@ export const useCardImagePreloader = (
     return () => {
       controller.abort();
 
+      if (
+        typeof window !== "undefined" &&
+        flushReadyRafRef.current != null
+      ) {
+        window.cancelAnimationFrame(flushReadyRafRef.current);
+        flushReadyRafRef.current = null;
+      }
+
       for (const handle of idleHandles) {
         if (cic) {
           cic(handle);
@@ -411,8 +482,16 @@ export const useCardImagePreloader = (
           clearTimeout(handle as ReturnType<typeof setTimeout>);
         }
       }
+
+      flushPendingReadyIds();
     };
-  }, [activeIndex, preloadPlanSignature, userId]);
+  }, [
+    activeIndex,
+    flushPendingReadyIds,
+    preloadPlanSignature,
+    scheduleReadyCommit,
+    userId,
+  ]);
 
   return readySet;
 };
