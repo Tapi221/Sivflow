@@ -1,7 +1,7 @@
 /**
  * PDF ビューアの補助ツールバー。
- * 検索・フィット・外部オープンと状態表示を担い、
- * ページ移動とズームは下部オーバーレイ側に分離する。
+ * 検索・外部オープンと状態表示を担い、
+ * ページ移動・ズーム・幅フィットは下部オーバーレイ側に集約する。
  */
 import { useId } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,6 @@ import { ExternalLink } from "@/ui/icons";
 interface PdfPaneToolbarProps {
   isLocalOnly: boolean;
   uploadStatus?: "pending" | "queued" | "uploading" | "ready" | "failed" | null;
-  fitMode: "width" | "manual";
   sourceUnavailable: boolean;
   canOpenExternal: boolean;
   searchQuery: string;
@@ -19,14 +18,12 @@ interface PdfPaneToolbarProps {
   onSearchQueryChange: (value: string) => void;
   onPrevMatch: () => void;
   onNextMatch: () => void;
-  onFitWidth: () => void;
   onOpenNewTab: () => void;
 }
 
 export const PdfPaneToolbar = ({
   isLocalOnly,
   uploadStatus,
-  fitMode,
   sourceUnavailable,
   canOpenExternal,
   searchQuery,
@@ -35,7 +32,6 @@ export const PdfPaneToolbar = ({
   onSearchQueryChange,
   onPrevMatch,
   onNextMatch,
-  onFitWidth,
   onOpenNewTab,
 }: PdfPaneToolbarProps) => {
   const searchInputId = useId();
@@ -125,14 +121,6 @@ export const PdfPaneToolbar = ({
       </div>
 
       <div className="flex shrink-0 items-center gap-1">
-        <Button
-          variant={fitMode === "width" ? "default" : "outline"}
-          size="sm"
-          onClick={onFitWidth}
-          disabled={sourceUnavailable}
-        >
-          幅に合わせる
-        </Button>
         <Button
           variant="ghost"
           size="sm"

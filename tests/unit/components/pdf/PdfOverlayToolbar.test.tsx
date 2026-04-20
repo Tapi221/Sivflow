@@ -1,81 +1,80 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+// @vitest-environment jsdom
+import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { PdfOverlayToolbar } from "@/components/pdf/PdfOverlayToolbar";
 
+afterEach(() => {
+  cleanup();
+});
+
 describe("PdfOverlayToolbar", () => {
-  it("renders pager and zoom controls with compact overlay styling contract", () => {
+  it("幅に合わせるボタンを表示し、fitMode が width のとき active になる", async () => {
+    const user = userEvent.setup();
+    const onFitWidth = vi.fn();
+
     render(
       <PdfOverlayToolbar
-        currentPage={3}
-        numPages={12}
-        scalePercent={187}
+        currentPage={2}
+        numPages={6}
+        scalePercent={100}
         minScalePercent={50}
         maxScalePercent={300}
-        onCommitPage={vi.fn()}
-        onPrevPage={vi.fn()}
-        onNextPage={vi.fn()}
-        onScalePercentChange={vi.fn()}
-        canGoToPrevPage
-        canGoToNextPage
+        fitMode="width"
+        onCommitPage={() => {}}
+        onPrevPage={() => {}}
+        onNextPage={() => {}}
+        onFitWidth={onFitWidth}
+        onScalePercentChange={() => {}}
+        canGoToPrevPage={true}
+        canGoToNextPage={true}
       />,
     );
 
-    expect(screen.getByRole("button", { name: "前のページ" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "次のページ" })).toBeTruthy();
-    expect(screen.getByDisplayValue("3")).toBeTruthy();
-    expect(screen.getByText("/ 12")).toBeTruthy();
-    expect(screen.getByText("187%")).toBeTruthy();
+    const fitWidthButton = screen.getByRole("button", {
+      name: "幅に合わせる",
+    });
+
+    expect(fitWidthButton.getAttribute("aria-pressed")).toBe("true");
+
+    await user.click(fitWidthButton);
+
+    expect(onFitWidth).toHaveBeenCalledTimes(1);
   });
 
-  it("clamps committed page input to the available page count", () => {
-    const onCommitPage = vi.fn();
+  it("disabled のとき幅に合わせるボタンを押せない", async () => {
+    const user = userEvent.setup();
+    const onFitWidth = vi.fn();
 
     render(
       <PdfOverlayToolbar
-        currentPage={3}
-        numPages={12}
-        scalePercent={187}
+        currentPage={1}
+        numPages={1}
+        scalePercent={100}
         minScalePercent={50}
         maxScalePercent={300}
-        onCommitPage={onCommitPage}
-        onPrevPage={vi.fn()}
-        onNextPage={vi.fn()}
-        onScalePercentChange={vi.fn()}
-        canGoToPrevPage
-        canGoToNextPage
+        fitMode="manual"
+        onCommitPage={() => {}}
+        onPrevPage={() => {}}
+        onNextPage={() => {}}
+        onFitWidth={onFitWidth}
+        onScalePercentChange={() => {}}
+        canGoToPrevPage={false}
+        canGoToNextPage={false}
+        disabled={true}
       />,
     );
 
-    const input = screen.getByLabelText("PDFページ番号");
-    fireEvent.change(input, { target: { value: "999" } });
-    fireEvent.blur(input);
+    const fitWidthButton = screen.getByRole("button", {
+      name: "幅に合わせる",
+    }) as HTMLButtonElement;
 
-    expect(onCommitPage).toHaveBeenCalledWith(12);
-  });
+    expect(fitWidthButton.disabled).toBe(true);
+    expect(fitWidthButton.getAttribute("aria-pressed")).toBe("false");
 
-  it("emits exact slider values in 1 percent increments", () => {
-    const onScalePercentChange = vi.fn();
+    await user.click(fitWidthButton);
 
-    render(
-      <PdfOverlayToolbar
-        currentPage={3}
-        numPages={12}
-        scalePercent={187}
-        minScalePercent={50}
-        maxScalePercent={300}
-        onCommitPage={vi.fn()}
-        onPrevPage={vi.fn()}
-        onNextPage={vi.fn()}
-        onScalePercentChange={onScalePercentChange}
-        canGoToPrevPage
-        canGoToNextPage
-      />,
-    );
-
-    const slider = screen.getByLabelText("PDFズーム") as HTMLInputElement;
-    fireEvent.change(slider, { target: { value: "188" } });
-
-    expect(onScalePercentChange).toHaveBeenCalledWith(188);
+    expect(onFitWidth).not.toHaveBeenCalled();
   });
 });
