@@ -5,6 +5,7 @@ import platform from "@/platform";
 import type { PdfViewerState } from "@/types";
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PdfOverlayToolbar } from "./PdfOverlayToolbar";
 import { PdfPaneToolbar } from "./PdfPaneToolbar";
 import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
@@ -16,7 +17,6 @@ import {
   FIT_MAX_SCALE,
   FIT_MIN_SCALE,
   FIT_PADDING_X,
-  ZOOM_STEP,
   clampScale,
 } from "./pdfViewerStateStorage";
 
@@ -49,6 +49,7 @@ interface PdfPaneProps {
 }
 
 const SEARCH_INPUT_DEBOUNCE_MS = 300;
+const PDF_OVERLAY_ZOOM_STEP_PERCENT = 1;
 
 export const PdfPane = ({
   doc,
@@ -116,6 +117,19 @@ export const PdfPane = ({
     handleSourceLoadError,
   } = usePdfSourceResolver(doc, currentUser?.uid);
 
+  const scalePercent = useMemo(() => Number((scale * 100).toFixed(1)), [scale]);
+
+  const handleScalePercentChange = useCallback(
+    (nextPercent: number) => {
+      if (!Number.isFinite(nextPercent)) {
+        return;
+      }
+
+      handleViewerScaleChange(nextPercent / 100);
+    },
+    [handleViewerScaleChange],
+  );
+
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       setSearchQuery(searchInputValue);
@@ -145,6 +159,18 @@ export const PdfPane = ({
     const nextPage = Math.min(numPages || currentPage, currentPage + 1);
     viewerRef.current?.scrollToPage(nextPage);
   }, [currentPage, numPages]);
+
+  const handleCommitPage = useCallback(
+    (nextPage: number) => {
+      if (!Number.isFinite(nextPage) || numPages <= 0) {
+        return;
+      }
+
+      const normalizedPage = Math.min(numPages, Math.max(1, Math.trunc(nextPage)));
+      viewerRef.current?.scrollToPage(normalizedPage);
+    },
+    [numPages],
+  );
 
   const commitSearchQuery = useCallback(() => {
     setSearchQuery((previous) =>
@@ -234,14 +260,13 @@ export const PdfPane = ({
     };
   }, []);
 
+  const shouldRenderOverlayToolbar = !sourceUnavailable && numPages > 0;
+
   return (
     <div className={cn("flex h-full min-h-0 min-w-0 flex-col", className)}>
       <PdfPaneToolbar
         isLocalOnly={isLocalOnly}
         uploadStatus={doc.uploadStatus}
-        currentPage={currentPage}
-        numPages={numPages}
-        scale={scale}
         fitMode={fitMode}
         sourceUnavailable={sourceUnavailable}
         canOpenExternal={!!effectiveRemoteUrl || !!localSourceBytes}
@@ -251,10 +276,6 @@ export const PdfPane = ({
         onSearchQueryChange={setSearchInputValue}
         onPrevMatch={handlePrevMatch}
         onNextMatch={handleNextMatch}
-        onPrev={handlePrev}
-        onNext={handleNext}
-        onZoomOut={handleZoomOut}
-        onZoomIn={handleZoomIn}
         onFitWidth={handleFitWidth}
         onOpenNewTab={() => {
           void handleOpenNewTab();
@@ -263,7 +284,7 @@ export const PdfPane = ({
 
       <div
         ref={containerRef}
-        className="flex-1 min-h-0 min-w-0 w-full overflow-hidden bg-transparent"
+        className="relative flex-1 min-h-0 min-w-0 w-full overflow-hidden bg-transparent"
       >
         {sourceUnavailable ? (
           <div className="p-4 text-sm text-slate-500">
@@ -273,32 +294,60 @@ export const PdfPane = ({
             {localDataStatus === "idle" && "PDFソースがありません。"}
           </div>
         ) : (
-          <PdfViewer
-            ref={viewerRef}
-            source={source}
-            scale={scale}
-            minScale={FIT_MIN_SCALE}
-            maxScale={FIT_MAX_SCALE}
-            zoomStep={ZOOM_STEP}
-            searchQuery={searchQuery}
-            searchNavToken={searchNavToken}
-            searchNavDirection={searchNavDirection}
-            onScaleChange={handleViewerScaleChange}
-            onNumPages={setNumPages}
-            onPageChange={setCurrentPage}
-            onFirstPageSize={handleFirstPageSize}
-            viewerOptions={resolvedViewerOptions}
-            sourceMeta={sourceMeta}
-            onSourceLoadError={handleSourceLoadError}
-            onSearchStateChange={({
-              totalMatches: nextTotalMatches,
-              activeMatchIndex: nextActiveMatchIndex,
-            }) => {
-              setTotalMatches(nextTotalMatches);
-              setActiveMatchIndex(nextActiveMatchIndex);
-            }}
-            className="h-full w-full"
-          />
+          <>
+            <PdfViewer
+              ref={viewerRef}
+              source={source}
+              scale={scale}
+              minScale={FIT_MIN_SCALE}
+              maxScale={FIT_MAX_SCALE}
+              searchQuery={searchQuery}
+              searchNavToken={searchNavToken}
+              searchNavDirection={searchNavDirection}
+              onScaleChange={handleViewerScaleChange}
+              onNumPages={setNumPages}
+              onPageChange={setCurrentPage}
+              onFirstPageSize={handleFirstPageSize}
+              viewerOptions={resolvedViewerOptions}
+              sourceMeta={sourceMeta}
+              onSourceLoadError={handleSourceLoadError}
+              onSearchStateChange={({
+                totalMatches: nextTotalMatches,
+                activeMatchIndex: nextActiveMatchIndex,
+              }) => {
+                setTotalMatches(nextTotalMatches);
+                setActiveMatchIndex(nextActiveMatchIndex);
+              }}
+              className="h-full w-full"
+            />
+
+            {shouldRenderOverlayToolbar ? (
+              <div
+                className="pointer-events-none absolute z-20 flex items-end gap-2"
+                style={{
+                  right: "max(1rem, env(safe-area-inset-right))",
+                  bottom: "max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))",
+                }}
+              >
+                <div className="pointer-events-auto">
+                  <PdfOverlayToolbar
+                    currentPage={currentPage}
+                    numPages={numPages}
+                    scalePercent={scalePercent}
+                    minScalePercent={FIT_MIN_SCALE * 100}
+                    maxScalePercent={FIT_MAX_SCALE * 100}
+                    zoomStepPercent={PDF_OVERLAY_ZOOM_STEP_PERCENT}
+                    onCommitPage={handleCommitPage}
+                    onPrevPage={handlePrev}
+                    onNextPage={handleNext}
+                    onScalePercentChange={handleScalePercentChange}
+                    canGoToPrevPage={currentPage > 1}
+                    canGoToNextPage={numPages > 0 && currentPage < numPages}
+                  />
+                </div>
+              </div>
+            ) : null}
+          </>
         )}
       </div>
     </div>

@@ -1,17 +1,16 @@
 import React from "react";
 
-import { Slider } from "@/components/ui/slider";
-import {
-  overlayGlassActionButtonClassName,
-  overlayGlassToolbarClassName,
-} from "@/components/card/shell/overlaySurfaceClassNames";
 import {
   CARD_LAYOUT_MODE_LABELS,
   type CardLayoutMode,
 } from "@/features/cardsetview/domain/cardLayoutMode";
-import { cn } from "@/lib/utils";
-import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@constants/shared/flashcard";
+import { OverlayToolbar } from "@/components/overlay-toolbar/OverlayToolbar";
+import { OverlayToolbarButton } from "@/components/overlay-toolbar/OverlayToolbarButton";
+import { OverlayToolbarDivider } from "@/components/overlay-toolbar/OverlayToolbarDivider";
+import { OverlayToolbarIndexNavigator } from "@/components/overlay-toolbar/OverlayToolbarIndexNavigator";
+import { OverlayToolbarZoomControl } from "@/components/overlay-toolbar/OverlayToolbarZoomControl";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type ZoomControlProps = {
   value: number;
@@ -47,28 +46,6 @@ type ModeButtonProps = {
   children: React.ReactNode;
 };
 
-const normalizeCommittedCardIndex = ({
-  draftValue,
-  fallbackValue,
-  total,
-}: {
-  draftValue: string;
-  fallbackValue: number;
-  total: number;
-}) => {
-  const trimmedDraftValue = draftValue.trim();
-  if (trimmedDraftValue.length === 0) {
-    return fallbackValue;
-  }
-
-  const parsedValue = Number(trimmedDraftValue);
-  if (!Number.isFinite(parsedValue)) {
-    return fallbackValue;
-  }
-
-  return Math.min(total, Math.max(1, Math.trunc(parsedValue)));
-};
-
 const ModeButton = ({
   isActive,
   onClick,
@@ -77,27 +54,15 @@ const ModeButton = ({
   children,
 }: ModeButtonProps) => {
   return (
-    <button
-      type="button"
-      className={cn(
-        overlayGlassActionButtonClassName,
-        "h-6 w-6",
-        "relative",
-        isActive &&
-          !disabled &&
-          "border-[rgba(214,198,182,0.96)] bg-[rgba(255,252,247,0.98)] text-[#3d342d] shadow-[inset_0_0_0_1px_rgba(107,95,85,0.08)]",
-        disabled &&
-          "border-[rgba(233,224,216,0.88)] bg-[rgba(255,250,245,0.56)] text-[#baaea4] hover:bg-[rgba(255,250,245,0.56)] hover:text-[#baaea4]",
-      )}
+    <OverlayToolbarButton
       onClick={onClick}
-      aria-label={label}
-      title={label}
-      aria-pressed={isActive}
-      aria-disabled={disabled}
+      label={label}
       disabled={disabled}
+      active={isActive}
+      className="h-6 w-6"
     >
       {children}
-    </button>
+    </OverlayToolbarButton>
   );
 };
 
@@ -266,13 +231,6 @@ const SplitGlyph = () => (
   </svg>
 );
 
-const ToolbarDivider = () => (
-  <span
-    className="h-4 w-px shrink-0 bg-[rgba(218,207,197,0.82)]"
-    aria-hidden="true"
-  />
-);
-
 export const CardViewCompactToolbar = ({
   displayMode,
   cardLayoutMode,
@@ -290,14 +248,6 @@ export const CardViewCompactToolbar = ({
       ? "カード表示。タップで最大表示に切り替え"
       : "最大表示。タップでカード表示に切り替え";
 
-  const sliderValue = React.useMemo<readonly [number] | null>(() => {
-    if (!zoom) {
-      return null;
-    }
-
-    return [zoom.value] as const;
-  }, [zoom]);
-
   const resolvedStep = React.useMemo(() => {
     if (!zoom?.step || !Number.isFinite(zoom.step) || zoom.step <= 0) {
       return CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT;
@@ -306,112 +256,8 @@ export const CardViewCompactToolbar = ({
     return zoom.step;
   }, [zoom?.step]);
 
-  const handleSliderChange = React.useCallback(
-    (next: number[]) => {
-      if (!zoom) {
-        return;
-      }
-
-      const nextValue = next[0];
-      if (typeof nextValue === "number" && Number.isFinite(nextValue)) {
-        zoom.onChange(nextValue);
-      }
-    },
-    [zoom],
-  );
-
-  const indexNavigatorCurrent = indexNavigator?.current ?? null;
-  const indexNavigatorTotal = indexNavigator?.total ?? null;
-  const skipNextBlurCommitRef = React.useRef(false);
-  const [draftIndexValue, setDraftIndexValue] = React.useState(() => {
-    if (indexNavigatorCurrent == null) {
-      return "";
-    }
-
-    return String(indexNavigatorCurrent);
-  });
-
-  React.useEffect(() => {
-    if (indexNavigatorCurrent == null || indexNavigatorTotal == null) {
-      setDraftIndexValue("");
-      return;
-    }
-
-    setDraftIndexValue(String(indexNavigatorCurrent));
-  }, [indexNavigatorCurrent, indexNavigatorTotal]);
-
-  const commitIndexInput = React.useCallback(() => {
-    if (
-      !indexNavigator ||
-      indexNavigatorCurrent == null ||
-      indexNavigatorTotal == null
-    ) {
-      return;
-    }
-
-    const nextCommittedValue = normalizeCommittedCardIndex({
-      draftValue: draftIndexValue,
-      fallbackValue: indexNavigatorCurrent,
-      total: indexNavigatorTotal,
-    });
-
-    setDraftIndexValue(String(nextCommittedValue));
-    indexNavigator.onCommit(nextCommittedValue);
-  }, [
-    draftIndexValue,
-    indexNavigator,
-    indexNavigatorCurrent,
-    indexNavigatorTotal,
-  ]);
-
-  const handleIndexInputChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const sanitizedValue = event.currentTarget.value.replace(/\D+/g, "");
-      setDraftIndexValue(sanitizedValue);
-    },
-    [],
-  );
-
-  const handleIndexInputBlur = React.useCallback(() => {
-    if (skipNextBlurCommitRef.current) {
-      skipNextBlurCommitRef.current = false;
-      return;
-    }
-
-    commitIndexInput();
-  }, [commitIndexInput]);
-
-  const handleIndexInputKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.nativeEvent.isComposing) {
-        return;
-      }
-
-      if (event.key === "Enter") {
-        event.preventDefault();
-        skipNextBlurCommitRef.current = true;
-        commitIndexInput();
-        event.currentTarget.blur();
-        return;
-      }
-
-      if (event.key === "Escape") {
-        event.preventDefault();
-        if (indexNavigatorCurrent == null) {
-          return;
-        }
-
-        setDraftIndexValue(String(indexNavigatorCurrent));
-      }
-    },
-    [commitIndexInput, indexNavigatorCurrent],
-  );
-
   return (
-    <div
-      className={cn(overlayGlassToolbarClassName, "gap-1.5 px-2 py-1")}
-      data-card-zoom-input-ignore="true"
-    >
+    <OverlayToolbar className="gap-1.5 px-2 py-1">
       <ModeButton
         isActive={displayMode === "fluid"}
         onClick={() => onChangeDisplayMode(nextDisplayMode)}
@@ -453,49 +299,32 @@ export const CardViewCompactToolbar = ({
 
       {indexNavigator ? (
         <>
-          <ToolbarDivider />
+          <OverlayToolbarDivider />
 
-          <div className="flex items-center gap-1 text-[10px] font-semibold tabular-nums text-[#6b5f55]">
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={draftIndexValue}
-              onChange={handleIndexInputChange}
-              onBlur={handleIndexInputBlur}
-              onKeyDown={handleIndexInputKeyDown}
-              className={cn(
-                "h-6 w-12 rounded-full border border-[rgba(225,214,203,0.9)] bg-[rgba(255,250,244,0.84)] px-2 text-center text-[10px] font-semibold text-[#463c35] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none transition focus:border-[rgba(189,166,144,0.92)] focus:bg-[rgba(255,252,247,0.98)] sm:w-14",
-              )}
-              aria-label="カード番号"
-              data-card-zoom-input-ignore="true"
-            />
-            <span className="shrink-0">/ {indexNavigator.total}</span>
-          </div>
+          <OverlayToolbarIndexNavigator
+            value={indexNavigator.current}
+            total={indexNavigator.total}
+            onCommit={indexNavigator.onCommit}
+            inputAriaLabel="カード番号"
+          />
         </>
       ) : null}
 
-      {zoom && sliderValue ? (
+      {zoom ? (
         <>
-          <ToolbarDivider />
+          <OverlayToolbarDivider />
 
-          <div className="w-14 px-0.5 sm:w-16">
-            <Slider
-              min={zoom.min}
-              max={zoom.max}
-              step={resolvedStep}
-              value={sliderValue}
-              onValueChange={handleSliderChange}
-              onValueCommit={handleSliderChange}
-              aria-label="カードズーム"
-            />
-          </div>
-
-          <div className="min-w-[2.25rem] text-center text-[10px] font-semibold tabular-nums text-[#6b5f55]">
-            {zoom.value}%
-          </div>
+          <OverlayToolbarZoomControl
+            value={zoom.value}
+            min={zoom.min}
+            max={zoom.max}
+            step={resolvedStep}
+            onChange={zoom.onChange}
+            label="カードズーム"
+            sliderWrapperClassName="w-14 px-0.5 sm:w-16"
+          />
         </>
       ) : null}
-    </div>
+    </OverlayToolbar>
   );
 };
