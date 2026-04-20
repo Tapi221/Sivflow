@@ -30,7 +30,8 @@ export interface PdfPageResourceCache<Page> {
 
 const DEFAULT_MAX_PAGE_CACHE_ENTRIES = 12;
 
-const normalizePageNumber = (pageNumber: number) => Math.max(1, Math.floor(pageNumber));
+const normalizePageNumber = (pageNumber: number) =>
+  Math.max(1, Math.floor(pageNumber));
 
 export const createPdfPageResourceCache = <Page>({
   loadPage,

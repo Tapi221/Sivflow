@@ -77,15 +77,13 @@ const sidebarItems = [
   {
     id: "voice",
     label: "音声設定",
-    description:
-      "自動読み上げの挙動と、音声まわりの既定値を確認します。",
+    description: "自動読み上げの挙動と、音声まわりの既定値を確認します。",
     icon: Volume2,
   },
   {
     id: "shortcut",
     label: "ショートカット",
-    description:
-      "主要画面で使えるショートカットを一覧で確認できます。",
+    description: "主要画面で使えるショートカットを一覧で確認できます。",
     icon: Keyboard,
   },
   {
@@ -189,8 +187,7 @@ const reviewButtonItems = [
   {
     id: "remembered",
     label: "覚えた",
-    description:
-      "通常の正答ボタンです。忘却曲線に沿って次回間隔を伸ばします。",
+    description: "通常の正答ボタンです。忘却曲線に沿って次回間隔を伸ばします。",
     badge: "固定",
     dotClassName: "bg-sky-500",
   },
@@ -308,10 +305,7 @@ const resolveSettingsTab = (tab?: SettingsTabParam): SettingsTab => {
 };
 
 const getSidebarItem = (tab: SettingsTab): SidebarItem => {
-  return (
-    sidebarItems.find((item) => item.id === tab) ??
-    sidebarItems[0]
-  );
+  return sidebarItems.find((item) => item.id === tab) ?? sidebarItems[0];
 };
 
 const getOnOffLabel = (enabled: boolean) => {
@@ -434,7 +428,9 @@ const SettingsNavButton = ({
         className="h-4 w-4 shrink-0 ds-nav-action__icon"
         strokeWidth={2.05}
       />
-      <span className="ds-settings-panel__nav-label truncate">{item.label}</span>
+      <span className="ds-settings-panel__nav-label truncate">
+        {item.label}
+      </span>
     </button>
   );
 };
@@ -577,8 +573,6 @@ const SettingsDialog = ({
     }
   };
 
-
-
   const handleReviewButtonToggle = (
     settingKey: ReviewToggleSettingKey,
     checked: boolean,
@@ -590,7 +584,10 @@ const SettingsDialog = ({
     return updateSettings({ showReviewEasy: checked });
   };
 
-  const renderStatusSwitch = (enabled: boolean, onCheckedChange: (checked: boolean) => void) => {
+  const renderStatusSwitch = (
+    enabled: boolean,
+    onCheckedChange: (checked: boolean) => void,
+  ) => {
     return (
       <div className="flex items-center gap-3">
         <span
@@ -620,7 +617,8 @@ const SettingsDialog = ({
             description="編集画面を開いた直後のプレビュー表示状態を決めます。"
             action={renderStatusSwitch(
               settings?.defaultPreviewEnabled ?? false,
-              (checked) => void updateSettings({ defaultPreviewEnabled: checked }),
+              (checked) =>
+                void updateSettings({ defaultPreviewEnabled: checked }),
             )}
           />
           <SettingsRow
@@ -636,7 +634,8 @@ const SettingsDialog = ({
             description="複製したブロックを反対側のセクション（問題 / 解答）にも追加します。"
             action={renderStatusSwitch(
               settings?.duplicateToOpposite ?? false,
-              (checked) => void updateSettings({ duplicateToOpposite: checked }),
+              (checked) =>
+                void updateSettings({ duplicateToOpposite: checked }),
             )}
           />
         </SettingsSection>
@@ -651,7 +650,7 @@ const SettingsDialog = ({
         >
           {reviewButtonItems.map((item) => {
             const toggleValue = item.settingKey
-              ? settings?.[item.settingKey] ?? true
+              ? (settings?.[item.settingKey] ?? true)
               : true;
 
             return (
@@ -668,15 +667,17 @@ const SettingsDialog = ({
                   />
                 }
                 action={
-                  item.settingKey
-                    ? renderStatusSwitch(toggleValue, (checked) =>
+                  item.settingKey ? (
+                    renderStatusSwitch(
+                      toggleValue,
+                      (checked) =>
                         void handleReviewButtonToggle(item.settingKey, checked),
-                      )
-                    : (
-                        <span className="ds-settings-panel__status-pill ds-settings-panel__status-pill--off">
-                          {item.badge}
-                        </span>
-                      )
+                    )
+                  ) : (
+                    <span className="ds-settings-panel__status-pill ds-settings-panel__status-pill--off">
+                      {item.badge}
+                    </span>
+                  )
                 }
               />
             );
@@ -760,8 +761,7 @@ const SettingsDialog = ({
         >
           <div className="ds-settings-panel__choice-grid md:grid-cols-2">
             {folderSidebarDisplayModeOptions.map((option) => {
-              const isSelected =
-                currentFolderSidebarDisplayMode === option.id;
+              const isSelected = currentFolderSidebarDisplayMode === option.id;
 
               return (
                 <SettingsChoiceCard
@@ -931,7 +931,9 @@ const SettingsDialog = ({
                 value={String(syncPrefs.intervalMinutes)}
                 onValueChange={(value) =>
                   void updateSyncPrefs({
-                    intervalMinutes: Number(value) as SyncSettings["intervalMinutes"],
+                    intervalMinutes: Number(
+                      value,
+                    ) as SyncSettings["intervalMinutes"],
                   })
                 }
               >
@@ -951,8 +953,9 @@ const SettingsDialog = ({
           <SettingsRow
             title="Wi-Fi 接続時のみ同期"
             description="モバイルデータ通信量を抑えたいときに有効にします。"
-            action={renderStatusSwitch(syncPrefs.wifiOnly, (checked) =>
-              void updateSyncPrefs({ wifiOnly: checked }),
+            action={renderStatusSwitch(
+              syncPrefs.wifiOnly,
+              (checked) => void updateSyncPrefs({ wifiOnly: checked }),
             )}
           />
         </SettingsSection>
@@ -1084,7 +1087,9 @@ const SettingsDialog = ({
           <div
             className={cn(
               "ds-settings-panel__sidebar md:w-[248px] flex-shrink-0 flex flex-col border-r",
-              isMobileMenuOpen ? "absolute inset-0 z-50 w-full" : "hidden md:flex",
+              isMobileMenuOpen
+                ? "absolute inset-0 z-50 w-full"
+                : "hidden md:flex",
             )}
           >
             <div className="flex-1 overflow-y-auto px-4 py-4 custom-scrollbar">

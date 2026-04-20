@@ -49,5 +49,5 @@ export const shouldHandleZoomInputTarget = ({
     return false;
   }
 
-  return !Boolean(targetElement.closest(ignoreSelector));
+  return targetElement.closest(ignoreSelector) === null;
 };

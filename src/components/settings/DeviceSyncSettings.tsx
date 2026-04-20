@@ -283,7 +283,9 @@ export const DeviceSyncSettings = () => {
             disabled={cleaning}
             className="rounded-xl"
           >
-            <Trash2 className={cn("mr-2 h-4 w-4", cleaning && "animate-pulse")} />
+            <Trash2
+              className={cn("mr-2 h-4 w-4", cleaning && "animate-pulse")}
+            />
             古いセッションを掃除
           </Button>
 
@@ -489,7 +491,9 @@ export const DeviceSyncSettings = () => {
                           <button
                             type="button"
                             disabled={removingId === device.deviceId}
-                            onClick={() => void handleDisconnect(device.deviceId)}
+                            onClick={() =>
+                              void handleDisconnect(device.deviceId)
+                            }
                             className="rounded-lg border border-slate-200 p-2 text-slate-500 transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
                             aria-label={`${device.deviceName} の同期を解除`}
                           >

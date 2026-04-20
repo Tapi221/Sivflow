@@ -523,12 +523,14 @@ const VerticalCardPagerFn = <T,>({
       return;
     }
 
-    layoutMeasurementsCommitRafRef.current = window.requestAnimationFrame(() => {
-      layoutMeasurementsCommitRafRef.current = null;
-      setLayoutMeasurements(
-        createLayoutMeasurementsSnapshot(measuredHeightsRef.current),
-      );
-    });
+    layoutMeasurementsCommitRafRef.current = window.requestAnimationFrame(
+      () => {
+        layoutMeasurementsCommitRafRef.current = null;
+        setLayoutMeasurements(
+          createLayoutMeasurementsSnapshot(measuredHeightsRef.current),
+        );
+      },
+    );
   }, []);
 
   useEffect(() => {

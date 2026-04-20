@@ -207,7 +207,9 @@ export const getPdfErrorDetails = (error: unknown): PdfErrorDetails => {
   const message = getErrorMessage(error);
   const code = readStringField(error, "code");
   const stack =
-    error instanceof Error ? error.stack ?? null : readStringField(error, "stack");
+    error instanceof Error
+      ? (error.stack ?? null)
+      : readStringField(error, "stack");
 
   return {
     name,
