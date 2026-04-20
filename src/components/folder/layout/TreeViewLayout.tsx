@@ -265,7 +265,7 @@ const TreeViewLayout = ({
     return Array.from(tagNames).sort();
   }, [cards, tagById]);
 
-  const currentHeaderActionFolderId = useMemo(() => {
+  const currentSelectedContextFolderId = useMemo(() => {
     if (isSectionListMode) return null;
     if (selectedFolderId) return selectedFolderId;
 
@@ -287,32 +287,20 @@ const TreeViewLayout = ({
     routeSelectedCardSet,
     selectedFolderId,
   ]);
+
+  const currentHeaderActionFolderId = currentSelectedContextFolderId;
 
   const currentHeaderFolderId = useMemo(() => {
-    if (isSectionListMode) return null;
-    if (selectedFolderId) return selectedFolderId;
-
-    if (activeSelectedCardSetId) {
-      return (
-        cardSets.find(
-          (cardSet: CardSet) => cardSet.id === activeSelectedCardSetId,
-        )?.folderId ??
-        routeSelectedCardSet?.folderId ??
-        null
-      );
+    if (currentSelectedContextFolderId !== null) {
+      return currentSelectedContextFolderId;
     }
 
-    if (explorerHeaderFolderId) return explorerHeaderFolderId;
+    if (explorerHeaderFolderId) {
+      return explorerHeaderFolderId;
+    }
 
     return null;
-  }, [
-    activeSelectedCardSetId,
-    cardSets,
-    explorerHeaderFolderId,
-    isSectionListMode,
-    routeSelectedCardSet,
-    selectedFolderId,
-  ]);
+  }, [currentSelectedContextFolderId, explorerHeaderFolderId]);
 
   useLayoutEffect(() => {
     onBreadcrumbContextChange?.({
