@@ -4,7 +4,6 @@ import { useCardSetViewScreenController } from "@/features/cardsetview/presentat
 import { CardSetViewDesktopContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewDesktopContent";
 import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMetaPanel";
 import { CardSetViewMobileContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMobileContent";
-import { CardSetViewOverlayControls } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewOverlayControls";
 import { CardViewCompactToolbar } from "@/features/cardsetview/presentation/web/ui/components/CardViewCompactToolbar";
 import type { CardSetViewContentProps } from "@/features/cardsetview/presentation/web/ui/components/cardSetViewContentProps";
 import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
@@ -28,9 +27,6 @@ export const CardSetViewScreen = () => {
     data,
     state,
     paneWidth,
-    widthControl,
-    overlayRight,
-    resolvedLastSyncedAtMs,
     topLeftZoomControl,
     effectiveCardLayoutMode,
     disabledCardLayoutModes,
@@ -87,15 +83,6 @@ export const CardSetViewScreen = () => {
 
   const overlayChildren = (
     <>
-      <CardSetViewOverlayControls
-        isDesktop={isDesktopPresentation}
-        overlayRight={overlayRight}
-        resolvedLastSyncedAtMs={resolvedLastSyncedAtMs}
-        activeSyncStatus={state.activeSyncStatus}
-        onRetryActiveSync={state.handleRetryActiveSync}
-        topInsetPx={desktopOverlayTopInsetPx}
-      />
-
       <div
         className="pointer-events-auto absolute z-20 flex items-end gap-2"
         style={{

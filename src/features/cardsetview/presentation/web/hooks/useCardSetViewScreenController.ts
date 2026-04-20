@@ -15,11 +15,7 @@ import { useCardSetViewZoom } from "@/features/cardsetview/presentation/web/hook
 import { useCardSetViewZoomInput } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoomInput";
 import { useCardSetViewBreadcrumbs } from "@/features/cardsetview/presentation/web/infra/useCardSetViewBreadcrumbs";
 import { useCardSetViewParams } from "@/features/cardsetview/presentation/web/infra/useCardSetViewParams";
-import {
-  buildWidthControl,
-  resolveLastSyncedAtMs,
-  resolveOverlayRight,
-} from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
+import { buildWidthControl } from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import {
@@ -135,20 +131,6 @@ export const useCardSetViewScreenController = () => {
     widthStepPx: CARD_PANE_WIDTH_STEP_PX,
   });
 
-  const overlayRight = resolveOverlayRight({
-    isDesktop,
-    isMetaOpen: state.isMetaOpen,
-  });
-
-  const resolvedLastSyncedAtMs = resolveLastSyncedAtMs({
-    activeSyncStatus: state.activeSyncStatus,
-    selectedCard: state.selectedCard as {
-      id?: string | null;
-      updatedAt?: unknown;
-      createdAt?: unknown;
-    } | null,
-  });
-
   const topLeftZoomControl = isDesktop
     ? {
         value: zoom.zoomPercent,
@@ -257,8 +239,6 @@ export const useCardSetViewScreenController = () => {
     paneWidth,
     zoom,
     widthControl,
-    overlayRight,
-    resolvedLastSyncedAtMs,
     topLeftZoomControl,
     handleActiveScrollAnchorFaceChange,
     handleChangeCardLayoutMode,

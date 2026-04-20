@@ -1,19 +1,9 @@
-import type { CardSyncStatusSnapshot } from "@/components/card/shell/cardSyncStatus";
 import type { CardPaneMode } from "@constants/shared/flashcard";
 import {
   DISPLAY_MODE_LABELS,
   DISPLAY_MODE_TRIGGER_LABELS,
 } from "@constants/shared/flashcard";
-import { toTimeMs } from "@/features/cardsetview/domain/cardSetViewUtils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-
-type ActiveSyncStatusLike = CardSyncStatusSnapshot | null;
-
-type SelectedCardLike = {
-  id?: string | null;
-  updatedAt?: unknown;
-  createdAt?: unknown;
-} | null;
 
 export type WidthControlViewModel = {
   modeLabel: string;
@@ -26,37 +16,6 @@ export type WidthControlViewModel = {
   onStepDown: () => void;
   onStepUp: () => void;
   onReset: () => void;
-};
-
-export const resolveOverlayRight = ({
-  isDesktop,
-  isMetaOpen,
-}: {
-  isDesktop: boolean;
-  isMetaOpen: boolean;
-}) => {
-  if (!isDesktop) {
-    return "0.75rem";
-  }
-
-  return isMetaOpen
-    ? "calc(var(--ui-panel-width) + 2.75rem)"
-    : "calc(var(--ui-space-1) + 2.75rem)";
-};
-
-export const resolveLastSyncedAtMs = ({
-  activeSyncStatus,
-  selectedCard,
-}: {
-  activeSyncStatus: ActiveSyncStatusLike;
-  selectedCard: SelectedCardLike;
-}) => {
-  return (
-    activeSyncStatus?.lastSyncedAtMs ??
-    toTimeMs(selectedCard?.updatedAt) ??
-    toTimeMs(selectedCard?.createdAt) ??
-    null
-  );
 };
 
 export const resolveDisplayModeLabels = (

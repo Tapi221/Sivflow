@@ -40,7 +40,6 @@ export const CardSetViewDesktopContent = ({
       }
       onToggleUncertainty={state.handleToggleUncertainty}
       onToggleBookmark={state.handleToggleBookmark}
-      onSyncStatusChange={state.handleActiveSyncStatusChange}
     />
   );
 };

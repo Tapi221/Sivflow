@@ -6,7 +6,6 @@ import { useCardSetViewDisplayMode } from "@/features/cardsetview/presentation/w
 import { useCardSetViewEditingBridge } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewEditingBridge";
 import { useCardSetViewMetaPanelState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewMetaPanelState";
 import { useCardSetViewSelectionState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewSelectionState";
-import { useCardSetViewSyncState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewSyncState";
 
 interface UseCardSetViewViewStateOptions {
   initialIndex: number;
@@ -54,17 +53,10 @@ export const useCardSetViewViewState = ({
 
   useCardSetViewEditingBridge(selectionState.isGlobalEditing);
 
-  const syncState = useCardSetViewSyncState({
-    currentCardId: selectionState.currentCardId,
-    isGlobalEditing: selectionState.isGlobalEditing,
-    sourceKey: selectionState.sourceKey,
-  });
-
   return {
     ...selectionState,
     ...metaPanelState,
     ...displayModeState,
     ...cardLayoutModeState,
-    ...syncState,
   };
 };
