@@ -263,7 +263,7 @@ export const PdfPane = ({
 
       <div
         ref={containerRef}
-        className="flex-1 min-h-0 min-w-0 w-full overflow-hidden bg-slate-50"
+        className="flex-1 min-h-0 min-w-0 w-full overflow-hidden bg-transparent"
       >
         {sourceUnavailable ? (
           <div className="p-4 text-sm text-slate-500">

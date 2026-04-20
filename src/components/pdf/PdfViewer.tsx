@@ -776,7 +776,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
         ref={containerRef}
         onScroll={handleScroll}
         data-testid="pdf-scroll-container"
-        className={cn("h-full min-h-0 w-full bg-slate-50", className)}
+        className={cn("h-full min-h-0 w-full bg-transparent", className)}
         style={{
           WebkitOverflowScrolling: "touch",
           overscrollBehavior: "contain",
