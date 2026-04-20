@@ -1085,7 +1085,6 @@ const VerticalCardPagerFn = <T,>({
 
   useEffect(() => {
     const cleanupMap = itemCleanupMapRef.current;
-    const itemRefs = itemRefs.current;
 
     return () => {
       if (typeof window !== "undefined") {
@@ -1112,7 +1111,7 @@ const VerticalCardPagerFn = <T,>({
         cleanup();
       });
       cleanupMap.clear();
-      itemRefs.clear();
+      itemRefs.current.clear();
     };
   }, [
     clearComputeNearestRaf,
