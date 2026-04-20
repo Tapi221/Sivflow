@@ -1043,8 +1043,6 @@ export const CardEditorPane = ({
           overlayTopInsetPx={overlayTopInsetPx}
           topRightControl={readonlyTopRightControls}
           isMetaOpen={isMetaOpen}
-          onToggleMetaOpen={undefined}
-          hideMetaToggle={true}
           viewportRef={contentViewportRef}
           viewportClassName={cn(
             "flex min-w-0 flex-1 flex-col items-center",
