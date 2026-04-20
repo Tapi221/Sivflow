@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import SettingsDialog from "@/components/settings/SettingsDialog";
-import { SyncStatusIndicator } from "@/components/sync/SyncStatusIndicator";
 import { cn } from "@/lib/utils";
 import { UI_TYPO } from "@/styles/tokens/typography";
 import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
@@ -65,17 +64,6 @@ const Layout = () => {
     >
       <TitleBar />
 
-      <div
-        className="hidden md:flex fixed right-2 z-50"
-        style={{
-          top: isDesktopPresentation
-            ? "calc(var(--app-top-inset, 0px) + 4px)"
-            : "4px",
-        }}
-      >
-        {!isStudyModePage && <SyncStatusIndicator />}
-      </div>
-
       <SettingsDialog
         open={isSettingsOpen}
         onOpenChange={setIsSettingsOpen}
@@ -91,3 +79,4 @@ const Layout = () => {
 };
 
 export default Layout;
+
