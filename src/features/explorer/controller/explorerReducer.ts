@@ -51,7 +51,9 @@ export const explorerReducer = (
           ? null
           : next.selectedFolderId;
       const nextSelectedItem =
-        next.isHomeOnlyMode || next.isSectionListMode ? null : next.selectedItem;
+        next.isHomeOnlyMode || next.isSectionListMode
+          ? null
+          : next.selectedItem;
       const nextFolderSelectionNonce = shouldIncrementFolderSelectionNonce
         ? state.folderSelectionNonce + 1
         : state.folderSelectionNonce;
@@ -133,7 +135,9 @@ export const explorerReducer = (
 
     case "SELECT_ITEM": {
       const shouldResetFolder = shouldClearSelectionFolder(action.payload.item);
-      const nextSelectedFolderId = shouldResetFolder ? null : state.selectedFolderId;
+      const nextSelectedFolderId = shouldResetFolder
+        ? null
+        : state.selectedFolderId;
       const nextExplorerBreadcrumbContext = shouldResetFolder
         ? resetBreadcrumbContext()
         : state.explorerBreadcrumbContext;

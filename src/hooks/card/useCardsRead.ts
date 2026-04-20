@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
@@ -39,11 +39,6 @@ type UseCardsReadOptions = {
   enabled?: boolean;
 };
 
-type CachedNormalizedCard = {
-  revisionKey: string;
-  card: Card;
-};
-
 const normalizeFolderId = (value: string | null | undefined) => {
   if (typeof value !== "string") {
     return null;
@@ -53,88 +48,6 @@ const normalizeFolderId = (value: string | null | undefined) => {
   return trimmed.length > 0 ? trimmed : null;
 };
 
-const toRecord = (value: unknown): Record<string, unknown> | null => {
-  return typeof value === "object" && value !== null
-    ? (value as Record<string, unknown>)
-    : null;
-};
-
-const resolveRawField = (
-  record: Record<string, unknown>,
-  keys: string[],
-): unknown => {
-  for (const key of keys) {
-    if (record[key] !== undefined) {
-      return record[key];
-    }
-  }
-
-  return undefined;
-};
-
-const serializeRevisionPart = (value: unknown): string => {
-  if (value instanceof Date) {
-    return `date:${value.toISOString()}`;
-  }
-
-  if (Array.isArray(value)) {
-    return `[${value.map(serializeRevisionPart).join(",")}]`;
-  }
-
-  if (typeof value === "object" && value !== null) {
-    const record = value as Record<string, unknown>;
-    const keys = Object.keys(record).sort();
-
-    return `{${keys
-      .map((key) => `${key}:${serializeRevisionPart(record[key])}`)
-      .join(",")}}`;
-  }
-
-  return JSON.stringify(value);
-};
-
-const resolveRawCardCacheId = (raw: unknown): string | null => {
-  const record = toRecord(raw);
-
-  if (!record) {
-    return null;
-  }
-
-  const id = resolveRawField(record, ["id", "cardId", "card_id"]);
-  return typeof id === "string" && id.trim().length > 0 ? id.trim() : null;
-};
-
-const buildCardRevisionKey = (raw: unknown): string => {
-  const record = toRecord(raw);
-
-  if (!record) {
-    return serializeRevisionPart(raw);
-  }
-
-  const id = resolveRawCardCacheId(raw) ?? "";
-  const updatedAt = resolveRawField(record, ["updatedAt", "updated_at"]);
-
-  if (updatedAt === undefined) {
-    return serializeRevisionPart(record);
-  }
-
-  return [
-    id,
-    serializeRevisionPart(updatedAt),
-    serializeRevisionPart(resolveRawField(record, ["deletedAt", "deleted_at"])),
-    serializeRevisionPart(resolveRawField(record, ["isDeleted", "is_deleted"])),
-    serializeRevisionPart(resolveRawField(record, ["folderId", "folder_id"])),
-    serializeRevisionPart(
-      resolveRawField(record, ["cardSetId", "card_set_id"]),
-    ),
-    serializeRevisionPart(
-      resolveRawField(record, ["orderIndex", "order_index"]),
-    ),
-    serializeRevisionPart(
-      resolveRawField(record, ["nextReviewDate", "next_review_date"]),
-    ),
-  ].join("|");
-};
 
 const toTime = (value: unknown): number => {
   return toMillis(value);
@@ -165,6 +78,35 @@ const compareCards = (left: Card, right: Card): number => {
   return left.id.localeCompare(right.id);
 };
 
+const resolveVisibleCards = ({
+  rawCards,
+  folderId,
+  cardSetId,
+  cardSetById,
+}: {
+  rawCards: readonly unknown[];
+  folderId?: string;
+  cardSetId?: string;
+  cardSetById: Map<string, Pick<CardSet, "id" | "folderId">>;
+}): Card[] => {
+  let normalized = rawCards
+    .map((rawCard) => normalizeCard(rawCard))
+    .filter(
+      (card) =>
+        !isCardDeleted(card as Partial<Card> & { is_deleted?: boolean }),
+    );
+
+  if (cardSetId) {
+    normalized = normalized.filter((card) => card.cardSetId === cardSetId);
+  } else if (folderId) {
+    normalized = filterCardsByFolderId(normalized, folderId, cardSetById);
+  }
+
+  normalized.sort(compareCards);
+
+  return normalized;
+};
+
 export const useCardsRead = (
   folderId?: string,
   cardSetId?: string,
@@ -173,13 +115,6 @@ export const useCardsRead = (
   const { currentUser } = useAuthSession();
   const [error] = useState<string | null>(null);
   const enabled = options?.enabled ?? true;
-  const normalizedCardCacheRef = useRef<Map<string, CachedNormalizedCard>>(
-    new Map(),
-  );
-
-  useEffect(() => {
-    normalizedCardCacheRef.current.clear();
-  }, [currentUser?.uid, folderId, cardSetId, enabled]);
 
   const rawCards = useLiveQuery(async () => {
     try {
@@ -263,54 +198,16 @@ export const useCardsRead = (
 
   const cards = useMemo(() => {
     if (!rawCards || rawCards.length === 0) {
-      normalizedCardCacheRef.current = new Map();
       return [];
     }
 
-    const previousCache = normalizedCardCacheRef.current;
-    const nextCache = new Map<string, CachedNormalizedCard>();
-
-    let normalized = rawCards.map((rawCard) => {
-      const cacheId = resolveRawCardCacheId(rawCard);
-
-      if (!cacheId) {
-        return normalizeCard(rawCard);
-      }
-
-      const revisionKey = buildCardRevisionKey(rawCard);
-      const cached = previousCache.get(cacheId);
-
-      if (cached && cached.revisionKey === revisionKey) {
-        nextCache.set(cacheId, cached);
-        return cached.card;
-      }
-
-      const card = normalizeCard(rawCard);
-      nextCache.set(cacheId, {
-        revisionKey,
-        card,
-      });
-
-      return card;
+    return resolveVisibleCards({
+      rawCards,
+      folderId,
+      cardSetId,
+      cardSetById,
     });
-
-    normalizedCardCacheRef.current = nextCache;
-
-    normalized = normalized.filter(
-      (card) =>
-        !isCardDeleted(card as Partial<Card> & { is_deleted?: boolean }),
-    );
-
-    if (cardSetId) {
-      normalized = normalized.filter((card) => card.cardSetId === cardSetId);
-    } else if (folderId) {
-      normalized = filterCardsByFolderId(normalized, folderId, cardSetById);
-    }
-
-    normalized.sort(compareCards);
-
-    return normalized;
-  }, [rawCards, folderId, cardSetId, cardSetById]);
+  }, [cardSetById, cardSetId, folderId, rawCards]);
 
   const loading = enabled && rawCards === undefined;
 

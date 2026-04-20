@@ -58,9 +58,10 @@ export const useBreadcrumbExtraCrumbs = (): BreadcrumbCrumb[] => {
   return useContext(BreadcrumbExtraCrumbsContext);
 };
 
-export const useSetBreadcrumbCrumbs = (): BreadcrumbActionsContextValue["setExtraCrumbs"] => {
-  return useContext(BreadcrumbActionsContext).setExtraCrumbs;
-};
+export const useSetBreadcrumbCrumbs =
+  (): BreadcrumbActionsContextValue["setExtraCrumbs"] => {
+    return useContext(BreadcrumbActionsContext).setExtraCrumbs;
+  };
 
 export const useBreadcrumbContext = (): BreadcrumbContextValue => {
   const extraCrumbs = useBreadcrumbExtraCrumbs();

@@ -112,6 +112,36 @@ type ScrollAnchorSnapshot = {
   offsetWithinAnchorPx: number;
 };
 
+type LayoutMeasurementsSnapshot = Readonly<{
+  averageItemExtent: number;
+  heightsByKey: ReadonlyMap<string, number>;
+}>;
+
+const resolveAverageItemExtent = (
+  heightsByKey: ReadonlyMap<string, number>,
+): number => {
+  if (heightsByKey.size === 0) {
+    return PLACEHOLDER_HEIGHT_PX;
+  }
+
+  let totalHeight = 0;
+
+  for (const height of heightsByKey.values()) {
+    totalHeight += height;
+  }
+
+  return Math.max(1, Math.round(totalHeight / heightsByKey.size));
+};
+
+const createLayoutMeasurementsSnapshot = (
+  heightsByKey: ReadonlyMap<string, number> = new Map<string, number>(),
+): LayoutMeasurementsSnapshot => {
+  return {
+    averageItemExtent: resolveAverageItemExtent(heightsByKey),
+    heightsByKey: new Map(heightsByKey),
+  };
+};
+
 const isSameRenderRange = (
   left: { start: number; end: number } | null,
   right: { start: number; end: number } | null,
@@ -429,13 +459,12 @@ const VerticalCardPagerFn = <T,>({
   const itemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
   const itemCleanupMapRef = useRef<Map<string, () => void>>(new Map());
   const measuredHeightsRef = useRef<Map<string, number>>(new Map());
-  const avgItemExtentRef = useRef(PLACEHOLDER_HEIGHT_PX);
   const activeIndexRef = useRef(activeIndex);
   const onRenderRangeChangeRef = useRef(onRenderRangeChange);
   const emittedRenderRangeRef = useRef<{ start: number; end: number } | null>(
     null,
   );
-  const layoutVersionRafRef = useRef<number | null>(null);
+  const layoutMeasurementsCommitRafRef = useRef<number | null>(null);
 
   const anchorCorrectionRafRef = useRef<number | null>(null);
   const anchorStabilizationUntilRef = useRef<number>(0);
@@ -454,7 +483,10 @@ const VerticalCardPagerFn = <T,>({
     scrollTop: 0,
     clientHeight: 0,
   });
-  const [layoutVersion, setLayoutVersion] = useState(0);
+  const [layoutMeasurements, setLayoutMeasurements] =
+    useState<LayoutMeasurementsSnapshot>(() =>
+      createLayoutMeasurementsSnapshot(),
+    );
   const preserveKey =
     preserveScrollAnchorKey == null ? null : String(preserveScrollAnchorKey);
 
@@ -477,18 +509,65 @@ const VerticalCardPagerFn = <T,>({
     [cards, getKey],
   );
 
+  const commitLayoutMeasurements = useCallback(() => {
+    const nextSnapshot = createLayoutMeasurementsSnapshot(
+      measuredHeightsRef.current,
+    );
+
+    if (typeof window === "undefined") {
+      setLayoutMeasurements(nextSnapshot);
+      return;
+    }
+
+    if (layoutMeasurementsCommitRafRef.current != null) {
+      return;
+    }
+
+    layoutMeasurementsCommitRafRef.current = window.requestAnimationFrame(() => {
+      layoutMeasurementsCommitRafRef.current = null;
+      setLayoutMeasurements(
+        createLayoutMeasurementsSnapshot(measuredHeightsRef.current),
+      );
+    });
+  }, []);
+
+  useEffect(() => {
+    const activeKeys = new Set(stableCardKeys);
+    let didPrune = false;
+
+    for (const key of Array.from(measuredHeightsRef.current.keys())) {
+      if (activeKeys.has(key)) {
+        continue;
+      }
+
+      measuredHeightsRef.current.delete(key);
+      didPrune = true;
+    }
+
+    if (!didPrune) {
+      return;
+    }
+
+    commitLayoutMeasurements();
+  }, [commitLayoutMeasurements, stableCardKeys]);
+
   const getEstimatedHeight = useCallback(
     (index: number) => {
       const stableKey = stableCardKeys[index];
       if (!stableKey) {
-        return avgItemExtentRef.current;
+        return layoutMeasurements.averageItemExtent;
       }
 
       return (
-        measuredHeightsRef.current.get(stableKey) ?? avgItemExtentRef.current
+        layoutMeasurements.heightsByKey.get(stableKey) ??
+        layoutMeasurements.averageItemExtent
       );
     },
-    [stableCardKeys],
+    [
+      layoutMeasurements.averageItemExtent,
+      layoutMeasurements.heightsByKey,
+      stableCardKeys,
+    ],
   );
 
   const layoutSnapshot = useMemo(
@@ -497,7 +576,7 @@ const VerticalCardPagerFn = <T,>({
         count: cards.length,
         getEstimatedHeight,
       }),
-    [cards.length, getEstimatedHeight, layoutVersion],
+    [cards.length, getEstimatedHeight],
   );
 
   const renderRange = useMemo(
@@ -1003,6 +1082,9 @@ const VerticalCardPagerFn = <T,>({
   ]);
 
   useEffect(() => {
+    const cleanupMap = itemCleanupMapRef.current;
+    const itemRefs = itemRefs.current;
+
     return () => {
       if (typeof window !== "undefined") {
         if (anchorCorrectionRafRef.current != null) {
@@ -1013,9 +1095,9 @@ const VerticalCardPagerFn = <T,>({
           window.cancelAnimationFrame(visibleRangeRafRef.current);
         }
 
-        if (layoutVersionRafRef.current != null) {
-          window.cancelAnimationFrame(layoutVersionRafRef.current);
-          layoutVersionRafRef.current = null;
+        if (layoutMeasurementsCommitRafRef.current != null) {
+          window.cancelAnimationFrame(layoutMeasurementsCommitRafRef.current);
+          layoutMeasurementsCommitRafRef.current = null;
         }
 
         clearScrollAnchorCaptureRaf();
@@ -1024,11 +1106,11 @@ const VerticalCardPagerFn = <T,>({
         clearNaturalIndexTimer();
       }
 
-      itemCleanupMapRef.current.forEach((cleanup) => {
+      cleanupMap.forEach((cleanup) => {
         cleanup();
       });
-      itemCleanupMapRef.current.clear();
-      itemRefs.current.clear();
+      cleanupMap.clear();
+      itemRefs.clear();
     };
   }, [
     clearComputeNearestRaf,
@@ -1104,20 +1186,9 @@ const VerticalCardPagerFn = <T,>({
       }
 
       measuredHeightsRef.current.set(stableKey, safeHeight);
-      avgItemExtentRef.current = Math.round(
-        (avgItemExtentRef.current + safeHeight) / 2,
-      );
-
-      if (layoutVersionRafRef.current != null) {
-        return;
-      }
-
-      layoutVersionRafRef.current = window.requestAnimationFrame(() => {
-        layoutVersionRafRef.current = null;
-        setLayoutVersion((previousVersion) => previousVersion + 1);
-      });
+      commitLayoutMeasurements();
     },
-    [],
+    [commitLayoutMeasurements],
   );
 
   const attachMeasuredRef = useCallback(

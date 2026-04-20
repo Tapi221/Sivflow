@@ -1,6 +1,4 @@
-import {
-  buildRenameDeleteMenuActions,
-} from "@/components/folder/components/menus/explorerMenuActionBuilders";
+import { buildRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
 import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
 import { cn } from "@/lib/utils";

@@ -89,6 +89,10 @@ export const useLayoutRowsController = <
     [getRequiredMinRows, setLayoutRows],
   );
 
+  const setManualResizeInProgress = useCallback((next: boolean) => {
+    manualResizeInProgressRef.current = next;
+  }, []);
+
   const handleSideMinHeightChange = useCallback(
     (side: Side, minHeightPx: number) => {
       minHeightPxBySideRef.current[side] = Math.max(0, minHeightPx);
@@ -139,7 +143,7 @@ export const useLayoutRowsController = <
 
   return {
     allowAutoMinHeightSyncRef,
-    manualResizeInProgressRef,
+    setManualResizeInProgress,
     scheduleLayoutRowsFromHeight,
     handleQuestionMinHeightChange,
     handleAnswerMinHeightChange,

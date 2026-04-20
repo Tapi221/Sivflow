@@ -587,7 +587,11 @@ const CardMetaPanelInner = ({
   const localStudyLogs = useLiveQuery(async () => {
     if (!shouldLoadStudyLogs || !currentUser?.uid || !card?.id) return [];
     const db = await getLocalDb(currentUser.uid);
-    return await db.table("studyLogs").where("cardId").equals(card.id).toArray();
+    return await db
+      .table("studyLogs")
+      .where("cardId")
+      .equals(card.id)
+      .toArray();
   }, [shouldLoadStudyLogs, currentUser?.uid, card?.id]);
 
   const { data: remoteStudyLogs = [], isPending: isRemoteStudyLogsPending } =
@@ -732,9 +736,9 @@ const CardMetaPanelInner = ({
     editableReviewLogs.length > 1 ? (editableReviewLogs.at(-2) ?? null) : null;
   const canManageLatestReview = Boolean(
     latestEditableReview &&
-      onUpdateLatestReviewLog &&
-      onDeleteLatestReviewLog &&
-      canPersistReview,
+    onUpdateLatestReviewLog &&
+    onDeleteLatestReviewLog &&
+    canPersistReview,
   );
 
   const latestReview = safeLogs.at(-1);
@@ -1472,9 +1476,7 @@ const CardMetaPanelInner = ({
                 {(["7d", "30d", "all"] as const).map((nextPeriod) => (
                   <SurfaceButton
                     key={nextPeriod}
-                    surface={
-                      period === nextPeriod ? "convexActive" : "concave"
-                    }
+                    surface={period === nextPeriod ? "convexActive" : "concave"}
                     size="xs"
                     onClick={() => setPeriod(nextPeriod)}
                   >
@@ -1773,7 +1775,8 @@ const CardMetaPanelInner = ({
                             <div className="flex flex-col items-center gap-0.5 py-0.5">
                               <div className="inline-grid grid-cols-2 gap-1 place-items-center">
                                 {([1, 2, 3, 4] as const).map((rating) => {
-                                  const faceDesign = getRatingFaceDesign(rating);
+                                  const faceDesign =
+                                    getRatingFaceDesign(rating);
                                   return (
                                     <button
                                       key={rating}
@@ -1913,7 +1916,8 @@ const CardMetaPanelInner = ({
                                     pendingReviewDurationInput,
                                   ),
                                   minWidth: "1.65rem",
-                                  fontVariantNumeric: "tabular-nums lining-nums",
+                                  fontVariantNumeric:
+                                    "tabular-nums lining-nums",
                                 }}
                                 placeholder="-"
                               />
@@ -1939,7 +1943,8 @@ const CardMetaPanelInner = ({
                                     latestReviewDurationInput,
                                   ),
                                   minWidth: "1.65rem",
-                                  fontVariantNumeric: "tabular-nums lining-nums",
+                                  fontVariantNumeric:
+                                    "tabular-nums lining-nums",
                                 }}
                                 placeholder="-"
                               />
@@ -2007,7 +2012,8 @@ const CardMetaPanelInner = ({
                                         : ""),
                                   ),
                                   minWidth: "1.65rem",
-                                  fontVariantNumeric: "tabular-nums lining-nums",
+                                  fontVariantNumeric:
+                                    "tabular-nums lining-nums",
                                 }}
                                 placeholder="-"
                               />
@@ -2097,12 +2103,16 @@ const CardMetaPanelInner = ({
         <>
           <section>
             <div className="mt-3 rounded-[20px] border border-[color:var(--meta-panel-border)] bg-[color:var(--meta-panel-surface)] px-3 py-4">
-              <div className={`text-sm ${mutedTextClass}`}>集計を読み込み中...</div>
+              <div className={`text-sm ${mutedTextClass}`}>
+                集計を読み込み中...
+              </div>
             </div>
           </section>
           <section>
             <div className="rounded-[20px] border border-[color:var(--meta-panel-border)] bg-[color:var(--meta-panel-surface)] px-3 py-10">
-              <div className={`text-sm ${mutedTextClass}`}>履歴を読み込み中...</div>
+              <div className={`text-sm ${mutedTextClass}`}>
+                履歴を読み込み中...
+              </div>
             </div>
           </section>
         </>
