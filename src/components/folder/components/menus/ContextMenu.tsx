@@ -15,7 +15,6 @@ interface ContextMenuProps {
   className?: string;
 }
 
-const CONTEXT_MENU_CURSOR_OFFSET_PX = 6;
 const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
 
 /**
@@ -36,10 +35,10 @@ export const ContextMenu = ({
 
     return {
       position: "fixed" as const,
-      left: anchorPoint.x + CONTEXT_MENU_CURSOR_OFFSET_PX,
-      top: anchorPoint.y + CONTEXT_MENU_CURSOR_OFFSET_PX,
-      width: 1,
-      height: 1,
+      left: anchorPoint.x,
+      top: anchorPoint.y,
+      width: 0,
+      height: 0,
     };
   }, [anchorPoint]);
 
@@ -67,7 +66,7 @@ export const ContextMenu = ({
         closeMenu={closeMenu}
         side="right"
         align="start"
-        sideOffset={CONTEXT_MENU_CURSOR_OFFSET_PX}
+        sideOffset={0}
         collisionPadding={CONTEXT_MENU_COLLISION_PADDING_PX}
         className={className}
         onCloseAutoFocus={(e) => {

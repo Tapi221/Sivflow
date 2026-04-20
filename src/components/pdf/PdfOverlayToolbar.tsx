@@ -4,6 +4,9 @@ import { OverlayToolbarButton } from "@/components/overlay-toolbar/OverlayToolba
 import { OverlayToolbarDivider } from "@/components/overlay-toolbar/OverlayToolbarDivider";
 import { OverlayToolbarIndexNavigator } from "@/components/overlay-toolbar/OverlayToolbarIndexNavigator";
 import { OverlayToolbarZoomControl } from "@/components/overlay-toolbar/OverlayToolbarZoomControl";
+import { PdfFitWidthGlyph } from "./pdfToolbarGlyphs";
+
+type PdfFitMode = "width" | "manual";
 
 type PdfOverlayToolbarProps = {
   currentPage: number;
@@ -11,10 +14,12 @@ type PdfOverlayToolbarProps = {
   scalePercent: number;
   minScalePercent: number;
   maxScalePercent: number;
+  fitMode: PdfFitMode;
   zoomStepPercent?: number;
   onCommitPage: (nextPage: number) => void;
   onPrevPage: () => void;
   onNextPage: () => void;
+  onFitWidth: () => void;
   onScalePercentChange: (nextPercent: number) => void;
   canGoToPrevPage: boolean;
   canGoToNextPage: boolean;
@@ -27,15 +32,19 @@ export const PdfOverlayToolbar = ({
   scalePercent,
   minScalePercent,
   maxScalePercent,
+  fitMode,
   zoomStepPercent = 1,
   onCommitPage,
   onPrevPage,
   onNextPage,
+  onFitWidth,
   onScalePercentChange,
   canGoToPrevPage,
   canGoToNextPage,
   disabled = false,
 }: PdfOverlayToolbarProps) => {
+  const isFitWidthActive = fitMode === "width";
+
   return (
     <OverlayToolbar>
       <OverlayToolbarButton
@@ -66,6 +75,16 @@ export const PdfOverlayToolbar = ({
       />
 
       <OverlayToolbarDivider />
+
+      <OverlayToolbarButton
+        onClick={onFitWidth}
+        label="幅に合わせる"
+        disabled={disabled}
+        active={isFitWidthActive}
+        className="h-6 w-6"
+      >
+        <PdfFitWidthGlyph />
+      </OverlayToolbarButton>
 
       <OverlayToolbarZoomControl
         value={scalePercent}

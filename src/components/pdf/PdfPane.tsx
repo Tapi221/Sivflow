@@ -1,4 +1,3 @@
-import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@constants/shared/flashcard";
 import type { BlobUrl } from "@/types/core/branded";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -50,6 +49,7 @@ interface PdfPaneProps {
 }
 
 const SEARCH_INPUT_DEBOUNCE_MS = 300;
+const PDF_OVERLAY_ZOOM_STEP_PERCENT = 1;
 
 export const PdfPane = ({
   doc,
@@ -268,7 +268,6 @@ export const PdfPane = ({
       <PdfPaneToolbar
         isLocalOnly={isLocalOnly}
         uploadStatus={doc.uploadStatus}
-        fitMode={fitMode}
         sourceUnavailable={sourceUnavailable}
         canOpenExternal={!!effectiveRemoteUrl || !!localSourceBytes}
         searchQuery={searchInputValue}
@@ -277,7 +276,6 @@ export const PdfPane = ({
         onSearchQueryChange={setSearchInputValue}
         onPrevMatch={handlePrevMatch}
         onNextMatch={handleNextMatch}
-        onFitWidth={handleFitWidth}
         onOpenNewTab={() => {
           void handleOpenNewTab();
         }}
@@ -337,10 +335,12 @@ export const PdfPane = ({
                     scalePercent={scalePercent}
                     minScalePercent={FIT_MIN_SCALE * 100}
                     maxScalePercent={FIT_MAX_SCALE * 100}
-                    zoomStepPercent={CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT}
+                    fitMode={fitMode}
+                    zoomStepPercent={PDF_OVERLAY_ZOOM_STEP_PERCENT}
                     onCommitPage={handleCommitPage}
                     onPrevPage={handlePrev}
                     onNextPage={handleNext}
+                    onFitWidth={handleFitWidth}
                     onScalePercentChange={handleScalePercentChange}
                     canGoToPrevPage={currentPage > 1}
                     canGoToNextPage={numPages > 0 && currentPage < numPages}
