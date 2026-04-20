@@ -143,4 +143,24 @@ describe("VerticalCardPager", () => {
       }),
     );
   });
+
+  it("StrictMode の mount / unmount で ReferenceError を出さない", () => {
+    const cards = ["a", "b"];
+
+    expect(() => {
+      const view = render(
+        <React.StrictMode>
+          <VerticalCardPager
+            cards={cards}
+            activeIndex={0}
+            onActiveIndexChange={vi.fn()}
+            renderCard={(card) => <div>{card}</div>}
+            getKey={(card) => card}
+          />
+        </React.StrictMode>,
+      );
+
+      view.unmount();
+    }).not.toThrow();
+  });
 });
