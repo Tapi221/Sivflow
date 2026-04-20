@@ -3,12 +3,6 @@ import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import platform from "@/platform";
 import type { PdfPageLayoutMode, PdfViewerState } from "@/types";
-import {
-  PDF_BAR_MAX_PERCENT,
-  PDF_BAR_MIN_PERCENT,
-  PDF_GESTURE_MAX_SCALE,
-  PDF_GESTURE_MIN_SCALE,
-} from "@constants/web/pdf";
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PdfOverlayToolbar } from "./PdfOverlayToolbar";
@@ -19,7 +13,14 @@ import { usePdfContainerWidth } from "./hooks/usePdfContainerWidth";
 import { usePdfSourceResolver } from "./hooks/usePdfSourceResolver";
 import { defaultPdfViewerOptions } from "./defaultPdfViewerOptions";
 import { usePdfViewerPersistence } from "./hooks/usePdfViewerPersistence";
-import { FIT_PADDING_X, clampScale } from "./pdfViewerStateStorage";
+import {
+  FIT_MAX_SCALE,
+  FIT_MIN_SCALE,
+  FIT_PADDING_X,
+  clampScale,
+} from "./pdfViewerStateStorage";
+import { usePdfDocument } from "./hooks/usePdfDocument";
+import { PdfThumbnailPanel } from "./PdfThumbnailPanel";
 
 interface PdfPaneDoc {
   id: string;
@@ -52,6 +53,12 @@ interface PdfPaneProps {
 const SEARCH_INPUT_DEBOUNCE_MS = 300;
 const PDF_OVERLAY_ZOOM_STEP_PERCENT = 1;
 const PDF_DOUBLE_PAGE_GAP = 16;
+const PDF_ZOOM_UI_MIN_PERCENT = 0;
+const PDF_ZOOM_UI_MAX_PERCENT = 100;
+const PDF_ZOOM_UI_RANGE_PERCENT =
+  PDF_ZOOM_UI_MAX_PERCENT - PDF_ZOOM_UI_MIN_PERCENT;
+const PDF_SCALE_RANGE = FIT_MAX_SCALE - FIT_MIN_SCALE;
+const MOBILE_PANEL_MEDIA_QUERY = "(max-width: 1023px)";
 
 const normalizePageForLayout = (
   page: number,
@@ -65,6 +72,56 @@ const normalizePageForLayout = (
   return normalizedPage - ((normalizedPage - 1) % 2);
 };
 
+const clampZoomUiPercent = (value: number) => {
+  if (!Number.isFinite(value)) {
+    return PDF_ZOOM_UI_MIN_PERCENT;
+  }
+
+  return Math.min(
+    PDF_ZOOM_UI_MAX_PERCENT,
+    Math.max(PDF_ZOOM_UI_MIN_PERCENT, value),
+  );
+};
+
+const scaleToZoomUiPercent = (value: number) => {
+  const clampedScale = clampScale(value);
+
+  if (PDF_SCALE_RANGE <= 0 || PDF_ZOOM_UI_RANGE_PERCENT <= 0) {
+    return PDF_ZOOM_UI_MAX_PERCENT;
+  }
+
+  const ratio = (clampedScale - FIT_MIN_SCALE) / PDF_SCALE_RANGE;
+  const normalizedRatio = Math.min(1, Math.max(0, ratio));
+
+  return Number(
+    (
+      PDF_ZOOM_UI_MIN_PERCENT +
+      normalizedRatio * PDF_ZOOM_UI_RANGE_PERCENT
+    ).toFixed(0),
+  );
+};
+
+const zoomUiPercentToScale = (value: number) => {
+  const clampedUiPercent = clampZoomUiPercent(value);
+
+  if (PDF_SCALE_RANGE <= 0 || PDF_ZOOM_UI_RANGE_PERCENT <= 0) {
+    return clampScale(FIT_MIN_SCALE);
+  }
+
+  const ratio =
+    (clampedUiPercent - PDF_ZOOM_UI_MIN_PERCENT) / PDF_ZOOM_UI_RANGE_PERCENT;
+
+  return clampScale(Number((FIT_MIN_SCALE + ratio * PDF_SCALE_RANGE).toFixed(3)));
+};
+
+const readInitialMobileViewportState = () => {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return false;
+  }
+
+  return window.matchMedia(MOBILE_PANEL_MEDIA_QUERY).matches;
+};
+
 export const PdfPane = ({
   doc,
   className,
@@ -75,9 +132,7 @@ export const PdfPane = ({
   const viewerRef = useRef<PdfViewerHandle>(null);
   const previousPageLayoutModeRef = useRef<PdfPageLayoutMode | null>(null);
 
-  const [numPages, setNumPages] = useState(0);
   const [basePageWidth, setBasePageWidth] = useState<number | null>(null);
-  const [gestureScale, setGestureScale] = useState(PDF_GESTURE_MIN_SCALE);
   const [searchInputValue, setSearchInputValue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchNavToken, setSearchNavToken] = useState(0);
@@ -86,6 +141,13 @@ export const PdfPane = ({
   );
   const [totalMatches, setTotalMatches] = useState(0);
   const [activeMatchIndex, setActiveMatchIndex] = useState(-1);
+  const [isMobileViewport, setIsMobileViewport] = useState(
+    readInitialMobileViewportState,
+  );
+  const [isDesktopThumbnailPanelOpen, setIsDesktopThumbnailPanelOpen] =
+    useState(true);
+  const [isMobileThumbnailPanelOpen, setIsMobileThumbnailPanelOpen] =
+    useState(false);
 
   const { containerRef, containerWidth } = usePdfContainerWidth();
 
@@ -117,23 +179,19 @@ export const PdfPane = ({
     };
   }, [viewerOptions]);
 
-  const isFitScaleReady = Boolean(containerWidth && basePageWidth);
-
   const {
     currentPage,
-    baseRenderScale,
+    scale,
     fitMode,
     pageLayoutMode,
-    zoomPercent,
     setCurrentPage,
     handleFitWidth,
-    handleViewerZoomPercentChange,
-    handlePageLayoutModeChange: handlePersistedPageLayoutModeChange,
+    handleViewerScaleChange,
+    handlePageLayoutModeChange,
   } = usePdfViewerPersistence({
     docId: doc.id,
     viewerState: doc.viewerState,
     getFitScale,
-    isFitScaleReady,
     onDocumentUpdate: onDocumentUpdate
       ? (updates) => onDocumentUpdate(updates)
       : undefined,
@@ -150,10 +208,49 @@ export const PdfPane = ({
     handleSourceLoadError,
   } = usePdfSourceResolver(doc, currentUser?.uid);
 
+  const handleFirstPageSize = useCallback(
+    (size: { width: number; height: number } | null) => {
+      const nextWidth = size?.width ?? null;
+      setBasePageWidth((previousWidth) =>
+        previousWidth === nextWidth ? previousWidth : nextWidth,
+      );
+    },
+    [],
+  );
+
+  const documentController = usePdfDocument({
+    source,
+    viewerOptions: resolvedViewerOptions,
+    sourceMeta,
+    onNumPages: () => {
+      // PdfPane 側では controller.numPages を参照するため、ここでは副作用不要。
+    },
+    onFirstPageSize: handleFirstPageSize,
+    onSourceLoadError: handleSourceLoadError,
+  });
+
+  const numPages = documentController.numPages;
+  const zoomPercent = useMemo(() => scaleToZoomUiPercent(scale), [scale]);
+
   const pageStep = pageLayoutMode === "double" ? 2 : 1;
   const alignedCurrentPage = useMemo(
     () => normalizePageForLayout(currentPage, pageLayoutMode),
     [currentPage, pageLayoutMode],
+  );
+  const isThumbnailPanelOpen = isMobileViewport
+    ? isMobileThumbnailPanelOpen
+    : isDesktopThumbnailPanelOpen;
+
+  const handleThumbnailPanelOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (isMobileViewport) {
+        setIsMobileThumbnailPanelOpen(nextOpen);
+        return;
+      }
+
+      setIsDesktopThumbnailPanelOpen(nextOpen);
+    },
+    [isMobileViewport],
   );
 
   const handleZoomPercentChange = useCallback(
@@ -162,26 +259,40 @@ export const PdfPane = ({
         return;
       }
 
-      handleViewerZoomPercentChange(nextPercent);
+      handleViewerScaleChange(zoomUiPercentToScale(nextPercent));
     },
-    [handleViewerZoomPercentChange],
+    [handleViewerScaleChange],
   );
 
-  const handleFitWidthWithGestureReset = useCallback(() => {
-    setGestureScale(PDF_GESTURE_MIN_SCALE);
-    handleFitWidth();
-  }, [handleFitWidth]);
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
 
-  const handlePageLayoutModeChange = useCallback(
-    (nextPageLayoutMode: PdfPageLayoutMode) => {
-      setGestureScale(PDF_GESTURE_MIN_SCALE);
-      handlePersistedPageLayoutModeChange(nextPageLayoutMode);
-    },
-    [handlePersistedPageLayoutModeChange],
-  );
+    const mediaQueryList = window.matchMedia(MOBILE_PANEL_MEDIA_QUERY);
+    const updateViewport = (matches: boolean) => {
+      setIsMobileViewport((previousMatches) =>
+        previousMatches === matches ? previousMatches : matches,
+      );
+    };
 
-  const handleGestureScaleChange = useCallback((nextGestureScale: number) => {
-    setGestureScale(nextGestureScale);
+    updateViewport(mediaQueryList.matches);
+
+    const handleMediaQueryChange = (event: MediaQueryListEvent) => {
+      updateViewport(event.matches);
+    };
+
+    if (typeof mediaQueryList.addEventListener === "function") {
+      mediaQueryList.addEventListener("change", handleMediaQueryChange);
+      return () => {
+        mediaQueryList.removeEventListener("change", handleMediaQueryChange);
+      };
+    }
+
+    mediaQueryList.addListener(handleMediaQueryChange);
+    return () => {
+      mediaQueryList.removeListener(handleMediaQueryChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -193,10 +304,6 @@ export const PdfPane = ({
       window.clearTimeout(timeoutId);
     };
   }, [searchInputValue]);
-
-  useEffect(() => {
-    setGestureScale(PDF_GESTURE_MIN_SCALE);
-  }, [doc.id]);
 
   useEffect(() => {
     if (!numPages) {
@@ -260,12 +367,21 @@ export const PdfPane = ({
     [numPages, pageLayoutMode],
   );
 
+  const handleSelectThumbnailPage = useCallback(
+    (nextPage: number) => {
+      handleCommitPage(nextPage);
+
+      if (isMobileViewport) {
+        setIsMobileThumbnailPanelOpen(false);
+      }
+    },
+    [handleCommitPage, isMobileViewport],
+  );
+
   const commitSearchQuery = useCallback(() => {
-    setSearchQuery((previousQuery) => {
-      return previousQuery === searchInputValue
-        ? previousQuery
-        : searchInputValue;
-    });
+    setSearchQuery((previousQuery) =>
+      previousQuery === searchInputValue ? previousQuery : searchInputValue,
+    );
   }, [searchInputValue]);
 
   const handlePrevMatch = useCallback(() => {
@@ -310,16 +426,6 @@ export const PdfPane = ({
       }, 60_000);
     }
   }, [doc.mimeType, effectiveRemoteUrl, localSourceBytes]);
-
-  const handleFirstPageSize = useCallback(
-    (size: { width: number; height: number } | null) => {
-      const nextWidth = size?.width ?? null;
-      setBasePageWidth((previousWidth) => {
-        return previousWidth === nextWidth ? previousWidth : nextWidth;
-      });
-    },
-    [],
-  );
 
   useEffect(() => {
     if (!DEV_MODE) {
@@ -372,10 +478,7 @@ export const PdfPane = ({
         }}
       />
 
-      <div
-        ref={containerRef}
-        className="relative flex-1 min-h-0 min-w-0 w-full overflow-hidden bg-transparent"
-      >
+      <div className="relative flex-1 min-h-0 min-w-0 w-full overflow-hidden bg-transparent">
         {sourceUnavailable ? (
           <div className="p-4 text-sm text-slate-500">
             {localDataStatus === "loading" && "ローカルPDFを復元中..."}
@@ -384,68 +487,79 @@ export const PdfPane = ({
             {localDataStatus === "idle" && "PDFソースがありません。"}
           </div>
         ) : (
-          <>
-            <PdfViewer
-              ref={viewerRef}
-              source={source}
-              baseScale={baseRenderScale}
-              gestureScale={gestureScale}
-              minGestureScale={PDF_GESTURE_MIN_SCALE}
-              maxGestureScale={PDF_GESTURE_MAX_SCALE}
-              searchQuery={searchQuery}
-              searchNavToken={searchNavToken}
-              searchNavDirection={searchNavDirection}
+          <div className="relative flex h-full min-h-0 min-w-0 w-full overflow-hidden">
+            <PdfThumbnailPanel
+              documentController={documentController}
+              currentPage={alignedCurrentPage}
               pageLayoutMode={pageLayoutMode}
-              spreadGap={PDF_DOUBLE_PAGE_GAP}
-              onGestureScaleChange={handleGestureScaleChange}
-              onNumPages={setNumPages}
-              onPageChange={setCurrentPage}
-              onFirstPageSize={handleFirstPageSize}
-              viewerOptions={resolvedViewerOptions}
-              sourceMeta={sourceMeta}
-              onSourceLoadError={handleSourceLoadError}
-              onSearchStateChange={({
-                totalMatches: nextTotalMatches,
-                activeMatchIndex: nextActiveMatchIndex,
-              }) => {
-                setTotalMatches(nextTotalMatches);
-                setActiveMatchIndex(nextActiveMatchIndex);
-              }}
-              className="h-full w-full"
+              isMobileViewport={isMobileViewport}
+              isOpen={isThumbnailPanelOpen}
+              onOpenChange={handleThumbnailPanelOpenChange}
+              onSelectPage={handleSelectThumbnailPage}
             />
 
-            {shouldRenderOverlayToolbar ? (
-              <div
-                className="pointer-events-none absolute z-20 flex items-end gap-2"
-                style={{
-                  right: "max(1rem, env(safe-area-inset-right))",
-                  bottom:
-                    "max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))",
+            <div
+              ref={containerRef}
+              className="relative flex-1 min-h-0 min-w-0 overflow-hidden bg-transparent"
+            >
+              <PdfViewer
+                ref={viewerRef}
+                documentController={documentController}
+                navigationIdentity={doc.id}
+                scale={scale}
+                minScale={FIT_MIN_SCALE}
+                maxScale={FIT_MAX_SCALE}
+                opaqueCanvas={resolvedViewerOptions.opaqueCanvas ?? false}
+                searchQuery={searchQuery}
+                searchNavToken={searchNavToken}
+                searchNavDirection={searchNavDirection}
+                pageLayoutMode={pageLayoutMode}
+                spreadGap={PDF_DOUBLE_PAGE_GAP}
+                onScaleChange={handleViewerScaleChange}
+                onPageChange={setCurrentPage}
+                onSearchStateChange={({
+                  totalMatches: nextTotalMatches,
+                  activeMatchIndex: nextActiveMatchIndex,
+                }) => {
+                  setTotalMatches(nextTotalMatches);
+                  setActiveMatchIndex(nextActiveMatchIndex);
                 }}
-              >
-                <div className="pointer-events-auto">
-                  <PdfOverlayToolbar
-                    currentPage={alignedCurrentPage}
-                    numPages={numPages}
-                    zoomPercent={zoomPercent}
-                    minZoomPercent={PDF_BAR_MIN_PERCENT}
-                    maxZoomPercent={PDF_BAR_MAX_PERCENT}
-                    fitMode={fitMode}
-                    pageLayoutMode={pageLayoutMode}
-                    zoomStepPercent={PDF_OVERLAY_ZOOM_STEP_PERCENT}
-                    onCommitPage={handleCommitPage}
-                    onPrevPage={handlePrev}
-                    onNextPage={handleNext}
-                    onFitWidth={handleFitWidthWithGestureReset}
-                    onZoomPercentChange={handleZoomPercentChange}
-                    onPageLayoutModeChange={handlePageLayoutModeChange}
-                    canGoToPrevPage={canGoToPrevPage}
-                    canGoToNextPage={canGoToNextPage}
-                  />
+                className="h-full w-full"
+              />
+
+              {shouldRenderOverlayToolbar ? (
+                <div
+                  className="pointer-events-none absolute z-20 flex items-end gap-2"
+                  style={{
+                    right: "max(1rem, env(safe-area-inset-right))",
+                    bottom:
+                      "max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))",
+                  }}
+                >
+                  <div className="pointer-events-auto">
+                    <PdfOverlayToolbar
+                      currentPage={alignedCurrentPage}
+                      numPages={numPages}
+                      zoomPercent={zoomPercent}
+                      minZoomPercent={PDF_ZOOM_UI_MIN_PERCENT}
+                      maxZoomPercent={PDF_ZOOM_UI_MAX_PERCENT}
+                      fitMode={fitMode}
+                      pageLayoutMode={pageLayoutMode}
+                      zoomStepPercent={PDF_OVERLAY_ZOOM_STEP_PERCENT}
+                      onCommitPage={handleCommitPage}
+                      onPrevPage={handlePrev}
+                      onNextPage={handleNext}
+                      onFitWidth={handleFitWidth}
+                      onZoomPercentChange={handleZoomPercentChange}
+                      onPageLayoutModeChange={handlePageLayoutModeChange}
+                      canGoToPrevPage={canGoToPrevPage}
+                      canGoToNextPage={canGoToNextPage}
+                    />
+                  </div>
                 </div>
-              </div>
-            ) : null}
-          </>
+              ) : null}
+            </div>
+          </div>
         )}
       </div>
     </div>

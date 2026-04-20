@@ -33,11 +33,11 @@ interface UsePdfDocumentOptions {
   }) => void;
 }
 
-interface PrefetchPageResourceOptions {
+export interface PrefetchPageResourceOptions {
   includeTextContent?: boolean;
 }
 
-interface UsePdfDocumentResult {
+export interface PdfDocumentController {
   doc: PdfJsDocument | null;
   documentKey: string;
   numPages: number;
@@ -53,6 +53,7 @@ interface UsePdfDocumentResult {
   ) => void;
 }
 
+type UsePdfDocumentResult = PdfDocumentController;
 type PdfPageCache = ReturnType<typeof createPdfPageResourceCache<PdfJsPage>>;
 
 export const usePdfDocument = ({
