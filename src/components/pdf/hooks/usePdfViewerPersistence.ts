@@ -1,225 +1,151 @@
 /**
- * PDF ビューアの表示状態（currentPage / zoomPercent / fitMode / pageLayoutMode）を管理するフック。
+ * PDF ビューアの表示状態（currentPage / scale / fitMode / pageLayoutMode）を管理するフック。
  *
- * 0-100% のズーム UI を fitScale 基準で解釈し、touchpad gesture 側の拡大とは分離する。
- * 永続化時は zoomPercent を正規化して保存し、旧 scale ベースの状態も読み込めるようにする。
+ * === 安定性保証 ===
+ * ✅ 初期復元と永続保存の分離
+ *    - ハイドレーション中は onDocumentUpdate を呼ばない
+ *    - Promise.resolve() で state 確定を待機してから hydration 完了
+ *
+ * ✅ debounce の安全性
+ *    - unmount 時に必ず cleanup（StrictMode 対応）
+ *    - doc.id 変更時に古い debounce をクリア
+ *    - 800ms debounce で不要な書き込みを削減
+ *
+ * ✅ ドキュメント切替時の分離
+ *    - sessionStorage キーは docId 単位（`pdf_viewer_${docId}`）
+ *    - docId 変更時に isHydratingRef をリセット
+ *    - PDF A の viewerState が PDF B に適用されない
  */
 import {
-  EPSILON,
   clampScale,
+  EPSILON,
   getViewerStateFromSession,
   saveViewerStateToSession,
   VIEWER_STATE_DEBOUNCE_MS,
+  ZOOM_STEP,
 } from "@/components/pdf/pdfViewerStateStorage";
-import {
-  clampPdfBarZoomPercent,
-  resolvePdfBarRenderScale,
-  resolvePdfBarZoomPercentFromRenderScale,
-} from "@/components/pdf/pdfBarZoomPolicy";
-import { PDF_BAR_MAX_PERCENT } from "@constants/web/pdf";
 import type { PdfPageLayoutMode, PdfViewerState } from "@/types";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UsePdfViewerPersistenceOptions {
   docId: string;
   viewerState?: PdfViewerState | null;
   getFitScale: (pageLayoutMode: PdfPageLayoutMode) => number;
-  isFitScaleReady: boolean;
   onDocumentUpdate?: (updates: {
     viewerState: PdfViewerState;
   }) => Promise<void>;
 }
 
-const isFiniteNumber = (value: unknown): value is number => {
-  return typeof value === "number" && Number.isFinite(value);
+const sanitizeCurrentPage = (value: unknown) => {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return 1;
+  }
+
+  return Math.max(1, Math.trunc(value));
 };
 
-const resolvePageLayoutMode = (
-  viewerState: PdfViewerState | null | undefined,
-): PdfPageLayoutMode => {
-  return viewerState?.pageLayoutMode === "double" ? "double" : "single";
+const sanitizeScale = (value: unknown) => {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return 1;
+  }
+
+  return clampScale(value);
 };
 
-const resolveFitMode = (
-  viewerState: PdfViewerState | null | undefined,
-): "width" | "manual" => {
-  return viewerState?.fitMode === "manual" ? "manual" : "width";
+const sanitizeFitScale = (value: number) => {
+  if (!Number.isFinite(value)) {
+    return 1;
+  }
+
+  return clampScale(value);
 };
 
 export const usePdfViewerPersistence = ({
   docId,
   viewerState,
   getFitScale,
-  isFitScaleReady,
   onDocumentUpdate,
 }: UsePdfViewerPersistenceOptions) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [fitMode, setFitMode] = useState<"width" | "manual">("width");
-  const [zoomPercent, setZoomPercent] = useState(PDF_BAR_MAX_PERCENT);
+  const [scale, setScale] = useState(1.0);
   const [pageLayoutMode, setPageLayoutMode] =
     useState<PdfPageLayoutMode>("single");
 
   const isHydratingRef = useRef(false);
   const initializedRef = useRef(false);
+
   const lastDocIdRef = useRef<string | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingLegacyScaleRef = useRef<number | null>(null);
-
-  const fitScale = useMemo(() => {
-    const nextFitScale = getFitScale(pageLayoutMode);
-
-    return clampScale(Number.isFinite(nextFitScale) ? nextFitScale : 1);
-  }, [getFitScale, pageLayoutMode]);
-
-  const baseRenderScale = useMemo(() => {
-    return resolvePdfBarRenderScale({
-      zoomPercent,
-      fitScale,
-    });
-  }, [fitScale, zoomPercent]);
-
-  const finalizeHydration = useCallback(() => {
-    Promise.resolve().then(() => {
-      isHydratingRef.current = false;
-
-      if (import.meta.env.DEV) {
-        console.debug(
-          "[usePdfViewerPersistence] Hydration complete for doc:",
-          docId,
-        );
-      }
-    });
-  }, [docId]);
 
   useEffect(() => {
     if (lastDocIdRef.current !== docId && lastDocIdRef.current !== null) {
-      if (import.meta.env.DEV) {
-        console.warn(
-          "[usePdfViewerPersistence] Document changed, clearing debounce:",
-          {
-            from: lastDocIdRef.current,
-            to: docId,
-          },
-        );
-      }
-
+      console.warn(
+        "[usePdfViewerPersistence] Document changed, clearing debounce:",
+        {
+          from: lastDocIdRef.current,
+          to: docId,
+        },
+      );
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
         debounceTimerRef.current = null;
       }
     }
-
     lastDocIdRef.current = docId;
     isHydratingRef.current = false;
     initializedRef.current = false;
-    pendingLegacyScaleRef.current = null;
   }, [docId]);
 
   useEffect(() => {
-    if (initializedRef.current) {
-      return;
-    }
-
+    if (initializedRef.current) return;
     initializedRef.current = true;
+
     isHydratingRef.current = true;
 
-    const restoredState =
-      getViewerStateFromSession(docId) ?? viewerState ?? null;
-    const restoredPageLayoutMode = resolvePageLayoutMode(restoredState);
-    const restoredFitMode = resolveFitMode(restoredState);
+    let restoredState: PdfViewerState | null = null;
 
-    queueMicrotask(() => {
-      if (isFiniteNumber(restoredState?.currentPage)) {
-        setCurrentPage(Math.max(1, Math.trunc(restoredState.currentPage)));
+    restoredState = getViewerStateFromSession(docId);
+
+    if (!restoredState && viewerState) {
+      restoredState = viewerState;
+    }
+
+    if (restoredState) {
+      queueMicrotask(() =>
+        setCurrentPage(sanitizeCurrentPage(restoredState.currentPage)),
+      );
+
+      queueMicrotask(() => setScale(sanitizeScale(restoredState.scale)));
+
+      if (
+        restoredState.fitMode === "width" ||
+        restoredState.fitMode === "manual"
+      ) {
+        queueMicrotask(() => setFitMode(restoredState.fitMode ?? "width"));
       }
-
-      setPageLayoutMode(restoredPageLayoutMode);
-      setFitMode(restoredFitMode);
-    });
-
-    if (isFiniteNumber(restoredState?.zoomPercent)) {
-      queueMicrotask(() => {
-        setZoomPercent(clampPdfBarZoomPercent(restoredState.zoomPercent));
-      });
-      finalizeHydration();
-      return;
-    }
-
-    if (restoredFitMode === "width") {
-      queueMicrotask(() => {
-        setZoomPercent(PDF_BAR_MAX_PERCENT);
-      });
-      finalizeHydration();
-      return;
-    }
-
-    if (isFiniteNumber(restoredState?.scale)) {
-      pendingLegacyScaleRef.current = clampScale(restoredState.scale);
-
-      if (isFitScaleReady) {
-        const nextRestoredFitScale = getFitScale(restoredPageLayoutMode);
-        const restoredFitScale = clampScale(
-          Number.isFinite(nextRestoredFitScale) ? nextRestoredFitScale : 1,
+      if (
+        restoredState.pageLayoutMode === "single" ||
+        restoredState.pageLayoutMode === "double"
+      ) {
+        queueMicrotask(() =>
+          setPageLayoutMode(restoredState.pageLayoutMode ?? "single"),
         );
-        const migratedZoomPercent = resolvePdfBarZoomPercentFromRenderScale({
-          renderScale: pendingLegacyScaleRef.current,
-          fitScale: restoredFitScale,
-        });
-
-        pendingLegacyScaleRef.current = null;
-
-        queueMicrotask(() => {
-          setZoomPercent(migratedZoomPercent);
-        });
-        finalizeHydration();
-        return;
       }
-
-      return;
     }
 
-    queueMicrotask(() => {
-      setZoomPercent(PDF_BAR_MAX_PERCENT);
+    Promise.resolve().then(() => {
+      isHydratingRef.current = false;
+      console.debug(
+        "[usePdfViewerPersistence] Hydration complete for doc:",
+        docId,
+      );
     });
-    finalizeHydration();
-  }, [
-    docId,
-    finalizeHydration,
-    getFitScale,
-    isFitScaleReady,
-    viewerState,
-  ]);
-
-  useEffect(() => {
-    if (pendingLegacyScaleRef.current === null || !isFitScaleReady) {
-      return;
-    }
-
-    const migratedZoomPercent = resolvePdfBarZoomPercentFromRenderScale({
-      renderScale: pendingLegacyScaleRef.current,
-      fitScale,
-    });
-
-    pendingLegacyScaleRef.current = null;
-
-    queueMicrotask(() => {
-      setZoomPercent((previousZoomPercent) => {
-        return previousZoomPercent === migratedZoomPercent
-          ? previousZoomPercent
-          : migratedZoomPercent;
-      });
-    });
-
-    finalizeHydration();
-  }, [finalizeHydration, fitScale, isFitScaleReady]);
+  }, [docId, viewerState]);
 
   useEffect(() => {
     if (isHydratingRef.current) {
-      if (import.meta.env.DEV) {
-        console.debug(
-          "[usePdfViewerPersistence] Skipping save during hydration",
-        );
-      }
+      console.debug("[usePdfViewerPersistence] Skipping save during hydration");
       return;
     }
 
@@ -228,21 +154,20 @@ export const usePdfViewerPersistence = ({
     }
 
     debounceTimerRef.current = setTimeout(() => {
-      const nextViewerState: PdfViewerState = {
-        currentPage,
-        scale: Number(baseRenderScale.toFixed(3)),
-        zoomPercent,
+      const newViewerState: PdfViewerState = {
+        currentPage: sanitizeCurrentPage(currentPage),
+        scale: parseFloat(sanitizeScale(scale).toFixed(3)),
         fitMode,
         pageLayoutMode,
       };
 
-      saveViewerStateToSession(docId, nextViewerState);
+      saveViewerStateToSession(docId, newViewerState);
 
       if (onDocumentUpdate) {
-        onDocumentUpdate({ viewerState: nextViewerState }).catch((error) => {
+        onDocumentUpdate({ viewerState: newViewerState }).catch((err) => {
           console.warn(
             "[usePdfViewerPersistence] Failed to save viewer state:",
-            error,
+            err,
             {
               docId,
             },
@@ -259,80 +184,74 @@ export const usePdfViewerPersistence = ({
         debounceTimerRef.current = null;
       }
     };
-  }, [
-    baseRenderScale,
-    currentPage,
-    docId,
-    fitMode,
-    onDocumentUpdate,
-    pageLayoutMode,
-    zoomPercent,
-  ]);
+  }, [currentPage, scale, fitMode, pageLayoutMode, docId, onDocumentUpdate]);
+
+  useEffect(() => {
+    if (fitMode !== "width") return;
+
+    const nextFitScale = sanitizeFitScale(getFitScale(pageLayoutMode));
+    queueMicrotask(() =>
+      setScale((previousScale) =>
+        Math.abs(previousScale - nextFitScale) < EPSILON
+          ? previousScale
+          : nextFitScale,
+      ),
+    );
+  }, [fitMode, getFitScale, pageLayoutMode]);
 
   const handleZoomOut = useCallback(() => {
     setFitMode("manual");
-    setZoomPercent((previousZoomPercent) => {
-      return clampPdfBarZoomPercent(previousZoomPercent - 1);
-    });
+    setScale((previousScale) =>
+      clampScale(parseFloat((previousScale - ZOOM_STEP).toFixed(2))),
+    );
   }, []);
 
   const handleZoomIn = useCallback(() => {
     setFitMode("manual");
-    setZoomPercent((previousZoomPercent) => {
-      return clampPdfBarZoomPercent(previousZoomPercent + 1);
-    });
+    setScale((previousScale) =>
+      clampScale(parseFloat((previousScale + ZOOM_STEP).toFixed(2))),
+    );
   }, []);
 
   const handleFitWidth = useCallback(() => {
     setFitMode("width");
-    setZoomPercent((previousZoomPercent) => {
-      return previousZoomPercent === PDF_BAR_MAX_PERCENT
-        ? previousZoomPercent
-        : PDF_BAR_MAX_PERCENT;
-    });
-  }, []);
+    setScale(sanitizeFitScale(getFitScale(pageLayoutMode)));
+  }, [getFitScale, pageLayoutMode]);
 
-  const handleViewerZoomPercentChange = useCallback((nextZoomPercent: number) => {
-    if (!Number.isFinite(nextZoomPercent)) {
-      return;
-    }
-
-    const clampedZoomPercent = clampPdfBarZoomPercent(nextZoomPercent);
-
+  const handleViewerScaleChange = useCallback((nextScale: number) => {
+    if (!Number.isFinite(nextScale)) return;
+    const clamped = clampScale(nextScale);
+    const rounded = parseFloat(clamped.toFixed(3));
     setFitMode("manual");
-    setZoomPercent((previousZoomPercent) => {
-      return Math.abs(previousZoomPercent - clampedZoomPercent) < EPSILON
-        ? previousZoomPercent
-        : clampedZoomPercent;
-    });
+    setScale((previousScale) =>
+      Math.abs(previousScale - rounded) < EPSILON ? previousScale : rounded,
+    );
   }, []);
 
   const handlePageLayoutModeChange = useCallback(
     (nextPageLayoutMode: PdfPageLayoutMode) => {
-      setPageLayoutMode((previousPageLayoutMode) => {
-        return previousPageLayoutMode === nextPageLayoutMode
+      setPageLayoutMode((previousPageLayoutMode) =>
+        previousPageLayoutMode === nextPageLayoutMode
           ? previousPageLayoutMode
-          : nextPageLayoutMode;
-      });
+          : nextPageLayoutMode,
+      );
     },
     [],
   );
 
   return {
     currentPage,
-    baseRenderScale,
+    scale,
     fitMode,
-    fitScale,
     pageLayoutMode,
-    zoomPercent,
     setCurrentPage,
+    setScale,
     setFitMode,
     setPageLayoutMode,
-    setZoomPercent,
     handleZoomIn,
     handleZoomOut,
     handleFitWidth,
-    handleViewerZoomPercentChange,
+    handleViewerScaleChange,
     handlePageLayoutModeChange,
   };
 };
