@@ -51,6 +51,11 @@ interface PdfPaneProps {
 const SEARCH_INPUT_DEBOUNCE_MS = 300;
 const PDF_OVERLAY_ZOOM_STEP_PERCENT = 1;
 const PDF_DOUBLE_PAGE_GAP = 16;
+const PDF_ZOOM_UI_MIN_PERCENT = 0;
+const PDF_ZOOM_UI_MAX_PERCENT = 100;
+const PDF_ZOOM_UI_RANGE_PERCENT =
+  PDF_ZOOM_UI_MAX_PERCENT - PDF_ZOOM_UI_MIN_PERCENT;
+const PDF_SCALE_RANGE = FIT_MAX_SCALE - FIT_MIN_SCALE;
 
 const normalizePageForLayout = (
   page: number,
@@ -62,6 +67,48 @@ const normalizePageForLayout = (
 
   const normalizedPage = Math.max(1, Math.trunc(page));
   return normalizedPage - ((normalizedPage - 1) % 2);
+};
+
+const clampZoomUiPercent = (value: number) => {
+  if (!Number.isFinite(value)) {
+    return PDF_ZOOM_UI_MIN_PERCENT;
+  }
+
+  return Math.min(
+    PDF_ZOOM_UI_MAX_PERCENT,
+    Math.max(PDF_ZOOM_UI_MIN_PERCENT, value),
+  );
+};
+
+const scaleToZoomUiPercent = (value: number) => {
+  const clampedScale = clampScale(value);
+
+  if (PDF_SCALE_RANGE <= 0 || PDF_ZOOM_UI_RANGE_PERCENT <= 0) {
+    return PDF_ZOOM_UI_MAX_PERCENT;
+  }
+
+  const ratio = (clampedScale - FIT_MIN_SCALE) / PDF_SCALE_RANGE;
+  const normalizedRatio = Math.min(1, Math.max(0, ratio));
+
+  return Number(
+    (
+      PDF_ZOOM_UI_MIN_PERCENT +
+      normalizedRatio * PDF_ZOOM_UI_RANGE_PERCENT
+    ).toFixed(0),
+  );
+};
+
+const zoomUiPercentToScale = (value: number) => {
+  const clampedUiPercent = clampZoomUiPercent(value);
+
+  if (PDF_SCALE_RANGE <= 0 || PDF_ZOOM_UI_RANGE_PERCENT <= 0) {
+    return clampScale(FIT_MIN_SCALE);
+  }
+
+  const ratio =
+    (clampedUiPercent - PDF_ZOOM_UI_MIN_PERCENT) / PDF_ZOOM_UI_RANGE_PERCENT;
+
+  return clampScale(Number((FIT_MIN_SCALE + ratio * PDF_SCALE_RANGE).toFixed(3)));
 };
 
 export const PdfPane = ({
@@ -88,14 +135,14 @@ export const PdfPane = ({
   const { containerRef, containerWidth } = usePdfContainerWidth();
 
   const getFitScale = useCallback(
-    (pageLayoutMode: PdfPageLayoutMode) => {
+    (nextPageLayoutMode: PdfPageLayoutMode) => {
       if (!containerWidth || !basePageWidth) {
         return 1;
       }
 
-      const pagesPerRow = pageLayoutMode === "double" ? 2 : 1;
+      const pagesPerRow = nextPageLayoutMode === "double" ? 2 : 1;
       const horizontalGap =
-        pageLayoutMode === "double" ? PDF_DOUBLE_PAGE_GAP : 0;
+        nextPageLayoutMode === "double" ? PDF_DOUBLE_PAGE_GAP : 0;
       const usableWidth = Math.max(
         1,
         containerWidth - FIT_PADDING_X - horizontalGap,
@@ -144,7 +191,7 @@ export const PdfPane = ({
     handleSourceLoadError,
   } = usePdfSourceResolver(doc, currentUser?.uid);
 
-  const scalePercent = useMemo(() => Number((scale * 100).toFixed(1)), [scale]);
+  const zoomPercent = useMemo(() => scaleToZoomUiPercent(scale), [scale]);
 
   const pageStep = pageLayoutMode === "double" ? 2 : 1;
   const alignedCurrentPage = useMemo(
@@ -152,13 +199,13 @@ export const PdfPane = ({
     [currentPage, pageLayoutMode],
   );
 
-  const handleScalePercentChange = useCallback(
+  const handleZoomPercentChange = useCallback(
     (nextPercent: number) => {
       if (!Number.isFinite(nextPercent)) {
         return;
       }
 
-      handleViewerScaleChange(nextPercent / 100);
+      handleViewerScaleChange(zoomUiPercentToScale(nextPercent));
     },
     [handleViewerScaleChange],
   );
@@ -399,9 +446,9 @@ export const PdfPane = ({
                   <PdfOverlayToolbar
                     currentPage={alignedCurrentPage}
                     numPages={numPages}
-                    scalePercent={scalePercent}
-                    minScalePercent={FIT_MIN_SCALE * 100}
-                    maxScalePercent={FIT_MAX_SCALE * 100}
+                    zoomPercent={zoomPercent}
+                    minZoomPercent={PDF_ZOOM_UI_MIN_PERCENT}
+                    maxZoomPercent={PDF_ZOOM_UI_MAX_PERCENT}
                     fitMode={fitMode}
                     pageLayoutMode={pageLayoutMode}
                     zoomStepPercent={PDF_OVERLAY_ZOOM_STEP_PERCENT}
@@ -409,7 +456,7 @@ export const PdfPane = ({
                     onPrevPage={handlePrev}
                     onNextPage={handleNext}
                     onFitWidth={handleFitWidth}
-                    onScalePercentChange={handleScalePercentChange}
+                    onZoomPercentChange={handleZoomPercentChange}
                     onPageLayoutModeChange={handlePageLayoutModeChange}
                     canGoToPrevPage={canGoToPrevPage}
                     canGoToNextPage={canGoToNextPage}

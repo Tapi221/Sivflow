@@ -16,9 +16,9 @@ type PdfFitMode = "width" | "manual";
 type PdfOverlayToolbarProps = {
   currentPage: number;
   numPages: number;
-  scalePercent: number;
-  minScalePercent: number;
-  maxScalePercent: number;
+  zoomPercent: number;
+  minZoomPercent: number;
+  maxZoomPercent: number;
   fitMode: PdfFitMode;
   pageLayoutMode: PdfPageLayoutMode;
   zoomStepPercent?: number;
@@ -26,7 +26,7 @@ type PdfOverlayToolbarProps = {
   onPrevPage: () => void;
   onNextPage: () => void;
   onFitWidth: () => void;
-  onScalePercentChange: (nextPercent: number) => void;
+  onZoomPercentChange: (nextPercent: number) => void;
   onPageLayoutModeChange: (nextMode: PdfPageLayoutMode) => void;
   canGoToPrevPage: boolean;
   canGoToNextPage: boolean;
@@ -36,9 +36,9 @@ type PdfOverlayToolbarProps = {
 export const PdfOverlayToolbar = ({
   currentPage,
   numPages,
-  scalePercent,
-  minScalePercent,
-  maxScalePercent,
+  zoomPercent,
+  minZoomPercent,
+  maxZoomPercent,
   fitMode,
   pageLayoutMode,
   zoomStepPercent = 1,
@@ -46,7 +46,7 @@ export const PdfOverlayToolbar = ({
   onPrevPage,
   onNextPage,
   onFitWidth,
-  onScalePercentChange,
+  onZoomPercentChange,
   onPageLayoutModeChange,
   canGoToPrevPage,
   canGoToNextPage,
@@ -124,15 +124,14 @@ export const PdfOverlayToolbar = ({
       <OverlayToolbarDivider />
 
       <OverlayToolbarZoomControl
-        value={scalePercent}
-        min={minScalePercent}
-        max={maxScalePercent}
+        value={zoomPercent}
+        min={minZoomPercent}
+        max={maxZoomPercent}
         step={zoomStepPercent}
-        onChange={onScalePercentChange}
+        onChange={onZoomPercentChange}
         label="PDFズーム"
         disabled={disabled}
-        sliderWrapperClassName="w-20 px-0.5 sm:w-24"
-        valueClassName="min-w-[2.5rem] text-center text-[10px] font-semibold tabular-nums text-[#6b5f55]"
+        sliderWrapperClassName="w-14 px-0.5 sm:w-16"
       />
     </OverlayToolbar>
   );
