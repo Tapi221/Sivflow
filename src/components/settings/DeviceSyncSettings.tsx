@@ -1,11 +1,16 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { collection, getDocs, query } from "firebase/firestore";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 
+import { SettingsRow } from "@/components/settings/SettingsRow";
+import { SettingsSection } from "@/components/settings/SettingsSection";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useSyncSettings } from "@/hooks/sync/useSyncSettings";
+import { cn } from "@/lib/utils";
 import { requireAppFirestoreDb } from "@/services/firebaseGateway";
 import { getLocalDb, initializeDB } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
@@ -13,16 +18,71 @@ import type { SyncMetadata, UserStats } from "@/types";
 import { Check, Pencil, RefreshCw, Smartphone, Trash2, X } from "@/ui/icons";
 import { toDateOrNull, toMillis } from "@/utils/toMillis";
 
-const sortByLastSyncDesc = (
-  left: SyncMetadata,
-  right: SyncMetadata,
-): number => {
+type DeviceStatus = "revoked" | "active" | "disconnected";
+
+type DeviceRecord = SyncMetadata & {
+  status?: DeviceStatus;
+  revokedAt?: unknown;
+};
+
+const sortByLastSyncDesc = (left: DeviceRecord, right: DeviceRecord) => {
   return toMillis(right.lastSyncTime) - toMillis(left.lastSyncTime);
 };
 
-export const DeviceSyncSettings: React.FC = () => {
+const getCurrentDeviceId = () => {
+  try {
+    const deviceId = localStorage.getItem("deviceId");
+    return typeof deviceId === "string" && deviceId.trim().length > 0
+      ? deviceId
+      : null;
+  } catch {
+    return null;
+  }
+};
+
+const formatDate = (value: unknown) => {
+  const date = toDateOrNull(value);
+  if (!date) return "未同期";
+  return format(date, "yyyy/MM/dd HH:mm", { locale: ja });
+};
+
+const formatSize = (bytes: number) => {
+  if (bytes <= 0) return "0 B";
+
+  const kilo = 1024;
+  const units = ["B", "KB", "MB", "GB"] as const;
+  const unitIndex = Math.min(
+    Math.floor(Math.log(bytes) / Math.log(kilo)),
+    units.length - 1,
+  );
+
+  return `${parseFloat((bytes / Math.pow(kilo, unitIndex)).toFixed(2))} ${units[unitIndex]}`;
+};
+
+const getDeviceStatusMeta = (device: DeviceRecord) => {
+  if (device.status === "revoked") {
+    return {
+      label: "解除済み",
+      toneClassName: "ds-settings-panel__status-pill--off",
+    };
+  }
+
+  if (device.isActive) {
+    return {
+      label: "有効",
+      toneClassName: "ds-settings-panel__status-pill--success",
+    };
+  }
+
+  return {
+    label: "停止中",
+    toneClassName: "ds-settings-panel__status-pill--off",
+  };
+};
+
+export const DeviceSyncSettings = () => {
   const { currentUser } = useAuthSession();
-  const [devices, setDevices] = useState<SyncMetadata[]>([]);
+  const [devices, setDevices] = useState<DeviceRecord[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -30,31 +90,45 @@ export const DeviceSyncSettings: React.FC = () => {
   const [editName, setEditName] = useState("");
   const [cleaning, setCleaning] = useState(false);
   const [cleanupMessage, setCleanupMessage] = useState<string | null>(null);
+
+  const cleanupMessageTimeoutRef = useRef<number | null>(null);
+
   const { settings: syncSettings, updateSettings: updateSyncSettings } =
     useSyncSettings();
 
   const fetchStats = useCallback(async () => {
     if (!currentUser) return;
+
     initializeDB(currentUser.uid);
     const db = await getLocalDb();
     const nextStats =
-      (await db.userStats.get("current")) ||
+      (await db.userStats.get("current")) ??
       (await db.userStats.toCollection().first());
-    setStats(nextStats || null);
+
+    setStats(nextStats ?? null);
   }, [currentUser]);
 
   const fetchDevices = useCallback(async () => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      setDevices([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    const db = requireAppFirestoreDb();
+
     try {
+      const db = requireAppFirestoreDb();
       const devicesQuery = query(
         collection(db, `sync_metadata/${currentUser.uid}/devices`),
       );
       const snapshot = await getDocs(devicesQuery);
-      const deviceList = snapshot.docs.map((doc) => doc.data() as SyncMetadata);
-      deviceList.sort(sortByLastSyncDesc);
-      setDevices(deviceList);
+      const nextDevices = snapshot.docs.map((doc) => {
+        return doc.data() as DeviceRecord;
+      });
+
+      nextDevices.sort(sortByLastSyncDesc);
+      setDevices(nextDevices);
     } catch (error) {
       console.error("[DeviceSyncSettings] Failed to fetch devices:", error);
     } finally {
@@ -67,6 +141,7 @@ export const DeviceSyncSettings: React.FC = () => {
     if (!window.confirm("この端末の同期を解除しますか？")) return;
 
     setRemovingId(deviceId);
+
     try {
       const syncService = await SyncServiceFactory.getInstance(currentUser.uid);
       await syncService.removeDevice(deviceId);
@@ -80,20 +155,30 @@ export const DeviceSyncSettings: React.FC = () => {
 
   const handleCleanup = async () => {
     if (!currentUser) return;
+
     if (
       !window.confirm(
-        "60日以上同期がない古いセッションを一括解除しますか？\n(シークレットモード等の残骸を掃除します)",
+        "60日以上同期がない古いセッションを一括解除しますか？\n(シークレットモード等の残骸も整理します)",
       )
     ) {
       return;
     }
 
     setCleaning(true);
+
     try {
       const syncService = await SyncServiceFactory.getInstance(currentUser.uid);
       const cleanedCount = await syncService.cleanupInactiveDevices();
-      setCleanupMessage(`${cleanedCount}台の古いセッションを解除しました。`);
-      setTimeout(() => setCleanupMessage(null), 3000);
+      setCleanupMessage(`${cleanedCount} 台の古いセッションを解除しました。`);
+
+      if (cleanupMessageTimeoutRef.current) {
+        window.clearTimeout(cleanupMessageTimeoutRef.current);
+      }
+
+      cleanupMessageTimeoutRef.current = window.setTimeout(() => {
+        setCleanupMessage(null);
+      }, 3000);
+
       await fetchDevices();
     } catch (error) {
       console.error("[DeviceSyncSettings] Cleanup failed:", error);
@@ -103,14 +188,17 @@ export const DeviceSyncSettings: React.FC = () => {
   };
 
   const handleUpdateName = async (deviceId: string) => {
-    if (!currentUser || !editName.trim()) {
+    if (!currentUser) return;
+
+    const trimmedName = editName.trim();
+    if (!trimmedName) {
       setEditingId(null);
       return;
     }
 
     try {
       const syncService = await SyncServiceFactory.getInstance(currentUser.uid);
-      await syncService.updateDeviceName(deviceId, editName.trim());
+      await syncService.updateDeviceName(deviceId, trimmedName);
       setEditingId(null);
       await fetchDevices();
     } catch (error) {
@@ -121,9 +209,9 @@ export const DeviceSyncSettings: React.FC = () => {
     }
   };
 
-  const startEditing = (device: SyncMetadata) => {
+  const startEditing = (device: DeviceRecord) => {
     setEditingId(device.deviceId);
-    setEditName(device.deviceName || "");
+    setEditName(device.deviceName ?? "");
   };
 
   useEffect(() => {
@@ -131,308 +219,315 @@ export const DeviceSyncSettings: React.FC = () => {
     void fetchStats();
   }, [fetchDevices, fetchStats]);
 
-  const formatDate = (value: unknown): string => {
-    const date = toDateOrNull(value);
-    if (!date) return "未同期";
-    return format(date, "yyyy/MM/dd HH:mm", { locale: ja });
-  };
+  useEffect(() => {
+    return () => {
+      if (cleanupMessageTimeoutRef.current) {
+        window.clearTimeout(cleanupMessageTimeoutRef.current);
+      }
+    };
+  }, []);
 
-  const totalUsed = stats?.totalStorageUsedBytes || 0;
-  const highResUsed = stats?.totalHighResBytes || 0;
-  const thumbnailUsed = stats?.totalThumbnailBytes || 0;
+  const currentDeviceId = useMemo(() => getCurrentDeviceId(), []);
+  const activeDeviceCount = useMemo(() => {
+    return devices.filter((device) => {
+      return device.isActive && device.status !== "revoked";
+    }).length;
+  }, [devices]);
+
+  const totalUsed = stats?.totalStorageUsedBytes ?? 0;
+  const highResUsed = stats?.totalHighResBytes ?? 0;
+  const thumbnailUsed = stats?.totalThumbnailBytes ?? 0;
   const maxQuota = 500 * 1024 * 1024;
   const quotaPercent = Math.min((totalUsed / maxQuota) * 100, 100);
-  const highResPercent = (highResUsed / maxQuota) * 100;
-  const thumbnailPercent = (thumbnailUsed / maxQuota) * 100;
 
-  const formatSize = (bytes: number): string => {
-    if (bytes === 0) return "0 B";
-    const kilo = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const index = Math.floor(Math.log(bytes) / Math.log(kilo));
-    return `${parseFloat((bytes / Math.pow(kilo, index)).toFixed(2))} ${sizes[index]}`;
-  };
+  if (!currentUser) {
+    return null;
+  }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-white">
-        <div className="p-2.5 bg-primary-400/20 text-primary-300 rounded-xl shadow-[0_0_10px_rgba(123,172,170,0.3)]">
-          <Smartphone className="w-6 h-6" />
-        </div>
-        同期・ストレージ管理
-      </h2>
-
-      <div className="p-6 bg-white/5 border border-white/10 rounded-2xl shadow-sm mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-sm font-bold text-slate-200">
-              非アクティブ端末の自動整理
-            </h4>
-            <p className="text-[10px] text-slate-400 font-medium mt-1">
-              60日以上同期がない古いセッションを自動的に解除します（シークレットモード等の残骸の掃除）。
-            </p>
-          </div>
-          <Switch
-            checked={syncSettings?.autoCleanupDevices ?? true}
-            onCheckedChange={(checked) =>
-              updateSyncSettings({ autoCleanupDevices: checked })
-            }
-          />
-        </div>
-      </div>
-
-      <div className="p-6 bg-white/5 border border-white/10 rounded-2xl shadow-sm">
-        <div className="flex justify-between items-end mb-3">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-            クラウドストレージ使用量
-          </span>
-          <span
-            className={`text-[10px] font-bold ${quotaPercent > 90 ? "text-red-400 animate-pulse" : "text-slate-400"}`}
-          >
-            {formatSize(totalUsed)} / {formatSize(maxQuota)}
-            {quotaPercent > 90 && " (残りわずか!)"}
-          </span>
-        </div>
-        <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden flex">
-          <div
-            style={
-              {
-                "--progress": `${highResPercent}%`,
-                "--progress-color":
-                  quotaPercent > 90 ? "#ef4444" : "var(--primary-color)",
-              } as React.CSSProperties
-            }
-            className="h-full progress-bar-fill opacity-80"
-          />
-          <div
-            style={
-              {
-                "--progress": `${thumbnailPercent}%`,
-                "--progress-color": "#a5b4fc",
-              } as React.CSSProperties
-            }
-            className="h-full progress-bar-fill opacity-60"
-          />
-        </div>
-        <div className="mt-4 flex gap-6 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-primary-400 rounded-full shadow-[0_0_5px_rgba(123,172,170,0.5)]"></span>
-            高解像度画像 ({formatSize(highResUsed)})
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-indigo-300 rounded-full"></span>
-            サムネイル ({formatSize(thumbnailUsed)})
-          </div>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="flex justify-center py-10">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center px-1">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
-              登録デバイス ({devices.filter((device) => device.isActive).length}
-              )
-            </h3>
+    <div className="space-y-6">
+      <SettingsSection
+        title="端末の自動整理"
+        description="一定期間同期がない端末を整理し、不要なセッションを溜め込みにくくします。"
+      >
+        <SettingsRow
+          title="60日以上同期がない端末を自動整理"
+          description="シークレットモードや古い端末の残骸を自動的に片付けます。"
+          action={
             <div className="flex items-center gap-3">
-              {cleanupMessage && (
-                <span className="text-[10px] text-emerald-500 font-bold animate-in slide-in-from-right-2 fade-in">
-                  {cleanupMessage}
-                </span>
-              )}
-              <button
-                onClick={handleCleanup}
-                disabled={cleaning}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all border border-transparent hover:border-red-100 disabled:opacity-50"
-                title="60日以上動いていない端末を掃除"
+              <span
+                className={cn(
+                  "ds-settings-panel__status-pill",
+                  (syncSettings?.autoCleanupDevices ?? true)
+                    ? "ds-settings-panel__status-pill--success"
+                    : "ds-settings-panel__status-pill--off",
+                )}
               >
-                <Trash2
-                  className={`w-3 h-3 ${cleaning ? "animate-bounce" : ""}`}
-                />
-                古いセッションを掃除
-              </button>
+                {(syncSettings?.autoCleanupDevices ?? true) ? "ON" : "OFF"}
+              </span>
+              <Switch
+                checked={syncSettings?.autoCleanupDevices ?? true}
+                onCheckedChange={(checked) =>
+                  void updateSyncSettings({ autoCleanupDevices: checked })
+                }
+              />
+            </div>
+          }
+        />
+
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void handleCleanup()}
+            disabled={cleaning}
+            className="rounded-xl"
+          >
+            <Trash2 className={cn("mr-2 h-4 w-4", cleaning && "animate-pulse")} />
+            古いセッションを掃除
+          </Button>
+
+          {cleanupMessage ? (
+            <span className="text-xs font-semibold text-emerald-600">
+              {cleanupMessage}
+            </span>
+          ) : null}
+        </div>
+      </SettingsSection>
+
+      <SettingsSection
+        title="クラウドストレージ使用量"
+        description="画像同期で使っている容量を確認できます。上限は 500 MB です。"
+      >
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div className="text-sm font-semibold text-slate-800">
+              {formatSize(totalUsed)} / {formatSize(maxQuota)}
+            </div>
+            <div
+              className={cn(
+                "text-xs font-semibold",
+                quotaPercent >= 90 ? "text-rose-600" : "text-slate-500",
+              )}
+            >
+              {Math.round(quotaPercent)}% 使用中
             </div>
           </div>
-          {devices.length === 0 ? (
-            <p className="text-slate-400 text-center py-10 font-bold text-sm bg-white/5 rounded-2xl border border-dashed border-white/20">
-              同期されているデバイスはありません。
-            </p>
-          ) : (
-            devices.map((device) => {
-              const isRevoked = device.status === "revoked";
-              const isCurrentDevice =
-                device.deviceId === localStorage.getItem("deviceId");
+
+          <div className="ds-settings-panel__meter">
+            <div
+              className="ds-settings-panel__meter-bar"
+              style={{ width: `${quotaPercent}%` }}
+            />
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                高解像度画像
+              </div>
+              <div className="mt-2 text-sm font-semibold text-slate-800">
+                {formatSize(highResUsed)}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                サムネイル
+              </div>
+              <div className="mt-2 text-sm font-semibold text-slate-800">
+                {formatSize(thumbnailUsed)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </SettingsSection>
+
+      <SettingsSection
+        title={`登録デバイス (${activeDeviceCount})`}
+        description="端末ごとの同期状態を確認し、名前の変更や解除を行えます。"
+        action={
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void fetchDevices()}
+            className="rounded-xl"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            一覧を更新
+          </Button>
+        }
+      >
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <RefreshCw className="h-5 w-5 animate-spin text-slate-400" />
+          </div>
+        ) : devices.length <= 0 ? (
+          <div className="ds-settings-panel__empty-state">
+            同期されているデバイスはありません。
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {devices.map((device) => {
+              const statusMeta = getDeviceStatusMeta(device);
+              const isCurrentDevice = currentDeviceId === device.deviceId;
+              const isEditing = editingId === device.deviceId;
+              const canDisconnect =
+                device.status !== "revoked" && device.isActive;
 
               return (
                 <div
                   key={device.deviceId}
-                  className={`p-5 rounded-2xl border transition-all ${
-                    isRevoked
-                      ? "bg-white/5 border-white/10 opacity-60"
-                      : device.isActive
-                        ? "bg-white/5 border-white/10 shadow-sm hover:shadow-md hover:border-white/20 hover:bg-white/10"
-                        : "bg-white/5 border-white/5 grayscale opacity-70"
-                  } ${isCurrentDevice ? "ring-1 ring-primary-400/30" : ""}`}
+                  className={cn(
+                    "rounded-2xl border border-slate-200 bg-white p-4",
+                    isCurrentDevice &&
+                      "border-[var(--settings-accent)] shadow-sm",
+                  )}
                 >
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      isRevoked
-                        ? "bg-white/10 text-slate-500"
-                        : "bg-orange-500/10 text-orange-400"
-                    }`}
-                  >
-                    <Smartphone className="w-5 h-5" />
-                  </div>
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1">
-                      {editingId === device.deviceId ? (
-                        <div className="flex items-center gap-2">
-                          <input
-                            autoFocus
-                            type="text"
-                            title="デバイス名を編集"
-                            value={editName}
-                            onChange={(event) =>
-                              setEditName(event.target.value)
-                            }
-                            onKeyDown={(event) =>
-                              event.key === "Enter" &&
-                              handleUpdateName(device.deviceId)
-                            }
-                            className="text-sm font-bold text-white bg-black/40 border border-primary-500/30 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-primary-500/20 flex-1"
-                          />
-                          <button
-                            onClick={() => handleUpdateName(device.deviceId)}
-                            title="保存"
-                            className="p-1 text-primary-400 hover:bg-primary-500/20 rounded-md transition-colors"
-                          >
-                            <Check className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setEditingId(null)}
-                            title="キャンセル"
-                            className="p-1 text-slate-400 hover:bg-white/10 rounded-md transition-colors"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <h3
-                          className={`font-bold text-base flex items-center gap-2 group/title ${
-                            isRevoked
-                              ? "text-slate-500 line-through decoration-slate-400/50"
-                              : "text-slate-200"
-                          }`}
-                        >
-                          {device.deviceName || "不明なデバイス"}
-                          {!isRevoked && (
-                            <button
-                              onClick={() => startEditing(device)}
-                              title="名前を編集"
-                              className="opacity-0 group-hover/title:opacity-100 p-1 text-slate-400 hover:text-primary-400 transition-all"
-                            >
-                              <Pencil className="w-3 h-3" />
-                            </button>
-                          )}
-                          {isCurrentDevice && (
-                            <span className="text-[10px] bg-primary-500/80 text-white px-2 py-0.5 rounded-full font-bold shadow-sm backdrop-blur-sm">
-                              現在使用中
-                            </span>
-                          )}
-                        </h3>
-                      )}
-                      <p className="text-[10px] text-slate-400 font-serif mt-1">
-                        {device.deviceId}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 ml-4">
-                      <span
-                        className={`px-2.5 py-1 text-[10px] rounded-full font-bold border ${
-                          isRevoked
-                            ? "bg-white/5 text-slate-500 border-white/10"
-                            : device.isActive
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                              : "bg-white/5 text-slate-500 border-white/10"
-                        }`}
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="flex min-w-0 gap-3">
+                      <div
+                        className={cn(
+                          "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500",
+                          device.status !== "revoked" && "text-slate-700",
+                        )}
                       >
-                        {isRevoked
-                          ? "REVOKED (履歴)"
-                          : device.isActive
-                            ? "ACTIVE"
-                            : "DISCONNECTED"}
-                      </span>
-                      {!isRevoked && device.isActive && (
-                        <button
-                          disabled={removingId === device.deviceId}
-                          onClick={() => handleDisconnect(device.deviceId)}
-                          className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all disabled:opacity-50"
-                          title="解除"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
+                        <Smartphone className="h-5 w-5" />
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        {isEditing ? (
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Input
+                              autoFocus
+                              value={editName}
+                              onChange={(event) =>
+                                setEditName(event.target.value)
+                              }
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter") {
+                                  void handleUpdateName(device.deviceId);
+                                }
+                                if (event.key === "Escape") {
+                                  setEditingId(null);
+                                }
+                              }}
+                              title="デバイス名"
+                              className="h-9 min-w-[220px] max-w-[320px]"
                             />
-                          </svg>
-                        </button>
-                      )}
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() =>
+                                void handleUpdateName(device.deviceId)
+                              }
+                              className="rounded-lg"
+                            >
+                              <Check className="mr-1 h-4 w-4" />
+                              保存
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingId(null)}
+                              className="rounded-lg"
+                            >
+                              <X className="mr-1 h-4 w-4" />
+                              キャンセル
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex flex-wrap items-center gap-2">
+                            <div
+                              className={cn(
+                                "min-w-0 text-sm font-semibold text-slate-800",
+                                device.status === "revoked" &&
+                                  "text-slate-500 line-through",
+                              )}
+                            >
+                              {device.deviceName || "不明なデバイス"}
+                            </div>
+
+                            {isCurrentDevice ? (
+                              <span className="ds-settings-panel__status-pill ds-settings-panel__status-pill--info">
+                                この端末
+                              </span>
+                            ) : null}
+
+                            <span
+                              className={cn(
+                                "ds-settings-panel__status-pill",
+                                statusMeta.toneClassName,
+                              )}
+                            >
+                              {statusMeta.label}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="mt-1 break-all text-[11px] leading-5 text-slate-500">
+                          {device.deviceId}
+                        </div>
+                      </div>
                     </div>
+
+                    {!isEditing ? (
+                      <div className="flex shrink-0 items-center gap-2 self-start">
+                        {device.status !== "revoked" ? (
+                          <button
+                            type="button"
+                            onClick={() => startEditing(device)}
+                            className="rounded-lg border border-slate-200 p-2 text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
+                            aria-label={`${device.deviceName} の名前を編集`}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                        ) : null}
+
+                        {canDisconnect ? (
+                          <button
+                            type="button"
+                            disabled={removingId === device.deviceId}
+                            onClick={() => void handleDisconnect(device.deviceId)}
+                            className="rounded-lg border border-slate-200 p-2 text-slate-500 transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
+                            aria-label={`${device.deviceName} の同期を解除`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/10">
+                  <div className="mt-4 grid gap-3 border-t border-slate-200 pt-4 md:grid-cols-2">
                     <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                         最終同期
-                      </p>
-                      <p className="text-xs font-bold text-slate-500">
+                      </div>
+                      <div className="mt-1 text-sm text-slate-700">
                         {formatDate(device.lastSyncTime)}
-                      </p>
+                      </div>
                     </div>
+
                     <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                         高画質同期
-                      </p>
-                      <p className="text-xs font-bold text-slate-500">
+                      </div>
+                      <div className="mt-1 text-sm text-slate-700">
                         {formatDate(device.lastHighResSync)}
-                      </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               );
-            })
-          )}
-        </div>
-      )}
+            })}
+          </div>
+        )}
+      </SettingsSection>
 
-      <button
-        onClick={() => void fetchDevices()}
-        className="mt-6 w-full py-4 bg-white/5 text-slate-400 border border-white/10 rounded-2xl font-bold hover:bg-white/10 hover:shadow-lg hover:border-white/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group hover:text-white"
-      >
-        <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
-        同期状態を更新
-      </button>
-
-      <div className="mt-8 p-5 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
-        <h4 className="text-blue-400 font-bold text-xs mb-2 flex items-center gap-2">
-          <span className="w-5 h-5 bg-blue-500/20 rounded-full flex items-center justify-center text-[10px]">
-            i
-          </span>
-          マルチデバイス同期について
-        </h4>
-        <p className="text-[11px] text-blue-300/80 leading-relaxed font-medium">
-          複数の端末で同時に学習を進めることができます。60日以上ログインしていない古い端末は、
-          「古いセッションを掃除」ボタンで整理可能です。
-        </p>
+      <div className="ds-settings-panel__note ds-settings-panel__note--info">
+        複数端末で同時に学習できます。不要な端末を解除しても、ほかの端末やクラウド上のデータは消えません。
       </div>
     </div>
   );
