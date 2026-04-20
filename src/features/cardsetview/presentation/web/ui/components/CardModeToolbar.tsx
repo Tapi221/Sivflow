@@ -1,14 +1,12 @@
 import type { ReactNode } from "react";
 
-import {
-  overlayGlassActionButtonClassName,
-  overlayGlassToolbarClassName,
-} from "@/components/card/shell/overlaySurfaceClassNames";
+import { OverlayToolbar } from "@/components/overlay-toolbar/OverlayToolbar";
+import { OverlayToolbarButton } from "@/components/overlay-toolbar/OverlayToolbarButton";
+import { OverlayToolbarDivider } from "@/components/overlay-toolbar/OverlayToolbarDivider";
 import {
   CARD_LAYOUT_MODE_LABELS,
   type CardLayoutMode,
 } from "@/features/cardsetview/domain/cardLayoutMode";
-import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type CardModeToolbarProps = {
@@ -35,26 +33,15 @@ const ModeButton = ({
   children,
 }: ModeButtonProps) => {
   return (
-    <button
-      type="button"
-      className={cn(
-        overlayGlassActionButtonClassName,
-        "relative",
-        isActive &&
-          !disabled &&
-          "border-[rgba(214,198,182,0.96)] bg-[rgba(255,252,247,0.98)] text-[#3d342d] shadow-[inset_0_0_0_1px_rgba(107,95,85,0.08)]",
-        disabled &&
-          "border-[rgba(233,224,216,0.88)] bg-[rgba(255,250,245,0.56)] text-[#baaea4] hover:bg-[rgba(255,250,245,0.56)] hover:text-[#baaea4]",
-      )}
+    <OverlayToolbarButton
       onClick={onClick}
-      aria-label={label}
-      title={label}
-      aria-pressed={isActive}
-      aria-disabled={disabled}
+      label={label}
       disabled={disabled}
+      active={isActive}
+      className="h-7 w-7"
     >
       {children}
-    </button>
+    </OverlayToolbarButton>
   );
 };
 
@@ -238,7 +225,7 @@ export const CardModeToolbar = ({
       : "最大表示。タップでカード表示に切り替え";
 
   return (
-    <div className={cn(overlayGlassToolbarClassName, "gap-2 px-2.5")}>
+    <OverlayToolbar className="gap-2 px-2.5">
       <ModeButton
         isActive={displayMode === "fluid"}
         onClick={() => onChangeDisplayMode(nextDisplayMode)}
@@ -251,7 +238,7 @@ export const CardModeToolbar = ({
         )}
       </ModeButton>
 
-      <span className="h-5 w-px bg-[rgba(218,207,197,0.92)]" />
+      <OverlayToolbarDivider className="h-5 bg-[rgba(218,207,197,0.92)]" />
 
       <div className="flex items-center gap-1">
         <ModeButton
@@ -279,6 +266,6 @@ export const CardModeToolbar = ({
           <SplitGlyph />
         </ModeButton>
       </div>
-    </div>
+    </OverlayToolbar>
   );
 };

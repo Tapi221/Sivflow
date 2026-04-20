@@ -1,24 +1,15 @@
 /**
- * PDF ビューアのヘッダーツールバー。
- * ページ移動・ズーム・フィット・検索・外部オープンと状態表示を含む。
+ * PDF ビューアの補助ツールバー。
+ * 検索・フィット・外部オープンと状態表示を担い、
+ * ページ移動とズームは下部オーバーレイ側に分離する。
  */
 import { useId } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Minus,
-  Plus,
-  ExternalLink,
-} from "@/ui/icons";
-import { FIT_MIN_SCALE, FIT_MAX_SCALE } from "./pdfViewerStateStorage";
+import { ExternalLink } from "@/ui/icons";
 
 interface PdfPaneToolbarProps {
   isLocalOnly: boolean;
   uploadStatus?: "pending" | "queued" | "uploading" | "ready" | "failed" | null;
-  currentPage: number;
-  numPages: number;
-  scale: number;
   fitMode: "width" | "manual";
   sourceUnavailable: boolean;
   canOpenExternal: boolean;
@@ -28,10 +19,6 @@ interface PdfPaneToolbarProps {
   onSearchQueryChange: (value: string) => void;
   onPrevMatch: () => void;
   onNextMatch: () => void;
-  onPrev: () => void;
-  onNext: () => void;
-  onZoomOut: () => void;
-  onZoomIn: () => void;
   onFitWidth: () => void;
   onOpenNewTab: () => void;
 }
@@ -39,9 +26,6 @@ interface PdfPaneToolbarProps {
 export const PdfPaneToolbar = ({
   isLocalOnly,
   uploadStatus,
-  currentPage,
-  numPages,
-  scale,
   fitMode,
   sourceUnavailable,
   canOpenExternal,
@@ -51,26 +35,53 @@ export const PdfPaneToolbar = ({
   onSearchQueryChange,
   onPrevMatch,
   onNextMatch,
-  onPrev,
-  onNext,
-  onZoomOut,
-  onZoomIn,
   onFitWidth,
   onOpenNewTab,
 }: PdfPaneToolbarProps) => {
   const searchInputId = useId();
 
+  const statusMessages = [
+    isLocalOnly
+      ? {
+          key: "local-only",
+          text: "このPDFはこの端末ローカルのみです（クラウド未同期）。",
+          className: "text-amber-600",
+        }
+      : null,
+    uploadStatus === "failed"
+      ? {
+          key: "upload-failed",
+          text: "クラウド同期に失敗しました。再アップロードを試してください。",
+          className: "text-rose-600",
+        }
+      : null,
+  ].filter(
+    (
+      statusMessage,
+    ): statusMessage is {
+      key: string;
+      text: string;
+      className: string;
+    } => statusMessage !== null,
+  );
+
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white px-3 py-2">
+    <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-3 py-2">
       <div className="min-w-0 flex-1">
-        {isLocalOnly && (
-          <div className="truncate text-[11px] text-amber-600">
-            このPDFはこの端末ローカルのみです（クラウド未同期）。
+        {statusMessages.length > 0 ? (
+          <div className="flex flex-col gap-0.5">
+            {statusMessages.map((statusMessage) => (
+              <div
+                key={statusMessage.key}
+                className={`truncate text-[11px] ${statusMessage.className}`}
+              >
+                {statusMessage.text}
+              </div>
+            ))}
           </div>
-        )}
-        {uploadStatus === "failed" && (
-          <div className="truncate text-[11px] text-rose-600">
-            クラウド同期に失敗しました。再アップロードを試してください。
+        ) : (
+          <div className="text-[11px] text-slate-400">
+            PDF表示コントロール
           </div>
         )}
       </div>
@@ -115,64 +126,18 @@ export const PdfPaneToolbar = ({
 
       <div className="flex shrink-0 items-center gap-1">
         <Button
-          variant="outline"
-          size="sm"
-          onClick={onPrev}
-          disabled={sourceUnavailable || currentPage <= 1}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <div className="min-w-[72px] text-center text-xs text-slate-600">
-          {numPages > 0 ? `${currentPage} / ${numPages}` : "0 / 0"}
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onNext}
-          disabled={
-            sourceUnavailable || numPages === 0 || currentPage >= numPages
-          }
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-
-        <div className="mx-2 h-6 w-px bg-slate-200" />
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onZoomOut}
-          disabled={sourceUnavailable || scale <= FIT_MIN_SCALE}
-        >
-          <Minus className="h-4 w-4" />
-        </Button>
-        <div className="min-w-[48px] text-center text-xs text-slate-600">
-          {Math.round(scale * 100)}%
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onZoomIn}
-          disabled={sourceUnavailable || scale >= FIT_MAX_SCALE}
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-        <Button
           variant={fitMode === "width" ? "default" : "outline"}
           size="sm"
           onClick={onFitWidth}
           disabled={sourceUnavailable}
-          className="ml-1"
         >
           幅に合わせる
         </Button>
-
         <Button
           variant="ghost"
           size="sm"
           onClick={onOpenNewTab}
           disabled={!canOpenExternal}
-          className="ml-1"
         >
           <ExternalLink className="h-4 w-4" />
         </Button>
