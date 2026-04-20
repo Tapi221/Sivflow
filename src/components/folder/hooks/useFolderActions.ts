@@ -547,6 +547,9 @@ export const useFolderActions = ({
       const resolvedType = resolveTargetKind(id, type);
 
       if (resolvedType === "folder") {
+        const deleteFolder = onDeleteFolder;
+        if (!deleteFolder) return;
+
         closeRenameIfEditingTarget(id);
         hideFolder(id);
         removeOptimisticFolder(id);
@@ -557,7 +560,7 @@ export const useFolderActions = ({
           try {
             const createResult = await pendingCreate;
             if (createResult === "persisted") {
-              await onDeleteFolder?.(id);
+              await deleteFolder(id);
             }
           } catch (error) {
             unhideFolder(id);
@@ -569,7 +572,7 @@ export const useFolderActions = ({
         }
 
         try {
-          await onDeleteFolder?.(id);
+          await deleteFolder(id);
         } catch (error) {
           unhideFolder(id);
           throw error;
@@ -579,6 +582,9 @@ export const useFolderActions = ({
       }
 
       if (resolvedType === "cardSet") {
+        const deleteCardSet = onDeleteCardSet;
+        if (!deleteCardSet) return;
+
         closeRenameIfEditingTarget(id);
         hideCardSet(id);
         removeOptimisticCardSet(id);
@@ -589,7 +595,7 @@ export const useFolderActions = ({
           try {
             const createResult = await pendingCreate;
             if (createResult === "persisted") {
-              await onDeleteCardSet?.(id);
+              await deleteCardSet(id);
             }
           } catch (error) {
             unhideCardSet(id);
@@ -601,7 +607,7 @@ export const useFolderActions = ({
         }
 
         try {
-          await onDeleteCardSet?.(id);
+          await deleteCardSet(id);
         } catch (error) {
           unhideCardSet(id);
           throw error;
@@ -611,12 +617,16 @@ export const useFolderActions = ({
       }
 
       if (resolvedType === "document") {
-        await onDeleteDocument?.(id);
+        const deleteDocument = onDeleteDocument;
+        if (!deleteDocument) return;
+        await deleteDocument(id);
         return;
       }
 
       if (resolvedType === "card") {
-        await onDeleteCard?.(id);
+        const deleteCard = onDeleteCard;
+        if (!deleteCard) return;
+        await deleteCard(id);
       }
     },
     [
@@ -656,23 +666,52 @@ export const useFolderActions = ({
       const resolvedType = resolveTargetKind(id, type);
 
       if (resolvedType === "folder") {
+        const updateFolder = onUpdateFolder;
+        if (!updateFolder) {
+          closeRename();
+          return;
+        }
+
         if (pendingFolderDeleteRequestsRef.current.has(id)) {
           closeRename();
           return;
         }
+
         updateOptimisticFolderName(id, nextName);
-      } else if (resolvedType === "cardSet") {
+        closeRename();
+
+        try {
+          const pendingResult = await pendingFolderCreatesRef.current.get(id);
+          if (
+            pendingFolderDeleteRequestsRef.current.has(id) ||
+            (pendingResult && pendingResult !== "persisted")
+          ) {
+            return;
+          }
+          await updateFolder(id, { folderName: nextName, name: nextName });
+        } catch (error) {
+          console.error("[useFolderActions] rename failed:", error);
+        }
+
+        return;
+      }
+
+      if (resolvedType === "cardSet") {
+        const updateCardSet = onUpdateCardSet;
+        if (!updateCardSet) {
+          closeRename();
+          return;
+        }
+
         if (pendingCardSetDeleteRequestsRef.current.has(id)) {
           closeRename();
           return;
         }
+
         updateOptimisticCardSetName(id, nextName);
-      }
+        closeRename();
 
-      closeRename();
-
-      try {
-        if (resolvedType === "cardSet") {
+        try {
           const pendingResult = await pendingCardSetCreatesRef.current.get(id);
           if (
             pendingCardSetDeleteRequestsRef.current.has(id) ||
@@ -680,25 +719,28 @@ export const useFolderActions = ({
           ) {
             return;
           }
-          await onUpdateCardSet?.(id, { name: nextName });
+          await updateCardSet(id, { name: nextName });
+        } catch (error) {
+          console.error("[useFolderActions] rename failed:", error);
+        }
+
+        return;
+      }
+
+      if (resolvedType === "document") {
+        const updateDocument = onUpdateDocument;
+        if (!updateDocument) {
+          closeRename();
           return;
         }
 
-        if (resolvedType === "document") {
-          await onUpdateDocument?.(id, { title: nextName });
-          return;
-        }
+        closeRename();
 
-        const pendingResult = await pendingFolderCreatesRef.current.get(id);
-        if (
-          pendingFolderDeleteRequestsRef.current.has(id) ||
-          (pendingResult && pendingResult !== "persisted")
-        ) {
-          return;
+        try {
+          await updateDocument(id, { title: nextName });
+        } catch (error) {
+          console.error("[useFolderActions] rename failed:", error);
         }
-        await onUpdateFolder?.(id, { folderName: nextName, name: nextName });
-      } catch (error) {
-        console.error("[useFolderActions] rename failed:", error);
       }
     },
     [

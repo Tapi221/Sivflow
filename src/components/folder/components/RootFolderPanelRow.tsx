@@ -38,6 +38,14 @@ interface RootFolderPanelRowProps {
     type: "card" | "cardSet" | "document";
     id: string;
   }) => void;
+  canCreateFolder: boolean;
+  canCreateCardSet: boolean;
+  canRenameFolder: boolean;
+  canDeleteFolder: boolean;
+  canRenameCardSet: boolean;
+  canDeleteCardSet: boolean;
+  canRenameDocument: boolean;
+  canDeleteDocument: boolean;
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
   handleDelete: (
@@ -70,6 +78,14 @@ export const RootFolderPanelRow = ({
   setOpenRowMenuId,
   onSelectFolder,
   onItemSelect,
+  canCreateFolder,
+  canCreateCardSet,
+  canRenameFolder,
+  canDeleteFolder,
+  canRenameCardSet,
+  canDeleteCardSet,
+  canRenameDocument,
+  canDeleteDocument,
   handleCreateFolderAction,
   handleCreateCardSetAction,
   handleDelete,
@@ -82,13 +98,13 @@ export const RootFolderPanelRow = ({
   handleRenameConfirm,
   attachInputRef,
 }: RootFolderPanelRowProps) => {
-  const supportsContextMenu =
+  const supportsContextMenuKind =
     entry.kind === "folder" ||
     entry.kind === "cardSet" ||
     entry.kind === "document";
 
-  const menuId = supportsContextMenu ? `${entry.kind}:${entry.id}:panel` : null;
-  const isEditing = supportsContextMenu && editingId === entry.id;
+  const menuId = supportsContextMenuKind ? `${entry.kind}:${entry.id}:panel` : null;
+  const isEditing = supportsContextMenuKind && editingId === entry.id;
   const isMenuOpen = menuId !== null && openRowMenuId === menuId;
 
   const isSelected =
@@ -135,31 +151,43 @@ export const RootFolderPanelRow = ({
     onItemSelect({ type: entry.kind, id: entry.id });
   }, [entry, isEditing, isMenuOpen, onItemSelect]);
 
-  const menuActions = React.useMemo(
+  const folderMenuActions = React.useMemo(
     () =>
       entry.kind === "folder"
         ? buildFolderMenuActions({
-            onCreateSubfolder: () => {
-              void handleCreateFolderAction(entry.id);
-            },
-            onCreateCardSet: () => {
-              void handleCreateCardSetAction(entry.id);
-            },
-            onRename: () => {
-              beginInlineRename({
-                id: entry.id,
-                name: entry.name,
-                closeMenu,
-                setEditingId,
-                setEditingName,
-              });
-            },
-            onDelete: () => {
-              handleDelete(entry.id, "folder");
-            },
+            onCreateSubfolder: canCreateFolder
+              ? () => {
+                  void handleCreateFolderAction(entry.id);
+                }
+              : undefined,
+            onCreateCardSet: canCreateCardSet
+              ? () => {
+                  void handleCreateCardSetAction(entry.id);
+                }
+              : undefined,
+            onRename: canRenameFolder
+              ? () => {
+                  beginInlineRename({
+                    id: entry.id,
+                    name: entry.name,
+                    closeMenu,
+                    setEditingId,
+                    setEditingName,
+                  });
+                }
+              : undefined,
+            onDelete: canDeleteFolder
+              ? () => {
+                  handleDelete(entry.id, "folder");
+                }
+              : undefined,
           })
         : [],
     [
+      canCreateCardSet,
+      canCreateFolder,
+      canDeleteFolder,
+      canRenameFolder,
       closeMenu,
       entry,
       handleCreateCardSetAction,
@@ -171,7 +199,7 @@ export const RootFolderPanelRow = ({
   );
 
   const resolvedMenuActions = React.useMemo(() => {
-    if (entry.kind === "folder") return menuActions;
+    if (entry.kind === "folder") return folderMenuActions;
 
     if (entry.kind === "cardSet") {
       return buildEntityRenameDeleteMenuActions({
@@ -184,7 +212,12 @@ export const RootFolderPanelRow = ({
         closeMenu,
         setEditingId,
         setEditingName,
-        handleDelete,
+        canRename: canRenameCardSet,
+        onDelete: canDeleteCardSet
+          ? (id, type) => {
+              handleDelete(id, type);
+            }
+          : undefined,
       });
     }
 
@@ -199,20 +232,31 @@ export const RootFolderPanelRow = ({
         closeMenu,
         setEditingId,
         setEditingName,
-        handleDelete,
+        canRename: canRenameDocument,
+        onDelete: canDeleteDocument
+          ? (id, type) => {
+              handleDelete(id, type);
+            }
+          : undefined,
       });
     }
 
     return [];
   }, [
+    canDeleteCardSet,
+    canDeleteDocument,
+    canRenameCardSet,
+    canRenameDocument,
     closeMenu,
     entry,
+    folderMenuActions,
     handleDelete,
-    menuActions,
     onItemSelect,
     setEditingId,
     setEditingName,
   ]);
+
+  const hasContextMenu = resolvedMenuActions.length > 0;
 
   return (
     <SidebarEntityRow
@@ -221,7 +265,7 @@ export const RootFolderPanelRow = ({
         setOpenRowMenuId(open && menuId ? menuId : null);
       }}
       menuActions={resolvedMenuActions}
-      hasContextMenu={supportsContextMenu}
+      hasContextMenu={hasContextMenu}
       isEditing={isEditing}
       onContextMenuSelect={handleContextMenuSelect}
       rowRef={(node) => setRowRef(entry.id, node)}

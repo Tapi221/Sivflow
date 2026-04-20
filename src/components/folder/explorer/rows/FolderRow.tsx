@@ -50,6 +50,10 @@ interface FolderRowProps {
   onToggle: () => void;
   onSelect: () => void;
   onNavigate?: () => void;
+  canCreateFolder: boolean;
+  canCreateCardSet: boolean;
+  canRename: boolean;
+  canDelete: boolean;
   handleCreateFolderAction: (parentId: string) => string;
   handleCreateCardSetAction: (parentId: string) => string | null;
   handleDelete: (id: string, type: "folder") => void;
@@ -58,7 +62,6 @@ interface FolderRowProps {
   isFiltering: boolean;
   matchCount: number;
   rowBaseClassName: string;
-  hasUpdateOrDelete: boolean;
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
   setRowRef: (id: string, node: HTMLElement | null) => void;
@@ -86,6 +89,10 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   onToggle,
   onSelect,
   onNavigate,
+  canCreateFolder,
+  canCreateCardSet,
+  canRename,
+  canDelete,
   handleCreateFolderAction,
   handleCreateCardSetAction,
   handleDelete,
@@ -94,7 +101,6 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   isFiltering,
   matchCount,
   rowBaseClassName,
-  hasUpdateOrDelete,
   menuOpen,
   onMenuOpenChange,
   setRowRef,
@@ -113,7 +119,6 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const folderName =
     typedFolder.folderName ?? typedFolder.folder_name ?? "無題のフォルダ";
   const isOptimisticFolder = Boolean(typedFolder.__optimistic);
-  const hasContextMenu = !isOptimisticFolder && hasUpdateOrDelete;
   const parentFolderId = normalizeFolderId(getParentFolderId(folder));
   const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
   const FolderGlyph = isTopLevelFolder ? FolderIcon : FolderOutlineIcon;
@@ -121,30 +126,42 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const menuActions = React.useMemo(
     () =>
       buildFolderMenuActions({
-        onCreateSubfolder: () => {
-          void handleCreateFolderAction(folderId);
-        },
-        onCreateCardSet: () => {
-          void handleCreateCardSetAction(folderId);
-        },
-        onRename: () => {
-          beginInlineRename({
-            id: folderId,
-            name: folderName,
-            closeMenu: () => {
-              onMenuOpenChange(false);
-            },
-            setEditingId,
-            setEditingName,
-            beforeStart: onSelect,
-          });
-        },
-        onDelete: () => {
-          handleDelete(folderId, "folder");
-        },
+        onCreateSubfolder: canCreateFolder
+          ? () => {
+              void handleCreateFolderAction(folderId);
+            }
+          : undefined,
+        onCreateCardSet: canCreateCardSet
+          ? () => {
+              void handleCreateCardSetAction(folderId);
+            }
+          : undefined,
+        onRename: canRename
+          ? () => {
+              beginInlineRename({
+                id: folderId,
+                name: folderName,
+                closeMenu: () => {
+                  onMenuOpenChange(false);
+                },
+                setEditingId,
+                setEditingName,
+                beforeStart: onSelect,
+              });
+            }
+          : undefined,
+        onDelete: canDelete
+          ? () => {
+              handleDelete(folderId, "folder");
+            }
+          : undefined,
         onBulkTag,
       }),
     [
+      canCreateCardSet,
+      canCreateFolder,
+      canDelete,
+      canRename,
       folderId,
       folderName,
       handleCreateCardSetAction,
@@ -157,6 +174,8 @@ export const FolderRow: React.FC<FolderRowProps> = ({
       setEditingName,
     ],
   );
+
+  const hasContextMenu = !isOptimisticFolder && menuActions.length > 0;
 
   const nestedToggleOffsetStyle = !isTopLevelFolder
     ? ({ marginLeft: "calc(var(--tree-indent-px) * -0.5)" } as const)

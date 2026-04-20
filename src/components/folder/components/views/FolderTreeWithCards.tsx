@@ -176,6 +176,16 @@ export const FolderTreeWithCards = ({
     string | null
   >(null);
 
+  const canCreateFolder = Boolean(onCreateFolder);
+  const canCreateCardSet = Boolean(onCreateCardSet);
+  const canRenameFolder = Boolean(onUpdateFolder);
+  const canDeleteFolder = Boolean(onDeleteFolder);
+  const canRenameCardSet = Boolean(onUpdateCardSet);
+  const canDeleteCardSet = Boolean(onDeleteCardSet);
+  const canDeleteCard = Boolean(onDeleteCard);
+  const canRenameDocument = Boolean(onUpdateDocument);
+  const canDeleteDocument = Boolean(onDeleteDocument);
+
   const rowRefs = useRef<Map<string, HTMLElement>>(new Map());
   const treeRootRef = useRef<HTMLDivElement | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
@@ -546,6 +556,60 @@ export const FolderTreeWithCards = ({
   }, [cardSets]);
 
   useEffect(() => {
+    setHiddenFolderIds((prev) => {
+      if (prev.size === 0) return prev;
+
+      const activeIds = new Set<string>();
+      for (const folder of folders) {
+        const id = getFolderId(folder);
+        if (id) activeIds.add(id);
+      }
+      for (const folder of optimisticFolders) {
+        const id = getFolderId(folder);
+        if (id) activeIds.add(id);
+      }
+
+      let changed = false;
+      const next = new Set<string>();
+      prev.forEach((id) => {
+        if (activeIds.has(id)) {
+          next.add(id);
+        } else {
+          changed = true;
+        }
+      });
+
+      return changed ? next : prev;
+    });
+  }, [folders, optimisticFolders]);
+
+  useEffect(() => {
+    setHiddenCardSetIds((prev) => {
+      if (prev.size === 0) return prev;
+
+      const activeIds = new Set<string>();
+      for (const cardSet of cardSets) {
+        activeIds.add(cardSet.id);
+      }
+      for (const cardSet of optimisticCardSets) {
+        activeIds.add(cardSet.id);
+      }
+
+      let changed = false;
+      const next = new Set<string>();
+      prev.forEach((id) => {
+        if (activeIds.has(id)) {
+          next.add(id);
+        } else {
+          changed = true;
+        }
+      });
+
+      return changed ? next : prev;
+    });
+  }, [cardSets, optimisticCardSets]);
+
+  useEffect(() => {
     dialogs.editingIdRef.current = dialogs.editingId;
   }, [dialogs.editingId]);
 
@@ -710,6 +774,11 @@ export const FolderTreeWithCards = ({
   }, [headerFolderId, onHeaderFolderIdChange]);
 
   useEffect(() => {
+    if (!canCreateFolder) {
+      onRegisterCreateFolderTrigger?.(null);
+      return;
+    }
+
     const trigger = () => {
       actions.handleCreateFolderAction(headerFolderId);
     };
@@ -717,6 +786,7 @@ export const FolderTreeWithCards = ({
     return () => onRegisterCreateFolderTrigger?.(null);
   }, [
     actions.handleCreateFolderAction,
+    canCreateFolder,
     headerFolderId,
     onRegisterCreateFolderTrigger,
   ]);
@@ -742,6 +812,8 @@ export const FolderTreeWithCards = ({
     selectedFolderId,
     selectedItem,
     treeFolders,
+    treeCardSets,
+    documents,
     expandedFolders,
     treeRootRef,
     rootFolders,
@@ -750,6 +822,11 @@ export const FolderTreeWithCards = ({
     toggleFolder,
     onFolderSelect,
     onItemSelect,
+    canCreateFolder,
+    canDeleteFolder,
+    canDeleteCardSet,
+    canDeleteCard,
+    canDeleteDocument,
     handleCreateFolderAction: actions.handleCreateFolderAction,
     handleToolbarAddDocument,
     handleDelete: (id, type) => {
@@ -765,12 +842,18 @@ export const FolderTreeWithCards = ({
   );
 
   useEffect(() => {
+    if (!canCreateCardSet) {
+      onRegisterCreateCardSetTrigger?.(null);
+      return;
+    }
+
     const trigger = (folderId?: string | null) => {
       handleCreateCardSetFromMenu(folderId ?? headerFolderId);
     };
     onRegisterCreateCardSetTrigger?.(trigger);
     return () => onRegisterCreateCardSetTrigger?.(null);
   }, [
+    canCreateCardSet,
     handleCreateCardSetFromMenu,
     headerFolderId,
     onRegisterCreateCardSetTrigger,
@@ -940,6 +1023,14 @@ export const FolderTreeWithCards = ({
     setOpenRowMenuId: dialogs.setOpenRowMenuId,
     onFolderSelect: handleFolderNodeSelect,
     onItemSelect,
+    canCreateFolder,
+    canCreateCardSet,
+    canRenameFolder,
+    canDeleteFolder,
+    canRenameCardSet,
+    canDeleteCardSet,
+    canRenameDocument,
+    canDeleteDocument,
     handleCreateFolderAction: actions.handleCreateFolderAction,
     handleCreateCardSetAction: handleCreateCardSetFromMenu,
     handleDelete: (
@@ -951,7 +1042,6 @@ export const FolderTreeWithCards = ({
     handleRenameConfirm: actions.handleRenameConfirm,
     setRowRef,
     isFiltering,
-    hasUpdateOrDelete: Boolean(onUpdateFolder || onDeleteFolder),
     setBulkTagFolderId: dialogs.setBulkTagFolderId,
   } as const;
 
@@ -964,29 +1054,33 @@ export const FolderTreeWithCards = ({
       toggle: () => void;
     }) => <ExplorerTreeNodeRenderer {...renderProps} {...nodeRendererProps} />,
     [
+      canCreateCardSet,
+      canCreateFolder,
+      canDeleteCardSet,
+      canDeleteDocument,
+      canDeleteFolder,
+      canRenameCardSet,
+      canRenameDocument,
+      canRenameFolder,
       dialogs.editingId,
       dialogs.editingName,
       dialogs.editingNameRef,
       dialogs.renameCancelledRef,
+      dialogs.setBulkTagFolderId,
       dialogs.setEditingId,
       dialogs.setEditingName,
       dialogs.openRowMenuId,
       dialogs.setOpenRowMenuId,
-      dialogs.setBulkTagFolderId,
       fileDragFolderId,
-      setFileDragFolderId,
-      handlePdfDropped,
-      handleFolderNodeSelect,
-      onItemSelect,
-      actions.handleCreateFolderAction,
       handleCreateCardSetFromMenu,
-      actions.handleRenameConfirm,
-      setRowRef,
+      handleFolderNodeSelect,
+      handlePdfDropped,
       isFiltering,
-      onUpdateFolder,
-      onDeleteFolder,
-      onUpdateDocument,
-      onDeleteDocument,
+      onItemSelect,
+      setFileDragFolderId,
+      setRowRef,
+      actions.handleCreateFolderAction,
+      actions.handleRenameConfirm,
     ],
   );
 
@@ -1074,6 +1168,14 @@ export const FolderTreeWithCards = ({
                 onFolderSelect(id);
               }}
               onItemSelect={onItemSelect}
+              canCreateFolder={canCreateFolder}
+              canCreateCardSet={canCreateCardSet}
+              canRenameFolder={canRenameFolder}
+              canDeleteFolder={canDeleteFolder}
+              canRenameCardSet={canRenameCardSet}
+              canDeleteCardSet={canDeleteCardSet}
+              canRenameDocument={canRenameDocument}
+              canDeleteDocument={canDeleteDocument}
               handleCreateFolderAction={actions.handleCreateFolderAction}
               handleCreateCardSetAction={handleCreateCardSetFromRootPanel}
               handleDelete={(id, type) => {

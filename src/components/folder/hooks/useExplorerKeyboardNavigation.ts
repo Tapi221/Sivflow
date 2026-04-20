@@ -4,13 +4,20 @@ import {
   hasOpenModalDialog,
   isTextInputTarget,
 } from "@/components/folder/explorer/model/utils";
-import type { ExplorerItem, SelectedExplorerItem } from "@/types";
+import type {
+  CardSet,
+  DocumentItem,
+  ExplorerItem,
+  SelectedExplorerItem,
+} from "@/types";
 import React, { useEffect, useRef } from "react";
 
 interface UseExplorerKeyboardNavigationParams {
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
   treeFolders: FolderTreeNode[];
+  treeCardSets: CardSet[];
+  documents: DocumentItem[];
   expandedFolders: Set<string>;
   treeRootRef: React.RefObject<HTMLDivElement | null>;
   rootFolders: FolderTreeNode[];
@@ -19,9 +26,17 @@ interface UseExplorerKeyboardNavigationParams {
   toggleFolder: (folderId: string) => void;
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
+  canCreateFolder: boolean;
+  canDeleteFolder: boolean;
+  canDeleteCardSet: boolean;
+  canDeleteCard: boolean;
+  canDeleteDocument: boolean;
   handleCreateFolderAction: (parentId: string | null) => void;
   handleToolbarAddDocument: () => void;
-  handleDelete: (id: string, type: "folder" | "card") => void;
+  handleDelete: (
+    id: string,
+    type: "folder" | "cardSet" | "card" | "document",
+  ) => void;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
   setEditingName: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -55,6 +70,8 @@ export const useExplorerKeyboardNavigation = ({
   selectedFolderId,
   selectedItem,
   treeFolders,
+  treeCardSets,
+  documents,
   expandedFolders,
   treeRootRef,
   rootFolders,
@@ -63,6 +80,11 @@ export const useExplorerKeyboardNavigation = ({
   toggleFolder,
   onFolderSelect,
   onItemSelect,
+  canCreateFolder,
+  canDeleteFolder,
+  canDeleteCardSet,
+  canDeleteCard,
+  canDeleteDocument,
   handleCreateFolderAction,
   handleToolbarAddDocument,
   handleDelete,
@@ -178,6 +200,7 @@ export const useExplorerKeyboardNavigation = ({
       if (hasOpenModalDialog()) return;
 
       if (
+        canCreateFolder &&
         (e.ctrlKey || e.metaKey) &&
         e.shiftKey &&
         e.key.toLowerCase() === "n"
@@ -202,11 +225,12 @@ export const useExplorerKeyboardNavigation = ({
       if (!currentId) return;
 
       const isCard = selectedItem?.type === "card";
+      const isCardSet = selectedItem?.type === "cardSet";
       const isDoc = selectedItem?.type === "document";
 
       if (e.key === "F2") {
         e.preventDefault();
-        if (!selectedFolderId || isCard || isDoc) return;
+        if (!selectedFolderId || isCard || isDoc || isCardSet) return;
 
         const folder = treeFolders.find(
           (f) => getFolderId(f) === selectedFolderId,
@@ -217,15 +241,31 @@ export const useExplorerKeyboardNavigation = ({
       }
 
       if (e.key === "Delete" || e.key === "Backspace") {
-        e.preventDefault();
-
         if (isCard) {
+          if (!canDeleteCard) return;
+          e.preventDefault();
           void handleDelete(currentId, "card");
-        } else if (isDoc) {
-          /* ドキュメント削除は未実装 */
-        } else {
-          void handleDelete(currentId, "folder");
+          return;
         }
+
+        if (isCardSet) {
+          if (!canDeleteCardSet) return;
+          e.preventDefault();
+          void handleDelete(currentId, "cardSet");
+          return;
+        }
+
+        if (isDoc) {
+          if (!canDeleteDocument) return;
+          e.preventDefault();
+          void handleDelete(currentId, "document");
+          return;
+        }
+
+        if (!canDeleteFolder) return;
+        e.preventDefault();
+        void handleDelete(currentId, "folder");
+        return;
       }
 
       if (e.key === "Enter" && isCard) {
@@ -239,21 +279,28 @@ export const useExplorerKeyboardNavigation = ({
       }
     };
   }, [
-    selectedItem,
-    selectedFolderId,
-    treeFolders,
+    canCreateFolder,
+    canDeleteCard,
+    canDeleteCardSet,
+    canDeleteDocument,
+    canDeleteFolder,
+    documents,
     expandedFolders,
-    treeRootRef,
-    rootFolders,
     getChildFolders,
     getFolderItems,
-    toggleFolder,
-    onItemSelect,
-    onFolderSelect,
     handleCreateFolderAction,
     handleDelete,
     handleToolbarAddDocument,
+    onFolderSelect,
+    onItemSelect,
+    rootFolders,
+    selectedFolderId,
+    selectedItem,
     setEditingId,
     setEditingName,
+    toggleFolder,
+    treeCardSets,
+    treeFolders,
+    treeRootRef,
   ]);
 };
