@@ -990,7 +990,7 @@ export const CardEditorPane = ({
               : "h-full overflow-hidden",
           )}
           widthControl={widthControlProps}
-          overlayChildren={syncStatusOverlay}
+          overlayChildren={null}
           overlayTopInsetPx={overlayTopInsetPx}
           isMetaOpen={isMetaOpen}
           onToggleMetaOpen={hideMetaPanel ? undefined : actions.toggleMetaOpen}
