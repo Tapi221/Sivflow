@@ -47,25 +47,54 @@
 
   .ds-settings-panel__nav {
     display: grid;
+    gap: 1rem;
+  }
+
+  .ds-settings-panel__nav-section {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .ds-settings-panel__nav-section-label {
+    padding-inline: 0.75rem;
+    color: #94a3b8;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .ds-settings-panel__nav-section-items {
+    display: grid;
     gap: 0.125rem;
   }
 
   .ds-settings-panel .ds-settings-panel__nav-item {
+    display: flex;
+    align-items: center;
     width: 100%;
-    min-height: 2.5rem;
+    min-height: 2.625rem;
     justify-content: flex-start;
     gap: 0.75rem;
-    padding-inline: 0.75rem;
+    padding: 0.625rem 0.75rem;
     border: 1px solid transparent;
     border-radius: 0.875rem;
     background: transparent;
     color: var(--settings-muted);
     box-shadow: none;
+    text-align: left;
   }
 
   .ds-settings-panel .ds-settings-panel__nav-item:hover {
     background: var(--settings-hover);
     color: var(--settings-text);
+  }
+
+  .ds-settings-panel .ds-settings-panel__nav-item:focus-visible {
+    outline: none;
+    border-color: color-mix(in srgb, var(--settings-accent) 48%, white 52%);
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--settings-accent) 16%, transparent);
   }
 
   .ds-settings-panel .ds-settings-panel__nav-item.ds-nav-action--active {
@@ -87,6 +116,7 @@
   }
 
   .ds-settings-panel__nav-label {
+    min-width: 0;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.01em;
@@ -357,6 +387,10 @@
   }
 
   @media (max-width: 767px) {
+    .ds-settings-panel__nav {
+      gap: 0.85rem;
+    }
+
     .ds-settings-panel__section {
       padding: 0.95rem 1rem;
       border-radius: 1rem;
