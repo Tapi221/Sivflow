@@ -20,7 +20,6 @@ export const CardSetViewDesktopContent = ({
       isGlobalEditing={state.isGlobalEditing}
       flippedCardIds={state.flippedCardIds}
       cardsForPager={state.cardsForPager}
-      selectedCardIndex={state.safeCurrentIndex}
       safeCurrentIndex={state.safeCurrentIndex}
       settings={settings}
       currentDisplayMode={state.currentDisplayMode}
