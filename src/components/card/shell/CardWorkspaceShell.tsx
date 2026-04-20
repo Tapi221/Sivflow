@@ -1,7 +1,6 @@
 import { CardPaneWidthAdjuster } from "@/features/cardsetview/hooks/components/CardPaneWidthAdjuster";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight } from "@/ui/icons";
-import { overlayGlassIconButtonClassName } from "@/components/card/shell/overlaySurfaceClassNames";
+import { X } from "@/ui/icons";
 import type { CSSProperties, ReactNode, Ref } from "react";
 
 export type CardWorkspaceSurfaceVariant = "plain" | "dotted";
@@ -35,6 +34,24 @@ type MetaToggleLabels = {
 const DEFAULT_META_TOGGLE_LABELS: MetaToggleLabels = {
   open: "open meta panel",
   close: "close meta panel",
+};
+
+const MetaPanelToggleGlyph = ({ className }: { className?: string }) => {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3.5" y="4.5" width="17" height="15" rx="4.5" />
+      <path d="M8 8.25v7.5" />
+    </svg>
+  );
 };
 
 export type CardWorkspaceShellProps = {
@@ -90,8 +107,7 @@ export const CardWorkspaceShell = ({
   const showMetaToggle =
     !hideMetaToggle && typeof onToggleMetaOpen === "function";
 
-  const topLeftOffsetPx = overlayTopInsetPx + 8;
-  const topRightOffsetPx = overlayTopInsetPx + 12;
+  const topControlsOffsetPx = overlayTopInsetPx + 8;
 
   const surfaceClassName = WORKSPACE_SURFACE_CLASS_NAMES[surfaceVariant];
 
@@ -103,65 +119,61 @@ export const CardWorkspaceShell = ({
           shellClassName,
         )}
       >
-        {topLeftControl ? (
+        {topLeftControl || widthControl || showMetaToggle ? (
           <div
-            className="pointer-events-auto absolute left-3 z-30 flex"
-            style={{ top: `${topLeftOffsetPx}px` }}
+            className="pointer-events-none absolute left-3 z-30 flex items-center gap-2"
+            style={{ top: `${topControlsOffsetPx}px` }}
           >
-            {topLeftControl}
-          </div>
-        ) : null}
+            {topLeftControl ? (
+              <div className="pointer-events-auto flex">{topLeftControl}</div>
+            ) : null}
 
-        {widthControl ? (
-          <div
-            className={cn(
-              "pointer-events-auto absolute left-3 z-30 flex",
-              widthControlClassName,
-            )}
-            style={{ top: `${topLeftOffsetPx}px` }}
-          >
-            <CardPaneWidthAdjuster
-              modeLabel={widthControl.modeLabel}
-              value={widthControl.value}
-              min={widthControl.min}
-              max={widthControl.max}
-              defaultValue={widthControl.defaultValue}
-              onPreviewChange={widthControl.onPreviewChange}
-              onCommit={widthControl.onCommit}
-              onStepDown={widthControl.onStepDown}
-              onStepUp={widthControl.onStepUp}
-              onReset={widthControl.onReset}
-            />
+            {widthControl ? (
+              <div
+                className={cn(
+                  "pointer-events-auto flex",
+                  widthControlClassName,
+                )}
+              >
+                <CardPaneWidthAdjuster
+                  modeLabel={widthControl.modeLabel}
+                  value={widthControl.value}
+                  min={widthControl.min}
+                  max={widthControl.max}
+                  defaultValue={widthControl.defaultValue}
+                  onPreviewChange={widthControl.onPreviewChange}
+                  onCommit={widthControl.onCommit}
+                  onStepDown={widthControl.onStepDown}
+                  onStepUp={widthControl.onStepUp}
+                  onReset={widthControl.onReset}
+                />
+              </div>
+            ) : null}
+
+            {showMetaToggle ? (
+              <button
+                type="button"
+                className={cn(
+                  "pointer-events-auto grid h-10 w-10 place-items-center rounded-[12px] border border-[rgba(203,213,225,0.96)] bg-[linear-gradient(180deg,rgba(248,250,252,0.98)_0%,rgba(241,245,249,0.96)_100%)] text-slate-700 shadow-[0_8px_18px_rgba(15,23,42,0.10),inset_0_1px_0_rgba(255,255,255,0.96)] backdrop-blur-[10px] transition-colors duration-200 hover:bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,250,252,0.98)_100%)] hover:text-slate-900",
+                  isMetaOpen &&
+                    "border-[rgba(148,163,184,0.96)] bg-[linear-gradient(180deg,rgba(226,232,240,0.98)_0%,rgba(203,213,225,0.96)_100%)] text-slate-900 shadow-[0_10px_22px_rgba(15,23,42,0.14),inset_0_1px_0_rgba(255,255,255,0.96)]",
+                  metaToggleClassName,
+                )}
+                onClick={onToggleMetaOpen}
+                aria-label={isMetaOpen ? labels.close : labels.open}
+                aria-pressed={isMetaOpen}
+              >
+                {isMetaOpen ? (
+                  <X className="h-[18px] w-[18px]" />
+                ) : (
+                  <MetaPanelToggleGlyph className="h-[18px] w-[18px]" />
+                )}
+              </button>
+            ) : null}
           </div>
         ) : null}
 
         {overlayChildren}
-
-        {showMetaToggle ? (
-          <button
-            type="button"
-            className={cn(
-              "absolute z-20",
-              overlayGlassIconButtonClassName,
-              metaToggleClassName,
-            )}
-            style={{
-              top: `${topRightOffsetPx}px`,
-              right: isMetaOpen
-                ? "calc(var(--ui-panel-width) - var(--ui-space-3))"
-                : "var(--ui-space-1)",
-              transform: "none",
-            }}
-            onClick={onToggleMetaOpen}
-            aria-label={isMetaOpen ? labels.close : labels.open}
-          >
-            {isMetaOpen ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <ChevronLeft className="h-4 w-4" />
-            )}
-          </button>
-        ) : null}
 
         <div
           className={cn(
