@@ -1,0 +1,10 @@
+{
+  "base_commit": "78fad7fcb6f3b9d29ebdb818a2fea0633e71f05b",
+  "files": [
+    {
+      "path": "src/components/folder/layout/TreeViewLayout.tsx",
+      "sha256": "f6e3e2741904a19e10546d7fbd80ff486b88e60c31ab16620e0755e4bfa0cbd2",
+      "purpose": "Root-level folder creation behavior fix with action/breadcrumb context separation cleanup"
+    }
+  ]
+}
