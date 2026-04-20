@@ -10,7 +10,11 @@ describe("mergeTitleBarBreadcrumbs", () => {
       { label: "カード閲覧", to: undefined },
     ];
     const extraCrumbs: BreadcrumbCrumb[] = [
-      { label: "React", to: "/folders?folderId=folder-react", folderId: "folder-react" },
+      {
+        label: "React",
+        to: "/folders?folderId=folder-react",
+        folderId: "folder-react",
+      },
       {
         label: "Hooks",
         to: "/folders?folderId=folder-hooks",
@@ -26,6 +30,37 @@ describe("mergeTitleBarBreadcrumbs", () => {
 
     const merged = mergeTitleBarBreadcrumbs({
       pathname: "/CardSetView",
+      baseCrumbs,
+      extraCrumbs,
+    });
+
+    expect(merged[1]).toEqual({
+      label: "フォルダ一覧",
+      to: "/folders?folderId=folder-hooks",
+    });
+  });
+
+  it("folders 画面でもフォルダ一覧パンくずは現在フォルダに戻る", () => {
+    const baseCrumbs: BreadcrumbCrumb[] = [
+      { label: "ホーム", to: "/folders?home=1" },
+      { label: "フォルダ一覧", to: undefined },
+    ];
+    const extraCrumbs: BreadcrumbCrumb[] = [
+      {
+        label: "React",
+        to: "/folders?folderId=folder-react",
+        folderId: "folder-react",
+      },
+      {
+        label: "Hooks",
+        to: "/folders?folderId=folder-hooks",
+        folderId: "folder-hooks",
+      },
+      { label: "useEffect 集", to: undefined },
+    ];
+
+    const merged = mergeTitleBarBreadcrumbs({
+      pathname: "/folders",
       baseCrumbs,
       extraCrumbs,
     });
