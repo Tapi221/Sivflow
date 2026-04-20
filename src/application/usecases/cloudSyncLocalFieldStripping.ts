@@ -20,10 +20,23 @@ const stripAssetLocalFields = (
   return record;
 };
 
+const stripCardLocalFields = (
+  record: Record<string, unknown>,
+): Record<string, unknown> => {
+  delete record.lastSyncedAt;
+  delete record.syncState;
+  delete record.lastSyncedByDeviceId;
+  return record;
+};
+
 export const stripCloudSyncLocalOnlyFields = (
   type: string,
   record: Record<string, unknown>,
 ): Record<string, unknown> => {
+  if (type === "card") {
+    return stripCardLocalFields(record);
+  }
+
   if (type === "document") {
     return stripDocumentLocalFields(record);
   }

@@ -174,6 +174,18 @@ const preserveLocalOnlyFields = (
 ) => {
   if (!isRecord(merged)) return merged;
 
+  if (type === "card" && isRecord(localData)) {
+    if ("lastSyncedAt" in localData) {
+      merged.lastSyncedAt = localData.lastSyncedAt;
+    }
+    if ("syncState" in localData) {
+      merged.syncState = localData.syncState;
+    }
+    if ("lastSyncedByDeviceId" in localData) {
+      merged.lastSyncedByDeviceId = localData.lastSyncedByDeviceId;
+    }
+  }
+
   if (type === "document" && isRecord(localData)) {
     if (localData.localFileId) merged.localFileId = localData.localFileId;
     if (localData.blobUrl) merged.blobUrl = localData.blobUrl;
@@ -191,6 +203,36 @@ const preserveLocalOnlyFields = (
   }
 
   return merged;
+};
+
+const getCurrentDeviceId = () => {
+  try {
+    const deviceId = localStorage.getItem("deviceId");
+    return typeof deviceId === "string" && deviceId.trim().length > 0
+      ? deviceId
+      : null;
+  } catch {
+    return null;
+  }
+};
+
+const applyLocalCardSyncMetadata = (
+  record: unknown,
+  {
+    syncedAt,
+    syncState,
+  }: {
+    syncedAt: Date;
+    syncState: Card["syncState"];
+  },
+) => {
+  if (!isRecord(record)) return record;
+
+  record.lastSyncedAt = syncedAt;
+  record.syncState = syncState ?? "synced";
+  record.lastSyncedByDeviceId = getCurrentDeviceId();
+
+  return record;
 };
 
 const repairMissingCardSetsAfterSync = async (
@@ -397,6 +439,10 @@ export class SyncServiceV2 implements ISyncService {
     const startTime = performance.now();
     const successIds: string[] = [];
     const failedIds: string[] = [];
+    const syncedCardIds = new Set<string>();
+    const failedCardIds = new Set<string>();
+    const conflictedCardIds = new Set<string>();
+    const syncedAt = new Date();
 
     for (const task of tasks) {
       try {
@@ -416,8 +462,14 @@ export class SyncServiceV2 implements ISyncService {
 
           if (result.successIds.length > 0) {
             successIds.push(task.id);
+            if (task.entity === "card") {
+              syncedCardIds.add(payloadId);
+            }
           } else {
             failedIds.push(task.id);
+            if (task.entity === "card") {
+              failedCardIds.add(payloadId);
+            }
           }
         } else if (task.type === "download") {
           const { changes } = await this.cloudAdapter.pullDiff(0);
@@ -440,6 +492,12 @@ export class SyncServiceV2 implements ISyncService {
           errorMessage.includes("conflict") ||
           errorMessage.includes("version_mismatch")
         ) {
+          if (task.entity === "card") {
+            const payloadId = getPayloadId(task.payload);
+            if (payloadId) {
+              conflictedCardIds.add(payloadId);
+            }
+          }
           this.telemetry.log(
             "warn",
             "Fatal sync conflict detected. Triggering self-healing full resync.",
@@ -449,6 +507,12 @@ export class SyncServiceV2 implements ISyncService {
         }
 
         failedIds.push(task.id);
+        if (task.entity === "card") {
+          const payloadId = getPayloadId(task.payload);
+          if (payloadId) {
+            failedCardIds.add(payloadId);
+          }
+        }
       }
     }
 
@@ -459,6 +523,38 @@ export class SyncServiceV2 implements ISyncService {
 
     if (successIds.length > 0) {
       await this.queueManager.complete(successIds);
+    }
+
+    if (syncedCardIds.size > 0) {
+      await Promise.all(
+        [...syncedCardIds].map((id) =>
+          this.localDB.updateCardById(id, {
+            lastSyncedAt: syncedAt,
+            syncState: "synced",
+            lastSyncedByDeviceId: getCurrentDeviceId(),
+          }),
+        ),
+      );
+    }
+
+    if (conflictedCardIds.size > 0) {
+      await Promise.all(
+        [...conflictedCardIds].map((id) =>
+          this.localDB.updateCardById(id, {
+            syncState: "conflict",
+          }),
+        ),
+      );
+    }
+
+    if (failedCardIds.size > 0) {
+      await Promise.all(
+        [...failedCardIds].map((id) =>
+          this.localDB.updateCardById(id, {
+            syncState: "error",
+          }),
+        ),
+      );
     }
 
     if (failedIds.length > 0) {
@@ -512,6 +608,7 @@ export class SyncServiceV2 implements ISyncService {
 
   private async applyRemoteChanges(changes: SyncChange[]): Promise<void> {
     const allFolders = await this.localDB.folders.toArray();
+    const syncedAt = new Date();
 
     for (const change of changes) {
       const changeType = typeof change.type === "string" ? change.type : "";
@@ -573,7 +670,15 @@ export class SyncServiceV2 implements ISyncService {
       const localData = await this.localDB.getItem(table, localLookupId);
 
       if (!localData) {
-        await this.localDB.upsert(table, remoteData as never, true);
+        const nextRecord =
+          changeType === "card"
+            ? applyLocalCardSyncMetadata(remoteData, {
+                syncedAt,
+                syncState: "synced",
+              })
+            : remoteData;
+
+        await this.localDB.upsert(table, nextRecord as never, true);
         continue;
       }
 
@@ -588,6 +693,14 @@ export class SyncServiceV2 implements ISyncService {
         localData,
         merged,
       );
+
+      const nextRecord =
+        changeType === "card"
+          ? applyLocalCardSyncMetadata(mergedWithLocalFields, {
+              syncedAt,
+              syncState: conflict ? "conflict" : "synced",
+            })
+          : mergedWithLocalFields;
 
       if (conflict) {
         this.telemetry.log(
@@ -611,7 +724,7 @@ export class SyncServiceV2 implements ISyncService {
         await this.localDB.putConflict(storedConflict);
       }
 
-      await this.localDB.upsert(table, mergedWithLocalFields as never, true);
+      await this.localDB.upsert(table, nextRecord as never, true);
     }
 
     if (shouldRepairCardSets(changes)) {
@@ -634,6 +747,9 @@ export class SyncServiceV2 implements ISyncService {
 
     try {
       const diff = await this.cloudAdapter.pullDiff(0);
+      const resyncedAt = diff.serverTime
+        ? new Date(diff.serverTime)
+        : new Date();
 
       this.telemetry.log("info", "Pulling all data for resync", {
         changesCount: diff.changes.length,
@@ -657,9 +773,17 @@ export class SyncServiceV2 implements ISyncService {
             data: change.data,
           });
 
+          const nextRecord =
+            changeType === "card"
+              ? applyLocalCardSyncMetadata(data, {
+                  syncedAt: resyncedAt,
+                  syncState: "synced",
+                })
+              : data;
+
           await this.localDB.putSyncRecord(
             tableName as (typeof FULL_RESYNC_TABLES)[number],
-            data as never,
+            nextRecord as never,
           );
         }
       });

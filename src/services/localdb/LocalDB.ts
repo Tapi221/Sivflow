@@ -677,6 +677,15 @@ export class LocalDB extends Dexie {
 
     await this.syncQueue.add(task);
 
+    if (tableName === "cards" && type === "upload") {
+      await this.cards.update(
+        payloadId,
+        {
+          syncState: "pending",
+        } satisfies Partial<Card>,
+      );
+    }
+
     if (this.syncTrigger) {
       console.log("[Diagnostic] enqueueSync -> triggering sync callback");
       setTimeout(() => {
