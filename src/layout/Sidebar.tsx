@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import "./Sidebar.css";
 import { SidebarNavIcon } from "./sidebarNavItem";
 import { getSidebarNavItemClassName } from "./sidebarNavItem.utils";
+import { SidebarSyncStatus } from "./SidebarSyncStatus";
 
 type NavItem = {
   to: string;
@@ -319,7 +320,10 @@ export const Sidebar = () => {
           </SidebarNavIcon>
           <span className="sidebar__nav-label">設定</span>
         </button>
+
+        <SidebarSyncStatus />
       </div>
     </aside>
   );
 };
+
