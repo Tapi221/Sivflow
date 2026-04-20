@@ -101,56 +101,61 @@ export const TreeViewTabContent = ({
   switch (explorerTab) {
     case "recent":
       return (
-        <RecentPanel
-          recent={recent}
-          folders={folders}
-          cards={cards}
-          documents={documents}
-          onFolderSelect={onFolderSelect}
-          onItemSelect={onItemSelect}
-          onClearRecent={onClearRecent}
-        />
+        <div className="h-full w-full min-w-0">
+          <RecentPanel
+            recent={recent}
+            folders={folders}
+            cards={cards}
+            documents={documents}
+            onFolderSelect={onFolderSelect}
+            onItemSelect={onItemSelect}
+            onClearRecent={onClearRecent}
+          />
+        </div>
       );
 
     case "explorer":
     default:
       return (
-        <FolderTreeWithCards
-          sidebarDisplayMode={sidebarDisplayMode}
-          folders={folders as unknown as FolderTreeNode[]}
-          cards={filteredCards}
-          cardSets={cardSets}
-          documents={filteredDocuments}
-          selectedFolderId={selectedFolderId}
-          selectedItem={selectedItem}
-          onFolderSelect={onFolderSelect}
-          onItemSelect={onItemSelect}
-          onCreateFolder={onCreateFolder}
-          onUpdateFolder={onUpdateFolder}
-          onDeleteFolder={onDeleteFolder}
-          onCreateCardSet={onCreateCardSet}
-          onUpdateCardSet={onUpdateCardSet}
-          onDeleteCardSet={onDeleteCardSet}
-          onCreateCard={onCreateCard}
-          onUpdateCard={onUpdateCard}
-          onDeleteCard={onDeleteCard}
-          onUpdateDocument={onUpdateDocument}
-          onDeleteDocument={onDeleteDocument}
-          moveCardToSet={moveCardToSet}
-          moveCardSetToFolder={moveCardSetToFolder}
-          moveDocumentToFolder={moveDocumentToFolder}
-          reorderCardsInCardSet={reorderCardsInCardSet}
-          selectedCardSetId={selectedCardSetId}
-          onSelectCardSet={onSelectCardSet}
-          isFiltering={isFiltering}
-          onRegisterCreateFolderTrigger={onRegisterCreateFolderTrigger}
-          onRegisterCreateCardSetTrigger={onRegisterCreateCardSetTrigger}
-          onRegisterDocumentTrigger={onRegisterDocumentTrigger}
-          navigateToSectionListToken={navigateToSectionListToken}
-          folderSelectionNonce={folderSelectionNonce}
-          onSectionListModeChange={onSectionListModeChange}
-          onHeaderFolderIdChange={onHeaderFolderIdChange}
-        />
+        <div className="h-full w-full min-w-0">
+          <FolderTreeWithCards
+            className="h-full w-full min-w-0"
+            sidebarDisplayMode={sidebarDisplayMode}
+            folders={folders as unknown as FolderTreeNode[]}
+            cards={filteredCards}
+            cardSets={cardSets}
+            documents={filteredDocuments}
+            selectedFolderId={selectedFolderId}
+            selectedItem={selectedItem}
+            onFolderSelect={onFolderSelect}
+            onItemSelect={onItemSelect}
+            onCreateFolder={onCreateFolder}
+            onUpdateFolder={onUpdateFolder}
+            onDeleteFolder={onDeleteFolder}
+            onCreateCardSet={onCreateCardSet}
+            onUpdateCardSet={onUpdateCardSet}
+            onDeleteCardSet={onDeleteCardSet}
+            onCreateCard={onCreateCard}
+            onUpdateCard={onUpdateCard}
+            onDeleteCard={onDeleteCard}
+            onUpdateDocument={onUpdateDocument}
+            onDeleteDocument={onDeleteDocument}
+            moveCardToSet={moveCardToSet}
+            moveCardSetToFolder={moveCardSetToFolder}
+            moveDocumentToFolder={moveDocumentToFolder}
+            reorderCardsInCardSet={reorderCardsInCardSet}
+            selectedCardSetId={selectedCardSetId}
+            onSelectCardSet={onSelectCardSet}
+            isFiltering={isFiltering}
+            onRegisterCreateFolderTrigger={onRegisterCreateFolderTrigger}
+            onRegisterCreateCardSetTrigger={onRegisterCreateCardSetTrigger}
+            onRegisterDocumentTrigger={onRegisterDocumentTrigger}
+            navigateToSectionListToken={navigateToSectionListToken}
+            folderSelectionNonce={folderSelectionNonce}
+            onSectionListModeChange={onSectionListModeChange}
+            onHeaderFolderIdChange={onHeaderFolderIdChange}
+          />
+        </div>
       );
   }
 };

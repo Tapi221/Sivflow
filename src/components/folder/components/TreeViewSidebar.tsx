@@ -7,7 +7,9 @@ import React from "react";
 interface TreeViewSidebarProps {
   sidebarRef: React.RefObject<HTMLDivElement | null>;
   contentScrollRef: React.RefObject<HTMLDivElement | null>;
+  sidebarWidth: number;
   isSidebarOpen: boolean;
+  isMobile: boolean;
   isResizing: boolean;
   showMobileDetail: boolean;
   explorerTab: ExplorerTab;
@@ -20,7 +22,7 @@ interface TreeViewSidebarProps {
   onCreateCardSet: () => void;
   onAddDocument: () => void;
   onBulkImport: () => void;
-  onStartResizing: (e: React.PointerEvent) => void;
+  onStartResizing: (event: React.PointerEvent) => void;
   children: React.ReactNode;
   canCreateCardSet?: boolean;
   canAddDocuments?: boolean;
@@ -31,7 +33,9 @@ interface TreeViewSidebarProps {
 export const TreeViewSidebar = ({
   sidebarRef,
   contentScrollRef,
+  sidebarWidth,
   isSidebarOpen,
+  isMobile,
   isResizing,
   showMobileDetail,
   explorerTab,
@@ -54,19 +58,27 @@ export const TreeViewSidebar = ({
   return (
     <div
       ref={sidebarRef}
-      style={{ backgroundColor: "var(--sidebar-bg)" }}
+      data-testid="explorer-sidebar"
+      style={{
+        backgroundColor: "var(--sidebar-bg)",
+        ...(isMobile
+          ? {}
+          : {
+              width: isSidebarOpen ? `${sidebarWidth}px` : "0px",
+            }),
+      }}
       className={cn(
         "relative z-10 flex-col border-r border-[var(--sidebar-border,#e3e6ea)] group/sidebar select-none",
         "shrink-0",
         showMobileDetail ? "hidden md:flex" : "flex",
         "transition-none",
         isResizing && "will-change-[width]",
-        "w-[100dvw] max-w-[100dvw] md:w-auto md:max-w-none",
+        "w-[100dvw] max-w-[100dvw] md:max-w-none",
         !isSidebarOpen &&
-          "md:w-0 md:border-0 md:overflow-hidden md:shadow-none",
+          "md:border-0 md:overflow-hidden md:shadow-none",
       )}
     >
-      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
+      <div className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden">
         <div className="shrink-0">
           <ExplorerTabs
             activeTab={explorerTab}
@@ -100,7 +112,7 @@ export const TreeViewSidebar = ({
         </div>
       </div>
 
-      {isSidebarOpen && (
+      {isSidebarOpen && !isMobile ? (
         <div
           className={cn(
             "absolute top-0 -right-[3px] z-50 hidden h-full w-1.5 cursor-col-resize select-none outline-none md:block group/resize",
@@ -114,7 +126,7 @@ export const TreeViewSidebar = ({
           tabIndex={0}
           style={{ touchAction: "none" }}
         />
-      )}
+      ) : null}
     </div>
   );
 };

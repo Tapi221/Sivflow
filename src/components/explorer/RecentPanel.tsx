@@ -110,10 +110,12 @@ export const RecentPanel = ({
 
   if (validRecent.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full py-12 text-[#6E6E80]">
-        <Clock className="w-10 h-10 mb-3 opacity-30" />
-        <p className="text-sm font-medium">履歴がありません</p>
-        <p className="text-xs mt-1">
+      <div className="flex h-full w-full min-w-0 flex-col items-center justify-center px-4 py-12 text-center text-[#6E6E80]">
+        <Clock className="mb-3 h-10 w-10 shrink-0 opacity-30" />
+        <p className="max-w-full break-words text-sm font-medium">
+          履歴がありません
+        </p>
+        <p className="mt-1 max-w-full break-words text-xs">
           フォルダやカードを開くと履歴に追加されます
         </p>
       </div>
@@ -121,16 +123,16 @@ export const RecentPanel = ({
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100">
-        <span className="text-xs font-medium text-[#6E6E80]">
+    <div className="flex h-full w-full min-w-0 flex-col">
+      <div className="flex min-w-0 items-center justify-between gap-2 border-b border-slate-100 px-3 py-2">
+        <span className="truncate text-xs font-medium text-[#6E6E80]">
           最近開いたアイテム
         </span>
         <button
           onClick={onClearRecent}
-          className="text-xs text-[#6E6E80] hover:text-red-500 flex items-center gap-1 transition-colors"
+          className="flex shrink-0 items-center gap-1 text-xs text-[#6E6E80] transition-colors hover:text-red-500"
         >
-          <Trash2 className="w-3 h-3" />
+          <Trash2 className="h-3 w-3" />
           <span>クリア</span>
         </button>
       </div>
@@ -151,7 +153,7 @@ export const RecentPanel = ({
                 left={
                   <Icon
                     className={cn(
-                      "sidebar-icon w-4 h-4 shrink-0 mr-2",
+                      "sidebar-icon mr-2 h-4 w-4 shrink-0",
                       item.type === "folder"
                         ? "text-[#E8A858]"
                         : item.type === "document"
@@ -162,7 +164,7 @@ export const RecentPanel = ({
                 }
                 title={info.name}
                 right={
-                  <span className="text-[10px] text-[#6E6E80] shrink-0">
+                  <span className="shrink-0 text-[10px] text-[#6E6E80]">
                     {getRelativeTime(item.ts)}
                   </span>
                 }
