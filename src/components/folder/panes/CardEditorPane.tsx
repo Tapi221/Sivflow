@@ -755,54 +755,52 @@ export const CardEditorPane = ({
       }
     : null;
 
-  const metaPanelNode =
-    !hideMetaPanel && isMetaOpen ? (
-      <CardMetaPanel
-        card={panelCardEntity}
-        isEditingCard={isEditing}
-        reviewLogs={panelCardEntity?.reviewLogs ?? []}
-        onAddReviewLog={({ reviewedAt, rating, durationMinutes }) =>
-          metaPanel.onAddReviewLog({
-            reviewedAt,
-            rating,
-            durationMinutes,
-          })
-        }
-        onUpdateLatestReviewLog={({
+  const metaPanelNode = hideMetaPanel ? null : (
+    <CardMetaPanel
+      isVisible={isMetaOpen}
+      card={panelCardEntity}
+      isEditingCard={isEditing}
+      reviewLogs={panelCardEntity?.reviewLogs ?? []}
+      onAddReviewLog={({ reviewedAt, rating, durationMinutes }) =>
+        metaPanel.onAddReviewLog({
+          reviewedAt,
+          rating,
+          durationMinutes,
+        })
+      }
+      onUpdateLatestReviewLog={({
+        reviewLogs,
+        reviewedAt,
+        rating,
+        durationMinutes,
+      }) =>
+        metaPanel.onUpdateLatestReviewLog({
           reviewLogs,
           reviewedAt,
           rating,
           durationMinutes,
-        }) =>
-          metaPanel.onUpdateLatestReviewLog({
-            reviewLogs,
-            reviewedAt,
-            rating,
-            durationMinutes,
-          })
-        }
-        onDeleteLatestReviewLog={metaPanel.onDeleteLatestReviewLog}
-        onUpdateReviewLogDuration={metaPanel.onUpdateReviewLogDuration}
-        onFlushAutosave={() => {
-          void metaPanel.onFlushAutosave();
-        }}
-        onTitleInputChange={metaPanel.onTitleInputChange}
-        onUpdateTags={metaPanel.onUpdateTags}
-        onToggleDraft={metaPanel.onToggleDraft}
-        onUpdateTitle={metaPanel.onUpdateTitle}
-        delayBonusEnabled={settings?.delayBonusEnabled ?? false}
-        reviewStartNextDay={settings?.reviewStartNextDay ?? true}
-        syncStatus={{
-          lastSyncedAtMs: syncStatus.lastSyncedAtMs,
-          hasError: syncStatus.hasError,
-          isRetrying: syncStatus.isRetrying,
-          canRetry: syncStatus.retry != null,
-          onRetry: syncStatus.retry ?? undefined,
-        }}
-      />
-    ) : null;
-
-  const syncStatusOverlay = null;
+        })
+      }
+      onDeleteLatestReviewLog={metaPanel.onDeleteLatestReviewLog}
+      onUpdateReviewLogDuration={metaPanel.onUpdateReviewLogDuration}
+      onFlushAutosave={() => {
+        void metaPanel.onFlushAutosave();
+      }}
+      onTitleInputChange={metaPanel.onTitleInputChange}
+      onUpdateTags={metaPanel.onUpdateTags}
+      onToggleDraft={metaPanel.onToggleDraft}
+      onUpdateTitle={metaPanel.onUpdateTitle}
+      delayBonusEnabled={settings?.delayBonusEnabled ?? false}
+      reviewStartNextDay={settings?.reviewStartNextDay ?? true}
+      syncStatus={{
+        lastSyncedAtMs: syncStatus.lastSyncedAtMs,
+        hasError: syncStatus.hasError,
+        isRetrying: syncStatus.isRetrying,
+        canRetry: syncStatus.retry != null,
+        onRetry: syncStatus.retry ?? undefined,
+      }}
+    />
+  );
 
   const questionEditorPane = (
     <EditorSidePane

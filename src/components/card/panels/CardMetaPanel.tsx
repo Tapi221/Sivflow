@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
-import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import { collection, getDocs, limit, query, where } from "firebase/firestore";
 import {
   memo,
   useEffect,
@@ -68,6 +68,7 @@ type CardMetaSyncStatus = {
 
 type CardMetaPanelProps = {
   isLoading?: boolean;
+  isVisible?: boolean;
   card: Card | null;
   isEditingCard?: boolean;
   reviewLogs?: ReviewLog[];
@@ -431,6 +432,7 @@ const areCardMetaPanelPropsEqual = (
   next: CardMetaPanelProps,
 ): boolean =>
   prev.isLoading === next.isLoading &&
+  prev.isVisible === next.isVisible &&
   areCardMetaCardsEqual(prev.card, next.card) &&
   prev.isEditingCard === next.isEditingCard &&
   prev.reviewLogs === next.reviewLogs &&
@@ -455,6 +457,7 @@ const areCardMetaPanelPropsEqual = (
 
 const CardMetaPanelInner = ({
   isLoading = false,
+  isVisible = false,
   card,
   isEditingCard = false,
   reviewLogs = [],
@@ -478,27 +481,41 @@ const CardMetaPanelInner = ({
   }
 
   const isCalendarMode = mode === "calendar";
+  const [hasActivatedHeavySections, setHasActivatedHeavySections] = useState(
+    Boolean(isVisible),
+  );
+
+  useEffect(() => {
+    setHasActivatedHeavySections(Boolean(isVisible));
+  }, [card?.id]);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    setHasActivatedHeavySections(true);
+  }, [isVisible]);
+
+  const shouldRenderHeavySections =
+    !isCalendarMode && hasActivatedHeavySections;
+
   const infoRowClass =
     "ds-editor-pane__info-row h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-[length:var(--meta-font-size)]";
   const actionRowClass =
     "h-[var(--meta-row-px)] min-h-[var(--meta-row-px)] flex items-center";
   const sectionTitleClass =
     "ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold uppercase";
-  const inlineInputClass =
-    "ds-editor-pane__inline-input h-[var(--meta-row-px)] rounded-md px-2 text-[length:var(--surface-placeholder-font-size)] leading-[var(--meta-row-px)]";
-  const compactInlineInputClass =
-    "ds-editor-pane__inline-input h-7 rounded px-1 text-[11px] outline-none";
   const mutedTextClass = "ds-editor-pane__muted-text";
   const syncStatusText = syncStatus?.hasError
     ? "同期失敗"
     : syncStatus?.isRetrying
       ? "再試行中..."
       : formatLastSyncedAt(syncStatus?.lastSyncedAtMs ?? null);
+
   const getDurationInputWidthCh = (value: string): string => {
     const digits = value.trim().length;
     const widthCh = Math.min(6, Math.max(1, digits));
     return `calc(${widthCh}ch + 0.4rem)`;
   };
+
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
   const legacyCard = asRecord(card);
@@ -562,40 +579,33 @@ const CardMetaPanelInner = ({
   }, [card?.id]);
 
   const shouldLoadStudyLogs =
-    reviewLogs.length === 0 && canPersistReview && Boolean(currentUser?.uid);
+    shouldRenderHeavySections &&
+    reviewLogs.length === 0 &&
+    canPersistReview &&
+    Boolean(currentUser?.uid);
 
   const localStudyLogs = useLiveQuery(async () => {
     if (!shouldLoadStudyLogs || !currentUser?.uid || !card?.id) return [];
     const db = await getLocalDb(currentUser.uid);
-    const logs = await db.table("studyLogs").toArray();
-    return logs.filter((log) => {
-      const record = asRecord(log);
-      const logCardId = record?.cardId ?? record?.card_id;
-      return typeof logCardId === "string" && logCardId === card.id;
-    });
+    return await db.table("studyLogs").where("cardId").equals(card.id).toArray();
   }, [shouldLoadStudyLogs, currentUser?.uid, card?.id]);
 
-  const { data: remoteStudyLogs = [] } = useQuery({
-    queryKey: ["card-meta-study-logs", currentUser?.uid, card?.id],
-    queryFn: async () => {
-      if (!currentUser?.uid || !card?.id || !firestoreDb) return [];
-      const q = query(
-        collection(firestoreDb, "studyLogs"),
-        where("userId", "==", currentUser.uid),
-        orderBy("createdAt", "desc"),
-      );
-      const snapshot = await getDocs(q);
-      return snapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((log) => {
-          const record = asRecord(log);
-          const logCardId = record?.cardId ?? record?.card_id;
-          return typeof logCardId === "string" && logCardId === card.id;
-        })
-        .slice(0, 200);
-    },
-    enabled: shouldLoadStudyLogs && Boolean(firestoreDb),
-  });
+  const { data: remoteStudyLogs = [], isPending: isRemoteStudyLogsPending } =
+    useQuery({
+      queryKey: ["card-meta-study-logs", currentUser?.uid, card?.id],
+      queryFn: async () => {
+        if (!currentUser?.uid || !card?.id || !firestoreDb) return [];
+        const q = query(
+          collection(firestoreDb, "studyLogs"),
+          where("userId", "==", currentUser.uid),
+          where("cardId", "==", card.id),
+          limit(200),
+        );
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      },
+      enabled: shouldLoadStudyLogs && Boolean(firestoreDb),
+    });
 
   const derivedResistanceScore = useMemo(() => {
     if (!card) return null;
@@ -716,14 +726,15 @@ const CardMetaPanelInner = ({
 
     return [];
   }, [mergedStoredLogs, normalizedReviewCount, syntheticSummaryLogs]);
+
   const latestEditableReview = editableReviewLogs.at(-1) ?? null;
   const previousEditableReview =
     editableReviewLogs.length > 1 ? (editableReviewLogs.at(-2) ?? null) : null;
   const canManageLatestReview = Boolean(
     latestEditableReview &&
-    onUpdateLatestReviewLog &&
-    onDeleteLatestReviewLog &&
-    canPersistReview,
+      onUpdateLatestReviewLog &&
+      onDeleteLatestReviewLog &&
+      canPersistReview,
   );
 
   const latestReview = safeLogs.at(-1);
@@ -1262,6 +1273,11 @@ const CardMetaPanelInner = ({
       });
   };
 
+  const isHeavyDataHydrating =
+    shouldLoadStudyLogs &&
+    normalizedCardReviewLogs.length === 0 &&
+    (localStudyLogs === undefined || isRemoteStudyLogsPending);
+
   return (
     <EmptyMetaPanel>
       <MetaPanelLeadSection>
@@ -1417,406 +1433,356 @@ const CardMetaPanelInner = ({
         )}
       </MetaPanelLeadSection>
 
-      {!isCalendarMode && (
-        <section>
-          <div className="mt-3 space-y-2"></div>
-          <RatingCountTiles
-            counts={distribution20}
-            compact
-            disableHover
-            singleRow
-            surface="concave"
-            className="mt-3"
-          />
-        </section>
-      )}
-
-      {!isCalendarMode && (
-        <section>
-          {currentResistanceScore !== null && (
-            <div className="ds-editor-pane__stats mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between px-2">
-              <span
-                className="text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)]"
-                style={{
-                  color:
-                    "var(--meta-panel-text-muted, var(--sidebar-text-muted))",
-                }}
-              >
-                現在の耐性スコア
-              </span>
-              <span className="text-[length:var(--meta-font-size)] font-semibold leading-[var(--meta-row-px)] tabular-nums">
-                {currentResistanceScore}%
-              </span>
-            </div>
-          )}
-          <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
-            <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
-              耐性スコア推移
-            </h3>
-            <div className="ds-segmented-control">
-              {(["7d", "30d", "all"] as const).map((p) => (
-                <SurfaceButton
-                  key={p}
-                  surface={period === p ? "convexActive" : "concave"}
-                  size="xs"
-                  onClick={() => setPeriod(p)}
-                >
-                  {p === "all" ? "全期間" : p === "7d" ? "直近7件" : "直近30件"}
-                </SurfaceButton>
-              ))}
-            </div>
-          </div>
-          <div className="ds-editor-pane__chart relative mt-3 overflow-hidden p-0">
-            <div
-              className="pointer-events-none absolute inset-x-0 top-0 h-24 opacity-90"
-              style={{
-                background:
-                  "linear-gradient(180deg, color-mix(in srgb, var(--meta-panel-accent-soft) 72%, white 28%) 0%, transparent 100%)",
-              }}
+      {shouldRenderHeavySections && !isHeavyDataHydrating ? (
+        <>
+          <section>
+            <div className="mt-3 space-y-2"></div>
+            <RatingCountTiles
+              counts={distribution20}
+              compact
+              disableHover
+              singleRow
+              surface="concave"
+              className="mt-3"
             />
-            {chartSummary && (
-              <div
-                className="relative z-10 flex items-start justify-between gap-3 border-b px-3 pb-2 pt-3"
-                style={{
-                  borderColor:
-                    "color-mix(in srgb, var(--meta-panel-border) 72%, transparent)",
-                }}
-              >
-                <div className="min-w-0">
-                  <p
-                    className={`text-[10px] font-semibold tracking-[0.16em] ${mutedTextClass}`}
-                  >
-                    推移サマリー
-                  </p>
-                  <div className="mt-1 flex items-end gap-2">
-                    <span className="text-[22px] font-semibold leading-none tabular-nums">
-                      {chartSummary.latestScore}%
-                    </span>
-                    <span
-                      className="rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums"
-                      style={{
-                        background:
-                          chartSummary.delta === null
-                            ? "color-mix(in srgb, var(--meta-panel-surface) 88%, white 12%)"
-                            : chartSummary.delta >= 0
-                              ? "color-mix(in srgb, var(--meta-panel-accent) 14%, white 86%)"
-                              : "color-mix(in srgb, var(--ds-semantic-color-status-danger) 12%, white 88%)",
-                        color:
-                          chartSummary.delta !== null && chartSummary.delta < 0
-                            ? "var(--ds-semantic-color-status-danger)"
-                            : "var(--meta-panel-accent, #0f766e)",
-                      }}
-                    >
-                      {chartTrendLabel}
-                    </span>
-                  </div>
-                </div>
-                <div
-                  className={`shrink-0 text-right text-[10px] leading-4 ${mutedTextClass}`}
+          </section>
+
+          <section>
+            {currentResistanceScore !== null && (
+              <div className="ds-editor-pane__stats mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between px-2">
+                <span
+                  className="text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)]"
+                  style={{
+                    color:
+                      "var(--meta-panel-text-muted, var(--sidebar-text-muted))",
+                  }}
                 >
-                  <div>
-                    {chartSummary.minScore === chartSummary.maxScore
-                      ? `スコア ${chartSummary.maxScore}%`
-                      : `${chartSummary.minScore}% - ${chartSummary.maxScore}%`}
-                  </div>
-                  <div>
-                    {period === "all"
-                      ? "全期間"
-                      : period === "7d"
-                        ? "直近7件"
-                        : "直近30件"}
-                  </div>
-                </div>
+                  現在の耐性スコア
+                </span>
+                <span className="text-[length:var(--meta-font-size)] font-semibold leading-[var(--meta-row-px)] tabular-nums">
+                  {currentResistanceScore}%
+                </span>
               </div>
             )}
-            <div className="relative z-10 h-44 w-full px-2 pb-2 pt-2">
-              {chartData.length === 0 ? (
+            <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
+              <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
+                耐性スコア推移
+              </h3>
+              <div className="ds-segmented-control">
+                {(["7d", "30d", "all"] as const).map((nextPeriod) => (
+                  <SurfaceButton
+                    key={nextPeriod}
+                    surface={
+                      period === nextPeriod ? "convexActive" : "concave"
+                    }
+                    size="xs"
+                    onClick={() => setPeriod(nextPeriod)}
+                  >
+                    {nextPeriod === "all"
+                      ? "全期間"
+                      : nextPeriod === "7d"
+                        ? "直近7件"
+                        : "直近30件"}
+                  </SurfaceButton>
+                ))}
+              </div>
+            </div>
+            <div className="ds-editor-pane__chart relative mt-3 overflow-hidden p-0">
+              <div
+                className="pointer-events-none absolute inset-x-0 top-0 h-24 opacity-90"
+                style={{
+                  background:
+                    "linear-gradient(180deg, color-mix(in srgb, var(--meta-panel-accent-soft) 72%, white 28%) 0%, transparent 100%)",
+                }}
+              />
+              {chartSummary && (
                 <div
-                  className={`flex h-full items-center justify-center text-sm ${mutedTextClass}`}
+                  className="relative z-10 flex items-start justify-between gap-3 border-b px-3 pb-2 pt-3"
+                  style={{
+                    borderColor:
+                      "color-mix(in srgb, var(--meta-panel-border) 72%, transparent)",
+                  }}
                 >
-                  データなし
+                  <div className="min-w-0">
+                    <p
+                      className={`text-[10px] font-semibold tracking-[0.16em] ${mutedTextClass}`}
+                    >
+                      推移サマリー
+                    </p>
+                    <div className="mt-1 flex items-end gap-2">
+                      <span className="text-[22px] font-semibold leading-none tabular-nums">
+                        {chartSummary.latestScore}%
+                      </span>
+                      <span
+                        className="rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums"
+                        style={{
+                          background:
+                            chartSummary.delta === null
+                              ? "color-mix(in srgb, var(--meta-panel-surface) 88%, white 12%)"
+                              : chartSummary.delta >= 0
+                                ? "color-mix(in srgb, var(--meta-panel-accent) 14%, white 86%)"
+                                : "color-mix(in srgb, var(--ds-semantic-color-status-danger) 12%, white 88%)",
+                          color:
+                            chartSummary.delta !== null &&
+                            chartSummary.delta < 0
+                              ? "var(--ds-semantic-color-status-danger)"
+                              : "var(--meta-panel-accent, #0f766e)",
+                        }}
+                      >
+                        {chartTrendLabel}
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    className={`shrink-0 text-right text-[10px] leading-4 ${mutedTextClass}`}
+                  >
+                    <div>
+                      {chartSummary.minScore === chartSummary.maxScore
+                        ? `スコア ${chartSummary.maxScore}%`
+                        : `${chartSummary.minScore}% - ${chartSummary.maxScore}%`}
+                    </div>
+                    <div>
+                      {period === "all"
+                        ? "全期間"
+                        : period === "7d"
+                          ? "直近7件"
+                          : "直近30件"}
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="relative z-10 h-44 w-full px-2 pb-2 pt-2">
+                {chartData.length === 0 ? (
+                  <div
+                    className={`flex h-full items-center justify-center text-sm ${mutedTextClass}`}
+                  >
+                    データなし
+                  </div>
+                ) : (
+                  <ResponsiveContainer
+                    width="100%"
+                    height="100%"
+                    minWidth={0}
+                    minHeight={0}
+                    debounce={1}
+                  >
+                    <ComposedChart
+                      data={chartData}
+                      margin={{ top: 8, right: 8, left: -12, bottom: 0 }}
+                      accessibilityLayer={false}
+                    >
+                      <defs>
+                        <linearGradient
+                          id={chartGradientId}
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="var(--meta-panel-accent, #0f766e)"
+                            stopOpacity={0.28}
+                          />
+                          <stop
+                            offset="65%"
+                            stopColor="var(--meta-panel-accent, #0f766e)"
+                            stopOpacity={0.1}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="var(--meta-panel-accent, #0f766e)"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid
+                        stroke="color-mix(in srgb, var(--meta-panel-border) 54%, transparent)"
+                        strokeDasharray="4 6"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="reviewIndex"
+                        ticks={xTicks}
+                        tick={{
+                          fontSize: 10,
+                          fill: "var(--meta-panel-text-muted, var(--sidebar-text-muted))",
+                        }}
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                      />
+                      <YAxis
+                        domain={chartSummary?.domain ?? [0, 100]}
+                        ticks={chartSummary?.ticks ?? [0, 50, 100]}
+                        allowDecimals={false}
+                        width={30}
+                        tick={{
+                          fontSize: 10,
+                          fill: "var(--meta-panel-text-muted, var(--sidebar-text-muted))",
+                        }}
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                      />
+                      <Tooltip
+                        cursor={{
+                          stroke:
+                            "color-mix(in srgb, var(--meta-panel-accent) 36%, white 64%)",
+                          strokeWidth: 1,
+                          strokeDasharray: "3 3",
+                        }}
+                        formatter={(value) => [`${value}%`, "耐性スコア"]}
+                        labelFormatter={(label) => `復習 ${label} 回目`}
+                        contentStyle={{
+                          borderRadius: 12,
+                          border:
+                            "1px solid var(--meta-panel-border, var(--ds-semantic-color-border-floating))",
+                          background:
+                            "var(--meta-panel-surface-elevated, var(--ds-semantic-color-background-app))",
+                          boxShadow:
+                            "var(--meta-panel-shadow-strong, var(--ds-semantic-elevation-floating))",
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="resistanceScore"
+                        stroke="none"
+                        fill={`url(#${chartGradientId})`}
+                        fillOpacity={1}
+                        isAnimationActive={false}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="resistanceScore"
+                        stroke="var(--meta-panel-accent, #0f766e)"
+                        strokeWidth={3}
+                        isAnimationActive={false}
+                        dot={{
+                          r: chartData.length === 1 ? 4.5 : 3,
+                          fill: "var(--meta-panel-accent, #0f766e)",
+                          stroke: "rgba(255,255,255,0.92)",
+                          strokeWidth: 2,
+                        }}
+                        activeDot={{
+                          r: 6,
+                          fill: "var(--meta-panel-accent, #0f766e)",
+                          stroke: "rgba(255,255,255,0.96)",
+                          strokeWidth: 2,
+                        }}
+                        connectNulls
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
+              <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
+                学習記録
+              </h3>
+              <div className="flex items-center gap-2">
+                <SurfaceButton
+                  type="button"
+                  surface="convex"
+                  size="xs"
+                  className="h-[var(--meta-row-px)] leading-[var(--meta-row-px)]"
+                  onClick={handleStartAddReview}
+                  disabled={
+                    !canPersistReview ||
+                    !!pendingReviewTimestamp ||
+                    isSavingPendingReview ||
+                    isEditingLatestReview ||
+                    isMutatingLatestReview
+                  }
+                >
+                  + 追加
+                </SurfaceButton>
+              </div>
+            </div>
+            {canManageLatestReview && (
+              <p className={`mt-2 text-[11px] ${mutedTextClass}`}>
+                所要時間は全件編集できます。日時・評価の編集と削除は最新1件のみです。
+              </p>
+            )}
+            {latestReviewError && (
+              <div className="ds-status-tone--danger mt-2 rounded border px-2 py-1 text-[11px] [border-color:var(--ds-semantic-color-status-danger)]">
+                {latestReviewError}
+              </div>
+            )}
+            <div className="ds-editor-pane__history mt-3 overflow-hidden">
+              {displayHistoryRows.length === 0 ? (
+                <div className="ds-editor-pane__history-empty flex h-24 items-center justify-center text-sm">
+                  学習記録なし
                 </div>
               ) : (
-                <ResponsiveContainer
-                  width="100%"
-                  height="100%"
-                  minWidth={0}
-                  minHeight={0}
-                  debounce={1}
-                >
-                  <ComposedChart
-                    data={chartData}
-                    margin={{ top: 8, right: 8, left: -12, bottom: 0 }}
-                    accessibilityLayer={false}
-                  >
-                    <defs>
-                      <linearGradient
-                        id={chartGradientId}
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
+                <Table className="text-[length:var(--meta-font-size)]">
+                  <TableHeader className="ds-editor-pane__surface--muted">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead
+                        className={`h-7 w-px px-1 whitespace-nowrap ${mutedTextClass}`}
                       >
-                        <stop
-                          offset="0%"
-                          stopColor="var(--meta-panel-accent, #0f766e)"
-                          stopOpacity={0.28}
-                        />
-                        <stop
-                          offset="65%"
-                          stopColor="var(--meta-panel-accent, #0f766e)"
-                          stopOpacity={0.1}
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor="var(--meta-panel-accent, #0f766e)"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid
-                      stroke="color-mix(in srgb, var(--meta-panel-border) 54%, transparent)"
-                      strokeDasharray="4 6"
-                      vertical={false}
-                    />
-                    <XAxis
-                      dataKey="reviewIndex"
-                      ticks={xTicks}
-                      tick={{
-                        fontSize: 10,
-                        fill: "var(--meta-panel-text-muted, var(--sidebar-text-muted))",
-                      }}
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                    />
-                    <YAxis
-                      domain={chartSummary?.domain ?? [0, 100]}
-                      ticks={chartSummary?.ticks ?? [0, 50, 100]}
-                      allowDecimals={false}
-                      width={30}
-                      tick={{
-                        fontSize: 10,
-                        fill: "var(--meta-panel-text-muted, var(--sidebar-text-muted))",
-                      }}
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                    />
-                    <Tooltip
-                      cursor={{
-                        stroke:
-                          "color-mix(in srgb, var(--meta-panel-accent) 36%, white 64%)",
-                        strokeWidth: 1,
-                        strokeDasharray: "3 3",
-                      }}
-                      formatter={(value) => [`${value}%`, "耐性スコア"]}
-                      labelFormatter={(label) => `復習 ${label} 回目`}
-                      contentStyle={{
-                        borderRadius: 12,
-                        border:
-                          "1px solid var(--meta-panel-border, var(--ds-semantic-color-border-floating))",
-                        background:
-                          "var(--meta-panel-surface-elevated, var(--ds-semantic-color-background-app))",
-                        boxShadow:
-                          "var(--meta-panel-shadow-strong, var(--ds-semantic-elevation-floating))",
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="resistanceScore"
-                      stroke="none"
-                      fill={`url(#${chartGradientId})`}
-                      fillOpacity={1}
-                      isAnimationActive={false}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="resistanceScore"
-                      stroke="var(--meta-panel-accent, #0f766e)"
-                      strokeWidth={3}
-                      isAnimationActive={false}
-                      dot={{
-                        r: chartData.length === 1 ? 4.5 : 3,
-                        fill: "var(--meta-panel-accent, #0f766e)",
-                        stroke: "rgba(255,255,255,0.92)",
-                        strokeWidth: 2,
-                      }}
-                      activeDot={{
-                        r: 6,
-                        fill: "var(--meta-panel-accent, #0f766e)",
-                        stroke: "rgba(255,255,255,0.96)",
-                        strokeWidth: 2,
-                      }}
-                      connectNulls
-                    />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {!isCalendarMode && (
-        <section>
-          <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
-            <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
-              学習記録
-            </h3>
-            <div className="flex items-center gap-2">
-              <SurfaceButton
-                type="button"
-                surface="convex"
-                size="xs"
-                className="h-[var(--meta-row-px)] leading-[var(--meta-row-px)]"
-                onClick={handleStartAddReview}
-                disabled={
-                  !canPersistReview ||
-                  !!pendingReviewTimestamp ||
-                  isSavingPendingReview ||
-                  isEditingLatestReview ||
-                  isMutatingLatestReview
-                }
-              >
-                + 追加
-              </SurfaceButton>
-            </div>
-          </div>
-          {canManageLatestReview && (
-            <p className={`mt-2 text-[11px] ${mutedTextClass}`}>
-              所要時間は全件編集できます。日時・評価の編集と削除は最新1件のみです。
-            </p>
-          )}
-          {latestReviewError && (
-            <div className="ds-status-tone--danger mt-2 rounded border px-2 py-1 text-[11px] [border-color:var(--ds-semantic-color-status-danger)]">
-              {latestReviewError}
-            </div>
-          )}
-          <div className="ds-editor-pane__history mt-3 overflow-hidden">
-            {displayHistoryRows.length === 0 ? (
-              <div className="ds-editor-pane__history-empty flex h-24 items-center justify-center text-sm">
-                学習記録なし
-              </div>
-            ) : (
-              <Table className="text-[length:var(--meta-font-size)]">
-                <TableHeader className="ds-editor-pane__surface--muted">
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead
-                      className={`h-7 w-px px-1 whitespace-nowrap ${mutedTextClass}`}
-                    >
-                      &nbsp;
-                    </TableHead>
-                    <TableHead
-                      className={`h-7 min-w-[8.5rem] whitespace-nowrap py-0.5 ${mutedTextClass}`}
-                    >
-                      日時
-                    </TableHead>
-                    <TableHead
-                      className={`h-7 min-w-[3.25rem] whitespace-nowrap px-1 py-0.5 ${mutedTextClass}`}
-                    >
-                      評価
-                    </TableHead>
-                    <TableHead
-                      className={`h-7 min-w-[4.5rem] whitespace-nowrap px-1 py-0.5 ${mutedTextClass}`}
-                    >
-                      所要時間
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {displayHistoryRows.map((row) => (
-                    <TableRow
-                      key={`${row.reviewIndex}-${row.reviewedAtRaw ?? row.reviewedAtLabel}`}
-                      className="bg-transparent"
-                    >
-                      <TableCell className="w-px px-1 py-0.5 whitespace-nowrap font-medium tabular-nums">
-                        {row.reviewIndex}
-                      </TableCell>
-                      <TableCell className="py-0.5 whitespace-nowrap tabular-nums">
-                        {row.isLatestEditable && isEditingLatestReview ? (
-                          <input
-                            type="datetime-local"
-                            value={latestReviewDateInput}
-                            onChange={(e) =>
-                              setLatestReviewDateInput(e.target.value)
-                            }
-                            disabled={isMutatingLatestReview}
-                            className="ds-input h-7 w-full min-w-[11rem] px-1.5 text-[11px] outline-none"
-                          />
-                        ) : (
-                          row.reviewedAtLabel
-                        )}
-                      </TableCell>
-                      <TableCell className="px-1 py-0.5">
-                        {"isPending" in row && row.isPending ? (
-                          <div className="flex flex-col items-center gap-0.5 py-0.5">
-                            <div className="inline-grid grid-cols-2 gap-1 place-items-center">
-                              {([1, 2, 3, 4] as const).map((rating) => {
-                                const faceDesign = getRatingFaceDesign(rating);
-                                return (
-                                  <button
-                                    key={rating}
-                                    type="button"
-                                    className="ds-surface-button ds-surface-button--concave relative z-0 flex h-7 w-7 items-center justify-center disabled:cursor-wait disabled:opacity-50"
-                                    onClick={() =>
-                                      handleSelectReviewRating(rating)
-                                    }
-                                    disabled={isSavingPendingReview}
-                                    aria-label={getRatingLabel(rating)}
-                                    title={getRatingLabel(rating)}
-                                  >
-                                    <div
-                                      className={`flex h-[22px] w-[22px] items-center justify-center rounded-full ${faceDesign?.iconWrap ?? getRatingToneClass(rating)}`}
-                                    >
-                                      <svg
-                                        width="12"
-                                        height="12"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2.5"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      >
-                                        {faceDesign?.svg}
-                                      </svg>
-                                    </div>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                            <button
-                              type="button"
-                              className={`text-[10px] leading-none underline-offset-2 hover:underline disabled:opacity-50 ${mutedTextClass}`}
-                              onClick={handleCancelPendingReview}
-                              disabled={isSavingPendingReview}
-                            >
-                              取消
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center gap-0 py-0">
-                            {row.isLatestEditable && isEditingLatestReview ? (
+                        &nbsp;
+                      </TableHead>
+                      <TableHead
+                        className={`h-7 min-w-[8.5rem] whitespace-nowrap py-0.5 ${mutedTextClass}`}
+                      >
+                        日時
+                      </TableHead>
+                      <TableHead
+                        className={`h-7 min-w-[3.25rem] whitespace-nowrap px-1 py-0.5 ${mutedTextClass}`}
+                      >
+                        評価
+                      </TableHead>
+                      <TableHead
+                        className={`h-7 min-w-[4.5rem] whitespace-nowrap px-1 py-0.5 ${mutedTextClass}`}
+                      >
+                        所要時間
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {displayHistoryRows.map((row) => (
+                      <TableRow
+                        key={`${row.reviewIndex}-${row.reviewedAtRaw ?? row.reviewedAtLabel}`}
+                        className="bg-transparent"
+                      >
+                        <TableCell className="w-px px-1 py-0.5 whitespace-nowrap font-medium tabular-nums">
+                          {row.reviewIndex}
+                        </TableCell>
+                        <TableCell className="py-0.5 whitespace-nowrap tabular-nums">
+                          {row.isLatestEditable && isEditingLatestReview ? (
+                            <input
+                              type="datetime-local"
+                              value={latestReviewDateInput}
+                              onChange={(e) =>
+                                setLatestReviewDateInput(e.target.value)
+                              }
+                              disabled={isMutatingLatestReview}
+                              className="ds-input h-7 w-full min-w-[11rem] px-1.5 text-[11px] outline-none"
+                            />
+                          ) : (
+                            row.reviewedAtLabel
+                          )}
+                        </TableCell>
+                        <TableCell className="px-1 py-0.5">
+                          {"isPending" in row && row.isPending ? (
+                            <div className="flex flex-col items-center gap-0.5 py-0.5">
                               <div className="inline-grid grid-cols-2 gap-1 place-items-center">
                                 {([1, 2, 3, 4] as const).map((rating) => {
-                                  const faceDesign =
-                                    getRatingFaceDesign(rating);
-                                  const isSelected =
-                                    latestReviewRatingInput === rating;
+                                  const faceDesign = getRatingFaceDesign(rating);
                                   return (
                                     <button
                                       key={rating}
                                       type="button"
-                                      className={`ds-surface-button ds-surface-button--concave relative z-0 flex h-7 w-7 items-center justify-center disabled:cursor-wait disabled:opacity-50 ${
-                                        isSelected
-                                          ? "ds-surface-button--active ring-1 ring-[color:var(--ds-semantic-color-border-strong)]"
-                                          : ""
-                                      }`}
+                                      className="ds-surface-button ds-surface-button--concave relative z-0 flex h-7 w-7 items-center justify-center disabled:cursor-wait disabled:opacity-50"
                                       onClick={() =>
-                                        setLatestReviewRatingInput(rating)
+                                        handleSelectReviewRating(rating)
                                       }
-                                      disabled={isMutatingLatestReview}
+                                      disabled={isSavingPendingReview}
                                       aria-label={getRatingLabel(rating)}
                                       title={getRatingLabel(rating)}
                                     >
@@ -1840,239 +1806,307 @@ const CardMetaPanelInner = ({
                                   );
                                 })}
                               </div>
-                            ) : row.ratingFaceDesign ? (
-                              <div className="flex items-center justify-center">
-                                <div
-                                  className={`flex h-6 w-6 items-center justify-center rounded-full ${row.ratingFaceDesign.iconWrap}`}
-                                >
-                                  <svg
-                                    width="12"
-                                    height="12"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    {row.ratingFaceDesign.svg}
-                                  </svg>
-                                </div>
-                              </div>
-                            ) : (
-                              <span
-                                className={`inline-flex min-w-[2.75rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-medium ${row.ratingToneClass}`}
+                              <button
+                                type="button"
+                                className={`text-[10px] leading-none underline-offset-2 hover:underline disabled:opacity-50 ${mutedTextClass}`}
+                                onClick={handleCancelPendingReview}
+                                disabled={isSavingPendingReview}
                               >
-                                {row.ratingLabel}
+                                取消
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center gap-0 py-0">
+                              {row.isLatestEditable && isEditingLatestReview ? (
+                                <div className="inline-grid grid-cols-2 gap-1 place-items-center">
+                                  {([1, 2, 3, 4] as const).map((rating) => {
+                                    const faceDesign =
+                                      getRatingFaceDesign(rating);
+                                    const isSelected =
+                                      latestReviewRatingInput === rating;
+                                    return (
+                                      <button
+                                        key={rating}
+                                        type="button"
+                                        className={`ds-surface-button ds-surface-button--concave relative z-0 flex h-7 w-7 items-center justify-center disabled:cursor-wait disabled:opacity-50 ${
+                                          isSelected
+                                            ? "ds-surface-button--active ring-1 ring-[color:var(--ds-semantic-color-border-strong)]"
+                                            : ""
+                                        }`}
+                                        onClick={() =>
+                                          setLatestReviewRatingInput(rating)
+                                        }
+                                        disabled={isMutatingLatestReview}
+                                        aria-label={getRatingLabel(rating)}
+                                        title={getRatingLabel(rating)}
+                                      >
+                                        <div
+                                          className={`flex h-[22px] w-[22px] items-center justify-center rounded-full ${faceDesign?.iconWrap ?? getRatingToneClass(rating)}`}
+                                        >
+                                          <svg
+                                            width="12"
+                                            height="12"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          >
+                                            {faceDesign?.svg}
+                                          </svg>
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              ) : row.ratingFaceDesign ? (
+                                <div className="flex items-center justify-center">
+                                  <div
+                                    className={`flex h-6 w-6 items-center justify-center rounded-full ${row.ratingFaceDesign.iconWrap}`}
+                                  >
+                                    <svg
+                                      width="12"
+                                      height="12"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2.5"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      {row.ratingFaceDesign.svg}
+                                    </svg>
+                                  </div>
+                                </div>
+                              ) : (
+                                <span
+                                  className={`inline-flex min-w-[2.75rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-medium ${row.ratingToneClass}`}
+                                >
+                                  {row.ratingLabel}
+                                </span>
+                              )}
+                              <span
+                                className={`text-[9px] leading-none tabular-nums ${mutedTextClass}`}
+                              >
+                                耐性 {row.resistanceScore ?? "-"}
                               </span>
-                            )}
-                            <span
-                              className={`text-[9px] leading-none tabular-nums ${mutedTextClass}`}
-                            >
-                              耐性 {row.resistanceScore ?? "-"}
-                            </span>
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="py-0.5 whitespace-nowrap">
-                        {"isPending" in row && row.isPending ? (
-                          <div className="flex items-center gap-0">
-                            <input
-                              type="text"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              value={pendingReviewDurationInput}
-                              onChange={(e) =>
-                                setPendingReviewDurationInput(e.target.value)
-                              }
-                              onFocus={(e) => e.currentTarget.select()}
-                              disabled={isSavingPendingReview}
-                              className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
-                              style={{
-                                width: getDurationInputWidthCh(
-                                  pendingReviewDurationInput,
-                                ),
-                                minWidth: "1.65rem",
-                                fontVariantNumeric: "tabular-nums lining-nums",
-                              }}
-                              placeholder="-"
-                            />
-                            <span className={`text-[11px] ${mutedTextClass}`}>
-                              min.
-                            </span>
-                          </div>
-                        ) : row.isLatestEditable && isEditingLatestReview ? (
-                          <div className="flex items-center gap-0">
-                            <input
-                              type="text"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              value={latestReviewDurationInput}
-                              onChange={(e) =>
-                                setLatestReviewDurationInput(e.target.value)
-                              }
-                              onFocus={(e) => e.currentTarget.select()}
-                              disabled={isMutatingLatestReview}
-                              className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
-                              style={{
-                                width: getDurationInputWidthCh(
-                                  latestReviewDurationInput,
-                                ),
-                                minWidth: "1.65rem",
-                                fontVariantNumeric: "tabular-nums lining-nums",
-                              }}
-                              placeholder="-"
-                            />
-                            <span className={`text-[11px] ${mutedTextClass}`}>
-                              min.
-                            </span>
-                          </div>
-                        ) : row.editableLogIndex != null &&
-                          onUpdateReviewLogDuration ? (
-                          <div className="flex items-center gap-0">
-                            <input
-                              type="text"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              value={
-                                durationDrafts[row.editableLogIndex] ??
-                                (row.durationMinutes != null
-                                  ? String(row.durationMinutes)
-                                  : "")
-                              }
-                              onChange={(e) =>
-                                handleChangeDurationDraft(
-                                  row.editableLogIndex as number,
-                                  e.target.value,
-                                )
-                              }
-                              onFocus={(e) => e.currentTarget.select()}
-                              onBlur={(e) =>
-                                handleSaveReviewDuration(
-                                  row.editableLogIndex as number,
-                                  e.target.value,
-                                )
-                              }
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  handleSaveReviewDuration(
-                                    row.editableLogIndex!,
-                                    e.currentTarget.value,
-                                  );
-                                  e.currentTarget.blur();
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="py-0.5 whitespace-nowrap">
+                          {"isPending" in row && row.isPending ? (
+                            <div className="flex items-center gap-0">
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                value={pendingReviewDurationInput}
+                                onChange={(e) =>
+                                  setPendingReviewDurationInput(e.target.value)
                                 }
-                                if (e.key === "Escape") {
-                                  e.preventDefault();
-                                  setDurationDrafts((prev) => ({
-                                    ...prev,
-                                    [row.editableLogIndex!]:
-                                      row.durationMinutes != null
-                                        ? String(row.durationMinutes)
-                                        : "",
-                                  }));
-                                  e.currentTarget.blur();
+                                onFocus={(e) => e.currentTarget.select()}
+                                disabled={isSavingPendingReview}
+                                className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
+                                style={{
+                                  width: getDurationInputWidthCh(
+                                    pendingReviewDurationInput,
+                                  ),
+                                  minWidth: "1.65rem",
+                                  fontVariantNumeric: "tabular-nums lining-nums",
+                                }}
+                                placeholder="-"
+                              />
+                              <span className={`text-[11px] ${mutedTextClass}`}>
+                                min.
+                              </span>
+                            </div>
+                          ) : row.isLatestEditable && isEditingLatestReview ? (
+                            <div className="flex items-center gap-0">
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                value={latestReviewDurationInput}
+                                onChange={(e) =>
+                                  setLatestReviewDurationInput(e.target.value)
                                 }
-                              }}
-                              disabled={
-                                isMutatingLatestReview ||
-                                durationSavingIndex === row.editableLogIndex
-                              }
-                              className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
-                              style={{
-                                width: getDurationInputWidthCh(
+                                onFocus={(e) => e.currentTarget.select()}
+                                disabled={isMutatingLatestReview}
+                                className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
+                                style={{
+                                  width: getDurationInputWidthCh(
+                                    latestReviewDurationInput,
+                                  ),
+                                  minWidth: "1.65rem",
+                                  fontVariantNumeric: "tabular-nums lining-nums",
+                                }}
+                                placeholder="-"
+                              />
+                              <span className={`text-[11px] ${mutedTextClass}`}>
+                                min.
+                              </span>
+                            </div>
+                          ) : row.editableLogIndex != null &&
+                            onUpdateReviewLogDuration ? (
+                            <div className="flex items-center gap-0">
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                value={
                                   durationDrafts[row.editableLogIndex] ??
-                                    (row.durationMinutes != null
-                                      ? String(row.durationMinutes)
-                                      : ""),
-                                ),
-                                minWidth: "1.65rem",
-                                fontVariantNumeric: "tabular-nums lining-nums",
-                              }}
-                              placeholder="-"
-                            />
-                            <span className={`text-[11px] ${mutedTextClass}`}>
-                              min.
+                                  (row.durationMinutes != null
+                                    ? String(row.durationMinutes)
+                                    : "")
+                                }
+                                onChange={(e) =>
+                                  handleChangeDurationDraft(
+                                    row.editableLogIndex as number,
+                                    e.target.value,
+                                  )
+                                }
+                                onFocus={(e) => e.currentTarget.select()}
+                                onBlur={(e) =>
+                                  handleSaveReviewDuration(
+                                    row.editableLogIndex as number,
+                                    e.target.value,
+                                  )
+                                }
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    handleSaveReviewDuration(
+                                      row.editableLogIndex!,
+                                      e.currentTarget.value,
+                                    );
+                                    e.currentTarget.blur();
+                                  }
+                                  if (e.key === "Escape") {
+                                    e.preventDefault();
+                                    setDurationDrafts((prev) => ({
+                                      ...prev,
+                                      [row.editableLogIndex!]:
+                                        row.durationMinutes != null
+                                          ? String(row.durationMinutes)
+                                          : "",
+                                    }));
+                                    e.currentTarget.blur();
+                                  }
+                                }}
+                                disabled={
+                                  isMutatingLatestReview ||
+                                  durationSavingIndex === row.editableLogIndex
+                                }
+                                className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
+                                style={{
+                                  width: getDurationInputWidthCh(
+                                    durationDrafts[row.editableLogIndex] ??
+                                      (row.durationMinutes != null
+                                        ? String(row.durationMinutes)
+                                        : ""),
+                                  ),
+                                  minWidth: "1.65rem",
+                                  fontVariantNumeric: "tabular-nums lining-nums",
+                                }}
+                                placeholder="-"
+                              />
+                              <span className={`text-[11px] ${mutedTextClass}`}>
+                                min.
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="tabular-nums">
+                              {row.durationLabel}
                             </span>
-                          </div>
-                        ) : (
-                          <span className="tabular-nums">
-                            {row.durationLabel}
-                          </span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
-          {canManageLatestReview && latestEditableReview && (
-            <div className="ds-editor-pane__toolbar mt-2 flex flex-wrap items-center justify-between gap-2 px-3 py-2">
-              <p className="text-[11px] leading-5 text-[var(--sidebar-text-muted)]">
-                {isEditingLatestReview
-                  ? "最新記録を編集中"
-                  : `最新記録: ${formatDateLabel(latestEditableReview.reviewedAt)} / ${getRatingLabel(latestEditableReview.rating)}`}
-              </p>
-              {isEditingLatestReview ? (
-                <div className="flex items-center justify-end gap-1">
-                  <SurfaceButton
-                    type="button"
-                    surface="convex"
-                    size="xs"
-                    className="h-7 px-2"
-                    onClick={handleSaveLatestReview}
-                    disabled={isMutatingLatestReview}
-                  >
-                    保存
-                  </SurfaceButton>
-                  <SurfaceButton
-                    type="button"
-                    surface="concave"
-                    size="xs"
-                    className="h-7 px-2"
-                    onClick={handleCancelEditLatestReview}
-                    disabled={isMutatingLatestReview}
-                  >
-                    取消
-                  </SurfaceButton>
-                </div>
-              ) : (
-                <div className="flex items-center justify-end gap-1">
-                  <SurfaceButton
-                    type="button"
-                    surface="concave"
-                    size="xs"
-                    className="h-7 px-2"
-                    onClick={handleStartEditLatestReview}
-                    disabled={
-                      Boolean(pendingReviewTimestamp) ||
-                      isSavingPendingReview ||
-                      isMutatingLatestReview
-                    }
-                  >
-                    編集
-                  </SurfaceButton>
-                  <SurfaceButton
-                    type="button"
-                    surface="concave"
-                    size="xs"
-                    className="h-7 px-2 text-[var(--ds-semantic-color-status-danger)]"
-                    onClick={handleDeleteLatestReview}
-                    disabled={
-                      Boolean(pendingReviewTimestamp) ||
-                      isSavingPendingReview ||
-                      isMutatingLatestReview
-                    }
-                  >
-                    削除
-                  </SurfaceButton>
-                </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </div>
-          )}
-        </section>
-      )}
+            {canManageLatestReview && latestEditableReview && (
+              <div className="ds-editor-pane__toolbar mt-2 flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+                <p className="text-[11px] leading-5 text-[var(--sidebar-text-muted)]">
+                  {isEditingLatestReview
+                    ? "最新記録を編集中"
+                    : `最新記録: ${formatDateLabel(latestEditableReview.reviewedAt)} / ${getRatingLabel(latestEditableReview.rating)}`}
+                </p>
+                {isEditingLatestReview ? (
+                  <div className="flex items-center justify-end gap-1">
+                    <SurfaceButton
+                      type="button"
+                      surface="convex"
+                      size="xs"
+                      className="h-7 px-2"
+                      onClick={handleSaveLatestReview}
+                      disabled={isMutatingLatestReview}
+                    >
+                      保存
+                    </SurfaceButton>
+                    <SurfaceButton
+                      type="button"
+                      surface="concave"
+                      size="xs"
+                      className="h-7 px-2"
+                      onClick={handleCancelEditLatestReview}
+                      disabled={isMutatingLatestReview}
+                    >
+                      取消
+                    </SurfaceButton>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-end gap-1">
+                    <SurfaceButton
+                      type="button"
+                      surface="concave"
+                      size="xs"
+                      className="h-7 px-2"
+                      onClick={handleStartEditLatestReview}
+                      disabled={
+                        Boolean(pendingReviewTimestamp) ||
+                        isSavingPendingReview ||
+                        isMutatingLatestReview
+                      }
+                    >
+                      編集
+                    </SurfaceButton>
+                    <SurfaceButton
+                      type="button"
+                      surface="concave"
+                      size="xs"
+                      className="h-7 px-2 text-[var(--ds-semantic-color-status-danger)]"
+                      onClick={handleDeleteLatestReview}
+                      disabled={
+                        Boolean(pendingReviewTimestamp) ||
+                        isSavingPendingReview ||
+                        isMutatingLatestReview
+                      }
+                    >
+                      削除
+                    </SurfaceButton>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+        </>
+      ) : shouldRenderHeavySections ? (
+        <>
+          <section>
+            <div className="mt-3 rounded-[20px] border border-[color:var(--meta-panel-border)] bg-[color:var(--meta-panel-surface)] px-3 py-4">
+              <div className={`text-sm ${mutedTextClass}`}>集計を読み込み中...</div>
+            </div>
+          </section>
+          <section>
+            <div className="rounded-[20px] border border-[color:var(--meta-panel-border)] bg-[color:var(--meta-panel-surface)] px-3 py-10">
+              <div className={`text-sm ${mutedTextClass}`}>履歴を読み込み中...</div>
+            </div>
+          </section>
+        </>
+      ) : null}
     </EmptyMetaPanel>
   );
 };
