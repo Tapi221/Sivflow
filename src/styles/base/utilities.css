@@ -231,6 +231,25 @@
     color: var(--titlebar-divider);
   }
 
+  .titlebar-breadcrumb-item {
+    display: inline-flex;
+    min-width: 0;
+    max-width: 100%;
+    align-items: center;
+    border-radius: 0.125rem;
+    font-weight: 500;
+    line-height: 1.2;
+    padding: 0.125rem 0.25rem;
+  }
+
+  .titlebar-breadcrumb-link {
+    color: var(--titlebar-text);
+  }
+
+  .titlebar-breadcrumb-current {
+    color: var(--titlebar-text-strong);
+  }
+
   @media (min-width: 768px) {
     .surface-dialog-convex-md {
       border: 1px solid var(--floating-surface-border) !important;
