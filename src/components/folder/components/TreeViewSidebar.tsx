@@ -1,5 +1,4 @@
 import { ExplorerSidebarHeader } from "@/components/explorer/ExplorerSidebarHeader";
-import { ExplorerFilterSummary } from "@/components/folder/components/explorer/ExplorerFilterSummary";
 import { cn } from "@/lib/utils";
 import React from "react";
 
@@ -10,9 +9,6 @@ interface TreeViewSidebarProps {
   isResizing: boolean;
   showMobileDetail: boolean;
   allTags: string[];
-  getTagColor: (tagName: string) => string | undefined;
-  isFilterActive: boolean;
-  resultCount: number;
   onCreateRootFolder: () => void;
   onCreateCardSet: () => void;
   onAddDocument: () => void;
@@ -32,9 +28,6 @@ export const TreeViewSidebar = ({
   isResizing,
   showMobileDetail,
   allTags,
-  getTagColor,
-  isFilterActive,
-  resultCount,
   onCreateRootFolder,
   onCreateCardSet,
   onAddDocument,
@@ -73,14 +66,6 @@ export const TreeViewSidebar = ({
             canAddDocuments={canAddDocuments}
             canBulkImport={canBulkImport}
             preferDirectRootFolderCreate={preferDirectRootFolderCreate}
-          />
-        </div>
-
-        <div className="shrink-0">
-          <ExplorerFilterSummary
-            getTagColor={(tag) => getTagColor(tag) || "bg-slate-200"}
-            isFilterActive={isFilterActive}
-            resultCount={resultCount}
           />
         </div>
 
