@@ -52,7 +52,8 @@ const ModeButton = ({
       type="button"
       className={cn(
         overlayGlassActionButtonClassName,
-        "relative h-6 w-6",
+        "h-6 w-6",
+        "relative",
         isActive &&
           !disabled &&
           "border-[rgba(214,198,182,0.96)] bg-[rgba(255,252,247,0.98)] text-[#3d342d] shadow-[inset_0_0_0_1px_rgba(107,95,85,0.08)]",
