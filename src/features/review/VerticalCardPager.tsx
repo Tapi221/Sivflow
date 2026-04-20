@@ -552,6 +552,10 @@ const VerticalCardPagerFn = <T,>({
     [cards.length, getEstimatedHeight, layoutSnapshot],
   );
 
+  const isAnchorStabilizing = useCallback(() => {
+    return resolveNowMs() <= anchorStabilizationUntilRef.current;
+  }, []);
+
   const clearNaturalIndexTimer = useCallback(() => {
     if (naturalIndexTimerRef.current != null) {
       window.clearTimeout(naturalIndexTimerRef.current);
@@ -581,13 +585,19 @@ const VerticalCardPagerFn = <T,>({
   }, []);
 
   const flushQueuedNaturalIndex = useCallback(() => {
+    if (isAnchorStabilizing()) {
+      queuedNaturalIndexRef.current = null;
+      clearNaturalIndexTimer();
+      return;
+    }
+
     const nearestIdx = queuedNaturalIndexRef.current;
     queuedNaturalIndexRef.current = null;
     clearNaturalIndexTimer();
 
     if (nearestIdx == null || nearestIdx === activeIndexRef.current) return;
     onActiveIndexChange(nearestIdx);
-  }, [clearNaturalIndexTimer, onActiveIndexChange]);
+  }, [clearNaturalIndexTimer, isAnchorStabilizing, onActiveIndexChange]);
 
   const queueNaturalIndexCommit = useCallback(
     (nearestIdx: number) => {
@@ -611,6 +621,10 @@ const VerticalCardPagerFn = <T,>({
   );
 
   const computeNearestIndex = useCallback(() => {
+    if (isAnchorStabilizing()) {
+      return;
+    }
+
     const container = containerRef.current;
     if (!container) return;
     if (cards.length <= 0) return;
@@ -643,6 +657,7 @@ const VerticalCardPagerFn = <T,>({
   }, [
     cards.length,
     freezeActiveIndex,
+    isAnchorStabilizing,
     itemRefs,
     layoutSnapshot,
     queueNaturalIndexCommit,
@@ -873,6 +888,14 @@ const VerticalCardPagerFn = <T,>({
     const handleScroll = () => {
       scheduleScrollAnchorCapture();
       scheduleVisibleRangeUpdate();
+
+      if (isAnchorStabilizing()) {
+        clearIdleCommitTimer();
+        clearNaturalIndexTimer();
+        queuedNaturalIndexRef.current = null;
+        return;
+      }
+
       clearIdleCommitTimer();
       idleCommitTimerRef.current = window.setTimeout(() => {
         idleCommitTimerRef.current = null;
@@ -898,7 +921,9 @@ const VerticalCardPagerFn = <T,>({
     };
   }, [
     clearIdleCommitTimer,
+    clearNaturalIndexTimer,
     computeNearestIndex,
+    isAnchorStabilizing,
     scheduleScrollAnchorCapture,
     scheduleVisibleRangeUpdate,
   ]);
