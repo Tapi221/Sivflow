@@ -265,6 +265,29 @@ const TreeViewLayout = ({
     return Array.from(tagNames).sort();
   }, [cards, tagById]);
 
+  const currentHeaderActionFolderId = useMemo(() => {
+    if (isSectionListMode) return null;
+    if (selectedFolderId) return selectedFolderId;
+
+    if (activeSelectedCardSetId) {
+      return (
+        cardSets.find(
+          (cardSet: CardSet) => cardSet.id === activeSelectedCardSetId,
+        )?.folderId ??
+        routeSelectedCardSet?.folderId ??
+        null
+      );
+    }
+
+    return null;
+  }, [
+    activeSelectedCardSetId,
+    cardSets,
+    isSectionListMode,
+    routeSelectedCardSet,
+    selectedFolderId,
+  ]);
+
   const currentHeaderFolderId = useMemo(() => {
     if (isSectionListMode) return null;
     if (selectedFolderId) return selectedFolderId;
@@ -314,23 +337,23 @@ const TreeViewLayout = ({
   }, []);
 
   const handleCreateCardSetFromHeader = useCallback(() => {
-    if (!currentHeaderFolderId) return;
-    createCardSetTriggerRef.current?.(currentHeaderFolderId);
-  }, [currentHeaderFolderId]);
+    if (!currentHeaderActionFolderId) return;
+    createCardSetTriggerRef.current?.(currentHeaderActionFolderId);
+  }, [currentHeaderActionFolderId]);
 
   const handleAddDocumentFromHeader = useCallback(() => {
-    if (!currentHeaderFolderId) return;
+    if (!currentHeaderActionFolderId) return;
     documentTriggerRef.current?.();
-  }, [currentHeaderFolderId]);
+  }, [currentHeaderActionFolderId]);
 
   const handleOpenBulkImport = useCallback(() => {
-    if (!currentHeaderFolderId) {
+    if (!currentHeaderActionFolderId) {
       toast.error("一括インポート先のフォルダを先に選択してください。");
       return;
     }
 
     setIsImportDialogOpen(true);
-  }, [currentHeaderFolderId, toast]);
+  }, [currentHeaderActionFolderId, toast]);
 
   const handleImportCompleted = useCallback(
     ({
@@ -360,14 +383,14 @@ const TreeViewLayout = ({
   );
 
   const importTargetCardSets = useMemo(() => {
-    if (!currentHeaderFolderId) {
+    if (!currentHeaderActionFolderId) {
       return [];
     }
 
     return cardSets.filter(
-      (cardSet: CardSet) => cardSet.folderId === currentHeaderFolderId,
+      (cardSet: CardSet) => cardSet.folderId === currentHeaderActionFolderId,
     );
-  }, [cardSets, currentHeaderFolderId]);
+  }, [cardSets, currentHeaderActionFolderId]);
 
   const { filteredCards, filteredDocuments, isFiltering } = useTreeViewFilters({
     cards,
@@ -496,8 +519,8 @@ const TreeViewLayout = ({
     />
   );
 
-  const canCreateCardSet = Boolean(currentHeaderFolderId);
-  const canAddDocuments = Boolean(currentHeaderFolderId);
+  const canCreateCardSet = Boolean(currentHeaderActionFolderId);
+  const canAddDocuments = Boolean(currentHeaderActionFolderId);
 
   return (
     <div
@@ -520,8 +543,8 @@ const TreeViewLayout = ({
         onStartResizing={startResizing}
         canCreateCardSet={canCreateCardSet}
         canAddDocuments={canAddDocuments}
-        canBulkImport={Boolean(currentHeaderFolderId)}
-        preferDirectRootFolderCreate={isSectionListMode}
+        canBulkImport={Boolean(currentHeaderActionFolderId)}
+        preferDirectRootFolderCreate={currentHeaderActionFolderId === null}
       >
         {sidebarContent}
       </TreeViewSidebar>
@@ -562,11 +585,12 @@ const TreeViewLayout = ({
       <XlsxImportDialog
         open={isImportDialogOpen}
         onOpenChange={setIsImportDialogOpen}
-        folderId={currentHeaderFolderId}
+        folderId={currentHeaderActionFolderId}
         folderName={
-          currentHeaderFolderId
-            ? (folders.find((folder) => folder.id === currentHeaderFolderId)
-                ?.folderName ?? null)
+          currentHeaderActionFolderId
+            ? (folders.find(
+                (folder) => folder.id === currentHeaderActionFolderId,
+              )?.folderName ?? null)
             : null
         }
         cardSets={importTargetCardSets}
