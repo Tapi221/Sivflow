@@ -118,7 +118,10 @@ export const CardSetViewScreen = () => {
     );
 
     return () => {
-      dispatchCardSetViewWindowEvent(CARD_SET_VIEW_EVENTS.metaOpenChange, false);
+      dispatchCardSetViewWindowEvent(
+        CARD_SET_VIEW_EVENTS.metaOpenChange,
+        false,
+      );
     };
   }, [state.isMetaOpen]);
 

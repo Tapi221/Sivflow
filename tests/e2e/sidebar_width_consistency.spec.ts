@@ -55,7 +55,10 @@ test.describe("Sidebar width consistency", () => {
     const recentWidth = await waitForSidebarWidth(page, persistedSidebarWidth);
 
     await page.getByTestId("explorer-tab-explorer").click();
-    const explorerWidth = await waitForSidebarWidth(page, persistedSidebarWidth);
+    const explorerWidth = await waitForSidebarWidth(
+      page,
+      persistedSidebarWidth,
+    );
 
     expect(Math.abs(recentWidth - initialWidth)).toBeLessThanOrEqual(2);
     expect(Math.abs(explorerWidth - initialWidth)).toBeLessThanOrEqual(2);

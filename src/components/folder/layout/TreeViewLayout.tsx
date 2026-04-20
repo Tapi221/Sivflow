@@ -366,18 +366,17 @@ const TreeViewLayout = ({
     );
   }, [cardSets, currentHeaderFolderId]);
 
-  const { filteredCards, filteredDocuments, isFiltering } =
-    useTreeViewFilters({
-      cards,
-      documents,
-      tagFilter,
-      tagMatchMode,
-      uncertaintyFilter,
-      bookmarkedFilter,
-      draftFilter,
-      contentTypeFilter,
-      tagById,
-    });
+  const { filteredCards, filteredDocuments, isFiltering } = useTreeViewFilters({
+    cards,
+    documents,
+    tagFilter,
+    tagMatchMode,
+    uncertaintyFilter,
+    bookmarkedFilter,
+    draftFilter,
+    contentTypeFilter,
+    tagById,
+  });
 
   const handleUpdateFolderForTree: NonNullable<
     TreeViewTabContentProps["onUpdateFolder"]
