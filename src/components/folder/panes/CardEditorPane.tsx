@@ -33,6 +33,7 @@ import {
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { useCardSyncStatusReporter } from "@/components/card/shell/useCardSyncStatusReporter";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
+import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
 import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
 import { CardEditorPaneReadonlySurface } from "@/components/folder/panes/CardEditorPaneReadonlySurface";
 import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
@@ -144,23 +145,6 @@ const OverlayTopRight = ({ children }: OverlayTopRightProps) => {
   );
 };
 
-const MetaPanelToggleGlyph = ({ className }: { className?: string }) => {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3.5" y="4.5" width="17" height="15" rx="4.5" />
-      <path d="M8 8.25v7.5" />
-    </svg>
-  );
-};
 
 type EditorSidePaneProps = {
   side: "question" | "answer";
@@ -1009,7 +993,7 @@ export const CardEditorPane = ({
         {isMetaOpen ? (
           <X className="h-3.5 w-3.5" />
         ) : (
-          <MetaPanelToggleGlyph className="h-3.5 w-3.5" />
+          <MetaPanelToggleIcon className="h-3.5 w-3.5" />
         )}
       </button>
     );

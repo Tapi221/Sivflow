@@ -109,8 +109,6 @@ export const CardSetViewScreen = () => {
     </>
   );
 
-  const topLeftControl = null;
-
   useEffect(() => {
     dispatchCardSetViewWindowEvent(
       CARD_SET_VIEW_EVENTS.metaOpenChange,
@@ -131,7 +129,6 @@ export const CardSetViewScreen = () => {
       shellClassName="h-full"
       widthControl={null}
       widthControlClassName="hidden md:flex"
-      topLeftControl={topLeftControl}
       overlayChildren={overlayChildren}
       overlayTopInsetPx={desktopOverlayTopInsetPx}
       isMetaOpen={state.isMetaOpen}
