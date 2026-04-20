@@ -69,6 +69,33 @@ const WindowControlButton: React.FC<WindowControlButtonProps> = ({
   );
 };
 
+const HomeBreadcrumbIcon: React.FC = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+    className="shrink-0"
+  >
+    <path
+      d="M3 10.25L12 3L21 10.25"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M5.25 9.5V19.5H18.75V9.5"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 export const TitleBar: React.FC = () => {
   const [bridgeIsMaximized, setBridgeIsMaximized] = useState(false);
   const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
@@ -151,6 +178,15 @@ export const TitleBar: React.FC = () => {
         <nav className="titlebar-text flex min-w-0 items-center gap-1 overflow-hidden text-xs">
           {allCrumbs.map((crumb, index) => {
             const isClickable = Boolean(crumb.to);
+            const isHomeCrumb = index === 0 && crumb.label === "ホーム";
+            const breadcrumbContent = isHomeCrumb ? (
+              <>
+                <HomeBreadcrumbIcon />
+                <span className="sr-only">{crumb.label}</span>
+              </>
+            ) : (
+              crumb.label
+            );
 
             const handleBreadcrumbClick = (
               event: React.MouseEvent<HTMLButtonElement>,
@@ -180,16 +216,23 @@ export const TitleBar: React.FC = () => {
                 {isClickable ? (
                   <button
                     type="button"
-                    className="titlebar-hover titlebar-text truncate rounded-sm px-1 py-0.5 transition-colors"
+                    className="titlebar-hover titlebar-text inline-flex items-center truncate rounded-sm px-1 py-0.5 transition-colors"
                     style={noDragStyle}
                     onMouseDown={(event) => event.stopPropagation()}
                     onClick={handleBreadcrumbClick}
+                    title={crumb.label}
                   >
-                    {crumb.label}
+                    {breadcrumbContent}
                   </button>
                 ) : (
-                  <span className="titlebar-text-strong truncate font-medium">
-                    {crumb.label}
+                  <span
+                    className={cn(
+                      "titlebar-text-strong truncate font-medium",
+                      isHomeCrumb && "inline-flex items-center",
+                    )}
+                    title={crumb.label}
+                  >
+                    {breadcrumbContent}
                   </span>
                 )}
               </React.Fragment>
