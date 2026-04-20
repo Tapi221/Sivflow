@@ -66,6 +66,7 @@ export const CardWorkspaceShell = ({
 }: CardWorkspaceShellProps) => {
   const topControlsOffsetPx = overlayTopInsetPx + 8;
   const surfaceClassName = WORKSPACE_SURFACE_CLASS_NAMES[surfaceVariant];
+  const metaPanelWidth = isMetaOpen ? "var(--ui-panel-width)" : "0px";
 
   return (
     <div className={cn(surfaceClassName, containerClassName)}>
@@ -137,12 +138,16 @@ export const CardWorkspaceShell = ({
           </div>
         </div>
 
-        {isMetaOpen && metaPanel ? (
+        {metaPanel ? (
           <div
+            aria-hidden={!isMetaOpen}
             className={cn(
-              "hidden h-full min-h-0 shrink-0 md:block",
+              "hidden h-full min-h-0 shrink-0 overflow-hidden md:block",
+              "transition-[width,opacity] duration-200 ease-out",
+              isMetaOpen ? "opacity-100" : "pointer-events-none opacity-0",
               metaPanelContainerClassName,
             )}
+            style={{ width: metaPanelWidth }}
           >
             {metaPanel}
           </div>
