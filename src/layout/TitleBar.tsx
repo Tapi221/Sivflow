@@ -1,4 +1,5 @@
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
+import { APP_CHROME } from "@/config/appChrome";
 import {
   buildRouteBreadcrumbs,
   mergeTitleBarBreadcrumbs,
@@ -107,6 +108,7 @@ export const TitleBar: React.FC = () => {
   const crumbs = useBreadcrumbs();
   const { extraCrumbs } = useBreadcrumbContext();
   const isCardSetViewPage = pathname.toLowerCase().startsWith("/cardsetview");
+  const shouldShowBrandLabel = APP_CHROME.desktopTitleBar.showBrandLabel;
 
   useEffect(() => {
     if (!hasDesktopBridge) return;
@@ -168,14 +170,19 @@ export const TitleBar: React.FC = () => {
       }}
     >
       <div
-        className="flex h-full min-w-0 items-center gap-2 px-4"
+        className={cn(
+          "flex h-full min-w-0 items-center px-4",
+          shouldShowBrandLabel && "gap-2",
+        )}
         style={noDragStyle}
       >
-        <span className="titlebar-text-strong mr-2 shrink-0 text-xs font-semibold tracking-wide">
-          Manifolia
-        </span>
+        {shouldShowBrandLabel ? (
+          <span className="titlebar-text-strong shrink-0 text-xs font-semibold tracking-wide">
+            {APP_CHROME.brandLabel}
+          </span>
+        ) : null}
 
-        <nav className="titlebar-text flex min-w-0 items-center gap-1 overflow-hidden text-xs">
+        <nav className="titlebar-text flex min-w-0 flex-1 items-center gap-1 overflow-hidden text-xs">
           {allCrumbs.map((crumb, index) => {
             const isClickable = Boolean(crumb.to);
             const isHomeCrumb = index === 0 && crumb.label === "ホーム";
