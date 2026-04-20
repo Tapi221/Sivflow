@@ -81,6 +81,11 @@ export interface PdfJsPage {
   }) => PdfJsRenderTask;
 }
 
+export interface PdfJsPageLease {
+  page: PdfJsPage;
+  release: () => void;
+}
+
 export interface PdfJsDocument {
   numPages: number;
   fingerprints?: Array<string | null>;
@@ -132,6 +137,47 @@ export interface PdfPageSearchMatch {
   globalIndex: number;
 }
 
+export interface PdfErrorDetails {
+  name: string | null;
+  message: string;
+  code: string | null;
+  stack: string | null;
+}
+
+type ErrorLike = {
+  name?: unknown;
+  message?: unknown;
+  code?: unknown;
+  stack?: unknown;
+};
+
+const PDF_ABORT_ERROR_NAMES = new Set([
+  "AbortError",
+  "RenderingCancelledException",
+]);
+
+const PDF_ABORT_ERROR_MESSAGE_PATTERNS = [
+  /rendering cancelled/i,
+  /rendering canceled/i,
+  /cancelled/i,
+  /canceled/i,
+  /aborted/i,
+];
+
+const readStringField = (
+  value: unknown,
+  field: keyof ErrorLike,
+): string | null => {
+  if (typeof value !== "object" || value === null) {
+    return null;
+  }
+
+  const candidate = (value as ErrorLike)[field];
+  return typeof candidate === "string" && candidate.length > 0
+    ? candidate
+    : null;
+};
+
 export const getPdfDocument = (
   params: PdfJsGetDocumentParams,
 ): PdfJsLoadingTask => pdfjsLib.getDocument(params) as PdfJsLoadingTask;
@@ -153,6 +199,46 @@ export const getErrorMessage = (error: unknown): string => {
   return String(error ?? "");
 };
 
+export const getPdfErrorDetails = (error: unknown): PdfErrorDetails => {
+  const name =
+    error instanceof Error
+      ? error.name || null
+      : readStringField(error, "name");
+  const message = getErrorMessage(error);
+  const code = readStringField(error, "code");
+  const stack =
+    error instanceof Error ? error.stack ?? null : readStringField(error, "stack");
+
+  return {
+    name,
+    message,
+    code,
+    stack,
+  };
+};
+
+export const isPdfAbortError = (error: unknown): boolean => {
+  if (typeof DOMException !== "undefined" && error instanceof DOMException) {
+    if (error.name === "AbortError") {
+      return true;
+    }
+  }
+
+  const details = getPdfErrorDetails(error);
+
+  if (details.name && PDF_ABORT_ERROR_NAMES.has(details.name)) {
+    return true;
+  }
+
+  if (details.code && PDF_ABORT_ERROR_NAMES.has(details.code)) {
+    return true;
+  }
+
+  return PDF_ABORT_ERROR_MESSAGE_PATTERNS.some((pattern) =>
+    pattern.test(details.message),
+  );
+};
+
 export const isPdfTextItem = (
   item: PdfJsTextItem | PdfJsTextMarkedContent,
 ): item is PdfJsTextItem => typeof (item as PdfJsTextItem).str === "string";
@@ -165,4 +251,28 @@ export const destroyPdfResource = (
   } catch {
     // noop
   }
+};
+
+export const disposePdfDocumentResource = (
+  resource:
+    | {
+        cleanup?: (keepLoadedFonts?: boolean) => void | Promise<void>;
+        destroy?: () => void | Promise<void>;
+      }
+    | null
+    | undefined,
+) => {
+  void (async () => {
+    try {
+      await resource?.cleanup?.(false);
+    } catch {
+      // noop
+    }
+
+    try {
+      await resource?.destroy?.();
+    } catch {
+      // noop
+    }
+  })();
 };

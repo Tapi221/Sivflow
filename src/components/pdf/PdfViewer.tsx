@@ -513,7 +513,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       loading,
       error,
       setPageSize,
-      getPage,
+      acquirePage,
       getPageTextContent,
       prefetchPageResources,
     } = usePdfDocument({
@@ -922,7 +922,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
                           renderTextLayer={renderTextLayer}
                           searchMatches={pageSearchMatches}
                           activeSearchMatchIndex={activeSearchMatchIndexForPage}
-                          getPage={getPage}
+                          acquirePage={acquirePage}
                           getPageTextContent={getPageTextContent}
                           onPageSize={setPageSize}
                         />
