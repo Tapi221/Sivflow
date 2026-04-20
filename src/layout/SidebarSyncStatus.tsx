@@ -1,5 +1,4 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { AlertCircle, Check, Cloud, RefreshCw } from "@/ui/icons";
 import "./Sidebar.css";
 
 type SyncTone = "idle" | "syncing" | "success" | "error" | "waiting";
@@ -66,23 +65,8 @@ const getSyncLabel = ({
   if (syncNotice === "wifi_wait") return "Wi-Fi待機中";
   if (syncStatus === "syncing") return "同期中...";
   if (syncStatus === "error") return "同期エラー";
-  if (syncStatus === "success") return formatLastSyncText(lastSyncTime);
-  return "同期待機中";
-};
-
-const renderSyncIcon = (tone: SyncTone) => {
-  switch (tone) {
-    case "syncing":
-      return <RefreshCw className="h-3 w-3 animate-spin" />;
-    case "success":
-      return <Check className="h-3 w-3" />;
-    case "error":
-      return <AlertCircle className="h-3 w-3" />;
-    case "waiting":
-    case "idle":
-    default:
-      return <Cloud className="h-3 w-3" />;
-  }
+  if (lastSyncTime) return formatLastSyncText(lastSyncTime);
+  return "最終同期: 未実行";
 };
 
 export const SidebarSyncStatus = () => {
@@ -97,9 +81,7 @@ export const SidebarSyncStatus = () => {
       aria-live="polite"
       title={label}
     >
-      <span className="sidebar__sync-status-icon" aria-hidden="true">
-        {renderSyncIcon(tone)}
-      </span>
+      <span className="sidebar__sync-status-dot" aria-hidden="true" />
       <span className="sidebar__sync-status-label">{label}</span>
     </div>
   );
