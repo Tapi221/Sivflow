@@ -1,10 +1,11 @@
 {
-  "base_commit": "78fad7fcb6f3b9d29ebdb818a2fea0633e71f05b",
+  "repository": "akari221/FlashCard-Master",
+  "base_ref": "7b5e7748cfd58a04bc70579f5421803a7e7a3569",
+  "description": "Overwrite-ready final implementation for root direct-folder-create behavior and breadcrumb context guard.",
   "files": [
     {
       "path": "src/components/folder/layout/TreeViewLayout.tsx",
-      "sha256": "f6e3e2741904a19e10546d7fbd80ff486b88e60c31ab16620e0755e4bfa0cbd2",
-      "purpose": "Root-level folder creation behavior fix with action/breadcrumb context separation cleanup"
+      "sha256": "1c82785cc8bc71613c8e3a512c56a06ad7b2c44fcad02ffce39932045a14766c"
     }
   ]
 }
