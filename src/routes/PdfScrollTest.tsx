@@ -39,7 +39,7 @@ const createE2EPdfData = (pageCount = 14): Uint8Array => {
     `<< /Type /Pages /Kids [${kids.join(" ")}] /Count ${pageCount} >>`,
   );
 
-  const ids = Array.from(objects.keys()).sort((a, b) => a - b);
+  const ids = Array.from(objects.keys()).sort((left, right) => left - right);
   const maxId = ids[ids.length - 1];
   const offsets: Array<number | null> = new Array(maxId + 1).fill(null);
 
@@ -62,7 +62,9 @@ const createE2EPdfData = (pageCount = 14): Uint8Array => {
 
   out += `trailer\n<< /Size ${maxId + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
   const bytes = new Uint8Array(out.length);
-  for (let i = 0; i < out.length; i += 1) bytes[i] = out.charCodeAt(i) & 0xff;
+  for (let index = 0; index < out.length; index += 1) {
+    bytes[index] = out.charCodeAt(index) & 0xff;
+  }
   return bytes;
 };
 
@@ -86,18 +88,27 @@ const PdfScrollTest = () => {
   }, [pdfBlobUrl]);
 
   useEffect(() => {
-    if (!DEV_MODE) return;
-    if (!isLocalHost(window.location.hostname)) return;
+    if (!DEV_MODE) {
+      return;
+    }
+
+    if (!isLocalHost(window.location.hostname)) {
+      return;
+    }
+
     const debugWindow = window as Window & {
       __logPdfScrollDiagnostics?: () => void;
       __getPdfScrollDiagnostics?: () => ReturnType<
         PdfViewerHandle["getScrollDiagnostics"]
       >;
     };
-    debugWindow.__logPdfScrollDiagnostics = () =>
+
+    debugWindow.__logPdfScrollDiagnostics = () => {
       viewerRef.current?.logScrollDiagnostics();
-    debugWindow.__getPdfScrollDiagnostics = () =>
-      viewerRef.current?.getScrollDiagnostics() ?? null;
+    };
+    debugWindow.__getPdfScrollDiagnostics = () => {
+      return viewerRef.current?.getScrollDiagnostics() ?? null;
+    };
 
     return () => {
       delete debugWindow.__logPdfScrollDiagnostics;
@@ -126,7 +137,7 @@ const PdfScrollTest = () => {
           <PdfViewer
             ref={viewerRef}
             source={{ data: null, url: pdfBlobUrl }}
-            scale={1}
+            baseScale={1}
             onNumPages={setNumPages}
             onPageChange={setCurrentPage}
             className="h-full w-full"
