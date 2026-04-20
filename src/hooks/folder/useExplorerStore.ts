@@ -1,91 +1,132 @@
 /**
  * useExplorerStore - Explorer状態管理フック
  *
- * Recent, タブ状態をlocalStorageで永続化
+ * 絞り込み状態をlocalStorageで永続化
  */
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type ExplorerTab = "explorer" | "recent" | "inbox";
+type ContentTypeFilter = "card" | "pdf";
+type ToggleableFlag = "any" | "on" | "off";
+type TagMatchMode = "any" | "all";
+type DirectoryBadgeVisibilityKey = "uncertainty" | "bookmarked" | "tags";
 
-export interface RecentItem {
-  type: "folder" | "card" | "document";
-  id: string;
-  ts: number;
-}
+type DirectoryBadgeVisibility = {
+  uncertainty: boolean;
+  bookmarked: boolean;
+  tags: boolean;
+};
 
 export interface ExplorerState {
-  activeTab: ExplorerTab;
-  explorerTab: ExplorerTab;
-  setExplorerTab: (tab: ExplorerTab) => void;
-  recent: RecentItem[];
-  addRecent: (item: Omit<RecentItem, "ts">) => void;
-  clearRecent: () => void;
   tagFilter: string[];
-  tagMatchMode: "any" | "all";
-  uncertaintyFilter: "any" | "on" | "off";
-  bookmarkedFilter: "any" | "on" | "off";
-  draftFilter: "any" | "on" | "off";
-  contentTypeFilter: ("card" | "pdf")[];
-  directoryBadgeVisibility: {
-    uncertainty: boolean;
-    bookmarked: boolean;
-    tags: boolean;
-  };
+  tagMatchMode: TagMatchMode;
+  uncertaintyFilter: ToggleableFlag;
+  bookmarkedFilter: ToggleableFlag;
+  draftFilter: ToggleableFlag;
+  contentTypeFilter: ContentTypeFilter[];
+  directoryBadgeVisibility: DirectoryBadgeVisibility;
   setTagFilter: (tags: string[]) => void;
   toggleTag: (tag: string) => void;
   clearTagFilter: () => void;
   clearAllFilters: () => void;
-  setTagMatchMode: (mode: "any" | "all") => void;
-  setUncertaintyFilter: (mode: "any" | "on" | "off") => void;
-  setBookmarkedFilter: (mode: "any" | "on" | "off") => void;
-  setDraftFilter: (mode: "any" | "on" | "off") => void;
-  toggleContentType: (kind: "card" | "pdf") => void;
-  toggleDirectoryBadgeVisibility: (
-    key: "uncertainty" | "bookmarked" | "tags",
-  ) => void;
+  setTagMatchMode: (mode: TagMatchMode) => void;
+  setUncertaintyFilter: (mode: ToggleableFlag) => void;
+  setBookmarkedFilter: (mode: ToggleableFlag) => void;
+  setDraftFilter: (mode: ToggleableFlag) => void;
+  toggleContentType: (kind: ContentTypeFilter) => void;
+  toggleDirectoryBadgeVisibility: (key: DirectoryBadgeVisibilityKey) => void;
 }
 
-const MAX_RECENT = 30;
+const DEFAULT_CONTENT_TYPE_FILTER: ContentTypeFilter[] = ["card", "pdf"];
+
+const DEFAULT_DIRECTORY_BADGE_VISIBILITY: DirectoryBadgeVisibility = {
+  uncertainty: true,
+  bookmarked: true,
+  tags: true,
+};
+
+const normalizeTagFilter = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === "string");
+};
+
+const normalizeTagMatchMode = (value: unknown): TagMatchMode => {
+  return value === "all" ? "all" : "any";
+};
+
+const normalizeToggleableFlag = (value: unknown): ToggleableFlag => {
+  if (value === "on" || value === "off") return value;
+  return "any";
+};
+
+const normalizeContentTypeFilter = (value: unknown): ContentTypeFilter[] => {
+  if (!Array.isArray(value)) return [...DEFAULT_CONTENT_TYPE_FILTER];
+
+  const next = value.filter(
+    (entry): entry is ContentTypeFilter =>
+      entry === "card" || entry === "pdf",
+  );
+
+  return next.length > 0 ? next : [...DEFAULT_CONTENT_TYPE_FILTER];
+};
+
+const normalizeDirectoryBadgeVisibility = (
+  value: unknown,
+): DirectoryBadgeVisibility => {
+  if (!value || typeof value !== "object") {
+    return { ...DEFAULT_DIRECTORY_BADGE_VISIBILITY };
+  }
+
+  const record = value as Partial<Record<DirectoryBadgeVisibilityKey, unknown>>;
+
+  return {
+    uncertainty:
+      typeof record.uncertainty === "boolean"
+        ? record.uncertainty
+        : DEFAULT_DIRECTORY_BADGE_VISIBILITY.uncertainty,
+    bookmarked:
+      typeof record.bookmarked === "boolean"
+        ? record.bookmarked
+        : DEFAULT_DIRECTORY_BADGE_VISIBILITY.bookmarked,
+    tags:
+      typeof record.tags === "boolean"
+        ? record.tags
+        : DEFAULT_DIRECTORY_BADGE_VISIBILITY.tags,
+  };
+};
+
+const createDefaultState = (): Pick<
+  ExplorerState,
+  | "tagFilter"
+  | "tagMatchMode"
+  | "uncertaintyFilter"
+  | "bookmarkedFilter"
+  | "draftFilter"
+  | "contentTypeFilter"
+  | "directoryBadgeVisibility"
+> => ({
+  tagFilter: [],
+  tagMatchMode: "any",
+  uncertaintyFilter: "any",
+  bookmarkedFilter: "any",
+  draftFilter: "any",
+  contentTypeFilter: [...DEFAULT_CONTENT_TYPE_FILTER],
+  directoryBadgeVisibility: { ...DEFAULT_DIRECTORY_BADGE_VISIBILITY },
+});
 
 export const useExplorerStore = create<ExplorerState>()(
   persist(
     (set) => ({
-      activeTab: "explorer",
-      explorerTab: "explorer",
-      setExplorerTab: (tab) => set({ explorerTab: tab }),
-      recent: [],
-      addRecent: (item) =>
-        set((state) => {
-          const filtered = state.recent.filter(
-            (r) => !(r.type === item.type && r.id === item.id),
-          );
-          const newRecent = [{ ...item, ts: Date.now() }, ...filtered].slice(
-            0,
-            MAX_RECENT,
-          );
-          return { recent: newRecent };
-        }),
-      clearRecent: () => set({ recent: [] }),
-      tagFilter: [],
-      tagMatchMode: "any",
-      uncertaintyFilter: "any",
-      bookmarkedFilter: "any",
-      draftFilter: "any",
-      contentTypeFilter: ["card", "pdf"],
-      directoryBadgeVisibility: {
-        uncertainty: true,
-        bookmarked: true,
-        tags: true,
-      },
+      ...createDefaultState(),
       setTagFilter: (tags) => set({ tagFilter: tags }),
       toggleTag: (tag) =>
         set((state) => {
           const exists = state.tagFilter.includes(tag);
-          const newFilter = exists
-            ? state.tagFilter.filter((t) => t !== tag)
+          const next = exists
+            ? state.tagFilter.filter((currentTag) => currentTag !== tag)
             : [...state.tagFilter, tag];
-          return { tagFilter: newFilter };
+
+          return { tagFilter: next };
         }),
       clearTagFilter: () => set({ tagFilter: [] }),
       clearAllFilters: () =>
@@ -95,7 +136,7 @@ export const useExplorerStore = create<ExplorerState>()(
           uncertaintyFilter: "any",
           bookmarkedFilter: "any",
           draftFilter: "any",
-          contentTypeFilter: ["card", "pdf"],
+          contentTypeFilter: [...DEFAULT_CONTENT_TYPE_FILTER],
         }),
       setTagMatchMode: (mode) => set({ tagMatchMode: mode }),
       setUncertaintyFilter: (mode) => set({ uncertaintyFilter: mode }),
@@ -108,9 +149,15 @@ export const useExplorerStore = create<ExplorerState>()(
             const next = state.contentTypeFilter.filter(
               (value) => value !== kind,
             );
-            return { contentTypeFilter: next.length > 0 ? next : [kind] };
+
+            return {
+              contentTypeFilter: next.length > 0 ? next : [kind],
+            };
           }
-          return { contentTypeFilter: [...state.contentTypeFilter, kind] };
+
+          return {
+            contentTypeFilter: [...state.contentTypeFilter, kind],
+          };
         }),
       toggleDirectoryBadgeVisibility: (key) =>
         set((state) => ({
@@ -123,8 +170,6 @@ export const useExplorerStore = create<ExplorerState>()(
     {
       name: "explorer-storage",
       partialize: (state) => ({
-        explorerTab: state.explorerTab,
-        recent: state.recent,
         tagFilter: state.tagFilter,
         tagMatchMode: state.tagMatchMode,
         uncertaintyFilter: state.uncertaintyFilter,
@@ -135,28 +180,28 @@ export const useExplorerStore = create<ExplorerState>()(
       }),
       migrate: (persistedState: unknown) => {
         if (!persistedState || typeof persistedState !== "object") {
-          return persistedState;
+          return createDefaultState();
         }
 
         const next = { ...persistedState } as Record<string, unknown>;
 
-        if (next.explorerTab === "favorites") {
-          next.explorerTab = "explorer";
-        }
+        next.tagFilter = normalizeTagFilter(next.tagFilter);
+        next.tagMatchMode = normalizeTagMatchMode(next.tagMatchMode);
+        next.uncertaintyFilter = normalizeToggleableFlag(
+          next.uncertaintyFilter,
+        );
+        next.bookmarkedFilter = normalizeToggleableFlag(next.bookmarkedFilter);
+        next.draftFilter = normalizeToggleableFlag(next.draftFilter);
+        next.contentTypeFilter = normalizeContentTypeFilter(
+          next.contentTypeFilter,
+        );
+        next.directoryBadgeVisibility = normalizeDirectoryBadgeVisibility(
+          next.directoryBadgeVisibility,
+        );
 
-        if (next.explorerTab === "pinned" || next.explorerTab === "views") {
-          next.explorerTab = "explorer";
-        }
-
-        if (Array.isArray(next.contentTypeFilter)) {
-          next.contentTypeFilter = next.contentTypeFilter.filter(
-            (value) => value === "card" || value === "pdf",
-          );
-          if ((next.contentTypeFilter as unknown[]).length === 0) {
-            next.contentTypeFilter = ["card", "pdf"];
-          }
-        }
-
+        delete next.recent;
+        delete next.explorerTab;
+        delete next.activeTab;
         delete next.favorites;
         delete next.pinnedItems;
 

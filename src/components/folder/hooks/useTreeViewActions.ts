@@ -8,23 +8,18 @@ interface UseTreeViewActionsParams {
   navigate: (to: string) => void;
   selectedFolderId: string | null;
   onFolderSelect: (folderId: string | null) => void;
-  addRecent: (item: { type: "folder"; id: string }) => void;
 }
 
 export const useTreeViewActions = ({
   navigate,
   selectedFolderId,
   onFolderSelect,
-  addRecent,
 }: UseTreeViewActionsParams) => {
-  const handleFolderSelectWithRecent = useCallback(
+  const handleFolderSelect = useCallback(
     (folderId: string | null) => {
       onFolderSelect(folderId);
-      if (folderId) {
-        addRecent({ type: "folder", id: folderId });
-      }
     },
-    [addRecent, onFolderSelect],
+    [onFolderSelect],
   );
 
   const handleStartStudy = useCallback(() => {
@@ -55,7 +50,7 @@ export const useTreeViewActions = ({
   }, [navigate, selectedFolderId]);
 
   return {
-    handleFolderSelectWithRecent,
+    handleFolderSelect,
     handleStartStudy,
     handleViewCards,
     handleOpenCreateCard,

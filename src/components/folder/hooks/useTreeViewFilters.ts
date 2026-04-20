@@ -4,23 +4,23 @@ import { useMemo } from "react";
 
 type TagMapLike = Parameters<typeof resolveCardTagNames>[1];
 
+type ContentTypeFilter = "card" | "pdf";
+
 interface UseTreeViewFiltersParams {
   cards: Card[];
   documents: DocumentItem[];
-  explorerTab: string;
   tagFilter: string[];
   tagMatchMode: "any" | "all";
   uncertaintyFilter: "any" | "on" | "off";
   bookmarkedFilter: "any" | "on" | "off";
   draftFilter: "any" | "on" | "off";
-  contentTypeFilter: string[];
+  contentTypeFilter: ContentTypeFilter[];
   tagById: TagMapLike;
 }
 
 export const useTreeViewFilters = ({
   cards,
   documents,
-  explorerTab,
   tagFilter,
   tagMatchMode,
   uncertaintyFilter,
@@ -29,26 +29,15 @@ export const useTreeViewFilters = ({
   contentTypeFilter,
   tagById,
 }: UseTreeViewFiltersParams) => {
-  const isFilterTargetTab = explorerTab === "explorer";
-
   const isFilterActive =
-    isFilterTargetTab &&
-    (tagFilter.length > 0 ||
-      uncertaintyFilter !== "any" ||
-      bookmarkedFilter !== "any" ||
-      draftFilter !== "any" ||
-      contentTypeFilter.length < 2);
+    tagFilter.length > 0 ||
+    uncertaintyFilter !== "any" ||
+    bookmarkedFilter !== "any" ||
+    draftFilter !== "any" ||
+    contentTypeFilter.length < 2;
 
   const { filteredCards, filteredDocuments, isFiltering } = useMemo(() => {
-    const active =
-      isFilterTargetTab &&
-      (tagFilter.length > 0 ||
-        uncertaintyFilter !== "any" ||
-        bookmarkedFilter !== "any" ||
-        draftFilter !== "any" ||
-        contentTypeFilter.length < 2);
-
-    if (!active) {
+    if (!isFilterActive) {
       return {
         filteredCards: cards,
         filteredDocuments: documents.filter(
@@ -61,7 +50,7 @@ export const useTreeViewFilters = ({
     const allowCards = contentTypeFilter.includes("card");
     const allowPdf = contentTypeFilter.includes("pdf");
 
-    const filtered = cards.filter((card) => {
+    const nextCards = cards.filter((card) => {
       if (!allowCards) return false;
 
       if (tagFilter.length > 0) {
@@ -99,25 +88,24 @@ export const useTreeViewFilters = ({
     });
 
     return {
-      filteredCards: filtered,
+      filteredCards: nextCards,
       filteredDocuments: nextDocuments,
       isFiltering: true,
     };
   }, [
+    bookmarkedFilter,
     cards,
+    contentTypeFilter,
     documents,
+    draftFilter,
+    isFilterActive,
+    tagById,
     tagFilter,
     tagMatchMode,
-    isFilterTargetTab,
     uncertaintyFilter,
-    bookmarkedFilter,
-    draftFilter,
-    contentTypeFilter,
-    tagById,
   ]);
 
   return {
-    isFilterTargetTab,
     isFilterActive,
     filteredCards,
     filteredDocuments,

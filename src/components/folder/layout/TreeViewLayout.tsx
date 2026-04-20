@@ -16,7 +16,6 @@ import {
   createPageUrl,
 } from "@/platform/web/navigation/toWebPath";
 import type {
-  Card,
   CardSet,
   DocumentItem,
   Folder,
@@ -184,7 +183,6 @@ const TreeViewLayout = ({
   const {
     sidebarRef,
     contentScrollRef,
-    renderedSidebarWidth,
     isSidebarOpen,
     isMobile,
     isResizing,
@@ -216,13 +214,6 @@ const TreeViewLayout = ({
     isMobile,
   });
 
-  const explorerTab = useExplorerStore((state) => state.explorerTab);
-  const setExplorerTab = useExplorerStore((state) => state.setExplorerTab);
-
-  const recent = useExplorerStore((state) => state.recent);
-  const addRecent = useExplorerStore((state) => state.addRecent);
-  const clearRecent = useExplorerStore((state) => state.clearRecent);
-
   const tagFilter = useExplorerStore((state) => state.tagFilter);
   const tagMatchMode = useExplorerStore((state) => state.tagMatchMode);
   const uncertaintyFilter = useExplorerStore(
@@ -234,14 +225,8 @@ const TreeViewLayout = ({
     (state) => state.contentTypeFilter,
   );
 
-  useEffect(() => {
-    if (explorerTab === "inbox") {
-      setExplorerTab("explorer");
-    }
-  }, [explorerTab, setExplorerTab]);
-
   const {
-    handleFolderSelectWithRecent,
+    handleFolderSelect: handleFolderSelectBase,
     handleStartStudy,
     handleViewCards,
     handleOpenCreateCard,
@@ -249,16 +234,15 @@ const TreeViewLayout = ({
     navigate,
     selectedFolderId,
     onFolderSelect,
-    addRecent,
   });
 
   const handleFolderSelect = useCallback(
     (folderId: string | null) => {
       setSelectedCardSetId(null);
       setSelectedCardSetLabel(null);
-      handleFolderSelectWithRecent(folderId);
+      handleFolderSelectBase(folderId);
     },
-    [handleFolderSelectWithRecent],
+    [handleFolderSelectBase],
   );
 
   const handleCardSetSelectWithoutNavigation = useCallback(
@@ -356,11 +340,9 @@ const TreeViewLayout = ({
       folderId: string;
       createdCount: number;
     }) => {
-      addRecent({ type: "folder", id: folderId });
       onFolderSelect(folderId);
       setSelectedCardSetId(cardSetId);
       setSelectedCardSetLabel(cardSetName || "無題のセット");
-      setExplorerTab("explorer");
 
       navigate(
         createPageUrl(
@@ -371,7 +353,7 @@ const TreeViewLayout = ({
         ),
       );
     },
-    [addRecent, navigate, onFolderSelect, setExplorerTab],
+    [navigate, onFolderSelect],
   );
 
   const importTargetCardSets = useMemo(() => {
@@ -388,7 +370,6 @@ const TreeViewLayout = ({
     useTreeViewFilters({
       cards,
       documents,
-      explorerTab,
       tagFilter,
       tagMatchMode,
       uncertaintyFilter,
@@ -466,11 +447,9 @@ const TreeViewLayout = ({
     );
   }
 
-  const tabContent = (
+  const sidebarContent = (
     <TreeViewTabContent
-      explorerTab={explorerTab}
       sidebarDisplayMode={resolvedSidebarDisplayMode}
-      recent={recent}
       folders={folders}
       cards={cards}
       cardSets={cardSets}
@@ -495,7 +474,6 @@ const TreeViewLayout = ({
       onHeaderFolderIdChange={setExplorerHeaderFolderId}
       onFolderSelect={handleFolderSelect}
       onItemSelect={handleItemSelect}
-      onClearRecent={clearRecent}
       onCreateFolder={createFolder}
       onUpdateFolder={handleUpdateFolderForTree}
       onDeleteFolder={deleteFolder}
@@ -529,13 +507,9 @@ const TreeViewLayout = ({
       <TreeViewSidebar
         sidebarRef={sidebarRef}
         contentScrollRef={contentScrollRef}
-        sidebarWidth={renderedSidebarWidth}
         isSidebarOpen={isSidebarOpen}
-        isMobile={isMobile}
         isResizing={isResizing}
         showMobileDetail={showMobileDetail}
-        explorerTab={explorerTab}
-        setExplorerTab={setExplorerTab}
         allTags={allTags}
         getTagColor={getTagColor}
         isFilterActive={isFilterActive}
@@ -550,7 +524,7 @@ const TreeViewLayout = ({
         canBulkImport={Boolean(currentHeaderFolderId)}
         preferDirectRootFolderCreate={isSectionListMode}
       >
-        {tabContent}
+        {sidebarContent}
       </TreeViewSidebar>
 
       <TreeViewMainPane
