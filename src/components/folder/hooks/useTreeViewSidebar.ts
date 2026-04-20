@@ -1,27 +1,49 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type PointerEvent as ReactPointerEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { SIDEBAR_WIDTH_LIMITS } from "@constants/web/app";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 
-const clamp = (w: number) =>
-  Math.min(Math.max(w, SIDEBAR_WIDTH_LIMITS.min), SIDEBAR_WIDTH_LIMITS.max);
+const clampSidebarWidth = (width: number) =>
+  Math.min(Math.max(width, SIDEBAR_WIDTH_LIMITS.min), SIDEBAR_WIDTH_LIMITS.max);
+
+const readStoredSidebarWidth = () => {
+  if (typeof window === "undefined") {
+    return SIDEBAR_WIDTH_LIMITS.default;
+  }
+
+  const savedWidth = window.localStorage.getItem(WEB_STORAGE_KEYS.sidebarWidth);
+  const parsedWidth = Number.parseInt(savedWidth ?? "", 10);
+
+  if (!Number.isFinite(parsedWidth)) {
+    return SIDEBAR_WIDTH_LIMITS.default;
+  }
+
+  return clampSidebarWidth(parsedWidth);
+};
+
+const readStoredSidebarOpen = () => {
+  if (typeof window === "undefined") {
+    return true;
+  }
+
+  const savedOpen = window.localStorage.getItem(WEB_STORAGE_KEYS.sidebarOpen);
+  return savedOpen !== null ? savedOpen === "true" : true;
+};
 
 export const useTreeViewSidebar = () => {
-  const [sidebarWidth, setSidebarWidth] = useState(() => {
-    if (typeof window === "undefined") return SIDEBAR_WIDTH_LIMITS.default;
-    const saved = window.localStorage.getItem(WEB_STORAGE_KEYS.sidebarWidth);
-    return saved ? parseInt(saved, 10) : SIDEBAR_WIDTH_LIMITS.default;
-  });
-
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    if (typeof window === "undefined") return true;
-    const saved = window.localStorage.getItem(WEB_STORAGE_KEYS.sidebarOpen);
-    return saved !== null ? saved === "true" : true;
-  });
-
+  const [sidebarWidth, setSidebarWidth] = useState(readStoredSidebarWidth);
+  const [renderedSidebarWidth, setRenderedSidebarWidth] = useState(() =>
+    clampSidebarWidth(readStoredSidebarWidth()),
+  );
+  const [isSidebarOpen, setIsSidebarOpen] = useState(readStoredSidebarOpen);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth < 768 : false,
   );
-
   const [isResizing, setIsResizing] = useState(false);
 
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -29,50 +51,56 @@ export const useTreeViewSidebar = () => {
 
   const resizingRef = useRef(false);
   const startXRef = useRef(0);
-  const startWRef = useRef(0);
-  const pendingWRef = useRef(sidebarWidth);
+  const startWidthRef = useRef(sidebarWidth);
+  const pendingWidthRef = useRef(sidebarWidth);
   const rafIdRef = useRef<number | null>(null);
 
-  const applyWidthDom = useCallback(
-    (w: number) => {
-      if (isMobile) return;
-      pendingWRef.current = clamp(w);
+  const scheduleRenderedSidebarWidth = useCallback(
+    (nextWidth: number) => {
+      pendingWidthRef.current = clampSidebarWidth(nextWidth);
 
-      if (rafIdRef.current != null) return;
+      if (rafIdRef.current !== null) {
+        return;
+      }
+
       rafIdRef.current = window.requestAnimationFrame(() => {
         rafIdRef.current = null;
-        const el = sidebarRef.current;
-        if (!el) return;
-        el.style.width = isSidebarOpen ? `${pendingWRef.current}px` : "0px";
+        setRenderedSidebarWidth(
+          isSidebarOpen ? pendingWidthRef.current : 0,
+        );
       });
     },
-    [isMobile, isSidebarOpen],
+    [isSidebarOpen],
   );
 
   useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 768);
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   useEffect(() => {
-    const el = sidebarRef.current;
-    if (!el) return;
-
-    if (!isMobile) {
-      el.style.width = isSidebarOpen ? `${sidebarWidth}px` : "0px";
-    } else {
-      el.style.width = "";
+    if (isMobile) {
+      return;
     }
 
-    pendingWRef.current = sidebarWidth;
+    const normalizedWidth = clampSidebarWidth(sidebarWidth);
+    pendingWidthRef.current = normalizedWidth;
+    setRenderedSidebarWidth(isSidebarOpen ? normalizedWidth : 0);
   }, [isMobile, isSidebarOpen, sidebarWidth]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
-        const target = e.target as HTMLElement;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "b") {
+        const target = event.target as HTMLElement;
+
         if (
           target.tagName === "INPUT" ||
           target.tagName === "TEXTAREA" ||
@@ -81,43 +109,52 @@ export const useTreeViewSidebar = () => {
           return;
         }
 
-        e.preventDefault();
-        setIsSidebarOpen((prev) => {
-          const next = !prev;
+        event.preventDefault();
+
+        setIsSidebarOpen((previousOpen) => {
+          const nextOpen = !previousOpen;
           window.localStorage.setItem(
             WEB_STORAGE_KEYS.sidebarOpen,
-            String(next),
+            String(nextOpen),
           );
-          return next;
+          return nextOpen;
         });
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   const startResizing = useCallback(
-    (e: React.PointerEvent) => {
-      if (!isSidebarOpen) return;
-      e.preventDefault();
+    (event: ReactPointerEvent) => {
+      if (!isSidebarOpen || isMobile) {
+        return;
+      }
 
-      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+      event.preventDefault();
+      (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
 
       resizingRef.current = true;
       setIsResizing(true);
 
-      startXRef.current = e.clientX;
-      startWRef.current = pendingWRef.current;
+      startXRef.current = event.clientX;
+      startWidthRef.current = clampSidebarWidth(sidebarWidth);
+      pendingWidthRef.current = clampSidebarWidth(sidebarWidth);
 
       document.body.style.userSelect = "none";
       document.body.style.cursor = "col-resize";
     },
-    [isSidebarOpen],
+    [isMobile, isSidebarOpen, sidebarWidth],
   );
 
   const stopResizing = useCallback(() => {
-    if (!resizingRef.current) return;
+    if (!resizingRef.current) {
+      return;
+    }
 
     resizingRef.current = false;
     setIsResizing(false);
@@ -125,43 +162,53 @@ export const useTreeViewSidebar = () => {
     document.body.style.userSelect = "";
     document.body.style.cursor = "";
 
-    const finalW = pendingWRef.current;
-    setSidebarWidth(finalW);
-    window.localStorage.setItem(WEB_STORAGE_KEYS.sidebarWidth, String(finalW));
-  }, []);
+    const finalWidth = clampSidebarWidth(pendingWidthRef.current);
+    setSidebarWidth(finalWidth);
+    setRenderedSidebarWidth(isSidebarOpen ? finalWidth : 0);
+    window.localStorage.setItem(WEB_STORAGE_KEYS.sidebarWidth, String(finalWidth));
+  }, [isSidebarOpen]);
 
-  const onResizeMove = useCallback(
-    (e: PointerEvent) => {
-      if (!resizingRef.current) return;
-      const dx = e.clientX - startXRef.current;
-      applyWidthDom(startWRef.current + dx);
+  const handleResizeMove = useCallback(
+    (event: PointerEvent) => {
+      if (!resizingRef.current) {
+        return;
+      }
+
+      const deltaX = event.clientX - startXRef.current;
+      scheduleRenderedSidebarWidth(startWidthRef.current + deltaX);
     },
-    [applyWidthDom],
+    [scheduleRenderedSidebarWidth],
   );
 
   useEffect(() => {
-    if (!isResizing) return;
+    if (!isResizing) {
+      return;
+    }
 
-    window.addEventListener("pointermove", onResizeMove, { passive: true });
+    window.addEventListener("pointermove", handleResizeMove, { passive: true });
     window.addEventListener("pointerup", stopResizing);
     window.addEventListener("pointercancel", stopResizing);
 
     return () => {
-      window.removeEventListener("pointermove", onResizeMove);
+      window.removeEventListener("pointermove", handleResizeMove);
       window.removeEventListener("pointerup", stopResizing);
       window.removeEventListener("pointercancel", stopResizing);
-
-      if (rafIdRef.current != null) {
-        cancelAnimationFrame(rafIdRef.current);
-      }
-      rafIdRef.current = null;
     };
-  }, [isResizing, onResizeMove, stopResizing]);
+  }, [handleResizeMove, isResizing, stopResizing]);
+
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        window.cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
 
   return {
     sidebarRef,
     contentScrollRef,
     sidebarWidth,
+    renderedSidebarWidth,
     isSidebarOpen,
     setIsSidebarOpen,
     isMobile,

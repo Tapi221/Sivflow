@@ -3,7 +3,7 @@
  * Linear/Notion 系のテキストリンクスタイル
  */
 import React, { useMemo, useRef, useState } from "react";
-import { History, Plus } from "@/ui/icons";
+import { Folder, History, Plus } from "@/ui/icons";
 import type { ExplorerTab } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { SidebarNavIcon } from "@/layout/sidebarNavItem";
@@ -36,18 +36,9 @@ const TABS: {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
-  {
-    id: "explorer",
-    label: "フォルダ",
-    icon: () => (
-      <Plus className="hidden" />
-    ) /* Dummy, will be overwritten by History or Folder icons from @/ui/icons if needed, but TABS use actual icons */,
-  },
+  { id: "explorer", label: "フォルダ", icon: Folder },
+  { id: "recent", label: "最近", icon: History },
 ];
-// Re-importing icons correctly for TABS
-import { Folder } from "@/ui/icons";
-TABS[0] = { id: "explorer", label: "フォルダ", icon: Folder };
-TABS[1] = { id: "recent", label: "最近", icon: History };
 
 export const ExplorerTabs = ({
   activeTab,
@@ -104,6 +95,8 @@ export const ExplorerTabs = ({
           return (
             <button
               key={tab.id}
+              type="button"
+              data-testid={`explorer-tab-${tab.id}`}
               onClick={() => onTabChange(tab.id)}
               aria-label={tab.label}
               className={getSidebarNavItemClassName({
