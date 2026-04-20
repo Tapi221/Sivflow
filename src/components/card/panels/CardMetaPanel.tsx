@@ -103,6 +103,8 @@ type CardMetaPanelProps = {
   syncStatus?: CardMetaSyncStatus;
 };
 
+type CardMetaPanelContentProps = Omit<CardMetaPanelProps, "isLoading">;
+
 const META_DATE_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
   year: "numeric",
   month: "2-digit",
@@ -389,8 +391,9 @@ const areCardMetaCardsEqual = (
   if ((prev.title ?? "") !== (next.title ?? "")) return false;
   if (cardMetaDraftFlag(prev) !== cardMetaDraftFlag(next)) return false;
   if (cardMetaReviewCount(prev) !== cardMetaReviewCount(next)) return false;
-  if (cardMetaLastSubjectiveScore(prev) !== cardMetaLastSubjectiveScore(next))
+  if (cardMetaLastSubjectiveScore(prev) !== cardMetaLastSubjectiveScore(next)) {
     return false;
+  }
 
   const prevLegacy = asRecord(prev);
   const nextLegacy = asRecord(next);
@@ -455,8 +458,7 @@ const areCardMetaPanelPropsEqual = (
   prev.syncStatus?.canRetry === next.syncStatus?.canRetry &&
   prev.syncStatus?.onRetry === next.syncStatus?.onRetry;
 
-const CardMetaPanelInner = ({
-  isLoading = false,
+const CardMetaPanelContent = ({
   isVisible = false,
   card,
   isEditingCard = false,
@@ -475,18 +477,19 @@ const CardMetaPanelInner = ({
   mode = "full",
   tagNamesOverride,
   syncStatus,
-}: CardMetaPanelProps) => {
-  if (isLoading) {
-    return <CardMetaPanelSkeleton />;
-  }
-
+}: CardMetaPanelContentProps) => {
   const isCalendarMode = mode === "calendar";
   const [hasActivatedHeavySections, setHasActivatedHeavySections] = useState(
     Boolean(isVisible),
   );
+  const isVisibleRef = useRef(isVisible);
 
   useEffect(() => {
-    setHasActivatedHeavySections(Boolean(isVisible));
+    isVisibleRef.current = isVisible;
+  }, [isVisible]);
+
+  useEffect(() => {
+    setHasActivatedHeavySections(Boolean(isVisibleRef.current));
   }, [card?.id]);
 
   useEffect(() => {
@@ -1967,14 +1970,14 @@ const CardMetaPanelInner = ({
                                 }
                                 onChange={(e) =>
                                   handleChangeDurationDraft(
-                                    row.editableLogIndex as number,
+                                    row.editableLogIndex,
                                     e.target.value,
                                   )
                                 }
                                 onFocus={(e) => e.currentTarget.select()}
                                 onBlur={(e) =>
                                   handleSaveReviewDuration(
-                                    row.editableLogIndex as number,
+                                    row.editableLogIndex,
                                     e.target.value,
                                   )
                                 }
@@ -1982,7 +1985,7 @@ const CardMetaPanelInner = ({
                                   if (e.key === "Enter") {
                                     e.preventDefault();
                                     handleSaveReviewDuration(
-                                      row.editableLogIndex!,
+                                      row.editableLogIndex,
                                       e.currentTarget.value,
                                     );
                                     e.currentTarget.blur();
@@ -1991,7 +1994,7 @@ const CardMetaPanelInner = ({
                                     e.preventDefault();
                                     setDurationDrafts((prev) => ({
                                       ...prev,
-                                      [row.editableLogIndex!]:
+                                      [row.editableLogIndex]:
                                         row.durationMinutes != null
                                           ? String(row.durationMinutes)
                                           : "",
@@ -2119,6 +2122,17 @@ const CardMetaPanelInner = ({
       ) : null}
     </EmptyMetaPanel>
   );
+};
+
+const CardMetaPanelInner = ({
+  isLoading = false,
+  ...contentProps
+}: CardMetaPanelProps) => {
+  if (isLoading) {
+    return <CardMetaPanelSkeleton />;
+  }
+
+  return <CardMetaPanelContent {...contentProps} />;
 };
 
 export const CardMetaPanel = memo(

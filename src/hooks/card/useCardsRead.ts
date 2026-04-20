@@ -48,7 +48,6 @@ const normalizeFolderId = (value: string | null | undefined) => {
   return trimmed.length > 0 ? trimmed : null;
 };
 
-
 const toTime = (value: unknown): number => {
   return toMillis(value);
 };
