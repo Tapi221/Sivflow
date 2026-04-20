@@ -65,9 +65,7 @@ export const useTreeViewSidebar = () => {
 
       rafIdRef.current = window.requestAnimationFrame(() => {
         rafIdRef.current = null;
-        setRenderedSidebarWidth(
-          isSidebarOpen ? pendingWidthRef.current : 0,
-        );
+        setRenderedSidebarWidth(isSidebarOpen ? pendingWidthRef.current : 0);
       });
     },
     [isSidebarOpen],
@@ -165,7 +163,10 @@ export const useTreeViewSidebar = () => {
     const finalWidth = clampSidebarWidth(pendingWidthRef.current);
     setSidebarWidth(finalWidth);
     setRenderedSidebarWidth(isSidebarOpen ? finalWidth : 0);
-    window.localStorage.setItem(WEB_STORAGE_KEYS.sidebarWidth, String(finalWidth));
+    window.localStorage.setItem(
+      WEB_STORAGE_KEYS.sidebarWidth,
+      String(finalWidth),
+    );
   }, [isSidebarOpen]);
 
   const handleResizeMove = useCallback(

@@ -63,8 +63,7 @@ const normalizeContentTypeFilter = (value: unknown): ContentTypeFilter[] => {
   if (!Array.isArray(value)) return [...DEFAULT_CONTENT_TYPE_FILTER];
 
   const next = value.filter(
-    (entry): entry is ContentTypeFilter =>
-      entry === "card" || entry === "pdf",
+    (entry): entry is ContentTypeFilter => entry === "card" || entry === "pdf",
   );
 
   return next.length > 0 ? next : [...DEFAULT_CONTENT_TYPE_FILTER];
