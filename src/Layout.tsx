@@ -29,8 +29,6 @@ const Layout = () => {
   const { isSettingsOpen, settingsTab, setIsSettingsOpen } =
     useSettingsQueryParam(searchParams, setSearchParams);
 
-  const isStudyModePage = /^\/study(?:\/|$)/i.test(location.pathname);
-
   useKatexLoader();
 
   useEffect(() => {
@@ -79,4 +77,5 @@ const Layout = () => {
 };
 
 export default Layout;
+
 
