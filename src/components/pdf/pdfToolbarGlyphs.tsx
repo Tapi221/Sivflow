@@ -54,3 +54,53 @@ export const PdfFitWidthGlyph = () => (
     />
   </svg>
 );
+
+export const PdfSinglePageGlyph = () => (
+  <svg
+    viewBox="0 0 16 16"
+    className="h-3.5 w-3.5"
+    fill="none"
+    aria-hidden="true"
+  >
+    <rect
+      x="3.25"
+      y="2.5"
+      width="9.5"
+      height="11"
+      rx="1.75"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      opacity="0.9"
+    />
+  </svg>
+);
+
+export const PdfDoublePageGlyph = () => (
+  <svg
+    viewBox="0 0 16 16"
+    className="h-3.5 w-3.5"
+    fill="none"
+    aria-hidden="true"
+  >
+    <rect
+      x="1.75"
+      y="2.75"
+      width="5.5"
+      height="10.5"
+      rx="1.3"
+      stroke="currentColor"
+      strokeWidth="1.15"
+      opacity="0.9"
+    />
+    <rect
+      x="8.75"
+      y="2.75"
+      width="5.5"
+      height="10.5"
+      rx="1.3"
+      stroke="currentColor"
+      strokeWidth="1.15"
+      opacity="0.9"
+    />
+  </svg>
+);

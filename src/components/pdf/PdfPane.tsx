@@ -2,7 +2,7 @@ import type { BlobUrl } from "@/types/core/branded";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import platform from "@/platform";
-import type { PdfViewerState } from "@/types";
+import type { PdfPageLayoutMode, PdfViewerState } from "@/types";
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PdfOverlayToolbar } from "./PdfOverlayToolbar";
@@ -50,6 +50,19 @@ interface PdfPaneProps {
 
 const SEARCH_INPUT_DEBOUNCE_MS = 300;
 const PDF_OVERLAY_ZOOM_STEP_PERCENT = 1;
+const PDF_DOUBLE_PAGE_GAP = 16;
+
+const normalizePageForLayout = (
+  page: number,
+  pageLayoutMode: PdfPageLayoutMode,
+) => {
+  if (pageLayoutMode !== "double") {
+    return Math.max(1, Math.trunc(page));
+  }
+
+  const normalizedPage = Math.max(1, Math.trunc(page));
+  return normalizedPage - ((normalizedPage - 1) % 2);
+};
 
 export const PdfPane = ({
   doc,
@@ -59,6 +72,8 @@ export const PdfPane = ({
 }: PdfPaneProps) => {
   const { currentUser } = useAuthSession();
   const viewerRef = useRef<PdfViewerHandle>(null);
+  const previousPageLayoutModeRef = useRef<PdfPageLayoutMode | null>(null);
+
   const [numPages, setNumPages] = useState(0);
   const [basePageWidth, setBasePageWidth] = useState<number | null>(null);
   const [searchInputValue, setSearchInputValue] = useState("");
@@ -72,14 +87,26 @@ export const PdfPane = ({
 
   const { containerRef, containerWidth } = usePdfContainerWidth();
 
-  const fitScale = useMemo(() => {
-    if (!containerWidth || !basePageWidth) {
-      return 1;
-    }
+  const getFitScale = useCallback(
+    (pageLayoutMode: PdfPageLayoutMode) => {
+      if (!containerWidth || !basePageWidth) {
+        return 1;
+      }
 
-    const usableWidth = Math.max(1, containerWidth - FIT_PADDING_X);
-    return clampScale(Number((usableWidth / basePageWidth).toFixed(3)));
-  }, [containerWidth, basePageWidth]);
+      const pagesPerRow = pageLayoutMode === "double" ? 2 : 1;
+      const horizontalGap =
+        pageLayoutMode === "double" ? PDF_DOUBLE_PAGE_GAP : 0;
+      const usableWidth = Math.max(
+        1,
+        containerWidth - FIT_PADDING_X - horizontalGap,
+      );
+
+      return clampScale(
+        Number((usableWidth / (basePageWidth * pagesPerRow)).toFixed(3)),
+      );
+    },
+    [basePageWidth, containerWidth],
+  );
 
   const resolvedViewerOptions = useMemo(() => {
     return {
@@ -92,13 +119,15 @@ export const PdfPane = ({
     currentPage,
     scale,
     fitMode,
+    pageLayoutMode,
     setCurrentPage,
     handleFitWidth,
     handleViewerScaleChange,
+    handlePageLayoutModeChange,
   } = usePdfViewerPersistence({
     docId: doc.id,
     viewerState: doc.viewerState,
-    fitScale,
+    getFitScale,
     onDocumentUpdate: onDocumentUpdate
       ? (updates) => onDocumentUpdate(updates)
       : undefined,
@@ -116,6 +145,12 @@ export const PdfPane = ({
   } = usePdfSourceResolver(doc, currentUser?.uid);
 
   const scalePercent = useMemo(() => Number((scale * 100).toFixed(1)), [scale]);
+
+  const pageStep = pageLayoutMode === "double" ? 2 : 1;
+  const alignedCurrentPage = useMemo(
+    () => normalizePageForLayout(currentPage, pageLayoutMode),
+    [currentPage, pageLayoutMode],
+  );
 
   const handleScalePercentChange = useCallback(
     (nextPercent: number) => {
@@ -148,15 +183,37 @@ export const PdfPane = ({
     }
   }, [numPages, currentPage, setCurrentPage]);
 
+  useEffect(() => {
+    if (previousPageLayoutModeRef.current === pageLayoutMode) {
+      return;
+    }
+
+    previousPageLayoutModeRef.current = pageLayoutMode;
+
+    const normalizedPage = normalizePageForLayout(currentPage, pageLayoutMode);
+
+    if (normalizedPage !== currentPage) {
+      setCurrentPage(normalizedPage);
+    }
+
+    const rafId = window.requestAnimationFrame(() => {
+      viewerRef.current?.scrollToPage(normalizedPage);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+    };
+  }, [currentPage, pageLayoutMode, setCurrentPage]);
+
   const handlePrev = useCallback(() => {
-    const nextPage = Math.max(1, currentPage - 1);
+    const nextPage = Math.max(1, alignedCurrentPage - pageStep);
     viewerRef.current?.scrollToPage(nextPage);
-  }, [currentPage]);
+  }, [alignedCurrentPage, pageStep]);
 
   const handleNext = useCallback(() => {
-    const nextPage = Math.min(numPages || currentPage, currentPage + 1);
+    const nextPage = Math.min(numPages || alignedCurrentPage, alignedCurrentPage + pageStep);
     viewerRef.current?.scrollToPage(nextPage);
-  }, [currentPage, numPages]);
+  }, [alignedCurrentPage, numPages, pageStep]);
 
   const handleCommitPage = useCallback(
     (nextPage: number) => {
@@ -168,27 +225,29 @@ export const PdfPane = ({
         numPages,
         Math.max(1, Math.trunc(nextPage)),
       );
-      viewerRef.current?.scrollToPage(normalizedPage);
+      const targetPage = normalizePageForLayout(normalizedPage, pageLayoutMode);
+
+      viewerRef.current?.scrollToPage(targetPage);
     },
-    [numPages],
+    [numPages, pageLayoutMode],
   );
 
   const commitSearchQuery = useCallback(() => {
-    setSearchQuery((previous) =>
-      previous === searchInputValue ? previous : searchInputValue,
+    setSearchQuery((previousQuery) =>
+      previousQuery === searchInputValue ? previousQuery : searchInputValue,
     );
   }, [searchInputValue]);
 
   const handlePrevMatch = useCallback(() => {
     commitSearchQuery();
     setSearchNavDirection("prev");
-    setSearchNavToken((previous) => previous + 1);
+    setSearchNavToken((previousToken) => previousToken + 1);
   }, [commitSearchQuery]);
 
   const handleNextMatch = useCallback(() => {
     commitSearchQuery();
     setSearchNavDirection("next");
-    setSearchNavToken((previous) => previous + 1);
+    setSearchNavToken((previousToken) => previousToken + 1);
   }, [commitSearchQuery]);
 
   const handleOpenNewTab = useCallback(async () => {
@@ -225,8 +284,8 @@ export const PdfPane = ({
   const handleFirstPageSize = useCallback(
     (size: { width: number; height: number } | null) => {
       const nextWidth = size?.width ?? null;
-      setBasePageWidth((previous) =>
-        previous === nextWidth ? previous : nextWidth,
+      setBasePageWidth((previousWidth) =>
+        previousWidth === nextWidth ? previousWidth : nextWidth,
       );
     },
     [],
@@ -262,6 +321,8 @@ export const PdfPane = ({
   }, []);
 
   const shouldRenderOverlayToolbar = !sourceUnavailable && numPages > 0;
+  const canGoToPrevPage = alignedCurrentPage > 1;
+  const canGoToNextPage = alignedCurrentPage + pageStep <= numPages;
 
   return (
     <div className={cn("flex h-full min-h-0 min-w-0 flex-col", className)}>
@@ -303,6 +364,8 @@ export const PdfPane = ({
               searchQuery={searchQuery}
               searchNavToken={searchNavToken}
               searchNavDirection={searchNavDirection}
+              pageLayoutMode={pageLayoutMode}
+              spreadGap={PDF_DOUBLE_PAGE_GAP}
               onScaleChange={handleViewerScaleChange}
               onNumPages={setNumPages}
               onPageChange={setCurrentPage}
@@ -330,20 +393,22 @@ export const PdfPane = ({
               >
                 <div className="pointer-events-auto">
                   <PdfOverlayToolbar
-                    currentPage={currentPage}
+                    currentPage={alignedCurrentPage}
                     numPages={numPages}
                     scalePercent={scalePercent}
                     minScalePercent={FIT_MIN_SCALE * 100}
                     maxScalePercent={FIT_MAX_SCALE * 100}
                     fitMode={fitMode}
+                    pageLayoutMode={pageLayoutMode}
                     zoomStepPercent={PDF_OVERLAY_ZOOM_STEP_PERCENT}
                     onCommitPage={handleCommitPage}
                     onPrevPage={handlePrev}
                     onNextPage={handleNext}
                     onFitWidth={handleFitWidth}
                     onScalePercentChange={handleScalePercentChange}
-                    canGoToPrevPage={currentPage > 1}
-                    canGoToNextPage={numPages > 0 && currentPage < numPages}
+                    onPageLayoutModeChange={handlePageLayoutModeChange}
+                    canGoToPrevPage={canGoToPrevPage}
+                    canGoToNextPage={canGoToNextPage}
                   />
                 </div>
               </div>

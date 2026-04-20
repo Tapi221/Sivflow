@@ -1,4 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 import { pdfjsLib } from "@/lib/pdfjs";
 import type {
   PageSize,
@@ -32,6 +33,7 @@ interface PdfPageProps {
   scale: number;
   opaqueCanvas: boolean;
   renderTextLayer: boolean;
+  className?: string;
   baseSize?: PageSize;
   searchMatches?: PdfPageSearchMatch[];
   activeSearchMatchIndex?: number;
@@ -213,6 +215,7 @@ const PdfPageComponent = ({
   scale,
   opaqueCanvas,
   renderTextLayer,
+  className,
   baseSize,
   searchMatches = [],
   activeSearchMatchIndex,
@@ -752,7 +755,7 @@ const PdfPageComponent = ({
 
   return (
     <div
-      className="flex w-full justify-center"
+      className={cn("flex justify-center", className)}
       style={
         placeholderHeight > 0
           ? { minHeight: `${placeholderHeight}px` }
@@ -796,6 +799,7 @@ const arePdfPagePropsEqual = (left: PdfPageProps, right: PdfPageProps) =>
   left.scale === right.scale &&
   left.opaqueCanvas === right.opaqueCanvas &&
   left.renderTextLayer === right.renderTextLayer &&
+  left.className === right.className &&
   arePageSizesEqual(left.baseSize, right.baseSize) &&
   left.searchMatches === right.searchMatches &&
   left.activeSearchMatchIndex === right.activeSearchMatchIndex &&

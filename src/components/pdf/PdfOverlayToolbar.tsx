@@ -1,10 +1,15 @@
+import type { PdfPageLayoutMode } from "@/types";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 import { OverlayToolbar } from "@/components/overlay-toolbar/OverlayToolbar";
 import { OverlayToolbarButton } from "@/components/overlay-toolbar/OverlayToolbarButton";
 import { OverlayToolbarDivider } from "@/components/overlay-toolbar/OverlayToolbarDivider";
 import { OverlayToolbarIndexNavigator } from "@/components/overlay-toolbar/OverlayToolbarIndexNavigator";
 import { OverlayToolbarZoomControl } from "@/components/overlay-toolbar/OverlayToolbarZoomControl";
-import { PdfFitWidthGlyph } from "./pdfToolbarGlyphs";
+import {
+  PdfDoublePageGlyph,
+  PdfFitWidthGlyph,
+  PdfSinglePageGlyph,
+} from "./pdfToolbarGlyphs";
 
 type PdfFitMode = "width" | "manual";
 
@@ -15,12 +20,14 @@ type PdfOverlayToolbarProps = {
   minScalePercent: number;
   maxScalePercent: number;
   fitMode: PdfFitMode;
+  pageLayoutMode: PdfPageLayoutMode;
   zoomStepPercent?: number;
   onCommitPage: (nextPage: number) => void;
   onPrevPage: () => void;
   onNextPage: () => void;
   onFitWidth: () => void;
   onScalePercentChange: (nextPercent: number) => void;
+  onPageLayoutModeChange: (nextMode: PdfPageLayoutMode) => void;
   canGoToPrevPage: boolean;
   canGoToNextPage: boolean;
   disabled?: boolean;
@@ -33,12 +40,14 @@ export const PdfOverlayToolbar = ({
   minScalePercent,
   maxScalePercent,
   fitMode,
+  pageLayoutMode,
   zoomStepPercent = 1,
   onCommitPage,
   onPrevPage,
   onNextPage,
   onFitWidth,
   onScalePercentChange,
+  onPageLayoutModeChange,
   canGoToPrevPage,
   canGoToNextPage,
   disabled = false,
@@ -85,6 +94,34 @@ export const PdfOverlayToolbar = ({
       >
         <PdfFitWidthGlyph />
       </OverlayToolbarButton>
+
+      <OverlayToolbarDivider />
+
+      <OverlayToolbarButton
+        onClick={() => {
+          onPageLayoutModeChange("single");
+        }}
+        label="単一表示"
+        disabled={disabled}
+        active={pageLayoutMode === "single"}
+        className="h-6 w-6"
+      >
+        <PdfSinglePageGlyph />
+      </OverlayToolbarButton>
+
+      <OverlayToolbarButton
+        onClick={() => {
+          onPageLayoutModeChange("double");
+        }}
+        label="2枚表示"
+        disabled={disabled || numPages <= 1}
+        active={pageLayoutMode === "double"}
+        className="h-6 w-6"
+      >
+        <PdfDoublePageGlyph />
+      </OverlayToolbarButton>
+
+      <OverlayToolbarDivider />
 
       <OverlayToolbarZoomControl
         value={scalePercent}
