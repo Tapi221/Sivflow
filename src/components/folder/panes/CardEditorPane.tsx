@@ -49,6 +49,7 @@ import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web
 import { cn } from "@/lib/utils";
 import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+import { X } from "@/ui/icons";
 import { toMillisOrNull } from "@/utils/toMillis";
 
 type CardEditorPaneSettings = {
@@ -140,6 +141,24 @@ const OverlayTopRight = ({ children }: OverlayTopRightProps) => {
         {children}
       </div>
     </div>
+  );
+};
+
+const MetaPanelToggleGlyph = ({ className }: { className?: string }) => {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3.5" y="4.5" width="17" height="15" rx="4.5" />
+      <path d="M8 8.25v7.5" />
+    </svg>
   );
 };
 
@@ -975,6 +994,36 @@ export const CardEditorPane = ({
     </button>
   );
 
+  const metaToggleButton =
+    hideMetaPanel || !actions.toggleMetaOpen ? null : (
+      <button
+        type="button"
+        className={cn(
+          "inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-700 shadow-sm backdrop-blur-[2px] transition-colors hover:bg-white hover:text-slate-900",
+          isMetaOpen && "border-slate-300 bg-slate-100 text-slate-900",
+        )}
+        onClick={actions.toggleMetaOpen}
+        aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
+        aria-pressed={isMetaOpen}
+      >
+        {isMetaOpen ? (
+          <X className="h-3.5 w-3.5" />
+        ) : (
+          <MetaPanelToggleGlyph className="h-3.5 w-3.5" />
+        )}
+      </button>
+    );
+
+  const readonlyTopRightControls =
+    selectedCardEntity && !isEditing ? (
+      <div className="flex items-center gap-2">
+        {readonlyEditButton}
+        {metaToggleButton}
+      </div>
+    ) : (
+      metaToggleButton
+    );
+
   return (
     <BlockEditModeContext.Provider value={true}>
       <>
@@ -992,9 +1041,10 @@ export const CardEditorPane = ({
           widthControl={widthControlProps}
           overlayChildren={null}
           overlayTopInsetPx={overlayTopInsetPx}
+          topRightControl={readonlyTopRightControls}
           isMetaOpen={isMetaOpen}
-          onToggleMetaOpen={hideMetaPanel ? undefined : actions.toggleMetaOpen}
-          hideMetaToggle={hideMetaPanel}
+          onToggleMetaOpen={undefined}
+          hideMetaToggle={true}
           viewportRef={contentViewportRef}
           viewportClassName={cn(
             "flex min-w-0 flex-1 flex-col items-center",
@@ -1036,7 +1086,6 @@ export const CardEditorPane = ({
             selectedCardEntity && (
               <div className="flex w-full justify-center">
                 <div className="w-full space-y-2" style={activePaneWidthStyle}>
-                  <div className="flex justify-end">{readonlyEditButton}</div>
                   <CardEditorPaneReadonlySurface
                     card={selectedCardEntity}
                     isFlipped={Boolean(isFlipped)}
