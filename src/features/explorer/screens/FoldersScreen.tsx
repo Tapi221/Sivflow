@@ -132,6 +132,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
         ) : (
           <TreeViewLayout
             folders={lookups.normalizedFolders}
+            isSectionListMode={controller.state.isSectionListMode}
             selectedFolderId={controller.state.selectedFolderId}
             selectedItem={controller.state.selectedItem}
             selectedCardId={lookups.selectedCardId}

@@ -29,6 +29,7 @@ interface TreeViewTabContentProps {
   onRegisterDocumentTrigger?: (fn: () => void) => void;
   navigateToSectionListToken: number;
   folderSelectionNonce: number;
+  forceSectionListRoot?: boolean;
   onSectionListModeChange?: (isSectionListMode: boolean) => void;
   onHeaderFolderIdChange?: (folderId: string | null) => void;
   onFolderSelect: (folderId: string | null) => void;
@@ -68,6 +69,7 @@ export const TreeViewTabContent = ({
   onRegisterDocumentTrigger,
   navigateToSectionListToken,
   folderSelectionNonce,
+  forceSectionListRoot = false,
   onSectionListModeChange,
   onHeaderFolderIdChange,
   onFolderSelect,
@@ -124,6 +126,7 @@ export const TreeViewTabContent = ({
       onRegisterDocumentTrigger={onRegisterDocumentTrigger}
       navigateToSectionListToken={navigateToSectionListToken}
       folderSelectionNonce={folderSelectionNonce}
+      forceSectionListRoot={forceSectionListRoot}
       onSectionListModeChange={onSectionListModeChange}
       onHeaderFolderIdChange={onHeaderFolderIdChange}
     />
