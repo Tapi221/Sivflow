@@ -61,6 +61,8 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
       ruledOpacity = 1,
       overlay,
       topAttachment,
+      heightPx = null,
+      lockHeight = false,
       style,
       ...shellProps
     },
@@ -76,6 +78,14 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
         fixedScale={fixedScale}
         disableScale={disableScale}
         fitHeight={fitHeight}
+        intrinsicHeightPx={
+          lockHeight &&
+          typeof heightPx === "number" &&
+          Number.isFinite(heightPx) &&
+          heightPx > 0
+            ? heightPx
+            : null
+        }
       >
         <div
           className={cn(
@@ -121,6 +131,8 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
                   className,
                 )}
                 style={shellStyle}
+                heightPx={heightPx}
+                lockHeight={lockHeight}
                 {...shellProps}
               >
                 <CardSurface
