@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { clearPdfPageBitmapCacheForDocument } from "@/components/pdf/pdfPageBitmapCache";
+import { acquirePdfDocumentSession } from "@/components/pdf/pdfDocumentSessionRegistry";
 import { createPdfPageResourceCache } from "@/components/pdf/pdfPageResourceCache";
 import type {
   PageSize,
   PdfJsDocument,
   PdfJsGetDocumentParams,
-  PdfJsLoadingTask,
   PdfJsPage,
   PdfJsPageLease,
   PdfJsTextContent,
@@ -14,10 +13,7 @@ import type {
   SourceLoadErrorKind,
 } from "@/components/pdf/pdfViewerTypes";
 import {
-  destroyPdfResource,
-  disposePdfDocumentResource,
   getErrorMessage,
-  getPdfDocument,
   isPdfAbortError,
 } from "@/components/pdf/pdfViewerTypes";
 
@@ -58,74 +54,6 @@ interface UsePdfDocumentResult {
 }
 
 type PdfPageCache = ReturnType<typeof createPdfPageResourceCache<PdfJsPage>>;
-
-const normalizeSourceToken = (value: string | null | undefined) => {
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : null;
-};
-
-const buildStableDocumentKey = ({
-  pdf,
-  sourceUrl,
-  sourceDataLength,
-  sourceMeta,
-}: {
-  pdf: PdfJsDocument;
-  sourceUrl: string;
-  sourceDataLength: number;
-  sourceMeta?: PdfViewerSourceMeta;
-}) => {
-  const fingerprint = pdf.fingerprints?.[0] ?? null;
-  if (typeof fingerprint === "string" && fingerprint.length > 0) {
-    return `fingerprint:${fingerprint}`;
-  }
-
-  const localFileId = normalizeSourceToken(sourceMeta?.localFileId);
-  if (localFileId) {
-    return `local:${localFileId}`;
-  }
-
-  const remoteUrl =
-    normalizeSourceToken(sourceMeta?.remoteUrl) ??
-    normalizeSourceToken(sourceMeta?.url) ??
-    normalizeSourceToken(sourceUrl);
-  if (remoteUrl) {
-    return `url:${remoteUrl}`;
-  }
-
-  return `bytes:${sourceDataLength}`;
-};
-
-const disposeDocumentArtifacts = ({
-  documentKey,
-  resource,
-}: {
-  documentKey: string | null;
-  resource: PdfJsDocument | null | undefined;
-}) => {
-  if (documentKey) {
-    clearPdfPageBitmapCacheForDocument(documentKey);
-  }
-
-  disposePdfDocumentResource(resource);
-};
-
-const createPageCache = (pdf: PdfJsDocument): PdfPageCache => {
-  return createPdfPageResourceCache<PdfJsPage>({
-    loadPage: (pageNumber) => pdf.getPage(pageNumber),
-    cleanupPage: (page) => {
-      try {
-        page.cleanup?.();
-      } catch {
-        // noop
-      }
-    },
-  });
-};
 
 export const usePdfDocument = ({
   source,
@@ -332,19 +260,11 @@ export const usePdfDocument = ({
 
   useEffect(() => {
     let cancelled = false;
-    let loadingTask: PdfJsLoadingTask | null = null;
-
-    const previousDocument = docRef.current;
-    const previousDocumentKey = documentKeyRef.current;
+    let releaseSession: (() => void) | null = null;
 
     docRef.current = null;
     documentKeyRef.current = null;
     resetResourceCaches();
-
-    disposeDocumentArtifacts({
-      documentKey: previousDocumentKey,
-      resource: previousDocument,
-    });
 
     setDoc(null);
     setDocumentKey("unloaded");
@@ -456,24 +376,36 @@ export const usePdfDocument = ({
           return;
         }
 
-        loadingTask = getPdfDocument(params);
-        const pdf = await loadingTask.promise;
+        const sessionLease = acquirePdfDocumentSession({
+          source: {
+            url: hasUrl ? sourceUrl : null,
+            data: sourceData,
+          },
+          sourceMeta: sourceMetaRef.current,
+          getDocumentParams: params,
+        });
+
+        releaseSession = sessionLease.release;
+
+        const { pdf, documentKey: nextDocumentKey } =
+          await sessionLease.documentPromise;
 
         if (cancelled) {
-          disposeDocumentArtifacts({ documentKey: null, resource: pdf });
           return;
         }
 
-        const nextDocumentKey = buildStableDocumentKey({
-          pdf,
-          sourceUrl,
-          sourceDataLength,
-          sourceMeta: sourceMetaRef.current,
-        });
-
         docRef.current = pdf;
         documentKeyRef.current = nextDocumentKey;
-        pageCacheRef.current = createPageCache(pdf);
+        pageCacheRef.current = createPdfPageResourceCache<PdfJsPage>({
+          loadPage: (pageNumber) => pdf.getPage(pageNumber),
+          cleanupPage: (page) => {
+            try {
+              page.cleanup?.();
+            } catch {
+              // noop
+            }
+          },
+        });
         textContentPromiseCacheRef.current.clear();
         pendingPageSizesRef.current.clear();
 
@@ -544,18 +476,10 @@ export const usePdfDocument = ({
     return () => {
       cancelled = true;
 
-      const currentDocument = docRef.current;
-      const currentDocumentKey = documentKeyRef.current;
-
       docRef.current = null;
       documentKeyRef.current = null;
       resetResourceCaches();
-
-      disposeDocumentArtifacts({
-        documentKey: currentDocumentKey,
-        resource: currentDocument,
-      });
-      destroyPdfResource(loadingTask);
+      releaseSession?.();
     };
   }, [
     acquirePage,
