@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo } from "react";
-import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
+import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import { buildExplorerBreadcrumbs } from "@/features/breadcrumbs/builders";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import type { ExplorerBreadcrumbContext } from "@/features/explorer/contracts/explorerBreadcrumbContext";
@@ -21,7 +21,7 @@ export const useExplorerBreadcrumbSync = ({
   cardById,
   documentById,
 }: Params) => {
-  const { setExtraCrumbs } = useBreadcrumbContext();
+  const setExtraCrumbs = useSetBreadcrumbCrumbs();
 
   const extraCrumbs = useMemo(
     () =>

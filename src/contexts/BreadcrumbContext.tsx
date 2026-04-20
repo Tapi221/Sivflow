@@ -1,5 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useCallback, useContext, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { areBreadcrumbCrumbsEqual } from "@/features/breadcrumbs/builders";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
 
@@ -8,9 +14,15 @@ type BreadcrumbContextValue = {
   setExtraCrumbs: (crumbs: BreadcrumbCrumb[]) => void;
 };
 
-const BreadcrumbContext = createContext<BreadcrumbContextValue>({
-  extraCrumbs: [],
-  setExtraCrumbs: () => {},
+type BreadcrumbActionsContextValue = {
+  setExtraCrumbs: (crumbs: BreadcrumbCrumb[]) => void;
+};
+
+const noopSetExtraCrumbs = (_crumbs: BreadcrumbCrumb[]): void => {};
+
+const BreadcrumbExtraCrumbsContext = createContext<BreadcrumbCrumb[]>([]);
+const BreadcrumbActionsContext = createContext<BreadcrumbActionsContextValue>({
+  setExtraCrumbs: noopSetExtraCrumbs,
 });
 
 export const BreadcrumbProvider = ({
@@ -26,13 +38,39 @@ export const BreadcrumbProvider = ({
     );
   }, []);
 
+  const actionsValue = useMemo<BreadcrumbActionsContextValue>(
+    () => ({
+      setExtraCrumbs,
+    }),
+    [setExtraCrumbs],
+  );
+
   return (
-    <BreadcrumbContext.Provider value={{ extraCrumbs, setExtraCrumbs }}>
-      {children}
-    </BreadcrumbContext.Provider>
+    <BreadcrumbActionsContext.Provider value={actionsValue}>
+      <BreadcrumbExtraCrumbsContext.Provider value={extraCrumbs}>
+        {children}
+      </BreadcrumbExtraCrumbsContext.Provider>
+    </BreadcrumbActionsContext.Provider>
   );
 };
 
-export const useBreadcrumbContext = () => {
-  return useContext(BreadcrumbContext);
+export const useBreadcrumbExtraCrumbs = (): BreadcrumbCrumb[] => {
+  return useContext(BreadcrumbExtraCrumbsContext);
+};
+
+export const useSetBreadcrumbCrumbs = (): BreadcrumbActionsContextValue["setExtraCrumbs"] => {
+  return useContext(BreadcrumbActionsContext).setExtraCrumbs;
+};
+
+export const useBreadcrumbContext = (): BreadcrumbContextValue => {
+  const extraCrumbs = useBreadcrumbExtraCrumbs();
+  const setExtraCrumbs = useSetBreadcrumbCrumbs();
+
+  return useMemo(
+    () => ({
+      extraCrumbs,
+      setExtraCrumbs,
+    }),
+    [extraCrumbs, setExtraCrumbs],
+  );
 };

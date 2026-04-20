@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
+import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import { useToast } from "@/contexts/ToastContext";
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
 import { clampCardIndex } from "@/features/cardsetview/domain/cardSetViewState";
@@ -30,7 +30,7 @@ import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutF
 type ScrollAnchorFace = "question" | "answer";
 
 export const useCardSetViewScreenController = () => {
-  const { setExtraCrumbs } = useBreadcrumbContext();
+  const setExtraCrumbs = useSetBreadcrumbCrumbs();
   const { error: toastError } = useToast();
   const presentationTarget = usePresentationTarget();
   const isDesktop = presentationTarget === "desktop";
