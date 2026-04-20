@@ -44,6 +44,7 @@ import { useTreeViewSidebar } from "@/components/folder/hooks/useTreeViewSidebar
 
 interface TreeViewLayoutProps {
   folders: Folder[];
+  isSectionListMode: boolean;
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
@@ -60,6 +61,7 @@ type TreeViewTabContentProps = ComponentProps<typeof TreeViewTabContent>;
 
 const TreeViewLayout = ({
   folders,
+  isSectionListMode,
   selectedFolderId,
   selectedItem,
   selectedCardId,
@@ -91,7 +93,6 @@ const TreeViewLayout = ({
   const [selectedCardSetLabel, setSelectedCardSetLabel] = useState<
     string | null
   >(null);
-  const [isSectionListMode, setIsSectionListMode] = useState(false);
   const [explorerHeaderFolderId, setExplorerHeaderFolderId] = useState<
     string | null
   >(null);
@@ -265,6 +266,7 @@ const TreeViewLayout = ({
   }, [cards, tagById]);
 
   const currentHeaderFolderId = useMemo(() => {
+    if (isSectionListMode) return null;
     if (selectedFolderId) return selectedFolderId;
 
     if (activeSelectedCardSetId) {
@@ -284,6 +286,7 @@ const TreeViewLayout = ({
     activeSelectedCardSetId,
     cardSets,
     explorerHeaderFolderId,
+    isSectionListMode,
     routeSelectedCardSet,
     selectedFolderId,
   ]);
@@ -469,7 +472,7 @@ const TreeViewLayout = ({
       }}
       navigateToSectionListToken={navigateToSectionListToken}
       folderSelectionNonce={folderSelectionNonce}
-      onSectionListModeChange={setIsSectionListMode}
+      forceSectionListRoot={isSectionListMode}
       onHeaderFolderIdChange={setExplorerHeaderFolderId}
       onFolderSelect={handleFolderSelect}
       onItemSelect={handleItemSelect}
