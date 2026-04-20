@@ -1,6 +1,7 @@
 @layer components {
   .card-editor-workspace-viewport {
     scrollbar-color: var(--scrollbar-thumb) transparent;
+    scrollbar-gutter: stable;
   }
 
   .card-editor-workspace-viewport::-webkit-scrollbar-track {
@@ -11,7 +12,7 @@
     border: 2px solid transparent;
     border-radius: 9999px;
     background-clip: padding-box;
-    background: color-mix(
+    background-color: color-mix(
       in srgb,
       var(--sidebar-border) 72%,
       rgba(255, 255, 255, 0.28) 28%
@@ -19,7 +20,7 @@
   }
 
   .card-editor-workspace-viewport::-webkit-scrollbar-thumb:hover {
-    background: color-mix(
+    background-color: color-mix(
       in srgb,
       var(--card-resize-handle-active) 18%,
       var(--sidebar-border) 82%
@@ -27,7 +28,7 @@
   }
 
   .card-editor-workspace-viewport::-webkit-scrollbar-thumb:active {
-    background: color-mix(
+    background-color: color-mix(
       in srgb,
       var(--card-resize-handle-active) 32%,
       var(--sidebar-border) 68%

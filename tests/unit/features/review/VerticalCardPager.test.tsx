@@ -1,7 +1,15 @@
 // @vitest-environment jsdom
 import React from "react";
 import { render } from "@testing-library/react";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 const scrollToMock = vi.fn();
 

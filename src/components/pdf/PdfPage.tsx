@@ -511,11 +511,13 @@ const PdfPageComponent = ({
           renderBackingStore,
         });
 
-        void setCachedPdfPageBitmap(cacheKey, documentKey, renderSurface.canvas).catch(
-          () => {
-            // noop
-          },
-        );
+        void setCachedPdfPageBitmap(
+          cacheKey,
+          documentKey,
+          renderSurface.canvas,
+        ).catch(() => {
+          // noop
+        });
       } catch (errorValue: unknown) {
         if (cancelled) {
           return;
@@ -637,7 +639,9 @@ const PdfPageComponent = ({
           element: nextTextLayerEl,
           viewport,
         });
-        nextTextLayerEl.replaceChildren(...Array.from(stagedTextLayerEl.childNodes));
+        nextTextLayerEl.replaceChildren(
+          ...Array.from(stagedTextLayerEl.childNodes),
+        );
         nextTextLayerEl.dataset.textLayerReady = textLayerReady
           ? "true"
           : "false";

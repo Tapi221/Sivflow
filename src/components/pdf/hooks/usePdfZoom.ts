@@ -58,8 +58,7 @@ const applyPreviewTargetStyle = ({
   targetEl.style.transformOrigin = "top center";
   targetEl.style.transform = strategy.transform;
   targetEl.style.willChange = strategy.willChange ?? "";
-  targetEl.style.zoom =
-    strategy.zoom != null ? String(strategy.zoom) : "";
+  targetEl.style.zoom = strategy.zoom != null ? String(strategy.zoom) : "";
 };
 
 export const usePdfZoom = ({

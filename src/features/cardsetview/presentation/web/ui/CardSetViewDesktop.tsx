@@ -141,7 +141,6 @@ interface CardSetViewDesktopProps {
   isGlobalEditing: boolean;
   flippedCardIds: Set<string>;
   cardsForPager: Card[];
-  selectedCardIndex: number;
   safeCurrentIndex: number;
   settings?: Partial<UserSettings> | null;
   currentDisplayMode: CardDisplayMode;
@@ -165,7 +164,6 @@ export const CardSetViewDesktop = ({
   isGlobalEditing,
   flippedCardIds,
   cardsForPager,
-  selectedCardIndex,
   safeCurrentIndex,
   settings = null,
   currentDisplayMode,
@@ -310,8 +308,6 @@ export const CardSetViewDesktop = ({
       viewZoomScale,
     ],
   );
-
-  void selectedCardIndex;
 
   if (isLoading) {
     return <CardSetViewDesktopLoading />;

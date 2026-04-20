@@ -145,7 +145,6 @@ const OverlayTopRight = ({ children }: OverlayTopRightProps) => {
   );
 };
 
-
 type EditorSidePaneProps = {
   side: "question" | "answer";
   blocks: CardBlock[];
