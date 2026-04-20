@@ -1,3 +1,4 @@
+import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@constants/shared/flashcard";
 import type { BlobUrl } from "@/types/core/branded";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -49,7 +50,6 @@ interface PdfPaneProps {
 }
 
 const SEARCH_INPUT_DEBOUNCE_MS = 300;
-const PDF_OVERLAY_ZOOM_STEP_PERCENT = 1;
 
 export const PdfPane = ({
   doc,
@@ -93,8 +93,6 @@ export const PdfPane = ({
     scale,
     fitMode,
     setCurrentPage,
-    handleZoomIn,
-    handleZoomOut,
     handleFitWidth,
     handleViewerScaleChange,
   } = usePdfViewerPersistence({
@@ -166,7 +164,10 @@ export const PdfPane = ({
         return;
       }
 
-      const normalizedPage = Math.min(numPages, Math.max(1, Math.trunc(nextPage)));
+      const normalizedPage = Math.min(
+        numPages,
+        Math.max(1, Math.trunc(nextPage)),
+      );
       viewerRef.current?.scrollToPage(normalizedPage);
     },
     [numPages],
@@ -336,7 +337,7 @@ export const PdfPane = ({
                     scalePercent={scalePercent}
                     minScalePercent={FIT_MIN_SCALE * 100}
                     maxScalePercent={FIT_MAX_SCALE * 100}
-                    zoomStepPercent={PDF_OVERLAY_ZOOM_STEP_PERCENT}
+                    zoomStepPercent={CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT}
                     onCommitPage={handleCommitPage}
                     onPrevPage={handlePrev}
                     onNextPage={handleNext}
