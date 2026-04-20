@@ -29,6 +29,7 @@ service cloud.firestore {
       match /assets/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
       match /documents/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
       match /securityLogs/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
+      match /storageStats/{id} { allow read: if isAuthenticated() && isOwner(userId); }
     }
 
     match /images/{imageId} {

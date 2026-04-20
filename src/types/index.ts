@@ -5,6 +5,7 @@ export * from "./domain/cardSet";
 export * from "./domain/document";
 export * from "./domain/explorer";
 export * from "./domain/folder";
+export * from "./domain/storageStats";
 export * from "./domain/sync";
 export * from "./domain/user";
 export * from "./style";

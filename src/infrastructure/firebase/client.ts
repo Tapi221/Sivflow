@@ -26,7 +26,7 @@ const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const storage = getStorage(app);
-const functions = getFunctions(app, "asia-northeast1");
+export const functionsClient = getFunctions(app, "asia-northeast1");
 
 let firestoreDbInternal: Firestore | null = null;
 
@@ -92,7 +92,7 @@ if (typeof window !== "undefined") {
         FIREBASE_EMULATORS.storage.port,
       );
       connectFunctionsEmulator(
-        functions,
+        functionsClient,
         FIREBASE_EMULATORS.functions.host,
         FIREBASE_EMULATORS.functions.port,
       );
@@ -114,6 +114,7 @@ const debugFirebase = (): void => {
   try {
     console.log("App name:", app.name);
     console.log("DB instance:", firestoreDbInternal ? "exists" : "MISSING");
+    console.log("Functions instance:", functionsClient ? "exists" : "MISSING");
 
     if (firestoreDbInternal) {
       const testRef = collection(firestoreDbInternal, "test_connection");

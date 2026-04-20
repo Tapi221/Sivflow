@@ -58,3 +58,18 @@ export const imageDocPathSegments = (
 
   return ["users", userId, "images", imageId];
 };
+
+export const storageStatsDocPathSegments = (
+  userId: string,
+  docId: string = "current",
+): string[] => {
+  if (!userId) {
+    throw new Error("userId is required for storageStatsDocPath");
+  }
+
+  if (!docId) {
+    throw new Error("docId is required for storageStatsDocPath");
+  }
+
+  return ["users", userId, "storageStats", docId];
+};
