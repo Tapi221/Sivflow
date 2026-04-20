@@ -106,7 +106,7 @@ interface FolderTreeWithCardsProps {
   onRegisterDocumentTrigger?: (fn: () => void) => void;
   navigateToSectionListToken?: number;
   folderSelectionNonce?: number;
-  onSectionListModeChange?: (isSectionListMode: boolean) => void;
+  forceSectionListRoot?: boolean;
   onHeaderFolderIdChange?: (folderId: string | null) => void;
   className?: string;
 }
@@ -143,7 +143,7 @@ export const FolderTreeWithCards = ({
   onRegisterDocumentTrigger,
   navigateToSectionListToken = 0,
   folderSelectionNonce = 0,
-  onSectionListModeChange,
+  forceSectionListRoot = false,
   onHeaderFolderIdChange,
   className,
 }: FolderTreeWithCardsProps) => {
@@ -161,12 +161,6 @@ export const FolderTreeWithCards = ({
   );
   const [optimisticCards] = useState<Card[]>([]);
   const [optimisticCardSets, setOptimisticCardSets] = useState<CardSet[]>([]);
-  const [hiddenFolderIds, setHiddenFolderIds] = useState<Set<string>>(
-    () => new Set(),
-  );
-  const [hiddenCardSetIds, setHiddenCardSetIds] = useState<Set<string>>(
-    () => new Set(),
-  );
   const [newlyCreatedCardId, setNewlyCreatedCardId] = useState<string | null>(
     null,
   );
@@ -236,16 +230,14 @@ export const FolderTreeWithCards = ({
     const map = new Map<string, FolderTreeNode>();
     for (const f of optimisticFolders) {
       const id = getFolderId(f);
-      if (!id || hiddenFolderIds.has(id)) continue;
-      map.set(id, f);
+      if (id) map.set(id, f);
     }
     for (const f of folders) {
       const id = getFolderId(f);
-      if (!id || hiddenFolderIds.has(id) || map.has(id)) continue;
-      map.set(id, f);
+      if (id && !map.has(id)) map.set(id, f);
     }
     return Array.from(map.values());
-  }, [folders, hiddenFolderIds, optimisticFolders]);
+  }, [folders, optimisticFolders]);
 
   const treeCards = useMemo(() => {
     const map = new Map<string, Card>();
@@ -259,15 +251,13 @@ export const FolderTreeWithCards = ({
   const treeCardSets = useMemo(() => {
     const map = new Map<string, CardSet>();
     for (const cs of optimisticCardSets) {
-      if (hiddenCardSetIds.has(cs.id)) continue;
       map.set(cs.id, cs);
     }
     for (const cs of cardSets) {
-      if (hiddenCardSetIds.has(cs.id) || map.has(cs.id)) continue;
-      map.set(cs.id, cs);
+      if (!map.has(cs.id)) map.set(cs.id, cs);
     }
     return Array.from(map.values());
-  }, [cardSets, hiddenCardSetIds, optimisticCardSets]);
+  }, [cardSets, optimisticCardSets]);
 
   const derived = useExplorerDerivedData({
     treeFolders,
@@ -289,8 +279,6 @@ export const FolderTreeWithCards = ({
 
   const rootItems = useMemo(() => getFolderItems(null), [getFolderItems]);
 
-  const navigationFolderId = navigationParentFolderId ?? null;
-
   const hasFolderMatches = useCallback(
     (folderId: string) => {
       if (!isFiltering) return true;
@@ -307,6 +295,19 @@ export const FolderTreeWithCards = ({
     [getCardSetItems, isFiltering],
   );
 
+  const effectiveSidebarDisplayMode = useMemo(() => {
+    if (forceSectionListRoot) {
+      return "navigation";
+    }
+
+    return sidebarDisplayMode === "navigation" ? "navigation" : "tree";
+  }, [forceSectionListRoot, sidebarDisplayMode]);
+
+  const activeNavigationParentFolderId =
+    effectiveSidebarDisplayMode === "navigation" ? navigationParentFolderId : null;
+
+  const navigationFolderId = activeNavigationParentFolderId ?? null;
+
   const navigationCardSets = useMemo(
     () =>
       getCardSets(navigationFolderId).filter((cardSet) =>
@@ -322,8 +323,8 @@ export const FolderTreeWithCards = ({
 
   const navigationFolderPanels = useMemo(
     () =>
-      (navigationParentFolderId
-        ? getChildFolders(navigationParentFolderId)
+      (activeNavigationParentFolderId
+        ? getChildFolders(activeNavigationParentFolderId)
         : rootFolders
       )
         .filter((folder) => {
@@ -350,7 +351,12 @@ export const FolderTreeWithCards = ({
           ): item is { id: string; name: string; folder: FolderTreeNode } =>
             item !== null,
         ),
-    [getChildFolders, navigationParentFolderId, rootFolders, hasFolderMatches],
+    [
+      activeNavigationParentFolderId,
+      getChildFolders,
+      rootFolders,
+      hasFolderMatches,
+    ],
   );
 
   const navigationEntries = useMemo(
@@ -421,14 +427,6 @@ export const FolderTreeWithCards = ({
     [rootFolders, hasFolderMatches],
   );
 
-  const effectiveSidebarDisplayMode = useMemo(() => {
-    return sidebarDisplayMode === "navigation" ? "navigation" : "tree";
-  }, [sidebarDisplayMode]);
-
-  const isSectionListVisible =
-    effectiveSidebarDisplayMode === "navigation" &&
-    navigationParentFolderId === null;
-
   const allFolderIdSet = useMemo(
     () =>
       new Set(
@@ -460,8 +458,6 @@ export const FolderTreeWithCards = ({
 
     setOptimisticFolders,
     setOptimisticCardSets,
-    setHiddenFolderIds,
-    setHiddenCardSetIds,
     optimisticFolders,
     optimisticCardSets,
     setExpandedFolders,
@@ -529,62 +525,6 @@ export const FolderTreeWithCards = ({
       return changed ? next : prev;
     });
   }, [cardSets]);
-
-  useEffect(() => {
-    const existingFolderIds = new Set<string>();
-
-    for (const folder of folders) {
-      const id = getFolderId(folder);
-      if (id) existingFolderIds.add(id);
-    }
-
-    for (const folder of optimisticFolders) {
-      const id = getFolderId(folder);
-      if (id) existingFolderIds.add(id);
-    }
-
-    setHiddenFolderIds((prev) => {
-      let changed = false;
-      const next = new Set<string>();
-
-      for (const id of prev) {
-        if (existingFolderIds.has(id)) {
-          next.add(id);
-          continue;
-        }
-        changed = true;
-      }
-
-      return changed ? next : prev;
-    });
-  }, [folders, optimisticFolders]);
-
-  useEffect(() => {
-    const existingCardSetIds = new Set<string>();
-
-    for (const cardSet of cardSets) {
-      existingCardSetIds.add(cardSet.id);
-    }
-
-    for (const cardSet of optimisticCardSets) {
-      existingCardSetIds.add(cardSet.id);
-    }
-
-    setHiddenCardSetIds((prev) => {
-      let changed = false;
-      const next = new Set<string>();
-
-      for (const id of prev) {
-        if (existingCardSetIds.has(id)) {
-          next.add(id);
-          continue;
-        }
-        changed = true;
-      }
-
-      return changed ? next : prev;
-    });
-  }, [cardSets, optimisticCardSets]);
 
   useEffect(() => {
     dialogs.editingIdRef.current = dialogs.editingId;
@@ -702,6 +642,13 @@ export const FolderTreeWithCards = ({
   useEffect(() => {
     if (effectiveSidebarDisplayMode !== "navigation") return;
 
+    if (forceSectionListRoot) {
+      if (navigationParentFolderId !== null) {
+        setNavigationParentFolderId(null);
+      }
+      return;
+    }
+
     if (!selectedFolderId || !allFolderIdSet.has(selectedFolderId)) {
       if (selectedFolderId === null && navigationParentFolderId !== null) {
         setNavigationParentFolderId(null);
@@ -715,13 +662,15 @@ export const FolderTreeWithCards = ({
   }, [
     allFolderIdSet,
     effectiveSidebarDisplayMode,
+    forceSectionListRoot,
     navigationParentFolderId,
     selectedFolderId,
   ]);
 
   const headerFolderId = useMemo(() => {
+    if (forceSectionListRoot) return null;
     if (selectedFolderId) return selectedFolderId;
-    if (navigationParentFolderId) return navigationParentFolderId;
+    if (activeNavigationParentFolderId) return activeNavigationParentFolderId;
     if (selectedItem?.type === "cardSet") {
       return (
         treeCardSets.find((cardSet) => cardSet.id === selectedItem.id)
@@ -729,7 +678,13 @@ export const FolderTreeWithCards = ({
       );
     }
     return null;
-  }, [navigationParentFolderId, selectedFolderId, selectedItem, treeCardSets]);
+  }, [
+    activeNavigationParentFolderId,
+    forceSectionListRoot,
+    selectedFolderId,
+    selectedItem,
+    treeCardSets,
+  ]);
 
   useEffect(() => {
     onHeaderFolderIdChange?.(headerFolderId);
@@ -849,10 +804,6 @@ export const FolderTreeWithCards = ({
       rootItems,
     ],
   );
-
-  useEffect(() => {
-    onSectionListModeChange?.(isSectionListVisible);
-  }, [isSectionListVisible, onSectionListModeChange]);
 
   const selectedTreeId = useMemo(() => {
     return toSelectedTreeId(selectedFolderId, selectedItem, selectedCardSetId);
@@ -1054,7 +1005,7 @@ export const FolderTreeWithCards = ({
 
   const navigationEmptyMessage =
     effectiveSidebarDisplayMode === "navigation" &&
-    navigationParentFolderId !== null &&
+    activeNavigationParentFolderId !== null &&
     navigationEntries.length === 0
       ? "この階層には表示できるコンテンツがありません"
       : null;
