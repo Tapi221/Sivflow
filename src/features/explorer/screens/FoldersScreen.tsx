@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FoldersScreenSkeleton } from "@/components/loading/ScreenSkeletons";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { notifySelectedFolderChanged } from "@/features/explorer/adapters/web/explorerSelectionNotifier";
+import { subscribeSectionListNavigation } from "@/features/explorer/adapters/web/explorerSectionListNavigation";
 import type { FoldersRouteAdapter } from "@/features/explorer/adapters/web/useFoldersRouteAdapter";
 import { useWorkspaceScrollController } from "@/features/explorer/adapters/web/useWorkspaceScrollController";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
@@ -95,6 +96,13 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     cardById: lookups.cardById,
     documentById: lookups.documentById,
   });
+
+  useEffect(() => {
+    return subscribeSectionListNavigation(() => {
+      resetExplorerPaneScroll();
+      controller.actions.navigateToSectionList();
+    });
+  }, [controller.actions.navigateToSectionList, resetExplorerPaneScroll]);
 
   useEffect(() => {
     route.persistLastSelectedFolderId(controller.state.selectedFolderId);
