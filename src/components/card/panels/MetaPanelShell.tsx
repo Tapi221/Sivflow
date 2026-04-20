@@ -50,6 +50,14 @@ export const MetaPanelShell = ({
             "0 10px 24px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.88)",
           "--meta-panel-shadow-strong":
             "0 16px 30px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.92)",
+          "--scrollbar-track": "transparent",
+          "--scrollbar-thumb":
+            "color-mix(in srgb, var(--meta-panel-border-strong) 72%, white 28%)",
+          "--scrollbar-thumb-hover":
+            "color-mix(in srgb, var(--meta-panel-accent) 20%, var(--meta-panel-border-strong) 80%)",
+          "--scrollbar-thumb-active":
+            "color-mix(in srgb, var(--meta-panel-accent) 36%, var(--meta-panel-border-strong) 64%)",
+
           background: "var(--meta-panel-shell-bg)",
           borderColor: "var(--meta-panel-border)",
           ...style,
