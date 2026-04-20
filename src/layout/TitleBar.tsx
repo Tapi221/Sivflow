@@ -10,7 +10,6 @@ import {
   dispatchCardSetViewWindowEvent,
   subscribeCardSetViewWindowEvent,
 } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
-import { requestSectionListNavigation } from "@/features/explorer/adapters/web/explorerSectionListNavigation";
 import { useHasDesktopBridge } from "@/hooks/platform/useHasDesktopBridge";
 import { cn } from "@/lib/utils";
 import { windowControls } from "@/platform/capabilities/windowControls";
@@ -31,7 +30,6 @@ type WindowControlButtonProps = {
 
 type TitleBarBreadcrumbsProps = {
   pathname: string;
-  search: string;
   baseCrumbs: BreadcrumbCrumb[];
   extraCrumbs: BreadcrumbCrumb[];
   noDragStyle?: React.CSSProperties;
@@ -45,40 +43,7 @@ const TITLE_BAR_NO_DRAG_STYLE: React.CSSProperties = {
   WebkitAppRegion: "no-drag",
 };
 
-const ROUTE_COMPARE_BASE_URL = "https://flashcard-master.local";
-
-const normalizeRouteKey = (route: string): string => {
-  const url = new URL(route, ROUTE_COMPARE_BASE_URL);
-  const normalizedSearchParams = new URLSearchParams();
-
-  [...url.searchParams.entries()]
-    .sort(([leftKey, leftValue], [rightKey, rightValue]) => {
-      if (leftKey === rightKey) {
-        return leftValue.localeCompare(rightValue);
-      }
-
-      return leftKey.localeCompare(rightKey);
-    })
-    .forEach(([key, value]) => {
-      normalizedSearchParams.append(key, value);
-    });
-
-  const normalizedSearch = normalizedSearchParams.toString();
-
-  return normalizedSearch ? `${url.pathname}?${normalizedSearch}` : url.pathname;
-};
-
-const isSectionListRoute = (route: string): boolean => {
-  const url = new URL(route, ROUTE_COMPARE_BASE_URL);
-
-  return (
-    url.pathname.toLowerCase() === "/folders" &&
-    url.searchParams.get("view") === "section-list"
-  );
-};
-
-const isFolderListBreadcrumb = (crumb: BreadcrumbCrumb): boolean =>
-  crumb.label === "フォルダ一覧";
+const TITLE_BAR_BREADCRUMB_ITEM_CLASS = "titlebar-breadcrumb-item truncate";
 
 const WindowControlButton: React.FC<WindowControlButtonProps> = ({
   title,
@@ -145,7 +110,6 @@ const HomeBreadcrumbIcon: React.FC = () => (
 const TitleBarBreadcrumbs = React.memo(
   ({
     pathname,
-    search,
     baseCrumbs,
     extraCrumbs,
     noDragStyle,
@@ -162,34 +126,11 @@ const TitleBarBreadcrumbs = React.memo(
       [baseCrumbs, extraCrumbs, pathname],
     );
 
-    const currentRouteKey = useMemo(
-      () => normalizeRouteKey(`${pathname}${search}`),
-      [pathname, search],
-    );
-
-    const currentRouteIsSectionList = useMemo(
-      () => isSectionListRoute(`${pathname}${search}`),
-      [pathname, search],
-    );
-
     return (
       <nav className="titlebar-text flex min-w-0 flex-1 items-center gap-1 overflow-hidden text-xs">
         {allCrumbs.map((crumb, index) => {
+          const isClickable = Boolean(crumb.to);
           const isHomeCrumb = index === 0 && crumb.label === "ホーム";
-          const targetRouteKey = crumb.to ? normalizeRouteKey(crumb.to) : null;
-          const isCurrentSectionListBreadcrumb =
-            !crumb.to &&
-            currentRouteIsSectionList &&
-            isFolderListBreadcrumb(crumb);
-          const isSectionListReselect =
-            Boolean(crumb.to) &&
-            currentRouteIsSectionList &&
-            isSectionListRoute(crumb.to) &&
-            targetRouteKey === currentRouteKey;
-          const isClickable =
-            Boolean(crumb.to) ||
-            isCurrentSectionListBreadcrumb ||
-            isSectionListReselect;
           const breadcrumbContent = isHomeCrumb ? (
             <>
               <HomeBreadcrumbIcon />
@@ -204,11 +145,6 @@ const TitleBarBreadcrumbs = React.memo(
           ) => {
             event.preventDefault();
             event.stopPropagation();
-
-            if (isCurrentSectionListBreadcrumb || isSectionListReselect) {
-              requestSectionListNavigation();
-              return;
-            }
 
             if (!crumb.to) {
               return;
@@ -230,7 +166,10 @@ const TitleBarBreadcrumbs = React.memo(
               {isClickable ? (
                 <button
                   type="button"
-                  className="titlebar-hover titlebar-text inline-flex items-center truncate rounded-sm px-1 py-0.5 transition-colors"
+                  className={cn(
+                    TITLE_BAR_BREADCRUMB_ITEM_CLASS,
+                    "titlebar-hover titlebar-breadcrumb-link",
+                  )}
                   style={noDragStyle}
                   onMouseDown={(event) => event.stopPropagation()}
                   onClick={handleBreadcrumbClick}
@@ -241,10 +180,11 @@ const TitleBarBreadcrumbs = React.memo(
               ) : (
                 <span
                   className={cn(
-                    "titlebar-text-strong truncate font-medium",
-                    isHomeCrumb && "inline-flex items-center",
+                    TITLE_BAR_BREADCRUMB_ITEM_CLASS,
+                    "titlebar-breadcrumb-current",
                   )}
                   title={crumb.label}
+                  aria-current="page"
                 >
                   {breadcrumbContent}
                 </span>
@@ -344,7 +284,6 @@ export const TitleBar: React.FC = () => {
 
         <TitleBarBreadcrumbs
           pathname={pathname}
-          search={search}
           baseCrumbs={baseCrumbs}
           extraCrumbs={extraCrumbs}
           noDragStyle={noDragStyle}
