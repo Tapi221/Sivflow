@@ -1,3 +1,5 @@
+import { resolveWheelZoomStepCount } from "@/shared/zoom/wheelZoomMath";
+
 export const normalizeScale = (value: number): number =>
   Number(value.toFixed(3));
 
@@ -17,20 +19,26 @@ export const computeNextScaleFromWheel = ({
   zoomStep,
   minScale,
   maxScale,
+  deltaPerStep = 80,
 }: {
   currentScale: number;
   deltaY: number;
   zoomStep: number;
   minScale: number;
   maxScale: number;
+  deltaPerStep?: number;
 }): number | null => {
   if (!Number.isFinite(currentScale) || !Number.isFinite(deltaY)) return null;
   const direction = Math.sign(deltaY);
   if (!direction) return null;
 
   const step = Math.max(0.001, Number.isFinite(zoomStep) ? zoomStep : 0.1);
+  const stepCount = resolveWheelZoomStepCount({ deltaY, deltaPerStep });
   const rawNextScale =
-    direction > 0 ? currentScale - step : currentScale + step;
+    direction > 0
+      ? currentScale - step * stepCount
+      : currentScale + step * stepCount;
+
   return normalizeScale(clampScale(rawNextScale, minScale, maxScale));
 };
 

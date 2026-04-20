@@ -17,6 +17,13 @@ import {
   getCachedPdfPageBitmap,
   setCachedPdfPageBitmap,
 } from "@/components/pdf/pdfPageBitmapCache";
+import {
+  applyPdfOverlayViewportStyles,
+  applyPdfTextLayerViewportStyles,
+  commitPdfBitmapToCanvas,
+  createDetachedPdfCanvasSurface,
+  prepareDetachedPdfCanvasSurfaceForRender,
+} from "@/components/pdf/pdfCanvasRenderUtils";
 
 interface PdfPageProps {
   documentKey: string;
@@ -401,6 +408,39 @@ const PdfPageComponent = ({
     let renderStartRafId: number | null = null;
     let pageForCleanup: PdfJsPage | null = null;
 
+    const commitBitmap = ({
+      bitmap,
+      viewport,
+      renderBackingStore,
+    }: {
+      bitmap: HTMLCanvasElement | ImageBitmap;
+      viewport: ReturnType<PdfJsPage["getViewport"]>;
+      renderBackingStore: ReturnType<typeof resolvePdfRenderBackingStore>;
+    }) => {
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        throw new Error("PDF の描画先 canvas を取得できません");
+      }
+
+      const didCommit = commitPdfBitmapToCanvas({
+        targetCanvas: canvas,
+        bitmap,
+        viewport,
+        renderBackingStore,
+        opaqueCanvas,
+      });
+
+      if (!didCommit) {
+        throw new Error("PDF の描画先 canvas を初期化できません");
+      }
+
+      setCanvasRenderState({
+        renderIdentity,
+        rendered: true,
+        error: null,
+      });
+    };
+
     const run = async () => {
       try {
         const page = await getPage(pageNumber);
@@ -411,18 +451,10 @@ const PdfPageComponent = ({
         }
 
         const viewport = page.getViewport({ scale });
-        const canvas = canvasRef.current;
-
-        if (!canvas) {
-          return;
-        }
-
-        const context = opaqueCanvas
-          ? canvas.getContext("2d", { alpha: false })
-          : canvas.getContext("2d");
-
-        if (!context) {
-          return;
+        const visibleCanvas = canvasRef.current;
+        if (visibleCanvas) {
+          visibleCanvas.style.width = `${viewport.width}px`;
+          visibleCanvas.style.height = `${viewport.height}px`;
         }
 
         const renderBackingStore = resolvePdfRenderBackingStore({
@@ -431,52 +463,59 @@ const PdfPageComponent = ({
           devicePixelRatio: renderDevicePixelRatio,
         });
 
-        canvas.width = renderBackingStore.canvasWidthPx;
-        canvas.height = renderBackingStore.canvasHeightPx;
-        canvas.style.width = `${viewport.width}px`;
-        canvas.style.height = `${viewport.height}px`;
-
         const cacheKey = renderIdentity;
         const cachedBitmap = getCachedPdfPageBitmap(cacheKey);
 
-        context.setTransform(1, 0, 0, 1, 0, 0);
-        context.clearRect(0, 0, canvas.width, canvas.height);
-
         if (
           cachedBitmap &&
-          cachedBitmap.width === canvas.width &&
-          cachedBitmap.height === canvas.height
+          cachedBitmap.width === renderBackingStore.canvasWidthPx &&
+          cachedBitmap.height === renderBackingStore.canvasHeightPx
         ) {
-          context.drawImage(cachedBitmap, 0, 0);
-        } else {
-          context.setTransform(
-            renderBackingStore.scaleX,
-            0,
-            0,
-            renderBackingStore.scaleY,
-            0,
-            0,
-          );
-
-          renderTask = page.render({
-            canvasContext: context,
+          commitBitmap({
+            bitmap: cachedBitmap,
             viewport,
-            intent: "display",
+            renderBackingStore,
           });
-
-          await renderTask.promise;
-          if (cancelled) {
-            return;
-          }
-
-          await setCachedPdfPageBitmap(cacheKey, documentKey, canvas);
+          return;
         }
 
-        setCanvasRenderState({
-          renderIdentity,
-          rendered: true,
-          error: null,
+        const renderSurface = createDetachedPdfCanvasSurface({
+          renderBackingStore,
+          opaqueCanvas,
         });
+
+        if (!renderSurface) {
+          throw new Error("PDF のバックバッファを作成できません");
+        }
+
+        prepareDetachedPdfCanvasSurfaceForRender({
+          surface: renderSurface,
+          renderBackingStore,
+          opaqueCanvas,
+        });
+
+        renderTask = page.render({
+          canvasContext: renderSurface.context,
+          viewport,
+          intent: "display",
+        });
+
+        await renderTask.promise;
+        if (cancelled) {
+          return;
+        }
+
+        commitBitmap({
+          bitmap: renderSurface.canvas,
+          viewport,
+          renderBackingStore,
+        });
+
+        void setCachedPdfPageBitmap(cacheKey, documentKey, renderSurface.canvas).catch(
+          () => {
+            // noop
+          },
+        );
       } catch (errorValue: unknown) {
         if (cancelled) {
           return;
@@ -567,24 +606,15 @@ const PdfPageComponent = ({
 
         const viewport = page.getViewport({ scale });
 
-        nextTextLayerEl.replaceChildren();
-        nextSearchLayerEl.replaceChildren();
-        nextTextLayerEl.dataset.textLayerReady = "pending";
-        nextTextLayerEl.dataset.textLayerExpectedText = "false";
-
-        nextTextLayerEl.style.width = `${viewport.width}px`;
-        nextTextLayerEl.style.height = `${viewport.height}px`;
-        nextTextLayerEl.style.setProperty(
-          "--scale-factor",
-          String(viewport.scale),
-        );
-
-        nextSearchLayerEl.style.width = `${viewport.width}px`;
-        nextSearchLayerEl.style.height = `${viewport.height}px`;
+        const stagedTextLayerEl = document.createElement("div");
+        applyPdfTextLayerViewportStyles({
+          element: stagedTextLayerEl,
+          viewport,
+        });
 
         const TextLayerCtor = getTextLayerCtor();
         const textLayer = new TextLayerCtor({
-          container: nextTextLayerEl,
+          container: stagedTextLayerEl,
           textContentSource: textContent,
           viewport,
         });
@@ -597,17 +627,28 @@ const PdfPageComponent = ({
         const textItemCount = textContent.items.filter(
           (item) => isPdfTextItem(item) && item.str.trim().length > 0,
         ).length;
-        const textSpanCount = nextTextLayerEl.querySelectorAll("span").length;
+        const textSpanCount = stagedTextLayerEl.querySelectorAll("span").length;
         const textLayerReady = textItemCount === 0 || textSpanCount > 0;
         const warning = textLayerReady
           ? null
           : "PDFテキストレイヤーの構築に失敗した可能性があります";
 
+        applyPdfTextLayerViewportStyles({
+          element: nextTextLayerEl,
+          viewport,
+        });
+        nextTextLayerEl.replaceChildren(...Array.from(stagedTextLayerEl.childNodes));
         nextTextLayerEl.dataset.textLayerReady = textLayerReady
           ? "true"
           : "false";
         nextTextLayerEl.dataset.textLayerExpectedText =
           textItemCount > 0 ? "true" : "false";
+
+        applyPdfOverlayViewportStyles({
+          element: nextSearchLayerEl,
+          viewport,
+        });
+        nextSearchLayerEl.replaceChildren();
 
         setTextLayerState({
           textLayerIdentity,
@@ -628,8 +669,6 @@ const PdfPageComponent = ({
         }
 
         console.error("[PdfViewer] text layer error", errorValue);
-        clearElement(textLayerRef.current);
-        clearElement(searchLayerRef.current);
 
         setTextLayerState({
           textLayerIdentity,
@@ -649,8 +688,6 @@ const PdfPageComponent = ({
       if (rafId !== null) {
         window.cancelAnimationFrame(rafId);
       }
-      clearElement(textLayerRef.current);
-      clearElement(searchLayerRef.current);
     };
   }, [
     getPage,

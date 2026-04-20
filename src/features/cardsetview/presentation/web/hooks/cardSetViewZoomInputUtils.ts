@@ -1,4 +1,3 @@
-// src/features/cardsetview/presentation/web/hooks/cardSetViewZoomInputUtils.ts
 import {
   CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT,
   CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT,
@@ -8,33 +7,16 @@ import {
   clampNormalizedZoomPercent,
   resolveZoomPercentForPresentationWidthPx,
 } from "@/features/cardsetview/domain/cardSetViewPresentationPolicy";
+import {
+  DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR,
+  shouldHandleZoomInputTarget,
+} from "@/shared/zoom/zoomInputTarget";
+import { resolveWheelZoomStepCount } from "@/shared/zoom/wheelZoomMath";
 
 const CARD_SET_VIEW_ZOOM_INPUT_IGNORE_SELECTOR = [
-  "input",
-  "textarea",
-  "select",
-  "button",
-  "summary",
-  "a[href]",
-  "[role='button']",
-  "[role='slider']",
-  "[contenteditable]:not([contenteditable='false'])",
+  DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR,
   "[data-card-zoom-input-ignore='true']",
 ].join(",");
-
-const resolveEventTargetElement = (
-  target: EventTarget | null,
-): Element | null => {
-  if (typeof Element !== "undefined" && target instanceof Element) {
-    return target;
-  }
-
-  if (typeof Node !== "undefined" && target instanceof Node) {
-    return target.parentElement;
-  }
-
-  return null;
-};
 
 const clampZoomPercentToBounds = (
   value: number,
@@ -63,19 +45,6 @@ const normalizeZoomPercentWithinBounds = ({
     maxZoomPercent,
   );
 
-const resolveWheelZoomStepCount = ({
-  deltaY,
-  deltaPerStep = 80,
-}: {
-  deltaY: number;
-  deltaPerStep?: number;
-}) => {
-  const safeDeltaPerStep =
-    Number.isFinite(deltaPerStep) && deltaPerStep > 0 ? deltaPerStep : 80;
-
-  return Math.max(1, Math.round(Math.abs(deltaY) / safeDeltaPerStep));
-};
-
 export const shouldHandleCardSetViewZoomInputTarget = ({
   container,
   target,
@@ -83,22 +52,11 @@ export const shouldHandleCardSetViewZoomInputTarget = ({
   container: HTMLElement | null;
   target: EventTarget | null;
 }) => {
-  if (!container) {
-    return false;
-  }
-
-  const targetElement = resolveEventTargetElement(target);
-  if (!targetElement) {
-    return false;
-  }
-
-  if (!container.contains(targetElement)) {
-    return false;
-  }
-
-  return !Boolean(
-    targetElement.closest(CARD_SET_VIEW_ZOOM_INPUT_IGNORE_SELECTOR),
-  );
+  return shouldHandleZoomInputTarget({
+    container,
+    target,
+    ignoreSelector: CARD_SET_VIEW_ZOOM_INPUT_IGNORE_SELECTOR,
+  });
 };
 
 export const computeNextCardSetViewZoomPercentFromWheel = ({

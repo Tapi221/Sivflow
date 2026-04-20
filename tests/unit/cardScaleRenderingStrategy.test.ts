@@ -27,4 +27,17 @@ describe("resolveCardScaleRenderingStrategy", () => {
     expect(result.zoom).toBe(1.35);
     expect(result.transform).toBe("none");
   });
+
+  it("falls back to transform when css zoom is not supported", () => {
+    const result = resolveCardScaleRenderingStrategy({
+      disableScale: false,
+      effectiveScale: 1.35,
+      supportsCssZoom: false,
+    });
+
+    expect(result.mode).toBe("transform");
+    expect(result.zoom).toBeUndefined();
+    expect(result.transform).toBe("scale(1.35)");
+    expect(result.willChange).toBe("transform");
+  });
 });

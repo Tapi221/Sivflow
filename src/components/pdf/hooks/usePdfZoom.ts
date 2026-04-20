@@ -4,6 +4,14 @@ import {
   computeNextScaleFromGesture,
   computeNextScaleFromWheel,
 } from "@/components/pdf/pdfZoomUtils";
+import {
+  DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR,
+  shouldHandleZoomInputTarget,
+} from "@/shared/zoom/zoomInputTarget";
+import {
+  detectCssZoomSupport,
+  resolveScaleRenderingStrategy,
+} from "@/shared/zoom/scaleRenderingStrategy";
 
 interface UsePdfZoomOptions {
   container: HTMLDivElement | null;
@@ -16,6 +24,10 @@ interface UsePdfZoomOptions {
 }
 
 const WHEEL_COMMIT_DELAY_MS = 90;
+const PDF_ZOOM_INPUT_IGNORE_SELECTOR = [
+  DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR,
+  "[data-pdf-zoom-input-ignore='true']",
+].join(",");
 
 const resetPreviewTargetStyle = (targetEl: HTMLDivElement | null) => {
   if (!targetEl) return;
@@ -23,17 +35,31 @@ const resetPreviewTargetStyle = (targetEl: HTMLDivElement | null) => {
   targetEl.style.transform = "";
   targetEl.style.transformOrigin = "";
   targetEl.style.willChange = "";
+  targetEl.style.zoom = "";
 };
 
-const applyPreviewTargetStyle = (
-  targetEl: HTMLDivElement | null,
-  ratio: number,
-) => {
+const applyPreviewTargetStyle = ({
+  targetEl,
+  ratio,
+  supportsCssZoom,
+}: {
+  targetEl: HTMLDivElement | null;
+  ratio: number;
+  supportsCssZoom: boolean;
+}) => {
   if (!targetEl) return;
 
+  const strategy = resolveScaleRenderingStrategy({
+    disableScale: false,
+    effectiveScale: ratio,
+    supportsCssZoom,
+  });
+
   targetEl.style.transformOrigin = "top center";
-  targetEl.style.transform = `scale(${ratio})`;
-  targetEl.style.willChange = "transform";
+  targetEl.style.transform = strategy.transform;
+  targetEl.style.willChange = strategy.willChange ?? "";
+  targetEl.style.zoom =
+    strategy.zoom != null ? String(strategy.zoom) : "";
 };
 
 export const usePdfZoom = ({
@@ -56,6 +82,7 @@ export const usePdfZoom = ({
   const commitTimerRef = useRef<number | null>(null);
   const previewScaleRef = useRef<number | null>(null);
   const awaitingCommittedScaleRef = useRef(false);
+  const supportsCssZoomRef = useRef(detectCssZoomSupport());
 
   useEffect(() => {
     scaleRef.current = scale;
@@ -76,7 +103,11 @@ export const usePdfZoom = ({
 
       if (targetEl && Number.isFinite(scale) && scale > 0) {
         const ratio = previewScale / scale;
-        applyPreviewTargetStyle(targetEl, ratio);
+        applyPreviewTargetStyle({
+          targetEl,
+          ratio,
+          supportsCssZoom: supportsCssZoomRef.current,
+        });
       }
       return;
     }
@@ -139,7 +170,11 @@ export const usePdfZoom = ({
         return;
       }
 
-      applyPreviewTargetStyle(targetEl, ratio);
+      applyPreviewTargetStyle({
+        targetEl,
+        ratio,
+        supportsCssZoom: supportsCssZoomRef.current,
+      });
     },
     [clearPreviewTransform, previewTarget],
   );
@@ -201,8 +236,17 @@ export const usePdfZoom = ({
       ).stopImmediatePropagation?.();
     };
 
+    const shouldHandleTarget = (target: EventTarget | null) => {
+      return shouldHandleZoomInputTarget({
+        container,
+        target,
+        ignoreSelector: PDF_ZOOM_INPUT_IGNORE_SELECTOR,
+      });
+    };
+
     const handleWheel = (event: WheelEvent) => {
       if (!(event.ctrlKey || event.metaKey)) return;
+      if (!shouldHandleTarget(event.target)) return;
 
       stopNativeEvent(event);
 
@@ -243,6 +287,8 @@ export const usePdfZoom = ({
     };
 
     const handleGestureStart = (event: Event) => {
+      if (!shouldHandleTarget(event.target)) return;
+
       stopNativeEvent(event);
       cancelScheduledCommit();
       gestureStartScaleRef.current = scaleRef.current;
@@ -250,6 +296,8 @@ export const usePdfZoom = ({
     };
 
     const handleGestureChange = (event: Event) => {
+      if (!shouldHandleTarget(event.target)) return;
+
       stopNativeEvent(event);
 
       const gestureScale = (event as Event & { scale?: number }).scale;
@@ -279,6 +327,8 @@ export const usePdfZoom = ({
     };
 
     const handleGestureEnd = (event: Event) => {
+      if (!shouldHandleTarget(event.target)) return;
+
       stopNativeEvent(event);
       gestureStartScaleRef.current = null;
 

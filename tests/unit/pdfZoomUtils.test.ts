@@ -86,7 +86,19 @@ describe("pdfZoomUtils", () => {
           minScale: 0.5,
           maxScale: 3,
         }),
-      ).toBe(1.333);
+      ).toBe(1.667);
+    });
+
+    it("scales wheel step count by delta magnitude", () => {
+      expect(
+        computeNextScaleFromWheel({
+          currentScale: 1,
+          deltaY: -240,
+          zoomStep: 0.1,
+          minScale: 0.5,
+          maxScale: 3,
+        }),
+      ).toBe(1.3);
     });
   });
 
