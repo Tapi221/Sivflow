@@ -66,6 +66,8 @@ export type CardWorkspaceShellProps = {
   widthControl?: CardWorkspaceWidthControlProps | null;
   widthControlClassName?: string;
   topLeftControl?: ReactNode;
+  topRightControl?: ReactNode;
+  topRightControlClassName?: string;
   overlayChildren?: ReactNode;
   overlayTopInsetPx?: number;
   isMetaOpen: boolean;
@@ -89,6 +91,8 @@ export const CardWorkspaceShell = ({
   widthControl = null,
   widthControlClassName,
   topLeftControl,
+  topRightControl,
+  topRightControlClassName,
   overlayChildren,
   overlayTopInsetPx = 0,
   isMetaOpen,
@@ -174,6 +178,18 @@ export const CardWorkspaceShell = ({
         ) : null}
 
         {overlayChildren}
+
+        {topRightControl ? (
+          <div
+            className={cn(
+              "pointer-events-auto absolute right-3 z-30 flex",
+              topRightControlClassName,
+            )}
+            style={{ top: `${topControlsOffsetPx}px` }}
+          >
+            {topRightControl}
+          </div>
+        ) : null}
 
         <div
           className={cn(
