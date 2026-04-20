@@ -1029,6 +1029,7 @@ export const CardEditorPane = ({
           isMetaOpen={isMetaOpen}
           viewportRef={contentViewportRef}
           viewportClassName={cn(
+            "card-editor-workspace-viewport",
             "flex min-w-0 flex-1 flex-col items-center",
             dockToolbarsToTop ? "overflow-x-visible" : "overflow-x-clip",
             embeddedInPager ? "overflow-y-visible" : "overflow-y-auto",
