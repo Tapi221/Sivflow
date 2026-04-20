@@ -1,4 +1,8 @@
 import { useAuthSession } from "@/contexts/AuthContext";
+import {
+  createDefaultEditorBlockSettings,
+  parseEditorBlockSettings,
+} from "@/lib/editorBlockSettings";
 import { getLocalDb } from "@/services/localDB";
 import {
   readCachedFolderSidebarDisplayMode,
@@ -38,55 +42,13 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   questionDisplayMode: "tap_to_reveal" as const,
   folderSidebarDisplayMode: "tree" as const,
   markdownTabSize: 2,
-  editorBlockSettings: [
-    {
-      id: "text",
-      type: "text",
-      label: "テキスト",
-      isVisible: true,
-      orderIndex: 0,
-    },
-    {
-      id: "question",
-      type: "question",
-      label: "疑問",
-      isVisible: true,
-      orderIndex: 1,
-    },
-    {
-      id: "code",
-      type: "code",
-      label: "コード",
-      isVisible: true,
-      orderIndex: 2,
-    },
-    {
-      id: "image",
-      type: "image",
-      label: "画像",
-      isVisible: true,
-      orderIndex: 3,
-    },
-    {
-      id: "math",
-      type: "math",
-      label: "数式",
-      isVisible: true,
-      orderIndex: 4,
-    },
-    {
-      id: "markdown",
-      type: "markdown",
-      label: "Markdown",
-      isVisible: true,
-      orderIndex: 5,
-    },
-  ],
+  editorBlockSettings: createDefaultEditorBlockSettings(),
 };
 
 const buildBootSettingsSnapshot = (): Partial<UserSettings> => ({
   ...DEFAULT_SETTINGS,
   folderSidebarDisplayMode: readCachedFolderSidebarDisplayMode(),
+  editorBlockSettings: createDefaultEditorBlockSettings(),
 });
 
 const removeLegacyProfileFields = (
@@ -103,6 +65,48 @@ const removeLegacyProfileFields = (
   return rest;
 };
 
+const normalizeStoredSettingsRecord = (
+  input: Record<string, unknown> | undefined,
+  bootSettings: Partial<UserSettings>,
+): Partial<UserSettings> => {
+  const merged = {
+    ...bootSettings,
+    ...removeLegacyProfileFields(input),
+  };
+
+  const folderSidebarDisplayMode = normalizeFolderSidebarDisplayMode(
+    (
+      merged as {
+        folderSidebarDisplayMode?: LegacyFolderSidebarDisplayMode;
+      }
+    ).folderSidebarDisplayMode,
+  );
+
+  const editorBlockSettings = parseEditorBlockSettings(
+    Array.isArray(merged["editorBlockSettings"])
+      ? (merged["editorBlockSettings"] as unknown[])
+      : undefined,
+  );
+
+  return {
+    ...merged,
+    folderSidebarDisplayMode,
+    editorBlockSettings,
+  };
+};
+
+const toComparableRecordJson = (input: Record<string, unknown>): string => {
+  const { updatedAt: _updatedAt, ...rest } = input;
+  return JSON.stringify(rest);
+};
+
+const areSettingsRecordsEquivalent = (
+  left: Record<string, unknown>,
+  right: Record<string, unknown>,
+) => {
+  return toComparableRecordJson(left) === toComparableRecordJson(right);
+};
+
 export const useUserSettings = () => {
   const { currentUser } = useAuthSession();
   const currentUserId = currentUser?.uid ?? null;
@@ -115,26 +119,16 @@ export const useUserSettings = () => {
 
       const db = await getLocalDb(currentUserId);
       const userSettings = await db.userSettings.get(currentUserId);
-      const merged = {
-        ...bootSettings,
-        ...removeLegacyProfileFields(
-          userSettings as Record<string, unknown> | undefined,
-        ),
-      };
-      const folderSidebarDisplayMode = normalizeFolderSidebarDisplayMode(
-        (
-          merged as {
-            folderSidebarDisplayMode?: LegacyFolderSidebarDisplayMode;
-          }
-        ).folderSidebarDisplayMode,
+      const normalizedSettings = normalizeStoredSettingsRecord(
+        userSettings as Record<string, unknown> | undefined,
+        bootSettings,
       );
 
-      writeCachedFolderSidebarDisplayMode(folderSidebarDisplayMode);
+      writeCachedFolderSidebarDisplayMode(
+        normalizedSettings.folderSidebarDisplayMode ?? "tree",
+      );
 
-      return {
-        ...merged,
-        folderSidebarDisplayMode,
-      };
+      return normalizedSettings;
     },
     [bootSettings, currentUserId],
     bootSettings,
@@ -145,40 +139,41 @@ export const useUserSettings = () => {
 
     let cancelled = false;
 
-    const cleanupLegacyProfileFields = async () => {
+    const normalizeStoredSettings = async () => {
       const db = await getLocalDb(currentUserId);
       const current = await db.userSettings.get(currentUserId);
 
       if (cancelled || !current) return;
 
       const currentRecord = current as Record<string, unknown>;
-      const hasLegacyDisplayName = Object.prototype.hasOwnProperty.call(
+      const currentWithoutLegacy = removeLegacyProfileFields(currentRecord);
+      const normalizedSettings = normalizeStoredSettingsRecord(
         currentRecord,
-        "displayName",
+        bootSettings,
       );
-      const hasLegacyProfileImage = Object.prototype.hasOwnProperty.call(
-        currentRecord,
-        "profileImage",
-      );
-
-      if (!hasLegacyDisplayName && !hasLegacyProfileImage) return;
-
-      const cleaned = removeLegacyProfileFields(currentRecord);
-
-      await db.userSettings.put({
-        ...cleaned,
+      const nextRecord = {
+        ...currentWithoutLegacy,
+        ...normalizedSettings,
         userId: currentUserId,
         id: currentUserId,
+      };
+
+      if (areSettingsRecordsEquivalent(currentWithoutLegacy, nextRecord)) {
+        return;
+      }
+
+      await db.userSettings.put({
+        ...nextRecord,
         updatedAt: new Date(),
       } as UserSettings);
     };
 
-    void cleanupLegacyProfileFields();
+    void normalizeStoredSettings();
 
     return () => {
       cancelled = true;
     };
-  }, [currentUserId]);
+  }, [bootSettings, currentUserId]);
 
   const updateSettings = useCallback(
     async (newSettings: Partial<UserSettings>) => {
@@ -202,6 +197,18 @@ export const useUserSettings = () => {
               ),
             }
           : {}),
+        ...(Object.prototype.hasOwnProperty.call(
+          newSettings,
+          "editorBlockSettings",
+        )
+          ? {
+              editorBlockSettings: parseEditorBlockSettings(
+                Array.isArray(newSettings.editorBlockSettings)
+                  ? newSettings.editorBlockSettings
+                  : undefined,
+              ),
+            }
+          : {}),
       };
 
       if (
@@ -215,18 +222,21 @@ export const useUserSettings = () => {
         );
       }
 
-      const updated = {
+      const nextRecord = {
         ...currentWithoutLegacy,
         ...normalizedSettings,
         userId: currentUserId,
-        updatedAt: new Date(),
         id: currentUserId,
       };
 
-      if (JSON.stringify(currentWithoutLegacy) === JSON.stringify(updated))
+      if (areSettingsRecordsEquivalent(currentWithoutLegacy, nextRecord)) {
         return;
+      }
 
-      await db.userSettings.put(updated as UserSettings);
+      await db.userSettings.put({
+        ...nextRecord,
+        updatedAt: new Date(),
+      } as UserSettings);
     },
     [currentUserId],
   );

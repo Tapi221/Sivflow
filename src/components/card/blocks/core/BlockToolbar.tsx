@@ -4,6 +4,12 @@ import {
   overlayGlassPillClassName,
   overlayGlassToolbarClassName,
 } from "@/components/card/shell/overlaySurfaceClassNames";
+import {
+  getEditorBlockDefinition,
+  parseEditorBlockSettings,
+  type EditorBlockIconName,
+  type EditorBlockType,
+} from "@/lib/editorBlockSettings";
 import type { CardBlock } from "@/types/domain/card";
 import type { IconProps } from "@/ui/icons";
 import { Plus } from "@/ui/icons";
@@ -26,48 +32,13 @@ interface BlockToolbarProps {
   className?: string;
 }
 
-type BlockConfig = {
-  type: CardBlock["type"];
+type ToolbarBlockConfig = {
+  type: EditorBlockType;
   label: string;
-  icon?: string;
-  isVisible?: boolean;
-  enabled?: boolean;
-  color?: string;
-  orderIndex?: number;
+  icon: EditorBlockIconName;
+  isVisible: boolean;
+  orderIndex: number;
 };
-
-const ALLOWED_TYPES: readonly CardBlock["type"][] = [
-  "text",
-  "question",
-  "code",
-  "image",
-  "markdown",
-  "math",
-] as const;
-
-const DEFAULT_CONFIGS: BlockConfig[] = [
-  { type: "text", label: "テキスト", icon: "Type", isVisible: true },
-  { type: "question", label: "疑問", icon: "HelpCircle", isVisible: true },
-  { type: "code", label: "コード", icon: "Code", isVisible: true },
-  { type: "image", label: "画像", icon: "Image", isVisible: true },
-  { type: "math", label: "数式", icon: "Sigma", isVisible: true },
-  {
-    type: "markdown",
-    label: "Markdown",
-    icon: "NotebookPen",
-    isVisible: true,
-  },
-];
-
-const DEFAULT_ORDER_INDEX_BY_TYPE = DEFAULT_CONFIGS.reduce<
-  Record<CardBlock["type"], number>
->(
-  (acc, config, index) => {
-    acc[config.type] = index;
-    return acc;
-  },
-  {} as Record<CardBlock["type"], number>,
-);
 
 const TextBlockGlyph = ({
   size = 16,
@@ -312,25 +283,19 @@ const MarkdownBlockGlyph = ({
   );
 };
 
-const getIcon = (iconName: string | undefined, type: CardBlock["type"]) => {
-  const map: Record<string, React.ComponentType<IconProps>> = {
+const getIcon = (
+  iconName: EditorBlockIconName,
+): React.ComponentType<IconProps> => {
+  const map: Record<EditorBlockIconName, React.ComponentType<IconProps>> = {
     Type: TextBlockGlyph,
+    HelpCircle: QuestionBlockGlyph,
+    Code: CodeBlockGlyph,
     Image: ImageBlockGlyph,
     Sigma: MathBlockGlyph,
-    Code: CodeBlockGlyph,
     NotebookPen: MarkdownBlockGlyph,
-    HelpCircle: QuestionBlockGlyph,
   };
-  if (iconName && map[iconName]) return map[iconName];
-  const typeMap: Record<string, React.ComponentType<IconProps>> = {
-    text: TextBlockGlyph,
-    question: QuestionBlockGlyph,
-    code: CodeBlockGlyph,
-    image: ImageBlockGlyph,
-    markdown: MarkdownBlockGlyph,
-    math: MathBlockGlyph,
-  };
-  return typeMap[type] ?? Plus;
+
+  return map[iconName];
 };
 
 const Tooltip = ({
@@ -460,51 +425,27 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
     null,
   );
 
-  type RawSettings = { editorBlockSettings?: Record<string, unknown>[] };
-  const rawSettings = (settings as RawSettings | undefined)
-    ?.editorBlockSettings;
+  type RawSettings = { editorBlockSettings?: unknown[] };
+  const rawSettings = (settings as RawSettings | undefined)?.editorBlockSettings;
 
-  const blockSettings: BlockConfig[] = useMemo(() => {
-    if (!rawSettings || rawSettings.length === 0) return DEFAULT_CONFIGS;
+  const blockSettings = useMemo<ToolbarBlockConfig[]>(() => {
+    return parseEditorBlockSettings(rawSettings).map((config) => {
+      const definition = getEditorBlockDefinition(config.type);
 
-    const fromSettings = rawSettings
-      .map((x) => ({
-        type: x["type"] as CardBlock["type"],
-        label: (x["label"] as string | undefined) ?? String(x["type"]),
-        icon: x["icon"] as string | undefined,
-        isVisible: x["isVisible"] as boolean | undefined,
-        enabled: x["enabled"] as boolean | undefined,
-        color: x["color"] as string | undefined,
-        orderIndex:
-          typeof x["orderIndex"] === "number"
-            ? (x["orderIndex"] as number)
-            : undefined,
-      }))
-      .filter((x) => ALLOWED_TYPES.includes(x.type));
-
-    // DB に保存されていない新しいブロック型をデフォルト設定から補完する
-    const missingDefaults = DEFAULT_CONFIGS.filter(
-      (d) => !fromSettings.some((s) => s.type === d.type),
-    );
-
-    const merged = [...fromSettings, ...missingDefaults];
-
-    // 順序は配列の自然順ではなく orderIndex を優先し、UI の並びを安定化する。
-    return merged.sort((a, b) => {
-      const aOrder = a.orderIndex ?? DEFAULT_ORDER_INDEX_BY_TYPE[a.type] ?? 999;
-      const bOrder = b.orderIndex ?? DEFAULT_ORDER_INDEX_BY_TYPE[b.type] ?? 999;
-      if (aOrder !== bOrder) return aOrder - bOrder;
-      return (
-        (DEFAULT_ORDER_INDEX_BY_TYPE[a.type] ?? 999) -
-        (DEFAULT_ORDER_INDEX_BY_TYPE[b.type] ?? 999)
-      );
+      return {
+        type: config.type,
+        label: definition.label,
+        icon: definition.icon,
+        isVisible: config.isVisible,
+        orderIndex: config.orderIndex,
+      };
     });
   }, [rawSettings]);
 
   const visibleConfigs = useMemo(
     () =>
       blockSettings.filter((config) => {
-        if (!(config.isVisible ?? config.enabled ?? true)) return false;
+        if (!config.isVisible) return false;
         if (hiddenBlockTypes.includes(config.type)) return false;
         return true;
       }),
@@ -526,7 +467,6 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
       const anchorLeft = el.getBoundingClientRect().left;
       const mountTransform = (el.parentElement as HTMLElement | null)?.style
         ?.transform;
-      // transform に "-100%" が含まれる配置では、アンカーがツールバー右端基準になる。
       const shouldShiftByToolbarWidth =
         typeof mountTransform === "string" && mountTransform.includes("-100%");
       const nextLeft = shouldShiftByToolbarWidth
@@ -573,7 +513,6 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
         className,
       )}
     >
-      {/* モバイル: ドロップダウン */}
       <div className="flex md:hidden">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -599,7 +538,7 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
               </div>
             ) : (
               visibleConfigs.map((config) => {
-                const Icon = getIcon(config.icon, config.type);
+                const Icon = getIcon(config.icon);
                 return (
                   <DropdownMenuItem
                     key={config.type}
@@ -620,7 +559,6 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
         </DropdownMenu>
       </div>
 
-      {/* デスクトップ: アイコン only ボタン（横/縦） */}
       <div
         className={cn(
           "hidden md:flex items-center",
@@ -630,7 +568,7 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
         )}
       >
         {visibleConfigs.map((config) => {
-          const Icon = getIcon(config.icon, config.type);
+          const Icon = getIcon(config.icon);
           return (
             <ActionButton
               key={config.type}

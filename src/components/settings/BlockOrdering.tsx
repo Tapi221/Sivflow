@@ -12,15 +12,22 @@ import {
   Droppable,
   type DropResult,
 } from "@hello-pangea/dnd";
+import { createPortal } from "react-dom";
 
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { Switch } from "@/components/ui/switch";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import {
+  createDefaultEditorBlockSettings,
+  parseEditorBlockSettings,
+  type EditorBlockConfig,
+  type EditorBlockType,
+} from "@/lib/editorBlockSettings";
 import { cn } from "@/lib/utils";
-import type { BlockConfig } from "@/types";
 import {
   Code,
   GripVertical,
+  HelpCircle,
   ImageIcon,
   Sigma,
   StratisMarkdownIcon,
@@ -28,89 +35,23 @@ import {
   type IconProps,
 } from "@/ui/icons";
 
-type SupportedBlockType = Extract<
-  BlockConfig["type"],
-  "text" | "code" | "image" | "math" | "markdown"
->;
-
-const BLOCK_ICONS: Record<SupportedBlockType, ComponentType<IconProps>> = {
+const BLOCK_ICONS: Record<EditorBlockType, ComponentType<IconProps>> = {
   text: Type,
+  question: HelpCircle,
   code: Code,
   image: ImageIcon,
   math: Sigma,
   markdown: StratisMarkdownIcon,
 };
 
-const DEFAULT_BLOCKS: BlockConfig[] = [
-  {
-    id: "text",
-    type: "text",
-    label: "テキスト",
-    isVisible: true,
-    orderIndex: 0,
-  },
-  {
-    id: "code",
-    type: "code",
-    label: "コード",
-    isVisible: true,
-    orderIndex: 1,
-  },
-  {
-    id: "image",
-    type: "image",
-    label: "画像",
-    isVisible: true,
-    orderIndex: 2,
-  },
-  {
-    id: "math",
-    type: "math",
-    label: "数式",
-    isVisible: true,
-    orderIndex: 3,
-  },
-  {
-    id: "markdown",
-    type: "markdown",
-    label: "Markdown",
-    isVisible: true,
-    orderIndex: 4,
-  },
-];
-
-const sanitizeBlockSettings = (items: BlockConfig[]) => {
-  return items
-    .filter((item) => item.type !== "reference" && item.type !== "audio")
-    .sort((left, right) => left.orderIndex - right.orderIndex)
-    .map((item, index) => ({ ...item, orderIndex: index }));
-};
-
-const resolveVerticalTransform = (transform?: string) => {
-  if (!transform) return undefined;
-
-  const translateMatch = transform.match(
-    /translate\(\s*[-\d.]+px,\s*([-\d.]+px)\s*\)/,
-  );
-  if (translateMatch?.[1]) {
-    return `translate(0px, ${translateMatch[1]})`;
-  }
-
-  const translate3dMatch = transform.match(
-    /translate3d\(\s*[-\d.]+px,\s*([-\d.]+px),\s*[-\d.]+px\s*\)/,
-  );
-  if (translate3dMatch?.[1]) {
-    return `translate3d(0px, ${translate3dMatch[1]}, 0px)`;
-  }
-
-  return transform;
-};
-
 export const BlockOrdering = () => {
   const { settings, updateSettings } = useUserSettings();
-  const [blocks, setBlocks] = useState<BlockConfig[]>([]);
+  const [blocks, setBlocks] = useState<EditorBlockConfig[]>(() =>
+    createDefaultEditorBlockSettings(),
+  );
   const [enabled, setEnabled] = useState(false);
   const isDraggingRef = useRef(false);
+  const itemWidthByIdRef = useRef<Partial<Record<EditorBlockType, number>>>({});
 
   useEffect(() => {
     const frameId = requestAnimationFrame(() => setEnabled(true));
@@ -126,10 +67,7 @@ export const BlockOrdering = () => {
       return;
     }
 
-    const source = settings?.editorBlockSettings
-      ? [...settings.editorBlockSettings]
-      : DEFAULT_BLOCKS;
-    const nextBlocks = sanitizeBlockSettings(source);
+    const nextBlocks = parseEditorBlockSettings(settings?.editorBlockSettings);
 
     queueMicrotask(() =>
       setBlocks((previousBlocks) => {
@@ -154,6 +92,11 @@ export const BlockOrdering = () => {
       return;
     }
 
+    if (result.destination.index === result.source.index) {
+      isDraggingRef.current = false;
+      return;
+    }
+
     const reorderedBlocks = [...blocks];
     const [movedBlock] = reorderedBlocks.splice(result.source.index, 1);
     reorderedBlocks.splice(result.destination.index, 0, movedBlock);
@@ -170,11 +113,11 @@ export const BlockOrdering = () => {
     } finally {
       window.setTimeout(() => {
         isDraggingRef.current = false;
-      }, 100);
+      }, 0);
     }
   };
 
-  const handleToggleVisibility = (blockId: string, checked: boolean) => {
+  const handleToggleVisibility = (blockId: EditorBlockType, checked: boolean) => {
     const nextBlocks = blocks.map((block) =>
       block.id === blockId ? { ...block, isVisible: checked } : block,
     );
@@ -206,8 +149,7 @@ export const BlockOrdering = () => {
               className="space-y-2"
             >
               {blocks.map((block, index) => {
-                const Icon =
-                  BLOCK_ICONS[block.type as SupportedBlockType] ?? Type;
+                const Icon = BLOCK_ICONS[block.type];
 
                 return (
                   <Draggable
@@ -215,80 +157,99 @@ export const BlockOrdering = () => {
                     draggableId={block.id}
                     index={index}
                   >
-                    {(draggableProvided, snapshot) => (
-                      <div
-                        ref={draggableProvided.innerRef}
-                        {...draggableProvided.draggableProps}
-                        className={cn(
-                          "rounded-2xl border border-slate-200 bg-white px-4 py-3 transition-shadow",
-                          !snapshot.isDragging && "hover:shadow-sm",
-                          snapshot.isDragging &&
-                            "border-[var(--settings-accent)] shadow-lg",
-                        )}
-                        style={
-                          {
-                            ...draggableProvided.draggableProps.style,
-                            transform: resolveVerticalTransform(
-                              draggableProvided.draggableProps.style?.transform,
-                            ),
-                            zIndex: snapshot.isDragging ? 30 : 1,
-                          } satisfies CSSProperties
-                        }
-                      >
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            aria-label={`${block.label} を並び替え`}
-                            {...draggableProvided.dragHandleProps}
-                            className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 active:cursor-grabbing"
-                          >
-                            <GripVertical className="h-4 w-4 cursor-grab" />
-                          </button>
+                    {(draggableProvided, snapshot) => {
+                      const draggableStyle = {
+                        ...draggableProvided.draggableProps.style,
+                        width: snapshot.isDragging
+                          ? itemWidthByIdRef.current[block.id]
+                          : undefined,
+                        zIndex: snapshot.isDragging ? 9999 : 1,
+                      } satisfies CSSProperties;
 
-                          <div
-                            className={cn(
-                              "flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500",
-                              !block.isVisible && "opacity-60",
-                            )}
-                          >
-                            <Icon className="h-4 w-4" />
-                          </div>
+                      const draggableNode = (
+                        <div
+                          ref={(element) => {
+                            draggableProvided.innerRef(element);
 
-                          <div className="min-w-0 flex-1">
+                            if (element) {
+                              itemWidthByIdRef.current[block.id] =
+                                element.getBoundingClientRect().width;
+                            }
+                          }}
+                          {...draggableProvided.draggableProps}
+                          className={cn(
+                            "rounded-2xl border border-slate-200 bg-white px-4 py-3 transition-shadow",
+                            !snapshot.isDragging && "hover:shadow-sm",
+                            snapshot.isDragging &&
+                              "border-[var(--settings-accent)] shadow-lg",
+                          )}
+                          style={draggableStyle}
+                        >
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              aria-label={`${block.label} を並び替え`}
+                              {...draggableProvided.dragHandleProps}
+                              className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 active:cursor-grabbing"
+                            >
+                              <GripVertical className="h-4 w-4 cursor-grab" />
+                            </button>
+
                             <div
                               className={cn(
-                                "text-sm font-semibold text-slate-800",
-                                !block.isVisible && "text-slate-500",
+                                "flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500",
+                                !block.isVisible && "opacity-60",
                               )}
                             >
-                              {block.label}
+                              <Icon className="h-4 w-4" />
                             </div>
-                            <div className="mt-0.5 text-xs text-slate-500">
-                              新規カード作成時の候補順 {index + 1}
-                            </div>
-                          </div>
 
-                          <div className="flex items-center gap-3">
-                            <span
-                              className={cn(
-                                "ds-settings-panel__status-pill",
-                                block.isVisible
-                                  ? "ds-settings-panel__status-pill--success"
-                                  : "ds-settings-panel__status-pill--off",
-                              )}
-                            >
-                              {block.isVisible ? "表示" : "非表示"}
-                            </span>
-                            <Switch
-                              checked={block.isVisible}
-                              onCheckedChange={(checked) =>
-                                handleToggleVisibility(block.id, checked)
-                              }
-                            />
+                            <div className="min-w-0 flex-1">
+                              <div
+                                className={cn(
+                                  "text-sm font-semibold text-slate-800",
+                                  !block.isVisible && "text-slate-500",
+                                )}
+                              >
+                                {block.label}
+                              </div>
+                              <div className="mt-0.5 text-xs text-slate-500">
+                                新規カード作成時の候補順 {index + 1}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <span
+                                className={cn(
+                                  "ds-settings-panel__status-pill",
+                                  block.isVisible
+                                    ? "ds-settings-panel__status-pill--success"
+                                    : "ds-settings-panel__status-pill--off",
+                                )}
+                              >
+                                {block.isVisible ? "表示" : "非表示"}
+                              </span>
+                              <Switch
+                                checked={block.isVisible}
+                                onCheckedChange={(checked) =>
+                                  handleToggleVisibility(block.id, checked)
+                                }
+                              />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      );
+
+                      if (
+                        snapshot.isDragging &&
+                        typeof document !== "undefined" &&
+                        document.body
+                      ) {
+                        return createPortal(draggableNode, document.body);
+                      }
+
+                      return draggableNode;
+                    }}
                   </Draggable>
                 );
               })}
