@@ -21,6 +21,8 @@ export interface ScaleToFitFrameProps {
   intrinsicHeightPx?: number | null;
 }
 
+const CONTENT_HEIGHT_EPSILON_PX = 2;
+
 const resolveLogicalHeight = ({
   contentElement,
   measurementScale,
@@ -173,7 +175,10 @@ export const ScaleToFitFrame = ({
       });
       const nextHeight = Math.max(0, Math.ceil(logicalHeight));
       setContentHeight((previousHeight) =>
-        previousHeight === nextHeight ? previousHeight : nextHeight,
+        previousHeight != null &&
+        Math.abs(previousHeight - nextHeight) < CONTENT_HEIGHT_EPSILON_PX
+          ? previousHeight
+          : nextHeight,
       );
     };
 

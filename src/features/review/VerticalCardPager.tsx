@@ -23,6 +23,7 @@ export const ACTIVE_INDEX_RENDER_RADIUS = 6;
 const PLACEHOLDER_HEIGHT_PX = 900;
 const CARD_RADIUS_SM = 32;
 const CARD_RADIUS_MD = 40;
+const MEASURED_HEIGHT_EPSILON_PX = 2;
 const SCROLL_IDLE_COMMIT_DELAY_MS = 110;
 
 const resolveCardBaseRadius = () => {
@@ -430,6 +431,7 @@ const VerticalCardPagerFn = <T,>({
   const emittedRenderRangeRef = useRef<{ start: number; end: number } | null>(
     null,
   );
+  const layoutVersionRafRef = useRef<number | null>(null);
 
   const anchorCorrectionRafRef = useRef<number | null>(null);
   const anchorStabilizationUntilRef = useRef<number>(0);
@@ -939,6 +941,11 @@ const VerticalCardPagerFn = <T,>({
           window.cancelAnimationFrame(visibleRangeRafRef.current);
         }
 
+        if (layoutVersionRafRef.current != null) {
+          window.cancelAnimationFrame(layoutVersionRafRef.current);
+          layoutVersionRafRef.current = null;
+        }
+
         clearScrollAnchorCaptureRaf();
         clearComputeNearestRaf();
         clearIdleCommitTimer();
@@ -1017,7 +1024,10 @@ const VerticalCardPagerFn = <T,>({
       const safeHeight = Math.max(1, Math.round(nextHeight));
       const previousHeight = measuredHeightsRef.current.get(stableKey);
 
-      if (previousHeight === safeHeight) {
+      if (
+        previousHeight != null &&
+        Math.abs(previousHeight - safeHeight) < MEASURED_HEIGHT_EPSILON_PX
+      ) {
         return;
       }
 
@@ -1025,7 +1035,15 @@ const VerticalCardPagerFn = <T,>({
       avgItemExtentRef.current = Math.round(
         (avgItemExtentRef.current + safeHeight) / 2,
       );
-      setLayoutVersion((previousVersion) => previousVersion + 1);
+
+      if (layoutVersionRafRef.current != null) {
+        return;
+      }
+
+      layoutVersionRafRef.current = window.requestAnimationFrame(() => {
+        layoutVersionRafRef.current = null;
+        setLayoutVersion((previousVersion) => previousVersion + 1);
+      });
     },
     [],
   );

@@ -1,12 +1,11 @@
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
 import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
-import { CardModeToolbar } from "@/features/cardsetview/presentation/web/ui/components/CardModeToolbar";
-import { CardZoomControl } from "@/features/cardsetview/presentation/web/ui/components/CardZoomControl";
 import { CardSetViewDesktopContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewDesktopContent";
 import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMetaPanel";
 import { CardSetViewMobileContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMobileContent";
 import { CardSetViewOverlayControls } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewOverlayControls";
+import { CardViewCompactToolbar } from "@/features/cardsetview/presentation/web/ui/components/CardViewCompactToolbar";
 import type { CardSetViewContentProps } from "@/features/cardsetview/presentation/web/ui/components/cardSetViewContentProps";
 import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
@@ -53,21 +52,38 @@ export const CardSetViewScreen = () => {
   const Content = CARD_SET_VIEW_CONTENT_COMPONENTS[presentationTarget];
   const desktopOverlayTopInsetPx = getAppTopInsetPx({ presentationTarget });
 
-  const modeToolbar = (
-    <CardModeToolbar
+  const compactToolbar = (
+    <CardViewCompactToolbar
       displayMode={state.currentDisplayMode}
       cardLayoutMode={effectiveCardLayoutMode}
       disabledCardLayoutModes={disabledCardLayoutModes}
       onChangeDisplayMode={state.setCurrentDisplayMode}
       onChangeCardLayoutMode={handleChangeCardLayoutMode}
+      zoom={
+        topLeftZoomControl
+          ? {
+              value: topLeftZoomControl.value,
+              min: topLeftZoomControl.min,
+              max: topLeftZoomControl.max,
+              step: topLeftZoomControl.step,
+              onChange: topLeftZoomControl.onChange,
+              onStepDown: topLeftZoomControl.onStepDown,
+              onStepUp: topLeftZoomControl.onStepUp,
+            }
+          : null
+      }
     />
   );
 
-  const modeToolbarRight = isDesktopPresentation
+  const toolbarRight = isDesktopPresentation
     ? state.isMetaOpen
       ? "calc(var(--ui-panel-width) + 0.75rem)"
       : "0.75rem"
-    : "0.75rem";
+    : "max(0.75rem, env(safe-area-inset-right))";
+
+  const toolbarBottom = isDesktopPresentation
+    ? "1rem"
+    : "max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))";
 
   const overlayChildren = (
     <>
@@ -79,51 +95,31 @@ export const CardSetViewScreen = () => {
         onRetryActiveSync={state.handleRetryActiveSync}
         topInsetPx={desktopOverlayTopInsetPx}
       />
-      {isDesktopPresentation ? (
-        <div
-          className="pointer-events-auto absolute bottom-4 z-20 flex"
-          style={{
-            right: modeToolbarRight,
-            transform: "none",
-          }}
-        >
-          {modeToolbar}
-        </div>
-      ) : null}
+
+      <div
+        className="pointer-events-auto absolute z-20 flex items-end gap-2"
+        style={{
+          right: toolbarRight,
+          bottom: toolbarBottom,
+        }}
+      >
+        {layoutConstraintIndicatorLabel ? (
+          <div
+            className={cn(
+              overlayGlassPillClassName,
+              "text-[11px] font-semibold text-slate-600",
+            )}
+          >
+            {layoutConstraintIndicatorLabel}
+          </div>
+        ) : null}
+
+        {compactToolbar}
+      </div>
     </>
   );
 
-  const showTopLeftControl =
-    !isDesktopPresentation ||
-    Boolean(topLeftZoomControl) ||
-    Boolean(layoutConstraintIndicatorLabel);
-
-  const topLeftControl = showTopLeftControl ? (
-    <div className="flex items-center gap-2">
-      {!isDesktopPresentation ? modeToolbar : null}
-      {topLeftZoomControl ? (
-        <CardZoomControl
-          value={topLeftZoomControl.value}
-          min={topLeftZoomControl.min}
-          max={topLeftZoomControl.max}
-          step={topLeftZoomControl.step}
-          onChange={topLeftZoomControl.onChange}
-          onStepDown={topLeftZoomControl.onStepDown}
-          onStepUp={topLeftZoomControl.onStepUp}
-        />
-      ) : null}
-      {layoutConstraintIndicatorLabel ? (
-        <div
-          className={cn(
-            overlayGlassPillClassName,
-            "text-[11px] font-semibold text-slate-600",
-          )}
-        >
-          {layoutConstraintIndicatorLabel}
-        </div>
-      ) : null}
-    </div>
-  ) : null;
+  const topLeftControl = null;
 
   return (
     <CardWorkspaceShell

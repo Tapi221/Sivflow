@@ -243,13 +243,6 @@ export const CardSetViewDesktop = ({
     [],
   );
 
-  useEffect(() => {
-    if (selectedCardIndex < 0) return;
-    if (selectedCardIndex === safeCurrentIndex) return;
-
-    onActiveIndexChange(selectedCardIndex);
-  }, [onActiveIndexChange, safeCurrentIndex, selectedCardIndex]);
-
   const getScrollAnchorSelector = useCallback(
     (card: Card, _idx: number, isActive: boolean) => {
       if (!isActive || currentCardLayoutMode !== "flip") {
