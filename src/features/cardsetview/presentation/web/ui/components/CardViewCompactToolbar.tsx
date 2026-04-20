@@ -11,7 +11,6 @@ import {
 } from "@/features/cardsetview/domain/cardLayoutMode";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { Minus, Plus } from "@/ui/icons";
 import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@constants/shared/flashcard";
 
 type ZoomControlProps = {
@@ -53,7 +52,7 @@ const ModeButton = ({
       type="button"
       className={cn(
         overlayGlassActionButtonClassName,
-        "relative",
+        "relative h-6 w-6",
         isActive &&
           !disabled &&
           "border-[rgba(214,198,182,0.96)] bg-[rgba(255,252,247,0.98)] text-[#3d342d] shadow-[inset_0_0_0_1px_rgba(107,95,85,0.08)]",
@@ -239,7 +238,7 @@ const SplitGlyph = () => (
 
 const ToolbarDivider = () => (
   <span
-    className="h-5 w-px shrink-0 bg-[rgba(218,207,197,0.92)]"
+    className="h-4 w-px shrink-0 bg-[rgba(218,207,197,0.82)]"
     aria-hidden="true"
   />
 );
@@ -294,7 +293,7 @@ export const CardViewCompactToolbar = ({
     <div
       className={cn(
         overlayGlassToolbarClassName,
-        "gap-2 px-2.5 py-1.5",
+        "gap-1.5 px-2 py-1",
       )}
       data-card-zoom-input-ignore="true"
     >
@@ -341,17 +340,7 @@ export const CardViewCompactToolbar = ({
         <>
           <ToolbarDivider />
 
-          <button
-            type="button"
-            className={overlayGlassActionButtonClassName}
-            onClick={zoom.onStepDown}
-            disabled={zoom.value <= zoom.min}
-            aria-label="ズームを縮小"
-          >
-            <Minus className="h-3.5 w-3.5" />
-          </button>
-
-          <div className="w-20 px-0.5 sm:w-24">
+          <div className="w-14 px-0.5 sm:w-16">
             <Slider
               min={zoom.min}
               max={zoom.max}
@@ -363,19 +352,9 @@ export const CardViewCompactToolbar = ({
             />
           </div>
 
-          <div className="min-w-[2.75rem] text-center text-[11px] font-semibold tabular-nums text-[#6b5f55]">
+          <div className="min-w-[2.25rem] text-center text-[10px] font-semibold tabular-nums text-[#6b5f55]">
             {zoom.value}%
           </div>
-
-          <button
-            type="button"
-            className={overlayGlassActionButtonClassName}
-            onClick={zoom.onStepUp}
-            disabled={zoom.value >= zoom.max}
-            aria-label="ズームを拡大"
-          >
-            <Plus className="h-3.5 w-3.5" />
-          </button>
         </>
       ) : null}
     </div>
