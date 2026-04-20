@@ -148,6 +148,9 @@ export const PdfPane = ({
     useState(true);
   const [isMobileThumbnailPanelOpen, setIsMobileThumbnailPanelOpen] =
     useState(false);
+  const [pendingThumbnailPage, setPendingThumbnailPage] = useState<number | null>(
+    null,
+  );
 
   const { containerRef, containerWidth } = usePdfContainerWidth();
 
@@ -237,6 +240,13 @@ export const PdfPane = ({
     () => normalizePageForLayout(currentPage, pageLayoutMode),
     [currentPage, pageLayoutMode],
   );
+  const displayedThumbnailPage = useMemo(() => {
+    if (pendingThumbnailPage === null) {
+      return alignedCurrentPage;
+    }
+
+    return normalizePageForLayout(pendingThumbnailPage, pageLayoutMode);
+  }, [alignedCurrentPage, pageLayoutMode, pendingThumbnailPage]);
   const isThumbnailPanelOpen = isMobileViewport
     ? isMobileThumbnailPanelOpen
     : isDesktopThumbnailPanelOpen;
@@ -294,6 +304,25 @@ export const PdfPane = ({
       mediaQueryList.removeListener(handleMediaQueryChange);
     };
   }, []);
+
+  useEffect(() => {
+    if (pendingThumbnailPage === null) {
+      return;
+    }
+
+    const normalizedPendingThumbnailPage = normalizePageForLayout(
+      pendingThumbnailPage,
+      pageLayoutMode,
+    );
+
+    if (normalizedPendingThumbnailPage === alignedCurrentPage) {
+      setPendingThumbnailPage(null);
+    }
+  }, [alignedCurrentPage, pageLayoutMode, pendingThumbnailPage]);
+
+  useEffect(() => {
+    setPendingThumbnailPage(null);
+  }, [doc.id]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -369,13 +398,24 @@ export const PdfPane = ({
 
   const handleSelectThumbnailPage = useCallback(
     (nextPage: number) => {
-      handleCommitPage(nextPage);
+      if (!Number.isFinite(nextPage) || numPages <= 0) {
+        return;
+      }
+
+      const normalizedPage = Math.min(
+        numPages,
+        Math.max(1, Math.trunc(nextPage)),
+      );
+      const targetPage = normalizePageForLayout(normalizedPage, pageLayoutMode);
+
+      setPendingThumbnailPage(targetPage);
+      handleCommitPage(targetPage);
 
       if (isMobileViewport) {
         setIsMobileThumbnailPanelOpen(false);
       }
     },
-    [handleCommitPage, isMobileViewport],
+    [handleCommitPage, isMobileViewport, numPages, pageLayoutMode],
   );
 
   const commitSearchQuery = useCallback(() => {
@@ -490,7 +530,7 @@ export const PdfPane = ({
           <div className="relative flex h-full min-h-0 min-w-0 w-full overflow-hidden">
             <PdfThumbnailPanel
               documentController={documentController}
-              currentPage={alignedCurrentPage}
+              currentPage={displayedThumbnailPage}
               pageLayoutMode={pageLayoutMode}
               isMobileViewport={isMobileViewport}
               isOpen={isThumbnailPanelOpen}
