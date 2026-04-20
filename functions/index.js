@@ -11,13 +11,184 @@ const {
 } = require("firebase-functions/v2/https");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
+const {
+  onObjectDeleted,
+  onObjectFinalized,
+} = require("firebase-functions/v2/storage");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
 
 admin.initializeApp();
 const db = admin.firestore();
+const storageBucket = admin.storage().bucket();
 
 setGlobalOptions({ maxInstances: 10 });
+
+const DEFAULT_CLOUD_STORAGE_QUOTA_BYTES = 500 * 1024 * 1024;
+const STORAGE_STATS_SCHEMA_VERSION = 1;
+const STORAGE_STATS_DOC_ID = "current";
+const ASSET_STORAGE_OBJECT_RE = /^users\/([^/]+)\/assets\/[^/]+$/;
+const LEGACY_IMAGE_STORAGE_OBJECT_RE = /^users\/([^/]+)\/images\/[^/]+_(full|thumb)$/i;
+
+const isNonEmptyString = (value) =>
+  typeof value === "string" && value.trim().length > 0;
+
+const toNonNegativeNumber = (value) => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.max(0, value);
+  }
+
+  if (typeof value === "string" && value.trim().length > 0) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+  }
+
+  return 0;
+};
+
+const getStorageStatsRef = (userId) =>
+  db.doc(`users/${userId}/storageStats/${STORAGE_STATS_DOC_ID}`);
+
+const buildStorageStatsPayload = ({
+  userId,
+  totalStorageUsedBytes,
+  syncedImageCount,
+  includeCreatedAt = false,
+  includeLastRebuiltAt = false,
+}) => {
+  const payload = {
+    userId,
+    quotaBytes: DEFAULT_CLOUD_STORAGE_QUOTA_BYTES,
+    totalStorageUsedBytes: Math.max(0, totalStorageUsedBytes),
+    syncedImageCount: Math.max(0, syncedImageCount),
+    schemaVersion: STORAGE_STATS_SCHEMA_VERSION,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  if (includeCreatedAt) {
+    payload.createdAt = admin.firestore.FieldValue.serverTimestamp();
+  }
+
+  if (includeLastRebuiltAt) {
+    payload.lastRebuiltAt = admin.firestore.FieldValue.serverTimestamp();
+  }
+
+  return payload;
+};
+
+const readStorageStatsNumber = (data, key) => {
+  if (!data || typeof data !== "object") {
+    return 0;
+  }
+
+  return toNonNegativeNumber(data[key]);
+};
+
+const extractTrackedStorageObjectInfo = (objectName) => {
+  if (!isNonEmptyString(objectName)) {
+    return null;
+  }
+
+  const trimmedName = objectName.trim();
+
+  const assetMatch = ASSET_STORAGE_OBJECT_RE.exec(trimmedName);
+  if (assetMatch) {
+    return {
+      userId: assetMatch[1],
+      countsTowardImageTotal: true,
+    };
+  }
+
+  const legacyMatch = LEGACY_IMAGE_STORAGE_OBJECT_RE.exec(trimmedName);
+  if (!legacyMatch) {
+    return null;
+  }
+
+  return {
+    userId: legacyMatch[1],
+    countsTowardImageTotal: legacyMatch[2]?.toLowerCase() === "full",
+  };
+};
+
+const updateStorageStatsByDelta = async ({
+  userId,
+  deltaBytes,
+  deltaImageCount,
+}) => {
+  if (deltaBytes === 0 && deltaImageCount === 0) {
+    return;
+  }
+
+  const storageStatsRef = getStorageStatsRef(userId);
+
+  await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(storageStatsRef);
+    const currentData = snapshot.exists ? snapshot.data() : null;
+    const nextTotalStorageUsedBytes = Math.max(
+      0,
+      readStorageStatsNumber(currentData, "totalStorageUsedBytes") + deltaBytes,
+    );
+    const nextSyncedImageCount = Math.max(
+      0,
+      readStorageStatsNumber(currentData, "syncedImageCount") + deltaImageCount,
+    );
+
+    transaction.set(
+      storageStatsRef,
+      buildStorageStatsPayload({
+        userId,
+        totalStorageUsedBytes: nextTotalStorageUsedBytes,
+        syncedImageCount: nextSyncedImageCount,
+        includeCreatedAt: !snapshot.exists,
+      }),
+      { merge: true },
+    );
+  });
+};
+
+const collectTrackedImageStorageUsageForUser = async (userId) => {
+  const [assetFiles, legacyImageFiles] = await Promise.all([
+    storageBucket.getFiles({ prefix: `users/${userId}/assets/` }),
+    storageBucket.getFiles({ prefix: `users/${userId}/images/` }),
+  ]);
+
+  let totalStorageUsedBytes = 0;
+  let syncedImageCount = 0;
+
+  [...assetFiles[0], ...legacyImageFiles[0]].forEach((file) => {
+    const trackedInfo = extractTrackedStorageObjectInfo(file.name);
+    if (!trackedInfo || trackedInfo.userId !== userId) {
+      return;
+    }
+
+    totalStorageUsedBytes += toNonNegativeNumber(file.metadata?.size);
+    syncedImageCount += trackedInfo.countsTowardImageTotal ? 1 : 0;
+  });
+
+  return {
+    totalStorageUsedBytes,
+    syncedImageCount,
+  };
+};
+
+const rebuildStorageStatsForUser = async (userId) => {
+  const usage = await collectTrackedImageStorageUsageForUser(userId);
+  const storageStatsRef = getStorageStatsRef(userId);
+  const snapshot = await storageStatsRef.get();
+
+  await storageStatsRef.set(
+    buildStorageStatsPayload({
+      userId,
+      totalStorageUsedBytes: usage.totalStorageUsedBytes,
+      syncedImageCount: usage.syncedImageCount,
+      includeCreatedAt: !snapshot.exists,
+      includeLastRebuiltAt: true,
+    }),
+    { merge: true },
+  );
+
+  return usage;
+};
 
 /**
  * 統計更新 API
@@ -178,6 +349,122 @@ exports.recordLogin = onCall({ region: "asia-northeast1" }, async (request) => {
     throw new HttpsError("internal", "ログイン記録に失敗しました");
   }
 });
+
+/**
+ * クラウドストレージ使用量の再集計
+ */
+exports.rebuildStorageStats = onCall(
+  { region: "asia-northeast1" },
+  async (request) => {
+    const { auth } = request;
+
+    if (!auth) {
+      throw new HttpsError("unauthenticated", "認証が必要です");
+    }
+
+    const userId = auth.uid;
+
+    try {
+      const usage = await rebuildStorageStatsForUser(userId);
+
+      logger.info("Storage stats rebuilt", {
+        userId,
+        totalStorageUsedBytes: usage.totalStorageUsedBytes,
+        syncedImageCount: usage.syncedImageCount,
+      });
+
+      return {
+        userId,
+        quotaBytes: DEFAULT_CLOUD_STORAGE_QUOTA_BYTES,
+        totalStorageUsedBytes: usage.totalStorageUsedBytes,
+        syncedImageCount: usage.syncedImageCount,
+        schemaVersion: STORAGE_STATS_SCHEMA_VERSION,
+      };
+    } catch (error) {
+      logger.error("Storage stats rebuild error", { userId, error });
+      throw new HttpsError(
+        "internal",
+        "クラウドストレージ使用量の再集計に失敗しました",
+      );
+    }
+  },
+);
+
+/**
+ * 画像アセット保存時にストレージ使用量を加算
+ */
+exports.onTrackedImageObjectFinalized = onObjectFinalized(
+  { region: "asia-northeast1" },
+  async (event) => {
+    const objectName = event.data.name ?? "";
+    const trackedInfo = extractTrackedStorageObjectInfo(objectName);
+
+    if (!trackedInfo) {
+      return;
+    }
+
+    const sizeBytes = toNonNegativeNumber(event.data.size);
+    if (sizeBytes <= 0) {
+      logger.warn("Tracked image finalize event missing size. Rebuilding stats.", {
+        objectName,
+        userId: trackedInfo.userId,
+      });
+      await rebuildStorageStatsForUser(trackedInfo.userId);
+      return;
+    }
+
+    await updateStorageStatsByDelta({
+      userId: trackedInfo.userId,
+      deltaBytes: sizeBytes,
+      deltaImageCount: trackedInfo.countsTowardImageTotal ? 1 : 0,
+    });
+
+    logger.info("Tracked image object finalized", {
+      objectName,
+      userId: trackedInfo.userId,
+      sizeBytes,
+      countsTowardImageTotal: trackedInfo.countsTowardImageTotal,
+    });
+  },
+);
+
+/**
+ * 画像アセット削除時にストレージ使用量を減算
+ */
+exports.onTrackedImageObjectDeleted = onObjectDeleted(
+  { region: "asia-northeast1" },
+  async (event) => {
+    const objectName = event.data.name ?? "";
+    const trackedInfo = extractTrackedStorageObjectInfo(objectName);
+
+    if (!trackedInfo) {
+      return;
+    }
+
+    const sizeBytes = toNonNegativeNumber(event.data.size);
+    if (sizeBytes <= 0) {
+      logger.warn("Tracked image delete event missing size. Rebuilding stats.", {
+        objectName,
+        userId: trackedInfo.userId,
+      });
+      await rebuildStorageStatsForUser(trackedInfo.userId);
+      return;
+    }
+
+    await updateStorageStatsByDelta({
+      userId: trackedInfo.userId,
+      deltaBytes: -sizeBytes,
+      deltaImageCount: trackedInfo.countsTowardImageTotal ? -1 : 0,
+    });
+
+    logger.info("Tracked image object deleted", {
+      objectName,
+      userId: trackedInfo.userId,
+      sizeBytes,
+      countsTowardImageTotal: trackedInfo.countsTowardImageTotal,
+    });
+  },
+);
 
 /**
  * 学習ログ作成時に統計を自動更新
@@ -591,7 +878,7 @@ exports.sendDailyNotifications = onSchedule(
     timeZone: "Asia/Tokyo",
     region: "asia-northeast1",
   },
-  async (event) => {
+  async () => {
     const today = new Date();
 
     try {

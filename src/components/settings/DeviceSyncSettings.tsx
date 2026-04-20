@@ -9,12 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useAuthSession } from "@/contexts/AuthContext";
+import { useCloudStorageStats } from "@/hooks/settings/useCloudStorageStats";
 import { useSyncSettings } from "@/hooks/sync/useSyncSettings";
 import { cn } from "@/lib/utils";
 import { requireAppFirestoreDb } from "@/services/firebaseGateway";
-import { getLocalDb, initializeDB } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-import type { SyncMetadata, UserStats } from "@/types";
+import type { SyncMetadata } from "@/types";
 import { Check, Pencil, RefreshCw, Smartphone, Trash2, X } from "@/ui/icons";
 import { toDateOrNull, toMillis } from "@/utils/toMillis";
 
@@ -24,6 +24,8 @@ type DeviceRecord = SyncMetadata & {
   status?: DeviceStatus;
   revokedAt?: unknown;
 };
+
+const numberFormatter = new Intl.NumberFormat("ja-JP");
 
 const sortByLastSyncDesc = (left: DeviceRecord, right: DeviceRecord) => {
   return toMillis(right.lastSyncTime) - toMillis(left.lastSyncTime);
@@ -40,9 +42,9 @@ const getCurrentDeviceId = () => {
   }
 };
 
-const formatDate = (value: unknown) => {
+const formatDate = (value: unknown, fallback: string = "未同期") => {
   const date = toDateOrNull(value);
-  if (!date) return "未同期";
+  if (!date) return fallback;
   return format(date, "yyyy/MM/dd HH:mm", { locale: ja });
 };
 
@@ -83,7 +85,6 @@ const getDeviceStatusMeta = (device: DeviceRecord) => {
 export const DeviceSyncSettings = () => {
   const { currentUser } = useAuthSession();
   const [devices, setDevices] = useState<DeviceRecord[]>([]);
-  const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -95,18 +96,13 @@ export const DeviceSyncSettings = () => {
 
   const { settings: syncSettings, updateSettings: updateSyncSettings } =
     useSyncSettings();
-
-  const fetchStats = useCallback(async () => {
-    if (!currentUser) return;
-
-    initializeDB(currentUser.uid);
-    const db = await getLocalDb();
-    const nextStats =
-      (await db.userStats.get("current")) ??
-      (await db.userStats.toCollection().first());
-
-    setStats(nextStats ?? null);
-  }, [currentUser]);
+  const {
+    stats: storageStats,
+    loading: storageStatsLoading,
+    error: storageStatsError,
+    rebuilding: storageStatsRebuilding,
+    refresh: refreshStorageStats,
+  } = useCloudStorageStats(currentUser?.uid ?? null);
 
   const fetchDevices = useCallback(async () => {
     if (!currentUser) {
@@ -216,8 +212,7 @@ export const DeviceSyncSettings = () => {
 
   useEffect(() => {
     void fetchDevices();
-    void fetchStats();
-  }, [fetchDevices, fetchStats]);
+  }, [fetchDevices]);
 
   useEffect(() => {
     return () => {
@@ -234,11 +229,13 @@ export const DeviceSyncSettings = () => {
     }).length;
   }, [devices]);
 
-  const totalUsed = stats?.totalStorageUsedBytes ?? 0;
-  const highResUsed = stats?.totalHighResBytes ?? 0;
-  const thumbnailUsed = stats?.totalThumbnailBytes ?? 0;
-  const maxQuota = 500 * 1024 * 1024;
+  const totalUsed = storageStats?.totalStorageUsedBytes ?? 0;
+  const syncedImageCount = storageStats?.syncedImageCount ?? 0;
+  const maxQuota = storageStats?.quotaBytes ?? 500 * 1024 * 1024;
   const quotaPercent = Math.min((totalUsed / maxQuota) * 100, 100);
+  const storageStatsUpdatedAt =
+    storageStats?.updatedAt ?? storageStats?.lastRebuiltAt ?? null;
+  const formattedSyncedImageCount = `${numberFormatter.format(syncedImageCount)} 件`;
 
   if (!currentUser) {
     return null;
@@ -299,49 +296,82 @@ export const DeviceSyncSettings = () => {
 
       <SettingsSection
         title="クラウドストレージ使用量"
-        description="画像同期で使っている容量を確認できます。上限は 500 MB です。"
+        description="クラウドに保存された画像アセットの実使用量を確認できます。上限は 500 MB です。"
       >
         <div className="space-y-4">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div className="text-sm font-semibold text-slate-800">
-              {formatSize(totalUsed)} / {formatSize(maxQuota)}
-            </div>
-            <div
-              className={cn(
-                "text-xs font-semibold",
-                quotaPercent >= 90 ? "text-rose-600" : "text-slate-500",
-              )}
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void refreshStorageStats()}
+              disabled={storageStatsLoading || storageStatsRebuilding}
+              className="rounded-xl"
             >
-              {Math.round(quotaPercent)}% 使用中
-            </div>
+              <RefreshCw
+                className={cn(
+                  "mr-2 h-4 w-4",
+                  (storageStatsLoading || storageStatsRebuilding) &&
+                    "animate-spin",
+                )}
+              />
+              使用量を再集計
+            </Button>
+
+            {storageStatsError ? (
+              <span className="text-xs font-semibold text-rose-600">
+                {storageStatsError}
+              </span>
+            ) : null}
           </div>
 
-          <div className="ds-settings-panel__meter">
-            <div
-              className="ds-settings-panel__meter-bar"
-              style={{ width: `${quotaPercent}%` }}
-            />
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
-                高解像度画像
-              </div>
-              <div className="mt-2 text-sm font-semibold text-slate-800">
-                {formatSize(highResUsed)}
-              </div>
+          {storageStatsLoading && !storageStats ? (
+            <div className="flex items-center justify-center py-8">
+              <RefreshCw className="h-5 w-5 animate-spin text-slate-400" />
             </div>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div className="text-sm font-semibold text-slate-800">
+                  {formatSize(totalUsed)} / {formatSize(maxQuota)}
+                </div>
+                <div
+                  className={cn(
+                    "text-xs font-semibold",
+                    quotaPercent >= 90 ? "text-rose-600" : "text-slate-500",
+                  )}
+                >
+                  {Math.round(quotaPercent)}% 使用中
+                </div>
+              </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
-                サムネイル
+              <div className="ds-settings-panel__meter">
+                <div
+                  className="ds-settings-panel__meter-bar"
+                  style={{ width: `${quotaPercent}%` }}
+                />
               </div>
-              <div className="mt-2 text-sm font-semibold text-slate-800">
-                {formatSize(thumbnailUsed)}
+
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                  <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                    同期済み画像
+                  </div>
+                  <div className="mt-2 text-sm font-semibold text-slate-800">
+                    {formattedSyncedImageCount}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                  <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                    最終集計
+                  </div>
+                  <div className="mt-2 text-sm font-semibold text-slate-800">
+                    {formatDate(storageStatsUpdatedAt, "未集計")}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </SettingsSection>
 

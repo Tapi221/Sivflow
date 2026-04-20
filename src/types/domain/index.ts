@@ -6,6 +6,7 @@ export * from "./explorer";
 export * from "./folder";
 export * from "./media";
 export * from "./notification";
+export * from "./storageStats";
 export * from "./sync";
 export * from "./telemetry";
 
