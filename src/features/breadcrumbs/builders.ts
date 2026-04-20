@@ -21,6 +21,27 @@ const PAGE_LABELS: Record<string, string> = {
 const HOME_ROUTE = "/folders?home=1";
 const FOLDER_LIST_ROUTE = "/folders?view=section-list";
 
+const buildFolderRoute = (folderId: string | null | undefined): string => {
+  if (!folderId) {
+    return FOLDER_LIST_ROUTE;
+  }
+
+  const searchParams = new URLSearchParams();
+  searchParams.set("folderId", folderId);
+
+  return `/folders?${searchParams.toString()}`;
+};
+
+const resolveTitleBarFolderListRoute = (
+  extraCrumbs: BreadcrumbCrumb[],
+): string => {
+  const currentFolderCrumb = [...extraCrumbs]
+    .reverse()
+    .find((crumb) => crumb.folderId !== undefined);
+
+  return buildFolderRoute(currentFolderCrumb?.folderId);
+};
+
 export const areBreadcrumbCrumbsEqual = (
   a: BreadcrumbCrumb[],
   b: BreadcrumbCrumb[],
@@ -87,13 +108,16 @@ export const mergeTitleBarBreadcrumbs = ({
 
   const normalizedPathname = pathname.toLowerCase();
   const isCardSetViewPath = normalizedPathname.startsWith("/cardsetview");
+  const folderListRoute = isCardSetViewPath
+    ? resolveTitleBarFolderListRoute(extraCrumbs)
+    : FOLDER_LIST_ROUTE;
   const baseCrumbsForMerge =
     isCardSetViewPath && baseCrumbs.length > 1
-      ? [baseCrumbs[0], { label: "フォルダ一覧", to: FOLDER_LIST_ROUTE }]
+      ? [baseCrumbs[0], { label: "フォルダ一覧", to: folderListRoute }]
       : baseCrumbs;
 
   const defaultLastBaseRoute = isCardSetViewPath
-    ? FOLDER_LIST_ROUTE
+    ? folderListRoute
     : HOME_ROUTE;
 
   const clickableBaseCrumbs = baseCrumbsForMerge.map((crumb, index) =>
