@@ -52,50 +52,100 @@ import {
   type SettingsTabParam,
 } from "@constants/shared/app";
 
-const sidebarItems = [
-  {
-    id: "study",
-    label: "学習設定",
-    description:
-      "カード編集、レビュー導線、スケジュールの既定値をまとめて管理します。",
-    icon: BookOpen,
-  },
-  {
-    id: "display",
-    label: "表示設定",
-    description:
-      "フォルダサイドバーの表示モードと、設定画面の閲覧体験を調整します。",
-    icon: Layers,
-  },
-  {
-    id: "tags",
-    label: "タグ管理",
-    description:
-      "タグ階層、カテゴリ、色、マージや削除をひとつの画面で整理できます。",
-    icon: Tag,
-  },
-  {
-    id: "voice",
-    label: "音声設定",
-    description: "自動読み上げの挙動と、音声まわりの既定値を確認します。",
-    icon: Volume2,
-  },
-  {
-    id: "shortcut",
-    label: "ショートカット",
-    description: "主要画面で使えるショートカットを一覧で確認できます。",
-    icon: Keyboard,
-  },
-  {
-    id: "sync",
-    label: "同期設定",
-    description:
-      "自動同期、クラウド接続、端末管理、ストレージ使用量をまとめて確認します。",
-    icon: RefreshCw,
-  },
-] as const;
+type SidebarItemIcon = typeof BookOpen;
 
-type SidebarItem = (typeof sidebarItems)[number];
+type SidebarItem = {
+  id: SettingsTab;
+  label: string;
+  description: string;
+  icon: SidebarItemIcon;
+};
+
+type SidebarSection = {
+  id: string;
+  label: string;
+  items: readonly SidebarItem[];
+};
+
+const settingsSidebarSections = [
+  {
+    id: "preferences",
+    label: "Preferences",
+    items: [
+      {
+        id: "study",
+        label: "学習設定",
+        description:
+          "カード編集、レビュー導線、スケジュールの既定値をまとめて管理します。",
+        icon: BookOpen,
+      },
+      {
+        id: "display",
+        label: "表示設定",
+        description:
+          "フォルダサイドバーの表示モードと、設定画面の閲覧体験を調整します。",
+        icon: Layers,
+      },
+      {
+        id: "voice",
+        label: "音声設定",
+        description: "自動読み上げの挙動と、音声まわりの既定値を確認します。",
+        icon: Volume2,
+      },
+    ],
+  },
+  {
+    id: "library",
+    label: "Library",
+    items: [
+      {
+        id: "tags",
+        label: "タグ管理",
+        description:
+          "タグ階層、カテゴリ、色、マージや削除をひとつの画面で整理できます。",
+        icon: Tag,
+      },
+      {
+        id: "shortcut",
+        label: "ショートカット",
+        description: "主要画面で使えるショートカットを一覧で確認できます。",
+        icon: Keyboard,
+      },
+    ],
+  },
+  {
+    id: "workspace",
+    label: "Workspace",
+    items: [
+      {
+        id: "sync",
+        label: "同期設定",
+        description:
+          "自動同期、クラウド接続、端末管理、ストレージ使用量をまとめて確認します。",
+        icon: RefreshCw,
+      },
+    ],
+  },
+] as const satisfies ReadonlyArray<SidebarSection>;
+
+const sidebarItems: readonly SidebarItem[] = settingsSidebarSections.flatMap(
+  (section) => section.items,
+);
+
+const getDefaultSidebarItem = (): SidebarItem => {
+  const defaultItem =
+    sidebarItems.find((item) => item.id === DEFAULT_SETTINGS_TAB) ??
+    settingsSidebarSections[0]?.items[0];
+
+  if (!defaultItem) {
+    throw new Error("settingsSidebarSections must include at least one item.");
+  }
+
+  return defaultItem;
+};
+
+const defaultSidebarItem = getDefaultSidebarItem();
+
 type FolderSidebarDisplayMode = NonNullable<
   UserSettings["folderSidebarDisplayMode"]
 >;
@@ -288,24 +338,20 @@ const shortcutSections = [
 
 const syncIntervalOptions = [5, 15, 30, 60] as const;
 
-const normalizeSettingsTab = (tab?: SettingsTabParam): SettingsTab => {
-  if (tab === "theme") return "display";
-
-  return sidebarItems.some((item) => item.id === tab)
-    ? (tab as SettingsTab)
-    : DEFAULT_SETTINGS_TAB;
+const isSidebarSettingsTab = (
+  value?: SettingsTabParam,
+): value is SettingsTab => {
+  return sidebarItems.some((item) => item.id === value);
 };
 
 const resolveSettingsTab = (tab?: SettingsTabParam): SettingsTab => {
-  const normalizedTab = normalizeSettingsTab(tab);
+  if (tab === "theme") return "display";
 
-  return sidebarItems.some((item) => item.id === normalizedTab)
-    ? normalizedTab
-    : DEFAULT_SETTINGS_TAB;
+  return isSidebarSettingsTab(tab) ? tab : DEFAULT_SETTINGS_TAB;
 };
 
 const getSidebarItem = (tab: SettingsTab): SidebarItem => {
-  return sidebarItems.find((item) => item.id === tab) ?? sidebarItems[0];
+  return sidebarItems.find((item) => item.id === tab) ?? defaultSidebarItem;
 };
 
 const getOnOffLabel = (enabled: boolean) => {
@@ -419,8 +465,10 @@ const SettingsNavButton = ({
     <button
       type="button"
       onClick={onSelect}
+      aria-current={active ? "page" : undefined}
+      title={item.label}
       className={cn(
-        "ds-nav-action ds-settings-panel__nav-item",
+        "ds-nav-action ds-settings-panel__nav-item flex w-full items-center gap-3 text-left",
         active && "ds-nav-action--active",
       )}
     >
@@ -1086,27 +1134,35 @@ const SettingsDialog = ({
         <div className="ds-settings-panel__shell flex flex-1 overflow-hidden">
           <div
             className={cn(
-              "ds-settings-panel__sidebar md:w-[248px] flex-shrink-0 flex flex-col border-r",
+              "ds-settings-panel__sidebar md:w-[260px] flex-shrink-0 flex flex-col border-r",
               isMobileMenuOpen
                 ? "absolute inset-0 z-50 w-full"
                 : "hidden md:flex",
             )}
           >
             <div className="flex-1 overflow-y-auto px-4 py-4 custom-scrollbar">
-              <div className="mb-4 px-2">
-                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                  Preferences
-                </div>
-              </div>
-
               <div className="ds-settings-panel__nav">
-                {sidebarItems.map((item) => (
-                  <SettingsNavButton
-                    key={item.id}
-                    item={item}
-                    active={activeTab === item.id}
-                    onSelect={() => handleSelectTab(item.id)}
-                  />
+                {settingsSidebarSections.map((section) => (
+                  <section
+                    key={section.id}
+                    className="ds-settings-panel__nav-section"
+                    aria-label={section.label}
+                  >
+                    <div className="ds-settings-panel__nav-section-label">
+                      {section.label}
+                    </div>
+
+                    <div className="ds-settings-panel__nav-section-items">
+                      {section.items.map((item) => (
+                        <SettingsNavButton
+                          key={item.id}
+                          item={item}
+                          active={activeTab === item.id}
+                          onSelect={() => handleSelectTab(item.id)}
+                        />
+                      ))}
+                    </div>
+                  </section>
                 ))}
               </div>
             </div>
