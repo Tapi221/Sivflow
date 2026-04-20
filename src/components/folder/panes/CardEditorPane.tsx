@@ -30,7 +30,6 @@ import {
   type CardPresentationContextInput,
   type CardPresentationState,
 } from "@/components/card/presentation/cardPresentation";
-import { CardSyncStatusPill } from "@/components/card/shell/CardSyncStatusPill";
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { useCardSyncStatusReporter } from "@/components/card/shell/useCardSyncStatusReporter";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
@@ -52,7 +51,6 @@ import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { toMillisOrNull } from "@/utils/toMillis";
 
-/* full implementation intentionally mirrors current repo body with imports moved only */
 type CardEditorPaneSettings = {
   accentColor?: string;
   duplicateToOpposite?: boolean;
@@ -792,33 +790,17 @@ export const CardEditorPane = ({
         onUpdateTitle={metaPanel.onUpdateTitle}
         delayBonusEnabled={settings?.delayBonusEnabled ?? false}
         reviewStartNextDay={settings?.reviewStartNextDay ?? true}
+        syncStatus={{
+          lastSyncedAtMs: syncStatus.lastSyncedAtMs,
+          hasError: syncStatus.hasError,
+          isRetrying: syncStatus.isRetrying,
+          canRetry: syncStatus.retry != null,
+          onRetry: syncStatus.retry ?? undefined,
+        }}
       />
     ) : null;
 
-  const syncStatusRight = hideMetaPanel
-    ? "calc(var(--ui-space-1) + 2.75rem)"
-    : isMetaOpen
-      ? "calc(var(--ui-panel-width) + 2.75rem)"
-      : "calc(var(--ui-space-1) + 2.75rem)";
-
-  const syncStatusOverlay = !embeddedInPager ? (
-    <div
-      className="pointer-events-none absolute z-20 flex"
-      style={{
-        top: `${overlayTopInsetPx + 12}px`,
-        right: syncStatusRight,
-        transform: "none",
-      }}
-    >
-      <CardSyncStatusPill
-        lastSyncedAtMs={syncStatus.lastSyncedAtMs}
-        hasError={syncStatus.hasError}
-        isRetrying={syncStatus.isRetrying}
-        canRetry={syncStatus.retry != null}
-        onRetry={syncStatus.retry ?? undefined}
-      />
-    </div>
-  ) : null;
+  const syncStatusOverlay = null;
 
   const questionEditorPane = (
     <EditorSidePane

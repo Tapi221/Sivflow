@@ -24,6 +24,7 @@ import {
 import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
 import { CardMetaPanelSkeleton } from "@/components/card/panels/CardMetaPanelSkeleton";
 import { MetaPanelLeadSection } from "@/components/card/panels/MetaPanelShell";
+import { formatLastSyncedAt } from "@/components/card/shell/formatLastSyncedAt";
 import { SurfaceButton } from "@/components/ui/surface-button";
 import {
   Table,
@@ -55,6 +56,14 @@ type MetaReviewLog = {
   resistanceScore: number | null;
   durationMinutes: number | null;
   reviewIndexHint?: number;
+};
+
+type CardMetaSyncStatus = {
+  lastSyncedAtMs: number | null;
+  hasError?: boolean;
+  isRetrying?: boolean;
+  canRetry?: boolean;
+  onRetry?: () => Promise<void> | void;
 };
 
 type CardMetaPanelProps = {
@@ -90,6 +99,7 @@ type CardMetaPanelProps = {
   reviewStartNextDay?: boolean;
   mode?: "full" | "calendar";
   tagNamesOverride?: string[];
+  syncStatus?: CardMetaSyncStatus;
 };
 
 const META_DATE_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
@@ -409,7 +419,12 @@ const areCardMetaPanelPropsEqual = (
   prev.delayBonusEnabled === next.delayBonusEnabled &&
   prev.reviewStartNextDay === next.reviewStartNextDay &&
   prev.mode === next.mode &&
-  prev.tagNamesOverride === next.tagNamesOverride;
+  prev.tagNamesOverride === next.tagNamesOverride &&
+  prev.syncStatus?.lastSyncedAtMs === next.syncStatus?.lastSyncedAtMs &&
+  prev.syncStatus?.hasError === next.syncStatus?.hasError &&
+  prev.syncStatus?.isRetrying === next.syncStatus?.isRetrying &&
+  prev.syncStatus?.canRetry === next.syncStatus?.canRetry &&
+  prev.syncStatus?.onRetry === next.syncStatus?.onRetry;
 
 const CardMetaPanelInner = ({
   isLoading = false,
@@ -429,6 +444,7 @@ const CardMetaPanelInner = ({
   reviewStartNextDay = true,
   mode = "full",
   tagNamesOverride,
+  syncStatus,
 }: CardMetaPanelProps) => {
   if (isLoading) {
     return <CardMetaPanelSkeleton />;
@@ -446,6 +462,11 @@ const CardMetaPanelInner = ({
   const compactInlineInputClass =
     "ds-editor-pane__inline-input h-7 rounded px-1 text-[11px] outline-none";
   const mutedTextClass = "ds-editor-pane__muted-text";
+  const syncStatusText = syncStatus?.hasError
+    ? "同期失敗"
+    : syncStatus?.isRetrying
+      ? "再試行中..."
+      : formatLastSyncedAt(syncStatus?.lastSyncedAtMs ?? null);
   const getDurationInputWidthCh = (value: string): string => {
     const digits = value.trim().length;
     const widthCh = Math.min(6, Math.max(1, digits));
@@ -489,7 +510,6 @@ const CardMetaPanelInner = ({
   const { tagById } = useTags();
   const canPersistReview = Boolean(card?.id && card.id !== "__draft__");
 
-  // reviewCount は snake_case で入ってくるケースがあるので両対応しておく（UI側は事故らないのが正義）
   const rawReviewCount = (card?.reviewCount ??
     legacyCard?.review_count ??
     0) as unknown;
@@ -662,7 +682,6 @@ const CardMetaPanelInner = ({
     const storedLogs = toEditableReviewLogs(mergedStoredLogs);
     if (storedLogs.length > 0) return storedLogs;
 
-    // reviewLogs が欠損している旧データでも、1回分だけなら安全に復元編集できる。
     if (normalizedReviewCount === 1) {
       const syntheticLogs = toEditableReviewLogs(syntheticSummaryLogs);
       if (syntheticLogs.length > 0) return syntheticLogs;
@@ -767,7 +786,6 @@ const CardMetaPanelInner = ({
     derivedResistanceScore,
   ]);
 
-  // SSOT は card.reviewCount（互換あり）。ログはあってもなくても表示が壊れないよう max を取る。
   const completedReviewCount = Math.max(
     normalizedReviewCount,
     safeLogs.reduce(
@@ -1149,7 +1167,7 @@ const CardMetaPanelInner = ({
 
     const durationMinutes =
       trimmed === "" ? null : normalizeDurationMinutes(trimmed);
-    if ((currentLog.durationMinutes ?? null) === durationMinutes) {
+    if ((currentLog.durationMinutes ?? null) == durationMinutes) {
       setDurationDrafts((prev) => {
         const next = { ...prev };
         delete next[logIndex];
@@ -1289,9 +1307,7 @@ const CardMetaPanelInner = ({
             </div>
             <section>
               <div className={`${actionRowClass} justify-between`}>
-                <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
-                  タグ管理
-                </h3>
+                <h3 className={sectionTitleClass}>タグ管理</h3>
                 <SurfaceButton
                   type="button"
                   surface="convex"
@@ -1327,6 +1343,23 @@ const CardMetaPanelInner = ({
               更新日:{" "}
               {formatDateLabel(card?.updatedAt ?? asRecord(card)?.updated_at)}
             </p>
+            <p className={infoRowClass}>最終同期: {syncStatusText}</p>
+            {syncStatus?.hasError && syncStatus.onRetry ? (
+              <div className={actionRowClass}>
+                <SurfaceButton
+                  type="button"
+                  surface="concave"
+                  size="xs"
+                  className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)]"
+                  onClick={() => {
+                    void syncStatus.onRetry?.();
+                  }}
+                  disabled={syncStatus.isRetrying || !syncStatus.canRetry}
+                >
+                  {syncStatus.isRetrying ? "再試行中..." : "同期を再試行"}
+                </SurfaceButton>
+              </div>
+            ) : null}
             <p className={infoRowClass}>
               最終復習日:{" "}
               {latestReview
