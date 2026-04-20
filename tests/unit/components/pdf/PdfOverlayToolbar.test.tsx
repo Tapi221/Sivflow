@@ -18,15 +18,17 @@ describe("PdfOverlayToolbar", () => {
       <PdfOverlayToolbar
         currentPage={2}
         numPages={6}
-        scalePercent={100}
-        minScalePercent={50}
-        maxScalePercent={300}
+        zoomPercent={100}
+        minZoomPercent={0}
+        maxZoomPercent={100}
         fitMode="width"
+        pageLayoutMode="single"
         onCommitPage={() => {}}
         onPrevPage={() => {}}
         onNextPage={() => {}}
         onFitWidth={onFitWidth}
-        onScalePercentChange={() => {}}
+        onZoomPercentChange={() => {}}
+        onPageLayoutModeChange={() => {}}
         canGoToPrevPage={true}
         canGoToNextPage={true}
       />,
@@ -51,15 +53,17 @@ describe("PdfOverlayToolbar", () => {
       <PdfOverlayToolbar
         currentPage={1}
         numPages={1}
-        scalePercent={100}
-        minScalePercent={50}
-        maxScalePercent={300}
+        zoomPercent={100}
+        minZoomPercent={0}
+        maxZoomPercent={100}
         fitMode="manual"
+        pageLayoutMode="single"
         onCommitPage={() => {}}
         onPrevPage={() => {}}
         onNextPage={() => {}}
         onFitWidth={onFitWidth}
-        onScalePercentChange={() => {}}
+        onZoomPercentChange={() => {}}
+        onPageLayoutModeChange={() => {}}
         canGoToPrevPage={false}
         canGoToNextPage={false}
         disabled={true}

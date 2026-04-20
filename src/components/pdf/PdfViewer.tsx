@@ -4,7 +4,6 @@ import React, {
   useImperativeHandle,
   useMemo,
   useRef,
-  useState,
 } from "react";
 import type { PdfPageLayoutMode } from "@/types";
 import { cn } from "@/lib/utils";
@@ -21,6 +20,7 @@ import { usePdfZoom } from "./hooks/usePdfZoom";
 import { usePdfSearch } from "./hooks/usePdfSearch";
 import type {
   PageSize,
+  PdfScaleChangeSource,
   PdfViewerHandle,
   PdfViewerOptions,
   PdfViewerSourceMeta,
@@ -34,16 +34,19 @@ interface PdfViewerProps {
     url?: string | null;
     data?: Uint8Array | null;
   };
-  scale: number;
-  minScale?: number;
-  maxScale?: number;
-  zoomStep?: number;
+  baseScale: number;
+  gestureScale?: number;
+  minGestureScale?: number;
+  maxGestureScale?: number;
   searchQuery?: string;
   searchNavToken?: number;
   searchNavDirection?: "next" | "prev";
   pageLayoutMode?: PdfPageLayoutMode;
-  onScaleChange?: (nextScale: number, source: "wheel" | "gesture") => void;
-  onNumPages: (n: number) => void;
+  onGestureScaleChange?: (
+    nextGestureScale: number,
+    source: PdfScaleChangeSource,
+  ) => void;
+  onNumPages: (numPages: number) => void;
   onFirstPageSize?: (size: PageSize | null) => void;
   onPageChange?: (page: number) => void;
   onSourceLoadError?: (details: {
@@ -147,12 +150,13 @@ const buildPageLayoutMetrics = ({
     rowHeights.push(rowHeight);
 
     currentRowPageNumbers.forEach((pageNumber, pageIndexInRow) => {
-      const nextPageHeight = measuredPageHeights[pageIndexInRow] ?? rowHeight;
       const pageOffsetIndex = pageNumber - 1;
 
       pageTopOffsets[pageOffsetIndex] = runningTop;
       pageBottomOffsets[pageOffsetIndex] = runningTop + rowHeight;
       pageAnchorPageNumbers[pageOffsetIndex] = rowAnchorPageNumber;
+
+      void measuredPageHeights[pageIndexInRow];
     });
 
     runningTop += rowHeight;
@@ -483,15 +487,15 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
   (
     {
       source,
-      scale,
-      minScale = 0.5,
-      maxScale = 3,
-      zoomStep = 0.1,
+      baseScale,
+      gestureScale = 1,
+      minGestureScale = 1,
+      maxGestureScale = 4,
       searchQuery = "",
       searchNavToken = 0,
       searchNavDirection = "next",
       pageLayoutMode = "single",
-      onScaleChange,
+      onGestureScaleChange,
       onNumPages,
       onFirstPageSize,
       onPageChange,
@@ -505,6 +509,26 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
     }: PdfViewerProps,
     ref,
   ) => {
+    const resolvedGestureScale = useMemo(() => {
+      const lowerBound = Math.min(minGestureScale, maxGestureScale);
+      const upperBound = Math.max(minGestureScale, maxGestureScale);
+
+      if (!Number.isFinite(gestureScale) || gestureScale <= 0) {
+        return Number(lowerBound.toFixed(3));
+      }
+
+      return Number(
+        Math.min(Math.max(gestureScale, lowerBound), upperBound).toFixed(3),
+      );
+    }, [gestureScale, maxGestureScale, minGestureScale]);
+
+    const scale = useMemo(() => {
+      const safeBaseScale =
+        Number.isFinite(baseScale) && baseScale > 0 ? baseScale : 1;
+
+      return Number((safeBaseScale * resolvedGestureScale).toFixed(3));
+    }, [baseScale, resolvedGestureScale]);
+
     const {
       doc,
       documentKey,
@@ -555,26 +579,12 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       onPageChange,
     });
 
-    const [contentViewportEl, setContentViewportEl] =
-      useState<HTMLDivElement | null>(null);
-
-    const handleContentViewportRef = useCallback(
-      (element: HTMLDivElement | null) => {
-        setContentViewportEl((previousElement) =>
-          previousElement === element ? previousElement : element,
-        );
-      },
-      [],
-    );
-
     usePdfZoom({
       container: scrollContainerEl,
-      previewTarget: contentViewportEl,
-      scale,
-      minScale,
-      maxScale,
-      zoomStep,
-      onScaleChange,
+      gestureScale: resolvedGestureScale,
+      minGestureScale,
+      maxGestureScale,
+      onGestureScaleChange,
     });
 
     const prioritizedSearchPageNumbers = useMemo(
@@ -698,9 +708,9 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
           rowPageNumbers,
         }))
         .filter(({ rowPageNumbers }) =>
-          rowPageNumbers.some((pageNumber) =>
-            renderedPageNumberSet.has(pageNumber),
-          ),
+          rowPageNumbers.some((pageNumber) => {
+            return renderedPageNumberSet.has(pageNumber);
+          }),
         );
     }, [pageLayoutMetrics.rowPageNumbers, renderedPageNumbers]);
 
@@ -838,11 +848,17 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       }
 
       resetNavigation();
+
+      if (resolvedGestureScale !== 1) {
+        onGestureScaleChange?.(1, "reset");
+      }
     }, [
       normalizedLocalFileId,
       normalizedSourceData,
       normalizedSourceUrl,
+      onGestureScaleChange,
       resetNavigation,
+      resolvedGestureScale,
     ]);
 
     useImperativeHandle(
@@ -877,7 +893,6 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
 
           {!error && doc && (
             <div
-              ref={handleContentViewportRef}
               className="relative w-full"
               style={{ height: `${pageLayoutMetrics.totalContentHeight}px` }}
             >

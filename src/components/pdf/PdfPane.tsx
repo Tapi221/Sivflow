@@ -3,6 +3,12 @@ import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import platform from "@/platform";
 import type { PdfPageLayoutMode, PdfViewerState } from "@/types";
+import {
+  PDF_BAR_MAX_PERCENT,
+  PDF_BAR_MIN_PERCENT,
+  PDF_GESTURE_MAX_SCALE,
+  PDF_GESTURE_MIN_SCALE,
+} from "@constants/web/pdf";
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PdfOverlayToolbar } from "./PdfOverlayToolbar";
@@ -13,12 +19,7 @@ import { usePdfContainerWidth } from "./hooks/usePdfContainerWidth";
 import { usePdfSourceResolver } from "./hooks/usePdfSourceResolver";
 import { defaultPdfViewerOptions } from "./defaultPdfViewerOptions";
 import { usePdfViewerPersistence } from "./hooks/usePdfViewerPersistence";
-import {
-  FIT_MAX_SCALE,
-  FIT_MIN_SCALE,
-  FIT_PADDING_X,
-  clampScale,
-} from "./pdfViewerStateStorage";
+import { FIT_PADDING_X, clampScale } from "./pdfViewerStateStorage";
 
 interface PdfPaneDoc {
   id: string;
@@ -51,11 +52,6 @@ interface PdfPaneProps {
 const SEARCH_INPUT_DEBOUNCE_MS = 300;
 const PDF_OVERLAY_ZOOM_STEP_PERCENT = 1;
 const PDF_DOUBLE_PAGE_GAP = 16;
-const PDF_ZOOM_UI_MIN_PERCENT = 0;
-const PDF_ZOOM_UI_MAX_PERCENT = 100;
-const PDF_ZOOM_UI_RANGE_PERCENT =
-  PDF_ZOOM_UI_MAX_PERCENT - PDF_ZOOM_UI_MIN_PERCENT;
-const PDF_SCALE_RANGE = FIT_MAX_SCALE - FIT_MIN_SCALE;
 
 const normalizePageForLayout = (
   page: number,
@@ -67,48 +63,6 @@ const normalizePageForLayout = (
 
   const normalizedPage = Math.max(1, Math.trunc(page));
   return normalizedPage - ((normalizedPage - 1) % 2);
-};
-
-const clampZoomUiPercent = (value: number) => {
-  if (!Number.isFinite(value)) {
-    return PDF_ZOOM_UI_MIN_PERCENT;
-  }
-
-  return Math.min(
-    PDF_ZOOM_UI_MAX_PERCENT,
-    Math.max(PDF_ZOOM_UI_MIN_PERCENT, value),
-  );
-};
-
-const scaleToZoomUiPercent = (value: number) => {
-  const clampedScale = clampScale(value);
-
-  if (PDF_SCALE_RANGE <= 0 || PDF_ZOOM_UI_RANGE_PERCENT <= 0) {
-    return PDF_ZOOM_UI_MAX_PERCENT;
-  }
-
-  const ratio = (clampedScale - FIT_MIN_SCALE) / PDF_SCALE_RANGE;
-  const normalizedRatio = Math.min(1, Math.max(0, ratio));
-
-  return Number(
-    (
-      PDF_ZOOM_UI_MIN_PERCENT +
-      normalizedRatio * PDF_ZOOM_UI_RANGE_PERCENT
-    ).toFixed(0),
-  );
-};
-
-const zoomUiPercentToScale = (value: number) => {
-  const clampedUiPercent = clampZoomUiPercent(value);
-
-  if (PDF_SCALE_RANGE <= 0 || PDF_ZOOM_UI_RANGE_PERCENT <= 0) {
-    return clampScale(FIT_MIN_SCALE);
-  }
-
-  const ratio =
-    (clampedUiPercent - PDF_ZOOM_UI_MIN_PERCENT) / PDF_ZOOM_UI_RANGE_PERCENT;
-
-  return clampScale(Number((FIT_MIN_SCALE + ratio * PDF_SCALE_RANGE).toFixed(3)));
 };
 
 export const PdfPane = ({
@@ -123,6 +77,7 @@ export const PdfPane = ({
 
   const [numPages, setNumPages] = useState(0);
   const [basePageWidth, setBasePageWidth] = useState<number | null>(null);
+  const [gestureScale, setGestureScale] = useState(PDF_GESTURE_MIN_SCALE);
   const [searchInputValue, setSearchInputValue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchNavToken, setSearchNavToken] = useState(0);
@@ -162,19 +117,23 @@ export const PdfPane = ({
     };
   }, [viewerOptions]);
 
+  const isFitScaleReady = Boolean(containerWidth && basePageWidth);
+
   const {
     currentPage,
-    scale,
+    baseRenderScale,
     fitMode,
     pageLayoutMode,
+    zoomPercent,
     setCurrentPage,
     handleFitWidth,
-    handleViewerScaleChange,
-    handlePageLayoutModeChange,
+    handleViewerZoomPercentChange,
+    handlePageLayoutModeChange: handlePersistedPageLayoutModeChange,
   } = usePdfViewerPersistence({
     docId: doc.id,
     viewerState: doc.viewerState,
     getFitScale,
+    isFitScaleReady,
     onDocumentUpdate: onDocumentUpdate
       ? (updates) => onDocumentUpdate(updates)
       : undefined,
@@ -191,8 +150,6 @@ export const PdfPane = ({
     handleSourceLoadError,
   } = usePdfSourceResolver(doc, currentUser?.uid);
 
-  const zoomPercent = useMemo(() => scaleToZoomUiPercent(scale), [scale]);
-
   const pageStep = pageLayoutMode === "double" ? 2 : 1;
   const alignedCurrentPage = useMemo(
     () => normalizePageForLayout(currentPage, pageLayoutMode),
@@ -205,10 +162,27 @@ export const PdfPane = ({
         return;
       }
 
-      handleViewerScaleChange(zoomUiPercentToScale(nextPercent));
+      handleViewerZoomPercentChange(nextPercent);
     },
-    [handleViewerScaleChange],
+    [handleViewerZoomPercentChange],
   );
+
+  const handleFitWidthWithGestureReset = useCallback(() => {
+    setGestureScale(PDF_GESTURE_MIN_SCALE);
+    handleFitWidth();
+  }, [handleFitWidth]);
+
+  const handlePageLayoutModeChange = useCallback(
+    (nextPageLayoutMode: PdfPageLayoutMode) => {
+      setGestureScale(PDF_GESTURE_MIN_SCALE);
+      handlePersistedPageLayoutModeChange(nextPageLayoutMode);
+    },
+    [handlePersistedPageLayoutModeChange],
+  );
+
+  const handleGestureScaleChange = useCallback((nextGestureScale: number) => {
+    setGestureScale(nextGestureScale);
+  }, []);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -219,6 +193,10 @@ export const PdfPane = ({
       window.clearTimeout(timeoutId);
     };
   }, [searchInputValue]);
+
+  useEffect(() => {
+    setGestureScale(PDF_GESTURE_MIN_SCALE);
+  }, [doc.id]);
 
   useEffect(() => {
     if (!numPages) {
@@ -283,9 +261,11 @@ export const PdfPane = ({
   );
 
   const commitSearchQuery = useCallback(() => {
-    setSearchQuery((previousQuery) =>
-      previousQuery === searchInputValue ? previousQuery : searchInputValue,
-    );
+    setSearchQuery((previousQuery) => {
+      return previousQuery === searchInputValue
+        ? previousQuery
+        : searchInputValue;
+    });
   }, [searchInputValue]);
 
   const handlePrevMatch = useCallback(() => {
@@ -334,9 +314,9 @@ export const PdfPane = ({
   const handleFirstPageSize = useCallback(
     (size: { width: number; height: number } | null) => {
       const nextWidth = size?.width ?? null;
-      setBasePageWidth((previousWidth) =>
-        previousWidth === nextWidth ? previousWidth : nextWidth,
-      );
+      setBasePageWidth((previousWidth) => {
+        return previousWidth === nextWidth ? previousWidth : nextWidth;
+      });
     },
     [],
   );
@@ -408,15 +388,16 @@ export const PdfPane = ({
             <PdfViewer
               ref={viewerRef}
               source={source}
-              scale={scale}
-              minScale={FIT_MIN_SCALE}
-              maxScale={FIT_MAX_SCALE}
+              baseScale={baseRenderScale}
+              gestureScale={gestureScale}
+              minGestureScale={PDF_GESTURE_MIN_SCALE}
+              maxGestureScale={PDF_GESTURE_MAX_SCALE}
               searchQuery={searchQuery}
               searchNavToken={searchNavToken}
               searchNavDirection={searchNavDirection}
               pageLayoutMode={pageLayoutMode}
               spreadGap={PDF_DOUBLE_PAGE_GAP}
-              onScaleChange={handleViewerScaleChange}
+              onGestureScaleChange={handleGestureScaleChange}
               onNumPages={setNumPages}
               onPageChange={setCurrentPage}
               onFirstPageSize={handleFirstPageSize}
@@ -447,15 +428,15 @@ export const PdfPane = ({
                     currentPage={alignedCurrentPage}
                     numPages={numPages}
                     zoomPercent={zoomPercent}
-                    minZoomPercent={PDF_ZOOM_UI_MIN_PERCENT}
-                    maxZoomPercent={PDF_ZOOM_UI_MAX_PERCENT}
+                    minZoomPercent={PDF_BAR_MIN_PERCENT}
+                    maxZoomPercent={PDF_BAR_MAX_PERCENT}
                     fitMode={fitMode}
                     pageLayoutMode={pageLayoutMode}
                     zoomStepPercent={PDF_OVERLAY_ZOOM_STEP_PERCENT}
                     onCommitPage={handleCommitPage}
                     onPrevPage={handlePrev}
                     onNextPage={handleNext}
-                    onFitWidth={handleFitWidth}
+                    onFitWidth={handleFitWidthWithGestureReset}
                     onZoomPercentChange={handleZoomPercentChange}
                     onPageLayoutModeChange={handlePageLayoutModeChange}
                     canGoToPrevPage={canGoToPrevPage}

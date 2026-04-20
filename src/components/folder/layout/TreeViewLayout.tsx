@@ -291,6 +291,10 @@ const TreeViewLayout = ({
   const currentHeaderActionFolderId = currentSelectedContextFolderId;
 
   const currentHeaderFolderId = useMemo(() => {
+    if (isSectionListMode) {
+      return null;
+    }
+
     if (currentSelectedContextFolderId !== null) {
       return currentSelectedContextFolderId;
     }
@@ -300,7 +304,7 @@ const TreeViewLayout = ({
     }
 
     return null;
-  }, [currentSelectedContextFolderId, explorerHeaderFolderId]);
+  }, [currentSelectedContextFolderId, explorerHeaderFolderId, isSectionListMode]);
 
   useLayoutEffect(() => {
     onBreadcrumbContextChange?.({

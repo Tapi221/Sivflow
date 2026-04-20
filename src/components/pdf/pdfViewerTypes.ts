@@ -1,6 +1,6 @@
 import { pdfjsLib } from "@/lib/pdfjs";
 
-export type PdfScaleChangeSource = "wheel" | "gesture";
+export type PdfScaleChangeSource = "wheel" | "gesture" | "reset";
 
 export type PageSize = {
   width: number;
@@ -236,9 +236,9 @@ export const isPdfAbortError = (error: unknown): boolean => {
     return true;
   }
 
-  return PDF_ABORT_ERROR_MESSAGE_PATTERNS.some((pattern) =>
-    pattern.test(details.message),
-  );
+  return PDF_ABORT_ERROR_MESSAGE_PATTERNS.some((pattern) => {
+    return pattern.test(details.message);
+  });
 };
 
 export const isPdfTextItem = (
