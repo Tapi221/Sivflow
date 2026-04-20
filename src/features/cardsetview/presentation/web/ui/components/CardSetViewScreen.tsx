@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
 import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
@@ -6,6 +7,8 @@ import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui
 import { CardSetViewMobileContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMobileContent";
 import { CardViewCompactToolbar } from "@/features/cardsetview/presentation/web/ui/components/CardViewCompactToolbar";
 import type { CardSetViewContentProps } from "@/features/cardsetview/presentation/web/ui/components/cardSetViewContentProps";
+import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
+import { dispatchCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
@@ -108,6 +111,17 @@ export const CardSetViewScreen = () => {
 
   const topLeftControl = null;
 
+  useEffect(() => {
+    dispatchCardSetViewWindowEvent(
+      CARD_SET_VIEW_EVENTS.metaOpenChange,
+      state.isMetaOpen,
+    );
+
+    return () => {
+      dispatchCardSetViewWindowEvent(CARD_SET_VIEW_EVENTS.metaOpenChange, false);
+    };
+  }, [state.isMetaOpen]);
+
   return (
     <CardWorkspaceShell
       containerClassName="h-full overflow-hidden pt-0 card-editor-right-pane-font"
@@ -118,8 +132,8 @@ export const CardSetViewScreen = () => {
       overlayChildren={overlayChildren}
       overlayTopInsetPx={desktopOverlayTopInsetPx}
       isMetaOpen={state.isMetaOpen}
-      onToggleMetaOpen={() => state.setIsMetaOpen((prev) => !prev)}
-      metaToggleClassName="hidden md:grid"
+      onToggleMetaOpen={undefined}
+      hideMetaToggle={true}
       viewportRef={paneWidth.contentViewportRef}
       viewportClassName={
         state.isGlobalEditing || isDesktopPresentation

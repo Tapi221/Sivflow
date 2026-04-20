@@ -97,9 +97,39 @@ const HomeBreadcrumbIcon: React.FC = () => (
   </svg>
 );
 
+const MetaPanelTitlebarIcon = () => {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <rect
+        x="3.5"
+        y="4.5"
+        width="17"
+        height="15"
+        rx="4.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M8 8.25V15.75"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+};
+
 export const TitleBar: React.FC = () => {
   const [bridgeIsMaximized, setBridgeIsMaximized] = useState(false);
   const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
+  const [isCardSetViewMetaOpen, setIsCardSetViewMetaOpen] = useState(false);
   const navigate = useNavigate();
   const hasDesktopBridge = useHasDesktopBridge();
   const presentationTarget = usePresentationTarget();
@@ -133,6 +163,15 @@ export const TitleBar: React.FC = () => {
       CARD_SET_VIEW_EVENTS.editingChange,
       (isEditing) => {
         setIsCardSetViewEditing(Boolean(isEditing));
+      },
+    );
+  }, []);
+
+  useEffect(() => {
+    return subscribeCardSetViewWindowEvent(
+      CARD_SET_VIEW_EVENTS.metaOpenChange,
+      (isOpen) => {
+        setIsCardSetViewMetaOpen(Boolean(isOpen));
       },
     );
   }, []);
@@ -310,6 +349,49 @@ export const TitleBar: React.FC = () => {
                 </svg>
               </button>
             )}
+
+            <button
+              type="button"
+              onClick={() =>
+                dispatchCardSetViewWindowEvent(
+                  CARD_SET_VIEW_EVENTS.toggleMetaPanelRequest,
+                  undefined,
+                )
+              }
+              className="titlebar-hover titlebar-text flex h-full w-[46px] items-center justify-center transition-colors"
+              title={
+                isCardSetViewMetaOpen
+                  ? "メタパネルを閉じる"
+                  : "メタパネルを開く"
+              }
+              aria-label={
+                isCardSetViewMetaOpen
+                  ? "メタパネルを閉じる"
+                  : "メタパネルを開く"
+              }
+              tabIndex={-1}
+              style={noDragStyle}
+            >
+              {isCardSetViewMetaOpen ? (
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 10 10"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M1 1L9 9M9 1L1 9"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              ) : (
+                <MetaPanelTitlebarIcon />
+              )}
+            </button>
 
             <button
               type="button"
