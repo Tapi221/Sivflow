@@ -76,8 +76,6 @@ export const CardSetViewScreen = () => {
               max: topLeftZoomControl.max,
               step: topLeftZoomControl.step,
               onChange: topLeftZoomControl.onChange,
-              onStepDown: topLeftZoomControl.onStepDown,
-              onStepUp: topLeftZoomControl.onStepUp,
             }
           : null
       }
