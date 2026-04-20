@@ -1,5 +1,3 @@
-import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
-import { useCardSyncStatusReporter } from "@/components/card/shell/useCardSyncStatusReporter";
 import {
   CANONICAL_CARD_WIDTH,
   CARD_ROW_PX,
@@ -40,7 +38,6 @@ export interface DesktopEmbeddedCardEditorSurfaceProps {
   cardLayoutMode: CardLayoutMode;
   zoomScale: number;
   isInteractive: boolean;
-  onSyncStatusChange: (status: CardSyncStatus | null) => void;
 }
 
 type EmbeddedEditorHeaderRightProps = Readonly<{
@@ -75,29 +72,6 @@ const isCardEntity = (value: unknown): value is Card =>
   value !== null &&
   "id" in value &&
   typeof (value as { id?: unknown }).id === "string";
-
-const toTimeMs = (value: unknown) => {
-  if (value instanceof Date && !Number.isNaN(value.getTime())) {
-    return value.getTime();
-  }
-
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "toDate" in value &&
-    typeof (value as { toDate?: unknown }).toDate === "function"
-  ) {
-    const nextDate = (value as { toDate: () => Date }).toDate();
-    return Number.isNaN(nextDate.getTime()) ? null : nextDate.getTime();
-  }
-
-  if (typeof value === "string" || typeof value === "number") {
-    const nextDate = new Date(value);
-    return Number.isNaN(nextDate.getTime()) ? null : nextDate.getTime();
-  }
-
-  return null;
-};
 
 const resolveFaceLabel = (side: Side) =>
   side === "question" ? "問題" : "解答";
@@ -211,7 +185,6 @@ export const DesktopEmbeddedCardEditorSurface = ({
   cardLayoutMode,
   zoomScale,
   isInteractive,
-  onSyncStatusChange,
 }: DesktopEmbeddedCardEditorSurfaceProps) => {
   const controller = useCardEditorPaneController({
     selectedCardId,
@@ -230,28 +203,13 @@ export const DesktopEmbeddedCardEditorSurface = ({
     isFlipped,
     setIsFlipped,
     isEditing,
-    lastSavedAt,
-    saveError,
     flushDraft,
     handleToggleBookmark,
     handleToggleUncertainty,
   } = session;
 
-  const [isRetryingSync, setIsRetryingSync] = useState(false);
-  const [showRetryErrorState, setShowRetryErrorState] = useState(false);
   const surfaceViewportRef = useRef<HTMLDivElement | null>(null);
   const [surfaceViewportWidth, setSurfaceViewportWidth] = useState(0);
-
-  useEffect(() => {
-    if (saveError) {
-      setShowRetryErrorState(true);
-      return;
-    }
-
-    if (!isRetryingSync) {
-      setShowRetryErrorState(false);
-    }
-  }, [isRetryingSync, saveError]);
 
   useEffect(() => {
     const element = surfaceViewportRef.current;
@@ -402,54 +360,6 @@ export const DesktopEmbeddedCardEditorSurface = ({
     ),
     [isFlipped, setIsFlipped],
   );
-
-  const handleRetrySync = useCallback(async () => {
-    if (!showRetryErrorState) return;
-
-    setIsRetryingSync(true);
-    try {
-      const saved = await flushDraft({
-        reason: "autosave",
-        showSuccessToast: false,
-      });
-
-      if (saved) {
-        setShowRetryErrorState(false);
-      }
-    } finally {
-      setIsRetryingSync(false);
-    }
-  }, [flushDraft, showRetryErrorState]);
-
-  const fallbackLastSyncedAtMs = useMemo(
-    () =>
-      lastSavedAt?.getTime() ??
-      toTimeMs(selectedCardEntity?.updatedAt) ??
-      toTimeMs(selectedCardEntity?.createdAt) ??
-      null,
-    [lastSavedAt, selectedCardEntity?.createdAt, selectedCardEntity?.updatedAt],
-  );
-
-  const syncStatus = useMemo<CardSyncStatus>(
-    () => ({
-      lastSyncedAtMs: fallbackLastSyncedAtMs,
-      hasError: showRetryErrorState,
-      isRetrying: isRetryingSync,
-      retry: showRetryErrorState ? handleRetrySync : null,
-    }),
-    [
-      fallbackLastSyncedAtMs,
-      handleRetrySync,
-      isRetryingSync,
-      showRetryErrorState,
-    ],
-  );
-
-  useCardSyncStatusReporter({
-    status: syncStatus,
-    onSyncStatusChange,
-    isEnabled: isInteractive,
-  });
 
   const previousInteractiveRef = useRef(isInteractive);
   useEffect(() => {

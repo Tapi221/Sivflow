@@ -1,5 +1,4 @@
 import { layoutRowsToCardHeightPx } from "@constants/shared/flashcard";
-import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { useFlashcardDualDerived } from "@/components/card/frame/useFlashcardDualDerived";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
@@ -25,7 +24,6 @@ export interface DesktopCardSurfaceProps {
   onFlip: () => void;
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
-  onSyncStatusChange: (status: CardSyncStatus | null) => void;
 }
 
 const DesktopCardSurfaceInner = ({
@@ -43,7 +41,6 @@ const DesktopCardSurfaceInner = ({
   onFlip,
   onToggleUncertainty,
   onToggleBookmark,
-  onSyncStatusChange,
 }: DesktopCardSurfaceProps) => {
   const [hasFocusWithin, setHasFocusWithin] = React.useState(false);
 
@@ -159,7 +156,6 @@ const DesktopCardSurfaceInner = ({
           cardLayoutMode={currentCardLayoutMode}
           zoomScale={viewZoomScale}
           isInteractive={canInteractWithEditor}
-          onSyncStatusChange={onSyncStatusChange}
         />
       </div>
     );
@@ -221,7 +217,6 @@ const areDesktopCardSurfacePropsEqual = (
   if (prev.onFlip !== next.onFlip) return false;
   if (prev.onToggleUncertainty !== next.onToggleUncertainty) return false;
   if (prev.onToggleBookmark !== next.onToggleBookmark) return false;
-  if (prev.onSyncStatusChange !== next.onSyncStatusChange) return false;
 
   if (next.isGlobalEditing && prev.cardsOverride !== next.cardsOverride) {
     return false;

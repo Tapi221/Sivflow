@@ -1,4 +1,3 @@
-import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getCardText } from "@/domain/card/content";
@@ -158,7 +157,6 @@ interface CardSetViewDesktopProps {
   onActiveScrollAnchorFaceChange?: (face: "question" | "answer" | null) => void;
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
-  onSyncStatusChange: (status: CardSyncStatus | null) => void;
 }
 
 export const CardSetViewDesktop = ({
@@ -182,7 +180,6 @@ export const CardSetViewDesktop = ({
   onActiveScrollAnchorFaceChange,
   onToggleUncertainty,
   onToggleBookmark,
-  onSyncStatusChange,
 }: CardSetViewDesktopProps) => {
   const { currentUser } = useAuthSession();
 
@@ -293,7 +290,6 @@ export const CardSetViewDesktop = ({
           onFlip={onFlip}
           onToggleUncertainty={onToggleUncertainty}
           onToggleBookmark={onToggleBookmark}
-          onSyncStatusChange={onSyncStatusChange}
         />
       );
     },
@@ -306,7 +302,6 @@ export const CardSetViewDesktop = ({
       folderId,
       isGlobalEditing,
       onFlip,
-      onSyncStatusChange,
       onToggleBookmark,
       onToggleUncertainty,
       settings,
