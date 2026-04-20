@@ -178,7 +178,7 @@ const TreeViewLayout = ({
   );
 
   const { updateDocument, deleteDocument } = useDocumentCommands();
-  const { getTagColor, tagById } = useTags();
+  const { tagById } = useTags();
 
   const {
     sidebarRef,
@@ -366,7 +366,7 @@ const TreeViewLayout = ({
     );
   }, [cardSets, currentHeaderFolderId]);
 
-  const { isFilterActive, filteredCards, filteredDocuments, isFiltering } =
+  const { filteredCards, filteredDocuments, isFiltering } =
     useTreeViewFilters({
       cards,
       documents,
@@ -511,9 +511,6 @@ const TreeViewLayout = ({
         isResizing={isResizing}
         showMobileDetail={showMobileDetail}
         allTags={allTags}
-        getTagColor={getTagColor}
-        isFilterActive={isFilterActive}
-        resultCount={filteredCards.length + filteredDocuments.length}
         onCreateRootFolder={handleCreateRootFolder}
         onCreateCardSet={handleCreateCardSetFromHeader}
         onAddDocument={handleAddDocumentFromHeader}
