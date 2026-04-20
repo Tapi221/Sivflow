@@ -243,16 +243,20 @@ const PdfPageComponent = ({
     [documentKey, pageNumber, scale],
   );
 
-  const [measuredPageState, setMeasuredPageState] = useState<MeasuredPageState>({
-    pageIdentity: "",
-    size: null,
-  });
+  const [measuredPageState, setMeasuredPageState] = useState<MeasuredPageState>(
+    {
+      pageIdentity: "",
+      size: null,
+    },
+  );
 
-  const [canvasRenderState, setCanvasRenderState] = useState<CanvasRenderState>({
-    renderIdentity: "",
-    rendered: false,
-    error: null,
-  });
+  const [canvasRenderState, setCanvasRenderState] = useState<CanvasRenderState>(
+    {
+      renderIdentity: "",
+      rendered: false,
+      error: null,
+    },
+  );
 
   const [textLayerState, setTextLayerState] = useState<TextLayerState>({
     textLayerIdentity: "",
@@ -599,7 +603,9 @@ const PdfPageComponent = ({
           ? null
           : "PDFテキストレイヤーの構築に失敗した可能性があります";
 
-        nextTextLayerEl.dataset.textLayerReady = textLayerReady ? "true" : "false";
+        nextTextLayerEl.dataset.textLayerReady = textLayerReady
+          ? "true"
+          : "false";
         nextTextLayerEl.dataset.textLayerExpectedText =
           textItemCount > 0 ? "true" : "false";
 

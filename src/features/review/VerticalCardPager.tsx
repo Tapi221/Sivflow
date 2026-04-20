@@ -356,14 +356,12 @@ const findNearestRenderedIndexByCenterY = ({
   container: HTMLDivElement;
   itemRefs: React.MutableRefObject<Map<string, HTMLDivElement | null>>;
   stableCardKeys: string[];
-  renderRange:
-    | {
-        start: number;
-        end: number;
-        visibleStart: number;
-        visibleEnd: number;
-      }
-    | null;
+  renderRange: {
+    start: number;
+    end: number;
+    visibleStart: number;
+    visibleEnd: number;
+  } | null;
   targetCenterY: number;
   fallbackIndex: number;
 }) => {
@@ -376,7 +374,9 @@ const findNearestRenderedIndexByCenterY = ({
 
   for (let index = renderRange.start; index <= renderRange.end; index += 1) {
     const stableKey = stableCardKeys[index];
-    const element = stableKey ? itemRefs.current.get(stableKey) ?? null : null;
+    const element = stableKey
+      ? (itemRefs.current.get(stableKey) ?? null)
+      : null;
     if (!element) continue;
 
     const elementTop = resolveElementTopWithinContainer(container, element);

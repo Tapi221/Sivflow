@@ -29,9 +29,9 @@ const isCardDeleted = (
 
   return Boolean(
     card.isDeleted ??
-      card.is_deleted ??
-      (card as unknown as { deleted?: boolean }).deleted ??
-      deletedAt,
+    card.is_deleted ??
+    (card as unknown as { deleted?: boolean }).deleted ??
+    deletedAt,
   );
 };
 
@@ -124,8 +124,12 @@ const buildCardRevisionKey = (raw: unknown): string => {
     serializeRevisionPart(resolveRawField(record, ["deletedAt", "deleted_at"])),
     serializeRevisionPart(resolveRawField(record, ["isDeleted", "is_deleted"])),
     serializeRevisionPart(resolveRawField(record, ["folderId", "folder_id"])),
-    serializeRevisionPart(resolveRawField(record, ["cardSetId", "card_set_id"])),
-    serializeRevisionPart(resolveRawField(record, ["orderIndex", "order_index"])),
+    serializeRevisionPart(
+      resolveRawField(record, ["cardSetId", "card_set_id"]),
+    ),
+    serializeRevisionPart(
+      resolveRawField(record, ["orderIndex", "order_index"]),
+    ),
     serializeRevisionPart(
       resolveRawField(record, ["nextReviewDate", "next_review_date"]),
     ),

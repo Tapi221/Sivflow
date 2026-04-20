@@ -94,11 +94,7 @@ export const useCardSetViewPaneWidth = ({
       edit: CARD_PANE_VIEW_MIN_WIDTH_PX,
     },
     measureViewportWidth,
-    viewportObserverDeps: [
-      isDesktop,
-      isGlobalEditing,
-      isMetaOpen,
-        ],
+    viewportObserverDeps: [isDesktop, isGlobalEditing, isMetaOpen],
     reservedViewportInsetPx: reservedScrollbarGutterWidthPx,
     allowStoredWidthBeyondViewport: false,
     previewBehavior: "both",

@@ -198,7 +198,9 @@ export const PdfPane = ({
   const handleFirstPageSize = useCallback(
     (size: { width: number; height: number } | null) => {
       const nextWidth = size?.width ?? null;
-      setBasePageWidth((previous) => (previous === nextWidth ? previous : nextWidth));
+      setBasePageWidth((previous) =>
+        previous === nextWidth ? previous : nextWidth,
+      );
     },
     [],
   );
