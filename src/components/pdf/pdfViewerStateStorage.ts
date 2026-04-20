@@ -21,7 +21,7 @@ export {
   ZOOM_STEP,
 };
 
-// ドキュメント切替保護：呼び出し側で docId を指定する
+// ✅ ドキュメント切替保護：呼び出し側で docId を指定する
 export const getViewerStateFromSession = (
   docId: string,
 ): PdfViewerState | null => {
@@ -34,7 +34,7 @@ export const getViewerStateFromSession = (
   }
 };
 
-// ドキュメント切替保護：docId パラメータで正しいキーを保証
+// ✅ ドキュメント切替保護：docId パラメータで正しいキーを保証
 export const saveViewerStateToSession = (
   docId: string,
   state: PdfViewerState,
@@ -47,5 +47,10 @@ export const saveViewerStateToSession = (
   }
 };
 
-export const clampScale = (value: number): number =>
-  Math.min(Math.max(value, FIT_MIN_SCALE), FIT_MAX_SCALE);
+export const clampScale = (value: number): number => {
+  if (!Number.isFinite(value)) {
+    return 1;
+  }
+
+  return Math.min(Math.max(value, FIT_MIN_SCALE), FIT_MAX_SCALE);
+};
