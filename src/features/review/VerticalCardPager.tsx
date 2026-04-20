@@ -109,6 +109,16 @@ type ScrollAnchorSnapshot = {
   offsetWithinAnchorPx: number;
 };
 
+const isSameRenderRange = (
+  left: { start: number; end: number } | null,
+  right: { start: number; end: number } | null,
+) => {
+  if (left === right) return true;
+  if (!left || !right) return left === right;
+
+  return left.start === right.start && left.end === right.end;
+};
+
 const resolveElementTopWithinContainer = (
   container: HTMLDivElement,
   element: HTMLElement,
@@ -417,6 +427,9 @@ const VerticalCardPagerFn = <T,>({
   const avgItemExtentRef = useRef(PLACEHOLDER_HEIGHT_PX);
   const activeIndexRef = useRef(activeIndex);
   const onRenderRangeChangeRef = useRef(onRenderRangeChange);
+  const emittedRenderRangeRef = useRef<{ start: number; end: number } | null>(
+    null,
+  );
 
   const anchorCorrectionRafRef = useRef<number | null>(null);
   const anchorStabilizationUntilRef = useRef<number>(0);
@@ -817,8 +830,17 @@ const VerticalCardPagerFn = <T,>({
             end: renderRange.end,
           };
 
+    if (isSameRenderRange(emittedRenderRangeRef.current, nextEffectiveRange)) {
+      return;
+    }
+
+    emittedRenderRangeRef.current = nextEffectiveRange;
     onRenderRangeChangeRef.current?.(nextEffectiveRange);
   }, [renderRange]);
+
+  useEffect(() => {
+    emittedRenderRangeRef.current = null;
+  }, [cards.length]);
 
   useEffect(() => {
     const container = containerRef.current;

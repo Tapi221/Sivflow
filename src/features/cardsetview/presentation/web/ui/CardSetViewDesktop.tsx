@@ -8,6 +8,7 @@ import {
   CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
   CARD_SET_VIEW_PAGER_PADDING_BLOCK,
   CARD_SET_VIEW_PAGER_PADDING_INLINE,
+  layoutRowsToCardHeightPx,
 } from "@constants/shared/flashcard";
 import { DesktopCardSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopCardSurface";
 import {
@@ -27,12 +28,25 @@ const CARD_LOADING_PREVIEW_RULED_STYLE: React.CSSProperties = {
   backgroundSize: "calc(100% - 24px) 24px",
 };
 
-const CardLoadingPreview = ({ card }: { card: Card }) => {
+const isSameRenderRange = (
+  left: { start: number; end: number } | null,
+  right: { start: number; end: number } | null,
+) => {
+  if (left === right) return true;
+  if (!left || !right) return left === right;
+
+  return left.start === right.start && left.end === right.end;
+};
+
+const CardLoadingPreview = ({
+  card,
+  heightPx,
+}: { card: Card; heightPx?: number }) => {
   return (
     <div
       aria-hidden
       style={{
-        height: 900,
+        height: heightPx ?? 900,
         width: "100%",
         borderRadius: "inherit",
         position: "relative",
@@ -220,6 +234,15 @@ export const CardSetViewDesktop = ({
 
   const editingCardsOverride = isGlobalEditing ? cardsForPager : undefined;
 
+  const handleRenderRangeChange = useCallback(
+    (nextRange: { start: number; end: number } | null) => {
+      setRenderRange((prevRange) => {
+        return isSameRenderRange(prevRange, nextRange) ? prevRange : nextRange;
+      });
+    },
+    [],
+  );
+
   useEffect(() => {
     if (selectedCardIndex < 0) return;
     if (selectedCardIndex === safeCurrentIndex) return;
@@ -247,8 +270,15 @@ export const CardSetViewDesktop = ({
       const readyToDisplay =
         isActive || isGlobalEditing || readySetRef.current.has(card.id ?? "");
 
+      const loadingPreviewHeightPx =
+        currentDisplayMode === "fixed"
+          ? layoutRowsToCardHeightPx(card.layoutRows)
+          : undefined;
+
       if (!readyToDisplay) {
-        return <CardLoadingPreview card={card} />;
+        return (
+          <CardLoadingPreview card={card} heightPx={loadingPreviewHeightPx} />
+        );
       }
 
       return (
@@ -313,7 +343,7 @@ export const CardSetViewDesktop = ({
       }
       getKey={(card) => card.id}
       disableVirtualization={false}
-      onRenderRangeChange={setRenderRange}
+      onRenderRangeChange={handleRenderRangeChange}
       onActiveScrollAnchorFaceChange={onActiveScrollAnchorFaceChange}
       getScrollAnchorSelector={getScrollAnchorSelector}
       preserveScrollAnchorKey={preserveScrollAnchorKey}
