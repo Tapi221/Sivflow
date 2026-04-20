@@ -135,8 +135,6 @@ export const CardSetViewScreen = () => {
       overlayChildren={overlayChildren}
       overlayTopInsetPx={desktopOverlayTopInsetPx}
       isMetaOpen={state.isMetaOpen}
-      onToggleMetaOpen={undefined}
-      hideMetaToggle={true}
       viewportRef={paneWidth.contentViewportRef}
       viewportClassName={
         state.isGlobalEditing || isDesktopPresentation
