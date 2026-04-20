@@ -1,5 +1,7 @@
-import { Card } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { CalendarScreenSkeleton } from "@/components/loading/ScreenSkeletons";
 import { useNavigate } from "react-router-dom";
 
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
@@ -14,6 +16,7 @@ export const CalendarScreen = () => {
   const navigate = useNavigate();
 
   const {
+    isLoading,
     isMetaOpen,
     setIsMetaOpen,
     viewModel,
@@ -23,6 +26,10 @@ export const CalendarScreen = () => {
     goToNextMonth,
     selectDate,
   } = useCalendarScreen();
+
+  if (isLoading) {
+    return <CalendarScreenSkeleton />;
+  }
 
   return (
     <div className="relative min-h-screen bg-transparent text-slate-800 selection:bg-indigo-100 selection:text-indigo-900 flex">

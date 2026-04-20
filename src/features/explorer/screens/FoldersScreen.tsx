@@ -1,7 +1,8 @@
+
 import { useEffect, useMemo, useState } from "react";
 
+import { FoldersScreenSkeleton } from "@/components/loading/ScreenSkeletons";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
-import { Skeleton } from "@/components/ui/skeleton";
 import { notifySelectedFolderChanged } from "@/features/explorer/adapters/web/explorerSelectionNotifier";
 import type { FoldersRouteAdapter } from "@/features/explorer/adapters/web/useFoldersRouteAdapter";
 import { useWorkspaceScrollController } from "@/features/explorer/adapters/web/useWorkspaceScrollController";
@@ -113,6 +114,10 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     return <div className="flex min-h-0 h-full w-full bg-transparent" />;
   }
 
+  if (foldersLoading) {
+    return <FoldersScreenSkeleton />;
+  }
+
   return (
     <div
       className={cn(
@@ -123,32 +128,24 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
       )}
     >
       <div className="relative z-10 w-full mx-auto h-full min-h-0 flex">
-        {foldersLoading ? (
-          <div className="space-y-3 p-4">
-            {[...Array(3)].map((_, index) => (
-              <Skeleton key={index} className="h-16 w-full rounded-2xl" />
-            ))}
-          </div>
-        ) : (
-          <TreeViewLayout
-            folders={lookups.normalizedFolders}
-            isSectionListMode={controller.state.isSectionListMode}
-            selectedFolderId={controller.state.selectedFolderId}
-            selectedItem={controller.state.selectedItem}
-            selectedCardId={lookups.selectedCardId}
-            selectedDocumentId={lookups.selectedDocumentId}
-            onFolderSelect={handleFolderSelect}
-            onItemSelect={handleItemSelect}
-            onCardUpdated={() => {
-              // カード更新後の処理は既存実装へ委譲
-            }}
-            onBreadcrumbContextChange={controller.actions.setBreadcrumbContext}
-            navigateToSectionListToken={
-              controller.state.navigateToSectionListToken
-            }
-            folderSelectionNonce={controller.state.folderSelectionNonce}
-          />
-        )}
+        <TreeViewLayout
+          folders={lookups.normalizedFolders}
+          isSectionListMode={controller.state.isSectionListMode}
+          selectedFolderId={controller.state.selectedFolderId}
+          selectedItem={controller.state.selectedItem}
+          selectedCardId={lookups.selectedCardId}
+          selectedDocumentId={lookups.selectedDocumentId}
+          onFolderSelect={handleFolderSelect}
+          onItemSelect={handleItemSelect}
+          onCardUpdated={() => {
+            // カード更新後の処理は既存実装へ委譲
+          }}
+          onBreadcrumbContextChange={controller.actions.setBreadcrumbContext}
+          navigateToSectionListToken={
+            controller.state.navigateToSectionListToken
+          }
+          folderSelectionNonce={controller.state.folderSelectionNonce}
+        />
       </div>
     </div>
   );

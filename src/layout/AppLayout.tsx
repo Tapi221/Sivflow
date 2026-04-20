@@ -1,18 +1,13 @@
+
 import React, { Suspense, useEffect, useRef } from "react";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 
+import { AppShellLoadingFallback } from "@/components/loading/ScreenSkeletons";
 import "./AppLayout.css";
 import { Sidebar } from "./Sidebar";
 
 const LoadingFallback = () => {
-  return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-[#FCFBF7] bg-[radial-gradient(#D1D1D1_0.75px,transparent_0.75px)] [background-size:14px_14px] animate-in fade-in duration-300">
-      <div className="relative h-16 w-16">
-        <div className="absolute inset-0 rounded-full border-4 border-emerald-600/15" />
-        <div className="absolute inset-0 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
-      </div>
-    </div>
-  );
+  return <AppShellLoadingFallback />;
 };
 
 const resetWorkspaceScroll = (mainElement: HTMLElement | null) => {

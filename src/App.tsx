@@ -1,4 +1,18 @@
+
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
+import {
+  AppBootLoadingFallback,
+  CalendarScreenSkeleton,
+  CardEditScreenSkeleton,
+  CardSetViewScreenSkeleton,
+  DirectoryScreenSkeleton,
+  FoldersScreenSkeleton,
+  GalleryScreenSkeleton,
+  RedirectPageScreenSkeleton,
+  StudyModeScreenSkeleton,
+  TagMapScreenSkeleton,
+  TrashScreenSkeleton,
+} from "@/components/loading/ScreenSkeletons";
 import { BlockNoteSandboxPage } from "@/sandbox/blocknote";
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
@@ -53,44 +67,15 @@ const isTestBypassEnabled = () => {
   return isLocalHost(window.location.hostname);
 };
 
-const LoadingFallbackSpinner = () => {
-  return (
-    <div className="relative h-12 w-12" aria-hidden="true">
-      <div
-        className="absolute inset-0 rounded-full"
-        style={{
-          border: "3px solid var(--app-loading-spinner-track)",
-        }}
-      />
-      <div
-        className="absolute inset-0 rounded-full animate-spin motion-reduce:animate-none"
-        style={{
-          border: "3px solid var(--app-loading-spinner-indicator)",
-          borderTopColor: "transparent",
-        }}
-      />
-    </div>
-  );
+const LoadingFallback = () => {
+  return <AppBootLoadingFallback />;
 };
 
-const LoadingFallback = () => {
-  return (
-    <div
-      className="fixed inset-0 z-[999] flex items-center justify-center animate-in fade-in duration-300"
-      role="status"
-      aria-live="polite"
-      style={{
-        backgroundColor: "var(--app-bg)",
-        backgroundImage:
-          "radial-gradient(circle at var(--app-bg-dot-size) var(--app-bg-dot-size), var(--app-bg-dot) var(--app-bg-dot-size), transparent var(--app-bg-dot-size))",
-        backgroundSize: "var(--app-bg-dot-gap) var(--app-bg-dot-gap)",
-        backgroundPosition: "0 0",
-      }}
-    >
-      <LoadingFallbackSpinner />
-      <span className="sr-only">読み込み中</span>
-    </div>
-  );
+const withRouteFallback = (
+  element: React.ReactNode,
+  fallback: React.ReactNode,
+) => {
+  return <Suspense fallback={fallback}>{element}</Suspense>;
 };
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -331,66 +316,81 @@ const AppContent = () => {
 
           <Route
             path="folders"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <Folders />
-              </Suspense>
-            }
+            element={withRouteFallback(<Folders />, <FoldersScreenSkeleton />)}
           />
 
           <Route
             path="tag-map"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <TagMap />
-              </Suspense>
-            }
+            element={withRouteFallback(<TagMap />, <TagMapScreenSkeleton />)}
           />
 
           <Route
             path="dictionary"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <Dictionary />
-              </Suspense>
-            }
+            element={withRouteFallback(
+              <Dictionary />,
+              <RedirectPageScreenSkeleton />,
+            )}
           />
 
           <Route
             path="questions"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <Questions />
-              </Suspense>
-            }
+            element={withRouteFallback(
+              <Questions />,
+              <RedirectPageScreenSkeleton />,
+            )}
           />
 
-          <Route path="CardEdit" element={<CardEdit />} />
-          <Route path="CardSetView" element={<CardSetView />} />
+          <Route
+            path="CardEdit"
+            element={withRouteFallback(
+              <CardEdit />,
+              <CardEditScreenSkeleton />,
+            )}
+          />
+          <Route
+            path="CardSetView"
+            element={withRouteFallback(
+              <CardSetView />,
+              <CardSetViewScreenSkeleton />,
+            )}
+          />
           <Route
             path="CardView"
             element={<Navigate to="/CardSetView" replace />}
           />
-          <Route path="study" element={<StudyMode />} />
-          <Route path="calendar" element={<Calendar />} />
+          <Route
+            path="study"
+            element={withRouteFallback(
+              <StudyMode />,
+              <StudyModeScreenSkeleton />,
+            )}
+          />
+          <Route
+            path="calendar"
+            element={withRouteFallback(
+              <Calendar />,
+              <CalendarScreenSkeleton />,
+            )}
+          />
           <Route path="sandbox/blocknote" element={<BlockNoteSandboxPage />} />
 
           <Route
             path="gallery"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <Gallery />
-              </Suspense>
-            }
+            element={withRouteFallback(
+              <Gallery />,
+              <GalleryScreenSkeleton />,
+            )}
           />
-          <Route path="trash" element={<Trash />} />
+          <Route
+            path="trash"
+            element={withRouteFallback(<Trash />, <TrashScreenSkeleton />)}
+          />
           <Route
             path="directory"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <Directory />
-              </Suspense>
-            }
+            element={withRouteFallback(
+              <Directory />,
+              <DirectoryScreenSkeleton />,
+            )}
           />
 
           {PdfScrollTest ? (

@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { addDays, addMonths, startOfMonth } from "date-fns";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -34,8 +35,8 @@ export const useCalendarScreen = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isMetaOpen, setIsMetaOpen] = useState(true);
 
-  const { cards = [] } = useCards();
-  const { cardSets = [] } = useCardSets();
+  const { cards = [], loading: cardsLoading } = useCards();
+  const { cardSets = [], loading: cardSetsLoading } = useCardSets();
   const { folders = [], loading: foldersLoading } = useFolders();
   const { settings } = useUserSettings();
   const { ratings } = useTodayStudyStore();
@@ -157,7 +158,14 @@ export const useCalendarScreen = () => {
     setSelectedDate(date);
   };
 
+  const isLoading =
+    cardsLoading ||
+    cardSetsLoading ||
+    foldersLoading ||
+    localStudyLogs === undefined;
+
   return {
+    isLoading,
     isMetaOpen,
     setIsMetaOpen,
     currentDate,
