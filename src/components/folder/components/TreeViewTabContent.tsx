@@ -30,7 +30,6 @@ interface TreeViewTabContentProps {
   navigateToSectionListToken: number;
   folderSelectionNonce: number;
   forceSectionListRoot?: boolean;
-  onSectionListModeChange?: (isSectionListMode: boolean) => void;
   onHeaderFolderIdChange?: (folderId: string | null) => void;
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
@@ -70,7 +69,6 @@ export const TreeViewTabContent = ({
   navigateToSectionListToken,
   folderSelectionNonce,
   forceSectionListRoot = false,
-  onSectionListModeChange,
   onHeaderFolderIdChange,
   onFolderSelect,
   onItemSelect,
@@ -127,7 +125,6 @@ export const TreeViewTabContent = ({
       navigateToSectionListToken={navigateToSectionListToken}
       folderSelectionNonce={folderSelectionNonce}
       forceSectionListRoot={forceSectionListRoot}
-      onSectionListModeChange={onSectionListModeChange}
       onHeaderFolderIdChange={onHeaderFolderIdChange}
     />
   );
