@@ -4,6 +4,7 @@ import type { PdfScrollDiagnostics } from "@/components/pdf/pdfViewerTypes";
 interface UsePdfCurrentPageOptions {
   numPages: number;
   pageTopOffsets: number[];
+  pageNavigationPageNumbers?: number[];
   onPageChange?: (page: number) => void;
 }
 
@@ -42,13 +43,29 @@ const areScrollViewportStatesEqual = (
   );
 };
 
+const getResolvedPageNumber = ({
+  pageIndex,
+  pageNavigationPageNumbers,
+  numPages,
+}: {
+  pageIndex: number;
+  pageNavigationPageNumbers: number[];
+  numPages: number;
+}) => {
+  const fallbackPage = pageIndex + 1;
+  const resolvedPage = pageNavigationPageNumbers[pageIndex] ?? fallbackPage;
+  return clampPage(resolvedPage, numPages);
+};
+
 const findNearestPageFromOffsets = ({
   scrollTop,
   pageTopOffsets,
+  pageNavigationPageNumbers,
   numPages,
 }: {
   scrollTop: number;
   pageTopOffsets: number[];
+  pageNavigationPageNumbers: number[];
   numPages: number;
 }) => {
   if (numPages <= 0 || pageTopOffsets.length === 0) {
@@ -79,12 +96,17 @@ const findNearestPageFromOffsets = ({
       ? leftIndex
       : rightIndex;
 
-  return clampPage(nearestIndex + 1, numPages);
+  return getResolvedPageNumber({
+    pageIndex: nearestIndex,
+    pageNavigationPageNumbers,
+    numPages,
+  });
 };
 
 export const usePdfCurrentPage = ({
   numPages,
   pageTopOffsets,
+  pageNavigationPageNumbers,
   onPageChange,
 }: UsePdfCurrentPageOptions): UsePdfCurrentPageResult => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -94,6 +116,10 @@ export const usePdfCurrentPage = ({
   const currentPageRef = useRef(1);
   const onPageChangeRef = useRef(onPageChange);
   const pageTopOffsetsRef = useRef(pageTopOffsets);
+  const pageNavigationPageNumbersRef = useRef(
+    pageNavigationPageNumbers ??
+      Array.from({ length: numPages }, (_, index) => index + 1),
+  );
 
   const scrollRafRef = useRef<number | null>(null);
   const pageChangeRafRef = useRef<number | null>(null);
@@ -114,6 +140,12 @@ export const usePdfCurrentPage = ({
   useEffect(() => {
     pageTopOffsetsRef.current = pageTopOffsets;
   }, [pageTopOffsets]);
+
+  useEffect(() => {
+    pageNavigationPageNumbersRef.current =
+      pageNavigationPageNumbers ??
+      Array.from({ length: numPages }, (_, index) => index + 1);
+  }, [numPages, pageNavigationPageNumbers]);
 
   const cancelPendingRafs = useCallback(() => {
     if (scrollRafRef.current !== null) {
@@ -229,6 +261,7 @@ export const usePdfCurrentPage = ({
     const nextPage = findNearestPageFromOffsets({
       scrollTop: viewportAnchorTop,
       pageTopOffsets: pageTopOffsetsRef.current,
+      pageNavigationPageNumbers: pageNavigationPageNumbersRef.current,
       numPages,
     });
 
@@ -280,7 +313,13 @@ export const usePdfCurrentPage = ({
       }
 
       const clamped = clampPage(page, numPages);
-      const targetTop = pageTopOffsetsRef.current[clamped - 1] ?? 0;
+      const anchorPage =
+        pageNavigationPageNumbersRef.current[clamped - 1] ?? clamped;
+      const targetTop =
+        pageTopOffsetsRef.current[anchorPage - 1] ??
+        pageTopOffsetsRef.current[clamped - 1] ??
+        0;
+
       container.scrollTo({ top: targetTop, behavior: "smooth" });
     },
     [numPages],
@@ -411,11 +450,35 @@ export const usePdfCurrentPage = ({
   ]);
 
   useEffect(() => {
+    if (numPages <= 0) {
+      return;
+    }
+
+    const normalizedCurrentPage =
+      pageNavigationPageNumbersRef.current[currentPageRef.current - 1] ??
+      currentPageRef.current;
+
+    if (normalizedCurrentPage === currentPageRef.current) {
+      return;
+    }
+
+    currentPageRef.current = normalizedCurrentPage;
+    scheduleCurrentPageStateSync(normalizedCurrentPage);
+    scheduleOnPageChange(normalizedCurrentPage);
+  }, [
+    numPages,
+    pageNavigationPageNumbers,
+    scheduleCurrentPageStateSync,
+    scheduleOnPageChange,
+  ]);
+
+  useEffect(() => {
     scheduleScrollViewportSync();
     estimateCurrentPageFromScroll();
   }, [
     estimateCurrentPageFromScroll,
     pageTopOffsets,
+    pageNavigationPageNumbers,
     scheduleScrollViewportSync,
   ]);
 

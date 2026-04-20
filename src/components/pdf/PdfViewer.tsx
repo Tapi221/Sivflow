@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import type { PdfPageLayoutMode } from "@/types";
 import { cn } from "@/lib/utils";
 import { PdfPage } from "./PdfPage";
 import {
@@ -40,6 +41,7 @@ interface PdfViewerProps {
   searchQuery?: string;
   searchNavToken?: number;
   searchNavDirection?: "next" | "prev";
+  pageLayoutMode?: PdfPageLayoutMode;
   onScaleChange?: (nextScale: number, source: "wheel" | "gesture") => void;
   onNumPages: (n: number) => void;
   onFirstPageSize?: (size: PageSize | null) => void;
@@ -56,6 +58,7 @@ interface PdfViewerProps {
   }) => void;
   className?: string;
   pageGap?: number;
+  spreadGap?: number;
   sourceMeta?: PdfViewerSourceMeta;
   viewerOptions?: PdfViewerOptions;
 }
@@ -64,7 +67,43 @@ type PageLayoutMetrics = {
   pageTopOffsets: number[];
   pageHeights: number[];
   pageBottomOffsets: number[];
+  pageAnchorPageNumbers: number[];
+  rowTopOffsets: number[];
+  rowHeights: number[];
+  rowPageNumbers: number[][];
   totalContentHeight: number;
+};
+
+const buildPageRows = ({
+  numPages,
+  pageLayoutMode,
+}: {
+  numPages: number;
+  pageLayoutMode: PdfPageLayoutMode;
+}) => {
+  const rows: number[][] = [];
+
+  if (numPages <= 0) {
+    return rows;
+  }
+
+  const pagesPerRow = pageLayoutMode === "double" ? 2 : 1;
+
+  for (let pageNumber = 1; pageNumber <= numPages; pageNumber += pagesPerRow) {
+    const rowPageNumbers: number[] = [];
+
+    for (
+      let offset = 0;
+      offset < pagesPerRow && pageNumber + offset <= numPages;
+      offset += 1
+    ) {
+      rowPageNumbers.push(pageNumber + offset);
+    }
+
+    rows.push(rowPageNumbers);
+  }
+
+  return rows;
 };
 
 const buildPageLayoutMetrics = ({
@@ -72,40 +111,69 @@ const buildPageLayoutMetrics = ({
   pageSizes,
   scale,
   pageGap,
+  pageLayoutMode,
 }: {
   numPages: number;
   pageSizes: Record<number, PageSize>;
   scale: number;
   pageGap: number;
+  pageLayoutMode: PdfPageLayoutMode;
 }): PageLayoutMetrics => {
-  const pageTopOffsets: number[] = [];
-  const pageHeights: number[] = [];
-  const pageBottomOffsets: number[] = [];
+  const pageTopOffsets = Array.from({ length: numPages }, () => 0);
+  const pageHeights = Array.from({ length: numPages }, () => 0);
+  const pageBottomOffsets = Array.from({ length: numPages }, () => 0);
+  const pageAnchorPageNumbers = Array.from({ length: numPages }, (_, index) => {
+    return index + 1;
+  });
+  const rowTopOffsets: number[] = [];
+  const rowHeights: number[] = [];
+  const rowPageNumbers = buildPageRows({ numPages, pageLayoutMode });
+
   let runningTop = 0;
 
-  for (let index = 0; index < numPages; index += 1) {
-    const pageNumber = index + 1;
-    const baseSize = pageSizes[pageNumber] ?? pageSizes[1];
-    const pageHeight =
-      baseSize && baseSize.height > 0
+  rowPageNumbers.forEach((currentRowPageNumbers, rowIndex) => {
+    const measuredPageHeights = currentRowPageNumbers.map((pageNumber) => {
+      const baseSize = pageSizes[pageNumber] ?? pageSizes[1];
+      return baseSize && baseSize.height > 0
         ? Math.max(1, Math.floor(baseSize.height * scale))
         : PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT;
+    });
 
-    pageTopOffsets.push(runningTop);
-    pageHeights.push(pageHeight);
-    pageBottomOffsets.push(runningTop + pageHeight);
+    const rowHeight =
+      measuredPageHeights.length > 0
+        ? Math.max(...measuredPageHeights)
+        : PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT;
+    const rowAnchorPageNumber = currentRowPageNumbers[0] ?? 1;
 
-    runningTop += pageHeight;
+    rowTopOffsets.push(runningTop);
+    rowHeights.push(rowHeight);
 
-    if (index < numPages - 1) {
+    currentRowPageNumbers.forEach((pageNumber, pageIndexInRow) => {
+      const nextPageHeight =
+        measuredPageHeights[pageIndexInRow] ?? rowHeight;
+      const pageOffsetIndex = pageNumber - 1;
+
+      pageTopOffsets[pageOffsetIndex] = runningTop;
+      pageHeights[pageOffsetIndex] = nextPageHeight;
+      pageBottomOffsets[pageOffsetIndex] = runningTop + rowHeight;
+      pageAnchorPageNumbers[pageOffsetIndex] = rowAnchorPageNumber;
+    });
+
+    runningTop += rowHeight;
+
+    if (rowIndex < rowPageNumbers.length - 1) {
       runningTop += pageGap;
     }
-  }
+  });
 
   return {
     pageTopOffsets,
     pageHeights,
     pageBottomOffsets,
+    pageAnchorPageNumbers,
+    rowTopOffsets,
+    rowHeights,
+    rowPageNumbers,
     totalContentHeight: Math.max(runningTop, 1),
   };
 };
@@ -427,6 +495,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       searchQuery = "",
       searchNavToken = 0,
       searchNavDirection = "next",
+      pageLayoutMode = "single",
       onScaleChange,
       onNumPages,
       onFirstPageSize,
@@ -435,6 +504,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       onSearchStateChange,
       className,
       pageGap = 16,
+      spreadGap = 16,
       viewerOptions,
       sourceMeta,
     }: PdfViewerProps,
@@ -467,8 +537,9 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
           pageSizes,
           scale,
           pageGap,
+          pageLayoutMode,
         }),
-      [numPages, pageGap, pageSizes, scale],
+      [numPages, pageGap, pageLayoutMode, pageSizes, scale],
     );
 
     const {
@@ -485,6 +556,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
     } = usePdfCurrentPage({
       numPages,
       pageTopOffsets: pageLayoutMetrics.pageTopOffsets,
+      pageNavigationPageNumbers: pageLayoutMetrics.pageAnchorPageNumbers,
       onPageChange,
     });
 
@@ -493,8 +565,8 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
 
     const handleContentViewportRef = useCallback(
       (element: HTMLDivElement | null) => {
-        setContentViewportEl((previous) =>
-          previous === element ? previous : element,
+        setContentViewportEl((previousElement) =>
+          previousElement === element ? previousElement : element,
         );
       },
       [],
@@ -622,6 +694,19 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       ],
     );
 
+    const renderedRows = useMemo(() => {
+      const renderedPageNumberSet = new Set(renderedPageNumbers);
+
+      return pageLayoutMetrics.rowPageNumbers
+        .map((rowPageNumbers, rowIndex) => ({
+          rowIndex,
+          rowPageNumbers,
+        }))
+        .filter(({ rowPageNumbers }) =>
+          rowPageNumbers.some((pageNumber) => renderedPageNumberSet.has(pageNumber)),
+        );
+    }, [pageLayoutMetrics.rowPageNumbers, renderedPageNumbers]);
+
     useEffect(() => {
       if (!doc || prefetchPageNumbers.length === 0) {
         return;
@@ -697,8 +782,10 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
     }, [
       doc,
       notifyLayoutChanged,
+      pageLayoutMetrics.pageAnchorPageNumbers,
       pageLayoutMetrics.pageBottomOffsets,
       pageLayoutMetrics.pageTopOffsets,
+      pageLayoutMode,
       scale,
     ]);
 
@@ -797,44 +884,53 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
               className="relative w-full"
               style={{ height: `${pageLayoutMetrics.totalContentHeight}px` }}
             >
-              {renderedPageNumbers.map((pageNumber) => {
-                const pageTop =
-                  pageLayoutMetrics.pageTopOffsets[pageNumber - 1] ?? 0;
-                const placeholderHeight =
-                  pageLayoutMetrics.pageHeights[pageNumber - 1] ??
+              {renderedRows.map(({ rowIndex, rowPageNumbers }) => {
+                const rowStartPageNumber = rowPageNumbers[0] ?? rowIndex + 1;
+                const rowTop = pageLayoutMetrics.rowTopOffsets[rowIndex] ?? 0;
+                const rowHeight =
+                  pageLayoutMetrics.rowHeights[rowIndex] ??
                   PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT;
-                const pageSearchMatches =
-                  searchState.pageMatches[pageNumber] ?? [];
-                const activeSearchMatchIndexForPage =
-                  activeMatchPageNumber === pageNumber
-                    ? searchState.activeMatchIndex
-                    : undefined;
-                const renderTextLayer =
-                  textLayerPageNumbers.includes(pageNumber);
 
                 return (
                   <div
-                    key={`pdf-row-${documentKey}-${pageNumber}`}
-                    className="absolute left-0 right-0 flex justify-center"
+                    key={`pdf-row-${documentKey}-${rowStartPageNumber}`}
+                    className="absolute left-0 right-0 flex items-start justify-center"
                     style={{
-                      top: `${pageTop}px`,
-                      minHeight: `${placeholderHeight}px`,
+                      top: `${rowTop}px`,
+                      minHeight: `${rowHeight}px`,
+                      columnGap:
+                        pageLayoutMode === "double" ? `${spreadGap}px` : "0px",
                     }}
                   >
-                    <PdfPage
-                      documentKey={documentKey}
-                      pdf={doc}
-                      pageNumber={pageNumber}
-                      scale={scale}
-                      baseSize={pageSizes[pageNumber]}
-                      opaqueCanvas={viewerOptions?.opaqueCanvas ?? false}
-                      renderTextLayer={renderTextLayer}
-                      searchMatches={pageSearchMatches}
-                      activeSearchMatchIndex={activeSearchMatchIndexForPage}
-                      getPage={getPage}
-                      getPageTextContent={getPageTextContent}
-                      onPageSize={setPageSize}
-                    />
+                    {rowPageNumbers.map((pageNumber) => {
+                      const pageSearchMatches =
+                        searchState.pageMatches[pageNumber] ?? [];
+                      const activeSearchMatchIndexForPage =
+                        activeMatchPageNumber === pageNumber
+                          ? searchState.activeMatchIndex
+                          : undefined;
+                      const renderTextLayer =
+                        textLayerPageNumbers.includes(pageNumber);
+
+                      return (
+                        <PdfPage
+                          key={`pdf-page-${documentKey}-${pageNumber}`}
+                          className="shrink-0"
+                          documentKey={documentKey}
+                          pdf={doc}
+                          pageNumber={pageNumber}
+                          scale={scale}
+                          baseSize={pageSizes[pageNumber]}
+                          opaqueCanvas={viewerOptions?.opaqueCanvas ?? false}
+                          renderTextLayer={renderTextLayer}
+                          searchMatches={pageSearchMatches}
+                          activeSearchMatchIndex={activeSearchMatchIndexForPage}
+                          getPage={getPage}
+                          getPageTextContent={getPageTextContent}
+                          onPageSize={setPageSize}
+                        />
+                      );
+                    })}
                   </div>
                 );
               })}

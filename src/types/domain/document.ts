@@ -2,11 +2,13 @@ import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 import type { BaseEntity } from "./base";
 
 export type DocumentKind = "pdf";
+export type PdfPageLayoutMode = "single" | "double";
 
 export interface PdfViewerState {
   currentPage?: number;
   scale?: number;
   fitMode?: "width" | "manual";
+  pageLayoutMode?: PdfPageLayoutMode;
 }
 
 export interface DocumentItem extends BaseEntity {
