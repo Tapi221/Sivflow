@@ -32,6 +32,7 @@ debug_*.txt
 
 # Env / local config
 *.local
+.env
 .env.local
 .env.*
 !.env.example

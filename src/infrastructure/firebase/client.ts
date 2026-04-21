@@ -22,6 +22,32 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+const requireFirebaseConfig = (): void => {
+  const missing: string[] = [];
+
+  if (!firebaseConfig.apiKey?.trim()) missing.push("VITE_FIREBASE_API_KEY");
+  if (!firebaseConfig.authDomain?.trim())
+    missing.push("VITE_FIREBASE_AUTH_DOMAIN");
+  if (!firebaseConfig.projectId?.trim()) missing.push("VITE_FIREBASE_PROJECT_ID");
+  if (!firebaseConfig.storageBucket?.trim())
+    missing.push("VITE_FIREBASE_STORAGE_BUCKET");
+  if (!firebaseConfig.messagingSenderId?.trim())
+    missing.push("VITE_FIREBASE_MESSAGING_SENDER_ID");
+  if (!firebaseConfig.appId?.trim()) missing.push("VITE_FIREBASE_APP_ID");
+
+  if (missing.length > 0) {
+    throw new Error(
+      `[env] Missing required Firebase env vars: ${missing.join(
+        ", ",
+      )}. Copy .env.example to .env.local (or .env) and set values.`,
+    );
+  }
+};
+
+if (import.meta.env.MODE !== "test") {
+  requireFirebaseConfig();
+}
+
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
