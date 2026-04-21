@@ -2,15 +2,11 @@ import SwiftUI
 
 @main
 struct FlashCardMasterNativeApp: App {
-    private let environment = AppEnvironment.bootstrap()
+    @StateObject private var runtimeStore = StudyRuntimeStore.bootstrap()
 
     var body: some Scene {
         WindowGroup {
-            StudyRootScreen(
-                service: environment.studyBrowsingService,
-                source: environment.bootstrapSource,
-                bootstrapError: environment.bootstrapError
-            )
+            StudyRootScreen(runtimeStore: runtimeStore)
         }
     }
 }

@@ -1,7 +1,7 @@
 {
   "metadata": {
     "schemaVersion": 3,
-    "generationCounter": 7,
+    "generationCounter": 12,
     "createdAt": "2026-04-21T00:00:00Z",
     "appVersion": "1.0.0",
     "userId": "sample-user"
@@ -21,6 +21,20 @@
         "folderColor": "indigo",
         "orderIndex": 0,
         "cloudSyncEnabled": false
+      },
+      {
+        "id": "folder-002",
+        "userId": "sample-user",
+        "deviceId": "device-ios",
+        "createdAt": "2026-04-02T00:00:00Z",
+        "updatedAt": "2026-04-20T00:00:00Z",
+        "isDeleted": false,
+        "parentFolderId": "folder-001",
+        "folderId": "folder-002",
+        "folderName": "Recurrence",
+        "folderColor": "orange",
+        "orderIndex": 1,
+        "cloudSyncEnabled": false
       }
     ],
     "cardSets": [
@@ -31,9 +45,9 @@
         "createdAt": "2026-04-01T00:00:00Z",
         "updatedAt": "2026-04-20T00:00:00Z",
         "isDeleted": false,
-        "folderId": "folder-001",
+        "folderId": "folder-002",
         "name": "Algorithms",
-        "description": "bundle sample snapshot",
+        "description": "bundle sample snapshot with rich block coverage",
         "orderIndex": 0,
         "defaultDisplayMode": "fixed"
       }
@@ -47,7 +61,7 @@
         "updatedAt": "2026-04-20T00:00:00Z",
         "isDeleted": false,
         "cardSetId": "cardset-001",
-        "folderId": "folder-001",
+        "folderId": "folder-002",
         "orderIndex": 0,
         "questionNumber": "Q1",
         "title": "Binary Search",
@@ -66,9 +80,9 @@
           "blocks": [
             {
               "id": "block-back-001",
-              "type": "text",
+              "type": "markdown",
               "orderIndex": 0,
-              "content": "O(log n)"
+              "markdown": "**O(log n)** です。探索範囲を毎回半分に絞るため。"
             },
             {
               "id": "block-back-002",
@@ -78,6 +92,17 @@
                 "language": "swift",
                 "code": "let middle = (left + right) / 2"
               }
+            },
+            {
+              "id": "block-back-003",
+              "type": "reference",
+              "orderIndex": 2,
+              "references": [
+                {
+                  "url": "https://en.wikipedia.org/wiki/Binary_search_algorithm",
+                  "name": "Binary search"
+                }
+              ]
             }
           ]
         },
@@ -94,7 +119,7 @@
         "updatedAt": "2026-04-20T00:00:00Z",
         "isDeleted": false,
         "cardSetId": "cardset-001",
-        "folderId": "folder-001",
+        "folderId": "folder-002",
         "orderIndex": 1,
         "questionNumber": "Q2",
         "title": "Master Theorem",
@@ -107,7 +132,8 @@
               "orderIndex": 0,
               "math": {
                 "latex": "T(n)=2T(n/2)+n",
-                "displayMode": "block"
+                "displayMode": "block",
+                "note": "Case 2 の典型例"
               }
             }
           ]
@@ -128,8 +154,10 @@
                 {
                   "id": "image-001",
                   "assetId": "asset-001",
-                  "remoteUrl": "https://example.invalid/assets/tree.png",
-                  "storagePath": "snapshots/assets/tree.png"
+                  "remoteUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4////fwAJ+wP9KobjigAAAABJRU5ErkJggg==",
+                  "storagePath": "snapshots/assets/tree.png",
+                  "naturalW": 1,
+                  "naturalH": 1
                 }
               ]
             }
@@ -148,8 +176,8 @@
         "assetId": "asset-001",
         "storagePath": "snapshots/assets/tree.png",
         "mime": "image/png",
-        "naturalW": 1200,
-        "naturalH": 800,
+        "naturalW": 1,
+        "naturalH": 1,
         "createdAt": "2026-04-20T00:00:00Z",
         "updatedAt": "2026-04-20T00:00:00Z"
       }

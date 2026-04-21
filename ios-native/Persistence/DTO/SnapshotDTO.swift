@@ -22,6 +22,16 @@ struct SnapshotDataDTO: Decodable {
     let assets: [SnapshotAssetDTO]
     let tagRecords: [TagRecordDTO]
 
+    enum CodingKeys: String, CodingKey {
+        case cards
+        case cardSets
+        case folders
+        case reviews
+        case settings
+        case assets
+        case tagRecords
+    }
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         cards = try container.decodeIfPresent([CardDTO].self, forKey: .cards) ?? []
@@ -86,10 +96,36 @@ struct CardDTO: Decodable {
 
 struct CardFaceDTO: Decodable {
     let blocks: [CardBlockDTO]
+    let attachments: CardFaceAttachmentsDTO?
+
+    enum CodingKeys: String, CodingKey {
+        case blocks
+        case attachments
+    }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         blocks = try container.decodeIfPresent([CardBlockDTO].self, forKey: .blocks) ?? []
+        attachments = try container.decodeIfPresent(CardFaceAttachmentsDTO.self, forKey: .attachments)
+    }
+}
+
+struct CardFaceAttachmentsDTO: Decodable {
+    let images: [UploadedImageDTO]
+    let audios: [AudioAttachmentDTO]
+    let references: [ReferenceBlockDTO]
+
+    enum CodingKeys: String, CodingKey {
+        case images
+        case audios
+        case references
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        images = try container.decodeIfPresent([UploadedImageDTO].self, forKey: .images) ?? []
+        audios = try container.decodeIfPresent([AudioAttachmentDTO].self, forKey: .audios) ?? []
+        references = try container.decodeIfPresent([ReferenceBlockDTO].self, forKey: .references) ?? []
     }
 }
 
@@ -103,6 +139,7 @@ struct CardBlockDTO: Decodable {
     let markdown: String?
     let code: CodeBlockDTO?
     let images: [UploadedImageDTO]?
+    let audios: [AudioAttachmentDTO]?
     let references: [ReferenceBlockDTO]?
     let math: MathBlockDTO?
 }
@@ -115,9 +152,19 @@ struct CodeBlockDTO: Decodable {
 struct UploadedImageDTO: Decodable {
     let id: String
     let assetId: String?
-    let remoteUrl: String?
     let localUrl: String?
+    let remoteUrl: String?
+    let url: String?
+    let thumbnailUrl: String?
     let storagePath: String?
+    let naturalW: Double?
+    let naturalH: Double?
+}
+
+struct AudioAttachmentDTO: Decodable {
+    let url: String
+    let filename: String
+    let order: Int
 }
 
 struct ReferenceBlockDTO: Decodable {

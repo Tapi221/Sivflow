@@ -1,7 +1,18 @@
 import Foundation
 
 enum StudySnapshotMapper {
-    static let map = { (dto: SnapshotDTO) -> StudySnapshot in
+    enum MapperError: LocalizedError {
+        case emptyCardSetIdentifier(String)
+
+        var errorDescription: String? {
+            switch self {
+            case .emptyCardSetIdentifier(let cardId):
+                return "Card \(cardId) does not have a valid cardSetId."
+            }
+        }
+    }
+
+    static func map(dto: SnapshotDTO, assetBaseDirectoryURL: URL?) throws -> StudySnapshot {
         let metadata = StudySnapshotMetadata(
             schemaVersion: dto.metadata.schemaVersion,
             generationCounter: dto.metadata.generationCounter,
@@ -29,31 +40,35 @@ enum StudySnapshotMapper {
             .map {
                 StudyCardSet(
                     id: $0.id,
-                    folderId: $0.folderId,
+                    folderId: normalized($0.folderId),
                     name: $0.name,
-                    descriptionText: $0.description,
+                    descriptionText: normalized($0.description),
                     orderIndex: $0.orderIndex ?? 0,
-                    defaultDisplayMode: $0.defaultDisplayMode ?? "fixed"
+                    defaultDisplayMode: normalized($0.defaultDisplayMode) ?? "fixed"
                 )
             }
 
-        let cards = dto.data.cards
+        let cards = try dto.data.cards
             .filter { !$0.isDeleted }
-            .map {
-                StudyCard(
-                    id: $0.id,
-                    cardSetId: $0.cardSetId,
-                    folderId: $0.folderId,
-                    questionNumber: $0.questionNumber,
-                    title: $0.title,
-                    orderIndex: $0.orderIndex ?? 0,
-                    tagIds: $0.tagIds ?? [],
-                    front: mapFace($0.front),
-                    back: mapFace($0.back),
-                    isDraft: $0.isDraft ?? false,
-                    hasUncertainty: $0.hasUncertainty ?? false,
-                    isCompleted: $0.isCompleted ?? false,
-                    isSilent: $0.isSilent ?? false
+            .map { cardDTO in
+                guard !cardDTO.cardSetId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                    throw MapperError.emptyCardSetIdentifier(cardDTO.id)
+                }
+
+                return StudyCard(
+                    id: cardDTO.id,
+                    cardSetId: cardDTO.cardSetId,
+                    folderId: normalized(cardDTO.folderId),
+                    questionNumber: cardDTO.questionNumber,
+                    title: normalized(cardDTO.title),
+                    orderIndex: cardDTO.orderIndex ?? 0,
+                    tagIds: cardDTO.tagIds ?? [],
+                    front: mapFace(cardDTO.front),
+                    back: mapFace(cardDTO.back),
+                    isDraft: cardDTO.isDraft ?? false,
+                    hasUncertainty: cardDTO.hasUncertainty ?? false,
+                    isCompleted: cardDTO.isCompleted ?? false,
+                    isSilent: cardDTO.isSilent ?? false
                 )
             }
 
@@ -67,46 +82,183 @@ enum StudySnapshotMapper {
                 )
             }
 
+        let assets = dto.data.assets.map {
+            StudyAsset(
+                id: $0.assetId,
+                storagePath: $0.storagePath,
+                mime: $0.mime,
+                naturalWidth: $0.naturalW,
+                naturalHeight: $0.naturalH,
+                createdAt: $0.createdAt,
+                updatedAt: $0.updatedAt
+            )
+        }
+
         return StudySnapshot(
             metadata: metadata,
             folders: folders,
             cardSets: cardSets,
             cards: cards,
-            tags: tags
+            tags: tags,
+            assets: assets,
+            assetBaseDirectoryURL: assetBaseDirectoryURL
         )
     }
 
-    private static let mapFace = { (face: CardFaceDTO) -> StudyCardFace in
-        StudyCardFace(
-            blocks: face.blocks
-                .sorted { ($0.orderIndex ?? 0) < ($1.orderIndex ?? 0) }
-                .map(mapBlock)
-        )
-    }
+    private static func mapFace(_ face: CardFaceDTO) -> StudyCardFace {
+        let baseBlocks = face.blocks.map(mapBlock)
+        let attachmentStartOrder = (baseBlocks.map(\.orderIndex).max() ?? -1) + 1
+        let attachmentBlocks = mapAttachments(face.attachments, startOrderIndex: attachmentStartOrder)
 
-    private static let mapBlock = { (block: CardBlockDTO) -> StudyCardBlock in
-        let type = StudyCardBlock.BlockType(rawValue: block.type) ?? .text
-        let imageSummary = block.images?
-            .map { image -> String in
-                image.assetId ?? image.remoteUrl ?? image.localUrl ?? image.id
+        return StudyCardFace(
+            blocks: (baseBlocks + attachmentBlocks).sorted { lhs, rhs in
+                if lhs.orderIndex == rhs.orderIndex {
+                    return lhs.id.localizedCaseInsensitiveCompare(rhs.id) == .orderedAscending
+                }
+                return lhs.orderIndex < rhs.orderIndex
             }
-            .joined(separator: ", ")
-        let referenceSummary = block.references?
-            .map { $0.name ?? $0.url }
-            .joined(separator: ", ")
+        )
+    }
+
+    private static func mapBlock(_ block: CardBlockDTO) -> StudyCardBlock {
+        let type = StudyCardBlock.BlockType(rawValue: block.type) ?? .text
 
         return StudyCardBlock(
             id: block.id,
             type: type,
             orderIndex: block.orderIndex ?? 0,
-            content: block.content,
-            markdown: block.markdown,
-            questionTitle: block.questionTitle,
-            questionAnswer: block.questionAnswer,
-            imageAssetSummary: imageSummary,
-            referenceSummary: referenceSummary,
-            mathLatex: block.math?.latex,
-            codeText: block.code?.code
+            questionTitle: normalized(block.questionTitle),
+            questionAnswer: normalized(block.questionAnswer),
+            content: normalized(block.content),
+            markdown: normalized(block.markdown),
+            code: mapCode(block.code),
+            images: (block.images ?? []).map(mapImage),
+            audios: (block.audios ?? []).map(mapAudio),
+            references: (block.references ?? []).enumerated().map(mapReference),
+            math: mapMath(block.math)
         )
+    }
+
+    private static func mapAttachments(
+        _ attachments: CardFaceAttachmentsDTO?,
+        startOrderIndex: Int
+    ) -> [StudyCardBlock] {
+        guard let attachments else { return [] }
+
+        var nextOrder = startOrderIndex
+        var blocks: [StudyCardBlock] = []
+
+        if !attachments.images.isEmpty {
+            blocks.append(
+                StudyCardBlock(
+                    id: "attachments-image-\(startOrderIndex)",
+                    type: .image,
+                    orderIndex: nextOrder,
+                    questionTitle: nil,
+                    questionAnswer: nil,
+                    content: nil,
+                    markdown: nil,
+                    code: nil,
+                    images: attachments.images.map(mapImage),
+                    audios: [],
+                    references: [],
+                    math: nil
+                )
+            )
+            nextOrder += 1
+        }
+
+        if !attachments.audios.isEmpty {
+            blocks.append(
+                StudyCardBlock(
+                    id: "attachments-audio-\(nextOrder)",
+                    type: .audio,
+                    orderIndex: nextOrder,
+                    questionTitle: nil,
+                    questionAnswer: nil,
+                    content: nil,
+                    markdown: nil,
+                    code: nil,
+                    images: [],
+                    audios: attachments.audios.map(mapAudio),
+                    references: [],
+                    math: nil
+                )
+            )
+            nextOrder += 1
+        }
+
+        if !attachments.references.isEmpty {
+            blocks.append(
+                StudyCardBlock(
+                    id: "attachments-reference-\(nextOrder)",
+                    type: .reference,
+                    orderIndex: nextOrder,
+                    questionTitle: nil,
+                    questionAnswer: nil,
+                    content: nil,
+                    markdown: nil,
+                    code: nil,
+                    images: [],
+                    audios: [],
+                    references: attachments.references.enumerated().map(mapReference),
+                    math: nil
+                )
+            )
+        }
+
+        return blocks
+    }
+
+    private static func mapCode(_ dto: CodeBlockDTO?) -> StudyCodeBlock? {
+        guard let dto, let code = normalized(dto.code) else {
+            return nil
+        }
+        return StudyCodeBlock(language: normalized(dto.language), code: code)
+    }
+
+    private static func mapMath(_ dto: MathBlockDTO?) -> StudyMathBlock? {
+        guard let dto, let latex = normalized(dto.latex) else {
+            return nil
+        }
+        let displayMode = StudyMathBlock.DisplayMode(rawValue: normalized(dto.displayMode) ?? "block") ?? .block
+        return StudyMathBlock(latex: latex, displayMode: displayMode, note: normalized(dto.note))
+    }
+
+    private static func mapImage(_ dto: UploadedImageDTO) -> StudyImageReference {
+        StudyImageReference(
+            id: dto.id,
+            assetId: normalized(dto.assetId),
+            localURLString: normalized(dto.localUrl),
+            remoteURLString: normalized(dto.remoteUrl),
+            genericURLString: normalized(dto.url),
+            storagePath: normalized(dto.storagePath),
+            thumbnailURLString: normalized(dto.thumbnailUrl),
+            naturalWidth: dto.naturalW,
+            naturalHeight: dto.naturalH
+        )
+    }
+
+    private static func mapAudio(_ dto: AudioAttachmentDTO) -> StudyAudioReference {
+        StudyAudioReference(
+            id: "audio-\(dto.order)-\(dto.filename)",
+            url: dto.url,
+            filename: dto.filename,
+            order: dto.order
+        )
+    }
+
+    private static func mapReference(_ entry: (offset: Int, element: ReferenceBlockDTO)) -> StudyReference {
+        StudyReference(
+            id: "reference-\(entry.offset)-\(entry.element.url)",
+            url: entry.element.url,
+            name: normalized(entry.element.name)
+        )
+    }
+
+    private static func normalized(_ value: String?) -> String? {
+        guard let value else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 }
