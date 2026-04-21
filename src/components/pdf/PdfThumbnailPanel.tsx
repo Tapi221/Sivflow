@@ -337,7 +337,6 @@ const normalizeOutlineItems = async ({
     normalizedItems.push({
       id,
       title: truncateOutlineTitle(item.title?.trim() || `Section ${index + 1}`),
-      pageNumber,
       items: children,
     });
   }
@@ -360,7 +359,6 @@ const buildFallbackOutlineEntries = async ({
     const text = await extractPageText({
       getPageTextContent,
       cache,
-      pageNumber,
     });
     const firstMeaningfulLine =
       text
@@ -371,7 +369,6 @@ const buildFallbackOutlineEntries = async ({
     fallbackEntries.push({
       id: `fallback-outline-${pageNumber}`,
       title: truncateOutlineTitle(firstMeaningfulLine),
-      pageNumber,
       items: [],
     });
   }
@@ -467,8 +464,12 @@ export const PdfThumbnailPanel = ({
   const [dropTargetPageNumber, setDropTargetPageNumber] = useState<number | null>(
     null,
   );
+  const [previewThumbnailPageNumbers, setPreviewThumbnailPageNumbers] = useState<
+    number[] | null
+  >(null);
 
   const pageTextCacheRef = useRef<Map<number, string>>(new Map());
+  const didDropRef = useRef(false);
 
   const normalizedTab: PdfSidePanelTab =
     selectedTab === "markdown" ||
@@ -525,34 +526,44 @@ export const PdfThumbnailPanel = ({
     [onSelectPage],
   );
 
-  const movePageNumber = useCallback(
-    (sourcePageNumber: number, destinationPageNumber: number) => {
-      const sourceIndex =
-        normalizedOrderedThumbnailPageNumbers.indexOf(sourcePageNumber);
-      const destinationIndex =
-        normalizedOrderedThumbnailPageNumbers.indexOf(destinationPageNumber);
+  const reorderPageNumbers = useCallback(
+    (
+      pageNumbers: number[],
+      sourcePageNumber: number,
+      destinationPageNumber: number,
+    ) => {
+      const sourceIndex = pageNumbers.indexOf(sourcePageNumber);
+      const destinationIndex = pageNumbers.indexOf(destinationPageNumber);
 
-      if (sourceIndex < 0 || destinationIndex < 0 || sourceIndex === destinationIndex) {
-        return;
+      if (
+        sourceIndex < 0 ||
+        destinationIndex < 0 ||
+        sourceIndex === destinationIndex
+      ) {
+        return pageNumbers;
       }
 
-      const nextPageNumbers = [...normalizedOrderedThumbnailPageNumbers];
+      const nextPageNumbers = [...pageNumbers];
       const [movedPageNumber] = nextPageNumbers.splice(sourceIndex, 1);
       nextPageNumbers.splice(destinationIndex, 0, movedPageNumber);
-
-      onThumbnailOrderChange?.(nextPageNumbers);
+      return nextPageNumbers;
     },
-    [normalizedOrderedThumbnailPageNumbers, onThumbnailOrderChange],
+    [],
   );
+
+  const displayedThumbnailPageNumbers =
+    previewThumbnailPageNumbers ?? normalizedOrderedThumbnailPageNumbers;
 
   const handleDragStart = useCallback(
     (event: ReactDragEvent<HTMLDivElement>, pageNumber: number) => {
+      didDropRef.current = false;
       setDraggingPageNumber(pageNumber);
       setDropTargetPageNumber(pageNumber);
+      setPreviewThumbnailPageNumbers(normalizedOrderedThumbnailPageNumbers);
       event.dataTransfer.effectAllowed = "move";
       event.dataTransfer.setData("text/plain", String(pageNumber));
     },
-    [],
+    [normalizedOrderedThumbnailPageNumbers],
   );
 
   const handleDragOver = useCallback(
@@ -560,16 +571,39 @@ export const PdfThumbnailPanel = ({
       event.preventDefault();
       event.dataTransfer.dropEffect = "move";
 
+      const draggedPageNumberText =
+        event.dataTransfer.getData("text/plain") || String(draggingPageNumber ?? "");
+      const draggedPageNumber = Number(draggedPageNumberText);
+
+      if (!Number.isFinite(draggedPageNumber)) {
+        return;
+      }
+
+      const normalizedDraggedPageNumber = Math.trunc(draggedPageNumber);
       setDropTargetPageNumber((previousPageNumber) =>
         previousPageNumber === pageNumber ? previousPageNumber : pageNumber,
       );
+      setPreviewThumbnailPageNumbers((previousPageNumbers) => {
+        const basePageNumbers = previousPageNumbers ?? normalizedOrderedThumbnailPageNumbers;
+        const nextPageNumbers = reorderPageNumbers(
+          basePageNumbers,
+          normalizedDraggedPageNumber,
+            );
+
+        if (nextPageNumbers === basePageNumbers) {
+          return previousPageNumbers ?? basePageNumbers;
+        }
+
+        return nextPageNumbers;
+      });
     },
-    [],
+    [draggingPageNumber, normalizedOrderedThumbnailPageNumbers, reorderPageNumbers],
   );
 
   const handleDrop = useCallback(
     (event: ReactDragEvent<HTMLDivElement>, pageNumber: number) => {
       event.preventDefault();
+      didDropRef.current = true;
 
       const draggedPageNumberText =
         event.dataTransfer.getData("text/plain") || String(draggingPageNumber ?? "");
@@ -578,19 +612,45 @@ export const PdfThumbnailPanel = ({
       if (!Number.isFinite(draggedPageNumber)) {
         setDraggingPageNumber(null);
         setDropTargetPageNumber(null);
+        setPreviewThumbnailPageNumbers(null);
         return;
       }
 
-      movePageNumber(Math.trunc(draggedPageNumber), pageNumber);
+      const normalizedDraggedPageNumber = Math.trunc(draggedPageNumber);
+      const committedPageNumbers = reorderPageNumbers(
+        displayedThumbnailPageNumbers,
+        normalizedDraggedPageNumber,
+        pageNumber,
+      );
+
+      if (committedPageNumbers !== displayedThumbnailPageNumbers) {
+        onThumbnailOrderChange?.(committedPageNumbers);
+      } else if (previewThumbnailPageNumbers !== null) {
+        onThumbnailOrderChange?.(previewThumbnailPageNumbers);
+      }
+
       setDraggingPageNumber(null);
       setDropTargetPageNumber(null);
+      setPreviewThumbnailPageNumbers(null);
     },
-    [draggingPageNumber, movePageNumber],
+    [
+      displayedThumbnailPageNumbers,
+      draggingPageNumber,
+      onThumbnailOrderChange,
+      previewThumbnailPageNumbers,
+      reorderPageNumbers,
+    ],
   );
 
   const handleDragEnd = useCallback(() => {
     setDraggingPageNumber(null);
     setDropTargetPageNumber(null);
+
+    if (!didDropRef.current) {
+      setPreviewThumbnailPageNumbers(null);
+    }
+
+    didDropRef.current = false;
   }, []);
 
   useEffect(() => {
@@ -605,6 +665,7 @@ export const PdfThumbnailPanel = ({
     });
     setDraggingPageNumber(null);
     setDropTargetPageNumber(null);
+    setPreviewThumbnailPageNumbers(null);
   }, [documentController.documentKey]);
 
   useEffect(() => {
@@ -630,8 +691,7 @@ export const PdfThumbnailPanel = ({
           const text = await extractPageText({
             getPageTextContent: documentController.getPageTextContent,
             cache: pageTextCacheRef.current,
-            pageNumber,
-          });
+                });
           markdownSections.push(`## Page ${pageNumber}\n\n${text || "_No text_"}\n`);
         }
 
@@ -806,7 +866,7 @@ export const PdfThumbnailPanel = ({
 
     return (
       <div className="space-y-4 p-4">
-        {normalizedOrderedThumbnailPageNumbers.map((pageNumber) => {
+        {displayedThumbnailPageNumbers.map((pageNumber) => {
           const heading = `Page ${pageNumber}`;
           const text = pageTextCacheRef.current.get(pageNumber) ?? "";
 
@@ -877,7 +937,7 @@ export const PdfThumbnailPanel = ({
   };
 
   const renderThumbnailContent = () => {
-    if (documentController.loading && normalizedOrderedThumbnailPageNumbers.length === 0) {
+    if (documentController.loading && displayedThumbnailPageNumbers.length === 0) {
       return (
         <div className="grid grid-cols-2 gap-3 p-4">
           {Array.from({ length: 6 }, (_, index) => (
@@ -913,7 +973,7 @@ export const PdfThumbnailPanel = ({
     if (
       !documentController.loading &&
       !documentController.error &&
-      normalizedOrderedThumbnailPageNumbers.length === 0
+      displayedThumbnailPageNumbers.length === 0
     ) {
       return (
         <div className="px-4 py-6 text-sm" style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}>
@@ -924,7 +984,7 @@ export const PdfThumbnailPanel = ({
 
     return (
       <div className="grid grid-cols-2 gap-3 p-4">
-        {normalizedOrderedThumbnailPageNumbers.map((pageNumber) => {
+        {displayedThumbnailPageNumbers.map((pageNumber) => {
           return (
             <PdfThumbnailItem
               key={`pdf-thumbnail-${documentController.documentKey}-${pageNumber}`}
