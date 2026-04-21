@@ -122,6 +122,22 @@ const readInitialMobileViewportState = () => {
   return window.matchMedia(MOBILE_PANEL_MEDIA_QUERY).matches;
 };
 
+const sanitizeBookmarkPages = (value: unknown): number[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      value
+        .filter((pageNumber): pageNumber is number => {
+          return typeof pageNumber === "number" && Number.isFinite(pageNumber);
+        })
+        .map((pageNumber) => Math.max(1, Math.trunc(pageNumber))),
+    ),
+  ).sort((left, right) => left - right);
+};
+
 export const PdfPane = ({
   doc,
   className,
@@ -151,6 +167,9 @@ export const PdfPane = ({
   const [pendingThumbnailPage, setPendingThumbnailPage] = useState<number | null>(
     null,
   );
+  const [bookmarkPages, setBookmarkPages] = useState<number[]>(() => {
+    return sanitizeBookmarkPages(doc.viewerState?.bookmarkPages);
+  });
 
   const { containerRef, containerWidth } = usePdfContainerWidth();
 
@@ -194,6 +213,7 @@ export const PdfPane = ({
   } = usePdfViewerPersistence({
     docId: doc.id,
     viewerState: doc.viewerState,
+    bookmarkPages,
     getFitScale,
     onDocumentUpdate: onDocumentUpdate
       ? (updates) => onDocumentUpdate(updates)
@@ -250,6 +270,9 @@ export const PdfPane = ({
   const isThumbnailPanelOpen = isMobileViewport
     ? isMobileThumbnailPanelOpen
     : isDesktopThumbnailPanelOpen;
+  const bookmarkedPageNumberSet = useMemo(() => {
+    return new Set(bookmarkPages);
+  }, [bookmarkPages]);
 
   const handleThumbnailPanelOpenChange = useCallback(
     (nextOpen: boolean) => {
@@ -323,6 +346,11 @@ export const PdfPane = ({
   useEffect(() => {
     setPendingThumbnailPage(null);
   }, [doc.id]);
+
+
+  useEffect(() => {
+    setBookmarkPages(sanitizeBookmarkPages(doc.viewerState?.bookmarkPages));
+  }, [doc.id, doc.viewerState?.bookmarkPages]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -416,6 +444,55 @@ export const PdfPane = ({
       }
     },
     [handleCommitPage, isMobileViewport, numPages, pageLayoutMode],
+  );
+
+
+  const handleToggleBookmark = useCallback(
+    (pageNumber: number) => {
+      if (!Number.isFinite(pageNumber)) {
+        return;
+      }
+
+      const normalizedPageNumber = Math.max(1, Math.trunc(pageNumber));
+
+      setBookmarkPages((previousBookmarkPages) => {
+        const hasBookmark = previousBookmarkPages.includes(normalizedPageNumber);
+        const nextBookmarkPages = hasBookmark
+          ? previousBookmarkPages.filter(
+              (previousPageNumber) => previousPageNumber !== normalizedPageNumber,
+            )
+          : [...previousBookmarkPages, normalizedPageNumber].sort(
+              (left, right) => left - right,
+            );
+
+        if (!onDocumentUpdate) {
+          return nextBookmarkPages;
+        }
+
+        const nextViewerState: PdfViewerState = {
+          currentPage: Math.max(1, Math.trunc(currentPage)),
+          scale: Number(clampScale(scale).toFixed(3)),
+          fitMode,
+          pageLayoutMode,
+          ...(nextBookmarkPages.length > 0
+            ? { bookmarkPages: nextBookmarkPages }
+            : {}),
+        };
+
+        void onDocumentUpdate({
+          viewerState: nextViewerState,
+        }).catch((errorValue) => {
+          console.warn("[PdfPane] Failed to save PDF bookmarks", {
+            docId: doc.id,
+            pageNumber: normalizedPageNumber,
+            error: errorValue,
+          });
+        });
+
+        return nextBookmarkPages;
+      });
+    },
+    [currentPage, doc.id, fitMode, onDocumentUpdate, pageLayoutMode, scale],
   );
 
   const commitSearchQuery = useCallback(() => {
@@ -532,10 +609,12 @@ export const PdfPane = ({
               documentController={documentController}
               currentPage={displayedThumbnailPage}
               pageLayoutMode={pageLayoutMode}
+              bookmarkedPageNumbers={bookmarkedPageNumberSet}
               isMobileViewport={isMobileViewport}
               isOpen={isThumbnailPanelOpen}
               onOpenChange={handleThumbnailPanelOpenChange}
               onSelectPage={handleSelectThumbnailPage}
+              onToggleBookmark={handleToggleBookmark}
             />
 
             <div

@@ -11,10 +11,12 @@ interface PdfThumbnailPanelProps {
   documentController: PdfDocumentController;
   currentPage: number;
   pageLayoutMode: PdfPageLayoutMode;
+  bookmarkedPageNumbers: ReadonlySet<number>;
   isMobileViewport: boolean;
   isOpen: boolean;
   onOpenChange: (nextOpen: boolean) => void;
   onSelectPage: (pageNumber: number) => void;
+  onToggleBookmark: (pageNumber: number) => void;
 }
 
 interface IconProps {
@@ -101,10 +103,12 @@ export const PdfThumbnailPanel = ({
   documentController,
   currentPage,
   pageLayoutMode,
+  bookmarkedPageNumbers,
   isMobileViewport,
   isOpen,
   onOpenChange,
   onSelectPage,
+  onToggleBookmark,
 }: PdfThumbnailPanelProps) => {
   const [scrollRootElement, setScrollRootElement] = useState<HTMLElement | null>(
     null,
@@ -128,6 +132,8 @@ export const PdfThumbnailPanel = ({
 
     return nextActivePageNumbers;
   }, [currentPage, documentController.numPages, pageLayoutMode]);
+
+  const bookmarkCount = bookmarkedPageNumbers.size;
 
   const handleScrollRootRef = useCallback((element: HTMLDivElement | null) => {
     setScrollRootElement((previousElement) =>
@@ -175,7 +181,9 @@ export const PdfThumbnailPanel = ({
                 pageNumber={pageNumber}
                 baseSize={documentController.pageSizes[pageNumber]}
                 isActive={activePageNumbers.has(pageNumber)}
+                isBookmarked={bookmarkedPageNumbers.has(pageNumber)}
                 onSelect={onSelectPage}
+                onToggleBookmark={onToggleBookmark}
                 rootElement={scrollRootElement}
                 acquirePage={documentController.acquirePage}
                 setPageSize={documentController.setPageSize}
@@ -240,6 +248,9 @@ export const PdfThumbnailPanel = ({
               </div>
               <div className="mt-1 text-sm font-semibold text-[var(--ds-semantic-color-text-strong)]">
                 {documentController.numPages} pages
+              </div>
+              <div className="mt-1 text-xs text-[var(--ds-semantic-color-text-secondary)]">
+                Bookmarks {bookmarkCount}
               </div>
             </div>
             <button
@@ -332,6 +343,9 @@ export const PdfThumbnailPanel = ({
             </div>
             <div className="mt-1 text-sm font-semibold text-[var(--ds-semantic-color-text-strong)]">
               {documentController.numPages} pages
+            </div>
+            <div className="mt-1 text-xs text-[var(--ds-semantic-color-text-secondary)]">
+              Bookmarks {bookmarkCount}
             </div>
           </div>
 
