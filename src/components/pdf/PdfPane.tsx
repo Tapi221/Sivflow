@@ -517,6 +517,47 @@ export const PdfPane = ({
     viewerRef.current?.scrollToPage(nextPage);
   }, [alignedCurrentPage, numPages, pageStep]);
 
+  const prewarmPageMetrics = useCallback(
+    async (pageNumbers: number[]) => {
+      const uniquePageNumbers = Array.from(
+        new Set(
+          pageNumbers
+            .filter((pageNumber) => Number.isFinite(pageNumber))
+            .map((pageNumber) => Math.max(1, Math.trunc(pageNumber))),
+        ),
+      ).filter((pageNumber) => pageNumber <= numPages);
+
+      if (uniquePageNumbers.length === 0) {
+        return;
+      }
+
+      await Promise.all(
+        uniquePageNumbers.map(async (pageNumber) => {
+          if (documentController.pageSizes[pageNumber]) {
+            return;
+          }
+
+          const pageLease = await documentController.acquirePage(pageNumber);
+
+          try {
+            const viewport = pageLease.page.getViewport({ scale: 1 });
+            documentController.setPageSize(pageNumber, {
+              width: viewport.width,
+              height: viewport.height,
+            });
+          } finally {
+            pageLease.release();
+          }
+        }),
+      );
+
+      await new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => resolve());
+      });
+    },
+    [documentController, numPages],
+  );
+
   const handleCommitPage = useCallback(
     (nextPage: number) => {
       if (!Number.isFinite(nextPage) || numPages <= 0) {
@@ -545,15 +586,42 @@ export const PdfPane = ({
         Math.max(1, Math.trunc(nextPage)),
       );
       const targetPage = normalizePageForLayout(normalizedPage, pageLayoutMode);
+      const pagesToPrewarm =
+        pageLayoutMode === "double"
+          ? [targetPage, Math.min(numPages, targetPage + 1)]
+          : [targetPage];
 
       setPendingThumbnailPage(targetPage);
-      handleCommitPage(targetPage);
+      documentController.prefetchPageResources(pagesToPrewarm, {
+        includeTextContent: false,
+      });
+
+      void (async () => {
+        try {
+          await prewarmPageMetrics(pagesToPrewarm);
+        } catch (errorValue) {
+          console.warn("[PdfPane] Failed to prewarm page metrics", {
+            docId: doc.id,
+            targetPage,
+            error: errorValue,
+          });
+        } finally {
+          viewerRef.current?.scrollToPage(targetPage, { behavior: "auto" });
+        }
+      })();
 
       if (isMobileViewport) {
         setIsMobileThumbnailPanelOpen(false);
       }
     },
-    [handleCommitPage, isMobileViewport, numPages, pageLayoutMode],
+    [
+      doc.id,
+      documentController,
+      isMobileViewport,
+      numPages,
+      pageLayoutMode,
+      prewarmPageMetrics,
+    ],
   );
 
   const handleToggleBookmark = useCallback((pageNumber: number) => {
