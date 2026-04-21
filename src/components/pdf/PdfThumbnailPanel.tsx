@@ -66,15 +66,15 @@ interface PdfThumbnailPanelProps {
   currentPage: number;
   pageLayoutMode: PdfPageLayoutMode;
   bookmarkedPageNumbers: ReadonlySet<number>;
-  orderedThumbnailPageNumbers: number[];
-  selectedTab: PdfSidePanelTab;
+  orderedThumbnailPageNumbers?: number[];
+  selectedTab?: PdfSidePanelTab;
   isMobileViewport: boolean;
   isOpen: boolean;
   onOpenChange: (nextOpen: boolean) => void;
-  onTabChange: (nextTab: PdfSidePanelTab) => void;
+  onTabChange?: (nextTab: PdfSidePanelTab) => void;
   onSelectPage: (pageNumber: number) => void;
   onToggleBookmark: (pageNumber: number) => void;
-  onThumbnailOrderChange: (pageNumbers: number[]) => void;
+  onThumbnailOrderChange?: (pageNumbers: number[]) => void;
 }
 
 interface IconProps {
@@ -263,7 +263,7 @@ const PanelTabsBar = ({
   onTabChange,
 }: {
   selectedTab: PdfSidePanelTab;
-  onTabChange: (nextTab: PdfSidePanelTab) => void;
+  onTabChange?: (nextTab: PdfSidePanelTab) => void;
 }) => {
   return (
     <div
@@ -384,15 +384,15 @@ export const PdfThumbnailPanel = ({
   currentPage,
   pageLayoutMode,
   bookmarkedPageNumbers,
-  orderedThumbnailPageNumbers,
-  selectedTab,
+  orderedThumbnailPageNumbers = [],
+  selectedTab = "thumbnails",
   isMobileViewport,
   isOpen,
   onOpenChange,
-  onTabChange,
+  onTabChange = () => {},
   onSelectPage,
   onToggleBookmark,
-  onThumbnailOrderChange,
+  onThumbnailOrderChange = () => {},
 }: PdfThumbnailPanelProps) => {
   const [scrollRootElement, setScrollRootElement] = useState<HTMLElement | null>(
     null,
@@ -423,11 +423,21 @@ export const PdfThumbnailPanel = ({
     return buildPageNumbers(documentController.numPages);
   }, [documentController.numPages]);
 
+  const normalizedOrderedThumbnailPageNumbers = useMemo(() => {
+    if (!Array.isArray(orderedThumbnailPageNumbers)) {
+      return [] as number[];
+    }
+
+    return orderedThumbnailPageNumbers.filter((pageNumber): pageNumber is number => {
+      return typeof pageNumber === "number" && Number.isFinite(pageNumber);
+    });
+  }, [orderedThumbnailPageNumbers]);
+
   const fallbackThumbnailPageNumbers = useMemo(() => {
-    return orderedThumbnailPageNumbers.length > 0
-      ? orderedThumbnailPageNumbers
+    return normalizedOrderedThumbnailPageNumbers.length > 0
+      ? normalizedOrderedThumbnailPageNumbers
       : naturalPageNumbers;
-  }, [naturalPageNumbers, orderedThumbnailPageNumbers]);
+  }, [naturalPageNumbers, normalizedOrderedThumbnailPageNumbers]);
 
   const handleScrollRootRef = useCallback((element: HTMLDivElement | null) => {
     setScrollRootElement((previousElement) => {
