@@ -24,6 +24,7 @@ const createE2EPdfData = (pageCount = 14): Uint8Array => {
       `(PDF E2E Scroll Page ${page}) Tj`,
       "ET",
     ].join("\n");
+
     objects.set(
       pageId,
       `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 100 0 R >> >> /Contents ${contentId} 0 R >>`,
@@ -52,19 +53,22 @@ const createE2EPdfData = (pageCount = 14): Uint8Array => {
   const xrefStart = out.length;
   out += `xref\n0 ${maxId + 1}\n`;
   out += "0000000000 65535 f \n";
+
   for (let id = 1; id <= maxId; id += 1) {
-    const off = offsets[id];
+    const offset = offsets[id];
     out +=
-      typeof off === "number"
-        ? `${String(off).padStart(10, "0")} 00000 n \n`
+      typeof offset === "number"
+        ? `${String(offset).padStart(10, "0")} 00000 n \n`
         : "0000000000 00000 f \n";
   }
 
   out += `trailer\n<< /Size ${maxId + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
+
   const bytes = new Uint8Array(out.length);
   for (let index = 0; index < out.length; index += 1) {
     bytes[index] = out.charCodeAt(index) & 0xff;
   }
+
   return bytes;
 };
 
@@ -73,13 +77,11 @@ const PdfScrollTest = () => {
   const [numPages, setNumPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const pdfData = useMemo(() => createE2EPdfData(14), []);
-  const pdfBlobUrl = useMemo(
-    () =>
-      URL.createObjectURL(
-        new Blob([pdfData as unknown], { type: "application/pdf" }),
-      ),
-    [pdfData],
-  );
+  const pdfBlobUrl = useMemo(() => {
+    return URL.createObjectURL(
+      new Blob([pdfData.buffer as BlobPart], { type: "application/pdf" }),
+    );
+  }, [pdfData]);
 
   useEffect(() => {
     return () => {
@@ -88,13 +90,8 @@ const PdfScrollTest = () => {
   }, [pdfBlobUrl]);
 
   useEffect(() => {
-    if (!DEV_MODE) {
-      return;
-    }
-
-    if (!isLocalHost(window.location.hostname)) {
-      return;
-    }
+    if (!DEV_MODE) return;
+    if (!isLocalHost(window.location.hostname)) return;
 
     const debugWindow = window as Window & {
       __logPdfScrollDiagnostics?: () => void;
@@ -121,8 +118,7 @@ const PdfScrollTest = () => {
       <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2">
           <div className="text-sm text-slate-700">
-            PDF scroll test:{" "}
-            {numPages > 0 ? `${currentPage} / ${numPages}` : "loading"}
+            PDF scroll test: {numPages > 0 ? `${currentPage} / ${numPages}` : "loading"}
           </div>
           <Button
             type="button"
@@ -133,11 +129,11 @@ const PdfScrollTest = () => {
             Log Scroll Diagnostics
           </Button>
         </div>
+
         <div className="flex-1 min-h-0 min-w-0 overflow-hidden bg-slate-50">
           <PdfViewer
             ref={viewerRef}
             source={{ data: null, url: pdfBlobUrl }}
-            baseScale={1}
             onNumPages={setNumPages}
             onPageChange={setCurrentPage}
             className="h-full w-full"

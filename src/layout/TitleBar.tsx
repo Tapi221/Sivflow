@@ -35,11 +35,15 @@ type TitleBarBreadcrumbsProps = {
   noDragStyle?: React.CSSProperties;
 };
 
-const TITLE_BAR_DRAG_STYLE: React.CSSProperties = {
+type AppRegionStyle = React.CSSProperties & {
+  WebkitAppRegion?: "drag" | "no-drag";
+};
+
+const TITLE_BAR_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "drag",
 };
 
-const TITLE_BAR_NO_DRAG_STYLE: React.CSSProperties = {
+const TITLE_BAR_NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
 };
 
@@ -155,9 +159,7 @@ const TitleBarBreadcrumbs = React.memo(
 
           return (
             <React.Fragment
-              key={`${crumb.label}:${crumb.to ?? "no-to"}:${
-                crumb.folderId ?? "no-folder"
-              }:${index}`}
+              key={`${crumb.label}:${crumb.to ?? "no-to"}:${crumb.folderId ?? "no-folder"}:${index}`}
             >
               {index > 0 && (
                 <span className="titlebar-divider select-none">/</span>

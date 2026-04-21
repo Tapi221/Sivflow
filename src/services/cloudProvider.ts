@@ -1,13 +1,19 @@
 import type { Card, Folder } from "@/types";
-import * as Firestore from "firebase/firestore";
 import {
   collection,
   doc,
   getDocs,
+  limit,
+  orderBy,
   query,
   setDoc,
+  startAfter,
   Timestamp,
   where,
+  type CollectionReference,
+  type DocumentData,
+  type QueryConstraint,
+  type QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import {
@@ -21,10 +27,49 @@ const denormalizeCardForCloud = (card: Card) => {
   return { ...card };
 };
 
-/**
- * クラウドストレージの抽象化インターフェース
- * Firebase, CloudKit, Google Driveなどに対応可能
- */
+const PAGE_SIZE = 500;
+
+const fetchPagedDocs = async <T extends DocumentData>(
+  collectionRef: CollectionReference<T>,
+  sinceTimestamp: Timestamp,
+): Promise<Array<QueryDocumentSnapshot<T>>> => {
+  const documents: Array<QueryDocumentSnapshot<T>> = [];
+  let lastDocument: QueryDocumentSnapshot<T> | null = null;
+
+  while (true) {
+    const constraints: QueryConstraint[] = [
+      where("updatedAt", ">", sinceTimestamp),
+      orderBy("updatedAt", "asc"),
+      limit(PAGE_SIZE),
+    ];
+
+    if (lastDocument) {
+      constraints.push(startAfter(lastDocument));
+    }
+
+    const snapshot = await getDocs(query(collectionRef, ...constraints));
+    documents.push(...snapshot.docs);
+
+    if (snapshot.empty || snapshot.size < PAGE_SIZE) {
+      break;
+    }
+
+    lastDocument = snapshot.docs[snapshot.docs.length - 1] ?? null;
+    if (!lastDocument) break;
+  }
+
+  return documents;
+};
+
+const mapSnapshotWithId = <T extends object>(
+  snapshot: QueryDocumentSnapshot<DocumentData>,
+): T => {
+  return {
+    id: snapshot.id,
+    ...(snapshot.data() as Record<string, unknown>),
+  } as T;
+};
+
 export interface ICloudProvider {
   upsertFolder(folder: Folder): Promise<void>;
   upsertCard(card: Card): Promise<void>;
@@ -36,119 +81,108 @@ export interface ICloudProvider {
   deleteCard(cardId: string, userId: string): Promise<void>;
 }
 
-/**
- * Firebase Firestore実装
- */
 export class FirebaseCloudProvider implements ICloudProvider {
-  async upsertFolder(folder: Folder): Promise<void> {
+  public readonly upsertFolder = async (folder: Folder): Promise<void> => {
     const db = requireFirestoreDb();
-    if (!folder.userId) throw new Error("userId is required for upsertFolder");
-    const docRef = doc(db, ...folderDocPathSegments(folder.userId, folder.id));
-    const data = {
-      ...folder,
-      updatedAt: Timestamp.now(),
-    };
-    await setDoc(docRef, data, { merge: true });
-  }
+    if (!folder.userId) {
+      throw new Error("userId is required for upsertFolder");
+    }
 
-  async upsertCard(card: Card): Promise<void> {
+    const documentRef = doc(db, ...folderDocPathSegments(folder.userId, folder.id));
+    await setDoc(
+      documentRef,
+      {
+        ...folder,
+        updatedAt: Timestamp.now(),
+      },
+      { merge: true },
+    );
+  };
+
+  public readonly upsertCard = async (card: Card): Promise<void> => {
     const db = requireFirestoreDb();
-    if (!card.userId) throw new Error("userId is required for upsertCard");
-    const docRef = doc(db, ...cardDocPathSegments(card.userId, card.id));
-    const data = {
-      ...denormalizeCardForCloud(card),
-      updatedAt: Timestamp.now(),
-    };
-    await setDoc(docRef, data, { merge: true });
-  }
+    if (!card.userId) {
+      throw new Error("userId is required for upsertCard");
+    }
 
-  async fetchUpdatedDataSince(
+    const documentRef = doc(db, ...cardDocPathSegments(card.userId, card.id));
+    await setDoc(
+      documentRef,
+      {
+        ...denormalizeCardForCloud(card),
+        updatedAt: Timestamp.now(),
+      },
+      { merge: true },
+    );
+  };
+
+  public readonly fetchUpdatedDataSince = async (
     lastSyncTime: Date,
     userId: string,
-  ): Promise<{ folders: Folder[]; cards: Card[] }> {
+  ): Promise<{ folders: Folder[]; cards: Card[] }> => {
     const db = requireFirestoreDb();
-    if (!userId)
+    if (!userId) {
       throw new Error("userId is required for fetchUpdatedDataSince");
+    }
 
     const sinceTimestamp = Timestamp.fromDate(lastSyncTime);
+    const foldersCollection = collection(
+      db,
+      ...foldersPathSegments(userId),
+    ) as CollectionReference<DocumentData>;
+    const cardsCollection = collection(
+      db,
+      ...cardsPathSegments(userId),
+    ) as CollectionReference<DocumentData>;
 
-    // 型定義が欠けていても死なないように namespace 経由で参照（存在すればページング）
-    const orderByFn = (Firestore as unknown).orderBy as
-      | undefined
-      | ((field: string, dir?: "asc" | "desc") => unknown);
-    const limitFn = (Firestore as unknown).limit as
-      | undefined
-      | ((n: number) => unknown);
-    const startAfterFn = (Firestore as unknown).startAfter as
-      | undefined
-      | ((snapshot: unknown) => unknown);
+    const [folderDocs, cardDocs] = await Promise.all([
+      fetchPagedDocs(foldersCollection, sinceTimestamp),
+      fetchPagedDocs(cardsCollection, sinceTimestamp),
+    ]);
 
-    const PAGE_SIZE = 500;
-    const canOrder = typeof orderByFn === "function";
-    const canLimit = typeof limitFn === "function";
-    const canPage = canOrder && canLimit && typeof startAfterFn === "function";
-
-    const fetchPagedDocs = async (colRef: unknown): Promise<unknown[]> => {
-      const out: unknown[] = [];
-      let lastDoc: unknown = null;
-
-      while (true) {
-        const constraints: unknown[] = [
-          where("updatedAt", ">", sinceTimestamp),
-        ];
-        if (canOrder) constraints.push(orderByFn("updatedAt", "asc"));
-        if (canPage && lastDoc) constraints.push(startAfterFn(lastDoc));
-        if (canLimit) constraints.push(limitFn(PAGE_SIZE));
-
-        const qy = query(colRef, ...(constraints as unknown));
-        const snap = await getDocs(qy);
-        out.push(...snap.docs);
-
-        if (!canPage) break;
-        if (snap.empty || snap.size < PAGE_SIZE) break;
-        lastDoc = snap.docs[snap.docs.length - 1] ?? null;
-        if (!lastDoc) break;
-      }
-
-      return out;
+    return {
+      folders: folderDocs.map((snapshot) => mapSnapshotWithId<Folder>(snapshot)),
+      cards: cardDocs.map((snapshot) => mapSnapshotWithId<Card>(snapshot)),
     };
+  };
 
-    // フォルダの取得
-    const foldersCol = collection(db, ...foldersPathSegments(userId));
-    const folderDocs = await fetchPagedDocs(foldersCol);
-    const folders = folderDocs.map(
-      (d: unknown) => ({ id: d.id, ...d.data() }) as unknown as Folder,
-    );
-
-    // カードの取得（フォルダに関わらずユーザー単位で取得）
-    const cardsCol = collection(db, ...cardsPathSegments(userId));
-    const cardDocs = await fetchPagedDocs(cardsCol);
-    const cards = cardDocs.map(
-      (d: unknown) => ({ id: d.id, ...d.data() }) as unknown as Card,
-    );
-
-    return { folders, cards };
-  }
-
-  async deleteFolder(folderId: string, userId: string): Promise<void> {
+  public readonly deleteFolder = async (
+    folderId: string,
+    userId: string,
+  ): Promise<void> => {
     const db = requireFirestoreDb();
-    if (!userId) throw new Error("userId is required for deleteFolder");
-    const docRef = doc(db, ...folderDocPathSegments(userId, folderId));
+    if (!userId) {
+      throw new Error("userId is required for deleteFolder");
+    }
+
+    const documentRef = doc(db, ...folderDocPathSegments(userId, folderId));
     await setDoc(
-      docRef,
-      { isDeleted: true, updatedAt: Timestamp.now() },
+      documentRef,
+      {
+        isDeleted: true,
+        updatedAt: Timestamp.now(),
+      },
       { merge: true },
     );
-  }
+  };
 
-  async deleteCard(cardId: string, userId: string): Promise<void> {
+  public readonly deleteCard = async (
+    cardId: string,
+    userId: string,
+  ): Promise<void> => {
     const db = requireFirestoreDb();
-    if (!userId) throw new Error("userId is required for deleteCard");
-    const docRef = doc(db, ...cardDocPathSegments(userId, cardId));
+    if (!userId) {
+      throw new Error("userId is required for deleteCard");
+    }
+
+    const documentRef = doc(db, ...cardDocPathSegments(userId, cardId));
     await setDoc(
-      docRef,
-      { isDeleted: true, updatedAt: Timestamp.now() },
+      documentRef,
+      {
+        isDeleted: true,
+        updatedAt: Timestamp.now(),
+      },
       { merge: true },
     );
-  }
+  };
 }

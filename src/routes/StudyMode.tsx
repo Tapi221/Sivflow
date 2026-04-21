@@ -68,7 +68,8 @@ const StudyMode = () => {
     () => new URLSearchParams(location.search).get("folderId"),
     [location.search],
   );
-  const SESSION_KEY = folderId ? `manifolmia_session_${folderId}` : null;
+  const effectiveFolderId = folderId ?? undefined;
+  const sessionKey = folderId ? `manifolmia_session_${folderId}` : null;
 
   useEffect(() => {
     const root = document.documentElement;
@@ -76,6 +77,7 @@ const StudyMode = () => {
     const next = prev + 1;
     root.dataset.noPageScrollCount = String(next);
     root.classList.add("no-page-scroll");
+
     return () => {
       const current = Number(root.dataset.noPageScrollCount || "1") - 1;
       if (current <= 0) {
@@ -91,10 +93,13 @@ const StudyMode = () => {
     cards: allCards = [],
     loading: isLoading,
     updateCard,
-  } = useCards(folderId);
+  } = useCards(effectiveFolderId);
   const { cardSets = [] } = useCardSets();
-  const { folders = [], loading: foldersLoading } = useFolders();
-  const { updateFolder } = useFolders();
+  const {
+    folders = [],
+    loading: foldersLoading,
+    updateFolder,
+  } = useFolders();
 
   const isPracticeFeatureEnabled = flags.isEnabled("postReviewPractice");
   const isAdvancedTelemetryEnabled = flags.isEnabled(
@@ -110,6 +115,7 @@ const StudyMode = () => {
     foldersLoading,
     settings,
   });
+
   const [sessionSeedCards, setSessionSeedCards] = useState<Card[]>([]);
 
   useEffect(() => {
@@ -118,6 +124,7 @@ const StudyMode = () => {
       if (cancelled) return;
       setSessionSeedCards([]);
     });
+
     return () => {
       cancelled = true;
     };
@@ -125,17 +132,19 @@ const StudyMode = () => {
 
   useEffect(() => {
     let cancelled = false;
+
     queueMicrotask(() => {
       if (cancelled) return;
       if (sessionSeedCards.length > 0) return;
       if (dueStudyCards.length === 0) return;
 
-      if (SESSION_KEY) {
+      if (sessionKey) {
         try {
-          const raw = localStorage.getItem(SESSION_KEY);
+          const raw = localStorage.getItem(sessionKey);
           if (raw) {
             const data = JSON.parse(raw) as PersistedStudySession;
             const isRecent = Date.now() - data.savedAt < 24 * 60 * 60 * 1000;
+
             if (isRecent && Array.isArray(data.cardIds)) {
               const dueById = new Map<string, Card>(
                 dueStudyCards.map((card) => [card.id, card]),
@@ -143,6 +152,7 @@ const StudyMode = () => {
               const remaining = data.cardIds
                 .map((id: string) => dueById.get(id))
                 .filter((card): card is Card => Boolean(card));
+
               if (
                 remaining.length > 0 &&
                 remaining.length < data.cardIds.length
@@ -151,10 +161,11 @@ const StudyMode = () => {
                 return;
               }
             }
-            localStorage.removeItem(SESSION_KEY);
+
+            localStorage.removeItem(sessionKey);
           }
         } catch {
-          if (SESSION_KEY) localStorage.removeItem(SESSION_KEY);
+          localStorage.removeItem(sessionKey);
         }
       }
 
@@ -164,27 +175,32 @@ const StudyMode = () => {
     return () => {
       cancelled = true;
     };
-  }, [dueStudyCards, sessionSeedCards.length, SESSION_KEY]);
+  }, [dueStudyCards, sessionKey, sessionSeedCards.length]);
 
   const allCardsById = useMemo(() => {
     const map = new Map<string, Card>();
     for (const card of allCards) {
-      if (card?.id) map.set(card.id, card);
+      if (card?.id) {
+        map.set(card.id, card);
+      }
     }
     return map;
   }, [allCards]);
 
   const studyCards = useMemo(() => {
     if (sessionSeedCards.length === 0) return dueStudyCards;
+
     return sessionSeedCards
       .map((seedCard) => allCardsById.get(seedCard.id) ?? seedCard)
-      .filter(Boolean);
+      .filter((card): card is Card => Boolean(card));
   }, [allCardsById, dueStudyCards, sessionSeedCards]);
 
   const studyCardById = useMemo(() => {
     const map = new Map<string, Card>();
     for (const card of studyCards) {
-      if (card?.id) map.set(card.id, card);
+      if (card?.id) {
+        map.set(card.id, card);
+      }
     }
     return map;
   }, [studyCards]);
@@ -199,7 +215,10 @@ const StudyMode = () => {
 
   const createLevelHistoryMutation = useMutation({
     mutationFn: async (data: Record<string, unknown>) => {
-      const localDb = await getLocalDb(currentUser?.uid);
+      const currentUserId = currentUser?.uid;
+      if (!currentUserId) return null;
+
+      const localDb = await getLocalDb(currentUserId);
       return localDb.addItem("levelHistories", data);
     },
   });
@@ -223,24 +242,28 @@ const StudyMode = () => {
 
   useEffect(() => {
     if (
-      !SESSION_KEY ||
+      !sessionKey ||
       sessionSeedCards.length === 0 ||
       studyComplete ||
       currentIndex === 0
-    )
+    ) {
       return;
+    }
+
     localStorage.setItem(
-      SESSION_KEY,
+      sessionKey,
       JSON.stringify({
-        cardIds: sessionSeedCards.map((c) => c.id),
+        cardIds: sessionSeedCards.map((card) => card.id),
         savedAt: Date.now(),
       }),
     );
-  }, [currentIndex, SESSION_KEY, sessionSeedCards, studyComplete]);
+  }, [currentIndex, sessionKey, sessionSeedCards, studyComplete]);
 
   useEffect(() => {
-    if (studyComplete && SESSION_KEY) localStorage.removeItem(SESSION_KEY);
-  }, [studyComplete, SESSION_KEY]);
+    if (studyComplete && sessionKey) {
+      localStorage.removeItem(sessionKey);
+    }
+  }, [sessionKey, studyComplete]);
 
   const debugStreak = getDebugStreak();
   const effectiveStreak = debugStreak ?? sanitizeStreak(results?.streak);
@@ -251,9 +274,13 @@ const StudyMode = () => {
 
   const finalRatingByCardId = useMemo(() => {
     const finalByCardId = new Map<string, PracticeFilterRating>();
+
     for (const result of safeSessionResults) {
-      if (result?.cardId) finalByCardId.set(result.cardId, result.rating);
+      if (result?.cardId) {
+        finalByCardId.set(result.cardId, result.rating);
+      }
     }
+
     return finalByCardId;
   }, [safeSessionResults]);
 
@@ -264,15 +291,18 @@ const StudyMode = () => {
       remembered: 0,
       easy: 0,
     };
+
     for (const rating of finalRatingByCardId.values()) {
       counts[rating] += 1;
     }
+
     return counts;
   }, [finalRatingByCardId]);
 
   const logPracticeEvent = useCallback(
     (eventName: string, context: Record<string, unknown> = {}) => {
       if (!isAdvancedTelemetryEnabled) return;
+
       telemetry.log("info", eventName, {
         event: eventName,
         userId: currentUser?.uid,
@@ -297,20 +327,28 @@ const StudyMode = () => {
     logPracticeEvent,
   });
 
+  const activePracticeState = isPracticeMode ? practiceState : null;
+  const isActivePracticeMode = isPracticeMode && activePracticeState !== null;
+
   useEffect(() => {
     const updateLastAccess = async () => {
       if (!folderId || !updateFolder) return;
       await updateFolder(folderId, { lastAccessAt: new Date() });
     };
+
     void updateLastAccess();
   }, [folderId, updateFolder]);
 
   useEffect(() => {
     if (!studyComplete) return;
+
     const timeoutId = window.setTimeout(() => {
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
     }, 180);
-    return () => window.clearTimeout(timeoutId);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [studyComplete]);
 
   const handleToggleUncertainty = async (card: Card) => {
@@ -320,20 +358,23 @@ const StudyMode = () => {
 
   const handleToggleBookmark = async (card: Card) => {
     if (!updateCard || !card?.id) return;
-    const current = Boolean(card.isBookmarked ?? card.is_bookmarked);
-    await updateCard(card.id, { isBookmarked: !current });
+    await updateCard(card.id, {
+      isBookmarked: !Boolean(card.isBookmarked),
+    });
   };
 
   const handleBack = () => {
-    if (practiceState) {
+    if (activePracticeState) {
       handlePracticeExit("back_button");
       return;
     }
+
     if (folderId) {
       navigate(createPageUrl(`Folders?folderId=${folderId}`));
-    } else {
-      navigate(createPageUrl("Dashboard"));
+      return;
     }
+
+    navigate(createPageUrl("Dashboard"));
   };
 
   if (isLoading) {
@@ -348,46 +389,52 @@ const StudyMode = () => {
   }
 
   const practiceCurrentCardId =
-    isPracticeMode && practiceState?.phase === "cards"
-      ? practiceState.roundQueue[0]
+    isActivePracticeMode && activePracticeState.phase === "cards"
+      ? activePracticeState.roundQueue[0] ?? null
       : null;
+
   const practiceCurrentCard = practiceCurrentCardId
-    ? studyCardById.get(practiceCurrentCardId)
+    ? studyCardById.get(practiceCurrentCardId) ?? null
     : null;
-  const currentCard = isPracticeMode
+
+  const currentCard = isActivePracticeMode
     ? practiceCurrentCard
-    : studyCards[currentIndex];
+    : (studyCards[currentIndex] ?? null);
 
   const progressPercent = (() => {
     if (studyCards.length === 0) return 0;
-    if (isPracticeMode && practiceState) {
+
+    if (isActivePracticeMode) {
       const done =
-        (practiceState.roundTotal ?? 0) -
-        (practiceState.roundQueue?.length ?? 0);
-      return (done / (practiceState.roundTotal || 1)) * 100;
+        (activePracticeState.roundTotal ?? 0) -
+        (activePracticeState.roundQueue?.length ?? 0);
+      return (done / Math.max(activePracticeState.roundTotal || 1, 1)) * 100;
     }
+
     if (studyComplete) return 100;
     return (currentIndex / studyCards.length) * 100;
   })();
 
-  const showCounter = isPracticeMode
-    ? practiceState?.phase === "cards" && (practiceState?.roundTotal ?? 0) > 0
+  const showCounter = isActivePracticeMode
+    ? activePracticeState.phase === "cards" &&
+      (activePracticeState.roundTotal ?? 0) > 0
     : !studyComplete && studyCards.length > 0;
 
-  const counterCurrent = isPracticeMode
+  const counterCurrent = isActivePracticeMode
     ? Math.min(
-        practiceState?.roundTotal ?? 0,
-        (practiceState?.roundTotal ?? 0) -
-          (practiceState?.roundQueue?.length ?? 0) +
+        activePracticeState.roundTotal ?? 0,
+        (activePracticeState.roundTotal ?? 0) -
+          (activePracticeState.roundQueue?.length ?? 0) +
           1,
       )
     : currentIndex + 1;
 
-  const counterTotal = isPracticeMode
-    ? (practiceState?.roundTotal ?? 0)
+  const counterTotal = isActivePracticeMode
+    ? (activePracticeState.roundTotal ?? 0)
     : studyCards.length;
+
   const isCompletionView =
-    !isPracticeMode && studyComplete && studyCards.length > 0;
+    !isActivePracticeMode && studyComplete && studyCards.length > 0;
 
   const reviewPageStyle = {
     "--card-display-max-height": "100%",
@@ -413,20 +460,26 @@ const StudyMode = () => {
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
+
               <div className="min-w-0">
                 <div className="reviewMeta text-[9px] md:text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase mb-0.5 truncate">
-                  {isPracticeMode
-                    ? `追い復習 ROUND ${practiceState.roundNumber}`
+                  {isActivePracticeMode
+                    ? `追い復習 ROUND ${activePracticeState.roundNumber}`
                     : "Knowledge Review"}
                 </div>
+
                 <h1 className="reviewTitle text-lg md:text-xl font-bold text-slate-700 font-serif truncate">
                   {(() => {
-                    const t = currentCard?.title || "";
-                    const q = currentCard
+                    const title = currentCard?.title || "";
+                    const question = currentCard
                       ? getCardText(currentCard, "question")
                       : "";
-                    if (t && q && t.trim() === q.trim()) return t;
-                    return t || "Untitled Card";
+
+                    if (title && question && title.trim() === question.trim()) {
+                      return title;
+                    }
+
+                    return title || "Untitled Card";
                   })()}
                 </h1>
               </div>
@@ -461,7 +514,7 @@ const StudyMode = () => {
             "flex-1 min-h-0",
             studyCards.length === 0 ||
             studyComplete ||
-            (isPracticeMode && practiceState?.phase === "summary")
+            (isActivePracticeMode && activePracticeState.phase === "summary")
               ? "overflow-y-auto overscroll-contain"
               : "overflow-hidden",
           ].join(" ")}
@@ -472,17 +525,17 @@ const StudyMode = () => {
               navigate={navigate}
               handleBack={handleBack}
             />
-          ) : isPracticeMode ? (
-            practiceState.phase === "summary" ? (
+          ) : isActivePracticeMode ? (
+            activePracticeState.phase === "summary" ? (
               <PracticeSummary
-                practiceState={practiceState}
+                practiceState={activePracticeState}
                 handlePracticeContinueRound={handlePracticeContinueRound}
                 handlePracticeExit={handlePracticeExit}
                 ratingLabels={RATING_LABELS}
               />
             ) : (
               <PracticeCards
-                practiceState={practiceState}
+                practiceState={activePracticeState}
                 practiceCurrentCard={practiceCurrentCard}
                 counterCurrent={counterCurrent}
                 counterTotal={counterTotal}
@@ -513,7 +566,7 @@ const StudyMode = () => {
               onToggleBookmark={handleToggleBookmark}
               onEdit={(card) =>
                 navigate(
-                  `/CardEdit?id=${card.id}&folderId=${folderId}&returnTo=study`,
+                  `/CardEdit?id=${card.id}&folderId=${folderId ?? ""}&returnTo=study`,
                 )
               }
               showHard={settings?.showReviewHard ?? true}

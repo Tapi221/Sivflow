@@ -6,42 +6,42 @@ export {
 
 type MaintenanceDb = {
   tables: Array<{
-    clear: () => PromiseLike<void> | void;
+    clear(): PromiseLike<void> | void;
   }>;
   syncHistory: {
-    where: (index: string) => {
-      below: (value: number) => {
-        delete: () => PromiseLike<number> | number;
+    where(index: string): {
+      below(value: number): {
+        delete(): PromiseLike<number> | number;
       };
     };
-    orderBy: (index: string) => {
-      toArray: () => Promise<Array<{ id: string }>>;
+    orderBy(index: string): {
+      toArray(): Promise<Array<{ id: string }>>;
     };
-    bulkDelete: (ids: string[]) => PromiseLike<void> | void;
+    bulkDelete(ids: string[]): PromiseLike<void> | void;
   };
   syncErrors: {
-    where: (index: string) => {
-      below: (value: number) => {
-        and: (predicate: (item: { retryable?: boolean }) => boolean) => {
-          toArray: () => Promise<Array<{ id: string; retryable?: boolean }>>;
+    where(index: string): {
+      below(value: number): {
+        and(predicate: (item: { retryable?: boolean }) => boolean): {
+          toArray(): Promise<Array<{ id: string; retryable?: boolean }>>;
         };
       };
     };
-    bulkDelete: (ids: string[]) => PromiseLike<void> | void;
+    bulkDelete(ids: string[]): PromiseLike<void> | void;
   };
   deviceMeta: {
-    where: (index: string) => {
-      equals: (value: string) => {
-        first: () => Promise<Record<string, unknown> | undefined>;
+    where(index: string): {
+      equals(value: string): {
+        first(): Promise<Record<string, unknown> | undefined>;
       };
     };
-    put: (meta: Record<string, unknown>) => PromiseLike<void> | void;
+    put(meta: Record<string, unknown>): PromiseLike<unknown> | unknown;
   };
   folders: {
-    where: (index: string) => {
-      equals: (value: string) => {
-        and: (predicate: (folder: Record<string, unknown>) => boolean) => {
-          toArray: () => Promise<Record<string, unknown>[]>;
+    where(index: string): {
+      equals(value: string): {
+        and(predicate: (folder: Record<string, unknown>) => boolean): {
+          toArray(): Promise<Record<string, unknown>[]>;
         };
       };
     };

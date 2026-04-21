@@ -13,13 +13,11 @@ import type {
   UserSettings,
   UserStats,
 } from "@/types";
-import type { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
 import type {
   DeleteEntity,
   UpsertEntity,
 } from "@/application/usecases/syncQueuePayloadGuards";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
-import type { LocalDB } from "./LocalDB";
 
 export type CardRelation = {
   id: string;
@@ -72,9 +70,66 @@ export type LocalDBTableMap = {
 
 export type SyncableEntityTable = keyof LocalDBTableMap;
 
+export interface QueryableCollection<T extends object, TKey = string> {
+  and(predicate: (item: T) => boolean): QueryableCollection<T, TKey>;
+  filter(predicate: (item: T) => boolean): QueryableCollection<T, TKey>;
+  reverse(): QueryableCollection<T, TKey>;
+  limit(limit: number): QueryableCollection<T, TKey>;
+  toArray(): Promise<T[]>;
+  first(): Promise<T | undefined>;
+  count(): Promise<number>;
+  delete(): Promise<number>;
+  modify(
+    changes:
+      | Partial<T>
+      | ((item: T, ctx?: { value: T; primKey: TKey }) => boolean | void),
+  ): Promise<number>;
+  sortBy(field: keyof T | string): Promise<T[]>;
+  primaryKeys(): Promise<TKey[]>;
+  each(
+    callback: (
+      item: T,
+      cursor?: { primaryKey: TKey },
+    ) => void | Promise<void>,
+  ): Promise<void>;
+}
+
+export interface QueryableWhereClause<T extends object, TKey = string> {
+  equals(value: unknown): QueryableCollection<T, TKey>;
+  above(value: unknown): QueryableCollection<T, TKey>;
+  aboveOrEqual(value: unknown): QueryableCollection<T, TKey>;
+  below(value: unknown): QueryableCollection<T, TKey>;
+  belowOrEqual(value: unknown): QueryableCollection<T, TKey>;
+  between(
+    lowerValue: unknown,
+    upperValue: unknown,
+    includeLower?: boolean,
+    includeUpper?: boolean,
+  ): QueryableCollection<T, TKey>;
+  startsWith(prefix: string): QueryableCollection<T, TKey>;
+  anyOf(values: readonly unknown[]): QueryableCollection<T, TKey>;
+}
+
+export interface QueryableTable<T extends object, TKey = string> {
+  count(): Promise<number>;
+  get(key: unknown): Promise<T | undefined>;
+  put(record: T): PromiseLike<unknown> | Promise<unknown>;
+  add(record: T): PromiseLike<unknown> | Promise<unknown>;
+  update(key: unknown, changes: unknown): PromiseLike<number> | Promise<number>;
+  delete(key: unknown): PromiseLike<void> | Promise<void>;
+  clear(): PromiseLike<void> | Promise<void>;
+  toArray(): Promise<T[]>;
+  where(index: string | string[]): QueryableWhereClause<T, TKey>;
+  where(criteria: { [key: string]: unknown }): QueryableCollection<T, TKey>;
+  filter(predicate: (item: T) => boolean): QueryableCollection<T, TKey>;
+  orderBy(index: string | string[]): QueryableCollection<T, TKey>;
+  bulkDelete?(keys: readonly unknown[]): PromiseLike<void> | Promise<void>;
+  bulkPut?(items: readonly T[]): PromiseLike<unknown> | Promise<unknown>;
+}
+
 export interface LocalDBSyncApi {
-  cards: { count(): Promise<number> };
-  folders: { count(): Promise<number> };
+  cards: QueryableTable<Card, string>;
+  folders: QueryableTable<Folder, string>;
 
   getItem<TTable extends SyncableEntityTable>(
     table: TTable,
@@ -146,6 +201,31 @@ export interface LocalDBSyncApi {
 }
 
 export interface LocalDBSyncStore extends LocalDBSyncApi {
+  readonly name: string;
+  cards: QueryableTable<Card, string>;
+  folders: QueryableTable<Folder, string>;
+  cardSets: QueryableTable<CardSet, string>;
+  documents: QueryableTable<Document, string>;
+  tagRecords: QueryableTable<TagRecord, string>;
+  images: QueryableTable<AssetRecord | UploadedImage, string>;
+  userSettings: QueryableTable<UserSettings, string>;
+  userStats: QueryableTable<UserStats, string>;
+  levelHistories: QueryableTable<Record<string, unknown>, string>;
+  deviceMeta: QueryableTable<Record<string, unknown>, string>;
+  syncErrors: QueryableTable<SyncError, string>;
+  syncHistory: QueryableTable<SyncHistory, string>;
+  syncSettings: QueryableTable<SyncSettings, string>;
+  syncQueue: QueryableTable<SyncQueueItem, string>;
+  conflicts: QueryableTable<SyncConflict, string>;
+  metadata: QueryableTable<Record<string, unknown>, string>;
+
+  table<T extends object, TKey = string>(
+    name: string,
+  ): QueryableTable<T, TKey>;
+  transaction<T>(mode: string, ...args: unknown[]): Promise<T>;
+  isOpen(): boolean;
+  close(): void;
+
   listCardsByUser(userId: string): Promise<Card[]>;
   listFoldersByUser(userId: string): Promise<Folder[]>;
   listCardSetsByUser(userId: string): Promise<CardSet[]>;
@@ -159,5 +239,5 @@ export interface LocalDBSyncStore extends LocalDBSyncApi {
   ): Promise<void>;
 }
 
-export type LocalDBLike = (LocalDB | InMemoryLocalDB) & LocalDBSyncStore;
-export type LocalDBInstance = LocalDBLike;
+export type LocalDBLike = LocalDBSyncStore;
+export type LocalDBInstance = LocalDBSyncStore;

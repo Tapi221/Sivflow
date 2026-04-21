@@ -8,7 +8,18 @@ import {
 import type { AssetRecord, ResolvableImageRef, UploadedImage } from "@/types";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
 
-type ImageRecordLike = Partial<AssetRecord & UploadedImage> | undefined;
+type ImageRecordLike =
+  | {
+      remoteUrlCache?: string | null;
+      remoteUrl?: string | null;
+      remoteKey?: string | null;
+      storagePath?: string | null;
+      localBlobId?: string | null;
+      localFileId?: string | null;
+      remoteStatus?: "pending" | "uploading" | "ready" | "failed" | null;
+      status?: "pending" | "uploading" | "ready" | "failed" | null;
+    }
+  | undefined;
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
@@ -61,8 +72,8 @@ const getResolvedStatusFromRecord = (
   if (
     record.remoteStatus === "ready" ||
     record.status === "ready" ||
-    isNonEmptyString(record?.remoteUrlCache) ||
-    isNonEmptyString(record?.remoteUrl)
+    isNonEmptyString(record.remoteUrlCache) ||
+    isNonEmptyString(record.remoteUrl)
   ) {
     return "ready";
   }

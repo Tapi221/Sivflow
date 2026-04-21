@@ -25,7 +25,7 @@ type OrderedOptimisticCreateParams<T> = {
   onAfterOptimisticCreate?: (entity: T) => void;
 };
 
-export const createOrderedOptimistically = async ({
+export const createOrderedOptimistically = async <T>({
   entities,
   setOptimisticEntities,
   getEntityId,

@@ -41,6 +41,7 @@ const CardLayoutConsistencyTest = () => {
   const canRender =
     typeof window !== "undefined" &&
     new URLSearchParams(window.location.search).get("test_bypass") === "true";
+
   if (!canRender) return null;
 
   return (
@@ -73,7 +74,6 @@ const CardLayoutConsistencyTest = () => {
                   onChange={setEditBlocks}
                   prefix="question"
                   label="問題"
-                  color="text-indigo-500"
                   droppableId="layout-test-question-blocks"
                   hideToolbar
                 />

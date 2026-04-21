@@ -37,14 +37,14 @@ export const saveDocumentWithBlob = async ({
   const documentFiles = getDocumentFilesTable(db);
   const localFileId = resolveDocumentFileId(document);
 
-  await db.transaction("rw", db.documents, documentFiles, async () => {
+  await db.runSyncTransaction(async () => {
     await documentFiles.put({
       id: localFileId,
       blob,
       updatedAt: Date.now(),
     });
 
-    await db.documents.put(document as DocumentItem & Record<string, unknown>);
+    await db.documents.put(document);
   });
 };
 

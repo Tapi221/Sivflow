@@ -1,7 +1,18 @@
 import { getLocalDb } from "./localDB";
-import type { CardSet } from "@/types";
+import type { Card, CardSet, Folder } from "@/types";
 
 const backfillPromiseByUserId = new Map<string, Promise<void>>();
+
+const createId = (): string => {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return crypto.randomUUID();
+  }
+
+  return `cardset-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+};
 
 export const backfillLegacyCardsToCardSets = async (
   userId: string,
@@ -12,55 +23,69 @@ export const backfillLegacyCardsToCardSets = async (
   const activeCards = await db.cards
     .where("userId")
     .equals(userId)
-    .and((c) => !c.isDeleted)
+    .and((card: Card) => !card.isDeleted)
     .toArray();
 
   const legacyCards = activeCards.filter((card) => !card.cardSetId);
   const folders = await db.folders.where("userId").equals(userId).toArray();
   const folderNameById = new Map(
-    folders.map((f) => [
-      String(f.id ?? f.folderId ?? ""),
-      String(f.folderName ?? ""),
+    folders.map((folder: Folder) => [
+      String(folder.id ?? folder.folderId ?? ""),
+      String(folder.folderName ?? ""),
     ]),
   );
 
   const sets = await db.cardSets.where("userId").equals(userId).toArray();
-  const activeSets = sets.filter((s) => !s.isDeleted);
-  const activeSetIds = new Set(activeSets.map((set) => set.id));
+  const activeSets = sets.filter((set: CardSet) => !set.isDeleted);
+  const activeSetIds = new Set(activeSets.map((set: CardSet) => set.id));
   const deletedSetById = new Map(
-    sets.filter((s) => s.isDeleted).map((s) => [s.id, s]),
+    sets
+      .filter((set: CardSet) => set.isDeleted)
+      .map((set: CardSet) => [set.id, set] as const),
   );
 
-  const danglingCardsBySetId = new Map<string, typeof activeCards>();
+  const danglingCardsBySetId = new Map<string, Card[]>();
   for (const card of activeCards) {
     const cardSetId = card.cardSetId?.trim();
     if (!cardSetId || activeSetIds.has(cardSetId)) continue;
-    const list = danglingCardsBySetId.get(cardSetId);
-    if (list) list.push(card);
-    else danglingCardsBySetId.set(cardSetId, [card]);
+
+    const existing = danglingCardsBySetId.get(cardSetId);
+    if (existing) {
+      existing.push(card);
+    } else {
+      danglingCardsBySetId.set(cardSetId, [card]);
+    }
   }
 
   if (legacyCards.length === 0 && danglingCardsBySetId.size === 0) return;
 
   const setByFolder = new Map<string, CardSet>();
   const nextOrderIndexByFolder = new Map<string, number>();
+
   for (const set of activeSets) {
     const key = set.folderId ?? "__root__";
-    if (!setByFolder.has(key)) setByFolder.set(key, set);
+    if (!setByFolder.has(key)) {
+      setByFolder.set(key, set);
+    }
+
     nextOrderIndexByFolder.set(
       key,
       Math.max(nextOrderIndexByFolder.get(key) ?? 0, (set.orderIndex ?? 0) + 1),
     );
   }
 
-  const groups = new Map<string, typeof legacyCards>();
+  const groups = new Map<string, Card[]>();
   for (const card of legacyCards) {
     const key = card.folderId ? String(card.folderId) : "__root__";
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(card);
+    const existing = groups.get(key);
+    if (existing) {
+      existing.push(card);
+    } else {
+      groups.set(key, [card]);
+    }
   }
 
-  await db.transaction("rw", db.cardSets, db.cards, async () => {
+  await db.runSyncTransaction(async () => {
     for (const [missingSetId, cards] of danglingCardsBySetId.entries()) {
       const sample = cards[0];
       const folderId = sample?.folderId ? String(sample.folderId) : null;
@@ -70,18 +95,20 @@ export const backfillLegacyCardsToCardSets = async (
         : "インポート済みカード";
       const deletedSet = deletedSetById.get(missingSetId);
       const restoredOrder = nextOrderIndexByFolder.get(folderKey) ?? 0;
+      const deviceId = sample?.deviceId || deletedSet?.deviceId || "web";
 
       if (deletedSet) {
         await db.cardSets.update(missingSetId, {
           isDeleted: false,
           folderId,
+          deviceId,
           updatedAt: now,
         });
       } else {
         await db.cardSets.add({
           id: missingSetId,
           userId,
-          deviceId: sample?.deviceId || "web",
+          deviceId,
           folderId,
           name: `${folderName} セット`,
           orderIndex: restoredOrder,
@@ -95,7 +122,7 @@ export const backfillLegacyCardsToCardSets = async (
         setByFolder.set(folderKey, {
           id: missingSetId,
           userId,
-          deviceId: sample?.deviceId || "web",
+          deviceId,
           folderId,
           name: deletedSet?.name || `${folderName} セット`,
           orderIndex: restoredOrder,
@@ -104,19 +131,24 @@ export const backfillLegacyCardsToCardSets = async (
           updatedAt: now,
         });
       }
+
       nextOrderIndexByFolder.set(folderKey, restoredOrder + 1);
     }
 
     for (const [folderKey, cards] of groups.entries()) {
       let targetSet = setByFolder.get(folderKey);
+
       if (!targetSet) {
         const folderId = folderKey === "__root__" ? null : folderKey;
         const folderName = folderId
           ? folderNameById.get(folderId) || "インポート済みカード"
           : "インポート済みカード";
+
+        const sampleCard = cards[0];
         const createdSet: CardSet = {
-          id: crypto.randomUUID(),
+          id: createId(),
           userId,
+          deviceId: sampleCard?.deviceId || "web",
           folderId,
           name: `${folderName} セット`,
           orderIndex: nextOrderIndexByFolder.get(folderKey) ?? 0,
@@ -124,6 +156,7 @@ export const backfillLegacyCardsToCardSets = async (
           createdAt: now,
           updatedAt: now,
         };
+
         await db.cardSets.add(createdSet);
         targetSet = createdSet;
         setByFolder.set(folderKey, createdSet);

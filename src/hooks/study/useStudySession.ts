@@ -13,7 +13,13 @@ import {
   buildCardSetById,
   resolveCardFolderIdStrict,
 } from "@/domain/card/selectors/cardFolder";
-import type { Card, CardPatch, CardSet, UserSettings } from "@/types";
+import type {
+  Card,
+  CardPatch,
+  CardSet,
+  SubjectiveScoreValue,
+  UserSettings,
+} from "@/types";
 import type { PracticeFilterRating } from "./usePracticeMode";
 
 export type StudySessionRating = PracticeFilterRating;
@@ -21,7 +27,7 @@ export type StudySessionRating = PracticeFilterRating;
 export type StudySessionResult = {
   cardId: string;
   rating: StudySessionRating;
-  subjectiveScore: number;
+  subjectiveScore: SubjectiveScoreValue;
   responseTimeMs: number;
   studiedAt: Date;
 };
@@ -45,7 +51,7 @@ type MutationLike<T> = {
   mutate: (payload: T) => void;
 };
 
-const SCORE_TO_RATING: Record<number, StudySessionRating> = {
+const SCORE_TO_RATING: Record<SubjectiveScoreValue, StudySessionRating> = {
   0: "forgot",
   1: "vague",
   2: "remembered",
@@ -108,7 +114,7 @@ export const useStudySession = ({
     return buildCardSetById(activeCardSets);
   }, [cardSets]);
   const debugStreak = getDebugStreak();
-  const effectiveStreak = debugStreak ?? sanitizeStreak(results?.streak);
+  const effectiveStreak = debugStreak ?? sanitizeStreak(results.streak);
   const stampRallyStreak =
     studyComplete && debugStreak === null
       ? Math.max(1, effectiveStreak)
@@ -117,21 +123,21 @@ export const useStudySession = ({
   const fetchStreak = useCallback(async () => {
     if (!currentUser) return;
     try {
-      setResults((prev) => ({ ...prev, streak: prev?.streak ?? 0 }));
+      setResults((prev) => ({ ...prev, streak: prev.streak }));
     } catch {
-      /* noop */
+      // noop
     }
   }, [currentUser]);
 
   const handleResult = useCallback(
-    async (subjectiveScore: number, responseTime: number) => {
+    async (subjectiveScore: SubjectiveScoreValue, responseTime: number) => {
       const card = studyCards[currentIndex];
       if (!card) return;
-      const reviewedAt = new Date();
 
+      const reviewedAt = new Date();
       const memoryStabilityBefore = normalizeMemoryStability(
         card.memoryStability,
-        card.currentLevel ?? card.level,
+        card.currentLevel,
       );
 
       const reviewUpdate = computeNextReview({
@@ -147,6 +153,7 @@ export const useStudySession = ({
           rating: (subjectiveScore + 1) as 1 | 2 | 3 | 4,
           intervalDays: reviewUpdate.intervalDays,
         });
+
         await updateCard(card.id, {
           ...reviewUpdate,
           reviewLogs: [...(card.reviewLogs ?? []), newLog],
@@ -157,6 +164,7 @@ export const useStudySession = ({
       if (currentUser) {
         const resolvedFolderId =
           resolveCardFolderIdStrict(card, cardSetById) ?? undefined;
+
         createStudyLogMutation.mutate({
           userId: currentUser.uid,
           cardId: card.id,
@@ -166,7 +174,6 @@ export const useStudySession = ({
           createdAt: Timestamp.now(),
         });
 
-        // Dashboardの即時反映用にローカルにも保存する
         try {
           const localDb = await getLocalDb(currentUser.uid);
           await localDb.addItem("studyLogs", {
@@ -179,7 +186,7 @@ export const useStudySession = ({
             studiedAt: reviewedAt,
           });
         } catch {
-          /* noop */
+          // noop
         }
       }
 
@@ -197,23 +204,19 @@ export const useStudySession = ({
         });
       }
 
-      setSessionResults((prev) => {
-        const base = prev;
-        return [
-          ...base,
-          {
-            cardId: card.id,
-            rating: SCORE_TO_RATING[subjectiveScore] ?? "forgot",
-            subjectiveScore,
-            responseTimeMs: responseTime,
-            studiedAt: reviewedAt,
-          },
-        ];
-      });
+      setSessionResults((prev) => [
+        ...prev,
+        {
+          cardId: card.id,
+          rating: SCORE_TO_RATING[subjectiveScore],
+          subjectiveScore,
+          responseTimeMs: responseTime,
+          studiedAt: reviewedAt,
+        },
+      ]);
 
-      // 当日集計ストアを即時更新（ダッシュボードへの即時反映用）
-      const ratingKey = SCORE_TO_RATING[subjectiveScore] ?? "forgot";
       const todayStore = useTodayStudyStore.getState();
+      const ratingKey = SCORE_TO_RATING[subjectiveScore];
       todayStore.addRating(ratingKey);
       if (subjectiveScore === 0 || subjectiveScore === 1) {
         todayStore.markForExtra(card.id);
@@ -221,7 +224,7 @@ export const useStudySession = ({
 
       setResults((prev) => ({
         ...prev,
-        [subjectiveScore]: prev[subjectiveScore as 0 | 1 | 2 | 3] + 1,
+        [subjectiveScore]: prev[subjectiveScore] + 1,
       }));
 
       if (currentIndex < studyCards.length - 1) {
@@ -233,6 +236,7 @@ export const useStudySession = ({
       setStudyComplete(true);
     },
     [
+      cardSetById,
       createLevelHistoryMutation,
       createStudyLogMutation,
       currentIndex,
@@ -240,7 +244,6 @@ export const useStudySession = ({
       fetchStreak,
       settings?.delayBonusEnabled,
       studyCards,
-      cardSetById,
       updateCard,
     ],
   );
