@@ -1,7 +1,5 @@
-
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import type { DragEvent as ReactDragEvent } from "react";
 import type { PageSize, PdfJsRenderTask } from "./pdfViewerTypes";
 import { isPdfAbortError } from "./pdfViewerTypes";
 import type { PdfDocumentController } from "./hooks/usePdfDocument";
@@ -27,6 +25,7 @@ const PDF_THUMBNAIL_PANEL_COLORS = {
   surfaceBlush: "#F7EFED",
   textStrong: "#5E545B",
   textMuted: "#8C7C83",
+  textOnAccent: "#FFFFFF",
 } as const;
 
 interface PdfThumbnailItemProps {
@@ -35,14 +34,8 @@ interface PdfThumbnailItemProps {
   baseSize?: PageSize;
   isActive: boolean;
   isBookmarked: boolean;
-  isDragging?: boolean;
-  isDropTarget?: boolean;
   onSelect: (pageNumber: number) => void;
   onToggleBookmark: (pageNumber: number) => void;
-  onDragStart?: (event: ReactDragEvent<HTMLDivElement>, pageNumber: number) => void;
-  onDragOver?: (event: ReactDragEvent<HTMLDivElement>, pageNumber: number) => void;
-  onDrop?: (event: ReactDragEvent<HTMLDivElement>, pageNumber: number) => void;
-  onDragEnd?: (event: ReactDragEvent<HTMLDivElement>, pageNumber: number) => void;
   rootElement: HTMLElement | null;
   acquirePage: PdfDocumentController["acquirePage"];
   setPageSize: PdfDocumentController["setPageSize"];
@@ -99,14 +92,8 @@ const PdfThumbnailItemComponent = ({
   baseSize,
   isActive,
   isBookmarked,
-  isDragging = false,
-  isDropTarget = false,
   onSelect,
   onToggleBookmark,
-  onDragStart,
-  onDragOver,
-  onDrop,
-  onDragEnd,
   rootElement,
   acquirePage,
   setPageSize,
@@ -334,119 +321,109 @@ const PdfThumbnailItemComponent = ({
   ]);
 
   return (
-    <div
-      ref={cardRef}
-      draggable
-      onDragStart={(event) => onDragStart?.(event, pageNumber)}
-      onDragOver={(event) => onDragOver?.(event, pageNumber)}
-      onDrop={(event) => onDrop?.(event, pageNumber)}
-      onDragEnd={(event) => onDragEnd?.(event, pageNumber)}
-      className={cn(
-        "relative min-w-0 select-none",
-        isDragging && "opacity-60",
-      )}
-      style={{ cursor: "grab" }}
-    >
-      <div
+    <div ref={cardRef} className="relative min-w-0">
+      <button
+        type="button"
+        onClick={() => onSelect(pageNumber)}
+        aria-label={`ページ ${pageNumber} を開く`}
         className={cn(
-          "group relative flex w-full min-w-0 flex-col gap-2 rounded-[20px] border p-2 transition-all duration-150 ease-out",
-          isDropTarget && "scale-[1.01]",
+          "group relative flex w-full min-w-0 flex-col rounded-[18px] border p-[8px] text-left transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+          isActive
+            ? "shadow-[0_10px_22px_rgba(216,175,181,0.18)]"
+            : "hover:shadow-[0_8px_18px_rgba(216,175,181,0.12)]",
         )}
         style={{
           color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
-          borderColor: isActive || isDropTarget
+          borderColor: isActive
             ? PDF_THUMBNAIL_PANEL_COLORS.accent
             : PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
           background: isActive
             ? PDF_THUMBNAIL_PANEL_COLORS.surfaceBlush
             : PDF_THUMBNAIL_PANEL_COLORS.surfacePaper,
           boxShadow: isActive
-            ? "0 10px 20px rgba(216, 175, 181, 0.14), inset 0 1px 0 rgba(255,255,255,0.95)"
+            ? "0 10px 22px rgba(216, 175, 181, 0.14), inset 0 1px 0 rgba(255,255,255,0.95)"
             : "inset 0 1px 0 rgba(255,255,255,0.95)",
-          outline: isDropTarget ? "1px solid rgba(216, 175, 181, 0.35)" : "none",
+          outline: isActive ? "1px solid rgba(216, 175, 181, 0.24)" : "none",
         }}
       >
-        <button
-          type="button"
-          onClick={() => onSelect(pageNumber)}
-          aria-label={`ページ ${pageNumber} を開く`}
-          className="flex w-full min-w-0 flex-col gap-2 text-left focus:outline-none"
+        <div
+          className="relative flex w-full items-center justify-center overflow-hidden rounded-[14px] border bg-white p-[10px] shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
+          style={{
+            aspectRatio: pageAspectRatio,
+            borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+            background: "linear-gradient(180deg, #FFFFFF 0%, #F8F7F5 100%)",
+          }}
         >
-          <div
-            className="relative flex w-full items-center justify-center overflow-hidden rounded-[16px] border bg-white p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
+          {!isRendered && !renderError ? (
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(248,247,245,0.96), rgba(247,239,237,0.92))",
+              }}
+            />
+          ) : null}
+
+          <div className="pointer-events-none absolute left-2 top-2 z-20 inline-flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-[12px] font-semibold tabular-nums"
             style={{
-              aspectRatio: pageAspectRatio,
-              borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
-              background: "linear-gradient(180deg, #FFFFFF 0%, #F8F7F5 100%)",
-            }}
-          >
-            {!isRendered && !renderError ? (
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(180deg, rgba(248,247,245,0.96), rgba(247,239,237,0.92))",
-                }}
-              />
-            ) : null}
-
-            <canvas ref={canvasRef} className="relative z-10 block max-w-full" />
-
-            {renderError ? (
-              <div
-                className="absolute inset-0 flex items-center justify-center px-3 text-center text-[11px] font-medium"
-                style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}
-              >
-                {renderError}
-              </div>
-            ) : null}
-          </div>
-        </button>
-
-        <div className="flex items-center justify-between gap-2 px-1 pt-1">
-          <div
-            className="rounded-full px-2 py-0.5 text-[12px] font-semibold tabular-nums"
-            style={{
-              background: "rgba(255,255,255,0.64)",
-              color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
+              color: isActive
+                ? PDF_THUMBNAIL_PANEL_COLORS.textOnAccent
+                : PDF_THUMBNAIL_PANEL_COLORS.textStrong,
+              background: isActive
+                ? PDF_THUMBNAIL_PANEL_COLORS.accent
+                : "rgba(248,247,245,0.94)",
+              boxShadow: isActive
+                ? "0 6px 14px rgba(216, 175, 181, 0.22)"
+                : "0 4px 10px rgba(216, 175, 181, 0.10)",
             }}
           >
             {pageNumber}
           </div>
 
-          <button
-            type="button"
-            aria-label={
-              isBookmarked
-                ? `ページ ${pageNumber} のブックマークを外す`
-                : `ページ ${pageNumber} をブックマークする`
-            }
-            aria-pressed={isBookmarked}
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              onToggleBookmark(pageNumber);
-            }}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border transition-all duration-150 ease-out hover:scale-[1.03]"
-            style={{
-              borderColor: isBookmarked
-                ? PDF_THUMBNAIL_PANEL_COLORS.accent
-                : PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
-              background: isBookmarked
-                ? PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft
-                : "rgba(248,247,245,0.95)",
-              color: isBookmarked
-                ? PDF_THUMBNAIL_PANEL_COLORS.accent
-                : PDF_THUMBNAIL_PANEL_COLORS.textMuted,
-              boxShadow: isBookmarked
-                ? "0 8px 18px rgba(216, 175, 181, 0.18)"
-                : "0 4px 12px rgba(216, 175, 181, 0.10)",
-            }}
-          >
-            <BookmarkIcon className="h-4 w-4" />
-          </button>
+          <canvas ref={canvasRef} className="relative z-10 block max-h-full max-w-full" />
+
+          {renderError ? (
+            <div
+              className="absolute inset-0 flex items-center justify-center px-3 text-center text-[11px] font-medium"
+              style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}
+            >
+              {renderError}
+            </div>
+          ) : null}
         </div>
-      </div>
+      </button>
+
+      <button
+        type="button"
+        aria-label={
+          isBookmarked
+            ? `ページ ${pageNumber} のブックマークを外す`
+            : `ページ ${pageNumber} をブックマークする`
+        }
+        aria-pressed={isBookmarked}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          onToggleBookmark(pageNumber);
+        }}
+        className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border transition-all duration-150 ease-out hover:scale-[1.03]"
+        style={{
+          borderColor: isBookmarked
+            ? PDF_THUMBNAIL_PANEL_COLORS.accent
+            : PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+          background: isBookmarked
+            ? PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft
+            : "rgba(248,247,245,0.94)",
+          color: isBookmarked
+            ? PDF_THUMBNAIL_PANEL_COLORS.accent
+            : PDF_THUMBNAIL_PANEL_COLORS.textMuted,
+          boxShadow: isBookmarked
+            ? "0 8px 16px rgba(216, 175, 181, 0.18)"
+            : "0 4px 10px rgba(216, 175, 181, 0.10)",
+        }}
+      >
+        <BookmarkIcon className="h-4 w-4" />
+      </button>
     </div>
   );
 };
@@ -461,14 +438,8 @@ const arePdfThumbnailItemPropsEqual = (
     arePageSizesEqual(left.baseSize, right.baseSize) &&
     left.isActive === right.isActive &&
     left.isBookmarked === right.isBookmarked &&
-    left.isDragging === right.isDragging &&
-    left.isDropTarget === right.isDropTarget &&
     left.onSelect === right.onSelect &&
     left.onToggleBookmark === right.onToggleBookmark &&
-    left.onDragStart === right.onDragStart &&
-    left.onDragOver === right.onDragOver &&
-    left.onDrop === right.onDrop &&
-    left.onDragEnd === right.onDragEnd &&
     left.rootElement === right.rootElement &&
     left.acquirePage === right.acquirePage &&
     left.setPageSize === right.setPageSize
