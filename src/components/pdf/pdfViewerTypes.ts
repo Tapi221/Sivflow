@@ -70,6 +70,22 @@ export interface PdfJsTextContent {
   >;
 }
 
+export interface PdfJsDestinationReference {
+  num: number;
+  gen: number;
+}
+
+export type PdfJsExplicitDestination = unknown[];
+export type PdfJsOutlineDestination = string | PdfJsExplicitDestination | null;
+
+export interface PdfJsOutlineNode {
+  title?: string | null;
+  dest?: PdfJsOutlineDestination;
+  items?: PdfJsOutlineNode[];
+  bold?: boolean;
+  italic?: boolean;
+}
+
 export interface PdfJsPage {
   getViewport: (params: { scale: number }) => PdfJsViewport;
   getTextContent: () => Promise<PdfJsTextContent>;
@@ -90,6 +106,9 @@ export interface PdfJsDocument {
   numPages: number;
   fingerprints?: Array<string | null>;
   getPage: (pageNumber: number) => Promise<PdfJsPage>;
+  getOutline?: () => Promise<PdfJsOutlineNode[] | null>;
+  getDestination?: (id: string) => Promise<PdfJsExplicitDestination | null>;
+  getPageIndex?: (ref: PdfJsDestinationReference) => Promise<number>;
   cleanup?: (keepLoadedFonts?: boolean) => Promise<void>;
   destroy?: () => void | Promise<void>;
 }
