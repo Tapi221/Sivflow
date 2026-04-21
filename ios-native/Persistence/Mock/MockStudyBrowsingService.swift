@@ -21,6 +21,15 @@ struct MockStudyBrowsingService: StudyBrowsingService {
                     parentFolderId: nil,
                     cloudSyncEnabled: false,
                     orderIndex: 0
+                ),
+                StudyFolder(
+                    id: "folder-2",
+                    folderId: "folder-2",
+                    folderName: "Dynamic Programming",
+                    folderColor: "green",
+                    parentFolderId: "folder-1",
+                    cloudSyncEnabled: false,
+                    orderIndex: 1
                 )
             ],
             cardSets: [
@@ -28,7 +37,7 @@ struct MockStudyBrowsingService: StudyBrowsingService {
                     id: "cardset-1",
                     folderId: "folder-1",
                     name: "Sorting",
-                    descriptionText: "read-only MVP 用の mock データ",
+                    descriptionText: "read-only native mock data",
                     orderIndex: 0,
                     defaultDisplayMode: "fixed"
                 )
@@ -47,29 +56,45 @@ struct MockStudyBrowsingService: StudyBrowsingService {
                             id: "block-1",
                             type: .text,
                             orderIndex: 0,
-                            content: "Quick Sort の平均計算量は？",
-                            markdown: nil,
                             questionTitle: nil,
                             questionAnswer: nil,
-                            imageAssetSummary: nil,
-                            referenceSummary: nil,
-                            mathLatex: nil,
-                            codeText: nil
+                            content: "Quick Sort の平均計算量は？",
+                            markdown: nil,
+                            code: nil,
+                            images: [],
+                            audios: [],
+                            references: [],
+                            math: nil
                         )
                     ]),
                     back: StudyCardFace(blocks: [
                         StudyCardBlock(
                             id: "block-2",
-                            type: .text,
+                            type: .markdown,
                             orderIndex: 0,
-                            content: "平均 O(n log n)",
-                            markdown: nil,
                             questionTitle: nil,
                             questionAnswer: nil,
-                            imageAssetSummary: nil,
-                            referenceSummary: nil,
-                            mathLatex: nil,
-                            codeText: nil
+                            content: nil,
+                            markdown: "平均 **O(n log n)**",
+                            code: nil,
+                            images: [],
+                            audios: [],
+                            references: [],
+                            math: nil
+                        ),
+                        StudyCardBlock(
+                            id: "block-3",
+                            type: .code,
+                            orderIndex: 1,
+                            questionTitle: nil,
+                            questionAnswer: nil,
+                            content: nil,
+                            markdown: nil,
+                            code: StudyCodeBlock(language: "swift", code: "let pivot = items[count / 2]"),
+                            images: [],
+                            audios: [],
+                            references: [],
+                            math: nil
                         )
                     ]),
                     isDraft: false,
@@ -80,13 +105,18 @@ struct MockStudyBrowsingService: StudyBrowsingService {
             ],
             tags: [
                 StudyTag(id: "tag-algo", name: "algorithm", color: "indigo")
-            ]
+            ],
+            assets: [],
+            assetBaseDirectoryURL: nil
         )
         backingService = InMemoryStudyBrowsingService(snapshot: snapshot)
     }
 
-    func listFolders() -> [StudyFolder] {
-        backingService.listFolders()
+    var metadata: StudySnapshotMetadata { backingService.metadata }
+    var assetBaseDirectoryURL: URL? { backingService.assetBaseDirectoryURL }
+
+    func listFolders(parentFolderId: String?) -> [StudyFolder] {
+        backingService.listFolders(parentFolderId: parentFolderId)
     }
 
     func listCardSets(folderId: String?) -> [StudyCardSet] {
@@ -99,5 +129,17 @@ struct MockStudyBrowsingService: StudyBrowsingService {
 
     func card(withId id: String) -> StudyCard? {
         backingService.card(withId: id)
+    }
+
+    func tags(for ids: [String]) -> [StudyTag] {
+        backingService.tags(for: ids)
+    }
+
+    func asset(for id: String) -> StudyAsset? {
+        backingService.asset(for: id)
+    }
+
+    func resolveImageSource(for image: StudyImageReference) -> StudyResolvedImageSource? {
+        backingService.resolveImageSource(for: image)
     }
 }
