@@ -10,12 +10,20 @@ import {
   prepareDetachedPdfCanvasSurfaceForRender,
 } from "./pdfCanvasRenderUtils";
 
-const THUMBNAIL_TARGET_WIDTH_PX = 96;
+const THUMBNAIL_TARGET_WIDTH_PX = 84;
 const THUMBNAIL_RENDER_CONSTRAINTS = {
-  maxPreferredDevicePixelRatio: 2,
-  maxCanvasPixels: 1_200_000,
-  maxCanvasEdgePx: 2048,
+  maxPreferredDevicePixelRatio: 1.25,
+  maxCanvasPixels: 480_000,
+  maxCanvasEdgePx: 1024,
 } as const;
+const EAGER_THUMBNAIL_PAGE_COUNT = 12;
+
+type ThumbnailBitmapCacheEntry = {
+  bitmap: HTMLCanvasElement;
+  size: PageSize;
+};
+
+const thumbnailBitmapCache = new Map<string, ThumbnailBitmapCacheEntry>();
 
 const PDF_THUMBNAIL_PANEL_COLORS = {
   accent: "#D8AFB5",
@@ -25,7 +33,6 @@ const PDF_THUMBNAIL_PANEL_COLORS = {
   surfaceBlush: "#F7EFED",
   textStrong: "#5E545B",
   textMuted: "#8C7C83",
-  textOnAccent: "#FFFFFF",
 } as const;
 
 interface PdfThumbnailItemProps {
@@ -86,6 +93,24 @@ const readWindowDevicePixelRatio = () => {
   return rawDevicePixelRatio;
 };
 
+const buildThumbnailCacheKey = (documentKey: string, pageNumber: number) => {
+  return `${documentKey}::thumbnail::${pageNumber}`;
+};
+
+const cloneCanvasBitmap = (sourceCanvas: HTMLCanvasElement) => {
+  const nextCanvas = document.createElement("canvas");
+  nextCanvas.width = sourceCanvas.width;
+  nextCanvas.height = sourceCanvas.height;
+
+  const nextContext = nextCanvas.getContext("2d", { alpha: false });
+  if (!nextContext) {
+    return null;
+  }
+
+  nextContext.drawImage(sourceCanvas, 0, 0);
+  return nextCanvas;
+};
+
 const PdfThumbnailItemComponent = ({
   documentKey,
   pageNumber,
@@ -102,7 +127,9 @@ const PdfThumbnailItemComponent = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const renderPassIdRef = useRef(0);
 
-  const [isVisible, setIsVisible] = useState(isActive);
+  const [isVisible, setIsVisible] = useState(
+    () => isActive || pageNumber <= EAGER_THUMBNAIL_PAGE_COUNT,
+  );
   const [isRendered, setIsRendered] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
 
@@ -128,11 +155,13 @@ const PdfThumbnailItemComponent = ({
           return;
         }
 
-        setIsVisible(entry.isIntersecting || entry.intersectionRatio > 0);
+        setIsVisible((previousIsVisible) => {
+          return previousIsVisible || entry.isIntersecting || entry.intersectionRatio > 0;
+        });
       },
       {
         root: rootElement,
-        rootMargin: "200px 0px 200px 0px",
+        rootMargin: "320px 0px 320px 0px",
         threshold: 0.01,
       },
     );
@@ -166,7 +195,6 @@ const PdfThumbnailItemComponent = ({
     renderPassIdRef.current = renderPassId;
 
     let disposed = false;
-    let rafId: number | null = null;
     let renderTask: PdfJsRenderTask | null = null;
     let activePageRelease: (() => void) | null = null;
 
@@ -184,122 +212,166 @@ const PdfThumbnailItemComponent = ({
       return disposed || renderPassIdRef.current !== renderPassId;
     };
 
-    setRenderError(null);
-    setIsRendered(false);
+    const cachedEntry = thumbnailBitmapCache.get(
+      buildThumbnailCacheKey(documentKey, pageNumber),
+    );
+    const resolvedSize = baseSize ?? cachedEntry?.size;
 
-    rafId = window.requestAnimationFrame(() => {
-      void (async () => {
-        try {
-          const pageLease = await acquirePage(pageNumber);
-          if (isStale()) {
-            pageLease.release();
-            return;
-          }
+    if (cachedEntry && resolvedSize) {
+      const viewportWidthPx = THUMBNAIL_TARGET_WIDTH_PX;
+      const viewportHeightPx = Math.max(
+        1,
+        (resolvedSize.height / Math.max(1, resolvedSize.width)) * THUMBNAIL_TARGET_WIDTH_PX,
+      );
+      const renderBackingStore = resolvePdfRenderBackingStore({
+        viewportWidthPx,
+        viewportHeightPx,
+        devicePixelRatio: 1,
+        constraints: THUMBNAIL_RENDER_CONSTRAINTS,
+      });
 
-          activePageRelease = pageLease.release;
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const didCommit = commitPdfBitmapToCanvas({
+          targetCanvas: canvas,
+          bitmap: cachedEntry.bitmap,
+          viewport: {
+            width: viewportWidthPx,
+            height: viewportHeightPx,
+            scale: 1,
+            transform: [1, 0, 0, 1, 0, 0],
+          },
+          renderBackingStore,
+          opaqueCanvas: true,
+        });
 
-          const baseViewport = pageLease.page.getViewport({ scale: 1 });
-          const nextPageSize = {
-            width: baseViewport.width,
-            height: baseViewport.height,
-          };
-
-          if (!arePageSizesEqual(baseSize, nextPageSize)) {
-            setPageSize(pageNumber, nextPageSize);
-          }
-
-          const thumbnailScale = Math.max(
-            0.01,
-            THUMBNAIL_TARGET_WIDTH_PX / Math.max(1, nextPageSize.width),
-          );
-          const viewport = pageLease.page.getViewport({ scale: thumbnailScale });
-          const renderBackingStore = resolvePdfRenderBackingStore({
-            viewportWidthPx: viewport.width,
-            viewportHeightPx: viewport.height,
-            devicePixelRatio: readWindowDevicePixelRatio(),
-            constraints: THUMBNAIL_RENDER_CONSTRAINTS,
-          });
-          const renderSurface = createDetachedPdfCanvasSurface({
-            renderBackingStore,
-            opaqueCanvas: true,
-          });
-
-          if (!renderSurface) {
-            throw new Error("thumbnail surface unavailable");
-          }
-
-          prepareDetachedPdfCanvasSurfaceForRender({
-            surface: renderSurface,
-            renderBackingStore,
-            opaqueCanvas: true,
-          });
-
-          renderTask = pageLease.page.render({
-            canvasContext: renderSurface.context,
-            viewport,
-            intent: "display",
-          });
-
-          await renderTask.promise;
-          if (isStale()) {
-            return;
-          }
-
-          const canvas = canvasRef.current;
-          if (!canvas) {
-            return;
-          }
-
-          const didCommit = commitPdfBitmapToCanvas({
-            targetCanvas: canvas,
-            bitmap: renderSurface.canvas,
-            viewport,
-            renderBackingStore,
-            opaqueCanvas: true,
-          });
-
-          if (!didCommit) {
-            throw new Error("thumbnail canvas commit failed");
-          }
-
-          if (isStale()) {
-            return;
-          }
-
+        if (didCommit) {
           setRenderError(null);
           setIsRendered(true);
-        } catch (errorValue: unknown) {
-          if (isStale() || isPdfAbortError(errorValue)) {
-            return;
-          }
-
-          console.error("[PdfThumbnailItem] render error", {
-            documentKey,
-            pageNumber,
-            error: errorValue,
-          });
-
-          if (isStale()) {
-            return;
-          }
-
-          setIsRendered(false);
-          setRenderError("サムネイルを表示できません");
-        } finally {
-          releasePage();
+          return () => {
+            disposed = true;
+          };
         }
-      })();
-    });
+      }
+    }
+
+    setRenderError(null);
+
+    void (async () => {
+      try {
+        const pageLease = await acquirePage(pageNumber);
+        if (isStale()) {
+          pageLease.release();
+          return;
+        }
+
+        activePageRelease = pageLease.release;
+
+        const baseViewport = pageLease.page.getViewport({ scale: 1 });
+        const nextPageSize = {
+          width: baseViewport.width,
+          height: baseViewport.height,
+        };
+
+        if (!arePageSizesEqual(baseSize, nextPageSize)) {
+          setPageSize(pageNumber, nextPageSize);
+        }
+
+        const thumbnailScale = Math.max(
+          0.01,
+          THUMBNAIL_TARGET_WIDTH_PX / Math.max(1, nextPageSize.width),
+        );
+        const viewport = pageLease.page.getViewport({ scale: thumbnailScale });
+        const renderBackingStore = resolvePdfRenderBackingStore({
+          viewportWidthPx: viewport.width,
+          viewportHeightPx: viewport.height,
+          devicePixelRatio: readWindowDevicePixelRatio(),
+          constraints: THUMBNAIL_RENDER_CONSTRAINTS,
+        });
+        const renderSurface = createDetachedPdfCanvasSurface({
+          renderBackingStore,
+          opaqueCanvas: true,
+        });
+
+        if (!renderSurface) {
+          throw new Error("thumbnail surface unavailable");
+        }
+
+        prepareDetachedPdfCanvasSurfaceForRender({
+          surface: renderSurface,
+          renderBackingStore,
+          opaqueCanvas: true,
+        });
+
+        renderTask = pageLease.page.render({
+          canvasContext: renderSurface.context,
+          viewport,
+          intent: "display",
+        });
+
+        await renderTask.promise;
+        if (isStale()) {
+          return;
+        }
+
+        const canvas = canvasRef.current;
+        if (!canvas) {
+          return;
+        }
+
+        const didCommit = commitPdfBitmapToCanvas({
+          targetCanvas: canvas,
+          bitmap: renderSurface.canvas,
+          viewport,
+          renderBackingStore,
+          opaqueCanvas: true,
+        });
+
+        if (!didCommit) {
+          throw new Error("thumbnail canvas commit failed");
+        }
+
+        if (isStale()) {
+          return;
+        }
+
+        const clonedBitmap = cloneCanvasBitmap(renderSurface.canvas);
+        if (clonedBitmap) {
+          thumbnailBitmapCache.set(buildThumbnailCacheKey(documentKey, pageNumber), {
+            bitmap: clonedBitmap,
+            size: nextPageSize,
+          });
+        }
+
+        setRenderError(null);
+        setIsRendered(true);
+      } catch (errorValue: unknown) {
+        if (isStale() || isPdfAbortError(errorValue)) {
+          return;
+        }
+
+        console.error("[PdfThumbnailItem] render error", {
+          documentKey,
+          pageNumber,
+          error: errorValue,
+        });
+
+        if (isStale()) {
+          return;
+        }
+
+        setIsRendered(false);
+        setRenderError("サムネイルを表示できません");
+      } finally {
+        releasePage();
+      }
+    })();
 
     return () => {
       disposed = true;
 
       if (renderPassIdRef.current === renderPassId) {
         renderPassIdRef.current += 1;
-      }
-
-      if (rafId !== null) {
-        window.cancelAnimationFrame(rafId);
       }
 
       try {
@@ -327,10 +399,10 @@ const PdfThumbnailItemComponent = ({
         onClick={() => onSelect(pageNumber)}
         aria-label={`ページ ${pageNumber} を開く`}
         className={cn(
-          "group relative flex w-full min-w-0 flex-col rounded-[18px] border p-[8px] text-left transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+          "group relative flex w-full min-w-0 flex-col rounded-[20px] border p-2 text-left transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           isActive
-            ? "shadow-[0_10px_22px_rgba(216,175,181,0.18)]"
-            : "hover:shadow-[0_8px_18px_rgba(216,175,181,0.12)]",
+            ? "shadow-[0_12px_28px_rgba(216,175,181,0.22)]"
+            : "hover:shadow-[0_10px_24px_rgba(216,175,181,0.14)]",
         )}
         style={{
           color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
@@ -341,13 +413,13 @@ const PdfThumbnailItemComponent = ({
             ? PDF_THUMBNAIL_PANEL_COLORS.surfaceBlush
             : PDF_THUMBNAIL_PANEL_COLORS.surfacePaper,
           boxShadow: isActive
-            ? "0 10px 22px rgba(216, 175, 181, 0.14), inset 0 1px 0 rgba(255,255,255,0.95)"
+            ? "0 12px 28px rgba(216, 175, 181, 0.16), inset 0 1px 0 rgba(255,255,255,0.95)"
             : "inset 0 1px 0 rgba(255,255,255,0.95)",
-          outline: isActive ? "1px solid rgba(216, 175, 181, 0.24)" : "none",
+          outline: isActive ? "1px solid rgba(216, 175, 181, 0.28)" : "none",
         }}
       >
         <div
-          className="relative flex w-full items-center justify-center overflow-hidden rounded-[14px] border bg-white p-[10px] shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
+          className="relative flex w-full items-center justify-center overflow-hidden rounded-[16px] border bg-white p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
           style={{
             aspectRatio: pageAspectRatio,
             borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
@@ -364,23 +436,7 @@ const PdfThumbnailItemComponent = ({
             />
           ) : null}
 
-          <div className="pointer-events-none absolute left-2 top-2 z-20 inline-flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-[12px] font-semibold tabular-nums"
-            style={{
-              color: isActive
-                ? PDF_THUMBNAIL_PANEL_COLORS.textOnAccent
-                : PDF_THUMBNAIL_PANEL_COLORS.textStrong,
-              background: isActive
-                ? PDF_THUMBNAIL_PANEL_COLORS.accent
-                : "rgba(248,247,245,0.94)",
-              boxShadow: isActive
-                ? "0 6px 14px rgba(216, 175, 181, 0.22)"
-                : "0 4px 10px rgba(216, 175, 181, 0.10)",
-            }}
-          >
-            {pageNumber}
-          </div>
-
-          <canvas ref={canvasRef} className="relative z-10 block max-h-full max-w-full" />
+          <canvas ref={canvasRef} className="relative z-10 block max-w-full" />
 
           {renderError ? (
             <div
@@ -392,6 +448,10 @@ const PdfThumbnailItemComponent = ({
           ) : null}
         </div>
       </button>
+
+      <div className="pointer-events-none absolute left-3 top-3 z-20 inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-[rgba(248,247,245,0.94)] px-2 text-[12px] font-semibold tabular-nums shadow-[0_4px_12px_rgba(216,175,181,0.10)]">
+        {pageNumber}
+      </div>
 
       <button
         type="button"
@@ -413,13 +473,13 @@ const PdfThumbnailItemComponent = ({
             : PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
           background: isBookmarked
             ? PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft
-            : "rgba(248,247,245,0.94)",
+            : "rgba(248,247,245,0.95)",
           color: isBookmarked
             ? PDF_THUMBNAIL_PANEL_COLORS.accent
             : PDF_THUMBNAIL_PANEL_COLORS.textMuted,
           boxShadow: isBookmarked
-            ? "0 8px 16px rgba(216, 175, 181, 0.18)"
-            : "0 4px 10px rgba(216, 175, 181, 0.10)",
+            ? "0 8px 18px rgba(216, 175, 181, 0.18)"
+            : "0 4px 12px rgba(216, 175, 181, 0.10)",
         }}
       >
         <BookmarkIcon className="h-4 w-4" />
