@@ -3,11 +3,16 @@ import { acquirePdfDocumentSession } from "@/components/pdf/pdfDocumentSessionRe
 import { createPdfPageResourceCache } from "@/components/pdf/pdfPageResourceCache";
 import type {
   PageSize,
+  PdfJsDestinationReference,
   PdfJsDocument,
+  PdfJsExplicitDestination,
   PdfJsGetDocumentParams,
+  PdfJsOutlineDestination,
+  PdfJsOutlineNode,
   PdfJsPage,
   PdfJsPageLease,
   PdfJsTextContent,
+  PdfJsTextItem,
   PdfViewerOptions,
   PdfViewerSourceMeta,
   SourceLoadErrorKind,
@@ -15,6 +20,7 @@ import type {
 import {
   getErrorMessage,
   isPdfAbortError,
+  isPdfTextItem,
 } from "@/components/pdf/pdfViewerTypes";
 
 interface UsePdfDocumentOptions {
@@ -37,6 +43,30 @@ export interface PrefetchPageResourceOptions {
   includeTextContent?: boolean;
 }
 
+export type PdfDocumentOutlineItemSource = "pdf-outline" | "derived";
+
+export interface PdfDocumentOutlineItem {
+  id: string;
+  title: string;
+  pageNumber: number | null;
+  depth: number;
+  source: PdfDocumentOutlineItemSource;
+  children: PdfDocumentOutlineItem[];
+}
+
+export interface PdfDocumentMarkdownSection {
+  id: string;
+  pageNumber: number;
+  title: string;
+  markdown: string;
+  preview: string;
+}
+
+export interface PdfDocumentMarkdown {
+  content: string;
+  sections: PdfDocumentMarkdownSection[];
+}
+
 export interface PdfDocumentController {
   doc: PdfJsDocument | null;
   documentKey: string;
@@ -51,10 +81,257 @@ export interface PdfDocumentController {
     pageNumbers: number[],
     options?: PrefetchPageResourceOptions,
   ) => void;
+  getDocumentOutline: () => Promise<PdfDocumentOutlineItem[]>;
+  getDocumentMarkdown: () => Promise<PdfDocumentMarkdown>;
 }
 
 type UsePdfDocumentResult = PdfDocumentController;
 type PdfPageCache = ReturnType<typeof createPdfPageResourceCache<PdfJsPage>>;
+
+type PdfTextToken = {
+  text: string;
+  x: number;
+  y: number;
+  height: number;
+};
+
+type PdfTextLineBucket = {
+  y: number;
+  threshold: number;
+  tokens: PdfTextToken[];
+};
+
+const OUTLINE_TITLE_MAX_LENGTH = 96;
+const MARKDOWN_PREVIEW_MAX_LENGTH = 180;
+
+const clampPositiveInteger = (value: number) => {
+  return Math.max(1, Math.trunc(value));
+};
+
+const truncateText = (value: string, maxLength: number) => {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  return `${value.slice(0, Math.max(0, maxLength - 1)).trimEnd()}…`;
+};
+
+const normalizePdfText = (value: string) => {
+  return value.replace(/\s+/g, " ").trim();
+};
+
+const normalizePdfLineText = (tokens: PdfTextToken[]) => {
+  const joined = tokens
+    .map((token) => token.text)
+    .filter((text) => text.length > 0)
+    .join(" ")
+    .replace(/\s+([,.;:!?])/g, "$1")
+    .replace(/\(\s+/g, "(")
+    .replace(/\s+\)/g, ")")
+    .trim();
+
+  return joined;
+};
+
+const extractPdfTextTokens = (textContent: PdfJsTextContent): PdfTextToken[] => {
+  return textContent.items
+    .filter(isPdfTextItem)
+    .map((item) => {
+      const text = normalizePdfText(item.str);
+      const x = typeof item.transform[4] === "number" ? item.transform[4] : 0;
+      const y = typeof item.transform[5] === "number" ? item.transform[5] : 0;
+      const height =
+        typeof item.height === "number" && Number.isFinite(item.height)
+          ? Math.max(1, item.height)
+          : Math.max(1, Math.abs(item.transform[3] ?? 0));
+
+      return {
+        text,
+        x,
+        y,
+        height,
+      } satisfies PdfTextToken;
+    })
+    .filter((token) => token.text.length > 0);
+};
+
+const buildPdfTextLines = (textContent: PdfJsTextContent): string[] => {
+  const tokens = extractPdfTextTokens(textContent);
+  const lineBuckets: PdfTextLineBucket[] = [];
+
+  tokens.forEach((token) => {
+    const nextThreshold = Math.max(2.5, token.height * 0.45);
+    const existingBucket = lineBuckets.find((lineBucket) => {
+      return Math.abs(lineBucket.y - token.y) <= Math.max(lineBucket.threshold, nextThreshold);
+    });
+
+    if (existingBucket) {
+      existingBucket.tokens.push(token);
+      existingBucket.y = (existingBucket.y * (existingBucket.tokens.length - 1) + token.y) /
+        existingBucket.tokens.length;
+      existingBucket.threshold = Math.max(existingBucket.threshold, nextThreshold);
+      return;
+    }
+
+    lineBuckets.push({
+      y: token.y,
+      threshold: nextThreshold,
+      tokens: [token],
+    });
+  });
+
+  return lineBuckets
+    .sort((left, right) => right.y - left.y)
+    .map((lineBucket) => {
+      const sortedTokens = [...lineBucket.tokens].sort((left, right) => left.x - right.x);
+      return normalizePdfLineText(sortedTokens);
+    })
+    .filter((line) => line.length > 0);
+};
+
+const buildMarkdownSection = ({
+  pageNumber,
+  lines,
+}: {
+  pageNumber: number;
+  lines: string[];
+}): PdfDocumentMarkdownSection => {
+  const fallbackTitle = `Page ${pageNumber}`;
+  const firstMeaningfulLine = lines.find((line) => line.length > 0) ?? fallbackTitle;
+  const title = truncateText(firstMeaningfulLine, OUTLINE_TITLE_MAX_LENGTH);
+  const bodyLines = lines.length > 0 ? lines : ["(テキストを抽出できませんでした)"];
+  const markdown = [`## ${fallbackTitle}`, "", ...bodyLines].join("\n");
+  const preview = truncateText(bodyLines.join(" "), MARKDOWN_PREVIEW_MAX_LENGTH);
+
+  return {
+    id: `pdf-markdown-page-${pageNumber}`,
+    pageNumber,
+    title,
+    markdown,
+    preview,
+  };
+};
+
+const buildDerivedOutlineItems = (
+  sections: PdfDocumentMarkdownSection[],
+): PdfDocumentOutlineItem[] => {
+  return sections.map((section) => {
+    return {
+      id: `pdf-outline-derived-${section.pageNumber}`,
+      title: section.title,
+      pageNumber: section.pageNumber,
+      depth: 0,
+      source: "derived",
+      children: [],
+    } satisfies PdfDocumentOutlineItem;
+  });
+};
+
+const isPdfDestinationReference = (
+  value: unknown,
+): value is PdfJsDestinationReference => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  return (
+    "num" in value &&
+    "gen" in value &&
+    typeof (value as { num?: unknown }).num === "number" &&
+    typeof (value as { gen?: unknown }).gen === "number"
+  );
+};
+
+const resolveOutlineDestinationPageNumber = async (
+  pdf: PdfJsDocument,
+  destination: PdfJsOutlineDestination,
+): Promise<number | null> => {
+  if (destination === null || destination === undefined) {
+    return null;
+  }
+
+  if (typeof destination === "string") {
+    if (typeof pdf.getDestination !== "function") {
+      return null;
+    }
+
+    const explicitDestination = await pdf.getDestination(destination);
+    return resolveOutlineDestinationPageNumber(pdf, explicitDestination);
+  }
+
+  if (!Array.isArray(destination) || destination.length === 0) {
+    return null;
+  }
+
+  const [firstDestinationToken] = destination as PdfJsExplicitDestination;
+
+  if (typeof firstDestinationToken === "number" && Number.isFinite(firstDestinationToken)) {
+    return clampPositiveInteger(firstDestinationToken + 1);
+  }
+
+  if (
+    isPdfDestinationReference(firstDestinationToken) &&
+    typeof pdf.getPageIndex === "function"
+  ) {
+    try {
+      const pageIndex = await pdf.getPageIndex(firstDestinationToken);
+      return clampPositiveInteger(pageIndex + 1);
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+};
+
+const buildOutlineTitle = (title: string | null | undefined, pageNumber: number | null) => {
+  const normalizedTitle = normalizePdfText(title ?? "");
+
+  if (normalizedTitle.length > 0) {
+    return truncateText(normalizedTitle, OUTLINE_TITLE_MAX_LENGTH);
+  }
+
+  if (typeof pageNumber === "number") {
+    return `Page ${pageNumber}`;
+  }
+
+  return "Untitled";
+};
+
+const mapPdfOutlineNodes = async ({
+  pdf,
+  nodes,
+  depth,
+  idPrefix,
+}: {
+  pdf: PdfJsDocument;
+  nodes: PdfJsOutlineNode[];
+  depth: number;
+  idPrefix: string;
+}): Promise<PdfDocumentOutlineItem[]> => {
+  const nextOutlineItems = await Promise.all(
+    nodes.map(async (node, index) => {
+      const pageNumber = await resolveOutlineDestinationPageNumber(pdf, node.dest ?? null);
+      const children = await mapPdfOutlineNodes({
+        pdf,
+        nodes: Array.isArray(node.items) ? node.items : [],
+        depth: depth + 1,
+        idPrefix: `${idPrefix}-${index}`,
+      });
+
+      return {
+        id: `${idPrefix}-${index}`,
+        title: buildOutlineTitle(node.title, pageNumber),
+        pageNumber,
+        depth,
+        source: "pdf-outline",
+        children,
+      } satisfies PdfDocumentOutlineItem;
+    }),
+  );
+
+  return nextOutlineItems;
+};
 
 export const usePdfDocument = ({
   source,
@@ -71,11 +348,15 @@ export const usePdfDocument = ({
   const onSourceLoadErrorRef = useRef(onSourceLoadError);
   const sourceMetaRef = useRef(sourceMeta);
   const pageCacheRef = useRef<PdfPageCache | null>(null);
-  const textContentPromiseCacheRef = useRef<
-    Map<number, Promise<PdfJsTextContent>>
-  >(new Map());
+  const textContentPromiseCacheRef = useRef<Map<number, Promise<PdfJsTextContent>>>(
+    new Map(),
+  );
   const pendingPageSizesRef = useRef<Map<number, PageSize>>(new Map());
   const pageSizeFlushRafRef = useRef<number | null>(null);
+  const outlinePromiseCacheRef = useRef<Promise<PdfDocumentOutlineItem[]> | null>(
+    null,
+  );
+  const markdownPromiseCacheRef = useRef<Promise<PdfDocumentMarkdown> | null>(null);
 
   const [doc, setDoc] = useState<PdfJsDocument | null>(null);
   const [documentKey, setDocumentKey] = useState("unloaded");
@@ -129,25 +410,25 @@ export const usePdfDocument = ({
     const nextEntries = Array.from(pendingPageSizesRef.current.entries());
     pendingPageSizesRef.current.clear();
 
-    setPageSizes((previous) => {
-      let changed = false;
-      const nextState = { ...previous };
+    setPageSizes((previousPageSizes) => {
+      let hasChanged = false;
+      const nextPageSizes = { ...previousPageSizes };
 
       nextEntries.forEach(([pageNumber, size]) => {
-        const existing = nextState[pageNumber];
+        const currentSize = nextPageSizes[pageNumber];
         if (
-          existing &&
-          existing.width === size.width &&
-          existing.height === size.height
+          currentSize &&
+          currentSize.width === size.width &&
+          currentSize.height === size.height
         ) {
           return;
         }
 
-        nextState[pageNumber] = size;
-        changed = true;
+        nextPageSizes[pageNumber] = size;
+        hasChanged = true;
       });
 
-      return changed ? nextState : previous;
+      return hasChanged ? nextPageSizes : previousPageSizes;
     });
   }, [cancelScheduledPageSizeFlush]);
 
@@ -166,6 +447,8 @@ export const usePdfDocument = ({
     pageCacheRef.current?.clear();
     pageCacheRef.current = null;
     textContentPromiseCacheRef.current.clear();
+    outlinePromiseCacheRef.current = null;
+    markdownPromiseCacheRef.current = null;
     pendingPageSizesRef.current.clear();
     cancelScheduledPageSizeFlush();
   }, [cancelScheduledPageSizeFlush]);
@@ -177,22 +460,23 @@ export const usePdfDocument = ({
         return Promise.reject(new Error("PDF document is not loaded"));
       }
 
-      return pageCache.acquirePage(pageNumber).then(({ page, release }) => ({
-        page,
-        release,
-      }));
+      return pageCache.acquirePage(pageNumber).then(({ page, release }) => {
+        return {
+          page,
+          release,
+        } satisfies PdfJsPageLease;
+      });
     },
     [],
   );
 
   const getPageTextContent = useCallback(
     (pageNumber: number): Promise<PdfJsTextContent> => {
-      const safePageNumber = Math.max(1, Math.floor(pageNumber));
-      const existingPromise =
-        textContentPromiseCacheRef.current.get(safePageNumber);
+      const safePageNumber = clampPositiveInteger(pageNumber);
+      const cachedPromise = textContentPromiseCacheRef.current.get(safePageNumber);
 
-      if (existingPromise) {
-        return existingPromise;
+      if (cachedPromise) {
+        return cachedPromise;
       }
 
       const nextPromise = acquirePage(safePageNumber)
@@ -214,6 +498,83 @@ export const usePdfDocument = ({
     [acquirePage],
   );
 
+  const getDocumentMarkdown = useCallback(async (): Promise<PdfDocumentMarkdown> => {
+    const cachedPromise = markdownPromiseCacheRef.current;
+    if (cachedPromise) {
+      return cachedPromise;
+    }
+
+    const nextPromise = (async () => {
+      const pdf = docRef.current;
+      if (!pdf) {
+        throw new Error("PDF document is not loaded");
+      }
+
+      const sections: PdfDocumentMarkdownSection[] = [];
+
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const textContent = await getPageTextContent(pageNumber);
+        const textLines = buildPdfTextLines(textContent);
+        sections.push(
+          buildMarkdownSection({
+            pageNumber,
+            lines: textLines,
+          }),
+        );
+      }
+
+      return {
+        content: sections.map((section) => section.markdown).join("\n\n"),
+        sections,
+      } satisfies PdfDocumentMarkdown;
+    })().catch((errorValue) => {
+      markdownPromiseCacheRef.current = null;
+      throw errorValue;
+    });
+
+    markdownPromiseCacheRef.current = nextPromise;
+    return nextPromise;
+  }, [getPageTextContent]);
+
+  const getDocumentOutline = useCallback(async (): Promise<PdfDocumentOutlineItem[]> => {
+    const cachedPromise = outlinePromiseCacheRef.current;
+    if (cachedPromise) {
+      return cachedPromise;
+    }
+
+    const nextPromise = (async () => {
+      const pdf = docRef.current;
+      if (!pdf) {
+        throw new Error("PDF document is not loaded");
+      }
+
+      if (typeof pdf.getOutline === "function") {
+        const rawOutlineItems = await pdf.getOutline();
+        if (Array.isArray(rawOutlineItems) && rawOutlineItems.length > 0) {
+          const mappedOutlineItems = await mapPdfOutlineNodes({
+            pdf,
+            nodes: rawOutlineItems,
+            depth: 0,
+            idPrefix: "pdf-outline",
+          });
+
+          if (mappedOutlineItems.length > 0) {
+            return mappedOutlineItems;
+          }
+        }
+      }
+
+      const markdownDocument = await getDocumentMarkdown();
+      return buildDerivedOutlineItems(markdownDocument.sections);
+    })().catch((errorValue) => {
+      outlinePromiseCacheRef.current = null;
+      throw errorValue;
+    });
+
+    outlinePromiseCacheRef.current = nextPromise;
+    return nextPromise;
+  }, [getDocumentMarkdown]);
+
   const prefetchPageResources = useCallback(
     (pageNumbers: number[], options?: PrefetchPageResourceOptions) => {
       const pdf = docRef.current;
@@ -226,7 +587,7 @@ export const usePdfDocument = ({
         new Set(
           pageNumbers
             .filter((pageNumber) => Number.isFinite(pageNumber))
-            .map((pageNumber) => Math.max(1, Math.floor(pageNumber))),
+            .map((pageNumber) => clampPositiveInteger(pageNumber)),
         ),
       ).filter((pageNumber) => pageNumber <= pdf.numPages);
 
@@ -243,7 +604,7 @@ export const usePdfDocument = ({
 
   const setPageSize = useCallback(
     (pageNumber: number, size: PageSize) => {
-      const safePageNumber = Math.max(1, Math.floor(pageNumber));
+      const safePageNumber = clampPositiveInteger(pageNumber);
       const pendingSize = pendingPageSizesRef.current.get(safePageNumber);
       if (
         pendingSize &&
@@ -314,48 +675,47 @@ export const usePdfDocument = ({
           return;
         }
 
-        const fallback = { width: 1, height: 1 };
-        pendingPageSizesRef.current.set(1, fallback);
+        const fallbackSize = { width: 1, height: 1 } satisfies PageSize;
+        pendingPageSizesRef.current.set(1, fallbackSize);
         flushPendingPageSizes();
-        onFirstPageSizeRef.current?.(fallback);
+        onFirstPageSizeRef.current?.(fallbackSize);
       }
     };
 
-    const buildGetDocumentParams =
-      async (): Promise<PdfJsGetDocumentParams> => {
-        const params: PdfJsGetDocumentParams = {
-          enableXfa,
-          useSystemFonts,
-          cMapUrl,
-          cMapPacked,
-          standardFontDataUrl,
-          disableFontFace,
-          verbosity,
-        };
-
-        if (hasData && sourceData) {
-          params.data = sourceData;
-          return params;
-        }
-
-        if (!hasUrl) {
-          throw new Error("missing pdf source");
-        }
-
-        if (sourceUrl.startsWith("blob:")) {
-          const response = await fetch(sourceUrl);
-          if (!response.ok) {
-            throw new Error(`blob fetch failed: ${response.status}`);
-          }
-
-          const buffer = await response.arrayBuffer();
-          params.data = new Uint8Array(buffer);
-          return params;
-        }
-
-        params.url = sourceUrl;
-        return params;
+    const buildGetDocumentParams = async (): Promise<PdfJsGetDocumentParams> => {
+      const params: PdfJsGetDocumentParams = {
+        enableXfa,
+        useSystemFonts,
+        cMapUrl,
+        cMapPacked,
+        standardFontDataUrl,
+        disableFontFace,
+        verbosity,
       };
+
+      if (hasData && sourceData) {
+        params.data = sourceData;
+        return params;
+      }
+
+      if (!hasUrl) {
+        throw new Error("missing pdf source");
+      }
+
+      if (sourceUrl.startsWith("blob:")) {
+        const response = await fetch(sourceUrl);
+        if (!response.ok) {
+          throw new Error(`blob fetch failed: ${response.status}`);
+        }
+
+        const buffer = await response.arrayBuffer();
+        params.data = new Uint8Array(buffer);
+        return params;
+      }
+
+      params.url = sourceUrl;
+      return params;
+    };
 
     const run = async () => {
       setLoading(true);
@@ -408,10 +768,11 @@ export const usePdfDocument = ({
           },
         });
         textContentPromiseCacheRef.current.clear();
+        outlinePromiseCacheRef.current = null;
+        markdownPromiseCacheRef.current = null;
         pendingPageSizesRef.current.clear();
 
         const pageCount = Math.max(0, pdf.numPages || 0);
-
         setDoc(pdf);
         setDocumentKey(nextDocumentKey);
         setNumPages(pageCount);
@@ -476,7 +837,6 @@ export const usePdfDocument = ({
 
     return () => {
       cancelled = true;
-
       docRef.current = null;
       documentKeyRef.current = null;
       resetResourceCaches();
@@ -515,5 +875,7 @@ export const usePdfDocument = ({
     acquirePage,
     getPageTextContent,
     prefetchPageResources,
+    getDocumentOutline,
+    getDocumentMarkdown,
   };
 };

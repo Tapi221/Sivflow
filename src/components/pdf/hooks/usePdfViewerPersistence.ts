@@ -1,20 +1,6 @@
 /**
- * PDF ビューアの表示状態（currentPage / scale / fitMode / pageLayoutMode）を管理するフック。
- *
- * === 安定性保証 ===
- * ✅ 初期復元と永続保存の分離
- *    - ハイドレーション中は onDocumentUpdate を呼ばない
- *    - Promise.resolve() で state 確定を待機してから hydration 完了
- *
- * ✅ debounce の安全性
- *    - unmount 時に必ず cleanup（StrictMode 対応）
- *    - doc.id 変更時に古い debounce をクリア
- *    - 800ms debounce で不要な書き込みを削減
- *
- * ✅ ドキュメント切替時の分離
- *    - sessionStorage キーは docId 単位（`pdf_viewer_${docId}`）
- *    - docId 変更時に isHydratingRef をリセット
- *    - PDF A の viewerState が PDF B に適用されない
+ * PDF ビューアの表示状態（currentPage / scale / fitMode / pageLayoutMode）と
+ * サイドパネル状態（tab / thumbnailOrder / bookmarkPages）を管理するフック。
  */
 import {
   clampScale,
@@ -24,13 +10,15 @@ import {
   VIEWER_STATE_DEBOUNCE_MS,
   ZOOM_STEP,
 } from "@/components/pdf/pdfViewerStateStorage";
-import type { PdfPageLayoutMode, PdfViewerState } from "@/types";
+import type { PdfPageLayoutMode, PdfSidePanelTab, PdfViewerState } from "@/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UsePdfViewerPersistenceOptions {
   docId: string;
   viewerState?: PdfViewerState | null;
   bookmarkPages?: number[];
+  sidePanelTab?: PdfSidePanelTab;
+  thumbnailOrder?: number[];
   getFitScale: (pageLayoutMode: PdfPageLayoutMode) => number;
   onDocumentUpdate?: (updates: {
     viewerState: PdfViewerState;
@@ -77,10 +65,43 @@ const sanitizeBookmarkPages = (value: unknown): number[] => {
   ).sort((left, right) => left - right);
 };
 
+const sanitizeSidePanelTab = (value: unknown): PdfSidePanelTab => {
+  return value === "markdown" || value === "outline" || value === "thumbnails"
+    ? value
+    : "thumbnails";
+};
+
+const sanitizeThumbnailOrder = (value: unknown): number[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const seenPageNumbers = new Set<number>();
+  const nextThumbnailOrder: number[] = [];
+
+  value.forEach((pageNumber) => {
+    if (typeof pageNumber !== "number" || !Number.isFinite(pageNumber)) {
+      return;
+    }
+
+    const normalizedPageNumber = Math.max(1, Math.trunc(pageNumber));
+    if (seenPageNumbers.has(normalizedPageNumber)) {
+      return;
+    }
+
+    seenPageNumbers.add(normalizedPageNumber);
+    nextThumbnailOrder.push(normalizedPageNumber);
+  });
+
+  return nextThumbnailOrder;
+};
+
 export const usePdfViewerPersistence = ({
   docId,
   viewerState,
   bookmarkPages,
+  sidePanelTab,
+  thumbnailOrder,
   getFitScale,
   onDocumentUpdate,
 }: UsePdfViewerPersistenceOptions) => {
@@ -92,78 +113,61 @@ export const usePdfViewerPersistence = ({
 
   const isHydratingRef = useRef(false);
   const initializedRef = useRef(false);
-
-  const lastDocIdRef = useRef<string | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastDocIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (lastDocIdRef.current !== docId && lastDocIdRef.current !== null) {
-      console.warn(
-        "[usePdfViewerPersistence] Document changed, clearing debounce:",
-        {
-          from: lastDocIdRef.current,
-          to: docId,
-        },
-      );
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
         debounceTimerRef.current = null;
       }
     }
+
     lastDocIdRef.current = docId;
     isHydratingRef.current = false;
     initializedRef.current = false;
   }, [docId]);
 
   useEffect(() => {
-    if (initializedRef.current) return;
-    initializedRef.current = true;
+    if (initializedRef.current) {
+      return;
+    }
 
+    initializedRef.current = true;
     isHydratingRef.current = true;
 
-    let restoredState: PdfViewerState | null = null;
-
-    restoredState = getViewerStateFromSession(docId);
+    let restoredState: PdfViewerState | null = getViewerStateFromSession(docId);
 
     if (!restoredState && viewerState) {
       restoredState = viewerState;
     }
 
     if (restoredState) {
-      queueMicrotask(() =>
-        setCurrentPage(sanitizeCurrentPage(restoredState.currentPage)),
-      );
-
-      queueMicrotask(() => setScale(sanitizeScale(restoredState.scale)));
-
-      if (
-        restoredState.fitMode === "width" ||
-        restoredState.fitMode === "manual"
-      ) {
-        queueMicrotask(() => setFitMode(restoredState.fitMode ?? "width"));
-      }
-      if (
-        restoredState.pageLayoutMode === "single" ||
-        restoredState.pageLayoutMode === "double"
-      ) {
-        queueMicrotask(() =>
-          setPageLayoutMode(restoredState.pageLayoutMode ?? "single"),
+      queueMicrotask(() => {
+        setCurrentPage(sanitizeCurrentPage(restoredState?.currentPage));
+        setScale(sanitizeScale(restoredState?.scale));
+        setFitMode(
+          restoredState?.fitMode === "manual" || restoredState?.fitMode === "width"
+            ? restoredState.fitMode
+            : "width",
         );
-      }
+        setPageLayoutMode(
+          restoredState?.pageLayoutMode === "double" ||
+            restoredState?.pageLayoutMode === "single"
+            ? restoredState.pageLayoutMode
+            : "single",
+        );
+      });
     }
 
     Promise.resolve().then(() => {
       isHydratingRef.current = false;
-      console.debug(
-        "[usePdfViewerPersistence] Hydration complete for doc:",
-        docId,
-      );
     });
   }, [docId, viewerState]);
 
   useEffect(() => {
     if (isHydratingRef.current) {
-      console.debug("[usePdfViewerPersistence] Skipping save during hydration");
       return;
     }
 
@@ -173,26 +177,30 @@ export const usePdfViewerPersistence = ({
 
     debounceTimerRef.current = setTimeout(() => {
       const sanitizedBookmarkPages = sanitizeBookmarkPages(bookmarkPages);
-      const newViewerState: PdfViewerState = {
+      const sanitizedThumbnailOrder = sanitizeThumbnailOrder(thumbnailOrder);
+      const sanitizedSidePanelTab = sanitizeSidePanelTab(sidePanelTab);
+      const nextViewerState: PdfViewerState = {
         currentPage: sanitizeCurrentPage(currentPage),
-        scale: parseFloat(sanitizeScale(scale).toFixed(3)),
+        scale: Number(sanitizeScale(scale).toFixed(3)),
         fitMode,
         pageLayoutMode,
         ...(sanitizedBookmarkPages.length > 0
           ? { bookmarkPages: sanitizedBookmarkPages }
           : {}),
+        ...(sanitizedThumbnailOrder.length > 0
+          ? { thumbnailOrder: sanitizedThumbnailOrder }
+          : {}),
+        sidePanelTab: sanitizedSidePanelTab,
       };
 
-      saveViewerStateToSession(docId, newViewerState);
+      saveViewerStateToSession(docId, nextViewerState);
 
       if (onDocumentUpdate) {
-        onDocumentUpdate({ viewerState: newViewerState }).catch((err) => {
+        onDocumentUpdate({ viewerState: nextViewerState }).catch((errorValue) => {
           console.warn(
-            "[usePdfViewerPersistence] Failed to save viewer state:",
-            err,
-            {
-              docId,
-            },
+            "[usePdfViewerPersistence] Failed to save viewer state",
+            errorValue,
+            { docId },
           );
         });
       }
@@ -209,38 +217,42 @@ export const usePdfViewerPersistence = ({
   }, [
     bookmarkPages,
     currentPage,
-    scale,
-    fitMode,
-    pageLayoutMode,
     docId,
+    fitMode,
     onDocumentUpdate,
+    pageLayoutMode,
+    scale,
+    sidePanelTab,
+    thumbnailOrder,
   ]);
 
   useEffect(() => {
-    if (fitMode !== "width") return;
+    if (fitMode !== "width") {
+      return;
+    }
 
     const nextFitScale = sanitizeFitScale(getFitScale(pageLayoutMode));
-    queueMicrotask(() =>
-      setScale((previousScale) =>
-        Math.abs(previousScale - nextFitScale) < EPSILON
+    queueMicrotask(() => {
+      setScale((previousScale) => {
+        return Math.abs(previousScale - nextFitScale) < EPSILON
           ? previousScale
-          : nextFitScale,
-      ),
-    );
+          : nextFitScale;
+      });
+    });
   }, [fitMode, getFitScale, pageLayoutMode]);
 
   const handleZoomOut = useCallback(() => {
     setFitMode("manual");
-    setScale((previousScale) =>
-      clampScale(parseFloat((previousScale - ZOOM_STEP).toFixed(2))),
-    );
+    setScale((previousScale) => {
+      return clampScale(Number((previousScale - ZOOM_STEP).toFixed(2)));
+    });
   }, []);
 
   const handleZoomIn = useCallback(() => {
     setFitMode("manual");
-    setScale((previousScale) =>
-      clampScale(parseFloat((previousScale + ZOOM_STEP).toFixed(2))),
-    );
+    setScale((previousScale) => {
+      return clampScale(Number((previousScale + ZOOM_STEP).toFixed(2)));
+    });
   }, []);
 
   const handleFitWidth = useCallback(() => {
@@ -249,22 +261,26 @@ export const usePdfViewerPersistence = ({
   }, [getFitScale, pageLayoutMode]);
 
   const handleViewerScaleChange = useCallback((nextScale: number) => {
-    if (!Number.isFinite(nextScale)) return;
-    const clamped = clampScale(nextScale);
-    const rounded = parseFloat(clamped.toFixed(3));
+    if (!Number.isFinite(nextScale)) {
+      return;
+    }
+
+    const roundedScale = Number(clampScale(nextScale).toFixed(3));
     setFitMode("manual");
-    setScale((previousScale) =>
-      Math.abs(previousScale - rounded) < EPSILON ? previousScale : rounded,
-    );
+    setScale((previousScale) => {
+      return Math.abs(previousScale - roundedScale) < EPSILON
+        ? previousScale
+        : roundedScale;
+    });
   }, []);
 
   const handlePageLayoutModeChange = useCallback(
     (nextPageLayoutMode: PdfPageLayoutMode) => {
-      setPageLayoutMode((previousPageLayoutMode) =>
-        previousPageLayoutMode === nextPageLayoutMode
+      setPageLayoutMode((previousPageLayoutMode) => {
+        return previousPageLayoutMode === nextPageLayoutMode
           ? previousPageLayoutMode
-          : nextPageLayoutMode,
-      );
+          : nextPageLayoutMode;
+      });
     },
     [],
   );

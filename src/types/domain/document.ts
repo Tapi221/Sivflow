@@ -3,6 +3,7 @@ import type { BaseEntity } from "./base";
 
 export type DocumentKind = "pdf";
 export type PdfPageLayoutMode = "single" | "double";
+export type PdfSidePanelTab = "thumbnails" | "outline" | "markdown";
 
 export interface PdfViewerState {
   currentPage?: number;
@@ -10,6 +11,8 @@ export interface PdfViewerState {
   fitMode?: "width" | "manual";
   pageLayoutMode?: PdfPageLayoutMode;
   bookmarkPages?: number[];
+  sidePanelTab?: PdfSidePanelTab;
+  thumbnailOrder?: number[];
 }
 
 export interface DocumentItem extends BaseEntity {
