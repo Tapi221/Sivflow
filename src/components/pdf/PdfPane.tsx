@@ -1,8 +1,13 @@
+
 import type { BlobUrl } from "@/types/core/branded";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import platform from "@/platform";
-import type { PdfPageLayoutMode, PdfSidePanelTab, PdfViewerState } from "@/types";
+import type {
+  PdfPageLayoutMode,
+  PdfSidePanelTab,
+  PdfViewerState,
+} from "@/types";
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PdfOverlayToolbar } from "./PdfOverlayToolbar";
@@ -10,11 +15,9 @@ import { PdfPaneToolbar } from "./PdfPaneToolbar";
 import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
 import { usePdfContainerWidth } from "./hooks/usePdfContainerWidth";
-import { usePdfDocument } from "./hooks/usePdfDocument";
 import { usePdfSourceResolver } from "./hooks/usePdfSourceResolver";
 import { defaultPdfViewerOptions } from "./defaultPdfViewerOptions";
 import { usePdfViewerPersistence } from "./hooks/usePdfViewerPersistence";
-import { PdfThumbnailPanel } from "./PdfThumbnailPanel";
 import {
   FIT_MAX_SCALE,
   FIT_MIN_SCALE,
@@ -22,6 +25,8 @@ import {
   clampScale,
   getViewerStateFromSession,
 } from "./pdfViewerStateStorage";
+import { usePdfDocument } from "./hooks/usePdfDocument";
+import { PdfThumbnailPanel } from "./PdfThumbnailPanel";
 
 interface PdfPaneDoc {
   id: string;
@@ -145,13 +150,19 @@ const sanitizeSidePanelTab = (value: unknown): PdfSidePanelTab => {
     : "thumbnails";
 };
 
-const sanitizeThumbnailOrder = (value: unknown): number[] => {
-  if (!Array.isArray(value)) {
+const normalizeThumbnailOrder = (value: unknown, numPages: number): number[] => {
+  const defaultOrder = Array.from({ length: numPages }, (_, index) => index + 1);
+
+  if (numPages <= 0) {
     return [];
   }
 
-  const seenPageNumbers = new Set<number>();
-  const nextThumbnailOrder: number[] = [];
+  if (!Array.isArray(value) || value.length === 0) {
+    return defaultOrder;
+  }
+
+  const seen = new Set<number>();
+  const nextOrder: number[] = [];
 
   value.forEach((pageNumber) => {
     if (typeof pageNumber !== "number" || !Number.isFinite(pageNumber)) {
@@ -159,40 +170,24 @@ const sanitizeThumbnailOrder = (value: unknown): number[] => {
     }
 
     const normalizedPageNumber = Math.max(1, Math.trunc(pageNumber));
-    if (seenPageNumbers.has(normalizedPageNumber)) {
+    if (normalizedPageNumber > numPages || seen.has(normalizedPageNumber)) {
       return;
     }
 
-    seenPageNumbers.add(normalizedPageNumber);
-    nextThumbnailOrder.push(normalizedPageNumber);
+    seen.add(normalizedPageNumber);
+    nextOrder.push(normalizedPageNumber);
   });
 
-  return nextThumbnailOrder;
-};
-
-const resolveThumbnailOrder = (numPages: number, value: unknown): number[] => {
-  if (!Number.isFinite(numPages) || numPages <= 0) {
-    return [];
-  }
-
-  const sanitizedThumbnailOrder = sanitizeThumbnailOrder(value).filter(
-    (pageNumber) => pageNumber <= numPages,
-  );
-  const seenPageNumbers = new Set(sanitizedThumbnailOrder);
-  const nextThumbnailOrder = [...sanitizedThumbnailOrder];
-
-  for (let pageNumber = 1; pageNumber <= numPages; pageNumber += 1) {
-    if (seenPageNumbers.has(pageNumber)) {
-      continue;
+  defaultOrder.forEach((pageNumber) => {
+    if (!seen.has(pageNumber)) {
+      nextOrder.push(pageNumber);
     }
+  });
 
-    nextThumbnailOrder.push(pageNumber);
-  }
-
-  return nextThumbnailOrder;
+  return nextOrder;
 };
 
-const arePageNumberArraysEqual = (left: number[], right: number[]) => {
+const areNumberArraysEqual = (left: number[], right: number[]) => {
   if (left === right) {
     return true;
   }
@@ -201,18 +196,11 @@ const arePageNumberArraysEqual = (left: number[], right: number[]) => {
     return false;
   }
 
-  return left.every((pageNumber, index) => pageNumber === right[index]);
+  return left.every((value, index) => value === right[index]);
 };
 
-const readPersistedViewerState = (
-  docId: string,
-  fallbackViewerState?: PdfViewerState | null,
-): PdfViewerState | null => {
-  if (typeof window === "undefined") {
-    return fallbackViewerState ?? null;
-  }
-
-  return getViewerStateFromSession(docId) ?? fallbackViewerState ?? null;
+const readInitialViewerState = (docId: string, viewerState?: PdfViewerState | null) => {
+  return getViewerStateFromSession(docId) ?? viewerState ?? null;
 };
 
 export const PdfPane = ({
@@ -225,9 +213,10 @@ export const PdfPane = ({
   const viewerRef = useRef<PdfViewerHandle>(null);
   const previousPageLayoutModeRef = useRef<PdfPageLayoutMode | null>(null);
 
-  const initialPersistedViewerState = useMemo(() => {
-    return readPersistedViewerState(doc.id, doc.viewerState);
-  }, [doc.id, doc.viewerState]);
+  const initialViewerState = useMemo(
+    () => readInitialViewerState(doc.id, doc.viewerState),
+    [doc.id, doc.viewerState],
+  );
 
   const [basePageWidth, setBasePageWidth] = useState<number | null>(null);
   const [searchInputValue, setSearchInputValue] = useState("");
@@ -245,16 +234,21 @@ export const PdfPane = ({
     useState(true);
   const [isMobileThumbnailPanelOpen, setIsMobileThumbnailPanelOpen] =
     useState(false);
-  const [pendingPanelPage, setPendingPanelPage] = useState<number | null>(null);
+  const [pendingThumbnailPage, setPendingThumbnailPage] = useState<number | null>(
+    null,
+  );
   const [bookmarkPages, setBookmarkPages] = useState<number[]>(() => {
-    return sanitizeBookmarkPages(initialPersistedViewerState?.bookmarkPages);
+    return sanitizeBookmarkPages(initialViewerState?.bookmarkPages);
   });
-  const [selectedSidePanelTab, setSelectedSidePanelTab] =
-    useState<PdfSidePanelTab>(() => {
-      return sanitizeSidePanelTab(initialPersistedViewerState?.sidePanelTab);
-    });
+  const [sidePanelTab, setSidePanelTab] = useState<PdfSidePanelTab>(() => {
+    return sanitizeSidePanelTab(initialViewerState?.sidePanelTab);
+  });
   const [thumbnailOrder, setThumbnailOrder] = useState<number[]>(() => {
-    return [];
+    return Array.isArray(initialViewerState?.thumbnailOrder)
+      ? initialViewerState.thumbnailOrder.filter(
+          (pageNumber): pageNumber is number => typeof pageNumber === "number",
+        )
+      : [];
   });
 
   const { containerRef, containerWidth } = usePdfContainerWidth();
@@ -300,7 +294,7 @@ export const PdfPane = ({
     docId: doc.id,
     viewerState: doc.viewerState,
     bookmarkPages,
-    sidePanelTab: selectedSidePanelTab,
+    sidePanelTab,
     thumbnailOrder,
     getFitScale,
     onDocumentUpdate: onDocumentUpdate
@@ -322,9 +316,9 @@ export const PdfPane = ({
   const handleFirstPageSize = useCallback(
     (size: { width: number; height: number } | null) => {
       const nextWidth = size?.width ?? null;
-      setBasePageWidth((previousWidth) => {
-        return previousWidth === nextWidth ? previousWidth : nextWidth;
-      });
+      setBasePageWidth((previousWidth) =>
+        previousWidth === nextWidth ? previousWidth : nextWidth,
+      );
     },
     [],
   );
@@ -334,35 +328,37 @@ export const PdfPane = ({
     viewerOptions: resolvedViewerOptions,
     sourceMeta,
     onNumPages: () => {
-      // controller.numPages を直接参照する。
+      // no-op
     },
     onFirstPageSize: handleFirstPageSize,
     onSourceLoadError: handleSourceLoadError,
   });
 
   const numPages = documentController.numPages;
+  const normalizedThumbnailOrder = useMemo(
+    () => normalizeThumbnailOrder(thumbnailOrder, numPages),
+    [numPages, thumbnailOrder],
+  );
   const zoomPercent = useMemo(() => scaleToZoomUiPercent(scale), [scale]);
 
   const pageStep = pageLayoutMode === "double" ? 2 : 1;
-  const alignedCurrentPage = useMemo(() => {
-    return normalizePageForLayout(currentPage, pageLayoutMode);
-  }, [currentPage, pageLayoutMode]);
-  const displayedPanelPage = useMemo(() => {
-    if (pendingPanelPage === null) {
+  const alignedCurrentPage = useMemo(
+    () => normalizePageForLayout(currentPage, pageLayoutMode),
+    [currentPage, pageLayoutMode],
+  );
+  const displayedThumbnailPage = useMemo(() => {
+    if (pendingThumbnailPage === null) {
       return alignedCurrentPage;
     }
 
-    return normalizePageForLayout(pendingPanelPage, pageLayoutMode);
-  }, [alignedCurrentPage, pageLayoutMode, pendingPanelPage]);
+    return normalizePageForLayout(pendingThumbnailPage, pageLayoutMode);
+  }, [alignedCurrentPage, pageLayoutMode, pendingThumbnailPage]);
   const isThumbnailPanelOpen = isMobileViewport
     ? isMobileThumbnailPanelOpen
     : isDesktopThumbnailPanelOpen;
   const bookmarkedPageNumberSet = useMemo(() => {
     return new Set(bookmarkPages);
   }, [bookmarkPages]);
-  const orderedThumbnailPageNumbers = useMemo(() => {
-    return resolveThumbnailOrder(numPages, thumbnailOrder);
-  }, [numPages, thumbnailOrder]);
 
   const handleThumbnailPanelOpenChange = useCallback(
     (nextOpen: boolean) => {
@@ -394,9 +390,9 @@ export const PdfPane = ({
 
     const mediaQueryList = window.matchMedia(MOBILE_PANEL_MEDIA_QUERY);
     const updateViewport = (matches: boolean) => {
-      setIsMobileViewport((previousMatches) => {
-        return previousMatches === matches ? previousMatches : matches;
-      });
+      setIsMobileViewport((previousMatches) =>
+        previousMatches === matches ? previousMatches : matches,
+      );
     };
 
     updateViewport(mediaQueryList.matches);
@@ -419,45 +415,52 @@ export const PdfPane = ({
   }, []);
 
   useEffect(() => {
-    if (pendingPanelPage === null) {
-      return;
-    }
+    const restoredViewerState = readInitialViewerState(doc.id, doc.viewerState);
 
-    const normalizedPendingPage = normalizePageForLayout(
-      pendingPanelPage,
-      pageLayoutMode,
+    setBookmarkPages(
+      sanitizeBookmarkPages(restoredViewerState?.bookmarkPages),
     );
-
-    if (normalizedPendingPage === alignedCurrentPage) {
-      setPendingPanelPage(null);
-    }
-  }, [alignedCurrentPage, pageLayoutMode, pendingPanelPage]);
-
-  useEffect(() => {
-    const persistedViewerState = readPersistedViewerState(doc.id, doc.viewerState);
-    setPendingPanelPage(null);
-    setBookmarkPages(sanitizeBookmarkPages(persistedViewerState?.bookmarkPages));
-    setSelectedSidePanelTab(sanitizeSidePanelTab(persistedViewerState?.sidePanelTab));
-    setThumbnailOrder([]);
+    setSidePanelTab(sanitizeSidePanelTab(restoredViewerState?.sidePanelTab));
+    setThumbnailOrder(
+      Array.isArray(restoredViewerState?.thumbnailOrder)
+        ? restoredViewerState.thumbnailOrder.filter(
+            (pageNumber): pageNumber is number => typeof pageNumber === "number",
+          )
+        : [],
+    );
+    setPendingThumbnailPage(null);
   }, [doc.id, doc.viewerState]);
 
   useEffect(() => {
-    const persistedViewerState = readPersistedViewerState(doc.id, doc.viewerState);
-    setThumbnailOrder((previousOrder) => {
-      const resolvedPreviousOrder = resolveThumbnailOrder(numPages, previousOrder);
-      const resolvedPersistedOrder = resolveThumbnailOrder(
-        numPages,
-        persistedViewerState?.thumbnailOrder,
-      );
-      const nextOrder = resolvedPreviousOrder.length > 0
-        ? resolvedPreviousOrder
-        : resolvedPersistedOrder;
+    if (pendingThumbnailPage === null) {
+      return;
+    }
 
-      return arePageNumberArraysEqual(previousOrder, nextOrder)
-        ? previousOrder
-        : nextOrder;
+    const normalizedPendingThumbnailPage = normalizePageForLayout(
+      pendingThumbnailPage,
+      pageLayoutMode,
+    );
+
+    if (normalizedPendingThumbnailPage === alignedCurrentPage) {
+      setPendingThumbnailPage(null);
+    }
+  }, [alignedCurrentPage, pageLayoutMode, pendingThumbnailPage]);
+
+  useEffect(() => {
+    if (!numPages) {
+      return;
+    }
+
+    const nextNormalizedOrder = normalizeThumbnailOrder(thumbnailOrder, numPages);
+
+    setThumbnailOrder((previousOrder) => {
+      if (areNumberArraysEqual(previousOrder, nextNormalizedOrder)) {
+        return previousOrder;
+      }
+
+      return nextNormalizedOrder;
     });
-  }, [doc.id, doc.viewerState, numPages]);
+  }, [numPages, thumbnailOrder]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -531,7 +534,7 @@ export const PdfPane = ({
     [numPages, pageLayoutMode],
   );
 
-  const handleSelectPanelPage = useCallback(
+  const handleSelectThumbnailPage = useCallback(
     (nextPage: number) => {
       if (!Number.isFinite(nextPage) || numPages <= 0) {
         return;
@@ -543,7 +546,7 @@ export const PdfPane = ({
       );
       const targetPage = normalizePageForLayout(normalizedPage, pageLayoutMode);
 
-      setPendingPanelPage(targetPage);
+      setPendingThumbnailPage(targetPage);
       handleCommitPage(targetPage);
 
       if (isMobileViewport) {
@@ -562,27 +565,23 @@ export const PdfPane = ({
 
     setBookmarkPages((previousBookmarkPages) => {
       const hasBookmark = previousBookmarkPages.includes(normalizedPageNumber);
-      return hasBookmark
-        ? previousBookmarkPages.filter(
-            (previousPageNumber) => previousPageNumber !== normalizedPageNumber,
-          )
-        : [...previousBookmarkPages, normalizedPageNumber].sort(
-            (left, right) => left - right,
-          );
+
+      if (hasBookmark) {
+        return previousBookmarkPages.filter(
+          (previousPageNumber) => previousPageNumber !== normalizedPageNumber,
+        );
+      }
+
+      return [...previousBookmarkPages, normalizedPageNumber].sort(
+        (left, right) => left - right,
+      );
     });
   }, []);
 
-  const handleThumbnailOrderChange = useCallback(
-    (pageNumbers: number[]) => {
-      setThumbnailOrder(resolveThumbnailOrder(numPages, pageNumbers));
-    },
-    [numPages],
-  );
-
   const commitSearchQuery = useCallback(() => {
-    setSearchQuery((previousQuery) => {
-      return previousQuery === searchInputValue ? previousQuery : searchInputValue;
-    });
+    setSearchQuery((previousQuery) =>
+      previousQuery === searchInputValue ? previousQuery : searchInputValue,
+    );
   }, [searchInputValue]);
 
   const handlePrevMatch = useCallback(() => {
@@ -691,18 +690,18 @@ export const PdfPane = ({
           <div className="relative flex h-full min-h-0 min-w-0 w-full overflow-hidden">
             <PdfThumbnailPanel
               documentController={documentController}
-              currentPage={displayedPanelPage}
+              currentPage={displayedThumbnailPage}
               pageLayoutMode={pageLayoutMode}
               bookmarkedPageNumbers={bookmarkedPageNumberSet}
-              orderedThumbnailPageNumbers={orderedThumbnailPageNumbers}
-              selectedTab={selectedSidePanelTab}
+              selectedTab={sidePanelTab}
+              orderedThumbnailPageNumbers={normalizedThumbnailOrder}
               isMobileViewport={isMobileViewport}
               isOpen={isThumbnailPanelOpen}
               onOpenChange={handleThumbnailPanelOpenChange}
-              onTabChange={setSelectedSidePanelTab}
-              onSelectPage={handleSelectPanelPage}
+              onTabChange={setSidePanelTab}
+              onSelectPage={handleSelectThumbnailPage}
               onToggleBookmark={handleToggleBookmark}
-              onThumbnailOrderChange={handleThumbnailOrderChange}
+              onThumbnailOrderChange={setThumbnailOrder}
             />
 
             <div
@@ -713,6 +712,7 @@ export const PdfPane = ({
                 ref={viewerRef}
                 documentController={documentController}
                 navigationIdentity={doc.id}
+                pageOrder={normalizedThumbnailOrder}
                 scale={scale}
                 minScale={FIT_MIN_SCALE}
                 maxScale={FIT_MAX_SCALE}

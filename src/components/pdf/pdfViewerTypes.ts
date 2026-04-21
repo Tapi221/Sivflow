@@ -1,3 +1,4 @@
+
 import { pdfjsLib } from "@/lib/pdfjs";
 
 export type PdfScaleChangeSource = "wheel" | "gesture" | "reset";
@@ -70,20 +71,20 @@ export interface PdfJsTextContent {
   >;
 }
 
-export interface PdfJsDestinationReference {
+export interface PdfJsReference {
   num: number;
   gen: number;
 }
 
-export type PdfJsExplicitDestination = unknown[];
-export type PdfJsOutlineDestination = string | PdfJsExplicitDestination | null;
+export type PdfJsOutlineDestination =
+  | string
+  | [PdfJsReference | number | null, ...unknown[]]
+  | null;
 
-export interface PdfJsOutlineNode {
-  title?: string | null;
+export interface PdfJsOutlineItem {
+  title: string;
   dest?: PdfJsOutlineDestination;
-  items?: PdfJsOutlineNode[];
-  bold?: boolean;
-  italic?: boolean;
+  items?: PdfJsOutlineItem[];
 }
 
 export interface PdfJsPage {
@@ -106,9 +107,9 @@ export interface PdfJsDocument {
   numPages: number;
   fingerprints?: Array<string | null>;
   getPage: (pageNumber: number) => Promise<PdfJsPage>;
-  getOutline?: () => Promise<PdfJsOutlineNode[] | null>;
-  getDestination?: (id: string) => Promise<PdfJsExplicitDestination | null>;
-  getPageIndex?: (ref: PdfJsDestinationReference) => Promise<number>;
+  getOutline?: () => Promise<PdfJsOutlineItem[] | null>;
+  getDestination?: (id: string) => Promise<PdfJsOutlineDestination>;
+  getPageIndex?: (ref: PdfJsReference) => Promise<number>;
   cleanup?: (keepLoadedFonts?: boolean) => Promise<void>;
   destroy?: () => void | Promise<void>;
 }
@@ -263,6 +264,20 @@ export const isPdfAbortError = (error: unknown): boolean => {
 export const isPdfTextItem = (
   item: PdfJsTextItem | PdfJsTextMarkedContent,
 ): item is PdfJsTextItem => typeof (item as PdfJsTextItem).str === "string";
+
+export const isPdfJsReference = (value: unknown): value is PdfJsReference => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as Partial<PdfJsReference>;
+  return (
+    typeof candidate.num === "number" &&
+    Number.isFinite(candidate.num) &&
+    typeof candidate.gen === "number" &&
+    Number.isFinite(candidate.gen)
+  );
+};
 
 export const destroyPdfResource = (
   resource: { destroy?: () => void | Promise<void> } | null | undefined,

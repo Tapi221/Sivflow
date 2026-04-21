@@ -1,17 +1,7 @@
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
-import type {
-  DraggableProvidedDragHandleProps,
-  DraggableProvidedDraggableProps,
-} from "@hello-pangea/dnd";
+
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import type { DragEvent as ReactDragEvent } from "react";
 import type { PageSize, PdfJsRenderTask } from "./pdfViewerTypes";
 import { isPdfAbortError } from "./pdfViewerTypes";
 import type { PdfDocumentController } from "./hooks/usePdfDocument";
@@ -22,7 +12,7 @@ import {
   prepareDetachedPdfCanvasSurfaceForRender,
 } from "./pdfCanvasRenderUtils";
 
-const THUMBNAIL_TARGET_WIDTH_PX = 152;
+const THUMBNAIL_TARGET_WIDTH_PX = 96;
 const THUMBNAIL_RENDER_CONSTRAINTS = {
   maxPreferredDevicePixelRatio: 2,
   maxCanvasPixels: 1_200_000,
@@ -46,12 +36,13 @@ interface PdfThumbnailItemProps {
   isActive: boolean;
   isBookmarked: boolean;
   isDragging?: boolean;
-  dragStyle?: CSSProperties;
-  outerRef?: (element: HTMLDivElement | null) => void;
-  draggableProps?: DraggableProvidedDraggableProps;
-  dragHandleProps?: DraggableProvidedDragHandleProps | null;
+  isDropTarget?: boolean;
   onSelect: (pageNumber: number) => void;
   onToggleBookmark: (pageNumber: number) => void;
+  onDragStart?: (event: ReactDragEvent<HTMLDivElement>, pageNumber: number) => void;
+  onDragOver?: (event: ReactDragEvent<HTMLDivElement>, pageNumber: number) => void;
+  onDrop?: (event: ReactDragEvent<HTMLDivElement>, pageNumber: number) => void;
+  onDragEnd?: (event: ReactDragEvent<HTMLDivElement>, pageNumber: number) => void;
   rootElement: HTMLElement | null;
   acquirePage: PdfDocumentController["acquirePage"];
   setPageSize: PdfDocumentController["setPageSize"];
@@ -70,24 +61,6 @@ const BookmarkIcon = ({ className }: IconProps) => {
       className={className}
     >
       <path d="M6.2 3.25c-.994 0-1.8.806-1.8 1.8v11.273c0 .407.46.643.79.405L10 13.552l4.81 3.176a.487.487 0 0 0 .79-.405V5.05c0-.994-.806-1.8-1.8-1.8H6.2Z" />
-    </svg>
-  );
-};
-
-const GripIcon = ({ className }: IconProps) => {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 20 20"
-      fill="currentColor"
-      className={className}
-    >
-      <circle cx="7" cy="5.5" r="1.1" />
-      <circle cx="13" cy="5.5" r="1.1" />
-      <circle cx="7" cy="10" r="1.1" />
-      <circle cx="13" cy="10" r="1.1" />
-      <circle cx="7" cy="14.5" r="1.1" />
-      <circle cx="13" cy="14.5" r="1.1" />
     </svg>
   );
 };
@@ -127,17 +100,18 @@ const PdfThumbnailItemComponent = ({
   isActive,
   isBookmarked,
   isDragging = false,
-  dragStyle,
-  outerRef,
-  draggableProps,
-  dragHandleProps,
+  isDropTarget = false,
   onSelect,
   onToggleBookmark,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
   rootElement,
   acquirePage,
   setPageSize,
 }: PdfThumbnailItemProps) => {
-  const cardRef = useRef<HTMLDivElement | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const renderPassIdRef = useRef(0);
 
@@ -152,14 +126,6 @@ const PdfThumbnailItemComponent = ({
 
     return "210 / 297";
   }, [baseSize]);
-
-  const handleCombinedRef = useCallback(
-    (element: HTMLDivElement | null) => {
-      cardRef.current = element;
-      outerRef?.(element);
-    },
-    [outerRef],
-  );
 
   useEffect(() => {
     const nextCard = cardRef.current;
@@ -249,7 +215,7 @@ const PdfThumbnailItemComponent = ({
           const nextPageSize = {
             width: baseViewport.width,
             height: baseViewport.height,
-          } satisfies PageSize;
+          };
 
           if (!arePageSizesEqual(baseSize, nextPageSize)) {
             setPageSize(pageNumber, nextPageSize);
@@ -369,54 +335,45 @@ const PdfThumbnailItemComponent = ({
 
   return (
     <div
-      ref={handleCombinedRef}
-      {...draggableProps}
-      style={dragStyle}
-      className={cn("relative min-w-0", isDragging && "z-20")}
+      ref={cardRef}
+      draggable
+      onDragStart={(event) => onDragStart?.(event, pageNumber)}
+      onDragOver={(event) => onDragOver?.(event, pageNumber)}
+      onDrop={(event) => onDrop?.(event, pageNumber)}
+      onDragEnd={(event) => onDragEnd?.(event, pageNumber)}
+      className={cn(
+        "relative min-w-0 select-none",
+        isDragging && "opacity-60",
+      )}
+      style={{ cursor: "grab" }}
     >
       <div
-        className="group relative overflow-hidden rounded-[22px] border transition-all duration-150 ease-out"
+        className={cn(
+          "group relative flex w-full min-w-0 flex-col gap-2 rounded-[20px] border p-2 transition-all duration-150 ease-out",
+          isDropTarget && "scale-[1.01]",
+        )}
         style={{
-          borderColor: isActive
+          color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
+          borderColor: isActive || isDropTarget
             ? PDF_THUMBNAIL_PANEL_COLORS.accent
             : PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
           background: isActive
             ? PDF_THUMBNAIL_PANEL_COLORS.surfaceBlush
             : PDF_THUMBNAIL_PANEL_COLORS.surfacePaper,
-          boxShadow: isDragging
-            ? "0 18px 36px rgba(216, 175, 181, 0.24)"
-            : isActive
-              ? "0 12px 28px rgba(216, 175, 181, 0.18)"
-              : "0 8px 20px rgba(216, 175, 181, 0.08)",
+          boxShadow: isActive
+            ? "0 10px 20px rgba(216, 175, 181, 0.14), inset 0 1px 0 rgba(255,255,255,0.95)"
+            : "inset 0 1px 0 rgba(255,255,255,0.95)",
+          outline: isDropTarget ? "1px solid rgba(216, 175, 181, 0.35)" : "none",
         }}
       >
-        <div className="absolute left-3 top-3 z-20 flex items-center gap-2">
-          <button
-            type="button"
-            aria-label={`ページ ${pageNumber} を並び替える`}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border transition-colors duration-150"
-            style={{
-              color: PDF_THUMBNAIL_PANEL_COLORS.textMuted,
-              background: "rgba(248, 247, 245, 0.94)",
-              borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
-            }}
-            {...dragHandleProps}
-          >
-            <GripIcon className="h-4 w-4" />
-          </button>
-        </div>
-
         <button
           type="button"
-          aria-label={`ページ ${pageNumber} を開く`}
           onClick={() => onSelect(pageNumber)}
-          className="flex w-full min-w-0 flex-col gap-3 px-3 pb-3 pt-12 text-left transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          style={{
-            color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
-          }}
+          aria-label={`ページ ${pageNumber} を開く`}
+          className="flex w-full min-w-0 flex-col gap-2 text-left focus:outline-none"
         >
           <div
-            className="relative flex w-full items-center justify-center overflow-hidden rounded-[18px] border bg-white p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
+            className="relative flex w-full items-center justify-center overflow-hidden rounded-[16px] border bg-white p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
             style={{
               aspectRatio: pageAspectRatio,
               borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
@@ -444,67 +401,51 @@ const PdfThumbnailItemComponent = ({
               </div>
             ) : null}
           </div>
+        </button>
 
-          <div className="flex items-end justify-between gap-3 px-1">
-            <div className="min-w-0">
-              <div
-                className="text-sm font-semibold tabular-nums"
-                style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textStrong }}
-              >
-                Page {pageNumber}
-              </div>
-              <div
-                className="mt-1 text-[11px] font-medium tracking-[0.16em]"
-                style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}
-              >
-                THUMBNAIL
-              </div>
-            </div>
-            {isActive ? (
-              <span
-                className="rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em]"
-                style={{
-                  color: PDF_THUMBNAIL_PANEL_COLORS.accent,
-                  background: PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft,
-                }}
-              >
-                ACTIVE
-              </span>
-            ) : null}
+        <div className="flex items-center justify-between gap-2 px-1 pt-1">
+          <div
+            className="rounded-full px-2 py-0.5 text-[12px] font-semibold tabular-nums"
+            style={{
+              background: "rgba(255,255,255,0.64)",
+              color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
+            }}
+          >
+            {pageNumber}
           </div>
-        </button>
 
-        <button
-          type="button"
-          aria-label={
-            isBookmarked
-              ? `ページ ${pageNumber} のブックマークを外す`
-              : `ページ ${pageNumber} をブックマークする`
-          }
-          aria-pressed={isBookmarked}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            onToggleBookmark(pageNumber);
-          }}
-          className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border transition-all duration-150 ease-out hover:scale-[1.03]"
-          style={{
-            borderColor: isBookmarked
-              ? PDF_THUMBNAIL_PANEL_COLORS.accent
-              : PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
-            background: isBookmarked
-              ? PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft
-              : "rgba(248,247,245,0.95)",
-            color: isBookmarked
-              ? PDF_THUMBNAIL_PANEL_COLORS.accent
-              : PDF_THUMBNAIL_PANEL_COLORS.textMuted,
-            boxShadow: isBookmarked
-              ? "0 8px 18px rgba(216, 175, 181, 0.18)"
-              : "0 4px 12px rgba(216, 175, 181, 0.10)",
-          }}
-        >
-          <BookmarkIcon className="h-4 w-4" />
-        </button>
+          <button
+            type="button"
+            aria-label={
+              isBookmarked
+                ? `ページ ${pageNumber} のブックマークを外す`
+                : `ページ ${pageNumber} をブックマークする`
+            }
+            aria-pressed={isBookmarked}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onToggleBookmark(pageNumber);
+            }}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border transition-all duration-150 ease-out hover:scale-[1.03]"
+            style={{
+              borderColor: isBookmarked
+                ? PDF_THUMBNAIL_PANEL_COLORS.accent
+                : PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+              background: isBookmarked
+                ? PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft
+                : "rgba(248,247,245,0.95)",
+              color: isBookmarked
+                ? PDF_THUMBNAIL_PANEL_COLORS.accent
+                : PDF_THUMBNAIL_PANEL_COLORS.textMuted,
+              boxShadow: isBookmarked
+                ? "0 8px 18px rgba(216, 175, 181, 0.18)"
+                : "0 4px 12px rgba(216, 175, 181, 0.10)",
+            }}
+          >
+            <BookmarkIcon className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -521,12 +462,13 @@ const arePdfThumbnailItemPropsEqual = (
     left.isActive === right.isActive &&
     left.isBookmarked === right.isBookmarked &&
     left.isDragging === right.isDragging &&
-    left.dragStyle === right.dragStyle &&
-    left.outerRef === right.outerRef &&
-    left.draggableProps === right.draggableProps &&
-    left.dragHandleProps === right.dragHandleProps &&
+    left.isDropTarget === right.isDropTarget &&
     left.onSelect === right.onSelect &&
     left.onToggleBookmark === right.onToggleBookmark &&
+    left.onDragStart === right.onDragStart &&
+    left.onDragOver === right.onDragOver &&
+    left.onDrop === right.onDrop &&
+    left.onDragEnd === right.onDragEnd &&
     left.rootElement === right.rootElement &&
     left.acquirePage === right.acquirePage &&
     left.setPageSize === right.setPageSize

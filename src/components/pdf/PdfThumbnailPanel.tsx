@@ -1,31 +1,29 @@
+
 import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
-  type CSSProperties,
-  type ReactNode,
+  type DragEvent as ReactDragEvent,
+  type ReactElement,
 } from "react";
-import {
-  DragDropContext,
-  Draggable,
-  Droppable,
-  type DropResult,
-  type DroppableProvided,
-} from "@hello-pangea/dnd";
-import { cn } from "@/lib/utils";
 import type { PdfPageLayoutMode, PdfSidePanelTab } from "@/types";
-import type {
-  PdfDocumentController,
-  PdfDocumentMarkdown,
-  PdfDocumentOutlineItem,
-} from "./hooks/usePdfDocument";
+import { cn } from "@/lib/utils";
+import type { PdfDocumentController } from "./hooks/usePdfDocument";
+import {
+  isPdfJsReference,
+  isPdfTextItem,
+  type PdfJsDocument,
+  type PdfJsOutlineDestination,
+  type PdfJsOutlineItem,
+} from "./pdfViewerTypes";
 import { PdfThumbnailItem } from "./PdfThumbnailItem";
 
-const DESKTOP_PANEL_WIDTH_PX = 336;
-const DESKTOP_PANEL_COLLAPSED_WIDTH_PX = 64;
+const DESKTOP_PANEL_WIDTH_PX = 320;
+const DESKTOP_PANEL_COLLAPSED_WIDTH_PX = 56;
 
-const PDF_PANEL_COLORS = {
+const PDF_THUMBNAIL_PANEL_COLORS = {
   accent: "#D8AFB5",
   surfaceSoft: "#F5EBE9",
   surfaceMuted: "#F1E2E1",
@@ -36,38 +34,32 @@ const PDF_PANEL_COLORS = {
   shadow: "0 12px 28px rgba(216, 175, 181, 0.22)",
 } as const;
 
-const PANEL_TABS = [
-  {
-    id: "markdown",
-    label: "マークダウン",
-  },
-  {
-    id: "outline",
-    label: "アウトライン",
-  },
-  {
-    id: "thumbnails",
-    label: "サムネイル",
-  },
-] as const satisfies ReadonlyArray<{
-  id: PdfSidePanelTab;
-  label: string;
-}>;
+type AsyncStatus = "idle" | "loading" | "ready" | "error";
 
-type AsyncPanelState<T> = {
-  documentKey: string;
-  status: "idle" | "loading" | "ready" | "error";
-  data: T | null;
-  error: string | null;
-};
+interface PdfOutlineEntry {
+  id: string;
+  title: string;
+  pageNumber: number | null;
+  items: PdfOutlineEntry[];
+}
+
+interface PdfMarkdownState {
+  status: AsyncStatus;
+  content: string;
+}
+
+interface PdfOutlineState {
+  status: AsyncStatus;
+  items: PdfOutlineEntry[];
+}
 
 interface PdfThumbnailPanelProps {
   documentController: PdfDocumentController;
   currentPage: number;
   pageLayoutMode: PdfPageLayoutMode;
   bookmarkedPageNumbers: ReadonlySet<number>;
-  orderedThumbnailPageNumbers?: number[];
   selectedTab?: PdfSidePanelTab;
+  orderedThumbnailPageNumbers?: number[];
   isMobileViewport: boolean;
   isOpen: boolean;
   onOpenChange: (nextOpen: boolean) => void;
@@ -81,39 +73,23 @@ interface IconProps {
   className?: string;
 }
 
-const createAsyncPanelState = <T,>(documentKey: string): AsyncPanelState<T> => {
-  return {
-    documentKey,
-    status: "idle",
-    data: null,
-    error: null,
-  };
-};
-
-const buildPageNumbers = (numPages: number) => {
-  return Array.from({ length: numPages }, (_, index) => index + 1);
-};
-
-const moveArrayItem = <T,>(values: T[], fromIndex: number, toIndex: number) => {
-  const nextValues = [...values];
-  const [movedValue] = nextValues.splice(fromIndex, 1);
-  nextValues.splice(toIndex, 0, movedValue);
-  return nextValues;
-};
-
-const getOutlineSourceLabel = (outlineItems: PdfDocumentOutlineItem[]) => {
-  const hasNativeOutline = outlineItems.some((outlineItem) => {
-    return outlineItem.source === "pdf-outline";
-  });
-
-  return hasNativeOutline
-    ? "PDF のアウトライン"
-    : "ページ先頭のテキストから自動生成";
-};
+const TAB_ITEMS = [
+  { id: "markdown", label: "マークダウン" },
+  { id: "outline", label: "アウトライン" },
+  { id: "thumbnails", label: "サムネイル" },
+] as const satisfies ReadonlyArray<{
+  id: PdfSidePanelTab;
+  label: string;
+}>;
 
 const GridIcon = ({ className }: IconProps) => {
   return (
-    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className={className}>
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      className={className}
+    >
       <rect x="3" y="3" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.4" />
       <rect x="12" y="3" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.4" />
       <rect x="3" y="12" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.4" />
@@ -124,259 +100,341 @@ const GridIcon = ({ className }: IconProps) => {
 
 const OutlineIcon = ({ className }: IconProps) => {
   return (
-    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className={className}>
-      <path d="M4 5h3M9 5h7M4 10h3M9 10h7M4 15h3M9 15h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="5.5" cy="5" r="1" fill="currentColor" />
-      <circle cx="5.5" cy="10" r="1" fill="currentColor" />
-      <circle cx="5.5" cy="15" r="1" fill="currentColor" />
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      className={className}
+    >
+      <path d="M5 5.5h10M5 10h10M5 14.5h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="3.5" cy="5.5" r="0.8" fill="currentColor" />
+      <circle cx="3.5" cy="10" r="0.8" fill="currentColor" />
+      <circle cx="3.5" cy="14.5" r="0.8" fill="currentColor" />
     </svg>
   );
 };
 
 const MarkdownIcon = ({ className }: IconProps) => {
   return (
-    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className={className}>
-      <path d="M3.5 5.25A1.75 1.75 0 0 1 5.25 3.5h9.5a1.75 1.75 0 0 1 1.75 1.75v9.5a1.75 1.75 0 0 1-1.75 1.75h-9.5A1.75 1.75 0 0 1 3.5 14.75v-9.5Z" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M6 13V7l2 2.5L10 7v6M12.5 11h2.5l-2.5 2.5v-5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      className={className}
+    >
+      <path d="M3.5 5.5h13v9h-13z" stroke="currentColor" strokeWidth="1.4" rx="1.6" />
+      <path d="M6.2 12.8V7.2l2.1 2.5 2.1-2.5v5.6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="m13 8.2 1.6 1.8H13.6v2.3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 };
 
 const ChevronLeftIcon = ({ className }: IconProps) => {
   return (
-    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className={className}>
-      <path d="M11.75 4.5 6.25 10l5.5 5.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      className={className}
+    >
+      <path
+        d="M11.75 4.5 6.25 10l5.5 5.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 };
 
 const ChevronRightIcon = ({ className }: IconProps) => {
   return (
-    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className={className}>
-      <path d="m8.25 4.5 5.5 5.5-5.5 5.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      className={className}
+    >
+      <path
+        d="m8.25 4.5 5.5 5.5-5.5 5.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 };
 
 const XIcon = ({ className }: IconProps) => {
   return (
-    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className={className}>
-      <path d="m5 5 10 10M15 5 5 15" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      className={className}
+    >
+      <path
+        d="m5 5 10 10M15 5 5 15"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
     </svg>
   );
 };
 
-const getTabIcon = (tab: PdfSidePanelTab) => {
-  if (tab === "markdown") {
-    return MarkdownIcon;
+const TAB_ICON_BY_ID: Record<PdfSidePanelTab, (props: IconProps) => ReactElement> = {
+  markdown: MarkdownIcon,
+  outline: OutlineIcon,
+  thumbnails: GridIcon,
+};
+
+const buildPageNumbers = (numPages: number) => {
+  return Array.from({ length: numPages }, (_, index) => index + 1);
+};
+
+const normalizeThumbnailOrder = (pageNumbers: number[] | undefined, numPages: number) => {
+  const defaultPageNumbers = buildPageNumbers(numPages);
+
+  if (numPages <= 0) {
+    return [];
   }
 
-  if (tab === "outline") {
-    return OutlineIcon;
+  if (!Array.isArray(pageNumbers) || pageNumbers.length === 0) {
+    return defaultPageNumbers;
   }
 
-  return GridIcon;
+  const seen = new Set<number>();
+  const normalizedPageNumbers: number[] = [];
+
+  pageNumbers.forEach((pageNumber) => {
+    if (typeof pageNumber !== "number" || !Number.isFinite(pageNumber)) {
+      return;
+    }
+
+    const normalizedPageNumber = Math.max(1, Math.trunc(pageNumber));
+    if (normalizedPageNumber > numPages || seen.has(normalizedPageNumber)) {
+      return;
+    }
+
+    seen.add(normalizedPageNumber);
+    normalizedPageNumbers.push(normalizedPageNumber);
+  });
+
+  defaultPageNumbers.forEach((pageNumber) => {
+    if (seen.has(pageNumber)) {
+      return;
+    }
+
+    normalizedPageNumbers.push(pageNumber);
+  });
+
+  return normalizedPageNumbers;
 };
 
-const renderEmptyState = (message: string) => {
-  return (
-    <div
-      className="px-4 py-6 text-sm"
-      style={{ color: PDF_PANEL_COLORS.textMuted }}
-    >
-      {message}
-    </div>
-  );
-};
 
-const renderLoadingState = () => {
-  return (
-    <div className="space-y-3 p-4">
-      {Array.from({ length: 4 }, (_, index) => {
-        return (
-          <div
-            key={`pdf-panel-loading-${index}`}
-            className="rounded-2xl border px-4 py-3"
-            style={{
-              borderColor: PDF_PANEL_COLORS.surfaceMuted,
-              background: PDF_PANEL_COLORS.surfacePaper,
-            }}
-          >
-            <div className="h-3 w-28 rounded-full bg-white/80" />
-            <div className="mt-3 h-3 w-full rounded-full bg-white/70" />
-            <div className="mt-2 h-3 w-5/6 rounded-full bg-white/60" />
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
-const PanelRailTabs = ({
-  selectedTab,
-  isOpen,
-  onSelectTab,
+const extractPageText = async ({
+  getPageTextContent,
+  cache,
+  pageNumber,
 }: {
-  selectedTab: PdfSidePanelTab;
-  isOpen: boolean;
-  onSelectTab: (nextTab: PdfSidePanelTab) => void;
+  getPageTextContent: PdfDocumentController["getPageTextContent"];
+  cache: Map<number, string>;
+  pageNumber: number;
 }) => {
-  return (
-    <div className="mt-2 flex w-full flex-col gap-2">
-      {PANEL_TABS.map((tab) => {
-        const Icon = getTabIcon(tab.id);
-        const isActive = tab.id === selectedTab;
+  const cachedText = cache.get(pageNumber);
+  if (typeof cachedText === "string") {
+    return cachedText;
+  }
 
-        return (
-          <button
-            key={tab.id}
-            type="button"
-            aria-label={`${tab.label} タブを開く`}
-            aria-pressed={isActive}
-            onClick={() => onSelectTab(tab.id)}
-            className="inline-flex h-10 w-10 items-center justify-center self-center rounded-full border transition-all duration-150"
-            style={{
-              color: isActive
-                ? PDF_PANEL_COLORS.accent
-                : PDF_PANEL_COLORS.textMuted,
-              background: isActive
-                ? PDF_PANEL_COLORS.surfaceSoft
-                : "rgba(248, 247, 245, 0.92)",
-              borderColor: isActive
-                ? PDF_PANEL_COLORS.accent
-                : PDF_PANEL_COLORS.surfaceMuted,
-              boxShadow: isOpen && isActive
-                ? "0 8px 18px rgba(216, 175, 181, 0.18)"
-                : "0 4px 12px rgba(216, 175, 181, 0.08)",
-            }}
-          >
-            <Icon className="h-4 w-4" />
-          </button>
-        );
-      })}
-    </div>
-  );
+  const textContent = await getPageTextContent(pageNumber);
+  const nextText = textContent.items
+    .filter(isPdfTextItem)
+    .map((item) => item.str)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  cache.set(pageNumber, nextText);
+  return nextText;
 };
 
-const PanelTabsBar = ({
-  selectedTab,
-  onTabChange,
+const truncateOutlineTitle = (value: string) => {
+  if (value.length <= 48) {
+    return value;
+  }
+
+  return `${value.slice(0, 48)}…`;
+};
+
+const resolveOutlineDestinationToPageNumber = async (
+  doc: PdfJsDocument,
+  dest: PdfJsOutlineDestination | undefined,
+): Promise<number | null> => {
+  if (!dest) {
+    return null;
+  }
+
+  let resolvedDestination: PdfJsOutlineDestination = dest;
+
+  if (typeof resolvedDestination === "string") {
+    if (typeof doc.getDestination !== "function") {
+      return null;
+    }
+
+    resolvedDestination = await doc.getDestination(resolvedDestination);
+  }
+
+  if (!Array.isArray(resolvedDestination) || resolvedDestination.length === 0) {
+    return null;
+  }
+
+  const [target] = resolvedDestination;
+
+  if (typeof target === "number" && Number.isFinite(target)) {
+    return Math.max(1, Math.trunc(target) + 1);
+  }
+
+  if (isPdfJsReference(target) && typeof doc.getPageIndex === "function") {
+    try {
+      const pageIndex = await doc.getPageIndex(target);
+      if (Number.isFinite(pageIndex)) {
+        return Math.max(1, Math.trunc(pageIndex) + 1);
+      }
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+};
+
+const normalizeOutlineItems = async ({
+  items,
+  doc,
+  parentId,
 }: {
-  selectedTab: PdfSidePanelTab;
-  onTabChange?: (nextTab: PdfSidePanelTab) => void;
-}) => {
-  return (
-    <div
-      className="border-b px-3 py-3"
-      style={{ borderColor: PDF_PANEL_COLORS.surfaceMuted }}
-    >
-      <div
-        className="inline-flex w-full items-center gap-1 rounded-full border p-1"
-        style={{
-          borderColor: PDF_PANEL_COLORS.surfaceMuted,
-          background: "rgba(248, 247, 245, 0.92)",
-        }}
-      >
-        {PANEL_TABS.map((tab) => {
-          const isActive = tab.id === selectedTab;
+  items: PdfJsOutlineItem[];
+  doc: PdfJsDocument;
+  parentId: string;
+}): Promise<PdfOutlineEntry[]> => {
+  const normalizedItems: PdfOutlineEntry[] = [];
 
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              aria-pressed={isActive}
-              onClick={() => onTabChange(tab.id)}
-              className="inline-flex flex-1 items-center justify-center rounded-full px-3 py-2 text-[12px] font-semibold transition-colors duration-150"
-              style={{
-                color: isActive
-                  ? PDF_PANEL_COLORS.accent
-                  : PDF_PANEL_COLORS.textMuted,
-                background: isActive
-                  ? PDF_PANEL_COLORS.surfaceSoft
-                  : "transparent",
-              }}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
+  for (let index = 0; index < items.length; index += 1) {
+    const item = items[index];
+    const id = `${parentId}-${index}`;
+    const pageNumber = await resolveOutlineDestinationToPageNumber(doc, item.dest);
+    const children = Array.isArray(item.items) && item.items.length > 0
+      ? await normalizeOutlineItems({
+          items: item.items,
+          doc,
+          parentId: id,
+        })
+      : [];
+
+    normalizedItems.push({
+      id,
+      title: truncateOutlineTitle(item.title?.trim() || `Section ${index + 1}`),
+      pageNumber,
+      items: children,
+    });
+  }
+
+  return normalizedItems;
 };
 
-const OutlineTree = ({
-  outlineItems,
-  activePageNumbers,
+const buildFallbackOutlineEntries = async ({
+  getPageTextContent,
+  pageNumbers,
+  cache,
+}: {
+  getPageTextContent: PdfDocumentController["getPageTextContent"];
+  pageNumbers: number[];
+  cache: Map<number, string>;
+}) => {
+  const fallbackEntries: PdfOutlineEntry[] = [];
+
+  for (const pageNumber of pageNumbers) {
+    const text = await extractPageText({
+      getPageTextContent,
+      cache,
+      pageNumber,
+    });
+    const firstMeaningfulLine =
+      text
+        .split(/(?<=[。.!?])\s+/)
+        .map((line) => line.trim())
+        .find((line) => line.length > 0) ?? `Page ${pageNumber}`;
+
+    fallbackEntries.push({
+      id: `fallback-outline-${pageNumber}`,
+      title: truncateOutlineTitle(firstMeaningfulLine),
+      pageNumber,
+      items: [],
+    });
+  }
+
+  return fallbackEntries;
+};
+
+const renderOutlineEntries = ({
+  items,
+  depth,
   onSelectPage,
 }: {
-  outlineItems: PdfDocumentOutlineItem[];
-  activePageNumbers: ReadonlySet<number>;
+  items: PdfOutlineEntry[];
+  depth: number;
   onSelectPage: (pageNumber: number) => void;
 }) => {
-  return (
-    <div className="space-y-1 p-3">
-      {outlineItems.map((outlineItem) => {
-        const isCurrentPage =
-          typeof outlineItem.pageNumber === "number" &&
-          activePageNumbers.has(outlineItem.pageNumber);
-
-        return (
-          <div key={outlineItem.id}>
-            <button
-              type="button"
-              disabled={outlineItem.pageNumber === null}
-              onClick={() => {
-                if (typeof outlineItem.pageNumber === "number") {
-                  onSelectPage(outlineItem.pageNumber);
-                }
-              }}
-              className={cn(
-                "flex w-full items-center justify-between gap-3 rounded-2xl border px-3 py-2 text-left transition-colors duration-150",
-                outlineItem.pageNumber === null && "cursor-default opacity-80",
-              )}
+  return items.map((item) => {
+    return (
+      <div key={item.id} className="min-w-0">
+        <button
+          type="button"
+          onClick={() => {
+            if (typeof item.pageNumber === "number") {
+              onSelectPage(item.pageNumber);
+            }
+          }}
+          className="flex w-full min-w-0 items-center gap-2 rounded-2xl border px-3 py-2 text-left transition-colors duration-150"
+          style={{
+            marginLeft: `${depth * 12}px`,
+            borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+            background: "rgba(248, 247, 245, 0.78)",
+            color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
+          }}
+          disabled={typeof item.pageNumber !== "number"}
+        >
+          <span className="min-w-0 flex-1 truncate text-sm font-medium">
+            {item.title}
+          </span>
+          {typeof item.pageNumber === "number" ? (
+            <span
+              className="rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums"
               style={{
-                marginLeft: `${Math.min(outlineItem.depth * 10, 32)}px`,
-                borderColor: isCurrentPage
-                  ? PDF_PANEL_COLORS.accent
-                  : PDF_PANEL_COLORS.surfaceMuted,
-                background: isCurrentPage
-                  ? PDF_PANEL_COLORS.surfaceSoft
-                  : PDF_PANEL_COLORS.surfacePaper,
-                color: isCurrentPage
-                  ? PDF_PANEL_COLORS.accent
-                  : PDF_PANEL_COLORS.textStrong,
+                background: PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft,
+                color: PDF_THUMBNAIL_PANEL_COLORS.textMuted,
               }}
             >
-              <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                {outlineItem.title}
-              </span>
-              {typeof outlineItem.pageNumber === "number" ? (
-                <span
-                  className="shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold tabular-nums"
-                  style={{
-                    background: PDF_PANEL_COLORS.surfaceBlush,
-                    color: PDF_PANEL_COLORS.textMuted,
-                  }}
-                >
-                  p.{outlineItem.pageNumber}
-                </span>
-              ) : null}
-            </button>
-            {outlineItem.children.length > 0 ? (
-              <div className="pt-1">
-                <OutlineTree
-                  outlineItems={outlineItem.children}
-                  activePageNumbers={activePageNumbers}
-                  onSelectPage={onSelectPage}
-                />
-              </div>
-            ) : null}
+              {item.pageNumber}
+            </span>
+          ) : null}
+        </button>
+
+        {item.items.length > 0 ? (
+          <div className="mt-2 space-y-2">
+            {renderOutlineEntries({
+              items: item.items,
+              depth: depth + 1,
+              onSelectPage,
+            })}
           </div>
-        );
-      })}
-    </div>
-  );
+        ) : null}
+      </div>
+    );
+  });
 };
 
 export const PdfThumbnailPanel = ({
@@ -384,26 +442,54 @@ export const PdfThumbnailPanel = ({
   currentPage,
   pageLayoutMode,
   bookmarkedPageNumbers,
-  orderedThumbnailPageNumbers = [],
   selectedTab = "thumbnails",
+  orderedThumbnailPageNumbers,
   isMobileViewport,
   isOpen,
   onOpenChange,
-  onTabChange = () => {},
+  onTabChange,
   onSelectPage,
   onToggleBookmark,
-  onThumbnailOrderChange = () => {},
+  onThumbnailOrderChange,
 }: PdfThumbnailPanelProps) => {
   const [scrollRootElement, setScrollRootElement] = useState<HTMLElement | null>(
     null,
   );
-  const [isDndReady, setIsDndReady] = useState(false);
-  const [markdownState, setMarkdownState] = useState<AsyncPanelState<PdfDocumentMarkdown>>(
-    () => createAsyncPanelState(documentController.documentKey),
+  const [markdownState, setMarkdownState] = useState<PdfMarkdownState>({
+    status: "idle",
+    content: "",
+  });
+  const [outlineState, setOutlineState] = useState<PdfOutlineState>({
+    status: "idle",
+    items: [],
+  });
+  const [draggingPageNumber, setDraggingPageNumber] = useState<number | null>(null);
+  const [dropTargetPageNumber, setDropTargetPageNumber] = useState<number | null>(
+    null,
   );
-  const [outlineState, setOutlineState] = useState<
-    AsyncPanelState<PdfDocumentOutlineItem[]>
-  >(() => createAsyncPanelState(documentController.documentKey));
+
+  const pageTextCacheRef = useRef<Map<number, string>>(new Map());
+
+  const normalizedTab: PdfSidePanelTab =
+    selectedTab === "markdown" ||
+    selectedTab === "outline" ||
+    selectedTab === "thumbnails"
+      ? selectedTab
+      : "thumbnails";
+
+  const pageNumbers = useMemo(
+    () => buildPageNumbers(documentController.numPages),
+    [documentController.numPages],
+  );
+
+  const normalizedOrderedThumbnailPageNumbers = useMemo(
+    () =>
+      normalizeThumbnailOrder(
+        orderedThumbnailPageNumbers,
+        documentController.numPages,
+      ),
+    [documentController.numPages, orderedThumbnailPageNumbers],
+  );
 
   const activePageNumbers = useMemo(() => {
     const nextActivePageNumbers = new Set<number>([currentPage]);
@@ -419,455 +505,474 @@ export const PdfThumbnailPanel = ({
     return nextActivePageNumbers;
   }, [currentPage, documentController.numPages, pageLayoutMode]);
 
-  const naturalPageNumbers = useMemo(() => {
-    return buildPageNumbers(documentController.numPages);
-  }, [documentController.numPages]);
-
-  const normalizedOrderedThumbnailPageNumbers = useMemo(() => {
-    if (!Array.isArray(orderedThumbnailPageNumbers)) {
-      return [] as number[];
-    }
-
-    return orderedThumbnailPageNumbers.filter((pageNumber): pageNumber is number => {
-      return typeof pageNumber === "number" && Number.isFinite(pageNumber);
-    });
-  }, [orderedThumbnailPageNumbers]);
-
-  const fallbackThumbnailPageNumbers = useMemo(() => {
-    return normalizedOrderedThumbnailPageNumbers.length > 0
-      ? normalizedOrderedThumbnailPageNumbers
-      : naturalPageNumbers;
-  }, [naturalPageNumbers, normalizedOrderedThumbnailPageNumbers]);
-
   const handleScrollRootRef = useCallback((element: HTMLDivElement | null) => {
-    setScrollRootElement((previousElement) => {
-      return previousElement === element ? previousElement : element;
-    });
+    setScrollRootElement((previousElement) =>
+      previousElement === element ? previousElement : element,
+    );
+  }, []);
+
+  const handleTabChange = useCallback(
+    (nextTab: PdfSidePanelTab) => {
+      onTabChange?.(nextTab);
+    },
+    [onTabChange],
+  );
+
+  const handleSelectPage = useCallback(
+    (pageNumber: number) => {
+      onSelectPage(pageNumber);
+    },
+    [onSelectPage],
+  );
+
+  const movePageNumber = useCallback(
+    (sourcePageNumber: number, destinationPageNumber: number) => {
+      const sourceIndex =
+        normalizedOrderedThumbnailPageNumbers.indexOf(sourcePageNumber);
+      const destinationIndex =
+        normalizedOrderedThumbnailPageNumbers.indexOf(destinationPageNumber);
+
+      if (sourceIndex < 0 || destinationIndex < 0 || sourceIndex === destinationIndex) {
+        return;
+      }
+
+      const nextPageNumbers = [...normalizedOrderedThumbnailPageNumbers];
+      const [movedPageNumber] = nextPageNumbers.splice(sourceIndex, 1);
+      nextPageNumbers.splice(destinationIndex, 0, movedPageNumber);
+
+      onThumbnailOrderChange?.(nextPageNumbers);
+    },
+    [normalizedOrderedThumbnailPageNumbers, onThumbnailOrderChange],
+  );
+
+  const handleDragStart = useCallback(
+    (event: ReactDragEvent<HTMLDivElement>, pageNumber: number) => {
+      setDraggingPageNumber(pageNumber);
+      setDropTargetPageNumber(pageNumber);
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", String(pageNumber));
+    },
+    [],
+  );
+
+  const handleDragOver = useCallback(
+    (event: ReactDragEvent<HTMLDivElement>, pageNumber: number) => {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+
+      setDropTargetPageNumber((previousPageNumber) =>
+        previousPageNumber === pageNumber ? previousPageNumber : pageNumber,
+      );
+    },
+    [],
+  );
+
+  const handleDrop = useCallback(
+    (event: ReactDragEvent<HTMLDivElement>, pageNumber: number) => {
+      event.preventDefault();
+
+      const draggedPageNumberText =
+        event.dataTransfer.getData("text/plain") || String(draggingPageNumber ?? "");
+      const draggedPageNumber = Number(draggedPageNumberText);
+
+      if (!Number.isFinite(draggedPageNumber)) {
+        setDraggingPageNumber(null);
+        setDropTargetPageNumber(null);
+        return;
+      }
+
+      movePageNumber(Math.trunc(draggedPageNumber), pageNumber);
+      setDraggingPageNumber(null);
+      setDropTargetPageNumber(null);
+    },
+    [draggingPageNumber, movePageNumber],
+  );
+
+  const handleDragEnd = useCallback(() => {
+    setDraggingPageNumber(null);
+    setDropTargetPageNumber(null);
   }, []);
 
   useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => {
-      setIsDndReady(true);
+    pageTextCacheRef.current.clear();
+    setMarkdownState({
+      status: "idle",
+      content: "",
     });
-
-    return () => {
-      window.cancelAnimationFrame(frameId);
-      queueMicrotask(() => {
-        setIsDndReady(false);
-      });
-    };
-  }, []);
+    setOutlineState({
+      status: "idle",
+      items: [],
+    });
+    setDraggingPageNumber(null);
+    setDropTargetPageNumber(null);
+  }, [documentController.documentKey]);
 
   useEffect(() => {
-    if (markdownState.documentKey === documentController.documentKey) {
+    if (normalizedTab !== "markdown") {
       return;
     }
 
-    setMarkdownState(createAsyncPanelState(documentController.documentKey));
-  }, [documentController.documentKey, markdownState.documentKey]);
-
-  useEffect(() => {
-    if (outlineState.documentKey === documentController.documentKey) {
-      return;
-    }
-
-    setOutlineState(createAsyncPanelState(documentController.documentKey));
-  }, [documentController.documentKey, outlineState.documentKey]);
-
-  useEffect(() => {
-    if (
-      selectedTab !== "markdown" ||
-      documentController.loading ||
-      documentController.error ||
-      !documentController.doc
-    ) {
-      return;
-    }
-
-    if (
-      markdownState.documentKey === documentController.documentKey &&
-      (markdownState.status === "loading" || markdownState.status === "ready")
-    ) {
+    if (markdownState.status === "loading" || markdownState.status === "ready") {
       return;
     }
 
     let cancelled = false;
-
     setMarkdownState({
-      documentKey: documentController.documentKey,
       status: "loading",
-      data: null,
-      error: null,
+      content: "",
     });
 
-    void documentController
-      .getDocumentMarkdown()
-      .then((markdownDocument) => {
+    void (async () => {
+      try {
+        const markdownSections: string[] = [];
+
+        for (const pageNumber of normalizedOrderedThumbnailPageNumbers) {
+          const text = await extractPageText({
+            getPageTextContent: documentController.getPageTextContent,
+            cache: pageTextCacheRef.current,
+            pageNumber,
+          });
+          markdownSections.push(`## Page ${pageNumber}\n\n${text || "_No text_"}\n`);
+        }
+
         if (cancelled) {
           return;
         }
 
         setMarkdownState({
-          documentKey: documentController.documentKey,
           status: "ready",
-          data: markdownDocument,
-          error: null,
+          content: markdownSections.join("\n"),
         });
-      })
-      .catch((errorValue) => {
+      } catch (errorValue) {
         if (cancelled) {
           return;
         }
 
+        console.error("[PdfThumbnailPanel] Failed to build markdown", errorValue);
         setMarkdownState({
-          documentKey: documentController.documentKey,
           status: "error",
-          data: null,
-          error: errorValue instanceof Error ? errorValue.message : String(errorValue),
+          content: "",
         });
-      });
+      }
+    })();
 
     return () => {
       cancelled = true;
     };
   }, [
-    documentController,
-    markdownState.documentKey,
+    documentController.documentKey,
+    documentController.getPageTextContent,
     markdownState.status,
-    selectedTab,
+    normalizedOrderedThumbnailPageNumbers,
+    normalizedTab,
   ]);
 
   useEffect(() => {
-    if (
-      selectedTab !== "outline" ||
-      documentController.loading ||
-      documentController.error ||
-      !documentController.doc
-    ) {
+    if (normalizedTab !== "outline") {
       return;
     }
 
-    if (
-      outlineState.documentKey === documentController.documentKey &&
-      (outlineState.status === "loading" || outlineState.status === "ready")
-    ) {
+    if (outlineState.status === "loading" || outlineState.status === "ready") {
       return;
     }
 
     let cancelled = false;
-
     setOutlineState({
-      documentKey: documentController.documentKey,
       status: "loading",
-      data: null,
-      error: null,
+      items: [],
     });
 
-    void documentController
-      .getDocumentOutline()
-      .then((outlineItems) => {
+    void (async () => {
+      try {
+        const doc = documentController.doc;
+        let nextItems: PdfOutlineEntry[] = [];
+
+        if (doc && typeof doc.getOutline === "function") {
+          const outlineItems = await doc.getOutline();
+          if (Array.isArray(outlineItems) && outlineItems.length > 0) {
+            nextItems = await normalizeOutlineItems({
+              items: outlineItems,
+              doc,
+              parentId: "outline",
+            });
+          }
+        }
+
+        if (nextItems.length === 0) {
+          nextItems = await buildFallbackOutlineEntries({
+            getPageTextContent: documentController.getPageTextContent,
+            pageNumbers: normalizedOrderedThumbnailPageNumbers,
+            cache: pageTextCacheRef.current,
+          });
+        }
+
         if (cancelled) {
           return;
         }
 
         setOutlineState({
-          documentKey: documentController.documentKey,
           status: "ready",
-          data: outlineItems,
-          error: null,
+          items: nextItems,
         });
-      })
-      .catch((errorValue) => {
+      } catch (errorValue) {
         if (cancelled) {
           return;
         }
 
+        console.error("[PdfThumbnailPanel] Failed to build outline", errorValue);
         setOutlineState({
-          documentKey: documentController.documentKey,
           status: "error",
-          data: null,
-          error: errorValue instanceof Error ? errorValue.message : String(errorValue),
+          items: [],
         });
-      });
+      }
+    })();
 
     return () => {
       cancelled = true;
     };
-  }, [documentController, outlineState.documentKey, outlineState.status, selectedTab]);
+  }, [
+    documentController.doc,
+    documentController.documentKey,
+    documentController.getPageTextContent,
+    normalizedOrderedThumbnailPageNumbers,
+    normalizedTab,
+    outlineState.status,
+  ]);
 
-  const handleDesktopTabShortcut = useCallback(
-    (nextTab: PdfSidePanelTab) => {
-      onTabChange(nextTab);
-      if (!isOpen) {
-        onOpenChange(true);
-      }
-    },
-    [isOpen, onOpenChange, onTabChange],
+  const renderTabs = (
+    <div
+      className="border-b px-3 py-3"
+      style={{ borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted }}
+    >
+      <div
+        role="tablist"
+        aria-label="PDF サイドパネル"
+        className="grid grid-cols-3 gap-2 rounded-[22px] border p-2"
+        style={{
+          borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+          background: "rgba(248, 247, 245, 0.68)",
+        }}
+      >
+        {TAB_ITEMS.map((item) => {
+          const Icon = TAB_ICON_BY_ID[item.id];
+          const isSelected = normalizedTab === item.id;
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              aria-selected={isSelected}
+              aria-label={item.label}
+              title={item.label}
+              onClick={() => handleTabChange(item.id)}
+              className="inline-flex h-11 items-center justify-center rounded-[18px] border transition-colors duration-150"
+              style={{
+                borderColor: isSelected
+                  ? PDF_THUMBNAIL_PANEL_COLORS.accent
+                  : "transparent",
+                background: isSelected
+                  ? PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft
+                  : "transparent",
+                color: isSelected
+                  ? PDF_THUMBNAIL_PANEL_COLORS.accent
+                  : PDF_THUMBNAIL_PANEL_COLORS.textMuted,
+              }}
+            >
+              <Icon className="h-5 w-5" />
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 
-  const handleDragEnd = useCallback(
-    (result: DropResult) => {
-      if (!result.destination) {
-        return;
-      }
-
-      if (result.destination.index === result.source.index) {
-        return;
-      }
-
-      const nextPageNumbers = moveArrayItem(
-        fallbackThumbnailPageNumbers,
-        result.source.index,
-        result.destination.index,
-      );
-      onThumbnailOrderChange(nextPageNumbers);
-    },
-    [fallbackThumbnailPageNumbers, onThumbnailOrderChange],
-  );
-
-  const thumbnailTabContent = useMemo(() => {
-    if (documentController.loading && fallbackThumbnailPageNumbers.length === 0) {
-      return renderLoadingState();
-    }
-
-    if (documentController.error) {
-      return renderEmptyState("サムネイル一覧を準備できませんでした。");
-    }
-
-    if (fallbackThumbnailPageNumbers.length === 0) {
-      return renderEmptyState("ページ情報を読み込み中です。");
-    }
-
-    const renderThumbnailList = (
-      providedAttributes?: Pick<
-        DroppableProvided,
-        "innerRef" | "droppableProps" | "placeholder"
-      >,
-    ) => {
+  const renderMarkdownContent = () => {
+    if (markdownState.status === "loading" || markdownState.status === "idle") {
       return (
-        <div
-          ref={(element) => {
-            handleScrollRootRef(element);
-            providedAttributes?.innerRef(element);
-          }}
-          {...providedAttributes?.droppableProps}
-          className="space-y-3 p-3"
-        >
-          <div
-            className="rounded-2xl border px-3 py-2 text-[11px] font-medium"
-            style={{
-              borderColor: PDF_PANEL_COLORS.surfaceMuted,
-              background: PDF_PANEL_COLORS.surfacePaper,
-              color: PDF_PANEL_COLORS.textMuted,
-            }}
-          >
-            ドラッグで並び替えできます。ページ番号は元の PDF の位置を保ちます。
-          </div>
-
-          {fallbackThumbnailPageNumbers.map((pageNumber, index) => {
-            return (
-              <Draggable
-                key={`pdf-thumbnail-draggable-${documentController.documentKey}-${pageNumber}`}
-                draggableId={`pdf-thumbnail-draggable-${documentController.documentKey}-${pageNumber}`}
-                index={index}
-                isDragDisabled={!isDndReady}
-              >
-                {(draggableProvided, draggableSnapshot) => {
-                  const draggableStyle = {
-                    ...(draggableProvided.draggableProps.style ?? {}),
-                    zIndex: draggableSnapshot.isDragging ? 20 : undefined,
-                  } satisfies CSSProperties;
-
-                  return (
-                    <PdfThumbnailItem
-                      documentKey={documentController.documentKey}
-                      pageNumber={pageNumber}
-                      baseSize={documentController.pageSizes[pageNumber]}
-                      isActive={activePageNumbers.has(pageNumber)}
-                      isBookmarked={bookmarkedPageNumbers.has(pageNumber)}
-                      isDragging={draggableSnapshot.isDragging}
-                      dragStyle={draggableStyle}
-                      outerRef={draggableProvided.innerRef}
-                      draggableProps={draggableProvided.draggableProps}
-                      dragHandleProps={draggableProvided.dragHandleProps}
-                      onSelect={onSelectPage}
-                      onToggleBookmark={onToggleBookmark}
-                      rootElement={scrollRootElement}
-                      acquirePage={documentController.acquirePage}
-                      setPageSize={documentController.setPageSize}
-                    />
-                  );
-                }}
-              </Draggable>
-            );
-          })}
-
-          {providedAttributes?.placeholder}
+        <div className="px-4 py-5 text-sm" style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}>
+          マークダウンを生成中です。
         </div>
       );
-    };
-
-    if (!isDndReady) {
-      return renderThumbnailList();
-    }
-
-    return (
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId={`pdf-thumbnails-${documentController.documentKey}`}>
-          {(droppableProvided) => {
-            return renderThumbnailList({
-              innerRef: droppableProvided.innerRef,
-              droppableProps: droppableProvided.droppableProps,
-              placeholder: droppableProvided.placeholder,
-            });
-          }}
-        </Droppable>
-      </DragDropContext>
-    );
-  }, [
-    activePageNumbers,
-    bookmarkedPageNumbers,
-    documentController,
-    fallbackThumbnailPageNumbers,
-    handleDragEnd,
-    handleScrollRootRef,
-    isDndReady,
-    onSelectPage,
-    onToggleBookmark,
-    scrollRootElement,
-  ]);
-
-  const markdownTabContent = useMemo(() => {
-    if (documentController.loading || markdownState.status === "loading") {
-      return renderLoadingState();
-    }
-
-    if (documentController.error) {
-      return renderEmptyState("マークダウンを準備できませんでした。");
     }
 
     if (markdownState.status === "error") {
-      return renderEmptyState(markdownState.error ?? "マークダウンを準備できませんでした。");
-    }
-
-    if (!markdownState.data || markdownState.data.sections.length === 0) {
-      return renderEmptyState("抽出できるテキストがありませんでした。");
+      return (
+        <div className="px-4 py-5 text-sm" style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}>
+          マークダウンを生成できませんでした。
+        </div>
+      );
     }
 
     return (
-      <div ref={handleScrollRootRef} className="space-y-3 p-3">
-        {markdownState.data.sections.map((section) => {
-          const isCurrentPage = activePageNumbers.has(section.pageNumber);
+      <div className="space-y-4 p-4">
+        {normalizedOrderedThumbnailPageNumbers.map((pageNumber) => {
+          const heading = `Page ${pageNumber}`;
+          const text = pageTextCacheRef.current.get(pageNumber) ?? "";
 
           return (
-            <section
-              key={section.id}
-              className="overflow-hidden rounded-2xl border"
+            <button
+              key={`markdown-page-${pageNumber}`}
+              type="button"
+              onClick={() => handleSelectPage(pageNumber)}
+              className="block w-full rounded-[20px] border px-4 py-3 text-left transition-colors duration-150"
               style={{
-                borderColor: isCurrentPage
-                  ? PDF_PANEL_COLORS.accent
-                  : PDF_PANEL_COLORS.surfaceMuted,
-                background: PDF_PANEL_COLORS.surfacePaper,
-                boxShadow: isCurrentPage
-                  ? "0 10px 24px rgba(216, 175, 181, 0.16)"
-                  : "0 6px 16px rgba(216, 175, 181, 0.08)",
+                borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+                background: "rgba(248, 247, 245, 0.78)",
               }}
             >
               <div
-                className="flex items-center justify-between gap-3 border-b px-3 py-2"
-                style={{ borderColor: PDF_PANEL_COLORS.surfaceMuted }}
+                className="text-sm font-semibold"
+                style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textStrong }}
               >
-                <div className="min-w-0">
-                  <div
-                    className="text-[11px] font-semibold tracking-[0.16em]"
-                    style={{ color: PDF_PANEL_COLORS.textMuted }}
-                  >
-                    PAGE {section.pageNumber}
-                  </div>
-                  <div
-                    className="mt-1 truncate text-sm font-semibold"
-                    style={{ color: PDF_PANEL_COLORS.textStrong }}
-                  >
-                    {section.title}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onSelectPage(section.pageNumber)}
-                  className="shrink-0 rounded-full px-3 py-1.5 text-[11px] font-semibold transition-colors duration-150"
-                  style={{
-                    color: PDF_PANEL_COLORS.accent,
-                    background: PDF_PANEL_COLORS.surfaceSoft,
-                  }}
-                >
-                  開く
-                </button>
+                {heading}
               </div>
-              <pre
-                className="overflow-x-auto whitespace-pre-wrap px-3 py-3 text-[12px] leading-6"
-                style={{ color: PDF_PANEL_COLORS.textStrong }}
+              <div
+                className="mt-2 whitespace-pre-wrap text-xs leading-6"
+                style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}
               >
-                {section.markdown}
-              </pre>
-            </section>
+                {text || "テキストが見つかりません。"}
+              </div>
+            </button>
           );
         })}
       </div>
     );
-  }, [activePageNumbers, documentController.error, documentController.loading, handleScrollRootRef, markdownState, onSelectPage]);
+  };
 
-  const outlineTabContent = useMemo(() => {
-    if (documentController.loading || outlineState.status === "loading") {
-      return renderLoadingState();
-    }
-
-    if (documentController.error) {
-      return renderEmptyState("アウトラインを準備できませんでした。");
+  const renderOutlineContent = () => {
+    if (outlineState.status === "loading" || outlineState.status === "idle") {
+      return (
+        <div className="px-4 py-5 text-sm" style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}>
+          アウトラインを生成中です。
+        </div>
+      );
     }
 
     if (outlineState.status === "error") {
-      return renderEmptyState(outlineState.error ?? "アウトラインを準備できませんでした。");
+      return (
+        <div className="px-4 py-5 text-sm" style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}>
+          アウトラインを生成できませんでした。
+        </div>
+      );
     }
 
-    if (!outlineState.data || outlineState.data.length === 0) {
-      return renderEmptyState("アウトラインが見つかりませんでした。");
+    if (outlineState.items.length === 0) {
+      return (
+        <div className="px-4 py-5 text-sm" style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}>
+          アウトラインはありません。
+        </div>
+      );
     }
 
     return (
-      <div ref={handleScrollRootRef} className="p-3">
-        <div
-          className="mb-3 rounded-2xl border px-3 py-2 text-[11px] font-medium"
-          style={{
-            borderColor: PDF_PANEL_COLORS.surfaceMuted,
-            background: PDF_PANEL_COLORS.surfacePaper,
-            color: PDF_PANEL_COLORS.textMuted,
-          }}
-        >
-          {getOutlineSourceLabel(outlineState.data)}
-        </div>
-        <OutlineTree
-          outlineItems={outlineState.data}
-          activePageNumbers={activePageNumbers}
-          onSelectPage={onSelectPage}
-        />
+      <div className="space-y-2 p-4">
+        {renderOutlineEntries({
+          items: outlineState.items,
+          depth: 0,
+          onSelectPage: handleSelectPage,
+        })}
       </div>
     );
-  }, [activePageNumbers, documentController.error, documentController.loading, handleScrollRootRef, onSelectPage, outlineState]);
+  };
 
-  const activeTabContent = (() => {
-    if (selectedTab === "markdown") {
-      return markdownTabContent;
+  const renderThumbnailContent = () => {
+    if (documentController.loading && normalizedOrderedThumbnailPageNumbers.length === 0) {
+      return (
+        <div className="grid grid-cols-2 gap-3 p-4">
+          {Array.from({ length: 6 }, (_, index) => (
+            <div
+              key={`pdf-thumbnail-skeleton-${index}`}
+              className="flex flex-col gap-2 rounded-[20px] border p-2"
+              style={{
+                borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+                background: PDF_THUMBNAIL_PANEL_COLORS.surfacePaper,
+              }}
+            >
+              <div
+                className="aspect-[210/297] rounded-[16px] border"
+                style={{
+                  borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+                  background: PDF_THUMBNAIL_PANEL_COLORS.surfaceBlush,
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      );
     }
 
-    if (selectedTab === "outline") {
-      return outlineTabContent;
+    if (!documentController.loading && documentController.error) {
+      return (
+        <div className="px-4 py-6 text-sm" style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}>
+          サムネイルを準備できませんでした。
+        </div>
+      );
     }
 
-    return thumbnailTabContent;
-  })();
+    if (
+      !documentController.loading &&
+      !documentController.error &&
+      normalizedOrderedThumbnailPageNumbers.length === 0
+    ) {
+      return (
+        <div className="px-4 py-6 text-sm" style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}>
+          ページ情報を読み込み中です。
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-2 gap-3 p-4">
+        {normalizedOrderedThumbnailPageNumbers.map((pageNumber) => {
+          return (
+            <PdfThumbnailItem
+              key={`pdf-thumbnail-${documentController.documentKey}-${pageNumber}`}
+              documentKey={documentController.documentKey}
+              pageNumber={pageNumber}
+              baseSize={documentController.pageSizes[pageNumber]}
+              isActive={activePageNumbers.has(pageNumber)}
+              isBookmarked={bookmarkedPageNumbers.has(pageNumber)}
+              isDragging={draggingPageNumber === pageNumber}
+              isDropTarget={
+                dropTargetPageNumber === pageNumber &&
+                draggingPageNumber !== null &&
+                draggingPageNumber !== pageNumber
+              }
+              onSelect={handleSelectPage}
+              onToggleBookmark={onToggleBookmark}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onDragEnd={handleDragEnd}
+              rootElement={scrollRootElement}
+              acquirePage={documentController.acquirePage}
+              setPageSize={documentController.setPageSize}
+            />
+          );
+        })}
+      </div>
+    );
+  };
+
+  const panelContent = (
+    <>
+      {renderTabs}
+      <div
+        ref={handleScrollRootRef}
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+      >
+        {normalizedTab === "markdown"
+          ? renderMarkdownContent()
+          : normalizedTab === "outline"
+            ? renderOutlineContent()
+            : renderThumbnailContent()}
+      </div>
+    </>
+  );
 
   if (isMobileViewport) {
-    const MobileToggleIcon = getTabIcon(selectedTab);
+    const SelectedTabIcon = TAB_ICON_BY_ID[normalizedTab];
 
     return (
       <>
@@ -877,13 +982,17 @@ export const PdfThumbnailPanel = ({
           onClick={() => onOpenChange(!isOpen)}
           className="absolute left-3 top-3 z-30 inline-flex h-11 w-11 items-center justify-center rounded-full border backdrop-blur-sm transition-colors duration-150"
           style={{
-            color: PDF_PANEL_COLORS.textStrong,
+            color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
             background: "rgba(248, 247, 245, 0.94)",
-            borderColor: PDF_PANEL_COLORS.surfaceMuted,
+            borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
             boxShadow: "0 10px 22px rgba(216, 175, 181, 0.18)",
           }}
         >
-          {isOpen ? <XIcon className="h-4 w-4" /> : <MobileToggleIcon className="h-4 w-4" />}
+          {isOpen ? (
+            <XIcon className="h-4 w-4" />
+          ) : (
+            <SelectedTabIcon className="h-4 w-4" />
+          )}
         </button>
 
         {isOpen ? (
@@ -901,22 +1010,21 @@ export const PdfThumbnailPanel = ({
             isOpen ? "pointer-events-auto" : "pointer-events-none",
           )}
           style={{
-            width: "min(21rem, calc(100% - 1.5rem))",
+            width: "min(20rem, calc(100% - 1.5rem))",
             background: "linear-gradient(180deg, #F8F7F5 0%, #F7EFED 100%)",
-            borderColor: PDF_PANEL_COLORS.surfaceMuted,
-            boxShadow: PDF_PANEL_COLORS.shadow,
+            borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+            boxShadow: PDF_THUMBNAIL_PANEL_COLORS.shadow,
             opacity: isOpen ? 1 : 0,
             transform: isOpen ? "translateX(0)" : "translateX(calc(-100% - 1rem))",
           }}
         >
-          <PanelTabsBar selectedTab={selectedTab} onTabChange={onTabChange} />
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-            {activeTabContent}
-          </div>
+          {panelContent}
         </aside>
       </>
     );
   }
+
+  const CurrentTabIcon = TAB_ICON_BY_ID[normalizedTab];
 
   return (
     <aside
@@ -926,13 +1034,15 @@ export const PdfThumbnailPanel = ({
           ? `${DESKTOP_PANEL_WIDTH_PX}px`
           : `${DESKTOP_PANEL_COLLAPSED_WIDTH_PX}px`,
         background: "linear-gradient(180deg, #F8F7F5 0%, #F7EFED 100%)",
-        borderColor: PDF_PANEL_COLORS.surfaceMuted,
+        borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
       }}
     >
       <div className="flex h-full min-w-0">
         <div
-          className="flex w-16 shrink-0 flex-col items-center gap-2 border-r px-2 py-3"
-          style={{ borderColor: PDF_PANEL_COLORS.surfaceMuted }}
+          className="flex w-14 shrink-0 flex-col items-center gap-2 border-r px-2 py-3"
+          style={{
+            borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+          }}
         >
           <button
             type="button"
@@ -940,17 +1050,17 @@ export const PdfThumbnailPanel = ({
             onClick={() => onOpenChange(!isOpen)}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors duration-150"
             style={{
-              color: PDF_PANEL_COLORS.textStrong,
+              color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
               background: "rgba(248, 247, 245, 0.92)",
-              borderColor: PDF_PANEL_COLORS.surfaceMuted,
+              borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
               boxShadow: "0 6px 16px rgba(216, 175, 181, 0.16)",
             }}
           >
             <span className="relative inline-flex items-center justify-center">
-              <GridIcon className="h-4 w-4" />
+              <CurrentTabIcon className="h-4 w-4" />
               <span
                 className="absolute -right-4 top-1/2 -translate-y-1/2"
-                style={{ color: PDF_PANEL_COLORS.accent }}
+                style={{ color: PDF_THUMBNAIL_PANEL_COLORS.accent }}
               >
                 {isOpen ? (
                   <ChevronLeftIcon className="h-3 w-3" />
@@ -961,11 +1071,16 @@ export const PdfThumbnailPanel = ({
             </span>
           </button>
 
-          <PanelRailTabs
-            selectedTab={selectedTab}
-            isOpen={isOpen}
-            onSelectTab={handleDesktopTabShortcut}
-          />
+          <div
+            className="rounded-full px-2 py-1 text-[10px] font-semibold tabular-nums shadow-sm"
+            style={{
+              background: PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft,
+              color: PDF_THUMBNAIL_PANEL_COLORS.textMuted,
+              boxShadow: "0 4px 12px rgba(216, 175, 181, 0.12)",
+            }}
+          >
+            {documentController.numPages}
+          </div>
         </div>
 
         <div
@@ -975,10 +1090,7 @@ export const PdfThumbnailPanel = ({
           )}
           aria-hidden={!isOpen}
         >
-          <PanelTabsBar selectedTab={selectedTab} onTabChange={onTabChange} />
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-            {activeTabContent}
-          </div>
+          {panelContent}
         </div>
       </div>
     </aside>
