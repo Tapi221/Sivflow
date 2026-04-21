@@ -1,15 +1,10 @@
-
 import { useCallback, useEffect, useRef, useState } from "react";
-import type {
-  PdfScrollDiagnostics,
-  PdfScrollToPageOptions,
-} from "@/components/pdf/pdfViewerTypes";
+import type { PdfScrollDiagnostics } from "@/components/pdf/pdfViewerTypes";
 
 interface UsePdfCurrentPageOptions {
   numPages: number;
   pageTopOffsets: number[];
   pageNavigationPageNumbers?: number[];
-  pageScrollTopsByPageNumber?: Record<number, number>;
   onPageChange?: (page: number) => void;
 }
 
@@ -26,12 +21,13 @@ interface UsePdfCurrentPageResult {
   handleScroll: () => void;
   notifyLayoutChanged: () => void;
   resetNavigation: () => void;
-  scrollToPage: (page: number, options?: PdfScrollToPageOptions) => void;
+  scrollToPage: (page: number) => void;
   getScrollDiagnostics: () => PdfScrollDiagnostics | null;
   logScrollDiagnostics: () => void;
 }
 
 const VIEWPORT_PAGE_ANCHOR_RATIO = 0.35;
+const PROGRAMMATIC_NAVIGATION_LOCK_MS = 260;
 
 const clampPage = (page: number, numPages: number) => {
   const safeMax = Math.max(numPages, 1);
@@ -78,7 +74,7 @@ const findNearestPageFromOffsets = ({
   }
 
   let lo = 0;
-  let hi = Math.min(pageTopOffsets.length, pageNavigationPageNumbers.length) - 1;
+  let hi = Math.min(numPages, pageTopOffsets.length) - 1;
 
   while (lo < hi) {
     const mid = Math.floor((lo + hi) / 2);
@@ -112,7 +108,6 @@ export const usePdfCurrentPage = ({
   numPages,
   pageTopOffsets,
   pageNavigationPageNumbers,
-  pageScrollTopsByPageNumber,
   onPageChange,
 }: UsePdfCurrentPageOptions): UsePdfCurrentPageResult => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -126,15 +121,14 @@ export const usePdfCurrentPage = ({
     pageNavigationPageNumbers ??
       Array.from({ length: numPages }, (_, index) => index + 1),
   );
-  const pageScrollTopsByPageNumberRef = useRef<Record<number, number>>(
-    pageScrollTopsByPageNumber ?? {},
-  );
 
   const scrollRafRef = useRef<number | null>(null);
   const pageChangeRafRef = useRef<number | null>(null);
   const stateSyncRafRef = useRef<number | null>(null);
   const viewportSyncRafRef = useRef<number | null>(null);
   const pendingPageForCallbackRef = useRef<number | null>(null);
+  const programmaticNavigationPageRef = useRef<number | null>(null);
+  const programmaticNavigationUnlockTimerRef = useRef<number | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [scrollViewport, setScrollViewport] = useState<ScrollViewportState>({
@@ -156,9 +150,14 @@ export const usePdfCurrentPage = ({
       Array.from({ length: numPages }, (_, index) => index + 1);
   }, [numPages, pageNavigationPageNumbers]);
 
-  useEffect(() => {
-    pageScrollTopsByPageNumberRef.current = pageScrollTopsByPageNumber ?? {};
-  }, [pageScrollTopsByPageNumber]);
+  const clearProgrammaticNavigationLock = useCallback(() => {
+    programmaticNavigationPageRef.current = null;
+
+    if (programmaticNavigationUnlockTimerRef.current !== null) {
+      window.clearTimeout(programmaticNavigationUnlockTimerRef.current);
+      programmaticNavigationUnlockTimerRef.current = null;
+    }
+  }, []);
 
   const cancelPendingRafs = useCallback(() => {
     if (scrollRafRef.current !== null) {
@@ -264,6 +263,12 @@ export const usePdfCurrentPage = ({
   );
 
   const estimateCurrentPageFromScroll = useCallback(() => {
+    const lockedPage = programmaticNavigationPageRef.current;
+    if (typeof lockedPage === "number") {
+      commitCurrentPage(lockedPage);
+      return;
+    }
+
     const container = scrollContainerRef.current;
     if (!container || numPages <= 0) {
       return;
@@ -271,7 +276,6 @@ export const usePdfCurrentPage = ({
 
     const viewportAnchorTop =
       container.scrollTop + container.clientHeight * VIEWPORT_PAGE_ANCHOR_RATIO;
-
     const nextPage = findNearestPageFromOffsets({
       scrollTop: viewportAnchorTop,
       pageTopOffsets: pageTopOffsetsRef.current,
@@ -301,6 +305,7 @@ export const usePdfCurrentPage = ({
 
   const resetNavigation = useCallback(() => {
     cancelPendingRafs();
+    clearProgrammaticNavigationLock();
     pendingPageForCallbackRef.current = null;
     currentPageRef.current = 1;
     scheduleCurrentPageStateSync(1);
@@ -314,33 +319,44 @@ export const usePdfCurrentPage = ({
     syncScrollViewportState();
   }, [
     cancelPendingRafs,
+    clearProgrammaticNavigationLock,
     scheduleCurrentPageStateSync,
     scheduleOnPageChange,
     syncScrollViewportState,
   ]);
 
   const scrollToPage = useCallback(
-    (page: number, options?: PdfScrollToPageOptions) => {
+    (page: number) => {
       const container = scrollContainerRef.current;
       if (!container) {
         return;
       }
 
       const clamped = clampPage(page, numPages);
+      const anchorPage =
+        pageNavigationPageNumbersRef.current[clamped - 1] ?? clamped;
       const targetTop =
-        pageScrollTopsByPageNumberRef.current[clamped] ??
+        pageTopOffsetsRef.current[anchorPage - 1] ??
         pageTopOffsetsRef.current[clamped - 1] ??
         0;
-      const behavior = options?.behavior ?? "smooth";
 
-      container.scrollTo({ top: targetTop, behavior });
+      programmaticNavigationPageRef.current = clamped;
+      commitCurrentPage(clamped);
+      container.scrollTo({ top: targetTop, behavior: "auto" });
+      syncScrollViewportState();
 
-      if (behavior === "auto") {
-        commitCurrentPage(clamped);
-        scheduleScrollViewportSync();
+      if (programmaticNavigationUnlockTimerRef.current !== null) {
+        window.clearTimeout(programmaticNavigationUnlockTimerRef.current);
       }
+
+      programmaticNavigationUnlockTimerRef.current = window.setTimeout(() => {
+        programmaticNavigationUnlockTimerRef.current = null;
+        programmaticNavigationPageRef.current = null;
+        syncScrollViewportState();
+        estimateCurrentPageFromScroll();
+      }, PROGRAMMATIC_NAVIGATION_LOCK_MS);
     },
-    [commitCurrentPage, numPages, scheduleScrollViewportSync],
+    [commitCurrentPage, estimateCurrentPageFromScroll, numPages, syncScrollViewportState],
   );
 
   const getScrollDiagnostics = useCallback((): PdfScrollDiagnostics | null => {
@@ -439,6 +455,8 @@ export const usePdfCurrentPage = ({
 
   useEffect(() => {
     if (numPages <= 0) {
+      clearProgrammaticNavigationLock();
+
       if (currentPageRef.current !== 1) {
         currentPageRef.current = 1;
         scheduleCurrentPageStateSync(1);
@@ -461,6 +479,7 @@ export const usePdfCurrentPage = ({
       scheduleCurrentPageStateSync(clamped);
     }
   }, [
+    clearProgrammaticNavigationLock,
     currentPage,
     numPages,
     scheduleCurrentPageStateSync,
@@ -472,16 +491,8 @@ export const usePdfCurrentPage = ({
       return;
     }
 
-    const currentVisualIndex = pageNavigationPageNumbersRef.current.findIndex(
-      (pageNumber) => pageNumber === currentPageRef.current,
-    );
-
-    if (currentVisualIndex < 0) {
-      return;
-    }
-
     const normalizedCurrentPage =
-      pageNavigationPageNumbersRef.current[currentVisualIndex] ??
+      pageNavigationPageNumbersRef.current[currentPageRef.current - 1] ??
       currentPageRef.current;
 
     if (normalizedCurrentPage === currentPageRef.current) {
@@ -505,16 +516,16 @@ export const usePdfCurrentPage = ({
     estimateCurrentPageFromScroll,
     pageTopOffsets,
     pageNavigationPageNumbers,
-    pageScrollTopsByPageNumber,
     scheduleScrollViewportSync,
   ]);
 
   useEffect(() => {
     return () => {
       cancelPendingRafs();
+      clearProgrammaticNavigationLock();
       pendingPageForCallbackRef.current = null;
     };
-  }, [cancelPendingRafs]);
+  }, [cancelPendingRafs, clearProgrammaticNavigationLock]);
 
   return {
     containerRef,
