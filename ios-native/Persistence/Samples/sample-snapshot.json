@@ -1,0 +1,188 @@
+{
+  "metadata": {
+    "schemaVersion": 3,
+    "generationCounter": 7,
+    "createdAt": "2026-04-21T00:00:00Z",
+    "appVersion": "1.0.0",
+    "userId": "sample-user"
+  },
+  "data": {
+    "folders": [
+      {
+        "id": "folder-001",
+        "userId": "sample-user",
+        "deviceId": "device-ios",
+        "createdAt": "2026-04-01T00:00:00Z",
+        "updatedAt": "2026-04-20T00:00:00Z",
+        "isDeleted": false,
+        "parentFolderId": null,
+        "folderId": "folder-001",
+        "folderName": "Computer Science",
+        "folderColor": "indigo",
+        "orderIndex": 0,
+        "cloudSyncEnabled": false
+      }
+    ],
+    "cardSets": [
+      {
+        "id": "cardset-001",
+        "userId": "sample-user",
+        "deviceId": "device-ios",
+        "createdAt": "2026-04-01T00:00:00Z",
+        "updatedAt": "2026-04-20T00:00:00Z",
+        "isDeleted": false,
+        "folderId": "folder-001",
+        "name": "Algorithms",
+        "description": "bundle sample snapshot",
+        "orderIndex": 0,
+        "defaultDisplayMode": "fixed"
+      }
+    ],
+    "cards": [
+      {
+        "id": "card-001",
+        "userId": "sample-user",
+        "deviceId": "device-ios",
+        "createdAt": "2026-04-01T00:00:00Z",
+        "updatedAt": "2026-04-20T00:00:00Z",
+        "isDeleted": false,
+        "cardSetId": "cardset-001",
+        "folderId": "folder-001",
+        "orderIndex": 0,
+        "questionNumber": "Q1",
+        "title": "Binary Search",
+        "tagIds": ["tag-001"],
+        "front": {
+          "blocks": [
+            {
+              "id": "block-front-001",
+              "type": "text",
+              "orderIndex": 0,
+              "content": "Binary Search の時間計算量は？"
+            }
+          ]
+        },
+        "back": {
+          "blocks": [
+            {
+              "id": "block-back-001",
+              "type": "text",
+              "orderIndex": 0,
+              "content": "O(log n)"
+            },
+            {
+              "id": "block-back-002",
+              "type": "code",
+              "orderIndex": 1,
+              "code": {
+                "language": "swift",
+                "code": "let middle = (left + right) / 2"
+              }
+            }
+          ]
+        },
+        "isDraft": false,
+        "hasUncertainty": false,
+        "isCompleted": false,
+        "isSilent": false
+      },
+      {
+        "id": "card-002",
+        "userId": "sample-user",
+        "deviceId": "device-ios",
+        "createdAt": "2026-04-02T00:00:00Z",
+        "updatedAt": "2026-04-20T00:00:00Z",
+        "isDeleted": false,
+        "cardSetId": "cardset-001",
+        "folderId": "folder-001",
+        "orderIndex": 1,
+        "questionNumber": "Q2",
+        "title": "Master Theorem",
+        "tagIds": ["tag-001", "tag-002"],
+        "front": {
+          "blocks": [
+            {
+              "id": "block-front-010",
+              "type": "math",
+              "orderIndex": 0,
+              "math": {
+                "latex": "T(n)=2T(n/2)+n",
+                "displayMode": "block"
+              }
+            }
+          ]
+        },
+        "back": {
+          "blocks": [
+            {
+              "id": "block-back-010",
+              "type": "markdown",
+              "orderIndex": 0,
+              "markdown": "Case 2 により **O(n log n)**"
+            },
+            {
+              "id": "block-back-011",
+              "type": "image",
+              "orderIndex": 1,
+              "images": [
+                {
+                  "id": "image-001",
+                  "assetId": "asset-001",
+                  "remoteUrl": "https://example.invalid/assets/tree.png",
+                  "storagePath": "snapshots/assets/tree.png"
+                }
+              ]
+            }
+          ]
+        },
+        "isDraft": false,
+        "hasUncertainty": true,
+        "isCompleted": false,
+        "isSilent": false
+      }
+    ],
+    "reviews": [],
+    "settings": null,
+    "assets": [
+      {
+        "assetId": "asset-001",
+        "storagePath": "snapshots/assets/tree.png",
+        "mime": "image/png",
+        "naturalW": 1200,
+        "naturalH": 800,
+        "createdAt": "2026-04-20T00:00:00Z",
+        "updatedAt": "2026-04-20T00:00:00Z"
+      }
+    ],
+    "tagRecords": [
+      {
+        "id": "tag-001",
+        "name": "algorithm",
+        "nameLower": "algorithm",
+        "color": "indigo",
+        "userId": "sample-user",
+        "createdAt": "2026-04-01T00:00:00Z",
+        "updatedAt": "2026-04-20T00:00:00Z",
+        "deviceId": "device-ios",
+        "isDeleted": false,
+        "deletedAt": null,
+        "categoryId": null,
+        "parentId": null
+      },
+      {
+        "id": "tag-002",
+        "name": "recurrence",
+        "nameLower": "recurrence",
+        "color": "orange",
+        "userId": "sample-user",
+        "createdAt": "2026-04-01T00:00:00Z",
+        "updatedAt": "2026-04-20T00:00:00Z",
+        "deviceId": "device-ios",
+        "isDeleted": false,
+        "deletedAt": null,
+        "categoryId": null,
+        "parentId": null
+      }
+    ]
+  }
+}
