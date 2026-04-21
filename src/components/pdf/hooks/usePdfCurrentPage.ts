@@ -1,6 +1,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { PdfScrollDiagnostics } from "@/components/pdf/pdfViewerTypes";
+import type {
+  PdfScrollDiagnostics,
+  PdfScrollToPageOptions,
+} from "@/components/pdf/pdfViewerTypes";
 
 interface UsePdfCurrentPageOptions {
   numPages: number;
@@ -23,7 +26,7 @@ interface UsePdfCurrentPageResult {
   handleScroll: () => void;
   notifyLayoutChanged: () => void;
   resetNavigation: () => void;
-  scrollToPage: (page: number) => void;
+  scrollToPage: (page: number, options?: PdfScrollToPageOptions) => void;
   getScrollDiagnostics: () => PdfScrollDiagnostics | null;
   logScrollDiagnostics: () => void;
 }
@@ -317,7 +320,7 @@ export const usePdfCurrentPage = ({
   ]);
 
   const scrollToPage = useCallback(
-    (page: number) => {
+    (page: number, options?: PdfScrollToPageOptions) => {
       const container = scrollContainerRef.current;
       if (!container) {
         return;
@@ -328,10 +331,16 @@ export const usePdfCurrentPage = ({
         pageScrollTopsByPageNumberRef.current[clamped] ??
         pageTopOffsetsRef.current[clamped - 1] ??
         0;
+      const behavior = options?.behavior ?? "smooth";
 
-      container.scrollTo({ top: targetTop, behavior: "smooth" });
+      container.scrollTo({ top: targetTop, behavior });
+
+      if (behavior === "auto") {
+        commitCurrentPage(clamped);
+        scheduleScrollViewportSync();
+      }
     },
-    [numPages],
+    [commitCurrentPage, numPages, scheduleScrollViewportSync],
   );
 
   const getScrollDiagnostics = useCallback((): PdfScrollDiagnostics | null => {

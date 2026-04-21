@@ -31,8 +31,12 @@ export interface PdfScrollDiagnostics {
   }>;
 }
 
+export interface PdfScrollToPageOptions {
+  behavior?: ScrollBehavior;
+}
+
 export interface PdfViewerHandle {
-  scrollToPage: (page: number) => void;
+  scrollToPage: (page: number, options?: PdfScrollToPageOptions) => void;
   getScrollDiagnostics: () => PdfScrollDiagnostics | null;
   logScrollDiagnostics: () => void;
 }
