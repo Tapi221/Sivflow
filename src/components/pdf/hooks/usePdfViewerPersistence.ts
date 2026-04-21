@@ -30,6 +30,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 interface UsePdfViewerPersistenceOptions {
   docId: string;
   viewerState?: PdfViewerState | null;
+  bookmarkPages?: number[];
   getFitScale: (pageLayoutMode: PdfPageLayoutMode) => number;
   onDocumentUpdate?: (updates: {
     viewerState: PdfViewerState;
@@ -60,9 +61,26 @@ const sanitizeFitScale = (value: number) => {
   return clampScale(value);
 };
 
+const sanitizeBookmarkPages = (value: unknown): number[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      value
+        .filter((pageNumber): pageNumber is number => {
+          return typeof pageNumber === "number" && Number.isFinite(pageNumber);
+        })
+        .map((pageNumber) => Math.max(1, Math.trunc(pageNumber))),
+    ),
+  ).sort((left, right) => left - right);
+};
+
 export const usePdfViewerPersistence = ({
   docId,
   viewerState,
+  bookmarkPages,
   getFitScale,
   onDocumentUpdate,
 }: UsePdfViewerPersistenceOptions) => {
@@ -154,11 +172,15 @@ export const usePdfViewerPersistence = ({
     }
 
     debounceTimerRef.current = setTimeout(() => {
+      const sanitizedBookmarkPages = sanitizeBookmarkPages(bookmarkPages);
       const newViewerState: PdfViewerState = {
         currentPage: sanitizeCurrentPage(currentPage),
         scale: parseFloat(sanitizeScale(scale).toFixed(3)),
         fitMode,
         pageLayoutMode,
+        ...(sanitizedBookmarkPages.length > 0
+          ? { bookmarkPages: sanitizedBookmarkPages }
+          : {}),
       };
 
       saveViewerStateToSession(docId, newViewerState);
@@ -184,7 +206,15 @@ export const usePdfViewerPersistence = ({
         debounceTimerRef.current = null;
       }
     };
-  }, [currentPage, scale, fitMode, pageLayoutMode, docId, onDocumentUpdate]);
+  }, [
+    bookmarkPages,
+    currentPage,
+    scale,
+    fitMode,
+    pageLayoutMode,
+    docId,
+    onDocumentUpdate,
+  ]);
 
   useEffect(() => {
     if (fitMode !== "width") return;

@@ -22,11 +22,30 @@ interface PdfThumbnailItemProps {
   pageNumber: number;
   baseSize?: PageSize;
   isActive: boolean;
+  isBookmarked: boolean;
   onSelect: (pageNumber: number) => void;
+  onToggleBookmark: (pageNumber: number) => void;
   rootElement: HTMLElement | null;
   acquirePage: PdfDocumentController["acquirePage"];
   setPageSize: PdfDocumentController["setPageSize"];
 }
+
+interface IconProps {
+  className?: string;
+}
+
+const BookmarkIcon = ({ className }: IconProps) => {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className={className}
+    >
+      <path d="M6.2 3.25c-.994 0-1.8.806-1.8 1.8v11.273c0 .407.46.643.79.405L10 13.552l4.81 3.176a.487.487 0 0 0 .79-.405V5.05c0-.994-.806-1.8-1.8-1.8H6.2Z" />
+    </svg>
+  );
+};
 
 const arePageSizesEqual = (
   left: PageSize | undefined,
@@ -61,12 +80,15 @@ const PdfThumbnailItemComponent = ({
   pageNumber,
   baseSize,
   isActive,
+  isBookmarked,
   onSelect,
+  onToggleBookmark,
   rootElement,
   acquirePage,
   setPageSize,
 }: PdfThumbnailItemProps) => {
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const pageButtonRef = useRef<HTMLButtonElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const renderPassIdRef = useRef(0);
 
@@ -83,8 +105,8 @@ const PdfThumbnailItemComponent = ({
   }, [baseSize]);
 
   useEffect(() => {
-    const nextButton = buttonRef.current;
-    if (!nextButton || typeof IntersectionObserver === "undefined") {
+    const nextCard = cardRef.current;
+    if (!nextCard || typeof IntersectionObserver === "undefined") {
       setIsVisible(true);
       return;
     }
@@ -105,7 +127,7 @@ const PdfThumbnailItemComponent = ({
       },
     );
 
-    observer.observe(nextButton);
+    observer.observe(nextCard);
 
     return () => {
       observer.disconnect();
@@ -118,7 +140,7 @@ const PdfThumbnailItemComponent = ({
     }
 
     setIsVisible(true);
-    buttonRef.current?.scrollIntoView({
+    cardRef.current?.scrollIntoView({
       block: "nearest",
       inline: "nearest",
     });
@@ -148,8 +170,9 @@ const PdfThumbnailItemComponent = ({
       release();
     };
 
-    const isStale = () =>
-      disposed || renderPassIdRef.current !== renderPassId;
+    const isStale = () => {
+      return disposed || renderPassIdRef.current !== renderPassId;
+    };
 
     setRenderError(null);
     setIsRendered(false);
@@ -288,55 +311,84 @@ const PdfThumbnailItemComponent = ({
   ]);
 
   return (
-    <button
-      ref={buttonRef}
-      type="button"
-      onClick={() => onSelect(pageNumber)}
-      aria-label={`ページ ${pageNumber} を開く`}
-      className={cn(
-        "group relative flex min-w-0 flex-col gap-2 rounded-[20px] border p-2 text-left transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-semantic-color-action-primary)] focus-visible:ring-offset-2",
-        isActive ? "shadow-[0_10px_24px_rgba(15,23,42,0.08)]" : "hover:shadow-[0_10px_24px_rgba(15,23,42,0.05)]",
-      )}
-      style={{
-        color: "var(--ds-semantic-color-text-primary)",
-        borderColor: isActive
-          ? "var(--ds-color-primary-500)"
-          : "var(--ds-semantic-color-border-default)",
-        background: isActive
-          ? "var(--ds-semantic-color-background-sidebar-active)"
-          : "color-mix(in srgb, var(--ds-semantic-color-background-sidebar) 82%, white 18%)",
-      }}
-    >
-      {isActive ? (
-        <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-[var(--ds-color-primary-500)]" />
-      ) : null}
-
-      <div
-        className="relative flex w-full items-center justify-center overflow-hidden rounded-[16px] border border-[color-mix(in_srgb,var(--ds-semantic-color-border-default)_72%,white_28%)] bg-white p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
-        style={{ aspectRatio: pageAspectRatio }}
+    <div ref={cardRef} className="relative min-w-0">
+      <button
+        ref={pageButtonRef}
+        type="button"
+        onClick={() => onSelect(pageNumber)}
+        aria-label={`ページ ${pageNumber} を開く`}
+        className={cn(
+          "group relative flex w-full min-w-0 flex-col gap-2 rounded-[20px] border p-2 text-left transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-semantic-color-action-primary)] focus-visible:ring-offset-2",
+          isActive
+            ? "shadow-[0_10px_24px_rgba(15,23,42,0.08)]"
+            : "hover:shadow-[0_10px_24px_rgba(15,23,42,0.05)]",
+        )}
+        style={{
+          color: "var(--ds-semantic-color-text-primary)",
+          borderColor: isActive
+            ? "var(--ds-color-primary-500)"
+            : "var(--ds-semantic-color-border-default)",
+          background: isActive
+            ? "var(--ds-semantic-color-background-sidebar-active)"
+            : "color-mix(in srgb, var(--ds-semantic-color-background-sidebar) 82%, white 18%)",
+        }}
       >
-        {!isRendered && !renderError ? (
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,241,235,0.72))]" />
-        ) : null}
+        <div
+          className="relative flex w-full items-center justify-center overflow-hidden rounded-[16px] border border-[color-mix(in_srgb,var(--ds-semantic-color-border-default)_72%,white_28%)] bg-white p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
+          style={{ aspectRatio: pageAspectRatio }}
+        >
+          {!isRendered && !renderError ? (
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,241,235,0.72))]" />
+          ) : null}
 
-        <canvas ref={canvasRef} className="relative z-10 block max-w-full" />
+          <canvas ref={canvasRef} className="relative z-10 block max-w-full" />
 
-        {renderError ? (
-          <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-[11px] font-medium text-[var(--ds-semantic-color-text-secondary)]">
-            {renderError}
-          </div>
-        ) : null}
-      </div>
+          {renderError ? (
+            <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-[11px] font-medium text-[var(--ds-semantic-color-text-secondary)]">
+              {renderError}
+            </div>
+          ) : null}
+        </div>
 
-      <div className="flex items-center justify-between gap-2 px-1">
-        <span className="text-[12px] font-semibold tabular-nums text-[var(--ds-semantic-color-text-strong)]">
-          {pageNumber}
-        </span>
-        <span className="text-[10px] font-medium tracking-[0.16em] text-[var(--ds-semantic-color-text-secondary)]">
-          PAGE
-        </span>
-      </div>
-    </button>
+        <div className="flex items-center justify-between gap-2 px-1">
+          <span className="text-[12px] font-semibold tabular-nums text-[var(--ds-semantic-color-text-strong)]">
+            {pageNumber}
+          </span>
+          <span className="text-[10px] font-medium tracking-[0.16em] text-[var(--ds-semantic-color-text-secondary)]">
+            PAGE
+          </span>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        aria-label={
+          isBookmarked
+            ? `ページ ${pageNumber} のブックマークを外す`
+            : `ページ ${pageNumber} をブックマークする`
+        }
+        aria-pressed={isBookmarked}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          onToggleBookmark(pageNumber);
+        }}
+        className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border shadow-[0_4px_12px_rgba(15,23,42,0.08)] transition-all duration-150 ease-out hover:scale-[1.03]"
+        style={{
+          borderColor: isBookmarked
+            ? "color-mix(in srgb, var(--ds-color-primary-500) 72%, white 28%)"
+            : "var(--ds-semantic-color-border-default)",
+          background: isBookmarked
+            ? "color-mix(in srgb, var(--ds-semantic-color-action-primary-soft) 72%, white 28%)"
+            : "rgba(255,255,255,0.9)",
+          color: isBookmarked
+            ? "var(--ds-semantic-color-action-primary)"
+            : "var(--ds-semantic-color-text-secondary)",
+        }}
+      >
+        <BookmarkIcon className="h-4 w-4" />
+      </button>
+    </div>
   );
 };
 
@@ -349,7 +401,9 @@ const arePdfThumbnailItemPropsEqual = (
     left.pageNumber === right.pageNumber &&
     arePageSizesEqual(left.baseSize, right.baseSize) &&
     left.isActive === right.isActive &&
+    left.isBookmarked === right.isBookmarked &&
     left.onSelect === right.onSelect &&
+    left.onToggleBookmark === right.onToggleBookmark &&
     left.rootElement === right.rootElement &&
     left.acquirePage === right.acquirePage &&
     left.setPageSize === right.setPageSize

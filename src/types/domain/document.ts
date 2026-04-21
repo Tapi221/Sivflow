@@ -7,9 +7,9 @@ export type PdfPageLayoutMode = "single" | "double";
 export interface PdfViewerState {
   currentPage?: number;
   scale?: number;
-  zoomPercent?: number;
   fitMode?: "width" | "manual";
   pageLayoutMode?: PdfPageLayoutMode;
+  bookmarkPages?: number[];
 }
 
 export interface DocumentItem extends BaseEntity {
