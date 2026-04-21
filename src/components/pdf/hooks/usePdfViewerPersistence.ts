@@ -1,6 +1,6 @@
+
 /**
- * PDF ビューアの表示状態（currentPage / scale / fitMode / pageLayoutMode）と
- * サイドパネル状態（tab / thumbnailOrder / bookmarkPages）を管理するフック。
+ * PDF ビューアの表示状態（currentPage / scale / fitMode / pageLayoutMode）を管理するフック。
  */
 import {
   clampScale,
@@ -10,7 +10,11 @@ import {
   VIEWER_STATE_DEBOUNCE_MS,
   ZOOM_STEP,
 } from "@/components/pdf/pdfViewerStateStorage";
-import type { PdfPageLayoutMode, PdfSidePanelTab, PdfViewerState } from "@/types";
+import type {
+  PdfPageLayoutMode,
+  PdfSidePanelTab,
+  PdfViewerState,
+} from "@/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UsePdfViewerPersistenceOptions {
@@ -76,24 +80,15 @@ const sanitizeThumbnailOrder = (value: unknown): number[] => {
     return [];
   }
 
-  const seenPageNumbers = new Set<number>();
-  const nextThumbnailOrder: number[] = [];
-
-  value.forEach((pageNumber) => {
-    if (typeof pageNumber !== "number" || !Number.isFinite(pageNumber)) {
-      return;
-    }
-
-    const normalizedPageNumber = Math.max(1, Math.trunc(pageNumber));
-    if (seenPageNumbers.has(normalizedPageNumber)) {
-      return;
-    }
-
-    seenPageNumbers.add(normalizedPageNumber);
-    nextThumbnailOrder.push(normalizedPageNumber);
-  });
-
-  return nextThumbnailOrder;
+  return Array.from(
+    new Set(
+      value
+        .filter((pageNumber): pageNumber is number => {
+          return typeof pageNumber === "number" && Number.isFinite(pageNumber);
+        })
+        .map((pageNumber) => Math.max(1, Math.trunc(pageNumber))),
+    ),
+  );
 };
 
 export const usePdfViewerPersistence = ({
@@ -113,8 +108,8 @@ export const usePdfViewerPersistence = ({
 
   const isHydratingRef = useRef(false);
   const initializedRef = useRef(false);
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastDocIdRef = useRef<string | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (lastDocIdRef.current !== docId && lastDocIdRef.current !== null) {
@@ -137,7 +132,7 @@ export const usePdfViewerPersistence = ({
     initializedRef.current = true;
     isHydratingRef.current = true;
 
-    let restoredState: PdfViewerState | null = getViewerStateFromSession(docId);
+    let restoredState = getViewerStateFromSession(docId);
 
     if (!restoredState && viewerState) {
       restoredState = viewerState;
@@ -146,19 +141,29 @@ export const usePdfViewerPersistence = ({
     if (restoredState) {
       queueMicrotask(() => {
         setCurrentPage(sanitizeCurrentPage(restoredState?.currentPage));
-        setScale(sanitizeScale(restoredState?.scale));
-        setFitMode(
-          restoredState?.fitMode === "manual" || restoredState?.fitMode === "width"
-            ? restoredState.fitMode
-            : "width",
-        );
-        setPageLayoutMode(
-          restoredState?.pageLayoutMode === "double" ||
-            restoredState?.pageLayoutMode === "single"
-            ? restoredState.pageLayoutMode
-            : "single",
-        );
       });
+
+      queueMicrotask(() => {
+        setScale(sanitizeScale(restoredState?.scale));
+      });
+
+      if (
+        restoredState.fitMode === "width" ||
+        restoredState.fitMode === "manual"
+      ) {
+        queueMicrotask(() => {
+          setFitMode(restoredState.fitMode ?? "width");
+        });
+      }
+
+      if (
+        restoredState.pageLayoutMode === "single" ||
+        restoredState.pageLayoutMode === "double"
+      ) {
+        queueMicrotask(() => {
+          setPageLayoutMode(restoredState.pageLayoutMode ?? "single");
+        });
+      }
     }
 
     Promise.resolve().then(() => {
@@ -177,30 +182,33 @@ export const usePdfViewerPersistence = ({
 
     debounceTimerRef.current = setTimeout(() => {
       const sanitizedBookmarkPages = sanitizeBookmarkPages(bookmarkPages);
-      const sanitizedThumbnailOrder = sanitizeThumbnailOrder(thumbnailOrder);
       const sanitizedSidePanelTab = sanitizeSidePanelTab(sidePanelTab);
-      const nextViewerState: PdfViewerState = {
+      const sanitizedThumbnailOrder = sanitizeThumbnailOrder(thumbnailOrder);
+
+      const newViewerState: PdfViewerState = {
         currentPage: sanitizeCurrentPage(currentPage),
-        scale: Number(sanitizeScale(scale).toFixed(3)),
+        scale: parseFloat(sanitizeScale(scale).toFixed(3)),
         fitMode,
         pageLayoutMode,
         ...(sanitizedBookmarkPages.length > 0
           ? { bookmarkPages: sanitizedBookmarkPages }
           : {}),
+        sidePanelTab: sanitizedSidePanelTab,
         ...(sanitizedThumbnailOrder.length > 0
           ? { thumbnailOrder: sanitizedThumbnailOrder }
           : {}),
-        sidePanelTab: sanitizedSidePanelTab,
       };
 
-      saveViewerStateToSession(docId, nextViewerState);
+      saveViewerStateToSession(docId, newViewerState);
 
       if (onDocumentUpdate) {
-        onDocumentUpdate({ viewerState: nextViewerState }).catch((errorValue) => {
+        onDocumentUpdate({ viewerState: newViewerState }).catch((errorValue) => {
           console.warn(
             "[usePdfViewerPersistence] Failed to save viewer state",
             errorValue,
-            { docId },
+            {
+              docId,
+            },
           );
         });
       }
@@ -233,26 +241,26 @@ export const usePdfViewerPersistence = ({
 
     const nextFitScale = sanitizeFitScale(getFitScale(pageLayoutMode));
     queueMicrotask(() => {
-      setScale((previousScale) => {
-        return Math.abs(previousScale - nextFitScale) < EPSILON
+      setScale((previousScale) =>
+        Math.abs(previousScale - nextFitScale) < EPSILON
           ? previousScale
-          : nextFitScale;
-      });
+          : nextFitScale,
+      );
     });
   }, [fitMode, getFitScale, pageLayoutMode]);
 
   const handleZoomOut = useCallback(() => {
     setFitMode("manual");
-    setScale((previousScale) => {
-      return clampScale(Number((previousScale - ZOOM_STEP).toFixed(2)));
-    });
+    setScale((previousScale) =>
+      clampScale(parseFloat((previousScale - ZOOM_STEP).toFixed(2))),
+    );
   }, []);
 
   const handleZoomIn = useCallback(() => {
     setFitMode("manual");
-    setScale((previousScale) => {
-      return clampScale(Number((previousScale + ZOOM_STEP).toFixed(2)));
-    });
+    setScale((previousScale) =>
+      clampScale(parseFloat((previousScale + ZOOM_STEP).toFixed(2))),
+    );
   }, []);
 
   const handleFitWidth = useCallback(() => {
@@ -265,22 +273,21 @@ export const usePdfViewerPersistence = ({
       return;
     }
 
-    const roundedScale = Number(clampScale(nextScale).toFixed(3));
+    const clamped = clampScale(nextScale);
+    const rounded = parseFloat(clamped.toFixed(3));
     setFitMode("manual");
-    setScale((previousScale) => {
-      return Math.abs(previousScale - roundedScale) < EPSILON
-        ? previousScale
-        : roundedScale;
-    });
+    setScale((previousScale) =>
+      Math.abs(previousScale - rounded) < EPSILON ? previousScale : rounded,
+    );
   }, []);
 
   const handlePageLayoutModeChange = useCallback(
     (nextPageLayoutMode: PdfPageLayoutMode) => {
-      setPageLayoutMode((previousPageLayoutMode) => {
-        return previousPageLayoutMode === nextPageLayoutMode
+      setPageLayoutMode((previousPageLayoutMode) =>
+        previousPageLayoutMode === nextPageLayoutMode
           ? previousPageLayoutMode
-          : nextPageLayoutMode;
-      });
+          : nextPageLayoutMode,
+      );
     },
     [],
   );

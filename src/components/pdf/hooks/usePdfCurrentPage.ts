@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PdfScrollDiagnostics } from "@/components/pdf/pdfViewerTypes";
 
@@ -5,6 +6,7 @@ interface UsePdfCurrentPageOptions {
   numPages: number;
   pageTopOffsets: number[];
   pageNavigationPageNumbers?: number[];
+  pageScrollTopsByPageNumber?: Record<number, number>;
   onPageChange?: (page: number) => void;
 }
 
@@ -73,7 +75,7 @@ const findNearestPageFromOffsets = ({
   }
 
   let lo = 0;
-  let hi = Math.min(numPages, pageTopOffsets.length) - 1;
+  let hi = Math.min(pageTopOffsets.length, pageNavigationPageNumbers.length) - 1;
 
   while (lo < hi) {
     const mid = Math.floor((lo + hi) / 2);
@@ -107,6 +109,7 @@ export const usePdfCurrentPage = ({
   numPages,
   pageTopOffsets,
   pageNavigationPageNumbers,
+  pageScrollTopsByPageNumber,
   onPageChange,
 }: UsePdfCurrentPageOptions): UsePdfCurrentPageResult => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -119,6 +122,9 @@ export const usePdfCurrentPage = ({
   const pageNavigationPageNumbersRef = useRef(
     pageNavigationPageNumbers ??
       Array.from({ length: numPages }, (_, index) => index + 1),
+  );
+  const pageScrollTopsByPageNumberRef = useRef<Record<number, number>>(
+    pageScrollTopsByPageNumber ?? {},
   );
 
   const scrollRafRef = useRef<number | null>(null);
@@ -146,6 +152,10 @@ export const usePdfCurrentPage = ({
       pageNavigationPageNumbers ??
       Array.from({ length: numPages }, (_, index) => index + 1);
   }, [numPages, pageNavigationPageNumbers]);
+
+  useEffect(() => {
+    pageScrollTopsByPageNumberRef.current = pageScrollTopsByPageNumber ?? {};
+  }, [pageScrollTopsByPageNumber]);
 
   const cancelPendingRafs = useCallback(() => {
     if (scrollRafRef.current !== null) {
@@ -258,6 +268,7 @@ export const usePdfCurrentPage = ({
 
     const viewportAnchorTop =
       container.scrollTop + container.clientHeight * VIEWPORT_PAGE_ANCHOR_RATIO;
+
     const nextPage = findNearestPageFromOffsets({
       scrollTop: viewportAnchorTop,
       pageTopOffsets: pageTopOffsetsRef.current,
@@ -313,10 +324,8 @@ export const usePdfCurrentPage = ({
       }
 
       const clamped = clampPage(page, numPages);
-      const anchorPage =
-        pageNavigationPageNumbersRef.current[clamped - 1] ?? clamped;
       const targetTop =
-        pageTopOffsetsRef.current[anchorPage - 1] ??
+        pageScrollTopsByPageNumberRef.current[clamped] ??
         pageTopOffsetsRef.current[clamped - 1] ??
         0;
 
@@ -454,8 +463,16 @@ export const usePdfCurrentPage = ({
       return;
     }
 
+    const currentVisualIndex = pageNavigationPageNumbersRef.current.findIndex(
+      (pageNumber) => pageNumber === currentPageRef.current,
+    );
+
+    if (currentVisualIndex < 0) {
+      return;
+    }
+
     const normalizedCurrentPage =
-      pageNavigationPageNumbersRef.current[currentPageRef.current - 1] ??
+      pageNavigationPageNumbersRef.current[currentVisualIndex] ??
       currentPageRef.current;
 
     if (normalizedCurrentPage === currentPageRef.current) {
@@ -479,6 +496,7 @@ export const usePdfCurrentPage = ({
     estimateCurrentPageFromScroll,
     pageTopOffsets,
     pageNavigationPageNumbers,
+    pageScrollTopsByPageNumber,
     scheduleScrollViewportSync,
   ]);
 
