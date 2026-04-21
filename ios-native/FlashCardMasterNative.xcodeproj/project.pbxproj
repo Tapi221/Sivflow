@@ -7,48 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A1B2C3D4E5F6000000000101 /* FlashCardMasterNativeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000201 /* FlashCardMasterNativeApp.swift */; };
-		A1B2C3D4E5F6000000000102 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000202 /* AppEnvironment.swift */; };
-		A1B2C3D4E5F6000000000103 /* StudyRootScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000203 /* StudyRootScreen.swift */; };
-		A1B2C3D4E5F6000000000104 /* FolderListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000204 /* FolderListScreen.swift */; };
-		A1B2C3D4E5F6000000000105 /* CardSetListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000205 /* CardSetListScreen.swift */; };
-		A1B2C3D4E5F6000000000106 /* CardListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000206 /* CardListScreen.swift */; };
-		A1B2C3D4E5F6000000000107 /* CardDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000207 /* CardDetailScreen.swift */; };
-		A1B2C3D4E5F6000000000108 /* StudyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000208 /* StudyModels.swift */; };
-		A1B2C3D4E5F6000000000109 /* StudyBrowsingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000209 /* StudyBrowsingService.swift */; };
-		A1B2C3D4E5F6000000000110 /* SnapshotDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000210 /* SnapshotDTO.swift */; };
-		A1B2C3D4E5F6000000000111 /* StudySnapshotMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000211 /* StudySnapshotMapper.swift */; };
-		A1B2C3D4E5F6000000000112 /* SnapshotBundleLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000212 /* SnapshotBundleLoader.swift */; };
-		A1B2C3D4E5F6000000000113 /* MockStudyBrowsingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000213 /* MockStudyBrowsingService.swift */; };
-		A1B2C3D4E5F6000000000114 /* AppSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000214 /* AppSpacing.swift */; };
-		A1B2C3D4E5F6000000000115 /* EntityRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000215 /* EntityRow.swift */; };
-		A1B2C3D4E5F6000000000116 /* EmptyPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000216 /* EmptyPlaceholderView.swift */; };
-		A1B2C3D4E5F6000000000117 /* sample-snapshot.json in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000217 /* sample-snapshot.json */; };
+		A000000000000000000001 /* FlashCardMasterNativeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000101 /* FlashCardMasterNativeApp.swift */; };
+		A000000000000000000002 /* StudyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000102 /* StudyModels.swift */; };
+		A000000000000000000003 /* StudyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000103 /* StudyStore.swift */; };
+		A000000000000000000004 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000104 /* ContentView.swift */; };
+		A000000000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A000000000000000000105 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A1B2C3D4E5F6000000000201 /* FlashCardMasterNativeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashCardMasterNativeApp.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000202 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000203 /* StudyRootScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyRootScreen.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000204 /* FolderListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderListScreen.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000205 /* CardSetListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSetListScreen.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000206 /* CardListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardListScreen.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000207 /* CardDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDetailScreen.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000208 /* StudyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyModels.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000209 /* StudyBrowsingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyBrowsingService.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000210 /* SnapshotDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotDTO.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000211 /* StudySnapshotMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudySnapshotMapper.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000212 /* SnapshotBundleLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotBundleLoader.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000213 /* MockStudyBrowsingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStudyBrowsingService.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000214 /* AppSpacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSpacing.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000215 /* EntityRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityRow.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000216 /* EmptyPlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyPlaceholderView.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000217 /* sample-snapshot.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sample-snapshot.json; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000218 /* FlashCardMasterNative.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlashCardMasterNative.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A000000000000000000101 /* FlashCardMasterNativeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashCardMasterNativeApp.swift; sourceTree = "<group>"; };
+		A000000000000000000102 /* StudyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyModels.swift; sourceTree = "<group>"; };
+		A000000000000000000103 /* StudyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyStore.swift; sourceTree = "<group>"; };
+		A000000000000000000104 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A000000000000000000105 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A000000000000000000201 /* FlashCardMasterNative.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = FlashCardMasterNative.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		A1B2C3D4E5F6000000000301 /* Frameworks */ = {
+		A000000000000000000301 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -58,212 +34,70 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A1B2C3D4E5F6000000000401 = {
+		A000000000000000000401 = {
 			isa = PBXGroup;
 			children = (
-				A1B2C3D4E5F6000000000402 /* App */,
-				A1B2C3D4E5F6000000000403 /* Features */,
-				A1B2C3D4E5F6000000000404 /* Core */,
-				A1B2C3D4E5F6000000000405 /* Persistence */,
-				A1B2C3D4E5F6000000000406 /* DesignSystem */,
-				A1B2C3D4E5F6000000000407 /* Products */,
+				A000000000000000000402 /* FlashCardMasterNative */,
+				A000000000000000000403 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		A1B2C3D4E5F6000000000402 /* App */ = {
+		A000000000000000000402 /* FlashCardMasterNative */ = {
 			isa = PBXGroup;
-			path = App;
+			path = FlashCardMasterNative;
 			sourceTree = "<group>";
 			children = (
-				A1B2C3D4E5F6000000000201 /* FlashCardMasterNativeApp.swift */,
-				A1B2C3D4E5F6000000000202 /* AppEnvironment.swift */,
+				A000000000000000000101 /* FlashCardMasterNativeApp.swift */,
+				A000000000000000000102 /* StudyModels.swift */,
+				A000000000000000000103 /* StudyStore.swift */,
+				A000000000000000000104 /* ContentView.swift */,
+				A000000000000000000105 /* Assets.xcassets */,
 			);
 		};
-		A1B2C3D4E5F6000000000403 /* Features */ = {
-			isa = PBXGroup;
-			path = Features;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000408 /* Root */,
-				A1B2C3D4E5F6000000000409 /* Folders */,
-				A1B2C3D4E5F6000000000410 /* CardSets */,
-				A1B2C3D4E5F6000000000411 /* Cards */,
-			);
-		};
-		A1B2C3D4E5F6000000000404 /* Core */ = {
-			isa = PBXGroup;
-			path = Core;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000412 /* Models */,
-				A1B2C3D4E5F6000000000413 /* Services */,
-			);
-		};
-		A1B2C3D4E5F6000000000405 /* Persistence */ = {
-			isa = PBXGroup;
-			path = Persistence;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000414 /* DTO */,
-				A1B2C3D4E5F6000000000415 /* Loaders */,
-				A1B2C3D4E5F6000000000416 /* Mock */,
-				A1B2C3D4E5F6000000000417 /* Samples */,
-			);
-		};
-		A1B2C3D4E5F6000000000406 /* DesignSystem */ = {
-			isa = PBXGroup;
-			path = DesignSystem;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000418 /* Theme */,
-				A1B2C3D4E5F6000000000419 /* Components */,
-			);
-		};
-		A1B2C3D4E5F6000000000407 /* Products */ = {
+		A000000000000000000403 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A1B2C3D4E5F6000000000218 /* FlashCardMasterNative.app */,
+				A000000000000000000201 /* FlashCardMasterNative.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A1B2C3D4E5F6000000000408 /* Root */ = {
-			isa = PBXGroup;
-			path = Root;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000203 /* StudyRootScreen.swift */,
-			);
-		};
-		A1B2C3D4E5F6000000000409 /* Folders */ = {
-			isa = PBXGroup;
-			path = Folders;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000204 /* FolderListScreen.swift */,
-			);
-		};
-		A1B2C3D4E5F6000000000410 /* CardSets */ = {
-			isa = PBXGroup;
-			path = CardSets;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000205 /* CardSetListScreen.swift */,
-			);
-		};
-		A1B2C3D4E5F6000000000411 /* Cards */ = {
-			isa = PBXGroup;
-			path = Cards;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000206 /* CardListScreen.swift */,
-				A1B2C3D4E5F6000000000207 /* CardDetailScreen.swift */,
-			);
-		};
-		A1B2C3D4E5F6000000000412 /* Models */ = {
-			isa = PBXGroup;
-			path = Models;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000208 /* StudyModels.swift */,
-			);
-		};
-		A1B2C3D4E5F6000000000413 /* Services */ = {
-			isa = PBXGroup;
-			path = Services;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000209 /* StudyBrowsingService.swift */,
-			);
-		};
-		A1B2C3D4E5F6000000000414 /* DTO */ = {
-			isa = PBXGroup;
-			path = DTO;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000210 /* SnapshotDTO.swift */,
-				A1B2C3D4E5F6000000000211 /* StudySnapshotMapper.swift */,
-			);
-		};
-		A1B2C3D4E5F6000000000415 /* Loaders */ = {
-			isa = PBXGroup;
-			path = Loaders;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000212 /* SnapshotBundleLoader.swift */,
-			);
-		};
-		A1B2C3D4E5F6000000000416 /* Mock */ = {
-			isa = PBXGroup;
-			path = Mock;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000213 /* MockStudyBrowsingService.swift */,
-			);
-		};
-		A1B2C3D4E5F6000000000417 /* Samples */ = {
-			isa = PBXGroup;
-			path = Samples;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000217 /* sample-snapshot.json */,
-			);
-		};
-		A1B2C3D4E5F6000000000418 /* Theme */ = {
-			isa = PBXGroup;
-			path = Theme;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000214 /* AppSpacing.swift */,
-			);
-		};
-		A1B2C3D4E5F6000000000419 /* Components */ = {
-			isa = PBXGroup;
-			path = Components;
-			sourceTree = "<group>";
-			children = (
-				A1B2C3D4E5F6000000000215 /* EntityRow.swift */,
-				A1B2C3D4E5F6000000000216 /* EmptyPlaceholderView.swift */,
-			);
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A1B2C3D4E5F6000000000001 /* FlashCardMasterNative */ = {
+		A000000000000000000501 /* FlashCardMasterNative */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A1B2C3D4E5F6000000000502 /* Build configuration list for PBXNativeTarget "FlashCardMasterNative" */;
+			buildConfigurationList = A000000000000000000701 /* Build configuration list for PBXNativeTarget "FlashCardMasterNative" */;
 			buildPhases = (
-				A1B2C3D4E5F6000000000302 /* Sources */,
-				A1B2C3D4E5F6000000000301 /* Frameworks */,
-				A1B2C3D4E5F6000000000303 /* Resources */,
+				A000000000000000000302 /* Sources */,
+				A000000000000000000301 /* Frameworks */,
+				A000000000000000000303 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = FlashCardMasterNative;
-			packageProductDependencies = (
-			);
 			productName = FlashCardMasterNative;
-			productReference = A1B2C3D4E5F6000000000218 /* FlashCardMasterNative.app */;
+			productReference = A000000000000000000201 /* FlashCardMasterNative.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		A1B2C3D4E5F6000000000501 /* Project object */ = {
+		A000000000000000000601 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
-					A1B2C3D4E5F6000000000001 = {
+					A000000000000000000501 = {
 						CreatedOnToolsVersion = 16.0;
 					};
 				};
 			};
-			buildConfigurationList = A1B2C3D4E5F6000000000503 /* Build configuration list for PBXProject "FlashCardMasterNative" */;
+			buildConfigurationList = A000000000000000000702 /* Build configuration list for PBXProject "FlashCardMasterNative" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -271,150 +105,167 @@
 				en,
 				Base,
 			);
-			mainGroup = A1B2C3D4E5F6000000000401;
-			productRefGroup = A1B2C3D4E5F6000000000407 /* Products */;
+			mainGroup = A000000000000000000401;
+			productRefGroup = A000000000000000000403 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A1B2C3D4E5F6000000000001 /* FlashCardMasterNative */,
+				A000000000000000000501 /* FlashCardMasterNative */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		A1B2C3D4E5F6000000000303 /* Resources */ = {
+		A000000000000000000303 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1B2C3D4E5F6000000000117 /* sample-snapshot.json in Resources */,
+				A000000000000000000005 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A1B2C3D4E5F6000000000302 /* Sources */ = {
+		A000000000000000000302 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1B2C3D4E5F6000000000101 /* FlashCardMasterNativeApp.swift in Sources */,
-				A1B2C3D4E5F6000000000102 /* AppEnvironment.swift in Sources */,
-				A1B2C3D4E5F6000000000103 /* StudyRootScreen.swift in Sources */,
-				A1B2C3D4E5F6000000000104 /* FolderListScreen.swift in Sources */,
-				A1B2C3D4E5F6000000000105 /* CardSetListScreen.swift in Sources */,
-				A1B2C3D4E5F6000000000106 /* CardListScreen.swift in Sources */,
-				A1B2C3D4E5F6000000000107 /* CardDetailScreen.swift in Sources */,
-				A1B2C3D4E5F6000000000108 /* StudyModels.swift in Sources */,
-				A1B2C3D4E5F6000000000109 /* StudyBrowsingService.swift in Sources */,
-				A1B2C3D4E5F6000000000110 /* SnapshotDTO.swift in Sources */,
-				A1B2C3D4E5F6000000000111 /* StudySnapshotMapper.swift in Sources */,
-				A1B2C3D4E5F6000000000112 /* SnapshotBundleLoader.swift in Sources */,
-				A1B2C3D4E5F6000000000113 /* MockStudyBrowsingService.swift in Sources */,
-				A1B2C3D4E5F6000000000114 /* AppSpacing.swift in Sources */,
-				A1B2C3D4E5F6000000000115 /* EntityRow.swift in Sources */,
-				A1B2C3D4E5F6000000000116 /* EmptyPlaceholderView.swift in Sources */,
+				A000000000000000000001 /* FlashCardMasterNativeApp.swift in Sources */,
+				A000000000000000000002 /* StudyModels.swift in Sources */,
+				A000000000000000000003 /* StudyStore.swift in Sources */,
+				A000000000000000000004 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		A1B2C3D4E5F6000000000601 /* Debug */ = {
+		A000000000000000000801 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		A1B2C3D4E5F6000000000602 /* Release */ = {
+		A000000000000000000802 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		A1B2C3D4E5F6000000000603 /* Debug */ = {
+		A000000000000000000803 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = FlashCardMasterNative;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.akari221.FlashCardMasterNative;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		A1B2C3D4E5F6000000000604 /* Release */ = {
+		A000000000000000000804 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = FlashCardMasterNative;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.akari221.FlashCardMasterNative;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -424,25 +275,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A1B2C3D4E5F6000000000502 /* Build configuration list for PBXNativeTarget "FlashCardMasterNative" */ = {
+		A000000000000000000701 /* Build configuration list for PBXNativeTarget "FlashCardMasterNative" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A1B2C3D4E5F6000000000603 /* Debug */,
-				A1B2C3D4E5F6000000000604 /* Release */,
+				A000000000000000000803 /* Debug */,
+				A000000000000000000804 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A1B2C3D4E5F6000000000503 /* Build configuration list for PBXProject "FlashCardMasterNative" */ = {
+		A000000000000000000702 /* Build configuration list for PBXProject "FlashCardMasterNative" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A1B2C3D4E5F6000000000601 /* Debug */,
-				A1B2C3D4E5F6000000000602 /* Release */,
+				A000000000000000000801 /* Debug */,
+				A000000000000000000802 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = A1B2C3D4E5F6000000000501 /* Project object */;
+	rootObject = A000000000000000000601 /* Project object */;
 }

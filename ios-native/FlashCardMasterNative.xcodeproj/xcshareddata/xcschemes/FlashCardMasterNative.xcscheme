@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "A1B2C3D4E5F6000000000001"
+               BlueprintIdentifier = "A000000000000000000501"
                BuildableName = "FlashCardMasterNative.app"
                BlueprintName = "FlashCardMasterNative"
                ReferencedContainer = "container:FlashCardMasterNative.xcodeproj">
@@ -27,8 +27,15 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
-      <Testables>
-      </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "A000000000000000000501"
+            BuildableName = "FlashCardMasterNative.app"
+            BlueprintName = "FlashCardMasterNative"
+            ReferencedContainer = "container:FlashCardMasterNative.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -44,7 +51,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "A1B2C3D4E5F6000000000001"
+            BlueprintIdentifier = "A000000000000000000501"
             BuildableName = "FlashCardMasterNative.app"
             BlueprintName = "FlashCardMasterNative"
             ReferencedContainer = "container:FlashCardMasterNative.xcodeproj">
@@ -61,7 +68,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "A1B2C3D4E5F6000000000001"
+            BlueprintIdentifier = "A000000000000000000501"
             BuildableName = "FlashCardMasterNative.app"
             BlueprintName = "FlashCardMasterNative"
             ReferencedContainer = "container:FlashCardMasterNative.xcodeproj">
