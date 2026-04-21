@@ -17,6 +17,16 @@ const THUMBNAIL_RENDER_CONSTRAINTS = {
   maxCanvasEdgePx: 2048,
 } as const;
 
+const PDF_THUMBNAIL_PANEL_COLORS = {
+  accent: "#D8AFB5",
+  surfaceSoft: "#F5EBE9",
+  surfaceMuted: "#F1E2E1",
+  surfacePaper: "#F8F7F5",
+  surfaceBlush: "#F7EFED",
+  textStrong: "#5E545B",
+  textMuted: "#8C7C83",
+} as const;
+
 interface PdfThumbnailItemProps {
   documentKey: string;
   pageNumber: number;
@@ -318,43 +328,57 @@ const PdfThumbnailItemComponent = ({
         onClick={() => onSelect(pageNumber)}
         aria-label={`ページ ${pageNumber} を開く`}
         className={cn(
-          "group relative flex w-full min-w-0 flex-col gap-2 rounded-[20px] border p-2 text-left transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-semantic-color-action-primary)] focus-visible:ring-offset-2",
+          "group relative flex w-full min-w-0 flex-col gap-2 rounded-[20px] border p-2 text-left transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           isActive
-            ? "shadow-[0_10px_24px_rgba(15,23,42,0.08)]"
-            : "hover:shadow-[0_10px_24px_rgba(15,23,42,0.05)]",
+            ? "shadow-[0_12px_28px_rgba(216,175,181,0.22)]"
+            : "hover:shadow-[0_10px_24px_rgba(216,175,181,0.14)]",
         )}
         style={{
-          color: "var(--ds-semantic-color-text-primary)",
+          color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
           borderColor: isActive
-            ? "var(--ds-color-primary-500)"
-            : "var(--ds-semantic-color-border-default)",
+            ? PDF_THUMBNAIL_PANEL_COLORS.accent
+            : PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
           background: isActive
-            ? "var(--ds-semantic-color-background-sidebar-active)"
-            : "color-mix(in srgb, var(--ds-semantic-color-background-sidebar) 82%, white 18%)",
+            ? PDF_THUMBNAIL_PANEL_COLORS.surfaceBlush
+            : PDF_THUMBNAIL_PANEL_COLORS.surfacePaper,
+          boxShadow: isActive
+            ? "0 12px 28px rgba(216, 175, 181, 0.16), inset 0 1px 0 rgba(255,255,255,0.95)"
+            : "inset 0 1px 0 rgba(255,255,255,0.95)",
+          outline: isActive ? "1px solid rgba(216, 175, 181, 0.28)" : "none",
         }}
       >
         <div
-          className="relative flex w-full items-center justify-center overflow-hidden rounded-[16px] border border-[color-mix(in_srgb,var(--ds-semantic-color-border-default)_72%,white_28%)] bg-white p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
-          style={{ aspectRatio: pageAspectRatio }}
+          className="relative flex w-full items-center justify-center overflow-hidden rounded-[16px] border bg-white p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
+          style={{
+            aspectRatio: pageAspectRatio,
+            borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+            background: "linear-gradient(180deg, #FFFFFF 0%, #F8F7F5 100%)",
+          }}
         >
           {!isRendered && !renderError ? (
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,241,235,0.72))]" />
+            <div className="absolute inset-0"
+              style={{
+                background: "linear-gradient(180deg, rgba(248,247,245,0.96), rgba(247,239,237,0.92))",
+              }} />
           ) : null}
 
           <canvas ref={canvasRef} className="relative z-10 block max-w-full" />
 
           {renderError ? (
-            <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-[11px] font-medium text-[var(--ds-semantic-color-text-secondary)]">
+            <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-[11px] font-medium"
+              style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}>
               {renderError}
             </div>
           ) : null}
         </div>
 
         <div className="flex items-center justify-between gap-2 px-1">
-          <span className="text-[12px] font-semibold tabular-nums text-[var(--ds-semantic-color-text-strong)]">
+          <span className="text-[12px] font-semibold tabular-nums"
+            style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textStrong }}>
             {pageNumber}
           </span>
-          <span className="text-[10px] font-medium tracking-[0.16em] text-[var(--ds-semantic-color-text-secondary)]">
+          <span className="text-[10px] font-medium tracking-[0.16em]"
+            style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}>
             PAGE
           </span>
         </div>
@@ -373,17 +397,20 @@ const PdfThumbnailItemComponent = ({
           event.stopPropagation();
           onToggleBookmark(pageNumber);
         }}
-        className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border shadow-[0_4px_12px_rgba(15,23,42,0.08)] transition-all duration-150 ease-out hover:scale-[1.03]"
+        className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border transition-all duration-150 ease-out hover:scale-[1.03]"
         style={{
           borderColor: isBookmarked
-            ? "color-mix(in srgb, var(--ds-color-primary-500) 72%, white 28%)"
-            : "var(--ds-semantic-color-border-default)",
+            ? PDF_THUMBNAIL_PANEL_COLORS.accent
+            : PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
           background: isBookmarked
-            ? "color-mix(in srgb, var(--ds-semantic-color-action-primary-soft) 72%, white 28%)"
-            : "rgba(255,255,255,0.9)",
+            ? PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft
+            : "rgba(248,247,245,0.95)",
           color: isBookmarked
-            ? "var(--ds-semantic-color-action-primary)"
-            : "var(--ds-semantic-color-text-secondary)",
+            ? PDF_THUMBNAIL_PANEL_COLORS.accent
+            : PDF_THUMBNAIL_PANEL_COLORS.textMuted,
+          boxShadow: isBookmarked
+            ? "0 8px 18px rgba(216, 175, 181, 0.18)"
+            : "0 4px 12px rgba(216, 175, 181, 0.10)",
         }}
       >
         <BookmarkIcon className="h-4 w-4" />
