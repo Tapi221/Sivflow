@@ -49,7 +49,7 @@ const PANEL_TABS = [
     id: "thumbnails",
     label: "サムネイル",
   },
-] as const satisfies readonly Array<{
+] as const satisfies ReadonlyArray<{
   id: PdfSidePanelTab;
   label: string;
 }>;
