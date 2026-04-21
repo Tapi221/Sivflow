@@ -16,6 +16,12 @@ type LegacyFolderSidebarDisplayMode =
   | UserSettings["folderSidebarDisplayMode"]
   | "auto";
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const toRecord = (value: unknown): Record<string, unknown> | undefined =>
+  isRecord(value) ? value : undefined;
+
 const normalizeFolderSidebarDisplayMode = (
   value: LegacyFolderSidebarDisplayMode | null | undefined,
 ): NonNullable<UserSettings["folderSidebarDisplayMode"]> => {
@@ -27,7 +33,6 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   weekStartDay: "monday",
   notificationsEnabled: false,
   soundEnabled: true,
-
   showReviewHard: true,
   showReviewEasy: true,
   autoCarryOver: true,
@@ -75,11 +80,8 @@ const normalizeStoredSettingsRecord = (
   };
 
   const folderSidebarDisplayMode = normalizeFolderSidebarDisplayMode(
-    (
-      merged as {
-        folderSidebarDisplayMode?: LegacyFolderSidebarDisplayMode;
-      }
-    ).folderSidebarDisplayMode,
+    (merged as { folderSidebarDisplayMode?: LegacyFolderSidebarDisplayMode })
+      .folderSidebarDisplayMode,
   );
 
   const editorBlockSettings = parseEditorBlockSettings(
@@ -110,7 +112,6 @@ const areSettingsRecordsEquivalent = (
 export const useUserSettings = () => {
   const { currentUser } = useAuthSession();
   const currentUserId = currentUser?.uid ?? null;
-
   const bootSettings = useMemo(() => buildBootSettingsSnapshot(), []);
 
   const settings = useLiveQuery(
@@ -120,7 +121,7 @@ export const useUserSettings = () => {
       const db = await getLocalDb(currentUserId);
       const userSettings = await db.userSettings.get(currentUserId);
       const normalizedSettings = normalizeStoredSettingsRecord(
-        userSettings as Record<string, unknown> | undefined,
+        toRecord(userSettings),
         bootSettings,
       );
 
@@ -145,7 +146,7 @@ export const useUserSettings = () => {
 
       if (cancelled || !current) return;
 
-      const currentRecord = current as Record<string, unknown>;
+      const currentRecord = toRecord(current) ?? {};
       const currentWithoutLegacy = removeLegacyProfileFields(currentRecord);
       const normalizedSettings = normalizeStoredSettingsRecord(
         currentRecord,
@@ -181,9 +182,7 @@ export const useUserSettings = () => {
 
       const db = await getLocalDb(currentUserId);
       const current = await db.userSettings.get(currentUserId);
-      const currentWithoutLegacy = removeLegacyProfileFields(
-        current as Record<string, unknown> | undefined,
-      );
+      const currentWithoutLegacy = removeLegacyProfileFields(toRecord(current));
 
       const normalizedSettings: Partial<UserSettings> = {
         ...newSettings,

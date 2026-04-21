@@ -1,4 +1,3 @@
-
 import React from "react";
 
 import { DirectoryScreenSkeleton } from "@/components/loading/ScreenSkeletons";
@@ -6,11 +5,28 @@ import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagram
 import { useCards } from "@/hooks/card/useCards";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
+import type { DocumentItem } from "@/types";
+
+const isDocumentItem = (value: unknown): value is DocumentItem => {
+  if (typeof value !== "object" || value === null) return false;
+
+  const record = value as Record<string, unknown>;
+  return (
+    record.kind === "pdf" &&
+    typeof record.folderId === "string" &&
+    typeof record.orderIndex === "number" &&
+    typeof record.title === "string"
+  );
+};
 
 const Directory = () => {
   const { cards = [], loading: cardsLoading } = useCards();
   const { folders = [], loading: foldersLoading } = useFolders();
   const { documents = [], loading: documentsLoading } = useDocuments();
+
+  const normalizedDocuments = React.useMemo(() => {
+    return documents.filter(isDocumentItem);
+  }, [documents]);
 
   const isLoading = cardsLoading || foldersLoading || documentsLoading;
 
@@ -23,7 +39,7 @@ const Directory = () => {
       <DirectoryDiagramPane
         folders={folders}
         cards={cards}
-        documents={documents}
+        documents={normalizedDocuments}
       />
     </div>
   );

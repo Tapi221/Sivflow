@@ -4,14 +4,26 @@
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf";
 import workerSrc from "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url";
 
-// Vite向け: worker URL をバンドル時に確定させる
-pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
-if (import.meta.env.DEV && !(globalThis as unknown).__pdfWorkerLogged) {
-  (globalThis as unknown).__pdfWorkerLogged = true;
-  console.info(
-    "[pdfjs] workerSrc",
-    (pdfjsLib as unknown).GlobalWorkerOptions?.workerSrc,
-  );
+type PdfjsGlobalWorkerOptions = {
+  workerSrc: string;
+};
+
+type PdfjsCompatModule = {
+  GlobalWorkerOptions: PdfjsGlobalWorkerOptions;
+};
+
+type WorkerLogGlobal = typeof globalThis & {
+  __pdfWorkerLogged?: boolean;
+};
+
+const pdfjsCompat = pdfjsLib as unknown as PdfjsCompatModule;
+const globalRef = globalThis as WorkerLogGlobal;
+
+pdfjsCompat.GlobalWorkerOptions.workerSrc = workerSrc;
+
+if (import.meta.env.DEV && globalRef.__pdfWorkerLogged !== true) {
+  globalRef.__pdfWorkerLogged = true;
+  console.info("[pdfjs] workerSrc", pdfjsCompat.GlobalWorkerOptions.workerSrc);
 }
 
 export { pdfjsLib };

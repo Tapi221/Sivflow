@@ -1,37 +1,73 @@
 import { getLocalDb } from "./localDB";
 import { StorageStateManager } from "./StorageStateManager";
 
-/**
- * 圧縮された履歴データの型定義
- */
 interface CompressedHistory {
   id: string;
   userId: string;
   cardId: string;
-  date: Date; // 日単位
+  date: Date;
   reviewCount: number;
   correctCount: number;
   avgInterval: number;
 }
 
-/**
- * 履歴圧縮サービス
- *
- * ルール:
- * - 直近30日: raw event
- * - 31日〜90日: 日単位に圧縮
- * - 91日以降: 統計値のみ
- *
- * 🔥 重要: 圧縮は贅沢処理。READ_ONLY 中は実行しない。
- */
+type HistoryEvent = {
+  cardId: string;
+  changedAt: Date;
+  correct?: boolean;
+  newLevel?: number;
+  oldLevel?: number;
+  interval?: number;
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null;
+};
+
+const toFiniteNumber = (value: unknown): number | undefined => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
+};
+
+const toDate = (value: unknown): Date | null => {
+  if (value instanceof Date) return value;
+  if (typeof value === "string" || typeof value === "number") {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  return null;
+};
+
+const toHistoryEvent = (value: unknown): HistoryEvent | null => {
+  if (!isRecord(value)) return null;
+  const cardId = typeof value.cardId === "string" ? value.cardId : null;
+  const changedAt = toDate(value.changedAt);
+
+  if (!cardId || !changedAt) return null;
+
+  const correct =
+    typeof value.correct === "boolean" ? value.correct : undefined;
+
+  return {
+    cardId,
+    changedAt,
+    correct,
+    newLevel: toFiniteNumber(value.newLevel),
+    oldLevel: toFiniteNumber(value.oldLevel),
+    interval: toFiniteNumber(value.interval),
+  };
+};
+
 export class HistoryCompressionService {
-  /**
-   * 古い履歴を圧縮
-   *
-   * @param userId ユーザーID
-   */
-  async compress(userId: string): Promise<void> {
-    // READ_ONLY 中は圧縮しない（無意味な計算を避ける）
+  public readonly compress = async (userId: string): Promise<void> => {
     if (StorageStateManager.isReadOnly(userId)) {
       console.log(`[Compression:${userId}] Skipped (READ_ONLY mode)`);
       return;
@@ -40,7 +76,6 @@ export class HistoryCompressionService {
     const db = await getLocalDb(userId);
 
     try {
-      // 30日以前の raw event を取得
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -54,78 +89,65 @@ export class HistoryCompressionService {
         return;
       }
 
-      // 日単位に圧縮
       const compressed = this.compressByDay(oldEvents, userId);
 
-      // TODO: 圧縮データを保存するテーブルを追加
-      // 現時点では圧縮データの保存先がないため、ログのみ
       console.log(
         `[Compression:${userId}] Compressed ${oldEvents.length} events into ${compressed.length} daily summaries`,
       );
-
-      // TODO: raw event を削除
-      // await SafeIndexedDBWriter.write(
-      //   userId,
-      //   () => db.levelHistories
-      //     .where('changedAt')
-      //     .below(thirtyDaysAgo)
-      //     .delete(),
-      //   'deleteOldEvents'
-      // );
     } catch (error) {
       console.error(`[Compression:${userId}] Failed:`, error);
-      // 失敗してもアプリは継続
     }
-  }
+  };
 
-  /**
-   * イベントを日単位に圧縮
-   */
-  private compressByDay(
+  private readonly compressByDay = (
     events: unknown[],
     userId: string,
-  ): CompressedHistory[] {
-    // 日ごとにグループ化
-    const byDay = new Map<string, unknown[]>();
+  ): CompressedHistory[] => {
+    const byDay = new Map<string, HistoryEvent[]>();
 
-    for (const event of events) {
-      const changedAt =
-        event.changedAt instanceof Date
-          ? event.changedAt
-          : new Date(event.changedAt);
-      const day = changedAt.toISOString().split("T")[0];
+    for (const rawEvent of events) {
+      const event = toHistoryEvent(rawEvent);
+      if (!event) continue;
+
+      const day = event.changedAt.toISOString().split("T")[0];
       const key = `${event.cardId}_${day}`;
 
-      if (!byDay.has(key)) {
-        byDay.set(key, []);
+      const existing = byDay.get(key);
+      if (existing) {
+        existing.push(event);
+      } else {
+        byDay.set(key, [event]);
       }
-      byDay.get(key)!.push(event);
     }
 
-    // 統計値を計算
     const compressed: CompressedHistory[] = [];
 
     for (const [key, dayEvents] of byDay.entries()) {
-      const [cardId, day] = key.split("_");
+      const separatorIndex = key.lastIndexOf("_");
+      const cardId = key.slice(0, separatorIndex);
+      const day = key.slice(separatorIndex + 1);
 
-      // 正解数をカウント
-      const correctCount = dayEvents.filter((e) => {
-        // correct フィールドがある場合
-        if (typeof e.correct === "boolean") return e.correct;
-        // level の変化で判定（増加 = 正解）
-        if (e.newLevel !== undefined && e.oldLevel !== undefined) {
-          return e.newLevel > e.oldLevel;
+      const correctCount = dayEvents.filter((event) => {
+        if (typeof event.correct === "boolean") return event.correct;
+        if (
+          typeof event.newLevel === "number" &&
+          typeof event.oldLevel === "number"
+        ) {
+          return event.newLevel > event.oldLevel;
         }
         return false;
       }).length;
 
-      // 平均間隔を計算
       const intervals = dayEvents
-        .map((e) => e.interval)
-        .filter((i) => typeof i === "number" && i > 0);
+        .map((event) => event.interval)
+        .filter((interval): interval is number => {
+          return typeof interval === "number" && interval > 0;
+        });
+
       const avgInterval =
         intervals.length > 0
-          ? intervals.reduce((sum, i) => sum + i, 0) / intervals.length
+          ? intervals.reduce((sum, interval) => sum + interval, 0) /
+            intervals.length
           : 0;
 
       compressed.push({
@@ -140,5 +162,5 @@ export class HistoryCompressionService {
     }
 
     return compressed;
-  }
+  };
 }

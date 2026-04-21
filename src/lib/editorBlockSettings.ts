@@ -27,6 +27,8 @@ export type EditorBlockConfig = Omit<BlockConfig, "id" | "type"> & {
   type: EditorBlockType;
 };
 
+type EditorBlockComparable = Pick<BlockConfig, "type" | "orderIndex">;
+
 const EDITOR_BLOCK_DEFINITIONS = [
   {
     id: "text",
@@ -82,30 +84,31 @@ const EDITOR_BLOCK_DEFINITION_BY_TYPE = Object.fromEntries(
   EDITOR_BLOCK_DEFINITIONS.map((definition) => [definition.type, definition] as const),
 ) as Record<EditorBlockType, EditorBlockDefinition>;
 
-const isRecord = (value: unknown): value is Record<string, unknown> => {
-  return typeof value === "object" && value !== null;
-};
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
 
 const createEditorBlockConfigFromDefinition = (
   definition: EditorBlockDefinition,
-): EditorBlockConfig => {
-  return {
-    id: definition.id,
-    type: definition.type,
-    label: definition.label,
-    isVisible: definition.isVisible,
-    orderIndex: definition.orderIndex,
-  };
-};
+): EditorBlockConfig => ({
+  id: definition.id,
+  type: definition.type,
+  label: definition.label,
+  isVisible: definition.isVisible,
+  orderIndex: definition.orderIndex,
+});
 
 const getFallbackOrderIndex = (type: EditorBlockType) => {
   return EDITOR_BLOCK_DEFINITION_BY_TYPE[type].orderIndex;
 };
 
 const compareEditorBlockConfigs = (
-  left: Pick<EditorBlockConfig, "type" | "orderIndex">,
-  right: Pick<EditorBlockConfig, "type" | "orderIndex">,
+  left: EditorBlockComparable,
+  right: EditorBlockComparable,
 ) => {
+  if (!isEditorBlockType(left.type) || !isEditorBlockType(right.type)) {
+    return 0;
+  }
+
   const orderDiff = left.orderIndex - right.orderIndex;
   if (orderDiff !== 0) {
     return orderDiff;
@@ -135,7 +138,6 @@ export const normalizeEditorBlockSettings = (
   items: readonly EditorBlockConfig[] | readonly BlockConfig[] | null | undefined,
 ): EditorBlockConfig[] => {
   const byType = new Map<EditorBlockType, EditorBlockConfig>();
-
   const sortedItems = [...(items ?? [])].sort(compareEditorBlockConfigs);
 
   for (const item of sortedItems) {

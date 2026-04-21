@@ -18,17 +18,17 @@ export type EnqueueSync = (
   payload: unknown,
 ) => Promise<void>;
 
-export interface TableLike<T extends Record<string, unknown>> {
-  add: (item: T) => PromiseLike<unknown>;
-  get: (id: unknown) => Promise<T | undefined>;
-  update: (id: unknown, changes: unknown) => PromiseLike<number>;
-  put: (item: T) => PromiseLike<unknown>;
-  bulkPut: (items: ReadonlyArray<T>) => PromiseLike<unknown>;
-  delete: (id: unknown) => PromiseLike<void>;
+export interface TableLike<T extends object> {
+  add(item: T): PromiseLike<unknown> | unknown;
+  get(id: unknown): PromiseLike<T | undefined> | T | undefined;
+  update(id: unknown, changes: unknown): PromiseLike<number> | number;
+  put(item: T): PromiseLike<unknown> | unknown;
+  bulkPut(items: ReadonlyArray<T>): PromiseLike<unknown> | unknown;
+  delete(id: unknown): PromiseLike<void> | void;
 }
 
 export interface DbLike {
-  table: <T extends Record<string, unknown>>(name: string) => TableLike<T>;
+  table<T extends object, TKey = string>(name: string): TableLike<T>;
   name?: string;
 }
 
@@ -244,6 +244,7 @@ export const addItem: AddItem = async (
       getId(payload) ?? "<generated>"
     }, localDb instance type=${getConstructorName(db)}`,
   );
+
   console.log(
     `[LocalDB] addItem START -> table=${table} id=${
       getId(payload) ?? "<generated>"
@@ -281,6 +282,7 @@ export const addItem: AddItem = async (
         }
 
         if (saved) break;
+
         await new Promise<void>((resolve) => {
           setTimeout(resolve, 35 * attempt);
         });
@@ -546,7 +548,9 @@ export const bulkUpsert: BulkUpsert = async (
     }
   }
 
-  const payload = items.filter(isRecord).map((item) => ({ ...item }) as AnyRow);
+  const payload = items
+    .filter(isRecord)
+    .map((item) => ({ ...item }) as AnyRow);
 
   if (table === "cards") {
     for (const entry of payload) {

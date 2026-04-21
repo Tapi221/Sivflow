@@ -1,31 +1,24 @@
 import { StorageStateManager } from "./StorageStateManager";
 import { notificationService } from "./NotificationService";
 
-/**
- * IndexedDB への書き込みを安全に行う唯一のインターフェース
- *
- * ルール:
- * - このクラス以外から IndexedDB に書き込んではならない
- * - QuotaExceededError はここでのみ検知
- * - 例外は状態遷移に変換
- */
-export class SafeIndexedDBWriter {
-  private static quotaWarningShown = new Set<string>();
+const isQuotaExceededError = (error: unknown): boolean => {
+  if (typeof error !== "object" || error === null) return false;
 
-  /**
-   * 安全な書き込み
-   *
-   * @param userId ユーザーID（状態管理用）
-   * @param operation 書き込み操作
-   * @param context 操作のコンテキスト（ログ用）
-   * @returns 成功時: 書き込み結果、失敗時: null
-   */
-  static async write<T>(
+  const record = error as Record<string, unknown>;
+  return (
+    record.name === "QuotaExceededError" ||
+    record.code === "QuotaExceededError"
+  );
+};
+
+export class SafeIndexedDBWriter {
+  private static readonly quotaWarningShown = new Set<string>();
+
+  static readonly write = async <T>(
     userId: string,
     operation: () => Promise<T>,
     context: string,
-  ): Promise<T | null> {
-    // READ_ONLY モードでは書き込みを拒否
+  ): Promise<T | null> => {
     if (StorageStateManager.isReadOnly(userId)) {
       console.warn(`[Storage:${userId}] Write blocked (READ_ONLY): ${context}`);
       return null;
@@ -34,11 +27,9 @@ export class SafeIndexedDBWriter {
     try {
       return await operation();
     } catch (error: unknown) {
-      if (error.name === "QuotaExceededError") {
-        // 状態遷移
+      if (isQuotaExceededError(error)) {
         StorageStateManager.setReadOnly(userId, context);
 
-        // WARNING レベルの通知（一度だけ）
         if (!this.quotaWarningShown.has(userId)) {
           this.quotaWarningShown.add(userId);
 
@@ -54,31 +45,21 @@ export class SafeIndexedDBWriter {
         return null;
       }
 
-      // QuotaExceededError 以外は再スロー
       throw error;
     }
-  }
+  };
 
-  /**
-   * 一括書き込み
-   *
-   * @param userId ユーザーID
-   * @param operations 書き込み操作の配列
-   * @param context 操作のコンテキスト
-   * @returns 各操作の結果（失敗時は null）
-   */
-  static async bulkWrite<T>(
+  static readonly bulkWrite = async <T>(
     userId: string,
     operations: Array<() => Promise<T>>,
     context: string,
-  ): Promise<Array<T | null>> {
+  ): Promise<Array<T | null>> => {
     const results: Array<T | null> = [];
 
-    for (const op of operations) {
-      const result = await this.write(userId, op, context);
+    for (const operation of operations) {
+      const result = await this.write(userId, operation, context);
       results.push(result);
 
-      // 一つでも失敗したら中断
       if (result === null) {
         console.warn(
           `[Storage:${userId}] Bulk write aborted at index ${results.length - 1}`,
@@ -88,5 +69,5 @@ export class SafeIndexedDBWriter {
     }
 
     return results;
-  }
+  };
 }

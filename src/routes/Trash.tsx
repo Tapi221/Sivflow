@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -36,39 +36,79 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { getLocalDb } from "@/services/localDB";
 import { firestoreDb } from "@/services/firebase";
-import { updateDoc, deleteDoc, doc, Timestamp } from "firebase/firestore";
+import { deleteDoc, doc, Timestamp, updateDoc } from "firebase/firestore";
 import {
   folderDocPathSegments,
   cardDocPathSegments,
 } from "@/services/firestorePaths";
 import { getCardImages, getCardText } from "@/domain/card/content";
-import type { Card as CardEntity } from "@/types";
+import type { Card as CardEntity, Folder as FolderEntity } from "@/types";
+import type { Timestamp as FirestoreTimestamp } from "firebase/firestore";
 
-const normalizeCaseFold = (value: string | null | undefined) =>
-  typeof value === "string" ? value.trim().toLowerCase() : "";
+type SelectedIds = {
+  folders: string[];
+  cards: string[];
+};
 
-const groupCardsByFolderId = (
-  cards: readonly CardEntity[],
-  cardFolderIdByCardId: ReadonlyMap<string, string | null>,
-  deletedFolders: readonly { id: string }[],
-) => {
-  const deletedFolderIdSet = new Set(
-    deletedFolders.map((folder) => normalizeCaseFold(folder.id)),
+type PreviewItem = CardEntity | null;
+
+const normalizeCaseFold = (value: string | null | undefined): string => {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
+};
+
+const isFirestoreTimestamp = (
+  value: Date | FirestoreTimestamp | null | undefined,
+): value is FirestoreTimestamp => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "toDate" in value &&
+    typeof value.toDate === "function"
   );
-  const grouped = new Map<string, CardEntity[]>();
-  for (const card of cards) {
-    const folderId = cardFolderIdByCardId.get(card.id) ?? null;
-    const normalizedFolderId = normalizeCaseFold(folderId);
-    if (!normalizedFolderId || deletedFolderIdSet.has(normalizedFolderId))
-      continue;
-    const existing = grouped.get(normalizedFolderId);
-    if (existing) {
-      existing.push(card);
-      continue;
-    }
-    grouped.set(normalizedFolderId, [card]);
-  }
-  return grouped;
+};
+
+const toSafeDate = (
+  value: Date | FirestoreTimestamp | null | undefined,
+): Date | null => {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (isFirestoreTimestamp(value)) return value.toDate();
+  return null;
+};
+
+const formatDateTime = (
+  value: Date | FirestoreTimestamp | null | undefined,
+): string => {
+  const date = toSafeDate(value);
+  return date ? format(date, "yyyy/MM/dd HH:mm", { locale: ja }) : "-";
+};
+
+const errorToMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  return String(error);
+};
+
+const maybeUpdateFirestoreDeletedState = async ({
+  pathSegments,
+  isDeleted,
+}: {
+  pathSegments: string[];
+  isDeleted: boolean;
+}): Promise<void> => {
+  if (!firestoreDb) return;
+
+  const targetRef = doc(firestoreDb, ...pathSegments);
+  await updateDoc(targetRef, {
+    isDeleted,
+    deletedAt: isDeleted ? Timestamp.now() : null,
+    updatedAt: Timestamp.now(),
+  });
+};
+
+const maybeDeleteFirestoreDoc = async (pathSegments: string[]): Promise<void> => {
+  if (!firestoreDb) return;
+  const targetRef = doc(firestoreDb, ...pathSegments);
+  await deleteDoc(targetRef);
 };
 
 const restoreFolderWithParents = async ({
@@ -77,15 +117,15 @@ const restoreFolderWithParents = async ({
 }: {
   userId: string;
   folderId: string;
-}) => {
+}): Promise<void> => {
   const db = await getLocalDb(userId);
   const rawFolder = await db.getItem("folders", folderId);
   if (!rawFolder) {
-    console.error("Folder not found:", folderId);
-    return;
+    throw new Error(`Folder not found: ${folderId}`);
   }
 
   const folder = normalizeFolder(rawFolder);
+
   if (folder.parentFolderId) {
     const rawParentFolder = await db.getItem("folders", folder.parentFolderId);
     if (rawParentFolder) {
@@ -100,86 +140,109 @@ const restoreFolderWithParents = async ({
   }
 
   await db.restore("folders", folderId);
-  const folderRef = doc(
-    firestoreDb,
-    ...folderDocPathSegments(userId, folderId),
-  );
-  await updateDoc(folderRef, {
+  await maybeUpdateFirestoreDeletedState({
+    pathSegments: folderDocPathSegments(userId, folderId),
     isDeleted: false,
-    deletedAt: null,
-    updatedAt: Timestamp.now(),
   });
+};
+
+const groupCardsByFolderId = (
+  cards: readonly CardEntity[],
+  cardFolderIdByCardId: ReadonlyMap<string, string | null>,
+  deletedFolders: readonly Pick<FolderEntity, "id">[],
+): Map<string, CardEntity[]> => {
+  const deletedFolderIdSet = new Set(
+    deletedFolders.map((folder) => normalizeCaseFold(folder.id)),
+  );
+  const grouped = new Map<string, CardEntity[]>();
+
+  for (const card of cards) {
+    const folderId = cardFolderIdByCardId.get(card.id) ?? null;
+    const normalizedFolderId = normalizeCaseFold(folderId);
+
+    if (!normalizedFolderId || deletedFolderIdSet.has(normalizedFolderId)) {
+      continue;
+    }
+
+    const existing = grouped.get(normalizedFolderId);
+    if (existing) {
+      existing.push(card);
+    } else {
+      grouped.set(normalizedFolderId, [card]);
+    }
+  }
+
+  return grouped;
 };
 
 const Trash = () => {
   const { currentUser } = useAuthSession();
+  const currentUserId = currentUser?.uid ?? null;
 
-  // IndexedDBから削除されたアイテムを直接取得
   const allFolders = useLiveQuery(
     async () => {
-      if (!currentUser) return [];
+      if (!currentUserId) return [] as FolderEntity[];
+
       try {
-        const db = await getLocalDb(currentUser.uid);
-        const folders = await db.getAllFolders();
-        // normalizeFolder で正規化（isDeleted, deletedAt を一貫して処理）
-        return folders.map(normalizeFolder);
-      } catch (err) {
-        console.error("Failed to load folders:", err);
-        return [];
+        const db = await getLocalDb(currentUserId);
+        return (await db.getAllFolders()).map(normalizeFolder);
+      } catch (error) {
+        console.error("Failed to load folders:", error);
+        return [] as FolderEntity[];
       }
     },
-    [currentUser?.uid],
-    [],
+    [currentUserId],
+    [] as FolderEntity[],
   );
 
   const allCards = useLiveQuery(
     async () => {
-      if (!currentUser) return [];
+      if (!currentUserId) return [] as CardEntity[];
+
       try {
-        const db = await getLocalDb(currentUser.uid);
-        const cards = await db.getAllCards();
-        // normalizeCard で正規化（isDeleted, deletedAt を一貫して処理）
-        return cards.map(normalizeCard);
-      } catch (err) {
-        console.error("Failed to load cards:", err);
-        return [];
+        const db = await getLocalDb(currentUserId);
+        return (await db.getAllCards()).map(normalizeCard);
+      } catch (error) {
+        console.error("Failed to load cards:", error);
+        return [] as CardEntity[];
       }
     },
-    [currentUser?.uid],
-    [],
+    [currentUserId],
+    [] as CardEntity[],
   );
 
   const allCardSets = useLiveQuery(
     async () => {
-      if (!currentUser) return [];
+      if (!currentUserId) return [];
+
       try {
-        const db = await getLocalDb(currentUser.uid);
+        const db = await getLocalDb(currentUserId);
         return await db.cardSets
           .where("userId")
-          .equals(currentUser.uid)
+          .equals(currentUserId)
           .toArray();
-      } catch (err) {
-        console.error("Failed to load cardSets:", err);
+      } catch (error) {
+        console.error("Failed to load cardSets:", error);
         return [];
       }
     },
-    [currentUser?.uid],
+    [currentUserId],
     [],
   );
 
-  // 削除されたフォルダのみ（normalize済みなので isDeleted のみチェック）
-  const deletedFolders = useMemo(
-    () => (allFolders || []).filter((f) => f.isDeleted === true),
-    [allFolders],
-  );
-
-  // すべてのフォルダ（削除済み・未削除を含む）
   const folders = useMemo(() => allFolders ?? [], [allFolders]);
   const allCardsData = useMemo(() => allCards ?? [], [allCards]);
+
+  const deletedFolders = useMemo(
+    () => folders.filter((folder) => folder.isDeleted === true),
+    [folders],
+  );
+
   const cardSetById = useMemo(
     () => buildCardSetById((allCardSets ?? []).filter((set) => !set.isDeleted)),
     [allCardSets],
   );
+
   const cardFolderIdByCardId = useMemo(() => {
     const map = new Map<string, string | null>();
     for (const card of allCardsData) {
@@ -188,48 +251,45 @@ const Trash = () => {
     return map;
   }, [allCardsData, cardSetById]);
 
-  // 削除されたカード、または削除されたフォルダに属するカード
-  // normalize済みなので isDeleted のみチェック
   const cards = useMemo(() => {
-    const deletedFolderIds = deletedFolders.map((f) => f.id);
-    return allCardsData.filter(
-      (c) =>
-        c.isDeleted === true ||
-        deletedFolderIds.includes(cardFolderIdByCardId.get(c.id) ?? ""),
-    );
-  }, [allCardsData, deletedFolders, cardFolderIdByCardId]);
+    const deletedFolderIdSet = new Set(deletedFolders.map((folder) => folder.id));
+
+    return allCardsData.filter((card) => {
+      const folderId = cardFolderIdByCardId.get(card.id);
+      return card.isDeleted === true || (folderId ? deletedFolderIdSet.has(folderId) : false);
+    });
+  }, [allCardsData, cardFolderIdByCardId, deletedFolders]);
+
+  const cardsWithoutResolvedFolder = useMemo(() => {
+    return cards.filter((card) => !cardFolderIdByCardId.get(card.id));
+  }, [cardFolderIdByCardId, cards]);
 
   const isLoading =
-    allFolders === undefined ||
-    allCards === undefined ||
-    allCardSets === undefined;
+    allFolders === undefined || allCards === undefined || allCardSets === undefined;
 
-  const [selectedIds, setSelectedIds] = useState<{
-    folders: string[];
-    cards: string[];
-  }>({
+  const [selectedIds, setSelectedIds] = useState<SelectedIds>({
     folders: [],
     cards: [],
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
   const [isProcessing, setIsProcessing] = useState(false);
-  const [previewCard, setPreviewCard] = useState<CardEntity | null>(null);
+  const [previewCard, setPreviewCard] = useState<PreviewItem>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [dateFilter, setDateFilter] = useState("all"); // 'all', 'today', 'week', 'month'
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
 
   const hasSelection =
     selectedIds.folders.length > 0 || selectedIds.cards.length > 0;
 
-  // 日付フィルタロジック
-  const filterByDate = (deletedAt) => {
+  const filterByDate = (
+    deletedAt: Date | FirestoreTimestamp | null | undefined,
+  ): boolean => {
     if (dateFilter === "all") return true;
-    if (!deletedAt) return false;
 
-    const now = new Date();
-    const deleted = new Date(deletedAt);
-    const diffMs = now - deleted;
-    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    const deleted = toSafeDate(deletedAt);
+    if (!deleted) return false;
+
+    const now = Date.now();
+    const diffDays = (now - deleted.getTime()) / (1000 * 60 * 60 * 24);
 
     switch (dateFilter) {
       case "today":
@@ -243,190 +303,142 @@ const Trash = () => {
     }
   };
 
-  // 検索フィルタロジック
-  const matchesSearch = (item) => {
+  const matchesSearch = (item: FolderEntity | CardEntity): boolean => {
     if (!searchQuery.trim()) return true;
+
     const query = normalizeCaseFold(searchQuery);
-    const name = normalizeCaseFold(
-      item.folderName ||
-        item.folder_name ||
-        (item.front ? getCardText(item, "question") : "") ||
-        item.question_text ||
-        item.title ||
-        "",
-    );
-    return name.includes(query);
+    const targetText =
+      "folderName" in item
+        ? item.folderName
+        : item.title || getCardText(item, "question") || "";
+
+    return normalizeCaseFold(targetText).includes(query);
   };
 
-  // フィルタ適用済みデータ
-  const filteredFolders = deletedFolders.filter(
-    (f) => matchesSearch(f) && filterByDate(f.deletedAt),
-  );
-  const filteredCards = cards.filter(
-    (c) => matchesSearch(c) && filterByDate(c.deletedAt),
-  );
-  const cardsWithoutResolvedFolder = useMemo(
-    () => cards.filter((card) => !cardFolderIdByCardId.get(card.id)),
-    [cards, cardFolderIdByCardId],
-  );
+  const filteredFolders = useMemo(() => {
+    return deletedFolders.filter(
+      (folder) => matchesSearch(folder) && filterByDate(folder.deletedAt),
+    );
+  }, [deletedFolders, searchQuery, dateFilter]);
 
-  // カードまたはフォルダが1つでも削除されていればごみ箱は空ではない
+  const filteredCards = useMemo(() => {
+    return cards.filter(
+      (card) => matchesSearch(card) && filterByDate(card.deletedAt),
+    );
+  }, [cards, searchQuery, dateFilter]);
+
   const isEmpty = deletedFolders.length === 0 && cards.length === 0;
   const isFilteredEmpty =
     filteredFolders.length === 0 && filteredCards.length === 0;
 
-  const toggleFolder = (id) => {
+  const toggleFolder = (id: string): void => {
     setSelectedIds((prev) => ({
       ...prev,
       folders: prev.folders.includes(id)
-        ? prev.folders.filter((fid) => fid !== id)
+        ? prev.folders.filter((folderId) => folderId !== id)
         : [...prev.folders, id],
     }));
   };
 
-  const toggleCard = (id) => {
+  const toggleCard = (id: string): void => {
     setSelectedIds((prev) => ({
       ...prev,
       cards: prev.cards.includes(id)
-        ? prev.cards.filter((cid) => cid !== id)
+        ? prev.cards.filter((cardId) => cardId !== id)
         : [...prev.cards, id],
     }));
   };
 
-  const selectAll = () => {
+  const selectAll = (): void => {
     setSelectedIds({
-      folders: deletedFolders.map((f) => f.id),
-      cards: cards.map((c) => c.id),
+      folders: filteredFolders.map((folder) => folder.id),
+      cards: filteredCards.map((card) => card.id),
     });
   };
 
-  const clearSelection = () => {
+  const clearSelection = (): void => {
     setSelectedIds({ folders: [], cards: [] });
   };
 
-  const handleRestore = async () => {
-    if (!currentUser) return;
+  const handleRestore = async (): Promise<void> => {
+    if (!currentUserId) return;
+
     setIsProcessing(true);
 
     try {
-      const db = await getLocalDb(currentUser.uid);
-      // まず、選択されたカードの親フォルダを特定
-      const parentFolderIds = new Set();
+      const db = await getLocalDb(currentUserId);
+      const parentFolderIds = new Set<string>();
+
       for (const cardId of selectedIds.cards) {
-        const card = cards.find((c) => c.id === cardId);
+        const card = cards.find((entry) => entry.id === cardId);
         const resolvedFolderId = card
-          ? (cardFolderIdByCardId.get(card.id) ?? null)
+          ? cardFolderIdByCardId.get(card.id) ?? null
           : null;
+
         if (resolvedFolderId) {
           parentFolderIds.add(resolvedFolderId);
         }
       }
 
-      // 親フォルダも復元対象に追加（削除されている場合のみ）
       for (const folderId of parentFolderIds) {
-        const folder = deletedFolders.find((f) => f.id === folderId);
-        if (folder && folder.isDeleted) {
-          // 親フォルダの親フォルダも再帰的に復元
+        const folder = deletedFolders.find((entry) => entry.id === folderId);
+        if (folder?.isDeleted) {
           await restoreFolderWithParents({
-            userId: currentUser.uid,
+            userId: currentUserId,
             folderId,
           });
         }
       }
 
-      // 選択されたフォルダを復元（localDB.restore → Firestore）
       for (const id of selectedIds.folders) {
-        // IndexedDB を先に更新（ローカルファースト）
         await db.restore("folders", id);
-
-        // Firestore も更新
-        const folderRef = doc(
-          firestoreDb,
-          ...folderDocPathSegments(currentUser.uid, id),
-        );
-        await updateDoc(folderRef, {
+        await maybeUpdateFirestoreDeletedState({
+          pathSegments: folderDocPathSegments(currentUserId, id),
           isDeleted: false,
-          deletedAt: null,
-          updatedAt: Timestamp.now(),
         });
       }
 
-      // 選択されたカードを復元（localDB.restore → Firestore）
       for (const id of selectedIds.cards) {
-        // IndexedDB を先に更新（ローカルファースト）
         await db.restore("cards", id);
-
-        // Firestore も更新
-        const cardRef = doc(
-          firestoreDb,
-          ...cardDocPathSegments(currentUser.uid, id),
-        );
-        await updateDoc(cardRef, {
+        await maybeUpdateFirestoreDeletedState({
+          pathSegments: cardDocPathSegments(currentUserId, id),
           isDeleted: false,
-          deletedAt: null,
-          updatedAt: Timestamp.now(),
         });
       }
 
       setSelectedIds({ folders: [], cards: [] });
-      alert("復元しました");
+      window.alert("復元しました");
     } catch (error) {
       console.error("Failed to restore items:", error);
-      alert(`復元に失敗しました: ${error.message}`);
+      window.alert(`復元に失敗しました: ${errorToMessage(error)}`);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  // 完全削除 - TRASHED → PURGED
-  // IndexedDB と Firestore 両方から物理削除
-  const handlePermanentDelete = async () => {
-    if (!currentUser) return;
+  const handlePermanentDelete = async (): Promise<void> => {
+    if (!currentUserId) return;
+
     setIsProcessing(true);
 
     try {
-      const db = await getLocalDb(currentUser.uid);
-      // フォルダを完全削除
-      for (const id of selectedIds.folders) {
-        // IndexedDB から削除（ローカルファースト）
-        await db.purge("folders", id);
+      const db = await getLocalDb(currentUserId);
 
-        // Firestore からも削除
+      for (const id of selectedIds.folders) {
+        await db.purge("folders", id);
         try {
-          const folderRef = doc(
-            firestoreDb,
-            ...folderDocPathSegments(currentUser.uid, id),
-          );
-          await deleteDoc(folderRef);
-        } catch (firestoreError) {
-          console.warn(
-            `Firestore delete failed for folder ${id}:`,
-            firestoreError,
-          );
-          // Firestore 削除失敗はログのみ（オフライン時など）
-          // TODO: syncQueue に追加して後で再試行
+          await maybeDeleteFirestoreDoc(folderDocPathSegments(currentUserId, id));
+        } catch (error) {
+          console.warn(`Firestore delete failed for folder ${id}:`, error);
         }
       }
 
-      // カードを完全削除
       for (const id of selectedIds.cards) {
-        // IndexedDB から削除（ローカルファースト）
         await db.purge("cards", id);
-
-        // Firestore からも削除
         try {
-          const cardRef = doc(
-            firestoreDb,
-            ...cardDocPathSegments(currentUser.uid, id),
-          );
-          await deleteDoc(cardRef);
-        } catch (firestoreError) {
-          console.warn(
-            `Firestore delete failed for card ${id}:`,
-            firestoreError,
-          );
-          // Firestore 削除失敗はログのみ（オフライン時など）
-          // TODO: syncQueue に追加して後で再試行
+          await maybeDeleteFirestoreDoc(cardDocPathSegments(currentUserId, id));
+        } catch (error) {
+          console.warn(`Firestore delete failed for card ${id}:`, error);
         }
       }
 
@@ -434,24 +446,60 @@ const Trash = () => {
       setDeleteDialogOpen(false);
     } catch (error) {
       console.error("Failed to delete items:", error);
-      alert("削除に失敗しました");
+      window.alert("削除に失敗しました");
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const handleEmptyTrash = async () => {
+  const handleEmptyTrash = (): void => {
     setSelectedIds({
-      folders: deletedFolders.map((f) => f.id),
-      cards: cards.map((c) => c.id),
+      folders: filteredFolders.map((folder) => folder.id),
+      cards: filteredCards.map((card) => card.id),
     });
     setDeleteDialogOpen(true);
+  };
+
+  const renderCardRow = (
+    card: CardEntity,
+    index: number,
+    intent: "neutral" | "error" = "neutral",
+  ) => {
+    const rowClassName =
+      intent === "error"
+        ? "flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-200 cursor-pointer hover:bg-red-100 transition-colors"
+        : "flex items-center gap-3 p-3 bg-gray-50 rounded-lg ml-8 cursor-pointer hover:bg-gray-100 transition-colors";
+
+    return (
+      <div
+        key={card.id}
+        className={rowClassName}
+        onClick={() => setPreviewCard(card)}
+      >
+        <Checkbox
+          checked={selectedIds.cards.includes(card.id)}
+          onCheckedChange={() => toggleCard(card.id)}
+          onClick={(event) => event.stopPropagation()}
+        />
+        <FileText
+          className={`w-4 h-4 ${intent === "error" ? "text-red-400" : "text-gray-400"}`}
+        />
+        <div className="flex-1">
+          <p className="font-medium text-sm">
+            Q{index + 1}:{" "}
+            {card.title || getCardText(card, "question").substring(0, 30) || "(無題)"}
+          </p>
+          <p className="text-xs text-gray-500">
+            削除日: {formatDateTime(card.deletedAt)}
+          </p>
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="min-h-screen text-slate-800 selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto p-6 md:p-14">
-        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-12">
           {!isEmpty && (
             <div className="flex items-center gap-4">
@@ -461,6 +509,7 @@ const Trash = () => {
               >
                 {deletedFolders.length + cards.length} 件
               </Badge>
+
               <Button
                 variant="destructive"
                 size="sm"
@@ -474,28 +523,27 @@ const Trash = () => {
           )}
         </div>
 
-        {/* Search and Filter */}
         {!isEmpty && (
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            {/* Search */}
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="カードやフォルダを検索..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(event) => setSearchQuery(event.target.value)}
                 className="w-full pl-11 pr-4 py-2.5 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-600/20 focus:border-primary-600 bg-white shadow-sm transition-all text-slate-700 font-bold placeholder:text-slate-300"
               />
             </div>
 
-            {/* Date Filter */}
             <div className="flex items-center gap-2">
               <div className="relative">
                 <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
                 <select
                   value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
+                  onChange={(event) =>
+                    setDateFilter(event.target.value as "all" | "today" | "week" | "month")
+                  }
                   className="pl-11 pr-8 py-2.5 border border-slate-200 rounded-2xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-600/20 focus:border-primary-600 shadow-sm appearance-none font-bold text-slate-600 cursor-pointer hover:border-slate-300 transition-all"
                 >
                   <option value="all">すべての期間</option>
@@ -509,7 +557,6 @@ const Trash = () => {
           </div>
         )}
 
-        {/* Filter Results Info */}
         {!isEmpty && (searchQuery || dateFilter !== "all") && (
           <div className="mb-4 text-sm text-gray-600">
             {isFilteredEmpty ? (
@@ -525,22 +572,23 @@ const Trash = () => {
             )}
           </div>
         )}
-        {/* Actions */}
+
         {!isEmpty && (
           <div className="flex items-center justify-between mb-4 p-3 bg-white rounded-lg border">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={selectAll}>
                 すべて選択
               </Button>
+
               {hasSelection && (
                 <Button variant="ghost" size="sm" onClick={clearSelection}>
                   選択解除
                 </Button>
               )}
+
               {hasSelection && (
                 <span className="text-sm text-gray-500 select-none">
-                  {selectedIds.folders.length + selectedIds.cards.length}{" "}
-                  件選択中
+                  {selectedIds.folders.length + selectedIds.cards.length} 件選択中
                 </span>
               )}
             </div>
@@ -550,12 +598,13 @@ const Trash = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleRestore}
+                  onClick={() => void handleRestore()}
                   disabled={isProcessing}
                 >
                   <RotateCcw className="w-4 h-4 mr-1" />
                   復元
                 </Button>
+
                 <Button
                   variant="destructive"
                   size="sm"
@@ -570,11 +619,10 @@ const Trash = () => {
           </div>
         )}
 
-        {/* Content */}
         {isLoading ? (
           <div className="space-y-2">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-16 w-full" />
+            {[1, 2, 3, 4].map((index) => (
+              <Skeleton key={index} className="h-16 w-full" />
             ))}
           </div>
         ) : isEmpty ? (
@@ -591,9 +639,7 @@ const Trash = () => {
           </Card>
         ) : (
           <div className="space-y-4">
-            {/* 削除されたフォルダとそのカードを表示 */}
-            {deletedFolders.map((folder) => {
-              // このフォルダに属するすべてのカード（削除済み・未削除を含む）
+            {filteredFolders.map((folder) => {
               const folderCards = allCardsData.filter(
                 (card) =>
                   normalizeCaseFold(cardFolderIdByCardId.get(card.id)) ===
@@ -612,71 +658,51 @@ const Trash = () => {
                         <Folder className="w-5 h-5 text-indigo-500" />
                         <div>
                           <CardTitle className="text-base select-none">
-                            {folder.folderName || folder.folder_name}
+                            {folder.folderName}
                           </CardTitle>
                           <p className="text-xs text-gray-500">
-                            カード {folderCards.length}枚 |
-                            {/* normalize済みなのでdeletedAtは常にDateまたはnull */}
-                            削除日:{" "}
-                            {folder.deletedAt
-                              ? format(folder.deletedAt, "yyyy/MM/dd HH:mm", {
-                                  locale: ja,
-                                })
-                              : "-"}
+                            カード {folderCards.length}枚 | 削除日:{" "}
+                            {formatDateTime(folder.deletedAt)}
                           </p>
                         </div>
                       </div>
+
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
+                          disabled={isProcessing || !currentUserId}
                           onClick={async () => {
+                            if (!currentUserId) return;
+
                             setIsProcessing(true);
                             try {
                               await restoreFolderWithParents({
-                                userId: currentUser.uid,
+                                userId: currentUserId,
                                 folderId: folder.id,
                               });
 
-                              // フォルダ内のカードも自動復元（カード自体が isDeleted=true の場合のみ）
-                              // 親フォルダ削除により不可視になっていたカードは状態変更不要
-                              const db = await getLocalDb(currentUser.uid);
+                              const db = await getLocalDb(currentUserId);
                               for (const card of folderCards) {
-                                if (card.isDeleted) {
-                                  await db.restore("cards", card.id);
-                                  // Firestore も更新
-                                  try {
-                                    const cardRef = doc(
-                                      firestoreDb,
-                                      ...cardDocPathSegments(
-                                        currentUser.uid,
-                                        card.id,
-                                      ),
-                                    );
-                                    await updateDoc(cardRef, {
-                                      isDeleted: false,
-                                      deletedAt: null,
-                                      updatedAt: Timestamp.now(),
-                                    });
-                                  } catch (firestoreError) {
-                                    console.warn(
-                                      `Firestore update failed for card ${card.id}:`,
-                                      firestoreError,
-                                    );
-                                  }
-                                }
+                                if (!card.isDeleted) continue;
+
+                                await db.restore("cards", card.id);
+                                await maybeUpdateFirestoreDeletedState({
+                                  pathSegments: cardDocPathSegments(currentUserId, card.id),
+                                  isDeleted: false,
+                                });
                               }
-                              alert(
+
+                              window.alert(
                                 `フォルダとカード${folderCards.length}枚を復元しました`,
                               );
                             } catch (error) {
                               console.error("Failed to restore folder:", error);
-                              alert("復元に失敗しました: " + error.message);
+                              window.alert(`復元に失敗しました: ${errorToMessage(error)}`);
                             } finally {
                               setIsProcessing(false);
                             }
                           }}
-                          disabled={isProcessing}
                         >
                           <RotateCcw className="w-4 h-4 mr-1" />
                           フォルダごと復元
@@ -688,39 +714,7 @@ const Trash = () => {
                   {folderCards.length > 0 && (
                     <CardContent>
                       <div className="space-y-2">
-                        {folderCards.map((card, index) => (
-                          <div
-                            key={card.id}
-                            className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg ml-8 cursor-pointer hover:bg-gray-100 transition-colors"
-                            onClick={() => setPreviewCard(card)}
-                          >
-                            <Checkbox
-                              checked={selectedIds.cards.includes(card.id)}
-                              onCheckedChange={() => toggleCard(card.id)}
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                            <FileText className="w-4 h-4 text-gray-400" />
-                            <div className="flex-1">
-                              <p className="font-medium text-sm">
-                                Q{index + 1}:{" "}
-                                {card.title ||
-                                  getCardText(card, "question").substring(
-                                    0,
-                                    30,
-                                  ) ||
-                                  "(無題)"}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                削除日:{" "}
-                                {card.deletedAt
-                                  ? format(card.deletedAt, "yyyy/MM/dd HH:mm", {
-                                      locale: ja,
-                                    })
-                                  : "-"}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                        {folderCards.map((card, index) => renderCardRow(card, index))}
                       </div>
                     </CardContent>
                   )}
@@ -728,136 +722,73 @@ const Trash = () => {
               );
             })}
 
-            {/* フォルダごとにグループ化して表示（親フォルダが存在し未削除のカード） */}
-            {(() => {
-              const cardsByFolder = groupCardsByFolderId(
-                cards,
-                cardFolderIdByCardId,
-                deletedFolders,
+            {Array.from(
+              groupCardsByFolderId(cards, cardFolderIdByCardId, deletedFolders).entries(),
+            ).map(([normalizedFolderId, folderCards]) => {
+              const folder = folders.find(
+                (candidate) => normalizeCaseFold(candidate.id) === normalizedFolderId,
               );
+              if (!folder) return null;
 
-              return Array.from(cardsByFolder.entries()).map(
-                ([normalizedFolderId, folderCards]) => {
-                  const folder = folders.find(
-                    (candidate) =>
-                      normalizeCaseFold(candidate.id) === normalizedFolderId,
-                  );
-                  if (!folder) return null;
-
-                  return (
-                    <Card key={normalizedFolderId}>
-                      <CardHeader className="pb-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Folder className="w-5 h-5 text-gray-400" />
-                            <div>
-                              <CardTitle className="text-base select-none text-gray-600">
-                                {folder.folderName || folder.folder_name}
-                              </CardTitle>
-                              <p className="text-xs text-gray-500">
-                                削除されたカード {folderCards.length}枚
-                              </p>
-                            </div>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={async () => {
-                              setIsProcessing(true);
-                              try {
-                                const db = await getLocalDb(currentUser.uid);
-                                // カードを復元（localDB.restore → Firestore）
-                                for (const card of folderCards) {
-                                  await db.restore("cards", card.id);
-                                  // Firestore も更新
-                                  try {
-                                    const cardRef = doc(
-                                      firestoreDb,
-                                      ...cardDocPathSegments(
-                                        currentUser.uid,
-                                        card.id,
-                                      ),
-                                    );
-                                    await updateDoc(cardRef, {
-                                      isDeleted: false,
-                                      deletedAt: null,
-                                      updatedAt: Timestamp.now(),
-                                    });
-                                  } catch (firestoreError) {
-                                    console.warn(
-                                      `Firestore update failed for card ${card.id}:`,
-                                      firestoreError,
-                                    );
-                                  }
-                                }
-                                alert(
-                                  `${folderCards.length}枚のカードを復元しました`,
-                                );
-                              } catch (error) {
-                                console.error(
-                                  "Failed to restore cards:",
-                                  error,
-                                );
-                                alert("復元に失敗しました");
-                              } finally {
-                                setIsProcessing(false);
-                              }
-                            }}
-                            disabled={isProcessing}
-                          >
-                            <RotateCcw className="w-4 h-4 mr-1" />
-                            すべて復元
-                          </Button>
+              return (
+                <Card key={normalizedFolderId}>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Folder className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <CardTitle className="text-base select-none text-gray-600">
+                            {folder.folderName}
+                          </CardTitle>
+                          <p className="text-xs text-gray-500">
+                            削除されたカード {folderCards.length}枚
+                          </p>
                         </div>
-                      </CardHeader>
+                      </div>
 
-                      <CardContent>
-                        <div className="space-y-2">
-                          {folderCards.map((card, index) => (
-                            <div
-                              key={card.id}
-                              className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg ml-8 cursor-pointer hover:bg-gray-100 transition-colors"
-                              onClick={() => setPreviewCard(card)}
-                            >
-                              <Checkbox
-                                checked={selectedIds.cards.includes(card.id)}
-                                onCheckedChange={() => toggleCard(card.id)}
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                              <FileText className="w-4 h-4 text-gray-400" />
-                              <div className="flex-1">
-                                <p className="font-medium text-sm">
-                                  Q{index + 1}:{" "}
-                                  {card.title ||
-                                    getCardText(card, "question").substring(
-                                      0,
-                                      30,
-                                    ) ||
-                                    "(無題)"}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {/* normalize済みなのでdeletedAtは常にDateまたはnull */}
-                                  削除日:{" "}
-                                  {card.deletedAt
-                                    ? format(
-                                        card.deletedAt,
-                                        "yyyy/MM/dd HH:mm",
-                                        { locale: ja },
-                                      )
-                                    : "-"}
-                                </p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                },
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={isProcessing || !currentUserId}
+                        onClick={async () => {
+                          if (!currentUserId) return;
+
+                          setIsProcessing(true);
+                          try {
+                            const db = await getLocalDb(currentUserId);
+
+                            for (const card of folderCards) {
+                              await db.restore("cards", card.id);
+                              await maybeUpdateFirestoreDeletedState({
+                                pathSegments: cardDocPathSegments(currentUserId, card.id),
+                                isDeleted: false,
+                              });
+                            }
+
+                            window.alert(`${folderCards.length}枚のカードを復元しました`);
+                          } catch (error) {
+                            console.error("Failed to restore cards:", error);
+                            window.alert("復元に失敗しました");
+                          } finally {
+                            setIsProcessing(false);
+                          }
+                        }}
+                      >
+                        <RotateCcw className="w-4 h-4 mr-1" />
+                        すべて復元
+                      </Button>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent>
+                    <div className="space-y-2">
+                      {folderCards.map((card, index) => renderCardRow(card, index))}
+                    </div>
+                  </CardContent>
+                </Card>
               );
-            })()}
+            })}
 
-            {/* フォルダIDがないカード（エラー状態） */}
             {cardsWithoutResolvedFolder.length > 0 && (
               <Card>
                 <CardHeader className="pb-2">
@@ -866,42 +797,16 @@ const Trash = () => {
                     フォルダなしカード ({cardsWithoutResolvedFolder.length})
                   </CardTitle>
                 </CardHeader>
+
                 <CardContent>
                   <p className="text-sm text-gray-600 mb-2">
                     これらのカードにはフォルダIDが設定されていません。復元するには手動で修正が必要です。
                   </p>
+
                   <div className="space-y-2">
-                    {cardsWithoutResolvedFolder.map((card) => (
-                      <div
-                        key={card.id}
-                        className="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-200 cursor-pointer hover:bg-red-100 transition-colors"
-                        onClick={() => setPreviewCard(card)}
-                      >
-                        <Checkbox
-                          checked={selectedIds.cards.includes(card.id)}
-                          onCheckedChange={() => toggleCard(card.id)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                        <FileText className="w-4 h-4 text-red-400" />
-                        <div className="flex-1">
-                          <p className="font-medium">
-                            {card.title ||
-                              getCardText(card, "question").substring(0, 30) ||
-                              "(無題)"}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            削除日:{" "}
-                            {card.deletedAt
-                              ? format(
-                                  new Date(card.deletedAt),
-                                  "yyyy/MM/dd HH:mm",
-                                  { locale: ja },
-                                )
-                              : "-"}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                    {cardsWithoutResolvedFolder.map((card, index) =>
+                      renderCardRow(card, index, "error"),
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -909,12 +814,9 @@ const Trash = () => {
           </div>
         )}
 
-        {/* Delete Confirmation Dialog - 二段階確認 */}
         <AlertDialog
           open={deleteDialogOpen}
-          onOpenChange={(open) => {
-            setDeleteDialogOpen(open);
-          }}
+          onOpenChange={(open) => setDeleteDialogOpen(open)}
         >
           <AlertDialogContent className="max-w-lg">
             <AlertDialogHeader>
@@ -944,17 +846,16 @@ const Trash = () => {
                       )}
                     </ul>
                   </div>
-
-                  {/* 入力確認を削除 */}
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
+
             <AlertDialogFooter>
               <AlertDialogCancel disabled={isProcessing}>
                 キャンセル
               </AlertDialogCancel>
               <AlertDialogAction
-                onClick={handlePermanentDelete}
+                onClick={() => void handlePermanentDelete()}
                 disabled={isProcessing}
                 className="bg-red-500 hover:bg-red-600 border-none text-white font-bold"
               >
@@ -964,9 +865,8 @@ const Trash = () => {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Card Preview Dialog */}
         <AlertDialog
-          open={!!previewCard}
+          open={Boolean(previewCard)}
           onOpenChange={() => setPreviewCard(null)}
         >
           <AlertDialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -975,9 +875,9 @@ const Trash = () => {
                 カードプレビュー
               </AlertDialogTitle>
             </AlertDialogHeader>
+
             {previewCard && (
               <div className="space-y-4">
-                {/* Question */}
                 <div className="space-y-2">
                   <h3 className="font-semibold text-sm text-gray-700">問題</h3>
                   <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -986,27 +886,24 @@ const Trash = () => {
                     </p>
                     {getCardImages(previewCard, "question").length > 0 && (
                       <div className="mt-3 space-y-2">
-                        {getCardImages(previewCard, "question").map(
-                          (img, idx) => (
-                            <img
-                              key={idx}
-                              src={
-                                img?.remoteUrl ??
-                                img?.localUrl ??
-                                img?.url ??
-                                img
-                              }
-                              alt={`Question ${idx + 1}`}
-                              className="max-w-full rounded"
-                            />
-                          ),
-                        )}
+                        {getCardImages(previewCard, "question").map((image, index) => (
+                          <img
+                            key={index}
+                            src={
+                              image?.remoteUrl ??
+                              image?.localUrl ??
+                              image?.url ??
+                              String(image)
+                            }
+                            alt={`Question ${index + 1}`}
+                            className="max-w-full rounded"
+                          />
+                        ))}
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Answer */}
                 <div className="space-y-2">
                   <h3 className="font-semibold text-sm text-gray-700">解答</h3>
                   <div className="p-4 bg-green-50 rounded-lg border border-green-200">
@@ -1015,51 +912,31 @@ const Trash = () => {
                     </p>
                     {getCardImages(previewCard, "answer").length > 0 && (
                       <div className="mt-3 space-y-2">
-                        {getCardImages(previewCard, "answer").map(
-                          (img, idx) => (
-                            <img
-                              key={idx}
-                              src={
-                                img?.remoteUrl ??
-                                img?.localUrl ??
-                                img?.url ??
-                                img
-                              }
-                              alt={`Answer ${idx + 1}`}
-                              className="max-w-full rounded"
-                            />
-                          ),
-                        )}
+                        {getCardImages(previewCard, "answer").map((image, index) => (
+                          <img
+                            key={index}
+                            src={
+                              image?.remoteUrl ??
+                              image?.localUrl ??
+                              image?.url ??
+                              String(image)
+                            }
+                            alt={`Answer ${index + 1}`}
+                            className="max-w-full rounded"
+                          />
+                        ))}
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Metadata */}
                 <div className="text-xs text-gray-500 space-y-1 pt-2 border-t">
-                  <p>
-                    作成日:{" "}
-                    {previewCard.createdAt
-                      ? format(
-                          new Date(previewCard.createdAt),
-                          "yyyy/MM/dd HH:mm",
-                          { locale: ja },
-                        )
-                      : "-"}
-                  </p>
-                  <p>
-                    削除日:{" "}
-                    {previewCard.deletedAt
-                      ? format(
-                          new Date(previewCard.deletedAt),
-                          "yyyy/MM/dd HH:mm",
-                          { locale: ja },
-                        )
-                      : "-"}
-                  </p>
+                  <p>作成日: {formatDateTime(previewCard.createdAt)}</p>
+                  <p>削除日: {formatDateTime(previewCard.deletedAt)}</p>
                 </div>
               </div>
             )}
+
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setPreviewCard(null)}>
                 閉じる
