@@ -14,19 +14,12 @@ interface TreeViewMainPaneProps {
   cards: Card[];
   documents: DocumentItem[];
   folderCards: Card[];
-  folderStats: {
-    dueCount: number;
-    unlearnedCount: number;
-    lastReviewedAt: Date | null;
-  };
-  onItemSelect: (item: SelectedExplorerItem) => void;
-  onFolderSelect: (folderId: string | null) => void;
   onCardUpdated: () => void;
   onDocumentUpdated: (
     documentId: string,
     updates: Partial<DocumentItem>,
   ) => Promise<void> | void;
-  onRenameFolder: (folderId: string, newName: string) => Promise<void>;
+  onRenameFolder?: (newName: string) => Promise<void>;
   handlers: {
     onStartStudy: () => void;
     onViewCards: () => void;
@@ -47,7 +40,6 @@ export const TreeViewMainPane = ({
   cards,
   documents,
   folderCards,
-  folderStats,
   onCardUpdated,
   onDocumentUpdated,
   onRenameFolder,
@@ -72,16 +64,9 @@ export const TreeViewMainPane = ({
         cards={cards}
         documents={documents}
         folderCards={folderCards}
-        folderStats={folderStats}
         onCardUpdated={onCardUpdated}
         onDocumentUpdated={onDocumentUpdated}
-        onRenameFolder={
-          selectedFolderId
-            ? async (newName: string) => {
-                await onRenameFolder(selectedFolderId, newName);
-              }
-            : undefined
-        }
+        onRenameFolder={onRenameFolder}
         handlers={handlers}
         folderSelectionNonce={folderSelectionNonce}
       />
