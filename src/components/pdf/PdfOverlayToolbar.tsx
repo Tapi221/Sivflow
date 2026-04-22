@@ -54,6 +54,13 @@ export const PdfOverlayToolbar = ({
   disabled = false,
 }: PdfOverlayToolbarProps) => {
   const isFitWidthActive = fitMode === "width";
+  const nextPageLayoutMode: PdfPageLayoutMode =
+    pageLayoutMode === "single" ? "double" : "single";
+  const pageLayoutToggleLabel =
+    pageLayoutMode === "single"
+      ? "単一表示。タップで2枚表示に切り替え"
+      : "2枚表示。タップで単一表示に切り替え";
+  const isPageLayoutToggleDisabled = disabled || numPages <= 1;
 
   return (
     <OverlayToolbar>
@@ -100,26 +107,18 @@ export const PdfOverlayToolbar = ({
 
       <OverlayToolbarButton
         onClick={() => {
-          onPageLayoutModeChange("single");
+          onPageLayoutModeChange(nextPageLayoutMode);
         }}
-        label="単一表示"
-        disabled={disabled}
-        active={pageLayoutMode === "single"}
-        className="h-6 w-6"
-      >
-        <PdfSinglePageGlyph />
-      </OverlayToolbarButton>
-
-      <OverlayToolbarButton
-        onClick={() => {
-          onPageLayoutModeChange("double");
-        }}
-        label="2枚表示"
-        disabled={disabled || numPages <= 1}
+        label={pageLayoutToggleLabel}
+        disabled={isPageLayoutToggleDisabled}
         active={pageLayoutMode === "double"}
         className="h-6 w-6"
       >
-        <PdfDoublePageGlyph />
+        {pageLayoutMode === "single" ? (
+          <PdfSinglePageGlyph />
+        ) : (
+          <PdfDoublePageGlyph />
+        )}
       </OverlayToolbarButton>
 
       <OverlayToolbarDivider />
