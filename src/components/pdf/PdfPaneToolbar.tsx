@@ -19,6 +19,16 @@ interface PdfPaneToolbarProps {
   onPrevMatch: () => void;
   onNextMatch: () => void;
   onOpenNewTab: () => void;
+  ocrStatus: "idle" | "running" | "success" | "error" | "cancelled";
+  ocrProgress: number;
+  ocrProcessedPages: number;
+  ocrTotalPages: number;
+  ocrCurrentProcessingPage: number | null;
+  ocrError: string | null;
+  hasOcrForCurrentPage: boolean;
+  onRunCurrentPageOcr: () => void;
+  onRunAllPagesOcr: () => void;
+  onCancelOcr: () => void;
 }
 
 export const PdfPaneToolbar = ({
@@ -33,8 +43,19 @@ export const PdfPaneToolbar = ({
   onPrevMatch,
   onNextMatch,
   onOpenNewTab,
+  ocrStatus,
+  ocrProgress,
+  ocrProcessedPages,
+  ocrTotalPages,
+  ocrCurrentProcessingPage,
+  ocrError,
+  hasOcrForCurrentPage,
+  onRunCurrentPageOcr,
+  onRunAllPagesOcr,
+  onCancelOcr,
 }: PdfPaneToolbarProps) => {
   const searchInputId = useId();
+  const isOcrRunning = ocrStatus === "running";
 
   const statusMessages = [
     isLocalOnly
@@ -48,6 +69,34 @@ export const PdfPaneToolbar = ({
       ? {
           key: "upload-failed",
           text: "クラウド同期に失敗しました。再アップロードを試してください。",
+          className: "text-rose-600",
+        }
+      : null,
+    ocrStatus === "running"
+      ? {
+          key: "ocr-running",
+          text: `OCR中 ${ocrProcessedPages} / ${ocrTotalPages}${typeof ocrCurrentProcessingPage === "number" ? ` · p.${ocrCurrentProcessingPage}` : ""}`,
+          className: "text-sky-600",
+        }
+      : null,
+    ocrStatus === "success"
+      ? {
+          key: "ocr-success",
+          text: "OCR完了。OCR結果を保存しました。",
+          className: "text-emerald-600",
+        }
+      : null,
+    ocrStatus === "cancelled"
+      ? {
+          key: "ocr-cancelled",
+          text: "OCRを中断しました。",
+          className: "text-slate-500",
+        }
+      : null,
+    ocrStatus === "error" && ocrError
+      ? {
+          key: "ocr-error",
+          text: `OCRエラー: ${ocrError}`,
           className: "text-rose-600",
         }
       : null,
@@ -119,6 +168,34 @@ export const PdfPaneToolbar = ({
       </div>
 
       <div className="flex shrink-0 items-center gap-1">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onRunCurrentPageOcr}
+          disabled={sourceUnavailable || isOcrRunning}
+          title={hasOcrForCurrentPage ? "現在ページはOCR済みです。再実行できます。" : "現在ページをOCR"}
+        >
+          現在OCR
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onRunAllPagesOcr}
+          disabled={sourceUnavailable || isOcrRunning}
+        >
+          全体OCR
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onCancelOcr}
+          disabled={!isOcrRunning}
+        >
+          中断
+        </Button>
+        <div className="min-w-[56px] text-right text-[11px] text-slate-500">
+          {ocrTotalPages > 0 ? `${Math.round(ocrProgress * 100)}%` : "OCR"}
+        </div>
         <Button
           variant="ghost"
           size="sm"
