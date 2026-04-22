@@ -5,11 +5,17 @@ export const floatingSurfaceVariants = cva("", {
     surface: {
       default: "",
       floating:
-        "surface-floating ds-menu-surface ds-menu-surface--glass text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
+        "ds-floating-panel ds-floating-panel--menu ds-floating-panel--glass text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
       strong:
-        "surface-floating-strong ds-menu-surface ds-menu-surface--glass ds-menu-surface--strong text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
+        "ds-floating-panel ds-floating-panel--menu ds-floating-panel--glass ds-floating-panel--strong text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
+      menu:
+        "ds-floating-panel ds-floating-panel--menu ds-floating-panel--glass text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
+      menuStrong:
+        "ds-floating-panel ds-floating-panel--menu ds-floating-panel--glass ds-floating-panel--strong text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
+      filter:
+        "ds-floating-panel ds-floating-panel--filter ds-floating-panel--glass ds-floating-panel--strong text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
       panel:
-        "surface-panel-floating text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
+        "surface-panel-floating ds-floating-panel ds-floating-panel--panel text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
       plain: "border-transparent bg-transparent shadow-none backdrop-blur-0",
     },
   },

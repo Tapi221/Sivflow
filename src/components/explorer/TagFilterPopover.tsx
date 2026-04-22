@@ -3,6 +3,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { floatingPanelPresets } from "@/components/ui/menu-styles";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { Filter } from "@/ui/icons";
@@ -26,6 +27,7 @@ export const TagFilterPopover = ({
     contentTypeFilter,
   } = useExplorerStore();
   const [isOpen, setIsOpen] = useState(false);
+  const panelPreset = floatingPanelPresets.filter;
 
   const isFilterActive =
     tagFilter.length > 0 ||
@@ -52,7 +54,8 @@ export const TagFilterPopover = ({
 
       <PopoverContent
         align="center"
-        className="ds-popover-surface--filter w-64 overflow-hidden p-0"
+        className={cn(panelPreset.className, "w-64")}
+        surface={panelPreset.surface}
       >
         <TagFilterPanel allTags={allTags} isOpen={isOpen} />
       </PopoverContent>

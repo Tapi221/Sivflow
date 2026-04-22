@@ -5,7 +5,7 @@ import {
   DropdownMenuItemLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { glassMenuContentClass } from "@/components/ui/menu-styles";
+import { floatingPanelPresets } from "@/components/ui/menu-styles";
 import { cn } from "@/lib/utils";
 import React from "react";
 import type { MenuAction } from "./menuActions";
@@ -17,7 +17,8 @@ interface ExplorerMenuPanelProps extends React.ComponentPropsWithoutRef<
   closeMenu?: () => void;
 }
 
-const DANGER_ITEM_CLASS = "ds-menu__item--danger";
+const DANGER_ITEM_CLASS =
+  "ds-floating-panel__row--danger ds-menu__item--danger";
 
 /**
  * エクスプローラーの各種メニュー（追加ボタン、コンテキストメニュー）で共有されるパネルコンポーネント
@@ -29,11 +30,12 @@ export const ExplorerMenuPanel = ({
   ...contentProps
 }: ExplorerMenuPanelProps) => {
   const visibleActions = actions.filter((action) => !action.hidden);
+  const panelPreset = floatingPanelPresets.menu;
 
   return (
     <DropdownMenuContent
-      className={cn("w-48", glassMenuContentClass, className)}
-      surface="floating"
+      className={cn("w-48", panelPreset.className, className)}
+      surface={panelPreset.surface}
       {...contentProps}
     >
       {visibleActions.map((action, index) => (
