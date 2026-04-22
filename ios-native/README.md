@@ -1,23 +1,35 @@
 # FlashCardMaster iOS Native
 
-`ios-native` の上書き用スタンドアロン版です。
+This overwrite package replaces the old unfinished `ios-native` skeleton with a local-first iOS app that aligns more closely with the Electron/React information architecture.
 
-## 含まれるもの
-- SwiftUI ベースの iOS アプリ
-- ライブラリ管理
-- フォルダ / カードセット / カード / タグ CRUD
-- 全文検索
-- ステータス / タグ絞り込み
-- ローカル JSON 永続化
-- スナップショット export / import
-- テーマ切替
+Included routes:
+- Library
+- Study
+- Search
+- Tags
+- Calendar
+- Directory
+- Gallery
+- Questions
+- Dictionary
+- Tag Map
+- Trash
+- Settings
 
-## 開き方
-1. `ios-native/FlashCardMasterNative.xcodeproj` を Xcode で開く
-2. iOS 17 以上のシミュレータまたは実機を選ぶ
-3. Build & Run
+Included capabilities:
+- Folder / card set / card / tag CRUD
+- Study queue with spaced-review grading
+- Soft delete + restore + purge
+- Local JSON persistence
+- Import / export snapshot
+- Theme switching
+- Gallery cards via image URLs
+- Review calendar
 
-## 補足
-- Firebase 依存は外しています
-- まず単体で動く完成版を優先しています
-- データは Application Support に `study-snapshot.json` として保存されます
+Still intentionally not included:
+- Firebase auth / cloud sync
+- XLSX import parity
+- PDF tooling parity
+- Rich text / code / math editors matching BlockNote exactly
+
+The point is to give you a real app you can overwrite with now, not another polite pile of placeholder docs.
