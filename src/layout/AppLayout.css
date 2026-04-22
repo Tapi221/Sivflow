@@ -35,16 +35,11 @@
 
 .app-layout__content {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: 1fr;
   height: 100%;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-}
-
-.app-layout__tabs {
-  min-width: 0;
-  min-height: 0;
 }
 
 .app-layout__main {
