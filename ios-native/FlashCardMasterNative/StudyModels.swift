@@ -233,18 +233,93 @@ struct StudyCard: Identifiable, Codable, Hashable {
     }
 }
 
-struct StudySnapshot: Codable {
+struct SnapshotSyncState: Codable, Equatable {
+    var deletedFolderTimestamps: [String: Date]
+    var deletedCardSetTimestamps: [String: Date]
+    var deletedTagTimestamps: [String: Date]
+    var deletedCardTimestamps: [String: Date]
+
+    init(
+        deletedFolderTimestamps: [String: Date] = [:],
+        deletedCardSetTimestamps: [String: Date] = [:],
+        deletedTagTimestamps: [String: Date] = [:],
+        deletedCardTimestamps: [String: Date] = [:]
+    ) {
+        self.deletedFolderTimestamps = deletedFolderTimestamps
+        self.deletedCardSetTimestamps = deletedCardSetTimestamps
+        self.deletedTagTimestamps = deletedTagTimestamps
+        self.deletedCardTimestamps = deletedCardTimestamps
+    }
+
+    static let empty = SnapshotSyncState()
+}
+
+struct StudySnapshot: Codable, Equatable {
     var version: Int
     var theme: AppTheme
     var folders: [StudyFolder]
     var cardSets: [StudyCardSet]
     var cards: [StudyCard]
     var tags: [StudyTag]
+    var syncState: SnapshotSyncState
 
-    static let currentVersion = 3
+    static let currentVersion = 4
+
+    init(
+        version: Int,
+        theme: AppTheme,
+        folders: [StudyFolder],
+        cardSets: [StudyCardSet],
+        cards: [StudyCard],
+        tags: [StudyTag],
+        syncState: SnapshotSyncState = .empty
+    ) {
+        self.version = version
+        self.theme = theme
+        self.folders = folders
+        self.cardSets = cardSets
+        self.cards = cards
+        self.tags = tags
+        self.syncState = syncState
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case version
+        case theme
+        case folders
+        case cardSets
+        case cards
+        case tags
+        case syncState
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        version = try container.decodeIfPresent(Int.self, forKey: .version) ?? StudySnapshot.currentVersion
+        theme = try container.decodeIfPresent(AppTheme.self, forKey: .theme) ?? .system
+        folders = try container.decodeIfPresent([StudyFolder].self, forKey: .folders) ?? []
+        cardSets = try container.decodeIfPresent([StudyCardSet].self, forKey: .cardSets) ?? []
+        cards = try container.decodeIfPresent([StudyCard].self, forKey: .cards) ?? []
+        tags = try container.decodeIfPresent([StudyTag].self, forKey: .tags) ?? []
+        syncState = try container.decodeIfPresent(SnapshotSyncState.self, forKey: .syncState) ?? .empty
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(version, forKey: .version)
+        try container.encode(theme, forKey: .theme)
+        try container.encode(folders, forKey: .folders)
+        try container.encode(cardSets, forKey: .cardSets)
+        try container.encode(cards, forKey: .cards)
+        try container.encode(tags, forKey: .tags)
+        if syncState != .empty {
+            try container.encode(syncState, forKey: .syncState)
+        }
+    }
 }
 
 extension StudySnapshot {
+
     static var sample: StudySnapshot {
         let basicsTag = StudyTag(name: "Basics", colorName: .blue)
         let swiftTag = StudyTag(name: "Swift", colorName: .purple)
@@ -327,7 +402,8 @@ extension StudySnapshot {
             folders: [rootFolder, childFolder, systemFolder],
             cardSets: [syntaxSet, viewSet, rootSet, architectureSet],
             cards: cards,
-            tags: [basicsTag, swiftTag, reviewTag, uiTag, systemTag]
+            tags: [basicsTag, swiftTag, reviewTag, uiTag, systemTag],
+            syncState: .empty
         )
     }
 }

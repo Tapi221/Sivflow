@@ -1152,6 +1152,8 @@ struct SettingsView: View {
     @State private var showResetConfirmation = false
     @State private var firebaseAPIKey = ""
     @State private var firebaseProjectID = ""
+    @State private var googleClientID = ""
+    @State private var googleRedirectScheme = FirebaseConfiguration.defaultGoogleRedirectScheme
     @State private var email = ""
     @State private var password = ""
 
@@ -1183,9 +1185,23 @@ struct SettingsView: View {
                 TextField("Firebase Project ID", text: $firebaseProjectID)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
+                TextField("Google OAuth Client ID", text: $googleClientID)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                TextField("Google Redirect Scheme", text: $googleRedirectScheme)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                Text("Authorize this redirect URI in Google Cloud: \(googleRedirectScheme):\(FirebaseConfiguration.defaultGoogleRedirectPath)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
 
                 Button("Save Firebase Configuration") {
-                    firebase.updateConfiguration(apiKey: firebaseAPIKey, projectID: firebaseProjectID)
+                    firebase.updateConfiguration(
+                        apiKey: firebaseAPIKey,
+                        projectID: firebaseProjectID,
+                        googleClientID: googleClientID,
+                        googleRedirectScheme: googleRedirectScheme
+                    )
                 }
 
                 if hasFirebaseConfiguration {
@@ -1193,13 +1209,16 @@ struct SettingsView: View {
                         firebase.clearConfiguration()
                         firebaseAPIKey = ""
                         firebaseProjectID = ""
+                        googleClientID = ""
+                        googleRedirectScheme = FirebaseConfiguration.defaultGoogleRedirectScheme
                     }
                 }
             }
 
             Section("Firebase Authentication") {
                 if let session = firebase.session {
-                    InfoLine(label: "Signed in", value: session.email)
+                    InfoLine(label: "Signed in", value: session.email.isEmpty ? "Authenticated account" : session.email)
+                    InfoLine(label: "Provider", value: session.providerID)
                     Button("Sign Out", role: .destructive) {
                         firebase.signOut()
                     }
@@ -1220,10 +1239,27 @@ struct SettingsView: View {
                         }
                         .disabled(!hasFirebaseConfiguration || email.isEmpty || password.isEmpty || firebase.isWorking)
                     }
+
+                    Button("Sign In with Google") {
+                        Task { await firebase.signInWithGoogle() }
+                    }
+                    .disabled(!hasFirebaseConfiguration || googleClientID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || firebase.isWorking)
                 }
             }
 
             Section("Cloud Sync") {
+                Toggle(
+                    "Live Merge Sync",
+                    isOn: Binding(
+                        get: { firebase.autoSyncEnabled },
+                        set: { firebase.setAutoSyncEnabled($0) }
+                    )
+                )
+
+                Text(firebase.liveSyncState)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
                 Button("Push Snapshot to Cloud") {
                     Task {
                         do {
@@ -1278,8 +1314,8 @@ struct SettingsView: View {
             }
 
             Section("Parity Notes") {
-                Text("This iOS build now includes Firebase email/password auth, Firestore snapshot sync, XLSX import, and PDF preview support in addition to the local-first routes.")
-                Text("Google popup auth and the exact BlockNote/PDF block editor surface from Electron/React are still separate work. Shocking that software has edges.")
+                Text("This iOS build now includes Firebase email/password auth, Google popup sign-in, automatic Firestore merge sync, XLSX import, and PDF preview support in addition to the local-first routes.")
+                Text("The editor surface is still SwiftUI-native rather than BlockNote-identical, because cloning every web editing primitive into UIKit would be an excellent way to waste a month.")
             }
 
             if let lastErrorMessage = store.lastErrorMessage,
@@ -1292,7 +1328,7 @@ struct SettingsView: View {
 
             Section("About") {
                 InfoLine(label: "App", value: "FlashCardMasterNative")
-                InfoLine(label: "Mode", value: "Parity build with cloud options")
+                InfoLine(label: "Mode", value: "Parity build with Google auth + live merge sync")
                 InfoLine(label: "Storage", value: "JSON snapshot + optional Firestore")
                 InfoLine(label: "Snapshot version", value: String(StudySnapshot.currentVersion))
             }
@@ -1301,6 +1337,8 @@ struct SettingsView: View {
         .onAppear {
             firebaseAPIKey = firebase.configuration?.apiKey ?? ""
             firebaseProjectID = firebase.configuration?.projectID ?? ""
+            googleClientID = firebase.configuration?.googleClientID ?? ""
+            googleRedirectScheme = firebase.configuration?.googleRedirectScheme ?? FirebaseConfiguration.defaultGoogleRedirectScheme
             email = firebase.session?.email ?? email
         }
         .fileExporter(

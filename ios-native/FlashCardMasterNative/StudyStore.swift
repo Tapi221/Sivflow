@@ -3,6 +3,10 @@ import Foundation
 #if canImport(Combine)
 import Combine
 
+extension Notification.Name {
+    static let studyStoreDidPersist = Notification.Name("StudyStore.didPersist")
+}
+
 struct DirectoryEntry: Identifiable, Hashable {
     enum Kind: String {
         case folder
@@ -246,8 +250,11 @@ final class StudyStore: ObservableObject {
             snapshot.folders[index].colorName = colorName
             snapshot.folders[index].parentID = parentID
             snapshot.folders[index].updatedAt = .now
+            snapshot.syncState.deletedFolderTimestamps.removeValue(forKey: id.uuidString)
         } else {
-            snapshot.folders.append(StudyFolder(name: trimmedName, colorName: colorName, parentID: parentID))
+            let folder = StudyFolder(name: trimmedName, colorName: colorName, parentID: parentID)
+            snapshot.folders.append(folder)
+            snapshot.syncState.deletedFolderTimestamps.removeValue(forKey: folder.id.uuidString)
         }
         saveSilently()
     }
@@ -257,12 +264,19 @@ final class StudyStore: ObservableObject {
         let allFolderIDs = Set(descendantIDs + [id])
         let cardSetIDs = snapshot.cardSets.filter { allFolderIDs.contains($0.parentFolderID ?? UUID()) }.map(\.id)
 
+        let deletionDate = Date.now
+        for folderID in allFolderIDs {
+            snapshot.syncState.deletedFolderTimestamps[folderID.uuidString] = deletionDate
+        }
+        for cardSetID in cardSetIDs {
+            snapshot.syncState.deletedCardSetTimestamps[cardSetID.uuidString] = deletionDate
+        }
         snapshot.folders.removeAll { allFolderIDs.contains($0.id) }
         snapshot.cardSets.removeAll { cardSetIDs.contains($0.id) }
         for index in snapshot.cards.indices {
             if cardSetIDs.contains(snapshot.cards[index].cardSetID) {
-                snapshot.cards[index].deletedAt = .now
-                snapshot.cards[index].updatedAt = .now
+                snapshot.cards[index].deletedAt = deletionDate
+                snapshot.cards[index].updatedAt = deletionDate
             }
         }
         saveSilently()
@@ -277,18 +291,23 @@ final class StudyStore: ObservableObject {
             snapshot.cardSets[index].colorName = colorName
             snapshot.cardSets[index].parentFolderID = parentFolderID
             snapshot.cardSets[index].updatedAt = .now
+            snapshot.syncState.deletedCardSetTimestamps.removeValue(forKey: id.uuidString)
         } else {
-            snapshot.cardSets.append(StudyCardSet(name: trimmedName, colorName: colorName, parentFolderID: parentFolderID))
+            let cardSet = StudyCardSet(name: trimmedName, colorName: colorName, parentFolderID: parentFolderID)
+            snapshot.cardSets.append(cardSet)
+            snapshot.syncState.deletedCardSetTimestamps.removeValue(forKey: cardSet.id.uuidString)
         }
         saveSilently()
     }
 
     func deleteCardSet(id: UUID) {
+        let deletionDate = Date.now
+        snapshot.syncState.deletedCardSetTimestamps[id.uuidString] = deletionDate
         snapshot.cardSets.removeAll { $0.id == id }
         for index in snapshot.cards.indices {
             if snapshot.cards[index].cardSetID == id {
-                snapshot.cards[index].deletedAt = .now
-                snapshot.cards[index].updatedAt = .now
+                snapshot.cards[index].deletedAt = deletionDate
+                snapshot.cards[index].updatedAt = deletionDate
             }
         }
         saveSilently()
@@ -332,22 +351,23 @@ final class StudyStore: ObservableObject {
             snapshot.cards[index].nextReviewAt = nextReviewAt
             snapshot.cards[index].deletedAt = nil
             snapshot.cards[index].updatedAt = .now
+            snapshot.syncState.deletedCardTimestamps.removeValue(forKey: id.uuidString)
         } else {
-            snapshot.cards.append(
-                StudyCard(
-                    cardSetID: cardSetID,
-                    title: trimmedTitle,
-                    frontText: trimmedFront,
-                    backText: trimmedBack,
-                    noteText: trimmedNote,
-                    imageURL: normalizedImageURL,
-                    sourceURL: normalizedSourceURL,
-                    pdfURL: normalizedPDFURL,
-                    tagIDs: Array(Set(tagIDs)).sorted { $0.uuidString < $1.uuidString },
-                    flags: flags,
-                    nextReviewAt: nextReviewAt
-                )
+            let card = StudyCard(
+                cardSetID: cardSetID,
+                title: trimmedTitle,
+                frontText: trimmedFront,
+                backText: trimmedBack,
+                noteText: trimmedNote,
+                imageURL: normalizedImageURL,
+                sourceURL: normalizedSourceURL,
+                pdfURL: normalizedPDFURL,
+                tagIDs: Array(Set(tagIDs)).sorted { $0.uuidString < $1.uuidString },
+                flags: flags,
+                nextReviewAt: nextReviewAt
             )
+            snapshot.cards.append(card)
+            snapshot.syncState.deletedCardTimestamps.removeValue(forKey: card.id.uuidString)
         }
         saveSilently()
     }
@@ -358,6 +378,7 @@ final class StudyStore: ObservableObject {
         let resolvedName = trimmedName.isEmpty ? "Imported" : trimmedName
         let cardSet = StudyCardSet(name: resolvedName, colorName: colorName, parentFolderID: parentFolderID)
         snapshot.cardSets.append(cardSet)
+        snapshot.syncState.deletedCardSetTimestamps.removeValue(forKey: cardSet.id.uuidString)
         saveSilently()
         return cardSet.id
     }
@@ -416,16 +437,22 @@ final class StudyStore: ObservableObject {
 
     func permanentlyDeleteCard(id: UUID) {
         snapshot.cards.removeAll { $0.id == id }
+        snapshot.syncState.deletedCardTimestamps[id.uuidString] = .now
         saveSilently()
     }
 
     func emptyTrash() {
+        let deletionDate = Date.now
+        for card in snapshot.cards where card.isDeleted {
+            snapshot.syncState.deletedCardTimestamps[card.id.uuidString] = deletionDate
+        }
         snapshot.cards.removeAll { $0.isDeleted }
         saveSilently()
     }
 
     func deleteTag(id: UUID) {
         snapshot.tags.removeAll { $0.id == id }
+        snapshot.syncState.deletedTagTimestamps[id.uuidString] = .now
         for index in snapshot.cards.indices {
             snapshot.cards[index].tagIDs.removeAll { $0 == id }
         }
@@ -440,8 +467,11 @@ final class StudyStore: ObservableObject {
             snapshot.tags[index].name = trimmedName
             snapshot.tags[index].colorName = colorName
             snapshot.tags[index].updatedAt = .now
+            snapshot.syncState.deletedTagTimestamps.removeValue(forKey: id.uuidString)
         } else {
-            snapshot.tags.append(StudyTag(name: trimmedName, colorName: colorName))
+            let tag = StudyTag(name: trimmedName, colorName: colorName)
+            snapshot.tags.append(tag)
+            snapshot.syncState.deletedTagTimestamps.removeValue(forKey: tag.id.uuidString)
         }
         saveSilently()
     }
@@ -472,6 +502,13 @@ final class StudyStore: ObservableObject {
 
     func replaceSnapshot(with snapshot: StudySnapshot) {
         self.snapshot = snapshot
+        saveSilently()
+    }
+
+    func replaceSnapshotFromCloudMerge(with snapshot: StudySnapshot) {
+        var mergedSnapshot = snapshot
+        mergedSnapshot.version = max(mergedSnapshot.version, StudySnapshot.currentVersion)
+        self.snapshot = mergedSnapshot
         saveSilently()
     }
 
@@ -509,8 +546,14 @@ final class StudyStore: ObservableObject {
     }
 
     private func persist() throws {
+        snapshot.version = max(snapshot.version, StudySnapshot.currentVersion)
         let data = try encoder.encode(snapshot)
         try data.write(to: storageURL, options: .atomic)
+        NotificationCenter.default.post(
+            name: .studyStoreDidPersist,
+            object: self,
+            userInfo: ["snapshotData": data]
+        )
     }
 
     private func sortCards(_ lhs: StudyCard, _ rhs: StudyCard) -> Bool {

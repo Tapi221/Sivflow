@@ -10,6 +10,9 @@ struct FlashCardMasterNativeApp: App {
             ContentView()
                 .environmentObject(store)
                 .preferredColorScheme(colorScheme(for: store.theme()))
+                .task {
+                    FirebaseSyncManager.shared.attach(store: store)
+                }
         }
     }
 
