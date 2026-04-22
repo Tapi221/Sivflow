@@ -1,15 +1,16 @@
 import type { PdfPageLayoutMode } from "@/types";
-import { ChevronLeft, ChevronRight } from "@/ui/icons";
 import { OverlayToolbar } from "@/components/overlay-toolbar/OverlayToolbar";
 import { OverlayToolbarButton } from "@/components/overlay-toolbar/OverlayToolbarButton";
 import { OverlayToolbarDivider } from "@/components/overlay-toolbar/OverlayToolbarDivider";
-import { OverlayToolbarIndexNavigator } from "@/components/overlay-toolbar/OverlayToolbarIndexNavigator";
-import { OverlayToolbarZoomControl } from "@/components/overlay-toolbar/OverlayToolbarZoomControl";
 import {
   PdfDoublePageGlyph,
   PdfFitWidthGlyph,
+  PdfNextGlyph,
+  PdfPrevGlyph,
   PdfSinglePageGlyph,
-} from "./pdfToolbarGlyphs";
+} from "@/components/overlay-toolbar/OverlayToolbarGlyphs";
+import { OverlayToolbarIndexNavigator } from "@/components/overlay-toolbar/OverlayToolbarIndexNavigator";
+import { OverlayToolbarZoomControl } from "@/components/overlay-toolbar/OverlayToolbarZoomControl";
 
 type PdfFitMode = "width" | "manual";
 
@@ -62,7 +63,7 @@ export const PdfOverlayToolbar = ({
         disabled={disabled || !canGoToPrevPage}
         className="h-6 w-6"
       >
-        <ChevronLeft className="h-3.5 w-3.5" />
+        <PdfPrevGlyph />
       </OverlayToolbarButton>
 
       <OverlayToolbarButton
@@ -71,7 +72,7 @@ export const PdfOverlayToolbar = ({
         disabled={disabled || !canGoToNextPage}
         className="h-6 w-6"
       >
-        <ChevronRight className="h-3.5 w-3.5" />
+        <PdfNextGlyph />
       </OverlayToolbarButton>
 
       <OverlayToolbarDivider />
