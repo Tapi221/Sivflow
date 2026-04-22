@@ -24,15 +24,13 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { PdfPageLayoutMode } from "@/types";
+import type { PdfPageLayoutMode, PdfSidePanelTab } from "@/types";
 import { cn } from "@/lib/utils";
 import type { PdfDocumentController } from "./hooks/usePdfDocument";
 import { PdfThumbnailItem } from "./PdfThumbnailItem";
 
 const DESKTOP_PANEL_WIDTH_PX = 320;
 const DESKTOP_PANEL_COLLAPSED_WIDTH_PX = 56;
-
-type PdfSidePanelTab = "markdown" | "outline" | "thumbnails";
 
 type OutlineEntry = {
   pageNumber: number;
@@ -51,18 +49,10 @@ const PDF_THUMBNAIL_PANEL_COLORS = {
 } as const;
 
 const PANEL_TABS = [
-  {
-    id: "markdown",
-    label: "ブックマーク",
-  },
-  {
-    id: "outline",
-    label: "アウトライン",
-  },
-  {
-    id: "thumbnails",
-    label: "サムネイル",
-  },
+  { id: "bookmarks", label: "ブックマーク" },
+  { id: "outline", label: "アウトライン" },
+  { id: "ocr", label: "OCR" },
+  { id: "thumbnails", label: "サムネイル" },
 ] as const satisfies ReadonlyArray<{
   id: PdfSidePanelTab;
   label: string;
@@ -82,6 +72,12 @@ interface PdfThumbnailPanelProps {
   onTabChange?: (nextTab: PdfSidePanelTab) => void;
   orderedThumbnailPageNumbers?: readonly number[];
   onThumbnailOrderChange?: (nextPageNumbers: number[]) => void;
+  ocrTextByPage?: Record<number, string>;
+  ocrPageNumbers?: readonly number[];
+  isOcrRunning?: boolean;
+  onRunCurrentPageOcr?: () => void;
+  onRunAllPagesOcr?: () => void;
+  onClearOcr?: () => void;
 }
 
 interface IconProps {
@@ -109,6 +105,14 @@ const ListIcon = ({ className }: IconProps) => (
     <circle cx="4.25" cy="5.5" r="0.9" fill="currentColor" />
     <circle cx="4.25" cy="10" r="0.9" fill="currentColor" />
     <circle cx="4.25" cy="14.5" r="0.9" fill="currentColor" />
+  </svg>
+);
+
+const OcrIcon = ({ className }: IconProps) => (
+  <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className={className}>
+    <rect x="3.5" y="4" width="13" height="12" rx="2" stroke="currentColor" strokeWidth="1.4" />
+    <path d="M6.4 12.8V7.2h2.1c1.1 0 1.9.7 1.9 1.8 0 1-.7 1.7-1.9 1.7H7.8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    <path d="M11.3 12.8V7.2h1.4c1.7 0 2.8 1.1 2.8 2.8s-1 2.8-2.8 2.8h-1.4Z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
   </svg>
 );
 
@@ -262,6 +266,12 @@ export const PdfThumbnailPanel = ({
   onTabChange,
   orderedThumbnailPageNumbers,
   onThumbnailOrderChange,
+  ocrTextByPage = {},
+  ocrPageNumbers = [],
+  isOcrRunning = false,
+  onRunCurrentPageOcr,
+  onRunAllPagesOcr,
+  onClearOcr,
 }: PdfThumbnailPanelProps) => {
   const [scrollRootElement, setScrollRootElement] = useState<HTMLElement | null>(null);
   const [outlineEntries, setOutlineEntries] = useState<OutlineEntry[]>([]);
@@ -287,6 +297,11 @@ export const PdfThumbnailPanel = ({
   const bookmarkedPages = useMemo(() => {
     return orderedPageNumbers.filter((pageNumber) => bookmarkedPageNumbers.has(pageNumber));
   }, [bookmarkedPageNumbers, orderedPageNumbers]);
+
+  const orderedOcrPageNumbers = useMemo(() => {
+    const ocrPageNumberSet = new Set(ocrPageNumbers);
+    return orderedPageNumbers.filter((pageNumber) => ocrPageNumberSet.has(pageNumber));
+  }, [ocrPageNumbers, orderedPageNumbers]);
 
   const activePageNumbers = useMemo(() => {
     const nextActivePageNumbers = new Set<number>([currentPage]);
@@ -443,6 +458,7 @@ export const PdfThumbnailPanel = ({
                   baseSize={documentController.pageSizes[pageNumber]}
                   isActive={activePageNumbers.has(pageNumber)}
                   isBookmarked={bookmarkedPageNumbers.has(pageNumber)}
+                  hasOcrText={typeof ocrTextByPage[pageNumber] === "string" && ocrTextByPage[pageNumber].length > 0}
                   onSelect={onSelectPage}
                   onToggleBookmark={onToggleBookmark}
                   rootElement={scrollRootElement}
@@ -463,6 +479,7 @@ export const PdfThumbnailPanel = ({
                 baseSize={documentController.pageSizes[activeDragOverlayPageNumber]}
                 isActive={activePageNumbers.has(activeDragOverlayPageNumber)}
                 isBookmarked={bookmarkedPageNumbers.has(activeDragOverlayPageNumber)}
+                hasOcrText={typeof ocrTextByPage[activeDragOverlayPageNumber] === "string" && ocrTextByPage[activeDragOverlayPageNumber].length > 0}
                 onSelect={() => {}}
                 onToggleBookmark={() => {}}
                 rootElement={null}
@@ -495,6 +512,7 @@ export const PdfThumbnailPanel = ({
             baseSize={documentController.pageSizes[pageNumber]}
             isActive={activePageNumbers.has(pageNumber)}
             isBookmarked={bookmarkedPageNumbers.has(pageNumber)}
+            hasOcrText={typeof ocrTextByPage[pageNumber] === "string" && ocrTextByPage[pageNumber].length > 0}
             onSelect={onSelectPage}
             onToggleBookmark={onToggleBookmark}
             rootElement={scrollRootElement}
@@ -544,12 +562,142 @@ export const PdfThumbnailPanel = ({
     );
   };
 
+  const renderOcrPanel = () => {
+    if (orderedOcrPageNumbers.length === 0) {
+      return (
+        <div className="space-y-3 p-4">
+          <div className="rounded-2xl border px-4 py-4 text-sm"
+            style={{
+              borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+              background: PDF_THUMBNAIL_PANEL_COLORS.surfacePaper,
+              color: PDF_THUMBNAIL_PANEL_COLORS.textMuted,
+            }}
+          >
+            OCR結果はまだありません。スキャンPDFならツールバーのOCRを実行してください。
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => onRunCurrentPageOcr?.()}
+              disabled={isOcrRunning}
+              className="rounded-full border px-3 py-2 text-xs font-semibold"
+              style={{
+                borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+                background: PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft,
+                color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
+              }}
+            >
+              現在ページをOCR
+            </button>
+            <button
+              type="button"
+              onClick={() => onRunAllPagesOcr?.()}
+              disabled={isOcrRunning}
+              className="rounded-full border px-3 py-2 text-xs font-semibold"
+              style={{
+                borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+                background: PDF_THUMBNAIL_PANEL_COLORS.surfacePaper,
+                color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
+              }}
+            >
+              全ページOCR
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="text-xs font-semibold" style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}>
+            OCR済み {orderedOcrPageNumbers.length} ページ
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => onRunCurrentPageOcr?.()}
+              disabled={isOcrRunning}
+              className="rounded-full border px-3 py-1.5 text-[11px] font-semibold"
+              style={{
+                borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+                background: PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft,
+                color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
+              }}
+            >
+              現在OCR
+            </button>
+            <button
+              type="button"
+              onClick={() => onRunAllPagesOcr?.()}
+              disabled={isOcrRunning}
+              className="rounded-full border px-3 py-1.5 text-[11px] font-semibold"
+              style={{
+                borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+                background: PDF_THUMBNAIL_PANEL_COLORS.surfacePaper,
+                color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
+              }}
+            >
+              全体OCR
+            </button>
+            <button
+              type="button"
+              onClick={() => onClearOcr?.()}
+              disabled={isOcrRunning}
+              className="rounded-full border px-3 py-1.5 text-[11px] font-semibold"
+              style={{
+                borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+                background: "rgba(255,255,255,0.9)",
+                color: PDF_THUMBNAIL_PANEL_COLORS.textMuted,
+              }}
+            >
+              OCR削除
+            </button>
+          </div>
+        </div>
+
+        {orderedOcrPageNumbers.map((pageNumber) => (
+          <button
+            key={`ocr-page-${pageNumber}`}
+            type="button"
+            onClick={() => onSelectPage(pageNumber)}
+            className="w-full rounded-2xl border px-3 py-3 text-left transition-colors"
+            style={{
+              borderColor: activePageNumbers.has(pageNumber)
+                ? PDF_THUMBNAIL_PANEL_COLORS.accent
+                : PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
+              background: activePageNumbers.has(pageNumber)
+                ? PDF_THUMBNAIL_PANEL_COLORS.surfaceBlush
+                : PDF_THUMBNAIL_PANEL_COLORS.surfacePaper,
+            }}
+          >
+            <div className="mb-2 inline-flex rounded-full px-2 py-1 text-[11px] font-semibold"
+              style={{
+                background: PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft,
+                color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
+              }}
+            >
+              p.{pageNumber}
+            </div>
+            <div className="text-xs leading-6 whitespace-pre-wrap break-words"
+              style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textStrong }}
+            >
+              {ocrTextByPage[pageNumber] ?? ""}
+            </div>
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   const panelBody = (() => {
     switch (selectedTab) {
-      case "markdown":
+      case "bookmarks":
         return renderBookmarkedGrid();
       case "outline":
         return renderOutline();
+      case "ocr":
+        return renderOcrPanel();
       default:
         return renderThumbnailGrid();
     }
@@ -558,7 +706,7 @@ export const PdfThumbnailPanel = ({
   const tabList = (
     <div className="px-3 pb-3 pt-3">
       <div
-        className="grid grid-cols-3 gap-2 rounded-full border p-1"
+        className="grid grid-cols-4 gap-2 rounded-full border p-1"
         style={{
           borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
           background: "rgba(248, 247, 245, 0.75)",
@@ -566,11 +714,13 @@ export const PdfThumbnailPanel = ({
       >
         {PANEL_TABS.map((tab) => {
           const IconComponent =
-            tab.id === "markdown"
+            tab.id === "bookmarks"
               ? BookmarkIcon
               : tab.id === "outline"
                 ? ListIcon
-                : GridIcon;
+                : tab.id === "ocr"
+                  ? OcrIcon
+                  : GridIcon;
           const isSelected = selectedTab === tab.id;
 
           return (

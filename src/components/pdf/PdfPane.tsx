@@ -145,7 +145,14 @@ const sanitizeBookmarkPages = (value: unknown): number[] => {
 };
 
 const sanitizeSidePanelTab = (value: unknown): PdfSidePanelTab => {
-  return value === "markdown" || value === "outline" || value === "thumbnails"
+  if (value === "markdown") {
+    return "bookmarks";
+  }
+
+  return value === "bookmarks" ||
+    value === "outline" ||
+    value === "ocr" ||
+    value === "thumbnails"
     ? value
     : "thumbnails";
 };
@@ -362,9 +369,13 @@ export const PdfPane = ({
 
   const {
     ocrState,
+    ocrTextByPage,
+    ocrPageNumbers,
+    hasAnyOcr,
     runCurrentPageOcr,
     runAllPagesOcr,
     cancelOcr,
+    clearOcr,
     hasOcrForCurrentPage,
   } = usePdfOcr({
     docId: doc.id,
@@ -764,7 +775,9 @@ export const PdfPane = ({
         ocrTotalPages={ocrState.totalPages}
         ocrCurrentProcessingPage={ocrState.currentProcessingPage}
         ocrError={ocrState.error}
+        ocrCachedPageCount={ocrPageNumbers.length}
         hasOcrForCurrentPage={hasOcrForCurrentPage}
+        hasAnyOcr={hasAnyOcr}
         onRunCurrentPageOcr={() => {
           void runCurrentPageOcr();
         }}
@@ -772,6 +785,13 @@ export const PdfPane = ({
           void runAllPagesOcr();
         }}
         onCancelOcr={cancelOcr}
+        onClearOcr={() => {
+          void clearOcr();
+        }}
+        onOpenOcrTab={() => {
+          setSidePanelTab("ocr");
+          handleThumbnailPanelOpenChange(true);
+        }}
       />
 
       <div className="relative flex-1 min-h-0 min-w-0 w-full overflow-hidden bg-transparent">
@@ -798,6 +818,18 @@ export const PdfPane = ({
               onSelectPage={handleSelectThumbnailPage}
               onToggleBookmark={handleToggleBookmark}
               onThumbnailOrderChange={setThumbnailOrder}
+              ocrTextByPage={ocrTextByPage}
+              ocrPageNumbers={ocrPageNumbers}
+              isOcrRunning={ocrState.status === "running"}
+              onRunCurrentPageOcr={() => {
+                void runCurrentPageOcr();
+              }}
+              onRunAllPagesOcr={() => {
+                void runAllPagesOcr();
+              }}
+              onClearOcr={() => {
+                void clearOcr();
+              }}
             />
 
             <div
