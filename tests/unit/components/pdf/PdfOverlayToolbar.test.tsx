@@ -154,7 +154,10 @@ describe("PdfOverlayToolbar", () => {
     expect(onPageLayoutModeChange).toHaveBeenCalledWith("single");
   });
 
-  it("ページが1枚しかないときレイアウト切り替えボタンは disabled になる", () => {
+  it("ページ数が 1 のときレイアウト切り替えボタンを押せない", async () => {
+    const user = userEvent.setup();
+    const onPageLayoutModeChange = vi.fn();
+
     render(
       <PdfOverlayToolbar
         currentPage={1}
@@ -169,7 +172,7 @@ describe("PdfOverlayToolbar", () => {
         onNextPage={() => {}}
         onFitWidth={() => {}}
         onZoomPercentChange={() => {}}
-        onPageLayoutModeChange={() => {}}
+        onPageLayoutModeChange={onPageLayoutModeChange}
         canGoToPrevPage={false}
         canGoToNextPage={false}
       />,
@@ -180,5 +183,9 @@ describe("PdfOverlayToolbar", () => {
     }) as HTMLButtonElement;
 
     expect(layoutToggleButton.disabled).toBe(true);
+
+    await user.click(layoutToggleButton);
+
+    expect(onPageLayoutModeChange).not.toHaveBeenCalled();
   });
 });
