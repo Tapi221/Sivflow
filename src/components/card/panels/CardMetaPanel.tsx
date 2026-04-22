@@ -23,6 +23,15 @@ import {
 
 import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
 import { CardMetaPanelSkeleton } from "@/components/card/panels/CardMetaPanelSkeleton";
+import {
+  MetaPanelActionRow,
+  MetaPanelInfoRow,
+  MetaPanelInput,
+  MetaPanelSectionActionButton,
+  MetaPanelSectionHeader,
+  MetaPanelSurfaceField,
+  MetaPanelSwitchRow,
+} from "@/components/card/panels/MetaPanelPrimitives";
 import { MetaPanelLeadSection } from "@/components/card/panels/MetaPanelShell";
 import { formatLastSyncedAt } from "@/components/card/shell/formatLastSyncedAt";
 import { SurfaceButton } from "@/components/ui/surface-button";
@@ -500,12 +509,6 @@ const CardMetaPanelContent = ({
   const shouldRenderHeavySections =
     !isCalendarMode && hasActivatedHeavySections;
 
-  const infoRowClass =
-    "ds-editor-pane__info-row h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-[length:var(--meta-font-size)]";
-  const actionRowClass =
-    "h-[var(--meta-row-px)] min-h-[var(--meta-row-px)] flex items-center";
-  const sectionTitleClass =
-    "ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold uppercase";
   const mutedTextClass = "ds-editor-pane__muted-text";
   const syncStatusText = syncStatus?.hasError
     ? "同期失敗"
@@ -1290,8 +1293,8 @@ const CardMetaPanelContent = ({
       <MetaPanelLeadSection>
         {!isCalendarMode && (
           <>
-            <div className={actionRowClass}>
-              <input
+            <MetaPanelActionRow>
+              <MetaPanelInput
                 value={titleInput}
                 onChange={(e) => handleTitleInputChange(e.target.value)}
                 onCompositionStart={() => {
@@ -1324,51 +1327,27 @@ const CardMetaPanelContent = ({
                     commitTitle(e.currentTarget.value, { flush: true });
                   }
                 }}
-                className="ds-input h-[var(--meta-row-px)] w-full px-2 text-[length:var(--surface-placeholder-font-size)] leading-[var(--meta-row-px)] outline-none"
                 placeholder="タイトル"
               />
-            </div>
-            <div className={`${actionRowClass} justify-start gap-2`}>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={draftFlag}
-                aria-label="下書き"
-                onClick={handleToggleDraft}
-                disabled={!card || isDraftTogglePending}
-                className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors ${
-                  draftFlag
-                    ? "border-transparent bg-[var(--meta-panel-accent,#0f766e)]"
-                    : "border-[var(--ds-semantic-color-border-default)] bg-[var(--ds-semantic-color-surface-subtle,rgba(127,127,127,0.16))]"
-                } ${!card || isDraftTogglePending ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-              >
-                <span
-                  aria-hidden="true"
-                  className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
-                    draftFlag ? "translate-x-4" : "translate-x-0.5"
-                  }`}
-                />
-              </button>
-              <span
-                className={`${mutedTextClass} text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)]`}
-              >
-                下書き
-              </span>
-            </div>
+            </MetaPanelActionRow>
+            <MetaPanelSwitchRow
+              label="下書き"
+              checked={draftFlag}
+              onCheckedChange={() => {
+                handleToggleDraft();
+              }}
+              disabled={!card || isDraftTogglePending}
+            />
             <section>
-              <div className={`${actionRowClass} justify-between`}>
-                <h3 className={sectionTitleClass}>タグ管理</h3>
-                <SurfaceButton
-                  type="button"
-                  surface="convex"
-                  size="xs"
-                  className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)]"
-                  onClick={openTagSettings}
-                >
-                  設定で管理
-                </SurfaceButton>
-              </div>
-              <div className="ds-editor-pane__surface ds-editor-pane__surface--muted mt-2 px-2 py-1">
+              <MetaPanelSectionHeader
+                title="タグ管理"
+                action={
+                  <MetaPanelSectionActionButton onClick={openTagSettings}>
+                    設定で管理
+                  </MetaPanelSectionActionButton>
+                }
+              />
+              <MetaPanelSurfaceField muted className="mt-2">
                 <TagInput
                   tags={tags}
                   onChange={(nextTags) => {
@@ -1379,63 +1358,62 @@ const CardMetaPanelContent = ({
                   quietHover
                   className={`bg-transparent ${!card ? "pointer-events-none opacity-60" : ""}`}
                 />
-              </div>
+              </MetaPanelSurfaceField>
             </section>
           </>
         )}
         {!isCalendarMode && (
           <div className="space-y-0">
-            <p className={infoRowClass}>
-              作成日:{" "}
-              {formatDateLabel(card?.createdAt ?? asRecord(card)?.created_at)}
-            </p>
-            <p className={infoRowClass}>
-              更新日:{" "}
-              {formatDateLabel(card?.updatedAt ?? asRecord(card)?.updated_at)}
-            </p>
-            <p className={infoRowClass}>
-              カード同期:{" "}
-              {formatDateLabel(
+            <MetaPanelInfoRow
+              label="作成日:"
+              value={formatDateLabel(card?.createdAt ?? asRecord(card)?.created_at)}
+            />
+            <MetaPanelInfoRow
+              label="更新日:"
+              value={formatDateLabel(card?.updatedAt ?? asRecord(card)?.updated_at)}
+            />
+            <MetaPanelInfoRow
+              label="カード同期:"
+              value={formatDateLabel(
                 card?.lastSyncedAt ?? asRecord(card)?.last_synced_at,
               )}
-            </p>
-            <p className={infoRowClass}>
-              同期状態:{" "}
-              {formatCardSyncStateLabel(
+            />
+            <MetaPanelInfoRow
+              label="同期状態:"
+              value={formatCardSyncStateLabel(
                 card?.syncState ?? asRecord(card)?.sync_state,
               )}
-            </p>
-            <p className={infoRowClass}>最終同期: {syncStatusText}</p>
+            />
+            <MetaPanelInfoRow label="最終同期:" value={syncStatusText} />
             {syncStatus?.hasError && syncStatus.onRetry ? (
-              <div className={actionRowClass}>
-                <SurfaceButton
-                  type="button"
+              <MetaPanelActionRow>
+                <MetaPanelSectionActionButton
                   surface="concave"
-                  size="xs"
-                  className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)]"
                   onClick={() => {
                     void syncStatus.onRetry?.();
                   }}
                   disabled={syncStatus.isRetrying || !syncStatus.canRetry}
                 >
                   {syncStatus.isRetrying ? "再試行中..." : "同期を再試行"}
-                </SurfaceButton>
-              </div>
+                </MetaPanelSectionActionButton>
+              </MetaPanelActionRow>
             ) : null}
-            <p className={infoRowClass}>
-              最終復習日:{" "}
-              {latestReview
-                ? formatDateLabel(latestReview.reviewedAt)
-                : formatDateLabel(
-                    card?.lastReviewAt ?? asRecord(card)?.last_review_at,
-                  )}
-            </p>
-            <p className={infoRowClass}>
-              次回復習日 ({nextReviewAttempt}回目):{" "}
-              {formatDateLabel(
+            <MetaPanelInfoRow
+              label="最終復習日:"
+              value={
+                latestReview
+                  ? formatDateLabel(latestReview.reviewedAt)
+                  : formatDateLabel(
+                      card?.lastReviewAt ?? asRecord(card)?.last_review_at,
+                    )
+              }
+            />
+            <MetaPanelInfoRow
+              label={`次回復習日 (${nextReviewAttempt}回目):`}
+              value={formatDateLabel(
                 card?.nextReviewDate ?? asRecord(card)?.next_review_date,
               )}
-            </p>
+            />
           </div>
         )}
       </MetaPanelLeadSection>
@@ -1471,27 +1449,29 @@ const CardMetaPanelContent = ({
                 </span>
               </div>
             )}
-            <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
-              <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
-                耐性スコア推移
-              </h3>
-              <div className="ds-segmented-control">
-                {(["7d", "30d", "all"] as const).map((nextPeriod) => (
-                  <SurfaceButton
-                    key={nextPeriod}
-                    surface={period === nextPeriod ? "convexActive" : "concave"}
-                    size="xs"
-                    onClick={() => setPeriod(nextPeriod)}
-                  >
-                    {nextPeriod === "all"
-                      ? "全期間"
-                      : nextPeriod === "7d"
-                        ? "直近7件"
-                        : "直近30件"}
-                  </SurfaceButton>
-                ))}
-              </div>
-            </div>
+            <MetaPanelSectionHeader
+              className="min-h-[var(--meta-action-min-h)]"
+              title="耐性スコア推移"
+              titleClassName="tracking-wide"
+              action={
+                <div className="ds-segmented-control">
+                  {(["7d", "30d", "all"] as const).map((nextPeriod) => (
+                    <SurfaceButton
+                      key={nextPeriod}
+                      surface={period === nextPeriod ? "convexActive" : "concave"}
+                      size="xs"
+                      onClick={() => setPeriod(nextPeriod)}
+                    >
+                      {nextPeriod === "all"
+                        ? "全期間"
+                        : nextPeriod === "7d"
+                          ? "直近7件"
+                          : "直近30件"}
+                    </SurfaceButton>
+                  ))}
+                </div>
+              }
+            />
             <div className="ds-editor-pane__chart relative mt-3 overflow-hidden p-0">
               <div
                 className="pointer-events-none absolute inset-x-0 top-0 h-24 opacity-90"
@@ -1685,29 +1665,27 @@ const CardMetaPanelContent = ({
           </section>
 
           <section>
-            <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
-              <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
-                学習記録
-              </h3>
-              <div className="flex items-center gap-2">
-                <SurfaceButton
-                  type="button"
-                  surface="convex"
-                  size="xs"
-                  className="h-[var(--meta-row-px)] leading-[var(--meta-row-px)]"
-                  onClick={handleStartAddReview}
-                  disabled={
-                    !canPersistReview ||
-                    !!pendingReviewTimestamp ||
-                    isSavingPendingReview ||
-                    isEditingLatestReview ||
-                    isMutatingLatestReview
-                  }
-                >
-                  + 追加
-                </SurfaceButton>
-              </div>
-            </div>
+            <MetaPanelSectionHeader
+              className="min-h-[var(--meta-action-min-h)]"
+              title="学習記録"
+              titleClassName="tracking-wide"
+              action={
+                <div className="flex items-center gap-2">
+                  <MetaPanelSectionActionButton
+                    onClick={handleStartAddReview}
+                    disabled={
+                      !canPersistReview ||
+                      !!pendingReviewTimestamp ||
+                      isSavingPendingReview ||
+                      isEditingLatestReview ||
+                      isMutatingLatestReview
+                    }
+                  >
+                    + 追加
+                  </MetaPanelSectionActionButton>
+                </div>
+              }
+            />
             {canManageLatestReview && (
               <p className={`mt-2 text-[11px] ${mutedTextClass}`}>
                 所要時間は全件編集できます。日時・評価の編集と削除は最新1件のみです。
