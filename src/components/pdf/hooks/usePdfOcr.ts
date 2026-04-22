@@ -3,16 +3,17 @@ import { createWorker, type Worker as TesseractWorker } from "tesseract.js";
 import type { PdfDocumentController } from "./usePdfDocument";
 import {
   clearPdfOcrRecords,
-  deleteStalePdfOcrRecords,
   getPdfOcrPageRecord,
   listPdfOcrPageRecords,
   putPdfOcrPageRecord,
+  trimPdfOcrRecordsForDoc,
   type PdfOcrPageRecord,
 } from "@/lib/pdf/pdfOcrStore";
 import { renderPdfPageForOcr } from "@/lib/pdf/renderPdfPageForOcr";
 
 const OCR_LANGUAGES = "jpn+eng";
 const OCR_NATIVE_TEXT_SKIP_THRESHOLD = 32;
+const OCR_DOCUMENT_RETENTION_LIMIT = 3;
 
 type OcrStatus = "idle" | "running" | "success" | "error" | "cancelled";
 
@@ -33,6 +34,16 @@ interface PdfOcrState {
   error: string | null;
   cachedPageNumbers: number[];
 }
+
+const createInitialOcrState = (): PdfOcrState => ({
+  status: "idle",
+  progress: 0,
+  processedPages: 0,
+  totalPages: 0,
+  currentProcessingPage: null,
+  error: null,
+  cachedPageNumbers: [],
+});
 
 const extractTextFromTextContent = async (
   getPageTextContent: PdfDocumentController["getPageTextContent"],
@@ -89,15 +100,7 @@ export const usePdfOcr = ({
   numPages,
   documentController,
 }: UsePdfOcrOptions) => {
-  const [ocrState, setOcrState] = useState<PdfOcrState>({
-    status: "idle",
-    progress: 0,
-    processedPages: 0,
-    totalPages: 0,
-    currentProcessingPage: null,
-    error: null,
-    cachedPageNumbers: [],
-  });
+  const [ocrState, setOcrState] = useState<PdfOcrState>(createInitialOcrState);
   const [ocrTextByPage, setOcrTextByPage] = useState<Record<number, string>>(
     {},
   );
@@ -109,12 +112,16 @@ export const usePdfOcr = ({
   const processedPagesRef = useRef(0);
   const totalPagesRef = useRef(0);
 
-  const syncCachedRecords = useCallback(async () => {
-    const records = await listPdfOcrPageRecords({ docId, documentKey });
-    if (!mountedRef.current) {
-      return;
+  const resolvedDocumentKey = useMemo(() => {
+    if (!documentController.doc) {
+      return null;
     }
 
+    const normalizedDocumentKey = documentKey.trim();
+    return normalizedDocumentKey.length > 0 ? normalizedDocumentKey : null;
+  }, [documentController.doc, documentKey]);
+
+  const applyCachedRecords = useCallback((records: PdfOcrPageRecord[]) => {
     setOcrRecords(records);
     setOcrTextByPage(
       records.reduce<Record<number, string>>((accumulator, record) => {
@@ -126,23 +133,65 @@ export const usePdfOcr = ({
       ...previousState,
       cachedPageNumbers: records.map((record) => record.pageNumber),
     }));
-  }, [docId, documentKey]);
+  }, []);
+
+  const resetLocalOcrState = useCallback(() => {
+    processedPagesRef.current = 0;
+    totalPagesRef.current = 0;
+    cancelRequestedRef.current = true;
+    setOcrRecords([]);
+    setOcrTextByPage({});
+    setOcrState(createInitialOcrState());
+  }, []);
+
+  const syncCachedRecords = useCallback(async () => {
+    if (!resolvedDocumentKey) {
+      if (!mountedRef.current) {
+        return;
+      }
+
+      applyCachedRecords([]);
+      return;
+    }
+
+    const records = await listPdfOcrPageRecords({
+      docId,
+      documentKey: resolvedDocumentKey,
+    });
+
+    if (!mountedRef.current) {
+      return;
+    }
+
+    applyCachedRecords(records);
+  }, [applyCachedRecords, docId, resolvedDocumentKey]);
 
   useEffect(() => {
     mountedRef.current = true;
 
+    if (!resolvedDocumentKey) {
+      resetLocalOcrState();
+
+      return () => {
+        mountedRef.current = false;
+      };
+    }
+
+    cancelRequestedRef.current = false;
+
     void (async () => {
-      await deleteStalePdfOcrRecords({
-        docId,
-        keepDocumentKey: documentKey,
-      });
       await syncCachedRecords();
+      await trimPdfOcrRecordsForDoc({
+        docId,
+        keepDocumentKey: resolvedDocumentKey,
+        maxDocumentKeys: OCR_DOCUMENT_RETENTION_LIMIT,
+      });
     })();
 
     return () => {
       mountedRef.current = false;
     };
-  }, [docId, documentKey, syncCachedRecords]);
+  }, [docId, resetLocalOcrState, resolvedDocumentKey, syncCachedRecords]);
 
   useEffect(() => {
     return () => {
@@ -207,8 +256,22 @@ export const usePdfOcr = ({
     }));
   }, []);
 
+  const markUnavailableDocumentError = useCallback(() => {
+    setOcrState((previousState) => ({
+      ...createInitialOcrState(),
+      status: "error",
+      error: "PDFの読み込み完了後にOCRを実行してください。",
+      cachedPageNumbers: previousState.cachedPageNumbers,
+    }));
+  }, []);
+
   const runOcr = useCallback(
     async (pageNumbers: number[]) => {
+      if (!resolvedDocumentKey || !documentController.doc) {
+        markUnavailableDocumentError();
+        return;
+      }
+
       const normalizedPageNumbers = Array.from(
         new Set(
           pageNumbers
@@ -252,7 +315,7 @@ export const usePdfOcr = ({
 
           const cachedRecord = await getPdfOcrPageRecord({
             docId,
-            documentKey,
+            documentKey: resolvedDocumentKey,
             pageNumber,
           });
 
@@ -270,7 +333,7 @@ export const usePdfOcr = ({
           if (normalizedNativeText.length >= OCR_NATIVE_TEXT_SKIP_THRESHOLD) {
             await persistPageText({
               docId,
-              documentKey,
+              documentKey: resolvedDocumentKey,
               pageNumber,
               text: normalizedNativeText,
             });
@@ -288,14 +351,14 @@ export const usePdfOcr = ({
           if (normalizedOcrText.length > 0) {
             await persistPageText({
               docId,
-              documentKey,
+              documentKey: resolvedDocumentKey,
               pageNumber,
               text: normalizedOcrText,
             });
           } else if (normalizedNativeText.length > 0) {
             await persistPageText({
               docId,
-              documentKey,
+              documentKey: resolvedDocumentKey,
               pageNumber,
               text: normalizedNativeText,
             });
@@ -335,11 +398,13 @@ export const usePdfOcr = ({
     [
       docId,
       documentController.acquirePage,
+      documentController.doc,
       documentController.getPageTextContent,
-      documentKey,
       getWorker,
       markProcessed,
+      markUnavailableDocumentError,
       numPages,
+      resolvedDocumentKey,
       syncCachedRecords,
     ],
   );
@@ -354,21 +419,24 @@ export const usePdfOcr = ({
 
   const clearOcr = useCallback(async () => {
     cancelRequestedRef.current = true;
-    await clearPdfOcrRecords({ docId, documentKey });
+
+    if (!resolvedDocumentKey) {
+      resetLocalOcrState();
+      return;
+    }
+
+    await clearPdfOcrRecords({
+      docId,
+      documentKey: resolvedDocumentKey,
+    });
     await syncCachedRecords();
+
     if (!mountedRef.current) {
       return;
     }
-    setOcrState({
-      status: "idle",
-      progress: 0,
-      processedPages: 0,
-      totalPages: 0,
-      currentProcessingPage: null,
-      error: null,
-      cachedPageNumbers: [],
-    });
-  }, [docId, documentKey, syncCachedRecords]);
+
+    setOcrState(createInitialOcrState());
+  }, [docId, resetLocalOcrState, resolvedDocumentKey, syncCachedRecords]);
 
   const cancelOcr = useCallback(() => {
     cancelRequestedRef.current = true;
