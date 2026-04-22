@@ -1,10 +1,10 @@
-
 import React, { Suspense, useEffect, useRef } from "react";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 
 import { AppShellLoadingFallback } from "@/components/loading/ScreenSkeletons";
 import "./AppLayout.css";
 import { Sidebar } from "./Sidebar";
+import { KnowledgeModeTabs } from "./KnowledgeModeTabs";
 
 const LoadingFallback = () => {
   return <AppShellLoadingFallback />;
@@ -35,6 +35,12 @@ export const AppLayout = () => {
   const [searchParams] = useSearchParams();
 
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(pathname);
+  const isTagMapRoute = /^\/tag-map(?:\/|$)/i.test(pathname);
+  const isDictionaryRoute = /^\/dictionary(?:\/|$)/i.test(pathname);
+  const isQuestionsRoute = /^\/questions(?:\/|$)/i.test(pathname);
+  const isKnowledgeRoute =
+    isFoldersRoute || isTagMapRoute || isDictionaryRoute || isQuestionsRoute;
+
   const isCardSetViewRoute = /^\/(?:cardsetview|cardview)(?:\/|$)/i.test(
     pathname,
   );
@@ -45,8 +51,13 @@ export const AppLayout = () => {
   const mainRef = useRef<HTMLElement | null>(null);
 
   const shouldHideMainSidebar =
-    (isFoldersRoute && !isHomeOnlyMode) ||
+    ((isFoldersRoute && !isHomeOnlyMode) ||
+      isTagMapRoute ||
+      isDictionaryRoute ||
+      isQuestionsRoute) ||
     ((isCardSetViewRoute || isCardEditRoute) && Boolean(selectedCardSetId));
+
+  const shouldShowKnowledgeTabs = isKnowledgeRoute && !isHomeOnlyMode;
 
   const isScrollLocked =
     isFoldersRoute ||
@@ -79,6 +90,12 @@ export const AppLayout = () => {
       </div>
 
       <div className="app-layout__content">
+        {shouldShowKnowledgeTabs ? (
+          <div className="app-layout__tabs">
+            <KnowledgeModeTabs />
+          </div>
+        ) : null}
+
         <main
           ref={mainRef}
           className={[

@@ -28,8 +28,21 @@ export const MetaPanelShell = ({
           "--meta-row-px": "var(--ds-layout-card-row-px)",
           "--meta-font-size": "var(--ds-typography-font-size-sm)",
           "--meta-action-min-h": "var(--ds-layout-card-row-px)",
-          "--meta-panel-accent":
-            "color-mix(in srgb, #0f766e 82%, var(--ds-semantic-color-action-primary) 18%)",
+          "--meta-panel-shell-bg": "#f4f0e9",
+          "--meta-panel-surface": "#fbfaf7",
+          "--meta-panel-surface-muted": "#efe7dc",
+          "--meta-panel-surface-elevated": "#f8f5f0",
+          "--meta-panel-border": "#d8cdbf",
+          "--meta-panel-border-strong": "#cbbcab",
+          "--meta-panel-text-muted": "#746f69",
+          "--meta-panel-accent": "#667188",
+          "--meta-panel-accent-soft": "#eef1f4",
+          "--meta-panel-shadow-soft":
+            "0 1px 2px rgba(84, 67, 44, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.92)",
+          "--meta-panel-shadow-strong":
+            "0 2px 6px rgba(84, 67, 44, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.94)",
+          background: "var(--meta-panel-shell-bg)",
+          borderColor: "var(--meta-panel-border)",
           ...style,
         } as CSSProperties
       }
