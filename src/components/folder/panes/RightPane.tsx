@@ -22,11 +22,6 @@ interface RightPaneProps {
   cards: Card[];
   documents: DocumentItem[];
   folderCards: Card[];
-  folderStats: {
-    dueCount: number;
-    unlearnedCount: number;
-    lastReviewedAt: Date | null;
-  };
   onCardUpdated: () => void;
   onDocumentUpdated?: (
     documentId: string,

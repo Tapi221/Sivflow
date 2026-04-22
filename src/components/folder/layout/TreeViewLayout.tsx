@@ -546,7 +546,6 @@ const TreeViewLayout = ({
       </TreeViewSidebar>
 
       <TreeViewMainPane
-        isMobile={isMobile}
         showMobileDetail={showMobileDetail}
         hideOnSectionList={isSectionListMode}
         selectedItem={selectedItem}
@@ -558,7 +557,6 @@ const TreeViewLayout = ({
         cards={cards}
         documents={documents}
         folderCards={folderCards}
-        folderStats={folderStats}
         onCardUpdated={onCardUpdated}
         onDocumentUpdated={updateDocument}
         onRenameFolder={
@@ -568,8 +566,6 @@ const TreeViewLayout = ({
               }
             : undefined
         }
-        onItemSelect={onItemSelect}
-        onFolderSelect={onFolderSelect}
         handlers={{
           onStartStudy: handleStartStudy,
           onViewCards: handleViewCards,
