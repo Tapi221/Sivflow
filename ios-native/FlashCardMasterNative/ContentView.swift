@@ -3,13 +3,16 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct ContentView: View {
-    @EnvironmentObject private var store: StudyStore
-
     var body: some View {
         TabView {
             LibraryRootView(parentFolderID: nil, navigationTitle: "Library")
                 .tabItem {
                     Label("Library", systemImage: "books.vertical")
+                }
+
+            StudyModeRootView()
+                .tabItem {
+                    Label("Study", systemImage: "brain")
                 }
 
             SearchView()
@@ -22,9 +25,9 @@ struct ContentView: View {
                     Label("Tags", systemImage: "tag")
                 }
 
-            SettingsView()
+            MoreHubView()
                 .tabItem {
-                    Label("Settings", systemImage: "gearshape")
+                    Label("More", systemImage: "square.grid.2x2")
                 }
         }
     }
@@ -56,13 +59,28 @@ struct LibraryRootView: View {
     var body: some View {
         NavigationStack {
             List {
+                if currentFolder == nil {
+                    Section {
+                        DashboardHeroCard(
+                            title: "FlashCardMaster",
+                            subtitle: "Folders, study mode, questions, trash, directory, and local export in one iOS build. Miraculously civilized."
+                        )
+                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                        .listRowBackground(Color.clear)
+                    }
+                }
+
                 if !childFolders.isEmpty {
                     Section("Folders") {
                         ForEach(childFolders) { folder in
                             NavigationLink {
                                 LibraryRootView(parentFolderID: folder.id, navigationTitle: folder.name)
                             } label: {
-                                FolderRow(folder: folder, childFolderCount: store.childFolderCount(for: folder.id), cardSetCount: store.cardSetCount(in: folder.id))
+                                FolderRow(
+                                    folder: folder,
+                                    childFolderCount: store.childFolderCount(for: folder.id),
+                                    cardSetCount: store.cardSetCount(in: folder.id)
+                                )
                             }
                         }
                         .onDelete(perform: deleteFolders)
@@ -75,7 +93,7 @@ struct LibraryRootView: View {
                             NavigationLink {
                                 CardSetDetailView(cardSetID: cardSet.id)
                             } label: {
-                                CardSetRow(cardSet: cardSet, cardCount: store.cardCount(in: cardSet.id))
+                                CardSetRow(cardSet: cardSet, cardCount: store.cardCount(in: cardSet.id), deletedCount: store.deletedCardCount(in: cardSet.id))
                             }
                         }
                         .onDelete(perform: deleteCardSets)
@@ -86,7 +104,7 @@ struct LibraryRootView: View {
                     ContentUnavailableView(
                         "Nothing here yet",
                         systemImage: "tray",
-                        description: Text("Create a folder or card set. The universe will survive either way.")
+                        description: Text("Create a folder or card set. Humanity invented hierarchy and now you have to use it.")
                     )
                     .listRowBackground(Color.clear)
                 }
@@ -135,7 +153,7 @@ struct LibraryRootView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This deletes the folder, nested folders, card sets, and cards inside it.")
+                Text("This removes the folder tree and moves matching cards to trash.")
             }
         }
     }
@@ -179,6 +197,16 @@ struct CardSetDetailView: View {
         Group {
             if let cardSet {
                 List {
+                    Section {
+                        HStack {
+                            Label("\(store.cardCount(in: cardSet.id)) active", systemImage: "rectangle.stack")
+                            Spacer()
+                            Label("\(store.deletedCardCount(in: cardSet.id)) trashed", systemImage: "trash")
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    }
+
                     if cards.isEmpty {
                         ContentUnavailableView(
                             searchText.isEmpty ? "No cards yet" : "No matching cards",
@@ -191,7 +219,11 @@ struct CardSetDetailView: View {
                             NavigationLink {
                                 CardDetailView(cardID: card.id)
                             } label: {
-                                CardRow(card: card, tags: card.tagIDs.compactMap(store.tag(id:)))
+                                CardRow(
+                                    card: card,
+                                    tags: card.tagIDs.compactMap(store.tag(id:)),
+                                    cardSet: store.cardSet(id: card.cardSetID)
+                                )
                             }
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button("Edit") {
@@ -199,7 +231,7 @@ struct CardSetDetailView: View {
                                 }
                                 .tint(.blue)
 
-                                Button("Delete", role: .destructive) {
+                                Button("Trash", role: .destructive) {
                                     cardIDToDelete = card.id
                                 }
                             }
@@ -237,20 +269,20 @@ struct CardSetDetailView: View {
                     CardSetEditorSheet(mode: mode)
                         .environmentObject(store)
                 }
-                .alert("Delete Card", isPresented: Binding(
+                .alert("Move Card to Trash", isPresented: Binding(
                     get: { cardIDToDelete != nil },
                     set: { if !$0 { cardIDToDelete = nil } }
                 )) {
-                    Button("Delete", role: .destructive) {
+                    Button("Move to Trash", role: .destructive) {
                         guard let cardIDToDelete else { return }
-                        store.deleteCard(id: cardIDToDelete)
+                        store.softDeleteCard(id: cardIDToDelete)
                         self.cardIDToDelete = nil
                     }
                     Button("Cancel", role: .cancel) {
                         cardIDToDelete = nil
                     }
                 } message: {
-                    Text("This card will be removed permanently.")
+                    Text("The card goes to Trash and can be restored later.")
                 }
                 .alert("Delete Card Set", isPresented: $showDeleteCardSetConfirmation) {
                     Button("Delete", role: .destructive) {
@@ -258,7 +290,7 @@ struct CardSetDetailView: View {
                     }
                     Button("Cancel", role: .cancel) {}
                 } message: {
-                    Text("All cards in this set will be deleted.")
+                    Text("All cards in this set will move to Trash.")
                 }
             } else {
                 ContentUnavailableView("Missing card set", systemImage: "exclamationmark.triangle")
@@ -269,6 +301,7 @@ struct CardSetDetailView: View {
 
 struct CardDetailView: View {
     @EnvironmentObject private var store: StudyStore
+    @Environment(\.openURL) private var openURL
 
     let cardID: UUID
 
@@ -304,6 +337,27 @@ struct CardDetailView: View {
                             }
                         }
 
+                        if let imageURL = card.imageURL, let url = URL(string: imageURL) {
+                            AsyncImage(url: url) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 220)
+                                        .clipped()
+                                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                                case .failure:
+                                    EmptyStateCard(title: "Image failed to load", subtitle: imageURL)
+                                default:
+                                    ProgressView()
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 220)
+                                }
+                            }
+                        }
+
                         VStack(alignment: .leading, spacing: 12) {
                             Picker("Side", selection: $showingBack) {
                                 Text("Front").tag(false)
@@ -323,10 +377,46 @@ struct CardDetailView: View {
                             }
                         }
 
+                        if !card.noteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Notes")
+                                    .font(.headline)
+                                Text(card.noteText)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(16)
+                                    .background(Color.secondarySystemGroupedBackground)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                            }
+                        }
+
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Study Actions")
+                                .font(.headline)
+                            HStack(spacing: 8) {
+                                ForEach(StudyReviewGrade.allCases) { grade in
+                                    Button(grade.displayName) {
+                                        store.markReviewed(cardID: card.id, grade: grade)
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                    .tint(tintColor(for: grade))
+                                }
+                            }
+                        }
+
+                        if let sourceURL = card.sourceURL, let url = URL(string: sourceURL) {
+                            Button {
+                                openURL(url)
+                            } label: {
+                                Label("Open source link", systemImage: "link")
+                            }
+                        }
+
                         VStack(alignment: .leading, spacing: 8) {
-                            LabeledContent("Card Set", value: cardSet.name)
-                            LabeledContent("Updated", value: card.updatedAt.formatted(date: .abbreviated, time: .shortened))
-                            LabeledContent("Created", value: card.createdAt.formatted(date: .abbreviated, time: .shortened))
+                            InfoLine(label: "Card Set", value: cardSet.name)
+                            InfoLine(label: "Updated", value: card.updatedAt.formatted(date: .abbreviated, time: .shortened))
+                            InfoLine(label: "Created", value: card.createdAt.formatted(date: .abbreviated, time: .shortened))
+                            InfoLine(label: "Study Count", value: String(card.studyCount))
+                            InfoLine(label: "Next Review", value: card.nextReviewAt?.formatted(date: .abbreviated, time: .shortened) ?? "Not scheduled")
                         }
                         .font(.subheadline)
                     }
@@ -350,17 +440,160 @@ struct CardDetailView: View {
                     CardEditorSheet(mode: mode)
                         .environmentObject(store)
                 }
-                .alert("Delete Card", isPresented: $showDeleteConfirmation) {
-                    Button("Delete", role: .destructive) {
-                        store.deleteCard(id: card.id)
+                .alert("Move Card to Trash", isPresented: $showDeleteConfirmation) {
+                    Button("Move to Trash", role: .destructive) {
+                        store.softDeleteCard(id: card.id)
                     }
                     Button("Cancel", role: .cancel) {}
                 } message: {
-                    Text("This cannot be undone.")
+                    Text("The card can still be restored from Trash.")
                 }
             } else {
                 ContentUnavailableView("Missing card", systemImage: "questionmark.square")
             }
+        }
+    }
+
+    private func tintColor(for grade: StudyReviewGrade) -> Color {
+        switch grade {
+        case .again: return .red
+        case .hard: return .orange
+        case .good: return .blue
+        case .easy: return .green
+        }
+    }
+}
+
+struct StudyModeRootView: View {
+    @EnvironmentObject private var store: StudyStore
+
+    @State private var selectedMode: StudyQueueMode = .due
+    @State private var currentIndex = 0
+    @State private var showingBack = false
+
+    private var queue: [StudyCard] {
+        store.studyQueue(mode: selectedMode)
+    }
+
+    private var currentCard: StudyCard? {
+        guard !queue.isEmpty else { return nil }
+        let safeIndex = min(currentIndex, max(queue.count - 1, 0))
+        return queue[safeIndex]
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    DashboardHeroCard(
+                        title: "Study Mode",
+                        subtitle: "Due, all, and needs-work queues mapped from the Electron/Web app into something iOS can actually run today."
+                    )
+
+                    Picker("Queue", selection: $selectedMode) {
+                        ForEach(StudyQueueMode.allCases) { mode in
+                            Text(mode.displayName).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+
+                    HStack {
+                        Label("\(store.dueCards().count) due", systemImage: "calendar.badge.clock")
+                        Spacer()
+                        Label("\(queue.count) in queue", systemImage: "list.number")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                    if let currentCard {
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Text(currentCard.title)
+                                    .font(.title3.weight(.semibold))
+                                Spacer()
+                                Text("\(min(currentIndex + 1, queue.count))/\(queue.count)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            Picker("Side", selection: $showingBack) {
+                                Text("Front").tag(false)
+                                Text("Back").tag(true)
+                            }
+                            .pickerStyle(.segmented)
+
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text(showingBack ? currentCard.backText : currentCard.frontText)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(20)
+                                    .background(Color.secondarySystemGroupedBackground)
+                                    .clipShape(RoundedRectangle(cornerRadius: 20))
+
+                                if !currentCard.noteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                    Text(currentCard.noteText)
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Grade")
+                                    .font(.headline)
+                                LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: 8)], spacing: 8) {
+                                    ForEach(StudyReviewGrade.allCases) { grade in
+                                        Button(grade.displayName) {
+                                            store.markReviewed(cardID: currentCard.id, grade: grade)
+                                            currentIndex = 0
+                                            showingBack = false
+                                        }
+                                        .buttonStyle(.borderedProminent)
+                                        .tint(tintColor(for: grade))
+                                    }
+                                }
+                            }
+
+                            HStack {
+                                Button("Previous") {
+                                    currentIndex = max(currentIndex - 1, 0)
+                                    showingBack = false
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(currentIndex == 0)
+
+                                Spacer()
+
+                                Button("Next") {
+                                    currentIndex = min(currentIndex + 1, max(queue.count - 1, 0))
+                                    showingBack = false
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(currentIndex >= queue.count - 1)
+                            }
+                        }
+                        .padding()
+                        .background(Color(.systemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                        .shadow(color: .black.opacity(0.05), radius: 16, x: 0, y: 8)
+                    } else {
+                        EmptyStateCard(title: "No cards in this queue", subtitle: "Add cards or change the queue filter.")
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Study")
+            .onChange(of: selectedMode) { _, _ in
+                currentIndex = 0
+                showingBack = false
+            }
+        }
+    }
+
+    private func tintColor(for grade: StudyReviewGrade) -> Color {
+        switch grade {
+        case .again: return .red
+        case .hard: return .orange
+        case .good: return .blue
+        case .easy: return .green
         }
     }
 }
@@ -385,7 +618,7 @@ struct SearchView: View {
                         ContentUnavailableView(
                             searchText.isEmpty ? "Start searching" : "No results",
                             systemImage: "magnifyingglass",
-                            description: Text(searchText.isEmpty ? "Search titles, fronts, and backs." : "Try fewer filters.")
+                            description: Text(searchText.isEmpty ? "Search titles, fronts, backs, notes, and source links." : "Try fewer filters.")
                         )
                         .listRowBackground(Color.clear)
                     } else {
@@ -393,25 +626,11 @@ struct SearchView: View {
                             NavigationLink {
                                 CardDetailView(cardID: card.id)
                             } label: {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text(card.title)
-                                        .font(.headline)
-
-                                    Text(card.frontText)
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(2)
-
-                                    HStack(spacing: 8) {
-                                        if let cardSet = store.cardSet(id: card.cardSetID) {
-                                            BadgeView(text: cardSet.name, colorName: cardSet.colorName)
-                                        }
-                                        ForEach(card.tagIDs.compactMap(store.tag(id:)).prefix(3), id: \.id) { tag in
-                                            BadgeView(text: tag.name, colorName: tag.colorName)
-                                        }
-                                    }
-                                }
-                                .padding(.vertical, 4)
+                                CardRow(
+                                    card: card,
+                                    tags: card.tagIDs.compactMap(store.tag(id:)),
+                                    cardSet: store.cardSet(id: card.cardSetID)
+                                )
                             }
                         }
                     }
@@ -451,10 +670,7 @@ struct SearchView: View {
     }
 
     private var statusBinding: Binding<CardFlag?> {
-        Binding(
-            get: { selectedStatus },
-            set: { selectedStatus = $0 }
-        )
+        Binding(get: { selectedStatus }, set: { selectedStatus = $0 })
     }
 }
 
@@ -596,7 +812,7 @@ struct TaggedCardsView: View {
                             NavigationLink {
                                 CardDetailView(cardID: card.id)
                             } label: {
-                                CardRow(card: card, tags: card.tagIDs.compactMap(store.tag(id:)))
+                                CardRow(card: card, tags: card.tagIDs.compactMap(store.tag(id:)), cardSet: store.cardSet(id: card.cardSetID))
                             }
                         }
                     }
@@ -609,9 +825,314 @@ struct TaggedCardsView: View {
     }
 }
 
+struct MoreHubView: View {
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("Explore") {
+                    NavigationLink("Calendar", destination: CalendarRouteView())
+                    NavigationLink("Directory", destination: DirectoryRouteView())
+                    NavigationLink("Gallery", destination: GalleryRouteView())
+                    NavigationLink("Questions", destination: QuestionsRouteView())
+                    NavigationLink("Dictionary", destination: DictionaryRouteView())
+                    NavigationLink("Tag Map", destination: TagMapRouteView())
+                    NavigationLink("Trash", destination: TrashRouteView())
+                }
+
+                Section("System") {
+                    NavigationLink("Settings", destination: SettingsView())
+                }
+            }
+            .navigationTitle("More")
+        }
+    }
+}
+
+struct CalendarRouteView: View {
+    @EnvironmentObject private var store: StudyStore
+    @State private var selectedDate = Date.now
+
+    var body: some View {
+        List {
+            Section {
+                DatePicker("Review Day", selection: $selectedDate, displayedComponents: .date)
+                    .datePickerStyle(.graphical)
+            }
+
+            Section("Due on selected day") {
+                let cards = store.cardsForCalendarDay(selectedDate)
+                if cards.isEmpty {
+                    Text("No reviews scheduled.")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(cards) { card in
+                        NavigationLink {
+                            CardDetailView(cardID: card.id)
+                        } label: {
+                            CardRow(card: card, tags: card.tagIDs.compactMap(store.tag(id:)), cardSet: store.cardSet(id: card.cardSetID))
+                        }
+                    }
+                }
+            }
+
+            Section("Upcoming") {
+                ForEach(store.upcomingCards()) { card in
+                    NavigationLink {
+                        CardDetailView(cardID: card.id)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(card.title)
+                            Text(card.nextReviewAt?.formatted(date: .abbreviated, time: .shortened) ?? "Not scheduled")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("Calendar")
+    }
+}
+
+struct DirectoryRouteView: View {
+    @EnvironmentObject private var store: StudyStore
+
+    var body: some View {
+        List {
+            ForEach(store.directoryEntries()) { entry in
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(entry.title)
+                        .font(.headline)
+                    Text(entry.subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .navigationTitle("Directory")
+    }
+}
+
+struct GalleryRouteView: View {
+    @EnvironmentObject private var store: StudyStore
+
+    let columns = [GridItem(.adaptive(minimum: 160), spacing: 12)]
+
+    var body: some View {
+        ScrollView {
+            if store.cardsWithImages.isEmpty {
+                EmptyStateCard(title: "No gallery items", subtitle: "Add image URLs in card edit to populate the gallery.")
+                    .padding()
+            } else {
+                LazyVGrid(columns: columns, spacing: 12) {
+                    ForEach(store.cardsWithImages) { card in
+                        NavigationLink {
+                            CardDetailView(cardID: card.id)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 8) {
+                                if let imageURL = card.imageURL, let url = URL(string: imageURL) {
+                                    AsyncImage(url: url) { phase in
+                                        switch phase {
+                                        case .success(let image):
+                                            image
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(height: 120)
+                                                .frame(maxWidth: .infinity)
+                                                .clipped()
+                                        default:
+                                            ZStack {
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .fill(Color.secondarySystemGroupedBackground)
+                                                Image(systemName: "photo")
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                            .frame(height: 120)
+                                        }
+                                    }
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                }
+
+                                Text(card.title)
+                                    .font(.headline)
+                                    .foregroundStyle(.primary)
+                                    .lineLimit(2)
+
+                                Text(store.cardSet(id: card.cardSetID)?.name ?? "Unknown set")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding()
+                            .background(Color(.systemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                            .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 4)
+                        }
+                    }
+                }
+                .padding()
+            }
+        }
+        .navigationTitle("Gallery")
+    }
+}
+
+struct QuestionsRouteView: View {
+    @EnvironmentObject private var store: StudyStore
+
+    var body: some View {
+        List {
+            ForEach(store.questions()) { card in
+                NavigationLink {
+                    CardDetailView(cardID: card.id)
+                } label: {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(card.frontText)
+                            .lineLimit(3)
+                        Text(card.title)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+        .navigationTitle("Questions")
+    }
+}
+
+struct DictionaryRouteView: View {
+    @EnvironmentObject private var store: StudyStore
+
+    var body: some View {
+        List {
+            ForEach(Array(store.dictionaryTerms().enumerated()), id: \.offset) { _, item in
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.term)
+                        .font(.headline)
+                    Text(item.detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                }
+            }
+        }
+        .navigationTitle("Dictionary")
+    }
+}
+
+struct TagMapRouteView: View {
+    @EnvironmentObject private var store: StudyStore
+
+    var body: some View {
+        List {
+            ForEach(store.tagMapRows(), id: \.tag.id) { row in
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        BadgeView(text: row.tag.name, colorName: row.tag.colorName)
+                        Spacer()
+                        Text("\(row.count) cards")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if row.cardSets.isEmpty {
+                        Text("No linked card sets")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        FlowLayout(spacing: 8) {
+                            ForEach(row.cardSets, id: \.id) { cardSet in
+                                BadgeView(text: cardSet.name, colorName: cardSet.colorName)
+                            }
+                        }
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        }
+        .navigationTitle("Tag Map")
+    }
+}
+
+struct TrashRouteView: View {
+    @EnvironmentObject private var store: StudyStore
+    @State private var cardToPurge: UUID?
+    @State private var showEmptyTrashConfirmation = false
+
+    var body: some View {
+        List {
+            if store.deletedCards.isEmpty {
+                ContentUnavailableView(
+                    "Trash is empty",
+                    systemImage: "trash",
+                    description: Text("Deleted cards land here until you restore or purge them.")
+                )
+                .listRowBackground(Color.clear)
+            } else {
+                ForEach(store.deletedCards) { card in
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(card.title)
+                            .font(.headline)
+                        Text(card.frontText)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                        HStack {
+                            Text(card.deletedAt?.formatted(date: .abbreviated, time: .shortened) ?? "Deleted")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Button("Restore") {
+                                store.restoreCard(id: card.id)
+                            }
+                            .buttonStyle(.bordered)
+                            Button("Delete Forever", role: .destructive) {
+                                cardToPurge = card.id
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+        }
+        .navigationTitle("Trash")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                if !store.deletedCards.isEmpty {
+                    Button("Empty") {
+                        showEmptyTrashConfirmation = true
+                    }
+                }
+            }
+        }
+        .alert("Delete Forever", isPresented: Binding(
+            get: { cardToPurge != nil },
+            set: { if !$0 { cardToPurge = nil } }
+        )) {
+            Button("Delete Forever", role: .destructive) {
+                guard let cardToPurge else { return }
+                store.permanentlyDeleteCard(id: cardToPurge)
+                self.cardToPurge = nil
+            }
+            Button("Cancel", role: .cancel) {
+                cardToPurge = nil
+            }
+        } message: {
+            Text("This permanently removes the card from local storage.")
+        }
+        .alert("Empty Trash", isPresented: $showEmptyTrashConfirmation) {
+            Button("Empty", role: .destructive) {
+                store.emptyTrash()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This permanently removes all trashed cards.")
+        }
+    }
+}
+
 struct SettingsView: View {
     @EnvironmentObject private var store: StudyStore
-    @AppStorage("flashcardmaster.theme.override") private var themeOverrideRawValue = AppTheme.system.rawValue
 
     @State private var exportDocument: SnapshotDocument?
     @State private var exportFileName = "flashcardmaster-snapshot.json"
@@ -621,94 +1142,158 @@ struct SettingsView: View {
 
     private var selectedTheme: Binding<AppTheme> {
         Binding(
-            get: { AppTheme(rawValue: themeOverrideRawValue) ?? .system },
-            set: {
-                themeOverrideRawValue = $0.rawValue
-                store.updateTheme($0)
-            }
+            get: { store.theme() },
+            set: { store.updateTheme($0) }
         )
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section("Appearance") {
-                    Picker("Theme", selection: selectedTheme) {
-                        ForEach(AppTheme.allCases) { theme in
-                            Text(theme.displayName).tag(theme)
-                        }
+        Form {
+            Section("Appearance") {
+                Picker("Theme", selection: selectedTheme) {
+                    ForEach(AppTheme.allCases) { theme in
+                        Text(theme.displayName).tag(theme)
                     }
-                }
-
-                Section("Data") {
-                    Button("Export Snapshot") {
-                        do {
-                            exportDocument = try SnapshotDocument(data: store.snapshotData())
-                            exportFileName = "flashcardmaster-\(Date.now.formatted(.iso8601.year().month().day())).json"
-                            showExporter = true
-                        } catch {
-                            store.lastErrorMessage = error.localizedDescription
-                        }
-                    }
-
-                    Button("Import Snapshot") {
-                        showImporter = true
-                    }
-
-                    Button("Reset to Sample Data", role: .destructive) {
-                        showResetConfirmation = true
-                    }
-                }
-
-                if let lastErrorMessage = store.lastErrorMessage,
-                   !lastErrorMessage.isEmpty {
-                    Section("Last Error") {
-                        Text(lastErrorMessage)
-                            .foregroundStyle(.red)
-                    }
-                }
-
-                Section("About") {
-                    LabeledContent("App", value: "FlashCardMasterNative")
-                    LabeledContent("Mode", value: "Local-first")
-                    LabeledContent("Storage", value: "JSON snapshot")
                 }
             }
-            .navigationTitle("Settings")
-            .fileExporter(
-                isPresented: $showExporter,
-                document: exportDocument,
-                contentType: .json,
-                defaultFilename: exportFileName
-            ) { _ in
-                exportDocument = nil
-            }
-            .fileImporter(
-                isPresented: $showImporter,
-                allowedContentTypes: [.json],
-                allowsMultipleSelection: false
-            ) { result in
-                switch result {
-                case .success(let urls):
-                    guard let url = urls.first else { return }
+
+            Section("Data") {
+                Button("Export Snapshot") {
                     do {
-                        let data = try Data(contentsOf: url)
-                        try store.importSnapshot(from: data)
+                        exportDocument = try SnapshotDocument(data: store.snapshotData())
+                        exportFileName = "flashcardmaster-\(Date.now.formatted(.iso8601.year().month().day())).json"
+                        showExporter = true
                     } catch {
                         store.lastErrorMessage = error.localizedDescription
                     }
-                case .failure(let error):
+                }
+
+                Button("Import Snapshot") {
+                    showImporter = true
+                }
+
+                Button("Reset to Sample Data", role: .destructive) {
+                    showResetConfirmation = true
+                }
+            }
+
+            Section("Parity Notes") {
+                Text("This iOS build mirrors Library, Study, Search, Tags, Calendar, Directory, Gallery, Questions, Dictionary, Tag Map, and Trash as local-first routes.")
+                Text("Firebase auth, cloud sync, XLSX import, and PDF-specific tooling are intentionally still out. Pretending otherwise would be theater.")
+            }
+
+            if let lastErrorMessage = store.lastErrorMessage,
+               !lastErrorMessage.isEmpty {
+                Section("Last Error") {
+                    Text(lastErrorMessage)
+                        .foregroundStyle(.red)
+                }
+            }
+
+            Section("About") {
+                InfoLine(label: "App", value: "FlashCardMasterNative")
+                InfoLine(label: "Mode", value: "Local-first parity build")
+                InfoLine(label: "Storage", value: "JSON snapshot")
+                InfoLine(label: "Snapshot version", value: String(StudySnapshot.currentVersion))
+            }
+        }
+        .navigationTitle("Settings")
+        .fileExporter(
+            isPresented: $showExporter,
+            document: exportDocument,
+            contentType: .json,
+            defaultFilename: exportFileName
+        ) { _ in
+            exportDocument = nil
+        }
+        .fileImporter(
+            isPresented: $showImporter,
+            allowedContentTypes: [.json],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let url = urls.first else { return }
+                do {
+                    let data = try Data(contentsOf: url)
+                    try store.importSnapshot(from: data)
+                } catch {
                     store.lastErrorMessage = error.localizedDescription
                 }
+            case .failure(let error):
+                store.lastErrorMessage = error.localizedDescription
             }
-            .alert("Reset Data", isPresented: $showResetConfirmation) {
-                Button("Reset", role: .destructive) {
-                    store.resetToSample()
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("This replaces your local data with the bundled sample snapshot.")
+        }
+        .alert("Reset Data", isPresented: $showResetConfirmation) {
+            Button("Reset", role: .destructive) {
+                store.resetToSample()
             }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This replaces your local data with the bundled sample snapshot.")
+        }
+    }
+}
+
+struct DashboardHeroCard: View {
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.title2.weight(.bold))
+            Text(subtitle)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(
+                colors: [Color.blue.opacity(0.18), Color.purple.opacity(0.12)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+    }
+}
+
+struct EmptyStateCard: View {
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "sparkles.rectangle.stack")
+                .font(.system(size: 28))
+                .foregroundStyle(.secondary)
+            Text(title)
+                .font(.headline)
+            Text(subtitle)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity)
+        .background(Color.secondarySystemGroupedBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+    }
+}
+
+struct InfoLine: View {
+    let label: String
+    let value: String
+
+    var body: some View {
+        HStack(alignment: .top) {
+            Text(label)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(value)
+                .multilineTextAlignment(.trailing)
         }
     }
 }
@@ -744,6 +1329,7 @@ struct FolderRow: View {
 struct CardSetRow: View {
     let cardSet: StudyCardSet
     let cardCount: Int
+    let deletedCount: Int
 
     var body: some View {
         HStack(spacing: 12) {
@@ -753,7 +1339,7 @@ struct CardSetRow: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(cardSet.name)
-                Text("\(cardCount) cards")
+                Text("\(cardCount) cards • \(deletedCount) trashed")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -767,11 +1353,19 @@ struct CardSetRow: View {
 struct CardRow: View {
     let card: StudyCard
     let tags: [StudyTag]
+    let cardSet: StudyCardSet?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(card.title)
-                .font(.headline)
+            HStack {
+                Text(card.title)
+                    .font(.headline)
+                Spacer()
+                if card.imageURL != nil {
+                    Image(systemName: "photo")
+                        .foregroundStyle(.secondary)
+                }
+            }
 
             Text(card.frontText)
                 .font(.subheadline)
@@ -779,6 +1373,9 @@ struct CardRow: View {
                 .lineLimit(2)
 
             FlowLayout(spacing: 8) {
+                if let cardSet {
+                    BadgeView(text: cardSet.name, colorName: cardSet.colorName)
+                }
                 ForEach(tags.prefix(3), id: \.id) { tag in
                     BadgeView(text: tag.name, colorName: tag.colorName)
                 }
@@ -860,7 +1457,7 @@ struct CardSetEditorSheet: View {
     let mode: CardSetEditorMode
 
     @State private var name = ""
-    @State private var colorName: StudyColorName = .green
+    @State private var colorName: StudyColorName = .blue
 
     var body: some View {
         NavigationStack {
@@ -909,18 +1506,41 @@ struct CardEditorSheet: View {
     @State private var title = ""
     @State private var frontText = ""
     @State private var backText = ""
+    @State private var noteText = ""
+    @State private var imageURL = ""
+    @State private var sourceURL = ""
     @State private var selectedTagIDs: Set<UUID> = []
     @State private var selectedFlags: Set<CardFlag> = []
+    @State private var hasScheduledReview = false
+    @State private var nextReviewAt = Date.now
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Card") {
+                Section("Basics") {
                     TextField("Title", text: $title)
                     TextEditor(text: $frontText)
-                        .frame(minHeight: 120)
+                        .frame(minHeight: 100)
                     TextEditor(text: $backText)
-                        .frame(minHeight: 120)
+                        .frame(minHeight: 100)
+                }
+
+                Section("Extras") {
+                    TextEditor(text: $noteText)
+                        .frame(minHeight: 80)
+                    TextField("Image URL", text: $imageURL)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.URL)
+                    TextField("Source URL", text: $sourceURL)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.URL)
+                }
+
+                Section("Review Schedule") {
+                    Toggle("Schedule review", isOn: $hasScheduledReview)
+                    if hasScheduledReview {
+                        DatePicker("Next review", selection: $nextReviewAt)
+                    }
                 }
 
                 if !store.tags.isEmpty {
@@ -932,11 +1552,10 @@ struct CardEditorSheet: View {
                                 HStack {
                                     Circle()
                                         .fill(tag.colorName.color)
-                                        .frame(width: 12, height: 12)
+                                        .frame(width: 14, height: 14)
                                     Text(tag.name)
                                     Spacer()
                                     Image(systemName: selectedTagIDs.contains(tag.id) ? "checkmark.circle.fill" : "circle")
-                                        .foregroundStyle(selectedTagIDs.contains(tag.id) ? Color.accentColor : .secondary)
                                 }
                             }
                             .buttonStyle(.plain)
@@ -944,7 +1563,7 @@ struct CardEditorSheet: View {
                     }
                 }
 
-                Section("Status") {
+                Section("Flags") {
                     ForEach(CardFlag.allCases) { flag in
                         Button {
                             toggleFlag(flag)
@@ -953,7 +1572,6 @@ struct CardEditorSheet: View {
                                 Text(flag.displayName)
                                 Spacer()
                                 Image(systemName: selectedFlags.contains(flag) ? "checkmark.circle.fill" : "circle")
-                                    .foregroundStyle(selectedFlags.contains(flag) ? Color.accentColor : .secondary)
                             }
                         }
                         .buttonStyle(.plain)
@@ -973,12 +1591,16 @@ struct CardEditorSheet: View {
                             title: title,
                             frontText: frontText,
                             backText: backText,
+                            noteText: noteText,
+                            imageURL: imageURL,
+                            sourceURL: sourceURL,
                             tagIDs: Array(selectedTagIDs),
-                            flags: selectedFlags
+                            flags: selectedFlags,
+                            nextReviewAt: hasScheduledReview ? nextReviewAt : nil
                         )
                         dismiss()
                     }
-                    .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || (frontText + backText).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
             .onAppear {
@@ -986,8 +1608,13 @@ struct CardEditorSheet: View {
                     title = card.title
                     frontText = card.frontText
                     backText = card.backText
+                    noteText = card.noteText
+                    imageURL = card.imageURL ?? ""
+                    sourceURL = card.sourceURL ?? ""
                     selectedTagIDs = Set(card.tagIDs)
                     selectedFlags = card.flags
+                    hasScheduledReview = card.nextReviewAt != nil
+                    nextReviewAt = card.nextReviewAt ?? Date.now
                 }
             }
         }

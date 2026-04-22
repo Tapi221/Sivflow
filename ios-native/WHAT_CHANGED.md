@@ -1,24 +1,35 @@
-# WHAT_CHANGED
+# What changed in this parity-oriented iOS overwrite
 
-この `ios-native` は、元の未統合な SwiftUI 断片を置き換えるために再構築したスタンドアロン版です。
+## Core direction
+The previous zip delivered a clean local card app, but it was not close enough to the Electron/React route surface. This overwrite pushes the iOS version toward route parity and feature discoverability.
 
-## 実装済み
-- TabView ベースの 4 タブ構成
-- Folder / Card Set / Card / Tag の CRUD
-- カード詳細表示
-- 全文検索
-- ステータス絞り込み
-- タグ絞り込み
-- ローカル JSON 永続化
-- スナップショット export / import
-- テーマ切替
-- Xcode プロジェクト同梱
+## Added or expanded
+- Study route with grading buttons and review scheduling
+- Calendar route for due cards
+- Directory route for folders / sets / tags overview
+- Gallery route for image-backed cards
+- Questions route for prompt-first browsing
+- Dictionary route from local study content
+- Tag Map route for tag-to-card-set relationships
+- Trash route with restore and permanent delete
+- Card editor fields for notes, image URL, source URL, review date
+- Soft-delete workflow instead of immediate hard delete
 
-## 意図的に外したもの
-- Firebase / Google Sign-In
-- クラウド同期
-- 外部 SDK 依存
+## Data model changes
+- `nextReviewAt`
+- `lastStudiedAt`
+- `studyCount`
+- `deletedAt`
+- `noteText`
+- `imageURL`
+- `sourceURL`
 
-## 理由
-上書きしてすぐ動く完成物を優先したためです。
-まず単体アプリとして成立させ、その上で必要なら Firebase を別ブランチで戻す方が安全です。
+## Honest gap list
+Still not 1:1 with Electron/React:
+- No Firebase authentication
+- No cloud sync
+- No XLSX import workflow
+- No PDF block tooling
+- No BlockNote-compatible rich editor surface
+
+That is deliberate. Shipping a stable overwrite package beats pretending the missing integrations exist.

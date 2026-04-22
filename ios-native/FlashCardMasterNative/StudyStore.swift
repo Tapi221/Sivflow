@@ -3,6 +3,19 @@ import Foundation
 #if canImport(Combine)
 import Combine
 
+struct DirectoryEntry: Identifiable, Hashable {
+    enum Kind: String {
+        case folder
+        case cardSet
+        case tag
+    }
+
+    let id: String
+    let kind: Kind
+    let title: String
+    let subtitle: String
+}
+
 @MainActor
 final class StudyStore: ObservableObject {
     @Published private(set) var snapshot: StudySnapshot
@@ -49,13 +62,20 @@ final class StudyStore: ObservableObject {
         snapshot.tags.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
-    var cards: [StudyCard] {
-        snapshot.cards.sorted {
-            if $0.updatedAt == $1.updatedAt {
-                return $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
-            }
-            return $0.updatedAt > $1.updatedAt
-        }
+    var activeCards: [StudyCard] {
+        snapshot.cards
+            .filter { !$0.isDeleted }
+            .sorted(by: sortCards)
+    }
+
+    var deletedCards: [StudyCard] {
+        snapshot.cards
+            .filter { $0.isDeleted }
+            .sorted { ($0.deletedAt ?? .distantPast) > ($1.deletedAt ?? .distantPast) }
+    }
+
+    var cardsWithImages: [StudyCard] {
+        activeCards.filter { !($0.imageURL?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) }
     }
 
     func theme() -> AppTheme {
@@ -76,11 +96,15 @@ final class StudyStore: ObservableObject {
     }
 
     func cards(in cardSetID: UUID) -> [StudyCard] {
-        cards.filter { $0.cardSetID == cardSetID }
+        activeCards.filter { $0.cardSetID == cardSetID }
+    }
+
+    func allCardsIncludingDeleted(in cardSetID: UUID) -> [StudyCard] {
+        snapshot.cards.filter { $0.cardSetID == cardSetID }.sorted(by: sortCards)
     }
 
     func cards(forTag tagID: UUID) -> [StudyCard] {
-        cards.filter { $0.tagIDs.contains(tagID) }
+        activeCards.filter { $0.tagIDs.contains(tagID) }
     }
 
     func folder(id: UUID) -> StudyFolder? {
@@ -108,15 +132,107 @@ final class StudyStore: ObservableObject {
     }
 
     func cardCount(in cardSetID: UUID) -> Int {
-        snapshot.cards.count { $0.cardSetID == cardSetID }
+        snapshot.cards.count { $0.cardSetID == cardSetID && !$0.isDeleted }
+    }
+
+    func deletedCardCount(in cardSetID: UUID) -> Int {
+        snapshot.cards.count { $0.cardSetID == cardSetID && $0.isDeleted }
     }
 
     func tagUsageCount(tagID: UUID) -> Int {
-        snapshot.cards.count { $0.tagIDs.contains(tagID) }
+        activeCards.count { $0.tagIDs.contains(tagID) }
     }
 
     func matchingCards(filter: SearchFilter) -> [StudyCard] {
-        cards.filter { filter.matches(card: $0) }
+        activeCards.filter { filter.matches(card: $0) }
+    }
+
+    func dueCards(referenceDate: Date = .now) -> [StudyCard] {
+        activeCards.filter { ($0.nextReviewAt ?? .distantFuture) <= referenceDate }
+    }
+
+    func upcomingCards(daysAhead: Int = 7) -> [StudyCard] {
+        guard let end = Calendar.current.date(byAdding: .day, value: daysAhead, to: .now) else {
+            return []
+        }
+        return activeCards.filter {
+            guard let nextReviewAt = $0.nextReviewAt else { return false }
+            return nextReviewAt >= Calendar.current.startOfDay(for: .now) && nextReviewAt <= end
+        }
+    }
+
+    func cardsForCalendarDay(_ date: Date) -> [StudyCard] {
+        activeCards.filter {
+            guard let nextReviewAt = $0.nextReviewAt else { return false }
+            return Calendar.current.isDate(nextReviewAt, inSameDayAs: date)
+        }
+    }
+
+    func studyQueue(mode: StudyQueueMode) -> [StudyCard] {
+        switch mode {
+        case .due:
+            return dueCards()
+        case .all:
+            return activeCards
+        case .needsWork:
+            return activeCards.filter { $0.flags.contains(.draft) || $0.flags.contains(.uncertain) }
+        }
+    }
+
+    func directoryEntries() -> [DirectoryEntry] {
+        let folderEntries = folders.map { folder in
+            DirectoryEntry(
+                id: "folder-\(folder.id.uuidString)",
+                kind: .folder,
+                title: folder.name,
+                subtitle: "\(childFolderCount(for: folder.id)) folders • \(cardSetCount(in: folder.id)) sets"
+            )
+        }
+        let cardSetEntries = cardSets.map { cardSet in
+            DirectoryEntry(
+                id: "cardset-\(cardSet.id.uuidString)",
+                kind: .cardSet,
+                title: cardSet.name,
+                subtitle: "\(cardCount(in: cardSet.id)) cards"
+            )
+        }
+        let tagEntries = tags.map { tag in
+            DirectoryEntry(
+                id: "tag-\(tag.id.uuidString)",
+                kind: .tag,
+                title: tag.name,
+                subtitle: "\(tagUsageCount(tagID: tag.id)) cards"
+            )
+        }
+        return folderEntries + cardSetEntries + tagEntries
+    }
+
+    func dictionaryTerms() -> [(term: String, detail: String)] {
+        var items: [(String, String)] = []
+        for tag in tags {
+            items.append((tag.name, "Tag • used on \(tagUsageCount(tagID: tag.id)) cards"))
+        }
+        for cardSet in cardSets {
+            items.append((cardSet.name, "Card Set • \(cardCount(in: cardSet.id)) cards"))
+        }
+        for card in activeCards.prefix(40) {
+            items.append((card.title, firstNonEmptyText(from: [card.frontText, card.noteText, card.backText])))
+        }
+        return items.sorted { $0.0.localizedCaseInsensitiveCompare($1.0) == .orderedAscending }
+    }
+
+    func questions() -> [StudyCard] {
+        activeCards.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+    }
+
+    func tagMapRows() -> [(tag: StudyTag, cardSets: [StudyCardSet], count: Int)] {
+        tags.map { tag in
+            let cards = cards(forTag: tag.id)
+            let sets = Array(Set(cards.compactMap { cardSet(id: $0.cardSetID) }))
+                .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+            return (tag, sets, cards.count)
+        }
+        .sorted { $0.tag.name.localizedCaseInsensitiveCompare($1.tag.name) == .orderedAscending }
     }
 
     func upsertFolder(id: UUID?, name: String, colorName: StudyColorName, parentID: UUID?) {
@@ -129,9 +245,7 @@ final class StudyStore: ObservableObject {
             snapshot.folders[index].parentID = parentID
             snapshot.folders[index].updatedAt = .now
         } else {
-            snapshot.folders.append(
-                StudyFolder(name: trimmedName, colorName: colorName, parentID: parentID)
-            )
+            snapshot.folders.append(StudyFolder(name: trimmedName, colorName: colorName, parentID: parentID))
         }
         saveSilently()
     }
@@ -139,14 +253,16 @@ final class StudyStore: ObservableObject {
     func deleteFolder(id: UUID) {
         let descendantIDs = collectDescendantFolderIDs(parentID: id)
         let allFolderIDs = Set(descendantIDs + [id])
-
-        let cardSetIDs = snapshot.cardSets
-            .filter { allFolderIDs.contains($0.parentFolderID ?? UUID()) }
-            .map(\.id)
+        let cardSetIDs = snapshot.cardSets.filter { allFolderIDs.contains($0.parentFolderID ?? UUID()) }.map(\.id)
 
         snapshot.folders.removeAll { allFolderIDs.contains($0.id) }
         snapshot.cardSets.removeAll { cardSetIDs.contains($0.id) }
-        snapshot.cards.removeAll { cardSetIDs.contains($0.cardSetID) }
+        for index in snapshot.cards.indices {
+            if cardSetIDs.contains(snapshot.cards[index].cardSetID) {
+                snapshot.cards[index].deletedAt = .now
+                snapshot.cards[index].updatedAt = .now
+            }
+        }
         saveSilently()
     }
 
@@ -160,16 +276,19 @@ final class StudyStore: ObservableObject {
             snapshot.cardSets[index].parentFolderID = parentFolderID
             snapshot.cardSets[index].updatedAt = .now
         } else {
-            snapshot.cardSets.append(
-                StudyCardSet(name: trimmedName, colorName: colorName, parentFolderID: parentFolderID)
-            )
+            snapshot.cardSets.append(StudyCardSet(name: trimmedName, colorName: colorName, parentFolderID: parentFolderID))
         }
         saveSilently()
     }
 
     func deleteCardSet(id: UUID) {
         snapshot.cardSets.removeAll { $0.id == id }
-        snapshot.cards.removeAll { $0.cardSetID == id }
+        for index in snapshot.cards.indices {
+            if snapshot.cards[index].cardSetID == id {
+                snapshot.cards[index].deletedAt = .now
+                snapshot.cards[index].updatedAt = .now
+            }
+        }
         saveSilently()
     }
 
@@ -179,12 +298,19 @@ final class StudyStore: ObservableObject {
         title: String,
         frontText: String,
         backText: String,
+        noteText: String,
+        imageURL: String?,
+        sourceURL: String?,
         tagIDs: [UUID],
-        flags: Set<CardFlag>
+        flags: Set<CardFlag>,
+        nextReviewAt: Date?
     ) {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedFront = frontText.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedBack = backText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedNote = noteText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedImageURL = normalizedOptionalString(imageURL)
+        let normalizedSourceURL = normalizedOptionalString(sourceURL)
 
         guard !trimmedTitle.isEmpty else { return }
         guard !trimmedFront.isEmpty || !trimmedBack.isEmpty else { return }
@@ -193,8 +319,13 @@ final class StudyStore: ObservableObject {
             snapshot.cards[index].title = trimmedTitle
             snapshot.cards[index].frontText = trimmedFront
             snapshot.cards[index].backText = trimmedBack
+            snapshot.cards[index].noteText = trimmedNote
+            snapshot.cards[index].imageURL = normalizedImageURL
+            snapshot.cards[index].sourceURL = normalizedSourceURL
             snapshot.cards[index].tagIDs = Array(Set(tagIDs)).sorted { $0.uuidString < $1.uuidString }
             snapshot.cards[index].flags = flags
+            snapshot.cards[index].nextReviewAt = nextReviewAt
+            snapshot.cards[index].deletedAt = nil
             snapshot.cards[index].updatedAt = .now
         } else {
             snapshot.cards.append(
@@ -203,16 +334,47 @@ final class StudyStore: ObservableObject {
                     title: trimmedTitle,
                     frontText: trimmedFront,
                     backText: trimmedBack,
+                    noteText: trimmedNote,
+                    imageURL: normalizedImageURL,
+                    sourceURL: normalizedSourceURL,
                     tagIDs: Array(Set(tagIDs)).sorted { $0.uuidString < $1.uuidString },
-                    flags: flags
+                    flags: flags,
+                    nextReviewAt: nextReviewAt
                 )
             )
         }
         saveSilently()
     }
 
-    func deleteCard(id: UUID) {
+    func softDeleteCard(id: UUID) {
+        guard let index = snapshot.cards.firstIndex(where: { $0.id == id }) else { return }
+        snapshot.cards[index].deletedAt = .now
+        snapshot.cards[index].updatedAt = .now
+        saveSilently()
+    }
+
+    func restoreCard(id: UUID) {
+        guard let index = snapshot.cards.firstIndex(where: { $0.id == id }) else { return }
+        snapshot.cards[index].deletedAt = nil
+        snapshot.cards[index].updatedAt = .now
+        saveSilently()
+    }
+
+    func permanentlyDeleteCard(id: UUID) {
         snapshot.cards.removeAll { $0.id == id }
+        saveSilently()
+    }
+
+    func emptyTrash() {
+        snapshot.cards.removeAll { $0.isDeleted }
+        saveSilently()
+    }
+
+    func deleteTag(id: UUID) {
+        snapshot.tags.removeAll { $0.id == id }
+        for index in snapshot.cards.indices {
+            snapshot.cards[index].tagIDs.removeAll { $0 == id }
+        }
         saveSilently()
     }
 
@@ -230,10 +392,26 @@ final class StudyStore: ObservableObject {
         saveSilently()
     }
 
-    func deleteTag(id: UUID) {
-        snapshot.tags.removeAll { $0.id == id }
-        for index in snapshot.cards.indices {
-            snapshot.cards[index].tagIDs.removeAll { $0 == id }
+    func markReviewed(cardID: UUID, grade: StudyReviewGrade) {
+        guard let index = snapshot.cards.firstIndex(where: { $0.id == cardID }) else { return }
+        let now = Date.now
+        snapshot.cards[index].lastStudiedAt = now
+        snapshot.cards[index].updatedAt = now
+        snapshot.cards[index].studyCount += 1
+        snapshot.cards[index].deletedAt = nil
+        snapshot.cards[index].nextReviewAt = Calendar.current.date(byAdding: .day, value: grade.intervalDays, to: now)
+        switch grade {
+        case .again:
+            snapshot.cards[index].flags.insert(.uncertain)
+        case .hard:
+            snapshot.cards[index].flags.insert(.uncertain)
+            snapshot.cards[index].flags.remove(.complete)
+        case .good:
+            snapshot.cards[index].flags.remove(.draft)
+        case .easy:
+            snapshot.cards[index].flags.remove(.draft)
+            snapshot.cards[index].flags.remove(.uncertain)
+            snapshot.cards[index].flags.insert(.complete)
         }
         saveSilently()
     }
@@ -279,6 +457,74 @@ final class StudyStore: ObservableObject {
     private func persist() throws {
         let data = try encoder.encode(snapshot)
         try data.write(to: storageURL, options: .atomic)
+    }
+
+    private func sortCards(_ lhs: StudyCard, _ rhs: StudyCard) -> Bool {
+        let lhsDate = lhs.nextReviewAt ?? lhs.updatedAt
+        let rhsDate = rhs.nextReviewAt ?? rhs.updatedAt
+        if lhsDate == rhsDate {
+            return lhs.title.localizedCaseInsensitiveCompare(rhs.title) == .orderedAscending
+        }
+        return lhsDate < rhsDate
+    }
+
+    private func normalizedOptionalString(_ value: String?) -> String? {
+        guard let value else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private func firstNonEmptyText(from values: [String]) -> String {
+        for value in values {
+            let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                return trimmed
+            }
+        }
+        return ""
+    }
+}
+
+enum StudyQueueMode: String, CaseIterable, Identifiable {
+    case due
+    case all
+    case needsWork
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .due: return "Due"
+        case .all: return "All"
+        case .needsWork: return "Needs Work"
+        }
+    }
+}
+
+enum StudyReviewGrade: String, CaseIterable, Identifiable {
+    case again
+    case hard
+    case good
+    case easy
+
+    var id: String { rawValue }
+
+    var intervalDays: Int {
+        switch self {
+        case .again: return 0
+        case .hard: return 1
+        case .good: return 3
+        case .easy: return 7
+        }
+    }
+
+    var displayName: String {
+        switch self {
+        case .again: return "Again"
+        case .hard: return "Hard"
+        case .good: return "Good"
+        case .easy: return "Easy"
+        }
     }
 }
 #endif
