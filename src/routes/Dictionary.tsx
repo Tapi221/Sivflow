@@ -15,7 +15,7 @@ const Dictionary = () => {
         </section>
 
         <section className="mt-6 rounded-[28px] border border-dashed border-slate-200 bg-slate-50 px-6 py-10 text-sm leading-relaxed text-slate-500">
-          辞書データの一覧と検索 UI は次の実装対象です。
+          辞書データの一覧と検索UIは次の実装対象です。
         </section>
       </div>
     </div>

@@ -15,7 +15,7 @@ const Questions = () => {
         </section>
 
         <section className="mt-6 rounded-[28px] border border-dashed border-slate-200 bg-slate-50 px-6 py-10 text-sm leading-relaxed text-slate-500">
-          疑問一覧、優先度、解決状態の管理 UI は次の実装対象です。
+          疑問一覧、優先度、解決状態の管理UIは次の実装対象です。
         </section>
       </div>
     </div>
