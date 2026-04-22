@@ -25,7 +25,7 @@ const PopoverContent = React.forwardRef<
         align={align}
         sideOffset={sideOffset}
         className={cn(
-          "ds-floating-panel__content ds-floating-panel__content--popover ds-popover-surface z-50 w-72 outline-none",
+          "ds-floating-panel__content ds-floating-panel__content--popover z-50 w-72 outline-none",
           "data-[state=open]:animate-in data-[state=closed]:animate-out",
           "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
           "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",

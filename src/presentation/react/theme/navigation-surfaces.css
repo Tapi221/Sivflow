@@ -1,6 +1,5 @@
 @layer components {
-  .ds-floating-panel--filter,
-  .ds-popover-surface--filter {
+  .ds-floating-panel--filter {
     min-width: 16rem;
     border: 1px solid var(--ds-semantic-color-border-strong);
     background: color-mix(
