@@ -28,7 +28,8 @@ export const MetaPanelShell = ({
           "--meta-row-px": "var(--ds-layout-card-row-px)",
           "--meta-font-size": "var(--ds-typography-font-size-sm)",
           "--meta-action-min-h": "var(--ds-layout-card-row-px)",
-          "--meta-panel-shell-bg": "var(--ds-semantic-color-background-sidebar)",
+          "--meta-panel-shell-bg":
+            "var(--ds-semantic-color-background-sidebar)",
           "--meta-panel-surface":
             "color-mix(in srgb, var(--ds-semantic-color-background-app) 82%, var(--ds-semantic-color-background-sidebar) 18%)",
           "--meta-panel-surface-muted":

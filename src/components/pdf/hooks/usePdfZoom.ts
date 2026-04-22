@@ -120,7 +120,10 @@ export const usePdfZoom = ({
         return;
       }
 
-      if (!onGestureScaleChangeRef.current || !shouldHandleTarget(event.target)) {
+      if (
+        !onGestureScaleChangeRef.current ||
+        !shouldHandleTarget(event.target)
+      ) {
         return;
       }
 
@@ -150,7 +153,10 @@ export const usePdfZoom = ({
     };
 
     const handleGestureStart = (event: Event) => {
-      if (!onGestureScaleChangeRef.current || !shouldHandleTarget(event.target)) {
+      if (
+        !onGestureScaleChangeRef.current ||
+        !shouldHandleTarget(event.target)
+      ) {
         return;
       }
 
@@ -159,7 +165,10 @@ export const usePdfZoom = ({
     };
 
     const handleGestureChange = (event: Event) => {
-      if (!onGestureScaleChangeRef.current || !shouldHandleTarget(event.target)) {
+      if (
+        !onGestureScaleChangeRef.current ||
+        !shouldHandleTarget(event.target)
+      ) {
         return;
       }
 
@@ -183,7 +192,10 @@ export const usePdfZoom = ({
     };
 
     const handleGestureEnd = (event: Event) => {
-      if (!onGestureScaleChangeRef.current || !shouldHandleTarget(event.target)) {
+      if (
+        !onGestureScaleChangeRef.current ||
+        !shouldHandleTarget(event.target)
+      ) {
         return;
       }
 

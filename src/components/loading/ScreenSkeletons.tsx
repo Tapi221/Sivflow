@@ -1,4 +1,3 @@
-
 import type { ReactNode } from "react";
 
 import { CardMetaPanelSkeleton } from "@/components/card/panels/CardMetaPanelSkeleton";

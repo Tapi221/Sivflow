@@ -164,7 +164,9 @@ export const PdfPaneToolbar = ({
           次
         </Button>
         <div className="min-w-[72px] text-center text-xs text-slate-600">
-          {totalMatches > 0 ? `${activeMatchIndex + 1} / ${totalMatches}` : "0 / 0"}
+          {totalMatches > 0
+            ? `${activeMatchIndex + 1} / ${totalMatches}`
+            : "0 / 0"}
         </div>
       </div>
 
@@ -215,7 +217,9 @@ export const PdfPaneToolbar = ({
           OCR削除
         </Button>
         <div className="min-w-[56px] text-right text-[11px] text-slate-500">
-          {ocrTotalPages > 0 ? `${Math.round(ocrProgress * 100)}%` : `${ocrCachedPageCount}p`}
+          {ocrTotalPages > 0
+            ? `${Math.round(ocrProgress * 100)}%`
+            : `${ocrCachedPageCount}p`}
         </div>
         <Button
           variant="ghost"

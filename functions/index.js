@@ -28,7 +28,8 @@ const DEFAULT_CLOUD_STORAGE_QUOTA_BYTES = 500 * 1024 * 1024;
 const STORAGE_STATS_SCHEMA_VERSION = 1;
 const STORAGE_STATS_DOC_ID = "current";
 const ASSET_STORAGE_OBJECT_RE = /^users\/([^/]+)\/assets\/[^/]+$/;
-const LEGACY_IMAGE_STORAGE_OBJECT_RE = /^users\/([^/]+)\/images\/[^/]+_(full|thumb)$/i;
+const LEGACY_IMAGE_STORAGE_OBJECT_RE =
+  /^users\/([^/]+)\/images\/[^/]+_(full|thumb)$/i;
 
 const isNonEmptyString = (value) =>
   typeof value === "string" && value.trim().length > 0;
@@ -405,10 +406,13 @@ exports.onTrackedImageObjectFinalized = onObjectFinalized(
 
     const sizeBytes = toNonNegativeNumber(event.data.size);
     if (sizeBytes <= 0) {
-      logger.warn("Tracked image finalize event missing size. Rebuilding stats.", {
-        objectName,
-        userId: trackedInfo.userId,
-      });
+      logger.warn(
+        "Tracked image finalize event missing size. Rebuilding stats.",
+        {
+          objectName,
+          userId: trackedInfo.userId,
+        },
+      );
       await rebuildStorageStatsForUser(trackedInfo.userId);
       return;
     }
@@ -443,10 +447,13 @@ exports.onTrackedImageObjectDeleted = onObjectDeleted(
 
     const sizeBytes = toNonNegativeNumber(event.data.size);
     if (sizeBytes <= 0) {
-      logger.warn("Tracked image delete event missing size. Rebuilding stats.", {
-        objectName,
-        userId: trackedInfo.userId,
-      });
+      logger.warn(
+        "Tracked image delete event missing size. Rebuilding stats.",
+        {
+          objectName,
+          userId: trackedInfo.userId,
+        },
+      );
       await rebuildStorageStatsForUser(trackedInfo.userId);
       return;
     }

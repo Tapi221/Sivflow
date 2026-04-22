@@ -4,8 +4,7 @@ export type ExplorerSectionListNavigationDetail = {
   reason: ExplorerSectionListNavigationReason;
 };
 
-const EXPLORER_SECTION_LIST_NAVIGATION_EVENT =
-  "folders:navigate-section-list";
+const EXPLORER_SECTION_LIST_NAVIGATION_EVENT = "folders:navigate-section-list";
 
 export const requestSectionListNavigation = (
   detail: ExplorerSectionListNavigationDetail = {

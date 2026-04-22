@@ -98,7 +98,9 @@ export const usePdfOcr = ({
     error: null,
     cachedPageNumbers: [],
   });
-  const [ocrTextByPage, setOcrTextByPage] = useState<Record<number, string>>({});
+  const [ocrTextByPage, setOcrTextByPage] = useState<Record<number, string>>(
+    {},
+  );
   const [ocrRecords, setOcrRecords] = useState<PdfOcrPageRecord[]>([]);
 
   const mountedRef = useRef(true);
@@ -172,7 +174,10 @@ export const usePdfOcr = ({
         const totalPagesValue = Math.max(totalPagesRef.current, 1);
         const normalizedProgress = Math.min(
           1,
-          Math.max(0, (processedPagesRef.current + rawProgress) / totalPagesValue),
+          Math.max(
+            0,
+            (processedPagesRef.current + rawProgress) / totalPagesValue,
+          ),
         );
 
         if (!mountedRef.current) {

@@ -158,7 +158,11 @@ const PdfThumbnailItemComponent = ({
         }
 
         setIsVisible((previousIsVisible) => {
-          return previousIsVisible || entry.isIntersecting || entry.intersectionRatio > 0;
+          return (
+            previousIsVisible ||
+            entry.isIntersecting ||
+            entry.intersectionRatio > 0
+          );
         });
       },
       {
@@ -223,7 +227,8 @@ const PdfThumbnailItemComponent = ({
       const viewportWidthPx = THUMBNAIL_TARGET_WIDTH_PX;
       const viewportHeightPx = Math.max(
         1,
-        (resolvedSize.height / Math.max(1, resolvedSize.width)) * THUMBNAIL_TARGET_WIDTH_PX,
+        (resolvedSize.height / Math.max(1, resolvedSize.width)) *
+          THUMBNAIL_TARGET_WIDTH_PX,
       );
       const renderBackingStore = resolvePdfRenderBackingStore({
         viewportWidthPx,
@@ -339,10 +344,13 @@ const PdfThumbnailItemComponent = ({
 
         const clonedBitmap = cloneCanvasBitmap(renderSurface.canvas);
         if (clonedBitmap) {
-          thumbnailBitmapCache.set(buildThumbnailCacheKey(documentKey, pageNumber), {
-            bitmap: clonedBitmap,
-            size: nextPageSize,
-          });
+          thumbnailBitmapCache.set(
+            buildThumbnailCacheKey(documentKey, pageNumber),
+            {
+              bitmap: clonedBitmap,
+              size: nextPageSize,
+            },
+          );
         }
 
         setRenderError(null);
@@ -456,7 +464,8 @@ const PdfThumbnailItemComponent = ({
       </div>
 
       {hasOcrText ? (
-        <div className="pointer-events-none absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]"
+        <div
+          className="pointer-events-none absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]"
           style={{
             color: PDF_THUMBNAIL_PANEL_COLORS.accent,
             borderColor: "rgba(216,175,181,0.32)",

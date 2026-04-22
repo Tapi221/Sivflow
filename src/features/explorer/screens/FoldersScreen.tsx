@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 
 import { FoldersScreenSkeleton } from "@/components/loading/ScreenSkeletons";
