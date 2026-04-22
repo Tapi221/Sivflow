@@ -54,13 +54,13 @@ export const PdfOverlayToolbar = ({
   disabled = false,
 }: PdfOverlayToolbarProps) => {
   const isFitWidthActive = fitMode === "width";
+  const canTogglePageLayout = numPages > 1;
   const nextPageLayoutMode: PdfPageLayoutMode =
     pageLayoutMode === "single" ? "double" : "single";
   const pageLayoutToggleLabel =
     pageLayoutMode === "single"
       ? "単一表示。タップで2枚表示に切り替え"
       : "2枚表示。タップで単一表示に切り替え";
-  const isPageLayoutToggleDisabled = disabled || numPages <= 1;
 
   return (
     <OverlayToolbar>
@@ -110,7 +110,7 @@ export const PdfOverlayToolbar = ({
           onPageLayoutModeChange(nextPageLayoutMode);
         }}
         label={pageLayoutToggleLabel}
-        disabled={isPageLayoutToggleDisabled}
+        disabled={disabled || !canTogglePageLayout}
         active={pageLayoutMode === "double"}
         className="h-6 w-6"
       >
