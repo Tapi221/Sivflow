@@ -1,19 +1,16 @@
 import { useId } from "react";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "@/ui/icons";
 
 interface PdfPaneToolbarProps {
   isLocalOnly: boolean;
   uploadStatus?: "pending" | "queued" | "uploading" | "ready" | "failed" | null;
   sourceUnavailable: boolean;
-  canOpenExternal: boolean;
   searchQuery: string;
   totalMatches: number;
   activeMatchIndex: number;
   onSearchQueryChange: (value: string) => void;
   onPrevMatch: () => void;
   onNextMatch: () => void;
-  onOpenNewTab: () => void;
   ocrStatus: "idle" | "running" | "success" | "error" | "cancelled";
   ocrProgress: number;
   ocrProcessedPages: number;
@@ -34,14 +31,12 @@ export const PdfPaneToolbar = ({
   isLocalOnly,
   uploadStatus,
   sourceUnavailable,
-  canOpenExternal,
   searchQuery,
   totalMatches,
   activeMatchIndex,
   onSearchQueryChange,
   onPrevMatch,
   onNextMatch,
-  onOpenNewTab,
   ocrStatus,
   ocrProgress,
   ocrProcessedPages,
@@ -221,14 +216,6 @@ export const PdfPaneToolbar = ({
             ? `${Math.round(ocrProgress * 100)}%`
             : `${ocrCachedPageCount}p`}
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onOpenNewTab}
-          disabled={!canOpenExternal}
-        >
-          <ExternalLink className="h-4 w-4" />
-        </Button>
       </div>
     </div>
   );

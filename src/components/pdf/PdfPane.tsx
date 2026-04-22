@@ -708,37 +708,6 @@ export const PdfPane = ({
     setSearchNavToken((previousToken) => previousToken + 1);
   }, [commitSearchQuery]);
 
-  const handleOpenNewTab = useCallback(async () => {
-    if (effectiveRemoteUrl) {
-      await Promise.resolve(platform.shell.openExternal(effectiveRemoteUrl));
-      return;
-    }
-
-    if (!localSourceBytes || localSourceBytes.byteLength === 0) {
-      return;
-    }
-
-    const blobBytes = new Uint8Array(localSourceBytes.byteLength);
-    blobBytes.set(localSourceBytes);
-
-    const blob = new Blob([blobBytes], {
-      type: doc.mimeType || "application/pdf",
-    });
-    const tempUrl = URL.createObjectURL(blob);
-
-    try {
-      await Promise.resolve(platform.shell.openExternal(tempUrl));
-    } finally {
-      window.setTimeout(() => {
-        try {
-          URL.revokeObjectURL(tempUrl);
-        } catch {
-          // noop
-        }
-      }, 60_000);
-    }
-  }, [doc.mimeType, effectiveRemoteUrl, localSourceBytes]);
-
   useEffect(() => {
     if (!DEV_MODE) {
       return;
@@ -778,16 +747,12 @@ export const PdfPane = ({
         isLocalOnly={isLocalOnly}
         uploadStatus={doc.uploadStatus}
         sourceUnavailable={sourceUnavailable}
-        canOpenExternal={!!effectiveRemoteUrl || !!localSourceBytes}
         searchQuery={searchInputValue}
         totalMatches={totalMatches}
         activeMatchIndex={activeMatchIndex}
         onSearchQueryChange={setSearchInputValue}
         onPrevMatch={handlePrevMatch}
         onNextMatch={handleNextMatch}
-        onOpenNewTab={() => {
-          void handleOpenNewTab();
-        }}
         ocrStatus={ocrState.status}
         ocrProgress={ocrState.progress}
         ocrProcessedPages={ocrState.processedPages}
