@@ -54,6 +54,34 @@ const extractTextFromTextContent = async (
     .trim();
 };
 
+const normalizeExtractedText = (value: string) => {
+  return value.replace(/\s+/g, " ").trim();
+};
+
+const persistPageText = async ({
+  docId,
+  documentKey,
+  pageNumber,
+  text,
+}: {
+  docId: string;
+  documentKey: string;
+  pageNumber: number;
+  text: string;
+}) => {
+  const normalizedText = normalizeExtractedText(text);
+  if (normalizedText.length === 0) {
+    return null;
+  }
+
+  return putPdfOcrPageRecord({
+    docId,
+    documentKey,
+    pageNumber,
+    text: normalizedText,
+  });
+};
+
 export const usePdfOcr = ({
   docId,
   documentKey,
@@ -165,6 +193,15 @@ export const usePdfOcr = ({
     return workerPromiseRef.current;
   }, []);
 
+  const markProcessed = useCallback(() => {
+    processedPagesRef.current += 1;
+    setOcrState((previousState) => ({
+      ...previousState,
+      processedPages: processedPagesRef.current,
+      progress: processedPagesRef.current / Math.max(totalPagesRef.current, 1),
+    }));
+  }, []);
+
   const runOcr = useCallback(
     async (pageNumbers: number[]) => {
       const normalizedPageNumbers = Array.from(
@@ -215,13 +252,7 @@ export const usePdfOcr = ({
           });
 
           if (cachedRecord?.text) {
-            processedPagesRef.current += 1;
-            setOcrState((previousState) => ({
-              ...previousState,
-              processedPages: processedPagesRef.current,
-              progress:
-                processedPagesRef.current / Math.max(totalPagesRef.current, 1),
-            }));
+            markProcessed();
             continue;
           }
 
@@ -229,15 +260,16 @@ export const usePdfOcr = ({
             documentController.getPageTextContent,
             pageNumber,
           );
+          const normalizedNativeText = normalizeExtractedText(nativeText);
 
-          if (nativeText.length >= OCR_NATIVE_TEXT_SKIP_THRESHOLD) {
-            processedPagesRef.current += 1;
-            setOcrState((previousState) => ({
-              ...previousState,
-              processedPages: processedPagesRef.current,
-              progress:
-                processedPagesRef.current / Math.max(totalPagesRef.current, 1),
-            }));
+          if (normalizedNativeText.length >= OCR_NATIVE_TEXT_SKIP_THRESHOLD) {
+            await persistPageText({
+              docId,
+              documentKey,
+              pageNumber,
+              text: normalizedNativeText,
+            });
+            markProcessed();
             continue;
           }
 
@@ -246,24 +278,25 @@ export const usePdfOcr = ({
             pageNumber,
           });
           const result = await worker.recognize(renderedPage.canvas);
-          const normalizedText = result.data.text.replace(/\s+/g, " ").trim();
+          const normalizedOcrText = normalizeExtractedText(result.data.text);
 
-          if (normalizedText.length > 0) {
-            await putPdfOcrPageRecord({
+          if (normalizedOcrText.length > 0) {
+            await persistPageText({
               docId,
               documentKey,
               pageNumber,
-              text: normalizedText,
+              text: normalizedOcrText,
+            });
+          } else if (normalizedNativeText.length > 0) {
+            await persistPageText({
+              docId,
+              documentKey,
+              pageNumber,
+              text: normalizedNativeText,
             });
           }
 
-          processedPagesRef.current += 1;
-          setOcrState((previousState) => ({
-            ...previousState,
-            processedPages: processedPagesRef.current,
-            progress:
-              processedPagesRef.current / Math.max(totalPagesRef.current, 1),
-          }));
+          markProcessed();
         }
 
         await syncCachedRecords();
@@ -300,6 +333,7 @@ export const usePdfOcr = ({
       documentController.getPageTextContent,
       documentKey,
       getWorker,
+      markProcessed,
       numPages,
       syncCachedRecords,
     ],
