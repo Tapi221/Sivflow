@@ -1,7 +1,6 @@
 import type { BlobUrl } from "@/types/core/branded";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import platform from "@/platform";
 import type {
   PdfPageLayoutMode,
   PdfSidePanelTab,
@@ -329,8 +328,6 @@ export const PdfPane = ({
     sourceUnavailable,
     isLocalOnly,
     localDataStatus,
-    effectiveRemoteUrl,
-    localSourceBytes,
     handleSourceLoadError,
   } = usePdfSourceResolver(doc, currentUser?.uid);
 
