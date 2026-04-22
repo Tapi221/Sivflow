@@ -25,16 +25,6 @@ type ThumbnailBitmapCacheEntry = {
 
 const thumbnailBitmapCache = new Map<string, ThumbnailBitmapCacheEntry>();
 
-const PDF_THUMBNAIL_PANEL_COLORS = {
-  accent: "#D8AFB5",
-  surfaceSoft: "#F5EBE9",
-  surfaceMuted: "#F1E2E1",
-  surfacePaper: "#F8F7F5",
-  surfaceBlush: "#F7EFED",
-  textStrong: "#5E545B",
-  textMuted: "#8C7C83",
-} as const;
-
 interface PdfThumbnailItemProps {
   documentKey: string;
   pageNumber: number;
@@ -409,69 +399,34 @@ const PdfThumbnailItemComponent = ({
         onClick={() => onSelect(pageNumber)}
         aria-label={`ページ ${pageNumber} を開く`}
         className={cn(
-          "group relative flex w-full min-w-0 flex-col rounded-[20px] border p-2 text-left transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-          isActive
-            ? "shadow-[0_12px_28px_rgba(216,175,181,0.22)]"
-            : "hover:shadow-[0_10px_24px_rgba(216,175,181,0.14)]",
+          "pdf-thumbnail-card group relative flex w-full min-w-0 flex-col rounded-[20px] border p-2 text-left transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+          isActive && "pdf-thumbnail-card--active",
         )}
-        style={{
-          color: PDF_THUMBNAIL_PANEL_COLORS.textStrong,
-          borderColor: isActive
-            ? PDF_THUMBNAIL_PANEL_COLORS.accent
-            : PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
-          background: isActive
-            ? PDF_THUMBNAIL_PANEL_COLORS.surfaceBlush
-            : PDF_THUMBNAIL_PANEL_COLORS.surfacePaper,
-          boxShadow: isActive
-            ? "0 12px 28px rgba(216, 175, 181, 0.16), inset 0 1px 0 rgba(255,255,255,0.95)"
-            : "inset 0 1px 0 rgba(255,255,255,0.95)",
-          outline: isActive ? "1px solid rgba(216, 175, 181, 0.28)" : "none",
-        }}
       >
         <div
-          className="relative flex w-full items-center justify-center overflow-hidden rounded-[16px] border bg-white p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
-          style={{
-            aspectRatio: pageAspectRatio,
-            borderColor: PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
-            background: "linear-gradient(180deg, #FFFFFF 0%, #F8F7F5 100%)",
-          }}
+          className="pdf-thumbnail-card__preview relative flex w-full items-center justify-center overflow-hidden rounded-[16px] border p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
+          style={{ aspectRatio: pageAspectRatio }}
         >
           {!isRendered && !renderError ? (
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(248,247,245,0.96), rgba(247,239,237,0.92))",
-              }}
-            />
+            <div className="pdf-thumbnail-card__skeleton absolute inset-0" />
           ) : null}
 
           <canvas ref={canvasRef} className="relative z-10 block max-w-full" />
 
           {renderError ? (
-            <div
-              className="absolute inset-0 flex items-center justify-center px-3 text-center text-[11px] font-medium"
-              style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}
-            >
+            <div className="pdf-thumbnail-card__error absolute inset-0 flex items-center justify-center px-3 text-center text-[11px] font-medium">
               {renderError}
             </div>
           ) : null}
         </div>
       </button>
 
-      <div className="pointer-events-none absolute left-3 top-3 z-20 inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-[rgba(248,247,245,0.94)] px-2 text-[12px] font-semibold tabular-nums shadow-[0_4px_12px_rgba(216,175,181,0.10)]">
+      <div className="pdf-thumbnail-chip pointer-events-none absolute left-3 top-3 z-20 inline-flex h-8 min-w-8 items-center justify-center px-2 text-[12px] font-semibold tabular-nums">
         {pageNumber}
       </div>
 
       {hasOcrText ? (
-        <div
-          className="pointer-events-none absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]"
-          style={{
-            color: PDF_THUMBNAIL_PANEL_COLORS.accent,
-            borderColor: "rgba(216,175,181,0.32)",
-            background: "rgba(248,247,245,0.95)",
-          }}
-        >
+        <div className="pdf-thumbnail-chip pdf-thumbnail-chip--ocr pointer-events-none absolute left-1/2 top-3 z-20 -translate-x-1/2 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]">
           OCR
         </div>
       ) : null}
@@ -489,21 +444,10 @@ const PdfThumbnailItemComponent = ({
           event.stopPropagation();
           onToggleBookmark(pageNumber);
         }}
-        className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border transition-all duration-150 ease-out hover:scale-[1.03]"
-        style={{
-          borderColor: isBookmarked
-            ? PDF_THUMBNAIL_PANEL_COLORS.accent
-            : PDF_THUMBNAIL_PANEL_COLORS.surfaceMuted,
-          background: isBookmarked
-            ? PDF_THUMBNAIL_PANEL_COLORS.surfaceSoft
-            : "rgba(248,247,245,0.95)",
-          color: isBookmarked
-            ? PDF_THUMBNAIL_PANEL_COLORS.accent
-            : PDF_THUMBNAIL_PANEL_COLORS.textMuted,
-          boxShadow: isBookmarked
-            ? "0 8px 18px rgba(216, 175, 181, 0.18)"
-            : "0 4px 12px rgba(216, 175, 181, 0.10)",
-        }}
+        className={cn(
+          "pdf-thumbnail-action absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border transition-all duration-150 ease-out hover:scale-[1.03]",
+          isBookmarked && "pdf-thumbnail-action--active",
+        )}
       >
         <BookmarkIcon className="h-4 w-4" />
       </button>
