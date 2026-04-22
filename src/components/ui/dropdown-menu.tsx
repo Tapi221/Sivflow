@@ -20,28 +20,32 @@ const DropdownMenuContent = React.forwardRef<
   (
     { className, sideOffset = 6, surface, collisionPadding = 8, ...props },
     ref,
-  ) => (
-    <DropdownMenuPrimitive.Portal>
-      <DropdownMenuPrimitive.Content
-        ref={ref}
-        sideOffset={sideOffset}
-        collisionPadding={collisionPadding}
-        className={cn(
-          "ds-menu__content ds-menu-surface ds-menu-surface--glass z-50 min-w-[8rem] overflow-hidden p-1",
-          "data-[state=open]:animate-in data-[state=closed]:animate-out",
-          "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-          "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-          "data-[side=bottom]:slide-in-from-top-2",
-          "data-[side=left]:slide-in-from-right-2",
-          "data-[side=right]:slide-in-from-left-2",
-          "data-[side=top]:slide-in-from-bottom-2",
-          floatingSurfaceVariants({ surface }),
-          className,
-        )}
-        {...props}
-      />
-    </DropdownMenuPrimitive.Portal>
-  ),
+  ) => {
+    const resolvedSurface = surface ?? "menu";
+
+    return (
+      <DropdownMenuPrimitive.Portal>
+        <DropdownMenuPrimitive.Content
+          ref={ref}
+          sideOffset={sideOffset}
+          collisionPadding={collisionPadding}
+          className={cn(
+            "ds-floating-panel__content ds-floating-panel__content--menu ds-menu__content z-50 min-w-[8rem] overflow-hidden p-1",
+            "data-[state=open]:animate-in data-[state=closed]:animate-out",
+            "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+            "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+            "data-[side=bottom]:slide-in-from-top-2",
+            "data-[side=left]:slide-in-from-right-2",
+            "data-[side=right]:slide-in-from-left-2",
+            "data-[side=top]:slide-in-from-bottom-2",
+            floatingSurfaceVariants({ surface: resolvedSurface }),
+            className,
+          )}
+          {...props}
+        />
+      </DropdownMenuPrimitive.Portal>
+    );
+  },
 );
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 
@@ -54,7 +58,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      "ds-menu__item relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm leading-none outline-none",
+      "ds-floating-panel__row ds-menu__item relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm leading-none outline-none",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       inset && "pl-8",
       className,
@@ -71,7 +75,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
   <DropdownMenuPrimitive.CheckboxItem
     ref={ref}
     className={cn(
-      "ds-menu__item relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm leading-none outline-none",
+      "ds-floating-panel__row ds-menu__item relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm leading-none outline-none",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className,
     )}
@@ -96,7 +100,7 @@ const DropdownMenuRadioItem = React.forwardRef<
   <DropdownMenuPrimitive.RadioItem
     ref={ref}
     className={cn(
-      "ds-menu__item relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm leading-none outline-none",
+      "ds-floating-panel__row ds-menu__item relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm leading-none outline-none",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className,
     )}
@@ -121,7 +125,7 @@ const DropdownMenuLabel = React.forwardRef<
   <DropdownMenuPrimitive.Label
     ref={ref}
     className={cn(
-      "ds-menu__label px-2 py-1.5 text-sm font-semibold leading-none",
+      "ds-floating-panel__label ds-menu__label px-2 py-1.5 text-sm font-semibold leading-none",
       inset && "pl-8",
       className,
     )}
@@ -149,7 +153,7 @@ const DropdownMenuShortcut = ({
   return (
     <span
       className={cn(
-        "ds-menu__shortcut ml-auto text-xs tracking-widest opacity-60",
+        "ds-floating-panel__shortcut ds-menu__shortcut ml-auto text-xs tracking-widest opacity-60",
         className,
       )}
       {...props}
@@ -165,7 +169,7 @@ const DropdownMenuItemIcon = ({
   return (
     <span
       className={cn(
-        "ds-menu__icon flex h-4 w-4 shrink-0 items-center justify-center",
+        "ds-floating-panel__icon ds-menu__icon flex h-4 w-4 shrink-0 items-center justify-center",
         "[&>svg]:block [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0",
         className,
       )}

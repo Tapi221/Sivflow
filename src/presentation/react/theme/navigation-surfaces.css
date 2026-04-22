@@ -1,21 +1,13 @@
 @layer components {
-  .ds-popover-surface {
-    border: 1px solid var(--ds-semantic-color-border-floating);
+  .ds-floating-panel--filter,
+  .ds-popover-surface--filter {
+    min-width: 16rem;
+    border: 1px solid var(--ds-semantic-color-border-strong);
     background: color-mix(
       in srgb,
       var(--ds-semantic-color-background-floating) 94%,
       white 6%
     );
-    color: var(--ds-semantic-color-text-primary);
-    border-radius: var(--ds-semantic-radius-dialog);
-    box-shadow: var(--ds-semantic-elevation-floating);
-    backdrop-filter: blur(var(--ds-elevation-blur-floating));
-    -webkit-backdrop-filter: blur(var(--ds-elevation-blur-floating));
-  }
-
-  .ds-popover-surface--filter {
-    min-width: 16rem;
-    border: 1px solid var(--ds-semantic-color-border-strong);
   }
 
   .ds-nav-action,
@@ -122,15 +114,18 @@
     max-height: 25rem;
   }
 
-  .ds-filter-section {
+  .ds-filter-section,
+  .ds-floating-panel__section {
     border-bottom: 1px solid var(--ds-semantic-color-border-default);
   }
 
-  .ds-filter-section__title {
+  .ds-filter-section__title,
+  .ds-floating-panel__title {
     color: var(--ds-semantic-color-text-strong);
   }
 
-  .ds-filter-section__label {
+  .ds-filter-section__label,
+  .ds-floating-panel__label {
     color: var(--ds-semantic-color-text-secondary);
   }
 
@@ -251,7 +246,8 @@
     color: var(--ds-semantic-color-text-secondary);
   }
 
-  .ds-filter-row {
+  .ds-filter-row,
+  .ds-floating-panel__row {
     border-radius: var(--ds-semantic-radius-medium);
     color: var(--ds-semantic-color-text-primary);
     transition:

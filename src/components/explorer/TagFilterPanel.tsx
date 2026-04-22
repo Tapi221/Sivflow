@@ -11,7 +11,7 @@ import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 import { Tag } from "@/ui/icons";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 
 type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";
@@ -126,6 +126,18 @@ export const TagFilterPanel = ({
     onChange: (value: ToggleableFlag) => void;
   }>;
 
+  const handleTagRowKeyDown = (
+    event: KeyboardEvent<HTMLDivElement>,
+    tag: string,
+  ) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    toggleTag(tag);
+  };
+
   return (
     <FilterPanelShell
       title="タグで絞り込み"
@@ -149,8 +161,10 @@ export const TagFilterPanel = ({
       }
       sections={
         <>
-          <div className="ds-filter-section flex items-center gap-2 bg-transparent px-3 py-2 text-[11px]">
-            <span className="ds-filter-section__label">条件:</span>
+          <div className="ds-filter-section ds-floating-panel__section ds-floating-panel__section--dense flex items-center gap-2 bg-transparent text-[11px]">
+            <span className="ds-filter-section__label ds-floating-panel__label">
+              条件:
+            </span>
             <SegmentedControlGroup
               value={tagMatchMode}
               options={TAG_MATCH_MODE_OPTIONS}
@@ -158,9 +172,11 @@ export const TagFilterPanel = ({
             />
           </div>
 
-          <div className="ds-filter-section space-y-2 bg-transparent px-3 py-2">
+          <div className="ds-filter-section ds-floating-panel__section ds-floating-panel__section--dense space-y-2 bg-transparent">
             <div className="flex items-center justify-between gap-2 text-[11px]">
-              <span className="ds-filter-section__label">表示:</span>
+              <span className="ds-filter-section__label ds-floating-panel__label">
+                表示:
+              </span>
 
               <div className="ds-filter-toggle-group">
                 {CONTENT_TYPE_OPTIONS.map((item) => {
@@ -185,7 +201,9 @@ export const TagFilterPanel = ({
                 key={item.label}
                 className="flex items-center justify-between gap-2 text-[11px]"
               >
-                <span className="ds-filter-section__label">{item.label}:</span>
+                <span className="ds-filter-section__label ds-floating-panel__label">
+                  {item.label}:
+                </span>
 
                 <SegmentedControlGroup
                   value={item.value}
@@ -211,10 +229,15 @@ export const TagFilterPanel = ({
             return (
               <div
                 key={tag}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isSelected}
                 onClick={() => toggleTag(tag)}
+                onKeyDown={(event) => handleTagRowKeyDown(event, tag)}
                 className={cn(
-                  "ds-filter-row group flex w-full items-center px-2 py-1 text-left text-xs",
-                  isSelected && "ds-filter-row--active",
+                  "ds-floating-panel__row ds-filter-row group flex w-full items-center px-2 py-1 text-left text-xs outline-none",
+                  isSelected &&
+                    "ds-floating-panel__row--active ds-filter-row--active",
                 )}
               >
                 <Switch

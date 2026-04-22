@@ -33,9 +33,9 @@ export const FilterPanelShell = ({
 
   return (
     <div className={cn("ds-filter-panel flex h-full min-h-0 flex-col", className)}>
-      <div className="ds-filter-section bg-transparent p-3">
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <span className="ds-filter-section__title text-xs font-semibold">
+      <div className="ds-filter-section ds-floating-panel__section ds-floating-panel__section--spacious">
+        <div className="ds-floating-panel__header mb-2">
+          <span className="ds-filter-section__title ds-floating-panel__title text-xs font-semibold">
             {title}
           </span>
           {headerAction}
@@ -56,7 +56,7 @@ export const FilterPanelShell = ({
       <div
         ref={bodyRef}
         className={cn(
-          "min-h-0 flex-1 overflow-y-auto overscroll-contain bg-transparent p-1",
+          "ds-floating-panel__body min-h-0 flex-1 overflow-y-auto bg-transparent",
           bodyClassName,
         )}
       >
