@@ -178,3 +178,90 @@ export const MetaPanelSwitchRow = ({
     </MetaPanelActionRow>
   );
 };
+
+type MetaPanelSectionTitleProps = {
+  children: React.ReactNode;
+  className?: string;
+};
+
+export const MetaPanelSectionTitle = ({
+  children,
+  className,
+}: MetaPanelSectionTitleProps) => {
+  return <h3 className={cn("ds-editor-pane__section-title", className)}>{children}</h3>;
+};
+
+type MetaPanelMutedSurfaceProps = {
+  children: React.ReactNode;
+  className?: string;
+};
+
+export const MetaPanelMutedSurface = ({
+  children,
+  className,
+}: MetaPanelMutedSurfaceProps) => {
+  return (
+    <div
+      className={cn(
+        "ds-editor-pane__surface ds-editor-pane__surface--muted px-2 py-1",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+};
+
+type MetaPanelSwitchProps = {
+  checked: boolean;
+  label: React.ReactNode;
+  onCheckedChange?: (checked: boolean) => void;
+  disabled?: boolean;
+  className?: string;
+  labelClassName?: string;
+  switchAriaLabel?: string;
+};
+
+export const MetaPanelSwitch = ({
+  checked,
+  label,
+  onCheckedChange,
+  disabled = false,
+  className,
+  labelClassName,
+  switchAriaLabel,
+}: MetaPanelSwitchProps) => {
+  const accessibleLabel = typeof label === "string" ? label : switchAriaLabel;
+
+  return (
+    <MetaPanelActionRow className={cn("justify-start gap-2", className)}>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={accessibleLabel}
+        disabled={disabled}
+        onClick={() => {
+          onCheckedChange?.(!checked);
+        }}
+        className={cn(
+          "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-[background-color,border-color,opacity] duration-150",
+          checked
+            ? "border-transparent bg-[var(--meta-panel-accent)]"
+            : "border-[color:var(--meta-panel-border)] bg-[color:var(--meta-panel-surface-elevated)] shadow-[var(--meta-panel-shadow-soft)]",
+          disabled && "opacity-60",
+        )}
+      >
+        <span
+          className={cn(
+            "pointer-events-none inline-block h-4 w-4 translate-x-0.5 rounded-full bg-white shadow-sm transition-transform duration-150",
+            checked && "translate-x-4",
+          )}
+        />
+      </button>
+      <span className={cn("ds-editor-pane__inline-label", labelClassName)}>
+        {label}
+      </span>
+    </MetaPanelActionRow>
+  );
+};
