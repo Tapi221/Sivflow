@@ -1,4 +1,3 @@
-
 import type { BlobUrl } from "@/types/core/branded";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -18,6 +17,7 @@ import { usePdfContainerWidth } from "./hooks/usePdfContainerWidth";
 import { usePdfSourceResolver } from "./hooks/usePdfSourceResolver";
 import { defaultPdfViewerOptions } from "./defaultPdfViewerOptions";
 import { usePdfViewerPersistence } from "./hooks/usePdfViewerPersistence";
+import { usePdfOcr } from "./hooks/usePdfOcr";
 import {
   FIT_MAX_SCALE,
   FIT_MIN_SCALE,
@@ -359,6 +359,20 @@ export const PdfPane = ({
   const bookmarkedPageNumberSet = useMemo(() => {
     return new Set(bookmarkPages);
   }, [bookmarkPages]);
+
+  const {
+    ocrState,
+    runCurrentPageOcr,
+    runAllPagesOcr,
+    cancelOcr,
+    hasOcrForCurrentPage,
+  } = usePdfOcr({
+    docId: doc.id,
+    documentKey: documentController.documentKey,
+    currentPage: alignedCurrentPage,
+    numPages,
+    documentController,
+  });
 
   const handleThumbnailPanelOpenChange = useCallback(
     (nextOpen: boolean) => {
@@ -744,6 +758,20 @@ export const PdfPane = ({
         onOpenNewTab={() => {
           void handleOpenNewTab();
         }}
+        ocrStatus={ocrState.status}
+        ocrProgress={ocrState.progress}
+        ocrProcessedPages={ocrState.processedPages}
+        ocrTotalPages={ocrState.totalPages}
+        ocrCurrentProcessingPage={ocrState.currentProcessingPage}
+        ocrError={ocrState.error}
+        hasOcrForCurrentPage={hasOcrForCurrentPage}
+        onRunCurrentPageOcr={() => {
+          void runCurrentPageOcr();
+        }}
+        onRunAllPagesOcr={() => {
+          void runAllPagesOcr();
+        }}
+        onCancelOcr={cancelOcr}
       />
 
       <div className="relative flex-1 min-h-0 min-w-0 w-full overflow-hidden bg-transparent">
