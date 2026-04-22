@@ -325,22 +325,13 @@ export const Sidebar = () => {
           to="/folders"
           className="sidebar__workspace-link"
           aria-label="ホームに移動"
-        >
-          <span className="sidebar__workspace-icon" aria-hidden="true">
-            <FolderIcon />
-          </span>
-          <span className="sidebar__workspace-copy">
-            <span className="sidebar__workspace-name">FlashCard Master</span>
-            <span className="sidebar__workspace-meta">メインメニュー</span>
-          </span>
-        </NavLink>
+        />
       </div>
 
       <nav className="sidebar__nav" aria-label="メインナビゲーション">
         {NAV_SECTIONS.map(({ title, items }) => {
           return (
             <div key={title} className="sidebar__section">
-              <div className="sidebar__section-label">{title}</div>
               <div className="sidebar__section-items">
                 {items.map(renderNavLink)}
               </div>
