@@ -12,6 +12,9 @@
 		A000000000000000000003 /* StudyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000103 /* StudyStore.swift */; };
 		A000000000000000000004 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000104 /* ContentView.swift */; };
 		A000000000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A000000000000000000105 /* Assets.xcassets */; };
+		A000000000000000000006 /* FirebaseSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000106 /* FirebaseSync.swift */; };
+		A000000000000000000007 /* XLSXImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000107 /* XLSXImport.swift */; };
+		A000000000000000000008 /* PDFSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000000000000000108 /* PDFSupport.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +23,9 @@
 		A000000000000000000103 /* StudyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyStore.swift; sourceTree = "<group>"; };
 		A000000000000000000104 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A000000000000000000105 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A000000000000000000106 /* FirebaseSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseSync.swift; sourceTree = "<group>"; };
+		A000000000000000000107 /* XLSXImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XLSXImport.swift; sourceTree = "<group>"; };
+		A000000000000000000108 /* PDFSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFSupport.swift; sourceTree = "<group>"; };
 		A000000000000000000201 /* FlashCardMasterNative.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = FlashCardMasterNative.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -51,6 +57,9 @@
 				A000000000000000000102 /* StudyModels.swift */,
 				A000000000000000000103 /* StudyStore.swift */,
 				A000000000000000000104 /* ContentView.swift */,
+				A000000000000000000106 /* FirebaseSync.swift */,
+				A000000000000000000107 /* XLSXImport.swift */,
+				A000000000000000000108 /* PDFSupport.swift */,
 				A000000000000000000105 /* Assets.xcassets */,
 			);
 		};
@@ -135,6 +144,9 @@
 				A000000000000000000002 /* StudyModels.swift in Sources */,
 				A000000000000000000003 /* StudyStore.swift in Sources */,
 				A000000000000000000004 /* ContentView.swift in Sources */,
+				A000000000000000000006 /* FirebaseSync.swift in Sources */,
+				A000000000000000000007 /* XLSXImport.swift in Sources */,
+				A000000000000000000008 /* PDFSupport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

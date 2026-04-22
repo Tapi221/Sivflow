@@ -26,10 +26,14 @@ Included capabilities:
 - Gallery cards via image URLs
 - Review calendar
 
+Included cloud and file features:
+- Firebase email/password auth
+- Firestore whole-snapshot push/pull sync
+- XLSX import for the workbook format used by the Electron/React importer
+- PDF preview from remote URLs or imported local files
+
 Still intentionally not included:
-- Firebase auth / cloud sync
-- XLSX import parity
-- PDF tooling parity
-- Rich text / code / math editors matching BlockNote exactly
+- Google popup Sign-In parity
+- BlockNote-compatible rich text / code / math editing surface
 
 The point is to give you a real app you can overwrite with now, not another polite pile of placeholder docs.

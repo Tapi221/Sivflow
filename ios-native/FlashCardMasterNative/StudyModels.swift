@@ -137,6 +137,7 @@ struct StudyCard: Identifiable, Codable, Hashable {
     var noteText: String
     var imageURL: String?
     var sourceURL: String?
+    var pdfURL: String?
     var tagIDs: [UUID]
     var flags: Set<CardFlag>
     var createdAt: Date
@@ -155,6 +156,7 @@ struct StudyCard: Identifiable, Codable, Hashable {
         noteText: String = "",
         imageURL: String? = nil,
         sourceURL: String? = nil,
+        pdfURL: String? = nil,
         tagIDs: [UUID] = [],
         flags: Set<CardFlag> = [],
         createdAt: Date = .now,
@@ -172,6 +174,7 @@ struct StudyCard: Identifiable, Codable, Hashable {
         self.noteText = noteText
         self.imageURL = imageURL
         self.sourceURL = sourceURL
+        self.pdfURL = pdfURL
         self.tagIDs = tagIDs
         self.flags = flags
         self.createdAt = createdAt
@@ -191,6 +194,7 @@ struct StudyCard: Identifiable, Codable, Hashable {
         case noteText
         case imageURL
         case sourceURL
+        case pdfURL
         case tagIDs
         case flags
         case createdAt
@@ -211,6 +215,7 @@ struct StudyCard: Identifiable, Codable, Hashable {
         noteText = try container.decodeIfPresent(String.self, forKey: .noteText) ?? ""
         imageURL = try container.decodeIfPresent(String.self, forKey: .imageURL)
         sourceURL = try container.decodeIfPresent(String.self, forKey: .sourceURL)
+        pdfURL = try container.decodeIfPresent(String.self, forKey: .pdfURL)
         tagIDs = try container.decodeIfPresent([UUID].self, forKey: .tagIDs) ?? []
         flags = try container.decodeIfPresent(Set<CardFlag>.self, forKey: .flags) ?? []
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? .now
@@ -224,7 +229,7 @@ struct StudyCard: Identifiable, Codable, Hashable {
     var isDeleted: Bool { deletedAt != nil }
 
     var searchText: String {
-        [title, frontText, backText, noteText, sourceURL ?? ""].joined(separator: "\n").lowercased()
+        [title, frontText, backText, noteText, sourceURL ?? "", pdfURL ?? ""].joined(separator: "\n").lowercased()
     }
 }
 
@@ -236,7 +241,7 @@ struct StudySnapshot: Codable {
     var cards: [StudyCard]
     var tags: [StudyTag]
 
-    static let currentVersion = 2
+    static let currentVersion = 3
 }
 
 extension StudySnapshot {
@@ -264,6 +269,7 @@ extension StudySnapshot {
                 backText: "Structs are value types copied on assignment. Classes are reference types shared across references. Prefer structs until identity or shared mutable state becomes necessary.",
                 noteText: "Maps to interview fundamentals and dictionary terms.",
                 sourceURL: "https://developer.apple.com/documentation/swift",
+                pdfURL: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
                 tagIDs: [basicsTag.id, swiftTag.id],
                 flags: [.complete],
                 nextReviewAt: Calendar.current.date(byAdding: .day, value: 2, to: .now),
