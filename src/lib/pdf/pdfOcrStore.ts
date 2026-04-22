@@ -131,6 +131,23 @@ export const putPdfOcrPageRecord = async ({
   return record;
 };
 
+export const deletePdfOcrPageRecord = async ({
+  docId,
+  documentKey,
+  pageNumber,
+}: {
+  docId: string;
+  documentKey: string;
+  pageNumber: number;
+}) => {
+  const id = buildPdfOcrRecordId({ docId, documentKey, pageNumber });
+
+  await runOcrTransaction<undefined>({
+    mode: "readwrite",
+    action: (store) => store.delete(id),
+  });
+};
+
 export const listPdfOcrPageRecords = async ({
   docId,
   documentKey,
@@ -169,6 +186,26 @@ export const listPdfOcrPageRecords = async ({
       db.close();
     };
   });
+};
+
+export const clearPdfOcrRecords = async ({
+  docId,
+  documentKey,
+}: {
+  docId: string;
+  documentKey: string;
+}) => {
+  const records = await listPdfOcrPageRecords({ docId, documentKey });
+
+  await Promise.all(
+    records.map((record) =>
+      deletePdfOcrPageRecord({
+        docId,
+        documentKey,
+        pageNumber: record.pageNumber,
+      }),
+    ),
+  );
 };
 
 export const deleteStalePdfOcrRecords = async ({

@@ -41,6 +41,7 @@ interface PdfThumbnailItemProps {
   baseSize?: PageSize;
   isActive: boolean;
   isBookmarked: boolean;
+  hasOcrText?: boolean;
   onSelect: (pageNumber: number) => void;
   onToggleBookmark: (pageNumber: number) => void;
   rootElement: HTMLElement | null;
@@ -117,6 +118,7 @@ const PdfThumbnailItemComponent = ({
   baseSize,
   isActive,
   isBookmarked,
+  hasOcrText = false,
   onSelect,
   onToggleBookmark,
   rootElement,
@@ -453,6 +455,18 @@ const PdfThumbnailItemComponent = ({
         {pageNumber}
       </div>
 
+      {hasOcrText ? (
+        <div className="pointer-events-none absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]"
+          style={{
+            color: PDF_THUMBNAIL_PANEL_COLORS.accent,
+            borderColor: "rgba(216,175,181,0.32)",
+            background: "rgba(248,247,245,0.95)",
+          }}
+        >
+          OCR
+        </div>
+      ) : null}
+
       <button
         type="button"
         aria-label={
@@ -498,6 +512,7 @@ const arePdfThumbnailItemPropsEqual = (
     arePageSizesEqual(left.baseSize, right.baseSize) &&
     left.isActive === right.isActive &&
     left.isBookmarked === right.isBookmarked &&
+    left.hasOcrText === right.hasOcrText &&
     left.onSelect === right.onSelect &&
     left.onToggleBookmark === right.onToggleBookmark &&
     left.rootElement === right.rootElement &&

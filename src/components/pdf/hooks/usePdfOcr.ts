@@ -2,10 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createWorker, type Worker as TesseractWorker } from "tesseract.js";
 import type { PdfDocumentController } from "./usePdfDocument";
 import {
+  clearPdfOcrRecords,
   deleteStalePdfOcrRecords,
   getPdfOcrPageRecord,
   listPdfOcrPageRecords,
   putPdfOcrPageRecord,
+  type PdfOcrPageRecord,
 } from "@/lib/pdf/pdfOcrStore";
 import { renderPdfPageForOcr } from "@/lib/pdf/renderPdfPageForOcr";
 
@@ -69,6 +71,7 @@ export const usePdfOcr = ({
     cachedPageNumbers: [],
   });
   const [ocrTextByPage, setOcrTextByPage] = useState<Record<number, string>>({});
+  const [ocrRecords, setOcrRecords] = useState<PdfOcrPageRecord[]>([]);
 
   const mountedRef = useRef(true);
   const workerPromiseRef = useRef<Promise<TesseractWorker> | null>(null);
@@ -82,6 +85,7 @@ export const usePdfOcr = ({
       return;
     }
 
+    setOcrRecords(records);
     setOcrTextByPage(
       records.reduce<Record<number, string>>((accumulator, record) => {
         accumulator[record.pageNumber] = record.text;
@@ -167,7 +171,9 @@ export const usePdfOcr = ({
         new Set(
           pageNumbers
             .filter((pageNumber) => Number.isFinite(pageNumber))
-            .map((pageNumber) => Math.max(1, Math.min(numPages, Math.trunc(pageNumber)))),
+            .map((pageNumber) =>
+              Math.max(1, Math.min(numPages, Math.trunc(pageNumber))),
+            ),
         ),
       );
 
@@ -213,7 +219,8 @@ export const usePdfOcr = ({
             setOcrState((previousState) => ({
               ...previousState,
               processedPages: processedPagesRef.current,
-              progress: processedPagesRef.current / Math.max(totalPagesRef.current, 1),
+              progress:
+                processedPagesRef.current / Math.max(totalPagesRef.current, 1),
             }));
             continue;
           }
@@ -228,7 +235,8 @@ export const usePdfOcr = ({
             setOcrState((previousState) => ({
               ...previousState,
               processedPages: processedPagesRef.current,
-              progress: processedPagesRef.current / Math.max(totalPagesRef.current, 1),
+              progress:
+                processedPagesRef.current / Math.max(totalPagesRef.current, 1),
             }));
             continue;
           }
@@ -253,7 +261,8 @@ export const usePdfOcr = ({
           setOcrState((previousState) => ({
             ...previousState,
             processedPages: processedPagesRef.current,
-            progress: processedPagesRef.current / Math.max(totalPagesRef.current, 1),
+            progress:
+              processedPagesRef.current / Math.max(totalPagesRef.current, 1),
           }));
         }
 
@@ -304,6 +313,24 @@ export const usePdfOcr = ({
     await runOcr(Array.from({ length: numPages }, (_, index) => index + 1));
   }, [numPages, runOcr]);
 
+  const clearOcr = useCallback(async () => {
+    cancelRequestedRef.current = true;
+    await clearPdfOcrRecords({ docId, documentKey });
+    await syncCachedRecords();
+    if (!mountedRef.current) {
+      return;
+    }
+    setOcrState({
+      status: "idle",
+      progress: 0,
+      processedPages: 0,
+      totalPages: 0,
+      currentProcessingPage: null,
+      error: null,
+      cachedPageNumbers: [],
+    });
+  }, [docId, documentKey, syncCachedRecords]);
+
   const cancelOcr = useCallback(() => {
     cancelRequestedRef.current = true;
     setOcrState((previousState) => ({
@@ -314,15 +341,30 @@ export const usePdfOcr = ({
   }, []);
 
   const hasOcrForCurrentPage = useMemo(() => {
-    return typeof ocrTextByPage[currentPage] === "string" && ocrTextByPage[currentPage].length > 0;
+    return (
+      typeof ocrTextByPage[currentPage] === "string" &&
+      ocrTextByPage[currentPage].length > 0
+    );
   }, [currentPage, ocrTextByPage]);
+
+  const hasAnyOcr = useMemo(() => {
+    return ocrRecords.length > 0;
+  }, [ocrRecords.length]);
+
+  const ocrPageNumbers = useMemo(() => {
+    return ocrRecords.map((record) => record.pageNumber);
+  }, [ocrRecords]);
 
   return {
     ocrState,
     ocrTextByPage,
+    ocrRecords,
+    ocrPageNumbers,
+    hasAnyOcr,
     runCurrentPageOcr,
     runAllPagesOcr,
     cancelOcr,
+    clearOcr,
     hasOcrForCurrentPage,
   };
 };

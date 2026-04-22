@@ -1,8 +1,3 @@
-/**
- * PDF ビューアの補助ツールバー。
- * 検索・外部オープンと状態表示を担い、
- * ページ移動・ズーム・幅フィットは下部オーバーレイ側に集約する。
- */
 import { useId } from "react";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "@/ui/icons";
@@ -25,10 +20,14 @@ interface PdfPaneToolbarProps {
   ocrTotalPages: number;
   ocrCurrentProcessingPage: number | null;
   ocrError: string | null;
+  ocrCachedPageCount: number;
   hasOcrForCurrentPage: boolean;
+  hasAnyOcr: boolean;
   onRunCurrentPageOcr: () => void;
   onRunAllPagesOcr: () => void;
   onCancelOcr: () => void;
+  onClearOcr: () => void;
+  onOpenOcrTab: () => void;
 }
 
 export const PdfPaneToolbar = ({
@@ -49,10 +48,14 @@ export const PdfPaneToolbar = ({
   ocrTotalPages,
   ocrCurrentProcessingPage,
   ocrError,
+  ocrCachedPageCount,
   hasOcrForCurrentPage,
+  hasAnyOcr,
   onRunCurrentPageOcr,
   onRunAllPagesOcr,
   onCancelOcr,
+  onClearOcr,
+  onOpenOcrTab,
 }: PdfPaneToolbarProps) => {
   const searchInputId = useId();
   const isOcrRunning = ocrStatus === "running";
@@ -82,7 +85,7 @@ export const PdfPaneToolbar = ({
     ocrStatus === "success"
       ? {
           key: "ocr-success",
-          text: "OCR完了。OCR結果を保存しました。",
+          text: `OCR完了。OCRキャッシュ ${ocrCachedPageCount} ページ。`,
           className: "text-emerald-600",
         }
       : null,
@@ -161,9 +164,7 @@ export const PdfPaneToolbar = ({
           次
         </Button>
         <div className="min-w-[72px] text-center text-xs text-slate-600">
-          {totalMatches > 0
-            ? `${activeMatchIndex + 1} / ${totalMatches}`
-            : "0 / 0"}
+          {totalMatches > 0 ? `${activeMatchIndex + 1} / ${totalMatches}` : "0 / 0"}
         </div>
       </div>
 
@@ -173,7 +174,11 @@ export const PdfPaneToolbar = ({
           size="sm"
           onClick={onRunCurrentPageOcr}
           disabled={sourceUnavailable || isOcrRunning}
-          title={hasOcrForCurrentPage ? "現在ページはOCR済みです。再実行できます。" : "現在ページをOCR"}
+          title={
+            hasOcrForCurrentPage
+              ? "現在ページはOCR済みです。再実行できます。"
+              : "現在ページをOCR"
+          }
         >
           現在OCR
         </Button>
@@ -193,8 +198,24 @@ export const PdfPaneToolbar = ({
         >
           中断
         </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onOpenOcrTab}
+          disabled={!hasAnyOcr}
+        >
+          OCR一覧
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onClearOcr}
+          disabled={isOcrRunning || !hasAnyOcr}
+        >
+          OCR削除
+        </Button>
         <div className="min-w-[56px] text-right text-[11px] text-slate-500">
-          {ocrTotalPages > 0 ? `${Math.round(ocrProgress * 100)}%` : "OCR"}
+          {ocrTotalPages > 0 ? `${Math.round(ocrProgress * 100)}%` : `${ocrCachedPageCount}p`}
         </div>
         <Button
           variant="ghost"

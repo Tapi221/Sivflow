@@ -1,7 +1,3 @@
-
-/**
- * PDF ビューアの表示状態（currentPage / scale / fitMode / pageLayoutMode）を管理するフック。
- */
 import {
   clampScale,
   EPSILON,
@@ -21,7 +17,7 @@ interface UsePdfViewerPersistenceOptions {
   docId: string;
   viewerState?: PdfViewerState | null;
   bookmarkPages?: number[];
-  sidePanelTab?: PdfSidePanelTab;
+  sidePanelTab?: PdfSidePanelTab | "markdown";
   thumbnailOrder?: number[];
   getFitScale: (pageLayoutMode: PdfPageLayoutMode) => number;
   onDocumentUpdate?: (updates: {
@@ -69,8 +65,17 @@ const sanitizeBookmarkPages = (value: unknown): number[] => {
   ).sort((left, right) => left - right);
 };
 
-const sanitizeSidePanelTab = (value: unknown): PdfSidePanelTab => {
-  return value === "markdown" || value === "outline" || value === "thumbnails"
+const sanitizeSidePanelTab = (
+  value: unknown,
+): PdfSidePanelTab => {
+  if (value === "markdown") {
+    return "bookmarks";
+  }
+
+  return value === "bookmarks" ||
+    value === "outline" ||
+    value === "ocr" ||
+    value === "thumbnails"
     ? value
     : "thumbnails";
 };
@@ -206,9 +211,7 @@ export const usePdfViewerPersistence = ({
           console.warn(
             "[usePdfViewerPersistence] Failed to save viewer state",
             errorValue,
-            {
-              docId,
-            },
+            { docId },
           );
         });
       }
