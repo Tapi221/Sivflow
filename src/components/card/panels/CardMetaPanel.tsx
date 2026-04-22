@@ -30,7 +30,7 @@ import {
   MetaPanelSectionActionButton,
   MetaPanelSectionHeader,
   MetaPanelSurfaceField,
-  MetaPanelSwitchRow,
+  MetaPanelSwitch,
 } from "@/components/card/panels/MetaPanelPrimitives";
 import { MetaPanelLeadSection } from "@/components/card/panels/MetaPanelShell";
 import { formatLastSyncedAt } from "@/components/card/shell/formatLastSyncedAt";
@@ -1330,9 +1330,9 @@ const CardMetaPanelContent = ({
                 placeholder="タイトル"
               />
             </MetaPanelActionRow>
-            <MetaPanelSwitchRow
-              label="下書き"
+            <MetaPanelSwitch
               checked={draftFlag}
+              label="下書き"
               onCheckedChange={() => {
                 handleToggleDraft();
               }}
