@@ -356,7 +356,12 @@ export const usePdfCurrentPage = ({
         estimateCurrentPageFromScroll();
       }, PROGRAMMATIC_NAVIGATION_LOCK_MS);
     },
-    [commitCurrentPage, estimateCurrentPageFromScroll, numPages, syncScrollViewportState],
+    [
+      commitCurrentPage,
+      estimateCurrentPageFromScroll,
+      numPages,
+      syncScrollViewportState,
+    ],
   );
 
   const getScrollDiagnostics = useCallback((): PdfScrollDiagnostics | null => {

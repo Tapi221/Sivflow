@@ -1,5 +1,11 @@
 import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import {
+  ExplorerDictionaryNavIcon,
+  ExplorerFolderNavIcon,
+  ExplorerQuestionNavIcon,
+  ExplorerTagMapNavIcon,
+} from "@/components/explorer/ExplorerNavIcons";
 import "./Sidebar.css";
 import { SidebarNavIcon } from "./sidebarNavItem";
 import { getSidebarNavItemClassName } from "./sidebarNavItem.utils";
@@ -15,122 +21,6 @@ type NavSection = {
   title: string;
   items: NavItem[];
 };
-
-const FolderIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path
-      d="M1.5 3.5A1 1 0 0 1 2.5 2.5H6l1.5 1.5H13.5A1 1 0 0 1 14.5 5V12.5A1 1 0 0 1 13.5 13.5H2.5A1 1 0 0 1 1.5 12.5V3.5Z"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const TagMapIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path
-      d="M4.25 4.25H8M8 4.25L11.75 2.75M8 4.25L11.75 7.25M4.25 4.25V11.75"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <circle
-      cx="4.25"
-      cy="4.25"
-      r="1.75"
-      stroke="currentColor"
-      strokeWidth="1.2"
-    />
-    <circle
-      cx="11.75"
-      cy="2.75"
-      r="1.75"
-      stroke="currentColor"
-      strokeWidth="1.2"
-    />
-    <circle
-      cx="11.75"
-      cy="7.25"
-      r="1.75"
-      stroke="currentColor"
-      strokeWidth="1.2"
-    />
-    <circle
-      cx="4.25"
-      cy="11.75"
-      r="1.75"
-      stroke="currentColor"
-      strokeWidth="1.2"
-    />
-  </svg>
-);
-
-const DictionaryIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path
-      d="M3 2.5H11.5A1.5 1.5 0 0 1 13 4V13.5H4.5A1.5 1.5 0 0 0 3 15V2.5Z"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M4.5 15V4A1.5 1.5 0 0 1 6 2.5"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M6.5 5.5H10.5M6.5 8H10.5"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
-const QuestionIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path
-      d="M8 11.5V10.8C8 9.9 8.45 9.45 9.05 9.05C9.7 8.62 10.5 8.05 10.5 6.95C10.5 5.43 9.28 4.25 7.75 4.25C6.38 4.25 5.25 5.18 5.02 6.45"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <circle cx="8" cy="13" r="0.7" fill="currentColor" />
-    <path
-      d="M8 1.5C4.41 1.5 1.5 4.41 1.5 8C1.5 11.59 4.41 14.5 8 14.5C11.59 14.5 14.5 11.59 14.5 8C14.5 4.41 11.59 1.5 8 1.5Z"
-      stroke="currentColor"
-      strokeWidth="1.2"
-    />
-  </svg>
-);
 
 const CalendarIcon = () => (
   <svg
@@ -268,14 +158,30 @@ const SettingsIcon = () => (
 );
 
 const PRIMARY_NAV_ITEMS: NavItem[] = [
-  { to: "/folders", label: "フォルダ", icon: <FolderIcon /> },
-  { to: "/dictionary", label: "辞書", icon: <DictionaryIcon /> },
-  { to: "/questions", label: "疑問集", icon: <QuestionIcon /> },
+  {
+    to: "/folders",
+    label: "フォルダ",
+    icon: <ExplorerFolderNavIcon className="h-4 w-4" />,
+  },
+  {
+    to: "/dictionary",
+    label: "辞書",
+    icon: <ExplorerDictionaryNavIcon className="h-4 w-4" />,
+  },
+  {
+    to: "/questions",
+    label: "疑問集",
+    icon: <ExplorerQuestionNavIcon className="h-4 w-4" />,
+  },
   { to: "/calendar", label: "カレンダー", icon: <CalendarIcon /> },
 ];
 
 const SECONDARY_NAV_ITEMS: NavItem[] = [
-  { to: "/tag-map", label: "タグマップ", icon: <TagMapIcon /> },
+  {
+    to: "/tag-map",
+    label: "タグマップ",
+    icon: <ExplorerTagMapNavIcon className="h-4 w-4" />,
+  },
   { to: "/gallery", label: "ギャラリー", icon: <GalleryIcon /> },
   { to: "/directory", label: "ディレクトリ", icon: <DirectoryIcon /> },
   { to: "/trash", label: "ゴミ箱", icon: <TrashIcon /> },

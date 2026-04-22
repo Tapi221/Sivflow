@@ -47,7 +47,9 @@ interface PdfDocumentSessionEntry {
 
 const pdfDocumentSessionRegistry = new Map<string, PdfDocumentSessionEntry>();
 
-const normalizeSourceToken = (value: string | null | undefined): string | null => {
+const normalizeSourceToken = (
+  value: string | null | undefined,
+): string | null => {
   if (typeof value !== "string") {
     return null;
   }
@@ -153,7 +155,9 @@ const createSessionDisposedAbortError = (): Error => {
     );
   }
 
-  const error = new Error("PDF document session was disposed before resolution");
+  const error = new Error(
+    "PDF document session was disposed before resolution",
+  );
   error.name = "AbortError";
   return error;
 };

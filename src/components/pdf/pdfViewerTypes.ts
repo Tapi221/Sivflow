@@ -1,4 +1,3 @@
-
 import { pdfjsLib } from "@/lib/pdfjs";
 
 export type PdfScaleChangeSource = "wheel" | "gesture" | "reset";

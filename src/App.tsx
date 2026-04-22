@@ -1,4 +1,3 @@
-
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 import {
   AppBootLoadingFallback,
@@ -376,10 +375,7 @@ const AppContent = () => {
 
           <Route
             path="gallery"
-            element={withRouteFallback(
-              <Gallery />,
-              <GalleryScreenSkeleton />,
-            )}
+            element={withRouteFallback(<Gallery />, <GalleryScreenSkeleton />)}
           />
           <Route
             path="trash"

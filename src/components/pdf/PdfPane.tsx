@@ -117,11 +117,16 @@ const zoomUiPercentToScale = (value: number) => {
   const ratio =
     (clampedUiPercent - PDF_ZOOM_UI_MIN_PERCENT) / PDF_ZOOM_UI_RANGE_PERCENT;
 
-  return clampScale(Number((FIT_MIN_SCALE + ratio * PDF_SCALE_RANGE).toFixed(3)));
+  return clampScale(
+    Number((FIT_MIN_SCALE + ratio * PDF_SCALE_RANGE).toFixed(3)),
+  );
 };
 
 const readInitialMobileViewportState = () => {
-  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+  if (
+    typeof window === "undefined" ||
+    typeof window.matchMedia !== "function"
+  ) {
     return false;
   }
 
@@ -157,8 +162,14 @@ const sanitizeSidePanelTab = (value: unknown): PdfSidePanelTab => {
     : "thumbnails";
 };
 
-const normalizeThumbnailOrder = (value: unknown, numPages: number): number[] => {
-  const defaultOrder = Array.from({ length: numPages }, (_, index) => index + 1);
+const normalizeThumbnailOrder = (
+  value: unknown,
+  numPages: number,
+): number[] => {
+  const defaultOrder = Array.from(
+    { length: numPages },
+    (_, index) => index + 1,
+  );
 
   if (numPages <= 0) {
     return [];
@@ -206,7 +217,10 @@ const areNumberArraysEqual = (left: number[], right: number[]) => {
   return left.every((value, index) => value === right[index]);
 };
 
-const readInitialViewerState = (docId: string, viewerState?: PdfViewerState | null) => {
+const readInitialViewerState = (
+  docId: string,
+  viewerState?: PdfViewerState | null,
+) => {
   return getViewerStateFromSession(docId) ?? viewerState ?? null;
 };
 
@@ -241,9 +255,9 @@ export const PdfPane = ({
     useState(true);
   const [isMobileThumbnailPanelOpen, setIsMobileThumbnailPanelOpen] =
     useState(false);
-  const [pendingThumbnailPage, setPendingThumbnailPage] = useState<number | null>(
-    null,
-  );
+  const [pendingThumbnailPage, setPendingThumbnailPage] = useState<
+    number | null
+  >(null);
   const [bookmarkPages, setBookmarkPages] = useState<number[]>(() => {
     return sanitizeBookmarkPages(initialViewerState?.bookmarkPages);
   });
@@ -409,7 +423,10 @@ export const PdfPane = ({
   );
 
   useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    if (
+      typeof window === "undefined" ||
+      typeof window.matchMedia !== "function"
+    ) {
       return;
     }
 
@@ -442,14 +459,13 @@ export const PdfPane = ({
   useEffect(() => {
     const restoredViewerState = readInitialViewerState(doc.id, doc.viewerState);
 
-    setBookmarkPages(
-      sanitizeBookmarkPages(restoredViewerState?.bookmarkPages),
-    );
+    setBookmarkPages(sanitizeBookmarkPages(restoredViewerState?.bookmarkPages));
     setSidePanelTab(sanitizeSidePanelTab(restoredViewerState?.sidePanelTab));
     setThumbnailOrder(
       Array.isArray(restoredViewerState?.thumbnailOrder)
         ? restoredViewerState.thumbnailOrder.filter(
-            (pageNumber): pageNumber is number => typeof pageNumber === "number",
+            (pageNumber): pageNumber is number =>
+              typeof pageNumber === "number",
           )
         : [],
     );
@@ -476,7 +492,10 @@ export const PdfPane = ({
       return;
     }
 
-    const nextNormalizedOrder = normalizeThumbnailOrder(thumbnailOrder, numPages);
+    const nextNormalizedOrder = normalizeThumbnailOrder(
+      thumbnailOrder,
+      numPages,
+    );
 
     setThumbnailOrder((previousOrder) => {
       if (areNumberArraysEqual(previousOrder, nextNormalizedOrder)) {

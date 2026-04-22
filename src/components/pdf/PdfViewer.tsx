@@ -1,4 +1,3 @@
-
 import React, {
   useCallback,
   useEffect,
@@ -84,9 +83,7 @@ interface PdfViewerDocumentControllerProps extends PdfViewerCommonProps {
   viewerOptions?: never;
 }
 
-type PdfViewerProps =
-  | PdfViewerSourceProps
-  | PdfViewerDocumentControllerProps;
+type PdfViewerProps = PdfViewerSourceProps | PdfViewerDocumentControllerProps;
 
 type PageLayoutMetrics = {
   visualPageNumbers: number[];
@@ -104,8 +101,14 @@ interface PdfViewerInnerProps extends PdfViewerCommonProps {
   documentController: PdfDocumentController;
 }
 
-const normalizePageOrder = (pageOrder: number[] | undefined, numPages: number) => {
-  const defaultOrder = Array.from({ length: numPages }, (_, index) => index + 1);
+const normalizePageOrder = (
+  pageOrder: number[] | undefined,
+  numPages: number,
+) => {
+  const defaultOrder = Array.from(
+    { length: numPages },
+    (_, index) => index + 1,
+  );
   if (numPages <= 0) {
     return [];
   }
@@ -118,10 +121,7 @@ const normalizePageOrder = (pageOrder: number[] | undefined, numPages: number) =
   const orderedPages: number[] = [];
 
   pageOrder.forEach((pageNumber) => {
-    if (
-      typeof pageNumber !== "number" ||
-      !Number.isFinite(pageNumber)
-    ) {
+    if (typeof pageNumber !== "number" || !Number.isFinite(pageNumber)) {
       return;
     }
 
@@ -200,7 +200,8 @@ const buildPageLayoutMetrics = ({
 
   rowPageNumbers.forEach((currentRowPageNumbers, rowIndex) => {
     const measuredPageHeights = currentRowPageNumbers.map((pageNumber) => {
-      const baseSize = pageSizes[pageNumber] ?? pageSizes[orderedPageNumbers[0] ?? 1];
+      const baseSize =
+        pageSizes[pageNumber] ?? pageSizes[orderedPageNumbers[0] ?? 1];
       return baseSize && baseSize.height > 0
         ? Math.max(1, Math.floor(baseSize.height * scale))
         : PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT;
@@ -538,7 +539,8 @@ const buildPrefetchPageNumbers = ({
     windowPages.includes(pageNumber),
   );
   const firstPage = sortedWindowPages[0] ?? currentPage;
-  const lastPage = sortedWindowPages[sortedWindowPages.length - 1] ?? currentPage;
+  const lastPage =
+    sortedWindowPages[sortedWindowPages.length - 1] ?? currentPage;
   const firstVisualIndex = visualPageNumbers.indexOf(firstPage);
   const lastVisualIndex = visualPageNumbers.indexOf(lastPage);
 
@@ -1005,7 +1007,10 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
 
 PdfViewerInner.displayName = "PdfViewerInner";
 
-const PdfViewerWithSource = React.forwardRef<PdfViewerHandle, PdfViewerSourceProps>(
+const PdfViewerWithSource = React.forwardRef<
+  PdfViewerHandle,
+  PdfViewerSourceProps
+>(
   (
     {
       source,
@@ -1053,7 +1058,9 @@ const PdfViewerWithSource = React.forwardRef<PdfViewerHandle, PdfViewerSourcePro
         navigationIdentity={
           (viewerProps.navigationIdentity ?? navigationIdentity) || null
         }
-        opaqueCanvas={viewerProps.opaqueCanvas ?? viewerOptions?.opaqueCanvas ?? false}
+        opaqueCanvas={
+          viewerProps.opaqueCanvas ?? viewerOptions?.opaqueCanvas ?? false
+        }
       />
     );
   },

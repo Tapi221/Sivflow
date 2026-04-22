@@ -133,7 +133,9 @@ const normalizePdfLineText = (tokens: PdfTextToken[]) => {
   return joined;
 };
 
-const extractPdfTextTokens = (textContent: PdfJsTextContent): PdfTextToken[] => {
+const extractPdfTextTokens = (
+  textContent: PdfJsTextContent,
+): PdfTextToken[] => {
   return textContent.items
     .filter(isPdfTextItem)
     .map((item) => {
@@ -162,14 +164,21 @@ const buildPdfTextLines = (textContent: PdfJsTextContent): string[] => {
   tokens.forEach((token) => {
     const nextThreshold = Math.max(2.5, token.height * 0.45);
     const existingBucket = lineBuckets.find((lineBucket) => {
-      return Math.abs(lineBucket.y - token.y) <= Math.max(lineBucket.threshold, nextThreshold);
+      return (
+        Math.abs(lineBucket.y - token.y) <=
+        Math.max(lineBucket.threshold, nextThreshold)
+      );
     });
 
     if (existingBucket) {
       existingBucket.tokens.push(token);
-      existingBucket.y = (existingBucket.y * (existingBucket.tokens.length - 1) + token.y) /
+      existingBucket.y =
+        (existingBucket.y * (existingBucket.tokens.length - 1) + token.y) /
         existingBucket.tokens.length;
-      existingBucket.threshold = Math.max(existingBucket.threshold, nextThreshold);
+      existingBucket.threshold = Math.max(
+        existingBucket.threshold,
+        nextThreshold,
+      );
       return;
     }
 
@@ -183,7 +192,9 @@ const buildPdfTextLines = (textContent: PdfJsTextContent): string[] => {
   return lineBuckets
     .sort((left, right) => right.y - left.y)
     .map((lineBucket) => {
-      const sortedTokens = [...lineBucket.tokens].sort((left, right) => left.x - right.x);
+      const sortedTokens = [...lineBucket.tokens].sort(
+        (left, right) => left.x - right.x,
+      );
       return normalizePdfLineText(sortedTokens);
     })
     .filter((line) => line.length > 0);
@@ -197,11 +208,16 @@ const buildMarkdownSection = ({
   lines: string[];
 }): PdfDocumentMarkdownSection => {
   const fallbackTitle = `Page ${pageNumber}`;
-  const firstMeaningfulLine = lines.find((line) => line.length > 0) ?? fallbackTitle;
+  const firstMeaningfulLine =
+    lines.find((line) => line.length > 0) ?? fallbackTitle;
   const title = truncateText(firstMeaningfulLine, OUTLINE_TITLE_MAX_LENGTH);
-  const bodyLines = lines.length > 0 ? lines : ["(テキストを抽出できませんでした)"];
+  const bodyLines =
+    lines.length > 0 ? lines : ["(テキストを抽出できませんでした)"];
   const markdown = [`## ${fallbackTitle}`, "", ...bodyLines].join("\n");
-  const preview = truncateText(bodyLines.join(" "), MARKDOWN_PREVIEW_MAX_LENGTH);
+  const preview = truncateText(
+    bodyLines.join(" "),
+    MARKDOWN_PREVIEW_MAX_LENGTH,
+  );
 
   return {
     id: `pdf-markdown-page-${pageNumber}`,
@@ -265,7 +281,10 @@ const resolveOutlineDestinationPageNumber = async (
 
   const [firstDestinationToken] = destination as PdfJsExplicitDestination;
 
-  if (typeof firstDestinationToken === "number" && Number.isFinite(firstDestinationToken)) {
+  if (
+    typeof firstDestinationToken === "number" &&
+    Number.isFinite(firstDestinationToken)
+  ) {
     return clampPositiveInteger(firstDestinationToken + 1);
   }
 
@@ -284,7 +303,10 @@ const resolveOutlineDestinationPageNumber = async (
   return null;
 };
 
-const buildOutlineTitle = (title: string | null | undefined, pageNumber: number | null) => {
+const buildOutlineTitle = (
+  title: string | null | undefined,
+  pageNumber: number | null,
+) => {
   const normalizedTitle = normalizePdfText(title ?? "");
 
   if (normalizedTitle.length > 0) {
@@ -311,7 +333,10 @@ const mapPdfOutlineNodes = async ({
 }): Promise<PdfDocumentOutlineItem[]> => {
   const nextOutlineItems = await Promise.all(
     nodes.map(async (node, index) => {
-      const pageNumber = await resolveOutlineDestinationPageNumber(pdf, node.dest ?? null);
+      const pageNumber = await resolveOutlineDestinationPageNumber(
+        pdf,
+        node.dest ?? null,
+      );
       const children = await mapPdfOutlineNodes({
         pdf,
         nodes: Array.isArray(node.items) ? node.items : [],
@@ -348,15 +373,17 @@ export const usePdfDocument = ({
   const onSourceLoadErrorRef = useRef(onSourceLoadError);
   const sourceMetaRef = useRef(sourceMeta);
   const pageCacheRef = useRef<PdfPageCache | null>(null);
-  const textContentPromiseCacheRef = useRef<Map<number, Promise<PdfJsTextContent>>>(
-    new Map(),
-  );
+  const textContentPromiseCacheRef = useRef<
+    Map<number, Promise<PdfJsTextContent>>
+  >(new Map());
   const pendingPageSizesRef = useRef<Map<number, PageSize>>(new Map());
   const pageSizeFlushRafRef = useRef<number | null>(null);
-  const outlinePromiseCacheRef = useRef<Promise<PdfDocumentOutlineItem[]> | null>(
+  const outlinePromiseCacheRef = useRef<Promise<
+    PdfDocumentOutlineItem[]
+  > | null>(null);
+  const markdownPromiseCacheRef = useRef<Promise<PdfDocumentMarkdown> | null>(
     null,
   );
-  const markdownPromiseCacheRef = useRef<Promise<PdfDocumentMarkdown> | null>(null);
 
   const [doc, setDoc] = useState<PdfJsDocument | null>(null);
   const [documentKey, setDocumentKey] = useState("unloaded");
@@ -473,7 +500,8 @@ export const usePdfDocument = ({
   const getPageTextContent = useCallback(
     (pageNumber: number): Promise<PdfJsTextContent> => {
       const safePageNumber = clampPositiveInteger(pageNumber);
-      const cachedPromise = textContentPromiseCacheRef.current.get(safePageNumber);
+      const cachedPromise =
+        textContentPromiseCacheRef.current.get(safePageNumber);
 
       if (cachedPromise) {
         return cachedPromise;
@@ -498,45 +526,48 @@ export const usePdfDocument = ({
     [acquirePage],
   );
 
-  const getDocumentMarkdown = useCallback(async (): Promise<PdfDocumentMarkdown> => {
-    const cachedPromise = markdownPromiseCacheRef.current;
-    if (cachedPromise) {
-      return cachedPromise;
-    }
-
-    const nextPromise = (async () => {
-      const pdf = docRef.current;
-      if (!pdf) {
-        throw new Error("PDF document is not loaded");
+  const getDocumentMarkdown =
+    useCallback(async (): Promise<PdfDocumentMarkdown> => {
+      const cachedPromise = markdownPromiseCacheRef.current;
+      if (cachedPromise) {
+        return cachedPromise;
       }
 
-      const sections: PdfDocumentMarkdownSection[] = [];
+      const nextPromise = (async () => {
+        const pdf = docRef.current;
+        if (!pdf) {
+          throw new Error("PDF document is not loaded");
+        }
 
-      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-        const textContent = await getPageTextContent(pageNumber);
-        const textLines = buildPdfTextLines(textContent);
-        sections.push(
-          buildMarkdownSection({
-            pageNumber,
-            lines: textLines,
-          }),
-        );
-      }
+        const sections: PdfDocumentMarkdownSection[] = [];
 
-      return {
-        content: sections.map((section) => section.markdown).join("\n\n"),
-        sections,
-      } satisfies PdfDocumentMarkdown;
-    })().catch((errorValue) => {
-      markdownPromiseCacheRef.current = null;
-      throw errorValue;
-    });
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+          const textContent = await getPageTextContent(pageNumber);
+          const textLines = buildPdfTextLines(textContent);
+          sections.push(
+            buildMarkdownSection({
+              pageNumber,
+              lines: textLines,
+            }),
+          );
+        }
 
-    markdownPromiseCacheRef.current = nextPromise;
-    return nextPromise;
-  }, [getPageTextContent]);
+        return {
+          content: sections.map((section) => section.markdown).join("\n\n"),
+          sections,
+        } satisfies PdfDocumentMarkdown;
+      })().catch((errorValue) => {
+        markdownPromiseCacheRef.current = null;
+        throw errorValue;
+      });
 
-  const getDocumentOutline = useCallback(async (): Promise<PdfDocumentOutlineItem[]> => {
+      markdownPromiseCacheRef.current = nextPromise;
+      return nextPromise;
+    }, [getPageTextContent]);
+
+  const getDocumentOutline = useCallback(async (): Promise<
+    PdfDocumentOutlineItem[]
+  > => {
     const cachedPromise = outlinePromiseCacheRef.current;
     if (cachedPromise) {
       return cachedPromise;
@@ -682,40 +713,41 @@ export const usePdfDocument = ({
       }
     };
 
-    const buildGetDocumentParams = async (): Promise<PdfJsGetDocumentParams> => {
-      const params: PdfJsGetDocumentParams = {
-        enableXfa,
-        useSystemFonts,
-        cMapUrl,
-        cMapPacked,
-        standardFontDataUrl,
-        disableFontFace,
-        verbosity,
-      };
+    const buildGetDocumentParams =
+      async (): Promise<PdfJsGetDocumentParams> => {
+        const params: PdfJsGetDocumentParams = {
+          enableXfa,
+          useSystemFonts,
+          cMapUrl,
+          cMapPacked,
+          standardFontDataUrl,
+          disableFontFace,
+          verbosity,
+        };
 
-      if (hasData && sourceData) {
-        params.data = sourceData;
-        return params;
-      }
-
-      if (!hasUrl) {
-        throw new Error("missing pdf source");
-      }
-
-      if (sourceUrl.startsWith("blob:")) {
-        const response = await fetch(sourceUrl);
-        if (!response.ok) {
-          throw new Error(`blob fetch failed: ${response.status}`);
+        if (hasData && sourceData) {
+          params.data = sourceData;
+          return params;
         }
 
-        const buffer = await response.arrayBuffer();
-        params.data = new Uint8Array(buffer);
-        return params;
-      }
+        if (!hasUrl) {
+          throw new Error("missing pdf source");
+        }
 
-      params.url = sourceUrl;
-      return params;
-    };
+        if (sourceUrl.startsWith("blob:")) {
+          const response = await fetch(sourceUrl);
+          if (!response.ok) {
+            throw new Error(`blob fetch failed: ${response.status}`);
+          }
+
+          const buffer = await response.arrayBuffer();
+          params.data = new Uint8Array(buffer);
+          return params;
+        }
+
+        params.url = sourceUrl;
+        return params;
+      };
 
     const run = async () => {
       setLoading(true);

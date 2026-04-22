@@ -1,12 +1,18 @@
 import * as React from "react";
 import * as SwitchPrimitives from "@radix-ui/react-switch";
 
-import { SurfaceButton, type SurfaceButtonProps } from "@/components/ui/surface-button";
+import {
+  SurfaceButton,
+  type SurfaceButtonProps,
+} from "@/components/ui/surface-button";
 import { cn } from "@/lib/utils";
 
 type MetaPanelActionRowAlign = "start" | "between" | "end";
 
-const META_PANEL_ACTION_ROW_ALIGN_CLASS: Record<MetaPanelActionRowAlign, string> = {
+const META_PANEL_ACTION_ROW_ALIGN_CLASS: Record<
+  MetaPanelActionRowAlign,
+  string
+> = {
   start: "ds-editor-pane__action-row--start",
   between: "ds-editor-pane__action-row--between",
   end: "ds-editor-pane__action-row--end",
@@ -56,7 +62,9 @@ export const MetaPanelSectionHeader = ({
       <h3 className={cn("ds-editor-pane__section-title", titleClassName)}>
         {title}
       </h3>
-      {action ? <div className={cn("shrink-0", actionClassName)}>{action}</div> : null}
+      {action ? (
+        <div className={cn("shrink-0", actionClassName)}>{action}</div>
+      ) : null}
     </MetaPanelActionRow>
   );
 };
@@ -188,7 +196,11 @@ export const MetaPanelSectionTitle = ({
   children,
   className,
 }: MetaPanelSectionTitleProps) => {
-  return <h3 className={cn("ds-editor-pane__section-title", className)}>{children}</h3>;
+  return (
+    <h3 className={cn("ds-editor-pane__section-title", className)}>
+      {children}
+    </h3>
+  );
 };
 
 type MetaPanelMutedSurfaceProps = {

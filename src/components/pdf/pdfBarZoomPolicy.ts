@@ -33,7 +33,11 @@ export const clampPdfBarZoomPercent = (value: number) => {
     return PDF_BAR_MIN_PERCENT;
   }
 
-  return clampRange(Math.round(value), PDF_BAR_MIN_PERCENT, PDF_BAR_MAX_PERCENT);
+  return clampRange(
+    Math.round(value),
+    PDF_BAR_MIN_PERCENT,
+    PDF_BAR_MAX_PERCENT,
+  );
 };
 
 export const clampPdfGestureZoomScale = (value: number) => {

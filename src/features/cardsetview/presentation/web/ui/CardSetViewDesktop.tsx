@@ -1,4 +1,3 @@
-
 import { CardSetViewDesktopContentSkeleton } from "@/components/loading/ScreenSkeletons";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getCardText } from "@/domain/card/content";

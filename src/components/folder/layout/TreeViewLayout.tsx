@@ -304,7 +304,11 @@ const TreeViewLayout = ({
     }
 
     return null;
-  }, [currentSelectedContextFolderId, explorerHeaderFolderId, isSectionListMode]);
+  }, [
+    currentSelectedContextFolderId,
+    explorerHeaderFolderId,
+    isSectionListMode,
+  ]);
 
   useLayoutEffect(() => {
     onBreadcrumbContextChange?.({

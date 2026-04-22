@@ -426,7 +426,8 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
   );
 
   type RawSettings = { editorBlockSettings?: unknown[] };
-  const rawSettings = (settings as RawSettings | undefined)?.editorBlockSettings;
+  const rawSettings = (settings as RawSettings | undefined)
+    ?.editorBlockSettings;
 
   const blockSettings = useMemo<ToolbarBlockConfig[]>(() => {
     return parseEditorBlockSettings(rawSettings).map((config) => {

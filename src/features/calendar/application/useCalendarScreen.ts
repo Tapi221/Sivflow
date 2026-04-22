@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { addDays, addMonths, startOfMonth } from "date-fns";
 import { useLiveQuery } from "dexie-react-hooks";

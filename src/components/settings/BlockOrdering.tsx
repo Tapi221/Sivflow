@@ -117,7 +117,10 @@ export const BlockOrdering = () => {
     }
   };
 
-  const handleToggleVisibility = (blockId: EditorBlockType, checked: boolean) => {
+  const handleToggleVisibility = (
+    blockId: EditorBlockType,
+    checked: boolean,
+  ) => {
     const nextBlocks = blocks.map((block) =>
       block.id === blockId ? { ...block, isVisible: checked } : block,
     );

@@ -1366,11 +1366,15 @@ const CardMetaPanelContent = ({
           <div className="space-y-0">
             <MetaPanelInfoRow
               label="作成日:"
-              value={formatDateLabel(card?.createdAt ?? asRecord(card)?.created_at)}
+              value={formatDateLabel(
+                card?.createdAt ?? asRecord(card)?.created_at,
+              )}
             />
             <MetaPanelInfoRow
               label="更新日:"
-              value={formatDateLabel(card?.updatedAt ?? asRecord(card)?.updated_at)}
+              value={formatDateLabel(
+                card?.updatedAt ?? asRecord(card)?.updated_at,
+              )}
             />
             <MetaPanelInfoRow
               label="カード同期:"
@@ -1458,7 +1462,9 @@ const CardMetaPanelContent = ({
                   {(["7d", "30d", "all"] as const).map((nextPeriod) => (
                     <SurfaceButton
                       key={nextPeriod}
-                      surface={period === nextPeriod ? "convexActive" : "concave"}
+                      surface={
+                        period === nextPeriod ? "convexActive" : "concave"
+                      }
                       size="xs"
                       onClick={() => setPeriod(nextPeriod)}
                     >

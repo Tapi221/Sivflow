@@ -65,9 +65,7 @@ const sanitizeBookmarkPages = (value: unknown): number[] => {
   ).sort((left, right) => left - right);
 };
 
-const sanitizeSidePanelTab = (
-  value: unknown,
-): PdfSidePanelTab => {
+const sanitizeSidePanelTab = (value: unknown): PdfSidePanelTab => {
   if (value === "markdown") {
     return "bookmarks";
   }
@@ -207,13 +205,15 @@ export const usePdfViewerPersistence = ({
       saveViewerStateToSession(docId, newViewerState);
 
       if (onDocumentUpdate) {
-        onDocumentUpdate({ viewerState: newViewerState }).catch((errorValue) => {
-          console.warn(
-            "[usePdfViewerPersistence] Failed to save viewer state",
-            errorValue,
-            { docId },
-          );
-        });
+        onDocumentUpdate({ viewerState: newViewerState }).catch(
+          (errorValue) => {
+            console.warn(
+              "[usePdfViewerPersistence] Failed to save viewer state",
+              errorValue,
+              { docId },
+            );
+          },
+        );
       }
 
       debounceTimerRef.current = null;
