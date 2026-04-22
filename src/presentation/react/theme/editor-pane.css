@@ -81,10 +81,11 @@
 
   .ds-editor-pane__section-title {
     color: var(
-      --meta-panel-text-muted,
+      --meta-panel-accent,
       var(--ds-semantic-color-text-secondary)
     );
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
+    font-weight: 700;
   }
 
   .ds-editor-pane__surface {
