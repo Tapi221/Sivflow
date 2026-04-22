@@ -1,6 +1,8 @@
 .app-layout {
+  --app-shell-sidebar-width: 264px;
+
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-columns: var(--app-shell-sidebar-width) minmax(0, 1fr);
   grid-template-rows: 1fr;
   height: 100%;
   flex: 1;
