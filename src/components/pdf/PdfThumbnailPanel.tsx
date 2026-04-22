@@ -21,6 +21,7 @@ import {
   SortableContext,
   arrayMove,
   rectSortingStrategy,
+  defaultAnimateLayoutChanges,
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -325,6 +326,16 @@ const matchesSearchToken = (
   });
 };
 
+const animateSortableGridLayoutChanges = (
+  args: Parameters<typeof defaultAnimateLayoutChanges>[0],
+) => {
+  if (!args.isSorting && !args.wasDragging) {
+    return false;
+  }
+
+  return defaultAnimateLayoutChanges(args);
+};
+
 const SortableThumbnailCard = ({
   pageNumber,
   children,
@@ -339,13 +350,19 @@ const SortableThumbnailCard = ({
     transform,
     transition,
     isDragging,
+    isSorting,
   } = useSortable({
     id: String(pageNumber),
+    animateLayoutChanges: animateSortableGridLayoutChanges,
   });
 
+  const shouldApplySortableTransform = isDragging || isSorting;
+
   const style: CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: shouldApplySortableTransform
+      ? CSS.Transform.toString(transform)
+      : undefined,
+    transition: shouldApplySortableTransform ? transition : undefined,
     opacity: isDragging ? 0.3 : 1,
     zIndex: isDragging ? 30 : 1,
     touchAction: "none",
@@ -353,7 +370,7 @@ const SortableThumbnailCard = ({
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {children}
+      <div className="min-h-0">{children}</div>
     </div>
   );
 };
@@ -950,7 +967,7 @@ export const PdfThumbnailPanel = ({
       searchValue={searchQuery}
       searchPlaceholder={SEARCH_PLACEHOLDER_BY_TAB[selectedTab]}
       onSearchChange={setSearchQuery}
-      className="pdf-filter-panel-root h-full"
+      className="pdf-filter-panel-root h-full min-h-0"
       bodyClassName="overscroll-contain p-3"
       bodyRef={handleScrollRootRef}
       headerAction={
@@ -991,7 +1008,7 @@ export const PdfThumbnailPanel = ({
 
         <aside
           className={cn(
-            "pdf-filter-scope pdf-filter-mobile-sheet absolute inset-y-3 left-3 z-30 flex min-w-0 flex-col overflow-hidden rounded-[24px] border transition-all duration-150 ease-out",
+            "pdf-filter-scope pdf-filter-mobile-sheet absolute inset-y-3 left-3 z-30 flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[24px] border transition-all duration-150 ease-out",
             isOpen ? "pointer-events-auto" : "pointer-events-none",
           )}
           style={{
@@ -1023,7 +1040,7 @@ export const PdfThumbnailPanel = ({
             type="button"
             aria-label={isOpen ? "ページ一覧を閉じる" : "ページ一覧を開く"}
             onClick={() => onOpenChange(!isOpen)}
-            className="pdf-filter-toggle-button inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors duration-150"
+            className="pdf-filter-toggle-button inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-colors duration-150"
           >
             <span className="relative inline-flex items-center justify-center">
               <GridIcon className="h-4 w-4" />
@@ -1047,8 +1064,8 @@ export const PdfThumbnailPanel = ({
 
         <div
           className={cn(
-            "min-w-0 flex-1 flex-col transition-opacity duration-150 ease-out",
-            isOpen ? "flex opacity-100" : "pointer-events-none opacity-0",
+            "min-h-0 min-w-0 flex-1 flex-col transition-opacity duration-150 ease-out",
+            isOpen ? "flex opacity-100" : "pointer-events-none flex opacity-0",
           )}
           aria-hidden={!isOpen}
         >

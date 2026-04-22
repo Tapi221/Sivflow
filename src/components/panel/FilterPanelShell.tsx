@@ -55,7 +55,10 @@ export const FilterPanelShell = ({
 
       <div
         ref={bodyRef}
-        className={cn("min-h-0 flex-1 overflow-y-auto bg-transparent p-1", bodyClassName)}
+        className={cn(
+          "min-h-0 flex-1 overflow-y-auto overscroll-contain bg-transparent p-1",
+          bodyClassName,
+        )}
       >
         {children}
       </div>
