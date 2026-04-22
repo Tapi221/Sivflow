@@ -22,6 +22,7 @@ final class StudyStore: ObservableObject {
     @Published var lastErrorMessage: String?
 
     private let storageURL: URL
+    private let appDirectoryURL: URL
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
 
@@ -30,6 +31,7 @@ final class StudyStore: ObservableObject {
             ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let folderURL = appSupport.appendingPathComponent("FlashCardMasterNative", isDirectory: true)
         try? FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true)
+        self.appDirectoryURL = folderURL
         self.storageURL = storageURL ?? folderURL.appendingPathComponent("study-snapshot.json")
 
         let encoder = JSONEncoder()
@@ -301,6 +303,7 @@ final class StudyStore: ObservableObject {
         noteText: String,
         imageURL: String?,
         sourceURL: String?,
+        pdfURL: String?,
         tagIDs: [UUID],
         flags: Set<CardFlag>,
         nextReviewAt: Date?
@@ -311,6 +314,7 @@ final class StudyStore: ObservableObject {
         let trimmedNote = noteText.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalizedImageURL = normalizedOptionalString(imageURL)
         let normalizedSourceURL = normalizedOptionalString(sourceURL)
+        let normalizedPDFURL = normalizedOptionalString(pdfURL)
 
         guard !trimmedTitle.isEmpty else { return }
         guard !trimmedFront.isEmpty || !trimmedBack.isEmpty else { return }
@@ -322,6 +326,7 @@ final class StudyStore: ObservableObject {
             snapshot.cards[index].noteText = trimmedNote
             snapshot.cards[index].imageURL = normalizedImageURL
             snapshot.cards[index].sourceURL = normalizedSourceURL
+            snapshot.cards[index].pdfURL = normalizedPDFURL
             snapshot.cards[index].tagIDs = Array(Set(tagIDs)).sorted { $0.uuidString < $1.uuidString }
             snapshot.cards[index].flags = flags
             snapshot.cards[index].nextReviewAt = nextReviewAt
@@ -337,6 +342,7 @@ final class StudyStore: ObservableObject {
                     noteText: trimmedNote,
                     imageURL: normalizedImageURL,
                     sourceURL: normalizedSourceURL,
+                    pdfURL: normalizedPDFURL,
                     tagIDs: Array(Set(tagIDs)).sorted { $0.uuidString < $1.uuidString },
                     flags: flags,
                     nextReviewAt: nextReviewAt
@@ -344,6 +350,54 @@ final class StudyStore: ObservableObject {
             )
         }
         saveSilently()
+    }
+
+
+    func createCardSet(name: String, colorName: StudyColorName = .blue, parentFolderID: UUID? = nil) -> UUID {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedName = trimmedName.isEmpty ? "Imported" : trimmedName
+        let cardSet = StudyCardSet(name: resolvedName, colorName: colorName, parentFolderID: parentFolderID)
+        snapshot.cardSets.append(cardSet)
+        saveSilently()
+        return cardSet.id
+    }
+
+    func copyImportedFile(from externalURL: URL, preferredFileName: String? = nil) throws -> String {
+        let attachmentsURL = appDirectoryURL.appendingPathComponent("Attachments", isDirectory: true)
+        try FileManager.default.createDirectory(at: attachmentsURL, withIntermediateDirectories: true)
+        let sanitizedBaseName = preferredFileName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedName = (sanitizedBaseName?.isEmpty == false ? sanitizedBaseName! : externalURL.deletingPathExtension().lastPathComponent)
+        let ext = externalURL.pathExtension.isEmpty ? "bin" : externalURL.pathExtension
+        let targetURL = attachmentsURL.appendingPathComponent("\(resolvedName)-\(UUID().uuidString).\(ext)")
+        if FileManager.default.fileExists(atPath: targetURL.path) {
+            try FileManager.default.removeItem(at: targetURL)
+        }
+        try FileManager.default.copyItem(at: externalURL, to: targetURL)
+        return targetURL.absoluteString
+    }
+
+    func importXLSXWorkbook(from data: Data, fileName: String) throws -> String {
+        let result = try XLSXImportService.importWorkbook(data: data, fileName: fileName)
+        let cardSetID = createCardSet(name: result.cardSetName, colorName: .amber, parentFolderID: nil)
+        for card in result.cards {
+            upsertCard(
+                id: nil,
+                cardSetID: cardSetID,
+                title: card.title,
+                frontText: card.frontText,
+                backText: card.backText,
+                noteText: card.noteText,
+                imageURL: card.imageURL,
+                sourceURL: card.sourceURL,
+                pdfURL: card.pdfURL,
+                tagIDs: [],
+                flags: [],
+                nextReviewAt: nil
+            )
+        }
+        let warningSuffix = result.warnings.isEmpty ? "" : " Warnings: \(result.warnings.prefix(3).joined(separator: " | "))"
+        lastErrorMessage = "Imported \(result.cards.count) cards from XLSX into \(result.cardSetName).\(warningSuffix)"
+        return result.cardSetName
     }
 
     func softDeleteCard(id: UUID) {

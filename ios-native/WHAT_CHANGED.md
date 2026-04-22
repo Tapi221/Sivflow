@@ -24,12 +24,16 @@ The previous zip delivered a clean local card app, but it was not close enough t
 - `imageURL`
 - `sourceURL`
 
+## Added in this overwrite
+- Firebase email/password authentication via REST
+- Firestore snapshot push/pull cloud sync
+- XLSX workbook import for the blocks sheet format
+- PDF preview and local PDF attachment import
+
 ## Honest gap list
 Still not 1:1 with Electron/React:
-- No Firebase authentication
-- No cloud sync
-- No XLSX import workflow
-- No PDF block tooling
+- No Google popup sign-in flow
 - No BlockNote-compatible rich editor surface
+- No fully structured PDF block editing
 
 That is deliberate. Shipping a stable overwrite package beats pretending the missing integrations exist.

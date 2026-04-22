@@ -403,6 +403,14 @@ struct CardDetailView: View {
                             }
                         }
 
+                        if let pdfURL = card.pdfURL, PDFSourceResolver.canPreview(pdfURL) {
+                            NavigationLink {
+                                PDFPreviewScreen(sourceValue: pdfURL, title: card.title)
+                            } label: {
+                                Label("Open attached PDF", systemImage: "doc.richtext")
+                            }
+                        }
+
                         if let sourceURL = card.sourceURL, let url = URL(string: sourceURL) {
                             Button {
                                 openURL(url)
@@ -417,6 +425,7 @@ struct CardDetailView: View {
                             InfoLine(label: "Created", value: card.createdAt.formatted(date: .abbreviated, time: .shortened))
                             InfoLine(label: "Study Count", value: String(card.studyCount))
                             InfoLine(label: "Next Review", value: card.nextReviewAt?.formatted(date: .abbreviated, time: .shortened) ?? "Not scheduled")
+                            InfoLine(label: "Attached PDF", value: PDFSourceResolver.displayName(card.pdfURL))
                         }
                         .font(.subheadline)
                     }
@@ -1133,18 +1142,28 @@ struct TrashRouteView: View {
 
 struct SettingsView: View {
     @EnvironmentObject private var store: StudyStore
+    @ObservedObject private var firebase = FirebaseSyncManager.shared
 
     @State private var exportDocument: SnapshotDocument?
     @State private var exportFileName = "flashcardmaster-snapshot.json"
     @State private var showExporter = false
-    @State private var showImporter = false
+    @State private var showJSONImporter = false
+    @State private var showXLSXImporter = false
     @State private var showResetConfirmation = false
+    @State private var firebaseAPIKey = ""
+    @State private var firebaseProjectID = ""
+    @State private var email = ""
+    @State private var password = ""
 
     private var selectedTheme: Binding<AppTheme> {
         Binding(
             get: { store.theme() },
             set: { store.updateTheme($0) }
         )
+    }
+
+    private var hasFirebaseConfiguration: Bool {
+        firebase.configuration?.isComplete == true
     }
 
     var body: some View {
@@ -1154,6 +1173,83 @@ struct SettingsView: View {
                     ForEach(AppTheme.allCases) { theme in
                         Text(theme.displayName).tag(theme)
                     }
+                }
+            }
+
+            Section("Firebase Configuration") {
+                TextField("Firebase Web API Key", text: $firebaseAPIKey)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                TextField("Firebase Project ID", text: $firebaseProjectID)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+
+                Button("Save Firebase Configuration") {
+                    firebase.updateConfiguration(apiKey: firebaseAPIKey, projectID: firebaseProjectID)
+                }
+
+                if hasFirebaseConfiguration {
+                    Button("Clear Firebase Configuration", role: .destructive) {
+                        firebase.clearConfiguration()
+                        firebaseAPIKey = ""
+                        firebaseProjectID = ""
+                    }
+                }
+            }
+
+            Section("Firebase Authentication") {
+                if let session = firebase.session {
+                    InfoLine(label: "Signed in", value: session.email)
+                    Button("Sign Out", role: .destructive) {
+                        firebase.signOut()
+                    }
+                } else {
+                    TextField("Email", text: $email)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.emailAddress)
+                        .autocorrectionDisabled()
+                    SecureField("Password", text: $password)
+                    HStack {
+                        Button("Sign In") {
+                            Task { await firebase.signIn(email: email, password: password) }
+                        }
+                        .disabled(!hasFirebaseConfiguration || email.isEmpty || password.isEmpty || firebase.isWorking)
+
+                        Button("Create Account") {
+                            Task { await firebase.signUp(email: email, password: password) }
+                        }
+                        .disabled(!hasFirebaseConfiguration || email.isEmpty || password.isEmpty || firebase.isWorking)
+                    }
+                }
+            }
+
+            Section("Cloud Sync") {
+                Button("Push Snapshot to Cloud") {
+                    Task {
+                        do {
+                            try await pushSnapshot()
+                        } catch {
+                            store.lastErrorMessage = error.localizedDescription
+                        }
+                    }
+                }
+                .disabled(firebase.session == nil || firebase.isWorking)
+
+                Button("Pull Snapshot from Cloud") {
+                    Task {
+                        do {
+                            try await pullSnapshot()
+                        } catch {
+                            store.lastErrorMessage = error.localizedDescription
+                        }
+                    }
+                }
+                .disabled(firebase.session == nil || firebase.isWorking)
+
+                if let status = firebase.statusMessage, !status.isEmpty {
+                    Text(status)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
 
@@ -1169,7 +1265,11 @@ struct SettingsView: View {
                 }
 
                 Button("Import Snapshot") {
-                    showImporter = true
+                    showJSONImporter = true
+                }
+
+                Button("Import XLSX Workbook") {
+                    showXLSXImporter = true
                 }
 
                 Button("Reset to Sample Data", role: .destructive) {
@@ -1178,8 +1278,8 @@ struct SettingsView: View {
             }
 
             Section("Parity Notes") {
-                Text("This iOS build mirrors Library, Study, Search, Tags, Calendar, Directory, Gallery, Questions, Dictionary, Tag Map, and Trash as local-first routes.")
-                Text("Firebase auth, cloud sync, XLSX import, and PDF-specific tooling are intentionally still out. Pretending otherwise would be theater.")
+                Text("This iOS build now includes Firebase email/password auth, Firestore snapshot sync, XLSX import, and PDF preview support in addition to the local-first routes.")
+                Text("Google popup auth and the exact BlockNote/PDF block editor surface from Electron/React are still separate work. Shocking that software has edges.")
             }
 
             if let lastErrorMessage = store.lastErrorMessage,
@@ -1192,12 +1292,17 @@ struct SettingsView: View {
 
             Section("About") {
                 InfoLine(label: "App", value: "FlashCardMasterNative")
-                InfoLine(label: "Mode", value: "Local-first parity build")
-                InfoLine(label: "Storage", value: "JSON snapshot")
+                InfoLine(label: "Mode", value: "Parity build with cloud options")
+                InfoLine(label: "Storage", value: "JSON snapshot + optional Firestore")
                 InfoLine(label: "Snapshot version", value: String(StudySnapshot.currentVersion))
             }
         }
         .navigationTitle("Settings")
+        .onAppear {
+            firebaseAPIKey = firebase.configuration?.apiKey ?? ""
+            firebaseProjectID = firebase.configuration?.projectID ?? ""
+            email = firebase.session?.email ?? email
+        }
         .fileExporter(
             isPresented: $showExporter,
             document: exportDocument,
@@ -1207,7 +1312,7 @@ struct SettingsView: View {
             exportDocument = nil
         }
         .fileImporter(
-            isPresented: $showImporter,
+            isPresented: $showJSONImporter,
             allowedContentTypes: [.json],
             allowsMultipleSelection: false
         ) { result in
@@ -1224,6 +1329,24 @@ struct SettingsView: View {
                 store.lastErrorMessage = error.localizedDescription
             }
         }
+        .fileImporter(
+            isPresented: $showXLSXImporter,
+            allowedContentTypes: [.xlsx],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let url = urls.first else { return }
+                do {
+                    let data = try Data(contentsOf: url)
+                    _ = try store.importXLSXWorkbook(from: data, fileName: url.lastPathComponent)
+                } catch {
+                    store.lastErrorMessage = error.localizedDescription
+                }
+            case .failure(let error):
+                store.lastErrorMessage = error.localizedDescription
+            }
+        }
         .alert("Reset Data", isPresented: $showResetConfirmation) {
             Button("Reset", role: .destructive) {
                 store.resetToSample()
@@ -1232,6 +1355,16 @@ struct SettingsView: View {
         } message: {
             Text("This replaces your local data with the bundled sample snapshot.")
         }
+    }
+
+    private func pushSnapshot() async throws {
+        let data = try store.snapshotData()
+        await firebase.pushSnapshot(data: data)
+    }
+
+    private func pullSnapshot() async throws {
+        let data = try await firebase.pullSnapshot()
+        try store.importSnapshot(from: data)
     }
 }
 
@@ -1509,10 +1642,12 @@ struct CardEditorSheet: View {
     @State private var noteText = ""
     @State private var imageURL = ""
     @State private var sourceURL = ""
+    @State private var pdfURL = ""
     @State private var selectedTagIDs: Set<UUID> = []
     @State private var selectedFlags: Set<CardFlag> = []
     @State private var hasScheduledReview = false
     @State private var nextReviewAt = Date.now
+    @State private var showPDFImporter = false
 
     var body: some View {
         NavigationStack {
@@ -1534,6 +1669,17 @@ struct CardEditorSheet: View {
                     TextField("Source URL", text: $sourceURL)
                         .textInputAutocapitalization(.never)
                         .keyboardType(.URL)
+                    TextField("PDF URL", text: $pdfURL)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.URL)
+                    Button(pdfURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Import PDF from Files" : "Replace Imported PDF") {
+                        showPDFImporter = true
+                    }
+                    if !pdfURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Text(PDFSourceResolver.displayName(pdfURL))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 Section("Review Schedule") {
@@ -1594,6 +1740,7 @@ struct CardEditorSheet: View {
                             noteText: noteText,
                             imageURL: imageURL,
                             sourceURL: sourceURL,
+                            pdfURL: pdfURL,
                             tagIDs: Array(selectedTagIDs),
                             flags: selectedFlags,
                             nextReviewAt: hasScheduledReview ? nextReviewAt : nil
@@ -1611,10 +1758,28 @@ struct CardEditorSheet: View {
                     noteText = card.noteText
                     imageURL = card.imageURL ?? ""
                     sourceURL = card.sourceURL ?? ""
+                    pdfURL = card.pdfURL ?? ""
                     selectedTagIDs = Set(card.tagIDs)
                     selectedFlags = card.flags
                     hasScheduledReview = card.nextReviewAt != nil
                     nextReviewAt = card.nextReviewAt ?? Date.now
+                }
+            }
+            .fileImporter(
+                isPresented: $showPDFImporter,
+                allowedContentTypes: [.pdf],
+                allowsMultipleSelection: false
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    guard let url = urls.first else { return }
+                    do {
+                        pdfURL = try store.copyImportedFile(from: url, preferredFileName: title.isEmpty ? "card-pdf" : title.replacingOccurrences(of: " ", with: "-"))
+                    } catch {
+                        store.lastErrorMessage = error.localizedDescription
+                    }
+                case .failure(let error):
+                    store.lastErrorMessage = error.localizedDescription
                 }
             }
         }
