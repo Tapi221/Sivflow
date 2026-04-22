@@ -11,6 +11,11 @@ type NavItem = {
   icon: React.ReactNode;
 };
 
+type NavSection = {
+  title: string;
+  items: NavItem[];
+};
+
 const FolderIcon = () => (
   <svg
     width="16"
@@ -262,15 +267,23 @@ const SettingsIcon = () => (
   </svg>
 );
 
-const NAV_ITEMS: NavItem[] = [
+const PRIMARY_NAV_ITEMS: NavItem[] = [
   { to: "/folders", label: "フォルダ", icon: <FolderIcon /> },
-  { to: "/tag-map", label: "タグマップ", icon: <TagMapIcon /> },
   { to: "/dictionary", label: "辞書", icon: <DictionaryIcon /> },
   { to: "/questions", label: "疑問集", icon: <QuestionIcon /> },
   { to: "/calendar", label: "カレンダー", icon: <CalendarIcon /> },
+];
+
+const SECONDARY_NAV_ITEMS: NavItem[] = [
+  { to: "/tag-map", label: "タグマップ", icon: <TagMapIcon /> },
   { to: "/gallery", label: "ギャラリー", icon: <GalleryIcon /> },
-  { to: "/trash", label: "ゴミ箱", icon: <TrashIcon /> },
   { to: "/directory", label: "ディレクトリ", icon: <DirectoryIcon /> },
+  { to: "/trash", label: "ゴミ箱", icon: <TrashIcon /> },
+];
+
+const NAV_SECTIONS: NavSection[] = [
+  { title: "メイン", items: PRIMARY_NAV_ITEMS },
+  { title: "整理", items: SECONDARY_NAV_ITEMS },
 ];
 
 export const Sidebar = () => {
@@ -287,24 +300,53 @@ export const Sidebar = () => {
     navigate({ search: `?${next.toString()}` });
   };
 
+  const renderNavLink = ({ to, label, icon }: NavItem) => {
+    return (
+      <NavLink
+        key={to}
+        to={to}
+        className={({ isActive }) =>
+          getSidebarNavItemClassName({
+            isActive:
+              to === "/folders" ? isActive && !isHomeOnlyMode : isActive,
+          })
+        }
+      >
+        <SidebarNavIcon>{icon}</SidebarNavIcon>
+        <span className="sidebar__nav-label">{label}</span>
+      </NavLink>
+    );
+  };
+
   return (
     <aside className="sidebar">
+      <div className="sidebar__header">
+        <NavLink
+          to="/folders"
+          className="sidebar__workspace-link"
+          aria-label="ホームに移動"
+        >
+          <span className="sidebar__workspace-icon" aria-hidden="true">
+            <FolderIcon />
+          </span>
+          <span className="sidebar__workspace-copy">
+            <span className="sidebar__workspace-name">FlashCard Master</span>
+            <span className="sidebar__workspace-meta">メインメニュー</span>
+          </span>
+        </NavLink>
+      </div>
+
       <nav className="sidebar__nav" aria-label="メインナビゲーション">
-        {NAV_ITEMS.map(({ to, label, icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              getSidebarNavItemClassName({
-                isActive:
-                  to === "/folders" ? isActive && !isHomeOnlyMode : isActive,
-              })
-            }
-          >
-            <SidebarNavIcon>{icon}</SidebarNavIcon>
-            <span className="sidebar__nav-label">{label}</span>
-          </NavLink>
-        ))}
+        {NAV_SECTIONS.map(({ title, items }) => {
+          return (
+            <div key={title} className="sidebar__section">
+              <div className="sidebar__section-label">{title}</div>
+              <div className="sidebar__section-items">
+                {items.map(renderNavLink)}
+              </div>
+            </div>
+          );
+        })}
       </nav>
 
       <div className="sidebar__footer">
