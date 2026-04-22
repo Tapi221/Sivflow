@@ -9,7 +9,6 @@ import type {
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PdfOverlayToolbar } from "./PdfOverlayToolbar";
-import { PdfPaneToolbar } from "./PdfPaneToolbar";
 import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
 import { usePdfContainerWidth } from "./hooks/usePdfContainerWidth";
@@ -55,7 +54,6 @@ interface PdfPaneProps {
   onDocumentUpdate?: (updates: Partial<PdfPaneDoc>) => Promise<void>;
 }
 
-const SEARCH_INPUT_DEBOUNCE_MS = 300;
 const PDF_OVERLAY_ZOOM_STEP_PERCENT = 1;
 const PDF_DOUBLE_PAGE_GAP = 16;
 const PDF_ZOOM_UI_MIN_PERCENT = 0;
@@ -239,14 +237,6 @@ export const PdfPane = ({
   );
 
   const [basePageWidth, setBasePageWidth] = useState<number | null>(null);
-  const [searchInputValue, setSearchInputValue] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchNavToken, setSearchNavToken] = useState(0);
-  const [searchNavDirection, setSearchNavDirection] = useState<"next" | "prev">(
-    "next",
-  );
-  const [totalMatches, setTotalMatches] = useState(0);
-  const [activeMatchIndex, setActiveMatchIndex] = useState(-1);
   const [isMobileViewport, setIsMobileViewport] = useState(
     readInitialMobileViewportState,
   );
@@ -504,16 +494,6 @@ export const PdfPane = ({
   }, [numPages, thumbnailOrder]);
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setSearchQuery(searchInputValue);
-    }, SEARCH_INPUT_DEBOUNCE_MS);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [searchInputValue]);
-
-  useEffect(() => {
     if (!numPages) {
       return;
     }
@@ -687,24 +667,6 @@ export const PdfPane = ({
     });
   }, []);
 
-  const commitSearchQuery = useCallback(() => {
-    setSearchQuery((previousQuery) =>
-      previousQuery === searchInputValue ? previousQuery : searchInputValue,
-    );
-  }, [searchInputValue]);
-
-  const handlePrevMatch = useCallback(() => {
-    commitSearchQuery();
-    setSearchNavDirection("prev");
-    setSearchNavToken((previousToken) => previousToken + 1);
-  }, [commitSearchQuery]);
-
-  const handleNextMatch = useCallback(() => {
-    commitSearchQuery();
-    setSearchNavDirection("next");
-    setSearchNavToken((previousToken) => previousToken + 1);
-  }, [commitSearchQuery]);
-
   useEffect(() => {
     if (!DEV_MODE) {
       return;
@@ -740,41 +702,6 @@ export const PdfPane = ({
 
   return (
     <div className={cn("flex h-full min-h-0 min-w-0 flex-col", className)}>
-      <PdfPaneToolbar
-        isLocalOnly={isLocalOnly}
-        uploadStatus={doc.uploadStatus}
-        sourceUnavailable={sourceUnavailable}
-        searchQuery={searchInputValue}
-        totalMatches={totalMatches}
-        activeMatchIndex={activeMatchIndex}
-        onSearchQueryChange={setSearchInputValue}
-        onPrevMatch={handlePrevMatch}
-        onNextMatch={handleNextMatch}
-        ocrStatus={ocrState.status}
-        ocrProgress={ocrState.progress}
-        ocrProcessedPages={ocrState.processedPages}
-        ocrTotalPages={ocrState.totalPages}
-        ocrCurrentProcessingPage={ocrState.currentProcessingPage}
-        ocrError={ocrState.error}
-        ocrCachedPageCount={ocrPageNumbers.length}
-        hasOcrForCurrentPage={hasOcrForCurrentPage}
-        hasAnyOcr={hasAnyOcr}
-        onRunCurrentPageOcr={() => {
-          void runCurrentPageOcr();
-        }}
-        onRunAllPagesOcr={() => {
-          void runAllPagesOcr();
-        }}
-        onCancelOcr={cancelOcr}
-        onClearOcr={() => {
-          void clearOcr();
-        }}
-        onOpenOcrTab={() => {
-          setSidePanelTab("ocr");
-          handleThumbnailPanelOpenChange(true);
-        }}
-      />
-
       <div className="relative flex-1 min-h-0 min-w-0 w-full overflow-hidden bg-transparent">
         {sourceUnavailable ? (
           <div className="p-4 text-sm text-slate-500">
@@ -826,20 +753,10 @@ export const PdfPane = ({
                 minScale={FIT_MIN_SCALE}
                 maxScale={FIT_MAX_SCALE}
                 opaqueCanvas={resolvedViewerOptions.opaqueCanvas ?? false}
-                searchQuery={searchQuery}
-                searchNavToken={searchNavToken}
-                searchNavDirection={searchNavDirection}
                 pageLayoutMode={pageLayoutMode}
                 spreadGap={PDF_DOUBLE_PAGE_GAP}
                 onScaleChange={handleViewerScaleChange}
                 onPageChange={setCurrentPage}
-                onSearchStateChange={({
-                  totalMatches: nextTotalMatches,
-                  activeMatchIndex: nextActiveMatchIndex,
-                }) => {
-                  setTotalMatches(nextTotalMatches);
-                  setActiveMatchIndex(nextActiveMatchIndex);
-                }}
                 className="h-full w-full"
               />
 
