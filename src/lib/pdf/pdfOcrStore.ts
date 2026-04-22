@@ -70,6 +70,100 @@ const runOcrTransaction = async <T>({
   });
 };
 
+const runOcrWriteTransaction = async ({
+  action,
+}: {
+  action: (store: IDBObjectStore) => void;
+}): Promise<void> => {
+  const db = await openOcrDb();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(OCR_STORE_NAME, "readwrite");
+    const store = transaction.objectStore(OCR_STORE_NAME);
+
+    transaction.onerror = () => {
+      reject(transaction.error ?? new Error("OCR IndexedDB transaction failed"));
+    };
+
+    transaction.oncomplete = () => {
+      resolve();
+      db.close();
+    };
+
+    try {
+      action(store);
+    } catch (errorValue) {
+      reject(
+        errorValue instanceof Error
+          ? errorValue
+          : new Error("OCR IndexedDB write failed"),
+      );
+      db.close();
+    }
+  });
+};
+
+const isPdfOcrPageRecord = (value: unknown): value is PdfOcrPageRecord => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as Partial<PdfOcrPageRecord>;
+
+  return (
+    typeof candidate.id === "string" &&
+    typeof candidate.docId === "string" &&
+    typeof candidate.documentKey === "string" &&
+    typeof candidate.pageNumber === "number" &&
+    Number.isFinite(candidate.pageNumber) &&
+    typeof candidate.text === "string" &&
+    typeof candidate.updatedAt === "number" &&
+    Number.isFinite(candidate.updatedAt)
+  );
+};
+
+const listPdfOcrRecordsForDocId = async (docId: string) => {
+  const db = await openOcrDb();
+
+  return new Promise<PdfOcrPageRecord[]>((resolve, reject) => {
+    const transaction = db.transaction(OCR_STORE_NAME, "readonly");
+    const store = transaction.objectStore(OCR_STORE_NAME);
+    const index = store.index(OCR_BY_DOC_ID_INDEX);
+    const request = index.getAll(docId);
+
+    request.onerror = () => {
+      reject(request.error ?? new Error("Failed to list OCR records"));
+    };
+
+    transaction.onerror = () => {
+      reject(transaction.error ?? new Error("Failed to list OCR records"));
+    };
+
+    transaction.oncomplete = () => {
+      const records = (request.result ?? [])
+        .filter(isPdfOcrPageRecord)
+        .sort((left, right) => left.pageNumber - right.pageNumber);
+
+      resolve(records);
+      db.close();
+    };
+  });
+};
+
+const deletePdfOcrRecordIds = async (ids: string[]) => {
+  if (ids.length === 0) {
+    return;
+  }
+
+  await runOcrWriteTransaction({
+    action: (store) => {
+      ids.forEach((id) => {
+        store.delete(id);
+      });
+    },
+  });
+};
+
 export const buildPdfOcrRecordId = ({
   docId,
   documentKey,
@@ -142,10 +236,7 @@ export const deletePdfOcrPageRecord = async ({
 }) => {
   const id = buildPdfOcrRecordId({ docId, documentKey, pageNumber });
 
-  await runOcrTransaction<undefined>({
-    mode: "readwrite",
-    action: (store) => store.delete(id),
-  });
+  await deletePdfOcrRecordIds([id]);
 };
 
 export const listPdfOcrPageRecords = async ({
@@ -155,37 +246,9 @@ export const listPdfOcrPageRecords = async ({
   docId: string;
   documentKey: string;
 }) => {
-  const db = await openOcrDb();
+  const records = await listPdfOcrRecordsForDocId(docId);
 
-  return new Promise<PdfOcrPageRecord[]>((resolve, reject) => {
-    const transaction = db.transaction(OCR_STORE_NAME, "readonly");
-    const store = transaction.objectStore(OCR_STORE_NAME);
-    const index = store.index(OCR_BY_DOC_ID_INDEX);
-    const request = index.getAll(docId);
-
-    request.onerror = () => {
-      reject(request.error ?? new Error("Failed to list OCR records"));
-    };
-
-    transaction.onerror = () => {
-      reject(transaction.error ?? new Error("Failed to list OCR records"));
-    };
-
-    transaction.oncomplete = () => {
-      const records = (request.result ?? [])
-        .filter((record): record is PdfOcrPageRecord => {
-          return (
-            typeof record === "object" &&
-            record !== null &&
-            (record as PdfOcrPageRecord).documentKey === documentKey
-          );
-        })
-        .sort((left, right) => left.pageNumber - right.pageNumber);
-
-      resolve(records);
-      db.close();
-    };
-  });
+  return records.filter((record) => record.documentKey === documentKey);
 };
 
 export const clearPdfOcrRecords = async ({
@@ -197,59 +260,60 @@ export const clearPdfOcrRecords = async ({
 }) => {
   const records = await listPdfOcrPageRecords({ docId, documentKey });
 
-  await Promise.all(
-    records.map((record) =>
-      deletePdfOcrPageRecord({
-        docId,
-        documentKey,
-        pageNumber: record.pageNumber,
-      }),
-    ),
-  );
+  await deletePdfOcrRecordIds(records.map((record) => record.id));
 };
 
-export const deleteStalePdfOcrRecords = async ({
+export const trimPdfOcrRecordsForDoc = async ({
   docId,
   keepDocumentKey,
+  maxDocumentKeys = 3,
 }: {
   docId: string;
   keepDocumentKey: string;
+  maxDocumentKeys?: number;
 }) => {
-  const db = await openOcrDb();
+  const normalizedKeepDocumentKey = keepDocumentKey.trim();
+  if (normalizedKeepDocumentKey.length === 0) {
+    return;
+  }
 
-  return new Promise<void>((resolve, reject) => {
-    const transaction = db.transaction(OCR_STORE_NAME, "readwrite");
-    const store = transaction.objectStore(OCR_STORE_NAME);
-    const index = store.index(OCR_BY_DOC_ID_INDEX);
-    const request = index.getAll(docId);
+  const records = await listPdfOcrRecordsForDocId(docId);
+  if (records.length === 0) {
+    return;
+  }
 
-    request.onerror = () => {
-      reject(request.error ?? new Error("Failed to read stale OCR records"));
-    };
+  const safeMaxDocumentKeys = Math.max(1, Math.trunc(maxDocumentKeys));
+  const documentKeyActivity = new Map<string, number>();
 
-    transaction.onerror = () => {
-      reject(transaction.error ?? new Error("Failed to delete stale OCR records"));
-    };
-
-    request.onsuccess = () => {
-      const records = request.result ?? [];
-
-      records.forEach((record) => {
-        const candidate = record as Partial<PdfOcrPageRecord>;
-        if (
-          typeof candidate.id !== "string" ||
-          candidate.documentKey === keepDocumentKey
-        ) {
-          return;
-        }
-
-        store.delete(candidate.id);
-      });
-    };
-
-    transaction.oncomplete = () => {
-      resolve();
-      db.close();
-    };
+  records.forEach((record) => {
+    const currentUpdatedAt = documentKeyActivity.get(record.documentKey) ?? 0;
+    if (record.updatedAt > currentUpdatedAt) {
+      documentKeyActivity.set(record.documentKey, record.updatedAt);
+    }
   });
+
+  const orderedDocumentKeys = Array.from(documentKeyActivity.entries())
+    .sort(([leftKey, leftUpdatedAt], [rightKey, rightUpdatedAt]) => {
+      if (leftKey === normalizedKeepDocumentKey) {
+        return -1;
+      }
+
+      if (rightKey === normalizedKeepDocumentKey) {
+        return 1;
+      }
+
+      return rightUpdatedAt - leftUpdatedAt;
+    })
+    .map(([documentKey]) => documentKey);
+
+  const retainedDocumentKeys = new Set(
+    orderedDocumentKeys.slice(0, safeMaxDocumentKeys),
+  );
+  retainedDocumentKeys.add(normalizedKeepDocumentKey);
+
+  await deletePdfOcrRecordIds(
+    records
+      .filter((record) => !retainedDocumentKeys.has(record.documentKey))
+      .map((record) => record.id),
+  );
 };
