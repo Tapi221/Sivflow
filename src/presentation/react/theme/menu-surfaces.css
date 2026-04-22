@@ -1,7 +1,5 @@
 @layer components {
-  .ds-floating-panel,
-  .ds-menu-surface,
-  .ds-popover-surface {
+  .ds-floating-panel {
     border: 1px solid var(--ds-semantic-color-border-floating);
     background: var(--ds-semantic-color-background-floating);
     color: var(--ds-semantic-color-text-strong);
@@ -11,8 +9,7 @@
     -webkit-backdrop-filter: blur(var(--ds-elevation-blur-floating));
   }
 
-  .ds-floating-panel--glass,
-  .ds-menu-surface--glass {
+  .ds-floating-panel--glass {
     background: color-mix(
       in srgb,
       var(--ds-semantic-color-background-floating) 92%,
@@ -20,8 +17,7 @@
     );
   }
 
-  .ds-floating-panel--strong,
-  .ds-menu-surface--strong {
+  .ds-floating-panel--strong {
     box-shadow:
       var(--ds-semantic-elevation-floating),
       inset 0 1px 0 rgba(255, 255, 255, 0.95),

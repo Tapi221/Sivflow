@@ -157,7 +157,7 @@ export const TagInput = ({
         </div>
       </div>
       <PopoverContent
-        surface="floating"
+        surface="menu"
         className="ds-tag-input__panel"
         align="start"
       >

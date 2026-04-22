@@ -17,6 +17,3 @@ export const floatingPanelPresets = {
     surface: "filter",
   },
 } as const satisfies Record<string, FloatingPanelPreset>;
-
-export const glassMenuContentClass = floatingPanelPresets.menu.className;
-export const filterPanelContentClass = floatingPanelPresets.filter.className;

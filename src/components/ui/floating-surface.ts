@@ -4,10 +4,6 @@ export const floatingSurfaceVariants = cva("", {
   variants: {
     surface: {
       default: "",
-      floating:
-        "ds-floating-panel ds-floating-panel--menu ds-floating-panel--glass text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
-      strong:
-        "ds-floating-panel ds-floating-panel--menu ds-floating-panel--glass ds-floating-panel--strong text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
       menu:
         "ds-floating-panel ds-floating-panel--menu ds-floating-panel--glass text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
       menuStrong:
