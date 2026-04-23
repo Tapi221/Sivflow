@@ -1,25 +1,27 @@
 .app-layout {
   display: grid;
   grid-template-columns: 236px minmax(0, 1fr);
+  gap: 10px;
   grid-template-rows: 1fr;
   height: 100%;
   flex: 1;
   width: 100%;
   overflow: hidden;
+  box-sizing: border-box;
+  padding: 6px 8px 8px;
   background-color: var(--app-bg);
-  background-image: radial-gradient(
-    circle at var(--app-bg-dot-size) var(--app-bg-dot-size),
-    var(--app-bg-dot) var(--app-bg-dot-size),
-    transparent var(--app-bg-dot-size)
-  );
-  background-size: var(--app-bg-dot-gap) var(--app-bg-dot-gap);
+  background-image: none;
+  align-items: stretch;
 }
 
 .app-layout--sidebar-hidden {
-  grid-template-columns: 0 minmax(0, 1fr) !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0;
 }
 
 .app-layout__sidebar {
+  width: 236px;
+  min-width: 236px;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
@@ -27,8 +29,7 @@
 }
 
 .app-layout__sidebar--hidden {
-  width: 0;
-  min-width: 0;
+  display: none;
   opacity: 0;
   pointer-events: none;
 }

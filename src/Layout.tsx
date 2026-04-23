@@ -57,6 +57,7 @@ const Layout = () => {
       style={
         {
           "--app-top-inset": `${appTopInsetPx}px`,
+          backgroundColor: "var(--app-bg)",
         } as React.CSSProperties
       }
     >

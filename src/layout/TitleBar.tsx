@@ -402,13 +402,13 @@ export const TitleBar: React.FC = () => {
   return (
     <div
       className={cn(
-        "surface-glass-base surface-glass-titlebar",
+        "surface-flat-titlebar",
         "flex w-full shrink-0 select-none items-center justify-between",
-        "border-x-0 border-t-0 rounded-none text-sm titlebar-text",
+        "bg-transparent text-sm titlebar-text",
       )}
       style={{
         ...dragStyle,
-        zIndex: 9999,
+        zIndex: 20,
         height: `${APP_DESKTOP_TOP_INSET_PX}px`,
       }}
     >
