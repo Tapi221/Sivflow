@@ -184,6 +184,7 @@ const TreeViewLayout = ({
   const {
     sidebarRef,
     contentScrollRef,
+    renderedSidebarWidth,
     isSidebarOpen,
     isMobile,
     isResizing,
@@ -528,6 +529,7 @@ const TreeViewLayout = ({
       <TreeViewSidebar
         sidebarRef={sidebarRef}
         contentScrollRef={contentScrollRef}
+        renderedSidebarWidth={renderedSidebarWidth}
         isSidebarOpen={isSidebarOpen}
         isResizing={isResizing}
         showMobileDetail={showMobileDetail}

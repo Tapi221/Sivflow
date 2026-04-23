@@ -7,6 +7,7 @@ interface TreeViewSidebarProps {
   sidebarRef: React.RefObject<HTMLDivElement | null>;
   contentScrollRef: React.RefObject<HTMLDivElement | null>;
   isSidebarOpen: boolean;
+  renderedSidebarWidth: number;
   isResizing: boolean;
   showMobileDetail: boolean;
   allTags: string[];
@@ -26,6 +27,7 @@ export const TreeViewSidebar = ({
   sidebarRef,
   contentScrollRef,
   isSidebarOpen,
+  renderedSidebarWidth,
   isResizing,
   showMobileDetail,
   allTags,
@@ -43,19 +45,29 @@ export const TreeViewSidebar = ({
   return (
     <div
       ref={sidebarRef}
-      style={{ backgroundColor: "var(--sidebar-bg)" }}
+      style={{
+        width: isSidebarOpen ? renderedSidebarWidth : 0,
+        minWidth: isSidebarOpen ? renderedSidebarWidth : 0,
+      }}
       className={cn(
-        "relative z-10 flex-col border-r border-[var(--sidebar-border,#e3e6ea)] group/sidebar select-none",
+        "relative z-10 flex-col group/sidebar select-none",
         "shrink-0",
         showMobileDetail ? "hidden md:flex" : "flex",
         "transition-none",
         isResizing && "will-change-[width]",
-        "w-[100dvw] max-w-[100dvw] md:w-auto md:max-w-none",
+        "w-[100dvw] max-w-[100dvw] md:max-w-none",
         !isSidebarOpen &&
           "md:w-0 md:border-0 md:overflow-hidden md:shadow-none",
       )}
     >
-      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
+      <div
+        className={cn(
+          "flex h-full min-h-0 w-full flex-col overflow-hidden",
+          "md:rounded-[18px] md:border md:border-[rgba(229,231,235,1)]",
+          "md:bg-[rgba(255,255,255,0.92)] md:shadow-[0_4px_20px_rgba(0,0,0,0.02)]",
+          "md:backdrop-blur-[8px] md:[-webkit-backdrop-filter:blur(8px)]",
+        )}
+      >
         <div className="shrink-0">
           <ExplorerSidebarHeader
             allTags={allTags}
@@ -72,12 +84,12 @@ export const TreeViewSidebar = ({
 
         <div
           ref={contentScrollRef}
-          className="flex-1 min-h-0 min-w-0 overflow-hidden outline-none"
+          className="flex-1 min-h-0 min-w-0 overflow-hidden px-1 pb-1 outline-none"
         >
           {children}
         </div>
 
-        <div className="shrink-0 border-t border-[var(--sidebar-border,#e3e6ea)] px-2 py-2">
+        <div className="shrink-0 border-t border-[rgba(229,231,235,0.9)] px-2 py-2">
           <ExplorerBottomIconNav />
         </div>
       </div>
@@ -85,7 +97,7 @@ export const TreeViewSidebar = ({
       {isSidebarOpen && (
         <div
           className={cn(
-            "absolute top-0 -right-[3px] z-50 hidden h-full w-1.5 cursor-col-resize select-none outline-none md:block group/resize",
+            "absolute top-2 -right-[4px] z-50 hidden h-[calc(100%-16px)] w-2 cursor-col-resize select-none outline-none md:block group/resize",
             "hover:bg-[color-mix(in_srgb,var(--sidebar-text-muted,#6e6e80)_20%,transparent)]",
             isResizing &&
               "bg-[color-mix(in_srgb,var(--sidebar-text-muted,#6e6e80)_30%,transparent)]",
