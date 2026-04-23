@@ -452,7 +452,7 @@ const TitleBarBreadcrumbs = React.memo(
     });
 
     return (
-      <nav className="titlebar-text flex min-w-0 flex-1 items-center gap-0.5 overflow-hidden text-xs">
+      <nav className="titlebar-text flex min-w-0 flex-1 items-center gap-0.5 overflow-hidden text-[13px] leading-5">
         {visibleCrumbs.map((crumb, index) => {
           const isClickable = Boolean(crumb.to);
           const breadcrumbContent = crumb.label;
