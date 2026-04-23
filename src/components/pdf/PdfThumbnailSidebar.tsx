@@ -16,6 +16,7 @@ import type {
 const THUMBNAIL_GRID_GAP_PX = 8;
 const MIN_THUMBNAIL_WIDTH_PX = 72;
 const FALLBACK_THUMBNAIL_SCALE = 0.18;
+const THREE_COLUMN_MIN_WIDTH_PX = 520;
 const INITIAL_VISIBLE_PAGE_COUNT = 6;
 
 const sanitizeCurrentPage = (value: unknown) => {
@@ -212,16 +213,22 @@ export const PdfThumbnailSidebar = ({ doc }: PdfThumbnailSidebarProps) => {
     onSourceLoadError: handleSourceLoadError,
   });
 
+  const columnCount = useMemo(() => {
+    return containerWidth >= THREE_COLUMN_MIN_WIDTH_PX ? 3 : 2;
+  }, [containerWidth]);
+
   const thumbnailWidth = useMemo(() => {
     if (!containerWidth) {
       return 96;
     }
 
+    const totalGapWidth = THUMBNAIL_GRID_GAP_PX * (columnCount - 1);
+
     return Math.max(
       MIN_THUMBNAIL_WIDTH_PX,
-      Math.floor((containerWidth - THUMBNAIL_GRID_GAP_PX) / 2),
+      Math.floor((containerWidth - totalGapWidth) / columnCount),
     );
-  }, [containerWidth]);
+  }, [columnCount, containerWidth]);
 
   const thumbnailScale = useMemo(() => {
     if (!firstPageSize || firstPageSize.width <= 0) {
@@ -292,7 +299,13 @@ export const PdfThumbnailSidebar = ({ doc }: PdfThumbnailSidebarProps) => {
         ref={scrollRootRef}
         className="min-h-0 flex-1 overflow-y-auto px-2 pb-2 pt-2"
       >
-        <div ref={containerRef} className="grid grid-cols-2 gap-2">
+        <div
+          ref={containerRef}
+          className="grid gap-2"
+          style={{
+            gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+          }}
+        >
           {orderedPageNumbers.map((pageNumber) => (
             <PdfThumbnailTile
               key={`${doc.id}:thumbnail:${pageNumber}`}
