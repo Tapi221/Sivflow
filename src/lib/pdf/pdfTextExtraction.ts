@@ -22,6 +22,7 @@ export interface PdfTextSelection {
 export interface PdfTextLanguageProfile {
   japaneseRatio: number;
   latinRatio: number;
+  digitRatio: number;
   dominant: "japanese" | "latin" | "mixed";
 }
 
@@ -32,6 +33,7 @@ const PDF_TEXT_PRINTABLE_RE = /[\p{L}\p{N}\p{P}\p{S}\p{Zs}]/gu;
 const PDF_TEXT_WORD_RE = /[\p{L}\p{N}][\p{L}\p{N}\p{M}_-]*/gu;
 const PDF_TEXT_JAPANESE_RE = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/gu;
 const PDF_TEXT_LATIN_RE = /[A-Za-z]/g;
+const PDF_TEXT_DIGIT_RE = /\d/g;
 
 const clampUnit = (value: number) => {
   if (!Number.isFinite(value)) {
@@ -101,6 +103,55 @@ const getDuplicateLineRatio = (lines: string[]) => {
   return 1 - uniqueCount / Math.max(lines.length, 1);
 };
 
+const getShortLineRatio = (lines: string[]) => {
+  if (lines.length === 0) {
+    return 1;
+  }
+
+  return lines.filter((line) => line.length <= 6).length / lines.length;
+};
+
+const getAverageLineLength = (lines: string[]) => {
+  if (lines.length === 0) {
+    return 0;
+  }
+
+  const totalLength = lines.reduce((sum, line) => sum + line.length, 0);
+  return totalLength / lines.length;
+};
+
+export const scorePdfLineQuality = (rawValue: string) => {
+  const line = normalizePdfExtractedText(rawValue);
+  if (line.length === 0) {
+    return 0;
+  }
+
+  const printableRatio = getPrintableRatio(line);
+  const tokenCount = getTokenCount(line);
+  const mojibakeRatio =
+    (line.match(PDF_TEXT_MOJIBAKE_RE)?.length ?? 0) / Math.max(line.length, 1);
+  const symbolRunRatio =
+    (line.match(PDF_TEXT_SYMBOL_RUN_RE)?.length ?? 0) / Math.max(line.length, 1);
+
+  let score = 0;
+  score += clampUnit(line.length / 48) * 0.28;
+  score += clampUnit(tokenCount / 7) * 0.22;
+  score += clampUnit(printableRatio) * 0.22;
+  score += clampUnit(1 - mojibakeRatio * 8) * 0.18;
+  score += clampUnit(1 - symbolRunRatio * 10) * 0.1;
+
+  return Number(clampUnit(score).toFixed(4));
+};
+
+export const hasMeaningfulPdfText = (rawValue: string) => {
+  const normalized = normalizePdfExtractedText(rawValue);
+  if (normalized.length === 0) {
+    return false;
+  }
+
+  return scorePdfTextQuality(normalized) >= 0.18 || normalized.length >= 10;
+};
+
 export const scorePdfTextQuality = (rawValue: string) => {
   const text = normalizePdfExtractedText(rawValue);
   const lines = splitPdfTextIntoLines(text);
@@ -115,20 +166,27 @@ export const scorePdfTextQuality = (rawValue: string) => {
   const singleCharacterLineRatio = getSingleCharacterLineRatio(lines);
   const suspiciousLineRatio = getSuspiciousLineRatio(lines);
   const duplicateLineRatio = getDuplicateLineRatio(lines);
-  const mojibakeRatio = (text.match(PDF_TEXT_MOJIBAKE_RE)?.length ?? 0) / Math.max(charCount, 1);
-  const symbolRunRatio = (text.match(PDF_TEXT_SYMBOL_RUN_RE)?.length ?? 0) / Math.max(lines.length, 1);
-  const multiSpaceRatio = (text.match(PDF_TEXT_MULTISPACE_RE)?.length ?? 0) / Math.max(lines.length, 1);
+  const shortLineRatio = getShortLineRatio(lines);
+  const averageLineLength = getAverageLineLength(lines);
+  const mojibakeRatio =
+    (text.match(PDF_TEXT_MOJIBAKE_RE)?.length ?? 0) / Math.max(charCount, 1);
+  const symbolRunRatio =
+    (text.match(PDF_TEXT_SYMBOL_RUN_RE)?.length ?? 0) / Math.max(lines.length, 1);
+  const multiSpaceRatio =
+    (text.match(PDF_TEXT_MULTISPACE_RE)?.length ?? 0) / Math.max(lines.length, 1);
 
   let score = 0;
-  score += clampUnit(charCount / 120) * 0.17;
-  score += clampUnit(tokenCount / 20) * 0.18;
-  score += clampUnit(printableRatio) * 0.16;
-  score += clampUnit(1 - singleCharacterLineRatio) * 0.12;
-  score += clampUnit(1 - suspiciousLineRatio) * 0.14;
+  score += clampUnit(charCount / 140) * 0.14;
+  score += clampUnit(tokenCount / 24) * 0.16;
+  score += clampUnit(printableRatio) * 0.14;
+  score += clampUnit(1 - singleCharacterLineRatio) * 0.1;
+  score += clampUnit(1 - suspiciousLineRatio) * 0.12;
   score += clampUnit(1 - duplicateLineRatio) * 0.08;
-  score += clampUnit(1 - mojibakeRatio * 6) * 0.08;
-  score += clampUnit(1 - symbolRunRatio * 1.5) * 0.04;
-  score += clampUnit(1 - multiSpaceRatio * 1.5) * 0.03;
+  score += clampUnit(1 - shortLineRatio) * 0.08;
+  score += clampUnit(averageLineLength / 28) * 0.08;
+  score += clampUnit(1 - mojibakeRatio * 6) * 0.06;
+  score += clampUnit(1 - symbolRunRatio * 1.5) * 0.02;
+  score += clampUnit(1 - multiSpaceRatio * 1.5) * 0.02;
 
   return Number(clampUnit(score).toFixed(4));
 };
@@ -141,27 +199,32 @@ export const getPdfTextLanguageProfile = (
     return {
       japaneseRatio: 0,
       latinRatio: 0,
+      digitRatio: 0,
       dominant: "mixed",
     };
   }
 
   const japaneseCount = text.match(PDF_TEXT_JAPANESE_RE)?.length ?? 0;
   const latinCount = text.match(PDF_TEXT_LATIN_RE)?.length ?? 0;
+  const digitCount = text.match(PDF_TEXT_DIGIT_RE)?.length ?? 0;
   const japaneseRatio = japaneseCount / Math.max(text.length, 1);
   const latinRatio = latinCount / Math.max(text.length, 1);
+  const digitRatio = digitCount / Math.max(text.length, 1);
 
-  if (japaneseRatio >= 0.18 && latinRatio < 0.08) {
+  if (japaneseRatio >= 0.16 && latinRatio < 0.1) {
     return {
       japaneseRatio: Number(japaneseRatio.toFixed(4)),
       latinRatio: Number(latinRatio.toFixed(4)),
+      digitRatio: Number(digitRatio.toFixed(4)),
       dominant: "japanese",
     };
   }
 
-  if (latinRatio >= 0.25 && japaneseRatio < 0.08) {
+  if (latinRatio >= 0.22 && japaneseRatio < 0.08) {
     return {
       japaneseRatio: Number(japaneseRatio.toFixed(4)),
       latinRatio: Number(latinRatio.toFixed(4)),
+      digitRatio: Number(digitRatio.toFixed(4)),
       dominant: "latin",
     };
   }
@@ -169,6 +232,7 @@ export const getPdfTextLanguageProfile = (
   return {
     japaneseRatio: Number(japaneseRatio.toFixed(4)),
     latinRatio: Number(latinRatio.toFixed(4)),
+    digitRatio: Number(digitRatio.toFixed(4)),
     dominant: "mixed",
   };
 };
@@ -176,14 +240,19 @@ export const getPdfTextLanguageProfile = (
 export const guessPreferredOcrLanguages = (rawValue: string) => {
   const profile = getPdfTextLanguageProfile(rawValue);
 
-  switch (profile.dominant) {
-    case "japanese":
-      return ["jpn", "jpn+eng", "eng"];
-    case "latin":
-      return ["eng", "jpn+eng", "jpn"];
-    default:
-      return ["jpn+eng", "jpn", "eng"];
+  if (profile.dominant === "japanese") {
+    return ["jpn", "jpn+eng", "eng"];
   }
+
+  if (profile.dominant === "latin") {
+    return ["eng", "jpn+eng", "jpn"];
+  }
+
+  if (profile.digitRatio >= 0.2 && profile.latinRatio >= 0.1) {
+    return ["eng", "jpn+eng", "jpn"];
+  }
+
+  return ["jpn+eng", "jpn", "eng"];
 };
 
 const normalizeLineKey = (line: string) => {
@@ -198,7 +267,7 @@ const buildOriginLines = (
     order: index,
     text,
     origin,
-  } satisfies PdfOcrLineRecord));
+  }) satisfies PdfOcrLineRecord));
 };
 
 const mergeLineCandidates = ({
@@ -330,7 +399,7 @@ export const buildPdfTextSelection = ({
   }
 
   const scoreDelta = ocrQualityScore - nativeQualityScore;
-  if (scoreDelta >= 0.18) {
+  if (scoreDelta >= 0.16) {
     return buildSelectionResult({
       finalText: normalizedOcrText,
       source: "ocr",
@@ -340,7 +409,7 @@ export const buildPdfTextSelection = ({
     });
   }
 
-  if (scoreDelta <= -0.18 && nativeQualityScore >= 0.45) {
+  if (scoreDelta <= -0.16 && nativeQualityScore >= 0.46) {
     return buildSelectionResult({
       finalText: normalizedNativeText,
       source: "native",
@@ -350,7 +419,8 @@ export const buildPdfTextSelection = ({
     });
   }
 
-  const primarySource = ocrQualityScore >= nativeQualityScore ? "ocr" : "native";
+  const primarySource =
+    ocrQualityScore >= nativeQualityScore ? "ocr" : "native";
   const mergedLines = mergeLineCandidates({
     primaryLines: primarySource === "ocr" ? ocrLines : nativeLines,
     secondaryLines: primarySource === "ocr" ? nativeLines : ocrLines,
@@ -360,7 +430,7 @@ export const buildPdfTextSelection = ({
 
   if (
     mergedLines.length > Math.max(nativeLines.length, ocrLines.length) &&
-    mergedQualityScore >= Math.max(nativeQualityScore, ocrQualityScore) - 0.05
+    mergedQualityScore >= Math.max(nativeQualityScore, ocrQualityScore) - 0.04
   ) {
     return buildSelectionResult({
       finalText: mergedText,
@@ -387,5 +457,72 @@ export const buildPdfTextSelection = ({
     nativeQualityScore,
     ocrQualityScore,
     lines: nativeLines,
+  });
+};
+
+export const selectBestPdfTextSelection = (
+  selections: readonly PdfTextSelection[],
+) => {
+  if (selections.length === 0) {
+    return buildPdfTextSelection({ nativeText: "", ocrText: "" });
+  }
+
+  return [...selections].sort((left, right) => {
+    if (right.qualityScore !== left.qualityScore) {
+      return right.qualityScore - left.qualityScore;
+    }
+
+    if (right.charCount !== left.charCount) {
+      return right.charCount - left.charCount;
+    }
+
+    return right.lineCount - left.lineCount;
+  })[0];
+};
+
+export const mergePdfTextSelections = (
+  selections: readonly PdfTextSelection[],
+  preferredSource: PdfOcrTextSource = "ocr",
+) => {
+  const meaningfulSelections = selections.filter(
+    (selection) => selection.finalText.length > 0,
+  );
+
+  if (meaningfulSelections.length === 0) {
+    return buildPdfTextSelection({ nativeText: "", ocrText: "" });
+  }
+
+  const orderedSelections = [...meaningfulSelections].sort((left, right) => {
+    const leftPreferred = left.source === preferredSource ? 1 : 0;
+    const rightPreferred = right.source === preferredSource ? 1 : 0;
+    if (leftPreferred !== rightPreferred) {
+      return rightPreferred - leftPreferred;
+    }
+
+    if (right.qualityScore !== left.qualityScore) {
+      return right.qualityScore - left.qualityScore;
+    }
+
+    return right.charCount - left.charCount;
+  });
+
+  const mergedLines = mergeLineCandidates({
+    primaryLines: orderedSelections.flatMap((selection) => selection.lines),
+    secondaryLines: [],
+  });
+
+  return buildSelectionResult({
+    finalText: mergedLines.map((line) => line.text).join("\n"),
+    source: "hybrid",
+    nativeQualityScore: Math.max(
+      ...orderedSelections.map((selection) => selection.nativeQualityScore),
+    ),
+    ocrQualityScore: Math.max(
+      ...orderedSelections.map((selection) => selection.ocrQualityScore),
+    ),
+    lines: mergedLines.map((line, index) => ({
+      ...line,
+      order: index,
+    })),
   });
 };
