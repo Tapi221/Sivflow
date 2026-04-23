@@ -244,14 +244,15 @@ const TitleBarBreadcrumbs = React.memo(
                   <PopoverContent
                     align="start"
                     side="bottom"
-                    sideOffset={10}
+                    sideOffset={8}
                     className={cn(
                       HOME_MENU_PANEL_PRESET.className,
-                      "w-[344px] p-2",
+                      "w-[220px] p-1.5",
                     )}
                     surface={HOME_MENU_PANEL_PRESET.surface}
+                    style={noDragStyle}
                   >
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="flex flex-col gap-0.5">
                       {HOME_MENU_ITEMS.map((item) => {
                         const active = isHomeMenuItemActive(item.to);
 
@@ -259,49 +260,43 @@ const TitleBarBreadcrumbs = React.memo(
                           <button
                             key={item.to}
                             type="button"
+                            onMouseDown={(event) => event.stopPropagation()}
                             onClick={() => {
                               setIsHomeMenuOpen(false);
                               void navigate(item.to);
                             }}
                             className={cn(
-                              "group flex min-h-[76px] flex-col items-start gap-2 rounded-xl border px-3 py-3 text-left transition-colors",
+                              "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
                               active
-                                ? "border-[rgba(35,131,226,0.18)] bg-[rgba(35,131,226,0.08)]"
-                                : "border-transparent hover:bg-[rgba(55,53,47,0.05)]",
+                                ? "bg-[rgba(55,53,47,0.08)] text-[rgba(55,53,47,0.96)]"
+                                : "text-[rgba(55,53,47,0.78)] hover:bg-[rgba(55,53,47,0.05)] hover:text-[rgba(55,53,47,0.96)]",
                             )}
                           >
-                            <span
-                              className={cn(
-                                "flex h-9 w-9 items-center justify-center rounded-lg border text-[rgba(55,53,47,0.72)] transition-colors",
-                                active
-                                  ? "border-[rgba(35,131,226,0.18)] bg-white text-[rgba(35,131,226,0.92)]"
-                                  : "border-[rgba(55,53,47,0.08)] bg-[rgba(55,53,47,0.03)] group-hover:text-[rgba(55,53,47,0.92)]",
-                              )}
-                            >
+                            <span className="flex h-4 w-4 shrink-0 items-center justify-center text-[rgba(55,53,47,0.72)]">
                               {item.icon}
                             </span>
-                            <span className="text-sm font-medium text-slate-800">
-                              {item.label}
-                            </span>
+                            <span className="truncate">{item.label}</span>
                           </button>
                         );
                       })}
                     </div>
 
-                    <div className="mt-2 border-t border-[rgba(55,53,47,0.08)] pt-2">
-                      <button
-                        type="button"
-                        onClick={handleOpenSettings}
-                        className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-[rgba(55,53,47,0.05)]"
-                      >
-                        <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-[rgba(55,53,47,0.08)] bg-[rgba(55,53,47,0.03)] text-[rgba(55,53,47,0.72)] transition-colors group-hover:text-[rgba(55,53,47,0.92)]">
-                          <TitleBarMenuSettingsIcon />
-                        </span>
-                        <span className="text-sm font-medium text-slate-800">
-                          設定
-                        </span>
-                      </button>
-                    </div>
+                    <div className="my-1 border-t border-[rgba(55,53,47,0.08)]" />
+
+                    <button
+                      type="button"
+                      onMouseDown={(event) => event.stopPropagation()}
+                      onClick={() => {
+                        setIsHomeMenuOpen(false);
+                        handleOpenSettings();
+                      }}
+                      className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-[rgba(55,53,47,0.78)] transition-colors hover:bg-[rgba(55,53,47,0.05)] hover:text-[rgba(55,53,47,0.96)]"
+                    >
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center text-[rgba(55,53,47,0.72)]">
+                        <TitleBarMenuSettingsIcon />
+                      </span>
+                      <span className="truncate">設定</span>
+                    </button>
                   </PopoverContent>
                 </Popover>
               ) : shouldRenderClickableButton ? (
