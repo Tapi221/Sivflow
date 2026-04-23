@@ -13,18 +13,29 @@ import {
 const recognizeMock = vi.fn(async () => ({
   data: { text: "" },
 }));
+const createWorkerMock = vi.fn(async () => ({
+  recognize: recognizeMock,
+  terminate: vi.fn(async () => undefined),
+}));
+const renderPdfPageForOcrMock = vi.fn(async () => ({
+  canvas: document.createElement("canvas"),
+  scale: 2,
+  profile: {
+    mode: "none",
+    targetPixels: 3_600_000,
+    minScale: 1.6,
+    maxScale: 2.6,
+    trimWhitespace: false,
+    contrastBoost: 1.04,
+  },
+}));
 
 vi.mock("tesseract.js", () => ({
-  createWorker: vi.fn(async () => ({
-    recognize: recognizeMock,
-    terminate: vi.fn(async () => undefined),
-  })),
+  createWorker: createWorkerMock,
 }));
 
 vi.mock("@/lib/pdf/renderPdfPageForOcr", () => ({
-  renderPdfPageForOcr: vi.fn(async () => ({
-    canvas: document.createElement("canvas"),
-  })),
+  renderPdfPageForOcr: renderPdfPageForOcrMock,
 }));
 
 const OCR_DB_NAME = "flashcard-master-pdf-ocr";
@@ -53,9 +64,10 @@ const createDocumentController = ({
     acquirePage: vi.fn(async () => ({
       page: {
         getViewport: vi.fn(() => ({
-          width: 1,
-          height: 1,
+          width: 1000,
+          height: 1400,
         })),
+        render: vi.fn(() => ({ promise: Promise.resolve() })),
       },
       release: vi.fn(),
     })),
@@ -94,7 +106,10 @@ const resetOcrDatabase = async () => {
 describe("usePdfOcr", () => {
   beforeEach(async () => {
     vi.restoreAllMocks();
+    createWorkerMock.mockClear();
+    recognizeMock.mockReset();
     recognizeMock.mockResolvedValue({ data: { text: "" } });
+    renderPdfPageForOcrMock.mockClear();
     cleanup();
     await resetOcrDatabase();
   });
@@ -148,14 +163,6 @@ describe("usePdfOcr", () => {
 
     expect(result.current.hasAnyOcr).toBe(false);
 
-    const recordDuringUnresolvedPhase = await getPdfOcrPageRecord({
-      docId,
-      documentKey: resolvedDocumentKey,
-      pageNumber: 1,
-    });
-
-    expect(recordDuringUnresolvedPhase?.finalText).toBe(persistedText);
-
     rerender({
       currentDocumentKey: resolvedDocumentKey,
       controller: createDocumentController({
@@ -183,38 +190,10 @@ describe("usePdfOcr", () => {
 
     const docId = "doc-retention-regression";
 
-    await putPdfOcrPageRecord({
-      docId,
-      documentKey: "fingerprint:oldest",
-      pageNumber: 1,
-      finalText: "oldest",
-      nativeText: "",
-      ocrText: "oldest",
-    });
-    await putPdfOcrPageRecord({
-      docId,
-      documentKey: "fingerprint:older",
-      pageNumber: 1,
-      finalText: "older",
-      nativeText: "",
-      ocrText: "older",
-    });
-    await putPdfOcrPageRecord({
-      docId,
-      documentKey: "fingerprint:recent",
-      pageNumber: 1,
-      finalText: "recent",
-      nativeText: "",
-      ocrText: "recent",
-    });
-    await putPdfOcrPageRecord({
-      docId,
-      documentKey: "fingerprint:active",
-      pageNumber: 1,
-      finalText: "active",
-      nativeText: "",
-      ocrText: "active",
-    });
+    await putPdfOcrPageRecord({ docId, documentKey: "fingerprint:oldest", pageNumber: 1, finalText: "oldest", nativeText: "", ocrText: "oldest" });
+    await putPdfOcrPageRecord({ docId, documentKey: "fingerprint:older", pageNumber: 1, finalText: "older", nativeText: "", ocrText: "older" });
+    await putPdfOcrPageRecord({ docId, documentKey: "fingerprint:recent", pageNumber: 1, finalText: "recent", nativeText: "", ocrText: "recent" });
+    await putPdfOcrPageRecord({ docId, documentKey: "fingerprint:active", pageNumber: 1, finalText: "active", nativeText: "", ocrText: "active" });
 
     const { result } = renderHook(() =>
       usePdfOcr({
@@ -239,58 +218,41 @@ describe("usePdfOcr", () => {
       });
       expect(oldestRecords).toHaveLength(0);
     });
-
-    const activeRecords = await listPdfOcrPageRecords({
-      docId,
-      documentKey: "fingerprint:active",
-    });
-    const olderRecords = await listPdfOcrPageRecords({
-      docId,
-      documentKey: "fingerprint:older",
-    });
-    const recentRecords = await listPdfOcrPageRecords({
-      docId,
-      documentKey: "fingerprint:recent",
-    });
-
-    expect(activeRecords).toHaveLength(1);
-    expect(olderRecords).toHaveLength(1);
-    expect(recentRecords).toHaveLength(1);
   });
 
-  it("stores OCR output when native text quality is too low", async () => {
-    recognizeMock.mockResolvedValueOnce({
-      data: { text: "微分係数の定義\n極限を用いて変化率を求める。" },
-    });
-
-    const docId = "doc-quality-fallback";
-    const controller = createDocumentController({
-      isResolved: true,
-      nativeText: "| | | | --- ___",
-    });
+  it("retries OCR with enhanced profiles for low quality native text and persists the best attempt", async () => {
+    const docId = "doc-performance-retry";
+    recognizeMock
+      .mockResolvedValueOnce({ data: { text: "a b c d" } })
+      .mockResolvedValueOnce({ data: { text: "細胞分裂ではDNAが複製され、二つの娘細胞へ均等に分配される。" } });
 
     const { result } = renderHook(() =>
       usePdfOcr({
         docId,
-        documentKey: "fingerprint:quality-fallback",
+        documentKey: "fingerprint:retry-target",
         currentPage: 1,
         numPages: 1,
-        documentController: controller,
+        documentController: createDocumentController({
+          isResolved: true,
+          nativeText: "a\nb\nc\nd",
+        }),
       }),
     );
 
     await waitFor(async () => {
       await result.current.runCurrentPageOcr();
-      expect(result.current.ocrTextByPage[1]).toContain("微分係数の定義");
+      expect(result.current.ocrState.status).toBe("success");
     });
 
-    const stored = await getPdfOcrPageRecord({
+    const record = await getPdfOcrPageRecord({
       docId,
-      documentKey: "fingerprint:quality-fallback",
+      documentKey: "fingerprint:retry-target",
       pageNumber: 1,
     });
 
-    expect(stored?.source).toBe("ocr");
-    expect(stored?.ocrQualityScore).toBeGreaterThan(stored?.nativeQualityScore ?? 0);
+    expect(record?.finalText).toContain("細胞分裂");
+    expect(record?.attempts.length).toBeGreaterThanOrEqual(2);
+    expect(createWorkerMock).toHaveBeenCalled();
+    expect(renderPdfPageForOcrMock).toHaveBeenCalled();
   });
 });

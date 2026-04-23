@@ -19,11 +19,19 @@ export interface PdfTextSelection {
   lines: PdfOcrLineRecord[];
 }
 
+export interface PdfTextLanguageProfile {
+  japaneseRatio: number;
+  latinRatio: number;
+  dominant: "japanese" | "latin" | "mixed";
+}
+
 const PDF_TEXT_SYMBOL_RUN_RE = /[_=\-]{4,}|[|/\\]{4,}|\.{4,}/g;
 const PDF_TEXT_MOJIBAKE_RE = /[�□◻︎◼︎◆◇]/g;
 const PDF_TEXT_MULTISPACE_RE = /\s{3,}/g;
 const PDF_TEXT_PRINTABLE_RE = /[\p{L}\p{N}\p{P}\p{S}\p{Zs}]/gu;
 const PDF_TEXT_WORD_RE = /[\p{L}\p{N}][\p{L}\p{N}\p{M}_-]*/gu;
+const PDF_TEXT_JAPANESE_RE = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/gu;
+const PDF_TEXT_LATIN_RE = /[A-Za-z]/g;
 
 const clampUnit = (value: number) => {
   if (!Number.isFinite(value)) {
@@ -84,6 +92,15 @@ const getSuspiciousLineRatio = (lines: string[]) => {
   return suspiciousLineCount / lines.length;
 };
 
+const getDuplicateLineRatio = (lines: string[]) => {
+  if (lines.length === 0) {
+    return 0;
+  }
+
+  const uniqueCount = new Set(lines.map((line) => line.toLowerCase())).size;
+  return 1 - uniqueCount / Math.max(lines.length, 1);
+};
+
 export const scorePdfTextQuality = (rawValue: string) => {
   const text = normalizePdfExtractedText(rawValue);
   const lines = splitPdfTextIntoLines(text);
@@ -97,21 +114,76 @@ export const scorePdfTextQuality = (rawValue: string) => {
   const printableRatio = getPrintableRatio(text);
   const singleCharacterLineRatio = getSingleCharacterLineRatio(lines);
   const suspiciousLineRatio = getSuspiciousLineRatio(lines);
+  const duplicateLineRatio = getDuplicateLineRatio(lines);
   const mojibakeRatio = (text.match(PDF_TEXT_MOJIBAKE_RE)?.length ?? 0) / Math.max(charCount, 1);
   const symbolRunRatio = (text.match(PDF_TEXT_SYMBOL_RUN_RE)?.length ?? 0) / Math.max(lines.length, 1);
   const multiSpaceRatio = (text.match(PDF_TEXT_MULTISPACE_RE)?.length ?? 0) / Math.max(lines.length, 1);
 
   let score = 0;
-  score += clampUnit(charCount / 120) * 0.2;
-  score += clampUnit(tokenCount / 20) * 0.2;
-  score += clampUnit(printableRatio) * 0.2;
-  score += clampUnit(1 - singleCharacterLineRatio) * 0.15;
-  score += clampUnit(1 - suspiciousLineRatio) * 0.15;
-  score += clampUnit(1 - mojibakeRatio * 6) * 0.05;
-  score += clampUnit(1 - symbolRunRatio * 1.5) * 0.03;
-  score += clampUnit(1 - multiSpaceRatio * 1.5) * 0.02;
+  score += clampUnit(charCount / 120) * 0.17;
+  score += clampUnit(tokenCount / 20) * 0.18;
+  score += clampUnit(printableRatio) * 0.16;
+  score += clampUnit(1 - singleCharacterLineRatio) * 0.12;
+  score += clampUnit(1 - suspiciousLineRatio) * 0.14;
+  score += clampUnit(1 - duplicateLineRatio) * 0.08;
+  score += clampUnit(1 - mojibakeRatio * 6) * 0.08;
+  score += clampUnit(1 - symbolRunRatio * 1.5) * 0.04;
+  score += clampUnit(1 - multiSpaceRatio * 1.5) * 0.03;
 
   return Number(clampUnit(score).toFixed(4));
+};
+
+export const getPdfTextLanguageProfile = (
+  rawValue: string,
+): PdfTextLanguageProfile => {
+  const text = normalizePdfExtractedText(rawValue);
+  if (text.length === 0) {
+    return {
+      japaneseRatio: 0,
+      latinRatio: 0,
+      dominant: "mixed",
+    };
+  }
+
+  const japaneseCount = text.match(PDF_TEXT_JAPANESE_RE)?.length ?? 0;
+  const latinCount = text.match(PDF_TEXT_LATIN_RE)?.length ?? 0;
+  const japaneseRatio = japaneseCount / Math.max(text.length, 1);
+  const latinRatio = latinCount / Math.max(text.length, 1);
+
+  if (japaneseRatio >= 0.18 && latinRatio < 0.08) {
+    return {
+      japaneseRatio: Number(japaneseRatio.toFixed(4)),
+      latinRatio: Number(latinRatio.toFixed(4)),
+      dominant: "japanese",
+    };
+  }
+
+  if (latinRatio >= 0.25 && japaneseRatio < 0.08) {
+    return {
+      japaneseRatio: Number(japaneseRatio.toFixed(4)),
+      latinRatio: Number(latinRatio.toFixed(4)),
+      dominant: "latin",
+    };
+  }
+
+  return {
+    japaneseRatio: Number(japaneseRatio.toFixed(4)),
+    latinRatio: Number(latinRatio.toFixed(4)),
+    dominant: "mixed",
+  };
+};
+
+export const guessPreferredOcrLanguages = (rawValue: string) => {
+  const profile = getPdfTextLanguageProfile(rawValue);
+
+  switch (profile.dominant) {
+    case "japanese":
+      return ["jpn", "jpn+eng", "eng"];
+    case "latin":
+      return ["eng", "jpn+eng", "jpn"];
+    default:
+      return ["jpn+eng", "jpn", "eng"];
+  }
 };
 
 const normalizeLineKey = (line: string) => {
@@ -191,7 +263,10 @@ const buildSelectionResult = ({
   const effectiveLines =
     lines.length > 0
       ? lines.map((line, index) => ({ ...line, order: index }))
-      : buildOriginLines(normalizedFinalText, source === "hybrid" ? "native" : source);
+      : buildOriginLines(
+          normalizedFinalText,
+          source === "hybrid" ? "native" : source,
+        );
   const qualityScore = Math.max(nativeQualityScore, ocrQualityScore);
 
   return {

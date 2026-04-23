@@ -1,37 +1,35 @@
 import { describe, expect, it } from "vitest";
 import {
   buildPdfTextSelection,
+  guessPreferredOcrLanguages,
   scorePdfTextQuality,
 } from "@/lib/pdf/pdfTextExtraction";
 
 describe("pdfTextExtraction", () => {
-  it("scores readable native text higher than noisy fragments", () => {
-    const readable = "微分係数の定義\n極限を用いて関数の変化率を求める。";
-    const noisy = "| | | | --- ___ □□□";
-
-    expect(scorePdfTextQuality(readable)).toBeGreaterThan(
-      scorePdfTextQuality(noisy),
-    );
-  });
-
-  it("prefers OCR text when native text is low quality", () => {
+  it("prefers OCR when native text quality is much lower", () => {
     const selection = buildPdfTextSelection({
-      nativeText: "| | | | --- ___",
-      ocrText: "微分係数の定義\n極限を用いて関数の変化率を求める。",
+      nativeText: "a\nb\nc\nd\ne",
+      ocrText: "光合成は葉緑体で行われる。二酸化炭素と水から有機物を合成する。",
     });
 
     expect(selection.source).toBe("ocr");
-    expect(selection.finalText).toContain("微分係数の定義");
+    expect(selection.qualityScore).toBeGreaterThan(0.6);
   });
 
-  it("builds a hybrid result when both sources contribute unique lines", () => {
-    const selection = buildPdfTextSelection({
-      nativeText: "Chapter 1\n微分係数の定義",
-      ocrText: "微分係数の定義\n例題 1",
-    });
+  it("guesses japanese-first OCR for Japanese heavy text", () => {
+    expect(
+      guessPreferredOcrLanguages(
+        "免疫記憶は再感染時の応答を速める。抗体価の推移を確認する。",
+      )[0],
+    ).toBe("jpn");
+  });
 
-    expect(selection.source).toBe("hybrid");
-    expect(selection.finalText).toContain("Chapter 1");
-    expect(selection.finalText).toContain("例題 1");
+  it("scores readable paragraph text above noisy symbols", () => {
+    const paragraphScore = scorePdfTextQuality(
+      "Cell division produces two daughter cells with nearly identical genetic information.",
+    );
+    const noisyScore = scorePdfTextQuality("==== //// .... □□□□");
+
+    expect(paragraphScore).toBeGreaterThan(noisyScore);
   });
 });

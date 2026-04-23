@@ -7,18 +7,25 @@ import {
   listPdfOcrPageRecords,
   putPdfOcrPageRecord,
   trimPdfOcrRecordsForDoc,
+  type PdfOcrAttemptRecord,
   type PdfOcrPageRecord,
 } from "@/lib/pdf/pdfOcrStore";
 import {
   buildPdfTextSelection,
+  guessPreferredOcrLanguages,
   normalizePdfExtractedText,
   scorePdfTextQuality,
 } from "@/lib/pdf/pdfTextExtraction";
-import { renderPdfPageForOcr } from "@/lib/pdf/renderPdfPageForOcr";
+import {
+  renderPdfPageForOcr,
+  type PdfOcrRenderProfile,
+} from "@/lib/pdf/renderPdfPageForOcr";
 
-const OCR_LANGUAGES = "jpn+eng";
+const OCR_DEFAULT_LANGUAGE = "jpn+eng";
 const OCR_NATIVE_TEXT_SKIP_THRESHOLD = 32;
 const OCR_NATIVE_QUALITY_SKIP_THRESHOLD = 0.72;
+const OCR_CACHE_SKIP_QUALITY_THRESHOLD = 0.67;
+const OCR_RETRY_QUALITY_THRESHOLD = 0.58;
 const OCR_DOCUMENT_RETENTION_LIMIT = 3;
 
 type OcrStatus = "idle" | "running" | "success" | "error" | "cancelled";
@@ -39,6 +46,21 @@ interface PdfOcrState {
   currentProcessingPage: number | null;
   error: string | null;
   cachedPageNumbers: number[];
+}
+
+interface OcrAttemptPlan {
+  languageHint: string;
+  renderProfile: PdfOcrRenderProfile;
+  reason: string;
+}
+
+interface OcrAttemptResult {
+  attemptIndex: number;
+  languageHint: string;
+  renderProfile: PdfOcrRenderProfile;
+  recognizedText: string;
+  selection: ReturnType<typeof buildPdfTextSelection>;
+  renderScale: number;
 }
 
 const createInitialOcrState = (): PdfOcrState => ({
@@ -71,50 +93,7 @@ const extractTextFromTextContent = async (
     .trim();
 };
 
-const persistSelection = async ({
-  docId,
-  documentKey,
-  pageNumber,
-  nativeText,
-  ocrText,
-}: {
-  docId: string;
-  documentKey: string;
-  pageNumber: number;
-  nativeText: string;
-  ocrText: string;
-}) => {
-  const selection = buildPdfTextSelection({
-    nativeText,
-    ocrText,
-  });
-
-  if (selection.finalText.length === 0) {
-    return null;
-  }
-
-  return putPdfOcrPageRecord({
-    docId,
-    documentKey,
-    pageNumber,
-    finalText: selection.finalText,
-    nativeText,
-    ocrText,
-    source: selection.source,
-    status: selection.status,
-    qualityScore: selection.qualityScore,
-    nativeQualityScore: selection.nativeQualityScore,
-    ocrQualityScore: selection.ocrQualityScore,
-    lines: selection.lines,
-    languageHint: OCR_LANGUAGES,
-  });
-};
-
-const shouldUseNativeTextOnly = ({
-  nativeText,
-}: {
-  nativeText: string;
-}) => {
+const shouldUseNativeTextOnly = ({ nativeText }: { nativeText: string }) => {
   const normalizedNativeText = normalizePdfExtractedText(nativeText);
   const nativeQualityScore = scorePdfTextQuality(normalizedNativeText);
 
@@ -122,6 +101,186 @@ const shouldUseNativeTextOnly = ({
     normalizedNativeText.length >= OCR_NATIVE_TEXT_SKIP_THRESHOLD &&
     nativeQualityScore >= OCR_NATIVE_QUALITY_SKIP_THRESHOLD
   );
+};
+
+const prioritizePageNumbers = ({
+  pageNumbers,
+  currentPage,
+}: {
+  pageNumbers: number[];
+  currentPage: number;
+}) => {
+  const normalizedCurrentPage = Math.max(1, Math.trunc(currentPage));
+  return [...pageNumbers].sort((left, right) => {
+    const leftDistance = Math.abs(left - normalizedCurrentPage);
+    const rightDistance = Math.abs(right - normalizedCurrentPage);
+    if (leftDistance !== rightDistance) {
+      return leftDistance - rightDistance;
+    }
+
+    return left - right;
+  });
+};
+
+const buildAttemptPlan = ({
+  nativeText,
+}: {
+  nativeText: string;
+}): OcrAttemptPlan[] => {
+  const preferredLanguages = guessPreferredOcrLanguages(nativeText);
+  const plans: OcrAttemptPlan[] = [];
+  const seen = new Set<string>();
+
+  const pushPlan = (plan: OcrAttemptPlan) => {
+    const key = `${plan.languageHint}::${plan.reason}::${plan.renderProfile.mode}::${plan.renderProfile.targetPixels ?? 0}`;
+    if (seen.has(key)) {
+      return;
+    }
+
+    seen.add(key);
+    plans.push(plan);
+  };
+
+  preferredLanguages.forEach((languageHint, index) => {
+    if (index === 0) {
+      pushPlan({
+        languageHint,
+        reason: "default",
+        renderProfile: {
+          mode: "none",
+          targetPixels: 3_600_000,
+          minScale: 1.6,
+          maxScale: 2.6,
+          trimWhitespace: false,
+          contrastBoost: 1.04,
+        },
+      });
+    }
+  });
+
+  pushPlan({
+    languageHint: preferredLanguages[0] ?? OCR_DEFAULT_LANGUAGE,
+    reason: "grayscale-enhanced",
+    renderProfile: {
+      mode: "grayscale",
+      targetPixels: 4_800_000,
+      minScale: 1.9,
+      maxScale: 3,
+      trimWhitespace: true,
+      contrastBoost: 1.2,
+    },
+  });
+
+  pushPlan({
+    languageHint: preferredLanguages[0] ?? OCR_DEFAULT_LANGUAGE,
+    reason: "binary-highres",
+    renderProfile: {
+      mode: "binary",
+      targetPixels: 6_200_000,
+      minScale: 2.2,
+      maxScale: 3.2,
+      trimWhitespace: true,
+      contrastBoost: 1.28,
+      brightnessBoost: 0.02,
+    },
+  });
+
+  const fallbackLanguage = preferredLanguages[1] ?? OCR_DEFAULT_LANGUAGE;
+  if (fallbackLanguage !== preferredLanguages[0]) {
+    pushPlan({
+      languageHint: fallbackLanguage,
+      reason: "language-fallback",
+      renderProfile: {
+        mode: "binary",
+        targetPixels: 5_400_000,
+        minScale: 2,
+        maxScale: 3,
+        trimWhitespace: true,
+        contrastBoost: 1.24,
+      },
+    });
+  }
+
+  return plans;
+};
+
+const shouldStopRetrying = ({
+  bestSelection,
+  attemptIndex,
+}: {
+  bestSelection: ReturnType<typeof buildPdfTextSelection> | null;
+  attemptIndex: number;
+}) => {
+  if (!bestSelection) {
+    return false;
+  }
+
+  if (bestSelection.qualityScore >= 0.82) {
+    return true;
+  }
+
+  if (attemptIndex >= 1 && bestSelection.qualityScore >= 0.7) {
+    return true;
+  }
+
+  return false;
+};
+
+const buildAttemptRecords = (
+  attempts: OcrAttemptResult[],
+): PdfOcrAttemptRecord[] => {
+  return attempts.map((attempt) => ({
+    attemptIndex: attempt.attemptIndex,
+    languageHint: attempt.languageHint,
+    renderMode: attempt.renderProfile.mode,
+    renderScale: attempt.renderScale,
+    qualityScore: attempt.selection.qualityScore,
+    text: attempt.selection.finalText,
+  }));
+};
+
+const persistSelection = async ({
+  docId,
+  documentKey,
+  pageNumber,
+  nativeText,
+  selection,
+  attempts,
+  processingMs,
+}: {
+  docId: string;
+  documentKey: string;
+  pageNumber: number;
+  nativeText: string;
+  selection: ReturnType<typeof buildPdfTextSelection>;
+  attempts: OcrAttemptResult[];
+  processingMs: number;
+}) => {
+  if (selection.finalText.length === 0) {
+    return null;
+  }
+
+  const bestAttempt = attempts[0] ?? null;
+
+  return putPdfOcrPageRecord({
+    docId,
+    documentKey,
+    pageNumber,
+    finalText: selection.finalText,
+    nativeText,
+    ocrText:
+      bestAttempt?.recognizedText ??
+      (selection.source === "native" ? "" : selection.finalText),
+    source: selection.source,
+    status: selection.status,
+    qualityScore: selection.qualityScore,
+    nativeQualityScore: selection.nativeQualityScore,
+    ocrQualityScore: selection.ocrQualityScore,
+    lines: selection.lines,
+    languageHint: bestAttempt?.languageHint ?? OCR_DEFAULT_LANGUAGE,
+    attempts: buildAttemptRecords(attempts),
+    processingMs,
+  });
 };
 
 export const usePdfOcr = ({
@@ -136,7 +295,9 @@ export const usePdfOcr = ({
   const [ocrRecords, setOcrRecords] = useState<PdfOcrPageRecord[]>([]);
 
   const mountedRef = useRef(true);
-  const workerPromiseRef = useRef<Promise<TesseractWorker> | null>(null);
+  const workerPromiseMapRef = useRef<Map<string, Promise<TesseractWorker>>>(
+    new Map(),
+  );
   const cancelRequestedRef = useRef(false);
   const processedPagesRef = useRef(0);
   const totalPagesRef = useRef(0);
@@ -229,24 +390,28 @@ export const usePdfOcr = ({
     return () => {
       cancelRequestedRef.current = true;
       void (async () => {
-        const workerPromise = workerPromiseRef.current;
-        workerPromiseRef.current = null;
-        if (!workerPromise) {
-          return;
-        }
-
-        const worker = await workerPromise;
-        await worker.terminate();
+        const workerPromises = Array.from(workerPromiseMapRef.current.values());
+        workerPromiseMapRef.current.clear();
+        await Promise.all(
+          workerPromises.map(async (workerPromise) => {
+            const worker = await workerPromise;
+            await worker.terminate();
+          }),
+        );
       })();
     };
   }, []);
 
-  const getWorker = useCallback(async () => {
-    if (workerPromiseRef.current) {
-      return workerPromiseRef.current;
+  const getWorker = useCallback(async (languageHint: string) => {
+    const normalizedLanguageHint = languageHint.trim() || OCR_DEFAULT_LANGUAGE;
+    const existingWorkerPromise = workerPromiseMapRef.current.get(
+      normalizedLanguageHint,
+    );
+    if (existingWorkerPromise) {
+      return existingWorkerPromise;
     }
 
-    workerPromiseRef.current = createWorker(OCR_LANGUAGES, 1, {
+    const workerPromise = createWorker(normalizedLanguageHint, 1, {
       logger: (message) => {
         const rawProgress =
           typeof (message as { progress?: unknown }).progress === "number"
@@ -276,7 +441,8 @@ export const usePdfOcr = ({
       },
     });
 
-    return workerPromiseRef.current;
+    workerPromiseMapRef.current.set(normalizedLanguageHint, workerPromise);
+    return workerPromise;
   }, []);
 
   const markProcessed = useCallback(() => {
@@ -297,6 +463,76 @@ export const usePdfOcr = ({
     }));
   }, []);
 
+  const performOcrAttempts = useCallback(
+    async ({
+      pageNumber,
+      nativeText,
+    }: {
+      pageNumber: number;
+      nativeText: string;
+    }) => {
+      const plans = buildAttemptPlan({ nativeText });
+      const attemptResults: OcrAttemptResult[] = [];
+      let bestSelection = buildPdfTextSelection({
+        nativeText,
+        ocrText: "",
+      });
+
+      for (let attemptIndex = 0; attemptIndex < plans.length; attemptIndex += 1) {
+        if (cancelRequestedRef.current) {
+          break;
+        }
+
+        const plan = plans[attemptIndex];
+        if (!plan) {
+          continue;
+        }
+
+        const worker = await getWorker(plan.languageHint);
+        const renderedPage = await renderPdfPageForOcr({
+          acquirePage: documentController.acquirePage,
+          pageNumber,
+          profile: plan.renderProfile,
+        });
+        const result = await worker.recognize(renderedPage.canvas);
+        const recognizedText = normalizePdfExtractedText(result.data.text);
+        const selection = buildPdfTextSelection({
+          nativeText,
+          ocrText: recognizedText,
+        });
+
+        attemptResults.push({
+          attemptIndex,
+          languageHint: plan.languageHint,
+          renderProfile: renderedPage.profile,
+          recognizedText,
+          selection,
+          renderScale: renderedPage.scale,
+        });
+
+        attemptResults.sort(
+          (left, right) => right.selection.qualityScore - left.selection.qualityScore,
+        );
+        bestSelection = attemptResults[0]?.selection ?? bestSelection;
+
+        if (
+          shouldStopRetrying({
+            bestSelection,
+            attemptIndex,
+          })
+        ) {
+          break;
+        }
+      }
+
+      return {
+        attempts: attemptResults,
+        bestSelection,
+      };
+    },
+    [documentController.acquirePage, getWorker],
+  );
+
   const runOcr = useCallback(
     async (pageNumbers: number[]) => {
       if (!resolvedDocumentKey || !documentController.doc) {
@@ -304,13 +540,18 @@ export const usePdfOcr = ({
         return;
       }
 
-      const normalizedPageNumbers = Array.from(
-        new Set(
-          pageNumbers
-            .filter((pageNumber) => Number.isFinite(pageNumber))
-            .map((pageNumber) => Math.max(1, Math.min(numPages, Math.trunc(pageNumber)))),
+      const normalizedPageNumbers = prioritizePageNumbers({
+        pageNumbers: Array.from(
+          new Set(
+            pageNumbers
+              .filter((pageNumber) => Number.isFinite(pageNumber))
+              .map((pageNumber) =>
+                Math.max(1, Math.min(numPages, Math.trunc(pageNumber))),
+              ),
+          ),
         ),
-      );
+        currentPage,
+      });
 
       if (normalizedPageNumbers.length === 0) {
         return;
@@ -331,8 +572,6 @@ export const usePdfOcr = ({
       }));
 
       try {
-        const worker = await getWorker();
-
         for (const pageNumber of normalizedPageNumbers) {
           if (cancelRequestedRef.current) {
             break;
@@ -349,7 +588,11 @@ export const usePdfOcr = ({
             pageNumber,
           });
 
-          if (cachedRecord?.finalText) {
+          if (
+            cachedRecord?.finalText &&
+            cachedRecord.qualityScore >= OCR_CACHE_SKIP_QUALITY_THRESHOLD &&
+            cachedRecord.status !== "error"
+          ) {
             markProcessed();
             continue;
           }
@@ -359,32 +602,48 @@ export const usePdfOcr = ({
             pageNumber,
           );
           const normalizedNativeText = normalizePdfExtractedText(nativeText);
+          const pageStartAt = performance.now();
 
           if (shouldUseNativeTextOnly({ nativeText: normalizedNativeText })) {
+            const selection = buildPdfTextSelection({
+              nativeText: normalizedNativeText,
+              ocrText: "",
+            });
             await persistSelection({
               docId,
               documentKey: resolvedDocumentKey,
               pageNumber,
               nativeText: normalizedNativeText,
-              ocrText: "",
+              selection,
+              attempts: [],
+              processingMs: performance.now() - pageStartAt,
             });
             markProcessed();
             continue;
           }
 
-          const renderedPage = await renderPdfPageForOcr({
-            acquirePage: documentController.acquirePage,
+          const { attempts, bestSelection } = await performOcrAttempts({
             pageNumber,
+            nativeText: normalizedNativeText,
           });
-          const result = await worker.recognize(renderedPage.canvas);
-          const normalizedOcrText = normalizePdfExtractedText(result.data.text);
+
+          const effectiveSelection =
+            bestSelection.qualityScore >= OCR_RETRY_QUALITY_THRESHOLD ||
+            attempts.length === 0
+              ? bestSelection
+              : buildPdfTextSelection({
+                  nativeText: normalizedNativeText,
+                  ocrText: attempts[0]?.recognizedText ?? "",
+                });
 
           await persistSelection({
             docId,
             documentKey: resolvedDocumentKey,
             pageNumber,
             nativeText: normalizedNativeText,
-            ocrText: normalizedOcrText,
+            selection: effectiveSelection,
+            attempts,
+            processingMs: performance.now() - pageStartAt,
           });
 
           markProcessed();
@@ -419,12 +678,14 @@ export const usePdfOcr = ({
       }
     },
     [
+      currentPage,
       docId,
-      documentController,
-      getWorker,
+      documentController.doc,
+      documentController.getPageTextContent,
       markProcessed,
       markUnavailableDocumentError,
       numPages,
+      performOcrAttempts,
       resolvedDocumentKey,
       syncCachedRecords,
     ],
@@ -458,7 +719,13 @@ export const usePdfOcr = ({
 
     setOcrState(createInitialOcrState());
     documentController.invalidateDerivedTextCache();
-  }, [docId, documentController, resetLocalOcrState, resolvedDocumentKey, syncCachedRecords]);
+  }, [
+    docId,
+    documentController,
+    resetLocalOcrState,
+    resolvedDocumentKey,
+    syncCachedRecords,
+  ]);
 
   const cancelOcr = useCallback(() => {
     cancelRequestedRef.current = true;
