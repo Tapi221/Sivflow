@@ -81,7 +81,9 @@ const EDITOR_BLOCK_DEFINITIONS = [
 ] as const satisfies readonly EditorBlockDefinition[];
 
 const EDITOR_BLOCK_DEFINITION_BY_TYPE = Object.fromEntries(
-  EDITOR_BLOCK_DEFINITIONS.map((definition) => [definition.type, definition] as const),
+  EDITOR_BLOCK_DEFINITIONS.map(
+    (definition) => [definition.type, definition] as const,
+  ),
 ) as Record<EditorBlockType, EditorBlockDefinition>;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -135,7 +137,11 @@ export const createDefaultEditorBlockSettings = (): EditorBlockConfig[] => {
 };
 
 export const normalizeEditorBlockSettings = (
-  items: readonly EditorBlockConfig[] | readonly BlockConfig[] | null | undefined,
+  items:
+    | readonly EditorBlockConfig[]
+    | readonly BlockConfig[]
+    | null
+    | undefined,
 ): EditorBlockConfig[] => {
   const byType = new Map<EditorBlockType, EditorBlockConfig>();
   const sortedItems = [...(items ?? [])].sort(compareEditorBlockConfigs);
@@ -164,7 +170,8 @@ export const normalizeEditorBlockSettings = (
 
   const merged = EDITOR_BLOCK_DEFINITIONS.map((definition) => {
     return (
-      byType.get(definition.type) ?? createEditorBlockConfigFromDefinition(definition)
+      byType.get(definition.type) ??
+      createEditorBlockConfigFromDefinition(definition)
     );
   });
 

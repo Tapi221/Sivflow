@@ -3,17 +3,12 @@
     --meta-panel-surface: color-mix(in srgb, #f7f5ef 88%, #eef2db 12%);
     --meta-panel-surface-elevated: color-mix(in srgb, white 88%, #eef2db 12%);
     --meta-panel-border: color-mix(in srgb, #d8d3c5 74%, #9ca86b 26%);
-    --meta-panel-border-strong: color-mix(
-      in srgb,
-      #c9cfab 58%,
-      #8f9c5a 42%
-    );
+    --meta-panel-border-strong: color-mix(in srgb, #c9cfab 58%, #8f9c5a 42%);
     --meta-panel-text-muted: color-mix(in srgb, #7d8370 88%, #4f5560 12%);
     --meta-panel-accent: #8f9c5a;
     --meta-panel-accent-soft: color-mix(in srgb, #eef2db 72%, white 28%);
     --meta-panel-shadow-soft:
-      inset 0 1px 0 rgba(255, 255, 255, 0.82),
-      0 8px 24px rgba(79, 85, 96, 0.08);
+      inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 8px 24px rgba(79, 85, 96, 0.08);
 
     --pdf-sidebar-surface: linear-gradient(180deg, #f8f7f2 0%, #f1efe5 100%);
     --pdf-sidebar-surface-plain: #fbfaf7;
@@ -26,8 +21,7 @@
     --pdf-sidebar-chip-bg: rgba(251, 250, 247, 0.95);
     --pdf-sidebar-shadow-strong: 0 12px 28px rgba(79, 85, 96, 0.14);
     --pdf-sidebar-shadow-soft:
-      0 8px 22px rgba(79, 85, 96, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.92);
+      0 8px 22px rgba(79, 85, 96, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.92);
     --pdf-sidebar-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.94);
   }
 
@@ -47,7 +41,13 @@
     background: var(--pdf-sidebar-surface);
   }
 
+  .pdf-filter-scope .ds-filter-panel {
+    max-height: none;
+  }
+
   .pdf-filter-panel-root {
+    max-height: none;
+    height: 100%;
     min-height: 0;
     background: var(--pdf-sidebar-surface);
     color: var(--pdf-sidebar-text-strong);
@@ -64,7 +64,11 @@
   .pdf-filter-toggle-button {
     color: var(--pdf-sidebar-text-strong);
     border-color: var(--pdf-sidebar-border);
-    background: color-mix(in srgb, white 78%, var(--meta-panel-accent-soft) 22%);
+    background: color-mix(
+      in srgb,
+      white 78%,
+      var(--meta-panel-accent-soft) 22%
+    );
     box-shadow: var(--meta-panel-shadow-soft);
   }
 
@@ -142,7 +146,8 @@
     box-shadow:
       0 12px 28px rgba(79, 85, 96, 0.12),
       inset 0 1px 0 rgba(255, 255, 255, 0.94);
-    outline: 1px solid color-mix(in srgb, var(--meta-panel-accent) 24%, white 76%);
+    outline: 1px solid
+      color-mix(in srgb, var(--meta-panel-accent) 24%, white 76%);
   }
 
   .pdf-thumbnail-card__preview {
@@ -151,7 +156,11 @@
   }
 
   .pdf-thumbnail-card__skeleton {
-    background: linear-gradient(180deg, rgba(248, 247, 242, 0.96), rgba(241, 239, 229, 0.92));
+    background: linear-gradient(
+      180deg,
+      rgba(248, 247, 242, 0.96),
+      rgba(241, 239, 229, 0.92)
+    );
   }
 
   .pdf-thumbnail-card__error {
@@ -166,7 +175,8 @@
   }
 
   .pdf-thumbnail-chip--ocr {
-    border: 1px solid color-mix(in srgb, var(--meta-panel-accent) 28%, white 72%);
+    border: 1px solid
+      color-mix(in srgb, var(--meta-panel-accent) 28%, white 72%);
     color: var(--meta-panel-accent);
   }
 

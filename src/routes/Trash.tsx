@@ -105,7 +105,9 @@ const maybeUpdateFirestoreDeletedState = async ({
   });
 };
 
-const maybeDeleteFirestoreDoc = async (pathSegments: string[]): Promise<void> => {
+const maybeDeleteFirestoreDoc = async (
+  pathSegments: string[],
+): Promise<void> => {
   if (!firestoreDb) return;
   const targetRef = doc(firestoreDb, ...pathSegments);
   await deleteDoc(targetRef);
@@ -252,11 +254,16 @@ const Trash = () => {
   }, [allCardsData, cardSetById]);
 
   const cards = useMemo(() => {
-    const deletedFolderIdSet = new Set(deletedFolders.map((folder) => folder.id));
+    const deletedFolderIdSet = new Set(
+      deletedFolders.map((folder) => folder.id),
+    );
 
     return allCardsData.filter((card) => {
       const folderId = cardFolderIdByCardId.get(card.id);
-      return card.isDeleted === true || (folderId ? deletedFolderIdSet.has(folderId) : false);
+      return (
+        card.isDeleted === true ||
+        (folderId ? deletedFolderIdSet.has(folderId) : false)
+      );
     });
   }, [allCardsData, cardFolderIdByCardId, deletedFolders]);
 
@@ -265,7 +272,9 @@ const Trash = () => {
   }, [cardFolderIdByCardId, cards]);
 
   const isLoading =
-    allFolders === undefined || allCards === undefined || allCardSets === undefined;
+    allFolders === undefined ||
+    allCards === undefined ||
+    allCardSets === undefined;
 
   const [selectedIds, setSelectedIds] = useState<SelectedIds>({
     folders: [],
@@ -275,7 +284,9 @@ const Trash = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewCard, setPreviewCard] = useState<PreviewItem>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
+  const [dateFilter, setDateFilter] = useState<
+    "all" | "today" | "week" | "month"
+  >("all");
 
   const hasSelection =
     selectedIds.folders.length > 0 || selectedIds.cards.length > 0;
@@ -372,7 +383,7 @@ const Trash = () => {
       for (const cardId of selectedIds.cards) {
         const card = cards.find((entry) => entry.id === cardId);
         const resolvedFolderId = card
-          ? cardFolderIdByCardId.get(card.id) ?? null
+          ? (cardFolderIdByCardId.get(card.id) ?? null)
           : null;
 
         if (resolvedFolderId) {
@@ -427,7 +438,9 @@ const Trash = () => {
       for (const id of selectedIds.folders) {
         await db.purge("folders", id);
         try {
-          await maybeDeleteFirestoreDoc(folderDocPathSegments(currentUserId, id));
+          await maybeDeleteFirestoreDoc(
+            folderDocPathSegments(currentUserId, id),
+          );
         } catch (error) {
           console.warn(`Firestore delete failed for folder ${id}:`, error);
         }
@@ -487,7 +500,9 @@ const Trash = () => {
         <div className="flex-1">
           <p className="font-medium text-sm">
             Q{index + 1}:{" "}
-            {card.title || getCardText(card, "question").substring(0, 30) || "(無題)"}
+            {card.title ||
+              getCardText(card, "question").substring(0, 30) ||
+              "(無題)"}
           </p>
           <p className="text-xs text-gray-500">
             削除日: {formatDateTime(card.deletedAt)}
@@ -542,7 +557,9 @@ const Trash = () => {
                 <select
                   value={dateFilter}
                   onChange={(event) =>
-                    setDateFilter(event.target.value as "all" | "today" | "week" | "month")
+                    setDateFilter(
+                      event.target.value as "all" | "today" | "week" | "month",
+                    )
                   }
                   className="pl-11 pr-8 py-2.5 border border-slate-200 rounded-2xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-600/20 focus:border-primary-600 shadow-sm appearance-none font-bold text-slate-600 cursor-pointer hover:border-slate-300 transition-all"
                 >
@@ -588,7 +605,8 @@ const Trash = () => {
 
               {hasSelection && (
                 <span className="text-sm text-gray-500 select-none">
-                  {selectedIds.folders.length + selectedIds.cards.length} 件選択中
+                  {selectedIds.folders.length + selectedIds.cards.length}{" "}
+                  件選択中
                 </span>
               )}
             </div>
@@ -688,7 +706,10 @@ const Trash = () => {
 
                                 await db.restore("cards", card.id);
                                 await maybeUpdateFirestoreDeletedState({
-                                  pathSegments: cardDocPathSegments(currentUserId, card.id),
+                                  pathSegments: cardDocPathSegments(
+                                    currentUserId,
+                                    card.id,
+                                  ),
                                   isDeleted: false,
                                 });
                               }
@@ -698,7 +719,9 @@ const Trash = () => {
                               );
                             } catch (error) {
                               console.error("Failed to restore folder:", error);
-                              window.alert(`復元に失敗しました: ${errorToMessage(error)}`);
+                              window.alert(
+                                `復元に失敗しました: ${errorToMessage(error)}`,
+                              );
                             } finally {
                               setIsProcessing(false);
                             }
@@ -714,7 +737,9 @@ const Trash = () => {
                   {folderCards.length > 0 && (
                     <CardContent>
                       <div className="space-y-2">
-                        {folderCards.map((card, index) => renderCardRow(card, index))}
+                        {folderCards.map((card, index) =>
+                          renderCardRow(card, index),
+                        )}
                       </div>
                     </CardContent>
                   )}
@@ -723,10 +748,15 @@ const Trash = () => {
             })}
 
             {Array.from(
-              groupCardsByFolderId(cards, cardFolderIdByCardId, deletedFolders).entries(),
+              groupCardsByFolderId(
+                cards,
+                cardFolderIdByCardId,
+                deletedFolders,
+              ).entries(),
             ).map(([normalizedFolderId, folderCards]) => {
               const folder = folders.find(
-                (candidate) => normalizeCaseFold(candidate.id) === normalizedFolderId,
+                (candidate) =>
+                  normalizeCaseFold(candidate.id) === normalizedFolderId,
               );
               if (!folder) return null;
 
@@ -760,12 +790,17 @@ const Trash = () => {
                             for (const card of folderCards) {
                               await db.restore("cards", card.id);
                               await maybeUpdateFirestoreDeletedState({
-                                pathSegments: cardDocPathSegments(currentUserId, card.id),
+                                pathSegments: cardDocPathSegments(
+                                  currentUserId,
+                                  card.id,
+                                ),
                                 isDeleted: false,
                               });
                             }
 
-                            window.alert(`${folderCards.length}枚のカードを復元しました`);
+                            window.alert(
+                              `${folderCards.length}枚のカードを復元しました`,
+                            );
                           } catch (error) {
                             console.error("Failed to restore cards:", error);
                             window.alert("復元に失敗しました");
@@ -782,7 +817,9 @@ const Trash = () => {
 
                   <CardContent>
                     <div className="space-y-2">
-                      {folderCards.map((card, index) => renderCardRow(card, index))}
+                      {folderCards.map((card, index) =>
+                        renderCardRow(card, index),
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -886,19 +923,21 @@ const Trash = () => {
                     </p>
                     {getCardImages(previewCard, "question").length > 0 && (
                       <div className="mt-3 space-y-2">
-                        {getCardImages(previewCard, "question").map((image, index) => (
-                          <img
-                            key={index}
-                            src={
-                              image?.remoteUrl ??
-                              image?.localUrl ??
-                              image?.url ??
-                              String(image)
-                            }
-                            alt={`Question ${index + 1}`}
-                            className="max-w-full rounded"
-                          />
-                        ))}
+                        {getCardImages(previewCard, "question").map(
+                          (image, index) => (
+                            <img
+                              key={index}
+                              src={
+                                image?.remoteUrl ??
+                                image?.localUrl ??
+                                image?.url ??
+                                String(image)
+                              }
+                              alt={`Question ${index + 1}`}
+                              className="max-w-full rounded"
+                            />
+                          ),
+                        )}
                       </div>
                     )}
                   </div>
@@ -912,19 +951,21 @@ const Trash = () => {
                     </p>
                     {getCardImages(previewCard, "answer").length > 0 && (
                       <div className="mt-3 space-y-2">
-                        {getCardImages(previewCard, "answer").map((image, index) => (
-                          <img
-                            key={index}
-                            src={
-                              image?.remoteUrl ??
-                              image?.localUrl ??
-                              image?.url ??
-                              String(image)
-                            }
-                            alt={`Answer ${index + 1}`}
-                            className="max-w-full rounded"
-                          />
-                        ))}
+                        {getCardImages(previewCard, "answer").map(
+                          (image, index) => (
+                            <img
+                              key={index}
+                              src={
+                                image?.remoteUrl ??
+                                image?.localUrl ??
+                                image?.url ??
+                                String(image)
+                              }
+                              alt={`Answer ${index + 1}`}
+                              className="max-w-full rounded"
+                            />
+                          ),
+                        )}
                       </div>
                     )}
                   </div>

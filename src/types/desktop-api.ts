@@ -12,7 +12,9 @@ export interface DesktopOauthApi {
   start(authorizeUrl: string): Promise<unknown>;
   cancel(): Promise<void>;
   exchangeIdToken(input: DesktopOauthExchangeInput): Promise<unknown>;
-  onCallback(handler: (payload: DesktopOauthCallbackPayload) => void): () => void;
+  onCallback(
+    handler: (payload: DesktopOauthCallbackPayload) => void,
+  ): () => void;
 }
 
 export interface DesktopBridgeApi {

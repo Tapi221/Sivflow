@@ -16,9 +16,7 @@ const toDate = (value: unknown, fallback: Date): Date => {
   return fallback;
 };
 
-const toStorageState = (
-  value: unknown,
-): IndexedDBMetadata["storageState"] => {
+const toStorageState = (value: unknown): IndexedDBMetadata["storageState"] => {
   return value === "DIRTY" ? "DIRTY" : "CLEAN";
 };
 
@@ -39,9 +37,7 @@ const toOptionalString = (value: unknown): string | undefined => {
     : undefined;
 };
 
-const normalizeMetadata = (
-  value: unknown,
-): IndexedDBMetadata | null => {
+const normalizeMetadata = (value: unknown): IndexedDBMetadata | null => {
   if (!isRecord(value)) return null;
 
   const rawExpected = isRecord(value.expectedEntityCounts)
@@ -72,7 +68,9 @@ export class IndexedDBMetadataService {
     this.userId = userId;
   }
 
-  private readonly recomputeMetadata = async (reason: string): Promise<void> => {
+  private readonly recomputeMetadata = async (
+    reason: string,
+  ): Promise<void> => {
     const cardCount = await this.db.cards.count();
     const folderCount = await this.db.folders.count();
     const eventCount = await this.db.levelHistories.count();
@@ -105,7 +103,9 @@ export class IndexedDBMetadataService {
     });
   };
 
-  public readonly recomputeMetadataFor = async (reason: string): Promise<void> => {
+  public readonly recomputeMetadataFor = async (
+    reason: string,
+  ): Promise<void> => {
     await this.recomputeMetadata(reason);
   };
 
@@ -131,7 +131,10 @@ export class IndexedDBMetadataService {
 
     const saved = await this.db.metadata.get("main");
     console.log(`[Metadata:${this.userId}] Marked CLEAN`);
-    console.log(`[Metadata:${this.userId}] Verification - saved metadata:`, saved);
+    console.log(
+      `[Metadata:${this.userId}] Verification - saved metadata:`,
+      saved,
+    );
   };
 
   public readonly markDirty = async (): Promise<void> => {

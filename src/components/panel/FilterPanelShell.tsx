@@ -32,7 +32,9 @@ export const FilterPanelShell = ({
   const shouldRenderSearch = typeof onSearchChange === "function";
 
   return (
-    <div className={cn("ds-filter-panel flex h-full min-h-0 flex-col", className)}>
+    <div
+      className={cn("ds-filter-panel flex h-full min-h-0 flex-col", className)}
+    >
       <div className="ds-filter-section ds-floating-panel__section ds-floating-panel__section--spacious">
         <div className="ds-floating-panel__header mb-2">
           <span className="ds-filter-section__title ds-floating-panel__title text-xs font-semibold">

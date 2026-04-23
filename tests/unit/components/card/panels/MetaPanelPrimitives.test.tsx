@@ -22,7 +22,11 @@ describe("MetaPanelPrimitives", () => {
         <MetaPanelSwitchRow label="下書き" checked={false} />
         <MetaPanelSectionHeader
           title="タグ管理"
-          action={<MetaPanelSectionActionButton>設定で管理</MetaPanelSectionActionButton>}
+          action={
+            <MetaPanelSectionActionButton>
+              設定で管理
+            </MetaPanelSectionActionButton>
+          }
         />
         <MetaPanelSurfaceField muted>タグを選択・追加</MetaPanelSurfaceField>
         <MetaPanelInfoRow label="作成日:" value="2026/04/16 07:42" />

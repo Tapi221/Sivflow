@@ -548,9 +548,7 @@ export const bulkUpsert: BulkUpsert = async (
     }
   }
 
-  const payload = items
-    .filter(isRecord)
-    .map((item) => ({ ...item }) as AnyRow);
+  const payload = items.filter(isRecord).map((item) => ({ ...item }) as AnyRow);
 
   if (table === "cards") {
     for (const entry of payload) {

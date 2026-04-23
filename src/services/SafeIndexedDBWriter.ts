@@ -6,8 +6,7 @@ const isQuotaExceededError = (error: unknown): boolean => {
 
   const record = error as Record<string, unknown>;
   return (
-    record.name === "QuotaExceededError" ||
-    record.code === "QuotaExceededError"
+    record.name === "QuotaExceededError" || record.code === "QuotaExceededError"
   );
 };
 

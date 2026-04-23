@@ -1,4 +1,7 @@
-import { functionsClient, requireFirestoreDb } from "@/infrastructure/firebase/client";
+import {
+  functionsClient,
+  requireFirestoreDb,
+} from "@/infrastructure/firebase/client";
 import { storageStatsDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
 import type { CloudStorageStats } from "@/types";
 import type { Unsubscribe } from "firebase/firestore";

@@ -28,7 +28,8 @@ const requireFirebaseConfig = (): void => {
   if (!firebaseConfig.apiKey?.trim()) missing.push("VITE_FIREBASE_API_KEY");
   if (!firebaseConfig.authDomain?.trim())
     missing.push("VITE_FIREBASE_AUTH_DOMAIN");
-  if (!firebaseConfig.projectId?.trim()) missing.push("VITE_FIREBASE_PROJECT_ID");
+  if (!firebaseConfig.projectId?.trim())
+    missing.push("VITE_FIREBASE_PROJECT_ID");
   if (!firebaseConfig.storageBucket?.trim())
     missing.push("VITE_FIREBASE_STORAGE_BUCKET");
   if (!firebaseConfig.messagingSenderId?.trim())

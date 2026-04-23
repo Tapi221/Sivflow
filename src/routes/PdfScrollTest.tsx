@@ -118,7 +118,8 @@ const PdfScrollTest = () => {
       <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2">
           <div className="text-sm text-slate-700">
-            PDF scroll test: {numPages > 0 ? `${currentPage} / ${numPages}` : "loading"}
+            PDF scroll test:{" "}
+            {numPages > 0 ? `${currentPage} / ${numPages}` : "loading"}
           </div>
           <Button
             type="button"

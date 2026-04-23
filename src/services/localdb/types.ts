@@ -87,10 +87,7 @@ export interface QueryableCollection<T extends object, TKey = string> {
   sortBy(field: keyof T | string): Promise<T[]>;
   primaryKeys(): Promise<TKey[]>;
   each(
-    callback: (
-      item: T,
-      cursor?: { primaryKey: TKey },
-    ) => void | Promise<void>,
+    callback: (item: T, cursor?: { primaryKey: TKey }) => void | Promise<void>,
   ): Promise<void>;
 }
 
@@ -219,9 +216,7 @@ export interface LocalDBSyncStore extends LocalDBSyncApi {
   conflicts: QueryableTable<SyncConflict, string>;
   metadata: QueryableTable<Record<string, unknown>, string>;
 
-  table<T extends object, TKey = string>(
-    name: string,
-  ): QueryableTable<T, TKey>;
+  table<T extends object, TKey = string>(name: string): QueryableTable<T, TKey>;
   transaction<T>(mode: string, ...args: unknown[]): Promise<T>;
   isOpen(): boolean;
   close(): void;
