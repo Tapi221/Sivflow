@@ -190,10 +190,38 @@ describe("usePdfOcr", () => {
 
     const docId = "doc-retention-regression";
 
-    await putPdfOcrPageRecord({ docId, documentKey: "fingerprint:oldest", pageNumber: 1, finalText: "oldest", nativeText: "", ocrText: "oldest" });
-    await putPdfOcrPageRecord({ docId, documentKey: "fingerprint:older", pageNumber: 1, finalText: "older", nativeText: "", ocrText: "older" });
-    await putPdfOcrPageRecord({ docId, documentKey: "fingerprint:recent", pageNumber: 1, finalText: "recent", nativeText: "", ocrText: "recent" });
-    await putPdfOcrPageRecord({ docId, documentKey: "fingerprint:active", pageNumber: 1, finalText: "active", nativeText: "", ocrText: "active" });
+    await putPdfOcrPageRecord({
+      docId,
+      documentKey: "fingerprint:oldest",
+      pageNumber: 1,
+      finalText: "oldest",
+      nativeText: "",
+      ocrText: "oldest",
+    });
+    await putPdfOcrPageRecord({
+      docId,
+      documentKey: "fingerprint:older",
+      pageNumber: 1,
+      finalText: "older",
+      nativeText: "",
+      ocrText: "older",
+    });
+    await putPdfOcrPageRecord({
+      docId,
+      documentKey: "fingerprint:recent",
+      pageNumber: 1,
+      finalText: "recent",
+      nativeText: "",
+      ocrText: "recent",
+    });
+    await putPdfOcrPageRecord({
+      docId,
+      documentKey: "fingerprint:active",
+      pageNumber: 1,
+      finalText: "active",
+      nativeText: "",
+      ocrText: "active",
+    });
 
     const { result } = renderHook(() =>
       usePdfOcr({
@@ -224,7 +252,11 @@ describe("usePdfOcr", () => {
     const docId = "doc-performance-retry";
     recognizeMock
       .mockResolvedValueOnce({ data: { text: "a b c d" } })
-      .mockResolvedValueOnce({ data: { text: "細胞分裂ではDNAが複製され、二つの娘細胞へ均等に分配される。" } });
+      .mockResolvedValueOnce({
+        data: {
+          text: "細胞分裂ではDNAが複製され、二つの娘細胞へ均等に分配される。",
+        },
+      });
 
     const { result } = renderHook(() =>
       usePdfOcr({
