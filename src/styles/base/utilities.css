@@ -235,12 +235,12 @@
   }
 
   .surface-flat-titlebar {
-    border-color: var(--titlebar-border);
-    background: color-mix(in srgb, var(--sidebar-bg) 72%, transparent 28%);
-    box-shadow: none;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-  }
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
 
   .titlebar-text-strong,
   .titlebar-text,
