@@ -167,6 +167,45 @@ const SearchIcon: React.FC = () => (
   </svg>
 );
 
+const CalendarIcon: React.FC = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <rect
+      x="4"
+      y="5"
+      width="16"
+      height="15"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
+    <path
+      d="M8 3V7"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+    <path
+      d="M16 3V7"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+    <path
+      d="M4 9H20"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 const BackIcon: React.FC = () => (
   <svg
     width="14"
@@ -294,11 +333,15 @@ const TitleBarPrimaryActions: React.FC<{
       </TitleBarToolbarButton>
 
       <TitleBarToolbarButton
-        title="検索欄へ移動"
+        title="検索"
         onClick={focusFirstSearchField}
         noDragStyle={noDragStyle}
       >
         <SearchIcon />
+      </TitleBarToolbarButton>
+
+      <TitleBarToolbarButton title="カレンダー" noDragStyle={noDragStyle}>
+        <CalendarIcon />
       </TitleBarToolbarButton>
 
       <TitleBarToolbarButton
