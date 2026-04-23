@@ -141,7 +141,7 @@ const makeIcon = (name: string) => {
   const glyph = glyphByIconName[name] ?? "default";
 
   const Icon = forwardRef<SVGSVGElement, IconProps>(function Icon(
-    { size = 16, className, label, title, style, strokeWidth = 1.8, ...rest },
+    { size = 16, className, label, title, style, strokeWidth = 1.5, ...rest },
     ref,
   ) {
     const resolvedLabel = label ?? rest["aria-label"];
