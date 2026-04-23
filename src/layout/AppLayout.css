@@ -1,6 +1,6 @@
 .app-layout {
   display: grid;
-  grid-template-columns: 236px minmax(0, 1fr);
+  grid-template-columns: 212px minmax(0, 1fr);
   gap: 10px;
   grid-template-rows: 1fr;
   height: 100%;
@@ -20,8 +20,8 @@
 }
 
 .app-layout__sidebar {
-  width: 236px;
-  min-width: 236px;
+  width: 212px;
+  min-width: 212px;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
