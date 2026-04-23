@@ -1,9 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps -- large legacy explorer handlers intentionally stabilized to avoid interaction regressions. */
 import { ExplorerEmptyState } from "@/components/folder/components/ExplorerEmptyState";
 import { ExplorerNoResultsState } from "@/components/folder/components/ExplorerNoResultsState";
-import { NavigationListPanel } from "@/components/folder/components/NavigationListPanel";
-import { NavigationPanelScope } from "@/components/folder/components/NavigationPanelScope";
 import { ExplorerTreeNodeRenderer } from "@/components/folder/components/ExplorerTreeNode";
+import { RootFolderPanelList } from "@/components/folder/components/RootFolderPanelList";
 import {
   getFolderId,
   type FolderTreeNode,
@@ -111,14 +110,6 @@ interface FolderTreeWithCardsProps {
   onHeaderFolderIdChange?: (folderId: string | null) => void;
   className?: string;
 }
-
-const getFolderDisplayName = (folder: FolderTreeNode) => {
-  return (
-    (folder as { folderName?: string; folder_name?: string }).folderName ??
-    (folder as { folderName?: string; folder_name?: string }).folder_name ??
-    "無題のフォルダ"
-  );
-};
 
 export const FolderTreeWithCards = ({
   sidebarDisplayMode = "tree",
@@ -373,7 +364,12 @@ export const FolderTreeWithCards = ({
           if (!id) return null;
           return {
             id,
-            name: getFolderDisplayName(folder),
+            name:
+              (folder as { folderName?: string; folder_name?: string })
+                .folderName ??
+              (folder as { folderName?: string; folder_name?: string })
+                .folder_name ??
+              "無題のフォルダ",
             folder,
           };
         })
@@ -441,7 +437,12 @@ export const FolderTreeWithCards = ({
           if (!id) return null;
           return {
             id,
-            name: getFolderDisplayName(folder),
+            name:
+              (folder as { folderName?: string; folder_name?: string })
+                .folderName ??
+              (folder as { folderName?: string; folder_name?: string })
+                .folder_name ??
+              "無題のフォルダ",
             folder,
           };
         })
@@ -454,21 +455,6 @@ export const FolderTreeWithCards = ({
     [rootFolders, hasFolderMatches],
   );
 
-  const currentNavigationScopeName = useMemo(() => {
-    if (!activeNavigationParentFolderId) return null;
-
-    const scopeFolder = treeFolders.find(
-      (folder) => getFolderId(folder) === activeNavigationParentFolderId,
-    );
-
-    return scopeFolder ? getFolderDisplayName(scopeFolder) : null;
-  }, [activeNavigationParentFolderId, treeFolders]);
-
-  const navigationPanelTitle = useMemo(() => {
-    if (forceSectionListRoot) return "セクション";
-    return currentNavigationScopeName ?? "セクション";
-  }, [currentNavigationScopeName, forceSectionListRoot]);
-
   const navigationEmptyMessage = useMemo(() => {
     if (isFiltering) {
       return "一致する項目がありません";
@@ -480,24 +466,6 @@ export const FolderTreeWithCards = ({
 
     return "表示できる項目はありません";
   }, [activeNavigationParentFolderId, isFiltering]);
-
-  const navigationSections = useMemo(
-    () => (
-      <NavigationPanelScope
-        scopeName={forceSectionListRoot ? null : currentNavigationScopeName}
-        folderCount={navigationFolderPanels.length}
-        cardSetCount={navigationCardSets.length}
-        itemCount={navigationItems.length}
-      />
-    ),
-    [
-      currentNavigationScopeName,
-      forceSectionListRoot,
-      navigationFolderPanels.length,
-      navigationCardSets.length,
-      navigationItems.length,
-    ],
-  );
 
   const allFolderIdSet = useMemo(
     () =>
@@ -1192,18 +1160,14 @@ export const FolderTreeWithCards = ({
               disableDrop={arboristDisableDrop}
             />
           ) : (
-            <NavigationListPanel
-              title={navigationPanelTitle}
-              sections={navigationSections}
-              panelClassName="h-full min-h-0"
-              listClassName="py-1"
+            <RootFolderPanelList
               entries={navigationEntries}
-              emptyMessage={navigationEmptyMessage}
               selectedFolderId={selectedFolderId}
               selectedItem={selectedItem}
               selectedCardSetId={selectedCardSetId}
               openRowMenuId={dialogs.openRowMenuId}
               setOpenRowMenuId={dialogs.setOpenRowMenuId}
+              emptyMessage={navigationEmptyMessage}
               setRowRef={setRowRef}
               onSelectFolder={(id) => {
                 if (!id) return;
