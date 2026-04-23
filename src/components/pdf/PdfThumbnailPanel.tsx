@@ -503,12 +503,6 @@ export const PdfThumbnailPanel = ({
     );
   }, [normalizedSearchToken, ocrTextByPage, orderedOcrPageNumbers]);
 
-  const selectedTabLabel = useMemo(() => {
-    return (
-      PANEL_TABS.find((tab) => tab.id === selectedTab)?.label ?? "サムネイル"
-    );
-  }, [selectedTab]);
-
   useEffect(() => {
     setSearchQuery("");
   }, [selectedTab]);
@@ -1045,11 +1039,6 @@ export const PdfThumbnailPanel = ({
       className="pdf-filter-panel-root h-full min-h-0"
       bodyClassName="overscroll-contain p-3"
       bodyRef={handleScrollRootRef}
-      headerAction={
-        <div className="pdf-filter-badge text-[10px] font-semibold tabular-nums">
-          {selectedTabLabel}
-        </div>
-      }
       sections={panelSections}
     >
       {panelBody}
