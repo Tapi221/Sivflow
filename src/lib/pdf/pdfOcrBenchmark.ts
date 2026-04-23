@@ -71,7 +71,7 @@ export const summarizePdfOcrBenchmark = (
     "mixed-layout": 0,
     "sparse-scan": 0,
     "numeric-heavy": 0,
-    "unknown": 0,
+    unknown: 0,
   };
 
   safeSamples.forEach((sample) => {

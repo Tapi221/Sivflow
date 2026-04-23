@@ -118,7 +118,9 @@ const computeOtsuThreshold = (imageData: ImageData) => {
     const meanBackground = sumBackground / weightBackground;
     const meanForeground = (sum - sumBackground) / weightForeground;
     const betweenClassVariance =
-      weightBackground * weightForeground * (meanBackground - meanForeground) ** 2;
+      weightBackground *
+      weightForeground *
+      (meanBackground - meanForeground) ** 2;
 
     if (betweenClassVariance > maxVariance) {
       maxVariance = betweenClassVariance;
@@ -461,7 +463,10 @@ export const renderPdfPageForOcr = async ({
       Math.trunc(profile?.targetPixels ?? OCR_DEFAULT_TARGET_PIXELS),
     );
     const minScale = Math.max(0.8, profile?.minScale ?? OCR_DEFAULT_MIN_SCALE);
-    const maxScale = Math.max(minScale, profile?.maxScale ?? OCR_DEFAULT_MAX_SCALE);
+    const maxScale = Math.max(
+      minScale,
+      profile?.maxScale ?? OCR_DEFAULT_MAX_SCALE,
+    );
     const contrastBoost = profile?.contrastBoost ?? 1.08;
     const brightnessBoost = profile?.brightnessBoost ?? 0;
     const preprocessMode = profile?.mode ?? "none";

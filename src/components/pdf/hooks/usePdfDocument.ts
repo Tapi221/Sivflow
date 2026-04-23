@@ -142,7 +142,9 @@ const normalizePdfLineText = (tokens: PdfTextToken[]) => {
   return joined;
 };
 
-const extractPdfTextTokens = (textContent: PdfJsTextContent): PdfTextToken[] => {
+const extractPdfTextTokens = (
+  textContent: PdfJsTextContent,
+): PdfTextToken[] => {
   return textContent.items
     .filter(isPdfTextItem)
     .map((item) => {
@@ -215,12 +217,16 @@ const buildMarkdownSection = ({
   lines: string[];
 }) => {
   const fallbackTitle = `Page ${pageNumber}`;
-  const firstMeaningfulLine = lines.find((line) => line.length > 0) ?? fallbackTitle;
+  const firstMeaningfulLine =
+    lines.find((line) => line.length > 0) ?? fallbackTitle;
   const title = truncateText(firstMeaningfulLine, OUTLINE_TITLE_MAX_LENGTH);
   const bodyLines =
     lines.length > 0 ? lines : ["(テキストを抽出できませんでした)"];
   const markdown = [`## ${fallbackTitle}`, "", ...bodyLines].join("\n");
-  const preview = truncateText(bodyLines.join(" "), MARKDOWN_PREVIEW_MAX_LENGTH);
+  const preview = truncateText(
+    bodyLines.join(" "),
+    MARKDOWN_PREVIEW_MAX_LENGTH,
+  );
 
   return {
     id: `pdf-markdown-page-${pageNumber}`,
@@ -244,7 +250,9 @@ const buildDerivedOutlineItems = (sections: PdfDocumentMarkdownSection[]) => {
   });
 };
 
-const isPdfDestinationReference = (value: unknown): value is PdfJsDestinationReference => {
+const isPdfDestinationReference = (
+  value: unknown,
+): value is PdfJsDestinationReference => {
   if (typeof value !== "object" || value === null) {
     return false;
   }
@@ -373,14 +381,14 @@ export const usePdfDocument = ({
   const onSourceLoadErrorRef = useRef(onSourceLoadError);
   const sourceMetaRef = useRef(sourceMeta);
   const pageCacheRef = useRef<PdfPageCache | null>(null);
-  const textContentPromiseCacheRef = useRef<Map<number, Promise<PdfJsTextContent>>>(
-    new Map(),
-  );
+  const textContentPromiseCacheRef = useRef<
+    Map<number, Promise<PdfJsTextContent>>
+  >(new Map());
   const pendingPageSizesRef = useRef<Map<number, PageSize>>(new Map());
   const pageSizeFlushRafRef = useRef<number | null>(null);
-  const outlinePromiseCacheRef = useRef<Promise<PdfDocumentOutlineItem[]> | null>(
-    null,
-  );
+  const outlinePromiseCacheRef = useRef<Promise<
+    PdfDocumentOutlineItem[]
+  > | null>(null);
   const markdownPromiseCacheRef = useRef<Promise<PdfDocumentMarkdown> | null>(
     null,
   );
@@ -484,24 +492,28 @@ export const usePdfDocument = ({
     cancelScheduledPageSizeFlush();
   }, [cancelScheduledPageSizeFlush, invalidateDerivedTextCache]);
 
-  const acquirePage = useCallback((pageNumber: number): Promise<PdfJsPageLease> => {
-    const pageCache = pageCacheRef.current;
-    if (!pageCache) {
-      return Promise.reject(new Error("PDF document is not loaded"));
-    }
+  const acquirePage = useCallback(
+    (pageNumber: number): Promise<PdfJsPageLease> => {
+      const pageCache = pageCacheRef.current;
+      if (!pageCache) {
+        return Promise.reject(new Error("PDF document is not loaded"));
+      }
 
-    return pageCache.acquirePage(pageNumber).then(({ page, release }) => {
-      return {
-        page,
-        release,
-      } satisfies PdfJsPageLease;
-    });
-  }, []);
+      return pageCache.acquirePage(pageNumber).then(({ page, release }) => {
+        return {
+          page,
+          release,
+        } satisfies PdfJsPageLease;
+      });
+    },
+    [],
+  );
 
   const getPageTextContent = useCallback(
     (pageNumber: number): Promise<PdfJsTextContent> => {
       const safePageNumber = clampPositiveInteger(pageNumber);
-      const cachedPromise = textContentPromiseCacheRef.current.get(safePageNumber);
+      const cachedPromise =
+        textContentPromiseCacheRef.current.get(safePageNumber);
 
       if (cachedPromise) {
         return cachedPromise;
@@ -534,7 +546,11 @@ export const usePdfDocument = ({
       const activeDocId = docId?.trim();
       const activeDocumentKey = documentKeyRef.current?.trim();
 
-      if (!activeDocId || !activeDocumentKey || activeDocumentKey === "unloaded") {
+      if (
+        !activeDocId ||
+        !activeDocumentKey ||
+        activeDocumentKey === "unloaded"
+      ) {
         return normalizePdfExtractedText(nativeText);
       }
 
@@ -550,7 +566,8 @@ export const usePdfDocument = ({
 
       const selection = buildPdfTextSelection({
         nativeText,
-        ocrText: cachedRecord.ocrText || cachedRecord.finalText || cachedRecord.text,
+        ocrText:
+          cachedRecord.ocrText || cachedRecord.finalText || cachedRecord.text,
       });
 
       if (selection.finalText.length > 0) {
@@ -562,45 +579,48 @@ export const usePdfDocument = ({
     [docId, getPageTextContent],
   );
 
-  const getDocumentMarkdown = useCallback(async (): Promise<PdfDocumentMarkdown> => {
-    const cachedPromise = markdownPromiseCacheRef.current;
-    if (cachedPromise) {
-      return cachedPromise;
-    }
-
-    const nextPromise = (async () => {
-      const pdf = docRef.current;
-      if (!pdf) {
-        throw new Error("PDF document is not loaded");
+  const getDocumentMarkdown =
+    useCallback(async (): Promise<PdfDocumentMarkdown> => {
+      const cachedPromise = markdownPromiseCacheRef.current;
+      if (cachedPromise) {
+        return cachedPromise;
       }
 
-      const sections: PdfDocumentMarkdownSection[] = [];
+      const nextPromise = (async () => {
+        const pdf = docRef.current;
+        if (!pdf) {
+          throw new Error("PDF document is not loaded");
+        }
 
-      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-        const pageText = await getBestAvailablePageText(pageNumber);
-        const textLines = splitPdfTextIntoLines(pageText);
-        sections.push(
-          buildMarkdownSection({
-            pageNumber,
-            lines: textLines,
-          }),
-        );
-      }
+        const sections: PdfDocumentMarkdownSection[] = [];
 
-      return {
-        content: sections.map((section) => section.markdown).join("\n\n"),
-        sections,
-      } satisfies PdfDocumentMarkdown;
-    })().catch((errorValue) => {
-      markdownPromiseCacheRef.current = null;
-      throw errorValue;
-    });
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+          const pageText = await getBestAvailablePageText(pageNumber);
+          const textLines = splitPdfTextIntoLines(pageText);
+          sections.push(
+            buildMarkdownSection({
+              pageNumber,
+              lines: textLines,
+            }),
+          );
+        }
 
-    markdownPromiseCacheRef.current = nextPromise;
-    return nextPromise;
-  }, [getBestAvailablePageText]);
+        return {
+          content: sections.map((section) => section.markdown).join("\n\n"),
+          sections,
+        } satisfies PdfDocumentMarkdown;
+      })().catch((errorValue) => {
+        markdownPromiseCacheRef.current = null;
+        throw errorValue;
+      });
 
-  const getDocumentOutline = useCallback(async (): Promise<PdfDocumentOutlineItem[]> => {
+      markdownPromiseCacheRef.current = nextPromise;
+      return nextPromise;
+    }, [getBestAvailablePageText]);
+
+  const getDocumentOutline = useCallback(async (): Promise<
+    PdfDocumentOutlineItem[]
+  > => {
     const cachedPromise = outlinePromiseCacheRef.current;
     if (cachedPromise) {
       return cachedPromise;
@@ -746,40 +766,41 @@ export const usePdfDocument = ({
       }
     };
 
-    const buildGetDocumentParams = async (): Promise<PdfJsGetDocumentParams> => {
-      const params: PdfJsGetDocumentParams = {
-        enableXfa,
-        useSystemFonts,
-        cMapUrl,
-        cMapPacked,
-        standardFontDataUrl,
-        disableFontFace,
-        verbosity,
-      };
+    const buildGetDocumentParams =
+      async (): Promise<PdfJsGetDocumentParams> => {
+        const params: PdfJsGetDocumentParams = {
+          enableXfa,
+          useSystemFonts,
+          cMapUrl,
+          cMapPacked,
+          standardFontDataUrl,
+          disableFontFace,
+          verbosity,
+        };
 
-      if (hasData && sourceData) {
-        params.data = sourceData;
-        return params;
-      }
-
-      if (!hasUrl) {
-        throw new Error("missing pdf source");
-      }
-
-      if (sourceUrl.startsWith("blob:")) {
-        const response = await fetch(sourceUrl);
-        if (!response.ok) {
-          throw new Error(`blob fetch failed: ${response.status}`);
+        if (hasData && sourceData) {
+          params.data = sourceData;
+          return params;
         }
 
-        const buffer = await response.arrayBuffer();
-        params.data = new Uint8Array(buffer);
-        return params;
-      }
+        if (!hasUrl) {
+          throw new Error("missing pdf source");
+        }
 
-      params.url = sourceUrl;
-      return params;
-    };
+        if (sourceUrl.startsWith("blob:")) {
+          const response = await fetch(sourceUrl);
+          if (!response.ok) {
+            throw new Error(`blob fetch failed: ${response.status}`);
+          }
+
+          const buffer = await response.arrayBuffer();
+          params.data = new Uint8Array(buffer);
+          return params;
+        }
+
+        params.url = sourceUrl;
+        return params;
+      };
 
     const run = async () => {
       setLoading(true);
@@ -812,7 +833,8 @@ export const usePdfDocument = ({
 
         releaseSession = sessionLease.release;
 
-        const { pdf, documentKey: nextDocumentKey } = await sessionLease.documentPromise;
+        const { pdf, documentKey: nextDocumentKey } =
+          await sessionLease.documentPromise;
 
         if (cancelled) {
           return;

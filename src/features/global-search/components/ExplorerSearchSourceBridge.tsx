@@ -27,7 +27,9 @@ export const ExplorerSearchSourceBridge = ({
   onItemSelect,
 }: ExplorerSearchSourceBridgeProps) => {
   const registerSource = useGlobalSearchStore((state) => state.registerSource);
-  const unregisterSource = useGlobalSearchStore((state) => state.unregisterSource);
+  const unregisterSource = useGlobalSearchStore(
+    (state) => state.unregisterSource,
+  );
 
   const items = useMemo(() => {
     return buildExplorerSearchItems({

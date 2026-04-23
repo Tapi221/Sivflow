@@ -1,6 +1,7 @@
 # FlashCardMaster iOS Native - Implementation TODO
 
 ## Phase 1: Firebase Integration & Authentication
+
 - [ ] Add Firebase SDK to Xcode project (CocoaPods/SPM)
 - [ ] Create FirebaseManager for configuration and initialization
 - [ ] Implement Google Sign-In integration
@@ -11,6 +12,7 @@
 - [ ] Create authentication UI screens (Sign In, Sign Up)
 
 ## Phase 2: Cloud Data Sync
+
 - [ ] Create FirestoreService for cloud data operations
 - [ ] Implement snapshot upload/download from Firestore
 - [ ] Add conflict resolution logic
@@ -19,6 +21,7 @@
 - [ ] Create data migration utilities
 
 ## Phase 3: Card Display & Interaction
+
 - [ ] Implement card flip animation
 - [ ] Add pinch-to-zoom functionality for card content
 - [ ] Implement display mode toggle (card view / fluid view)
@@ -28,6 +31,7 @@
 - [ ] Create CardDetailScreen enhancements
 
 ## Phase 4: Card Editing
+
 - [ ] Create CardEditScreen with form
 - [ ] Implement rich text editor for card content
 - [ ] Add support for code blocks with syntax highlighting
@@ -39,6 +43,7 @@
 - [ ] Add delete card functionality
 
 ## Phase 5: Search & Filtering
+
 - [ ] Create SearchScreen UI
 - [ ] Implement full-text search across cards
 - [ ] Add filter by card set
@@ -49,6 +54,7 @@
 - [ ] Add recent searches feature
 
 ## Phase 6: Tag Management
+
 - [ ] Create TagBrowserScreen
 - [ ] Implement tag CRUD operations
 - [ ] Add tag color selection
@@ -56,6 +62,7 @@
 - [ ] Add tag-based filtering on card lists
 
 ## Phase 7: Folder & CardSet Management
+
 - [ ] Implement folder creation
 - [ ] Add folder editing (name, color)
 - [ ] Implement folder deletion
@@ -66,6 +73,7 @@
 - [ ] Add card set duplication
 
 ## Phase 8: Settings & Profile
+
 - [ ] Create SettingsScreen
 - [ ] Implement theme toggle (light/dark mode)
 - [ ] Add default display mode preference
@@ -76,6 +84,7 @@
 - [ ] Add about/version info
 
 ## Phase 9: UI/UX Optimization
+
 - [ ] Implement dark mode support throughout app
 - [ ] Add haptic feedback for interactions
 - [ ] Implement smooth animations and transitions
@@ -86,6 +95,7 @@
 - [ ] Test on various device sizes (iPhone SE to Max)
 
 ## Phase 10: Testing & QA
+
 - [ ] Unit tests for services and utilities
 - [ ] UI tests for core user flows
 - [ ] Performance testing
@@ -96,6 +106,7 @@
 - [ ] Test data sync scenarios
 
 ## Phase 11: Branding & Polish
+
 - [ ] Create app icon variants
 - [ ] Design splash screen
 - [ ] Implement app intro animations
@@ -106,10 +117,10 @@
 - [ ] Write app store description
 
 ## Phase 12: Deployment Preparation
+
 - [ ] Set up code signing certificates
 - [ ] Configure app capabilities (push notifications, etc.)
 - [ ] Create TestFlight build
 - [ ] Prepare for App Store submission
 - [ ] Create release notes
 - [ ] Set up CI/CD pipeline (optional)
-

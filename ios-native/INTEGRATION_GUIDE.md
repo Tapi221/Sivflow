@@ -5,6 +5,7 @@
 ## 1. ルートナビゲーションの更新
 
 ### 現在の構成
+
 `StudyRootScreen.swift` は単一の `FolderListScreen` を表示しています。
 
 ### 更新手順
@@ -36,15 +37,15 @@ struct FlashCardMasterNativeApp: App {
 
 ### ✅ 実装済みスクリーン
 
-| スクリーン | ファイル | 統合状態 | 備考 |
-|-----------|---------|--------|------|
-| Library (Folder List) | `FolderListScreen.swift` | 既存 | タブバーの "Library" に表示 |
-| Search | `SearchScreen.swift` | 新規 | タブバーの "Search" に表示 |
-| Tags | `TagBrowserScreen.swift` | 新規 | タブバーの "Tags" に表示 |
-| Settings | `SettingsScreen.swift` | 新規 | タブバーの "Settings" に表示 |
-| Card Detail | `CardDetailScreenEnhanced.swift` | 新規 | Library から遷移 |
-| Card Edit | `CardEditScreen.swift` | 新規 | Card Detail から遷移 |
-| Folder Management | `FolderManagementScreen.swift` | 新規 | Library から遷移 |
+| スクリーン            | ファイル                         | 統合状態 | 備考                         |
+| --------------------- | -------------------------------- | -------- | ---------------------------- |
+| Library (Folder List) | `FolderListScreen.swift`         | 既存     | タブバーの "Library" に表示  |
+| Search                | `SearchScreen.swift`             | 新規     | タブバーの "Search" に表示   |
+| Tags                  | `TagBrowserScreen.swift`         | 新規     | タブバーの "Tags" に表示     |
+| Settings              | `SettingsScreen.swift`           | 新規     | タブバーの "Settings" に表示 |
+| Card Detail           | `CardDetailScreenEnhanced.swift` | 新規     | Library から遷移             |
+| Card Edit             | `CardEditScreen.swift`           | 新規     | Card Detail から遷移         |
+| Folder Management     | `FolderManagementScreen.swift`   | 新規     | Library から遷移             |
 
 ## 3. ナビゲーションフロー
 
@@ -83,20 +84,24 @@ AppTabNavigationView (タブバー)
 ## 4. 実装ステップ
 
 ### ステップ 1: ルートナビゲーション更新
+
 ```swift
 // FlashCardMasterNativeApp.swift を更新
 AppTabNavigationView(runtimeStore: runtimeStore)
 ```
 
 ### ステップ 2: 各スクリーンの確認
+
 - すべてのスクリーンが正しくコンパイルされることを確認
 - Mock データで各スクリーンが表示されることを確認
 
 ### ステップ 3: ナビゲーション接続
+
 - タブ間のナビゲーションが機能することを確認
 - スクリーン間の遷移が正しく動作することを確認
 
 ### ステップ 4: 機能実装
+
 - Firebase 認証の実装
 - データ永続化の実装
 - クラウド同期の実装
@@ -123,6 +128,7 @@ pod 'Firebase/Firestore'
 **SPM を使用する場合：**
 
 Xcode で以下を追加：
+
 - `https://github.com/firebase/firebase-ios-sdk.git`
 
 ### 5.2 GoogleService-Info.plist の設定
@@ -221,10 +227,10 @@ class CardDetailScreenUITests: XCTestCase {
     func testFlipAnimation() {
         let app = XCUIApplication()
         app.launch()
-        
+
         let flipButton = app.buttons["Front"]
         flipButton.tap()
-        
+
         XCTAssertTrue(app.staticTexts["Back"].exists)
     }
 }
@@ -240,7 +246,7 @@ class CardDetailScreenUITests: XCTestCase {
 private func performSearch(query: String) {
     // 既存のタイマーをキャンセル
     searchTimer?.invalidate()
-    
+
     // 0.5秒後に検索を実行
     searchTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
         // 検索実行
@@ -322,6 +328,7 @@ xcodebuild -exportArchive -archivePath build/FlashCardMasterNative.xcarchive \
 ### 問題: スクリーンが表示されない
 
 **解決策:**
+
 1. ナビゲーション設定を確認
 2. Mock データが正しく設定されているか確認
 3. Xcode ビルドログでエラーを確認
@@ -329,6 +336,7 @@ xcodebuild -exportArchive -archivePath build/FlashCardMasterNative.xcarchive \
 ### 問題: Firebase 認証が失敗する
 
 **解決策:**
+
 1. `GoogleService-Info.plist` が正しく設定されているか確認
 2. Firebase Console でプロジェクト設定を確認
 3. ネットワーク接続を確認
@@ -336,6 +344,7 @@ xcodebuild -exportArchive -archivePath build/FlashCardMasterNative.xcarchive \
 ### 問題: データが保存されない
 
 **解決策:**
+
 1. ローカルストレージの実装を確認
 2. ファイルシステムの権限を確認
 3. Xcode デバッガで変数を確認

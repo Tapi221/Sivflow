@@ -53,7 +53,9 @@ export const buildExplorerSearchItems = ({
     (document) => document.kind === "pdf" && !document.isDeleted,
   );
 
-  const folderById = new Map(activeFolders.map((folder) => [folder.id, folder]));
+  const folderById = new Map(
+    activeFolders.map((folder) => [folder.id, folder]),
+  );
   const cardSetById = buildCardSetById(activeCardSets);
   const folderPathCache = new Map<string, string>();
 
@@ -74,7 +76,9 @@ export const buildExplorerSearchItems = ({
 
     const parentPath = getFolderPath(folder.parentFolderId ?? null);
     const currentLabel = normalizeLabel(folder.folderName, "無題のフォルダ");
-    const nextPath = parentPath ? `${parentPath} / ${currentLabel}` : currentLabel;
+    const nextPath = parentPath
+      ? `${parentPath} / ${currentLabel}`
+      : currentLabel;
     folderPathCache.set(folderId, nextPath);
     return nextPath;
   };

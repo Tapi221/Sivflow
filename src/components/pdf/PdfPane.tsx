@@ -33,13 +33,7 @@ interface PdfPaneDoc {
   localUrl?: BlobUrl | null;
   localFileId?: string | null;
   downloadUrl?: string | null;
-  uploadStatus?:
-    | "pending"
-    | "queued"
-    | "uploading"
-    | "ready"
-    | "failed"
-    | null;
+  uploadStatus?: "pending" | "queued" | "uploading" | "ready" | "failed" | null;
   updatedAt?: unknown;
   mimeType?: string;
   viewerState?: PdfViewerState | null;
@@ -368,7 +362,10 @@ export const PdfPane = ({
       return;
     }
 
-    const nextNormalizedOrder = normalizeThumbnailOrder(thumbnailOrder, numPages);
+    const nextNormalizedOrder = normalizeThumbnailOrder(
+      thumbnailOrder,
+      numPages,
+    );
 
     setThumbnailOrder((previousOrder) => {
       if (areNumberArraysEqual(previousOrder, nextNormalizedOrder)) {
