@@ -12,13 +12,24 @@ import type {
   PdfJsTextContent,
 } from "./pdfViewerTypes";
 
+const THUMBNAIL_CARD_WIDTH_PX = 92;
+const THUMBNAIL_PREVIEW_WIDTH_PX = 80;
 const THUMBNAIL_GRID_GAP_PX = 8;
-const MIN_THUMBNAIL_WIDTH_PX = 72;
 const FALLBACK_THUMBNAIL_SCALE = 0.18;
 const INITIAL_VISIBLE_PAGE_COUNT = 6;
 const SIDEBAR_HORIZONTAL_PADDING_PX = 16;
-const SIDEBAR_INNER_BORDER_PX = 2;
-const THREE_COLUMN_MIN_WIDTH_PX = 356;
+const SIDEBAR_BORDER_PX = 2;
+const SCROLLBAR_ALLOWANCE_PX = 12;
+const THREE_COLUMN_SIDEBAR_MIN_WIDTH_PX =
+  THUMBNAIL_CARD_WIDTH_PX * 3 +
+  THUMBNAIL_GRID_GAP_PX * 2 +
+  SIDEBAR_HORIZONTAL_PADDING_PX +
+  SIDEBAR_BORDER_PX +
+  SCROLLBAR_ALLOWANCE_PX;
+
+const resolveColumnCount = (sidebarWidthPx: number) => {
+  return sidebarWidthPx >= THREE_COLUMN_SIDEBAR_MIN_WIDTH_PX ? 3 : 2;
+};
 
 const sanitizeCurrentPage = (value: unknown) => {
   if (typeof value !== "number" || !Number.isFinite(value)) {
@@ -217,37 +228,19 @@ export const PdfThumbnailSidebar = ({
     onSourceLoadError: handleSourceLoadError,
   });
 
-  const availableGridWidth = useMemo(() => {
-    return Math.max(
-      0,
-      sidebarWidthPx - SIDEBAR_HORIZONTAL_PADDING_PX - SIDEBAR_INNER_BORDER_PX,
-    );
-  }, [sidebarWidthPx]);
-
   const columnCount = useMemo(() => {
-    return availableGridWidth >= THREE_COLUMN_MIN_WIDTH_PX ? 3 : 2;
-  }, [availableGridWidth]);
-
-  const thumbnailWidth = useMemo(() => {
-    if (!availableGridWidth) {
-      return 96;
-    }
-
-    const totalGapWidth = THUMBNAIL_GRID_GAP_PX * (columnCount - 1);
-
-    return Math.max(
-      MIN_THUMBNAIL_WIDTH_PX,
-      Math.floor((availableGridWidth - totalGapWidth) / columnCount),
-    );
-  }, [availableGridWidth, columnCount]);
+    return resolveColumnCount(sidebarWidthPx);
+  }, [sidebarWidthPx]);
 
   const thumbnailScale = useMemo(() => {
     if (!firstPageSize || firstPageSize.width <= 0) {
       return FALLBACK_THUMBNAIL_SCALE;
     }
 
-    return Number((thumbnailWidth / firstPageSize.width).toFixed(3));
-  }, [firstPageSize, thumbnailWidth]);
+    return Number(
+      (THUMBNAIL_PREVIEW_WIDTH_PX / firstPageSize.width).toFixed(3),
+    );
+  }, [firstPageSize]);
 
   const currentPage = useMemo(() => {
     return sanitizeCurrentPage(doc.viewerState?.currentPage);
@@ -312,7 +305,8 @@ export const PdfThumbnailSidebar = ({
               <div
                 className="grid gap-2"
                 style={{
-                  gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+                  gridTemplateColumns: `repeat(${columnCount}, ${THUMBNAIL_CARD_WIDTH_PX}px)`,
+                  justifyContent: "center",
                 }}
               >
                 {orderedPageNumbers.map((pageNumber) => (
