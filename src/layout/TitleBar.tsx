@@ -206,6 +206,37 @@ const CalendarIcon: React.FC = () => (
   </svg>
 );
 
+const GlobeIcon: React.FC = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      r="8"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
+    <path
+      d="M4.5 12H19.5"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+    <path
+      d="M12 4C14.2 6.1 15.5 8.95 15.5 12C15.5 15.05 14.2 17.9 12 20C9.8 17.9 8.5 15.05 8.5 12C8.5 8.95 9.8 6.1 12 4Z"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const BackIcon: React.FC = () => (
   <svg
     width="14"
@@ -251,6 +282,9 @@ const TitleBarToolbarButton: React.FC<{
   noDragStyle?: React.CSSProperties;
   children: React.ReactNode;
 }> = ({ title, onClick, disabled = false, noDragStyle, children }) => {
+  const disabledClassName = disabled
+    ? "cursor-default opacity-60 hover:bg-transparent hover:text-current"
+    : "titlebar-hover";
   return (
     <button
       type="button"
@@ -258,12 +292,13 @@ const TitleBarToolbarButton: React.FC<{
       aria-label={title}
       onClick={disabled ? undefined : onClick}
       onMouseDown={(event) => event.stopPropagation()}
+      disabled={disabled}
       aria-disabled={disabled}
       tabIndex={disabled ? -1 : undefined}
       style={noDragStyle}
       className={cn(
         "titlebar-text inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors [&>svg]:scale-[1.06]",
-        disabled ? "cursor-default" : "titlebar-hover",
+        disabledClassName,
       )}
     >
       {children}
@@ -346,6 +381,10 @@ const TitleBarPrimaryActions: React.FC<{
 
       <TitleBarToolbarButton title="カレンダー" noDragStyle={noDragStyle}>
         <CalendarIcon />
+      </TitleBarToolbarButton>
+
+      <TitleBarToolbarButton title="グローバル" disabled noDragStyle={noDragStyle}>
+        <GlobeIcon />
       </TitleBarToolbarButton>
 
       <TitleBarToolbarButton
