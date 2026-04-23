@@ -1,9 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import {
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import SettingsDialog from "@/components/settings/SettingsDialog";
 import { GlobalSearchDialog } from "@/features/global-search/components/GlobalSearchDialog";
 import type { GlobalSearchItem } from "@/features/global-search/model/globalSearchTypes";
@@ -28,7 +24,9 @@ const Layout = () => {
   const isDesktopPresentation = presentationTarget === "desktop";
   const appTopInsetPx = getAppTopInsetPx({ presentationTarget });
   const registerSource = useGlobalSearchStore((state) => state.registerSource);
-  const unregisterSource = useGlobalSearchStore((state) => state.unregisterSource);
+  const unregisterSource = useGlobalSearchStore(
+    (state) => state.unregisterSource,
+  );
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -49,7 +47,13 @@ const Layout = () => {
         kind: "action",
         iconKind: "folders",
         title: "フォルダ",
-        keywords: ["フォルダ", "folders", "folder", "explorer", "エクスプローラー"],
+        keywords: [
+          "フォルダ",
+          "folders",
+          "folder",
+          "explorer",
+          "エクスプローラー",
+        ],
         priority: 100,
         onSelect: () => {
           void navigate("/folders");

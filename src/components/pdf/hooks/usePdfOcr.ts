@@ -128,7 +128,7 @@ const isPdfOcrTimeoutError = (value: unknown) => {
   return value instanceof PdfOcrTimeoutError;
 };
 
-const withTimeout = async <T,>(
+const withTimeout = async <T>(
   promise: Promise<T>,
   timeoutMs: number,
   message: string,
@@ -150,7 +150,6 @@ const withTimeout = async <T,>(
     }
   }
 };
-
 
 const extractTextFromTextContent = async (
   getPageTextContent: PdfDocumentController["getPageTextContent"],
@@ -427,7 +426,8 @@ const buildAttemptPlan = ({
           minScale: classification.recommendedMinScale,
           maxScale: classification.recommendedMaxScale,
           trimWhitespace: classification.shouldPreferRegions,
-          contrastBoost: classification.recommendedInitialMode === "none" ? 1.04 : 1.16,
+          contrastBoost:
+            classification.recommendedInitialMode === "none" ? 1.04 : 1.16,
           autoDeskew: classification.shouldEnableDeskew,
           maxDeskewAngle: 1.5,
         },
@@ -617,7 +617,8 @@ const createBenchmarkSample = ({
     finalQualityScore: selection.qualityScore,
     processingMs: Number(processingMs.toFixed(2)),
     attemptCount: attempts.length,
-    regionAttemptCount: attempts.filter((attempt) => attempt.regionCount > 0).length,
+    regionAttemptCount: attempts.filter((attempt) => attempt.regionCount > 0)
+      .length,
     timeoutCount,
     finalCharCount: selection.charCount,
     finalLineCount: selection.lineCount,
@@ -753,7 +754,8 @@ export const usePdfOcr = ({
 
   const getWorker = useCallback(
     async (languageHint: string, slotId: number) => {
-      const normalizedLanguageHint = languageHint.trim() || OCR_DEFAULT_LANGUAGE;
+      const normalizedLanguageHint =
+        languageHint.trim() || OCR_DEFAULT_LANGUAGE;
       const workerKey = `${slotId}::${normalizedLanguageHint}`;
       const existingWorkerPromise = workerPromiseMapRef.current.get(workerKey);
       if (existingWorkerPromise) {
@@ -772,8 +774,7 @@ export const usePdfOcr = ({
     setOcrState((previousState) => ({
       ...previousState,
       processedPages: processedPagesRef.current,
-      progress:
-        processedPagesRef.current / Math.max(totalPagesRef.current, 1),
+      progress: processedPagesRef.current / Math.max(totalPagesRef.current, 1),
     }));
   }, []);
 
@@ -883,7 +884,11 @@ export const usePdfOcr = ({
       let consecutiveFailureCount = 0;
       let timeoutCount = 0;
 
-      for (let attemptIndex = 0; attemptIndex < plans.length; attemptIndex += 1) {
+      for (
+        let attemptIndex = 0;
+        attemptIndex < plans.length;
+        attemptIndex += 1
+      ) {
         if (cancelRequestedRef.current) {
           break;
         }
@@ -1130,10 +1135,7 @@ export const usePdfOcr = ({
           bestSelection.qualityScore >= OCR_REGION_RETRY_QUALITY_THRESHOLD ||
           attempts.length === 0
             ? bestSelection
-            : selectBestPdfTextSelection([
-                bestSelection,
-                bestAttemptSelection,
-              ]);
+            : selectBestPdfTextSelection([bestSelection, bestAttemptSelection]);
 
         const persistedSelection =
           effectiveSelection.qualityScore >= OCR_RETRY_QUALITY_THRESHOLD
@@ -1212,7 +1214,10 @@ export const usePdfOcr = ({
           return;
         }
 
-        if (typeof benchmarkSamples !== "undefined" && benchmarkSamples.length > 0) {
+        if (
+          typeof benchmarkSamples !== "undefined" &&
+          benchmarkSamples.length > 0
+        ) {
           const benchmarkSummary = summarizePdfOcrBenchmark(benchmarkSamples);
           setOcrBenchmarkSummary(benchmarkSummary);
           console.info(

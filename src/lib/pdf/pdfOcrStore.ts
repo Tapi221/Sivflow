@@ -100,7 +100,9 @@ const runOcrTransaction = async <T>({
     };
 
     transaction.onerror = () => {
-      reject(transaction.error ?? new Error("OCR IndexedDB transaction failed"));
+      reject(
+        transaction.error ?? new Error("OCR IndexedDB transaction failed"),
+      );
     };
 
     transaction.oncomplete = () => {
@@ -122,7 +124,9 @@ const runOcrWriteTransaction = async ({
     const store = transaction.objectStore(OCR_STORE_NAME);
 
     transaction.onerror = () => {
-      reject(transaction.error ?? new Error("OCR IndexedDB transaction failed"));
+      reject(
+        transaction.error ?? new Error("OCR IndexedDB transaction failed"),
+      );
     };
 
     transaction.oncomplete = () => {
@@ -159,7 +163,9 @@ const isPdfOcrLineRecord = (value: unknown): value is PdfOcrLineRecord => {
   );
 };
 
-const isPdfOcrAttemptRecord = (value: unknown): value is PdfOcrAttemptRecord => {
+const isPdfOcrAttemptRecord = (
+  value: unknown,
+): value is PdfOcrAttemptRecord => {
   if (typeof value !== "object" || value === null) {
     return false;
   }

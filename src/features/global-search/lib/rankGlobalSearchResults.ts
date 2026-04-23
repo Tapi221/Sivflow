@@ -26,7 +26,9 @@ const splitQueryTokens = (value: string) => {
 
 const buildSearchHaystack = (item: GlobalSearchItem) => {
   return normalizeText(
-    [item.title, item.subtitle ?? "", ...item.keywords].filter(Boolean).join(" "),
+    [item.title, item.subtitle ?? "", ...item.keywords]
+      .filter(Boolean)
+      .join(" "),
   );
 };
 
@@ -61,7 +63,10 @@ const scoreRecentness = (timestampMillis: number) => {
   return 0;
 };
 
-const compareRankedItems = (left: RankedSearchItem, right: RankedSearchItem) => {
+const compareRankedItems = (
+  left: RankedSearchItem,
+  right: RankedSearchItem,
+) => {
   if (right.score !== left.score) {
     return right.score - left.score;
   }
@@ -95,7 +100,9 @@ const rankItemForQuery = (
 
   if (normalizedTitle === normalizedQuery) {
     score += 1500;
-  } else if (normalizedKeywords.some((keyword) => keyword === normalizedQuery)) {
+  } else if (
+    normalizedKeywords.some((keyword) => keyword === normalizedQuery)
+  ) {
     score += 1380;
   } else if (haystack === normalizedQuery) {
     score += 1320;
@@ -103,7 +110,9 @@ const rankItemForQuery = (
 
   if (normalizedTitle.startsWith(normalizedQuery)) {
     score += 960;
-  } else if (normalizedKeywords.some((keyword) => keyword.startsWith(normalizedQuery))) {
+  } else if (
+    normalizedKeywords.some((keyword) => keyword.startsWith(normalizedQuery))
+  ) {
     score += 860;
   } else if (normalizedSubtitle.startsWith(normalizedQuery)) {
     score += 760;
@@ -111,7 +120,9 @@ const rankItemForQuery = (
 
   if (normalizedTitle.includes(normalizedQuery)) {
     score += 640;
-  } else if (normalizedKeywords.some((keyword) => keyword.includes(normalizedQuery))) {
+  } else if (
+    normalizedKeywords.some((keyword) => keyword.includes(normalizedQuery))
+  ) {
     score += 560;
   } else if (haystack.includes(normalizedQuery)) {
     score += 420;

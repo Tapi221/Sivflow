@@ -8,7 +8,8 @@ import {
 import { SIDEBAR_WIDTH_LIMITS } from "@constants/web/app";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 
-export const TREE_VIEW_SIDEBAR_TOGGLE_EVENT = "manifolia:treeview-sidebar-toggle";
+export const TREE_VIEW_SIDEBAR_TOGGLE_EVENT =
+  "manifolia:treeview-sidebar-toggle";
 
 const clampSidebarWidth = (width: number) =>
   Math.min(Math.max(width, SIDEBAR_WIDTH_LIMITS.min), SIDEBAR_WIDTH_LIMITS.max);

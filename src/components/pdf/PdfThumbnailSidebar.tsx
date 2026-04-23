@@ -29,7 +29,10 @@ const sanitizeCurrentPage = (value: unknown) => {
 };
 
 const normalizeThumbnailOrder = (value: unknown, numPages: number) => {
-  const defaultOrder = Array.from({ length: numPages }, (_, index) => index + 1);
+  const defaultOrder = Array.from(
+    { length: numPages },
+    (_, index) => index + 1,
+  );
 
   if (numPages <= 0) {
     return [];

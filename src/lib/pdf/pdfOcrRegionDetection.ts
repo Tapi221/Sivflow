@@ -65,10 +65,7 @@ const buildBands = ({
   const mergedBands: Band[] = [];
   bands.forEach((band) => {
     const previousBand = mergedBands.at(-1);
-    if (
-      previousBand &&
-      band.start - previousBand.end - 1 <= maxMergeGap
-    ) {
+    if (previousBand && band.start - previousBand.end - 1 <= maxMergeGap) {
       previousBand.end = band.end;
       return;
     }
@@ -153,7 +150,9 @@ export const segmentCanvasIntoTextRegions = ({
   }
 
   const rowBands = buildBands({
-    values: rowInkCounts.map((count) => count / Math.max(width, 1) >= minRowInkRatio),
+    values: rowInkCounts.map(
+      (count) => count / Math.max(width, 1) >= minRowInkRatio,
+    ),
     limit: maxRegions * 2,
     minLength: minRegionHeightPx,
     maxMergeGap: maxMergeGapPx,
@@ -199,8 +198,7 @@ export const segmentCanvasIntoTextRegions = ({
         y: rowBand.start,
         width: bandWidth,
         height: bandHeight,
-        darkPixelRatio:
-          darkPixels / Math.max(1, bandWidth * bandHeight),
+        darkPixelRatio: darkPixels / Math.max(1, bandWidth * bandHeight),
         canvas: cropCanvas({
           sourceCanvas: canvas,
           x: 0,
@@ -235,8 +233,7 @@ export const segmentCanvasIntoTextRegions = ({
         y: rowBand.start,
         width: regionWidth,
         height: regionHeight,
-        darkPixelRatio:
-          darkPixels / Math.max(1, regionWidth * regionHeight),
+        darkPixelRatio: darkPixels / Math.max(1, regionWidth * regionHeight),
         canvas: cropCanvas({
           sourceCanvas: canvas,
           x: columnBand.start,

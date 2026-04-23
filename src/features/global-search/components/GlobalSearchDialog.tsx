@@ -37,7 +37,11 @@ const resolveTimestampLabel = (value: unknown) => {
 
   const timestamp = new Date(timestampMillis);
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const todayStart = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  ).getTime();
   const targetStart = new Date(
     timestamp.getFullYear(),
     timestamp.getMonth(),
@@ -66,8 +70,7 @@ const resolveTimestampLabel = (value: unknown) => {
 
 const resolveItemIcon = (item: GlobalSearchItem) => {
   const iconKind: GlobalSearchIconKind =
-    item.iconKind ??
-    (item.kind === "action" ? "directory" : item.kind);
+    item.iconKind ?? (item.kind === "action" ? "directory" : item.kind);
 
   switch (iconKind) {
     case "folder":
@@ -136,7 +139,9 @@ export const GlobalSearchDialog = () => {
   };
 
   const emptyTitle =
-    query.trim().length > 0 ? "一致する項目がありません" : "検索できる項目がありません";
+    query.trim().length > 0
+      ? "一致する項目がありません"
+      : "検索できる項目がありません";
   const emptyDescription =
     query.trim().length > 0
       ? "別のキーワードで試してください。"
@@ -187,7 +192,9 @@ export const GlobalSearchDialog = () => {
             <CommandList className="gs-results">
               {rankedItems.map((item) => {
                 const Icon = resolveItemIcon(item);
-                const timestampLabel = resolveTimestampLabel(item.timestampValue);
+                const timestampLabel = resolveTimestampLabel(
+                  item.timestampValue,
+                );
                 const titleAttribute = item.subtitle
                   ? `${item.title} - ${item.subtitle}`
                   : item.title;
@@ -207,7 +214,9 @@ export const GlobalSearchDialog = () => {
                     </span>
                     <span className="gs-row__title">{item.title}</span>
                     {timestampLabel ? (
-                      <span className="gs-row__timestamp">{timestampLabel}</span>
+                      <span className="gs-row__timestamp">
+                        {timestampLabel}
+                      </span>
                     ) : null}
                     <span className="gs-row__enter-badge">Enter</span>
                   </CommandItem>

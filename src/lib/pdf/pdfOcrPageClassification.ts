@@ -46,7 +46,8 @@ const getAverageLineLength = (lines: string[]) => {
   }
 
   return (
-    lines.reduce((sum, line) => sum + line.length, 0) / Math.max(lines.length, 1)
+    lines.reduce((sum, line) => sum + line.length, 0) /
+    Math.max(lines.length, 1)
   );
 };
 
@@ -64,7 +65,9 @@ const getDuplicateLineRatio = (lines: string[]) => {
   }
 
   const normalizedLines = lines.map((line) => line.trim().toLowerCase());
-  return 1 - new Set(normalizedLines).size / Math.max(normalizedLines.length, 1);
+  return (
+    1 - new Set(normalizedLines).size / Math.max(normalizedLines.length, 1)
+  );
 };
 
 const getLongestLineLength = (lines: string[]) => {

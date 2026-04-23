@@ -31,7 +31,8 @@ const PDF_TEXT_MOJIBAKE_RE = /(?:�|□|\u25FB\uFE0E|\u25FC\uFE0E|◆|◇)/g;
 const PDF_TEXT_MULTISPACE_RE = /\s{3,}/g;
 const PDF_TEXT_PRINTABLE_RE = /[\p{L}\p{N}\p{P}\p{S}\p{Zs}]/gu;
 const PDF_TEXT_WORD_RE = /[\p{L}\p{N}][\p{L}\p{N}\p{M}_-]*/gu;
-const PDF_TEXT_JAPANESE_RE = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/gu;
+const PDF_TEXT_JAPANESE_RE =
+  /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/gu;
 const PDF_TEXT_LATIN_RE = /[A-Za-z]/g;
 const PDF_TEXT_DIGIT_RE = /\d/g;
 
@@ -71,7 +72,9 @@ const getSingleCharacterLineRatio = (lines: string[]) => {
     return 1;
   }
 
-  const singleCharacterLineCount = lines.filter((line) => line.length <= 1).length;
+  const singleCharacterLineCount = lines.filter(
+    (line) => line.length <= 1,
+  ).length;
   return singleCharacterLineCount / lines.length;
 };
 
@@ -87,7 +90,8 @@ const getSuspiciousLineRatio = (lines: string[]) => {
     }
 
     const wordCount = getTokenCount(line);
-    const symbolRunCount = compactLine.match(PDF_TEXT_SYMBOL_RUN_RE)?.length ?? 0;
+    const symbolRunCount =
+      compactLine.match(PDF_TEXT_SYMBOL_RUN_RE)?.length ?? 0;
     return wordCount === 0 || symbolRunCount > 0;
   }).length;
 
@@ -131,7 +135,8 @@ export const scorePdfLineQuality = (rawValue: string) => {
   const mojibakeRatio =
     (line.match(PDF_TEXT_MOJIBAKE_RE)?.length ?? 0) / Math.max(line.length, 1);
   const symbolRunRatio =
-    (line.match(PDF_TEXT_SYMBOL_RUN_RE)?.length ?? 0) / Math.max(line.length, 1);
+    (line.match(PDF_TEXT_SYMBOL_RUN_RE)?.length ?? 0) /
+    Math.max(line.length, 1);
 
   let score = 0;
   score += clampUnit(line.length / 48) * 0.28;
@@ -171,9 +176,11 @@ export const scorePdfTextQuality = (rawValue: string) => {
   const mojibakeRatio =
     (text.match(PDF_TEXT_MOJIBAKE_RE)?.length ?? 0) / Math.max(charCount, 1);
   const symbolRunRatio =
-    (text.match(PDF_TEXT_SYMBOL_RUN_RE)?.length ?? 0) / Math.max(lines.length, 1);
+    (text.match(PDF_TEXT_SYMBOL_RUN_RE)?.length ?? 0) /
+    Math.max(lines.length, 1);
   const multiSpaceRatio =
-    (text.match(PDF_TEXT_MULTISPACE_RE)?.length ?? 0) / Math.max(lines.length, 1);
+    (text.match(PDF_TEXT_MULTISPACE_RE)?.length ?? 0) /
+    Math.max(lines.length, 1);
 
   let score = 0;
   score += clampUnit(charCount / 140) * 0.14;
