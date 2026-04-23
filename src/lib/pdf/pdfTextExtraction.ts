@@ -26,8 +26,8 @@ export interface PdfTextLanguageProfile {
   dominant: "japanese" | "latin" | "mixed";
 }
 
-const PDF_TEXT_SYMBOL_RUN_RE = /[_=\-]{4,}|[|/\\]{4,}|\.{4,}/g;
-const PDF_TEXT_MOJIBAKE_RE = /[�□◻︎◼︎◆◇]/g;
+const PDF_TEXT_SYMBOL_RUN_RE = /[_=-]{4,}|[|/\\]{4,}|\.{4,}/g;
+const PDF_TEXT_MOJIBAKE_RE = /(?:�|□|\u25FB\uFE0E|\u25FC\uFE0E|◆|◇)/g;
 const PDF_TEXT_MULTISPACE_RE = /\s{3,}/g;
 const PDF_TEXT_PRINTABLE_RE = /[\p{L}\p{N}\p{P}\p{S}\p{Zs}]/gu;
 const PDF_TEXT_WORD_RE = /[\p{L}\p{N}][\p{L}\p{N}\p{M}_-]*/gu;
