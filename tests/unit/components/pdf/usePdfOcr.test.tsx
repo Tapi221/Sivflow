@@ -10,9 +10,13 @@ import {
   putPdfOcrPageRecord,
 } from "@/lib/pdf/pdfOcrStore";
 
+const recognizeMock = vi.fn(async () => ({
+  data: { text: "" },
+}));
+
 vi.mock("tesseract.js", () => ({
   createWorker: vi.fn(async () => ({
-    recognize: vi.fn(async () => ({ data: { text: "" } })),
+    recognize: recognizeMock,
     terminate: vi.fn(async () => undefined),
   })),
 }));
@@ -58,12 +62,14 @@ const createDocumentController = ({
     getPageTextContent: vi.fn(async () => ({
       items: nativeText.length > 0 ? [{ str: nativeText }] : [],
     })),
+    getBestAvailablePageText: vi.fn(async () => nativeText),
     prefetchPageResources: vi.fn(),
     getDocumentOutline: vi.fn(async () => []),
     getDocumentMarkdown: vi.fn(async () => ({
       content: "",
       sections: [],
     })),
+    invalidateDerivedTextCache: vi.fn(),
   };
 };
 
@@ -88,6 +94,7 @@ const resetOcrDatabase = async () => {
 describe("usePdfOcr", () => {
   beforeEach(async () => {
     vi.restoreAllMocks();
+    recognizeMock.mockResolvedValue({ data: { text: "" } });
     cleanup();
     await resetOcrDatabase();
   });
@@ -107,7 +114,9 @@ describe("usePdfOcr", () => {
       docId,
       documentKey: resolvedDocumentKey,
       pageNumber: 1,
-      text: persistedText,
+      finalText: persistedText,
+      nativeText: "",
+      ocrText: persistedText,
     });
 
     const initialController = createDocumentController({
@@ -145,7 +154,7 @@ describe("usePdfOcr", () => {
       pageNumber: 1,
     });
 
-    expect(recordDuringUnresolvedPhase?.text).toBe(persistedText);
+    expect(recordDuringUnresolvedPhase?.finalText).toBe(persistedText);
 
     rerender({
       currentDocumentKey: resolvedDocumentKey,
@@ -178,25 +187,33 @@ describe("usePdfOcr", () => {
       docId,
       documentKey: "fingerprint:oldest",
       pageNumber: 1,
-      text: "oldest",
+      finalText: "oldest",
+      nativeText: "",
+      ocrText: "oldest",
     });
     await putPdfOcrPageRecord({
       docId,
       documentKey: "fingerprint:older",
       pageNumber: 1,
-      text: "older",
+      finalText: "older",
+      nativeText: "",
+      ocrText: "older",
     });
     await putPdfOcrPageRecord({
       docId,
       documentKey: "fingerprint:recent",
       pageNumber: 1,
-      text: "recent",
+      finalText: "recent",
+      nativeText: "",
+      ocrText: "recent",
     });
     await putPdfOcrPageRecord({
       docId,
       documentKey: "fingerprint:active",
       pageNumber: 1,
-      text: "active",
+      finalText: "active",
+      nativeText: "",
+      ocrText: "active",
     });
 
     const { result } = renderHook(() =>
@@ -239,5 +256,41 @@ describe("usePdfOcr", () => {
     expect(activeRecords).toHaveLength(1);
     expect(olderRecords).toHaveLength(1);
     expect(recentRecords).toHaveLength(1);
+  });
+
+  it("stores OCR output when native text quality is too low", async () => {
+    recognizeMock.mockResolvedValueOnce({
+      data: { text: "微分係数の定義\n極限を用いて変化率を求める。" },
+    });
+
+    const docId = "doc-quality-fallback";
+    const controller = createDocumentController({
+      isResolved: true,
+      nativeText: "| | | | --- ___",
+    });
+
+    const { result } = renderHook(() =>
+      usePdfOcr({
+        docId,
+        documentKey: "fingerprint:quality-fallback",
+        currentPage: 1,
+        numPages: 1,
+        documentController: controller,
+      }),
+    );
+
+    await waitFor(async () => {
+      await result.current.runCurrentPageOcr();
+      expect(result.current.ocrTextByPage[1]).toContain("微分係数の定義");
+    });
+
+    const stored = await getPdfOcrPageRecord({
+      docId,
+      documentKey: "fingerprint:quality-fallback",
+      pageNumber: 1,
+    });
+
+    expect(stored?.source).toBe("ocr");
+    expect(stored?.ocrQualityScore).toBeGreaterThan(stored?.nativeQualityScore ?? 0);
   });
 });
