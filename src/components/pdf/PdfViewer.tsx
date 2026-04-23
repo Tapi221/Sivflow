@@ -932,9 +932,17 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
           overscrollBehavior: "contain",
           overflow: "auto",
           overflowX: "hidden",
+          scrollPaddingBottom:
+            "calc(var(--pdf-overlay-toolbar-clearance, 0px) + env(safe-area-inset-bottom))",
         }}
       >
-        <div className="min-w-0 p-2">
+        <div
+          className="min-w-0 px-2 pt-2"
+          style={{
+            paddingBottom:
+              "calc(var(--pdf-overlay-toolbar-clearance, 0px) + env(safe-area-inset-bottom))",
+          }}
+        >
           {loading && (
             <div className="mb-2 text-xs text-slate-400">読み込み中...</div>
           )}

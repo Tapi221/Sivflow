@@ -7,7 +7,14 @@ import type {
   PdfViewerState,
 } from "@/types";
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { PdfOverlayToolbar } from "./PdfOverlayToolbar";
 import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
@@ -62,6 +69,8 @@ const PDF_ZOOM_UI_RANGE_PERCENT =
   PDF_ZOOM_UI_MAX_PERCENT - PDF_ZOOM_UI_MIN_PERCENT;
 const PDF_SCALE_RANGE = FIT_MAX_SCALE - FIT_MIN_SCALE;
 const MOBILE_PANEL_MEDIA_QUERY = "(max-width: 1023px)";
+const PDF_OVERLAY_TOOLBAR_CLEARANCE_FALLBACK = 80;
+const PDF_OVERLAY_TOOLBAR_CLEARANCE_BUFFER = 24;
 
 const normalizePageForLayout = (
   page: number,
@@ -229,6 +238,7 @@ export const PdfPane = ({
 }: PdfPaneProps) => {
   const { currentUser } = useAuthSession();
   const viewerRef = useRef<PdfViewerHandle>(null);
+  const overlayToolbarRef = useRef<HTMLDivElement | null>(null);
   const previousPageLayoutModeRef = useRef<PdfPageLayoutMode | null>(null);
 
   const initialViewerState = useMemo(
@@ -237,6 +247,8 @@ export const PdfPane = ({
   );
 
   const [basePageWidth, setBasePageWidth] = useState<number | null>(null);
+  const [overlayToolbarClearance, setOverlayToolbarClearance] =
+    useState<number>(PDF_OVERLAY_TOOLBAR_CLEARANCE_FALLBACK);
   const [isMobileViewport, setIsMobileViewport] = useState(
     readInitialMobileViewportState,
   );
@@ -348,6 +360,12 @@ export const PdfPane = ({
     [numPages, thumbnailOrder],
   );
   const zoomPercent = useMemo(() => scaleToZoomUiPercent(scale), [scale]);
+  const pdfViewportStyle = useMemo<CSSProperties>(() => {
+    return {
+      ["--pdf-overlay-toolbar-clearance" as string]:
+        `${overlayToolbarClearance}px`,
+    };
+  }, [overlayToolbarClearance]);
 
   const pageStep = pageLayoutMode === "double" ? 2 : 1;
   const alignedCurrentPage = useMemo(
@@ -442,6 +460,45 @@ export const PdfPane = ({
       mediaQueryList.removeListener(handleMediaQueryChange);
     };
   }, []);
+
+  useEffect(() => {
+    const element = overlayToolbarRef.current;
+    if (!element) {
+      return;
+    }
+
+    const updateOverlayToolbarClearance = () => {
+      const nextClearance = Math.max(
+        PDF_OVERLAY_TOOLBAR_CLEARANCE_FALLBACK,
+        Math.ceil(
+          element.getBoundingClientRect().height +
+            PDF_OVERLAY_TOOLBAR_CLEARANCE_BUFFER,
+        ),
+      );
+
+      setOverlayToolbarClearance((previousClearance) =>
+        previousClearance === nextClearance
+          ? previousClearance
+          : nextClearance,
+      );
+    };
+
+    updateOverlayToolbarClearance();
+
+    if (typeof ResizeObserver === "undefined") {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      updateOverlayToolbarClearance();
+    });
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [numPages, sourceUnavailable]);
 
   useEffect(() => {
     const restoredViewerState = readInitialViewerState(doc.id, doc.viewerState);
@@ -743,6 +800,7 @@ export const PdfPane = ({
             <div
               ref={containerRef}
               className="relative flex-1 min-h-0 min-w-0 overflow-hidden bg-transparent"
+              style={pdfViewportStyle}
             >
               <PdfViewer
                 ref={viewerRef}
@@ -762,6 +820,7 @@ export const PdfPane = ({
 
               {shouldRenderOverlayToolbar ? (
                 <div
+                  ref={overlayToolbarRef}
                   className="pointer-events-none absolute z-20 flex items-end gap-2"
                   style={{
                     right: "max(1rem, env(safe-area-inset-right))",
