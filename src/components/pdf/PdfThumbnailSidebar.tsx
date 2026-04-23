@@ -15,10 +15,9 @@ import type {
 
 const THUMBNAIL_GRID_GAP_PX = 8;
 const MIN_THUMBNAIL_WIDTH_PX = 72;
-const MIN_THUMBNAIL_COLUMN_WIDTH_PX = 118;
 const FALLBACK_THUMBNAIL_SCALE = 0.18;
 const INITIAL_VISIBLE_PAGE_COUNT = 6;
-const MAX_THUMBNAIL_COLUMNS = 3;
+const THREE_COLUMN_MIN_WIDTH_PX = 356;
 
 const sanitizeCurrentPage = (value: unknown) => {
   if (typeof value !== "number" || !Number.isFinite(value)) {
@@ -63,23 +62,6 @@ const normalizeThumbnailOrder = (value: unknown, numPages: number) => {
   });
 
   return nextOrder;
-};
-
-const resolveThumbnailColumnCount = (containerWidth: number) => {
-  if (!Number.isFinite(containerWidth) || containerWidth <= 0) {
-    return 2;
-  }
-
-  for (let candidate = MAX_THUMBNAIL_COLUMNS; candidate >= 2; candidate -= 1) {
-    const totalGapWidth = THUMBNAIL_GRID_GAP_PX * (candidate - 1);
-    const cellWidth = Math.floor((containerWidth - totalGapWidth) / candidate);
-
-    if (cellWidth >= MIN_THUMBNAIL_COLUMN_WIDTH_PX) {
-      return candidate;
-    }
-  }
-
-  return 2;
 };
 
 interface PdfThumbnailSidebarProps {
@@ -232,7 +214,7 @@ export const PdfThumbnailSidebar = ({ doc }: PdfThumbnailSidebarProps) => {
   });
 
   const columnCount = useMemo(() => {
-    return resolveThumbnailColumnCount(containerWidth);
+    return containerWidth >= THREE_COLUMN_MIN_WIDTH_PX ? 3 : 2;
   }, [containerWidth]);
 
   const thumbnailWidth = useMemo(() => {
