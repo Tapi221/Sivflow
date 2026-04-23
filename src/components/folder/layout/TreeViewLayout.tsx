@@ -524,7 +524,10 @@ const TreeViewLayout = ({
   const isSidebarContentCollapsed = selectedItem?.type === "document";
 
   const collapsedSidebarContent = selectedDocument ? (
-    <PdfThumbnailSidebar doc={selectedDocument} />
+    <PdfThumbnailSidebar
+      doc={selectedDocument}
+      sidebarWidthPx={renderedSidebarWidth}
+    />
   ) : null;
 
   return (
