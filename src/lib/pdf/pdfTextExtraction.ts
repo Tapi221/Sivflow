@@ -263,11 +263,14 @@ const buildOriginLines = (
   value: string,
   origin: Exclude<PdfOcrTextSource, "hybrid">,
 ) => {
-  return splitPdfTextIntoLines(value).map((text, index) => ({
-    order: index,
-    text,
-    origin,
-  }) satisfies PdfOcrLineRecord));
+  return splitPdfTextIntoLines(value).map(
+    (text, index) =>
+      ({
+        order: index,
+        text,
+        origin,
+      }) satisfies PdfOcrLineRecord,
+  );
 };
 
 const mergeLineCandidates = ({

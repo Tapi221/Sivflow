@@ -7,6 +7,7 @@ import {
   type PdfOcrTextSource,
 } from "@/lib/pdf/pdfTextExtraction";
 import type { PdfOcrPreprocessMode } from "@/lib/pdf/renderPdfPageForOcr";
+import type { PdfOcrPageKind } from "@/lib/pdf/pdfOcrPageClassification";
 
 export interface PdfOcrAttemptRecord {
   attemptIndex: number;
@@ -26,6 +27,8 @@ export interface PdfOcrPageRecord {
   docId: string;
   documentKey: string;
   pageNumber: number;
+  pageKind: PdfOcrPageKind;
+  classificationConfidence: number;
   text: string;
   finalText: string;
   nativeText: string;
@@ -241,6 +244,20 @@ const normalizeStoredPdfOcrPageRecord = (
     docId: candidate.docId,
     documentKey: candidate.documentKey,
     pageNumber: candidate.pageNumber,
+    pageKind:
+      candidate.pageKind === "native-rich" ||
+      candidate.pageKind === "dense-text" ||
+      candidate.pageKind === "mixed-layout" ||
+      candidate.pageKind === "sparse-scan" ||
+      candidate.pageKind === "numeric-heavy" ||
+      candidate.pageKind === "unknown"
+        ? candidate.pageKind
+        : "unknown",
+    classificationConfidence:
+      typeof candidate.classificationConfidence === "number" &&
+      Number.isFinite(candidate.classificationConfidence)
+        ? candidate.classificationConfidence
+        : 0,
     text: finalText,
     finalText,
     nativeText,
@@ -394,6 +411,8 @@ export const putPdfOcrPageRecord = async ({
   docId: string;
   documentKey: string;
   pageNumber: number;
+  pageKind?: PdfOcrPageKind;
+  classificationConfidence?: number;
   text?: string;
   finalText?: string;
   nativeText?: string;
@@ -425,6 +444,12 @@ export const putPdfOcrPageRecord = async ({
     docId,
     documentKey,
     pageNumber,
+    pageKind: pageKind ?? "unknown",
+    classificationConfidence:
+      typeof classificationConfidence === "number" &&
+      Number.isFinite(classificationConfidence)
+        ? Number(classificationConfidence.toFixed(4))
+        : 0,
     text: normalizedFinalText,
     finalText: normalizedFinalText,
     nativeText: normalizePdfExtractedText(nativeText ?? ""),
