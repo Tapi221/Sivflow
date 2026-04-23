@@ -6,6 +6,16 @@ import {
   type PdfOcrRecordStatus,
   type PdfOcrTextSource,
 } from "@/lib/pdf/pdfTextExtraction";
+import type { PdfOcrPreprocessMode } from "@/lib/pdf/renderPdfPageForOcr";
+
+export interface PdfOcrAttemptRecord {
+  attemptIndex: number;
+  languageHint: string;
+  renderMode: PdfOcrPreprocessMode;
+  renderScale: number;
+  qualityScore: number;
+  text: string;
+}
 
 export interface PdfOcrPageRecord {
   id: string;
@@ -25,6 +35,8 @@ export interface PdfOcrPageRecord {
   lineCount: number;
   lines: PdfOcrLineRecord[];
   languageHint: string;
+  attempts: PdfOcrAttemptRecord[];
+  processingMs: number;
   updatedAt: number;
 }
 
@@ -140,7 +152,30 @@ const isPdfOcrLineRecord = (value: unknown): value is PdfOcrLineRecord => {
   );
 };
 
-const normalizeStoredPdfOcrPageRecord = (value: unknown): PdfOcrPageRecord | null => {
+const isPdfOcrAttemptRecord = (value: unknown): value is PdfOcrAttemptRecord => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as Partial<PdfOcrAttemptRecord>;
+  return (
+    typeof candidate.attemptIndex === "number" &&
+    Number.isFinite(candidate.attemptIndex) &&
+    typeof candidate.languageHint === "string" &&
+    (candidate.renderMode === "none" ||
+      candidate.renderMode === "grayscale" ||
+      candidate.renderMode === "binary") &&
+    typeof candidate.renderScale === "number" &&
+    Number.isFinite(candidate.renderScale) &&
+    typeof candidate.qualityScore === "number" &&
+    Number.isFinite(candidate.qualityScore) &&
+    typeof candidate.text === "string"
+  );
+};
+
+const normalizeStoredPdfOcrPageRecord = (
+  value: unknown,
+): PdfOcrPageRecord | null => {
   if (typeof value !== "object" || value === null) {
     return null;
   }
@@ -207,7 +242,8 @@ const normalizeStoredPdfOcrPageRecord = (value: unknown): PdfOcrPageRecord | nul
         ? candidate.status
         : fallbackSelection.status,
     qualityScore:
-      typeof candidate.qualityScore === "number" && Number.isFinite(candidate.qualityScore)
+      typeof candidate.qualityScore === "number" &&
+      Number.isFinite(candidate.qualityScore)
         ? candidate.qualityScore
         : fallbackSelection.qualityScore,
     nativeQualityScore:
@@ -221,18 +257,29 @@ const normalizeStoredPdfOcrPageRecord = (value: unknown): PdfOcrPageRecord | nul
         ? candidate.ocrQualityScore
         : fallbackSelection.ocrQualityScore,
     charCount:
-      typeof candidate.charCount === "number" && Number.isFinite(candidate.charCount)
+      typeof candidate.charCount === "number" &&
+      Number.isFinite(candidate.charCount)
         ? candidate.charCount
         : finalText.length,
     lineCount:
-      typeof candidate.lineCount === "number" && Number.isFinite(candidate.lineCount)
+      typeof candidate.lineCount === "number" &&
+      Number.isFinite(candidate.lineCount)
         ? candidate.lineCount
         : lines.length,
     lines,
     languageHint:
-      typeof candidate.languageHint === "string" && candidate.languageHint.trim().length > 0
+      typeof candidate.languageHint === "string" &&
+      candidate.languageHint.trim().length > 0
         ? candidate.languageHint
         : "jpn+eng",
+    attempts: Array.isArray(candidate.attempts)
+      ? candidate.attempts.filter(isPdfOcrAttemptRecord)
+      : [],
+    processingMs:
+      typeof candidate.processingMs === "number" &&
+      Number.isFinite(candidate.processingMs)
+        ? candidate.processingMs
+        : 0,
     updatedAt: candidate.updatedAt,
   };
 };
@@ -330,6 +377,8 @@ export const putPdfOcrPageRecord = async ({
   ocrQualityScore,
   lines,
   languageHint,
+  attempts,
+  processingMs,
 }: {
   docId: string;
   documentKey: string;
@@ -345,6 +394,8 @@ export const putPdfOcrPageRecord = async ({
   ocrQualityScore?: number;
   lines?: PdfOcrLineRecord[];
   languageHint?: string;
+  attempts?: PdfOcrAttemptRecord[];
+  processingMs?: number;
 }) => {
   const selection = buildPdfTextSelection({
     nativeText: nativeText ?? "",
@@ -380,6 +431,16 @@ export const putPdfOcrPageRecord = async ({
     lineCount: normalizedLines.length,
     lines: normalizedLines,
     languageHint: languageHint?.trim() || "jpn+eng",
+    attempts:
+      attempts?.map((attempt) => ({
+        ...attempt,
+        text: normalizePdfExtractedText(attempt.text),
+        qualityScore: Number(attempt.qualityScore.toFixed(4)),
+      })) ?? [],
+    processingMs:
+      typeof processingMs === "number" && Number.isFinite(processingMs)
+        ? Math.max(0, Math.trunc(processingMs))
+        : 0,
     updatedAt: Date.now(),
   };
 
