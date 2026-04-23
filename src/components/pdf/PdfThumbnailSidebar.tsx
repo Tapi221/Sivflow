@@ -18,7 +18,7 @@ const THUMBNAIL_GRID_GAP_PX = 8;
 const FALLBACK_THUMBNAIL_SCALE = 0.18;
 const INITIAL_VISIBLE_PAGE_COUNT = 6;
 const MIN_THUMBNAIL_COLUMNS = 2;
-const MAX_THUMBNAIL_COLUMNS = 3;
+const MAX_THUMBNAIL_COLUMNS = 4;
 
 const sanitizeCurrentPage = (value: unknown) => {
   if (typeof value !== "number" || !Number.isFinite(value)) {
@@ -65,18 +65,29 @@ const normalizeThumbnailOrder = (value: unknown, numPages: number) => {
   return nextOrder;
 };
 
+const getRequiredGridWidth = (columnCount: number) => {
+  return (
+    THUMBNAIL_CARD_WIDTH_PX * columnCount +
+    THUMBNAIL_GRID_GAP_PX * Math.max(0, columnCount - 1)
+  );
+};
+
 const resolveColumnCount = (availableWidthPx: number) => {
   if (!Number.isFinite(availableWidthPx) || availableWidthPx <= 0) {
     return MIN_THUMBNAIL_COLUMNS;
   }
 
-  const threeColumnRequiredWidth =
-    THUMBNAIL_CARD_WIDTH_PX * MAX_THUMBNAIL_COLUMNS +
-    THUMBNAIL_GRID_GAP_PX * (MAX_THUMBNAIL_COLUMNS - 1);
+  for (
+    let candidateColumnCount = MAX_THUMBNAIL_COLUMNS;
+    candidateColumnCount >= MIN_THUMBNAIL_COLUMNS;
+    candidateColumnCount -= 1
+  ) {
+    if (availableWidthPx >= getRequiredGridWidth(candidateColumnCount)) {
+      return candidateColumnCount;
+    }
+  }
 
-  return availableWidthPx >= threeColumnRequiredWidth
-    ? MAX_THUMBNAIL_COLUMNS
-    : MIN_THUMBNAIL_COLUMNS;
+  return MIN_THUMBNAIL_COLUMNS;
 };
 
 interface PdfThumbnailSidebarProps {
@@ -208,8 +219,7 @@ const PdfThumbnailTile = ({
   );
 };
 
-export const PdfThumbnailSidebar = (props: PdfThumbnailSidebarProps) => {
-  const { doc } = props;
+export const PdfThumbnailSidebar = ({ doc }: PdfThumbnailSidebarProps) => {
   const { currentUser } = useAuthSession();
   const scrollRootRef = useRef<HTMLDivElement | null>(null);
   const [gridHostElement, setGridHostElement] = useState<HTMLDivElement | null>(
@@ -321,10 +331,7 @@ export const PdfThumbnailSidebar = (props: PdfThumbnailSidebarProps) => {
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-transparent">
-      <div
-        ref={scrollRootRef}
-        className="min-h-0 flex-1 overflow-y-auto"
-      >
+      <div ref={scrollRootRef} className="min-h-0 flex-1 overflow-y-auto">
         <div className="px-2 pb-2 pt-2">
           <div ref={handleGridHostRef} className="w-full">
             {!documentController.doc || statusMessage ? (
