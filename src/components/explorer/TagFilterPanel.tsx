@@ -146,7 +146,6 @@ export const TagFilterPanel = ({
 
   return (
     <FilterPanelShell
-      title="タグで絞り込み"
       searchValue={searchQuery}
       searchPlaceholder="タグを検索..."
       onSearchChange={setSearchQuery}
