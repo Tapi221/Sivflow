@@ -1,3 +1,4 @@
+import { TREE_VIEW_SIDEBAR_TOGGLE_EVENT } from "@/components/folder/hooks/useTreeViewSidebar";
 import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
 import { floatingPanelPresets } from "@/components/ui/menu-styles";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -92,7 +93,108 @@ const WindowControlButton: React.FC<WindowControlButtonProps> = ({
   );
 };
 
-const HomeBreadcrumbIcon: React.FC = () => (
+const MenuIcon: React.FC = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <path
+      d="M4 7H20"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+    <path
+      d="M4 12H20"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+    <path
+      d="M4 17H20"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const SectionListIcon: React.FC = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <rect
+      x="4"
+      y="6"
+      width="16"
+      height="12"
+      rx="1.75"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    />
+    <path
+      d="M10 6V18"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const SearchIcon: React.FC = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <circle
+      cx="11"
+      cy="11"
+      r="6.25"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
+    <path
+      d="M16 16L20 20"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const BackIcon: React.FC = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <path
+      d="M15 5L8 12L15 19"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const HomeIcon: React.FC = () => (
   <svg
     width="14"
     height="14"
@@ -118,6 +220,226 @@ const HomeBreadcrumbIcon: React.FC = () => (
     />
   </svg>
 );
+
+const TitleBarToolbarButton: React.FC<{
+  title: string;
+  onClick?: () => void;
+  noDragStyle?: React.CSSProperties;
+  children: React.ReactNode;
+}> = ({ title, onClick, noDragStyle, children }) => {
+  return (
+    <button
+      type="button"
+      title={title}
+      aria-label={title}
+      onClick={onClick}
+      onMouseDown={(event) => event.stopPropagation()}
+      style={noDragStyle}
+      className="titlebar-hover titlebar-text inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors"
+    >
+      {children}
+    </button>
+  );
+};
+
+const focusFirstSearchField = () => {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  const candidates = Array.from(
+    document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+      [
+        'input[type="search"]',
+        'input[placeholder*="検索"]',
+        'input[aria-label*="検索"]',
+        'textarea[placeholder*="検索"]',
+        'textarea[aria-label*="検索"]',
+      ].join(","),
+    ),
+  );
+
+  const target = candidates.find((element) => {
+    const style = window.getComputedStyle(element);
+    return (
+      style.display !== "none" &&
+      style.visibility !== "hidden" &&
+      !element.hasAttribute("disabled") &&
+      element.offsetParent !== null
+    );
+  });
+
+  if (!target) {
+    return;
+  }
+
+  target.focus();
+  if ("select" in target) {
+    target.select();
+  }
+};
+
+const TitleBarHomeMenuButton: React.FC<{
+  noDragStyle?: React.CSSProperties;
+}> = ({ noDragStyle }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [isHomeMenuOpen, setIsHomeMenuOpen] = useState(false);
+
+  const isHomeOnlyMode =
+    location.pathname.toLowerCase() === "/folders" &&
+    new URLSearchParams(location.search).get("home") === "1";
+
+  useEffect(() => {
+    setIsHomeMenuOpen(false);
+  }, [location.pathname, location.search]);
+
+  const handleOpenSettings = () => {
+    const next = new URLSearchParams(location.search);
+    next.set("settings", "true");
+    next.set("settingsTab", "study");
+    void navigate({ search: `?${next.toString()}` });
+  };
+
+  const isHomeMenuItemActive = (to: string) => {
+    if (to === "/folders") {
+      return location.pathname.toLowerCase() === "/folders" && !isHomeOnlyMode;
+    }
+    return location.pathname.toLowerCase() === to.toLowerCase();
+  };
+
+  return (
+    <Popover open={isHomeMenuOpen} onOpenChange={setIsHomeMenuOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          title="ホームメニューを開く"
+          aria-label="ホームメニューを開く"
+          aria-haspopup="menu"
+          aria-expanded={isHomeMenuOpen}
+          onMouseDown={(event) => event.stopPropagation()}
+          style={noDragStyle}
+          className="titlebar-hover titlebar-text inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors"
+        >
+          <HomeIcon />
+        </button>
+      </PopoverTrigger>
+
+      <PopoverContent
+        align="start"
+        side="bottom"
+        sideOffset={6}
+        className={cn(
+          HOME_MENU_PANEL_PRESET.className,
+          HOME_MENU_WIDTH_CLASS,
+          "rounded-2xl p-1 shadow-[0_8px_24px_rgba(15,23,42,0.10)]",
+        )}
+        surface={HOME_MENU_PANEL_PRESET.surface}
+        style={noDragStyle}
+      >
+        <div className="flex flex-col gap-0">
+          {HOME_MENU_ITEMS.map((item) => {
+            const active = isHomeMenuItemActive(item.to);
+
+            return (
+              <button
+                key={item.to}
+                type="button"
+                onMouseDown={(event) => event.stopPropagation()}
+                onClick={() => {
+                  setIsHomeMenuOpen(false);
+                  void navigate(item.to);
+                }}
+                className={cn(
+                  "flex w-full items-center gap-2 rounded-lg px-2 text-left text-[13px] font-medium transition-colors",
+                  HOME_MENU_ITEM_CLASS,
+                  active
+                    ? "bg-[rgba(55,53,47,0.08)] text-[rgba(55,53,47,0.96)]"
+                    : "text-[rgba(55,53,47,0.78)] hover:bg-[rgba(55,53,47,0.045)] hover:text-[rgba(55,53,47,0.96)]",
+                )}
+              >
+                <span className="flex h-[14px] w-[14px] shrink-0 items-center justify-center text-[rgba(55,53,47,0.68)]">
+                  {item.icon}
+                </span>
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="my-1 border-t border-[rgba(55,53,47,0.07)]" />
+
+        <button
+          type="button"
+          onMouseDown={(event) => event.stopPropagation()}
+          onClick={() => {
+            setIsHomeMenuOpen(false);
+            handleOpenSettings();
+          }}
+          className={cn(
+            "flex w-full items-center gap-2 rounded-lg px-2 text-left text-[13px] font-medium text-[rgba(55,53,47,0.78)] transition-colors hover:bg-[rgba(55,53,47,0.045)] hover:text-[rgba(55,53,47,0.96)]",
+            HOME_MENU_ITEM_CLASS,
+          )}
+        >
+          <span className="flex h-[14px] w-[14px] shrink-0 items-center justify-center text-[rgba(55,53,47,0.68)]">
+            <TitleBarMenuSettingsIcon />
+          </span>
+          <span className="truncate">設定</span>
+        </button>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+const TitleBarPrimaryActions: React.FC<{
+  noDragStyle?: React.CSSProperties;
+}> = ({ noDragStyle }) => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="flex shrink-0 items-center gap-1 pr-2" style={noDragStyle}>
+      <TitleBarToolbarButton
+        title="サイドバーを開閉"
+        onClick={() => {
+          window.dispatchEvent(new Event(TREE_VIEW_SIDEBAR_TOGGLE_EVENT));
+        }}
+        noDragStyle={noDragStyle}
+      >
+        <MenuIcon />
+      </TitleBarToolbarButton>
+
+      <TitleBarToolbarButton
+        title="フォルダー一覧へ移動"
+        onClick={() => {
+          void navigate("/folders?view=section-list");
+        }}
+        noDragStyle={noDragStyle}
+      >
+        <SectionListIcon />
+      </TitleBarToolbarButton>
+
+      <TitleBarToolbarButton
+        title="検索欄へ移動"
+        onClick={focusFirstSearchField}
+        noDragStyle={noDragStyle}
+      >
+        <SearchIcon />
+      </TitleBarToolbarButton>
+
+      <TitleBarToolbarButton
+        title="戻る"
+        onClick={() => {
+          void navigate(-1);
+        }}
+        noDragStyle={noDragStyle}
+      >
+        <BackIcon />
+      </TitleBarToolbarButton>
+
+      <TitleBarHomeMenuButton noDragStyle={noDragStyle} />
+    </div>
+  );
+};
 
 const TitleBarMenuSettingsIcon: React.FC = () => (
   <svg
@@ -146,8 +468,6 @@ const TitleBarBreadcrumbs = React.memo(
     noDragStyle,
   }: TitleBarBreadcrumbsProps) => {
     const navigate = useNavigate();
-    const location = useLocation();
-    const [isHomeMenuOpen, setIsHomeMenuOpen] = useState(false);
 
     const allCrumbs = useMemo(
       () =>
@@ -158,14 +478,6 @@ const TitleBarBreadcrumbs = React.memo(
         }),
       [baseCrumbs, extraCrumbs, pathname],
     );
-
-    const isHomeOnlyMode =
-      location.pathname.toLowerCase() === "/folders" &&
-      new URLSearchParams(location.search).get("home") === "1";
-
-    useEffect(() => {
-      setIsHomeMenuOpen(false);
-    }, [location.pathname, location.search]);
 
     const handleBreadcrumbNavigateClick = (
       event: React.MouseEvent<HTMLButtonElement>,
@@ -181,39 +493,19 @@ const TitleBarBreadcrumbs = React.memo(
       void navigate(crumb.to);
     };
 
-    const handleOpenSettings = () => {
-      const next = new URLSearchParams(location.search);
-      next.set("settings", "true");
-      next.set("settingsTab", "study");
-      void navigate({ search: `?${next.toString()}` });
-    };
-
-    const isHomeMenuItemActive = (to: string) => {
-      if (to === "/folders") {
-        return (
-          location.pathname.toLowerCase() === "/folders" && !isHomeOnlyMode
-        );
+    const visibleCrumbs = allCrumbs.filter((crumb, index) => {
+      const isLeadingHomeCrumb = index === 0 && crumb.label === "ホーム";
+      if (!isLeadingHomeCrumb) {
+        return true;
       }
-      return location.pathname.toLowerCase() === to.toLowerCase();
-    };
+      return allCrumbs.length <= 1;
+    });
 
     return (
       <nav className="titlebar-text flex min-w-0 flex-1 items-center gap-1 overflow-hidden text-xs">
-        {allCrumbs.map((crumb, index) => {
+        {visibleCrumbs.map((crumb, index) => {
           const isClickable = Boolean(crumb.to);
-          const isHomeCrumb = index === 0 && crumb.label === "ホーム";
-          const breadcrumbContent = isHomeCrumb ? (
-            <>
-              <HomeBreadcrumbIcon />
-              <span className="sr-only">{crumb.label}</span>
-            </>
-          ) : (
-           crumb.label
-          );
-
-          const shouldRenderHomeMenuTrigger = isHomeCrumb;
-          const shouldRenderClickableButton =
-            isClickable || shouldRenderHomeMenuTrigger;
+          const breadcrumbContent = crumb.label;
 
           return (
             <React.Fragment
@@ -223,90 +515,7 @@ const TitleBarBreadcrumbs = React.memo(
                 <span className="titlebar-divider select-none">/</span>
               )}
 
-              {shouldRenderHomeMenuTrigger ? (
-                <Popover open={isHomeMenuOpen} onOpenChange={setIsHomeMenuOpen}>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className={cn(
-                        TITLE_BAR_BREADCRUMB_ITEM_CLASS,
-                        "titlebar-hover titlebar-breadcrumb-link",
-                      )}
-                      style={noDragStyle}
-                      onMouseDown={(event) => event.stopPropagation()}
-                      title={crumb.label}
-                      aria-label={`${crumb.label}メニューを開く`}
-                      aria-haspopup="menu"
-                      aria-expanded={isHomeMenuOpen}
-                    >
-                      {breadcrumbContent}
-                    </button>
-                  </PopoverTrigger>
-
-                  <PopoverContent
-                    align="start"
-                    side="bottom"
-                    sideOffset={6}
-                    className={cn(
-                      HOME_MENU_PANEL_PRESET.className,
-                      HOME_MENU_WIDTH_CLASS,
-                      "rounded-2xl p-1 shadow-[0_8px_24px_rgba(15,23,42,0.10)]",
-                    )}
-                    surface={HOME_MENU_PANEL_PRESET.surface}
-                    style={noDragStyle}
-                  >
-                    <div className="flex flex-col gap-0">
-                      {HOME_MENU_ITEMS.map((item) => {
-                        const active = isHomeMenuItemActive(item.to);
-
-                        return (
-                          <button
-                            key={item.to}
-                            type="button"
-                            onMouseDown={(event) => event.stopPropagation()}
-                            onClick={() => {
-                              setIsHomeMenuOpen(false);
-                              void navigate(item.to);
-                            }}
-                            className={cn(
-                              "flex w-full items-center gap-2 rounded-lg px-2 text-left text-[13px] font-medium transition-colors",
-                              HOME_MENU_ITEM_CLASS,
-                              active
-                                ? "bg-[rgba(55,53,47,0.08)] text-[rgba(55,53,47,0.96)]"
-                                : "text-[rgba(55,53,47,0.78)] hover:bg-[rgba(55,53,47,0.045)] hover:text-[rgba(55,53,47,0.96)]",
-                            )}
-                          >
-                            <span className="flex h-[14px] w-[14px] shrink-0 items-center justify-center text-[rgba(55,53,47,0.68)]">
-                              {item.icon}
-                            </span>
-                            <span className="truncate">{item.label}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="my-1 border-t border-[rgba(55,53,47,0.07)]" />
-
-                    <button
-                      type="button"
-                      onMouseDown={(event) => event.stopPropagation()}
-                      onClick={() => {
-                        setIsHomeMenuOpen(false);
-                        handleOpenSettings();
-                      }}
-                      className={cn(
-                        "flex w-full items-center gap-2 rounded-lg px-2 text-left text-[13px] font-medium text-[rgba(55,53,47,0.78)] transition-colors hover:bg-[rgba(55,53,47,0.045)] hover:text-[rgba(55,53,47,0.96)]",
-                        HOME_MENU_ITEM_CLASS,
-                      )}
-                    >
-                      <span className="flex h-[14px] w-[14px] shrink-0 items-center justify-center text-[rgba(55,53,47,0.68)]">
-                        <TitleBarMenuSettingsIcon />
-                      </span>
-                      <span className="truncate">設定</span>
-                    </button>
-                  </PopoverContent>
-                </Popover>
-              ) : shouldRenderClickableButton ? (
+              {isClickable ? (
                 <button
                   type="button"
                   className={cn(
@@ -414,11 +623,13 @@ export const TitleBar: React.FC = () => {
     >
       <div
         className={cn(
-          "flex h-full min-w-0 items-center px-4",
+          "flex h-full min-w-0 items-center px-2",
           shouldShowBrandLabel && "gap-2",
         )}
         style={noDragStyle}
       >
+        <TitleBarPrimaryActions noDragStyle={noDragStyle} />
+
         {shouldShowBrandLabel ? (
           <span className="titlebar-text-strong shrink-0 text-xs font-semibold tracking-wide">
             {APP_CHROME.brandLabel}

@@ -1,5 +1,4 @@
 import { ExplorerSidebarHeader } from "@/components/explorer/ExplorerSidebarHeader";
-import { ExplorerBottomIconNav } from "@/components/folder/components/ExplorerBottomIconNav";
 import { cn } from "@/lib/utils";
 import React from "react";
 
@@ -87,10 +86,6 @@ export const TreeViewSidebar = ({
           className="flex-1 min-h-0 min-w-0 overflow-hidden px-1 pb-1 outline-none"
         >
           {children}
-        </div>
-
-        <div className="shrink-0 border-t border-[rgba(229,231,235,0.9)] px-2 py-2">
-          <ExplorerBottomIconNav />
         </div>
       </div>
 
