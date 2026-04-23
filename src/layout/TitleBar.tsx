@@ -219,7 +219,7 @@ const TitleBarToolbarButton: React.FC<{
       onClick={onClick}
       onMouseDown={(event) => event.stopPropagation()}
       style={noDragStyle}
-      className="titlebar-hover titlebar-text inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors"
+      className="titlebar-hover titlebar-text inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors [&>svg]:scale-[1.06]"
     >
       {children}
     </button>
@@ -269,7 +269,10 @@ const TitleBarPrimaryActions: React.FC<{
   const navigate = useNavigate();
 
   return (
-    <div className="flex shrink-0 items-center gap-1 pr-3" style={noDragStyle}>
+    <div
+      className="flex shrink-0 items-center gap-0.5 pr-2.5"
+      style={noDragStyle}
+    >
       <TitleBarToolbarButton
         title="サイドバーを開閉"
         onClick={() => {
