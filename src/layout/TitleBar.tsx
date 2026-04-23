@@ -1,7 +1,5 @@
 import { TREE_VIEW_SIDEBAR_TOGGLE_EVENT } from "@/components/folder/hooks/useTreeViewSidebar";
 import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
-import { floatingPanelPresets } from "@/components/ui/menu-styles";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { APP_CHROME } from "@/config/appChrome";
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 import {
@@ -21,7 +19,6 @@ import { usePresentationTarget } from "@/platform/presentation/usePresentationTa
 import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { NAV_SECTIONS } from "./sidebarNavigation";
 
 type WindowControlButtonProps = {
   title: string;
@@ -52,11 +49,6 @@ const TITLE_BAR_NO_DRAG_STYLE: AppRegionStyle = {
 };
 
 const TITLE_BAR_BREADCRUMB_ITEM_CLASS = "titlebar-breadcrumb-item truncate";
-
-const HOME_MENU_ITEMS = NAV_SECTIONS.flatMap((section) => section.items);
-const HOME_MENU_PANEL_PRESET = floatingPanelPresets.menu;
-const HOME_MENU_WIDTH_CLASS = "w-[208px]";
-const HOME_MENU_ITEM_CLASS = "h-8";
 
 const WindowControlButton: React.FC<WindowControlButtonProps> = ({
   title,
@@ -194,7 +186,7 @@ const BackIcon: React.FC = () => (
   </svg>
 );
 
-const HomeIcon: React.FC = () => (
+const ForwardIcon: React.FC = () => (
   <svg
     width="14"
     height="14"
@@ -202,17 +194,9 @@ const HomeIcon: React.FC = () => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
-    className="shrink-0"
   >
     <path
-      d="M3 10.25L12 3L21 10.25"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M5.25 9.5V19.5H18.75V9.5"
+      d="M9 5L16 12L9 19"
       stroke="currentColor"
       strokeWidth="1.8"
       strokeLinecap="round"
@@ -279,118 +263,6 @@ const focusFirstSearchField = () => {
   }
 };
 
-const TitleBarHomeMenuButton: React.FC<{
-  noDragStyle?: React.CSSProperties;
-}> = ({ noDragStyle }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [isHomeMenuOpen, setIsHomeMenuOpen] = useState(false);
-
-  const isHomeOnlyMode =
-    location.pathname.toLowerCase() === "/folders" &&
-    new URLSearchParams(location.search).get("home") === "1";
-
-  useEffect(() => {
-    setIsHomeMenuOpen(false);
-  }, [location.pathname, location.search]);
-
-  const handleOpenSettings = () => {
-    const next = new URLSearchParams(location.search);
-    next.set("settings", "true");
-    next.set("settingsTab", "study");
-    void navigate({ search: `?${next.toString()}` });
-  };
-
-  const isHomeMenuItemActive = (to: string) => {
-    if (to === "/folders") {
-      return location.pathname.toLowerCase() === "/folders" && !isHomeOnlyMode;
-    }
-    return location.pathname.toLowerCase() === to.toLowerCase();
-  };
-
-  return (
-    <Popover open={isHomeMenuOpen} onOpenChange={setIsHomeMenuOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          title="ホームメニューを開く"
-          aria-label="ホームメニューを開く"
-          aria-haspopup="menu"
-          aria-expanded={isHomeMenuOpen}
-          onMouseDown={(event) => event.stopPropagation()}
-          style={noDragStyle}
-          className="titlebar-hover titlebar-text inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors"
-        >
-          <HomeIcon />
-        </button>
-      </PopoverTrigger>
-
-      <PopoverContent
-        align="start"
-        side="bottom"
-        sideOffset={6}
-        className={cn(
-          HOME_MENU_PANEL_PRESET.className,
-          HOME_MENU_WIDTH_CLASS,
-          "rounded-2xl p-1 shadow-[0_8px_24px_rgba(15,23,42,0.10)]",
-        )}
-        surface={HOME_MENU_PANEL_PRESET.surface}
-        style={noDragStyle}
-      >
-        <div className="flex flex-col gap-0">
-          {HOME_MENU_ITEMS.map((item) => {
-            const active = isHomeMenuItemActive(item.to);
-
-            return (
-              <button
-                key={item.to}
-                type="button"
-                onMouseDown={(event) => event.stopPropagation()}
-                onClick={() => {
-                  setIsHomeMenuOpen(false);
-                  void navigate(item.to);
-                }}
-                className={cn(
-                  "flex w-full items-center gap-2 rounded-lg px-2 text-left text-[13px] font-medium transition-colors",
-                  HOME_MENU_ITEM_CLASS,
-                  active
-                    ? "bg-[rgba(55,53,47,0.08)] text-[rgba(55,53,47,0.96)]"
-                    : "text-[rgba(55,53,47,0.78)] hover:bg-[rgba(55,53,47,0.045)] hover:text-[rgba(55,53,47,0.96)]",
-                )}
-              >
-                <span className="flex h-[14px] w-[14px] shrink-0 items-center justify-center text-[rgba(55,53,47,0.68)]">
-                  {item.icon}
-                </span>
-                <span className="truncate">{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="my-1 border-t border-[rgba(55,53,47,0.07)]" />
-
-        <button
-          type="button"
-          onMouseDown={(event) => event.stopPropagation()}
-          onClick={() => {
-            setIsHomeMenuOpen(false);
-            handleOpenSettings();
-          }}
-          className={cn(
-            "flex w-full items-center gap-2 rounded-lg px-2 text-left text-[13px] font-medium text-[rgba(55,53,47,0.78)] transition-colors hover:bg-[rgba(55,53,47,0.045)] hover:text-[rgba(55,53,47,0.96)]",
-            HOME_MENU_ITEM_CLASS,
-          )}
-        >
-          <span className="flex h-[14px] w-[14px] shrink-0 items-center justify-center text-[rgba(55,53,47,0.68)]">
-            <TitleBarMenuSettingsIcon />
-          </span>
-          <span className="truncate">設定</span>
-        </button>
-      </PopoverContent>
-    </Popover>
-  );
-};
-
 const TitleBarPrimaryActions: React.FC<{
   noDragStyle?: React.CSSProperties;
 }> = ({ noDragStyle }) => {
@@ -436,29 +308,18 @@ const TitleBarPrimaryActions: React.FC<{
         <BackIcon />
       </TitleBarToolbarButton>
 
-      <TitleBarHomeMenuButton noDragStyle={noDragStyle} />
+      <TitleBarToolbarButton
+        title="進む"
+        onClick={() => {
+          void navigate(1);
+        }}
+        noDragStyle={noDragStyle}
+      >
+        <ForwardIcon />
+      </TitleBarToolbarButton>
     </div>
   );
 };
-
-const TitleBarMenuSettingsIcon: React.FC = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
-    <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.2" />
-    <path
-      d="M8 1.5V3M8 13V14.5M14.5 8H13M3 8H1.5M12.364 3.636L11.3 4.7M4.7 11.3L3.636 12.364M12.364 12.364L11.3 11.3M4.7 4.7L3.636 3.636"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
 
 const TitleBarBreadcrumbs = React.memo(
   ({
