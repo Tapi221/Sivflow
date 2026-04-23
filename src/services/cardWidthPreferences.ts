@@ -39,7 +39,9 @@ const normalizeStore = (value: unknown): CardWidthPreferencesStore => {
   }
 
   const byCardSet = Object.fromEntries(
-    Object.entries(value.byCardSet).filter(([, entry]) => isCardWidthEntry(entry)),
+    Object.entries(value.byCardSet).filter(([, entry]) =>
+      isCardWidthEntry(entry),
+    ),
   ) as Record<string, CardWidthEntry>;
 
   return {

@@ -38,7 +38,7 @@ interface Deferred<T> {
   reject: (reason?: unknown) => void;
 }
 
-const createDeferred = <T,>(): Deferred<T> => {
+const createDeferred = <T>(): Deferred<T> => {
   let resolve!: (value: T) => void;
   let reject!: (reason?: unknown) => void;
 
@@ -59,9 +59,7 @@ const flushMicrotasks = async (): Promise<void> => {
   await Promise.resolve();
 };
 
-const createMockPdfDocument = (
-  fingerprint: string,
-): PdfJsDocument => ({
+const createMockPdfDocument = (fingerprint: string): PdfJsDocument => ({
   numPages: 1,
   fingerprints: [fingerprint],
   getPage: vi.fn(),

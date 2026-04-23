@@ -60,7 +60,9 @@ const runOcrTransaction = async <T>({
     };
 
     transaction.onerror = () => {
-      reject(transaction.error ?? new Error("OCR IndexedDB transaction failed"));
+      reject(
+        transaction.error ?? new Error("OCR IndexedDB transaction failed"),
+      );
     };
 
     transaction.oncomplete = () => {
@@ -82,7 +84,9 @@ const runOcrWriteTransaction = async ({
     const store = transaction.objectStore(OCR_STORE_NAME);
 
     transaction.onerror = () => {
-      reject(transaction.error ?? new Error("OCR IndexedDB transaction failed"));
+      reject(
+        transaction.error ?? new Error("OCR IndexedDB transaction failed"),
+      );
     };
 
     transaction.oncomplete = () => {

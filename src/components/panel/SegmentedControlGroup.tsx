@@ -18,7 +18,7 @@ interface SegmentedControlGroupProps<T extends string> {
   buttonClassName?: string;
 }
 
-export const SegmentedControlGroup = <T extends string,>({
+export const SegmentedControlGroup = <T extends string>({
   value,
   options,
   onChange,

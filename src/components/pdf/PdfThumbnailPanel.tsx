@@ -563,18 +563,21 @@ export const PdfThumbnailPanel = ({
     resetDragState();
   }, [canReorderThumbnails, resetDragState]);
 
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    if (!canReorderThumbnails || !isReorderMode) {
-      return;
-    }
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      if (!canReorderThumbnails || !isReorderMode) {
+        return;
+      }
 
-    const nextPageNumber = Number(event.active.id);
-    setActiveDragPageNumber(
-      Number.isFinite(nextPageNumber) ? nextPageNumber : null,
-    );
-    const nextWidth = event.active.rect.current.initial?.width ?? null;
-    setDragOverlayWidth(typeof nextWidth === "number" ? nextWidth : null);
-  }, [canReorderThumbnails, isReorderMode]);
+      const nextPageNumber = Number(event.active.id);
+      setActiveDragPageNumber(
+        Number.isFinite(nextPageNumber) ? nextPageNumber : null,
+      );
+      const nextWidth = event.active.rect.current.initial?.width ?? null;
+      setDragOverlayWidth(typeof nextWidth === "number" ? nextWidth : null);
+    },
+    [canReorderThumbnails, isReorderMode],
+  );
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {

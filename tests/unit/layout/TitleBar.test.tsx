@@ -56,10 +56,7 @@ type RenderTitleBarOptions = {
   crumbs?: BreadcrumbCrumb[];
 };
 
-const renderTitleBar = ({
-  path,
-  crumbs = [],
-}: RenderTitleBarOptions): void => {
+const renderTitleBar = ({ path, crumbs = [] }: RenderTitleBarOptions): void => {
   render(
     <MemoryRouter initialEntries={[path]}>
       <BreadcrumbProvider>

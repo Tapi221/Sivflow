@@ -11,7 +11,13 @@ import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 import { Tag } from "@/ui/icons";
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 
 type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";

@@ -155,7 +155,9 @@ export class IndexedDBRebuildOrchestrator {
       let insertedCount = 0;
 
       await newDb.runSyncTransaction(async () => {
-        console.log(`[Rebuild] Inserting ${changes.length} items to fresh DB...`);
+        console.log(
+          `[Rebuild] Inserting ${changes.length} items to fresh DB...`,
+        );
 
         for (const rawChange of changes) {
           const change = toPullChange(rawChange);
@@ -181,7 +183,14 @@ export class IndexedDBRebuildOrchestrator {
 
           try {
             await newDb.upsert(
-              table as "cards" | "folders" | "cardSets" | "documents" | "tagRecords" | "images" | "userSettings",
+              table as
+                | "cards"
+                | "folders"
+                | "cardSets"
+                | "documents"
+                | "tagRecords"
+                | "images"
+                | "userSettings",
               normalizeRebuildRecord(userId, {
                 type: changeType,
                 id: toNonEmptyString(change.id) ?? undefined,
@@ -224,9 +233,8 @@ export class IndexedDBRebuildOrchestrator {
       }
 
       try {
-        const { IndexedDBMetadataService } = await import(
-          "./IndexedDBMetadataService"
-        );
+        const { IndexedDBMetadataService } =
+          await import("./IndexedDBMetadataService");
         const metadataService = new IndexedDBMetadataService(newDb, userId);
         await metadataService.markClean();
       } catch (error) {

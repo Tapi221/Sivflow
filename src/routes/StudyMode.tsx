@@ -95,11 +95,7 @@ const StudyMode = () => {
     updateCard,
   } = useCards(effectiveFolderId);
   const { cardSets = [] } = useCardSets();
-  const {
-    folders = [],
-    loading: foldersLoading,
-    updateFolder,
-  } = useFolders();
+  const { folders = [], loading: foldersLoading, updateFolder } = useFolders();
 
   const isPracticeFeatureEnabled = flags.isEnabled("postReviewPractice");
   const isAdvancedTelemetryEnabled = flags.isEnabled(
@@ -390,11 +386,11 @@ const StudyMode = () => {
 
   const practiceCurrentCardId =
     isActivePracticeMode && activePracticeState.phase === "cards"
-      ? activePracticeState.roundQueue[0] ?? null
+      ? (activePracticeState.roundQueue[0] ?? null)
       : null;
 
   const practiceCurrentCard = practiceCurrentCardId
-    ? studyCardById.get(practiceCurrentCardId) ?? null
+    ? (studyCardById.get(practiceCurrentCardId) ?? null)
     : null;
 
   const currentCard = isActivePracticeMode

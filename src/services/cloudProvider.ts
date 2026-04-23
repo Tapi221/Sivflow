@@ -88,7 +88,10 @@ export class FirebaseCloudProvider implements ICloudProvider {
       throw new Error("userId is required for upsertFolder");
     }
 
-    const documentRef = doc(db, ...folderDocPathSegments(folder.userId, folder.id));
+    const documentRef = doc(
+      db,
+      ...folderDocPathSegments(folder.userId, folder.id),
+    );
     await setDoc(
       documentRef,
       {
@@ -141,7 +144,9 @@ export class FirebaseCloudProvider implements ICloudProvider {
     ]);
 
     return {
-      folders: folderDocs.map((snapshot) => mapSnapshotWithId<Folder>(snapshot)),
+      folders: folderDocs.map((snapshot) =>
+        mapSnapshotWithId<Folder>(snapshot),
+      ),
       cards: cardDocs.map((snapshot) => mapSnapshotWithId<Card>(snapshot)),
     };
   };

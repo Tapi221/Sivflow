@@ -202,10 +202,7 @@
     min-height: var(--meta-row-px);
     height: var(--meta-row-px);
     padding-inline: 0.5rem;
-    font-size: var(
-      --surface-placeholder-font-size,
-      var(--meta-font-size)
-    );
+    font-size: var(--surface-placeholder-font-size, var(--meta-font-size));
     line-height: var(--meta-row-px);
     outline: none;
   }
