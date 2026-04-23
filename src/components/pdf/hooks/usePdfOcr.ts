@@ -9,10 +9,16 @@ import {
   trimPdfOcrRecordsForDoc,
   type PdfOcrPageRecord,
 } from "@/lib/pdf/pdfOcrStore";
+import {
+  buildPdfTextSelection,
+  normalizePdfExtractedText,
+  scorePdfTextQuality,
+} from "@/lib/pdf/pdfTextExtraction";
 import { renderPdfPageForOcr } from "@/lib/pdf/renderPdfPageForOcr";
 
 const OCR_LANGUAGES = "jpn+eng";
 const OCR_NATIVE_TEXT_SKIP_THRESHOLD = 32;
+const OCR_NATIVE_QUALITY_SKIP_THRESHOLD = 0.72;
 const OCR_DOCUMENT_RETENTION_LIMIT = 3;
 
 type OcrStatus = "idle" | "running" | "success" | "error" | "cancelled";
@@ -65,23 +71,25 @@ const extractTextFromTextContent = async (
     .trim();
 };
 
-const normalizeExtractedText = (value: string) => {
-  return value.replace(/\s+/g, " ").trim();
-};
-
-const persistPageText = async ({
+const persistSelection = async ({
   docId,
   documentKey,
   pageNumber,
-  text,
+  nativeText,
+  ocrText,
 }: {
   docId: string;
   documentKey: string;
   pageNumber: number;
-  text: string;
+  nativeText: string;
+  ocrText: string;
 }) => {
-  const normalizedText = normalizeExtractedText(text);
-  if (normalizedText.length === 0) {
+  const selection = buildPdfTextSelection({
+    nativeText,
+    ocrText,
+  });
+
+  if (selection.finalText.length === 0) {
     return null;
   }
 
@@ -89,8 +97,31 @@ const persistPageText = async ({
     docId,
     documentKey,
     pageNumber,
-    text: normalizedText,
+    finalText: selection.finalText,
+    nativeText,
+    ocrText,
+    source: selection.source,
+    status: selection.status,
+    qualityScore: selection.qualityScore,
+    nativeQualityScore: selection.nativeQualityScore,
+    ocrQualityScore: selection.ocrQualityScore,
+    lines: selection.lines,
+    languageHint: OCR_LANGUAGES,
   });
+};
+
+const shouldUseNativeTextOnly = ({
+  nativeText,
+}: {
+  nativeText: string;
+}) => {
+  const normalizedNativeText = normalizePdfExtractedText(nativeText);
+  const nativeQualityScore = scorePdfTextQuality(normalizedNativeText);
+
+  return (
+    normalizedNativeText.length >= OCR_NATIVE_TEXT_SKIP_THRESHOLD &&
+    nativeQualityScore >= OCR_NATIVE_QUALITY_SKIP_THRESHOLD
+  );
 };
 
 export const usePdfOcr = ({
@@ -101,9 +132,7 @@ export const usePdfOcr = ({
   documentController,
 }: UsePdfOcrOptions) => {
   const [ocrState, setOcrState] = useState<PdfOcrState>(createInitialOcrState);
-  const [ocrTextByPage, setOcrTextByPage] = useState<Record<number, string>>(
-    {},
-  );
+  const [ocrTextByPage, setOcrTextByPage] = useState<Record<number, string>>({});
   const [ocrRecords, setOcrRecords] = useState<PdfOcrPageRecord[]>([]);
 
   const mountedRef = useRef(true);
@@ -125,7 +154,7 @@ export const usePdfOcr = ({
     setOcrRecords(records);
     setOcrTextByPage(
       records.reduce<Record<number, string>>((accumulator, record) => {
-        accumulator[record.pageNumber] = record.text;
+        accumulator[record.pageNumber] = record.finalText || record.text;
         return accumulator;
       }, {}),
     );
@@ -142,7 +171,8 @@ export const usePdfOcr = ({
     setOcrRecords([]);
     setOcrTextByPage({});
     setOcrState(createInitialOcrState());
-  }, []);
+    documentController.invalidateDerivedTextCache();
+  }, [documentController]);
 
   const syncCachedRecords = useCallback(async () => {
     if (!resolvedDocumentKey) {
@@ -151,6 +181,7 @@ export const usePdfOcr = ({
       }
 
       applyCachedRecords([]);
+      documentController.invalidateDerivedTextCache();
       return;
     }
 
@@ -164,7 +195,8 @@ export const usePdfOcr = ({
     }
 
     applyCachedRecords(records);
-  }, [applyCachedRecords, docId, resolvedDocumentKey]);
+    documentController.invalidateDerivedTextCache();
+  }, [applyCachedRecords, docId, documentController, resolvedDocumentKey]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -276,9 +308,7 @@ export const usePdfOcr = ({
         new Set(
           pageNumbers
             .filter((pageNumber) => Number.isFinite(pageNumber))
-            .map((pageNumber) =>
-              Math.max(1, Math.min(numPages, Math.trunc(pageNumber))),
-            ),
+            .map((pageNumber) => Math.max(1, Math.min(numPages, Math.trunc(pageNumber)))),
         ),
       );
 
@@ -319,7 +349,7 @@ export const usePdfOcr = ({
             pageNumber,
           });
 
-          if (cachedRecord?.text) {
+          if (cachedRecord?.finalText) {
             markProcessed();
             continue;
           }
@@ -328,14 +358,15 @@ export const usePdfOcr = ({
             documentController.getPageTextContent,
             pageNumber,
           );
-          const normalizedNativeText = normalizeExtractedText(nativeText);
+          const normalizedNativeText = normalizePdfExtractedText(nativeText);
 
-          if (normalizedNativeText.length >= OCR_NATIVE_TEXT_SKIP_THRESHOLD) {
-            await persistPageText({
+          if (shouldUseNativeTextOnly({ nativeText: normalizedNativeText })) {
+            await persistSelection({
               docId,
               documentKey: resolvedDocumentKey,
               pageNumber,
-              text: normalizedNativeText,
+              nativeText: normalizedNativeText,
+              ocrText: "",
             });
             markProcessed();
             continue;
@@ -346,23 +377,15 @@ export const usePdfOcr = ({
             pageNumber,
           });
           const result = await worker.recognize(renderedPage.canvas);
-          const normalizedOcrText = normalizeExtractedText(result.data.text);
+          const normalizedOcrText = normalizePdfExtractedText(result.data.text);
 
-          if (normalizedOcrText.length > 0) {
-            await persistPageText({
-              docId,
-              documentKey: resolvedDocumentKey,
-              pageNumber,
-              text: normalizedOcrText,
-            });
-          } else if (normalizedNativeText.length > 0) {
-            await persistPageText({
-              docId,
-              documentKey: resolvedDocumentKey,
-              pageNumber,
-              text: normalizedNativeText,
-            });
-          }
+          await persistSelection({
+            docId,
+            documentKey: resolvedDocumentKey,
+            pageNumber,
+            nativeText: normalizedNativeText,
+            ocrText: normalizedOcrText,
+          });
 
           markProcessed();
         }
@@ -397,9 +420,7 @@ export const usePdfOcr = ({
     },
     [
       docId,
-      documentController.acquirePage,
-      documentController.doc,
-      documentController.getPageTextContent,
+      documentController,
       getWorker,
       markProcessed,
       markUnavailableDocumentError,
@@ -436,7 +457,8 @@ export const usePdfOcr = ({
     }
 
     setOcrState(createInitialOcrState());
-  }, [docId, resetLocalOcrState, resolvedDocumentKey, syncCachedRecords]);
+    documentController.invalidateDerivedTextCache();
+  }, [docId, documentController, resetLocalOcrState, resolvedDocumentKey, syncCachedRecords]);
 
   const cancelOcr = useCallback(() => {
     cancelRequestedRef.current = true;
