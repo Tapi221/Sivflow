@@ -676,7 +676,7 @@ export const PdfThumbnailPanel = ({
     ) => {
       if (documentController.loading && orderedPageNumbers.length === 0) {
         return (
-          <div className="grid grid-cols-2 gap-3 p-4">
+          <div className="grid grid-cols-2 gap-2.5 p-3">
             {Array.from({ length: 8 }, (_, index) => (
               <div
                 key={`pdf-thumbnail-skeleton-${index}`}
@@ -719,7 +719,7 @@ export const PdfThumbnailPanel = ({
 
       if (!options.reorderEnabled) {
         return (
-          <div className="grid grid-cols-2 gap-3 p-4">
+          <div className="grid grid-cols-2 gap-2.5 p-3">
             {pageNumbers.map((pageNumber) => renderThumbnailCard(pageNumber))}
           </div>
         );
@@ -742,7 +742,7 @@ export const PdfThumbnailPanel = ({
             items={pageNumbers.map((pageNumber) => String(pageNumber))}
             strategy={rectSortingStrategy}
           >
-            <div className="grid grid-cols-2 gap-3 p-4">
+            <div className="grid grid-cols-2 gap-2.5 p-3">
               {pageNumbers.map((pageNumber) => (
                 <SortableThumbnailCard
                   key={`sortable-${pageNumber}`}
