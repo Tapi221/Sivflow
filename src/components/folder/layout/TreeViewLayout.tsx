@@ -34,6 +34,7 @@ import { useNavigate } from "react-router-dom";
 
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
 import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
+import { PdfThumbnailSidebar } from "@/components/pdf/PdfThumbnailSidebar";
 import { TreeViewTabContent } from "@/components/folder/components/TreeViewTabContent";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -522,6 +523,10 @@ const TreeViewLayout = ({
 
   const isSidebarContentCollapsed = selectedItem?.type === "document";
 
+  const collapsedSidebarContent = selectedDocument ? (
+    <PdfThumbnailSidebar doc={selectedDocument} />
+  ) : null;
+
   return (
     <div
       className={cn(
@@ -548,6 +553,7 @@ const TreeViewLayout = ({
         canBulkImport={Boolean(currentHeaderActionFolderId)}
         preferDirectRootFolderCreate={currentHeaderActionFolderId === null}
         collapseContent={isSidebarContentCollapsed}
+        collapsedContent={collapsedSidebarContent}
       >
         {sidebarContent}
       </TreeViewSidebar>
