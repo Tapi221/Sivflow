@@ -15,7 +15,6 @@ import { usePdfContainerWidth } from "./hooks/usePdfContainerWidth";
 import { usePdfSourceResolver } from "./hooks/usePdfSourceResolver";
 import { defaultPdfViewerOptions } from "./defaultPdfViewerOptions";
 import { usePdfViewerPersistence } from "./hooks/usePdfViewerPersistence";
-import { usePdfOcr } from "./hooks/usePdfOcr";
 import {
   FIT_MAX_SCALE,
   FIT_MIN_SCALE,
@@ -24,7 +23,6 @@ import {
   getViewerStateFromSession,
 } from "./pdfViewerStateStorage";
 import { usePdfDocument } from "./hooks/usePdfDocument";
-import { PdfThumbnailPanel } from "./PdfThumbnailPanel";
 
 interface PdfPaneDoc {
   id: string;
@@ -35,7 +33,13 @@ interface PdfPaneDoc {
   localUrl?: BlobUrl | null;
   localFileId?: string | null;
   downloadUrl?: string | null;
-  uploadStatus?: "pending" | "queued" | "uploading" | "ready" | "failed" | null;
+  uploadStatus?:
+    | "pending"
+    | "queued"
+    | "uploading"
+    | "ready"
+    | "failed"
+    | null;
   updatedAt?: unknown;
   mimeType?: string;
   viewerState?: PdfViewerState | null;
@@ -61,7 +65,6 @@ const PDF_ZOOM_UI_MAX_PERCENT = 100;
 const PDF_ZOOM_UI_RANGE_PERCENT =
   PDF_ZOOM_UI_MAX_PERCENT - PDF_ZOOM_UI_MIN_PERCENT;
 const PDF_SCALE_RANGE = FIT_MAX_SCALE - FIT_MIN_SCALE;
-const MOBILE_PANEL_MEDIA_QUERY = "(max-width: 1023px)";
 
 const normalizePageForLayout = (
   page: number,
@@ -117,17 +120,6 @@ const zoomUiPercentToScale = (value: number) => {
   return clampScale(
     Number((FIT_MIN_SCALE + ratio * PDF_SCALE_RANGE).toFixed(3)),
   );
-};
-
-const readInitialMobileViewportState = () => {
-  if (
-    typeof window === "undefined" ||
-    typeof window.matchMedia !== "function"
-  ) {
-    return false;
-  }
-
-  return window.matchMedia(MOBILE_PANEL_MEDIA_QUERY).matches;
 };
 
 const sanitizeBookmarkPages = (value: unknown): number[] => {
@@ -237,16 +229,6 @@ export const PdfPane = ({
   );
 
   const [basePageWidth, setBasePageWidth] = useState<number | null>(null);
-  const [isMobileViewport, setIsMobileViewport] = useState(
-    readInitialMobileViewportState,
-  );
-  const [isDesktopThumbnailPanelOpen, setIsDesktopThumbnailPanelOpen] =
-    useState(true);
-  const [isMobileThumbnailPanelOpen, setIsMobileThumbnailPanelOpen] =
-    useState(false);
-  const [pendingThumbnailPage, setPendingThumbnailPage] = useState<
-    number | null
-  >(null);
   const [bookmarkPages, setBookmarkPages] = useState<number[]>(() => {
     return sanitizeBookmarkPages(initialViewerState?.bookmarkPages);
   });
@@ -316,7 +298,6 @@ export const PdfPane = ({
     source,
     sourceMeta,
     sourceUnavailable,
-    isLocalOnly,
     localDataStatus,
     handleSourceLoadError,
   } = usePdfSourceResolver(doc, currentUser?.uid);
@@ -355,49 +336,6 @@ export const PdfPane = ({
     () => normalizePageForLayout(currentPage, pageLayoutMode),
     [currentPage, pageLayoutMode],
   );
-  const displayedThumbnailPage = useMemo(() => {
-    if (pendingThumbnailPage === null) {
-      return alignedCurrentPage;
-    }
-
-    return normalizePageForLayout(pendingThumbnailPage, pageLayoutMode);
-  }, [alignedCurrentPage, pageLayoutMode, pendingThumbnailPage]);
-  const isThumbnailPanelOpen = isMobileViewport
-    ? isMobileThumbnailPanelOpen
-    : isDesktopThumbnailPanelOpen;
-  const bookmarkedPageNumberSet = useMemo(() => {
-    return new Set(bookmarkPages);
-  }, [bookmarkPages]);
-
-  const {
-    ocrState,
-    ocrTextByPage,
-    ocrPageNumbers,
-    hasAnyOcr,
-    runCurrentPageOcr,
-    runAllPagesOcr,
-    cancelOcr,
-    clearOcr,
-    hasOcrForCurrentPage,
-  } = usePdfOcr({
-    docId: doc.id,
-    documentKey: documentController.documentKey,
-    currentPage: alignedCurrentPage,
-    numPages,
-    documentController,
-  });
-
-  const handleThumbnailPanelOpenChange = useCallback(
-    (nextOpen: boolean) => {
-      if (isMobileViewport) {
-        setIsMobileThumbnailPanelOpen(nextOpen);
-        return;
-      }
-
-      setIsDesktopThumbnailPanelOpen(nextOpen);
-    },
-    [isMobileViewport],
-  );
 
   const handleZoomPercentChange = useCallback(
     (nextPercent: number) => {
@@ -409,40 +347,6 @@ export const PdfPane = ({
     },
     [handleViewerScaleChange],
   );
-
-  useEffect(() => {
-    if (
-      typeof window === "undefined" ||
-      typeof window.matchMedia !== "function"
-    ) {
-      return;
-    }
-
-    const mediaQueryList = window.matchMedia(MOBILE_PANEL_MEDIA_QUERY);
-    const updateViewport = (matches: boolean) => {
-      setIsMobileViewport((previousMatches) =>
-        previousMatches === matches ? previousMatches : matches,
-      );
-    };
-
-    updateViewport(mediaQueryList.matches);
-
-    const handleMediaQueryChange = (event: MediaQueryListEvent) => {
-      updateViewport(event.matches);
-    };
-
-    if (typeof mediaQueryList.addEventListener === "function") {
-      mediaQueryList.addEventListener("change", handleMediaQueryChange);
-      return () => {
-        mediaQueryList.removeEventListener("change", handleMediaQueryChange);
-      };
-    }
-
-    mediaQueryList.addListener(handleMediaQueryChange);
-    return () => {
-      mediaQueryList.removeListener(handleMediaQueryChange);
-    };
-  }, []);
 
   useEffect(() => {
     const restoredViewerState = readInitialViewerState(doc.id, doc.viewerState);
@@ -457,33 +361,14 @@ export const PdfPane = ({
           )
         : [],
     );
-    setPendingThumbnailPage(null);
   }, [doc.id, doc.viewerState]);
-
-  useEffect(() => {
-    if (pendingThumbnailPage === null) {
-      return;
-    }
-
-    const normalizedPendingThumbnailPage = normalizePageForLayout(
-      pendingThumbnailPage,
-      pageLayoutMode,
-    );
-
-    if (normalizedPendingThumbnailPage === alignedCurrentPage) {
-      setPendingThumbnailPage(null);
-    }
-  }, [alignedCurrentPage, pageLayoutMode, pendingThumbnailPage]);
 
   useEffect(() => {
     if (!numPages) {
       return;
     }
 
-    const nextNormalizedOrder = normalizeThumbnailOrder(
-      thumbnailOrder,
-      numPages,
-    );
+    const nextNormalizedOrder = normalizeThumbnailOrder(thumbnailOrder, numPages);
 
     setThumbnailOrder((previousOrder) => {
       if (areNumberArraysEqual(previousOrder, nextNormalizedOrder)) {
@@ -539,47 +424,6 @@ export const PdfPane = ({
     viewerRef.current?.scrollToPage(nextPage);
   }, [alignedCurrentPage, numPages, pageStep]);
 
-  const prewarmPageMetrics = useCallback(
-    async (pageNumbers: number[]) => {
-      const uniquePageNumbers = Array.from(
-        new Set(
-          pageNumbers
-            .filter((pageNumber) => Number.isFinite(pageNumber))
-            .map((pageNumber) => Math.max(1, Math.trunc(pageNumber))),
-        ),
-      ).filter((pageNumber) => pageNumber <= numPages);
-
-      if (uniquePageNumbers.length === 0) {
-        return;
-      }
-
-      await Promise.all(
-        uniquePageNumbers.map(async (pageNumber) => {
-          if (documentController.pageSizes[pageNumber]) {
-            return;
-          }
-
-          const pageLease = await documentController.acquirePage(pageNumber);
-
-          try {
-            const viewport = pageLease.page.getViewport({ scale: 1 });
-            documentController.setPageSize(pageNumber, {
-              width: viewport.width,
-              height: viewport.height,
-            });
-          } finally {
-            pageLease.release();
-          }
-        }),
-      );
-
-      await new Promise<void>((resolve) => {
-        window.requestAnimationFrame(() => resolve());
-      });
-    },
-    [documentController, numPages],
-  );
-
   const handleCommitPage = useCallback(
     (nextPage: number) => {
       if (!Number.isFinite(nextPage) || numPages <= 0) {
@@ -596,77 +440,6 @@ export const PdfPane = ({
     },
     [numPages, pageLayoutMode],
   );
-
-  const handleSelectThumbnailPage = useCallback(
-    (nextPage: number) => {
-      if (!Number.isFinite(nextPage) || numPages <= 0) {
-        return;
-      }
-
-      const normalizedPage = Math.min(
-        numPages,
-        Math.max(1, Math.trunc(nextPage)),
-      );
-      const targetPage = normalizePageForLayout(normalizedPage, pageLayoutMode);
-      const pagesToPrewarm =
-        pageLayoutMode === "double"
-          ? [targetPage, Math.min(numPages, targetPage + 1)]
-          : [targetPage];
-
-      setPendingThumbnailPage(targetPage);
-      documentController.prefetchPageResources(pagesToPrewarm, {
-        includeTextContent: false,
-      });
-
-      void (async () => {
-        try {
-          await prewarmPageMetrics(pagesToPrewarm);
-        } catch (errorValue) {
-          console.warn("[PdfPane] Failed to prewarm page metrics", {
-            docId: doc.id,
-            targetPage,
-            error: errorValue,
-          });
-        } finally {
-          viewerRef.current?.scrollToPage(targetPage, { behavior: "auto" });
-        }
-      })();
-
-      if (isMobileViewport) {
-        setIsMobileThumbnailPanelOpen(false);
-      }
-    },
-    [
-      doc.id,
-      documentController,
-      isMobileViewport,
-      numPages,
-      pageLayoutMode,
-      prewarmPageMetrics,
-    ],
-  );
-
-  const handleToggleBookmark = useCallback((pageNumber: number) => {
-    if (!Number.isFinite(pageNumber)) {
-      return;
-    }
-
-    const normalizedPageNumber = Math.max(1, Math.trunc(pageNumber));
-
-    setBookmarkPages((previousBookmarkPages) => {
-      const hasBookmark = previousBookmarkPages.includes(normalizedPageNumber);
-
-      if (hasBookmark) {
-        return previousBookmarkPages.filter(
-          (previousPageNumber) => previousPageNumber !== normalizedPageNumber,
-        );
-      }
-
-      return [...previousBookmarkPages, normalizedPageNumber].sort(
-        (left, right) => left - right,
-      );
-    });
-  }, []);
 
   useEffect(() => {
     if (!DEV_MODE) {
@@ -712,87 +485,57 @@ export const PdfPane = ({
             {localDataStatus === "idle" && "PDFソースがありません。"}
           </div>
         ) : (
-          <div className="relative flex h-full min-h-0 min-w-0 w-full overflow-hidden">
-            <PdfThumbnailPanel
+          <div
+            ref={containerRef}
+            className="relative flex h-full min-h-0 min-w-0 w-full overflow-hidden bg-transparent"
+          >
+            <PdfViewer
+              ref={viewerRef}
               documentController={documentController}
-              currentPage={displayedThumbnailPage}
+              navigationIdentity={doc.id}
+              pageOrder={normalizedThumbnailOrder}
+              scale={scale}
+              minScale={FIT_MIN_SCALE}
+              maxScale={FIT_MAX_SCALE}
+              opaqueCanvas={resolvedViewerOptions.opaqueCanvas ?? false}
               pageLayoutMode={pageLayoutMode}
-              bookmarkedPageNumbers={bookmarkedPageNumberSet}
-              selectedTab={sidePanelTab}
-              orderedThumbnailPageNumbers={normalizedThumbnailOrder}
-              isMobileViewport={isMobileViewport}
-              isOpen={isThumbnailPanelOpen}
-              onOpenChange={handleThumbnailPanelOpenChange}
-              onTabChange={setSidePanelTab}
-              onSelectPage={handleSelectThumbnailPage}
-              onToggleBookmark={handleToggleBookmark}
-              onThumbnailOrderChange={setThumbnailOrder}
-              ocrTextByPage={ocrTextByPage}
-              ocrPageNumbers={ocrPageNumbers}
-              isOcrRunning={ocrState.status === "running"}
-              onRunCurrentPageOcr={() => {
-                void runCurrentPageOcr();
-              }}
-              onRunAllPagesOcr={() => {
-                void runAllPagesOcr();
-              }}
-              onClearOcr={() => {
-                void clearOcr();
-              }}
+              spreadGap={PDF_DOUBLE_PAGE_GAP}
+              onScaleChange={handleViewerScaleChange}
+              onPageChange={setCurrentPage}
+              className="h-full w-full"
             />
 
-            <div
-              ref={containerRef}
-              className="relative flex-1 min-h-0 min-w-0 overflow-hidden bg-transparent"
-            >
-              <PdfViewer
-                ref={viewerRef}
-                documentController={documentController}
-                navigationIdentity={doc.id}
-                pageOrder={normalizedThumbnailOrder}
-                scale={scale}
-                minScale={FIT_MIN_SCALE}
-                maxScale={FIT_MAX_SCALE}
-                opaqueCanvas={resolvedViewerOptions.opaqueCanvas ?? false}
-                pageLayoutMode={pageLayoutMode}
-                spreadGap={PDF_DOUBLE_PAGE_GAP}
-                onScaleChange={handleViewerScaleChange}
-                onPageChange={setCurrentPage}
-                className="h-full w-full"
-              />
-
-              {shouldRenderOverlayToolbar ? (
-                <div
-                  className="pointer-events-none absolute z-20 flex items-end gap-2"
-                  style={{
-                    right: "max(1rem, env(safe-area-inset-right))",
-                    bottom:
-                      "max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))",
-                  }}
-                >
-                  <div className="pointer-events-auto">
-                    <PdfOverlayToolbar
-                      currentPage={alignedCurrentPage}
-                      numPages={numPages}
-                      zoomPercent={zoomPercent}
-                      minZoomPercent={PDF_ZOOM_UI_MIN_PERCENT}
-                      maxZoomPercent={PDF_ZOOM_UI_MAX_PERCENT}
-                      fitMode={fitMode}
-                      pageLayoutMode={pageLayoutMode}
-                      zoomStepPercent={PDF_OVERLAY_ZOOM_STEP_PERCENT}
-                      onCommitPage={handleCommitPage}
-                      onPrevPage={handlePrev}
-                      onNextPage={handleNext}
-                      onFitWidth={handleFitWidth}
-                      onZoomPercentChange={handleZoomPercentChange}
-                      onPageLayoutModeChange={handlePageLayoutModeChange}
-                      canGoToPrevPage={canGoToPrevPage}
-                      canGoToNextPage={canGoToNextPage}
-                    />
-                  </div>
+            {shouldRenderOverlayToolbar ? (
+              <div
+                className="pointer-events-none absolute z-20 flex items-end gap-2"
+                style={{
+                  right: "max(1rem, env(safe-area-inset-right))",
+                  bottom:
+                    "max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))",
+                }}
+              >
+                <div className="pointer-events-auto">
+                  <PdfOverlayToolbar
+                    currentPage={alignedCurrentPage}
+                    numPages={numPages}
+                    zoomPercent={zoomPercent}
+                    minZoomPercent={PDF_ZOOM_UI_MIN_PERCENT}
+                    maxZoomPercent={PDF_ZOOM_UI_MAX_PERCENT}
+                    fitMode={fitMode}
+                    pageLayoutMode={pageLayoutMode}
+                    zoomStepPercent={PDF_OVERLAY_ZOOM_STEP_PERCENT}
+                    onCommitPage={handleCommitPage}
+                    onPrevPage={handlePrev}
+                    onNextPage={handleNext}
+                    onFitWidth={handleFitWidth}
+                    onZoomPercentChange={handleZoomPercentChange}
+                    onPageLayoutModeChange={handlePageLayoutModeChange}
+                    canGoToPrevPage={canGoToPrevPage}
+                    canGoToNextPage={canGoToNextPage}
+                  />
                 </div>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
           </div>
         )}
       </div>
