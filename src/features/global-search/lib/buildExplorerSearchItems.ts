@@ -1,3 +1,7 @@
+import {
+  buildCardSetById,
+  resolveCardFolderId,
+} from "@/domain/card/selectors/cardFolder";
 import type {
   Card,
   CardSet,
@@ -50,7 +54,7 @@ export const buildExplorerSearchItems = ({
   );
 
   const folderById = new Map(activeFolders.map((folder) => [folder.id, folder]));
-  const cardSetById = new Map(activeCardSets.map((cardSet) => [cardSet.id, cardSet]));
+  const cardSetById = buildCardSetById(activeCardSets);
   const folderPathCache = new Map<string, string>();
 
   const getFolderPath = (folderId: string | null | undefined): string => {
@@ -130,7 +134,8 @@ export const buildExplorerSearchItems = ({
     const cardSetTitle = linkedCardSet
       ? normalizeLabel(linkedCardSet.name, "無題のセット")
       : "";
-    const folderPath = getFolderPath(linkedCardSet?.folderId ?? card.folderId ?? null);
+    const resolvedFolderId = resolveCardFolderId(card, cardSetById);
+    const folderPath = getFolderPath(resolvedFolderId);
     const cardTitle = normalizeLabel(
       card.title,
       normalizeLabel(card.questionNumber, "無題のカード"),
