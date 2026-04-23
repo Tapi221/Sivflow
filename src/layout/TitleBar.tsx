@@ -48,16 +48,17 @@ const TITLE_BAR_NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
 };
 
-const TITLE_BAR_BREADCRUMB_ITEM_CLASS = "titlebar-breadcrumb-item truncate";
+const TITLE_BAR_BREADCRUMB_ITEM_CLASS =
+  "titlebar-breadcrumb-item truncate";
 
-const WindowControlButton: React.FC<WindowControlButtonProps> = ({
+const WindowControlButton = ({
   title,
   onClick,
   disabled = false,
   danger = false,
   noDragStyle,
   children,
-}) => {
+}: WindowControlButtonProps) => {
   const disabledClassName = disabled
     ? "cursor-default opacity-60 hover:bg-transparent hover:text-current"
     : danger
@@ -85,7 +86,7 @@ const WindowControlButton: React.FC<WindowControlButtonProps> = ({
   );
 };
 
-const MenuIcon: React.FC = () => (
+const MenuIcon = () => (
   <svg
     width="14"
     height="14"
@@ -115,7 +116,7 @@ const MenuIcon: React.FC = () => (
   </svg>
 );
 
-const SectionListIcon: React.FC = () => (
+const SectionListIcon = () => (
   <svg
     width="14"
     height="14"
@@ -142,7 +143,7 @@ const SectionListIcon: React.FC = () => (
   </svg>
 );
 
-const SearchIcon: React.FC = () => (
+const SearchIcon = () => (
   <svg
     width="14"
     height="14"
@@ -167,7 +168,7 @@ const SearchIcon: React.FC = () => (
   </svg>
 );
 
-const CalendarIcon: React.FC = () => (
+const CalendarIcon = () => (
   <svg
     width="14"
     height="14"
@@ -206,7 +207,7 @@ const CalendarIcon: React.FC = () => (
   </svg>
 );
 
-const GlobeIcon: React.FC = () => (
+const GlobeIcon = () => (
   <svg
     width="14"
     height="14"
@@ -237,7 +238,7 @@ const GlobeIcon: React.FC = () => (
   </svg>
 );
 
-const BackIcon: React.FC = () => (
+const BackIcon = () => (
   <svg
     width="14"
     height="14"
@@ -256,7 +257,7 @@ const BackIcon: React.FC = () => (
   </svg>
 );
 
-const ForwardIcon: React.FC = () => (
+const ForwardIcon = () => (
   <svg
     width="14"
     height="14"
@@ -275,16 +276,25 @@ const ForwardIcon: React.FC = () => (
   </svg>
 );
 
-const TitleBarToolbarButton: React.FC<{
+type TitleBarToolbarButtonProps = {
   title: string;
   onClick?: () => void;
   disabled?: boolean;
   noDragStyle?: React.CSSProperties;
   children: React.ReactNode;
-}> = ({ title, onClick, disabled = false, noDragStyle, children }) => {
+};
+
+const TitleBarToolbarButton = ({
+  title,
+  onClick,
+  disabled = false,
+  noDragStyle,
+  children,
+}: TitleBarToolbarButtonProps) => {
   const disabledClassName = disabled
     ? "cursor-default opacity-60 hover:bg-transparent hover:text-current"
     : "titlebar-hover";
+
   return (
     <button
       type="button"
@@ -297,7 +307,7 @@ const TitleBarToolbarButton: React.FC<{
       tabIndex={disabled ? -1 : undefined}
       style={noDragStyle}
       className={cn(
-        "titlebar-text inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors [&>svg]:scale-[1.06]",
+        "titlebar-text inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors",
         disabledClassName,
       )}
     >
@@ -325,6 +335,7 @@ const focusFirstSearchField = () => {
 
   const target = candidates.find((element) => {
     const style = window.getComputedStyle(element);
+
     return (
       style.display !== "none" &&
       style.visibility !== "hidden" &&
@@ -338,19 +349,24 @@ const focusFirstSearchField = () => {
   }
 
   target.focus();
+
   if ("select" in target) {
     target.select();
   }
 };
 
-const TitleBarPrimaryActions: React.FC<{
+type TitleBarPrimaryActionsProps = {
   noDragStyle?: React.CSSProperties;
-}> = ({ noDragStyle }) => {
+};
+
+const TitleBarPrimaryActions = ({
+  noDragStyle,
+}: TitleBarPrimaryActionsProps) => {
   const navigate = useNavigate();
 
   return (
     <div
-      className="flex shrink-0 items-center gap-0.5 pr-2.5"
+      className="flex shrink-0 items-center gap-0.5 pr-2"
       style={noDragStyle}
     >
       <TitleBarToolbarButton
@@ -383,7 +399,11 @@ const TitleBarPrimaryActions: React.FC<{
         <CalendarIcon />
       </TitleBarToolbarButton>
 
-      <TitleBarToolbarButton title="グローバル" disabled noDragStyle={noDragStyle}>
+      <TitleBarToolbarButton
+        title="グローバル"
+        disabled
+        noDragStyle={noDragStyle}
+      >
         <GlobeIcon />
       </TitleBarToolbarButton>
 
@@ -445,52 +465,56 @@ const TitleBarBreadcrumbs = React.memo(
 
     const visibleCrumbs = allCrumbs.filter((crumb, index) => {
       const isLeadingHomeCrumb = index === 0 && crumb.label === "ホーム";
+
       if (!isLeadingHomeCrumb) {
         return true;
       }
+
       return allCrumbs.length <= 1;
     });
 
     return (
-      <nav className="titlebar-text flex min-w-0 flex-1 items-center gap-0.5 overflow-hidden text-[13px] leading-5">
+      <nav className="titlebar-breadcrumb-nav titlebar-text flex min-w-0 flex-1 items-center gap-0 overflow-hidden text-[12px] leading-4">
         {visibleCrumbs.map((crumb, index) => {
           const isClickable = Boolean(crumb.to);
-          const breadcrumbContent = crumb.label;
+          const isCurrent = index === visibleCrumbs.length - 1;
 
           return (
             <React.Fragment
               key={`${crumb.label}:${crumb.to ?? "no-to"}:${crumb.folderId ?? "no-folder"}:${index}`}
             >
-              {index > 0 && (
-                <span className="titlebar-divider mx-0.5 select-none opacity-45">
+              {index > 0 ? (
+                <span className="titlebar-divider mx-0.5 shrink-0 select-none opacity-35">
                   /
                 </span>
-              )}
+              ) : null}
 
-              {isClickable ? (
+              {isClickable && !isCurrent ? (
                 <button
                   type="button"
                   className={cn(
                     TITLE_BAR_BREADCRUMB_ITEM_CLASS,
-                    "titlebar-hover titlebar-breadcrumb-link",
+                    "titlebar-hover titlebar-breadcrumb-link max-w-[220px] md:max-w-[260px]",
                   )}
                   style={noDragStyle}
                   onMouseDown={(event) => event.stopPropagation()}
-                  onClick={(event) => handleBreadcrumbNavigateClick(event, crumb)}
+                  onClick={(event) =>
+                    handleBreadcrumbNavigateClick(event, crumb)
+                  }
                   title={crumb.label}
                 >
-                  {breadcrumbContent}
+                  {crumb.label}
                 </button>
               ) : (
                 <span
                   className={cn(
                     TITLE_BAR_BREADCRUMB_ITEM_CLASS,
-                    "titlebar-breadcrumb-current",
+                    "titlebar-breadcrumb-current max-w-[min(52vw,720px)]",
                   )}
                   title={crumb.label}
                   aria-current="page"
                 >
-                  {breadcrumbContent}
+                  {crumb.label}
                 </span>
               )}
             </React.Fragment>
@@ -503,24 +527,30 @@ const TitleBarBreadcrumbs = React.memo(
 
 TitleBarBreadcrumbs.displayName = "TitleBarBreadcrumbs";
 
-export const TitleBar: React.FC = () => {
+export const TitleBar = () => {
   const [bridgeIsMaximized, setBridgeIsMaximized] = useState(false);
   const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
   const [isCardSetViewMetaOpen, setIsCardSetViewMetaOpen] = useState(false);
+
   const hasDesktopBridge = useHasDesktopBridge();
   const presentationTarget = usePresentationTarget();
   const isDesktopPresentation = presentationTarget === "desktop";
+
   const { pathname, search } = useLocation();
+
   const baseCrumbs = useMemo(
     () => buildRouteBreadcrumbs({ pathname, search }),
     [pathname, search],
   );
+
   const extraCrumbs = useBreadcrumbExtraCrumbs();
   const isCardSetViewPage = pathname.toLowerCase().startsWith("/cardsetview");
   const shouldShowBrandLabel = APP_CHROME.desktopTitleBar.showBrandLabel;
 
   useEffect(() => {
-    if (!hasDesktopBridge) return;
+    if (!hasDesktopBridge) {
+      return;
+    }
 
     void windowControls.isMaximized().then(setBridgeIsMaximized);
 
@@ -555,7 +585,9 @@ export const TitleBar: React.FC = () => {
     );
   }, []);
 
-  if (!isDesktopPresentation) return null;
+  if (!isDesktopPresentation) {
+    return null;
+  }
 
   const dragStyle = hasDesktopBridge ? TITLE_BAR_DRAG_STYLE : undefined;
   const noDragStyle = hasDesktopBridge ? TITLE_BAR_NO_DRAG_STYLE : undefined;
@@ -565,7 +597,7 @@ export const TitleBar: React.FC = () => {
       className={cn(
         "surface-flat-titlebar",
         "flex w-full shrink-0 select-none items-center justify-between",
-        "border-x-0 border-t-0 rounded-none border-b border-[rgba(229,229,227,0.9)] bg-transparent px-4 text-sm titlebar-text",
+        "border-x-0 border-t-0 rounded-none border-b px-4 text-sm",
       )}
       style={{
         ...dragStyle,
@@ -583,7 +615,7 @@ export const TitleBar: React.FC = () => {
         <TitleBarPrimaryActions noDragStyle={noDragStyle} />
 
         {shouldShowBrandLabel ? (
-          <span className="titlebar-text-strong shrink-0 text-xs font-semibold tracking-wide">
+          <span className="titlebar-text-strong shrink-0 text-[11px] font-semibold tracking-[0.08em]">
             {APP_CHROME.brandLabel}
           </span>
         ) : null}
@@ -600,9 +632,9 @@ export const TitleBar: React.FC = () => {
         className="titlebar-text flex h-full items-center"
         style={noDragStyle}
       >
-        {isCardSetViewPage && (
+        {isCardSetViewPage ? (
           <>
-            {isCardSetViewEditing && (
+            {isCardSetViewEditing ? (
               <button
                 type="button"
                 onClick={() =>
@@ -657,7 +689,7 @@ export const TitleBar: React.FC = () => {
                   />
                 </svg>
               </button>
-            )}
+            ) : null}
 
             <button
               type="button"
@@ -753,7 +785,7 @@ export const TitleBar: React.FC = () => {
               />
             </button>
           </>
-        )}
+        ) : null}
 
         <WindowControlButton
           title={hasDesktopBridge ? "最小化" : "ブラウザでは最小化できません"}
@@ -822,7 +854,9 @@ export const TitleBar: React.FC = () => {
 
         <WindowControlButton
           title={
-            hasDesktopBridge ? "閉じる" : "ブラウザでは閉じる操作を提供しません"
+            hasDesktopBridge
+              ? "閉じる"
+              : "ブラウザでは閉じる操作を提供しません"
           }
           onClick={() => void windowControls.close()}
           disabled={!hasDesktopBridge}
