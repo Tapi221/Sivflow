@@ -283,48 +283,49 @@ export const PdfThumbnailSidebar = ({ doc }: PdfThumbnailSidebarProps) => {
     return null;
   }
 
-  if (!documentController.doc || statusMessage) {
-    return (
-      <div className="flex h-full min-h-0 items-start justify-center px-3 py-3">
-        <div className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-sm">
-          {statusMessage ?? "サムネイルを初期化中..."}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex h-full min-h-0 flex-col bg-transparent">
       <div
         ref={scrollRootRef}
-        className="min-h-0 flex-1 overflow-y-auto px-2 pb-2 pt-2"
+        className="min-h-0 flex-1 overflow-y-auto"
       >
-        <div
-          ref={containerRef}
-          className="grid gap-2"
-          style={{
-            gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
-          }}
-        >
-          {orderedPageNumbers.map((pageNumber) => (
-            <PdfThumbnailTile
-              key={`${doc.id}:thumbnail:${pageNumber}`}
-              pdf={documentController.doc!}
-              documentKey={documentController.documentKey}
-              pageNumber={pageNumber}
-              scale={thumbnailScale}
-              baseSize={
-                documentController.pageSizes[pageNumber] ??
-                firstPageSize ??
-                undefined
-              }
-              isActive={pageNumber === currentPage}
-              observerRoot={scrollRootRef.current}
-              acquirePage={documentController.acquirePage}
-              getPageTextContent={documentController.getPageTextContent}
-              onPageSize={documentController.setPageSize}
-            />
-          ))}
+        <div className="px-2 pb-2 pt-2">
+          <div ref={containerRef} className="w-full">
+            {!documentController.doc || statusMessage ? (
+              <div className="flex min-h-0 items-start justify-center">
+                <div className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-sm">
+                  {statusMessage ?? "サムネイルを初期化中..."}
+                </div>
+              </div>
+            ) : (
+              <div
+                className="grid gap-2"
+                style={{
+                  gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+                }}
+              >
+                {orderedPageNumbers.map((pageNumber) => (
+                  <PdfThumbnailTile
+                    key={`${doc.id}:thumbnail:${pageNumber}`}
+                    pdf={documentController.doc}
+                    documentKey={documentController.documentKey}
+                    pageNumber={pageNumber}
+                    scale={thumbnailScale}
+                    baseSize={
+                      documentController.pageSizes[pageNumber] ??
+                      firstPageSize ??
+                      undefined
+                    }
+                    isActive={pageNumber === currentPage}
+                    observerRoot={scrollRootRef.current}
+                    acquirePage={documentController.acquirePage}
+                    getPageTextContent={documentController.getPageTextContent}
+                    onPageSize={documentController.setPageSize}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
