@@ -152,7 +152,13 @@ const SearchIcon: React.FC = () => (
     xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
   >
-    <circle cx="11" cy="11" r="6.25" stroke="currentColor" strokeWidth="1.8" />
+    <circle
+      cx="11"
+      cy="11"
+      r="6.25"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
     <path
       d="M16 16L20 20"
       stroke="currentColor"
@@ -210,7 +216,13 @@ const GlobeIcon: React.FC = () => (
     xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
   >
-    <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8" />
+    <circle
+      cx="12"
+      cy="12"
+      r="8"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
     <path
       d="M4.5 12H19.5"
       stroke="currentColor"
@@ -274,6 +286,7 @@ const TitleBarToolbarButton: React.FC<{
   const disabledClassName = disabled
     ? "cursor-default opacity-60 hover:bg-transparent hover:text-current"
     : "titlebar-hover";
+
   return (
     <button
       type="button"
@@ -439,9 +452,7 @@ const TitleBarBreadcrumbs = React.memo(
                   )}
                   style={noDragStyle}
                   onMouseDown={(event) => event.stopPropagation()}
-                  onClick={(event) =>
-                    handleBreadcrumbNavigateClick(event, crumb)
-                  }
+                  onClick={(event) => handleBreadcrumbNavigateClick(event, crumb)}
                   title={crumb.label}
                 >
                   {breadcrumbContent}
@@ -529,8 +540,7 @@ export const TitleBar: React.FC = () => {
     <div
       className={cn(
         "surface-flat-titlebar",
-        "flex w-full shrink-0 select-none items-center justify-between",
-        "border-x-0 border-t-0 rounded-none  bg-transparent px-4 text-sm titlebar-text",
+        "flex w-full shrink-0 select-none items-center justify-between bg-transparent px-4 text-sm titlebar-text",
       )}
       style={{
         ...dragStyle,
