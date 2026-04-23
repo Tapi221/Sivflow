@@ -33,10 +33,12 @@ interface BuildEntityRenameDeleteMenuActionsParams {
 
 interface BuildExplorerCreateMenuActionsParams {
   canCreateCardSet?: boolean;
+  canCreateCard?: boolean;
   canAddDocuments?: boolean;
   canBulkImport?: boolean;
   onCreateRootFolder?: () => void | Promise<void>;
   onCreateCardSet?: () => void | Promise<void>;
+  onCreateCard?: () => void | Promise<void>;
   onAddDocument?: () => void | Promise<void>;
   onBulkImport?: () => void | Promise<void>;
 }
@@ -159,10 +161,12 @@ export const buildFolderMenuActions = ({
  */
 export const buildExplorerCreateMenuActions = ({
   canCreateCardSet = false,
+  canCreateCard = false,
   canAddDocuments = false,
   canBulkImport = false,
   onCreateRootFolder,
   onCreateCardSet,
+  onCreateCard,
   onAddDocument,
   onBulkImport,
 }: BuildExplorerCreateMenuActionsParams): MenuAction[] => {
@@ -184,6 +188,17 @@ export const buildExplorerCreateMenuActions = ({
       icon: <Plus className="h-4 w-4" />,
       onSelect: () => {
         void onCreateCardSet?.();
+      },
+    });
+  }
+
+  if (canCreateCard) {
+    actions.push({
+      id: "create-card",
+      label: "新規暗記カード",
+      icon: <Plus className="h-4 w-4" />,
+      onSelect: () => {
+        void onCreateCard?.();
       },
     });
   }
