@@ -269,7 +269,7 @@ const TitleBarPrimaryActions: React.FC<{
   const navigate = useNavigate();
 
   return (
-    <div className="flex shrink-0 items-center gap-1 pr-2" style={noDragStyle}>
+    <div className="flex shrink-0 items-center gap-1 pr-3" style={noDragStyle}>
       <TitleBarToolbarButton
         title="サイドバーを開閉"
         onClick={() => {
@@ -363,7 +363,7 @@ const TitleBarBreadcrumbs = React.memo(
     });
 
     return (
-      <nav className="titlebar-text flex min-w-0 flex-1 items-center gap-1 overflow-hidden text-xs">
+      <nav className="titlebar-text flex min-w-0 flex-1 items-center gap-0.5 overflow-hidden text-xs">
         {visibleCrumbs.map((crumb, index) => {
           const isClickable = Boolean(crumb.to);
           const breadcrumbContent = crumb.label;
@@ -373,7 +373,9 @@ const TitleBarBreadcrumbs = React.memo(
               key={`${crumb.label}:${crumb.to ?? "no-to"}:${crumb.folderId ?? "no-folder"}:${index}`}
             >
               {index > 0 && (
-                <span className="titlebar-divider select-none">/</span>
+                <span className="titlebar-divider mx-0.5 select-none opacity-45">
+                  /
+                </span>
               )}
 
               {isClickable ? (
@@ -484,7 +486,7 @@ export const TitleBar: React.FC = () => {
     >
       <div
         className={cn(
-          "flex h-full min-w-0 items-center px-2",
+          "flex h-full min-w-0 items-center pl-2 pr-3",
           shouldShowBrandLabel && "gap-2",
         )}
         style={noDragStyle}
