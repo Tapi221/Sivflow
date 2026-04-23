@@ -680,7 +680,6 @@ export const usePdfOcr = ({
     setOcrRecords([]);
     setOcrTextByPage({});
     setOcrBenchmarkSummary(null);
-    setOcrBenchmarkSummary(null);
     setOcrState(createInitialOcrState());
     documentController.invalidateDerivedTextCache();
   }, [documentController]);

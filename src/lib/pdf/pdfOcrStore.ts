@@ -394,6 +394,8 @@ export const putPdfOcrPageRecord = async ({
   docId,
   documentKey,
   pageNumber,
+  pageKind,
+  classificationConfidence,
   text,
   finalText,
   nativeText,
