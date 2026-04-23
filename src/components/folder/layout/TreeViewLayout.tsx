@@ -520,6 +520,8 @@ const TreeViewLayout = ({
   const canCreateCard = Boolean(currentHeaderActionFolderId);
   const canAddDocuments = Boolean(currentHeaderActionFolderId);
 
+  const isSidebarContentCollapsed = selectedItem?.type === "document";
+
   return (
     <div
       className={cn(
@@ -545,6 +547,7 @@ const TreeViewLayout = ({
         canAddDocuments={canAddDocuments}
         canBulkImport={Boolean(currentHeaderActionFolderId)}
         preferDirectRootFolderCreate={currentHeaderActionFolderId === null}
+        collapseContent={isSidebarContentCollapsed}
       >
         {sidebarContent}
       </TreeViewSidebar>
