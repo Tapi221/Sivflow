@@ -22,6 +22,7 @@ interface TreeViewSidebarProps {
   canBulkImport?: boolean;
   preferDirectRootFolderCreate?: boolean;
   collapseContent?: boolean;
+  collapsedContent?: React.ReactNode;
 }
 
 export const TreeViewSidebar = ({
@@ -44,6 +45,7 @@ export const TreeViewSidebar = ({
   canBulkImport = false,
   preferDirectRootFolderCreate = false,
   collapseContent = false,
+  collapsedContent,
 }: TreeViewSidebarProps) => {
   return (
     <div
@@ -87,7 +89,9 @@ export const TreeViewSidebar = ({
         </div>
 
         {collapseContent ? (
-          <div className="flex-1 min-h-0 min-w-0" />
+          <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
+            {collapsedContent}
+          </div>
         ) : (
           <div
             ref={contentScrollRef}
