@@ -23,6 +23,16 @@ import {
   type PdfOcrRenderProfile,
 } from "@/lib/pdf/renderPdfPageForOcr";
 import { segmentCanvasIntoTextRegions } from "@/lib/pdf/pdfOcrRegionDetection";
+import {
+  classifyPdfOcrPage,
+  type PdfOcrPageClassification,
+} from "@/lib/pdf/pdfOcrPageClassification";
+import {
+  formatPdfOcrBenchmarkSummary,
+  summarizePdfOcrBenchmark,
+  type PdfOcrBenchmarkSample,
+  type PdfOcrBenchmarkSummary,
+} from "@/lib/pdf/pdfOcrBenchmark";
 
 const OCR_DEFAULT_LANGUAGE = "jpn+eng";
 const OCR_NATIVE_TEXT_SKIP_THRESHOLD = 32;
@@ -32,6 +42,9 @@ const OCR_RETRY_QUALITY_THRESHOLD = 0.58;
 const OCR_REGION_RETRY_QUALITY_THRESHOLD = 0.66;
 const OCR_DOCUMENT_RETENTION_LIMIT = 3;
 const OCR_MAX_REGION_COUNT = 8;
+const OCR_ATTEMPT_TIMEOUT_MS = 18_000;
+const OCR_REGION_TIMEOUT_MS = 9_000;
+const OCR_PAGE_TIMEOUT_MS = 52_000;
 
 type OcrStatus = "idle" | "running" | "success" | "error" | "cancelled";
 
@@ -58,6 +71,7 @@ interface OcrAttemptPlan {
   renderProfile: PdfOcrRenderProfile;
   reason: string;
   enableRegionSegmentation?: boolean;
+  timeoutMs?: number;
 }
 
 interface OcrAttemptResult {
@@ -102,6 +116,41 @@ const getOcrPageConcurrency = () => {
 
   return hardwareConcurrency >= 6 ? 2 : 1;
 };
+
+class PdfOcrTimeoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PdfOcrTimeoutError";
+  }
+}
+
+const isPdfOcrTimeoutError = (value: unknown) => {
+  return value instanceof PdfOcrTimeoutError;
+};
+
+const withTimeout = async <T,>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  message: string,
+): Promise<T> => {
+  let timeoutId: number | null = null;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timeoutId = window.setTimeout(() => {
+          reject(new PdfOcrTimeoutError(message));
+        }, timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeoutId !== null) {
+      window.clearTimeout(timeoutId);
+    }
+  }
+};
+
 
 const extractTextFromTextContent = async (
   getPageTextContent: PdfDocumentController["getPageTextContent"],
@@ -154,10 +203,15 @@ const prioritizePageNumbers = ({
 
 const buildAttemptPlan = ({
   nativeText,
+  classification,
 }: {
   nativeText: string;
+  classification: PdfOcrPageClassification;
 }): OcrAttemptPlan[] => {
-  const preferredLanguages = guessPreferredOcrLanguages(nativeText);
+  const preferredLanguages =
+    classification.preferredLanguages.length > 0
+      ? classification.preferredLanguages
+      : guessPreferredOcrLanguages(nativeText);
   const normalizedNativeText = normalizePdfExtractedText(nativeText);
   const plans: OcrAttemptPlan[] = [];
   const seen = new Set<string>();
@@ -172,102 +226,261 @@ const buildAttemptPlan = ({
     plans.push(plan);
   };
 
-  pushPlan({
-    languageHint: preferredLanguages[0] ?? OCR_DEFAULT_LANGUAGE,
-    reason: "default",
-    renderProfile: {
-      mode: "none",
-      targetPixels: 3_200_000,
-      minScale: 1.4,
-      maxScale: 2.4,
-      trimWhitespace: false,
-      contrastBoost: 1.04,
-      autoDeskew: false,
-    },
-  });
+  const primaryLanguage = preferredLanguages[0] ?? OCR_DEFAULT_LANGUAGE;
+  const fallbackLanguage = preferredLanguages[1] ?? OCR_DEFAULT_LANGUAGE;
+  const recommendedPixels =
+    classification.recommendedTargetPixels +
+    (normalizedNativeText.length < 24 ? 500_000 : 0);
 
-  pushPlan({
-    languageHint: preferredLanguages[0] ?? OCR_DEFAULT_LANGUAGE,
-    reason: "deskew-grayscale",
-    renderProfile: {
-      mode: "grayscale",
-      targetPixels: 4_400_000,
-      minScale: 1.7,
-      maxScale: 2.9,
-      trimWhitespace: true,
-      contrastBoost: 1.18,
-      autoDeskew: true,
-      maxDeskewAngle: 1.6,
-    },
-  });
+  switch (classification.kind) {
+    case "native-rich":
+      pushPlan({
+        languageHint: primaryLanguage,
+        reason: "native-rich-default",
+        timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+        renderProfile: {
+          mode: "none",
+          targetPixels: 2_800_000,
+          minScale: 1.25,
+          maxScale: 2.1,
+          trimWhitespace: false,
+          contrastBoost: 1.02,
+          autoDeskew: false,
+        },
+      });
+      pushPlan({
+        languageHint: primaryLanguage,
+        reason: "native-rich-grayscale",
+        timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+        renderProfile: {
+          mode: "grayscale",
+          targetPixels: 3_600_000,
+          minScale: 1.5,
+          maxScale: 2.4,
+          trimWhitespace: true,
+          contrastBoost: 1.12,
+          autoDeskew: false,
+        },
+      });
+      break;
+    case "dense-text":
+      pushPlan({
+        languageHint: primaryLanguage,
+        reason: "dense-grayscale",
+        timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+        renderProfile: {
+          mode: "grayscale",
+          targetPixels: Math.max(4_600_000, recommendedPixels),
+          minScale: classification.recommendedMinScale,
+          maxScale: classification.recommendedMaxScale,
+          trimWhitespace: true,
+          contrastBoost: 1.18,
+          autoDeskew: classification.shouldEnableDeskew,
+          maxDeskewAngle: 1.4,
+        },
+      });
+      pushPlan({
+        languageHint: primaryLanguage,
+        reason: "dense-binary-highres",
+        timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+        renderProfile: {
+          mode: "binary",
+          targetPixels: Math.max(5_600_000, recommendedPixels + 600_000),
+          minScale: 2,
+          maxScale: 3.3,
+          trimWhitespace: true,
+          contrastBoost: 1.26,
+          brightnessBoost: 0.02,
+          autoDeskew: true,
+          maxDeskewAngle: 1.5,
+        },
+      });
+      pushPlan({
+        languageHint: primaryLanguage,
+        reason: "dense-region-binary",
+        enableRegionSegmentation: true,
+        timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+        renderProfile: {
+          mode: "binary",
+          targetPixels: Math.max(5_900_000, recommendedPixels + 900_000),
+          minScale: 2.05,
+          maxScale: 3.4,
+          trimWhitespace: true,
+          contrastBoost: 1.24,
+          brightnessBoost: 0.02,
+          autoDeskew: true,
+          maxDeskewAngle: 1.5,
+        },
+      });
+      break;
+    case "numeric-heavy":
+      pushPlan({
+        languageHint: primaryLanguage,
+        reason: "numeric-default",
+        timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+        renderProfile: {
+          mode: "none",
+          targetPixels: 3_800_000,
+          minScale: 1.5,
+          maxScale: 2.5,
+          trimWhitespace: false,
+          contrastBoost: 1.06,
+          autoDeskew: false,
+        },
+      });
+      pushPlan({
+        languageHint: primaryLanguage,
+        reason: "numeric-binary",
+        timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+        renderProfile: {
+          mode: "binary",
+          targetPixels: Math.max(5_400_000, recommendedPixels),
+          minScale: 1.9,
+          maxScale: 3.1,
+          trimWhitespace: true,
+          contrastBoost: 1.28,
+          brightnessBoost: 0.02,
+          autoDeskew: classification.shouldEnableDeskew,
+          maxDeskewAngle: 1.3,
+        },
+      });
+      pushPlan({
+        languageHint: primaryLanguage,
+        reason: "numeric-region",
+        enableRegionSegmentation: true,
+        timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+        renderProfile: {
+          mode: "binary",
+          targetPixels: Math.max(5_800_000, recommendedPixels + 400_000),
+          minScale: 2,
+          maxScale: 3.2,
+          trimWhitespace: true,
+          contrastBoost: 1.26,
+          autoDeskew: true,
+          maxDeskewAngle: 1.3,
+        },
+      });
+      break;
+    case "sparse-scan":
+      pushPlan({
+        languageHint: primaryLanguage,
+        reason: "sparse-binary-highres",
+        timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+        renderProfile: {
+          mode: "binary",
+          targetPixels: Math.max(6_200_000, recommendedPixels),
+          minScale: 2.05,
+          maxScale: 3.4,
+          trimWhitespace: true,
+          contrastBoost: 1.3,
+          brightnessBoost: 0.02,
+          autoDeskew: true,
+          maxDeskewAngle: 1.6,
+        },
+      });
+      pushPlan({
+        languageHint: primaryLanguage,
+        reason: "sparse-region-binary",
+        enableRegionSegmentation: true,
+        timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+        renderProfile: {
+          mode: "binary",
+          targetPixels: Math.max(6_400_000, recommendedPixels + 400_000),
+          minScale: 2.1,
+          maxScale: 3.4,
+          trimWhitespace: true,
+          contrastBoost: 1.28,
+          brightnessBoost: 0.02,
+          autoDeskew: true,
+          maxDeskewAngle: 1.6,
+        },
+      });
 
-  pushPlan({
-    languageHint: preferredLanguages[0] ?? OCR_DEFAULT_LANGUAGE,
-    reason: "binary-highres",
-    renderProfile: {
-      mode: "binary",
-      targetPixels: normalizedNativeText.length < 24 ? 6_800_000 : 5_900_000,
-      minScale: 2,
-      maxScale: 3.4,
-      trimWhitespace: true,
-      contrastBoost: 1.28,
-      brightnessBoost: 0.02,
-      autoDeskew: true,
-      maxDeskewAngle: 1.6,
-    },
-  });
-
-  pushPlan({
-    languageHint: preferredLanguages[0] ?? OCR_DEFAULT_LANGUAGE,
-    reason: "region-binary",
-    enableRegionSegmentation: true,
-    renderProfile: {
-      mode: "binary",
-      targetPixels: 6_000_000,
-      minScale: 2.1,
-      maxScale: 3.4,
-      trimWhitespace: true,
-      contrastBoost: 1.26,
-      brightnessBoost: 0.02,
-      autoDeskew: true,
-      maxDeskewAngle: 1.6,
-    },
-  });
-
-  if (
-    normalizedNativeText.length === 0 ||
-    scorePdfTextQuality(normalizedNativeText) < 0.12
-  ) {
-    pushPlan({
-      languageHint: preferredLanguages[0] ?? OCR_DEFAULT_LANGUAGE,
-      reason: "sideways-fallback",
-      renderProfile: {
-        mode: "binary",
-        targetPixels: 5_200_000,
-        minScale: 1.8,
-        maxScale: 3,
-        trimWhitespace: true,
-        contrastBoost: 1.22,
-        autoDeskew: false,
-        rotationDegrees: 90,
-      },
-    });
+      if (classification.shouldTryRotation) {
+        pushPlan({
+          languageHint: primaryLanguage,
+          reason: "sparse-sideways-fallback",
+          timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+          renderProfile: {
+            mode: "binary",
+            targetPixels: 5_400_000,
+            minScale: 1.8,
+            maxScale: 3,
+            trimWhitespace: true,
+            contrastBoost: 1.22,
+            autoDeskew: false,
+            rotationDegrees: 90,
+          },
+        });
+      }
+      break;
+    case "mixed-layout":
+    case "unknown":
+    default:
+      pushPlan({
+        languageHint: primaryLanguage,
+        reason: "default",
+        timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+        renderProfile: {
+          mode: classification.recommendedInitialMode,
+          targetPixels: recommendedPixels,
+          minScale: classification.recommendedMinScale,
+          maxScale: classification.recommendedMaxScale,
+          trimWhitespace: classification.shouldPreferRegions,
+          contrastBoost: classification.recommendedInitialMode === "none" ? 1.04 : 1.16,
+          autoDeskew: classification.shouldEnableDeskew,
+          maxDeskewAngle: 1.5,
+        },
+      });
+      pushPlan({
+        languageHint: primaryLanguage,
+        reason: "deskew-grayscale",
+        timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+        renderProfile: {
+          mode: "grayscale",
+          targetPixels: Math.max(4_600_000, recommendedPixels),
+          minScale: 1.7,
+          maxScale: 2.9,
+          trimWhitespace: true,
+          contrastBoost: 1.18,
+          autoDeskew: true,
+          maxDeskewAngle: 1.5,
+        },
+      });
+      pushPlan({
+        languageHint: primaryLanguage,
+        reason: "region-binary",
+        enableRegionSegmentation: true,
+        timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
+        renderProfile: {
+          mode: "binary",
+          targetPixels: Math.max(5_800_000, recommendedPixels + 400_000),
+          minScale: 2,
+          maxScale: 3.3,
+          trimWhitespace: true,
+          contrastBoost: 1.25,
+          brightnessBoost: 0.02,
+          autoDeskew: true,
+          maxDeskewAngle: 1.5,
+        },
+      });
+      break;
   }
 
-  const fallbackLanguage = preferredLanguages[1] ?? OCR_DEFAULT_LANGUAGE;
-  if (fallbackLanguage !== preferredLanguages[0]) {
+  if (fallbackLanguage !== primaryLanguage) {
     pushPlan({
       languageHint: fallbackLanguage,
       reason: "language-fallback",
-      enableRegionSegmentation: true,
+      enableRegionSegmentation: classification.shouldPreferRegions,
+      timeoutMs: OCR_ATTEMPT_TIMEOUT_MS,
       renderProfile: {
         mode: "binary",
-        targetPixels: 5_500_000,
+        targetPixels: Math.max(5_300_000, recommendedPixels),
         minScale: 1.9,
         maxScale: 3.1,
         trimWhitespace: true,
         contrastBoost: 1.24,
-        autoDeskew: true,
+        autoDeskew: classification.shouldEnableDeskew,
         maxDeskewAngle: 1.4,
       },
     });
@@ -279,19 +492,37 @@ const buildAttemptPlan = ({
 const shouldStopRetrying = ({
   bestSelection,
   attemptIndex,
+  classification,
 }: {
   bestSelection: ReturnType<typeof buildPdfTextSelection> | null;
   attemptIndex: number;
+  classification: PdfOcrPageClassification;
 }) => {
   if (!bestSelection) {
     return false;
   }
 
-  if (bestSelection.qualityScore >= 0.84) {
+  if (bestSelection.qualityScore >= 0.86) {
     return true;
   }
 
-  if (attemptIndex >= 1 && bestSelection.qualityScore >= 0.72) {
+  if (
+    classification.kind === "native-rich" &&
+    attemptIndex >= 0 &&
+    bestSelection.qualityScore >= 0.68
+  ) {
+    return true;
+  }
+
+  if (
+    classification.kind === "dense-text" &&
+    attemptIndex >= 1 &&
+    bestSelection.qualityScore >= 0.74
+  ) {
+    return true;
+  }
+
+  if (attemptIndex >= 2 && bestSelection.qualityScore >= 0.7) {
     return true;
   }
 
@@ -323,6 +554,7 @@ const persistSelection = async ({
   selection,
   attempts,
   processingMs,
+  classification,
 }: {
   docId: string;
   documentKey: string;
@@ -331,6 +563,7 @@ const persistSelection = async ({
   selection: ReturnType<typeof buildPdfTextSelection>;
   attempts: OcrAttemptResult[];
   processingMs: number;
+  classification: PdfOcrPageClassification;
 }) => {
   if (selection.finalText.length === 0) {
     return null;
@@ -343,6 +576,8 @@ const persistSelection = async ({
     documentKey,
     pageNumber,
     finalText: selection.finalText,
+    pageKind: classification.kind,
+    classificationConfidence: classification.confidence,
     nativeText,
     ocrText:
       bestAttempt?.recognizedText ??
@@ -359,6 +594,39 @@ const persistSelection = async ({
   });
 };
 
+const createBenchmarkSample = ({
+  pageNumber,
+  classification,
+  selection,
+  attempts,
+  processingMs,
+  timeoutCount,
+}: {
+  pageNumber: number;
+  classification: PdfOcrPageClassification;
+  selection: ReturnType<typeof buildPdfTextSelection>;
+  attempts: OcrAttemptResult[];
+  processingMs: number;
+  timeoutCount: number;
+}): PdfOcrBenchmarkSample => {
+  return {
+    pageNumber,
+    pageKind: classification.kind,
+    classificationConfidence: classification.confidence,
+    selectedSource: selection.source,
+    finalQualityScore: selection.qualityScore,
+    processingMs: Number(processingMs.toFixed(2)),
+    attemptCount: attempts.length,
+    regionAttemptCount: attempts.filter((attempt) => attempt.regionCount > 0).length,
+    timeoutCount,
+    finalCharCount: selection.charCount,
+    finalLineCount: selection.lineCount,
+    usedLanguageHints: Array.from(
+      new Set(attempts.map((attempt) => attempt.languageHint)),
+    ),
+  };
+};
+
 export const usePdfOcr = ({
   docId,
   documentKey,
@@ -371,6 +639,8 @@ export const usePdfOcr = ({
     {},
   );
   const [ocrRecords, setOcrRecords] = useState<PdfOcrPageRecord[]>([]);
+  const [ocrBenchmarkSummary, setOcrBenchmarkSummary] =
+    useState<PdfOcrBenchmarkSummary | null>(null);
 
   const mountedRef = useRef(true);
   const workerPromiseMapRef = useRef<Map<string, Promise<TesseractWorker>>>(
@@ -409,6 +679,8 @@ export const usePdfOcr = ({
     cancelRequestedRef.current = true;
     setOcrRecords([]);
     setOcrTextByPage({});
+    setOcrBenchmarkSummary(null);
+    setOcrBenchmarkSummary(null);
     setOcrState(createInitialOcrState());
     documentController.invalidateDerivedTextCache();
   }, [documentController]);
@@ -519,11 +791,17 @@ export const usePdfOcr = ({
     async ({
       worker,
       canvas,
+      timeoutMs,
     }: {
       worker: TesseractWorker;
       canvas: HTMLCanvasElement;
+      timeoutMs: number;
     }) => {
-      const result = await worker.recognize(canvas);
+      const result = await withTimeout(
+        worker.recognize(canvas),
+        timeoutMs,
+        "OCR attempt timed out",
+      );
       return normalizePdfExtractedText(result.data.text);
     },
     [],
@@ -533,9 +811,11 @@ export const usePdfOcr = ({
     async ({
       worker,
       canvas,
+      timeoutMs,
     }: {
       worker: TesseractWorker;
       canvas: HTMLCanvasElement;
+      timeoutMs: number;
     }) => {
       const regions = segmentCanvasIntoTextRegions({
         canvas,
@@ -543,7 +823,11 @@ export const usePdfOcr = ({
       });
 
       if (regions.length < 2) {
-        const recognizedText = await recognizeCanvasText({ worker, canvas });
+        const recognizedText = await recognizeCanvasText({
+          worker,
+          canvas,
+          timeoutMs,
+        });
         return {
           recognizedText,
           regionCount: 0,
@@ -551,6 +835,10 @@ export const usePdfOcr = ({
       }
 
       const regionTexts: string[] = [];
+      const regionTimeoutMs = Math.max(
+        2_500,
+        Math.floor(timeoutMs / Math.max(1, regions.length)),
+      );
 
       for (const region of regions) {
         if (cancelRequestedRef.current) {
@@ -560,6 +848,7 @@ export const usePdfOcr = ({
         const recognizedText = await recognizeCanvasText({
           worker,
           canvas: region.canvas,
+          timeoutMs: Math.min(OCR_REGION_TIMEOUT_MS, regionTimeoutMs),
         });
         if (recognizedText.length > 0) {
           regionTexts.push(recognizedText);
@@ -567,7 +856,7 @@ export const usePdfOcr = ({
       }
 
       return {
-        recognizedText: regionTexts.join("\n"),
+        recognizedText: regionTexts.join("\\n"),
         regionCount: regions.length,
       };
     },
@@ -578,18 +867,22 @@ export const usePdfOcr = ({
     async ({
       pageNumber,
       nativeText,
+      classification,
       slotId,
     }: {
       pageNumber: number;
       nativeText: string;
+      classification: PdfOcrPageClassification;
       slotId: number;
     }) => {
-      const plans = buildAttemptPlan({ nativeText });
+      const plans = buildAttemptPlan({ nativeText, classification });
       const attemptResults: OcrAttemptResult[] = [];
       let bestSelection = buildPdfTextSelection({
         nativeText,
         ocrText: "",
       });
+      let consecutiveFailureCount = 0;
+      let timeoutCount = 0;
 
       for (let attemptIndex = 0; attemptIndex < plans.length; attemptIndex += 1) {
         if (cancelRequestedRef.current) {
@@ -601,72 +894,89 @@ export const usePdfOcr = ({
           continue;
         }
 
-        const worker = await getWorker(plan.languageHint, slotId);
-        const renderedPage = await renderPdfPageForOcr({
-          acquirePage: documentController.acquirePage,
-          pageNumber,
-          profile: plan.renderProfile,
-        });
+        try {
+          const worker = await getWorker(plan.languageHint, slotId);
+          const renderedPage = await renderPdfPageForOcr({
+            acquirePage: documentController.acquirePage,
+            pageNumber,
+            profile: plan.renderProfile,
+          });
 
-        const recognition = plan.enableRegionSegmentation
-          ? await recognizeSegmentedRegions({
-              worker,
-              canvas: renderedPage.canvas,
-            })
-          : {
-              recognizedText: await recognizeCanvasText({
+          const recognition = plan.enableRegionSegmentation
+            ? await recognizeSegmentedRegions({
                 worker,
                 canvas: renderedPage.canvas,
-              }),
-              regionCount: 0,
-            };
+                timeoutMs: plan.timeoutMs ?? OCR_ATTEMPT_TIMEOUT_MS,
+              })
+            : {
+                recognizedText: await recognizeCanvasText({
+                  worker,
+                  canvas: renderedPage.canvas,
+                  timeoutMs: plan.timeoutMs ?? OCR_ATTEMPT_TIMEOUT_MS,
+                }),
+                regionCount: 0,
+              };
 
-        const selection = buildPdfTextSelection({
-          nativeText,
-          ocrText: recognition.recognizedText,
-        });
+          const selection = buildPdfTextSelection({
+            nativeText,
+            ocrText: recognition.recognizedText,
+          });
 
-        attemptResults.push({
-          attemptIndex,
-          reason: plan.reason,
-          languageHint: plan.languageHint,
-          renderProfile: renderedPage.profile,
-          recognizedText: recognition.recognizedText,
-          selection,
-          renderScale: renderedPage.scale,
-          regionCount: recognition.regionCount,
-          deskewAngle: renderedPage.deskewAngle,
-          rotationDegrees: renderedPage.rotationDegrees,
-        });
-
-        attemptResults.sort(
-          (left, right) =>
-            right.selection.qualityScore - left.selection.qualityScore,
-        );
-
-        const mergedSelection = mergePdfTextSelections(
-          [bestSelection, selection],
-          "ocr",
-        );
-        bestSelection = selectBestPdfTextSelection([
-          bestSelection,
-          selection,
-          mergedSelection,
-        ]);
-
-        if (
-          shouldStopRetrying({
-            bestSelection,
+          attemptResults.push({
             attemptIndex,
-          })
-        ) {
-          break;
+            reason: plan.reason,
+            languageHint: plan.languageHint,
+            renderProfile: renderedPage.profile,
+            recognizedText: recognition.recognizedText,
+            selection,
+            renderScale: renderedPage.scale,
+            regionCount: recognition.regionCount,
+            deskewAngle: renderedPage.deskewAngle,
+            rotationDegrees: renderedPage.rotationDegrees,
+          });
+
+          attemptResults.sort(
+            (left, right) =>
+              right.selection.qualityScore - left.selection.qualityScore,
+          );
+
+          const mergedSelection = mergePdfTextSelections(
+            [bestSelection, selection],
+            "ocr",
+          );
+          bestSelection = selectBestPdfTextSelection([
+            bestSelection,
+            selection,
+            mergedSelection,
+          ]);
+
+          consecutiveFailureCount = 0;
+
+          if (
+            shouldStopRetrying({
+              bestSelection,
+              attemptIndex,
+              classification,
+            })
+          ) {
+            break;
+          }
+        } catch (errorValue) {
+          consecutiveFailureCount += 1;
+          if (isPdfOcrTimeoutError(errorValue)) {
+            timeoutCount += 1;
+          }
+
+          if (consecutiveFailureCount >= classification.failureBudget) {
+            break;
+          }
         }
       }
 
       return {
         attempts: attemptResults,
         bestSelection,
+        timeoutCount,
       };
     },
     [
@@ -705,6 +1015,7 @@ export const usePdfOcr = ({
       processedPagesRef.current = 0;
       totalPagesRef.current = normalizedPageNumbers.length;
 
+      setOcrBenchmarkSummary(null);
       setOcrState((previousState) => ({
         ...previousState,
         status: "running",
@@ -714,6 +1025,8 @@ export const usePdfOcr = ({
         currentProcessingPage: null,
         error: null,
       }));
+
+      const benchmarkSamples: PdfOcrBenchmarkSample[] = [];
 
       const processSinglePage = async (pageNumber: number, slotId: number) => {
         if (cancelRequestedRef.current) {
@@ -745,6 +1058,9 @@ export const usePdfOcr = ({
           pageNumber,
         );
         const normalizedNativeText = normalizePdfExtractedText(nativeText);
+        const classification = classifyPdfOcrPage({
+          nativeText: normalizedNativeText,
+        });
         const pageStartAt = performance.now();
 
         if (shouldUseNativeTextOnly({ nativeText: normalizedNativeText })) {
@@ -752,6 +1068,7 @@ export const usePdfOcr = ({
             nativeText: normalizedNativeText,
             ocrText: "",
           });
+          const processingMs = performance.now() - pageStartAt;
           await persistSelection({
             docId,
             documentKey: resolvedDocumentKey,
@@ -759,17 +1076,49 @@ export const usePdfOcr = ({
             nativeText: normalizedNativeText,
             selection,
             attempts: [],
-            processingMs: performance.now() - pageStartAt,
+            processingMs,
+            classification,
           });
+          benchmarkSamples.push(
+            createBenchmarkSample({
+              pageNumber,
+              classification,
+              selection,
+              attempts: [],
+              processingMs,
+              timeoutCount: 0,
+            }),
+          );
           markProcessed();
           return;
         }
 
-        const { attempts, bestSelection } = await performOcrAttempts({
-          pageNumber,
+        let attempts: OcrAttemptResult[] = [];
+        let bestSelection = buildPdfTextSelection({
           nativeText: normalizedNativeText,
-          slotId,
+          ocrText: "",
         });
+        let timeoutCount = 0;
+
+        try {
+          const outcome = await withTimeout(
+            performOcrAttempts({
+              pageNumber,
+              nativeText: normalizedNativeText,
+              classification,
+              slotId,
+            }),
+            OCR_PAGE_TIMEOUT_MS,
+            "Page OCR timed out",
+          );
+          attempts = outcome.attempts;
+          bestSelection = outcome.bestSelection;
+          timeoutCount = outcome.timeoutCount;
+        } catch (errorValue) {
+          if (isPdfOcrTimeoutError(errorValue)) {
+            timeoutCount += 1;
+          }
+        }
 
         const bestAttemptSelection =
           attempts[0]?.selection ??
@@ -787,18 +1136,33 @@ export const usePdfOcr = ({
                 bestAttemptSelection,
               ]);
 
+        const persistedSelection =
+          effectiveSelection.qualityScore >= OCR_RETRY_QUALITY_THRESHOLD
+            ? effectiveSelection
+            : bestSelection;
+        const processingMs = performance.now() - pageStartAt;
+
         await persistSelection({
           docId,
           documentKey: resolvedDocumentKey,
           pageNumber,
           nativeText: normalizedNativeText,
-          selection:
-            effectiveSelection.qualityScore >= OCR_RETRY_QUALITY_THRESHOLD
-              ? effectiveSelection
-              : bestSelection,
+          selection: persistedSelection,
           attempts,
-          processingMs: performance.now() - pageStartAt,
+          processingMs,
+          classification,
         });
+
+        benchmarkSamples.push(
+          createBenchmarkSample({
+            pageNumber,
+            classification,
+            selection: persistedSelection,
+            attempts,
+            processingMs,
+            timeoutCount,
+          }),
+        );
 
         markProcessed();
       };
@@ -831,6 +1195,13 @@ export const usePdfOcr = ({
           return;
         }
 
+        const benchmarkSummary = summarizePdfOcrBenchmark(benchmarkSamples);
+        setOcrBenchmarkSummary(benchmarkSummary);
+        console.info(
+          "[PdfOcr] benchmark summary",
+          formatPdfOcrBenchmarkSummary(benchmarkSummary),
+        );
+
         setOcrState((previousState) => ({
           ...previousState,
           status: cancelRequestedRef.current ? "cancelled" : "success",
@@ -840,6 +1211,15 @@ export const usePdfOcr = ({
       } catch (errorValue) {
         if (!mountedRef.current) {
           return;
+        }
+
+        if (typeof benchmarkSamples !== "undefined" && benchmarkSamples.length > 0) {
+          const benchmarkSummary = summarizePdfOcrBenchmark(benchmarkSamples);
+          setOcrBenchmarkSummary(benchmarkSummary);
+          console.info(
+            "[PdfOcr] partial benchmark summary",
+            formatPdfOcrBenchmarkSummary(benchmarkSummary),
+          );
         }
 
         setOcrState((previousState) => ({
@@ -893,6 +1273,7 @@ export const usePdfOcr = ({
       return;
     }
 
+    setOcrBenchmarkSummary(null);
     setOcrState(createInitialOcrState());
     documentController.invalidateDerivedTextCache();
   }, [
@@ -938,5 +1319,6 @@ export const usePdfOcr = ({
     cancelOcr,
     clearOcr,
     hasOcrForCurrentPage,
+    ocrBenchmarkSummary,
   };
 };
