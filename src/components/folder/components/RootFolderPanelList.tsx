@@ -1,4 +1,5 @@
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { cn } from "@/lib/utils";
 import type { SelectedExplorerItem } from "@/types";
 import React from "react";
 import { RootFolderPanelRow } from "./RootFolderPanelRow";
@@ -21,7 +22,7 @@ export type NavigationListEntry =
       name: string;
     };
 
-interface RootFolderPanelListProps {
+export interface RootFolderPanelListProps {
   entries: NavigationListEntry[];
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
@@ -56,6 +57,7 @@ interface RootFolderPanelListProps {
   editingName: string;
   editingNameRef: React.MutableRefObject<string>;
   handleRenameConfirm: (target?: RenameTarget) => Promise<void>;
+  className?: string;
 }
 
 /**
@@ -90,6 +92,7 @@ export const RootFolderPanelList = ({
   editingName,
   editingNameRef,
   handleRenameConfirm,
+  className,
 }: RootFolderPanelListProps) => {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -111,7 +114,7 @@ export const RootFolderPanelList = ({
   );
 
   return (
-    <div className="h-full overflow-y-auto py-1">
+    <div className={cn("h-full overflow-y-auto py-1", className)}>
       {entries.map((entry) => (
         <RootFolderPanelRow
           key={`${entry.kind}:${entry.id}`}
