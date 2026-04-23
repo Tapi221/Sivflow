@@ -15,6 +15,7 @@ interface ExplorerSidebarHeaderProps {
   onAddDocument?: () => void | Promise<void>;
   onBulkImport?: () => void | Promise<void>;
   canCreateCardSet?: boolean;
+  canCreateCard?: boolean;
   canAddDocuments?: boolean;
   canBulkImport?: boolean;
   preferDirectRootFolderCreate?: boolean;
@@ -27,6 +28,7 @@ export const ExplorerSidebarHeader = ({
   onAddDocument,
   onBulkImport,
   canCreateCardSet = false,
+  canCreateCard = false,
   canAddDocuments = false,
   canBulkImport = false,
   preferDirectRootFolderCreate = false,
@@ -38,6 +40,7 @@ export const ExplorerSidebarHeader = ({
     () =>
       buildExplorerCreateMenuActions({
         canCreateCardSet,
+        canCreateCard,
         canAddDocuments,
         canBulkImport,
         onCreateRootFolder,
@@ -48,6 +51,7 @@ export const ExplorerSidebarHeader = ({
     [
       canAddDocuments,
       canBulkImport,
+      canCreateCard,
       canCreateCardSet,
       onAddDocument,
       onBulkImport,

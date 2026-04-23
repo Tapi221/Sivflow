@@ -517,6 +517,7 @@ const TreeViewLayout = ({
   );
 
   const canCreateCardSet = Boolean(currentHeaderActionFolderId);
+  const canCreateCard = Boolean(currentHeaderActionFolderId);
   const canAddDocuments = Boolean(currentHeaderActionFolderId);
 
   return (
@@ -540,6 +541,7 @@ const TreeViewLayout = ({
         onBulkImport={handleOpenBulkImport}
         onStartResizing={startResizing}
         canCreateCardSet={canCreateCardSet}
+        canCreateCard={canCreateCard}
         canAddDocuments={canAddDocuments}
         canBulkImport={Boolean(currentHeaderActionFolderId)}
         preferDirectRootFolderCreate={currentHeaderActionFolderId === null}
