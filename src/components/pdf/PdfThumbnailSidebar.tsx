@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import type { DocumentItem } from "@/types";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PdfPage } from "./PdfPage";
-import { usePdfContainerWidth } from "./hooks/usePdfContainerWidth";
 import { usePdfDocument } from "./hooks/usePdfDocument";
 import { usePdfSourceResolver } from "./hooks/usePdfSourceResolver";
 import type {
@@ -17,6 +16,8 @@ const THUMBNAIL_GRID_GAP_PX = 8;
 const MIN_THUMBNAIL_WIDTH_PX = 72;
 const FALLBACK_THUMBNAIL_SCALE = 0.18;
 const INITIAL_VISIBLE_PAGE_COUNT = 6;
+const SIDEBAR_HORIZONTAL_PADDING_PX = 16;
+const SIDEBAR_INNER_BORDER_PX = 2;
 const THREE_COLUMN_MIN_WIDTH_PX = 356;
 
 const sanitizeCurrentPage = (value: unknown) => {
@@ -66,6 +67,7 @@ const normalizeThumbnailOrder = (value: unknown, numPages: number) => {
 
 interface PdfThumbnailSidebarProps {
   doc: DocumentItem;
+  sidebarWidthPx: number;
 }
 
 interface PdfThumbnailTileProps {
@@ -188,10 +190,12 @@ const PdfThumbnailTile = ({
   );
 };
 
-export const PdfThumbnailSidebar = ({ doc }: PdfThumbnailSidebarProps) => {
+export const PdfThumbnailSidebar = ({
+  doc,
+  sidebarWidthPx,
+}: PdfThumbnailSidebarProps) => {
   const { currentUser } = useAuthSession();
   const scrollRootRef = useRef<HTMLDivElement | null>(null);
-  const { containerRef, containerWidth } = usePdfContainerWidth();
   const [firstPageSize, setFirstPageSize] = useState<PageSize | null>(null);
 
   const {
@@ -213,12 +217,19 @@ export const PdfThumbnailSidebar = ({ doc }: PdfThumbnailSidebarProps) => {
     onSourceLoadError: handleSourceLoadError,
   });
 
+  const availableGridWidth = useMemo(() => {
+    return Math.max(
+      0,
+      sidebarWidthPx - SIDEBAR_HORIZONTAL_PADDING_PX - SIDEBAR_INNER_BORDER_PX,
+    );
+  }, [sidebarWidthPx]);
+
   const columnCount = useMemo(() => {
-    return containerWidth >= THREE_COLUMN_MIN_WIDTH_PX ? 3 : 2;
-  }, [containerWidth]);
+    return availableGridWidth >= THREE_COLUMN_MIN_WIDTH_PX ? 3 : 2;
+  }, [availableGridWidth]);
 
   const thumbnailWidth = useMemo(() => {
-    if (!containerWidth) {
+    if (!availableGridWidth) {
       return 96;
     }
 
@@ -226,9 +237,9 @@ export const PdfThumbnailSidebar = ({ doc }: PdfThumbnailSidebarProps) => {
 
     return Math.max(
       MIN_THUMBNAIL_WIDTH_PX,
-      Math.floor((containerWidth - totalGapWidth) / columnCount),
+      Math.floor((availableGridWidth - totalGapWidth) / columnCount),
     );
-  }, [columnCount, containerWidth]);
+  }, [availableGridWidth, columnCount]);
 
   const thumbnailScale = useMemo(() => {
     if (!firstPageSize || firstPageSize.width <= 0) {
@@ -290,7 +301,7 @@ export const PdfThumbnailSidebar = ({ doc }: PdfThumbnailSidebarProps) => {
         className="min-h-0 flex-1 overflow-y-auto"
       >
         <div className="px-2 pb-2 pt-2">
-          <div ref={containerRef} className="w-full">
+          <div className="w-full">
             {!documentController.doc || statusMessage ? (
               <div className="flex min-h-0 items-start justify-center">
                 <div className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-sm">
