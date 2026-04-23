@@ -54,6 +54,8 @@ const TITLE_BAR_BREADCRUMB_ITEM_CLASS = "titlebar-breadcrumb-item truncate";
 
 const HOME_MENU_ITEMS = NAV_SECTIONS.flatMap((section) => section.items);
 const HOME_MENU_PANEL_PRESET = floatingPanelPresets.menu;
+const HOME_MENU_WIDTH_CLASS = "w-[208px]";
+const HOME_MENU_ITEM_CLASS = "h-8";
 
 const WindowControlButton: React.FC<WindowControlButtonProps> = ({
   title,
@@ -244,15 +246,16 @@ const TitleBarBreadcrumbs = React.memo(
                   <PopoverContent
                     align="start"
                     side="bottom"
-                    sideOffset={8}
+                    sideOffset={6}
                     className={cn(
                       HOME_MENU_PANEL_PRESET.className,
-                      "w-[220px] p-1.5",
+                      HOME_MENU_WIDTH_CLASS,
+                      "rounded-2xl p-1 shadow-[0_8px_24px_rgba(15,23,42,0.10)]",
                     )}
                     surface={HOME_MENU_PANEL_PRESET.surface}
                     style={noDragStyle}
                   >
-                    <div className="flex flex-col gap-0.5">
+                    <div className="flex flex-col gap-0">
                       {HOME_MENU_ITEMS.map((item) => {
                         const active = isHomeMenuItemActive(item.to);
 
@@ -266,13 +269,14 @@ const TitleBarBreadcrumbs = React.memo(
                               void navigate(item.to);
                             }}
                             className={cn(
-                              "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+                              "flex w-full items-center gap-2 rounded-lg px-2 text-left text-[13px] font-medium transition-colors",
+                              HOME_MENU_ITEM_CLASS,
                               active
                                 ? "bg-[rgba(55,53,47,0.08)] text-[rgba(55,53,47,0.96)]"
-                                : "text-[rgba(55,53,47,0.78)] hover:bg-[rgba(55,53,47,0.05)] hover:text-[rgba(55,53,47,0.96)]",
+                                : "text-[rgba(55,53,47,0.78)] hover:bg-[rgba(55,53,47,0.045)] hover:text-[rgba(55,53,47,0.96)]",
                             )}
                           >
-                            <span className="flex h-4 w-4 shrink-0 items-center justify-center text-[rgba(55,53,47,0.72)]">
+                            <span className="flex h-[14px] w-[14px] shrink-0 items-center justify-center text-[rgba(55,53,47,0.68)]">
                               {item.icon}
                             </span>
                             <span className="truncate">{item.label}</span>
@@ -281,7 +285,7 @@ const TitleBarBreadcrumbs = React.memo(
                       })}
                     </div>
 
-                    <div className="my-1 border-t border-[rgba(55,53,47,0.08)]" />
+                    <div className="my-1 border-t border-[rgba(55,53,47,0.07)]" />
 
                     <button
                       type="button"
@@ -290,9 +294,12 @@ const TitleBarBreadcrumbs = React.memo(
                         setIsHomeMenuOpen(false);
                         handleOpenSettings();
                       }}
-                      className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-[rgba(55,53,47,0.78)] transition-colors hover:bg-[rgba(55,53,47,0.05)] hover:text-[rgba(55,53,47,0.96)]"
+                      className={cn(
+                        "flex w-full items-center gap-2 rounded-lg px-2 text-left text-[13px] font-medium text-[rgba(55,53,47,0.78)] transition-colors hover:bg-[rgba(55,53,47,0.045)] hover:text-[rgba(55,53,47,0.96)]",
+                        HOME_MENU_ITEM_CLASS,
+                      )}
                     >
-                      <span className="flex h-4 w-4 shrink-0 items-center justify-center text-[rgba(55,53,47,0.72)]">
+                      <span className="flex h-[14px] w-[14px] shrink-0 items-center justify-center text-[rgba(55,53,47,0.68)]">
                         <TitleBarMenuSettingsIcon />
                       </span>
                       <span className="truncate">設定</span>
