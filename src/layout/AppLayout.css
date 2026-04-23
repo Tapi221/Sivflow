@@ -1,14 +1,14 @@
 .app-layout {
   display: grid;
-  grid-template-columns: 212px minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: 268px minmax(0, 1fr);
+  gap: 12px;
   grid-template-rows: 1fr;
   height: 100%;
   flex: 1;
   width: 100%;
   overflow: hidden;
   box-sizing: border-box;
-  padding: 6px 8px 8px;
+  padding: 8px 12px 12px;
   background-color: var(--app-bg);
   background-image: none;
   align-items: stretch;
@@ -17,11 +17,13 @@
 .app-layout--sidebar-hidden {
   grid-template-columns: minmax(0, 1fr) !important;
   gap: 0;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 .app-layout__sidebar {
-  width: 212px;
-  min-width: 212px;
+  width: 268px;
+  min-width: 268px;
   min-width: 0;
   min-height: 0;
   overflow: hidden;

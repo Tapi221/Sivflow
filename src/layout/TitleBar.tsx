@@ -404,7 +404,7 @@ export const TitleBar: React.FC = () => {
       className={cn(
         "surface-flat-titlebar",
         "flex w-full shrink-0 select-none items-center justify-between",
-        "bg-transparent text-sm titlebar-text",
+        "border-x-0 border-t-0 rounded-none border-b border-[rgba(229,229,227,0.9)] bg-transparent px-4 text-sm titlebar-text",
       )}
       style={{
         ...dragStyle,

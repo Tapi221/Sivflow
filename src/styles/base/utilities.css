@@ -190,25 +190,25 @@
     );
     --titlebar-text-strong: color-mix(
       in srgb,
-      var(--ds-semantic-color-text-strong) 78%,
+      var(--ds-semantic-color-text-strong) 70%,
       #6b5c4e 22%
     );
     --titlebar-text: color-mix(
       in srgb,
-      var(--ds-semantic-color-text-secondary) 72%,
-      #7e6f61 28%
+      var(--ds-semantic-color-text-secondary) 62%,
+      #8a857d 38%
     );
     --titlebar-text-muted: color-mix(
       in srgb,
-      var(--ds-color-neutral-500) 70%,
-      #a09183 30%
+      var(--ds-color-neutral-500) 68%,
+      #9d988f 32%
     );
     --titlebar-divider: color-mix(
       in srgb,
       var(--titlebar-border) 64%,
       transparent
     );
-    --titlebar-hover-bg: color-mix(in srgb, #e9dfd4 54%, transparent);
+    --titlebar-hover-bg: rgba(61, 61, 58, 0.04);
   }
 
   .surface-glass-titlebar {
@@ -224,7 +224,6 @@
   }
 
   .surface-flat-titlebar {
-    --titlebar-hover-bg: rgba(55, 53, 47, 0.045);
     border-color: transparent;
     background: transparent;
     box-shadow: none;
@@ -249,10 +248,11 @@
     min-width: 0;
     max-width: 100%;
     align-items: center;
-    border-radius: 0.125rem;
-    font-weight: 500;
+    border-radius: 0.25rem;
+    font-size: 13px;
+    font-weight: 400;
     line-height: 1.2;
-    padding: 0.125rem 0.25rem;
+    padding: 0.125rem 0.125rem;
   }
 
   .titlebar-breadcrumb-link {
@@ -261,6 +261,15 @@
 
   .titlebar-breadcrumb-current {
     color: var(--titlebar-text-strong);
+  }
+
+  .titlebar-breadcrumb-link.titlebar-hover:hover {
+    background-color: transparent;
+    color: var(--titlebar-text-strong);
+  }
+
+  .titlebar-breadcrumb-current.titlebar-hover:hover {
+    background-color: transparent;
   }
 
   @media (min-width: 768px) {
