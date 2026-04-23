@@ -279,9 +279,13 @@
   }
 
   .titlebar-breadcrumb-current {
-    color: var(--titlebar-text-strong);
-    font-weight: 500;
-  }
+  color: color-mix(
+    in srgb,
+    var(--titlebar-text-strong) 58%,
+    var(--titlebar-text) 42%
+  );
+  font-weight: 500;
+}
 
   .titlebar-breadcrumb-link.titlebar-hover:hover {
     background-color: transparent;
