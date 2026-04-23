@@ -158,7 +158,11 @@ const PdfThumbnailTile = ({
       : 144;
 
   return (
-    <div ref={hostRef} className="min-w-0">
+    <div
+      ref={hostRef}
+      className="shrink-0"
+      style={{ width: `${THUMBNAIL_CARD_WIDTH_PX}px` }}
+    >
       <div
         className={cn(
           "overflow-hidden rounded-xl border bg-white p-1 shadow-sm",
@@ -302,32 +306,33 @@ export const PdfThumbnailSidebar = ({
                 </div>
               </div>
             ) : (
-              <div
-                className="grid gap-2"
-                style={{
-                  gridTemplateColumns: `repeat(${columnCount}, ${THUMBNAIL_CARD_WIDTH_PX}px)`,
-                  justifyContent: "center",
-                }}
-              >
-                {orderedPageNumbers.map((pageNumber) => (
-                  <PdfThumbnailTile
-                    key={`${doc.id}:thumbnail:${pageNumber}`}
-                    pdf={documentController.doc}
-                    documentKey={documentController.documentKey}
-                    pageNumber={pageNumber}
-                    scale={thumbnailScale}
-                    baseSize={
-                      documentController.pageSizes[pageNumber] ??
-                      firstPageSize ??
-                      undefined
-                    }
-                    isActive={pageNumber === currentPage}
-                    observerRoot={scrollRootRef.current}
-                    acquirePage={documentController.acquirePage}
-                    getPageTextContent={documentController.getPageTextContent}
-                    onPageSize={documentController.setPageSize}
-                  />
-                ))}
+              <div className="flex justify-center">
+                <div
+                  className="inline-grid gap-2"
+                  style={{
+                    gridTemplateColumns: `repeat(${columnCount}, ${THUMBNAIL_CARD_WIDTH_PX}px)`,
+                  }}
+                >
+                  {orderedPageNumbers.map((pageNumber) => (
+                    <PdfThumbnailTile
+                      key={`${doc.id}:thumbnail:${pageNumber}`}
+                      pdf={documentController.doc}
+                      documentKey={documentController.documentKey}
+                      pageNumber={pageNumber}
+                      scale={thumbnailScale}
+                      baseSize={
+                        documentController.pageSizes[pageNumber] ??
+                        firstPageSize ??
+                        undefined
+                      }
+                      isActive={pageNumber === currentPage}
+                      observerRoot={scrollRootRef.current}
+                      acquirePage={documentController.acquirePage}
+                      getPageTextContent={documentController.getPageTextContent}
+                      onPageSize={documentController.setPageSize}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </div>
