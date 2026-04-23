@@ -10,9 +10,13 @@ import type { PdfOcrPreprocessMode } from "@/lib/pdf/renderPdfPageForOcr";
 
 export interface PdfOcrAttemptRecord {
   attemptIndex: number;
+  reason: string;
   languageHint: string;
   renderMode: PdfOcrPreprocessMode;
   renderScale: number;
+  deskewAngle: number;
+  rotationDegrees: number;
+  regionCount: number;
   qualityScore: number;
   text: string;
 }
@@ -161,12 +165,19 @@ const isPdfOcrAttemptRecord = (value: unknown): value is PdfOcrAttemptRecord => 
   return (
     typeof candidate.attemptIndex === "number" &&
     Number.isFinite(candidate.attemptIndex) &&
+    typeof candidate.reason === "string" &&
     typeof candidate.languageHint === "string" &&
     (candidate.renderMode === "none" ||
       candidate.renderMode === "grayscale" ||
       candidate.renderMode === "binary") &&
     typeof candidate.renderScale === "number" &&
     Number.isFinite(candidate.renderScale) &&
+    typeof candidate.deskewAngle === "number" &&
+    Number.isFinite(candidate.deskewAngle) &&
+    typeof candidate.rotationDegrees === "number" &&
+    Number.isFinite(candidate.rotationDegrees) &&
+    typeof candidate.regionCount === "number" &&
+    Number.isFinite(candidate.regionCount) &&
     typeof candidate.qualityScore === "number" &&
     Number.isFinite(candidate.qualityScore) &&
     typeof candidate.text === "string"
@@ -436,6 +447,8 @@ export const putPdfOcrPageRecord = async ({
         ...attempt,
         text: normalizePdfExtractedText(attempt.text),
         qualityScore: Number(attempt.qualityScore.toFixed(4)),
+        deskewAngle: Number(attempt.deskewAngle.toFixed(2)),
+        renderScale: Number(attempt.renderScale.toFixed(3)),
       })) ?? [],
     processingMs:
       typeof processingMs === "number" && Number.isFinite(processingMs)
