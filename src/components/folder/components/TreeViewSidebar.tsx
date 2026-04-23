@@ -21,6 +21,7 @@ interface TreeViewSidebarProps {
   canAddDocuments?: boolean;
   canBulkImport?: boolean;
   preferDirectRootFolderCreate?: boolean;
+  collapseContent?: boolean;
 }
 
 export const TreeViewSidebar = ({
@@ -42,6 +43,7 @@ export const TreeViewSidebar = ({
   canAddDocuments = false,
   canBulkImport = false,
   preferDirectRootFolderCreate = false,
+  collapseContent = false,
 }: TreeViewSidebarProps) => {
   return (
     <div
@@ -84,12 +86,16 @@ export const TreeViewSidebar = ({
           />
         </div>
 
-        <div
-          ref={contentScrollRef}
-          className="flex-1 min-h-0 min-w-0 overflow-hidden px-1 pb-1 outline-none"
-        >
-          {children}
-        </div>
+        {collapseContent ? (
+          <div className="flex-1 min-h-0 min-w-0" />
+        ) : (
+          <div
+            ref={contentScrollRef}
+            className="flex-1 min-h-0 min-w-0 overflow-hidden px-1 pb-1 outline-none"
+          >
+            {children}
+          </div>
+        )}
       </div>
 
       {isSidebarOpen && (
