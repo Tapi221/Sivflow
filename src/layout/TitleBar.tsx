@@ -247,18 +247,24 @@ const ForwardIcon: React.FC = () => (
 const TitleBarToolbarButton: React.FC<{
   title: string;
   onClick?: () => void;
+  disabled?: boolean;
   noDragStyle?: React.CSSProperties;
   children: React.ReactNode;
-}> = ({ title, onClick, noDragStyle, children }) => {
+}> = ({ title, onClick, disabled = false, noDragStyle, children }) => {
   return (
     <button
       type="button"
       title={title}
       aria-label={title}
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
       onMouseDown={(event) => event.stopPropagation()}
+      aria-disabled={disabled}
+      tabIndex={disabled ? -1 : undefined}
       style={noDragStyle}
-      className="titlebar-hover titlebar-text inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors [&>svg]:scale-[1.06]"
+      className={cn(
+        "titlebar-text inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors [&>svg]:scale-[1.06]",
+        disabled ? "cursor-default" : "titlebar-hover",
+      )}
     >
       {children}
     </button>
@@ -319,17 +325,15 @@ const TitleBarPrimaryActions: React.FC<{
         }}
         noDragStyle={noDragStyle}
       >
-        <MenuIcon />
+        <SectionListIcon />
       </TitleBarToolbarButton>
 
       <TitleBarToolbarButton
-        title="フォルダー一覧へ移動"
-        onClick={() => {
-          void navigate("/folders?view=section-list");
-        }}
+        title="メニュー"
+        disabled
         noDragStyle={noDragStyle}
       >
-        <SectionListIcon />
+        <MenuIcon />
       </TitleBarToolbarButton>
 
       <TitleBarToolbarButton
