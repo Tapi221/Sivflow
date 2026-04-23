@@ -12,6 +12,7 @@ import {
   DragOverlay,
   MeasuringStrategy,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -338,9 +339,11 @@ const animateSortableGridLayoutChanges = (
 
 const SortableThumbnailCard = ({
   pageNumber,
+  touchAction,
   children,
 }: {
   pageNumber: number;
+  touchAction?: CSSProperties["touchAction"];
   children: ReactNode;
 }) => {
   const {
@@ -365,7 +368,7 @@ const SortableThumbnailCard = ({
     transition: shouldApplySortableTransform ? transition : undefined,
     opacity: isDragging ? 0.3 : 1,
     zIndex: isDragging ? 30 : 1,
-    touchAction: "none",
+    touchAction,
   };
 
   return (
@@ -404,15 +407,23 @@ export const PdfThumbnailPanel = ({
     number | null
   >(null);
   const [dragOverlayWidth, setDragOverlayWidth] = useState<number | null>(null);
-  const [isReorderMode, setIsReorderMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const desktopPointerSensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 6,
+    },
+  });
+
+  const mobileTouchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 180,
+      tolerance: 8,
+    },
+  });
+
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 6,
-      },
-    }),
+    isMobileViewport ? mobileTouchSensor : desktopPointerSensor,
   );
 
   const orderedPageNumbers = useMemo(() => {
@@ -553,13 +564,12 @@ export const PdfThumbnailPanel = ({
       return;
     }
 
-    setIsReorderMode(false);
     resetDragState();
   }, [canReorderThumbnails, resetDragState]);
 
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
-      if (!canReorderThumbnails || !isReorderMode) {
+      if (!canReorderThumbnails) {
         return;
       }
 
@@ -570,12 +580,12 @@ export const PdfThumbnailPanel = ({
       const nextWidth = event.active.rect.current.initial?.width ?? null;
       setDragOverlayWidth(typeof nextWidth === "number" ? nextWidth : null);
     },
-    [canReorderThumbnails, isReorderMode],
+    [canReorderThumbnails],
   );
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
-      if (!canReorderThumbnails || !isReorderMode) {
+      if (!canReorderThumbnails) {
         resetDragState();
         return;
       }
@@ -613,7 +623,6 @@ export const PdfThumbnailPanel = ({
     },
     [
       canReorderThumbnails,
-      isReorderMode,
       onThumbnailOrderChange,
       orderedPageNumbers,
       resetDragState,
@@ -738,6 +747,7 @@ export const PdfThumbnailPanel = ({
                 <SortableThumbnailCard
                   key={`sortable-${pageNumber}`}
                   pageNumber={pageNumber}
+                  touchAction={isMobileViewport ? undefined : "none"}
                 >
                   {renderThumbnailCard(pageNumber)}
                 </SortableThumbnailCard>
@@ -913,7 +923,7 @@ export const PdfThumbnailPanel = ({
               ? "一致するページがありません。"
               : "ページ情報を読み込み中です。",
           emptyIcon: <GridIcon className="h-8 w-8" />,
-          reorderEnabled: canReorderThumbnails && isReorderMode,
+          reorderEnabled: canReorderThumbnails,
         });
     }
   })();
@@ -947,38 +957,18 @@ export const PdfThumbnailPanel = ({
       </div>
 
       {selectedTab === "thumbnails" ? (
-        <div className="ds-filter-section space-y-2 bg-transparent px-3 py-2">
+        <div className="ds-filter-section bg-transparent px-3 py-1">
           <div className="flex items-center justify-between gap-2 text-[11px]">
-            <span className="ds-filter-section__label">並び替え:</span>
             <span className="ds-filter-section__label">
               {orderedPageNumbers.length} ページ
             </span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <SurfaceButton
-              type="button"
-              onClick={() => {
-                setIsReorderMode((previousValue) => {
-                  const nextValue = !previousValue;
-                  if (!nextValue) {
-                    resetDragState();
-                  }
-                  return nextValue;
-                });
-              }}
-              disabled={!canReorderThumbnails}
-              surface={isReorderMode ? "convexActive" : "concave"}
-              size="xs"
-            >
-              {isReorderMode ? "並び替え完了" : "並び替え開始"}
-            </SurfaceButton>
-
-            {normalizedSearchToken.length > 0 ? (
-              <span className="ds-filter-section__label">
-                検索中は並び替え不可
-              </span>
-            ) : null}
+            <span className="ds-filter-section__label">
+              {normalizedSearchToken.length > 0
+                ? "検索中は並び替え不可"
+                : isMobileViewport
+                  ? "長押しで並び替え"
+                  : "ドラッグで並び替え"}
+            </span>
           </div>
         </div>
       ) : null}
@@ -1032,7 +1022,6 @@ export const PdfThumbnailPanel = ({
 
   const panelShell = (
     <FilterPanelShell
-      title="PDFサイドバー"
       searchValue={searchQuery}
       searchPlaceholder={SEARCH_PLACEHOLDER_BY_TAB[selectedTab]}
       onSearchChange={setSearchQuery}

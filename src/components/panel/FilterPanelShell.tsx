@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { PanelSearchField } from "./PanelSearchField";
 
 interface FilterPanelShellProps {
-  title: string;
+  title?: string;
   searchValue?: string;
   searchPlaceholder?: string;
   onSearchChange?: (value: string) => void;
@@ -30,18 +30,23 @@ export const FilterPanelShell = ({
   bodyRef,
 }: FilterPanelShellProps) => {
   const shouldRenderSearch = typeof onSearchChange === "function";
+  const shouldRenderHeader = Boolean(title) || Boolean(headerAction);
 
   return (
     <div
       className={cn("ds-filter-panel flex h-full min-h-0 flex-col", className)}
     >
       <div className="ds-filter-section ds-floating-panel__section ds-floating-panel__section--spacious">
-        <div className="ds-floating-panel__header mb-2">
-          <span className="ds-filter-section__title ds-floating-panel__title text-xs font-semibold">
-            {title}
-          </span>
-          {headerAction}
-        </div>
+        {shouldRenderHeader ? (
+          <div className="ds-floating-panel__header mb-2">
+            {title ? (
+              <span className="ds-filter-section__title ds-floating-panel__title text-xs font-semibold">
+                {title}
+              </span>
+            ) : null}
+            {headerAction}
+          </div>
+        ) : null}
 
         {shouldRenderSearch ? (
           <PanelSearchField
