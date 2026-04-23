@@ -64,16 +64,16 @@ export const ExplorerSidebarHeader = ({
 
   return (
     <div
-      className="ds-nav-tabs flex items-center justify-end px-2"
-      style={{ height: 36 }}
+      className="flex items-center justify-end px-2.5 pt-1.5 pb-1"
+      style={{ minHeight: 34 }}
     >
-      <div className="flex shrink-0 items-center gap-0.5">
+      <div className="flex shrink-0 items-center gap-1">
         {shouldUseDirectRootFolderCreate ? (
           <button
             type="button"
             title="新規フォルダを追加"
             aria-label="新規フォルダを追加"
-            className="ds-nav-action ds-nav-action--icon flex items-center"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border-0 bg-transparent text-[rgba(107,114,128,0.92)] transition-colors hover:bg-[#f9fafb] hover:text-[#4b5563]"
             onClick={() => {
               void onCreateRootFolder?.();
             }}
@@ -96,7 +96,7 @@ export const ExplorerSidebarHeader = ({
                 type="button"
                 title="追加"
                 aria-label="追加メニューを開く"
-                className="ds-nav-action ds-nav-action--icon flex items-center"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border-0 bg-transparent text-[rgba(107,114,128,0.92)] transition-colors hover:bg-[#f9fafb] hover:text-[#4b5563]"
               >
                 <Plus className="h-3.5 w-3.5" />
               </button>
@@ -118,7 +118,10 @@ export const ExplorerSidebarHeader = ({
           </DropdownMenu>
         )}
 
-        <TagFilterPopover allTags={allTags} />
+        <TagFilterPopover
+          allTags={allTags}
+          className="h-7 w-7 rounded-lg border-0 bg-transparent text-[rgba(107,114,128,0.92)] transition-colors hover:bg-[#f9fafb] hover:text-[#4b5563]"
+        />
       </div>
     </div>
   );
