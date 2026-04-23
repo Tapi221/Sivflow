@@ -8,6 +8,8 @@ import {
 import { SIDEBAR_WIDTH_LIMITS } from "@constants/web/app";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 
+export const TREE_VIEW_SIDEBAR_TOGGLE_EVENT = "manifolia:treeview-sidebar-toggle";
+
 const clampSidebarWidth = (width: number) =>
   Math.min(Math.max(width, SIDEBAR_WIDTH_LIMITS.min), SIDEBAR_WIDTH_LIMITS.max);
 
@@ -93,6 +95,31 @@ export const useTreeViewSidebar = () => {
     pendingWidthRef.current = normalizedWidth;
     setRenderedSidebarWidth(isSidebarOpen ? normalizedWidth : 0);
   }, [isMobile, isSidebarOpen, sidebarWidth]);
+
+  useEffect(() => {
+    const handleSidebarToggleEvent = () => {
+      setIsSidebarOpen((previousOpen) => {
+        const nextOpen = !previousOpen;
+        window.localStorage.setItem(
+          WEB_STORAGE_KEYS.sidebarOpen,
+          String(nextOpen),
+        );
+        return nextOpen;
+      });
+    };
+
+    window.addEventListener(
+      TREE_VIEW_SIDEBAR_TOGGLE_EVENT,
+      handleSidebarToggleEvent,
+    );
+
+    return () => {
+      window.removeEventListener(
+        TREE_VIEW_SIDEBAR_TOGGLE_EVENT,
+        handleSidebarToggleEvent,
+      );
+    };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
