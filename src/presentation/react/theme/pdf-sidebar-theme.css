@@ -53,6 +53,10 @@
     color: var(--pdf-sidebar-text-strong);
   }
 
+  .pdf-filter-panel-root .ds-floating-panel__body {
+    padding: 0;
+  }
+
   .pdf-filter-panel-root .ds-filter-section {
     border-bottom-color: var(--pdf-sidebar-border);
   }

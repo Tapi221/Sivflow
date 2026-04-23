@@ -1,4 +1,6 @@
 import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
+import { floatingPanelPresets } from "@/components/ui/menu-styles";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { APP_CHROME } from "@/config/appChrome";
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 import {
@@ -18,6 +20,7 @@ import { usePresentationTarget } from "@/platform/presentation/usePresentationTa
 import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { NAV_SECTIONS } from "./sidebarNavigation";
 
 type WindowControlButtonProps = {
   title: string;
@@ -48,6 +51,9 @@ const TITLE_BAR_NO_DRAG_STYLE: AppRegionStyle = {
 };
 
 const TITLE_BAR_BREADCRUMB_ITEM_CLASS = "titlebar-breadcrumb-item truncate";
+
+const HOME_MENU_ITEMS = NAV_SECTIONS.flatMap((section) => section.items);
+const HOME_MENU_PANEL_PRESET = floatingPanelPresets.menu;
 
 const WindowControlButton: React.FC<WindowControlButtonProps> = ({
   title,
@@ -111,6 +117,25 @@ const HomeBreadcrumbIcon: React.FC = () => (
   </svg>
 );
 
+const TitleBarMenuSettingsIcon: React.FC = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.2" />
+    <path
+      d="M8 1.5V3M8 13V14.5M14.5 8H13M3 8H1.5M12.364 3.636L11.3 4.7M4.7 11.3L3.636 12.364M12.364 12.364L11.3 11.3M4.7 4.7L3.636 3.636"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 const TitleBarBreadcrumbs = React.memo(
   ({
     pathname,
@@ -119,6 +144,8 @@ const TitleBarBreadcrumbs = React.memo(
     noDragStyle,
   }: TitleBarBreadcrumbsProps) => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const [isHomeMenuOpen, setIsHomeMenuOpen] = useState(false);
 
     const allCrumbs = useMemo(
       () =>
@@ -129,6 +156,44 @@ const TitleBarBreadcrumbs = React.memo(
         }),
       [baseCrumbs, extraCrumbs, pathname],
     );
+
+    const isHomeOnlyMode =
+      location.pathname.toLowerCase() === "/folders" &&
+      new URLSearchParams(location.search).get("home") === "1";
+
+    useEffect(() => {
+      setIsHomeMenuOpen(false);
+    }, [location.pathname, location.search]);
+
+    const handleBreadcrumbNavigateClick = (
+      event: React.MouseEvent<HTMLButtonElement>,
+      crumb: BreadcrumbCrumb,
+    ) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (!crumb.to) {
+        return;
+      }
+
+      void navigate(crumb.to);
+    };
+
+    const handleOpenSettings = () => {
+      const next = new URLSearchParams(location.search);
+      next.set("settings", "true");
+      next.set("settingsTab", "study");
+      void navigate({ search: `?${next.toString()}` });
+    };
+
+    const isHomeMenuItemActive = (to: string) => {
+      if (to === "/folders") {
+        return (
+          location.pathname.toLowerCase() === "/folders" && !isHomeOnlyMode
+        );
+      }
+      return location.pathname.toLowerCase() === to.toLowerCase();
+    };
 
     return (
       <nav className="titlebar-text flex min-w-0 flex-1 items-center gap-1 overflow-hidden text-xs">
@@ -141,21 +206,12 @@ const TitleBarBreadcrumbs = React.memo(
               <span className="sr-only">{crumb.label}</span>
             </>
           ) : (
-            crumb.label
+           crumb.label
           );
 
-          const handleBreadcrumbClick = (
-            event: React.MouseEvent<HTMLButtonElement>,
-          ) => {
-            event.preventDefault();
-            event.stopPropagation();
-
-            if (!crumb.to) {
-              return;
-            }
-
-            navigate(crumb.to);
-          };
+          const shouldRenderHomeMenuTrigger = isHomeCrumb;
+          const shouldRenderClickableButton =
+            isClickable || shouldRenderHomeMenuTrigger;
 
           return (
             <React.Fragment
@@ -165,7 +221,90 @@ const TitleBarBreadcrumbs = React.memo(
                 <span className="titlebar-divider select-none">/</span>
               )}
 
-              {isClickable ? (
+              {shouldRenderHomeMenuTrigger ? (
+                <Popover open={isHomeMenuOpen} onOpenChange={setIsHomeMenuOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className={cn(
+                        TITLE_BAR_BREADCRUMB_ITEM_CLASS,
+                        "titlebar-hover titlebar-breadcrumb-link",
+                      )}
+                      style={noDragStyle}
+                      onMouseDown={(event) => event.stopPropagation()}
+                      title={crumb.label}
+                      aria-label={`${crumb.label}メニューを開く`}
+                      aria-haspopup="menu"
+                      aria-expanded={isHomeMenuOpen}
+                    >
+                      {breadcrumbContent}
+                    </button>
+                  </PopoverTrigger>
+
+                  <PopoverContent
+                    align="start"
+                    side="bottom"
+                    sideOffset={10}
+                    className={cn(
+                      HOME_MENU_PANEL_PRESET.className,
+                      "w-[344px] p-2",
+                    )}
+                    surface={HOME_MENU_PANEL_PRESET.surface}
+                  >
+                    <div className="grid grid-cols-2 gap-2">
+                      {HOME_MENU_ITEMS.map((item) => {
+                        const active = isHomeMenuItemActive(item.to);
+
+                        return (
+                          <button
+                            key={item.to}
+                            type="button"
+                            onClick={() => {
+                              setIsHomeMenuOpen(false);
+                              void navigate(item.to);
+                            }}
+                            className={cn(
+                              "group flex min-h-[76px] flex-col items-start gap-2 rounded-xl border px-3 py-3 text-left transition-colors",
+                              active
+                                ? "border-[rgba(35,131,226,0.18)] bg-[rgba(35,131,226,0.08)]"
+                                : "border-transparent hover:bg-[rgba(55,53,47,0.05)]",
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "flex h-9 w-9 items-center justify-center rounded-lg border text-[rgba(55,53,47,0.72)] transition-colors",
+                                active
+                                  ? "border-[rgba(35,131,226,0.18)] bg-white text-[rgba(35,131,226,0.92)]"
+                                  : "border-[rgba(55,53,47,0.08)] bg-[rgba(55,53,47,0.03)] group-hover:text-[rgba(55,53,47,0.92)]",
+                              )}
+                            >
+                              {item.icon}
+                            </span>
+                            <span className="text-sm font-medium text-slate-800">
+                              {item.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="mt-2 border-t border-[rgba(55,53,47,0.08)] pt-2">
+                      <button
+                        type="button"
+                        onClick={handleOpenSettings}
+                        className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-[rgba(55,53,47,0.05)]"
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-[rgba(55,53,47,0.08)] bg-[rgba(55,53,47,0.03)] text-[rgba(55,53,47,0.72)] transition-colors group-hover:text-[rgba(55,53,47,0.92)]">
+                          <TitleBarMenuSettingsIcon />
+                        </span>
+                        <span className="text-sm font-medium text-slate-800">
+                          設定
+                        </span>
+                      </button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ) : shouldRenderClickableButton ? (
                 <button
                   type="button"
                   className={cn(
@@ -174,7 +313,7 @@ const TitleBarBreadcrumbs = React.memo(
                   )}
                   style={noDragStyle}
                   onMouseDown={(event) => event.stopPropagation()}
-                  onClick={handleBreadcrumbClick}
+                  onClick={(event) => handleBreadcrumbNavigateClick(event, crumb)}
                   title={crumb.label}
                 >
                   {breadcrumbContent}

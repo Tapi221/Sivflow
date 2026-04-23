@@ -10,7 +10,10 @@ import {
   prepareDetachedPdfCanvasSurfaceForRender,
 } from "./pdfCanvasRenderUtils";
 
-const THUMBNAIL_TARGET_WIDTH_PX = 84;
+const THUMBNAIL_TARGET_WIDTH_MIN_PX = 96;
+const THUMBNAIL_TARGET_WIDTH_MAX_PX = 160;
+const THUMBNAIL_TARGET_WIDTH_BUCKET_PX = 8;
+const THUMBNAIL_CARD_HORIZONTAL_PADDING_PX = 12;
 const THUMBNAIL_RENDER_CONSTRAINTS = {
   maxPreferredDevicePixelRatio: 1.25,
   maxCanvasPixels: 480_000,
@@ -84,8 +87,27 @@ const readWindowDevicePixelRatio = () => {
   return rawDevicePixelRatio;
 };
 
-const buildThumbnailCacheKey = (documentKey: string, pageNumber: number) => {
-  return `${documentKey}::thumbnail::${pageNumber}`;
+const clampThumbnailTargetWidth = (value: number) => {
+  return Math.min(
+    THUMBNAIL_TARGET_WIDTH_MAX_PX,
+    Math.max(THUMBNAIL_TARGET_WIDTH_MIN_PX, value),
+  );
+};
+
+const quantizeThumbnailTargetWidth = (value: number) => {
+  const clampedValue = clampThumbnailTargetWidth(value);
+  return (
+    Math.round(clampedValue / THUMBNAIL_TARGET_WIDTH_BUCKET_PX) *
+    THUMBNAIL_TARGET_WIDTH_BUCKET_PX
+  );
+};
+
+const buildThumbnailCacheKey = (
+  documentKey: string,
+  pageNumber: number,
+  targetWidthPx: number,
+) => {
+  return `${documentKey}::thumbnail::${pageNumber}::${targetWidthPx}`;
 };
 
 const cloneCanvasBitmap = (sourceCanvas: HTMLCanvasElement) => {
@@ -117,6 +139,7 @@ const PdfThumbnailItemComponent = ({
 }: PdfThumbnailItemProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const renderPassIdRef = useRef(0);
 
   const [isVisible, setIsVisible] = useState(
@@ -124,6 +147,56 @@ const PdfThumbnailItemComponent = ({
   );
   const [isRendered, setIsRendered] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
+  const [previewWidthPx, setPreviewWidthPx] = useState<number | null>(null);
+
+  useEffect(() => {
+    const previewElement = previewRef.current;
+    if (!previewElement) {
+      return;
+    }
+
+    const updatePreviewWidth = () => {
+      const nextWidth = previewElement.clientWidth;
+      if (!Number.isFinite(nextWidth) || nextWidth <= 0) {
+        return;
+      }
+
+      setPreviewWidthPx((previousWidthPx) => {
+        return previousWidthPx === nextWidth ? previousWidthPx : nextWidth;
+      });
+    };
+
+    updatePreviewWidth();
+
+    if (typeof ResizeObserver === "undefined") {
+      if (typeof window !== "undefined") {
+        window.addEventListener("resize", updatePreviewWidth);
+        return () => {
+          window.removeEventListener("resize", updatePreviewWidth);
+        };
+      }
+
+      return;
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      updatePreviewWidth();
+    });
+
+    resizeObserver.observe(previewElement);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  const thumbnailTargetWidthPx = useMemo(() => {
+    const measuredPreviewWidthPx =
+      previewWidthPx ?? THUMBNAIL_TARGET_WIDTH_MIN_PX;
+    return quantizeThumbnailTargetWidth(
+      measuredPreviewWidthPx - THUMBNAIL_CARD_HORIZONTAL_PADDING_PX,
+    );
+  }, [previewWidthPx]);
 
   const pageAspectRatio = useMemo(() => {
     if (baseSize && baseSize.width > 0 && baseSize.height > 0) {
@@ -208,17 +281,21 @@ const PdfThumbnailItemComponent = ({
       return disposed || renderPassIdRef.current !== renderPassId;
     };
 
-    const cachedEntry = thumbnailBitmapCache.get(
-      buildThumbnailCacheKey(documentKey, pageNumber),
+    const thumbnailCacheKey = buildThumbnailCacheKey(
+      documentKey,
+      pageNumber,
+      thumbnailTargetWidthPx,
     );
+
+    const cachedEntry = thumbnailBitmapCache.get(thumbnailCacheKey);
     const resolvedSize = baseSize ?? cachedEntry?.size;
 
     if (cachedEntry && resolvedSize) {
-      const viewportWidthPx = THUMBNAIL_TARGET_WIDTH_PX;
+      const viewportWidthPx = thumbnailTargetWidthPx;
       const viewportHeightPx = Math.max(
         1,
         (resolvedSize.height / Math.max(1, resolvedSize.width)) *
-          THUMBNAIL_TARGET_WIDTH_PX,
+          thumbnailTargetWidthPx,
       );
       const renderBackingStore = resolvePdfRenderBackingStore({
         viewportWidthPx,
@@ -276,7 +353,7 @@ const PdfThumbnailItemComponent = ({
 
         const thumbnailScale = Math.max(
           0.01,
-          THUMBNAIL_TARGET_WIDTH_PX / Math.max(1, nextPageSize.width),
+          thumbnailTargetWidthPx / Math.max(1, nextPageSize.width),
         );
         const viewport = pageLease.page.getViewport({ scale: thumbnailScale });
         const renderBackingStore = resolvePdfRenderBackingStore({
@@ -335,7 +412,7 @@ const PdfThumbnailItemComponent = ({
         const clonedBitmap = cloneCanvasBitmap(renderSurface.canvas);
         if (clonedBitmap) {
           thumbnailBitmapCache.set(
-            buildThumbnailCacheKey(documentKey, pageNumber),
+            thumbnailCacheKey,
             {
               bitmap: clonedBitmap,
               size: nextPageSize,
@@ -389,6 +466,7 @@ const PdfThumbnailItemComponent = ({
     isActive,
     isVisible,
     pageNumber,
+    thumbnailTargetWidthPx,
     setPageSize,
   ]);
 
@@ -399,12 +477,13 @@ const PdfThumbnailItemComponent = ({
         onClick={() => onSelect(pageNumber)}
         aria-label={`ページ ${pageNumber} を開く`}
         className={cn(
-          "pdf-thumbnail-card group relative flex w-full min-w-0 flex-col rounded-[20px] border p-2 text-left transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+          "pdf-thumbnail-card group relative flex w-full min-w-0 flex-col rounded-[20px] border p-1.5 text-left transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           isActive && "pdf-thumbnail-card--active",
         )}
       >
         <div
-          className="pdf-thumbnail-card__preview relative flex w-full items-center justify-center overflow-hidden rounded-[16px] border p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
+          ref={previewRef}
+          className="pdf-thumbnail-card__preview relative flex w-full items-center justify-center overflow-hidden rounded-[16px] border p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]"
           style={{ aspectRatio: pageAspectRatio }}
         >
           {!isRendered && !renderError ? (
@@ -421,7 +500,7 @@ const PdfThumbnailItemComponent = ({
         </div>
       </button>
 
-      <div className="pdf-thumbnail-chip pointer-events-none absolute left-3 top-3 z-20 inline-flex h-8 min-w-8 items-center justify-center px-2 text-[12px] font-semibold tabular-nums">
+      <div className="pdf-thumbnail-chip pointer-events-none absolute left-2.5 top-2.5 z-20 inline-flex h-7 min-w-7 items-center justify-center px-2 text-[12px] font-semibold tabular-nums">
         {pageNumber}
       </div>
 
@@ -445,7 +524,7 @@ const PdfThumbnailItemComponent = ({
           onToggleBookmark(pageNumber);
         }}
         className={cn(
-          "pdf-thumbnail-action absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border transition-all duration-150 ease-out hover:scale-[1.03]",
+          "pdf-thumbnail-action absolute right-2.5 top-2.5 z-20 inline-flex h-7 w-7 items-center justify-center rounded-full border transition-all duration-150 ease-out hover:scale-[1.03]",
           isBookmarked && "pdf-thumbnail-action--active",
         )}
       >
