@@ -128,13 +128,13 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   return (
     <div
       className={cn(
-        "relative flex min-h-0 h-full flex-col bg-transparent",
+        "relative flex min-h-0 h-full w-full min-w-0 flex-col bg-transparent",
         route.isDesktop
           ? "overflow-hidden"
           : "overflow-x-hidden overflow-y-auto",
       )}
     >
-      <div className="relative z-10 w-full mx-auto h-full min-h-0 flex">
+      <div className="relative z-10 flex h-full min-h-0 w-full min-w-0">
         <TreeViewLayout
           folders={lookups.normalizedFolders}
           isSectionListMode={controller.state.isSectionListMode}

@@ -530,7 +530,7 @@ const TreeViewLayout = ({
   const shell = (
     <div
       className={cn(
-        "relative flex h-full min-h-0 w-full items-stretch overflow-hidden border-0 bg-transparent",
+        "relative flex h-full min-h-0 w-full flex-1 items-stretch overflow-hidden border-0 bg-transparent",
         isResizing && "select-none cursor-col-resize",
       )}
     >
