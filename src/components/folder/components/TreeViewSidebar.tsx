@@ -69,7 +69,7 @@ export const TreeViewSidebar = ({
         className={cn(
           "flex h-full min-h-0 w-full flex-col overflow-hidden",
           "md:rounded-[14px] md:border md:border-[rgba(229,231,235,1)]",
-          "md:bg-[rgba(255,255,255,0.92)] md:shadow-[0_4px_20px_rgba(0,0,0,0.02)]",
+          "md:bg-[rgba(255,255,255,0.92)] md:shadow-[0_16px_36px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.04)]",
           "md:backdrop-blur-[8px] md:[-webkit-backdrop-filter:blur(8px)]",
         )}
       >
