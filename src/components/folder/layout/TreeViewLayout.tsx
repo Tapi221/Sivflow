@@ -572,7 +572,6 @@ const TreeViewLayout = ({
         {sidebarContent}
       </TreeViewSidebar>
 
-      
       {isCalendarDockOpen ? (
         <CalendarDockPanel onClose={closeCalendarDock} />
       ) : null}
@@ -651,6 +650,7 @@ const TreeViewLayout = ({
 };
 
 export default TreeViewLayout;
+
 
 
 
