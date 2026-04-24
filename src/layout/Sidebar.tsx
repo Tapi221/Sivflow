@@ -38,7 +38,27 @@ export const Sidebar = () => {
     navigate({ search: `?${next.toString()}` });
   };
 
-  const renderNavLink = ({ to, label, icon }: NavItem) => {
+  const renderNavLink = ({ to, label, icon, disabled }: NavItem) => {
+    if (disabled) {
+      return (
+        <button
+          key={to}
+          type="button"
+          disabled
+          aria-disabled="true"
+          className={getSidebarNavItemClassName({
+            className: "cursor-not-allowed opacity-45",
+          })}
+          onClick={(event) => {
+            event.preventDefault();
+          }}
+        >
+          <SidebarNavIcon>{icon}</SidebarNavIcon>
+          <span className="sidebar__nav-label">{label}</span>
+        </button>
+      );
+    }
+
     return (
       <NavLink
         key={to}
@@ -97,3 +117,4 @@ export const Sidebar = () => {
     </aside>
   );
 };
+
