@@ -7,7 +7,6 @@ import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 type Tile = { rating: string; score: number; Icon: unknown };
 
 type Props = {
-  stampRallyStreak: number;
   ratingTiles: Tile[];
   ratingCounts: Record<string, number>;
   isPracticeFeatureEnabled: boolean;
@@ -19,7 +18,6 @@ type Props = {
 };
 
 export const StudyComplete = ({
-  stampRallyStreak,
   ratingTiles,
   ratingCounts,
   isPracticeFeatureEnabled,
@@ -186,3 +184,4 @@ export const StudyComplete = ({
     </div>
   );
 };
+
