@@ -22,6 +22,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type MouseEvent,
   type PointerEvent,
 } from "react";
 import { PdfThumbnailPage } from "./PdfThumbnailPage";
@@ -48,7 +49,7 @@ const CURRENT_PAGE_RENDER_PRIORITY = 1_000;
 const INTERSECTING_PAGE_RENDER_PRIORITY = 900;
 const INITIAL_PAGE_RENDER_PRIORITY = 700;
 const BACKGROUND_PAGE_RENDER_PRIORITY = 120;
-const DRAG_ACTIVATION_DISTANCE_PX = 8;
+const DRAG_ACTIVATION_DISTANCE_PX = 1;
 const NAVIGATION_BACKGROUND_PAUSE_MS = 1_100;
 const OPTIMISTIC_NAVIGATION_CLEAR_MS = 1_600;
 
@@ -417,6 +418,7 @@ const SortablePdfThumbnailTileComponent = ({
   const {
     attributes,
     listeners,
+    setActivatorNodeRef,
     setNodeRef,
     transform,
     transition,
@@ -425,7 +427,7 @@ const SortablePdfThumbnailTileComponent = ({
     id: createSortableId(pageNumber),
   });
 
-  const handlePointerDownCapture = useCallback(
+  const handlePreviewPointerDown = useCallback(
     (event: PointerEvent<HTMLButtonElement>) => {
       if (event.button !== 0 || event.ctrlKey || event.metaKey || event.altKey) {
         return;
@@ -440,10 +442,17 @@ const SortablePdfThumbnailTileComponent = ({
     onOpenPage(pageNumber);
   }, [onOpenPage, pageNumber]);
 
+  const stopDragHandleClickPropagation = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+    },
+    [],
+  );
+
   return (
     <div
       ref={setNodeRef}
-      className="shrink-0"
+      className="relative shrink-0"
       style={{
         width: `${THUMBNAIL_CARD_WIDTH_PX}px`,
         transform: CSS.Transform.toString(transform),
@@ -455,15 +464,12 @@ const SortablePdfThumbnailTileComponent = ({
     >
       <button
         type="button"
-        aria-label={`ページ ${pageNumber} を開く。ドラッグで順序を変更`}
+        aria-label={`ページ ${pageNumber} を開く`}
         className={cn(
-          "block w-full touch-none select-none rounded-xl text-left outline-none",
-          "cursor-grab focus-visible:ring-2 focus-visible:ring-primary-500/40",
-          isDragging && "cursor-grabbing",
+          "block w-full select-none rounded-xl text-left outline-none",
+          "cursor-pointer focus-visible:ring-2 focus-visible:ring-primary-500/40",
         )}
-        {...attributes}
-        {...listeners}
-        onPointerDownCapture={handlePointerDownCapture}
+        onPointerDown={handlePreviewPointerDown}
         onClick={handleClick}
       >
         <PdfThumbnailCardContent
@@ -471,6 +477,30 @@ const SortablePdfThumbnailTileComponent = ({
           pageNumber={pageNumber}
           isDragging={isDragging}
         />
+      </button>
+
+      <button
+        ref={setActivatorNodeRef}
+        type="button"
+        aria-label={`ページ ${pageNumber} をドラッグして順序を変更`}
+        className={cn(
+          "absolute right-1 top-1 z-10 flex h-6 w-6 touch-none select-none items-center justify-center rounded-md",
+          "border border-slate-200 bg-white/95 text-slate-400 shadow-sm backdrop-blur-sm",
+          "cursor-grab outline-none transition-colors hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-primary-500/40",
+          isDragging && "cursor-grabbing text-slate-700",
+        )}
+        {...attributes}
+        {...listeners}
+        onClick={stopDragHandleClickPropagation}
+      >
+        <span aria-hidden="true" className="grid grid-cols-2 gap-0.5">
+          <span className="h-1 w-1 rounded-full bg-current" />
+          <span className="h-1 w-1 rounded-full bg-current" />
+          <span className="h-1 w-1 rounded-full bg-current" />
+          <span className="h-1 w-1 rounded-full bg-current" />
+          <span className="h-1 w-1 rounded-full bg-current" />
+          <span className="h-1 w-1 rounded-full bg-current" />
+        </span>
       </button>
     </div>
   );
