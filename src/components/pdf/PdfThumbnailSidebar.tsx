@@ -17,6 +17,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PdfThumbnailPage } from "./PdfThumbnailPage";
+import { cancelPendingPdfThumbnailRenders } from "./pdfThumbnailRenderQueue";
 import { usePdfWorkspace } from "./usePdfWorkspace";
 import type { PageSize, PdfJsPage } from "./pdfViewerTypes";
 
@@ -26,15 +27,19 @@ const THUMBNAIL_PAGE_BOX_HEIGHT_PX = 116;
 const THUMBNAIL_GRID_GAP_PX = 8;
 const INITIAL_RENDER_ROW_COUNT = 6;
 const BACKGROUND_RENDER_BATCH_ROW_COUNT = 2;
-const BACKGROUND_RENDER_INTERVAL_MS = 140;
+const BACKGROUND_RENDER_INTERVAL_MS = 180;
 const MAX_BACKGROUND_RENDER_COUNT = 96;
 const THUMBNAIL_INTERSECTION_ROOT_MARGIN = "360px 0px 720px 0px";
 const MIN_THUMBNAIL_COLUMNS = 2;
 const MAX_THUMBNAIL_COLUMNS = 4;
+const NAVIGATION_PAGE_RENDER_PRIORITY = 1_100;
 const CURRENT_PAGE_RENDER_PRIORITY = 1_000;
 const INTERSECTING_PAGE_RENDER_PRIORITY = 900;
 const INITIAL_PAGE_RENDER_PRIORITY = 700;
 const BACKGROUND_PAGE_RENDER_PRIORITY = 120;
+const DRAG_ACTIVATION_DISTANCE_PX = 8;
+const NAVIGATION_BACKGROUND_PAUSE_MS = 900;
+const OPTIMISTIC_NAVIGATION_CLEAR_MS = 1_400;
 
 const getRequiredGridWidth = (columnCount: number) => {
   return (
@@ -96,16 +101,22 @@ const parseSortableId = (value: string | number) => {
 };
 
 const resolveRenderPriority = ({
+  isNavigationPage,
   isCurrentPage,
   pageIndex,
   initialRenderCount,
   eagerRenderItemCount,
 }: {
+  isNavigationPage: boolean;
   isCurrentPage: boolean;
   pageIndex: number;
   initialRenderCount: number;
   eagerRenderItemCount: number;
 }) => {
+  if (isNavigationPage) {
+    return NAVIGATION_PAGE_RENDER_PRIORITY;
+  }
+
   if (isCurrentPage) {
     return CURRENT_PAGE_RENDER_PRIORITY;
   }
@@ -119,6 +130,20 @@ const resolveRenderPriority = ({
   }
 
   return 0;
+};
+
+const mergeUniquePageNumbers = (...pageNumberCollections: number[][]) => {
+  const pageNumbers = new Set<number>();
+
+  pageNumberCollections.forEach((collection) => {
+    collection.forEach((pageNumber) => {
+      if (Number.isFinite(pageNumber) && pageNumber > 0) {
+        pageNumbers.add(Math.trunc(pageNumber));
+      }
+    });
+  });
+
+  return Array.from(pageNumbers);
 };
 
 const applyDocumentDragCursor = () => {
@@ -380,6 +405,7 @@ export const PdfThumbnailSidebar = () => {
     sourceUnavailable,
     currentPage,
     normalizedThumbnailOrder,
+    setCurrentPage,
     scrollToPage,
     reorderThumbnailOrder,
   } = usePdfWorkspace();
@@ -398,16 +424,37 @@ export const PdfThumbnailSidebar = () => {
 
   const scrollRootRef = useRef<HTMLDivElement | null>(null);
   const releaseDragCursorRef = useRef<(() => void) | null>(null);
+  const resumeBackgroundRenderTimerRef = useRef<number | null>(null);
+  const clearOptimisticNavigationTimerRef = useRef<number | null>(null);
   const [gridHostElement, setGridHostElement] = useState<HTMLDivElement | null>(
     null,
   );
   const [availableGridWidth, setAvailableGridWidth] = useState(0);
   const [eagerRenderItemCount, setEagerRenderItemCount] = useState(0);
+  const [pendingNavigationPage, setPendingNavigationPage] = useState<
+    number | null
+  >(null);
+  const [isNavigationPriorityMode, setIsNavigationPriorityMode] =
+    useState(false);
 
   const handleGridHostRef = useCallback((node: HTMLDivElement | null) => {
     setGridHostElement((previousNode) =>
       previousNode === node ? previousNode : node,
     );
+  }, []);
+
+  const clearResumeBackgroundRenderTimer = useCallback(() => {
+    if (resumeBackgroundRenderTimerRef.current !== null) {
+      window.clearTimeout(resumeBackgroundRenderTimerRef.current);
+      resumeBackgroundRenderTimerRef.current = null;
+    }
+  }, []);
+
+  const clearOptimisticNavigationTimer = useCallback(() => {
+    if (clearOptimisticNavigationTimerRef.current !== null) {
+      window.clearTimeout(clearOptimisticNavigationTimerRef.current);
+      clearOptimisticNavigationTimerRef.current = null;
+    }
   }, []);
 
   useEffect(() => {
@@ -431,8 +478,21 @@ export const PdfThumbnailSidebar = () => {
     return () => {
       releaseDragCursorRef.current?.();
       releaseDragCursorRef.current = null;
+      clearResumeBackgroundRenderTimer();
+      clearOptimisticNavigationTimer();
     };
-  }, []);
+  }, [clearOptimisticNavigationTimer, clearResumeBackgroundRenderTimer]);
+
+  useEffect(() => {
+    if (pendingNavigationPage === null) {
+      return;
+    }
+
+    if (currentPage === pendingNavigationPage) {
+      setPendingNavigationPage(null);
+      clearOptimisticNavigationTimer();
+    }
+  }, [clearOptimisticNavigationTimer, currentPage, pendingNavigationPage]);
 
   const columnCount = useMemo(() => {
     return resolveColumnCount(availableGridWidth);
@@ -470,6 +530,7 @@ export const PdfThumbnailSidebar = () => {
     if (
       !doc ||
       hasBlockingStatus ||
+      isNavigationPriorityMode ||
       eagerRenderItemCount >= backgroundRenderTarget
     ) {
       return;
@@ -491,6 +552,7 @@ export const PdfThumbnailSidebar = () => {
     doc,
     eagerRenderItemCount,
     hasBlockingStatus,
+    isNavigationPriorityMode,
   ]);
 
   const prefetchPageNumbers = useMemo(() => {
@@ -498,18 +560,30 @@ export const PdfThumbnailSidebar = () => {
       return [];
     }
 
-    const prefetchCount = Math.min(
+    const basePrefetchCount = Math.min(
       totalThumbnailCount,
-      Math.max(eagerRenderItemCount, initialRenderCount) +
-        resolveBackgroundBatchSize(columnCount),
+      isNavigationPriorityMode
+        ? initialRenderCount
+        : Math.max(eagerRenderItemCount, initialRenderCount) +
+            resolveBackgroundBatchSize(columnCount),
+    );
+    const basePrefetchPageNumbers = normalizedThumbnailOrder.slice(
+      0,
+      basePrefetchCount,
+    );
+    const interactionPageNumbers = [pendingNavigationPage, currentPage].filter(
+      (pageNumber): pageNumber is number => typeof pageNumber === "number",
     );
 
-    return normalizedThumbnailOrder.slice(0, prefetchCount);
+    return mergeUniquePageNumbers(basePrefetchPageNumbers, interactionPageNumbers);
   }, [
     columnCount,
+    currentPage,
     eagerRenderItemCount,
     initialRenderCount,
+    isNavigationPriorityMode,
     normalizedThumbnailOrder,
+    pendingNavigationPage,
     totalThumbnailCount,
   ]);
 
@@ -523,7 +597,7 @@ export const PdfThumbnailSidebar = () => {
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 2 },
+      activationConstraint: { distance: DRAG_ACTIVATION_DISTANCE_PX },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -575,9 +649,42 @@ export const PdfThumbnailSidebar = () => {
 
   const openPage = useCallback(
     (pageNumber: number) => {
-      scrollToPage(pageNumber);
+      const normalizedPageNumber = Math.min(
+        Math.max(1, Math.trunc(pageNumber)),
+        Math.max(1, numPages),
+      );
+
+      cancelPendingPdfThumbnailRenders({
+        maxPriority: INITIAL_PAGE_RENDER_PRIORITY,
+      });
+      clearResumeBackgroundRenderTimer();
+      clearOptimisticNavigationTimer();
+      setPendingNavigationPage(normalizedPageNumber);
+      setIsNavigationPriorityMode(true);
+      setCurrentPage(normalizedPageNumber);
+      scrollToPage(normalizedPageNumber);
+
+      resumeBackgroundRenderTimerRef.current = window.setTimeout(() => {
+        resumeBackgroundRenderTimerRef.current = null;
+        setIsNavigationPriorityMode(false);
+      }, NAVIGATION_BACKGROUND_PAUSE_MS);
+
+      clearOptimisticNavigationTimerRef.current = window.setTimeout(() => {
+        clearOptimisticNavigationTimerRef.current = null;
+        setPendingNavigationPage((previousPageNumber) => {
+          return previousPageNumber === normalizedPageNumber
+            ? null
+            : previousPageNumber;
+        });
+      }, OPTIMISTIC_NAVIGATION_CLEAR_MS);
     },
-    [scrollToPage],
+    [
+      clearOptimisticNavigationTimer,
+      clearResumeBackgroundRenderTimer,
+      numPages,
+      scrollToPage,
+      setCurrentPage,
+    ],
   );
 
   if (!doc || hasBlockingStatus) {
@@ -609,8 +716,11 @@ export const PdfThumbnailSidebar = () => {
                   >
                     {normalizedThumbnailOrder.map((pageNumber, pageIndex) => {
                       const isCurrentPage = pageNumber === currentPage;
+                      const isNavigationPage =
+                        pendingNavigationPage === pageNumber;
+                      const isActive = isCurrentPage || isNavigationPage;
                       const eagerRender =
-                        pageIndex < eagerRenderItemCount || isCurrentPage;
+                        pageIndex < eagerRenderItemCount || isActive;
 
                       return (
                         <SortablePdfThumbnailTile
@@ -619,13 +729,14 @@ export const PdfThumbnailSidebar = () => {
                           pageNumber={pageNumber}
                           eagerRender={eagerRender}
                           renderPriority={resolveRenderPriority({
+                            isNavigationPage,
                             isCurrentPage,
                             pageIndex,
                             initialRenderCount,
                             eagerRenderItemCount,
                           })}
                           baseSize={pageSizes[pageNumber]}
-                          isActive={isCurrentPage}
+                          isActive={isActive}
                           observerRoot={scrollRootRef.current}
                           acquirePage={acquirePage}
                           onPageSize={setPageSize}
