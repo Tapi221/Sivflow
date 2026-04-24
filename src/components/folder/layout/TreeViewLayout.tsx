@@ -575,7 +575,8 @@ const TreeViewLayout = ({
       {isCalendarDockOpen ? (
         <CalendarDockPanel onClose={closeCalendarDock} />
       ) : null}
-{isSectionListMode ? (
+
+      {isSectionListMode ? (
         <SectionListBlankPane
           sidebarWidth={isSidebarOpen ? renderedSidebarWidth : 0}
           topOffsetPx={APP_DESKTOP_TOP_INSET_PX}
@@ -650,6 +651,7 @@ const TreeViewLayout = ({
 };
 
 export default TreeViewLayout;
+
 
 
 
