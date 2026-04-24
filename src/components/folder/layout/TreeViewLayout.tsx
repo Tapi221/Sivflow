@@ -11,6 +11,7 @@ import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
 import { cn } from "@/lib/utils";
 import {
   createAppDestination,
@@ -31,7 +32,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { SectionListBlankPane } from "@/components/folder/components/SectionListBlankPane";
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
@@ -79,6 +80,11 @@ const TreeViewLayout = ({
 }: TreeViewLayoutProps) => {
   const navigate = useNavigate();
   const toast = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { setIsSettingsOpen } = useSettingsQueryParam(
+    searchParams,
+    setSearchParams,
+  );
   const { settings } = useUserSettings();
   const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
   const { cards = [], loading: cardsLoading } = useCardsRead();
@@ -356,6 +362,10 @@ const TreeViewLayout = ({
     setIsImportDialogOpen(true);
   }, [currentHeaderActionFolderId, toast]);
 
+  const handleOpenSettings = useCallback(() => {
+    setIsSettingsOpen(true);
+  }, [setIsSettingsOpen]);
+
   const handleImportCompleted = useCallback(
     ({
       cardSetId,
@@ -556,6 +566,7 @@ const TreeViewLayout = ({
         onAddDocument={handleAddDocumentFromHeader}
         onBulkImport={handleOpenBulkImport}
         onStartResizing={startResizing}
+        onOpenSettings={handleOpenSettings}
         canCreateCardSet={canCreateCardSet}
         canCreateCard={canCreateCard}
         canAddDocuments={canAddDocuments}
