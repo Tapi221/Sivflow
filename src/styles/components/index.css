@@ -6,3 +6,25 @@
 @import "./common.css";
 @import "../features/markdown.css";
 @import "../features/pdf-viewer.css";
+
+@layer components {
+  .folder-panel-list {
+    font-family:
+      "IBM Plex Sans JP",
+      "Zen Kaku Gothic New",
+      "Noto Sans JP",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+    font-feature-settings:
+      "palt" 1,
+      "lnum" 1,
+      "tnum" 1;
+  }
+
+  .folder-panel-list .ds-list-item__title {
+    font-weight: 400;
+    letter-spacing: 0.005em;
+  }
+}

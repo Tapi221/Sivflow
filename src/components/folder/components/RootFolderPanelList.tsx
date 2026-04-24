@@ -114,7 +114,12 @@ export const RootFolderPanelList = ({
   );
 
   return (
-    <div className={cn("h-full overflow-y-auto py-1", className)}>
+    <div
+      className={cn(
+        "folder-panel-list h-full overflow-y-auto py-1",
+        className,
+      )}
+    >
       {entries.map((entry) => (
         <RootFolderPanelRow
           key={`${entry.kind}:${entry.id}`}
