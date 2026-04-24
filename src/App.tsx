@@ -10,7 +10,6 @@ import {
   RedirectPageScreenSkeleton,
   StudyModeScreenSkeleton,
   TagMapScreenSkeleton,
-  TrashScreenSkeleton,
 } from "@/components/loading/ScreenSkeletons";
 import { BlockNoteSandboxPage } from "@/sandbox/blocknote";
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
@@ -34,7 +33,6 @@ const Folders = lazy(() => import("./routes/Folders"));
 const CardEdit = lazy(() => import("./routes/CardEdit"));
 const CardSetView = lazy(() => import("./routes/CardSetView"));
 const StudyMode = lazy(() => import("./routes/StudyMode"));
-const Trash = lazy(() => import("./routes/Trash"));
 const Gallery = lazy(() => import("./routes/Gallery"));
 const Directory = lazy(() => import("./routes/Directory"));
 const Dictionary = lazy(() => import("./routes/Dictionary"));
@@ -377,10 +375,7 @@ const AppContent = () => {
             path="gallery"
             element={withRouteFallback(<Gallery />, <GalleryScreenSkeleton />)}
           />
-          <Route
-            path="trash"
-            element={withRouteFallback(<Trash />, <TrashScreenSkeleton />)}
-          />
+          <Route path="trash" element={<Navigate to="/folders" replace />} />
           <Route
             path="directory"
             element={withRouteFallback(
@@ -467,3 +462,4 @@ const App = () => {
 };
 
 export default App;
+

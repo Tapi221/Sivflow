@@ -110,30 +110,6 @@ const DIRECTORY_ICON = (
   </svg>
 );
 
-const TRASH_ICON = (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path
-      d="M2.5 4.5H13.5L12.5 13.5H3.5L2.5 4.5Z"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M1 4.5H15M6 4.5V2.5H10V4.5"
-      stroke="currentColor"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
 export const PRIMARY_NAV_ITEMS: NavItem[] = [
   {
     to: "/folders",
@@ -161,10 +137,10 @@ export const SECONDARY_NAV_ITEMS: NavItem[] = [
   },
   { to: "/gallery", label: "ギャラリー", icon: GALLERY_ICON },
   { to: "/directory", label: "ディレクトリ", icon: DIRECTORY_ICON },
-  { to: "/trash", label: "ゴミ箱", icon: TRASH_ICON },
 ];
 
 export const NAV_SECTIONS: NavSection[] = [
   { title: "メイン", items: PRIMARY_NAV_ITEMS },
   { title: "整理", items: SECONDARY_NAV_ITEMS },
 ];
+
