@@ -450,7 +450,7 @@ const TitleBarPrimaryActions: React.FC<{
             sideOffset={6}
             style={noDragStyle}
             className={cn(
-              "z-[9999] w-[148px] rounded-[10px] border border-[#dddcd5] bg-white p-[3px]",
+              "z-[9999] w-[148px] rounded-[10px] border border-[var(--floating-menu-border)] bg-white p-[3px]",
               "shadow-[0_4px_20px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)]",
             )}
           >

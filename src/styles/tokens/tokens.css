@@ -96,6 +96,7 @@
     --surface-shadow-convex: var(--ds-semantic-elevation-control-raised);
     --floating-surface-bg: var(--ds-semantic-color-background-floating);
     --floating-surface-border: var(--ds-semantic-color-border-floating);
+    --floating-menu-border: #dddcd5;
     --floating-surface-shadow: var(--ds-semantic-elevation-floating);
     --floating-surface-radius: calc(
       var(--ds-semantic-radius-dialog) * var(--ui-scale)

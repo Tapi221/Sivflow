@@ -1,7 +1,7 @@
 @layer components {
   .ds-floating-panel--filter {
     min-width: 16rem;
-    border: 1px solid var(--ds-semantic-color-border-strong);
+    border: 1px solid var(--floating-menu-border);
     background: color-mix(
       in srgb,
       var(--ds-semantic-color-background-floating) 94%,
