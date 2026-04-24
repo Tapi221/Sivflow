@@ -41,6 +41,8 @@ import { APP_DESKTOP_TOP_INSET_PX } from "@/platform/presentation/shellMetrics";
 import { PdfWorkspaceProvider } from "@/components/pdf/PdfWorkspaceProvider";
 import { TreeViewTabContent } from "@/components/folder/components/TreeViewTabContent";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CalendarDockPanel } from "@/features/calendar/ui/CalendarDockPanel";
+import { useCalendarDockPanelStore } from "@/features/calendar/store/useCalendarDockPanelStore";
 
 import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions";
 import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
@@ -79,6 +81,8 @@ const TreeViewLayout = ({
   folderSelectionNonce = 0,
 }: TreeViewLayoutProps) => {
   const navigate = useNavigate();
+  const isCalendarDockOpen = useCalendarDockPanelStore((state) => state.isOpen);
+  const closeCalendarDock = useCalendarDockPanelStore((state) => state.close);
   const toast = useToast();
   const { settings } = useUserSettings();
   const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
@@ -568,7 +572,11 @@ const TreeViewLayout = ({
         {sidebarContent}
       </TreeViewSidebar>
 
-      {isSectionListMode ? (
+      
+      {isCalendarDockOpen ? (
+        <CalendarDockPanel onClose={closeCalendarDock} />
+      ) : null}
+{isSectionListMode ? (
         <SectionListBlankPane
           sidebarWidth={isSidebarOpen ? renderedSidebarWidth : 0}
           topOffsetPx={APP_DESKTOP_TOP_INSET_PX}
@@ -643,6 +651,7 @@ const TreeViewLayout = ({
 };
 
 export default TreeViewLayout;
+
 
 
 
