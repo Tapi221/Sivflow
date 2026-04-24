@@ -14,6 +14,7 @@ interface ExplorerSidebarHeaderProps {
   allTags: string[];
   onOpenBookmarks?: () => void | Promise<void>;
   onOpenOutline?: () => void | Promise<void>;
+  onOpenSettings?: () => void | Promise<void>;
   onCreateRootFolder?: () => void | Promise<void>;
   onCreateCardSet?: () => void | Promise<void>;
   onCreateCard?: () => void | Promise<void>;
@@ -43,6 +44,22 @@ const OutlineIcon = ({ size = 16, ...props }: UiIconProps) => (
   </UiIcon>
 );
 
+const SettingsIcon = ({ size = 16, ...props }: UiIconProps) => (
+  <UiIcon size={size} strokeWidth={1.7} {...props}>
+    <path d="M12 15.25a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5Z" />
+    <path
+      d={[
+        "M19.43 12.98a7.95 7.95 0 0 0 .05-.98 7.95 7.95 0 0 0-.05-.98",
+        "l2.02-1.58-1.92-3.32-2.38.96a7.5 7.5 0 0 0-1.7-.98L15.08 3.5h-3.84",
+        "l-.37 2.6a7.5 7.5 0 0 0-1.7.98l-2.38-.96-1.92 3.32 2.02 1.58",
+        "a7.95 7.95 0 0 0-.05.98c0 .33.02.66.05.98l-2.02 1.58 1.92 3.32 2.38-.96",
+        "c.52.4 1.09.73 1.7.98l.37 2.6h3.84l.37-2.6a7.5 7.5 0 0 0 1.7-.98",
+        "l2.38.96 1.92-3.32-2.02-1.58Z",
+      ].join(" ")}
+    />
+  </UiIcon>
+);
+
 const iconButtonClassName =
   "inline-flex h-7 w-7 items-center justify-center rounded-lg border-0 bg-transparent text-[rgba(107,114,128,0.92)] transition-colors hover:bg-[#f9fafb] hover:text-[#4b5563]";
 
@@ -50,6 +67,7 @@ export const ExplorerSidebarHeader = ({
   allTags,
   onOpenBookmarks,
   onOpenOutline,
+  onOpenSettings,
   onCreateRootFolder,
   onCreateCardSet,
   onCreateCard,
@@ -183,6 +201,20 @@ export const ExplorerSidebarHeader = ({
           allTags={allTags}
           className="h-7 w-7 rounded-lg border-0 bg-transparent text-[#888780] transition-colors hover:bg-[#f9fafb] hover:text-[#888780]"
         />
+
+        {onOpenSettings ? (
+          <button
+            type="button"
+            title="設定"
+            aria-label="設定を開く"
+            className={iconButtonClassName}
+            onClick={() => {
+              void onOpenSettings();
+            }}
+          >
+            <SettingsIcon className="h-3.5 w-3.5" />
+          </button>
+        ) : null}
       </div>
     </div>
   );
