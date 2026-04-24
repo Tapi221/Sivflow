@@ -1167,7 +1167,7 @@ const SettingsDialog = ({
                   {isMobileMenuOpen ? (
                     <X className="h-5 w-5" />
                   ) : (
-                    <Layers className="h-5 w-5" />
+                    <BookOpen className="h-5 w-5" />
                   )}
                 </Button>
                 <Button
@@ -1220,4 +1220,5 @@ const SettingsDialog = ({
 };
 
 export default SettingsDialog;
+
 
