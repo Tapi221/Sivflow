@@ -231,11 +231,11 @@ TextField("Input", text: $input)
 VStack(alignment: .leading, spacing: AppSpacing.md) {
     Text(card.displayTitle)
         .font(.headline)
-    
+
     Text("Question #\(card.questionNumber)")
         .font(.caption)
         .foregroundStyle(.secondary)
-    
+
     Button(action: { /* ... */ }) {
         Label("Edit", systemImage: "pencil")
     }

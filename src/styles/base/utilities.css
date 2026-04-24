@@ -183,12 +183,8 @@
 
   .surface-flat-titlebar {
     --titlebar-font-family:
-      -apple-system,
-      BlinkMacSystemFont,
-      "SF Pro Text",
-      "Hiragino Sans",
-      "Noto Sans JP",
-      sans-serif;
+      -apple-system, BlinkMacSystemFont, "SF Pro Text", "Hiragino Sans",
+      "Noto Sans JP", sans-serif;
     --titlebar-text-strong: color-mix(
       in srgb,
       var(--ds-semantic-color-text-strong) 82%,

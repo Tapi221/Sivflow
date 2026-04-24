@@ -1,4 +1,3 @@
-
 import { useToast } from "@/contexts/ToastContext";
 import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/types";
 import { ExplorerSearchSourceBridge } from "@/features/global-search/components/ExplorerSearchSourceBridge";

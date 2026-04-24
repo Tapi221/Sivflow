@@ -1,4 +1,3 @@
-
 import { useAuthSession } from "@/contexts/AuthContext";
 import type {
   DocumentItem,
@@ -427,11 +426,7 @@ export const PdfWorkspaceProvider = ({
         const activeIndex = baseOrder.indexOf(activePageNumber);
         const overIndex = baseOrder.indexOf(overPageNumber);
 
-        if (
-          activeIndex < 0 ||
-          overIndex < 0 ||
-          activeIndex === overIndex
-        ) {
+        if (activeIndex < 0 || overIndex < 0 || activeIndex === overIndex) {
           return previousOrder;
         }
 

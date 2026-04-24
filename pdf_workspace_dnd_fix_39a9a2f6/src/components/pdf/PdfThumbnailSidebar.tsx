@@ -1,4 +1,3 @@
-
 import {
   closestCenter,
   DndContext,
@@ -228,8 +227,10 @@ const PdfThumbnailTile = ({
   );
 };
 
-interface SortablePdfThumbnailTileProps
-  extends Omit<PdfThumbnailTileProps, "forceRender" | "isDragging"> {
+interface SortablePdfThumbnailTileProps extends Omit<
+  PdfThumbnailTileProps,
+  "forceRender" | "isDragging"
+> {
   onSelect: (pageNumber: number) => void;
 }
 
@@ -298,9 +299,9 @@ export const PdfThumbnailSidebar = () => {
     null,
   );
   const [availableGridWidth, setAvailableGridWidth] = useState(0);
-  const [activeDragPageNumber, setActiveDragPageNumber] = useState<number | null>(
-    null,
-  );
+  const [activeDragPageNumber, setActiveDragPageNumber] = useState<
+    number | null
+  >(null);
 
   const handleGridHostRef = useCallback((node: HTMLDivElement | null) => {
     setGridHostElement((previousNode) =>
@@ -468,7 +469,9 @@ export const PdfThumbnailSidebar = () => {
                           isActive={pageNumber === currentPage}
                           observerRoot={scrollRootRef.current}
                           acquirePage={documentController.acquirePage}
-                          getPageTextContent={documentController.getPageTextContent}
+                          getPageTextContent={
+                            documentController.getPageTextContent
+                          }
                           onPageSize={documentController.setPageSize}
                           onSelect={scrollToPage}
                         />
@@ -485,7 +488,9 @@ export const PdfThumbnailSidebar = () => {
                       pageNumber={activeDragPreviewPageNumber}
                       scale={thumbnailScale}
                       baseSize={
-                        documentController.pageSizes[activeDragPreviewPageNumber] ??
+                        documentController.pageSizes[
+                          activeDragPreviewPageNumber
+                        ] ??
                         firstPageSize ??
                         undefined
                       }
