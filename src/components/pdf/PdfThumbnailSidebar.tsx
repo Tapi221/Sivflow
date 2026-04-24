@@ -24,6 +24,8 @@ import {
   useMemo,
   useRef,
   useState,
+  type MouseEvent,
+  type PointerEvent,
 } from "react";
 import { PdfThumbnailPage } from "./PdfThumbnailPage";
 import { cancelPendingPdfThumbnailRenders } from "./pdfThumbnailRenderQueue";
@@ -51,6 +53,8 @@ const DRAG_CLICK_SUPPRESSION_MS = 220;
 const NAVIGATION_BACKGROUND_PAUSE_MS = 900;
 const OPTIMISTIC_NAVIGATION_CLEAR_MS = 1_400;
 const POINTER_PREVIEW_CLEAR_MS = 650;
+const DRAG_PREVIEW_FALLBACK_IMAGE_WIDTH_PX = THUMBNAIL_PAGE_BOX_WIDTH_PX;
+const DRAG_PREVIEW_FALLBACK_IMAGE_HEIGHT_PX = THUMBNAIL_PAGE_BOX_HEIGHT_PX;
 
 const getRequiredGridWidth = (columnCount: number) => {
   return (
@@ -194,6 +198,71 @@ const applyDocumentDragCursor = () => {
     body.style.cursor = previousBodyCursor;
     documentElement.style.cursor = previousDocumentElementCursor;
   };
+};
+
+interface PdfThumbnailDragPreviewState {
+  pageNumber: number;
+  imageDataUrl: string;
+  imageCssWidthPx: number;
+  imageCssHeightPx: number;
+}
+
+const resolveElementSizePx = ({
+  element,
+  fallbackWidthPx,
+  fallbackHeightPx,
+}: {
+  element: HTMLElement;
+  fallbackWidthPx: number;
+  fallbackHeightPx: number;
+}) => {
+  const rect = element.getBoundingClientRect();
+  const width = rect.width || element.offsetWidth || fallbackWidthPx;
+  const height = rect.height || element.offsetHeight || fallbackHeightPx;
+
+  return {
+    width: Number.isFinite(width) && width > 0 ? width : fallbackWidthPx,
+    height: Number.isFinite(height) && height > 0 ? height : fallbackHeightPx,
+  };
+};
+
+const captureThumbnailCanvasPreview = (
+  pageNumber: number,
+): PdfThumbnailDragPreviewState | null => {
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  const tile = document.querySelector<HTMLElement>(
+    `[data-pdf-thumbnail-tile="${pageNumber}"]`,
+  );
+  const canvas = tile?.querySelector<HTMLCanvasElement>("canvas") ?? null;
+
+  if (!canvas || canvas.width <= 0 || canvas.height <= 0) {
+    return null;
+  }
+
+  try {
+    const imageDataUrl = canvas.toDataURL("image/png");
+    if (!imageDataUrl || imageDataUrl === "data:,") {
+      return null;
+    }
+
+    const imageSize = resolveElementSizePx({
+      element: canvas,
+      fallbackWidthPx: DRAG_PREVIEW_FALLBACK_IMAGE_WIDTH_PX,
+      fallbackHeightPx: DRAG_PREVIEW_FALLBACK_IMAGE_HEIGHT_PX,
+    });
+
+    return {
+      pageNumber,
+      imageDataUrl,
+      imageCssWidthPx: imageSize.width,
+      imageCssHeightPx: imageSize.height,
+    };
+  } catch {
+    return null;
+  }
 };
 
 interface PdfThumbnailPagePreviewProps {
@@ -408,6 +477,7 @@ const PdfThumbnailCardContent = memo(
 PdfThumbnailCardContent.displayName = "PdfThumbnailCardContent";
 
 interface SortablePdfThumbnailTileProps extends PdfThumbnailCardContentProps {
+  hasDragOverlayPreview: boolean;
   onPreviewPage: (pageNumber: number) => void;
   onOpenPage: (pageNumber: number) => void;
   shouldSuppressClick: () => boolean;
@@ -415,6 +485,7 @@ interface SortablePdfThumbnailTileProps extends PdfThumbnailCardContentProps {
 
 const SortablePdfThumbnailTileComponent = ({
   pageNumber,
+  hasDragOverlayPreview,
   onPreviewPage,
   onOpenPage,
   shouldSuppressClick,
@@ -432,7 +503,7 @@ const SortablePdfThumbnailTileComponent = ({
   });
 
   const handlePointerDownCapture = useCallback(
-    (event: React.PointerEvent<HTMLButtonElement>) => {
+    (event: PointerEvent<HTMLButtonElement>) => {
       if (
         event.button !== 0 ||
         event.altKey ||
@@ -449,7 +520,7 @@ const SortablePdfThumbnailTileComponent = ({
   );
 
   const handleClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
+    (event: MouseEvent<HTMLButtonElement>) => {
       if (shouldSuppressClick()) {
         event.preventDefault();
         event.stopPropagation();
@@ -478,6 +549,7 @@ const SortablePdfThumbnailTileComponent = ({
       <button
         type="button"
         aria-label={`ページ ${pageNumber} を開く。ドラッグで順序を変更`}
+        data-pdf-thumbnail-tile={pageNumber}
         className={cn(
           "block w-full touch-none select-none rounded-xl text-left outline-none",
           "cursor-grab focus-visible:ring-2 focus-visible:ring-primary-500/40",
@@ -491,7 +563,7 @@ const SortablePdfThumbnailTileComponent = ({
         <PdfThumbnailCardContent
           {...contentProps}
           pageNumber={pageNumber}
-          isDragging={isDragging}
+          isDragging={isDragging && hasDragOverlayPreview}
         />
       </button>
     </div>
@@ -507,6 +579,7 @@ const SortablePdfThumbnailTile = memo(
     left.renderPriority === right.renderPriority &&
     arePageSizesEqual(left.baseSize, right.baseSize) &&
     left.isActive === right.isActive &&
+    left.hasDragOverlayPreview === right.hasDragOverlayPreview &&
     left.observerRoot === right.observerRoot &&
     left.acquirePage === right.acquirePage &&
     left.onPageSize === right.onPageSize &&
@@ -518,12 +591,12 @@ const SortablePdfThumbnailTile = memo(
 SortablePdfThumbnailTile.displayName = "SortablePdfThumbnailTile";
 
 interface PdfThumbnailDragOverlayProps {
-  pageNumber: number;
+  preview: PdfThumbnailDragPreviewState;
   isActive: boolean;
 }
 
 const PdfThumbnailDragOverlay = memo(
-  ({ pageNumber, isActive }: PdfThumbnailDragOverlayProps) => {
+  ({ preview, isActive }: PdfThumbnailDragOverlayProps) => {
     return (
       <div
         className="pointer-events-none select-none"
@@ -536,12 +609,24 @@ const PdfThumbnailDragOverlay = memo(
           )}
         >
           <div
-            className="rounded-lg bg-slate-100"
+            className="flex items-center justify-center overflow-hidden rounded-lg bg-slate-100"
             style={{
               width: `${THUMBNAIL_PAGE_BOX_WIDTH_PX}px`,
               height: `${THUMBNAIL_PAGE_BOX_HEIGHT_PX}px`,
             }}
-          />
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              src={preview.imageDataUrl}
+              className="block select-none"
+              style={{
+                width: `${preview.imageCssWidthPx}px`,
+                height: `${preview.imageCssHeightPx}px`,
+              }}
+            />
+          </div>
         </div>
         <div
           className={cn(
@@ -549,7 +634,7 @@ const PdfThumbnailDragOverlay = memo(
             isActive ? "font-semibold text-slate-900" : "text-slate-500",
           )}
         >
-          {pageNumber}
+          {preview.pageNumber}
         </div>
       </div>
     );
@@ -599,6 +684,8 @@ export const PdfThumbnailSidebar = () => {
     null,
   );
   const [activeDragPage, setActiveDragPage] = useState<number | null>(null);
+  const [dragPreview, setDragPreview] =
+    useState<PdfThumbnailDragPreviewState | null>(null);
   const [isNavigationPriorityMode, setIsNavigationPriorityMode] =
     useState(false);
 
@@ -844,6 +931,11 @@ export const PdfThumbnailSidebar = () => {
       clearPointerPreviewTimer();
       setPointerPreviewPage(null);
       setActiveDragPage(activePageNumber);
+      setDragPreview(
+        activePageNumber === null
+          ? null
+          : captureThumbnailCanvasPreview(activePageNumber),
+      );
       setIsNavigationPriorityMode(true);
       cancelPendingPdfThumbnailRenders({
         maxPriority: INITIAL_PAGE_RENDER_PRIORITY,
@@ -858,6 +950,7 @@ export const PdfThumbnailSidebar = () => {
     suppressFollowingClick();
     releaseDragCursor();
     setActiveDragPage(null);
+    setDragPreview(null);
     setIsNavigationPriorityMode(false);
   }, [releaseDragCursor, suppressFollowingClick]);
 
@@ -869,6 +962,7 @@ export const PdfThumbnailSidebar = () => {
       suppressFollowingClick();
       releaseDragCursor();
       setActiveDragPage(null);
+      setDragPreview(null);
       setIsNavigationPriorityMode(false);
 
       if (
@@ -991,6 +1085,10 @@ export const PdfThumbnailSidebar = () => {
                           })}
                           baseSize={pageSizes[pageNumber]}
                           isActive={isActive}
+                          hasDragOverlayPreview={
+                            activeDragPage === pageNumber &&
+                            dragPreview?.pageNumber === pageNumber
+                          }
                           observerRoot={scrollRootRef.current}
                           acquirePage={acquirePage}
                           onPageSize={setPageSize}
@@ -1005,10 +1103,10 @@ export const PdfThumbnailSidebar = () => {
               </div>
 
               <DragOverlay adjustScale={false} dropAnimation={null} zIndex={40}>
-                {activeDragPage !== null ? (
+                {dragPreview ? (
                   <PdfThumbnailDragOverlay
-                    pageNumber={activeDragPage}
-                    isActive={activeDragPage === currentPage}
+                    preview={dragPreview}
+                    isActive={dragPreview.pageNumber === currentPage}
                   />
                 ) : null}
               </DragOverlay>
