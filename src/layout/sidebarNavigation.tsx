@@ -10,6 +10,7 @@ export type NavItem = {
   to: string;
   label: string;
   icon: React.ReactNode;
+  disabled?: boolean;
 };
 
 export type NavSection = {
@@ -143,4 +144,5 @@ export const NAV_SECTIONS: NavSection[] = [
   { title: "メイン", items: PRIMARY_NAV_ITEMS },
   { title: "整理", items: SECONDARY_NAV_ITEMS },
 ];
+
 
