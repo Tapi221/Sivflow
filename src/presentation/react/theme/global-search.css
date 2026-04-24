@@ -92,7 +92,7 @@
     max-height: min(456px, calc(100vh - 172px));
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 4px 0 6px;
+    padding: 6px 4px 8px;
     background: #ffffff;
   }
 
@@ -112,59 +112,68 @@
   }
 
   .gs-row {
-    min-height: 32px;
-    margin: 0 4px;
-    padding: 0 8px;
-    gap: 8px;
-    border-radius: 4px;
-    background: transparent;
-    color: rgb(55, 53, 47);
+    margin: 0;
     transition: none;
   }
 
   .gs-row:hover {
-    background: rgba(55, 53, 47, 0.06);
+    background: var(
+      --sidebar-hover-bg,
+      var(--ds-semantic-color-background-sidebar-active)
+    );
+    color: var(--sidebar-text, var(--ds-semantic-color-text-primary));
   }
 
   .gs-row[data-selected="true"] {
-    background: rgba(55, 53, 47, 0.08);
+    background: var(
+      --sidebar-active-bg,
+      var(--ds-semantic-color-background-sidebar-active)
+    );
+    color: var(--sidebar-text, var(--ds-semantic-color-text-primary));
+  }
+
+  .gs-row:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 1px
+      var(--sidebar-border, var(--ds-semantic-color-border-default));
+  }
+
+  .gs-row__icon-slot {
+    color: var(
+      --sidebar-text-muted,
+      var(--ds-semantic-color-text-secondary)
+    );
   }
 
   .gs-row__icon {
-    display: inline-flex;
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    color: rgba(55, 53, 47, 0.5);
+    color: currentColor;
   }
 
-  .gs-row[data-selected="true"] .gs-row__icon {
-    color: rgba(55, 53, 47, 0.7);
+  .gs-row:hover .gs-row__icon-slot,
+  .gs-row[data-selected="true"] .gs-row__icon-slot {
+    color: var(
+      --sidebar-icon-active,
+      var(--sidebar-text, var(--ds-semantic-color-text-primary))
+    );
+  }
+
+  .gs-row__content {
+    color: inherit;
   }
 
   .gs-row__title {
-    min-width: 0;
-    flex: 1 1 auto;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: rgb(55, 53, 47);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.35;
+    color: var(--sidebar-text, var(--ds-semantic-color-text-primary));
   }
 
   .gs-row__timestamp {
     flex: 0 0 auto;
-    color: rgba(55, 53, 47, 0.45);
+    padding-left: 8px;
+    color: var(
+      --sidebar-text-muted,
+      var(--ds-semantic-color-text-secondary)
+    );
     font-size: 12px;
     line-height: 1;
-  }
-
-  .gs-row__enter-badge {
-    display: none;
   }
 
   .gs-empty {
