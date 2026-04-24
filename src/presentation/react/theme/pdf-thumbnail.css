@@ -19,13 +19,9 @@
       opacity var(--ds-semantic-motion-interactive);
   }
 
-  button[data-pdf-thumbnail-tile]:hover > div:first-child {
-    background: var(--ds-semantic-color-background-sidebar-active) !important;
-    background-color: var(--ds-semantic-color-background-sidebar-active) !important;
-  }
-
+  button[data-pdf-thumbnail-tile]:hover > div:first-child,
   button[data-pdf-thumbnail-tile]:focus-visible > div:first-child {
-    background: var(--ds-semantic-color-background-sidebar-active) !important;
-    background-color: var(--ds-semantic-color-background-sidebar-active) !important;
+    background: var(--pdf-thumbnail-folder-row-hover-bg, #f3f5ef) !important;
+    background-color: var(--pdf-thumbnail-folder-row-hover-bg, #f3f5ef) !important;
   }
 }
