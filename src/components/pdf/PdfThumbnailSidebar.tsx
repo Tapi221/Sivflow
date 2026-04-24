@@ -17,7 +17,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { GripVertical } from "@/ui/icons";
 import { PdfPage } from "./PdfPage";
 import { usePdfWorkspace } from "./usePdfWorkspace";
 import type {
@@ -277,33 +276,25 @@ const SortablePdfThumbnailTile = ({
         zIndex: isDragging ? 2 : 1,
       }}
     >
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => onOpenPage(pageNumber)}
-          className="block w-full text-left outline-none"
-        >
-          <PdfThumbnailCardContent
-            {...contentProps}
-            pageNumber={pageNumber}
-            isDragging={isDragging}
-          />
-        </button>
-
-        <button
-          type="button"
-          aria-label={`ページ ${pageNumber} の順序を変更`}
-          className={cn(
-            "absolute right-1 top-1 z-10 rounded-md border border-slate-200 bg-white/90 p-1 text-slate-400 shadow-sm transition-colors",
-            "hover:text-slate-700",
-            isDragging && "cursor-grabbing",
-          )}
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical className="h-3.5 w-3.5 cursor-grab" />
-        </button>
-      </div>
+      <button
+        type="button"
+        aria-label={`ページ ${pageNumber} を開く。ドラッグで順序を変更`}
+        title="ドラッグで順序を変更"
+        className={cn(
+          "block w-full touch-none select-none rounded-xl text-left outline-none transition-transform",
+          "focus-visible:ring-2 focus-visible:ring-primary-500/40",
+          isDragging ? "cursor-grabbing" : "cursor-grab hover:-translate-y-0.5",
+        )}
+        {...attributes}
+        {...listeners}
+        onClick={() => onOpenPage(pageNumber)}
+      >
+        <PdfThumbnailCardContent
+          {...contentProps}
+          pageNumber={pageNumber}
+          isDragging={isDragging}
+        />
+      </button>
     </div>
   );
 };
@@ -402,6 +393,11 @@ export const PdfThumbnailSidebar = () => {
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
+      keyboardCodes: {
+        start: ["Space"],
+        cancel: ["Escape"],
+        end: ["Space"],
+      },
     }),
   );
 
