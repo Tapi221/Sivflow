@@ -401,6 +401,7 @@ export const FolderTreeWithCards = ({
         kind: "cardSet" as const,
         id: cardSet.id,
         name: cardSet.name?.trim() || "無題のセット",
+        contentCount: getCardSetItems(cardSet.id).length,
       })),
       ...navigationItems.map((item: ExplorerItem) => {
         if (item.type === "document") {
@@ -426,6 +427,7 @@ export const FolderTreeWithCards = ({
     ],
     [
       getFolderContentCount,
+      getCardSetItems,
       navigationFolderPanels,
       navigationCardSets,
       navigationItems,

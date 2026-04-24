@@ -260,10 +260,15 @@ export const RootFolderPanelRow = ({
 
   const hasContextMenu = resolvedMenuActions.length > 0;
 
+  const contentCount =
+    entry.kind === "folder" || entry.kind === "cardSet"
+      ? entry.contentCount
+      : undefined;
+
   const contentCountNode =
-    entry.kind === "folder" && typeof entry.contentCount === "number" ? (
+    typeof contentCount === "number" ? (
       <span className="ds-list-item__subtitle ml-auto shrink-0 pr-1 text-[11px] font-normal tabular-nums leading-none opacity-60">
-        {entry.contentCount}
+        {contentCount}
       </span>
     ) : null;
 
