@@ -44,67 +44,75 @@ interface BuildExplorerCreateMenuActionsParams {
 }
 
 const createMenuIconClassName = "h-[15px] w-[15px] shrink-0";
-const folderContextMenuIconClassName = "h-5 w-5 shrink-0";
+const folderContextMenuIconClassName = "h-[15px] w-[15px] shrink-0";
 
 const FolderContextFolderIcon = () => (
   <svg
+    width="15"
+    height="15"
     viewBox="0 0 24 24"
-    className={folderContextMenuIconClassName}
     fill="none"
     stroke="currentColor"
-    strokeWidth={1.8}
+    strokeWidth={1.6}
     strokeLinecap="round"
     strokeLinejoin="round"
+    className={folderContextMenuIconClassName}
     aria-hidden="true"
   >
-    <path d="M3 7.5a2 2 0 0 1 2-2h4.4a2 2 0 0 1 1.5.68l1.2 1.32H19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9Z" />
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
   </svg>
 );
 
-const FolderContextPlusIcon = () => (
+const FolderContextCardSetIcon = () => (
   <svg
+    width="15"
+    height="15"
     viewBox="0 0 24 24"
-    className={folderContextMenuIconClassName}
     fill="none"
     stroke="#2f6fff"
-    strokeWidth={2}
+    strokeWidth={1.8}
     strokeLinecap="round"
     strokeLinejoin="round"
+    className={folderContextMenuIconClassName}
     aria-hidden="true"
   >
-    <line x1="12" y1="5" x2="12" y2="19" />
-    <line x1="5" y1="12" x2="19" y2="12" />
+    <line x1="12" y1="4" x2="12" y2="20" />
+    <line x1="4" y1="12" x2="20" y2="12" />
   </svg>
 );
 
 const FolderContextRenameIcon = () => (
   <svg
+    width="15"
+    height="15"
     viewBox="0 0 24 24"
-    className={folderContextMenuIconClassName}
     fill="none"
     stroke="currentColor"
-    strokeWidth={1.8}
+    strokeWidth={1.6}
     strokeLinecap="round"
     strokeLinejoin="round"
+    className={folderContextMenuIconClassName}
     aria-hidden="true"
   >
-    <rect x="6.5" y="6.5" width="11" height="11" rx="1" />
+    <rect x="6" y="6" width="12" height="12" rx="1" />
   </svg>
 );
 
 const FolderContextTrashIcon = () => (
   <svg
+    width="15"
+    height="15"
     viewBox="0 0 24 24"
-    className={folderContextMenuIconClassName}
     fill="none"
     stroke="currentColor"
-    strokeWidth={1.8}
+    strokeWidth={1.6}
     strokeLinecap="round"
     strokeLinejoin="round"
+    className={folderContextMenuIconClassName}
     aria-hidden="true"
   >
     <polyline points="3 6 5 6 21 6" />
-    <path d="m19 6-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
     <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
     <line x1="10" y1="11" x2="10" y2="17" />
     <line x1="14" y1="11" x2="14" y2="17" />
@@ -291,7 +299,7 @@ export const buildFolderMenuActions = ({
     actions.push({
       id: "create-card-set",
       label: "新規カードセット",
-      icon: <FolderContextPlusIcon />,
+      icon: <FolderContextCardSetIcon />,
       onSelect: onCreateCardSet,
     });
   }
@@ -300,7 +308,7 @@ export const buildFolderMenuActions = ({
     actions.push({
       id: "bulk-tag",
       label: "タグを一括付与",
-      icon: <Tag className="h-5 w-5 text-violet-500" />,
+      icon: <Tag className="h-4 w-4 text-violet-500" />,
       onSelect: onBulkTag,
     });
   }
