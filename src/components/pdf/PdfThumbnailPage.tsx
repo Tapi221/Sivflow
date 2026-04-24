@@ -1,24 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  commitPdfBitmapToCanvas,
-  createDetachedPdfCanvasSurface,
-  prepareDetachedPdfCanvasSurfaceForRender,
-} from "./pdfCanvasRenderUtils";
-import {
-  getCachedPdfPageBitmap,
-  setCachedPdfPageBitmap,
-} from "./pdfPageBitmapCache";
-import { resolvePdfRenderBackingStore } from "./pdfRenderQuality";
 import type {
   PageSize,
+  PdfJsDocument,
   PdfJsPage,
   PdfJsRenderTask,
-  PdfJsViewport,
 } from "./pdfViewerTypes";
-import { isPdfAbortError } from "./pdfViewerTypes";
 
 interface PdfThumbnailPageProps {
   documentKey: string;
+  pdf: PdfJsDocument;
   pageNumber: number;
   boxWidthPx: number;
   boxHeightPx: number;
@@ -29,57 +19,21 @@ interface PdfThumbnailPageProps {
   onPageSize: (pageNumber: number, size: PageSize) => void;
 }
 
-type ThumbnailPageSizeState = {
-  pageIdentity: string;
-  size: PageSize | null;
-};
-
-type ThumbnailContainLayout = {
-  scale: number;
-  cssWidthPx: number;
-  cssHeightPx: number;
-};
-
-const OPAQUE_THUMBNAIL_CANVAS = false;
-
-const buildPageIdentity = (documentKey: string, pageNumber: number) =>
-  `${documentKey}::thumbnail::${pageNumber}`;
-
-const buildRenderIdentity = ({
-  documentKey,
-  pageNumber,
-  boxWidthPx,
-  boxHeightPx,
-  scale,
-  devicePixelRatio,
-}: {
-  documentKey: string;
-  pageNumber: number;
-  boxWidthPx: number;
-  boxHeightPx: number;
-  scale: number;
-  devicePixelRatio: number;
-}) =>
-  [
-    documentKey,
-    "thumbnail",
-    pageNumber,
-    `${boxWidthPx}x${boxHeightPx}`,
-    scale.toFixed(6),
-    devicePixelRatio.toFixed(3),
-  ].join("::");
-
-const readWindowDevicePixelRatio = () => {
+const readDevicePixelRatio = () => {
   if (typeof window === "undefined") {
     return 1;
   }
 
-  const rawDevicePixelRatio = window.devicePixelRatio;
-  if (!Number.isFinite(rawDevicePixelRatio) || rawDevicePixelRatio <= 0) {
-    return 1;
+  const value = window.devicePixelRatio;
+  return Number.isFinite(value) && value > 0 ? value : 1;
+};
+
+const normalizePositiveFinite = (value: number, fallback: number) => {
+  if (!Number.isFinite(value) || value <= 0) {
+    return fallback;
   }
 
-  return rawDevicePixelRatio;
+  return value;
 };
 
 const resolveContainLayout = ({
@@ -90,67 +44,48 @@ const resolveContainLayout = ({
   pageSize: PageSize;
   boxWidthPx: number;
   boxHeightPx: number;
-}): ThumbnailContainLayout | null => {
-  if (
-    pageSize.width <= 0 ||
-    pageSize.height <= 0 ||
-    boxWidthPx <= 0 ||
-    boxHeightPx <= 0
-  ) {
-    return null;
-  }
-
-  const scale = Math.min(boxWidthPx / pageSize.width, boxHeightPx / pageSize.height);
-  if (!Number.isFinite(scale) || scale <= 0) {
-    return null;
-  }
+}) => {
+  const safePageWidthPx = normalizePositiveFinite(pageSize.width, boxWidthPx);
+  const safePageHeightPx = normalizePositiveFinite(pageSize.height, boxHeightPx);
+  const widthScale = boxWidthPx / safePageWidthPx;
+  const heightScale = boxHeightPx / safePageHeightPx;
+  const scale = Math.min(widthScale, heightScale);
 
   return {
     scale,
-    cssWidthPx: Math.max(1, pageSize.width * scale),
-    cssHeightPx: Math.max(1, pageSize.height * scale),
+    cssWidthPx: Math.max(1, safePageWidthPx * scale),
+    cssHeightPx: Math.max(1, safePageHeightPx * scale),
   };
 };
 
-const createFallbackPageSize = ({
+const buildRenderIdentity = ({
+  documentKey,
+  pageNumber,
+  scale,
   boxWidthPx,
   boxHeightPx,
-}: {
-  boxWidthPx: number;
-  boxHeightPx: number;
-}): PageSize => ({
-  width: Math.max(1, boxWidthPx),
-  height: Math.max(1, boxHeightPx),
-});
-
-const commitThumbnailBitmap = ({
-  canvas,
-  bitmap,
-  viewport,
   devicePixelRatio,
 }: {
-  canvas: HTMLCanvasElement;
-  bitmap: HTMLCanvasElement | ImageBitmap;
-  viewport: PdfJsViewport;
+  documentKey: string;
+  pageNumber: number;
+  scale: number;
+  boxWidthPx: number;
+  boxHeightPx: number;
   devicePixelRatio: number;
 }) => {
-  const renderBackingStore = resolvePdfRenderBackingStore({
-    viewportWidthPx: viewport.width,
-    viewportHeightPx: viewport.height,
-    devicePixelRatio,
-  });
-
-  return commitPdfBitmapToCanvas({
-    targetCanvas: canvas,
-    bitmap,
-    viewport,
-    renderBackingStore,
-    opaqueCanvas: OPAQUE_THUMBNAIL_CANVAS,
-  });
+  return [
+    documentKey,
+    pageNumber,
+    scale.toFixed(6),
+    boxWidthPx,
+    boxHeightPx,
+    devicePixelRatio.toFixed(3),
+  ].join("::");
 };
 
 export const PdfThumbnailPage = ({
   documentKey,
+  pdf: _pdf,
   pageNumber,
   boxWidthPx,
   boxHeightPx,
@@ -159,300 +94,162 @@ export const PdfThumbnailPage = ({
   onPageSize,
 }: PdfThumbnailPageProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const canvasRenderPassIdRef = useRef(0);
-  const pageIdentity = useMemo(
-    () => buildPageIdentity(documentKey, pageNumber),
-    [documentKey, pageNumber],
+  const renderPassRef = useRef(0);
+  const lastRenderIdentityRef = useRef<string | null>(null);
+  const [measuredSize, setMeasuredSize] = useState<PageSize | null>(
+    baseSize ?? null,
   );
 
-  const [renderDevicePixelRatio, setRenderDevicePixelRatio] = useState<number>(
-    () => readWindowDevicePixelRatio(),
-  );
-  const [measuredPageState, setMeasuredPageState] =
-    useState<ThumbnailPageSizeState>({
-      pageIdentity: "",
-      size: null,
-    });
-
-  const resolvedPageSize =
-    baseSize ??
-    (measuredPageState.pageIdentity === pageIdentity
-      ? measuredPageState.size
-      : null);
+  const resolvedSize = baseSize ?? measuredSize;
 
   const layout = useMemo(() => {
-    if (!resolvedPageSize) {
+    if (!resolvedSize) {
       return null;
     }
 
     return resolveContainLayout({
-      pageSize: resolvedPageSize,
+      pageSize: resolvedSize,
       boxWidthPx,
       boxHeightPx,
     });
-  }, [boxHeightPx, boxWidthPx, resolvedPageSize]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    let animationFrameId: number | null = null;
-
-    const syncRenderDevicePixelRatio = () => {
-      if (animationFrameId !== null) {
-        window.cancelAnimationFrame(animationFrameId);
-      }
-
-      animationFrameId = window.requestAnimationFrame(() => {
-        animationFrameId = null;
-
-        const nextDevicePixelRatio = readWindowDevicePixelRatio();
-        setRenderDevicePixelRatio((previousDevicePixelRatio) =>
-          Math.abs(previousDevicePixelRatio - nextDevicePixelRatio) < 0.001
-            ? previousDevicePixelRatio
-            : nextDevicePixelRatio,
-        );
-      });
-    };
-
-    syncRenderDevicePixelRatio();
-
-    window.addEventListener("resize", syncRenderDevicePixelRatio, {
-      passive: true,
-    });
-    window.visualViewport?.addEventListener(
-      "resize",
-      syncRenderDevicePixelRatio,
-    );
-
-    return () => {
-      window.removeEventListener("resize", syncRenderDevicePixelRatio);
-      window.visualViewport?.removeEventListener(
-        "resize",
-        syncRenderDevicePixelRatio,
-      );
-
-      if (animationFrameId !== null) {
-        window.cancelAnimationFrame(animationFrameId);
-      }
-    };
-  }, []);
+  }, [boxHeightPx, boxWidthPx, resolvedSize]);
 
   useEffect(() => {
     if (baseSize) {
+      setMeasuredSize((previousSize) => {
+        if (
+          previousSize &&
+          previousSize.width === baseSize.width &&
+          previousSize.height === baseSize.height
+        ) {
+          return previousSize;
+        }
+
+        return baseSize;
+      });
       return;
     }
 
-    if (
-      measuredPageState.pageIdentity === pageIdentity &&
-      measuredPageState.size !== null
-    ) {
-      return;
-    }
-
-    let cancelled = false;
+    let disposed = false;
 
     void acquirePage(pageNumber)
       .then(({ page, release }) => {
         try {
-          if (cancelled) {
+          if (disposed) {
             return;
           }
 
           const viewport = page.getViewport({ scale: 1 });
-          const nextSize = { width: viewport.width, height: viewport.height };
+          const nextSize = {
+            width: viewport.width,
+            height: viewport.height,
+          };
 
-          setMeasuredPageState({
-            pageIdentity,
-            size: nextSize,
-          });
+          setMeasuredSize(nextSize);
           onPageSize(pageNumber, nextSize);
         } finally {
           release();
         }
       })
       .catch(() => {
-        if (cancelled) {
+        if (disposed) {
           return;
         }
 
-        const fallbackSize = createFallbackPageSize({ boxWidthPx, boxHeightPx });
-        setMeasuredPageState({
-          pageIdentity,
-          size: fallbackSize,
-        });
+        const fallbackSize = { width: boxWidthPx, height: boxHeightPx };
+        setMeasuredSize(fallbackSize);
         onPageSize(pageNumber, fallbackSize);
       });
 
     return () => {
-      cancelled = true;
+      disposed = true;
     };
-  }, [
-    acquirePage,
-    baseSize,
-    boxHeightPx,
-    boxWidthPx,
-    measuredPageState.pageIdentity,
-    measuredPageState.size,
-    onPageSize,
-    pageIdentity,
-    pageNumber,
-  ]);
+  }, [acquirePage, baseSize, boxHeightPx, boxWidthPx, onPageSize, pageNumber]);
 
   useEffect(() => {
-    if (!layout || typeof window === "undefined") {
+    if (!layout) {
       return;
     }
 
-    if (!canvasRef.current) {
+    const canvas = canvasRef.current;
+    if (!canvas) {
       return;
     }
 
-    const renderPassId = canvasRenderPassIdRef.current + 1;
-    canvasRenderPassIdRef.current = renderPassId;
-
-    let disposed = false;
-    let renderTask: PdfJsRenderTask | null = null;
-    let renderStartRafId: number | null = null;
-    let activePageRelease: (() => void) | null = null;
-
-    const releasePage = () => {
-      if (!activePageRelease) {
-        return;
-      }
-
-      const release = activePageRelease;
-      activePageRelease = null;
-      release();
-    };
-
-    const isStale = () =>
-      disposed || canvasRenderPassIdRef.current !== renderPassId;
-
+    const devicePixelRatio = readDevicePixelRatio();
     const renderIdentity = buildRenderIdentity({
       documentKey,
       pageNumber,
+      scale: layout.scale,
       boxWidthPx,
       boxHeightPx,
-      scale: layout.scale,
-      devicePixelRatio: renderDevicePixelRatio,
+      devicePixelRatio,
     });
 
+    canvas.style.width = `${layout.cssWidthPx}px`;
+    canvas.style.height = `${layout.cssHeightPx}px`;
+
+    if (lastRenderIdentityRef.current === renderIdentity) {
+      return;
+    }
+
+    lastRenderIdentityRef.current = renderIdentity;
+
+    const renderPass = renderPassRef.current + 1;
+    renderPassRef.current = renderPass;
+
+    let disposed = false;
+    let renderTask: PdfJsRenderTask | null = null;
+    let releasePage: (() => void) | null = null;
+
+    const isStale = () => disposed || renderPassRef.current !== renderPass;
+
     const run = async () => {
-      try {
-        const pageLease = await acquirePage(pageNumber);
-        if (isStale()) {
-          pageLease.release();
-          return;
-        }
+      const pageLease = await acquirePage(pageNumber);
 
-        activePageRelease = pageLease.release;
-        const page = pageLease.page;
-        const viewport = page.getViewport({ scale: layout.scale });
-        const targetCanvas = canvasRef.current;
-        if (!targetCanvas) {
-          return;
-        }
-
-        const renderBackingStore = resolvePdfRenderBackingStore({
-          viewportWidthPx: viewport.width,
-          viewportHeightPx: viewport.height,
-          devicePixelRatio: renderDevicePixelRatio,
-        });
-
-        const cachedBitmap = getCachedPdfPageBitmap(renderIdentity);
-        if (
-          cachedBitmap &&
-          cachedBitmap.width === renderBackingStore.canvasWidthPx &&
-          cachedBitmap.height === renderBackingStore.canvasHeightPx
-        ) {
-          commitThumbnailBitmap({
-            canvas: targetCanvas,
-            bitmap: cachedBitmap,
-            viewport,
-            devicePixelRatio: renderDevicePixelRatio,
-          });
-          return;
-        }
-
-        const renderSurface = createDetachedPdfCanvasSurface({
-          renderBackingStore,
-          opaqueCanvas: OPAQUE_THUMBNAIL_CANVAS,
-        });
-
-        if (!renderSurface) {
-          return;
-        }
-
-        prepareDetachedPdfCanvasSurfaceForRender({
-          surface: renderSurface,
-          renderBackingStore,
-          opaqueCanvas: OPAQUE_THUMBNAIL_CANVAS,
-        });
-
-        renderTask = page.render({
-          canvasContext: renderSurface.context,
-          viewport,
-          intent: "display",
-        });
-
-        await renderTask.promise;
-        if (isStale()) {
-          return;
-        }
-
-        const didCommit = commitThumbnailBitmap({
-          canvas: targetCanvas,
-          bitmap: renderSurface.canvas,
-          viewport,
-          devicePixelRatio: renderDevicePixelRatio,
-        });
-
-        if (!didCommit || isStale()) {
-          return;
-        }
-
-        void setCachedPdfPageBitmap(
-          renderIdentity,
-          documentKey,
-          renderSurface.canvas,
-        ).catch(() => {
-          // noop
-        });
-      } catch (errorValue: unknown) {
-        if (isStale() || isPdfAbortError(errorValue)) {
-          return;
-        }
-
-        console.warn("[PdfThumbnailPage] render error", {
-          documentKey,
-          pageNumber,
-          error: errorValue,
-        });
-      } finally {
-        releasePage();
-      }
-    };
-
-    renderStartRafId = window.requestAnimationFrame(() => {
       if (isStale()) {
+        pageLease.release();
         return;
       }
 
-      renderStartRafId = null;
-      void run();
+      releasePage = pageLease.release;
+
+      const page = pageLease.page;
+      const viewport = page.getViewport({ scale: layout.scale });
+      const canvasWidthPx = Math.max(1, Math.ceil(layout.cssWidthPx * devicePixelRatio));
+      const canvasHeightPx = Math.max(1, Math.ceil(layout.cssHeightPx * devicePixelRatio));
+
+      canvas.width = canvasWidthPx;
+      canvas.height = canvasHeightPx;
+
+      const context = canvas.getContext("2d", { alpha: true });
+      if (!context) {
+        return;
+      }
+
+      context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+      context.clearRect(0, 0, layout.cssWidthPx, layout.cssHeightPx);
+
+      renderTask = page.render({
+        canvasContext: context,
+        viewport,
+        intent: "display",
+      });
+
+      await renderTask.promise;
+    };
+
+    void run().catch(() => {
+      if (lastRenderIdentityRef.current === renderIdentity) {
+        lastRenderIdentityRef.current = null;
+      }
     });
 
     return () => {
       disposed = true;
 
-      if (canvasRenderPassIdRef.current === renderPassId) {
-        canvasRenderPassIdRef.current += 1;
-      }
-
-      if (renderStartRafId !== null) {
-        window.cancelAnimationFrame(renderStartRafId);
+      if (renderPassRef.current === renderPass) {
+        renderPassRef.current += 1;
       }
 
       try {
@@ -461,17 +258,9 @@ export const PdfThumbnailPage = ({
         // noop
       }
 
-      releasePage();
+      releasePage?.();
     };
-  }, [
-    acquirePage,
-    boxHeightPx,
-    boxWidthPx,
-    documentKey,
-    layout,
-    pageNumber,
-    renderDevicePixelRatio,
-  ]);
+  }, [acquirePage, boxHeightPx, boxWidthPx, documentKey, layout, pageNumber]);
 
   return (
     <div
