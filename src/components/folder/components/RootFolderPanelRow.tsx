@@ -262,7 +262,7 @@ export const RootFolderPanelRow = ({
 
   const contentCountNode =
     entry.kind === "folder" && typeof entry.contentCount === "number" ? (
-      <span className="ds-list-item__subtitle ml-auto shrink-0 pr-1 text-[11px] font-normal tabular-nums leading-none">
+      <span className="ds-list-item__subtitle ml-auto shrink-0 pr-1 text-[11px] font-normal tabular-nums leading-none opacity-60">
         {entry.contentCount}
       </span>
     ) : null;
