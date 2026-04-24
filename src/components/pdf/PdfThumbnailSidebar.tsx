@@ -357,35 +357,10 @@ export const PdfThumbnailSidebar = () => {
     );
   }, [firstPageSize]);
 
-  const statusMessage = useMemo(() => {
-    if (documentController.error) {
-      return documentController.error;
-    }
-
-    if (sourceUnavailable) {
-      if (localDataStatus === "loading") {
-        return "ローカルPDFを復元中...";
-      }
-
-      if (localDataStatus === "failed") {
-        return "PDFの復元に失敗しました。";
-      }
-
-      return "PDFソースがありません。";
-    }
-
-    if (documentController.loading && documentController.numPages === 0) {
-      return "サムネイルを読み込み中...";
-    }
-
-    return null;
-  }, [
-    documentController.error,
-    documentController.loading,
-    documentController.numPages,
-    localDataStatus,
-    sourceUnavailable,
-  ]);
+  const hasBlockingStatus =
+    Boolean(documentController.error) ||
+    sourceUnavailable ||
+    (documentController.loading && documentController.numPages === 0);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -447,9 +422,9 @@ export const PdfThumbnailSidebar = () => {
     [scrollToPage],
   );
 
-  if (!documentController.doc || statusMessage) {
-  return null;
-}
+  if (!documentController.doc || hasBlockingStatus) {
+    return null;
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-transparent">
