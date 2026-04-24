@@ -37,6 +37,7 @@ import { SectionListBlankPane } from "@/components/folder/components/SectionList
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
 import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
 import { PdfThumbnailSidebar } from "@/components/pdf/PdfThumbnailSidebar";
+import { APP_DESKTOP_TOP_INSET_PX } from "@/platform/presentation/shellMetrics";
 import { PdfWorkspaceProvider } from "@/components/pdf/PdfWorkspaceProvider";
 import { TreeViewTabContent } from "@/components/folder/components/TreeViewTabContent";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -567,7 +568,14 @@ const TreeViewLayout = ({
         {sidebarContent}
       </TreeViewSidebar>
 
-      {isSectionListMode ? <SectionListBlankPane /> : null}
+      {isSectionListMode ? (
+        <SectionListBlankPane
+          sidebarWidth={isSidebarOpen ? renderedSidebarWidth : 0}
+          topOffsetPx={APP_DESKTOP_TOP_INSET_PX}
+          leftInsetPx={12}
+          rightInsetPx={12}
+        />
+      ) : null}
 
       <TreeViewMainPane
         showMobileDetail={showMobileDetail}
