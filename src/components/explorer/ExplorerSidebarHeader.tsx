@@ -14,7 +14,6 @@ interface ExplorerSidebarHeaderProps {
   allTags: string[];
   onOpenBookmarks?: () => void | Promise<void>;
   onOpenOutline?: () => void | Promise<void>;
-  onOpenSettings?: () => void | Promise<void>;
   onCreateRootFolder?: () => void | Promise<void>;
   onCreateCardSet?: () => void | Promise<void>;
   onCreateCard?: () => void | Promise<void>;
@@ -63,11 +62,13 @@ const SettingsIcon = ({ size = 16, ...props }: UiIconProps) => (
 const iconButtonClassName =
   "inline-flex h-7 w-7 items-center justify-center rounded-lg border-0 bg-transparent text-[rgba(107,114,128,0.92)] transition-colors hover:bg-[#f9fafb] hover:text-[#4b5563]";
 
+const passiveIconClassName =
+  "inline-flex h-7 w-7 items-center justify-center rounded-lg border-0 bg-transparent text-[rgba(107,114,128,0.92)]";
+
 export const ExplorerSidebarHeader = ({
   allTags,
   onOpenBookmarks,
   onOpenOutline,
-  onOpenSettings,
   onCreateRootFolder,
   onCreateCardSet,
   onCreateCard,
@@ -202,19 +203,9 @@ export const ExplorerSidebarHeader = ({
           className="h-7 w-7 rounded-lg border-0 bg-transparent text-[#888780] transition-colors hover:bg-[#f9fafb] hover:text-[#888780]"
         />
 
-        {onOpenSettings ? (
-          <button
-            type="button"
-            title="設定"
-            aria-label="設定を開く"
-            className={iconButtonClassName}
-            onClick={() => {
-              void onOpenSettings();
-            }}
-          >
-            <SettingsIcon className="h-3.5 w-3.5" />
-          </button>
-        ) : null}
+        <span title="設定" aria-label="設定" className={passiveIconClassName}>
+          <SettingsIcon className="h-3.5 w-3.5" />
+        </span>
       </div>
     </div>
   );
