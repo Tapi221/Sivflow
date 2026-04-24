@@ -33,6 +33,7 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { SectionListBlankPane } from "@/components/folder/components/SectionListBlankPane";
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
 import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
 import { PdfThumbnailSidebar } from "@/components/pdf/PdfThumbnailSidebar";
@@ -565,6 +566,8 @@ const TreeViewLayout = ({
         {sidebarContent}
       </TreeViewSidebar>
 
+      {isSectionListMode ? <SectionListBlankPane /> : null}
+
       <TreeViewMainPane
         showMobileDetail={showMobileDetail}
         hideOnSectionList={isSectionListMode}
@@ -631,4 +634,5 @@ const TreeViewLayout = ({
 };
 
 export default TreeViewLayout;
+
 
