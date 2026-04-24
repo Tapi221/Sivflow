@@ -8,6 +8,10 @@ export interface PdfThumbnailQueuedRender<T> {
   cancel: () => void;
 }
 
+export interface CancelPendingPdfThumbnailRendersOptions {
+  maxPriority?: number;
+}
+
 interface PdfThumbnailQueuedRenderEntry<T> {
   id: number;
   priority: number;
@@ -22,6 +26,7 @@ interface PdfThumbnailQueuedRenderEntry<T> {
 const DEFAULT_MAX_CONCURRENT_THUMBNAIL_RENDERS = 2;
 const MIN_MAX_CONCURRENT_THUMBNAIL_RENDERS = 1;
 const MAX_MAX_CONCURRENT_THUMBNAIL_RENDERS = 4;
+const HIGH_PRIORITY_PARALLEL_RENDER_THRESHOLD = 900;
 
 let maxConcurrentThumbnailRenders = DEFAULT_MAX_CONCURRENT_THUMBNAIL_RENDERS;
 let activeRenderCount = 0;
@@ -38,6 +43,10 @@ export class PdfThumbnailRenderCancelledError extends Error {
 
 export const isPdfThumbnailRenderCancelledError = (value: unknown) => {
   return value instanceof PdfThumbnailRenderCancelledError;
+};
+
+const normalizePriority = (value: number | undefined) => {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
 };
 
 const clampMaxConcurrentRenders = (value: number) => {
@@ -73,6 +82,22 @@ const rejectCancelledPendingEntries = () => {
   }
 };
 
+const canStartQueuedEntry = (entry: PdfThumbnailQueuedRenderEntry<unknown>) => {
+  if (activeRenderCount >= maxConcurrentThumbnailRenders) {
+    return false;
+  }
+
+  if (activeRenderCount === 0) {
+    return true;
+  }
+
+  return entry.priority >= HIGH_PRIORITY_PARALLEL_RENDER_THRESHOLD;
+};
+
+const findNextStartableEntryIndex = () => {
+  return queuedRenderEntries.findIndex((entry) => canStartQueuedEntry(entry));
+};
+
 const pumpPdfThumbnailRenderQueue = () => {
   rejectCancelledPendingEntries();
   sortQueuedRenderEntries();
@@ -81,7 +106,12 @@ const pumpPdfThumbnailRenderQueue = () => {
     activeRenderCount < maxConcurrentThumbnailRenders &&
     queuedRenderEntries.length > 0
   ) {
-    const entry = queuedRenderEntries.shift();
+    const nextEntryIndex = findNextStartableEntryIndex();
+    if (nextEntryIndex < 0) {
+      return;
+    }
+
+    const [entry] = queuedRenderEntries.splice(nextEntryIndex, 1);
     if (!entry || entry.cancelled) {
       entry?.reject(new PdfThumbnailRenderCancelledError());
       continue;
@@ -112,7 +142,7 @@ export const schedulePdfThumbnailRender = <T>({
   const promise = new Promise<T>((resolve, reject) => {
     entry = {
       id,
-      priority: Number.isFinite(priority) ? priority : 0,
+      priority: normalizePriority(priority),
       sequence: nextSequence,
       cancelled: false,
       started: false,
@@ -140,11 +170,36 @@ export const schedulePdfThumbnailRender = <T>({
   };
 };
 
+export const cancelPendingPdfThumbnailRenders = ({
+  maxPriority = Number.POSITIVE_INFINITY,
+}: CancelPendingPdfThumbnailRendersOptions = {}) => {
+  const normalizedMaxPriority = Number.isFinite(maxPriority)
+    ? maxPriority
+    : Number.POSITIVE_INFINITY;
+  let cancelledCount = 0;
+
+  queuedRenderEntries.forEach((entry) => {
+    if (entry.started || entry.cancelled || entry.priority > normalizedMaxPriority) {
+      return;
+    }
+
+    entry.cancelled = true;
+    cancelledCount += 1;
+  });
+
+  if (cancelledCount > 0) {
+    pumpPdfThumbnailRenderQueue();
+  }
+
+  return cancelledCount;
+};
+
 export const getPdfThumbnailRenderQueueSnapshot = () => {
   return {
     activeRenderCount,
     pendingRenderCount: queuedRenderEntries.length,
     maxConcurrentThumbnailRenders,
+    highPriorityParallelRenderThreshold: HIGH_PRIORITY_PARALLEL_RENDER_THRESHOLD,
   };
 };
 
