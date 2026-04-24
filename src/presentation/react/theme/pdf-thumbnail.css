@@ -1,0 +1,31 @@
+@layer components {
+  button[data-pdf-thumbnail-tile] {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+
+  button[data-pdf-thumbnail-tile]:hover,
+  button[data-pdf-thumbnail-tile]:focus,
+  button[data-pdf-thumbnail-tile]:active {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+
+  button[data-pdf-thumbnail-tile] > div:first-child {
+    transition:
+      background-color var(--ds-semantic-motion-interactive),
+      border-color var(--ds-semantic-motion-interactive),
+      box-shadow var(--ds-semantic-motion-interactive),
+      opacity var(--ds-semantic-motion-interactive);
+  }
+
+  button[data-pdf-thumbnail-tile]:hover > div:first-child {
+    background: var(--ds-semantic-color-background-sidebar-active) !important;
+    background-color: var(--ds-semantic-color-background-sidebar-active) !important;
+  }
+
+  button[data-pdf-thumbnail-tile]:focus-visible > div:first-child {
+    background: var(--ds-semantic-color-background-sidebar-active) !important;
+    background-color: var(--ds-semantic-color-background-sidebar-active) !important;
+  }
+}
