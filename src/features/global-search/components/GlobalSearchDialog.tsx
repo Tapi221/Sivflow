@@ -17,6 +17,17 @@ import {
 } from "@/ui/icons";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Command, CommandItem, CommandList } from "@/components/ui/command";
+import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
+import {
+  EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS,
+  EXPLORER_ENTITY_ROW_INTERACTIVE_CLASS,
+  EXPLORER_ENTITY_ROW_SHELL_BASE_CLASS,
+  EXPLORER_ROW_BASE_CLASS_NAME,
+  EXPLORER_ROW_CONTENT_CLASS,
+  EXPLORER_ROW_ICON_SLOT_CLASS,
+  FOLDER_ROW_ICON_SIZE_CLASS,
+  FOLDER_ROW_TITLE_CLASS,
+} from "@/components/folder/explorer/rows/shared";
 import type {
   GlobalSearchIconKind,
   GlobalSearchItem,
@@ -24,6 +35,7 @@ import type {
 import { rankGlobalSearchResults } from "@/features/global-search/lib/rankGlobalSearchResults";
 import { useGlobalSearchHotkey } from "@/features/global-search/hooks/useGlobalSearchHotkey";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
+import { cn } from "@/lib/utils";
 import { toMillis } from "@/utils/toMillis";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -70,7 +82,8 @@ const resolveTimestampLabel = (value: unknown) => {
 
 const resolveItemIcon = (item: GlobalSearchItem) => {
   const iconKind: GlobalSearchIconKind =
-    item.iconKind ?? (item.kind === "action" ? "directory" : item.kind);
+    item.iconKind ??
+    (item.kind === "action" ? "directory" : item.kind);
 
   switch (iconKind) {
     case "folder":
@@ -139,9 +152,7 @@ export const GlobalSearchDialog = () => {
   };
 
   const emptyTitle =
-    query.trim().length > 0
-      ? "一致する項目がありません"
-      : "検索できる項目がありません";
+    query.trim().length > 0 ? "一致する項目がありません" : "検索できる項目がありません";
   const emptyDescription =
     query.trim().length > 0
       ? "別のキーワードで試してください。"
@@ -192,33 +203,38 @@ export const GlobalSearchDialog = () => {
             <CommandList className="gs-results">
               {rankedItems.map((item) => {
                 const Icon = resolveItemIcon(item);
-                const timestampLabel = resolveTimestampLabel(
-                  item.timestampValue,
-                );
-                const titleAttribute = item.subtitle
-                  ? `${item.title} - ${item.subtitle}`
-                  : item.title;
+                const timestampLabel = resolveTimestampLabel(item.timestampValue);
 
                 return (
                   <CommandItem
                     key={item.id}
                     value={item.value}
-                    className="gs-row"
+                    className={cn(
+                      EXPLORER_ROW_BASE_CLASS_NAME,
+                      EXPLORER_ENTITY_ROW_INTERACTIVE_CLASS,
+                      EXPLORER_ENTITY_ROW_SHELL_BASE_CLASS,
+                      EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS,
+                      "gs-row",
+                    )}
                     onSelect={() => {
                       handleItemSelect(item);
                     }}
-                    title={titleAttribute}
                   >
-                    <span className="gs-row__icon">
-                      <Icon className="h-[16px] w-[16px]" />
-                    </span>
-                    <span className="gs-row__title">{item.title}</span>
-                    {timestampLabel ? (
-                      <span className="gs-row__timestamp">
-                        {timestampLabel}
-                      </span>
-                    ) : null}
-                    <span className="gs-row__enter-badge">Enter</span>
+                    <ExplorerRowContent
+                      left={
+                        <span className={cn(EXPLORER_ROW_ICON_SLOT_CLASS, "gs-row__icon-slot")}>
+                          <Icon className={cn(FOLDER_ROW_ICON_SIZE_CLASS, "gs-row__icon")} />
+                        </span>
+                      }
+                      title={item.title}
+                      right={
+                        timestampLabel ? (
+                          <span className="gs-row__timestamp">{timestampLabel}</span>
+                        ) : null
+                      }
+                      contentClassName={cn(EXPLORER_ROW_CONTENT_CLASS, "gs-row__content")}
+                      titleClassName={cn(FOLDER_ROW_TITLE_CLASS, "gs-row__title")}
+                    />
                   </CommandItem>
                 );
               })}
