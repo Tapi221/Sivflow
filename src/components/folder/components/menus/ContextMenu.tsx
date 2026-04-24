@@ -3,7 +3,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useMemo, useRef, type ReactNode } from "react";
-import { ExplorerMenuPanel } from "./ExplorerMenuPanel";
+import {
+  ExplorerMenuPanel,
+  type ExplorerMenuPanelVariant,
+} from "./ExplorerMenuPanel";
 import type { MenuAction } from "./menuActions";
 
 interface ContextMenuProps {
@@ -13,6 +16,7 @@ interface ContextMenuProps {
   onOpenChange?: (open: boolean) => void;
   actions: MenuAction[];
   className?: string;
+  variant?: ExplorerMenuPanelVariant;
 }
 
 const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
@@ -27,6 +31,7 @@ export const ContextMenu = ({
   onOpenChange,
   actions,
   className,
+  variant = "default",
 }: ContextMenuProps) => {
   const suppressCloseAutoFocusRef = useRef(false);
 
@@ -64,6 +69,7 @@ export const ContextMenu = ({
       <ExplorerMenuPanel
         actions={actions}
         closeMenu={closeMenu}
+        variant={variant}
         side="right"
         align="start"
         sideOffset={0}
