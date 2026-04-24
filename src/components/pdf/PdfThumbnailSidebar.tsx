@@ -448,20 +448,8 @@ export const PdfThumbnailSidebar = () => {
   );
 
   if (!documentController.doc || statusMessage) {
-    return (
-      <div className="flex h-full min-h-0 flex-col bg-transparent">
-        <div ref={scrollRootRef} className="min-h-0 flex-1 overflow-y-auto">
-          <div className="px-2 pb-2 pt-2">
-            <div className="flex min-h-0 items-start justify-center">
-              <div className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 shadow-sm">
-                {statusMessage ?? "サムネイルを初期化中..."}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  return null;
+}
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-transparent">
