@@ -159,6 +159,11 @@ type ModifyCallback<T extends object, TKey> = (
   ctx?: { value: T; primKey: TKey },
 ) => boolean | void;
 
+type RegisteredInMemoryTable = {
+  readonly name: string;
+  readonly clear: () => Promise<void>;
+};
+
 class InMemoryCollection<T extends object, TKey = string> {
   constructor(
     private readonly tableRef: InMemoryTable<T, TKey>,
@@ -782,8 +787,8 @@ export class InMemoryLocalDB {
   public projectMaps!: InMemoryTable<Record<string, unknown>, string>;
   public studyLogs!: InMemoryTable<Record<string, unknown>, string>;
 
-  public tables: Array<InMemoryTable<any, any>> = [];
-  private readonly tableMap = new Map<string, InMemoryTable<any, any>>();
+  public tables: RegisteredInMemoryTable[] = [];
+  private readonly tableMap = new Map<string, unknown>();
   private opened = true;
   private syncTrigger: (() => void) | null = null;
 
@@ -849,7 +854,7 @@ export class InMemoryLocalDB {
   ): InMemoryTable<T, TKey> => {
     const table = new InMemoryTable<T, TKey>(name, keyPath);
     this.tableMap.set(name, table);
-    this.tables.push(table);
+    this.tables.push({ name, clear: () => table.clear() });
     return table;
   };
 

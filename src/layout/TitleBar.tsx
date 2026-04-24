@@ -152,13 +152,7 @@ const SearchIcon: React.FC = () => (
     xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
   >
-    <circle
-      cx="11"
-      cy="11"
-      r="6.25"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    />
+    <circle cx="11" cy="11" r="6.25" stroke="currentColor" strokeWidth="1.8" />
     <path
       d="M16 16L20 20"
       stroke="currentColor"
@@ -216,13 +210,7 @@ const GlobeIcon: React.FC = () => (
     xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
   >
-    <circle
-      cx="12"
-      cy="12"
-      r="8"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    />
+    <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8" />
     <path
       d="M4.5 12H19.5"
       stroke="currentColor"
@@ -452,7 +440,9 @@ const TitleBarBreadcrumbs = React.memo(
                   )}
                   style={noDragStyle}
                   onMouseDown={(event) => event.stopPropagation()}
-                  onClick={(event) => handleBreadcrumbNavigateClick(event, crumb)}
+                  onClick={(event) =>
+                    handleBreadcrumbNavigateClick(event, crumb)
+                  }
                   title={crumb.label}
                 >
                   {breadcrumbContent}

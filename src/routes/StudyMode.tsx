@@ -355,7 +355,7 @@ const StudyMode = () => {
   const handleToggleBookmark = async (card: Card) => {
     if (!updateCard || !card?.id) return;
     await updateCard(card.id, {
-      isBookmarked: !Boolean(card.isBookmarked),
+      isBookmarked: !card.isBookmarked,
     });
   };
 
