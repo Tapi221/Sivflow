@@ -14,9 +14,8 @@ export const mapSearchParamsToExplorerRouteState = ({
   searchParams,
   fallbackFolderId,
 }: Params): ExplorerRouteState => {
-  const isHomeOnlyMode = searchParams.get("home") === "1";
-  const isSectionListMode =
-    !isHomeOnlyMode && searchParams.get("view") === "section-list";
+  const isHomeOnlyMode = false;
+  const isSectionListMode = searchParams.get("view") === "section-list";
 
   const queryFolderId = searchParams.get("folderId");
   const queryCardId = searchParams.get("cardId");
@@ -50,3 +49,4 @@ export const mapSearchParamsToExplorerRouteState = ({
               : null,
   };
 };
+

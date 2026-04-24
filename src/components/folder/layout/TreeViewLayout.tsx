@@ -456,8 +456,7 @@ const TreeViewLayout = ({
     [updateDocument],
   );
 
-  const resolvedSidebarDisplayMode =
-    settings?.folderSidebarDisplayMode === "navigation" ? "navigation" : "tree";
+  const resolvedSidebarDisplayMode = "navigation" as const;
 
   const isExplorerDataLoading =
     cardsLoading || documentsLoading || cardSetsLoading;
@@ -632,3 +631,4 @@ const TreeViewLayout = ({
 };
 
 export default TreeViewLayout;
+
