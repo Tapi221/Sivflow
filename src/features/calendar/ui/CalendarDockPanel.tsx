@@ -33,12 +33,11 @@ export const CalendarDockPanel = ({ onClose }: CalendarDockPanelProps) => {
   return (
     <aside
       className={cn(
-        "relative z-10 ml-2 hidden h-full min-h-0 w-[280px] shrink-0 flex-col overflow-hidden",
+        "relative z-10 ml-2 flex h-full min-h-0 w-[280px] shrink-0 flex-col overflow-hidden",
         "rounded-[14px] border border-[#dddcd5]",
         "bg-[rgba(255,255,255,0.92)]",
         "shadow-[0_16px_36px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.04)]",
         "backdrop-blur-[8px] [-webkit-backdrop-filter:blur(8px)]",
-        "md:flex",
       )}
       aria-label="カレンダーパネル"
     >
