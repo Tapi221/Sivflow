@@ -109,17 +109,19 @@ export const mergeTitleBarBreadcrumbs = ({
   const normalizedPathname = pathname.toLowerCase();
   const isCardSetViewPath = normalizedPathname.startsWith("/cardsetview");
   const isFoldersPath = normalizedPathname.startsWith("/folders");
-  const shouldUseResolvedFolderListRoute = isCardSetViewPath || isFoldersPath;
-  const folderListRoute = shouldUseResolvedFolderListRoute
-    ? resolveTitleBarFolderListRoute(extraCrumbs)
-    : FOLDER_LIST_ROUTE;
+  const shouldUseFolderListRoute = isCardSetViewPath || isFoldersPath;
+  const folderListRoute = isFoldersPath
+    ? FOLDER_LIST_ROUTE
+    : isCardSetViewPath
+      ? resolveTitleBarFolderListRoute(extraCrumbs)
+      : FOLDER_LIST_ROUTE;
   const shouldReplaceBaseCrumbs =
-    shouldUseResolvedFolderListRoute && baseCrumbs.length > 1;
+    shouldUseFolderListRoute && baseCrumbs.length > 1;
   const baseCrumbsForMerge = shouldReplaceBaseCrumbs
     ? [baseCrumbs[0], { label: "フォルダ一覧", to: folderListRoute }]
     : baseCrumbs;
 
-  const defaultLastBaseRoute = shouldUseResolvedFolderListRoute
+  const defaultLastBaseRoute = shouldUseFolderListRoute
     ? folderListRoute
     : HOME_ROUTE;
 
