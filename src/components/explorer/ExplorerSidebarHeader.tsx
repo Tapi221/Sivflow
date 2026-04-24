@@ -181,7 +181,7 @@ export const ExplorerSidebarHeader = ({
 
         <TagFilterPopover
           allTags={allTags}
-          className="h-7 w-7 rounded-lg border-0 bg-transparent text-[rgba(107,114,128,0.92)] transition-colors hover:bg-[#f9fafb] hover:text-[#4b5563]"
+          className="h-7 w-7 rounded-lg border-0 bg-transparent text-[#888780] transition-colors hover:bg-[#f9fafb] hover:text-[#888780]"
         />
       </div>
     </div>
