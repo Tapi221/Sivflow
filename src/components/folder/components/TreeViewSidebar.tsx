@@ -14,7 +14,6 @@ interface TreeViewSidebarProps {
   onCreateCardSet: () => void;
   onAddDocument: () => void;
   onBulkImport: () => void;
-  onOpenSettings?: () => void;
   onStartResizing: (e: React.PointerEvent) => void;
   children: React.ReactNode;
   canCreateCardSet?: boolean;
@@ -38,7 +37,6 @@ export const TreeViewSidebar = ({
   onCreateCardSet,
   onAddDocument,
   onBulkImport,
-  onOpenSettings,
   onStartResizing,
   children,
   canCreateCardSet = false,
@@ -84,7 +82,6 @@ export const TreeViewSidebar = ({
             onCreateCardSet={onCreateCardSet}
             onAddDocument={onAddDocument}
             onBulkImport={onBulkImport}
-            onOpenSettings={onOpenSettings}
             canCreateCardSet={canCreateCardSet}
             canCreateCard={canCreateCard}
             canAddDocuments={canAddDocuments}
