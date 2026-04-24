@@ -14,10 +14,8 @@
     background-color: transparent;
     color: var(--sidebar-text, #202123);
     transition:
-      background-color 140ms ease,
-      color 140ms ease,
-      box-shadow 140ms ease,
-      transform 140ms ease;
+      color 120ms ease,
+      box-shadow 120ms ease;
   }
 
   .sidebar-row::before {
@@ -30,9 +28,8 @@
     border-radius: 999px;
     background: transparent;
     transition:
-      background-color 140ms ease,
-      opacity 140ms ease,
-      transform 140ms ease;
+      opacity 120ms ease,
+      transform 120ms ease;
     opacity: 0;
     transform: scaleY(0.7);
   }

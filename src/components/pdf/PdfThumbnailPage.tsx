@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PageSize, PdfJsPage, PdfJsRenderTask } from "./pdfViewerTypes";
 import {
   getCachedPdfThumbnailBitmap,
@@ -17,7 +17,7 @@ interface PdfThumbnailPageProps {
   boxHeightPx: number;
   baseSize?: PageSize;
   renderPriority: number;
-  renderVersion: number;
+  renderVersion?: number;
   acquirePage: (
     pageNumber: number,
   ) => Promise<{ page: PdfJsPage; release: () => void }>;
@@ -218,7 +218,7 @@ export const PdfThumbnailPage = ({
   boxHeightPx,
   baseSize,
   renderPriority,
-  renderVersion,
+  renderVersion = 0,
   acquirePage,
   onPageSize,
 }: PdfThumbnailPageProps) => {
@@ -226,10 +226,21 @@ export const PdfThumbnailPage = ({
   const renderPassRef = useRef(0);
   const lastRenderIdentityRef = useRef<string | null>(null);
   const baseSizeRef = useRef<PageSize | undefined>(baseSize);
+  const retryAnimationFrameRef = useRef<number | null>(null);
+  const [renderRetryToken, setRenderRetryToken] = useState(0);
 
   useEffect(() => {
     baseSizeRef.current = baseSize;
   }, [baseSize]);
+
+  useEffect(() => {
+    return () => {
+      if (retryAnimationFrameRef.current !== null) {
+        window.cancelAnimationFrame(retryAnimationFrameRef.current);
+        retryAnimationFrameRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -425,13 +436,33 @@ export const PdfThumbnailPage = ({
       run,
     });
 
+    const scheduleRetryAfterCancellation = () => {
+      if (retryAnimationFrameRef.current !== null) {
+        return;
+      }
+
+      retryAnimationFrameRef.current = window.requestAnimationFrame(() => {
+        retryAnimationFrameRef.current = null;
+
+        if (disposed || renderPassRef.current !== renderPass) {
+          return;
+        }
+
+        setRenderRetryToken((previousToken) => previousToken + 1);
+      });
+    };
+
     void queuedRender.promise.catch((errorValue) => {
       if (lastRenderIdentityRef.current === renderIdentity) {
         lastRenderIdentityRef.current = null;
       }
 
-      if (isPdfThumbnailRenderCancelledError(errorValue)) {
+      if (disposed || renderPassRef.current !== renderPass) {
         return;
+      }
+
+      if (isPdfThumbnailRenderCancelledError(errorValue)) {
+        scheduleRetryAfterCancellation();
       }
     });
 
@@ -446,6 +477,11 @@ export const PdfThumbnailPage = ({
       cancelRenderTask();
       releaseActivePage();
 
+      if (retryAnimationFrameRef.current !== null) {
+        window.cancelAnimationFrame(retryAnimationFrameRef.current);
+        retryAnimationFrameRef.current = null;
+      }
+
       if (lastRenderIdentityRef.current === renderIdentity) {
         lastRenderIdentityRef.current = null;
       }
@@ -458,6 +494,7 @@ export const PdfThumbnailPage = ({
     onPageSize,
     pageNumber,
     renderPriority,
+    renderRetryToken,
     renderVersion,
   ]);
 
