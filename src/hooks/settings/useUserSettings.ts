@@ -8,6 +8,12 @@ import type { UserSettings } from "@/types";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useEffect, useMemo } from "react";
 
+const LEGACY_SETTING_KEYS = [
+  "displayName",
+  "profileImage",
+  "folder" + "SidebarDisplayMode",
+] as const;
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
@@ -45,14 +51,13 @@ const removeLegacySettingsFields = (
 ): Record<string, unknown> => {
   if (!input) return {};
 
-  const {
-    displayName: _displayName,
-    profileImage: _profileImage,
-    folderSidebarDisplayMode: _folderSidebarDisplayMode,
-    ...rest
-  } = input;
+  const next = { ...input };
 
-  return rest;
+  LEGACY_SETTING_KEYS.forEach((key) => {
+    delete next[key];
+  });
+
+  return next;
 };
 
 const normalizeStoredSettingsRecord = (
