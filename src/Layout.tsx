@@ -108,18 +108,6 @@ const Layout = () => {
         },
       },
       {
-        id: "action:trash",
-        value: "action:trash",
-        kind: "action",
-        iconKind: "trash",
-        title: "ゴミ箱",
-        keywords: ["ゴミ箱", "trash", "deleted", "削除"],
-        priority: 90,
-        onSelect: () => {
-          void navigate("/trash");
-        },
-      },
-      {
         id: "action:settings",
         value: "action:settings",
         kind: "action",
@@ -194,3 +182,4 @@ const Layout = () => {
 };
 
 export default Layout;
+
