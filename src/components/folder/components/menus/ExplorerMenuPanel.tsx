@@ -10,11 +10,13 @@ import { cn } from "@/lib/utils";
 import React from "react";
 import type { MenuAction } from "./menuActions";
 
+export type ExplorerMenuPanelVariant = "default" | "create" | "folderContext";
+
 interface ExplorerMenuPanelProps
   extends React.ComponentPropsWithoutRef<typeof DropdownMenuContent> {
   actions: MenuAction[];
   closeMenu?: () => void;
-  variant?: "default" | "create";
+  variant?: ExplorerMenuPanelVariant;
 }
 
 const DANGER_ITEM_CLASS =
@@ -31,6 +33,24 @@ const CREATE_MENU_ICON_CLASS =
 
 const CREATE_MENU_SEPARATOR_CLASS = "!mx-0 !my-[3px] !h-px !bg-[#e5e4dd]";
 
+const FOLDER_CONTEXT_MENU_CONTENT_CLASS =
+  "!w-[287px] !rounded-[16px] !border !border-[#e5e8f0] !bg-white !p-[14px] !shadow-[0_14px_40px_rgba(15,23,42,0.10),0_2px_8px_rgba(15,23,42,0.06)]";
+
+const FOLDER_CONTEXT_MENU_ITEM_CLASS =
+  "!h-[41px] !cursor-pointer gap-[14px] !rounded-[9px] !px-1.5 !py-0 text-[20px] font-normal leading-none text-[#222222] transition-colors duration-75 hover:bg-[#f6f7fb] focus:bg-[#f6f7fb] data-[highlighted]:bg-[#f6f7fb] active:bg-[#eef1f6] overflow-hidden whitespace-nowrap";
+
+const FOLDER_CONTEXT_MENU_ICON_CLASS =
+  "h-[20px] w-[20px] text-[#222222] [&>svg]:h-[20px] [&>svg]:w-[20px] [&>svg]:shrink-0";
+
+const FOLDER_CONTEXT_MENU_DANGER_ITEM_CLASS =
+  "text-[#222222] hover:bg-[#f6f7fb] focus:bg-[#f6f7fb] data-[highlighted]:bg-[#f6f7fb] active:bg-[#eef1f6]";
+
+const FOLDER_CONTEXT_MENU_DANGER_ICON_CLASS =
+  "text-[#222222] [&>svg]:stroke-[#222222]";
+
+const FOLDER_CONTEXT_MENU_SEPARATOR_CLASS =
+  "!mx-0 !my-[6px] !h-px !bg-[#e5e8f0]";
+
 /**
  * エクスプローラーの各種メニュー（追加ボタン、コンテキストメニュー）で共有されるパネルコンポーネント
  */
@@ -44,31 +64,54 @@ export const ExplorerMenuPanel = ({
   const visibleActions = actions.filter((action) => !action.hidden);
   const panelPreset = floatingPanelPresets.menu;
   const isCreateVariant = variant === "create";
+  const isFolderContextVariant = variant === "folderContext";
+
+  const contentClassName = isFolderContextVariant
+    ? FOLDER_CONTEXT_MENU_CONTENT_CLASS
+    : isCreateVariant
+      ? CREATE_MENU_CONTENT_CLASS
+      : cn("w-48", panelPreset.className);
+
+  const itemClassName = isFolderContextVariant
+    ? FOLDER_CONTEXT_MENU_ITEM_CLASS
+    : isCreateVariant
+      ? CREATE_MENU_ITEM_CLASS
+      : undefined;
+
+  const iconClassName = isFolderContextVariant
+    ? FOLDER_CONTEXT_MENU_ICON_CLASS
+    : isCreateVariant
+      ? CREATE_MENU_ICON_CLASS
+      : undefined;
+
+  const separatorClassName = isFolderContextVariant
+    ? FOLDER_CONTEXT_MENU_SEPARATOR_CLASS
+    : isCreateVariant
+      ? CREATE_MENU_SEPARATOR_CLASS
+      : undefined;
 
   return (
     <DropdownMenuContent
-      className={cn(
-        isCreateVariant
-          ? CREATE_MENU_CONTENT_CLASS
-          : cn("w-48", panelPreset.className),
-        className,
-      )}
-      surface={isCreateVariant ? "plain" : panelPreset.surface}
+      className={cn(contentClassName, className)}
+      surface={
+        isCreateVariant || isFolderContextVariant ? "plain" : panelPreset.surface
+      }
       {...contentProps}
     >
       {visibleActions.map((action, index) => (
         <React.Fragment key={action.id}>
           {action.separatorBefore && index > 0 ? (
-            <DropdownMenuSeparator
-              className={cn(isCreateVariant && CREATE_MENU_SEPARATOR_CLASS)}
-            />
+            <DropdownMenuSeparator className={cn(separatorClassName)} />
           ) : null}
 
           <DropdownMenuItem
             disabled={action.disabled}
             className={cn(
-              isCreateVariant && CREATE_MENU_ITEM_CLASS,
-              action.danger && DANGER_ITEM_CLASS,
+              itemClassName,
+              action.danger &&
+                (isFolderContextVariant
+                  ? FOLDER_CONTEXT_MENU_DANGER_ITEM_CLASS
+                  : DANGER_ITEM_CLASS),
             )}
             onSelect={(event) => {
               event.preventDefault();
@@ -79,12 +122,21 @@ export const ExplorerMenuPanel = ({
           >
             {action.icon ? (
               <DropdownMenuItemIcon
-                className={cn(isCreateVariant && CREATE_MENU_ICON_CLASS)}
+                className={cn(
+                  iconClassName,
+                  isFolderContextVariant &&
+                    action.danger &&
+                    FOLDER_CONTEXT_MENU_DANGER_ICON_CLASS,
+                )}
               >
                 {action.icon}
               </DropdownMenuItemIcon>
             ) : null}
-            <DropdownMenuItemLabel className={cn(isCreateVariant && "truncate")}>
+            <DropdownMenuItemLabel
+              className={cn(
+                (isCreateVariant || isFolderContextVariant) && "truncate",
+              )}
+            >
               {action.label}
             </DropdownMenuItemLabel>
           </DropdownMenuItem>

@@ -203,6 +203,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
         onMenuOpenChange={onMenuOpenChange}
         menuActions={menuActions}
         hasContextMenu={hasContextMenu}
+        contextMenuVariant="folderContext"
         isEditing={isEditing}
         isDimmed={isDimmed}
         isDraggingOver={isFileDraggingOver}

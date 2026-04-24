@@ -24,6 +24,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type MouseEvent,
   type PointerEvent,
 } from "react";
@@ -55,6 +56,11 @@ const OPTIMISTIC_NAVIGATION_CLEAR_MS = 1_400;
 const POINTER_PREVIEW_CLEAR_MS = 650;
 const DRAG_PREVIEW_FALLBACK_IMAGE_WIDTH_PX = THUMBNAIL_PAGE_BOX_WIDTH_PX;
 const DRAG_PREVIEW_FALLBACK_IMAGE_HEIGHT_PX = THUMBNAIL_PAGE_BOX_HEIGHT_PX;
+
+const THUMBNAIL_TILE_HOVER_STYLE = {
+  "--pdf-thumbnail-tile-hover-bg":
+    "var(--sidebar-hover-bg, rgba(241, 232, 222, 0.92))",
+} as CSSProperties & Record<"--pdf-thumbnail-tile-hover-bg", string>;
 
 const getRequiredGridWidth = (columnCount: number) => {
   return (
@@ -600,9 +606,11 @@ const SortablePdfThumbnailTileComponent = ({
         data-pdf-thumbnail-tile={pageNumber}
         className={cn(
           "block w-full touch-none select-none rounded-xl text-left outline-none",
+          "transition-colors duration-75 hover:bg-[var(--pdf-thumbnail-tile-hover-bg)]",
           "cursor-grab focus-visible:ring-2 focus-visible:ring-primary-500/40",
           isDragging && "cursor-grabbing",
         )}
+        style={THUMBNAIL_TILE_HOVER_STYLE}
         {...attributes}
         {...listeners}
         onPointerDownCapture={handlePointerDownCapture}

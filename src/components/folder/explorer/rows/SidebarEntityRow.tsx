@@ -1,3 +1,4 @@
+import type { ExplorerMenuPanelVariant } from "@/components/folder/components/menus/ExplorerMenuPanel";
 import type { MenuAction } from "@/components/folder/components/menus/menuActions";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -18,6 +19,7 @@ interface SidebarEntityRowProps extends Omit<
   onMenuOpenChange?: (open: boolean) => void;
   menuActions?: MenuAction[];
   hasContextMenu?: boolean;
+  contextMenuVariant?: ExplorerMenuPanelVariant;
   isEditing?: boolean;
   isDimmed?: boolean;
   isDraggingOver?: boolean;
@@ -49,6 +51,7 @@ const SidebarEntityRowBase = ({
   onMenuOpenChange,
   menuActions,
   hasContextMenu = false,
+  contextMenuVariant = "default",
   isEditing = false,
   isDimmed = false,
   isDraggingOver = false,
@@ -88,6 +91,7 @@ const SidebarEntityRowBase = ({
       onMenuOpenChange={handleMenuOpenChange}
       menuActions={menuActions}
       hasContextMenu={hasContextMenu}
+      contextMenuVariant={contextMenuVariant}
       isEditing={isEditing}
       isDimmed={isDimmed}
       isDraggingOver={isDraggingOver}
