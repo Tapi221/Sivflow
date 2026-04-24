@@ -268,6 +268,7 @@ export const RootFolderPanelRow = ({
       }}
       menuActions={resolvedMenuActions}
       hasContextMenu={hasContextMenu}
+      contextMenuVariant={entry.kind === "folder" ? "folderContext" : "default"}
       isEditing={isEditing}
       onContextMenuSelect={handleContextMenuSelect}
       rowRef={(node) => setRowRef(entry.id, node)}
