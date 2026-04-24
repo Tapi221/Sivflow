@@ -18,7 +18,13 @@ export type NavigationListEntry =
       contentCount?: number;
     }
   | {
-      kind: "cardSet" | "card" | "document";
+      kind: "cardSet";
+      id: string;
+      name: string;
+      contentCount?: number;
+    }
+  | {
+      kind: "card" | "document";
       id: string;
       name: string;
     };
