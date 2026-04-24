@@ -24,10 +24,12 @@ import {
   useMemo,
   useRef,
   useState,
+  type ComponentProps,
   type CSSProperties,
   type MouseEvent,
   type PointerEvent,
 } from "react";
+import { createPortal } from "react-dom";
 import { PdfThumbnailPage } from "./PdfThumbnailPage";
 import { cancelPendingPdfThumbnailRenders } from "./pdfThumbnailRenderQueue";
 import { usePdfWorkspace } from "./usePdfWorkspace";
@@ -61,6 +63,56 @@ const THUMBNAIL_TILE_HOVER_STYLE = {
   "--pdf-thumbnail-tile-hover-bg":
     "var(--sidebar-hover-bg, rgba(241, 232, 222, 0.92))",
 } as CSSProperties & Record<"--pdf-thumbnail-tile-hover-bg", string>;
+
+type DragOverlayModifier = NonNullable<
+  ComponentProps<typeof DragOverlay>["modifiers"]
+>[number];
+
+interface ClientPointEvent extends Event {
+  clientX: number;
+  clientY: number;
+}
+
+const isClientPointEvent = (event: Event | null): event is ClientPointEvent => {
+  return (
+    event !== null &&
+    "clientX" in event &&
+    "clientY" in event &&
+    typeof event.clientX === "number" &&
+    typeof event.clientY === "number"
+  );
+};
+
+const centerDragOverlayOnPointer: DragOverlayModifier = ({
+  activeNodeRect,
+  activatorEvent,
+  overlayNodeRect,
+  transform,
+}) => {
+  if (
+    !activeNodeRect ||
+    !overlayNodeRect ||
+    !isClientPointEvent(activatorEvent)
+  ) {
+    return transform;
+  }
+
+  return {
+    ...transform,
+    x:
+      transform.x +
+      (activatorEvent.clientX - activeNodeRect.left) -
+      overlayNodeRect.width / 2,
+    y:
+      transform.y +
+      (activatorEvent.clientY - activeNodeRect.top) -
+      overlayNodeRect.height / 2,
+  };
+};
+
+const DRAG_OVERLAY_MODIFIERS: DragOverlayModifier[] = [
+  centerDragOverlayOnPointer,
+];
 
 const getRequiredGridWidth = (columnCount: number) => {
   return (
@@ -1176,14 +1228,38 @@ export const PdfThumbnailSidebar = () => {
                 </SortableContext>
               </div>
 
-              <DragOverlay adjustScale={false} dropAnimation={null} zIndex={40}>
-                {dragPreview ? (
+              {typeof document === "undefined" ? (
+              <DragOverlay
+                adjustScale={false}
+                dropAnimation={null}
+                modifiers={DRAG_OVERLAY_MODIFIERS}
+                zIndex={10_000}
+              >
+                {dragPreview && activeDragPage !== null ? (
                   <PdfThumbnailDragOverlay
                     preview={dragPreview}
                     isActive={activeThumbnailPages.has(dragPreview.pageNumber)}
                   />
                 ) : null}
               </DragOverlay>
+            ) : (
+              createPortal(
+                <DragOverlay
+                  adjustScale={false}
+                  dropAnimation={null}
+                  modifiers={DRAG_OVERLAY_MODIFIERS}
+                  zIndex={10_000}
+                >
+                  {dragPreview && activeDragPage !== null ? (
+                    <PdfThumbnailDragOverlay
+                      preview={dragPreview}
+                      isActive={activeThumbnailPages.has(dragPreview.pageNumber)}
+                    />
+                  ) : null}
+                </DragOverlay>,
+                document.body,
+              )
+            )}
             </DndContext>
           </div>
         </div>
