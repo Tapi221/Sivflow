@@ -115,6 +115,54 @@ const parseSortableId = (value: string | number) => {
   return Math.max(1, Math.trunc(rawPageNumber));
 };
 
+const normalizePageNumber = (pageNumber: number, numPages: number) => {
+  const safeMaxPage = Math.max(1, Math.trunc(numPages));
+  if (!Number.isFinite(pageNumber)) {
+    return 1;
+  }
+
+  return Math.min(safeMaxPage, Math.max(1, Math.trunc(pageNumber)));
+};
+
+const normalizeSpreadStartPage = (pageNumber: number, numPages: number) => {
+  const normalizedPageNumber = normalizePageNumber(pageNumber, numPages);
+  return normalizedPageNumber - ((normalizedPageNumber - 1) % 2);
+};
+
+const buildActiveThumbnailPageSet = ({
+  anchorPage,
+  alignedCurrentPage,
+  currentPage,
+  numPages,
+  pageLayoutMode,
+}: {
+  anchorPage: number | null;
+  alignedCurrentPage: number;
+  currentPage: number;
+  numPages: number;
+  pageLayoutMode: "single" | "double";
+}) => {
+  if (numPages <= 0) {
+    return new Set<number>();
+  }
+
+  if (pageLayoutMode !== "double") {
+    return new Set([normalizePageNumber(anchorPage ?? currentPage, numPages)]);
+  }
+
+  const spreadStartPage = normalizeSpreadStartPage(
+    anchorPage ?? alignedCurrentPage ?? currentPage,
+    numPages,
+  );
+  const activePages = new Set<number>([spreadStartPage]);
+
+  if (spreadStartPage + 1 <= numPages) {
+    activePages.add(spreadStartPage + 1);
+  }
+
+  return activePages;
+};
+
 const readInteractionClock = () => {
   if (typeof performance !== "undefined") {
     return performance.now();
@@ -648,6 +696,8 @@ export const PdfThumbnailSidebar = () => {
     documentController,
     sourceUnavailable,
     currentPage,
+    alignedCurrentPage,
+    pageLayoutMode,
     normalizedThumbnailOrder,
     setCurrentPage,
     scrollToPage,
@@ -776,6 +826,26 @@ export const PdfThumbnailSidebar = () => {
 
   const hasBlockingStatus =
     Boolean(error) || sourceUnavailable || (loading && numPages === 0);
+
+  const activeThumbnailPages = useMemo(() => {
+    return buildActiveThumbnailPageSet({
+      anchorPage:
+        pendingNavigationPage ??
+        (activeDragPage === null ? pointerPreviewPage : null),
+      alignedCurrentPage,
+      currentPage,
+      numPages,
+      pageLayoutMode,
+    });
+  }, [
+    activeDragPage,
+    alignedCurrentPage,
+    currentPage,
+    numPages,
+    pageLayoutMode,
+    pendingNavigationPage,
+    pointerPreviewPage,
+  ]);
 
   useEffect(() => {
     setEagerRenderItemCount((previousCount) => {
@@ -1055,19 +1125,15 @@ export const PdfThumbnailSidebar = () => {
                     }}
                   >
                     {normalizedThumbnailOrder.map((pageNumber, pageIndex) => {
+                      const isDisplayedSpreadPage =
+                        activeThumbnailPages.has(pageNumber);
                       const isCurrentPage = pageNumber === currentPage;
                       const isNavigationPage =
                         pendingNavigationPage === pageNumber;
-                      const isPointerPreviewPage =
-                        pointerPreviewPage === pageNumber &&
-                        activeDragPage === null;
-                      const isActive =
-                        isCurrentPage ||
-                        isNavigationPage ||
-                        isPointerPreviewPage;
+                      const isActive = isDisplayedSpreadPage;
                       const eagerRender =
                         pageIndex < eagerRenderItemCount ||
-                        isCurrentPage ||
+                        isDisplayedSpreadPage ||
                         isNavigationPage;
 
                       return (
@@ -1078,7 +1144,7 @@ export const PdfThumbnailSidebar = () => {
                           eagerRender={eagerRender}
                           renderPriority={resolveRenderPriority({
                             isNavigationPage,
-                            isCurrentPage,
+                            isCurrentPage: isDisplayedSpreadPage || isCurrentPage,
                             pageIndex,
                             initialRenderCount,
                             eagerRenderItemCount,
@@ -1106,7 +1172,7 @@ export const PdfThumbnailSidebar = () => {
                 {dragPreview ? (
                   <PdfThumbnailDragOverlay
                     preview={dragPreview}
-                    isActive={dragPreview.pageNumber === currentPage}
+                    isActive={activeThumbnailPages.has(dragPreview.pageNumber)}
                   />
                 ) : null}
               </DragOverlay>
