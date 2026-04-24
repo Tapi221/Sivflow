@@ -383,6 +383,23 @@ export const PdfThumbnailSidebar = () => {
     [scrollToPage],
   );
 
+  useEffect(() => {
+    if (activeDragPageNumber === null || typeof document === "undefined") {
+      return;
+    }
+
+    const previousBodyCursor = document.body.style.cursor;
+    const previousDocumentCursor = document.documentElement.style.cursor;
+
+    document.body.style.cursor = "grabbing";
+    document.documentElement.style.cursor = "grabbing";
+
+    return () => {
+      document.body.style.cursor = previousBodyCursor;
+      document.documentElement.style.cursor = previousDocumentCursor;
+    };
+  }, [activeDragPageNumber]);
+
   if (!documentController.doc || hasBlockingStatus) {
     return null;
   }
@@ -430,8 +447,11 @@ export const PdfThumbnailSidebar = () => {
               <DragOverlay adjustScale={false} dropAnimation={null}>
                 {activeDragPageNumber !== null ? (
                   <div
-                    className="shrink-0"
-                    style={{ width: `${THUMBNAIL_CARD_WIDTH_PX}px` }}
+                    className="shrink-0 cursor-grabbing"
+                    style={{
+                      width: `${THUMBNAIL_CARD_WIDTH_PX}px`,
+                      cursor: "grabbing",
+                    }}
                   >
                     <PdfThumbnailCardContent
                       documentKey={documentController.documentKey}
