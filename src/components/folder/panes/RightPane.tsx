@@ -4,7 +4,6 @@ import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagram
 import { PdfPane } from "@/components/pdf/PdfPane";
 import Calendar from "@/routes/Calendar";
 import Gallery from "@/routes/Gallery";
-import Trash from "@/routes/Trash";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 type PdfPaneUpdateHandler = NonNullable<
@@ -85,12 +84,11 @@ export const RightPane = ({
   if (selectedItem?.type === "calendar") {
     return <Calendar />;
   }
-
   if (selectedItem?.type === "trash") {
-    return <Trash />;
+    return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
   }
 
-  if (selectedDocument) {
+if (selectedDocument) {
     if (selectedDocument.kind !== "pdf") {
       return <UnsupportedDocumentPane />;
     }
@@ -133,3 +131,4 @@ export const RightPane = ({
 
   return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
 };
+
