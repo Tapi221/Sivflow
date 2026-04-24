@@ -75,7 +75,6 @@
     border: none;
     background: transparent;
     color: rgba(55, 53, 47, 0.35);
-    transition: color 0.12s ease;
   }
 
   .gs-searchbar__clear:hover {
@@ -120,9 +119,7 @@
     border-radius: 4px;
     background: transparent;
     color: rgb(55, 53, 47);
-    transition:
-      background-color 0.12s ease,
-      color 0.12s ease;
+    transition: none;
   }
 
   .gs-row:hover {
@@ -159,19 +156,11 @@
     line-height: 1.35;
   }
 
-  .gs-row[data-selected="true"] .gs-row__title {
-    font-weight: 400;
-  }
-
   .gs-row__timestamp {
     flex: 0 0 auto;
     color: rgba(55, 53, 47, 0.45);
     font-size: 12px;
     line-height: 1;
-  }
-
-  .gs-row[data-selected="true"] .gs-row__timestamp {
-    display: inline-flex;
   }
 
   .gs-row__enter-badge {
