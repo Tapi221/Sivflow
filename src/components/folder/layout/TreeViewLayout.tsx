@@ -36,6 +36,7 @@ import { useNavigate } from "react-router-dom";
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
 import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
 import { PdfThumbnailSidebar } from "@/components/pdf/PdfThumbnailSidebar";
+import { PdfWorkspaceProvider } from "@/components/pdf/PdfWorkspaceProvider";
 import { TreeViewTabContent } from "@/components/folder/components/TreeViewTabContent";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -523,15 +524,9 @@ const TreeViewLayout = ({
   const canAddDocuments = Boolean(currentHeaderActionFolderId);
 
   const isSidebarContentCollapsed = selectedItem?.type === "document";
+  const hasPdfWorkspace = selectedDocument?.kind === "pdf";
 
-  const collapsedSidebarContent = selectedDocument ? (
-    <PdfThumbnailSidebar
-      doc={selectedDocument}
-      sidebarWidthPx={renderedSidebarWidth}
-    />
-  ) : null;
-
-  return (
+  const shell = (
     <div
       className={cn(
         "relative flex h-full min-h-0 w-full items-stretch overflow-hidden border-0 bg-transparent",
@@ -566,7 +561,7 @@ const TreeViewLayout = ({
         canBulkImport={Boolean(currentHeaderActionFolderId)}
         preferDirectRootFolderCreate={currentHeaderActionFolderId === null}
         collapseContent={isSidebarContentCollapsed}
-        collapsedContent={collapsedSidebarContent}
+        collapsedContent={hasPdfWorkspace ? <PdfThumbnailSidebar /> : null}
       >
         {sidebarContent}
       </TreeViewSidebar>
@@ -617,6 +612,22 @@ const TreeViewLayout = ({
         createCard={createCard}
       />
     </div>
+  );
+
+  if (!hasPdfWorkspace || !selectedDocument) {
+    return shell;
+  }
+
+  return (
+    <PdfWorkspaceProvider
+      key={selectedDocument.id}
+      doc={selectedDocument}
+      onDocumentUpdate={async (updates) => {
+        await updateDocument(selectedDocument.id, updates);
+      }}
+    >
+      {shell}
+    </PdfWorkspaceProvider>
   );
 };
 
