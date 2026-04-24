@@ -18,13 +18,17 @@ import { CSS } from "@dnd-kit/utilities";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PdfThumbnailPage } from "./PdfThumbnailPage";
 import { usePdfWorkspace } from "./usePdfWorkspace";
-import type { PageSize, PdfJsDocument, PdfJsPage } from "./pdfViewerTypes";
+import type { PageSize, PdfJsPage } from "./pdfViewerTypes";
 
 const THUMBNAIL_CARD_WIDTH_PX = 92;
 const THUMBNAIL_PAGE_BOX_WIDTH_PX = 82;
 const THUMBNAIL_PAGE_BOX_HEIGHT_PX = 116;
 const THUMBNAIL_GRID_GAP_PX = 8;
-const INITIAL_VISIBLE_PAGE_COUNT = 6;
+const INITIAL_RENDER_ROW_COUNT = 7;
+const BACKGROUND_RENDER_BATCH_ROW_COUNT = 3;
+const BACKGROUND_RENDER_INTERVAL_MS = 80;
+const MAX_BACKGROUND_RENDER_COUNT = 120;
+const THUMBNAIL_INTERSECTION_ROOT_MARGIN = "1200px 0px 1600px 0px";
 const MIN_THUMBNAIL_COLUMNS = 2;
 const MAX_THUMBNAIL_COLUMNS = 4;
 
@@ -51,6 +55,24 @@ const resolveColumnCount = (availableWidthPx: number) => {
   }
 
   return MIN_THUMBNAIL_COLUMNS;
+};
+
+const resolveInitialRenderCount = ({
+  columnCount,
+  totalCount,
+}: {
+  columnCount: number;
+  totalCount: number;
+}) => {
+  return Math.min(totalCount, columnCount * INITIAL_RENDER_ROW_COUNT);
+};
+
+const resolveBackgroundRenderTarget = (totalCount: number) => {
+  return Math.min(totalCount, MAX_BACKGROUND_RENDER_COUNT);
+};
+
+const resolveBackgroundBatchSize = (columnCount: number) => {
+  return Math.max(columnCount, columnCount * BACKGROUND_RENDER_BATCH_ROW_COUNT);
 };
 
 const createSortableId = (pageNumber: number) => `page:${pageNumber}`;
@@ -89,10 +111,9 @@ const applyDocumentDragCursor = () => {
 };
 
 interface PdfThumbnailPagePreviewProps {
-  pdf: PdfJsDocument;
   documentKey: string;
   pageNumber: number;
-  baseSize?: PageSize;
+  eagerRender: boolean;
   observerRoot: HTMLDivElement | null;
   acquirePage: (
     pageNumber: number,
@@ -101,18 +122,21 @@ interface PdfThumbnailPagePreviewProps {
 }
 
 const PdfThumbnailPagePreview = ({
-  pdf,
   documentKey,
   pageNumber,
-  baseSize,
+  eagerRender,
   observerRoot,
   acquirePage,
   onPageSize,
 }: PdfThumbnailPagePreviewProps) => {
   const hostRef = useRef<HTMLDivElement | null>(null);
-  const [shouldRender, setShouldRender] = useState(
-    pageNumber <= INITIAL_VISIBLE_PAGE_COUNT,
-  );
+  const [shouldRender, setShouldRender] = useState(eagerRender);
+
+  useEffect(() => {
+    if (eagerRender) {
+      setShouldRender(true);
+    }
+  }, [eagerRender]);
 
   useEffect(() => {
     if (shouldRender) {
@@ -144,7 +168,7 @@ const PdfThumbnailPagePreview = ({
       },
       {
         root: observerRoot,
-        rootMargin: "240px 0px 240px 0px",
+        rootMargin: THUMBNAIL_INTERSECTION_ROOT_MARGIN,
         threshold: 0.01,
       },
     );
@@ -164,11 +188,9 @@ const PdfThumbnailPagePreview = ({
       {shouldRender ? (
         <PdfThumbnailPage
           documentKey={documentKey}
-          pdf={pdf}
           pageNumber={pageNumber}
           boxWidthPx={THUMBNAIL_PAGE_BOX_WIDTH_PX}
           boxHeightPx={THUMBNAIL_PAGE_BOX_HEIGHT_PX}
-          baseSize={baseSize}
           acquirePage={acquirePage}
           onPageSize={onPageSize}
         />
@@ -186,10 +208,9 @@ const PdfThumbnailPagePreview = ({
 };
 
 interface PdfThumbnailCardContentProps {
-  pdf: PdfJsDocument;
   documentKey: string;
   pageNumber: number;
-  baseSize?: PageSize;
+  eagerRender: boolean;
   isActive: boolean;
   isDragging?: boolean;
   observerRoot: HTMLDivElement | null;
@@ -200,10 +221,9 @@ interface PdfThumbnailCardContentProps {
 }
 
 const PdfThumbnailCardContent = ({
-  pdf,
   documentKey,
   pageNumber,
-  baseSize,
+  eagerRender,
   isActive,
   isDragging = false,
   observerRoot,
@@ -222,10 +242,9 @@ const PdfThumbnailCardContent = ({
         )}
       >
         <PdfThumbnailPagePreview
-          pdf={pdf}
           documentKey={documentKey}
           pageNumber={pageNumber}
-          baseSize={baseSize}
+          eagerRender={eagerRender}
           observerRoot={observerRoot}
           acquirePage={acquirePage}
           onPageSize={onPageSize}
@@ -303,12 +322,22 @@ export const PdfThumbnailSidebar = () => {
   const {
     documentController,
     sourceUnavailable,
-    firstPageSize,
     currentPage,
     normalizedThumbnailOrder,
     scrollToPage,
     reorderThumbnailOrder,
   } = usePdfWorkspace();
+
+  const {
+    acquirePage,
+    doc,
+    documentKey,
+    error,
+    loading,
+    numPages,
+    prefetchPageResources,
+    setPageSize,
+  } = documentController;
 
   const scrollRootRef = useRef<HTMLDivElement | null>(null);
   const releaseDragCursorRef = useRef<(() => void) | null>(null);
@@ -316,6 +345,7 @@ export const PdfThumbnailSidebar = () => {
     null,
   );
   const [availableGridWidth, setAvailableGridWidth] = useState(0);
+  const [eagerRenderItemCount, setEagerRenderItemCount] = useState(0);
 
   const handleGridHostRef = useCallback((node: HTMLDivElement | null) => {
     setGridHostElement((previousNode) =>
@@ -351,10 +381,88 @@ export const PdfThumbnailSidebar = () => {
     return resolveColumnCount(availableGridWidth);
   }, [availableGridWidth]);
 
+  const totalThumbnailCount = normalizedThumbnailOrder.length;
+  const initialRenderCount = useMemo(() => {
+    return resolveInitialRenderCount({
+      columnCount,
+      totalCount: totalThumbnailCount,
+    });
+  }, [columnCount, totalThumbnailCount]);
+
+  const backgroundRenderTarget = useMemo(() => {
+    return resolveBackgroundRenderTarget(totalThumbnailCount);
+  }, [totalThumbnailCount]);
+
   const hasBlockingStatus =
-    Boolean(documentController.error) ||
-    sourceUnavailable ||
-    (documentController.loading && documentController.numPages === 0);
+    Boolean(error) || sourceUnavailable || (loading && numPages === 0);
+
+  useEffect(() => {
+    setEagerRenderItemCount((previousCount) => {
+      if (!doc || hasBlockingStatus || totalThumbnailCount === 0) {
+        return 0;
+      }
+
+      return Math.min(
+        totalThumbnailCount,
+        Math.max(previousCount, initialRenderCount),
+      );
+    });
+  }, [doc, hasBlockingStatus, initialRenderCount, totalThumbnailCount]);
+
+  useEffect(() => {
+    if (
+      !doc ||
+      hasBlockingStatus ||
+      eagerRenderItemCount >= backgroundRenderTarget
+    ) {
+      return;
+    }
+
+    const timerId = window.setTimeout(() => {
+      setEagerRenderItemCount((previousCount) => {
+        return Math.min(
+          backgroundRenderTarget,
+          previousCount + resolveBackgroundBatchSize(columnCount),
+        );
+      });
+    }, BACKGROUND_RENDER_INTERVAL_MS);
+
+    return () => window.clearTimeout(timerId);
+  }, [
+    backgroundRenderTarget,
+    columnCount,
+    doc,
+    eagerRenderItemCount,
+    hasBlockingStatus,
+  ]);
+
+  const prefetchPageNumbers = useMemo(() => {
+    if (totalThumbnailCount === 0) {
+      return [];
+    }
+
+    const prefetchCount = Math.min(
+      totalThumbnailCount,
+      Math.max(eagerRenderItemCount, initialRenderCount) +
+        resolveBackgroundBatchSize(columnCount),
+    );
+
+    return normalizedThumbnailOrder.slice(0, prefetchCount);
+  }, [
+    columnCount,
+    eagerRenderItemCount,
+    initialRenderCount,
+    normalizedThumbnailOrder,
+    totalThumbnailCount,
+  ]);
+
+  useEffect(() => {
+    if (!doc || hasBlockingStatus || prefetchPageNumbers.length === 0) {
+      return;
+    }
+
+    prefetchPageResources(prefetchPageNumbers);
+  }, [doc, hasBlockingStatus, prefetchPageNumbers, prefetchPageResources]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -415,7 +523,7 @@ export const PdfThumbnailSidebar = () => {
     [scrollToPage],
   );
 
-  if (!documentController.doc || hasBlockingStatus) {
+  if (!doc || hasBlockingStatus) {
     return null;
   }
 
@@ -442,21 +550,19 @@ export const PdfThumbnailSidebar = () => {
                       gridTemplateColumns: `repeat(${columnCount}, ${THUMBNAIL_CARD_WIDTH_PX}px)`,
                     }}
                   >
-                    {normalizedThumbnailOrder.map((pageNumber) => (
+                    {normalizedThumbnailOrder.map((pageNumber, pageIndex) => (
                       <SortablePdfThumbnailTile
                         key={pageNumber}
-                        pdf={documentController.doc}
-                        documentKey={documentController.documentKey}
+                        documentKey={documentKey}
                         pageNumber={pageNumber}
-                        baseSize={
-                          documentController.pageSizes[pageNumber] ??
-                          firstPageSize ??
-                          undefined
+                        eagerRender={
+                          pageIndex < eagerRenderItemCount ||
+                          pageNumber === currentPage
                         }
                         isActive={pageNumber === currentPage}
                         observerRoot={scrollRootRef.current}
-                        acquirePage={documentController.acquirePage}
-                        onPageSize={documentController.setPageSize}
+                        acquirePage={acquirePage}
+                        onPageSize={setPageSize}
                         onOpenPage={openPage}
                       />
                     ))}
