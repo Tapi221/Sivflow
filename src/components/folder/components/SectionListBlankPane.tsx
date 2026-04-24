@@ -1,7 +1,12 @@
 import { cn } from "@/lib/utils";
+import type { CSSProperties } from "react";
 
 interface SectionListBlankPaneProps {
   className?: string;
+  sidebarWidth: number;
+  topOffsetPx: number;
+  leftInsetPx?: number;
+  rightInsetPx?: number;
 }
 
 /**
@@ -10,11 +15,26 @@ interface SectionListBlankPaneProps {
  */
 export const SectionListBlankPane = ({
   className,
+  sidebarWidth,
+  topOffsetPx,
+  leftInsetPx = 12,
+  rightInsetPx = 12,
 }: SectionListBlankPaneProps) => {
+  const panelGapPx = 16;
+  const bottomInsetPx = 12;
+
+  const style = {
+    left: `${leftInsetPx + sidebarWidth + panelGapPx}px`,
+    right: `${rightInsetPx}px`,
+    top: `${topOffsetPx}px`,
+    bottom: `${bottomInsetPx}px`,
+  } satisfies CSSProperties;
+
   return (
     <div
+      style={style}
       className={cn(
-        "hidden h-full min-h-0 min-w-0 flex-1 basis-0 self-stretch bg-transparent pl-4 pr-3 md:flex",
+        "fixed z-0 hidden min-h-0 min-w-0 bg-transparent md:block",
         className,
       )}
     >
