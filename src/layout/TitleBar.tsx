@@ -1,3 +1,4 @@
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { TREE_VIEW_SIDEBAR_TOGGLE_EVENT } from "@/components/folder/hooks/useTreeViewSidebar";
 import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
 import { APP_CHROME } from "@/config/appChrome";
@@ -7,19 +8,21 @@ import {
   mergeTitleBarBreadcrumbs,
 } from "@/features/breadcrumbs/builders";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
-import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import {
   dispatchCardSetViewWindowEvent,
   subscribeCardSetViewWindowEvent,
 } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
+import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useHasDesktopBridge } from "@/hooks/platform/useHasDesktopBridge";
 import { cn } from "@/lib/utils";
 import { windowControls } from "@/platform/capabilities/windowControls";
 import { APP_DESKTOP_TOP_INSET_PX } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
+import { auth } from "@/services/firebase";
 import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
+import { signOut } from "firebase/auth";
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 type WindowControlButtonProps = {
   title: string;
@@ -50,6 +53,9 @@ const TITLE_BAR_NO_DRAG_STYLE: AppRegionStyle = {
 };
 
 const TITLE_BAR_BREADCRUMB_ITEM_CLASS = "titlebar-breadcrumb-item truncate";
+
+const TITLE_BAR_MENU_ITEM_CLASS =
+  "flex h-8 cursor-pointer select-none items-center gap-2 rounded-[5px] px-2 text-[13px] text-[#1a1a18] outline-none hover:bg-[#f1efe8] focus:bg-[#f1efe8] active:bg-[#eae8e0] [&>svg]:shrink-0 [&>svg]:text-[#888780]";
 
 const WindowControlButton: React.FC<WindowControlButtonProps> = ({
   title,
@@ -226,6 +232,99 @@ const GlobeIcon: React.FC = () => (
   </svg>
 );
 
+const SettingsMenuIcon: React.FC = () => (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" />
+    <path
+      d="M19.4 15A1.65 1.65 0 0 0 19.73 16.82L19.79 16.88A2 2 0 0 1 16.96 19.71L16.9 19.65A1.65 1.65 0 0 0 15.08 19.32A1.65 1.65 0 0 0 14.08 20.83V21A2 2 0 0 1 10.08 21V20.91A1.65 1.65 0 0 0 9 19.4A1.65 1.65 0 0 0 7.18 19.73L7.12 19.79A2 2 0 0 1 4.29 16.96L4.35 16.9A1.65 1.65 0 0 0 4.68 15.08A1.65 1.65 0 0 0 3.17 14H3A2 2 0 0 1 3 10H3.09A1.65 1.65 0 0 0 4.6 9A1.65 1.65 0 0 0 4.27 7.18L4.21 7.12A2 2 0 0 1 7.04 4.29L7.1 4.35A1.65 1.65 0 0 0 8.92 4.68A1.65 1.65 0 0 0 10 3.17V3A2 2 0 0 1 14 3V3.09A1.65 1.65 0 0 0 15 4.6A1.65 1.65 0 0 0 16.82 4.27L16.88 4.21A2 2 0 0 1 19.71 7.04L19.65 7.1A1.65 1.65 0 0 0 19.32 8.92A1.65 1.65 0 0 0 20.83 10H21A2 2 0 0 1 21 14H20.91A1.65 1.65 0 0 0 19.4 15Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const TrashMenuIcon: React.FC = () => (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M3 6H21"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M19 6L18 20A2 2 0 0 1 16 22H8A2 2 0 0 1 6 20L5 6"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M10 11V17"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M14 11V17"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M9 6V4A1 1 0 0 1 10 3H14A1 1 0 0 1 15 4V6"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const LogoutMenuIcon: React.FC = () => (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M9 21H5A2 2 0 0 1 3 19V5A2 2 0 0 1 5 3H9"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M16 17L21 12L16 7"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M21 12H9"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 const BackIcon: React.FC = () => (
   <svg
     width="14"
@@ -300,7 +399,18 @@ const TitleBarPrimaryActions: React.FC<{
   noDragStyle?: React.CSSProperties;
 }> = ({ noDragStyle }) => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const openGlobalSearch = useGlobalSearchStore((state) => state.open);
+
+  const openSettings = () => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("settings", "true");
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
 
   return (
     <div
@@ -317,13 +427,81 @@ const TitleBarPrimaryActions: React.FC<{
         <SectionListIcon />
       </TitleBarToolbarButton>
 
-      <TitleBarToolbarButton
-        title="メニュー"
-        disabled
-        noDragStyle={noDragStyle}
-      >
-        <MenuIcon />
-      </TitleBarToolbarButton>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger asChild>
+          <button
+            type="button"
+            title="メニュー"
+            aria-label="メニュー"
+            onMouseDown={(event) => event.stopPropagation()}
+            style={noDragStyle}
+            className={cn(
+              "titlebar-text inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors [&>svg]:scale-[1.06]",
+              "titlebar-hover",
+            )}
+          >
+            <MenuIcon />
+          </button>
+        </DropdownMenu.Trigger>
+
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content
+            align="start"
+            sideOffset={6}
+            style={noDragStyle}
+            className={cn(
+              "z-[9999] w-[148px] rounded-[10px] border border-[#dddcd5] bg-white p-[3px]",
+              "shadow-[0_4px_20px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)]",
+            )}
+          >
+            <DropdownMenu.Item
+              onSelect={openSettings}
+              className={TITLE_BAR_MENU_ITEM_CLASS}
+            >
+              <SettingsMenuIcon />
+              <span>設定</span>
+              <span className="ml-auto flex items-center text-[11px] text-[#b8b7b0]">
+                Ctrl+,
+              </span>
+            </DropdownMenu.Item>
+
+            <DropdownMenu.Item
+              onSelect={(event) => {
+                event.preventDefault();
+              }}
+              className={TITLE_BAR_MENU_ITEM_CLASS}
+            >
+              <GlobeIcon />
+              <span>言語</span>
+              <span className="ml-auto flex items-center text-[13px] leading-none text-[#b8b7b0]">
+                ›
+              </span>
+            </DropdownMenu.Item>
+
+            <DropdownMenu.Item
+              onSelect={() => {
+                void navigate("/trash");
+              }}
+              className={TITLE_BAR_MENU_ITEM_CLASS}
+            >
+              <TrashMenuIcon />
+              <span>ごみ箱</span>
+            </DropdownMenu.Item>
+
+            <DropdownMenu.Separator className="my-[3px] h-px bg-[#e5e4dd]" />
+
+            <DropdownMenu.Item
+              onSelect={() => {
+                void handleLogout();
+              }}
+              className={TITLE_BAR_MENU_ITEM_CLASS}
+            >
+              <LogoutMenuIcon />
+              <span>ログアウト</span>
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
 
       <TitleBarToolbarButton
         title="検索 (Cmd/Ctrl+K)"
@@ -506,7 +684,7 @@ export const TitleBar: React.FC = () => {
   useEffect(() => {
     return subscribeCardSetViewWindowEvent(
       CARD_SET_VIEW_EVENTS.editingChange,
-      (isEditing) => {
+      (isEditing: boolean) => {
         setIsCardSetViewEditing(Boolean(isEditing));
       },
     );
@@ -515,7 +693,7 @@ export const TitleBar: React.FC = () => {
   useEffect(() => {
     return subscribeCardSetViewWindowEvent(
       CARD_SET_VIEW_EVENTS.metaOpenChange,
-      (isOpen) => {
+      (isOpen: boolean) => {
         setIsCardSetViewMetaOpen(Boolean(isOpen));
       },
     );
