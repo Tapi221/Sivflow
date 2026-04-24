@@ -303,6 +303,56 @@ export const useExplorerDerivedData = ({
     [cardSetsByFolderId],
   );
 
+  const folderContentCountMap = useMemo(() => {
+    const counts = new Map<string, number>();
+    const visiting = new Set<string>();
+
+    const countFolderContent = (folderId: string): number => {
+      const cached = counts.get(folderId);
+      if (cached !== undefined) return cached;
+
+      if (visiting.has(folderId)) return 0;
+      visiting.add(folderId);
+
+      const documentCount = getFolderItems(folderId).filter(
+        (item) => item.type === "document",
+      ).length;
+
+      const cardSetCount = getCardSets(folderId).length;
+
+      const childFolderContentCount = getChildFolders(folderId).reduce(
+        (total, childFolder) => {
+          const childFolderId = getFolderId(childFolder);
+          return childFolderId
+            ? total + countFolderContent(childFolderId)
+            : total;
+        },
+        0,
+      );
+
+      const total = documentCount + cardSetCount + childFolderContentCount;
+
+      counts.set(folderId, total);
+      visiting.delete(folderId);
+
+      return total;
+    };
+
+    for (const folder of treeFolders) {
+      const folderId = getFolderId(folder);
+      if (folderId) countFolderContent(folderId);
+    }
+
+    return counts;
+  }, [getCardSets, getChildFolders, getFolderItems, treeFolders]);
+
+  const getFolderContentCount = useCallback(
+    (folderId: string | null): number => {
+      if (!folderId) return 0;
+      return folderContentCountMap.get(folderId) ?? 0;
+    },
+    [folderContentCountMap],
+  );
   const itemsByCardSetId = useMemo(() => {
     const map = new Map<string, ExplorerItem[]>();
     if (cardSets.length === 0) return map;
@@ -343,6 +393,8 @@ export const useExplorerDerivedData = ({
     getFolderItems,
     getCardSets,
     getCardSetItems,
+    folderContentCountMap,
+    getFolderContentCount,
     matchCountMap,
     deleteTargetCounts,
     getNextOrderIndex,
