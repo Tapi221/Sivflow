@@ -15,6 +15,7 @@ export type NavigationListEntry =
       id: string;
       name: string;
       folder: FolderTreeNode;
+      contentCount?: number;
     }
   | {
       kind: "cardSet" | "card" | "document";

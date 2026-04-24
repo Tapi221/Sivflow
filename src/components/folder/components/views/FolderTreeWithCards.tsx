@@ -301,6 +301,7 @@ export const FolderTreeWithCards = ({
     getCardSetItems,
     matchCountMap,
     getNextOrderIndex,
+    getFolderContentCount,
   } = derived;
 
   const rootItems = useMemo(() => getFolderItems(null), [getFolderItems]);
@@ -394,6 +395,7 @@ export const FolderTreeWithCards = ({
         id: panel.id,
         name: panel.name,
         folder: panel.folder,
+        contentCount: getFolderContentCount(panel.id),
       })),
       ...navigationCardSets.map((cardSet) => ({
         kind: "cardSet" as const,
@@ -422,7 +424,12 @@ export const FolderTreeWithCards = ({
         };
       }),
     ],
-    [navigationFolderPanels, navigationCardSets, navigationItems],
+    [
+      getFolderContentCount,
+      navigationFolderPanels,
+      navigationCardSets,
+      navigationItems,
+    ],
   );
 
   const rootFolderPanels = useMemo(
