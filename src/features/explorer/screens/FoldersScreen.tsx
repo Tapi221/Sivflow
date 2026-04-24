@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useState } from "react";
 
 import { FoldersScreenSkeleton } from "@/components/loading/ScreenSkeletons";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
@@ -20,6 +20,12 @@ import type { SelectedExplorerItem } from "@/types";
 type FoldersScreenProps = {
   route: FoldersRouteAdapter;
 };
+
+const FOLDERS_SCREEN_FILL_STYLE = {
+  width:
+    "calc(100dvw - var(--app-layout-padding-x, 12px) - var(--app-layout-padding-x, 12px))",
+  maxWidth: "none",
+} satisfies CSSProperties;
 
 const resolveSelectedCardId = (selectedItem: SelectedExplorerItem) => {
   if (selectedItem?.type !== "card") {
@@ -127,14 +133,15 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
 
   return (
     <div
+      style={FOLDERS_SCREEN_FILL_STYLE}
       className={cn(
-        "relative flex min-h-0 h-full w-full min-w-0 flex-col bg-transparent",
+        "relative flex h-full min-h-0 min-w-0 max-w-none flex-col bg-transparent",
         route.isDesktop
           ? "overflow-hidden"
           : "overflow-x-hidden overflow-y-auto",
       )}
     >
-      <div className="relative z-10 flex h-full min-h-0 w-full min-w-0">
+      <div className="relative z-10 flex h-full min-h-0 w-full min-w-0 max-w-none">
         <TreeViewLayout
           folders={lookups.normalizedFolders}
           isSectionListMode={controller.state.isSectionListMode}
