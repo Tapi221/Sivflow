@@ -24,13 +24,17 @@ const THUMBNAIL_CARD_WIDTH_PX = 92;
 const THUMBNAIL_PAGE_BOX_WIDTH_PX = 82;
 const THUMBNAIL_PAGE_BOX_HEIGHT_PX = 116;
 const THUMBNAIL_GRID_GAP_PX = 8;
-const INITIAL_RENDER_ROW_COUNT = 7;
-const BACKGROUND_RENDER_BATCH_ROW_COUNT = 3;
-const BACKGROUND_RENDER_INTERVAL_MS = 80;
-const MAX_BACKGROUND_RENDER_COUNT = 120;
-const THUMBNAIL_INTERSECTION_ROOT_MARGIN = "1200px 0px 1600px 0px";
+const INITIAL_RENDER_ROW_COUNT = 6;
+const BACKGROUND_RENDER_BATCH_ROW_COUNT = 2;
+const BACKGROUND_RENDER_INTERVAL_MS = 140;
+const MAX_BACKGROUND_RENDER_COUNT = 96;
+const THUMBNAIL_INTERSECTION_ROOT_MARGIN = "360px 0px 720px 0px";
 const MIN_THUMBNAIL_COLUMNS = 2;
 const MAX_THUMBNAIL_COLUMNS = 4;
+const CURRENT_PAGE_RENDER_PRIORITY = 1_000;
+const INTERSECTING_PAGE_RENDER_PRIORITY = 900;
+const INITIAL_PAGE_RENDER_PRIORITY = 700;
+const BACKGROUND_PAGE_RENDER_PRIORITY = 120;
 
 const getRequiredGridWidth = (columnCount: number) => {
   return (
@@ -91,6 +95,32 @@ const parseSortableId = (value: string | number) => {
   return Math.max(1, Math.trunc(rawPageNumber));
 };
 
+const resolveRenderPriority = ({
+  isCurrentPage,
+  pageIndex,
+  initialRenderCount,
+  eagerRenderItemCount,
+}: {
+  isCurrentPage: boolean;
+  pageIndex: number;
+  initialRenderCount: number;
+  eagerRenderItemCount: number;
+}) => {
+  if (isCurrentPage) {
+    return CURRENT_PAGE_RENDER_PRIORITY;
+  }
+
+  if (pageIndex < initialRenderCount) {
+    return INITIAL_PAGE_RENDER_PRIORITY - pageIndex;
+  }
+
+  if (pageIndex < eagerRenderItemCount) {
+    return BACKGROUND_PAGE_RENDER_PRIORITY - pageIndex / 1_000;
+  }
+
+  return 0;
+};
+
 const applyDocumentDragCursor = () => {
   if (typeof document === "undefined") {
     return () => undefined;
@@ -114,6 +144,8 @@ interface PdfThumbnailPagePreviewProps {
   documentKey: string;
   pageNumber: number;
   eagerRender: boolean;
+  renderPriority: number;
+  baseSize?: PageSize;
   observerRoot: HTMLDivElement | null;
   acquirePage: (
     pageNumber: number,
@@ -121,30 +153,40 @@ interface PdfThumbnailPagePreviewProps {
   onPageSize: (pageNumber: number, size: PageSize) => void;
 }
 
+type ThumbnailRenderTrigger = "idle" | "eager" | "intersection";
+
 const PdfThumbnailPagePreview = ({
   documentKey,
   pageNumber,
   eagerRender,
+  renderPriority,
+  baseSize,
   observerRoot,
   acquirePage,
   onPageSize,
 }: PdfThumbnailPagePreviewProps) => {
   const hostRef = useRef<HTMLDivElement | null>(null);
-  const [shouldRender, setShouldRender] = useState(eagerRender);
+  const [renderTrigger, setRenderTrigger] = useState<ThumbnailRenderTrigger>(
+    eagerRender ? "eager" : "idle",
+  );
 
   useEffect(() => {
-    if (eagerRender) {
-      setShouldRender(true);
+    if (!eagerRender) {
+      return;
     }
+
+    setRenderTrigger((previousTrigger) => {
+      return previousTrigger === "idle" ? "eager" : previousTrigger;
+    });
   }, [eagerRender]);
 
   useEffect(() => {
-    if (shouldRender) {
+    if (renderTrigger !== "idle") {
       return;
     }
 
     if (typeof IntersectionObserver === "undefined") {
-      setShouldRender(true);
+      setRenderTrigger("intersection");
       return;
     }
 
@@ -163,7 +205,7 @@ const PdfThumbnailPagePreview = ({
           return;
         }
 
-        setShouldRender(true);
+        setRenderTrigger("intersection");
         observer.disconnect();
       },
       {
@@ -175,7 +217,13 @@ const PdfThumbnailPagePreview = ({
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [observerRoot, shouldRender]);
+  }, [observerRoot, renderTrigger]);
+
+  const shouldRender = renderTrigger !== "idle";
+  const effectiveRenderPriority =
+    renderTrigger === "intersection"
+      ? Math.max(renderPriority, INTERSECTING_PAGE_RENDER_PRIORITY)
+      : renderPriority;
 
   return (
     <div
@@ -191,6 +239,8 @@ const PdfThumbnailPagePreview = ({
           pageNumber={pageNumber}
           boxWidthPx={THUMBNAIL_PAGE_BOX_WIDTH_PX}
           boxHeightPx={THUMBNAIL_PAGE_BOX_HEIGHT_PX}
+          baseSize={baseSize}
+          renderPriority={effectiveRenderPriority}
           acquirePage={acquirePage}
           onPageSize={onPageSize}
         />
@@ -211,6 +261,8 @@ interface PdfThumbnailCardContentProps {
   documentKey: string;
   pageNumber: number;
   eagerRender: boolean;
+  renderPriority: number;
+  baseSize?: PageSize;
   isActive: boolean;
   isDragging?: boolean;
   observerRoot: HTMLDivElement | null;
@@ -224,6 +276,8 @@ const PdfThumbnailCardContent = ({
   documentKey,
   pageNumber,
   eagerRender,
+  renderPriority,
+  baseSize,
   isActive,
   isDragging = false,
   observerRoot,
@@ -245,6 +299,8 @@ const PdfThumbnailCardContent = ({
           documentKey={documentKey}
           pageNumber={pageNumber}
           eagerRender={eagerRender}
+          renderPriority={renderPriority}
+          baseSize={baseSize}
           observerRoot={observerRoot}
           acquirePage={acquirePage}
           onPageSize={onPageSize}
@@ -335,6 +391,7 @@ export const PdfThumbnailSidebar = () => {
     error,
     loading,
     numPages,
+    pageSizes,
     prefetchPageResources,
     setPageSize,
   } = documentController;
@@ -550,22 +607,32 @@ export const PdfThumbnailSidebar = () => {
                       gridTemplateColumns: `repeat(${columnCount}, ${THUMBNAIL_CARD_WIDTH_PX}px)`,
                     }}
                   >
-                    {normalizedThumbnailOrder.map((pageNumber, pageIndex) => (
-                      <SortablePdfThumbnailTile
-                        key={pageNumber}
-                        documentKey={documentKey}
-                        pageNumber={pageNumber}
-                        eagerRender={
-                          pageIndex < eagerRenderItemCount ||
-                          pageNumber === currentPage
-                        }
-                        isActive={pageNumber === currentPage}
-                        observerRoot={scrollRootRef.current}
-                        acquirePage={acquirePage}
-                        onPageSize={setPageSize}
-                        onOpenPage={openPage}
-                      />
-                    ))}
+                    {normalizedThumbnailOrder.map((pageNumber, pageIndex) => {
+                      const isCurrentPage = pageNumber === currentPage;
+                      const eagerRender =
+                        pageIndex < eagerRenderItemCount || isCurrentPage;
+
+                      return (
+                        <SortablePdfThumbnailTile
+                          key={pageNumber}
+                          documentKey={documentKey}
+                          pageNumber={pageNumber}
+                          eagerRender={eagerRender}
+                          renderPriority={resolveRenderPriority({
+                            isCurrentPage,
+                            pageIndex,
+                            initialRenderCount,
+                            eagerRenderItemCount,
+                          })}
+                          baseSize={pageSizes[pageNumber]}
+                          isActive={isCurrentPage}
+                          observerRoot={scrollRootRef.current}
+                          acquirePage={acquirePage}
+                          onPageSize={setPageSize}
+                          onOpenPage={openPage}
+                        />
+                      );
+                    })}
                   </div>
                 </SortableContext>
               </div>

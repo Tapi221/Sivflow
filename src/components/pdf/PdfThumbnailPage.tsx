@@ -1,11 +1,22 @@
 import { useEffect, useRef } from "react";
 import type { PageSize, PdfJsPage, PdfJsRenderTask } from "./pdfViewerTypes";
+import {
+  getCachedPdfThumbnailBitmap,
+  setCachedPdfThumbnailBitmap,
+} from "./pdfThumbnailBitmapCache";
+import {
+  isPdfThumbnailRenderCancelledError,
+  schedulePdfThumbnailRender,
+  type PdfThumbnailQueuedRender,
+} from "./pdfThumbnailRenderQueue";
 
 interface PdfThumbnailPageProps {
   documentKey: string;
   pageNumber: number;
   boxWidthPx: number;
   boxHeightPx: number;
+  baseSize?: PageSize;
+  renderPriority: number;
   acquirePage: (
     pageNumber: number,
   ) => Promise<{ page: PdfJsPage; release: () => void }>;
@@ -33,6 +44,10 @@ const normalizePositiveFinite = (value: number, fallback: number) => {
   }
 
   return value;
+};
+
+const arePageSizesEqual = (left: PageSize, right: PageSize) => {
+  return left.width === right.width && left.height === right.height;
 };
 
 const resolveContainLayout = ({
@@ -79,17 +94,132 @@ const buildRenderIdentity = ({
   ].join("::");
 };
 
+const resolveCanvasPixelSize = ({
+  cssWidthPx,
+  cssHeightPx,
+  devicePixelRatio,
+}: {
+  cssWidthPx: number;
+  cssHeightPx: number;
+  devicePixelRatio: number;
+}) => {
+  return {
+    canvasWidthPx: Math.max(1, Math.ceil(cssWidthPx * devicePixelRatio)),
+    canvasHeightPx: Math.max(1, Math.ceil(cssHeightPx * devicePixelRatio)),
+  };
+};
+
+const applyCanvasSize = ({
+  canvas,
+  cssWidthPx,
+  cssHeightPx,
+  canvasWidthPx,
+  canvasHeightPx,
+}: {
+  canvas: HTMLCanvasElement;
+  cssWidthPx: number;
+  cssHeightPx: number;
+  canvasWidthPx: number;
+  canvasHeightPx: number;
+}) => {
+  canvas.style.width = `${cssWidthPx}px`;
+  canvas.style.height = `${cssHeightPx}px`;
+
+  if (canvas.width !== canvasWidthPx) {
+    canvas.width = canvasWidthPx;
+  }
+
+  if (canvas.height !== canvasHeightPx) {
+    canvas.height = canvasHeightPx;
+  }
+};
+
+const commitCachedBitmapToCanvas = ({
+  canvas,
+  bitmap,
+  cssWidthPx,
+  cssHeightPx,
+  canvasWidthPx,
+  canvasHeightPx,
+}: {
+  canvas: HTMLCanvasElement;
+  bitmap: HTMLCanvasElement | ImageBitmap;
+  cssWidthPx: number;
+  cssHeightPx: number;
+  canvasWidthPx: number;
+  canvasHeightPx: number;
+}) => {
+  applyCanvasSize({
+    canvas,
+    cssWidthPx,
+    cssHeightPx,
+    canvasWidthPx,
+    canvasHeightPx,
+  });
+
+  const context = canvas.getContext("2d", { alpha: false });
+  if (!context) {
+    return false;
+  }
+
+  context.setTransform(1, 0, 0, 1, 0, 0);
+  context.clearRect(0, 0, canvasWidthPx, canvasHeightPx);
+  context.drawImage(bitmap, 0, 0);
+  return true;
+};
+
+const prepareCanvasForPdfRender = ({
+  canvas,
+  cssWidthPx,
+  cssHeightPx,
+  canvasWidthPx,
+  canvasHeightPx,
+  devicePixelRatio,
+}: {
+  canvas: HTMLCanvasElement;
+  cssWidthPx: number;
+  cssHeightPx: number;
+  canvasWidthPx: number;
+  canvasHeightPx: number;
+  devicePixelRatio: number;
+}) => {
+  applyCanvasSize({
+    canvas,
+    cssWidthPx,
+    cssHeightPx,
+    canvasWidthPx,
+    canvasHeightPx,
+  });
+
+  const context = canvas.getContext("2d", { alpha: false });
+  if (!context) {
+    return null;
+  }
+
+  context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, cssWidthPx, cssHeightPx);
+  return context;
+};
+
 export const PdfThumbnailPage = ({
   documentKey,
   pageNumber,
   boxWidthPx,
   boxHeightPx,
+  baseSize,
+  renderPriority,
   acquirePage,
   onPageSize,
 }: PdfThumbnailPageProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const renderPassRef = useRef(0);
   const lastRenderIdentityRef = useRef<string | null>(null);
+  const baseSizeRef = useRef<PageSize | undefined>(baseSize);
+
+  useEffect(() => {
+    baseSizeRef.current = baseSize;
+  }, [baseSize]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -106,6 +236,44 @@ export const PdfThumbnailPage = ({
       devicePixelRatio,
     });
 
+    const commitCachedRender = (pageSize: PageSize) => {
+      const layout = resolveContainLayout({
+        pageSize,
+        boxWidthPx,
+        boxHeightPx,
+      });
+      const { canvasWidthPx, canvasHeightPx } = resolveCanvasPixelSize({
+        cssWidthPx: layout.cssWidthPx,
+        cssHeightPx: layout.cssHeightPx,
+        devicePixelRatio,
+      });
+      const cachedBitmap = getCachedPdfThumbnailBitmap({
+        key: renderIdentity,
+        width: canvasWidthPx,
+        height: canvasHeightPx,
+      });
+
+      if (!cachedBitmap) {
+        return false;
+      }
+
+      return commitCachedBitmapToCanvas({
+        canvas,
+        bitmap: cachedBitmap.bitmap,
+        cssWidthPx: layout.cssWidthPx,
+        cssHeightPx: layout.cssHeightPx,
+        canvasWidthPx,
+        canvasHeightPx,
+      });
+    };
+
+    const baseSizeSnapshot = baseSizeRef.current;
+
+    if (baseSizeSnapshot && commitCachedRender(baseSizeSnapshot)) {
+      lastRenderIdentityRef.current = renderIdentity;
+      return;
+    }
+
     if (lastRenderIdentityRef.current === renderIdentity) {
       return;
     }
@@ -117,6 +285,7 @@ export const PdfThumbnailPage = ({
 
     let disposed = false;
     let renderTask: PdfJsRenderTask | null = null;
+    let queuedRender: PdfThumbnailQueuedRender<void> | null = null;
     let releasePage: (() => void) | null = null;
 
     const isStale = () => disposed || renderPassRef.current !== renderPass;
@@ -144,40 +313,58 @@ export const PdfThumbnailPage = ({
           width: baseViewport.width,
           height: baseViewport.height,
         };
+
+        const activeBaseSize = baseSizeRef.current;
+        if (!activeBaseSize || !arePageSizesEqual(activeBaseSize, pageSize)) {
+          onPageSize(pageNumber, pageSize);
+        }
+
         const layout = resolveContainLayout({
           pageSize,
           boxWidthPx,
           boxHeightPx,
         });
         const viewport = page.getViewport({ scale: layout.scale });
-        const canvasWidthPx = Math.max(
-          1,
-          Math.ceil(layout.cssWidthPx * devicePixelRatio),
-        );
-        const canvasHeightPx = Math.max(
-          1,
-          Math.ceil(layout.cssHeightPx * devicePixelRatio),
-        );
+        const { canvasWidthPx, canvasHeightPx } = resolveCanvasPixelSize({
+          cssWidthPx: layout.cssWidthPx,
+          cssHeightPx: layout.cssHeightPx,
+          devicePixelRatio,
+        });
 
         if (isStale()) {
           return;
         }
 
-        onPageSize(pageNumber, pageSize);
+        const cachedBitmap = getCachedPdfThumbnailBitmap({
+          key: renderIdentity,
+          width: canvasWidthPx,
+          height: canvasHeightPx,
+        });
 
-        canvas.style.width = `${layout.cssWidthPx}px`;
-        canvas.style.height = `${layout.cssHeightPx}px`;
-        canvas.width = canvasWidthPx;
-        canvas.height = canvasHeightPx;
-
-        const context = canvas.getContext("2d", { alpha: false });
-        if (!context) {
+        if (cachedBitmap) {
+          commitCachedBitmapToCanvas({
+            canvas,
+            bitmap: cachedBitmap.bitmap,
+            cssWidthPx: layout.cssWidthPx,
+            cssHeightPx: layout.cssHeightPx,
+            canvasWidthPx,
+            canvasHeightPx,
+          });
           return;
         }
 
-        context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-        context.fillStyle = "#ffffff";
-        context.fillRect(0, 0, layout.cssWidthPx, layout.cssHeightPx);
+        const context = prepareCanvasForPdfRender({
+          canvas,
+          cssWidthPx: layout.cssWidthPx,
+          cssHeightPx: layout.cssHeightPx,
+          canvasWidthPx,
+          canvasHeightPx,
+          devicePixelRatio,
+        });
+
+        if (!context) {
+          return;
+        }
 
         renderTask = page.render({
           canvasContext: context,
@@ -186,12 +373,33 @@ export const PdfThumbnailPage = ({
         });
 
         await renderTask.promise;
+
+        if (isStale()) {
+          return;
+        }
+
+        void setCachedPdfThumbnailBitmap({
+          key: renderIdentity,
+          documentKey,
+          canvas,
+        }).catch(() => {
+          // Cache failures must not break thumbnail rendering.
+        });
       } finally {
         releaseActivePage();
       }
     };
 
-    void run().catch(() => {
+    queuedRender = schedulePdfThumbnailRender({
+      priority: renderPriority,
+      run,
+    });
+
+    void queuedRender.promise.catch((errorValue) => {
+      if (isPdfThumbnailRenderCancelledError(errorValue)) {
+        return;
+      }
+
       if (lastRenderIdentityRef.current === renderIdentity) {
         lastRenderIdentityRef.current = null;
       }
@@ -204,15 +412,29 @@ export const PdfThumbnailPage = ({
         renderPassRef.current += 1;
       }
 
+      queuedRender?.cancel();
+
       try {
         renderTask?.cancel?.();
       } catch {
         // noop
       }
 
-      releasePage?.();
+      releaseActivePage();
+
+      if (lastRenderIdentityRef.current === renderIdentity) {
+        lastRenderIdentityRef.current = null;
+      }
     };
-  }, [acquirePage, boxHeightPx, boxWidthPx, documentKey, onPageSize, pageNumber]);
+  }, [
+    acquirePage,
+    boxHeightPx,
+    boxWidthPx,
+    documentKey,
+    onPageSize,
+    pageNumber,
+    renderPriority,
+  ]);
 
   return (
     <div
