@@ -1,9 +1,8 @@
 import React, { Suspense, useEffect, useRef } from "react";
-import { Outlet, useLocation, useSearchParams } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 import { AppShellLoadingFallback } from "@/components/loading/ScreenSkeletons";
 import "./AppLayout.css";
-import { Sidebar } from "./Sidebar";
 
 const LoadingFallback = () => {
   return <AppShellLoadingFallback />;
@@ -31,21 +30,14 @@ const resetWorkspaceScroll = (mainElement: HTMLElement | null) => {
 
 export const AppLayout = () => {
   const { pathname } = useLocation();
-  const [searchParams] = useSearchParams();
 
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(pathname);
   const isCardSetViewRoute = /^\/(?:cardsetview|cardview)(?:\/|$)/i.test(
     pathname,
   );
   const isCardEditRoute = /^\/cardedit(?:\/|$)/i.test(pathname);
-  const isHomeOnlyMode = searchParams.get("home") === "1";
-  const selectedCardSetId = searchParams.get("cardSetId");
 
   const mainRef = useRef<HTMLElement | null>(null);
-
-  const shouldHideMainSidebar =
-    (isFoldersRoute && !isHomeOnlyMode) ||
-    ((isCardSetViewRoute || isCardEditRoute) && Boolean(selectedCardSetId));
 
   const isScrollLocked =
     isFoldersRoute ||
@@ -58,25 +50,7 @@ export const AppLayout = () => {
   }, [pathname]);
 
   return (
-    <div
-      className={[
-        "app-layout",
-        shouldHideMainSidebar ? "app-layout--sidebar-hidden" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <div
-        className={[
-          "app-layout__sidebar",
-          shouldHideMainSidebar ? "app-layout__sidebar--hidden" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-      >
-        <Sidebar />
-      </div>
-
+    <div className="app-layout">
       <div className="app-layout__content">
         <main
           ref={mainRef}
