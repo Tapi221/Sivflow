@@ -16,6 +16,7 @@ interface ExplorerSidebarHeaderProps {
   onOpenOutline?: () => void | Promise<void>;
   onCreateRootFolder?: () => void | Promise<void>;
   onCreateCardSet?: () => void | Promise<void>;
+  onCreateCard?: () => void | Promise<void>;
   onAddDocument?: () => void | Promise<void>;
   onBulkImport?: () => void | Promise<void>;
   canCreateCardSet?: boolean;
@@ -51,6 +52,7 @@ export const ExplorerSidebarHeader = ({
   onOpenOutline,
   onCreateRootFolder,
   onCreateCardSet,
+  onCreateCard,
   onAddDocument,
   onBulkImport,
   canCreateCardSet = false,
@@ -71,6 +73,7 @@ export const ExplorerSidebarHeader = ({
         canBulkImport,
         onCreateRootFolder,
         onCreateCardSet,
+        onCreateCard,
         onAddDocument,
         onBulkImport,
       }),
@@ -81,6 +84,7 @@ export const ExplorerSidebarHeader = ({
       canCreateCardSet,
       onAddDocument,
       onBulkImport,
+      onCreateCard,
       onCreateCardSet,
       onCreateRootFolder,
     ],
@@ -90,7 +94,9 @@ export const ExplorerSidebarHeader = ({
     preferDirectRootFolderCreate &&
     Boolean(onCreateRootFolder) &&
     !canCreateCardSet &&
-    !canAddDocuments;
+    !canCreateCard &&
+    !canAddDocuments &&
+    !canBulkImport;
 
   return (
     <div
@@ -155,10 +161,11 @@ export const ExplorerSidebarHeader = ({
                 <Plus className="h-3.5 w-3.5" />
               </button>
             </DropdownMenuTrigger>
+
             <ExplorerMenuPanel
               actions={createMenuActions}
               align="end"
-              className="w-44"
+              variant="create"
               closeMenu={() => {
                 suppressCloseAutoFocusRef.current = true;
                 setCreateMenuOpen(false);
