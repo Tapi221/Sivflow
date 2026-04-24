@@ -17,7 +17,6 @@
 @import "./base/utilities.css";
 
 @import "./tokens/code-theme.css";
-@import "./options/options.css";
 
 @tailwind base;
 @tailwind components;
