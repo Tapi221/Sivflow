@@ -30,14 +30,13 @@ import { useSyncSettings } from "@/hooks/sync/useSyncSettings";
 import { cn } from "@/lib/utils";
 import { auth } from "@/services/firebase";
 import { getLocalDb } from "@/services/localDB";
-import type { SyncSettings, UserSettings } from "@/types";
+import type { SyncSettings } from "@/types";
 import {
   BookOpen,
   Check,
   Cloud,
   Folder,
   Keyboard,
-  Layers,
   Loader2,
   LogOut,
   RefreshCw,
@@ -78,13 +77,6 @@ const settingsSidebarSections = [
         description:
           "カード編集、レビュー導線、スケジュールの既定値をまとめて管理します。",
         icon: BookOpen,
-      },
-      {
-        id: "display",
-        label: "表示設定",
-        description:
-          "フォルダサイドバーの表示モードと、設定画面の閲覧体験を調整します。",
-        icon: Layers,
       },
       {
         id: "voice",
@@ -146,9 +138,6 @@ const getDefaultSidebarItem = (): SidebarItem => {
 
 const defaultSidebarItem = getDefaultSidebarItem();
 
-type FolderSidebarDisplayMode = NonNullable<
-  UserSettings["folderSidebarDisplayMode"]
->;
 type ReviewToggleSettingKey = "showReviewHard" | "showReviewEasy";
 
 type SettingsDialogProps = {
@@ -200,22 +189,6 @@ const voiceOptions = [
   },
 ] as const;
 
-const folderSidebarDisplayModeOptions = [
-  {
-    id: "tree",
-    label: "ツリー表示",
-    description: "フォルダ全体を常に1本のツリーとして表示します。",
-  },
-  {
-    id: "navigation",
-    label: "遷移表示",
-    description: "最上位フォルダから入り、選択中の階層だけを表示します。",
-  },
-] satisfies ReadonlyArray<{
-  id: FolderSidebarDisplayMode;
-  label: string;
-  description: string;
-}>;
 
 const reviewButtonItems = [
   {
@@ -345,7 +318,7 @@ const isSidebarSettingsTab = (
 };
 
 const resolveSettingsTab = (tab?: SettingsTabParam): SettingsTab => {
-  if (tab === "theme") return "display";
+  if (tab === "theme" || tab === "display") return DEFAULT_SETTINGS_TAB;
 
   return isSidebarSettingsTab(tab) ? tab : DEFAULT_SETTINGS_TAB;
 };
@@ -794,45 +767,6 @@ const SettingsDialog = ({
       </div>
     );
   };
-
-  const renderDisplayTab = () => {
-    const currentFolderSidebarDisplayMode: FolderSidebarDisplayMode =
-      settings?.folderSidebarDisplayMode === "navigation"
-        ? "navigation"
-        : "tree";
-
-    return (
-      <div className="space-y-6">
-        <SettingsSection
-          title="フォルダサイドバー表示"
-          description="作業ビューの左サイドバーを、常時ツリー表示にするか階層遷移型にするかを選びます。"
-        >
-          <div className="ds-settings-panel__choice-grid md:grid-cols-2">
-            {folderSidebarDisplayModeOptions.map((option) => {
-              const isSelected = currentFolderSidebarDisplayMode === option.id;
-
-              return (
-                <SettingsChoiceCard
-                  key={option.id}
-                  title={option.label}
-                  description={option.description}
-                  selected={isSelected}
-                  badge={isSelected ? "使用中" : undefined}
-                  onSelect={() =>
-                    void updateSettings({
-                      folderSidebarDisplayMode:
-                        option.id as FolderSidebarDisplayMode,
-                    })
-                  }
-                />
-              );
-            })}
-          </div>
-        </SettingsSection>
-      </div>
-    );
-  };
-
   const renderVoiceTab = () => {
     return (
       <div className="space-y-6">
@@ -1105,8 +1039,6 @@ const SettingsDialog = ({
     switch (activeTab) {
       case "study":
         return renderStudyTab();
-      case "display":
-        return renderDisplayTab();
       case "tags":
         return <TagManagerPanel />;
       case "voice":
@@ -1288,3 +1220,4 @@ const SettingsDialog = ({
 };
 
 export default SettingsDialog;
+

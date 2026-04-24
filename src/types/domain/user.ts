@@ -52,7 +52,6 @@ export interface UserSettings extends BaseEntity {
   cardEditPaneWidthPx?: number | null;
   editorBlockSettings?: BlockConfig[];
   questionDisplayMode?: "always" | "tap_to_reveal";
-  folderSidebarDisplayMode?: "tree" | "navigation";
   blockButtonShowLabel?: boolean;
   tagCategoryDisplayNames?: Record<string, string>;
   markdownTabSize?: 2 | 4 | 8;
@@ -70,3 +69,4 @@ export interface UserStats extends BaseEntity {
   totalHighResBytes?: number;
   totalStorageUsedBytes?: number;
 }
+

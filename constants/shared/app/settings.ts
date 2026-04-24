@@ -9,7 +9,7 @@ export const SETTINGS_TAB_PARAMS = [
 ] as const;
 
 export type SettingsTabParam = (typeof SETTINGS_TAB_PARAMS)[number];
-export type SettingsTab = Exclude<SettingsTabParam, "theme">;
+export type SettingsTab = Exclude<SettingsTabParam, "theme" | "display">;
 
 export const DEFAULT_SETTINGS_TAB: SettingsTab = "study";
 
