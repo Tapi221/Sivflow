@@ -14,14 +14,14 @@ export const SectionListBlankPane = ({
   return (
     <div
       className={cn(
-        "hidden min-h-0 min-w-0 flex-1 bg-transparent pl-4 pr-3 md:flex",
+        "hidden h-full min-h-0 min-w-0 flex-1 basis-0 self-stretch bg-transparent pl-4 pr-3 md:flex",
         className,
       )}
     >
       <div
         aria-hidden="true"
         className={cn(
-          "h-full min-h-0 w-full overflow-hidden rounded-[14px]",
+          "h-full min-h-0 w-full min-w-0 overflow-hidden rounded-[14px]",
           "border border-[#dddcd5]",
           "bg-[rgba(255,255,255,0.92)]",
           "shadow-[0_16px_36px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.04)]",
