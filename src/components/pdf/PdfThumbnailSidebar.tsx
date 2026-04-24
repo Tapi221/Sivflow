@@ -2,7 +2,6 @@ import { cn } from "@/lib/utils";
 import {
   closestCenter,
   DndContext,
-  DragOverlay,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -19,10 +18,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PdfThumbnailPage } from "./PdfThumbnailPage";
 import { usePdfWorkspace } from "./usePdfWorkspace";
-import type { PageSize, PdfJsPage } from "./pdfViewerTypes";
+import type { PageSize, PdfJsDocument, PdfJsPage } from "./pdfViewerTypes";
 
 const THUMBNAIL_CARD_WIDTH_PX = 92;
-const THUMBNAIL_PAGE_BOX_WIDTH_PX = 80;
+const THUMBNAIL_PAGE_BOX_WIDTH_PX = 82;
 const THUMBNAIL_PAGE_BOX_HEIGHT_PX = 116;
 const THUMBNAIL_GRID_GAP_PX = 8;
 const INITIAL_VISIBLE_PAGE_COUNT = 6;
@@ -70,7 +69,27 @@ const parseSortableId = (value: string | number) => {
   return Math.max(1, Math.trunc(rawPageNumber));
 };
 
+const applyDocumentDragCursor = () => {
+  if (typeof document === "undefined") {
+    return () => undefined;
+  }
+
+  const body = document.body;
+  const documentElement = document.documentElement;
+  const previousBodyCursor = body.style.cursor;
+  const previousDocumentElementCursor = documentElement.style.cursor;
+
+  body.style.cursor = "grabbing";
+  documentElement.style.cursor = "grabbing";
+
+  return () => {
+    body.style.cursor = previousBodyCursor;
+    documentElement.style.cursor = previousDocumentElementCursor;
+  };
+};
+
 interface PdfThumbnailPagePreviewProps {
+  pdf: PdfJsDocument;
   documentKey: string;
   pageNumber: number;
   baseSize?: PageSize;
@@ -79,25 +98,24 @@ interface PdfThumbnailPagePreviewProps {
     pageNumber: number,
   ) => Promise<{ page: PdfJsPage; release: () => void }>;
   onPageSize: (pageNumber: number, size: PageSize) => void;
-  forceRender?: boolean;
 }
 
 const PdfThumbnailPagePreview = ({
+  pdf,
   documentKey,
   pageNumber,
   baseSize,
   observerRoot,
   acquirePage,
   onPageSize,
-  forceRender = false,
 }: PdfThumbnailPagePreviewProps) => {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [shouldRender, setShouldRender] = useState(
-    forceRender || pageNumber <= INITIAL_VISIBLE_PAGE_COUNT,
+    pageNumber <= INITIAL_VISIBLE_PAGE_COUNT,
   );
 
   useEffect(() => {
-    if (forceRender || shouldRender) {
+    if (shouldRender) {
       return;
     }
 
@@ -133,7 +151,7 @@ const PdfThumbnailPagePreview = ({
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [forceRender, observerRoot, shouldRender]);
+  }, [observerRoot, shouldRender]);
 
   return (
     <div
@@ -146,6 +164,7 @@ const PdfThumbnailPagePreview = ({
       {shouldRender ? (
         <PdfThumbnailPage
           documentKey={documentKey}
+          pdf={pdf}
           pageNumber={pageNumber}
           boxWidthPx={THUMBNAIL_PAGE_BOX_WIDTH_PX}
           boxHeightPx={THUMBNAIL_PAGE_BOX_HEIGHT_PX}
@@ -167,46 +186,49 @@ const PdfThumbnailPagePreview = ({
 };
 
 interface PdfThumbnailCardContentProps {
+  pdf: PdfJsDocument;
   documentKey: string;
   pageNumber: number;
   baseSize?: PageSize;
   isActive: boolean;
+  isDragging?: boolean;
   observerRoot: HTMLDivElement | null;
   acquirePage: (
     pageNumber: number,
   ) => Promise<{ page: PdfJsPage; release: () => void }>;
   onPageSize: (pageNumber: number, size: PageSize) => void;
-  forceRender?: boolean;
 }
 
 const PdfThumbnailCardContent = ({
+  pdf,
   documentKey,
   pageNumber,
   baseSize,
   isActive,
+  isDragging = false,
   observerRoot,
   acquirePage,
   onPageSize,
-  forceRender = false,
 }: PdfThumbnailCardContentProps) => {
   return (
     <>
       <div
         className={cn(
-          "flex justify-center overflow-hidden rounded-xl border bg-white p-1 shadow-sm",
+          "overflow-hidden rounded-xl border bg-white p-1 shadow-sm",
           isActive
             ? "border-primary-500 ring-2 ring-primary-500/20"
             : "border-slate-200",
+          isDragging && "shadow-lg",
         )}
       >
         <PdfThumbnailPagePreview
+          pdf={pdf}
           documentKey={documentKey}
           pageNumber={pageNumber}
           baseSize={baseSize}
           observerRoot={observerRoot}
           acquirePage={acquirePage}
           onPageSize={onPageSize}
-          forceRender={forceRender}
         />
       </div>
 
@@ -249,8 +271,10 @@ const SortablePdfThumbnailTile = ({
       style={{
         width: `${THUMBNAIL_CARD_WIDTH_PX}px`,
         transform: CSS.Transform.toString(transform),
-        transition,
-        zIndex: isDragging ? 2 : 1,
+        transition: isDragging ? undefined : transition,
+        zIndex: isDragging ? 10 : 1,
+        position: "relative",
+        willChange: isDragging ? "transform" : undefined,
       }}
     >
       <button
@@ -258,8 +282,8 @@ const SortablePdfThumbnailTile = ({
         aria-label={`ページ ${pageNumber} を開く。ドラッグで順序を変更`}
         className={cn(
           "block w-full touch-none select-none rounded-xl text-left outline-none",
-          "focus-visible:ring-2 focus-visible:ring-primary-500/40",
-          isDragging ? "cursor-grabbing" : "cursor-grab",
+          "cursor-grab focus-visible:ring-2 focus-visible:ring-primary-500/40",
+          isDragging && "cursor-grabbing",
         )}
         {...attributes}
         {...listeners}
@@ -268,6 +292,7 @@ const SortablePdfThumbnailTile = ({
         <PdfThumbnailCardContent
           {...contentProps}
           pageNumber={pageNumber}
+          isDragging={isDragging}
         />
       </button>
     </div>
@@ -278,6 +303,7 @@ export const PdfThumbnailSidebar = () => {
   const {
     documentController,
     sourceUnavailable,
+    firstPageSize,
     currentPage,
     normalizedThumbnailOrder,
     scrollToPage,
@@ -285,13 +311,11 @@ export const PdfThumbnailSidebar = () => {
   } = usePdfWorkspace();
 
   const scrollRootRef = useRef<HTMLDivElement | null>(null);
+  const releaseDragCursorRef = useRef<(() => void) | null>(null);
   const [gridHostElement, setGridHostElement] = useState<HTMLDivElement | null>(
     null,
   );
   const [availableGridWidth, setAvailableGridWidth] = useState(0);
-  const [activeDragPageNumber, setActiveDragPageNumber] = useState<number | null>(
-    null,
-  );
 
   const handleGridHostRef = useCallback((node: HTMLDivElement | null) => {
     setGridHostElement((previousNode) =>
@@ -316,6 +340,13 @@ export const PdfThumbnailSidebar = () => {
     return () => observer.disconnect();
   }, [gridHostElement]);
 
+  useEffect(() => {
+    return () => {
+      releaseDragCursorRef.current?.();
+      releaseDragCursorRef.current = null;
+    };
+  }, []);
+
   const columnCount = useMemo(() => {
     return resolveColumnCount(availableGridWidth);
   }, [availableGridWidth]);
@@ -327,7 +358,7 @@ export const PdfThumbnailSidebar = () => {
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
+      activationConstraint: { distance: 2 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -343,20 +374,26 @@ export const PdfThumbnailSidebar = () => {
     return normalizedThumbnailOrder.map((pageNumber) => createSortableId(pageNumber));
   }, [normalizedThumbnailOrder]);
 
-  const handleDragStart = useCallback((event: { active: { id: string | number } }) => {
-    setActiveDragPageNumber(parseSortableId(event.active.id));
+  const releaseDragCursor = useCallback(() => {
+    releaseDragCursorRef.current?.();
+    releaseDragCursorRef.current = null;
+  }, []);
+
+  const handleDragStart = useCallback(() => {
+    releaseDragCursorRef.current?.();
+    releaseDragCursorRef.current = applyDocumentDragCursor();
   }, []);
 
   const handleDragCancel = useCallback(() => {
-    setActiveDragPageNumber(null);
-  }, []);
+    releaseDragCursor();
+  }, [releaseDragCursor]);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const activePageNumber = parseSortableId(event.active.id);
       const overPageNumber = event.over ? parseSortableId(event.over.id) : null;
 
-      setActiveDragPageNumber(null);
+      releaseDragCursor();
 
       if (
         activePageNumber === null ||
@@ -368,13 +405,8 @@ export const PdfThumbnailSidebar = () => {
 
       reorderThumbnailOrder(activePageNumber, overPageNumber);
     },
-    [reorderThumbnailOrder],
+    [releaseDragCursor, reorderThumbnailOrder],
   );
-
-  const activeDragBaseSize =
-    activeDragPageNumber !== null
-      ? documentController.pageSizes[activeDragPageNumber] ?? undefined
-      : undefined;
 
   const openPage = useCallback(
     (pageNumber: number) => {
@@ -382,23 +414,6 @@ export const PdfThumbnailSidebar = () => {
     },
     [scrollToPage],
   );
-
-  useEffect(() => {
-    if (activeDragPageNumber === null || typeof document === "undefined") {
-      return;
-    }
-
-    const previousBodyCursor = document.body.style.cursor;
-    const previousDocumentCursor = document.documentElement.style.cursor;
-
-    document.body.style.cursor = "grabbing";
-    document.documentElement.style.cursor = "grabbing";
-
-    return () => {
-      document.body.style.cursor = previousBodyCursor;
-      document.documentElement.style.cursor = previousDocumentCursor;
-    };
-  }, [activeDragPageNumber]);
 
   if (!documentController.doc || hasBlockingStatus) {
     return null;
@@ -430,9 +445,14 @@ export const PdfThumbnailSidebar = () => {
                     {normalizedThumbnailOrder.map((pageNumber) => (
                       <SortablePdfThumbnailTile
                         key={pageNumber}
+                        pdf={documentController.doc}
                         documentKey={documentController.documentKey}
                         pageNumber={pageNumber}
-                        baseSize={documentController.pageSizes[pageNumber]}
+                        baseSize={
+                          documentController.pageSizes[pageNumber] ??
+                          firstPageSize ??
+                          undefined
+                        }
                         isActive={pageNumber === currentPage}
                         observerRoot={scrollRootRef.current}
                         acquirePage={documentController.acquirePage}
@@ -443,29 +463,6 @@ export const PdfThumbnailSidebar = () => {
                   </div>
                 </SortableContext>
               </div>
-
-              <DragOverlay adjustScale={false} dropAnimation={null}>
-                {activeDragPageNumber !== null ? (
-                  <div
-                    className="shrink-0 cursor-grabbing"
-                    style={{
-                      width: `${THUMBNAIL_CARD_WIDTH_PX}px`,
-                      cursor: "grabbing",
-                    }}
-                  >
-                    <PdfThumbnailCardContent
-                      documentKey={documentController.documentKey}
-                      pageNumber={activeDragPageNumber}
-                      baseSize={activeDragBaseSize}
-                      isActive={activeDragPageNumber === currentPage}
-                      observerRoot={null}
-                      acquirePage={documentController.acquirePage}
-                      onPageSize={documentController.setPageSize}
-                      forceRender
-                    />
-                  </div>
-                ) : null}
-              </DragOverlay>
             </DndContext>
           </div>
         </div>
