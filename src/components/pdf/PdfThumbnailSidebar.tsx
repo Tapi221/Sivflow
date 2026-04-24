@@ -484,24 +484,14 @@ const SortablePdfThumbnailTileComponent = ({
         type="button"
         aria-label={`ページ ${pageNumber} をドラッグして順序を変更`}
         className={cn(
-          "absolute right-1 top-1 z-10 flex h-6 w-6 touch-none select-none items-center justify-center rounded-md",
-          "border border-slate-200 bg-white/95 text-slate-400 shadow-sm backdrop-blur-sm",
-          "cursor-grab outline-none transition-colors hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-primary-500/40",
-          isDragging && "cursor-grabbing text-slate-700",
+          "absolute right-0 top-0 z-10 h-8 w-8 touch-none select-none rounded-xl bg-transparent",
+          "cursor-grab outline-none focus-visible:ring-2 focus-visible:ring-primary-500/40",
+          isDragging && "cursor-grabbing",
         )}
         {...attributes}
         {...listeners}
         onClick={stopDragHandleClickPropagation}
-      >
-        <span aria-hidden="true" className="grid grid-cols-2 gap-0.5">
-          <span className="h-1 w-1 rounded-full bg-current" />
-          <span className="h-1 w-1 rounded-full bg-current" />
-          <span className="h-1 w-1 rounded-full bg-current" />
-          <span className="h-1 w-1 rounded-full bg-current" />
-          <span className="h-1 w-1 rounded-full bg-current" />
-          <span className="h-1 w-1 rounded-full bg-current" />
-        </span>
-      </button>
+      />
     </div>
   );
 };
