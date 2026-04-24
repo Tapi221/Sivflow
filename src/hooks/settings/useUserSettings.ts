@@ -4,29 +4,15 @@ import {
   parseEditorBlockSettings,
 } from "@/lib/editorBlockSettings";
 import { getLocalDb } from "@/services/localDB";
-import {
-  readCachedFolderSidebarDisplayMode,
-  writeCachedFolderSidebarDisplayMode,
-} from "@/services/folderSidebarDisplayModePreference";
 import type { UserSettings } from "@/types";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useEffect, useMemo } from "react";
-
-type LegacyFolderSidebarDisplayMode =
-  | UserSettings["folderSidebarDisplayMode"]
-  | "auto";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
 const toRecord = (value: unknown): Record<string, unknown> | undefined =>
   isRecord(value) ? value : undefined;
-
-const normalizeFolderSidebarDisplayMode = (
-  value: LegacyFolderSidebarDisplayMode | null | undefined,
-): NonNullable<UserSettings["folderSidebarDisplayMode"]> => {
-  return value === "navigation" ? "navigation" : "tree";
-};
 
 export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   language: "ja",
@@ -45,18 +31,16 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   autoVoiceAnswer: false,
   cardEditorHeightPx: null,
   questionDisplayMode: "tap_to_reveal" as const,
-  folderSidebarDisplayMode: "tree" as const,
   markdownTabSize: 2,
   editorBlockSettings: createDefaultEditorBlockSettings(),
 };
 
 const buildBootSettingsSnapshot = (): Partial<UserSettings> => ({
   ...DEFAULT_SETTINGS,
-  folderSidebarDisplayMode: readCachedFolderSidebarDisplayMode(),
   editorBlockSettings: createDefaultEditorBlockSettings(),
 });
 
-const removeLegacyProfileFields = (
+const removeLegacySettingsFields = (
   input: Record<string, unknown> | undefined,
 ): Record<string, unknown> => {
   if (!input) return {};
@@ -64,6 +48,7 @@ const removeLegacyProfileFields = (
   const {
     displayName: _displayName,
     profileImage: _profileImage,
+    folderSidebarDisplayMode: _folderSidebarDisplayMode,
     ...rest
   } = input;
 
@@ -76,13 +61,8 @@ const normalizeStoredSettingsRecord = (
 ): Partial<UserSettings> => {
   const merged = {
     ...bootSettings,
-    ...removeLegacyProfileFields(input),
+    ...removeLegacySettingsFields(input),
   };
-
-  const folderSidebarDisplayMode = normalizeFolderSidebarDisplayMode(
-    (merged as { folderSidebarDisplayMode?: LegacyFolderSidebarDisplayMode })
-      .folderSidebarDisplayMode,
-  );
 
   const editorBlockSettings = parseEditorBlockSettings(
     Array.isArray(merged["editorBlockSettings"])
@@ -92,7 +72,6 @@ const normalizeStoredSettingsRecord = (
 
   return {
     ...merged,
-    folderSidebarDisplayMode,
     editorBlockSettings,
   };
 };
@@ -120,16 +99,8 @@ export const useUserSettings = () => {
 
       const db = await getLocalDb(currentUserId);
       const userSettings = await db.userSettings.get(currentUserId);
-      const normalizedSettings = normalizeStoredSettingsRecord(
-        toRecord(userSettings),
-        bootSettings,
-      );
 
-      writeCachedFolderSidebarDisplayMode(
-        normalizedSettings.folderSidebarDisplayMode ?? "tree",
-      );
-
-      return normalizedSettings;
+      return normalizeStoredSettingsRecord(toRecord(userSettings), bootSettings);
     },
     [bootSettings, currentUserId],
     bootSettings,
@@ -147,11 +118,12 @@ export const useUserSettings = () => {
       if (cancelled || !current) return;
 
       const currentRecord = toRecord(current) ?? {};
-      const currentWithoutLegacy = removeLegacyProfileFields(currentRecord);
+      const currentWithoutLegacy = removeLegacySettingsFields(currentRecord);
       const normalizedSettings = normalizeStoredSettingsRecord(
         currentRecord,
         bootSettings,
       );
+
       const nextRecord = {
         ...currentWithoutLegacy,
         ...normalizedSettings,
@@ -182,20 +154,12 @@ export const useUserSettings = () => {
 
       const db = await getLocalDb(currentUserId);
       const current = await db.userSettings.get(currentUserId);
-      const currentWithoutLegacy = removeLegacyProfileFields(toRecord(current));
+      const currentWithoutLegacy = removeLegacySettingsFields(
+        toRecord(current),
+      );
 
       const normalizedSettings: Partial<UserSettings> = {
         ...newSettings,
-        ...(Object.prototype.hasOwnProperty.call(
-          newSettings,
-          "folderSidebarDisplayMode",
-        )
-          ? {
-              folderSidebarDisplayMode: normalizeFolderSidebarDisplayMode(
-                newSettings.folderSidebarDisplayMode,
-              ),
-            }
-          : {}),
         ...(Object.prototype.hasOwnProperty.call(
           newSettings,
           "editorBlockSettings",
@@ -209,17 +173,6 @@ export const useUserSettings = () => {
             }
           : {}),
       };
-
-      if (
-        Object.prototype.hasOwnProperty.call(
-          normalizedSettings,
-          "folderSidebarDisplayMode",
-        )
-      ) {
-        writeCachedFolderSidebarDisplayMode(
-          normalizedSettings.folderSidebarDisplayMode,
-        );
-      }
 
       const nextRecord = {
         ...currentWithoutLegacy,

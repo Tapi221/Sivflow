@@ -457,6 +457,7 @@ const TreeViewLayout = ({
     [updateDocument],
   );
 
+  // フォルダサイドバーは白いパネル型の遷移表示に一本化する。
   const resolvedSidebarDisplayMode = "navigation" as const;
 
   const isExplorerDataLoading =
@@ -634,5 +635,6 @@ const TreeViewLayout = ({
 };
 
 export default TreeViewLayout;
+
 
 

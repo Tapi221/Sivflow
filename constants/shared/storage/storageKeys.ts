@@ -11,6 +11,5 @@ export const SHARED_STORAGE_KEYS = {
   cardLayoutModePrefix: "flashcard-master:card-layout-mode",
   cardSetViewFlippedFacePrefix: "flashcard-master:cardsetview-flipped-face",
   cardLayoutSplitFallback: "flashcard-master:card-layout-split-fallback",
-  folderSidebarDisplayMode: "flashcard-master:folder-sidebar-display-mode",
   cardWidthPreferences: "card-width-preferences",
 } as const;
