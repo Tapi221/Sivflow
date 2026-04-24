@@ -13,6 +13,7 @@ import {
   subscribeCardSetViewWindowEvent,
 } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
+import { useCalendarDockPanelStore } from "@/features/calendar/store/useCalendarDockPanelStore";
 import { useHasDesktopBridge } from "@/hooks/platform/useHasDesktopBridge";
 import { cn } from "@/lib/utils";
 import { windowControls } from "@/platform/capabilities/windowControls";
@@ -401,6 +402,8 @@ const TitleBarPrimaryActions: React.FC<{
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const openGlobalSearch = useGlobalSearchStore((state) => state.open);
+  const isCalendarDockOpen = useCalendarDockPanelStore((state) => state.isOpen);
+  const toggleCalendarDock = useCalendarDockPanelStore((state) => state.toggle);
 
   const openSettings = () => {
     const nextParams = new URLSearchParams(searchParams);
@@ -514,8 +517,8 @@ const TitleBarPrimaryActions: React.FC<{
       </TitleBarToolbarButton>
 
       <TitleBarToolbarButton
-        title="カレンダー"
-        disabled
+        title={isCalendarDockOpen ? "カレンダーを閉じる" : "カレンダーを開く"}
+        onClick={toggleCalendarDock}
         noDragStyle={noDragStyle}
       >
         <CalendarIcon />
@@ -991,3 +994,4 @@ export const TitleBar: React.FC = () => {
     </div>
   );
 };
+
