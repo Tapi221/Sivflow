@@ -171,7 +171,6 @@ interface PdfThumbnailCardContentProps {
   pageNumber: number;
   baseSize?: PageSize;
   isActive: boolean;
-  isDragging?: boolean;
   observerRoot: HTMLDivElement | null;
   acquirePage: (
     pageNumber: number,
@@ -185,7 +184,6 @@ const PdfThumbnailCardContent = ({
   pageNumber,
   baseSize,
   isActive,
-  isDragging = false,
   observerRoot,
   acquirePage,
   onPageSize,
@@ -195,11 +193,10 @@ const PdfThumbnailCardContent = ({
     <>
       <div
         className={cn(
-          "flex justify-center overflow-hidden rounded-xl border bg-white p-1 shadow-sm transition-shadow",
+          "flex justify-center overflow-hidden rounded-xl border bg-white p-1 shadow-sm",
           isActive
             ? "border-primary-500 ring-2 ring-primary-500/20"
             : "border-slate-200",
-          isDragging && "shadow-lg",
         )}
       >
         <PdfThumbnailPagePreview
@@ -259,11 +256,10 @@ const SortablePdfThumbnailTile = ({
       <button
         type="button"
         aria-label={`ページ ${pageNumber} を開く。ドラッグで順序を変更`}
-        title="ドラッグで順序を変更"
         className={cn(
-          "block w-full touch-none select-none rounded-xl text-left outline-none transition-transform",
+          "block w-full touch-none select-none rounded-xl text-left outline-none",
           "focus-visible:ring-2 focus-visible:ring-primary-500/40",
-          isDragging ? "cursor-grabbing" : "cursor-grab hover:-translate-y-0.5",
+          isDragging ? "cursor-grabbing" : "cursor-grab",
         )}
         {...attributes}
         {...listeners}
@@ -272,7 +268,6 @@ const SortablePdfThumbnailTile = ({
         <PdfThumbnailCardContent
           {...contentProps}
           pageNumber={pageNumber}
-          isDragging={isDragging}
         />
       </button>
     </div>
@@ -432,7 +427,7 @@ export const PdfThumbnailSidebar = () => {
                 </SortableContext>
               </div>
 
-              <DragOverlay>
+              <DragOverlay adjustScale={false} dropAnimation={null}>
                 {activeDragPageNumber !== null ? (
                   <div
                     className="shrink-0"
@@ -443,7 +438,6 @@ export const PdfThumbnailSidebar = () => {
                       pageNumber={activeDragPageNumber}
                       baseSize={activeDragBaseSize}
                       isActive={activeDragPageNumber === currentPage}
-                      isDragging
                       observerRoot={null}
                       acquirePage={documentController.acquirePage}
                       onPageSize={documentController.setPageSize}
