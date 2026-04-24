@@ -1,4 +1,5 @@
 .app-layout {
+  --app-layout-padding-x: 12px;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: 1fr;
@@ -9,7 +10,7 @@
   min-height: 0;
   overflow: hidden;
   box-sizing: border-box;
-  padding: 8px 12px 12px;
+  padding: 8px var(--app-layout-padding-x) 12px;
   background-color: var(--app-bg);
   background-image: none;
   align-items: stretch;
