@@ -17,6 +17,7 @@ interface PdfThumbnailPageProps {
   boxHeightPx: number;
   baseSize?: PageSize;
   renderPriority: number;
+  renderVersion: number;
   acquirePage: (
     pageNumber: number,
   ) => Promise<{ page: PdfJsPage; release: () => void }>;
@@ -202,6 +203,14 @@ const prepareCanvasForPdfRender = ({
   return context;
 };
 
+const throwIfAborted = (signal: AbortSignal) => {
+  if (signal.aborted) {
+    throw signal.reason instanceof Error
+      ? signal.reason
+      : new Error("PDF thumbnail render was cancelled");
+  }
+};
+
 export const PdfThumbnailPage = ({
   documentKey,
   pageNumber,
@@ -209,6 +218,7 @@ export const PdfThumbnailPage = ({
   boxHeightPx,
   baseSize,
   renderPriority,
+  renderVersion,
   acquirePage,
   onPageSize,
 }: PdfThumbnailPageProps) => {
@@ -296,12 +306,29 @@ export const PdfThumbnailPage = ({
       release?.();
     };
 
-    const run = async () => {
+    const cancelRenderTask = () => {
       try {
+        renderTask?.cancel?.();
+      } catch {
+        // noop
+      }
+    };
+
+    const run = async ({ signal }: { signal: AbortSignal }) => {
+      const handleAbort = () => {
+        cancelRenderTask();
+        releaseActivePage();
+      };
+
+      signal.addEventListener("abort", handleAbort, { once: true });
+
+      try {
+        throwIfAborted(signal);
         const pageLease = await acquirePage(pageNumber);
 
-        if (isStale()) {
+        if (isStale() || signal.aborted) {
           pageLease.release();
+          throwIfAborted(signal);
           return;
         }
 
@@ -334,6 +361,7 @@ export const PdfThumbnailPage = ({
         if (isStale()) {
           return;
         }
+        throwIfAborted(signal);
 
         const cachedBitmap = getCachedPdfThumbnailBitmap({
           key: renderIdentity,
@@ -377,6 +405,7 @@ export const PdfThumbnailPage = ({
         if (isStale()) {
           return;
         }
+        throwIfAborted(signal);
 
         void setCachedPdfThumbnailBitmap({
           key: renderIdentity,
@@ -386,6 +415,7 @@ export const PdfThumbnailPage = ({
           // Cache failures must not break thumbnail rendering.
         });
       } finally {
+        signal.removeEventListener("abort", handleAbort);
         releaseActivePage();
       }
     };
@@ -396,12 +426,12 @@ export const PdfThumbnailPage = ({
     });
 
     void queuedRender.promise.catch((errorValue) => {
-      if (isPdfThumbnailRenderCancelledError(errorValue)) {
-        return;
-      }
-
       if (lastRenderIdentityRef.current === renderIdentity) {
         lastRenderIdentityRef.current = null;
+      }
+
+      if (isPdfThumbnailRenderCancelledError(errorValue)) {
+        return;
       }
     });
 
@@ -413,13 +443,7 @@ export const PdfThumbnailPage = ({
       }
 
       queuedRender?.cancel();
-
-      try {
-        renderTask?.cancel?.();
-      } catch {
-        // noop
-      }
-
+      cancelRenderTask();
       releaseActivePage();
 
       if (lastRenderIdentityRef.current === renderIdentity) {
@@ -434,6 +458,7 @@ export const PdfThumbnailPage = ({
     onPageSize,
     pageNumber,
     renderPriority,
+    renderVersion,
   ]);
 
   return (

@@ -37,7 +37,7 @@ interface PdfWorkspaceProviderProps extends PropsWithChildren {
   onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
 }
 
-export interface PdfWorkspaceContextValue {
+export interface PdfWorkspaceDocumentContextValue {
   doc: DocumentItem;
   viewerRef: RefObject<PdfViewerHandle | null>;
   containerRef: RefObject<HTMLDivElement | null>;
@@ -46,14 +46,21 @@ export interface PdfWorkspaceContextValue {
   localDataStatus: "idle" | "loading" | "ready" | "failed";
   opaqueCanvas: boolean;
   numPages: number;
+  normalizedThumbnailOrder: number[];
+  firstPageSize: { width: number; height: number } | null;
+  reorderThumbnailOrder: (
+    activePageNumber: number,
+    overPageNumber: number,
+  ) => void;
+}
+
+export interface PdfWorkspaceNavigationContextValue {
   currentPage: number;
   alignedCurrentPage: number;
   scale: number;
   fitMode: "width" | "manual";
   pageLayoutMode: PdfPageLayoutMode;
   zoomPercent: number;
-  normalizedThumbnailOrder: number[];
-  firstPageSize: { width: number; height: number } | null;
   canGoToPrevPage: boolean;
   canGoToNextPage: boolean;
   setCurrentPage: (pageNumber: number) => void;
@@ -65,11 +72,16 @@ export interface PdfWorkspaceContextValue {
   handlePrev: () => void;
   handleNext: () => void;
   handleCommitPage: (nextPage: number) => void;
-  reorderThumbnailOrder: (
-    activePageNumber: number,
-    overPageNumber: number,
-  ) => void;
 }
+
+export interface PdfWorkspaceContextValue
+  extends PdfWorkspaceDocumentContextValue,
+    PdfWorkspaceNavigationContextValue {}
+
+export const PdfWorkspaceDocumentContext =
+  createContext<PdfWorkspaceDocumentContextValue | null>(null);
+export const PdfWorkspaceNavigationContext =
+  createContext<PdfWorkspaceNavigationContextValue | null>(null);
 
 export const PdfWorkspaceContext =
   createContext<PdfWorkspaceContextValue | null>(null);
@@ -494,7 +506,7 @@ export const PdfWorkspaceProvider = ({
   const canGoToPrevPage = alignedCurrentPage > 1;
   const canGoToNextPage = alignedCurrentPage + pageStep <= numPages;
 
-  const contextValue = useMemo(() => {
+  const documentContextValue = useMemo(() => {
     return {
       doc,
       viewerRef,
@@ -504,14 +516,32 @@ export const PdfWorkspaceProvider = ({
       localDataStatus,
       opaqueCanvas: resolvedViewerOptions.opaqueCanvas ?? false,
       numPages,
+      normalizedThumbnailOrder,
+      firstPageSize,
+      reorderThumbnailOrder,
+    } satisfies PdfWorkspaceDocumentContextValue;
+  }, [
+    containerRef,
+    doc,
+    documentController,
+    firstPageSize,
+    localDataStatus,
+    normalizedThumbnailOrder,
+    numPages,
+    reorderThumbnailOrder,
+    resolvedViewerOptions.opaqueCanvas,
+    sourceUnavailable,
+    viewerRef,
+  ]);
+
+  const navigationContextValue = useMemo(() => {
+    return {
       currentPage,
       alignedCurrentPage,
       scale,
       fitMode,
       pageLayoutMode,
       zoomPercent,
-      normalizedThumbnailOrder,
-      firstPageSize,
       canGoToPrevPage,
       canGoToNextPage,
       setCurrentPage,
@@ -523,17 +553,12 @@ export const PdfWorkspaceProvider = ({
       handlePrev,
       handleNext,
       handleCommitPage,
-      reorderThumbnailOrder,
-    } satisfies PdfWorkspaceContextValue;
+    } satisfies PdfWorkspaceNavigationContextValue;
   }, [
     alignedCurrentPage,
     canGoToNextPage,
     canGoToPrevPage,
-    containerRef,
     currentPage,
-    doc,
-    documentController,
-    firstPageSize,
     fitMode,
     handleCommitPage,
     handleFitWidth,
@@ -542,23 +567,27 @@ export const PdfWorkspaceProvider = ({
     handlePrev,
     handleViewerScaleChange,
     handleZoomPercentChange,
-    localDataStatus,
-    normalizedThumbnailOrder,
-    numPages,
     pageLayoutMode,
-    reorderThumbnailOrder,
-    resolvedViewerOptions.opaqueCanvas,
     scale,
     scrollToPage,
     setCurrentPage,
-    sourceUnavailable,
-    viewerRef,
     zoomPercent,
   ]);
 
+  const contextValue = useMemo(() => {
+    return {
+      ...documentContextValue,
+      ...navigationContextValue,
+    } satisfies PdfWorkspaceContextValue;
+  }, [documentContextValue, navigationContextValue]);
+
   return (
-    <PdfWorkspaceContext.Provider value={contextValue}>
-      {children}
-    </PdfWorkspaceContext.Provider>
+    <PdfWorkspaceDocumentContext.Provider value={documentContextValue}>
+      <PdfWorkspaceNavigationContext.Provider value={navigationContextValue}>
+        <PdfWorkspaceContext.Provider value={contextValue}>
+          {children}
+        </PdfWorkspaceContext.Provider>
+      </PdfWorkspaceNavigationContext.Provider>
+    </PdfWorkspaceDocumentContext.Provider>
   );
 };

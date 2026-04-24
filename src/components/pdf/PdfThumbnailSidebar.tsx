@@ -15,10 +15,21 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent,
+} from "react";
 import { PdfThumbnailPage } from "./PdfThumbnailPage";
-import { cancelPendingPdfThumbnailRenders } from "./pdfThumbnailRenderQueue";
-import { usePdfWorkspace } from "./usePdfWorkspace";
+import { cancelPdfThumbnailRenders } from "./pdfThumbnailRenderQueue";
+import {
+  usePdfWorkspaceDocument,
+  usePdfWorkspaceNavigation,
+} from "./usePdfWorkspace";
 import type { PageSize, PdfJsPage } from "./pdfViewerTypes";
 
 const THUMBNAIL_CARD_WIDTH_PX = 92;
@@ -27,7 +38,7 @@ const THUMBNAIL_PAGE_BOX_HEIGHT_PX = 116;
 const THUMBNAIL_GRID_GAP_PX = 8;
 const INITIAL_RENDER_ROW_COUNT = 6;
 const BACKGROUND_RENDER_BATCH_ROW_COUNT = 2;
-const BACKGROUND_RENDER_INTERVAL_MS = 180;
+const BACKGROUND_RENDER_INTERVAL_MS = 220;
 const MAX_BACKGROUND_RENDER_COUNT = 96;
 const THUMBNAIL_INTERSECTION_ROOT_MARGIN = "360px 0px 720px 0px";
 const MIN_THUMBNAIL_COLUMNS = 2;
@@ -38,8 +49,8 @@ const INTERSECTING_PAGE_RENDER_PRIORITY = 900;
 const INITIAL_PAGE_RENDER_PRIORITY = 700;
 const BACKGROUND_PAGE_RENDER_PRIORITY = 120;
 const DRAG_ACTIVATION_DISTANCE_PX = 8;
-const NAVIGATION_BACKGROUND_PAUSE_MS = 900;
-const OPTIMISTIC_NAVIGATION_CLEAR_MS = 1_400;
+const NAVIGATION_BACKGROUND_PAUSE_MS = 1_100;
+const OPTIMISTIC_NAVIGATION_CLEAR_MS = 1_600;
 
 const getRequiredGridWidth = (columnCount: number) => {
   return (
@@ -146,6 +157,18 @@ const mergeUniquePageNumbers = (...pageNumberCollections: number[][]) => {
   return Array.from(pageNumbers);
 };
 
+const arePageSizesEqual = (left?: PageSize, right?: PageSize) => {
+  if (left === right) {
+    return true;
+  }
+
+  if (!left || !right) {
+    return !left && !right;
+  }
+
+  return left.width === right.width && left.height === right.height;
+};
+
 const applyDocumentDragCursor = () => {
   if (typeof document === "undefined") {
     return () => undefined;
@@ -170,6 +193,7 @@ interface PdfThumbnailPagePreviewProps {
   pageNumber: number;
   eagerRender: boolean;
   renderPriority: number;
+  renderVersion: number;
   baseSize?: PageSize;
   observerRoot: HTMLDivElement | null;
   acquirePage: (
@@ -180,11 +204,12 @@ interface PdfThumbnailPagePreviewProps {
 
 type ThumbnailRenderTrigger = "idle" | "eager" | "intersection";
 
-const PdfThumbnailPagePreview = ({
+const PdfThumbnailPagePreviewComponent = ({
   documentKey,
   pageNumber,
   eagerRender,
   renderPriority,
+  renderVersion,
   baseSize,
   observerRoot,
   acquirePage,
@@ -266,6 +291,7 @@ const PdfThumbnailPagePreview = ({
           boxHeightPx={THUMBNAIL_PAGE_BOX_HEIGHT_PX}
           baseSize={baseSize}
           renderPriority={effectiveRenderPriority}
+          renderVersion={renderVersion}
           acquirePage={acquirePage}
           onPageSize={onPageSize}
         />
@@ -282,11 +308,26 @@ const PdfThumbnailPagePreview = ({
   );
 };
 
+const PdfThumbnailPagePreview = memo(
+  PdfThumbnailPagePreviewComponent,
+  (left, right) =>
+    left.documentKey === right.documentKey &&
+    left.pageNumber === right.pageNumber &&
+    left.eagerRender === right.eagerRender &&
+    left.renderPriority === right.renderPriority &&
+    left.renderVersion === right.renderVersion &&
+    left.observerRoot === right.observerRoot &&
+    left.acquirePage === right.acquirePage &&
+    left.onPageSize === right.onPageSize &&
+    arePageSizesEqual(left.baseSize, right.baseSize),
+);
+
 interface PdfThumbnailCardContentProps {
   documentKey: string;
   pageNumber: number;
   eagerRender: boolean;
   renderPriority: number;
+  renderVersion: number;
   baseSize?: PageSize;
   isActive: boolean;
   isDragging?: boolean;
@@ -297,11 +338,12 @@ interface PdfThumbnailCardContentProps {
   onPageSize: (pageNumber: number, size: PageSize) => void;
 }
 
-const PdfThumbnailCardContent = ({
+const PdfThumbnailCardContentComponent = ({
   documentKey,
   pageNumber,
   eagerRender,
   renderPriority,
+  renderVersion,
   baseSize,
   isActive,
   isDragging = false,
@@ -325,6 +367,7 @@ const PdfThumbnailCardContent = ({
           pageNumber={pageNumber}
           eagerRender={eagerRender}
           renderPriority={renderPriority}
+          renderVersion={renderVersion}
           baseSize={baseSize}
           observerRoot={observerRoot}
           acquirePage={acquirePage}
@@ -344,12 +387,30 @@ const PdfThumbnailCardContent = ({
   );
 };
 
+const PdfThumbnailCardContent = memo(
+  PdfThumbnailCardContentComponent,
+  (left, right) =>
+    left.documentKey === right.documentKey &&
+    left.pageNumber === right.pageNumber &&
+    left.eagerRender === right.eagerRender &&
+    left.renderPriority === right.renderPriority &&
+    left.renderVersion === right.renderVersion &&
+    left.isActive === right.isActive &&
+    left.isDragging === right.isDragging &&
+    left.observerRoot === right.observerRoot &&
+    left.acquirePage === right.acquirePage &&
+    left.onPageSize === right.onPageSize &&
+    arePageSizesEqual(left.baseSize, right.baseSize),
+);
+
 interface SortablePdfThumbnailTileProps extends PdfThumbnailCardContentProps {
+  onPreviewNavigation: (pageNumber: number) => void;
   onOpenPage: (pageNumber: number) => void;
 }
 
-const SortablePdfThumbnailTile = ({
+const SortablePdfThumbnailTileComponent = ({
   pageNumber,
+  onPreviewNavigation,
   onOpenPage,
   ...contentProps
 }: SortablePdfThumbnailTileProps) => {
@@ -363,6 +424,21 @@ const SortablePdfThumbnailTile = ({
   } = useSortable({
     id: createSortableId(pageNumber),
   });
+
+  const handlePointerDownCapture = useCallback(
+    (event: PointerEvent<HTMLButtonElement>) => {
+      if (event.button !== 0 || event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+      }
+
+      onPreviewNavigation(pageNumber);
+    },
+    [onPreviewNavigation, pageNumber],
+  );
+
+  const handleClick = useCallback(() => {
+    onOpenPage(pageNumber);
+  }, [onOpenPage, pageNumber]);
 
   return (
     <div
@@ -387,7 +463,8 @@ const SortablePdfThumbnailTile = ({
         )}
         {...attributes}
         {...listeners}
-        onClick={() => onOpenPage(pageNumber)}
+        onPointerDownCapture={handlePointerDownCapture}
+        onClick={handleClick}
       >
         <PdfThumbnailCardContent
           {...contentProps}
@@ -399,16 +476,32 @@ const SortablePdfThumbnailTile = ({
   );
 };
 
+const SortablePdfThumbnailTile = memo(
+  SortablePdfThumbnailTileComponent,
+  (left, right) =>
+    left.documentKey === right.documentKey &&
+    left.pageNumber === right.pageNumber &&
+    left.eagerRender === right.eagerRender &&
+    left.renderPriority === right.renderPriority &&
+    left.renderVersion === right.renderVersion &&
+    left.isActive === right.isActive &&
+    left.observerRoot === right.observerRoot &&
+    left.acquirePage === right.acquirePage &&
+    left.onPageSize === right.onPageSize &&
+    left.onPreviewNavigation === right.onPreviewNavigation &&
+    left.onOpenPage === right.onOpenPage &&
+    arePageSizesEqual(left.baseSize, right.baseSize),
+);
+
 export const PdfThumbnailSidebar = () => {
   const {
     documentController,
     sourceUnavailable,
-    currentPage,
     normalizedThumbnailOrder,
-    setCurrentPage,
-    scrollToPage,
     reorderThumbnailOrder,
-  } = usePdfWorkspace();
+  } = usePdfWorkspaceDocument();
+  const { currentPage, setCurrentPage, scrollToPage } =
+    usePdfWorkspaceNavigation();
 
   const {
     acquirePage,
@@ -436,6 +529,7 @@ export const PdfThumbnailSidebar = () => {
   >(null);
   const [isNavigationPriorityMode, setIsNavigationPriorityMode] =
     useState(false);
+  const [renderVersion, setRenderVersion] = useState(0);
 
   const handleGridHostRef = useCallback((node: HTMLDivElement | null) => {
     setGridHostElement((previousNode) =>
@@ -456,6 +550,40 @@ export const PdfThumbnailSidebar = () => {
       clearOptimisticNavigationTimerRef.current = null;
     }
   }, []);
+
+  const normalizePageNumber = useCallback(
+    (pageNumber: number) => {
+      return Math.min(
+        Math.max(1, Math.trunc(pageNumber)),
+        Math.max(1, numPages),
+      );
+    },
+    [numPages],
+  );
+
+  const enterNavigationPriorityMode = useCallback(() => {
+    cancelPdfThumbnailRenders({
+      maxPriority: INITIAL_PAGE_RENDER_PRIORITY,
+      includeActive: true,
+    });
+    setRenderVersion((previousVersion) => previousVersion + 1);
+    clearResumeBackgroundRenderTimer();
+    setIsNavigationPriorityMode(true);
+
+    resumeBackgroundRenderTimerRef.current = window.setTimeout(() => {
+      resumeBackgroundRenderTimerRef.current = null;
+      setIsNavigationPriorityMode(false);
+      setRenderVersion((previousVersion) => previousVersion + 1);
+    }, NAVIGATION_BACKGROUND_PAUSE_MS);
+  }, [clearResumeBackgroundRenderTimer]);
+
+  const previewNavigationPage = useCallback(
+    (pageNumber: number) => {
+      const normalizedPageNumber = normalizePageNumber(pageNumber);
+      setPendingNavigationPage(normalizedPageNumber);
+    },
+    [normalizePageNumber],
+  );
 
   useEffect(() => {
     if (!gridHostElement) {
@@ -649,25 +777,13 @@ export const PdfThumbnailSidebar = () => {
 
   const openPage = useCallback(
     (pageNumber: number) => {
-      const normalizedPageNumber = Math.min(
-        Math.max(1, Math.trunc(pageNumber)),
-        Math.max(1, numPages),
-      );
+      const normalizedPageNumber = normalizePageNumber(pageNumber);
 
-      cancelPendingPdfThumbnailRenders({
-        maxPriority: INITIAL_PAGE_RENDER_PRIORITY,
-      });
-      clearResumeBackgroundRenderTimer();
+      enterNavigationPriorityMode();
       clearOptimisticNavigationTimer();
       setPendingNavigationPage(normalizedPageNumber);
-      setIsNavigationPriorityMode(true);
       setCurrentPage(normalizedPageNumber);
       scrollToPage(normalizedPageNumber);
-
-      resumeBackgroundRenderTimerRef.current = window.setTimeout(() => {
-        resumeBackgroundRenderTimerRef.current = null;
-        setIsNavigationPriorityMode(false);
-      }, NAVIGATION_BACKGROUND_PAUSE_MS);
 
       clearOptimisticNavigationTimerRef.current = window.setTimeout(() => {
         clearOptimisticNavigationTimerRef.current = null;
@@ -680,8 +796,8 @@ export const PdfThumbnailSidebar = () => {
     },
     [
       clearOptimisticNavigationTimer,
-      clearResumeBackgroundRenderTimer,
-      numPages,
+      enterNavigationPriorityMode,
+      normalizePageNumber,
       scrollToPage,
       setCurrentPage,
     ],
@@ -720,7 +836,12 @@ export const PdfThumbnailSidebar = () => {
                         pendingNavigationPage === pageNumber;
                       const isActive = isCurrentPage || isNavigationPage;
                       const eagerRender =
-                        pageIndex < eagerRenderItemCount || isActive;
+                        isActive ||
+                        pageIndex < initialRenderCount ||
+                        (!isNavigationPriorityMode &&
+                          pageIndex < eagerRenderItemCount);
+                      const tileRenderVersion =
+                        isActive || !isNavigationPriorityMode ? renderVersion : 0;
 
                       return (
                         <SortablePdfThumbnailTile
@@ -735,11 +856,13 @@ export const PdfThumbnailSidebar = () => {
                             initialRenderCount,
                             eagerRenderItemCount,
                           })}
+                          renderVersion={tileRenderVersion}
                           baseSize={pageSizes[pageNumber]}
                           isActive={isActive}
                           observerRoot={scrollRootRef.current}
                           acquirePage={acquirePage}
                           onPageSize={setPageSize}
+                          onPreviewNavigation={previewNavigationPage}
                           onOpenPage={openPage}
                         />
                       );
