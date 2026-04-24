@@ -27,8 +27,6 @@ import { TelemetryService } from "@/services/logic/TelemetryService";
 import { getLocalDb } from "@/services/localDB";
 import type { Card } from "@/types";
 import { ArrowLeft } from "@/ui/icons";
-import { getDebugStreak } from "@/utils/debugStreak";
-import { sanitizeStreak } from "@/utils/streak";
 
 type StudyLogPayload = {
   userId: string;
@@ -261,12 +259,6 @@ const StudyMode = () => {
     }
   }, [sessionKey, studyComplete]);
 
-  const debugStreak = getDebugStreak();
-  const effectiveStreak = debugStreak ?? sanitizeStreak(results?.streak);
-  const stampRallyStreak =
-    studyComplete && debugStreak === null
-      ? Math.max(1, effectiveStreak)
-      : effectiveStreak;
 
   const finalRatingByCardId = useMemo(() => {
     const finalByCardId = new Map<string, PracticeFilterRating>();
@@ -543,7 +535,6 @@ const StudyMode = () => {
             )
           ) : studyComplete ? (
             <StudyComplete
-              stampRallyStreak={stampRallyStreak}
               ratingTiles={RATING_TILES}
               ratingCounts={ratingCounts}
               isPracticeFeatureEnabled={isPracticeFeatureEnabled}
@@ -576,3 +567,4 @@ const StudyMode = () => {
 };
 
 export default StudyMode;
+

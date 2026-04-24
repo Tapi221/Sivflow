@@ -5,8 +5,6 @@ import {
   createReviewLogEntry,
 } from "@/services/reviewAlgorithm";
 import { normalizeMemoryStability } from "@/utils/reviewUtils";
-import { getDebugStreak } from "@/utils/debugStreak";
-import { sanitizeStreak } from "@/utils/streak";
 import { getLocalDb } from "@/services/localDB";
 import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 import {
@@ -37,7 +35,6 @@ type ResultsState = {
   1: number;
   2: number;
   3: number;
-  streak: number;
 };
 
 type AuthUserLike =
@@ -101,7 +98,6 @@ export const useStudySession = ({
     1: 0,
     2: 0,
     3: 0,
-    streak: 0,
   });
   const [sessionResults, setSessionResults] = useState<StudySessionResult[]>(
     [],
@@ -113,21 +109,7 @@ export const useStudySession = ({
     const activeCardSets = cardSets.filter((cardSet) => !cardSet.isDeleted);
     return buildCardSetById(activeCardSets);
   }, [cardSets]);
-  const debugStreak = getDebugStreak();
-  const effectiveStreak = debugStreak ?? sanitizeStreak(results.streak);
-  const stampRallyStreak =
-    studyComplete && debugStreak === null
-      ? Math.max(1, effectiveStreak)
-      : effectiveStreak;
 
-  const fetchStreak = useCallback(async () => {
-    if (!currentUser) return;
-    try {
-      setResults((prev) => ({ ...prev, streak: prev.streak }));
-    } catch {
-      // noop
-    }
-  }, [currentUser]);
 
   const handleResult = useCallback(
     async (subjectiveScore: SubjectiveScoreValue, responseTime: number) => {
@@ -232,7 +214,6 @@ export const useStudySession = ({
         return;
       }
 
-      await fetchStreak();
       setStudyComplete(true);
     },
     [
@@ -241,7 +222,6 @@ export const useStudySession = ({
       createStudyLogMutation,
       currentIndex,
       currentUser,
-      fetchStreak,
       settings?.delayBonusEnabled,
       studyCards,
       updateCard,
@@ -260,8 +240,6 @@ export const useStudySession = ({
     safeSessionResults,
     sourceSessionId,
     handleResult,
-    fetchStreak,
-    effectiveStreak,
-    stampRallyStreak,
   };
 };
+
