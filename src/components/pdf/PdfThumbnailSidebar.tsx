@@ -17,19 +17,14 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { PdfPage } from "./PdfPage";
+import { PdfThumbnailPage } from "./PdfThumbnailPage";
 import { usePdfWorkspace } from "./usePdfWorkspace";
-import type {
-  PageSize,
-  PdfJsDocument,
-  PdfJsPage,
-  PdfJsTextContent,
-} from "./pdfViewerTypes";
+import type { PageSize, PdfJsPage } from "./pdfViewerTypes";
 
 const THUMBNAIL_CARD_WIDTH_PX = 92;
-const THUMBNAIL_PREVIEW_WIDTH_PX = 80;
+const THUMBNAIL_PAGE_BOX_WIDTH_PX = 80;
+const THUMBNAIL_PAGE_BOX_HEIGHT_PX = 116;
 const THUMBNAIL_GRID_GAP_PX = 8;
-const FALLBACK_THUMBNAIL_SCALE = 0.18;
 const INITIAL_VISIBLE_PAGE_COUNT = 6;
 const MIN_THUMBNAIL_COLUMNS = 2;
 const MAX_THUMBNAIL_COLUMNS = 4;
@@ -76,29 +71,23 @@ const parseSortableId = (value: string | number) => {
 };
 
 interface PdfThumbnailPagePreviewProps {
-  pdf: PdfJsDocument;
   documentKey: string;
   pageNumber: number;
-  scale: number;
   baseSize?: PageSize;
   observerRoot: HTMLDivElement | null;
   acquirePage: (
     pageNumber: number,
   ) => Promise<{ page: PdfJsPage; release: () => void }>;
-  getPageTextContent: (pageNumber: number) => Promise<PdfJsTextContent>;
   onPageSize: (pageNumber: number, size: PageSize) => void;
   forceRender?: boolean;
 }
 
 const PdfThumbnailPagePreview = ({
-  pdf,
   documentKey,
   pageNumber,
-  scale,
   baseSize,
   observerRoot,
   acquirePage,
-  getPageTextContent,
   onPageSize,
   forceRender = false,
 }: PdfThumbnailPagePreviewProps) => {
@@ -146,31 +135,31 @@ const PdfThumbnailPagePreview = ({
     return () => observer.disconnect();
   }, [forceRender, observerRoot, shouldRender]);
 
-  const placeholderHeight =
-    baseSize && baseSize.width > 0
-      ? Math.max(96, Math.floor(baseSize.height * scale))
-      : 144;
-
   return (
-    <div ref={hostRef}>
+    <div
+      ref={hostRef}
+      style={{
+        width: `${THUMBNAIL_PAGE_BOX_WIDTH_PX}px`,
+        height: `${THUMBNAIL_PAGE_BOX_HEIGHT_PX}px`,
+      }}
+    >
       {shouldRender ? (
-        <PdfPage
-          className="pointer-events-none"
+        <PdfThumbnailPage
           documentKey={documentKey}
-          pdf={pdf}
           pageNumber={pageNumber}
-          scale={scale}
+          boxWidthPx={THUMBNAIL_PAGE_BOX_WIDTH_PX}
+          boxHeightPx={THUMBNAIL_PAGE_BOX_HEIGHT_PX}
           baseSize={baseSize}
-          opaqueCanvas={false}
-          renderTextLayer={false}
           acquirePage={acquirePage}
-          getPageTextContent={getPageTextContent}
           onPageSize={onPageSize}
         />
       ) : (
         <div
           className="rounded-lg bg-slate-100"
-          style={{ height: `${placeholderHeight}px` }}
+          style={{
+            width: `${THUMBNAIL_PAGE_BOX_WIDTH_PX}px`,
+            height: `${THUMBNAIL_PAGE_BOX_HEIGHT_PX}px`,
+          }}
         />
       )}
     </div>
@@ -178,10 +167,8 @@ const PdfThumbnailPagePreview = ({
 };
 
 interface PdfThumbnailCardContentProps {
-  pdf: PdfJsDocument;
   documentKey: string;
   pageNumber: number;
-  scale: number;
   baseSize?: PageSize;
   isActive: boolean;
   isDragging?: boolean;
@@ -189,22 +176,18 @@ interface PdfThumbnailCardContentProps {
   acquirePage: (
     pageNumber: number,
   ) => Promise<{ page: PdfJsPage; release: () => void }>;
-  getPageTextContent: (pageNumber: number) => Promise<PdfJsTextContent>;
   onPageSize: (pageNumber: number, size: PageSize) => void;
   forceRender?: boolean;
 }
 
 const PdfThumbnailCardContent = ({
-  pdf,
   documentKey,
   pageNumber,
-  scale,
   baseSize,
   isActive,
   isDragging = false,
   observerRoot,
   acquirePage,
-  getPageTextContent,
   onPageSize,
   forceRender = false,
 }: PdfThumbnailCardContentProps) => {
@@ -212,7 +195,7 @@ const PdfThumbnailCardContent = ({
     <>
       <div
         className={cn(
-          "overflow-hidden rounded-xl border bg-white p-1 shadow-sm transition-shadow",
+          "flex justify-center overflow-hidden rounded-xl border bg-white p-1 shadow-sm transition-shadow",
           isActive
             ? "border-primary-500 ring-2 ring-primary-500/20"
             : "border-slate-200",
@@ -220,14 +203,11 @@ const PdfThumbnailCardContent = ({
         )}
       >
         <PdfThumbnailPagePreview
-          pdf={pdf}
           documentKey={documentKey}
           pageNumber={pageNumber}
-          scale={scale}
           baseSize={baseSize}
           observerRoot={observerRoot}
           acquirePage={acquirePage}
-          getPageTextContent={getPageTextContent}
           onPageSize={onPageSize}
           forceRender={forceRender}
         />
@@ -303,8 +283,6 @@ export const PdfThumbnailSidebar = () => {
   const {
     documentController,
     sourceUnavailable,
-    localDataStatus,
-    firstPageSize,
     currentPage,
     normalizedThumbnailOrder,
     scrollToPage,
@@ -346,16 +324,6 @@ export const PdfThumbnailSidebar = () => {
   const columnCount = useMemo(() => {
     return resolveColumnCount(availableGridWidth);
   }, [availableGridWidth]);
-
-  const thumbnailScale = useMemo(() => {
-    if (!firstPageSize || firstPageSize.width <= 0) {
-      return FALLBACK_THUMBNAIL_SCALE;
-    }
-
-    return Number(
-      (THUMBNAIL_PREVIEW_WIDTH_PX / firstPageSize.width).toFixed(3),
-    );
-  }, [firstPageSize]);
 
   const hasBlockingStatus =
     Boolean(documentController.error) ||
@@ -410,9 +378,7 @@ export const PdfThumbnailSidebar = () => {
 
   const activeDragBaseSize =
     activeDragPageNumber !== null
-      ? documentController.pageSizes[activeDragPageNumber] ??
-        firstPageSize ??
-        undefined
+      ? documentController.pageSizes[activeDragPageNumber] ?? undefined
       : undefined;
 
   const openPage = useCallback(
@@ -452,19 +418,12 @@ export const PdfThumbnailSidebar = () => {
                     {normalizedThumbnailOrder.map((pageNumber) => (
                       <SortablePdfThumbnailTile
                         key={pageNumber}
-                        pdf={documentController.doc}
                         documentKey={documentController.documentKey}
                         pageNumber={pageNumber}
-                        scale={thumbnailScale}
-                        baseSize={
-                          documentController.pageSizes[pageNumber] ??
-                          firstPageSize ??
-                          undefined
-                        }
+                        baseSize={documentController.pageSizes[pageNumber]}
                         isActive={pageNumber === currentPage}
                         observerRoot={scrollRootRef.current}
                         acquirePage={documentController.acquirePage}
-                        getPageTextContent={documentController.getPageTextContent}
                         onPageSize={documentController.setPageSize}
                         onOpenPage={openPage}
                       />
@@ -480,16 +439,13 @@ export const PdfThumbnailSidebar = () => {
                     style={{ width: `${THUMBNAIL_CARD_WIDTH_PX}px` }}
                   >
                     <PdfThumbnailCardContent
-                      pdf={documentController.doc}
                       documentKey={documentController.documentKey}
                       pageNumber={activeDragPageNumber}
-                      scale={thumbnailScale}
                       baseSize={activeDragBaseSize}
                       isActive={activeDragPageNumber === currentPage}
                       isDragging
                       observerRoot={null}
                       acquirePage={documentController.acquirePage}
-                      getPageTextContent={documentController.getPageTextContent}
                       onPageSize={documentController.setPageSize}
                       forceRender
                     />
