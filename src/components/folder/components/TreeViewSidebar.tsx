@@ -66,13 +66,14 @@ export const TreeViewSidebar = ({
       )}
     >
       <div
-          className={cn(
-            "flex h-full min-h-0 w-full flex-col overflow-hidden",
-            "md:rounded-[14px] md:border md:border-[#dddcd5]",
-            "[--sidebar-text-muted:#888780] [--sidebar-icon-active:#888780]",
-            "md:bg-[rgba(255,255,255,0.92)] md:shadow-[0_16px_36px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.04)]",
-            "md:backdrop-blur-[8px] md:[-webkit-backdrop-filter:blur(8px)]",
-          )}
+            className={cn(
+              "flex h-full min-h-0 w-full flex-col overflow-hidden",
+              "md:rounded-[14px] md:border md:border-[#dddcd5]",
+              "[--sidebar-text:#4b5563]",
+              "[--sidebar-text-muted:#888780] [--sidebar-icon-active:#888780]",
+              "md:bg-[rgba(255,255,255,0.92)] md:shadow-[0_16px_36px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.04)]",
+              "md:backdrop-blur-[8px] md:[-webkit-backdrop-filter:blur(8px)]",
+            )}
       >
         <div className="shrink-0">
           <ExplorerSidebarHeader
