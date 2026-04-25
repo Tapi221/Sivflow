@@ -2,10 +2,7 @@ import { useAuthSession } from "@/contexts/AuthContext";
 import { defaultPdfViewerOptions } from "@/components/pdf/defaultPdfViewerOptions";
 import type { PdfViewerHandle } from "@/components/pdf/PdfViewer";
 import { usePdfContainerWidth } from "@/components/pdf/hooks/usePdfContainerWidth";
-import {
-  usePdfDocument,
-  type PdfDocumentController,
-} from "@/components/pdf/hooks/usePdfDocument";
+import { usePdfDocument } from "@/components/pdf/hooks/usePdfDocument";
 import { usePdfSourceResolver } from "@/components/pdf/hooks/usePdfSourceResolver";
 import { usePdfViewerPersistence } from "@/components/pdf/hooks/usePdfViewerPersistence";
 import {
@@ -548,4 +545,5 @@ export const PdfWorkspaceProvider = ({
     </PdfWorkspaceDocumentContext.Provider>
   );
 };
+
 
