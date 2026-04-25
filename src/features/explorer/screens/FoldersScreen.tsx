@@ -26,7 +26,7 @@ import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { cn } from "@/lib/utils";
-import type { Card, CardSet, DocumentItem, SelectedExplorerItem } from "@/types";
+import type { SelectedExplorerItem } from "@/types";
 
 type FoldersScreenProps = {
   route: FoldersRouteAdapter;
@@ -103,6 +103,11 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     [activeTabId, tabs],
   );
 
+  const activeExplorerTabId =
+    activeTab?.kind === "explorer" ? activeTab.id : null;
+  const activeExplorerState =
+    activeTab?.kind === "explorer" ? activeTab.explorerState : null;
+
   const cardById = useMemo(() => buildMapById(cards), [cards]);
   const cardSetById = useMemo(() => buildMapById(cardSets), [cardSets]);
   const documentById = useMemo(() => buildMapById(documents), [documents]);
@@ -167,16 +172,16 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   });
 
   useEffect(() => {
-    if (activeTab?.kind !== "explorer") return;
+    if (!activeExplorerState) return;
 
-    controller.actions.applyRouteState(activeTab.explorerState);
-  }, [activeTab, controller.actions.applyRouteState]);
+    controller.actions.applyRouteState(activeExplorerState);
+  }, [activeExplorerState, controller.actions]);
 
   useEffect(() => {
-    if (activeTab?.kind !== "explorer") return;
+    if (!activeExplorerTabId) return;
 
-    updateExplorerTabState(activeTab.id, currentExplorerRouteState);
-  }, [activeTab, currentExplorerRouteState, updateExplorerTabState]);
+    updateExplorerTabState(activeExplorerTabId, currentExplorerRouteState);
+  }, [activeExplorerTabId, currentExplorerRouteState, updateExplorerTabState]);
 
   useEffect(() => {
     tabs.forEach((tab) => {
@@ -204,7 +209,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
       resetExplorerPaneScroll();
       controller.actions.navigateToSectionList();
     });
-  }, [controller.actions.navigateToSectionList, resetExplorerPaneScroll]);
+  }, [controller.actions, resetExplorerPaneScroll]);
 
   useEffect(() => {
     route.persistLastSelectedFolderId(controller.state.selectedFolderId);
