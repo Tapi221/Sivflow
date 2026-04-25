@@ -15,6 +15,14 @@ import {
   clampScale,
   getViewerStateFromSession,
 } from "@/components/pdf/pdfViewerStateStorage";
+import {
+  PdfWorkspaceContext,
+  PdfWorkspaceDocumentContext,
+  PdfWorkspaceNavigationContext,
+  type PdfWorkspaceContextValue,
+  type PdfWorkspaceDocumentContextValue,
+  type PdfWorkspaceNavigationContextValue,
+} from "@/components/pdf/PdfWorkspaceContexts";
 import type {
   DocumentItem,
   PdfPageLayoutMode,
@@ -22,14 +30,12 @@ import type {
   PdfViewerState,
 } from "@/types";
 import {
-  createContext,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
   type PropsWithChildren,
-  type RefObject,
 } from "react";
 
 interface PdfWorkspaceProviderProps extends PropsWithChildren {
@@ -37,56 +43,7 @@ interface PdfWorkspaceProviderProps extends PropsWithChildren {
   onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
 }
 
-export interface PdfWorkspaceDocumentContextValue {
-  doc: DocumentItem;
-  viewerRef: RefObject<PdfViewerHandle | null>;
-  containerRef: RefObject<HTMLDivElement | null>;
-  documentController: PdfDocumentController;
-  sourceUnavailable: boolean;
-  localDataStatus: "idle" | "loading" | "ready" | "failed";
-  opaqueCanvas: boolean;
-  numPages: number;
-  normalizedThumbnailOrder: number[];
-  firstPageSize: { width: number; height: number } | null;
-  reorderThumbnailOrder: (
-    activePageNumber: number,
-    overPageNumber: number,
-  ) => void;
-}
 
-export interface PdfWorkspaceNavigationContextValue {
-  currentPage: number;
-  alignedCurrentPage: number;
-  scale: number;
-  fitMode: "width" | "manual";
-  pageLayoutMode: PdfPageLayoutMode;
-  zoomPercent: number;
-  canGoToPrevPage: boolean;
-  canGoToNextPage: boolean;
-  setCurrentPage: (pageNumber: number) => void;
-  scrollToPage: (pageNumber: number) => void;
-  handleFitWidth: () => void;
-  handleViewerScaleChange: (nextScale: number) => void;
-  handlePageLayoutModeChange: (nextPageLayoutMode: PdfPageLayoutMode) => void;
-  handleZoomPercentChange: (nextPercent: number) => void;
-  handlePrev: () => void;
-  handleNext: () => void;
-  handleCommitPage: (nextPage: number) => void;
-}
-
-export interface PdfWorkspaceContextValue
-  extends PdfWorkspaceDocumentContextValue,
-    PdfWorkspaceNavigationContextValue {}
-
-export const PdfWorkspaceDocumentContext =
-  createContext<PdfWorkspaceDocumentContextValue | null>(null);
-export const PdfWorkspaceNavigationContext =
-  createContext<PdfWorkspaceNavigationContextValue | null>(null);
-
-export const PdfWorkspaceContext =
-  createContext<PdfWorkspaceContextValue | null>(null);
-
-const PDF_OVERLAY_ZOOM_STEP_PERCENT = 1;
 const PDF_DOUBLE_PAGE_GAP = 16;
 const PDF_ZOOM_UI_MIN_PERCENT = 0;
 const PDF_ZOOM_UI_MAX_PERCENT = 100;
@@ -591,3 +548,4 @@ export const PdfWorkspaceProvider = ({
     </PdfWorkspaceDocumentContext.Provider>
   );
 };
+

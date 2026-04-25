@@ -2,7 +2,7 @@ import {
   PdfWorkspaceContext,
   PdfWorkspaceDocumentContext,
   PdfWorkspaceNavigationContext,
-} from "@/components/pdf/PdfWorkspaceProvider";
+} from "@/components/pdf/PdfWorkspaceContexts";
 import { useContext } from "react";
 
 export const usePdfWorkspace = () => {
@@ -38,3 +38,4 @@ export const usePdfWorkspaceNavigation = () => {
 
   return contextValue;
 };
+
