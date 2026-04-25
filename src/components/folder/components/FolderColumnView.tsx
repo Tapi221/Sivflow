@@ -777,12 +777,8 @@ export const FolderColumnView = ({
 
   const getDragBadgeLabel = useCallback(
     (intent: FolderColumnDropIntent) => {
-      if (intent.position === "before" && intent.targetEntry) {
-        return `${intent.targetEntry.name} の上に移動`;
-      }
-
-      if (intent.position === "after" && intent.targetEntry) {
-        return `${intent.targetEntry.name} の下に移動`;
+      if (intent.position === "before" || intent.position === "after") {
+        return "ここに移動";
       }
 
       if (intent.target.type === "folder") {
