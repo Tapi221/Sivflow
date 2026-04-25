@@ -18,7 +18,6 @@ import type {
   PdfJsPage,
   PdfJsPageLease,
   PdfJsTextContent,
-  PdfJsTextItem,
   PdfViewerOptions,
   PdfViewerSourceMeta,
   SourceLoadErrorKind,
