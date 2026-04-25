@@ -32,6 +32,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 
 type FolderColumnContext =
   | { type: "folder"; id: string }
@@ -155,7 +156,6 @@ interface FolderColumnRowProps {
   selected: boolean;
   draggable: boolean;
   dragging: boolean;
-  dragBadge?: FolderColumnDragBadge | null;
   dropPosition: Exclude<FolderColumnDropPosition, "append"> | null;
   onSelect: () => void;
   onDragStart: (event: ReactDragEvent<HTMLDivElement>) => void;
@@ -183,9 +183,7 @@ const clampFolderColumnWidth = (width: number) => {
 };
 
 const readStoredFolderColumnWidths = (): FolderColumnWidthMap => {
-  if (typeof window === "undefined") {
-    return {};
-  }
+  if (typeof window === "undefined") return {};
 
   const storedWidths = window.localStorage.getItem(
     FOLDER_COLUMN_WIDTHS_STORAGE_KEY,
@@ -213,20 +211,20 @@ const readStoredFolderColumnWidths = (): FolderColumnWidthMap => {
   }
 };
 
-const getCardCardSetId = (card: Card) => {
-  return (
-    card.cardSetId ??
-    (card as unknown as { card_set_id?: string | null }).card_set_id ??
-    null
-  );
-};
-
 const writeStoredFolderColumnWidths = (widths: FolderColumnWidthMap) => {
   if (typeof window === "undefined") return;
 
   window.localStorage.setItem(
     FOLDER_COLUMN_WIDTHS_STORAGE_KEY,
     JSON.stringify(widths),
+  );
+};
+
+const getCardCardSetId = (card: Card) => {
+  return (
+    card.cardSetId ??
+    (card as unknown as { card_set_id?: string | null }).card_set_id ??
+    null
   );
 };
 
@@ -330,7 +328,6 @@ const FolderColumnRow = ({
   selected,
   draggable,
   dragging,
-  dragBadge = null,
   dropPosition,
   onSelect,
   onDragStart,
@@ -442,38 +439,6 @@ const FolderColumnRow = ({
         </div>
         {trailing}
       </div>
-
-      {dragBadge ? (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none fixed z-[70]"
-          style={{
-            left: Math.max(12, dragBadge.x + 16),
-            top: Math.max(12, dragBadge.y + 18),
-          }}
-        >
-          <div
-            className={cn(
-              "inline-flex items-center gap-2 rounded-[10px] border px-3 py-2",
-              "border-white/10 bg-[rgba(43,41,39,0.92)] text-white shadow-[0_12px_28px_rgba(0,0,0,0.28)]",
-              "backdrop-blur-[10px]",
-            )}
-          >
-            <span className="flex h-4 w-4 shrink-0 items-center justify-center text-white/90">
-              {dragBadge.icon === "folder" ? (
-                <FolderOutlineIcon className="h-3.5 w-3.5" />
-              ) : dragBadge.icon === "cardSet" ? (
-                <Layers className="h-3.5 w-3.5" />
-              ) : (
-                <FileText className="h-3.5 w-3.5" />
-              )}
-            </span>
-            <span className="whitespace-nowrap text-[13px] font-medium leading-none text-white/96">
-              {dragBadge.label}
-            </span>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 };
@@ -707,9 +672,7 @@ export const FolderColumnView = ({
         return;
       }
 
-      if (resizeAnimationFrameRef.current !== null) {
-        return;
-      }
+      if (resizeAnimationFrameRef.current !== null) return;
 
       resizeAnimationFrameRef.current = window.requestAnimationFrame(() => {
         resizeAnimationFrameRef.current = null;
@@ -823,10 +786,7 @@ export const FolderColumnView = ({
       }
 
       if (intent.target.type === "folder") {
-        if (intent.target.id === null) {
-          return "ルートに移動";
-        }
-
+        if (intent.target.id === null) return "ルートに移動";
         return `${folderNameById.get(intent.target.id) ?? "フォルダ"} に移動`;
       }
 
@@ -838,16 +798,8 @@ export const FolderColumnView = ({
   const getDragBadgeIcon = useCallback(
     (intent: FolderColumnDropIntent): FolderColumnDragBadge["icon"] => {
       if (intent.position === "before" || intent.position === "after") {
-        if (
-          intent.targetEntry?.kind === "folder"
-        ) {
-          return "folder";
-        }
-
-        if (intent.targetEntry?.kind === "cardSet") {
-          return "cardSet";
-        }
-
+        if (intent.targetEntry?.kind === "folder") return "folder";
+        if (intent.targetEntry?.kind === "cardSet") return "cardSet";
         return "document";
       }
 
@@ -904,14 +856,8 @@ export const FolderColumnView = ({
 
   const getDropTargetForEntry = useCallback(
     (entry: FolderColumnEntry): FolderColumnDropTarget | null => {
-      if (entry.kind === "folder") {
-        return { type: "folder", id: entry.id };
-      }
-
-      if (entry.kind === "cardSet") {
-        return { type: "cardSet", id: entry.id };
-      }
-
+      if (entry.kind === "folder") return { type: "folder", id: entry.id };
+      if (entry.kind === "cardSet") return { type: "cardSet", id: entry.id };
       return null;
     },
     [],
@@ -932,7 +878,8 @@ export const FolderColumnView = ({
       event: ReactDragEvent<HTMLDivElement>,
     ): Exclude<FolderColumnDropPosition, "append"> => {
       const rect = event.currentTarget.getBoundingClientRect();
-      const ratio = rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
+      const ratio =
+        rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
 
       if (ratio < 0.42) return "before";
       if (ratio > 0.58) return "after";
@@ -1034,7 +981,6 @@ export const FolderColumnView = ({
 
       if (payload.kind === "card") {
         if (target.type !== "cardSet") return false;
-
         return Boolean(onReorderCardsInCardSet);
       }
 
@@ -1054,10 +1000,7 @@ export const FolderColumnView = ({
   );
 
   const buildNextOrderedIds = useCallback(
-    (
-      payload: FolderColumnDragPayload,
-      intent: FolderColumnDropIntent,
-    ) => {
+    (payload: FolderColumnDragPayload, intent: FolderColumnDropIntent) => {
       const ids = getEntityIdsForTarget(payload, intent.target).filter(
         (id) => id !== payload.id,
       );
@@ -1092,7 +1035,6 @@ export const FolderColumnView = ({
 
       setColumnPath((previousPath) => {
         const nextPath = [...previousPath.slice(0, columnIndex), nextContext];
-
         return areSameColumnPaths(previousPath, nextPath)
           ? previousPath
           : nextPath;
@@ -1120,10 +1062,7 @@ export const FolderColumnView = ({
   );
 
   const moveDraggedEntry = useCallback(
-    async (
-      payload: FolderColumnDragPayload,
-      intent: FolderColumnDropIntent,
-    ) => {
+    async (payload: FolderColumnDragPayload, intent: FolderColumnDropIntent) => {
       const { target } = intent;
       const nextOrderedIds = buildNextOrderedIds(payload, intent);
       const optimisticSnapshot = setOptimisticOrderForScope(
@@ -1223,10 +1162,7 @@ export const FolderColumnView = ({
   }, [clearDropState]);
 
   const handleDropIntentDragOver = useCallback(
-    (
-      intent: FolderColumnDropIntent | null,
-      event: ReactDragEvent<HTMLElement>,
-    ) => {
+    (intent: FolderColumnDropIntent | null, event: ReactDragEvent<HTMLElement>) => {
       const payload = dragPayloadRef.current;
       if (!canDropOnIntent(payload, intent)) return;
 
@@ -1258,12 +1194,12 @@ export const FolderColumnView = ({
     [clearDropState],
   );
 
-  const handleRowDragLeave = useCallback(() => {
-    // HTML5 dragleave often reports relatedTarget as null while moving across
-    // text/icon children inside the same row. Clearing here makes the insertion
-    // guide flicker or disappear, so rows keep the last active intent until the
-    // column changes it, the drop completes, or dragend fires.
-  }, []);
+  const handleRowDragLeave = useCallback(
+    (event: ReactDragEvent<HTMLDivElement>) => {
+      event.stopPropagation();
+    },
+    [],
+  );
 
   const handleDropOnIntent = useCallback(
     async (
@@ -1285,10 +1221,7 @@ export const FolderColumnView = ({
   );
 
   const getColumnDropIntent = useCallback(
-    (
-      column: FolderColumn,
-      columnIndex: number,
-    ): FolderColumnDropIntent => ({
+    (column: FolderColumn, columnIndex: number): FolderColumnDropIntent => ({
       target: getDropTargetForColumn(column.context),
       position: "append",
       columnId: column.id,
@@ -1351,7 +1284,6 @@ export const FolderColumnView = ({
       };
 
       writeStoredFolderColumnWidths(nextWidths);
-
       return nextWidths;
     });
 
@@ -1365,7 +1297,6 @@ export const FolderColumnView = ({
       if (!resizeState) return;
 
       event.preventDefault();
-
       showResizeGuide(event.clientX);
       const deltaX = event.clientX - resizeState.startX;
       scheduleColumnWidthApply(
@@ -1519,7 +1450,6 @@ export const FolderColumnView = ({
       }
 
       const parentFolderId = context?.type === "folder" ? context.id : null;
-
       const targetFolderDropTarget: FolderColumnDropTarget = {
         type: "folder",
         id: parentFolderId,
@@ -1586,9 +1516,6 @@ export const FolderColumnView = ({
           if (item.type === "document") return true;
 
           const cardSetId = getCardCardSetId(item.data);
-
-          // カードセットに属するカードは、親フォルダ直下では表示しない。
-          // カードセットを開いた次カラムだけで表示する。
           if (cardSetId && activeCardSetIdSet.has(cardSetId)) return false;
 
           return true;
@@ -1617,7 +1544,12 @@ export const FolderColumnView = ({
       );
       const childCards = childItems.filter((item) => item.kind === "card");
 
-      return [...childFolders, ...childCardSets, ...childDocuments, ...childCards];
+      return [
+        ...childFolders,
+        ...childCardSets,
+        ...childDocuments,
+        ...childCards,
+      ];
     },
     [
       activeCardSetIdSet,
@@ -1746,9 +1678,7 @@ export const FolderColumnView = ({
               key={`${column.id}:${columnIndex}`}
               ref={(node) => setColumnSectionRef(column.id, node)}
               style={getColumnStyle(column.id)}
-              className={cn(
-                "relative h-full min-h-0 shrink-0 overflow-hidden border-r border-[#e7e5df]",
-              )}
+              className="relative h-full min-h-0 shrink-0 overflow-hidden border-r border-[#e7e5df]"
               aria-label={
                 column.context?.type === "cardSet"
                   ? "カードセット内のカード"
@@ -1798,7 +1728,9 @@ export const FolderColumnView = ({
                       if (!activeDropIntent) return null;
                       if (activeDropIntent.columnId !== column.id) return null;
                       if (!activeDropIntent.targetEntry) return null;
-                      if (activeDropIntent.targetEntry.id !== entry.id) return null;
+                      if (activeDropIntent.targetEntry.id !== entry.id) {
+                        return null;
+                      }
                       if (activeDropIntent.targetEntry.kind !== entry.kind) {
                         return null;
                       }
@@ -1858,7 +1790,49 @@ export const FolderColumnView = ({
           );
         })}
       </div>
+
+      {dragBadge && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              aria-hidden="true"
+              className="pointer-events-none fixed"
+              style={{
+                left: Math.max(12, dragBadge.x + 16),
+                top: Math.max(12, dragBadge.y + 18),
+                zIndex: 2147483000,
+              }}
+            >
+              <div
+                className="inline-flex items-center gap-2 rounded-[10px] border px-3 py-2"
+                style={{
+                  background: "rgba(43, 41, 39, 0.92)",
+                  borderColor: "rgba(255, 255, 255, 0.12)",
+                  boxShadow: "0 12px 28px rgba(0, 0, 0, 0.28)",
+                  color: "rgba(255, 255, 255, 0.96)",
+                  backdropFilter: "blur(10px)",
+                  WebkitBackdropFilter: "blur(10px)",
+                }}
+              >
+                <span className="flex h-4 w-4 shrink-0 items-center justify-center">
+                  {dragBadge.icon === "folder" ? (
+                    <FolderOutlineIcon className="h-3.5 w-3.5" />
+                  ) : dragBadge.icon === "cardSet" ? (
+                    <Layers className="h-3.5 w-3.5" />
+                  ) : (
+                    <FileText className="h-3.5 w-3.5" />
+                  )}
+                </span>
+                <span
+                  className="whitespace-nowrap text-[13px] font-medium leading-none"
+                  style={{ color: "rgba(255, 255, 255, 0.96)" }}
+                >
+                  {dragBadge.label}
+                </span>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 };
-
