@@ -127,6 +127,8 @@ type FolderColumnDropTarget =
   | { type: "folder"; id: string | null }
   | { type: "cardSet"; id: string };
 
+type FolderColumnOrderScopeKey = string;
+
 type FolderColumnDropPosition = "inside" | "before" | "after" | "append";
 
 type FolderColumnDropIntent = {
@@ -233,6 +235,29 @@ const getDropIntentKey = (intent: FolderColumnDropIntent) => {
     ? `${intent.targetEntry.kind}:${intent.targetEntry.id}`
     : "__column__";
   return `${getDropTargetKey(intent.target)}:${intent.position}:${entryKey}`;
+};
+
+const getOrderScopeKey = (
+  kind: FolderColumnDragPayload["kind"],
+  target: FolderColumnDropTarget,
+): FolderColumnOrderScopeKey | null => {
+  if (kind === "folder" && target.type === "folder") {
+    return `folder:${target.id ?? "__root__"}`;
+  }
+
+  if (kind === "cardSet" && target.type === "folder" && target.id) {
+    return `cardSet:${target.id}`;
+  }
+
+  if (kind === "document" && target.type === "folder" && target.id) {
+    return `document:${target.id}`;
+  }
+
+  if (kind === "card" && target.type === "cardSet") {
+    return `card:${target.id}`;
+  }
+
+  return null;
 };
 
 const FOLDER_COLUMN_ROW_STYLE = {
@@ -452,6 +477,12 @@ export const FolderColumnView = ({
   const [draggingEntryKey, setDraggingEntryKey] = useState<string | null>(null);
   const [activeDropIntent, setActiveDropIntent] =
     useState<FolderColumnDropIntent | null>(null);
+  const optimisticOrderByScopeRef = useRef<
+    Record<FolderColumnOrderScopeKey, string[]>
+  >({});
+  const [optimisticOrderByScope, setOptimisticOrderByScope] = useState<
+    Record<FolderColumnOrderScopeKey, string[]>
+  >({});
 
   const derived = useExplorerDerivedData({
     treeFolders: folders,
@@ -627,6 +658,89 @@ export const FolderColumnView = ({
     previousBodyUserSelectRef.current = "";
     previousBodyCursorRef.current = "";
   }, []);
+
+  const setOptimisticOrderForScope = useCallback(
+    (
+      payload: FolderColumnDragPayload,
+      target: FolderColumnDropTarget,
+      orderedIds: string[],
+    ) => {
+      const scopeKey = getOrderScopeKey(payload.kind, target);
+      if (!scopeKey) return null;
+
+      const previousOrder = optimisticOrderByScopeRef.current[scopeKey];
+      const nextOrderByScope = {
+        ...optimisticOrderByScopeRef.current,
+        [scopeKey]: orderedIds,
+      };
+
+      optimisticOrderByScopeRef.current = nextOrderByScope;
+      setOptimisticOrderByScope(nextOrderByScope);
+
+      return { scopeKey, previousOrder };
+    },
+    [],
+  );
+
+  const rollbackOptimisticOrderForScope = useCallback(
+    (
+      snapshot: {
+        scopeKey: FolderColumnOrderScopeKey;
+        previousOrder?: string[];
+      } | null,
+    ) => {
+      if (!snapshot) return;
+
+      const nextOrderByScope = { ...optimisticOrderByScopeRef.current };
+
+      if (snapshot.previousOrder) {
+        nextOrderByScope[snapshot.scopeKey] = snapshot.previousOrder;
+      } else {
+        delete nextOrderByScope[snapshot.scopeKey];
+      }
+
+      optimisticOrderByScopeRef.current = nextOrderByScope;
+      setOptimisticOrderByScope(nextOrderByScope);
+    },
+    [],
+  );
+
+  const applyOptimisticEntryOrder = useCallback(
+    <TEntry extends Pick<FolderColumnEntry, "id" | "kind">>(
+      entries: TEntry[],
+      kind: FolderColumnDragPayload["kind"],
+      target: FolderColumnDropTarget,
+    ) => {
+      const scopeKey = getOrderScopeKey(kind, target);
+      const optimisticOrder = scopeKey
+        ? optimisticOrderByScope[scopeKey]
+        : undefined;
+
+      if (!optimisticOrder || optimisticOrder.length === 0) return entries;
+
+      const orderIndexById = new Map(
+        optimisticOrder.map((id, index) => [id, index]),
+      );
+
+      return entries
+        .map((entry, originalIndex) => ({ entry, originalIndex }))
+        .sort((left, right) => {
+          const leftOrder = orderIndexById.get(left.entry.id);
+          const rightOrder = orderIndexById.get(right.entry.id);
+
+          if (leftOrder !== undefined && rightOrder !== undefined) {
+            return leftOrder - rightOrder;
+          }
+
+          if (leftOrder !== undefined) return -1;
+          if (rightOrder !== undefined) return 1;
+
+          return left.originalIndex - right.originalIndex;
+        })
+        .map(({ entry }) => entry);
+    },
+    [optimisticOrderByScope],
+  );
 
   const clearDropState = useCallback(() => {
     setActiveDropIntent(null);
@@ -882,51 +996,61 @@ export const FolderColumnView = ({
     ) => {
       const { target } = intent;
       const nextOrderedIds = buildNextOrderedIds(payload, intent);
+      const optimisticSnapshot = setOptimisticOrderForScope(
+        payload,
+        target,
+        nextOrderedIds,
+      );
 
-      if (payload.kind === "folder" && target.type === "folder") {
-        if (onReorderFolders) {
-          await onReorderFolders(target.id, nextOrderedIds);
+      try {
+        if (payload.kind === "folder" && target.type === "folder") {
+          if (onReorderFolders) {
+            await onReorderFolders(target.id, nextOrderedIds);
+            return;
+          }
+
+          await onMoveFolder?.(payload.id, target.id);
           return;
         }
 
-        await onMoveFolder?.(payload.id, target.id);
-        return;
-      }
+        if (
+          payload.kind === "cardSet" &&
+          target.type === "folder" &&
+          target.id
+        ) {
+          if (onReorderCardSets) {
+            await onReorderCardSets(target.id, nextOrderedIds);
+            return;
+          }
 
-      if (
-        payload.kind === "cardSet" &&
-        target.type === "folder" &&
-        target.id
-      ) {
-        if (onReorderCardSets) {
-          await onReorderCardSets(target.id, nextOrderedIds);
+          await onMoveCardSetToFolder?.(payload.id, target.id);
           return;
         }
 
-        await onMoveCardSetToFolder?.(payload.id, target.id);
-        return;
-      }
+        if (
+          payload.kind === "document" &&
+          target.type === "folder" &&
+          target.id
+        ) {
+          if (onReorderDocuments) {
+            await onReorderDocuments(target.id, nextOrderedIds);
+            return;
+          }
 
-      if (
-        payload.kind === "document" &&
-        target.type === "folder" &&
-        target.id
-      ) {
-        if (onReorderDocuments) {
-          await onReorderDocuments(target.id, nextOrderedIds);
+          await onMoveDocumentToFolder?.(payload.id, target.id);
           return;
         }
 
-        await onMoveDocumentToFolder?.(payload.id, target.id);
-        return;
-      }
+        if (payload.kind === "card" && target.type === "cardSet") {
+          if (payload.cardSetId !== target.id) {
+            await onMoveCardToSet?.(payload.id, target.id);
+          }
 
-      if (payload.kind === "card" && target.type === "cardSet") {
-        if (payload.cardSetId !== target.id) {
-          await onMoveCardToSet?.(payload.id, target.id);
+          await onReorderCardsInCardSet?.(target.id, nextOrderedIds);
         }
-
-        await onReorderCardsInCardSet?.(target.id, nextOrderedIds);
+      } catch (error) {
+        rollbackOptimisticOrderForScope(optimisticSnapshot);
+        throw error;
       }
     },
     [
@@ -939,6 +1063,8 @@ export const FolderColumnView = ({
       onReorderCardsInCardSet,
       onReorderDocuments,
       onReorderFolders,
+      rollbackOptimisticOrderForScope,
+      setOptimisticOrderForScope,
     ],
   );
 
@@ -1236,27 +1362,39 @@ export const FolderColumnView = ({
   const buildColumnEntries = useCallback(
     (context: FolderColumnContext | null): FolderColumnEntry[] => {
       if (context?.type === "cardSet") {
-        return getCardSetItems(context.id).map((item): FolderColumnEntry => {
-          if (item.type === "card") {
+        const cardSetEntries = getCardSetItems(context.id).map(
+          (item): FolderColumnEntry => {
+            if (item.type === "card") {
+              return {
+                kind: "card",
+                id: item.data.id,
+                name: getExplorerItemDisplayName(item),
+                cardSetId: getCardCardSetId(item.data),
+              };
+            }
+
             return {
-              kind: "card",
+              kind: "document",
               id: item.data.id,
               name: getExplorerItemDisplayName(item),
-              cardSetId: getCardCardSetId(item.data),
             };
-          }
+          },
+        );
 
-          return {
-            kind: "document",
-            id: item.data.id,
-            name: getExplorerItemDisplayName(item),
-          };
+        return applyOptimisticEntryOrder(cardSetEntries, "card", {
+          type: "cardSet",
+          id: context.id,
         });
       }
 
       const parentFolderId = context?.type === "folder" ? context.id : null;
 
-      const childFolders = (
+      const targetFolderDropTarget: FolderColumnDropTarget = {
+        type: "folder",
+        id: parentFolderId,
+      };
+
+      let childFolders = (
         parentFolderId ? getChildFolders(parentFolderId) : rootFolders
       )
         .filter((folder) => {
@@ -1286,7 +1424,13 @@ export const FolderColumnView = ({
           };
         });
 
-      const childCardSets = getCardSets(parentFolderId)
+      childFolders = applyOptimisticEntryOrder(
+        childFolders,
+        "folder",
+        targetFolderDropTarget,
+      );
+
+      let childCardSets = getCardSets(parentFolderId)
         .filter((cardSet) => hasCardSetMatches(cardSet.id))
         .map((cardSet) => {
           const cardSetItems = getCardSetItems(cardSet.id);
@@ -1299,6 +1443,12 @@ export const FolderColumnView = ({
             hasNextColumn: cardSetItems.length > 0,
           };
         });
+
+      childCardSets = applyOptimisticEntryOrder(
+        childCardSets,
+        "cardSet",
+        targetFolderDropTarget,
+      );
 
       const childItems = getFolderItems(parentFolderId)
         .filter((item) => {
@@ -1329,10 +1479,18 @@ export const FolderColumnView = ({
           };
         });
 
-      return [...childFolders, ...childCardSets, ...childItems];
+      const childDocuments = applyOptimisticEntryOrder(
+        childItems.filter((item) => item.kind === "document"),
+        "document",
+        targetFolderDropTarget,
+      );
+      const childCards = childItems.filter((item) => item.kind === "card");
+
+      return [...childFolders, ...childCardSets, ...childDocuments, ...childCards];
     },
     [
       activeCardSetIdSet,
+      applyOptimisticEntryOrder,
       getCardSetItems,
       getCardSets,
       getChildFolders,
