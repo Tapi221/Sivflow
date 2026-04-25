@@ -1,4 +1,10 @@
-import { type CSSProperties, useEffect, useMemo, useState } from "react";
+import {
+  type CSSProperties,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
@@ -32,11 +38,18 @@ type FoldersScreenProps = {
   route: FoldersRouteAdapter;
 };
 
+const WORKSPACE_TABS_HEIGHT_PX = 40;
+
+type FoldersScreenStyle = CSSProperties & {
+  "--workspace-tabs-offset-y": string;
+};
+
 const FOLDERS_SCREEN_FILL_STYLE = {
   width:
     "calc(100dvw - var(--app-layout-padding-x, 12px) - var(--app-layout-padding-x, 12px))",
   maxWidth: "none",
-} satisfies CSSProperties;
+  "--workspace-tabs-offset-y": `${WORKSPACE_TABS_HEIGHT_PX}px`,
+} satisfies FoldersScreenStyle;
 
 const resolveSelectedCardId = (selectedItem: SelectedExplorerItem) => {
   if (selectedItem?.type !== "card") {
@@ -65,6 +78,45 @@ const resolveActiveTab = (
   return tabs.find((tab) => tab.id === activeTabId) ?? tabs[0] ?? null;
 };
 
+const resolveSelectedExplorerItemId = (item: SelectedExplorerItem) => {
+  if (!item || !("id" in item)) {
+    return null;
+  }
+
+  return item.id;
+};
+
+const areSelectedExplorerItemsEqual = (
+  left: SelectedExplorerItem,
+  right: SelectedExplorerItem,
+) => {
+  if (left === right) {
+    return true;
+  }
+
+  if (!left || !right) {
+    return false;
+  }
+
+  if (left.type !== right.type) {
+    return false;
+  }
+
+  return resolveSelectedExplorerItemId(left) === resolveSelectedExplorerItemId(right);
+};
+
+const areExplorerRouteStatesEqual = (
+  left: ExplorerRouteState,
+  right: ExplorerRouteState,
+) => {
+  return (
+    left.isHomeOnlyMode === right.isHomeOnlyMode &&
+    left.isSectionListMode === right.isSectionListMode &&
+    left.selectedFolderId === right.selectedFolderId &&
+    areSelectedExplorerItemsEqual(left.selectedItem, right.selectedItem)
+  );
+};
+
 export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   const [initialRouteState] = useState<ExplorerRouteState>(() =>
     route.readRouteState(),
@@ -82,6 +134,9 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     selectItem,
     setBreadcrumbContext,
   } = controller.actions;
+
+  const previousActiveExplorerTabIdRef = useRef<WorkspaceTab["id"] | null>(null);
+  const restoringExplorerTabIdRef = useRef<WorkspaceTab["id"] | null>(null);
 
   const { resetExplorerPaneScroll } = useWorkspaceScrollController({
     isDesktop: route.isDesktop,
@@ -182,16 +237,56 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   });
 
   useEffect(() => {
-    if (!activeExplorerState) return;
+    if (!activeExplorerTabId || !activeExplorerState) {
+      previousActiveExplorerTabIdRef.current = null;
+      restoringExplorerTabIdRef.current = null;
+      return;
+    }
 
+    if (previousActiveExplorerTabIdRef.current === activeExplorerTabId) {
+      return;
+    }
+
+    previousActiveExplorerTabIdRef.current = activeExplorerTabId;
+
+    if (areExplorerRouteStatesEqual(currentExplorerRouteState, activeExplorerState)) {
+      restoringExplorerTabIdRef.current = null;
+      return;
+    }
+
+    restoringExplorerTabIdRef.current = activeExplorerTabId;
     applyRouteState(activeExplorerState);
-  }, [activeExplorerState, applyRouteState]);
+  }, [
+    activeExplorerState,
+    activeExplorerTabId,
+    applyRouteState,
+    currentExplorerRouteState,
+  ]);
 
   useEffect(() => {
-    if (!activeExplorerTabId) return;
+    if (!activeExplorerTabId || !activeExplorerState) {
+      return;
+    }
+
+    if (restoringExplorerTabIdRef.current === activeExplorerTabId) {
+      if (areExplorerRouteStatesEqual(currentExplorerRouteState, activeExplorerState)) {
+        restoringExplorerTabIdRef.current = null;
+      }
+
+      return;
+    }
+
+    if (areExplorerRouteStatesEqual(currentExplorerRouteState, activeExplorerState)) {
+      return;
+    }
 
     updateExplorerTabState(activeExplorerTabId, currentExplorerRouteState);
-  }, [activeExplorerTabId, currentExplorerRouteState, updateExplorerTabState]);
+  }, [
+    activeExplorerState,
+    activeExplorerTabId,
+    currentExplorerRouteState,
+    updateExplorerTabState,
+  ]);
 
   useEffect(() => {
     tabs.forEach((tab) => {
@@ -273,22 +368,24 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   }
 
   const explorerContent = (
-    <TreeViewLayout
-      folders={lookups.normalizedFolders}
-      isSectionListMode={controller.state.isSectionListMode}
-      selectedFolderId={controller.state.selectedFolderId}
-      selectedItem={controller.state.selectedItem}
-      selectedCardId={lookups.selectedCardId}
-      selectedDocumentId={lookups.selectedDocumentId}
-      onFolderSelect={handleFolderSelect}
-      onItemSelect={handleItemSelect}
-      onCardUpdated={() => {
-        // カード更新後の処理は既存実装へ委譲
-      }}
-      onBreadcrumbContextChange={setBreadcrumbContext}
-      navigateToSectionListToken={controller.state.navigateToSectionListToken}
-      folderSelectionNonce={controller.state.folderSelectionNonce}
-    />
+    <div className="relative z-10 flex h-full min-h-0 w-full min-w-0 max-w-none">
+      <TreeViewLayout
+        folders={lookups.normalizedFolders}
+        isSectionListMode={controller.state.isSectionListMode}
+        selectedFolderId={controller.state.selectedFolderId}
+        selectedItem={controller.state.selectedItem}
+        selectedCardId={lookups.selectedCardId}
+        selectedDocumentId={lookups.selectedDocumentId}
+        onFolderSelect={handleFolderSelect}
+        onItemSelect={handleItemSelect}
+        onCardUpdated={() => {
+          // カード更新後の処理は既存実装へ委譲
+        }}
+        onBreadcrumbContextChange={setBreadcrumbContext}
+        navigateToSectionListToken={controller.state.navigateToSectionListToken}
+        folderSelectionNonce={controller.state.folderSelectionNonce}
+      />
+    </div>
   );
 
   return (
@@ -302,22 +399,19 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
       <WorkspaceTabsBar />
 
       <div className="relative z-10 flex min-h-0 w-full min-w-0 flex-1 overflow-hidden">
-        {activeTab.kind === "explorer" ? (
-          explorerContent
-        ) : (
-          <WorkspaceTabPanel
-            activeTab={activeTab}
-            cards={cards}
-            cardSets={cardSets}
-            documents={documents}
-            cardsLoading={cardsLoading}
-            cardSetsLoading={cardSetsLoading}
-            documentsLoading={documentsLoading}
-            onCardUpdated={() => {
-              // カード更新後の処理は既存実装へ委譲
-            }}
-          />
-        )}
+        <WorkspaceTabPanel
+          activeTab={activeTab}
+          explorerContent={explorerContent}
+          cards={cards}
+          cardSets={cardSets}
+          documents={documents}
+          cardsLoading={cardsLoading}
+          cardSetsLoading={cardSetsLoading}
+          documentsLoading={documentsLoading}
+          onCardUpdated={() => {
+            // カード更新後の処理は既存実装へ委譲
+          }}
+        />
       </div>
     </div>
   );
