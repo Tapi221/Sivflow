@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps -- large legacy explorer handlers intentionally stabilized to avoid interaction regressions. */
 import { ExplorerEmptyState } from "@/components/folder/components/ExplorerEmptyState";
 import { ExplorerNoResultsState } from "@/components/folder/components/ExplorerNoResultsState";
+import { ExplorerTreeNodeRenderer } from "@/components/folder/components/ExplorerTreeNode";
 import { RootFolderPanelList } from "@/components/folder/components/RootFolderPanelList";
 import {
   getFolderId,
