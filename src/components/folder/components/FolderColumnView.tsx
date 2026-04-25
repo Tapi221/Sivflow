@@ -145,10 +145,8 @@ type FolderColumnDropIntent = {
 };
 
 type FolderColumnDragBadge = {
-  x: number;
-  y: number;
   label: string;
-  icon: "folder" | "cardSet" | "document";
+  icon: "into" | "below";
 };
 
 interface FolderColumnRowProps {
@@ -466,6 +464,11 @@ export const FolderColumnView = ({
 }: FolderColumnViewProps) => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const resizeGuideRef = useRef<HTMLDivElement | null>(null);
+  const dragBadgeRef = useRef<HTMLDivElement | null>(null);
+  const pendingDragBadgePointRef = useRef<{
+    x: number;
+    y: number;
+  } | null>(null);
   const columnSectionRefs = useRef<Map<string, HTMLElement>>(new Map());
   const dragPayloadRef = useRef<FolderColumnDragPayload | null>(null);
   const expandDropTargetTimeoutRef = useRef<number | null>(null);
@@ -476,6 +479,7 @@ export const FolderColumnView = ({
   } | null>(null);
   const pendingColumnWidthRef = useRef(DEFAULT_FOLDER_COLUMN_WIDTH_PX);
   const resizeAnimationFrameRef = useRef<number | null>(null);
+  const dragBadgeAnimationFrameRef = useRef<number | null>(null);
   const previousBodyUserSelectRef = useRef("");
   const previousBodyCursorRef = useRef("");
 
@@ -775,6 +779,62 @@ export const FolderColumnView = ({
     [optimisticOrderByScope],
   );
 
+  const applyDragBadgePosition = useCallback((x: number, y: number) => {
+    const badge = dragBadgeRef.current;
+    if (!badge) return;
+
+    const nextX = Math.max(12, x + 14);
+    const nextY = Math.max(12, y + 16);
+
+    badge.style.transform = `translate3d(${nextX}px, ${nextY}px, 0)`;
+  }, []);
+
+  const cancelDragBadgeAnimationFrame = useCallback(() => {
+    if (
+      typeof window !== "undefined" &&
+      dragBadgeAnimationFrameRef.current !== null
+    ) {
+      window.cancelAnimationFrame(dragBadgeAnimationFrameRef.current);
+      dragBadgeAnimationFrameRef.current = null;
+    }
+
+    pendingDragBadgePointRef.current = null;
+  }, []);
+
+  const scheduleDragBadgePosition = useCallback(
+    (x: number, y: number) => {
+      pendingDragBadgePointRef.current = { x, y };
+
+      if (typeof window === "undefined") {
+        applyDragBadgePosition(x, y);
+        return;
+      }
+
+      if (dragBadgeAnimationFrameRef.current !== null) {
+        return;
+      }
+
+      dragBadgeAnimationFrameRef.current = window.requestAnimationFrame(() => {
+        dragBadgeAnimationFrameRef.current = null;
+
+        const point = pendingDragBadgePointRef.current;
+        if (!point) return;
+
+        applyDragBadgePosition(point.x, point.y);
+      });
+    },
+    [applyDragBadgePosition],
+  );
+
+  useEffect(() => {
+    if (!dragBadge) return;
+
+    const point = pendingDragBadgePointRef.current;
+    if (!point) return;
+
+    applyDragBadgePosition(point.x, point.y);
+  }, [applyDragBadgePosition, dragBadge]);
+
   const getDragBadgeLabel = useCallback(
     (intent: FolderColumnDropIntent) => {
       if (intent.position === "before" || intent.position === "after") {
@@ -794,12 +854,10 @@ export const FolderColumnView = ({
   const getDragBadgeIcon = useCallback(
     (intent: FolderColumnDropIntent): FolderColumnDragBadge["icon"] => {
       if (intent.position === "before" || intent.position === "after") {
-        if (intent.targetEntry?.kind === "folder") return "folder";
-        if (intent.targetEntry?.kind === "cardSet") return "cardSet";
-        return "document";
+        return "below";
       }
 
-      return intent.target.type === "folder" ? "folder" : "cardSet";
+      return "into";
     },
     [],
   );
@@ -809,19 +867,31 @@ export const FolderColumnView = ({
       intent: FolderColumnDropIntent,
       event: ReactDragEvent<HTMLElement>,
     ) => {
-      setDragBadge({
-        x: event.clientX,
-        y: event.clientY,
+      const nextBadge = {
         label: getDragBadgeLabel(intent),
         icon: getDragBadgeIcon(intent),
+      } satisfies FolderColumnDragBadge;
+
+      setDragBadge((previousBadge) => {
+        if (
+          previousBadge?.label === nextBadge.label &&
+          previousBadge.icon === nextBadge.icon
+        ) {
+          return previousBadge;
+        }
+
+        return nextBadge;
       });
+
+      scheduleDragBadgePosition(event.clientX, event.clientY);
     },
-    [getDragBadgeIcon, getDragBadgeLabel],
+    [getDragBadgeIcon, getDragBadgeLabel, scheduleDragBadgePosition],
   );
 
   const clearDropState = useCallback(() => {
     setActiveDropIntent(null);
     setDragBadge(null);
+    cancelDragBadgeAnimationFrame();
 
     if (
       typeof window !== "undefined" &&
@@ -830,7 +900,7 @@ export const FolderColumnView = ({
       window.clearTimeout(expandDropTargetTimeoutRef.current);
       expandDropTargetTimeoutRef.current = null;
     }
-  }, []);
+  }, [cancelDragBadgeAnimationFrame]);
 
   const getDragPayloadForEntry = useCallback(
     (entry: FolderColumnEntry): FolderColumnDragPayload => {
@@ -1389,6 +1459,8 @@ export const FolderColumnView = ({
         window.cancelAnimationFrame(resizeAnimationFrameRef.current);
       }
 
+      cancelDragBadgeAnimationFrame();
+
       if (columnResizeStateRef.current) {
         columnResizeStateRef.current = null;
         restoreBodyResizeStyles();
@@ -1398,7 +1470,12 @@ export const FolderColumnView = ({
       clearDropState();
       dragPayloadRef.current = null;
     };
-  }, [clearDropState, hideResizeGuide, restoreBodyResizeStyles]);
+  }, [
+    cancelDragBadgeAnimationFrame,
+    clearDropState,
+    hideResizeGuide,
+    restoreBodyResizeStyles,
+  ]);
 
   useEffect(() => {
     if (!selectedFolderId || !visibleFolderIdSet.has(selectedFolderId)) return;
@@ -1823,21 +1900,23 @@ export const FolderColumnView = ({
       {dragBadge && typeof document !== "undefined"
         ? createPortal(
             <div
+              ref={dragBadgeRef}
               aria-hidden="true"
-              className="pointer-events-none fixed"
+              className="pointer-events-none fixed left-0 top-0"
               style={{
-                left: Math.max(12, dragBadge.x + 14),
-                top: Math.max(12, dragBadge.y + 16),
                 zIndex: 2147483000,
+                transform: "translate3d(-9999px, -9999px, 0)",
+                willChange: "transform",
+                contain: "layout style paint",
               }}
             >
               <div
                 className="inline-flex items-center gap-1.5 rounded-[9px] border px-2.5 py-1.5"
                 style={{
-                  background: "rgba(55, 53, 49, 0.82)",
+                  background: "rgba(58, 55, 51, 0.86)",
                   borderColor: "rgba(255, 255, 255, 0.1)",
-                  boxShadow: "0 8px 20px rgba(0, 0, 0, 0.18)",
-                  color: "rgba(255, 255, 255, 0.9)",
+                  boxShadow: "0 8px 18px rgba(0, 0, 0, 0.18)",
+                  color: "rgba(255, 255, 255, 0.88)",
                   backdropFilter: "blur(8px)",
                   WebkitBackdropFilter: "blur(8px)",
                 }}
