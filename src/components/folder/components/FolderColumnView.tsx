@@ -778,11 +778,11 @@ export const FolderColumnView = ({
   const getDragBadgeLabel = useCallback(
     (intent: FolderColumnDropIntent) => {
       if (intent.position === "before" && intent.targetEntry) {
-        return `${intent.targetEntry.name} の前に移動`;
+        return `${intent.targetEntry.name} の上に移動`;
       }
 
       if (intent.position === "after" && intent.targetEntry) {
-        return `${intent.targetEntry.name} の後に移動`;
+        return `${intent.targetEntry.name} の下に移動`;
       }
 
       if (intent.target.type === "folder") {
@@ -1024,6 +1024,18 @@ export const FolderColumnView = ({
     [getEntityIdsForTarget],
   );
 
+  const doesDropChange = useCallback(
+    (payload: FolderColumnDragPayload, intent: FolderColumnDropIntent) => {
+      const currentIds = getEntityIdsForTarget(payload, intent.target);
+      const nextIds = buildNextOrderedIds(payload, intent);
+
+      if (currentIds.length !== nextIds.length) return true;
+
+      return currentIds.some((id, index) => id !== nextIds[index]);
+    },
+    [buildNextOrderedIds, getEntityIdsForTarget],
+  );
+
   const expandDropTarget = useCallback(
     (target: FolderColumnDropTarget, columnIndex: number) => {
       if (target.type === "folder" && target.id === null) return;
@@ -1164,19 +1176,32 @@ export const FolderColumnView = ({
   const handleDropIntentDragOver = useCallback(
     (intent: FolderColumnDropIntent | null, event: ReactDragEvent<HTMLElement>) => {
       const payload = dragPayloadRef.current;
-      if (!canDropOnIntent(payload, intent)) return;
+
+      if (
+        !payload ||
+        !intent ||
+        !canDropOnIntent(payload, intent) ||
+        !doesDropChange(payload, intent)
+      ) {
+        setActiveDropIntent(null);
+        setDragBadge(null);
+        return;
+      }
 
       event.preventDefault();
       event.stopPropagation();
       event.dataTransfer.dropEffect = "move";
 
-      if (intent) {
-        setActiveDropIntent(intent);
-        updateDragBadge(intent, event);
-        scheduleDropTargetExpand(intent);
-      }
+      setActiveDropIntent(intent);
+      updateDragBadge(intent, event);
+      scheduleDropTargetExpand(intent);
     },
-    [canDropOnIntent, scheduleDropTargetExpand, updateDragBadge],
+    [
+      canDropOnIntent,
+      doesDropChange,
+      scheduleDropTargetExpand,
+      updateDragBadge,
+    ],
   );
 
   const handleDropTargetDragLeave = useCallback(
@@ -1207,7 +1232,15 @@ export const FolderColumnView = ({
       event: ReactDragEvent<HTMLElement>,
     ) => {
       const payload = dragPayloadRef.current;
-      if (!payload || !intent || !canDropOnIntent(payload, intent)) return;
+      if (
+        !payload ||
+        !intent ||
+        !canDropOnIntent(payload, intent) ||
+        !doesDropChange(payload, intent)
+      ) {
+        clearDropState();
+        return;
+      }
 
       event.preventDefault();
       event.stopPropagation();
@@ -1217,7 +1250,7 @@ export const FolderColumnView = ({
       dragPayloadRef.current = null;
       setDraggingEntryKey(null);
     },
-    [canDropOnIntent, clearDropState, moveDraggedEntry],
+    [canDropOnIntent, clearDropState, doesDropChange, moveDraggedEntry],
   );
 
   const getColumnDropIntent = useCallback(
@@ -1797,34 +1830,34 @@ export const FolderColumnView = ({
               aria-hidden="true"
               className="pointer-events-none fixed"
               style={{
-                left: Math.max(12, dragBadge.x + 16),
-                top: Math.max(12, dragBadge.y + 18),
+                left: Math.max(12, dragBadge.x + 14),
+                top: Math.max(12, dragBadge.y + 16),
                 zIndex: 2147483000,
               }}
             >
               <div
-                className="inline-flex items-center gap-2 rounded-[10px] border px-3 py-2"
+                className="inline-flex items-center gap-1.5 rounded-[9px] border px-2.5 py-1.5"
                 style={{
-                  background: "rgba(43, 41, 39, 0.92)",
-                  borderColor: "rgba(255, 255, 255, 0.12)",
-                  boxShadow: "0 12px 28px rgba(0, 0, 0, 0.28)",
-                  color: "rgba(255, 255, 255, 0.96)",
-                  backdropFilter: "blur(10px)",
-                  WebkitBackdropFilter: "blur(10px)",
+                  background: "rgba(55, 53, 49, 0.82)",
+                  borderColor: "rgba(255, 255, 255, 0.1)",
+                  boxShadow: "0 8px 20px rgba(0, 0, 0, 0.18)",
+                  color: "rgba(255, 255, 255, 0.9)",
+                  backdropFilter: "blur(8px)",
+                  WebkitBackdropFilter: "blur(8px)",
                 }}
               >
-                <span className="flex h-4 w-4 shrink-0 items-center justify-center">
+                <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center opacity-85">
                   {dragBadge.icon === "folder" ? (
-                    <FolderOutlineIcon className="h-3.5 w-3.5" />
+                    <FolderOutlineIcon className="h-3 w-3" />
                   ) : dragBadge.icon === "cardSet" ? (
-                    <Layers className="h-3.5 w-3.5" />
+                    <Layers className="h-3 w-3" />
                   ) : (
-                    <FileText className="h-3.5 w-3.5" />
+                    <FileText className="h-3 w-3" />
                   )}
                 </span>
                 <span
-                  className="whitespace-nowrap text-[13px] font-medium leading-none"
-                  style={{ color: "rgba(255, 255, 255, 0.96)" }}
+                  className="whitespace-nowrap text-[12px] font-medium leading-none"
+                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
                 >
                   {dragBadge.label}
                 </span>
