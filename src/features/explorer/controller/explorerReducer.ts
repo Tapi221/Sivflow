@@ -18,11 +18,19 @@ export const explorerReducer = (
   switch (action.type) {
     case "APPLY_ROUTE_STATE": {
       const next = action.payload;
+
+      const nextSelectedFolderId =
+        next.isHomeOnlyMode || next.isSectionListMode
+          ? null
+          : next.selectedFolderId;
+      const nextSelectedItem =
+        next.isHomeOnlyMode || next.isSectionListMode ? null : next.selectedItem;
+
       const didSelectedFolderChange =
-        state.selectedFolderId !== next.selectedFolderId;
+        state.selectedFolderId !== nextSelectedFolderId;
       const didSelectedItemChange = !isSameSelectedExplorerItem(
         state.selectedItem,
-        next.selectedItem,
+        nextSelectedItem,
       );
 
       const shouldIncrementSectionListToken =
@@ -45,15 +53,6 @@ export const explorerReducer = (
         next.isSectionListMode ||
         didSelectedFolderChange ||
         didSelectedItemChange;
-
-      const nextSelectedFolderId =
-        next.isHomeOnlyMode || next.isSectionListMode
-          ? null
-          : next.selectedFolderId;
-      const nextSelectedItem =
-        next.isHomeOnlyMode || next.isSectionListMode
-          ? null
-          : next.selectedItem;
       const nextFolderSelectionNonce = shouldIncrementFolderSelectionNonce
         ? state.folderSelectionNonce + 1
         : state.folderSelectionNonce;

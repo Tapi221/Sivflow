@@ -66,15 +66,41 @@ const resolveActiveTab = (
   return tabs.find((tab) => tab.id === activeTabId) ?? tabs[0] ?? null;
 };
 
+const normalizeExplorerRouteState = (
+  routeState: ExplorerRouteState,
+): ExplorerRouteState => {
+  const shouldClearSelection =
+    routeState.isHomeOnlyMode || routeState.isSectionListMode;
+
+  if (
+    !shouldClearSelection ||
+    (routeState.selectedFolderId === null && routeState.selectedItem === null)
+  ) {
+    return routeState;
+  }
+
+  return {
+    ...routeState,
+    selectedFolderId: null,
+    selectedItem: null,
+  };
+};
+
 const areExplorerRouteStatesEqual = (
   left: ExplorerRouteState,
   right: ExplorerRouteState,
 ): boolean => {
+  const normalizedLeft = normalizeExplorerRouteState(left);
+  const normalizedRight = normalizeExplorerRouteState(right);
+
   return (
-    left.isHomeOnlyMode === right.isHomeOnlyMode &&
-    left.isSectionListMode === right.isSectionListMode &&
-    left.selectedFolderId === right.selectedFolderId &&
-    isSameSelectedExplorerItem(left.selectedItem, right.selectedItem)
+    normalizedLeft.isHomeOnlyMode === normalizedRight.isHomeOnlyMode &&
+    normalizedLeft.isSectionListMode === normalizedRight.isSectionListMode &&
+    normalizedLeft.selectedFolderId === normalizedRight.selectedFolderId &&
+    isSameSelectedExplorerItem(
+      normalizedLeft.selectedItem,
+      normalizedRight.selectedItem,
+    )
   );
 };
 
@@ -187,16 +213,19 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   useEffect(() => {
     if (!activeExplorerState) return;
 
+    const normalizedActiveExplorerState =
+      normalizeExplorerRouteState(activeExplorerState);
+
     if (
       areExplorerRouteStatesEqual(
-        activeExplorerState,
+        normalizedActiveExplorerState,
         currentExplorerRouteState,
       )
     ) {
       return;
     }
 
-    controller.actions.applyRouteState(activeExplorerState);
+    controller.actions.applyRouteState(normalizedActiveExplorerState);
   }, [
     activeExplorerState,
     currentExplorerRouteState,
