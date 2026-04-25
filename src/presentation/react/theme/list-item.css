@@ -41,7 +41,7 @@
 
   .ds-list-item__icon {
     color: var(--sidebar-text-muted, var(--ds-semantic-color-text-secondary));
-    transition: color var(--ds-semantic-motion-interactive);
+    transition: none;
   }
 
   .group:hover .ds-list-item__icon,
@@ -101,9 +101,7 @@
 
   .ds-list-item__action {
     color: var(--ds-semantic-color-text-secondary);
-    transition:
-      background-color var(--ds-semantic-motion-interactive),
-      color var(--ds-semantic-motion-interactive);
+    transition: none;
   }
 
   .ds-list-item__action:hover {

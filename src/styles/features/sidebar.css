@@ -1,5 +1,9 @@
 @layer components {
   .sidebar-row {
+    --sidebar-row-hover-bg: var(
+      --sidebar-hover-bg,
+      rgb(122 166 161 / 0.1)
+    );
     position: relative;
     display: flex;
     width: 100%;
@@ -37,19 +41,11 @@
 
   .sidebar-row--folder:hover,
   .sidebar-row--document:hover {
-    background-color: color-mix(
-      in srgb,
-      var(--sidebar-active-accent, #7aa6a1) 10%,
-      transparent
-    );
+    background-color: var(--sidebar-row-hover-bg);
   }
 
   .sidebar-row[data-selected="true"] {
-    background-color: color-mix(
-      in srgb,
-      var(--sidebar-active-accent, #7aa6a1) 10%,
-      transparent
-    );
+    background-color: var(--sidebar-row-hover-bg);
     color: var(--sidebar-text, #202123);
     box-shadow: none;
   }
@@ -95,16 +91,14 @@
     font-size: var(--font-size-body, 13px);
     font-weight: 400;
     letter-spacing: 0;
-    transition:
-      font-weight 140ms ease,
-      color 140ms ease;
+    transition: none;
   }
 
   .sidebar-row .sidebar-icon {
     transform: translateY(-1px);
     transform-origin: center;
     color: var(--sidebar-text-muted, #6e6e80);
-    transition: color 140ms ease;
+    transition: none;
   }
 
   .sidebar-row .sidebar-action {
