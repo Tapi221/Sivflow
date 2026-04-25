@@ -28,11 +28,28 @@
       var(--sidebar-active-bg) 58%,
       transparent
     );
+    --titlebar-panel-bg: rgba(255, 255, 255, 0.92);
+    --titlebar-panel-border: #dddcd5;
+    --titlebar-panel-shadow:
+      0 16px 36px rgba(15, 23, 42, 0.06),
+      0 4px 12px rgba(15, 23, 42, 0.04);
 
-    background: transparent;
-    box-shadow: none;
+    width: calc(100% - 24px) !important;
+    height: 36px !important;
+    min-height: 36px;
+    margin: 4px 12px;
+    box-sizing: border-box;
+    overflow: hidden;
+    border: 1px solid var(--titlebar-panel-border);
+    border-radius: 14px;
+    background: var(--titlebar-panel-bg);
+    box-shadow: var(--titlebar-panel-shadow);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+  }
+
+  .surface-flat-titlebar.bg-transparent {
+    background: var(--titlebar-panel-bg);
   }
 
   .titlebar-text-strong,
@@ -52,6 +69,13 @@
 
   .titlebar-divider {
     color: var(--titlebar-divider);
+    font-size: 0;
+  }
+
+  .titlebar-divider::before {
+    content: "›";
+    font-size: 16px;
+    line-height: 1;
   }
 
   .titlebar-breadcrumb-item {
