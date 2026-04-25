@@ -1,6 +1,5 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { TREE_VIEW_SIDEBAR_TOGGLE_EVENT } from "@/components/folder/hooks/useTreeViewSidebar";
-import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
 import { APP_CHROME } from "@/config/appChrome";
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 import {
@@ -8,20 +7,14 @@ import {
   mergeTitleBarBreadcrumbs,
 } from "@/features/breadcrumbs/builders";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
-import {
-  dispatchCardSetViewWindowEvent,
-  subscribeCardSetViewWindowEvent,
-} from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
-import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useCalendarDockPanelStore } from "@/features/calendar/store/useCalendarDockPanelStore";
-import { WorkspaceTabsBar } from "@/features/workspace-tabs/components/WorkspaceTabsBar";
+import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useHasDesktopBridge } from "@/hooks/platform/useHasDesktopBridge";
 import { cn } from "@/lib/utils";
 import { windowControls } from "@/platform/capabilities/windowControls";
 import { APP_DESKTOP_TOP_INSET_PX } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { auth } from "@/services/firebase";
-import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
 import { signOut } from "firebase/auth";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -95,273 +88,104 @@ const WindowControlButton: React.FC<WindowControlButtonProps> = ({
 };
 
 const MenuIcon: React.FC = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
-    <path
-      d="M4 7H20"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    <path
-      d="M4 12H20"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    <path
-      d="M4 17H20"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M4 7H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <path d="M4 12H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <path d="M4 17H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
   </svg>
 );
 
 const SectionListIcon: React.FC = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
-    <rect
-      x="4"
-      y="6"
-      width="16"
-      height="12"
-      rx="1.75"
-      stroke="currentColor"
-      strokeWidth="1.6"
-    />
-    <path
-      d="M10 6V18"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-    />
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <rect x="4" y="6" width="16" height="12" rx="1.75" stroke="currentColor" strokeWidth="1.6" />
+    <path d="M10 6V18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
   </svg>
 );
 
 const SearchIcon: React.FC = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <circle cx="11" cy="11" r="6.25" stroke="currentColor" strokeWidth="1.8" />
-    <path
-      d="M16 16L20 20"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
+    <path d="M16 16L20 20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
   </svg>
 );
 
 const CalendarIcon: React.FC = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
-    <rect
-      x="4"
-      y="5"
-      width="16"
-      height="15"
-      rx="2"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    />
-    <path
-      d="M8 3V7"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    <path
-      d="M16 3V7"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    <path
-      d="M4 9H20"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" strokeWidth="1.8" />
+    <path d="M8 3V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <path d="M16 3V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <path d="M4 9H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
   </svg>
 );
 
 const GlobeIcon: React.FC = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8" />
-    <path
-      d="M4.5 12H19.5"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    <path
-      d="M12 4C14.2 6.1 15.5 8.95 15.5 12C15.5 15.05 14.2 17.9 12 20C9.8 17.9 8.5 15.05 8.5 12C8.5 8.95 9.8 6.1 12 4Z"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-    />
+    <path d="M4.5 12H19.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <path d="M12 4C14.2 6.1 15.5 8.95 15.5 12C15.5 15.05 14.2 17.9 12 20C9.8 17.9 8.5 15.05 8.5 12C8.5 8.95 9.8 6.1 12 4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
   </svg>
 );
 
 const SettingsMenuIcon: React.FC = () => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden="true"
-  >
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" />
-    <path
-      d="M19.4 15A1.65 1.65 0 0 0 19.73 16.82L19.79 16.88A2 2 0 0 1 16.96 19.71L16.9 19.65A1.65 1.65 0 0 0 15.08 19.32A1.65 1.65 0 0 0 14.08 20.83V21A2 2 0 0 1 10.08 21V20.91A1.65 1.65 0 0 0 9 19.4A1.65 1.65 0 0 0 7.18 19.73L7.12 19.79A2 2 0 0 1 4.29 16.96L4.35 16.9A1.65 1.65 0 0 0 4.68 15.08A1.65 1.65 0 0 0 3.17 14H3A2 2 0 0 1 3 10H3.09A1.65 1.65 0 0 0 4.6 9A1.65 1.65 0 0 0 4.27 7.18L4.21 7.12A2 2 0 0 1 7.04 4.29L7.1 4.35A1.65 1.65 0 0 0 8.92 4.68A1.65 1.65 0 0 0 10 3.17V3A2 2 0 0 1 14 3V3.09A1.65 1.65 0 0 0 15 4.6A1.65 1.65 0 0 0 16.82 4.27L16.88 4.21A2 2 0 0 1 19.71 7.04L19.65 7.1A1.65 1.65 0 0 0 19.32 8.92A1.65 1.65 0 0 0 20.83 10H21A2 2 0 0 1 21 14H20.91A1.65 1.65 0 0 0 19.4 15Z"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M19.4 15A1.65 1.65 0 0 0 19.73 16.82L19.79 16.88A2 2 0 0 1 16.96 19.71L16.9 19.65A1.65 1.65 0 0 0 15.08 19.32A1.65 1.65 0 0 0 14.08 20.83V21A2 2 0 0 1 10.08 21V20.91A1.65 1.65 0 0 0 9 19.4A1.65 1.65 0 0 0 7.18 19.73L7.12 19.79A2 2 0 0 1 4.29 16.96L4.35 16.9A1.65 1.65 0 0 0 4.68 15.08A1.65 1.65 0 0 0 3.17 14H3A2 2 0 0 1 3 10H3.09A1.65 1.65 0 0 0 4.6 9A1.65 1.65 0 0 0 4.27 7.18L4.21 7.12A2 2 0 0 1 7.04 4.29L7.1 4.35A1.65 1.65 0 0 0 8.92 4.68A1.65 1.65 0 0 0 10 3.17V3A2 2 0 0 1 14 3V3.09A1.65 1.65 0 0 0 15 4.6A1.65 1.65 0 0 0 16.82 4.27L16.88 4.21A2 2 0 0 1 19.71 7.04L19.65 7.1A1.65 1.65 0 0 0 19.32 8.92A1.65 1.65 0 0 0 20.83 10H21A2 2 0 0 1 21 14H20.91A1.65 1.65 0 0 0 19.4 15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const TrashMenuIcon: React.FC = () => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path
-      d="M3 6H21"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-    <path
-      d="M19 6L18 20A2 2 0 0 1 16 22H8A2 2 0 0 1 6 20L5 6"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M10 11V17"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-    <path
-      d="M14 11V17"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-    <path
-      d="M9 6V4A1 1 0 0 1 10 3H14A1 1 0 0 1 15 4V6"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M3 6H21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M19 6L18 20A2 2 0 0 1 16 22H8A2 2 0 0 1 6 20L5 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M10 11V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M14 11V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M9 6V4A1 1 0 0 1 10 3H14A1 1 0 0 1 15 4V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const LogoutMenuIcon: React.FC = () => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path
-      d="M9 21H5A2 2 0 0 1 3 19V5A2 2 0 0 1 5 3H9"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M16 17L21 12L16 7"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M21 12H9"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M9 21H5A2 2 0 0 1 3 19V5A2 2 0 0 1 5 3H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M21 12H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
   </svg>
 );
 
 const BackIcon: React.FC = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
-    <path
-      d="M15 5L8 12L15 19"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M15 5L8 12L15 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const ForwardIcon: React.FC = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
-    <path
-      d="M9 5L16 12L9 19"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M9 5L16 12L9 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const MinimizeIcon: React.FC = () => (
+  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+    <path d="M2 5H8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+);
+
+const MaximizeIcon: React.FC = () => (
+  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+    <rect x="2" y="2" width="6" height="6" stroke="currentColor" strokeWidth="1.1" />
+  </svg>
+);
+
+const RestoreIcon: React.FC = () => (
+  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+    <path d="M3 2.5H7.5V7" stroke="currentColor" strokeWidth="1.1" />
+    <rect x="2" y="4" width="4.5" height="4" stroke="currentColor" strokeWidth="1.1" />
+  </svg>
+);
+
+const CloseIcon: React.FC = () => (
+  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+    <path d="M2.2 2.2L7.8 7.8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    <path d="M7.8 2.2L2.2 7.8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
   </svg>
 );
 
@@ -417,10 +241,7 @@ const TitleBarPrimaryActions: React.FC<{
   };
 
   return (
-    <div
-      className="flex shrink-0 items-center gap-0.5 pr-2.5"
-      style={noDragStyle}
-    >
+    <div className="flex shrink-0 items-center gap-0.5 pr-2.5" style={noDragStyle}>
       <TitleBarToolbarButton
         title="サイドバーを開閉"
         onClick={() => {
@@ -458,15 +279,10 @@ const TitleBarPrimaryActions: React.FC<{
               "shadow-[0_4px_20px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)]",
             )}
           >
-            <DropdownMenu.Item
-              onSelect={openSettings}
-              className={TITLE_BAR_MENU_ITEM_CLASS}
-            >
+            <DropdownMenu.Item onSelect={openSettings} className={TITLE_BAR_MENU_ITEM_CLASS}>
               <SettingsMenuIcon />
               <span>設定</span>
-              <span className="ml-auto flex items-center text-[11px] text-[#b8b7b0]">
-                Ctrl+,
-              </span>
+              <span className="ml-auto flex items-center text-[11px] text-[#b8b7b0]">Ctrl+,</span>
             </DropdownMenu.Item>
 
             <DropdownMenu.Item
@@ -477,9 +293,7 @@ const TitleBarPrimaryActions: React.FC<{
             >
               <GlobeIcon />
               <span>言語</span>
-              <span className="ml-auto flex items-center text-[13px] leading-none text-[#b8b7b0]">
-                ›
-              </span>
+              <span className="ml-auto flex items-center text-[13px] leading-none text-[#b8b7b0]">›</span>
             </DropdownMenu.Item>
 
             <DropdownMenu.Item
@@ -525,11 +339,7 @@ const TitleBarPrimaryActions: React.FC<{
         <CalendarIcon />
       </TitleBarToolbarButton>
 
-      <TitleBarToolbarButton
-        title="グローバル"
-        disabled
-        noDragStyle={noDragStyle}
-      >
+      <TitleBarToolbarButton title="グローバル" disabled noDragStyle={noDragStyle}>
         <GlobeIcon />
       </TitleBarToolbarButton>
 
@@ -557,12 +367,7 @@ const TitleBarPrimaryActions: React.FC<{
 };
 
 const TitleBarBreadcrumbs = React.memo(
-  ({
-    pathname,
-    baseCrumbs,
-    extraCrumbs,
-    noDragStyle,
-  }: TitleBarBreadcrumbsProps) => {
+  ({ pathname, baseCrumbs, extraCrumbs, noDragStyle }: TitleBarBreadcrumbsProps) => {
     const navigate = useNavigate();
 
     const allCrumbs = useMemo(
@@ -582,18 +387,13 @@ const TitleBarBreadcrumbs = React.memo(
       event.preventDefault();
       event.stopPropagation();
 
-      if (!crumb.to) {
-        return;
-      }
-
+      if (!crumb.to) return;
       void navigate(crumb.to);
     };
 
     const visibleCrumbs = allCrumbs.filter((crumb, index) => {
       const isLeadingHomeCrumb = index === 0 && crumb.label === "ホーム";
-      if (!isLeadingHomeCrumb) {
-        return true;
-      }
+      if (!isLeadingHomeCrumb) return true;
       return allCrumbs.length <= 1;
     });
 
@@ -604,37 +404,23 @@ const TitleBarBreadcrumbs = React.memo(
           const breadcrumbContent = crumb.label;
 
           return (
-            <React.Fragment
-              key={`${crumb.label}:${crumb.to ?? "no-to"}:${crumb.folderId ?? "no-folder"}:${index}`}
-            >
-              {index > 0 && (
-                <span className="titlebar-divider mx-0.5 select-none opacity-45">
-                  /
-                </span>
-              )}
+            <React.Fragment key={`${crumb.label}:${crumb.to ?? "no-to"}:${crumb.folderId ?? "no-folder"}:${index}`}>
+              {index > 0 && <span className="titlebar-divider mx-0.5 select-none opacity-45">/</span>}
 
               {isClickable ? (
                 <button
                   type="button"
-                  className={cn(
-                    TITLE_BAR_BREADCRUMB_ITEM_CLASS,
-                    "titlebar-hover titlebar-breadcrumb-link",
-                  )}
+                  className={cn(TITLE_BAR_BREADCRUMB_ITEM_CLASS, "titlebar-hover titlebar-breadcrumb-link")}
                   style={noDragStyle}
                   onMouseDown={(event) => event.stopPropagation()}
-                  onClick={(event) =>
-                    handleBreadcrumbNavigateClick(event, crumb)
-                  }
+                  onClick={(event) => handleBreadcrumbNavigateClick(event, crumb)}
                   title={crumb.label}
                 >
                   {breadcrumbContent}
                 </button>
               ) : (
                 <span
-                  className={cn(
-                    TITLE_BAR_BREADCRUMB_ITEM_CLASS,
-                    "titlebar-breadcrumb-current",
-                  )}
+                  className={cn(TITLE_BAR_BREADCRUMB_ITEM_CLASS, "titlebar-breadcrumb-current")}
                   title={crumb.label}
                   aria-current="page"
                 >
@@ -651,10 +437,46 @@ const TitleBarBreadcrumbs = React.memo(
 
 TitleBarBreadcrumbs.displayName = "TitleBarBreadcrumbs";
 
+const WindowControlGroup: React.FC<{
+  hasDesktopBridge: boolean;
+  isMaximized: boolean;
+  noDragStyle?: React.CSSProperties;
+}> = ({ hasDesktopBridge, isMaximized, noDragStyle }) => {
+  return (
+    <div className="titlebar-text flex h-full items-center" style={noDragStyle}>
+      <WindowControlButton
+        title={hasDesktopBridge ? "最小化" : "ブラウザでは最小化できません"}
+        onClick={() => void windowControls.minimize()}
+        disabled={!hasDesktopBridge}
+        noDragStyle={noDragStyle}
+      >
+        <MinimizeIcon />
+      </WindowControlButton>
+
+      <WindowControlButton
+        title={hasDesktopBridge ? (isMaximized ? "元に戻す" : "最大化") : "ブラウザでは最大化できません"}
+        onClick={() => void windowControls.maximizeToggle()}
+        disabled={!hasDesktopBridge}
+        noDragStyle={noDragStyle}
+      >
+        {isMaximized ? <RestoreIcon /> : <MaximizeIcon />}
+      </WindowControlButton>
+
+      <WindowControlButton
+        title={hasDesktopBridge ? "閉じる" : "ブラウザでは閉じられません"}
+        onClick={() => void windowControls.close()}
+        disabled={!hasDesktopBridge}
+        danger
+        noDragStyle={noDragStyle}
+      >
+        <CloseIcon />
+      </WindowControlButton>
+    </div>
+  );
+};
+
 export const TitleBar: React.FC = () => {
   const [bridgeIsMaximized, setBridgeIsMaximized] = useState(false);
-  const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
-  const [isCardSetViewMetaOpen, setIsCardSetViewMetaOpen] = useState(false);
   const hasDesktopBridge = useHasDesktopBridge();
   const presentationTarget = usePresentationTarget();
   const isDesktopPresentation = presentationTarget === "desktop";
@@ -664,57 +486,56 @@ export const TitleBar: React.FC = () => {
     [pathname, search],
   );
   const extraCrumbs = useBreadcrumbExtraCrumbs();
-  const isCardSetViewPage = pathname.toLowerCase().startsWith("/cardsetview");
-  const isFoldersPage = pathname.toLowerCase().startsWith("/folders");
   const shouldShowBrandLabel = APP_CHROME.desktopTitleBar.showBrandLabel;
+  const isFoldersPage = pathname.toLowerCase().startsWith("/folders");
 
   useEffect(() => {
     if (!hasDesktopBridge) return;
 
     void windowControls.isMaximized().then(setBridgeIsMaximized);
 
-    const cleanup = windowControls.onMaximizedStateChange(
-      (maximized: boolean) => {
-        setBridgeIsMaximized(maximized);
-      },
-    );
+    const cleanup = windowControls.onMaximizedStateChange((maximized: boolean) => {
+      setBridgeIsMaximized(maximized);
+    });
 
     return () => {
       cleanup();
     };
   }, [hasDesktopBridge]);
 
-  const isMaximized = hasDesktopBridge && bridgeIsMaximized;
-
-  useEffect(() => {
-    return subscribeCardSetViewWindowEvent(
-      CARD_SET_VIEW_EVENTS.editingChange,
-      (isEditing: boolean) => {
-        setIsCardSetViewEditing(Boolean(isEditing));
-      },
-    );
-  }, []);
-
-  useEffect(() => {
-    return subscribeCardSetViewWindowEvent(
-      CARD_SET_VIEW_EVENTS.metaOpenChange,
-      (isOpen: boolean) => {
-        setIsCardSetViewMetaOpen(Boolean(isOpen));
-      },
-    );
-  }, []);
-
   if (!isDesktopPresentation) return null;
 
+  const isMaximized = hasDesktopBridge && bridgeIsMaximized;
   const dragStyle = hasDesktopBridge ? TITLE_BAR_DRAG_STYLE : undefined;
   const noDragStyle = hasDesktopBridge ? TITLE_BAR_NO_DRAG_STYLE : undefined;
+
+  if (isFoldersPage) {
+    return (
+      <div
+        className={cn(
+          "pointer-events-none absolute right-0 top-0 z-50 flex shrink-0 select-none items-center justify-end bg-transparent pr-3 text-sm titlebar-text",
+        )}
+        style={{
+          height: `${APP_DESKTOP_TOP_INSET_PX}px`,
+        }}
+      >
+        <div className="pointer-events-auto flex h-full items-center" style={noDragStyle}>
+          <TitleBarPrimaryActions noDragStyle={noDragStyle} />
+          <WindowControlGroup
+            hasDesktopBridge={hasDesktopBridge}
+            isMaximized={isMaximized}
+            noDragStyle={noDragStyle}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
       className={cn(
         "surface-flat-titlebar",
-        "flex w-full shrink-0 select-none items-center justify-between bg-transparent text-sm titlebar-text",
-        isFoldersPage ? "pl-0 pr-2" : "px-4",
+        "flex w-full shrink-0 select-none items-center justify-between bg-transparent px-4 text-sm titlebar-text",
       )}
       style={{
         ...dragStyle,
@@ -724,295 +545,32 @@ export const TitleBar: React.FC = () => {
     >
       <div
         className={cn(
-          "flex h-full min-w-0",
-          isFoldersPage
-            ? "flex-1 items-stretch pl-0 pr-2"
-            : "items-center pl-2 pr-3",
-          shouldShowBrandLabel && !isFoldersPage && "gap-2",
+          "flex h-full min-w-0 items-center pl-2 pr-3",
+          shouldShowBrandLabel && "gap-2",
         )}
-        style={isFoldersPage ? undefined : noDragStyle}
-      >
-        {isFoldersPage ? (
-          <WorkspaceTabsBar
-            variant="titlebar"
-            noDragStyle={noDragStyle}
-            className="min-w-0 flex-1"
-          />
-        ) : (
-          <>
-            <TitleBarPrimaryActions noDragStyle={noDragStyle} />
-
-            {shouldShowBrandLabel ? (
-              <span className="titlebar-text-strong shrink-0 text-xs font-semibold tracking-wide">
-                {APP_CHROME.brandLabel}
-              </span>
-            ) : null}
-
-            <TitleBarBreadcrumbs
-              pathname={pathname}
-              baseCrumbs={baseCrumbs}
-              extraCrumbs={extraCrumbs}
-              noDragStyle={noDragStyle}
-            />
-          </>
-        )}
-      </div>
-
-      <div
-        className="titlebar-text flex h-full items-center"
         style={noDragStyle}
       >
-        {isFoldersPage ? (
-          <TitleBarPrimaryActions noDragStyle={noDragStyle} />
+        <TitleBarPrimaryActions noDragStyle={noDragStyle} />
+
+        {shouldShowBrandLabel ? (
+          <span className="titlebar-text-strong shrink-0 text-xs font-semibold tracking-wide">
+            {APP_CHROME.brandLabel}
+          </span>
         ) : null}
 
-        {isCardSetViewPage && (
-          <>
-            {isCardSetViewEditing && (
-              <button
-                type="button"
-                onClick={() =>
-                  dispatchCardSetViewWindowEvent(
-                    CARD_SET_VIEW_EVENTS.createCardRequest,
-                    undefined,
-                  )
-                }
-                className="titlebar-hover titlebar-text flex h-full w-[46px] items-center justify-center transition-colors"
-                title="新規カードを追加"
-                aria-label="新規カードを追加"
-                tabIndex={-1}
-                style={noDragStyle}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M6 4H15C16.1046 4 17 4.89543 17 6V18C17 19.1046 16.1046 20 15 20H6C4.89543 20 4 19.1046 4 18V6C4 4.89543 4.89543 4 6 4Z"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M12 9V15"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M9 12H15"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M17 8H20"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M18.5 6.5V9.5"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() =>
-                dispatchCardSetViewWindowEvent(
-                  CARD_SET_VIEW_EVENTS.toggleEditingRequest,
-                  undefined,
-                )
-              }
-              className="titlebar-hover titlebar-text flex h-full w-[46px] items-center justify-center transition-colors"
-              title={
-                isCardSetViewEditing
-                  ? "閲覧モードに切り替え"
-                  : "編集モードに切り替え"
-              }
-              tabIndex={-1}
-              style={noDragStyle}
-            >
-              {isCardSetViewEditing ? (
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M2 12C2 12 5.8 6 12 6C18.2 6 22 12 22 12C22 12 18.2 18 12 18C5.8 18 2 12 2 12Z"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="3"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 20H21"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M16.5 3.5C17.3284 2.67157 18.6716 2.67157 19.5 3.5C20.3284 4.32843 20.3284 5.67157 19.5 6.5L7 19L3 20L4 16L16.5 3.5Z"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                dispatchCardSetViewWindowEvent(
-                  CARD_SET_VIEW_EVENTS.toggleMetaPanelRequest,
-                  undefined,
-                )
-              }
-              className="titlebar-hover titlebar-text flex h-full w-[46px] items-center justify-center transition-colors"
-              title={
-                isCardSetViewMetaOpen
-                  ? "メタパネルを閉じる"
-                  : "メタパネルを開く"
-              }
-              aria-label={
-                isCardSetViewMetaOpen
-                  ? "メタパネルを閉じる"
-                  : "メタパネルを開く"
-              }
-              tabIndex={-1}
-              style={noDragStyle}
-            >
-              <MetaPanelToggleIcon
-                open={isCardSetViewMetaOpen}
-                width="14"
-                height="14"
-              />
-            </button>
-          </>
-        )}
-
-        <WindowControlButton
-          title={hasDesktopBridge ? "最小化" : "ブラウザでは最小化できません"}
-          onClick={() => void windowControls.minimize()}
-          disabled={!hasDesktopBridge}
+        <TitleBarBreadcrumbs
+          pathname={pathname}
+          baseCrumbs={baseCrumbs}
+          extraCrumbs={extraCrumbs}
           noDragStyle={noDragStyle}
-        >
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 10 10"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M1 5H9"
-              stroke="currentColor"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </WindowControlButton>
-
-        <WindowControlButton
-          title={
-            hasDesktopBridge
-              ? isMaximized
-                ? "元に戻す"
-                : "最大化"
-              : "ブラウザではウィンドウ制御できません"
-          }
-          onClick={() => void windowControls.maximizeToggle()}
-          disabled={!hasDesktopBridge}
-          noDragStyle={noDragStyle}
-        >
-          {isMaximized ? (
-            <svg
-              width="10"
-              height="10"
-              viewBox="0 0 10 10"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M3 1H9V7" stroke="currentColor" strokeWidth="1.2" />
-              <path d="M1 3H7V9H1V3Z" stroke="currentColor" strokeWidth="1.2" />
-            </svg>
-          ) : (
-            <svg
-              width="10"
-              height="10"
-              viewBox="0 0 10 10"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <rect
-                x="1"
-                y="1"
-                width="8"
-                height="8"
-                stroke="currentColor"
-                strokeWidth="1.2"
-              />
-            </svg>
-          )}
-        </WindowControlButton>
-
-        <WindowControlButton
-          title={
-            hasDesktopBridge ? "閉じる" : "ブラウザでは閉じる操作を提供しません"
-          }
-          onClick={() => void windowControls.close()}
-          disabled={!hasDesktopBridge}
-          noDragStyle={noDragStyle}
-          danger
-        >
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 10 10"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M1 1L9 9M9 1L1 9"
-              stroke="currentColor"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </WindowControlButton>
+        />
       </div>
+
+      <WindowControlGroup
+        hasDesktopBridge={hasDesktopBridge}
+        isMaximized={isMaximized}
+        noDragStyle={noDragStyle}
+      />
     </div>
   );
 };
-
-
