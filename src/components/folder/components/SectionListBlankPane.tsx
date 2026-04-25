@@ -31,7 +31,7 @@ export const SectionListBlankPane = ({
   const style = {
     left: `${leftInsetPx + sidebarWidth + panelGapPx}px`,
     right: `${rightInsetPx}px`,
-    top: `${topOffsetPx}px`,
+    top: `calc(${topOffsetPx}px + var(--workspace-tabs-offset-y, 0px))`,
     bottom: `${bottomInsetPx}px`,
   } satisfies CSSProperties;
 
