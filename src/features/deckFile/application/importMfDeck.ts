@@ -1,3 +1,4 @@
+import { normalizeInkDocument } from "@/domain/card/inkDocument";
 import type { Card, CardBlock, CardSet } from "@/types";
 import type {
   CardDisplayMode,
@@ -136,6 +137,20 @@ const normalizeDisplayModePatch = (
   return { defaultDisplayMode: value };
 };
 
+const normalizeMfDeckInk = (value: unknown): Card["front"]["ink"] => {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  const normalized = normalizeInkDocument(value);
+
+  if (normalized.strokes.length === 0) {
+    return null;
+  }
+
+  return normalized;
+};
+
 const buildCardInput = async ({
   card,
   folderId,
@@ -161,12 +176,12 @@ const buildCardInput = async ({
     title: card.title?.trim() || "",
     front: {
       blocks: cloneBlocksWithFreshIds(card.front.blocks),
-      ink: cloneJson(card.front.ink ?? null),
+      ink: normalizeMfDeckInk(card.front.ink),
       extraRows: card.front.extraRows ?? 0,
     },
     back: {
       blocks: cloneBlocksWithFreshIds(card.back.blocks),
-      ink: cloneJson(card.back.ink ?? null),
+      ink: normalizeMfDeckInk(card.back.ink),
       extraRows: card.back.extraRows ?? 0,
     },
     layoutRows: cloneJson(card.layoutRows ?? undefined) as Card["layoutRows"],
