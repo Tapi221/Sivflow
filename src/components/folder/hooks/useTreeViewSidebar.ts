@@ -11,19 +11,19 @@ import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 export const TREE_VIEW_SIDEBAR_TOGGLE_EVENT =
   "manifolia:treeview-sidebar-toggle";
 
-const EXPLORER_TAB_WIDTH_CSS_VAR = "--workspace-explorer-tab-width";
+const WORKSPACE_EXPLORER_TAB_WIDTH_VAR = "--workspace-explorer-tab-width";
 
 const clampSidebarWidth = (width: number) =>
   Math.min(Math.max(width, SIDEBAR_WIDTH_LIMITS.min), SIDEBAR_WIDTH_LIMITS.max);
 
-const writeExplorerTabWidthCssVar = (width: number) => {
+const publishWorkspaceExplorerTabWidth = (width: number) => {
   if (typeof document === "undefined") {
     return;
   }
 
   const nextWidth = Math.max(0, Math.round(width));
   document.documentElement.style.setProperty(
-    EXPLORER_TAB_WIDTH_CSS_VAR,
+    WORKSPACE_EXPLORER_TAB_WIDTH_VAR,
     `${nextWidth}px`,
   );
 };
@@ -75,12 +75,12 @@ export const useTreeViewSidebar = () => {
   const bodyCursorRef = useRef("");
 
   const applyRenderedSidebarWidthToDom = useCallback((width: number) => {
+    const element = sidebarRef.current;
     const nextWidth = Math.max(0, Math.round(width));
     const cssWidth = `${nextWidth}px`;
 
-    writeExplorerTabWidthCssVar(nextWidth);
+    publishWorkspaceExplorerTabWidth(nextWidth);
 
-    const element = sidebarRef.current;
     if (!element) {
       return;
     }
@@ -131,6 +131,10 @@ export const useTreeViewSidebar = () => {
   );
 
   useEffect(() => {
+    publishWorkspaceExplorerTabWidth(isSidebarOpen ? renderedSidebarWidth : 0);
+  }, [isSidebarOpen, renderedSidebarWidth]);
+
+  useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -160,10 +164,6 @@ export const useTreeViewSidebar = () => {
     isSidebarOpen,
     sidebarWidth,
   ]);
-
-  useEffect(() => {
-    writeExplorerTabWidthCssVar(renderedSidebarWidth);
-  }, [renderedSidebarWidth]);
 
   useEffect(() => {
     const handleSidebarToggleEvent = () => {
