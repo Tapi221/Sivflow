@@ -164,28 +164,72 @@ const ForwardIcon: React.FC = () => (
 );
 
 const MinimizeIcon: React.FC = () => (
-  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-    <path d="M2 5H8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+  <svg
+    width="10"
+    height="10"
+    viewBox="0 0 10 10"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <path
+      d="M1 5H9"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
 const MaximizeIcon: React.FC = () => (
-  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-    <rect x="2" y="2" width="6" height="6" stroke="currentColor" strokeWidth="1.1" />
+  <svg
+    width="10"
+    height="10"
+    viewBox="0 0 10 10"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <rect
+      x="1"
+      y="1"
+      width="8"
+      height="8"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
   </svg>
 );
 
 const RestoreIcon: React.FC = () => (
-  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-    <path d="M3 2.5H7.5V7" stroke="currentColor" strokeWidth="1.1" />
-    <rect x="2" y="4" width="4.5" height="4" stroke="currentColor" strokeWidth="1.1" />
+  <svg
+    width="10"
+    height="10"
+    viewBox="0 0 10 10"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <path d="M3 1H9V7" stroke="currentColor" strokeWidth="1.2" />
+    <path d="M1 3H7V9H1V3Z" stroke="currentColor" strokeWidth="1.2" />
   </svg>
 );
 
 const CloseIcon: React.FC = () => (
-  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-    <path d="M2.2 2.2L7.8 7.8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    <path d="M7.8 2.2L2.2 7.8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+  <svg
+    width="10"
+    height="10"
+    viewBox="0 0 10 10"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <path
+      d="M1 1L9 9M9 1L1 9"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
