@@ -4,11 +4,7 @@ import {
   getParentFolderId,
   normalizeFolderId,
 } from "@/components/folder/explorer/model/utils";
-import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
 import {
-  EXPLORER_ROW_CONTENT_CLASS,
-  EXPLORER_ROW_ICON_SLOT_CLASS,
-  EXPLORER_ROW_TITLE_SLOT_CLASS,
   FOLDER_ROW_ICON_ACTIVE_CLASS,
   FOLDER_ROW_ICON_MUTED_CLASS,
   FOLDER_ROW_ICON_SIZE_CLASS,
@@ -112,6 +108,12 @@ const readStoredFolderColumnWidth = () => {
   return clampFolderColumnWidth(parsedWidth);
 };
 
+const FOLDER_COLUMN_ROW_STYLE = {
+  height: 28,
+  minHeight: 28,
+  lineHeight: "28px",
+} satisfies CSSProperties;
+
 const getFolderDisplayName = (folder: FolderTreeNode) => {
   return (
     (folder as { folderName?: string; folder_name?: string }).folderName ??
@@ -188,30 +190,17 @@ const FolderColumnRow = ({
     ) : null;
 
   return (
-    <SidebarEntityRow
-      selected={selected}
-      contentClassName={EXPLORER_ROW_CONTENT_CLASS}
-      iconClassName={EXPLORER_ROW_ICON_SLOT_CLASS}
-      titleSlotClassName={EXPLORER_ROW_TITLE_SLOT_CLASS}
-      title={entry.name}
-      titleClassName={cn(
-        FOLDER_ROW_TITLE_CLASS,
-        selected ? "font-medium" : "font-normal",
-      )}
-      trailing={trailing}
-      icon={
-        <Icon
-          className={cn(
-            "sidebar-icon",
-            FOLDER_ROW_ICON_SIZE_CLASS,
-            selected
-              ? FOLDER_ROW_ICON_ACTIVE_CLASS
-              : FOLDER_ROW_ICON_MUTED_CLASS,
-          )}
-        />
-      }
+    <div
       role="button"
       tabIndex={0}
+      data-selected={selected ? "true" : undefined}
+      style={FOLDER_COLUMN_ROW_STYLE}
+      className={cn(
+        "sidebar-row sidebar-row--folder ds-list-item ds-list-item--interactive",
+        "relative flex w-full cursor-pointer items-center rounded-[8px] px-2 text-left",
+        "select-none outline-none",
+        selected && "ds-list-item--selected",
+      )}
       onClick={(event) => {
         if (event.defaultPrevented) return;
         onSelect();
@@ -222,7 +211,28 @@ const FolderColumnRow = ({
           onSelect();
         }
       }}
-    />
+    >
+      <span className="ds-list-item__icon flex h-full w-4 shrink-0 items-center justify-center">
+        <Icon
+          className={cn(
+            "sidebar-icon ds-list-item__icon",
+            FOLDER_ROW_ICON_SIZE_CLASS,
+            selected
+              ? FOLDER_ROW_ICON_ACTIVE_CLASS
+              : FOLDER_ROW_ICON_MUTED_CLASS,
+          )}
+        />
+      </span>
+
+      <div className="ds-list-item__content flex h-full min-w-0 flex-1 items-center pr-1">
+        <div className="pointer-events-none flex min-w-0 flex-1 items-center">
+          <span className={cn(FOLDER_ROW_TITLE_CLASS, "font-normal")}>
+            {entry.name}
+          </span>
+        </div>
+        {trailing}
+      </div>
+    </div>
   );
 };
 
@@ -240,6 +250,7 @@ export const FolderColumnView = ({
   className,
 }: FolderColumnViewProps) => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const resizeGuideRef = useRef<HTMLDivElement | null>(null);
   const columnResizeStateRef = useRef<{
     startX: number;
     startWidth: number;
@@ -327,10 +338,15 @@ export const FolderColumnView = ({
   const columnStyle = useMemo(
     () =>
       ({
+        flex: "0 0 var(--folder-column-width-px)",
         width: "var(--folder-column-width-px)",
         minWidth: "var(--folder-column-width-px)",
+        contain: "layout paint style",
+        willChange: isColumnResizing
+          ? "width, min-width, flex-basis"
+          : undefined,
       }) satisfies CSSProperties,
-    [],
+    [isColumnResizing],
   );
 
   const applyColumnWidthToDom = useCallback((width: number) => {
@@ -338,7 +354,30 @@ export const FolderColumnView = ({
     const scroller = scrollerRef.current;
     if (!scroller) return;
 
-    scroller.style.setProperty("--folder-column-width-px", `${nextWidth}px`);
+    scroller.style.setProperty(
+      "--folder-column-width-px",
+      `${nextWidth}px`,
+    );
+  }, []);
+
+  const showResizeGuide = useCallback((clientX: number) => {
+    const guide = resizeGuideRef.current;
+    const scroller = scrollerRef.current;
+    if (!guide || !scroller) return;
+
+    const rect = scroller.getBoundingClientRect();
+    const x = Math.round(clientX - rect.left + scroller.scrollLeft);
+
+    guide.style.opacity = "1";
+    guide.style.transform = `translate3d(${x}px, 0, 0)`;
+  }, []);
+
+  const hideResizeGuide = useCallback(() => {
+    const guide = resizeGuideRef.current;
+    if (!guide) return;
+
+    guide.style.opacity = "0";
+    guide.style.transform = "translate3d(-9999px, 0, 0)";
   }, []);
 
   const scheduleColumnWidthApply = useCallback(
@@ -397,7 +436,8 @@ export const FolderColumnView = ({
     }
 
     restoreBodyResizeStyles();
-  }, [applyColumnWidthToDom, restoreBodyResizeStyles]);
+    hideResizeGuide();
+  }, [applyColumnWidthToDom, hideResizeGuide, restoreBodyResizeStyles]);
 
   const handleColumnResizeMove = useCallback(
     (event: PointerEvent) => {
@@ -406,16 +446,18 @@ export const FolderColumnView = ({
 
       event.preventDefault();
 
+      showResizeGuide(event.clientX);
       const deltaX = event.clientX - resizeState.startX;
       scheduleColumnWidthApply(resizeState.startWidth + deltaX);
     },
-    [scheduleColumnWidthApply],
+    [scheduleColumnWidthApply, showResizeGuide],
   );
 
   const handleColumnResizeStart = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       event.preventDefault();
       event.stopPropagation();
+      event.currentTarget.setPointerCapture?.(event.pointerId);
 
       const currentWidth = pendingColumnWidthRef.current || columnWidthPx;
 
@@ -426,6 +468,7 @@ export const FolderColumnView = ({
       pendingColumnWidthRef.current = currentWidth;
       setIsColumnResizing(true);
       applyColumnWidthToDom(currentWidth);
+      showResizeGuide(event.clientX);
 
       if (typeof document !== "undefined") {
         previousBodyUserSelectRef.current = document.body.style.userSelect;
@@ -434,7 +477,7 @@ export const FolderColumnView = ({
         document.body.style.cursor = "col-resize";
       }
     },
-    [applyColumnWidthToDom, columnWidthPx],
+    [applyColumnWidthToDom, columnWidthPx, showResizeGuide],
   );
 
   useEffect(() => {
@@ -465,9 +508,10 @@ export const FolderColumnView = ({
       if (columnResizeStateRef.current) {
         columnResizeStateRef.current = null;
         restoreBodyResizeStyles();
+        hideResizeGuide();
       }
     };
-  }, [restoreBodyResizeStyles]);
+  }, [hideResizeGuide, restoreBodyResizeStyles]);
 
   useEffect(() => {
     if (!selectedFolderId || !visibleFolderIdSet.has(selectedFolderId)) return;
@@ -633,11 +677,21 @@ export const FolderColumnView = ({
       ref={scrollerRef}
       style={columnViewStyle}
       className={cn(
-        "folder-column-view h-full min-h-0 w-full overflow-x-auto overflow-y-hidden",
+        "folder-column-view relative h-full min-h-0 w-full overflow-x-auto overflow-y-hidden",
         isColumnResizing && "cursor-col-resize select-none",
         className,
       )}
     >
+      <div
+        ref={resizeGuideRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 z-50 h-full w-px bg-[#b8b3aa] opacity-0 shadow-[0_0_0_1px_rgba(120,116,108,0.18)]"
+        style={{
+          transform: "translate3d(-9999px, 0, 0)",
+          willChange: "transform, opacity",
+        }}
+      />
+
       <div className="flex h-full min-h-0 min-w-max items-stretch">
         {columns.map((column, columnIndex) => (
           <section
@@ -645,17 +699,21 @@ export const FolderColumnView = ({
             style={columnStyle}
             className={cn(
               "relative h-full min-h-0 shrink-0 overflow-hidden border-r border-[#e7e5df]",
-              columnIndex === columns.length - 1 && "border-r-0",
             )}
             aria-label={
               column.parentFolderId ? "フォルダ内の項目" : "ルートフォルダ"
             }
           >
             <div
+              aria-hidden="true"
+              className="pointer-events-none absolute right-0 top-0 z-10 h-full w-px bg-[#e1ded7]"
+            />
+
+            <div
               role="separator"
               aria-label="カラム幅を変更"
               aria-orientation="vertical"
-              className="absolute right-[-4px] top-0 z-20 h-full w-2 cursor-col-resize bg-transparent hover:bg-[#d9d7d0]"
+              className="absolute right-[-6px] top-0 z-30 h-full w-3 cursor-col-resize bg-transparent"
               style={{ touchAction: "none" }}
               onPointerDown={handleColumnResizeStart}
             />
