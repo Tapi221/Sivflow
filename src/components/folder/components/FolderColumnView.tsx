@@ -86,17 +86,33 @@ interface FolderColumnViewProps {
     folderId: string,
     targetParentFolderId: string | null,
   ) => Promise<void>;
+  onReorderFolders?: (
+    targetParentFolderId: string | null,
+    folderIds: string[],
+  ) => Promise<void>;
   onMoveCardSetToFolder?: (
     cardSetId: string,
     targetFolderId: string,
+  ) => Promise<void>;
+  onReorderCardSets?: (
+    targetFolderId: string,
+    cardSetIds: string[],
   ) => Promise<void>;
   onMoveDocumentToFolder?: (
     documentId: string,
     targetFolderId: string,
   ) => Promise<void>;
+  onReorderDocuments?: (
+    targetFolderId: string,
+    documentIds: string[],
+  ) => Promise<void>;
   onMoveCardToSet?: (
     cardId: string,
     targetCardSetId: string,
+  ) => Promise<void>;
+  onReorderCardsInCardSet?: (
+    cardSetId: string,
+    cardIds: string[],
   ) => Promise<void>;
   className?: string;
 }
@@ -111,12 +127,25 @@ type FolderColumnDropTarget =
   | { type: "folder"; id: string | null }
   | { type: "cardSet"; id: string };
 
+type FolderColumnDropPosition = "inside" | "before" | "after" | "append";
+
+type FolderColumnDropIntent = {
+  target: FolderColumnDropTarget;
+  position: FolderColumnDropPosition;
+  columnId: string;
+  columnIndex: number;
+  targetEntry?: {
+    kind: FolderColumnEntry["kind"];
+    id: string;
+  };
+};
+
 interface FolderColumnRowProps {
   entry: FolderColumnEntry;
   selected: boolean;
   draggable: boolean;
   dragging: boolean;
-  dropTarget: boolean;
+  dropPosition: Exclude<FolderColumnDropPosition, "append"> | null;
   onSelect: () => void;
   onDragStart: (event: ReactDragEvent<HTMLDivElement>) => void;
   onDragEnd: (event: ReactDragEvent<HTMLDivElement>) => void;
@@ -199,6 +228,13 @@ const getDropTargetKey = (target: FolderColumnDropTarget) => {
   return `cardSet:${target.id}`;
 };
 
+const getDropIntentKey = (intent: FolderColumnDropIntent) => {
+  const entryKey = intent.targetEntry
+    ? `${intent.targetEntry.kind}:${intent.targetEntry.id}`
+    : "__column__";
+  return `${getDropTargetKey(intent.target)}:${intent.position}:${entryKey}`;
+};
+
 const FOLDER_COLUMN_ROW_STYLE = {
   height: 28,
   minHeight: 28,
@@ -260,7 +296,7 @@ const FolderColumnRow = ({
   selected,
   draggable,
   dragging,
-  dropTarget,
+  dropPosition,
   onSelect,
   onDragStart,
   onDragEnd,
@@ -316,7 +352,7 @@ const FolderColumnRow = ({
         "select-none outline-none",
         selected && "ds-list-item--selected",
         dragging && "opacity-45",
-        dropTarget &&
+        dropPosition === "inside" &&
           "bg-[var(--sidebar-row-hover-bg)] shadow-[inset_0_0_0_1px_rgba(120,116,108,0.22)]",
       )}
       onDragStart={onDragStart}
@@ -335,6 +371,19 @@ const FolderColumnRow = ({
         }
       }}
     >
+      {dropPosition === "before" ? (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1 right-1 top-0 z-20 h-px bg-[#8f8a82]"
+        />
+      ) : null}
+      {dropPosition === "after" ? (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-0 left-1 right-1 z-20 h-px bg-[#8f8a82]"
+        />
+      ) : null}
+
       <span className="ds-list-item__icon flex h-full w-4 shrink-0 items-center justify-center">
         <Icon
           className={cn(
@@ -371,9 +420,13 @@ export const FolderColumnView = ({
   resetToken = 0,
   onItemSelect,
   onMoveFolder,
+  onReorderFolders,
   onMoveCardSetToFolder,
+  onReorderCardSets,
   onMoveDocumentToFolder,
+  onReorderDocuments,
   onMoveCardToSet,
+  onReorderCardsInCardSet,
   className,
 }: FolderColumnViewProps) => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
@@ -397,9 +450,8 @@ export const FolderColumnView = ({
   );
   const [isColumnResizing, setIsColumnResizing] = useState(false);
   const [draggingEntryKey, setDraggingEntryKey] = useState<string | null>(null);
-  const [activeDropTargetKey, setActiveDropTargetKey] = useState<string | null>(
-    null,
-  );
+  const [activeDropIntent, setActiveDropIntent] =
+    useState<FolderColumnDropIntent | null>(null);
 
   const derived = useExplorerDerivedData({
     treeFolders: folders,
@@ -577,7 +629,7 @@ export const FolderColumnView = ({
   }, []);
 
   const clearDropState = useCallback(() => {
-    setActiveDropTargetKey(null);
+    setActiveDropIntent(null);
 
     if (
       typeof window !== "undefined" &&
@@ -630,12 +682,81 @@ export const FolderColumnView = ({
     [],
   );
 
-  const canDropOnTarget = useCallback(
+  const getEntryDropPosition = useCallback(
+    (
+      entry: FolderColumnEntry,
+      event: ReactDragEvent<HTMLDivElement>,
+    ): Exclude<FolderColumnDropPosition, "append"> => {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const ratio = rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
+
+      if (ratio < 0.28) return "before";
+      if (ratio > 0.72) return "after";
+
+      return entry.kind === "folder" || entry.kind === "cardSet"
+        ? "inside"
+        : ratio < 0.5
+          ? "before"
+          : "after";
+    },
+    [],
+  );
+
+  const getEntityIdsForTarget = useCallback(
+    (
+      payload: FolderColumnDragPayload,
+      target: FolderColumnDropTarget,
+    ): string[] => {
+      if (payload.kind === "folder" && target.type === "folder") {
+        return (target.id ? getChildFolders(target.id) : rootFolders)
+          .map((folder) => getFolderId(folder))
+          .filter((id): id is string => Boolean(id));
+      }
+
+      if (
+        payload.kind === "cardSet" &&
+        target.type === "folder" &&
+        target.id
+      ) {
+        return getCardSets(target.id).map((cardSet) => cardSet.id);
+      }
+
+      if (
+        payload.kind === "document" &&
+        target.type === "folder" &&
+        target.id
+      ) {
+        return getFolderItems(target.id)
+          .filter((item) => item.type === "document")
+          .map((item) => item.data.id);
+      }
+
+      if (payload.kind === "card" && target.type === "cardSet") {
+        return getCardSetItems(target.id)
+          .filter((item) => item.type === "card")
+          .map((item) => item.data.id);
+      }
+
+      return [];
+    },
+    [getCardSetItems, getCardSets, getChildFolders, getFolderItems, rootFolders],
+  );
+
+  const canDropOnIntent = useCallback(
     (
       payload: FolderColumnDragPayload | null,
-      target: FolderColumnDropTarget | null,
+      intent: FolderColumnDropIntent | null,
     ) => {
-      if (!payload || !target) return false;
+      if (!payload || !intent || isFiltering) return false;
+
+      const { target, position, targetEntry } = intent;
+      const isBetweenDrop = position === "before" || position === "after";
+
+      if (isBetweenDrop) {
+        if (!targetEntry) return false;
+        if (targetEntry.id === payload.id) return false;
+        if (targetEntry.kind !== payload.kind) return false;
+      }
 
       if (payload.kind === "folder") {
         if (target.type !== "folder") return false;
@@ -643,36 +764,77 @@ export const FolderColumnView = ({
         if (target.id && isFolderDescendantOf(target.id, payload.id)) {
           return false;
         }
-        return Boolean(onMoveFolder);
+
+        return isBetweenDrop || position === "append"
+          ? Boolean(onReorderFolders)
+          : Boolean(onReorderFolders || onMoveFolder);
       }
 
       if (payload.kind === "cardSet") {
         if (target.type !== "folder") return false;
         if (!target.id) return false;
-        return Boolean(onMoveCardSetToFolder);
+
+        return isBetweenDrop || position === "append"
+          ? Boolean(onReorderCardSets)
+          : Boolean(onReorderCardSets || onMoveCardSetToFolder);
       }
 
       if (payload.kind === "document") {
         if (target.type !== "folder") return false;
         if (!target.id) return false;
-        return Boolean(onMoveDocumentToFolder);
+
+        return isBetweenDrop || position === "append"
+          ? Boolean(onReorderDocuments)
+          : Boolean(onReorderDocuments || onMoveDocumentToFolder);
       }
 
       if (payload.kind === "card") {
         if (target.type !== "cardSet") return false;
-        if (payload.cardSetId === target.id) return false;
-        return Boolean(onMoveCardToSet);
+
+        return Boolean(onReorderCardsInCardSet);
       }
 
       return false;
     },
     [
+      isFiltering,
       isFolderDescendantOf,
       onMoveCardSetToFolder,
-      onMoveCardToSet,
       onMoveDocumentToFolder,
       onMoveFolder,
+      onReorderCardSets,
+      onReorderCardsInCardSet,
+      onReorderDocuments,
+      onReorderFolders,
     ],
+  );
+
+  const buildNextOrderedIds = useCallback(
+    (
+      payload: FolderColumnDragPayload,
+      intent: FolderColumnDropIntent,
+    ) => {
+      const ids = getEntityIdsForTarget(payload, intent.target).filter(
+        (id) => id !== payload.id,
+      );
+
+      if (
+        (intent.position === "before" || intent.position === "after") &&
+        intent.targetEntry
+      ) {
+        const targetIndex = ids.indexOf(intent.targetEntry.id);
+        const insertIndex =
+          targetIndex === -1
+            ? ids.length
+            : targetIndex + (intent.position === "after" ? 1 : 0);
+        ids.splice(insertIndex, 0, payload.id);
+        return ids;
+      }
+
+      ids.push(payload.id);
+      return ids;
+    },
+    [getEntityIdsForTarget],
   );
 
   const expandDropTarget = useCallback(
@@ -696,9 +858,10 @@ export const FolderColumnView = ({
   );
 
   const scheduleDropTargetExpand = useCallback(
-    (target: FolderColumnDropTarget, columnIndex: number) => {
+    (intent: FolderColumnDropIntent) => {
       if (typeof window === "undefined") return;
-      if (target.type === "folder" && target.id === null) return;
+      if (intent.position !== "inside") return;
+      if (intent.target.type === "folder" && intent.target.id === null) return;
 
       if (expandDropTargetTimeoutRef.current !== null) {
         window.clearTimeout(expandDropTargetTimeoutRef.current);
@@ -706,7 +869,7 @@ export const FolderColumnView = ({
 
       expandDropTargetTimeoutRef.current = window.setTimeout(() => {
         expandDropTargetTimeoutRef.current = null;
-        expandDropTarget(target, columnIndex);
+        expandDropTarget(intent.target, intent.columnIndex);
       }, 480);
     },
     [expandDropTarget],
@@ -715,9 +878,17 @@ export const FolderColumnView = ({
   const moveDraggedEntry = useCallback(
     async (
       payload: FolderColumnDragPayload,
-      target: FolderColumnDropTarget,
+      intent: FolderColumnDropIntent,
     ) => {
+      const { target } = intent;
+      const nextOrderedIds = buildNextOrderedIds(payload, intent);
+
       if (payload.kind === "folder" && target.type === "folder") {
+        if (onReorderFolders) {
+          await onReorderFolders(target.id, nextOrderedIds);
+          return;
+        }
+
         await onMoveFolder?.(payload.id, target.id);
         return;
       }
@@ -727,6 +898,11 @@ export const FolderColumnView = ({
         target.type === "folder" &&
         target.id
       ) {
+        if (onReorderCardSets) {
+          await onReorderCardSets(target.id, nextOrderedIds);
+          return;
+        }
+
         await onMoveCardSetToFolder?.(payload.id, target.id);
         return;
       }
@@ -736,19 +912,33 @@ export const FolderColumnView = ({
         target.type === "folder" &&
         target.id
       ) {
+        if (onReorderDocuments) {
+          await onReorderDocuments(target.id, nextOrderedIds);
+          return;
+        }
+
         await onMoveDocumentToFolder?.(payload.id, target.id);
         return;
       }
 
       if (payload.kind === "card" && target.type === "cardSet") {
-        await onMoveCardToSet?.(payload.id, target.id);
+        if (payload.cardSetId !== target.id) {
+          await onMoveCardToSet?.(payload.id, target.id);
+        }
+
+        await onReorderCardsInCardSet?.(target.id, nextOrderedIds);
       }
     },
     [
+      buildNextOrderedIds,
       onMoveCardSetToFolder,
       onMoveCardToSet,
       onMoveDocumentToFolder,
       onMoveFolder,
+      onReorderCardSets,
+      onReorderCardsInCardSet,
+      onReorderDocuments,
+      onReorderFolders,
     ],
   );
 
@@ -776,27 +966,24 @@ export const FolderColumnView = ({
     clearDropState();
   }, [clearDropState]);
 
-  const handleDropTargetDragOver = useCallback(
+  const handleDropIntentDragOver = useCallback(
     (
-      target: FolderColumnDropTarget | null,
-      columnIndex: number,
+      intent: FolderColumnDropIntent | null,
       event: ReactDragEvent<HTMLElement>,
     ) => {
       const payload = dragPayloadRef.current;
-      if (!canDropOnTarget(payload, target)) return;
+      if (!canDropOnIntent(payload, intent)) return;
 
       event.preventDefault();
       event.stopPropagation();
       event.dataTransfer.dropEffect = "move";
 
-      const targetKey = target ? getDropTargetKey(target) : null;
-      setActiveDropTargetKey(targetKey);
-
-      if (target) {
-        scheduleDropTargetExpand(target, columnIndex);
+      if (intent) {
+        setActiveDropIntent(intent);
+        scheduleDropTargetExpand(intent);
       }
     },
-    [canDropOnTarget, scheduleDropTargetExpand],
+    [canDropOnIntent, scheduleDropTargetExpand],
   );
 
   const handleDropTargetDragLeave = useCallback(
@@ -814,23 +1001,65 @@ export const FolderColumnView = ({
     [clearDropState],
   );
 
-  const handleDropOnTarget = useCallback(
+  const handleDropOnIntent = useCallback(
     async (
-      target: FolderColumnDropTarget | null,
+      intent: FolderColumnDropIntent | null,
       event: ReactDragEvent<HTMLElement>,
     ) => {
       const payload = dragPayloadRef.current;
-      if (!payload || !target || !canDropOnTarget(payload, target)) return;
+      if (!payload || !intent || !canDropOnIntent(payload, intent)) return;
 
       event.preventDefault();
       event.stopPropagation();
 
       clearDropState();
-      await moveDraggedEntry(payload, target);
+      await moveDraggedEntry(payload, intent);
       dragPayloadRef.current = null;
       setDraggingEntryKey(null);
     },
-    [canDropOnTarget, clearDropState, moveDraggedEntry],
+    [canDropOnIntent, clearDropState, moveDraggedEntry],
+  );
+
+  const getColumnDropIntent = useCallback(
+    (
+      column: FolderColumn,
+      columnIndex: number,
+    ): FolderColumnDropIntent => ({
+      target: getDropTargetForColumn(column.context),
+      position: "append",
+      columnId: column.id,
+      columnIndex,
+    }),
+    [getDropTargetForColumn],
+  );
+
+  const getRowDropIntent = useCallback(
+    (
+      entry: FolderColumnEntry,
+      column: FolderColumn,
+      columnIndex: number,
+      event: ReactDragEvent<HTMLDivElement>,
+    ): FolderColumnDropIntent | null => {
+      const position = getEntryDropPosition(entry, event);
+      const target =
+        position === "inside"
+          ? getDropTargetForEntry(entry)
+          : getDropTargetForColumn(column.context);
+
+      if (!target) return null;
+
+      return {
+        target,
+        position,
+        columnId: column.id,
+        columnIndex,
+        targetEntry:
+          position === "before" || position === "after"
+            ? { kind: entry.kind, id: entry.id }
+            : undefined,
+      };
+    },
+    [getDropTargetForColumn, getDropTargetForEntry, getEntryDropPosition],
   );
 
   const handleColumnResizeEnd = useCallback(() => {
@@ -1210,8 +1439,11 @@ export const FolderColumnView = ({
 
       <div className="flex h-full min-h-0 min-w-max items-stretch">
         {columns.map((column, columnIndex) => {
-          const columnDropTarget = getDropTargetForColumn(column.context);
-          const columnDropTargetKey = getDropTargetKey(columnDropTarget);
+          const columnDropIntent = getColumnDropIntent(column, columnIndex);
+          const isColumnDropTarget =
+            activeDropIntent !== null &&
+            getDropIntentKey(activeDropIntent) ===
+              getDropIntentKey(columnDropIntent);
 
           return (
             <section
@@ -1248,56 +1480,58 @@ export const FolderColumnView = ({
               <div
                 className={cn(
                   "h-full min-h-0 overflow-y-auto px-1 py-1",
-                  activeDropTargetKey === columnDropTargetKey &&
-                    "bg-[rgba(122,166,161,0.055)]",
+                  isColumnDropTarget && "bg-[rgba(122,166,161,0.055)]",
                 )}
                 onDragOver={(event) => {
-                  handleDropTargetDragOver(
-                    columnDropTarget,
-                    columnIndex,
-                    event,
-                  );
+                  handleDropIntentDragOver(columnDropIntent, event);
                 }}
                 onDragLeave={handleDropTargetDragLeave}
                 onDrop={(event) => {
-                  handleDropOnTarget(columnDropTarget, event);
+                  handleDropOnIntent(columnDropIntent, event);
                 }}
               >
                 {column.entries.length > 0 ? (
                   column.entries.map((entry) => {
                     const dragPayload = getDragPayloadForEntry(entry);
-                    const entryDropTarget = getDropTargetForEntry(entry);
+                    const dropPosition = (() => {
+                      if (!activeDropIntent) return null;
+                      if (activeDropIntent.columnId !== column.id) return null;
+                      if (!activeDropIntent.targetEntry) return null;
+                      if (activeDropIntent.targetEntry.id !== entry.id) return null;
+                      if (activeDropIntent.targetEntry.kind !== entry.kind) {
+                        return null;
+                      }
+                      if (activeDropIntent.position === "append") return null;
+                      return activeDropIntent.position;
+                    })();
 
                     return (
                       <FolderColumnRow
                         key={`${column.id}:${entry.kind}:${entry.id}`}
                         entry={entry}
                         selected={isEntrySelected(entry, columnIndex)}
-                        draggable
+                        draggable={!isFiltering}
                         dragging={
                           draggingEntryKey === getDragPayloadKey(dragPayload)
                         }
-                        dropTarget={
-                          entryDropTarget
-                            ? activeDropTargetKey ===
-                              getDropTargetKey(entryDropTarget)
-                            : false
-                        }
+                        dropPosition={dropPosition}
                         onSelect={() => handleEntrySelect(entry, columnIndex)}
                         onDragStart={(event) => {
                           handleEntryDragStart(entry, event);
                         }}
                         onDragEnd={handleEntryDragEnd}
                         onDragOver={(event) => {
-                          handleDropTargetDragOver(
-                            entryDropTarget,
-                            columnIndex,
+                          handleDropIntentDragOver(
+                            getRowDropIntent(entry, column, columnIndex, event),
                             event,
                           );
                         }}
                         onDragLeave={handleDropTargetDragLeave}
                         onDrop={(event) => {
-                          handleDropOnTarget(entryDropTarget, event);
+                          handleDropOnIntent(
+                            getRowDropIntent(entry, column, columnIndex, event),
+                            event,
+                          );
                         }}
                       />
                     );

@@ -472,11 +472,53 @@ const TreeViewLayout = ({
     [updateFolder],
   );
 
+  const handleReorderFoldersFromColumnPane = useCallback(
+    async (targetParentFolderId: string | null, folderIds: string[]) => {
+      await Promise.all(
+        folderIds.map((folderId, orderIndex) =>
+          updateFolder(folderId, {
+            parentFolderId: targetParentFolderId,
+            orderIndex,
+          }),
+        ),
+      );
+    },
+    [updateFolder],
+  );
+
   const handleMoveCardSetToFolderFromColumnPane = useCallback(
     async (cardSetId: string, targetFolderId: string) => {
       await moveCardSetToFolder(cardSetId, targetFolderId);
     },
     [moveCardSetToFolder],
+  );
+
+  const handleReorderCardSetsFromColumnPane = useCallback(
+    async (targetFolderId: string, cardSetIds: string[]) => {
+      await Promise.all(
+        cardSetIds.map((cardSetId, orderIndex) =>
+          updateCardSet(cardSetId, {
+            folderId: targetFolderId,
+            orderIndex,
+          }),
+        ),
+      );
+    },
+    [updateCardSet],
+  );
+
+  const handleReorderDocumentsFromColumnPane = useCallback(
+    async (targetFolderId: string, documentIds: string[]) => {
+      await Promise.all(
+        documentIds.map((documentId, orderIndex) =>
+          updateDocument(documentId, {
+            folderId: targetFolderId,
+            orderIndex,
+          }),
+        ),
+      );
+    },
+    [updateDocument],
   );
 
   // フォルダサイドバーは白いパネル型の遷移表示に一本化する。
@@ -626,9 +668,13 @@ const TreeViewLayout = ({
           onFolderSelect={handleFolderSelect}
           onItemSelect={handleItemSelect}
           onMoveFolder={handleMoveFolderFromColumnPane}
+          onReorderFolders={handleReorderFoldersFromColumnPane}
           onMoveCardSetToFolder={handleMoveCardSetToFolderFromColumnPane}
+          onReorderCardSets={handleReorderCardSetsFromColumnPane}
           onMoveDocumentToFolder={handleMoveDocumentToFolder}
+          onReorderDocuments={handleReorderDocumentsFromColumnPane}
           onMoveCardToSet={moveCardToSet}
+          onReorderCardsInCardSet={reorderCardsInCardSet}
         />
       ) : null}
 
