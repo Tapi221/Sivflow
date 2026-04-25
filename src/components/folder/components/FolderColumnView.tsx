@@ -29,6 +29,10 @@ import {
   useState,
 } from "react";
 
+type FolderColumnContext =
+  | { type: "folder"; id: string }
+  | { type: "cardSet"; id: string };
+
 type FolderColumnEntry =
   | {
       kind: "folder";
@@ -43,6 +47,7 @@ type FolderColumnEntry =
       id: string;
       name: string;
       contentCount: number;
+      hasNextColumn: boolean;
     }
   | {
       kind: "card" | "document";
@@ -52,7 +57,7 @@ type FolderColumnEntry =
 
 type FolderColumn = {
   id: string;
-  parentFolderId: string | null;
+  context: FolderColumnContext | null;
   entries: FolderColumnEntry[];
 };
 
@@ -173,9 +178,20 @@ const hasSelectedItemId = (
   return item !== null && "id" in item;
 };
 
-const areSameFolderPaths = (left: string[], right: string[]) => {
+const getColumnContextKey = (context: FolderColumnContext | null) => {
+  if (!context) return "__root__";
+  return `${context.type}:${context.id}`;
+};
+
+const areSameColumnPaths = (
+  left: FolderColumnContext[],
+  right: FolderColumnContext[],
+) => {
   if (left.length !== right.length) return false;
-  return left.every((folderId, index) => folderId === right[index]);
+  return left.every((context, index) => {
+    const other = right[index];
+    return context.type === other?.type && context.id === other.id;
+  });
 };
 
 const FolderColumnRow = ({
@@ -195,15 +211,18 @@ const FolderColumnRow = ({
       ? entry.contentCount
       : undefined;
 
+  const hasNextColumn =
+    (entry.kind === "folder" || entry.kind === "cardSet") && entry.hasNextColumn;
+
   const trailing =
-    typeof contentCount === "number" || entry.kind === "folder" ? (
+    typeof contentCount === "number" || hasNextColumn ? (
       <span className="ml-auto flex h-full shrink-0 items-center gap-1 pr-1">
         {typeof contentCount === "number" ? (
           <span className="ds-list-item__subtitle shrink-0 text-[11px] font-normal tabular-nums leading-none opacity-60">
             {contentCount}
           </span>
         ) : null}
-        {entry.kind === "folder" && entry.hasNextColumn ? (
+        {hasNextColumn ? (
           <ChevronRight
             className={cn(
               "sidebar-icon ds-list-item__icon h-3.5 w-3.5",
@@ -287,7 +306,7 @@ export const FolderColumnView = ({
   const previousBodyUserSelectRef = useRef("");
   const previousBodyCursorRef = useRef("");
 
-  const [columnFolderPath, setColumnFolderPath] = useState<string[]>([]);
+  const [columnPath, setColumnPath] = useState<FolderColumnContext[]>([]);
   const [columnWidthById, setColumnWidthById] = useState<FolderColumnWidthMap>(
     readStoredFolderColumnWidths,
   );
@@ -335,7 +354,7 @@ export const FolderColumnView = ({
     (folderId: string | null | undefined) => {
       if (!folderId || !visibleFolderIdSet.has(folderId)) return [];
 
-      const path: string[] = [];
+      const path: FolderColumnContext[] = [];
       const seenFolderIds = new Set<string>();
       let currentFolderId: string | null = folderId;
 
@@ -345,7 +364,7 @@ export const FolderColumnView = ({
         !seenFolderIds.has(currentFolderId)
       ) {
         seenFolderIds.add(currentFolderId);
-        path.unshift(currentFolderId);
+        path.unshift({ type: "folder", id: currentFolderId });
         currentFolderId = parentFolderIdById.get(currentFolderId) ?? null;
       }
 
@@ -566,13 +585,13 @@ export const FolderColumnView = ({
     if (!selectedFolderId || !visibleFolderIdSet.has(selectedFolderId)) return;
 
     const nextPath = buildFolderPath(selectedFolderId);
-    setColumnFolderPath((previousPath) =>
-      areSameFolderPaths(previousPath, nextPath) ? previousPath : nextPath,
+    setColumnPath((previousPath) =>
+      areSameColumnPaths(previousPath, nextPath) ? previousPath : nextPath,
     );
   }, [buildFolderPath, selectedFolderId, visibleFolderIdSet]);
 
   useEffect(() => {
-    setColumnFolderPath([]);
+    setColumnPath([]);
   }, [resetToken]);
 
   useEffect(() => {
@@ -583,7 +602,7 @@ export const FolderColumnView = ({
       left: scroller.scrollWidth,
       behavior: "auto",
     });
-  }, [columnFolderPath.length]);
+  }, [columnPath.length]);
 
   const hasFolderMatches = useCallback(
     (folderId: string) => {
@@ -602,7 +621,17 @@ export const FolderColumnView = ({
   );
 
   const buildColumnEntries = useCallback(
-    (parentFolderId: string | null): FolderColumnEntry[] => {
+    (context: FolderColumnContext | null): FolderColumnEntry[] => {
+      if (context?.type === "cardSet") {
+        return getCardSetItems(context.id).map((item) => ({
+          kind: item.type,
+          id: item.data.id,
+          name: getExplorerItemDisplayName(item),
+        }));
+      }
+
+      const parentFolderId = context?.type === "folder" ? context.id : null;
+
       const childFolders = (
         parentFolderId ? getChildFolders(parentFolderId) : rootFolders
       )
@@ -635,12 +664,17 @@ export const FolderColumnView = ({
 
       const childCardSets = getCardSets(parentFolderId)
         .filter((cardSet) => hasCardSetMatches(cardSet.id))
-        .map((cardSet) => ({
-          kind: "cardSet" as const,
-          id: cardSet.id,
-          name: getCardSetDisplayName(cardSet),
-          contentCount: getCardSetItems(cardSet.id).length,
-        }));
+        .map((cardSet) => {
+          const cardSetItems = getCardSetItems(cardSet.id);
+
+          return {
+            kind: "cardSet" as const,
+            id: cardSet.id,
+            name: getCardSetDisplayName(cardSet),
+            contentCount: cardSetItems.length,
+            hasNextColumn: cardSetItems.length > 0,
+          };
+        });
 
       const childItems = getFolderItems(parentFolderId).map((item) => ({
         kind: item.type,
@@ -663,20 +697,30 @@ export const FolderColumnView = ({
   );
 
   const columns = useMemo<FolderColumn[]>(() => {
-    const parentFolderIds = [null, ...columnFolderPath];
+    const contexts = [null, ...columnPath];
 
-    return parentFolderIds.map((parentFolderId) => ({
-      id: parentFolderId ?? "__root__",
-      parentFolderId,
-      entries: buildColumnEntries(parentFolderId),
+    return contexts.map((context) => ({
+      id: getColumnContextKey(context),
+      context,
+      entries: buildColumnEntries(context),
     }));
-  }, [buildColumnEntries, columnFolderPath]);
+  }, [buildColumnEntries, columnPath]);
 
-  const handleFolderEntrySelect = useCallback(
-    (folderId: string, columnIndex: number) => {
-      setColumnFolderPath((previousPath) => {
-        const nextPath = [...previousPath.slice(0, columnIndex), folderId];
-        return areSameFolderPaths(previousPath, nextPath) ? previousPath : nextPath;
+  const handleBranchEntrySelect = useCallback(
+    (
+      entry: Extract<FolderColumnEntry, { kind: "folder" | "cardSet" }>,
+      columnIndex: number,
+    ) => {
+      const nextContext: FolderColumnContext = {
+        type: entry.kind,
+        id: entry.id,
+      };
+
+      setColumnPath((previousPath) => {
+        const nextPath = [...previousPath.slice(0, columnIndex), nextContext];
+        return areSameColumnPaths(previousPath, nextPath)
+          ? previousPath
+          : nextPath;
       });
     },
     [],
@@ -684,8 +728,8 @@ export const FolderColumnView = ({
 
   const handleEntrySelect = useCallback(
     (entry: FolderColumnEntry, columnIndex: number) => {
-      if (entry.kind === "folder") {
-        handleFolderEntrySelect(entry.id, columnIndex);
+      if (entry.kind === "folder" || entry.kind === "cardSet") {
+        handleBranchEntrySelect(entry, columnIndex);
         return;
       }
 
@@ -694,16 +738,28 @@ export const FolderColumnView = ({
         id: entry.id,
       });
     },
-    [handleFolderEntrySelect, onItemSelect],
+    [handleBranchEntrySelect, onItemSelect],
   );
 
   const isEntrySelected = useCallback(
     (entry: FolderColumnEntry, columnIndex: number) => {
       if (entry.kind === "folder") {
-        return columnFolderPath[columnIndex] === entry.id;
+        const selectedPathEntry = columnPath[columnIndex];
+        return (
+          selectedPathEntry?.type === "folder" &&
+          selectedPathEntry.id === entry.id
+        );
       }
 
       if (entry.kind === "cardSet") {
+        const selectedPathEntry = columnPath[columnIndex];
+        if (
+          selectedPathEntry?.type === "cardSet" &&
+          selectedPathEntry.id === entry.id
+        ) {
+          return true;
+        }
+
         return (
           selectedCardSetId === entry.id ||
           (hasSelectedItemId(selectedItem) &&
@@ -718,7 +774,7 @@ export const FolderColumnView = ({
         selectedItem.id === entry.id
       );
     },
-    [columnFolderPath, selectedCardSetId, selectedItem],
+    [columnPath, selectedCardSetId, selectedItem],
   );
 
   return (
@@ -750,7 +806,11 @@ export const FolderColumnView = ({
               "relative h-full min-h-0 shrink-0 overflow-hidden border-r border-[#e7e5df]",
             )}
             aria-label={
-              column.parentFolderId ? "フォルダ内の項目" : "ルートフォルダ"
+              column.context?.type === "cardSet"
+                ? "カードセット内のカード"
+                : column.context?.type === "folder"
+                  ? "フォルダ内の項目"
+                  : "ルートフォルダ"
             }
           >
             <div
@@ -783,7 +843,9 @@ export const FolderColumnView = ({
                 <div className="px-2 py-2 text-sm font-normal text-muted-foreground">
                   {isFiltering
                     ? "一致する項目がありません"
-                    : "この階層には表示できる項目がありません"}
+                    : column.context?.type === "cardSet"
+                      ? "このカードセットにはカードがありません"
+                      : "この階層には表示できる項目がありません"}
                 </div>
               )}
             </div>
