@@ -713,7 +713,8 @@ export const TitleBar: React.FC = () => {
     <div
       className={cn(
         "surface-flat-titlebar",
-        "flex w-full shrink-0 select-none items-center justify-between bg-transparent px-4 text-sm titlebar-text",
+        "flex w-full shrink-0 select-none items-center justify-between bg-transparent text-sm titlebar-text",
+        isFoldersPage ? "pl-0 pr-2" : "px-4",
       )}
       style={{
         ...dragStyle,
@@ -723,7 +724,10 @@ export const TitleBar: React.FC = () => {
     >
       <div
         className={cn(
-          "flex h-full min-w-0 flex-1 items-center pl-2 pr-3",
+          "flex h-full min-w-0",
+          isFoldersPage
+            ? "flex-1 items-stretch pl-0 pr-2"
+            : "items-center pl-2 pr-3",
           shouldShowBrandLabel && !isFoldersPage && "gap-2",
         )}
         style={isFoldersPage ? undefined : noDragStyle}
@@ -732,7 +736,7 @@ export const TitleBar: React.FC = () => {
           <WorkspaceTabsBar
             variant="titlebar"
             noDragStyle={noDragStyle}
-            className="max-w-[760px]"
+            className="min-w-0 flex-1"
           />
         ) : (
           <>

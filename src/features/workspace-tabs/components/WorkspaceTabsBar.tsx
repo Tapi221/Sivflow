@@ -27,6 +27,49 @@ const resolveTabWidthClassName = (tab: WorkspaceTab) => {
   return "min-w-[190px] max-w-[240px] shrink";
 };
 
+const resolveRootClassName = (isTitlebar: boolean) => {
+  return cn(
+    "explorer-chrome-font relative z-30 flex shrink-0 gap-0",
+    isTitlebar
+      ? "h-full min-w-0 flex-1 items-end overflow-visible border-b border-[#dddcd5] bg-[rgba(246,246,244,0.96)] pl-3 pr-2 pt-1"
+      : "h-10 items-end overflow-hidden rounded-t-[14px] border border-b-0 border-[#dddcd5] bg-[rgba(246,246,244,0.96)] px-2 pt-1",
+  );
+};
+
+const resolveTabsContainerClassName = (isTitlebar: boolean) => {
+  return cn(
+    "flex min-w-0 flex-1 items-end",
+    isTitlebar ? "h-full overflow-visible" : "overflow-hidden",
+  );
+};
+
+const resolveTabFrameClassName = ({
+  isTitlebar,
+  selected,
+  tab,
+}: {
+  isTitlebar: boolean;
+  selected: boolean;
+  tab: WorkspaceTab;
+}) => {
+  return cn(
+    "group/tab relative mr-1 flex min-w-0 items-center overflow-hidden border text-[12.5px] transition-colors",
+    resolveTabWidthClassName(tab),
+    isTitlebar ? "h-9 rounded-t-[10px] rounded-b-none" : "h-8 rounded-t-[8px]",
+    selected
+      ? cn(
+          "z-20 border-[#d8d7d1] bg-white text-[#24231f] shadow-[0_-1px_0_rgba(255,255,255,0.85)_inset]",
+          isTitlebar
+            ? "mb-[-1px] border-b-white"
+            : "border-b-white",
+        )
+      : cn(
+          "z-10 border-transparent bg-transparent text-[#777671] hover:bg-white/60 hover:text-[#33322f]",
+          isTitlebar && "mb-px",
+        ),
+  );
+};
+
 export const WorkspaceTabsBar = ({
   variant = "workspace",
   className,
@@ -42,16 +85,8 @@ export const WorkspaceTabsBar = ({
   const isTitlebar = variant === "titlebar";
 
   return (
-    <div
-      className={cn(
-        "explorer-chrome-font relative z-20 flex shrink-0 items-end gap-0 overflow-hidden",
-        isTitlebar
-          ? "h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 pt-0"
-          : "h-10 rounded-t-[14px] border border-b-0 border-[#dddcd5] bg-[rgba(246,246,244,0.96)] px-2 pt-1",
-        className,
-      )}
-    >
-      <div className="flex min-w-0 flex-1 items-end overflow-hidden">
+    <div className={cn(resolveRootClassName(isTitlebar), className)}>
+      <div className={resolveTabsContainerClassName(isTitlebar)}>
         {tabs.map((tab) => {
           const selected = tab.id === activeTabId;
           const Icon = resolveTabIcon(tab);
@@ -59,13 +94,7 @@ export const WorkspaceTabsBar = ({
           return (
             <div
               key={tab.id}
-              className={cn(
-                "group/tab mr-1 flex h-8 min-w-0 items-center overflow-hidden rounded-t-[8px] border text-[12.5px] transition-colors",
-                resolveTabWidthClassName(tab),
-                selected
-                  ? "border-[#d8d7d1] border-b-white bg-white text-[#24231f] shadow-[0_-1px_0_rgba(255,255,255,0.85)_inset]"
-                  : "border-transparent bg-transparent text-[#777671] hover:bg-white/60 hover:text-[#33322f]",
-              )}
+              className={resolveTabFrameClassName({ isTitlebar, selected, tab })}
             >
               <button
                 type="button"
@@ -114,7 +143,10 @@ export const WorkspaceTabsBar = ({
       <button
         type="button"
         style={noDragStyle}
-        className="mb-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#8b8a84] outline-none transition-colors hover:bg-black/5 hover:text-[#45443f]"
+        className={cn(
+          "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#8b8a84] outline-none transition-colors hover:bg-black/5 hover:text-[#45443f]",
+          isTitlebar ? "mb-[5px]" : "mb-1",
+        )}
         aria-label="新しいエクスプローラータブを開く"
         title="新しいエクスプローラータブ"
         onMouseDown={(event) => event.stopPropagation()}
