@@ -1,7 +1,17 @@
+import type { CSSProperties } from "react";
+
 import { FileText, FolderOutlineIcon, Layers, Plus, X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import type { WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
 import { useWorkspaceTabsStore } from "@/features/workspace-tabs/store/useWorkspaceTabsStore";
+
+type WorkspaceTabsBarVariant = "workspace" | "titlebar";
+
+type WorkspaceTabsBarProps = {
+  variant?: WorkspaceTabsBarVariant;
+  className?: string;
+  noDragStyle?: CSSProperties;
+};
 
 const resolveTabIcon = (tab: WorkspaceTab) => {
   if (tab.kind === "explorer") return FolderOutlineIcon;
@@ -17,7 +27,11 @@ const resolveTabWidthClassName = (tab: WorkspaceTab) => {
   return "min-w-[190px] max-w-[240px] shrink";
 };
 
-export const WorkspaceTabsBar = () => {
+export const WorkspaceTabsBar = ({
+  variant = "workspace",
+  className,
+  noDragStyle,
+}: WorkspaceTabsBarProps) => {
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const selectTab = useWorkspaceTabsStore((state) => state.selectTab);
@@ -25,12 +39,16 @@ export const WorkspaceTabsBar = () => {
   const createExplorerTab = useWorkspaceTabsStore(
     (state) => state.createExplorerTab,
   );
+  const isTitlebar = variant === "titlebar";
 
   return (
     <div
       className={cn(
-        "explorer-chrome-font relative z-20 flex h-10 shrink-0 items-end gap-0 overflow-hidden",
-        "rounded-t-[14px] border border-b-0 border-[#dddcd5] bg-[rgba(246,246,244,0.96)] px-2 pt-1",
+        "explorer-chrome-font relative z-20 flex shrink-0 items-end gap-0 overflow-hidden",
+        isTitlebar
+          ? "h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 pt-0"
+          : "h-10 rounded-t-[14px] border border-b-0 border-[#dddcd5] bg-[rgba(246,246,244,0.96)] px-2 pt-1",
+        className,
       )}
     >
       <div className="flex min-w-0 flex-1 items-end overflow-hidden">
@@ -51,9 +69,11 @@ export const WorkspaceTabsBar = () => {
             >
               <button
                 type="button"
+                style={noDragStyle}
                 className="flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left outline-none"
                 aria-current={selected ? "page" : undefined}
                 title={tab.title}
+                onMouseDown={(event) => event.stopPropagation()}
                 onClick={() => selectTab(tab.id)}
               >
                 <Icon
@@ -68,6 +88,7 @@ export const WorkspaceTabsBar = () => {
               {tab.isClosable ? (
                 <button
                   type="button"
+                  style={noDragStyle}
                   className={cn(
                     "mr-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-[#aaa9a3] outline-none transition-colors",
                     "hover:bg-black/10 hover:text-[#55544f]",
@@ -75,6 +96,7 @@ export const WorkspaceTabsBar = () => {
                   )}
                   aria-label={`${tab.title} を閉じる`}
                   title="閉じる"
+                  onMouseDown={(event) => event.stopPropagation()}
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
@@ -91,9 +113,11 @@ export const WorkspaceTabsBar = () => {
 
       <button
         type="button"
+        style={noDragStyle}
         className="mb-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#8b8a84] outline-none transition-colors hover:bg-black/5 hover:text-[#45443f]"
         aria-label="新しいエクスプローラータブを開く"
         title="新しいエクスプローラータブ"
+        onMouseDown={(event) => event.stopPropagation()}
         onClick={() => {
           createExplorerTab();
         }}
