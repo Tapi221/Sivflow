@@ -33,7 +33,7 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { SectionListBlankPane } from "@/components/folder/components/SectionListBlankPane";
+import { SectionListColumnPane } from "@/components/folder/components/SectionListColumnPane";
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
 import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
 import { PdfThumbnailSidebar } from "@/components/pdf/PdfThumbnailSidebar";
@@ -580,11 +580,21 @@ const TreeViewLayout = ({
       ) : null}
 
       {isSectionListMode ? (
-        <SectionListBlankPane
+        <SectionListColumnPane
           sidebarWidth={isSidebarOpen ? renderedSidebarWidth : 0}
           topOffsetPx={APP_DESKTOP_TOP_INSET_PX}
           leftInsetPx={12}
           rightInsetPx={12}
+          folders={folders}
+          cards={filteredCards}
+          cardSets={cardSets}
+          documents={filteredDocuments}
+          selectedFolderId={selectedFolderId}
+          selectedItem={selectedItem}
+          selectedCardSetId={activeSelectedCardSetId}
+          isFiltering={isFiltering}
+          onFolderSelect={handleFolderSelect}
+          onItemSelect={handleItemSelect}
         />
       ) : null}
 
