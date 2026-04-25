@@ -33,6 +33,7 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { PinnedFolderSidebarSection } from "@/components/folder/components/PinnedFolderSidebarSection";
 import { SectionListColumnPane } from "@/components/folder/components/SectionListColumnPane";
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
 import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
@@ -481,50 +482,64 @@ const TreeViewLayout = ({
   }
 
   const sidebarContent = (
-    <TreeViewTabContent
-      sidebarDisplayMode={resolvedSidebarDisplayMode}
-      folders={folders}
-      cards={cards}
-      cardSets={cardSets}
-      documents={documents}
-      filteredCards={filteredCards}
-      filteredDocuments={filteredDocuments}
-      selectedFolderId={selectedFolderId}
-      selectedItem={selectedItem}
-      isFiltering={isFiltering}
-      onRegisterCreateFolderTrigger={(fn) => {
-        createFolderTriggerRef.current = fn;
-      }}
-      onRegisterCreateCardSetTrigger={(fn) => {
-        createCardSetTriggerRef.current = fn;
-      }}
-      onRegisterDocumentTrigger={(fn) => {
-        documentTriggerRef.current = fn;
-      }}
-      navigateToSectionListToken={navigateToSectionListToken}
-      folderSelectionNonce={folderSelectionNonce}
-      forceSectionListRoot={isSectionListMode}
-      onHeaderFolderIdChange={setExplorerHeaderFolderId}
-      onFolderSelect={handleFolderSelect}
-      onItemSelect={handleItemSelect}
-      onCreateFolder={createFolder}
-      onUpdateFolder={handleUpdateFolderForTree}
-      onDeleteFolder={deleteFolder}
-      onCreateCardSet={createCardSet}
-      onUpdateCardSet={handleUpdateCardSetForTree}
-      onDeleteCardSet={deleteCardSet}
-      onCreateCard={handleCreateCardForTree}
-      onUpdateCard={handleUpdateCardForTree}
-      onDeleteCard={deleteCard}
-      onUpdateDocument={handleUpdateDocumentForTree}
-      onDeleteDocument={deleteDocument}
-      moveCardToSet={moveCardToSet}
-      moveCardSetToFolder={moveCardSetToFolder}
-      moveDocumentToFolder={handleMoveDocumentToFolder}
-      reorderCardsInCardSet={reorderCardsInCardSet}
-      selectedCardSetId={activeSelectedCardSetId}
-      onSelectCardSet={handleCardSetSelectWithoutNavigation}
-    />
+    <div className="flex h-full min-h-0 flex-col">
+      <PinnedFolderSidebarSection
+        folders={folders}
+        cards={filteredCards}
+        cardSets={cardSets}
+        documents={filteredDocuments}
+        selectedFolderId={selectedFolderId}
+        isFiltering={isFiltering}
+        onFolderSelect={handleFolderSelect}
+      />
+
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <TreeViewTabContent
+          sidebarDisplayMode={resolvedSidebarDisplayMode}
+          folders={folders}
+          cards={cards}
+          cardSets={cardSets}
+          documents={documents}
+          filteredCards={filteredCards}
+          filteredDocuments={filteredDocuments}
+          selectedFolderId={selectedFolderId}
+          selectedItem={selectedItem}
+          isFiltering={isFiltering}
+          onRegisterCreateFolderTrigger={(fn) => {
+            createFolderTriggerRef.current = fn;
+          }}
+          onRegisterCreateCardSetTrigger={(fn) => {
+            createCardSetTriggerRef.current = fn;
+          }}
+          onRegisterDocumentTrigger={(fn) => {
+            documentTriggerRef.current = fn;
+          }}
+          navigateToSectionListToken={navigateToSectionListToken}
+          folderSelectionNonce={folderSelectionNonce}
+          forceSectionListRoot={isSectionListMode}
+          onHeaderFolderIdChange={setExplorerHeaderFolderId}
+          onFolderSelect={handleFolderSelect}
+          onItemSelect={handleItemSelect}
+          onCreateFolder={createFolder}
+          onUpdateFolder={handleUpdateFolderForTree}
+          onDeleteFolder={deleteFolder}
+          onCreateCardSet={createCardSet}
+          onUpdateCardSet={handleUpdateCardSetForTree}
+          onDeleteCardSet={deleteCardSet}
+          onCreateCard={handleCreateCardForTree}
+          onUpdateCard={handleUpdateCardForTree}
+          onDeleteCard={deleteCard}
+          onUpdateDocument={handleUpdateDocumentForTree}
+          onDeleteDocument={deleteDocument}
+          moveCardToSet={moveCardToSet}
+          moveCardSetToFolder={moveCardSetToFolder}
+          moveDocumentToFolder={handleMoveDocumentToFolder}
+          reorderCardsInCardSet={reorderCardsInCardSet}
+          selectedCardSetId={activeSelectedCardSetId}
+          onSelectCardSet={handleCardSetSelectWithoutNavigation}
+        />
+      </div>
+    </div>
   );
 
   const canCreateCardSet = Boolean(currentHeaderActionFolderId);

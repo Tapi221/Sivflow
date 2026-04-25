@@ -1,7 +1,7 @@
 /**
  * useExplorerStore - Explorer状態管理フック
  *
- * 絞り込み状態をlocalStorageで永続化
+ * 絞り込み状態とユーザー別のエクスプローラー表示設定をlocalStorageで永続化
  */
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -10,6 +10,7 @@ type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";
 type TagMatchMode = "any" | "all";
 type DirectoryBadgeVisibilityKey = "uncertainty" | "bookmarked" | "tags";
+type ExplorerPinnedFolderId = string;
 
 type DirectoryBadgeVisibility = {
   uncertainty: boolean;
@@ -25,6 +26,7 @@ export interface ExplorerState {
   draftFilter: ToggleableFlag;
   contentTypeFilter: ContentTypeFilter[];
   directoryBadgeVisibility: DirectoryBadgeVisibility;
+  pinnedFolderIds: ExplorerPinnedFolderId[];
   setTagFilter: (tags: string[]) => void;
   toggleTag: (tag: string) => void;
   clearTagFilter: () => void;
@@ -35,6 +37,10 @@ export interface ExplorerState {
   setDraftFilter: (mode: ToggleableFlag) => void;
   toggleContentType: (kind: ContentTypeFilter) => void;
   toggleDirectoryBadgeVisibility: (key: DirectoryBadgeVisibilityKey) => void;
+  setPinnedFolderIds: (folderIds: string[]) => void;
+  pinFolder: (folderId: string) => void;
+  unpinFolder: (folderId: string) => void;
+  togglePinnedFolder: (folderId: string) => void;
 }
 
 const DEFAULT_CONTENT_TYPE_FILTER: ContentTypeFilter[] = ["card", "pdf"];
@@ -94,6 +100,18 @@ const normalizeDirectoryBadgeVisibility = (
   };
 };
 
+const normalizePinnedFolderIds = (value: unknown): ExplorerPinnedFolderId[] => {
+  if (!Array.isArray(value)) return [];
+
+  return Array.from(
+    new Set(
+      value.filter(
+        (entry): entry is ExplorerPinnedFolderId => typeof entry === "string",
+      ),
+    ),
+  );
+};
+
 const createDefaultState = (): Pick<
   ExplorerState,
   | "tagFilter"
@@ -103,6 +121,7 @@ const createDefaultState = (): Pick<
   | "draftFilter"
   | "contentTypeFilter"
   | "directoryBadgeVisibility"
+  | "pinnedFolderIds"
 > => ({
   tagFilter: [],
   tagMatchMode: "any",
@@ -111,6 +130,7 @@ const createDefaultState = (): Pick<
   draftFilter: "any",
   contentTypeFilter: [...DEFAULT_CONTENT_TYPE_FILTER],
   directoryBadgeVisibility: { ...DEFAULT_DIRECTORY_BADGE_VISIBILITY },
+  pinnedFolderIds: [],
 });
 
 export const useExplorerStore = create<ExplorerState>()(
@@ -165,6 +185,30 @@ export const useExplorerStore = create<ExplorerState>()(
             [key]: !state.directoryBadgeVisibility[key],
           },
         })),
+      setPinnedFolderIds: (folderIds) =>
+        set({ pinnedFolderIds: normalizePinnedFolderIds(folderIds) }),
+      pinFolder: (folderId) =>
+        set((state) => {
+          if (state.pinnedFolderIds.includes(folderId)) {
+            return {};
+          }
+
+          return { pinnedFolderIds: [...state.pinnedFolderIds, folderId] };
+        }),
+      unpinFolder: (folderId) =>
+        set((state) => ({
+          pinnedFolderIds: state.pinnedFolderIds.filter((id) => id !== folderId),
+        })),
+      togglePinnedFolder: (folderId) =>
+        set((state) => {
+          const exists = state.pinnedFolderIds.includes(folderId);
+
+          return {
+            pinnedFolderIds: exists
+              ? state.pinnedFolderIds.filter((id) => id !== folderId)
+              : [...state.pinnedFolderIds, folderId],
+          };
+        }),
     }),
     {
       name: "explorer-storage",
@@ -176,6 +220,7 @@ export const useExplorerStore = create<ExplorerState>()(
         draftFilter: state.draftFilter,
         contentTypeFilter: state.contentTypeFilter,
         directoryBadgeVisibility: state.directoryBadgeVisibility,
+        pinnedFolderIds: state.pinnedFolderIds,
       }),
       migrate: (persistedState: unknown) => {
         if (!persistedState || typeof persistedState !== "object") {
@@ -196,6 +241,9 @@ export const useExplorerStore = create<ExplorerState>()(
         );
         next.directoryBadgeVisibility = normalizeDirectoryBadgeVisibility(
           next.directoryBadgeVisibility,
+        );
+        next.pinnedFolderIds = normalizePinnedFolderIds(
+          next.pinnedFolderIds ?? next.pinnedItems,
         );
 
         delete next.recent;

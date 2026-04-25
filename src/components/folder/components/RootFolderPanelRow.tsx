@@ -3,6 +3,7 @@ import {
   buildFolderMenuActions,
 } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
+import type { MenuAction } from "@/components/folder/components/menus/menuActions";
 import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
 import {
   EXPLORER_ROW_CONTENT_CLASS,
@@ -14,9 +15,10 @@ import {
   FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import type { SelectedExplorerItem } from "@/types";
-import { FileText, FolderOutlineIcon, Layers } from "@/ui/icons";
+import { FileText, FolderOutlineIcon, Layers, Pin } from "@/ui/icons";
 import React from "react";
 import type { NavigationListEntry } from "./RootFolderPanelList";
 
@@ -98,6 +100,11 @@ export const RootFolderPanelRow = ({
   handleRenameConfirm,
   attachInputRef,
 }: RootFolderPanelRowProps) => {
+  const pinnedFolderIds = useExplorerStore((state) => state.pinnedFolderIds);
+  const togglePinnedFolder = useExplorerStore(
+    (state) => state.togglePinnedFolder,
+  );
+
   const supportsContextMenuKind =
     entry.kind === "folder" ||
     entry.kind === "cardSet" ||
@@ -120,6 +127,9 @@ export const RootFolderPanelRow = ({
         : hasSelectedItemId(selectedItem) &&
           selectedItem.type === entry.kind &&
           selectedItem.id === entry.id;
+
+  const isFolderPinned =
+    entry.kind === "folder" && pinnedFolderIds.includes(entry.id);
 
   const Icon =
     entry.kind === "folder"
@@ -152,6 +162,11 @@ export const RootFolderPanelRow = ({
 
     onItemSelect({ type: entry.kind, id: entry.id });
   }, [entry, isEditing, isMenuOpen, onItemSelect]);
+
+  const handleTogglePinnedFolder = React.useCallback(() => {
+    if (entry.kind !== "folder") return;
+    togglePinnedFolder(entry.id);
+  }, [entry.id, entry.kind, togglePinnedFolder]);
 
   const folderMenuActions = React.useMemo(
     () =>
@@ -200,8 +215,25 @@ export const RootFolderPanelRow = ({
     ],
   );
 
+  const pinMenuActions = React.useMemo<MenuAction[]>(
+    () =>
+      entry.kind === "folder"
+        ? [
+            {
+              id: isFolderPinned ? "unpin-folder" : "pin-folder",
+              label: isFolderPinned ? "ピン留めを外す" : "ピン留めする",
+              icon: <Pin className="h-4 w-4" />,
+              onSelect: handleTogglePinnedFolder,
+            },
+          ]
+        : [],
+    [entry.kind, handleTogglePinnedFolder, isFolderPinned],
+  );
+
   const resolvedMenuActions = React.useMemo(() => {
-    if (entry.kind === "folder") return folderMenuActions;
+    if (entry.kind === "folder") {
+      return [...pinMenuActions, ...folderMenuActions];
+    }
 
     if (entry.kind === "cardSet") {
       return buildEntityRenameDeleteMenuActions({
@@ -254,6 +286,7 @@ export const RootFolderPanelRow = ({
     folderMenuActions,
     handleDelete,
     onItemSelect,
+    pinMenuActions,
     setEditingId,
     setEditingName,
   ]);
@@ -267,9 +300,41 @@ export const RootFolderPanelRow = ({
 
   const contentCountNode =
     typeof contentCount === "number" ? (
-      <span className="ds-list-item__subtitle ml-auto shrink-0 pr-1 text-[11px] font-normal tabular-nums leading-none opacity-60">
+      <span className="ds-list-item__subtitle text-[11px] font-normal tabular-nums leading-none opacity-60">
         {contentCount}
       </span>
+    ) : null;
+
+  const pinButtonNode =
+    entry.kind === "folder" ? (
+      <button
+        type="button"
+        className={cn(
+          "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground",
+          "opacity-0 transition hover:bg-muted hover:text-foreground group-hover:opacity-100",
+          isFolderPinned && "opacity-100 text-foreground",
+        )}
+        aria-label={isFolderPinned ? "ピン留めを外す" : "ピン留めする"}
+        title={isFolderPinned ? "ピン留めを外す" : "ピン留めする"}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          handleTogglePinnedFolder();
+        }}
+        onPointerDown={(event) => {
+          event.stopPropagation();
+        }}
+      >
+        <Pin className="h-3.5 w-3.5" />
+      </button>
+    ) : null;
+
+  const trailingNode =
+    contentCountNode || pinButtonNode ? (
+      <div className="ml-auto flex shrink-0 items-center gap-1 pr-1">
+        {contentCountNode}
+        {pinButtonNode}
+      </div>
     ) : null;
 
   return (
@@ -293,7 +358,7 @@ export const RootFolderPanelRow = ({
         FOLDER_ROW_TITLE_CLASS,
         isSelected ? "font-medium" : "font-normal",
       )}
-      trailing={contentCountNode}
+      trailing={trailingNode}
       icon={
         <Icon
           className={cn(
