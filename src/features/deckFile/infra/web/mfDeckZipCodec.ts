@@ -69,7 +69,7 @@ export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => {
     },
     {
       level: 6,
-      mtime: new Date(0),
+      mtime: new Date(Date.UTC(1980, 0, 1, 0, 0, 0)),
     },
   );
 };
