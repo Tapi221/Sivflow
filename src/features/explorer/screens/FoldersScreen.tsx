@@ -12,6 +12,7 @@ import { useExplorerController } from "@/features/explorer/controller/useExplore
 import { useExplorerBreadcrumbSync } from "@/features/explorer/hooks/useExplorerBreadcrumbSync";
 import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups";
 import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
+import { isSameSelectedExplorerItem } from "@/features/explorer/utils/isSameSelectedExplorerItem";
 import { WorkspaceTabPanel } from "@/features/workspace-tabs/components/WorkspaceTabPanel";
 import { WorkspaceTabsBar } from "@/features/workspace-tabs/components/WorkspaceTabsBar";
 import type { WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
@@ -63,6 +64,18 @@ const resolveActiveTab = (
   activeTabId: WorkspaceTab["id"],
 ): WorkspaceTab | null => {
   return tabs.find((tab) => tab.id === activeTabId) ?? tabs[0] ?? null;
+};
+
+const areExplorerRouteStatesEqual = (
+  left: ExplorerRouteState,
+  right: ExplorerRouteState,
+): boolean => {
+  return (
+    left.isHomeOnlyMode === right.isHomeOnlyMode &&
+    left.isSectionListMode === right.isSectionListMode &&
+    left.selectedFolderId === right.selectedFolderId &&
+    isSameSelectedExplorerItem(left.selectedItem, right.selectedItem)
+  );
 };
 
 export const FoldersScreen = ({ route }: FoldersScreenProps) => {
@@ -174,8 +187,21 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   useEffect(() => {
     if (!activeExplorerState) return;
 
+    if (
+      areExplorerRouteStatesEqual(
+        activeExplorerState,
+        currentExplorerRouteState,
+      )
+    ) {
+      return;
+    }
+
     controller.actions.applyRouteState(activeExplorerState);
-  }, [activeExplorerState, controller.actions]);
+  }, [
+    activeExplorerState,
+    currentExplorerRouteState,
+    controller.actions.applyRouteState,
+  ]);
 
   useEffect(() => {
     if (!activeExplorerTabId) return;
@@ -209,7 +235,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
       resetExplorerPaneScroll();
       controller.actions.navigateToSectionList();
     });
-  }, [controller.actions, resetExplorerPaneScroll]);
+  }, [controller.actions.navigateToSectionList, resetExplorerPaneScroll]);
 
   useEffect(() => {
     route.persistLastSelectedFolderId(controller.state.selectedFolderId);
