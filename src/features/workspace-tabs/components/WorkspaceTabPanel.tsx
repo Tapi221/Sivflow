@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps } from "react";
 import { useMemo } from "react";
 
 import { CardPane } from "@/components/folder/panes/CardPane";
@@ -8,7 +8,7 @@ import { PdfWorkspaceProvider } from "@/components/pdf/PdfWorkspaceProvider";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem } from "@/types";
-import type { WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
+import type { WorkspaceEntityTab } from "@/features/workspace-tabs/domain/workspaceTab";
 import {
   resolveCardSetTabTitle,
   resolveCardTabTitle,
@@ -21,8 +21,7 @@ type PdfPaneUpdateHandler = NonNullable<
 type PdfPaneUpdates = Parameters<PdfPaneUpdateHandler>[0];
 
 type WorkspaceTabPanelProps = {
-  activeTab: WorkspaceTab;
-  explorerContent: ReactNode;
+  activeTab: WorkspaceEntityTab;
   cards: Card[];
   cardSets: CardSet[];
   documents: DocumentItem[];
@@ -59,7 +58,6 @@ const buildMapById = <TEntity extends { id: string }>(entities: TEntity[]) => {
 
 export const WorkspaceTabPanel = ({
   activeTab,
-  explorerContent,
   cards,
   cardSets,
   documents,
@@ -74,10 +72,6 @@ export const WorkspaceTabPanel = ({
   const documentById = useMemo(() => buildMapById(documents), [documents]);
   const cardById = useMemo(() => buildMapById(cards), [cards]);
   const cardSetById = useMemo(() => buildMapById(cardSets), [cardSets]);
-
-  if (activeTab.kind === "explorer") {
-    return <>{explorerContent}</>;
-  }
 
   if (activeTab.kind === "document") {
     const document = documentById.get(activeTab.documentId);
@@ -151,7 +145,7 @@ export const WorkspaceTabPanel = ({
     const cardSetCards = cards.filter((card) => card.cardSetId === cardSet.id);
 
     return (
-      <div className="flex h-full min-h-0 w-full flex-col bg-[#fbfbfa]">
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-b-[14px] border-x border-b border-[#dddcd5] bg-[#fbfbfa]">
         <div className="shrink-0 border-b border-[#e5e4df] bg-white px-5 py-4">
           <div className="text-[13px] text-[#8b8a84]">カードセット</div>
           <div className="mt-1 text-[20px] font-semibold text-[#2f2e2a]">
