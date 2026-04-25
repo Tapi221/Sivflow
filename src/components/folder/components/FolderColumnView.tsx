@@ -1487,7 +1487,12 @@ export const FolderColumnView = ({
                 }}
                 onDragLeave={handleDropTargetDragLeave}
                 onDrop={(event) => {
-                  handleDropOnIntent(columnDropIntent, event);
+                  handleDropOnIntent(
+                    activeDropIntent?.columnId === column.id
+                      ? activeDropIntent
+                      : columnDropIntent,
+                    event,
+                  );
                 }}
               >
                 {column.entries.length > 0 ? (
@@ -1529,7 +1534,14 @@ export const FolderColumnView = ({
                         onDragLeave={handleDropTargetDragLeave}
                         onDrop={(event) => {
                           handleDropOnIntent(
-                            getRowDropIntent(entry, column, columnIndex, event),
+                            activeDropIntent?.columnId === column.id
+                              ? activeDropIntent
+                              : getRowDropIntent(
+                                  entry,
+                                  column,
+                                  columnIndex,
+                                  event,
+                                ),
                             event,
                           );
                         }}
