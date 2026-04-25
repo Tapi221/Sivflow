@@ -7,6 +7,10 @@ import {
   ImportFormatDialog,
   type ImportFormat,
 } from "@/features/import/presentation/web/ImportFormatDialog";
+import {
+  detectImportFileKind,
+  isSupportedImportFileKind,
+} from "@/features/import/domain/importFileKind";
 import { XlsxImportDialog } from "@/features/import/presentation/web/XlsxImportDialog";
 import { useCardCommands } from "@/hooks/card/useCardCommands";
 import { useCardsRead } from "@/hooks/card/useCardsRead";
@@ -28,7 +32,7 @@ import type {
   Folder,
   SelectedExplorerItem,
 } from "@/types";
-import type { ComponentProps } from "react";
+import type { ComponentProps, DragEvent } from "react";
 import {
   useCallback,
   useEffect,
@@ -69,6 +73,18 @@ interface TreeViewLayoutProps {
 }
 
 type TreeViewTabContentProps = ComponentProps<typeof TreeViewTabContent>;
+
+const isExternalFileDragEvent = (event: DragEvent<HTMLDivElement>) => {
+  return Array.from(event.dataTransfer.types).includes("Files");
+};
+
+const getFirstSupportedImportFile = (files: FileList): File | null => {
+  return (
+    Array.from(files).find((file) =>
+      isSupportedImportFileKind(detectImportFileKind(file)),
+    ) ?? null
+  );
+};
 
 const TreeViewLayout = ({
   folders,
@@ -116,6 +132,14 @@ const TreeViewLayout = ({
     useState(false);
   const [isMfCardImportDialogOpen, setIsMfCardImportDialogOpen] =
     useState(false);
+  const [pendingMfDeckFile, setPendingMfDeckFile] = useState<File | null>(null);
+  const [pendingMfDeckFileRevision, setPendingMfDeckFileRevision] =
+    useState(0);
+  const [pendingMfCardFile, setPendingMfCardFile] = useState<File | null>(null);
+  const [pendingMfCardFileRevision, setPendingMfCardFileRevision] =
+    useState(0);
+  const [, setImportDragDepth] = useState(0);
+  const [isImportDragActive, setIsImportDragActive] = useState(false);
   const createFolderTriggerRef = useRef<(() => void) | null>(null);
   const createCardSetTriggerRef = useRef<
     ((folderId?: string | null) => void) | null
@@ -377,6 +401,128 @@ const TreeViewLayout = ({
     setIsXlsxImportDialogOpen(true);
   }, []);
 
+  const handleMfDeckImportDialogOpenChange = useCallback((open: boolean) => {
+    setIsMfDeckImportDialogOpen(open);
+
+    if (!open) {
+      setPendingMfDeckFile(null);
+    }
+  }, []);
+
+  const handleMfCardImportDialogOpenChange = useCallback((open: boolean) => {
+    setIsMfCardImportDialogOpen(open);
+
+    if (!open) {
+      setPendingMfCardFile(null);
+    }
+  }, []);
+
+  const openDroppedImportFile = useCallback(
+    (file: File) => {
+      if (!currentHeaderActionFolderId) {
+        toast.error("インポート先のフォルダを先に選択してください。");
+        return;
+      }
+
+      const kind = detectImportFileKind(file);
+
+      if (!isSupportedImportFileKind(kind)) {
+        toast.error("対応していないファイル形式です。");
+        return;
+      }
+
+      if (kind === "mfdeck") {
+        setPendingMfDeckFile(file);
+        setPendingMfDeckFileRevision((revision) => revision + 1);
+        setIsMfDeckImportDialogOpen(true);
+        return;
+      }
+
+      if (kind === "mfcard") {
+        setPendingMfCardFile(file);
+        setPendingMfCardFileRevision((revision) => revision + 1);
+        setIsMfCardImportDialogOpen(true);
+        return;
+      }
+
+      setIsXlsxImportDialogOpen(true);
+    },
+    [currentHeaderActionFolderId, toast],
+  );
+
+  const handleImportDragEnter = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      if (!isExternalFileDragEvent(event)) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      setImportDragDepth((depth) => depth + 1);
+      setIsImportDragActive(true);
+    },
+    [],
+  );
+
+  const handleImportDragOver = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      if (!isExternalFileDragEvent(event)) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.dataTransfer.dropEffect = currentHeaderActionFolderId
+        ? "copy"
+        : "none";
+    },
+    [currentHeaderActionFolderId],
+  );
+
+  const handleImportDragLeave = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      if (!isExternalFileDragEvent(event)) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      setImportDragDepth((depth) => {
+        const nextDepth = Math.max(0, depth - 1);
+
+        if (nextDepth === 0) {
+          setIsImportDragActive(false);
+        }
+
+        return nextDepth;
+      });
+    },
+    [],
+  );
+
+  const handleImportDrop = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      if (!isExternalFileDragEvent(event)) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      setImportDragDepth(0);
+      setIsImportDragActive(false);
+
+      const file = getFirstSupportedImportFile(event.dataTransfer.files);
+
+      if (!file) {
+        toast.error("対応しているファイルをドロップしてください。");
+        return;
+      }
+
+      openDroppedImportFile(file);
+    },
+    [openDroppedImportFile, toast],
+  );
+
   const ensureMfDeckTagByName = useCallback(
     async (name: string) => {
       const tag = await addTag(name);
@@ -625,6 +771,10 @@ const TreeViewLayout = ({
 
   return (
     <div
+      onDragEnter={handleImportDragEnter}
+      onDragOver={handleImportDragOver}
+      onDragLeave={handleImportDragLeave}
+      onDrop={handleImportDrop}
       className={cn(
         "relative flex h-full min-h-0 w-full max-w-none flex-1 items-stretch overflow-hidden",
         "rounded-b-[14px] border-x border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)]",
@@ -639,6 +789,24 @@ const TreeViewLayout = ({
         onFolderSelect={handleFolderSelect}
         onItemSelect={handleItemSelect}
       />
+
+      {isImportDragActive ? (
+        <div className="pointer-events-none absolute inset-0 z-[80] flex items-center justify-center bg-slate-900/10 backdrop-blur-[1px]">
+          <div className="rounded-[28px] border border-slate-200 bg-white/95 px-6 py-5 text-center shadow-[0_18px_60px_rgba(15,23,42,0.18)]">
+            <p className="text-sm font-bold text-slate-800">
+              ファイルをドロップしてインポート
+            </p>
+            <p className="mt-2 text-xs leading-relaxed text-slate-500">
+              .mfdeck / .mfcard を選択中のフォルダへ追加します。
+            </p>
+            {!currentHeaderActionFolderId ? (
+              <p className="mt-2 text-xs font-semibold text-rose-600">
+                先にインポート先フォルダを選択してください。
+              </p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       <TreeViewSidebar
         sidebarRef={sidebarRef}
@@ -750,7 +918,7 @@ const TreeViewLayout = ({
 
       <MfDeckImportDialog
         open={isMfDeckImportDialogOpen}
-        onOpenChange={setIsMfDeckImportDialogOpen}
+        onOpenChange={handleMfDeckImportDialogOpenChange}
         folderId={currentHeaderActionFolderId}
         folderName={
           currentHeaderActionFolderId
@@ -765,11 +933,13 @@ const TreeViewLayout = ({
         updateCardSet={updateCardSet}
         createCard={createCard}
         ensureTagByName={ensureMfDeckTagByName}
+        initialFile={pendingMfDeckFile}
+        initialFileRevision={pendingMfDeckFileRevision}
       />
 
       <MfCardImportDialog
         open={isMfCardImportDialogOpen}
-        onOpenChange={setIsMfCardImportDialogOpen}
+        onOpenChange={handleMfCardImportDialogOpenChange}
         folderId={currentHeaderActionFolderId}
         folderName={
           currentHeaderActionFolderId
@@ -784,6 +954,8 @@ const TreeViewLayout = ({
         updateCardSet={updateCardSet}
         createCard={createCard}
         ensureTagByName={ensureMfDeckTagByName}
+        initialFile={pendingMfCardFile}
+        initialFileRevision={pendingMfCardFileRevision}
       />
     </div>
   );

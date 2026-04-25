@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -52,6 +52,8 @@ type MfCardImportDialogProps = {
   updateCardSet?: UpdateMfDeckCardSet;
   createCard: CreateMfDeckCard;
   ensureTagByName?: EnsureMfDeckTagByName;
+  initialFile?: File | null;
+  initialFileRevision?: number;
 };
 
 const emptyLoadedState = {
@@ -70,6 +72,8 @@ export const MfCardImportDialog = ({
   updateCardSet,
   createCard,
   ensureTagByName,
+  initialFile = null,
+  initialFileRevision = 0,
 }: MfCardImportDialogProps) => {
   const toast = useToast();
   const [destinationMode, setDestinationMode] = useState<"new" | "existing">(
@@ -123,6 +127,39 @@ export const MfCardImportDialog = ({
     onOpenChange(nextOpen);
   };
 
+  const loadFile = useCallback(
+    async (file: File) => {
+      setIsParsing(true);
+
+      try {
+        const loaded = await readMfCardFile(file);
+
+        setState({
+          file: loaded.file,
+          loaded,
+        });
+        setNewCardSetName((current) => {
+          return current.trim() || loaded.suggestedCardSetName;
+        });
+      } catch (error) {
+        console.error("[MfCardImportDialog] parse failed", error);
+        toast.error("MFCard の解析に失敗しました。ファイル形式を確認してください。");
+        setState({ file, loaded: null });
+      } finally {
+        setIsParsing(false);
+      }
+    },
+    [toast],
+  );
+
+  useEffect(() => {
+    if (!open || !initialFile) {
+      return;
+    }
+
+    void loadFile(initialFile);
+  }, [initialFile, initialFileRevision, loadFile, open]);
+
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
 
@@ -131,26 +168,8 @@ export const MfCardImportDialog = ({
       return;
     }
 
-    setIsParsing(true);
-
-    try {
-      const loaded = await readMfCardFile(file);
-
-      setState({
-        file: loaded.file,
-        loaded,
-      });
-      setNewCardSetName((current) => {
-        return current.trim() || loaded.suggestedCardSetName;
-      });
-    } catch (error) {
-      console.error("[MfCardImportDialog] parse failed", error);
-      toast.error("MFCard の解析に失敗しました。ファイル形式を確認してください。");
-      setState({ file, loaded: null });
-    } finally {
-      setIsParsing(false);
-      event.target.value = "";
-    }
+    await loadFile(file);
+    event.target.value = "";
   };
 
   const handleImport = async () => {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -50,6 +50,8 @@ type MfDeckImportDialogProps = {
   updateCardSet?: UpdateMfDeckCardSet;
   createCard: CreateMfDeckCard;
   ensureTagByName?: EnsureMfDeckTagByName;
+  initialFile?: File | null;
+  initialFileRevision?: number;
 };
 
 const emptyLoadedState = {
@@ -68,6 +70,8 @@ export const MfDeckImportDialog = ({
   updateCardSet,
   createCard,
   ensureTagByName,
+  initialFile = null,
+  initialFileRevision = 0,
 }: MfDeckImportDialogProps) => {
   const toast = useToast();
   const [destinationMode, setDestinationMode] = useState<"new" | "existing">(
@@ -123,6 +127,50 @@ export const MfDeckImportDialog = ({
     onOpenChange(nextOpen);
   };
 
+  const loadFile = useCallback(
+    async (file: File) => {
+      setIsParsing(true);
+
+      try {
+        const loaded = await readMfDeckFile(file);
+
+        setState({ file, loaded });
+        setNewCardSetName((current) => {
+          return current.trim() || loaded.suggestedCardSetName;
+        });
+      } catch (error) {
+        console.error("[MfDeckImportDialog] parse failed", error);
+        toast.error("MFDeck の解析に失敗しました。ファイル形式を確認してください。");
+        setState({
+          file,
+          loaded: {
+            file,
+            archive: null,
+            suggestedCardSetName: file.name,
+            issues: [
+              {
+                level: "error",
+                code: "invalid_zip",
+                message: "MFDeck の解析に失敗しました。",
+              },
+            ],
+          },
+        });
+      } finally {
+        setIsParsing(false);
+      }
+    },
+    [toast],
+  );
+
+  useEffect(() => {
+    if (!open || !initialFile) {
+      return;
+    }
+
+    void loadFile(initialFile);
+  }, [initialFile, initialFileRevision, loadFile, open]);
+
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
 
@@ -131,37 +179,8 @@ export const MfDeckImportDialog = ({
       return;
     }
 
-    setIsParsing(true);
-
-    try {
-      const loaded = await readMfDeckFile(file);
-
-      setState({ file, loaded });
-      setNewCardSetName((current) => {
-        return current.trim() || loaded.suggestedCardSetName;
-      });
-    } catch (error) {
-      console.error("[MfDeckImportDialog] parse failed", error);
-      toast.error("MFDeck の解析に失敗しました。ファイル形式を確認してください。");
-      setState({
-        file,
-        loaded: {
-          file,
-          archive: null,
-          suggestedCardSetName: file.name,
-          issues: [
-            {
-              level: "error",
-              code: "invalid_zip",
-              message: "MFDeck の解析に失敗しました。",
-            },
-          ],
-        },
-      });
-    } finally {
-      setIsParsing(false);
-      event.target.value = "";
-    }
+    await loadFile(file);
+    event.target.value = "";
   };
 
   const handleImport = async () => {
