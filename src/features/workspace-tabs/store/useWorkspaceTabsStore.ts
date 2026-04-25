@@ -53,12 +53,14 @@ type WorkspaceTabsState = {
   updateTabTitle: (tabId: WorkspaceTab["id"], title: string) => void;
 };
 
+const EXPLORER_TAB_TITLE = "エクスプローラー";
+
 const createInitialExplorerTab = (): WorkspaceExplorerTab => ({
   id: WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
   kind: "explorer",
-  title: "フォルダー一覧",
+  title: EXPLORER_TAB_TITLE,
   explorerState: createDefaultExplorerRouteState(),
-  isClosable: false,
+  isClosable: true,
 });
 
 const createRandomIdSegment = (): string => {
@@ -132,9 +134,9 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
     const nextTab: WorkspaceExplorerTab = {
       id,
       kind: "explorer",
-      title: params.title ?? "フォルダー一覧",
+      title: params.title ?? EXPLORER_TAB_TITLE,
       explorerState: params.explorerState ?? createDefaultExplorerRouteState(),
-      isClosable: params.isClosable ?? id !== WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
+      isClosable: params.isClosable ?? true,
     };
 
     set((state) => ({
@@ -150,7 +152,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
     const nextTab: WorkspaceExplorerTab = {
       id,
       kind: "explorer",
-      title: "フォルダー一覧",
+      title: EXPLORER_TAB_TITLE,
       explorerState: explorerState ?? createDefaultExplorerRouteState(),
       isClosable: true,
     };
@@ -264,7 +266,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
 
     set({
       tabs: nextTabs.length > 0 ? nextTabs : [createInitialExplorerTab()],
-      activeTabId: nextActiveTabId,
+      activeTabId: nextTabs.length > 0 ? nextActiveTabId : WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
     });
   },
 

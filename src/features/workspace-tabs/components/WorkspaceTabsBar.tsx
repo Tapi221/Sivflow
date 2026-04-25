@@ -21,53 +21,10 @@ const resolveTabIcon = (tab: WorkspaceTab) => {
 
 const resolveTabWidthClassName = (tab: WorkspaceTab) => {
   if (tab.kind === "explorer") {
-    return "w-[236px] max-w-[236px] flex-none";
+    return "w-[278px] max-w-[278px] flex-none";
   }
 
-  return "min-w-[190px] max-w-[240px] shrink";
-};
-
-const resolveRootClassName = (isTitlebar: boolean) => {
-  return cn(
-    "explorer-chrome-font relative z-30 flex shrink-0 gap-0",
-    isTitlebar
-      ? "h-full min-w-0 flex-1 items-end overflow-visible border-b border-[#dddcd5] bg-[rgba(246,246,244,0.96)] pl-3 pr-2 pt-1"
-      : "h-10 items-end overflow-hidden rounded-t-[14px] border border-b-0 border-[#dddcd5] bg-[rgba(246,246,244,0.96)] px-2 pt-1",
-  );
-};
-
-const resolveTabsContainerClassName = (isTitlebar: boolean) => {
-  return cn(
-    "flex min-w-0 flex-1 items-end",
-    isTitlebar ? "h-full overflow-visible" : "overflow-hidden",
-  );
-};
-
-const resolveTabFrameClassName = ({
-  isTitlebar,
-  selected,
-  tab,
-}: {
-  isTitlebar: boolean;
-  selected: boolean;
-  tab: WorkspaceTab;
-}) => {
-  return cn(
-    "group/tab relative mr-1 flex min-w-0 items-center overflow-hidden border text-[12.5px] transition-colors",
-    resolveTabWidthClassName(tab),
-    isTitlebar ? "h-9 rounded-t-[10px] rounded-b-none" : "h-8 rounded-t-[8px]",
-    selected
-      ? cn(
-          "z-20 border-[#d8d7d1] bg-white text-[#24231f] shadow-[0_-1px_0_rgba(255,255,255,0.85)_inset]",
-          isTitlebar
-            ? "mb-[-1px] border-b-white"
-            : "border-b-white",
-        )
-      : cn(
-          "z-10 border-transparent bg-transparent text-[#777671] hover:bg-white/60 hover:text-[#33322f]",
-          isTitlebar && "mb-px",
-        ),
-  );
+  return "min-w-[190px] max-w-[260px] shrink";
 };
 
 export const WorkspaceTabsBar = ({
@@ -82,11 +39,27 @@ export const WorkspaceTabsBar = ({
   const createExplorerTab = useWorkspaceTabsStore(
     (state) => state.createExplorerTab,
   );
+
   const isTitlebar = variant === "titlebar";
 
   return (
-    <div className={cn(resolveRootClassName(isTitlebar), className)}>
-      <div className={resolveTabsContainerClassName(isTitlebar)}>
+    <div
+      style={noDragStyle}
+      className={cn(
+        "explorer-chrome-font relative z-20 flex shrink-0 items-end gap-0 overflow-hidden",
+        isTitlebar
+          ? [
+              "h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-2 pt-[5px]",
+              "shadow-[inset_0_-1px_0_rgba(221,220,213,0.72)]",
+            ]
+          : [
+              "h-10 rounded-t-[14px] border border-b-0 border-[#dddcd5]",
+              "bg-[rgba(246,246,244,0.96)] px-2 pt-1",
+            ],
+        className,
+      )}
+    >
+      <div className="flex min-w-0 flex-1 items-end overflow-hidden">
         {tabs.map((tab) => {
           const selected = tab.id === activeTabId;
           const Icon = resolveTabIcon(tab);
@@ -94,15 +67,30 @@ export const WorkspaceTabsBar = ({
           return (
             <div
               key={tab.id}
-              className={resolveTabFrameClassName({ isTitlebar, selected, tab })}
+              className={cn(
+                "group/tab mr-1 flex min-w-0 items-center overflow-hidden border text-[12.5px] transition-colors",
+                isTitlebar ? "h-[34px] rounded-t-[12px]" : "h-8 rounded-t-[8px]",
+                resolveTabWidthClassName(tab),
+                selected
+                  ? [
+                      "border-[#d8d7d1] border-b-white bg-white text-[#24231f]",
+                      "shadow-[0_-1px_0_rgba(255,255,255,0.85)_inset]",
+                    ]
+                  : [
+                      "border-transparent bg-transparent text-[#777671]",
+                      "hover:bg-white/60 hover:text-[#33322f]",
+                    ],
+              )}
             >
               <button
                 type="button"
                 style={noDragStyle}
-                className="flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left outline-none"
+                className={cn(
+                  "flex h-full min-w-0 flex-1 items-center gap-2 text-left outline-none",
+                  isTitlebar ? "px-4" : "px-3",
+                )}
                 aria-current={selected ? "page" : undefined}
                 title={tab.title}
-                onMouseDown={(event) => event.stopPropagation()}
                 onClick={() => selectTab(tab.id)}
               >
                 <Icon
@@ -119,13 +107,12 @@ export const WorkspaceTabsBar = ({
                   type="button"
                   style={noDragStyle}
                   className={cn(
-                    "mr-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-[#aaa9a3] outline-none transition-colors",
+                    "mr-2 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-[#aaa9a3] outline-none transition-colors",
                     "hover:bg-black/10 hover:text-[#55544f]",
                     selected ? "opacity-100" : "opacity-0 group-hover/tab:opacity-100",
                   )}
                   aria-label={`${tab.title} を閉じる`}
                   title="閉じる"
-                  onMouseDown={(event) => event.stopPropagation()}
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
@@ -144,12 +131,11 @@ export const WorkspaceTabsBar = ({
         type="button"
         style={noDragStyle}
         className={cn(
-          "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#8b8a84] outline-none transition-colors hover:bg-black/5 hover:text-[#45443f]",
-          isTitlebar ? "mb-[5px]" : "mb-1",
+          "mb-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md",
+          "text-[#8b8a84] outline-none transition-colors hover:bg-black/5 hover:text-[#45443f]",
         )}
         aria-label="新しいエクスプローラータブを開く"
         title="新しいエクスプローラータブ"
-        onMouseDown={(event) => event.stopPropagation()}
         onClick={() => {
           createExplorerTab();
         }}
