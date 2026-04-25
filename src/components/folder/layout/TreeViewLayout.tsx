@@ -66,6 +66,8 @@ interface TreeViewLayoutProps {
 
 type TreeViewTabContentProps = ComponentProps<typeof TreeViewTabContent>;
 
+const PDF_WORKSPACE_PANEL_GAP_PX = 12;
+
 const TreeViewLayout = ({
   folders,
   isSectionListMode,
@@ -568,6 +570,7 @@ const TreeViewLayout = ({
         preferDirectRootFolderCreate={currentHeaderActionFolderId === null}
         collapseContent={isSidebarContentCollapsed}
         collapsedContent={hasPdfWorkspace ? <PdfThumbnailSidebar /> : null}
+        rightGapPx={hasPdfWorkspace ? PDF_WORKSPACE_PANEL_GAP_PX : 0}
       >
         {sidebarContent}
       </TreeViewSidebar>
@@ -651,9 +654,3 @@ const TreeViewLayout = ({
 };
 
 export default TreeViewLayout;
-
-
-
-
-
-
