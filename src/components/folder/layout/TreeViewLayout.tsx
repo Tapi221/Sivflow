@@ -1,6 +1,11 @@
 import { useToast } from "@/contexts/ToastContext";
 import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/types";
 import { ExplorerSearchSourceBridge } from "@/features/global-search/components/ExplorerSearchSourceBridge";
+import { MfDeckImportDialog } from "@/features/deckFile/presentation/web/MfDeckImportDialog";
+import {
+  ImportFormatDialog,
+  type ImportFormat,
+} from "@/features/import/presentation/web/ImportFormatDialog";
 import { XlsxImportDialog } from "@/features/import/presentation/web/XlsxImportDialog";
 import { useCardCommands } from "@/hooks/card/useCardCommands";
 import { useCardsRead } from "@/hooks/card/useCardsRead";
@@ -103,7 +108,11 @@ const TreeViewLayout = ({
   const [explorerHeaderFolderId, setExplorerHeaderFolderId] = useState<
     string | null
   >(null);
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isImportFormatDialogOpen, setIsImportFormatDialogOpen] =
+    useState(false);
+  const [isXlsxImportDialogOpen, setIsXlsxImportDialogOpen] = useState(false);
+  const [isMfDeckImportDialogOpen, setIsMfDeckImportDialogOpen] =
+    useState(false);
   const createFolderTriggerRef = useRef<(() => void) | null>(null);
   const createCardSetTriggerRef = useRef<
     ((folderId?: string | null) => void) | null
@@ -179,7 +188,7 @@ const TreeViewLayout = ({
   );
 
   const { updateDocument, deleteDocument } = useDocumentCommands();
-  const { tagById } = useTags();
+  const { tagById, addTag } = useTags();
 
   const {
     sidebarRef,
@@ -348,8 +357,25 @@ const TreeViewLayout = ({
       return;
     }
 
-    setIsImportDialogOpen(true);
+    setIsImportFormatDialogOpen(true);
   }, [currentHeaderActionFolderId, toast]);
+
+  const handleImportFormatSelect = useCallback((format: ImportFormat) => {
+    if (format === "mfdeck") {
+      setIsMfDeckImportDialogOpen(true);
+      return;
+    }
+
+    setIsXlsxImportDialogOpen(true);
+  }, []);
+
+  const ensureMfDeckTagByName = useCallback(
+    async (name: string) => {
+      const tag = await addTag(name);
+      return tag.id;
+    },
+    [addTag],
+  );
 
   const handleImportCompleted = useCallback(
     ({
@@ -691,9 +717,15 @@ const TreeViewLayout = ({
         folderSelectionNonce={folderSelectionNonce}
       />
 
+      <ImportFormatDialog
+        open={isImportFormatDialogOpen}
+        onOpenChange={setIsImportFormatDialogOpen}
+        onSelect={handleImportFormatSelect}
+      />
+
       <XlsxImportDialog
-        open={isImportDialogOpen}
-        onOpenChange={setIsImportDialogOpen}
+        open={isXlsxImportDialogOpen}
+        onOpenChange={setIsXlsxImportDialogOpen}
         folderId={currentHeaderActionFolderId}
         folderName={
           currentHeaderActionFolderId
@@ -706,6 +738,25 @@ const TreeViewLayout = ({
         onImported={handleImportCompleted}
         createCardSet={createCardSet}
         createCard={createCard}
+      />
+
+      <MfDeckImportDialog
+        open={isMfDeckImportDialogOpen}
+        onOpenChange={setIsMfDeckImportDialogOpen}
+        folderId={currentHeaderActionFolderId}
+        folderName={
+          currentHeaderActionFolderId
+            ? (folders.find(
+                (folder) => folder.id === currentHeaderActionFolderId,
+              )?.folderName ?? null)
+            : null
+        }
+        cardSets={importTargetCardSets}
+        onImported={handleImportCompleted}
+        createCardSet={createCardSet}
+        updateCardSet={updateCardSet}
+        createCard={createCard}
+        ensureTagByName={ensureMfDeckTagByName}
       />
     </div>
   );

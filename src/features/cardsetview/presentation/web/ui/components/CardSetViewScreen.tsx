@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
+import { ExportMfDeckButton } from "@/features/deckFile/presentation/web/ExportMfDeckButton";
 import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
 import { CardSetViewDesktopContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewDesktopContent";
 import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMetaPanel";
@@ -12,6 +13,7 @@ import { dispatchCardSetViewWindowEvent } from "@/features/cardsetview/presentat
 import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
+import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 
 const CARD_SET_VIEW_CONTENT_COMPONENTS = {
@@ -37,6 +39,7 @@ export const CardSetViewScreen = () => {
     handleChangeCardLayoutMode,
     handleJumpToCard,
   } = controller;
+  const { tagById } = useTags();
 
   const presentationTarget = usePresentationTarget();
 
@@ -135,7 +138,14 @@ export const CardSetViewScreen = () => {
     </>
   );
 
-  const topLeftControl = null;
+  const topLeftControl = data.selectedCardSet ? (
+    <ExportMfDeckButton
+      cardSet={data.selectedCardSet}
+      cards={data.sortedCards}
+      tagById={tagById}
+      disabled={data.isLoading}
+    />
+  ) : null;
 
   return (
     <CardWorkspaceShell
