@@ -1842,13 +1842,35 @@ export const FolderColumnView = ({
                   WebkitBackdropFilter: "blur(8px)",
                 }}
               >
-                <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center opacity-85">
-                  {dragBadge.icon === "folder" ? (
-                    <FolderOutlineIcon className="h-3 w-3" />
-                  ) : dragBadge.icon === "cardSet" ? (
-                    <Layers className="h-3 w-3" />
+                <span className="flex h-4 w-4 shrink-0 items-center justify-center">
+                  {dragBadge.icon === "below" ? (
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 5v14" />
+                      <path d="m6 13 6 6 6-6" />
+                    </svg>
                   ) : (
-                    <FileText className="h-3 w-3" />
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="m13 6 6 6-6 6" />
+                    </svg>
                   )}
                 </span>
                 <span
