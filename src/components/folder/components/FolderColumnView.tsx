@@ -24,6 +24,7 @@ import type {
   SelectedExplorerItem,
 } from "@/types";
 import { ChevronRight, FileText, FolderOutlineIcon, Layers } from "@/ui/icons";
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import {
   useCallback,
   useEffect,
@@ -78,6 +79,38 @@ interface FolderColumnRowProps {
   selected: boolean;
   onSelect: () => void;
 }
+
+const FOLDER_COLUMN_WIDTH_STORAGE_KEY =
+  "manifolia:folder-column-view:column-width";
+const DEFAULT_FOLDER_COLUMN_WIDTH_PX = 280;
+const MIN_FOLDER_COLUMN_WIDTH_PX = 180;
+const MAX_FOLDER_COLUMN_WIDTH_PX = 520;
+
+const clampFolderColumnWidth = (width: number) => {
+  if (!Number.isFinite(width)) return DEFAULT_FOLDER_COLUMN_WIDTH_PX;
+
+  return Math.min(
+    Math.max(Math.round(width), MIN_FOLDER_COLUMN_WIDTH_PX),
+    MAX_FOLDER_COLUMN_WIDTH_PX,
+  );
+};
+
+const readStoredFolderColumnWidth = () => {
+  if (typeof window === "undefined") {
+    return DEFAULT_FOLDER_COLUMN_WIDTH_PX;
+  }
+
+  const storedWidth = window.localStorage.getItem(
+    FOLDER_COLUMN_WIDTH_STORAGE_KEY,
+  );
+  const parsedWidth = Number.parseInt(storedWidth ?? "", 10);
+
+  if (!Number.isFinite(parsedWidth)) {
+    return DEFAULT_FOLDER_COLUMN_WIDTH_PX;
+  }
+
+  return clampFolderColumnWidth(parsedWidth);
+};
 
 const getFolderDisplayName = (folder: FolderTreeNode) => {
   return (
@@ -207,7 +240,20 @@ export const FolderColumnView = ({
   className,
 }: FolderColumnViewProps) => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const columnResizeStateRef = useRef<{
+    startX: number;
+    startWidth: number;
+  } | null>(null);
+  const pendingColumnWidthRef = useRef(readStoredFolderColumnWidth());
+  const resizeAnimationFrameRef = useRef<number | null>(null);
+  const previousBodyUserSelectRef = useRef("");
+  const previousBodyCursorRef = useRef("");
+
   const [columnFolderPath, setColumnFolderPath] = useState<string[]>([]);
+  const [columnWidthPx, setColumnWidthPx] = useState(
+    readStoredFolderColumnWidth,
+  );
+  const [isColumnResizing, setIsColumnResizing] = useState(false);
 
   const derived = useExplorerDerivedData({
     treeFolders: folders,
@@ -269,6 +315,159 @@ export const FolderColumnView = ({
     },
     [parentFolderIdById, visibleFolderIdSet],
   );
+
+  const columnViewStyle = useMemo(
+    () =>
+      ({
+        "--folder-column-width-px": `${columnWidthPx}px`,
+      }) as CSSProperties,
+    [columnWidthPx],
+  );
+
+  const columnStyle = useMemo(
+    () =>
+      ({
+        width: "var(--folder-column-width-px)",
+        minWidth: "var(--folder-column-width-px)",
+      }) satisfies CSSProperties,
+    [],
+  );
+
+  const applyColumnWidthToDom = useCallback((width: number) => {
+    const nextWidth = clampFolderColumnWidth(width);
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    scroller.style.setProperty("--folder-column-width-px", `${nextWidth}px`);
+  }, []);
+
+  const scheduleColumnWidthApply = useCallback(
+    (width: number) => {
+      pendingColumnWidthRef.current = clampFolderColumnWidth(width);
+
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      if (resizeAnimationFrameRef.current !== null) {
+        return;
+      }
+
+      resizeAnimationFrameRef.current = window.requestAnimationFrame(() => {
+        resizeAnimationFrameRef.current = null;
+        applyColumnWidthToDom(pendingColumnWidthRef.current);
+      });
+    },
+    [applyColumnWidthToDom],
+  );
+
+  const restoreBodyResizeStyles = useCallback(() => {
+    if (typeof document === "undefined") return;
+
+    document.body.style.userSelect = previousBodyUserSelectRef.current;
+    document.body.style.cursor = previousBodyCursorRef.current;
+
+    previousBodyUserSelectRef.current = "";
+    previousBodyCursorRef.current = "";
+  }, []);
+
+  const handleColumnResizeEnd = useCallback(() => {
+    if (!columnResizeStateRef.current) return;
+
+    columnResizeStateRef.current = null;
+    setIsColumnResizing(false);
+
+    if (
+      typeof window !== "undefined" &&
+      resizeAnimationFrameRef.current !== null
+    ) {
+      window.cancelAnimationFrame(resizeAnimationFrameRef.current);
+      resizeAnimationFrameRef.current = null;
+    }
+
+    const nextWidth = clampFolderColumnWidth(pendingColumnWidthRef.current);
+    applyColumnWidthToDom(nextWidth);
+    setColumnWidthPx(nextWidth);
+
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(
+        FOLDER_COLUMN_WIDTH_STORAGE_KEY,
+        String(nextWidth),
+      );
+    }
+
+    restoreBodyResizeStyles();
+  }, [applyColumnWidthToDom, restoreBodyResizeStyles]);
+
+  const handleColumnResizeMove = useCallback(
+    (event: PointerEvent) => {
+      const resizeState = columnResizeStateRef.current;
+      if (!resizeState) return;
+
+      event.preventDefault();
+
+      const deltaX = event.clientX - resizeState.startX;
+      scheduleColumnWidthApply(resizeState.startWidth + deltaX);
+    },
+    [scheduleColumnWidthApply],
+  );
+
+  const handleColumnResizeStart = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const currentWidth = pendingColumnWidthRef.current || columnWidthPx;
+
+      columnResizeStateRef.current = {
+        startX: event.clientX,
+        startWidth: currentWidth,
+      };
+      pendingColumnWidthRef.current = currentWidth;
+      setIsColumnResizing(true);
+      applyColumnWidthToDom(currentWidth);
+
+      if (typeof document !== "undefined") {
+        previousBodyUserSelectRef.current = document.body.style.userSelect;
+        previousBodyCursorRef.current = document.body.style.cursor;
+        document.body.style.userSelect = "none";
+        document.body.style.cursor = "col-resize";
+      }
+    },
+    [applyColumnWidthToDom, columnWidthPx],
+  );
+
+  useEffect(() => {
+    if (!isColumnResizing) return;
+
+    window.addEventListener("pointermove", handleColumnResizeMove, {
+      passive: false,
+    });
+    window.addEventListener("pointerup", handleColumnResizeEnd);
+    window.addEventListener("pointercancel", handleColumnResizeEnd);
+
+    return () => {
+      window.removeEventListener("pointermove", handleColumnResizeMove);
+      window.removeEventListener("pointerup", handleColumnResizeEnd);
+      window.removeEventListener("pointercancel", handleColumnResizeEnd);
+    };
+  }, [handleColumnResizeEnd, handleColumnResizeMove, isColumnResizing]);
+
+  useEffect(() => {
+    return () => {
+      if (
+        typeof window !== "undefined" &&
+        resizeAnimationFrameRef.current !== null
+      ) {
+        window.cancelAnimationFrame(resizeAnimationFrameRef.current);
+      }
+
+      if (columnResizeStateRef.current) {
+        columnResizeStateRef.current = null;
+        restoreBodyResizeStyles();
+      }
+    };
+  }, [restoreBodyResizeStyles]);
 
   useEffect(() => {
     if (!selectedFolderId || !visibleFolderIdSet.has(selectedFolderId)) return;
@@ -432,8 +631,10 @@ export const FolderColumnView = ({
   return (
     <div
       ref={scrollerRef}
+      style={columnViewStyle}
       className={cn(
         "folder-column-view h-full min-h-0 w-full overflow-x-auto overflow-y-hidden",
+        isColumnResizing && "cursor-col-resize select-none",
         className,
       )}
     >
@@ -441,14 +642,24 @@ export const FolderColumnView = ({
         {columns.map((column, columnIndex) => (
           <section
             key={`${column.id}:${columnIndex}`}
+            style={columnStyle}
             className={cn(
-              "h-full min-h-0 w-[280px] shrink-0 overflow-hidden border-r border-[#e7e5df]",
+              "relative h-full min-h-0 shrink-0 overflow-hidden border-r border-[#e7e5df]",
               columnIndex === columns.length - 1 && "border-r-0",
             )}
             aria-label={
               column.parentFolderId ? "フォルダ内の項目" : "ルートフォルダ"
             }
           >
+            <div
+              role="separator"
+              aria-label="カラム幅を変更"
+              aria-orientation="vertical"
+              className="absolute right-[-4px] top-0 z-20 h-full w-2 cursor-col-resize bg-transparent hover:bg-[#d9d7d0]"
+              style={{ touchAction: "none" }}
+              onPointerDown={handleColumnResizeStart}
+            />
+
             <div className="h-full min-h-0 overflow-y-auto px-1 py-1">
               {column.entries.length > 0 ? (
                 column.entries.map((entry) => (
