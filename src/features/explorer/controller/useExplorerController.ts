@@ -54,24 +54,28 @@ export const useExplorerController = ({
     dispatch({ type: "INCREMENT_SECTION_LIST_TOKEN" });
   }, []);
 
+  const actions = useMemo(
+    () => ({
+      selectFolder,
+      selectItem,
+      applyRouteState,
+      setBreadcrumbContext,
+      navigateToSectionList,
+    }),
+    [
+      selectFolder,
+      selectItem,
+      applyRouteState,
+      setBreadcrumbContext,
+      navigateToSectionList,
+    ],
+  );
+
   return useMemo(
     () => ({
       state,
-      actions: {
-        selectFolder,
-        selectItem,
-        applyRouteState,
-        setBreadcrumbContext,
-        navigateToSectionList,
-      },
+      actions,
     }),
-    [
-      applyRouteState,
-      navigateToSectionList,
-      selectFolder,
-      selectItem,
-      setBreadcrumbContext,
-      state,
-    ],
+    [state, actions],
   );
 };

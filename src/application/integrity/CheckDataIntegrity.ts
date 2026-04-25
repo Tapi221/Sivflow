@@ -8,6 +8,8 @@ import type {
 } from "@/services/dataIntegrityTypes";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 import { normalizeDate } from "@/shared/codec/date";
+import type { Card } from "@/types/domain/card";
+import type { Folder } from "@/types/domain/folder";
 
 const TIMESTAMP_KEYS = [
   "createdAt",
@@ -29,21 +31,33 @@ const readDeletedState = (entity: Record<string, unknown>): boolean => {
   return Boolean(entity.isDeleted ?? entity.is_deleted ?? entity.deleted);
 };
 
+const toRecord = (value: unknown): Record<string, unknown> => {
+  return value !== null && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : {};
+};
+
 export const createCheckDataIntegrityUseCase = () => {
   const execute = async (): Promise<IntegrityReport> => {
     const issues: IntegrityIssue[] = [];
 
     try {
       const db = await getLocalDb();
-      const allCards = await db.getAllCards();
-      const allFolders = await db.getAllFolders();
 
-      const cards = allCards.map(normalizeCard);
-      const folders = allFolders.map(normalizeFolder);
+      const [allCards, allFolders] = await Promise.all([
+        db.getAllItems("cards"),
+        db.getAllItems("folders"),
+      ]);
+
+      const cards: Card[] = allCards.map((card) => normalizeCard(card));
+      const folders: Folder[] = allFolders.map((folder) =>
+        normalizeFolder(folder),
+      );
+
       const folderIds = new Set(folders.map((folder) => folder.id));
 
-      for (const card of cards as unknown[]) {
-        const candidate = card as Record<string, unknown>;
+      for (const card of cards) {
+        const candidate = toRecord(card);
         const deletedAtExists = candidate.deletedAt != null;
         const isDeleted = readDeletedState(candidate);
 
@@ -108,7 +122,7 @@ export const createCheckDataIntegrityUseCase = () => {
         const backBlocks = getCardBlocks(card, "answer");
         const blocks = [...frontBlocks, ...backBlocks];
 
-        if (blocks.some((block) => typeof block?.orderIndex !== "number")) {
+        if (blocks.some((block) => typeof block.orderIndex !== "number")) {
           issues.push({
             code: "BLOCK_ORDER_INDEX_MISSING",
             entityType: "card",
@@ -123,8 +137,8 @@ export const createCheckDataIntegrityUseCase = () => {
         void getCardText(card, "answer");
       }
 
-      for (const folder of folders as unknown[]) {
-        const candidate = folder as Record<string, unknown>;
+      for (const folder of folders) {
+        const candidate = toRecord(folder);
 
         if (!candidate.folderName && !candidate.folder_name) {
           issues.push({
