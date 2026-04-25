@@ -1,11 +1,23 @@
 {
+  "name": "flashcard-master-top-tabs-fix",
   "repository": "akari221/FlashCard-Master",
-  "base_ref": "7b5e7748cfd58a04bc70579f5421803a7e7a3569",
-  "description": "Overwrite-ready final implementation for root direct-folder-create behavior and breadcrumb context guard.",
+  "target_branch_seen": "main",
   "files": [
     {
-      "path": "src/components/folder/layout/TreeViewLayout.tsx",
-      "sha256": "1c82785cc8bc71613c8e3a512c56a06ad7b2c44fcad02ffce39932045a14766c"
+      "path": "src/features/workspace-tabs/components/WorkspaceTabsBar.tsx",
+      "mode": "replace"
+    },
+    {
+      "path": "src/layout/TitleBar.tsx",
+      "mode": "scripted-patch"
+    },
+    {
+      "path": "src/features/explorer/screens/FoldersScreen.tsx",
+      "mode": "scripted-patch"
     }
+  ],
+  "verification_commands": [
+    "npm run typecheck",
+    "npm run build"
   ]
 }

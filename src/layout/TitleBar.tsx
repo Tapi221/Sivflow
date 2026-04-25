@@ -14,6 +14,7 @@ import {
 } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useCalendarDockPanelStore } from "@/features/calendar/store/useCalendarDockPanelStore";
+import { WorkspaceTabsBar } from "@/features/workspace-tabs/components/WorkspaceTabsBar";
 import { useHasDesktopBridge } from "@/hooks/platform/useHasDesktopBridge";
 import { cn } from "@/lib/utils";
 import { windowControls } from "@/platform/capabilities/windowControls";
@@ -664,6 +665,7 @@ export const TitleBar: React.FC = () => {
   );
   const extraCrumbs = useBreadcrumbExtraCrumbs();
   const isCardSetViewPage = pathname.toLowerCase().startsWith("/cardsetview");
+  const isFoldersPage = pathname.toLowerCase().startsWith("/folders");
   const shouldShowBrandLabel = APP_CHROME.desktopTitleBar.showBrandLabel;
 
   useEffect(() => {
@@ -721,31 +723,45 @@ export const TitleBar: React.FC = () => {
     >
       <div
         className={cn(
-          "flex h-full min-w-0 items-center pl-2 pr-3",
-          shouldShowBrandLabel && "gap-2",
+          "flex h-full min-w-0 flex-1 items-center pl-2 pr-3",
+          shouldShowBrandLabel && !isFoldersPage && "gap-2",
         )}
-        style={noDragStyle}
+        style={isFoldersPage ? undefined : noDragStyle}
       >
-        <TitleBarPrimaryActions noDragStyle={noDragStyle} />
+        {isFoldersPage ? (
+          <WorkspaceTabsBar
+            variant="titlebar"
+            noDragStyle={noDragStyle}
+            className="max-w-[760px]"
+          />
+        ) : (
+          <>
+            <TitleBarPrimaryActions noDragStyle={noDragStyle} />
 
-        {shouldShowBrandLabel ? (
-          <span className="titlebar-text-strong shrink-0 text-xs font-semibold tracking-wide">
-            {APP_CHROME.brandLabel}
-          </span>
-        ) : null}
+            {shouldShowBrandLabel ? (
+              <span className="titlebar-text-strong shrink-0 text-xs font-semibold tracking-wide">
+                {APP_CHROME.brandLabel}
+              </span>
+            ) : null}
 
-        <TitleBarBreadcrumbs
-          pathname={pathname}
-          baseCrumbs={baseCrumbs}
-          extraCrumbs={extraCrumbs}
-          noDragStyle={noDragStyle}
-        />
+            <TitleBarBreadcrumbs
+              pathname={pathname}
+              baseCrumbs={baseCrumbs}
+              extraCrumbs={extraCrumbs}
+              noDragStyle={noDragStyle}
+            />
+          </>
+        )}
       </div>
 
       <div
         className="titlebar-text flex h-full items-center"
         style={noDragStyle}
       >
+        {isFoldersPage ? (
+          <TitleBarPrimaryActions noDragStyle={noDragStyle} />
+        ) : null}
+
         {isCardSetViewPage && (
           <>
             {isCardSetViewEditing && (

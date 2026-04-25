@@ -425,7 +425,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
         !route.isDesktop && "overflow-x-hidden overflow-y-auto",
       )}
     >
-      <WorkspaceTabsBar />
+      {route.isDesktop ? null : <WorkspaceTabsBar />}
 
       <div className="relative z-10 flex min-h-0 w-full min-w-0 flex-1 overflow-hidden">
         {workspaceContent}
