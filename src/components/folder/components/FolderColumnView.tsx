@@ -68,7 +68,7 @@ interface FolderColumnViewProps {
   selectedItem: SelectedExplorerItem;
   selectedCardSetId?: string | null;
   isFiltering?: boolean;
-  onFolderSelect: (folderId: string | null) => void;
+  resetToken?: number;
   onItemSelect: (item: SelectedExplorerItem) => void;
   className?: string;
 }
@@ -111,6 +111,11 @@ const hasSelectedItemId = (
   item: SelectedExplorerItem,
 ): item is Extract<SelectedExplorerItem, { id: string }> => {
   return item !== null && "id" in item;
+};
+
+const areSameFolderPaths = (left: string[], right: string[]) => {
+  if (left.length !== right.length) return false;
+  return left.every((folderId, index) => folderId === right[index]);
 };
 
 const FolderColumnRow = ({
@@ -197,7 +202,7 @@ export const FolderColumnView = ({
   selectedItem,
   selectedCardSetId = null,
   isFiltering = false,
-  onFolderSelect,
+  resetToken = 0,
   onItemSelect,
   className,
 }: FolderColumnViewProps) => {
@@ -266,8 +271,17 @@ export const FolderColumnView = ({
   );
 
   useEffect(() => {
-    setColumnFolderPath(buildFolderPath(selectedFolderId));
-  }, [buildFolderPath, selectedFolderId]);
+    if (!selectedFolderId || !visibleFolderIdSet.has(selectedFolderId)) return;
+
+    const nextPath = buildFolderPath(selectedFolderId);
+    setColumnFolderPath((previousPath) =>
+      areSameFolderPaths(previousPath, nextPath) ? previousPath : nextPath,
+    );
+  }, [buildFolderPath, selectedFolderId, visibleFolderIdSet]);
+
+  useEffect(() => {
+    setColumnFolderPath([]);
+  }, [resetToken]);
 
   useEffect(() => {
     const scroller = scrollerRef.current;
@@ -368,13 +382,12 @@ export const FolderColumnView = ({
 
   const handleFolderEntrySelect = useCallback(
     (folderId: string, columnIndex: number) => {
-      setColumnFolderPath((previousPath) => [
-        ...previousPath.slice(0, columnIndex),
-        folderId,
-      ]);
-      onFolderSelect(folderId);
+      setColumnFolderPath((previousPath) => {
+        const nextPath = [...previousPath.slice(0, columnIndex), folderId];
+        return areSameFolderPaths(previousPath, nextPath) ? previousPath : nextPath;
+      });
     },
-    [onFolderSelect],
+    [],
   );
 
   const handleEntrySelect = useCallback(

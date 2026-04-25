@@ -23,7 +23,7 @@ interface SectionListColumnPaneProps {
   selectedItem: SelectedExplorerItem;
   selectedCardSetId?: string | null;
   isFiltering?: boolean;
-  onFolderSelect: (folderId: string | null) => void;
+  resetToken?: number;
   onItemSelect: (item: SelectedExplorerItem) => void;
 }
 
@@ -44,7 +44,7 @@ export const SectionListColumnPane = ({
   selectedItem,
   selectedCardSetId = null,
   isFiltering = false,
-  onFolderSelect,
+  resetToken = 0,
   onItemSelect,
 }: SectionListColumnPaneProps) => {
   return (
@@ -65,7 +65,7 @@ export const SectionListColumnPane = ({
         selectedItem={selectedItem}
         selectedCardSetId={selectedCardSetId}
         isFiltering={isFiltering}
-        onFolderSelect={onFolderSelect}
+        resetToken={resetToken}
         onItemSelect={onItemSelect}
       />
     </SectionListBlankPane>
