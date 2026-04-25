@@ -1,6 +1,7 @@
 import { useToast } from "@/contexts/ToastContext";
 import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/types";
 import { ExplorerSearchSourceBridge } from "@/features/global-search/components/ExplorerSearchSourceBridge";
+import { MfCardImportDialog } from "@/features/cardFile/presentation/web/MfCardImportDialog";
 import { MfDeckImportDialog } from "@/features/deckFile/presentation/web/MfDeckImportDialog";
 import {
   ImportFormatDialog,
@@ -112,6 +113,8 @@ const TreeViewLayout = ({
     useState(false);
   const [isXlsxImportDialogOpen, setIsXlsxImportDialogOpen] = useState(false);
   const [isMfDeckImportDialogOpen, setIsMfDeckImportDialogOpen] =
+    useState(false);
+  const [isMfCardImportDialogOpen, setIsMfCardImportDialogOpen] =
     useState(false);
   const createFolderTriggerRef = useRef<(() => void) | null>(null);
   const createCardSetTriggerRef = useRef<
@@ -363,6 +366,11 @@ const TreeViewLayout = ({
   const handleImportFormatSelect = useCallback((format: ImportFormat) => {
     if (format === "mfdeck") {
       setIsMfDeckImportDialogOpen(true);
+      return;
+    }
+
+    if (format === "mfcard") {
+      setIsMfCardImportDialogOpen(true);
       return;
     }
 
@@ -743,6 +751,25 @@ const TreeViewLayout = ({
       <MfDeckImportDialog
         open={isMfDeckImportDialogOpen}
         onOpenChange={setIsMfDeckImportDialogOpen}
+        folderId={currentHeaderActionFolderId}
+        folderName={
+          currentHeaderActionFolderId
+            ? (folders.find(
+                (folder) => folder.id === currentHeaderActionFolderId,
+              )?.folderName ?? null)
+            : null
+        }
+        cardSets={importTargetCardSets}
+        onImported={handleImportCompleted}
+        createCardSet={createCardSet}
+        updateCardSet={updateCardSet}
+        createCard={createCard}
+        ensureTagByName={ensureMfDeckTagByName}
+      />
+
+      <MfCardImportDialog
+        open={isMfCardImportDialogOpen}
+        onOpenChange={setIsMfCardImportDialogOpen}
         folderId={currentHeaderActionFolderId}
         folderName={
           currentHeaderActionFolderId
