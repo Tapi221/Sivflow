@@ -1,8 +1,7 @@
 import { useMemo, useRef, useState } from "react";
-import { Plus } from "@/ui/icons";
+
 import { UiIcon } from "@/ui/UiIcon";
 import type { UiIconProps } from "@/ui/UiIcon";
-import { TagFilterPopover } from "./TagFilterPopover";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -26,49 +25,30 @@ interface ExplorerSidebarHeaderProps {
   preferDirectRootFolderCreate?: boolean;
 }
 
-const BookmarkIcon = ({ size = 16, ...props }: UiIconProps) => (
-  <UiIcon size={size} strokeWidth={1.7} {...props}>
-    <path d="M7 4.75h10a1 1 0 0 1 1 1V20l-6-3.5L6 20V5.75a1 1 0 0 1 1-1Z" />
+const MoreHorizontalIcon = ({ size = 16, ...props }: UiIconProps) => (
+  <UiIcon size={size} strokeWidth={1.8} {...props}>
+    <circle cx="6" cy="12" r="1" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
+    <circle cx="18" cy="12" r="1" fill="currentColor" stroke="none" />
   </UiIcon>
 );
 
-const OutlineIcon = ({ size = 16, ...props }: UiIconProps) => (
+const PinIcon = ({ size = 16, ...props }: UiIconProps) => (
   <UiIcon size={size} strokeWidth={1.7} {...props}>
-    <circle cx="5" cy="7" r="1" fill="currentColor" stroke="none" />
-    <circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" />
-    <circle cx="5" cy="17" r="1" fill="currentColor" stroke="none" />
-    <path d="M9 7h10" />
-    <path d="M9 12h10" />
-    <path d="M9 17h10" />
+    <path d="M9.25 4.75h5.5" />
+    <path d="M10.25 4.75v5.5l-2.5 2.5v1.5h8.5v-1.5l-2.5-2.5v-5.5" />
+    <path d="M12 14.25v5" />
   </UiIcon>
 );
 
-const SettingsIcon = ({ size = 16, ...props }: UiIconProps) => (
-  <UiIcon size={size} strokeWidth={1.7} {...props}>
-    <path d="M12 15.25a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5Z" />
-    <path
-      d={[
-        "M19.43 12.98a7.95 7.95 0 0 0 .05-.98 7.95 7.95 0 0 0-.05-.98",
-        "l2.02-1.58-1.92-3.32-2.38.96a7.5 7.5 0 0 0-1.7-.98L15.08 3.5h-3.84",
-        "l-.37 2.6a7.5 7.5 0 0 0-1.7.98l-2.38-.96-1.92 3.32 2.02 1.58",
-        "a7.95 7.95 0 0 0-.05.98c0 .33.02.66.05.98l-2.02 1.58 1.92 3.32 2.38-.96",
-        "c.52.4 1.09.73 1.7.98l.37 2.6h3.84l.37-2.6a7.5 7.5 0 0 0 1.7-.98",
-        "l2.38.96 1.92-3.32-2.02-1.58Z",
-      ].join(" ")}
-    />
-  </UiIcon>
-);
-
-const iconButtonClassName =
+const headerIconButtonClassName =
   "inline-flex h-7 w-7 items-center justify-center rounded-lg border-0 bg-transparent text-[rgba(107,114,128,0.92)] transition-colors hover:bg-[#f9fafb] hover:text-[#4b5563]";
 
-const passiveIconClassName =
+const passiveHeaderIconClassName =
   "inline-flex h-7 w-7 items-center justify-center rounded-lg border-0 bg-transparent text-[rgba(107,114,128,0.92)]";
 
 export const ExplorerSidebarHeader = ({
   allTags,
-  onOpenBookmarks,
-  onOpenOutline,
   onCreateRootFolder,
   onCreateCardSet,
   onCreateCard,
@@ -117,47 +97,34 @@ export const ExplorerSidebarHeader = ({
     !canAddDocuments &&
     !canBulkImport;
 
+  const hasCreateActions = createMenuActions.length > 0;
+
   return (
     <div
-      className="flex items-center justify-end px-2.5 pt-1.5 pb-1"
-      style={{ minHeight: 34 }}
+      className="flex items-center justify-between gap-3 px-5 pb-2 pt-4"
+      style={{ minHeight: 52 }}
     >
+      <div className="min-w-0 flex-1">
+        <div
+          className="truncate text-[15px] font-semibold tracking-[0.01em] text-[#3f3e39]"
+          title="エクスプローラー"
+        >
+          エクスプローラー
+        </div>
+      </div>
+
       <div className="flex shrink-0 items-center gap-1">
-        <button
-          type="button"
-          title="ブックマーク"
-          aria-label="ブックマークを開く"
-          className={iconButtonClassName}
-          onClick={() => {
-            void onOpenBookmarks?.();
-          }}
-        >
-          <BookmarkIcon className="h-3.5 w-3.5" />
-        </button>
-
-        <button
-          type="button"
-          title="アウトライン"
-          aria-label="アウトラインを開く"
-          className={iconButtonClassName}
-          onClick={() => {
-            void onOpenOutline?.();
-          }}
-        >
-          <OutlineIcon className="h-3.5 w-3.5" />
-        </button>
-
         {shouldUseDirectRootFolderCreate ? (
           <button
             type="button"
             title="新規フォルダを追加"
             aria-label="新規フォルダを追加"
-            className={iconButtonClassName}
+            className={headerIconButtonClassName}
             onClick={() => {
               void onCreateRootFolder?.();
             }}
           >
-            <Plus className="h-3.5 w-3.5" />
+            <MoreHorizontalIcon className="h-3.5 w-3.5" />
           </button>
         ) : (
           <DropdownMenu
@@ -170,14 +137,15 @@ export const ExplorerSidebarHeader = ({
               }
             }}
           >
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild disabled={!hasCreateActions}>
               <button
                 type="button"
-                title="追加"
-                aria-label="追加メニューを開く"
-                className={iconButtonClassName}
+                title="メニュー"
+                aria-label="エクスプローラーのメニューを開く"
+                className={headerIconButtonClassName}
+                disabled={!hasCreateActions}
               >
-                <Plus className="h-3.5 w-3.5" />
+                <MoreHorizontalIcon className="h-3.5 w-3.5" />
               </button>
             </DropdownMenuTrigger>
 
@@ -198,13 +166,12 @@ export const ExplorerSidebarHeader = ({
           </DropdownMenu>
         )}
 
-        <TagFilterPopover
-          allTags={allTags}
-          className="h-7 w-7 rounded-lg border-0 bg-transparent text-[#888780] transition-colors hover:bg-[#f9fafb] hover:text-[#888780]"
-        />
-
-        <span title="設定" aria-label="設定" className={passiveIconClassName}>
-          <SettingsIcon className="h-3.5 w-3.5" />
+        <span
+          title="ピン留め"
+          aria-label="ピン留め"
+          className={passiveHeaderIconClassName}
+        >
+          <PinIcon className="h-3.5 w-3.5" />
         </span>
       </div>
     </div>
