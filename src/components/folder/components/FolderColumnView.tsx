@@ -374,13 +374,13 @@ const FolderColumnRow = ({
       {dropPosition === "before" ? (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute left-1 right-1 top-0 z-20 h-px bg-[#8f8a82]"
+          className="pointer-events-none absolute left-0 right-0 top-[-1px] z-50 h-[2px] bg-[#7f7a72] shadow-[0_0_0_1px_rgba(127,122,114,0.18)]"
         />
       ) : null}
       {dropPosition === "after" ? (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute bottom-0 left-1 right-1 z-20 h-px bg-[#8f8a82]"
+          className="pointer-events-none absolute bottom-[-1px] left-0 right-0 z-50 h-[2px] bg-[#7f7a72] shadow-[0_0_0_1px_rgba(127,122,114,0.18)]"
         />
       ) : null}
 
@@ -690,8 +690,8 @@ export const FolderColumnView = ({
       const rect = event.currentTarget.getBoundingClientRect();
       const ratio = rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
 
-      if (ratio < 0.28) return "before";
-      if (ratio > 0.72) return "after";
+      if (ratio < 0.42) return "before";
+      if (ratio > 0.58) return "after";
 
       return entry.kind === "folder" || entry.kind === "cardSet"
         ? "inside"
@@ -1000,6 +1000,13 @@ export const FolderColumnView = ({
     },
     [clearDropState],
   );
+
+  const handleRowDragLeave = useCallback(() => {
+    // HTML5 dragleave often reports relatedTarget as null while moving across
+    // text/icon children inside the same row. Clearing here makes the insertion
+    // guide flicker or disappear, so rows keep the last active intent until the
+    // column changes it, the drop completes, or dragend fires.
+  }, []);
 
   const handleDropOnIntent = useCallback(
     async (
@@ -1531,7 +1538,7 @@ export const FolderColumnView = ({
                             event,
                           );
                         }}
-                        onDragLeave={handleDropTargetDragLeave}
+                        onDragLeave={handleRowDragLeave}
                         onDrop={(event) => {
                           handleDropOnIntent(
                             activeDropIntent?.columnId === column.id
