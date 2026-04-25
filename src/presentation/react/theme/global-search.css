@@ -126,7 +126,7 @@
 
   .gs-row[data-selected="true"] {
     background: var(
-      --sidebar-active-bg,
+      --sidebar-hover-bg,
       var(--ds-semantic-color-background-sidebar-active)
     );
     color: var(--sidebar-text, var(--ds-semantic-color-text-primary));
