@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
+import { ExportMfCardButton } from "@/features/cardFile/presentation/web/ExportMfCardButton";
 import { ExportMfDeckButton } from "@/features/deckFile/presentation/web/ExportMfDeckButton";
 import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
 import { CardSetViewDesktopContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewDesktopContent";
@@ -139,12 +140,19 @@ export const CardSetViewScreen = () => {
   );
 
   const topLeftControl = data.selectedCardSet ? (
-    <ExportMfDeckButton
-      cardSet={data.selectedCardSet}
-      cards={data.sortedCards}
-      tagById={tagById}
-      disabled={data.isLoading}
-    />
+    <div className="flex flex-wrap items-center gap-2">
+      <ExportMfDeckButton
+        cardSet={data.selectedCardSet}
+        cards={data.sortedCards}
+        tagById={tagById}
+        disabled={data.isLoading}
+      />
+      <ExportMfCardButton
+        card={state.selectedCard}
+        tagById={tagById}
+        disabled={data.isLoading}
+      />
+    </div>
   ) : null;
 
   return (
