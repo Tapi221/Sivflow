@@ -1,4 +1,10 @@
-import { type CSSProperties, useEffect, useMemo, useState } from "react";
+import {
+  type CSSProperties,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
@@ -177,6 +183,8 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     selectedItem: controller.state.selectedItem,
   });
 
+  const lastRestoredExplorerTabIdRef = useRef<string | null>(null);
+
   const currentExplorerRouteState = useMemo<ExplorerRouteState>(
     () => ({
       isHomeOnlyMode: controller.state.isHomeOnlyMode,
@@ -211,7 +219,16 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   });
 
   useEffect(() => {
-    if (!activeExplorerState) return;
+    if (!activeExplorerTabId || !activeExplorerState) {
+      lastRestoredExplorerTabIdRef.current = null;
+      return;
+    }
+
+    if (lastRestoredExplorerTabIdRef.current === activeExplorerTabId) {
+      return;
+    }
+
+    lastRestoredExplorerTabIdRef.current = activeExplorerTabId;
 
     const normalizedActiveExplorerState =
       normalizeExplorerRouteState(activeExplorerState);
@@ -227,6 +244,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
 
     controller.actions.applyRouteState(normalizedActiveExplorerState);
   }, [
+    activeExplorerTabId,
     activeExplorerState,
     currentExplorerRouteState,
     controller.actions.applyRouteState,
