@@ -1,10 +1,4 @@
-import {
-  type CSSProperties,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, useEffect, useMemo, useState } from "react";
 
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
@@ -18,7 +12,6 @@ import { useExplorerController } from "@/features/explorer/controller/useExplore
 import { useExplorerBreadcrumbSync } from "@/features/explorer/hooks/useExplorerBreadcrumbSync";
 import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups";
 import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
-import { isSameSelectedExplorerItem } from "@/features/explorer/utils/isSameSelectedExplorerItem";
 import { WorkspaceTabPanel } from "@/features/workspace-tabs/components/WorkspaceTabPanel";
 import { WorkspaceTabsBar } from "@/features/workspace-tabs/components/WorkspaceTabsBar";
 import type { WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
@@ -39,11 +32,18 @@ type FoldersScreenProps = {
   route: FoldersRouteAdapter;
 };
 
+const WORKSPACE_TABS_HEIGHT_PX = 40;
+
+type FoldersScreenStyle = CSSProperties & {
+  "--workspace-tabs-offset-y": string;
+};
+
 const FOLDERS_SCREEN_FILL_STYLE = {
   width:
     "calc(100dvw - var(--app-layout-padding-x, 12px) - var(--app-layout-padding-x, 12px))",
   maxWidth: "none",
-} satisfies CSSProperties;
+  "--workspace-tabs-offset-y": `${WORKSPACE_TABS_HEIGHT_PX}px`,
+} satisfies FoldersScreenStyle;
 
 const resolveSelectedCardId = (selectedItem: SelectedExplorerItem) => {
   if (selectedItem?.type !== "card") {
@@ -70,44 +70,6 @@ const resolveActiveTab = (
   activeTabId: WorkspaceTab["id"],
 ): WorkspaceTab | null => {
   return tabs.find((tab) => tab.id === activeTabId) ?? tabs[0] ?? null;
-};
-
-const normalizeExplorerRouteState = (
-  routeState: ExplorerRouteState,
-): ExplorerRouteState => {
-  const shouldClearSelection =
-    routeState.isHomeOnlyMode || routeState.isSectionListMode;
-
-  if (
-    !shouldClearSelection ||
-    (routeState.selectedFolderId === null && routeState.selectedItem === null)
-  ) {
-    return routeState;
-  }
-
-  return {
-    ...routeState,
-    selectedFolderId: null,
-    selectedItem: null,
-  };
-};
-
-const areExplorerRouteStatesEqual = (
-  left: ExplorerRouteState,
-  right: ExplorerRouteState,
-): boolean => {
-  const normalizedLeft = normalizeExplorerRouteState(left);
-  const normalizedRight = normalizeExplorerRouteState(right);
-
-  return (
-    normalizedLeft.isHomeOnlyMode === normalizedRight.isHomeOnlyMode &&
-    normalizedLeft.isSectionListMode === normalizedRight.isSectionListMode &&
-    normalizedLeft.selectedFolderId === normalizedRight.selectedFolderId &&
-    isSameSelectedExplorerItem(
-      normalizedLeft.selectedItem,
-      normalizedRight.selectedItem,
-    )
-  );
 };
 
 export const FoldersScreen = ({ route }: FoldersScreenProps) => {
@@ -183,8 +145,6 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     selectedItem: controller.state.selectedItem,
   });
 
-  const lastRestoredExplorerTabIdRef = useRef<string | null>(null);
-
   const currentExplorerRouteState = useMemo<ExplorerRouteState>(
     () => ({
       isHomeOnlyMode: controller.state.isHomeOnlyMode,
@@ -219,36 +179,10 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   });
 
   useEffect(() => {
-    if (!activeExplorerTabId || !activeExplorerState) {
-      lastRestoredExplorerTabIdRef.current = null;
-      return;
-    }
+    if (!activeExplorerState) return;
 
-    if (lastRestoredExplorerTabIdRef.current === activeExplorerTabId) {
-      return;
-    }
-
-    lastRestoredExplorerTabIdRef.current = activeExplorerTabId;
-
-    const normalizedActiveExplorerState =
-      normalizeExplorerRouteState(activeExplorerState);
-
-    if (
-      areExplorerRouteStatesEqual(
-        normalizedActiveExplorerState,
-        currentExplorerRouteState,
-      )
-    ) {
-      return;
-    }
-
-    controller.actions.applyRouteState(normalizedActiveExplorerState);
-  }, [
-    activeExplorerTabId,
-    activeExplorerState,
-    currentExplorerRouteState,
-    controller.actions.applyRouteState,
-  ]);
+    controller.actions.applyRouteState(activeExplorerState);
+  }, [activeExplorerState, controller.actions]);
 
   useEffect(() => {
     if (!activeExplorerTabId) return;
@@ -282,7 +216,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
       resetExplorerPaneScroll();
       controller.actions.navigateToSectionList();
     });
-  }, [controller.actions.navigateToSectionList, resetExplorerPaneScroll]);
+  }, [controller.actions, resetExplorerPaneScroll]);
 
   useEffect(() => {
     route.persistLastSelectedFolderId(controller.state.selectedFolderId);
@@ -366,7 +300,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     >
       <WorkspaceTabsBar />
 
-      <div className="relative z-10 flex min-h-0 w-full min-w-0 flex-1 overflow-hidden rounded-b-[14px] border-x border-b border-[#dddcd5] bg-white">
+      <div className="relative z-10 flex min-h-0 w-full min-w-0 flex-1 overflow-hidden">
         <WorkspaceTabPanel
           activeTab={activeTab}
           explorerContent={explorerContent}

@@ -9,6 +9,14 @@ const resolveTabIcon = (tab: WorkspaceTab) => {
   return FileText;
 };
 
+const resolveTabWidthClassName = (tab: WorkspaceTab) => {
+  if (tab.kind === "explorer") {
+    return "w-[236px] max-w-[236px] flex-none";
+  }
+
+  return "min-w-[190px] max-w-[240px] shrink";
+};
+
 export const WorkspaceTabsBar = () => {
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
@@ -19,7 +27,12 @@ export const WorkspaceTabsBar = () => {
   );
 
   return (
-    <div className="explorer-chrome-font flex h-10 shrink-0 items-end gap-0 border-b border-[#e0e0de] bg-[#f2f2f0] px-2 pt-1">
+    <div
+      className={cn(
+        "explorer-chrome-font relative z-20 flex h-10 shrink-0 items-end gap-0 overflow-hidden",
+        "border-b border-[#dddcd5] bg-[rgba(246,246,244,0.96)] px-2 pt-1",
+      )}
+    >
       <div className="flex min-w-0 flex-1 items-end overflow-hidden">
         {tabs.map((tab) => {
           const selected = tab.id === activeTabId;
@@ -29,9 +42,10 @@ export const WorkspaceTabsBar = () => {
             <div
               key={tab.id}
               className={cn(
-                "group/tab mr-1 flex h-8 min-w-0 max-w-[240px] shrink items-center overflow-hidden rounded-t-[7px] border text-[12.5px] transition-colors",
+                "group/tab mr-1 flex h-8 min-w-0 items-center overflow-hidden rounded-t-[8px] border text-[12.5px] transition-colors",
+                resolveTabWidthClassName(tab),
                 selected
-                  ? "border-[#deddd7] border-b-white bg-white text-[#1a1a1a]"
+                  ? "border-[#d8d7d1] border-b-white bg-white text-[#24231f] shadow-[0_-1px_0_rgba(255,255,255,0.85)_inset]"
                   : "border-transparent bg-transparent text-[#777671] hover:bg-white/60 hover:text-[#33322f]",
               )}
             >
@@ -42,7 +56,12 @@ export const WorkspaceTabsBar = () => {
                 title={tab.title}
                 onClick={() => selectTab(tab.id)}
               >
-                <Icon className="h-3.5 w-3.5 shrink-0 text-[#8b8a84]" />
+                <Icon
+                  className={cn(
+                    "h-3.5 w-3.5 shrink-0",
+                    selected ? "text-[#6f6e69]" : "text-[#9b9a94]",
+                  )}
+                />
                 <span className="truncate">{tab.title}</span>
               </button>
 
