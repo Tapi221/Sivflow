@@ -25,7 +25,10 @@ export const downloadBytesAsMfDeck = ({
   bytes: Uint8Array;
   deckName: string;
 }): void => {
-  const blob = new Blob([bytes], { type: MF_DECK_MIME_TYPE });
+  const blobPart = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(blobPart).set(bytes);
+
+  const blob = new Blob([blobPart], { type: MF_DECK_MIME_TYPE });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
 
