@@ -131,10 +131,6 @@ export const useTreeViewSidebar = () => {
   );
 
   useEffect(() => {
-    publishWorkspaceExplorerTabWidth(isSidebarOpen ? renderedSidebarWidth : 0);
-  }, [isSidebarOpen, renderedSidebarWidth]);
-
-  useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
