@@ -38,18 +38,11 @@ type FoldersScreenProps = {
   route: FoldersRouteAdapter;
 };
 
-const WORKSPACE_TABS_HEIGHT_PX = 40;
-
-type FoldersScreenStyle = CSSProperties & {
-  "--workspace-tabs-offset-y": string;
-};
-
 const FOLDERS_SCREEN_FILL_STYLE = {
   width:
     "calc(100dvw - var(--app-layout-padding-x, 12px) - var(--app-layout-padding-x, 12px))",
   maxWidth: "none",
-  "--workspace-tabs-offset-y": `${WORKSPACE_TABS_HEIGHT_PX}px`,
-} satisfies FoldersScreenStyle;
+} satisfies CSSProperties;
 
 const resolveSelectedCardId = (selectedItem: SelectedExplorerItem) => {
   if (selectedItem?.type !== "card") {
@@ -425,9 +418,9 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
         !route.isDesktop && "overflow-x-hidden overflow-y-auto",
       )}
     >
-      <WorkspaceTabsBar className={route.isDesktop ? "pr-[420px]" : undefined} />
+      <WorkspaceTabsBar />
 
-      <div className="relative z-10 flex min-h-0 w-full min-w-0 flex-1 overflow-hidden">
+      <div className="relative z-10 -mt-px flex min-h-0 w-full min-w-0 flex-1 overflow-hidden">
         {workspaceContent}
       </div>
     </div>
