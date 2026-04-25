@@ -129,6 +129,14 @@ const readStoredFolderColumnWidths = (): FolderColumnWidthMap => {
   }
 };
 
+const getCardCardSetId = (card: Card) => {
+  return (
+    card.cardSetId ??
+    (card as unknown as { card_set_id?: string | null }).card_set_id ??
+    null
+  );
+};
+
 const writeStoredFolderColumnWidths = (widths: FolderColumnWidthMap) => {
   if (typeof window === "undefined") return;
 
@@ -620,6 +628,17 @@ export const FolderColumnView = ({
     [getCardSetItems, isFiltering],
   );
 
+  const activeCardSetIdSet = useMemo(() => {
+    return new Set(
+      cardSets
+        .filter(
+          (cardSet) =>
+            !(cardSet as unknown as { isDeleted?: boolean }).isDeleted,
+        )
+        .map((cardSet) => cardSet.id),
+    );
+  }, [cardSets]);
+
   const buildColumnEntries = useCallback(
     (context: FolderColumnContext | null): FolderColumnEntry[] => {
       if (context?.type === "cardSet") {
@@ -676,15 +695,28 @@ export const FolderColumnView = ({
           };
         });
 
-      const childItems = getFolderItems(parentFolderId).map((item) => ({
-        kind: item.type,
-        id: item.data.id,
-        name: getExplorerItemDisplayName(item),
-      }));
+      const childItems = getFolderItems(parentFolderId)
+        .filter((item) => {
+          if (item.type === "document") return true;
+
+          const cardSetId = getCardCardSetId(item.data);
+
+          // カードセットに属するカードは、親フォルダ直下では表示しない。
+          // カードセットを開いた次カラムだけで表示する。
+          if (cardSetId && activeCardSetIdSet.has(cardSetId)) return false;
+
+          return true;
+        })
+        .map((item) => ({
+          kind: item.type,
+          id: item.data.id,
+          name: getExplorerItemDisplayName(item),
+        }));
 
       return [...childFolders, ...childCardSets, ...childItems];
     },
     [
+      activeCardSetIdSet,
       getCardSetItems,
       getCardSets,
       getChildFolders,
