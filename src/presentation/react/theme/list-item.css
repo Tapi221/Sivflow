@@ -2,11 +2,7 @@
   .ds-list-item {
     background: transparent;
     color: var(--sidebar-text, var(--ds-semantic-color-text-primary));
-    transition:
-      background-color var(--ds-semantic-motion-interactive),
-      color var(--ds-semantic-motion-interactive),
-      opacity var(--ds-semantic-motion-interactive),
-      box-shadow var(--ds-semantic-motion-interactive);
+    transition: none;
   }
 
   .ds-list-item--interactive:hover {
