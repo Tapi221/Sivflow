@@ -73,6 +73,32 @@ const assertWorkspaceTabId = (value: string): WorkspaceTab["id"] => {
   return value as WorkspaceTab["id"];
 };
 
+const areSelectedExplorerItemsEqual = (
+  left: ExplorerRouteState["selectedItem"],
+  right: ExplorerRouteState["selectedItem"],
+): boolean => {
+  if (left === right) return true;
+  if (left === null || right === null) return false;
+  if (left.type !== right.type) return false;
+
+  const leftId = "id" in left ? left.id : null;
+  const rightId = "id" in right ? right.id : null;
+
+  return leftId === rightId;
+};
+
+const areExplorerRouteStatesEqual = (
+  left: ExplorerRouteState,
+  right: ExplorerRouteState,
+): boolean => {
+  return (
+    left.isHomeOnlyMode === right.isHomeOnlyMode &&
+    left.isSectionListMode === right.isSectionListMode &&
+    left.selectedFolderId === right.selectedFolderId &&
+    areSelectedExplorerItemsEqual(left.selectedItem, right.selectedItem)
+  );
+};
+
 const resolveNextActiveTabId = (
   tabs: WorkspaceTab[],
   closingTabId: WorkspaceTab["id"],
@@ -243,25 +269,41 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
   },
 
   updateExplorerTabState: (tabId, explorerState) => {
-    set((state) => ({
-      tabs: state.tabs.map((tab) =>
-        tab.id === tabId && tab.kind === "explorer"
-          ? { ...tab, explorerState }
-          : tab,
-      ),
-    }));
+    set((state) => {
+      let didChange = false;
+      const tabs = state.tabs.map((tab) => {
+        if (tab.id !== tabId || tab.kind !== "explorer") {
+          return tab;
+        }
+
+        if (areExplorerRouteStatesEqual(tab.explorerState, explorerState)) {
+          return tab;
+        }
+
+        didChange = true;
+        return { ...tab, explorerState };
+      });
+
+      return didChange ? { tabs } : state;
+    });
   },
 
   updateTabTitle: (tabId, title) => {
     const trimmedTitle = title.trim();
     if (!trimmedTitle) return;
 
-    set((state) => ({
-      tabs: state.tabs.map((tab) =>
-        tab.id === tabId && tab.title !== trimmedTitle
-          ? { ...tab, title: trimmedTitle }
-          : tab,
-      ),
-    }));
+    set((state) => {
+      let didChange = false;
+      const tabs = state.tabs.map((tab) => {
+        if (tab.id !== tabId || tab.title === trimmedTitle) {
+          return tab;
+        }
+
+        didChange = true;
+        return { ...tab, title: trimmedTitle };
+      });
+
+      return didChange ? { tabs } : state;
+    });
   },
 }));
