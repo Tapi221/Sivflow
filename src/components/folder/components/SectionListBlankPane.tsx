@@ -50,7 +50,6 @@ export const SectionListBlankPane = ({
           "border border-[#dddcd5]",
           "bg-[rgba(255,255,255,0.92)]",
           "shadow-[0_16px_36px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.04)]",
-          "backdrop-blur-[8px] [-webkit-backdrop-filter:blur(8px)]",
           contentClassName,
         )}
       >
