@@ -155,6 +155,7 @@ interface FolderColumnRowProps {
   selected: boolean;
   draggable: boolean;
   dragging: boolean;
+  dragBadge?: FolderColumnDragBadge | null;
   dropPosition: Exclude<FolderColumnDropPosition, "append"> | null;
   onSelect: () => void;
   onDragStart: (event: ReactDragEvent<HTMLDivElement>) => void;
@@ -329,6 +330,7 @@ const FolderColumnRow = ({
   selected,
   draggable,
   dragging,
+  dragBadge = null,
   dropPosition,
   onSelect,
   onDragStart,
@@ -555,7 +557,7 @@ export const FolderColumnView = ({
     for (const folder of folders) {
       const folderId = getFolderId(folder);
       if (!folderId) continue;
-      map.set(folderId, folder.name?.trim() || "無題のフォルダ");
+      map.set(folderId, getFolderDisplayName(folder));
     }
 
     return map;
@@ -565,7 +567,7 @@ export const FolderColumnView = ({
     const map = new Map<string, string>();
 
     for (const cardSet of cardSets) {
-      map.set(cardSet.id, getCardSetLabel(cardSet));
+      map.set(cardSet.id, getCardSetDisplayName(cardSet));
     }
 
     return map;
@@ -1859,3 +1861,4 @@ export const FolderColumnView = ({
     </div>
   );
 };
+
