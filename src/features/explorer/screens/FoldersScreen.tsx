@@ -102,7 +102,9 @@ const areSelectedExplorerItemsEqual = (
     return false;
   }
 
-  return resolveSelectedExplorerItemId(left) === resolveSelectedExplorerItemId(right);
+  return (
+    resolveSelectedExplorerItemId(left) === resolveSelectedExplorerItemId(right)
+  );
 };
 
 const areExplorerRouteStatesEqual = (
@@ -249,7 +251,9 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
 
     previousActiveExplorerTabIdRef.current = activeExplorerTabId;
 
-    if (areExplorerRouteStatesEqual(currentExplorerRouteState, activeExplorerState)) {
+    if (
+      areExplorerRouteStatesEqual(currentExplorerRouteState, activeExplorerState)
+    ) {
       restoringExplorerTabIdRef.current = null;
       return;
     }
@@ -269,14 +273,21 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     }
 
     if (restoringExplorerTabIdRef.current === activeExplorerTabId) {
-      if (areExplorerRouteStatesEqual(currentExplorerRouteState, activeExplorerState)) {
+      if (
+        areExplorerRouteStatesEqual(
+          currentExplorerRouteState,
+          activeExplorerState,
+        )
+      ) {
         restoringExplorerTabIdRef.current = null;
       }
 
       return;
     }
 
-    if (areExplorerRouteStatesEqual(currentExplorerRouteState, activeExplorerState)) {
+    if (
+      areExplorerRouteStatesEqual(currentExplorerRouteState, activeExplorerState)
+    ) {
       return;
     }
 
@@ -388,6 +399,24 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     </div>
   );
 
+  const workspaceContent =
+    activeTab.kind === "explorer" ? (
+      explorerContent
+    ) : (
+      <WorkspaceTabPanel
+        activeTab={activeTab}
+        cards={cards}
+        cardSets={cardSets}
+        documents={documents}
+        cardsLoading={cardsLoading}
+        cardSetsLoading={cardSetsLoading}
+        documentsLoading={documentsLoading}
+        onCardUpdated={() => {
+          // カード更新後の処理は既存実装へ委譲
+        }}
+      />
+    );
+
   return (
     <div
       style={FOLDERS_SCREEN_FILL_STYLE}
@@ -399,19 +428,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
       <WorkspaceTabsBar />
 
       <div className="relative z-10 flex min-h-0 w-full min-w-0 flex-1 overflow-hidden">
-        <WorkspaceTabPanel
-          activeTab={activeTab}
-          explorerContent={explorerContent}
-          cards={cards}
-          cardSets={cardSets}
-          documents={documents}
-          cardsLoading={cardsLoading}
-          cardSetsLoading={cardSetsLoading}
-          documentsLoading={documentsLoading}
-          onCardUpdated={() => {
-            // カード更新後の処理は既存実装へ委譲
-          }}
-        />
+        {workspaceContent}
       </div>
     </div>
   );
