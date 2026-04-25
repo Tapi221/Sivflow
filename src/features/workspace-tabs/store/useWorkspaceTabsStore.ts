@@ -56,7 +56,7 @@ type WorkspaceTabsState = {
 const createInitialExplorerTab = (): WorkspaceExplorerTab => ({
   id: WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
   kind: "explorer",
-  title: "エクスプローラー",
+  title: "フォルダー一覧",
   explorerState: createDefaultExplorerRouteState(),
   isClosable: false,
 });
@@ -132,7 +132,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
     const nextTab: WorkspaceExplorerTab = {
       id,
       kind: "explorer",
-      title: params.title ?? "エクスプローラー",
+      title: params.title ?? "フォルダー一覧",
       explorerState: params.explorerState ?? createDefaultExplorerRouteState(),
       isClosable: params.isClosable ?? id !== WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
     };
@@ -150,7 +150,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
     const nextTab: WorkspaceExplorerTab = {
       id,
       kind: "explorer",
-      title: "エクスプローラー",
+      title: "フォルダー一覧",
       explorerState: explorerState ?? createDefaultExplorerRouteState(),
       isClosable: true,
     };

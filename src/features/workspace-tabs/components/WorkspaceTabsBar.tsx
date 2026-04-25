@@ -30,7 +30,7 @@ export const WorkspaceTabsBar = () => {
     <div
       className={cn(
         "explorer-chrome-font relative z-20 flex h-10 shrink-0 items-end gap-0 overflow-hidden",
-        "border-b border-[#dddcd5] bg-[rgba(246,246,244,0.96)] px-2 pt-1",
+        "rounded-t-[14px] border border-b-0 border-[#dddcd5] bg-[rgba(246,246,244,0.96)] px-2 pt-1",
       )}
     >
       <div className="flex min-w-0 flex-1 items-end overflow-hidden">

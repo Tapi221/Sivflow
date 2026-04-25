@@ -12,44 +12,38 @@ export interface SectionListBlankPaneProps {
 }
 
 /**
- * セクション一覧モードで、左サイドバー右側に表示する白いコンテンツパネル。
- * children がない場合は従来通り空白パネルとして表示する。
+ * セクション一覧モードで、左サイドバー右側に表示するカラムビュー領域。
+ * ワークスペースタブ配下では固定配置にせず、TreeViewLayout の一体型シェル内に収める。
  */
 export const SectionListBlankPane = ({
   className,
   contentClassName,
   sidebarWidth,
-  topOffsetPx,
-  leftInsetPx = 12,
-  rightInsetPx = 12,
   children,
 }: SectionListBlankPaneProps) => {
-  const panelGapPx = 16;
-  const bottomInsetPx = 12;
   const hasContent = children !== undefined && children !== null;
 
   const style = {
-    left: `${leftInsetPx + sidebarWidth + panelGapPx}px`,
-    right: `${rightInsetPx}px`,
-    top: `calc(${topOffsetPx}px + var(--workspace-tabs-offset-y, 0px))`,
-    bottom: `${bottomInsetPx}px`,
+    left: `${sidebarWidth}px`,
+    right: 0,
+    top: 0,
+    bottom: 0,
   } satisfies CSSProperties;
 
   return (
     <div
       style={style}
       className={cn(
-        "fixed z-0 hidden min-h-0 min-w-0 bg-transparent md:block",
+        "absolute z-0 hidden min-h-0 min-w-0 bg-transparent md:block",
         className,
       )}
     >
       <div
         aria-hidden={hasContent ? undefined : true}
         className={cn(
-          "h-full min-h-0 w-full min-w-0 overflow-hidden rounded-[14px]",
-          "border border-[#dddcd5]",
-          "bg-[rgba(255,255,255,0.92)]",
-          "shadow-[0_16px_36px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.04)]",
+          "h-full min-h-0 w-full min-w-0 overflow-hidden",
+          "border-l border-[#e6e4dc]",
+          "bg-[rgba(255,255,255,0.96)]",
           contentClassName,
         )}
       >

@@ -32,18 +32,11 @@ type FoldersScreenProps = {
   route: FoldersRouteAdapter;
 };
 
-const WORKSPACE_TABS_HEIGHT_PX = 40;
-
-type FoldersScreenStyle = CSSProperties & {
-  "--workspace-tabs-offset-y": string;
-};
-
 const FOLDERS_SCREEN_FILL_STYLE = {
   width:
     "calc(100dvw - var(--app-layout-padding-x, 12px) - var(--app-layout-padding-x, 12px))",
   maxWidth: "none",
-  "--workspace-tabs-offset-y": `${WORKSPACE_TABS_HEIGHT_PX}px`,
-} satisfies FoldersScreenStyle;
+} satisfies CSSProperties;
 
 const resolveSelectedCardId = (selectedItem: SelectedExplorerItem) => {
   if (selectedItem?.type !== "card") {
@@ -81,6 +74,14 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     initialRouteState,
     onOpenSettings: route.openSettings,
   });
+
+  const {
+    applyRouteState,
+    navigateToSectionList,
+    selectFolder,
+    selectItem,
+    setBreadcrumbContext,
+  } = controller.actions;
 
   const { resetExplorerPaneScroll } = useWorkspaceScrollController({
     isDesktop: route.isDesktop,
@@ -124,7 +125,9 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     controller.state.selectedItem,
   );
 
-  const selectedCard = selectedCardId ? (cardById.get(selectedCardId) ?? null) : null;
+  const selectedCard = selectedCardId
+    ? (cardById.get(selectedCardId) ?? null)
+    : null;
   const selectedDocument = selectedDocumentId
     ? (documentById.get(selectedDocumentId) ?? null)
     : null;
@@ -166,7 +169,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     isSectionListMode: controller.state.isSectionListMode,
     selectedFolderId: controller.state.selectedFolderId,
     selectedItem: controller.state.selectedItem,
-    applyRouteState: controller.actions.applyRouteState,
+    applyRouteState,
   });
 
   useExplorerBreadcrumbSync({
@@ -181,8 +184,8 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   useEffect(() => {
     if (!activeExplorerState) return;
 
-    controller.actions.applyRouteState(activeExplorerState);
-  }, [activeExplorerState, controller.actions]);
+    applyRouteState(activeExplorerState);
+  }, [activeExplorerState, applyRouteState]);
 
   useEffect(() => {
     if (!activeExplorerTabId) return;
@@ -214,9 +217,9 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   useEffect(() => {
     return subscribeSectionListNavigation(() => {
       resetExplorerPaneScroll();
-      controller.actions.navigateToSectionList();
+      navigateToSectionList();
     });
-  }, [controller.actions, resetExplorerPaneScroll]);
+  }, [navigateToSectionList, resetExplorerPaneScroll]);
 
   useEffect(() => {
     route.persistLastSelectedFolderId(controller.state.selectedFolderId);
@@ -225,11 +228,11 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
 
   const handleFolderSelect = (folderId: string | null) => {
     resetExplorerPaneScroll();
-    controller.actions.selectFolder(folderId);
+    selectFolder(folderId);
   };
 
   const handleItemSelect = (item: SelectedExplorerItem) => {
-    controller.actions.selectItem(item);
+    selectItem(item);
 
     if (item?.type === "document") {
       const document = documentById.get(item.id);
@@ -270,24 +273,22 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   }
 
   const explorerContent = (
-    <div className="relative z-10 flex h-full min-h-0 w-full min-w-0 max-w-none">
-      <TreeViewLayout
-        folders={lookups.normalizedFolders}
-        isSectionListMode={controller.state.isSectionListMode}
-        selectedFolderId={controller.state.selectedFolderId}
-        selectedItem={controller.state.selectedItem}
-        selectedCardId={lookups.selectedCardId}
-        selectedDocumentId={lookups.selectedDocumentId}
-        onFolderSelect={handleFolderSelect}
-        onItemSelect={handleItemSelect}
-        onCardUpdated={() => {
-          // カード更新後の処理は既存実装へ委譲
-        }}
-        onBreadcrumbContextChange={controller.actions.setBreadcrumbContext}
-        navigateToSectionListToken={controller.state.navigateToSectionListToken}
-        folderSelectionNonce={controller.state.folderSelectionNonce}
-      />
-    </div>
+    <TreeViewLayout
+      folders={lookups.normalizedFolders}
+      isSectionListMode={controller.state.isSectionListMode}
+      selectedFolderId={controller.state.selectedFolderId}
+      selectedItem={controller.state.selectedItem}
+      selectedCardId={lookups.selectedCardId}
+      selectedDocumentId={lookups.selectedDocumentId}
+      onFolderSelect={handleFolderSelect}
+      onItemSelect={handleItemSelect}
+      onCardUpdated={() => {
+        // カード更新後の処理は既存実装へ委譲
+      }}
+      onBreadcrumbContextChange={setBreadcrumbContext}
+      navigateToSectionListToken={controller.state.navigateToSectionListToken}
+      folderSelectionNonce={controller.state.folderSelectionNonce}
+    />
   );
 
   return (
@@ -301,19 +302,22 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
       <WorkspaceTabsBar />
 
       <div className="relative z-10 flex min-h-0 w-full min-w-0 flex-1 overflow-hidden">
-        <WorkspaceTabPanel
-          activeTab={activeTab}
-          explorerContent={explorerContent}
-          cards={cards}
-          cardSets={cardSets}
-          documents={documents}
-          cardsLoading={cardsLoading}
-          cardSetsLoading={cardSetsLoading}
-          documentsLoading={documentsLoading}
-          onCardUpdated={() => {
-            // カード更新後の処理は既存実装へ委譲
-          }}
-        />
+        {activeTab.kind === "explorer" ? (
+          explorerContent
+        ) : (
+          <WorkspaceTabPanel
+            activeTab={activeTab}
+            cards={cards}
+            cardSets={cardSets}
+            documents={documents}
+            cardsLoading={cardsLoading}
+            cardSetsLoading={cardSetsLoading}
+            documentsLoading={documentsLoading}
+            onCardUpdated={() => {
+              // カード更新後の処理は既存実装へ委譲
+            }}
+          />
+        )}
       </div>
     </div>
   );

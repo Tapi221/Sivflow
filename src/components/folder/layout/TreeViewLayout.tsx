@@ -37,9 +37,6 @@ import { PinnedFolderSidebarSection } from "@/components/folder/components/Pinne
 import { SectionListColumnPane } from "@/components/folder/components/SectionListColumnPane";
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
 import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
-import { PdfThumbnailSidebar } from "@/components/pdf/PdfThumbnailSidebar";
-import { APP_DESKTOP_TOP_INSET_PX } from "@/platform/presentation/shellMetrics";
-import { PdfWorkspaceProvider } from "@/components/pdf/PdfWorkspaceProvider";
 import { TreeViewTabContent } from "@/components/folder/components/TreeViewTabContent";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarDockPanel } from "@/features/calendar/ui/CalendarDockPanel";
@@ -66,8 +63,6 @@ interface TreeViewLayoutProps {
 }
 
 type TreeViewTabContentProps = ComponentProps<typeof TreeViewTabContent>;
-
-const PDF_WORKSPACE_PANEL_GAP_PX = 12;
 
 const TreeViewLayout = ({
   folders,
@@ -170,16 +165,9 @@ const TreeViewLayout = ({
           onFolderSelect(cardSet.folderId ?? null);
           setSelectedCardSetId(item.id);
           setSelectedCardSetLabel(cardSet.name || "無題のセット");
-
-          navigate(
-            createPageUrl(
-              createAppDestination("cardSetView", {
-                cardSetId: item.id,
-                ...(cardSet.folderId ? { folderId: cardSet.folderId } : {}),
-              }),
-            ),
-          );
         }
+
+        onItemSelect(item);
         return;
       }
 
@@ -187,7 +175,7 @@ const TreeViewLayout = ({
       setSelectedCardSetLabel(null);
       onItemSelect(item);
     },
-    [cardSets, navigate, onFolderSelect, onItemSelect],
+    [cardSets, onFolderSelect, onItemSelect],
   );
 
   const { updateDocument, deleteDocument } = useDocumentCommands();
@@ -213,7 +201,6 @@ const TreeViewLayout = ({
     selectedFolder,
     selectedDocument,
     folderCards,
-    folderStats,
     showMobileDetail,
   } = useTreeViewDerivedState({
     folders,
@@ -602,13 +589,11 @@ const TreeViewLayout = ({
   const canCreateCard = Boolean(currentHeaderActionFolderId);
   const canAddDocuments = Boolean(currentHeaderActionFolderId);
 
-  const isSidebarContentCollapsed = selectedItem?.type === "document";
-  const hasPdfWorkspace = selectedDocument?.kind === "pdf";
-
-  const shell = (
+  return (
     <div
       className={cn(
-        "relative flex h-full min-h-0 w-full max-w-none flex-1 items-stretch overflow-hidden border-0 bg-transparent",
+        "relative flex h-full min-h-0 w-full max-w-none flex-1 items-stretch overflow-hidden",
+        "rounded-b-[14px] border-x border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)]",
         isResizing && "select-none cursor-col-resize",
       )}
     >
@@ -639,9 +624,8 @@ const TreeViewLayout = ({
         canAddDocuments={canAddDocuments}
         canBulkImport={Boolean(currentHeaderActionFolderId)}
         preferDirectRootFolderCreate={currentHeaderActionFolderId === null}
-        collapseContent={isSidebarContentCollapsed}
-        collapsedContent={hasPdfWorkspace ? <PdfThumbnailSidebar /> : null}
-        rightGapPx={hasPdfWorkspace ? PDF_WORKSPACE_PANEL_GAP_PX : 0}
+        collapseContent={false}
+        integratedChrome
       >
         {sidebarContent}
       </TreeViewSidebar>
@@ -653,9 +637,9 @@ const TreeViewLayout = ({
       {isSectionListMode ? (
         <SectionListColumnPane
           sidebarWidth={isSidebarOpen ? renderedSidebarWidth : 0}
-          topOffsetPx={APP_DESKTOP_TOP_INSET_PX}
-          leftInsetPx={12}
-          rightInsetPx={12}
+          topOffsetPx={0}
+          leftInsetPx={0}
+          rightInsetPx={0}
           folders={folders}
           cards={filteredCards}
           cardSets={cardSets}
@@ -724,22 +708,6 @@ const TreeViewLayout = ({
         createCard={createCard}
       />
     </div>
-  );
-
-  if (!hasPdfWorkspace || !selectedDocument) {
-    return shell;
-  }
-
-  return (
-    <PdfWorkspaceProvider
-      key={selectedDocument.id}
-      doc={selectedDocument}
-      onDocumentUpdate={async (updates) => {
-        await updateDocument(selectedDocument.id, updates);
-      }}
-    >
-      {shell}
-    </PdfWorkspaceProvider>
   );
 };
 
