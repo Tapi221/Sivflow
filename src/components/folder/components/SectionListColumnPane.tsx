@@ -30,17 +30,33 @@ interface SectionListColumnPaneProps {
     folderId: string,
     targetParentFolderId: string | null,
   ) => Promise<void>;
+  onReorderFolders?: (
+    targetParentFolderId: string | null,
+    folderIds: string[],
+  ) => Promise<void>;
   onMoveCardSetToFolder?: (
     cardSetId: string,
     targetFolderId: string,
+  ) => Promise<void>;
+  onReorderCardSets?: (
+    targetFolderId: string,
+    cardSetIds: string[],
   ) => Promise<void>;
   onMoveDocumentToFolder?: (
     documentId: string,
     targetFolderId: string,
   ) => Promise<void>;
+  onReorderDocuments?: (
+    targetFolderId: string,
+    documentIds: string[],
+  ) => Promise<void>;
   onMoveCardToSet?: (
     cardId: string,
     targetCardSetId: string,
+  ) => Promise<void>;
+  onReorderCardsInCardSet?: (
+    cardSetId: string,
+    cardIds: string[],
   ) => Promise<void>;
 }
 
@@ -64,14 +80,18 @@ export const SectionListColumnPane = ({
   resetToken = 0,
   onItemSelect,
   onMoveFolder,
+  onReorderFolders,
   onMoveCardSetToFolder,
+  onReorderCardSets,
   onMoveDocumentToFolder,
+  onReorderDocuments,
   onMoveCardToSet,
+  onReorderCardsInCardSet,
 }: SectionListColumnPaneProps) => {
   return (
     <SectionListBlankPane
       className={className}
-      contentClassName="explorer-chrome-font p-0"
+      contentClassName="p-0"
       sidebarWidth={sidebarWidth}
       topOffsetPx={topOffsetPx}
       leftInsetPx={leftInsetPx}
@@ -89,9 +109,13 @@ export const SectionListColumnPane = ({
         resetToken={resetToken}
         onItemSelect={onItemSelect}
         onMoveFolder={onMoveFolder}
+        onReorderFolders={onReorderFolders}
         onMoveCardSetToFolder={onMoveCardSetToFolder}
+        onReorderCardSets={onReorderCardSets}
         onMoveDocumentToFolder={onMoveDocumentToFolder}
+        onReorderDocuments={onReorderDocuments}
         onMoveCardToSet={onMoveCardToSet}
+        onReorderCardsInCardSet={onReorderCardsInCardSet}
       />
     </SectionListBlankPane>
   );
