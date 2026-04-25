@@ -13,6 +13,18 @@ type WorkspaceTabsBarProps = {
   noDragStyle?: CSSProperties;
 };
 
+type AppRegionStyle = CSSProperties & {
+  WebkitAppRegion?: "drag" | "no-drag";
+};
+
+const WORKSPACE_TAB_BAR_DRAG_STYLE: AppRegionStyle = {
+  WebkitAppRegion: "drag",
+};
+
+const WORKSPACE_TAB_BAR_NO_DRAG_STYLE: AppRegionStyle = {
+  WebkitAppRegion: "no-drag",
+};
+
 const EXPLORER_TAB_WIDTH_CSS_VAR =
   "var(--workspace-explorer-tab-width, 330px)";
 
@@ -57,7 +69,7 @@ export const WorkspaceTabsBar = ({
 
   return (
     <div
-      style={noDragStyle}
+      style={isTitlebar ? noDragStyle : WORKSPACE_TAB_BAR_DRAG_STYLE}
       className={cn(
         "explorer-chrome-font relative z-30 flex shrink-0 items-end gap-0 overflow-hidden",
         isTitlebar
@@ -93,7 +105,7 @@ export const WorkspaceTabsBar = ({
             >
               <button
                 type="button"
-                style={noDragStyle}
+                style={noDragStyle ?? WORKSPACE_TAB_BAR_NO_DRAG_STYLE}
                 className="flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left outline-none"
                 aria-current={selected ? "page" : undefined}
                 title={tab.title}
@@ -111,7 +123,7 @@ export const WorkspaceTabsBar = ({
               {tab.isClosable ? (
                 <button
                   type="button"
-                  style={noDragStyle}
+                  style={noDragStyle ?? WORKSPACE_TAB_BAR_NO_DRAG_STYLE}
                   className={cn(
                     "mr-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-[#aaa9a3] outline-none transition-colors",
                     "hover:bg-black/10 hover:text-[#55544f]",
@@ -135,7 +147,7 @@ export const WorkspaceTabsBar = ({
 
       <button
         type="button"
-        style={noDragStyle}
+        style={noDragStyle ?? WORKSPACE_TAB_BAR_NO_DRAG_STYLE}
         className={cn(
           "mb-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#8b8a84] outline-none transition-colors",
           "hover:bg-black/5 hover:text-[#45443f]",
