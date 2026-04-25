@@ -13,6 +13,9 @@ type WorkspaceTabsBarProps = {
   noDragStyle?: CSSProperties;
 };
 
+const EXPLORER_TAB_WIDTH_CSS_VAR =
+  "var(--workspace-explorer-tab-width, 330px)";
+
 const resolveTabIcon = (tab: WorkspaceTab) => {
   if (tab.kind === "explorer") return FolderOutlineIcon;
   if (tab.kind === "cardSet") return Layers;
@@ -21,10 +24,20 @@ const resolveTabIcon = (tab: WorkspaceTab) => {
 
 const resolveTabWidthClassName = (tab: WorkspaceTab) => {
   if (tab.kind === "explorer") {
-    return "w-[278px] max-w-[278px] flex-none";
+    return "flex-none";
   }
 
-  return "min-w-[190px] max-w-[260px] shrink";
+  return "min-w-[190px] max-w-[240px] shrink";
+};
+
+const resolveTabStyle = (tab: WorkspaceTab): CSSProperties | undefined => {
+  if (tab.kind !== "explorer") return undefined;
+
+  return {
+    width: EXPLORER_TAB_WIDTH_CSS_VAR,
+    maxWidth: EXPLORER_TAB_WIDTH_CSS_VAR,
+    flexBasis: EXPLORER_TAB_WIDTH_CSS_VAR,
+  };
 };
 
 export const WorkspaceTabsBar = ({
@@ -46,16 +59,10 @@ export const WorkspaceTabsBar = ({
     <div
       style={noDragStyle}
       className={cn(
-        "explorer-chrome-font relative z-20 flex shrink-0 items-end gap-0 overflow-hidden",
+        "explorer-chrome-font relative z-30 flex shrink-0 items-end gap-0 overflow-hidden",
         isTitlebar
-          ? [
-              "h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-2 pt-[5px]",
-              "shadow-[inset_0_-1px_0_rgba(221,220,213,0.72)]",
-            ]
-          : [
-              "h-10 rounded-t-[14px] border border-b-0 border-[#dddcd5]",
-              "bg-[rgba(246,246,244,0.96)] px-2 pt-1",
-            ],
+          ? "h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 pt-0"
+          : "h-10 rounded-t-[14px] border border-b-0 border-[#dddcd5] bg-[rgba(246,246,244,0.96)] px-2 pt-1",
         className,
       )}
     >
@@ -67,28 +74,27 @@ export const WorkspaceTabsBar = ({
           return (
             <div
               key={tab.id}
+              style={resolveTabStyle(tab)}
               className={cn(
-                "group/tab mr-1 flex min-w-0 items-center overflow-hidden border text-[12.5px] transition-colors",
-                isTitlebar ? "h-[34px] rounded-t-[12px]" : "h-8 rounded-t-[8px]",
+                "group/tab mr-0 flex h-8 min-w-0 items-center overflow-hidden rounded-t-[10px] border text-[12.5px] transition-colors",
+                !isTitlebar && "mr-1",
                 resolveTabWidthClassName(tab),
                 selected
-                  ? [
-                      "border-[#d8d7d1] border-b-white bg-white text-[#24231f]",
+                  ? cn(
+                      "border-[#dddcd5] bg-white text-[#24231f]",
                       "shadow-[0_-1px_0_rgba(255,255,255,0.85)_inset]",
-                    ]
-                  : [
+                      isTitlebar ? "border-b-white" : "border-b-white",
+                    )
+                  : cn(
                       "border-transparent bg-transparent text-[#777671]",
                       "hover:bg-white/60 hover:text-[#33322f]",
-                    ],
+                    ),
               )}
             >
               <button
                 type="button"
                 style={noDragStyle}
-                className={cn(
-                  "flex h-full min-w-0 flex-1 items-center gap-2 text-left outline-none",
-                  isTitlebar ? "px-4" : "px-3",
-                )}
+                className="flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left outline-none"
                 aria-current={selected ? "page" : undefined}
                 title={tab.title}
                 onClick={() => selectTab(tab.id)}
@@ -107,7 +113,7 @@ export const WorkspaceTabsBar = ({
                   type="button"
                   style={noDragStyle}
                   className={cn(
-                    "mr-2 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-[#aaa9a3] outline-none transition-colors",
+                    "mr-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-[#aaa9a3] outline-none transition-colors",
                     "hover:bg-black/10 hover:text-[#55544f]",
                     selected ? "opacity-100" : "opacity-0 group-hover/tab:opacity-100",
                   )}
@@ -131,8 +137,8 @@ export const WorkspaceTabsBar = ({
         type="button"
         style={noDragStyle}
         className={cn(
-          "mb-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md",
-          "text-[#8b8a84] outline-none transition-colors hover:bg-black/5 hover:text-[#45443f]",
+          "mb-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#8b8a84] outline-none transition-colors",
+          "hover:bg-black/5 hover:text-[#45443f]",
         )}
         aria-label="新しいエクスプローラータブを開く"
         title="新しいエクスプローラータブ"

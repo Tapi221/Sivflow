@@ -53,12 +53,10 @@ type WorkspaceTabsState = {
   updateTabTitle: (tabId: WorkspaceTab["id"], title: string) => void;
 };
 
-const EXPLORER_TAB_TITLE = "エクスプローラー";
-
 const createInitialExplorerTab = (): WorkspaceExplorerTab => ({
   id: WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
   kind: "explorer",
-  title: EXPLORER_TAB_TITLE,
+  title: "エクスプローラー",
   explorerState: createDefaultExplorerRouteState(),
   isClosable: true,
 });
@@ -134,7 +132,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
     const nextTab: WorkspaceExplorerTab = {
       id,
       kind: "explorer",
-      title: params.title ?? EXPLORER_TAB_TITLE,
+      title: params.title ?? "エクスプローラー",
       explorerState: params.explorerState ?? createDefaultExplorerRouteState(),
       isClosable: params.isClosable ?? true,
     };
@@ -152,7 +150,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
     const nextTab: WorkspaceExplorerTab = {
       id,
       kind: "explorer",
-      title: EXPLORER_TAB_TITLE,
+      title: "エクスプローラー",
       explorerState: explorerState ?? createDefaultExplorerRouteState(),
       isClosable: true,
     };
@@ -266,7 +264,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
 
     set({
       tabs: nextTabs.length > 0 ? nextTabs : [createInitialExplorerTab()],
-      activeTabId: nextTabs.length > 0 ? nextActiveTabId : WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
+      activeTabId: nextActiveTabId,
     });
   },
 
