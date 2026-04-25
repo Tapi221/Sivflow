@@ -1,6 +1,7 @@
 import { type CSSProperties, useEffect, useMemo, useState } from "react";
 
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
+import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { FoldersScreenSkeleton } from "@/components/loading/ScreenSkeletons";
 import { notifySelectedFolderChanged } from "@/features/explorer/adapters/web/explorerSelectionNotifier";
 import { subscribeSectionListNavigation } from "@/features/explorer/adapters/web/explorerSectionListNavigation";
@@ -55,13 +56,6 @@ const resolveSelectedDocumentId = (selectedItem: SelectedExplorerItem) => {
 
 const buildMapById = <TEntity extends { id: string }>(entities: TEntity[]) => {
   return new Map(entities.map((entity) => [entity.id, entity]));
-};
-
-const resolveCardFolderId = (
-  card: Card,
-  cardSetById: Map<string, CardSet>,
-): string | null => {
-  return card.folderId ?? cardSetById.get(card.cardSetId)?.folderId ?? null;
 };
 
 const resolveActiveTab = (
