@@ -2,6 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { useMemo } from "react";
 
 import { CardPane } from "@/components/folder/panes/CardPane";
+import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { PdfPane } from "@/components/pdf/PdfPane";
 import { PdfWorkspaceProvider } from "@/components/pdf/PdfWorkspaceProvider";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
@@ -54,13 +55,6 @@ const WorkspacePanelStatus = ({
 
 const buildMapById = <TEntity extends { id: string }>(entities: TEntity[]) => {
   return new Map(entities.map((entity) => [entity.id, entity]));
-};
-
-const resolveCardFolderId = (
-  card: Card,
-  cardSetById: Map<string, CardSet>,
-): string | null => {
-  return card.folderId ?? cardSetById.get(card.cardSetId)?.folderId ?? null;
 };
 
 export const WorkspaceTabPanel = ({
