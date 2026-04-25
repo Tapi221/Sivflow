@@ -368,6 +368,7 @@ const FolderColumnRow = ({
       role="button"
       tabIndex={0}
       data-selected={selected ? "true" : undefined}
+      data-drop-position={dropPosition ?? undefined}
       draggable={draggable}
       aria-grabbed={dragging ? true : undefined}
       style={FOLDER_COLUMN_ROW_STYLE}
@@ -379,6 +380,8 @@ const FolderColumnRow = ({
         dragging && "opacity-45",
         dropPosition === "inside" &&
           "bg-[var(--sidebar-row-hover-bg)] shadow-[inset_0_0_0_1px_rgba(120,116,108,0.22)]",
+        (dropPosition === "before" || dropPosition === "after") &&
+          "!bg-transparent hover:!bg-transparent !shadow-none",
       )}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
