@@ -139,7 +139,15 @@ type FolderColumnDropIntent = {
   targetEntry?: {
     kind: FolderColumnEntry["kind"];
     id: string;
+    name: string;
   };
+};
+
+type FolderColumnDragBadge = {
+  x: number;
+  y: number;
+  label: string;
+  icon: "folder" | "cardSet" | "document";
 };
 
 interface FolderColumnRowProps {
@@ -432,6 +440,38 @@ const FolderColumnRow = ({
         </div>
         {trailing}
       </div>
+
+      {dragBadge ? (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed z-[70]"
+          style={{
+            left: Math.max(12, dragBadge.x + 16),
+            top: Math.max(12, dragBadge.y + 18),
+          }}
+        >
+          <div
+            className={cn(
+              "inline-flex items-center gap-2 rounded-[10px] border px-3 py-2",
+              "border-white/10 bg-[rgba(43,41,39,0.92)] text-white shadow-[0_12px_28px_rgba(0,0,0,0.28)]",
+              "backdrop-blur-[10px]",
+            )}
+          >
+            <span className="flex h-4 w-4 shrink-0 items-center justify-center text-white/90">
+              {dragBadge.icon === "folder" ? (
+                <FolderOutlineIcon className="h-3.5 w-3.5" />
+              ) : dragBadge.icon === "cardSet" ? (
+                <Layers className="h-3.5 w-3.5" />
+              ) : (
+                <FileText className="h-3.5 w-3.5" />
+              )}
+            </span>
+            <span className="whitespace-nowrap text-[13px] font-medium leading-none text-white/96">
+              {dragBadge.label}
+            </span>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -480,6 +520,9 @@ export const FolderColumnView = ({
   const [draggingEntryKey, setDraggingEntryKey] = useState<string | null>(null);
   const [activeDropIntent, setActiveDropIntent] =
     useState<FolderColumnDropIntent | null>(null);
+  const [dragBadge, setDragBadge] = useState<FolderColumnDragBadge | null>(
+    null,
+  );
   const optimisticOrderByScopeRef = useRef<
     Record<FolderColumnOrderScopeKey, string[]>
   >({});
@@ -505,6 +548,28 @@ export const FolderColumnView = ({
     getFolderContentCount,
     visibleFolderIdSet,
   } = derived;
+
+  const folderNameById = useMemo(() => {
+    const map = new Map<string, string>();
+
+    for (const folder of folders) {
+      const folderId = getFolderId(folder);
+      if (!folderId) continue;
+      map.set(folderId, folder.name?.trim() || "無題のフォルダ");
+    }
+
+    return map;
+  }, [folders]);
+
+  const cardSetNameById = useMemo(() => {
+    const map = new Map<string, string>();
+
+    for (const cardSet of cardSets) {
+      map.set(cardSet.id, getCardSetLabel(cardSet));
+    }
+
+    return map;
+  }, [cardSets]);
 
   const parentFolderIdById = useMemo(() => {
     const map = new Map<string, string | null>();
@@ -745,8 +810,68 @@ export const FolderColumnView = ({
     [optimisticOrderByScope],
   );
 
+  const getDragBadgeLabel = useCallback(
+    (intent: FolderColumnDropIntent) => {
+      if (intent.position === "before" && intent.targetEntry) {
+        return `${intent.targetEntry.name} の前に移動`;
+      }
+
+      if (intent.position === "after" && intent.targetEntry) {
+        return `${intent.targetEntry.name} の後に移動`;
+      }
+
+      if (intent.target.type === "folder") {
+        if (intent.target.id === null) {
+          return "ルートに移動";
+        }
+
+        return `${folderNameById.get(intent.target.id) ?? "フォルダ"} に移動`;
+      }
+
+      return `${cardSetNameById.get(intent.target.id) ?? "カードセット"} に移動`;
+    },
+    [cardSetNameById, folderNameById],
+  );
+
+  const getDragBadgeIcon = useCallback(
+    (intent: FolderColumnDropIntent): FolderColumnDragBadge["icon"] => {
+      if (intent.position === "before" || intent.position === "after") {
+        if (
+          intent.targetEntry?.kind === "folder"
+        ) {
+          return "folder";
+        }
+
+        if (intent.targetEntry?.kind === "cardSet") {
+          return "cardSet";
+        }
+
+        return "document";
+      }
+
+      return intent.target.type === "folder" ? "folder" : "cardSet";
+    },
+    [],
+  );
+
+  const updateDragBadge = useCallback(
+    (
+      intent: FolderColumnDropIntent,
+      event: ReactDragEvent<HTMLElement>,
+    ) => {
+      setDragBadge({
+        x: event.clientX,
+        y: event.clientY,
+        label: getDragBadgeLabel(intent),
+        icon: getDragBadgeIcon(intent),
+      });
+    },
+    [getDragBadgeIcon, getDragBadgeLabel],
+  );
+
   const clearDropState = useCallback(() => {
     setActiveDropIntent(null);
+    setDragBadge(null);
 
     if (
       typeof window !== "undefined" &&
@@ -1109,10 +1234,11 @@ export const FolderColumnView = ({
 
       if (intent) {
         setActiveDropIntent(intent);
+        updateDragBadge(intent, event);
         scheduleDropTargetExpand(intent);
       }
     },
-    [canDropOnIntent, scheduleDropTargetExpand],
+    [canDropOnIntent, scheduleDropTargetExpand, updateDragBadge],
   );
 
   const handleDropTargetDragLeave = useCallback(
@@ -1191,7 +1317,7 @@ export const FolderColumnView = ({
         columnIndex,
         targetEntry:
           position === "before" || position === "after"
-            ? { kind: entry.kind, id: entry.id }
+            ? { kind: entry.kind, id: entry.id, name: entry.name }
             : undefined,
       };
     },
