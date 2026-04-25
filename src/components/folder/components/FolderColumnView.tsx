@@ -76,11 +76,13 @@ interface FolderColumnRowProps {
   onSelect: () => void;
 }
 
-const FOLDER_COLUMN_WIDTH_STORAGE_KEY =
-  "manifolia:folder-column-view:column-width";
+const FOLDER_COLUMN_WIDTHS_STORAGE_KEY =
+  "manifolia:folder-column-view:column-widths";
 const DEFAULT_FOLDER_COLUMN_WIDTH_PX = 280;
 const MIN_FOLDER_COLUMN_WIDTH_PX = 180;
 const MAX_FOLDER_COLUMN_WIDTH_PX = 520;
+
+type FolderColumnWidthMap = Record<string, number>;
 
 const clampFolderColumnWidth = (width: number) => {
   if (!Number.isFinite(width)) return DEFAULT_FOLDER_COLUMN_WIDTH_PX;
@@ -91,21 +93,44 @@ const clampFolderColumnWidth = (width: number) => {
   );
 };
 
-const readStoredFolderColumnWidth = () => {
+const readStoredFolderColumnWidths = (): FolderColumnWidthMap => {
   if (typeof window === "undefined") {
-    return DEFAULT_FOLDER_COLUMN_WIDTH_PX;
+    return {};
   }
 
-  const storedWidth = window.localStorage.getItem(
-    FOLDER_COLUMN_WIDTH_STORAGE_KEY,
+  const storedWidths = window.localStorage.getItem(
+    FOLDER_COLUMN_WIDTHS_STORAGE_KEY,
   );
-  const parsedWidth = Number.parseInt(storedWidth ?? "", 10);
+  if (!storedWidths) return {};
 
-  if (!Number.isFinite(parsedWidth)) {
-    return DEFAULT_FOLDER_COLUMN_WIDTH_PX;
+  try {
+    const parsed = JSON.parse(storedWidths) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return {};
+    }
+
+    const widths: FolderColumnWidthMap = {};
+
+    Object.entries(parsed as Record<string, unknown>).forEach(
+      ([columnId, width]) => {
+        if (typeof width !== "number") return;
+        widths[columnId] = clampFolderColumnWidth(width);
+      },
+    );
+
+    return widths;
+  } catch {
+    return {};
   }
+};
 
-  return clampFolderColumnWidth(parsedWidth);
+const writeStoredFolderColumnWidths = (widths: FolderColumnWidthMap) => {
+  if (typeof window === "undefined") return;
+
+  window.localStorage.setItem(
+    FOLDER_COLUMN_WIDTHS_STORAGE_KEY,
+    JSON.stringify(widths),
+  );
 };
 
 const FOLDER_COLUMN_ROW_STYLE = {
@@ -251,18 +276,20 @@ export const FolderColumnView = ({
 }: FolderColumnViewProps) => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const resizeGuideRef = useRef<HTMLDivElement | null>(null);
+  const columnSectionRefs = useRef<Map<string, HTMLElement>>(new Map());
   const columnResizeStateRef = useRef<{
+    columnId: string;
     startX: number;
     startWidth: number;
   } | null>(null);
-  const pendingColumnWidthRef = useRef(readStoredFolderColumnWidth());
+  const pendingColumnWidthRef = useRef(DEFAULT_FOLDER_COLUMN_WIDTH_PX);
   const resizeAnimationFrameRef = useRef<number | null>(null);
   const previousBodyUserSelectRef = useRef("");
   const previousBodyCursorRef = useRef("");
 
   const [columnFolderPath, setColumnFolderPath] = useState<string[]>([]);
-  const [columnWidthPx, setColumnWidthPx] = useState(
-    readStoredFolderColumnWidth,
+  const [columnWidthById, setColumnWidthById] = useState<FolderColumnWidthMap>(
+    readStoredFolderColumnWidths,
   );
   const [isColumnResizing, setIsColumnResizing] = useState(false);
 
@@ -327,37 +354,49 @@ export const FolderColumnView = ({
     [parentFolderIdById, visibleFolderIdSet],
   );
 
-  const columnViewStyle = useMemo(
-    () =>
-      ({
-        "--folder-column-width-px": `${columnWidthPx}px`,
-      }) as CSSProperties,
-    [columnWidthPx],
+  const getColumnWidth = useCallback(
+    (columnId: string) =>
+      clampFolderColumnWidth(
+        columnWidthById[columnId] ?? DEFAULT_FOLDER_COLUMN_WIDTH_PX,
+      ),
+    [columnWidthById],
   );
 
-  const columnStyle = useMemo(
-    () =>
-      ({
-        flex: "0 0 var(--folder-column-width-px)",
-        width: "var(--folder-column-width-px)",
-        minWidth: "var(--folder-column-width-px)",
+  const getColumnStyle = useCallback(
+    (columnId: string) => {
+      const widthPx = getColumnWidth(columnId);
+      const cssWidth = `${widthPx}px`;
+
+      return {
+        flex: `0 0 ${cssWidth}`,
+        width: cssWidth,
+        minWidth: cssWidth,
         contain: "layout paint style",
         willChange: isColumnResizing
           ? "width, min-width, flex-basis"
           : undefined,
-      }) satisfies CSSProperties,
-    [isColumnResizing],
+      } satisfies CSSProperties;
+    },
+    [getColumnWidth, isColumnResizing],
   );
 
-  const applyColumnWidthToDom = useCallback((width: number) => {
-    const nextWidth = clampFolderColumnWidth(width);
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
+  const setColumnSectionRef = useCallback(
+    (columnId: string, node: HTMLElement | null) => {
+      if (node) columnSectionRefs.current.set(columnId, node);
+      else columnSectionRefs.current.delete(columnId);
+    },
+    [],
+  );
 
-    scroller.style.setProperty(
-      "--folder-column-width-px",
-      `${nextWidth}px`,
-    );
+  const applyColumnWidthToDom = useCallback((columnId: string, width: number) => {
+    const nextWidth = clampFolderColumnWidth(width);
+    const section = columnSectionRefs.current.get(columnId);
+    if (!section) return;
+
+    const cssWidth = `${nextWidth}px`;
+    section.style.flexBasis = cssWidth;
+    section.style.width = cssWidth;
+    section.style.minWidth = cssWidth;
   }, []);
 
   const showResizeGuide = useCallback((clientX: number) => {
@@ -381,10 +420,12 @@ export const FolderColumnView = ({
   }, []);
 
   const scheduleColumnWidthApply = useCallback(
-    (width: number) => {
-      pendingColumnWidthRef.current = clampFolderColumnWidth(width);
+    (columnId: string, width: number) => {
+      const nextWidth = clampFolderColumnWidth(width);
+      pendingColumnWidthRef.current = nextWidth;
 
       if (typeof window === "undefined") {
+        applyColumnWidthToDom(columnId, nextWidth);
         return;
       }
 
@@ -394,7 +435,7 @@ export const FolderColumnView = ({
 
       resizeAnimationFrameRef.current = window.requestAnimationFrame(() => {
         resizeAnimationFrameRef.current = null;
-        applyColumnWidthToDom(pendingColumnWidthRef.current);
+        applyColumnWidthToDom(columnId, pendingColumnWidthRef.current);
       });
     },
     [applyColumnWidthToDom],
@@ -411,7 +452,8 @@ export const FolderColumnView = ({
   }, []);
 
   const handleColumnResizeEnd = useCallback(() => {
-    if (!columnResizeStateRef.current) return;
+    const resizeState = columnResizeStateRef.current;
+    if (!resizeState) return;
 
     columnResizeStateRef.current = null;
     setIsColumnResizing(false);
@@ -425,15 +467,18 @@ export const FolderColumnView = ({
     }
 
     const nextWidth = clampFolderColumnWidth(pendingColumnWidthRef.current);
-    applyColumnWidthToDom(nextWidth);
-    setColumnWidthPx(nextWidth);
+    applyColumnWidthToDom(resizeState.columnId, nextWidth);
 
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(
-        FOLDER_COLUMN_WIDTH_STORAGE_KEY,
-        String(nextWidth),
-      );
-    }
+    setColumnWidthById((previousWidths) => {
+      const nextWidths = {
+        ...previousWidths,
+        [resizeState.columnId]: nextWidth,
+      };
+
+      writeStoredFolderColumnWidths(nextWidths);
+
+      return nextWidths;
+    });
 
     restoreBodyResizeStyles();
     hideResizeGuide();
@@ -448,26 +493,30 @@ export const FolderColumnView = ({
 
       showResizeGuide(event.clientX);
       const deltaX = event.clientX - resizeState.startX;
-      scheduleColumnWidthApply(resizeState.startWidth + deltaX);
+      scheduleColumnWidthApply(
+        resizeState.columnId,
+        resizeState.startWidth + deltaX,
+      );
     },
     [scheduleColumnWidthApply, showResizeGuide],
   );
 
   const handleColumnResizeStart = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => {
+    (event: ReactPointerEvent<HTMLDivElement>, columnId: string) => {
       event.preventDefault();
       event.stopPropagation();
       event.currentTarget.setPointerCapture?.(event.pointerId);
 
-      const currentWidth = pendingColumnWidthRef.current || columnWidthPx;
+      const currentWidth = getColumnWidth(columnId);
 
       columnResizeStateRef.current = {
+        columnId,
         startX: event.clientX,
         startWidth: currentWidth,
       };
       pendingColumnWidthRef.current = currentWidth;
       setIsColumnResizing(true);
-      applyColumnWidthToDom(currentWidth);
+      applyColumnWidthToDom(columnId, currentWidth);
       showResizeGuide(event.clientX);
 
       if (typeof document !== "undefined") {
@@ -477,7 +526,7 @@ export const FolderColumnView = ({
         document.body.style.cursor = "col-resize";
       }
     },
-    [applyColumnWidthToDom, columnWidthPx, showResizeGuide],
+    [applyColumnWidthToDom, getColumnWidth, showResizeGuide],
   );
 
   useEffect(() => {
@@ -675,7 +724,6 @@ export const FolderColumnView = ({
   return (
     <div
       ref={scrollerRef}
-      style={columnViewStyle}
       className={cn(
         "folder-column-view relative h-full min-h-0 w-full overflow-x-auto overflow-y-hidden",
         isColumnResizing && "cursor-col-resize select-none",
@@ -696,7 +744,8 @@ export const FolderColumnView = ({
         {columns.map((column, columnIndex) => (
           <section
             key={`${column.id}:${columnIndex}`}
-            style={columnStyle}
+            ref={(node) => setColumnSectionRef(column.id, node)}
+            style={getColumnStyle(column.id)}
             className={cn(
               "relative h-full min-h-0 shrink-0 overflow-hidden border-r border-[#e7e5df]",
             )}
@@ -715,7 +764,9 @@ export const FolderColumnView = ({
               aria-orientation="vertical"
               className="absolute right-[-6px] top-0 z-30 h-full w-3 cursor-col-resize bg-transparent"
               style={{ touchAction: "none" }}
-              onPointerDown={handleColumnResizeStart}
+              onPointerDown={(event) => {
+                handleColumnResizeStart(event, column.id);
+              }}
             />
 
             <div className="h-full min-h-0 overflow-y-auto px-1 py-1">
