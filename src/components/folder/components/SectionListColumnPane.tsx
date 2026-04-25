@@ -91,7 +91,7 @@ export const SectionListColumnPane = ({
   return (
     <SectionListBlankPane
       className={className}
-      contentClassName="p-0"
+      contentClassName="explorer-chrome-font p-0"
       sidebarWidth={sidebarWidth}
       topOffsetPx={topOffsetPx}
       leftInsetPx={leftInsetPx}
