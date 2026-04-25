@@ -24,7 +24,24 @@ interface SectionListColumnPaneProps {
   selectedCardSetId?: string | null;
   isFiltering?: boolean;
   resetToken?: number;
+  onFolderSelect?: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
+  onMoveFolder?: (
+    folderId: string,
+    targetParentFolderId: string | null,
+  ) => Promise<void>;
+  onMoveCardSetToFolder?: (
+    cardSetId: string,
+    targetFolderId: string,
+  ) => Promise<void>;
+  onMoveDocumentToFolder?: (
+    documentId: string,
+    targetFolderId: string,
+  ) => Promise<void>;
+  onMoveCardToSet?: (
+    cardId: string,
+    targetCardSetId: string,
+  ) => Promise<void>;
 }
 
 /**
@@ -46,6 +63,10 @@ export const SectionListColumnPane = ({
   isFiltering = false,
   resetToken = 0,
   onItemSelect,
+  onMoveFolder,
+  onMoveCardSetToFolder,
+  onMoveDocumentToFolder,
+  onMoveCardToSet,
 }: SectionListColumnPaneProps) => {
   return (
     <SectionListBlankPane
@@ -67,6 +88,10 @@ export const SectionListColumnPane = ({
         isFiltering={isFiltering}
         resetToken={resetToken}
         onItemSelect={onItemSelect}
+        onMoveFolder={onMoveFolder}
+        onMoveCardSetToFolder={onMoveCardSetToFolder}
+        onMoveDocumentToFolder={onMoveDocumentToFolder}
+        onMoveCardToSet={onMoveCardToSet}
       />
     </SectionListBlankPane>
   );
