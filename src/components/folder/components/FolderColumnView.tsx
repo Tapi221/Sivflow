@@ -20,7 +20,11 @@ import type {
   SelectedExplorerItem,
 } from "@/types";
 import { ChevronRight, FileText, FolderOutlineIcon, Layers } from "@/ui/icons";
-import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
+import type {
+  CSSProperties,
+  DragEvent as ReactDragEvent,
+  PointerEvent as ReactPointerEvent,
+} from "react";
 import {
   useCallback,
   useEffect,
@@ -50,7 +54,13 @@ type FolderColumnEntry =
       hasNextColumn: boolean;
     }
   | {
-      kind: "card" | "document";
+      kind: "card";
+      id: string;
+      name: string;
+      cardSetId: string | null;
+    }
+  | {
+      kind: "document";
       id: string;
       name: string;
     };
@@ -72,13 +82,47 @@ interface FolderColumnViewProps {
   isFiltering?: boolean;
   resetToken?: number;
   onItemSelect: (item: SelectedExplorerItem) => void;
+  onMoveFolder?: (
+    folderId: string,
+    targetParentFolderId: string | null,
+  ) => Promise<void>;
+  onMoveCardSetToFolder?: (
+    cardSetId: string,
+    targetFolderId: string,
+  ) => Promise<void>;
+  onMoveDocumentToFolder?: (
+    documentId: string,
+    targetFolderId: string,
+  ) => Promise<void>;
+  onMoveCardToSet?: (
+    cardId: string,
+    targetCardSetId: string,
+  ) => Promise<void>;
   className?: string;
 }
+
+type FolderColumnDragPayload =
+  | { kind: "folder"; id: string }
+  | { kind: "cardSet"; id: string }
+  | { kind: "document"; id: string }
+  | { kind: "card"; id: string; cardSetId: string | null };
+
+type FolderColumnDropTarget =
+  | { type: "folder"; id: string | null }
+  | { type: "cardSet"; id: string };
 
 interface FolderColumnRowProps {
   entry: FolderColumnEntry;
   selected: boolean;
+  draggable: boolean;
+  dragging: boolean;
+  dropTarget: boolean;
   onSelect: () => void;
+  onDragStart: (event: ReactDragEvent<HTMLDivElement>) => void;
+  onDragEnd: (event: ReactDragEvent<HTMLDivElement>) => void;
+  onDragOver: (event: ReactDragEvent<HTMLDivElement>) => void;
+  onDragLeave: (event: ReactDragEvent<HTMLDivElement>) => void;
+  onDrop: (event: ReactDragEvent<HTMLDivElement>) => void;
 }
 
 const FOLDER_COLUMN_WIDTHS_STORAGE_KEY =
@@ -146,6 +190,15 @@ const writeStoredFolderColumnWidths = (widths: FolderColumnWidthMap) => {
   );
 };
 
+const getDragPayloadKey = (payload: FolderColumnDragPayload) => {
+  return `${payload.kind}:${payload.id}`;
+};
+
+const getDropTargetKey = (target: FolderColumnDropTarget) => {
+  if (target.type === "folder") return `folder:${target.id ?? "__root__"}`;
+  return `cardSet:${target.id}`;
+};
+
 const FOLDER_COLUMN_ROW_STYLE = {
   height: 28,
   minHeight: 28,
@@ -205,7 +258,15 @@ const areSameColumnPaths = (
 const FolderColumnRow = ({
   entry,
   selected,
+  draggable,
+  dragging,
+  dropTarget,
   onSelect,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragLeave,
+  onDrop,
 }: FolderColumnRowProps) => {
   const Icon =
     entry.kind === "folder"
@@ -246,13 +307,23 @@ const FolderColumnRow = ({
       role="button"
       tabIndex={0}
       data-selected={selected ? "true" : undefined}
+      draggable={draggable}
+      aria-grabbed={dragging ? true : undefined}
       style={FOLDER_COLUMN_ROW_STYLE}
       className={cn(
         "sidebar-row sidebar-row--folder ds-list-item ds-list-item--interactive",
         "relative flex w-full cursor-pointer items-center rounded-[8px] px-2 text-left",
         "select-none outline-none",
         selected && "ds-list-item--selected",
+        dragging && "opacity-45",
+        dropTarget &&
+          "bg-[var(--sidebar-row-hover-bg)] shadow-[inset_0_0_0_1px_rgba(120,116,108,0.22)]",
       )}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
       onClick={(event) => {
         if (event.defaultPrevented) return;
         onSelect();
@@ -299,11 +370,17 @@ export const FolderColumnView = ({
   isFiltering = false,
   resetToken = 0,
   onItemSelect,
+  onMoveFolder,
+  onMoveCardSetToFolder,
+  onMoveDocumentToFolder,
+  onMoveCardToSet,
   className,
 }: FolderColumnViewProps) => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const resizeGuideRef = useRef<HTMLDivElement | null>(null);
   const columnSectionRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const dragPayloadRef = useRef<FolderColumnDragPayload | null>(null);
+  const expandDropTargetTimeoutRef = useRef<number | null>(null);
   const columnResizeStateRef = useRef<{
     columnId: string;
     startX: number;
@@ -319,6 +396,10 @@ export const FolderColumnView = ({
     readStoredFolderColumnWidths,
   );
   const [isColumnResizing, setIsColumnResizing] = useState(false);
+  const [draggingEntryKey, setDraggingEntryKey] = useState<string | null>(null);
+  const [activeDropTargetKey, setActiveDropTargetKey] = useState<string | null>(
+    null,
+  );
 
   const derived = useExplorerDerivedData({
     treeFolders: folders,
@@ -379,6 +460,23 @@ export const FolderColumnView = ({
       return path;
     },
     [parentFolderIdById, visibleFolderIdSet],
+  );
+
+  const isFolderDescendantOf = useCallback(
+    (candidateFolderId: string, ancestorFolderId: string) => {
+      let currentFolderId: string | null =
+        parentFolderIdById.get(candidateFolderId) ?? null;
+      const seenFolderIds = new Set<string>();
+
+      while (currentFolderId && !seenFolderIds.has(currentFolderId)) {
+        if (currentFolderId === ancestorFolderId) return true;
+        seenFolderIds.add(currentFolderId);
+        currentFolderId = parentFolderIdById.get(currentFolderId) ?? null;
+      }
+
+      return false;
+    },
+    [parentFolderIdById],
   );
 
   const getColumnWidth = useCallback(
@@ -477,6 +575,263 @@ export const FolderColumnView = ({
     previousBodyUserSelectRef.current = "";
     previousBodyCursorRef.current = "";
   }, []);
+
+  const clearDropState = useCallback(() => {
+    setActiveDropTargetKey(null);
+
+    if (
+      typeof window !== "undefined" &&
+      expandDropTargetTimeoutRef.current !== null
+    ) {
+      window.clearTimeout(expandDropTargetTimeoutRef.current);
+      expandDropTargetTimeoutRef.current = null;
+    }
+  }, []);
+
+  const getDragPayloadForEntry = useCallback(
+    (entry: FolderColumnEntry): FolderColumnDragPayload => {
+      if (entry.kind === "card") {
+        return {
+          kind: "card",
+          id: entry.id,
+          cardSetId: entry.cardSetId,
+        };
+      }
+
+      return {
+        kind: entry.kind,
+        id: entry.id,
+      };
+    },
+    [],
+  );
+
+  const getDropTargetForEntry = useCallback(
+    (entry: FolderColumnEntry): FolderColumnDropTarget | null => {
+      if (entry.kind === "folder") {
+        return { type: "folder", id: entry.id };
+      }
+
+      if (entry.kind === "cardSet") {
+        return { type: "cardSet", id: entry.id };
+      }
+
+      return null;
+    },
+    [],
+  );
+
+  const getDropTargetForColumn = useCallback(
+    (context: FolderColumnContext | null): FolderColumnDropTarget => {
+      if (!context) return { type: "folder", id: null };
+      if (context.type === "folder") return { type: "folder", id: context.id };
+      return { type: "cardSet", id: context.id };
+    },
+    [],
+  );
+
+  const canDropOnTarget = useCallback(
+    (
+      payload: FolderColumnDragPayload | null,
+      target: FolderColumnDropTarget | null,
+    ) => {
+      if (!payload || !target) return false;
+
+      if (payload.kind === "folder") {
+        if (target.type !== "folder") return false;
+        if (target.id === payload.id) return false;
+        if (target.id && isFolderDescendantOf(target.id, payload.id)) {
+          return false;
+        }
+        return Boolean(onMoveFolder);
+      }
+
+      if (payload.kind === "cardSet") {
+        if (target.type !== "folder") return false;
+        if (!target.id) return false;
+        return Boolean(onMoveCardSetToFolder);
+      }
+
+      if (payload.kind === "document") {
+        if (target.type !== "folder") return false;
+        if (!target.id) return false;
+        return Boolean(onMoveDocumentToFolder);
+      }
+
+      if (payload.kind === "card") {
+        if (target.type !== "cardSet") return false;
+        if (payload.cardSetId === target.id) return false;
+        return Boolean(onMoveCardToSet);
+      }
+
+      return false;
+    },
+    [
+      isFolderDescendantOf,
+      onMoveCardSetToFolder,
+      onMoveCardToSet,
+      onMoveDocumentToFolder,
+      onMoveFolder,
+    ],
+  );
+
+  const expandDropTarget = useCallback(
+    (target: FolderColumnDropTarget, columnIndex: number) => {
+      if (target.type === "folder" && target.id === null) return;
+
+      const nextContext: FolderColumnContext =
+        target.type === "folder"
+          ? { type: "folder", id: target.id }
+          : { type: "cardSet", id: target.id };
+
+      setColumnPath((previousPath) => {
+        const nextPath = [...previousPath.slice(0, columnIndex), nextContext];
+
+        return areSameColumnPaths(previousPath, nextPath)
+          ? previousPath
+          : nextPath;
+      });
+    },
+    [],
+  );
+
+  const scheduleDropTargetExpand = useCallback(
+    (target: FolderColumnDropTarget, columnIndex: number) => {
+      if (typeof window === "undefined") return;
+      if (target.type === "folder" && target.id === null) return;
+
+      if (expandDropTargetTimeoutRef.current !== null) {
+        window.clearTimeout(expandDropTargetTimeoutRef.current);
+      }
+
+      expandDropTargetTimeoutRef.current = window.setTimeout(() => {
+        expandDropTargetTimeoutRef.current = null;
+        expandDropTarget(target, columnIndex);
+      }, 480);
+    },
+    [expandDropTarget],
+  );
+
+  const moveDraggedEntry = useCallback(
+    async (
+      payload: FolderColumnDragPayload,
+      target: FolderColumnDropTarget,
+    ) => {
+      if (payload.kind === "folder" && target.type === "folder") {
+        await onMoveFolder?.(payload.id, target.id);
+        return;
+      }
+
+      if (
+        payload.kind === "cardSet" &&
+        target.type === "folder" &&
+        target.id
+      ) {
+        await onMoveCardSetToFolder?.(payload.id, target.id);
+        return;
+      }
+
+      if (
+        payload.kind === "document" &&
+        target.type === "folder" &&
+        target.id
+      ) {
+        await onMoveDocumentToFolder?.(payload.id, target.id);
+        return;
+      }
+
+      if (payload.kind === "card" && target.type === "cardSet") {
+        await onMoveCardToSet?.(payload.id, target.id);
+      }
+    },
+    [
+      onMoveCardSetToFolder,
+      onMoveCardToSet,
+      onMoveDocumentToFolder,
+      onMoveFolder,
+    ],
+  );
+
+  const handleEntryDragStart = useCallback(
+    (entry: FolderColumnEntry, event: ReactDragEvent<HTMLDivElement>) => {
+      const payload = getDragPayloadForEntry(entry);
+      const payloadKey = getDragPayloadKey(payload);
+
+      dragPayloadRef.current = payload;
+      setDraggingEntryKey(payloadKey);
+
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData(
+        "application/x-manifolia-folder-column-entry",
+        JSON.stringify(payload),
+      );
+      event.dataTransfer.setData("text/plain", entry.name);
+    },
+    [getDragPayloadForEntry],
+  );
+
+  const handleEntryDragEnd = useCallback(() => {
+    dragPayloadRef.current = null;
+    setDraggingEntryKey(null);
+    clearDropState();
+  }, [clearDropState]);
+
+  const handleDropTargetDragOver = useCallback(
+    (
+      target: FolderColumnDropTarget | null,
+      columnIndex: number,
+      event: ReactDragEvent<HTMLElement>,
+    ) => {
+      const payload = dragPayloadRef.current;
+      if (!canDropOnTarget(payload, target)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.dataTransfer.dropEffect = "move";
+
+      const targetKey = target ? getDropTargetKey(target) : null;
+      setActiveDropTargetKey(targetKey);
+
+      if (target) {
+        scheduleDropTargetExpand(target, columnIndex);
+      }
+    },
+    [canDropOnTarget, scheduleDropTargetExpand],
+  );
+
+  const handleDropTargetDragLeave = useCallback(
+    (event: ReactDragEvent<HTMLElement>) => {
+      const relatedTarget = event.relatedTarget;
+      if (
+        relatedTarget instanceof Node &&
+        event.currentTarget.contains(relatedTarget)
+      ) {
+        return;
+      }
+
+      clearDropState();
+    },
+    [clearDropState],
+  );
+
+  const handleDropOnTarget = useCallback(
+    async (
+      target: FolderColumnDropTarget | null,
+      event: ReactDragEvent<HTMLElement>,
+    ) => {
+      const payload = dragPayloadRef.current;
+      if (!payload || !target || !canDropOnTarget(payload, target)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      clearDropState();
+      await moveDraggedEntry(payload, target);
+      dragPayloadRef.current = null;
+      setDraggingEntryKey(null);
+    },
+    [canDropOnTarget, clearDropState, moveDraggedEntry],
+  );
 
   const handleColumnResizeEnd = useCallback(() => {
     const resizeState = columnResizeStateRef.current;
@@ -586,8 +941,11 @@ export const FolderColumnView = ({
         restoreBodyResizeStyles();
         hideResizeGuide();
       }
+
+      clearDropState();
+      dragPayloadRef.current = null;
     };
-  }, [hideResizeGuide, restoreBodyResizeStyles]);
+  }, [clearDropState, hideResizeGuide, restoreBodyResizeStyles]);
 
   useEffect(() => {
     if (!selectedFolderId || !visibleFolderIdSet.has(selectedFolderId)) return;
@@ -642,11 +1000,22 @@ export const FolderColumnView = ({
   const buildColumnEntries = useCallback(
     (context: FolderColumnContext | null): FolderColumnEntry[] => {
       if (context?.type === "cardSet") {
-        return getCardSetItems(context.id).map((item) => ({
-          kind: item.type,
-          id: item.data.id,
-          name: getExplorerItemDisplayName(item),
-        }));
+        return getCardSetItems(context.id).map((item): FolderColumnEntry => {
+          if (item.type === "card") {
+            return {
+              kind: "card",
+              id: item.data.id,
+              name: getExplorerItemDisplayName(item),
+              cardSetId: getCardCardSetId(item.data),
+            };
+          }
+
+          return {
+            kind: "document",
+            id: item.data.id,
+            name: getExplorerItemDisplayName(item),
+          };
+        });
       }
 
       const parentFolderId = context?.type === "folder" ? context.id : null;
@@ -707,11 +1076,22 @@ export const FolderColumnView = ({
 
           return true;
         })
-        .map((item) => ({
-          kind: item.type,
-          id: item.data.id,
-          name: getExplorerItemDisplayName(item),
-        }));
+        .map((item): FolderColumnEntry => {
+          if (item.type === "card") {
+            return {
+              kind: "card",
+              id: item.data.id,
+              name: getExplorerItemDisplayName(item),
+              cardSetId: getCardCardSetId(item.data),
+            };
+          }
+
+          return {
+            kind: "document",
+            id: item.data.id,
+            name: getExplorerItemDisplayName(item),
+          };
+        });
 
       return [...childFolders, ...childCardSets, ...childItems];
     },
@@ -829,60 +1209,112 @@ export const FolderColumnView = ({
       />
 
       <div className="flex h-full min-h-0 min-w-max items-stretch">
-        {columns.map((column, columnIndex) => (
-          <section
-            key={`${column.id}:${columnIndex}`}
-            ref={(node) => setColumnSectionRef(column.id, node)}
-            style={getColumnStyle(column.id)}
-            className={cn(
-              "relative h-full min-h-0 shrink-0 overflow-hidden border-r border-[#e7e5df]",
-            )}
-            aria-label={
-              column.context?.type === "cardSet"
-                ? "カードセット内のカード"
-                : column.context?.type === "folder"
-                  ? "フォルダ内の項目"
-                  : "ルートフォルダ"
-            }
-          >
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute right-0 top-0 z-10 h-full w-px bg-[#e1ded7]"
-            />
+        {columns.map((column, columnIndex) => {
+          const columnDropTarget = getDropTargetForColumn(column.context);
+          const columnDropTargetKey = getDropTargetKey(columnDropTarget);
 
-            <div
-              role="separator"
-              aria-label="カラム幅を変更"
-              aria-orientation="vertical"
-              className="absolute right-[-6px] top-0 z-30 h-full w-3 cursor-col-resize bg-transparent"
-              style={{ touchAction: "none" }}
-              onPointerDown={(event) => {
-                handleColumnResizeStart(event, column.id);
-              }}
-            />
-
-            <div className="h-full min-h-0 overflow-y-auto px-1 py-1">
-              {column.entries.length > 0 ? (
-                column.entries.map((entry) => (
-                  <FolderColumnRow
-                    key={`${column.id}:${entry.kind}:${entry.id}`}
-                    entry={entry}
-                    selected={isEntrySelected(entry, columnIndex)}
-                    onSelect={() => handleEntrySelect(entry, columnIndex)}
-                  />
-                ))
-              ) : (
-                <div className="px-2 py-2 text-sm font-normal text-muted-foreground">
-                  {isFiltering
-                    ? "一致する項目がありません"
-                    : column.context?.type === "cardSet"
-                      ? "このカードセットにはカードがありません"
-                      : "この階層には表示できる項目がありません"}
-                </div>
+          return (
+            <section
+              key={`${column.id}:${columnIndex}`}
+              ref={(node) => setColumnSectionRef(column.id, node)}
+              style={getColumnStyle(column.id)}
+              className={cn(
+                "relative h-full min-h-0 shrink-0 overflow-hidden border-r border-[#e7e5df]",
               )}
-            </div>
-          </section>
-        ))}
+              aria-label={
+                column.context?.type === "cardSet"
+                  ? "カードセット内のカード"
+                  : column.context?.type === "folder"
+                    ? "フォルダ内の項目"
+                    : "ルートフォルダ"
+              }
+            >
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute right-0 top-0 z-10 h-full w-px bg-[#e1ded7]"
+              />
+
+              <div
+                role="separator"
+                aria-label="カラム幅を変更"
+                aria-orientation="vertical"
+                className="absolute right-[-6px] top-0 z-30 h-full w-3 cursor-col-resize bg-transparent"
+                style={{ touchAction: "none" }}
+                onPointerDown={(event) => {
+                  handleColumnResizeStart(event, column.id);
+                }}
+              />
+
+              <div
+                className={cn(
+                  "h-full min-h-0 overflow-y-auto px-1 py-1",
+                  activeDropTargetKey === columnDropTargetKey &&
+                    "bg-[rgba(122,166,161,0.055)]",
+                )}
+                onDragOver={(event) => {
+                  handleDropTargetDragOver(
+                    columnDropTarget,
+                    columnIndex,
+                    event,
+                  );
+                }}
+                onDragLeave={handleDropTargetDragLeave}
+                onDrop={(event) => {
+                  handleDropOnTarget(columnDropTarget, event);
+                }}
+              >
+                {column.entries.length > 0 ? (
+                  column.entries.map((entry) => {
+                    const dragPayload = getDragPayloadForEntry(entry);
+                    const entryDropTarget = getDropTargetForEntry(entry);
+
+                    return (
+                      <FolderColumnRow
+                        key={`${column.id}:${entry.kind}:${entry.id}`}
+                        entry={entry}
+                        selected={isEntrySelected(entry, columnIndex)}
+                        draggable
+                        dragging={
+                          draggingEntryKey === getDragPayloadKey(dragPayload)
+                        }
+                        dropTarget={
+                          entryDropTarget
+                            ? activeDropTargetKey ===
+                              getDropTargetKey(entryDropTarget)
+                            : false
+                        }
+                        onSelect={() => handleEntrySelect(entry, columnIndex)}
+                        onDragStart={(event) => {
+                          handleEntryDragStart(entry, event);
+                        }}
+                        onDragEnd={handleEntryDragEnd}
+                        onDragOver={(event) => {
+                          handleDropTargetDragOver(
+                            entryDropTarget,
+                            columnIndex,
+                            event,
+                          );
+                        }}
+                        onDragLeave={handleDropTargetDragLeave}
+                        onDrop={(event) => {
+                          handleDropOnTarget(entryDropTarget, event);
+                        }}
+                      />
+                    );
+                  })
+                ) : (
+                  <div className="px-2 py-2 text-sm font-normal text-muted-foreground">
+                    {isFiltering
+                      ? "一致する項目がありません"
+                      : column.context?.type === "cardSet"
+                        ? "このカードセットにはカードがありません"
+                        : "この階層には表示できる項目がありません"}
+                  </div>
+                )}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </div>
   );

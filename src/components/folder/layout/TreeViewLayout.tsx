@@ -465,6 +465,20 @@ const TreeViewLayout = ({
     [updateDocument],
   );
 
+  const handleMoveFolderFromColumnPane = useCallback(
+    async (folderId: string, targetParentFolderId: string | null) => {
+      await updateFolder(folderId, { parentFolderId: targetParentFolderId });
+    },
+    [updateFolder],
+  );
+
+  const handleMoveCardSetToFolderFromColumnPane = useCallback(
+    async (cardSetId: string, targetFolderId: string) => {
+      await moveCardSetToFolder(cardSetId, targetFolderId);
+    },
+    [moveCardSetToFolder],
+  );
+
   // フォルダサイドバーは白いパネル型の遷移表示に一本化する。
   const resolvedSidebarDisplayMode = "navigation" as const;
 
@@ -608,8 +622,13 @@ const TreeViewLayout = ({
           selectedItem={selectedItem}
           selectedCardSetId={activeSelectedCardSetId}
           isFiltering={isFiltering}
+          resetToken={navigateToSectionListToken}
           onFolderSelect={handleFolderSelect}
           onItemSelect={handleItemSelect}
+          onMoveFolder={handleMoveFolderFromColumnPane}
+          onMoveCardSetToFolder={handleMoveCardSetToFolderFromColumnPane}
+          onMoveDocumentToFolder={handleMoveDocumentToFolder}
+          onMoveCardToSet={moveCardToSet}
         />
       ) : null}
 
