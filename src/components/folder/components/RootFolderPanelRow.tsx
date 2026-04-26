@@ -142,7 +142,7 @@ export const RootFolderPanelRow = ({
         ? ExplorerChromeCardSetIcon
         : entry.kind === "card"
           ? ExplorerChromeCardIcon
-        : ExplorerChromePdfIcon;
+          : ExplorerChromePdfIcon;
 
   const closeMenu = React.useCallback(() => {
     setOpenRowMenuId(null);
@@ -173,6 +173,34 @@ export const RootFolderPanelRow = ({
     if (entry.kind !== "folder") return;
     togglePinnedFolder(entry.id);
   }, [entry.id, entry.kind, togglePinnedFolder]);
+
+  const handleRenameBlur = React.useCallback(
+    (event: React.FocusEvent<HTMLInputElement>) => {
+      const input = event.currentTarget;
+      const nextValue = input.value;
+      editingNameRef.current = nextValue;
+
+      const commit = () => {
+        // 新規作成直後は optimistic row から永続化 row へ差し替わることがある。
+        // その unmount blur で確定すると、編集 UI が即閉じる。
+        // DOM に残っている通常の blur だけを確定対象にする。
+        if (!input.isConnected) return;
+
+        void handleRenameConfirm({
+          id: entry.id,
+          type: entry.kind,
+        });
+      };
+
+      if (typeof window === "undefined") {
+        commit();
+        return;
+      }
+
+      window.requestAnimationFrame(commit);
+    },
+    [editingNameRef, entry.id, entry.kind, handleRenameConfirm],
+  );
 
   const folderMenuActions = React.useMemo(
     () =>
@@ -350,7 +378,12 @@ export const RootFolderPanelRow = ({
       input={
         <input
           ref={attachInputRef}
-          className={EXPLORER_ROW_INPUT_CLASS}
+          className={cn(
+            EXPLORER_ROW_INPUT_CLASS,
+            "h-7 min-w-0 w-full rounded-[5px] border border-[#a8a176] bg-white px-2",
+            "text-[12px] text-[#24231f] shadow-[0_0_0_2px_rgba(168,161,118,0.18)] outline-none",
+            "placeholder:text-muted-foreground/55",
+          )}
           style={{ userSelect: "text", WebkitUserSelect: "text" }}
           value={editingName}
           onFocus={(e) => {
@@ -389,13 +422,7 @@ export const RootFolderPanelRow = ({
               setEditingName("");
             }
           }}
-          onBlur={(e) => {
-            editingNameRef.current = e.currentTarget.value;
-            void handleRenameConfirm({
-              id: entry.id,
-              type: entry.kind,
-            });
-          }}
+          onBlur={handleRenameBlur}
         />
       }
       role="button"
