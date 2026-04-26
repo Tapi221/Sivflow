@@ -43,41 +43,92 @@ const ExplorerToolbarButton = ({
 
 const ChevronLeftIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M15 5L8 12L15 19" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+    <path
+      d="M15 5L8 12L15 19"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
 const ChevronRightIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M9 5L16 12L9 19" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+    <path
+      d="M9 5L16 12L9 19"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
 const ArrowUpIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M12 19V5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-    <path d="M6 11L12 5L18 11" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+    <path
+      d="M12 19V5"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+    />
+    <path
+      d="M6 11L12 5L18 11"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
 const RefreshIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M20 12A8 8 0 1 1 17.66 6.34" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M20 4V10H14" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+    <path
+      d="M20 12A8 8 0 1 1 17.66 6.34"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M20 4V10H14"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
 const SearchIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <circle cx="11" cy="11" r="6.25" stroke="currentColor" strokeWidth="1.8" />
-    <path d="M16 16L20 20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <path
+      d="M16 16L20 20"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
 const HomeIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M4 10.5L12 4L20 10.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M6.5 10V19H17.5V10" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+    <path
+      d="M4 10.5L12 4L20 10.5"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M6.5 10V19H17.5V10"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
@@ -90,7 +141,13 @@ const FolderIcon = () => (
       strokeWidth="1.2"
       strokeLinejoin="round"
     />
-    <path d="M2.4 6.6H17.6" stroke="#f8f8f8" strokeWidth="1.2" strokeLinecap="round" opacity="0.9" />
+    <path
+      d="M2.4 6.6H17.6"
+      stroke="#f8f8f8"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      opacity="0.9"
+    />
   </svg>
 );
 
@@ -155,8 +212,7 @@ export const ExplorerWorkspaceFrame = ({
       style={style}
       className={cn(
         "relative flex h-full min-h-0 min-w-0 max-w-none flex-col overflow-hidden",
-        "rounded-[10px] border border-[#e0e0e0] bg-white",
-        "shadow-[0_8px_24px_rgba(15,23,42,0.045)]",
+        "rounded-none border-0 bg-transparent shadow-none",
         className,
       )}
     >
@@ -166,7 +222,7 @@ export const ExplorerWorkspaceFrame = ({
 
       <div
         className={cn(
-          "relative flex min-h-0 w-full min-w-0 flex-1 overflow-hidden",
+          "relative flex min-h-0 w-full min-w-0 flex-1 overflow-hidden bg-white",
           "[&>div]:rounded-none [&>div]:border-0 [&>div]:bg-transparent [&>div]:shadow-none",
           bodyClassName,
         )}

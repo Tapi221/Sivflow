@@ -40,9 +40,10 @@ type FoldersScreenProps = {
 };
 
 const FOLDERS_SCREEN_FILL_STYLE = {
-  width:
-    "calc(100dvw - var(--app-layout-padding-x, 12px) - var(--app-layout-padding-x, 12px))",
+  width: "100dvw",
   maxWidth: "none",
+  marginLeft: "calc(var(--app-layout-padding-x, 12px) * -1)",
+  marginRight: "calc(var(--app-layout-padding-x, 12px) * -1)",
 } satisfies CSSProperties;
 
 const resolveSelectedCardId = (selectedItem: SelectedExplorerItem) => {
