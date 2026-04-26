@@ -564,6 +564,17 @@ const FolderDetailRowView = ({
   }, [isEditingTags]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const target = event.target;
+    if (target instanceof HTMLElement) {
+      const isInteractiveTarget = Boolean(
+        target.closest(
+          "input, textarea, select, button, [contenteditable='true'], [data-detail-tag-editor='true']",
+        ),
+      );
+
+      if (isInteractiveTarget) return;
+    }
+
     if (event.key !== "Enter" && event.key !== " ") return;
 
     event.preventDefault();
@@ -576,7 +587,7 @@ const FolderDetailRowView = ({
       tabIndex={0}
       data-selected={selected ? "true" : undefined}
       data-detail-row="true"
-      draggable={draggable}
+      draggable={draggable && !isEditingTags}
       aria-grabbed={dragging ? true : undefined}
       className={cn(
         DETAIL_GRID_CLASS,
@@ -627,7 +638,19 @@ const FolderDetailRowView = ({
         className="relative flex min-w-0 items-center px-3 text-[#777671]"
         title={tagDisplayText}
         onContextMenu={onTagCellContextMenu}
+        onPointerDown={(event) => {
+          if (!isEditingTags) return;
+          event.stopPropagation();
+        }}
+        onMouseDown={(event) => {
+          if (!isEditingTags) return;
+          event.stopPropagation();
+        }}
         onClick={(event) => {
+          if (!isEditingTags) return;
+          event.stopPropagation();
+        }}
+        onDoubleClick={(event) => {
           if (!isEditingTags) return;
           event.stopPropagation();
         }}
@@ -636,6 +659,7 @@ const FolderDetailRowView = ({
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <input
               ref={tagInputRef}
+              data-detail-tag-editor="true"
               value={tagEditState.value}
               disabled={tagEditState.isSaving}
               aria-label={`${row.name} のタグを編集`}
@@ -648,7 +672,10 @@ const FolderDetailRowView = ({
               onChange={(event) => onTagEditChange(event.target.value)}
               onKeyDown={onTagEditKeyDown}
               onBlur={onTagEditBlur}
+              onPointerDown={(event) => event.stopPropagation()}
+              onMouseDown={(event) => event.stopPropagation()}
               onClick={(event) => event.stopPropagation()}
+              onDoubleClick={(event) => event.stopPropagation()}
               onContextMenu={(event) => event.stopPropagation()}
             />
             {tagEditState.error ? (
@@ -938,6 +965,8 @@ export const FolderDetailView = ({
 
   const handleTagEditorKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
+      event.stopPropagation();
+
       if (event.key === "Enter") {
         event.preventDefault();
         void saveTagEditor();
