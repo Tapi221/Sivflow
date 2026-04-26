@@ -24,6 +24,10 @@ import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocu
 import { shouldDisableExplorerDrop } from "@/components/folder/components/views/explorerDropRules";
 import { FolderTreeArborist } from "@/components/sidebar/FolderTreeArborist";
 import BulkTagDialog from "@/components/tag/BulkTagDialog";
+import {
+  toVirtualMfCardDisplayName,
+  toVirtualMfDeckDisplayName,
+} from "@/features/fileDisplay/virtualFileExtensions";
 import { cn } from "@/lib/utils";
 import type {
   Card,
@@ -400,7 +404,7 @@ export const FolderTreeWithCards = ({
       ...navigationCardSets.map((cardSet) => ({
         kind: "cardSet" as const,
         id: cardSet.id,
-        name: cardSet.name?.trim() || "無題のセット",
+        name: toVirtualMfDeckDisplayName(cardSet.name?.trim() || "無題のセット"),
         contentCount: getCardSetItems(cardSet.id).length,
       })),
       ...navigationItems.map((item: ExplorerItem) => {
@@ -418,10 +422,11 @@ export const FolderTreeWithCards = ({
         return {
           kind: "card" as const,
           id: item.data.id,
-          name:
+          name: toVirtualMfCardDisplayName(
             item.data.title?.trim() ||
-            item.data.questionNumber?.trim() ||
-            "無題のカード",
+              item.data.questionNumber?.trim() ||
+              "無題のカード",
+          ),
         };
       }),
     ],

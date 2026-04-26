@@ -1,3 +1,7 @@
+import {
+  toVirtualMfCardDisplayName,
+  toVirtualMfDeckDisplayName,
+} from "@/features/fileDisplay/virtualFileExtensions";
 import type {
   Card,
   CardSet,
@@ -89,10 +93,9 @@ const getItemNode = (item: ExplorerItem): ExplorerTreeNode | null => {
   return {
     id: toTreeId("card", card.id),
     type: "card",
-    name:
-      card.title?.trim() ||
-      card.questionNumber?.trim() ||
-      "無題のカード",
+    name: toVirtualMfCardDisplayName(
+      card.title?.trim() || card.questionNumber?.trim() || "無題のカード",
+    ),
     data: card,
   };
 };
@@ -123,7 +126,7 @@ export const buildExplorerTreeData = ({
     const cardSetNodes = getCardSets(folderId).map((cardSet) => ({
       id: toTreeId("cardSet", cardSet.id),
       type: "cardSet" as const,
-      name: cardSet.name?.trim() || "無題のセット",
+      name: toVirtualMfDeckDisplayName(cardSet.name?.trim() || "無題のセット"),
       folderId,
       data: cardSet,
       children: getCardSetItems(cardSet.id)
@@ -152,7 +155,7 @@ export const buildExplorerTreeData = ({
   const rootCardSetNodes = getCardSets(null).map((cardSet) => ({
     id: toTreeId("cardSet", cardSet.id),
     type: "cardSet" as const,
-    name: cardSet.name?.trim() || "無題のセット",
+    name: toVirtualMfDeckDisplayName(cardSet.name?.trim() || "無題のセット"),
     folderId: null,
     data: cardSet,
     children: getCardSetItems(cardSet.id)
