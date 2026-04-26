@@ -46,10 +46,10 @@ type ListColumnMetrics = {
   itemCount: number;
 };
 
-const LIST_ROW_HEIGHT_PX = 34;
-const LIST_COLUMN_WIDTH_PX = 286;
-const LIST_COLUMN_GAP_PX = 22;
-const LIST_VERTICAL_PADDING_PX = 56;
+const LIST_ROW_HEIGHT_PX = 26;
+const LIST_COLUMN_WIDTH_PX = 232;
+const LIST_COLUMN_GAP_PX = 14;
+const LIST_VERTICAL_PADDING_PX = 32;
 
 const LIST_COLUMN_STYLE = {
   width: LIST_COLUMN_WIDTH_PX,
@@ -312,7 +312,7 @@ export const FolderListView = ({
       ref={viewportRef}
       role="grid"
       aria-label="エクスプローラー 一覧表示"
-      className="h-full min-h-0 w-full overflow-auto bg-[rgba(255,255,255,0.96)] px-8 py-7"
+      className="h-full min-h-0 w-full overflow-auto bg-[rgba(255,255,255,0.96)] px-4 py-4"
     >
       <div
         className="flex min-h-full items-start"
@@ -322,10 +322,15 @@ export const FolderListView = ({
           <section
             key={`list-column:${columnIndex}`}
             aria-label={`一覧列 ${columnIndex + 1}`}
-            className="min-h-[calc(100vh-220px)] border-r border-[#edeae3] pr-4 last:border-r-0"
+            className={cn(
+              "min-h-full pr-3",
+              columns.length > 1 &&
+                columnIndex < columns.length - 1 &&
+                "border-r border-[#f0eee8]",
+            )}
             style={LIST_COLUMN_STYLE}
           >
-            <div className="space-y-0.5">
+            <div className="space-y-px">
               {columnRows.map((row) => {
                 const Icon = getRowIcon(row.kind);
                 const selected = isSelected(row);
@@ -340,7 +345,7 @@ export const FolderListView = ({
                     data-selected={selected ? "true" : undefined}
                     title={row.name}
                     className={cn(
-                      "group flex h-[34px] w-full cursor-default items-center rounded-[7px] px-2 text-left",
+                      "group flex h-[26px] w-full cursor-default items-center rounded-[5px] px-1.5 text-left",
                       "select-none outline-none transition-colors",
                       "hover:bg-[#f5f3ee] focus-visible:ring-2 focus-visible:ring-ring",
                       selected &&
@@ -352,15 +357,15 @@ export const FolderListView = ({
                   >
                     <span
                       role="gridcell"
-                      className="flex min-w-0 flex-1 items-center gap-2"
+                      className="flex min-w-0 flex-1 items-center gap-1.5"
                     >
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center text-[var(--sidebar-icon-color,#6f6d66)]">
-                        <Icon className="h-4 w-4" />
+                      <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center text-[var(--sidebar-icon-color,#6f6d66)]">
+                        <Icon size={15} className="h-[15px] w-[15px]" />
                       </span>
 
                       <span
                         className={cn(
-                          "truncate text-[13px] leading-none",
+                          "truncate text-[13px] leading-[26px]",
                           selected ? "text-[#1f4f8f]" : "text-[#2f2d29]",
                         )}
                       >
