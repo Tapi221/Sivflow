@@ -122,6 +122,9 @@ const TreeViewLayout = ({
   const [selectedCardSetLabel, setSelectedCardSetLabel] = useState<
     string | null
   >(null);
+  const [sectionListSidebarFolderId, setSectionListSidebarFolderId] = useState<
+    string | null
+  >(null);
   const [explorerHeaderFolderId, setExplorerHeaderFolderId] = useState<
     string | null
   >(null);
@@ -178,6 +181,16 @@ const TreeViewLayout = ({
     setSelectedCardSetId(null);
     setSelectedCardSetLabel(null);
   }, [selectedItem]);
+  useEffect(() => {
+    if (!isSectionListMode) {
+      setSectionListSidebarFolderId(null);
+      return;
+    }
+
+    setSelectedCardSetId(null);
+    setSelectedCardSetLabel(null);
+    setSectionListSidebarFolderId(null);
+  }, [isSectionListMode, navigateToSectionListToken]);
 
   const activeSelectedCardSetId =
     routeSelectedCardSet?.id ?? selectedCardSetId ?? null;
@@ -289,6 +302,19 @@ const TreeViewLayout = ({
     [handleFolderSelectBase],
   );
 
+  const handleSidebarFolderSelect = useCallback(
+    (folderId: string | null) => {
+      if (isSectionListMode) {
+        setSelectedCardSetId(null);
+        setSelectedCardSetLabel(null);
+        setSectionListSidebarFolderId(folderId);
+        return;
+      }
+
+      handleFolderSelect(folderId);
+    },
+    [handleFolderSelect, isSectionListMode],
+  );
   const handleCardSetSelectWithoutNavigation = useCallback(
     (cardSetId: string, folderId: string, label: string) => {
       onFolderSelect(folderId);
@@ -751,6 +777,9 @@ const TreeViewLayout = ({
     );
   }
 
+  const sidebarSelectedFolderId = isSectionListMode
+    ? sectionListSidebarFolderId
+    : selectedFolderId;
   const sidebarContent = (
     <div className="flex h-full min-h-0 flex-col">
       <PinnedFolderSidebarSection
@@ -758,9 +787,9 @@ const TreeViewLayout = ({
         cards={filteredCards}
         cardSets={cardSets}
         documents={filteredDocuments}
-        selectedFolderId={selectedFolderId}
+        selectedFolderId={sidebarSelectedFolderId}
         isFiltering={isFiltering}
-        onFolderSelect={handleFolderSelect}
+        onFolderSelect={handleSidebarFolderSelect}
       />
 
       <div className="min-h-0 flex-1 overflow-hidden">
@@ -772,7 +801,7 @@ const TreeViewLayout = ({
           documents={documents}
           filteredCards={filteredCards}
           filteredDocuments={filteredDocuments}
-          selectedFolderId={selectedFolderId}
+          selectedFolderId={sidebarSelectedFolderId}
           selectedItem={selectedItem}
           isFiltering={isFiltering}
           onRegisterCreateFolderTrigger={(fn) => {
@@ -788,7 +817,7 @@ const TreeViewLayout = ({
           folderSelectionNonce={folderSelectionNonce}
           forceSectionListRoot={isSectionListMode}
           onHeaderFolderIdChange={setExplorerHeaderFolderId}
-          onFolderSelect={handleFolderSelect}
+          onFolderSelect={handleSidebarFolderSelect}
           onItemSelect={handleItemSelect}
           onCreateFolder={createFolder}
           onUpdateFolder={handleUpdateFolderForTree}
@@ -893,12 +922,12 @@ const TreeViewLayout = ({
           cards={filteredCards}
           cardSets={cardSets}
           documents={filteredDocuments}
-          selectedFolderId={selectedFolderId}
+          selectedFolderId={sectionListSidebarFolderId}
           selectedItem={selectedItem}
           selectedCardSetId={activeSelectedCardSetId}
           isFiltering={isFiltering}
           resetToken={navigateToSectionListToken + folderSelectionNonce}
-          onFolderSelect={handleFolderSelect}
+          onFolderSelect={handleSidebarFolderSelect}
           onItemSelect={handleItemSelect}
           onMoveFolder={handleMoveFolderFromColumnPane}
           onReorderFolders={handleReorderFoldersFromColumnPane}
