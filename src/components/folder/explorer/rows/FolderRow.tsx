@@ -1,3 +1,4 @@
+import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { buildFolderMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
 import {
@@ -7,12 +8,7 @@ import {
   type FolderTreeNode,
 } from "@/components/folder/explorer/model/utils";
 import { cn } from "@/lib/utils";
-import {
-  ChevronDown,
-  ChevronRight,
-  FolderIcon,
-  FolderOutlineIcon,
-} from "@/ui/icons";
+import { ChevronDown, ChevronRight } from "@/ui/icons";
 import React from "react";
 import { SidebarEntityRow } from "./SidebarEntityRow";
 import {
@@ -118,13 +114,12 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const folderId = typedFolder.id ?? typedFolder.folderId ?? "";
   const folderName =
     typedFolder.folderName ?? typedFolder.folder_name ?? "無題のフォルダ";
-  const isOptimisticFolder = Boolean(typedFolder.__optimistic);
-  const parentFolderId = normalizeFolderId(getParentFolderId(folder));
-  const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
-  const FolderGlyph = isTopLevelFolder ? FolderIcon : FolderOutlineIcon;
+    const isOptimisticFolder = Boolean(typedFolder.__optimistic);
+    const parentFolderId = normalizeFolderId(getParentFolderId(folder));
+    const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
 
-  const menuActions = React.useMemo(
-    () =>
+    const menuActions = React.useMemo(
+      () =>
       buildFolderMenuActions({
         onCreateSubfolder: canCreateFolder
           ? () => {
@@ -271,12 +266,9 @@ export const FolderRow: React.FC<FolderRowProps> = ({
           ) : null
         }
         icon={
-          <FolderGlyph
+          <ExplorerChromeFolderIcon
             className={cn(
-              "sidebar-icon ds-list-item__icon",
               FOLDER_ROW_ICON_SIZE_CLASS,
-              FOLDER_ROW_ICON_MUTED_CLASS,
-              isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
             )}
           />
         }
