@@ -5,8 +5,8 @@ import {
   ExplorerChromePdfIcon,
 } from "@/components/explorer/icons";
 
-const createMenuIconClassName = "h-[15px] w-[15px] shrink-0";
-const folderContextMenuIconClassName = "h-[15px] w-[15px] shrink-0";
+const createMenuIconClassName = "h-3.5 w-3.5 shrink-0";
+const folderContextMenuIconClassName = "h-3.5 w-3.5 shrink-0";
 
 export const FolderContextFolderIcon = () => (
   <ExplorerChromeFolderIcon
@@ -24,8 +24,8 @@ export const FolderContextCardSetIcon = () => (
 
 export const FolderContextRenameIcon = () => (
   <svg
-    width="15"
-    height="15"
+    width="14"
+    height="14"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -41,8 +41,8 @@ export const FolderContextRenameIcon = () => (
 
 export const FolderContextTrashIcon = () => (
   <svg
-    width="15"
-    height="15"
+    width="14"
+    height="14"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
