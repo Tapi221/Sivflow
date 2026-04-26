@@ -500,7 +500,6 @@ const ExplorerStatusBar = () => {
       <span>エクスプローラー</span>
       <span className="text-[#c8c7bf]">│</span>
       <span>フォルダとカードを管理</span>
-      <span className="ml-auto text-[#9b9a94]">Manifolia</span>
     </div>
   );
 };
