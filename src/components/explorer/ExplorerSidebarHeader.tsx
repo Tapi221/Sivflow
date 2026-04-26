@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ExplorerMenuPanel } from "@/components/folder/components/menus/ExplorerMenuPanel";
 import { buildExplorerCreateMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
+import { ExplorerChromePinIcon } from "@/components/explorer/icons";
 import { cn } from "@/lib/utils";
 
 interface ExplorerSidebarHeaderProps {
@@ -31,14 +32,6 @@ const EllipsisIcon = ({ size = 16, ...props }: UiIconProps) => (
     <circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" />
     <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
     <circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" />
-  </UiIcon>
-);
-
-const PinIcon = ({ size = 16, ...props }: UiIconProps) => (
-  <UiIcon size={size} strokeWidth={1.7} {...props}>
-    <path d="M9.25 3.75h5.5" />
-    <path d="M10.25 3.75v5.15l-2.75 2.35v1.25h9v-1.25l-2.75-2.35V3.75" />
-    <path d="M12 12.5v6" />
   </UiIcon>
 );
 
@@ -157,9 +150,12 @@ export const ExplorerSidebarHeader = ({
           type="button"
           title="ピン留め"
           aria-label="ピン留め"
-          className={iconButtonClassName}
+          className={cn(
+            iconButtonClassName,
+            "[--explorer-chrome-pin-stroke:#8b8a84] hover:[--explorer-chrome-pin-stroke:#1a1a1a]",
+          )}
         >
-          <PinIcon className="h-4 w-4" />
+          <ExplorerChromePinIcon className="h-4 w-4" />
         </button>
       </div>
     </div>

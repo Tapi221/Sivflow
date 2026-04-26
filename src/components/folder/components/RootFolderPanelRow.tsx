@@ -3,6 +3,7 @@ import {
   ExplorerChromeCardIcon,
   ExplorerChromeFolderIcon,
   ExplorerChromePdfIcon,
+  ExplorerChromePinIcon,
 } from "@/components/explorer/icons";
 import {
   buildEntityRenameDeleteMenuActions,
@@ -24,7 +25,6 @@ import {
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import type { SelectedExplorerItem } from "@/types";
-import { Pin } from "@/ui/icons";
 import React from "react";
 import type { NavigationListEntry } from "./RootFolderPanelList";
 
@@ -230,7 +230,7 @@ export const RootFolderPanelRow = ({
             {
               id: isFolderPinned ? "unpin-folder" : "pin-folder",
               label: isFolderPinned ? "ピン留めを外す" : "ピン留めする",
-              icon: <Pin className="h-4 w-4" />,
+              icon: <ExplorerChromePinIcon className="h-4 w-4" />,
               onSelect: handleTogglePinnedFolder,
             },
           ]
@@ -333,7 +333,7 @@ export const RootFolderPanelRow = ({
           event.stopPropagation();
         }}
       >
-        <Pin className="h-3.5 w-3.5" />
+        <ExplorerChromePinIcon className="h-3.5 w-3.5" />
       </button>
     ) : null;
 

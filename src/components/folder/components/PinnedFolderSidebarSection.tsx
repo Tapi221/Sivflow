@@ -1,4 +1,5 @@
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
+import { ExplorerChromePinIcon } from "@/components/explorer/icons";
 import type { MenuAction } from "@/components/folder/components/menus/menuActions";
 import {
   getFolderId,
@@ -19,7 +20,7 @@ import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDer
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, Folder } from "@/types";
-import { ChevronDown, ChevronRight, Pin } from "@/ui/icons";
+import { ChevronDown, ChevronRight } from "@/ui/icons";
 import { useMemo } from "react";
 
 interface PinnedFolderSidebarSectionProps {
@@ -192,7 +193,7 @@ export const PinnedFolderSidebarSection = ({
               {
                 id: "unpin-folder",
                 label: "ピン留めを外す",
-                icon: <Pin className="h-4 w-4" />,
+                icon: <ExplorerChromePinIcon className="h-4 w-4" />,
                 onSelect: () => unpinFolder(entry.id),
               },
             ];
@@ -234,7 +235,7 @@ export const PinnedFolderSidebarSection = ({
                         event.stopPropagation();
                       }}
                     >
-                      <Pin className="h-3.5 w-3.5" />
+                      <ExplorerChromePinIcon className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 }
