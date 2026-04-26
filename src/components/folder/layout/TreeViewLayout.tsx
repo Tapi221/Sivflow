@@ -234,7 +234,7 @@ const TreeViewLayout = ({
   );
 
   const { updateDocument, deleteDocument } = useDocumentCommands();
-  const { tagById, addTag } = useTags();
+  const { tags, tagById, addTag } = useTags();
 
   const {
     sidebarRef,
@@ -328,6 +328,8 @@ const TreeViewLayout = ({
     });
     return Array.from(tagNames).sort();
   }, [cards, tagById]);
+
+  const tagSectionCount = tags.length;
 
   const currentSelectedContextFolderId = useMemo(() => {
     if (isSectionListMode) return null;
@@ -878,7 +880,7 @@ const TreeViewLayout = ({
             <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" />
           )}
           <span className="min-w-0 flex-1 truncate">タグ</span>
-          <span className="tabular-nums opacity-60">0</span>
+          <span className="tabular-nums opacity-60">{tagSectionCount}</span>
         </button>
       </div>
 
