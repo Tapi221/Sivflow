@@ -1,6 +1,19 @@
 @layer components {
   .sidebar-row {
-    --sidebar-row-hover-bg: var(--sidebar-hover-bg, rgb(122 166 161 / 0.1));
+    /* Brown-ish hover/selected background (fallback) */
+    --sidebar-row-hover-bg: var(--sidebar-hover-bg, rgb(199 177 156 / 0.12));
+
+    /* ExplorerChrome icons: default */
+    --explorer-chrome-folder-fill: #f0efe9;
+    --explorer-chrome-folder-stroke: var(--sidebar-text-muted, #6e6e80);
+    --explorer-chrome-folder-highlight: #fbfaf6;
+    --explorer-chrome-cardset-fill: #f0efe9;
+    --explorer-chrome-cardset-stroke: var(--sidebar-text-muted, #6e6e80);
+    --explorer-chrome-cardset-highlight: #fbfaf6;
+    --explorer-chrome-card-fill: #f0efe9;
+    --explorer-chrome-card-stroke: var(--sidebar-text-muted, #6e6e80);
+    --explorer-chrome-card-highlight: #fbfaf6;
+
     position: relative;
     display: flex;
     width: 100%;
@@ -15,6 +28,13 @@
     background-color: transparent;
     color: var(--sidebar-text, #202123);
     transition: none;
+  }
+
+  .sidebar-row:hover,
+  .sidebar-row[data-selected="true"] {
+    --explorer-chrome-folder-stroke: var(--sidebar-text, #202123);
+    --explorer-chrome-cardset-stroke: var(--sidebar-text, #202123);
+    --explorer-chrome-card-stroke: var(--sidebar-text, #202123);
   }
 
   .sidebar-row::before {
