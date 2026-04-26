@@ -1,12 +1,16 @@
 import {
+  Fragment,
   useMemo,
   type CSSProperties,
   type ReactNode,
 } from "react";
+import { useNavigate } from "react-router-dom";
 import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useTags } from "@/hooks/settings/useTags";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
+import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
+import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
 
 import { cn } from "@/lib/utils";
 
@@ -253,6 +257,94 @@ const HomeIcon = () => (
   </svg>
 );
 
+const EXPLORER_HOME_CRUMB: BreadcrumbCrumb = {
+  label: "ホーム",
+  to: "/folders?home=1",
+};
+
+const EXPLORER_ROOT_CRUMB: BreadcrumbCrumb = {
+  label: "エクスプローラー",
+  to: "/folders?view=section-list",
+};
+
+const ExplorerPathBar = () => {
+  const navigate = useNavigate();
+  const extraCrumbs = useBreadcrumbExtraCrumbs();
+
+  const pathCrumbs = useMemo(() => {
+    const normalizedExtraCrumbs = extraCrumbs.map((crumb, index) =>
+      index === extraCrumbs.length - 1
+        ? { ...crumb, to: undefined }
+        : crumb,
+    );
+
+    const rootCrumb =
+      normalizedExtraCrumbs.length > 0
+        ? EXPLORER_ROOT_CRUMB
+        : { ...EXPLORER_ROOT_CRUMB, to: undefined };
+
+    return [EXPLORER_HOME_CRUMB, rootCrumb, ...normalizedExtraCrumbs];
+  }, [extraCrumbs]);
+
+  const handleCrumbClick = (crumb: BreadcrumbCrumb) => {
+    if (!crumb.to) return;
+    void navigate(crumb.to);
+  };
+
+  return (
+    <div
+      className={cn(
+        "flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[6px]",
+        "border border-[#d6d4cb] bg-[rgba(255,255,255,0.92)] px-3",
+        "shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)]",
+      )}
+    >
+      {pathCrumbs.map((crumb, index) => {
+        const isLast = index === pathCrumbs.length - 1;
+        const isClickable = Boolean(crumb.to);
+
+        return (
+          <Fragment key={`${crumb.label}:${crumb.to ?? "current"}:${index}`}>
+            {index > 0 ? (
+              <span className="text-[12px] text-[#b8b7b0]">›</span>
+            ) : null}
+
+            {index === 0 ? <HomeIcon /> : null}
+            {index === 1 ? <ExplorerChromeFolderIcon /> : null}
+
+            {isClickable ? (
+              <button
+                type="button"
+                onClick={() => handleCrumbClick(crumb)}
+                className={cn(
+                  "min-w-0 truncate rounded-[4px] text-left text-[12px]",
+                  "text-[#777671] hover:text-[#24231f]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                )}
+                title={crumb.label}
+              >
+                {crumb.label}
+              </button>
+            ) : (
+              <span
+                className={cn(
+                  "min-w-0 truncate text-[12px]",
+                  isLast
+                    ? "font-medium text-[#24231f]"
+                    : "text-[#777671]",
+                )}
+                title={crumb.label}
+              >
+                {crumb.label}
+              </span>
+            )}
+          </Fragment>
+        );
+      })}
+    </div>
+  );
+};
+
 const ExplorerToolbar = () => {
   const { tags } = useTags();
   const openGlobalSearch = useGlobalSearchStore((state) => state.open);
@@ -283,21 +375,7 @@ const ExplorerToolbar = () => {
 
       <div className="mx-1 h-[18px] w-px shrink-0 bg-[#dddcd5]" />
 
-      <div
-        className={cn(
-          "flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[6px]",
-          "border border-[#d6d4cb] bg-[rgba(255,255,255,0.92)] px-3",
-          "shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)]",
-        )}
-      >
-        <HomeIcon />
-        <span className="text-[12px] text-[#777671]">ホーム</span>
-        <span className="text-[12px] text-[#b8b7b0]">›</span>
-        <ExplorerChromeFolderIcon />
-        <span className="min-w-0 truncate text-[12px] font-medium text-[#24231f]">
-          エクスプローラー
-        </span>
-      </div>
+      <ExplorerPathBar />
 
       <div className="mx-1 h-[18px] w-px shrink-0 bg-[#dddcd5]" />
 

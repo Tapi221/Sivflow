@@ -24,10 +24,10 @@ const DANGER_ITEM_CLASS =
   "ds-floating-panel__row--danger ds-menu__item--danger";
 
 const CREATE_MENU_CONTENT_CLASS =
-  "!w-[148px] !rounded-[10px] !border !border-[#dddcd5] !bg-white !p-[3px] !shadow-[0_4px_20px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)]";
+  "!w-max !min-w-[136px] !max-w-[calc(100vw-16px)] !rounded-[10px] !border !border-[#dddcd5] !bg-white !p-[3px] !shadow-[0_4px_20px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)]";
 
 const CREATE_MENU_ITEM_CLASS =
-  "!h-[28px] !min-h-[28px] !cursor-pointer !rounded-[8px] !px-2 !py-0 text-[13px] font-normal !leading-[28px] text-[#1a1a18] transition-colors duration-75 hover:bg-[#f1efe8] focus:bg-[#f1efe8] data-[highlighted]:bg-[#f1efe8] active:bg-[#eae8e0] overflow-hidden whitespace-nowrap";
+  "!h-[26px] !min-h-[26px] !cursor-pointer !rounded-[8px] !px-2 !py-0 text-[12.5px] font-normal !leading-[26px] text-[#1a1a18] transition-colors duration-75 hover:bg-[#f1efe8] focus:bg-[#f1efe8] data-[highlighted]:bg-[#f1efe8] active:bg-[#eae8e0] overflow-hidden whitespace-nowrap";
 
 const CREATE_MENU_ICON_CLASS =
   "flex h-full w-4 shrink-0 items-center justify-center text-[#888780] [&>svg]:h-3.5 [&>svg]:w-3.5 [&>svg]:shrink-0";
@@ -35,10 +35,10 @@ const CREATE_MENU_ICON_CLASS =
 const CREATE_MENU_SEPARATOR_CLASS = "!mx-0 !my-[3px] !h-px !bg-[#e5e4dd]";
 
 const FOLDER_CONTEXT_MENU_CONTENT_CLASS =
-  "!w-[160px] !rounded-[10px] !border !border-[#dddcd5] !bg-white !p-[3px] !shadow-[0_4px_20px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)]";
+  "!w-max !min-w-[136px] !max-w-[calc(100vw-16px)] !rounded-[10px] !border !border-[#dddcd5] !bg-white !p-[3px] !shadow-[0_4px_20px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)]";
 
 const FOLDER_CONTEXT_MENU_ITEM_CLASS =
-  "!h-[28px] !min-h-[28px] !cursor-pointer !rounded-[8px] !px-2 !py-0 text-[13px] font-normal !leading-[28px] text-[#1a1a18] transition-colors duration-75 hover:bg-[#f1efe8] focus:bg-[#f1efe8] data-[highlighted]:bg-[#f1efe8] active:bg-[#eae8e0] overflow-hidden whitespace-nowrap";
+  "!h-[26px] !min-h-[26px] !cursor-pointer !rounded-[8px] !px-2 !py-0 text-[12.5px] font-normal !leading-[26px] text-[#1a1a18] transition-colors duration-75 hover:bg-[#f1efe8] focus:bg-[#f1efe8] data-[highlighted]:bg-[#f1efe8] active:bg-[#eae8e0] overflow-hidden whitespace-nowrap";
 
 const FOLDER_CONTEXT_MENU_ICON_CLASS =
   "flex h-full w-4 shrink-0 items-center justify-center text-[#888780] [&>svg]:h-3.5 [&>svg]:w-3.5 [&>svg]:shrink-0";
@@ -57,14 +57,15 @@ const PLAIN_MENU_CONTENT_STYLE = {
 } satisfies React.CSSProperties;
 
 const PLAIN_MENU_ROW_STYLE = {
-  height: 28,
-  minHeight: 28,
-  lineHeight: "28px",
+  height: 26,
+  minHeight: 26,
+  lineHeight: "26px",
   gap: 6,
+  fontSize: "12.5px",
 } satisfies React.CSSProperties;
 
 const PLAIN_MENU_LABEL_CLASS =
-  "flex h-full min-w-0 flex-1 items-center truncate pr-1 text-left leading-[28px]";
+  "flex h-full min-w-0 flex-1 items-center truncate pr-1 text-left leading-[26px]";
 
 /**
  * エクスプローラーの各種メニュー（追加ボタン、コンテキストメニュー）で共有されるパネルコンポーネント
