@@ -75,6 +75,7 @@ export const SectionListColumnPane = ({
   selectedCardSetId = null,
   isFiltering = false,
   resetToken = 0,
+  onFolderSelect,
   onItemSelect,
   onMoveFolder,
   onReorderFolders,
@@ -104,6 +105,7 @@ export const SectionListColumnPane = ({
         selectedCardSetId={selectedCardSetId}
         isFiltering={isFiltering}
         resetToken={resetToken}
+        onFolderSelect={onFolderSelect}
         onItemSelect={onItemSelect}
         onMoveFolder={onMoveFolder}
         onReorderFolders={onReorderFolders}
