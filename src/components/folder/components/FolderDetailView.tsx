@@ -560,7 +560,6 @@ const FolderDetailRowView = ({
   onTagEditKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
   onTagEditBlur: () => void;
 }) => {
-  const Icon = getRowIcon(row.kind);
   const tagInputRef = useRef<HTMLInputElement | null>(null);
   const isEditingTags = tagEditState?.rowKey === row.key;
 
@@ -1353,4 +1352,5 @@ export const FolderDetailView = ({
     </div>
   );
 };
+
 
