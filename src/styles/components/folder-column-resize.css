@@ -15,47 +15,47 @@
   /*
    * カラム表示の上下フェード。
    *
-   * mask は要素全体を透明化するため、カラム境界線まで巻き込む。
-   * そのため section 自体や child に mask は使わず、section の内側に
-   * 20px の overlay を置く。right: 1px にして右端の境界線は覆わない。
+   * 前版の .folder-column-view > section / > div > section は DOM 階層が
+   * 1 段足りず、実際のカラム要素に当たらないケースがある。
+   * FolderColumnView のカラム要素は getColumnStyle 由来の contain を持つので、
+   * その inline style を安定したフックとして使う。人類が DOM 階層を祈りで
+   * 当てようとした結果がこれ。
+   *
+   * section 自体や child に mask は使わず、カラム内側に 20px の overlay を置く。
+   * right: 1px にして右端の境界線は覆わない。
    */
-  .folder-column-view > section,
-  .folder-column-view > div > section {
+  .folder-column-view :where(section, [style*="contain: layout"]) {
     position: relative;
   }
 
-  .folder-column-view > section::before,
-  .folder-column-view > div > section::before,
-  .folder-column-view > section::after,
-  .folder-column-view > div > section::after {
+  .folder-column-view :where(section, [style*="contain: layout"])::before,
+  .folder-column-view :where(section, [style*="contain: layout"])::after {
     content: "";
     pointer-events: none;
     position: absolute;
     left: 0;
     right: 1px;
-    z-index: 20;
+    z-index: 60;
     height: 1.25rem;
   }
 
-  .folder-column-view > section::before,
-  .folder-column-view > div > section::before {
+  .folder-column-view :where(section, [style*="contain: layout"])::before {
     top: 0;
     background: linear-gradient(
       to bottom,
-      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.82) 0%,
-      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.46) 38%,
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.92) 0%,
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.62) 45%,
       rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0) 100%
     );
   }
 
-  .folder-column-view > section::after,
-  .folder-column-view > div > section::after {
+  .folder-column-view :where(section, [style*="contain: layout"])::after {
     bottom: 0;
     background: linear-gradient(
       to bottom,
       rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0) 0%,
-      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.46) 62%,
-      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.82) 100%
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.62) 55%,
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.92) 100%
     );
   }
 
@@ -112,7 +112,7 @@
     transform: none !important;
     cursor: col-resize !important;
     background: transparent !important;
-    z-index: 30 !important;
+    z-index: 70 !important;
   }
 
   .folder-column-view [role="separator"][aria-label="カラム幅を変更"] * {
