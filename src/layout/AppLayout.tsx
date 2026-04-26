@@ -50,7 +50,14 @@ export const AppLayout = () => {
   }, [pathname]);
 
   return (
-    <div className="app-layout">
+    <div
+      className={[
+        "app-layout",
+        isFoldersRoute ? "app-layout--folders" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div className="app-layout__content">
         <main
           ref={mainRef}
