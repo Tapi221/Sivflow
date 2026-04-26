@@ -24,4 +24,15 @@
     font-weight: 400;
     letter-spacing: 0.005em;
   }
+
+  .folder-panel-list__bottom-fade {
+    background: linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0),
+      rgb(255 255 255 / 0.82) 62%,
+      rgb(255 255 255 / 0.98) 100%
+    );
+    transition: opacity 120ms ease;
+    will-change: opacity;
+  }
 }

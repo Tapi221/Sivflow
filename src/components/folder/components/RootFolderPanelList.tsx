@@ -65,6 +65,7 @@ export interface RootFolderPanelListProps {
   editingNameRef: React.MutableRefObject<string>;
   handleRenameConfirm: (target?: RenameTarget) => Promise<void>;
   className?: string;
+  enableBottomFade?: boolean;
 }
 
 /**
@@ -100,8 +101,26 @@ export const RootFolderPanelList = ({
   editingNameRef,
   handleRenameConfirm,
   className,
+  enableBottomFade = true,
 }: RootFolderPanelListProps) => {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
+  const scrollContentRef = React.useRef<HTMLDivElement | null>(null);
+  const [showBottomFade, setShowBottomFade] = React.useState(false);
+
+  const updateScrollFade = React.useCallback(() => {
+    const node = scrollContainerRef.current;
+
+    if (!node) {
+      setShowBottomFade(false);
+      return;
+    }
+
+    const remainingScroll =
+      node.scrollHeight - node.clientHeight - node.scrollTop;
+
+    setShowBottomFade(remainingScroll > 2);
+  }, []);
 
   const attachInputRef = React.useCallback(
     (node: HTMLInputElement | null) => {
@@ -120,10 +139,51 @@ export const RootFolderPanelList = ({
     [editingId],
   );
 
-  return (
-    <div
-      className={cn("folder-panel-list h-full overflow-y-auto py-1", className)}
-    >
+  React.useLayoutEffect(() => {
+    if (!enableBottomFade) {
+      setShowBottomFade(false);
+      return;
+    }
+
+    updateScrollFade();
+
+    const animationFrameId = window.requestAnimationFrame(updateScrollFade);
+    const scrollNode = scrollContainerRef.current;
+    const contentNode = scrollContentRef.current;
+
+    if (!scrollNode) {
+      return () => {
+        window.cancelAnimationFrame(animationFrameId);
+      };
+    }
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateScrollFade);
+
+      return () => {
+        window.cancelAnimationFrame(animationFrameId);
+        window.removeEventListener("resize", updateScrollFade);
+      };
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateScrollFade();
+    });
+
+    resizeObserver.observe(scrollNode);
+
+    if (contentNode) {
+      resizeObserver.observe(contentNode);
+    }
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+      resizeObserver.disconnect();
+    };
+  }, [enableBottomFade, entries.length, emptyMessage, updateScrollFade]);
+
+  const content = (
+    <>
       {entries.map((entry) => (
         <RootFolderPanelRow
           key={`${entry.kind}:${entry.id}`}
@@ -163,6 +223,39 @@ export const RootFolderPanelList = ({
           {emptyMessage}
         </div>
       ) : null}
+    </>
+  );
+
+  if (!enableBottomFade) {
+    return (
+      <div
+        className={cn(
+          "folder-panel-list h-full overflow-y-auto py-1",
+          className,
+        )}
+      >
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("folder-panel-list relative h-full min-h-0", className)}>
+      <div
+        ref={scrollContainerRef}
+        className="h-full overflow-y-auto py-1"
+        onScroll={updateScrollFade}
+      >
+        <div ref={scrollContentRef}>{content}</div>
+      </div>
+
+      <div
+        aria-hidden="true"
+        className={cn(
+          "folder-panel-list__bottom-fade pointer-events-none absolute bottom-0 left-0 right-3 z-10 h-12",
+          showBottomFade ? "opacity-100" : "opacity-0",
+        )}
+      />
     </div>
   );
 };
