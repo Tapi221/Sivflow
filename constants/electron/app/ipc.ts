@@ -1,6 +1,8 @@
 export const IPC_CHANNELS = {
   appGetVersion: "desktop:app:getVersion",
   shellOpenExternal: "desktop:shell:openExternal",
+  desktopImportFileOpen: "desktop:importFile:open",
+  desktopImportReadFile: "desktop:importFile:read",
   oauthStart: "oauth:start",
   oauthCancel: "oauth:cancel",
   oauthExchangeIdToken: "oauth:exchangeIdToken",

@@ -6,6 +6,26 @@ export interface PlatformShellApi {
   openExternal(url: string): Promise<void>;
 }
 
+export interface DesktopImportFileOpenPayload {
+  paths: string[];
+}
+
+export interface DesktopImportFileReadResult {
+  path: string;
+  name: string;
+  size: number;
+  data: ArrayBuffer | Uint8Array | number[];
+}
+
+export type DesktopImportFileOpenHandler = (
+  payload: DesktopImportFileOpenPayload,
+) => void;
+
+export interface DesktopFileApi {
+  readImportFile(filePath: string): Promise<DesktopImportFileReadResult>;
+  onImportFileOpen(handler: DesktopImportFileOpenHandler): () => void;
+}
+
 export interface PlatformOauthApi {
   start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
@@ -47,6 +67,7 @@ export type DesktopOauthCallbackHandler = (
 export type DesktopOauthApi = PlatformOauthApi;
 
 export interface DesktopBridgeApi extends PlatformApi {
+  files: DesktopFileApi;
   oauth: DesktopOauthApi;
   window: DesktopWindowApi;
 }
