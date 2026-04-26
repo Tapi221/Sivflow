@@ -6,6 +6,7 @@ import {
 import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useTags } from "@/hooks/settings/useTags";
+import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 
 import { cn } from "@/lib/utils";
 
@@ -252,31 +253,6 @@ const HomeIcon = () => (
   </svg>
 );
 
-const FolderIcon = () => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 20 17"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path
-      d="M1.5 4.25C1.5 3.42 2.17 2.75 3 2.75H7.25C7.79 2.75 8.29 3.04 8.56 3.5L9.25 4.7H17C17.83 4.7 18.5 5.37 18.5 6.2V13.6C18.5 14.43 17.83 15.1 17 15.1H3C2.17 15.1 1.5 14.43 1.5 13.6V4.25Z"
-      fill="#f0efe9"
-      stroke="#8b8a84"
-      strokeWidth="1.2"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M2.4 6.6H17.6"
-      stroke="#fbfaf6"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-      opacity="0.9"
-    />
-  </svg>
-);
-
 const ExplorerToolbar = () => {
   const { tags } = useTags();
   const openGlobalSearch = useGlobalSearchStore((state) => state.open);
@@ -316,7 +292,7 @@ const ExplorerToolbar = () => {
         <HomeIcon />
         <span className="text-[12px] text-[#777671]">ホーム</span>
         <span className="text-[12px] text-[#b8b7b0]">›</span>
-        <FolderIcon />
+        <ExplorerChromeFolderIcon />
         <span className="min-w-0 truncate text-[12px] font-medium text-[#24231f]">
           エクスプローラー
         </span>

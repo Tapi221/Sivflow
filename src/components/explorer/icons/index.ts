@@ -1,0 +1,2 @@
+export { ExplorerChromeFolderIcon } from "./ExplorerChromeFolderIcon";
+
