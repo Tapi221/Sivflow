@@ -889,8 +889,9 @@ export const FolderDetailView = ({
     );
 
     try {
+      const tagIds = await resolveTagIds(tagNames);
+
       if (editor.rowKind === "card") {
-        const tagIds = await resolveTagIds(tagNames);
         await updateCard(editor.rowId, { tagIds });
       } else if (editor.rowKind === "document") {
         await updateDocument(editor.rowId, { tags: tagNames });

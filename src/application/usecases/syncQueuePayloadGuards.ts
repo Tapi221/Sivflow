@@ -30,11 +30,38 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const hasString = (value: Record<string, unknown>, key: string): boolean =>
   typeof value[key] === "string" && value[key].length > 0;
 
+const hasOptionalString = (
+  value: Record<string, unknown>,
+  key: string,
+): boolean => {
+  const field = value[key];
+  return field === undefined || field === null || typeof field === "string";
+};
+
 const hasBoolean = (value: Record<string, unknown>, key: string): boolean =>
   typeof value[key] === "boolean";
 
+const hasOptionalNumber = (
+  value: Record<string, unknown>,
+  key: string,
+): boolean => {
+  const field = value[key];
+  return field === undefined || (typeof field === "number" && Number.isFinite(field));
+};
+
 const hasNumber = (value: Record<string, unknown>, key: string): boolean =>
   typeof value[key] === "number" && Number.isFinite(value[key]);
+
+const hasOptionalStringArray = (
+  value: Record<string, unknown>,
+  key: string,
+): boolean => {
+  const field = value[key];
+  return (
+    field === undefined ||
+    (Array.isArray(field) && field.every((item) => typeof item === "string"))
+  );
+};
 
 const isDateLike = (value: unknown): value is DateLike =>
   value instanceof Date ||
@@ -50,26 +77,42 @@ const hasBaseEntityShape = (value: unknown): value is { id: string } =>
   hasBoolean(value, "isDeleted");
 
 const isCardPayload = (value: unknown): value is Card =>
-  hasBaseEntityShape(value);
+  hasBaseEntityShape(value) &&
+  isRecord(value) &&
+  hasOptionalStringArray(value, "tagIds");
 
 const isFolderPayload = (value: unknown): value is Folder => {
   if (!hasBaseEntityShape(value) || !isRecord(value)) return false;
-  if (!hasString(value, "name")) return false;
-  const folderRecord = value as Record<string, unknown>;
-  const parentId = folderRecord.parentId;
+
+  const hasFolderName = hasString(value, "folderName") || hasString(value, "name");
+  if (!hasFolderName) return false;
+
   return (
-    parentId === undefined || parentId === null || typeof parentId === "string"
+    hasOptionalString(value, "parentFolderId") &&
+    hasOptionalString(value, "parentId") &&
+    hasOptionalNumber(value, "orderIndex") &&
+    hasOptionalStringArray(value, "tags")
   );
 };
 
 const isCardSetPayload = (value: unknown): value is CardSet => {
   if (!hasBaseEntityShape(value) || !isRecord(value)) return false;
-  return hasString(value, "name") && hasNumber(value, "cardCount");
+
+  return (
+    hasString(value, "name") &&
+    hasOptionalString(value, "folderId") &&
+    hasOptionalNumber(value, "orderIndex") &&
+    (value.cardCount === undefined || hasNumber(value, "cardCount")) &&
+    hasOptionalStringArray(value, "tags")
+  );
 };
 
 const isDocumentPayload = (value: unknown): value is Document => {
   if (!hasBaseEntityShape(value) || !isRecord(value)) return false;
-  return hasString(value, "title") || hasString(value, "name");
+  return (
+    (hasString(value, "title") || hasString(value, "name")) &&
+    hasOptionalStringArray(value, "tags")
+  );
 };
 
 const isTagPayload = (value: unknown): value is TagSyncPayload => {
