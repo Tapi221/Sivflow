@@ -1,5 +1,6 @@
 import {
   Fragment,
+  forwardRef,
   useEffect,
   useMemo,
   useState,
@@ -70,33 +71,42 @@ const readInitialExplorerColumnPathCrumbs = (): BreadcrumbCrumb[] => {
   );
 };
 
-const ExplorerToolbarButton = ({
-  title,
-  disabled = false,
-  className,
-  onClick,
-  children,
-}: ExplorerToolbarButtonProps) => {
-  return (
-    <button
-      type="button"
-      title={title}
-      aria-label={title}
-      disabled={disabled}
-      onClick={disabled ? undefined : onClick}
-      className={cn(
-        "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px]",
-        "border-0 bg-transparent text-[#777671] outline-none transition-colors",
-        disabled
-          ? "cursor-default text-[#b8b7b0]"
-          : "hover:bg-[#eeece4] hover:text-[#24231f]",
-        className,
-      )}
+const ExplorerToolbarButton = forwardRef<
+  HTMLButtonElement,
+  ExplorerToolbarButtonProps &
+    Omit<
+      React.ButtonHTMLAttributes<HTMLButtonElement>,
+      "title" | "disabled" | "onClick" | "children" | "className"
     >
-      {children}
-    </button>
-  );
-};
+>(
+  (
+    { title, disabled = false, className, onClick, children, ...props },
+    ref,
+  ) => {
+    return (
+      <button
+        ref={ref}
+        type="button"
+        title={title}
+        aria-label={title}
+        disabled={disabled}
+        onClick={disabled ? undefined : onClick}
+        className={cn(
+          "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px]",
+          "border-0 bg-transparent text-[#777671] outline-none transition-colors",
+          disabled
+            ? "cursor-default text-[#b8b7b0]"
+            : "hover:bg-[#eeece4] hover:text-[#24231f]",
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  },
+);
+ExplorerToolbarButton.displayName = "ExplorerToolbarButton";
 
 const ChevronLeftIcon = () => (
   <svg
