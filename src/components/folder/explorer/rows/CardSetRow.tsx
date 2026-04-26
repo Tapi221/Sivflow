@@ -1,7 +1,8 @@
 import { buildEntityRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
+import { ExplorerChromeCardSetIcon } from "@/components/explorer/icons";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight, Layers } from "@/ui/icons";
+import { ChevronDown, ChevronRight } from "@/ui/icons";
 import React from "react";
 import { SidebarEntityRow } from "./SidebarEntityRow";
 import {
@@ -183,12 +184,9 @@ export const CardSetRow = ({
         ) : null
       }
       icon={
-        <Layers
+        <ExplorerChromeCardSetIcon
           className={cn(
-            "sidebar-icon ds-list-item__icon",
             FOLDER_ROW_ICON_SIZE_CLASS,
-            FOLDER_ROW_ICON_MUTED_CLASS,
-            isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
           )}
         />
       }

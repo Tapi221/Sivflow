@@ -1,4 +1,7 @@
-import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
+import {
+  ExplorerChromeCardSetIcon,
+  ExplorerChromeFolderIcon,
+} from "@/components/explorer/icons";
 import {
   buildEntityRenameDeleteMenuActions,
   buildFolderMenuActions,
@@ -19,7 +22,7 @@ import {
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import type { SelectedExplorerItem } from "@/types";
-import { FileText, Layers, Pin } from "@/ui/icons";
+import { FileText, Pin } from "@/ui/icons";
 import React from "react";
 import type { NavigationListEntry } from "./RootFolderPanelList";
 
@@ -136,7 +139,7 @@ export const RootFolderPanelRow = ({
     entry.kind === "folder"
       ? ExplorerChromeFolderIcon
       : entry.kind === "cardSet"
-        ? Layers
+        ? ExplorerChromeCardSetIcon
         : FileText;
 
   const closeMenu = React.useCallback(() => {
@@ -364,8 +367,8 @@ export const RootFolderPanelRow = ({
         <Icon
           className={cn(
             FOLDER_ROW_ICON_SIZE_CLASS,
-            entry.kind !== "folder" && "sidebar-icon",
-            entry.kind !== "folder" &&
+            entry.kind !== "folder" && entry.kind !== "cardSet" && "sidebar-icon",
+            entry.kind !== "folder" && entry.kind !== "cardSet" &&
               (isSelected
                 ? FOLDER_ROW_ICON_ACTIVE_CLASS
                 : FOLDER_ROW_ICON_MUTED_CLASS),
