@@ -480,11 +480,18 @@ const registerIpcHandlers = (): void => {
   );
 
   ipcMain.handle(IPC_CHANNELS.desktopImportSelectFiles, async () => {
-    const result = await dialog.showOpenDialog(mainWindow ?? undefined, {
+    const openDialogOptions: Electron.OpenDialogOptions = {
       title: "MFDeck / MFCard を選択",
       properties: ["openFile", "multiSelections"],
       filters: DESKTOP_IMPORT_FILE_FILTERS,
-    });
+    };
+
+    const ownerWindow =
+      mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
+
+    const result = ownerWindow
+      ? await dialog.showOpenDialog(ownerWindow, openDialogOptions)
+      : await dialog.showOpenDialog(openDialogOptions);
 
     if (result.canceled) {
       return [];
