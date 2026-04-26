@@ -53,7 +53,7 @@ export const useCardEditorPaneController = ({
   const { settings: settingsFromHook } = useUserSettings();
   const settings = settingsOverride ?? settingsFromHook;
   const { success: toastSuccess, error: toastError } = useToast();
-  const { tagById, addTag } = useTags();
+  const { tags, tagById, addTag } = useTags();
   const {
     cards: cardsFromHook,
     updateCard,
