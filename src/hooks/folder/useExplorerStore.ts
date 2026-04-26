@@ -29,6 +29,8 @@ export interface ExplorerState {
   pinnedFolderIds: ExplorerPinnedFolderId[];
   isPinnedFolderSectionCollapsed: boolean;
   isFolderListSectionCollapsed: boolean;
+  isTagSectionCollapsed: boolean;
+  isCalendarSectionCollapsed: boolean;
   setTagFilter: (tags: string[]) => void;
   toggleTag: (tag: string) => void;
   clearTagFilter: () => void;
@@ -47,6 +49,10 @@ export interface ExplorerState {
   togglePinnedFolderSectionCollapsed: () => void;
   setFolderListSectionCollapsed: (collapsed: boolean) => void;
   toggleFolderListSectionCollapsed: () => void;
+  setTagSectionCollapsed: (collapsed: boolean) => void;
+  toggleTagSectionCollapsed: () => void;
+  setCalendarSectionCollapsed: (collapsed: boolean) => void;
+  toggleCalendarSectionCollapsed: () => void;
 }
 
 const DEFAULT_CONTENT_TYPE_FILTER: ContentTypeFilter[] = ["card", "pdf"];
@@ -130,6 +136,8 @@ const createDefaultState = (): Pick<
   | "pinnedFolderIds"
   | "isPinnedFolderSectionCollapsed"
   | "isFolderListSectionCollapsed"
+  | "isTagSectionCollapsed"
+  | "isCalendarSectionCollapsed"
 > => ({
   tagFilter: [],
   tagMatchMode: "any",
@@ -141,6 +149,8 @@ const createDefaultState = (): Pick<
   pinnedFolderIds: [],
   isPinnedFolderSectionCollapsed: false,
   isFolderListSectionCollapsed: false,
+  isTagSectionCollapsed: false,
+  isCalendarSectionCollapsed: false,
 });
 
 export const useExplorerStore = create<ExplorerState>()(
@@ -233,6 +243,18 @@ export const useExplorerStore = create<ExplorerState>()(
         set((state) => ({
           isFolderListSectionCollapsed: !state.isFolderListSectionCollapsed,
         })),
+      setTagSectionCollapsed: (collapsed) =>
+        set({ isTagSectionCollapsed: collapsed }),
+      toggleTagSectionCollapsed: () =>
+        set((state) => ({
+          isTagSectionCollapsed: !state.isTagSectionCollapsed,
+        })),
+      setCalendarSectionCollapsed: (collapsed) =>
+        set({ isCalendarSectionCollapsed: collapsed }),
+      toggleCalendarSectionCollapsed: () =>
+        set((state) => ({
+          isCalendarSectionCollapsed: !state.isCalendarSectionCollapsed,
+        })),
     }),
     {
       name: "explorer-storage",
@@ -247,6 +269,8 @@ export const useExplorerStore = create<ExplorerState>()(
         pinnedFolderIds: state.pinnedFolderIds,
         isPinnedFolderSectionCollapsed: state.isPinnedFolderSectionCollapsed,
         isFolderListSectionCollapsed: state.isFolderListSectionCollapsed,
+        isTagSectionCollapsed: state.isTagSectionCollapsed,
+        isCalendarSectionCollapsed: state.isCalendarSectionCollapsed,
       }),
       migrate: (persistedState: unknown) => {
         if (!persistedState || typeof persistedState !== "object") {
@@ -278,6 +302,14 @@ export const useExplorerStore = create<ExplorerState>()(
         next.isFolderListSectionCollapsed =
           typeof next.isFolderListSectionCollapsed === "boolean"
             ? next.isFolderListSectionCollapsed
+            : false;
+        next.isTagSectionCollapsed =
+          typeof next.isTagSectionCollapsed === "boolean"
+            ? next.isTagSectionCollapsed
+            : false;
+        next.isCalendarSectionCollapsed =
+          typeof next.isCalendarSectionCollapsed === "boolean"
+            ? next.isCalendarSectionCollapsed
             : false;
 
         delete next.recent;

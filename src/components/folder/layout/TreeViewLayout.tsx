@@ -34,6 +34,7 @@ import {
   createAppDestination,
   createPageUrl,
 } from "@/platform/web/navigation/toWebPath";
+import { ChevronDown, ChevronRight } from "@/ui/icons";
 import type {
   CardSet,
   DocumentItem,
@@ -766,6 +767,18 @@ const TreeViewLayout = ({
   const isFolderListSectionCollapsed = useExplorerStore(
     (state) => state.isFolderListSectionCollapsed,
   );
+  const isTagSectionCollapsed = useExplorerStore(
+    (state) => state.isTagSectionCollapsed,
+  );
+  const toggleTagSectionCollapsed = useExplorerStore(
+    (state) => state.toggleTagSectionCollapsed,
+  );
+  const isCalendarSectionCollapsed = useExplorerStore(
+    (state) => state.isCalendarSectionCollapsed,
+  );
+  const toggleCalendarSectionCollapsed = useExplorerStore(
+    (state) => state.toggleCalendarSectionCollapsed,
+  );
 
   if (isExplorerDataLoading) {
     return (
@@ -843,6 +856,52 @@ const TreeViewLayout = ({
           selectedCardSetId={activeSelectedCardSetId}
           onSelectCardSet={handleCardSetSelectWithoutNavigation}
         />
+      </div>
+
+      <div className="mt-1 border-t border-border/60 px-2 pb-1 pt-2">
+        <button
+          type="button"
+          className={cn(
+            "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
+            "text-[11px] font-medium leading-5 text-muted-foreground transition",
+            "hover:bg-muted/70 hover:text-foreground",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          )}
+          aria-expanded={!isTagSectionCollapsed}
+          aria-controls="tag-sidebar-section-content"
+          onClick={toggleTagSectionCollapsed}
+        >
+          {isTagSectionCollapsed ? (
+            <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-70" />
+          ) : (
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" />
+          )}
+          <span className="min-w-0 flex-1 truncate">タグ</span>
+          <span className="tabular-nums opacity-60">0</span>
+        </button>
+      </div>
+
+      <div className="mt-1 border-t border-border/60 px-2 pb-1 pt-2">
+        <button
+          type="button"
+          className={cn(
+            "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
+            "text-[11px] font-medium leading-5 text-muted-foreground transition",
+            "hover:bg-muted/70 hover:text-foreground",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          )}
+          aria-expanded={!isCalendarSectionCollapsed}
+          aria-controls="calendar-sidebar-section-content"
+          onClick={toggleCalendarSectionCollapsed}
+        >
+          {isCalendarSectionCollapsed ? (
+            <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-70" />
+          ) : (
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" />
+          )}
+          <span className="min-w-0 flex-1 truncate">カレンダー</span>
+          <span className="tabular-nums opacity-60">0</span>
+        </button>
       </div>
     </div>
   );
