@@ -1,5 +1,8 @@
 import {
   MF_DECK_FORMAT,
+  MF_DECK_MAX_BLOCKS_PER_FACE,
+  MF_DECK_MAX_CARDS,
+  MF_DECK_MAX_MEDIA_ENTRIES,
   MF_DECK_MEDIA_MANIFEST_PATH,
   MF_DECK_VERSION,
   type MfDeckArchiveV1,
@@ -32,14 +35,20 @@ const isMediaKind = (value: unknown): value is "image" | "audio" | "unknown" => 
   return value === "image" || value === "audio" || value === "unknown";
 };
 
-const isCardBlock = (value: unknown): value is MfDeckCardsJsonV1["cards"][number]["front"]["blocks"][number] => {
+const isCardBlock = (
+  value: unknown,
+): value is MfDeckCardsJsonV1["cards"][number]["front"]["blocks"][number] => {
   if (!isRecord(value)) return false;
   if (!isNonEmptyString(value.id)) return false;
   if (!isNonEmptyString(value.type)) return false;
-  return typeof value.orderIndex === "number" && Number.isFinite(value.orderIndex);
+  return (
+    typeof value.orderIndex === "number" && Number.isFinite(value.orderIndex)
+  );
 };
 
-const isCardFace = (value: unknown): value is MfDeckCardsJsonV1["cards"][number]["front"] => {
+const isCardFace = (
+  value: unknown,
+): value is MfDeckCardsJsonV1["cards"][number]["front"] => {
   if (!isRecord(value)) return false;
   if (!Array.isArray(value.blocks)) return false;
   return value.blocks.every(isCardBlock);
@@ -47,6 +56,156 @@ const isCardFace = (value: unknown): value is MfDeckCardsJsonV1["cards"][number]
 
 const isStringArray = (value: unknown): value is string[] => {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
+};
+
+const pushDuplicateBlockIssues = (
+  issues: MfDeckIssue[],
+  card: MfDeckCardsJsonV1["cards"][number],
+): void => {
+  const seen = new Set<string>();
+
+  for (const face of [card.front, card.back]) {
+    for (const block of face.blocks) {
+      if (seen.has(block.id)) {
+        issues.push({
+          level: "error",
+          code: "duplicate_block_id",
+          cardId: card.id,
+          blockId: block.id,
+          message:
+            "同一カード内に重複した block id が含まれています。parentBlockId の解決が壊れるため読み込めません。",
+        });
+        continue;
+      }
+
+      seen.add(block.id);
+    }
+  }
+};
+
+const pushCardLimitIssues = (
+  issues: MfDeckIssue[],
+  cardsJson: MfDeckCardsJsonV1,
+): void => {
+  if (cardsJson.cards.length > MF_DECK_MAX_CARDS) {
+    issues.push({
+      level: "error",
+      code: "too_many_cards",
+      path: "cards.json",
+      message: `cards.json のカード数が上限 ${MF_DECK_MAX_CARDS} 件を超えています。`,
+    });
+  }
+
+  for (const card of cardsJson.cards) {
+    if (card.front.blocks.length > MF_DECK_MAX_BLOCKS_PER_FACE) {
+      issues.push({
+        level: "error",
+        code: "too_many_blocks",
+        cardId: card.id,
+        path: "cards.json",
+        message: `front のブロック数が上限 ${MF_DECK_MAX_BLOCKS_PER_FACE} 件を超えています。`,
+      });
+    }
+
+    if (card.back.blocks.length > MF_DECK_MAX_BLOCKS_PER_FACE) {
+      issues.push({
+        level: "error",
+        code: "too_many_blocks",
+        cardId: card.id,
+        path: "cards.json",
+        message: `back のブロック数が上限 ${MF_DECK_MAX_BLOCKS_PER_FACE} 件を超えています。`,
+      });
+    }
+  }
+};
+
+const pushDuplicateCardIssues = (
+  issues: MfDeckIssue[],
+  cardsJson: MfDeckCardsJsonV1,
+): void => {
+  const seen = new Set<string>();
+
+  for (const card of cardsJson.cards) {
+    if (seen.has(card.id)) {
+      issues.push({
+        level: "error",
+        code: "duplicate_card_id",
+        path: "cards.json",
+        cardId: card.id,
+        message:
+          "cards.json に重複した card id が含まれています。デッキの同一性が曖昧になるため読み込めません。",
+      });
+      continue;
+    }
+
+    seen.add(card.id);
+    pushDuplicateBlockIssues(issues, card);
+  }
+};
+
+const pushMediaManifestIssues = (
+  issues: MfDeckIssue[],
+  mediaManifest: MfDeckMediaManifestV1 | undefined,
+  media?: Record<string, Uint8Array>,
+): void => {
+  if (!mediaManifest) return;
+
+  if (mediaManifest.media.length > MF_DECK_MAX_MEDIA_ENTRIES) {
+    issues.push({
+      level: "error",
+      code: "too_many_media_entries",
+      path: MF_DECK_MEDIA_MANIFEST_PATH,
+      message: `media/manifest.json のメディア件数が上限 ${MF_DECK_MAX_MEDIA_ENTRIES} 件を超えています。`,
+    });
+  }
+
+  const seenPaths = new Set<string>();
+
+  for (const entry of mediaManifest.media) {
+    if (seenPaths.has(entry.path)) {
+      issues.push({
+        level: "error",
+        code: "duplicate_media_path",
+        path: entry.path,
+        message: "media/manifest.json に重複した media path が含まれています。",
+      });
+      continue;
+    }
+
+    seenPaths.add(entry.path);
+
+    const bytes = media?.[entry.path];
+    if (!bytes) {
+      issues.push({
+        level: "warning",
+        code: "missing_media",
+        path: entry.path,
+        message: `${entry.path} が見つかりません。該当メディア参照は復元できません。`,
+      });
+      continue;
+    }
+
+    if (entry.sizeBytes !== bytes.byteLength) {
+      issues.push({
+        level: "warning",
+        code: "media_size_mismatch",
+        path: entry.path,
+        message: `${entry.path} の sizeBytes と実データサイズが一致しません。実データを正として扱います。`,
+      });
+    }
+  }
+
+  for (const mediaPath of Object.keys(media ?? {})) {
+    if (!seenPaths.has(mediaPath)) {
+      issues.push({
+        level: "warning",
+        code: "unknown_media_entry",
+        path: mediaPath,
+        message:
+          "media/manifest.json に存在しないメディアファイルが含まれています。参照が無ければ無視されます。",
+      });
+    }
+  }
 };
 
 export const isMfDeckManifestV1 = (
@@ -76,7 +235,8 @@ export const isMfDeckManifestV1 = (
   if (
     typeof value.deck.cardCount !== "number" ||
     !Number.isInteger(value.deck.cardCount) ||
-    value.deck.cardCount < 0
+    value.deck.cardCount < 0 ||
+    value.deck.cardCount > MF_DECK_MAX_CARDS
   ) {
     return false;
   }
@@ -108,7 +268,6 @@ export const isMfDeckCardsJsonV1 = (
   if (value.format !== "manifolia.deck.cards") return false;
   if (value.version !== MF_DECK_VERSION) return false;
   if (!Array.isArray(value.cards)) return false;
-
   return value.cards.every((card) => {
     if (!isRecord(card)) return false;
     if (!isNonEmptyString(card.id)) return false;
@@ -152,7 +311,6 @@ export const isMfDeckMediaManifestV1 = (
   if (value.format !== "manifolia.deck.media") return false;
   if (value.version !== MF_DECK_VERSION) return false;
   if (!Array.isArray(value.media)) return false;
-
   return value.media.every((entry) => {
     if (!isRecord(entry)) return false;
     if (!isNonEmptyString(entry.path) || !isMfDeckMediaPath(entry.path)) {
@@ -242,19 +400,12 @@ export const validateMfDeckArchive = (input: {
     });
   }
 
-  if (mediaManifest) {
-    const media = input.media ?? {};
+  pushCardLimitIssues(issues, cardsJson);
+  pushDuplicateCardIssues(issues, cardsJson);
+  pushMediaManifestIssues(issues, mediaManifest, input.media);
 
-    for (const entry of mediaManifest.media) {
-      if (!media[entry.path]) {
-        issues.push({
-          level: "warning",
-          code: "missing_media",
-          path: entry.path,
-          message: `${entry.path} が見つかりません。該当メディア参照は復元できません。`,
-        });
-      }
-    }
+  if (issues.some((issue) => issue.level === "error")) {
+    return { ok: false, issues };
   }
 
   return {

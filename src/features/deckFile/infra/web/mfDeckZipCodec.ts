@@ -125,6 +125,15 @@ const collectMediaEntries = (
 };
 
 export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => {
+  const validation = validateMfDeckArchive(archive);
+
+  if (!validation.ok) {
+    throw new MfDeckValidationError(
+      "mfdeck の作成前検証に失敗しました。",
+      validation.issues,
+    );
+  }
+
   const entries: Record<string, Uint8Array> = {
     [MF_DECK_MANIFEST_PATH]: strToU8(JSON.stringify(archive.manifest, null, 2)),
     [MF_DECK_CARDS_PATH]: strToU8(JSON.stringify(archive.cardsJson, null, 2)),
@@ -135,6 +144,8 @@ export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => {
       JSON.stringify(archive.mediaManifest, null, 2),
     );
   }
+
+  let totalMediaBytes = 0;
 
   if (archive.media) {
     for (const [path, bytes] of Object.entries(archive.media)) {
@@ -148,6 +159,30 @@ export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => {
           },
         ]);
       }
+
+      if (bytes.byteLength > MF_DECK_MAX_MEDIA_ENTRY_BYTES) {
+        throw new MfDeckValidationError(`${path} が大きすぎます。`, [
+          {
+            level: "error",
+            code: "file_too_large",
+            path,
+            message: `${path} が大きすぎます。`,
+          },
+        ]);
+      }
+
+      totalMediaBytes += bytes.byteLength;
+
+      if (totalMediaBytes > MF_DECK_MAX_MEDIA_TOTAL_BYTES) {
+        throw new MfDeckValidationError("mfdeck 内のメディア合計サイズが大きすぎます。", [
+          {
+            level: "error",
+            code: "file_too_large",
+            message: "mfdeck 内のメディア合計サイズが大きすぎます。",
+          },
+        ]);
+      }
+
       entries[path] = bytes;
     }
   }
