@@ -11,8 +11,6 @@ import {
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
   EXPLORER_ROW_TITLE_SLOT_CLASS,
-  FOLDER_ROW_ICON_ACTIVE_CLASS,
-  FOLDER_ROW_ICON_MUTED_CLASS,
   FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
@@ -40,9 +38,6 @@ type PinnedFolderEntry = {
   folder: FolderTreeNode;
   contentCount: number;
 };
-
-const SIDEBAR_SECTION_LABEL_CLASS =
-  "px-3 pb-1 pt-1 text-[11px] font-medium leading-5 text-muted-foreground";
 
 const PINNED_FOLDER_SECTION_CONTENT_ID =
   "pinned-folder-sidebar-section-content";
