@@ -49,8 +49,14 @@ type ExplorerColumnPathEventDetail = {
   crumbs?: BreadcrumbCrumb[];
 };
 
+type ExplorerColumnPathNavigateEventDetail = {
+  folderId?: string | null;
+};
+
 const EXPLORER_COLUMN_PATH_CHANGE_EVENT =
   "manifolia:explorer-column-path-change";
+const EXPLORER_COLUMN_PATH_NAVIGATE_EVENT =
+  "manifolia:explorer-column-path-navigate";
 
 const EXPLORER_HOME_CRUMB: BreadcrumbCrumb = {
   label: "ホーム",
@@ -68,6 +74,19 @@ const readInitialExplorerColumnPathCrumbs = (): BreadcrumbCrumb[] => {
   return (
     (window as ExplorerColumnPathWindow).__manifoliaExplorerColumnPathCrumbs ??
     []
+  );
+};
+
+const dispatchExplorerColumnPathNavigate = (folderId: string | null) => {
+  if (typeof window === "undefined") return;
+
+  window.dispatchEvent(
+    new CustomEvent<ExplorerColumnPathNavigateEventDetail>(
+      EXPLORER_COLUMN_PATH_NAVIGATE_EVENT,
+      {
+        detail: { folderId },
+      },
+    ),
   );
 };
 
@@ -353,6 +372,21 @@ const ExplorerPathBar = () => {
 
   const handleCrumbClick = (crumb: BreadcrumbCrumb) => {
     if (!crumb.to) return;
+
+    const crumbWithFolderId = crumb as BreadcrumbCrumb & {
+      folderId?: string | null;
+    };
+
+    if (typeof crumbWithFolderId.folderId === "string") {
+      dispatchExplorerColumnPathNavigate(crumbWithFolderId.folderId);
+      return;
+    }
+
+    if (crumb.to === EXPLORER_ROOT_CRUMB.to) {
+      dispatchExplorerColumnPathNavigate(null);
+      return;
+    }
+
     void navigate(crumb.to);
   };
 

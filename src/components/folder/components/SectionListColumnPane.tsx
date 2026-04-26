@@ -72,6 +72,10 @@ type ExplorerColumnPathWindow = Window & {
   __manifoliaExplorerColumnPathCrumbs?: BreadcrumbCrumb[];
 };
 
+type ExplorerColumnPathNavigateEventDetail = {
+  folderId?: string | null;
+};
+
 type FolderLike = Pick<Folder, "id" | "folderName"> & {
   parentFolderId?: string | null;
   folder_name?: string | null;
@@ -86,6 +90,8 @@ type ColumnFolderEntry = {
 
 const EXPLORER_COLUMN_PATH_CHANGE_EVENT =
   "manifolia:explorer-column-path-change";
+const EXPLORER_COLUMN_PATH_NAVIGATE_EVENT =
+  "manifolia:explorer-column-path-navigate";
 const ROOT_FOLDER_KEY = "__root__";
 const DEFAULT_COLUMN_WIDTH_PX = 280;
 
@@ -275,8 +281,6 @@ export const SectionListColumnPane = ({
   onMoveCardToSet,
   onReorderCardsInCardSet,
 }: SectionListColumnPaneProps) => {
-  void onFolderSelect;
-
   const contentRef = useRef<HTMLDivElement | null>(null);
   const explorerLayoutMode = useExplorerStore(
     (state) => state.explorerLayoutMode,
@@ -356,10 +360,18 @@ export const SectionListColumnPane = ({
   const [columnPathIds, setColumnPathIds] = useState<string[]>(
     selectedFolderPathIds,
   );
+  const [detailCardSetId, setDetailCardSetId] = useState<string | null>(
+    selectedCardSetId,
+  );
 
   useEffect(() => {
     setColumnPathIds(selectedFolderPathIds);
+    setDetailCardSetId(null);
   }, [resetToken, selectedFolderPathIds]);
+
+  useEffect(() => {
+    setDetailCardSetId(selectedCardSetId);
+  }, [selectedCardSetId]);
 
   useEffect(() => {
     dispatchExplorerColumnPathChange(buildFolderCrumbs(columnPathIds));
@@ -414,15 +426,19 @@ export const SectionListColumnPane = ({
   const handleDetailFolderOpen = useCallback(
     (folderId: string) => {
       const folderPathIds = buildFolderPathIds(folderId);
+      setDetailCardSetId(null);
       setColumnPathIds(folderPathIds);
+      onFolderSelect?.(folderId);
+      onItemSelect(null);
       dispatchExplorerColumnPathChange(buildFolderCrumbs(folderPathIds));
     },
-    [buildFolderCrumbs, buildFolderPathIds],
+    [buildFolderCrumbs, buildFolderPathIds, onFolderSelect, onItemSelect],
   );
 
   const handleDetailCardSetOpen = useCallback(
     (cardSetId: string | null) => {
       if (!cardSetId) {
+        setDetailCardSetId(null);
         dispatchExplorerColumnPathChange(buildFolderCrumbs(columnPathIds));
         return;
       }
@@ -433,6 +449,7 @@ export const SectionListColumnPane = ({
       const folderPathIds = buildFolderPathIds(getCardSetFolderId(cardSet));
       const crumbs = buildFolderCrumbs(folderPathIds);
       crumbs.push({ label: getCardSetLabel(cardSet) });
+      setDetailCardSetId(cardSetId);
       setColumnPathIds(folderPathIds);
       dispatchExplorerColumnPathChange(crumbs);
     },
@@ -452,6 +469,7 @@ export const SectionListColumnPane = ({
           crumbs.push({ label: getCardSetLabel(cardSet) });
         }
 
+        setDetailCardSetId(item.id);
         setColumnPathIds(folderPathIds);
         dispatchExplorerColumnPathChange(crumbs);
       }
@@ -467,6 +485,7 @@ export const SectionListColumnPane = ({
           crumbs.push({ label: getDocumentLabel(documentItem) });
         }
 
+        setDetailCardSetId(null);
         setColumnPathIds(folderPathIds);
         dispatchExplorerColumnPathChange(crumbs);
       }
@@ -487,6 +506,7 @@ export const SectionListColumnPane = ({
           crumbs.push({ label: getCardLabel(card) });
         }
 
+        setDetailCardSetId(cardSet?.id ?? null);
         setColumnPathIds(folderPathIds);
         dispatchExplorerColumnPathChange(crumbs);
       }
@@ -511,6 +531,7 @@ export const SectionListColumnPane = ({
       const folderPathIds = buildFolderPathIds(getCardSetFolderId(cardSet));
       const crumbs = buildFolderCrumbs(folderPathIds);
       crumbs.push({ label: getCardSetLabel(cardSet) });
+      setDetailCardSetId(selectedItem.id);
       dispatchExplorerColumnPathChange(crumbs);
       return;
     }
@@ -524,6 +545,7 @@ export const SectionListColumnPane = ({
       const folderPathIds = buildFolderPathIds(getDocumentFolderId(documentItem));
       const crumbs = buildFolderCrumbs(folderPathIds);
       crumbs.push({ label: getDocumentLabel(documentItem) });
+      setDetailCardSetId(null);
       dispatchExplorerColumnPathChange(crumbs);
       return;
     }
@@ -543,6 +565,7 @@ export const SectionListColumnPane = ({
       }
 
       crumbs.push({ label: getCardLabel(card) });
+      setDetailCardSetId(cardSet?.id ?? null);
       dispatchExplorerColumnPathChange(crumbs);
     }
   }, [
@@ -553,6 +576,34 @@ export const SectionListColumnPane = ({
     documents,
     selectedItem,
   ]);
+
+  useEffect(() => {
+    const handleColumnPathNavigate = ((event: Event) => {
+      const detail = (
+        event as CustomEvent<ExplorerColumnPathNavigateEventDetail>
+      ).detail;
+      const folderId = detail?.folderId ?? null;
+      const folderPathIds = buildFolderPathIds(folderId);
+
+      setDetailCardSetId(null);
+      setColumnPathIds(folderPathIds);
+      onFolderSelect?.(folderId);
+      onItemSelect(null);
+      dispatchExplorerColumnPathChange(buildFolderCrumbs(folderPathIds));
+    }) as EventListener;
+
+    window.addEventListener(
+      EXPLORER_COLUMN_PATH_NAVIGATE_EVENT,
+      handleColumnPathNavigate,
+    );
+
+    return () => {
+      window.removeEventListener(
+        EXPLORER_COLUMN_PATH_NAVIGATE_EVENT,
+        handleColumnPathNavigate,
+      );
+    };
+  }, [buildFolderCrumbs, buildFolderPathIds, onFolderSelect, onItemSelect]);
 
   const currentDetailFolderId =
     columnPathIds.length > 0 ? columnPathIds[columnPathIds.length - 1] : null;
@@ -580,7 +631,7 @@ export const SectionListColumnPane = ({
             documents={documents}
             currentFolderId={currentDetailFolderId}
             selectedItem={selectedItem}
-            selectedCardSetId={selectedCardSetId}
+            currentCardSetId={detailCardSetId}
             onFolderOpen={handleDetailFolderOpen}
             onCardSetOpen={handleDetailCardSetOpen}
             onItemSelect={handleItemSelect}
