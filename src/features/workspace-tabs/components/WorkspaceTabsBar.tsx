@@ -21,6 +21,10 @@ const TABS_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "drag",
 };
 
+const TABS_NO_DRAG_STYLE: AppRegionStyle = {
+  WebkitAppRegion: "no-drag",
+};
+
 const resolveTabIcon = (tab: WorkspaceTab) => {
   if (tab.kind === "explorer") return FolderOutlineIcon;
   if (tab.kind === "cardSet") return Layers;
@@ -61,6 +65,9 @@ export const WorkspaceTabsBar = ({
   );
 
   const isTitlebar = variant === "titlebar";
+  const interactiveStyle = isTitlebar
+    ? noDragStyle
+    : (noDragStyle ?? TABS_NO_DRAG_STYLE);
 
   return (
     <div
@@ -84,7 +91,7 @@ export const WorkspaceTabsBar = ({
           return (
             <div
               key={tab.id}
-              style={resolveTabStyle(tab)}
+              style={{ ...resolveTabStyle(tab), ...interactiveStyle }}
               className={cn(
                 "group/tab flex min-w-0 items-center overflow-hidden border text-[13px] transition-colors",
                 index === 0 ? "ml-0" : "ml-1",
@@ -99,7 +106,7 @@ export const WorkspaceTabsBar = ({
             >
               <button
                 type="button"
-                style={noDragStyle}
+                style={interactiveStyle}
                 className={cn(
                   "flex h-full min-w-0 flex-1 items-center gap-2 text-left outline-none",
                   selected ? "px-4" : "px-3",
@@ -120,7 +127,7 @@ export const WorkspaceTabsBar = ({
               {tab.isClosable ? (
                 <button
                   type="button"
-                  style={noDragStyle}
+                  style={interactiveStyle}
                   className={cn(
                     "mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#9e9e9e] outline-none transition-colors",
                     "hover:bg-black/10 hover:text-[#4b4b4b]",
@@ -144,7 +151,7 @@ export const WorkspaceTabsBar = ({
 
       <button
         type="button"
-        style={noDragStyle}
+        style={interactiveStyle}
         className="mb-[5px] mr-2 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#6b6b6b] outline-none transition-colors hover:bg-[#eeeeee] hover:text-[#1a1a1a]"
         aria-label="新しいエクスプローラータブを開く"
         title="新しいエクスプローラータブ"
