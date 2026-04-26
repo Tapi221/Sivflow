@@ -1,16 +1,18 @@
 import {
   Fragment,
+  useEffect,
   useMemo,
+  useState,
   type CSSProperties,
   type ReactNode,
 } from "react";
-import { useNavigate } from "react-router-dom";
 import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useTags } from "@/hooks/settings/useTags";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
+import { useNavigate } from "react-router-dom";
 
 import { cn } from "@/lib/utils";
 
@@ -29,6 +31,36 @@ type ExplorerToolbarButtonProps = {
   className?: string;
   onClick?: () => void;
   children: ReactNode;
+};
+
+type ExplorerColumnPathWindow = Window & {
+  __manifoliaExplorerColumnPathCrumbs?: BreadcrumbCrumb[];
+};
+
+type ExplorerColumnPathEventDetail = {
+  crumbs?: BreadcrumbCrumb[];
+};
+
+const EXPLORER_COLUMN_PATH_CHANGE_EVENT =
+  "manifolia:explorer-column-path-change";
+
+const EXPLORER_HOME_CRUMB: BreadcrumbCrumb = {
+  label: "ホーム",
+  to: "/folders?home=1",
+};
+
+const EXPLORER_ROOT_CRUMB: BreadcrumbCrumb = {
+  label: "エクスプローラー",
+  to: "/folders?view=section-list",
+};
+
+const readInitialExplorerColumnPathCrumbs = (): BreadcrumbCrumb[] => {
+  if (typeof window === "undefined") return [];
+
+  return (
+    (window as ExplorerColumnPathWindow).__manifoliaExplorerColumnPathCrumbs ??
+    []
+  );
 };
 
 const ExplorerToolbarButton = ({
@@ -257,23 +289,39 @@ const HomeIcon = () => (
   </svg>
 );
 
-const EXPLORER_HOME_CRUMB: BreadcrumbCrumb = {
-  label: "ホーム",
-  to: "/folders?home=1",
-};
-
-const EXPLORER_ROOT_CRUMB: BreadcrumbCrumb = {
-  label: "エクスプローラー",
-  to: "/folders?view=section-list",
-};
-
 const ExplorerPathBar = () => {
   const navigate = useNavigate();
   const extraCrumbs = useBreadcrumbExtraCrumbs();
+  const [columnPathCrumbs, setColumnPathCrumbs] = useState<BreadcrumbCrumb[]>(
+    readInitialExplorerColumnPathCrumbs,
+  );
+
+  useEffect(() => {
+    const handleColumnPathChange = ((event: Event) => {
+      const detail = (event as CustomEvent<ExplorerColumnPathEventDetail>)
+        .detail;
+      setColumnPathCrumbs(detail?.crumbs ?? []);
+    }) as EventListener;
+
+    window.addEventListener(
+      EXPLORER_COLUMN_PATH_CHANGE_EVENT,
+      handleColumnPathChange,
+    );
+
+    return () => {
+      window.removeEventListener(
+        EXPLORER_COLUMN_PATH_CHANGE_EVENT,
+        handleColumnPathChange,
+      );
+    };
+  }, []);
+
+  const visibleExtraCrumbs =
+    extraCrumbs.length > 0 ? extraCrumbs : columnPathCrumbs;
 
   const pathCrumbs = useMemo(() => {
-    const normalizedExtraCrumbs = extraCrumbs.map((crumb, index) =>
-      index === extraCrumbs.length - 1
+    const normalizedExtraCrumbs = visibleExtraCrumbs.map((crumb, index) =>
+      index === visibleExtraCrumbs.length - 1
         ? { ...crumb, to: undefined }
         : crumb,
     );
@@ -284,7 +332,7 @@ const ExplorerPathBar = () => {
         : { ...EXPLORER_ROOT_CRUMB, to: undefined };
 
     return [EXPLORER_HOME_CRUMB, rootCrumb, ...normalizedExtraCrumbs];
-  }, [extraCrumbs]);
+  }, [visibleExtraCrumbs]);
 
   const handleCrumbClick = (crumb: BreadcrumbCrumb) => {
     if (!crumb.to) return;
