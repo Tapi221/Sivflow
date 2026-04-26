@@ -11,19 +11,19 @@ import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 export const TREE_VIEW_SIDEBAR_TOGGLE_EVENT =
   "manifolia:treeview-sidebar-toggle";
 
-const WORKSPACE_EXPLORER_TAB_WIDTH_VAR = "--workspace-explorer-tab-width";
+const SECTION_LIST_PANE_LEFT_VAR = "--manifolia-section-list-pane-left";
 
 const clampSidebarWidth = (width: number) =>
   Math.min(Math.max(width, SIDEBAR_WIDTH_LIMITS.min), SIDEBAR_WIDTH_LIMITS.max);
 
-const publishWorkspaceExplorerTabWidth = (width: number) => {
+const publishSectionListPaneLeft = (width: number) => {
   if (typeof document === "undefined") {
     return;
   }
 
   const nextWidth = Math.max(0, Math.round(width));
   document.documentElement.style.setProperty(
-    WORKSPACE_EXPLORER_TAB_WIDTH_VAR,
+    SECTION_LIST_PANE_LEFT_VAR,
     `${nextWidth}px`,
   );
 };
@@ -79,7 +79,7 @@ export const useTreeViewSidebar = () => {
     const nextWidth = Math.max(0, Math.round(width));
     const cssWidth = `${nextWidth}px`;
 
-    publishWorkspaceExplorerTabWidth(nextWidth);
+    publishSectionListPaneLeft(nextWidth);
 
     if (!element) {
       return;
