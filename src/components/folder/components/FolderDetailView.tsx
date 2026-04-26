@@ -29,8 +29,10 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type DragEvent as ReactDragEvent,
   type KeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 
 interface FolderDetailViewProps {
@@ -76,6 +78,7 @@ interface FolderDetailViewProps {
 }
 
 type ExplorerDetailSortKey = "manual" | "name" | "updatedAt" | "kind" | "size";
+type ExplorerDetailColumnId = "name" | "tags" | "path" | "updatedAt" | "kind" | "size";
 type ExplorerDetailSortDirection = "asc" | "desc";
 type ExplorerDetailDropPosition = "before" | "after" | "inside" | "append";
 
@@ -94,12 +97,114 @@ type ExplorerDetailDropIntent = {
   position: ExplorerDetailDropPosition;
 };
 
-const DETAIL_GRID_CLASS =
-  "grid grid-cols-[minmax(240px,1.24fr)_minmax(140px,0.72fr)_minmax(320px,1.42fr)_150px_112px_96px]";
+const EXPLORER_DETAIL_COLUMN_WIDTHS_STORAGE_KEY =
+  "manifolia:folder-detail-view:column-widths";
+
+const DETAIL_GRID_CLASS = "grid";
+
+const DETAIL_COLUMN_IDS = [
+  "name",
+  "tags",
+  "path",
+  "updatedAt",
+  "kind",
+  "size",
+] as const satisfies readonly ExplorerDetailColumnId[];
+
+type ExplorerDetailColumnWidths = Record<ExplorerDetailColumnId, number>;
+
+const DETAIL_DEFAULT_COLUMN_WIDTHS = {
+  name: 320,
+  tags: 190,
+  path: 420,
+  updatedAt: 168,
+  kind: 128,
+  size: 112,
+} satisfies ExplorerDetailColumnWidths;
+
+const DETAIL_MIN_COLUMN_WIDTHS = {
+  name: 180,
+  tags: 120,
+  path: 220,
+  updatedAt: 132,
+  kind: 96,
+  size: 84,
+} satisfies ExplorerDetailColumnWidths;
+
+const DETAIL_MAX_COLUMN_WIDTH_PX = 820;
 
 const DEFAULT_SORT_STATE: ExplorerDetailSortState = {
   key: "manual",
   direction: "asc",
+};
+
+const clampDetailColumnWidth = (
+  columnId: ExplorerDetailColumnId,
+  width: number,
+): number => {
+  if (!Number.isFinite(width)) return DETAIL_DEFAULT_COLUMN_WIDTHS[columnId];
+
+  return Math.min(
+    Math.max(Math.round(width), DETAIL_MIN_COLUMN_WIDTHS[columnId]),
+    DETAIL_MAX_COLUMN_WIDTH_PX,
+  );
+};
+
+const normalizeDetailColumnWidths = (value: unknown): ExplorerDetailColumnWidths => {
+  const next = { ...DETAIL_DEFAULT_COLUMN_WIDTHS };
+
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return next;
+  }
+
+  const record = value as Partial<Record<ExplorerDetailColumnId, unknown>>;
+
+  DETAIL_COLUMN_IDS.forEach((columnId) => {
+    const width = record[columnId];
+    if (typeof width !== "number") return;
+    next[columnId] = clampDetailColumnWidth(columnId, width);
+  });
+
+  return next;
+};
+
+const readStoredDetailColumnWidths = (): ExplorerDetailColumnWidths => {
+  if (typeof window === "undefined") {
+    return { ...DETAIL_DEFAULT_COLUMN_WIDTHS };
+  }
+
+  const raw = window.localStorage.getItem(
+    EXPLORER_DETAIL_COLUMN_WIDTHS_STORAGE_KEY,
+  );
+  if (!raw) return { ...DETAIL_DEFAULT_COLUMN_WIDTHS };
+
+  try {
+    return normalizeDetailColumnWidths(JSON.parse(raw) as unknown);
+  } catch {
+    return { ...DETAIL_DEFAULT_COLUMN_WIDTHS };
+  }
+};
+
+const writeStoredDetailColumnWidths = (widths: ExplorerDetailColumnWidths) => {
+  if (typeof window === "undefined") return;
+
+  window.localStorage.setItem(
+    EXPLORER_DETAIL_COLUMN_WIDTHS_STORAGE_KEY,
+    JSON.stringify(widths),
+  );
+};
+
+const buildDetailGridTemplateColumns = (
+  widths: ExplorerDetailColumnWidths,
+): string => {
+  return DETAIL_COLUMN_IDS.map((columnId) => `${widths[columnId]}px`).join(" ");
+};
+
+const getDetailGridMinWidth = (widths: ExplorerDetailColumnWidths): number => {
+  return DETAIL_COLUMN_IDS.reduce(
+    (total, columnId) => total + widths[columnId],
+    0,
+  );
 };
 
 const getFolderParentId = (folder: Folder): string | null => {
@@ -283,29 +388,63 @@ const isFolderDescendantOf = (
 
 const HeaderCell = ({
   label,
+  columnId,
   sortKey,
   sortState,
   onSort,
+  onResizePointerDown,
+  onResetWidth,
   className,
 }: {
   label: string;
+  columnId: ExplorerDetailColumnId;
   sortKey?: Exclude<ExplorerDetailSortKey, "manual">;
   sortState: ExplorerDetailSortState;
   onSort: (key: Exclude<ExplorerDetailSortKey, "manual">) => void;
+  onResizePointerDown: (
+    columnId: ExplorerDetailColumnId,
+    event: ReactPointerEvent<HTMLSpanElement>,
+  ) => void;
+  onResetWidth: (columnId: ExplorerDetailColumnId) => void;
   className?: string;
 }) => {
   const sortable = Boolean(sortKey);
+  const content = (
+    <>
+      <span className="truncate">
+        {label}
+        {sortKey ? getHeaderSortLabel(sortState, sortKey) : ""}
+      </span>
+      <span
+        role="separator"
+        aria-orientation="vertical"
+        aria-label={`${label}列の幅を変更`}
+        title="ドラッグで列幅を変更 / ダブルクリックで初期幅に戻す"
+        className={cn(
+          "absolute bottom-0 right-[-3px] top-0 z-40 w-[7px] cursor-col-resize",
+          "after:absolute after:bottom-1 after:right-[3px] after:top-1 after:w-px after:bg-transparent",
+          "hover:after:bg-[#aaa69c] active:after:bg-[#7f7a72]",
+        )}
+        onPointerDown={(event) => onResizePointerDown(columnId, event)}
+        onDoubleClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          onResetWidth(columnId);
+        }}
+      />
+    </>
+  );
 
   if (!sortable || !sortKey) {
     return (
       <div
         role="columnheader"
         className={cn(
-          "flex min-w-0 items-center border-r border-[#e6e4dc] px-3",
+          "relative flex min-w-0 items-center border-r border-[#e6e4dc] px-3",
           className,
         )}
       >
-        <span className="truncate">{label}</span>
+        {content}
       </div>
     );
   }
@@ -317,16 +456,13 @@ const HeaderCell = ({
       aria-sort={getHeaderAriaSort(sortState, sortKey)}
       onClick={() => onSort(sortKey)}
       className={cn(
-        "flex min-w-0 items-center border-r border-[#e6e4dc] px-3 text-left",
+        "relative flex min-w-0 items-center border-r border-[#e6e4dc] px-3 text-left",
         "text-[#777671] transition-colors hover:bg-[#eeece4] hover:text-[#24231f]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className,
       )}
     >
-      <span className="truncate">
-        {label}
-        {getHeaderSortLabel(sortState, sortKey)}
-      </span>
+      {content}
     </button>
   );
 };
@@ -343,6 +479,7 @@ const FolderDetailRowView = ({
   onDragOver,
   onDragLeave,
   onDrop,
+  gridStyle,
 }: {
   row: ExplorerDetailRow;
   selected: boolean;
@@ -355,6 +492,7 @@ const FolderDetailRowView = ({
   onDragOver: (event: ReactDragEvent<HTMLDivElement>) => void;
   onDragLeave: (event: ReactDragEvent<HTMLDivElement>) => void;
   onDrop: (event: ReactDragEvent<HTMLDivElement>) => void;
+  gridStyle: CSSProperties;
 }) => {
   const Icon = getRowIcon(row.kind);
 
@@ -381,6 +519,7 @@ const FolderDetailRowView = ({
         dragging && "opacity-45",
         "focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
       )}
+      style={gridStyle}
       onClick={onActivate}
       onKeyDown={handleKeyDown}
       onDragStart={onDragStart}
@@ -467,6 +606,9 @@ export const FolderDetailView = ({
   onReorderCardsInCardSet,
 }: FolderDetailViewProps) => {
   const dragPayloadRef = useRef<ExplorerDetailDragPayload | null>(null);
+  const [columnWidths, setColumnWidths] = useState<ExplorerDetailColumnWidths>(
+    readStoredDetailColumnWidths,
+  );
   const [sortState, setSortState] =
     useState<ExplorerDetailSortState>(DEFAULT_SORT_STATE);
   const [openedCardSetId, setOpenedCardSetId] = useState<string | null>(
@@ -476,6 +618,73 @@ export const FolderDetailView = ({
   const [dropIntent, setDropIntent] = useState<ExplorerDetailDropIntent | null>(
     null,
   );
+
+  useEffect(() => {
+    writeStoredDetailColumnWidths(columnWidths);
+  }, [columnWidths]);
+
+  const detailGridStyle = useMemo(
+    () =>
+      ({
+        gridTemplateColumns: buildDetailGridTemplateColumns(columnWidths),
+      }) satisfies CSSProperties,
+    [columnWidths],
+  );
+
+  const detailTableStyle = useMemo(
+    () =>
+      ({
+        minWidth: `${getDetailGridMinWidth(columnWidths)}px`,
+      }) satisfies CSSProperties,
+    [columnWidths],
+  );
+
+  const handleResizePointerDown = useCallback(
+    (
+      columnId: ExplorerDetailColumnId,
+      event: ReactPointerEvent<HTMLSpanElement>,
+    ) => {
+      if (event.button !== 0) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const startX = event.clientX;
+      const startWidth = columnWidths[columnId];
+      const previousCursor = document.body.style.cursor;
+      const previousUserSelect = document.body.style.userSelect;
+
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+
+      const handlePointerMove = (pointerEvent: PointerEvent) => {
+        const deltaX = pointerEvent.clientX - startX;
+        const nextWidth = clampDetailColumnWidth(columnId, startWidth + deltaX);
+        setColumnWidths((current) => ({
+          ...current,
+          [columnId]: nextWidth,
+        }));
+      };
+
+      const handlePointerUp = () => {
+        document.body.style.cursor = previousCursor;
+        document.body.style.userSelect = previousUserSelect;
+        window.removeEventListener("pointermove", handlePointerMove);
+        window.removeEventListener("pointerup", handlePointerUp);
+      };
+
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointerup", handlePointerUp);
+    },
+    [columnWidths],
+  );
+
+  const handleResetColumnWidth = useCallback((columnId: ExplorerDetailColumnId) => {
+    setColumnWidths((current) => ({
+      ...current,
+      [columnId]: DETAIL_DEFAULT_COLUMN_WIDTHS[columnId],
+    }));
+  }, []);
 
   useEffect(() => {
     setOpenedCardSetId(null);
@@ -703,7 +912,8 @@ export const FolderDetailView = ({
         role="table"
         aria-label="エクスプローラー詳細表示"
         aria-rowcount={rows.length + 1}
-        className="min-w-[1060px] text-[13px]"
+        className="text-[13px]"
+        style={detailTableStyle}
       >
         <div
           role="row"
@@ -712,32 +922,59 @@ export const FolderDetailView = ({
             "sticky top-0 z-30 h-9 border-b border-[#dddcd5]",
             "bg-[rgba(250,249,246,0.98)] text-[12px] font-medium text-[#777671]",
           )}
+          style={detailGridStyle}
         >
           <HeaderCell
             label="名前"
+            columnId="name"
             sortKey="name"
             sortState={sortState}
             onSort={handleSort}
+            onResizePointerDown={handleResizePointerDown}
+            onResetWidth={handleResetColumnWidth}
           />
-          <HeaderCell label="タグ" sortState={sortState} onSort={handleSort} />
-          <HeaderCell label="パス" sortState={sortState} onSort={handleSort} />
+          <HeaderCell
+            label="タグ"
+            columnId="tags"
+            sortState={sortState}
+            onSort={handleSort}
+            onResizePointerDown={handleResizePointerDown}
+            onResetWidth={handleResetColumnWidth}
+          />
+          <HeaderCell
+            label="パス"
+            columnId="path"
+            sortState={sortState}
+            onSort={handleSort}
+            onResizePointerDown={handleResizePointerDown}
+            onResetWidth={handleResetColumnWidth}
+          />
           <HeaderCell
             label="更新日時"
+            columnId="updatedAt"
             sortKey="updatedAt"
             sortState={sortState}
             onSort={handleSort}
+            onResizePointerDown={handleResizePointerDown}
+            onResetWidth={handleResetColumnWidth}
           />
           <HeaderCell
             label="種類"
+            columnId="kind"
             sortKey="kind"
             sortState={sortState}
             onSort={handleSort}
+            onResizePointerDown={handleResizePointerDown}
+            onResetWidth={handleResetColumnWidth}
           />
           <HeaderCell
             label="サイズ"
+            columnId="size"
             sortKey="size"
             sortState={sortState}
             onSort={handleSort}
+            onResizePointerDown={handleResizePointerDown}
+            onResetWidth={handleResetColumnWidth}
             className="justify-end border-r-0 text-right"
           />
         </div>
@@ -763,6 +1000,7 @@ export const FolderDetailView = ({
                 dragging={dragging}
                 draggable={isManualOrder}
                 dropPosition={currentDropPosition}
+                gridStyle={detailGridStyle}
                 onActivate={() => handleActivateRow(row)}
                 onDragStart={(event) => {
                   if (!isManualOrder) {
