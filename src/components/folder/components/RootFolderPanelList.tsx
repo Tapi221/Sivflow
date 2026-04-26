@@ -252,7 +252,7 @@ export const RootFolderPanelList = ({
       <div
         aria-hidden="true"
         className={cn(
-          "folder-panel-list__bottom-fade pointer-events-none absolute bottom-0 left-0 right-3 z-10 h-12",
+          "folder-panel-list__bottom-fade pointer-events-none absolute bottom-0 left-0 right-3 z-10 h-7",
           showBottomFade ? "opacity-100" : "opacity-0",
         )}
       />
