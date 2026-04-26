@@ -1,7 +1,8 @@
 import { app, BrowserWindow, ipcMain, Menu, shell } from "electron";
+import * as fs from "node:fs";
 import * as http from "node:http";
 import * as path from "node:path";
-import { URL } from "node:url";
+import { URL, fileURLToPath } from "node:url";
 import {
   DESKTOP_GOOGLE_OAUTH_REDIRECT_URI,
   DESKTOP_OAUTH_LOOPBACK,
@@ -14,10 +15,13 @@ if (process.platform === "win32") {
 
 const ALLOWED_EXTERNAL_PROTOCOLS = new Set(["http:", "https:", "mailto:"]);
 const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+const SUPPORTED_IMPORT_FILE_EXTENSIONS = new Set([".mfdeck", ".mfcard"]);
+const MAX_DESKTOP_IMPORT_FILE_BYTES = 128 * 1024 * 1024;
 
 let mainWindow: BrowserWindow | null = null;
 let pendingOauthCallbackUrl: string | null = null;
 let oauthLoopbackServer: http.Server | null = null;
+let pendingDesktopImportFilePaths: string[] = [];
 
 app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
 app.commandLine.appendSwitch("disable-renderer-backgrounding");
@@ -93,6 +97,124 @@ const flushPendingOauthCallback = (): void => {
     toOauthCallbackPayload(pendingOauthCallbackUrl),
   );
   pendingOauthCallbackUrl = null;
+};
+
+const stripWrappingQuotes = (value: string): string => {
+  return value.replace(/^"+|"+$/g, "");
+};
+
+const resolveFileUrlPath = (value: string): string | null => {
+  try {
+    return fileURLToPath(value);
+  } catch {
+    return null;
+  }
+};
+
+const normalizeDesktopImportFilePath = (value: string): string | null => {
+  const trimmed = stripWrappingQuotes(value.trim());
+
+  if (!trimmed || trimmed.startsWith("--")) {
+    return null;
+  }
+
+  const candidate = trimmed.startsWith("file://")
+    ? resolveFileUrlPath(trimmed)
+    : trimmed;
+
+  if (!candidate) {
+    return null;
+  }
+
+  const extension = path.extname(candidate).toLowerCase();
+  if (!SUPPORTED_IMPORT_FILE_EXTENSIONS.has(extension)) {
+    return null;
+  }
+
+  const resolvedPath = path.resolve(candidate);
+
+  try {
+    const stat = fs.statSync(resolvedPath);
+    if (!stat.isFile()) {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
+  return resolvedPath;
+};
+
+const collectDesktopImportFilePaths = (
+  values: readonly string[],
+): string[] => {
+  const paths = new Set<string>();
+
+  for (const value of values) {
+    const normalizedPath = normalizeDesktopImportFilePath(value);
+    if (normalizedPath) {
+      paths.add(normalizedPath);
+    }
+  }
+
+  return Array.from(paths);
+};
+
+const flushPendingDesktopImportFiles = (): void => {
+  if (pendingDesktopImportFilePaths.length === 0) return;
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  if (mainWindow.webContents.isDestroyed()) return;
+  if (mainWindow.webContents.isLoadingMainFrame()) return;
+
+  const paths = [...pendingDesktopImportFilePaths];
+  pendingDesktopImportFilePaths = [];
+
+  mainWindow.webContents.send(IPC_CHANNELS.desktopImportFileOpen, { paths });
+};
+
+const enqueueDesktopImportFiles = (values: readonly string[]): void => {
+  const paths = collectDesktopImportFilePaths(values);
+  if (paths.length === 0) return;
+
+  pendingDesktopImportFilePaths = Array.from(
+    new Set([...pendingDesktopImportFilePaths, ...paths]),
+  );
+
+  flushPendingDesktopImportFiles();
+};
+
+const readDesktopImportFile = async (
+  rawFilePath: string,
+): Promise<{
+  path: string;
+  name: string;
+  size: number;
+  data: Buffer;
+}> => {
+  const normalizedPath = normalizeDesktopImportFilePath(rawFilePath);
+
+  if (!normalizedPath) {
+    throw new Error("Unsupported import file path");
+  }
+
+  const stat = await fs.promises.stat(normalizedPath);
+
+  if (!stat.isFile()) {
+    throw new Error("Import path is not a file");
+  }
+
+  if (stat.size > MAX_DESKTOP_IMPORT_FILE_BYTES) {
+    throw new Error("Import file is too large");
+  }
+
+  const data = await fs.promises.readFile(normalizedPath);
+
+  return {
+    path: normalizedPath,
+    name: path.basename(normalizedPath),
+    size: stat.size,
+    data,
+  };
 };
 
 const handleOauthCallback = (rawUrl: string): void => {
@@ -263,6 +385,7 @@ const createMainWindow = (): BrowserWindow => {
 
   windowRef.webContents.on("did-finish-load", () => {
     flushPendingOauthCallback();
+    flushPendingDesktopImportFiles();
   });
 
   windowRef.once("ready-to-show", () => {
@@ -341,6 +464,13 @@ const registerIpcHandlers = (): void => {
     IPC_CHANNELS.shellOpenExternal,
     async (_event, rawUrl: string) => {
       await openExternal(rawUrl);
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.desktopImportReadFile,
+    async (_event, rawFilePath: string) => {
+      return readDesktopImportFile(rawFilePath);
     },
   );
 
@@ -462,7 +592,14 @@ const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) {
   app.quit();
 } else {
-  app.on("second-instance", () => {
+  app.on("second-instance", (_event, commandLine) => {
+    focusMainWindow();
+    enqueueDesktopImportFiles(commandLine);
+  });
+
+  app.on("open-file", (event, filePath) => {
+    event.preventDefault();
+    enqueueDesktopImportFiles([filePath]);
     focusMainWindow();
   });
 
@@ -470,10 +607,12 @@ if (!gotSingleInstanceLock) {
     Menu.setApplicationMenu(null);
     registerIpcHandlers();
     createMainWindow();
+    enqueueDesktopImportFiles(process.argv);
 
     app.on("activate", () => {
       if (BrowserWindow.getAllWindows().length === 0) {
         createMainWindow();
+        flushPendingDesktopImportFiles();
       }
     });
   });

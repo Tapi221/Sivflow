@@ -11,6 +11,10 @@ import {
   detectImportFileKind,
   isSupportedImportFileKind,
 } from "@/features/import/domain/importFileKind";
+import {
+  readDesktopImportFile,
+  subscribeDesktopImportFileOpen,
+} from "@/features/import/desktop/desktopImportFiles";
 import { XlsxImportDialog } from "@/features/import/presentation/web/XlsxImportDialog";
 import { useCardCommands } from "@/hooks/card/useCardCommands";
 import { useCardsRead } from "@/hooks/card/useCardsRead";
@@ -449,6 +453,24 @@ const TreeViewLayout = ({
     },
     [currentHeaderActionFolderId, toast],
   );
+
+  useEffect(() => {
+    return subscribeDesktopImportFileOpen(async (payload) => {
+      const filePath = payload.paths[0];
+
+      if (!filePath) {
+        return;
+      }
+
+      try {
+        const file = await readDesktopImportFile(filePath);
+        openDroppedImportFile(file);
+      } catch (error) {
+        console.error("[TreeViewLayout] desktop import file open failed", error);
+        toast.error("ファイルを開けませんでした。");
+      }
+    });
+  }, [openDroppedImportFile, toast]);
 
   const handleImportDragEnter = useCallback(
     (event: DragEvent<HTMLDivElement>) => {

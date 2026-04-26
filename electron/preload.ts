@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 import type {
   DesktopBridgeApi,
+  DesktopImportFileOpenPayload,
   DesktopOauthCallbackPayload,
 } from "@/types/externals/desktop-api";
 import { IPC_CHANNELS } from "../constants/electron/app";
@@ -12,6 +13,22 @@ const desktopApi: DesktopBridgeApi = {
   shell: {
     openExternal: (url: string) =>
       ipcRenderer.invoke(IPC_CHANNELS.shellOpenExternal, url),
+  },
+  files: {
+    readImportFile: (filePath: string) =>
+      ipcRenderer.invoke(IPC_CHANNELS.desktopImportReadFile, filePath),
+    onImportFileOpen: (handler) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        payload: DesktopImportFileOpenPayload,
+      ) => handler(payload);
+
+      ipcRenderer.on(IPC_CHANNELS.desktopImportFileOpen, listener);
+
+      return () => {
+        ipcRenderer.removeListener(IPC_CHANNELS.desktopImportFileOpen, listener);
+      };
+    },
   },
   oauth: {
     start: (authorizeUrl: string) =>
