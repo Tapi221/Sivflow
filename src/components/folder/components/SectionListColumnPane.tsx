@@ -634,7 +634,7 @@ export const SectionListColumnPane = ({
     };
   }, [buildFolderCrumbs, buildFolderPathIds]);
 
-  const currentDetailFolderId =
+  const currentPaneFolderId =
     columnPathIds.length > 0 ? columnPathIds[columnPathIds.length - 1] : null;
   const isDetailLayout = explorerLayoutMode === "detail";
 
@@ -658,7 +658,7 @@ export const SectionListColumnPane = ({
             cards={cards}
             cardSets={cardSets}
             documents={documents}
-            currentFolderId={currentDetailFolderId}
+            currentFolderId={currentPaneFolderId}
             selectedItem={selectedItem}
             currentCardSetId={detailCardSetId}
             onFolderOpen={handleDetailFolderOpen}
@@ -679,7 +679,7 @@ export const SectionListColumnPane = ({
             cards={cards}
             cardSets={cardSets}
             documents={documents}
-            selectedFolderId={selectedFolderId}
+            selectedFolderId={currentPaneFolderId}
             selectedItem={selectedItem}
             selectedCardSetId={selectedCardSetId}
             isFiltering={isFiltering}
