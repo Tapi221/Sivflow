@@ -28,7 +28,7 @@ export const ExportMfDeckButton = ({
     setIsExporting(true);
 
     try {
-      const bytes = exportMfDeckBytes({
+      const bytes = await exportMfDeckBytes({
         cardSet,
         cards,
         tagById,

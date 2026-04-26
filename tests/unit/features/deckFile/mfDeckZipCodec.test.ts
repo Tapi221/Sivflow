@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   MF_DECK_FORMAT,
   MF_DECK_VERSION,
+  MF_DECK_MEDIA_URI_PREFIX,
   MfDeckValidationError,
   type MfDeckArchiveV1,
 } from "@/features/deckFile/domain/mfDeckTypes";
@@ -27,7 +28,7 @@ const createArchive = (): MfDeckArchiveV1 => ({
       defaultDisplayMode: "fixed",
     },
     capabilities: {
-      mediaBundled: false,
+      mediaBundled: true,
       tagNames: true,
       reviewProgressIncluded: false,
     },
@@ -47,9 +48,15 @@ const createArchive = (): MfDeckArchiveV1 => ({
           blocks: [
             {
               id: "block-front-001",
-              type: "text",
+              type: "image",
               orderIndex: 0,
-              content: "表面",
+              images: [
+                {
+                  id: "image-001",
+                  status: "ready",
+                  localUrl: `${MF_DECK_MEDIA_URI_PREFIX}media/images/0001-image.png` as never,
+                },
+              ],
             },
           ],
         },
@@ -66,19 +73,49 @@ const createArchive = (): MfDeckArchiveV1 => ({
       },
     ],
   },
+  mediaManifest: {
+    format: "manifolia.deck.media",
+    version: MF_DECK_VERSION,
+    media: [
+      {
+        path: "media/images/0001-image.png",
+        kind: "image",
+        mimeType: "image/png",
+        sizeBytes: 4,
+        sourceName: "image.png",
+      },
+    ],
+  },
+  media: {
+    "media/images/0001-image.png": new Uint8Array([137, 80, 78, 71]),
+  },
 });
 
+const toArrayBuffer = (bytes: Uint8Array): ArrayBuffer => {
+  return bytes.buffer.slice(
+    bytes.byteOffset,
+    bytes.byteOffset + bytes.byteLength,
+  ) as ArrayBuffer;
+};
+
 describe("mfDeckZipCodec", () => {
-  it("manifest.json と cards.json を含む mfdeck を往復できる", () => {
+  it("manifest.json と cards.json と media を含む mfdeck を往復できる", () => {
     const archive = createArchive();
     const bytes = encodeMfDeckArchive(archive);
-    const decoded = decodeMfDeckArchive(
-      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
-    );
+    const decoded = decodeMfDeckArchive(toArrayBuffer(bytes));
 
     expect(decoded.manifest.deck.name).toBe("テストデッキ");
     expect(decoded.cardsJson.cards).toHaveLength(1);
-    expect(decoded.cardsJson.cards[0]?.front.blocks[0]?.content).toBe("表面");
+    expect(decoded.cardsJson.cards[0]?.front.blocks[0]?.type).toBe("image");
+    expect(decoded.mediaManifest?.media[0]?.path).toBe(
+      "media/images/0001-image.png",
+    );
+    expect(Array.from(decoded.media?.["media/images/0001-image.png"] ?? [])).toEqual([
+      137,
+      80,
+      78,
+      71,
+    ]);
   });
 
   it("mfdeck v1 ではない manifest を拒否する", () => {
@@ -93,10 +130,8 @@ describe("mfDeckZipCodec", () => {
 
     const bytes = encodeMfDeckArchive(invalidArchive);
 
-    expect(() =>
-      decodeMfDeckArchive(
-        bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
-      ),
-    ).toThrow(MfDeckValidationError);
+    expect(() => decodeMfDeckArchive(toArrayBuffer(bytes))).toThrow(
+      MfDeckValidationError,
+    );
   });
 });

@@ -3,12 +3,19 @@ import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
 import {
   MF_DECK_CARDS_PATH,
   MF_DECK_MANIFEST_PATH,
+  MF_DECK_MEDIA_DIRECTORY,
+  MF_DECK_MEDIA_MANIFEST_PATH,
   type MfDeckArchiveV1,
   MfDeckValidationError,
 } from "@/features/deckFile/domain/mfDeckTypes";
+import {
+  isMfDeckMediaPath,
+  MF_DECK_MAX_MEDIA_ENTRY_BYTES,
+  MF_DECK_MAX_MEDIA_TOTAL_BYTES,
+} from "@/features/deckFile/domain/mfDeckMedia";
 import { validateMfDeckArchive } from "@/features/deckFile/domain/mfDeckGuards";
 
-export const MF_DECK_MAX_FILE_BYTES = 64 * 1024 * 1024;
+export const MF_DECK_MAX_FILE_BYTES = 128 * 1024 * 1024;
 export const MF_DECK_MAX_JSON_BYTES = 24 * 1024 * 1024;
 
 const parseJsonEntry = (text: string, path: string): unknown => {
@@ -57,21 +64,98 @@ const readRequiredTextEntry = (
   return strFromU8(entry);
 };
 
+const readOptionalTextEntry = (
+  entries: Record<string, Uint8Array>,
+  path: typeof MF_DECK_MEDIA_MANIFEST_PATH,
+): string | undefined => {
+  const entry = entries[path];
+  if (!entry) return undefined;
+
+  if (entry.byteLength > MF_DECK_MAX_JSON_BYTES) {
+    throw new MfDeckValidationError(`${path} が大きすぎます。`, [
+      {
+        level: "error",
+        code: "file_too_large",
+        path,
+        message: `${path} が大きすぎます。`,
+      },
+    ]);
+  }
+
+  return strFromU8(entry);
+};
+
+const collectMediaEntries = (
+  entries: Record<string, Uint8Array>,
+): Record<string, Uint8Array> | undefined => {
+  const media: Record<string, Uint8Array> = {};
+  let totalBytes = 0;
+
+  for (const [path, entry] of Object.entries(entries)) {
+    if (!path.startsWith(MF_DECK_MEDIA_DIRECTORY)) continue;
+    if (path === MF_DECK_MEDIA_MANIFEST_PATH) continue;
+    if (!isMfDeckMediaPath(path)) continue;
+
+    if (entry.byteLength > MF_DECK_MAX_MEDIA_ENTRY_BYTES) {
+      throw new MfDeckValidationError(`${path} が大きすぎます。`, [
+        {
+          level: "error",
+          code: "file_too_large",
+          path,
+          message: `${path} が大きすぎます。`,
+        },
+      ]);
+    }
+
+    totalBytes += entry.byteLength;
+    if (totalBytes > MF_DECK_MAX_MEDIA_TOTAL_BYTES) {
+      throw new MfDeckValidationError("mfdeck 内のメディア合計サイズが大きすぎます。", [
+        {
+          level: "error",
+          code: "file_too_large",
+          message: "mfdeck 内のメディア合計サイズが大きすぎます。",
+        },
+      ]);
+    }
+
+    media[path] = entry;
+  }
+
+  return Object.keys(media).length > 0 ? media : undefined;
+};
+
 export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => {
-  return zipSync(
-    {
-      [MF_DECK_MANIFEST_PATH]: strToU8(
-        JSON.stringify(archive.manifest, null, 2),
-      ),
-      [MF_DECK_CARDS_PATH]: strToU8(
-        JSON.stringify(archive.cardsJson, null, 2),
-      ),
-    },
-    {
-      level: 6,
-      mtime: new Date(Date.UTC(1980, 0, 1, 0, 0, 0)),
-    },
-  );
+  const entries: Record<string, Uint8Array> = {
+    [MF_DECK_MANIFEST_PATH]: strToU8(JSON.stringify(archive.manifest, null, 2)),
+    [MF_DECK_CARDS_PATH]: strToU8(JSON.stringify(archive.cardsJson, null, 2)),
+  };
+
+  if (archive.mediaManifest) {
+    entries[MF_DECK_MEDIA_MANIFEST_PATH] = strToU8(
+      JSON.stringify(archive.mediaManifest, null, 2),
+    );
+  }
+
+  if (archive.media) {
+    for (const [path, bytes] of Object.entries(archive.media)) {
+      if (!isMfDeckMediaPath(path)) {
+        throw new MfDeckValidationError("安全でないメディアパスを含む mfdeck です。", [
+          {
+            level: "error",
+            code: "unsafe_path",
+            path,
+            message: "安全でないメディアパスを含む mfdeck です。",
+          },
+        ]);
+      }
+      entries[path] = bytes;
+    }
+  }
+
+  return zipSync(entries, {
+    level: 6,
+    mtime: new Date(Date.UTC(1980, 0, 1, 0, 0, 0)),
+  });
 };
 
 export const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => {
@@ -116,10 +200,19 @@ export const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => {
 
   const manifestText = readRequiredTextEntry(entries, MF_DECK_MANIFEST_PATH);
   const cardsText = readRequiredTextEntry(entries, MF_DECK_CARDS_PATH);
+  const mediaManifestText = readOptionalTextEntry(
+    entries,
+    MF_DECK_MEDIA_MANIFEST_PATH,
+  );
+  const media = collectMediaEntries(entries);
 
   const validation = validateMfDeckArchive({
     manifest: parseJsonEntry(manifestText, MF_DECK_MANIFEST_PATH),
     cardsJson: parseJsonEntry(cardsText, MF_DECK_CARDS_PATH),
+    mediaManifest: mediaManifestText
+      ? parseJsonEntry(mediaManifestText, MF_DECK_MEDIA_MANIFEST_PATH)
+      : undefined,
+    media,
   });
 
   if (!validation.ok) {

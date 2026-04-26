@@ -1,8 +1,11 @@
-import { buildMfDeckArchive, type MfDeckTagLookup } from "@/features/deckFile/application/mapCardToMfDeck";
+import {
+  buildMfDeckArchive,
+  type MfDeckTagLookup,
+} from "@/features/deckFile/application/mapCardToMfDeck";
 import { encodeMfDeckArchive } from "@/features/deckFile/infra/web/mfDeckZipCodec";
 import type { Card, CardSet } from "@/types";
 
-export const exportMfDeckBytes = ({
+export const exportMfDeckBytes = async ({
   cardSet,
   cards,
   tagById,
@@ -12,7 +15,12 @@ export const exportMfDeckBytes = ({
   cards: Card[];
   tagById?: MfDeckTagLookup;
   appVersion?: string;
-}): Uint8Array => {
-  const archive = buildMfDeckArchive({ cardSet, cards, tagById, appVersion });
+}): Promise<Uint8Array> => {
+  const archive = await buildMfDeckArchive({
+    cardSet,
+    cards,
+    tagById,
+    appVersion,
+  });
   return encodeMfDeckArchive(archive);
 };

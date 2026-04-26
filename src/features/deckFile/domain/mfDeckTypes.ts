@@ -6,8 +6,10 @@ export const MF_DECK_VERSION = 1 as const;
 export const MF_DECK_MANIFEST_PATH = "manifest.json" as const;
 export const MF_DECK_CARDS_PATH = "cards.json" as const;
 export const MF_DECK_MEDIA_DIRECTORY = "media/" as const;
+export const MF_DECK_MEDIA_MANIFEST_PATH = "media/manifest.json" as const;
 export const MF_DECK_FILE_EXTENSION = ".mfdeck" as const;
 export const MF_DECK_MIME_TYPE = "application/vnd.manifolia.deck+zip" as const;
+export const MF_DECK_MEDIA_URI_PREFIX = "mfdeck://media/" as const;
 
 export type MfDeckIssueLevel = "error" | "warning";
 
@@ -16,15 +18,18 @@ export type MfDeckIssueCode =
   | "file_too_large"
   | "missing_manifest"
   | "missing_cards"
+  | "missing_media"
   | "invalid_zip"
   | "invalid_json"
   | "invalid_format"
   | "unsupported_version"
   | "invalid_manifest"
   | "invalid_cards"
+  | "invalid_media_manifest"
   | "empty_deck"
   | "card_count_mismatch"
   | "unsupported_media_reference"
+  | "unreadable_media"
   | "unsafe_path"
   | "unexpected_value";
 
@@ -35,6 +40,23 @@ export type MfDeckIssue = {
   path?: string;
   cardId?: string;
   blockId?: string;
+};
+
+export type MfDeckMediaKindV1 = "image" | "audio" | "unknown";
+
+export type MfDeckMediaEntryV1 = {
+  path: string;
+  kind: MfDeckMediaKindV1;
+  mimeType: string;
+  sizeBytes: number;
+  sourceName?: string;
+  sourceUrlHash?: string;
+};
+
+export type MfDeckMediaManifestV1 = {
+  format: "manifolia.deck.media";
+  version: typeof MF_DECK_VERSION;
+  media: MfDeckMediaEntryV1[];
 };
 
 export type MfDeckManifestV1 = {
@@ -94,6 +116,8 @@ export type MfDeckCardsJsonV1 = {
 export type MfDeckArchiveV1 = {
   manifest: MfDeckManifestV1;
   cardsJson: MfDeckCardsJsonV1;
+  mediaManifest?: MfDeckMediaManifestV1;
+  media?: Record<string, Uint8Array>;
 };
 
 export type MfDeckValidationResult =
