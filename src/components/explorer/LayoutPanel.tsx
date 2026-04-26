@@ -1,8 +1,10 @@
 import { SurfaceButton } from "@/components/ui/surface-button";
+import {
+  type ExplorerLayoutMode,
+  useExplorerStore,
+} from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
-import { useMemo, useState } from "react";
-
-type LayoutMode = "detail" | "list" | "card" | "icon" | "column";
+import { useMemo } from "react";
 
 const LayoutDetailIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -15,34 +17,6 @@ const LayoutDetailIcon = () => (
   </svg>
 );
 
-const LayoutListIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <rect x="4" y="5" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.6" />
-    <path d="M10.5 7H20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    <rect x="4" y="10" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.6" />
-    <path d="M10.5 12H20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    <rect x="4" y="15" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.6" />
-    <path d="M10.5 17H20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-  </svg>
-);
-
-const LayoutCardIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <rect x="5" y="6" width="14" height="12" rx="2.5" stroke="currentColor" strokeWidth="1.6" />
-    <path d="M8 10H16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    <path d="M8 13.5H14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity="0.9" />
-  </svg>
-);
-
-const LayoutIconGridIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <rect x="5" y="5" width="6" height="6" rx="1.6" stroke="currentColor" strokeWidth="1.6" />
-    <rect x="13" y="5" width="6" height="6" rx="1.6" stroke="currentColor" strokeWidth="1.6" />
-    <rect x="5" y="13" width="6" height="6" rx="1.6" stroke="currentColor" strokeWidth="1.6" />
-    <rect x="13" y="13" width="6" height="6" rx="1.6" stroke="currentColor" strokeWidth="1.6" />
-  </svg>
-);
-
 const LayoutColumnIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <rect x="4" y="5" width="16" height="14" rx="2.6" stroke="currentColor" strokeWidth="1.6" />
@@ -52,18 +26,16 @@ const LayoutColumnIcon = () => (
 );
 
 export const LayoutPanel = ({ className }: { className?: string }) => {
-  const [mode, setMode] = useState<LayoutMode>("detail");
+  const mode = useExplorerStore((state) => state.explorerLayoutMode);
+  const setMode = useExplorerStore((state) => state.setExplorerLayoutMode);
 
   const options = useMemo(
     () =>
       [
         { value: "detail" as const, label: "詳細", icon: <LayoutDetailIcon /> },
-        { value: "list" as const, label: "一覧", icon: <LayoutListIcon /> },
-        { value: "card" as const, label: "カード", icon: <LayoutCardIcon /> },
-        { value: "icon" as const, label: "アイコン", icon: <LayoutIconGridIcon /> },
         { value: "column" as const, label: "カラム", icon: <LayoutColumnIcon /> },
       ] satisfies ReadonlyArray<{
-        value: LayoutMode;
+        value: ExplorerLayoutMode;
         label: string;
         icon: JSX.Element;
       }>,
@@ -89,6 +61,7 @@ export const LayoutPanel = ({ className }: { className?: string }) => {
                   size="xs"
                   title={opt.label}
                   aria-label={opt.label}
+                  aria-pressed={selected}
                   className={cn(
                     "h-8 w-8 px-0",
                     "rounded-[9px]",
