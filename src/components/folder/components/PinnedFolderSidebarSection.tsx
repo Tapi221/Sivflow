@@ -18,7 +18,7 @@ import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDer
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, Folder } from "@/types";
-import { ChevronDown, ChevronRight, Plus } from "@/ui/icons";
+import { ChevronDown, ChevronRight } from "@/ui/icons";
 import { useMemo } from "react";
 
 interface PinnedFolderSidebarSectionProps {
@@ -42,17 +42,18 @@ type PinnedFolderEntry = {
 const PINNED_FOLDER_SECTION_CONTENT_ID =
   "pinned-folder-sidebar-section-content";
 const FOLDER_LIST_SECTION_CONTENT_ID = "folder-list-sidebar-section-content";
+
 const isSoftDeletedFolder = (folder: FolderTreeNode) => {
   return Boolean(
     (folder as { isDeleted?: boolean; is_deleted?: boolean }).isDeleted ??
-    (folder as { isDeleted?: boolean; is_deleted?: boolean }).is_deleted,
+      (folder as { isDeleted?: boolean; is_deleted?: boolean }).is_deleted,
   );
 };
 
 const isHiddenFolder = (folder: FolderTreeNode) => {
   return Boolean(
     (folder as { isHidden?: boolean; is_hidden?: boolean }).isHidden ??
-    (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden,
+      (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden,
   );
 };
 
@@ -62,6 +63,13 @@ const getPinnedFolderName = (folder: FolderTreeNode) => {
     (folder as { folderName?: string; folder_name?: string }).folder_name ??
     "無題のフォルダ"
   );
+};
+
+const preventCreateButtonFocusTransfer = (
+  event: React.PointerEvent<HTMLButtonElement> | React.MouseEvent<HTMLButtonElement>,
+) => {
+  event.preventDefault();
+  event.stopPropagation();
 };
 
 export const PinnedFolderSidebarSection = ({
@@ -148,6 +156,13 @@ export const PinnedFolderSidebarSection = ({
     }
     return count;
   }, [folderById, isFiltering, matchCountMap]);
+
+  const handleCreateRootFolder = () => {
+    if (isFolderListSectionCollapsed) {
+      toggleFolderListSectionCollapsed();
+    }
+    onCreateRootFolder?.();
+  };
 
   return (
     <section className="shrink-0 pb-0 pt-1">
@@ -238,9 +253,7 @@ export const PinnedFolderSidebarSection = ({
                 }
                 icon={
                   <ExplorerChromeFolderIcon
-                    className={cn(
-                      FOLDER_ROW_ICON_SIZE_CLASS,
-                    )}
+                    className={cn(FOLDER_ROW_ICON_SIZE_CLASS)}
                   />
                 }
                 role="button"
@@ -265,7 +278,7 @@ export const PinnedFolderSidebarSection = ({
             <button
               type="button"
               className={cn(
-                "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
+                "group flex h-7 min-w-0 flex-1 items-center gap-1 rounded-md px-1 text-left",
                 "text-[11px] font-medium leading-5 text-muted-foreground transition",
                 "hover:bg-muted/70 hover:text-foreground",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -288,23 +301,23 @@ export const PinnedFolderSidebarSection = ({
             {onCreateRootFolder ? (
               <button
                 type="button"
-                title="フォルダを追加"
-                aria-label="フォルダを追加"
                 className={cn(
                   "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md",
-                  "text-muted-foreground transition hover:bg-muted/70 hover:text-foreground",
+                  "text-[17px] leading-none text-muted-foreground transition",
+                  "hover:bg-muted/70 hover:text-foreground",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 )}
+                aria-label="ルートフォルダを作成"
+                title="ルートフォルダを作成"
+                onPointerDown={preventCreateButtonFocusTransfer}
+                onMouseDown={preventCreateButtonFocusTransfer}
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
-                  onCreateRootFolder();
-                }}
-                onPointerDown={(event) => {
-                  event.stopPropagation();
+                  handleCreateRootFolder();
                 }}
               >
-                <Plus className="h-4 w-4" />
+                +
               </button>
             ) : null}
           </div>

@@ -1,4 +1,5 @@
 import { ExplorerSidebarHeader } from "@/components/explorer/ExplorerSidebarHeader";
+import { PinnedFolderSidebarSection } from "@/components/folder/components/PinnedFolderSidebarSection";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
@@ -38,52 +39,6 @@ type ElementWithChildrenProps = {
 type InjectionResult = {
   node: React.ReactNode;
   injected: boolean;
-};
-
-const runAfterCurrentPointerAction = (callback: () => void) => {
-  if (typeof window === "undefined") {
-    callback();
-    return;
-  }
-
-  window.setTimeout(() => {
-    window.requestAnimationFrame(() => {
-      callback();
-    });
-  }, 0);
-};
-
-const shouldSuppressSidebarButtonFocus = (
-  target: EventTarget | null,
-  currentTarget: HTMLElement,
-): boolean => {
-  if (!(target instanceof HTMLElement)) return false;
-
-  const button = target.closest("button");
-  if (!button || !currentTarget.contains(button)) return false;
-
-  const label = [
-    button.getAttribute("aria-label"),
-    button.getAttribute("title"),
-    button.textContent,
-  ]
-    .filter((value): value is string => typeof value === "string")
-    .join(" ");
-
-  return (
-    label.includes("+") ||
-    label.includes("作成") ||
-    label.includes("新規") ||
-    label.includes("追加")
-  );
-};
-
-const suppressSidebarCreateButtonFocus = (
-  event: React.SyntheticEvent<HTMLDivElement>,
-) => {
-  if (shouldSuppressSidebarButtonFocus(event.target, event.currentTarget)) {
-    event.preventDefault();
-  }
 };
 
 const isElementWithChildren = (
@@ -365,15 +320,59 @@ const SidebarTagSectionContent = () => {
   );
 };
 
-const useSidebarChildrenWithTagSection = (children: React.ReactNode) => {
+const injectRootFolderCreateAction = (
+  node: React.ReactNode,
+  onCreateRootFolder: () => void,
+): React.ReactNode => {
+  if (!isElementWithChildren(node)) {
+    return node;
+  }
+
+  if (node.type === PinnedFolderSidebarSection) {
+    return React.cloneElement(
+      node as React.ReactElement<
+        React.ComponentProps<typeof PinnedFolderSidebarSection>
+      >,
+      { onCreateRootFolder },
+    );
+  }
+
+  const children = React.Children.toArray(node.props.children);
+  if (children.length === 0) {
+    return node;
+  }
+
+  let changed = false;
+  const nextChildren = children.map((child) => {
+    const nextChild = injectRootFolderCreateAction(child, onCreateRootFolder);
+    if (nextChild !== child) changed = true;
+    return nextChild;
+  });
+
+  if (!changed) {
+    return node;
+  }
+
+  return React.cloneElement(node, undefined, nextChildren);
+};
+
+const useSidebarChildrenWithTagSection = (
+  children: React.ReactNode,
+  onCreateRootFolder: () => void,
+) => {
   return useMemo(() => {
-    if (hasTagSectionContent(children)) return children;
+    const enhancedChildren = injectRootFolderCreateAction(
+      children,
+      onCreateRootFolder,
+    );
+
+    if (hasTagSectionContent(enhancedChildren)) return enhancedChildren;
 
     return injectAfterTagSectionToggle(
-      children,
+      enhancedChildren,
       <SidebarTagSectionContent key="tag-sidebar-section-content" />,
     ).node;
-  }, [children]);
+  }, [children, onCreateRootFolder]);
 };
 
 export const TreeViewSidebar = ({
@@ -400,22 +399,25 @@ export const TreeViewSidebar = ({
   rightGapPx = 0,
   integratedChrome = false,
 }: TreeViewSidebarProps) => {
-  const sidebarChildren = useSidebarChildrenWithTagSection(children);
+  const sidebarChildren = useSidebarChildrenWithTagSection(
+    children,
+    onCreateRootFolder,
+  );
 
   const handleCreateRootFolder = useCallback(() => {
-    runAfterCurrentPointerAction(onCreateRootFolder);
+    onCreateRootFolder();
   }, [onCreateRootFolder]);
 
   const handleCreateCardSet = useCallback(() => {
-    runAfterCurrentPointerAction(onCreateCardSet);
+    onCreateCardSet();
   }, [onCreateCardSet]);
 
   const handleAddDocument = useCallback(() => {
-    runAfterCurrentPointerAction(onAddDocument);
+    onAddDocument();
   }, [onAddDocument]);
 
   const handleBulkImport = useCallback(() => {
-    runAfterCurrentPointerAction(onBulkImport);
+    onBulkImport();
   }, [onBulkImport]);
 
   return (
@@ -475,8 +477,6 @@ export const TreeViewSidebar = ({
           <div
             ref={contentScrollRef}
             className="flex-1 min-h-0 min-w-0 overflow-hidden px-1 pb-1 outline-none"
-            onPointerDownCapture={suppressSidebarCreateButtonFocus}
-            onMouseDownCapture={suppressSidebarCreateButtonFocus}
           >
             {sidebarChildren}
           </div>
