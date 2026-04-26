@@ -313,35 +313,10 @@ export const RootFolderPanelRow = ({
       </span>
     ) : null;
 
-  const pinButtonNode =
-    entry.kind === "folder" ? (
-      <button
-        type="button"
-        className={cn(
-          "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground",
-          "opacity-0 transition hover:bg-muted hover:text-foreground group-hover:opacity-100",
-          isFolderPinned && "opacity-100 text-foreground",
-        )}
-        aria-label={isFolderPinned ? "ピン留めを外す" : "ピン留めする"}
-        title={isFolderPinned ? "ピン留めを外す" : "ピン留めする"}
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          handleTogglePinnedFolder();
-        }}
-        onPointerDown={(event) => {
-          event.stopPropagation();
-        }}
-      >
-        <ExplorerChromePinIcon className="h-3.5 w-3.5" />
-      </button>
-    ) : null;
-
   const trailingNode =
-    contentCountNode || pinButtonNode ? (
+    contentCountNode ? (
       <div className="ml-auto flex shrink-0 items-center gap-1 pr-1">
         {contentCountNode}
-        {pinButtonNode}
       </div>
     ) : null;
 
