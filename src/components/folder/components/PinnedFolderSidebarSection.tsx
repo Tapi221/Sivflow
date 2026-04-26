@@ -17,7 +17,7 @@ import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDer
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, Folder } from "@/types";
-import { FolderOutlineIcon, Pin } from "@/ui/icons";
+import { ChevronDown, ChevronRight, FolderOutlineIcon, Pin } from "@/ui/icons";
 import { useMemo } from "react";
 
 interface PinnedFolderSidebarSectionProps {
@@ -39,6 +39,9 @@ type PinnedFolderEntry = {
 
 const SIDEBAR_SECTION_LABEL_CLASS =
   "px-3 pb-1 pt-1 text-[11px] font-medium leading-5 text-muted-foreground";
+
+const PINNED_FOLDER_SECTION_CONTENT_ID =
+  "pinned-folder-sidebar-section-content";
 
 const isSoftDeletedFolder = (folder: FolderTreeNode) => {
   return Boolean(
@@ -73,6 +76,12 @@ export const PinnedFolderSidebarSection = ({
 }: PinnedFolderSidebarSectionProps) => {
   const pinnedFolderIds = useExplorerStore((state) => state.pinnedFolderIds);
   const unpinFolder = useExplorerStore((state) => state.unpinFolder);
+  const isPinnedFolderSectionCollapsed = useExplorerStore(
+    (state) => state.isPinnedFolderSectionCollapsed,
+  );
+  const togglePinnedFolderSectionCollapsed = useExplorerStore(
+    (state) => state.togglePinnedFolderSectionCollapsed,
+  );
 
   const treeFolders = folders as unknown as FolderTreeNode[];
 
@@ -127,9 +136,40 @@ export const PinnedFolderSidebarSection = ({
     <section className="shrink-0 pb-0 pt-1">
       {pinnedFolders.length > 0 ? (
         <>
-          <div className={SIDEBAR_SECTION_LABEL_CLASS}>ピン留め</div>
+          <div className="px-2 pb-1 pt-1">
+            <button
+              type="button"
+              className={cn(
+                "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
+                "text-[11px] font-medium leading-5 text-muted-foreground transition",
+                "hover:bg-muted/70 hover:text-foreground",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              )}
+              aria-expanded={!isPinnedFolderSectionCollapsed}
+              aria-controls={PINNED_FOLDER_SECTION_CONTENT_ID}
+              onClick={togglePinnedFolderSectionCollapsed}
+            >
+              {isPinnedFolderSectionCollapsed ? (
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-70" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" />
+              )}
 
-          <div className="space-y-0.5">
+              <span className="min-w-0 flex-1 truncate">ピン留め</span>
+
+              <span className="tabular-nums opacity-60">
+                {pinnedFolders.length}
+              </span>
+            </button>
+          </div>
+
+          <div
+            id={PINNED_FOLDER_SECTION_CONTENT_ID}
+            className={cn(
+              "space-y-0.5",
+              isPinnedFolderSectionCollapsed && "hidden",
+            )}
+          >
             {pinnedFolders.map((entry) => {
               const isSelected = selectedFolderId === entry.id;
               const menuActions: MenuAction[] = [
