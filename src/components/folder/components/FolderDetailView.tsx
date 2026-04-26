@@ -577,7 +577,7 @@ const FolderDetailRowView = ({
       </div>
       <div
         role="cell"
-        className="flex min-w-0 items-center justify-end px-3 text-right text-[#777671]"
+        className="flex min-w-0 items-center px-3 text-left text-[#777671]"
       >
         <span className="truncate">{formatExplorerSize(row.sizeBytes)}</span>
       </div>
@@ -975,7 +975,7 @@ export const FolderDetailView = ({
             onSort={handleSort}
             onResizePointerDown={handleResizePointerDown}
             onResetWidth={handleResetColumnWidth}
-            className="justify-end border-r-0 text-right"
+            className="border-r-0 text-left"
           />
         </div>
 
