@@ -54,6 +54,12 @@ const getIconForKind = (kind: ExplorerDetailRowKind) => {
   return ExplorerChromePdfIcon;
 };
 
+const getIconSizeForKind = (kind: ExplorerDetailRowKind) => {
+  if (kind === "folder") return 64;
+  if (kind === "cardSet") return 54;
+  return 50;
+};
+
 const getTileKindLabel = (kind: ExplorerDetailRowKind) => {
   if (kind === "folder") return "フォルダー";
   if (kind === "cardSet") return "カードセット";
@@ -102,6 +108,7 @@ const getNextIndex = (
 
 const IconVisual = ({ row }: { row: ExplorerDetailRow }) => {
   const Icon = getIconForKind(row.kind);
+  const size = getIconSizeForKind(row.kind);
 
   return (
     <span
@@ -110,7 +117,7 @@ const IconVisual = ({ row }: { row: ExplorerDetailRow }) => {
         "text-[var(--sidebar-icon-color,#6f6d66)]",
       )}
     >
-      <Icon className="h-14 w-14" />
+      <Icon size={size} />
     </span>
   );
 };
