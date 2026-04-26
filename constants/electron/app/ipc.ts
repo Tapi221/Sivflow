@@ -3,6 +3,7 @@ export const IPC_CHANNELS = {
   shellOpenExternal: "desktop:shell:openExternal",
   desktopImportFileOpen: "desktop:importFile:open",
   desktopImportReadFile: "desktop:importFile:read",
+  desktopImportSelectFiles: "desktop:importFile:select",
   oauthStart: "oauth:start",
   oauthCancel: "oauth:cancel",
   oauthExchangeIdToken: "oauth:exchangeIdToken",

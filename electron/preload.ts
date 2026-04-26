@@ -17,6 +17,8 @@ const desktopApi: DesktopBridgeApi = {
   files: {
     readImportFile: (filePath: string) =>
       ipcRenderer.invoke(IPC_CHANNELS.desktopImportReadFile, filePath),
+    selectImportFiles: () =>
+      ipcRenderer.invoke(IPC_CHANNELS.desktopImportSelectFiles),
     onImportFileOpen: (handler) => {
       const listener = (
         _event: Electron.IpcRendererEvent,

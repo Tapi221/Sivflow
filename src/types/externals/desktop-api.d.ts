@@ -23,6 +23,7 @@ export type DesktopImportFileOpenHandler = (
 
 export interface DesktopFileApi {
   readImportFile(filePath: string): Promise<DesktopImportFileReadResult>;
+  selectImportFiles(): Promise<string[]>;
   onImportFileOpen(handler: DesktopImportFileOpenHandler): () => void;
 }
 
