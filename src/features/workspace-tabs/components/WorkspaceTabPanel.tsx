@@ -145,7 +145,7 @@ export const WorkspaceTabPanel = ({
     const cardSetCards = cards.filter((card) => card.cardSetId === cardSet.id);
 
     return (
-      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-b-[14px] border-x border-b border-[#dddcd5] bg-[#fbfbfa]">
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa]">
         <div className="shrink-0 border-b border-[#e5e4df] bg-white px-5 py-4">
           <div className="text-[13px] text-[#8b8a84]">カードセット</div>
           <div className="mt-1 text-[20px] font-semibold text-[#2f2e2a]">
