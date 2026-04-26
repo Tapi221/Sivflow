@@ -286,7 +286,8 @@ const ExplorerToolbar = () => {
       <div
         className={cn(
           "flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[6px]",
-          "border border-[#dddcd5] bg-[rgba(255,255,255,0.9)] px-3",
+          "border border-[#d6d4cb] bg-[rgba(255,255,255,0.92)] px-3",
+          "shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)]",
         )}
       >
         <HomeIcon />
