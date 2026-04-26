@@ -11,7 +11,7 @@ export interface SectionListBlankPaneProps {
   children?: ReactNode;
 }
 
-const WORKSPACE_EXPLORER_TAB_WIDTH_VAR = "--workspace-explorer-tab-width";
+const SECTION_LIST_PANE_LEFT_VAR = "--manifolia-section-list-pane-left";
 
 const buildSidebarWidthFallback = (sidebarWidth: number): string => {
   const normalizedWidth = Number.isFinite(sidebarWidth)
@@ -39,7 +39,7 @@ export const SectionListBlankPane = ({
   const sidebarWidthFallback = buildSidebarWidthFallback(sidebarWidth);
 
   const style = {
-    left: `var(${WORKSPACE_EXPLORER_TAB_WIDTH_VAR}, ${sidebarWidthFallback})`,
+    left: `var(${SECTION_LIST_PANE_LEFT_VAR}, ${sidebarWidthFallback})`,
     right: 0,
     top: 0,
     bottom: 0,
