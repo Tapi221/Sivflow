@@ -1,5 +1,6 @@
 import {
   ExplorerChromeCardSetIcon,
+  ExplorerChromeCardIcon,
   ExplorerChromeFolderIcon,
 } from "@/components/explorer/icons";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
@@ -336,6 +337,8 @@ const FolderColumnRow = ({
       ? ExplorerChromeFolderIcon
       : entry.kind === "cardSet"
         ? ExplorerChromeCardSetIcon
+        : entry.kind === "card"
+          ? ExplorerChromeCardIcon
         : FileText;
 
   const contentCount =
@@ -419,7 +422,7 @@ const FolderColumnRow = ({
         <Icon
           className={cn(
             FOLDER_ROW_ICON_SIZE_CLASS,
-            entry.kind !== "folder" && entry.kind !== "cardSet" && "sidebar-icon ds-list-item__icon",
+            entry.kind === "document" && "sidebar-icon ds-list-item__icon",
           )}
         />
       </span>

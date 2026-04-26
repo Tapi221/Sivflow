@@ -1,5 +1,6 @@
 import {
   ExplorerChromeCardSetIcon,
+  ExplorerChromeCardIcon,
   ExplorerChromeFolderIcon,
 } from "@/components/explorer/icons";
 import {
@@ -140,6 +141,8 @@ export const RootFolderPanelRow = ({
       ? ExplorerChromeFolderIcon
       : entry.kind === "cardSet"
         ? ExplorerChromeCardSetIcon
+        : entry.kind === "card"
+          ? ExplorerChromeCardIcon
         : FileText;
 
   const closeMenu = React.useCallback(() => {
@@ -367,8 +370,8 @@ export const RootFolderPanelRow = ({
         <Icon
           className={cn(
             FOLDER_ROW_ICON_SIZE_CLASS,
-            entry.kind !== "folder" && entry.kind !== "cardSet" && "sidebar-icon",
-            entry.kind !== "folder" && entry.kind !== "cardSet" &&
+            entry.kind === "document" && "sidebar-icon",
+            entry.kind === "document" &&
               (isSelected
                 ? FOLDER_ROW_ICON_ACTIVE_CLASS
                 : FOLDER_ROW_ICON_MUTED_CLASS),
