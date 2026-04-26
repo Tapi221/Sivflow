@@ -166,11 +166,7 @@
     --font-size-body: var(--ds-layout-font-size-body);
     --font-size-meta: var(--ds-layout-font-size-meta);
 
-    --scrollbar-track: color-mix(
-      in srgb,
-      var(--ds-semantic-color-background-sidebar) 86%,
-      white 14%
-    );
+    --scrollbar-track: transparent;
     --scrollbar-thumb: color-mix(
       in srgb,
       var(--sidebar-border) 68%,
