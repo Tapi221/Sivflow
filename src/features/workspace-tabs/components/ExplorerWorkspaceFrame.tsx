@@ -1,4 +1,11 @@
-import { useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  forwardRef,
+  useMemo,
+  useState,
+  type ButtonHTMLAttributes,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import { TagFilterPanel } from "@/components/explorer/TagFilterPanel";
 import { floatingPanelPresets } from "@/components/ui/menu-styles";
 import {
@@ -20,28 +27,32 @@ type ExplorerWorkspaceFrameProps = {
   showExplorerChrome?: boolean;
 };
 
-type ExplorerToolbarButtonProps = {
+type ExplorerToolbarButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   title: string;
-  disabled?: boolean;
-  className?: string;
-  onClick?: () => void;
   children: ReactNode;
 };
 
-const ExplorerToolbarButton = ({
-  title,
-  disabled = false,
-  className,
-  onClick,
-  children,
-}: ExplorerToolbarButtonProps) => {
+const ExplorerToolbarButton = forwardRef<
+  HTMLButtonElement,
+  ExplorerToolbarButtonProps
+>(function ExplorerToolbarButton(
+  {
+    title,
+    disabled = false,
+    className,
+    children,
+    type = "button",
+    ...props
+  },
+  ref,
+) {
   return (
     <button
-      type="button"
+      ref={ref}
+      type={type}
       title={title}
       aria-label={title}
       disabled={disabled}
-      onClick={disabled ? undefined : onClick}
       className={cn(
         "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px]",
         "border-0 bg-transparent text-[#777671] outline-none transition-colors",
@@ -50,11 +61,12 @@ const ExplorerToolbarButton = ({
           : "hover:bg-[#eeece4] hover:text-[#24231f]",
         className,
       )}
+      {...props}
     >
       {children}
     </button>
   );
-};
+});
 
 const ChevronLeftIcon = () => (
   <svg
