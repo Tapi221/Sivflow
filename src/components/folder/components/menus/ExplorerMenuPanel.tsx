@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { floatingPanelPresets } from "@/components/ui/menu-styles";
 import { cn } from "@/lib/utils";
-import React from "react";
+import React, { type CSSProperties } from "react";
 import type { MenuAction } from "./menuActions";
 
 export type ExplorerMenuPanelVariant = "default" | "create" | "folderContext";
@@ -26,22 +26,16 @@ const DANGER_ITEM_CLASS =
 const CREATE_MENU_CONTENT_CLASS =
   "!w-[148px] !rounded-[10px] !border !border-[#dddcd5] !bg-white !p-[3px] !shadow-[0_4px_20px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)]";
 
-const CREATE_MENU_ITEM_CLASS =
+const PLAIN_MENU_ITEM_CLASS =
   "!h-[28px] !min-h-[28px] !cursor-pointer !gap-0 !rounded-[8px] !px-2 !py-0 !text-[13px] !font-normal !leading-[28px] !text-[#1a1a18] transition-colors duration-75 hover:bg-[#f1efe8] focus:bg-[#f1efe8] data-[highlighted]:bg-[#f1efe8] active:bg-[#eae8e0] overflow-hidden whitespace-nowrap";
 
-const CREATE_MENU_ICON_CLASS =
-  "!flex !h-full !w-4 !shrink-0 !items-center !justify-center text-[#888780] [&>svg]:!h-3.5 [&>svg]:!w-3.5 [&>svg]:!shrink-0";
+const PLAIN_MENU_ICON_CLASS =
+  "ds-list-item__icon !flex !h-full !w-4 !shrink-0 !items-center !justify-center text-[#888780] [&>svg]:!h-3.5 [&>svg]:!w-3.5 [&>svg]:!shrink-0";
 
 const CREATE_MENU_SEPARATOR_CLASS = "!mx-0 !my-[3px] !h-px !bg-[#e5e4dd]";
 
 const FOLDER_CONTEXT_MENU_CONTENT_CLASS =
   "!w-[160px] !rounded-[10px] !border !border-[#dddcd5] !bg-white !p-[3px] !shadow-[0_4px_20px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)]";
-
-const FOLDER_CONTEXT_MENU_ITEM_CLASS =
-  "!h-[28px] !min-h-[28px] !cursor-pointer !gap-0 !rounded-[8px] !px-2 !py-0 !text-[13px] !font-normal !leading-[28px] !text-[#1a1a18] transition-colors duration-75 hover:bg-[#f1efe8] focus:bg-[#f1efe8] data-[highlighted]:bg-[#f1efe8] active:bg-[#eae8e0] overflow-hidden whitespace-nowrap";
-
-const FOLDER_CONTEXT_MENU_ICON_CLASS =
-  "!flex !h-full !w-4 !shrink-0 !items-center !justify-center text-[#888780] [&>svg]:!h-3.5 [&>svg]:!w-3.5 [&>svg]:!shrink-0";
 
 const FOLDER_CONTEXT_MENU_DANGER_ITEM_CLASS =
   "!text-[#c0392b] hover:!bg-[#fdf0ee] focus:!bg-[#fdf0ee] data-[highlighted]:!bg-[#fdf0ee] active:!bg-[#f9e3df] [&_svg]:!stroke-[#c0392b]";
@@ -50,7 +44,18 @@ const FOLDER_CONTEXT_MENU_SEPARATOR_CLASS =
   "!mx-0 !my-[3px] !h-px !bg-[#e5e4dd]";
 
 const PLAIN_MENU_LABEL_CLASS =
-  "flex h-full min-w-0 flex-1 items-center truncate pr-1 !leading-[28px]";
+  "ds-list-item__title flex h-full min-w-0 flex-1 items-center truncate pr-1 text-[13px] font-normal !leading-[28px]";
+
+const PLAIN_MENU_ROW_STYLE = {
+  height: 28,
+  minHeight: 28,
+  lineHeight: "28px",
+  columnGap: 0,
+} satisfies CSSProperties;
+
+const PLAIN_MENU_LABEL_STYLE = {
+  lineHeight: "28px",
+} satisfies CSSProperties;
 
 /**
  * エクスプローラーの各種メニュー（追加ボタン、コンテキストメニュー）で共有されるパネルコンポーネント
@@ -75,17 +80,9 @@ export const ExplorerMenuPanel = ({
       ? CREATE_MENU_CONTENT_CLASS
       : cn("w-48", panelPreset.className);
 
-  const itemClassName = isFolderContextVariant
-    ? FOLDER_CONTEXT_MENU_ITEM_CLASS
-    : isCreateVariant
-      ? CREATE_MENU_ITEM_CLASS
-      : undefined;
+  const itemClassName = isPlainVariant ? PLAIN_MENU_ITEM_CLASS : undefined;
 
-  const iconClassName = isFolderContextVariant
-    ? FOLDER_CONTEXT_MENU_ICON_CLASS
-    : isCreateVariant
-      ? CREATE_MENU_ICON_CLASS
-      : undefined;
+  const iconClassName = isPlainVariant ? PLAIN_MENU_ICON_CLASS : undefined;
 
   const separatorClassName = isFolderContextVariant
     ? FOLDER_CONTEXT_MENU_SEPARATOR_CLASS
@@ -120,6 +117,7 @@ export const ExplorerMenuPanel = ({
                   ? FOLDER_CONTEXT_MENU_DANGER_ITEM_CLASS
                   : DANGER_ITEM_CLASS),
             )}
+            style={isPlainVariant ? PLAIN_MENU_ROW_STYLE : undefined}
             onSelect={(event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -134,6 +132,7 @@ export const ExplorerMenuPanel = ({
             ) : null}
             <DropdownMenuItemLabel
               className={cn(isPlainVariant && PLAIN_MENU_LABEL_CLASS)}
+              style={isPlainVariant ? PLAIN_MENU_LABEL_STYLE : undefined}
             >
               {action.label}
             </DropdownMenuItemLabel>
