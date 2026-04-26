@@ -71,13 +71,13 @@ export const WorkspaceTabsBar = ({
           ? "h-full min-w-0 flex-1 bg-transparent px-0 pt-0"
           : [
               "h-10 w-full min-w-0 border-b border-[#e0e0e0] bg-[#f5f5f5]",
-              "px-2 pt-1",
+              "px-0 pt-0",
             ],
         className,
       )}
     >
       <div className="flex min-w-0 flex-1 items-end overflow-hidden">
-        {tabs.map((tab) => {
+        {tabs.map((tab, index) => {
           const selected = tab.id === activeTabId;
           const Icon = resolveTabIcon(tab);
 
@@ -86,10 +86,11 @@ export const WorkspaceTabsBar = ({
               key={tab.id}
               style={resolveTabStyle(tab)}
               className={cn(
-                "group/tab mr-1 flex min-w-0 items-center overflow-hidden border text-[13px] transition-colors",
+                "group/tab flex min-w-0 items-center overflow-hidden border text-[13px] transition-colors",
+                index === 0 ? "ml-0" : "ml-1",
                 selected
-                  ? "mb-[-1px] h-9 rounded-t-[10px]"
-                  : "mb-[4px] h-7 rounded-[7px]",
+                  ? "mb-[-1px] h-10 rounded-t-[10px]"
+                  : "mb-[5px] h-7 rounded-[7px]",
                 resolveTabWidthClassName(tab),
                 selected
                   ? "border-[#e0e0e0] border-b-white bg-white text-[#1a1a1a]"
@@ -144,7 +145,7 @@ export const WorkspaceTabsBar = ({
       <button
         type="button"
         style={noDragStyle}
-        className="mb-[5px] inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#6b6b6b] outline-none transition-colors hover:bg-[#eeeeee] hover:text-[#1a1a1a]"
+        className="mb-[5px] mr-2 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#6b6b6b] outline-none transition-colors hover:bg-[#eeeeee] hover:text-[#1a1a1a]"
         aria-label="新しいエクスプローラータブを開く"
         title="新しいエクスプローラータブ"
         onClick={() => {
