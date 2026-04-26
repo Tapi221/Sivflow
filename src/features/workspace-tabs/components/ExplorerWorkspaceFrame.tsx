@@ -385,12 +385,12 @@ const ExplorerPathBar = () => {
     );
 
     const rootCrumb =
-      normalizedExtraCrumbs.length > 0
+      isColumnPathActive || normalizedExtraCrumbs.length > 0
         ? EXPLORER_ROOT_CRUMB
         : { ...EXPLORER_ROOT_CRUMB, to: undefined };
 
     return [EXPLORER_HOME_CRUMB, rootCrumb, ...normalizedExtraCrumbs];
-  }, [visibleExtraCrumbs]);
+  }, [isColumnPathActive, visibleExtraCrumbs]);
 
   const handleCrumbClick = (crumb: BreadcrumbCrumb) => {
     if (!crumb.to) return;
