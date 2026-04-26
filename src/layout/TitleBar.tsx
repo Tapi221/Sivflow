@@ -8,7 +8,6 @@ import {
 } from "@/features/breadcrumbs/builders";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
 import { useCalendarDockPanelStore } from "@/features/calendar/store/useCalendarDockPanelStore";
-import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useHasDesktopBridge } from "@/hooks/platform/useHasDesktopBridge";
 import { cn } from "@/lib/utils";
 import { windowControls } from "@/platform/capabilities/windowControls";
@@ -137,24 +136,6 @@ const SectionListIcon: React.FC = () => (
       d="M10 6V18"
       stroke="currentColor"
       strokeWidth="1.6"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
-const SearchIcon: React.FC = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden="true"
-  >
-    <circle cx="11" cy="11" r="6.25" stroke="currentColor" strokeWidth="1.8" />
-    <path
-      d="M16 16L20 20"
-      stroke="currentColor"
-      strokeWidth="1.8"
       strokeLinecap="round"
     />
   </svg>
@@ -458,7 +439,6 @@ const TitleBarPrimaryActions: React.FC<{
 }> = ({ noDragStyle }) => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const openGlobalSearch = useGlobalSearchStore((state) => state.open);
   const isCalendarDockOpen = useCalendarDockPanelStore((state) => state.isOpen);
   const toggleCalendarDock = useCalendarDockPanelStore((state) => state.toggle);
 
@@ -562,16 +542,6 @@ const TitleBarPrimaryActions: React.FC<{
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
       </DropdownMenu.Root>
-
-      <TitleBarToolbarButton
-        title="検索 (Cmd/Ctrl+K)"
-        onClick={() => {
-          openGlobalSearch();
-        }}
-        noDragStyle={noDragStyle}
-      >
-        <SearchIcon />
-      </TitleBarToolbarButton>
 
       <TitleBarToolbarButton
         title={isCalendarDockOpen ? "カレンダーを閉じる" : "カレンダーを開く"}
