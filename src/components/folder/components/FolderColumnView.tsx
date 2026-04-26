@@ -648,8 +648,17 @@ export const FolderColumnView = ({
     const scroller = scrollerRef.current;
     if (!guide || !scroller) return;
 
+    const resizeState = columnResizeStateRef.current;
+    const guideClientX = resizeState
+      ? resizeState.startX +
+        (clampFolderColumnWidth(
+          resizeState.startWidth + clientX - resizeState.startX,
+        ) -
+          resizeState.startWidth)
+      : clientX;
+
     const rect = scroller.getBoundingClientRect();
-    const x = Math.round(clientX - rect.left + scroller.scrollLeft);
+    const x = Math.round(guideClientX - rect.left + scroller.scrollLeft);
 
     guide.style.opacity = "1";
     guide.style.transform = `translate3d(${x}px, 0, 0)`;
