@@ -39,7 +39,10 @@ let activeRenderCount = 0;
 let nextQueueId = 1;
 let nextSequence = 1;
 const queuedRenderEntries: Array<PdfThumbnailQueuedRenderEntry<unknown>> = [];
-const activeRenderEntries = new Map<number, PdfThumbnailQueuedRenderEntry<unknown>>();
+const activeRenderEntries = new Map<
+  number,
+  PdfThumbnailQueuedRenderEntry<unknown>
+>();
 
 export class PdfThumbnailRenderCancelledError extends Error {
   constructor(message = "PDF thumbnail render was cancelled") {
@@ -254,7 +257,8 @@ export const getPdfThumbnailRenderQueueSnapshot = () => {
     activeRenderEntryCount: activeRenderEntries.size,
     pendingRenderCount: queuedRenderEntries.length,
     maxConcurrentThumbnailRenders,
-    highPriorityParallelRenderThreshold: HIGH_PRIORITY_PARALLEL_RENDER_THRESHOLD,
+    highPriorityParallelRenderThreshold:
+      HIGH_PRIORITY_PARALLEL_RENDER_THRESHOLD,
   };
 };
 

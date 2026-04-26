@@ -41,7 +41,8 @@ export interface PdfWorkspaceNavigationContextValue {
 }
 
 export interface PdfWorkspaceContextValue
-  extends PdfWorkspaceDocumentContextValue,
+  extends
+    PdfWorkspaceDocumentContextValue,
     PdfWorkspaceNavigationContextValue {}
 
 export const PdfWorkspaceDocumentContext =

@@ -72,16 +72,9 @@
     --sidebar-active-bg: var(--ds-semantic-color-background-sidebar-active);
     --sidebar-active-accent: var(--ds-semantic-color-action-accent);
     --explorer-chrome-font-family:
-      "Segoe UI Variable Text",
-      "Segoe UI Variable",
-      "Segoe UI",
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      "Noto Sans JP",
-      "Yu Gothic UI",
-      "Hiragino Sans",
-      sans-serif;
+      "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui,
+      -apple-system, BlinkMacSystemFont, "Noto Sans JP", "Yu Gothic UI",
+      "Hiragino Sans", sans-serif;
 
     /* shadcn/ui semantic tokens */
     --background: 0 0% 100%;

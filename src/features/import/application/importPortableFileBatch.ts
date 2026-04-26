@@ -1,6 +1,4 @@
-import {
-  importMfCardFile,
-} from "@/features/cardFile/application/importMfCard";
+import { importMfCardFile } from "@/features/cardFile/application/importMfCard";
 import { readMfCardFile } from "@/features/cardFile/infra/web/readMfCardFile";
 import {
   importMfDeckArchive,
@@ -112,9 +110,7 @@ export const buildPortableImportBatchItems = (
   return items;
 };
 
-const getSuggestedCardSetName = (
-  result: ImportMfDeckArchiveResult,
-): string => {
+const getSuggestedCardSetName = (result: ImportMfDeckArchiveResult): string => {
   return result.createdCardSetName.trim() || "無題のカードセット";
 };
 
@@ -258,7 +254,8 @@ export const importPortableFileBatch = async ({
       emitItem(item, onItemChange);
     } catch (error) {
       item.status = "failed";
-      item.errorMessage = error instanceof Error ? error.message : "不明なエラー";
+      item.errorMessage =
+        error instanceof Error ? error.message : "不明なエラー";
       failedCount += 1;
       emitItem(item, onItemChange);
     }

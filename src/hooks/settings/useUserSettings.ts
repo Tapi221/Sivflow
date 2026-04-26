@@ -105,7 +105,10 @@ export const useUserSettings = () => {
       const db = await getLocalDb(currentUserId);
       const userSettings = await db.userSettings.get(currentUserId);
 
-      return normalizeStoredSettingsRecord(toRecord(userSettings), bootSettings);
+      return normalizeStoredSettingsRecord(
+        toRecord(userSettings),
+        bootSettings,
+      );
     },
     [bootSettings, currentUserId],
     bootSettings,

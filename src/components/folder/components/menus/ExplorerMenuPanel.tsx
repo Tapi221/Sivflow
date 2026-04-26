@@ -12,8 +12,9 @@ import type { MenuAction } from "./menuActions";
 
 export type ExplorerMenuPanelVariant = "default" | "create" | "folderContext";
 
-interface ExplorerMenuPanelProps
-  extends React.ComponentPropsWithoutRef<typeof DropdownMenuContent> {
+interface ExplorerMenuPanelProps extends React.ComponentPropsWithoutRef<
+  typeof DropdownMenuContent
+> {
   actions: MenuAction[];
   closeMenu?: () => void;
   variant?: ExplorerMenuPanelVariant;
@@ -121,9 +122,7 @@ export const ExplorerMenuPanel = ({
                 {action.icon}
               </DropdownMenuItemIcon>
             ) : null}
-            <DropdownMenuItemLabel
-              className={cn(isPlainVariant && "truncate")}
-            >
+            <DropdownMenuItemLabel className={cn(isPlainVariant && "truncate")}>
               {action.label}
             </DropdownMenuItemLabel>
           </DropdownMenuItem>

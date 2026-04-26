@@ -154,12 +154,7 @@ export const useTreeViewSidebar = () => {
     pendingWidthRef.current = normalizedWidth;
     setRenderedSidebarWidth(nextRenderedWidth);
     applyRenderedSidebarWidthToDom(nextRenderedWidth);
-  }, [
-    applyRenderedSidebarWidthToDom,
-    isMobile,
-    isSidebarOpen,
-    sidebarWidth,
-  ]);
+  }, [applyRenderedSidebarWidthToDom, isMobile, isSidebarOpen, sidebarWidth]);
 
   useEffect(() => {
     const handleSidebarToggleEvent = () => {

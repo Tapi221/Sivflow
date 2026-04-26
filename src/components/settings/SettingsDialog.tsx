@@ -189,7 +189,6 @@ const voiceOptions = [
   },
 ] as const;
 
-
 const reviewButtonItems = [
   {
     id: "forgot",
@@ -1220,5 +1219,3 @@ const SettingsDialog = ({
 };
 
 export default SettingsDialog;
-
-

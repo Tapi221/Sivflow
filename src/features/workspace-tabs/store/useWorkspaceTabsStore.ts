@@ -39,9 +39,15 @@ type OpenCardTabParams = {
 type WorkspaceTabsState = {
   tabs: WorkspaceTab[];
   activeTabId: WorkspaceTab["id"];
-  openExplorerTab: (params?: OpenExplorerTabParams) => WorkspaceExplorerTab["id"];
-  createExplorerTab: (explorerState?: ExplorerRouteState) => WorkspaceExplorerTab["id"];
-  openDocumentTab: (params: OpenDocumentTabParams) => WorkspaceDocumentTab["id"];
+  openExplorerTab: (
+    params?: OpenExplorerTabParams,
+  ) => WorkspaceExplorerTab["id"];
+  createExplorerTab: (
+    explorerState?: ExplorerRouteState,
+  ) => WorkspaceExplorerTab["id"];
+  openDocumentTab: (
+    params: OpenDocumentTabParams,
+  ) => WorkspaceDocumentTab["id"];
   openCardSetTab: (params: OpenCardSetTabParams) => WorkspaceCardSetTab["id"];
   openCardTab: (params: OpenCardTabParams) => WorkspaceCardTab["id"];
   selectTab: (tabId: WorkspaceTab["id"]) => void;
@@ -112,7 +118,10 @@ const resolveNextActiveTabId = (
     return WORKSPACE_DEFAULT_EXPLORER_TAB_ID;
   }
 
-  const fallbackIndex = Math.max(0, Math.min(closingIndex, nextTabs.length - 1));
+  const fallbackIndex = Math.max(
+    0,
+    Math.min(closingIndex, nextTabs.length - 1),
+  );
   const fallbackTab = nextTabs[fallbackIndex];
 
   return fallbackTab?.id ?? WORKSPACE_DEFAULT_EXPLORER_TAB_ID;

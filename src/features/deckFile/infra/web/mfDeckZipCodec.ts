@@ -43,7 +43,8 @@ const readRequiredTextEntry = (
     throw new MfDeckValidationError(`${path} が見つかりません。`, [
       {
         level: "error",
-        code: path === MF_DECK_MANIFEST_PATH ? "missing_manifest" : "missing_cards",
+        code:
+          path === MF_DECK_MANIFEST_PATH ? "missing_manifest" : "missing_cards",
         path,
         message: `${path} が見つかりません。`,
       },
@@ -109,13 +110,16 @@ const collectMediaEntries = (
 
     totalBytes += entry.byteLength;
     if (totalBytes > MF_DECK_MAX_MEDIA_TOTAL_BYTES) {
-      throw new MfDeckValidationError("mfdeck 内のメディア合計サイズが大きすぎます。", [
-        {
-          level: "error",
-          code: "file_too_large",
-          message: "mfdeck 内のメディア合計サイズが大きすぎます。",
-        },
-      ]);
+      throw new MfDeckValidationError(
+        "mfdeck 内のメディア合計サイズが大きすぎます。",
+        [
+          {
+            level: "error",
+            code: "file_too_large",
+            message: "mfdeck 内のメディア合計サイズが大きすぎます。",
+          },
+        ],
+      );
     }
 
     media[path] = entry;
@@ -150,14 +154,17 @@ export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => {
   if (archive.media) {
     for (const [path, bytes] of Object.entries(archive.media)) {
       if (!isMfDeckMediaPath(path)) {
-        throw new MfDeckValidationError("安全でないメディアパスを含む mfdeck です。", [
-          {
-            level: "error",
-            code: "unsafe_path",
-            path,
-            message: "安全でないメディアパスを含む mfdeck です。",
-          },
-        ]);
+        throw new MfDeckValidationError(
+          "安全でないメディアパスを含む mfdeck です。",
+          [
+            {
+              level: "error",
+              code: "unsafe_path",
+              path,
+              message: "安全でないメディアパスを含む mfdeck です。",
+            },
+          ],
+        );
       }
 
       if (bytes.byteLength > MF_DECK_MAX_MEDIA_ENTRY_BYTES) {
@@ -174,13 +181,16 @@ export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => {
       totalMediaBytes += bytes.byteLength;
 
       if (totalMediaBytes > MF_DECK_MAX_MEDIA_TOTAL_BYTES) {
-        throw new MfDeckValidationError("mfdeck 内のメディア合計サイズが大きすぎます。", [
-          {
-            level: "error",
-            code: "file_too_large",
-            message: "mfdeck 内のメディア合計サイズが大きすぎます。",
-          },
-        ]);
+        throw new MfDeckValidationError(
+          "mfdeck 内のメディア合計サイズが大きすぎます。",
+          [
+            {
+              level: "error",
+              code: "file_too_large",
+              message: "mfdeck 内のメディア合計サイズが大きすぎます。",
+            },
+          ],
+        );
       }
 
       entries[path] = bytes;

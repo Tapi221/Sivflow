@@ -51,10 +51,7 @@ export const AppLayout = () => {
 
   return (
     <div
-      className={[
-        "app-layout",
-        isFoldersRoute ? "app-layout--folders" : "",
-      ]
+      className={["app-layout", isFoldersRoute ? "app-layout--folders" : ""]
         .filter(Boolean)
         .join(" ")}
     >

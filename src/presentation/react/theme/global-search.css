@@ -139,10 +139,7 @@
   }
 
   .gs-row__icon-slot {
-    color: var(
-      --sidebar-text-muted,
-      var(--ds-semantic-color-text-secondary)
-    );
+    color: var(--sidebar-text-muted, var(--ds-semantic-color-text-secondary));
   }
 
   .gs-row__icon {
@@ -168,10 +165,7 @@
   .gs-row__timestamp {
     flex: 0 0 auto;
     padding-left: 8px;
-    color: var(
-      --sidebar-text-muted,
-      var(--ds-semantic-color-text-secondary)
-    );
+    color: var(--sidebar-text-muted, var(--ds-semantic-color-text-secondary));
     font-size: 12px;
     line-height: 1;
   }

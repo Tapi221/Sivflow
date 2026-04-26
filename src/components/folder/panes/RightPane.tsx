@@ -88,7 +88,7 @@ export const RightPane = ({
     return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
   }
 
-if (selectedDocument) {
+  if (selectedDocument) {
     if (selectedDocument.kind !== "pdf") {
       return <UnsupportedDocumentPane />;
     }
@@ -131,4 +131,3 @@ if (selectedDocument) {
 
   return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
 };
-

@@ -54,7 +54,8 @@ const createArchive = (): MfDeckArchiveV1 => ({
                 {
                   id: "image-001",
                   status: "ready",
-                  localUrl: `${MF_DECK_MEDIA_URI_PREFIX}media/images/0001-image.png` as never,
+                  localUrl:
+                    `${MF_DECK_MEDIA_URI_PREFIX}media/images/0001-image.png` as never,
                 },
               ],
             },
@@ -110,12 +111,9 @@ describe("mfDeckZipCodec", () => {
     expect(decoded.mediaManifest?.media[0]?.path).toBe(
       "media/images/0001-image.png",
     );
-    expect(Array.from(decoded.media?.["media/images/0001-image.png"] ?? [])).toEqual([
-      137,
-      80,
-      78,
-      71,
-    ]);
+    expect(
+      Array.from(decoded.media?.["media/images/0001-image.png"] ?? []),
+    ).toEqual([137, 80, 78, 71]);
   });
 
   it("mfdeck v1 ではない manifest を拒否する", () => {

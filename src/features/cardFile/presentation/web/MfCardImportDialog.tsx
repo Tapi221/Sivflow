@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+} from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,9 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/contexts/ToastContext";
-import {
-  importMfCardFile,
-} from "@/features/cardFile/application/importMfCard";
+import { importMfCardFile } from "@/features/cardFile/application/importMfCard";
 import { MF_CARD_MIME_TYPE } from "@/features/cardFile/domain/mfCardTypes";
 import {
   readMfCardFile,
@@ -143,7 +147,9 @@ export const MfCardImportDialog = ({
         });
       } catch (error) {
         console.error("[MfCardImportDialog] parse failed", error);
-        toast.error("MFCard の解析に失敗しました。ファイル形式を確認してください。");
+        toast.error(
+          "MFCard の解析に失敗しました。ファイル形式を確認してください。",
+        );
         setState({ file, loaded: null });
       } finally {
         setIsParsing(false);
@@ -229,7 +235,9 @@ export const MfCardImportDialog = ({
         destination,
       });
 
-      toast.success(`${imported.createdCount} 件のカードをインポートしました。`);
+      toast.success(
+        `${imported.createdCount} 件のカードをインポートしました。`,
+      );
       handleClose(false);
       onImported?.({
         cardSetId: imported.createdCardSetId,
@@ -282,7 +290,10 @@ export const MfCardImportDialog = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="new">新規カードセットを作成</SelectItem>
-                    <SelectItem value="existing" disabled={cardSets.length === 0}>
+                    <SelectItem
+                      value="existing"
+                      disabled={cardSets.length === 0}
+                    >
                       既存カードセットへ追加
                     </SelectItem>
                   </SelectContent>
@@ -325,7 +336,8 @@ export const MfCardImportDialog = ({
               />
 
               <p className="text-xs leading-relaxed text-slate-500">
-                MFCard は単体カードの共有形式です。復習履歴や同期状態は取り込みません。
+                MFCard
+                は単体カードの共有形式です。復習履歴や同期状態は取り込みません。
               </p>
             </div>
           </div>
@@ -346,7 +358,8 @@ export const MfCardImportDialog = ({
             <div className="rounded-xl border border-slate-200 p-3">
               <p className="text-xs text-slate-500">Issues</p>
               <p className="mt-1 text-sm font-medium text-slate-800">
-                error {issueSummary.errorCount} / warning {issueSummary.warningCount}
+                error {issueSummary.errorCount} / warning{" "}
+                {issueSummary.warningCount}
               </p>
             </div>
           </div>
@@ -366,7 +379,8 @@ export const MfCardImportDialog = ({
                     {card.title?.trim() || card.questionNumber || card.id}
                   </p>
                   <p className="mt-1 text-xs text-slate-500">
-                    front {card.front.blocks.length} blocks / back {card.back.blocks.length} blocks
+                    front {card.front.blocks.length} blocks / back{" "}
+                    {card.back.blocks.length} blocks
                   </p>
                   <div className="mt-2 flex flex-wrap gap-1">
                     {(card.tagNames ?? []).map((tag) => (

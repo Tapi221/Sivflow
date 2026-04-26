@@ -404,7 +404,9 @@ export const FolderTreeWithCards = ({
       ...navigationCardSets.map((cardSet) => ({
         kind: "cardSet" as const,
         id: cardSet.id,
-        name: toVirtualMfDeckDisplayName(cardSet.name?.trim() || "無題のセット"),
+        name: toVirtualMfDeckDisplayName(
+          cardSet.name?.trim() || "無題のセット",
+        ),
         contentCount: getCardSetItems(cardSet.id).length,
       })),
       ...navigationItems.map((item: ExplorerItem) => {

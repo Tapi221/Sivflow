@@ -28,7 +28,10 @@ const desktopApi: DesktopBridgeApi = {
       ipcRenderer.on(IPC_CHANNELS.desktopImportFileOpen, listener);
 
       return () => {
-        ipcRenderer.removeListener(IPC_CHANNELS.desktopImportFileOpen, listener);
+        ipcRenderer.removeListener(
+          IPC_CHANNELS.desktopImportFileOpen,
+          listener,
+        );
       };
     },
   },

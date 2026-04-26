@@ -24,7 +24,9 @@ export const explorerReducer = (
           ? null
           : next.selectedFolderId;
       const nextSelectedItem =
-        next.isHomeOnlyMode || next.isSectionListMode ? null : next.selectedItem;
+        next.isHomeOnlyMode || next.isSectionListMode
+          ? null
+          : next.selectedItem;
 
       const didSelectedFolderChange =
         state.selectedFolderId !== nextSelectedFolderId;

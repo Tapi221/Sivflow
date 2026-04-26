@@ -82,8 +82,7 @@ const resolveTimestampLabel = (value: unknown) => {
 
 const resolveItemIcon = (item: GlobalSearchItem) => {
   const iconKind: GlobalSearchIconKind =
-    item.iconKind ??
-    (item.kind === "action" ? "directory" : item.kind);
+    item.iconKind ?? (item.kind === "action" ? "directory" : item.kind);
 
   switch (iconKind) {
     case "folder":
@@ -152,7 +151,9 @@ export const GlobalSearchDialog = () => {
   };
 
   const emptyTitle =
-    query.trim().length > 0 ? "一致する項目がありません" : "検索できる項目がありません";
+    query.trim().length > 0
+      ? "一致する項目がありません"
+      : "検索できる項目がありません";
   const emptyDescription =
     query.trim().length > 0
       ? "別のキーワードで試してください。"
@@ -203,7 +204,9 @@ export const GlobalSearchDialog = () => {
             <CommandList className="gs-results">
               {rankedItems.map((item) => {
                 const Icon = resolveItemIcon(item);
-                const timestampLabel = resolveTimestampLabel(item.timestampValue);
+                const timestampLabel = resolveTimestampLabel(
+                  item.timestampValue,
+                );
 
                 return (
                   <CommandItem
@@ -222,18 +225,36 @@ export const GlobalSearchDialog = () => {
                   >
                     <ExplorerRowContent
                       left={
-                        <span className={cn(EXPLORER_ROW_ICON_SLOT_CLASS, "gs-row__icon-slot")}>
-                          <Icon className={cn(FOLDER_ROW_ICON_SIZE_CLASS, "gs-row__icon")} />
+                        <span
+                          className={cn(
+                            EXPLORER_ROW_ICON_SLOT_CLASS,
+                            "gs-row__icon-slot",
+                          )}
+                        >
+                          <Icon
+                            className={cn(
+                              FOLDER_ROW_ICON_SIZE_CLASS,
+                              "gs-row__icon",
+                            )}
+                          />
                         </span>
                       }
                       title={item.title}
                       right={
                         timestampLabel ? (
-                          <span className="gs-row__timestamp">{timestampLabel}</span>
+                          <span className="gs-row__timestamp">
+                            {timestampLabel}
+                          </span>
                         ) : null
                       }
-                      contentClassName={cn(EXPLORER_ROW_CONTENT_CLASS, "gs-row__content")}
-                      titleClassName={cn(FOLDER_ROW_TITLE_CLASS, "gs-row__title")}
+                      contentClassName={cn(
+                        EXPLORER_ROW_CONTENT_CLASS,
+                        "gs-row__content",
+                      )}
+                      titleClassName={cn(
+                        FOLDER_ROW_TITLE_CLASS,
+                        "gs-row__title",
+                      )}
                     />
                   </CommandItem>
                 );

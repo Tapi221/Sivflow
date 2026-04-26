@@ -80,12 +80,7 @@ const glyphPaths: Record<GlyphKind, string[]> = {
   circle: ["M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"],
   copy: ["M9 9h10v10H9z", "M5 15H4V5h10v1"],
   minus: ["M5 12h14"],
-  pin: [
-    "M12 17v5",
-    "M5 7h14",
-    "M7 7l2-4h6l2 4",
-    "M8 7v6l-2 4h12l-2-4V7",
-  ],
+  pin: ["M12 17v5", "M5 7h14", "M7 7l2-4h6l2 4", "M8 7v6l-2 4h12l-2-4V7"],
   plus: ["M12 5v14", "M5 12h14"],
   search: ["M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z", "m20 20-3.5-3.5"],
   x: ["m6 6 12 12", "m18 6-12 12"],

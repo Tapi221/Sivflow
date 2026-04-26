@@ -197,7 +197,9 @@ export const useExplorerStore = create<ExplorerState>()(
         }),
       unpinFolder: (folderId) =>
         set((state) => ({
-          pinnedFolderIds: state.pinnedFolderIds.filter((id) => id !== folderId),
+          pinnedFolderIds: state.pinnedFolderIds.filter(
+            (id) => id !== folderId,
+          ),
         })),
       togglePinnedFolder: (folderId) =>
         set((state) => {

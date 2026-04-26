@@ -136,11 +136,9 @@ const TreeViewLayout = ({
   const [isMfCardImportDialogOpen, setIsMfCardImportDialogOpen] =
     useState(false);
   const [pendingMfDeckFile, setPendingMfDeckFile] = useState<File | null>(null);
-  const [pendingMfDeckFileRevision, setPendingMfDeckFileRevision] =
-    useState(0);
+  const [pendingMfDeckFileRevision, setPendingMfDeckFileRevision] = useState(0);
   const [pendingMfCardFile, setPendingMfCardFile] = useState<File | null>(null);
-  const [pendingMfCardFileRevision, setPendingMfCardFileRevision] =
-    useState(0);
+  const [pendingMfCardFileRevision, setPendingMfCardFileRevision] = useState(0);
   const [queuedPortableImportFiles, setQueuedPortableImportFiles] = useState<
     File[]
   >([]);
@@ -253,23 +251,19 @@ const TreeViewLayout = ({
     scroller.scrollTop = 0;
   }, [contentScrollRef, selectedFolderId, navigateToSectionListToken]);
 
-  const {
-    selectedFolder,
-    selectedDocument,
-    folderCards,
-    showMobileDetail,
-  } = useTreeViewDerivedState({
-    folders,
-    cards,
-    cardSets,
-    documents,
-    selectedFolderId,
-    selectedItem,
-    selectedCardId,
-    selectedDocumentId,
-    autoCarryOver: settings?.autoCarryOver ?? true,
-    isMobile,
-  });
+  const { selectedFolder, selectedDocument, folderCards, showMobileDetail } =
+    useTreeViewDerivedState({
+      folders,
+      cards,
+      cardSets,
+      documents,
+      selectedFolderId,
+      selectedItem,
+      selectedCardId,
+      selectedDocumentId,
+      autoCarryOver: settings?.autoCarryOver ?? true,
+      isMobile,
+    });
 
   const tagFilter = useExplorerStore((state) => state.tagFilter);
   const tagMatchMode = useExplorerStore((state) => state.tagMatchMode);
@@ -517,7 +511,10 @@ const TreeViewLayout = ({
         const files = await readDesktopImportFiles(payload.paths);
         openImportFiles(files);
       } catch (error) {
-        console.error("[TreeViewLayout] desktop import file open failed", error);
+        console.error(
+          "[TreeViewLayout] desktop import file open failed",
+          error,
+        );
         toast.error("ファイルを開けませんでした。");
       }
     });

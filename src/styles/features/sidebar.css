@@ -1,9 +1,6 @@
 @layer components {
   .sidebar-row {
-    --sidebar-row-hover-bg: var(
-      --sidebar-hover-bg,
-      rgb(122 166 161 / 0.1)
-    );
+    --sidebar-row-hover-bg: var(--sidebar-hover-bg, rgb(122 166 161 / 0.1));
     position: relative;
     display: flex;
     width: 100%;
