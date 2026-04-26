@@ -272,7 +272,7 @@ export const RootFolderPanelList = ({
       <div
         aria-hidden="true"
         className={cn(
-          "folder-panel-list__edge-fade folder-panel-list__top-fade pointer-events-none absolute left-0 right-3 top-0 z-10 h-7",
+          "folder-panel-list__edge-fade folder-panel-list__top-fade pointer-events-none absolute left-0 right-3 top-0 z-10 h-4",
           showTopFade ? "opacity-100" : "opacity-0",
         )}
       />
@@ -280,7 +280,7 @@ export const RootFolderPanelList = ({
       <div
         aria-hidden="true"
         className={cn(
-          "folder-panel-list__edge-fade folder-panel-list__bottom-fade pointer-events-none absolute bottom-0 left-0 right-3 z-10 h-7",
+          "folder-panel-list__edge-fade folder-panel-list__bottom-fade pointer-events-none absolute bottom-0 left-0 right-3 z-10 h-6",
           showBottomFade ? "opacity-100" : "opacity-0",
         )}
       />
