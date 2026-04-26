@@ -35,9 +35,9 @@
   .folder-panel-list__top-fade {
     background: linear-gradient(
       to bottom,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0.88) 0%,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0.52) 22%,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0) 66%,
+      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0.96) 0%,
+      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0.72) 26%,
+      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0.24) 64%,
       rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0) 100%
     );
   }

@@ -128,10 +128,11 @@ export const RootFolderPanelList = ({
       return;
     }
 
-    const remainingScroll =
-      node.scrollHeight - node.clientHeight - node.scrollTop;
+    const scrollOverflow = node.scrollHeight - node.clientHeight;
+    const remainingScroll = scrollOverflow - node.scrollTop;
+    const canScroll = scrollOverflow > 2;
 
-    setShowTopFade(node.scrollTop > 2);
+    setShowTopFade(canScroll);
     setShowBottomFade(remainingScroll > 2);
   }, [shouldRenderEdgeFade]);
 
