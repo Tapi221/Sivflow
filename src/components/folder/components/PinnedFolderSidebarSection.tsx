@@ -37,6 +37,9 @@ type PinnedFolderEntry = {
   contentCount: number;
 };
 
+const SIDEBAR_SECTION_LABEL_CLASS =
+  "px-3 pb-1 pt-1 text-[11px] font-medium leading-5 text-muted-foreground";
+
 const isSoftDeletedFolder = (folder: FolderTreeNode) => {
   return Boolean(
     (folder as { isDeleted?: boolean; is_deleted?: boolean }).isDeleted ??
@@ -120,96 +123,100 @@ export const PinnedFolderSidebarSection = ({
     pinnedFolderIds,
   ]);
 
-  if (pinnedFolders.length === 0) {
-    return null;
-  }
-
   return (
-    <section className="shrink-0 border-b border-border/60 pb-1 pt-1">
-      <div className="px-3 pb-1 pt-1 text-[11px] font-medium leading-5 text-muted-foreground">
-        ピン留め
-      </div>
+    <section className="shrink-0 pb-0 pt-1">
+      {pinnedFolders.length > 0 ? (
+        <>
+          <div className={SIDEBAR_SECTION_LABEL_CLASS}>ピン留め</div>
 
-      <div className="space-y-0.5">
-        {pinnedFolders.map((entry) => {
-          const isSelected = selectedFolderId === entry.id;
-          const menuActions: MenuAction[] = [
-            {
-              id: "unpin-folder",
-              label: "ピン留めを外す",
-              icon: <Pin className="h-4 w-4" />,
-              onSelect: () => unpinFolder(entry.id),
-            },
-          ];
+          <div className="space-y-0.5">
+            {pinnedFolders.map((entry) => {
+              const isSelected = selectedFolderId === entry.id;
+              const menuActions: MenuAction[] = [
+                {
+                  id: "unpin-folder",
+                  label: "ピン留めを外す",
+                  icon: <Pin className="h-4 w-4" />,
+                  onSelect: () => unpinFolder(entry.id),
+                },
+              ];
 
-          return (
-            <SidebarEntityRow
-              key={entry.id}
-              selected={isSelected}
-              menuActions={menuActions}
-              hasContextMenu
-              contextMenuVariant="folderContext"
-              contentClassName={EXPLORER_ROW_CONTENT_CLASS}
-              iconClassName={EXPLORER_ROW_ICON_SLOT_CLASS}
-              titleSlotClassName={EXPLORER_ROW_TITLE_SLOT_CLASS}
-              title={entry.name}
-              titleClassName={cn(
-                FOLDER_ROW_TITLE_CLASS,
-                isSelected ? "font-medium" : "font-normal",
-              )}
-              trailing={
-                <div className="ml-auto flex shrink-0 items-center gap-1 pr-1">
-                  <span className="ds-list-item__subtitle text-[11px] font-normal tabular-nums leading-none opacity-60">
-                    {entry.contentCount}
-                  </span>
-                  <button
-                    type="button"
-                    className={cn(
-                      "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground",
-                      "opacity-70 transition hover:bg-muted hover:text-foreground group-hover:opacity-100",
-                    )}
-                    aria-label="ピン留めを外す"
-                    title="ピン留めを外す"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      unpinFolder(entry.id);
-                    }}
-                    onPointerDown={(event) => {
-                      event.stopPropagation();
-                    }}
-                  >
-                    <Pin className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              }
-              icon={
-                <FolderOutlineIcon
-                  className={cn(
-                    "sidebar-icon",
-                    FOLDER_ROW_ICON_SIZE_CLASS,
-                    isSelected
-                      ? FOLDER_ROW_ICON_ACTIVE_CLASS
-                      : FOLDER_ROW_ICON_MUTED_CLASS,
+              return (
+                <SidebarEntityRow
+                  key={entry.id}
+                  selected={isSelected}
+                  menuActions={menuActions}
+                  hasContextMenu
+                  contextMenuVariant="folderContext"
+                  contentClassName={EXPLORER_ROW_CONTENT_CLASS}
+                  iconClassName={EXPLORER_ROW_ICON_SLOT_CLASS}
+                  titleSlotClassName={EXPLORER_ROW_TITLE_SLOT_CLASS}
+                  title={entry.name}
+                  titleClassName={cn(
+                    FOLDER_ROW_TITLE_CLASS,
+                    isSelected ? "font-medium" : "font-normal",
                   )}
+                  trailing={
+                    <div className="ml-auto flex shrink-0 items-center gap-1 pr-1">
+                      <span className="ds-list-item__subtitle text-[11px] font-normal tabular-nums leading-none opacity-60">
+                        {entry.contentCount}
+                      </span>
+                      <button
+                        type="button"
+                        className={cn(
+                          "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground",
+                          "opacity-70 transition hover:bg-muted hover:text-foreground group-hover:opacity-100",
+                        )}
+                        aria-label="ピン留めを外す"
+                        title="ピン留めを外す"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          unpinFolder(entry.id);
+                        }}
+                        onPointerDown={(event) => {
+                          event.stopPropagation();
+                        }}
+                      >
+                        <Pin className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  }
+                  icon={
+                    <FolderOutlineIcon
+                      className={cn(
+                        "sidebar-icon",
+                        FOLDER_ROW_ICON_SIZE_CLASS,
+                        isSelected
+                          ? FOLDER_ROW_ICON_ACTIVE_CLASS
+                          : FOLDER_ROW_ICON_MUTED_CLASS,
+                      )}
+                    />
+                  }
+                  role="button"
+                  tabIndex={0}
+                  onClick={(event) => {
+                    if (event.defaultPrevented) return;
+                    onFolderSelect(entry.id);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onFolderSelect(entry.id);
+                    }
+                  }}
                 />
-              }
-              role="button"
-              tabIndex={0}
-              onClick={(event) => {
-                if (event.defaultPrevented) return;
-                onFolderSelect(entry.id);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  onFolderSelect(entry.id);
-                }
-              }}
-            />
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-1 border-t border-border/60 px-3 pb-1 pt-2 text-[11px] font-medium leading-5 text-muted-foreground">
+            フォルダ一覧
+          </div>
+        </>
+      ) : (
+        <div className={SIDEBAR_SECTION_LABEL_CLASS}>フォルダ一覧</div>
+      )}
     </section>
   );
 };
