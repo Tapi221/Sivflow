@@ -5,18 +5,19 @@
 
     /* ExplorerChrome icons: default */
     --explorer-chrome-folder-fill: #f0efe9;
-    --explorer-chrome-folder-stroke: var(--sidebar-text-muted, #6e6e80);
+    --explorer-chrome-folder-stroke: #8b8a84;
     --explorer-chrome-folder-highlight: #fbfaf6;
     --explorer-chrome-cardset-fill: #f0efe9;
-    --explorer-chrome-cardset-stroke: var(--sidebar-text-muted, #6e6e80);
+    --explorer-chrome-cardset-stroke: #8b8a84;
     --explorer-chrome-cardset-highlight: #fbfaf6;
     --explorer-chrome-card-fill: #f0efe9;
-    --explorer-chrome-card-stroke: var(--sidebar-text-muted, #6e6e80);
+    --explorer-chrome-card-stroke: #8b8a84;
     --explorer-chrome-card-highlight: #fbfaf6;
     --explorer-chrome-pdf-fill: #f0efe9;
-    --explorer-chrome-pdf-stroke: var(--sidebar-text-muted, #6e6e80);
+    --explorer-chrome-pdf-stroke: #8b8a84;
     --explorer-chrome-pdf-highlight: #fbfaf6;
     --explorer-chrome-pdf-accent: #c7b19c;
+    --explorer-chrome-pin-stroke: #8b8a84;
 
     position: relative;
     display: flex;
@@ -40,6 +41,7 @@
     --explorer-chrome-cardset-stroke: var(--sidebar-text, #202123);
     --explorer-chrome-card-stroke: var(--sidebar-text, #202123);
     --explorer-chrome-pdf-stroke: var(--sidebar-text, #202123);
+    --explorer-chrome-pin-stroke: var(--sidebar-text, #202123);
   }
 
   .sidebar-row::before {
