@@ -13,7 +13,7 @@
   }
 
   /*
-   * カラム表示の各縦スクロールカラムに、上下 24px のソフトフェードをかける。
+   * カラム表示の各縦スクロールカラムに、上下 20px のソフトフェードをかける。
    * TSX 側の DnD / リサイズ処理には触れず、描画マスクだけで完結させる。
    */
   .folder-column-view > section,
@@ -21,15 +21,15 @@
     -webkit-mask-image: linear-gradient(
       to bottom,
       transparent 0,
-      rgb(0 0 0 / 1) 1.5rem,
-      rgb(0 0 0 / 1) calc(100% - 1.5rem),
+      rgb(0 0 0 / 1) 1.25rem,
+      rgb(0 0 0 / 1) calc(100% - 1.25rem),
       transparent 100%
     );
     mask-image: linear-gradient(
       to bottom,
       transparent 0,
-      rgb(0 0 0 / 1) 1.5rem,
-      rgb(0 0 0 / 1) calc(100% - 1.5rem),
+      rgb(0 0 0 / 1) 1.25rem,
+      rgb(0 0 0 / 1) calc(100% - 1.25rem),
       transparent 100%
     );
     -webkit-mask-size: 100% 100%;
