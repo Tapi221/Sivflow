@@ -77,7 +77,7 @@ export const WorkspaceTabsBar = ({
         isTitlebar
           ? "h-full min-w-0 flex-1 bg-transparent px-0 pt-0"
           : [
-              "h-10 w-full min-w-0 border-b border-[#e0e0e0] bg-[#f5f5f5]",
+              "h-10 w-full min-w-0 border-b border-[#dddcd5] bg-[rgba(246,246,244,0.98)]",
               "px-0 pt-0",
             ],
         className,
@@ -100,8 +100,8 @@ export const WorkspaceTabsBar = ({
                   : "mb-[5px] h-7 rounded-[7px]",
                 resolveTabWidthClassName(tab),
                 selected
-                  ? "border-[#e0e0e0] border-b-white bg-white text-[#1a1a1a]"
-                  : "border-transparent bg-transparent text-[#6b6b6b] hover:bg-[#eeeeee] hover:text-[#1a1a1a]",
+                  ? "border-[#dddcd5] border-b-white bg-white text-[#24231f]"
+                  : "border-transparent bg-transparent text-[#777671] hover:bg-white/65 hover:text-[#33322f]",
               )}
             >
               <button
@@ -118,7 +118,7 @@ export const WorkspaceTabsBar = ({
                 <Icon
                   className={cn(
                     "h-4 w-4 shrink-0",
-                    selected ? "text-[#6b6b6b]" : "text-[#9e9e9e]",
+                    selected ? "text-[#6f6e69]" : "text-[#9b9a94]",
                   )}
                 />
                 <span className="truncate">{tab.title}</span>
@@ -129,8 +129,8 @@ export const WorkspaceTabsBar = ({
                   type="button"
                   style={interactiveStyle}
                   className={cn(
-                    "mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#9e9e9e] outline-none transition-colors",
-                    "hover:bg-black/10 hover:text-[#4b4b4b]",
+                    "mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#aaa9a3] outline-none transition-colors",
+                    "hover:bg-black/10 hover:text-[#55544f]",
                     selected ? "opacity-100" : "opacity-0 group-hover/tab:opacity-100",
                   )}
                   aria-label={`${tab.title} を閉じる`}
@@ -152,7 +152,7 @@ export const WorkspaceTabsBar = ({
       <button
         type="button"
         style={interactiveStyle}
-        className="mb-[5px] mr-2 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#6b6b6b] outline-none transition-colors hover:bg-[#eeeeee] hover:text-[#1a1a1a]"
+        className="mb-[5px] mr-2 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#8b8a84] outline-none transition-colors hover:bg-black/5 hover:text-[#45443f]"
         aria-label="新しいエクスプローラータブを開く"
         title="新しいエクスプローラータブ"
         onClick={() => {

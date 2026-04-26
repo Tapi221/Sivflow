@@ -30,10 +30,10 @@ const ExplorerToolbarButton = ({
       disabled={disabled}
       className={cn(
         "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px]",
-        "border-0 bg-transparent text-[#6b6b6b] outline-none transition-colors",
+        "border-0 bg-transparent text-[#777671] outline-none transition-colors",
         disabled
-          ? "cursor-default text-[#b8b8b8]"
-          : "hover:bg-[#f0f0f0] hover:text-[#1a1a1a]",
+          ? "cursor-default text-[#b8b7b0]"
+          : "hover:bg-[#eeece4] hover:text-[#24231f]",
       )}
     >
       {children}
@@ -136,14 +136,14 @@ const FolderIcon = () => (
   <svg width="15" height="15" viewBox="0 0 20 17" fill="none" aria-hidden="true">
     <path
       d="M1.5 4.25C1.5 3.42 2.17 2.75 3 2.75H7.25C7.79 2.75 8.29 3.04 8.56 3.5L9.25 4.7H17C17.83 4.7 18.5 5.37 18.5 6.2V13.6C18.5 14.43 17.83 15.1 17 15.1H3C2.17 15.1 1.5 14.43 1.5 13.6V4.25Z"
-      fill="#e4e4e4"
-      stroke="#8b8b8b"
+      fill="#f0efe9"
+      stroke="#8b8a84"
       strokeWidth="1.2"
       strokeLinejoin="round"
     />
     <path
       d="M2.4 6.6H17.6"
-      stroke="#f8f8f8"
+      stroke="#fbfaf6"
       strokeWidth="1.2"
       strokeLinecap="round"
       opacity="0.9"
@@ -153,7 +153,12 @@ const FolderIcon = () => (
 
 const ExplorerToolbar = () => {
   return (
-    <div className="flex h-12 shrink-0 items-center gap-1 border-b border-[#e0e0e0] bg-white px-2 text-[#1a1a1a]">
+    <div
+      className={cn(
+        "flex h-12 shrink-0 items-center gap-1 border-b border-[#dddcd5]",
+        "bg-[rgba(246,246,244,0.98)] px-2 text-[#24231f]",
+      )}
+    >
       <ExplorerToolbarButton title="戻る" disabled>
         <ChevronLeftIcon />
       </ExplorerToolbarButton>
@@ -164,19 +169,24 @@ const ExplorerToolbar = () => {
         <ArrowUpIcon />
       </ExplorerToolbarButton>
 
-      <div className="mx-1 h-[18px] w-px shrink-0 bg-[#e0e0e0]" />
+      <div className="mx-1 h-[18px] w-px shrink-0 bg-[#dddcd5]" />
 
-      <div className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[6px] border border-[#e0e0e0] bg-[#fafafa] px-3">
+      <div
+        className={cn(
+          "flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[6px]",
+          "border border-[#dddcd5] bg-[rgba(255,255,255,0.9)] px-3",
+        )}
+      >
         <HomeIcon />
-        <span className="text-[12px] text-[#6b6b6b]">ホーム</span>
-        <span className="text-[12px] text-[#b0b0b0]">›</span>
+        <span className="text-[12px] text-[#777671]">ホーム</span>
+        <span className="text-[12px] text-[#b8b7b0]">›</span>
         <FolderIcon />
-        <span className="min-w-0 truncate text-[12px] font-medium text-[#1a1a1a]">
+        <span className="min-w-0 truncate text-[12px] font-medium text-[#24231f]">
           エクスプローラー
         </span>
       </div>
 
-      <div className="mx-1 h-[18px] w-px shrink-0 bg-[#e0e0e0]" />
+      <div className="mx-1 h-[18px] w-px shrink-0 bg-[#dddcd5]" />
 
       <ExplorerToolbarButton title="更新">
         <RefreshIcon />
@@ -190,11 +200,16 @@ const ExplorerToolbar = () => {
 
 const ExplorerStatusBar = () => {
   return (
-    <div className="flex h-7 shrink-0 items-center gap-3 border-t border-[#e0e0e0] bg-white px-3 text-[11px] text-[#6b6b6b]">
+    <div
+      className={cn(
+        "flex h-7 shrink-0 items-center gap-3 border-t border-[#dddcd5]",
+        "bg-[rgba(246,246,244,0.98)] px-3 text-[11px] text-[#777671]",
+      )}
+    >
       <span>エクスプローラー</span>
-      <span className="text-[#d0d0d0]">│</span>
+      <span className="text-[#c8c7bf]">│</span>
       <span>フォルダとカードを管理</span>
-      <span className="ml-auto text-[#9e9e9e]">Manifolia</span>
+      <span className="ml-auto text-[#9b9a94]">Manifolia</span>
     </div>
   );
 };
@@ -212,7 +227,7 @@ export const ExplorerWorkspaceFrame = ({
       style={style}
       className={cn(
         "relative flex h-full min-h-0 min-w-0 max-w-none flex-col overflow-hidden",
-        "rounded-none border-0 bg-transparent shadow-none",
+        "rounded-none border-0 bg-[var(--app-bg)] shadow-none",
         className,
       )}
     >
@@ -222,7 +237,8 @@ export const ExplorerWorkspaceFrame = ({
 
       <div
         className={cn(
-          "relative flex min-h-0 w-full min-w-0 flex-1 overflow-hidden bg-white",
+          "relative flex min-h-0 w-full min-w-0 flex-1 overflow-hidden",
+          "bg-[rgba(255,255,255,0.96)]",
           "[&>div]:rounded-none [&>div]:border-0 [&>div]:bg-transparent [&>div]:shadow-none",
           bodyClassName,
         )}
