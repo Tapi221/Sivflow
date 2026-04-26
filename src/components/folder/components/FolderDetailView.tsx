@@ -359,6 +359,7 @@ const FolderDetailRowView = ({
       role="row"
       tabIndex={0}
       data-selected={selected ? "true" : undefined}
+      data-detail-row="true"
       draggable={draggable}
       aria-grabbed={dragging ? true : undefined}
       className={cn(
@@ -672,10 +673,9 @@ export const FolderDetailView = ({
           </div>
         ) : (
           rows.map((row) => {
-            const selected = isSameSelectedExplorerItem(
-              selectedItem,
-              row.selectTarget,
-            );
+            const selected =
+              row.selectTarget !== null &&
+              isSameSelectedExplorerItem(selectedItem, row.selectTarget);
             const dragging = draggingKey === row.key;
             const currentDropPosition =
               dropIntent?.rowKey === row.key ? dropIntent.position : null;
