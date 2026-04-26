@@ -10,6 +10,9 @@ export const MF_DECK_MEDIA_MANIFEST_PATH = "media/manifest.json" as const;
 export const MF_DECK_FILE_EXTENSION = ".mfdeck" as const;
 export const MF_DECK_MIME_TYPE = "application/vnd.manifolia.deck+zip" as const;
 export const MF_DECK_MEDIA_URI_PREFIX = "mfdeck://media/" as const;
+export const MF_DECK_MAX_CARDS = 50000 as const;
+export const MF_DECK_MAX_BLOCKS_PER_FACE = 1000 as const;
+export const MF_DECK_MAX_MEDIA_ENTRIES = 5000 as const;
 
 export type MfDeckIssueLevel = "error" | "warning";
 
@@ -31,7 +34,16 @@ export type MfDeckIssueCode =
   | "unsupported_media_reference"
   | "unreadable_media"
   | "unsafe_path"
-  | "unexpected_value";
+  | "unexpected_value"
+  | "duplicate_card_id"
+  | "duplicate_block_id"
+  | "duplicate_media_path"
+  | "too_many_cards"
+  | "too_many_blocks"
+  | "too_many_media_entries"
+  | "media_size_mismatch"
+  | "unknown_media_entry"
+  | "invalid_media_reference";
 
 export type MfDeckIssue = {
   level: MfDeckIssueLevel;

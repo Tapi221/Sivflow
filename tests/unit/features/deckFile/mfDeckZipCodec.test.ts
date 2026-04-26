@@ -128,9 +128,34 @@ describe("mfDeckZipCodec", () => {
       },
     } as unknown as MfDeckArchiveV1;
 
-    const bytes = encodeMfDeckArchive(invalidArchive);
+    expect(() => encodeMfDeckArchive(invalidArchive)).toThrow(
+      MfDeckValidationError,
+    );
+  });
 
-    expect(() => decodeMfDeckArchive(toArrayBuffer(bytes))).toThrow(
+  it("重複した card id を拒否する", () => {
+    const archive = createArchive();
+    const duplicatedCard = {
+      ...archive.cardsJson.cards[0],
+      title: "重複カード",
+    };
+
+    const invalidArchive = {
+      ...archive,
+      manifest: {
+        ...archive.manifest,
+        deck: {
+          ...archive.manifest.deck,
+          cardCount: 2,
+        },
+      },
+      cardsJson: {
+        ...archive.cardsJson,
+        cards: [...archive.cardsJson.cards, duplicatedCard],
+      },
+    } satisfies MfDeckArchiveV1;
+
+    expect(() => encodeMfDeckArchive(invalidArchive)).toThrow(
       MfDeckValidationError,
     );
   });
