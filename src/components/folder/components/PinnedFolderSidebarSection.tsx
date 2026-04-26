@@ -42,6 +42,7 @@ const SIDEBAR_SECTION_LABEL_CLASS =
 
 const PINNED_FOLDER_SECTION_CONTENT_ID =
   "pinned-folder-sidebar-section-content";
+const FOLDER_LIST_SECTION_CONTENT_ID = "folder-list-sidebar-section-content";
 
 const isSoftDeletedFolder = (folder: FolderTreeNode) => {
   return Boolean(
@@ -81,6 +82,12 @@ export const PinnedFolderSidebarSection = ({
   );
   const togglePinnedFolderSectionCollapsed = useExplorerStore(
     (state) => state.togglePinnedFolderSectionCollapsed,
+  );
+  const isFolderListSectionCollapsed = useExplorerStore(
+    (state) => state.isFolderListSectionCollapsed,
+  );
+  const toggleFolderListSectionCollapsed = useExplorerStore(
+    (state) => state.toggleFolderListSectionCollapsed,
   );
 
   const treeFolders = folders as unknown as FolderTreeNode[];
@@ -250,12 +257,52 @@ export const PinnedFolderSidebarSection = ({
             })}
           </div>
 
-          <div className="mt-1 border-t border-border/60 px-3 pb-1 pt-2 text-[11px] font-medium leading-5 text-muted-foreground">
-            フォルダ一覧
+          <div className="mt-1 border-t border-border/60 px-2 pb-1 pt-2">
+            <button
+              type="button"
+              className={cn(
+                "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
+                "text-[11px] font-medium leading-5 text-muted-foreground transition",
+                "hover:bg-muted/70 hover:text-foreground",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              )}
+              aria-expanded={!isFolderListSectionCollapsed}
+              aria-controls={FOLDER_LIST_SECTION_CONTENT_ID}
+              onClick={toggleFolderListSectionCollapsed}
+            >
+              {isFolderListSectionCollapsed ? (
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-70" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" />
+              )}
+
+              <span className="min-w-0 flex-1 truncate">フォルダ一覧</span>
+            </button>
           </div>
         </>
       ) : (
-        <div className={SIDEBAR_SECTION_LABEL_CLASS}>フォルダ一覧</div>
+        <div className="px-2 pb-1 pt-1">
+          <button
+            type="button"
+            className={cn(
+              "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
+              "text-[11px] font-medium leading-5 text-muted-foreground transition",
+              "hover:bg-muted/70 hover:text-foreground",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            )}
+            aria-expanded={!isFolderListSectionCollapsed}
+            aria-controls={FOLDER_LIST_SECTION_CONTENT_ID}
+            onClick={toggleFolderListSectionCollapsed}
+          >
+            {isFolderListSectionCollapsed ? (
+              <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-70" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" />
+            )}
+
+            <span className="min-w-0 flex-1 truncate">フォルダ一覧</span>
+          </button>
+        </div>
       )}
     </section>
   );
