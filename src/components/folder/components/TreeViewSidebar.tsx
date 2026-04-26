@@ -117,16 +117,13 @@ export const TreeViewSidebar = ({
       {isSidebarOpen && (
         <div
           className={cn(
-            "absolute top-2 -right-[4px] z-50 hidden h-[calc(100%-16px)] w-2 cursor-col-resize select-none outline-none md:block group/resize",
-            "hover:bg-[color-mix(in_srgb,var(--sidebar-text-muted,#6e6e80)_20%,transparent)]",
-            isResizing &&
-              "bg-[color-mix(in_srgb,var(--sidebar-text-muted,#6e6e80)_30%,transparent)]",
+            "absolute top-0 right-[-3px] z-50 hidden h-full w-[6px] select-none bg-transparent outline-none md:block",
           )}
           onPointerDown={onStartResizing}
           role="separator"
           aria-label="サイドバーのサイズ変更"
           tabIndex={0}
-          style={{ touchAction: "none" }}
+          style={{ cursor: "col-resize", touchAction: "none" }}
         />
       )}
     </div>
