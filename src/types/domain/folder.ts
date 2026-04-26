@@ -11,6 +11,7 @@ export type Folder = BaseEntity & {
   cloudSyncEnabled: boolean;
   isSilent?: boolean;
   isHidden?: boolean;
+  tags?: string[];
   notePdfs?: UploadedFile[];
   deletedAt?: Date | Timestamp | null;
   lastAccessAt?: Date | Timestamp | null;
