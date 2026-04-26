@@ -13,30 +13,50 @@
   }
 
   /*
-   * カラム表示の各縦スクロール内容に、上下 16px のソフトフェードをかける。
-   * section 自体には mask を当てないことで、カラム境界線やリサイズハンドルを
-   * フェード対象から外す。
+   * カラム表示の上下フェード。
+   *
+   * mask は要素全体を透明化するため、カラム境界線まで巻き込む。
+   * そのため section 自体や child に mask は使わず、section の内側に
+   * 16px の overlay を置く。right: 1px にして右端の境界線は覆わない。
    */
-  .folder-column-view > section > :not([role="separator"]),
-  .folder-column-view > div > section > :not([role="separator"]) {
-    -webkit-mask-image: linear-gradient(
+  .folder-column-view > section,
+  .folder-column-view > div > section {
+    position: relative;
+  }
+
+  .folder-column-view > section::before,
+  .folder-column-view > div > section::before,
+  .folder-column-view > section::after,
+  .folder-column-view > div > section::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+    right: 1px;
+    z-index: 20;
+    height: 1rem;
+  }
+
+  .folder-column-view > section::before,
+  .folder-column-view > div > section::before {
+    top: 0;
+    background: linear-gradient(
       to bottom,
-      transparent 0,
-      rgb(0 0 0 / 1) 1rem,
-      rgb(0 0 0 / 1) calc(100% - 1rem),
-      transparent 100%
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.82) 0%,
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.46) 38%,
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0) 100%
     );
-    mask-image: linear-gradient(
+  }
+
+  .folder-column-view > section::after,
+  .folder-column-view > div > section::after {
+    bottom: 0;
+    background: linear-gradient(
       to bottom,
-      transparent 0,
-      rgb(0 0 0 / 1) 1rem,
-      rgb(0 0 0 / 1) calc(100% - 1rem),
-      transparent 100%
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0) 0%,
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.46) 62%,
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.82) 100%
     );
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
   }
 
   .folder-column-view [role="separator"][aria-label="カラム幅を変更"] {
@@ -45,6 +65,7 @@
     transform: none !important;
     cursor: col-resize !important;
     background: transparent !important;
+    z-index: 30 !important;
   }
 
   .folder-column-view [role="separator"][aria-label="カラム幅を変更"] * {
