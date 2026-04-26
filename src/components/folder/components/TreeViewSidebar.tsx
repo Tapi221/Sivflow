@@ -236,30 +236,30 @@ const SidebarTagSectionContent = () => {
       <div className="mb-1 flex items-center justify-end">
         {isCreatingTag ? (
           <div className="w-full">
-            <div className="flex h-8 w-full items-center gap-1 rounded-md border border-[#c9c3ae] bg-white px-2 shadow-[0_0_0_1px_rgba(132,149,91,0.35)]">
-              <span className="shrink-0 text-[12px] text-muted-foreground">
-                #
-              </span>
-              <input
-                ref={createInputRef}
-                value={draftTagName}
-                placeholder="タグ名"
-                className="min-w-0 flex-1 bg-transparent text-[12px] text-foreground outline-none placeholder:text-muted-foreground/55"
-                onChange={(event) => {
-                  setDraftTagName(event.target.value);
-                  setCreateTagError(null);
-                }}
-                onKeyDown={handleCreateTagKeyDown}
-                onBlur={handleCommitCreateTag}
-                onPointerDown={stopTagEditorEvent}
-                onMouseDown={stopTagEditorEvent}
-                onClick={stopTagEditorEvent}
-                onDoubleClick={stopTagEditorEvent}
-                onContextMenu={stopTagEditorEvent}
-              />
-            </div>
+            <input
+              ref={createInputRef}
+              value={draftTagName}
+              aria-label="タグを作成"
+              placeholder="タグ名だけで入力可。保存後は # が付きます"
+              className={cn(
+                "h-7 min-w-0 w-full rounded-[5px] border border-[#a8a176] bg-white px-2",
+                "text-[12px] text-[#24231f] shadow-[0_0_0_2px_rgba(168,161,118,0.18)] outline-none",
+                "placeholder:text-muted-foreground/55",
+              )}
+              onChange={(event) => {
+                setDraftTagName(event.target.value);
+                setCreateTagError(null);
+              }}
+              onKeyDown={handleCreateTagKeyDown}
+              onBlur={handleCommitCreateTag}
+              onPointerDown={stopTagEditorEvent}
+              onMouseDown={stopTagEditorEvent}
+              onClick={stopTagEditorEvent}
+              onDoubleClick={stopTagEditorEvent}
+              onContextMenu={stopTagEditorEvent}
+            />
             {createTagError ? (
-              <div className="mt-1 px-1 text-[10px] leading-4 text-destructive">
+              <div className="mt-1 px-1 text-[10px] leading-4 text-[#9b3f35]">
                 {createTagError}
               </div>
             ) : null}
