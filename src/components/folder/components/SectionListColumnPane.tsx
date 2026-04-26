@@ -7,9 +7,11 @@ import {
   type MouseEvent as ReactMouseEvent,
 } from "react";
 import { FolderColumnView } from "@/components/folder/components/FolderColumnView";
+import { FolderDetailView } from "@/components/folder/components/FolderDetailView";
 import { SectionListBlankPane } from "@/components/folder/components/SectionListBlankPane";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import type {
   Card,
   CardSet,
@@ -237,7 +239,8 @@ const resolveClickedRowLabel = (row: HTMLElement): string => {
 };
 
 /**
- * セクション一覧モードの右側パネルに表示する Finder 風のカラムビュー。
+ * セクション一覧モードの右側パネル。
+ * 表示モードに応じて Finder 風カラムビューと詳細リストビューを切り替える。
  */
 export const SectionListColumnPane = ({
   className,
@@ -268,6 +271,9 @@ export const SectionListColumnPane = ({
   void onFolderSelect;
 
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const explorerLayoutMode = useExplorerStore(
+    (state) => state.explorerLayoutMode,
+  );
 
   const folderById = useMemo(() => {
     const map = new Map<string, FolderLike>();
@@ -398,6 +404,15 @@ export const SectionListColumnPane = ({
     [getFolderEntriesForColumn],
   );
 
+  const handleDetailFolderOpen = useCallback(
+    (folderId: string) => {
+      const folderPathIds = buildFolderPathIds(folderId);
+      setColumnPathIds(folderPathIds);
+      dispatchExplorerColumnPathChange(buildFolderCrumbs(folderPathIds));
+    },
+    [buildFolderCrumbs, buildFolderPathIds],
+  );
+
   const handleItemSelect = useCallback(
     (item: SelectedExplorerItem) => {
       if (item?.type === "cardSet") {
@@ -502,6 +517,9 @@ export const SectionListColumnPane = ({
     selectedItem,
   ]);
 
+  const currentDetailFolderId =
+    columnPathIds.length > 0 ? columnPathIds[columnPathIds.length - 1] : null;
+
   return (
     <SectionListBlankPane
       className={className}
@@ -514,28 +532,49 @@ export const SectionListColumnPane = ({
       <div
         ref={contentRef}
         className="h-full min-h-0 w-full"
-        onClickCapture={handleColumnClickCapture}
+        onClickCapture={
+          explorerLayoutMode === "column" ? handleColumnClickCapture : undefined
+        }
       >
-        <FolderColumnView
-          folders={folders as unknown as FolderTreeNode[]}
-          cards={cards}
-          cardSets={cardSets}
-          documents={documents}
-          selectedFolderId={selectedFolderId}
-          selectedItem={selectedItem}
-          selectedCardSetId={selectedCardSetId}
-          isFiltering={isFiltering}
-          resetToken={resetToken}
-          onItemSelect={handleItemSelect}
-          onMoveFolder={onMoveFolder}
-          onReorderFolders={onReorderFolders}
-          onMoveCardSetToFolder={onMoveCardSetToFolder}
-          onReorderCardSets={onReorderCardSets}
-          onMoveDocumentToFolder={onMoveDocumentToFolder}
-          onReorderDocuments={onReorderDocuments}
-          onMoveCardToSet={onMoveCardToSet}
-          onReorderCardsInCardSet={onReorderCardsInCardSet}
-        />
+        {explorerLayoutMode === "detail" ? (
+          <FolderDetailView
+            folders={folders}
+            cards={cards}
+            cardSets={cardSets}
+            documents={documents}
+            currentFolderId={currentDetailFolderId}
+            selectedItem={selectedItem}
+            onFolderOpen={handleDetailFolderOpen}
+            onItemSelect={handleItemSelect}
+            onMoveFolder={onMoveFolder}
+            onReorderFolders={onReorderFolders}
+            onMoveCardSetToFolder={onMoveCardSetToFolder}
+            onReorderCardSets={onReorderCardSets}
+            onMoveDocumentToFolder={onMoveDocumentToFolder}
+            onReorderDocuments={onReorderDocuments}
+          />
+        ) : (
+          <FolderColumnView
+            folders={folders as unknown as FolderTreeNode[]}
+            cards={cards}
+            cardSets={cardSets}
+            documents={documents}
+            selectedFolderId={selectedFolderId}
+            selectedItem={selectedItem}
+            selectedCardSetId={selectedCardSetId}
+            isFiltering={isFiltering}
+            resetToken={resetToken}
+            onItemSelect={handleItemSelect}
+            onMoveFolder={onMoveFolder}
+            onReorderFolders={onReorderFolders}
+            onMoveCardSetToFolder={onMoveCardSetToFolder}
+            onReorderCardSets={onReorderCardSets}
+            onMoveDocumentToFolder={onMoveDocumentToFolder}
+            onReorderDocuments={onReorderDocuments}
+            onMoveCardToSet={onMoveCardToSet}
+            onReorderCardsInCardSet={onReorderCardsInCardSet}
+          />
+        )}
       </div>
     </SectionListBlankPane>
   );

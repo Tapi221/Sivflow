@@ -12,6 +12,8 @@ type TagMatchMode = "any" | "all";
 type DirectoryBadgeVisibilityKey = "uncertainty" | "bookmarked" | "tags";
 type ExplorerPinnedFolderId = string;
 
+export type ExplorerLayoutMode = "detail" | "column";
+
 type DirectoryBadgeVisibility = {
   uncertainty: boolean;
   bookmarked: boolean;
@@ -27,6 +29,7 @@ export interface ExplorerState {
   contentTypeFilter: ContentTypeFilter[];
   directoryBadgeVisibility: DirectoryBadgeVisibility;
   pinnedFolderIds: ExplorerPinnedFolderId[];
+  explorerLayoutMode: ExplorerLayoutMode;
   isPinnedFolderSectionCollapsed: boolean;
   isFolderListSectionCollapsed: boolean;
   isTagSectionCollapsed: boolean;
@@ -45,6 +48,7 @@ export interface ExplorerState {
   pinFolder: (folderId: string) => void;
   unpinFolder: (folderId: string) => void;
   togglePinnedFolder: (folderId: string) => void;
+  setExplorerLayoutMode: (mode: ExplorerLayoutMode) => void;
   setPinnedFolderSectionCollapsed: (collapsed: boolean) => void;
   togglePinnedFolderSectionCollapsed: () => void;
   setFolderListSectionCollapsed: (collapsed: boolean) => void;
@@ -56,6 +60,7 @@ export interface ExplorerState {
 }
 
 const DEFAULT_CONTENT_TYPE_FILTER: ContentTypeFilter[] = ["card", "pdf"];
+const DEFAULT_EXPLORER_LAYOUT_MODE: ExplorerLayoutMode = "detail";
 
 const DEFAULT_DIRECTORY_BADGE_VISIBILITY: DirectoryBadgeVisibility = {
   uncertainty: true,
@@ -75,6 +80,11 @@ const normalizeTagMatchMode = (value: unknown): TagMatchMode => {
 const normalizeToggleableFlag = (value: unknown): ToggleableFlag => {
   if (value === "on" || value === "off") return value;
   return "any";
+};
+
+const normalizeExplorerLayoutMode = (value: unknown): ExplorerLayoutMode => {
+  if (value === "detail" || value === "column") return value;
+  return DEFAULT_EXPLORER_LAYOUT_MODE;
 };
 
 const normalizeContentTypeFilter = (value: unknown): ContentTypeFilter[] => {
@@ -134,6 +144,7 @@ const createDefaultState = (): Pick<
   | "contentTypeFilter"
   | "directoryBadgeVisibility"
   | "pinnedFolderIds"
+  | "explorerLayoutMode"
   | "isPinnedFolderSectionCollapsed"
   | "isFolderListSectionCollapsed"
   | "isTagSectionCollapsed"
@@ -147,6 +158,7 @@ const createDefaultState = (): Pick<
   contentTypeFilter: [...DEFAULT_CONTENT_TYPE_FILTER],
   directoryBadgeVisibility: { ...DEFAULT_DIRECTORY_BADGE_VISIBILITY },
   pinnedFolderIds: [],
+  explorerLayoutMode: DEFAULT_EXPLORER_LAYOUT_MODE,
   isPinnedFolderSectionCollapsed: false,
   isFolderListSectionCollapsed: false,
   isTagSectionCollapsed: false,
@@ -231,6 +243,7 @@ export const useExplorerStore = create<ExplorerState>()(
               : [...state.pinnedFolderIds, folderId],
           };
         }),
+      setExplorerLayoutMode: (mode) => set({ explorerLayoutMode: mode }),
       setPinnedFolderSectionCollapsed: (collapsed) =>
         set({ isPinnedFolderSectionCollapsed: collapsed }),
       togglePinnedFolderSectionCollapsed: () =>
@@ -267,6 +280,7 @@ export const useExplorerStore = create<ExplorerState>()(
         contentTypeFilter: state.contentTypeFilter,
         directoryBadgeVisibility: state.directoryBadgeVisibility,
         pinnedFolderIds: state.pinnedFolderIds,
+        explorerLayoutMode: state.explorerLayoutMode,
         isPinnedFolderSectionCollapsed: state.isPinnedFolderSectionCollapsed,
         isFolderListSectionCollapsed: state.isFolderListSectionCollapsed,
         isTagSectionCollapsed: state.isTagSectionCollapsed,
@@ -294,6 +308,9 @@ export const useExplorerStore = create<ExplorerState>()(
         );
         next.pinnedFolderIds = normalizePinnedFolderIds(
           next.pinnedFolderIds ?? next.pinnedItems,
+        );
+        next.explorerLayoutMode = normalizeExplorerLayoutMode(
+          next.explorerLayoutMode,
         );
         next.isPinnedFolderSectionCollapsed =
           typeof next.isPinnedFolderSectionCollapsed === "boolean"
