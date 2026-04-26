@@ -11,6 +11,10 @@ import {
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
+import {
+  toVirtualMfCardDisplayName,
+  toVirtualMfDeckDisplayName,
+} from "@/features/fileDisplay/virtualFileExtensions";
 import { cn } from "@/lib/utils";
 import type {
   Card,
@@ -280,7 +284,7 @@ const getFolderDisplayName = (folder: FolderTreeNode) => {
 };
 
 const getCardSetDisplayName = (cardSet: CardSet) => {
-  return cardSet.name?.trim() || "無題のセット";
+  return toVirtualMfDeckDisplayName(cardSet.name?.trim() || "無題のセット");
 };
 
 const getExplorerItemDisplayName = (item: ExplorerItem) => {
@@ -292,10 +296,10 @@ const getExplorerItemDisplayName = (item: ExplorerItem) => {
     );
   }
 
-  return (
+  return toVirtualMfCardDisplayName(
     item.data.title?.trim() ||
-    item.data.questionNumber?.trim() ||
-    "無題のカード"
+      item.data.questionNumber?.trim() ||
+      "無題のカード",
   );
 };
 
