@@ -107,7 +107,7 @@ export const TreeViewSidebar = ({
         ) : (
           <div
             ref={contentScrollRef}
-            className="flex-1 min-h-0 min-w-0 overflow-hidden px-1 pb-1 outline-none"
+            className="flex-1 min-h-0 min-w-0 overflow-hidden pl-1 pr-0 pb-1 outline-none"
           >
             {children}
           </div>
