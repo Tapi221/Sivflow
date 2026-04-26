@@ -2,6 +2,7 @@ import {
   ExplorerChromeCardSetIcon,
   ExplorerChromeCardIcon,
   ExplorerChromeFolderIcon,
+  ExplorerChromePdfIcon,
 } from "@/components/explorer/icons";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import {
@@ -28,7 +29,7 @@ import type {
   ExplorerItem,
   SelectedExplorerItem,
 } from "@/types";
-import { ChevronRight, FileText } from "@/ui/icons";
+import { ChevronRight } from "@/ui/icons";
 import type {
   CSSProperties,
   DragEvent as ReactDragEvent,
@@ -339,7 +340,7 @@ const FolderColumnRow = ({
         ? ExplorerChromeCardSetIcon
         : entry.kind === "card"
           ? ExplorerChromeCardIcon
-        : FileText;
+        : ExplorerChromePdfIcon;
 
   const contentCount =
     entry.kind === "folder" || entry.kind === "cardSet"
@@ -422,7 +423,6 @@ const FolderColumnRow = ({
         <Icon
           className={cn(
             FOLDER_ROW_ICON_SIZE_CLASS,
-            entry.kind === "document" && "sidebar-icon ds-list-item__icon",
           )}
         />
       </span>

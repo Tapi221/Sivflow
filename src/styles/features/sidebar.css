@@ -13,6 +13,10 @@
     --explorer-chrome-card-fill: #f0efe9;
     --explorer-chrome-card-stroke: var(--sidebar-text-muted, #6e6e80);
     --explorer-chrome-card-highlight: #fbfaf6;
+    --explorer-chrome-pdf-fill: #f0efe9;
+    --explorer-chrome-pdf-stroke: var(--sidebar-text-muted, #6e6e80);
+    --explorer-chrome-pdf-highlight: #fbfaf6;
+    --explorer-chrome-pdf-accent: #c7b19c;
 
     position: relative;
     display: flex;
@@ -35,6 +39,7 @@
     --explorer-chrome-folder-stroke: var(--sidebar-text, #202123);
     --explorer-chrome-cardset-stroke: var(--sidebar-text, #202123);
     --explorer-chrome-card-stroke: var(--sidebar-text, #202123);
+    --explorer-chrome-pdf-stroke: var(--sidebar-text, #202123);
   }
 
   .sidebar-row::before {

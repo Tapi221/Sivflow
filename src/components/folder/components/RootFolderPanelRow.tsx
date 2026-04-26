@@ -2,6 +2,7 @@ import {
   ExplorerChromeCardSetIcon,
   ExplorerChromeCardIcon,
   ExplorerChromeFolderIcon,
+  ExplorerChromePdfIcon,
 } from "@/components/explorer/icons";
 import {
   buildEntityRenameDeleteMenuActions,
@@ -23,7 +24,7 @@ import {
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import type { SelectedExplorerItem } from "@/types";
-import { FileText, Pin } from "@/ui/icons";
+import { Pin } from "@/ui/icons";
 import React from "react";
 import type { NavigationListEntry } from "./RootFolderPanelList";
 
@@ -143,7 +144,7 @@ export const RootFolderPanelRow = ({
         ? ExplorerChromeCardSetIcon
         : entry.kind === "card"
           ? ExplorerChromeCardIcon
-        : FileText;
+        : ExplorerChromePdfIcon;
 
   const closeMenu = React.useCallback(() => {
     setOpenRowMenuId(null);
@@ -370,11 +371,6 @@ export const RootFolderPanelRow = ({
         <Icon
           className={cn(
             FOLDER_ROW_ICON_SIZE_CLASS,
-            entry.kind === "document" && "sidebar-icon",
-            entry.kind === "document" &&
-              (isSelected
-                ? FOLDER_ROW_ICON_ACTIVE_CLASS
-                : FOLDER_ROW_ICON_MUTED_CLASS),
           )}
         />
       }
