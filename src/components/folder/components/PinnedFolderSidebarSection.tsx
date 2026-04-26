@@ -44,7 +44,6 @@ const SIDEBAR_SECTION_LABEL_CLASS =
 const PINNED_FOLDER_SECTION_CONTENT_ID =
   "pinned-folder-sidebar-section-content";
 const FOLDER_LIST_SECTION_CONTENT_ID = "folder-list-sidebar-section-content";
-
 const isSoftDeletedFolder = (folder: FolderTreeNode) => {
   return Boolean(
     (folder as { isDeleted?: boolean; is_deleted?: boolean }).isDeleted ??
@@ -90,7 +89,6 @@ export const PinnedFolderSidebarSection = ({
   const toggleFolderListSectionCollapsed = useExplorerStore(
     (state) => state.toggleFolderListSectionCollapsed,
   );
-
   const treeFolders = folders as unknown as FolderTreeNode[];
 
   const { getFolderContentCount, matchCountMap } = useExplorerDerivedData({
