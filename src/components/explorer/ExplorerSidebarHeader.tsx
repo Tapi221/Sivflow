@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ExplorerMenuPanel } from "@/components/folder/components/menus/ExplorerMenuPanel";
 import { buildExplorerCreateMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
+import { cn } from "@/lib/utils";
 
 interface ExplorerSidebarHeaderProps {
   allTags: string[];
@@ -22,6 +23,7 @@ interface ExplorerSidebarHeaderProps {
   canAddDocuments?: boolean;
   canBulkImport?: boolean;
   preferDirectRootFolderCreate?: boolean;
+  compact?: boolean;
 }
 
 const EllipsisIcon = ({ size = 16, ...props }: UiIconProps) => (
@@ -40,8 +42,14 @@ const PinIcon = ({ size = 16, ...props }: UiIconProps) => (
   </UiIcon>
 );
 
+const FolderIcon = ({ size = 16, ...props }: UiIconProps) => (
+  <UiIcon size={size} strokeWidth={1.7} {...props}>
+    <path d="M3.75 6.25V16.25C3.75 17.08 4.42 17.75 5.25 17.75H18.75C19.58 17.75 20.25 17.08 20.25 16.25V8.25C20.25 7.42 19.58 6.75 18.75 6.75H12.25L10.7 4.9C10.42 4.56 10 4.25 9.55 4.25H5.25C4.42 4.25 3.75 4.92 3.75 5.75V6.25Z" />
+  </UiIcon>
+);
+
 const iconButtonClassName =
-  "inline-flex h-7 w-7 items-center justify-center rounded-lg border-0 bg-transparent text-[rgba(107,114,128,0.92)] transition-colors hover:bg-[#f9fafb] hover:text-[#4b5563]";
+  "inline-flex h-7 w-7 items-center justify-center rounded-[5px] border-0 bg-transparent text-[#6b6b6b] transition-colors hover:bg-[#f0f0f0] hover:text-[#1a1a1a]";
 
 export const ExplorerSidebarHeader = ({
   allTags: _allTags,
@@ -55,6 +63,7 @@ export const ExplorerSidebarHeader = ({
   canAddDocuments = false,
   canBulkImport = false,
   preferDirectRootFolderCreate: _preferDirectRootFolderCreate = false,
+  compact = false,
 }: ExplorerSidebarHeaderProps) => {
   const suppressCloseAutoFocusRef = useRef(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -86,10 +95,25 @@ export const ExplorerSidebarHeader = ({
   );
 
   return (
-    <div className="border-b border-transparent px-4 pt-5 pb-3">
+    <div
+      className={cn(
+        compact
+          ? "border-b border-[#ebebeb] px-3 py-2"
+          : "border-b border-transparent px-4 pt-5 pb-3",
+      )}
+    >
       <div className="flex min-w-0 items-center gap-2">
-        <h2 className="min-w-0 flex-1 truncate text-[18px] font-semibold leading-7 text-[#111827]">
-          エクスプローラー
+        {compact ? (
+          <FolderIcon className="h-4 w-4 shrink-0 text-[#8b8b8b]" />
+        ) : null}
+
+        <h2
+          className={cn(
+            "min-w-0 flex-1 truncate font-semibold text-[#1a1a1a]",
+            compact ? "text-[13px] leading-6" : "text-[18px] leading-7",
+          )}
+        >
+          {compact ? "クイックアクセス" : "エクスプローラー"}
         </h2>
 
         <DropdownMenu
