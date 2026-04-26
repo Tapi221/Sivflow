@@ -17,10 +17,6 @@ type AppRegionStyle = CSSProperties & {
   WebkitAppRegion?: "drag" | "no-drag";
 };
 
-const TABS_DRAG_STYLE: AppRegionStyle = {
-  WebkitAppRegion: "drag",
-};
-
 const TABS_NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
 };
@@ -65,13 +61,11 @@ export const WorkspaceTabsBar = ({
   );
 
   const isTitlebar = variant === "titlebar";
-  const interactiveStyle = isTitlebar
-    ? noDragStyle
-    : (noDragStyle ?? TABS_NO_DRAG_STYLE);
+  const interactiveStyle = noDragStyle ?? TABS_NO_DRAG_STYLE;
 
   return (
     <div
-      style={isTitlebar ? noDragStyle : TABS_DRAG_STYLE}
+      style={interactiveStyle}
       className={cn(
         "explorer-chrome-font relative z-30 flex shrink-0 items-end gap-0 overflow-hidden",
         isTitlebar
@@ -83,7 +77,7 @@ export const WorkspaceTabsBar = ({
         className,
       )}
     >
-      <div className="flex min-w-0 flex-1 items-end overflow-hidden">
+      <div className="flex min-w-0 max-w-[calc(100%-220px)] items-end overflow-hidden">
         {tabs.map((tab, index) => {
           const selected = tab.id === activeTabId;
           const Icon = resolveTabIcon(tab);
@@ -152,7 +146,7 @@ export const WorkspaceTabsBar = ({
       <button
         type="button"
         style={interactiveStyle}
-        className="mb-[5px] mr-2 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#8b8a84] outline-none transition-colors hover:bg-black/5 hover:text-[#45443f]"
+        className="mb-[5px] ml-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#8b8a84] outline-none transition-colors hover:bg-black/5 hover:text-[#45443f]"
         aria-label="新しいエクスプローラータブを開く"
         title="新しいエクスプローラータブ"
         onClick={() => {
@@ -161,6 +155,8 @@ export const WorkspaceTabsBar = ({
       >
         <Plus className="h-3.5 w-3.5" />
       </button>
+
+      <div className="h-full min-w-0 flex-1" />
     </div>
   );
 };
