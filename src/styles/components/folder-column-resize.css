@@ -9,54 +9,45 @@
   .folder-column-view {
     --folder-column-view-fade-rgb: 255 255 255;
 
+    position: relative;
+    isolation: isolate;
     cursor: default !important;
   }
 
   /*
-   * カラム表示の上下フェード。
+   * カラム表示の左右フェード。
    *
-   * 前版の .folder-column-view > section / > div > section は DOM 階層が
-   * 1 段足りず、実際のカラム要素に当たらないケースがある。
-   * FolderColumnView のカラム要素は getColumnStyle 由来の contain を持つので、
-   * その inline style を安定したフックとして使う。人類が DOM 階層を祈りで
-   * 当てようとした結果がこれ。
-   *
-   * section 自体や child に mask は使わず、カラム内側に 20px の overlay を置く。
-   * right: 1px にして右端の境界線は覆わない。
+   * ここは上下ではなく、横スクロールの左右端にかける fade。
+   * 疑似要素を 1 枚だけ sticky にして、左右 20px（Tailwind の w-5 相当）
+   * のグラデーションを同時に描く。個別カラムや境界線に mask を当てない。
    */
-  .folder-column-view :where(section, [style*="contain: layout"]) {
-    position: relative;
-  }
-
-  .folder-column-view :where(section, [style*="contain: layout"])::before,
-  .folder-column-view :where(section, [style*="contain: layout"])::after {
+  .folder-column-view::before {
     content: "";
     pointer-events: none;
-    position: absolute;
+    position: sticky;
     left: 0;
-    right: 1px;
     z-index: 60;
-    height: 1.25rem;
-  }
-
-  .folder-column-view :where(section, [style*="contain: layout"])::before {
-    top: 0;
-    background: linear-gradient(
-      to bottom,
-      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.92) 0%,
-      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.62) 45%,
-      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0) 100%
-    );
-  }
-
-  .folder-column-view :where(section, [style*="contain: layout"])::after {
-    bottom: 0;
-    background: linear-gradient(
-      to bottom,
-      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0) 0%,
-      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.62) 55%,
-      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.92) 100%
-    );
+    display: block;
+    align-self: stretch;
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 100%;
+    margin-right: -100%;
+    background:
+      linear-gradient(
+          to right,
+          rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.92) 0%,
+          rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.62) 45%,
+          rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0) 100%
+        )
+        left / 1.25rem 100% no-repeat,
+      linear-gradient(
+          to left,
+          rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.92) 0%,
+          rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.62) 45%,
+          rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0) 100%
+        )
+        right / 1.25rem 100% no-repeat;
   }
 
   /*
