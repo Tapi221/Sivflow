@@ -6,48 +6,48 @@ type LayoutMode = "detail" | "list" | "card" | "icon" | "column";
 
 const LayoutDetailIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M7 6H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    <path d="M7 12H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    <path d="M7 18H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    <path d="M4 6H4.01" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />
-    <path d="M4 12H4.01" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />
-    <path d="M4 18H4.01" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />
+    <path d="M7 6H20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <path d="M7 12H20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <path d="M7 18H20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <path d="M4 6H4.01" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+    <path d="M4 12H4.01" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+    <path d="M4 18H4.01" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
   </svg>
 );
 
 const LayoutListIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <rect x="4" y="5" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.8" />
-    <path d="M10.5 7H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    <rect x="4" y="10" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.8" />
-    <path d="M10.5 12H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    <rect x="4" y="15" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.8" />
-    <path d="M10.5 17H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <rect x="4" y="5" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.6" />
+    <path d="M10.5 7H20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <rect x="4" y="10" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.6" />
+    <path d="M10.5 12H20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <rect x="4" y="15" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.6" />
+    <path d="M10.5 17H20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
   </svg>
 );
 
 const LayoutCardIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <rect x="5" y="6" width="14" height="12" rx="2.5" stroke="currentColor" strokeWidth="1.8" />
-    <path d="M8 10H16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    <path d="M8 13.5H14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" opacity="0.9" />
+    <rect x="5" y="6" width="14" height="12" rx="2.5" stroke="currentColor" strokeWidth="1.6" />
+    <path d="M8 10H16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <path d="M8 13.5H14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity="0.9" />
   </svg>
 );
 
 const LayoutIconGridIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <rect x="5" y="5" width="6" height="6" rx="1.6" stroke="currentColor" strokeWidth="1.8" />
-    <rect x="13" y="5" width="6" height="6" rx="1.6" stroke="currentColor" strokeWidth="1.8" />
-    <rect x="5" y="13" width="6" height="6" rx="1.6" stroke="currentColor" strokeWidth="1.8" />
-    <rect x="13" y="13" width="6" height="6" rx="1.6" stroke="currentColor" strokeWidth="1.8" />
+    <rect x="5" y="5" width="6" height="6" rx="1.6" stroke="currentColor" strokeWidth="1.6" />
+    <rect x="13" y="5" width="6" height="6" rx="1.6" stroke="currentColor" strokeWidth="1.6" />
+    <rect x="5" y="13" width="6" height="6" rx="1.6" stroke="currentColor" strokeWidth="1.6" />
+    <rect x="13" y="13" width="6" height="6" rx="1.6" stroke="currentColor" strokeWidth="1.6" />
   </svg>
 );
 
 const LayoutColumnIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <rect x="4" y="5" width="16" height="14" rx="2.6" stroke="currentColor" strokeWidth="1.8" />
-    <path d="M11 7V17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    <path d="M13 7V17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <rect x="4" y="5" width="16" height="14" rx="2.6" stroke="currentColor" strokeWidth="1.6" />
+    <path d="M11 7V17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <path d="M13 7V17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
   </svg>
 );
 
@@ -93,9 +93,7 @@ export const LayoutPanel = ({ className }: { className?: string }) => {
                     "h-8 w-8 px-0",
                     "rounded-[9px]",
                     "grid place-items-center",
-                    selected
-                      ? "text-[var(--ds-semantic-color-text-strong)]"
-                      : "text-[var(--ds-semantic-color-text-secondary)]",
+                    selected ? "[&>svg]:opacity-95" : "[&>svg]:opacity-72",
                   )}
                 >
                   {opt.icon}
