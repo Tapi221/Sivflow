@@ -53,6 +53,8 @@ type LegacyEntityFields = {
   is_deleted?: boolean;
   is_hidden?: boolean;
   tags?: string[];
+  tagIds?: string[];
+  tag_ids?: string[];
   card_set_id?: string | null;
 };
 
@@ -96,8 +98,21 @@ const getDocumentDisplayName = (document: DocumentItem): string => {
   return document.title?.trim() || document.fileName?.trim() || "無題の文書";
 };
 
+const getStringArray = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (entry): entry is string =>
+      typeof entry === "string" && entry.trim().length > 0,
+  );
+};
+
+const getEntityTags = (entity: object): string[] => {
+  const legacy = withLegacy(entity);
+  return getStringArray(legacy.tags ?? legacy.tagIds ?? legacy.tag_ids);
+};
+
 const getDocumentTags = (document: DocumentItem): string[] => {
-  return Array.isArray(document.tags) ? document.tags : [];
+  return getStringArray(document.tags);
 };
 
 const getCardCardSetId = (card: Card): string | null => {
@@ -111,8 +126,7 @@ const getCardDisplayName = (card: Card): string => {
 };
 
 const getCardTags = (card: Card): string[] => {
-  const tagIds = card.tagIds;
-  return Array.isArray(tagIds) ? tagIds.filter((tagId) => tagId.trim()) : [];
+  return getStringArray(card.tagIds);
 };
 
 const buildFolderById = (folders: Folder[]): Map<string, Folder> => {
@@ -230,7 +244,7 @@ const buildCardSetRows = ({
         kind: "cardSet",
         id: cardSet.id,
         name: cardSetName,
-        tags: cardCount > 0 ? [`${cardCount}枚`] : [],
+        tags: getEntityTags(cardSet),
         path: joinExplorerPath(currentPathSegments),
         updatedAt: cardSet.updatedAt,
         updatedAtMs: getEntityTime(cardSet.updatedAt),
@@ -329,7 +343,7 @@ export const buildExplorerDetailRows = ({
         kind: "folder",
         id: folderId,
         name: folderName,
-        tags: [],
+        tags: getEntityTags(folder),
         path: joinExplorerPath([...currentPathSegments, folderName]),
         updatedAt: folder.updatedAt,
         updatedAtMs: getEntityTime(folder.updatedAt),

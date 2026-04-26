@@ -15,6 +15,12 @@ import {
   formatExplorerUpdatedAt,
 } from "@/components/folder/explorer/model/formatExplorerDetail";
 import { isSameSelectedExplorerItem } from "@/features/explorer/utils/isSameSelectedExplorerItem";
+import { useCardCommands } from "@/hooks/card/useCardCommands";
+import { useCardSets } from "@/hooks/cardSet/useCardSets";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
+import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
+import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 import type {
   Card,
@@ -32,6 +38,7 @@ import {
   type CSSProperties,
   type DragEvent as ReactDragEvent,
   type KeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 
@@ -95,6 +102,15 @@ type ExplorerDetailDragPayload = {
 type ExplorerDetailDropIntent = {
   rowKey: string;
   position: ExplorerDetailDropPosition;
+};
+
+type ExplorerDetailTagEditorState = {
+  rowKey: string;
+  rowKind: ExplorerDetailRowKind;
+  rowId: string;
+  value: string;
+  error: string | null;
+  isSaving: boolean;
 };
 
 const EXPLORER_DETAIL_COLUMN_WIDTHS_STORAGE_KEY =
@@ -386,6 +402,27 @@ const isFolderDescendantOf = (
   return false;
 };
 
+const normalizeTagName = (tag: string): string => {
+  return tag.replace(/^#+/, "").trim();
+};
+
+const parseTagEditorValue = (value: string): string[] => {
+  const tagNames = value
+    .split(/[\s,、]+/u)
+    .map(normalizeTagName)
+    .filter(Boolean);
+
+  return Array.from(new Set(tagNames));
+};
+
+const buildTagEditorValue = (tags: string[]): string => {
+  return tags.map(normalizeTagName).filter(Boolean).join(" ");
+};
+
+const formatExplorerTagNames = (tags: string[]): string => {
+  return formatExplorerTags(tags.map(normalizeTagName).filter(Boolean));
+};
+
 const HeaderCell = ({
   label,
   columnId,
@@ -480,6 +517,12 @@ const FolderDetailRowView = ({
   onDragLeave,
   onDrop,
   gridStyle,
+  tagDisplayText,
+  tagEditState,
+  onTagCellContextMenu,
+  onTagEditChange,
+  onTagEditKeyDown,
+  onTagEditBlur,
 }: {
   row: ExplorerDetailRow;
   selected: boolean;
@@ -493,8 +536,27 @@ const FolderDetailRowView = ({
   onDragLeave: (event: ReactDragEvent<HTMLDivElement>) => void;
   onDrop: (event: ReactDragEvent<HTMLDivElement>) => void;
   gridStyle: CSSProperties;
+  tagDisplayText: string;
+  tagEditState: ExplorerDetailTagEditorState | null;
+  onTagCellContextMenu: (event: ReactMouseEvent<HTMLDivElement>) => void;
+  onTagEditChange: (value: string) => void;
+  onTagEditKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
+  onTagEditBlur: () => void;
 }) => {
   const Icon = getRowIcon(row.kind);
+  const tagInputRef = useRef<HTMLInputElement | null>(null);
+  const isEditingTags = tagEditState?.rowKey === row.key;
+
+  useEffect(() => {
+    if (!isEditingTags) return;
+
+    const frameId = window.requestAnimationFrame(() => {
+      tagInputRef.current?.focus({ preventScroll: true });
+      tagInputRef.current?.select();
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [isEditingTags]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -557,10 +619,42 @@ const FolderDetailRowView = ({
       </div>
       <div
         role="cell"
-        className="flex min-w-0 items-center px-3 text-[#777671]"
-        title={formatExplorerTags(row.tags)}
+        className="relative flex min-w-0 items-center px-3 text-[#777671]"
+        title={tagDisplayText}
+        onContextMenu={onTagCellContextMenu}
+        onClick={(event) => {
+          if (!isEditingTags) return;
+          event.stopPropagation();
+        }}
       >
-        <span className="truncate">{formatExplorerTags(row.tags)}</span>
+        {isEditingTags ? (
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <input
+              ref={tagInputRef}
+              value={tagEditState.value}
+              disabled={tagEditState.isSaving}
+              aria-label={`${row.name} のタグを編集`}
+              placeholder="タグを空白またはカンマで区切る"
+              className={cn(
+                "h-7 min-w-0 rounded-[5px] border border-[#a8a176] bg-white px-2",
+                "text-[12px] text-[#24231f] shadow-[0_0_0_2px_rgba(168,161,118,0.18)] outline-none",
+                "disabled:cursor-wait disabled:opacity-70",
+              )}
+              onChange={(event) => onTagEditChange(event.target.value)}
+              onKeyDown={onTagEditKeyDown}
+              onBlur={onTagEditBlur}
+              onClick={(event) => event.stopPropagation()}
+              onContextMenu={(event) => event.stopPropagation()}
+            />
+            {tagEditState.error ? (
+              <span className="truncate text-[10px] leading-none text-[#9b3f35]">
+                {tagEditState.error}
+              </span>
+            ) : null}
+          </div>
+        ) : (
+          <span className="truncate">{tagDisplayText}</span>
+        )}
       </div>
       <div
         role="cell"
@@ -614,6 +708,17 @@ export const FolderDetailView = ({
   const [draggingKey, setDraggingKey] = useState<string | null>(null);
   const [dropIntent, setDropIntent] = useState<ExplorerDetailDropIntent | null>(
     null,
+  );
+  const [tagEditor, setTagEditor] =
+    useState<ExplorerDetailTagEditorState | null>(null);
+  const tagEditorSkipNextBlurRef = useRef(false);
+  const { tags, tagById, addTag } = useTags();
+  const { updateCard } = useCardCommands();
+  const { updateDocument } = useDocumentCommands();
+  const { updateFolder } = useFolderCommands();
+  const { updateCardSet } = useCardSets();
+  const setExplorerLayoutMode = useExplorerStore(
+    (state) => state.setExplorerLayoutMode,
   );
 
   useEffect(() => {
@@ -702,6 +807,145 @@ export const FolderDetailView = ({
   );
 
   const isManualOrder = sortState.key === "manual";
+
+  const resolveRowTagNames = useCallback(
+    (row: ExplorerDetailRow): string[] => {
+      if (row.kind !== "card") {
+        return row.tags;
+      }
+
+      return row.tags.map((tagId) => tagById.get(tagId)?.name ?? tagId);
+    },
+    [tagById],
+  );
+
+  const resolveTagIds = useCallback(
+    async (tagNames: string[]): Promise<string[]> => {
+      const tagIds: string[] = [];
+
+      for (const tagName of tagNames) {
+        const normalizedName = normalizeTagName(tagName);
+        if (!normalizedName) continue;
+
+        const existingTag = tags.find(
+          (tag) =>
+            tag.name === normalizedName ||
+            tag.nameLower === normalizedName.toLowerCase(),
+        );
+        const tag = existingTag ?? (await addTag(normalizedName));
+
+        if (!tagIds.includes(tag.id)) {
+          tagIds.push(tag.id);
+        }
+      }
+
+      return tagIds;
+    },
+    [addTag, tags],
+  );
+
+  const saveTagEditor = useCallback(async () => {
+    const editor = tagEditor;
+    if (!editor || editor.isSaving) return;
+
+    const tagNames = parseTagEditorValue(editor.value);
+
+    setTagEditor((current) =>
+      current?.rowKey === editor.rowKey
+        ? { ...current, isSaving: true, error: null }
+        : current,
+    );
+
+    try {
+      if (editor.rowKind === "card") {
+        const tagIds = await resolveTagIds(tagNames);
+        await updateCard(editor.rowId, { tagIds });
+      } else if (editor.rowKind === "document") {
+        await updateDocument(editor.rowId, { tags: tagNames });
+      } else if (editor.rowKind === "folder") {
+        await updateFolder(
+          editor.rowId,
+          { tags: tagNames } as unknown as Partial<Folder>,
+        );
+      } else {
+        await updateCardSet(
+          editor.rowId,
+          { tags: tagNames } as unknown as Parameters<typeof updateCardSet>[1],
+        );
+      }
+
+      setTagEditor((current) =>
+        current?.rowKey === editor.rowKey ? null : current,
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "タグを保存できませんでした。";
+      setTagEditor((current) =>
+        current?.rowKey === editor.rowKey
+          ? { ...current, isSaving: false, error: message }
+          : current,
+      );
+    }
+  }, [
+    resolveTagIds,
+    tagEditor,
+    updateCard,
+    updateCardSet,
+    updateDocument,
+    updateFolder,
+  ]);
+
+  const cancelTagEditor = useCallback(() => {
+    tagEditorSkipNextBlurRef.current = true;
+    setTagEditor(null);
+  }, []);
+
+  const openTagEditor = useCallback(
+    (row: ExplorerDetailRow) => {
+      setExplorerLayoutMode("detail");
+      setTagEditor({
+        rowKey: row.key,
+        rowKind: row.kind,
+        rowId: row.id,
+        value: buildTagEditorValue(resolveRowTagNames(row)),
+        error: null,
+        isSaving: false,
+      });
+      setDropIntent(null);
+      setDraggingKey(null);
+      dragPayloadRef.current = null;
+    },
+    [resolveRowTagNames, setExplorerLayoutMode],
+  );
+
+  const handleTagEditorValueChange = useCallback((value: string) => {
+    setTagEditor((current) => (current ? { ...current, value } : current));
+  }, []);
+
+  const handleTagEditorBlur = useCallback(() => {
+    if (tagEditorSkipNextBlurRef.current) {
+      tagEditorSkipNextBlurRef.current = false;
+      return;
+    }
+
+    void saveTagEditor();
+  }, [saveTagEditor]);
+
+  const handleTagEditorKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        void saveTagEditor();
+        return;
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        cancelTagEditor();
+      }
+    },
+    [cancelTagEditor, saveTagEditor],
+  );
 
   const handleSort = useCallback(
     (key: Exclude<ExplorerDetailSortKey, "manual">) => {
@@ -986,6 +1230,16 @@ export const FolderDetailView = ({
                 draggable={isManualOrder}
                 dropPosition={currentDropPosition}
                 gridStyle={detailGridStyle}
+                tagDisplayText={formatExplorerTagNames(resolveRowTagNames(row))}
+                tagEditState={tagEditor}
+                onTagCellContextMenu={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  openTagEditor(row);
+                }}
+                onTagEditChange={handleTagEditorValueChange}
+                onTagEditKeyDown={handleTagEditorKeyDown}
+                onTagEditBlur={handleTagEditorBlur}
                 onActivate={() => handleActivateRow(row)}
                 onDragStart={(event) => {
                   if (!isManualOrder) {
