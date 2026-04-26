@@ -43,92 +43,41 @@ const ExplorerToolbarButton = ({
 
 const ChevronLeftIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path
-      d="M15 5L8 12L15 19"
-      stroke="currentColor"
-      strokeWidth="1.9"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M15 5L8 12L15 19" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const ChevronRightIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path
-      d="M9 5L16 12L9 19"
-      stroke="currentColor"
-      strokeWidth="1.9"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M9 5L16 12L9 19" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const ArrowUpIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path
-      d="M12 19V5"
-      stroke="currentColor"
-      strokeWidth="1.9"
-      strokeLinecap="round"
-    />
-    <path
-      d="M6 11L12 5L18 11"
-      stroke="currentColor"
-      strokeWidth="1.9"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M12 19V5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+    <path d="M6 11L12 5L18 11" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const RefreshIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path
-      d="M20 12A8 8 0 1 1 17.66 6.34"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M20 4V10H14"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M20 12A8 8 0 1 1 17.66 6.34" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M20 4V10H14" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const SearchIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <circle cx="11" cy="11" r="6.25" stroke="currentColor" strokeWidth="1.8" />
-    <path
-      d="M16 16L20 20"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
+    <path d="M16 16L20 20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
   </svg>
 );
 
 const HomeIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path
-      d="M4 10.5L12 4L20 10.5"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M6.5 10V19H17.5V10"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinejoin="round"
-    />
+    <path d="M4 10.5L12 4L20 10.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M6.5 10V19H17.5V10" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
   </svg>
 );
 
@@ -141,24 +90,13 @@ const FolderIcon = () => (
       strokeWidth="1.2"
       strokeLinejoin="round"
     />
-    <path
-      d="M2.4 6.6H17.6"
-      stroke="#f8f8f8"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-      opacity="0.9"
-    />
+    <path d="M2.4 6.6H17.6" stroke="#f8f8f8" strokeWidth="1.2" strokeLinecap="round" opacity="0.9" />
   </svg>
 );
 
 const ExplorerToolbar = () => {
   return (
-    <div
-      className={cn(
-        "flex h-12 shrink-0 items-center gap-1 border-b border-[#e0e0e0]",
-        "bg-white px-2 text-[#1a1a1a]",
-      )}
-    >
+    <div className="flex h-12 shrink-0 items-center gap-1 border-b border-[#e0e0e0] bg-white px-2 text-[#1a1a1a]">
       <ExplorerToolbarButton title="戻る" disabled>
         <ChevronLeftIcon />
       </ExplorerToolbarButton>
@@ -171,12 +109,7 @@ const ExplorerToolbar = () => {
 
       <div className="mx-1 h-[18px] w-px shrink-0 bg-[#e0e0e0]" />
 
-      <div
-        className={cn(
-          "flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[6px]",
-          "border border-[#e0e0e0] bg-[#fafafa] px-3",
-        )}
-      >
+      <div className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[6px] border border-[#e0e0e0] bg-[#fafafa] px-3">
         <HomeIcon />
         <span className="text-[12px] text-[#6b6b6b]">ホーム</span>
         <span className="text-[12px] text-[#b0b0b0]">›</span>
@@ -200,12 +133,7 @@ const ExplorerToolbar = () => {
 
 const ExplorerStatusBar = () => {
   return (
-    <div
-      className={cn(
-        "flex h-7 shrink-0 items-center gap-3 border-t border-[#e0e0e0]",
-        "bg-white px-3 text-[11px] text-[#6b6b6b]",
-      )}
-    >
+    <div className="flex h-7 shrink-0 items-center gap-3 border-t border-[#e0e0e0] bg-white px-3 text-[11px] text-[#6b6b6b]">
       <span>エクスプローラー</span>
       <span className="text-[#d0d0d0]">│</span>
       <span>フォルダとカードを管理</span>
