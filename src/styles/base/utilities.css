@@ -31,8 +31,7 @@
     --titlebar-panel-bg: rgba(255, 255, 255, 0.92);
     --titlebar-panel-border: #dddcd5;
     --titlebar-panel-shadow:
-      0 16px 36px rgba(15, 23, 42, 0.06),
-      0 4px 12px rgba(15, 23, 42, 0.04);
+      0 16px 36px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04);
 
     width: calc(100% - 24px) !important;
     height: 36px !important;

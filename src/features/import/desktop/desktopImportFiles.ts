@@ -54,8 +54,8 @@ const normalizeDesktopFileData = (
 export const canUseDesktopImportFiles = (): boolean => {
   return Boolean(
     typeof window !== "undefined" &&
-      window.desktop?.files?.readImportFile &&
-      window.desktop.files.onImportFileOpen,
+    window.desktop?.files?.readImportFile &&
+    window.desktop.files.onImportFileOpen,
   );
 };
 
@@ -87,7 +87,10 @@ export const readDesktopImportFile = async (
 };
 
 export const selectDesktopImportFiles = async (): Promise<File[]> => {
-  if (!canUseDesktopImportFiles() || !window.desktop?.files?.selectImportFiles) {
+  if (
+    !canUseDesktopImportFiles() ||
+    !window.desktop?.files?.selectImportFiles
+  ) {
     return [];
   }
 

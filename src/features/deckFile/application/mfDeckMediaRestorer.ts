@@ -13,7 +13,15 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
 };
 
 const bytesToBase64 = (bytes: Uint8Array): string => {
-  const maybeBuffer = (globalThis as { Buffer?: { from: (input: Uint8Array) => { toString: (encoding: "base64") => string } } }).Buffer;
+  const maybeBuffer = (
+    globalThis as {
+      Buffer?: {
+        from: (input: Uint8Array) => {
+          toString: (encoding: "base64") => string;
+        };
+      };
+    }
+  ).Buffer;
   if (maybeBuffer) {
     return maybeBuffer.from(bytes).toString("base64");
   }
@@ -41,7 +49,10 @@ const buildMediaLookup = (
   return lookup;
 };
 
-const buildDataUrl = (input: { bytes: Uint8Array; mimeType: string }): string => {
+const buildDataUrl = (input: {
+  bytes: Uint8Array;
+  mimeType: string;
+}): string => {
   return `data:${input.mimeType};base64,${bytesToBase64(input.bytes)}`;
 };
 

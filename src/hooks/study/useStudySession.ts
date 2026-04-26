@@ -110,7 +110,6 @@ export const useStudySession = ({
     return buildCardSetById(activeCardSets);
   }, [cardSets]);
 
-
   const handleResult = useCallback(
     async (subjectiveScore: SubjectiveScoreValue, responseTime: number) => {
       const card = studyCards[currentIndex];
@@ -242,4 +241,3 @@ export const useStudySession = ({
     handleResult,
   };
 };
-

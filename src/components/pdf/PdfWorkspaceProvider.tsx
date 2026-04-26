@@ -40,7 +40,6 @@ interface PdfWorkspaceProviderProps extends PropsWithChildren {
   onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
 }
 
-
 const PDF_DOUBLE_PAGE_GAP = 16;
 const PDF_ZOOM_UI_MIN_PERCENT = 0;
 const PDF_ZOOM_UI_MAX_PERCENT = 100;
@@ -275,7 +274,9 @@ export const PdfWorkspaceProvider = ({
     getFitScale,
     onDocumentUpdate: onDocumentUpdate
       ? async (updates) => {
-          await Promise.resolve(onDocumentUpdate(updates as Partial<DocumentItem>));
+          await Promise.resolve(
+            onDocumentUpdate(updates as Partial<DocumentItem>),
+          );
         }
       : undefined,
   });
@@ -355,7 +356,10 @@ export const PdfWorkspaceProvider = ({
       return;
     }
 
-    const nextNormalizedOrder = normalizeThumbnailOrder(thumbnailOrder, numPages);
+    const nextNormalizedOrder = normalizeThumbnailOrder(
+      thumbnailOrder,
+      numPages,
+    );
 
     setThumbnailOrder((previousOrder) => {
       if (areNumberArraysEqual(previousOrder, nextNormalizedOrder)) {
@@ -439,11 +443,7 @@ export const PdfWorkspaceProvider = ({
         const sourceIndex = nextBaseOrder.indexOf(activePageNumber);
         const targetIndex = nextBaseOrder.indexOf(overPageNumber);
 
-        if (
-          sourceIndex < 0 ||
-          targetIndex < 0 ||
-          sourceIndex === targetIndex
-        ) {
+        if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) {
           return previousOrder;
         }
 
@@ -545,5 +545,3 @@ export const PdfWorkspaceProvider = ({
     </PdfWorkspaceDocumentContext.Provider>
   );
 };
-
-

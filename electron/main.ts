@@ -150,9 +150,7 @@ const normalizeDesktopImportFilePath = (value: string): string | null => {
   return resolvedPath;
 };
 
-const collectDesktopImportFilePaths = (
-  values: readonly string[],
-): string[] => {
+const collectDesktopImportFilePaths = (values: readonly string[]): string[] => {
   const paths = new Set<string>();
 
   for (const value of values) {

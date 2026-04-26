@@ -1,6 +1,4 @@
-import {
-  isMfDeckCardsJsonV1,
-} from "@/features/deckFile/domain/mfDeckGuards";
+import { isMfDeckCardsJsonV1 } from "@/features/deckFile/domain/mfDeckGuards";
 import { MF_DECK_VERSION } from "@/features/deckFile/domain/mfDeckTypes";
 import {
   MF_CARD_FORMAT,

@@ -38,7 +38,9 @@ export const toMfDeckMediaUri = (path: string): string => {
 };
 
 export const isMfDeckMediaUri = (value: unknown): value is string => {
-  return typeof value === "string" && value.startsWith(MF_DECK_MEDIA_URI_PREFIX);
+  return (
+    typeof value === "string" && value.startsWith(MF_DECK_MEDIA_URI_PREFIX)
+  );
 };
 
 export const pathFromMfDeckMediaUri = (value: string): string | null => {
@@ -87,9 +89,17 @@ export const buildMfDeckMediaPath = (input: {
   extension: string;
   sourceName?: string;
 }): string => {
-  const directory = input.kind === "audio" ? "audio" : input.kind === "image" ? "images" : "files";
-  const name = sanitizeMfDeckMediaName(input.sourceName ?? `${input.kind}-${input.index}`);
-  const cleanExtension = sanitizeMfDeckMediaName(input.extension).replace(/^\.+/, "") || "bin";
+  const directory =
+    input.kind === "audio"
+      ? "audio"
+      : input.kind === "image"
+        ? "images"
+        : "files";
+  const name = sanitizeMfDeckMediaName(
+    input.sourceName ?? `${input.kind}-${input.index}`,
+  );
+  const cleanExtension =
+    sanitizeMfDeckMediaName(input.extension).replace(/^\.+/, "") || "bin";
   const paddedIndex = String(input.index).padStart(4, "0");
 
   return `${MF_DECK_MEDIA_DIRECTORY}${directory}/${paddedIndex}-${name}.${cleanExtension}`;

@@ -42,7 +42,13 @@ const ExplorerToolbarButton = ({
 };
 
 const ChevronLeftIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
     <path
       d="M15 5L8 12L15 19"
       stroke="currentColor"
@@ -54,7 +60,13 @@ const ChevronLeftIcon = () => (
 );
 
 const ChevronRightIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
     <path
       d="M9 5L16 12L9 19"
       stroke="currentColor"
@@ -66,7 +78,13 @@ const ChevronRightIcon = () => (
 );
 
 const ArrowUpIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
     <path
       d="M12 19V5"
       stroke="currentColor"
@@ -84,7 +102,13 @@ const ArrowUpIcon = () => (
 );
 
 const RefreshIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
     <path
       d="M20 12A8 8 0 1 1 17.66 6.34"
       stroke="currentColor"
@@ -103,7 +127,13 @@ const RefreshIcon = () => (
 );
 
 const SearchIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
     <circle cx="11" cy="11" r="6.25" stroke="currentColor" strokeWidth="1.8" />
     <path
       d="M16 16L20 20"
@@ -115,7 +145,13 @@ const SearchIcon = () => (
 );
 
 const HomeIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <svg
+    width="13"
+    height="13"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
     <path
       d="M4 10.5L12 4L20 10.5"
       stroke="currentColor"
@@ -133,7 +169,13 @@ const HomeIcon = () => (
 );
 
 const FolderIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 20 17" fill="none" aria-hidden="true">
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 20 17"
+    fill="none"
+    aria-hidden="true"
+  >
     <path
       d="M1.5 4.25C1.5 3.42 2.17 2.75 3 2.75H7.25C7.79 2.75 8.29 3.04 8.56 3.5L9.25 4.7H17C17.83 4.7 18.5 5.37 18.5 6.2V13.6C18.5 14.43 17.83 15.1 17 15.1H3C2.17 15.1 1.5 14.43 1.5 13.6V4.25Z"
       fill="#f0efe9"

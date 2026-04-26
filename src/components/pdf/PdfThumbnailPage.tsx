@@ -61,7 +61,10 @@ const resolveContainLayout = ({
   boxHeightPx: number;
 }) => {
   const safePageWidthPx = normalizePositiveFinite(pageSize.width, boxWidthPx);
-  const safePageHeightPx = normalizePositiveFinite(pageSize.height, boxHeightPx);
+  const safePageHeightPx = normalizePositiveFinite(
+    pageSize.height,
+    boxHeightPx,
+  );
   const widthScale = boxWidthPx / safePageWidthPx;
   const heightScale = boxHeightPx / safePageHeightPx;
   const scale = Math.min(widthScale, heightScale);

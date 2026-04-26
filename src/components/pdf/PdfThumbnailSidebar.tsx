@@ -971,7 +971,10 @@ export const PdfThumbnailSidebar = () => {
       (pageNumber): pageNumber is number => typeof pageNumber === "number",
     );
 
-    return mergeUniquePageNumbers(basePrefetchPageNumbers, interactionPageNumbers);
+    return mergeUniquePageNumbers(
+      basePrefetchPageNumbers,
+      interactionPageNumbers,
+    );
   }, [
     activeDragPage,
     columnCount,
@@ -1016,7 +1019,9 @@ export const PdfThumbnailSidebar = () => {
   );
 
   const sortableItems = useMemo(() => {
-    return normalizedThumbnailOrder.map((pageNumber) => createSortableId(pageNumber));
+    return normalizedThumbnailOrder.map((pageNumber) =>
+      createSortableId(pageNumber),
+    );
   }, [normalizedThumbnailOrder]);
 
   const releaseDragCursor = useCallback(() => {
@@ -1204,7 +1209,8 @@ export const PdfThumbnailSidebar = () => {
                           eagerRender={eagerRender}
                           renderPriority={resolveRenderPriority({
                             isNavigationPage,
-                            isCurrentPage: isDisplayedSpreadPage || isCurrentPage,
+                            isCurrentPage:
+                              isDisplayedSpreadPage || isCurrentPage,
                             pageIndex,
                             initialRenderCount,
                             eagerRenderItemCount,
@@ -1229,21 +1235,6 @@ export const PdfThumbnailSidebar = () => {
               </div>
 
               {typeof document === "undefined" ? (
-              <DragOverlay
-                adjustScale={false}
-                dropAnimation={null}
-                modifiers={DRAG_OVERLAY_MODIFIERS}
-                zIndex={10_000}
-              >
-                {dragPreview && activeDragPage !== null ? (
-                  <PdfThumbnailDragOverlay
-                    preview={dragPreview}
-                    isActive={activeThumbnailPages.has(dragPreview.pageNumber)}
-                  />
-                ) : null}
-              </DragOverlay>
-            ) : (
-              createPortal(
                 <DragOverlay
                   adjustScale={false}
                   dropAnimation={null}
@@ -1253,13 +1244,32 @@ export const PdfThumbnailSidebar = () => {
                   {dragPreview && activeDragPage !== null ? (
                     <PdfThumbnailDragOverlay
                       preview={dragPreview}
-                      isActive={activeThumbnailPages.has(dragPreview.pageNumber)}
+                      isActive={activeThumbnailPages.has(
+                        dragPreview.pageNumber,
+                      )}
                     />
                   ) : null}
-                </DragOverlay>,
-                document.body,
-              )
-            )}
+                </DragOverlay>
+              ) : (
+                createPortal(
+                  <DragOverlay
+                    adjustScale={false}
+                    dropAnimation={null}
+                    modifiers={DRAG_OVERLAY_MODIFIERS}
+                    zIndex={10_000}
+                  >
+                    {dragPreview && activeDragPage !== null ? (
+                      <PdfThumbnailDragOverlay
+                        preview={dragPreview}
+                        isActive={activeThumbnailPages.has(
+                          dragPreview.pageNumber,
+                        )}
+                      />
+                    ) : null}
+                  </DragOverlay>,
+                  document.body,
+                )
+              )}
             </DndContext>
           </div>
         </div>

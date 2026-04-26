@@ -259,7 +259,6 @@ const StudyMode = () => {
     }
   }, [sessionKey, studyComplete]);
 
-
   const finalRatingByCardId = useMemo(() => {
     const finalByCardId = new Map<string, PracticeFilterRating>();
 
@@ -567,4 +566,3 @@ const StudyMode = () => {
 };
 
 export default StudyMode;
-

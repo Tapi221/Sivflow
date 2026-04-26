@@ -183,9 +183,9 @@ describe("pdfThumbnailRenderQueue", () => {
     });
 
     await Promise.resolve();
-    expect(cancelPdfThumbnailRenders({ maxPriority: 1, includeActive: true })).toBe(
-      1,
-    );
+    expect(
+      cancelPdfThumbnailRenders({ maxPriority: 1, includeActive: true }),
+    ).toBe(1);
 
     try {
       await activeTask.promise;

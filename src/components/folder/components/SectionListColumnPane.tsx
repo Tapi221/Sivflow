@@ -50,10 +50,7 @@ interface SectionListColumnPaneProps {
     targetFolderId: string,
     documentIds: string[],
   ) => Promise<void>;
-  onMoveCardToSet?: (
-    cardId: string,
-    targetCardSetId: string,
-  ) => Promise<void>;
+  onMoveCardToSet?: (cardId: string, targetCardSetId: string) => Promise<void>;
   onReorderCardsInCardSet?: (
     cardSetId: string,
     cardIds: string[],

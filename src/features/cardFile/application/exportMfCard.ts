@@ -22,7 +22,9 @@ export const buildMfCardFile = ({
   appVersion?: string;
 }): MfCardFileV1 => {
   const exportIssues = collectMfDeckExportIssues([card]);
-  const blockingIssues = exportIssues.filter((issue) => issue.level === "error");
+  const blockingIssues = exportIssues.filter(
+    (issue) => issue.level === "error",
+  );
 
   if (blockingIssues.length > 0) {
     throw new MfCardExportError(

@@ -30,7 +30,9 @@ type MediaCandidate = {
   blockId?: string;
 };
 
-type BundleMediaInCardsParams<TCard extends { id?: string; front?: unknown; back?: unknown }> = {
+type BundleMediaInCardsParams<
+  TCard extends { id?: string; front?: unknown; back?: unknown },
+> = {
   cards: TCard[];
 };
 
@@ -64,10 +66,14 @@ const resolveCandidateUrl = (
   return null;
 };
 
-const resolveSourceName = (record: Record<string, unknown>, fallback: string): string => {
+const resolveSourceName = (
+  record: Record<string, unknown>,
+  fallback: string,
+): string => {
   const candidates = [record.filename, record.name, record.id, record.assetId];
   const found = candidates.find(
-    (value): value is string => typeof value === "string" && value.trim().length > 0,
+    (value): value is string =>
+      typeof value === "string" && value.trim().length > 0,
   );
   return found?.trim() || fallback;
 };
@@ -152,7 +158,9 @@ const collectFaceAttachmentCandidates = (input: {
   });
 };
 
-const collectCandidates = <TCard extends { id?: string; front?: unknown; back?: unknown }>(
+const collectCandidates = <
+  TCard extends { id?: string; front?: unknown; back?: unknown },
+>(
   cards: TCard[],
 ): MediaCandidate[] => {
   const candidates: MediaCandidate[] = [];
@@ -181,7 +189,9 @@ const collectCandidates = <TCard extends { id?: string; front?: unknown; back?: 
   return candidates;
 };
 
-const fetchBytes = async (url: string): Promise<{
+const fetchBytes = async (
+  url: string,
+): Promise<{
   bytes: Uint8Array;
   mimeType: string;
 }> => {
@@ -191,8 +201,11 @@ const fetchBytes = async (url: string): Promise<{
   }
 
   const buffer = await response.arrayBuffer();
-  const mimeType = response.headers.get("content-type")?.split(";")[0].trim() ||
-    (url.startsWith("data:") ? url.slice(5, url.indexOf(";")) : "application/octet-stream") ||
+  const mimeType =
+    response.headers.get("content-type")?.split(";")[0].trim() ||
+    (url.startsWith("data:")
+      ? url.slice(5, url.indexOf(";"))
+      : "application/octet-stream") ||
     "application/octet-stream";
 
   return {
@@ -212,7 +225,9 @@ const hashString = (value: string): string => {
 
 export const bundleMediaInMfDeckCards = async <
   TCard extends { id?: string; front?: unknown; back?: unknown },
->({ cards }: BundleMediaInCardsParams<TCard>): Promise<MfDeckMediaBundle> => {
+>({
+  cards,
+}: BundleMediaInCardsParams<TCard>): Promise<MfDeckMediaBundle> => {
   const candidates = collectCandidates(cards);
   const issues: MfDeckIssue[] = [];
   const media: Record<string, Uint8Array> = {};
@@ -236,24 +251,30 @@ export const bundleMediaInMfDeckCards = async <
           code: "file_too_large",
           cardId: candidate.cardId,
           blockId: candidate.blockId,
-          message: "メディアが大きすぎるため .mfdeck への同梱をスキップしました。",
+          message:
+            "メディアが大きすぎるため .mfdeck への同梱をスキップしました。",
         });
         continue;
       }
 
-      if (totalBytes + fetched.bytes.byteLength > MF_DECK_MAX_MEDIA_TOTAL_BYTES) {
+      if (
+        totalBytes + fetched.bytes.byteLength >
+        MF_DECK_MAX_MEDIA_TOTAL_BYTES
+      ) {
         issues.push({
           level: "warning",
           code: "file_too_large",
           cardId: candidate.cardId,
           blockId: candidate.blockId,
-          message: "メディア合計サイズが上限を超えるため、以降のメディア同梱をスキップしました。",
+          message:
+            "メディア合計サイズが上限を超えるため、以降のメディア同梱をスキップしました。",
         });
         continue;
       }
 
       const inferredKind = inferMfDeckMediaKind(fetched.mimeType);
-      const kind = inferredKind === "unknown" ? candidate.kindHint : inferredKind;
+      const kind =
+        inferredKind === "unknown" ? candidate.kindHint : inferredKind;
       const extension = inferMfDeckMediaExtension({
         mimeType: fetched.mimeType,
         sourceName: candidate.sourceName,
@@ -284,7 +305,8 @@ export const bundleMediaInMfDeckCards = async <
         code: "unreadable_media",
         cardId: candidate.cardId,
         blockId: candidate.blockId,
-        message: "メディアを読み取れなかったため .mfdeck への同梱をスキップしました。",
+        message:
+          "メディアを読み取れなかったため .mfdeck への同梱をスキップしました。",
       });
     }
   }
@@ -292,7 +314,9 @@ export const bundleMediaInMfDeckCards = async <
   return {
     media,
     mediaManifest:
-      mediaEntries.length > 0 ? buildMfDeckMediaManifest(mediaEntries) : undefined,
+      mediaEntries.length > 0
+        ? buildMfDeckMediaManifest(mediaEntries)
+        : undefined,
     issues,
   };
 };

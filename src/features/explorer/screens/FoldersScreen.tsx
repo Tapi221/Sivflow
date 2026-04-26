@@ -130,7 +130,9 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     setBreadcrumbContext,
   } = controller.actions;
 
-  const previousActiveExplorerTabIdRef = useRef<WorkspaceTab["id"] | null>(null);
+  const previousActiveExplorerTabIdRef = useRef<WorkspaceTab["id"] | null>(
+    null,
+  );
   const restoringExplorerTabIdRef = useRef<WorkspaceTab["id"] | null>(null);
 
   const { resetExplorerPaneScroll } = useWorkspaceScrollController({
@@ -148,9 +150,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     (state) => state.openDocumentTab,
   );
   const openCardTab = useWorkspaceTabsStore((state) => state.openCardTab);
-  const openCardSetTab = useWorkspaceTabsStore(
-    (state) => state.openCardSetTab,
-  );
+  const openCardSetTab = useWorkspaceTabsStore((state) => state.openCardSetTab);
   const updateExplorerTabState = useWorkspaceTabsStore(
     (state) => state.updateExplorerTabState,
   );
@@ -245,7 +245,10 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     previousActiveExplorerTabIdRef.current = activeExplorerTabId;
 
     if (
-      areExplorerRouteStatesEqual(currentExplorerRouteState, activeExplorerState)
+      areExplorerRouteStatesEqual(
+        currentExplorerRouteState,
+        activeExplorerState,
+      )
     ) {
       restoringExplorerTabIdRef.current = null;
       return;
@@ -279,7 +282,10 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     }
 
     if (
-      areExplorerRouteStatesEqual(currentExplorerRouteState, activeExplorerState)
+      areExplorerRouteStatesEqual(
+        currentExplorerRouteState,
+        activeExplorerState,
+      )
     ) {
       return;
     }

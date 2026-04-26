@@ -29,13 +29,7 @@ import type {
   DragEvent as ReactDragEvent,
   PointerEvent as ReactPointerEvent,
 } from "react";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type FolderColumnContext =
@@ -111,10 +105,7 @@ interface FolderColumnViewProps {
     targetFolderId: string,
     documentIds: string[],
   ) => Promise<void>;
-  onMoveCardToSet?: (
-    cardId: string,
-    targetCardSetId: string,
-  ) => Promise<void>;
+  onMoveCardToSet?: (cardId: string, targetCardSetId: string) => Promise<void>;
   onReorderCardsInCardSet?: (
     cardSetId: string,
     cardIds: string[],
@@ -290,9 +281,7 @@ const getCardSetDisplayName = (cardSet: CardSet) => {
 const getExplorerItemDisplayName = (item: ExplorerItem) => {
   if (item.type === "document") {
     return (
-      item.data.title?.trim() ||
-      item.data.fileName?.trim() ||
-      "無題の文書"
+      item.data.title?.trim() || item.data.fileName?.trim() || "無題の文書"
     );
   }
 
@@ -351,7 +340,8 @@ const FolderColumnRow = ({
       : undefined;
 
   const hasNextColumn =
-    (entry.kind === "folder" || entry.kind === "cardSet") && entry.hasNextColumn;
+    (entry.kind === "folder" || entry.kind === "cardSet") &&
+    entry.hasNextColumn;
 
   const trailing =
     typeof contentCount === "number" || hasNextColumn ? (
@@ -639,16 +629,19 @@ export const FolderColumnView = ({
     [],
   );
 
-  const applyColumnWidthToDom = useCallback((columnId: string, width: number) => {
-    const nextWidth = clampFolderColumnWidth(width);
-    const section = columnSectionRefs.current.get(columnId);
-    if (!section) return;
+  const applyColumnWidthToDom = useCallback(
+    (columnId: string, width: number) => {
+      const nextWidth = clampFolderColumnWidth(width);
+      const section = columnSectionRefs.current.get(columnId);
+      if (!section) return;
 
-    const cssWidth = `${nextWidth}px`;
-    section.style.flexBasis = cssWidth;
-    section.style.width = cssWidth;
-    section.style.minWidth = cssWidth;
-  }, []);
+      const cssWidth = `${nextWidth}px`;
+      section.style.flexBasis = cssWidth;
+      section.style.width = cssWidth;
+      section.style.minWidth = cssWidth;
+    },
+    [],
+  );
 
   const showResizeGuide = useCallback((clientX: number) => {
     const guide = resizeGuideRef.current;
@@ -867,10 +860,7 @@ export const FolderColumnView = ({
   );
 
   const updateDragBadge = useCallback(
-    (
-      intent: FolderColumnDropIntent,
-      event: ReactDragEvent<HTMLElement>,
-    ) => {
+    (intent: FolderColumnDropIntent, event: ReactDragEvent<HTMLElement>) => {
       const nextBadge = {
         label: getDragBadgeLabel(intent),
         icon: getDragBadgeIcon(intent),
@@ -974,11 +964,7 @@ export const FolderColumnView = ({
           .filter((id): id is string => Boolean(id));
       }
 
-      if (
-        payload.kind === "cardSet" &&
-        target.type === "folder" &&
-        target.id
-      ) {
+      if (payload.kind === "cardSet" && target.type === "folder" && target.id) {
         return getCardSets(target.id).map((cardSet) => cardSet.id);
       }
 
@@ -1000,7 +986,13 @@ export const FolderColumnView = ({
 
       return [];
     },
-    [getCardSetItems, getCardSets, getChildFolders, getFolderItems, rootFolders],
+    [
+      getCardSetItems,
+      getCardSets,
+      getChildFolders,
+      getFolderItems,
+      rootFolders,
+    ],
   );
 
   const canDropOnIntent = useCallback(
@@ -1144,7 +1136,10 @@ export const FolderColumnView = ({
   );
 
   const moveDraggedEntry = useCallback(
-    async (payload: FolderColumnDragPayload, intent: FolderColumnDropIntent) => {
+    async (
+      payload: FolderColumnDragPayload,
+      intent: FolderColumnDropIntent,
+    ) => {
       const { target } = intent;
       const nextOrderedIds = buildNextOrderedIds(payload, intent);
       const optimisticSnapshot = setOptimisticOrderForScope(
@@ -1244,7 +1239,10 @@ export const FolderColumnView = ({
   }, [clearDropState]);
 
   const handleDropIntentDragOver = useCallback(
-    (intent: FolderColumnDropIntent | null, event: ReactDragEvent<HTMLElement>) => {
+    (
+      intent: FolderColumnDropIntent | null,
+      event: ReactDragEvent<HTMLElement>,
+    ) => {
       const payload = dragPayloadRef.current;
 
       if (

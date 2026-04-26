@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+} from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -140,7 +146,9 @@ export const MfDeckImportDialog = ({
         });
       } catch (error) {
         console.error("[MfDeckImportDialog] parse failed", error);
-        toast.error("MFDeck の解析に失敗しました。ファイル形式を確認してください。");
+        toast.error(
+          "MFDeck の解析に失敗しました。ファイル形式を確認してください。",
+        );
         setState({
           file,
           loaded: {
@@ -232,7 +240,9 @@ export const MfDeckImportDialog = ({
               },
       });
 
-      toast.success(`${imported.createdCount} 件のカードをインポートしました。`);
+      toast.success(
+        `${imported.createdCount} 件のカードをインポートしました。`,
+      );
 
       if (imported.issues.length > 0) {
         toast.warning(
@@ -337,7 +347,8 @@ export const MfDeckImportDialog = ({
               </div>
 
               <p className="text-xs leading-relaxed text-slate-500">
-                v1 ではカード本文・数式・コード・タグ名を取り込みます。復習履歴は共有データに含めず、取り込み先の環境で新規カードとして扱います。
+                v1
+                ではカード本文・数式・コード・タグ名を取り込みます。復習履歴は共有データに含めず、取り込み先の環境で新規カードとして扱います。
               </p>
             </div>
           </div>
@@ -364,7 +375,8 @@ export const MfDeckImportDialog = ({
             <div className="rounded-xl border border-slate-200 p-3">
               <p className="text-xs text-slate-500">Issues</p>
               <p className="mt-1 text-sm font-medium text-slate-800">
-                error {issueSummary.errorCount} / warning {issueSummary.warningCount}
+                error {issueSummary.errorCount} / warning{" "}
+                {issueSummary.warningCount}
               </p>
             </div>
           </div>
@@ -390,7 +402,8 @@ export const MfDeckImportDialog = ({
                           {card.title?.trim() || card.questionNumber || card.id}
                         </p>
                         <p className="mt-1 text-xs text-slate-500">
-                          front {card.front.blocks.length} blocks / back {card.back.blocks.length} blocks
+                          front {card.front.blocks.length} blocks / back{" "}
+                          {card.back.blocks.length} blocks
                         </p>
                         {card.tagNames && card.tagNames.length > 0 ? (
                           <p className="mt-2 text-xs text-slate-500">

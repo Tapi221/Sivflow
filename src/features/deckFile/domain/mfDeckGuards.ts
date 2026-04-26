@@ -31,7 +31,9 @@ const isDisplayMode = (value: unknown): value is "fixed" | "fluid" => {
   return value === "fixed" || value === "fluid";
 };
 
-const isMediaKind = (value: unknown): value is "image" | "audio" | "unknown" => {
+const isMediaKind = (
+  value: unknown,
+): value is "image" | "audio" | "unknown" => {
   return value === "image" || value === "audio" || value === "unknown";
 };
 
@@ -55,7 +57,9 @@ const isCardFace = (
 };
 
 const isStringArray = (value: unknown): value is string[] => {
-  return Array.isArray(value) && value.every((item) => typeof item === "string");
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === "string")
+  );
 };
 
 const pushDuplicateBlockIssues = (
@@ -325,7 +329,10 @@ export const isMfDeckMediaManifestV1 = (
     ) {
       return false;
     }
-    if (entry.sourceName !== undefined && typeof entry.sourceName !== "string") {
+    if (
+      entry.sourceName !== undefined &&
+      typeof entry.sourceName !== "string"
+    ) {
       return false;
     }
     if (
@@ -380,7 +387,9 @@ export const validateMfDeckArchive = (input: {
 
   const manifest = input.manifest as MfDeckManifestV1;
   const cardsJson = input.cardsJson as MfDeckCardsJsonV1;
-  const mediaManifest = input.mediaManifest as MfDeckMediaManifestV1 | undefined;
+  const mediaManifest = input.mediaManifest as
+    | MfDeckMediaManifestV1
+    | undefined;
 
   if (manifest.deck.cardCount !== cardsJson.cards.length) {
     issues.push({

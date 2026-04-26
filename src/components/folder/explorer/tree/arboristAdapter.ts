@@ -80,10 +80,7 @@ const getItemNode = (item: ExplorerItem): ExplorerTreeNode | null => {
     return {
       id: toTreeId("document", document.id),
       type: "document",
-      name:
-        document.title?.trim() ||
-        document.fileName?.trim() ||
-        "無題の文書",
+      name: document.title?.trim() || document.fileName?.trim() || "無題の文書",
       data: document,
     };
   }
@@ -184,8 +181,10 @@ export const toSelectedTreeId = (
   selectedCardSetId?: string | null,
 ): string | null => {
   if (selectedItem?.type === "card") return toTreeId("card", selectedItem.id);
-  if (selectedItem?.type === "cardSet") return toTreeId("cardSet", selectedItem.id);
-  if (selectedItem?.type === "document") return toTreeId("document", selectedItem.id);
+  if (selectedItem?.type === "cardSet")
+    return toTreeId("cardSet", selectedItem.id);
+  if (selectedItem?.type === "document")
+    return toTreeId("document", selectedItem.id);
   if (selectedCardSetId) return toTreeId("cardSet", selectedCardSetId);
   if (selectedFolderId) return toTreeId("folder", selectedFolderId);
 

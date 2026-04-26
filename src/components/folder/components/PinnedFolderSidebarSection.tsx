@@ -43,14 +43,14 @@ const SIDEBAR_SECTION_LABEL_CLASS =
 const isSoftDeletedFolder = (folder: FolderTreeNode) => {
   return Boolean(
     (folder as { isDeleted?: boolean; is_deleted?: boolean }).isDeleted ??
-      (folder as { isDeleted?: boolean; is_deleted?: boolean }).is_deleted,
+    (folder as { isDeleted?: boolean; is_deleted?: boolean }).is_deleted,
   );
 };
 
 const isHiddenFolder = (folder: FolderTreeNode) => {
   return Boolean(
     (folder as { isHidden?: boolean; is_hidden?: boolean }).isHidden ??
-      (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden,
+    (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden,
   );
 };
 

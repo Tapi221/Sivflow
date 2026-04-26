@@ -51,7 +51,8 @@ const createArchive = (): MfDeckArchiveV1 => ({
                 {
                   id: "image-001",
                   status: "ready",
-                  localUrl: `${MF_DECK_MEDIA_URI_PREFIX}media/images/0001-image.png` as never,
+                  localUrl:
+                    `${MF_DECK_MEDIA_URI_PREFIX}media/images/0001-image.png` as never,
                 },
               ],
             },

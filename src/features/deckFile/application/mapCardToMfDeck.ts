@@ -156,7 +156,9 @@ export const buildMfDeckArchive = async ({
   appVersion?: string;
 }): Promise<MfDeckArchiveV1> => {
   const exportIssues = collectMfDeckExportIssues(cards);
-  const blockingIssues = exportIssues.filter((issue) => issue.level === "error");
+  const blockingIssues = exportIssues.filter(
+    (issue) => issue.level === "error",
+  );
 
   if (blockingIssues.length > 0) {
     throw new MfDeckExportError(
@@ -200,7 +202,9 @@ export const buildMfDeckArchive = async ({
       version: MF_DECK_VERSION,
       cards: exportedCards,
     },
-    ...(mediaBundle.mediaManifest ? { mediaManifest: mediaBundle.mediaManifest } : {}),
+    ...(mediaBundle.mediaManifest
+      ? { mediaManifest: mediaBundle.mediaManifest }
+      : {}),
     ...(mediaBundled ? { media: mediaBundle.media } : {}),
   };
 };

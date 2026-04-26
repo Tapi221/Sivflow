@@ -22,6 +22,9 @@
   button[data-pdf-thumbnail-tile]:hover > div:first-child,
   button[data-pdf-thumbnail-tile]:focus-visible > div:first-child {
     background: var(--pdf-thumbnail-folder-row-hover-bg, #f3f5ef) !important;
-    background-color: var(--pdf-thumbnail-folder-row-hover-bg, #f3f5ef) !important;
+    background-color: var(
+      --pdf-thumbnail-folder-row-hover-bg,
+      #f3f5ef
+    ) !important;
   }
 }

@@ -66,9 +66,7 @@ const loadTrashContext = async (userId: string) => {
   );
 
   const deletedFolders = folders.filter((folder) => folder.isDeleted === true);
-  const deletedFolderIdSet = new Set(
-    deletedFolders.map((folder) => folder.id),
-  );
+  const deletedFolderIdSet = new Set(deletedFolders.map((folder) => folder.id));
 
   const deletedCards = cards.filter((card) => {
     const folderId = resolveCardFolderIdStrict(card, cardSetById);
