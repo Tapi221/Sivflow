@@ -93,6 +93,11 @@ type ColumnFolderEntry = {
   label: string;
 };
 
+type ExternalPathSelectionSnapshot = {
+  resetToken: number;
+  selectedFolderId: string | null;
+};
+
 const EXPLORER_COLUMN_PATH_CHANGE_EVENT =
   "manifolia:explorer-column-path-change";
 const EXPLORER_COLUMN_PATH_NAVIGATE_EVENT =
@@ -274,6 +279,11 @@ const resolveClickedRowLabel = (row: HTMLElement): string => {
   return normalizeLabel(row.textContent ?? "");
 };
 
+const getSelectedItemKey = (item: SelectedExplorerItem): string => {
+  if (!item) return "__none__";
+  return "id" in item ? `${item.type}:${item.id}` : item.type;
+};
+
 /**
  * セクション一覧モードの右側パネル。
  * 表示モードに応じて Finder 風カラムビューと詳細リストビューを切り替える。
@@ -390,19 +400,48 @@ export const SectionListColumnPane = ({
   const [detailCardSetId, setDetailCardSetId] = useState<string | null>(
     selectedCardSetId,
   );
+  const [activeLeafCrumbs, setActiveLeafCrumbs] = useState<BreadcrumbCrumb[]>(
+    [],
+  );
+  const externalPathSelectionRef = useRef<ExternalPathSelectionSnapshot>({
+    resetToken,
+    selectedFolderId,
+  });
+  const syncedSelectedItemKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    setColumnPathIds(selectedFolderPathIds);
+    const previous = externalPathSelectionRef.current;
+    const resetChanged = previous.resetToken !== resetToken;
+    const selectedFolderChanged =
+      previous.selectedFolderId !== selectedFolderId;
+
+    externalPathSelectionRef.current = { resetToken, selectedFolderId };
+
+    if (!resetChanged && !selectedFolderChanged) {
+      return;
+    }
+
+    setColumnPathIds(buildFolderPathIds(selectedFolderId));
     setDetailCardSetId(null);
-  }, [resetToken, selectedFolderPathIds]);
+    setActiveLeafCrumbs([]);
+  }, [buildFolderPathIds, resetToken, selectedFolderId]);
 
   useEffect(() => {
     setDetailCardSetId(selectedCardSetId);
-  }, [selectedCardSetId]);
+    if (selectedCardSetId) {
+      const cardSet = cardSetById.get(selectedCardSetId);
+      if (cardSet) {
+        setActiveLeafCrumbs([{ label: getCardSetLabel(cardSet) }]);
+      }
+    }
+  }, [cardSetById, selectedCardSetId]);
 
   useEffect(() => {
-    dispatchExplorerColumnPathChange(buildFolderCrumbs(columnPathIds));
-  }, [buildFolderCrumbs, columnPathIds]);
+    dispatchExplorerColumnPathChange([
+      ...buildFolderCrumbs(columnPathIds),
+      ...activeLeafCrumbs,
+    ]);
+  }, [activeLeafCrumbs, buildFolderCrumbs, columnPathIds]);
 
   useEffect(() => {
     return () => {
@@ -448,6 +487,8 @@ export const SectionListColumnPane = ({
 
       if (!clickedFolder) return;
 
+      setDetailCardSetId(null);
+      setActiveLeafCrumbs([]);
       setColumnPathIds((previousPathIds) => [
         ...previousPathIds.slice(0, columnIndex),
         clickedFolder.id,
@@ -460,17 +501,17 @@ export const SectionListColumnPane = ({
     (folderId: string) => {
       const folderPathIds = buildFolderPathIds(folderId);
       setDetailCardSetId(null);
+      setActiveLeafCrumbs([]);
       setColumnPathIds(folderPathIds);
-      dispatchExplorerColumnPathChange(buildFolderCrumbs(folderPathIds));
     },
-    [buildFolderCrumbs, buildFolderPathIds],
+    [buildFolderPathIds],
   );
 
   const handleDetailCardSetOpen = useCallback(
     (cardSetId: string | null) => {
       if (!cardSetId) {
         setDetailCardSetId(null);
-        dispatchExplorerColumnPathChange(buildFolderCrumbs(columnPathIds));
+        setActiveLeafCrumbs([]);
         return;
       }
 
@@ -478,13 +519,11 @@ export const SectionListColumnPane = ({
       if (!cardSet) return;
 
       const folderPathIds = buildFolderPathIds(getCardSetFolderId(cardSet));
-      const crumbs = buildFolderCrumbs(folderPathIds);
-      crumbs.push({ label: getCardSetLabel(cardSet) });
       setDetailCardSetId(cardSetId);
+      setActiveLeafCrumbs([{ label: getCardSetLabel(cardSet) }]);
       setColumnPathIds(folderPathIds);
-      dispatchExplorerColumnPathChange(crumbs);
     },
-    [buildFolderCrumbs, buildFolderPathIds, cardSetById, columnPathIds],
+    [buildFolderPathIds, cardSetById],
   );
 
   const handleItemSelect = useCallback(
@@ -494,15 +533,9 @@ export const SectionListColumnPane = ({
         const folderPathIds = buildFolderPathIds(
           cardSet ? getCardSetFolderId(cardSet) : null,
         );
-        const crumbs = buildFolderCrumbs(folderPathIds);
-
-        if (cardSet) {
-          crumbs.push({ label: getCardSetLabel(cardSet) });
-        }
-
         setDetailCardSetId(item.id);
+        setActiveLeafCrumbs(cardSet ? [{ label: getCardSetLabel(cardSet) }] : []);
         setColumnPathIds(folderPathIds);
-        dispatchExplorerColumnPathChange(crumbs);
       }
 
       if (item?.type === "document") {
@@ -510,15 +543,11 @@ export const SectionListColumnPane = ({
         const folderPathIds = buildFolderPathIds(
           documentItem ? getDocumentFolderId(documentItem) : null,
         );
-        const crumbs = buildFolderCrumbs(folderPathIds);
-
-        if (documentItem) {
-          crumbs.push({ label: getDocumentLabel(documentItem) });
-        }
-
         setDetailCardSetId(null);
+        setActiveLeafCrumbs(
+          documentItem ? [{ label: getDocumentLabel(documentItem) }] : [],
+        );
         setColumnPathIds(folderPathIds);
-        dispatchExplorerColumnPathChange(crumbs);
       }
 
       if (item?.type === "card") {
@@ -526,26 +555,25 @@ export const SectionListColumnPane = ({
         const folderPathIds = buildFolderPathIds(
           card ? getCardFolderId(card, cardSetById) : null,
         );
-        const crumbs = buildFolderCrumbs(folderPathIds);
         const cardSet = card ? getCardSetByCard(card, cardSetById) : null;
+        const leafCrumbs: BreadcrumbCrumb[] = [];
 
         if (cardSet) {
-          crumbs.push({ label: getCardSetLabel(cardSet) });
+          leafCrumbs.push({ label: getCardSetLabel(cardSet) });
         }
 
         if (card) {
-          crumbs.push({ label: getCardLabel(card) });
+          leafCrumbs.push({ label: getCardLabel(card) });
         }
 
         setDetailCardSetId(cardSet?.id ?? null);
+        setActiveLeafCrumbs(leafCrumbs);
         setColumnPathIds(folderPathIds);
-        dispatchExplorerColumnPathChange(crumbs);
       }
 
       onItemSelect(item);
     },
     [
-      buildFolderCrumbs,
       buildFolderPathIds,
       cardSetById,
       cards,
@@ -555,15 +583,22 @@ export const SectionListColumnPane = ({
   );
 
   useEffect(() => {
+    const selectedItemKey = getSelectedItemKey(selectedItem);
+
+    if (syncedSelectedItemKeyRef.current === selectedItemKey) {
+      return;
+    }
+
+    syncedSelectedItemKeyRef.current = selectedItemKey;
+
     if (selectedItem?.type === "cardSet") {
       const cardSet = cardSetById.get(selectedItem.id);
       if (!cardSet) return;
 
       const folderPathIds = buildFolderPathIds(getCardSetFolderId(cardSet));
-      const crumbs = buildFolderCrumbs(folderPathIds);
-      crumbs.push({ label: getCardSetLabel(cardSet) });
       setDetailCardSetId(selectedItem.id);
-      dispatchExplorerColumnPathChange(crumbs);
+      setActiveLeafCrumbs([{ label: getCardSetLabel(cardSet) }]);
+      setColumnPathIds(folderPathIds);
       return;
     }
 
@@ -574,10 +609,9 @@ export const SectionListColumnPane = ({
       if (!documentItem) return;
 
       const folderPathIds = buildFolderPathIds(getDocumentFolderId(documentItem));
-      const crumbs = buildFolderCrumbs(folderPathIds);
-      crumbs.push({ label: getDocumentLabel(documentItem) });
       setDetailCardSetId(null);
-      dispatchExplorerColumnPathChange(crumbs);
+      setActiveLeafCrumbs([{ label: getDocumentLabel(documentItem) }]);
+      setColumnPathIds(folderPathIds);
       return;
     }
 
@@ -588,19 +622,19 @@ export const SectionListColumnPane = ({
       const folderPathIds = buildFolderPathIds(
         getCardFolderId(card, cardSetById),
       );
-      const crumbs = buildFolderCrumbs(folderPathIds);
       const cardSet = getCardSetByCard(card, cardSetById);
+      const leafCrumbs: BreadcrumbCrumb[] = [];
 
       if (cardSet) {
-        crumbs.push({ label: getCardSetLabel(cardSet) });
+        leafCrumbs.push({ label: getCardSetLabel(cardSet) });
       }
 
-      crumbs.push({ label: getCardLabel(card) });
+      leafCrumbs.push({ label: getCardLabel(card) });
       setDetailCardSetId(cardSet?.id ?? null);
-      dispatchExplorerColumnPathChange(crumbs);
+      setActiveLeafCrumbs(leafCrumbs);
+      setColumnPathIds(folderPathIds);
     }
   }, [
-    buildFolderCrumbs,
     buildFolderPathIds,
     cardSetById,
     cards,
@@ -617,8 +651,8 @@ export const SectionListColumnPane = ({
       const folderPathIds = buildFolderPathIds(folderId);
 
       setDetailCardSetId(null);
+      setActiveLeafCrumbs([]);
       setColumnPathIds(folderPathIds);
-      dispatchExplorerColumnPathChange(buildFolderCrumbs(folderPathIds));
     }) as EventListener;
 
     window.addEventListener(
@@ -632,11 +666,17 @@ export const SectionListColumnPane = ({
         handleColumnPathNavigate,
       );
     };
-  }, [buildFolderCrumbs, buildFolderPathIds]);
+  }, [buildFolderPathIds]);
 
   const currentPaneFolderId =
     columnPathIds.length > 0 ? columnPathIds[columnPathIds.length - 1] : null;
   const isDetailLayout = explorerLayoutMode === "detail";
+  const panePathKey = columnPathIds.length > 0 ? columnPathIds.join("/") : "__root__";
+  const paneLeafKey = activeLeafCrumbs
+    .map((crumb) => crumb.label)
+    .join("/");
+  const paneViewKey = `${isDetailLayout ? "detail" : "column"}:${panePathKey}:${detailCardSetId ?? "__no_card_set__"}:${paneLeafKey}`;
+
 
   return (
     <SectionListBlankPane
@@ -654,6 +694,7 @@ export const SectionListColumnPane = ({
       >
         {isDetailLayout ? (
           <FolderDetailView
+            key={paneViewKey}
             folders={folders}
             cards={cards}
             cardSets={cardSets}
@@ -675,6 +716,7 @@ export const SectionListColumnPane = ({
           />
         ) : (
           <FolderColumnView
+            key={paneViewKey}
             folders={folders as unknown as FolderTreeNode[]}
             cards={cards}
             cardSets={cardSets}
