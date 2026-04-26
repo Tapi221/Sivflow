@@ -42,7 +42,7 @@ interface FolderDetailViewProps {
   documents: DocumentItem[];
   currentFolderId: string | null;
   selectedItem: SelectedExplorerItem;
-  selectedCardSetId?: string | null;
+  currentCardSetId?: string | null;
   onFolderOpen: (folderId: string) => void;
   onCardSetOpen?: (cardSetId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
@@ -592,7 +592,7 @@ export const FolderDetailView = ({
   documents,
   currentFolderId,
   selectedItem,
-  selectedCardSetId = null,
+  currentCardSetId = null,
   onFolderOpen,
   onCardSetOpen,
   onItemSelect,
@@ -611,9 +611,6 @@ export const FolderDetailView = ({
   );
   const [sortState, setSortState] =
     useState<ExplorerDetailSortState>(DEFAULT_SORT_STATE);
-  const [openedCardSetId, setOpenedCardSetId] = useState<string | null>(
-    selectedCardSetId,
-  );
   const [draggingKey, setDraggingKey] = useState<string | null>(null);
   const [dropIntent, setDropIntent] = useState<ExplorerDetailDropIntent | null>(
     null,
@@ -686,17 +683,6 @@ export const FolderDetailView = ({
     }));
   }, []);
 
-  useEffect(() => {
-    setOpenedCardSetId(null);
-  }, [currentFolderId]);
-
-  useEffect(() => {
-    if (!selectedCardSetId) return;
-
-    setOpenedCardSetId(selectedCardSetId);
-    onCardSetOpen?.(selectedCardSetId);
-  }, [onCardSetOpen, selectedCardSetId]);
-
   const manualRows = useMemo(
     () =>
       buildExplorerDetailRows({
@@ -705,9 +691,9 @@ export const FolderDetailView = ({
         cardSets,
         documents,
         currentFolderId,
-        currentCardSetId: openedCardSetId,
+        currentCardSetId,
       }),
-    [cards, cardSets, currentFolderId, documents, folders, openedCardSetId],
+    [cards, cardSets, currentCardSetId, currentFolderId, documents, folders],
   );
 
   const rows = useMemo(
@@ -735,7 +721,6 @@ export const FolderDetailView = ({
       }
 
       if (row.openCardSetId) {
-        setOpenedCardSetId(row.openCardSetId);
         onCardSetOpen?.(row.openCardSetId);
         setDropIntent(null);
         setDraggingKey(null);
@@ -780,8 +765,8 @@ export const FolderDetailView = ({
       }
 
       if (payload.kind === "card") {
-        if (!openedCardSetId) return;
-        void onReorderCardsInCardSet?.(openedCardSetId, orderedIds);
+        if (!currentCardSetId) return;
+        void onReorderCardsInCardSet?.(currentCardSetId, orderedIds);
         return;
       }
 
@@ -801,7 +786,7 @@ export const FolderDetailView = ({
       onReorderCardsInCardSet,
       onReorderDocuments,
       onReorderFolders,
-      openedCardSetId,
+      currentCardSetId,
     ],
   );
 
@@ -873,8 +858,8 @@ export const FolderDetailView = ({
     const payload = dragPayloadRef.current;
     if (!payload || dropIntent?.position !== "append") return;
 
-    if (openedCardSetId && payload.kind === "card") {
-      movePayloadIntoCardSet(payload, openedCardSetId);
+    if (currentCardSetId && payload.kind === "card") {
+      movePayloadIntoCardSet(payload, currentCardSetId);
       return;
     }
 
@@ -884,7 +869,7 @@ export const FolderDetailView = ({
     dropIntent?.position,
     movePayloadIntoCardSet,
     movePayloadIntoFolder,
-    openedCardSetId,
+    currentCardSetId,
   ]);
 
   return (
