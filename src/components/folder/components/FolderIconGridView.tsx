@@ -22,7 +22,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
@@ -47,12 +46,6 @@ type GridColumnMetrics = {
 
 const TILE_WIDTH_PX = 132;
 const TILE_GAP_X_PX = 32;
-
-const folderIconStyle = {
-  "--explorer-chrome-folder-fill": "#ffd86a",
-  "--explorer-chrome-folder-stroke": "#d49a00",
-  "--explorer-chrome-folder-highlight": "#fff3b0",
-} satisfies CSSProperties;
 
 const getIconForKind = (kind: ExplorerDetailRowKind) => {
   if (kind === "folder") return ExplorerChromeFolderIcon;
@@ -110,28 +103,15 @@ const getNextIndex = (
 const IconVisual = ({ row }: { row: ExplorerDetailRow }) => {
   const Icon = getIconForKind(row.kind);
 
-  if (row.kind === "folder") {
-    return (
-      <ExplorerChromeFolderIcon
-        size={74}
-        style={folderIconStyle}
-        className="drop-shadow-[0_2px_3px_rgba(160,120,20,0.16)]"
-      />
-    );
-  }
-
   return (
-    <div
+    <span
       className={cn(
-        "relative grid h-[78px] w-[62px] place-items-center rounded-[3px]",
-        "border border-[#d8d6cf] bg-[#fffefb]",
-        "shadow-[0_1px_2px_rgba(40,38,30,0.08)]",
-        "before:absolute before:right-0 before:top-0 before:h-4 before:w-4",
-        "before:border-b before:border-l before:border-[#d8d6cf] before:bg-[#f5f3ee]",
+        "grid h-[78px] w-[78px] place-items-center",
+        "text-[var(--sidebar-icon-color,#6f6d66)]",
       )}
     >
-      <Icon className="h-8 w-8 text-[#2f73b7]" />
-    </div>
+      <Icon className="h-14 w-14" />
+    </span>
   );
 };
 
