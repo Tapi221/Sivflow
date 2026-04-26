@@ -403,16 +403,11 @@ export const SectionListColumnPane = ({
   const [activeLeafCrumbs, setActiveLeafCrumbs] = useState<BreadcrumbCrumb[]>(
     [],
   );
-  const [paneNavigationRevision, setPaneNavigationRevision] = useState(0);
   const externalPathSelectionRef = useRef<ExternalPathSelectionSnapshot>({
     resetToken,
     selectedFolderId,
   });
   const syncedSelectedItemKeyRef = useRef<string | null>(null);
-
-  const bumpPaneNavigationRevision = useCallback(() => {
-    setPaneNavigationRevision((revision) => revision + 1);
-  }, []);
 
   useEffect(() => {
     const previous = externalPathSelectionRef.current;
@@ -429,13 +424,7 @@ export const SectionListColumnPane = ({
     setColumnPathIds(buildFolderPathIds(selectedFolderId));
     setDetailCardSetId(null);
     setActiveLeafCrumbs([]);
-    bumpPaneNavigationRevision();
-  }, [
-    buildFolderPathIds,
-    bumpPaneNavigationRevision,
-    resetToken,
-    selectedFolderId,
-  ]);
+  }, [buildFolderPathIds, resetToken, selectedFolderId]);
 
   useEffect(() => {
     setDetailCardSetId(selectedCardSetId);
@@ -445,9 +434,7 @@ export const SectionListColumnPane = ({
         setActiveLeafCrumbs([{ label: getCardSetLabel(cardSet) }]);
       }
     }
-
-    bumpPaneNavigationRevision();
-  }, [bumpPaneNavigationRevision, cardSetById, selectedCardSetId]);
+  }, [cardSetById, selectedCardSetId]);
 
   useEffect(() => {
     dispatchExplorerColumnPathChange([
@@ -502,13 +489,12 @@ export const SectionListColumnPane = ({
 
       setDetailCardSetId(null);
       setActiveLeafCrumbs([]);
-      bumpPaneNavigationRevision();
       setColumnPathIds((previousPathIds) => [
         ...previousPathIds.slice(0, columnIndex),
         clickedFolder.id,
       ]);
     },
-    [bumpPaneNavigationRevision, getFolderEntriesForColumn],
+    [getFolderEntriesForColumn],
   );
 
   const handleDetailFolderOpen = useCallback(
@@ -516,10 +502,9 @@ export const SectionListColumnPane = ({
       const folderPathIds = buildFolderPathIds(folderId);
       setDetailCardSetId(null);
       setActiveLeafCrumbs([]);
-      bumpPaneNavigationRevision();
       setColumnPathIds(folderPathIds);
     },
-    [buildFolderPathIds, bumpPaneNavigationRevision],
+    [buildFolderPathIds],
   );
 
   const handleDetailCardSetOpen = useCallback(
@@ -527,7 +512,6 @@ export const SectionListColumnPane = ({
       if (!cardSetId) {
         setDetailCardSetId(null);
         setActiveLeafCrumbs([]);
-        bumpPaneNavigationRevision();
         return;
       }
 
@@ -537,10 +521,9 @@ export const SectionListColumnPane = ({
       const folderPathIds = buildFolderPathIds(getCardSetFolderId(cardSet));
       setDetailCardSetId(cardSetId);
       setActiveLeafCrumbs([{ label: getCardSetLabel(cardSet) }]);
-      bumpPaneNavigationRevision();
       setColumnPathIds(folderPathIds);
     },
-    [buildFolderPathIds, bumpPaneNavigationRevision, cardSetById],
+    [buildFolderPathIds, cardSetById],
   );
 
   const handleItemSelect = useCallback(
@@ -588,12 +571,10 @@ export const SectionListColumnPane = ({
         setColumnPathIds(folderPathIds);
       }
 
-      bumpPaneNavigationRevision();
       onItemSelect(item);
     },
     [
       buildFolderPathIds,
-      bumpPaneNavigationRevision,
       cardSetById,
       cards,
       documents,
@@ -609,7 +590,6 @@ export const SectionListColumnPane = ({
     }
 
     syncedSelectedItemKeyRef.current = selectedItemKey;
-    bumpPaneNavigationRevision();
 
     if (selectedItem?.type === "cardSet") {
       const cardSet = cardSetById.get(selectedItem.id);
@@ -656,7 +636,6 @@ export const SectionListColumnPane = ({
     }
   }, [
     buildFolderPathIds,
-    bumpPaneNavigationRevision,
     cardSetById,
     cards,
     documents,
@@ -673,7 +652,6 @@ export const SectionListColumnPane = ({
 
       setDetailCardSetId(null);
       setActiveLeafCrumbs([]);
-      bumpPaneNavigationRevision();
       setColumnPathIds(folderPathIds);
     }) as EventListener;
 
@@ -688,17 +666,17 @@ export const SectionListColumnPane = ({
         handleColumnPathNavigate,
       );
     };
-  }, [buildFolderPathIds, bumpPaneNavigationRevision]);
+  }, [buildFolderPathIds]);
 
   const currentPaneFolderId =
     columnPathIds.length > 0 ? columnPathIds[columnPathIds.length - 1] : null;
   const isDetailLayout = explorerLayoutMode === "detail";
-  const paneViewKey = [
-    isDetailLayout ? "detail" : "column",
-    currentPaneFolderId ?? "__root__",
-    detailCardSetId ?? "__folder__",
-    paneNavigationRevision,
-  ].join(":");
+  const panePathKey = columnPathIds.length > 0 ? columnPathIds.join("/") : "__root__";
+  const paneLeafKey = activeLeafCrumbs
+    .map((crumb) => crumb.label)
+    .join("/");
+  const paneViewKey = `${isDetailLayout ? "detail" : "column"}:${panePathKey}:${detailCardSetId ?? "__no_card_set__"}:${paneLeafKey}`;
+
 
   return (
     <SectionListBlankPane
