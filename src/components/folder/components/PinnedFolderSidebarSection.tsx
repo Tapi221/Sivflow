@@ -1,3 +1,4 @@
+import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import type { MenuAction } from "@/components/folder/components/menus/menuActions";
 import {
   getFolderId,
@@ -18,7 +19,7 @@ import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDer
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, Folder } from "@/types";
-import { ChevronDown, ChevronRight, FolderOutlineIcon, Pin } from "@/ui/icons";
+import { ChevronDown, ChevronRight, Pin } from "@/ui/icons";
 import { useMemo } from "react";
 
 interface PinnedFolderSidebarSectionProps {
@@ -238,13 +239,9 @@ export const PinnedFolderSidebarSection = ({
                   </div>
                 }
                 icon={
-                  <FolderOutlineIcon
+                  <ExplorerChromeFolderIcon
                     className={cn(
-                      "sidebar-icon",
                       FOLDER_ROW_ICON_SIZE_CLASS,
-                      isSelected
-                        ? FOLDER_ROW_ICON_ACTIVE_CLASS
-                        : FOLDER_ROW_ICON_MUTED_CLASS,
                     )}
                   />
                 }
