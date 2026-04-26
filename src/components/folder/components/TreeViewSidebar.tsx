@@ -1,6 +1,8 @@
 import { ExplorerSidebarHeader } from "@/components/explorer/ExplorerSidebarHeader";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 
 interface TreeViewSidebarProps {
   sidebarRef: React.RefObject<HTMLDivElement | null>;
@@ -27,6 +29,17 @@ interface TreeViewSidebarProps {
   integratedChrome?: boolean;
 }
 
+type ElementWithChildrenProps = {
+  children?: React.ReactNode;
+  id?: unknown;
+  "aria-controls"?: unknown;
+};
+
+type InjectionResult = {
+  node: React.ReactNode;
+  injected: boolean;
+};
+
 const runAfterCurrentPointerAction = (callback: () => void) => {
   if (typeof window === "undefined") {
     callback();
@@ -36,6 +49,164 @@ const runAfterCurrentPointerAction = (callback: () => void) => {
   window.requestAnimationFrame(() => {
     callback();
   });
+};
+
+const isElementWithChildren = (
+  node: React.ReactNode,
+): node is React.ReactElement<ElementWithChildrenProps> => {
+  return React.isValidElement<ElementWithChildrenProps>(node);
+};
+
+const hasTagSectionToggle = (node: React.ReactNode): boolean => {
+  if (!isElementWithChildren(node)) return false;
+
+  if (node.props["aria-controls"] === "tag-sidebar-section-content") {
+    return true;
+  }
+
+  return React.Children.toArray(node.props.children).some(hasTagSectionToggle);
+};
+
+const hasTagSectionContent = (node: React.ReactNode): boolean => {
+  if (!isElementWithChildren(node)) return false;
+
+  if (node.props.id === "tag-sidebar-section-content") {
+    return true;
+  }
+
+  return React.Children.toArray(node.props.children).some(hasTagSectionContent);
+};
+
+const injectAfterTagSectionToggle = (
+  node: React.ReactNode,
+  content: React.ReactNode,
+): InjectionResult => {
+  if (!isElementWithChildren(node)) {
+    return { node, injected: false };
+  }
+
+  const children = React.Children.toArray(node.props.children);
+  if (children.length === 0) {
+    return { node, injected: false };
+  }
+
+  let injected = false;
+  const nextChildren: React.ReactNode[] = [];
+
+  for (const child of children) {
+    if (injected) {
+      nextChildren.push(child);
+      continue;
+    }
+
+    if (hasTagSectionToggle(child)) {
+      nextChildren.push(child, content);
+      injected = true;
+      continue;
+    }
+
+    const result = injectAfterTagSectionToggle(child, content);
+    nextChildren.push(result.node);
+    injected = result.injected;
+  }
+
+  if (!injected) {
+    return { node, injected: false };
+  }
+
+  return {
+    node: React.cloneElement(node, undefined, nextChildren),
+    injected: true,
+  };
+};
+
+const toTagDisplayName = (name: string) => {
+  const trimmed = name.trim();
+  if (!trimmed) return "#";
+  return trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+};
+
+const SidebarTagSectionContent = () => {
+  const { tags } = useTags();
+  const tagFilter = useExplorerStore((state) => state.tagFilter);
+  const toggleTag = useExplorerStore((state) => state.toggleTag);
+  const isTagSectionCollapsed = useExplorerStore(
+    (state) => state.isTagSectionCollapsed,
+  );
+
+  const tagItems = useMemo(
+    () =>
+      [...tags].sort((left, right) =>
+        left.name.localeCompare(right.name, "ja"),
+      ),
+    [tags],
+  );
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const toggle = document.querySelector<HTMLElement>(
+      '[aria-controls="tag-sidebar-section-content"]',
+    );
+    const counter = toggle?.querySelector<HTMLElement>(".tabular-nums");
+    if (!counter) return;
+
+    counter.textContent = String(tagItems.length);
+  }, [tagItems.length]);
+
+  if (isTagSectionCollapsed) return null;
+
+  return (
+    <div
+      key="tag-sidebar-section-content"
+      id="tag-sidebar-section-content"
+      className="min-h-0 px-2 pb-2"
+    >
+      {tagItems.length > 0 ? (
+        <div className="max-h-40 overflow-y-auto pr-1">
+          {tagItems.map((tag) => {
+            const displayName = toTagDisplayName(tag.name);
+            const isSelected =
+              tagFilter.includes(tag.name) || tagFilter.includes(displayName);
+
+            return (
+              <button
+                key={tag.id}
+                type="button"
+                className={cn(
+                  "group flex h-7 w-full items-center gap-1 rounded-md px-2 text-left",
+                  "text-[11px] leading-5 transition",
+                  isSelected
+                    ? "bg-[#f0efe8] text-foreground"
+                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                )}
+                title={displayName}
+                onClick={() => toggleTag(tag.name)}
+              >
+                <span className="min-w-0 flex-1 truncate">{displayName}</span>
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="px-1 py-1 text-[11px] text-muted-foreground/70">
+          タグはまだありません
+        </div>
+      )}
+    </div>
+  );
+};
+
+const useSidebarChildrenWithTagSection = (children: React.ReactNode) => {
+  return useMemo(() => {
+    if (hasTagSectionContent(children)) return children;
+
+    return injectAfterTagSectionToggle(
+      children,
+      <SidebarTagSectionContent key="tag-sidebar-section-content" />,
+    ).node;
+  }, [children]);
 };
 
 export const TreeViewSidebar = ({
@@ -62,6 +233,8 @@ export const TreeViewSidebar = ({
   rightGapPx = 0,
   integratedChrome = false,
 }: TreeViewSidebarProps) => {
+  const sidebarChildren = useSidebarChildrenWithTagSection(children);
+
   const handleCreateRootFolder = useCallback(() => {
     runAfterCurrentPointerAction(onCreateRootFolder);
   }, [onCreateRootFolder]);
@@ -136,7 +309,7 @@ export const TreeViewSidebar = ({
             ref={contentScrollRef}
             className="flex-1 min-h-0 min-w-0 overflow-hidden px-1 pb-1 outline-none"
           >
-            {children}
+            {sidebarChildren}
           </div>
         )}
       </div>
