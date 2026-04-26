@@ -28,6 +28,7 @@ export interface ExplorerState {
   directoryBadgeVisibility: DirectoryBadgeVisibility;
   pinnedFolderIds: ExplorerPinnedFolderId[];
   isPinnedFolderSectionCollapsed: boolean;
+  isFolderListSectionCollapsed: boolean;
   setTagFilter: (tags: string[]) => void;
   toggleTag: (tag: string) => void;
   clearTagFilter: () => void;
@@ -44,6 +45,8 @@ export interface ExplorerState {
   togglePinnedFolder: (folderId: string) => void;
   setPinnedFolderSectionCollapsed: (collapsed: boolean) => void;
   togglePinnedFolderSectionCollapsed: () => void;
+  setFolderListSectionCollapsed: (collapsed: boolean) => void;
+  toggleFolderListSectionCollapsed: () => void;
 }
 
 const DEFAULT_CONTENT_TYPE_FILTER: ContentTypeFilter[] = ["card", "pdf"];
@@ -126,6 +129,7 @@ const createDefaultState = (): Pick<
   | "directoryBadgeVisibility"
   | "pinnedFolderIds"
   | "isPinnedFolderSectionCollapsed"
+  | "isFolderListSectionCollapsed"
 > => ({
   tagFilter: [],
   tagMatchMode: "any",
@@ -136,6 +140,7 @@ const createDefaultState = (): Pick<
   directoryBadgeVisibility: { ...DEFAULT_DIRECTORY_BADGE_VISIBILITY },
   pinnedFolderIds: [],
   isPinnedFolderSectionCollapsed: false,
+  isFolderListSectionCollapsed: false,
 });
 
 export const useExplorerStore = create<ExplorerState>()(
@@ -222,6 +227,12 @@ export const useExplorerStore = create<ExplorerState>()(
         set((state) => ({
           isPinnedFolderSectionCollapsed: !state.isPinnedFolderSectionCollapsed,
         })),
+      setFolderListSectionCollapsed: (collapsed) =>
+        set({ isFolderListSectionCollapsed: collapsed }),
+      toggleFolderListSectionCollapsed: () =>
+        set((state) => ({
+          isFolderListSectionCollapsed: !state.isFolderListSectionCollapsed,
+        })),
     }),
     {
       name: "explorer-storage",
@@ -235,6 +246,7 @@ export const useExplorerStore = create<ExplorerState>()(
         directoryBadgeVisibility: state.directoryBadgeVisibility,
         pinnedFolderIds: state.pinnedFolderIds,
         isPinnedFolderSectionCollapsed: state.isPinnedFolderSectionCollapsed,
+        isFolderListSectionCollapsed: state.isFolderListSectionCollapsed,
       }),
       migrate: (persistedState: unknown) => {
         if (!persistedState || typeof persistedState !== "object") {
@@ -262,6 +274,10 @@ export const useExplorerStore = create<ExplorerState>()(
         next.isPinnedFolderSectionCollapsed =
           typeof next.isPinnedFolderSectionCollapsed === "boolean"
             ? next.isPinnedFolderSectionCollapsed
+            : false;
+        next.isFolderListSectionCollapsed =
+          typeof next.isFolderListSectionCollapsed === "boolean"
+            ? next.isFolderListSectionCollapsed
             : false;
 
         delete next.recent;

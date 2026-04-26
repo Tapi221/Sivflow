@@ -777,6 +777,9 @@ const TreeViewLayout = ({
   const sidebarSelectedFolderId = isSectionListMode
     ? sectionListSidebarFolderId
     : selectedFolderId;
+  const isFolderListSectionCollapsed = useExplorerStore(
+    (state) => state.isFolderListSectionCollapsed,
+  );
   const sidebarContent = (
     <div className="flex h-full min-h-0 flex-col">
       <PinnedFolderSidebarSection
@@ -789,7 +792,13 @@ const TreeViewLayout = ({
         onFolderSelect={handleSidebarFolderSelect}
       />
 
-      <div className="min-h-0 flex-1 overflow-hidden">
+      <div
+        id="folder-list-sidebar-section-content"
+        className={cn(
+          "min-h-0 flex-1 overflow-hidden",
+          isFolderListSectionCollapsed && "hidden",
+        )}
+      >
         <TreeViewTabContent
           sidebarDisplayMode={resolvedSidebarDisplayMode}
           folders={folders}
