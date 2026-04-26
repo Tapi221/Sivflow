@@ -59,6 +59,53 @@
     );
   }
 
+  /*
+   * 詳細表示の上下フェード。
+   *
+   * 詳細表示は横方向にもスクロールするので、table 側ではなく overflow-auto の
+   * スクロールコンテナに overlay を載せる。sticky header を潰さないよう、
+   * 上フェードはヘッダー 36px の直下から開始する。
+   */
+  div:has(> [role="table"][aria-label="エクスプローラー詳細表示"]) {
+    --folder-detail-view-fade-rgb: 255 255 255;
+
+    position: relative;
+  }
+
+  div:has(> [role="table"][aria-label="エクスプローラー詳細表示"])::before,
+  div:has(> [role="table"][aria-label="エクスプローラー詳細表示"])::after {
+    content: "";
+    pointer-events: none;
+    position: sticky;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 1rem;
+    z-index: 35;
+  }
+
+  div:has(> [role="table"][aria-label="エクスプローラー詳細表示"])::before {
+    top: 2.25rem;
+    margin-bottom: -1rem;
+    background: linear-gradient(
+      to bottom,
+      rgb(var(--folder-detail-view-fade-rgb, 255 255 255) / 0.82) 0%,
+      rgb(var(--folder-detail-view-fade-rgb, 255 255 255) / 0.46) 38%,
+      rgb(var(--folder-detail-view-fade-rgb, 255 255 255) / 0) 100%
+    );
+  }
+
+  div:has(> [role="table"][aria-label="エクスプローラー詳細表示"])::after {
+    bottom: 0;
+    margin-top: -1rem;
+    background: linear-gradient(
+      to bottom,
+      rgb(var(--folder-detail-view-fade-rgb, 255 255 255) / 0) 0%,
+      rgb(var(--folder-detail-view-fade-rgb, 255 255 255) / 0.46) 62%,
+      rgb(var(--folder-detail-view-fade-rgb, 255 255 255) / 0.82) 100%
+    );
+  }
+
   .folder-column-view [role="separator"][aria-label="カラム幅を変更"] {
     right: -3px !important;
     width: 6px !important;
