@@ -9,45 +9,54 @@
   .folder-column-view {
     --folder-column-view-fade-rgb: 255 255 255;
 
-    position: relative;
-    isolation: isolate;
     cursor: default !important;
   }
 
   /*
    * カラム表示の左右フェード。
    *
-   * ここは上下ではなく、横スクロールの左右端にかける fade。
-   * 疑似要素を 1 枚だけ sticky にして、左右 20px（Tailwind の w-5 相当）
-   * のグラデーションを同時に描く。個別カラムや境界線に mask を当てない。
+   * .folder-column-view 自体は横スクロールコンテナなので、そこに疑似要素を
+   * 置くとスクロール内容側の flex item になりやすく、viewport 固定の
+   * overlay にならない。
+   *
+   * そのため、.folder-column-view の直親に左右 20px の overlay を置く。
+   * Tailwind の w-5 相当。個別カラムや境界線には mask を当てない。
    */
-  .folder-column-view::before {
+  :where(div, section):has(> .folder-column-view) {
+    --folder-column-view-fade-rgb: 255 255 255;
+
+    position: relative;
+  }
+
+  :where(div, section):has(> .folder-column-view)::before,
+  :where(div, section):has(> .folder-column-view)::after {
     content: "";
     pointer-events: none;
-    position: sticky;
+    position: absolute;
+    bottom: 0;
+    top: 0;
+    z-index: 80;
+    width: 1.25rem;
+  }
+
+  :where(div, section):has(> .folder-column-view)::before {
     left: 0;
-    z-index: 60;
-    display: block;
-    align-self: stretch;
-    flex: 0 0 100%;
-    width: 100%;
-    min-width: 100%;
-    margin-right: -100%;
-    background:
-      linear-gradient(
-          to right,
-          rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.92) 0%,
-          rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.62) 45%,
-          rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0) 100%
-        )
-        left / 1.25rem 100% no-repeat,
-      linear-gradient(
-          to left,
-          rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.92) 0%,
-          rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.62) 45%,
-          rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0) 100%
-        )
-        right / 1.25rem 100% no-repeat;
+    background: linear-gradient(
+      to right,
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.92) 0%,
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.62) 45%,
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0) 100%
+    );
+  }
+
+  :where(div, section):has(> .folder-column-view)::after {
+    right: 0;
+    background: linear-gradient(
+      to left,
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.92) 0%,
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0.62) 45%,
+      rgb(var(--folder-column-view-fade-rgb, 255 255 255) / 0) 100%
+    );
   }
 
   /*
@@ -103,7 +112,7 @@
     transform: none !important;
     cursor: col-resize !important;
     background: transparent !important;
-    z-index: 70 !important;
+    z-index: 90 !important;
   }
 
   .folder-column-view [role="separator"][aria-label="カラム幅を変更"] * {
