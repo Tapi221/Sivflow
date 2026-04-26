@@ -6,7 +6,14 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import { LayoutPanel } from "@/components/explorer/LayoutPanel";
 import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { floatingPanelPresets } from "@/components/ui/menu-styles";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useTags } from "@/hooks/settings/useTags";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
@@ -396,6 +403,7 @@ const ExplorerPathBar = () => {
 const ExplorerToolbar = () => {
   const { tags } = useTags();
   const openGlobalSearch = useGlobalSearchStore((state) => state.open);
+  const panelPreset = floatingPanelPresets.filter;
   const allTags = useMemo(
     () =>
       tags
@@ -443,9 +451,21 @@ const ExplorerToolbar = () => {
         <SortIcon />
       </ExplorerToolbarButton>
 
-      <ExplorerToolbarButton title="表示切替">
-        <ColumnsIcon />
-      </ExplorerToolbarButton>
+      <Popover>
+        <PopoverTrigger asChild>
+          <ExplorerToolbarButton title="表示切替">
+            <ColumnsIcon />
+          </ExplorerToolbarButton>
+        </PopoverTrigger>
+
+        <PopoverContent
+          align="end"
+          className={cn(panelPreset.className, "w-[420px]")}
+          surface={panelPreset.surface}
+        >
+          <LayoutPanel />
+        </PopoverContent>
+      </Popover>
 
       <ExplorerToolbarButton
         title="検索"
