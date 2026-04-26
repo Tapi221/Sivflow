@@ -78,7 +78,7 @@ export const LayoutPanel = ({ className }: { className?: string }) => {
             レイアウト:
           </span>
 
-          <div className="ds-filter-toggle-group grid grid-cols-5 gap-1">
+          <div className="ds-filter-toggle-group flex items-center gap-1">
             {options.map((opt) => {
               const selected = mode === opt.value;
               return (
@@ -87,14 +87,16 @@ export const LayoutPanel = ({ className }: { className?: string }) => {
                   onClick={() => setMode(opt.value)}
                   surface={selected ? "convexActive" : "concave"}
                   size="xs"
+                  title={opt.label}
+                  aria-label={opt.label}
                   className={cn(
-                    "h-14 w-[62px] px-0",
-                    "flex-col gap-1 rounded-[10px]",
-                    "[&>svg]:text-[#1a1a1a] [&>svg]:opacity-95",
+                    "h-8 w-8 px-0",
+                    "rounded-[9px]",
+                    "grid place-items-center",
+                    "text-[#1a1a1a]",
                   )}
                 >
                   {opt.icon}
-                  <span className="text-[11px] leading-none">{opt.label}</span>
                 </SurfaceButton>
               );
             })}
@@ -106,4 +108,3 @@ export const LayoutPanel = ({ className }: { className?: string }) => {
     </div>
   );
 };
-

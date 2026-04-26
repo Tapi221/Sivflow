@@ -470,7 +470,7 @@ const ExplorerToolbar = () => {
 
         <PopoverContent
           align="end"
-          className={cn(panelPreset.className, "w-[420px]")}
+          className={cn(panelPreset.className, "w-[300px]")}
           surface={panelPreset.surface}
         >
           <LayoutPanel />
