@@ -166,22 +166,32 @@ const SortIcon = () => (
     aria-hidden="true"
   >
     <path
-      d="M5 7H16"
+      d="M8 19V5"
       stroke="currentColor"
       strokeWidth="1.8"
       strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
-      d="M5 12H13"
+      d="M4 9L8 5L12 9"
       stroke="currentColor"
       strokeWidth="1.8"
       strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
-      d="M5 17H10"
+      d="M16 5V19"
       stroke="currentColor"
       strokeWidth="1.8"
       strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12 15L16 19L20 15"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -204,7 +214,13 @@ const ColumnsIcon = () => (
       strokeWidth="1.5"
     />
     <path
-      d="M12 7V17"
+      d="M10 7V17"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M14 7V17"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
