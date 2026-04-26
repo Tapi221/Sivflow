@@ -65,6 +65,7 @@ export interface RootFolderPanelListProps {
   editingNameRef: React.MutableRefObject<string>;
   handleRenameConfirm: (target?: RenameTarget) => Promise<void>;
   className?: string;
+  enableScrollEdgeFade?: boolean;
   enableBottomFade?: boolean;
 }
 
@@ -101,17 +102,28 @@ export const RootFolderPanelList = ({
   editingNameRef,
   handleRenameConfirm,
   className,
+  enableScrollEdgeFade,
   enableBottomFade = true,
 }: RootFolderPanelListProps) => {
+  const shouldRenderEdgeFade = enableScrollEdgeFade ?? enableBottomFade;
+
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
   const scrollContentRef = React.useRef<HTMLDivElement | null>(null);
+  const [showTopFade, setShowTopFade] = React.useState(false);
   const [showBottomFade, setShowBottomFade] = React.useState(false);
 
   const updateScrollFade = React.useCallback(() => {
+    if (!shouldRenderEdgeFade) {
+      setShowTopFade(false);
+      setShowBottomFade(false);
+      return;
+    }
+
     const node = scrollContainerRef.current;
 
     if (!node) {
+      setShowTopFade(false);
       setShowBottomFade(false);
       return;
     }
@@ -119,8 +131,9 @@ export const RootFolderPanelList = ({
     const remainingScroll =
       node.scrollHeight - node.clientHeight - node.scrollTop;
 
+    setShowTopFade(node.scrollTop > 2);
     setShowBottomFade(remainingScroll > 2);
-  }, []);
+  }, [shouldRenderEdgeFade]);
 
   const attachInputRef = React.useCallback(
     (node: HTMLInputElement | null) => {
@@ -140,7 +153,8 @@ export const RootFolderPanelList = ({
   );
 
   React.useLayoutEffect(() => {
-    if (!enableBottomFade) {
+    if (!shouldRenderEdgeFade) {
+      setShowTopFade(false);
       setShowBottomFade(false);
       return;
     }
@@ -180,7 +194,12 @@ export const RootFolderPanelList = ({
       window.cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
     };
-  }, [enableBottomFade, entries.length, emptyMessage, updateScrollFade]);
+  }, [
+    shouldRenderEdgeFade,
+    entries.length,
+    emptyMessage,
+    updateScrollFade,
+  ]);
 
   const content = (
     <>
@@ -226,7 +245,7 @@ export const RootFolderPanelList = ({
     </>
   );
 
-  if (!enableBottomFade) {
+  if (!shouldRenderEdgeFade) {
     return (
       <div
         className={cn(
@@ -252,7 +271,15 @@ export const RootFolderPanelList = ({
       <div
         aria-hidden="true"
         className={cn(
-          "folder-panel-list__bottom-fade pointer-events-none absolute bottom-0 left-0 right-3 z-10 h-7",
+          "folder-panel-list__edge-fade folder-panel-list__top-fade pointer-events-none absolute left-0 right-3 top-0 z-10 h-7",
+          showTopFade ? "opacity-100" : "opacity-0",
+        )}
+      />
+
+      <div
+        aria-hidden="true"
+        className={cn(
+          "folder-panel-list__edge-fade folder-panel-list__bottom-fade pointer-events-none absolute bottom-0 left-0 right-3 z-10 h-7",
           showBottomFade ? "opacity-100" : "opacity-0",
         )}
       />
