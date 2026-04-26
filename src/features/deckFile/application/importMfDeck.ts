@@ -1,8 +1,7 @@
 import { normalizeInkDocument } from "@/domain/card/inkDocument";
+import { restoreMfDeckMediaInBlocks } from "@/features/deckFile/application/mfDeckMediaRestorer";
 import type { Card, CardBlock, CardSet } from "@/types";
-import type {
-  CardDisplayMode,
-} from "@/types/domain/cardSet";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 import type {
   MfDeckArchiveV1,
   MfDeckCardV1,
@@ -158,6 +157,7 @@ const buildCardInput = async ({
   orderIndex,
   ensureTagByName,
   issues,
+  mediaContext,
 }: {
   card: MfDeckCardV1;
   folderId: string;
@@ -165,6 +165,7 @@ const buildCardInput = async ({
   orderIndex: number;
   ensureTagByName?: EnsureMfDeckTagByName;
   issues: MfDeckIssue[];
+  mediaContext: Pick<MfDeckArchiveV1, "media" | "mediaManifest">;
 }): Promise<Partial<Card> & { cardSetId: string }> => {
   const tagIds = await resolveCardTagIds({ card, ensureTagByName, issues });
 
@@ -175,12 +176,24 @@ const buildCardInput = async ({
     questionNumber: card.questionNumber?.trim() || undefined,
     title: card.title?.trim() || "",
     front: {
-      blocks: cloneBlocksWithFreshIds(card.front.blocks),
+      blocks: restoreMfDeckMediaInBlocks({
+        blocks: cloneBlocksWithFreshIds(card.front.blocks),
+        media: mediaContext.media,
+        mediaManifest: mediaContext.mediaManifest,
+        issues,
+        cardId: card.id,
+      }),
       ink: normalizeMfDeckInk(card.front.ink),
       extraRows: card.front.extraRows ?? 0,
     },
     back: {
-      blocks: cloneBlocksWithFreshIds(card.back.blocks),
+      blocks: restoreMfDeckMediaInBlocks({
+        blocks: cloneBlocksWithFreshIds(card.back.blocks),
+        media: mediaContext.media,
+        mediaManifest: mediaContext.mediaManifest,
+        issues,
+        cardId: card.id,
+      }),
       ink: normalizeMfDeckInk(card.back.ink),
       extraRows: card.back.extraRows ?? 0,
     },
@@ -241,6 +254,10 @@ export const importMfDeckArchive = async ({
       orderIndex: baseOrderIndex + index,
       ensureTagByName,
       issues,
+      mediaContext: {
+        media: archive.media,
+        mediaManifest: archive.mediaManifest,
+      },
     });
 
     await createCard(cardInput);

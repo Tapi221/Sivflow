@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { importMfDeckArchive } from "@/features/deckFile/application/importMfDeck";
 import {
   MF_DECK_FORMAT,
+  MF_DECK_MEDIA_URI_PREFIX,
   MF_DECK_VERSION,
   type MfDeckArchiveV1,
 } from "@/features/deckFile/domain/mfDeckTypes";
@@ -23,6 +24,11 @@ const createArchive = (): MfDeckArchiveV1 => ({
       cardCount: 1,
       defaultDisplayMode: "fluid",
     },
+    capabilities: {
+      mediaBundled: true,
+      tagNames: true,
+      reviewProgressIncluded: false,
+    },
   },
   cardsJson: {
     format: "manifolia.deck.cards",
@@ -39,9 +45,15 @@ const createArchive = (): MfDeckArchiveV1 => ({
           blocks: [
             {
               id: "front-block",
-              type: "text",
+              type: "image",
               orderIndex: 0,
-              content: "表面",
+              images: [
+                {
+                  id: "image-001",
+                  status: "ready",
+                  localUrl: `${MF_DECK_MEDIA_URI_PREFIX}media/images/0001-image.png` as never,
+                },
+              ],
             },
           ],
           extraRows: 1,
@@ -66,10 +78,25 @@ const createArchive = (): MfDeckArchiveV1 => ({
       },
     ],
   },
+  mediaManifest: {
+    format: "manifolia.deck.media",
+    version: MF_DECK_VERSION,
+    media: [
+      {
+        path: "media/images/0001-image.png",
+        kind: "image",
+        mimeType: "image/png",
+        sizeBytes: 4,
+      },
+    ],
+  },
+  media: {
+    "media/images/0001-image.png": new Uint8Array([137, 80, 78, 71]),
+  },
 });
 
 describe("importMfDeckArchive", () => {
-  it("新規カードセットを作成し、カードID/ブロックIDを再採番して取り込む", async () => {
+  it("新規カードセットを作成し、カードID/ブロックIDを再採番してメディアを復元する", async () => {
     const createCardSet = vi.fn(
       async (name: string, folderId?: string | null) =>
         ({
@@ -119,6 +146,13 @@ describe("importMfDeckArchive", () => {
 
     const createdFrontBlock = createCard.mock.calls[0]?.[0].front?.blocks[0];
     expect(createdFrontBlock?.id).not.toBe("front-block");
+
+    const restoredImage = (
+      createdFrontBlock as unknown as {
+        images?: Array<{ localUrl?: string }>;
+      }
+    )?.images?.[0];
+    expect(restoredImage?.localUrl).toBe("data:image/png;base64,iVBORw==");
     expect(result.createdCount).toBe(1);
     expect(result.createdCardSetId).toBe("created-set");
   });

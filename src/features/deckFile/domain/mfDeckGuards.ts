@@ -1,12 +1,15 @@
 import {
   MF_DECK_FORMAT,
+  MF_DECK_MEDIA_MANIFEST_PATH,
   MF_DECK_VERSION,
   type MfDeckArchiveV1,
   type MfDeckCardsJsonV1,
   type MfDeckIssue,
   type MfDeckManifestV1,
+  type MfDeckMediaManifestV1,
   type MfDeckValidationResult,
 } from "@/features/deckFile/domain/mfDeckTypes";
+import { isMfDeckMediaPath } from "@/features/deckFile/domain/mfDeckMedia";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -23,6 +26,10 @@ const isIsoLikeString = (value: unknown): value is string => {
 
 const isDisplayMode = (value: unknown): value is "fixed" | "fluid" => {
   return value === "fixed" || value === "fluid";
+};
+
+const isMediaKind = (value: unknown): value is "image" | "audio" | "unknown" => {
+  return value === "image" || value === "audio" || value === "unknown";
 };
 
 const isCardBlock = (value: unknown): value is MfDeckCardsJsonV1["cards"][number]["front"]["blocks"][number] => {
@@ -80,6 +87,17 @@ export const isMfDeckManifestV1 = (
     return false;
   }
 
+  if (value.capabilities !== undefined) {
+    if (!isRecord(value.capabilities)) return false;
+    if (
+      typeof value.capabilities.mediaBundled !== "boolean" ||
+      typeof value.capabilities.tagNames !== "boolean" ||
+      typeof value.capabilities.reviewProgressIncluded !== "boolean"
+    ) {
+      return false;
+    }
+  }
+
   return true;
 };
 
@@ -126,9 +144,48 @@ export const isMfDeckCardsJsonV1 = (
   });
 };
 
+export const isMfDeckMediaManifestV1 = (
+  value: unknown,
+): value is MfDeckMediaManifestV1 => {
+  if (value === undefined) return true;
+  if (!isRecord(value)) return false;
+  if (value.format !== "manifolia.deck.media") return false;
+  if (value.version !== MF_DECK_VERSION) return false;
+  if (!Array.isArray(value.media)) return false;
+
+  return value.media.every((entry) => {
+    if (!isRecord(entry)) return false;
+    if (!isNonEmptyString(entry.path) || !isMfDeckMediaPath(entry.path)) {
+      return false;
+    }
+    if (!isMediaKind(entry.kind)) return false;
+    if (!isNonEmptyString(entry.mimeType)) return false;
+    if (
+      typeof entry.sizeBytes !== "number" ||
+      !Number.isInteger(entry.sizeBytes) ||
+      entry.sizeBytes < 0
+    ) {
+      return false;
+    }
+    if (entry.sourceName !== undefined && typeof entry.sourceName !== "string") {
+      return false;
+    }
+    if (
+      entry.sourceUrlHash !== undefined &&
+      typeof entry.sourceUrlHash !== "string"
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+};
+
 export const validateMfDeckArchive = (input: {
   manifest: unknown;
   cardsJson: unknown;
+  mediaManifest?: unknown;
+  media?: Record<string, Uint8Array>;
 }): MfDeckValidationResult => {
   const issues: MfDeckIssue[] = [];
 
@@ -150,12 +207,22 @@ export const validateMfDeckArchive = (input: {
     });
   }
 
+  if (!isMfDeckMediaManifestV1(input.mediaManifest)) {
+    issues.push({
+      level: "error",
+      code: "invalid_media_manifest",
+      path: MF_DECK_MEDIA_MANIFEST_PATH,
+      message: "media/manifest.json の形式が mfdeck v1 と一致しません。",
+    });
+  }
+
   if (issues.some((issue) => issue.level === "error")) {
     return { ok: false, issues };
   }
 
   const manifest = input.manifest as MfDeckManifestV1;
   const cardsJson = input.cardsJson as MfDeckCardsJsonV1;
+  const mediaManifest = input.mediaManifest as MfDeckMediaManifestV1 | undefined;
 
   if (manifest.deck.cardCount !== cardsJson.cards.length) {
     issues.push({
@@ -175,11 +242,28 @@ export const validateMfDeckArchive = (input: {
     });
   }
 
+  if (mediaManifest) {
+    const media = input.media ?? {};
+
+    for (const entry of mediaManifest.media) {
+      if (!media[entry.path]) {
+        issues.push({
+          level: "warning",
+          code: "missing_media",
+          path: entry.path,
+          message: `${entry.path} が見つかりません。該当メディア参照は復元できません。`,
+        });
+      }
+    }
+  }
+
   return {
     ok: true,
     value: {
       manifest,
       cardsJson,
+      ...(mediaManifest ? { mediaManifest } : {}),
+      ...(input.media ? { media: input.media } : {}),
     } satisfies MfDeckArchiveV1,
     issues,
   };

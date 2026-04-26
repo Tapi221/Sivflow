@@ -6,6 +6,7 @@ import {
   type MfDeckIssue,
   MfDeckExportError,
 } from "@/features/deckFile/domain/mfDeckTypes";
+import { bundleMediaInMfDeckCards } from "@/features/deckFile/application/mfDeckMediaBundler";
 import type { Card, CardBlock, CardSet } from "@/types";
 
 export type MfDeckTagLookup = ReadonlyMap<string, { name: string }>;
@@ -91,15 +92,15 @@ export const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => {
 
     faces.forEach((face) => {
       visitObject(face, (record) => {
-        const url = record.url;
+        const url = record.url ?? record.localUrl ?? record.remoteUrl;
 
-        if (typeof url === "string" && url.startsWith("blob:")) {
+        if (typeof url === "string" && url.startsWith("file:")) {
           issues.push({
-            level: "error",
+            level: "warning",
             code: "unsupported_media_reference",
             cardId: card.id,
             message:
-              "blob: URL のメディア参照は .mfdeck v1 へ安全に書き出せません。先に永続化された画像/音声へ変換してください。",
+              "file: URL のメディア参照はブラウザから直接読めないため .mfdeck へ同梱できない場合があります。",
           });
         }
       });
@@ -143,7 +144,7 @@ export const mapCardToMfDeckCard = ({
   };
 };
 
-export const buildMfDeckArchive = ({
+export const buildMfDeckArchive = async ({
   cardSet,
   cards,
   tagById,
@@ -153,7 +154,7 @@ export const buildMfDeckArchive = ({
   cards: Card[];
   tagById?: MfDeckTagLookup;
   appVersion?: string;
-}): MfDeckArchiveV1 => {
+}): Promise<MfDeckArchiveV1> => {
   const exportIssues = collectMfDeckExportIssues(cards);
   const blockingIssues = exportIssues.filter((issue) => issue.level === "error");
 
@@ -168,6 +169,9 @@ export const buildMfDeckArchive = ({
     .filter((card) => !card.isDeleted)
     .sort(compareCardsForExport)
     .map((card) => mapCardToMfDeckCard({ card, tagById }));
+
+  const mediaBundle = await bundleMediaInMfDeckCards({ cards: exportedCards });
+  const mediaBundled = Object.keys(mediaBundle.media).length > 0;
 
   return {
     manifest: {
@@ -186,7 +190,7 @@ export const buildMfDeckArchive = ({
         defaultDisplayMode: cardSet.defaultDisplayMode,
       },
       capabilities: {
-        mediaBundled: false,
+        mediaBundled,
         tagNames: true,
         reviewProgressIncluded: false,
       },
@@ -196,5 +200,7 @@ export const buildMfDeckArchive = ({
       version: MF_DECK_VERSION,
       cards: exportedCards,
     },
+    ...(mediaBundle.mediaManifest ? { mediaManifest: mediaBundle.mediaManifest } : {}),
+    ...(mediaBundled ? { media: mediaBundle.media } : {}),
   };
 };
