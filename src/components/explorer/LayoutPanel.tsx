@@ -93,7 +93,9 @@ export const LayoutPanel = ({ className }: { className?: string }) => {
                     "h-8 w-8 px-0",
                     "rounded-[9px]",
                     "grid place-items-center",
-                    selected && "text-[var(--ds-semantic-color-text-strong)]",
+                    selected
+                      ? "text-[var(--ds-semantic-color-text-strong)]"
+                      : "text-[var(--ds-semantic-color-text-secondary)]",
                   )}
                 >
                   {opt.icon}
