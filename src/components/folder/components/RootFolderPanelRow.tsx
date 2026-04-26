@@ -119,6 +119,30 @@ export const RootFolderPanelRow = ({
     : null;
   const isEditing = supportsContextMenuKind && editingId === entry.id;
   const isMenuOpen = menuId !== null && openRowMenuId === menuId;
+  const isCreateDraft =
+    entry.kind === "folder" &&
+    Boolean((entry.folder as { __optimistic?: boolean }).__optimistic);
+  const createDraftIdRef = React.useRef<string | null>(null);
+  const renameInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  React.useEffect(() => {
+    if (isEditing && isCreateDraft) {
+      createDraftIdRef.current = entry.id;
+      return;
+    }
+
+    if (!isEditing && createDraftIdRef.current === entry.id) {
+      createDraftIdRef.current = null;
+    }
+  }, [entry.id, isCreateDraft, isEditing]);
+
+  const attachRenameInputRef = React.useCallback(
+    (node: HTMLInputElement | null) => {
+      renameInputRef.current = node;
+      attachInputRef(node);
+    },
+    [attachInputRef],
+  );
 
   const isSelected =
     entry.kind === "folder"
@@ -180,24 +204,34 @@ export const RootFolderPanelRow = ({
       const nextValue = input.value;
       editingNameRef.current = nextValue;
 
-      const commit = () => {
-        // 新規作成直後は optimistic row から永続化 row へ差し替わることがある。
-        // その unmount blur で確定すると、編集 UI が即閉じる。
-        // DOM に残っている通常の blur だけを確定対象にする。
-        if (!input.isConnected) return;
+      const nextTarget = event.relatedTarget;
+      const isCreateButtonFocus =
+        nextTarget instanceof HTMLElement &&
+        Boolean(nextTarget.closest("[data-sidebar-create-root-folder-button='true']"));
+      const isBodyFocus =
+        nextTarget === null ||
+        nextTarget === document.body ||
+        nextTarget === document.documentElement;
+      const shouldKeepCreateDraftOpen =
+        createDraftIdRef.current === entry.id &&
+        entry.kind === "folder" &&
+        (isCreateButtonFocus || isBodyFocus);
 
-        void handleRenameConfirm({
-          id: entry.id,
-          type: entry.kind,
+      if (shouldKeepCreateDraftOpen) {
+        window.requestAnimationFrame(() => {
+          const node = renameInputRef.current;
+          if (!node || !node.isConnected) return;
+          if (document.activeElement === node) return;
+          node.focus({ preventScroll: true });
+          node.select();
         });
-      };
-
-      if (typeof window === "undefined") {
-        commit();
         return;
       }
 
-      window.requestAnimationFrame(commit);
+      void handleRenameConfirm({
+        id: entry.id,
+        type: entry.kind,
+      });
     },
     [editingNameRef, entry.id, entry.kind, handleRenameConfirm],
   );
@@ -377,7 +411,7 @@ export const RootFolderPanelRow = ({
       }
       input={
         <input
-          ref={attachInputRef}
+          ref={attachRenameInputRef}
           className={cn(
             EXPLORER_ROW_INPUT_CLASS,
             "h-7 min-w-0 w-full rounded-[5px] border border-[#a8a176] bg-white px-2",

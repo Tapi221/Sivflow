@@ -309,6 +309,7 @@ export const PinnedFolderSidebarSection = ({
                 )}
                 aria-label="ルートフォルダを作成"
                 title="ルートフォルダを作成"
+                data-sidebar-create-root-folder-button="true"
                 onPointerDown={preventCreateButtonFocusTransfer}
                 onMouseDown={preventCreateButtonFocusTransfer}
                 onClick={(event) => {
