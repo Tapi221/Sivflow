@@ -3,9 +3,21 @@ import {
   MF_DECK_MIME_TYPE,
 } from "@/features/deckFile/domain/mfDeckTypes";
 
+const INVALID_FILENAME_CHARS_PATTERN = /[\\/:*?"<>|]/g;
+
+const replaceControlCharacters = (value: string): string => {
+  return Array.from(value, (char) => {
+    const codePoint = char.codePointAt(0);
+    return codePoint !== undefined && codePoint <= 0x1f ? "_" : char;
+  }).join("");
+};
+
 const sanitizeFileNamePart = (value: string): string => {
   const trimmed = value.trim();
-  const sanitized = trimmed.replace(/[\\/:*?"<>|\u0000-\u001F]/g, "_");
+  const sanitized = replaceControlCharacters(trimmed).replace(
+    INVALID_FILENAME_CHARS_PATTERN,
+    "_",
+  );
   return sanitized || "manifolia-deck";
 };
 

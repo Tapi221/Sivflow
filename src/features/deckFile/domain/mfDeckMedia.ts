@@ -20,6 +20,15 @@ const EXTENSION_BY_MIME_TYPE: Record<string, string> = {
   "audio/webm": "webm",
 };
 
+const INVALID_FILENAME_CHARS_PATTERN = /[\\/:*?"<>|]/g;
+
+const replaceControlCharacters = (value: string): string => {
+  return Array.from(value, (char) => {
+    const codePoint = char.codePointAt(0);
+    return codePoint !== undefined && codePoint <= 0x1f ? "_" : char;
+  }).join("");
+};
+
 export const MF_DECK_MAX_MEDIA_ENTRY_BYTES = 32 * 1024 * 1024;
 export const MF_DECK_MAX_MEDIA_TOTAL_BYTES = 96 * 1024 * 1024;
 
@@ -73,9 +82,8 @@ export const inferMfDeckMediaExtension = (input: {
 };
 
 export const sanitizeMfDeckMediaName = (value: string): string => {
-  const sanitized = value
-    .trim()
-    .replace(/[\\/:*?"<>|\u0000-\u001F]/g, "_")
+  const sanitized = replaceControlCharacters(value.trim())
+    .replace(INVALID_FILENAME_CHARS_PATTERN, "_")
     .replace(/\s+/g, "_")
     .replace(/_+/g, "_")
     .slice(0, 80);
