@@ -18,7 +18,7 @@ import { useExplorerController } from "@/features/explorer/controller/useExplore
 import { useExplorerBreadcrumbSync } from "@/features/explorer/hooks/useExplorerBreadcrumbSync";
 import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups";
 import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
-import { WorkspaceSurface } from "@/features/workspace-tabs/components/WorkspaceSurface";
+import { ExplorerWorkspaceFrame } from "@/features/workspace-tabs/components/ExplorerWorkspaceFrame";
 import { WorkspaceTabPanel } from "@/features/workspace-tabs/components/WorkspaceTabPanel";
 import { WorkspaceTabsBar } from "@/features/workspace-tabs/components/WorkspaceTabsBar";
 import type { WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
@@ -410,12 +410,13 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     );
 
   return (
-    <WorkspaceSurface
+    <ExplorerWorkspaceFrame
       style={FOLDERS_SCREEN_FILL_STYLE}
       className={cn(!route.isDesktop && "overflow-x-hidden overflow-y-auto")}
       tabs={<WorkspaceTabsBar />}
+      showExplorerChrome={activeTab.kind === "explorer"}
     >
       {workspaceContent}
-    </WorkspaceSurface>
+    </ExplorerWorkspaceFrame>
   );
 };

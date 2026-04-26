@@ -74,9 +74,9 @@ export const TreeViewSidebar = ({
         className={cn(
           "explorer-chrome-font flex h-full min-h-0 w-full flex-col overflow-hidden",
           "[--sidebar-text:#4b5563]",
-          "[--sidebar-text-muted:#888780] [--sidebar-icon-active:#888780]",
+          "[--sidebar-text-muted:#8b8b8b] [--sidebar-icon-active:#3b82f6]",
           integratedChrome
-            ? "border-r border-[#e6e4dc] bg-transparent"
+            ? "border-r border-[#e0e0e0] bg-white"
             : [
                 "md:rounded-[14px] md:border md:border-[#dddcd5]",
                 "md:bg-[rgba(255,255,255,0.92)]",
@@ -96,6 +96,7 @@ export const TreeViewSidebar = ({
             canAddDocuments={canAddDocuments}
             canBulkImport={canBulkImport}
             preferDirectRootFolderCreate={preferDirectRootFolderCreate}
+            compact={integratedChrome}
           />
         </div>
 
