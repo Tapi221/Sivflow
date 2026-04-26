@@ -286,6 +286,10 @@ export const SectionListColumnPane = ({
     (state) => state.explorerLayoutMode,
   );
 
+  // 詳細ビュー内のフォルダ移動は右側ペインだけで完結させる。
+  // 親の folder selection に同期すると、セクション一覧サイドバーまで遷移してしまう。
+  void onFolderSelect;
+
   const folderById = useMemo(() => {
     const map = new Map<string, FolderLike>();
     folders.forEach((folder) => map.set(folder.id, folder as FolderLike));
@@ -428,11 +432,9 @@ export const SectionListColumnPane = ({
       const folderPathIds = buildFolderPathIds(folderId);
       setDetailCardSetId(null);
       setColumnPathIds(folderPathIds);
-      onFolderSelect?.(folderId);
-      onItemSelect(null);
       dispatchExplorerColumnPathChange(buildFolderCrumbs(folderPathIds));
     },
-    [buildFolderCrumbs, buildFolderPathIds, onFolderSelect, onItemSelect],
+    [buildFolderCrumbs, buildFolderPathIds],
   );
 
   const handleDetailCardSetOpen = useCallback(
@@ -587,8 +589,6 @@ export const SectionListColumnPane = ({
 
       setDetailCardSetId(null);
       setColumnPathIds(folderPathIds);
-      onFolderSelect?.(folderId);
-      onItemSelect(null);
       dispatchExplorerColumnPathChange(buildFolderCrumbs(folderPathIds));
     }) as EventListener;
 
@@ -603,7 +603,7 @@ export const SectionListColumnPane = ({
         handleColumnPathNavigate,
       );
     };
-  }, [buildFolderCrumbs, buildFolderPathIds, onFolderSelect, onItemSelect]);
+  }, [buildFolderCrumbs, buildFolderPathIds]);
 
   const currentDetailFolderId =
     columnPathIds.length > 0 ? columnPathIds[columnPathIds.length - 1] : null;
