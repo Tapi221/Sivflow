@@ -3,16 +3,20 @@ import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/types";
 import { ExplorerSearchSourceBridge } from "@/features/global-search/components/ExplorerSearchSourceBridge";
 import { MfCardImportDialog } from "@/features/cardFile/presentation/web/MfCardImportDialog";
 import { MfDeckImportDialog } from "@/features/deckFile/presentation/web/MfDeckImportDialog";
+import { PortableImportBatchDialog } from "@/features/import/presentation/web/PortableImportBatchDialog";
 import {
   ImportFormatDialog,
   type ImportFormat,
 } from "@/features/import/presentation/web/ImportFormatDialog";
 import {
   detectImportFileKind,
+  getPortableImportFiles,
+  getSupportedImportFiles,
+  isPortableImportFileKind,
   isSupportedImportFileKind,
 } from "@/features/import/domain/importFileKind";
 import {
-  readDesktopImportFile,
+  readDesktopImportFiles,
   subscribeDesktopImportFileOpen,
 } from "@/features/import/desktop/desktopImportFiles";
 import { XlsxImportDialog } from "@/features/import/presentation/web/XlsxImportDialog";
@@ -82,14 +86,6 @@ const isExternalFileDragEvent = (event: DragEvent<HTMLDivElement>) => {
   return Array.from(event.dataTransfer.types).includes("Files");
 };
 
-const getFirstSupportedImportFile = (files: FileList): File | null => {
-  return (
-    Array.from(files).find((file) =>
-      isSupportedImportFileKind(detectImportFileKind(file)),
-    ) ?? null
-  );
-};
-
 const TreeViewLayout = ({
   folders,
   isSectionListMode,
@@ -142,6 +138,13 @@ const TreeViewLayout = ({
   const [pendingMfCardFile, setPendingMfCardFile] = useState<File | null>(null);
   const [pendingMfCardFileRevision, setPendingMfCardFileRevision] =
     useState(0);
+  const [queuedPortableImportFiles, setQueuedPortableImportFiles] = useState<
+    File[]
+  >([]);
+  const [portableImportFilesRevision, setPortableImportFilesRevision] =
+    useState(0);
+  const [isPortableImportBatchDialogOpen, setIsPortableImportBatchDialogOpen] =
+    useState(false);
   const [, setImportDragDepth] = useState(0);
   const [isImportDragActive, setIsImportDragActive] = useState(false);
   const createFolderTriggerRef = useRef<(() => void) | null>(null);
@@ -421,17 +424,41 @@ const TreeViewLayout = ({
     }
   }, []);
 
-  const openDroppedImportFile = useCallback(
-    (file: File) => {
+  const openImportFiles = useCallback(
+    (files: File[]) => {
       if (!currentHeaderActionFolderId) {
         toast.error("インポート先のフォルダを先に選択してください。");
         return;
       }
 
+      const supportedFiles = getSupportedImportFiles(files);
+
+      if (supportedFiles.length === 0) {
+        toast.error("対応していないファイル形式です。");
+        return;
+      }
+
+      const portableFiles = getPortableImportFiles(supportedFiles);
+
+      if (portableFiles.length > 1) {
+        setQueuedPortableImportFiles(portableFiles);
+        setPortableImportFilesRevision((revision) => revision + 1);
+        setIsPortableImportBatchDialogOpen(true);
+        return;
+      }
+
+      const [file] = supportedFiles;
       const kind = detectImportFileKind(file);
 
       if (!isSupportedImportFileKind(kind)) {
         toast.error("対応していないファイル形式です。");
+        return;
+      }
+
+      if (isPortableImportFileKind(kind) && supportedFiles.length > 1) {
+        setQueuedPortableImportFiles(portableFiles);
+        setPortableImportFilesRevision((revision) => revision + 1);
+        setIsPortableImportBatchDialogOpen(true);
         return;
       }
 
@@ -456,21 +483,19 @@ const TreeViewLayout = ({
 
   useEffect(() => {
     return subscribeDesktopImportFileOpen(async (payload) => {
-      const filePath = payload.paths[0];
-
-      if (!filePath) {
+      if (payload.paths.length === 0) {
         return;
       }
 
       try {
-        const file = await readDesktopImportFile(filePath);
-        openDroppedImportFile(file);
+        const files = await readDesktopImportFiles(payload.paths);
+        openImportFiles(files);
       } catch (error) {
         console.error("[TreeViewLayout] desktop import file open failed", error);
         toast.error("ファイルを開けませんでした。");
       }
     });
-  }, [openDroppedImportFile, toast]);
+  }, [openImportFiles, toast]);
 
   const handleImportDragEnter = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
@@ -533,16 +558,16 @@ const TreeViewLayout = ({
       setImportDragDepth(0);
       setIsImportDragActive(false);
 
-      const file = getFirstSupportedImportFile(event.dataTransfer.files);
+      const files = getSupportedImportFiles(event.dataTransfer.files);
 
-      if (!file) {
+      if (files.length === 0) {
         toast.error("対応しているファイルをドロップしてください。");
         return;
       }
 
-      openDroppedImportFile(file);
+      openImportFiles(files);
     },
-    [openDroppedImportFile, toast],
+    [openImportFiles, toast],
   );
 
   const ensureMfDeckTagByName = useCallback(
@@ -936,6 +961,26 @@ const TreeViewLayout = ({
         onImported={handleImportCompleted}
         createCardSet={createCardSet}
         createCard={createCard}
+      />
+
+      <PortableImportBatchDialog
+        open={isPortableImportBatchDialogOpen}
+        onOpenChange={setIsPortableImportBatchDialogOpen}
+        folderId={currentHeaderActionFolderId}
+        folderName={
+          currentHeaderActionFolderId
+            ? (folders.find(
+                (folder) => folder.id === currentHeaderActionFolderId,
+              )?.folderName ?? null)
+            : null
+        }
+        files={queuedPortableImportFiles}
+        filesRevision={portableImportFilesRevision}
+        onImported={handleImportCompleted}
+        createCardSet={createCardSet}
+        updateCardSet={updateCardSet}
+        createCard={createCard}
+        ensureTagByName={ensureMfDeckTagByName}
       />
 
       <MfDeckImportDialog

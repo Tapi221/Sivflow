@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, shell } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, Menu, shell } from "electron";
 import * as fs from "node:fs";
 import * as http from "node:http";
 import * as path from "node:path";
@@ -17,6 +17,11 @@ const ALLOWED_EXTERNAL_PROTOCOLS = new Set(["http:", "https:", "mailto:"]);
 const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const SUPPORTED_IMPORT_FILE_EXTENSIONS = new Set([".mfdeck", ".mfcard"]);
 const MAX_DESKTOP_IMPORT_FILE_BYTES = 128 * 1024 * 1024;
+const DESKTOP_IMPORT_FILE_FILTERS: Electron.FileFilter[] = [
+  { name: "Manifolia Files", extensions: ["mfdeck", "mfcard"] },
+  { name: "MFDeck", extensions: ["mfdeck"] },
+  { name: "MFCard", extensions: ["mfcard"] },
+];
 
 let mainWindow: BrowserWindow | null = null;
 let pendingOauthCallbackUrl: string | null = null;
@@ -473,6 +478,20 @@ const registerIpcHandlers = (): void => {
       return readDesktopImportFile(rawFilePath);
     },
   );
+
+  ipcMain.handle(IPC_CHANNELS.desktopImportSelectFiles, async () => {
+    const result = await dialog.showOpenDialog(mainWindow ?? undefined, {
+      title: "MFDeck / MFCard を選択",
+      properties: ["openFile", "multiSelections"],
+      filters: DESKTOP_IMPORT_FILE_FILTERS,
+    });
+
+    if (result.canceled) {
+      return [];
+    }
+
+    return collectDesktopImportFilePaths(result.filePaths);
+  });
 
   ipcMain.handle(
     IPC_CHANNELS.oauthStart,

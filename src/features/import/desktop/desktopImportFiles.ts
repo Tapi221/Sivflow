@@ -1,3 +1,5 @@
+import { IMPORT_FILE_MIME_TYPES } from "@/features/import/domain/importFileKind";
+
 export type DesktopImportFileOpenPayload = {
   paths: string[];
 };
@@ -9,18 +11,15 @@ export type DesktopImportFileReadResult = {
   data: ArrayBuffer | Uint8Array | number[];
 };
 
-const MF_DECK_MIME_TYPE = "application/vnd.manifolia.deck+zip";
-const MF_CARD_MIME_TYPE = "application/vnd.manifolia.card+json";
-
 const getImportFileMimeType = (fileName: string): string => {
   const normalizedFileName = fileName.trim().toLowerCase();
 
   if (normalizedFileName.endsWith(".mfdeck")) {
-    return MF_DECK_MIME_TYPE;
+    return IMPORT_FILE_MIME_TYPES.mfdeck;
   }
 
   if (normalizedFileName.endsWith(".mfcard")) {
-    return MF_CARD_MIME_TYPE;
+    return IMPORT_FILE_MIME_TYPES.mfcard;
   }
 
   return "";
@@ -85,4 +84,29 @@ export const readDesktopImportFile = async (
   return new File([data], result.name, {
     type: getImportFileMimeType(result.name),
   });
+};
+
+export const selectDesktopImportFiles = async (): Promise<File[]> => {
+  if (!canUseDesktopImportFiles() || !window.desktop?.files?.selectImportFiles) {
+    return [];
+  }
+
+  const paths = await window.desktop.files.selectImportFiles();
+  return readDesktopImportFiles(paths);
+};
+
+export const readDesktopImportFiles = async (
+  filePaths: readonly string[],
+): Promise<File[]> => {
+  const uniquePaths = Array.from(
+    new Set(filePaths.map((filePath) => filePath.trim()).filter(Boolean)),
+  );
+
+  const files: File[] = [];
+
+  for (const filePath of uniquePaths) {
+    files.push(await readDesktopImportFile(filePath));
+  }
+
+  return files;
 };
