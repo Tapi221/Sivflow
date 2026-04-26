@@ -11,12 +11,11 @@ type WorkspaceSurfaceProps = {
 };
 
 /**
- * Owns the workspace chrome as a single surface.
+ * Owns the workspace chrome boundary.
  *
- * Tabs and the active workspace panel are intentionally rendered under one
- * border/background/radius owner. Legacy child panels are neutralized at the
- * surface boundary so each feature can focus on layout/content instead of
- * drawing another outer shell.
+ * The tabs row remains a chrome row. The active panel body owns the shared
+ * border/background/radius underneath it, so feature panels do not draw their
+ * own outer shell.
  */
 export const WorkspaceSurface = ({
   children,
@@ -29,9 +28,7 @@ export const WorkspaceSurface = ({
     <section
       style={style}
       className={cn(
-        "relative flex h-full min-h-0 min-w-0 max-w-none flex-col overflow-hidden",
-        "rounded-[14px] border border-[#dddcd5] bg-[rgba(255,255,255,0.96)]",
-        "shadow-[0_16px_36px_rgba(15,23,42,0.055),0_4px_12px_rgba(15,23,42,0.035)]",
+        "relative flex h-full min-h-0 min-w-0 max-w-none flex-col overflow-hidden bg-transparent",
         className,
       )}
     >
@@ -40,6 +37,7 @@ export const WorkspaceSurface = ({
       <div
         className={cn(
           "relative z-10 -mt-px flex min-h-0 w-full min-w-0 flex-1 overflow-hidden",
+          "rounded-b-[14px] border-x border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)]",
           "[&>div]:rounded-none [&>div]:border-0 [&>div]:bg-transparent [&>div]:shadow-none",
           bodyClassName,
         )}
