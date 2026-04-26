@@ -20,7 +20,7 @@ import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDer
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, Folder } from "@/types";
-import { ChevronDown, ChevronRight } from "@/ui/icons";
+import { ChevronDown, ChevronRight, Plus } from "@/ui/icons";
 import { useMemo } from "react";
 
 interface PinnedFolderSidebarSectionProps {
@@ -31,6 +31,7 @@ interface PinnedFolderSidebarSectionProps {
   selectedFolderId: string | null;
   isFiltering: boolean;
   onFolderSelect: (folderId: string) => void;
+  onCreateRootFolder?: () => void;
 }
 
 type PinnedFolderEntry = {
@@ -76,6 +77,7 @@ export const PinnedFolderSidebarSection = ({
   selectedFolderId,
   isFiltering,
   onFolderSelect,
+  onCreateRootFolder,
 }: PinnedFolderSidebarSectionProps) => {
   const pinnedFolderIds = useExplorerStore((state) => state.pinnedFolderIds);
   const unpinFolder = useExplorerStore((state) => state.unpinFolder);
@@ -264,28 +266,53 @@ export const PinnedFolderSidebarSection = ({
         </div>
 
         <div className="mt-1 border-t border-border/60 px-2 pb-1 pt-2">
-          <button
-            type="button"
-            className={cn(
-              "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
-              "text-[11px] font-medium leading-5 text-muted-foreground transition",
-              "hover:bg-muted/70 hover:text-foreground",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            )}
-            aria-expanded={!isFolderListSectionCollapsed}
-            aria-controls={FOLDER_LIST_SECTION_CONTENT_ID}
-            onClick={toggleFolderListSectionCollapsed}
-          >
-            {isFolderListSectionCollapsed ? (
-              <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-70" />
-            ) : (
-              <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" />
-            )}
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              className={cn(
+                "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
+                "text-[11px] font-medium leading-5 text-muted-foreground transition",
+                "hover:bg-muted/70 hover:text-foreground",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              )}
+              aria-expanded={!isFolderListSectionCollapsed}
+              aria-controls={FOLDER_LIST_SECTION_CONTENT_ID}
+              onClick={toggleFolderListSectionCollapsed}
+            >
+              {isFolderListSectionCollapsed ? (
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-70" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" />
+              )}
 
-            <span className="min-w-0 flex-1 truncate">フォルダ一覧</span>
+              <span className="min-w-0 flex-1 truncate">フォルダ一覧</span>
 
-            <span className="tabular-nums opacity-60">{folderListCount}</span>
-          </button>
+              <span className="tabular-nums opacity-60">{folderListCount}</span>
+            </button>
+
+            {onCreateRootFolder ? (
+              <button
+                type="button"
+                title="フォルダを追加"
+                aria-label="フォルダを追加"
+                className={cn(
+                  "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md",
+                  "text-muted-foreground transition hover:bg-muted/70 hover:text-foreground",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                )}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onCreateRootFolder();
+                }}
+                onPointerDown={(event) => {
+                  event.stopPropagation();
+                }}
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            ) : null}
+          </div>
         </div>
       </>
     </section>

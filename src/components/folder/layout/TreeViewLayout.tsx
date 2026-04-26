@@ -803,6 +803,7 @@ const TreeViewLayout = ({
         selectedFolderId={sidebarSelectedFolderId}
         isFiltering={isFiltering}
         onFolderSelect={handleSidebarFolderSelect}
+        onCreateRootFolder={handleCreateRootFolder}
       />
 
       <div
