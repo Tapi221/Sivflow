@@ -12,7 +12,7 @@ type TagMatchMode = "any" | "all";
 type DirectoryBadgeVisibilityKey = "uncertainty" | "bookmarked" | "tags";
 type ExplorerPinnedFolderId = string;
 
-export type ExplorerLayoutMode = "detail" | "column";
+export type ExplorerLayoutMode = "detail" | "list" | "card" | "icon" | "column";
 
 type DirectoryBadgeVisibility = {
   uncertainty: boolean;
@@ -83,7 +83,16 @@ const normalizeToggleableFlag = (value: unknown): ToggleableFlag => {
 };
 
 const normalizeExplorerLayoutMode = (value: unknown): ExplorerLayoutMode => {
-  if (value === "detail" || value === "column") return value;
+  if (
+    value === "detail" ||
+    value === "list" ||
+    value === "card" ||
+    value === "icon" ||
+    value === "column"
+  ) {
+    return value;
+  }
+
   return DEFAULT_EXPLORER_LAYOUT_MODE;
 };
 

@@ -519,6 +519,7 @@ export const SectionListColumnPane = ({
 
   const currentDetailFolderId =
     columnPathIds.length > 0 ? columnPathIds[columnPathIds.length - 1] : null;
+  const isDetailLayout = explorerLayoutMode === "detail";
 
   return (
     <SectionListBlankPane
@@ -532,11 +533,9 @@ export const SectionListColumnPane = ({
       <div
         ref={contentRef}
         className="h-full min-h-0 w-full"
-        onClickCapture={
-          explorerLayoutMode === "column" ? handleColumnClickCapture : undefined
-        }
+        onClickCapture={isDetailLayout ? undefined : handleColumnClickCapture}
       >
-        {explorerLayoutMode === "detail" ? (
+        {isDetailLayout ? (
           <FolderDetailView
             folders={folders}
             cards={cards}
