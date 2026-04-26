@@ -1,0 +1,24 @@
+@layer components {
+  /*
+   * FolderColumnView のリサイズカーソルを境界ハンドルだけに閉じ込める。
+   *
+   * 過去の差分で .folder-column-view 本体に cursor-col-resize が残ると、
+   * カラム表示全体がリサイズ可能に見える。表示領域は通常カーソルへ戻し、
+   * 実際の separator だけ col-resize にする。
+   */
+  .folder-column-view {
+    cursor: default !important;
+  }
+
+  .folder-column-view [role="separator"][aria-label="カラム幅を変更"] {
+    right: -3px !important;
+    width: 6px !important;
+    transform: none !important;
+    cursor: col-resize !important;
+    background: transparent !important;
+  }
+
+  .folder-column-view [role="separator"][aria-label="カラム幅を変更"] * {
+    cursor: col-resize !important;
+  }
+}
