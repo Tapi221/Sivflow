@@ -157,6 +157,61 @@ const SearchIcon = () => (
   </svg>
 );
 
+const SortIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M5 7H16"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5 12H13"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5 17H10"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const ColumnsIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <rect
+      x="3.75"
+      y="4.75"
+      width="16.5"
+      height="14.5"
+      rx="2.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <path
+      d="M12 7V17"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 const HomeIcon = () => (
   <svg
     width="13"
@@ -264,6 +319,14 @@ const ExplorerToolbar = () => {
           "text-[#777671] hover:bg-[#eeece4] hover:text-[#24231f]",
         )}
       />
+
+      <ExplorerToolbarButton title="並び替え">
+        <SortIcon />
+      </ExplorerToolbarButton>
+
+      <ExplorerToolbarButton title="表示切替">
+        <ColumnsIcon />
+      </ExplorerToolbarButton>
 
       <ExplorerToolbarButton
         title="検索"
