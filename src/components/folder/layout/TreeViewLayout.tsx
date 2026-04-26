@@ -763,6 +763,9 @@ const TreeViewLayout = ({
 
   const isExplorerDataLoading =
     cardsLoading || documentsLoading || cardSetsLoading;
+  const isFolderListSectionCollapsed = useExplorerStore(
+    (state) => state.isFolderListSectionCollapsed,
+  );
 
   if (isExplorerDataLoading) {
     return (
@@ -777,9 +780,6 @@ const TreeViewLayout = ({
   const sidebarSelectedFolderId = isSectionListMode
     ? sectionListSidebarFolderId
     : selectedFolderId;
-  const isFolderListSectionCollapsed = useExplorerStore(
-    (state) => state.isFolderListSectionCollapsed,
-  );
   const sidebarContent = (
     <div className="flex h-full min-h-0 flex-col">
       <PinnedFolderSidebarSection
@@ -1064,3 +1064,5 @@ const TreeViewLayout = ({
 };
 
 export default TreeViewLayout;
+
+
