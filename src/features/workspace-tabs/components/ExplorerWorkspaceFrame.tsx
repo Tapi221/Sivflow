@@ -21,7 +21,6 @@ import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
 import { useNavigate } from "react-router-dom";
-import { Settings2 } from "@/ui/icons";
 
 import { cn } from "@/lib/utils";
 
@@ -48,6 +47,7 @@ type ExplorerColumnPathWindow = Window & {
 
 type ExplorerColumnPathEventDetail = {
   crumbs?: BreadcrumbCrumb[];
+  active?: boolean;
 };
 
 type ExplorerColumnPathNavigateEventDetail = {
@@ -75,6 +75,15 @@ const readInitialExplorerColumnPathCrumbs = (): BreadcrumbCrumb[] => {
   return (
     (window as ExplorerColumnPathWindow).__manifoliaExplorerColumnPathCrumbs ??
     []
+  );
+};
+
+const hasInitialExplorerColumnPathState = (): boolean => {
+  if (typeof window === "undefined") return false;
+
+  return Object.prototype.hasOwnProperty.call(
+    window,
+    "__manifoliaExplorerColumnPathCrumbs",
   );
 };
 
@@ -332,11 +341,22 @@ const ExplorerPathBar = () => {
   const [columnPathCrumbs, setColumnPathCrumbs] = useState<BreadcrumbCrumb[]>(
     readInitialExplorerColumnPathCrumbs,
   );
+  const [isColumnPathActive, setIsColumnPathActive] = useState<boolean>(
+    hasInitialExplorerColumnPathState,
+  );
 
   useEffect(() => {
     const handleColumnPathChange = ((event: Event) => {
       const detail = (event as CustomEvent<ExplorerColumnPathEventDetail>)
         .detail;
+
+      if (detail?.active === false) {
+        setIsColumnPathActive(false);
+        setColumnPathCrumbs([]);
+        return;
+      }
+
+      setIsColumnPathActive(true);
       setColumnPathCrumbs(detail?.crumbs ?? []);
     }) as EventListener;
 
@@ -353,8 +373,9 @@ const ExplorerPathBar = () => {
     };
   }, []);
 
-  const visibleExtraCrumbs =
-    extraCrumbs.length > 0 ? extraCrumbs : columnPathCrumbs;
+  const visibleExtraCrumbs = isColumnPathActive
+    ? columnPathCrumbs
+    : extraCrumbs;
 
   const pathCrumbs = useMemo(() => {
     const normalizedExtraCrumbs = visibleExtraCrumbs.map((crumb, index) =>
@@ -572,25 +593,6 @@ export const ExplorerWorkspaceFrame = ({
       </div>
 
       {showExplorerChrome ? <ExplorerStatusBar /> : null}
-
-      <button
-        type="button"
-        title="設定"
-        aria-label="設定"
-        onClick={() => {
-          // TODO: wire to settings navigation
-        }}
-        className={cn(
-          "absolute bottom-2 right-2 z-50",
-          "inline-flex h-9 w-9 items-center justify-center rounded-[10px]",
-          "border border-[#dddcd5] bg-[rgba(246,246,244,0.98)] text-[#777671]",
-          "shadow-[0_10px_24px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,0.88)]",
-          "transition-colors hover:bg-white hover:text-[#24231f]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7b19c]/40",
-        )}
-      >
-        <Settings2 className="h-4 w-4" />
-      </button>
     </section>
   );
 };
