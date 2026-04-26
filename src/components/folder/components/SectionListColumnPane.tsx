@@ -4,14 +4,19 @@ import {
   useMemo,
   useRef,
   useState,
-  type MouseEvent as ReactMouseEvent,
+  type CSSProperties,
 } from "react";
-import { FolderColumnView } from "@/components/folder/components/FolderColumnView";
+import {
+  ExplorerChromeCardIcon,
+  ExplorerChromeCardSetIcon,
+  ExplorerChromeFolderIcon,
+  ExplorerChromePdfIcon,
+} from "@/components/explorer/icons";
 import { FolderDetailView } from "@/components/folder/components/FolderDetailView";
 import { SectionListBlankPane } from "@/components/folder/components/SectionListBlankPane";
-import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { cn } from "@/lib/utils";
 import type {
   Card,
   CardSet,
@@ -19,6 +24,7 @@ import type {
   Folder,
   SelectedExplorerItem,
 } from "@/types";
+import { ChevronRight } from "@/ui/icons";
 
 interface SectionListColumnPaneProps {
   className?: string;
@@ -85,18 +91,64 @@ type FolderLike = Pick<Folder, "id" | "folderName"> & {
   parentFolderId?: string | null;
   folder_name?: string | null;
   parent_folder_id?: string | null;
-};
-
-type ColumnFolderEntry = {
-  kind: "folder";
-  id: string;
-  label: string;
+  isDeleted?: boolean;
+  is_deleted?: boolean;
+  isHidden?: boolean;
+  is_hidden?: boolean;
+  orderIndex?: number;
+  order_index?: number;
+  updatedAt?: unknown;
+  createdAt?: unknown;
 };
 
 type ExternalPathSelectionSnapshot = {
   resetToken: number;
   selectedFolderId: string | null;
 };
+
+type ControlledColumnContext =
+  | { type: "folder"; id: string | null; key: string }
+  | { type: "cardSet"; id: string; key: string };
+
+type ControlledColumnEntry =
+  | {
+      kind: "folder";
+      id: string;
+      label: string;
+      count: number;
+      hasNextColumn: boolean;
+    }
+  | {
+      kind: "cardSet";
+      id: string;
+      label: string;
+      count: number;
+      hasNextColumn: boolean;
+    }
+  | {
+      kind: "document";
+      id: string;
+      label: string;
+    }
+  | {
+      kind: "card";
+      id: string;
+      label: string;
+    };
+
+interface ControlledColumnViewProps {
+  folders: Folder[];
+  cards: Card[];
+  cardSets: CardSet[];
+  documents: DocumentItem[];
+  folderPathIds: string[];
+  activeCardSetId: string | null;
+  selectedItem: SelectedExplorerItem;
+  isFiltering: boolean;
+  onFolderPathChange: (folderPathIds: string[]) => void;
+  onCardSetOpen: (cardSetId: string | null) => void;
+  onItemSelect: (item: SelectedExplorerItem) => void;
+}
 
 const EXPLORER_COLUMN_PATH_CHANGE_EVENT =
   "manifolia:explorer-column-path-change";
@@ -105,12 +157,36 @@ const EXPLORER_COLUMN_PATH_NAVIGATE_EVENT =
 const ROOT_FOLDER_KEY = "__root__";
 const DEFAULT_COLUMN_WIDTH_PX = 280;
 
+const CONTROLLED_COLUMN_STYLE = {
+  flex: `0 0 ${DEFAULT_COLUMN_WIDTH_PX}px`,
+  width: DEFAULT_COLUMN_WIDTH_PX,
+  minWidth: DEFAULT_COLUMN_WIDTH_PX,
+} satisfies CSSProperties;
+
+const CONTROLLED_COLUMN_ROW_STYLE = {
+  height: 28,
+  minHeight: 28,
+  lineHeight: "28px",
+} satisfies CSSProperties;
+
 const normalizeFolderParentId = (folder: FolderLike): string | null => {
   return folder.parentFolderId ?? folder.parent_folder_id ?? null;
 };
 
 const getFolderLabel = (folder: FolderLike): string => {
   return folder.folderName ?? folder.folder_name ?? "無題のフォルダ";
+};
+
+const getFolderOrderIndex = (folder: FolderLike): number => {
+  return folder.orderIndex ?? folder.order_index ?? Number.MAX_SAFE_INTEGER;
+};
+
+const isSoftDeleted = (
+  entity?: { isDeleted?: boolean; is_deleted?: boolean } | null,
+): boolean => Boolean(entity?.isDeleted ?? entity?.is_deleted);
+
+const isFolderHidden = (folder: FolderLike): boolean => {
+  return Boolean(folder.isHidden ?? folder.is_hidden);
 };
 
 const getCardSetFolderId = (cardSet: CardSet): string | null => {
@@ -182,8 +258,52 @@ const getCardLabel = (card: Card): string => {
   return questionNumber?.trim() || "無題のカード";
 };
 
-const normalizeLabel = (label: string): string => {
-  return label.replace(/\s+/g, " ").trim();
+const getCardFileLabel = (card: Card): string => {
+  const baseLabel = getCardLabel(card);
+  return baseLabel.endsWith(".mfcard") ? baseLabel : `${baseLabel}.mfcard`;
+};
+
+const getOrderIndex = (entity: { orderIndex?: number }): number => {
+  return entity.orderIndex ?? Number.MAX_SAFE_INTEGER;
+};
+
+const getFolderKey = (folderId: string | null): string => {
+  return folderId ?? ROOT_FOLDER_KEY;
+};
+
+const compareLabels = (left: string, right: string): number => {
+  return left.localeCompare(right, "ja", { numeric: true, sensitivity: "base" });
+};
+
+const compareFolders = (left: FolderLike, right: FolderLike): number => {
+  const leftOrder = getFolderOrderIndex(left);
+  const rightOrder = getFolderOrderIndex(right);
+  if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+  return compareLabels(getFolderLabel(left), getFolderLabel(right));
+};
+
+const compareCardSets = (left: CardSet, right: CardSet): number => {
+  const leftOrder = getOrderIndex(left);
+  const rightOrder = getOrderIndex(right);
+  if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+  return compareLabels(getCardSetLabel(left), getCardSetLabel(right));
+};
+
+const compareDocuments = (
+  left: DocumentItem,
+  right: DocumentItem,
+): number => {
+  const leftOrder = getOrderIndex(left);
+  const rightOrder = getOrderIndex(right);
+  if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+  return compareLabels(getDocumentLabel(left), getDocumentLabel(right));
+};
+
+const compareCards = (left: Card, right: Card): number => {
+  const leftOrder = getOrderIndex(left);
+  const rightOrder = getOrderIndex(right);
+  if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+  return compareLabels(getCardFileLabel(left), getCardFileLabel(right));
 };
 
 const buildFolderRoute = (folderId: string): string => {
@@ -224,64 +344,350 @@ const dispatchExplorerColumnPathInactive = () => {
   );
 };
 
-const getFolderKey = (folderId: string | null): string => {
-  return folderId ?? ROOT_FOLDER_KEY;
-};
-
-const getFocusableColumnRows = (root: HTMLElement): HTMLElement[] => {
-  return Array.from(root.querySelectorAll<HTMLElement>("[role='button']")).filter(
-    (row) => root.contains(row),
-  );
-};
-
-const getLikelyColumnNodes = (root: HTMLElement): HTMLElement[] => {
-  const sections = Array.from(root.querySelectorAll<HTMLElement>("section"))
-    .filter((section) => root.contains(section))
-    .filter((section) => getFocusableColumnRows(section).length > 0);
-
-  if (sections.length > 0) return sections;
-
-  return Array.from(root.children).filter(
-    (child): child is HTMLElement =>
-      child instanceof HTMLElement && getFocusableColumnRows(child).length > 0,
-  );
-};
-
-const resolveClickedColumnIndex = (
-  root: HTMLElement,
-  row: HTMLElement,
-): number => {
-  const columnNodes = getLikelyColumnNodes(root);
-  const owningColumnIndex = columnNodes.findIndex((columnNode) =>
-    columnNode.contains(row),
-  );
-
-  if (owningColumnIndex >= 0) return owningColumnIndex;
-
-  const rootRect = root.getBoundingClientRect();
-  const rowRect = row.getBoundingClientRect();
-  return Math.max(
-    0,
-    Math.floor((rowRect.left - rootRect.left) / DEFAULT_COLUMN_WIDTH_PX),
-  );
-};
-
-const resolveClickedRowLabel = (row: HTMLElement): string => {
-  const spanLabels = Array.from(row.querySelectorAll("span"))
-    .map((span) => normalizeLabel(span.textContent ?? ""))
-    .filter(Boolean)
-    .filter((label) => !/^\d+$/.test(label))
-    .filter((label) => label !== "›" && label !== ">")
-    .sort((left, right) => right.length - left.length);
-
-  if (spanLabels.length > 0) return spanLabels[0];
-
-  return normalizeLabel(row.textContent ?? "");
-};
-
 const getSelectedItemKey = (item: SelectedExplorerItem): string => {
   if (!item) return "__none__";
   return "id" in item ? `${item.type}:${item.id}` : item.type;
+};
+
+const isEntrySelected = (
+  entry: ControlledColumnEntry,
+  selectedItem: SelectedExplorerItem,
+  selectedFolderId: string | null,
+  activeCardSetId: string | null,
+): boolean => {
+  if (entry.kind === "folder") return entry.id === selectedFolderId;
+  if (entry.kind === "cardSet") return entry.id === activeCardSetId;
+  if (!selectedItem || !("id" in selectedItem)) return false;
+  return selectedItem.type === entry.kind && selectedItem.id === entry.id;
+};
+
+const ControlledColumnRow = ({
+  entry,
+  selected,
+  onSelect,
+}: {
+  entry: ControlledColumnEntry;
+  selected: boolean;
+  onSelect: () => void;
+}) => {
+  const Icon =
+    entry.kind === "folder"
+      ? ExplorerChromeFolderIcon
+      : entry.kind === "cardSet"
+        ? ExplorerChromeCardSetIcon
+        : entry.kind === "card"
+          ? ExplorerChromeCardIcon
+          : ExplorerChromePdfIcon;
+
+  const contentCount =
+    entry.kind === "folder" || entry.kind === "cardSet"
+      ? entry.count
+      : undefined;
+
+  const hasNextColumn =
+    (entry.kind === "folder" || entry.kind === "cardSet") &&
+    entry.hasNextColumn;
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      data-selected={selected ? "true" : undefined}
+      style={CONTROLLED_COLUMN_ROW_STYLE}
+      className={cn(
+        "sidebar-row sidebar-row--folder ds-list-item ds-list-item--interactive",
+        "relative flex w-full cursor-pointer items-center rounded-[8px] px-2 text-left",
+        "select-none outline-none",
+        selected && "ds-list-item--selected",
+      )}
+      onClick={(event) => {
+        if (event.defaultPrevented) return;
+        onSelect();
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect();
+        }
+      }}
+    >
+      <span className="ds-list-item__icon flex h-full w-4 shrink-0 items-center justify-center">
+        <Icon className="h-3.5 w-3.5" />
+      </span>
+
+      <div className="ds-list-item__content flex h-full min-w-0 flex-1 items-center pr-1">
+        <div className="pointer-events-none flex min-w-0 flex-1 items-center">
+          <span className="ds-list-item__title truncate text-[13px] font-normal">
+            {entry.label}
+          </span>
+        </div>
+
+        {typeof contentCount === "number" || hasNextColumn ? (
+          <span className="ml-auto flex h-full shrink-0 items-center gap-1 pr-1">
+            {typeof contentCount === "number" ? (
+              <span className="ds-list-item__subtitle shrink-0 text-[11px] font-normal tabular-nums leading-none opacity-60">
+                {contentCount}
+              </span>
+            ) : null}
+            {hasNextColumn ? (
+              <ChevronRight className="sidebar-icon ds-list-item__icon h-3.5 w-3.5" />
+            ) : null}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
+const ControlledColumnView = ({
+  folders,
+  cards,
+  cardSets,
+  documents,
+  folderPathIds,
+  activeCardSetId,
+  selectedItem,
+  isFiltering,
+  onFolderPathChange,
+  onCardSetOpen,
+  onItemSelect,
+}: ControlledColumnViewProps) => {
+  void isFiltering;
+
+  const activeFolders = useMemo(
+    () =>
+      folders
+        .filter((folder) => !isSoftDeleted(folder) && !isFolderHidden(folder))
+        .map((folder) => folder as FolderLike),
+    [folders],
+  );
+
+  const childFoldersByParentKey = useMemo(() => {
+    const map = new Map<string, FolderLike[]>();
+
+    activeFolders.forEach((folder) => {
+      const parentKey = getFolderKey(normalizeFolderParentId(folder));
+      const siblings = map.get(parentKey) ?? [];
+      siblings.push(folder);
+      map.set(parentKey, siblings);
+    });
+
+    for (const siblings of map.values()) {
+      siblings.sort(compareFolders);
+    }
+
+    return map;
+  }, [activeFolders]);
+
+  const activeCardSets = useMemo(
+    () => cardSets.filter((cardSet) => !isSoftDeleted(cardSet)),
+    [cardSets],
+  );
+
+  const cardSetsByFolderKey = useMemo(() => {
+    const map = new Map<string, CardSet[]>();
+
+    activeCardSets.forEach((cardSet) => {
+      const folderKey = getFolderKey(getCardSetFolderId(cardSet));
+      const siblings = map.get(folderKey) ?? [];
+      siblings.push(cardSet);
+      map.set(folderKey, siblings);
+    });
+
+    for (const siblings of map.values()) {
+      siblings.sort(compareCardSets);
+    }
+
+    return map;
+  }, [activeCardSets]);
+
+  const documentsByFolderKey = useMemo(() => {
+    const map = new Map<string, DocumentItem[]>();
+
+    documents.forEach((document) => {
+      if (document.kind !== "pdf") return;
+      if (isSoftDeleted(document)) return;
+
+      const folderKey = getFolderKey(getDocumentFolderId(document));
+      const siblings = map.get(folderKey) ?? [];
+      siblings.push(document);
+      map.set(folderKey, siblings);
+    });
+
+    for (const siblings of map.values()) {
+      siblings.sort(compareDocuments);
+    }
+
+    return map;
+  }, [documents]);
+
+  const cardsByCardSetId = useMemo(() => {
+    const map = new Map<string, Card[]>();
+
+    cards.forEach((card) => {
+      if (isSoftDeleted(card)) return;
+      const cardSetId = getCardCardSetId(card);
+      if (!cardSetId) return;
+
+      const siblings = map.get(cardSetId) ?? [];
+      siblings.push(card);
+      map.set(cardSetId, siblings);
+    });
+
+    for (const siblings of map.values()) {
+      siblings.sort(compareCards);
+    }
+
+    return map;
+  }, [cards]);
+
+  const getFolderDirectCount = useCallback(
+    (folderId: string | null) => {
+      const folderKey = getFolderKey(folderId);
+      return (
+        (childFoldersByParentKey.get(folderKey)?.length ?? 0) +
+        (cardSetsByFolderKey.get(folderKey)?.length ?? 0) +
+        (documentsByFolderKey.get(folderKey)?.length ?? 0)
+      );
+    },
+    [childFoldersByParentKey, cardSetsByFolderKey, documentsByFolderKey],
+  );
+
+  const columns = useMemo<ControlledColumnContext[]>(() => {
+    const folderColumns: ControlledColumnContext[] = [
+      { type: "folder", id: null, key: "folder:__root__" },
+      ...folderPathIds.map((folderId) => ({
+        type: "folder" as const,
+        id: folderId,
+        key: `folder:${folderId}`,
+      })),
+    ];
+
+    if (!activeCardSetId) return folderColumns;
+
+    return [
+      ...folderColumns,
+      { type: "cardSet", id: activeCardSetId, key: `cardSet:${activeCardSetId}` },
+    ];
+  }, [activeCardSetId, folderPathIds]);
+
+  const getEntriesForColumn = useCallback(
+    (column: ControlledColumnContext): ControlledColumnEntry[] => {
+      if (column.type === "cardSet") {
+        return (cardsByCardSetId.get(column.id) ?? []).map((card) => ({
+          kind: "card",
+          id: card.id,
+          label: getCardFileLabel(card),
+        }));
+      }
+
+      const folderKey = getFolderKey(column.id);
+      const folderEntries: ControlledColumnEntry[] = (
+        childFoldersByParentKey.get(folderKey) ?? []
+      ).map((folder) => {
+        const count = getFolderDirectCount(folder.id);
+        return {
+          kind: "folder",
+          id: folder.id,
+          label: getFolderLabel(folder),
+          count,
+          hasNextColumn: count > 0,
+        };
+      });
+
+      const cardSetEntries: ControlledColumnEntry[] = (
+        cardSetsByFolderKey.get(folderKey) ?? []
+      ).map((cardSet) => {
+        const count = cardsByCardSetId.get(cardSet.id)?.length ?? 0;
+        return {
+          kind: "cardSet",
+          id: cardSet.id,
+          label: getCardSetLabel(cardSet),
+          count,
+          hasNextColumn: count > 0,
+        };
+      });
+
+      const documentEntries: ControlledColumnEntry[] = (
+        documentsByFolderKey.get(folderKey) ?? []
+      ).map((document) => ({
+        kind: "document",
+        id: document.id,
+        label: getDocumentLabel(document),
+      }));
+
+      return [...folderEntries, ...cardSetEntries, ...documentEntries];
+    },
+    [
+      cardsByCardSetId,
+      cardSetsByFolderKey,
+      childFoldersByParentKey,
+      documentsByFolderKey,
+      getFolderDirectCount,
+    ],
+  );
+
+  const handleEntrySelect = useCallback(
+    (entry: ControlledColumnEntry, columnIndex: number) => {
+      if (entry.kind === "folder") {
+        onFolderPathChange([...folderPathIds.slice(0, columnIndex), entry.id]);
+        return;
+      }
+
+      if (entry.kind === "cardSet") {
+        onCardSetOpen(entry.id);
+        return;
+      }
+
+      if (entry.kind === "document") {
+        onItemSelect({ type: "document", id: entry.id });
+        return;
+      }
+
+      onItemSelect({ type: "card", id: entry.id });
+    },
+    [folderPathIds, onCardSetOpen, onFolderPathChange, onItemSelect],
+  );
+
+  return (
+    <div className="h-full min-h-0 w-full overflow-x-auto overflow-y-hidden">
+      <div className="flex h-full min-w-max items-stretch">
+        {columns.map((column, columnIndex) => {
+          const selectedFolderInColumn = folderPathIds[columnIndex] ?? null;
+          const entries = getEntriesForColumn(column);
+
+          return (
+            <section
+              key={column.key}
+              aria-label={
+                column.type === "folder" ? "フォルダ列" : "カードセット列"
+              }
+              className="h-full min-h-0 overflow-y-auto border-r border-[#e6e4dc] bg-[rgba(255,255,255,0.96)] px-2 py-3"
+              style={CONTROLLED_COLUMN_STYLE}
+            >
+              <div className="space-y-0.5">
+                {entries.map((entry) => (
+                  <ControlledColumnRow
+                    key={`${entry.kind}:${entry.id}`}
+                    entry={entry}
+                    selected={isEntrySelected(
+                      entry,
+                      selectedItem,
+                      selectedFolderInColumn,
+                      activeCardSetId,
+                    )}
+                    onSelect={() => handleEntrySelect(entry, columnIndex)}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })}
+
+        <div className="min-w-[160px] flex-1 bg-[rgba(255,255,255,0.96)]" />
+      </div>
+    </div>
+  );
 };
 
 /**
@@ -314,12 +720,11 @@ export const SectionListColumnPane = ({
   onMoveCardToSet,
   onReorderCardsInCardSet,
 }: SectionListColumnPaneProps) => {
-  const contentRef = useRef<HTMLDivElement | null>(null);
   const explorerLayoutMode = useExplorerStore(
     (state) => state.explorerLayoutMode,
   );
 
-  // 詳細ビュー内のフォルダ移動は右側ペインだけで完結させる。
+  // 詳細/カラムペイン内のフォルダ移動は右側ペインだけで完結させる。
   // 親の folder selection に同期すると、セクション一覧サイドバーまで遷移してしまう。
   void onFolderSelect;
 
@@ -334,20 +739,6 @@ export const SectionListColumnPane = ({
     cardSets.forEach((cardSet) => map.set(cardSet.id, cardSet));
     return map;
   }, [cardSets]);
-
-  const childFoldersByParentKey = useMemo(() => {
-    const map = new Map<string, FolderLike[]>();
-
-    folders.forEach((folder) => {
-      const folderLike = folder as FolderLike;
-      const parentKey = getFolderKey(normalizeFolderParentId(folderLike));
-      const siblings = map.get(parentKey) ?? [];
-      siblings.push(folderLike);
-      map.set(parentKey, siblings);
-    });
-
-    return map;
-  }, [folders]);
 
   const buildFolderPathIds = useCallback(
     (folderId: string | null | undefined): string[] => {
@@ -449,62 +840,17 @@ export const SectionListColumnPane = ({
     };
   }, []);
 
-  const getFolderEntriesForColumn = useCallback(
-    (columnIndex: number): ColumnFolderEntry[] => {
-      const parentFolderId =
-        columnIndex === 0 ? null : (columnPathIds[columnIndex - 1] ?? null);
-      const foldersInColumn =
-        childFoldersByParentKey.get(getFolderKey(parentFolderId)) ?? [];
-
-      return foldersInColumn.map((folder) => ({
-        kind: "folder",
-        id: folder.id,
-        label: getFolderLabel(folder),
-      }));
-    },
-    [childFoldersByParentKey, columnPathIds],
-  );
-
-  const handleColumnClickCapture = useCallback(
-    (event: ReactMouseEvent<HTMLDivElement>) => {
-      const root = contentRef.current;
-      if (!root) return;
-
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-
-      const row = target.closest<HTMLElement>("[role='button']");
-      if (!row || !root.contains(row)) return;
-
-      const columnIndex = resolveClickedColumnIndex(root, row);
-      const rowLabel = resolveClickedRowLabel(row);
-      if (!rowLabel) return;
-
-      const entries = getFolderEntriesForColumn(columnIndex);
-      const clickedFolder = entries.find(
-        (entry) => normalizeLabel(entry.label) === rowLabel,
-      );
-
-      if (!clickedFolder) return;
-
-      setDetailCardSetId(null);
-      setActiveLeafCrumbs([]);
-      setColumnPathIds((previousPathIds) => [
-        ...previousPathIds.slice(0, columnIndex),
-        clickedFolder.id,
-      ]);
-    },
-    [getFolderEntriesForColumn],
-  );
+  const setFolderPathForPane = useCallback((folderPathIds: string[]) => {
+    setDetailCardSetId(null);
+    setActiveLeafCrumbs([]);
+    setColumnPathIds(folderPathIds);
+  }, []);
 
   const handleDetailFolderOpen = useCallback(
     (folderId: string) => {
-      const folderPathIds = buildFolderPathIds(folderId);
-      setDetailCardSetId(null);
-      setActiveLeafCrumbs([]);
-      setColumnPathIds(folderPathIds);
+      setFolderPathForPane(buildFolderPathIds(folderId));
     },
-    [buildFolderPathIds],
+    [buildFolderPathIds, setFolderPathForPane],
   );
 
   const handleDetailCardSetOpen = useCallback(
@@ -536,6 +882,7 @@ export const SectionListColumnPane = ({
         setDetailCardSetId(item.id);
         setActiveLeafCrumbs(cardSet ? [{ label: getCardSetLabel(cardSet) }] : []);
         setColumnPathIds(folderPathIds);
+        return;
       }
 
       if (item?.type === "document") {
@@ -548,6 +895,8 @@ export const SectionListColumnPane = ({
           documentItem ? [{ label: getDocumentLabel(documentItem) }] : [],
         );
         setColumnPathIds(folderPathIds);
+        onItemSelect(item);
+        return;
       }
 
       if (item?.type === "card") {
@@ -569,6 +918,8 @@ export const SectionListColumnPane = ({
         setDetailCardSetId(cardSet?.id ?? null);
         setActiveLeafCrumbs(leafCrumbs);
         setColumnPathIds(folderPathIds);
+        onItemSelect(item);
+        return;
       }
 
       onItemSelect(item);
@@ -650,9 +1001,7 @@ export const SectionListColumnPane = ({
       const folderId = detail?.folderId ?? null;
       const folderPathIds = buildFolderPathIds(folderId);
 
-      setDetailCardSetId(null);
-      setActiveLeafCrumbs([]);
-      setColumnPathIds(folderPathIds);
+      setFolderPathForPane(folderPathIds);
     }) as EventListener;
 
     window.addEventListener(
@@ -666,17 +1015,15 @@ export const SectionListColumnPane = ({
         handleColumnPathNavigate,
       );
     };
-  }, [buildFolderPathIds]);
+  }, [buildFolderPathIds, setFolderPathForPane]);
 
   const currentPaneFolderId =
     columnPathIds.length > 0 ? columnPathIds[columnPathIds.length - 1] : null;
   const isDetailLayout = explorerLayoutMode === "detail";
-  const panePathKey = columnPathIds.length > 0 ? columnPathIds.join("/") : "__root__";
-  const paneLeafKey = activeLeafCrumbs
-    .map((crumb) => crumb.label)
-    .join("/");
-  const paneViewKey = `${isDetailLayout ? "detail" : "column"}:${panePathKey}:${detailCardSetId ?? "__no_card_set__"}:${paneLeafKey}`;
-
+  const panePathKey =
+    columnPathIds.length > 0 ? columnPathIds.join("/") : "__root__";
+  const paneLeafKey = activeLeafCrumbs.map((crumb) => crumb.label).join("/");
+  const detailViewKey = `detail:${panePathKey}:${detailCardSetId ?? "__no_card_set__"}:${paneLeafKey}`;
 
   return (
     <SectionListBlankPane
@@ -687,14 +1034,10 @@ export const SectionListColumnPane = ({
       leftInsetPx={leftInsetPx}
       rightInsetPx={rightInsetPx}
     >
-      <div
-        ref={contentRef}
-        className="h-full min-h-0 w-full"
-        onClickCapture={isDetailLayout ? undefined : handleColumnClickCapture}
-      >
+      <div className="h-full min-h-0 w-full">
         {isDetailLayout ? (
           <FolderDetailView
-            key={paneViewKey}
+            key={detailViewKey}
             folders={folders}
             cards={cards}
             cardSets={cardSets}
@@ -715,26 +1058,18 @@ export const SectionListColumnPane = ({
             onReorderCardsInCardSet={onReorderCardsInCardSet}
           />
         ) : (
-          <FolderColumnView
-            key={paneViewKey}
-            folders={folders as unknown as FolderTreeNode[]}
+          <ControlledColumnView
+            folders={folders}
             cards={cards}
             cardSets={cardSets}
             documents={documents}
-            selectedFolderId={currentPaneFolderId}
+            folderPathIds={columnPathIds}
+            activeCardSetId={detailCardSetId}
             selectedItem={selectedItem}
-            selectedCardSetId={selectedCardSetId}
             isFiltering={isFiltering}
-            resetToken={resetToken}
+            onFolderPathChange={setFolderPathForPane}
+            onCardSetOpen={handleDetailCardSetOpen}
             onItemSelect={handleItemSelect}
-            onMoveFolder={onMoveFolder}
-            onReorderFolders={onReorderFolders}
-            onMoveCardSetToFolder={onMoveCardSetToFolder}
-            onReorderCardSets={onReorderCardSets}
-            onMoveDocumentToFolder={onMoveDocumentToFolder}
-            onReorderDocuments={onReorderDocuments}
-            onMoveCardToSet={onMoveCardToSet}
-            onReorderCardsInCardSet={onReorderCardsInCardSet}
           />
         )}
       </div>
