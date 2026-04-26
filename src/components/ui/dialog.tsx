@@ -29,16 +29,22 @@ const DialogOverlay = React.forwardRef<
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
+type DialogContentProps = React.ComponentPropsWithoutRef<
+  typeof DialogPrimitive.Content
+> & {
+  nonModal?: boolean;
+  overlayClassName?: string;
+  contentWrapperClassName?: string;
+  showCloseButton?: boolean;
+  closeButtonClassName?: string;
+  closeLabel?: string;
+  accessibleTitle?: React.ReactNode;
+  accessibleDescription?: React.ReactNode;
+} & FloatingSurfaceVariantProps;
+
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
-    nonModal?: boolean;
-    overlayClassName?: string;
-    contentWrapperClassName?: string;
-    showCloseButton?: boolean;
-    closeButtonClassName?: string;
-    closeLabel?: string;
-  } & FloatingSurfaceVariantProps
+  DialogContentProps
 >(
   (
     {
@@ -51,6 +57,8 @@ const DialogContent = React.forwardRef<
       showCloseButton = true,
       closeButtonClassName,
       closeLabel = "Close",
+      accessibleTitle,
+      accessibleDescription,
       ...props
     },
     ref,
@@ -73,6 +81,16 @@ const DialogContent = React.forwardRef<
           )}
           {...props}
         >
+          {accessibleTitle ? (
+            <DialogPrimitive.Title className="sr-only">
+              {accessibleTitle}
+            </DialogPrimitive.Title>
+          ) : null}
+          {accessibleDescription ? (
+            <DialogPrimitive.Description className="sr-only">
+              {accessibleDescription}
+            </DialogPrimitive.Description>
+          ) : null}
           {children}
           {showCloseButton ? (
             <DialogPrimitive.Close

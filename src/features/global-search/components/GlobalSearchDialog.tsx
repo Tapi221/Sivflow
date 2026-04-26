@@ -163,7 +163,8 @@ export const GlobalSearchDialog = () => {
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         surface="plain"
-        aria-label="グローバル検索"
+        accessibleTitle="グローバル検索"
+        accessibleDescription="フォルダ、カード、ドキュメント、各種画面を横断検索します。"
         className="gs-dialog !w-[min(600px,calc(100vw-32px))] !max-w-none !p-0"
         overlayClassName="gs-dialog__overlay"
         contentWrapperClassName="gs-dialog__positioner"
