@@ -160,10 +160,10 @@ const SidebarTagSectionContent = () => {
     <div
       key="tag-sidebar-section-content"
       id="tag-sidebar-section-content"
-      className="min-h-0 px-2 pb-2"
+      className="shrink-0 px-2 pb-3 pt-1"
     >
       {tagItems.length > 0 ? (
-        <div className="max-h-40 overflow-y-auto pr-1">
+        <div className="min-h-[96px] max-h-[280px] overflow-y-auto pr-1">
           {tagItems.map((tag) => {
             const displayName = toTagDisplayName(tag.name);
             const isSelected =
@@ -174,8 +174,8 @@ const SidebarTagSectionContent = () => {
                 key={tag.id}
                 type="button"
                 className={cn(
-                  "group flex h-7 w-full items-center gap-1 rounded-md px-2 text-left",
-                  "text-[11px] leading-5 transition",
+                  "group flex h-8 w-full items-center gap-1 rounded-md px-2 text-left",
+                  "text-[12px] leading-5 transition",
                   isSelected
                     ? "bg-[#f0efe8] text-foreground"
                     : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
@@ -190,7 +190,7 @@ const SidebarTagSectionContent = () => {
           })}
         </div>
       ) : (
-        <div className="px-1 py-1 text-[11px] text-muted-foreground/70">
+        <div className="min-h-[96px] px-1 py-2 text-[12px] text-muted-foreground/70">
           タグはまだありません
         </div>
       )}
