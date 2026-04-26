@@ -76,6 +76,11 @@ type ExplorerColumnPathNavigateEventDetail = {
   folderId?: string | null;
 };
 
+type ExplorerColumnPathChangeEventDetail = {
+  crumbs?: BreadcrumbCrumb[];
+  active?: boolean;
+};
+
 type FolderLike = Pick<Folder, "id" | "folderName"> & {
   parentFolderId?: string | null;
   folder_name?: string | null;
@@ -190,9 +195,27 @@ const dispatchExplorerColumnPathChange = (crumbs: BreadcrumbCrumb[]) => {
     stableCrumbs;
 
   window.dispatchEvent(
-    new CustomEvent(EXPLORER_COLUMN_PATH_CHANGE_EVENT, {
-      detail: { crumbs: stableCrumbs },
-    }),
+    new CustomEvent<ExplorerColumnPathChangeEventDetail>(
+      EXPLORER_COLUMN_PATH_CHANGE_EVENT,
+      {
+        detail: { crumbs: stableCrumbs, active: true },
+      },
+    ),
+  );
+};
+
+const dispatchExplorerColumnPathInactive = () => {
+  if (typeof window === "undefined") return;
+
+  delete (window as ExplorerColumnPathWindow).__manifoliaExplorerColumnPathCrumbs;
+
+  window.dispatchEvent(
+    new CustomEvent<ExplorerColumnPathChangeEventDetail>(
+      EXPLORER_COLUMN_PATH_CHANGE_EVENT,
+      {
+        detail: { crumbs: [], active: false },
+      },
+    ),
   );
 };
 
@@ -380,6 +403,12 @@ export const SectionListColumnPane = ({
   useEffect(() => {
     dispatchExplorerColumnPathChange(buildFolderCrumbs(columnPathIds));
   }, [buildFolderCrumbs, columnPathIds]);
+
+  useEffect(() => {
+    return () => {
+      dispatchExplorerColumnPathInactive();
+    };
+  }, []);
 
   const getFolderEntriesForColumn = useCallback(
     (columnIndex: number): ColumnFolderEntry[] => {
