@@ -23,11 +23,13 @@ interface ExplorerMenuPanelProps extends React.ComponentPropsWithoutRef<
 const DANGER_ITEM_CLASS =
   "ds-floating-panel__row--danger ds-menu__item--danger";
 
+const MENU_FONT_CLASS = "[font-family:var(--ds-semantic-typography-ui)]";
+
 const CREATE_MENU_CONTENT_CLASS =
   "!w-[148px] !rounded-[10px] !border !border-[#dddcd5] !bg-white !p-[3px] !shadow-[0_4px_20px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)]";
 
 const CREATE_MENU_ITEM_CLASS =
-  "!h-8 !cursor-pointer gap-[7px] !rounded-[5px] !px-2 !py-0 text-[13px] font-normal leading-none text-[#1a1a18] transition-colors duration-75 hover:bg-[#f1efe8] focus:bg-[#f1efe8] data-[highlighted]:bg-[#f1efe8] active:bg-[#eae8e0] overflow-hidden whitespace-nowrap";
+  "!h-[28px] !min-h-[28px] !cursor-pointer gap-[7px] !rounded-[5px] !px-2 !py-0 text-[13px] font-normal !leading-[28px] text-[#1a1a18] transition-colors duration-75 hover:bg-[#f1efe8] focus:bg-[#f1efe8] data-[highlighted]:bg-[#f1efe8] active:bg-[#eae8e0] overflow-hidden whitespace-nowrap";
 
 const CREATE_MENU_ICON_CLASS =
   "h-[15px] w-[15px] text-[#888780] [&>svg]:h-[15px] [&>svg]:w-[15px] [&>svg]:stroke-[#888780] [&>svg]:stroke-[1.5]";
@@ -38,7 +40,7 @@ const FOLDER_CONTEXT_MENU_CONTENT_CLASS =
   "!w-[160px] !rounded-[10px] !border !border-[#dddcd5] !bg-white !p-[3px] !shadow-[0_4px_20px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)]";
 
 const FOLDER_CONTEXT_MENU_ITEM_CLASS =
-  "!h-8 !cursor-pointer gap-[7px] !rounded-[5px] !px-2 !py-0 text-[13px] font-normal leading-none text-[#1a1a18] transition-colors duration-75 hover:bg-[#f1efe8] focus:bg-[#f1efe8] data-[highlighted]:bg-[#f1efe8] active:bg-[#eae8e0] overflow-hidden whitespace-nowrap";
+  "!h-[28px] !min-h-[28px] !cursor-pointer gap-[7px] !rounded-[5px] !px-2 !py-0 text-[13px] font-normal !leading-[28px] text-[#1a1a18] transition-colors duration-75 hover:bg-[#f1efe8] focus:bg-[#f1efe8] data-[highlighted]:bg-[#f1efe8] active:bg-[#eae8e0] overflow-hidden whitespace-nowrap";
 
 const FOLDER_CONTEXT_MENU_ICON_CLASS =
   "h-[15px] w-[15px] text-[#888780] [&>svg]:h-[15px] [&>svg]:w-[15px] [&>svg]:shrink-0 [&>svg]:stroke-current";
@@ -91,7 +93,7 @@ export const ExplorerMenuPanel = ({
 
   return (
     <DropdownMenuContent
-      className={cn(contentClassName, className)}
+      className={cn(contentClassName, MENU_FONT_CLASS, className)}
       surface={isPlainVariant ? "plain" : panelPreset.surface}
       {...contentProps}
     >
@@ -122,7 +124,12 @@ export const ExplorerMenuPanel = ({
                 {action.icon}
               </DropdownMenuItemIcon>
             ) : null}
-            <DropdownMenuItemLabel className={cn(isPlainVariant && "truncate")}>
+            <DropdownMenuItemLabel
+              className={cn(
+                isPlainVariant && "truncate",
+                isPlainVariant && "!leading-[28px]",
+              )}
+            >
               {action.label}
             </DropdownMenuItemLabel>
           </DropdownMenuItem>
