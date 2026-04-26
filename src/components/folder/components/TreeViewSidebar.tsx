@@ -1,6 +1,6 @@
 import { ExplorerSidebarHeader } from "@/components/explorer/ExplorerSidebarHeader";
 import { cn } from "@/lib/utils";
-import React from "react";
+import React, { useCallback } from "react";
 
 interface TreeViewSidebarProps {
   sidebarRef: React.RefObject<HTMLDivElement | null>;
@@ -27,6 +27,17 @@ interface TreeViewSidebarProps {
   integratedChrome?: boolean;
 }
 
+const runAfterCurrentPointerAction = (callback: () => void) => {
+  if (typeof window === "undefined") {
+    callback();
+    return;
+  }
+
+  window.requestAnimationFrame(() => {
+    callback();
+  });
+};
+
 export const TreeViewSidebar = ({
   sidebarRef,
   contentScrollRef,
@@ -51,6 +62,22 @@ export const TreeViewSidebar = ({
   rightGapPx = 0,
   integratedChrome = false,
 }: TreeViewSidebarProps) => {
+  const handleCreateRootFolder = useCallback(() => {
+    runAfterCurrentPointerAction(onCreateRootFolder);
+  }, [onCreateRootFolder]);
+
+  const handleCreateCardSet = useCallback(() => {
+    runAfterCurrentPointerAction(onCreateCardSet);
+  }, [onCreateCardSet]);
+
+  const handleAddDocument = useCallback(() => {
+    runAfterCurrentPointerAction(onAddDocument);
+  }, [onAddDocument]);
+
+  const handleBulkImport = useCallback(() => {
+    runAfterCurrentPointerAction(onBulkImport);
+  }, [onBulkImport]);
+
   return (
     <div
       ref={sidebarRef}
@@ -87,10 +114,10 @@ export const TreeViewSidebar = ({
         <div className="shrink-0">
           <ExplorerSidebarHeader
             allTags={allTags}
-            onCreateRootFolder={onCreateRootFolder}
-            onCreateCardSet={onCreateCardSet}
-            onAddDocument={onAddDocument}
-            onBulkImport={onBulkImport}
+            onCreateRootFolder={handleCreateRootFolder}
+            onCreateCardSet={handleCreateCardSet}
+            onAddDocument={handleAddDocument}
+            onBulkImport={handleBulkImport}
             canCreateCardSet={canCreateCardSet}
             canCreateCard={canCreateCard}
             canAddDocuments={canAddDocuments}
@@ -107,7 +134,7 @@ export const TreeViewSidebar = ({
         ) : (
           <div
             ref={contentScrollRef}
-            className="flex-1 min-h-0 min-w-0 overflow-hidden pl-1 pb-1 outline-none"
+            className="flex-1 min-h-0 min-w-0 overflow-hidden px-1 pb-1 outline-none"
           >
             {children}
           </div>
