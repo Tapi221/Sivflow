@@ -327,11 +327,23 @@ const getHeaderAriaSort = (
   return sortState.direction === "asc" ? "ascending" : "descending";
 };
 
-const getRowIcon = (kind: ExplorerDetailRowKind) => {
-  if (kind === "folder") return ExplorerChromeFolderIcon;
-  if (kind === "cardSet") return ExplorerChromeCardSetIcon;
-  if (kind === "card") return ExplorerChromeCardIcon;
-  return ExplorerChromePdfIcon;
+const renderRowIcon = (
+  kind: ExplorerDetailRowKind,
+  className: string,
+) => {
+  if (kind === "folder") {
+    return <ExplorerChromeFolderIcon className={className} />;
+  }
+
+  if (kind === "cardSet") {
+    return <ExplorerChromeCardSetIcon className={className} />;
+  }
+
+  if (kind === "card") {
+    return <ExplorerChromeCardIcon className={className} />;
+  }
+
+  return <ExplorerChromePdfIcon className={className} />;
 };
 
 const getDropPositionFromPointer = (
@@ -627,7 +639,7 @@ const FolderDetailRowView = ({
 
       <div role="cell" className="flex min-w-0 items-center gap-2 px-3">
         <span className="flex h-5 w-5 shrink-0 items-center justify-center">
-          <Icon className="h-4 w-4" />
+          {renderRowIcon(row.kind, "h-4 w-4")}
         </span>
         <span className="min-w-0 truncate" title={row.name}>
           {row.name}
@@ -1341,3 +1353,4 @@ export const FolderDetailView = ({
     </div>
   );
 };
+
