@@ -130,6 +130,16 @@ const getCardCardSetId = (card: Card): string | null => {
   );
 };
 
+const getCardSetByCard = (
+  card: Card,
+  cardSetById: Map<string, CardSet>,
+): CardSet | null => {
+  const cardSetId = getCardCardSetId(card);
+  if (!cardSetId) return null;
+
+  return cardSetById.get(cardSetId) ?? null;
+};
+
 const getCardFolderId = (
   card: Card,
   cardSetById: Map<string, CardSet>,
@@ -140,10 +150,7 @@ const getCardFolderId = (
     null;
   if (directFolderId) return directFolderId;
 
-  const cardSetId = getCardCardSetId(card);
-  if (!cardSetId) return null;
-
-  const cardSet = cardSetById.get(cardSetId);
+  const cardSet = getCardSetByCard(card, cardSetById);
   return cardSet ? getCardSetFolderId(cardSet) : null;
 };
 
@@ -413,6 +420,25 @@ export const SectionListColumnPane = ({
     [buildFolderCrumbs, buildFolderPathIds],
   );
 
+  const handleDetailCardSetOpen = useCallback(
+    (cardSetId: string | null) => {
+      if (!cardSetId) {
+        dispatchExplorerColumnPathChange(buildFolderCrumbs(columnPathIds));
+        return;
+      }
+
+      const cardSet = cardSetById.get(cardSetId);
+      if (!cardSet) return;
+
+      const folderPathIds = buildFolderPathIds(getCardSetFolderId(cardSet));
+      const crumbs = buildFolderCrumbs(folderPathIds);
+      crumbs.push({ label: getCardSetLabel(cardSet) });
+      setColumnPathIds(folderPathIds);
+      dispatchExplorerColumnPathChange(crumbs);
+    },
+    [buildFolderCrumbs, buildFolderPathIds, cardSetById, columnPathIds],
+  );
+
   const handleItemSelect = useCallback(
     (item: SelectedExplorerItem) => {
       if (item?.type === "cardSet") {
@@ -451,6 +477,11 @@ export const SectionListColumnPane = ({
           card ? getCardFolderId(card, cardSetById) : null,
         );
         const crumbs = buildFolderCrumbs(folderPathIds);
+        const cardSet = card ? getCardSetByCard(card, cardSetById) : null;
+
+        if (cardSet) {
+          crumbs.push({ label: getCardSetLabel(cardSet) });
+        }
 
         if (card) {
           crumbs.push({ label: getCardLabel(card) });
@@ -505,6 +536,12 @@ export const SectionListColumnPane = ({
         getCardFolderId(card, cardSetById),
       );
       const crumbs = buildFolderCrumbs(folderPathIds);
+      const cardSet = getCardSetByCard(card, cardSetById);
+
+      if (cardSet) {
+        crumbs.push({ label: getCardSetLabel(cardSet) });
+      }
+
       crumbs.push({ label: getCardLabel(card) });
       dispatchExplorerColumnPathChange(crumbs);
     }
@@ -543,7 +580,9 @@ export const SectionListColumnPane = ({
             documents={documents}
             currentFolderId={currentDetailFolderId}
             selectedItem={selectedItem}
+            selectedCardSetId={selectedCardSetId}
             onFolderOpen={handleDetailFolderOpen}
+            onCardSetOpen={handleDetailCardSetOpen}
             onItemSelect={handleItemSelect}
             onMoveFolder={onMoveFolder}
             onReorderFolders={onReorderFolders}
@@ -551,6 +590,8 @@ export const SectionListColumnPane = ({
             onReorderCardSets={onReorderCardSets}
             onMoveDocumentToFolder={onMoveDocumentToFolder}
             onReorderDocuments={onReorderDocuments}
+            onMoveCardToSet={onMoveCardToSet}
+            onReorderCardsInCardSet={onReorderCardsInCardSet}
           />
         ) : (
           <FolderColumnView

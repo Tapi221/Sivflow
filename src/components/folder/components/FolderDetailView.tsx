@@ -1,4 +1,5 @@
 import {
+  ExplorerChromeCardIcon,
   ExplorerChromeCardSetIcon,
   ExplorerChromeFolderIcon,
   ExplorerChromePdfIcon,
@@ -24,6 +25,7 @@ import type {
 } from "@/types";
 import {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -38,7 +40,9 @@ interface FolderDetailViewProps {
   documents: DocumentItem[];
   currentFolderId: string | null;
   selectedItem: SelectedExplorerItem;
+  selectedCardSetId?: string | null;
   onFolderOpen: (folderId: string) => void;
+  onCardSetOpen?: (cardSetId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
   onMoveFolder?: (
     folderId: string,
@@ -63,6 +67,11 @@ interface FolderDetailViewProps {
   onReorderDocuments?: (
     targetFolderId: string,
     documentIds: string[],
+  ) => Promise<void>;
+  onMoveCardToSet?: (cardId: string, targetCardSetId: string) => Promise<void>;
+  onReorderCardsInCardSet?: (
+    cardSetId: string,
+    cardIds: string[],
   ) => Promise<void>;
 }
 
@@ -126,7 +135,8 @@ const sortByNumber = (
 const getKindSortValue = (kind: ExplorerDetailRowKind): number => {
   if (kind === "folder") return 0;
   if (kind === "cardSet") return 1;
-  return 2;
+  if (kind === "card") return 2;
+  return 3;
 };
 
 const sortRows = (
@@ -199,6 +209,7 @@ const getHeaderAriaSort = (
 const getRowIcon = (kind: ExplorerDetailRowKind) => {
   if (kind === "folder") return ExplorerChromeFolderIcon;
   if (kind === "cardSet") return ExplorerChromeCardSetIcon;
+  if (kind === "card") return ExplorerChromeCardIcon;
   return ExplorerChromePdfIcon;
 };
 
@@ -442,7 +453,9 @@ export const FolderDetailView = ({
   documents,
   currentFolderId,
   selectedItem,
+  selectedCardSetId = null,
   onFolderOpen,
+  onCardSetOpen,
   onItemSelect,
   onMoveFolder,
   onReorderFolders,
@@ -450,14 +463,30 @@ export const FolderDetailView = ({
   onReorderCardSets,
   onMoveDocumentToFolder,
   onReorderDocuments,
+  onMoveCardToSet,
+  onReorderCardsInCardSet,
 }: FolderDetailViewProps) => {
   const dragPayloadRef = useRef<ExplorerDetailDragPayload | null>(null);
   const [sortState, setSortState] =
     useState<ExplorerDetailSortState>(DEFAULT_SORT_STATE);
+  const [openedCardSetId, setOpenedCardSetId] = useState<string | null>(
+    selectedCardSetId,
+  );
   const [draggingKey, setDraggingKey] = useState<string | null>(null);
   const [dropIntent, setDropIntent] = useState<ExplorerDetailDropIntent | null>(
     null,
   );
+
+  useEffect(() => {
+    setOpenedCardSetId(null);
+  }, [currentFolderId]);
+
+  useEffect(() => {
+    if (!selectedCardSetId) return;
+
+    setOpenedCardSetId(selectedCardSetId);
+    onCardSetOpen?.(selectedCardSetId);
+  }, [onCardSetOpen, selectedCardSetId]);
 
   const manualRows = useMemo(
     () =>
@@ -467,8 +496,9 @@ export const FolderDetailView = ({
         cardSets,
         documents,
         currentFolderId,
+        currentCardSetId: openedCardSetId,
       }),
-    [cards, cardSets, currentFolderId, documents, folders],
+    [cards, cardSets, currentFolderId, documents, folders, openedCardSetId],
   );
 
   const rows = useMemo(
@@ -495,11 +525,20 @@ export const FolderDetailView = ({
         return;
       }
 
+      if (row.openCardSetId) {
+        setOpenedCardSetId(row.openCardSetId);
+        onCardSetOpen?.(row.openCardSetId);
+        setDropIntent(null);
+        setDraggingKey(null);
+        dragPayloadRef.current = null;
+        return;
+      }
+
       if (row.selectTarget) {
         onItemSelect(row.selectTarget);
       }
     },
-    [onFolderOpen, onItemSelect],
+    [onCardSetOpen, onFolderOpen, onItemSelect],
   );
 
   const clearDragState = useCallback(() => {
@@ -531,6 +570,12 @@ export const FolderDetailView = ({
         return;
       }
 
+      if (payload.kind === "card") {
+        if (!openedCardSetId) return;
+        void onReorderCardsInCardSet?.(openedCardSetId, orderedIds);
+        return;
+      }
+
       if (!currentFolderId) return;
 
       if (payload.kind === "cardSet") {
@@ -544,8 +589,10 @@ export const FolderDetailView = ({
       currentFolderId,
       manualRows,
       onReorderCardSets,
+      onReorderCardsInCardSet,
       onReorderDocuments,
       onReorderFolders,
+      openedCardSetId,
     ],
   );
 
@@ -574,9 +621,21 @@ export const FolderDetailView = ({
         return;
       }
 
-      void onMoveDocumentToFolder?.(payload.id, targetFolderId);
+      if (payload.kind === "document") {
+        void onMoveDocumentToFolder?.(payload.id, targetFolderId);
+      }
     },
     [folders, onMoveCardSetToFolder, onMoveDocumentToFolder, onMoveFolder],
+  );
+
+  const movePayloadIntoCardSet = useCallback(
+    (payload: ExplorerDetailDragPayload, targetCardSetId: string) => {
+      if (payload.kind !== "card") return;
+
+      setSortState(DEFAULT_SORT_STATE);
+      void onMoveCardToSet?.(payload.id, targetCardSetId);
+    },
+    [onMoveCardToSet],
   );
 
   const handleDropOnRow = useCallback(
@@ -589,19 +648,35 @@ export const FolderDetailView = ({
         return;
       }
 
+      if (position === "inside" && row.kind === "cardSet") {
+        movePayloadIntoCardSet(payload, row.id);
+        return;
+      }
+
       if (position === "before" || position === "after") {
         reorderRows(payload, row, position);
       }
     },
-    [movePayloadIntoFolder, reorderRows],
+    [movePayloadIntoCardSet, movePayloadIntoFolder, reorderRows],
   );
 
   const handleDropOnPane = useCallback(() => {
     const payload = dragPayloadRef.current;
     if (!payload || dropIntent?.position !== "append") return;
 
+    if (openedCardSetId && payload.kind === "card") {
+      movePayloadIntoCardSet(payload, openedCardSetId);
+      return;
+    }
+
     movePayloadIntoFolder(payload, currentFolderId);
-  }, [currentFolderId, dropIntent?.position, movePayloadIntoFolder]);
+  }, [
+    currentFolderId,
+    dropIntent?.position,
+    movePayloadIntoCardSet,
+    movePayloadIntoFolder,
+    openedCardSetId,
+  ]);
 
   return (
     <div
@@ -681,66 +756,65 @@ export const FolderDetailView = ({
               dropIntent?.rowKey === row.key ? dropIntent.position : null;
 
             return (
-              <div key={row.key} data-detail-row="true">
-                <FolderDetailRowView
-                  row={row}
-                  selected={selected}
-                  dragging={dragging}
-                  draggable={isManualOrder}
-                  dropPosition={currentDropPosition}
-                  onActivate={() => handleActivateRow(row)}
-                  onDragStart={(event) => {
-                    if (!isManualOrder) {
-                      event.preventDefault();
-                      return;
-                    }
-
-                    dragPayloadRef.current = { kind: row.kind, id: row.id };
-                    setDraggingKey(row.key);
-                    event.dataTransfer.effectAllowed = "move";
-                    event.dataTransfer.setData(
-                      "application/x-manifolia-explorer-detail-row",
-                      row.key,
-                    );
-                  }}
-                  onDragEnd={() => {
-                    clearDragState();
-                  }}
-                  onDragOver={(event) => {
-                    const payload = dragPayloadRef.current;
-                    if (!isManualOrder || !payload || isSamePayloadAndRow(payload, row)) {
-                      return;
-                    }
-
+              <FolderDetailRowView
+                key={row.key}
+                row={row}
+                selected={selected}
+                dragging={dragging}
+                draggable={isManualOrder}
+                dropPosition={currentDropPosition}
+                onActivate={() => handleActivateRow(row)}
+                onDragStart={(event) => {
+                  if (!isManualOrder) {
                     event.preventDefault();
-                    event.dataTransfer.dropEffect = "move";
+                    return;
+                  }
 
-                    const position = getDropPositionFromPointer(row, event);
-                    setDropIntent({ rowKey: row.key, position });
-                  }}
-                  onDragLeave={(event) => {
-                    const relatedTarget = event.relatedTarget;
-                    if (
-                      relatedTarget instanceof Node &&
-                      event.currentTarget.contains(relatedTarget)
-                    ) {
-                      return;
-                    }
+                  dragPayloadRef.current = { kind: row.kind, id: row.id };
+                  setDraggingKey(row.key);
+                  event.dataTransfer.effectAllowed = "move";
+                  event.dataTransfer.setData(
+                    "application/x-manifolia-explorer-detail-row",
+                    row.key,
+                  );
+                }}
+                onDragEnd={() => {
+                  clearDragState();
+                }}
+                onDragOver={(event) => {
+                  const payload = dragPayloadRef.current;
+                  if (!isManualOrder || !payload || isSamePayloadAndRow(payload, row)) {
+                    return;
+                  }
 
-                    setDropIntent((current) =>
-                      current?.rowKey === row.key ? null : current,
-                    );
-                  }}
-                  onDrop={(event) => {
-                    if (!isManualOrder || !dragPayloadRef.current) return;
+                  event.preventDefault();
+                  event.dataTransfer.dropEffect = "move";
 
-                    event.preventDefault();
-                    const position = getDropPositionFromPointer(row, event);
-                    handleDropOnRow(row, position);
-                    clearDragState();
-                  }}
-                />
-              </div>
+                  const position = getDropPositionFromPointer(row, event);
+                  setDropIntent({ rowKey: row.key, position });
+                }}
+                onDragLeave={(event) => {
+                  const relatedTarget = event.relatedTarget;
+                  if (
+                    relatedTarget instanceof Node &&
+                    event.currentTarget.contains(relatedTarget)
+                  ) {
+                    return;
+                  }
+
+                  setDropIntent((current) =>
+                    current?.rowKey === row.key ? null : current,
+                  );
+                }}
+                onDrop={(event) => {
+                  if (!isManualOrder || !dragPayloadRef.current) return;
+
+                  event.preventDefault();
+                  const position = getDropPositionFromPointer(row, event);
+                  handleDropOnRow(row, position);
+                  clearDragState();
+                }}
+              />
             );
           })
         )}

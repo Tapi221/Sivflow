@@ -5,7 +5,10 @@ import {
   normalizeFolderId,
   type FolderTreeNode,
 } from "@/components/folder/explorer/model/utils";
-import { toVirtualMfDeckDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
+import {
+  toVirtualMfCardDisplayName,
+  toVirtualMfDeckDisplayName,
+} from "@/features/fileDisplay/virtualFileExtensions";
 import type {
   Card,
   CardSet,
@@ -14,7 +17,7 @@ import type {
   SelectedExplorerItem,
 } from "@/types";
 
-export type ExplorerDetailRowKind = "folder" | "cardSet" | "document";
+export type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";
 
 export type ExplorerDetailRow = {
   key: string;
@@ -30,6 +33,7 @@ export type ExplorerDetailRow = {
   orderIndex: number;
   selectTarget: SelectedExplorerItem;
   openFolderId: string | null;
+  openCardSetId: string | null;
 };
 
 type BuildExplorerDetailRowsParams = {
@@ -38,6 +42,7 @@ type BuildExplorerDetailRowsParams = {
   cardSets: CardSet[];
   documents: DocumentItem[];
   currentFolderId: string | null;
+  currentCardSetId?: string | null;
 };
 
 type LegacyEntityFields = {
@@ -48,6 +53,7 @@ type LegacyEntityFields = {
   is_deleted?: boolean;
   is_hidden?: boolean;
   tags?: string[];
+  card_set_id?: string | null;
 };
 
 const EXPLORER_ROOT_PATH_SEGMENTS = ["ホーム", "エクスプローラー"];
@@ -96,6 +102,17 @@ const getDocumentTags = (document: DocumentItem): string[] => {
 
 const getCardCardSetId = (card: Card): string | null => {
   return card.cardSetId ?? withLegacy(card).card_set_id ?? null;
+};
+
+const getCardDisplayName = (card: Card): string => {
+  return toVirtualMfCardDisplayName(
+    card.title?.trim() || card.questionNumber?.trim() || "無題のカード",
+  );
+};
+
+const getCardTags = (card: Card): string[] => {
+  const tagIds = card.tagIds;
+  return Array.isArray(tagIds) ? tagIds.filter((tagId) => tagId.trim()) : [];
 };
 
 const buildFolderById = (folders: Folder[]): Map<string, Folder> => {
@@ -161,7 +178,8 @@ const groupRows = (rows: ExplorerDetailRow[]): ExplorerDetailRow[] => {
   const kindOrder: Record<ExplorerDetailRowKind, number> = {
     folder: 0,
     cardSet: 1,
-    document: 2,
+    card: 2,
+    document: 3,
   };
 
   return [...rows].sort((left, right) => {
@@ -171,21 +189,19 @@ const groupRows = (rows: ExplorerDetailRow[]): ExplorerDetailRow[] => {
   });
 };
 
-export const buildExplorerDetailRows = ({
-  folders,
-  cards,
+const buildCardSetRows = ({
   cardSets,
-  documents,
-  currentFolderId,
-}: BuildExplorerDetailRowsParams): ExplorerDetailRow[] => {
-  const folderById = buildFolderById(folders);
-  const currentFolderKey = normalizeFolderId(currentFolderId);
-  const currentPathSegments = [
-    ...EXPLORER_ROOT_PATH_SEGMENTS,
-    ...buildFolderPathSegments(currentFolderId, folderById),
-  ];
-
+  cards,
+  currentFolderKey,
+  currentPathSegments,
+}: {
+  cardSets: CardSet[];
+  cards: Card[];
+  currentFolderKey: string;
+  currentPathSegments: string[];
+}): ExplorerDetailRow[] => {
   const cardCountByCardSetId = new Map<string, number>();
+
   cards.forEach((card) => {
     if (isSoftDeleted(withLegacy(card))) return;
 
@@ -197,6 +213,103 @@ export const buildExplorerDetailRows = ({
       (cardCountByCardSetId.get(cardSetId) ?? 0) + 1,
     );
   });
+
+  return cardSets
+    .filter((cardSet) => {
+      if (isSoftDeleted(cardSet)) return false;
+      return normalizeFolderId(getCardSetFolderId(cardSet)) === currentFolderKey;
+    })
+    .map((cardSet): ExplorerDetailRow => {
+      const cardSetName = toVirtualMfDeckDisplayName(
+        cardSet.name?.trim() || "無題のセット",
+      );
+      const cardCount = cardCountByCardSetId.get(cardSet.id) ?? 0;
+
+      return {
+        key: `cardSet:${cardSet.id}`,
+        kind: "cardSet",
+        id: cardSet.id,
+        name: cardSetName,
+        tags: cardCount > 0 ? [`${cardCount}枚`] : [],
+        path: joinExplorerPath(currentPathSegments),
+        updatedAt: cardSet.updatedAt,
+        updatedAtMs: getEntityTime(cardSet.updatedAt),
+        typeLabel: "カードセット",
+        sizeBytes: null,
+        orderIndex: cardSet.orderIndex ?? Number.MAX_SAFE_INTEGER,
+        selectTarget: null,
+        openFolderId: null,
+        openCardSetId: cardSet.id,
+      };
+    });
+};
+
+const buildCardRows = ({
+  cards,
+  cardSet,
+  folderById,
+}: {
+  cards: Card[];
+  cardSet: CardSet;
+  folderById: Map<string, Folder>;
+}): ExplorerDetailRow[] => {
+  const cardSetName = toVirtualMfDeckDisplayName(
+    cardSet.name?.trim() || "無題のセット",
+  );
+  const cardSetPathSegments = [
+    ...EXPLORER_ROOT_PATH_SEGMENTS,
+    ...buildFolderPathSegments(getCardSetFolderId(cardSet), folderById),
+    cardSetName,
+  ];
+
+  return cards
+    .filter((card) => {
+      if (isSoftDeleted(withLegacy(card))) return false;
+      return getCardCardSetId(card) === cardSet.id;
+    })
+    .map((card): ExplorerDetailRow => {
+      return {
+        key: `card:${card.id}`,
+        kind: "card",
+        id: card.id,
+        name: getCardDisplayName(card),
+        tags: getCardTags(card),
+        path: joinExplorerPath(cardSetPathSegments),
+        updatedAt: card.updatedAt,
+        updatedAtMs: getEntityTime(card.updatedAt),
+        typeLabel: "カード",
+        sizeBytes: null,
+        orderIndex: card.orderIndex ?? Number.MAX_SAFE_INTEGER,
+        selectTarget: { type: "card", id: card.id },
+        openFolderId: null,
+        openCardSetId: null,
+      };
+    })
+    .sort(compareDetailRowsWithinKind);
+};
+
+export const buildExplorerDetailRows = ({
+  folders,
+  cards,
+  cardSets,
+  documents,
+  currentFolderId,
+  currentCardSetId = null,
+}: BuildExplorerDetailRowsParams): ExplorerDetailRow[] => {
+  const folderById = buildFolderById(folders);
+  const activeCardSet = currentCardSetId
+    ? (cardSets.find((cardSet) => cardSet.id === currentCardSetId) ?? null)
+    : null;
+
+  if (activeCardSet) {
+    return buildCardRows({ cards, cardSet: activeCardSet, folderById });
+  }
+
+  const currentFolderKey = normalizeFolderId(currentFolderId);
+  const currentPathSegments = [
+    ...EXPLORER_ROOT_PATH_SEGMENTS,
+    ...buildFolderPathSegments(currentFolderId, folderById),
+  ];
 
   const folderRows = folders
     .filter((folder) => {
@@ -225,36 +338,16 @@ export const buildExplorerDetailRows = ({
         orderIndex: getFolderOrderIndex(folder),
         selectTarget: null,
         openFolderId: folderId,
+        openCardSetId: null,
       };
     });
 
-  const cardSetRows = cardSets
-    .filter((cardSet) => {
-      if (isSoftDeleted(cardSet)) return false;
-      return normalizeFolderId(getCardSetFolderId(cardSet)) === currentFolderKey;
-    })
-    .map((cardSet): ExplorerDetailRow => {
-      const cardSetName = toVirtualMfDeckDisplayName(
-        cardSet.name?.trim() || "無題のセット",
-      );
-      const cardCount = cardCountByCardSetId.get(cardSet.id) ?? 0;
-
-      return {
-        key: `cardSet:${cardSet.id}`,
-        kind: "cardSet",
-        id: cardSet.id,
-        name: cardSetName,
-        tags: cardCount > 0 ? [`${cardCount}枚`] : [],
-        path: joinExplorerPath(currentPathSegments),
-        updatedAt: cardSet.updatedAt,
-        updatedAtMs: getEntityTime(cardSet.updatedAt),
-        typeLabel: "カードセット",
-        sizeBytes: null,
-        orderIndex: cardSet.orderIndex ?? Number.MAX_SAFE_INTEGER,
-        selectTarget: { type: "cardSet", id: cardSet.id },
-        openFolderId: null,
-      };
-    });
+  const cardSetRows = buildCardSetRows({
+    cardSets,
+    cards,
+    currentFolderKey,
+    currentPathSegments,
+  });
 
   const documentRows = documents
     .filter((document) => {
@@ -279,6 +372,7 @@ export const buildExplorerDetailRows = ({
         orderIndex: document.orderIndex ?? Number.MAX_SAFE_INTEGER,
         selectTarget: { type: "document", id: document.id },
         openFolderId: null,
+        openCardSetId: null,
       };
     });
 
