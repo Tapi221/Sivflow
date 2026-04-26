@@ -60,7 +60,7 @@ const PLAIN_MENU_ROW_STYLE = {
   height: 28,
   minHeight: 28,
   lineHeight: "28px",
-  columnGap: 4,
+  columnGap: 6,
 } satisfies React.CSSProperties;
 
 const PLAIN_MENU_LABEL_CLASS =
