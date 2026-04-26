@@ -4,7 +4,7 @@ import {
   useExplorerStore,
 } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
-import { useMemo } from "react";
+import type { ReactElement } from "react";
 
 const LayoutDetailIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -53,25 +53,23 @@ const LayoutColumnIcon = () => (
   </svg>
 );
 
+type LayoutOption = {
+  value: ExplorerLayoutMode;
+  label: string;
+  icon: ReactElement;
+};
+
+const LAYOUT_OPTIONS = [
+  { value: "detail", label: "詳細", icon: <LayoutDetailIcon /> },
+  { value: "list", label: "一覧", icon: <LayoutListIcon /> },
+  { value: "card", label: "カード", icon: <LayoutCardIcon /> },
+  { value: "icon", label: "アイコン", icon: <LayoutIconGridIcon /> },
+  { value: "column", label: "カラム", icon: <LayoutColumnIcon /> },
+] as const satisfies readonly LayoutOption[];
+
 export const LayoutPanel = ({ className }: { className?: string }) => {
   const mode = useExplorerStore((state) => state.explorerLayoutMode);
   const setMode = useExplorerStore((state) => state.setExplorerLayoutMode);
-
-  const options = useMemo(
-    () =>
-      [
-        { value: "detail" as const, label: "詳細", icon: <LayoutDetailIcon /> },
-        { value: "list" as const, label: "一覧", icon: <LayoutListIcon /> },
-        { value: "card" as const, label: "カード", icon: <LayoutCardIcon /> },
-        { value: "icon" as const, label: "アイコン", icon: <LayoutIconGridIcon /> },
-        { value: "column" as const, label: "カラム", icon: <LayoutColumnIcon /> },
-      ] satisfies ReadonlyArray<{
-        value: ExplorerLayoutMode;
-        label: string;
-        icon: JSX.Element;
-      }>,
-    [],
-  );
 
   return (
     <div className={cn("ds-filter-panel flex h-full min-h-0 flex-col", className)}>
@@ -82,12 +80,17 @@ export const LayoutPanel = ({ className }: { className?: string }) => {
           </span>
 
           <div className="ds-filter-toggle-group flex items-center gap-1">
-            {options.map((opt) => {
+            {LAYOUT_OPTIONS.map((opt) => {
               const selected = mode === opt.value;
               return (
                 <SurfaceButton
                   key={opt.value}
-                  onClick={() => setMode(opt.value)}
+                  data-layout-mode={opt.value}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setMode(opt.value);
+                  }}
                   surface={selected ? "convexActive" : "concave"}
                   size="xs"
                   title={opt.label}
