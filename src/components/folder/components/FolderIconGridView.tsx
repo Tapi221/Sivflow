@@ -47,19 +47,6 @@ type GridColumnMetrics = {
 const TILE_WIDTH_PX = 132;
 const TILE_GAP_X_PX = 32;
 
-const getIconForKind = (kind: ExplorerDetailRowKind) => {
-  if (kind === "folder") return ExplorerChromeFolderIcon;
-  if (kind === "cardSet") return ExplorerChromeCardSetIcon;
-  if (kind === "card") return ExplorerChromeCardIcon;
-  return ExplorerChromePdfIcon;
-};
-
-const getIconSizeForKind = (kind: ExplorerDetailRowKind) => {
-  if (kind === "folder") return 64;
-  if (kind === "cardSet") return 54;
-  return 50;
-};
-
 const getTileKindLabel = (kind: ExplorerDetailRowKind) => {
   if (kind === "folder") return "フォルダー";
   if (kind === "cardSet") return "カードセット";
@@ -107,17 +94,33 @@ const getNextIndex = (
 };
 
 const IconVisual = ({ row }: { row: ExplorerDetailRow }) => {
-  const Icon = getIconForKind(row.kind);
-  const size = getIconSizeForKind(row.kind);
+  if (row.kind === "folder") {
+    return (
+      <span className="grid h-[78px] w-[78px] place-items-center text-[var(--sidebar-icon-color,#6f6d66)]">
+        <ExplorerChromeFolderIcon size={64} variant="large" />
+      </span>
+    );
+  }
+
+  if (row.kind === "cardSet") {
+    return (
+      <span className="grid h-[78px] w-[78px] place-items-center text-[var(--sidebar-icon-color,#6f6d66)]">
+        <ExplorerChromeCardSetIcon size={54} />
+      </span>
+    );
+  }
+
+  if (row.kind === "card") {
+    return (
+      <span className="grid h-[78px] w-[78px] place-items-center text-[var(--sidebar-icon-color,#6f6d66)]">
+        <ExplorerChromeCardIcon size={50} />
+      </span>
+    );
+  }
 
   return (
-    <span
-      className={cn(
-        "grid h-[78px] w-[78px] place-items-center",
-        "text-[var(--sidebar-icon-color,#6f6d66)]",
-      )}
-    >
-      <Icon size={size} />
+    <span className="grid h-[78px] w-[78px] place-items-center text-[var(--sidebar-icon-color,#6f6d66)]">
+      <ExplorerChromePdfIcon size={50} />
     </span>
   );
 };
