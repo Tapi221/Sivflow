@@ -2,7 +2,7 @@ import { ExplorerSidebarHeader } from "@/components/explorer/ExplorerSidebarHead
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface TreeViewSidebarProps {
   sidebarRef: React.RefObject<HTMLDivElement | null>;
@@ -46,9 +46,44 @@ const runAfterCurrentPointerAction = (callback: () => void) => {
     return;
   }
 
-  window.requestAnimationFrame(() => {
-    callback();
-  });
+  window.setTimeout(() => {
+    window.requestAnimationFrame(() => {
+      callback();
+    });
+  }, 0);
+};
+
+const shouldSuppressSidebarButtonFocus = (
+  target: EventTarget | null,
+  currentTarget: HTMLElement,
+): boolean => {
+  if (!(target instanceof HTMLElement)) return false;
+
+  const button = target.closest("button");
+  if (!button || !currentTarget.contains(button)) return false;
+
+  const label = [
+    button.getAttribute("aria-label"),
+    button.getAttribute("title"),
+    button.textContent,
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
+
+  return (
+    label.includes("+") ||
+    label.includes("作成") ||
+    label.includes("新規") ||
+    label.includes("追加")
+  );
+};
+
+const suppressSidebarCreateButtonFocus = (
+  event: React.SyntheticEvent<HTMLDivElement>,
+) => {
+  if (shouldSuppressSidebarButtonFocus(event.target, event.currentTarget)) {
+    event.preventDefault();
+  }
 };
 
 const isElementWithChildren = (
@@ -126,13 +161,29 @@ const toTagDisplayName = (name: string) => {
   return trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
 };
 
+const normalizeTagCreateName = (value: string): string => {
+  return value
+    .trim()
+    .replace(/^#+/, "")
+    .replace(/[#,，、]+$/g, "")
+    .trim();
+};
+
+const stopTagEditorEvent = (event: React.SyntheticEvent) => {
+  event.stopPropagation();
+};
+
 const SidebarTagSectionContent = () => {
-  const { tags } = useTags();
+  const { tags, addTag } = useTags();
   const tagFilter = useExplorerStore((state) => state.tagFilter);
   const toggleTag = useExplorerStore((state) => state.toggleTag);
   const isTagSectionCollapsed = useExplorerStore(
     (state) => state.isTagSectionCollapsed,
   );
+  const [isCreatingTag, setIsCreatingTag] = useState(false);
+  const [draftTagName, setDraftTagName] = useState("");
+  const [createTagError, setCreateTagError] = useState<string | null>(null);
+  const createInputRef = useRef<HTMLInputElement | null>(null);
 
   const tagItems = useMemo(
     () =>
@@ -154,6 +205,71 @@ const SidebarTagSectionContent = () => {
     counter.textContent = String(tagItems.length);
   }, [tagItems.length]);
 
+  useEffect(() => {
+    if (!isCreatingTag) return;
+
+    const frameId = window.requestAnimationFrame(() => {
+      createInputRef.current?.focus({ preventScroll: true });
+      createInputRef.current?.select();
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [isCreatingTag]);
+
+  const handleStartCreateTag = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDraftTagName("");
+    setCreateTagError(null);
+    setIsCreatingTag(true);
+  }, []);
+
+  const handleCancelCreateTag = useCallback(() => {
+    setDraftTagName("");
+    setCreateTagError(null);
+    setIsCreatingTag(false);
+  }, []);
+
+  const handleCommitCreateTag = useCallback(async () => {
+    const name = normalizeTagCreateName(draftTagName);
+
+    if (!name) {
+      handleCancelCreateTag();
+      return;
+    }
+
+    try {
+      await addTag(name);
+      setDraftTagName("");
+      setCreateTagError(null);
+      setIsCreatingTag(false);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "タグを作成できませんでした";
+      setCreateTagError(message);
+    }
+  }, [addTag, draftTagName, handleCancelCreateTag]);
+
+  const handleCreateTagKeyDown = useCallback(
+    async (event: React.KeyboardEvent<HTMLInputElement>) => {
+      event.stopPropagation();
+
+      if (event.key === "Enter") {
+        event.preventDefault();
+        await handleCommitCreateTag();
+        return;
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        handleCancelCreateTag();
+      }
+    },
+    [handleCancelCreateTag, handleCommitCreateTag],
+  );
+
   if (isTagSectionCollapsed) return null;
 
   return (
@@ -162,6 +278,57 @@ const SidebarTagSectionContent = () => {
       id="tag-sidebar-section-content"
       className="shrink-0 px-2 pb-3 pt-1"
     >
+      <div className="mb-1 flex items-center justify-end">
+        {isCreatingTag ? (
+          <div className="w-full">
+            <div className="flex h-8 w-full items-center gap-1 rounded-md border border-[#c9c3ae] bg-white px-2 shadow-[0_0_0_1px_rgba(132,149,91,0.35)]">
+              <span className="shrink-0 text-[12px] text-muted-foreground">
+                #
+              </span>
+              <input
+                ref={createInputRef}
+                value={draftTagName}
+                placeholder="タグ名"
+                className="min-w-0 flex-1 bg-transparent text-[12px] text-foreground outline-none placeholder:text-muted-foreground/55"
+                onChange={(event) => {
+                  setDraftTagName(event.target.value);
+                  setCreateTagError(null);
+                }}
+                onKeyDown={handleCreateTagKeyDown}
+                onBlur={handleCommitCreateTag}
+                onPointerDown={stopTagEditorEvent}
+                onMouseDown={stopTagEditorEvent}
+                onClick={stopTagEditorEvent}
+                onDoubleClick={stopTagEditorEvent}
+                onContextMenu={stopTagEditorEvent}
+              />
+            </div>
+            {createTagError ? (
+              <div className="mt-1 px-1 text-[10px] leading-4 text-destructive">
+                {createTagError}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <button
+            type="button"
+            className={cn(
+              "flex h-7 min-w-7 items-center justify-center rounded-md px-2",
+              "text-[15px] leading-none text-muted-foreground transition",
+              "hover:bg-muted/70 hover:text-foreground",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            )}
+            title="タグを作成"
+            aria-label="タグを作成"
+            onClick={handleStartCreateTag}
+            onPointerDown={stopTagEditorEvent}
+            onMouseDown={stopTagEditorEvent}
+          >
+            +
+          </button>
+        )}
+      </div>
+
       {tagItems.length > 0 ? (
         <div className="min-h-[96px] max-h-[280px] overflow-y-auto pr-1">
           {tagItems.map((tag) => {
@@ -308,6 +475,8 @@ export const TreeViewSidebar = ({
           <div
             ref={contentScrollRef}
             className="flex-1 min-h-0 min-w-0 overflow-hidden px-1 pb-1 outline-none"
+            onPointerDownCapture={suppressSidebarCreateButtonFocus}
+            onMouseDownCapture={suppressSidebarCreateButtonFocus}
           >
             {sidebarChildren}
           </div>
