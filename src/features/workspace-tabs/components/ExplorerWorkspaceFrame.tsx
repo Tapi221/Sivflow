@@ -20,6 +20,7 @@ import { useTags } from "@/hooks/settings/useTags";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
+import { Settings2 } from "@/ui/icons";
 import { useNavigate } from "react-router-dom";
 
 import { cn } from "@/lib/utils";
