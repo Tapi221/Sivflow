@@ -70,8 +70,8 @@ export const WorkspaceTabsBar = ({
         isTitlebar
           ? "h-full min-w-0 flex-1 bg-transparent px-0 pt-0"
           : [
-              "h-11 w-full min-w-0 border-b border-[#dddcd5] bg-transparent",
-              "px-3 pt-1",
+              "h-11 w-full min-w-0 border-b border-[#dddcd5] bg-[rgba(246,246,244,0.98)]",
+              "px-3 pt-1 shadow-[0_1px_0_rgba(255,255,255,0.75)_inset]",
             ],
         className,
       )}
@@ -90,11 +90,7 @@ export const WorkspaceTabsBar = ({
                 selected ? "mb-[-1px]" : "mb-[3px] h-8 rounded-t-[9px]",
                 resolveTabWidthClassName(tab),
                 selected
-                  ? [
-                      "border-[#dddcd5] border-b-[rgba(255,255,255,0.96)]",
-                      "bg-[rgba(255,255,255,0.96)] text-[#24231f]",
-                      "shadow-[0_-1px_0_rgba(255,255,255,0.9)_inset]",
-                    ]
+                  ? "border-[#dddcd5] border-b-white bg-white text-[#24231f] shadow-[0_-1px_0_rgba(255,255,255,0.9)_inset]"
                   : "border-transparent bg-transparent text-[#777671] hover:bg-white/65 hover:text-[#33322f]",
               )}
             >
