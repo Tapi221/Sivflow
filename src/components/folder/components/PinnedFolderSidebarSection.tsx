@@ -141,147 +141,120 @@ export const PinnedFolderSidebarSection = ({
 
   return (
     <section className="shrink-0 pb-0 pt-1">
-      {pinnedFolders.length > 0 ? (
-        <>
-          <div className="px-2 pb-1 pt-1">
-            <button
-              type="button"
-              className={cn(
-                "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
-                "text-[11px] font-medium leading-5 text-muted-foreground transition",
-                "hover:bg-muted/70 hover:text-foreground",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              )}
-              aria-expanded={!isPinnedFolderSectionCollapsed}
-              aria-controls={PINNED_FOLDER_SECTION_CONTENT_ID}
-              onClick={togglePinnedFolderSectionCollapsed}
-            >
-              {isPinnedFolderSectionCollapsed ? (
-                <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-70" />
-              ) : (
-                <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" />
-              )}
-
-              <span className="min-w-0 flex-1 truncate">ピン留め</span>
-
-              <span className="tabular-nums opacity-60">
-                {pinnedFolders.length}
-              </span>
-            </button>
-          </div>
-
-          <div
-            id={PINNED_FOLDER_SECTION_CONTENT_ID}
-            className={cn(
-              "space-y-0.5",
-              isPinnedFolderSectionCollapsed && "hidden",
-            )}
-          >
-            {pinnedFolders.map((entry) => {
-              const isSelected = selectedFolderId === entry.id;
-              const menuActions: MenuAction[] = [
-                {
-                  id: "unpin-folder",
-                  label: "ピン留めを外す",
-                  icon: <Pin className="h-4 w-4" />,
-                  onSelect: () => unpinFolder(entry.id),
-                },
-              ];
-
-              return (
-                <SidebarEntityRow
-                  key={entry.id}
-                  selected={isSelected}
-                  menuActions={menuActions}
-                  hasContextMenu
-                  contextMenuVariant="folderContext"
-                  contentClassName={EXPLORER_ROW_CONTENT_CLASS}
-                  iconClassName={EXPLORER_ROW_ICON_SLOT_CLASS}
-                  titleSlotClassName={EXPLORER_ROW_TITLE_SLOT_CLASS}
-                  title={entry.name}
-                  titleClassName={cn(
-                    FOLDER_ROW_TITLE_CLASS,
-                    isSelected ? "font-medium" : "font-normal",
-                  )}
-                  trailing={
-                    <div className="ml-auto flex shrink-0 items-center gap-1 pr-1">
-                      <span className="ds-list-item__subtitle text-[11px] font-normal tabular-nums leading-none opacity-60">
-                        {entry.contentCount}
-                      </span>
-                      <button
-                        type="button"
-                        className={cn(
-                          "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground",
-                          "opacity-70 transition hover:bg-muted hover:text-foreground group-hover:opacity-100",
-                        )}
-                        aria-label="ピン留めを外す"
-                        title="ピン留めを外す"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          unpinFolder(entry.id);
-                        }}
-                        onPointerDown={(event) => {
-                          event.stopPropagation();
-                        }}
-                      >
-                        <Pin className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  }
-                  icon={
-                    <FolderOutlineIcon
-                      className={cn(
-                        "sidebar-icon",
-                        FOLDER_ROW_ICON_SIZE_CLASS,
-                        isSelected
-                          ? FOLDER_ROW_ICON_ACTIVE_CLASS
-                          : FOLDER_ROW_ICON_MUTED_CLASS,
-                      )}
-                    />
-                  }
-                  role="button"
-                  tabIndex={0}
-                  onClick={(event) => {
-                    if (event.defaultPrevented) return;
-                    onFolderSelect(entry.id);
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      onFolderSelect(entry.id);
-                    }
-                  }}
-                />
-              );
-            })}
-          </div>
-
-          <div className="mt-1 border-t border-border/60 px-2 pb-1 pt-2">
-            <button
-              type="button"
-              className={cn(
-                "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
-                "text-[11px] font-medium leading-5 text-muted-foreground transition",
-                "hover:bg-muted/70 hover:text-foreground",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              )}
-              aria-expanded={!isFolderListSectionCollapsed}
-              aria-controls={FOLDER_LIST_SECTION_CONTENT_ID}
-              onClick={toggleFolderListSectionCollapsed}
-            >
-              {isFolderListSectionCollapsed ? (
-                <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-70" />
-              ) : (
-                <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" />
-              )}
-
-              <span className="min-w-0 flex-1 truncate">フォルダ一覧</span>
-            </button>
-          </div>
-        </>
-      ) : (
+      <>
         <div className="px-2 pb-1 pt-1">
+          <button
+            type="button"
+            className={cn(
+              "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
+              "text-[11px] font-medium leading-5 text-muted-foreground transition",
+              "hover:bg-muted/70 hover:text-foreground",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            )}
+            aria-expanded={!isPinnedFolderSectionCollapsed}
+            aria-controls={PINNED_FOLDER_SECTION_CONTENT_ID}
+            onClick={togglePinnedFolderSectionCollapsed}
+          >
+            {isPinnedFolderSectionCollapsed ? (
+              <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-70" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" />
+            )}
+
+            <span className="min-w-0 flex-1 truncate">ピン留め</span>
+
+            <span className="tabular-nums opacity-60">{pinnedFolders.length}</span>
+          </button>
+        </div>
+
+        <div
+          id={PINNED_FOLDER_SECTION_CONTENT_ID}
+          className={cn(
+            "space-y-0.5",
+            isPinnedFolderSectionCollapsed && "hidden",
+          )}
+        >
+          {pinnedFolders.map((entry) => {
+            const isSelected = selectedFolderId === entry.id;
+            const menuActions: MenuAction[] = [
+              {
+                id: "unpin-folder",
+                label: "ピン留めを外す",
+                icon: <Pin className="h-4 w-4" />,
+                onSelect: () => unpinFolder(entry.id),
+              },
+            ];
+
+            return (
+              <SidebarEntityRow
+                key={entry.id}
+                selected={isSelected}
+                menuActions={menuActions}
+                hasContextMenu
+                contextMenuVariant="folderContext"
+                contentClassName={EXPLORER_ROW_CONTENT_CLASS}
+                iconClassName={EXPLORER_ROW_ICON_SLOT_CLASS}
+                titleSlotClassName={EXPLORER_ROW_TITLE_SLOT_CLASS}
+                title={entry.name}
+                titleClassName={cn(
+                  FOLDER_ROW_TITLE_CLASS,
+                  isSelected ? "font-medium" : "font-normal",
+                )}
+                trailing={
+                  <div className="ml-auto flex shrink-0 items-center gap-1 pr-1">
+                    <span className="ds-list-item__subtitle text-[11px] font-normal tabular-nums leading-none opacity-60">
+                      {entry.contentCount}
+                    </span>
+                    <button
+                      type="button"
+                      className={cn(
+                        "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground",
+                        "opacity-70 transition hover:bg-muted hover:text-foreground group-hover:opacity-100",
+                      )}
+                      aria-label="ピン留めを外す"
+                      title="ピン留めを外す"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        unpinFolder(entry.id);
+                      }}
+                      onPointerDown={(event) => {
+                        event.stopPropagation();
+                      }}
+                    >
+                      <Pin className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                }
+                icon={
+                  <FolderOutlineIcon
+                    className={cn(
+                      "sidebar-icon",
+                      FOLDER_ROW_ICON_SIZE_CLASS,
+                      isSelected
+                        ? FOLDER_ROW_ICON_ACTIVE_CLASS
+                        : FOLDER_ROW_ICON_MUTED_CLASS,
+                    )}
+                  />
+                }
+                role="button"
+                tabIndex={0}
+                onClick={(event) => {
+                  if (event.defaultPrevented) return;
+                  onFolderSelect(entry.id);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onFolderSelect(entry.id);
+                  }
+                }}
+              />
+            );
+          })}
+        </div>
+
+        <div className="mt-1 border-t border-border/60 px-2 pb-1 pt-2">
           <button
             type="button"
             className={cn(
@@ -303,7 +276,7 @@ export const PinnedFolderSidebarSection = ({
             <span className="min-w-0 flex-1 truncate">フォルダ一覧</span>
           </button>
         </div>
-      )}
+      </>
     </section>
   );
 };
