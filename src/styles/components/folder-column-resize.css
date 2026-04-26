@@ -7,7 +7,35 @@
    * 実際の separator だけ col-resize にする。
    */
   .folder-column-view {
+    --folder-column-view-fade-rgb: 255 255 255;
+
     cursor: default !important;
+  }
+
+  /*
+   * カラム表示の各縦スクロールカラムに、上下 24px のソフトフェードをかける。
+   * TSX 側の DnD / リサイズ処理には触れず、描画マスクだけで完結させる。
+   */
+  .folder-column-view > section,
+  .folder-column-view > div > section {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      rgb(0 0 0 / 1) 1.5rem,
+      rgb(0 0 0 / 1) calc(100% - 1.5rem),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      rgb(0 0 0 / 1) 1.5rem,
+      rgb(0 0 0 / 1) calc(100% - 1.5rem),
+      transparent 100%
+    );
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
   }
 
   .folder-column-view [role="separator"][aria-label="カラム幅を変更"] {
