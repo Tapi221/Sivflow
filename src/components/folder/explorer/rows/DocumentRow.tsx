@@ -1,8 +1,8 @@
 import { buildRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
 import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
+import { ExplorerChromePdfIcon } from "@/components/explorer/icons";
 import { cn } from "@/lib/utils";
-import { FileText } from "@/ui/icons";
 import React from "react";
 import { SidebarEntityRow } from "./SidebarEntityRow";
 import {
@@ -151,12 +151,9 @@ export const DocumentRow = ({
         isSelected ? "font-medium" : "font-normal",
       )}
       icon={
-        <FileText
+        <ExplorerChromePdfIcon
           className={cn(
-            "sidebar-icon ds-list-item__icon",
             FOLDER_ROW_ICON_SIZE_CLASS,
-            FOLDER_ROW_ICON_MUTED_CLASS,
-            isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
           )}
         />
       }
