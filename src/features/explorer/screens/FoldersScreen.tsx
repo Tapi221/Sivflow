@@ -18,6 +18,7 @@ import { useExplorerController } from "@/features/explorer/controller/useExplore
 import { useExplorerBreadcrumbSync } from "@/features/explorer/hooks/useExplorerBreadcrumbSync";
 import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups";
 import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
+import { WorkspaceSurface } from "@/features/workspace-tabs/components/WorkspaceSurface";
 import { WorkspaceTabPanel } from "@/features/workspace-tabs/components/WorkspaceTabPanel";
 import { WorkspaceTabsBar } from "@/features/workspace-tabs/components/WorkspaceTabsBar";
 import type { WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
@@ -372,24 +373,22 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   }
 
   const explorerContent = (
-    <div className="relative z-10 flex h-full min-h-0 w-full min-w-0 max-w-none">
-      <TreeViewLayout
-        folders={lookups.normalizedFolders}
-        isSectionListMode={controller.state.isSectionListMode}
-        selectedFolderId={controller.state.selectedFolderId}
-        selectedItem={controller.state.selectedItem}
-        selectedCardId={lookups.selectedCardId}
-        selectedDocumentId={lookups.selectedDocumentId}
-        onFolderSelect={handleFolderSelect}
-        onItemSelect={handleItemSelect}
-        onCardUpdated={() => {
-          // カード更新後の処理は既存実装へ委譲
-        }}
-        onBreadcrumbContextChange={setBreadcrumbContext}
-        navigateToSectionListToken={controller.state.navigateToSectionListToken}
-        folderSelectionNonce={controller.state.folderSelectionNonce}
-      />
-    </div>
+    <TreeViewLayout
+      folders={lookups.normalizedFolders}
+      isSectionListMode={controller.state.isSectionListMode}
+      selectedFolderId={controller.state.selectedFolderId}
+      selectedItem={controller.state.selectedItem}
+      selectedCardId={lookups.selectedCardId}
+      selectedDocumentId={lookups.selectedDocumentId}
+      onFolderSelect={handleFolderSelect}
+      onItemSelect={handleItemSelect}
+      onCardUpdated={() => {
+        // カード更新後の処理は既存実装へ委譲
+      }}
+      onBreadcrumbContextChange={setBreadcrumbContext}
+      navigateToSectionListToken={controller.state.navigateToSectionListToken}
+      folderSelectionNonce={controller.state.folderSelectionNonce}
+    />
   );
 
   const workspaceContent =
@@ -411,18 +410,12 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     );
 
   return (
-    <div
+    <WorkspaceSurface
       style={FOLDERS_SCREEN_FILL_STYLE}
-      className={cn(
-        "relative flex h-full min-h-0 min-w-0 max-w-none flex-col overflow-hidden bg-transparent",
-        !route.isDesktop && "overflow-x-hidden overflow-y-auto",
-      )}
+      className={cn(!route.isDesktop && "overflow-x-hidden overflow-y-auto")}
+      tabs={<WorkspaceTabsBar />}
     >
-      <WorkspaceTabsBar />
-
-      <div className="relative z-10 -mt-px flex min-h-0 w-full min-w-0 flex-1 overflow-hidden">
-        {workspaceContent}
-      </div>
-    </div>
+      {workspaceContent}
+    </WorkspaceSurface>
   );
 };

@@ -76,7 +76,7 @@ export const TreeViewSidebar = ({
           "[--sidebar-text:#4b5563]",
           "[--sidebar-text-muted:#888780] [--sidebar-icon-active:#888780]",
           integratedChrome
-            ? "border-r border-[#e6e4dc] bg-[rgba(255,255,255,0.95)]"
+            ? "border-r border-[#e6e4dc] bg-transparent"
             : [
                 "md:rounded-[14px] md:border md:border-[#dddcd5]",
                 "md:bg-[rgba(255,255,255,0.92)]",
