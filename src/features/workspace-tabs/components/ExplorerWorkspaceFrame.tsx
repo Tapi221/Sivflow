@@ -1,4 +1,13 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { TagFilterPanel } from "@/components/explorer/TagFilterPanel";
+import { floatingPanelPresets } from "@/components/ui/menu-styles";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useTags } from "@/hooks/settings/useTags";
 
 import { cn } from "@/lib/utils";
 
@@ -14,12 +23,16 @@ type ExplorerWorkspaceFrameProps = {
 type ExplorerToolbarButtonProps = {
   title: string;
   disabled?: boolean;
+  className?: string;
+  onClick?: () => void;
   children: ReactNode;
 };
 
 const ExplorerToolbarButton = ({
   title,
   disabled = false,
+  className,
+  onClick,
   children,
 }: ExplorerToolbarButtonProps) => {
   return (
@@ -28,12 +41,14 @@ const ExplorerToolbarButton = ({
       title={title}
       aria-label={title}
       disabled={disabled}
+      onClick={disabled ? undefined : onClick}
       className={cn(
         "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px]",
         "border-0 bg-transparent text-[#777671] outline-none transition-colors",
         disabled
           ? "cursor-default text-[#b8b7b0]"
           : "hover:bg-[#eeece4] hover:text-[#24231f]",
+        className,
       )}
     >
       {children}
@@ -144,6 +159,35 @@ const SearchIcon = () => (
   </svg>
 );
 
+const FilterIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M4 6H20"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+    <path
+      d="M7 12H17"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+    <path
+      d="M10 18H14"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 const HomeIcon = () => (
   <svg
     width="13"
@@ -194,6 +238,30 @@ const FolderIcon = () => (
 );
 
 const ExplorerToolbar = () => {
+  const { tags } = useTags();
+  const {
+    tagFilter,
+    uncertaintyFilter,
+    bookmarkedFilter,
+    draftFilter,
+    contentTypeFilter,
+  } = useExplorerStore();
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const panelPreset = floatingPanelPresets.filter;
+  const allTags = useMemo(
+    () =>
+      tags
+        .map((tag) => tag.name)
+        .sort((left, right) => left.localeCompare(right, "ja")),
+    [tags],
+  );
+  const isFilterActive =
+    tagFilter.length > 0 ||
+    uncertaintyFilter !== "any" ||
+    bookmarkedFilter !== "any" ||
+    draftFilter !== "any" ||
+    contentTypeFilter.length < 2;
+
   return (
     <div
       className={cn(
@@ -233,6 +301,28 @@ const ExplorerToolbar = () => {
       <ExplorerToolbarButton title="更新">
         <RefreshIcon />
       </ExplorerToolbarButton>
+
+      <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+        <PopoverTrigger asChild>
+          <ExplorerToolbarButton
+            title="絞り込み"
+            className={cn(isFilterActive && "bg-[#eeece4] text-[#24231f]")}
+          >
+            <FilterIcon />
+          </ExplorerToolbarButton>
+        </PopoverTrigger>
+
+        <PopoverContent
+          align="start"
+          side="bottom"
+          sideOffset={8}
+          className={cn(panelPreset.className, "w-64")}
+          surface={panelPreset.surface}
+        >
+          <TagFilterPanel allTags={allTags} isOpen={isFilterOpen} />
+        </PopoverContent>
+      </Popover>
+
       <ExplorerToolbarButton title="検索">
         <SearchIcon />
       </ExplorerToolbarButton>
