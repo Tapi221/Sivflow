@@ -167,18 +167,10 @@
     --font-size-meta: var(--ds-layout-font-size-meta);
 
     --scrollbar-track: transparent;
-    --scrollbar-thumb: color-mix(
-      in srgb,
-      var(--sidebar-border) 68%,
-      #c7b19c 32%
-    );
-    --scrollbar-thumb-hover: color-mix(
-      in srgb,
-      var(--scrollbar-thumb) 78%,
-      #b0967f 22%
-    );
-    --card-resize-handle-active: #a78f79;
-    --scrollbar-thumb-active: var(--card-resize-handle-active);
+    /* Match ExplorerChrome icon fill tone */
+    --scrollbar-thumb: #f0efe9;
+    --scrollbar-thumb-hover: color-mix(in srgb, #f0efe9 86%, black 14%);
+    --scrollbar-thumb-active: color-mix(in srgb, #f0efe9 74%, black 26%);
     --scrollbar-size: calc(var(--ds-layout-scrollbar-size) * var(--ui-scale));
 
     /* Card interaction state tokens */
