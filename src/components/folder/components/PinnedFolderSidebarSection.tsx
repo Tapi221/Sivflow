@@ -1,6 +1,7 @@
 import type { MenuAction } from "@/components/folder/components/menus/menuActions";
 import {
   getFolderId,
+  getParentFolderId,
   type FolderTreeNode,
 } from "@/components/folder/explorer/model/utils";
 import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
@@ -139,6 +140,18 @@ export const PinnedFolderSidebarSection = ({
     pinnedFolderIds,
   ]);
 
+  const folderListCount = useMemo(() => {
+    let count = 0;
+    for (const folder of folderById.values()) {
+      const folderId = getFolderId(folder);
+      if (!folderId) continue;
+      if (getParentFolderId(folder) !== null) continue;
+      if (isFiltering && (matchCountMap.get(folderId) ?? 0) <= 0) continue;
+      count += 1;
+    }
+    return count;
+  }, [folderById, isFiltering, matchCountMap]);
+
   return (
     <section className="shrink-0 pb-0 pt-1">
       <>
@@ -274,6 +287,8 @@ export const PinnedFolderSidebarSection = ({
             )}
 
             <span className="min-w-0 flex-1 truncate">フォルダ一覧</span>
+
+            <span className="tabular-nums opacity-60">{folderListCount}</span>
           </button>
         </div>
       </>
