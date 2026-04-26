@@ -11,9 +11,23 @@ export interface SectionListBlankPaneProps {
   children?: ReactNode;
 }
 
+const WORKSPACE_EXPLORER_TAB_WIDTH_VAR = "--workspace-explorer-tab-width";
+
+const buildSidebarWidthFallback = (sidebarWidth: number): string => {
+  const normalizedWidth = Number.isFinite(sidebarWidth)
+    ? Math.max(0, Math.round(sidebarWidth))
+    : 0;
+
+  return `${normalizedWidth}px`;
+};
+
 /**
- * セクション一覧モードで、左サイドバー右側に表示するカラムビュー領域。
- * ワークスペースタブ配下では固定配置にせず、TreeViewLayout の一体型シェル内に収める。
+ * セクション一覧モードで、左サイドバー右側に表示するカラム/詳細ビュー領域。
+ *
+ * サイドバー幅は useTreeViewSidebar がリサイズ中に DOM と CSS 変数へ直接反映する。
+ * React state の renderedSidebarWidth は pointerup まで更新されないため、ここで props の
+ * sidebarWidth だけを見ると、ドラッグ中に右ペインの left が追従せず、サイドバーと
+ * 右ペインが重なって見える。
  */
 export const SectionListBlankPane = ({
   className,
@@ -22,9 +36,10 @@ export const SectionListBlankPane = ({
   children,
 }: SectionListBlankPaneProps) => {
   const hasContent = children !== undefined && children !== null;
+  const sidebarWidthFallback = buildSidebarWidthFallback(sidebarWidth);
 
   const style = {
-    left: `${sidebarWidth}px`,
+    left: `var(${WORKSPACE_EXPLORER_TAB_WIDTH_VAR}, ${sidebarWidthFallback})`,
     right: 0,
     top: 0,
     bottom: 0,
