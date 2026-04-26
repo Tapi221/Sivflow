@@ -406,6 +406,11 @@ const normalizeTagName = (tag: string): string => {
   return tag.replace(/^#+/, "").trim();
 };
 
+const toHashTagDisplayName = (tag: string): string => {
+  const normalizedTagName = normalizeTagName(tag);
+  return normalizedTagName ? `#${normalizedTagName}` : "";
+};
+
 const parseTagEditorValue = (value: string): string[] => {
   const tagNames = value
     .split(/[\s,、]+/u)
@@ -416,11 +421,11 @@ const parseTagEditorValue = (value: string): string[] => {
 };
 
 const buildTagEditorValue = (tags: string[]): string => {
-  return tags.map(normalizeTagName).filter(Boolean).join(" ");
+  return tags.map(toHashTagDisplayName).filter(Boolean).join(" ");
 };
 
 const formatExplorerTagNames = (tags: string[]): string => {
-  return formatExplorerTags(tags.map(normalizeTagName).filter(Boolean));
+  return formatExplorerTags(tags.map(toHashTagDisplayName).filter(Boolean));
 };
 
 const HeaderCell = ({
@@ -634,7 +639,7 @@ const FolderDetailRowView = ({
               value={tagEditState.value}
               disabled={tagEditState.isSaving}
               aria-label={`${row.name} のタグを編集`}
-              placeholder="タグを空白またはカンマで区切る"
+              placeholder="タグ名だけで入力可。保存後は # が付きます"
               className={cn(
                 "h-7 min-w-0 rounded-[5px] border border-[#a8a176] bg-white px-2",
                 "text-[12px] text-[#24231f] shadow-[0_0_0_2px_rgba(168,161,118,0.18)] outline-none",
