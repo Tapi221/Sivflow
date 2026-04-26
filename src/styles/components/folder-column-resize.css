@@ -17,7 +17,7 @@
    *
    * mask は要素全体を透明化するため、カラム境界線まで巻き込む。
    * そのため section 自体や child に mask は使わず、section の内側に
-   * 16px の overlay を置く。right: 1px にして右端の境界線は覆わない。
+   * 20px の overlay を置く。right: 1px にして右端の境界線は覆わない。
    */
   .folder-column-view > section,
   .folder-column-view > div > section {
@@ -34,7 +34,7 @@
     left: 0;
     right: 1px;
     z-index: 20;
-    height: 1rem;
+    height: 1.25rem;
   }
 
   .folder-column-view > section::before,
