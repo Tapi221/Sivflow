@@ -29,6 +29,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, X } from "@/ui/icons";
+import { ExplorerCalendarMonthView } from "./ExplorerCalendarMonthView";
 
 type ExplorerCalendarPaneProps = {
   onClose?: () => void;
@@ -546,18 +547,28 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
         ) : null}
       </header>
 
-      <div
-        ref={scrollContainerRef}
-        className="calendar-timeline-scroll min-h-0 flex-1 overflow-auto bg-white"
-        onScroll={handleTimelineScroll}
-      >
-        <div
-          className="grid"
-          style={{
-            gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${dayColumnWidth}px)`,
-            minWidth: `${gridWidth}px`,
+      {viewMode === "month" ? (
+        <ExplorerCalendarMonthView
+          currentDate={currentDate}
+          selectedDate={currentDate}
+          onSelectDate={(date) => {
+            resetTimelinePosition();
+            setCurrentDate(date);
           }}
+        />
+      ) : (
+        <div
+          ref={scrollContainerRef}
+          className="calendar-timeline-scroll min-h-0 flex-1 overflow-auto bg-white"
+          onScroll={handleTimelineScroll}
         >
+          <div
+            className="grid"
+            style={{
+              gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${dayColumnWidth}px)`,
+              minWidth: `${gridWidth}px`,
+            }}
+          >
           <div className="sticky left-0 top-0 z-30 border-b border-r border-[#e8e7e1] bg-white" />
 
           {visibleDays.map((day) => {
@@ -685,8 +696,9 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
               </div>
             );
           })}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 };
