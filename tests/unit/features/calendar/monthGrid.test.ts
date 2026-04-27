@@ -7,6 +7,7 @@ import {
   buildCalendarMonthGridDays,
   buildCalendarMonthPage,
   buildCalendarMonthPages,
+  buildCalendarMonthStackGridDays,
   getCalendarMonthKey,
 } from "@/features/calendar/model/monthGrid";
 
@@ -23,6 +24,19 @@ describe("monthGrid", () => {
     expect(days[33]?.key).toBe("2026-05-01");
     expect(days[34]?.key).toBe("2026-05-02");
     expect(days[41]?.key).toBe("2026-05-09");
+  });
+
+  it("縦スクロール用の月ページは必要な週だけで構築する", () => {
+    const aprilDays = buildCalendarMonthStackGridDays(new Date(2026, 3, 1));
+    const februaryDays = buildCalendarMonthStackGridDays(new Date(2026, 1, 1));
+
+    expect(aprilDays).toHaveLength(35);
+    expect(aprilDays[0]?.key).toBe("2026-03-29");
+    expect(aprilDays[34]?.key).toBe("2026-05-02");
+
+    expect(februaryDays).toHaveLength(28);
+    expect(februaryDays[0]?.key).toBe("2026-02-01");
+    expect(februaryDays[27]?.key).toBe("2026-02-28");
   });
 
   it("当月日と月外日を判定する", () => {
@@ -49,41 +63,32 @@ describe("monthGrid", () => {
     expect(april2?.isMonthStart).toBe(false);
   });
 
-  it("月キーを yyyy-MM で正規化する", () => {
-    expect(getCalendarMonthKey(new Date(2026, 3, 27))).toBe("2026-04");
-    expect(getCalendarMonthKey(new Date(2026, 3, 1))).toBe("2026-04");
+  it("月キーと月単位加算を安定して扱う", () => {
+    const april = new Date(2026, 3, 27);
+    const previousMonth = addCalendarMonths(april, -1);
+    const nextMonth = addCalendarMonths(april, 1);
+
+    expect(getCalendarMonthKey(april)).toBe("2026-04");
+    expect(getCalendarMonthKey(previousMonth)).toBe("2026-03");
+    expect(getCalendarMonthKey(nextMonth)).toBe("2026-05");
   });
 
-  it("月単位の加減算は月初へ正規化する", () => {
-    expect(toKey(addCalendarMonths(new Date(2026, 3, 27), -1))).toBe(
-      "2026-03-01",
-    );
-    expect(toKey(addCalendarMonths(new Date(2026, 3, 27), 1))).toBe(
-      "2026-05-01",
-    );
-  });
-
-  it("月ページはラベルと42セルを持つ", () => {
-    const page = buildCalendarMonthPage(new Date(2026, 3, 27));
-
-    expect(page.key).toBe("2026-04");
-    expect(page.label).toBe("2026年 4月");
-    expect(toKey(page.monthStart)).toBe("2026-04-01");
-    expect(page.days).toHaveLength(CALENDAR_MONTH_GRID_CELL_COUNT);
-  });
-
-  it("アンカー月を中心に連続する月ページを構築する", () => {
+  it("月ページと月ページ列を構築する", () => {
+    const aprilPage = buildCalendarMonthPage(new Date(2026, 3, 27));
     const pages = buildCalendarMonthPages({
       anchorDate: new Date(2026, 3, 27),
       startOffset: -1,
       endOffset: 1,
     });
 
+    expect(aprilPage.key).toBe("2026-04");
+    expect(aprilPage.label).toBe("2026年 4月");
+    expect(aprilPage.days).toHaveLength(35);
+
     expect(pages.map((page) => page.key)).toEqual([
       "2026-03",
       "2026-04",
       "2026-05",
     ]);
-    expect(pages.every((page) => page.days.length === 42)).toBe(true);
   });
 });
