@@ -405,66 +405,97 @@ export const RootFolderPanelRow = ({
       )}
       trailing={trailingNode}
       icon={
-        <Icon
-          className={cn(
-            FOLDER_ROW_ICON_SIZE_CLASS,
-          )}
-        />
+        isEditing ? undefined : (
+          <Icon
+            className={cn(
+              FOLDER_ROW_ICON_SIZE_CLASS,
+            )}
+          />
+        )
       }
       input={
-        <input
-          ref={attachRenameInputRef}
+        <div
           className={cn(
-            EXPLORER_ROW_INPUT_CLASS,
-            "h-7 min-w-0 w-full rounded-[5px] border border-[#d8d5cc] bg-white px-2",
-            "text-[12px] text-[#24231f] shadow-[0_1px_2px_rgba(25,23,17,0.06)] outline-none",
-            "focus:border-[#8b887f] focus:shadow-[0_0_0_2px_rgba(139,136,127,0.14)]",
-            "placeholder:text-muted-foreground/55",
+            "flex h-7 min-w-0 w-full items-center gap-1 rounded-[5px] border border-[#d8d5cc] bg-white px-1.5",
+            "shadow-[0_1px_2px_rgba(25,23,17,0.06)] transition",
+            "focus-within:border-[#8b887f] focus-within:shadow-[0_0_0_2px_rgba(139,136,127,0.14)]",
           )}
-          style={{ userSelect: "text", WebkitUserSelect: "text" }}
-          value={editingName}
-          onFocus={(e) => {
-            e.currentTarget.select();
-          }}
-          onMouseUp={(e) => {
-            e.preventDefault();
-          }}
-          onChange={(e) => {
-            const nextName = e.target.value;
-            editingNameRef.current = nextName;
-            setEditingName(nextName);
-          }}
-          onClick={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
-          onKeyDown={(e) => {
-            e.stopPropagation();
-            const isComposing = e.nativeEvent.isComposing || e.keyCode === 229;
-
-            if (e.key === "Enter" && isComposing) return;
-
-            if (e.key === "Enter") {
-              e.preventDefault();
-              editingNameRef.current = e.currentTarget.value;
-              void handleRenameConfirm({
-                id: entry.id,
-                type: entry.kind,
-              });
-              return;
+          onClick={(event) => {
+            event.stopPropagation();
+            if (event.target !== renameInputRef.current) {
+              renameInputRef.current?.focus({ preventScroll: true });
             }
-
-            if (e.key === "Escape") {
+          }}
+          onMouseDown={(event) => {
+            event.stopPropagation();
+            if (event.target !== renameInputRef.current) {
+              event.preventDefault();
+            }
+          }}
+          onPointerDown={(event) => {
+            event.stopPropagation();
+          }}
+        >
+          <Icon
+            className={cn(
+              FOLDER_ROW_ICON_SIZE_CLASS,
+              "shrink-0 text-[#8b887f]",
+            )}
+          />
+          <input
+            ref={attachRenameInputRef}
+            className={cn(
+              EXPLORER_ROW_INPUT_CLASS,
+              "h-full min-w-0 flex-1 border-0 bg-transparent px-0",
+              "text-[12px] text-[#24231f] shadow-none outline-none",
+              "focus:border-transparent focus:shadow-none focus:outline-none",
+              "placeholder:text-muted-foreground/55",
+            )}
+            style={{ userSelect: "text", WebkitUserSelect: "text" }}
+            value={editingName}
+            onFocus={(e) => {
+              e.currentTarget.select();
+            }}
+            onMouseUp={(e) => {
               e.preventDefault();
-              renameCancelledRef.current = true;
-              if (isCreateDraft && entry.kind === "folder") {
-                handleDelete(entry.id, "folder");
+            }}
+            onChange={(e) => {
+              const nextName = e.target.value;
+              editingNameRef.current = nextName;
+              setEditingName(nextName);
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              e.stopPropagation();
+              const isComposing = e.nativeEvent.isComposing || e.keyCode === 229;
+
+              if (e.key === "Enter" && isComposing) return;
+
+              if (e.key === "Enter") {
+                e.preventDefault();
+                editingNameRef.current = e.currentTarget.value;
+                void handleRenameConfirm({
+                  id: entry.id,
+                  type: entry.kind,
+                });
                 return;
               }
-              setEditingId(null);
-              setEditingName("");
-            }
-          }}
-          onBlur={handleRenameBlur}
-        />
+
+              if (e.key === "Escape") {
+                e.preventDefault();
+                renameCancelledRef.current = true;
+                if (isCreateDraft && entry.kind === "folder") {
+                  handleDelete(entry.id, "folder");
+                  return;
+                }
+                setEditingId(null);
+                setEditingName("");
+              }
+            }}
+            onBlur={handleRenameBlur}
+          />
+        </div>
       }
       role="button"
       tabIndex={0}
