@@ -58,13 +58,17 @@ const PINNED_FOLDER_SECTION_CONTENT_ID =
 const FOLDER_LIST_SECTION_HEADER_ID = "folder-list-sidebar-section-header";
 const FOLDER_LIST_SECTION_CONTENT_ID = "folder-list-sidebar-section-content";
 const TAG_SECTION_CONTENT_ID = "tag-sidebar-section-content";
+const CALENDAR_SECTION_CONTENT_ID = "calendar-sidebar-section-content";
 const SIDEBAR_SECTION_RESIZE_STORAGE_PREFIX =
   "flashcard-master.explorer.sidebarSectionHeight";
 const SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE =
   "data-explorer-sidebar-section-resize-handle";
-const SIDEBAR_SECTION_RESIZE_HANDLE_COLOR = "transparent";
-const SIDEBAR_SECTION_RESIZE_HANDLE_ACTIVE_COLOR =
-  "rgba(31, 41, 55, 0.24)";
+const getSidebarSectionHeaderElement = (contentId: string) => {
+  return (
+    document.querySelector<HTMLElement>(`[aria-controls="${contentId}"]`)
+      ?.parentElement ?? null
+  );
+};
 
 const SIDEBAR_SECTION_RESIZE_TARGETS: SidebarSectionResizeTarget[] = [
   {
@@ -74,7 +78,7 @@ const SIDEBAR_SECTION_RESIZE_TARGETS: SidebarSectionResizeTarget[] = [
     resolveElement: () =>
       document.getElementById(PINNED_FOLDER_SECTION_CONTENT_ID),
     resolveAnchor: () =>
-      document.getElementById(PINNED_FOLDER_SECTION_FRAME_ID),
+      document.getElementById(FOLDER_LIST_SECTION_HEADER_ID),
   },
   {
     id: "folder-list-content",
@@ -82,15 +86,15 @@ const SIDEBAR_SECTION_RESIZE_TARGETS: SidebarSectionResizeTarget[] = [
     maxHeight: 720,
     resolveElement: () =>
       document.getElementById(FOLDER_LIST_SECTION_CONTENT_ID),
-    resolveAnchor: () =>
-      document.getElementById(FOLDER_LIST_SECTION_CONTENT_ID),
+    resolveAnchor: () => getSidebarSectionHeaderElement(TAG_SECTION_CONTENT_ID),
   },
   {
     id: "tag-content",
     minHeight: 38,
     maxHeight: 320,
     resolveElement: () => document.getElementById(TAG_SECTION_CONTENT_ID),
-    resolveAnchor: () => document.getElementById(TAG_SECTION_CONTENT_ID),
+    resolveAnchor: () =>
+      getSidebarSectionHeaderElement(CALENDAR_SECTION_CONTENT_ID),
   },
 ];
 
@@ -181,9 +185,9 @@ const resetSidebarSectionHeight = (element: HTMLElement) => {
 const createSidebarSectionResizeHandle = (
   target: SidebarSectionResizeTarget,
   element: HTMLElement,
+  anchor: HTMLElement,
 ) => {
   const handle = document.createElement("div");
-  const indicator = document.createElement("div");
 
   handle.setAttribute(SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE, target.id);
   handle.setAttribute("role", "separator");
@@ -193,37 +197,17 @@ const createSidebarSectionResizeHandle = (
   handle.title = "ドラッグで区切り位置を変更。ダブルクリックで初期値に戻します。";
 
   Object.assign(handle.style, {
-    position: "relative",
+    position: "absolute",
+    left: "0",
+    right: "0",
+    top: "-5px",
     zIndex: "80",
-    height: "8px",
-    margin: "-4px 0",
+    height: "10px",
     cursor: "row-resize",
     touchAction: "none",
     userSelect: "none",
     background: "transparent",
-    flex: "0 0 8px",
   } satisfies Partial<CSSStyleDeclaration>);
-
-  Object.assign(indicator.style, {
-    position: "absolute",
-    left: "0",
-    right: "0",
-    top: "3px",
-    height: "2px",
-    borderRadius: "999px",
-    background: SIDEBAR_SECTION_RESIZE_HANDLE_COLOR,
-    transition: "background-color 120ms ease",
-  } satisfies Partial<CSSStyleDeclaration>);
-
-  handle.appendChild(indicator);
-
-  const showIndicator = () => {
-    indicator.style.background = SIDEBAR_SECTION_RESIZE_HANDLE_ACTIVE_COLOR;
-  };
-
-  const hideIndicator = () => {
-    indicator.style.background = SIDEBAR_SECTION_RESIZE_HANDLE_COLOR;
-  };
 
   const commitHeight = (height: number) => {
     const clampedHeight = clampSectionHeight(
@@ -273,7 +257,6 @@ const createSidebarSectionResizeHandle = (
 
     event.preventDefault();
     event.stopPropagation();
-    showIndicator();
 
     const startY = event.clientY;
     const startHeight = element.getBoundingClientRect().height;
@@ -310,7 +293,6 @@ const createSidebarSectionResizeHandle = (
       }
 
       commitHeight(pendingHeight);
-      hideIndicator();
       document.body.style.cursor = previousCursor;
       document.body.style.userSelect = previousUserSelect;
       window.removeEventListener("pointermove", handlePointerMove);
@@ -330,13 +312,11 @@ const createSidebarSectionResizeHandle = (
     resetSidebarSectionHeight(element);
   };
 
-  handle.addEventListener("mouseenter", showIndicator);
-  handle.addEventListener("mouseleave", hideIndicator);
-  handle.addEventListener("focus", showIndicator);
-  handle.addEventListener("blur", hideIndicator);
   handle.addEventListener("pointerdown", startResize);
   handle.addEventListener("keydown", resizeByKeyboard);
   handle.addEventListener("dblclick", resetHeight);
+
+  anchor.appendChild(handle);
 
   return handle;
 };
@@ -345,7 +325,10 @@ const SidebarSectionResizeBridge = () => {
   useEffect(() => {
     let disposed = false;
     const cleanupCallbacks: Array<() => void> = [];
-    const mounted = new Map<string, { handle: HTMLElement; element: HTMLElement }>();
+    const mounted = new Map<
+      string,
+      { handle: HTMLElement; element: HTMLElement; anchor: HTMLElement }
+    >();
 
     const cleanupMounted = (sectionId: string) => {
       const current = mounted.get(sectionId);
@@ -365,10 +348,11 @@ const SidebarSectionResizeBridge = () => {
       }
 
       const current = mounted.get(target.id);
-      if (current?.element === element && current.handle.parentElement) {
-        if (current.handle.previousElementSibling !== anchor) {
-          anchor.insertAdjacentElement("afterend", current.handle);
-        }
+      if (
+        current?.element === element &&
+        current.anchor === anchor &&
+        current.handle.parentElement === anchor
+      ) {
         return;
       }
 
@@ -379,15 +363,20 @@ const SidebarSectionResizeBridge = () => {
       const originalMinHeight = element.style.minHeight;
       const originalMaxHeight = element.style.maxHeight;
       const originalFlex = element.style.flex;
+      const originalAnchorPosition = anchor.style.position;
       const storedHeight = readStoredSectionHeight(target);
 
       if (storedHeight !== null) {
         applySidebarSectionHeight(element, storedHeight);
       }
 
-      const handle = createSidebarSectionResizeHandle(target, element);
-      anchor.insertAdjacentElement("afterend", handle);
-      mounted.set(target.id, { handle, element });
+      const anchorPosition = window.getComputedStyle(anchor).position;
+      if (anchorPosition === "static") {
+        anchor.style.position = "relative";
+      }
+
+      const handle = createSidebarSectionResizeHandle(target, element, anchor);
+      mounted.set(target.id, { handle, element, anchor });
 
       cleanupCallbacks.push(() => {
         if (handle.parentElement) {
@@ -398,6 +387,7 @@ const SidebarSectionResizeBridge = () => {
         element.style.minHeight = originalMinHeight;
         element.style.maxHeight = originalMaxHeight;
         element.style.flex = originalFlex;
+        anchor.style.position = originalAnchorPosition;
       });
     };
 
