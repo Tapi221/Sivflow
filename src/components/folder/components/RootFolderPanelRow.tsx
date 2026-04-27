@@ -416,8 +416,9 @@ export const RootFolderPanelRow = ({
           ref={attachRenameInputRef}
           className={cn(
             EXPLORER_ROW_INPUT_CLASS,
-            "h-7 min-w-0 w-full rounded-[5px] border border-[#a8a176] bg-white px-2",
-            "text-[12px] text-[#24231f] shadow-[0_0_0_2px_rgba(168,161,118,0.18)] outline-none",
+            "h-7 min-w-0 w-full rounded-[5px] border border-[#d8d5cc] bg-white px-2",
+            "text-[12px] text-[#24231f] shadow-[0_1px_2px_rgba(25,23,17,0.06)] outline-none",
+            "focus:border-[#8b887f] focus:shadow-[0_0_0_2px_rgba(139,136,127,0.14)]",
             "placeholder:text-muted-foreground/55",
           )}
           style={{ userSelect: "text", WebkitUserSelect: "text" }}
