@@ -50,7 +50,12 @@
   }
 
   .calendar-timeline-grid {
+    --calendar-all-day-row-height: 46px;
     --calendar-hour-row-height: 88px;
+  }
+
+  .calendar-all-day-row {
+    height: var(--calendar-all-day-row-height);
   }
 
   .calendar-hour-row {
@@ -69,10 +74,12 @@
     );
   }
 
+  .calendar-all-day-label-row,
   .calendar-hour-label-row {
     cursor: default;
   }
 
+  .calendar-all-day-boundary-resize-handle,
   .calendar-hour-boundary-resize-handle {
     position: absolute;
     bottom: -4px;
@@ -85,6 +92,11 @@
     background: transparent;
   }
 
+  .calendar-all-day-boundary-resize-handle {
+    z-index: 40;
+  }
+
+  .calendar-all-day-boundary-resize-handle::after,
   .calendar-hour-boundary-resize-handle::after {
     content: "";
     position: absolute;
@@ -97,11 +109,14 @@
     transition: background-color 120ms ease;
   }
 
+  .calendar-all-day-boundary-resize-handle:hover::after,
+  .calendar-all-day-boundary-resize-handle:focus-visible::after,
   .calendar-hour-boundary-resize-handle:hover::after,
   .calendar-hour-boundary-resize-handle:focus-visible::after {
     background: rgba(127, 45, 40, 0.42);
   }
 
+  .calendar-all-day-boundary-resize-handle:focus-visible,
   .calendar-hour-boundary-resize-handle:focus-visible {
     outline: none;
   }
