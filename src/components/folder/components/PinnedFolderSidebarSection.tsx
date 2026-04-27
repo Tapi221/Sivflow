@@ -47,14 +47,14 @@ const FOLDER_LIST_SECTION_CONTENT_ID = "folder-list-sidebar-section-content";
 const isSoftDeletedFolder = (folder: FolderTreeNode) => {
   return Boolean(
     (folder as { isDeleted?: boolean; is_deleted?: boolean }).isDeleted ??
-      (folder as { isDeleted?: boolean; is_deleted?: boolean }).is_deleted,
+    (folder as { isDeleted?: boolean; is_deleted?: boolean }).is_deleted,
   );
 };
 
 const isHiddenFolder = (folder: FolderTreeNode) => {
   return Boolean(
     (folder as { isHidden?: boolean; is_hidden?: boolean }).isHidden ??
-      (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden,
+    (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden,
   );
 };
 
@@ -67,7 +67,9 @@ const getPinnedFolderName = (folder: FolderTreeNode) => {
 };
 
 const preventCreateButtonFocusTransfer = (
-  event: React.PointerEvent<HTMLButtonElement> | React.MouseEvent<HTMLButtonElement>,
+  event:
+    | React.PointerEvent<HTMLButtonElement>
+    | React.MouseEvent<HTMLButtonElement>,
 ) => {
   event.preventDefault();
   event.stopPropagation();
@@ -191,7 +193,9 @@ export const PinnedFolderSidebarSection = ({
 
             <span className="min-w-0 flex-1 truncate">ピン留め</span>
 
-            <span className="tabular-nums opacity-60">{pinnedFolders.length}</span>
+            <span className="tabular-nums opacity-60">
+              {pinnedFolders.length}
+            </span>
           </button>
         </div>
 

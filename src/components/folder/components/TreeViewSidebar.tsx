@@ -3,7 +3,13 @@ import { PinnedFolderSidebarSection } from "@/components/folder/components/Pinne
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 interface TreeViewSidebarProps {
   sidebarRef: React.RefObject<HTMLDivElement | null>;

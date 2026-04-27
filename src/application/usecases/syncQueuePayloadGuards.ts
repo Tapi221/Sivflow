@@ -46,7 +46,9 @@ const hasOptionalNumber = (
   key: string,
 ): boolean => {
   const field = value[key];
-  return field === undefined || (typeof field === "number" && Number.isFinite(field));
+  return (
+    field === undefined || (typeof field === "number" && Number.isFinite(field))
+  );
 };
 
 const hasNumber = (value: Record<string, unknown>, key: string): boolean =>
@@ -84,7 +86,8 @@ const isCardPayload = (value: unknown): value is Card =>
 const isFolderPayload = (value: unknown): value is Folder => {
   if (!hasBaseEntityShape(value) || !isRecord(value)) return false;
 
-  const hasFolderName = hasString(value, "folderName") || hasString(value, "name");
+  const hasFolderName =
+    hasString(value, "folderName") || hasString(value, "name");
   if (!hasFolderName) return false;
 
   return (

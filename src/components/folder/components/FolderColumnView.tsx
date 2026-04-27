@@ -339,7 +339,7 @@ const FolderColumnRow = ({
         ? ExplorerChromeCardSetIcon
         : entry.kind === "card"
           ? ExplorerChromeCardIcon
-        : ExplorerChromePdfIcon;
+          : ExplorerChromePdfIcon;
 
   const contentCount =
     entry.kind === "folder" || entry.kind === "cardSet"
@@ -419,11 +419,7 @@ const FolderColumnRow = ({
       ) : null}
 
       <span className="ds-list-item__icon flex h-full w-4 shrink-0 items-center justify-center">
-        <Icon
-          className={cn(
-            FOLDER_ROW_ICON_SIZE_CLASS,
-          )}
-        />
+        <Icon className={cn(FOLDER_ROW_ICON_SIZE_CLASS)} />
       </span>
 
       <div className="ds-list-item__content flex h-full min-w-0 flex-1 items-center pr-1">
@@ -1980,4 +1976,3 @@ export const FolderColumnView = ({
     </div>
   );
 };
-

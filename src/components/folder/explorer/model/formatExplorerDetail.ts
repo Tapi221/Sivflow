@@ -20,7 +20,9 @@ export const formatExplorerUpdatedAt = (value: unknown): string => {
   return `${year}/${month}/${day} ${hours}:${minutes}`;
 };
 
-export const formatExplorerSize = (bytes: number | null | undefined): string => {
+export const formatExplorerSize = (
+  bytes: number | null | undefined,
+): string => {
   if (typeof bytes !== "number" || !Number.isFinite(bytes) || bytes < 0) {
     return "—";
   }

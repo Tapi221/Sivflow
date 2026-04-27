@@ -427,7 +427,10 @@ export const useFolderActions = ({
         ? getUniqueFolderName(normalizedParentId, DEFAULT_NEW_FOLDER_NAME)
         : DEFAULT_NEW_FOLDER_NAME;
       const folderId = createEntityId("folder");
-      const orderIndex = nextOrderIndexForFolder(treeFolders, normalizedParentId);
+      const orderIndex = nextOrderIndexForFolder(
+        treeFolders,
+        normalizedParentId,
+      );
 
       if (normalizedParentId) {
         setExpandedFolders((prev) => {
@@ -473,7 +476,10 @@ export const useFolderActions = ({
       if (!normalizedFolderId) return null;
 
       const cardSetId = createEntityId("cardSet");
-      const orderIndex = nextOrderIndexForCardSet(treeCardSets, normalizedFolderId);
+      const orderIndex = nextOrderIndexForCardSet(
+        treeCardSets,
+        normalizedFolderId,
+      );
 
       setExpandedFolders((prev) => {
         const next = new Set(prev);
@@ -485,7 +491,12 @@ export const useFolderActions = ({
         orderIndex,
       });
       setOptimisticCardSets((prev) => [
-        makeTempCardSet(cardSetId, DEFAULT_NEW_CARDSET_NAME, normalizedFolderId, orderIndex),
+        makeTempCardSet(
+          cardSetId,
+          DEFAULT_NEW_CARDSET_NAME,
+          normalizedFolderId,
+          orderIndex,
+        ),
         ...prev,
       ]);
       setPendingScrollId(cardSetId);
@@ -638,10 +649,14 @@ export const useFolderActions = ({
         closeRename();
 
         try {
-          await createFolder(nextName, folderDraft.parentFolderId || undefined, {
-            id,
-            orderIndex: folderDraft.orderIndex,
-          });
+          await createFolder(
+            nextName,
+            folderDraft.parentFolderId || undefined,
+            {
+              id,
+              orderIndex: folderDraft.orderIndex,
+            },
+          );
         } catch (error) {
           console.error("[useFolderActions] create folder failed:", error);
           removeOptimisticFolder(id);

@@ -139,7 +139,8 @@ const getNextIndex = (
   metrics: ListColumnMetrics,
 ): number => {
   if (key === "ArrowUp") return clampIndex(currentIndex - 1, metrics.itemCount);
-  if (key === "ArrowDown") return clampIndex(currentIndex + 1, metrics.itemCount);
+  if (key === "ArrowDown")
+    return clampIndex(currentIndex + 1, metrics.itemCount);
   if (key === "ArrowLeft") {
     return clampIndex(currentIndex - metrics.rowsPerColumn, metrics.itemCount);
   }
@@ -227,7 +228,10 @@ const moveIdToEnd = (orderedIds: string[], movingId: string): string[] => {
 };
 
 const hasSameOrder = (left: string[], right: string[]): boolean => {
-  return left.length === right.length && left.every((id, index) => id === right[index]);
+  return (
+    left.length === right.length &&
+    left.every((id, index) => id === right[index])
+  );
 };
 
 const isSamePayloadAndRow = (
@@ -267,10 +271,12 @@ const getDropPositionFromPointer = (
   event: ReactDragEvent<HTMLElement>,
 ): ExplorerListDropPosition => {
   const rect = event.currentTarget.getBoundingClientRect();
-  const ratio = rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
+  const ratio =
+    rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
 
   const canDropInsideFolder = row.kind === "folder" && payload.kind !== "card";
-  const canDropInsideCardSet = row.kind === "cardSet" && payload.kind === "card";
+  const canDropInsideCardSet =
+    row.kind === "cardSet" && payload.kind === "card";
 
   if (
     (canDropInsideFolder || canDropInsideCardSet) &&
@@ -360,7 +366,8 @@ export const FolderListView = ({
   const canReorderKind = useCallback(
     (kind: ExplorerDetailRowKind): boolean => {
       if (kind === "folder") return Boolean(onReorderFolders);
-      if (kind === "cardSet") return Boolean(currentFolderId && onReorderCardSets);
+      if (kind === "cardSet")
+        return Boolean(currentFolderId && onReorderCardSets);
       if (kind === "document") {
         return Boolean(currentFolderId && onReorderDocuments);
       }
@@ -378,7 +385,8 @@ export const FolderListView = ({
 
   const canDragRow = useCallback(
     (row: ExplorerDetailRow): boolean => {
-      if (row.kind === "folder") return Boolean(onMoveFolder || onReorderFolders);
+      if (row.kind === "folder")
+        return Boolean(onMoveFolder || onReorderFolders);
       if (row.kind === "cardSet") {
         return Boolean(onMoveCardSetToFolder || onReorderCardSets);
       }
@@ -499,7 +507,10 @@ export const FolderListView = ({
       position: "before" | "after",
     ) => {
       const orderedIds = getRowsOfKind(payload.kind).map((row) => row.id);
-      if (!orderedIds.includes(payload.id) || !orderedIds.includes(targetRow.id)) {
+      if (
+        !orderedIds.includes(payload.id) ||
+        !orderedIds.includes(targetRow.id)
+      ) {
         return;
       }
 
@@ -858,7 +869,10 @@ export const FolderListView = ({
   const handleRowDragLeave = useCallback(
     (row: ExplorerDetailRow, event: ReactDragEvent<HTMLDivElement>) => {
       const nextTarget = event.relatedTarget;
-      if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) {
+      if (
+        nextTarget instanceof Node &&
+        event.currentTarget.contains(nextTarget)
+      ) {
         return;
       }
 
@@ -917,7 +931,10 @@ export const FolderListView = ({
   const handleViewportDragLeave = useCallback(
     (event: ReactDragEvent<HTMLDivElement>) => {
       const nextTarget = event.relatedTarget;
-      if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) {
+      if (
+        nextTarget instanceof Node &&
+        event.currentTarget.contains(nextTarget)
+      ) {
         return;
       }
 

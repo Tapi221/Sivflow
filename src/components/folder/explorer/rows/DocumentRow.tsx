@@ -149,11 +149,7 @@ export const DocumentRow = ({
         isSelected ? "font-medium" : "font-normal",
       )}
       icon={
-        <ExplorerChromePdfIcon
-          className={cn(
-            FOLDER_ROW_ICON_SIZE_CLASS,
-          )}
-        />
+        <ExplorerChromePdfIcon className={cn(FOLDER_ROW_ICON_SIZE_CLASS)} />
       }
       input={
         <input
