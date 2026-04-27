@@ -2,7 +2,7 @@ import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import type {
   CSSProperties,
-  MouseEvent as ReactMouseEvent,
+  KeyboardEvent,
   PointerEvent as ReactPointerEvent,
   UIEvent,
 } from "react";
@@ -28,44 +28,44 @@ const INITIAL_MONTH_BUFFER = 6;
 const MONTH_EXTEND_COUNT = 6;
 const MONTH_SCROLL_EDGE_THRESHOLD_PX = 560;
 const MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX = 56;
-const DEFAULT_MONTH_CELL_HEIGHT = 112;
-const MIN_MONTH_CELL_HEIGHT = 72;
-const MAX_MONTH_CELL_HEIGHT = 280;
-const MONTH_CELL_RESIZE_HIT_AREA_PX = 8;
-const MONTH_CELL_HEIGHT_STORAGE_KEY =
-  "flashcard-master.calendar.monthCellHeight";
+const DEFAULT_MONTH_ROW_HEIGHT = 112;
+const MIN_MONTH_ROW_HEIGHT = 72;
+const MAX_MONTH_ROW_HEIGHT = 260;
+const MONTH_ROW_HEIGHT_STEP = 4;
+const MONTH_ROW_HEIGHT_STORAGE_KEY =
+  "flashcard-master.calendar.monthRowHeight";
 
 const createInitialMonthOffsetRange = () => ({
   startOffset: -INITIAL_MONTH_BUFFER,
   endOffset: INITIAL_MONTH_BUFFER,
 });
 
-const clampMonthCellHeight = (value: number) => {
+const clampMonthRowHeight = (value: number) => {
   return Math.min(
-    MAX_MONTH_CELL_HEIGHT,
-    Math.max(MIN_MONTH_CELL_HEIGHT, Math.round(value)),
+    MAX_MONTH_ROW_HEIGHT,
+    Math.max(MIN_MONTH_ROW_HEIGHT, Math.round(value)),
   );
 };
 
-const readStoredMonthCellHeight = () => {
+const readStoredMonthRowHeight = () => {
   if (typeof window === "undefined") {
-    return DEFAULT_MONTH_CELL_HEIGHT;
+    return DEFAULT_MONTH_ROW_HEIGHT;
   }
 
-  const rawValue = window.localStorage.getItem(MONTH_CELL_HEIGHT_STORAGE_KEY);
+  const rawValue = window.localStorage.getItem(MONTH_ROW_HEIGHT_STORAGE_KEY);
   const parsedValue = rawValue === null ? Number.NaN : Number(rawValue);
 
   return Number.isFinite(parsedValue)
-    ? clampMonthCellHeight(parsedValue)
-    : DEFAULT_MONTH_CELL_HEIGHT;
+    ? clampMonthRowHeight(parsedValue)
+    : DEFAULT_MONTH_ROW_HEIGHT;
 };
 
-const writeStoredMonthCellHeight = (value: number) => {
+const writeStoredMonthRowHeight = (value: number) => {
   if (typeof window === "undefined") {
     return;
   }
 
-  window.localStorage.setItem(MONTH_CELL_HEIGHT_STORAGE_KEY, String(value));
+  window.localStorage.setItem(MONTH_ROW_HEIGHT_STORAGE_KEY, String(value));
 };
 
 const getMonthAnnotation = (
@@ -80,21 +80,27 @@ const getMonthAnnotation = (
   return monthLabel === baseMonthLabel ? null : monthLabel;
 };
 
+type MonthRowResizeAnchor = {
+  monthKey: string;
+  offsetTop: number;
+};
+
+type MonthRowResizeState = {
+  startY: number;
+  startHeight: number;
+  anchor: MonthRowResizeAnchor | null;
+};
+
+type MonthViewStyle = CSSProperties & {
+  "--calendar-month-row-height": string;
+};
+
 type ExplorerCalendarMonthViewProps = {
   currentDate: Date;
   selectedDate: Date;
   scrollTargetToken?: number;
   onSelectDate: (date: Date) => void;
   onVisibleMonthChange?: (date: Date) => void;
-};
-
-type MonthCellResizeState = {
-  startY: number;
-  startHeight: number;
-};
-
-type MonthViewStyle = CSSProperties & {
-  "--calendar-month-cell-height": string;
 };
 
 export const ExplorerCalendarMonthView = ({
@@ -104,7 +110,7 @@ export const ExplorerCalendarMonthView = ({
   onSelectDate,
   onVisibleMonthChange,
 }: ExplorerCalendarMonthViewProps) => {
-  const monthViewRef = useRef<HTMLDivElement | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const monthSectionRefs = useRef<Map<string, HTMLElement>>(new Map());
   const prependScrollHeightRef = useRef<number | null>(null);
@@ -115,24 +121,19 @@ export const ExplorerCalendarMonthView = ({
   );
   const lastScrollTargetTokenRef = useRef(scrollTargetToken);
   const visibleMonthKeyRef = useRef(getCalendarMonthKey(currentDate));
-  const monthCellResizeStateRef = useRef<MonthCellResizeState | null>(null);
-  const monthCellHeightRef = useRef(DEFAULT_MONTH_CELL_HEIGHT);
-  const pendingMonthCellHeightRef = useRef(DEFAULT_MONTH_CELL_HEIGHT);
-  const monthCellResizeFrameRef = useRef<number | null>(null);
-  const suppressNextMonthCellClickRef = useRef(false);
+  const monthRowResizeStateRef = useRef<MonthRowResizeState | null>(null);
+  const monthRowHeightRef = useRef(DEFAULT_MONTH_ROW_HEIGHT);
+  const pendingMonthRowHeightRef = useRef(DEFAULT_MONTH_ROW_HEIGHT);
+  const monthRowResizeFrameRef = useRef<number | null>(null);
 
   const [anchorMonth, setAnchorMonth] = useState(() => currentDate);
   const [monthOffsetRange, setMonthOffsetRange] = useState(
     createInitialMonthOffsetRange,
   );
-  const [monthCellHeight, setMonthCellHeight] = useState(
-    readStoredMonthCellHeight,
+  const [monthRowHeight, setMonthRowHeight] = useState(
+    readStoredMonthRowHeight,
   );
   const today = useMemo(() => new Date(), []);
-
-  const monthViewStyle: MonthViewStyle = {
-    "--calendar-month-cell-height": `${monthCellHeight}px`,
-  };
 
   const monthPages = useMemo(
     () =>
@@ -143,48 +144,9 @@ export const ExplorerCalendarMonthView = ({
       }),
     [anchorMonth, monthOffsetRange.endOffset, monthOffsetRange.startOffset],
   );
-
-  const applyMonthCellHeightVariable = useCallback((nextHeight: number) => {
-    monthViewRef.current?.style.setProperty(
-      "--calendar-month-cell-height",
-      `${nextHeight}px`,
-    );
-  }, []);
-
-  const scheduleMonthCellHeightVariable = useCallback(
-    (nextHeight: number) => {
-      const clampedHeight = clampMonthCellHeight(nextHeight);
-      pendingMonthCellHeightRef.current = clampedHeight;
-
-      if (monthCellResizeFrameRef.current !== null) {
-        return;
-      }
-
-      monthCellResizeFrameRef.current = window.requestAnimationFrame(() => {
-        monthCellResizeFrameRef.current = null;
-        applyMonthCellHeightVariable(pendingMonthCellHeightRef.current);
-      });
-    },
-    [applyMonthCellHeightVariable],
-  );
-
-  const commitMonthCellHeight = useCallback(
-    (nextHeight: number) => {
-      const clampedHeight = clampMonthCellHeight(nextHeight);
-
-      if (monthCellResizeFrameRef.current !== null) {
-        window.cancelAnimationFrame(monthCellResizeFrameRef.current);
-        monthCellResizeFrameRef.current = null;
-      }
-
-      monthCellHeightRef.current = clampedHeight;
-      pendingMonthCellHeightRef.current = clampedHeight;
-      applyMonthCellHeightVariable(clampedHeight);
-      writeStoredMonthCellHeight(clampedHeight);
-      setMonthCellHeight(clampedHeight);
-    },
-    [applyMonthCellHeightVariable],
-  );
+  const monthViewStyle: MonthViewStyle = {
+    "--calendar-month-row-height": `${monthRowHeight}px`,
+  };
 
   const setMonthSectionRef = useCallback(
     (monthKey: string, node: HTMLElement | null) => {
@@ -194,6 +156,63 @@ export const ExplorerCalendarMonthView = ({
       }
 
       monthSectionRefs.current.delete(monthKey);
+    },
+    [],
+  );
+
+  const getMonthResizeAnchor = useCallback(
+    (scroller: HTMLElement): MonthRowResizeAnchor | null => {
+      if (monthPages.length === 0) return null;
+
+      const scrollerRect = scroller.getBoundingClientRect();
+      const sampleY = scrollerRect.top + MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
+      let closestPage: CalendarMonthPage | null = null;
+      let closestDistance = Number.POSITIVE_INFINITY;
+
+      for (const page of monthPages) {
+        const section = monthSectionRefs.current.get(page.key);
+        if (!section) continue;
+
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= sampleY && rect.bottom > sampleY) {
+          closestPage = page;
+          break;
+        }
+
+        const distance = Math.min(
+          Math.abs(rect.top - sampleY),
+          Math.abs(rect.bottom - sampleY),
+        );
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestPage = page;
+        }
+      }
+
+      if (!closestPage) return null;
+
+      const section = monthSectionRefs.current.get(closestPage.key);
+      if (!section) return null;
+
+      return {
+        monthKey: closestPage.key,
+        offsetTop: section.getBoundingClientRect().top - scrollerRect.top,
+      };
+    },
+    [monthPages],
+  );
+
+  const preserveMonthResizeAnchor = useCallback(
+    (anchor: MonthRowResizeAnchor | null) => {
+      if (!anchor) return;
+
+      const scroller = scrollContainerRef.current;
+      const section = monthSectionRefs.current.get(anchor.monthKey);
+      if (!scroller || !section) return;
+
+      const scrollerRect = scroller.getBoundingClientRect();
+      const nextOffsetTop = section.getBoundingClientRect().top - scrollerRect.top;
+      scroller.scrollTop += nextOffsetTop - anchor.offsetTop;
     },
     [],
   );
@@ -237,16 +256,74 @@ export const ExplorerCalendarMonthView = ({
     [monthPages, onVisibleMonthChange],
   );
 
+  const applyMonthRowHeightVariable = useCallback(
+    (nextHeight: number, anchor: MonthRowResizeAnchor | null = null) => {
+      rootRef.current?.style.setProperty(
+        "--calendar-month-row-height",
+        `${nextHeight}px`,
+      );
+      preserveMonthResizeAnchor(anchor);
+    },
+    [preserveMonthResizeAnchor],
+  );
+
+  const scheduleMonthRowHeightVariable = useCallback(
+    (nextHeight: number) => {
+      const clampedHeight = clampMonthRowHeight(nextHeight);
+      pendingMonthRowHeightRef.current = clampedHeight;
+
+      if (monthRowResizeFrameRef.current !== null) {
+        return;
+      }
+
+      monthRowResizeFrameRef.current = window.requestAnimationFrame(() => {
+        monthRowResizeFrameRef.current = null;
+        applyMonthRowHeightVariable(
+          pendingMonthRowHeightRef.current,
+          monthRowResizeStateRef.current?.anchor ?? null,
+        );
+      });
+    },
+    [applyMonthRowHeightVariable],
+  );
+
+  const commitMonthRowHeight = useCallback(
+    (nextHeight: number, anchor?: MonthRowResizeAnchor | null) => {
+      const clampedHeight = clampMonthRowHeight(nextHeight);
+      const scrollAnchor =
+        anchor === undefined && scrollContainerRef.current
+          ? getMonthResizeAnchor(scrollContainerRef.current)
+          : (anchor ?? null);
+
+      if (monthRowResizeFrameRef.current !== null) {
+        window.cancelAnimationFrame(monthRowResizeFrameRef.current);
+        monthRowResizeFrameRef.current = null;
+      }
+
+      monthRowHeightRef.current = clampedHeight;
+      pendingMonthRowHeightRef.current = clampedHeight;
+      applyMonthRowHeightVariable(clampedHeight, scrollAnchor);
+      writeStoredMonthRowHeight(clampedHeight);
+      setMonthRowHeight(clampedHeight);
+
+      const scroller = scrollContainerRef.current;
+      if (scroller) {
+        window.requestAnimationFrame(() => syncVisibleMonthFromScroll(scroller));
+      }
+    },
+    [applyMonthRowHeightVariable, getMonthResizeAnchor, syncVisibleMonthFromScroll],
+  );
+
   useEffect(() => {
-    monthCellHeightRef.current = monthCellHeight;
-    pendingMonthCellHeightRef.current = monthCellHeight;
-    applyMonthCellHeightVariable(monthCellHeight);
-  }, [applyMonthCellHeightVariable, monthCellHeight]);
+    monthRowHeightRef.current = monthRowHeight;
+    pendingMonthRowHeightRef.current = monthRowHeight;
+    applyMonthRowHeightVariable(monthRowHeight);
+  }, [applyMonthRowHeightVariable, monthRowHeight]);
 
   useEffect(() => {
     return () => {
-      if (monthCellResizeFrameRef.current !== null) {
-        window.cancelAnimationFrame(monthCellResizeFrameRef.current);
+      if (monthRowResizeFrameRef.current !== null) {
+        window.cancelAnimationFrame(monthRowResizeFrameRef.current);
       }
     };
   }, []);
@@ -337,29 +414,23 @@ export const ExplorerCalendarMonthView = ({
     [syncVisibleMonthFromScroll],
   );
 
-  const handleMonthCellResizePointerDown = useCallback(
-    (event: ReactPointerEvent<HTMLButtonElement>) => {
+  const handleMonthRowResizePointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLElement>) => {
       if (event.button !== 0) {
-        return;
-      }
-
-      const target = event.currentTarget;
-      const rect = target.getBoundingClientRect();
-
-      if (rect.bottom - event.clientY > MONTH_CELL_RESIZE_HIT_AREA_PX) {
         return;
       }
 
       event.preventDefault();
       event.stopPropagation();
 
-      const startHeight = monthCellHeightRef.current;
-      monthCellResizeStateRef.current = {
+      const scroller = scrollContainerRef.current;
+      const startHeight = monthRowHeightRef.current;
+      monthRowResizeStateRef.current = {
         startY: event.clientY,
         startHeight,
+        anchor: scroller ? getMonthResizeAnchor(scroller) : null,
       };
-      pendingMonthCellHeightRef.current = startHeight;
-      suppressNextMonthCellClickRef.current = true;
+      pendingMonthRowHeightRef.current = startHeight;
 
       const previousCursor = document.body.style.cursor;
       const previousUserSelect = document.body.style.userSelect;
@@ -367,74 +438,92 @@ export const ExplorerCalendarMonthView = ({
       document.body.style.userSelect = "none";
 
       const handlePointerMove = (moveEvent: PointerEvent) => {
-        const resizeState = monthCellResizeStateRef.current;
+        const resizeState = monthRowResizeStateRef.current;
 
         if (!resizeState) {
           return;
         }
 
-        scheduleMonthCellHeightVariable(
+        scheduleMonthRowHeightVariable(
           resizeState.startHeight + moveEvent.clientY - resizeState.startY,
         );
       };
 
       const handlePointerUp = () => {
-        commitMonthCellHeight(pendingMonthCellHeightRef.current);
-        monthCellResizeStateRef.current = null;
+        const resizeState = monthRowResizeStateRef.current;
+        commitMonthRowHeight(
+          pendingMonthRowHeightRef.current,
+          resizeState?.anchor ?? null,
+        );
+        monthRowResizeStateRef.current = null;
         document.body.style.cursor = previousCursor;
         document.body.style.userSelect = previousUserSelect;
         window.removeEventListener("pointermove", handlePointerMove);
         window.removeEventListener("pointerup", handlePointerUp);
         window.removeEventListener("pointercancel", handlePointerUp);
-        window.setTimeout(() => {
-          suppressNextMonthCellClickRef.current = false;
-        }, 120);
       };
 
       window.addEventListener("pointermove", handlePointerMove);
       window.addEventListener("pointerup", handlePointerUp);
       window.addEventListener("pointercancel", handlePointerUp);
     },
-    [commitMonthCellHeight, scheduleMonthCellHeightVariable],
+    [
+      commitMonthRowHeight,
+      getMonthResizeAnchor,
+      scheduleMonthRowHeightVariable,
+    ],
   );
 
-  const handleMonthCellDoubleClick = useCallback(
-    (event: ReactMouseEvent<HTMLButtonElement>) => {
-      const target = event.currentTarget;
-      const rect = target.getBoundingClientRect();
-
-      if (rect.bottom - event.clientY > MONTH_CELL_RESIZE_HIT_AREA_PX) {
-        return;
-      }
-
+  const handleMonthRowResizeKeyDown = (
+    event: KeyboardEvent<HTMLDivElement>,
+  ) => {
+    if (event.key === "ArrowUp") {
       event.preventDefault();
-      event.stopPropagation();
-      suppressNextMonthCellClickRef.current = true;
-      commitMonthCellHeight(DEFAULT_MONTH_CELL_HEIGHT);
-      window.setTimeout(() => {
-        suppressNextMonthCellClickRef.current = false;
-      }, 120);
-    },
-    [commitMonthCellHeight],
-  );
+      commitMonthRowHeight(monthRowHeightRef.current - MONTH_ROW_HEIGHT_STEP);
+      return;
+    }
 
-  const handleMonthCellClick = useCallback(
-    (event: ReactMouseEvent<HTMLButtonElement>, date: Date) => {
-      if (suppressNextMonthCellClickRef.current) {
-        event.preventDefault();
-        event.stopPropagation();
-        suppressNextMonthCellClickRef.current = false;
-        return;
-      }
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      commitMonthRowHeight(monthRowHeightRef.current + MONTH_ROW_HEIGHT_STEP);
+      return;
+    }
 
-      onSelectDate(date);
-    },
-    [onSelectDate],
-  );
+    if (event.key === "PageUp") {
+      event.preventDefault();
+      commitMonthRowHeight(
+        monthRowHeightRef.current - MONTH_ROW_HEIGHT_STEP * 4,
+      );
+      return;
+    }
+
+    if (event.key === "PageDown") {
+      event.preventDefault();
+      commitMonthRowHeight(
+        monthRowHeightRef.current + MONTH_ROW_HEIGHT_STEP * 4,
+      );
+      return;
+    }
+
+    if (event.key === "Home") {
+      event.preventDefault();
+      commitMonthRowHeight(MIN_MONTH_ROW_HEIGHT);
+      return;
+    }
+
+    if (event.key === "End") {
+      event.preventDefault();
+      commitMonthRowHeight(MAX_MONTH_ROW_HEIGHT);
+    }
+  };
+
+  const handleMonthRowResizeReset = () => {
+    commitMonthRowHeight(DEFAULT_MONTH_ROW_HEIGHT);
+  };
 
   return (
     <div
-      ref={monthViewRef}
+      ref={rootRef}
       className="calendar-month-view flex min-h-0 flex-1 flex-col overflow-hidden bg-white"
       style={monthViewStyle}
     >
@@ -451,7 +540,7 @@ export const ExplorerCalendarMonthView = ({
 
       <div
         ref={scrollContainerRef}
-        className="min-h-0 flex-1 overflow-y-auto bg-white"
+        className="calendar-month-scroll min-h-0 flex-1 overflow-y-auto bg-white"
         onScroll={handleMonthScroll}
       >
         {monthPages.map((monthPage) => (
@@ -488,9 +577,7 @@ export const ExplorerCalendarMonthView = ({
                       !selected && "hover:bg-[#fbfaf7]",
                       "focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                     )}
-                    onClick={(event) => handleMonthCellClick(event, day.date)}
-                    onDoubleClick={handleMonthCellDoubleClick}
-                    onPointerDown={handleMonthCellResizePointerDown}
+                    onClick={() => onSelectDate(day.date)}
                   >
                     <span
                       className={cn(
@@ -512,6 +599,22 @@ export const ExplorerCalendarMonthView = ({
                         {monthAnnotation}
                       </span>
                     ) : null}
+
+                    <div
+                      role="separator"
+                      aria-label="月表示の日付セルの高さを調整"
+                      aria-orientation="horizontal"
+                      aria-valuemin={MIN_MONTH_ROW_HEIGHT}
+                      aria-valuemax={MAX_MONTH_ROW_HEIGHT}
+                      aria-valuenow={monthRowHeight}
+                      tabIndex={0}
+                      className="calendar-month-row-boundary-resize-handle"
+                      title="ドラッグで月表示の縦幅を変更。ダブルクリックで初期値に戻します。"
+                      onClick={(event) => event.stopPropagation()}
+                      onDoubleClick={handleMonthRowResizeReset}
+                      onKeyDown={handleMonthRowResizeKeyDown}
+                      onPointerDown={handleMonthRowResizePointerDown}
+                    />
                   </button>
                 );
               })}
