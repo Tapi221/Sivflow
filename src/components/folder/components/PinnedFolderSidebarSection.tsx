@@ -61,9 +61,9 @@ const SIDEBAR_SECTION_RESIZE_STORAGE_PREFIX =
   "flashcard-master.explorer.sidebarSectionHeight";
 const SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE =
   "data-explorer-sidebar-section-resize-handle";
-const SIDEBAR_SECTION_RESIZE_HANDLE_COLOR = "rgba(120, 113, 108, 0.32)";
+const SIDEBAR_SECTION_RESIZE_HANDLE_COLOR = "rgba(229, 231, 235, 0.95)";
 const SIDEBAR_SECTION_RESIZE_HANDLE_ACTIVE_COLOR =
-  "rgba(87, 83, 78, 0.68)";
+  "rgba(156, 163, 175, 0.95)";
 
 const SIDEBAR_SECTION_RESIZE_TARGETS: SidebarSectionResizeTarget[] = [
   {
@@ -215,20 +215,20 @@ const createSidebarSectionResizeHandle = (
   Object.assign(handle.style, {
     position: "relative",
     zIndex: "80",
-    height: "8px",
-    margin: "0 8px",
+    height: "9px",
+    margin: "-4px 0",
     cursor: "row-resize",
     touchAction: "none",
     userSelect: "none",
     background: "transparent",
-    flex: "0 0 8px",
+    flex: "0 0 9px",
   } satisfies Partial<CSSStyleDeclaration>);
 
   Object.assign(indicator.style, {
     position: "absolute",
-    left: "0",
-    right: "0",
-    top: "3px",
+    left: "8px",
+    right: "8px",
+    top: "4px",
     height: "1px",
     borderRadius: "999px",
     background: SIDEBAR_SECTION_RESIZE_HANDLE_COLOR,
@@ -238,13 +238,13 @@ const createSidebarSectionResizeHandle = (
   handle.appendChild(indicator);
 
   const showIndicator = () => {
-    indicator.style.top = "2px";
+    indicator.style.top = "3px";
     indicator.style.height = "2px";
     indicator.style.background = SIDEBAR_SECTION_RESIZE_HANDLE_ACTIVE_COLOR;
   };
 
   const hideIndicator = () => {
-    indicator.style.top = "3px";
+    indicator.style.top = "4px";
     indicator.style.height = "1px";
     indicator.style.background = SIDEBAR_SECTION_RESIZE_HANDLE_COLOR;
   };
