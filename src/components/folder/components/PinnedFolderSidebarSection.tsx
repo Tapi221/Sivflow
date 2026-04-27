@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, Folder } from "@/types";
 import { ChevronDown, ChevronRight } from "@/ui/icons";
 import { useMemo } from "react";
+import { flushSync } from "react-dom";
 
 interface PinnedFolderSidebarSectionProps {
   folders: Folder[];
@@ -158,10 +159,12 @@ export const PinnedFolderSidebarSection = ({
   }, [folderById, isFiltering, matchCountMap]);
 
   const handleCreateRootFolder = () => {
-    if (isFolderListSectionCollapsed) {
-      toggleFolderListSectionCollapsed();
-    }
-    onCreateRootFolder?.();
+    flushSync(() => {
+      if (isFolderListSectionCollapsed) {
+        toggleFolderListSectionCollapsed();
+      }
+      onCreateRootFolder?.();
+    });
   };
 
   return (
