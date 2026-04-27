@@ -29,10 +29,19 @@ type HeaderColumnDefinition = {
 
 type ColumnDropIndicatorPosition = "before" | "after";
 
+type ColumnDragPreviewState = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  label: string;
+};
+
 type ColumnDragState = {
   activeColumnId: ExplorerDetailColumnId;
   overColumnId: ExplorerDetailColumnId;
   isDragging: boolean;
+  preview: ColumnDragPreviewState;
 };
 
 type HeaderCellProps = {
@@ -53,6 +62,7 @@ type HeaderCellProps = {
   onResetWidth: (columnId: ExplorerDetailColumnId) => void;
   dropIndicatorPosition: ColumnDropIndicatorPosition | null;
   isColumnDragging: boolean;
+  isColumnOver: boolean;
   className?: string;
 };
 
@@ -80,6 +90,13 @@ type ColumnPointerSession = {
   cancelled: boolean;
   previousCursor: string;
   previousUserSelect: string;
+  previewOffsetX: number;
+  previewTop: number;
+  previewWidth: number;
+  previewHeight: number;
+  minPreviewLeft: number;
+  maxPreviewLeft: number;
+  label: string;
 };
 
 const DETAIL_HEADER_COLUMNS = {
@@ -110,9 +127,39 @@ const DETAIL_HEADER_COLUMNS = {
   },
 } satisfies Record<ExplorerDetailColumnId, HeaderColumnDefinition>;
 
-const COLUMN_DRAG_ACTIVATION_DISTANCE_PX = 14;
-const COLUMN_DRAG_VERTICAL_CANCEL_DISTANCE_PX = 10;
-const COLUMN_DRAG_HORIZONTAL_INTENT_RATIO = 1.2;
+const COLUMN_DRAG_ACTIVATION_DISTANCE_PX = 6;
+const COLUMN_DRAG_VERTICAL_CANCEL_DISTANCE_PX = 12;
+const COLUMN_DRAG_HORIZONTAL_INTENT_RATIO = 1.15;
+
+const clampNumber = (value: number, min: number, max: number): number => {
+  return Math.min(Math.max(value, min), max);
+};
+
+const HeaderColumnDragPreview = ({
+  preview,
+}: {
+  preview: ColumnDragPreviewState;
+}) => {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none fixed z-[1000] flex items-center px-3",
+        "rounded-[6px] border border-[#d8d3c8] bg-[rgba(250,249,246,0.96)]",
+        "text-[12px] font-medium text-[#24231f]",
+        "shadow-[0_10px_24px_rgba(36,35,31,0.16)] ring-1 ring-black/5",
+      )}
+      style={{
+        left: preview.left,
+        top: preview.top,
+        width: preview.width,
+        height: preview.height,
+      }}
+    >
+      <span className="truncate">{preview.label}</span>
+    </div>
+  );
+};
 
 const HeaderCell = ({
   label,
@@ -126,6 +173,7 @@ const HeaderCell = ({
   onResetWidth,
   dropIndicatorPosition,
   isColumnDragging,
+  isColumnOver,
   className,
 }: HeaderCellProps) => {
   const labelContent = (
@@ -141,11 +189,16 @@ const HeaderCell = ({
       aria-sort={sortKey ? getHeaderAriaSort(sortState, sortKey) : undefined}
       data-detail-column-id={columnId}
       data-column-dragging={isColumnDragging ? "true" : undefined}
-      title="横にドラッグして列の順序を変更"
+      title={
+        sortKey
+          ? "クリックで並び替え / 横にドラッグして列順を変更"
+          : "横にドラッグして列順を変更"
+      }
       className={cn(
         "relative flex min-w-0 items-center border-r border-[#e6e4dc] px-3",
         "cursor-grab transition-colors active:cursor-grabbing",
         "hover:bg-[#eeece4] hover:text-[#24231f]",
+        isColumnOver && "bg-[#f7f4ec] text-[#24231f]",
         isColumnDragging && "bg-[#eeece4] text-[#24231f] opacity-80",
         className,
       )}
@@ -156,6 +209,7 @@ const HeaderCell = ({
           aria-hidden="true"
           className={cn(
             "pointer-events-none absolute bottom-0 top-0 z-50 w-[2px] bg-[#7f7a72]",
+            "shadow-[0_0_0_1px_rgba(127,122,114,0.18)]",
             dropIndicatorPosition === "before" ? "left-0" : "right-0",
           )}
         />
@@ -267,6 +321,26 @@ export const FolderDetailHeader = ({
     [],
   );
 
+  const buildPreviewState = useCallback(
+    (
+      session: ColumnPointerSession,
+      clientX: number,
+    ): ColumnDragPreviewState => {
+      return {
+        left: clampNumber(
+          clientX - session.previewOffsetX,
+          session.minPreviewLeft,
+          session.maxPreviewLeft,
+        ),
+        top: session.previewTop,
+        width: session.previewWidth,
+        height: session.previewHeight,
+        label: session.label,
+      };
+    },
+    [],
+  );
+
   const shouldSuppressSortClick = useCallback(() => {
     return suppressNextSortClickRef.current;
   }, []);
@@ -290,6 +364,14 @@ export const FolderDetailHeader = ({
     ) => {
       if (event.button !== 0) return;
 
+      const columnRect = event.currentTarget.getBoundingClientRect();
+      const headerRect =
+        headerRef.current?.getBoundingClientRect() ?? columnRect;
+      const maxPreviewLeft = Math.max(
+        headerRect.left,
+        headerRect.right - columnRect.width,
+      );
+
       dragSessionRef.current = {
         activeColumnId: columnId,
         startX: event.clientX,
@@ -298,6 +380,13 @@ export const FolderDetailHeader = ({
         cancelled: false,
         previousCursor: document.body.style.cursor,
         previousUserSelect: document.body.style.userSelect,
+        previewOffsetX: event.clientX - columnRect.left,
+        previewTop: columnRect.top,
+        previewWidth: columnRect.width,
+        previewHeight: columnRect.height,
+        minPreviewLeft: headerRect.left,
+        maxPreviewLeft,
+        label: DETAIL_HEADER_COLUMNS[columnId].label,
       };
 
       const handlePointerMove = (pointerEvent: PointerEvent) => {
@@ -342,6 +431,7 @@ export const FolderDetailHeader = ({
           activeColumnId: session.activeColumnId,
           overColumnId,
           isDragging: true,
+          preview: buildPreviewState(session, pointerEvent.clientX),
         });
       };
 
@@ -376,7 +466,12 @@ export const FolderDetailHeader = ({
       window.addEventListener("pointerup", handlePointerUp);
       window.addEventListener("pointercancel", handlePointerUp);
     },
-    [clearColumnDragSession, getColumnIdAtClientX, onColumnReorder],
+    [
+      buildPreviewState,
+      clearColumnDragSession,
+      getColumnIdAtClientX,
+      onColumnReorder,
+    ],
   );
 
   const getDropIndicatorPosition = useCallback(
@@ -398,38 +493,47 @@ export const FolderDetailHeader = ({
   );
 
   return (
-    <div
-      ref={headerRef}
-      role="row"
-      className={cn(
-        DETAIL_GRID_CLASS,
-        "sticky top-0 z-30 h-9 border-b border-[#dddcd5]",
-        "bg-[rgba(250,249,246,0.98)] text-[12px] font-medium text-[#777671]",
-      )}
-      style={gridStyle}
-    >
-      {normalizedColumnOrder.map((columnId, index) => {
-        const column = DETAIL_HEADER_COLUMNS[columnId];
-        const isLastColumn = index === normalizedColumnOrder.length - 1;
+    <>
+      <div
+        ref={headerRef}
+        role="row"
+        className={cn(
+          DETAIL_GRID_CLASS,
+          "sticky top-0 z-30 h-9 border-b border-[#dddcd5]",
+          "bg-[rgba(250,249,246,0.98)] text-[12px] font-medium text-[#777671]",
+        )}
+        style={gridStyle}
+      >
+        {normalizedColumnOrder.map((columnId, index) => {
+          const column = DETAIL_HEADER_COLUMNS[columnId];
+          const isLastColumn = index === normalizedColumnOrder.length - 1;
 
-        return (
-          <HeaderCell
-            key={columnId}
-            label={column.label}
-            columnId={columnId}
-            sortKey={column.sortKey}
-            sortState={sortState}
-            onSort={onSort}
-            onHeaderPointerDown={handleHeaderPointerDown}
-            shouldSuppressSortClick={shouldSuppressSortClick}
-            onResizePointerDown={onResizePointerDown}
-            onResetWidth={onResetWidth}
-            dropIndicatorPosition={getDropIndicatorPosition(columnId)}
-            isColumnDragging={dragState?.activeColumnId === columnId}
-            className={isLastColumn ? "border-r-0" : undefined}
-          />
-        );
-      })}
-    </div>
+          return (
+            <HeaderCell
+              key={columnId}
+              label={column.label}
+              columnId={columnId}
+              sortKey={column.sortKey}
+              sortState={sortState}
+              onSort={onSort}
+              onHeaderPointerDown={handleHeaderPointerDown}
+              shouldSuppressSortClick={shouldSuppressSortClick}
+              onResizePointerDown={onResizePointerDown}
+              onResetWidth={onResetWidth}
+              dropIndicatorPosition={getDropIndicatorPosition(columnId)}
+              isColumnDragging={dragState?.activeColumnId === columnId}
+              isColumnOver={
+                dragState?.isDragging === true && dragState.overColumnId === columnId
+              }
+              className={isLastColumn ? "border-r-0" : undefined}
+            />
+          );
+        })}
+      </div>
+
+      {dragState?.isDragging ? (
+        <HeaderColumnDragPreview preview={dragState.preview} />
+      ) : null}
+    </>
   );
 };
