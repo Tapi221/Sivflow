@@ -16,14 +16,15 @@ import {
 } from "react";
 
 import {
-  buildCalendarMonthPages,
+  buildCalendarMonthWeeks,
   getCalendarMonthKey,
-  type CalendarMonthGridDay,
-  type CalendarMonthPage,
+  getCalendarWeekKey,
+  type CalendarMonthWeek,
 } from "@/features/calendar/model/monthGrid";
 import { cn } from "@/lib/utils";
 
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
+const WEEKDAY_HEADER_HEIGHT_PX = 48;
 const INITIAL_MONTH_BUFFER = 6;
 const MONTH_EXTEND_COUNT = 6;
 const MONTH_SCROLL_EDGE_THRESHOLD_PX = 560;
@@ -68,20 +69,13 @@ const writeStoredMonthRowHeight = (value: number) => {
   window.localStorage.setItem(MONTH_ROW_HEIGHT_STORAGE_KEY, String(value));
 };
 
-const getMonthAnnotation = (
-  day: CalendarMonthGridDay,
-  baseDate: Date,
-): string | null => {
-  if (day.isCurrentMonth || !day.isMonthStart) return null;
-
-  const monthLabel = format(day.date, "M月", { locale: ja });
-  const baseMonthLabel = format(baseDate, "M月", { locale: ja });
-
-  return monthLabel === baseMonthLabel ? null : monthLabel;
+const getMonthAnnotation = (date: Date): string | null => {
+  if (date.getDate() !== 1) return null;
+  return format(date, "M月", { locale: ja });
 };
 
 type MonthRowResizeAnchor = {
-  monthKey: string;
+  weekKey: string;
   offsetTop: number;
 };
 
@@ -112,12 +106,12 @@ export const ExplorerCalendarMonthView = ({
 }: ExplorerCalendarMonthViewProps) => {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const monthSectionRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const weekRowRefs = useRef<Map<string, HTMLElement>>(new Map());
   const prependScrollHeightRef = useRef<number | null>(null);
   const isExtendingBeforeRef = useRef(false);
   const isExtendingAfterRef = useRef(false);
-  const pendingScrollMonthKeyRef = useRef<string | null>(
-    getCalendarMonthKey(currentDate),
+  const pendingScrollWeekKeyRef = useRef<string | null>(
+    getCalendarWeekKey(currentDate),
   );
   const lastScrollTargetTokenRef = useRef(scrollTargetToken);
   const visibleMonthKeyRef = useRef(getCalendarMonthKey(currentDate));
@@ -135,9 +129,9 @@ export const ExplorerCalendarMonthView = ({
   );
   const today = useMemo(() => new Date(), []);
 
-  const monthPages = useMemo(
+  const monthWeeks = useMemo(
     () =>
-      buildCalendarMonthPages({
+      buildCalendarMonthWeeks({
         anchorDate: anchorMonth,
         startOffset: monthOffsetRange.startOffset,
         endOffset: monthOffsetRange.endOffset,
@@ -148,34 +142,31 @@ export const ExplorerCalendarMonthView = ({
     "--calendar-month-row-height": `${monthRowHeight}px`,
   };
 
-  const setMonthSectionRef = useCallback(
-    (monthKey: string, node: HTMLElement | null) => {
-      if (node) {
-        monthSectionRefs.current.set(monthKey, node);
-        return;
-      }
+  const setWeekRowRef = useCallback((weekKey: string, node: HTMLElement | null) => {
+    if (node) {
+      weekRowRefs.current.set(weekKey, node);
+      return;
+    }
 
-      monthSectionRefs.current.delete(monthKey);
-    },
-    [],
-  );
+    weekRowRefs.current.delete(weekKey);
+  }, []);
 
   const getMonthResizeAnchor = useCallback(
     (scroller: HTMLElement): MonthRowResizeAnchor | null => {
-      if (monthPages.length === 0) return null;
+      if (monthWeeks.length === 0) return null;
 
       const scrollerRect = scroller.getBoundingClientRect();
       const sampleY = scrollerRect.top + MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
-      let closestPage: CalendarMonthPage | null = null;
+      let closestWeek: CalendarMonthWeek | null = null;
       let closestDistance = Number.POSITIVE_INFINITY;
 
-      for (const page of monthPages) {
-        const section = monthSectionRefs.current.get(page.key);
-        if (!section) continue;
+      for (const week of monthWeeks) {
+        const row = weekRowRefs.current.get(week.key);
+        if (!row) continue;
 
-        const rect = section.getBoundingClientRect();
+        const rect = row.getBoundingClientRect();
         if (rect.top <= sampleY && rect.bottom > sampleY) {
-          closestPage = page;
+          closestWeek = week;
           break;
         }
 
@@ -185,21 +176,21 @@ export const ExplorerCalendarMonthView = ({
         );
         if (distance < closestDistance) {
           closestDistance = distance;
-          closestPage = page;
+          closestWeek = week;
         }
       }
 
-      if (!closestPage) return null;
+      if (!closestWeek) return null;
 
-      const section = monthSectionRefs.current.get(closestPage.key);
-      if (!section) return null;
+      const row = weekRowRefs.current.get(closestWeek.key);
+      if (!row) return null;
 
       return {
-        monthKey: closestPage.key,
-        offsetTop: section.getBoundingClientRect().top - scrollerRect.top,
+        weekKey: closestWeek.key,
+        offsetTop: row.getBoundingClientRect().top - scrollerRect.top,
       };
     },
-    [monthPages],
+    [monthWeeks],
   );
 
   const preserveMonthResizeAnchor = useCallback(
@@ -207,11 +198,11 @@ export const ExplorerCalendarMonthView = ({
       if (!anchor) return;
 
       const scroller = scrollContainerRef.current;
-      const section = monthSectionRefs.current.get(anchor.monthKey);
-      if (!scroller || !section) return;
+      const row = weekRowRefs.current.get(anchor.weekKey);
+      if (!scroller || !row) return;
 
       const scrollerRect = scroller.getBoundingClientRect();
-      const nextOffsetTop = section.getBoundingClientRect().top - scrollerRect.top;
+      const nextOffsetTop = row.getBoundingClientRect().top - scrollerRect.top;
       scroller.scrollTop += nextOffsetTop - anchor.offsetTop;
     },
     [],
@@ -219,20 +210,20 @@ export const ExplorerCalendarMonthView = ({
 
   const syncVisibleMonthFromScroll = useCallback(
     (scroller: HTMLElement) => {
-      if (!onVisibleMonthChange || monthPages.length === 0) return;
+      if (!onVisibleMonthChange || monthWeeks.length === 0) return;
 
       const scrollerRect = scroller.getBoundingClientRect();
       const sampleY = scrollerRect.top + MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
-      let closestPage: CalendarMonthPage | null = null;
+      let closestWeek: CalendarMonthWeek | null = null;
       let closestDistance = Number.POSITIVE_INFINITY;
 
-      for (const page of monthPages) {
-        const section = monthSectionRefs.current.get(page.key);
-        if (!section) continue;
+      for (const week of monthWeeks) {
+        const row = weekRowRefs.current.get(week.key);
+        if (!row) continue;
 
-        const rect = section.getBoundingClientRect();
+        const rect = row.getBoundingClientRect();
         if (rect.top <= sampleY && rect.bottom > sampleY) {
-          closestPage = page;
+          closestWeek = week;
           break;
         }
 
@@ -242,18 +233,19 @@ export const ExplorerCalendarMonthView = ({
         );
         if (distance < closestDistance) {
           closestDistance = distance;
-          closestPage = page;
+          closestWeek = week;
         }
       }
 
-      if (!closestPage || closestPage.key === visibleMonthKeyRef.current) {
-        return;
-      }
+      if (!closestWeek) return;
 
-      visibleMonthKeyRef.current = closestPage.key;
-      onVisibleMonthChange(closestPage.monthStart);
+      const nextMonthKey = getCalendarMonthKey(closestWeek.visibleMonthDate);
+      if (nextMonthKey === visibleMonthKeyRef.current) return;
+
+      visibleMonthKeyRef.current = nextMonthKey;
+      onVisibleMonthChange(closestWeek.visibleMonthDate);
     },
-    [monthPages, onVisibleMonthChange],
+    [monthWeeks, onVisibleMonthChange],
   );
 
   const applyMonthRowHeightVariable = useCallback(
@@ -337,7 +329,7 @@ export const ExplorerCalendarMonthView = ({
 
     const targetMonthKey = getCalendarMonthKey(currentDate);
     visibleMonthKeyRef.current = targetMonthKey;
-    pendingScrollMonthKeyRef.current = targetMonthKey;
+    pendingScrollWeekKeyRef.current = getCalendarWeekKey(currentDate);
     prependScrollHeightRef.current = null;
     isExtendingBeforeRef.current = false;
     isExtendingAfterRef.current = false;
@@ -347,17 +339,20 @@ export const ExplorerCalendarMonthView = ({
   }, [currentDate, scrollTargetToken]);
 
   useLayoutEffect(() => {
-    const targetMonthKey = pendingScrollMonthKeyRef.current;
-    if (!targetMonthKey) return;
+    const targetWeekKey = pendingScrollWeekKeyRef.current;
+    if (!targetWeekKey) return;
 
     const scroller = scrollContainerRef.current;
-    const targetSection = monthSectionRefs.current.get(targetMonthKey);
-    if (!scroller || !targetSection) return;
+    const targetRow = weekRowRefs.current.get(targetWeekKey);
+    if (!scroller || !targetRow) return;
 
-    scroller.scrollTop = targetSection.offsetTop;
-    pendingScrollMonthKeyRef.current = null;
+    scroller.scrollTop = Math.max(
+      0,
+      targetRow.offsetTop - WEEKDAY_HEADER_HEIGHT_PX,
+    );
+    pendingScrollWeekKeyRef.current = null;
     syncVisibleMonthFromScroll(scroller);
-  }, [monthPages, syncVisibleMonthFromScroll]);
+  }, [monthWeeks, syncVisibleMonthFromScroll]);
 
   useLayoutEffect(() => {
     const previousScrollHeight = prependScrollHeightRef.current;
@@ -373,7 +368,7 @@ export const ExplorerCalendarMonthView = ({
     scroller.scrollTop += scroller.scrollHeight - previousScrollHeight;
     prependScrollHeightRef.current = null;
     isExtendingBeforeRef.current = false;
-  }, [monthPages.length]);
+  }, [monthWeeks.length]);
 
   useEffect(() => {
     isExtendingAfterRef.current = false;
@@ -527,52 +522,47 @@ export const ExplorerCalendarMonthView = ({
       className="calendar-month-view flex min-h-0 flex-1 flex-col overflow-hidden bg-white"
       style={monthViewStyle}
     >
-      <div className="grid h-[48px] shrink-0 grid-cols-7 border-b border-[#ebeae4] bg-white">
-        {WEEKDAY_LABELS.map((label) => (
-          <div
-            key={label}
-            className="flex items-center justify-center border-r border-[#f0efea] text-[13px] font-semibold text-[#9b9a94] last:border-r-0"
-          >
-            {label}
-          </div>
-        ))}
-      </div>
-
       <div
         ref={scrollContainerRef}
         className="calendar-month-scroll min-h-0 flex-1 overflow-y-auto bg-white"
         onScroll={handleMonthScroll}
       >
-        {monthPages.map((monthPage) => (
-          <section
-            key={monthPage.key}
-            ref={(node) => setMonthSectionRef(monthPage.key, node)}
-            aria-label={monthPage.label}
-            data-calendar-month-key={monthPage.key}
-            className="border-b border-[#e6e4dc] bg-white"
-          >
-            <div className="grid grid-cols-7 bg-white">
-              {monthPage.days.map((day, index) => {
+        <div className="sticky top-0 z-20 grid h-[48px] grid-cols-7 border-b border-[#ebeae4] bg-white">
+          {WEEKDAY_LABELS.map((label) => (
+            <div
+              key={label}
+              className="flex items-center justify-center border-r border-[#f0efea] text-[13px] font-semibold text-[#9b9a94] last:border-r-0"
+            >
+              {label}
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-white">
+          {monthWeeks.map((week) => (
+            <div
+              key={week.key}
+              ref={(node) => setWeekRowRef(week.key, node)}
+              data-calendar-week-key={week.key}
+              className="grid grid-cols-7 bg-white"
+            >
+              {week.days.map((day, index) => {
                 const selected = isSameDay(day.date, selectedDate);
                 const todayCell = isSameDay(day.date, today);
-                const monthAnnotation = getMonthAnnotation(
-                  day,
-                  monthPage.monthStart,
-                );
+                const monthAnnotation = getMonthAnnotation(day.date);
                 const isLastColumn = index % 7 === 6;
 
                 return (
                   <button
-                    key={`${monthPage.key}:${day.key}`}
+                    key={day.key}
                     type="button"
                     aria-label={format(day.date, "yyyy年M月d日", {
                       locale: ja,
                     })}
                     aria-pressed={selected}
                     className={cn(
-                      "calendar-month-day-cell group relative overflow-hidden border-[#ebeae4] bg-white text-left outline-none transition-colors",
+                      "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-hidden border-b border-[#ebeae4] bg-white text-left outline-none transition-colors",
                       !isLastColumn && "border-r",
-                      index < monthPage.days.length - 7 && "border-b",
                       selected && "bg-[#fff9f8]",
                       !selected && "hover:bg-[#fbfaf7]",
                       "focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
@@ -608,7 +598,7 @@ export const ExplorerCalendarMonthView = ({
                       aria-valuemax={MAX_MONTH_ROW_HEIGHT}
                       aria-valuenow={monthRowHeight}
                       tabIndex={0}
-                      className="calendar-month-row-boundary-resize-handle"
+                      className="calendar-month-row-boundary-resize-handle absolute inset-x-0 bottom-[-4px] z-30 h-2 cursor-row-resize"
                       title="ドラッグで月表示の縦幅を変更。ダブルクリックで初期値に戻します。"
                       onClick={(event) => event.stopPropagation()}
                       onDoubleClick={handleMonthRowResizeReset}
@@ -619,8 +609,8 @@ export const ExplorerCalendarMonthView = ({
                 );
               })}
             </div>
-          </section>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
