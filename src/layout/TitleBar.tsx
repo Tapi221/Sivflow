@@ -140,43 +140,6 @@ const SectionListIcon: React.FC = () => (
   </svg>
 );
 
-const CalendarIcon: React.FC = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden="true"
-  >
-    <rect
-      x="4"
-      y="5"
-      width="16"
-      height="15"
-      rx="2"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    />
-    <path
-      d="M8 3V7"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    <path
-      d="M16 3V7"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    <path
-      d="M4 9H20"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-  </svg>
-);
 
 const GlobeIcon: React.FC = () => (
   <svg
@@ -538,14 +501,6 @@ const TitleBarPrimaryActions: React.FC<{
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
       </DropdownMenu.Root>
-
-      <TitleBarToolbarButton
-        title={isCalendarDockOpen ? "カレンダーを閉じる" : "カレンダーを開く"}
-        onClick={toggleCalendarDock}
-        noDragStyle={noDragStyle}
-      >
-        <CalendarIcon />
-      </TitleBarToolbarButton>
 
       <TitleBarToolbarButton
         title="グローバル"
