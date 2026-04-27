@@ -24,7 +24,8 @@ import {
 } from "react";
 
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, X } from "@/ui/icons";
+import { Calendar, ChevronLeft, ChevronRight, X } from "@/ui/icons";
+import { ExplorerCalendarMonthView } from "./ExplorerCalendarMonthView";
 
 type ExplorerCalendarPaneProps = {
   onClose?: () => void;
@@ -162,7 +163,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   const shouldSyncScrollRef = useRef(true);
 
   const [currentDate, setCurrentDate] = useState(() => new Date());
-  const [viewMode, setViewMode] = useState<CalendarViewMode>("days");
+  const [viewMode, setViewMode] = useState<CalendarViewMode>("month");
   const [rangeDays, setRangeDays] = useState(DEFAULT_RANGE_DAYS);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [timelineBuffer, setTimelineBuffer] = useState(
@@ -203,6 +204,11 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   }, [dayColumnWidth, timelineBuffer.before]);
 
   useEffect(() => {
+    if (viewMode === "month") {
+      setViewportWidth(0);
+      return undefined;
+    }
+
     const scrollContainer = scrollContainerRef.current;
 
     if (!scrollContainer) {
@@ -222,18 +228,28 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [viewMode]);
 
   useLayoutEffect(() => {
-    if (!shouldSyncScrollRef.current) {
+    if (viewMode === "month" || !shouldSyncScrollRef.current) {
       return;
     }
 
     syncScrollToRangeStart();
     shouldSyncScrollRef.current = false;
-  }, [currentDate, rangeDays, syncScrollToRangeStart, viewMode, viewportWidth]);
+  }, [
+    currentDate,
+    rangeDays,
+    syncScrollToRangeStart,
+    viewMode,
+    viewportWidth,
+  ]);
 
   useLayoutEffect(() => {
+    if (viewMode === "month") {
+      return;
+    }
+
     const scrollContainer = scrollContainerRef.current;
     const correction = prependScrollCorrectionRef.current;
 
@@ -245,7 +261,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     scrollContainer.scrollLeft += correction;
     prependScrollCorrectionRef.current = 0;
     isExtendingLeftRef.current = false;
-  }, [dayColumnWidth, timelineBuffer.before]);
+  }, [dayColumnWidth, timelineBuffer.before, viewMode]);
 
   useEffect(() => {
     isExtendingRightRef.current = false;
@@ -255,7 +271,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     (event: UIEvent<HTMLDivElement>) => {
       const target = event.currentTarget;
 
-      if (dayColumnWidth <= 0) {
+      if (viewMode === "month" || dayColumnWidth <= 0) {
         return;
       }
 
@@ -286,7 +302,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
         }));
       }
     },
-    [dayColumnWidth],
+    [dayColumnWidth, viewMode],
   );
 
   const handleViewModeChange = (nextViewMode: CalendarViewMode) => {
@@ -326,10 +342,18 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     <section className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa] text-[#24231f]">
       <header className="flex h-[84px] shrink-0 items-center gap-4 border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)] px-5 shadow-[0_1px_0_rgba(255,255,255,0.72)_inset]">
         <div className="flex min-w-0 flex-1 items-center gap-5">
-          <div className="min-w-0">
-            <h1 className="truncate text-[26px] font-semibold tracking-[-0.035em] text-[#24231f]">
-              {monthLabel}
-            </h1>
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border border-[#dddcd5] bg-[#f6f6f4] text-[#777671] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]">
+              <Calendar className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#9b9a94]">
+                Calendar
+              </p>
+              <h1 className="truncate text-[26px] font-semibold tracking-[-0.035em] text-[#24231f]">
+                {monthLabel}
+              </h1>
+            </div>
           </div>
 
           <div className="hidden h-10 items-center rounded-[10px] border border-[#dddcd5] bg-[#f1f0ec] p-1 shadow-[inset_0_1px_2px_rgba(86,72,74,0.08)] md:flex">
@@ -402,115 +426,123 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
         ) : null}
       </header>
 
-      <div
-        ref={scrollContainerRef}
-        className="calendar-timeline-scroll min-h-0 flex-1 overflow-auto bg-white"
-        onScroll={handleTimelineScroll}
-      >
+      {viewMode === "month" ? (
+        <ExplorerCalendarMonthView
+          currentDate={currentDate}
+          selectedDate={currentDate}
+          onSelectDate={setCurrentDate}
+        />
+      ) : (
         <div
-          className="grid"
-          style={{
-            gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${dayColumnWidth}px)`,
-            minWidth: `${gridWidth}px`,
-          }}
+          ref={scrollContainerRef}
+          className="calendar-timeline-scroll min-h-0 flex-1 overflow-auto bg-white"
+          onScroll={handleTimelineScroll}
         >
-          <div className="sticky left-0 top-0 z-30 border-b border-r border-[#e8e7e1] bg-white" />
+          <div
+            className="grid"
+            style={{
+              gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${dayColumnWidth}px)`,
+              minWidth: `${gridWidth}px`,
+            }}
+          >
+            <div className="sticky left-0 top-0 z-30 border-b border-r border-[#e8e7e1] bg-white" />
 
-          {visibleDays.map((day) => {
-            const selected = isSameDay(day, currentDate);
-            const today = isSameDay(day, new Date());
+            {visibleDays.map((day) => {
+              const selected = isSameDay(day, currentDate);
+              const today = isSameDay(day, new Date());
 
-            return (
-              <div
-                key={day.toISOString()}
-                className={cn(
-                  "sticky top-0 z-20 flex h-[56px] items-center justify-center gap-2 border-b border-r border-[#e8e7e1] bg-white text-[13px]",
-                  selected && "bg-[#fff8f8]",
-                )}
-              >
-                <span className="font-semibold text-[#9b9a94]">
-                  {WEEKDAY_LABELS[day.getDay()]}
-                </span>
-                <span
+              return (
+                <div
+                  key={day.toISOString()}
                   className={cn(
-                    "inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 font-bold tabular-nums",
-                    selected
-                      ? "bg-[#ef5555] text-white shadow-[0_5px_14px_rgba(239,85,85,0.28)]"
-                      : today
-                        ? "bg-[#f0efea] text-[#24231f]"
-                        : "text-[#33322f]",
+                    "sticky top-0 z-20 flex h-[56px] items-center justify-center gap-2 border-b border-r border-[#e8e7e1] bg-white text-[13px]",
+                    selected && "bg-[#fff8f8]",
                   )}
                 >
-                  {day.getDate()}
-                </span>
-              </div>
-            );
-          })}
+                  <span className="font-semibold text-[#9b9a94]">
+                    {WEEKDAY_LABELS[day.getDay()]}
+                  </span>
+                  <span
+                    className={cn(
+                      "inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 font-bold tabular-nums",
+                      selected
+                        ? "bg-[#ef5555] text-white shadow-[0_5px_14px_rgba(239,85,85,0.28)]"
+                        : today
+                          ? "bg-[#f0efea] text-[#24231f]"
+                          : "text-[#33322f]",
+                    )}
+                  >
+                    {day.getDate()}
+                  </span>
+                </div>
+              );
+            })}
 
-          <div className="sticky left-0 z-10 flex h-[46px] items-center justify-center border-b border-r border-[#e8e7e1] bg-white text-[12px] font-semibold text-[#9b9a94]">
-            終日
-          </div>
+            <div className="sticky left-0 z-10 flex h-[46px] items-center justify-center border-b border-r border-[#e8e7e1] bg-white text-[12px] font-semibold text-[#9b9a94]">
+              終日
+            </div>
 
-          {visibleDays.map((day) => (
-            <div
-              key={`allday-${day.toISOString()}`}
-              className={cn(
-                "h-[46px] border-b border-r border-[#e8e7e1]",
-                isSameDay(day, currentDate) && "bg-[#fff8f8]",
-              )}
-            />
-          ))}
-
-          <div className="sticky left-0 z-10 bg-white">
-            {HOURS.map((hour) => (
+            {visibleDays.map((day) => (
               <div
-                key={`hour-label-${hour}`}
-                className="flex h-[88px] justify-center border-b border-r border-[#e8e7e1] pt-2 text-[12px] text-[#8b8a84]"
-              >
-                {createHourLabel(hour)}
-              </div>
-            ))}
-          </div>
-
-          {visibleDays.map((day) => {
-            const events = demoEvents.filter((event) =>
-              isSameDay(event.startsAt, day),
-            );
-
-            return (
-              <div
-                key={`day-body-${day.toISOString()}`}
+                key={`allday-${day.toISOString()}`}
                 className={cn(
-                  "relative border-r border-[#e8e7e1]",
+                  "h-[46px] border-b border-r border-[#e8e7e1]",
                   isSameDay(day, currentDate) && "bg-[#fff8f8]",
                 )}
-              >
-                {HOURS.map((hour) => (
-                  <div
-                    key={`${day.toISOString()}-${hour}`}
-                    className="h-[88px] border-b border-[#e8e7e1]"
-                  />
-                ))}
+              />
+            ))}
 
-                {events.map((event) => (
-                  <article
-                    key={event.id}
-                    style={calculateEventStyle(event)}
-                    className="absolute left-2 right-2 overflow-hidden rounded-[10px] border border-[#f2c4c0] bg-[#fff1f0] px-2.5 py-2 text-[#7f2d28] shadow-[0_8px_18px_rgba(127,45,40,0.08)]"
-                  >
-                    <div className="truncate text-[12px] font-bold leading-4">
-                      {event.title}
-                    </div>
-                    <div className="mt-0.5 text-[10px] font-medium tabular-nums opacity-70">
-                      {format(event.startsAt, "HH:mm")}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            );
-          })}
+            <div className="sticky left-0 z-10 bg-white">
+              {HOURS.map((hour) => (
+                <div
+                  key={`hour-label-${hour}`}
+                  className="flex h-[88px] justify-center border-b border-r border-[#e8e7e1] pt-2 text-[12px] text-[#8b8a84]"
+                >
+                  {createHourLabel(hour)}
+                </div>
+              ))}
+            </div>
+
+            {visibleDays.map((day) => {
+              const events = demoEvents.filter((event) =>
+                isSameDay(event.startsAt, day),
+              );
+
+              return (
+                <div
+                  key={`day-body-${day.toISOString()}`}
+                  className={cn(
+                    "relative border-r border-[#e8e7e1]",
+                    isSameDay(day, currentDate) && "bg-[#fff8f8]",
+                  )}
+                >
+                  {HOURS.map((hour) => (
+                    <div
+                      key={`${day.toISOString()}-${hour}`}
+                      className="h-[88px] border-b border-[#e8e7e1]"
+                    />
+                  ))}
+
+                  {events.map((event) => (
+                    <article
+                      key={event.id}
+                      style={calculateEventStyle(event)}
+                      className="absolute left-2 right-2 overflow-hidden rounded-[10px] border border-[#f2c4c0] bg-[#fff1f0] px-2.5 py-2 text-[#7f2d28] shadow-[0_8px_18px_rgba(127,45,40,0.08)]"
+                    >
+                      <div className="truncate text-[12px] font-bold leading-4">
+                        {event.title}
+                      </div>
+                      <div className="mt-0.5 text-[10px] font-medium tabular-nums opacity-70">
+                        {format(event.startsAt, "HH:mm")}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 };
