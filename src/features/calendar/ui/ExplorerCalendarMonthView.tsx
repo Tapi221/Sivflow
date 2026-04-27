@@ -13,7 +13,6 @@ import {
 import {
   buildCalendarMonthPages,
   getCalendarMonthKey,
-  type CalendarMonthGridDay,
   type CalendarMonthPage,
 } from "@/features/calendar/model/monthGrid";
 import { cn } from "@/lib/utils";
@@ -28,18 +27,6 @@ const createInitialMonthOffsetRange = () => ({
   startOffset: -INITIAL_MONTH_BUFFER,
   endOffset: INITIAL_MONTH_BUFFER,
 });
-
-const getMonthAnnotation = (
-  day: CalendarMonthGridDay,
-  baseDate: Date,
-): string | null => {
-  if (day.isCurrentMonth || !day.isMonthStart) return null;
-
-  const monthLabel = format(day.date, "M月", { locale: ja });
-  const baseMonthLabel = format(baseDate, "M月", { locale: ja });
-
-  return monthLabel === baseMonthLabel ? null : monthLabel;
-};
 
 type ExplorerCalendarMonthViewProps = {
   currentDate: Date;
@@ -248,13 +235,26 @@ export const ExplorerCalendarMonthView = ({
           >
             <div className="grid grid-cols-7 bg-white">
               {monthPage.days.map((day, index) => {
+                const isLastColumn = index % 7 === 6;
+                const hasBottomBorder = index < monthPage.days.length - 7;
+                const cellFrameClassName = cn(
+                  "relative min-h-[112px] overflow-hidden border-[#ebeae4] bg-white text-left outline-none transition-colors",
+                  !isLastColumn && "border-r",
+                  hasBottomBorder && "border-b",
+                );
+
+                if (!day.isCurrentMonth) {
+                  return (
+                    <div
+                      key={`${monthPage.key}:${day.key}`}
+                      aria-hidden="true"
+                      className={cellFrameClassName}
+                    />
+                  );
+                }
+
                 const selected = isSameDay(day.date, selectedDate);
                 const todayCell = isSameDay(day.date, today);
-                const monthAnnotation = getMonthAnnotation(
-                  day,
-                  monthPage.monthStart,
-                );
-                const isLastColumn = index % 7 === 6;
 
                 return (
                   <button
@@ -265,9 +265,7 @@ export const ExplorerCalendarMonthView = ({
                     })}
                     aria-pressed={selected}
                     className={cn(
-                      "group relative min-h-[112px] overflow-hidden border-[#ebeae4] bg-white text-left outline-none transition-colors",
-                      !isLastColumn && "border-r",
-                      index < monthPage.days.length - 7 && "border-b",
+                      cellFrameClassName,
                       selected && "bg-[#fff9f8]",
                       !selected && "hover:bg-[#fbfaf7]",
                       "focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
@@ -281,19 +279,11 @@ export const ExplorerCalendarMonthView = ({
                           ? "bg-[#ef5555] text-white shadow-[0_7px_18px_rgba(239,85,85,0.24)]"
                           : todayCell
                             ? "bg-[#f0efea] text-[#24231f]"
-                            : day.isCurrentMonth
-                              ? "text-[#24231f]"
-                              : "text-[#b0aea8]",
+                            : "text-[#24231f]",
                       )}
                     >
                       {day.dayOfMonth}
                     </span>
-
-                    {monthAnnotation ? (
-                      <span className="absolute right-4 top-[18px] text-[12px] font-semibold text-[#a09f98]">
-                        {monthAnnotation}
-                      </span>
-                    ) : null}
                   </button>
                 );
               })}

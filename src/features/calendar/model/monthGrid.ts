@@ -1,6 +1,9 @@
 import {
   addDays,
   addMonths,
+  differenceInCalendarDays,
+  endOfMonth,
+  endOfWeek,
   format,
   isSameMonth,
   startOfMonth,
@@ -26,6 +29,30 @@ export type CalendarMonthPage = {
 export const CALENDAR_MONTH_GRID_CELL_COUNT = 42;
 export const CALENDAR_MONTH_WEEK_STARTS_ON = 0;
 
+const buildCalendarMonthDaysBetween = ({
+  monthStart,
+  gridStart,
+  gridEnd,
+}: {
+  monthStart: Date;
+  gridStart: Date;
+  gridEnd: Date;
+}): CalendarMonthGridDay[] => {
+  const cellCount = differenceInCalendarDays(gridEnd, gridStart) + 1;
+
+  return Array.from({ length: cellCount }, (_, index) => {
+    const date = addDays(gridStart, index);
+
+    return {
+      date,
+      key: format(date, "yyyy-MM-dd"),
+      dayOfMonth: date.getDate(),
+      isCurrentMonth: isSameMonth(date, monthStart),
+      isMonthStart: date.getDate() === 1,
+    };
+  });
+};
+
 export const getCalendarMonthKey = (date: Date): string => {
   return format(startOfMonth(date), "yyyy-MM");
 };
@@ -41,17 +68,30 @@ export const buildCalendarMonthGridDays = (
   const gridStart = startOfWeek(monthStart, {
     weekStartsOn: CALENDAR_MONTH_WEEK_STARTS_ON,
   });
+  const gridEnd = addDays(gridStart, CALENDAR_MONTH_GRID_CELL_COUNT - 1);
 
-  return Array.from({ length: CALENDAR_MONTH_GRID_CELL_COUNT }, (_, index) => {
-    const date = addDays(gridStart, index);
+  return buildCalendarMonthDaysBetween({
+    monthStart,
+    gridStart,
+    gridEnd,
+  });
+};
 
-    return {
-      date,
-      key: format(date, "yyyy-MM-dd"),
-      dayOfMonth: date.getDate(),
-      isCurrentMonth: isSameMonth(date, monthStart),
-      isMonthStart: date.getDate() === 1,
-    };
+export const buildCalendarMonthStackGridDays = (
+  baseDate: Date,
+): CalendarMonthGridDay[] => {
+  const monthStart = startOfMonth(baseDate);
+  const gridStart = startOfWeek(monthStart, {
+    weekStartsOn: CALENDAR_MONTH_WEEK_STARTS_ON,
+  });
+  const gridEnd = endOfWeek(endOfMonth(monthStart), {
+    weekStartsOn: CALENDAR_MONTH_WEEK_STARTS_ON,
+  });
+
+  return buildCalendarMonthDaysBetween({
+    monthStart,
+    gridStart,
+    gridEnd,
   });
 };
 
@@ -62,7 +102,7 @@ export const buildCalendarMonthPage = (baseDate: Date): CalendarMonthPage => {
     key: getCalendarMonthKey(monthStart),
     monthStart,
     label: format(monthStart, "yyyy年 M月", { locale: ja }),
-    days: buildCalendarMonthGridDays(monthStart),
+    days: buildCalendarMonthStackGridDays(monthStart),
   };
 };
 
