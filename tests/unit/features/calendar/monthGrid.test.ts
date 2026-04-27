@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   CALENDAR_MONTH_GRID_CELL_COUNT,
-  addCalendarMonths,
   buildCalendarMonthGridDays,
   buildCalendarMonthPage,
   buildCalendarMonthPages,
-  buildCalendarMonthStackGridDays,
+  buildCalendarMonthWeeks,
   getCalendarMonthKey,
+  getCalendarWeekKey,
 } from "@/features/calendar/model/monthGrid";
 
 const toKey = (date: Date) => format(date, "yyyy-MM-dd");
@@ -24,19 +24,6 @@ describe("monthGrid", () => {
     expect(days[33]?.key).toBe("2026-05-01");
     expect(days[34]?.key).toBe("2026-05-02");
     expect(days[41]?.key).toBe("2026-05-09");
-  });
-
-  it("縦スクロール用の月ページは必要な週だけで構築する", () => {
-    const aprilDays = buildCalendarMonthStackGridDays(new Date(2026, 3, 1));
-    const februaryDays = buildCalendarMonthStackGridDays(new Date(2026, 1, 1));
-
-    expect(aprilDays).toHaveLength(35);
-    expect(aprilDays[0]?.key).toBe("2026-03-29");
-    expect(aprilDays[34]?.key).toBe("2026-05-02");
-
-    expect(februaryDays).toHaveLength(28);
-    expect(februaryDays[0]?.key).toBe("2026-02-01");
-    expect(februaryDays[27]?.key).toBe("2026-02-28");
   });
 
   it("当月日と月外日を判定する", () => {
@@ -63,32 +50,91 @@ describe("monthGrid", () => {
     expect(april2?.isMonthStart).toBe(false);
   });
 
-  it("月キーと月単位加算を安定して扱う", () => {
-    const april = new Date(2026, 3, 27);
-    const previousMonth = addCalendarMonths(april, -1);
-    const nextMonth = addCalendarMonths(april, 1);
-
-    expect(getCalendarMonthKey(april)).toBe("2026-04");
-    expect(getCalendarMonthKey(previousMonth)).toBe("2026-03");
-    expect(getCalendarMonthKey(nextMonth)).toBe("2026-05");
+  it("月キーと週キーを安定した文字列にする", () => {
+    expect(getCalendarMonthKey(new Date(2026, 3, 27))).toBe("2026-04");
+    expect(getCalendarWeekKey(new Date(2026, 3, 27))).toBe("2026-04-26");
   });
 
-  it("月ページと月ページ列を構築する", () => {
-    const aprilPage = buildCalendarMonthPage(new Date(2026, 3, 27));
+  it("月ページを指定オフセット範囲で構築する", () => {
     const pages = buildCalendarMonthPages({
       anchorDate: new Date(2026, 3, 27),
       startOffset: -1,
       endOffset: 1,
     });
 
-    expect(aprilPage.key).toBe("2026-04");
-    expect(aprilPage.label).toBe("2026年 4月");
-    expect(aprilPage.days).toHaveLength(35);
-
     expect(pages.map((page) => page.key)).toEqual([
       "2026-03",
       "2026-04",
       "2026-05",
     ]);
+    expect(pages.every((page) => page.days.length === 42)).toBe(true);
+  });
+
+  it("単月ページを構築する", () => {
+    const page = buildCalendarMonthPage(new Date(2026, 3, 27));
+
+    expect(page.key).toBe("2026-04");
+    expect(page.label).toBe("2026年 4月");
+    expect(page.days).toHaveLength(42);
+  });
+
+  it("縦スクロール用の週ストリームは日付を重複させない", () => {
+    const weeks = buildCalendarMonthWeeks({
+      anchorDate: new Date(2026, 3, 27),
+      startOffset: 0,
+      endOffset: 1,
+    });
+    const dayKeys = weeks.flatMap((week) => week.days.map((day) => day.key));
+
+    expect(new Set(dayKeys).size).toBe(dayKeys.length);
+    expect(dayKeys).toContain("2026-04-30");
+    expect(dayKeys).toContain("2026-05-01");
+    expect(dayKeys).toContain("2026-05-02");
+  });
+
+  it("月境界の週を1行として連続表示できる", () => {
+    const weeks = buildCalendarMonthWeeks({
+      anchorDate: new Date(2026, 3, 27),
+      startOffset: 0,
+      endOffset: 1,
+    });
+    const transitionWeek = weeks.find((week) => week.key === "2026-04-26");
+    const nextWeek = weeks.find((week) => week.key === "2026-05-03");
+
+    expect(transitionWeek?.days.map((day) => day.key)).toEqual([
+      "2026-04-26",
+      "2026-04-27",
+      "2026-04-28",
+      "2026-04-29",
+      "2026-04-30",
+      "2026-05-01",
+      "2026-05-02",
+    ]);
+    expect(nextWeek?.days.map((day) => day.key)).toEqual([
+      "2026-05-03",
+      "2026-05-04",
+      "2026-05-05",
+      "2026-05-06",
+      "2026-05-07",
+      "2026-05-08",
+      "2026-05-09",
+    ]);
+  });
+
+  it("週ごとの表示月を中央日で判定する", () => {
+    const weeks = buildCalendarMonthWeeks({
+      anchorDate: new Date(2026, 3, 27),
+      startOffset: 0,
+      endOffset: 1,
+    });
+    const aprilTransitionWeek = weeks.find((week) => week.key === "2026-04-26");
+    const mayWeek = weeks.find((week) => week.key === "2026-05-03");
+
+    expect(getCalendarMonthKey(aprilTransitionWeek?.visibleMonthDate ?? new Date())).toBe(
+      "2026-04",
+    );
+    expect(getCalendarMonthKey(mayWeek?.visibleMonthDate ?? new Date())).toBe(
+      "2026-05",
+    );
   });
 });
