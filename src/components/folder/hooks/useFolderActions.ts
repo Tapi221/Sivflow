@@ -445,7 +445,6 @@ export const useFolderActions = ({
         makeTempFolder(folderId, nextName, normalizedParentId, orderIndex),
         ...prev,
       ]);
-      setPendingScrollId(folderId);
       setEditingId(folderId);
       setEditingName(nextName);
       editingIdRef.current = folderId;
