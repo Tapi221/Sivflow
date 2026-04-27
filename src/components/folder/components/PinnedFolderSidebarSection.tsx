@@ -46,10 +46,16 @@ type SidebarSectionResizeTarget = {
   minHeight: number;
   maxHeight: number;
   resolveElement: () => HTMLElement | null;
+  resolveHandleHost?: () => HTMLElement | null;
 };
 
+const PINNED_FOLDER_SECTION_FRAME_ID =
+  "pinned-folder-sidebar-section-frame";
+const PINNED_FOLDER_SECTION_HEADER_ID =
+  "pinned-folder-sidebar-section-header";
 const PINNED_FOLDER_SECTION_CONTENT_ID =
   "pinned-folder-sidebar-section-content";
+const FOLDER_LIST_SECTION_HEADER_ID = "folder-list-sidebar-section-header";
 const FOLDER_LIST_SECTION_CONTENT_ID = "folder-list-sidebar-section-content";
 const SIDEBAR_SECTION_RESIZE_STORAGE_PREFIX =
   "flashcard-master.explorer.sidebarSectionHeight";
@@ -59,22 +65,26 @@ const SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE =
 const SIDEBAR_SECTION_RESIZE_TARGETS: SidebarSectionResizeTarget[] = [
   {
     id: "pinned",
-    minHeight: 40,
-    maxHeight: 220,
+    minHeight: 44,
+    maxHeight: 260,
     resolveElement: () =>
+      document.getElementById(PINNED_FOLDER_SECTION_FRAME_ID) ??
       document.getElementById(PINNED_FOLDER_SECTION_CONTENT_ID),
   },
   {
     id: "folder-list",
-    minHeight: 80,
-    maxHeight: 520,
+    minHeight: 96,
+    maxHeight: 640,
     resolveElement: () =>
       document.getElementById(FOLDER_LIST_SECTION_CONTENT_ID),
+    resolveHandleHost: () =>
+      document.getElementById(FOLDER_LIST_SECTION_CONTENT_ID) ??
+      document.getElementById(FOLDER_LIST_SECTION_HEADER_ID),
   },
   {
     id: "tag",
     minHeight: 42,
-    maxHeight: 220,
+    maxHeight: 260,
     resolveElement: () =>
       document.querySelector<HTMLElement>(
         '[aria-controls="tag-sidebar-section-content"]',
@@ -83,7 +93,7 @@ const SIDEBAR_SECTION_RESIZE_TARGETS: SidebarSectionResizeTarget[] = [
   {
     id: "calendar",
     minHeight: 42,
-    maxHeight: 220,
+    maxHeight: 260,
     resolveElement: () =>
       document.querySelector<HTMLElement>(
         '[aria-controls="calendar-sidebar-section-content"]',
@@ -170,6 +180,7 @@ const applySidebarSectionHeight = (
 const createSidebarSectionResizeHandle = (
   target: SidebarSectionResizeTarget,
   element: HTMLElement,
+  handleHost: HTMLElement,
 ) => {
   const handle = document.createElement("div");
   const indicator = document.createElement("div");
@@ -185,9 +196,9 @@ const createSidebarSectionResizeHandle = (
     position: "absolute",
     left: "0",
     right: "0",
-    bottom: "-4px",
-    zIndex: "60",
-    height: "8px",
+    bottom: "0",
+    zIndex: "80",
+    height: "10px",
     cursor: "row-resize",
     touchAction: "none",
     userSelect: "none",
@@ -196,23 +207,26 @@ const createSidebarSectionResizeHandle = (
 
   Object.assign(indicator.style, {
     position: "absolute",
-    left: "16px",
-    right: "16px",
-    top: "3px",
+    left: "14px",
+    right: "14px",
+    top: "4px",
     height: "2px",
     borderRadius: "999px",
-    background: "transparent",
-    transition: "background-color 120ms ease",
+    background: "rgba(96, 165, 250, 0.34)",
+    boxShadow: "0 0 0 1px rgba(255, 255, 255, 0.7)",
+    transition: "background-color 120ms ease, box-shadow 120ms ease",
   } satisfies Partial<CSSStyleDeclaration>);
 
   handle.appendChild(indicator);
 
   const showIndicator = () => {
-    indicator.style.background = "rgba(127, 45, 40, 0.42)";
+    indicator.style.background = "rgba(37, 99, 235, 0.78)";
+    indicator.style.boxShadow = "0 0 0 1px rgba(255, 255, 255, 0.85), 0 0 0 3px rgba(59, 130, 246, 0.12)";
   };
 
   const hideIndicator = () => {
-    indicator.style.background = "transparent";
+    indicator.style.background = "rgba(96, 165, 250, 0.34)";
+    indicator.style.boxShadow = "0 0 0 1px rgba(255, 255, 255, 0.7)";
   };
 
   const commitHeight = (height: number) => {
@@ -347,29 +361,30 @@ const SidebarSectionResizeBridge = () => {
 
     for (const target of SIDEBAR_SECTION_RESIZE_TARGETS) {
       const element = target.resolveElement();
+      const handleHost = target.resolveHandleHost?.() ?? element;
 
-      if (!element) {
+      if (!element || !handleHost) {
         continue;
       }
 
       if (
-        element.querySelector(
+        handleHost.querySelector(
           `[${SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE}="${target.id}"]`,
         )
       ) {
         continue;
       }
 
-      const computedStyle = window.getComputedStyle(element);
-      const originalPosition = element.style.position;
+      const hostComputedStyle = window.getComputedStyle(handleHost);
+      const originalHostPosition = handleHost.style.position;
       const originalOverflow = element.style.overflow;
       const originalHeight = element.style.height;
       const originalMinHeight = element.style.minHeight;
       const originalMaxHeight = element.style.maxHeight;
       const originalFlex = element.style.flex;
 
-      if (computedStyle.position === "static") {
-        element.style.position = "relative";
+      if (hostComputedStyle.position === "static") {
+        handleHost.style.position = "relative";
       }
 
       const storedHeight = readStoredSectionHeight(target);
@@ -381,12 +396,13 @@ const SidebarSectionResizeBridge = () => {
       const { handle, cleanup } = createSidebarSectionResizeHandle(
         target,
         element,
+        handleHost,
       );
-      element.appendChild(handle);
+      handleHost.appendChild(handle);
 
       cleanupCallbacks.push(() => {
         cleanup();
-        element.style.position = originalPosition;
+        handleHost.style.position = originalHostPosition;
         element.style.overflow = originalOverflow;
         element.style.height = originalHeight;
         element.style.minHeight = originalMinHeight;
@@ -505,8 +521,9 @@ export const PinnedFolderSidebarSection = ({
     <section className="shrink-0 pb-0 pt-1">
       <SidebarSectionResizeBridge />
       <>
-        <div className="px-2 pb-1 pt-1">
-          <button
+        <div id={PINNED_FOLDER_SECTION_FRAME_ID} className="relative">
+          <div id={PINNED_FOLDER_SECTION_HEADER_ID} className="px-2 pb-1 pt-1">
+            <button
             type="button"
             className={cn(
               "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
@@ -529,17 +546,17 @@ export const PinnedFolderSidebarSection = ({
             <span className="tabular-nums opacity-60">
               {pinnedFolders.length}
             </span>
-          </button>
-        </div>
+            </button>
+          </div>
 
-        <div
-          id={PINNED_FOLDER_SECTION_CONTENT_ID}
+          <div
+            id={PINNED_FOLDER_SECTION_CONTENT_ID}
           className={cn(
             "space-y-0.5",
             isPinnedFolderSectionCollapsed && "hidden",
           )}
         >
-          {pinnedFolders.map((entry) => {
+            {pinnedFolders.map((entry) => {
             const isSelected = selectedFolderId === entry.id;
             const menuActions: MenuAction[] = [
               {
@@ -611,9 +628,10 @@ export const PinnedFolderSidebarSection = ({
               />
             );
           })}
+          </div>
         </div>
 
-        <div className="mt-1 border-t border-border/60 px-2 pb-1 pt-2">
+        <div id={FOLDER_LIST_SECTION_HEADER_ID} className="mt-1 border-t border-border/60 px-2 pb-1 pt-2">
           <div className="flex items-center gap-1">
             <button
               type="button"
