@@ -36,6 +36,9 @@ type PendingColumnDragState = {
   pointerId: number;
   startX: number;
   startY: number;
+  columnLeft: number;
+  columnWidth: number;
+  rowWidth: number;
   hasStarted: boolean;
 };
 
@@ -85,6 +88,25 @@ type FolderDetailHeaderProps = {
 };
 
 const COLUMN_DRAG_START_DISTANCE_PX = 8;
+
+const clampNumber = (value: number, min: number, max: number): number => {
+  const safeMin = Math.min(min, max);
+  const safeMax = Math.max(min, max);
+
+  return Math.min(Math.max(value, safeMin), safeMax);
+};
+
+const getConstrainedColumnDragOffsetX = (
+  pendingDrag: PendingColumnDragState,
+  clientX: number,
+): number => {
+  const rawOffsetX = clientX - pendingDrag.startX;
+  const minOffsetX = -pendingDrag.columnLeft;
+  const maxOffsetX =
+    pendingDrag.rowWidth - pendingDrag.columnLeft - pendingDrag.columnWidth;
+
+  return clampNumber(rawOffsetX, minOffsetX, maxOffsetX);
+};
 
 const DETAIL_HEADER_COLUMNS = {
   name: {
@@ -259,6 +281,7 @@ export const FolderDetailHeader = ({
       }
 
       const rowRect = rowElement.getBoundingClientRect();
+      const boundedClientX = clampNumber(clientX, rowRect.left, rowRect.right);
 
       for (let index = 0; index < orderedColumnIds.length; index += 1) {
         const columnId = orderedColumnIds[index];
@@ -271,7 +294,7 @@ export const FolderDetailHeader = ({
         const columnRect = columnElement.getBoundingClientRect();
         const columnCenterX = columnRect.left + columnRect.width / 2;
 
-        if (clientX < columnCenterX) {
+        if (boundedClientX < columnCenterX) {
           return {
             insertIndex: index,
             insertLeft: columnRect.left - rowRect.left,
@@ -301,10 +324,14 @@ export const FolderDetailHeader = ({
 
   const updateColumnDragVisual = useCallback(
     (event: PointerEvent, pendingDrag: PendingColumnDragState) => {
-      const offsetX = event.clientX - pendingDrag.startX;
+      const offsetX = getConstrainedColumnDragOffsetX(
+        pendingDrag,
+        event.clientX,
+      );
+      const boundedClientX = pendingDrag.startX + offsetX;
       const placement = getColumnInsertPlacement(
         pendingDrag.activeColumnId,
-        event.clientX,
+        boundedClientX,
       );
       const nextVisual: ColumnDragVisualState = {
         activeColumnId: pendingDrag.activeColumnId,
@@ -404,13 +431,23 @@ export const FolderDetailHeader = ({
         return;
       }
 
+      const rowElement = rowRef.current;
       const rect = event.currentTarget.getBoundingClientRect();
+      const rowRect = rowElement?.getBoundingClientRect();
+
+      if (!rowRect || rect.width <= 0 || rect.height <= 0 || rowRect.width <= 0) {
+        return;
+      }
+
       pendingColumnDragRef.current = {
         activeColumnId: columnId,
         label,
         pointerId: event.pointerId,
         startX: event.clientX,
         startY: event.clientY,
+        columnLeft: rect.left - rowRect.left,
+        columnWidth: rect.width,
+        rowWidth: rowRect.width,
         hasStarted: false,
       };
 
@@ -422,8 +459,6 @@ export const FolderDetailHeader = ({
       });
       window.addEventListener("pointerup", handleWindowPointerEnd);
       window.addEventListener("pointercancel", handleWindowPointerEnd);
-
-      if (rect.width <= 0 || rect.height <= 0) return;
     },
     [handleWindowPointerEnd, handleWindowPointerMove],
   );
