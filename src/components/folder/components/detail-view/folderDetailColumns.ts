@@ -11,6 +11,7 @@ export const DETAIL_COLUMN_IDS = [
   "tags",
   "path",
   "updatedAt",
+  "sync",
   "kind",
   "size",
 ] as const satisfies readonly ExplorerDetailColumnId[];
@@ -22,6 +23,7 @@ export const DETAIL_DEFAULT_COLUMN_WIDTHS = {
   tags: 190,
   path: 420,
   updatedAt: 168,
+  sync: 132,
   kind: 128,
   size: 112,
 } satisfies ExplorerDetailColumnWidths;
@@ -31,6 +33,7 @@ export const DETAIL_MIN_COLUMN_WIDTHS = {
   tags: 120,
   path: 220,
   updatedAt: 132,
+  sync: 104,
   kind: 96,
   size: 84,
 } satisfies ExplorerDetailColumnWidths;

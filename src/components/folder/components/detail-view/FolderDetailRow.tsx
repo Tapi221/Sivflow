@@ -4,6 +4,7 @@ import {
   ExplorerChromeFolderIcon,
   ExplorerChromePdfIcon,
 } from "@/components/explorer/icons";
+import { ExplorerDetailSyncBadge } from "@/components/folder/components/ExplorerDetailSyncBadge";
 import type {
   ExplorerDetailRow,
   ExplorerDetailRowKind,
@@ -12,6 +13,7 @@ import {
   formatExplorerSize,
   formatExplorerUpdatedAt,
 } from "@/components/folder/explorer/model/formatExplorerDetail";
+import type { ExplorerDetailSyncViewState } from "@/hooks/sync/useExplorerDetailSyncStates";
 import { cn } from "@/lib/utils";
 import {
   useEffect,
@@ -29,6 +31,7 @@ import type {
 
 type FolderDetailRowProps = {
   row: ExplorerDetailRow;
+  syncState: ExplorerDetailSyncViewState;
   selected: boolean;
   dragging: boolean;
   draggable: boolean;
@@ -57,6 +60,7 @@ const getRowIcon = (kind: ExplorerDetailRowKind) => {
 
 export const FolderDetailRow = ({
   row,
+  syncState,
   selected,
   dragging,
   draggable,
@@ -229,6 +233,12 @@ export const FolderDetailRow = ({
         <span className="truncate">
           {formatExplorerUpdatedAt(row.updatedAt)}
         </span>
+      </div>
+      <div
+        role="cell"
+        className="flex min-w-0 items-center px-3 text-[#777671]"
+      >
+        <ExplorerDetailSyncBadge state={syncState} />
       </div>
       <div
         role="cell"

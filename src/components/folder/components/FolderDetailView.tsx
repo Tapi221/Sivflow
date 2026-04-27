@@ -6,6 +6,10 @@ import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { useTags } from "@/hooks/settings/useTags";
+import {
+  UNKNOWN_EXPLORER_DETAIL_SYNC_STATE,
+  useExplorerDetailSyncStates,
+} from "@/hooks/sync/useExplorerDetailSyncStates";
 import type {
   Card,
   CardSet,
@@ -222,6 +226,7 @@ export const FolderDetailView = ({
     () => sortRows(manualRows, sortState),
     [manualRows, sortState],
   );
+  const syncStateByRowKey = useExplorerDetailSyncStates(rows);
 
   const isManualOrder = sortState.key === "manual";
 
@@ -587,6 +592,10 @@ export const FolderDetailView = ({
               <FolderDetailRow
                 key={row.key}
                 row={row}
+                syncState={
+                  syncStateByRowKey.get(row.key) ??
+                  UNKNOWN_EXPLORER_DETAIL_SYNC_STATE
+                }
                 selected={selected}
                 dragging={dragging}
                 draggable={isManualOrder}

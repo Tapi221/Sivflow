@@ -159,6 +159,14 @@ export const FolderDetailHeader = ({
         onResetWidth={onResetWidth}
       />
       <HeaderCell
+        label="同期"
+        columnId="sync"
+        sortState={sortState}
+        onSort={onSort}
+        onResizePointerDown={onResizePointerDown}
+        onResetWidth={onResetWidth}
+      />
+      <HeaderCell
         label="種類"
         columnId="kind"
         sortKey="kind"
