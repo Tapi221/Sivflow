@@ -142,7 +142,7 @@ const getCardTags = (card: Card): string[] => {
   return getStringArray(card.tagIds);
 };
 
-const normalizeCardSyncState = (
+const normalizeCardLocalSyncState = (
   value: Card["syncState"],
 ): ExplorerDetailLocalSyncState | undefined => {
   if (
@@ -271,7 +271,6 @@ const buildCardSetRows = ({
       const cardSetName = toVirtualMfDeckDisplayName(
         cardSet.name?.trim() || "無題のセット",
       );
-      const cardCount = cardCountByCardSetId.get(cardSet.id) ?? 0;
 
       return {
         key: `cardSet:${cardSet.id}`,
@@ -335,7 +334,7 @@ const buildCardRows = ({
         openCardSetId: null,
         syncEntity: "card",
         syncTargetId: card.id,
-        localSyncState: normalizeCardSyncState(card.syncState),
+        localSyncState: normalizeCardLocalSyncState(card.syncState),
         lastSyncedAt: card.lastSyncedAt,
       };
     })
