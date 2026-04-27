@@ -1,8 +1,7 @@
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 import {
   AppBootLoadingFallback,
-  CalendarScreenSkeleton,
-  CardEditScreenSkeleton,
+    CardEditScreenSkeleton,
   CardSetViewScreenSkeleton,
   DirectoryScreenSkeleton,
   FoldersScreenSkeleton,
@@ -28,7 +27,6 @@ import {
 import { signInWithGoogle } from "./services/auth/googleSignIn";
 import { DEV_MODE, isLocalHost } from "./utils/envGuards";
 
-const Calendar = lazy(() => import("./routes/Calendar"));
 const Folders = lazy(() => import("./routes/Folders"));
 const CardEdit = lazy(() => import("./routes/CardEdit"));
 const CardSetView = lazy(() => import("./routes/CardSetView"));
@@ -360,13 +358,6 @@ const AppContent = () => {
             element={withRouteFallback(
               <StudyMode />,
               <StudyModeScreenSkeleton />,
-            )}
-          />
-          <Route
-            path="calendar"
-            element={withRouteFallback(
-              <Calendar />,
-              <CalendarScreenSkeleton />,
             )}
           />
           <Route path="sandbox/blocknote" element={<BlockNoteSandboxPage />} />
