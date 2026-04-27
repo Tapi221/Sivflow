@@ -1,4 +1,7 @@
-import { buildExplorerDetailRows, type ExplorerDetailRow } from "@/components/folder/explorer/model/detailRows";
+import {
+  buildExplorerDetailRows,
+  type ExplorerDetailRow,
+} from "@/components/folder/explorer/model/detailRows";
 import { isSameSelectedExplorerItem } from "@/features/explorer/utils/isSameSelectedExplorerItem";
 import { useCardCommands } from "@/hooks/card/useCardCommands";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";

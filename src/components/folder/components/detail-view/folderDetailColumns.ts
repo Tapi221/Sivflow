@@ -1,5 +1,8 @@
 import type { CSSProperties } from "react";
-import type { ExplorerDetailColumnId, ExplorerDetailSortState } from "./folderDetailTypes";
+import type {
+  ExplorerDetailColumnId,
+  ExplorerDetailSortState,
+} from "./folderDetailTypes";
 
 const EXPLORER_DETAIL_COLUMN_WIDTHS_STORAGE_KEY =
   "manifolia:folder-detail-view:column-widths";
@@ -94,7 +97,9 @@ export const readStoredDetailColumnWidths = (): ExplorerDetailColumnWidths => {
   }
 };
 
-export const writeStoredDetailColumnWidths = (widths: ExplorerDetailColumnWidths) => {
+export const writeStoredDetailColumnWidths = (
+  widths: ExplorerDetailColumnWidths,
+) => {
   if (typeof window === "undefined") return;
 
   window.localStorage.setItem(
@@ -109,7 +114,9 @@ export const buildDetailGridTemplateColumns = (
   return DETAIL_COLUMN_IDS.map((columnId) => `${widths[columnId]}px`).join(" ");
 };
 
-export const getDetailGridMinWidth = (widths: ExplorerDetailColumnWidths): number => {
+export const getDetailGridMinWidth = (
+  widths: ExplorerDetailColumnWidths,
+): number => {
   return DETAIL_COLUMN_IDS.reduce(
     (total, columnId) => total + widths[columnId],
     0,

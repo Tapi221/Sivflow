@@ -17,7 +17,11 @@ export type ExplorerDetailColumnId =
   | "size";
 
 export type ExplorerDetailSortDirection = "asc" | "desc";
-export type ExplorerDetailDropPosition = "before" | "after" | "inside" | "append";
+export type ExplorerDetailDropPosition =
+  | "before"
+  | "after"
+  | "inside"
+  | "append";
 
 export type ExplorerDetailSortState = {
   key: ExplorerDetailSortKey;
