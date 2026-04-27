@@ -142,30 +142,6 @@
     background: var(--scrollbar-thumb-active);
   }
 
-  .image-full-width {
-    margin-left: calc(var(--ui-space-2) * -1);
-    margin-right: calc(var(--ui-space-2) * -1);
-    width: calc(100% + var(--ui-space-2) * 2);
-  }
-
-  @media (min-width: 768px) {
-    .image-full-width {
-      margin-left: calc(var(--ui-space-3) * -1);
-      margin-right: calc(var(--ui-space-3) * -1);
-      width: calc(100% + var(--ui-space-3) * 2);
-    }
-  }
-
-  .card-shell-viewport {
-    @apply relative w-full overflow-hidden;
-    touch-action: none;
-  }
-
-  .card-shell-panzoom {
-    @apply will-change-transform;
-    transform-origin: 0 0;
-  }
-
   .card-shell--paper {
     width: var(--card-base-width);
     max-width: none;
@@ -403,66 +379,6 @@
   .card-active-chrome--plain:focus-within,
   .card-pager-item--plain:focus-within {
     box-shadow: none;
-  }
-
-  .card-list-card {
-    border-color: var(--card-border-default, rgba(15, 23, 42, 0.08));
-    box-shadow: 0 1px 6px rgba(15, 23, 42, 0.06);
-    transition:
-      box-shadow 110ms ease,
-      border-color 110ms ease,
-      background-color 110ms ease;
-  }
-
-  .card-list-card:hover {
-    border-color: var(--card-border-hover, rgba(15, 23, 42, 0.14));
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
-  }
-
-  .card-list-card[data-card-selected="true"] {
-    border-color: var(--card-border-selected, rgba(15, 23, 42, 0.2));
-    background: var(--card-selected-surface, #f4f5f6);
-    box-shadow:
-      0 12px 26px rgba(15, 23, 42, 0.14),
-      inset 0 0 0 var(--card-selected-outline-width, 1.6px)
-        var(--card-selected-outline-neutral, rgba(84, 95, 105, 0.42)),
-      inset 0 0 0 calc(var(--card-selected-outline-width, 1.6px) + 0.75px)
-        var(--card-selected-outline-accent, rgba(122, 166, 161, 0.32));
-  }
-
-  .card-list-card:focus-visible,
-  .card-list-card:focus-within {
-    outline: none;
-    border-color: var(--card-border-selected, rgba(15, 23, 42, 0.2));
-    box-shadow:
-      var(--card-focus-ring-shadow, 0 0 0 2px rgba(122, 166, 161, 0.25)),
-      0 12px 26px rgba(15, 23, 42, 0.14);
-  }
-
-  .card-list-editing-badge {
-    border-color: var(--card-editing-badge-border, rgba(122, 166, 161, 0.34));
-    background: var(--card-editing-badge-bg, rgba(122, 166, 161, 0.12));
-    color: var(--card-editing-badge-text, #5b7f79);
-  }
-
-  .card-ambient-shadow {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: min(92vw, 1200px);
-    height: min(70vh, 760px);
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    border-radius: 9999px;
-    background: radial-gradient(
-      ellipse at center,
-      rgba(15, 23, 42, 0.12) 0%,
-      rgba(15, 23, 42, 0.07) 36%,
-      rgba(15, 23, 42, 0.02) 68%,
-      rgba(15, 23, 42, 0) 100%
-    );
-    filter: blur(20px);
-    z-index: 0;
   }
 
   .card-shell-header,

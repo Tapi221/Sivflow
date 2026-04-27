@@ -10,8 +10,7 @@
   }
 
   .ds-nav-action,
-  .sidebar__nav-item.ds-nav-action,
-  .ds-nav-tab {
+  .sidebar__nav-item.ds-nav-action {
     color: var(--ds-semantic-color-text-secondary);
     border-radius: var(--ds-semantic-radius-pill);
     transition:
@@ -26,8 +25,7 @@
   }
 
   .ds-nav-action:hover,
-  .sidebar__nav-item.ds-nav-action:hover,
-  .ds-nav-tab:hover {
+  .sidebar__nav-item.ds-nav-action:hover {
     background: var(--ds-semantic-color-background-sidebar-active);
     color: var(--ds-semantic-color-text-primary);
   }
@@ -39,8 +37,7 @@
   }
 
   .ds-nav-action--active,
-  .sidebar__nav-item.ds-nav-action.ds-nav-action--active,
-  .ds-nav-tab.ds-nav-action--active {
+  .sidebar__nav-item.ds-nav-action.ds-nav-action--active {
     background: var(--ds-semantic-color-background-sidebar-active);
     color: var(--ds-semantic-color-text-strong);
   }
@@ -54,27 +51,14 @@
   }
 
   .ds-nav-action__icon,
-  .sidebar__nav-icon.ds-nav-action__icon,
-  .ds-nav-tab__icon {
+  .sidebar__nav-icon.ds-nav-action__icon {
     color: inherit;
     opacity: 0.84;
   }
 
   .ds-nav-action:hover .ds-nav-action__icon,
-  .ds-nav-action--active .ds-nav-action__icon,
-  .ds-nav-tab:hover .ds-nav-tab__icon,
-  .ds-nav-tab.ds-nav-action--active .ds-nav-tab__icon {
+  .ds-nav-action--active .ds-nav-action__icon {
     opacity: 1;
-  }
-
-  .ds-nav-tabs {
-    border-bottom: 1px solid var(--ds-semantic-color-border-default);
-    background: var(--ds-semantic-color-background-sidebar);
-  }
-
-  .ds-nav-tab {
-    min-height: 2rem;
-    min-width: 2rem;
   }
 
   .ds-nav-action--icon {

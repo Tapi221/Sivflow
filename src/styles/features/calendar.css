@@ -1,37 +1,4 @@
 @layer components {
-  .calendar-day-base {
-    @apply relative transition-all duration-200 rounded-2xl flex flex-col items-center pt-2 md:pt-4 overflow-hidden border;
-    border-color: var(--surface-border);
-  }
-
-  .calendar-day-flat {
-    @apply bg-white text-slate-400;
-    box-shadow: var(--surface-shadow-concave);
-  }
-
-  .calendar-day-flat:hover {
-    @apply border-primary-100 text-slate-600;
-    background-color: rgba(148, 163, 184, 0.12);
-    box-shadow: var(--surface-shadow-concave);
-  }
-
-  .calendar-day-selected {
-    @apply bg-white border-primary-200 text-primary-600 z-10;
-    box-shadow: var(--surface-shadow-convex);
-  }
-
-  .calendar-day-today {
-    border-color: var(--surface-border);
-  }
-
-  .calendar-dot-3d {
-    box-shadow: var(--surface-shadow-convex);
-  }
-
-  .calendar-day-selected .calendar-date-text {
-    text-shadow: none;
-  }
-
   .calendar-view-content {
     scrollbar-gutter: stable;
   }
