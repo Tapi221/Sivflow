@@ -387,10 +387,9 @@ export const RootFolderPanelRow = ({
     <div
       className={cn(
         "flex h-[26px] min-w-0 w-full items-center gap-1.5 rounded-[8px]",
-        "border border-[#ded9cf] bg-[#fbfaf7] px-2",
-        "shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_1px_1px_rgba(22,20,15,0.035)]",
-        "focus-within:border-[#c9c2b5] focus-within:bg-white",
-        "focus-within:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_0_0_1px_rgba(201,194,181,0.36)]",
+        "border border-[#c9c2b5] bg-[#fbfaf7] px-2",
+        "shadow-none outline-none",
+        "focus-within:border-[#8f887b] focus-within:bg-white",
       )}
       onClick={(event) => {
         event.stopPropagation();
@@ -528,9 +527,9 @@ export const RootFolderPanelRow = ({
       input={
         <div
           className={cn(
-            "flex h-7 min-w-0 w-full items-center gap-1 rounded-[5px] border border-[#d8d5cc] bg-white px-1.5",
-            "shadow-[0_1px_2px_rgba(25,23,17,0.06)] transition",
-            "focus-within:border-[#8b887f] focus-within:shadow-[0_0_0_2px_rgba(139,136,127,0.14)]",
+            "flex h-7 min-w-0 w-full items-center gap-1 rounded-[5px] border border-[#c9c2b5] bg-white px-1.5",
+            "shadow-none transition-colors",
+            "focus-within:border-[#8f887b]",
           )}
           onClick={(event) => {
             event.stopPropagation();
