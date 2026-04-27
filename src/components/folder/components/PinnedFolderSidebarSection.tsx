@@ -29,7 +29,8 @@ interface PinnedFolderSidebarSectionProps {
   documents: DocumentItem[];
   selectedFolderId: string | null;
   isFiltering: boolean;
-  onFolderSelect: (folderId: string) => void;
+  folderListCountOverride?: number;
+  onFolderSelect: (folderId: string | null) => void;
   onCreateRootFolder?: () => void;
 }
 
@@ -81,6 +82,7 @@ export const PinnedFolderSidebarSection = ({
   documents,
   selectedFolderId,
   isFiltering,
+  folderListCountOverride,
   onFolderSelect,
   onCreateRootFolder,
 }: PinnedFolderSidebarSectionProps) => {
@@ -147,7 +149,7 @@ export const PinnedFolderSidebarSection = ({
     pinnedFolderIds,
   ]);
 
-  const folderListCount = useMemo(() => {
+  const computedFolderListCount = useMemo(() => {
     let count = 0;
     for (const folder of folderById.values()) {
       const folderId = getFolderId(folder);
@@ -158,6 +160,8 @@ export const PinnedFolderSidebarSection = ({
     }
     return count;
   }, [folderById, isFiltering, matchCountMap]);
+
+  const folderListCount = folderListCountOverride ?? computedFolderListCount;
 
   const handleCreateRootFolder = () => {
     flushSync(() => {

@@ -149,6 +149,9 @@ const TreeViewLayout = ({
     useState(false);
   const [, setImportDragDepth] = useState(0);
   const [isImportDragActive, setIsImportDragActive] = useState(false);
+  const [visibleRootFolderCount, setVisibleRootFolderCount] = useState<
+    number | null
+  >(null);
   const createFolderTriggerRef = useRef<
     ((parentFolderId?: string | null) => void) | null
   >(null);
@@ -807,6 +810,7 @@ const TreeViewLayout = ({
         documents={filteredDocuments}
         selectedFolderId={sidebarSelectedFolderId}
         isFiltering={isFiltering}
+        folderListCountOverride={visibleRootFolderCount}
         onFolderSelect={handleSidebarFolderSelect}
         onCreateRootFolder={handleCreateRootFolder}
       />
@@ -842,6 +846,7 @@ const TreeViewLayout = ({
           folderSelectionNonce={folderSelectionNonce}
           forceSectionListRoot={isSectionListMode}
           onHeaderFolderIdChange={setExplorerHeaderFolderId}
+          onVisibleRootFolderCountChange={setVisibleRootFolderCount}
           onFolderSelect={handleSidebarFolderSelect}
           onItemSelect={handleItemSelect}
           onCreateFolder={createFolder}
