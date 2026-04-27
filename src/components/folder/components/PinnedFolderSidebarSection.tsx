@@ -15,6 +15,7 @@ import {
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
+import { requestRootFolderCreate } from "@/features/explorer/adapters/web/explorerRootFolderCreateRequest";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, Folder } from "@/types";
@@ -47,14 +48,14 @@ const FOLDER_LIST_SECTION_CONTENT_ID = "folder-list-sidebar-section-content";
 const isSoftDeletedFolder = (folder: FolderTreeNode) => {
   return Boolean(
     (folder as { isDeleted?: boolean; is_deleted?: boolean }).isDeleted ??
-    (folder as { isDeleted?: boolean; is_deleted?: boolean }).is_deleted,
+      (folder as { isDeleted?: boolean; is_deleted?: boolean }).is_deleted,
   );
 };
 
 const isHiddenFolder = (folder: FolderTreeNode) => {
   return Boolean(
     (folder as { isHidden?: boolean; is_hidden?: boolean }).isHidden ??
-    (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden,
+      (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden,
   );
 };
 
@@ -66,12 +67,11 @@ const getPinnedFolderName = (folder: FolderTreeNode) => {
   );
 };
 
-const preventCreateButtonFocusTransfer = (
+const stopCreateButtonFocusTransfer = (
   event:
     | React.PointerEvent<HTMLButtonElement>
     | React.MouseEvent<HTMLButtonElement>,
 ) => {
-  event.preventDefault();
   event.stopPropagation();
 };
 
@@ -165,8 +165,13 @@ export const PinnedFolderSidebarSection = ({
       if (isFolderListSectionCollapsed) {
         toggleFolderListSectionCollapsed();
       }
-      onCreateRootFolder?.();
     });
+
+    if (requestRootFolderCreate()) {
+      return;
+    }
+
+    onCreateRootFolder?.();
   };
 
   return (
@@ -317,8 +322,8 @@ export const PinnedFolderSidebarSection = ({
                 aria-label="ルートフォルダを作成"
                 title="ルートフォルダを作成"
                 data-sidebar-create-root-folder-button="true"
-                onPointerDown={preventCreateButtonFocusTransfer}
-                onMouseDown={preventCreateButtonFocusTransfer}
+                onPointerDown={stopCreateButtonFocusTransfer}
+                onMouseDown={stopCreateButtonFocusTransfer}
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();

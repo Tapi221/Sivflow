@@ -1,10 +1,11 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import {
   getFolderId,
   normalizeFolderId,
   type FolderTreeNode,
 } from "@/components/folder/explorer/model/utils";
+import { subscribeRootFolderCreateRequest } from "@/features/explorer/adapters/web/explorerRootFolderCreateRequest";
 import type { CardSet, SelectedExplorerItem } from "@/types";
 
 type RenameTargetKind = "folder" | "cardSet" | "card" | "document";
@@ -465,10 +466,15 @@ export const useFolderActions = ({
       setEditingName,
       setExpandedFolders,
       setOptimisticFolders,
-      setPendingScrollId,
       treeFolders,
     ],
   );
+
+  useEffect(() => {
+    return subscribeRootFolderCreateRequest(() => {
+      handleCreateFolderAction(null);
+    });
+  }, [handleCreateFolderAction]);
 
   const handleCreateCardSetAction = useCallback(
     (folderId: string | null) => {
