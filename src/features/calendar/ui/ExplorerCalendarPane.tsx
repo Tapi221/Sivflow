@@ -1,11 +1,16 @@
 import {
   addDays,
+  addMonths,
   format,
+  getDaysInMonth,
   isSameDay,
   setHours,
   setMinutes,
   startOfDay,
+  startOfMonth,
+  startOfWeek,
   subDays,
+  subMonths,
 } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useMemo, useState } from "react";
@@ -26,15 +31,40 @@ type CalendarDemoEvent = {
   minutes: number;
 };
 
-const VISIBLE_DAY_COUNT = 10;
 const DEFAULT_RANGE_DAYS = 3;
-const HOURS = Array.from({ length: 17 }, (_, index) => index + 6);
+const HOURS = Array.from({ length: 24 }, (_, index) => index);
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
+const WEEK_STARTS_ON_MONDAY = 1;
+const TIME_COLUMN_WIDTH = 74;
+const DAY_COLUMN_MIN_WIDTH = 136;
+const MONTH_NAVIGATION_STEP = 1;
 
-const createVisibleDays = (baseDate: Date) => {
-  const startDate = subDays(startOfDay(baseDate), 4);
+const VIEW_MODE_OPTIONS = [
+  { value: "month", label: "月" },
+  { value: "week", label: "週" },
+  { value: "days", label: "日数" },
+] satisfies Array<{ value: CalendarViewMode; label: string }>;
 
-  return Array.from({ length: VISIBLE_DAY_COUNT }, (_, index) =>
+const createVisibleDays = (
+  baseDate: Date,
+  viewMode: CalendarViewMode,
+  rangeDays: number,
+) => {
+  const normalizedDate = startOfDay(baseDate);
+  const startDate =
+    viewMode === "month"
+      ? startOfMonth(normalizedDate)
+      : viewMode === "week"
+        ? startOfWeek(normalizedDate, { weekStartsOn: WEEK_STARTS_ON_MONDAY })
+        : normalizedDate;
+  const visibleDayCount =
+    viewMode === "month"
+      ? getDaysInMonth(normalizedDate)
+      : viewMode === "week"
+        ? 7
+        : rangeDays;
+
+  return Array.from({ length: visibleDayCount }, (_, index) =>
     addDays(startDate, index),
   );
 };
@@ -86,23 +116,34 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   const [rangeDays, setRangeDays] = useState(DEFAULT_RANGE_DAYS);
 
   const visibleDays = useMemo(
-    () => createVisibleDays(currentDate),
-    [currentDate],
+    () => createVisibleDays(currentDate, viewMode, rangeDays),
+    [currentDate, rangeDays, viewMode],
   );
   const demoEvents = useMemo(() => createDemoEvents(currentDate), [currentDate]);
 
   const monthLabel = format(currentDate, "yyyy年 M月", { locale: ja });
+  const gridMinWidth =
+    TIME_COLUMN_WIDTH + visibleDays.length * DAY_COLUMN_MIN_WIDTH;
+  const dayNavigationStep = viewMode === "week" ? 7 : rangeDays;
 
   const handleToday = () => {
     setCurrentDate(new Date());
   };
 
   const handlePrevious = () => {
-    setCurrentDate((prev) => subDays(prev, rangeDays));
+    setCurrentDate((prev) =>
+      viewMode === "month"
+        ? subMonths(prev, MONTH_NAVIGATION_STEP)
+        : subDays(prev, dayNavigationStep),
+    );
   };
 
   const handleNext = () => {
-    setCurrentDate((prev) => addDays(prev, rangeDays));
+    setCurrentDate((prev) =>
+      viewMode === "month"
+        ? addMonths(prev, MONTH_NAVIGATION_STEP)
+        : addDays(prev, dayNavigationStep),
+    );
   };
 
   return (
@@ -124,11 +165,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
           </div>
 
           <div className="hidden h-10 items-center rounded-[10px] border border-[#dddcd5] bg-[#f1f0ec] p-1 shadow-[inset_0_1px_2px_rgba(86,72,74,0.08)] md:flex">
-            {[
-              { value: "month", label: "月" },
-              { value: "week", label: "週" },
-              { value: "days", label: "日数" },
-            ].map((item) => (
+            {VIEW_MODE_OPTIONS.map((item) => (
               <button
                 key={item.value}
                 type="button"
@@ -138,23 +175,25 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
                     ? "bg-white text-[#24231f] shadow-[0_1px_4px_rgba(15,23,42,0.12)]"
                     : "text-[#777671] hover:text-[#33322f]",
                 )}
-                onClick={() => setViewMode(item.value as CalendarViewMode)}
+                onClick={() => setViewMode(item.value)}
               >
                 {item.label}
               </button>
             ))}
           </div>
 
-          <button
-            type="button"
-            className="hidden h-10 items-center overflow-hidden rounded-[10px] border border-[#dddcd5] bg-[#f6f6f4] text-[13px] font-semibold text-[#33322f] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] transition-colors hover:bg-white md:flex"
-            onClick={() => setRangeDays((prev) => (prev === 3 ? 7 : 3))}
-          >
-            <span className="px-4 tabular-nums">{rangeDays}</span>
-            <span className="h-full border-l border-[#dddcd5] px-3 leading-10 text-[#777671]">
-              日
-            </span>
-          </button>
+          {viewMode === "days" ? (
+            <button
+              type="button"
+              className="hidden h-10 items-center overflow-hidden rounded-[10px] border border-[#dddcd5] bg-[#f6f6f4] text-[13px] font-semibold text-[#33322f] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] transition-colors hover:bg-white md:flex"
+              onClick={() => setRangeDays((prev) => (prev === 3 ? 7 : 3))}
+            >
+              <span className="px-4 tabular-nums">{rangeDays}</span>
+              <span className="h-full border-l border-[#dddcd5] px-3 leading-10 text-[#777671]">
+                日
+              </span>
+            </button>
+          ) : null}
         </div>
 
         <div className="flex h-10 shrink-0 items-center rounded-[10px] border border-[#dddcd5] bg-[#f6f6f4] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]">
@@ -197,9 +236,10 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
 
       <div className="min-h-0 flex-1 overflow-auto bg-white">
         <div
-          className="grid min-w-[1120px]"
+          className="grid w-max min-w-full"
           style={{
-            gridTemplateColumns: `74px repeat(${visibleDays.length}, minmax(104px, 1fr))`,
+            gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, minmax(${DAY_COLUMN_MIN_WIDTH}px, 1fr))`,
+            minWidth: `${gridMinWidth}px`,
           }}
         >
           <div className="sticky left-0 top-0 z-30 border-b border-r border-[#e8e7e1] bg-white" />
