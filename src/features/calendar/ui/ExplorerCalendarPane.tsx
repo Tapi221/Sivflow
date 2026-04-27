@@ -13,7 +13,11 @@ import {
   subMonths,
 } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { UIEvent } from "react";
+import type {
+  KeyboardEvent,
+  PointerEvent as ReactPointerEvent,
+  UIEvent,
+} from "react";
 import {
   useCallback,
   useEffect,
@@ -24,8 +28,7 @@ import {
 } from "react";
 
 import { cn } from "@/lib/utils";
-import { Calendar, ChevronLeft, ChevronRight, X } from "@/ui/icons";
-import { ExplorerCalendarMonthView } from "./ExplorerCalendarMonthView";
+import { ChevronLeft, ChevronRight, X } from "@/ui/icons";
 
 type ExplorerCalendarPaneProps = {
   onClose?: () => void;
@@ -45,7 +48,17 @@ type TimelineBufferDays = {
   after: number;
 };
 
+type HourRowResizeState = {
+  startY: number;
+  startHeight: number;
+};
+
 const DEFAULT_RANGE_DAYS = 3;
+const DEFAULT_HOUR_ROW_HEIGHT = 88;
+const MIN_HOUR_ROW_HEIGHT = 48;
+const MAX_HOUR_ROW_HEIGHT = 180;
+const HOUR_ROW_HEIGHT_STEP = 4;
+const HOUR_ROW_HEIGHT_STORAGE_KEY = "flashcard-master.calendar.hourRowHeight";
 const HOURS = Array.from({ length: 24 }, (_, index) => index);
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 const WEEK_STARTS_ON_MONDAY = 1;
@@ -66,6 +79,26 @@ const createInitialTimelineBuffer = (): TimelineBufferDays => ({
   before: INITIAL_TIMELINE_BUFFER_DAYS,
   after: INITIAL_TIMELINE_BUFFER_DAYS,
 });
+
+const clampHourRowHeight = (value: number) => {
+  return Math.min(
+    MAX_HOUR_ROW_HEIGHT,
+    Math.max(MIN_HOUR_ROW_HEIGHT, Math.round(value)),
+  );
+};
+
+const readStoredHourRowHeight = () => {
+  if (typeof window === "undefined") {
+    return DEFAULT_HOUR_ROW_HEIGHT;
+  }
+
+  const rawValue = window.localStorage.getItem(HOUR_ROW_HEIGHT_STORAGE_KEY);
+  const parsedValue = rawValue === null ? Number.NaN : Number(rawValue);
+
+  return Number.isFinite(parsedValue)
+    ? clampHourRowHeight(parsedValue)
+    : DEFAULT_HOUR_ROW_HEIGHT;
+};
 
 const getRangeDayCount = (
   baseDate: Date,
@@ -144,10 +177,13 @@ const createDemoEvents = (baseDate: Date): CalendarDemoEvent[] => {
   ];
 };
 
-const calculateEventStyle = (event: CalendarDemoEvent) => {
+const calculateEventStyle = (
+  event: CalendarDemoEvent,
+  hourRowHeight: number,
+) => {
   const startHour = event.startsAt.getHours() + event.startsAt.getMinutes() / 60;
-  const top = Math.max(0, (startHour - HOURS[0]) * 88);
-  const height = Math.max(36, (event.minutes / 60) * 88);
+  const top = Math.max(0, (startHour - HOURS[0]) * hourRowHeight);
+  const height = Math.max(36, (event.minutes / 60) * hourRowHeight);
 
   return {
     top: `${top + 8}px`,
@@ -161,14 +197,16 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   const isExtendingLeftRef = useRef(false);
   const isExtendingRightRef = useRef(false);
   const shouldSyncScrollRef = useRef(true);
+  const hourRowResizeStateRef = useRef<HourRowResizeState | null>(null);
 
   const [currentDate, setCurrentDate] = useState(() => new Date());
-  const [viewMode, setViewMode] = useState<CalendarViewMode>("month");
+  const [viewMode, setViewMode] = useState<CalendarViewMode>("days");
   const [rangeDays, setRangeDays] = useState(DEFAULT_RANGE_DAYS);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [timelineBuffer, setTimelineBuffer] = useState(
     createInitialTimelineBuffer,
   );
+  const [hourRowHeight, setHourRowHeight] = useState(readStoredHourRowHeight);
 
   const visibleDays = useMemo(
     () => createVisibleDays(currentDate, viewMode, rangeDays, timelineBuffer),
@@ -187,6 +225,11 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
       : DAY_COLUMN_MIN_WIDTH;
   const gridWidth = TIME_COLUMN_WIDTH + visibleDays.length * dayColumnWidth;
   const dayNavigationStep = viewMode === "week" ? 7 : rangeDays;
+  const hourRowStyle = { height: `${hourRowHeight}px` };
+
+  const setClampedHourRowHeight = useCallback((nextHeight: number) => {
+    setHourRowHeight(clampHourRowHeight(nextHeight));
+  }, []);
 
   const resetTimelinePosition = useCallback(() => {
     shouldSyncScrollRef.current = true;
@@ -204,11 +247,17 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   }, [dayColumnWidth, timelineBuffer.before]);
 
   useEffect(() => {
-    if (viewMode === "month") {
-      setViewportWidth(0);
-      return undefined;
+    if (typeof window === "undefined") {
+      return;
     }
 
+    window.localStorage.setItem(
+      HOUR_ROW_HEIGHT_STORAGE_KEY,
+      String(hourRowHeight),
+    );
+  }, [hourRowHeight]);
+
+  useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
 
     if (!scrollContainer) {
@@ -228,28 +277,18 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     return () => {
       resizeObserver.disconnect();
     };
-  }, [viewMode]);
+  }, []);
 
   useLayoutEffect(() => {
-    if (viewMode === "month" || !shouldSyncScrollRef.current) {
+    if (!shouldSyncScrollRef.current) {
       return;
     }
 
     syncScrollToRangeStart();
     shouldSyncScrollRef.current = false;
-  }, [
-    currentDate,
-    rangeDays,
-    syncScrollToRangeStart,
-    viewMode,
-    viewportWidth,
-  ]);
+  }, [currentDate, rangeDays, syncScrollToRangeStart, viewMode, viewportWidth]);
 
   useLayoutEffect(() => {
-    if (viewMode === "month") {
-      return;
-    }
-
     const scrollContainer = scrollContainerRef.current;
     const correction = prependScrollCorrectionRef.current;
 
@@ -261,7 +300,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     scrollContainer.scrollLeft += correction;
     prependScrollCorrectionRef.current = 0;
     isExtendingLeftRef.current = false;
-  }, [dayColumnWidth, timelineBuffer.before, viewMode]);
+  }, [dayColumnWidth, timelineBuffer.before]);
 
   useEffect(() => {
     isExtendingRightRef.current = false;
@@ -271,7 +310,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     (event: UIEvent<HTMLDivElement>) => {
       const target = event.currentTarget;
 
-      if (viewMode === "month" || dayColumnWidth <= 0) {
+      if (dayColumnWidth <= 0) {
         return;
       }
 
@@ -302,8 +341,97 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
         }));
       }
     },
-    [dayColumnWidth, viewMode],
+    [dayColumnWidth],
   );
+
+  const handleHourRowResizePointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLElement>) => {
+      if (event.button !== 0) {
+        return;
+      }
+
+      event.preventDefault();
+
+      hourRowResizeStateRef.current = {
+        startY: event.clientY,
+        startHeight: hourRowHeight,
+      };
+
+      const previousCursor = document.body.style.cursor;
+      const previousUserSelect = document.body.style.userSelect;
+      document.body.style.cursor = "row-resize";
+      document.body.style.userSelect = "none";
+
+      const handlePointerMove = (moveEvent: PointerEvent) => {
+        const resizeState = hourRowResizeStateRef.current;
+
+        if (!resizeState) {
+          return;
+        }
+
+        const nextHeight =
+          resizeState.startHeight + moveEvent.clientY - resizeState.startY;
+        setClampedHourRowHeight(nextHeight);
+      };
+
+      const handlePointerUp = () => {
+        hourRowResizeStateRef.current = null;
+        document.body.style.cursor = previousCursor;
+        document.body.style.userSelect = previousUserSelect;
+        window.removeEventListener("pointermove", handlePointerMove);
+        window.removeEventListener("pointerup", handlePointerUp);
+        window.removeEventListener("pointercancel", handlePointerUp);
+      };
+
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerUp);
+    },
+    [hourRowHeight, setClampedHourRowHeight],
+  );
+
+  const handleHourRowResizeKeyDown = (
+    event: KeyboardEvent<HTMLDivElement>,
+  ) => {
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setClampedHourRowHeight(hourRowHeight - HOUR_ROW_HEIGHT_STEP);
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setClampedHourRowHeight(hourRowHeight + HOUR_ROW_HEIGHT_STEP);
+      return;
+    }
+
+    if (event.key === "PageUp") {
+      event.preventDefault();
+      setClampedHourRowHeight(hourRowHeight - HOUR_ROW_HEIGHT_STEP * 4);
+      return;
+    }
+
+    if (event.key === "PageDown") {
+      event.preventDefault();
+      setClampedHourRowHeight(hourRowHeight + HOUR_ROW_HEIGHT_STEP * 4);
+      return;
+    }
+
+    if (event.key === "Home") {
+      event.preventDefault();
+      setClampedHourRowHeight(MIN_HOUR_ROW_HEIGHT);
+      return;
+    }
+
+    if (event.key === "End") {
+      event.preventDefault();
+      setClampedHourRowHeight(MAX_HOUR_ROW_HEIGHT);
+    }
+  };
+
+  const handleHourRowResizeReset = () => {
+    setHourRowHeight(DEFAULT_HOUR_ROW_HEIGHT);
+  };
 
   const handleViewModeChange = (nextViewMode: CalendarViewMode) => {
     resetTimelinePosition();
@@ -342,18 +470,10 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     <section className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa] text-[#24231f]">
       <header className="flex h-[84px] shrink-0 items-center gap-4 border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)] px-5 shadow-[0_1px_0_rgba(255,255,255,0.72)_inset]">
         <div className="flex min-w-0 flex-1 items-center gap-5">
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border border-[#dddcd5] bg-[#f6f6f4] text-[#777671] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]">
-              <Calendar className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#9b9a94]">
-                Calendar
-              </p>
-              <h1 className="truncate text-[26px] font-semibold tracking-[-0.035em] text-[#24231f]">
-                {monthLabel}
-              </h1>
-            </div>
+          <div className="min-w-0">
+            <h1 className="truncate text-[26px] font-semibold tracking-[-0.035em] text-[#24231f]">
+              {monthLabel}
+            </h1>
           </div>
 
           <div className="hidden h-10 items-center rounded-[10px] border border-[#dddcd5] bg-[#f1f0ec] p-1 shadow-[inset_0_1px_2px_rgba(86,72,74,0.08)] md:flex">
@@ -426,123 +546,147 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
         ) : null}
       </header>
 
-      {viewMode === "month" ? (
-        <ExplorerCalendarMonthView
-          currentDate={currentDate}
-          selectedDate={currentDate}
-          onSelectDate={setCurrentDate}
-        />
-      ) : (
+      <div
+        ref={scrollContainerRef}
+        className="calendar-timeline-scroll min-h-0 flex-1 overflow-auto bg-white"
+        onScroll={handleTimelineScroll}
+      >
         <div
-          ref={scrollContainerRef}
-          className="calendar-timeline-scroll min-h-0 flex-1 overflow-auto bg-white"
-          onScroll={handleTimelineScroll}
+          className="grid"
+          style={{
+            gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${dayColumnWidth}px)`,
+            minWidth: `${gridWidth}px`,
+          }}
         >
-          <div
-            className="grid"
-            style={{
-              gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${dayColumnWidth}px)`,
-              minWidth: `${gridWidth}px`,
-            }}
-          >
-            <div className="sticky left-0 top-0 z-30 border-b border-r border-[#e8e7e1] bg-white" />
+          <div className="sticky left-0 top-0 z-30 border-b border-r border-[#e8e7e1] bg-white" />
 
-            {visibleDays.map((day) => {
-              const selected = isSameDay(day, currentDate);
-              const today = isSameDay(day, new Date());
+          {visibleDays.map((day) => {
+            const selected = isSameDay(day, currentDate);
+            const today = isSameDay(day, new Date());
 
-              return (
-                <div
-                  key={day.toISOString()}
+            return (
+              <div
+                key={day.toISOString()}
+                className={cn(
+                  "sticky top-0 z-20 flex h-[56px] items-center justify-center gap-2 border-b border-r border-[#e8e7e1] bg-white text-[13px]",
+                  selected && "bg-[#fff8f8]",
+                )}
+              >
+                <span className="font-semibold text-[#9b9a94]">
+                  {WEEKDAY_LABELS[day.getDay()]}
+                </span>
+                <span
                   className={cn(
-                    "sticky top-0 z-20 flex h-[56px] items-center justify-center gap-2 border-b border-r border-[#e8e7e1] bg-white text-[13px]",
-                    selected && "bg-[#fff8f8]",
+                    "inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 font-bold tabular-nums",
+                    selected
+                      ? "bg-[#ef5555] text-white shadow-[0_5px_14px_rgba(239,85,85,0.28)]"
+                      : today
+                        ? "bg-[#f0efea] text-[#24231f]"
+                        : "text-[#33322f]",
                   )}
                 >
-                  <span className="font-semibold text-[#9b9a94]">
-                    {WEEKDAY_LABELS[day.getDay()]}
-                  </span>
-                  <span
-                    className={cn(
-                      "inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 font-bold tabular-nums",
-                      selected
-                        ? "bg-[#ef5555] text-white shadow-[0_5px_14px_rgba(239,85,85,0.28)]"
-                        : today
-                          ? "bg-[#f0efea] text-[#24231f]"
-                          : "text-[#33322f]",
-                    )}
-                  >
-                    {day.getDate()}
-                  </span>
-                </div>
-              );
-            })}
+                  {day.getDate()}
+                </span>
+              </div>
+            );
+          })}
 
-            <div className="sticky left-0 z-10 flex h-[46px] items-center justify-center border-b border-r border-[#e8e7e1] bg-white text-[12px] font-semibold text-[#9b9a94]">
-              終日
-            </div>
+          <div className="sticky left-0 z-10 flex h-[46px] items-center justify-center border-b border-r border-[#e8e7e1] bg-white text-[12px] font-semibold text-[#9b9a94]">
+            終日
+          </div>
 
-            {visibleDays.map((day) => (
+          {visibleDays.map((day) => (
+            <div
+              key={`allday-${day.toISOString()}`}
+              className={cn(
+                "h-[46px] border-b border-r border-[#e8e7e1]",
+                isSameDay(day, currentDate) && "bg-[#fff8f8]",
+              )}
+            />
+          ))}
+
+          <div
+            role="separator"
+            aria-label="1時間の高さを調整"
+            aria-orientation="horizontal"
+            aria-valuemin={MIN_HOUR_ROW_HEIGHT}
+            aria-valuemax={MAX_HOUR_ROW_HEIGHT}
+            aria-valuenow={hourRowHeight}
+            tabIndex={0}
+            className="calendar-hour-row-resize-handle sticky left-0 z-20 flex h-3 cursor-row-resize items-center justify-center border-b border-r border-[#e8e7e1] bg-white"
+            title="ドラッグで1時間の高さを変更。ダブルクリックで初期値に戻します。"
+            onDoubleClick={handleHourRowResizeReset}
+            onKeyDown={handleHourRowResizeKeyDown}
+            onPointerDown={handleHourRowResizePointerDown}
+          >
+            <span className="calendar-hour-row-resize-handle__grip" />
+          </div>
+
+          {visibleDays.map((day) => (
+            <div
+              key={`resize-handle-${day.toISOString()}`}
+              className={cn(
+                "calendar-hour-row-resize-handle flex h-3 cursor-row-resize items-center justify-center border-b border-r border-[#e8e7e1] bg-white",
+                isSameDay(day, currentDate) && "bg-[#fff8f8]",
+              )}
+              title="ドラッグで1時間の高さを変更。ダブルクリックで初期値に戻します。"
+              onDoubleClick={handleHourRowResizeReset}
+              onPointerDown={handleHourRowResizePointerDown}
+            />
+          ))}
+
+          <div className="sticky left-0 z-10 bg-white">
+            {HOURS.map((hour) => (
               <div
-                key={`allday-${day.toISOString()}`}
+                key={`hour-label-${hour}`}
+                className="flex justify-center border-b border-r border-[#e8e7e1] pt-2 text-[12px] text-[#8b8a84]"
+                style={hourRowStyle}
+              >
+                {createHourLabel(hour)}
+              </div>
+            ))}
+          </div>
+
+          {visibleDays.map((day) => {
+            const events = demoEvents.filter((event) =>
+              isSameDay(event.startsAt, day),
+            );
+
+            return (
+              <div
+                key={`day-body-${day.toISOString()}`}
                 className={cn(
-                  "h-[46px] border-b border-r border-[#e8e7e1]",
+                  "relative border-r border-[#e8e7e1]",
                   isSameDay(day, currentDate) && "bg-[#fff8f8]",
                 )}
-              />
-            ))}
+              >
+                {HOURS.map((hour) => (
+                  <div
+                    key={`${day.toISOString()}-${hour}`}
+                    className="border-b border-[#e8e7e1]"
+                    style={hourRowStyle}
+                  />
+                ))}
 
-            <div className="sticky left-0 z-10 bg-white">
-              {HOURS.map((hour) => (
-                <div
-                  key={`hour-label-${hour}`}
-                  className="flex h-[88px] justify-center border-b border-r border-[#e8e7e1] pt-2 text-[12px] text-[#8b8a84]"
-                >
-                  {createHourLabel(hour)}
-                </div>
-              ))}
-            </div>
-
-            {visibleDays.map((day) => {
-              const events = demoEvents.filter((event) =>
-                isSameDay(event.startsAt, day),
-              );
-
-              return (
-                <div
-                  key={`day-body-${day.toISOString()}`}
-                  className={cn(
-                    "relative border-r border-[#e8e7e1]",
-                    isSameDay(day, currentDate) && "bg-[#fff8f8]",
-                  )}
-                >
-                  {HOURS.map((hour) => (
-                    <div
-                      key={`${day.toISOString()}-${hour}`}
-                      className="h-[88px] border-b border-[#e8e7e1]"
-                    />
-                  ))}
-
-                  {events.map((event) => (
-                    <article
-                      key={event.id}
-                      style={calculateEventStyle(event)}
-                      className="absolute left-2 right-2 overflow-hidden rounded-[10px] border border-[#f2c4c0] bg-[#fff1f0] px-2.5 py-2 text-[#7f2d28] shadow-[0_8px_18px_rgba(127,45,40,0.08)]"
-                    >
-                      <div className="truncate text-[12px] font-bold leading-4">
-                        {event.title}
-                      </div>
-                      <div className="mt-0.5 text-[10px] font-medium tabular-nums opacity-70">
-                        {format(event.startsAt, "HH:mm")}
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
+                {events.map((event) => (
+                  <article
+                    key={event.id}
+                    style={calculateEventStyle(event, hourRowHeight)}
+                    className="absolute left-2 right-2 overflow-hidden rounded-[10px] border border-[#f2c4c0] bg-[#fff1f0] px-2.5 py-2 text-[#7f2d28] shadow-[0_8px_18px_rgba(127,45,40,0.08)]"
+                  >
+                    <div className="truncate text-[12px] font-bold leading-4">
+                      {event.title}
+                    </div>
+                    <div className="mt-0.5 text-[10px] font-medium tabular-nums opacity-70">
+                      {format(event.startsAt, "HH:mm")}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
     </section>
   );
 };
