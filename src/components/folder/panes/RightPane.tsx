@@ -2,7 +2,6 @@ import { FolderDashboard } from "@/components/folder/components/views/FolderDash
 import { CardPane } from "@/components/folder/panes/CardPane";
 import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagramPane";
 import { PdfPane } from "@/components/pdf/PdfPane";
-import Calendar from "@/routes/Calendar";
 import Gallery from "@/routes/Gallery";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
@@ -79,10 +78,6 @@ export const RightPane = ({
         documents={documents}
       />
     );
-  }
-
-  if (selectedItem?.type === "calendar") {
-    return <Calendar />;
   }
   if (selectedItem?.type === "trash") {
     return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
