@@ -19,7 +19,7 @@ import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, Folder } from "@/types";
 import { ChevronDown, ChevronRight } from "@/ui/icons";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { flushSync } from "react-dom";
 
 interface PinnedFolderSidebarSectionProps {
@@ -41,21 +41,67 @@ type PinnedFolderEntry = {
   contentCount: number;
 };
 
+type SidebarSectionResizeTarget = {
+  id: string;
+  minHeight: number;
+  maxHeight: number;
+  resolveElement: () => HTMLElement | null;
+};
+
 const PINNED_FOLDER_SECTION_CONTENT_ID =
   "pinned-folder-sidebar-section-content";
 const FOLDER_LIST_SECTION_CONTENT_ID = "folder-list-sidebar-section-content";
+const SIDEBAR_SECTION_RESIZE_STORAGE_PREFIX =
+  "flashcard-master.explorer.sidebarSectionHeight";
+const SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE =
+  "data-explorer-sidebar-section-resize-handle";
+
+const SIDEBAR_SECTION_RESIZE_TARGETS: SidebarSectionResizeTarget[] = [
+  {
+    id: "pinned",
+    minHeight: 40,
+    maxHeight: 220,
+    resolveElement: () =>
+      document.getElementById(PINNED_FOLDER_SECTION_CONTENT_ID),
+  },
+  {
+    id: "folder-list",
+    minHeight: 80,
+    maxHeight: 520,
+    resolveElement: () =>
+      document.getElementById(FOLDER_LIST_SECTION_CONTENT_ID),
+  },
+  {
+    id: "tag",
+    minHeight: 42,
+    maxHeight: 220,
+    resolveElement: () =>
+      document.querySelector<HTMLElement>(
+        '[aria-controls="tag-sidebar-section-content"]',
+      )?.parentElement ?? null,
+  },
+  {
+    id: "calendar",
+    minHeight: 42,
+    maxHeight: 220,
+    resolveElement: () =>
+      document.querySelector<HTMLElement>(
+        '[aria-controls="calendar-sidebar-section-content"]',
+      )?.parentElement ?? null,
+  },
+];
 
 const isSoftDeletedFolder = (folder: FolderTreeNode) => {
   return Boolean(
     (folder as { isDeleted?: boolean; is_deleted?: boolean }).isDeleted ??
-    (folder as { isDeleted?: boolean; is_deleted?: boolean }).is_deleted,
+      (folder as { isDeleted?: boolean; is_deleted?: boolean }).is_deleted,
   );
 };
 
 const isHiddenFolder = (folder: FolderTreeNode) => {
   return Boolean(
     (folder as { isHidden?: boolean; is_hidden?: boolean }).isHidden ??
-    (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden,
+      (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden,
   );
 };
 
@@ -73,6 +119,288 @@ const stopCreateButtonFocusTransfer = (
     | React.MouseEvent<HTMLButtonElement>,
 ) => {
   event.stopPropagation();
+};
+
+const getSidebarSectionResizeStorageKey = (sectionId: string) => {
+  return `${SIDEBAR_SECTION_RESIZE_STORAGE_PREFIX}.${sectionId}`;
+};
+
+const clampSectionHeight = (
+  value: number,
+  minHeight: number,
+  maxHeight: number,
+) => {
+  return Math.min(maxHeight, Math.max(minHeight, value));
+};
+
+const readStoredSectionHeight = (target: SidebarSectionResizeTarget) => {
+  const rawValue = window.localStorage.getItem(
+    getSidebarSectionResizeStorageKey(target.id),
+  );
+  const parsedValue = rawValue === null ? Number.NaN : Number(rawValue);
+
+  return Number.isFinite(parsedValue)
+    ? clampSectionHeight(parsedValue, target.minHeight, target.maxHeight)
+    : null;
+};
+
+const writeStoredSectionHeight = (
+  target: SidebarSectionResizeTarget,
+  height: number,
+) => {
+  window.localStorage.setItem(
+    getSidebarSectionResizeStorageKey(target.id),
+    String(Math.round(height)),
+  );
+};
+
+const applySidebarSectionHeight = (
+  element: HTMLElement,
+  height: number,
+) => {
+  const roundedHeight = Math.round(height);
+
+  element.style.height = `${roundedHeight}px`;
+  element.style.minHeight = `${roundedHeight}px`;
+  element.style.maxHeight = `${roundedHeight}px`;
+  element.style.flex = `0 0 ${roundedHeight}px`;
+  element.style.overflow = "hidden";
+};
+
+const createSidebarSectionResizeHandle = (
+  target: SidebarSectionResizeTarget,
+  element: HTMLElement,
+) => {
+  const handle = document.createElement("div");
+  const indicator = document.createElement("div");
+
+  handle.setAttribute(SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE, target.id);
+  handle.setAttribute("role", "separator");
+  handle.setAttribute("aria-orientation", "horizontal");
+  handle.setAttribute("aria-label", "サイドバー区切り位置を調整");
+  handle.setAttribute("tabindex", "0");
+  handle.title = "ドラッグで区切り位置を変更。ダブルクリックで初期値に戻します。";
+
+  Object.assign(handle.style, {
+    position: "absolute",
+    left: "0",
+    right: "0",
+    bottom: "-4px",
+    zIndex: "60",
+    height: "8px",
+    cursor: "row-resize",
+    touchAction: "none",
+    userSelect: "none",
+    background: "transparent",
+  } satisfies Partial<CSSStyleDeclaration>);
+
+  Object.assign(indicator.style, {
+    position: "absolute",
+    left: "16px",
+    right: "16px",
+    top: "3px",
+    height: "2px",
+    borderRadius: "999px",
+    background: "transparent",
+    transition: "background-color 120ms ease",
+  } satisfies Partial<CSSStyleDeclaration>);
+
+  handle.appendChild(indicator);
+
+  const showIndicator = () => {
+    indicator.style.background = "rgba(127, 45, 40, 0.42)";
+  };
+
+  const hideIndicator = () => {
+    indicator.style.background = "transparent";
+  };
+
+  const commitHeight = (height: number) => {
+    const clampedHeight = clampSectionHeight(
+      height,
+      target.minHeight,
+      target.maxHeight,
+    );
+
+    applySidebarSectionHeight(element, clampedHeight);
+    writeStoredSectionHeight(target, clampedHeight);
+  };
+
+  const resizeByKeyboard = (event: KeyboardEvent) => {
+    const currentHeight = element.getBoundingClientRect().height;
+    const step = event.shiftKey ? 16 : 6;
+    const nextHeight = (() => {
+      switch (event.key) {
+        case "ArrowUp":
+          return currentHeight - step;
+        case "ArrowDown":
+          return currentHeight + step;
+        case "PageUp":
+          return currentHeight - step * 4;
+        case "PageDown":
+          return currentHeight + step * 4;
+        case "Home":
+          return target.minHeight;
+        case "End":
+          return target.maxHeight;
+        default:
+          return null;
+      }
+    })();
+
+    if (nextHeight === null) {
+      return;
+    }
+
+    event.preventDefault();
+    commitHeight(nextHeight);
+  };
+
+  const startResize = (event: PointerEvent) => {
+    if (event.button !== 0) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    showIndicator();
+
+    const startY = event.clientY;
+    const startHeight = element.getBoundingClientRect().height;
+    let pendingHeight = startHeight;
+    let frameId: number | null = null;
+    const previousCursor = document.body.style.cursor;
+    const previousUserSelect = document.body.style.userSelect;
+
+    document.body.style.cursor = "row-resize";
+    document.body.style.userSelect = "none";
+
+    const paint = () => {
+      frameId = null;
+      applySidebarSectionHeight(element, pendingHeight);
+    };
+
+    const handlePointerMove = (moveEvent: PointerEvent) => {
+      pendingHeight = clampSectionHeight(
+        startHeight + moveEvent.clientY - startY,
+        target.minHeight,
+        target.maxHeight,
+      );
+
+      if (frameId !== null) {
+        return;
+      }
+
+      frameId = window.requestAnimationFrame(paint);
+    };
+
+    const handlePointerUp = () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+
+      commitHeight(pendingHeight);
+      document.body.style.cursor = previousCursor;
+      document.body.style.userSelect = previousUserSelect;
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
+  };
+
+  const resetHeight = (event: MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    window.localStorage.removeItem(getSidebarSectionResizeStorageKey(target.id));
+    element.style.height = "";
+    element.style.minHeight = "";
+    element.style.maxHeight = "";
+    element.style.flex = "";
+    element.style.overflow = "";
+  };
+
+  handle.addEventListener("mouseenter", showIndicator);
+  handle.addEventListener("mouseleave", hideIndicator);
+  handle.addEventListener("focus", showIndicator);
+  handle.addEventListener("blur", hideIndicator);
+  handle.addEventListener("pointerdown", startResize);
+  handle.addEventListener("keydown", resizeByKeyboard);
+  handle.addEventListener("dblclick", resetHeight);
+
+  return {
+    handle,
+    cleanup: () => {
+      if (handle.parentElement) {
+        handle.parentElement.removeChild(handle);
+      }
+    },
+  };
+};
+
+const SidebarSectionResizeBridge = () => {
+  useEffect(() => {
+    const cleanupCallbacks: Array<() => void> = [];
+
+    for (const target of SIDEBAR_SECTION_RESIZE_TARGETS) {
+      const element = target.resolveElement();
+
+      if (!element) {
+        continue;
+      }
+
+      if (
+        element.querySelector(
+          `[${SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE}="${target.id}"]`,
+        )
+      ) {
+        continue;
+      }
+
+      const computedStyle = window.getComputedStyle(element);
+      const originalPosition = element.style.position;
+      const originalOverflow = element.style.overflow;
+      const originalHeight = element.style.height;
+      const originalMinHeight = element.style.minHeight;
+      const originalMaxHeight = element.style.maxHeight;
+      const originalFlex = element.style.flex;
+
+      if (computedStyle.position === "static") {
+        element.style.position = "relative";
+      }
+
+      const storedHeight = readStoredSectionHeight(target);
+
+      if (storedHeight !== null) {
+        applySidebarSectionHeight(element, storedHeight);
+      }
+
+      const { handle, cleanup } = createSidebarSectionResizeHandle(
+        target,
+        element,
+      );
+      element.appendChild(handle);
+
+      cleanupCallbacks.push(() => {
+        cleanup();
+        element.style.position = originalPosition;
+        element.style.overflow = originalOverflow;
+        element.style.height = originalHeight;
+        element.style.minHeight = originalMinHeight;
+        element.style.maxHeight = originalMaxHeight;
+        element.style.flex = originalFlex;
+      });
+    }
+
+    return () => {
+      cleanupCallbacks.forEach((cleanup) => cleanup());
+    };
+  }, []);
+
+  return null;
 };
 
 export const PinnedFolderSidebarSection = ({
@@ -175,6 +503,7 @@ export const PinnedFolderSidebarSection = ({
 
   return (
     <section className="shrink-0 pb-0 pt-1">
+      <SidebarSectionResizeBridge />
       <>
         <div className="px-2 pb-1 pt-1">
           <button
