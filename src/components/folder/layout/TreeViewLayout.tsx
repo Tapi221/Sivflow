@@ -777,14 +777,9 @@ const TreeViewLayout = ({
   const toggleTagSectionCollapsed = useExplorerStore(
     (state) => state.toggleTagSectionCollapsed,
   );
-  const isCalendarSectionCollapsed = useExplorerStore(
-    (state) => state.isCalendarSectionCollapsed,
-  );
-  const toggleCalendarSectionCollapsed = useExplorerStore(
-    (state) => state.toggleCalendarSectionCollapsed,
-  );
-
-  if (isExplorerDataLoading) {
+  const isCalendarOpen = useExplorerCalendarViewStore((state) => state.isOpen);
+  const toggleCalendar = useExplorerCalendarViewStore((state) => state.toggle);
+if (isExplorerDataLoading) {
     return (
       <div className="space-y-3 p-4">
         {[...Array(3)].map((_, index) => (
@@ -897,9 +892,9 @@ const TreeViewLayout = ({
             "hover:bg-muted/70 hover:text-foreground",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           )}
-          aria-expanded={!isCalendarSectionCollapsed}
+          aria-expanded={isCalendarOpen}
           aria-controls="calendar-sidebar-section-content"
-          onClick={toggleCalendarSectionCollapsed}
+          onClick={toggleCalendar}
         >
           {isCalendarSectionCollapsed ? (
             <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-70" />
