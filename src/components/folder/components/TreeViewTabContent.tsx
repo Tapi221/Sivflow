@@ -22,7 +22,9 @@ interface TreeViewTabContentProps {
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
   isFiltering: boolean;
-  onRegisterCreateFolderTrigger?: (fn: (() => void) | null) => void;
+  onRegisterCreateFolderTrigger?: (
+    fn: ((parentFolderId?: string | null) => void) | null,
+  ) => void;
   onRegisterCreateCardSetTrigger?: (
     fn: ((folderId?: string | null) => void) | null,
   ) => void;

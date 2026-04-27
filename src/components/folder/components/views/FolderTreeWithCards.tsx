@@ -103,7 +103,9 @@ interface FolderTreeWithCardsProps {
     label: string,
   ) => void;
   isFiltering?: boolean;
-  onRegisterCreateFolderTrigger?: (fn: (() => void) | null) => void;
+  onRegisterCreateFolderTrigger?: (
+    fn: ((parentFolderId?: string | null) => void) | null,
+  ) => void;
   onRegisterCreateCardSetTrigger?: (
     fn: ((folderId?: string | null) => void) | null,
   ) => void;
@@ -809,8 +811,10 @@ export const FolderTreeWithCards = ({
       return;
     }
 
-    const trigger = () => {
-      actions.handleCreateFolderAction(headerFolderId);
+    const trigger = (parentFolderId?: string | null) => {
+      actions.handleCreateFolderAction(
+        parentFolderId === undefined ? headerFolderId : parentFolderId,
+      );
     };
     onRegisterCreateFolderTrigger?.(trigger);
     return () => onRegisterCreateFolderTrigger?.(null);

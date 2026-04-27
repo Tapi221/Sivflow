@@ -15,7 +15,6 @@ import {
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
-import { requestRootFolderCreate } from "@/features/explorer/adapters/web/explorerRootFolderCreateRequest";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, Folder } from "@/types";
@@ -166,10 +165,6 @@ export const PinnedFolderSidebarSection = ({
         toggleFolderListSectionCollapsed();
       }
     });
-
-    if (requestRootFolderCreate()) {
-      return;
-    }
 
     onCreateRootFolder?.();
   };

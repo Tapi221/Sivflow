@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { UiIcon } from "@/ui/UiIcon";
 import type { UiIconProps } from "@/ui/UiIcon";
 import {
@@ -8,7 +8,6 @@ import {
 import { ExplorerMenuPanel } from "@/components/folder/components/menus/ExplorerMenuPanel";
 import { buildExplorerCreateMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { ExplorerChromePinIcon } from "@/components/explorer/icons";
-import { requestRootFolderCreate } from "@/features/explorer/adapters/web/explorerRootFolderCreateRequest";
 import { cn } from "@/lib/utils";
 
 interface ExplorerSidebarHeaderProps {
@@ -62,13 +61,6 @@ export const ExplorerSidebarHeader = ({
   const suppressCloseAutoFocusRef = useRef(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const handleCreateRootFolder = useCallback(() => {
-    if (requestRootFolderCreate()) {
-      return;
-    }
-
-    void onCreateRootFolder?.();
-  }, [onCreateRootFolder]);
 
   const menuActions = useMemo(
     () =>
@@ -77,7 +69,7 @@ export const ExplorerSidebarHeader = ({
         canCreateCard,
         canAddDocuments,
         canBulkImport,
-        onCreateRootFolder: handleCreateRootFolder,
+        onCreateRootFolder,
         onCreateCardSet,
         onCreateCard,
         onAddDocument,
@@ -88,7 +80,7 @@ export const ExplorerSidebarHeader = ({
       canBulkImport,
       canCreateCard,
       canCreateCardSet,
-      handleCreateRootFolder,
+      onCreateRootFolder,
       onAddDocument,
       onBulkImport,
       onCreateCard,
