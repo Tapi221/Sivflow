@@ -32,17 +32,20 @@
     text-shadow: none;
   }
 
-  .explorer-calendar-scroll::-webkit-scrollbar:horizontal {
-    display: none;
+  .calendar-timeline-scroll {
+    overscroll-behavior: contain;
+  }
+
+  .calendar-timeline-scroll::-webkit-scrollbar:horizontal {
     height: 0;
   }
 
-  .explorer-calendar-scroll::-webkit-scrollbar-track:horizontal,
-  .explorer-calendar-scroll::-webkit-scrollbar-thumb:horizontal {
+  .calendar-timeline-scroll::-webkit-scrollbar-thumb:horizontal,
+  .calendar-timeline-scroll::-webkit-scrollbar-track:horizontal {
     display: none;
   }
 
-  .explorer-calendar-scroll::-webkit-scrollbar-corner {
+  .calendar-timeline-scroll::-webkit-scrollbar-corner {
     display: none;
   }
 }

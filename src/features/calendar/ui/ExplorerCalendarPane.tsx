@@ -24,7 +24,7 @@ import {
 } from "react";
 
 import { cn } from "@/lib/utils";
-import { Calendar, ChevronLeft, ChevronRight, X } from "@/ui/icons";
+import { ChevronLeft, ChevronRight, X } from "@/ui/icons";
 
 type ExplorerCalendarPaneProps = {
   onClose?: () => void;
@@ -326,18 +326,10 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     <section className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa] text-[#24231f]">
       <header className="flex h-[84px] shrink-0 items-center gap-4 border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)] px-5 shadow-[0_1px_0_rgba(255,255,255,0.72)_inset]">
         <div className="flex min-w-0 flex-1 items-center gap-5">
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border border-[#dddcd5] bg-[#f6f6f4] text-[#777671] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]">
-              <Calendar className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#9b9a94]">
-                Calendar
-              </p>
-              <h1 className="truncate text-[26px] font-semibold tracking-[-0.035em] text-[#24231f]">
-                {monthLabel}
-              </h1>
-            </div>
+          <div className="min-w-0">
+            <h1 className="truncate text-[26px] font-semibold tracking-[-0.035em] text-[#24231f]">
+              {monthLabel}
+            </h1>
           </div>
 
           <div className="hidden h-10 items-center rounded-[10px] border border-[#dddcd5] bg-[#f1f0ec] p-1 shadow-[inset_0_1px_2px_rgba(86,72,74,0.08)] md:flex">
@@ -412,7 +404,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
 
       <div
         ref={scrollContainerRef}
-        className="explorer-calendar-scroll min-h-0 flex-1 overflow-auto bg-white"
+        className="calendar-timeline-scroll min-h-0 flex-1 overflow-auto bg-white"
         onScroll={handleTimelineScroll}
       >
         <div
