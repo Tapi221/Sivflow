@@ -49,29 +49,60 @@
     display: none;
   }
 
-  .calendar-hour-row-boundary-resize {
-    cursor: row-resize !important;
-    touch-action: none;
+  .calendar-timeline-grid {
+    --calendar-hour-row-height: 88px;
   }
 
-  .calendar-hour-row-boundary-resize::before {
+  .calendar-hour-row {
+    height: var(--calendar-hour-row-height);
+  }
+
+  .calendar-event-card {
+    top: calc(
+      var(--calendar-event-start-hour) * var(--calendar-hour-row-height) + 8px
+    );
+    height: max(
+      36px,
+      calc(
+        var(--calendar-event-duration-hours) * var(--calendar-hour-row-height)
+      )
+    );
+  }
+
+  .calendar-hour-label-row {
+    cursor: default;
+  }
+
+  .calendar-hour-boundary-resize-handle {
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    height: 8px;
+    cursor: row-resize;
+    touch-action: none;
+    background: transparent;
+  }
+
+  .calendar-hour-boundary-resize-handle::after {
     content: "";
     position: absolute;
-    inset-inline: 0;
-    top: 50%;
-    height: 1px;
-    transform: translateY(-50%);
+    left: 16px;
+    right: 16px;
+    top: 3px;
+    height: 2px;
+    border-radius: 999px;
     background: transparent;
     transition: background-color 120ms ease;
   }
 
-  .calendar-hour-row-boundary-resize:hover::before,
-  .calendar-hour-row-boundary-resize:focus-visible::before {
-    background: rgba(127, 45, 40, 0.48);
+  .calendar-hour-boundary-resize-handle:hover::after,
+  .calendar-hour-boundary-resize-handle:focus-visible::after {
+    background: rgba(127, 45, 40, 0.42);
   }
 
-  .calendar-hour-row-boundary-resize:focus-visible {
-    outline: 2px solid rgba(239, 85, 85, 0.48);
-    outline-offset: -2px;
+  .calendar-hour-boundary-resize-handle:focus-visible {
+    outline: none;
   }
 }

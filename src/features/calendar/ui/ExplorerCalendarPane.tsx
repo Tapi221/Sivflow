@@ -14,6 +14,7 @@ import {
 } from "date-fns";
 import { ja } from "date-fns/locale";
 import type {
+  CSSProperties,
   KeyboardEvent,
   PointerEvent as ReactPointerEvent,
   UIEvent,
@@ -52,6 +53,15 @@ type TimelineBufferDays = {
 type HourRowResizeState = {
   startY: number;
   startHeight: number;
+};
+
+type TimelineGridStyle = CSSProperties & {
+  "--calendar-hour-row-height": string;
+};
+
+type CalendarEventStyle = CSSProperties & {
+  "--calendar-event-start-hour": number;
+  "--calendar-event-duration-hours": number;
 };
 
 const DEFAULT_RANGE_DAYS = 3;
@@ -99,6 +109,14 @@ const readStoredHourRowHeight = () => {
   return Number.isFinite(parsedValue)
     ? clampHourRowHeight(parsedValue)
     : DEFAULT_HOUR_ROW_HEIGHT;
+};
+
+const writeStoredHourRowHeight = (value: number) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(HOUR_ROW_HEIGHT_STORAGE_KEY, String(value));
 };
 
 const getRangeDayCount = (
@@ -178,27 +196,26 @@ const createDemoEvents = (baseDate: Date): CalendarDemoEvent[] => {
   ];
 };
 
-const calculateEventStyle = (
-  event: CalendarDemoEvent,
-  hourRowHeight: number,
-) => {
+const calculateEventStyle = (event: CalendarDemoEvent): CalendarEventStyle => {
   const startHour = event.startsAt.getHours() + event.startsAt.getMinutes() / 60;
-  const top = Math.max(0, (startHour - HOURS[0]) * hourRowHeight);
-  const height = Math.max(36, (event.minutes / 60) * hourRowHeight);
 
   return {
-    top: `${top + 8}px`,
-    height: `${height}px`,
+    "--calendar-event-start-hour": Math.max(0, startHour - HOURS[0]),
+    "--calendar-event-duration-hours": event.minutes / 60,
   };
 };
 
 export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const timelineGridRef = useRef<HTMLDivElement | null>(null);
   const prependScrollCorrectionRef = useRef(0);
   const isExtendingLeftRef = useRef(false);
   const isExtendingRightRef = useRef(false);
   const shouldSyncScrollRef = useRef(true);
   const hourRowResizeStateRef = useRef<HourRowResizeState | null>(null);
+  const hourRowHeightRef = useRef(DEFAULT_HOUR_ROW_HEIGHT);
+  const pendingHourRowHeightRef = useRef(DEFAULT_HOUR_ROW_HEIGHT);
+  const hourRowResizeFrameRef = useRef<number | null>(null);
 
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [viewMode, setViewMode] = useState<CalendarViewMode>("days");
@@ -226,11 +243,53 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
       : DAY_COLUMN_MIN_WIDTH;
   const gridWidth = TIME_COLUMN_WIDTH + visibleDays.length * dayColumnWidth;
   const dayNavigationStep = viewMode === "week" ? 7 : rangeDays;
-  const hourRowStyle = { height: `${hourRowHeight}px` };
+  const timelineGridStyle: TimelineGridStyle = {
+    "--calendar-hour-row-height": `${hourRowHeight}px`,
+    gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${dayColumnWidth}px)`,
+    minWidth: `${gridWidth}px`,
+  };
 
-  const setClampedHourRowHeight = useCallback((nextHeight: number) => {
-    setHourRowHeight(clampHourRowHeight(nextHeight));
+  const applyHourRowHeightVariable = useCallback((nextHeight: number) => {
+    timelineGridRef.current?.style.setProperty(
+      "--calendar-hour-row-height",
+      `${nextHeight}px`,
+    );
   }, []);
+
+  const scheduleHourRowHeightVariable = useCallback(
+    (nextHeight: number) => {
+      const clampedHeight = clampHourRowHeight(nextHeight);
+      pendingHourRowHeightRef.current = clampedHeight;
+
+      if (hourRowResizeFrameRef.current !== null) {
+        return;
+      }
+
+      hourRowResizeFrameRef.current = window.requestAnimationFrame(() => {
+        hourRowResizeFrameRef.current = null;
+        applyHourRowHeightVariable(pendingHourRowHeightRef.current);
+      });
+    },
+    [applyHourRowHeightVariable],
+  );
+
+  const commitHourRowHeight = useCallback(
+    (nextHeight: number) => {
+      const clampedHeight = clampHourRowHeight(nextHeight);
+
+      if (hourRowResizeFrameRef.current !== null) {
+        window.cancelAnimationFrame(hourRowResizeFrameRef.current);
+        hourRowResizeFrameRef.current = null;
+      }
+
+      hourRowHeightRef.current = clampedHeight;
+      pendingHourRowHeightRef.current = clampedHeight;
+      applyHourRowHeightVariable(clampedHeight);
+      writeStoredHourRowHeight(clampedHeight);
+      setHourRowHeight(clampedHeight);
+    },
+    [applyHourRowHeightVariable],
+  );
 
   const resetTimelinePosition = useCallback(() => {
     shouldSyncScrollRef.current = true;
@@ -248,15 +307,18 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   }, [dayColumnWidth, timelineBuffer.before]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+    hourRowHeightRef.current = hourRowHeight;
+    pendingHourRowHeightRef.current = hourRowHeight;
+    applyHourRowHeightVariable(hourRowHeight);
+  }, [applyHourRowHeightVariable, hourRowHeight]);
 
-    window.localStorage.setItem(
-      HOUR_ROW_HEIGHT_STORAGE_KEY,
-      String(hourRowHeight),
-    );
-  }, [hourRowHeight]);
+  useEffect(() => {
+    return () => {
+      if (hourRowResizeFrameRef.current !== null) {
+        window.cancelAnimationFrame(hourRowResizeFrameRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -353,10 +415,12 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
 
       event.preventDefault();
 
+      const startHeight = hourRowHeightRef.current;
       hourRowResizeStateRef.current = {
         startY: event.clientY,
-        startHeight: hourRowHeight,
+        startHeight,
       };
+      pendingHourRowHeightRef.current = startHeight;
 
       const previousCursor = document.body.style.cursor;
       const previousUserSelect = document.body.style.userSelect;
@@ -370,12 +434,13 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
           return;
         }
 
-        const nextHeight =
-          resizeState.startHeight + moveEvent.clientY - resizeState.startY;
-        setClampedHourRowHeight(nextHeight);
+        scheduleHourRowHeightVariable(
+          resizeState.startHeight + moveEvent.clientY - resizeState.startY,
+        );
       };
 
       const handlePointerUp = () => {
+        commitHourRowHeight(pendingHourRowHeightRef.current);
         hourRowResizeStateRef.current = null;
         document.body.style.cursor = previousCursor;
         document.body.style.userSelect = previousUserSelect;
@@ -388,7 +453,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
       window.addEventListener("pointerup", handlePointerUp);
       window.addEventListener("pointercancel", handlePointerUp);
     },
-    [hourRowHeight, setClampedHourRowHeight],
+    [commitHourRowHeight, scheduleHourRowHeightVariable],
   );
 
   const handleHourRowResizeKeyDown = (
@@ -396,42 +461,42 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   ) => {
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      setClampedHourRowHeight(hourRowHeight - HOUR_ROW_HEIGHT_STEP);
+      commitHourRowHeight(hourRowHeightRef.current - HOUR_ROW_HEIGHT_STEP);
       return;
     }
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      setClampedHourRowHeight(hourRowHeight + HOUR_ROW_HEIGHT_STEP);
+      commitHourRowHeight(hourRowHeightRef.current + HOUR_ROW_HEIGHT_STEP);
       return;
     }
 
     if (event.key === "PageUp") {
       event.preventDefault();
-      setClampedHourRowHeight(hourRowHeight - HOUR_ROW_HEIGHT_STEP * 4);
+      commitHourRowHeight(hourRowHeightRef.current - HOUR_ROW_HEIGHT_STEP * 4);
       return;
     }
 
     if (event.key === "PageDown") {
       event.preventDefault();
-      setClampedHourRowHeight(hourRowHeight + HOUR_ROW_HEIGHT_STEP * 4);
+      commitHourRowHeight(hourRowHeightRef.current + HOUR_ROW_HEIGHT_STEP * 4);
       return;
     }
 
     if (event.key === "Home") {
       event.preventDefault();
-      setClampedHourRowHeight(MIN_HOUR_ROW_HEIGHT);
+      commitHourRowHeight(MIN_HOUR_ROW_HEIGHT);
       return;
     }
 
     if (event.key === "End") {
       event.preventDefault();
-      setClampedHourRowHeight(MAX_HOUR_ROW_HEIGHT);
+      commitHourRowHeight(MAX_HOUR_ROW_HEIGHT);
     }
   };
 
   const handleHourRowResizeReset = () => {
-    setHourRowHeight(DEFAULT_HOUR_ROW_HEIGHT);
+    commitHourRowHeight(DEFAULT_HOUR_ROW_HEIGHT);
   };
 
   const handleViewModeChange = (nextViewMode: CalendarViewMode) => {
@@ -563,11 +628,9 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
           onScroll={handleTimelineScroll}
         >
           <div
-            className="grid"
-            style={{
-              gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${dayColumnWidth}px)`,
-              minWidth: `${gridWidth}px`,
-            }}
+            ref={timelineGridRef}
+            className="calendar-timeline-grid grid"
+            style={timelineGridStyle}
           >
             <div className="sticky left-0 top-0 z-30 border-b border-r border-[#e8e7e1] bg-white" />
 
@@ -620,8 +683,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
               {HOURS.map((hour) => (
                 <div
                   key={`hour-label-${hour}`}
-                  className="relative flex justify-center border-b border-r border-[#e8e7e1] pt-2 text-[12px] text-[#8b8a84]"
-                  style={hourRowStyle}
+                  className="calendar-hour-row calendar-hour-label-row relative flex justify-center border-b border-r border-[#e8e7e1] pt-2 text-[12px] text-[#8b8a84]"
                 >
                   {createHourLabel(hour)}
                   <div
@@ -632,8 +694,8 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
                     aria-valuemax={MAX_HOUR_ROW_HEIGHT}
                     aria-valuenow={hourRowHeight}
                     tabIndex={0}
-                    className="calendar-hour-row-boundary-resize absolute inset-x-0 bottom-[-4px] z-30 h-2 cursor-row-resize"
-                    title="時刻列の境界をドラッグで1時間の高さを変更。ダブルクリックで初期値に戻します。"
+                    className="calendar-hour-boundary-resize-handle"
+                    title="ドラッグで1時間の高さを変更。ダブルクリックで初期値に戻します。"
                     onDoubleClick={handleHourRowResizeReset}
                     onKeyDown={handleHourRowResizeKeyDown}
                     onPointerDown={handleHourRowResizePointerDown}
@@ -658,16 +720,15 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
                   {HOURS.map((hour) => (
                     <div
                       key={`${day.toISOString()}-${hour}`}
-                      className="border-b border-[#e8e7e1]"
-                      style={hourRowStyle}
+                      className="calendar-hour-row border-b border-[#e8e7e1]"
                     />
                   ))}
 
                   {events.map((event) => (
                     <article
                       key={event.id}
-                      style={calculateEventStyle(event, hourRowHeight)}
-                      className="absolute left-2 right-2 overflow-hidden rounded-[10px] border border-[#f2c4c0] bg-[#fff1f0] px-2.5 py-2 text-[#7f2d28] shadow-[0_8px_18px_rgba(127,45,40,0.08)]"
+                      style={calculateEventStyle(event)}
+                      className="calendar-event-card absolute left-2 right-2 overflow-hidden rounded-[10px] border border-[#f2c4c0] bg-[#fff1f0] px-2.5 py-2 text-[#7f2d28] shadow-[0_8px_18px_rgba(127,45,40,0.08)]"
                     >
                       <div className="truncate text-[12px] font-bold leading-4">
                         {event.title}
