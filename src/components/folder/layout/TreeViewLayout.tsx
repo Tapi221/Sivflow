@@ -149,7 +149,9 @@ const TreeViewLayout = ({
     useState(false);
   const [, setImportDragDepth] = useState(0);
   const [isImportDragActive, setIsImportDragActive] = useState(false);
-  const createFolderTriggerRef = useRef<(() => void) | null>(null);
+  const createFolderTriggerRef = useRef<
+    ((parentFolderId?: string | null) => void) | null
+  >(null);
   const createCardSetTriggerRef = useRef<
     ((folderId?: string | null) => void) | null
   >(null);
@@ -395,8 +397,9 @@ const TreeViewLayout = ({
   ]);
 
   const handleCreateRootFolder = useCallback(() => {
-    createFolderTriggerRef.current?.();
-  }, []);
+    handleSidebarFolderSelect(null);
+    createFolderTriggerRef.current?.(null);
+  }, [handleSidebarFolderSelect]);
 
   const handleCreateCardSetFromHeader = useCallback(() => {
     if (!currentHeaderActionFolderId) return;
