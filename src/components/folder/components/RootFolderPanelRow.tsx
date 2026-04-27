@@ -212,10 +212,12 @@ export const RootFolderPanelRow = ({
         nextTarget === null ||
         nextTarget === document.body ||
         nextTarget === document.documentElement;
+      const isInitialCreateDraftBlur =
+        isBodyFocus && input.value.trim() === "新規フォルダ";
       const shouldKeepCreateDraftOpen =
         createDraftIdRef.current === entry.id &&
         entry.kind === "folder" &&
-        (isCreateButtonFocus || isBodyFocus);
+        (isCreateButtonFocus || isInitialCreateDraftBlur);
 
       if (shouldKeepCreateDraftOpen) {
         window.requestAnimationFrame(() => {
@@ -452,6 +454,10 @@ export const RootFolderPanelRow = ({
             if (e.key === "Escape") {
               e.preventDefault();
               renameCancelledRef.current = true;
+              if (isCreateDraft && entry.kind === "folder") {
+                handleDelete(entry.id, "folder");
+                return;
+              }
               setEditingId(null);
               setEditingName("");
             }
