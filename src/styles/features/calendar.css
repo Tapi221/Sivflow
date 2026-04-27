@@ -50,8 +50,8 @@
   }
 
   .calendar-timeline-grid {
-    --calendar-hour-row-height: 88px;
     --calendar-all-day-row-height: 46px;
+    --calendar-hour-row-height: 88px;
   }
 
   .calendar-all-day-row {
@@ -74,14 +74,15 @@
     );
   }
 
+  .calendar-all-day-label-row,
   .calendar-hour-label-row {
     cursor: default;
   }
 
-  .calendar-hour-boundary-resize-handle,
   .calendar-all-day-boundary-resize-handle,
-  .calendar-month-row-boundary-resize-handle {
+  .calendar-hour-boundary-resize-handle {
     position: absolute;
+    bottom: -4px;
     left: 0;
     right: 0;
     z-index: 30;
@@ -91,19 +92,12 @@
     background: transparent;
   }
 
-  .calendar-hour-boundary-resize-handle,
   .calendar-all-day-boundary-resize-handle {
-    bottom: -4px;
-  }
-
-  .calendar-month-row-boundary-resize-handle {
-    bottom: -4px;
     z-index: 40;
   }
 
-  .calendar-hour-boundary-resize-handle::after,
   .calendar-all-day-boundary-resize-handle::after,
-  .calendar-month-row-boundary-resize-handle::after {
+  .calendar-hour-boundary-resize-handle::after {
     content: "";
     position: absolute;
     left: 16px;
@@ -115,32 +109,15 @@
     transition: background-color 120ms ease;
   }
 
-  .calendar-hour-boundary-resize-handle:hover::after,
-  .calendar-hour-boundary-resize-handle:focus-visible::after,
   .calendar-all-day-boundary-resize-handle:hover::after,
   .calendar-all-day-boundary-resize-handle:focus-visible::after,
-  .calendar-month-row-boundary-resize-handle:hover::after,
-  .calendar-month-row-boundary-resize-handle:focus-visible::after {
+  .calendar-hour-boundary-resize-handle:hover::after,
+  .calendar-hour-boundary-resize-handle:focus-visible::after {
     background: rgba(127, 45, 40, 0.42);
   }
 
-  .calendar-hour-boundary-resize-handle:focus-visible,
   .calendar-all-day-boundary-resize-handle:focus-visible,
-  .calendar-month-row-boundary-resize-handle:focus-visible {
+  .calendar-hour-boundary-resize-handle:focus-visible {
     outline: none;
-  }
-
-  .calendar-month-view {
-    --calendar-month-row-height: 112px;
-    overflow-anchor: none;
-  }
-
-  .calendar-month-scroll {
-    overscroll-behavior: contain;
-    overflow-anchor: none;
-  }
-
-  .calendar-month-day-cell {
-    min-height: var(--calendar-month-row-height);
   }
 }

@@ -42,10 +42,11 @@ const createInitialMonthOffsetRange = () => ({
 });
 
 const clampMonthRowHeight = (value: number) => {
-  return Math.min(
-    MAX_MONTH_ROW_HEIGHT,
-    Math.max(MIN_MONTH_ROW_HEIGHT, Math.round(value)),
-  );
+  return Math.min(MAX_MONTH_ROW_HEIGHT, Math.max(MIN_MONTH_ROW_HEIGHT, value));
+};
+
+const normalizeStoredMonthRowHeight = (value: number) => {
+  return Math.round(value);
 };
 
 const readStoredMonthRowHeight = () => {
@@ -57,7 +58,7 @@ const readStoredMonthRowHeight = () => {
   const parsedValue = rawValue === null ? Number.NaN : Number(rawValue);
 
   return Number.isFinite(parsedValue)
-    ? clampMonthRowHeight(parsedValue)
+    ? normalizeStoredMonthRowHeight(clampMonthRowHeight(parsedValue))
     : DEFAULT_MONTH_ROW_HEIGHT;
 };
 
@@ -66,7 +67,10 @@ const writeStoredMonthRowHeight = (value: number) => {
     return;
   }
 
-  window.localStorage.setItem(MONTH_ROW_HEIGHT_STORAGE_KEY, String(value));
+  window.localStorage.setItem(
+    MONTH_ROW_HEIGHT_STORAGE_KEY,
+    String(normalizeStoredMonthRowHeight(value)),
+  );
 };
 
 const getMonthAnnotation = (date: Date): string | null => {
@@ -282,6 +286,7 @@ export const ExplorerCalendarMonthView = ({
   const commitMonthRowHeight = useCallback(
     (nextHeight: number, anchor?: MonthRowResizeAnchor | null) => {
       const clampedHeight = clampMonthRowHeight(nextHeight);
+      const committedHeight = normalizeStoredMonthRowHeight(clampedHeight);
       const scrollAnchor =
         anchor === undefined && scrollContainerRef.current
           ? getMonthResizeAnchor(scrollContainerRef.current)
@@ -292,11 +297,11 @@ export const ExplorerCalendarMonthView = ({
         monthRowResizeFrameRef.current = null;
       }
 
-      monthRowHeightRef.current = clampedHeight;
-      pendingMonthRowHeightRef.current = clampedHeight;
-      applyMonthRowHeightVariable(clampedHeight, scrollAnchor);
-      writeStoredMonthRowHeight(clampedHeight);
-      setMonthRowHeight(clampedHeight);
+      monthRowHeightRef.current = committedHeight;
+      pendingMonthRowHeightRef.current = committedHeight;
+      applyMonthRowHeightVariable(committedHeight, scrollAnchor);
+      writeStoredMonthRowHeight(committedHeight);
+      setMonthRowHeight(committedHeight);
 
       const scroller = scrollContainerRef.current;
       if (scroller) {
