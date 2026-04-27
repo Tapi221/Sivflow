@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/popover";
 import { floatingPanelPresets } from "@/components/ui/menu-styles";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
-import { useExplorerCalendarViewStore } from "@/features/calendar/store/useExplorerCalendarViewStore";
+import { useExplorerSettingsOpener } from "@/features/explorer/adapters/web/useExplorerSettingsOpener";
 import { useTags } from "@/hooks/settings/useTags";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
@@ -68,10 +68,6 @@ const EXPLORER_HOME_CRUMB: BreadcrumbCrumb = {
 const EXPLORER_ROOT_CRUMB: BreadcrumbCrumb = {
   label: "エクスプローラー",
   to: "/folders?view=section-list",
-};
-
-const CALENDAR_ROOT_CRUMB: BreadcrumbCrumb = {
-  label: "カレンダー",
 };
 
 const readInitialExplorerColumnPathCrumbs = (): BreadcrumbCrumb[] => {
@@ -340,40 +336,21 @@ const HomeIcon = () => (
   </svg>
 );
 
-const CalendarPathIcon = () => (
+const SettingsIcon = () => (
   <svg
-    width="13"
-    height="13"
+    width="15"
+    height="15"
     viewBox="0 0 24 24"
     fill="none"
     aria-hidden="true"
   >
-    <rect
-      x="4"
-      y="5"
-      width="16"
-      height="15"
-      rx="2.5"
-      stroke="currentColor"
-      strokeWidth="1.6"
-    />
+    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" />
     <path
-      d="M8 3V7"
+      d="M19.4 15A1.65 1.65 0 0 0 19.73 16.82L19.79 16.88A2 2 0 0 1 16.96 19.71L16.9 19.65A1.65 1.65 0 0 0 15.08 19.32A1.65 1.65 0 0 0 14.08 20.83V21A2 2 0 0 1 10.08 21V20.91A1.65 1.65 0 0 0 9 19.4A1.65 1.65 0 0 0 7.18 19.73L7.12 19.79A2 2 0 0 1 4.29 16.96L4.35 16.9A1.65 1.65 0 0 0 4.68 15.08A1.65 1.65 0 0 0 3.17 14H3A2 2 0 0 1 3 10H3.09A1.65 1.65 0 0 0 4.6 9A1.65 1.65 0 0 0 4.27 7.18L4.21 7.12A2 2 0 0 1 7.04 4.29L7.1 4.35A1.65 1.65 0 0 0 8.92 4.68A1.65 1.65 0 0 0 10 3.17V3A2 2 0 0 1 14 3V3.09A1.65 1.65 0 0 0 15 4.6A1.65 1.65 0 0 0 16.82 4.27L16.88 4.21A2 2 0 0 1 19.71 7.04L19.65 7.1A1.65 1.65 0 0 0 19.32 8.92A1.65 1.65 0 0 0 20.83 10H21A2 2 0 0 1 21 14H20.91A1.65 1.65 0 0 0 19.4 15Z"
       stroke="currentColor"
-      strokeWidth="1.6"
+      strokeWidth="1.5"
       strokeLinecap="round"
-    />
-    <path
-      d="M16 3V7"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-    />
-    <path
-      d="M4 10H20"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -381,7 +358,6 @@ const CalendarPathIcon = () => (
 const ExplorerPathBar = () => {
   const navigate = useNavigate();
   const extraCrumbs = useBreadcrumbExtraCrumbs();
-  const isCalendarOpen = useExplorerCalendarViewStore((state) => state.isOpen);
   const [columnPathCrumbs, setColumnPathCrumbs] = useState<BreadcrumbCrumb[]>(
     readInitialExplorerColumnPathCrumbs,
   );
@@ -422,10 +398,6 @@ const ExplorerPathBar = () => {
     : extraCrumbs;
 
   const pathCrumbs = useMemo(() => {
-    if (isCalendarOpen) {
-      return [EXPLORER_HOME_CRUMB, CALENDAR_ROOT_CRUMB];
-    }
-
     const normalizedExtraCrumbs = visibleExtraCrumbs.map((crumb, index) =>
       index === visibleExtraCrumbs.length - 1
         ? { ...crumb, to: undefined }
@@ -438,7 +410,7 @@ const ExplorerPathBar = () => {
         : { ...EXPLORER_ROOT_CRUMB, to: undefined };
 
     return [EXPLORER_HOME_CRUMB, rootCrumb, ...normalizedExtraCrumbs];
-  }, [isCalendarOpen, visibleExtraCrumbs]);
+  }, [visibleExtraCrumbs]);
 
   const handleCrumbClick = (crumb: BreadcrumbCrumb) => {
     if (!crumb.to) return;
@@ -479,13 +451,7 @@ const ExplorerPathBar = () => {
             ) : null}
 
             {index === 0 ? <HomeIcon /> : null}
-            {index === 1 ? (
-              isCalendarOpen ? (
-                <CalendarPathIcon />
-              ) : (
-                <ExplorerChromeFolderIcon />
-              )
-            ) : null}
+            {index === 1 ? <ExplorerChromeFolderIcon /> : null}
 
             {isClickable ? (
               <button
@@ -598,7 +564,7 @@ const ExplorerToolbar = () => {
 };
 
 const ExplorerStatusBar = () => {
-  const isCalendarOpen = useExplorerCalendarViewStore((state) => state.isOpen);
+  const openSettings = useExplorerSettingsOpener();
 
   return (
     <div
@@ -607,11 +573,17 @@ const ExplorerStatusBar = () => {
         "bg-[rgba(246,246,244,0.98)] px-3 text-[11px] text-[#777671]",
       )}
     >
-      <span>{isCalendarOpen ? "カレンダー" : "エクスプローラー"}</span>
+      <span>エクスプローラー</span>
       <span className="text-[#c8c7bf]">│</span>
-      <span>
-        {isCalendarOpen ? "予定と学習日程を管理" : "フォルダとカードを管理"}
-      </span>
+      <span>フォルダとカードを管理</span>
+
+      <ExplorerToolbarButton
+        title="設定"
+        onClick={openSettings}
+        className="ml-auto -mr-1 h-6 w-6"
+      >
+        <SettingsIcon />
+      </ExplorerToolbarButton>
     </div>
   );
 };
