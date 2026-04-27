@@ -471,7 +471,6 @@ export const useFolderActions = ({
     ],
   );
 
-
   const handleCreateCardSetAction = useCallback(
     (folderId: string | null) => {
       const normalizedFolderId = normalizeFolderId(folderId);

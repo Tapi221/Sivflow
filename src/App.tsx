@@ -1,7 +1,7 @@
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 import {
   AppBootLoadingFallback,
-    CardEditScreenSkeleton,
+  CardEditScreenSkeleton,
   CardSetViewScreenSkeleton,
   DirectoryScreenSkeleton,
   FoldersScreenSkeleton,

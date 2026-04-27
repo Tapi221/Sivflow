@@ -1,10 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { PointerEvent as ReactPointerEvent, CSSProperties } from "react";
 import { DETAIL_GRID_CLASS } from "./folderDetailColumns";
-import {
-  getHeaderAriaSort,
-  getHeaderSortLabel,
-} from "./folderDetailSorting";
+import { getHeaderAriaSort, getHeaderSortLabel } from "./folderDetailSorting";
 import type {
   ExplorerDetailColumnId,
   ExplorerDetailSortKey,
