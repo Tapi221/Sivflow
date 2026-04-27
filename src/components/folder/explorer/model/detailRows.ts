@@ -16,8 +16,15 @@ import type {
   Folder,
   SelectedExplorerItem,
 } from "@/types";
+import type { SyncEntity } from "@/types/domain/sync";
 
 export type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";
+
+export type ExplorerDetailLocalSyncState =
+  | "pending"
+  | "synced"
+  | "error"
+  | "conflict";
 
 export type ExplorerDetailRow = {
   key: string;
@@ -34,6 +41,10 @@ export type ExplorerDetailRow = {
   selectTarget: SelectedExplorerItem;
   openFolderId: string | null;
   openCardSetId: string | null;
+  syncEntity: Extract<SyncEntity, "folder" | "cardSet" | "card" | "document">;
+  syncTargetId: string;
+  localSyncState?: ExplorerDetailLocalSyncState;
+  lastSyncedAt?: unknown;
 };
 
 type BuildExplorerDetailRowsParams = {
@@ -129,6 +140,21 @@ const getCardDisplayName = (card: Card): string => {
 
 const getCardTags = (card: Card): string[] => {
   return getStringArray(card.tagIds);
+};
+
+const normalizeCardSyncState = (
+  value: Card["syncState"],
+): ExplorerDetailLocalSyncState | undefined => {
+  if (
+    value === "pending" ||
+    value === "synced" ||
+    value === "error" ||
+    value === "conflict"
+  ) {
+    return value;
+  }
+
+  return undefined;
 };
 
 const buildFolderById = (folders: Folder[]): Map<string, Folder> => {
@@ -262,6 +288,8 @@ const buildCardSetRows = ({
         selectTarget: null,
         openFolderId: null,
         openCardSetId: cardSet.id,
+        syncEntity: "cardSet",
+        syncTargetId: cardSet.id,
       };
     });
 };
@@ -305,6 +333,10 @@ const buildCardRows = ({
         selectTarget: { type: "card", id: card.id },
         openFolderId: null,
         openCardSetId: null,
+        syncEntity: "card",
+        syncTargetId: card.id,
+        localSyncState: normalizeCardSyncState(card.syncState),
+        lastSyncedAt: card.lastSyncedAt,
       };
     })
     .sort(compareDetailRowsWithinKind);
@@ -365,6 +397,8 @@ export const buildExplorerDetailRows = ({
         selectTarget: null,
         openFolderId: folderId,
         openCardSetId: null,
+        syncEntity: "folder",
+        syncTargetId: folderId,
       };
     });
 
@@ -401,6 +435,8 @@ export const buildExplorerDetailRows = ({
         selectTarget: { type: "document", id: document.id },
         openFolderId: null,
         openCardSetId: null,
+        syncEntity: "document",
+        syncTargetId: document.id,
       };
     });
 
