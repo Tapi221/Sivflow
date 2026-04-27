@@ -6,6 +6,7 @@ import type {
 
 const EXPLORER_DETAIL_COLUMN_WIDTHS_STORAGE_KEY =
   "manifolia:folder-detail-view:column-widths";
+
 const EXPLORER_DETAIL_COLUMN_ORDER_STORAGE_KEY =
   "manifolia:folder-detail-view:column-order:v1";
 
@@ -22,8 +23,14 @@ export const DETAIL_COLUMN_IDS = [
 ] as const satisfies readonly ExplorerDetailColumnId[];
 
 export const DETAIL_DEFAULT_COLUMN_ORDER = [
-  ...DETAIL_COLUMN_IDS,
-] satisfies readonly ExplorerDetailColumnId[];
+  "name",
+  "tags",
+  "path",
+  "updatedAt",
+  "sync",
+  "kind",
+  "size",
+] as const satisfies readonly ExplorerDetailColumnId[];
 
 export type ExplorerDetailColumnWidths = Record<ExplorerDetailColumnId, number>;
 export type ExplorerDetailColumnOrder = ExplorerDetailColumnId[];
@@ -55,54 +62,13 @@ export const DEFAULT_SORT_STATE: ExplorerDetailSortState = {
   direction: "asc",
 };
 
-export const isDetailColumnId = (
+export const isExplorerDetailColumnId = (
   value: unknown,
 ): value is ExplorerDetailColumnId => {
   return (
     typeof value === "string" &&
-    (DETAIL_COLUMN_IDS as readonly string[]).includes(value)
+    DETAIL_COLUMN_IDS.includes(value as ExplorerDetailColumnId)
   );
-};
-
-export const normalizeDetailColumnOrder = (
-  value: unknown,
-): ExplorerDetailColumnOrder => {
-  if (!Array.isArray(value)) return [...DETAIL_DEFAULT_COLUMN_ORDER];
-
-  const next: ExplorerDetailColumnOrder = [];
-
-  value.forEach((entry) => {
-    if (!isDetailColumnId(entry)) return;
-    if (next.includes(entry)) return;
-    next.push(entry);
-  });
-
-  DETAIL_DEFAULT_COLUMN_ORDER.forEach((columnId) => {
-    if (next.includes(columnId)) return;
-    next.push(columnId);
-  });
-
-  return next;
-};
-
-export const moveDetailColumnToIndex = (
-  currentOrder: readonly ExplorerDetailColumnId[],
-  activeColumnId: ExplorerDetailColumnId,
-  overColumnId: ExplorerDetailColumnId,
-): ExplorerDetailColumnOrder => {
-  const normalizedOrder = normalizeDetailColumnOrder(currentOrder);
-  const activeIndex = normalizedOrder.indexOf(activeColumnId);
-  const overIndex = normalizedOrder.indexOf(overColumnId);
-
-  if (activeIndex < 0 || overIndex < 0 || activeIndex === overIndex) {
-    return normalizedOrder;
-  }
-
-  const nextOrder = [...normalizedOrder];
-  const [activeColumn] = nextOrder.splice(activeIndex, 1);
-  nextOrder.splice(overIndex, 0, activeColumn);
-
-  return nextOrder;
 };
 
 export const clampDetailColumnWidth = (
@@ -137,6 +103,55 @@ export const normalizeDetailColumnWidths = (
   return next;
 };
 
+export const normalizeDetailColumnOrder = (
+  value: unknown,
+): ExplorerDetailColumnOrder => {
+  if (!Array.isArray(value)) return [...DETAIL_DEFAULT_COLUMN_ORDER];
+
+  const next: ExplorerDetailColumnOrder = [];
+
+  value.forEach((entry) => {
+    if (!isExplorerDetailColumnId(entry)) return;
+    if (next.includes(entry)) return;
+
+    next.push(entry);
+  });
+
+  DETAIL_DEFAULT_COLUMN_ORDER.forEach((columnId) => {
+    if (next.includes(columnId)) return;
+
+    next.push(columnId);
+  });
+
+  return next;
+};
+
+export const moveDetailColumnOrder = (
+  order: readonly ExplorerDetailColumnId[],
+  activeColumnId: ExplorerDetailColumnId,
+  targetIndex: number,
+): ExplorerDetailColumnOrder => {
+  const normalizedOrder = normalizeDetailColumnOrder(order);
+
+  if (!normalizedOrder.includes(activeColumnId)) {
+    return normalizedOrder;
+  }
+
+  const orderWithoutActiveColumn = normalizedOrder.filter(
+    (columnId) => columnId !== activeColumnId,
+  );
+  const safeTargetIndex = Math.min(
+    Math.max(Math.round(targetIndex), 0),
+    orderWithoutActiveColumn.length,
+  );
+
+  return [
+    ...orderWithoutActiveColumn.slice(0, safeTargetIndex),
+    activeColumnId,
+    ...orderWithoutActiveColumn.slice(safeTargetIndex),
+  ];
+};
+
 export const readStoredDetailColumnWidths = (): ExplorerDetailColumnWidths => {
   if (typeof window === "undefined") {
     return { ...DETAIL_DEFAULT_COLUMN_WIDTHS };
@@ -161,7 +176,7 @@ export const writeStoredDetailColumnWidths = (
 
   window.localStorage.setItem(
     EXPLORER_DETAIL_COLUMN_WIDTHS_STORAGE_KEY,
-    JSON.stringify(normalizeDetailColumnWidths(widths)),
+    JSON.stringify(widths),
   );
 };
 
@@ -197,14 +212,23 @@ export const buildDetailGridTemplateColumns = (
   widths: ExplorerDetailColumnWidths,
   columnOrder: readonly ExplorerDetailColumnId[] = DETAIL_DEFAULT_COLUMN_ORDER,
 ): string => {
-  return columnOrder.map((columnId) => `${widths[columnId]}px`).join(" ");
+  const normalizedOrder = normalizeDetailColumnOrder(columnOrder);
+
+  return normalizedOrder
+    .map((columnId) => `${widths[columnId]}px`)
+    .join(" ");
 };
 
 export const getDetailGridMinWidth = (
   widths: ExplorerDetailColumnWidths,
   columnOrder: readonly ExplorerDetailColumnId[] = DETAIL_DEFAULT_COLUMN_ORDER,
 ): number => {
-  return columnOrder.reduce((total, columnId) => total + widths[columnId], 0);
+  const normalizedOrder = normalizeDetailColumnOrder(columnOrder);
+
+  return normalizedOrder.reduce(
+    (total, columnId) => total + widths[columnId],
+    0,
+  );
 };
 
 export const buildDetailGridStyle = (
