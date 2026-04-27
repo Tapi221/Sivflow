@@ -241,6 +241,7 @@ const calculateEventStyle = (event: CalendarDemoEvent): CalendarEventStyle => {
 };
 
 export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => {
+  const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const timelineGridRef = useRef<HTMLDivElement | null>(null);
   const prependScrollCorrectionRef = useRef(0);
@@ -301,11 +302,14 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     renderedViewMode,
     rangeDays,
   );
+  const measuredViewportWidth =
+    viewportWidth > 0 ? viewportWidth : (contentViewportRef.current?.clientWidth ?? 0);
   const dayColumnWidth =
-    viewportWidth > TIME_COLUMN_WIDTH
+    measuredViewportWidth > TIME_COLUMN_WIDTH
       ? Math.max(
           1,
-          (viewportWidth - TIME_COLUMN_WIDTH) / Math.max(1, viewportDayCount),
+          (measuredViewportWidth - TIME_COLUMN_WIDTH) /
+            Math.max(1, viewportDayCount),
         )
       : DAY_COLUMN_MIN_WIDTH;
   const gridWidth = TIME_COLUMN_WIDTH + visibleDays.length * dayColumnWidth;
@@ -500,32 +504,34 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     };
   }, []);
 
-  useEffect(() => {
-    if (renderedViewMode === "month") {
-      setViewportWidth(0);
-      return undefined;
-    }
+  useLayoutEffect(() => {
+    const contentViewport = contentViewportRef.current;
 
-    const scrollContainer = scrollContainerRef.current;
-
-    if (!scrollContainer) {
+    if (!contentViewport) {
       return undefined;
     }
 
     const updateViewportWidth = () => {
       shouldSyncScrollRef.current = true;
-      setViewportWidth(scrollContainer.clientWidth);
+      const nextWidth = contentViewport.clientWidth;
+      setViewportWidth((current) =>
+        current === nextWidth ? current : nextWidth,
+      );
     };
 
     updateViewportWidth();
 
+    if (typeof ResizeObserver === "undefined") {
+      return undefined;
+    }
+
     const resizeObserver = new ResizeObserver(updateViewportWidth);
-    resizeObserver.observe(scrollContainer);
+    resizeObserver.observe(contentViewport);
 
     return () => {
       resizeObserver.disconnect();
     };
-  }, [renderedViewMode]);
+  }, []);
 
   useLayoutEffect(() => {
     if (renderedViewMode === "month" || !shouldSyncScrollRef.current) {
@@ -936,7 +942,11 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
         ) : null}
       </header>
 
-      {renderedViewMode === "month" ? (
+      <div
+        ref={contentViewportRef}
+        className="calendar-view-content flex min-h-0 flex-1 flex-col overflow-hidden bg-white"
+      >
+        {renderedViewMode === "month" ? (
         <ExplorerCalendarMonthView
           currentDate={monthTitleDate}
           selectedDate={currentDate}
@@ -1081,6 +1091,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
           </div>
         </div>
       )}
+      </div>
     </section>
   );
 };
