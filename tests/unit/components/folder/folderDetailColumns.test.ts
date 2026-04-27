@@ -3,12 +3,12 @@ import {
   buildDetailGridTemplateColumns,
   DETAIL_DEFAULT_COLUMN_ORDER,
   getDetailGridMinWidth,
-  moveDetailColumnToIndex,
+  moveDetailColumnOrder,
   normalizeDetailColumnOrder,
   type ExplorerDetailColumnWidths,
 } from "@/components/folder/components/detail-view/folderDetailColumns";
 
-const widths = {
+const columnWidths = {
   name: 320,
   tags: 190,
   path: 420,
@@ -19,44 +19,47 @@ const widths = {
 } satisfies ExplorerDetailColumnWidths;
 
 describe("folderDetailColumns", () => {
-  it("保存済み列順の未知列と重複列を捨て、不足列を末尾に補完する", () => {
+  it("列順の重複と未知の値を除去し、不足列を既定順で補完する", () => {
     expect(
-      normalizeDetailColumnOrder(["sync", "name", "sync", "unknown", "tags"]),
-    ).toEqual(["sync", "name", "tags", "path", "updatedAt", "kind", "size"]);
+      normalizeDetailColumnOrder(["size", "name", "name", "unknown", "sync"]),
+    ).toEqual(["size", "name", "sync", "tags", "path", "updatedAt", "kind"]);
   });
 
-  it("保存済み列順が壊れている場合はデフォルト順に戻す", () => {
+  it("不正な列順は既定順に戻す", () => {
+    expect(normalizeDetailColumnOrder(null)).toEqual([
+      ...DETAIL_DEFAULT_COLUMN_ORDER,
+    ]);
     expect(normalizeDetailColumnOrder({ name: true })).toEqual([
       ...DETAIL_DEFAULT_COLUMN_ORDER,
     ]);
   });
 
-  it("列をドロップ先の列位置へ移動できる", () => {
-    expect(
-      moveDetailColumnToIndex(DETAIL_DEFAULT_COLUMN_ORDER, "sync", "tags"),
-    ).toEqual(["name", "sync", "tags", "path", "updatedAt", "kind", "size"]);
-  });
-
-  it("同じ列へ移動した場合は正規化済みの現在順を返す", () => {
-    expect(
-      moveDetailColumnToIndex(DETAIL_DEFAULT_COLUMN_ORDER, "name", "name"),
-    ).toEqual([...DETAIL_DEFAULT_COLUMN_ORDER]);
-  });
-
-  it("grid-template-columnsを列順どおりに組み立てる", () => {
-    const order = [
-      "sync",
-      "name",
-      "size",
-      "tags",
-      "path",
-      "updatedAt",
-      "kind",
-    ] as const;
-
-    expect(buildDetailGridTemplateColumns(widths, order)).toBe(
-      "132px 320px 112px 190px 420px 168px 128px",
+  it("指定列を対象indexへ移動できる", () => {
+    expect(moveDetailColumnOrder(DETAIL_DEFAULT_COLUMN_ORDER, "size", 0)).toEqual(
+      ["size", "name", "tags", "path", "updatedAt", "sync", "kind"],
     );
-    expect(getDetailGridMinWidth(widths, order)).toBe(1470);
+
+    expect(moveDetailColumnOrder(DETAIL_DEFAULT_COLUMN_ORDER, "name", 6)).toEqual(
+      ["tags", "path", "updatedAt", "sync", "kind", "size", "name"],
+    );
+  });
+
+  it("範囲外の対象indexは安全に丸める", () => {
+    expect(moveDetailColumnOrder(DETAIL_DEFAULT_COLUMN_ORDER, "path", -100)).toEqual(
+      ["path", "name", "tags", "updatedAt", "sync", "kind", "size"],
+    );
+
+    expect(
+      moveDetailColumnOrder(DETAIL_DEFAULT_COLUMN_ORDER, "path", 100),
+    ).toEqual(["name", "tags", "updatedAt", "sync", "kind", "size", "path"]);
+  });
+
+  it("列順を反映したgrid-template-columnsと最小幅を生成する", () => {
+    const columnOrder = ["size", "name", "tags"] as const;
+
+    expect(buildDetailGridTemplateColumns(columnWidths, columnOrder)).toBe(
+      "112px 320px 190px 420px 168px 132px 128px",
+    );
+    expect(getDetailGridMinWidth(columnWidths, columnOrder)).toBe(1470);
   });
 });

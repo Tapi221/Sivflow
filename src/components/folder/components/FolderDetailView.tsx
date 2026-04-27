@@ -27,8 +27,8 @@ import {
   useMemo,
   useRef,
   useState,
-  type PointerEvent as ReactPointerEvent,
   type KeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 import {
   buildDetailGridStyle,
@@ -36,7 +36,7 @@ import {
   clampDetailColumnWidth,
   DEFAULT_SORT_STATE,
   DETAIL_DEFAULT_COLUMN_WIDTHS,
-  moveDetailColumnToIndex,
+  moveDetailColumnOrder,
   readStoredDetailColumnOrder,
   readStoredDetailColumnWidths,
   writeStoredDetailColumnOrder,
@@ -168,9 +168,9 @@ export const FolderDetailView = ({
     useState<ExplorerDetailTagEditorState | null>(null);
   const [optimisticOrderByKey, setOptimisticOrderByKey] =
     useState<ExplorerDetailOptimisticOrderState>({});
-  const [pendingReorderKeys, setPendingReorderKeys] = useState<
-    ReadonlySet<string>
-  >(() => new Set());
+  const [pendingReorderKeys, setPendingReorderKeys] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
   const tagEditorSkipNextBlurRef = useRef(false);
   const { tags, tagById, addTag } = useTags();
   const { updateCard } = useCardCommands();
@@ -200,12 +200,9 @@ export const FolderDetailView = ({
   );
 
   const handleColumnReorder = useCallback(
-    (
-      activeColumnId: ExplorerDetailColumnId,
-      overColumnId: ExplorerDetailColumnId,
-    ) => {
+    (activeColumnId: ExplorerDetailColumnId, targetIndex: number) => {
       setColumnOrder((current) =>
-        moveDetailColumnToIndex(current, activeColumnId, overColumnId),
+        moveDetailColumnOrder(current, activeColumnId, targetIndex),
       );
     },
     [],
