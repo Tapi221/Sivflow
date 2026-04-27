@@ -12,7 +12,7 @@
 @layer components {
   .explorer-chrome-font,
   .folder-panel-list {
-    --folder-panel-list-fade-rgb: 255 255 255;
+    --folder-panel-list-fade-rgb: 248 251 253;
 
     font-family: var(--explorer-chrome-font-family);
     font-feature-settings:
@@ -36,19 +36,19 @@
   .folder-panel-list__top-fade {
     background: linear-gradient(
       to bottom,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0.82) 0%,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0.46) 38%,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0) 100%
+      rgb(var(--folder-panel-list-fade-rgb, 248 251 253) / 0.9) 0%,
+      rgb(var(--folder-panel-list-fade-rgb, 248 251 253) / 0.5) 38%,
+      rgb(var(--folder-panel-list-fade-rgb, 248 251 253) / 0) 100%
     );
   }
 
   .folder-panel-list__bottom-fade {
     background: linear-gradient(
       to bottom,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0) 0%,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0) 34%,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0.46) 78%,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0.82) 100%
+      rgb(var(--folder-panel-list-fade-rgb, 248 251 253) / 0) 0%,
+      rgb(var(--folder-panel-list-fade-rgb, 248 251 253) / 0) 34%,
+      rgb(var(--folder-panel-list-fade-rgb, 248 251 253) / 0.5) 78%,
+      rgb(var(--folder-panel-list-fade-rgb, 248 251 253) / 0.9) 100%
     );
   }
 }
