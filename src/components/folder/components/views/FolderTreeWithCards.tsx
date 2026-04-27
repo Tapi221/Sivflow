@@ -114,6 +114,7 @@ interface FolderTreeWithCardsProps {
   folderSelectionNonce?: number;
   forceSectionListRoot?: boolean;
   onHeaderFolderIdChange?: (folderId: string | null) => void;
+  onVisibleRootFolderCountChange?: (count: number) => void;
   className?: string;
 }
 
@@ -151,6 +152,7 @@ export const FolderTreeWithCards = ({
   folderSelectionNonce = 0,
   forceSectionListRoot = false,
   onHeaderFolderIdChange,
+  onVisibleRootFolderCountChange,
   className,
 }: FolderTreeWithCardsProps) => {
   const { expandedFolders, setExpandedFolders, toggleFolder } =
@@ -472,6 +474,10 @@ export const FolderTreeWithCards = ({
         ),
     [rootFolders, hasFolderMatches],
   );
+
+  useEffect(() => {
+    onVisibleRootFolderCountChange?.(rootFolderPanels.length);
+  }, [onVisibleRootFolderCountChange, rootFolderPanels.length]);
 
   const navigationEmptyMessage = useMemo(() => {
     if (isFiltering) {

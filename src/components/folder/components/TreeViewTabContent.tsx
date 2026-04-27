@@ -33,6 +33,7 @@ interface TreeViewTabContentProps {
   folderSelectionNonce: number;
   forceSectionListRoot?: boolean;
   onHeaderFolderIdChange?: (folderId: string | null) => void;
+  onVisibleRootFolderCountChange?: (count: number) => void;
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
   onCreateFolder: FolderTreeWithCardsProps["onCreateFolder"];
@@ -72,6 +73,7 @@ export const TreeViewTabContent = ({
   folderSelectionNonce,
   forceSectionListRoot = false,
   onHeaderFolderIdChange,
+  onVisibleRootFolderCountChange,
   onFolderSelect,
   onItemSelect,
   onCreateFolder,
@@ -128,6 +130,7 @@ export const TreeViewTabContent = ({
       folderSelectionNonce={folderSelectionNonce}
       forceSectionListRoot={forceSectionListRoot}
       onHeaderFolderIdChange={onHeaderFolderIdChange}
+      onVisibleRootFolderCountChange={onVisibleRootFolderCountChange}
     />
   );
 };
