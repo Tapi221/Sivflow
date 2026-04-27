@@ -4,6 +4,7 @@ import {
   format,
   getDaysInMonth,
   isSameDay,
+  isSameMonth,
   setHours,
   setMinutes,
   startOfDay,
@@ -218,7 +219,11 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   const hourRowResizeFrameRef = useRef<number | null>(null);
 
   const [currentDate, setCurrentDate] = useState(() => new Date());
-  const [viewMode, setViewMode] = useState<CalendarViewMode>("days");
+  const [monthTitleDate, setMonthTitleDate] = useState(() =>
+    startOfMonth(new Date()),
+  );
+  const [monthScrollTargetToken, setMonthScrollTargetToken] = useState(0);
+  const [viewMode, setViewMode] = useState<CalendarViewMode>("month");
   const [rangeDays, setRangeDays] = useState(DEFAULT_RANGE_DAYS);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [timelineBuffer, setTimelineBuffer] = useState(
@@ -232,7 +237,8 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   );
   const demoEvents = useMemo(() => createDemoEvents(currentDate), [currentDate]);
 
-  const monthLabel = format(currentDate, "yyyy年 M月", { locale: ja });
+  const calendarTitleDate = viewMode === "month" ? monthTitleDate : currentDate;
+  const monthLabel = format(calendarTitleDate, "yyyy年 M月", { locale: ja });
   const viewportDayCount = getViewportDayCount(currentDate, viewMode, rangeDays);
   const dayColumnWidth =
     viewportWidth > TIME_COLUMN_WIDTH
@@ -291,6 +297,10 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     [applyHourRowHeightVariable],
   );
 
+  const requestMonthScrollTarget = useCallback(() => {
+    setMonthScrollTargetToken((current) => current + 1);
+  }, []);
+
   const resetTimelinePosition = useCallback(() => {
     shouldSyncScrollRef.current = true;
     setTimelineBuffer(createInitialTimelineBuffer());
@@ -321,6 +331,11 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   }, []);
 
   useEffect(() => {
+    if (viewMode === "month") {
+      setViewportWidth(0);
+      return undefined;
+    }
+
     const scrollContainer = scrollContainerRef.current;
 
     if (!scrollContainer) {
@@ -340,18 +355,28 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [viewMode]);
 
   useLayoutEffect(() => {
-    if (!shouldSyncScrollRef.current) {
+    if (viewMode === "month" || !shouldSyncScrollRef.current) {
       return;
     }
 
     syncScrollToRangeStart();
     shouldSyncScrollRef.current = false;
-  }, [currentDate, rangeDays, syncScrollToRangeStart, viewMode, viewportWidth]);
+  }, [
+    currentDate,
+    rangeDays,
+    syncScrollToRangeStart,
+    viewMode,
+    viewportWidth,
+  ]);
 
   useLayoutEffect(() => {
+    if (viewMode === "month") {
+      return;
+    }
+
     const scrollContainer = scrollContainerRef.current;
     const correction = prependScrollCorrectionRef.current;
 
@@ -363,7 +388,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     scrollContainer.scrollLeft += correction;
     prependScrollCorrectionRef.current = 0;
     isExtendingLeftRef.current = false;
-  }, [dayColumnWidth, timelineBuffer.before]);
+  }, [dayColumnWidth, timelineBuffer.before, viewMode]);
 
   useEffect(() => {
     isExtendingRightRef.current = false;
@@ -373,7 +398,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     (event: UIEvent<HTMLDivElement>) => {
       const target = event.currentTarget;
 
-      if (dayColumnWidth <= 0) {
+      if (viewMode === "month" || dayColumnWidth <= 0) {
         return;
       }
 
@@ -404,7 +429,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
         }));
       }
     },
-    [dayColumnWidth],
+    [dayColumnWidth, viewMode],
   );
 
   const handleHourRowResizePointerDown = useCallback(
@@ -501,6 +526,12 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
 
   const handleViewModeChange = (nextViewMode: CalendarViewMode) => {
     resetTimelinePosition();
+
+    if (nextViewMode === "month") {
+      setMonthTitleDate(startOfMonth(currentDate));
+      requestMonthScrollTarget();
+    }
+
     setViewMode(nextViewMode);
   };
 
@@ -510,27 +541,59 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   };
 
   const handleToday = () => {
+    const today = new Date();
+
     resetTimelinePosition();
-    setCurrentDate(new Date());
+    setCurrentDate(today);
+
+    if (viewMode === "month") {
+      setMonthTitleDate(startOfMonth(today));
+      requestMonthScrollTarget();
+    }
   };
 
   const handlePrevious = () => {
     resetTimelinePosition();
-    setCurrentDate((prev) =>
-      viewMode === "month"
-        ? subMonths(prev, MONTH_NAVIGATION_STEP)
-        : subDays(prev, dayNavigationStep),
-    );
+
+    if (viewMode === "month") {
+      const nextMonth = subMonths(monthTitleDate, MONTH_NAVIGATION_STEP);
+      setMonthTitleDate(startOfMonth(nextMonth));
+      setCurrentDate(startOfDay(nextMonth));
+      requestMonthScrollTarget();
+      return;
+    }
+
+    setCurrentDate((prev) => subDays(prev, dayNavigationStep));
   };
 
   const handleNext = () => {
     resetTimelinePosition();
-    setCurrentDate((prev) =>
-      viewMode === "month"
-        ? addMonths(prev, MONTH_NAVIGATION_STEP)
-        : addDays(prev, dayNavigationStep),
-    );
+
+    if (viewMode === "month") {
+      const nextMonth = addMonths(monthTitleDate, MONTH_NAVIGATION_STEP);
+      setMonthTitleDate(startOfMonth(nextMonth));
+      setCurrentDate(startOfDay(nextMonth));
+      requestMonthScrollTarget();
+      return;
+    }
+
+    setCurrentDate((prev) => addDays(prev, dayNavigationStep));
   };
+
+  const handleMonthDateSelect = useCallback(
+    (date: Date) => {
+      resetTimelinePosition();
+      setCurrentDate(date);
+      setMonthTitleDate(startOfMonth(date));
+    },
+    [resetTimelinePosition],
+  );
+
+  const handleVisibleMonthChange = useCallback((date: Date) => {
+    setMonthTitleDate((current) =>
+      isSameMonth(current, date) ? current : startOfMonth(date),
+    );
+  }, []);
 
   return (
     <section className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa] text-[#24231f]">
@@ -614,12 +677,11 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
 
       {viewMode === "month" ? (
         <ExplorerCalendarMonthView
-          currentDate={currentDate}
+          currentDate={monthTitleDate}
           selectedDate={currentDate}
-          onSelectDate={(date) => {
-            resetTimelinePosition();
-            setCurrentDate(date);
-          }}
+          scrollTargetToken={monthScrollTargetToken}
+          onSelectDate={handleMonthDateSelect}
+          onVisibleMonthChange={handleVisibleMonthChange}
         />
       ) : (
         <div
