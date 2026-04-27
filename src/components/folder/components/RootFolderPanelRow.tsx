@@ -386,9 +386,11 @@ export const RootFolderPanelRow = ({
   const editingInputControl = (
     <div
       className={cn(
-        "flex h-[26px] min-w-0 w-full max-w-[240px] items-center gap-1 rounded-[5px] border border-[#d8d5cc] bg-white px-1.5",
-        "shadow-[0_1px_2px_rgba(25,23,17,0.06)]",
-        "focus-within:border-[#8b887f] focus-within:shadow-[0_0_0_2px_rgba(139,136,127,0.14)]",
+        "flex h-[26px] min-w-0 w-full items-center gap-1.5 rounded-[8px]",
+        "border border-[#ded9cf] bg-[#fbfaf7] px-2",
+        "shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_1px_1px_rgba(22,20,15,0.035)]",
+        "focus-within:border-[#c9c2b5] focus-within:bg-white",
+        "focus-within:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_0_0_1px_rgba(201,194,181,0.36)]",
       )}
       onClick={(event) => {
         event.stopPropagation();
@@ -407,15 +409,15 @@ export const RootFolderPanelRow = ({
       }}
     >
       <Icon
-        className={cn(FOLDER_ROW_ICON_SIZE_CLASS, "shrink-0 text-[#8b887f]")}
+        className={cn(FOLDER_ROW_ICON_SIZE_CLASS, "shrink-0 text-[#8f887b]")}
       />
       <input
         ref={attachRenameInputRef}
         className={cn(
           EXPLORER_ROW_INPUT_CLASS,
           "h-full min-w-0 flex-1 border-0 bg-transparent px-0",
-          "text-[12px] text-[#24231f] shadow-none outline-none",
-          "focus:border-transparent focus:shadow-none focus:outline-none",
+          "text-[13px] leading-5 text-[#2d2a24] shadow-none outline-none",
+          "focus:border-transparent focus:shadow-none focus:outline-none focus:ring-0",
           "placeholder:text-muted-foreground/55",
         )}
         style={{ userSelect: "text", WebkitUserSelect: "text" }}
@@ -473,7 +475,7 @@ export const RootFolderPanelRow = ({
         className={cn(
           "sidebar-row ds-list-item group box-border py-0 relative w-full text-left",
           "sidebar-row--folder ds-list-item--interactive",
-          "relative flex h-[28px] w-full cursor-text items-center rounded-[8px] px-2",
+          "relative flex h-[30px] w-full cursor-text items-center rounded-[8px] px-1.5",
         )}
         data-selected={isSelected ? "true" : undefined}
         role="presentation"
