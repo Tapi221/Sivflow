@@ -36,8 +36,12 @@ import {
   clampDetailColumnWidth,
   DEFAULT_SORT_STATE,
   DETAIL_DEFAULT_COLUMN_WIDTHS,
+  moveDetailColumnToIndex,
+  readStoredDetailColumnOrder,
   readStoredDetailColumnWidths,
+  writeStoredDetailColumnOrder,
   writeStoredDetailColumnWidths,
+  type ExplorerDetailColumnOrder,
   type ExplorerDetailColumnWidths,
 } from "./detail-view/folderDetailColumns";
 import {
@@ -151,6 +155,9 @@ export const FolderDetailView = ({
   const [columnWidths, setColumnWidths] = useState<ExplorerDetailColumnWidths>(
     readStoredDetailColumnWidths,
   );
+  const [columnOrder, setColumnOrder] = useState<ExplorerDetailColumnOrder>(
+    readStoredDetailColumnOrder,
+  );
   const [sortState, setSortState] =
     useState<ExplorerDetailSortState>(DEFAULT_SORT_STATE);
   const [draggingKey, setDraggingKey] = useState<string | null>(null);
@@ -161,9 +168,9 @@ export const FolderDetailView = ({
     useState<ExplorerDetailTagEditorState | null>(null);
   const [optimisticOrderByKey, setOptimisticOrderByKey] =
     useState<ExplorerDetailOptimisticOrderState>({});
-  const [pendingReorderKeys, setPendingReorderKeys] = useState<ReadonlySet<string>>(
-    () => new Set(),
-  );
+  const [pendingReorderKeys, setPendingReorderKeys] = useState<
+    ReadonlySet<string>
+  >(() => new Set());
   const tagEditorSkipNextBlurRef = useRef(false);
   const { tags, tagById, addTag } = useTags();
   const { updateCard } = useCardCommands();
@@ -178,14 +185,30 @@ export const FolderDetailView = ({
     writeStoredDetailColumnWidths(columnWidths);
   }, [columnWidths]);
 
+  useEffect(() => {
+    writeStoredDetailColumnOrder(columnOrder);
+  }, [columnOrder]);
+
   const detailGridStyle = useMemo(
-    () => buildDetailGridStyle(columnWidths),
-    [columnWidths],
+    () => buildDetailGridStyle(columnWidths, columnOrder),
+    [columnOrder, columnWidths],
   );
 
   const detailTableStyle = useMemo(
-    () => buildDetailTableStyle(columnWidths),
-    [columnWidths],
+    () => buildDetailTableStyle(columnWidths, columnOrder),
+    [columnOrder, columnWidths],
+  );
+
+  const handleColumnReorder = useCallback(
+    (
+      activeColumnId: ExplorerDetailColumnId,
+      overColumnId: ExplorerDetailColumnId,
+    ) => {
+      setColumnOrder((current) =>
+        moveDetailColumnToIndex(current, activeColumnId, overColumnId),
+      );
+    },
+    [],
   );
 
   const handleResizePointerDown = useCallback(
@@ -745,9 +768,11 @@ export const FolderDetailView = ({
         style={detailTableStyle}
       >
         <FolderDetailHeader
+          columnOrder={columnOrder}
           gridStyle={detailGridStyle}
           sortState={sortState}
           onSort={handleSort}
+          onColumnReorder={handleColumnReorder}
           onResizePointerDown={handleResizePointerDown}
           onResetWidth={handleResetColumnWidth}
         />
@@ -768,6 +793,7 @@ export const FolderDetailView = ({
             return (
               <FolderDetailRow
                 key={row.key}
+                columnOrder={columnOrder}
                 row={row}
                 syncState={
                   syncStateByRowKey.get(row.key) ??
