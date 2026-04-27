@@ -274,6 +274,7 @@ const calculateEventStyle = (event: CalendarDemoEvent): CalendarEventStyle => {
 
 export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
+  const rangeDaysMenuRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const timelineGridRef = useRef<HTMLDivElement | null>(null);
   const prependScrollCorrectionRef = useRef(0);
@@ -300,6 +301,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   const [renderedViewMode, setRenderedViewMode] =
     useState<CalendarViewMode>("month");
   const [rangeDays, setRangeDays] = useState(readStoredRangeDays);
+  const [isRangeDaysMenuOpen, setIsRangeDaysMenuOpen] = useState(false);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [timelineBuffer, setTimelineBuffer] = useState(
     createInitialTimelineBuffer,
@@ -335,7 +337,9 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     rangeDays,
   );
   const measuredViewportWidth =
-    viewportWidth > 0 ? viewportWidth : (contentViewportRef.current?.clientWidth ?? 0);
+    viewportWidth > 0
+      ? viewportWidth
+      : (contentViewportRef.current?.clientWidth ?? 0);
   const dayColumnWidth =
     measuredViewportWidth > TIME_COLUMN_WIDTH
       ? Math.max(
@@ -535,6 +539,38 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!isRangeDaysMenuOpen) {
+      return undefined;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+
+      if (!(target instanceof Node)) {
+        return;
+      }
+
+      if (!rangeDaysMenuRef.current?.contains(target)) {
+        setIsRangeDaysMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsRangeDaysMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isRangeDaysMenuOpen]);
 
   useLayoutEffect(() => {
     const contentViewport = contentViewportRef.current;
@@ -824,6 +860,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     }
 
     setSelectedViewMode(nextViewMode);
+    setIsRangeDaysMenuOpen(false);
     resetTimelinePosition();
 
     if (nextViewMode === "month") {
@@ -930,26 +967,55 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
           </div>
 
           {selectedViewMode === "days" ? (
-            <label className="hidden h-10 items-center overflow-hidden rounded-[10px] border border-[#dddcd5] bg-[#f6f6f4] text-[13px] font-semibold text-[#33322f] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] transition-colors hover:bg-white md:flex">
-              <select
+            <div ref={rangeDaysMenuRef} className="relative hidden md:block">
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={isRangeDaysMenuOpen}
                 aria-label="日数を選択"
                 title="日数を選択"
-                value={rangeDays}
-                className="h-full cursor-pointer appearance-none bg-transparent px-4 text-center tabular-nums text-[#33322f] outline-none"
-                onChange={(event) => {
-                  handleRangeDaysChange(Number(event.target.value));
+                className="flex h-10 items-center overflow-hidden rounded-[10px] border border-[#dddcd5] bg-[#f6f6f4] text-[13px] font-semibold text-[#33322f] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onClick={() => {
+                  setIsRangeDaysMenuOpen((current) => !current);
                 }}
               >
-                {RANGE_DAY_OPTIONS.map((days) => (
-                  <option key={days} value={days}>
-                    {days}
-                  </option>
-                ))}
-              </select>
-              <span className="h-full border-l border-[#dddcd5] px-3 leading-10 text-[#777671]">
-                日
-              </span>
-            </label>
+                <span className="min-w-[56px] px-4 text-center tabular-nums">
+                  {rangeDays}
+                </span>
+                <span className="h-full border-l border-[#dddcd5] px-3 leading-10 text-[#777671]">
+                  日
+                </span>
+              </button>
+
+              {isRangeDaysMenuOpen ? (
+                <div
+                  role="menu"
+                  aria-label="日数を選択"
+                  className="absolute left-0 top-[calc(100%+6px)] z-50 w-full overflow-hidden rounded-[10px] border border-[#dddcd5] bg-white p-1 shadow-[0_16px_34px_rgba(15,23,42,0.12),0_4px_10px_rgba(15,23,42,0.08)]"
+                >
+                  {RANGE_DAY_OPTIONS.map((days) => (
+                    <button
+                      key={days}
+                      type="button"
+                      role="menuitemradio"
+                      aria-checked={rangeDays === days}
+                      className={cn(
+                        "flex h-8 w-full items-center justify-center rounded-[7px] text-[13px] font-semibold tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        rangeDays === days
+                          ? "bg-[#ef5555] text-white shadow-[0_6px_14px_rgba(239,85,85,0.22)]"
+                          : "text-[#33322f] hover:bg-[#f4f3ef]",
+                      )}
+                      onClick={() => {
+                        handleRangeDaysChange(days);
+                        setIsRangeDaysMenuOpen(false);
+                      }}
+                    >
+                      {days}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           ) : null}
         </div>
 
