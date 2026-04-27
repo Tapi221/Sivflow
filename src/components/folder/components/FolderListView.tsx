@@ -48,10 +48,10 @@ type ListColumnMetrics = {
 
 const LIST_ROW_HEIGHT_PX = 28;
 const LIST_ROW_GAP_PX = 2;
-const LIST_COLUMN_WIDTH_PX = 236;
-const LIST_COLUMN_GAP_PX = 36;
+const LIST_COLUMN_WIDTH_PX = 280;
+const LIST_COLUMN_GAP_PX = 0;
 const LIST_VIEW_PADDING_Y_PX = 24;
-const LIST_VIEW_PADDING_X_CLASS = "px-4";
+const LIST_VIEW_PADDING_X_CLASS = "px-2";
 
 const LIST_ROW_STYLE = {
   height: LIST_ROW_HEIGHT_PX,
