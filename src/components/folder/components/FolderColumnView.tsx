@@ -12,7 +12,6 @@ import {
 } from "@/components/folder/explorer/model/utils";
 import {
   FOLDER_ROW_ICON_ACTIVE_CLASS,
-  FOLDER_ROW_ICON_MUTED_CLASS,
   FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
@@ -1981,3 +1980,4 @@ export const FolderColumnView = ({
     </div>
   );
 };
+
