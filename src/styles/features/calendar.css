@@ -121,3 +121,45 @@
     outline: none;
   }
 }
+
+@layer components {
+  .calendar-month-view {
+    --calendar-month-cell-height: 112px;
+  }
+
+  .calendar-month-day-cell {
+    min-height: var(--calendar-month-cell-height);
+  }
+
+  .calendar-month-day-cell::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    height: 8px;
+    cursor: row-resize;
+    touch-action: none;
+    background: transparent;
+  }
+
+  .calendar-month-day-cell::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    z-index: 21;
+    height: 2px;
+    border-radius: 999px;
+    background: transparent;
+    pointer-events: none;
+    transition: background-color 120ms ease;
+  }
+
+  .calendar-month-day-cell:hover::before,
+  .calendar-month-day-cell:focus-visible::before {
+    background: rgba(127, 45, 40, 0.32);
+  }
+}
