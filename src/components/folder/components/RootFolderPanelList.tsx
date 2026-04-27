@@ -106,6 +106,10 @@ export const RootFolderPanelList = ({
   enableBottomFade = true,
 }: RootFolderPanelListProps) => {
   const shouldRenderEdgeFade = enableScrollEdgeFade ?? enableBottomFade;
+  const scrollContainerClassName = cn(
+    "h-full overflow-y-auto py-1",
+    shouldRenderEdgeFade && "-mr-1 pr-1",
+  );
 
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
@@ -258,7 +262,7 @@ export const RootFolderPanelList = ({
     <div className={cn("folder-panel-list relative h-full min-h-0", className)}>
       <div
         ref={scrollContainerRef}
-        className="h-full overflow-y-auto py-1"
+        className={scrollContainerClassName}
         onScroll={updateScrollFade}
       >
         <div ref={scrollContentRef}>{content}</div>
