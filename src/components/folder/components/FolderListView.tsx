@@ -46,14 +46,22 @@ type ListColumnMetrics = {
   itemCount: number;
 };
 
-const LIST_ROW_HEIGHT_PX = 26;
-const LIST_COLUMN_WIDTH_PX = 232;
-const LIST_COLUMN_GAP_PX = 14;
-const LIST_VERTICAL_PADDING_PX = 32;
+const LIST_COLUMN_WIDTH_PX = 280;
+const LIST_ROW_HEIGHT_PX = 28;
+const LIST_ROW_GAP_PX = 2;
+const LIST_COLUMN_VERTICAL_PADDING_PX = 24;
+const ROOT_MIN_WIDTH_PX = 160;
 
 const LIST_COLUMN_STYLE = {
+  flex: `0 0 ${LIST_COLUMN_WIDTH_PX}px`,
   width: LIST_COLUMN_WIDTH_PX,
   minWidth: LIST_COLUMN_WIDTH_PX,
+} satisfies CSSProperties;
+
+const LIST_ROW_STYLE = {
+  height: LIST_ROW_HEIGHT_PX,
+  minHeight: LIST_ROW_HEIGHT_PX,
+  lineHeight: `${LIST_ROW_HEIGHT_PX}px`,
 } satisfies CSSProperties;
 
 const getRowIcon = (kind: ExplorerDetailRowKind) => {
@@ -112,6 +120,18 @@ const chunkRowsByColumn = (
   return columns;
 };
 
+const calculateRowsPerColumn = (viewportHeight: number): number => {
+  const availableHeight = Math.max(
+    LIST_ROW_HEIGHT_PX,
+    viewportHeight - LIST_COLUMN_VERTICAL_PADDING_PX,
+  );
+
+  return Math.max(
+    1,
+    Math.floor(availableHeight / (LIST_ROW_HEIGHT_PX + LIST_ROW_GAP_PX)),
+  );
+};
+
 export const FolderListView = ({
   folders,
   cards,
@@ -158,14 +178,7 @@ export const FolderListView = ({
     if (!viewport || typeof ResizeObserver === "undefined") return;
 
     const updateRowsPerColumn = () => {
-      const availableHeight = Math.max(
-        LIST_ROW_HEIGHT_PX,
-        viewport.clientHeight - LIST_VERTICAL_PADDING_PX,
-      );
-
-      setRowsPerColumn(
-        Math.max(1, Math.floor(availableHeight / LIST_ROW_HEIGHT_PX)),
-      );
+      setRowsPerColumn(calculateRowsPerColumn(viewport.clientHeight));
     };
 
     updateRowsPerColumn();
@@ -231,7 +244,6 @@ export const FolderListView = ({
       }
 
       if (!selectedItem || !("id" in selectedItem)) return false;
-
       return selectedItem.type === row.kind && selectedItem.id === row.id;
     },
     [currentCardSetId, focusedRowKey, selectedItem],
@@ -312,25 +324,17 @@ export const FolderListView = ({
       ref={viewportRef}
       role="grid"
       aria-label="エクスプローラー 一覧表示"
-      className="h-full min-h-0 w-full overflow-auto bg-[rgba(255,255,255,0.96)] px-4 py-4"
+      className="h-full min-h-0 w-full overflow-x-auto overflow-y-hidden"
     >
-      <div
-        className="flex min-h-full items-start"
-        style={{ columnGap: LIST_COLUMN_GAP_PX }}
-      >
+      <div className="flex h-full min-w-max items-stretch">
         {columns.map((columnRows, columnIndex) => (
           <section
             key={`list-column:${columnIndex}`}
             aria-label={`一覧列 ${columnIndex + 1}`}
-            className={cn(
-              "min-h-full pr-3",
-              columns.length > 1 &&
-                columnIndex < columns.length - 1 &&
-                "border-r border-[#f0eee8]",
-            )}
+            className="h-full min-h-0 overflow-hidden border-r border-[#e6e4dc] bg-[rgba(255,255,255,0.96)] px-2 py-3"
             style={LIST_COLUMN_STYLE}
           >
-            <div className="space-y-px">
+            <div className="space-y-0.5">
               {columnRows.map((row) => {
                 const Icon = getRowIcon(row.kind);
                 const selected = isSelected(row);
@@ -344,34 +348,28 @@ export const FolderListView = ({
                     aria-selected={selected}
                     data-selected={selected ? "true" : undefined}
                     title={row.name}
+                    style={LIST_ROW_STYLE}
                     className={cn(
-                      "group flex h-[26px] w-full cursor-default items-center rounded-[5px] px-1.5 text-left",
-                      "select-none outline-none transition-colors",
-                      "hover:bg-[#f5f3ee] focus-visible:ring-2 focus-visible:ring-ring",
-                      selected &&
-                        "bg-[#e9f1ff] shadow-[inset_0_0_0_1px_#6aa7ff]",
+                      "sidebar-row sidebar-row--folder ds-list-item ds-list-item--interactive",
+                      "relative flex w-full cursor-pointer items-center rounded-[8px] px-2 text-left",
+                      "select-none outline-none",
+                      selected && "ds-list-item--selected",
                     )}
                     onClick={(event) => handleRowClick(row, event)}
                     onDoubleClick={() => openRow(row)}
                     onKeyDown={(event) => handleRowKeyDown(row, event)}
                   >
-                    <span
-                      role="gridcell"
-                      className="flex min-w-0 flex-1 items-center gap-1.5"
-                    >
-                      <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center text-[var(--sidebar-icon-color,#6f6d66)]">
-                        <Icon size={15} className="h-[15px] w-[15px]" />
-                      </span>
-
-                      <span
-                        className={cn(
-                          "truncate text-[13px] leading-[26px]",
-                          selected ? "text-[#1f4f8f]" : "text-[#2f2d29]",
-                        )}
-                      >
-                        {row.name}
-                      </span>
+                    <span className="ds-list-item__icon flex h-full w-4 shrink-0 items-center justify-center">
+                      <Icon className="h-3.5 w-3.5" />
                     </span>
+
+                    <div className="ds-list-item__content flex h-full min-w-0 flex-1 items-center pr-1">
+                      <div className="pointer-events-none flex min-w-0 flex-1 items-center">
+                        <span className="ds-list-item__title truncate text-[13px] font-normal">
+                          {row.name}
+                        </span>
+                      </div>
+                    </div>
 
                     <span className="sr-only">{getRowKindLabel(row.kind)}</span>
                   </div>
@@ -381,7 +379,10 @@ export const FolderListView = ({
           </section>
         ))}
 
-        <div className="min-w-[120px] flex-1" />
+        <div
+          className="flex-1 bg-[rgba(255,255,255,0.96)]"
+          style={{ minWidth: ROOT_MIN_WIDTH_PX }}
+        />
       </div>
     </div>
   );
