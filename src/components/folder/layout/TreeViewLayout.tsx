@@ -780,6 +780,8 @@ const TreeViewLayout = ({
   );
   const isCalendarOpen = useExplorerCalendarViewStore((state) => state.isOpen);
   const toggleCalendar = useExplorerCalendarViewStore((state) => state.toggle);
+  const isCalendarSectionCollapsed = !isCalendarOpen;
+  const toggleCalendarSectionCollapsed = toggleCalendar;
 if (isExplorerDataLoading) {
     return (
       <div className="space-y-3 p-4">
