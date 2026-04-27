@@ -1,18 +1,12 @@
-import {
-  closestCenter,
-  DndContext,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  horizontalListSortingStrategy,
-  SortableContext,
-  useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
+import {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import {
   DETAIL_GRID_CLASS,
   isDetailColumnId,
@@ -20,11 +14,6 @@ import {
   type ExplorerDetailColumnOrder,
 } from "./folderDetailColumns";
 import { getHeaderAriaSort, getHeaderSortLabel } from "./folderDetailSorting";
-import {
-  useMemo,
-  type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
 import type {
   ExplorerDetailColumnId,
   ExplorerDetailSortKey,
@@ -38,17 +27,32 @@ type HeaderColumnDefinition = {
   sortKey?: SortableDetailSortKey;
 };
 
+type ColumnDropIndicatorPosition = "before" | "after";
+
+type ColumnDragState = {
+  activeColumnId: ExplorerDetailColumnId;
+  overColumnId: ExplorerDetailColumnId;
+  isDragging: boolean;
+};
+
 type HeaderCellProps = {
   label: string;
   columnId: ExplorerDetailColumnId;
   sortKey?: SortableDetailSortKey;
   sortState: ExplorerDetailSortState;
   onSort: (key: SortableDetailSortKey) => void;
+  onHeaderPointerDown: (
+    columnId: ExplorerDetailColumnId,
+    event: ReactPointerEvent<HTMLDivElement>,
+  ) => void;
+  shouldSuppressSortClick: () => boolean;
   onResizePointerDown: (
     columnId: ExplorerDetailColumnId,
     event: ReactPointerEvent<HTMLSpanElement>,
   ) => void;
   onResetWidth: (columnId: ExplorerDetailColumnId) => void;
+  dropIndicatorPosition: ColumnDropIndicatorPosition | null;
+  isColumnDragging: boolean;
   className?: string;
 };
 
@@ -66,6 +70,16 @@ type FolderDetailHeaderProps = {
     event: ReactPointerEvent<HTMLSpanElement>,
   ) => void;
   onResetWidth: (columnId: ExplorerDetailColumnId) => void;
+};
+
+type ColumnPointerSession = {
+  activeColumnId: ExplorerDetailColumnId;
+  startX: number;
+  startY: number;
+  dragging: boolean;
+  cancelled: boolean;
+  previousCursor: string;
+  previousUserSelect: string;
 };
 
 const DETAIL_HEADER_COLUMNS = {
@@ -96,30 +110,24 @@ const DETAIL_HEADER_COLUMNS = {
   },
 } satisfies Record<ExplorerDetailColumnId, HeaderColumnDefinition>;
 
+const COLUMN_DRAG_ACTIVATION_DISTANCE_PX = 14;
+const COLUMN_DRAG_VERTICAL_CANCEL_DISTANCE_PX = 10;
+const COLUMN_DRAG_HORIZONTAL_INTENT_RATIO = 1.2;
+
 const HeaderCell = ({
   label,
   columnId,
   sortKey,
   sortState,
   onSort,
+  onHeaderPointerDown,
+  shouldSuppressSortClick,
   onResizePointerDown,
   onResetWidth,
+  dropIndicatorPosition,
+  isColumnDragging,
   className,
 }: HeaderCellProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: columnId });
-
-  const sortableStyle = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  } satisfies CSSProperties;
-
   const labelContent = (
     <span className="truncate">
       {label}
@@ -129,23 +137,30 @@ const HeaderCell = ({
 
   return (
     <div
-      ref={setNodeRef}
       role="columnheader"
       aria-sort={sortKey ? getHeaderAriaSort(sortState, sortKey) : undefined}
-      data-column-id={columnId}
-      data-column-dragging={isDragging ? "true" : undefined}
+      data-detail-column-id={columnId}
+      data-column-dragging={isColumnDragging ? "true" : undefined}
       title="横にドラッグして列の順序を変更"
       className={cn(
         "relative flex min-w-0 items-center border-r border-[#e6e4dc] px-3",
         "cursor-grab transition-colors active:cursor-grabbing",
         "hover:bg-[#eeece4] hover:text-[#24231f]",
-        isDragging && "z-50 bg-[#eeece4] opacity-80 shadow-sm",
+        isColumnDragging && "bg-[#eeece4] text-[#24231f] opacity-80",
         className,
       )}
-      style={sortableStyle}
-      {...attributes}
-      {...listeners}
+      onPointerDown={(event) => onHeaderPointerDown(columnId, event)}
     >
+      {dropIndicatorPosition ? (
+        <span
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute bottom-0 top-0 z-50 w-[2px] bg-[#7f7a72]",
+            dropIndicatorPosition === "before" ? "left-0" : "right-0",
+          )}
+        />
+      ) : null}
+
       {sortKey ? (
         <button
           type="button"
@@ -155,7 +170,15 @@ const HeaderCell = ({
             "text-[#777671] transition-colors hover:text-[#24231f]",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           )}
-          onClick={() => onSort(sortKey)}
+          onClick={(event) => {
+            if (shouldSuppressSortClick()) {
+              event.preventDefault();
+              event.stopPropagation();
+              return;
+            }
+
+            onSort(sortKey);
+          }}
         >
           {labelContent}
         </button>
@@ -196,72 +219,217 @@ export const FolderDetailHeader = ({
   onResizePointerDown,
   onResetWidth,
 }: FolderDetailHeaderProps) => {
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const dragSessionRef = useRef<ColumnPointerSession | null>(null);
+  const suppressNextSortClickRef = useRef(false);
+  const [dragState, setDragState] = useState<ColumnDragState | null>(null);
+
   const normalizedColumnOrder = useMemo<ExplorerDetailColumnOrder>(
     () => normalizeDetailColumnOrder(columnOrder),
     [columnOrder],
   );
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
+
+  const getColumnIdAtClientX = useCallback(
+    (clientX: number): ExplorerDetailColumnId | null => {
+      const headerElement = headerRef.current;
+      if (!headerElement) return null;
+
+      const columnElements = Array.from(
+        headerElement.querySelectorAll<HTMLElement>("[data-detail-column-id]"),
+      );
+      if (columnElements.length === 0) return null;
+
+      for (const columnElement of columnElements) {
+        const rect = columnElement.getBoundingClientRect();
+        if (clientX < rect.left || clientX > rect.right) continue;
+
+        const columnId = columnElement.dataset.detailColumnId;
+        return isDetailColumnId(columnId) ? columnId : null;
+      }
+
+      const firstColumn = columnElements[0];
+      const lastColumn = columnElements[columnElements.length - 1];
+      const firstRect = firstColumn.getBoundingClientRect();
+      const lastRect = lastColumn.getBoundingClientRect();
+
+      if (clientX < firstRect.left) {
+        const columnId = firstColumn.dataset.detailColumnId;
+        return isDetailColumnId(columnId) ? columnId : null;
+      }
+
+      if (clientX > lastRect.right) {
+        const columnId = lastColumn.dataset.detailColumnId;
+        return isDetailColumnId(columnId) ? columnId : null;
+      }
+
+      return null;
+    },
+    [],
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const activeColumnId = event.active.id;
-    const overColumnId = event.over?.id;
+  const shouldSuppressSortClick = useCallback(() => {
+    return suppressNextSortClickRef.current;
+  }, []);
 
-    if (
-      !isDetailColumnId(activeColumnId) ||
-      !isDetailColumnId(overColumnId) ||
-      activeColumnId === overColumnId
-    ) {
-      return;
+  const clearColumnDragSession = useCallback(() => {
+    const session = dragSessionRef.current;
+
+    if (session?.dragging) {
+      document.body.style.cursor = session.previousCursor;
+      document.body.style.userSelect = session.previousUserSelect;
     }
 
-    onColumnReorder(activeColumnId, overColumnId);
-  };
+    dragSessionRef.current = null;
+    setDragState(null);
+  }, []);
+
+  const handleHeaderPointerDown = useCallback(
+    (
+      columnId: ExplorerDetailColumnId,
+      event: ReactPointerEvent<HTMLDivElement>,
+    ) => {
+      if (event.button !== 0) return;
+
+      dragSessionRef.current = {
+        activeColumnId: columnId,
+        startX: event.clientX,
+        startY: event.clientY,
+        dragging: false,
+        cancelled: false,
+        previousCursor: document.body.style.cursor,
+        previousUserSelect: document.body.style.userSelect,
+      };
+
+      const handlePointerMove = (pointerEvent: PointerEvent) => {
+        const session = dragSessionRef.current;
+        if (!session || session.cancelled) return;
+
+        const deltaX = pointerEvent.clientX - session.startX;
+        const deltaY = pointerEvent.clientY - session.startY;
+        const absDeltaX = Math.abs(deltaX);
+        const absDeltaY = Math.abs(deltaY);
+
+        if (!session.dragging) {
+          const isVerticalIntent =
+            absDeltaY >= COLUMN_DRAG_VERTICAL_CANCEL_DISTANCE_PX &&
+            absDeltaY > absDeltaX * COLUMN_DRAG_HORIZONTAL_INTENT_RATIO;
+
+          if (isVerticalIntent) {
+            session.cancelled = true;
+            dragSessionRef.current = session;
+            return;
+          }
+
+          const hasHorizontalIntent =
+            absDeltaX >= COLUMN_DRAG_ACTIVATION_DISTANCE_PX &&
+            absDeltaX > absDeltaY * COLUMN_DRAG_HORIZONTAL_INTENT_RATIO;
+
+          if (!hasHorizontalIntent) return;
+
+          session.dragging = true;
+          dragSessionRef.current = session;
+          suppressNextSortClickRef.current = true;
+          document.body.style.cursor = "grabbing";
+          document.body.style.userSelect = "none";
+        }
+
+        pointerEvent.preventDefault();
+
+        const overColumnId =
+          getColumnIdAtClientX(pointerEvent.clientX) ?? session.activeColumnId;
+
+        setDragState({
+          activeColumnId: session.activeColumnId,
+          overColumnId,
+          isDragging: true,
+        });
+      };
+
+      const handlePointerUp = (pointerEvent: PointerEvent) => {
+        window.removeEventListener("pointermove", handlePointerMove);
+        window.removeEventListener("pointerup", handlePointerUp);
+        window.removeEventListener("pointercancel", handlePointerUp);
+
+        const session = dragSessionRef.current;
+        const overColumnId = session?.dragging
+          ? getColumnIdAtClientX(pointerEvent.clientX)
+          : null;
+
+        if (
+          session?.dragging &&
+          overColumnId &&
+          overColumnId !== session.activeColumnId
+        ) {
+          onColumnReorder(session.activeColumnId, overColumnId);
+        }
+
+        clearColumnDragSession();
+
+        window.setTimeout(() => {
+          suppressNextSortClickRef.current = false;
+        }, 0);
+      };
+
+      window.addEventListener("pointermove", handlePointerMove, {
+        passive: false,
+      });
+      window.addEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerUp);
+    },
+    [clearColumnDragSession, getColumnIdAtClientX, onColumnReorder],
+  );
+
+  const getDropIndicatorPosition = useCallback(
+    (columnId: ExplorerDetailColumnId): ColumnDropIndicatorPosition | null => {
+      if (!dragState?.isDragging) return null;
+      if (dragState.activeColumnId === columnId) return null;
+      if (dragState.overColumnId !== columnId) return null;
+
+      const activeIndex = normalizedColumnOrder.indexOf(dragState.activeColumnId);
+      const overIndex = normalizedColumnOrder.indexOf(columnId);
+
+      if (activeIndex < 0 || overIndex < 0 || activeIndex === overIndex) {
+        return null;
+      }
+
+      return activeIndex < overIndex ? "after" : "before";
+    },
+    [dragState, normalizedColumnOrder],
+  );
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
+    <div
+      ref={headerRef}
+      role="row"
+      className={cn(
+        DETAIL_GRID_CLASS,
+        "sticky top-0 z-30 h-9 border-b border-[#dddcd5]",
+        "bg-[rgba(250,249,246,0.98)] text-[12px] font-medium text-[#777671]",
+      )}
+      style={gridStyle}
     >
-      <SortableContext
-        items={normalizedColumnOrder}
-        strategy={horizontalListSortingStrategy}
-      >
-        <div
-          role="row"
-          className={cn(
-            DETAIL_GRID_CLASS,
-            "sticky top-0 z-30 h-9 border-b border-[#dddcd5]",
-            "bg-[rgba(250,249,246,0.98)] text-[12px] font-medium text-[#777671]",
-          )}
-          style={gridStyle}
-        >
-          {normalizedColumnOrder.map((columnId, index) => {
-            const column = DETAIL_HEADER_COLUMNS[columnId];
-            const isLastColumn = index === normalizedColumnOrder.length - 1;
+      {normalizedColumnOrder.map((columnId, index) => {
+        const column = DETAIL_HEADER_COLUMNS[columnId];
+        const isLastColumn = index === normalizedColumnOrder.length - 1;
 
-            return (
-              <HeaderCell
-                key={columnId}
-                label={column.label}
-                columnId={columnId}
-                sortKey={column.sortKey}
-                sortState={sortState}
-                onSort={onSort}
-                onResizePointerDown={onResizePointerDown}
-                onResetWidth={onResetWidth}
-                className={isLastColumn ? "border-r-0" : undefined}
-              />
-            );
-          })}
-        </div>
-      </SortableContext>
-    </DndContext>
+        return (
+          <HeaderCell
+            key={columnId}
+            label={column.label}
+            columnId={columnId}
+            sortKey={column.sortKey}
+            sortState={sortState}
+            onSort={onSort}
+            onHeaderPointerDown={handleHeaderPointerDown}
+            shouldSuppressSortClick={shouldSuppressSortClick}
+            onResizePointerDown={onResizePointerDown}
+            onResetWidth={onResetWidth}
+            dropIndicatorPosition={getDropIndicatorPosition(columnId)}
+            isColumnDragging={dragState?.activeColumnId === columnId}
+            className={isLastColumn ? "border-r-0" : undefined}
+          />
+        );
+      })}
+    </div>
   );
 };
