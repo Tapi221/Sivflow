@@ -1,350 +1,229 @@
-@layer base {
+@layer components {
   :root {
-    --explorer-chrome-app-bg: #eef6f9;
-    --explorer-chrome-toolbar-bg: rgba(248, 251, 253, 0.96);
-    --explorer-chrome-toolbar-bg-solid: #f8fbfd;
-    --explorer-chrome-sidebar-bg: #f4fafb;
-    --explorer-chrome-sidebar-hover-bg: #eaf4fb;
-    --explorer-chrome-sidebar-selected-bg: #dbeafe;
+    --explorer-chrome-app-bg: #edf2f7;
+    --explorer-chrome-toolbar-bg: rgba(248, 250, 252, 0.94);
+    --explorer-chrome-sidebar-bg: #f6f9fc;
+    --explorer-chrome-sidebar-hover-bg: #eef4fb;
+    --explorer-chrome-sidebar-selected-bg: #e7f1fd;
     --explorer-chrome-panel-bg: #ffffff;
-    --explorer-chrome-panel-bg-subtle: #f7fafc;
-    --explorer-chrome-header-bg: #f4f8fb;
-    --explorer-chrome-row-hover-bg: #f0f7ff;
-    --explorer-chrome-row-selected-bg: #e1efff;
-    --explorer-chrome-selected-border: #b9d7f2;
-    --explorer-chrome-border: #d6e0e8;
-    --explorer-chrome-border-soft: #e7eef4;
-    --explorer-chrome-border-strong: #c5d3df;
+    --explorer-chrome-header-bg: #f5f8fb;
+    --explorer-chrome-border: #d7dfe8;
+    --explorer-chrome-border-strong: #c6d0dc;
+    --explorer-chrome-border-soft: #e8eef4;
     --explorer-chrome-text-primary: #1f2937;
-    --explorer-chrome-text-secondary: #475467;
-    --explorer-chrome-text-muted: #667085;
-    --explorer-chrome-text-faint: #98a2b3;
-    --explorer-chrome-accent: #2563eb;
-    --explorer-chrome-accent-soft: #dbeafe;
-    --explorer-chrome-focus-ring: rgba(37, 99, 235, 0.18);
-    --explorer-chrome-shadow-panel: 0 1px 2px rgba(15, 23, 42, 0.035), 0 10px 26px rgba(15, 23, 42, 0.045);
-    --explorer-chrome-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    --explorer-chrome-text-secondary: #4f5f73;
+    --explorer-chrome-text-muted: #66758a;
+    --explorer-chrome-text-faint: #93a0af;
+    --explorer-chrome-accent: #2f6fcb;
+    --explorer-chrome-selected-bg: #e8f2ff;
+    --explorer-chrome-selected-border: #d4e4f5;
+    --explorer-chrome-focus-ring: rgba(47, 111, 203, 0.16);
+    --explorer-chrome-icon-folder-fill: #f5c84b;
+    --explorer-chrome-icon-folder-stroke: #b77a12;
+    --explorer-chrome-icon-folder-highlight: #fff2bd;
+    --explorer-chrome-icon-cardset-fill: #eef5fc;
+    --explorer-chrome-icon-card-fill: #f1f6fb;
+    --explorer-chrome-icon-pdf-fill: #f1f6fb;
+    --explorer-chrome-icon-stroke: #65758a;
+  }
 
-    --explorer-chrome-icon-folder-fill: #f8c441;
-    --explorer-chrome-icon-folder-stroke: #b7791f;
-    --explorer-chrome-icon-folder-highlight: #fff2b8;
-    --explorer-chrome-icon-cardset-fill: #e9f3ff;
-    --explorer-chrome-icon-card-fill: #edf7ff;
-    --explorer-chrome-icon-pdf-fill: #edf7ff;
-    --explorer-chrome-icon-stroke: #667085;
-
-    --app-bg: var(--explorer-chrome-app-bg);
-    --app-bg-dot: rgba(37, 99, 235, 0.055);
+  .explorer-chrome-shell {
     --sidebar-bg: var(--explorer-chrome-sidebar-bg);
     --sidebar-border: var(--explorer-chrome-border);
     --sidebar-text: var(--explorer-chrome-text-primary);
     --sidebar-text-muted: var(--explorer-chrome-text-muted);
     --sidebar-active-bg: var(--explorer-chrome-sidebar-selected-bg);
     --sidebar-active-accent: var(--explorer-chrome-accent);
-    --pane-border: var(--explorer-chrome-border);
-    --section-divider: var(--explorer-chrome-border-soft);
-    --text-primary: var(--explorer-chrome-text-primary);
-    --text-secondary: var(--explorer-chrome-text-secondary);
-    --text-muted: var(--explorer-chrome-text-muted);
-    --hover-bg: var(--explorer-chrome-row-hover-bg);
-    --active-bg: var(--explorer-chrome-row-selected-bg);
-    --floating-menu-border: var(--explorer-chrome-border);
-    --scrollbar-thumb: #c7d6e2;
-    --scrollbar-thumb-hover: #9fb7ca;
-    --scrollbar-thumb-active: #7d9bb4;
-  }
-
-  body {
-    background-color: var(--explorer-chrome-app-bg) !important;
-    background-image: none !important;
-    color: var(--explorer-chrome-text-primary) !important;
-  }
-}
-
-@layer components {
-  /* Existing arbitrary Tailwind colors from the old beige Explorer chrome. */
-  body [class*="border-[#dddcd5]"],
-  body [class*="border-[#d6d4cb]"],
-  body [class*="border-[#e6e4dc]"],
-  body [class*="border-[#efeee8]"],
-  body [class*="border-[#dedbd2]"],
-  body [class*="border-[#e1dfd8]"],
-  body [class*="border-[#d8d6cf]"],
-  body [class*="border-[#ddd8ce]"] {
-    border-color: var(--explorer-chrome-border) !important;
-  }
-
-  body [class*="bg-[rgba(246,246,244,0.98)]"],
-  body [class*="bg-[rgba(250,249,246,0.98)]"] {
-    background: var(--explorer-chrome-toolbar-bg) !important;
-  }
-
-  body [class*="bg-[rgba(255,255,255,0.96)]"],
-  body [class*="bg-[rgba(255,255,255,0.92)]"] {
-    background: var(--explorer-chrome-panel-bg) !important;
-  }
-
-  body [class*="bg-[#eeece4]"],
-  body [class*="bg-[#f5f3ee]"],
-  body [class*="bg-[#f7f6f1]"],
-  body [class*="bg-[#faf9f5]"],
-  body [class*="bg-[#fbfaf6]"] {
-    background-color: var(--explorer-chrome-row-hover-bg) !important;
-  }
-
-  body [class*="bg-[#ebe7df]"],
-  body [class*="bg-[#f0efe8]"] {
-    background-color: var(--explorer-chrome-row-selected-bg) !important;
-  }
-
-  body [class*="text-[#24231f]"] {
-    color: var(--explorer-chrome-text-primary) !important;
-  }
-
-  body [class*="text-[#777671]"],
-  body [class*="text-[#8f8d86]"],
-  body [class*="text-[#6f6b63]"],
-  body [class*="text-[#746f65]"],
-  body [class*="text-[#746a59]"] {
-    color: var(--explorer-chrome-text-muted) !important;
-  }
-
-  body [class*="text-[#b8b7b0]"],
-  body [class*="text-[#c8c7bf]"] {
-    color: var(--explorer-chrome-text-faint) !important;
-  }
-
-  body [class*="bg-[#7f7a72]"] {
-    background-color: var(--explorer-chrome-accent) !important;
-  }
-
-  body [class*="shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)]"] {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      inset 0 -1px 0 rgba(148, 163, 184, 0.12),
-      0 1px 2px rgba(15, 23, 42, 0.04) !important;
-  }
-
-  /* Top Explorer toolbar and status bar. */
-  body [class*="h-12"][class*="border-b"][class*="bg-[rgba(246,246,244,0.98)]"] {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.98) 0%,
-      var(--explorer-chrome-toolbar-bg) 100%
-    ) !important;
-    border-color: var(--explorer-chrome-border) !important;
-    box-shadow: var(--explorer-chrome-shadow-inset) !important;
-    color: var(--explorer-chrome-text-primary) !important;
-  }
-
-  body [class*="h-7"][class*="border-t"][class*="bg-[rgba(246,246,244,0.98)]"] {
-    background: var(--explorer-chrome-toolbar-bg-solid) !important;
-    border-color: var(--explorer-chrome-border) !important;
-    color: var(--explorer-chrome-text-muted) !important;
-  }
-
-  body [class*="rounded-[6px]"][class*="border-[#d6d4cb]"][class*="bg-[rgba(255,255,255,0.92)]"] {
-    background: rgba(255, 255, 255, 0.94) !important;
-    border-color: var(--explorer-chrome-border) !important;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.96),
-      0 1px 2px rgba(15, 23, 42, 0.045) !important;
-  }
-
-  /* Sidebar shell and section chrome. */
-  .explorer-chrome-font {
-    --folder-panel-list-fade-rgb: 244 250 251;
-    --sidebar-text: var(--explorer-chrome-text-primary);
-    --sidebar-text-muted: var(--explorer-chrome-text-muted);
-    --sidebar-hover-bg: var(--explorer-chrome-sidebar-hover-bg);
+    --scrollbar-thumb: #c7d2df;
+    --scrollbar-thumb-hover: #b8c5d3;
+    --scrollbar-thumb-active: #a8b7c8;
     --explorer-chrome-folder-fill: var(--explorer-chrome-icon-folder-fill);
     --explorer-chrome-folder-stroke: var(--explorer-chrome-icon-folder-stroke);
-    --explorer-chrome-folder-highlight: var(
-      --explorer-chrome-icon-folder-highlight
-    );
+    --explorer-chrome-folder-highlight: var(--explorer-chrome-icon-folder-highlight);
     --explorer-chrome-cardset-fill: var(--explorer-chrome-icon-cardset-fill);
     --explorer-chrome-cardset-stroke: var(--explorer-chrome-icon-stroke);
+    --explorer-chrome-cardset-highlight: #ffffff;
     --explorer-chrome-card-fill: var(--explorer-chrome-icon-card-fill);
     --explorer-chrome-card-stroke: var(--explorer-chrome-icon-stroke);
+    --explorer-chrome-card-highlight: #ffffff;
     --explorer-chrome-pdf-fill: var(--explorer-chrome-icon-pdf-fill);
     --explorer-chrome-pdf-stroke: var(--explorer-chrome-icon-stroke);
+    --explorer-chrome-pdf-highlight: #ffffff;
     --explorer-chrome-pdf-accent: var(--explorer-chrome-accent);
+    --explorer-chrome-pin-stroke: var(--explorer-chrome-icon-stroke);
+
+    background:
+      linear-gradient(180deg, #f6f9fc 0%, var(--explorer-chrome-app-bg) 100%);
+    color: var(--explorer-chrome-text-primary);
   }
 
-  .explorer-chrome-font[class*="bg-[rgba(255,255,255,0.92)]"],
-  .explorer-chrome-font [class*="bg-[rgba(255,255,255,0.92)]"] {
+  .explorer-chrome-toolbar {
+    border-bottom-color: var(--explorer-chrome-border) !important;
+    background:
+      linear-gradient(180deg, rgba(252, 253, 255, 0.96), rgba(246, 249, 252, 0.94)) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 1px 0 rgba(15, 23, 42, 0.03);
+    backdrop-filter: blur(10px);
+  }
+
+  .explorer-chrome-toolbar-button {
+    color: #66758a;
+  }
+
+  .explorer-chrome-toolbar-button:hover {
+    background: #eef4fb !important;
+    color: #1f2937 !important;
+  }
+
+  .explorer-chrome-pathbar {
+    border-color: var(--explorer-chrome-border) !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 1px 1px rgba(15, 23, 42, 0.025) !important;
+  }
+
+  .explorer-chrome-body {
+    background: var(--explorer-chrome-app-bg) !important;
+  }
+
+  .explorer-chrome-statusbar {
+    border-top-color: var(--explorer-chrome-border) !important;
+    background: rgba(248, 250, 252, 0.92) !important;
+    color: var(--explorer-chrome-text-muted) !important;
+  }
+
+  .explorer-chrome-shell > div,
+  .explorer-chrome-body > div {
+    border-color: var(--explorer-chrome-border) !important;
+  }
+
+  .explorer-chrome-shell .explorer-chrome-font {
+    --sidebar-text: var(--explorer-chrome-text-primary);
+    --sidebar-text-muted: var(--explorer-chrome-text-muted);
+    --folder-panel-list-fade-rgb: 246 249 252;
+  }
+
+  .explorer-chrome-shell .explorer-chrome-font[class*="border-r"],
+  .explorer-chrome-shell .group\/sidebar .explorer-chrome-font {
     background: var(--explorer-chrome-sidebar-bg) !important;
+    border-right-color: var(--explorer-chrome-border) !important;
   }
 
-  .explorer-chrome-font[class*="border-[#dddcd5]"],
-  .explorer-chrome-font [class*="border-[#dddcd5]"] {
+  .explorer-chrome-shell #pinned-folder-sidebar-section-header,
+  .explorer-chrome-shell #folder-list-sidebar-section-header,
+  .explorer-chrome-shell #tag-sidebar-section-content,
+  .explorer-chrome-shell [aria-controls="tag-sidebar-section-content"],
+  .explorer-chrome-shell [aria-controls="calendar-sidebar-section-content"] {
+    color: var(--explorer-chrome-text-muted);
+  }
+
+  .explorer-chrome-shell .border-\[\#dddcd5\],
+  .explorer-chrome-shell .border-\[\#e6e4dc\],
+  .explorer-chrome-shell .border-\[\#efeee8\] {
     border-color: var(--explorer-chrome-border) !important;
   }
 
-  .explorer-chrome-font [aria-controls],
-  .explorer-chrome-font .sidebar-row {
-    color: var(--explorer-chrome-text-secondary) !important;
-  }
-
-  .explorer-chrome-font [aria-controls]:hover {
-    background: var(--explorer-chrome-sidebar-hover-bg) !important;
-    color: var(--explorer-chrome-text-primary) !important;
-  }
-
-  .explorer-chrome-font [aria-current="page"],
-  .explorer-chrome-font [data-selected="true"] {
-    background: var(--explorer-chrome-sidebar-selected-bg) !important;
-    color: var(--explorer-chrome-text-primary) !important;
-  }
-
-  /* Detail table and list surfaces. */
-  [aria-label="エクスプローラー詳細表示"],
-  [aria-label="エクスプローラー 一覧表示"] {
-    background: var(--explorer-chrome-panel-bg) !important;
-    color: var(--explorer-chrome-text-primary) !important;
-  }
-
-  [aria-label="エクスプローラー詳細表示"] {
-    border-color: var(--explorer-chrome-border) !important;
-  }
-
-  [aria-label="エクスプローラー詳細表示"] > [role="row"]:first-child {
+  .explorer-chrome-shell .bg-\[rgba\(246\,246\,244\,0\.98\)\],
+  .explorer-chrome-shell .bg-\[rgba\(250\,249\,246\,0\.98\)\] {
     background: var(--explorer-chrome-header-bg) !important;
-    border-color: var(--explorer-chrome-border) !important;
-    color: var(--explorer-chrome-text-secondary) !important;
-    box-shadow: inset 0 -1px 0 var(--explorer-chrome-border) !important;
   }
 
-  [aria-label="エクスプローラー詳細表示"] [role="columnheader"] {
+  .explorer-chrome-shell [role="table"] {
+    background: var(--explorer-chrome-panel-bg);
+  }
+
+  .explorer-chrome-shell [role="row"]:has([role="columnheader"]) {
+    min-height: 38px;
+    border-bottom-color: var(--explorer-chrome-border-strong) !important;
+    background: var(--explorer-chrome-header-bg) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  }
+
+  .explorer-chrome-shell [role="columnheader"] {
     background: transparent !important;
-    border-color: var(--explorer-chrome-border-soft) !important;
     color: var(--explorer-chrome-text-secondary) !important;
-    font-weight: 650 !important;
-  }
-
-  [aria-label="エクスプローラー詳細表示"] [role="columnheader"]:hover {
-    background: #eaf3fb !important;
-    color: var(--explorer-chrome-text-primary) !important;
-  }
-
-  [aria-label="エクスプローラー詳細表示"] [data-detail-row="true"] {
-    min-height: 40px !important;
-    background: var(--explorer-chrome-panel-bg) !important;
-    border-color: var(--explorer-chrome-border-soft) !important;
-    color: var(--explorer-chrome-text-primary) !important;
+    border-right-color: var(--explorer-chrome-border) !important;
     box-shadow: none !important;
   }
 
-  [aria-label="エクスプローラー詳細表示"] [data-detail-row="true"]:hover {
-    background: var(--explorer-chrome-row-hover-bg) !important;
-  }
-
-  [aria-label="エクスプローラー詳細表示"] [data-detail-row="true"][data-selected="true"] {
-    background: var(--explorer-chrome-row-selected-bg) !important;
-    box-shadow: inset 3px 0 0 var(--explorer-chrome-accent) !important;
-  }
-
-  [aria-label="エクスプローラー詳細表示"] [role="cell"] {
-    color: var(--explorer-chrome-text-muted) !important;
-  }
-
-  [aria-label="エクスプローラー詳細表示"] [role="cell"]:first-child,
-  [aria-label="エクスプローラー詳細表示"] [role="cell"]:first-child span[title] {
+  .explorer-chrome-shell [role="columnheader"]:hover {
+    background: #eef4fb !important;
     color: var(--explorer-chrome-text-primary) !important;
-    font-weight: 560 !important;
   }
 
-  [aria-label="エクスプローラー詳細表示"] [role="cell"] > span[class*="truncate"] {
-    color: inherit !important;
+  .explorer-chrome-shell [data-detail-column-resizer="true"]::after {
+    background: transparent !important;
   }
 
-  [aria-label="エクスプローラー詳細表示"] [role="cell"] > span.inline-flex,
-  [aria-label="エクスプローラー詳細表示"] [data-sync-status] {
+  .explorer-chrome-shell [data-detail-column-resizer="true"]:hover::after,
+  .explorer-chrome-shell [data-detail-column-resizer="true"]:active::after {
+    background: #b8c5d3 !important;
+  }
+
+  .explorer-chrome-shell [role="row"][data-detail-row="true"] {
+    min-height: 39px;
+    border-bottom-color: var(--explorer-chrome-border-soft) !important;
+    color: var(--explorer-chrome-text-muted) !important;
+    background: var(--explorer-chrome-panel-bg);
+  }
+
+  .explorer-chrome-shell [role="row"][data-detail-row="true"]:hover {
+    background: #f6faff !important;
+  }
+
+  .explorer-chrome-shell [role="row"][data-detail-row="true"][data-selected="true"] {
+    background: var(--explorer-chrome-selected-bg) !important;
+    box-shadow:
+      inset 3px 0 0 var(--explorer-chrome-accent),
+      inset 0 0 0 1px var(--explorer-chrome-selected-border);
+  }
+
+  .explorer-chrome-shell [role="row"][data-detail-row="true"] [role="cell"] {
+    color: var(--explorer-chrome-text-muted);
+  }
+
+  .explorer-chrome-shell [role="row"][data-detail-row="true"] [role="cell"]:first-child {
+    color: var(--explorer-chrome-text-primary) !important;
+  }
+
+  .explorer-chrome-shell [role="row"][data-detail-row="true"] [role="cell"]:first-child span[title] {
+    font-weight: 500;
+  }
+
+  .explorer-chrome-shell [role="row"][data-detail-row="true"] svg {
+    opacity: 1;
+  }
+
+  .explorer-chrome-shell [data-sync-status="synced"] {
     border-color: #c9dff4 !important;
     background: #f2f8fd !important;
     color: #37627e !important;
-    box-shadow: none !important;
   }
 
-  [aria-label="エクスプローラー 一覧表示"] {
-    background: var(--explorer-chrome-panel-bg) !important;
+  .explorer-chrome-shell input,
+  .explorer-chrome-shell textarea,
+  .explorer-chrome-shell [contenteditable="true"] {
+    caret-color: var(--explorer-chrome-accent);
   }
 
-  [aria-label="エクスプローラー 一覧表示"] [data-list-row="true"],
-  [aria-label="エクスプローラー 一覧表示"] [role="row"] {
-    color: var(--explorer-chrome-text-primary) !important;
+  .explorer-chrome-shell input:focus,
+  .explorer-chrome-shell textarea:focus {
+    border-color: #9bc2ef !important;
+    box-shadow: 0 0 0 3px rgba(47, 111, 203, 0.13) !important;
   }
 
-  [aria-label="エクスプローラー 一覧表示"] [data-list-row="true"]:hover,
-  [aria-label="エクスプローラー 一覧表示"] [role="row"]:hover {
-    background: var(--explorer-chrome-row-hover-bg) !important;
+  .explorer-chrome-shell ::-webkit-scrollbar-track {
+    background: #f4f7fb;
   }
 
-  [aria-label="エクスプローラー 一覧表示"] [data-selected="true"] {
-    background: var(--explorer-chrome-row-selected-bg) !important;
-    box-shadow:
-      inset 3px 0 0 var(--explorer-chrome-accent),
-      inset 0 0 0 1px var(--explorer-chrome-selected-border) !important;
+  .explorer-chrome-shell ::-webkit-scrollbar-thumb {
+    background: #c7d2df;
+    border-radius: 10px;
   }
 
-  /* Finder-style column view. */
-  [aria-label="フォルダ列"],
-  [aria-label="カードセット列"] {
-    background: var(--explorer-chrome-panel-bg) !important;
-    border-color: var(--explorer-chrome-border) !important;
-  }
-
-  [aria-label="フォルダ列"] [role="button"]:hover,
-  [aria-label="カードセット列"] [role="button"]:hover {
-    background: var(--explorer-chrome-row-hover-bg) !important;
-  }
-
-  [aria-label="フォルダ列"] [data-selected="true"],
-  [aria-label="カードセット列"] [data-selected="true"] {
-    background: var(--explorer-chrome-row-selected-bg) !important;
-    box-shadow:
-      inset 3px 0 0 var(--explorer-chrome-accent),
-      inset 0 0 0 1px var(--explorer-chrome-selected-border) !important;
-  }
-
-  /* Tag and calendar sections in the Explorer sidebar. */
-  [aria-controls="tag-sidebar-section-content"],
-  [aria-controls="calendar-sidebar-section-content"],
-  [aria-controls="folder-list-sidebar-section-content"],
-  [aria-controls="pinned-folder-sidebar-section-content"] {
-    color: var(--explorer-chrome-text-secondary) !important;
-  }
-
-  [aria-controls="tag-sidebar-section-content"]:hover,
-  [aria-controls="calendar-sidebar-section-content"]:hover,
-  [aria-controls="folder-list-sidebar-section-content"]:hover,
-  [aria-controls="pinned-folder-sidebar-section-content"]:hover {
-    background: var(--explorer-chrome-sidebar-hover-bg) !important;
-    color: var(--explorer-chrome-text-primary) !important;
-  }
-
-  /* Cool down remaining beige focus/editor controls in Explorer. */
-  [data-detail-tag-editor="true"],
-  [aria-label="タグを作成"] {
-    border-color: #93c5fd !important;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12) !important;
-    color: var(--explorer-chrome-text-primary) !important;
-  }
-
-  /* Scrollbar tone: Windows/Chrome blue-gray, not beige. */
-  * {
-    scrollbar-color: var(--scrollbar-thumb) transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb) !important;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-thumb-hover) !important;
-  }
-
-  ::-webkit-scrollbar-thumb:active {
-    background: var(--scrollbar-thumb-active) !important;
+  .explorer-chrome-shell ::-webkit-scrollbar-thumb:hover {
+    background: #b8c5d3;
   }
 }
