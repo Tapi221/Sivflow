@@ -17,6 +17,7 @@ import { ja } from "date-fns/locale";
 import type {
   CSSProperties,
   KeyboardEvent,
+  MutableRefObject,
   PointerEvent as ReactPointerEvent,
   UIEvent,
 } from "react";
@@ -51,12 +52,13 @@ type TimelineBufferDays = {
   after: number;
 };
 
-type HourRowResizeState = {
+type TimelineRowResizeState = {
   startY: number;
   startHeight: number;
 };
 
 type TimelineGridStyle = CSSProperties & {
+  "--calendar-all-day-row-height": string;
   "--calendar-hour-row-height": string;
 };
 
@@ -66,10 +68,15 @@ type CalendarEventStyle = CSSProperties & {
 };
 
 const DEFAULT_RANGE_DAYS = 3;
+const DEFAULT_ALL_DAY_ROW_HEIGHT = 46;
+const MIN_ALL_DAY_ROW_HEIGHT = 28;
+const MAX_ALL_DAY_ROW_HEIGHT = 180;
 const DEFAULT_HOUR_ROW_HEIGHT = 88;
 const MIN_HOUR_ROW_HEIGHT = 48;
 const MAX_HOUR_ROW_HEIGHT = 180;
-const HOUR_ROW_HEIGHT_STEP = 4;
+const ROW_HEIGHT_STEP = 4;
+const ALL_DAY_ROW_HEIGHT_STORAGE_KEY =
+  "flashcard-master.calendar.allDayRowHeight";
 const HOUR_ROW_HEIGHT_STORAGE_KEY = "flashcard-master.calendar.hourRowHeight";
 const HOURS = Array.from({ length: 24 }, (_, index) => index);
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
@@ -92,32 +99,55 @@ const createInitialTimelineBuffer = (): TimelineBufferDays => ({
   after: INITIAL_TIMELINE_BUFFER_DAYS,
 });
 
+const clampRowHeight = (value: number, min: number, max: number) => {
+  return Math.min(max, Math.max(min, Math.round(value)));
+};
+
+const clampAllDayRowHeight = (value: number) => {
+  return clampRowHeight(value, MIN_ALL_DAY_ROW_HEIGHT, MAX_ALL_DAY_ROW_HEIGHT);
+};
+
 const clampHourRowHeight = (value: number) => {
-  return Math.min(
-    MAX_HOUR_ROW_HEIGHT,
-    Math.max(MIN_HOUR_ROW_HEIGHT, Math.round(value)),
+  return clampRowHeight(value, MIN_HOUR_ROW_HEIGHT, MAX_HOUR_ROW_HEIGHT);
+};
+
+const readStoredRowHeight = (
+  storageKey: string,
+  defaultValue: number,
+  clampValue: (value: number) => number,
+) => {
+  if (typeof window === "undefined") {
+    return defaultValue;
+  }
+
+  const rawValue = window.localStorage.getItem(storageKey);
+  const parsedValue = rawValue === null ? Number.NaN : Number(rawValue);
+
+  return Number.isFinite(parsedValue) ? clampValue(parsedValue) : defaultValue;
+};
+
+const readStoredAllDayRowHeight = () => {
+  return readStoredRowHeight(
+    ALL_DAY_ROW_HEIGHT_STORAGE_KEY,
+    DEFAULT_ALL_DAY_ROW_HEIGHT,
+    clampAllDayRowHeight,
   );
 };
 
 const readStoredHourRowHeight = () => {
-  if (typeof window === "undefined") {
-    return DEFAULT_HOUR_ROW_HEIGHT;
-  }
-
-  const rawValue = window.localStorage.getItem(HOUR_ROW_HEIGHT_STORAGE_KEY);
-  const parsedValue = rawValue === null ? Number.NaN : Number(rawValue);
-
-  return Number.isFinite(parsedValue)
-    ? clampHourRowHeight(parsedValue)
-    : DEFAULT_HOUR_ROW_HEIGHT;
+  return readStoredRowHeight(
+    HOUR_ROW_HEIGHT_STORAGE_KEY,
+    DEFAULT_HOUR_ROW_HEIGHT,
+    clampHourRowHeight,
+  );
 };
 
-const writeStoredHourRowHeight = (value: number) => {
+const writeStoredRowHeight = (storageKey: string, value: number) => {
   if (typeof window === "undefined") {
     return;
   }
 
-  window.localStorage.setItem(HOUR_ROW_HEIGHT_STORAGE_KEY, String(value));
+  window.localStorage.setItem(storageKey, String(value));
 };
 
 const getRangeDayCount = (
@@ -213,9 +243,13 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   const isExtendingLeftRef = useRef(false);
   const isExtendingRightRef = useRef(false);
   const shouldSyncScrollRef = useRef(true);
-  const hourRowResizeStateRef = useRef<HourRowResizeState | null>(null);
+  const allDayRowResizeStateRef = useRef<TimelineRowResizeState | null>(null);
+  const hourRowResizeStateRef = useRef<TimelineRowResizeState | null>(null);
+  const allDayRowHeightRef = useRef(DEFAULT_ALL_DAY_ROW_HEIGHT);
   const hourRowHeightRef = useRef(DEFAULT_HOUR_ROW_HEIGHT);
+  const pendingAllDayRowHeightRef = useRef(DEFAULT_ALL_DAY_ROW_HEIGHT);
   const pendingHourRowHeightRef = useRef(DEFAULT_HOUR_ROW_HEIGHT);
+  const allDayRowResizeFrameRef = useRef<number | null>(null);
   const hourRowResizeFrameRef = useRef<number | null>(null);
 
   const [currentDate, setCurrentDate] = useState(() => new Date());
@@ -228,6 +262,9 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   const [viewportWidth, setViewportWidth] = useState(0);
   const [timelineBuffer, setTimelineBuffer] = useState(
     createInitialTimelineBuffer,
+  );
+  const [allDayRowHeight, setAllDayRowHeight] = useState(
+    readStoredAllDayRowHeight,
   );
   const [hourRowHeight, setHourRowHeight] = useState(readStoredHourRowHeight);
 
@@ -250,51 +287,128 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   const gridWidth = TIME_COLUMN_WIDTH + visibleDays.length * dayColumnWidth;
   const dayNavigationStep = viewMode === "week" ? 7 : rangeDays;
   const timelineGridStyle: TimelineGridStyle = {
+    "--calendar-all-day-row-height": `${allDayRowHeight}px`,
     "--calendar-hour-row-height": `${hourRowHeight}px`,
     gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${dayColumnWidth}px)`,
     minWidth: `${gridWidth}px`,
   };
 
-  const applyHourRowHeightVariable = useCallback((nextHeight: number) => {
-    timelineGridRef.current?.style.setProperty(
-      "--calendar-hour-row-height",
-      `${nextHeight}px`,
-    );
-  }, []);
+  const applyTimelineRowHeightVariable = useCallback(
+    (variableName: string, nextHeight: number) => {
+      timelineGridRef.current?.style.setProperty(
+        variableName,
+        `${nextHeight}px`,
+      );
+    },
+    [],
+  );
 
-  const scheduleHourRowHeightVariable = useCallback(
-    (nextHeight: number) => {
-      const clampedHeight = clampHourRowHeight(nextHeight);
-      pendingHourRowHeightRef.current = clampedHeight;
+  const scheduleTimelineRowHeightVariable = useCallback(
+    (
+      variableName: string,
+      nextHeight: number,
+      clampValue: (value: number) => number,
+      pendingValueRef: MutableRefObject<number>,
+      frameRef: MutableRefObject<number | null>,
+    ) => {
+      const clampedHeight = clampValue(nextHeight);
+      pendingValueRef.current = clampedHeight;
 
-      if (hourRowResizeFrameRef.current !== null) {
+      if (frameRef.current !== null) {
         return;
       }
 
-      hourRowResizeFrameRef.current = window.requestAnimationFrame(() => {
-        hourRowResizeFrameRef.current = null;
-        applyHourRowHeightVariable(pendingHourRowHeightRef.current);
+      frameRef.current = window.requestAnimationFrame(() => {
+        frameRef.current = null;
+        applyTimelineRowHeightVariable(variableName, pendingValueRef.current);
       });
     },
-    [applyHourRowHeightVariable],
+    [applyTimelineRowHeightVariable],
+  );
+
+  const commitTimelineRowHeight = useCallback(
+    (
+      variableName: string,
+      nextHeight: number,
+      storageKey: string,
+      clampValue: (value: number) => number,
+      currentValueRef: MutableRefObject<number>,
+      pendingValueRef: MutableRefObject<number>,
+      frameRef: MutableRefObject<number | null>,
+      setValue: (value: number) => void,
+    ) => {
+      const clampedHeight = clampValue(nextHeight);
+
+      if (frameRef.current !== null) {
+        window.cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
+      }
+
+      currentValueRef.current = clampedHeight;
+      pendingValueRef.current = clampedHeight;
+      applyTimelineRowHeightVariable(variableName, clampedHeight);
+      writeStoredRowHeight(storageKey, clampedHeight);
+      setValue(clampedHeight);
+    },
+    [applyTimelineRowHeightVariable],
+  );
+
+  const scheduleAllDayRowHeightVariable = useCallback(
+    (nextHeight: number) => {
+      scheduleTimelineRowHeightVariable(
+        "--calendar-all-day-row-height",
+        nextHeight,
+        clampAllDayRowHeight,
+        pendingAllDayRowHeightRef,
+        allDayRowResizeFrameRef,
+      );
+    },
+    [scheduleTimelineRowHeightVariable],
+  );
+
+  const scheduleHourRowHeightVariable = useCallback(
+    (nextHeight: number) => {
+      scheduleTimelineRowHeightVariable(
+        "--calendar-hour-row-height",
+        nextHeight,
+        clampHourRowHeight,
+        pendingHourRowHeightRef,
+        hourRowResizeFrameRef,
+      );
+    },
+    [scheduleTimelineRowHeightVariable],
+  );
+
+  const commitAllDayRowHeight = useCallback(
+    (nextHeight: number) => {
+      commitTimelineRowHeight(
+        "--calendar-all-day-row-height",
+        nextHeight,
+        ALL_DAY_ROW_HEIGHT_STORAGE_KEY,
+        clampAllDayRowHeight,
+        allDayRowHeightRef,
+        pendingAllDayRowHeightRef,
+        allDayRowResizeFrameRef,
+        setAllDayRowHeight,
+      );
+    },
+    [commitTimelineRowHeight],
   );
 
   const commitHourRowHeight = useCallback(
     (nextHeight: number) => {
-      const clampedHeight = clampHourRowHeight(nextHeight);
-
-      if (hourRowResizeFrameRef.current !== null) {
-        window.cancelAnimationFrame(hourRowResizeFrameRef.current);
-        hourRowResizeFrameRef.current = null;
-      }
-
-      hourRowHeightRef.current = clampedHeight;
-      pendingHourRowHeightRef.current = clampedHeight;
-      applyHourRowHeightVariable(clampedHeight);
-      writeStoredHourRowHeight(clampedHeight);
-      setHourRowHeight(clampedHeight);
+      commitTimelineRowHeight(
+        "--calendar-hour-row-height",
+        nextHeight,
+        HOUR_ROW_HEIGHT_STORAGE_KEY,
+        clampHourRowHeight,
+        hourRowHeightRef,
+        pendingHourRowHeightRef,
+        hourRowResizeFrameRef,
+        setHourRowHeight,
+      );
     },
-    [applyHourRowHeightVariable],
+    [commitTimelineRowHeight],
   );
 
   const requestMonthScrollTarget = useCallback(() => {
@@ -317,13 +431,29 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   }, [dayColumnWidth, timelineBuffer.before]);
 
   useEffect(() => {
+    allDayRowHeightRef.current = allDayRowHeight;
+    pendingAllDayRowHeightRef.current = allDayRowHeight;
+    applyTimelineRowHeightVariable(
+      "--calendar-all-day-row-height",
+      allDayRowHeight,
+    );
+  }, [allDayRowHeight, applyTimelineRowHeightVariable]);
+
+  useEffect(() => {
     hourRowHeightRef.current = hourRowHeight;
     pendingHourRowHeightRef.current = hourRowHeight;
-    applyHourRowHeightVariable(hourRowHeight);
-  }, [applyHourRowHeightVariable, hourRowHeight]);
+    applyTimelineRowHeightVariable(
+      "--calendar-hour-row-height",
+      hourRowHeight,
+    );
+  }, [applyTimelineRowHeightVariable, hourRowHeight]);
 
   useEffect(() => {
     return () => {
+      if (allDayRowResizeFrameRef.current !== null) {
+        window.cancelAnimationFrame(allDayRowResizeFrameRef.current);
+      }
+
       if (hourRowResizeFrameRef.current !== null) {
         window.cancelAnimationFrame(hourRowResizeFrameRef.current);
       }
@@ -432,20 +562,27 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     [dayColumnWidth, viewMode],
   );
 
-  const handleHourRowResizePointerDown = useCallback(
-    (event: ReactPointerEvent<HTMLElement>) => {
+  const handleTimelineRowResizePointerDown = useCallback(
+    (
+      event: ReactPointerEvent<HTMLElement>,
+      currentValueRef: MutableRefObject<number>,
+      pendingValueRef: MutableRefObject<number>,
+      resizeStateRef: MutableRefObject<TimelineRowResizeState | null>,
+      scheduleHeightVariable: (nextHeight: number) => void,
+      commitHeight: (nextHeight: number) => void,
+    ) => {
       if (event.button !== 0) {
         return;
       }
 
       event.preventDefault();
 
-      const startHeight = hourRowHeightRef.current;
-      hourRowResizeStateRef.current = {
+      const startHeight = currentValueRef.current;
+      resizeStateRef.current = {
         startY: event.clientY,
         startHeight,
       };
-      pendingHourRowHeightRef.current = startHeight;
+      pendingValueRef.current = startHeight;
 
       const previousCursor = document.body.style.cursor;
       const previousUserSelect = document.body.style.userSelect;
@@ -453,20 +590,20 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
       document.body.style.userSelect = "none";
 
       const handlePointerMove = (moveEvent: PointerEvent) => {
-        const resizeState = hourRowResizeStateRef.current;
+        const resizeState = resizeStateRef.current;
 
         if (!resizeState) {
           return;
         }
 
-        scheduleHourRowHeightVariable(
+        scheduleHeightVariable(
           resizeState.startHeight + moveEvent.clientY - resizeState.startY,
         );
       };
 
       const handlePointerUp = () => {
-        commitHourRowHeight(pendingHourRowHeightRef.current);
-        hourRowResizeStateRef.current = null;
+        commitHeight(pendingValueRef.current);
+        resizeStateRef.current = null;
         document.body.style.cursor = previousCursor;
         document.body.style.userSelect = previousUserSelect;
         window.removeEventListener("pointermove", handlePointerMove);
@@ -478,33 +615,108 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
       window.addEventListener("pointerup", handlePointerUp);
       window.addEventListener("pointercancel", handlePointerUp);
     },
-    [commitHourRowHeight, scheduleHourRowHeightVariable],
+    [],
   );
+
+  const handleAllDayRowResizePointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLElement>) => {
+      handleTimelineRowResizePointerDown(
+        event,
+        allDayRowHeightRef,
+        pendingAllDayRowHeightRef,
+        allDayRowResizeStateRef,
+        scheduleAllDayRowHeightVariable,
+        commitAllDayRowHeight,
+      );
+    },
+    [
+      commitAllDayRowHeight,
+      handleTimelineRowResizePointerDown,
+      scheduleAllDayRowHeightVariable,
+    ],
+  );
+
+  const handleHourRowResizePointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLElement>) => {
+      handleTimelineRowResizePointerDown(
+        event,
+        hourRowHeightRef,
+        pendingHourRowHeightRef,
+        hourRowResizeStateRef,
+        scheduleHourRowHeightVariable,
+        commitHourRowHeight,
+      );
+    },
+    [
+      commitHourRowHeight,
+      handleTimelineRowResizePointerDown,
+      scheduleHourRowHeightVariable,
+    ],
+  );
+
+  const handleAllDayRowResizeKeyDown = (
+    event: KeyboardEvent<HTMLDivElement>,
+  ) => {
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      commitAllDayRowHeight(allDayRowHeightRef.current - ROW_HEIGHT_STEP);
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      commitAllDayRowHeight(allDayRowHeightRef.current + ROW_HEIGHT_STEP);
+      return;
+    }
+
+    if (event.key === "PageUp") {
+      event.preventDefault();
+      commitAllDayRowHeight(allDayRowHeightRef.current - ROW_HEIGHT_STEP * 4);
+      return;
+    }
+
+    if (event.key === "PageDown") {
+      event.preventDefault();
+      commitAllDayRowHeight(allDayRowHeightRef.current + ROW_HEIGHT_STEP * 4);
+      return;
+    }
+
+    if (event.key === "Home") {
+      event.preventDefault();
+      commitAllDayRowHeight(MIN_ALL_DAY_ROW_HEIGHT);
+      return;
+    }
+
+    if (event.key === "End") {
+      event.preventDefault();
+      commitAllDayRowHeight(MAX_ALL_DAY_ROW_HEIGHT);
+    }
+  };
 
   const handleHourRowResizeKeyDown = (
     event: KeyboardEvent<HTMLDivElement>,
   ) => {
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      commitHourRowHeight(hourRowHeightRef.current - HOUR_ROW_HEIGHT_STEP);
+      commitHourRowHeight(hourRowHeightRef.current - ROW_HEIGHT_STEP);
       return;
     }
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      commitHourRowHeight(hourRowHeightRef.current + HOUR_ROW_HEIGHT_STEP);
+      commitHourRowHeight(hourRowHeightRef.current + ROW_HEIGHT_STEP);
       return;
     }
 
     if (event.key === "PageUp") {
       event.preventDefault();
-      commitHourRowHeight(hourRowHeightRef.current - HOUR_ROW_HEIGHT_STEP * 4);
+      commitHourRowHeight(hourRowHeightRef.current - ROW_HEIGHT_STEP * 4);
       return;
     }
 
     if (event.key === "PageDown") {
       event.preventDefault();
-      commitHourRowHeight(hourRowHeightRef.current + HOUR_ROW_HEIGHT_STEP * 4);
+      commitHourRowHeight(hourRowHeightRef.current + ROW_HEIGHT_STEP * 4);
       return;
     }
 
@@ -518,6 +730,10 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
       event.preventDefault();
       commitHourRowHeight(MAX_HOUR_ROW_HEIGHT);
     }
+  };
+
+  const handleAllDayRowResizeReset = () => {
+    commitAllDayRowHeight(DEFAULT_ALL_DAY_ROW_HEIGHT);
   };
 
   const handleHourRowResizeReset = () => {
@@ -727,18 +943,39 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
               );
             })}
 
-            <div className="sticky left-0 z-10 flex h-[46px] items-center justify-center border-b border-r border-[#e8e7e1] bg-white text-[12px] font-semibold text-[#9b9a94]">
+            <div className="calendar-all-day-row calendar-all-day-label-row sticky left-0 z-10 flex items-center justify-center border-b border-r border-[#e8e7e1] bg-white text-[12px] font-semibold text-[#9b9a94]">
               終日
+              <div
+                role="separator"
+                aria-label="終日行の高さを調整"
+                aria-orientation="horizontal"
+                aria-valuemin={MIN_ALL_DAY_ROW_HEIGHT}
+                aria-valuemax={MAX_ALL_DAY_ROW_HEIGHT}
+                aria-valuenow={allDayRowHeight}
+                tabIndex={0}
+                className="calendar-all-day-boundary-resize-handle"
+                title="ドラッグで終日行の高さを変更。ダブルクリックで初期値に戻します。"
+                onDoubleClick={handleAllDayRowResizeReset}
+                onKeyDown={handleAllDayRowResizeKeyDown}
+                onPointerDown={handleAllDayRowResizePointerDown}
+              />
             </div>
 
             {visibleDays.map((day) => (
               <div
                 key={`allday-${day.toISOString()}`}
                 className={cn(
-                  "h-[46px] border-b border-r border-[#e8e7e1]",
+                  "calendar-all-day-row relative border-b border-r border-[#e8e7e1]",
                   isSameDay(day, currentDate) && "bg-[#fff8f8]",
                 )}
-              />
+              >
+                <div
+                  className="calendar-all-day-boundary-resize-handle"
+                  title="ドラッグで終日行の高さを変更。ダブルクリックで初期値に戻します。"
+                  onDoubleClick={handleAllDayRowResizeReset}
+                  onPointerDown={handleAllDayRowResizePointerDown}
+                />
+              </div>
             ))}
 
             <div className="sticky left-0 z-10 bg-white">
