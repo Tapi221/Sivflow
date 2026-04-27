@@ -126,4 +126,41 @@
   .calendar-hour-boundary-resize-handle:focus-visible {
     outline: none;
   }
+
+  .calendar-month-day-cell {
+    overflow: visible;
+  }
+
+  .calendar-month-row-boundary-resize-handle {
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    height: 8px;
+    cursor: row-resize;
+    touch-action: none;
+    background: transparent;
+  }
+
+  .calendar-month-row-boundary-resize-handle::after {
+    content: "";
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: 3px;
+    height: 2px;
+    border-radius: 999px;
+    background: rgba(127, 45, 40, 0.16);
+    transition: background-color 120ms ease;
+  }
+
+  .calendar-month-row-boundary-resize-handle:hover::after,
+  .calendar-month-row-boundary-resize-handle:focus-visible::after {
+    background: rgba(127, 45, 40, 0.42);
+  }
+
+  .calendar-month-row-boundary-resize-handle:focus-visible {
+    outline: none;
+  }
 }

@@ -577,42 +577,45 @@ export const ExplorerCalendarMonthView = ({
                 const isLastColumn = index % 7 === 6;
 
                 return (
-                  <button
+                  <div
                     key={day.key}
-                    type="button"
-                    aria-label={format(day.date, "yyyy年M月d日", {
-                      locale: ja,
-                    })}
-                    aria-pressed={selected}
                     className={cn(
-                      "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-hidden border-b border-[#ebeae4] bg-white text-left outline-none transition-colors",
+                      "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#ebeae4] bg-white text-left transition-colors",
                       !isLastColumn && "border-r",
                       selected && "bg-[#fff9f8]",
                       !selected && "hover:bg-[#fbfaf7]",
-                      "focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                     )}
-                    onClick={() => onSelectDate(day.date)}
                   >
-                    <span
-                      className={cn(
-                        "absolute left-4 top-4 inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[15px] font-semibold tabular-nums transition-colors",
-                        selected
-                          ? "bg-[#ef5555] text-white shadow-[0_7px_18px_rgba(239,85,85,0.24)]"
-                          : todayCell
-                            ? "bg-[#f0efea] text-[#24231f]"
-                            : day.isCurrentMonth
-                              ? "text-[#24231f]"
-                              : "text-[#b0aea8]",
-                      )}
+                    <button
+                      type="button"
+                      aria-label={format(day.date, "yyyy年M月d日", {
+                        locale: ja,
+                      })}
+                      aria-pressed={selected}
+                      className="relative h-full w-full overflow-hidden text-left outline-none focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                      onClick={() => onSelectDate(day.date)}
                     >
-                      {day.dayOfMonth}
-                    </span>
-
-                    {monthAnnotation ? (
-                      <span className="absolute right-4 top-[18px] text-[12px] font-semibold text-[#a09f98]">
-                        {monthAnnotation}
+                      <span
+                        className={cn(
+                          "absolute left-4 top-4 inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[15px] font-semibold tabular-nums transition-colors",
+                          selected
+                            ? "bg-[#ef5555] text-white shadow-[0_7px_18px_rgba(239,85,85,0.24)]"
+                            : todayCell
+                              ? "bg-[#f0efea] text-[#24231f]"
+                              : day.isCurrentMonth
+                                ? "text-[#24231f]"
+                                : "text-[#b0aea8]",
+                        )}
+                      >
+                        {day.dayOfMonth}
                       </span>
-                    ) : null}
+
+                      {monthAnnotation ? (
+                        <span className="absolute right-4 top-[18px] text-[12px] font-semibold text-[#a09f98]">
+                          {monthAnnotation}
+                        </span>
+                      ) : null}
+                    </button>
 
                     <div
                       role="separator"
@@ -622,14 +625,14 @@ export const ExplorerCalendarMonthView = ({
                       aria-valuemax={MAX_MONTH_ROW_HEIGHT}
                       aria-valuenow={monthRowHeight}
                       tabIndex={0}
-                      className="calendar-month-row-boundary-resize-handle absolute inset-x-0 bottom-[-4px] z-30 h-2 cursor-row-resize"
+                      className="calendar-month-row-boundary-resize-handle"
                       title="ドラッグで月表示の縦幅を変更。ダブルクリックで初期値に戻します。"
                       onClick={(event) => event.stopPropagation()}
                       onDoubleClick={handleMonthRowResizeReset}
                       onKeyDown={handleMonthRowResizeKeyDown}
                       onPointerDown={handleMonthRowResizePointerDown}
                     />
-                  </button>
+                  </div>
                 );
               })}
             </div>
