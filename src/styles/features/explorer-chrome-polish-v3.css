@@ -1,0 +1,193 @@
+@layer components {
+  :root {
+    --explorer-chrome-v3-app-bg: #eef3f8;
+    --explorer-chrome-v3-toolbar-bg: linear-gradient(
+      180deg,
+      rgba(249, 251, 253, 0.98) 0%,
+      rgba(243, 247, 251, 0.96) 100%
+    );
+    --explorer-chrome-v3-sidebar-bg: #f7f9fc;
+    --explorer-chrome-v3-panel-bg: #ffffff;
+    --explorer-chrome-v3-header-bg: #f7f9fc;
+    --explorer-chrome-v3-border: #d9e0e8;
+    --explorer-chrome-v3-border-strong: #c9d3de;
+    --explorer-chrome-v3-border-soft: #e8edf3;
+    --explorer-chrome-v3-text: #1f2937;
+    --explorer-chrome-v3-text-muted: #66758a;
+    --explorer-chrome-v3-hover: #f5f9fe;
+    --explorer-chrome-v3-selected: #e8f1fd;
+    --explorer-chrome-v3-selected-accent: #4f8df7;
+    --explorer-chrome-v3-folder-fill: #efc14b;
+    --explorer-chrome-v3-folder-stroke: #c18a12;
+  }
+
+  .explorer-chrome-shell {
+    background: var(--explorer-chrome-v3-app-bg) !important;
+    color: var(--explorer-chrome-v3-text);
+  }
+
+  .explorer-chrome-toolbar {
+    background: var(--explorer-chrome-v3-toolbar-bg) !important;
+    border-bottom: 1px solid var(--explorer-chrome-v3-border) !important;
+  }
+
+  .explorer-chrome-body {
+    background: var(--explorer-chrome-v3-app-bg) !important;
+  }
+
+  .explorer-chrome-statusbar {
+    background: rgba(247, 249, 252, 0.96) !important;
+    border-top: 1px solid var(--explorer-chrome-v3-border) !important;
+  }
+
+  .explorer-chrome-shell .rounded-\[10px\],
+  .explorer-chrome-shell .rounded-\[12px\],
+  .explorer-chrome-shell .rounded-\[14px\] {
+    border-color: var(--explorer-chrome-v3-border);
+  }
+
+  .explorer-chrome-shell .border-border,
+  .explorer-chrome-shell .border-border\/70,
+  .explorer-chrome-shell .border-border\/60,
+  .explorer-chrome-shell .border-border\/50,
+  .explorer-chrome-shell .border-slate-200,
+  .explorer-chrome-shell .border-slate-200\/70 {
+    border-color: var(--explorer-chrome-v3-border) !important;
+  }
+
+  .explorer-chrome-shell .bg-\[rgba\(255\,255\,255\,0\.92\)\],
+  .explorer-chrome-shell .bg-\[rgba\(255\,255\,255\,0\.94\)\],
+  .explorer-chrome-shell .bg-\[rgba\(255\,255\,255\,0\.96\)\] {
+    background: var(--explorer-chrome-v3-panel-bg) !important;
+  }
+
+  .explorer-chrome-shell [role="grid"],
+  .explorer-chrome-shell [role="treegrid"],
+  .explorer-chrome-shell [role="table"] {
+    background: var(--explorer-chrome-v3-panel-bg);
+  }
+
+  .explorer-chrome-shell [role="columnheader"] {
+    background: var(--explorer-chrome-v3-header-bg) !important;
+    color: var(--explorer-chrome-v3-text) !important;
+    border-right: 1px solid var(--explorer-chrome-v3-border) !important;
+    border-left: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+  }
+
+  .explorer-chrome-shell [role="columnheader"]:last-child {
+    border-right: 0 !important;
+  }
+
+  .explorer-chrome-shell [role="columnheader"]::before,
+  .explorer-chrome-shell [role="columnheader"]::after {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .explorer-chrome-shell [role="columnheader"] * {
+    border-color: transparent !important;
+  }
+
+  .explorer-chrome-shell [role="separator"],
+  .explorer-chrome-shell .cursor-col-resize,
+  .explorer-chrome-shell .cursor-ew-resize,
+  .explorer-chrome-shell .col-resize,
+  .explorer-chrome-shell .ew-resize {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  .explorer-chrome-shell [role="separator"]::before,
+  .explorer-chrome-shell [role="separator"]::after,
+  .explorer-chrome-shell .cursor-col-resize::before,
+  .explorer-chrome-shell .cursor-col-resize::after,
+  .explorer-chrome-shell .cursor-ew-resize::before,
+  .explorer-chrome-shell .cursor-ew-resize::after {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .explorer-chrome-shell [role="row"] {
+    border-bottom-color: var(--explorer-chrome-v3-border-soft) !important;
+  }
+
+  .explorer-chrome-shell [role="row"]:hover {
+    background: var(--explorer-chrome-v3-hover) !important;
+  }
+
+  .explorer-chrome-shell [aria-selected="true"],
+  .explorer-chrome-shell [data-selected="true"] {
+    background: var(--explorer-chrome-v3-selected) !important;
+  }
+
+  .explorer-chrome-shell .sidebar-row,
+  .explorer-chrome-shell [data-sidebar-section],
+  .explorer-chrome-shell aside {
+    --sidebar-row-hover-bg: var(--explorer-chrome-v3-hover);
+  }
+
+  .explorer-chrome-shell .sidebar-row[data-selected="true"],
+  .explorer-chrome-shell .sidebar-row[aria-selected="true"] {
+    background: var(--explorer-chrome-v3-selected) !important;
+  }
+
+  .explorer-chrome-shell .sidebar-row[data-selected="true"]::before,
+  .explorer-chrome-shell .sidebar-row[aria-selected="true"]::before {
+    background: var(--explorer-chrome-v3-selected-accent) !important;
+  }
+
+  .explorer-chrome-shell .sidebar-row .ds-list-item__title,
+  .explorer-chrome-shell .sidebar-row .ds-list-item__subtitle,
+  .explorer-chrome-shell [role="row"] [role="cell"] {
+    color: var(--explorer-chrome-v3-text-muted);
+  }
+
+  .explorer-chrome-shell [role="row"] [role="cell"]:first-child,
+  .explorer-chrome-shell .sidebar-row .ds-list-item__title {
+    color: var(--explorer-chrome-v3-text) !important;
+  }
+
+  .explorer-chrome-shell svg[data-lucide="folder"],
+  .explorer-chrome-shell svg[data-lucide="folder-open"],
+  .explorer-chrome-shell .sidebar-row .ds-list-item__icon svg,
+  .explorer-chrome-shell [role="row"] [role="cell"]:first-child svg {
+    color: var(--explorer-chrome-v3-folder-fill) !important;
+    stroke: var(--explorer-chrome-v3-folder-stroke) !important;
+    fill: transparent;
+    stroke-width: 1.8 !important;
+    opacity: 1 !important;
+  }
+
+  .explorer-chrome-shell .sidebar-row .ds-list-item__icon,
+  .explorer-chrome-shell [role="row"] [role="cell"]:first-child > span:first-child,
+  .explorer-chrome-shell [role="row"] [role="cell"]:first-child svg {
+    width: 18px;
+    min-width: 18px;
+    height: 18px;
+  }
+
+  .explorer-chrome-shell .sidebar-row button,
+  .explorer-chrome-shell .sidebar-row [role="button"],
+  .explorer-chrome-shell .sidebar-row .inline-flex {
+    border-color: var(--explorer-chrome-v3-border);
+  }
+
+  .explorer-chrome-shell ::-webkit-scrollbar-track {
+    background: #f4f7fb;
+  }
+
+  .explorer-chrome-shell ::-webkit-scrollbar-thumb {
+    background: #c9d4e1;
+    border-radius: 10px;
+  }
+
+  .explorer-chrome-shell ::-webkit-scrollbar-thumb:hover {
+    background: #b8c6d6;
+  }
+}
