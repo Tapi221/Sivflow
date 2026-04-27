@@ -67,7 +67,11 @@ type CalendarEventStyle = CSSProperties & {
   "--calendar-event-duration-hours": number;
 };
 
+const MIN_RANGE_DAYS = 1;
+const MAX_RANGE_DAYS = 6;
 const DEFAULT_RANGE_DAYS = 3;
+const RANGE_DAY_OPTIONS = [1, 2, 3, 4, 5, 6] as const;
+const RANGE_DAYS_STORAGE_KEY = "flashcard-master.calendar.rangeDays";
 const DEFAULT_ALL_DAY_ROW_HEIGHT = 46;
 const MIN_ALL_DAY_ROW_HEIGHT = 28;
 const MAX_ALL_DAY_ROW_HEIGHT = 180;
@@ -105,6 +109,34 @@ const clampRowHeight = (value: number, min: number, max: number) => {
 
 const normalizeStoredRowHeight = (value: number) => {
   return Math.round(value);
+};
+
+const clampRangeDays = (value: number) => {
+  return Math.min(
+    MAX_RANGE_DAYS,
+    Math.max(MIN_RANGE_DAYS, Math.round(value)),
+  );
+};
+
+const readStoredRangeDays = () => {
+  if (typeof window === "undefined") {
+    return DEFAULT_RANGE_DAYS;
+  }
+
+  const rawValue = window.localStorage.getItem(RANGE_DAYS_STORAGE_KEY);
+  const parsedValue = rawValue === null ? Number.NaN : Number(rawValue);
+
+  return Number.isFinite(parsedValue)
+    ? clampRangeDays(parsedValue)
+    : DEFAULT_RANGE_DAYS;
+};
+
+const writeStoredRangeDays = (value: number) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(RANGE_DAYS_STORAGE_KEY, String(value));
 };
 
 const clampAllDayRowHeight = (value: number) => {
@@ -267,7 +299,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     useState<CalendarViewMode>("month");
   const [renderedViewMode, setRenderedViewMode] =
     useState<CalendarViewMode>("month");
-  const [rangeDays, setRangeDays] = useState(DEFAULT_RANGE_DAYS);
+  const [rangeDays, setRangeDays] = useState(readStoredRangeDays);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [timelineBuffer, setTimelineBuffer] = useState(
     createInitialTimelineBuffer,
@@ -802,9 +834,16 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     scheduleRenderedViewMode(nextViewMode);
   };
 
-  const handleRangeDaysToggle = () => {
+  const handleRangeDaysChange = (nextRangeDays: number) => {
+    const clampedRangeDays = clampRangeDays(nextRangeDays);
+
+    if (clampedRangeDays === rangeDays) {
+      return;
+    }
+
     resetTimelinePosition();
-    setRangeDays((prev) => (prev === 3 ? 7 : 3));
+    writeStoredRangeDays(clampedRangeDays);
+    setRangeDays(clampedRangeDays);
   };
 
   const handleToday = () => {
@@ -891,16 +930,26 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
           </div>
 
           {selectedViewMode === "days" ? (
-            <button
-              type="button"
-              className="hidden h-10 items-center overflow-hidden rounded-[10px] border border-[#dddcd5] bg-[#f6f6f4] text-[13px] font-semibold text-[#33322f] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] transition-colors hover:bg-white md:flex"
-              onClick={handleRangeDaysToggle}
-            >
-              <span className="px-4 tabular-nums">{rangeDays}</span>
+            <label className="hidden h-10 items-center overflow-hidden rounded-[10px] border border-[#dddcd5] bg-[#f6f6f4] text-[13px] font-semibold text-[#33322f] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] transition-colors hover:bg-white md:flex">
+              <select
+                aria-label="日数を選択"
+                title="日数を選択"
+                value={rangeDays}
+                className="h-full cursor-pointer appearance-none bg-transparent px-4 text-center tabular-nums text-[#33322f] outline-none"
+                onChange={(event) => {
+                  handleRangeDaysChange(Number(event.target.value));
+                }}
+              >
+                {RANGE_DAY_OPTIONS.map((days) => (
+                  <option key={days} value={days}>
+                    {days}
+                  </option>
+                ))}
+              </select>
               <span className="h-full border-l border-[#dddcd5] px-3 leading-10 text-[#777671]">
                 日
               </span>
-            </button>
+            </label>
           ) : null}
         </div>
 
