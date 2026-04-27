@@ -51,11 +51,20 @@ type FolderDetailRowProps = {
   onTagEditBlur: () => void;
 };
 
-const getRowIcon = (kind: ExplorerDetailRowKind) => {
-  if (kind === "folder") return ExplorerChromeFolderIcon;
-  if (kind === "cardSet") return ExplorerChromeCardSetIcon;
-  if (kind === "card") return ExplorerChromeCardIcon;
-  return ExplorerChromePdfIcon;
+const renderRowIcon = (kind: ExplorerDetailRowKind) => {
+  if (kind === "folder") {
+    return <ExplorerChromeFolderIcon className="h-4 w-4" />;
+  }
+
+  if (kind === "cardSet") {
+    return <ExplorerChromeCardSetIcon className="h-4 w-4" />;
+  }
+
+  if (kind === "card") {
+    return <ExplorerChromeCardIcon className="h-4 w-4" />;
+  }
+
+  return <ExplorerChromePdfIcon className="h-4 w-4" />;
 };
 
 export const FolderDetailRow = ({
@@ -79,7 +88,6 @@ export const FolderDetailRow = ({
   onTagEditKeyDown,
   onTagEditBlur,
 }: FolderDetailRowProps) => {
-  const Icon = getRowIcon(row.kind);
   const tagInputRef = useRef<HTMLInputElement | null>(null);
   const isEditingTags = tagEditState?.rowKey === row.key;
 
@@ -158,7 +166,7 @@ export const FolderDetailRow = ({
 
       <div role="cell" className="flex min-w-0 items-center gap-2 px-3">
         <span className="flex h-5 w-5 shrink-0 items-center justify-center">
-          <Icon className="h-4 w-4" />
+          {renderRowIcon(row.kind)}
         </span>
         <span className="min-w-0 truncate" title={row.name}>
           {row.name}
