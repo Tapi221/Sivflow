@@ -49,26 +49,29 @@
     display: none;
   }
 
-  .calendar-hour-row-resize-handle {
+  .calendar-hour-row-boundary-resize {
+    cursor: row-resize !important;
     touch-action: none;
   }
 
-  .calendar-hour-row-resize-handle:focus-visible {
+  .calendar-hour-row-boundary-resize::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: 1px;
+    transform: translateY(-50%);
+    background: transparent;
+    transition: background-color 120ms ease;
+  }
+
+  .calendar-hour-row-boundary-resize:hover::before,
+  .calendar-hour-row-boundary-resize:focus-visible::before {
+    background: rgba(127, 45, 40, 0.48);
+  }
+
+  .calendar-hour-row-boundary-resize:focus-visible {
     outline: 2px solid rgba(239, 85, 85, 0.48);
     outline-offset: -2px;
-  }
-
-  .calendar-hour-row-resize-handle__grip {
-    width: 28px;
-    height: 3px;
-    border-radius: 999px;
-    background: rgba(155, 154, 148, 0.42);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.82);
-  }
-
-  .calendar-hour-row-resize-handle:hover .calendar-hour-row-resize-handle__grip,
-  .calendar-hour-row-resize-handle:focus-visible
-    .calendar-hour-row-resize-handle__grip {
-    background: rgba(127, 45, 40, 0.52);
   }
 }
