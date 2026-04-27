@@ -70,7 +70,10 @@ describe("folderDetailOptimisticOrder", () => {
   });
 
   it("別スコープの楽観順は現在の行に適用しない", () => {
-    const rows = [createRow("document", "doc-a"), createRow("document", "doc-b")];
+    const rows = [
+      createRow("document", "doc-a"),
+      createRow("document", "doc-b"),
+    ];
     const currentScopeKeys = buildExplorerDetailOrderScopeKeyByKind({
       currentFolderId: "folder-current",
       currentCardSetId: null,
@@ -80,11 +83,13 @@ describe("folderDetailOptimisticOrder", () => {
       currentCardSetId: null,
     });
     const optimisticOrder: ExplorerDetailOptimisticOrderState = {
-      [getExplorerDetailOptimisticOrderKey("document", otherScopeKeys.document)]:
-        {
-          operationId: 1,
-          orderedIds: ["doc-b", "doc-a"],
-        },
+      [getExplorerDetailOptimisticOrderKey(
+        "document",
+        otherScopeKeys.document,
+      )]: {
+        operationId: 1,
+        orderedIds: ["doc-b", "doc-a"],
+      },
     };
 
     const nextRows = applyExplorerDetailOptimisticOrder({

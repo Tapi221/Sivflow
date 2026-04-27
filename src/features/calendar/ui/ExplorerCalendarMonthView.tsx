@@ -33,8 +33,7 @@ const DEFAULT_MONTH_ROW_HEIGHT = 112;
 const MIN_MONTH_ROW_HEIGHT = 72;
 const MAX_MONTH_ROW_HEIGHT = 260;
 const MONTH_ROW_HEIGHT_STEP = 4;
-const MONTH_ROW_HEIGHT_STORAGE_KEY =
-  "flashcard-master.calendar.monthRowHeight";
+const MONTH_ROW_HEIGHT_STORAGE_KEY = "flashcard-master.calendar.monthRowHeight";
 
 const createInitialMonthOffsetRange = () => ({
   startOffset: -INITIAL_MONTH_BUFFER,
@@ -331,7 +330,9 @@ export const ExplorerCalendarMonthView = ({
 
       const scroller = scrollContainerRef.current;
       if (scroller) {
-        window.requestAnimationFrame(() => syncVisibleMonthFromScroll(scroller));
+        window.requestAnimationFrame(() =>
+          syncVisibleMonthFromScroll(scroller),
+        );
       }
     },
     [

@@ -158,7 +158,9 @@ export const applyExplorerDetailOptimisticOrder = ({
 
     orderedBuckets.set(
       kind,
-      entry ? reconcileRowsWithOrderedIds(bucketRows, entry.orderedIds) : bucketRows,
+      entry
+        ? reconcileRowsWithOrderedIds(bucketRows, entry.orderedIds)
+        : bucketRows,
     );
   });
 

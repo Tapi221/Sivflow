@@ -35,19 +35,19 @@ describe("folderDetailColumns", () => {
   });
 
   it("指定列を対象indexへ移動できる", () => {
-    expect(moveDetailColumnOrder(DETAIL_DEFAULT_COLUMN_ORDER, "size", 0)).toEqual(
-      ["size", "name", "tags", "path", "updatedAt", "sync", "kind"],
-    );
+    expect(
+      moveDetailColumnOrder(DETAIL_DEFAULT_COLUMN_ORDER, "size", 0),
+    ).toEqual(["size", "name", "tags", "path", "updatedAt", "sync", "kind"]);
 
-    expect(moveDetailColumnOrder(DETAIL_DEFAULT_COLUMN_ORDER, "name", 6)).toEqual(
-      ["tags", "path", "updatedAt", "sync", "kind", "size", "name"],
-    );
+    expect(
+      moveDetailColumnOrder(DETAIL_DEFAULT_COLUMN_ORDER, "name", 6),
+    ).toEqual(["tags", "path", "updatedAt", "sync", "kind", "size", "name"]);
   });
 
   it("範囲外の対象indexは安全に丸める", () => {
-    expect(moveDetailColumnOrder(DETAIL_DEFAULT_COLUMN_ORDER, "path", -100)).toEqual(
-      ["path", "name", "tags", "updatedAt", "sync", "kind", "size"],
-    );
+    expect(
+      moveDetailColumnOrder(DETAIL_DEFAULT_COLUMN_ORDER, "path", -100),
+    ).toEqual(["path", "name", "tags", "updatedAt", "sync", "kind", "size"]);
 
     expect(
       moveDetailColumnOrder(DETAIL_DEFAULT_COLUMN_ORDER, "path", 100),

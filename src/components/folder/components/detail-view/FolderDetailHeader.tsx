@@ -161,7 +161,8 @@ const HeaderCell = ({
     "cursor-grab active:cursor-grabbing",
     "transition-colors",
     isLastColumn && "border-r-0",
-    isColumnDragging && "z-50 bg-[#eeece4] shadow-[0_2px_10px_rgba(36,35,31,0.10)]",
+    isColumnDragging &&
+      "z-50 bg-[#eeece4] shadow-[0_2px_10px_rgba(36,35,31,0.10)]",
   );
   const content = (
     <>
@@ -316,7 +317,8 @@ export const FolderDetailHeader = ({
 
       return {
         insertIndex: orderedColumnIds.length,
-        insertLeft: lastColumnElement.getBoundingClientRect().right - rowRect.left,
+        insertLeft:
+          lastColumnElement.getBoundingClientRect().right - rowRect.left,
       };
     },
     [],
@@ -435,7 +437,12 @@ export const FolderDetailHeader = ({
       const rect = event.currentTarget.getBoundingClientRect();
       const rowRect = rowElement?.getBoundingClientRect();
 
-      if (!rowRect || rect.width <= 0 || rect.height <= 0 || rowRect.width <= 0) {
+      if (
+        !rowRect ||
+        rect.width <= 0 ||
+        rect.height <= 0 ||
+        rowRect.width <= 0
+      ) {
         return;
       }
 
@@ -464,10 +471,7 @@ export const FolderDetailHeader = ({
   );
 
   const handleSortClick = useCallback(
-    (
-      key: SortableDetailSortKey,
-      event: ReactMouseEvent<HTMLButtonElement>,
-    ) => {
+    (key: SortableDetailSortKey, event: ReactMouseEvent<HTMLButtonElement>) => {
       if (columnClickSuppressedRef.current) {
         columnClickSuppressedRef.current = false;
         event.preventDefault();
@@ -493,8 +497,7 @@ export const FolderDetailHeader = ({
     >
       {columnOrder.map((columnId, index) => {
         const column = DETAIL_HEADER_COLUMNS[columnId];
-        const isColumnDragging =
-          columnDragVisual?.activeColumnId === columnId;
+        const isColumnDragging = columnDragVisual?.activeColumnId === columnId;
         const dragOffsetX = isColumnDragging ? columnDragVisual.offsetX : 0;
 
         return (

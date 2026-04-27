@@ -112,10 +112,7 @@ const normalizeStoredRowHeight = (value: number) => {
 };
 
 const clampRangeDays = (value: number) => {
-  return Math.min(
-    MAX_RANGE_DAYS,
-    Math.max(MIN_RANGE_DAYS, Math.round(value)),
-  );
+  return Math.min(MAX_RANGE_DAYS, Math.max(MIN_RANGE_DAYS, Math.round(value)));
 };
 
 const readStoredRangeDays = () => {
@@ -183,7 +180,10 @@ const writeStoredRowHeight = (storageKey: string, value: number) => {
     return;
   }
 
-  window.localStorage.setItem(storageKey, String(normalizeStoredRowHeight(value)));
+  window.localStorage.setItem(
+    storageKey,
+    String(normalizeStoredRowHeight(value)),
+  );
 };
 
 const getRangeDayCount = (
@@ -264,7 +264,8 @@ const createDemoEvents = (baseDate: Date): CalendarDemoEvent[] => {
 };
 
 const calculateEventStyle = (event: CalendarDemoEvent): CalendarEventStyle => {
-  const startHour = event.startsAt.getHours() + event.startsAt.getMinutes() / 60;
+  const startHour =
+    event.startsAt.getHours() + event.startsAt.getMinutes() / 60;
 
   return {
     "--calendar-event-start-hour": Math.max(0, startHour - HOURS[0]),
@@ -272,7 +273,9 @@ const calculateEventStyle = (event: CalendarDemoEvent): CalendarEventStyle => {
   };
 };
 
-export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => {
+export const ExplorerCalendarPane = ({
+  onClose,
+}: ExplorerCalendarPaneProps) => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const rangeDaysMenuRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -485,16 +488,19 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     setTimelineBuffer(createInitialTimelineBuffer());
   }, []);
 
-  const scheduleRenderedViewMode = useCallback((nextViewMode: CalendarViewMode) => {
-    if (renderModeFrameRef.current !== null) {
-      window.cancelAnimationFrame(renderModeFrameRef.current);
-    }
+  const scheduleRenderedViewMode = useCallback(
+    (nextViewMode: CalendarViewMode) => {
+      if (renderModeFrameRef.current !== null) {
+        window.cancelAnimationFrame(renderModeFrameRef.current);
+      }
 
-    renderModeFrameRef.current = window.requestAnimationFrame(() => {
-      renderModeFrameRef.current = null;
-      setRenderedViewMode(nextViewMode);
-    });
-  }, []);
+      renderModeFrameRef.current = window.requestAnimationFrame(() => {
+        renderModeFrameRef.current = null;
+        setRenderedViewMode(nextViewMode);
+      });
+    },
+    [],
+  );
 
   const syncScrollToRangeStart = useCallback(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -518,10 +524,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   useEffect(() => {
     hourRowHeightRef.current = hourRowHeight;
     pendingHourRowHeightRef.current = hourRowHeight;
-    applyTimelineRowHeightVariable(
-      "--calendar-hour-row-height",
-      hourRowHeight,
-    );
+    applyTimelineRowHeightVariable("--calendar-hour-row-height", hourRowHeight);
   }, [applyTimelineRowHeightVariable, hourRowHeight]);
 
   useEffect(() => {
@@ -807,9 +810,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     }
   };
 
-  const handleHourRowResizeKeyDown = (
-    event: KeyboardEvent<HTMLDivElement>,
-  ) => {
+  const handleHourRowResizeKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "ArrowUp") {
       event.preventDefault();
       commitHourRowHeight(hourRowHeightRef.current - ROW_HEIGHT_STEP);
@@ -1062,150 +1063,150 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
         className="calendar-view-content flex min-h-0 flex-1 flex-col overflow-hidden bg-white"
       >
         {renderedViewMode === "month" ? (
-        <ExplorerCalendarMonthView
-          currentDate={monthTitleDate}
-          selectedDate={currentDate}
-          scrollTargetToken={monthScrollTargetToken}
-          onSelectDate={handleMonthDateSelect}
-          onVisibleMonthChange={handleVisibleMonthChange}
-        />
-      ) : (
-        <div
-          ref={scrollContainerRef}
-          className="calendar-timeline-scroll min-h-0 flex-1 overflow-auto bg-white"
-          onScroll={handleTimelineScroll}
-        >
+          <ExplorerCalendarMonthView
+            currentDate={monthTitleDate}
+            selectedDate={currentDate}
+            scrollTargetToken={monthScrollTargetToken}
+            onSelectDate={handleMonthDateSelect}
+            onVisibleMonthChange={handleVisibleMonthChange}
+          />
+        ) : (
           <div
-            ref={timelineGridRef}
-            className="calendar-timeline-grid grid"
-            style={timelineGridStyle}
+            ref={scrollContainerRef}
+            className="calendar-timeline-scroll min-h-0 flex-1 overflow-auto bg-white"
+            onScroll={handleTimelineScroll}
           >
-            <div className="sticky left-0 top-0 z-30 border-b border-r border-[#e8e7e1] bg-white" />
+            <div
+              ref={timelineGridRef}
+              className="calendar-timeline-grid grid"
+              style={timelineGridStyle}
+            >
+              <div className="sticky left-0 top-0 z-30 border-b border-r border-[#e8e7e1] bg-white" />
 
-            {visibleDays.map((day) => {
-              const selected = isSameDay(day, currentDate);
-              const today = isSameDay(day, new Date());
+              {visibleDays.map((day) => {
+                const selected = isSameDay(day, currentDate);
+                const today = isSameDay(day, new Date());
 
-              return (
-                <div
-                  key={day.toISOString()}
-                  className={cn(
-                    "sticky top-0 z-20 flex h-[56px] items-center justify-center gap-2 border-b border-r border-[#e8e7e1] bg-white text-[13px]",
-                    selected && "bg-[#fff8f8]",
-                  )}
-                >
-                  <span className="font-semibold text-[#9b9a94]">
-                    {WEEKDAY_LABELS[day.getDay()]}
-                  </span>
-                  <span
+                return (
+                  <div
+                    key={day.toISOString()}
                     className={cn(
-                      "inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 font-bold tabular-nums",
-                      selected
-                        ? "bg-[#ef5555] text-white shadow-[0_5px_14px_rgba(239,85,85,0.28)]"
-                        : today
-                          ? "bg-[#f0efea] text-[#24231f]"
-                          : "text-[#33322f]",
+                      "sticky top-0 z-20 flex h-[56px] items-center justify-center gap-2 border-b border-r border-[#e8e7e1] bg-white text-[13px]",
+                      selected && "bg-[#fff8f8]",
                     )}
                   >
-                    {day.getDate()}
-                  </span>
-                </div>
-              );
-            })}
+                    <span className="font-semibold text-[#9b9a94]">
+                      {WEEKDAY_LABELS[day.getDay()]}
+                    </span>
+                    <span
+                      className={cn(
+                        "inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 font-bold tabular-nums",
+                        selected
+                          ? "bg-[#ef5555] text-white shadow-[0_5px_14px_rgba(239,85,85,0.28)]"
+                          : today
+                            ? "bg-[#f0efea] text-[#24231f]"
+                            : "text-[#33322f]",
+                      )}
+                    >
+                      {day.getDate()}
+                    </span>
+                  </div>
+                );
+              })}
 
-            <div className="calendar-all-day-row calendar-all-day-label-row sticky left-0 z-10 flex items-center justify-center border-b border-r border-[#e8e7e1] bg-white text-[12px] font-semibold text-[#9b9a94]">
-              終日
-              <div
-                role="separator"
-                aria-label="終日行の高さを調整"
-                aria-orientation="horizontal"
-                aria-valuemin={MIN_ALL_DAY_ROW_HEIGHT}
-                aria-valuemax={MAX_ALL_DAY_ROW_HEIGHT}
-                aria-valuenow={allDayRowHeight}
-                tabIndex={0}
-                className="calendar-all-day-boundary-resize-handle"
-                title="ドラッグで終日行の高さを変更。ダブルクリックで初期値に戻します。"
-                onDoubleClick={handleAllDayRowResizeReset}
-                onKeyDown={handleAllDayRowResizeKeyDown}
-                onPointerDown={handleAllDayRowResizePointerDown}
-              />
-            </div>
-
-            {visibleDays.map((day) => (
-              <div
-                key={`allday-${day.toISOString()}`}
-                className={cn(
-                  "calendar-all-day-row relative border-b border-r border-[#e8e7e1]",
-                  isSameDay(day, currentDate) && "bg-[#fff8f8]",
-                )}
-              />
-            ))}
-
-            <div className="sticky left-0 z-10 bg-white">
-              {HOURS.map((hour) => (
+              <div className="calendar-all-day-row calendar-all-day-label-row sticky left-0 z-10 flex items-center justify-center border-b border-r border-[#e8e7e1] bg-white text-[12px] font-semibold text-[#9b9a94]">
+                終日
                 <div
-                  key={`hour-label-${hour}`}
-                  className="calendar-hour-row calendar-hour-label-row relative flex justify-center border-b border-r border-[#e8e7e1] pt-2 text-[12px] text-[#8b8a84]"
-                >
-                  {createHourLabel(hour)}
-                  <div
-                    role="separator"
-                    aria-label="1時間の高さを調整"
-                    aria-orientation="horizontal"
-                    aria-valuemin={MIN_HOUR_ROW_HEIGHT}
-                    aria-valuemax={MAX_HOUR_ROW_HEIGHT}
-                    aria-valuenow={hourRowHeight}
-                    tabIndex={0}
-                    className="calendar-hour-boundary-resize-handle"
-                    title="ドラッグで1時間の高さを変更。ダブルクリックで初期値に戻します。"
-                    onDoubleClick={handleHourRowResizeReset}
-                    onKeyDown={handleHourRowResizeKeyDown}
-                    onPointerDown={handleHourRowResizePointerDown}
-                  />
-                </div>
-              ))}
-            </div>
+                  role="separator"
+                  aria-label="終日行の高さを調整"
+                  aria-orientation="horizontal"
+                  aria-valuemin={MIN_ALL_DAY_ROW_HEIGHT}
+                  aria-valuemax={MAX_ALL_DAY_ROW_HEIGHT}
+                  aria-valuenow={allDayRowHeight}
+                  tabIndex={0}
+                  className="calendar-all-day-boundary-resize-handle"
+                  title="ドラッグで終日行の高さを変更。ダブルクリックで初期値に戻します。"
+                  onDoubleClick={handleAllDayRowResizeReset}
+                  onKeyDown={handleAllDayRowResizeKeyDown}
+                  onPointerDown={handleAllDayRowResizePointerDown}
+                />
+              </div>
 
-            {visibleDays.map((day) => {
-              const events = demoEvents.filter((event) =>
-                isSameDay(event.startsAt, day),
-              );
-
-              return (
+              {visibleDays.map((day) => (
                 <div
-                  key={`day-body-${day.toISOString()}`}
+                  key={`allday-${day.toISOString()}`}
                   className={cn(
-                    "relative border-r border-[#e8e7e1]",
+                    "calendar-all-day-row relative border-b border-r border-[#e8e7e1]",
                     isSameDay(day, currentDate) && "bg-[#fff8f8]",
                   )}
-                >
-                  {HOURS.map((hour) => (
-                    <div
-                      key={`${day.toISOString()}-${hour}`}
-                      className="calendar-hour-row border-b border-[#e8e7e1]"
-                    />
-                  ))}
+                />
+              ))}
 
-                  {events.map((event) => (
-                    <article
-                      key={event.id}
-                      style={calculateEventStyle(event)}
-                      className="calendar-event-card absolute left-2 right-2 overflow-hidden rounded-[10px] border border-[#f2c4c0] bg-[#fff1f0] px-2.5 py-2 text-[#7f2d28] shadow-[0_8px_18px_rgba(127,45,40,0.08)]"
-                    >
-                      <div className="truncate text-[12px] font-bold leading-4">
-                        {event.title}
-                      </div>
-                      <div className="mt-0.5 text-[10px] font-medium tabular-nums opacity-70">
-                        {format(event.startsAt, "HH:mm")}
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              );
-            })}
+              <div className="sticky left-0 z-10 bg-white">
+                {HOURS.map((hour) => (
+                  <div
+                    key={`hour-label-${hour}`}
+                    className="calendar-hour-row calendar-hour-label-row relative flex justify-center border-b border-r border-[#e8e7e1] pt-2 text-[12px] text-[#8b8a84]"
+                  >
+                    {createHourLabel(hour)}
+                    <div
+                      role="separator"
+                      aria-label="1時間の高さを調整"
+                      aria-orientation="horizontal"
+                      aria-valuemin={MIN_HOUR_ROW_HEIGHT}
+                      aria-valuemax={MAX_HOUR_ROW_HEIGHT}
+                      aria-valuenow={hourRowHeight}
+                      tabIndex={0}
+                      className="calendar-hour-boundary-resize-handle"
+                      title="ドラッグで1時間の高さを変更。ダブルクリックで初期値に戻します。"
+                      onDoubleClick={handleHourRowResizeReset}
+                      onKeyDown={handleHourRowResizeKeyDown}
+                      onPointerDown={handleHourRowResizePointerDown}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {visibleDays.map((day) => {
+                const events = demoEvents.filter((event) =>
+                  isSameDay(event.startsAt, day),
+                );
+
+                return (
+                  <div
+                    key={`day-body-${day.toISOString()}`}
+                    className={cn(
+                      "relative border-r border-[#e8e7e1]",
+                      isSameDay(day, currentDate) && "bg-[#fff8f8]",
+                    )}
+                  >
+                    {HOURS.map((hour) => (
+                      <div
+                        key={`${day.toISOString()}-${hour}`}
+                        className="calendar-hour-row border-b border-[#e8e7e1]"
+                      />
+                    ))}
+
+                    {events.map((event) => (
+                      <article
+                        key={event.id}
+                        style={calculateEventStyle(event)}
+                        className="calendar-event-card absolute left-2 right-2 overflow-hidden rounded-[10px] border border-[#f2c4c0] bg-[#fff1f0] px-2.5 py-2 text-[#7f2d28] shadow-[0_8px_18px_rgba(127,45,40,0.08)]"
+                      >
+                        <div className="truncate text-[12px] font-bold leading-4">
+                          {event.title}
+                        </div>
+                        <div className="mt-0.5 text-[10px] font-medium tabular-nums opacity-70">
+                          {format(event.startsAt, "HH:mm")}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </section>
   );

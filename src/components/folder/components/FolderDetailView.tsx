@@ -168,9 +168,9 @@ export const FolderDetailView = ({
     useState<ExplorerDetailTagEditorState | null>(null);
   const [optimisticOrderByKey, setOptimisticOrderByKey] =
     useState<ExplorerDetailOptimisticOrderState>({});
-  const [pendingReorderKeys, setPendingReorderKeys] = useState<ReadonlySet<string>>(
-    () => new Set(),
-  );
+  const [pendingReorderKeys, setPendingReorderKeys] = useState<
+    ReadonlySet<string>
+  >(() => new Set());
   const tagEditorSkipNextBlurRef = useRef(false);
   const { tags, tagById, addTag } = useTags();
   const { updateCard } = useCardCommands();

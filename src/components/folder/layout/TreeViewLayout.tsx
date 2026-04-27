@@ -782,7 +782,7 @@ const TreeViewLayout = ({
   const toggleCalendar = useExplorerCalendarViewStore((state) => state.toggle);
   const isCalendarSectionCollapsed = !isCalendarOpen;
   const toggleCalendarSectionCollapsed = toggleCalendar;
-if (isExplorerDataLoading) {
+  if (isExplorerDataLoading) {
     return (
       <div className="space-y-3 p-4">
         {[...Array(3)].map((_, index) => (

@@ -140,7 +140,6 @@ const SectionListIcon: React.FC = () => (
   </svg>
 );
 
-
 const GlobeIcon: React.FC = () => (
   <svg
     width="14"

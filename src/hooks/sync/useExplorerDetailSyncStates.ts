@@ -77,7 +77,9 @@ const toLocalSyncViewState = (
   return {
     status: "synced",
     label: "同期済み",
-    title: lastSyncedAt ? "Manifolia Cloudと同期済みです" : "同期キューはありません",
+    title: lastSyncedAt
+      ? "Manifolia Cloudと同期済みです"
+      : "同期キューはありません",
   };
 };
 
@@ -88,9 +90,17 @@ const chooseQueueItem = (
   if (!current) return candidate;
 
   const currentStatus =
-    current.status === "processing" ? "syncing" : current.status === "pending" ? "pending" : "unknown";
+    current.status === "processing"
+      ? "syncing"
+      : current.status === "pending"
+        ? "pending"
+        : "unknown";
   const candidateStatus =
-    candidate.status === "processing" ? "syncing" : candidate.status === "pending" ? "pending" : "unknown";
+    candidate.status === "processing"
+      ? "syncing"
+      : candidate.status === "pending"
+        ? "pending"
+        : "unknown";
 
   return syncStatusPriority[candidateStatus] < syncStatusPriority[currentStatus]
     ? candidate
@@ -102,10 +112,7 @@ export const useExplorerDetailSyncStates = (
 ): Map<string, ExplorerDetailSyncViewState> => {
   const { currentUser } = useAuthSession();
 
-  const rowKeys = useMemo(
-    () => rows.map((row) => row.key).join("|"),
-    [rows],
-  );
+  const rowKeys = useMemo(() => rows.map((row) => row.key).join("|"), [rows]);
 
   const snapshot = useLiveQuery<ExplorerSyncSnapshot>(async () => {
     if (!currentUser || rows.length === 0) {
