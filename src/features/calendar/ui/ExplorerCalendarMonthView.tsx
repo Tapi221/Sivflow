@@ -114,6 +114,7 @@ export const ExplorerCalendarMonthView = ({
   const prependScrollHeightRef = useRef<number | null>(null);
   const isExtendingBeforeRef = useRef(false);
   const isExtendingAfterRef = useRef(false);
+  const isMonthRowResizingRef = useRef(false);
   const pendingScrollWeekKeyRef = useRef<string | null>(
     getCalendarWeekKey(currentDate),
   );
@@ -146,14 +147,17 @@ export const ExplorerCalendarMonthView = ({
     "--calendar-month-row-height": `${monthRowHeight}px`,
   };
 
-  const setWeekRowRef = useCallback((weekKey: string, node: HTMLElement | null) => {
-    if (node) {
-      weekRowRefs.current.set(weekKey, node);
-      return;
-    }
+  const setWeekRowRef = useCallback(
+    (weekKey: string, node: HTMLElement | null) => {
+      if (node) {
+        weekRowRefs.current.set(weekKey, node);
+        return;
+      }
 
-    weekRowRefs.current.delete(weekKey);
-  }, []);
+      weekRowRefs.current.delete(weekKey);
+    },
+    [],
+  );
 
   const getMonthResizeAnchor = useCallback(
     (scroller: HTMLElement): MonthRowResizeAnchor | null => {
@@ -215,7 +219,9 @@ export const ExplorerCalendarMonthView = ({
   const getMonthResizeAnchorFromElement = useCallback(
     (element: HTMLElement): MonthRowResizeAnchor | null => {
       const scroller = scrollContainerRef.current;
-      const row = element.closest("[data-calendar-week-key]") as HTMLElement | null;
+      const row = element.closest(
+        "[data-calendar-week-key]",
+      ) as HTMLElement | null;
       const weekKey = row?.dataset.calendarWeekKey;
 
       if (!scroller || !row || !weekKey) {
@@ -328,7 +334,11 @@ export const ExplorerCalendarMonthView = ({
         window.requestAnimationFrame(() => syncVisibleMonthFromScroll(scroller));
       }
     },
-    [applyMonthRowHeightVariable, getMonthResizeAnchor, syncVisibleMonthFromScroll],
+    [
+      applyMonthRowHeightVariable,
+      getMonthResizeAnchor,
+      syncVisibleMonthFromScroll,
+    ],
   );
 
   useEffect(() => {
@@ -401,6 +411,10 @@ export const ExplorerCalendarMonthView = ({
 
   const handleMonthScroll = useCallback(
     (event: UIEvent<HTMLDivElement>) => {
+      if (isMonthRowResizingRef.current) {
+        return;
+      }
+
       const scroller = event.currentTarget;
 
       if (
@@ -444,6 +458,7 @@ export const ExplorerCalendarMonthView = ({
       event.stopPropagation();
 
       const startHeight = monthRowHeightRef.current;
+      isMonthRowResizingRef.current = true;
       monthRowResizeStateRef.current = {
         startY: event.clientY,
         startHeight,
@@ -475,6 +490,7 @@ export const ExplorerCalendarMonthView = ({
           resizeState?.anchor ?? null,
         );
         monthRowResizeStateRef.current = null;
+        isMonthRowResizingRef.current = false;
         document.body.style.cursor = previousCursor;
         document.body.style.userSelect = previousUserSelect;
         window.removeEventListener("pointermove", handlePointerMove);
@@ -582,8 +598,9 @@ export const ExplorerCalendarMonthView = ({
                     className={cn(
                       "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#ebeae4] bg-white text-left transition-colors",
                       !isLastColumn && "border-r",
-                      selected && "bg-[#fff9f8]",
-                      !selected && "hover:bg-[#fbfaf7]",
+                      todayCell && "bg-[#fff9f8]",
+                      selected && !todayCell && "bg-[#fbfaf7]",
+                      !selected && !todayCell && "hover:bg-[#fbfaf7]",
                     )}
                   >
                     <button
@@ -598,10 +615,10 @@ export const ExplorerCalendarMonthView = ({
                       <span
                         className={cn(
                           "absolute left-4 top-4 inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[15px] font-semibold tabular-nums transition-colors",
-                          selected
+                          todayCell
                             ? "bg-[#ef5555] text-white shadow-[0_7px_18px_rgba(239,85,85,0.24)]"
-                            : todayCell
-                              ? "bg-[#f0efea] text-[#24231f]"
+                            : selected
+                              ? "bg-[#f0efea] text-[#24231f] ring-1 ring-[#d8d6ce]"
                               : day.isCurrentMonth
                                 ? "text-[#24231f]"
                                 : "text-[#b0aea8]",
