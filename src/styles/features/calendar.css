@@ -32,7 +32,13 @@
     text-shadow: none;
   }
 
+  .calendar-view-content {
+    scrollbar-gutter: stable;
+  }
+
+  .calendar-month-scroll,
   .calendar-timeline-scroll {
+    scrollbar-gutter: stable;
     overscroll-behavior: contain;
   }
 
