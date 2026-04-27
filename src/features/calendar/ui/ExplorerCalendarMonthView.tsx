@@ -11,9 +11,10 @@ import {
 } from "react";
 
 import {
-  buildCalendarMonthPages,
+  buildCalendarMonthWeeks,
   getCalendarMonthKey,
-  type CalendarMonthPage,
+  getCalendarWeekKey,
+  type CalendarMonthWeek,
 } from "@/features/calendar/model/monthGrid";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,11 @@ const createInitialMonthOffsetRange = () => ({
   startOffset: -INITIAL_MONTH_BUFFER,
   endOffset: INITIAL_MONTH_BUFFER,
 });
+
+const getMonthAnnotation = (date: Date): string | null => {
+  if (date.getDate() !== 1) return null;
+  return format(date, "M月", { locale: ja });
+};
 
 type ExplorerCalendarMonthViewProps = {
   currentDate: Date;
@@ -44,12 +50,12 @@ export const ExplorerCalendarMonthView = ({
   onVisibleMonthChange,
 }: ExplorerCalendarMonthViewProps) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const monthSectionRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const weekRowRefs = useRef<Map<string, HTMLElement>>(new Map());
   const prependScrollHeightRef = useRef<number | null>(null);
   const isExtendingBeforeRef = useRef(false);
   const isExtendingAfterRef = useRef(false);
-  const pendingScrollMonthKeyRef = useRef<string | null>(
-    getCalendarMonthKey(currentDate),
+  const pendingScrollWeekKeyRef = useRef<string | null>(
+    getCalendarWeekKey(currentDate),
   );
   const lastScrollTargetTokenRef = useRef(scrollTargetToken);
   const visibleMonthKeyRef = useRef(getCalendarMonthKey(currentDate));
@@ -60,9 +66,9 @@ export const ExplorerCalendarMonthView = ({
   );
   const today = useMemo(() => new Date(), []);
 
-  const monthPages = useMemo(
+  const monthWeeks = useMemo(
     () =>
-      buildCalendarMonthPages({
+      buildCalendarMonthWeeks({
         anchorDate: anchorMonth,
         startOffset: monthOffsetRange.startOffset,
         endOffset: monthOffsetRange.endOffset,
@@ -70,34 +76,31 @@ export const ExplorerCalendarMonthView = ({
     [anchorMonth, monthOffsetRange.endOffset, monthOffsetRange.startOffset],
   );
 
-  const setMonthSectionRef = useCallback(
-    (monthKey: string, node: HTMLElement | null) => {
-      if (node) {
-        monthSectionRefs.current.set(monthKey, node);
-        return;
-      }
+  const setWeekRowRef = useCallback((weekKey: string, node: HTMLElement | null) => {
+    if (node) {
+      weekRowRefs.current.set(weekKey, node);
+      return;
+    }
 
-      monthSectionRefs.current.delete(monthKey);
-    },
-    [],
-  );
+    weekRowRefs.current.delete(weekKey);
+  }, []);
 
   const syncVisibleMonthFromScroll = useCallback(
     (scroller: HTMLElement) => {
-      if (!onVisibleMonthChange || monthPages.length === 0) return;
+      if (!onVisibleMonthChange || monthWeeks.length === 0) return;
 
       const scrollerRect = scroller.getBoundingClientRect();
       const sampleY = scrollerRect.top + MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
-      let closestPage: CalendarMonthPage | null = null;
+      let closestWeek: CalendarMonthWeek | null = null;
       let closestDistance = Number.POSITIVE_INFINITY;
 
-      for (const page of monthPages) {
-        const section = monthSectionRefs.current.get(page.key);
-        if (!section) continue;
+      for (const week of monthWeeks) {
+        const row = weekRowRefs.current.get(week.key);
+        if (!row) continue;
 
-        const rect = section.getBoundingClientRect();
+        const rect = row.getBoundingClientRect();
         if (rect.top <= sampleY && rect.bottom > sampleY) {
-          closestPage = page;
+          closestWeek = week;
           break;
         }
 
@@ -107,18 +110,19 @@ export const ExplorerCalendarMonthView = ({
         );
         if (distance < closestDistance) {
           closestDistance = distance;
-          closestPage = page;
+          closestWeek = week;
         }
       }
 
-      if (!closestPage || closestPage.key === visibleMonthKeyRef.current) {
-        return;
-      }
+      if (!closestWeek) return;
 
-      visibleMonthKeyRef.current = closestPage.key;
-      onVisibleMonthChange(closestPage.monthStart);
+      const nextMonthKey = getCalendarMonthKey(closestWeek.visibleMonthDate);
+      if (nextMonthKey === visibleMonthKeyRef.current) return;
+
+      visibleMonthKeyRef.current = nextMonthKey;
+      onVisibleMonthChange(closestWeek.visibleMonthDate);
     },
-    [monthPages, onVisibleMonthChange],
+    [monthWeeks, onVisibleMonthChange],
   );
 
   useEffect(() => {
@@ -130,7 +134,7 @@ export const ExplorerCalendarMonthView = ({
 
     const targetMonthKey = getCalendarMonthKey(currentDate);
     visibleMonthKeyRef.current = targetMonthKey;
-    pendingScrollMonthKeyRef.current = targetMonthKey;
+    pendingScrollWeekKeyRef.current = getCalendarWeekKey(currentDate);
     prependScrollHeightRef.current = null;
     isExtendingBeforeRef.current = false;
     isExtendingAfterRef.current = false;
@@ -140,17 +144,17 @@ export const ExplorerCalendarMonthView = ({
   }, [currentDate, scrollTargetToken]);
 
   useLayoutEffect(() => {
-    const targetMonthKey = pendingScrollMonthKeyRef.current;
-    if (!targetMonthKey) return;
+    const targetWeekKey = pendingScrollWeekKeyRef.current;
+    if (!targetWeekKey) return;
 
     const scroller = scrollContainerRef.current;
-    const targetSection = monthSectionRefs.current.get(targetMonthKey);
-    if (!scroller || !targetSection) return;
+    const targetRow = weekRowRefs.current.get(targetWeekKey);
+    if (!scroller || !targetRow) return;
 
-    scroller.scrollTop = targetSection.offsetTop;
-    pendingScrollMonthKeyRef.current = null;
+    scroller.scrollTop = targetRow.offsetTop;
+    pendingScrollWeekKeyRef.current = null;
     syncVisibleMonthFromScroll(scroller);
-  }, [monthPages, syncVisibleMonthFromScroll]);
+  }, [monthWeeks, syncVisibleMonthFromScroll]);
 
   useLayoutEffect(() => {
     const previousScrollHeight = prependScrollHeightRef.current;
@@ -166,7 +170,7 @@ export const ExplorerCalendarMonthView = ({
     scroller.scrollTop += scroller.scrollHeight - previousScrollHeight;
     prependScrollHeightRef.current = null;
     isExtendingBeforeRef.current = false;
-  }, [monthPages.length]);
+  }, [monthWeeks.length]);
 
   useEffect(() => {
     isExtendingAfterRef.current = false;
@@ -225,47 +229,31 @@ export const ExplorerCalendarMonthView = ({
         className="min-h-0 flex-1 overflow-y-auto bg-white"
         onScroll={handleMonthScroll}
       >
-        {monthPages.map((monthPage) => (
-          <section
-            key={monthPage.key}
-            ref={(node) => setMonthSectionRef(monthPage.key, node)}
-            aria-label={monthPage.label}
-            data-calendar-month-key={monthPage.key}
-            className="border-b border-[#e6e4dc] bg-white"
-          >
-            <div className="grid grid-cols-7 bg-white">
-              {monthPage.days.map((day, index) => {
-                const isLastColumn = index % 7 === 6;
-                const hasBottomBorder = index < monthPage.days.length - 7;
-                const cellFrameClassName = cn(
-                  "relative min-h-[112px] overflow-hidden border-[#ebeae4] bg-white text-left outline-none transition-colors",
-                  !isLastColumn && "border-r",
-                  hasBottomBorder && "border-b",
-                );
-
-                if (!day.isCurrentMonth) {
-                  return (
-                    <div
-                      key={`${monthPage.key}:${day.key}`}
-                      aria-hidden="true"
-                      className={cellFrameClassName}
-                    />
-                  );
-                }
-
+        <div className="bg-white">
+          {monthWeeks.map((week) => (
+            <div
+              key={week.key}
+              ref={(node) => setWeekRowRef(week.key, node)}
+              data-calendar-week-key={week.key}
+              className="grid grid-cols-7 bg-white"
+            >
+              {week.days.map((day, index) => {
                 const selected = isSameDay(day.date, selectedDate);
                 const todayCell = isSameDay(day.date, today);
+                const monthAnnotation = getMonthAnnotation(day.date);
+                const isLastColumn = index % 7 === 6;
 
                 return (
                   <button
-                    key={`${monthPage.key}:${day.key}`}
+                    key={day.key}
                     type="button"
                     aria-label={format(day.date, "yyyy年M月d日", {
                       locale: ja,
                     })}
                     aria-pressed={selected}
                     className={cn(
-                      cellFrameClassName,
+                      "group relative min-h-[112px] overflow-hidden border-b border-[#ebeae4] bg-white text-left outline-none transition-colors",
+                      !isLastColumn && "border-r",
                       selected && "bg-[#fff9f8]",
                       !selected && "hover:bg-[#fbfaf7]",
                       "focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
@@ -279,17 +267,25 @@ export const ExplorerCalendarMonthView = ({
                           ? "bg-[#ef5555] text-white shadow-[0_7px_18px_rgba(239,85,85,0.24)]"
                           : todayCell
                             ? "bg-[#f0efea] text-[#24231f]"
-                            : "text-[#24231f]",
+                            : day.isCurrentMonth
+                              ? "text-[#24231f]"
+                              : "text-[#b0aea8]",
                       )}
                     >
                       {day.dayOfMonth}
                     </span>
+
+                    {monthAnnotation ? (
+                      <span className="absolute right-4 top-[18px] text-[12px] font-semibold text-[#a09f98]">
+                        {monthAnnotation}
+                      </span>
+                    ) : null}
                   </button>
                 );
               })}
             </div>
-          </section>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
