@@ -58,8 +58,6 @@ import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPan
 import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
 import { TreeViewTabContent } from "@/components/folder/components/TreeViewTabContent";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarDockPanel } from "@/features/calendar/ui/CalendarDockPanel";
-import { useCalendarDockPanelStore } from "@/features/calendar/store/useCalendarDockPanelStore";
 
 import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions";
 import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
@@ -102,8 +100,6 @@ const TreeViewLayout = ({
   folderSelectionNonce = 0,
 }: TreeViewLayoutProps) => {
   const navigate = useNavigate();
-  const isCalendarDockOpen = useCalendarDockPanelStore((state) => state.isOpen);
-  const closeCalendarDock = useCalendarDockPanelStore((state) => state.close);
   const toast = useToast();
   const { settings } = useUserSettings();
   const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
@@ -983,10 +979,6 @@ const TreeViewLayout = ({
       >
         {sidebarContent}
       </TreeViewSidebar>
-
-      {isCalendarDockOpen ? (
-        <CalendarDockPanel onClose={closeCalendarDock} />
-      ) : null}
 
       {isSectionListMode ? (
         <SectionListColumnPane
