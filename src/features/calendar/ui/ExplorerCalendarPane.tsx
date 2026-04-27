@@ -569,133 +569,117 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
               minWidth: `${gridWidth}px`,
             }}
           >
-          <div className="sticky left-0 top-0 z-30 border-b border-r border-[#e8e7e1] bg-white" />
+            <div className="sticky left-0 top-0 z-30 border-b border-r border-[#e8e7e1] bg-white" />
 
-          {visibleDays.map((day) => {
-            const selected = isSameDay(day, currentDate);
-            const today = isSameDay(day, new Date());
+            {visibleDays.map((day) => {
+              const selected = isSameDay(day, currentDate);
+              const today = isSameDay(day, new Date());
 
-            return (
-              <div
-                key={day.toISOString()}
-                className={cn(
-                  "sticky top-0 z-20 flex h-[56px] items-center justify-center gap-2 border-b border-r border-[#e8e7e1] bg-white text-[13px]",
-                  selected && "bg-[#fff8f8]",
-                )}
-              >
-                <span className="font-semibold text-[#9b9a94]">
-                  {WEEKDAY_LABELS[day.getDay()]}
-                </span>
-                <span
+              return (
+                <div
+                  key={day.toISOString()}
                   className={cn(
-                    "inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 font-bold tabular-nums",
-                    selected
-                      ? "bg-[#ef5555] text-white shadow-[0_5px_14px_rgba(239,85,85,0.28)]"
-                      : today
-                        ? "bg-[#f0efea] text-[#24231f]"
-                        : "text-[#33322f]",
+                    "sticky top-0 z-20 flex h-[56px] items-center justify-center gap-2 border-b border-r border-[#e8e7e1] bg-white text-[13px]",
+                    selected && "bg-[#fff8f8]",
                   )}
                 >
-                  {day.getDate()}
-                </span>
-              </div>
-            );
-          })}
+                  <span className="font-semibold text-[#9b9a94]">
+                    {WEEKDAY_LABELS[day.getDay()]}
+                  </span>
+                  <span
+                    className={cn(
+                      "inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 font-bold tabular-nums",
+                      selected
+                        ? "bg-[#ef5555] text-white shadow-[0_5px_14px_rgba(239,85,85,0.28)]"
+                        : today
+                          ? "bg-[#f0efea] text-[#24231f]"
+                          : "text-[#33322f]",
+                    )}
+                  >
+                    {day.getDate()}
+                  </span>
+                </div>
+              );
+            })}
 
-          <div className="sticky left-0 z-10 flex h-[46px] items-center justify-center border-b border-r border-[#e8e7e1] bg-white text-[12px] font-semibold text-[#9b9a94]">
-            終日
-          </div>
+            <div className="sticky left-0 z-10 flex h-[46px] items-center justify-center border-b border-r border-[#e8e7e1] bg-white text-[12px] font-semibold text-[#9b9a94]">
+              終日
+            </div>
 
-          {visibleDays.map((day) => (
-            <div
-              key={`allday-${day.toISOString()}`}
-              className={cn(
-                "h-[46px] border-b border-r border-[#e8e7e1]",
-                isSameDay(day, currentDate) && "bg-[#fff8f8]",
-              )}
-            />
-          ))}
-
-          <div
-            role="separator"
-            aria-label="1時間の高さを調整"
-            aria-orientation="horizontal"
-            aria-valuemin={MIN_HOUR_ROW_HEIGHT}
-            aria-valuemax={MAX_HOUR_ROW_HEIGHT}
-            aria-valuenow={hourRowHeight}
-            tabIndex={0}
-            className="calendar-hour-row-resize-handle sticky left-0 z-20 flex h-3 cursor-row-resize items-center justify-center border-b border-r border-[#e8e7e1] bg-white"
-            title="ドラッグで1時間の高さを変更。ダブルクリックで初期値に戻します。"
-            onDoubleClick={handleHourRowResizeReset}
-            onKeyDown={handleHourRowResizeKeyDown}
-            onPointerDown={handleHourRowResizePointerDown}
-          >
-            <span className="calendar-hour-row-resize-handle__grip" />
-          </div>
-
-          {visibleDays.map((day) => (
-            <div
-              key={`resize-handle-${day.toISOString()}`}
-              className={cn(
-                "calendar-hour-row-resize-handle flex h-3 cursor-row-resize items-center justify-center border-b border-r border-[#e8e7e1] bg-white",
-                isSameDay(day, currentDate) && "bg-[#fff8f8]",
-              )}
-              title="ドラッグで1時間の高さを変更。ダブルクリックで初期値に戻します。"
-              onDoubleClick={handleHourRowResizeReset}
-              onPointerDown={handleHourRowResizePointerDown}
-            />
-          ))}
-
-          <div className="sticky left-0 z-10 bg-white">
-            {HOURS.map((hour) => (
+            {visibleDays.map((day) => (
               <div
-                key={`hour-label-${hour}`}
-                className="flex justify-center border-b border-r border-[#e8e7e1] pt-2 text-[12px] text-[#8b8a84]"
-                style={hourRowStyle}
-              >
-                {createHourLabel(hour)}
-              </div>
-            ))}
-          </div>
-
-          {visibleDays.map((day) => {
-            const events = demoEvents.filter((event) =>
-              isSameDay(event.startsAt, day),
-            );
-
-            return (
-              <div
-                key={`day-body-${day.toISOString()}`}
+                key={`allday-${day.toISOString()}`}
                 className={cn(
-                  "relative border-r border-[#e8e7e1]",
+                  "h-[46px] border-b border-r border-[#e8e7e1]",
                   isSameDay(day, currentDate) && "bg-[#fff8f8]",
                 )}
-              >
-                {HOURS.map((hour) => (
-                  <div
-                    key={`${day.toISOString()}-${hour}`}
-                    className="border-b border-[#e8e7e1]"
-                    style={hourRowStyle}
-                  />
-                ))}
+              />
+            ))}
 
-                {events.map((event) => (
-                  <article
-                    key={event.id}
-                    style={calculateEventStyle(event, hourRowHeight)}
-                    className="absolute left-2 right-2 overflow-hidden rounded-[10px] border border-[#f2c4c0] bg-[#fff1f0] px-2.5 py-2 text-[#7f2d28] shadow-[0_8px_18px_rgba(127,45,40,0.08)]"
-                  >
-                    <div className="truncate text-[12px] font-bold leading-4">
-                      {event.title}
-                    </div>
-                    <div className="mt-0.5 text-[10px] font-medium tabular-nums opacity-70">
-                      {format(event.startsAt, "HH:mm")}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            );
-          })}
+            <div className="sticky left-0 z-10 bg-white">
+              {HOURS.map((hour) => (
+                <div
+                  key={`hour-label-${hour}`}
+                  className="relative flex justify-center border-b border-r border-[#e8e7e1] pt-2 text-[12px] text-[#8b8a84]"
+                  style={hourRowStyle}
+                >
+                  {createHourLabel(hour)}
+                  <div
+                    role="separator"
+                    aria-label="1時間の高さを調整"
+                    aria-orientation="horizontal"
+                    aria-valuemin={MIN_HOUR_ROW_HEIGHT}
+                    aria-valuemax={MAX_HOUR_ROW_HEIGHT}
+                    aria-valuenow={hourRowHeight}
+                    tabIndex={0}
+                    className="calendar-hour-row-boundary-resize absolute inset-x-0 bottom-[-4px] z-30 h-2 cursor-row-resize"
+                    title="時刻列の境界をドラッグで1時間の高さを変更。ダブルクリックで初期値に戻します。"
+                    onDoubleClick={handleHourRowResizeReset}
+                    onKeyDown={handleHourRowResizeKeyDown}
+                    onPointerDown={handleHourRowResizePointerDown}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {visibleDays.map((day) => {
+              const events = demoEvents.filter((event) =>
+                isSameDay(event.startsAt, day),
+              );
+
+              return (
+                <div
+                  key={`day-body-${day.toISOString()}`}
+                  className={cn(
+                    "relative border-r border-[#e8e7e1]",
+                    isSameDay(day, currentDate) && "bg-[#fff8f8]",
+                  )}
+                >
+                  {HOURS.map((hour) => (
+                    <div
+                      key={`${day.toISOString()}-${hour}`}
+                      className="border-b border-[#e8e7e1]"
+                      style={hourRowStyle}
+                    />
+                  ))}
+
+                  {events.map((event) => (
+                    <article
+                      key={event.id}
+                      style={calculateEventStyle(event, hourRowHeight)}
+                      className="absolute left-2 right-2 overflow-hidden rounded-[10px] border border-[#f2c4c0] bg-[#fff1f0] px-2.5 py-2 text-[#7f2d28] shadow-[0_8px_18px_rgba(127,45,40,0.08)]"
+                    >
+                      <div className="truncate text-[12px] font-bold leading-4">
+                        {event.title}
+                      </div>
+                      <div className="mt-0.5 text-[10px] font-medium tabular-nums opacity-70">
+                        {format(event.startsAt, "HH:mm")}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
