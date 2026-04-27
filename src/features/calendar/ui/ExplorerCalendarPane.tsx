@@ -84,8 +84,8 @@ const WEEK_STARTS_ON_MONDAY = 1;
 const TIME_COLUMN_WIDTH = 74;
 const DAY_COLUMN_MIN_WIDTH = 136;
 const MONTH_NAVIGATION_STEP = 1;
-const INITIAL_TIMELINE_BUFFER_DAYS = 28;
-const TIMELINE_EXTEND_DAYS = 28;
+const INITIAL_TIMELINE_BUFFER_DAYS = 7;
+const TIMELINE_EXTEND_DAYS = 14;
 const TIMELINE_EDGE_THRESHOLD_PX = 320;
 
 const VIEW_MODE_OPTIONS = [
@@ -247,6 +247,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   const isExtendingLeftRef = useRef(false);
   const isExtendingRightRef = useRef(false);
   const shouldSyncScrollRef = useRef(true);
+  const renderModeFrameRef = useRef<number | null>(null);
   const allDayRowResizeStateRef = useRef<TimelineRowResizeState | null>(null);
   const hourRowResizeStateRef = useRef<TimelineRowResizeState | null>(null);
   const allDayRowHeightRef = useRef(DEFAULT_ALL_DAY_ROW_HEIGHT);
@@ -261,7 +262,10 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     startOfMonth(new Date()),
   );
   const [monthScrollTargetToken, setMonthScrollTargetToken] = useState(0);
-  const [viewMode, setViewMode] = useState<CalendarViewMode>("month");
+  const [selectedViewMode, setSelectedViewMode] =
+    useState<CalendarViewMode>("month");
+  const [renderedViewMode, setRenderedViewMode] =
+    useState<CalendarViewMode>("month");
   const [rangeDays, setRangeDays] = useState(DEFAULT_RANGE_DAYS);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [timelineBuffer, setTimelineBuffer] = useState(
@@ -273,14 +277,30 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   const [hourRowHeight, setHourRowHeight] = useState(readStoredHourRowHeight);
 
   const visibleDays = useMemo(
-    () => createVisibleDays(currentDate, viewMode, rangeDays, timelineBuffer),
-    [currentDate, rangeDays, timelineBuffer, viewMode],
+    () =>
+      renderedViewMode === "month"
+        ? []
+        : createVisibleDays(
+            currentDate,
+            renderedViewMode,
+            rangeDays,
+            timelineBuffer,
+          ),
+    [currentDate, rangeDays, renderedViewMode, timelineBuffer],
   );
-  const demoEvents = useMemo(() => createDemoEvents(currentDate), [currentDate]);
+  const demoEvents = useMemo(
+    () => (renderedViewMode === "month" ? [] : createDemoEvents(currentDate)),
+    [currentDate, renderedViewMode],
+  );
 
-  const calendarTitleDate = viewMode === "month" ? monthTitleDate : currentDate;
+  const calendarTitleDate =
+    selectedViewMode === "month" ? monthTitleDate : currentDate;
   const monthLabel = format(calendarTitleDate, "yyyy年 M月", { locale: ja });
-  const viewportDayCount = getViewportDayCount(currentDate, viewMode, rangeDays);
+  const viewportDayCount = getViewportDayCount(
+    currentDate,
+    renderedViewMode,
+    rangeDays,
+  );
   const dayColumnWidth =
     viewportWidth > TIME_COLUMN_WIDTH
       ? Math.max(
@@ -289,7 +309,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
         )
       : DAY_COLUMN_MIN_WIDTH;
   const gridWidth = TIME_COLUMN_WIDTH + visibleDays.length * dayColumnWidth;
-  const dayNavigationStep = viewMode === "week" ? 7 : rangeDays;
+  const dayNavigationStep = selectedViewMode === "week" ? 7 : rangeDays;
   const timelineGridStyle: TimelineGridStyle = {
     "--calendar-all-day-row-height": `${allDayRowHeight}px`,
     "--calendar-hour-row-height": `${hourRowHeight}px`,
@@ -425,6 +445,17 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     setTimelineBuffer(createInitialTimelineBuffer());
   }, []);
 
+  const scheduleRenderedViewMode = useCallback((nextViewMode: CalendarViewMode) => {
+    if (renderModeFrameRef.current !== null) {
+      window.cancelAnimationFrame(renderModeFrameRef.current);
+    }
+
+    renderModeFrameRef.current = window.requestAnimationFrame(() => {
+      renderModeFrameRef.current = null;
+      setRenderedViewMode(nextViewMode);
+    });
+  }, []);
+
   const syncScrollToRangeStart = useCallback(() => {
     const scrollContainer = scrollContainerRef.current;
 
@@ -455,6 +486,10 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
 
   useEffect(() => {
     return () => {
+      if (renderModeFrameRef.current !== null) {
+        window.cancelAnimationFrame(renderModeFrameRef.current);
+      }
+
       if (allDayRowResizeFrameRef.current !== null) {
         window.cancelAnimationFrame(allDayRowResizeFrameRef.current);
       }
@@ -466,7 +501,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   }, []);
 
   useEffect(() => {
-    if (viewMode === "month") {
+    if (renderedViewMode === "month") {
       setViewportWidth(0);
       return undefined;
     }
@@ -490,10 +525,10 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     return () => {
       resizeObserver.disconnect();
     };
-  }, [viewMode]);
+  }, [renderedViewMode]);
 
   useLayoutEffect(() => {
-    if (viewMode === "month" || !shouldSyncScrollRef.current) {
+    if (renderedViewMode === "month" || !shouldSyncScrollRef.current) {
       return;
     }
 
@@ -503,12 +538,12 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     currentDate,
     rangeDays,
     syncScrollToRangeStart,
-    viewMode,
+    renderedViewMode,
     viewportWidth,
   ]);
 
   useLayoutEffect(() => {
-    if (viewMode === "month") {
+    if (renderedViewMode === "month") {
       return;
     }
 
@@ -523,7 +558,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     scrollContainer.scrollLeft += correction;
     prependScrollCorrectionRef.current = 0;
     isExtendingLeftRef.current = false;
-  }, [dayColumnWidth, timelineBuffer.before, viewMode]);
+  }, [dayColumnWidth, renderedViewMode, timelineBuffer.before]);
 
   useEffect(() => {
     isExtendingRightRef.current = false;
@@ -533,7 +568,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     (event: UIEvent<HTMLDivElement>) => {
       const target = event.currentTarget;
 
-      if (viewMode === "month" || dayColumnWidth <= 0) {
+      if (renderedViewMode === "month" || dayColumnWidth <= 0) {
         return;
       }
 
@@ -564,7 +599,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
         }));
       }
     },
-    [dayColumnWidth, viewMode],
+    [dayColumnWidth, renderedViewMode],
   );
 
   const handleTimelineRowResizePointerDown = useCallback(
@@ -746,6 +781,11 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   };
 
   const handleViewModeChange = (nextViewMode: CalendarViewMode) => {
+    if (nextViewMode === selectedViewMode) {
+      return;
+    }
+
+    setSelectedViewMode(nextViewMode);
     resetTimelinePosition();
 
     if (nextViewMode === "month") {
@@ -753,7 +793,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
       requestMonthScrollTarget();
     }
 
-    setViewMode(nextViewMode);
+    scheduleRenderedViewMode(nextViewMode);
   };
 
   const handleRangeDaysToggle = () => {
@@ -767,7 +807,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
     resetTimelinePosition();
     setCurrentDate(today);
 
-    if (viewMode === "month") {
+    if (selectedViewMode === "month") {
       setMonthTitleDate(startOfMonth(today));
       requestMonthScrollTarget();
     }
@@ -776,7 +816,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   const handlePrevious = () => {
     resetTimelinePosition();
 
-    if (viewMode === "month") {
+    if (selectedViewMode === "month") {
       const nextMonth = subMonths(monthTitleDate, MONTH_NAVIGATION_STEP);
       setMonthTitleDate(startOfMonth(nextMonth));
       setCurrentDate(startOfDay(nextMonth));
@@ -790,7 +830,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   const handleNext = () => {
     resetTimelinePosition();
 
-    if (viewMode === "month") {
+    if (selectedViewMode === "month") {
       const nextMonth = addMonths(monthTitleDate, MONTH_NAVIGATION_STEP);
       setMonthTitleDate(startOfMonth(nextMonth));
       setCurrentDate(startOfDay(nextMonth));
@@ -833,7 +873,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
                 type="button"
                 className={cn(
                   "h-8 rounded-[8px] px-4 text-[13px] font-medium transition-colors",
-                  viewMode === item.value
+                  selectedViewMode === item.value
                     ? "bg-white text-[#24231f] shadow-[0_1px_4px_rgba(15,23,42,0.12)]"
                     : "text-[#777671] hover:text-[#33322f]",
                 )}
@@ -844,7 +884,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
             ))}
           </div>
 
-          {viewMode === "days" ? (
+          {selectedViewMode === "days" ? (
             <button
               type="button"
               className="hidden h-10 items-center overflow-hidden rounded-[10px] border border-[#dddcd5] bg-[#f6f6f4] text-[13px] font-semibold text-[#33322f] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] transition-colors hover:bg-white md:flex"
@@ -896,7 +936,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
         ) : null}
       </header>
 
-      {viewMode === "month" ? (
+      {renderedViewMode === "month" ? (
         <ExplorerCalendarMonthView
           currentDate={monthTitleDate}
           selectedDate={currentDate}
@@ -973,14 +1013,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
                   "calendar-all-day-row relative border-b border-r border-[#e8e7e1]",
                   isSameDay(day, currentDate) && "bg-[#fff8f8]",
                 )}
-              >
-                <div
-                  className="calendar-all-day-boundary-resize-handle"
-                  title="ドラッグで終日行の高さを変更。ダブルクリックで初期値に戻します。"
-                  onDoubleClick={handleAllDayRowResizeReset}
-                  onPointerDown={handleAllDayRowResizePointerDown}
-                />
-              </div>
+              />
             ))}
 
             <div className="sticky left-0 z-10 bg-white">
