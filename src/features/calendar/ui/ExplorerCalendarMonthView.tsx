@@ -212,6 +212,26 @@ export const ExplorerCalendarMonthView = ({
     [],
   );
 
+  const getMonthResizeAnchorFromElement = useCallback(
+    (element: HTMLElement): MonthRowResizeAnchor | null => {
+      const scroller = scrollContainerRef.current;
+      const row = element.closest("[data-calendar-week-key]") as HTMLElement | null;
+      const weekKey = row?.dataset.calendarWeekKey;
+
+      if (!scroller || !row || !weekKey) {
+        return null;
+      }
+
+      const scrollerRect = scroller.getBoundingClientRect();
+
+      return {
+        weekKey,
+        offsetTop: row.getBoundingClientRect().top - scrollerRect.top,
+      };
+    },
+    [],
+  );
+
   const syncVisibleMonthFromScroll = useCallback(
     (scroller: HTMLElement) => {
       if (!onVisibleMonthChange || monthWeeks.length === 0) return;
@@ -423,12 +443,11 @@ export const ExplorerCalendarMonthView = ({
       event.preventDefault();
       event.stopPropagation();
 
-      const scroller = scrollContainerRef.current;
       const startHeight = monthRowHeightRef.current;
       monthRowResizeStateRef.current = {
         startY: event.clientY,
         startHeight,
-        anchor: scroller ? getMonthResizeAnchor(scroller) : null,
+        anchor: getMonthResizeAnchorFromElement(event.currentTarget),
       };
       pendingMonthRowHeightRef.current = startHeight;
 
@@ -469,7 +488,7 @@ export const ExplorerCalendarMonthView = ({
     },
     [
       commitMonthRowHeight,
-      getMonthResizeAnchor,
+      getMonthResizeAnchorFromElement,
       scheduleMonthRowHeightVariable,
     ],
   );
