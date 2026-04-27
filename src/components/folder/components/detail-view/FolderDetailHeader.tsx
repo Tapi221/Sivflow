@@ -1,7 +1,6 @@
 import {
   closestCenter,
   DndContext,
-  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -10,7 +9,6 @@ import {
 import {
   horizontalListSortingStrategy,
   SortableContext,
-  sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -111,7 +109,6 @@ const HeaderCell = ({
   const {
     attributes,
     listeners,
-    setActivatorNodeRef,
     setNodeRef,
     transform,
     transition,
@@ -123,13 +120,11 @@ const HeaderCell = ({
     transition,
   } satisfies CSSProperties;
 
-  const sortLabel = (
-    <>
-      <span className="truncate">
-        {label}
-        {sortKey ? getHeaderSortLabel(sortState, sortKey) : ""}
-      </span>
-    </>
+  const labelContent = (
+    <span className="truncate">
+      {label}
+      {sortKey ? getHeaderSortLabel(sortState, sortKey) : ""}
+    </span>
   );
 
   return (
@@ -139,46 +134,33 @@ const HeaderCell = ({
       aria-sort={sortKey ? getHeaderAriaSort(sortState, sortKey) : undefined}
       data-column-id={columnId}
       data-column-dragging={isDragging ? "true" : undefined}
+      title="横にドラッグして列の順序を変更"
       className={cn(
-        "relative flex min-w-0 items-center gap-1 border-r border-[#e6e4dc] px-2",
-        "transition-colors",
+        "relative flex min-w-0 items-center border-r border-[#e6e4dc] px-3",
+        "cursor-grab transition-colors active:cursor-grabbing",
+        "hover:bg-[#eeece4] hover:text-[#24231f]",
         isDragging && "z-50 bg-[#eeece4] opacity-80 shadow-sm",
         className,
       )}
       style={sortableStyle}
+      {...attributes}
+      {...listeners}
     >
-      <button
-        ref={setActivatorNodeRef}
-        type="button"
-        aria-label={`${label}列をドラッグして順序を変更`}
-        title="ドラッグで列の順序を変更"
-        data-detail-column-reorder-handle="true"
-        className={cn(
-          "flex h-6 w-4 shrink-0 cursor-grab items-center justify-center rounded-[4px]",
-          "text-[13px] leading-none text-[#aaa69c] transition-colors",
-          "hover:bg-[#e6e4dc] hover:text-[#6f6b63] active:cursor-grabbing",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        )}
-        {...attributes}
-        {...listeners}
-      >
-        ⋮⋮
-      </button>
-
       {sortKey ? (
         <button
           type="button"
+          aria-label={`${label}列で並び替え`}
           className={cn(
-            "flex min-w-0 flex-1 items-center text-left",
+            "flex min-w-0 flex-1 cursor-inherit items-center text-left",
             "text-[#777671] transition-colors hover:text-[#24231f]",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           )}
           onClick={() => onSort(sortKey)}
         >
-          {sortLabel}
+          {labelContent}
         </button>
       ) : (
-        <span className="min-w-0 flex-1 truncate">{sortLabel}</span>
+        <span className="min-w-0 flex-1 truncate">{labelContent}</span>
       )}
 
       <span
@@ -221,11 +203,8 @@ export const FolderDetailHeader = ({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 6,
+        distance: 8,
       },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
 
