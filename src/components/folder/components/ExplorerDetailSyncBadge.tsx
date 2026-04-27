@@ -6,12 +6,12 @@ type ExplorerDetailSyncBadgeProps = {
 };
 
 const syncBadgeClassNameByStatus = {
-  synced: "border-[#dedbd2] bg-[#faf9f5] text-[#6f6b63]",
-  syncing: "border-[#d8d6cf] bg-[#f7f6f1] text-[#5f625f]",
-  pending: "border-[#dedbd2] bg-[#fbfaf6] text-[#746f65]",
-  error: "border-[#e1d8d5] bg-[#fbf8f6] text-[#7a5d58]",
-  conflict: "border-[#ddd8ce] bg-[#faf8f2] text-[#746a59]",
-  unknown: "border-[#e1dfd8] bg-[#fafafa] text-[#777671]",
+  synced: "border-[#d7dde4] bg-[#f6f8fa] text-[#63707d]",
+  syncing: "border-[#b9d2ea] bg-[#eef7ff] text-[#2368a6]",
+  pending: "border-[#ead28e] bg-[#fff8dd] text-[#846211]",
+  error: "border-[#f0b7ae] bg-[#fff1ef] text-[#a43d32]",
+  conflict: "border-[#f0c779] bg-[#fff4d8] text-[#83550d]",
+  unknown: "border-[#dce2e8] bg-[#fafbfc] text-[#7a858f]",
 } satisfies Record<ExplorerDetailSyncViewState["status"], string>;
 
 export const ExplorerDetailSyncBadge = ({
@@ -20,9 +20,10 @@ export const ExplorerDetailSyncBadge = ({
   return (
     <span
       title={state.title}
+      data-sync-status={state.status}
       className={cn(
-        "inline-flex h-6 max-w-full items-center rounded-[7px] border px-2",
-        "text-[12px] leading-none shadow-[0_1px_0_rgba(36,35,31,0.02)]",
+        "explorer-detail-sync-badge inline-flex h-6 max-w-full items-center rounded-full border px-2",
+        "text-[12px] font-semibold leading-none shadow-[0_1px_0_rgba(255,255,255,0.72)]",
         syncBadgeClassNameByStatus[state.status],
       )}
     >
