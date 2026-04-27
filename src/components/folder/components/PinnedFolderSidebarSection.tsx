@@ -57,13 +57,14 @@ const PINNED_FOLDER_SECTION_CONTENT_ID =
   "pinned-folder-sidebar-section-content";
 const FOLDER_LIST_SECTION_HEADER_ID = "folder-list-sidebar-section-header";
 const FOLDER_LIST_SECTION_CONTENT_ID = "folder-list-sidebar-section-content";
+const TAG_SECTION_CONTENT_ID = "tag-sidebar-section-content";
 const SIDEBAR_SECTION_RESIZE_STORAGE_PREFIX =
   "flashcard-master.explorer.sidebarSectionHeight";
 const SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE =
   "data-explorer-sidebar-section-resize-handle";
-const SIDEBAR_SECTION_RESIZE_HANDLE_COLOR = "rgba(0, 0, 0, 0.1)";
+const SIDEBAR_SECTION_RESIZE_HANDLE_COLOR = "rgba(15, 23, 42, 0.08)";
 const SIDEBAR_SECTION_RESIZE_HANDLE_ACTIVE_COLOR =
-  "rgba(0, 0, 0, 0.22)";
+  "rgba(15, 23, 42, 0.22)";
 
 const SIDEBAR_SECTION_RESIZE_TARGETS: SidebarSectionResizeTarget[] = [
   {
@@ -81,36 +82,19 @@ const SIDEBAR_SECTION_RESIZE_TARGETS: SidebarSectionResizeTarget[] = [
     minHeight: 96,
     maxHeight: 720,
     resolveElement: () =>
-      document.getElementById(FOLDER_LIST_SECTION_CONTENT_ID),
+      getSidebarSectionContentOrHeaderElement(FOLDER_LIST_SECTION_CONTENT_ID),
     resolveAnchor: () =>
-      document.getElementById(FOLDER_LIST_SECTION_CONTENT_ID) ??
+      getSidebarSectionContentOrHeaderElement(FOLDER_LIST_SECTION_CONTENT_ID) ??
       document.getElementById(FOLDER_LIST_SECTION_HEADER_ID),
   },
   {
     id: "tag",
     minHeight: 38,
-    maxHeight: 260,
+    maxHeight: 320,
     resolveElement: () =>
-      document.querySelector<HTMLElement>(
-        '[aria-controls="tag-sidebar-section-content"]',
-      )?.parentElement ?? null,
+      getSidebarSectionContentOrHeaderElement(TAG_SECTION_CONTENT_ID),
     resolveAnchor: () =>
-      document.querySelector<HTMLElement>(
-        '[aria-controls="tag-sidebar-section-content"]',
-      )?.parentElement ?? null,
-  },
-  {
-    id: "calendar",
-    minHeight: 38,
-    maxHeight: 260,
-    resolveElement: () =>
-      document.querySelector<HTMLElement>(
-        '[aria-controls="calendar-sidebar-section-content"]',
-      )?.parentElement ?? null,
-    resolveAnchor: () =>
-      document.querySelector<HTMLElement>(
-        '[aria-controls="calendar-sidebar-section-content"]',
-      )?.parentElement ?? null,
+      getSidebarSectionContentOrHeaderElement(TAG_SECTION_CONTENT_ID),
   },
 ];
 
@@ -142,6 +126,21 @@ const stopCreateButtonFocusTransfer = (
     | React.MouseEvent<HTMLButtonElement>,
 ) => {
   event.stopPropagation();
+};
+
+const getSidebarSectionHeaderElement = (contentId: string) => {
+  return (
+    document.querySelector<HTMLElement>(
+      `[aria-controls="${contentId}"]`,
+    )?.parentElement ?? null
+  );
+};
+
+const getSidebarSectionContentOrHeaderElement = (contentId: string) => {
+  return (
+    document.getElementById(contentId) ??
+    getSidebarSectionHeaderElement(contentId)
+  );
 };
 
 const getSidebarSectionResizeStorageKey = (sectionId: string) => {
@@ -203,7 +202,6 @@ const createSidebarSectionResizeHandle = (
   element: HTMLElement,
 ) => {
   const handle = document.createElement("div");
-  const hitArea = document.createElement("div");
   const indicator = document.createElement("div");
 
   handle.setAttribute(SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE, target.id);
@@ -216,49 +214,36 @@ const createSidebarSectionResizeHandle = (
   Object.assign(handle.style, {
     position: "relative",
     zIndex: "80",
-    height: "0px",
-    minHeight: "0px",
-    margin: "0",
-    touchAction: "none",
-    userSelect: "none",
-    background: "transparent",
-    flex: "0 0 0px",
-    overflow: "visible",
-  } satisfies Partial<CSSStyleDeclaration>);
-
-  Object.assign(hitArea.style, {
-    position: "absolute",
-    left: "0",
-    right: "0",
-    top: "-4px",
     height: "9px",
+    margin: "-4px 0",
     cursor: "row-resize",
     touchAction: "none",
     userSelect: "none",
     background: "transparent",
+    flex: "0 0 9px",
   } satisfies Partial<CSSStyleDeclaration>);
 
   Object.assign(indicator.style, {
     position: "absolute",
-    left: "8px",
-    right: "8px",
+    left: "0",
+    right: "0",
     top: "4px",
     height: "1px",
     borderRadius: "999px",
     background: SIDEBAR_SECTION_RESIZE_HANDLE_COLOR,
-    transform: "translateY(-50%)",
-    transition: "background-color 120ms ease, height 120ms ease",
+    transition: "background-color 120ms ease, height 120ms ease, top 120ms ease",
   } satisfies Partial<CSSStyleDeclaration>);
 
-  hitArea.appendChild(indicator);
-  handle.appendChild(hitArea);
+  handle.appendChild(indicator);
 
   const showIndicator = () => {
+    indicator.style.top = "3px";
     indicator.style.height = "2px";
     indicator.style.background = SIDEBAR_SECTION_RESIZE_HANDLE_ACTIVE_COLOR;
   };
 
   const hideIndicator = () => {
+    indicator.style.top = "4px";
     indicator.style.height = "1px";
     indicator.style.background = SIDEBAR_SECTION_RESIZE_HANDLE_COLOR;
   };
@@ -368,13 +353,13 @@ const createSidebarSectionResizeHandle = (
     resetSidebarSectionHeight(element);
   };
 
-  hitArea.addEventListener("mouseenter", showIndicator);
-  hitArea.addEventListener("mouseleave", hideIndicator);
+  handle.addEventListener("mouseenter", showIndicator);
+  handle.addEventListener("mouseleave", hideIndicator);
   handle.addEventListener("focus", showIndicator);
   handle.addEventListener("blur", hideIndicator);
-  hitArea.addEventListener("pointerdown", startResize);
+  handle.addEventListener("pointerdown", startResize);
   handle.addEventListener("keydown", resizeByKeyboard);
-  hitArea.addEventListener("dblclick", resetHeight);
+  handle.addEventListener("dblclick", resetHeight);
 
   return handle;
 };
