@@ -265,7 +265,7 @@ export const useFolderActions = ({
   optimisticCardSets: _optimisticCardSets,
   setExpandedFolders,
   setPendingScrollId,
-  onFolderSelect: _onFolderSelect,
+  onFolderSelect,
   onItemSelect: _onItemSelect,
   onSelectCardSet: _onSelectCardSet,
   setNewlyCreatedCardId: _setNewlyCreatedCardId,
@@ -449,6 +449,7 @@ export const useFolderActions = ({
         makeTempFolder(folderId, nextName, normalizedParentId, orderIndex),
         ...prev,
       ]);
+      setPendingScrollId(folderId);
       setEditingId(folderId);
       setEditingName(nextName);
       editingIdRef.current = folderId;
@@ -466,15 +467,17 @@ export const useFolderActions = ({
       setEditingName,
       setExpandedFolders,
       setOptimisticFolders,
+      setPendingScrollId,
       treeFolders,
     ],
   );
 
   useEffect(() => {
     return subscribeRootFolderCreateRequest(() => {
+      onFolderSelect(null);
       handleCreateFolderAction(null);
     });
-  }, [handleCreateFolderAction]);
+  }, [handleCreateFolderAction, onFolderSelect]);
 
   const handleCreateCardSetAction = useCallback(
     (folderId: string | null) => {
