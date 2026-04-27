@@ -127,17 +127,27 @@
     outline: none;
   }
 
+  .calendar-month-view {
+    --calendar-month-row-height: 112px;
+    overflow-anchor: none;
+  }
+
+  .calendar-month-scroll {
+    overflow-anchor: none;
+  }
+
   .calendar-month-day-cell {
     overflow: visible;
+    min-height: var(--calendar-month-row-height);
   }
 
   .calendar-month-row-boundary-resize-handle {
     position: absolute;
-    bottom: -4px;
+    bottom: -5px;
     left: 0;
     right: 0;
-    z-index: 40;
-    height: 8px;
+    z-index: 50;
+    height: 10px;
     cursor: row-resize;
     touch-action: none;
     background: transparent;
@@ -148,16 +158,20 @@
     position: absolute;
     left: 16px;
     right: 16px;
-    top: 3px;
+    top: 4px;
     height: 2px;
     border-radius: 999px;
-    background: rgba(127, 45, 40, 0.16);
-    transition: background-color 120ms ease;
+    background: transparent;
+    transition:
+      background-color 120ms ease,
+      opacity 120ms ease;
+    opacity: 0;
   }
 
   .calendar-month-row-boundary-resize-handle:hover::after,
   .calendar-month-row-boundary-resize-handle:focus-visible::after {
     background: rgba(127, 45, 40, 0.42);
+    opacity: 1;
   }
 
   .calendar-month-row-boundary-resize-handle:focus-visible {
