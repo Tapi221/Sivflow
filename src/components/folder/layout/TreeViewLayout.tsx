@@ -24,6 +24,7 @@ import { useCardCommands } from "@/hooks/card/useCardCommands";
 import { useCardsRead } from "@/hooks/card/useCardsRead";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useExplorerCalendarViewStore } from "@/features/calendar/store/useExplorerCalendarViewStore";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
