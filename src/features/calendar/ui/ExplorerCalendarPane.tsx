@@ -122,8 +122,10 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
   const demoEvents = useMemo(() => createDemoEvents(currentDate), [currentDate]);
 
   const monthLabel = format(currentDate, "yyyy年 M月", { locale: ja });
-  const gridMinWidth =
-    TIME_COLUMN_WIDTH + visibleDays.length * DAY_COLUMN_MIN_WIDTH;
+  const shouldUseHorizontalScroll = viewMode === "month";
+  const gridMinWidth = shouldUseHorizontalScroll
+    ? TIME_COLUMN_WIDTH + visibleDays.length * DAY_COLUMN_MIN_WIDTH
+    : undefined;
   const dayNavigationStep = viewMode === "week" ? 7 : rangeDays;
 
   const handleToday = () => {
@@ -236,10 +238,12 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
 
       <div className="min-h-0 flex-1 overflow-auto bg-white">
         <div
-          className="grid w-max min-w-full"
+          className="grid min-w-full"
           style={{
-            gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, minmax(${DAY_COLUMN_MIN_WIDTH}px, 1fr))`,
-            minWidth: `${gridMinWidth}px`,
+            gridTemplateColumns: shouldUseHorizontalScroll
+              ? `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, minmax(${DAY_COLUMN_MIN_WIDTH}px, 1fr))`
+              : `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, minmax(0, 1fr))`,
+            minWidth: gridMinWidth ? `${gridMinWidth}px` : undefined,
           }}
         >
           <div className="sticky left-0 top-0 z-30 border-b border-r border-[#e8e7e1] bg-white" />
