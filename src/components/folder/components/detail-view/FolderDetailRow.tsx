@@ -25,11 +25,13 @@ import {
 } from "react";
 import { DETAIL_GRID_CLASS } from "./folderDetailColumns";
 import type {
+  ExplorerDetailColumnId,
   ExplorerDetailDropPosition,
   ExplorerDetailTagEditorState,
 } from "./folderDetailTypes";
 
 type FolderDetailRowProps = {
+  columnOrder: readonly ExplorerDetailColumnId[];
   row: ExplorerDetailRow;
   syncState: ExplorerDetailSyncViewState;
   selected: boolean;
@@ -68,6 +70,7 @@ const renderRowIcon = (kind: ExplorerDetailRowKind) => {
 };
 
 export const FolderDetailRow = ({
+  columnOrder,
   row,
   syncState,
   selected,
@@ -89,7 +92,9 @@ export const FolderDetailRow = ({
   onTagEditBlur,
 }: FolderDetailRowProps) => {
   const tagInputRef = useRef<HTMLInputElement | null>(null);
-  const isEditingTags = tagEditState?.rowKey === row.key;
+  const activeTagEditState =
+    tagEditState?.rowKey === row.key ? tagEditState : null;
+  const isEditingTags = Boolean(activeTagEditState);
 
   useEffect(() => {
     if (!isEditingTags) return;
@@ -118,6 +123,147 @@ export const FolderDetailRow = ({
 
     event.preventDefault();
     onActivate();
+  };
+
+  const renderCell = (columnId: ExplorerDetailColumnId) => {
+    if (columnId === "name") {
+      return (
+        <div
+          key={columnId}
+          role="cell"
+          className="flex min-w-0 items-center gap-2 px-3"
+        >
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+            {renderRowIcon(row.kind)}
+          </span>
+          <span className="min-w-0 truncate" title={row.name}>
+            {row.name}
+          </span>
+        </div>
+      );
+    }
+
+    if (columnId === "tags") {
+      return (
+        <div
+          key={columnId}
+          role="cell"
+          className="relative flex min-w-0 items-center px-3 text-[#777671]"
+          title={tagDisplayText}
+          onContextMenu={onTagCellContextMenu}
+          onPointerDown={(event) => {
+            if (!isEditingTags) return;
+            event.stopPropagation();
+          }}
+          onMouseDown={(event) => {
+            if (!isEditingTags) return;
+            event.stopPropagation();
+          }}
+          onClick={(event) => {
+            if (!isEditingTags) return;
+            event.stopPropagation();
+          }}
+          onDoubleClick={(event) => {
+            if (!isEditingTags) return;
+            event.stopPropagation();
+          }}
+        >
+          {isEditingTags ? (
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <input
+                ref={tagInputRef}
+                data-detail-tag-editor="true"
+                value={activeTagEditState.value}
+                disabled={activeTagEditState.isSaving}
+                aria-label={`${row.name} のタグを編集`}
+                placeholder="タグ名だけで入力可。保存後は # が付きます"
+                className={cn(
+                  "h-7 min-w-0 rounded-[5px] border border-[#a8a176] bg-white px-2",
+                  "text-[12px] text-[#24231f] shadow-[0_0_0_2px_rgba(168,161,118,0.18)] outline-none",
+                  "disabled:cursor-wait disabled:opacity-70",
+                )}
+                onChange={(event) => onTagEditChange(event.target.value)}
+                onKeyDown={onTagEditKeyDown}
+                onBlur={onTagEditBlur}
+                onPointerDown={(event) => event.stopPropagation()}
+                onMouseDown={(event) => event.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
+                onDoubleClick={(event) => event.stopPropagation()}
+                onContextMenu={(event) => event.stopPropagation()}
+              />
+              {activeTagEditState.error ? (
+                <span className="truncate text-[10px] leading-none text-[#9b3f35]">
+                  {activeTagEditState.error}
+                </span>
+              ) : null}
+            </div>
+          ) : (
+            <span className="truncate">{tagDisplayText}</span>
+          )}
+        </div>
+      );
+    }
+
+    if (columnId === "path") {
+      return (
+        <div
+          key={columnId}
+          role="cell"
+          className="flex min-w-0 items-center px-3 text-[#777671]"
+          title={row.path}
+        >
+          <span className="truncate">{row.path}</span>
+        </div>
+      );
+    }
+
+    if (columnId === "updatedAt") {
+      return (
+        <div
+          key={columnId}
+          role="cell"
+          className="flex min-w-0 items-center px-3 text-[#777671]"
+        >
+          <span className="truncate">
+            {formatExplorerUpdatedAt(row.updatedAt)}
+          </span>
+        </div>
+      );
+    }
+
+    if (columnId === "sync") {
+      return (
+        <div
+          key={columnId}
+          role="cell"
+          className="flex min-w-0 items-center px-3 text-[#777671]"
+        >
+          <ExplorerDetailSyncBadge state={syncState} />
+        </div>
+      );
+    }
+
+    if (columnId === "kind") {
+      return (
+        <div
+          key={columnId}
+          role="cell"
+          className="flex min-w-0 items-center px-3 text-[#777671]"
+        >
+          <span className="truncate">{row.typeLabel}</span>
+        </div>
+      );
+    }
+
+    return (
+      <div
+        key={columnId}
+        role="cell"
+        className="flex min-w-0 items-center px-3 text-left text-[#777671]"
+      >
+        <span className="truncate">{formatExplorerSize(row.sizeBytes)}</span>
+      </div>
+    );
   };
 
   return (
@@ -164,102 +310,7 @@ export const FolderDetailRow = ({
         />
       ) : null}
 
-      <div role="cell" className="flex min-w-0 items-center gap-2 px-3">
-        <span className="flex h-5 w-5 shrink-0 items-center justify-center">
-          {renderRowIcon(row.kind)}
-        </span>
-        <span className="min-w-0 truncate" title={row.name}>
-          {row.name}
-        </span>
-      </div>
-      <div
-        role="cell"
-        className="relative flex min-w-0 items-center px-3 text-[#777671]"
-        title={tagDisplayText}
-        onContextMenu={onTagCellContextMenu}
-        onPointerDown={(event) => {
-          if (!isEditingTags) return;
-          event.stopPropagation();
-        }}
-        onMouseDown={(event) => {
-          if (!isEditingTags) return;
-          event.stopPropagation();
-        }}
-        onClick={(event) => {
-          if (!isEditingTags) return;
-          event.stopPropagation();
-        }}
-        onDoubleClick={(event) => {
-          if (!isEditingTags) return;
-          event.stopPropagation();
-        }}
-      >
-        {isEditingTags ? (
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <input
-              ref={tagInputRef}
-              data-detail-tag-editor="true"
-              value={tagEditState.value}
-              disabled={tagEditState.isSaving}
-              aria-label={`${row.name} のタグを編集`}
-              placeholder="タグ名だけで入力可。保存後は # が付きます"
-              className={cn(
-                "h-7 min-w-0 rounded-[5px] border border-[#a8a176] bg-white px-2",
-                "text-[12px] text-[#24231f] shadow-[0_0_0_2px_rgba(168,161,118,0.18)] outline-none",
-                "disabled:cursor-wait disabled:opacity-70",
-              )}
-              onChange={(event) => onTagEditChange(event.target.value)}
-              onKeyDown={onTagEditKeyDown}
-              onBlur={onTagEditBlur}
-              onPointerDown={(event) => event.stopPropagation()}
-              onMouseDown={(event) => event.stopPropagation()}
-              onClick={(event) => event.stopPropagation()}
-              onDoubleClick={(event) => event.stopPropagation()}
-              onContextMenu={(event) => event.stopPropagation()}
-            />
-            {tagEditState.error ? (
-              <span className="truncate text-[10px] leading-none text-[#9b3f35]">
-                {tagEditState.error}
-              </span>
-            ) : null}
-          </div>
-        ) : (
-          <span className="truncate">{tagDisplayText}</span>
-        )}
-      </div>
-      <div
-        role="cell"
-        className="flex min-w-0 items-center px-3 text-[#777671]"
-        title={row.path}
-      >
-        <span className="truncate">{row.path}</span>
-      </div>
-      <div
-        role="cell"
-        className="flex min-w-0 items-center px-3 text-[#777671]"
-      >
-        <span className="truncate">
-          {formatExplorerUpdatedAt(row.updatedAt)}
-        </span>
-      </div>
-      <div
-        role="cell"
-        className="flex min-w-0 items-center px-3 text-[#777671]"
-      >
-        <ExplorerDetailSyncBadge state={syncState} />
-      </div>
-      <div
-        role="cell"
-        className="flex min-w-0 items-center px-3 text-[#777671]"
-      >
-        <span className="truncate">{row.typeLabel}</span>
-      </div>
-      <div
-        role="cell"
-        className="flex min-w-0 items-center px-3 text-left text-[#777671]"
-      >
-        <span className="truncate">{formatExplorerSize(row.sizeBytes)}</span>
-      </div>
+      {columnOrder.map(renderCell)}
     </div>
   );
 };
