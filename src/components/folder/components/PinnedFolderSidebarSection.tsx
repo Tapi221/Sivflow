@@ -62,41 +62,35 @@ const SIDEBAR_SECTION_RESIZE_STORAGE_PREFIX =
   "flashcard-master.explorer.sidebarSectionHeight";
 const SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE =
   "data-explorer-sidebar-section-resize-handle";
-const SIDEBAR_SECTION_RESIZE_HANDLE_COLOR = "rgba(15, 23, 42, 0.10)";
+const SIDEBAR_SECTION_RESIZE_HANDLE_COLOR = "transparent";
 const SIDEBAR_SECTION_RESIZE_HANDLE_ACTIVE_COLOR =
-  "rgba(15, 23, 42, 0.18)";
+  "rgba(31, 41, 55, 0.24)";
 
 const SIDEBAR_SECTION_RESIZE_TARGETS: SidebarSectionResizeTarget[] = [
   {
-    id: "pinned",
+    id: "pinned-content",
     minHeight: 0,
     maxHeight: 320,
     resolveElement: () =>
-      getSidebarSectionContentOrHeaderElement(PINNED_FOLDER_SECTION_CONTENT_ID) ??
-      document.getElementById(PINNED_FOLDER_SECTION_FRAME_ID),
+      document.getElementById(PINNED_FOLDER_SECTION_CONTENT_ID),
     resolveAnchor: () =>
-      getSidebarSectionContentOrHeaderElement(PINNED_FOLDER_SECTION_CONTENT_ID) ??
-      document.getElementById(PINNED_FOLDER_SECTION_FRAME_ID) ??
-      document.getElementById(PINNED_FOLDER_SECTION_HEADER_ID),
+      document.getElementById(PINNED_FOLDER_SECTION_FRAME_ID),
   },
   {
-    id: "folder-list",
+    id: "folder-list-content",
     minHeight: 96,
     maxHeight: 720,
     resolveElement: () =>
-      getSidebarSectionContentOrHeaderElement(FOLDER_LIST_SECTION_CONTENT_ID),
+      document.getElementById(FOLDER_LIST_SECTION_CONTENT_ID),
     resolveAnchor: () =>
-      getSidebarSectionContentOrHeaderElement(FOLDER_LIST_SECTION_CONTENT_ID) ??
-      document.getElementById(FOLDER_LIST_SECTION_HEADER_ID),
+      document.getElementById(FOLDER_LIST_SECTION_CONTENT_ID),
   },
   {
-    id: "tag",
+    id: "tag-content",
     minHeight: 38,
     maxHeight: 320,
-    resolveElement: () =>
-      getSidebarSectionContentOrHeaderElement(TAG_SECTION_CONTENT_ID),
-    resolveAnchor: () =>
-      getSidebarSectionContentOrHeaderElement(TAG_SECTION_CONTENT_ID),
+    resolveElement: () => document.getElementById(TAG_SECTION_CONTENT_ID),
+    resolveAnchor: () => document.getElementById(TAG_SECTION_CONTENT_ID),
   },
 ];
 
@@ -128,21 +122,6 @@ const stopCreateButtonFocusTransfer = (
     | React.MouseEvent<HTMLButtonElement>,
 ) => {
   event.stopPropagation();
-};
-
-const getSidebarSectionHeaderElement = (contentId: string) => {
-  return (
-    document.querySelector<HTMLElement>(
-      `[aria-controls="${contentId}"]`,
-    )?.parentElement ?? null
-  );
-};
-
-const getSidebarSectionContentOrHeaderElement = (contentId: string) => {
-  return (
-    document.getElementById(contentId) ??
-    getSidebarSectionHeaderElement(contentId)
-  );
 };
 
 const getSidebarSectionResizeStorageKey = (sectionId: string) => {
@@ -216,37 +195,33 @@ const createSidebarSectionResizeHandle = (
   Object.assign(handle.style, {
     position: "relative",
     zIndex: "80",
-    height: "9px",
+    height: "8px",
     margin: "-4px 0",
     cursor: "row-resize",
     touchAction: "none",
     userSelect: "none",
     background: "transparent",
-    flex: "0 0 9px",
+    flex: "0 0 8px",
   } satisfies Partial<CSSStyleDeclaration>);
 
   Object.assign(indicator.style, {
     position: "absolute",
     left: "0",
     right: "0",
-    top: "4px",
-    height: "1px",
+    top: "3px",
+    height: "2px",
     borderRadius: "999px",
     background: SIDEBAR_SECTION_RESIZE_HANDLE_COLOR,
-    transition: "background-color 120ms ease, height 120ms ease, top 120ms ease",
+    transition: "background-color 120ms ease",
   } satisfies Partial<CSSStyleDeclaration>);
 
   handle.appendChild(indicator);
 
   const showIndicator = () => {
-    indicator.style.top = "3px";
-    indicator.style.height = "2px";
     indicator.style.background = SIDEBAR_SECTION_RESIZE_HANDLE_ACTIVE_COLOR;
   };
 
   const hideIndicator = () => {
-    indicator.style.top = "4px";
-    indicator.style.height = "1px";
     indicator.style.background = SIDEBAR_SECTION_RESIZE_HANDLE_COLOR;
   };
 
