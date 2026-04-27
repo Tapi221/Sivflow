@@ -67,7 +67,7 @@ export const ExplorerCalendarMonthView = ({
               aria-label={format(day.date, "yyyy年M月d日", { locale: ja })}
               aria-pressed={selected}
               className={cn(
-                "group relative min-h-[112px] overflow-hidden border-[#ebeae4] bg-white px-5 py-5 text-left outline-none transition-colors",
+                "group relative min-h-[112px] overflow-hidden border-[#ebeae4] bg-white text-left outline-none transition-colors",
                 !isLastColumn && "border-r",
                 !isLastRow && "border-b",
                 selected && "bg-[#fff9f8]",
@@ -76,41 +76,25 @@ export const ExplorerCalendarMonthView = ({
               )}
               onClick={() => onSelectDate(day.date)}
             >
-              <div className="flex items-start justify-between gap-2">
-                <span
-                  className={cn(
-                    "inline-flex h-9 min-w-9 items-center justify-center rounded-full px-2 text-[15px] font-semibold tabular-nums transition-colors",
-                    selected
-                      ? "bg-[#ef5555] text-white shadow-[0_7px_18px_rgba(239,85,85,0.28)]"
-                      : todayCell
-                        ? "bg-[#f0efea] text-[#24231f]"
-                        : day.isCurrentMonth
-                          ? "text-[#24231f]"
-                          : "text-[#b0aea8]",
-                  )}
-                >
-                  {day.dayOfMonth}
+              <span
+                className={cn(
+                  "absolute left-4 top-4 inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[15px] font-semibold tabular-nums transition-colors",
+                  selected
+                    ? "bg-[#ef5555] text-white shadow-[0_7px_18px_rgba(239,85,85,0.24)]"
+                    : todayCell
+                      ? "bg-[#f0efea] text-[#24231f]"
+                      : day.isCurrentMonth
+                        ? "text-[#24231f]"
+                        : "text-[#b0aea8]",
+                )}
+              >
+                {day.dayOfMonth}
+              </span>
+
+              {monthAnnotation ? (
+                <span className="absolute right-4 top-[18px] text-[12px] font-semibold text-[#a09f98]">
+                  {monthAnnotation}
                 </span>
-
-                {monthAnnotation ? (
-                  <span className="pt-1 text-[12px] font-semibold text-[#a09f98]">
-                    {monthAnnotation}
-                  </span>
-                ) : null}
-              </div>
-
-              {selected ? (
-                <span
-                  aria-hidden="true"
-                  className="absolute left-5 right-5 top-[70px] h-[2px] rounded-full bg-[#f4b3b0]"
-                />
-              ) : null}
-
-              {selected ? (
-                <span
-                  aria-hidden="true"
-                  className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#fff1ef] to-transparent opacity-55"
-                />
               ) : null}
             </button>
           );
