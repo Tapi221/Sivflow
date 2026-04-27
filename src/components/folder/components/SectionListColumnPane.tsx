@@ -13,6 +13,7 @@ import {
   ExplorerChromePdfIcon,
 } from "@/components/explorer/icons";
 import { FolderDetailView } from "@/components/folder/components/FolderDetailView";
+import { FolderListView } from "@/components/folder/components/FolderListView";
 import { SectionListBlankPane } from "@/components/folder/components/SectionListBlankPane";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
@@ -692,7 +693,7 @@ const ControlledColumnView = ({
 
 /**
  * セクション一覧モードの右側パネル。
- * 表示モードに応じて Finder 風カラムビューと詳細リストビューを切り替える。
+ * 表示モードに応じて Finder 風カラムビュー、Explorer 風一覧ビュー、詳細リストビューを切り替える。
  */
 export const SectionListColumnPane = ({
   className,
@@ -724,7 +725,7 @@ export const SectionListColumnPane = ({
     (state) => state.explorerLayoutMode,
   );
 
-  // 詳細/カラムペイン内のフォルダ移動は右側ペインだけで完結させる。
+  // 詳細/カラム/一覧ペイン内のフォルダ移動は右側ペインだけで完結させる。
   // 親の folder selection に同期すると、セクション一覧サイドバーまで遷移してしまう。
   void onFolderSelect;
 
@@ -824,7 +825,10 @@ export const SectionListColumnPane = ({
       if (cardSet) {
         setActiveLeafCrumbs([{ label: getCardSetLabel(cardSet) }]);
       }
+      return;
     }
+
+    setActiveLeafCrumbs([]);
   }, [cardSetById, selectedCardSetId]);
 
   useEffect(() => {
@@ -970,10 +974,10 @@ export const SectionListColumnPane = ({
       const card = cards.find((candidate) => candidate.id === selectedItem.id);
       if (!card) return;
 
+      const cardSet = getCardSetByCard(card, cardSetById);
       const folderPathIds = buildFolderPathIds(
         getCardFolderId(card, cardSetById),
       );
-      const cardSet = getCardSetByCard(card, cardSetById);
       const leafCrumbs: BreadcrumbCrumb[] = [];
 
       if (cardSet) {
@@ -981,6 +985,7 @@ export const SectionListColumnPane = ({
       }
 
       leafCrumbs.push({ label: getCardLabel(card) });
+
       setDetailCardSetId(cardSet?.id ?? null);
       setActiveLeafCrumbs(leafCrumbs);
       setColumnPathIds(folderPathIds);
@@ -994,15 +999,14 @@ export const SectionListColumnPane = ({
   ]);
 
   useEffect(() => {
-    const handleColumnPathNavigate = ((event: Event) => {
-      const detail = (
-        event as CustomEvent<ExplorerColumnPathNavigateEventDetail>
-      ).detail;
-      const folderId = detail?.folderId ?? null;
-      const folderPathIds = buildFolderPathIds(folderId);
+    if (typeof window === "undefined") return;
 
-      setFolderPathForPane(folderPathIds);
-    }) as EventListener;
+    const handleColumnPathNavigate = (event: Event) => {
+      const customEvent =
+        event as CustomEvent<ExplorerColumnPathNavigateEventDetail>;
+      const folderId = customEvent.detail?.folderId ?? null;
+      setFolderPathForPane(buildFolderPathIds(folderId));
+    };
 
     window.addEventListener(
       EXPLORER_COLUMN_PATH_NAVIGATE_EVENT,
@@ -1017,62 +1021,65 @@ export const SectionListColumnPane = ({
     };
   }, [buildFolderPathIds, setFolderPathForPane]);
 
-  const currentPaneFolderId =
-    columnPathIds.length > 0 ? columnPathIds[columnPathIds.length - 1] : null;
-  const isDetailLayout = explorerLayoutMode === "detail";
-  const panePathKey =
-    columnPathIds.length > 0 ? columnPathIds.join("/") : "__root__";
-  const paneLeafKey = activeLeafCrumbs.map((crumb) => crumb.label).join("/");
-  const detailViewKey = `detail:${panePathKey}:${detailCardSetId ?? "__no_card_set__"}:${paneLeafKey}`;
+  const currentFolderId = columnPathIds[columnPathIds.length - 1] ?? null;
 
   return (
     <SectionListBlankPane
       className={className}
-      contentClassName="explorer-chrome-font p-0"
       sidebarWidth={sidebarWidth}
       topOffsetPx={topOffsetPx}
       leftInsetPx={leftInsetPx}
       rightInsetPx={rightInsetPx}
     >
-      <div className="h-full min-h-0 w-full">
-        {isDetailLayout ? (
-          <FolderDetailView
-            key={detailViewKey}
-            folders={folders}
-            cards={cards}
-            cardSets={cardSets}
-            documents={documents}
-            currentFolderId={currentPaneFolderId}
-            selectedItem={selectedItem}
-            currentCardSetId={detailCardSetId}
-            onFolderOpen={handleDetailFolderOpen}
-            onCardSetOpen={handleDetailCardSetOpen}
-            onItemSelect={handleItemSelect}
-            onMoveFolder={onMoveFolder}
-            onReorderFolders={onReorderFolders}
-            onMoveCardSetToFolder={onMoveCardSetToFolder}
-            onReorderCardSets={onReorderCardSets}
-            onMoveDocumentToFolder={onMoveDocumentToFolder}
-            onReorderDocuments={onReorderDocuments}
-            onMoveCardToSet={onMoveCardToSet}
-            onReorderCardsInCardSet={onReorderCardsInCardSet}
-          />
-        ) : (
-          <ControlledColumnView
-            folders={folders}
-            cards={cards}
-            cardSets={cardSets}
-            documents={documents}
-            folderPathIds={columnPathIds}
-            activeCardSetId={detailCardSetId}
-            selectedItem={selectedItem}
-            isFiltering={isFiltering}
-            onFolderPathChange={setFolderPathForPane}
-            onCardSetOpen={handleDetailCardSetOpen}
-            onItemSelect={handleItemSelect}
-          />
-        )}
-      </div>
+      {explorerLayoutMode === "column" ? (
+        <ControlledColumnView
+          folders={folders}
+          cards={cards}
+          cardSets={cardSets}
+          documents={documents}
+          folderPathIds={columnPathIds}
+          activeCardSetId={detailCardSetId}
+          selectedItem={selectedItem}
+          isFiltering={isFiltering}
+          onFolderPathChange={setFolderPathForPane}
+          onCardSetOpen={handleDetailCardSetOpen}
+          onItemSelect={handleItemSelect}
+        />
+      ) : explorerLayoutMode === "list" ? (
+        <FolderListView
+          folders={folders}
+          cards={cards}
+          cardSets={cardSets}
+          documents={documents}
+          currentFolderId={currentFolderId}
+          selectedItem={selectedItem}
+          currentCardSetId={detailCardSetId}
+          onFolderOpen={handleDetailFolderOpen}
+          onCardSetOpen={handleDetailCardSetOpen}
+          onItemSelect={handleItemSelect}
+        />
+      ) : (
+        <FolderDetailView
+          folders={folders}
+          cards={cards}
+          cardSets={cardSets}
+          documents={documents}
+          currentFolderId={currentFolderId}
+          selectedItem={selectedItem}
+          currentCardSetId={detailCardSetId}
+          onFolderOpen={handleDetailFolderOpen}
+          onCardSetOpen={handleDetailCardSetOpen}
+          onItemSelect={handleItemSelect}
+          onMoveFolder={onMoveFolder}
+          onReorderFolders={onReorderFolders}
+          onMoveCardSetToFolder={onMoveCardSetToFolder}
+          onReorderCardSets={onReorderCardSets}
+          onMoveDocumentToFolder={onMoveDocumentToFolder}
+          onReorderDocuments={onReorderDocuments}
+          onMoveCardToSet={onMoveCardToSet}
+          onReorderCardsInCardSet={onReorderCardsInCardSet}
+        />
+      )}
     </SectionListBlankPane>
   );
 };
