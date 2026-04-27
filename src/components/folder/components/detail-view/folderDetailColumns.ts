@@ -214,9 +214,7 @@ export const buildDetailGridTemplateColumns = (
 ): string => {
   const normalizedOrder = normalizeDetailColumnOrder(columnOrder);
 
-  return normalizedOrder
-    .map((columnId) => `${widths[columnId]}px`)
-    .join(" ");
+  return normalizedOrder.map((columnId) => `${widths[columnId]}px`).join(" ");
 };
 
 export const getDetailGridMinWidth = (

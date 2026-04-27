@@ -130,9 +130,9 @@ describe("monthGrid", () => {
     const aprilTransitionWeek = weeks.find((week) => week.key === "2026-04-26");
     const mayWeek = weeks.find((week) => week.key === "2026-05-03");
 
-    expect(getCalendarMonthKey(aprilTransitionWeek?.visibleMonthDate ?? new Date())).toBe(
-      "2026-04",
-    );
+    expect(
+      getCalendarMonthKey(aprilTransitionWeek?.visibleMonthDate ?? new Date()),
+    ).toBe("2026-04");
     expect(getCalendarMonthKey(mayWeek?.visibleMonthDate ?? new Date())).toBe(
       "2026-05",
     );
