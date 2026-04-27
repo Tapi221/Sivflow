@@ -46,7 +46,7 @@ type SidebarSectionResizeTarget = {
   minHeight: number;
   maxHeight: number;
   resolveElement: () => HTMLElement | null;
-  resolveHandleAnchor: () => HTMLElement | null;
+  resolveAnchor: () => HTMLElement | null;
 };
 
 const PINNED_FOLDER_SECTION_FRAME_ID =
@@ -61,51 +61,53 @@ const SIDEBAR_SECTION_RESIZE_STORAGE_PREFIX =
   "flashcard-master.explorer.sidebarSectionHeight";
 const SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE =
   "data-explorer-sidebar-section-resize-handle";
+const SIDEBAR_SECTION_RESIZE_HANDLE_COLOR = "rgba(120, 113, 108, 0.32)";
+const SIDEBAR_SECTION_RESIZE_HANDLE_ACTIVE_COLOR =
+  "rgba(87, 83, 78, 0.68)";
 
 const SIDEBAR_SECTION_RESIZE_TARGETS: SidebarSectionResizeTarget[] = [
   {
     id: "pinned",
-    minHeight: 44,
-    maxHeight: 260,
+    minHeight: 36,
+    maxHeight: 320,
     resolveElement: () =>
+      document.getElementById(PINNED_FOLDER_SECTION_FRAME_ID),
+    resolveAnchor: () =>
       document.getElementById(PINNED_FOLDER_SECTION_FRAME_ID) ??
-      document.getElementById(PINNED_FOLDER_SECTION_CONTENT_ID),
-    resolveHandleAnchor: () =>
-      document.getElementById(PINNED_FOLDER_SECTION_FRAME_ID) ??
-      document.getElementById(PINNED_FOLDER_SECTION_CONTENT_ID),
+      document.getElementById(PINNED_FOLDER_SECTION_HEADER_ID),
   },
   {
     id: "folder-list",
     minHeight: 96,
-    maxHeight: 640,
+    maxHeight: 720,
     resolveElement: () =>
       document.getElementById(FOLDER_LIST_SECTION_CONTENT_ID),
-    resolveHandleAnchor: () =>
+    resolveAnchor: () =>
       document.getElementById(FOLDER_LIST_SECTION_CONTENT_ID) ??
       document.getElementById(FOLDER_LIST_SECTION_HEADER_ID),
   },
   {
     id: "tag",
-    minHeight: 42,
+    minHeight: 38,
     maxHeight: 260,
     resolveElement: () =>
       document.querySelector<HTMLElement>(
         '[aria-controls="tag-sidebar-section-content"]',
       )?.parentElement ?? null,
-    resolveHandleAnchor: () =>
+    resolveAnchor: () =>
       document.querySelector<HTMLElement>(
         '[aria-controls="tag-sidebar-section-content"]',
       )?.parentElement ?? null,
   },
   {
     id: "calendar",
-    minHeight: 42,
+    minHeight: 38,
     maxHeight: 260,
     resolveElement: () =>
       document.querySelector<HTMLElement>(
         '[aria-controls="calendar-sidebar-section-content"]',
       )?.parentElement ?? null,
-    resolveHandleAnchor: () =>
+    resolveAnchor: () =>
       document.querySelector<HTMLElement>(
         '[aria-controls="calendar-sidebar-section-content"]',
       )?.parentElement ?? null,
@@ -179,13 +181,21 @@ const applySidebarSectionHeight = (
   element: HTMLElement,
   height: number,
 ) => {
-  const roundedHeight = Math.round(height);
+  const nextHeight = clampSectionHeight(height, 0, Number.MAX_SAFE_INTEGER);
 
-  element.style.height = `${roundedHeight}px`;
-  element.style.minHeight = `${roundedHeight}px`;
-  element.style.maxHeight = `${roundedHeight}px`;
-  element.style.flex = `0 0 ${roundedHeight}px`;
+  element.style.height = `${nextHeight}px`;
+  element.style.minHeight = `${nextHeight}px`;
+  element.style.maxHeight = `${nextHeight}px`;
+  element.style.flex = `0 0 ${nextHeight}px`;
   element.style.overflow = "hidden";
+};
+
+const resetSidebarSectionHeight = (element: HTMLElement) => {
+  element.style.height = "";
+  element.style.minHeight = "";
+  element.style.maxHeight = "";
+  element.style.flex = "";
+  element.style.overflow = "";
 };
 
 const createSidebarSectionResizeHandle = (
@@ -206,11 +216,12 @@ const createSidebarSectionResizeHandle = (
     position: "relative",
     zIndex: "80",
     height: "8px",
-    margin: "-4px 8px",
+    margin: "0 8px",
     cursor: "row-resize",
     touchAction: "none",
     userSelect: "none",
     background: "transparent",
+    flex: "0 0 8px",
   } satisfies Partial<CSSStyleDeclaration>);
 
   Object.assign(indicator.style, {
@@ -220,8 +231,7 @@ const createSidebarSectionResizeHandle = (
     top: "3px",
     height: "1px",
     borderRadius: "999px",
-    background: "rgba(120, 113, 108, 0.28)",
-    boxShadow: "none",
+    background: SIDEBAR_SECTION_RESIZE_HANDLE_COLOR,
     transition: "background-color 120ms ease, height 120ms ease, top 120ms ease",
   } satisfies Partial<CSSStyleDeclaration>);
 
@@ -230,13 +240,13 @@ const createSidebarSectionResizeHandle = (
   const showIndicator = () => {
     indicator.style.top = "2px";
     indicator.style.height = "2px";
-    indicator.style.background = "rgba(120, 113, 108, 0.62)";
+    indicator.style.background = SIDEBAR_SECTION_RESIZE_HANDLE_ACTIVE_COLOR;
   };
 
   const hideIndicator = () => {
     indicator.style.top = "3px";
     indicator.style.height = "1px";
-    indicator.style.background = "rgba(120, 113, 108, 0.28)";
+    indicator.style.background = SIDEBAR_SECTION_RESIZE_HANDLE_COLOR;
   };
 
   const commitHeight = (height: number) => {
@@ -341,11 +351,7 @@ const createSidebarSectionResizeHandle = (
     event.preventDefault();
     event.stopPropagation();
     window.localStorage.removeItem(getSidebarSectionResizeStorageKey(target.id));
-    element.style.height = "";
-    element.style.minHeight = "";
-    element.style.maxHeight = "";
-    element.style.flex = "";
-    element.style.overflow = "";
+    resetSidebarSectionHeight(element);
   };
 
   handle.addEventListener("mouseenter", showIndicator);
@@ -356,73 +362,94 @@ const createSidebarSectionResizeHandle = (
   handle.addEventListener("keydown", resizeByKeyboard);
   handle.addEventListener("dblclick", resetHeight);
 
-  return {
-    handle,
-    cleanup: () => {
-      if (handle.parentElement) {
-        handle.parentElement.removeChild(handle);
-      }
-    },
-  };
+  return handle;
 };
 
 const SidebarSectionResizeBridge = () => {
   useEffect(() => {
+    let disposed = false;
     const cleanupCallbacks: Array<() => void> = [];
+    const mounted = new Map<string, { handle: HTMLElement; element: HTMLElement }>();
+
+    const cleanupMounted = (sectionId: string) => {
+      const current = mounted.get(sectionId);
+      if (!current) return;
+
+      current.handle.remove();
+      mounted.delete(sectionId);
+    };
+
+    const mountHandle = (target: SidebarSectionResizeTarget) => {
+      const element = target.resolveElement();
+      const anchor = target.resolveAnchor();
+
+      if (!element || !anchor) {
+        cleanupMounted(target.id);
+        return;
+      }
+
+      const current = mounted.get(target.id);
+      if (current?.element === element && current.handle.parentElement) {
+        if (current.handle.previousElementSibling !== anchor) {
+          anchor.insertAdjacentElement("afterend", current.handle);
+        }
+        return;
+      }
+
+      cleanupMounted(target.id);
+
+      const originalOverflow = element.style.overflow;
+      const originalHeight = element.style.height;
+      const originalMinHeight = element.style.minHeight;
+      const originalMaxHeight = element.style.maxHeight;
+      const originalFlex = element.style.flex;
+      const storedHeight = readStoredSectionHeight(target);
+
+      if (storedHeight !== null) {
+        applySidebarSectionHeight(element, storedHeight);
+      }
+
+      const handle = createSidebarSectionResizeHandle(target, element);
+      anchor.insertAdjacentElement("afterend", handle);
+      mounted.set(target.id, { handle, element });
+
+      cleanupCallbacks.push(() => {
+        if (handle.parentElement) {
+          handle.remove();
+        }
+        element.style.overflow = originalOverflow;
+        element.style.height = originalHeight;
+        element.style.minHeight = originalMinHeight;
+        element.style.maxHeight = originalMaxHeight;
+        element.style.flex = originalFlex;
+      });
+    };
 
     const mountHandles = () => {
-      for (const target of SIDEBAR_SECTION_RESIZE_TARGETS) {
-        const element = target.resolveElement();
-        const anchor = target.resolveHandleAnchor();
-
-        if (!element || !anchor) {
-          continue;
-        }
-
-        if (
-          document.querySelector(
-            `[${SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE}="${target.id}"]`,
-          )
-        ) {
-          continue;
-        }
-
-        const originalOverflow = element.style.overflow;
-        const originalHeight = element.style.height;
-        const originalMinHeight = element.style.minHeight;
-        const originalMaxHeight = element.style.maxHeight;
-        const originalFlex = element.style.flex;
-        const storedHeight = readStoredSectionHeight(target);
-
-        if (storedHeight !== null) {
-          applySidebarSectionHeight(element, storedHeight);
-        }
-
-        const { handle, cleanup } = createSidebarSectionResizeHandle(
-          target,
-          element,
-        );
-        anchor.insertAdjacentElement("afterend", handle);
-
-        cleanupCallbacks.push(() => {
-          cleanup();
-          element.style.overflow = originalOverflow;
-          element.style.height = originalHeight;
-          element.style.minHeight = originalMinHeight;
-          element.style.maxHeight = originalMaxHeight;
-          element.style.flex = originalFlex;
-        });
-      }
+      if (disposed) return;
+      SIDEBAR_SECTION_RESIZE_TARGETS.forEach(mountHandle);
     };
 
     mountHandles();
+
+    const observer = new MutationObserver(mountHandles);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "aria-expanded"],
+    });
+
+    const intervalId = window.setInterval(mountHandles, 500);
     const frameId = window.requestAnimationFrame(mountHandles);
-    const timeoutId = window.setTimeout(mountHandles, 120);
 
     return () => {
+      disposed = true;
+      observer.disconnect();
+      window.clearInterval(intervalId);
       window.cancelAnimationFrame(frameId);
-      window.clearTimeout(timeoutId);
       cleanupCallbacks.forEach((cleanup) => cleanup());
+      mounted.clear();
     };
   }, []);
 
