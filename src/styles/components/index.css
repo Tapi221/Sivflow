@@ -3,6 +3,7 @@
 @import "../features/mathblock.css";
 @import "../features/calendar.css";
 @import "../features/sidebar.css";
+@import "../features/explorer-chrome-polish.css";
 @import "./common.css";
 @import "../features/markdown.css";
 @import "../features/pdf-viewer.css";
