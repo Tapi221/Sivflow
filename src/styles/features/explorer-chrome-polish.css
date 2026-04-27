@@ -226,4 +226,32 @@
   .explorer-chrome-shell ::-webkit-scrollbar-thumb:hover {
     background: #b8c5d3;
   }
+  /*
+   * v5 sticky header rescue.
+   * Column header must stay pinned inside the detail-list scroll container.
+   * Earlier overrides made the visual header feel like a normal row on some
+   * Electron/Chromium builds, because apparently CSS wanted a career in sabotage.
+   */
+  .explorer-chrome-shell [role="table"] {
+    position: relative;
+  }
+
+  .explorer-chrome-shell [role="table"] > [role="row"]:has([role="columnheader"]) {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 90 !important;
+    background: var(--explorer-chrome-header-bg) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 var(--explorer-chrome-border-strong),
+      0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  }
+
+  .explorer-chrome-shell [role="table"] > [role="row"]:has([role="columnheader"]) [role="columnheader"] {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 91 !important;
+    background: var(--explorer-chrome-header-bg) !important;
+  }
+
 }
