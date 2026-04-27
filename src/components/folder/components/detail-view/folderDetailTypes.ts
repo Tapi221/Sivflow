@@ -12,6 +12,7 @@ export type ExplorerDetailColumnId =
   | "tags"
   | "path"
   | "updatedAt"
+  | "sync"
   | "kind"
   | "size";
 
