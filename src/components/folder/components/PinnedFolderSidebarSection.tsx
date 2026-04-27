@@ -62,18 +62,20 @@ const SIDEBAR_SECTION_RESIZE_STORAGE_PREFIX =
   "flashcard-master.explorer.sidebarSectionHeight";
 const SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE =
   "data-explorer-sidebar-section-resize-handle";
-const SIDEBAR_SECTION_RESIZE_HANDLE_COLOR = "rgba(15, 23, 42, 0.08)";
+const SIDEBAR_SECTION_RESIZE_HANDLE_COLOR = "rgba(15, 23, 42, 0.10)";
 const SIDEBAR_SECTION_RESIZE_HANDLE_ACTIVE_COLOR =
-  "rgba(15, 23, 42, 0.22)";
+  "rgba(15, 23, 42, 0.18)";
 
 const SIDEBAR_SECTION_RESIZE_TARGETS: SidebarSectionResizeTarget[] = [
   {
     id: "pinned",
-    minHeight: 36,
+    minHeight: 0,
     maxHeight: 320,
     resolveElement: () =>
+      getSidebarSectionContentOrHeaderElement(PINNED_FOLDER_SECTION_CONTENT_ID) ??
       document.getElementById(PINNED_FOLDER_SECTION_FRAME_ID),
     resolveAnchor: () =>
+      getSidebarSectionContentOrHeaderElement(PINNED_FOLDER_SECTION_CONTENT_ID) ??
       document.getElementById(PINNED_FOLDER_SECTION_FRAME_ID) ??
       document.getElementById(PINNED_FOLDER_SECTION_HEADER_ID),
   },
