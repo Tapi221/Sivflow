@@ -7,7 +7,6 @@ import {
   mergeTitleBarBreadcrumbs,
 } from "@/features/breadcrumbs/builders";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
-import { useCalendarDockPanelStore } from "@/features/calendar/store/useCalendarDockPanelStore";
 import { useHasDesktopBridge } from "@/hooks/platform/useHasDesktopBridge";
 import { cn } from "@/lib/utils";
 import { windowControls } from "@/platform/capabilities/windowControls";
@@ -439,9 +438,6 @@ const TitleBarPrimaryActions: React.FC<{
 }> = ({ noDragStyle }) => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const isCalendarDockOpen = useCalendarDockPanelStore((state) => state.isOpen);
-  const toggleCalendarDock = useCalendarDockPanelStore((state) => state.toggle);
-
   const openSettings = () => {
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set("settings", "true");
