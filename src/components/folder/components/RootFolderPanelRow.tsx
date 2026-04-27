@@ -382,6 +382,122 @@ export const RootFolderPanelRow = ({
       </div>
     ) : null;
 
+  const editingInputControl = (
+    <div
+      className={cn(
+        "flex h-[26px] min-w-0 w-full max-w-[240px] items-center gap-1 rounded-[5px] border border-[#d8d5cc] bg-white px-1.5",
+        "shadow-[0_1px_2px_rgba(25,23,17,0.06)]",
+        "focus-within:border-[#8b887f] focus-within:shadow-[0_0_0_2px_rgba(139,136,127,0.14)]",
+      )}
+      onClick={(event) => {
+        event.stopPropagation();
+        if (event.target !== renameInputRef.current) {
+          renameInputRef.current?.focus({ preventScroll: true });
+        }
+      }}
+      onMouseDown={(event) => {
+        event.stopPropagation();
+        if (event.target !== renameInputRef.current) {
+          event.preventDefault();
+        }
+      }}
+      onPointerDown={(event) => {
+        event.stopPropagation();
+      }}
+    >
+      <Icon
+        className={cn(
+          FOLDER_ROW_ICON_SIZE_CLASS,
+          "shrink-0 text-[#8b887f]",
+        )}
+      />
+      <input
+        ref={attachRenameInputRef}
+        className={cn(
+          EXPLORER_ROW_INPUT_CLASS,
+          "h-full min-w-0 flex-1 border-0 bg-transparent px-0",
+          "text-[12px] text-[#24231f] shadow-none outline-none",
+          "focus:border-transparent focus:shadow-none focus:outline-none",
+          "placeholder:text-muted-foreground/55",
+        )}
+        style={{ userSelect: "text", WebkitUserSelect: "text" }}
+        value={editingName}
+        onFocus={(event) => {
+          event.currentTarget.select();
+        }}
+        onMouseUp={(event) => {
+          event.preventDefault();
+        }}
+        onChange={(event) => {
+          const nextName = event.target.value;
+          editingNameRef.current = nextName;
+          setEditingName(nextName);
+        }}
+        onClick={(event) => event.stopPropagation()}
+        onPointerDown={(event) => event.stopPropagation()}
+        onKeyDown={(event) => {
+          event.stopPropagation();
+          const isComposing =
+            event.nativeEvent.isComposing || event.keyCode === 229;
+
+          if (event.key === "Enter" && isComposing) return;
+
+          if (event.key === "Enter") {
+            event.preventDefault();
+            editingNameRef.current = event.currentTarget.value;
+            void handleRenameConfirm({
+              id: entry.id,
+              type: entry.kind,
+            });
+            return;
+          }
+
+          if (event.key === "Escape") {
+            event.preventDefault();
+            renameCancelledRef.current = true;
+            if (isCreateDraft && entry.kind === "folder") {
+              handleDelete(entry.id, "folder");
+              return;
+            }
+            setEditingId(null);
+            setEditingName("");
+          }
+        }}
+        onBlur={handleRenameBlur}
+      />
+    </div>
+  );
+
+  if (isEditing) {
+    return (
+      <div
+        ref={(node) => setRowRef(entry.id, node)}
+        className={cn(
+          "sidebar-row ds-list-item group box-border py-0 relative w-full text-left",
+          "sidebar-row--folder ds-list-item--interactive",
+          "relative flex h-[28px] w-full cursor-text items-center rounded-[8px] px-2",
+        )}
+        data-selected={isSelected ? "true" : undefined}
+        role="presentation"
+        onClick={(event) => {
+          event.stopPropagation();
+          renameInputRef.current?.focus({ preventScroll: true });
+        }}
+        onMouseDown={(event) => {
+          event.stopPropagation();
+          if (event.target !== renameInputRef.current) {
+            event.preventDefault();
+          }
+        }}
+        onPointerDown={(event) => {
+          event.stopPropagation();
+        }}
+      >
+        {editingInputControl}
+      </div>
+    );
+  }
+
   return (
     <SidebarEntityRow
       menuOpen={isMenuOpen}
