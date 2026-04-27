@@ -61,9 +61,9 @@ const SIDEBAR_SECTION_RESIZE_STORAGE_PREFIX =
   "flashcard-master.explorer.sidebarSectionHeight";
 const SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE =
   "data-explorer-sidebar-section-resize-handle";
-const SIDEBAR_SECTION_RESIZE_HANDLE_COLOR = "rgba(229, 231, 235, 0.95)";
+const SIDEBAR_SECTION_RESIZE_HANDLE_COLOR = "rgba(0, 0, 0, 0.1)";
 const SIDEBAR_SECTION_RESIZE_HANDLE_ACTIVE_COLOR =
-  "rgba(156, 163, 175, 0.95)";
+  "rgba(0, 0, 0, 0.22)";
 
 const SIDEBAR_SECTION_RESIZE_TARGETS: SidebarSectionResizeTarget[] = [
   {
@@ -203,6 +203,7 @@ const createSidebarSectionResizeHandle = (
   element: HTMLElement,
 ) => {
   const handle = document.createElement("div");
+  const hitArea = document.createElement("div");
   const indicator = document.createElement("div");
 
   handle.setAttribute(SIDEBAR_SECTION_RESIZE_HANDLE_ATTRIBUTE, target.id);
@@ -215,13 +216,26 @@ const createSidebarSectionResizeHandle = (
   Object.assign(handle.style, {
     position: "relative",
     zIndex: "80",
+    height: "0px",
+    minHeight: "0px",
+    margin: "0",
+    touchAction: "none",
+    userSelect: "none",
+    background: "transparent",
+    flex: "0 0 0px",
+    overflow: "visible",
+  } satisfies Partial<CSSStyleDeclaration>);
+
+  Object.assign(hitArea.style, {
+    position: "absolute",
+    left: "0",
+    right: "0",
+    top: "-4px",
     height: "9px",
-    margin: "-4px 0",
     cursor: "row-resize",
     touchAction: "none",
     userSelect: "none",
     background: "transparent",
-    flex: "0 0 9px",
   } satisfies Partial<CSSStyleDeclaration>);
 
   Object.assign(indicator.style, {
@@ -232,19 +246,19 @@ const createSidebarSectionResizeHandle = (
     height: "1px",
     borderRadius: "999px",
     background: SIDEBAR_SECTION_RESIZE_HANDLE_COLOR,
-    transition: "background-color 120ms ease, height 120ms ease, top 120ms ease",
+    transform: "translateY(-50%)",
+    transition: "background-color 120ms ease, height 120ms ease",
   } satisfies Partial<CSSStyleDeclaration>);
 
-  handle.appendChild(indicator);
+  hitArea.appendChild(indicator);
+  handle.appendChild(hitArea);
 
   const showIndicator = () => {
-    indicator.style.top = "3px";
     indicator.style.height = "2px";
     indicator.style.background = SIDEBAR_SECTION_RESIZE_HANDLE_ACTIVE_COLOR;
   };
 
   const hideIndicator = () => {
-    indicator.style.top = "4px";
     indicator.style.height = "1px";
     indicator.style.background = SIDEBAR_SECTION_RESIZE_HANDLE_COLOR;
   };
@@ -354,13 +368,13 @@ const createSidebarSectionResizeHandle = (
     resetSidebarSectionHeight(element);
   };
 
-  handle.addEventListener("mouseenter", showIndicator);
-  handle.addEventListener("mouseleave", hideIndicator);
+  hitArea.addEventListener("mouseenter", showIndicator);
+  hitArea.addEventListener("mouseleave", hideIndicator);
   handle.addEventListener("focus", showIndicator);
   handle.addEventListener("blur", hideIndicator);
-  handle.addEventListener("pointerdown", startResize);
+  hitArea.addEventListener("pointerdown", startResize);
   handle.addEventListener("keydown", resizeByKeyboard);
-  handle.addEventListener("dblclick", resetHeight);
+  hitArea.addEventListener("dblclick", resetHeight);
 
   return handle;
 };
