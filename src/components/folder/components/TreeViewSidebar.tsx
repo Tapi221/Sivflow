@@ -3,6 +3,9 @@ import { PinnedFolderSidebarSection } from "@/components/folder/components/Pinne
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
+import { ExplorerCalendarPane } from "@/features/calendar/ui/ExplorerCalendarPane";
+import { useExplorerCalendarViewStore } from "@/features/calendar/store/useExplorerCalendarViewStore";
+import { Calendar, ChevronDown, ChevronRight } from "@/ui/icons";
 import React, {
   useCallback,
   useEffect,
@@ -47,6 +50,10 @@ type InjectionResult = {
   injected: boolean;
 };
 
+const CALENDAR_SECTION_CONTENT_ID = "calendar-sidebar-section-content";
+const PINNED_FOLDER_SECTION_CONTENT_ID =
+  "pinned-folder-sidebar-section-content";
+
 const isElementWithChildren = (
   node: React.ReactNode,
 ): node is React.ReactElement<ElementWithChildrenProps> => {
@@ -71,6 +78,30 @@ const hasTagSectionContent = (node: React.ReactNode): boolean => {
   }
 
   return React.Children.toArray(node.props.children).some(hasTagSectionContent);
+};
+
+const hasCalendarSectionToggle = (node: React.ReactNode): boolean => {
+  if (!isElementWithChildren(node)) return false;
+
+  if (node.props["aria-controls"] === CALENDAR_SECTION_CONTENT_ID) {
+    return true;
+  }
+
+  return React.Children.toArray(node.props.children).some(
+    hasCalendarSectionToggle,
+  );
+};
+
+const hasCalendarSectionContent = (node: React.ReactNode): boolean => {
+  if (!isElementWithChildren(node)) return false;
+
+  if (node.props.id === CALENDAR_SECTION_CONTENT_ID) {
+    return true;
+  }
+
+  return React.Children.toArray(node.props.children).some(
+    hasCalendarSectionContent,
+  );
 };
 
 const injectAfterTagSectionToggle = (
@@ -326,6 +357,34 @@ const SidebarTagSectionContent = () => {
   );
 };
 
+const SidebarCalendarSection = () => {
+  const isCalendarOpen = useExplorerCalendarViewStore((state) => state.isOpen);
+  const toggleCalendar = useExplorerCalendarViewStore((state) => state.toggle);
+
+  return (
+    <div className="mt-1 border-t border-border/60 px-2 pb-1 pt-2">
+      <button
+        type="button"
+        className={cn(
+          "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
+          "text-[11px] font-medium leading-5 transition",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          isCalendarOpen
+            ? "bg-muted/80 text-foreground"
+            : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+        )}
+        aria-controls={CALENDAR_SECTION_CONTENT_ID}
+        aria-current={isCalendarOpen ? "page" : undefined}
+        onClick={toggleCalendar}
+      >
+        <Calendar className="h-3.5 w-3.5 shrink-0 opacity-70" />
+        <span className="min-w-0 flex-1 truncate">カレンダー</span>
+        <span className="tabular-nums opacity-60">0</span>
+      </button>
+    </div>
+  );
+};
+
 const injectRootFolderCreateAction = (
   node: React.ReactNode,
   onCreateRootFolder: () => void,
@@ -362,7 +421,7 @@ const injectRootFolderCreateAction = (
   return React.cloneElement(node, undefined, nextChildren);
 };
 
-const useSidebarChildrenWithTagSection = (
+const useSidebarChildrenWithInjectedSections = (
   children: React.ReactNode,
   onCreateRootFolder: () => void,
 ) => {
@@ -372,11 +431,21 @@ const useSidebarChildrenWithTagSection = (
       onCreateRootFolder,
     );
 
-    if (hasTagSectionContent(enhancedChildren)) return enhancedChildren;
+    const shouldInjectTagSection = !hasTagSectionContent(enhancedChildren);
+    const shouldInjectCalendarSection =
+      !hasCalendarSectionToggle(enhancedChildren) &&
+      !hasCalendarSectionContent(enhancedChildren);
+
+    if (!shouldInjectTagSection && !shouldInjectCalendarSection) {
+      return enhancedChildren;
+    }
 
     return injectAfterTagSectionToggle(
       enhancedChildren,
-      <SidebarTagSectionContent key="tag-sidebar-section-content" />,
+      <React.Fragment key="injected-sidebar-sections">
+        {shouldInjectTagSection ? <SidebarTagSectionContent /> : null}
+        {shouldInjectCalendarSection ? <SidebarCalendarSection /> : null}
+      </React.Fragment>,
     ).node;
   }, [children, onCreateRootFolder]);
 };
@@ -405,7 +474,9 @@ export const TreeViewSidebar = ({
   rightGapPx = 0,
   integratedChrome = false,
 }: TreeViewSidebarProps) => {
-  const sidebarChildren = useSidebarChildrenWithTagSection(
+  const isCalendarOpen = useExplorerCalendarViewStore((state) => state.isOpen);
+  const closeCalendar = useExplorerCalendarViewStore((state) => state.close);
+  const sidebarChildren = useSidebarChildrenWithInjectedSections(
     children,
     onCreateRootFolder,
   );
@@ -488,6 +559,21 @@ export const TreeViewSidebar = ({
           </div>
         )}
       </div>
+
+      {isCalendarOpen ? (
+        <div
+          id={CALENDAR_SECTION_CONTENT_ID}
+          className={cn(
+            "absolute bottom-0 top-0 z-40 hidden overflow-hidden border-l border-[#dddcd5] bg-white shadow-[0_18px_50px_rgba(15,23,42,0.12)] md:block",
+          )}
+          style={{
+            left: `calc(100% + ${rightGapPx}px)`,
+            width: `calc(100dvw - ${renderedSidebarWidth + rightGapPx}px)`,
+          }}
+        >
+          <ExplorerCalendarPane onClose={closeCalendar} />
+        </div>
+      ) : null}
 
       {isSidebarOpen && (
         <div
