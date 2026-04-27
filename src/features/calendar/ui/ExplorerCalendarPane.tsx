@@ -412,7 +412,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
 
       <div
         ref={scrollContainerRef}
-        className="min-h-0 flex-1 overflow-auto bg-white [&::-webkit-scrollbar-corner]:hidden [&::-webkit-scrollbar:horizontal]:h-0"
+        className="explorer-calendar-scroll min-h-0 flex-1 overflow-auto bg-white"
         onScroll={handleTimelineScroll}
       >
         <div

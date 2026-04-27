@@ -31,4 +31,18 @@
   .calendar-day-selected .calendar-date-text {
     text-shadow: none;
   }
+
+  .explorer-calendar-scroll::-webkit-scrollbar:horizontal {
+    display: none;
+    height: 0;
+  }
+
+  .explorer-calendar-scroll::-webkit-scrollbar-track:horizontal,
+  .explorer-calendar-scroll::-webkit-scrollbar-thumb:horizontal {
+    display: none;
+  }
+
+  .explorer-calendar-scroll::-webkit-scrollbar-corner {
+    display: none;
+  }
 }
