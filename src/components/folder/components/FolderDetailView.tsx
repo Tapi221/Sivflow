@@ -2,6 +2,7 @@ import {
   buildExplorerDetailRows,
   type ExplorerDetailRow,
 } from "@/components/folder/explorer/model/detailRows";
+import { useToast } from "@/contexts/ToastContext";
 import { isSameSelectedExplorerItem } from "@/features/explorer/utils/isSameSelectedExplorerItem";
 import { useCardCommands } from "@/hooks/card/useCardCommands";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
@@ -45,6 +46,15 @@ import {
   isSamePayloadAndRow,
   moveIdBeforeOrAfter,
 } from "./detail-view/folderDetailDrag";
+import {
+  applyExplorerDetailOptimisticOrder,
+  areExplorerDetailOrderedIdsEqual,
+  buildExplorerDetailOrderScopeKeyByKind,
+  getExplorerDetailOptimisticOrderKey,
+  getExplorerDetailScopedOrderedIds,
+  pruneResolvedExplorerDetailOptimisticOrder,
+  type ExplorerDetailOptimisticOrderState,
+} from "./detail-view/folderDetailOptimisticOrder";
 import {
   buildTagEditorValue,
   formatExplorerTagNames,
@@ -106,6 +116,14 @@ interface FolderDetailViewProps {
   ) => Promise<void>;
 }
 
+const getExplorerDetailReorderErrorMessage = (error: unknown): string => {
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return error.message;
+  }
+
+  return "並び替えを保存できませんでした。";
+};
+
 export const FolderDetailView = ({
   folders,
   cards,
@@ -127,6 +145,9 @@ export const FolderDetailView = ({
   onReorderCardsInCardSet,
 }: FolderDetailViewProps) => {
   const dragPayloadRef = useRef<ExplorerDetailDragPayload | null>(null);
+  const reorderOperationIdRef = useRef(0);
+  const pendingReorderKeysRef = useRef<Set<string>>(new Set());
+  const toast = useToast();
   const [columnWidths, setColumnWidths] = useState<ExplorerDetailColumnWidths>(
     readStoredDetailColumnWidths,
   );
@@ -138,6 +159,11 @@ export const FolderDetailView = ({
   );
   const [tagEditor, setTagEditor] =
     useState<ExplorerDetailTagEditorState | null>(null);
+  const [optimisticOrderByKey, setOptimisticOrderByKey] =
+    useState<ExplorerDetailOptimisticOrderState>({});
+  const [pendingReorderKeys, setPendingReorderKeys] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
   const tagEditorSkipNextBlurRef = useRef(false);
   const { tags, tagById, addTag } = useTags();
   const { updateCard } = useCardCommands();
@@ -202,6 +228,22 @@ export const FolderDetailView = ({
     [columnWidths],
   );
 
+  const setReorderPending = useCallback(
+    (orderKey: string, isPending: boolean) => {
+      const nextKeys = new Set(pendingReorderKeysRef.current);
+
+      if (isPending) {
+        nextKeys.add(orderKey);
+      } else {
+        nextKeys.delete(orderKey);
+      }
+
+      pendingReorderKeysRef.current = nextKeys;
+      setPendingReorderKeys(nextKeys);
+    },
+    [],
+  );
+
   const handleResetColumnWidth = useCallback(
     (columnId: ExplorerDetailColumnId) => {
       setColumnWidths((current) => ({
@@ -225,9 +267,61 @@ export const FolderDetailView = ({
     [cards, cardSets, currentCardSetId, currentFolderId, documents, folders],
   );
 
+  const orderScopeKeyByKind = useMemo(
+    () =>
+      buildExplorerDetailOrderScopeKeyByKind({
+        currentFolderId,
+        currentCardSetId,
+      }),
+    [currentCardSetId, currentFolderId],
+  );
+
+  const currentOrderKeys = useMemo(
+    () => [
+      getExplorerDetailOptimisticOrderKey("folder", orderScopeKeyByKind.folder),
+      getExplorerDetailOptimisticOrderKey(
+        "cardSet",
+        orderScopeKeyByKind.cardSet,
+      ),
+      getExplorerDetailOptimisticOrderKey("card", orderScopeKeyByKind.card),
+      getExplorerDetailOptimisticOrderKey(
+        "document",
+        orderScopeKeyByKind.document,
+      ),
+    ],
+    [orderScopeKeyByKind],
+  );
+
+  const isCurrentScopeReorderPending = useMemo(
+    () => currentOrderKeys.some((orderKey) => pendingReorderKeys.has(orderKey)),
+    [currentOrderKeys, pendingReorderKeys],
+  );
+
+  useEffect(() => {
+    setOptimisticOrderByKey((current) => {
+      const next = pruneResolvedExplorerDetailOptimisticOrder({
+        rows: manualRows,
+        optimisticOrderByKey: current,
+        orderScopeKeyByKind,
+      });
+
+      return next === current ? current : next;
+    });
+  }, [manualRows, orderScopeKeyByKind]);
+
+  const optimisticManualRows = useMemo(
+    () =>
+      applyExplorerDetailOptimisticOrder({
+        rows: manualRows,
+        optimisticOrderByKey,
+        orderScopeKeyByKind,
+      }),
+    [manualRows, optimisticOrderByKey, orderScopeKeyByKind],
+  );
+
   const rows = useMemo(
-    () => sortRows(manualRows, sortState),
-    [manualRows, sortState],
+    () => sortRows(optimisticManualRows, sortState),
+    [optimisticManualRows, sortState],
   );
   const syncStateByRowKey = useExplorerDetailSyncStates(rows);
 
@@ -412,51 +506,131 @@ export const FolderDetailView = ({
   }, []);
 
   const reorderRows = useCallback(
-    (
+    async (
       payload: ExplorerDetailDragPayload,
       targetRow: ExplorerDetailRow,
       position: "before" | "after",
     ) => {
       if (payload.kind !== targetRow.kind) return;
 
-      const scopedRows = manualRows.filter((row) => row.kind === payload.kind);
+      const scopedRows = optimisticManualRows.filter(
+        (row) => row.kind === payload.kind,
+      );
+      const previousIds = scopedRows.map((row) => row.id);
       const orderedIds = moveIdBeforeOrAfter(
-        scopedRows.map((row) => row.id),
+        previousIds,
         payload.id,
         targetRow.id,
         position,
       );
 
+      if (areExplorerDetailOrderedIdsEqual(previousIds, orderedIds)) {
+        return;
+      }
+
+      const canPersistReorder = (() => {
+        if (payload.kind === "folder") return Boolean(onReorderFolders);
+        if (payload.kind === "card") {
+          return Boolean(currentCardSetId && onReorderCardsInCardSet);
+        }
+
+        if (!currentFolderId) return false;
+        if (payload.kind === "cardSet") return Boolean(onReorderCardSets);
+
+        return Boolean(onReorderDocuments);
+      })();
+
+      if (!canPersistReorder) return;
+
+      const orderScopeKey = orderScopeKeyByKind[payload.kind];
+      const optimisticOrderKey = getExplorerDetailOptimisticOrderKey(
+        payload.kind,
+        orderScopeKey,
+      );
+
+      if (pendingReorderKeysRef.current.has(optimisticOrderKey)) return;
+
+      const operationId = reorderOperationIdRef.current + 1;
+      reorderOperationIdRef.current = operationId;
+
+      setReorderPending(optimisticOrderKey, true);
       setSortState(DEFAULT_SORT_STATE);
+      setOptimisticOrderByKey((current) => ({
+        ...current,
+        [optimisticOrderKey]: {
+          operationId,
+          orderedIds,
+        },
+      }));
 
-      if (payload.kind === "folder") {
-        void onReorderFolders?.(currentFolderId, orderedIds);
-        return;
+      try {
+        if (payload.kind === "folder") {
+          await onReorderFolders?.(currentFolderId, orderedIds);
+          return;
+        }
+
+        if (payload.kind === "card") {
+          if (!currentCardSetId) return;
+          await onReorderCardsInCardSet?.(currentCardSetId, orderedIds);
+          return;
+        }
+
+        if (!currentFolderId) return;
+
+        if (payload.kind === "cardSet") {
+          await onReorderCardSets?.(currentFolderId, orderedIds);
+          return;
+        }
+
+        await onReorderDocuments?.(currentFolderId, orderedIds);
+      } catch (error) {
+        console.error("[FolderDetailView] Failed to persist row reorder", {
+          error,
+          payload,
+          targetRow,
+          position,
+        });
+
+        setOptimisticOrderByKey((current) => {
+          const activeEntry = current[optimisticOrderKey];
+          if (activeEntry?.operationId !== operationId) return current;
+
+          const persistedIds = getExplorerDetailScopedOrderedIds(
+            manualRows,
+            payload.kind,
+          );
+
+          if (areExplorerDetailOrderedIdsEqual(previousIds, persistedIds)) {
+            const { [optimisticOrderKey]: _failedEntry, ...rest } = current;
+            return rest;
+          }
+
+          return {
+            ...current,
+            [optimisticOrderKey]: {
+              operationId,
+              orderedIds: previousIds,
+            },
+          };
+        });
+
+        toast.error(getExplorerDetailReorderErrorMessage(error));
+      } finally {
+        setReorderPending(optimisticOrderKey, false);
       }
-
-      if (payload.kind === "card") {
-        if (!currentCardSetId) return;
-        void onReorderCardsInCardSet?.(currentCardSetId, orderedIds);
-        return;
-      }
-
-      if (!currentFolderId) return;
-
-      if (payload.kind === "cardSet") {
-        void onReorderCardSets?.(currentFolderId, orderedIds);
-        return;
-      }
-
-      void onReorderDocuments?.(currentFolderId, orderedIds);
     },
     [
+      currentCardSetId,
       currentFolderId,
       manualRows,
+      optimisticManualRows,
       onReorderCardSets,
       onReorderCardsInCardSet,
       onReorderDocuments,
       onReorderFolders,
-      currentCardSetId,
+      orderScopeKeyByKind,
+      setReorderPending,
+      toast,
     ],
   );
 
@@ -518,7 +692,7 @@ export const FolderDetailView = ({
       }
 
       if (position === "before" || position === "after") {
-        reorderRows(payload, row, position);
+        void reorderRows(payload, row, position);
       }
     },
     [movePayloadIntoCardSet, movePayloadIntoFolder, reorderRows],
@@ -601,7 +775,7 @@ export const FolderDetailView = ({
                 }
                 selected={selected}
                 dragging={dragging}
-                draggable={isManualOrder}
+                draggable={isManualOrder && !isCurrentScopeReorderPending}
                 dropPosition={currentDropPosition}
                 gridStyle={detailGridStyle}
                 tagDisplayText={formatExplorerTagNames(resolveRowTagNames(row))}
@@ -616,7 +790,7 @@ export const FolderDetailView = ({
                 onTagEditBlur={handleTagEditorBlur}
                 onActivate={() => handleActivateRow(row)}
                 onDragStart={(event) => {
-                  if (!isManualOrder) {
+                  if (!isManualOrder || isCurrentScopeReorderPending) {
                     event.preventDefault();
                     return;
                   }

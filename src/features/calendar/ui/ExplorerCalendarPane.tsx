@@ -13,15 +13,8 @@ import {
   subMonths,
 } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { UIEvent } from "react";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import type { PointerEvent, WheelEvent } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { Calendar, ChevronLeft, ChevronRight, X } from "@/ui/icons";
@@ -39,9 +32,13 @@ type CalendarDemoEvent = {
   minutes: number;
 };
 
-type TimelineBufferDays = {
-  before: number;
-  after: number;
+type PointerDragState = {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  lastX: number;
+  accumulatedX: number;
+  isDraggingHorizontally: boolean;
 };
 
 const DEFAULT_RANGE_DAYS = 3;
@@ -49,11 +46,10 @@ const HOURS = Array.from({ length: 24 }, (_, index) => index);
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 const WEEK_STARTS_ON_MONDAY = 1;
 const TIME_COLUMN_WIDTH = 74;
-const DAY_COLUMN_MIN_WIDTH = 136;
 const MONTH_NAVIGATION_STEP = 1;
-const INITIAL_TIMELINE_BUFFER_DAYS = 28;
-const TIMELINE_EXTEND_DAYS = 28;
-const TIMELINE_EDGE_THRESHOLD_PX = 320;
+const WHEEL_NAVIGATION_THRESHOLD_PX = 96;
+const POINTER_NAVIGATION_THRESHOLD_PX = 72;
+const POINTER_DIRECTION_THRESHOLD_PX = 8;
 
 const VIEW_MODE_OPTIONS = [
   { value: "month", label: "月" },
@@ -61,55 +57,45 @@ const VIEW_MODE_OPTIONS = [
   { value: "days", label: "日数" },
 ] satisfies Array<{ value: CalendarViewMode; label: string }>;
 
-const createInitialTimelineBuffer = (): TimelineBufferDays => ({
-  before: INITIAL_TIMELINE_BUFFER_DAYS,
-  after: INITIAL_TIMELINE_BUFFER_DAYS,
-});
+const getInitialRangeStartDate = (baseDate: Date, viewMode: CalendarViewMode) => {
+  const normalizedDate = startOfDay(baseDate);
 
-const getRangeDayCount = (
-  baseDate: Date,
+  if (viewMode === "month") {
+    return startOfMonth(normalizedDate);
+  }
+
+  if (viewMode === "week") {
+    return startOfWeek(normalizedDate, { weekStartsOn: WEEK_STARTS_ON_MONDAY });
+  }
+
+  return normalizedDate;
+};
+
+const getVisibleDayCount = (
+  rangeStartDate: Date,
   viewMode: CalendarViewMode,
   rangeDays: number,
 ) => {
   if (viewMode === "month") {
-    return getDaysInMonth(baseDate);
+    return getDaysInMonth(rangeStartDate);
   }
 
   return viewMode === "week" ? 7 : rangeDays;
 };
 
-const getViewportDayCount = (
-  baseDate: Date,
-  viewMode: CalendarViewMode,
-  rangeDays: number,
-) => {
-  if (viewMode === "month") {
-    return 7;
-  }
-
-  return getRangeDayCount(baseDate, viewMode, rangeDays);
-};
-
 const createVisibleDays = (
-  baseDate: Date,
+  rangeStartDate: Date,
   viewMode: CalendarViewMode,
   rangeDays: number,
-  timelineBuffer: TimelineBufferDays,
 ) => {
-  const normalizedDate = startOfDay(baseDate);
-  const startDate =
-    viewMode === "month"
-      ? startOfMonth(normalizedDate)
-      : viewMode === "week"
-        ? startOfWeek(normalizedDate, { weekStartsOn: WEEK_STARTS_ON_MONDAY })
-        : normalizedDate;
-  const visibleDayCount = getRangeDayCount(normalizedDate, viewMode, rangeDays);
-  const timelineStartDate = subDays(startDate, timelineBuffer.before);
-  const timelineDayCount =
-    timelineBuffer.before + visibleDayCount + timelineBuffer.after;
+  const visibleDayCount = getVisibleDayCount(
+    rangeStartDate,
+    viewMode,
+    rangeDays,
+  );
 
-  return Array.from({ length: timelineDayCount }, (_, index) =>
-    addDays(timelineStartDate, index),
+  return Array.from({ length: visibleDayCount }, (_, index) =>
+    addDays(rangeStartDate, index),
   );
 };
 
@@ -155,171 +141,181 @@ const calculateEventStyle = (event: CalendarDemoEvent) => {
 };
 
 export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => {
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const prependScrollCorrectionRef = useRef(0);
-  const isExtendingLeftRef = useRef(false);
-  const isExtendingRightRef = useRef(false);
-  const shouldSyncScrollRef = useRef(true);
+  const wheelDeltaRef = useRef(0);
+  const pointerDragStateRef = useRef<PointerDragState | null>(null);
 
-  const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [viewMode, setViewMode] = useState<CalendarViewMode>("days");
   const [rangeDays, setRangeDays] = useState(DEFAULT_RANGE_DAYS);
-  const [viewportWidth, setViewportWidth] = useState(0);
-  const [timelineBuffer, setTimelineBuffer] = useState(
-    createInitialTimelineBuffer,
-  );
+  const [rangeStartDate, setRangeStartDate] = useState(() => startOfDay(new Date()));
 
   const visibleDays = useMemo(
-    () => createVisibleDays(currentDate, viewMode, rangeDays, timelineBuffer),
-    [currentDate, rangeDays, timelineBuffer, viewMode],
+    () => createVisibleDays(rangeStartDate, viewMode, rangeDays),
+    [rangeDays, rangeStartDate, viewMode],
   );
-  const demoEvents = useMemo(() => createDemoEvents(currentDate), [currentDate]);
+  const demoEvents = useMemo(() => createDemoEvents(selectedDate), [selectedDate]);
 
-  const monthLabel = format(currentDate, "yyyy年 M月", { locale: ja });
-  const viewportDayCount = getViewportDayCount(currentDate, viewMode, rangeDays);
-  const dayColumnWidth =
-    viewportWidth > TIME_COLUMN_WIDTH
-      ? Math.max(
-          1,
-          (viewportWidth - TIME_COLUMN_WIDTH) / Math.max(1, viewportDayCount),
-        )
-      : DAY_COLUMN_MIN_WIDTH;
-  const gridWidth = TIME_COLUMN_WIDTH + visibleDays.length * dayColumnWidth;
+  const monthLabel = format(rangeStartDate, "yyyy年 M月", { locale: ja });
   const dayNavigationStep = viewMode === "week" ? 7 : rangeDays;
 
-  const resetTimelinePosition = useCallback(() => {
-    shouldSyncScrollRef.current = true;
-    setTimelineBuffer(createInitialTimelineBuffer());
+  const shiftVisibleRangeByDays = useCallback((dayDiff: number) => {
+    if (dayDiff === 0) {
+      return;
+    }
+
+    setSelectedDate((prev) => addDays(prev, dayDiff));
+    setRangeStartDate((prev) => addDays(prev, dayDiff));
   }, []);
 
-  const syncScrollToRangeStart = useCallback(() => {
-    const scrollContainer = scrollContainerRef.current;
-
-    if (!scrollContainer || dayColumnWidth <= 0) {
-      return;
-    }
-
-    scrollContainer.scrollLeft = timelineBuffer.before * dayColumnWidth;
-  }, [dayColumnWidth, timelineBuffer.before]);
-
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-
-    if (!scrollContainer) {
-      return undefined;
-    }
-
-    const updateViewportWidth = () => {
-      shouldSyncScrollRef.current = true;
-      setViewportWidth(scrollContainer.clientWidth);
-    };
-
-    updateViewportWidth();
-
-    const resizeObserver = new ResizeObserver(updateViewportWidth);
-    resizeObserver.observe(scrollContainer);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
-
-  useLayoutEffect(() => {
-    if (!shouldSyncScrollRef.current) {
-      return;
-    }
-
-    syncScrollToRangeStart();
-    shouldSyncScrollRef.current = false;
-  }, [currentDate, rangeDays, syncScrollToRangeStart, viewMode, viewportWidth]);
-
-  useLayoutEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    const correction = prependScrollCorrectionRef.current;
-
-    if (!scrollContainer || correction <= 0) {
-      isExtendingLeftRef.current = false;
-      return;
-    }
-
-    scrollContainer.scrollLeft += correction;
-    prependScrollCorrectionRef.current = 0;
-    isExtendingLeftRef.current = false;
-  }, [dayColumnWidth, timelineBuffer.before]);
-
-  useEffect(() => {
-    isExtendingRightRef.current = false;
-  }, [timelineBuffer.after]);
-
-  const handleTimelineScroll = useCallback(
-    (event: UIEvent<HTMLDivElement>) => {
-      const target = event.currentTarget;
-
-      if (dayColumnWidth <= 0) {
-        return;
-      }
-
-      if (
-        target.scrollLeft < TIMELINE_EDGE_THRESHOLD_PX &&
-        !isExtendingLeftRef.current
-      ) {
-        isExtendingLeftRef.current = true;
-        prependScrollCorrectionRef.current +=
-          TIMELINE_EXTEND_DAYS * dayColumnWidth;
-        setTimelineBuffer((prev) => ({
-          ...prev,
-          before: prev.before + TIMELINE_EXTEND_DAYS,
-        }));
-      }
-
-      const distanceToRightEdge =
-        target.scrollWidth - target.clientWidth - target.scrollLeft;
-
-      if (
-        distanceToRightEdge < TIMELINE_EDGE_THRESHOLD_PX &&
-        !isExtendingRightRef.current
-      ) {
-        isExtendingRightRef.current = true;
-        setTimelineBuffer((prev) => ({
-          ...prev,
-          after: prev.after + TIMELINE_EXTEND_DAYS,
-        }));
-      }
+  const resetRangeStartForDate = useCallback(
+    (date: Date, nextViewMode = viewMode) => {
+      setRangeStartDate(getInitialRangeStartDate(date, nextViewMode));
+      wheelDeltaRef.current = 0;
+      pointerDragStateRef.current = null;
     },
-    [dayColumnWidth],
+    [viewMode],
   );
 
   const handleViewModeChange = (nextViewMode: CalendarViewMode) => {
-    resetTimelinePosition();
     setViewMode(nextViewMode);
+    resetRangeStartForDate(selectedDate, nextViewMode);
   };
 
   const handleRangeDaysToggle = () => {
-    resetTimelinePosition();
-    setRangeDays((prev) => (prev === 3 ? 7 : 3));
+    setRangeDays((prev) => {
+      const nextRangeDays = prev === 3 ? 7 : 3;
+      wheelDeltaRef.current = 0;
+      pointerDragStateRef.current = null;
+      setRangeStartDate(startOfDay(selectedDate));
+      return nextRangeDays;
+    });
   };
 
   const handleToday = () => {
-    resetTimelinePosition();
-    setCurrentDate(new Date());
+    const today = new Date();
+
+    setSelectedDate(today);
+    resetRangeStartForDate(today);
   };
 
   const handlePrevious = () => {
-    resetTimelinePosition();
-    setCurrentDate((prev) =>
-      viewMode === "month"
-        ? subMonths(prev, MONTH_NAVIGATION_STEP)
-        : subDays(prev, dayNavigationStep),
-    );
+    if (viewMode === "month") {
+      setSelectedDate((prev) => subMonths(prev, MONTH_NAVIGATION_STEP));
+      setRangeStartDate((prev) => subMonths(prev, MONTH_NAVIGATION_STEP));
+      return;
+    }
+
+    shiftVisibleRangeByDays(-dayNavigationStep);
   };
 
   const handleNext = () => {
-    resetTimelinePosition();
-    setCurrentDate((prev) =>
-      viewMode === "month"
-        ? addMonths(prev, MONTH_NAVIGATION_STEP)
-        : addDays(prev, dayNavigationStep),
+    if (viewMode === "month") {
+      setSelectedDate((prev) => addMonths(prev, MONTH_NAVIGATION_STEP));
+      setRangeStartDate((prev) => addMonths(prev, MONTH_NAVIGATION_STEP));
+      return;
+    }
+
+    shiftVisibleRangeByDays(dayNavigationStep);
+  };
+
+  const handleCalendarWheel = useCallback(
+    (event: WheelEvent<HTMLDivElement>) => {
+      const horizontalDelta =
+        event.shiftKey && Math.abs(event.deltaY) > Math.abs(event.deltaX)
+          ? event.deltaY
+          : event.deltaX;
+      const isHorizontalScrollIntent =
+        event.shiftKey || Math.abs(event.deltaX) > Math.abs(event.deltaY);
+
+      if (!isHorizontalScrollIntent || horizontalDelta === 0) {
+        return;
+      }
+
+      event.preventDefault();
+      wheelDeltaRef.current += horizontalDelta;
+
+      const dayDiff = Math.trunc(
+        wheelDeltaRef.current / WHEEL_NAVIGATION_THRESHOLD_PX,
+      );
+
+      if (dayDiff === 0) {
+        return;
+      }
+
+      wheelDeltaRef.current -= dayDiff * WHEEL_NAVIGATION_THRESHOLD_PX;
+      shiftVisibleRangeByDays(dayDiff);
+    },
+    [shiftVisibleRangeByDays],
+  );
+
+  const handleCalendarPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) {
+      return;
+    }
+
+    pointerDragStateRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      lastX: event.clientX,
+      accumulatedX: 0,
+      isDraggingHorizontally: false,
+    };
+  };
+
+  const handleCalendarPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const dragState = pointerDragStateRef.current;
+
+    if (!dragState || dragState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const totalX = event.clientX - dragState.startX;
+    const totalY = event.clientY - dragState.startY;
+
+    if (!dragState.isDraggingHorizontally) {
+      const isHorizontalIntent =
+        Math.abs(totalX) > POINTER_DIRECTION_THRESHOLD_PX &&
+        Math.abs(totalX) > Math.abs(totalY);
+
+      if (!isHorizontalIntent) {
+        return;
+      }
+
+      dragState.isDraggingHorizontally = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    event.preventDefault();
+
+    const deltaX = dragState.lastX - event.clientX;
+    dragState.lastX = event.clientX;
+    dragState.accumulatedX += deltaX;
+
+    const dayDiff = Math.trunc(
+      dragState.accumulatedX / POINTER_NAVIGATION_THRESHOLD_PX,
     );
+
+    if (dayDiff === 0) {
+      return;
+    }
+
+    dragState.accumulatedX -= dayDiff * POINTER_NAVIGATION_THRESHOLD_PX;
+    shiftVisibleRangeByDays(dayDiff);
+  };
+
+  const handleCalendarPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+    const dragState = pointerDragStateRef.current;
+
+    if (!dragState || dragState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    pointerDragStateRef.current = null;
   };
 
   return (
@@ -411,21 +407,24 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
       </header>
 
       <div
-        ref={scrollContainerRef}
-        className="min-h-0 flex-1 overflow-auto bg-white"
-        onScroll={handleTimelineScroll}
+        className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto bg-white overscroll-contain [touch-action:pan-y]"
+        onPointerCancel={handleCalendarPointerEnd}
+        onPointerDown={handleCalendarPointerDown}
+        onPointerLeave={handleCalendarPointerEnd}
+        onPointerMove={handleCalendarPointerMove}
+        onPointerUp={handleCalendarPointerEnd}
+        onWheel={handleCalendarWheel}
       >
         <div
-          className="grid"
+          className="grid min-w-full select-none"
           style={{
-            gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${dayColumnWidth}px)`,
-            minWidth: `${gridWidth}px`,
+            gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, minmax(0, 1fr))`,
           }}
         >
           <div className="sticky left-0 top-0 z-30 border-b border-r border-[#e8e7e1] bg-white" />
 
           {visibleDays.map((day) => {
-            const selected = isSameDay(day, currentDate);
+            const selected = isSameDay(day, selectedDate);
             const today = isSameDay(day, new Date());
 
             return (
@@ -464,7 +463,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
               key={`allday-${day.toISOString()}`}
               className={cn(
                 "h-[46px] border-b border-r border-[#e8e7e1]",
-                isSameDay(day, currentDate) && "bg-[#fff8f8]",
+                isSameDay(day, selectedDate) && "bg-[#fff8f8]",
               )}
             />
           ))}
@@ -490,7 +489,7 @@ export const ExplorerCalendarPane = ({ onClose }: ExplorerCalendarPaneProps) => 
                 key={`day-body-${day.toISOString()}`}
                 className={cn(
                   "relative border-r border-[#e8e7e1]",
-                  isSameDay(day, currentDate) && "bg-[#fff8f8]",
+                  isSameDay(day, selectedDate) && "bg-[#fff8f8]",
                 )}
               >
                 {HOURS.map((hour) => (
