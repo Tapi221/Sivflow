@@ -450,9 +450,7 @@ const ExplorerPathBar = () => {
               <span
                 className={cn(
                   "min-w-0 truncate text-[12px]",
-                  isLast
-                    ? "font-medium text-[#24231f]"
-                    : "text-[#777671]",
+                  isLast ? "font-medium text-[#24231f]" : "text-[#777671]",
                 )}
                 title={crumb.label}
               >

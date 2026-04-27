@@ -85,7 +85,13 @@ interface FolderDetailViewProps {
 }
 
 type ExplorerDetailSortKey = "manual" | "name" | "updatedAt" | "kind" | "size";
-type ExplorerDetailColumnId = "name" | "tags" | "path" | "updatedAt" | "kind" | "size";
+type ExplorerDetailColumnId =
+  | "name"
+  | "tags"
+  | "path"
+  | "updatedAt"
+  | "kind"
+  | "size";
 type ExplorerDetailSortDirection = "asc" | "desc";
 type ExplorerDetailDropPosition = "before" | "after" | "inside" | "append";
 
@@ -166,7 +172,9 @@ const clampDetailColumnWidth = (
   );
 };
 
-const normalizeDetailColumnWidths = (value: unknown): ExplorerDetailColumnWidths => {
+const normalizeDetailColumnWidths = (
+  value: unknown,
+): ExplorerDetailColumnWidths => {
   const next = { ...DETAIL_DEFAULT_COLUMN_WIDTHS };
 
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -226,7 +234,8 @@ const getDetailGridMinWidth = (widths: ExplorerDetailColumnWidths): number => {
 const getFolderParentId = (folder: Folder): string | null => {
   return (
     folder.parentFolderId ??
-    (folder as unknown as { parent_folder_id?: string | null }).parent_folder_id ??
+    (folder as unknown as { parent_folder_id?: string | null })
+      .parent_folder_id ??
     null
   );
 };
@@ -339,7 +348,8 @@ const getDropPositionFromPointer = (
   event: ReactDragEvent<HTMLElement>,
 ): ExplorerDetailDropPosition => {
   const rect = event.currentTarget.getBoundingClientRect();
-  const ratio = rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
+  const ratio =
+    rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
 
   if (row.kind === "folder" && ratio >= 0.32 && ratio <= 0.68) {
     return "inside";
@@ -695,10 +705,18 @@ const FolderDetailRowView = ({
       >
         <span className="truncate">{row.path}</span>
       </div>
-      <div role="cell" className="flex min-w-0 items-center px-3 text-[#777671]">
-        <span className="truncate">{formatExplorerUpdatedAt(row.updatedAt)}</span>
+      <div
+        role="cell"
+        className="flex min-w-0 items-center px-3 text-[#777671]"
+      >
+        <span className="truncate">
+          {formatExplorerUpdatedAt(row.updatedAt)}
+        </span>
       </div>
-      <div role="cell" className="flex min-w-0 items-center px-3 text-[#777671]">
+      <div
+        role="cell"
+        className="flex min-w-0 items-center px-3 text-[#777671]"
+      >
         <span className="truncate">{row.typeLabel}</span>
       </div>
       <div
@@ -813,12 +831,15 @@ export const FolderDetailView = ({
     [columnWidths],
   );
 
-  const handleResetColumnWidth = useCallback((columnId: ExplorerDetailColumnId) => {
-    setColumnWidths((current) => ({
-      ...current,
-      [columnId]: DETAIL_DEFAULT_COLUMN_WIDTHS[columnId],
-    }));
-  }, []);
+  const handleResetColumnWidth = useCallback(
+    (columnId: ExplorerDetailColumnId) => {
+      setColumnWidths((current) => ({
+        ...current,
+        [columnId]: DETAIL_DEFAULT_COLUMN_WIDTHS[columnId],
+      }));
+    },
+    [],
+  );
 
   const manualRows = useMemo(
     () =>
@@ -896,15 +917,13 @@ export const FolderDetailView = ({
       } else if (editor.rowKind === "document") {
         await updateDocument(editor.rowId, { tags: tagNames });
       } else if (editor.rowKind === "folder") {
-        await updateFolder(
-          editor.rowId,
-          { tags: tagNames } as unknown as Partial<Folder>,
-        );
+        await updateFolder(editor.rowId, {
+          tags: tagNames,
+        } as unknown as Partial<Folder>);
       } else {
-        await updateCardSet(
-          editor.rowId,
-          { tags: tagNames } as unknown as Parameters<typeof updateCardSet>[1],
-        );
+        await updateCardSet(editor.rowId, {
+          tags: tagNames,
+        } as unknown as Parameters<typeof updateCardSet>[1]);
       }
 
       setTagEditor((current) =>
@@ -1295,7 +1314,11 @@ export const FolderDetailView = ({
                 }}
                 onDragOver={(event) => {
                   const payload = dragPayloadRef.current;
-                  if (!isManualOrder || !payload || isSamePayloadAndRow(payload, row)) {
+                  if (
+                    !isManualOrder ||
+                    !payload ||
+                    isSamePayloadAndRow(payload, row)
+                  ) {
                     return;
                   }
 

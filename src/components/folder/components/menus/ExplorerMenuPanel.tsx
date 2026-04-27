@@ -151,7 +151,9 @@ export const ExplorerMenuPanel = ({
               </DropdownMenuItemIcon>
             ) : null}
             <DropdownMenuItemLabel
-              className={cn(isPlainVariant ? PLAIN_MENU_LABEL_CLASS : undefined)}
+              className={cn(
+                isPlainVariant ? PLAIN_MENU_LABEL_CLASS : undefined,
+              )}
             >
               {action.label}
             </DropdownMenuItemLabel>

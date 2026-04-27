@@ -83,7 +83,9 @@ const getFolderName = (folder: Folder | FolderTreeNode): string => {
 
 const getFolderOrderIndex = (folder: Folder | FolderTreeNode): number => {
   const folderLike = folder as FolderTreeNode;
-  return folderLike.orderIndex ?? folderLike.order_index ?? Number.MAX_SAFE_INTEGER;
+  return (
+    folderLike.orderIndex ?? folderLike.order_index ?? Number.MAX_SAFE_INTEGER
+  );
 };
 
 const getCardSetFolderId = (cardSet: CardSet): string | null => {
@@ -134,7 +136,11 @@ const buildFolderById = (folders: Folder[]): Map<string, Folder> => {
 
   folders.forEach((folder) => {
     const folderId = getFolderId(folder);
-    if (!folderId || isSoftDeleted(withLegacy(folder)) || isHiddenFolder(folder)) {
+    if (
+      !folderId ||
+      isSoftDeleted(withLegacy(folder)) ||
+      isHiddenFolder(folder)
+    ) {
       return;
     }
 
@@ -231,7 +237,9 @@ const buildCardSetRows = ({
   return cardSets
     .filter((cardSet) => {
       if (isSoftDeleted(cardSet)) return false;
-      return normalizeFolderId(getCardSetFolderId(cardSet)) === currentFolderKey;
+      return (
+        normalizeFolderId(getCardSetFolderId(cardSet)) === currentFolderKey
+      );
     })
     .map((cardSet): ExplorerDetailRow => {
       const cardSetName = toVirtualMfDeckDisplayName(
@@ -328,7 +336,11 @@ export const buildExplorerDetailRows = ({
   const folderRows = folders
     .filter((folder) => {
       const folderId = getFolderId(folder);
-      if (!folderId || isSoftDeleted(withLegacy(folder)) || isHiddenFolder(folder)) {
+      if (
+        !folderId ||
+        isSoftDeleted(withLegacy(folder)) ||
+        isHiddenFolder(folder)
+      ) {
         return false;
       }
 
@@ -369,7 +381,9 @@ export const buildExplorerDetailRows = ({
         return false;
       }
 
-      return normalizeFolderId(getDocumentFolderId(document)) === currentFolderKey;
+      return (
+        normalizeFolderId(getDocumentFolderId(document)) === currentFolderKey
+      );
     })
     .map((document): ExplorerDetailRow => {
       return {

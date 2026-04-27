@@ -86,8 +86,10 @@ const getNextIndex = (
 ) => {
   if (key === "ArrowLeft") return clampIndex(currentIndex - 1, itemCount);
   if (key === "ArrowRight") return clampIndex(currentIndex + 1, itemCount);
-  if (key === "ArrowUp") return clampIndex(currentIndex - columnCount, itemCount);
-  if (key === "ArrowDown") return clampIndex(currentIndex + columnCount, itemCount);
+  if (key === "ArrowUp")
+    return clampIndex(currentIndex - columnCount, itemCount);
+  if (key === "ArrowDown")
+    return clampIndex(currentIndex + columnCount, itemCount);
   if (key === "Home") return 0;
   if (key === "End") return Math.max(0, itemCount - 1);
   return currentIndex;

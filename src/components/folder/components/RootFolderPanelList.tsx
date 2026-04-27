@@ -195,12 +195,7 @@ export const RootFolderPanelList = ({
       window.cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
     };
-  }, [
-    shouldRenderEdgeFade,
-    entries.length,
-    emptyMessage,
-    updateScrollFade,
-  ]);
+  }, [shouldRenderEdgeFade, entries.length, emptyMessage, updateScrollFade]);
 
   const content = (
     <>

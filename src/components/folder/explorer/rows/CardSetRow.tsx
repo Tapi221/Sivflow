@@ -184,11 +184,7 @@ export const CardSetRow = ({
         ) : null
       }
       icon={
-        <ExplorerChromeCardSetIcon
-          className={cn(
-            FOLDER_ROW_ICON_SIZE_CLASS,
-          )}
-        />
+        <ExplorerChromeCardSetIcon className={cn(FOLDER_ROW_ICON_SIZE_CLASS)} />
       }
       input={
         <input

@@ -114,12 +114,12 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const folderId = typedFolder.id ?? typedFolder.folderId ?? "";
   const folderName =
     typedFolder.folderName ?? typedFolder.folder_name ?? "無題のフォルダ";
-    const isOptimisticFolder = Boolean(typedFolder.__optimistic);
-    const parentFolderId = normalizeFolderId(getParentFolderId(folder));
-    const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
+  const isOptimisticFolder = Boolean(typedFolder.__optimistic);
+  const parentFolderId = normalizeFolderId(getParentFolderId(folder));
+  const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
 
-    const menuActions = React.useMemo(
-      () =>
+  const menuActions = React.useMemo(
+    () =>
       buildFolderMenuActions({
         onCreateSubfolder: canCreateFolder
           ? () => {
@@ -267,9 +267,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
         }
         icon={
           <ExplorerChromeFolderIcon
-            className={cn(
-              FOLDER_ROW_ICON_SIZE_CLASS,
-            )}
+            className={cn(FOLDER_ROW_ICON_SIZE_CLASS)}
           />
         }
         input={

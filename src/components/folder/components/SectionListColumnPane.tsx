@@ -273,7 +273,10 @@ const getFolderKey = (folderId: string | null): string => {
 };
 
 const compareLabels = (left: string, right: string): number => {
-  return left.localeCompare(right, "ja", { numeric: true, sensitivity: "base" });
+  return left.localeCompare(right, "ja", {
+    numeric: true,
+    sensitivity: "base",
+  });
 };
 
 const compareFolders = (left: FolderLike, right: FolderLike): number => {
@@ -290,10 +293,7 @@ const compareCardSets = (left: CardSet, right: CardSet): number => {
   return compareLabels(getCardSetLabel(left), getCardSetLabel(right));
 };
 
-const compareDocuments = (
-  left: DocumentItem,
-  right: DocumentItem,
-): number => {
+const compareDocuments = (left: DocumentItem, right: DocumentItem): number => {
   const leftOrder = getOrderIndex(left);
   const rightOrder = getOrderIndex(right);
   if (leftOrder !== rightOrder) return leftOrder - rightOrder;
@@ -333,7 +333,8 @@ const dispatchExplorerColumnPathChange = (crumbs: BreadcrumbCrumb[]) => {
 const dispatchExplorerColumnPathInactive = () => {
   if (typeof window === "undefined") return;
 
-  delete (window as ExplorerColumnPathWindow).__manifoliaExplorerColumnPathCrumbs;
+  delete (window as ExplorerColumnPathWindow)
+    .__manifoliaExplorerColumnPathCrumbs;
 
   window.dispatchEvent(
     new CustomEvent<ExplorerColumnPathChangeEventDetail>(
@@ -568,7 +569,11 @@ const ControlledColumnView = ({
 
     return [
       ...folderColumns,
-      { type: "cardSet", id: activeCardSetId, key: `cardSet:${activeCardSetId}` },
+      {
+        type: "cardSet",
+        id: activeCardSetId,
+        key: `cardSet:${activeCardSetId}`,
+      },
     ];
   }, [activeCardSetId, folderPathIds]);
 
@@ -884,13 +889,17 @@ export const SectionListColumnPane = ({
           cardSet ? getCardSetFolderId(cardSet) : null,
         );
         setDetailCardSetId(item.id);
-        setActiveLeafCrumbs(cardSet ? [{ label: getCardSetLabel(cardSet) }] : []);
+        setActiveLeafCrumbs(
+          cardSet ? [{ label: getCardSetLabel(cardSet) }] : [],
+        );
         setColumnPathIds(folderPathIds);
         return;
       }
 
       if (item?.type === "document") {
-        const documentItem = documents.find((document) => document.id === item.id);
+        const documentItem = documents.find(
+          (document) => document.id === item.id,
+        );
         const folderPathIds = buildFolderPathIds(
           documentItem ? getDocumentFolderId(documentItem) : null,
         );
@@ -928,13 +937,7 @@ export const SectionListColumnPane = ({
 
       onItemSelect(item);
     },
-    [
-      buildFolderPathIds,
-      cardSetById,
-      cards,
-      documents,
-      onItemSelect,
-    ],
+    [buildFolderPathIds, cardSetById, cards, documents, onItemSelect],
   );
 
   useEffect(() => {
@@ -963,7 +966,9 @@ export const SectionListColumnPane = ({
       );
       if (!documentItem) return;
 
-      const folderPathIds = buildFolderPathIds(getDocumentFolderId(documentItem));
+      const folderPathIds = buildFolderPathIds(
+        getDocumentFolderId(documentItem),
+      );
       setDetailCardSetId(null);
       setActiveLeafCrumbs([{ label: getDocumentLabel(documentItem) }]);
       setColumnPathIds(folderPathIds);
@@ -990,13 +995,7 @@ export const SectionListColumnPane = ({
       setActiveLeafCrumbs(leafCrumbs);
       setColumnPathIds(folderPathIds);
     }
-  }, [
-    buildFolderPathIds,
-    cardSetById,
-    cards,
-    documents,
-    selectedItem,
-  ]);
+  }, [buildFolderPathIds, cardSetById, cards, documents, selectedItem]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

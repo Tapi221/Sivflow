@@ -207,7 +207,9 @@ export const RootFolderPanelRow = ({
       const nextTarget = event.relatedTarget;
       const isCreateButtonFocus =
         nextTarget instanceof HTMLElement &&
-        Boolean(nextTarget.closest("[data-sidebar-create-root-folder-button='true']"));
+        Boolean(
+          nextTarget.closest("[data-sidebar-create-root-folder-button='true']"),
+        );
       const isBodyFocus =
         nextTarget === null ||
         nextTarget === document.body ||
@@ -375,12 +377,11 @@ export const RootFolderPanelRow = ({
       </span>
     ) : null;
 
-  const trailingNode =
-    contentCountNode ? (
-      <div className="ml-auto flex shrink-0 items-center gap-1 pr-1">
-        {contentCountNode}
-      </div>
-    ) : null;
+  const trailingNode = contentCountNode ? (
+    <div className="ml-auto flex shrink-0 items-center gap-1 pr-1">
+      {contentCountNode}
+    </div>
+  ) : null;
 
   const editingInputControl = (
     <div
@@ -406,10 +407,7 @@ export const RootFolderPanelRow = ({
       }}
     >
       <Icon
-        className={cn(
-          FOLDER_ROW_ICON_SIZE_CLASS,
-          "shrink-0 text-[#8b887f]",
-        )}
+        className={cn(FOLDER_ROW_ICON_SIZE_CLASS, "shrink-0 text-[#8b887f]")}
       />
       <input
         ref={attachRenameInputRef}
@@ -522,11 +520,7 @@ export const RootFolderPanelRow = ({
       trailing={trailingNode}
       icon={
         isEditing ? undefined : (
-          <Icon
-            className={cn(
-              FOLDER_ROW_ICON_SIZE_CLASS,
-            )}
-          />
+          <Icon className={cn(FOLDER_ROW_ICON_SIZE_CLASS)} />
         )
       }
       input={
@@ -584,7 +578,8 @@ export const RootFolderPanelRow = ({
             onPointerDown={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
               e.stopPropagation();
-              const isComposing = e.nativeEvent.isComposing || e.keyCode === 229;
+              const isComposing =
+                e.nativeEvent.isComposing || e.keyCode === 229;
 
               if (e.key === "Enter" && isComposing) return;
 
