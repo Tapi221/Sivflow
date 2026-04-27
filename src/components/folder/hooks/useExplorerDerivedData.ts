@@ -23,9 +23,19 @@ type LegacyEntityFields = {
   orderIndex?: number;
 };
 
+type DraftFolderFields = {
+  __draft?: boolean;
+  __optimistic?: boolean;
+};
+
 const isSoftDeleted = (
   entity?: { isDeleted?: boolean; is_deleted?: boolean } | null,
 ) => Boolean(entity?.isDeleted ?? entity?.is_deleted);
+
+const isDraftFolder = (folder: FolderTreeNode) => {
+  const draftFolder = folder as FolderTreeNode & DraftFolderFields;
+  return Boolean(draftFolder.__draft || draftFolder.__optimistic);
+};
 
 const withLegacy = <T extends object>(v: T): T & LegacyEntityFields =>
   v as T & LegacyEntityFields;
@@ -217,6 +227,15 @@ export const useExplorerDerivedData = ({
 
   const matchCountMap = useMemo(() => {
     if (!isFiltering) return new Map<string, number>();
+
+    const draftFolderIdSet = new Set<string>();
+    for (const folder of treeFolders) {
+      const folderId = getFolderId(folder);
+      if (folderId && isDraftFolder(folder)) {
+        draftFolderIdSet.add(folderId);
+      }
+    }
+
     const map = new Map<string, number>();
     const calc = (folderId: string): number => {
       if (map.has(folderId)) return map.get(folderId)!;
@@ -227,8 +246,11 @@ export const useExplorerDerivedData = ({
         0,
       );
       const total = directCount + childCount;
-      map.set(folderId, total);
-      return total;
+      const visibleTotal = draftFolderIdSet.has(folderId)
+        ? Math.max(total, 1)
+        : total;
+      map.set(folderId, visibleTotal);
+      return visibleTotal;
     };
     for (const folder of treeFolders) {
       const folderId = getFolderId(folder);

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { UiIcon } from "@/ui/UiIcon";
 import type { UiIconProps } from "@/ui/UiIcon";
 import {
@@ -8,6 +8,7 @@ import {
 import { ExplorerMenuPanel } from "@/components/folder/components/menus/ExplorerMenuPanel";
 import { buildExplorerCreateMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { ExplorerChromePinIcon } from "@/components/explorer/icons";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 
 interface ExplorerSidebarHeaderProps {
@@ -60,7 +61,28 @@ export const ExplorerSidebarHeader = ({
 }: ExplorerSidebarHeaderProps) => {
   const suppressCloseAutoFocusRef = useRef(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const isFolderListSectionCollapsed = useExplorerStore(
+    (state) => state.isFolderListSectionCollapsed,
+  );
+  const toggleFolderListSectionCollapsed = useExplorerStore(
+    (state) => state.toggleFolderListSectionCollapsed,
+  );
 
+  const handleCreateRootFolder = useCallback(() => {
+    if (isFolderListSectionCollapsed) {
+      toggleFolderListSectionCollapsed();
+    }
+
+    void onCreateRootFolder?.();
+  }, [
+    isFolderListSectionCollapsed,
+    onCreateRootFolder,
+    toggleFolderListSectionCollapsed,
+  ]);
+
+  const rootFolderCreateAction = onCreateRootFolder
+    ? handleCreateRootFolder
+    : undefined;
 
   const menuActions = useMemo(
     () =>
@@ -69,7 +91,7 @@ export const ExplorerSidebarHeader = ({
         canCreateCard,
         canAddDocuments,
         canBulkImport,
-        onCreateRootFolder,
+        onCreateRootFolder: rootFolderCreateAction,
         onCreateCardSet,
         onCreateCard,
         onAddDocument,
@@ -80,7 +102,7 @@ export const ExplorerSidebarHeader = ({
       canBulkImport,
       canCreateCard,
       canCreateCardSet,
-      onCreateRootFolder,
+      rootFolderCreateAction,
       onAddDocument,
       onBulkImport,
       onCreateCard,
