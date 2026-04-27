@@ -1,26 +1,13 @@
 import { cn } from "@/lib/utils";
+import type { ExplorerDetailSyncViewState } from "@/hooks/sync/useExplorerDetailSyncStates";
 
-export type ExplorerDetailSyncStatus =
-  | "synced"
-  | "syncing"
-  | "pending"
-  | "error"
-  | "conflict"
-  | "unknown";
-
-export type ExplorerDetailSyncViewState = {
-  status: ExplorerDetailSyncStatus;
-  title: string;
-  lastSyncedAt?: unknown;
-  lastError?: string | null;
-};
-
-type SyncBadgeMeta = {
-  label: string;
-  className: string;
-};
-
-const syncBadgeMeta: Record<ExplorerDetailSyncStatus, SyncBadgeMeta> = {
+const syncBadgeMeta: Record<
+  ExplorerDetailSyncViewState["status"],
+  {
+    label: string;
+    className: string;
+  }
+> = {
   synced: {
     label: "同期済み",
     className: "border-[#dedbd2] bg-[#faf9f5] text-[#6f6b63]",
@@ -46,11 +33,6 @@ const syncBadgeMeta: Record<ExplorerDetailSyncStatus, SyncBadgeMeta> = {
     className: "border-[#e1dfd8] bg-[#fafafa] text-[#777671]",
   },
 };
-
-export const createUnknownExplorerDetailSyncState = (): ExplorerDetailSyncViewState => ({
-  status: "unknown",
-  title: "同期状態を確認中です",
-});
 
 export const ExplorerDetailSyncBadge = ({
   state,
