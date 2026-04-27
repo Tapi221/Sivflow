@@ -15,8 +15,8 @@ import type {
   DocumentItem,
   Folder,
   SelectedExplorerItem,
+  SyncEntity,
 } from "@/types";
-import type { SyncEntity } from "@/types/domain/sync";
 
 export type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";
 
@@ -142,9 +142,10 @@ const getCardTags = (card: Card): string[] => {
   return getStringArray(card.tagIds);
 };
 
-const normalizeCardLocalSyncState = (
-  value: Card["syncState"],
+const getCardLocalSyncState = (
+  card: Card,
 ): ExplorerDetailLocalSyncState | undefined => {
+  const value = card.syncState;
   if (
     value === "pending" ||
     value === "synced" ||
@@ -334,7 +335,7 @@ const buildCardRows = ({
         openCardSetId: null,
         syncEntity: "card",
         syncTargetId: card.id,
-        localSyncState: normalizeCardLocalSyncState(card.syncState),
+        localSyncState: getCardLocalSyncState(card),
         lastSyncedAt: card.lastSyncedAt,
       };
     })
