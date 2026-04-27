@@ -46,17 +46,12 @@ type ListColumnMetrics = {
   itemCount: number;
 };
 
-const LIST_COLUMN_WIDTH_PX = 280;
 const LIST_ROW_HEIGHT_PX = 28;
 const LIST_ROW_GAP_PX = 2;
-const LIST_COLUMN_VERTICAL_PADDING_PX = 24;
-const ROOT_MIN_WIDTH_PX = 160;
-
-const LIST_COLUMN_STYLE = {
-  flex: `0 0 ${LIST_COLUMN_WIDTH_PX}px`,
-  width: LIST_COLUMN_WIDTH_PX,
-  minWidth: LIST_COLUMN_WIDTH_PX,
-} satisfies CSSProperties;
+const LIST_COLUMN_WIDTH_PX = 236;
+const LIST_COLUMN_GAP_PX = 36;
+const LIST_VIEW_PADDING_Y_PX = 24;
+const LIST_VIEW_PADDING_X_CLASS = "px-4";
 
 const LIST_ROW_STYLE = {
   height: LIST_ROW_HEIGHT_PX,
@@ -106,29 +101,15 @@ const getNextIndex = (
   return currentIndex;
 };
 
-const chunkRowsByColumn = (
-  rows: ExplorerDetailRow[],
-  rowsPerColumn: number,
-): ExplorerDetailRow[][] => {
-  const normalizedRowsPerColumn = Math.max(1, rowsPerColumn);
-  const columns: ExplorerDetailRow[][] = [];
-
-  for (let index = 0; index < rows.length; index += normalizedRowsPerColumn) {
-    columns.push(rows.slice(index, index + normalizedRowsPerColumn));
-  }
-
-  return columns;
-};
-
 const calculateRowsPerColumn = (viewportHeight: number): number => {
   const availableHeight = Math.max(
     LIST_ROW_HEIGHT_PX,
-    viewportHeight - LIST_COLUMN_VERTICAL_PADDING_PX,
+    viewportHeight - LIST_VIEW_PADDING_Y_PX,
   );
 
   return Math.max(
     1,
-    Math.floor(availableHeight / (LIST_ROW_HEIGHT_PX + LIST_ROW_GAP_PX)),
+    Math.floor((availableHeight + LIST_ROW_GAP_PX) / (LIST_ROW_HEIGHT_PX + LIST_ROW_GAP_PX)),
   );
 };
 
@@ -168,20 +149,39 @@ export const FolderListView = ({
     return map;
   }, [rows]);
 
-  const columns = useMemo(
-    () => chunkRowsByColumn(rows, rowsPerColumn),
-    [rows, rowsPerColumn],
+  const listGridStyle = useMemo(
+    () =>
+      ({
+        gridAutoColumns: `${LIST_COLUMN_WIDTH_PX}px`,
+        gridAutoFlow: "column",
+        gridTemplateRows: `repeat(${rowsPerColumn}, ${LIST_ROW_HEIGHT_PX}px)`,
+        columnGap: `${LIST_COLUMN_GAP_PX}px`,
+        rowGap: `${LIST_ROW_GAP_PX}px`,
+      }) satisfies CSSProperties,
+    [rowsPerColumn],
   );
 
   useEffect(() => {
     const viewport = viewportRef.current;
-    if (!viewport || typeof ResizeObserver === "undefined") return;
+    if (!viewport) return;
 
     const updateRowsPerColumn = () => {
-      setRowsPerColumn(calculateRowsPerColumn(viewport.clientHeight));
+      const nextRowsPerColumn = calculateRowsPerColumn(viewport.clientHeight);
+      setRowsPerColumn((currentRowsPerColumn) =>
+        currentRowsPerColumn === nextRowsPerColumn
+          ? currentRowsPerColumn
+          : nextRowsPerColumn,
+      );
     };
 
     updateRowsPerColumn();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateRowsPerColumn);
+      return () => {
+        window.removeEventListener("resize", updateRowsPerColumn);
+      };
+    }
 
     const resizeObserver = new ResizeObserver(updateRowsPerColumn);
     resizeObserver.observe(viewport);
@@ -324,65 +324,52 @@ export const FolderListView = ({
       ref={viewportRef}
       role="grid"
       aria-label="エクスプローラー 一覧表示"
-      className="h-full min-h-0 w-full overflow-x-auto overflow-y-hidden"
+      className={cn(
+        "h-full min-h-0 w-full overflow-auto bg-[rgba(255,255,255,0.96)] py-3",
+        LIST_VIEW_PADDING_X_CLASS,
+      )}
     >
-      <div className="flex h-full min-w-max items-stretch">
-        {columns.map((columnRows, columnIndex) => (
-          <section
-            key={`list-column:${columnIndex}`}
-            aria-label={`一覧列 ${columnIndex + 1}`}
-            className="h-full min-h-0 overflow-hidden border-r border-[#e6e4dc] bg-[rgba(255,255,255,0.96)] px-2 py-3"
-            style={LIST_COLUMN_STYLE}
-          >
-            <div className="space-y-0.5">
-              {columnRows.map((row) => {
-                const Icon = getRowIcon(row.kind);
-                const selected = isSelected(row);
+      <div className="grid min-h-max w-max content-start" style={listGridStyle}>
+        {rows.map((row) => {
+          const Icon = getRowIcon(row.kind);
+          const selected = isSelected(row);
 
-                return (
-                  <div
-                    key={row.key}
-                    ref={(node) => setRowRef(row.key, node)}
-                    role="row"
-                    tabIndex={0}
-                    aria-selected={selected}
-                    data-selected={selected ? "true" : undefined}
-                    title={row.name}
-                    style={LIST_ROW_STYLE}
-                    className={cn(
-                      "sidebar-row sidebar-row--folder ds-list-item ds-list-item--interactive",
-                      "relative flex w-full cursor-pointer items-center rounded-[8px] px-2 text-left",
-                      "select-none outline-none",
-                      selected && "ds-list-item--selected",
-                    )}
-                    onClick={(event) => handleRowClick(row, event)}
-                    onDoubleClick={() => openRow(row)}
-                    onKeyDown={(event) => handleRowKeyDown(row, event)}
-                  >
-                    <span className="ds-list-item__icon flex h-full w-4 shrink-0 items-center justify-center">
-                      <Icon className="h-3.5 w-3.5" />
-                    </span>
+          return (
+            <div
+              key={row.key}
+              ref={(node) => setRowRef(row.key, node)}
+              role="row"
+              tabIndex={0}
+              aria-selected={selected}
+              data-selected={selected ? "true" : undefined}
+              title={row.name}
+              style={LIST_ROW_STYLE}
+              className={cn(
+                "sidebar-row sidebar-row--folder ds-list-item ds-list-item--interactive",
+                "relative flex w-full cursor-pointer items-center rounded-[8px] px-2 text-left",
+                "select-none outline-none",
+                selected && "ds-list-item--selected",
+              )}
+              onClick={(event) => handleRowClick(row, event)}
+              onDoubleClick={() => openRow(row)}
+              onKeyDown={(event) => handleRowKeyDown(row, event)}
+            >
+              <span className="ds-list-item__icon flex h-full w-4 shrink-0 items-center justify-center">
+                <Icon className="h-3.5 w-3.5" />
+              </span>
 
-                    <div className="ds-list-item__content flex h-full min-w-0 flex-1 items-center pr-1">
-                      <div className="pointer-events-none flex min-w-0 flex-1 items-center">
-                        <span className="ds-list-item__title truncate text-[13px] font-normal">
-                          {row.name}
-                        </span>
-                      </div>
-                    </div>
+              <div className="ds-list-item__content flex h-full min-w-0 flex-1 items-center pr-1">
+                <div className="pointer-events-none flex min-w-0 flex-1 items-center">
+                  <span className="ds-list-item__title truncate text-[13px] font-normal">
+                    {row.name}
+                  </span>
+                </div>
+              </div>
 
-                    <span className="sr-only">{getRowKindLabel(row.kind)}</span>
-                  </div>
-                );
-              })}
+              <span className="sr-only">{getRowKindLabel(row.kind)}</span>
             </div>
-          </section>
-        ))}
-
-        <div
-          className="flex-1 bg-[rgba(255,255,255,0.96)]"
-          style={{ minWidth: ROOT_MIN_WIDTH_PX }}
-        />
+          );
+        })}
       </div>
     </div>
   );
