@@ -58,9 +58,7 @@ interface TreeViewTabContentProps {
 export const TreeViewTabContent = ({
   sidebarDisplayMode = "tree",
   folders,
-  cards,
   cardSets,
-  documents,
   filteredCards,
   filteredDocuments,
   selectedFolderId,
