@@ -609,9 +609,16 @@ export const ExplorerWorkspaceFrame = ({
         className,
       )}
     >
-      {tabs}
-
-      {showExplorerChrome ? <ExplorerToolbar /> : null}
+      {showExplorerChrome ? (
+        <div className="explorer-chrome-main-topbar pointer-events-none absolute right-0 top-0 z-40 flex min-w-0 flex-col">
+          <div className="pointer-events-auto min-w-0">{tabs}</div>
+          <div className="pointer-events-auto min-w-0">
+            <ExplorerToolbar />
+          </div>
+        </div>
+      ) : (
+        tabs
+      )}
 
       <div
         className={cn(

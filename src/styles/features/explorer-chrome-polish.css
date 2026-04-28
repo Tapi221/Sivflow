@@ -365,4 +365,71 @@
       linear-gradient(90deg, rgba(229, 241, 225, 0.98), rgba(244, 248, 241, 0.86)) !important;
   }
 
+  /*
+   * Brand sidebar owns the titlebar area.
+   * Workspace tabs and explorer toolbar must begin after the sidebar, not above it.
+   */
+  .explorer-chrome-main-topbar {
+    left: var(--mf-explorer-sidebar-titlebar-offset, 276px);
+  }
+
+  .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font {
+    height: 48px !important;
+    border-bottom-color: var(--mf-explorer-border-soft) !important;
+    background: rgba(255, 255, 252, 0.78) !important;
+    backdrop-filter: blur(14px);
+  }
+
+  .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font > div:first-child {
+    padding-left: 12px;
+  }
+
+  .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font .group\/tab {
+    border-radius: 14px 14px 0 0 !important;
+  }
+
+  .explorer-chrome-main-topbar .explorer-chrome-toolbar {
+    height: 64px !important;
+    border-bottom: 0 !important;
+    padding: 10px 16px 10px 16px !important;
+    background: rgba(255, 255, 252, 0.68) !important;
+    box-shadow: none !important;
+  }
+
+  .explorer-chrome-body {
+    padding-top: 0 !important;
+  }
+
+  .explorer-chrome-body > div {
+    border-top: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .explorer-chrome-body > div > .group\/sidebar {
+    padding-top: 10px;
+    align-self: stretch;
+  }
+
+  .explorer-chrome-body > div > .group\/sidebar > .explorer-chrome-font {
+    min-height: 0;
+  }
+
+  .explorer-chrome-body > div > .group\/sidebar ~ * {
+    padding-top: var(--mf-explorer-main-chrome-height, 112px);
+  }
+
+  .explorer-chrome-body > div > .group\/sidebar ~ * [role="table"] {
+    margin-top: 0;
+  }
+
+  @media (max-width: 767px) {
+    .explorer-chrome-main-topbar {
+      left: 0;
+    }
+
+    .explorer-chrome-body > div > .group\/sidebar ~ * {
+      padding-top: 0;
+    }
+  }
+
 }
