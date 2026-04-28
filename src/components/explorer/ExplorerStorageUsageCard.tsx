@@ -50,7 +50,10 @@ const resolveStorageUsagePercent = (
     return null;
   }
 
-  return Math.min(100, Math.max(0, Math.round((usageBytes / quotaBytes) * 100)));
+  return Math.min(
+    100,
+    Math.max(0, Math.round((usageBytes / quotaBytes) * 100)),
+  );
 };
 
 const StorageGaugeIcon = () => (
@@ -101,7 +104,9 @@ const readStorageUsage = async (): Promise<StorageUsageState> => {
 
     return {
       status:
-        usageBytes === null && quotaBytes === null ? "unavailable" : "available",
+        usageBytes === null && quotaBytes === null
+          ? "unavailable"
+          : "available",
       usageBytes,
       quotaBytes,
     };

@@ -19,7 +19,9 @@ export const WorkspaceShell = ({
     <div
       className={[
         "workspace-shell app-layout__content",
-        showTabs ? "workspace-shell--with-tabs" : "workspace-shell--without-tabs",
+        showTabs
+          ? "workspace-shell--with-tabs"
+          : "workspace-shell--without-tabs",
       ]
         .filter(Boolean)
         .join(" ")}

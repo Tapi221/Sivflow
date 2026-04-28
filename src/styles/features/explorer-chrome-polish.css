@@ -32,10 +32,10 @@
     --mf-explorer-row-selected: rgba(232, 242, 228, 0.88);
     --mf-explorer-selected-border: rgba(95, 138, 106, 0.18);
     --mf-explorer-focus-ring: rgba(95, 138, 106, 0.18);
-    --mf-explorer-control-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86),
-      0 1px 2px rgba(31, 45, 35, 0.035);
-    --mf-explorer-panel-shadow: 0 10px 28px rgba(38, 49, 39, 0.055),
-      0 2px 8px rgba(38, 49, 39, 0.035);
+    --mf-explorer-control-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.86), 0 1px 2px rgba(31, 45, 35, 0.035);
+    --mf-explorer-panel-shadow:
+      0 10px 28px rgba(38, 49, 39, 0.055), 0 2px 8px rgba(38, 49, 39, 0.035);
     --mf-explorer-radius-window: 20px;
     --mf-explorer-radius-panel: 16px;
     --mf-explorer-radius-control: 14px;
@@ -61,7 +61,9 @@
     --explorer-chrome-toolbar-bg: var(--mf-explorer-toolbar-bg);
     --explorer-chrome-sidebar-bg: var(--mf-explorer-sidebar-bg);
     --explorer-chrome-sidebar-hover-bg: var(--mf-explorer-sidebar-hover-bg);
-    --explorer-chrome-sidebar-selected-bg: var(--mf-explorer-sidebar-selected-bg);
+    --explorer-chrome-sidebar-selected-bg: var(
+      --mf-explorer-sidebar-selected-bg
+    );
     --explorer-chrome-panel-bg: var(--mf-explorer-surface-solid);
     --explorer-chrome-header-bg: var(--mf-explorer-header-bg);
     --explorer-chrome-border: var(--mf-explorer-border);
@@ -77,7 +79,9 @@
     --explorer-chrome-focus-ring: var(--mf-explorer-focus-ring);
     --explorer-chrome-icon-folder-fill: var(--mf-explorer-icon-folder-fill);
     --explorer-chrome-icon-folder-stroke: var(--mf-explorer-icon-folder-stroke);
-    --explorer-chrome-icon-folder-highlight: var(--mf-explorer-icon-folder-highlight);
+    --explorer-chrome-icon-folder-highlight: var(
+      --mf-explorer-icon-folder-highlight
+    );
     --explorer-chrome-icon-cardset-fill: var(--mf-explorer-icon-cardset-fill);
     --explorer-chrome-icon-card-fill: var(--mf-explorer-icon-card-fill);
     --explorer-chrome-icon-pdf-fill: var(--mf-explorer-icon-pdf-fill);
@@ -96,7 +100,9 @@
     --scrollbar-thumb-active: #9fb79f;
     --explorer-chrome-folder-fill: var(--mf-explorer-icon-folder-fill);
     --explorer-chrome-folder-stroke: var(--mf-explorer-icon-folder-stroke);
-    --explorer-chrome-folder-highlight: var(--mf-explorer-icon-folder-highlight);
+    --explorer-chrome-folder-highlight: var(
+      --mf-explorer-icon-folder-highlight
+    );
     --explorer-chrome-cardset-fill: var(--mf-explorer-icon-cardset-fill);
     --explorer-chrome-cardset-stroke: var(--mf-explorer-icon-stroke);
     --explorer-chrome-cardset-highlight: #ffffff;
@@ -117,9 +123,15 @@
     border-radius: 0 !important;
     overflow: hidden;
     background:
-      radial-gradient(circle at 20px 20px, rgba(95, 138, 106, 0.035) 0 1px, transparent 1px),
+      radial-gradient(
+        circle at 20px 20px,
+        rgba(95, 138, 106, 0.035) 0 1px,
+        transparent 1px
+      ),
       linear-gradient(180deg, #fcfdf9 0%, var(--mf-explorer-app-bg) 100%) !important;
-    background-size: 18px 18px, auto;
+    background-size:
+      18px 18px,
+      auto;
     box-shadow: none !important;
     color: var(--mf-explorer-text);
   }
@@ -145,7 +157,9 @@
   }
 
   .explorer-workspace-tabs-bar::after,
-  .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font::after {
+  .explorer-chrome-main-topbar
+    > div:first-child
+    > .explorer-chrome-font::after {
     content: "";
     position: absolute;
     right: 0;
@@ -158,7 +172,10 @@
   }
 
   .explorer-workspace-tabs-list,
-  .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font > div:first-child {
+  .explorer-chrome-main-topbar
+    > div:first-child
+    > .explorer-chrome-font
+    > div:first-child {
     position: relative;
     z-index: 1;
     height: 100%;
@@ -168,7 +185,10 @@
   }
 
   .explorer-workspace-tab,
-  .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font .group\/tab {
+  .explorer-chrome-main-topbar
+    > div:first-child
+    > .explorer-chrome-font
+    .group\/tab {
     position: relative;
     z-index: 1;
     border-radius: 15px 15px 0 0 !important;
@@ -322,7 +342,6 @@
     background: transparent !important;
   }
 
-
   [data-explorer-sidebar-shell="true"] {
     box-sizing: border-box !important;
     padding: 0 !important;
@@ -339,8 +358,11 @@
     border: 0 !important;
     border-right: 1px solid rgba(223, 229, 220, 0.92) !important;
     border-radius: 0 !important;
-    background:
-      linear-gradient(180deg, rgba(255, 255, 252, 0.86), rgba(249, 252, 246, 0.78)) !important;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 252, 0.86),
+      rgba(249, 252, 246, 0.78)
+    ) !important;
     box-shadow: none !important;
   }
 
@@ -388,14 +410,28 @@
 
   .explorer-sidebar-brand-header {
     background:
-      radial-gradient(circle at 18px 18px, rgba(95, 138, 106, 0.055) 0 1px, transparent 1px),
-      linear-gradient(180deg, rgba(255, 255, 252, 0.86), rgba(250, 252, 247, 0.72));
-    background-size: 16px 16px, auto;
+      radial-gradient(
+        circle at 18px 18px,
+        rgba(95, 138, 106, 0.055) 0 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 252, 0.86),
+        rgba(250, 252, 247, 0.72)
+      );
+    background-size:
+      16px 16px,
+      auto;
   }
 
   .explorer-sidebar-brand-mark {
     border: 1px solid rgba(95, 138, 106, 0.16);
-    background: linear-gradient(180deg, rgba(255, 255, 252, 0.92), rgba(237, 245, 235, 0.86));
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 252, 0.92),
+      rgba(237, 245, 235, 0.86)
+    );
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.92),
       0 6px 14px rgba(63, 106, 78, 0.08);
@@ -414,7 +450,8 @@
   .explorer-chrome-shell #pinned-folder-sidebar-section-header:hover,
   .explorer-chrome-shell #folder-list-sidebar-section-header:hover,
   .explorer-chrome-shell [aria-controls="tag-sidebar-section-content"]:hover,
-  .explorer-chrome-shell [aria-controls="calendar-sidebar-section-content"]:hover {
+  .explorer-chrome-shell
+    [aria-controls="calendar-sidebar-section-content"]:hover {
     background: var(--mf-explorer-sidebar-hover-bg);
   }
 
@@ -426,8 +463,12 @@
   }
 
   .explorer-chrome-shell .sidebar-row .tabular-nums,
-  .explorer-chrome-shell [aria-controls="tag-sidebar-section-content"] .tabular-nums,
-  .explorer-chrome-shell [aria-controls="calendar-sidebar-section-content"] .tabular-nums {
+  .explorer-chrome-shell
+    [aria-controls="tag-sidebar-section-content"]
+    .tabular-nums,
+  .explorer-chrome-shell
+    [aria-controls="calendar-sidebar-section-content"]
+    .tabular-nums {
     min-width: 24px;
     border-radius: 999px;
     background: rgba(95, 138, 106, 0.08);
@@ -436,8 +477,11 @@
   }
 
   .explorer-chrome-shell .sidebar-row[data-selected="true"] {
-    background:
-      linear-gradient(90deg, rgba(229, 241, 225, 0.96), rgba(244, 248, 241, 0.82)) !important;
+    background: linear-gradient(
+      90deg,
+      rgba(229, 241, 225, 0.96),
+      rgba(244, 248, 241, 0.82)
+    ) !important;
   }
 
   .explorer-chrome-shell .border-\[\#dddcd5\],
@@ -451,7 +495,8 @@
     background: var(--mf-explorer-header-bg) !important;
   }
 
-  .explorer-chrome-shell div:has(> [role="table"][aria-label="エクスプローラー詳細表示"]) {
+  .explorer-chrome-shell
+    div:has(> [role="table"][aria-label="エクスプローラー詳細表示"]) {
     box-sizing: border-box;
     min-height: 0;
     padding: 14px 18px 18px !important;
@@ -471,7 +516,9 @@
       0 12px 30px rgba(38, 49, 39, 0.052);
   }
 
-  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] > [role="row"]:has([role="columnheader"]) {
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    > [role="row"]:has([role="columnheader"]) {
     position: sticky !important;
     top: 0 !important;
     z-index: 90 !important;
@@ -487,7 +534,10 @@
       inset 0 -1px 0 var(--mf-explorer-border) !important;
   }
 
-  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] > [role="row"]:has([role="columnheader"]) [role="columnheader"] {
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    > [role="row"]:has([role="columnheader"])
+    [role="columnheader"] {
     position: sticky !important;
     top: 0 !important;
     z-index: 91 !important;
@@ -498,7 +548,10 @@
     font-weight: 700;
   }
 
-  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] > [role="row"]:has([role="columnheader"]) [role="columnheader"]:hover {
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    > [role="row"]:has([role="columnheader"])
+    [role="columnheader"]:hover {
     background: rgba(237, 245, 235, 0.72) !important;
     color: var(--mf-explorer-text) !important;
   }
@@ -512,7 +565,9 @@
     background: rgba(95, 138, 106, 0.48) !important;
   }
 
-  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"] {
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    [role="row"][data-detail-row="true"] {
     isolation: isolate;
     min-height: 42px;
     border-bottom-color: var(--mf-explorer-border-soft) !important;
@@ -520,7 +575,9 @@
     color: var(--mf-explorer-text-muted) !important;
   }
 
-  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"]::before {
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    [role="row"][data-detail-row="true"]::before {
     content: "";
     position: absolute;
     inset: 4px 10px;
@@ -533,30 +590,47 @@
       box-shadow 120ms ease;
   }
 
-  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"]:hover::before {
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    [role="row"][data-detail-row="true"]:hover::before {
     background: var(--mf-explorer-row-hover);
   }
 
-  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"][data-selected="true"]::before {
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    [role="row"][data-detail-row="true"][data-selected="true"]::before {
     background: var(--mf-explorer-row-selected);
     box-shadow: inset 0 0 0 1px var(--mf-explorer-selected-border);
   }
 
-  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"] [role="cell"] {
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    [role="row"][data-detail-row="true"]
+    [role="cell"] {
     position: relative;
     z-index: 1;
     color: var(--mf-explorer-text-muted) !important;
   }
 
-  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"] [role="cell"]:first-child {
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    [role="row"][data-detail-row="true"]
+    [role="cell"]:first-child {
     color: var(--mf-explorer-text) !important;
   }
 
-  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"] [role="cell"]:first-child span[title] {
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    [role="row"][data-detail-row="true"]
+    [role="cell"]:first-child
+    span[title] {
     font-weight: 600;
   }
 
-  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"] svg {
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    [role="row"][data-detail-row="true"]
+    svg {
     opacity: 1;
   }
 
@@ -632,7 +706,10 @@
     }
 
     .explorer-workspace-tabs-list,
-    .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font > div:first-child {
+    .explorer-chrome-main-topbar
+      > div:first-child
+      > .explorer-chrome-font
+      > div:first-child {
       padding-left: 0;
     }
 
@@ -655,11 +732,13 @@
       padding-left: 0 !important;
     }
 
-    .explorer-chrome-shell div:has(> [role="table"][aria-label="エクスプローラー詳細表示"]) {
+    .explorer-chrome-shell
+      div:has(> [role="table"][aria-label="エクスプローラー詳細表示"]) {
       padding: 0 !important;
     }
 
-    .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] {
+    .explorer-chrome-shell
+      [role="table"][aria-label="エクスプローラー詳細表示"] {
       border-radius: 0;
       border-right: 0;
       border-left: 0;

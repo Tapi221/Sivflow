@@ -96,11 +96,8 @@ const TreeViewLayout = ({
   const { settings } = useUserSettings();
   const { updateFolder } = useFolderCommands();
   const { cards = [], loading: cardsLoading } = useCardsRead();
-  const {
-    createCard,
-    moveCardToSet,
-    reorderCardsInCardSet,
-  } = useCardCommands();
+  const { createCard, moveCardToSet, reorderCardsInCardSet } =
+    useCardCommands();
   const { documents = [], loading: documentsLoading } = useDocumentsRead();
 
   const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(

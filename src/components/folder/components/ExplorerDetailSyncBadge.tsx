@@ -10,12 +10,9 @@ const syncBadgeClassNameByStatus = {
     "border-[var(--mf-explorer-success-border)] bg-[var(--mf-explorer-success-bg)] text-[var(--mf-explorer-success-text)]",
   syncing:
     "border-[var(--mf-explorer-info-border)] bg-[var(--mf-explorer-info-bg)] text-[var(--mf-explorer-info-text)]",
-  pending:
-    "border-[#ead79c] bg-[#fff9e8] text-[#7b6420]",
-  error:
-    "border-[#efc2bb] bg-[#fff4f2] text-[#9d4439]",
-  conflict:
-    "border-[#e9c990] bg-[#fff7e7] text-[#8a5b18]",
+  pending: "border-[#ead79c] bg-[#fff9e8] text-[#7b6420]",
+  error: "border-[#efc2bb] bg-[#fff4f2] text-[#9d4439]",
+  conflict: "border-[#e9c990] bg-[#fff7e7] text-[#8a5b18]",
   unknown:
     "border-[var(--mf-explorer-border)] bg-[var(--mf-explorer-chip-bg)] text-[var(--mf-explorer-text-muted)]",
 } satisfies Record<ExplorerDetailSyncViewState["status"], string>;

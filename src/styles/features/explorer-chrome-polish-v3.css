@@ -165,7 +165,10 @@
   }
 
   .explorer-chrome-shell .sidebar-row .ds-list-item__icon,
-  .explorer-chrome-shell [role="row"] [role="cell"]:first-child > span:first-child,
+  .explorer-chrome-shell
+    [role="row"]
+    [role="cell"]:first-child
+    > span:first-child,
   .explorer-chrome-shell [role="row"] [role="cell"]:first-child svg {
     width: 18px;
     min-width: 18px;
