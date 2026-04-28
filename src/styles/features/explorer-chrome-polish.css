@@ -1,6 +1,6 @@
 @layer components {
   :root {
-    --mf-explorer-window-inset: 10px;
+    --mf-explorer-window-inset: 0px;
     --mf-explorer-sidebar-titlebar-offset: 276px;
     --mf-explorer-main-chrome-height: 122px;
     --mf-explorer-search-width: clamp(190px, 18vw, 260px);
@@ -460,17 +460,15 @@
 
   @media (min-width: 768px) {
     .explorer-chrome-shell {
-      width: calc(100% - (var(--mf-explorer-window-inset) * 2)) !important;
-      height: calc(100% - (var(--mf-explorer-window-inset) * 2)) !important;
-      margin: var(--mf-explorer-window-inset) !important;
-      border: 1px solid rgba(222, 228, 220, 0.88);
-      border-radius: var(--mf-explorer-radius-window) !important;
+      width: 100% !important;
+      height: 100% !important;
+      margin: 0 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
       overflow: hidden;
       background:
         linear-gradient(180deg, rgba(255, 255, 252, 0.96), rgba(247, 249, 244, 0.96)) !important;
-      box-shadow:
-        0 24px 64px rgba(31, 45, 35, 0.1),
-        0 4px 14px rgba(31, 45, 35, 0.06);
+      box-shadow: none !important;
     }
 
     .explorer-chrome-body > div > .group\/sidebar {
