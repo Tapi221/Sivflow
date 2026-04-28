@@ -46,6 +46,12 @@ type ExplorerToolbarSearchButtonProps = {
   onClick: () => void;
 };
 
+type ExplorerToolbarMenuItemProps = {
+  label: string;
+  description?: string;
+  onClick?: () => void;
+};
+
 type ExplorerColumnPathWindow = Window & {
   __manifoliaExplorerColumnPathCrumbs?: BreadcrumbCrumb[];
 };
@@ -317,6 +323,20 @@ const ColumnsIcon = () => (
   </svg>
 );
 
+const MoreHorizontalIcon = () => (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <circle cx="5" cy="12" r="1.45" fill="currentColor" />
+    <circle cx="12" cy="12" r="1.45" fill="currentColor" />
+    <circle cx="19" cy="12" r="1.45" fill="currentColor" />
+  </svg>
+);
+
 const HomeIcon = () => (
   <svg
     width="13"
@@ -360,6 +380,10 @@ const SettingsIcon = () => (
   </svg>
 );
 
+const ExplorerToolbarDivider = () => (
+  <div className="explorer-chrome-toolbar-divider mx-1 h-[18px] w-px shrink-0 bg-[var(--mf-explorer-border)]" />
+);
+
 const ExplorerToolbarSearchButton = ({
   onClick,
 }: ExplorerToolbarSearchButtonProps) => {
@@ -377,6 +401,33 @@ const ExplorerToolbarSearchButton = ({
     >
       <SearchIcon />
       <span className="min-w-0 truncate">検索</span>
+    </button>
+  );
+};
+
+const ExplorerToolbarMenuItem = ({
+  label,
+  description,
+  onClick,
+}: ExplorerToolbarMenuItemProps) => {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "flex w-full min-w-0 flex-col rounded-[10px] px-3 py-2 text-left outline-none transition-colors",
+        "text-[var(--mf-explorer-text)] hover:bg-[var(--mf-explorer-control-hover)]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+      )}
+      onClick={onClick}
+    >
+      <span className="truncate text-[12px] font-semibold leading-4">
+        {label}
+      </span>
+      {description ? (
+        <span className="mt-0.5 truncate text-[11px] leading-4 text-[var(--mf-explorer-text-muted)]">
+          {description}
+        </span>
+      ) : null}
     </button>
   );
 };
@@ -496,7 +547,9 @@ const ExplorerPathBar = () => {
               <span
                 className={cn(
                   "min-w-0 truncate text-[12px]",
-                  isLast ? "font-semibold text-[var(--mf-explorer-text)]" : "text-[var(--mf-explorer-text-muted)]",
+                  isLast
+                    ? "font-semibold text-[var(--mf-explorer-text)]"
+                    : "text-[var(--mf-explorer-text-muted)]",
                 )}
                 title={crumb.label}
               >
@@ -513,6 +566,7 @@ const ExplorerPathBar = () => {
 const ExplorerToolbar = () => {
   const { tags } = useTags();
   const openGlobalSearch = useGlobalSearchStore((state) => state.open);
+  const openSettings = useExplorerSettingsOpener();
   const panelPreset = floatingPanelPresets.filter;
   const allTags = useMemo(
     () =>
@@ -529,55 +583,84 @@ const ExplorerToolbar = () => {
         "bg-[var(--mf-explorer-toolbar-bg)] px-4 text-[var(--mf-explorer-text)]",
       )}
     >
-      <ExplorerToolbarButton title="戻る" disabled>
-        <ChevronLeftIcon />
-      </ExplorerToolbarButton>
-      <ExplorerToolbarButton title="進む" disabled>
-        <ChevronRightIcon />
-      </ExplorerToolbarButton>
-      <ExplorerToolbarButton title="上へ" disabled>
-        <ArrowUpIcon />
-      </ExplorerToolbarButton>
+      <div className="explorer-chrome-toolbar-nav flex shrink-0 items-center gap-1">
+        <ExplorerToolbarButton title="戻る" disabled>
+          <ChevronLeftIcon />
+        </ExplorerToolbarButton>
+        <ExplorerToolbarButton title="進む" disabled>
+          <ChevronRightIcon />
+        </ExplorerToolbarButton>
+        <ExplorerToolbarButton title="上へ" disabled>
+          <ArrowUpIcon />
+        </ExplorerToolbarButton>
+      </div>
 
-      <div className="mx-1 h-[18px] w-px shrink-0 bg-[var(--mf-explorer-border)]" />
+      <ExplorerToolbarDivider />
 
       <ExplorerPathBar />
 
-      <div className="mx-1 h-[18px] w-px shrink-0 bg-[var(--mf-explorer-border)]" />
-
-      <ExplorerToolbarButton title="更新">
-        <RefreshIcon />
-      </ExplorerToolbarButton>
-
-      <TagFilterPopover
-        allTags={allTags}
-        className={cn(
-          "explorer-chrome-toolbar-button h-8 w-8 shrink-0 rounded-[11px] border border-transparent bg-transparent px-0 py-0",
-          "text-[var(--mf-explorer-text-muted)] hover:border-[var(--mf-explorer-border-soft)] hover:bg-[var(--mf-explorer-control-hover)] hover:text-[var(--mf-explorer-text)]",
-        )}
-      />
-
-      <ExplorerToolbarButton title="並び替え">
-        <SortIcon />
-      </ExplorerToolbarButton>
-
-      <Popover>
-        <PopoverTrigger asChild>
-          <ExplorerToolbarButton title="表示切替">
-            <ColumnsIcon />
-          </ExplorerToolbarButton>
-        </PopoverTrigger>
-
-        <PopoverContent
-          align="end"
-          className={cn(panelPreset.className, "w-[300px]")}
-          surface={panelPreset.surface}
-        >
-          <LayoutPanel />
-        </PopoverContent>
-      </Popover>
-
       <ExplorerToolbarSearchButton onClick={openGlobalSearch} />
+
+      <div className="explorer-chrome-toolbar-actions flex shrink-0 items-center gap-1">
+        <ExplorerToolbarButton title="更新">
+          <RefreshIcon />
+        </ExplorerToolbarButton>
+
+        <TagFilterPopover
+          allTags={allTags}
+          className={cn(
+            "explorer-chrome-toolbar-button h-8 w-8 shrink-0 rounded-[11px] border border-transparent bg-transparent px-0 py-0",
+            "text-[var(--mf-explorer-text-muted)] hover:border-[var(--mf-explorer-border-soft)] hover:bg-[var(--mf-explorer-control-hover)] hover:text-[var(--mf-explorer-text)]",
+          )}
+        />
+
+        <ExplorerToolbarButton title="並び替え">
+          <SortIcon />
+        </ExplorerToolbarButton>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <ExplorerToolbarButton title="表示切替">
+              <ColumnsIcon />
+            </ExplorerToolbarButton>
+          </PopoverTrigger>
+
+          <PopoverContent
+            align="end"
+            className={cn(panelPreset.className, "w-[300px]")}
+            surface={panelPreset.surface}
+          >
+            <LayoutPanel />
+          </PopoverContent>
+        </Popover>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <ExplorerToolbarButton title="その他">
+              <MoreHorizontalIcon />
+            </ExplorerToolbarButton>
+          </PopoverTrigger>
+
+          <PopoverContent
+            align="end"
+            className={cn(panelPreset.className, "w-[230px] p-1.5")}
+            surface={panelPreset.surface}
+          >
+            <div className="space-y-1">
+              <ExplorerToolbarMenuItem
+                label="検索を開く"
+                description="フォルダ・カード・PDFを横断検索"
+                onClick={openGlobalSearch}
+              />
+              <ExplorerToolbarMenuItem
+                label="エクスプローラー設定"
+                description="表示と動作を調整"
+                onClick={openSettings}
+              />
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 };
