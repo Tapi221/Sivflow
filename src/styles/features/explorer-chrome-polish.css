@@ -346,16 +346,8 @@
 
   [data-explorer-sidebar-shell="true"] ~ * > div {
     overflow: hidden;
-    border: 1px solid var(--mf-explorer-border) !important;
-    border-radius: var(--mf-explorer-radius-panel) !important;
-    background: rgba(255, 255, 252, 0.96) !important;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.88),
-      0 8px 22px rgba(38, 49, 39, 0.04);
-  }
-
-  [data-explorer-sidebar-shell="true"] ~ * > div > [role="table"] {
-    border-radius: var(--mf-explorer-radius-panel) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
   }
@@ -425,31 +417,43 @@
     background: var(--mf-explorer-header-bg) !important;
   }
 
-  .explorer-chrome-shell [role="table"] {
+  .explorer-chrome-shell div:has(> [role="table"][aria-label="エクスプローラー詳細表示"]) {
+    box-sizing: border-box;
+    min-height: 0;
+    padding: 16px 18px 18px !important;
+    background: transparent !important;
+  }
+
+  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] {
     position: relative;
     width: 100%;
     min-width: 100%;
     overflow: clip;
-    border-radius: var(--mf-explorer-radius-panel);
-    background: var(--mf-explorer-surface-solid);
+    border: 1px solid var(--mf-explorer-border);
+    border-radius: 18px;
+    background: rgba(255, 255, 252, 0.98);
     box-shadow:
-      inset 0 0 0 1px var(--mf-explorer-border),
-      var(--mf-explorer-panel-shadow);
+      inset 0 1px 0 rgba(255, 255, 255, 0.88),
+      0 12px 30px rgba(38, 49, 39, 0.052);
   }
 
-  .explorer-chrome-shell [role="table"] > [role="row"]:has([role="columnheader"]) {
+  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] > [role="row"]:has([role="columnheader"]) {
     position: sticky !important;
     top: 0 !important;
     z-index: 90 !important;
-    min-height: 40px;
+    min-height: 44px;
     border-bottom-color: var(--mf-explorer-border) !important;
-    background: var(--mf-explorer-header-bg) !important;
+    background: linear-gradient(
+      180deg,
+      rgba(252, 253, 249, 0.99),
+      rgba(247, 250, 245, 0.98)
+    ) !important;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
       inset 0 -1px 0 var(--mf-explorer-border) !important;
   }
 
-  .explorer-chrome-shell [role="columnheader"] {
+  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] > [role="row"]:has([role="columnheader"]) [role="columnheader"] {
     position: sticky !important;
     top: 0 !important;
     z-index: 91 !important;
@@ -460,7 +464,7 @@
     font-weight: 700;
   }
 
-  .explorer-chrome-shell [role="columnheader"]:hover {
+  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] > [role="row"]:has([role="columnheader"]) [role="columnheader"]:hover {
     background: rgba(237, 245, 235, 0.72) !important;
     color: var(--mf-explorer-text) !important;
   }
@@ -474,35 +478,51 @@
     background: rgba(95, 138, 106, 0.48) !important;
   }
 
-  .explorer-chrome-shell [role="row"][data-detail-row="true"] {
-    min-height: 39px;
+  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"] {
+    isolation: isolate;
+    min-height: 42px;
     border-bottom-color: var(--mf-explorer-border-soft) !important;
-    background: transparent;
+    background: transparent !important;
     color: var(--mf-explorer-text-muted) !important;
   }
 
-  .explorer-chrome-shell [role="row"][data-detail-row="true"]:hover {
-    background: var(--mf-explorer-row-hover) !important;
+  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"]::before {
+    content: "";
+    position: absolute;
+    inset: 4px 10px;
+    z-index: 0;
+    border-radius: 12px;
+    background: transparent;
+    pointer-events: none;
+    transition:
+      background-color 120ms ease,
+      box-shadow 120ms ease;
   }
 
-  .explorer-chrome-shell [role="row"][data-detail-row="true"][data-selected="true"] {
-    background: var(--mf-explorer-row-selected) !important;
+  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"]:hover::before {
+    background: var(--mf-explorer-row-hover);
+  }
+
+  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"][data-selected="true"]::before {
+    background: var(--mf-explorer-row-selected);
     box-shadow: inset 0 0 0 1px var(--mf-explorer-selected-border);
   }
 
-  .explorer-chrome-shell [role="row"][data-detail-row="true"] [role="cell"] {
+  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"] [role="cell"] {
+    position: relative;
+    z-index: 1;
     color: var(--mf-explorer-text-muted) !important;
   }
 
-  .explorer-chrome-shell [role="row"][data-detail-row="true"] [role="cell"]:first-child {
+  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"] [role="cell"]:first-child {
     color: var(--mf-explorer-text) !important;
   }
 
-  .explorer-chrome-shell [role="row"][data-detail-row="true"] [role="cell"]:first-child span[title] {
+  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"] [role="cell"]:first-child span[title] {
     font-weight: 600;
   }
 
-  .explorer-chrome-shell [role="row"][data-detail-row="true"] svg {
+  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] [role="row"][data-detail-row="true"] svg {
     opacity: 1;
   }
 
@@ -599,6 +619,17 @@
       padding-right: 0 !important;
       padding-bottom: 0 !important;
       padding-left: 0 !important;
+    }
+
+    .explorer-chrome-shell div:has(> [role="table"][aria-label="エクスプローラー詳細表示"]) {
+      padding: 0 !important;
+    }
+
+    .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] {
+      border-radius: 0;
+      border-right: 0;
+      border-left: 0;
+      box-shadow: none;
     }
   }
 }
