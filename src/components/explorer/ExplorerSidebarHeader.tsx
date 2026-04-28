@@ -200,9 +200,6 @@ export const ExplorerSidebarHeader = ({
           <div className="truncate font-serif text-[21px] font-semibold leading-7 tracking-[0.01em] text-[var(--mf-explorer-logo-text)]">
             Manifolia
           </div>
-          <div className="truncate text-[11px] font-medium leading-4 text-[var(--mf-explorer-text-faint)]">
-            Knowledge Explorer
-          </div>
         </div>
 
         <DropdownMenu
