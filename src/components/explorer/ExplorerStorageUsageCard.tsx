@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { cn } from "@/lib/utils";
 
 type StorageUsageState = {
   status: "loading" | "available" | "unavailable";
@@ -30,6 +29,7 @@ const formatStorageBytes = (bytes: number | null): string => {
   }
 
   const maximumFractionDigits = value >= 10 || unitIndex === 0 ? 0 : 1;
+
   return `${new Intl.NumberFormat("ja-JP", {
     maximumFractionDigits,
   }).format(value)} ${units[unitIndex]}`;
@@ -55,32 +55,6 @@ const resolveStorageUsagePercent = (
     Math.max(0, Math.round((usageBytes / quotaBytes) * 100)),
   );
 };
-
-const StorageGaugeIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path
-      d="M4 7.5C4 5.57 7.58 4 12 4C16.42 4 20 5.57 20 7.5C20 9.43 16.42 11 12 11C7.58 11 4 9.43 4 7.5Z"
-      stroke="currentColor"
-      strokeWidth="1.55"
-    />
-    <path
-      d="M4 7.5V16.5C4 18.43 7.58 20 12 20C16.42 20 20 18.43 20 16.5V7.5"
-      stroke="currentColor"
-      strokeWidth="1.55"
-    />
-    <path
-      d="M4 12C4 13.93 7.58 15.5 12 15.5C16.42 15.5 20 13.93 20 12"
-      stroke="currentColor"
-      strokeWidth="1.55"
-    />
-  </svg>
-);
 
 const readStorageUsage = async (): Promise<StorageUsageState> => {
   if (
@@ -183,34 +157,15 @@ export const ExplorerStorageUsageCard = () => {
 
   return (
     <section
-      className={cn(
-        "explorer-storage-usage-card rounded-[14px] border border-[var(--mf-explorer-border)]",
-        "bg-[rgba(255,255,252,0.76)] px-3 py-3 text-[var(--mf-explorer-text)]",
-        "shadow-[inset_0_1px_0_rgba(255,255,255,0.84),0_8px_20px_rgba(38,49,39,0.045)]",
-      )}
+      className="explorer-storage-usage-card"
       aria-label="ストレージ使用量"
     >
-      <div className="flex min-w-0 items-center gap-2">
-        <span
-          className={cn(
-            "explorer-storage-usage-card__icon inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px]",
-            "bg-[var(--mf-explorer-brand-soft)] text-[var(--mf-explorer-brand)]",
-          )}
-        >
-          <StorageGaugeIcon />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-[12px] font-bold leading-4">
-            ストレージ
-          </div>
-          <div className="truncate text-[11px] leading-4 text-[var(--mf-explorer-text-muted)]">
-            {usageText}
-          </div>
-        </div>
-        <span className="shrink-0 text-[11px] font-semibold tabular-nums text-[var(--mf-explorer-text-muted)]">
-          {percentLabel}
-        </span>
+      <div className="explorer-storage-usage-card__header">
+        <h2 className="explorer-storage-usage-card__title">ストレージ</h2>
+        <span className="explorer-storage-usage-card__detail">詳細</span>
       </div>
+
+      <p className="explorer-storage-usage-card__usage">{usageText}</p>
 
       <div
         role="meter"
@@ -218,10 +173,10 @@ export const ExplorerStorageUsageCard = () => {
         aria-valuemax={100}
         aria-valuenow={usagePercent ?? 0}
         aria-valuetext={usageText}
-        className="mt-3 h-2 overflow-hidden rounded-full bg-[rgba(95,138,106,0.11)]"
+        className="explorer-storage-usage-card__meter"
       >
         <span
-          className="block h-full rounded-full bg-[var(--mf-explorer-brand)] transition-[width] duration-300"
+          className="explorer-storage-usage-card__meter-value"
           style={
             {
               width: `${usagePercent ?? 0}%`,
@@ -229,6 +184,10 @@ export const ExplorerStorageUsageCard = () => {
           }
         />
       </div>
+
+      <p className="explorer-storage-usage-card__percent">
+        {percentLabel} 使用
+      </p>
     </section>
   );
 };
