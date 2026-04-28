@@ -53,6 +53,7 @@ type InjectionResult = {
 const CALENDAR_SECTION_CONTENT_ID = "calendar-sidebar-section-content";
 const EXPLORER_SIDEBAR_TITLEBAR_OFFSET_VAR =
   "--mf-explorer-sidebar-titlebar-offset";
+const INTEGRATED_CHROME_SIDEBAR_GAP_PX = 14;
 
 const isElementWithChildren = (
   node: React.ReactNode,
@@ -480,13 +481,16 @@ export const TreeViewSidebar = ({
     children,
     onCreateRootFolder,
   );
+  const sidebarGapPx = integratedChrome
+    ? Math.max(rightGapPx, INTEGRATED_CHROME_SIDEBAR_GAP_PX)
+    : rightGapPx;
 
   useEffect(() => {
     if (typeof document === "undefined") return;
     if (!integratedChrome) return;
 
     const offsetPx = isSidebarOpen
-      ? Math.max(0, Math.round(renderedSidebarWidth + rightGapPx))
+      ? Math.max(0, Math.round(renderedSidebarWidth + sidebarGapPx))
       : 0;
 
     document.documentElement.style.setProperty(
@@ -499,7 +503,7 @@ export const TreeViewSidebar = ({
         EXPLORER_SIDEBAR_TITLEBAR_OFFSET_VAR,
       );
     };
-  }, [integratedChrome, isSidebarOpen, renderedSidebarWidth, rightGapPx]);
+  }, [integratedChrome, isSidebarOpen, renderedSidebarWidth, sidebarGapPx]);
 
   const handleCreateRootFolder = useCallback(() => {
     onCreateRootFolder();
@@ -520,10 +524,12 @@ export const TreeViewSidebar = ({
   return (
     <div
       ref={sidebarRef}
+      data-explorer-sidebar-shell={integratedChrome ? "true" : undefined}
       style={{
         width: isSidebarOpen ? renderedSidebarWidth : 0,
         minWidth: isSidebarOpen ? renderedSidebarWidth : 0,
-        marginRight: isSidebarOpen ? rightGapPx : 0,
+        marginRight: isSidebarOpen ? sidebarGapPx : 0,
+        boxSizing: "border-box",
       }}
       className={cn(
         "relative z-10 flex-col group/sidebar select-none",
@@ -537,12 +543,13 @@ export const TreeViewSidebar = ({
       )}
     >
       <div
+        data-explorer-sidebar-panel={integratedChrome ? "true" : undefined}
         className={cn(
           "explorer-chrome-font flex h-full min-h-0 w-full flex-col overflow-hidden",
           "[--sidebar-text:#4b5563]",
           "[--sidebar-text-muted:#888780] [--sidebar-icon-active:#888780]",
           integratedChrome
-            ? "border-r border-[#dddcd5] bg-[rgba(255,255,255,0.92)]"
+            ? "bg-[rgba(255,255,255,0.92)]"
             : [
                 "md:rounded-[14px] md:border md:border-[#dddcd5]",
                 "md:bg-[rgba(255,255,255,0.92)]",
@@ -587,8 +594,8 @@ export const TreeViewSidebar = ({
             "absolute bottom-0 top-0 z-40 hidden overflow-hidden border-l border-[#dddcd5] bg-white shadow-[0_18px_50px_rgba(15,23,42,0.12)] md:block",
           )}
           style={{
-            left: `calc(100% + ${rightGapPx}px)`,
-            width: `calc(100dvw - ${renderedSidebarWidth + rightGapPx}px)`,
+            left: `calc(100% + ${sidebarGapPx}px)`,
+            width: `calc(100dvw - ${renderedSidebarWidth + sidebarGapPx}px)`,
           }}
         >
           <ExplorerCalendarPane onClose={closeCalendar} />
