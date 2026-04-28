@@ -4,7 +4,9 @@
 
     --explorer-chrome-folder-fill: var(--mf-explorer-icon-folder-fill);
     --explorer-chrome-folder-stroke: var(--mf-explorer-icon-folder-stroke);
-    --explorer-chrome-folder-highlight: var(--mf-explorer-icon-folder-highlight);
+    --explorer-chrome-folder-highlight: var(
+      --mf-explorer-icon-folder-highlight
+    );
     --explorer-chrome-cardset-fill: var(--mf-explorer-icon-cardset-fill);
     --explorer-chrome-cardset-stroke: var(--mf-explorer-icon-stroke);
     --explorer-chrome-cardset-highlight: #ffffff;

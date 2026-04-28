@@ -128,9 +128,7 @@ export const WorkspaceTabsBar = ({
                   className={cn(
                     "explorer-workspace-tab-close mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[10px] text-[#9fa69c] outline-none transition-colors",
                     "hover:bg-black/5 hover:text-[#55544f]",
-                    selected
-                      ? "opacity-100"
-                      : "opacity-80 hover:opacity-100",
+                    selected ? "opacity-100" : "opacity-80 hover:opacity-100",
                   )}
                   aria-label={`${tab.title} を閉じる`}
                   title="閉じる"

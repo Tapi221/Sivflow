@@ -424,8 +424,9 @@ const isNavItemActive = (
     return normalizedPathname === targetPath;
   }
 
-  return normalizedPathname === targetPath || normalizedPathname.startsWith(
-    `${targetPath}/`,
+  return (
+    normalizedPathname === targetPath ||
+    normalizedPathname.startsWith(`${targetPath}/`)
   );
 };
 
@@ -448,9 +449,7 @@ const AppSidebarNavLink = ({ item }: { item: AppSidebarNavItem }) => {
 export const AppSidebar = () => {
   const { currentUser } = useAuthSession();
   const displayName =
-    currentUser?.displayName ??
-    currentUser?.email?.split("@")[0] ??
-    "User";
+    currentUser?.displayName ?? currentUser?.email?.split("@")[0] ?? "User";
   const planLabel = currentUser ? "プレミアムプラン" : "ローカルプラン";
   const initial = displayName.trim().charAt(0).toUpperCase() || "M";
 
@@ -469,7 +468,10 @@ export const AppSidebar = () => {
         ))}
       </nav>
 
-      <nav className="app-sidebar__nav app-sidebar__nav--secondary" aria-label="補助">
+      <nav
+        className="app-sidebar__nav app-sidebar__nav--secondary"
+        aria-label="補助"
+      >
         {secondaryNavItems.map((item) => (
           <AppSidebarNavLink key={item.id} item={item} />
         ))}
