@@ -24,46 +24,39 @@ import { useCardCommands } from "@/hooks/card/useCardCommands";
 import { useCardsRead } from "@/hooks/card/useCardsRead";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
-import { useExplorerCalendarViewStore } from "@/features/calendar/store/useExplorerCalendarViewStore";
 import { useFolderCommands } from "@/hooks/folder/useFolderCommands";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
-import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
+import { useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import {
   createAppDestination,
   createPageUrl,
 } from "@/platform/web/navigation/toWebPath";
-import { ChevronDown, ChevronRight } from "@/ui/icons";
 import type {
   CardSet,
   DocumentItem,
   Folder,
   SelectedExplorerItem,
 } from "@/types";
-import type { ComponentProps, DragEvent } from "react";
+import type { DragEvent } from "react";
 import {
   useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { PinnedFolderSidebarSection } from "@/components/folder/components/PinnedFolderSidebarSection";
 import { SectionListColumnPane } from "@/components/folder/components/SectionListColumnPane";
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
-import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
-import { TreeViewTabContent } from "@/components/folder/components/TreeViewTabContent";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions";
 import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
 import { useTreeViewFilters } from "@/components/folder/hooks/useTreeViewFilters";
-import { useTreeViewSidebar } from "@/components/folder/hooks/useTreeViewSidebar";
 
 interface TreeViewLayoutProps {
   folders: Folder[];
@@ -79,8 +72,6 @@ interface TreeViewLayoutProps {
   navigateToSectionListToken?: number;
   folderSelectionNonce?: number;
 }
-
-type TreeViewTabContentProps = ComponentProps<typeof TreeViewTabContent>;
 
 const isExternalFileDragEvent = (event: DragEvent<HTMLDivElement>) => {
   return Array.from(event.dataTransfer.types).includes("Files");
@@ -103,12 +94,10 @@ const TreeViewLayout = ({
   const navigate = useNavigate();
   const toast = useToast();
   const { settings } = useUserSettings();
-  const { createFolder, updateFolder, deleteFolder } = useFolderCommands();
+  const { updateFolder } = useFolderCommands();
   const { cards = [], loading: cardsLoading } = useCardsRead();
   const {
     createCard,
-    updateCard,
-    deleteCard,
     moveCardToSet,
     reorderCardsInCardSet,
   } = useCardCommands();
@@ -121,9 +110,6 @@ const TreeViewLayout = ({
     string | null
   >(null);
   const [sectionListSidebarFolderId, setSectionListSidebarFolderId] = useState<
-    string | null
-  >(null);
-  const [explorerHeaderFolderId, setExplorerHeaderFolderId] = useState<
     string | null
   >(null);
   const [isImportFormatDialogOpen, setIsImportFormatDialogOpen] =
@@ -146,23 +132,12 @@ const TreeViewLayout = ({
     useState(false);
   const [, setImportDragDepth] = useState(0);
   const [isImportDragActive, setIsImportDragActive] = useState(false);
-  const [visibleRootFolderCount, setVisibleRootFolderCount] = useState<
-    number | null
-  >(null);
-  const createFolderTriggerRef = useRef<
-    ((parentFolderId?: string | null) => void) | null
-  >(null);
-  const createCardSetTriggerRef = useRef<
-    ((folderId?: string | null) => void) | null
-  >(null);
-  const documentTriggerRef = useRef<(() => void) | null>(null);
 
   const {
     cardSets,
     loading: cardSetsLoading,
     createCardSet,
     updateCardSet,
-    deleteCardSet,
     moveCardSetToFolder,
   } = useCardSets();
 
@@ -235,24 +210,8 @@ const TreeViewLayout = ({
     [cardSets, onFolderSelect, onItemSelect],
   );
 
-  const { updateDocument, deleteDocument } = useDocumentCommands();
-  const { tags, tagById, addTag } = useTags();
-
-  const {
-    sidebarRef,
-    contentScrollRef,
-    renderedSidebarWidth,
-    isSidebarOpen,
-    isMobile,
-    isResizing,
-    startResizing,
-  } = useTreeViewSidebar();
-
-  useEffect(() => {
-    const scroller = contentScrollRef.current;
-    if (!scroller) return;
-    scroller.scrollTop = 0;
-  }, [contentScrollRef, selectedFolderId, navigateToSectionListToken]);
+  const { updateDocument } = useDocumentCommands();
+  const { tagById, addTag } = useTags();
 
   const { selectedFolder, selectedDocument, folderCards, showMobileDetail } =
     useTreeViewDerivedState({
@@ -265,7 +224,7 @@ const TreeViewLayout = ({
       selectedCardId,
       selectedDocumentId,
       autoCarryOver: settings?.autoCarryOver ?? true,
-      isMobile,
+      isMobile: false,
     });
 
   const tagFilter = useExplorerStore((state) => state.tagFilter);
@@ -312,27 +271,6 @@ const TreeViewLayout = ({
     },
     [handleFolderSelect, isSectionListMode],
   );
-  const handleCardSetSelectWithoutNavigation = useCallback(
-    (cardSetId: string, folderId: string, label: string) => {
-      onFolderSelect(folderId);
-      setSelectedCardSetId(cardSetId);
-      setSelectedCardSetLabel(label);
-    },
-    [onFolderSelect],
-  );
-
-  const allTags = useMemo(() => {
-    const tagNames = new Set<string>();
-    cards.forEach((card) => {
-      resolveCardTagNames(card.tagIds, tagById).forEach((tag) => {
-        tagNames.add(tag);
-      });
-    });
-    return Array.from(tagNames).sort();
-  }, [cards, tagById]);
-
-  const tagSectionCount = tags.length;
-
   const currentSelectedContextFolderId = useMemo(() => {
     if (isSectionListMode) return null;
     if (selectedFolderId) return selectedFolderId;
@@ -363,20 +301,8 @@ const TreeViewLayout = ({
       return null;
     }
 
-    if (currentSelectedContextFolderId !== null) {
-      return currentSelectedContextFolderId;
-    }
-
-    if (explorerHeaderFolderId) {
-      return explorerHeaderFolderId;
-    }
-
-    return null;
-  }, [
-    currentSelectedContextFolderId,
-    explorerHeaderFolderId,
-    isSectionListMode,
-  ]);
+    return currentSelectedContextFolderId;
+  }, [currentSelectedContextFolderId, isSectionListMode]);
 
   useLayoutEffect(() => {
     onBreadcrumbContextChange?.({
@@ -395,30 +321,6 @@ const TreeViewLayout = ({
     currentHeaderFolderId,
     onBreadcrumbContextChange,
   ]);
-
-  const handleCreateRootFolder = useCallback(() => {
-    handleSidebarFolderSelect(null);
-    createFolderTriggerRef.current?.(null);
-  }, [handleSidebarFolderSelect]);
-
-  const handleCreateCardSetFromHeader = useCallback(() => {
-    if (!currentHeaderActionFolderId) return;
-    createCardSetTriggerRef.current?.(currentHeaderActionFolderId);
-  }, [currentHeaderActionFolderId]);
-
-  const handleAddDocumentFromHeader = useCallback(() => {
-    if (!currentHeaderActionFolderId) return;
-    documentTriggerRef.current?.();
-  }, [currentHeaderActionFolderId]);
-
-  const handleOpenBulkImport = useCallback(() => {
-    if (!currentHeaderActionFolderId) {
-      toast.error("一括インポート先のフォルダを先に選択してください。");
-      return;
-    }
-
-    setIsImportFormatDialogOpen(true);
-  }, [currentHeaderActionFolderId, toast]);
 
   const handleImportFormatSelect = useCallback((format: ImportFormat) => {
     if (format === "mfdeck") {
@@ -656,57 +558,12 @@ const TreeViewLayout = ({
     tagById,
   });
 
-  const handleUpdateFolderForTree: NonNullable<
-    TreeViewTabContentProps["onUpdateFolder"]
-  > = useCallback(
-    async (folderId, data) => {
-      await updateFolder(folderId, data as Record<string, unknown>);
-    },
-    [updateFolder],
-  );
-
-  const handleUpdateCardSetForTree: NonNullable<
-    TreeViewTabContentProps["onUpdateCardSet"]
-  > = useCallback(
-    async (cardSetId, data) => {
-      await updateCardSet(cardSetId, data as Record<string, unknown>);
-    },
-    [updateCardSet],
-  );
-
-  const handleCreateCardForTree: NonNullable<
-    TreeViewTabContentProps["onCreateCard"]
-  > = useCallback(
-    async (data) => createCard(data as Record<string, unknown>),
-    [createCard],
-  );
-
-  const handleUpdateCardForTree: NonNullable<
-    TreeViewTabContentProps["onUpdateCard"]
-  > = useCallback(
-    async (cardId, data) => {
-      await updateCard(cardId, data as Record<string, unknown>);
-    },
-    [updateCard],
-  );
-
-  const handleUpdateDocumentForTree: NonNullable<
-    TreeViewTabContentProps["onUpdateDocument"]
-  > = useCallback(
-    async (documentId, data) => {
-      await updateDocument(documentId, data as Partial<DocumentItem>);
-    },
-    [updateDocument],
-  );
-
-  const handleMoveDocumentToFolder: NonNullable<
-    TreeViewTabContentProps["moveDocumentToFolder"]
-  > = useCallback(
+  const handleMoveDocumentToFolder = useCallback(
     async (id, folderId) => {
-      await updateDocument(id, { folderId });
+      await updateDocument(id, { folderId: folderId ?? undefined });
     },
     [updateDocument],
-  );
+  ) satisfies (id: string, folderId: string | null) => Promise<void>;
 
   const handleMoveFolderFromColumnPane = useCallback(
     async (folderId: string, targetParentFolderId: string | null) => {
@@ -739,15 +596,13 @@ const TreeViewLayout = ({
   const handleReorderCardSetsFromColumnPane = useCallback(
     async (targetFolderId: string, cardSetIds: string[]) => {
       await Promise.all(
-        cardSetIds.map((cardSetId, orderIndex) =>
-          updateCardSet(cardSetId, {
-            folderId: targetFolderId,
-            orderIndex,
-          }),
-        ),
+        cardSetIds.map(async (cardSetId, orderIndex) => {
+          await moveCardSetToFolder(cardSetId, targetFolderId);
+          await updateCardSet(cardSetId, { orderIndex });
+        }),
       );
     },
-    [updateCardSet],
+    [moveCardSetToFolder, updateCardSet],
   );
 
   const handleReorderDocumentsFromColumnPane = useCallback(
@@ -764,24 +619,8 @@ const TreeViewLayout = ({
     [updateDocument],
   );
 
-  // フォルダサイドバーは白いパネル型の遷移表示に一本化する。
-  const resolvedSidebarDisplayMode = "navigation" as const;
-
   const isExplorerDataLoading =
     cardsLoading || documentsLoading || cardSetsLoading;
-  const isFolderListSectionCollapsed = useExplorerStore(
-    (state) => state.isFolderListSectionCollapsed,
-  );
-  const isTagSectionCollapsed = useExplorerStore(
-    (state) => state.isTagSectionCollapsed,
-  );
-  const toggleTagSectionCollapsed = useExplorerStore(
-    (state) => state.toggleTagSectionCollapsed,
-  );
-  const isCalendarOpen = useExplorerCalendarViewStore((state) => state.isOpen);
-  const toggleCalendar = useExplorerCalendarViewStore((state) => state.toggle);
-  const isCalendarSectionCollapsed = !isCalendarOpen;
-  const toggleCalendarSectionCollapsed = toggleCalendar;
   if (isExplorerDataLoading) {
     return (
       <div className="space-y-3 p-4">
@@ -792,129 +631,6 @@ const TreeViewLayout = ({
     );
   }
 
-  const sidebarSelectedFolderId = isSectionListMode
-    ? sectionListSidebarFolderId
-    : selectedFolderId;
-  const sidebarContent = (
-    <div className="flex h-full min-h-0 flex-col">
-      <PinnedFolderSidebarSection
-        folders={folders}
-        cards={filteredCards}
-        cardSets={cardSets}
-        documents={filteredDocuments}
-        selectedFolderId={sidebarSelectedFolderId}
-        isFiltering={isFiltering}
-        folderListCountOverride={visibleRootFolderCount}
-        onFolderSelect={handleSidebarFolderSelect}
-        onCreateRootFolder={handleCreateRootFolder}
-      />
-
-      <div
-        id="folder-list-sidebar-section-content"
-        className={cn(
-          "min-h-0 flex-1 overflow-hidden",
-          isFolderListSectionCollapsed && "hidden",
-        )}
-      >
-        <TreeViewTabContent
-          sidebarDisplayMode={resolvedSidebarDisplayMode}
-          folders={folders}
-          cards={cards}
-          cardSets={cardSets}
-          documents={documents}
-          filteredCards={filteredCards}
-          filteredDocuments={filteredDocuments}
-          selectedFolderId={sidebarSelectedFolderId}
-          selectedItem={selectedItem}
-          isFiltering={isFiltering}
-          onRegisterCreateFolderTrigger={(fn) => {
-            createFolderTriggerRef.current = fn;
-          }}
-          onRegisterCreateCardSetTrigger={(fn) => {
-            createCardSetTriggerRef.current = fn;
-          }}
-          onRegisterDocumentTrigger={(fn) => {
-            documentTriggerRef.current = fn;
-          }}
-          navigateToSectionListToken={navigateToSectionListToken}
-          folderSelectionNonce={folderSelectionNonce}
-          forceSectionListRoot={isSectionListMode}
-          onHeaderFolderIdChange={setExplorerHeaderFolderId}
-          onVisibleRootFolderCountChange={setVisibleRootFolderCount}
-          onFolderSelect={handleSidebarFolderSelect}
-          onItemSelect={handleItemSelect}
-          onCreateFolder={createFolder}
-          onUpdateFolder={handleUpdateFolderForTree}
-          onDeleteFolder={deleteFolder}
-          onCreateCardSet={createCardSet}
-          onUpdateCardSet={handleUpdateCardSetForTree}
-          onDeleteCardSet={deleteCardSet}
-          onCreateCard={handleCreateCardForTree}
-          onUpdateCard={handleUpdateCardForTree}
-          onDeleteCard={deleteCard}
-          onUpdateDocument={handleUpdateDocumentForTree}
-          onDeleteDocument={deleteDocument}
-          moveCardToSet={moveCardToSet}
-          moveCardSetToFolder={moveCardSetToFolder}
-          moveDocumentToFolder={handleMoveDocumentToFolder}
-          reorderCardsInCardSet={reorderCardsInCardSet}
-          selectedCardSetId={activeSelectedCardSetId}
-          onSelectCardSet={handleCardSetSelectWithoutNavigation}
-        />
-      </div>
-
-      <div className="mt-1 border-t border-border/60 px-2 pb-1 pt-2">
-        <button
-          type="button"
-          className={cn(
-            "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
-            "text-[11px] font-medium leading-5 text-muted-foreground transition",
-            "hover:bg-muted/70 hover:text-foreground",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          )}
-          aria-expanded={!isTagSectionCollapsed}
-          aria-controls="tag-sidebar-section-content"
-          onClick={toggleTagSectionCollapsed}
-        >
-          {isTagSectionCollapsed ? (
-            <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-70" />
-          ) : (
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" />
-          )}
-          <span className="min-w-0 flex-1 truncate">タグ</span>
-          <span className="tabular-nums opacity-60">{tagSectionCount}</span>
-        </button>
-      </div>
-
-      <div className="mt-1 border-t border-border/60 px-2 pb-1 pt-2">
-        <button
-          type="button"
-          className={cn(
-            "group flex h-7 w-full items-center gap-1 rounded-md px-1 text-left",
-            "text-[11px] font-medium leading-5 text-muted-foreground transition",
-            "hover:bg-muted/70 hover:text-foreground",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          )}
-          aria-expanded={isCalendarOpen}
-          aria-controls="calendar-sidebar-section-content"
-          onClick={toggleCalendar}
-        >
-          {isCalendarSectionCollapsed ? (
-            <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-70" />
-          ) : (
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" />
-          )}
-          <span className="min-w-0 flex-1 truncate">カレンダー</span>
-          <span className="tabular-nums opacity-60">0</span>
-        </button>
-      </div>
-    </div>
-  );
-
-  const canCreateCardSet = Boolean(currentHeaderActionFolderId);
-  const canCreateCard = Boolean(currentHeaderActionFolderId);
-  const canAddDocuments = Boolean(currentHeaderActionFolderId);
-
   return (
     <div
       onDragEnter={handleImportDragEnter}
@@ -924,7 +640,6 @@ const TreeViewLayout = ({
       className={cn(
         "relative flex h-full min-h-0 w-full max-w-none flex-1 items-stretch overflow-hidden",
         "rounded-b-[14px] border-x border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)]",
-        isResizing && "select-none cursor-col-resize",
       )}
     >
       <ExplorerSearchSourceBridge
@@ -954,33 +669,9 @@ const TreeViewLayout = ({
         </div>
       ) : null}
 
-      <TreeViewSidebar
-        sidebarRef={sidebarRef}
-        contentScrollRef={contentScrollRef}
-        renderedSidebarWidth={renderedSidebarWidth}
-        isSidebarOpen={isSidebarOpen}
-        isResizing={isResizing}
-        showMobileDetail={showMobileDetail}
-        allTags={allTags}
-        onCreateRootFolder={handleCreateRootFolder}
-        onCreateCardSet={handleCreateCardSetFromHeader}
-        onAddDocument={handleAddDocumentFromHeader}
-        onBulkImport={handleOpenBulkImport}
-        onStartResizing={startResizing}
-        canCreateCardSet={canCreateCardSet}
-        canCreateCard={canCreateCard}
-        canAddDocuments={canAddDocuments}
-        canBulkImport={Boolean(currentHeaderActionFolderId)}
-        preferDirectRootFolderCreate={currentHeaderActionFolderId === null}
-        collapseContent={false}
-        integratedChrome
-      >
-        {sidebarContent}
-      </TreeViewSidebar>
-
       {isSectionListMode ? (
         <SectionListColumnPane
-          sidebarWidth={isSidebarOpen ? renderedSidebarWidth : 0}
+          sidebarWidth={0}
           topOffsetPx={0}
           leftInsetPx={0}
           rightInsetPx={0}

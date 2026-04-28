@@ -1,5 +1,4 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { TREE_VIEW_SIDEBAR_TOGGLE_EVENT } from "@/components/folder/hooks/useTreeViewSidebar";
 import { APP_CHROME } from "@/config/appChrome";
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 import {
@@ -109,32 +108,6 @@ const MenuIcon: React.FC = () => (
       d="M4 17H20"
       stroke="currentColor"
       strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
-const SectionListIcon: React.FC = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden="true"
-  >
-    <rect
-      x="4"
-      y="6"
-      width="16"
-      height="12"
-      rx="1.75"
-      stroke="currentColor"
-      strokeWidth="1.6"
-    />
-    <path
-      d="M10 6V18"
-      stroke="currentColor"
-      strokeWidth="1.6"
       strokeLinecap="round"
     />
   </svg>
@@ -415,16 +388,6 @@ const TitleBarPrimaryActions: React.FC<{
       className="flex shrink-0 items-center gap-0.5 pr-2.5"
       style={noDragStyle}
     >
-      <TitleBarToolbarButton
-        title="サイドバーを開閉"
-        onClick={() => {
-          window.dispatchEvent(new Event(TREE_VIEW_SIDEBAR_TOGGLE_EVENT));
-        }}
-        noDragStyle={noDragStyle}
-      >
-        <SectionListIcon />
-      </TitleBarToolbarButton>
-
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
           <button
