@@ -37,9 +37,15 @@ export const SectionListBlankPane = ({
 }: SectionListBlankPaneProps) => {
   const hasContent = children !== undefined && children !== null;
   const sidebarWidthFallback = buildSidebarWidthFallback(sidebarWidth);
+  const normalizedSidebarWidth = Number.isFinite(sidebarWidth)
+    ? Math.max(0, Math.round(sidebarWidth))
+    : 0;
 
   const style = {
-    left: `var(${SECTION_LIST_PANE_LEFT_VAR}, ${sidebarWidthFallback})`,
+    left:
+      normalizedSidebarWidth === 0
+        ? "0px"
+        : `var(${SECTION_LIST_PANE_LEFT_VAR}, ${sidebarWidthFallback})`,
     right: 0,
     top: 0,
     bottom: 0,
