@@ -5,7 +5,7 @@ import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 import { ExplorerCalendarPane } from "@/features/calendar/ui/ExplorerCalendarPane";
 import { useExplorerCalendarViewStore } from "@/features/calendar/store/useExplorerCalendarViewStore";
-import { Calendar, ChevronDown, ChevronRight } from "@/ui/icons";
+import { Calendar } from "@/ui/icons";
 import React, {
   useCallback,
   useEffect,
@@ -51,8 +51,6 @@ type InjectionResult = {
 };
 
 const CALENDAR_SECTION_CONTENT_ID = "calendar-sidebar-section-content";
-const PINNED_FOLDER_SECTION_CONTENT_ID =
-  "pinned-folder-sidebar-section-content";
 
 const isElementWithChildren = (
   node: React.ReactNode,
