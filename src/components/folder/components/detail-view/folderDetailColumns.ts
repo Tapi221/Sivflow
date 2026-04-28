@@ -5,10 +5,10 @@ import type {
 } from "./folderDetailTypes";
 
 const EXPLORER_DETAIL_COLUMN_WIDTHS_STORAGE_KEY =
-  "manifolia:folder-detail-view:column-widths";
+  "manifolia:folder-detail-view:column-widths:v2";
 
 const EXPLORER_DETAIL_COLUMN_ORDER_STORAGE_KEY =
-  "manifolia:folder-detail-view:column-order:v1";
+  "manifolia:folder-detail-view:column-order:v2";
 
 export const DETAIL_GRID_CLASS = "grid";
 
@@ -26,9 +26,9 @@ export const DETAIL_DEFAULT_COLUMN_ORDER = [
   "name",
   "tags",
   "path",
-  "updatedAt",
   "sync",
   "kind",
+  "updatedAt",
   "size",
 ] as const satisfies readonly ExplorerDetailColumnId[];
 
@@ -36,26 +36,27 @@ export type ExplorerDetailColumnWidths = Record<ExplorerDetailColumnId, number>;
 export type ExplorerDetailColumnOrder = ExplorerDetailColumnId[];
 
 export const DETAIL_DEFAULT_COLUMN_WIDTHS = {
-  name: 320,
-  tags: 190,
-  path: 420,
-  updatedAt: 168,
-  sync: 132,
-  kind: 128,
-  size: 112,
+  name: 248,
+  tags: 136,
+  path: 332,
+  sync: 116,
+  kind: 110,
+  updatedAt: 148,
+  size: 86,
 } satisfies ExplorerDetailColumnWidths;
 
 export const DETAIL_MIN_COLUMN_WIDTHS = {
   name: 180,
-  tags: 120,
-  path: 220,
-  updatedAt: 132,
+  tags: 110,
+  path: 240,
   sync: 104,
-  kind: 96,
-  size: 84,
+  kind: 92,
+  updatedAt: 128,
+  size: 72,
 } satisfies ExplorerDetailColumnWidths;
 
-const DETAIL_MAX_COLUMN_WIDTH_PX = 820;
+const DETAIL_MAX_COLUMN_WIDTH_PX = 680;
+const DETAIL_FLEX_COLUMN_ID = "path" satisfies ExplorerDetailColumnId;
 
 export const DEFAULT_SORT_STATE: ExplorerDetailSortState = {
   key: "manual",
@@ -214,7 +215,17 @@ export const buildDetailGridTemplateColumns = (
 ): string => {
   const normalizedOrder = normalizeDetailColumnOrder(columnOrder);
 
-  return normalizedOrder.map((columnId) => `${widths[columnId]}px`).join(" ");
+  return normalizedOrder
+    .map((columnId) => {
+      const width = widths[columnId];
+
+      if (columnId === DETAIL_FLEX_COLUMN_ID) {
+        return `minmax(${width}px, 1fr)`;
+      }
+
+      return `${width}px`;
+    })
+    .join(" ");
 };
 
 export const getDetailGridMinWidth = (
@@ -244,5 +255,6 @@ export const buildDetailTableStyle = (
 ): CSSProperties => {
   return {
     minWidth: `${getDetailGridMinWidth(widths, columnOrder)}px`,
+    width: "100%",
   } satisfies CSSProperties;
 };

@@ -42,6 +42,10 @@ type ExplorerToolbarButtonProps = {
   children: ReactNode;
 };
 
+type ExplorerToolbarSearchButtonProps = {
+  onClick: () => void;
+};
+
 type ExplorerColumnPathWindow = Window & {
   __manifoliaExplorerColumnPathCrumbs?: BreadcrumbCrumb[];
 };
@@ -356,6 +360,27 @@ const SettingsIcon = () => (
   </svg>
 );
 
+const ExplorerToolbarSearchButton = ({
+  onClick,
+}: ExplorerToolbarSearchButtonProps) => {
+  return (
+    <button
+      type="button"
+      title="検索"
+      aria-label="検索"
+      onClick={onClick}
+      className={cn(
+        "explorer-chrome-toolbar-search inline-flex h-9 shrink-0 items-center gap-2 rounded-[14px]",
+        "border px-3 text-left text-[12px] text-[var(--mf-explorer-text-muted)] outline-none transition-colors",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+      )}
+    >
+      <SearchIcon />
+      <span className="min-w-0 truncate">検索</span>
+    </button>
+  );
+};
+
 const ExplorerPathBar = () => {
   const navigate = useNavigate();
   const extraCrumbs = useBreadcrumbExtraCrumbs();
@@ -552,14 +577,7 @@ const ExplorerToolbar = () => {
         </PopoverContent>
       </Popover>
 
-      <ExplorerToolbarButton
-        title="検索"
-        onClick={() => {
-          openGlobalSearch();
-        }}
-      >
-        <SearchIcon />
-      </ExplorerToolbarButton>
+      <ExplorerToolbarSearchButton onClick={openGlobalSearch} />
     </div>
   );
 };
