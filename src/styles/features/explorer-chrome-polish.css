@@ -301,4 +301,68 @@
   .explorer-chrome-shell ::-webkit-scrollbar-thumb:hover {
     background: #b7c8b7;
   }
+  .explorer-chrome-shell {
+    --mf-explorer-logo-text: #355f46;
+  }
+
+  .explorer-sidebar-brand-header {
+    background:
+      radial-gradient(circle at 18px 18px, rgba(95, 138, 106, 0.12) 0 1px, transparent 1px),
+      linear-gradient(180deg, rgba(255, 255, 252, 0.96), rgba(250, 252, 247, 0.88));
+    background-size: 16px 16px, auto;
+  }
+
+  .explorer-sidebar-brand-mark {
+    background: linear-gradient(180deg, rgba(255, 255, 252, 0.92), rgba(237, 245, 235, 0.86));
+    border: 1px solid rgba(95, 138, 106, 0.18);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      0 8px 18px rgba(63, 106, 78, 0.1);
+  }
+
+  .explorer-chrome-shell .group\/sidebar > .explorer-chrome-font {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 252, 0.96), rgba(248, 251, 245, 0.94)) !important;
+    border-radius: 20px !important;
+  }
+
+  .explorer-chrome-shell .group\/sidebar .flex-1.min-h-0.min-w-0.overflow-hidden {
+    padding: 10px 10px 8px;
+  }
+
+  .explorer-chrome-shell .sidebar-row {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .explorer-chrome-shell .sidebar-row .tabular-nums,
+  .explorer-chrome-shell [aria-controls="tag-sidebar-section-content"] .tabular-nums,
+  .explorer-chrome-shell [aria-controls="calendar-sidebar-section-content"] .tabular-nums {
+    min-width: 24px;
+    border-radius: 999px;
+    background: rgba(95, 138, 106, 0.08);
+    color: var(--mf-explorer-text-muted);
+    text-align: center;
+  }
+
+  .explorer-chrome-shell #pinned-folder-sidebar-section-header,
+  .explorer-chrome-shell #folder-list-sidebar-section-header,
+  .explorer-chrome-shell [aria-controls="tag-sidebar-section-content"],
+  .explorer-chrome-shell [aria-controls="calendar-sidebar-section-content"] {
+    min-height: 34px;
+    border-radius: 14px;
+  }
+
+  .explorer-chrome-shell #pinned-folder-sidebar-section-header:hover,
+  .explorer-chrome-shell #folder-list-sidebar-section-header:hover,
+  .explorer-chrome-shell [aria-controls="tag-sidebar-section-content"]:hover,
+  .explorer-chrome-shell [aria-controls="calendar-sidebar-section-content"]:hover {
+    background: var(--mf-explorer-sidebar-hover-bg);
+  }
+
+  .explorer-chrome-shell .sidebar-row[data-selected="true"] {
+    background:
+      linear-gradient(90deg, rgba(229, 241, 225, 0.98), rgba(244, 248, 241, 0.86)) !important;
+  }
+
 }

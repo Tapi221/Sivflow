@@ -36,14 +36,88 @@ const EllipsisIcon = ({ size = 16, ...props }: UiIconProps) => (
   </UiIcon>
 );
 
-const FolderIcon = ({ size = 16, ...props }: UiIconProps) => (
-  <UiIcon size={size} strokeWidth={1.7} {...props}>
-    <path d="M3.75 6.25V16.25C3.75 17.08 4.42 17.75 5.25 17.75H18.75C19.58 17.75 20.25 17.08 20.25 16.25V8.25C20.25 7.42 19.58 6.75 18.75 6.75H12.25L10.7 4.9C10.42 4.56 10 4.25 9.55 4.25H5.25C4.42 4.25 3.75 4.92 3.75 5.75V6.25Z" />
+const ChevronDownIcon = ({ size = 15, ...props }: UiIconProps) => (
+  <UiIcon size={size} strokeWidth={1.8} {...props}>
+    <path
+      d="M7 9.5L12 14.5L17 9.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </UiIcon>
 );
 
+const ClockIcon = ({ size = 16, ...props }: UiIconProps) => (
+  <UiIcon size={size} strokeWidth={1.65} {...props}>
+    <circle cx="12" cy="12" r="8.25" />
+    <path d="M12 7.5V12.2L15.2 14.1" strokeLinecap="round" />
+  </UiIcon>
+);
+
+const ManifoliaLeafMark = () => (
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 48 48"
+    className="h-8 w-8 shrink-0"
+    fill="none"
+  >
+    <path
+      d="M24.1 8.2C18 12.8 15.6 18.9 17.2 25.1C20.6 23.7 23.3 21.5 25.2 18.4C27 15.4 26.7 11.9 24.1 8.2Z"
+      fill="url(#manifoliaLeafTop)"
+    />
+    <path
+      d="M12.1 18.1C20.6 18.5 26.8 23.1 30.3 31.7C22.7 32.1 16.8 29.2 12.9 22.9C12.2 21.7 11.9 20.1 12.1 18.1Z"
+      fill="url(#manifoliaLeafLeft)"
+    />
+    <path
+      d="M35.9 18.1C27.4 18.5 21.2 23.1 17.7 31.7C25.3 32.1 31.2 29.2 35.1 22.9C35.8 21.7 36.1 20.1 35.9 18.1Z"
+      fill="url(#manifoliaLeafRight)"
+    />
+    <path
+      d="M24 8.2V35"
+      stroke="rgba(63,106,78,0.36)"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
+    <defs>
+      <linearGradient
+        id="manifoliaLeafTop"
+        x1="19"
+        y1="9"
+        x2="29"
+        y2="27"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#c9d3ad" />
+        <stop offset="1" stopColor="#879766" />
+      </linearGradient>
+      <linearGradient
+        id="manifoliaLeafLeft"
+        x1="12"
+        y1="18"
+        x2="30"
+        y2="32"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#6c8d72" />
+        <stop offset="1" stopColor="#355f46" />
+      </linearGradient>
+      <linearGradient
+        id="manifoliaLeafRight"
+        x1="36"
+        y1="18"
+        x2="18"
+        y2="32"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#93aa80" />
+        <stop offset="1" stopColor="#426d52" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 const iconButtonClassName =
-  "inline-flex h-7 w-7 items-center justify-center rounded-[5px] border-0 bg-transparent text-[#6b6b6b] transition-colors hover:bg-[#f0f0f0] hover:text-[#1a1a1a]";
+  "inline-flex h-8 w-8 items-center justify-center rounded-[12px] border border-transparent bg-transparent text-[var(--mf-explorer-text-muted)] transition-colors hover:border-[var(--mf-explorer-border-soft)] hover:bg-[var(--mf-explorer-control-hover)] hover:text-[var(--mf-explorer-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mf-explorer-focus-ring)]";
 
 export const ExplorerSidebarHeader = ({
   allTags: _allTags,
@@ -113,24 +187,23 @@ export const ExplorerSidebarHeader = ({
   return (
     <div
       className={cn(
-        compact
-          ? "border-b border-[#ebebeb] px-3 py-2"
-          : "border-b border-transparent px-4 pt-5 pb-3",
+        "explorer-sidebar-brand-header shrink-0 border-b border-[var(--mf-explorer-border-soft)]",
+        compact ? "px-4 pb-3 pt-4" : "px-5 pb-4 pt-5",
       )}
     >
-      <div className="flex min-w-0 items-center gap-2">
-        {compact ? (
-          <FolderIcon className="h-4 w-4 shrink-0 text-[#8b8b8b]" />
-        ) : null}
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="explorer-sidebar-brand-mark flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px]">
+          <ManifoliaLeafMark />
+        </div>
 
-        <h2
-          className={cn(
-            "min-w-0 flex-1 truncate font-semibold text-[#1a1a1a]",
-            compact ? "text-[13px] leading-6" : "text-[18px] leading-7",
-          )}
-        >
-          {compact ? "クイックアクセス" : "エクスプローラー"}
-        </h2>
+        <div className="min-w-0 flex-1">
+          <div className="truncate font-serif text-[21px] font-semibold leading-7 tracking-[0.01em] text-[var(--mf-explorer-logo-text)]">
+            Manifolia
+          </div>
+          <div className="truncate text-[11px] font-medium leading-4 text-[var(--mf-explorer-text-faint)]">
+            Knowledge Explorer
+          </div>
+        </div>
 
         <DropdownMenu
           modal={false}
@@ -168,6 +241,18 @@ export const ExplorerSidebarHeader = ({
             }}
           />
         </DropdownMenu>
+      </div>
+
+      <div className="mt-5 flex min-w-0 items-center gap-2">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[12px] bg-[var(--mf-explorer-brand-soft)] text-[var(--mf-explorer-brand)]">
+          <ClockIcon className="h-4 w-4" />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-[13px] font-bold leading-5 text-[var(--mf-explorer-text)]">
+            クイックアクセス
+          </div>
+        </div>
 
         <button
           type="button"
@@ -175,11 +260,13 @@ export const ExplorerSidebarHeader = ({
           aria-label="ピン留め"
           className={cn(
             iconButtonClassName,
-            "[--explorer-chrome-pin-stroke:#8b8a84] hover:[--explorer-chrome-pin-stroke:#1a1a1a]",
+            "[--explorer-chrome-pin-stroke:var(--mf-explorer-text-muted)] hover:[--explorer-chrome-pin-stroke:var(--mf-explorer-brand)]",
           )}
         >
           <ExplorerChromePinIcon className="h-4 w-4" />
         </button>
+
+        <ChevronDownIcon className="h-4 w-4 text-[var(--mf-explorer-text-faint)]" />
       </div>
     </div>
   );
