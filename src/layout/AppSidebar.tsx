@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 
 import { ExplorerStorageUsageCard } from "@/components/explorer/ExplorerStorageUsageCard";
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
@@ -22,63 +22,24 @@ const ManifoliaLeafMark = () => {
   return (
     <svg
       aria-hidden="true"
-      viewBox="0 0 48 48"
-      className="h-8 w-8 shrink-0"
+      viewBox="0 0 40 40"
+      className="app-sidebar__brand-icon"
       fill="none"
     >
       <path
-        d="M24.1 8.2C18 12.8 15.6 18.9 17.2 25.1C20.6 23.7 23.3 21.5 25.2 18.4C27 15.4 26.7 11.9 24.1 8.2Z"
-        fill="url(#appSidebarLeafTop)"
-      />
-      <path
-        d="M12.1 18.1C20.6 18.5 26.8 23.1 30.3 31.7C22.7 32.1 16.8 29.2 12.9 22.9C12.2 21.7 11.9 20.1 12.1 18.1Z"
-        fill="url(#appSidebarLeafLeft)"
-      />
-      <path
-        d="M35.9 18.1C27.4 18.5 21.2 23.1 17.7 31.7C25.3 32.1 31.2 29.2 35.1 22.9C35.8 21.7 36.1 20.1 35.9 18.1Z"
-        fill="url(#appSidebarLeafRight)"
-      />
-      <path
-        d="M24 8.2V35"
-        stroke="rgba(63,106,78,0.36)"
+        d="M31.7 5.4C19.9 6.7 9 15.8 7.3 28.9c9.2.5 22.7-5.2 24.4-23.5Z"
+        stroke="currentColor"
         strokeLinecap="round"
-        strokeWidth="1.2"
+        strokeLinejoin="round"
+        strokeWidth="2"
       />
-      <defs>
-        <linearGradient
-          id="appSidebarLeafTop"
-          x1="19"
-          x2="29"
-          y1="9"
-          y2="27"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#c9d3ad" />
-          <stop offset="1" stopColor="#879766" />
-        </linearGradient>
-        <linearGradient
-          id="appSidebarLeafLeft"
-          x1="12"
-          x2="30"
-          y1="18"
-          y2="32"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#6c8d72" />
-          <stop offset="1" stopColor="#355f46" />
-        </linearGradient>
-        <linearGradient
-          id="appSidebarLeafRight"
-          x1="36"
-          x2="18"
-          y1="18"
-          y2="32"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#93aa80" />
-          <stop offset="1" stopColor="#426d52" />
-        </linearGradient>
-      </defs>
+      <path
+        d="M8.3 29.1 30.5 7.2M14.4 23.3l.1-9.5M20.8 17.1l8.2.4M11.9 31.9c-1.3 1.8-3.2 3-5.4 3.7"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
     </svg>
   );
 };
@@ -92,18 +53,55 @@ const HomeIcon = ({ className }: SidebarIconProps) => {
       aria-hidden="true"
     >
       <path
-        d="M4.25 10.7L12 4.35L19.75 10.7"
+        d="M3 10.7 12 3l9 7.7"
         stroke="currentColor"
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="1.75"
+        strokeWidth="1.85"
       />
       <path
-        d="M6.75 10.2V19.25H17.25V10.2"
+        d="M5.5 9.5V21h13V9.5"
         stroke="currentColor"
+        strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="1.75"
+        strokeWidth="1.85"
       />
+      <path
+        d="M9.5 21v-6h5v6"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.85"
+      />
+    </svg>
+  );
+};
+
+const GalleryIcon = ({ className }: SidebarIconProps) => {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="3.5"
+        y="4"
+        width="17"
+        height="16"
+        rx="2.4"
+        stroke="currentColor"
+        strokeWidth="1.85"
+      />
+      <path
+        d="M7.2 15.8 10.4 12l2.4 2.6 2-2.1 2.9 3.3"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.85"
+      />
+      <circle cx="8.8" cy="8.8" r="1.3" stroke="currentColor" strokeWidth="1.85" />
     </svg>
   );
 };
@@ -117,57 +115,22 @@ const LibraryIcon = ({ className }: SidebarIconProps) => {
       aria-hidden="true"
     >
       <path
-        d="M5.25 4.75H14.5C15.74 4.75 16.75 5.76 16.75 7V19.25H7.5C6.26 19.25 5.25 18.24 5.25 17V4.75Z"
+        d="M7 3.5h7.2L19 8.3V20a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 20V5A1.5 1.5 0 0 1 7 3.5Z"
         stroke="currentColor"
         strokeLinejoin="round"
-        strokeWidth="1.65"
+        strokeWidth="1.85"
       />
       <path
-        d="M8.25 8.5H13.75M8.25 12H13.75"
+        d="M14 3.8V8.5h4.7"
         stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.65"
-      />
-      <path
-        d="M16.75 7.25H18.25C18.8 7.25 19.25 7.7 19.25 8.25V21.25H8.75"
-        stroke="currentColor"
-        strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="1.65"
-      />
-    </svg>
-  );
-};
-
-const FlashcardIcon = ({ className }: SidebarIconProps) => {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <rect
-        x="5"
-        y="6.25"
-        width="12.5"
-        height="12"
-        rx="2"
-        stroke="currentColor"
-        strokeWidth="1.65"
+        strokeWidth="1.85"
       />
       <path
-        d="M7.5 3.75H17C18.1 3.75 19 4.65 19 5.75V15"
+        d="M8.5 13h7M8.5 16h5"
         stroke="currentColor"
         strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.65"
-      />
-      <path
-        d="M8.5 10H14M8.5 13.25H12.5"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.65"
+        strokeWidth="1.85"
       />
     </svg>
   );
@@ -182,28 +145,49 @@ const PdfIcon = ({ className }: SidebarIconProps) => {
       aria-hidden="true"
     >
       <path
-        d="M6.25 3.75H13.5L18.25 8.5V20.25H6.25V3.75Z"
+        d="M7 3.5h7.2L19 8.3V20a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 20V5A1.5 1.5 0 0 1 7 3.5Z"
         stroke="currentColor"
         strokeLinejoin="round"
-        strokeWidth="1.65"
+        strokeWidth="1.85"
       />
       <path
-        d="M13.5 3.75V8.5H18.25"
+        d="M14 3.8V8.5h4.7"
         stroke="currentColor"
         strokeLinejoin="round"
-        strokeWidth="1.65"
+        strokeWidth="1.85"
+      />
+    </svg>
+  );
+};
+
+const FlashcardIcon = ({ className }: SidebarIconProps) => {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="4"
+        y="5"
+        width="12.5"
+        height="15"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.85"
       />
       <path
-        d="M8.6 14.35H10.1C10.72 14.35 11.2 13.88 11.2 13.28C11.2 12.67 10.72 12.2 10.1 12.2H8.6V16.4"
+        d="M8 8.5h4.5M8 12h5.5M8 15.5h3"
         stroke="currentColor"
         strokeLinecap="round"
-        strokeWidth="1.45"
+        strokeWidth="1.85"
       />
       <path
-        d="M12.6 12.2H13.75C14.8 12.2 15.55 13.05 15.55 14.3C15.55 15.55 14.8 16.4 13.75 16.4H12.6V12.2Z"
+        d="M16.5 9H18a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-1.5"
         stroke="currentColor"
-        strokeLinejoin="round"
-        strokeWidth="1.45"
+        strokeLinecap="round"
+        strokeWidth="1.85"
       />
     </svg>
   );
@@ -218,16 +202,16 @@ const NoteIcon = ({ className }: SidebarIconProps) => {
       aria-hidden="true"
     >
       <path
-        d="M5.25 5.25C5.25 4.42 5.92 3.75 6.75 3.75H17.25C18.08 3.75 18.75 4.42 18.75 5.25V18.75C18.75 19.58 18.08 20.25 17.25 20.25H6.75C5.92 20.25 5.25 19.58 5.25 18.75V5.25Z"
+        d="M5 20.5h4.2L20.4 9.3a2.2 2.2 0 0 0-3.1-3.1L6.1 17.4 5 20.5Z"
         stroke="currentColor"
         strokeLinejoin="round"
-        strokeWidth="1.65"
+        strokeWidth="1.85"
       />
       <path
-        d="M8.25 8.25H15.75M8.25 11.75H15.75M8.25 15.25H12.75"
+        d="M15.8 7.7l3.1 3.1"
         stroke="currentColor"
         strokeLinecap="round"
-        strokeWidth="1.65"
+        strokeWidth="1.85"
       />
     </svg>
   );
@@ -242,39 +226,12 @@ const TagIcon = ({ className }: SidebarIconProps) => {
       aria-hidden="true"
     >
       <path
-        d="M4.75 12.1V5.75H11.1L19.25 13.9L13.9 19.25L4.75 12.1Z"
+        d="M4.7 12.8 11.5 6H19v7.5l-6.8 6.8a1.8 1.8 0 0 1-2.5 0l-5-5a1.8 1.8 0 0 1 0-2.5Z"
         stroke="currentColor"
         strokeLinejoin="round"
-        strokeWidth="1.65"
+        strokeWidth="1.85"
       />
-      <circle cx="8.35" cy="8.35" r="1.2" fill="currentColor" />
-    </svg>
-  );
-};
-
-const CollectionIcon = ({ className }: SidebarIconProps) => {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <rect
-        x="4.75"
-        y="6.25"
-        width="14.5"
-        height="11.5"
-        rx="2"
-        stroke="currentColor"
-        strokeWidth="1.65"
-      />
-      <path
-        d="M8.25 4.25H15.75M8.25 19.75H15.75"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.65"
-      />
+      <circle cx="16" cy="9" r="1" fill="currentColor" />
     </svg>
   );
 };
@@ -288,29 +245,16 @@ const TrashIcon = ({ className }: SidebarIconProps) => {
       aria-hidden="true"
     >
       <path
-        d="M4.75 6.5H19.25"
+        d="M6.5 7.5h11M9.2 7.5V5.2h5.6v2.3M8.2 10.5l.7 8M12 10.5v8M15.8 10.5l-.7 8"
         stroke="currentColor"
         strokeLinecap="round"
-        strokeWidth="1.65"
+        strokeWidth="1.85"
       />
       <path
-        d="M9.25 6.5V4.75H14.75V6.5"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.65"
-      />
-      <path
-        d="M6.75 6.5L7.65 19.25H16.35L17.25 6.5"
+        d="M7 7.5 8 21h8l1-13.5"
         stroke="currentColor"
         strokeLinejoin="round"
-        strokeWidth="1.65"
-      />
-      <path
-        d="M10.25 10.25V16M13.75 10.25V16"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.65"
+        strokeWidth="1.85"
       />
     </svg>
   );
@@ -325,11 +269,11 @@ const ChevronDownIcon = ({ className }: SidebarIconProps) => {
       aria-hidden="true"
     >
       <path
-        d="M7.5 9.5L12 14L16.5 9.5"
+        d="m8 10 4 4 4-4"
         stroke="currentColor"
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="1.75"
+        strokeWidth="2"
       />
     </svg>
   );
@@ -342,7 +286,14 @@ const primaryNavItems: AppSidebarNavItem[] = [
     to: "/folders?home=1",
     icon: <HomeIcon className="app-sidebar__nav-icon" />,
     match: (pathname, searchParams) =>
-      pathname.toLowerCase() === "/folders" && searchParams.get("home") === "1",
+      pathname === "/folders" && searchParams.get("home") === "1",
+  },
+  {
+    id: "gallery",
+    label: "ギャラリー",
+    to: "/gallery",
+    icon: <GalleryIcon className="app-sidebar__nav-icon" />,
+    exactPath: true,
   },
   {
     id: "library",
@@ -352,24 +303,23 @@ const primaryNavItems: AppSidebarNavItem[] = [
     exactPath: true,
   },
   {
-    id: "flashcards",
-    label: "フラッシュカード",
-    to: "/folders",
-    icon: <FlashcardIcon className="app-sidebar__nav-icon" />,
-    match: (pathname, searchParams) =>
-      pathname.toLowerCase() === "/folders" &&
-      searchParams.get("home") !== "1" &&
-      searchParams.get("content") !== "pdf" &&
-      searchParams.get("content") !== "note",
-  },
-  {
     id: "pdf",
     label: "PDF",
     to: "/folders?content=pdf",
     icon: <PdfIcon className="app-sidebar__nav-icon" />,
     match: (pathname, searchParams) =>
-      pathname.toLowerCase() === "/folders" &&
-      searchParams.get("content") === "pdf",
+      pathname === "/folders" && searchParams.get("content") === "pdf",
+  },
+  {
+    id: "flashcards",
+    label: "フラッシュカード",
+    to: "/folders",
+    icon: <FlashcardIcon className="app-sidebar__nav-icon" />,
+    match: (pathname, searchParams) =>
+      pathname === "/folders" &&
+      searchParams.get("home") !== "1" &&
+      searchParams.get("content") !== "pdf" &&
+      searchParams.get("content") !== "note",
   },
   {
     id: "note",
@@ -377,8 +327,7 @@ const primaryNavItems: AppSidebarNavItem[] = [
     to: "/folders?content=note",
     icon: <NoteIcon className="app-sidebar__nav-icon" />,
     match: (pathname, searchParams) =>
-      pathname.toLowerCase() === "/folders" &&
-      searchParams.get("content") === "note",
+      pathname === "/folders" && searchParams.get("content") === "note",
   },
   {
     id: "tags",
@@ -387,19 +336,12 @@ const primaryNavItems: AppSidebarNavItem[] = [
     icon: <TagIcon className="app-sidebar__nav-icon" />,
     exactPath: true,
   },
-  {
-    id: "collections",
-    label: "コレクション",
-    to: "/gallery",
-    icon: <CollectionIcon className="app-sidebar__nav-icon" />,
-    exactPath: true,
-  },
 ];
 
 const secondaryNavItems: AppSidebarNavItem[] = [
   {
     id: "trash",
-    label: "ゴミ箱",
+    label: "ごみ箱",
     to: "/trash",
     icon: <TrashIcon className="app-sidebar__nav-icon" />,
     exactPath: true,
@@ -454,15 +396,13 @@ export const AppSidebar = () => {
   const initial = displayName.trim().charAt(0).toUpperCase() || "M";
 
   return (
-    <aside className="app-sidebar" aria-label="アプリケーションナビゲーション">
-      <div className="app-sidebar__brand">
-        <div className="app-sidebar__brand-mark">
-          <ManifoliaLeafMark />
-        </div>
-        <div className="app-sidebar__brand-name">Manifolia</div>
-      </div>
+    <aside className="app-sidebar" aria-label="アプリのサイドバー">
+      <Link className="app-sidebar__brand" to="/folders?home=1">
+        <ManifoliaLeafMark />
+        <span className="app-sidebar__brand-name">Manifolia</span>
+      </Link>
 
-      <nav className="app-sidebar__nav" aria-label="メイン">
+      <nav className="app-sidebar__nav" aria-label="メインナビゲーション">
         {primaryNavItems.map((item) => (
           <AppSidebarNavLink key={item.id} item={item} />
         ))}
@@ -470,7 +410,7 @@ export const AppSidebar = () => {
 
       <nav
         className="app-sidebar__nav app-sidebar__nav--secondary"
-        aria-label="補助"
+        aria-label="補助ナビゲーション"
       >
         {secondaryNavItems.map((item) => (
           <AppSidebarNavLink key={item.id} item={item} />
@@ -483,7 +423,7 @@ export const AppSidebar = () => {
         <ExplorerStorageUsageCard />
       </div>
 
-      <div className="app-sidebar__account">
+      <div className="app-sidebar__account" aria-label={`${displayName} の現在のプラン`}>
         <div className="app-sidebar__avatar" aria-hidden="true">
           {initial}
         </div>

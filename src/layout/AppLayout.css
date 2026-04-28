@@ -1,6 +1,6 @@
 .app-layout {
-  --app-sidebar-width: 264px;
-  --app-sidebar-rail-width: 72px;
+  --app-sidebar-width: 240px;
+  --app-sidebar-rail-width: 76px;
   --app-layout-padding-x: 0px;
 
   display: grid;
@@ -14,16 +14,7 @@
   overflow: hidden;
   box-sizing: border-box;
   padding: 0;
-  background:
-    radial-gradient(
-      circle at 20px 20px,
-      rgba(95, 138, 106, 0.035) 0 1px,
-      transparent 1px
-    ),
-    linear-gradient(180deg, #fcfdf9 0%, var(--app-bg) 100%);
-  background-size:
-    18px 18px,
-    auto;
+  background: #fbfcfb;
   align-items: stretch;
 }
 
@@ -36,17 +27,21 @@
 }
 
 .app-sidebar {
-  --app-sidebar-border: rgba(223, 229, 220, 0.92);
-  --app-sidebar-bg: rgba(251, 253, 248, 0.94);
-  --app-sidebar-bg-strong: rgba(255, 255, 252, 0.9);
-  --app-sidebar-hover-bg: rgba(240, 246, 236, 0.86);
-  --app-sidebar-active-bg: rgba(229, 241, 225, 0.92);
-  --app-sidebar-text: #253127;
-  --app-sidebar-text-secondary: #536252;
-  --app-sidebar-text-muted: #778373;
-  --app-sidebar-text-faint: #a8b0a3;
-  --app-sidebar-brand: #3f6a4e;
-  --app-sidebar-focus-ring: rgba(95, 138, 106, 0.18);
+  --app-sidebar-border: #eef0ee;
+  --app-sidebar-bg: #f8f9f7;
+  --app-sidebar-surface: #ffffff;
+  --app-sidebar-surface-soft: #f1f4ef;
+  --app-sidebar-hover-bg: #f0f3ee;
+  --app-sidebar-active-bg: #eef2eb;
+  --app-sidebar-text: #202322;
+  --app-sidebar-text-secondary: #59635d;
+  --app-sidebar-text-muted: #8a948c;
+  --app-sidebar-brand: #3f7a43;
+  --app-sidebar-brand-strong: #356b39;
+  --app-sidebar-focus-ring: rgba(67, 125, 71, 0.22);
+  --app-sidebar-card-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 8px 24px rgba(16, 24, 40, 0.03);
 
   display: flex;
   min-width: 0;
@@ -55,16 +50,7 @@
   flex-direction: column;
   overflow: hidden;
   border-right: 1px solid var(--app-sidebar-border);
-  background:
-    radial-gradient(
-      circle at 18px 18px,
-      rgba(95, 138, 106, 0.055) 0 1px,
-      transparent 1px
-    ),
-    linear-gradient(180deg, rgba(255, 255, 252, 0.9), rgba(249, 252, 246, 0.82));
-  background-size:
-    16px 16px,
-    auto;
+  background: var(--app-sidebar-bg);
   color: var(--app-sidebar-text);
   font-family: var(--explorer-chrome-font-family);
   font-feature-settings:
@@ -77,40 +63,37 @@
 .app-sidebar__brand {
   display: flex;
   min-width: 0;
+  height: 62px;
   flex-shrink: 0;
   align-items: center;
   gap: 12px;
-  padding: 22px 20px 18px;
+  padding: 18px 22px 0 24px;
+  color: var(--app-sidebar-text);
+  text-decoration: none;
 }
 
-.app-sidebar__brand-mark {
-  display: flex;
-  width: 44px;
-  height: 44px;
+.app-sidebar__brand:focus-visible {
+  border-radius: 12px;
+  box-shadow: 0 0 0 3px var(--app-sidebar-focus-ring);
+  outline: none;
+}
+
+.app-sidebar__brand-icon {
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(95, 138, 106, 0.16);
-  border-radius: 16px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 252, 0.94),
-    rgba(237, 245, 235, 0.88)
-  );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    0 6px 14px rgba(63, 106, 78, 0.08);
+  color: var(--app-sidebar-brand);
 }
 
 .app-sidebar__brand-name {
   min-width: 0;
   overflow: hidden;
-  color: var(--app-sidebar-brand);
+  color: var(--app-sidebar-text);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 25px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  line-height: 32px;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -120,38 +103,35 @@
   min-width: 0;
   flex-direction: column;
   gap: 4px;
-  padding: 6px 12px;
+  padding: 18px 12px 0;
 }
 
 .app-sidebar__nav--secondary {
-  margin-top: 10px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(237, 241, 234, 0.92);
+  padding-top: 4px;
 }
 
 .app-sidebar__nav-link {
   display: flex;
   min-width: 0;
-  min-height: 42px;
+  height: 44px;
   align-items: center;
-  gap: 12px;
-  border-radius: 13px;
-  color: var(--app-sidebar-text-secondary);
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 20px;
+  gap: 14px;
+  border-radius: 10px;
+  color: var(--app-sidebar-text);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1;
   outline: none;
   padding: 0 14px;
   text-decoration: none;
   transition:
-    background-color 120ms ease,
-    color 120ms ease,
-    box-shadow 120ms ease;
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .app-sidebar__nav-link:hover {
   background: var(--app-sidebar-hover-bg);
-  color: var(--app-sidebar-text);
 }
 
 .app-sidebar__nav-link:focus-visible {
@@ -159,27 +139,22 @@
 }
 
 .app-sidebar__nav-link.is-active {
-  background: linear-gradient(
-    90deg,
-    rgba(229, 241, 225, 0.98),
-    rgba(244, 248, 241, 0.86)
-  );
-  color: var(--app-sidebar-brand);
-  box-shadow: inset 0 0 0 1px rgba(95, 138, 106, 0.1);
+  background: var(--app-sidebar-active-bg);
+  color: var(--app-sidebar-brand-strong);
 }
 
 .app-sidebar__nav-icon-slot {
   display: flex;
-  width: 22px;
-  height: 22px;
+  width: 21px;
+  height: 21px;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
 }
 
 .app-sidebar__nav-icon {
-  width: 20px;
-  height: 20px;
+  width: 21px;
+  height: 21px;
   color: currentColor;
 }
 
@@ -191,82 +166,153 @@
 }
 
 .app-sidebar__spacer {
-  min-height: 16px;
+  min-height: 26px;
   flex: 1 1 auto;
 }
 
 .app-sidebar__storage {
   flex-shrink: 0;
-  padding: 12px;
+  padding: 0 12px 16px;
 }
 
-.app-sidebar__storage .explorer-storage-usage-card {
-  color: var(--app-sidebar-text);
+.explorer-storage-usage-card {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 16px 16px 18px;
+  border: 1px solid #e3e8e0;
+  border-radius: 12px;
+  background: var(--app-sidebar-surface, #ffffff);
+  box-shadow: var(--app-sidebar-card-shadow);
+  color: var(--app-sidebar-text, #202322);
 }
 
-.app-sidebar__account {
+.explorer-storage-usage-card__header {
   display: flex;
   min-width: 0;
-  flex-shrink: 0;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  margin: 12px;
-  min-height: 66px;
-  border: 1px solid rgba(237, 241, 234, 0.96);
-  border-radius: 16px;
-  background: rgba(255, 255, 252, 0.74);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.86),
-    0 8px 22px rgba(38, 49, 39, 0.045);
-  padding: 10px 12px;
+  margin-bottom: 14px;
 }
 
-.app-sidebar__avatar {
-  display: flex;
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #6f9a64, #557f50);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-}
-
-.app-sidebar__account-text {
-  min-width: 0;
-  flex: 1;
-}
-
-.app-sidebar__account-name {
+.explorer-storage-usage-card__title {
+  margin: 0;
   overflow: hidden;
-  color: var(--app-sidebar-text);
+  color: inherit;
   font-size: 13px;
-  font-weight: 800;
-  line-height: 18px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  line-height: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.app-sidebar__account-plan {
-  margin-top: 1px;
+.explorer-storage-usage-card__detail {
+  flex-shrink: 0;
+  color: var(--app-sidebar-brand, #3f7a43);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 16px;
+}
+
+.explorer-storage-usage-card__usage {
+  margin: 0 0 12px;
   overflow: hidden;
-  color: var(--app-sidebar-text-muted);
-  font-size: 11px;
+  color: var(--app-sidebar-text-secondary, #59635d);
+  font-size: 12px;
   font-weight: 600;
   line-height: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.app-sidebar__account-chevron {
-  width: 16px;
-  height: 16px;
+.explorer-storage-usage-card__meter {
+  position: relative;
+  height: 7px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5e8e4;
+}
+
+.explorer-storage-usage-card__meter-value {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--storage-usage-percent, 0%);
+  border-radius: inherit;
+  background: var(--app-sidebar-brand, #3f7a43);
+  transition: width 300ms ease;
+}
+
+.explorer-storage-usage-card__percent {
+  margin: 0;
+  color: var(--app-sidebar-text-secondary, #59635d);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 18px;
+}
+
+.app-sidebar__account {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 18px;
+  min-width: 0;
+  min-height: 66px;
   flex-shrink: 0;
-  color: var(--app-sidebar-text-faint);
+  align-items: center;
+  gap: 12px;
+  margin: 0 12px 14px;
+  border: 1px solid var(--app-sidebar-border);
+  border-radius: 12px;
+  background: var(--app-sidebar-surface);
+  box-shadow: var(--app-sidebar-card-shadow);
+  padding: 10px 12px;
+}
+
+.app-sidebar__avatar {
+  display: flex;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #548a4e, #3e713f);
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.app-sidebar__account-text {
+  min-width: 0;
+}
+
+.app-sidebar__account-name {
+  overflow: hidden;
+  color: var(--app-sidebar-text);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-sidebar__account-plan {
+  margin-top: 3px;
+  overflow: hidden;
+  color: var(--app-sidebar-text-muted);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-sidebar__account-chevron {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--app-sidebar-text-secondary);
 }
 
 .workspace-shell,
@@ -323,6 +369,7 @@
 
   .app-sidebar__brand {
     justify-content: center;
+    height: 62px;
     padding-right: 0;
     padding-left: 0;
   }
@@ -337,8 +384,8 @@
 
   .app-sidebar__nav {
     align-items: center;
-    padding-right: 8px;
-    padding-left: 8px;
+    padding-right: 10px;
+    padding-left: 10px;
   }
 
   .app-sidebar__nav-link {
@@ -348,11 +395,12 @@
   }
 
   .app-sidebar__account {
+    display: flex;
     justify-content: center;
+    min-height: 58px;
     margin-right: 8px;
     margin-left: 8px;
-    padding-right: 0;
-    padding-left: 0;
+    padding: 8px;
   }
 }
 
