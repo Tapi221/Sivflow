@@ -142,8 +142,13 @@
   .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font > div:first-child {
     height: 100%;
     align-items: flex-end;
-    padding-left: 14px;
+    padding-left: 0;
     padding-top: 8px;
+  }
+
+  .explorer-workspace-tabs-list > .explorer-workspace-tab:first-child,
+  .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font > div:first-child > .group\/tab:first-child {
+    margin-left: 0 !important;
   }
 
   .explorer-workspace-tab,
