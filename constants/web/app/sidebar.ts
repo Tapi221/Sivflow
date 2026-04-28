@@ -1,5 +1,5 @@
 export const SIDEBAR_WIDTH_LIMITS = {
-  min: 220,
-  max: 420,
-  default: 240,
+  min: 260,
+  max: 320,
+  default: 292,
 } as const;

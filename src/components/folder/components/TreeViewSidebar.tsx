@@ -54,7 +54,7 @@ type InjectionResult = {
 const CALENDAR_SECTION_CONTENT_ID = "calendar-sidebar-section-content";
 const EXPLORER_SIDEBAR_TITLEBAR_OFFSET_VAR =
   "--mf-explorer-sidebar-titlebar-offset";
-const INTEGRATED_CHROME_SIDEBAR_GAP_PX = 0;
+const INTEGRATED_CHROME_SIDEBAR_GAP_PX = 20;
 
 const isElementWithChildren = (
   node: React.ReactNode,
