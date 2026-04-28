@@ -246,12 +246,6 @@
     background: transparent !important;
   }
 
-  .explorer-chrome-statusbar {
-    min-height: 34px;
-    border-top-color: var(--mf-explorer-border) !important;
-    background: var(--mf-explorer-status-bg) !important;
-    color: var(--mf-explorer-text-muted) !important;
-  }
 
   [data-explorer-sidebar-shell="true"] {
     box-sizing: border-box !important;
