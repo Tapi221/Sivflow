@@ -1,4 +1,5 @@
 import { ExplorerSidebarHeader } from "@/components/explorer/ExplorerSidebarHeader";
+import { ExplorerStorageUsageCard } from "@/components/explorer/ExplorerStorageUsageCard";
 import { PinnedFolderSidebarSection } from "@/components/folder/components/PinnedFolderSidebarSection";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useTags } from "@/hooks/settings/useTags";
@@ -585,6 +586,12 @@ export const TreeViewSidebar = ({
             {sidebarChildren}
           </div>
         )}
+
+        {integratedChrome ? (
+          <div className="explorer-sidebar-storage-slot shrink-0 px-3 pb-3 pt-2">
+            <ExplorerStorageUsageCard />
+          </div>
+        ) : null}
       </div>
 
       {isCalendarOpen ? (
