@@ -5,10 +5,10 @@ import type {
 } from "./folderDetailTypes";
 
 const EXPLORER_DETAIL_COLUMN_WIDTHS_STORAGE_KEY =
-  "manifolia:folder-detail-view:column-widths:v2";
+  "manifolia:folder-detail-view:column-widths:v3";
 
 const EXPLORER_DETAIL_COLUMN_ORDER_STORAGE_KEY =
-  "manifolia:folder-detail-view:column-order:v2";
+  "manifolia:folder-detail-view:column-order:v3";
 
 export const DETAIL_GRID_CLASS = "grid";
 

@@ -361,10 +361,6 @@ const HomeIcon = () => (
   </svg>
 );
 
-const ExplorerToolbarDivider = () => (
-  <div className="explorer-chrome-toolbar-divider mx-1 h-[18px] w-px shrink-0 bg-[var(--mf-explorer-border)]" />
-);
-
 const ExplorerToolbarSearchButton = ({
   onClick,
 }: ExplorerToolbarSearchButtonProps) => {
@@ -575,8 +571,6 @@ const ExplorerToolbar = () => {
           <ArrowUpIcon />
         </ExplorerToolbarButton>
       </div>
-
-      <ExplorerToolbarDivider />
 
       <ExplorerPathBar />
 
