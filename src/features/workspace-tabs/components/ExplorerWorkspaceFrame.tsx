@@ -122,11 +122,11 @@ const ExplorerToolbarButton = forwardRef<
         disabled={disabled}
         onClick={disabled ? undefined : onClick}
         className={cn(
-          "explorer-chrome-toolbar-button inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px]",
-          "border-0 bg-transparent text-[#737d87] outline-none transition-colors",
+          "explorer-chrome-toolbar-button inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[11px]",
+          "border border-transparent bg-transparent text-[var(--mf-explorer-text-muted)] outline-none transition-colors",
           disabled
-            ? "cursor-default text-[#a9b2bb]"
-            : "hover:bg-[#edf4fa] hover:text-[#20272f]",
+            ? "cursor-default text-[var(--mf-explorer-text-faint)]"
+            : "hover:border-[var(--mf-explorer-border-soft)] hover:bg-[var(--mf-explorer-control-hover)] hover:text-[var(--mf-explorer-text)]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           className,
         )}
@@ -436,9 +436,9 @@ const ExplorerPathBar = () => {
   return (
     <div
       className={cn(
-        "explorer-chrome-pathbar flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[8px]",
-        "border border-[#d7dde4] bg-[rgba(255,255,255,0.88)] px-3",
-        "shadow-[inset_0_1px_1px_rgba(15,23,42,0.045),0_1px_0_rgba(255,255,255,0.72)]",
+        "explorer-chrome-pathbar flex h-9 min-w-0 flex-1 items-center gap-2 rounded-[14px]",
+        "border border-[var(--mf-explorer-border)] bg-[var(--mf-explorer-control-bg)] px-3",
+        "shadow-[var(--mf-explorer-control-shadow)]",
       )}
     >
       {pathCrumbs.map((crumb, index) => {
@@ -448,7 +448,7 @@ const ExplorerPathBar = () => {
         return (
           <Fragment key={`${crumb.label}:${crumb.to ?? "current"}:${index}`}>
             {index > 0 ? (
-              <span className="text-[12px] text-[#a8b1ba]">›</span>
+              <span className="text-[12px] text-[var(--mf-explorer-text-faint)]">›</span>
             ) : null}
 
             {index === 0 ? <HomeIcon /> : null}
@@ -460,7 +460,7 @@ const ExplorerPathBar = () => {
                 onClick={() => handleCrumbClick(crumb)}
                 className={cn(
                   "min-w-0 truncate rounded-[4px] text-left text-[12px]",
-                  "text-[#737d87] hover:text-[#20272f]",
+                  "text-[var(--mf-explorer-text-muted)] hover:text-[var(--mf-explorer-text)]",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 )}
                 title={crumb.label}
@@ -471,7 +471,7 @@ const ExplorerPathBar = () => {
               <span
                 className={cn(
                   "min-w-0 truncate text-[12px]",
-                  isLast ? "font-semibold text-[#20272f]" : "text-[#737d87]",
+                  isLast ? "font-semibold text-[var(--mf-explorer-text)]" : "text-[var(--mf-explorer-text-muted)]",
                 )}
                 title={crumb.label}
               >
@@ -500,8 +500,8 @@ const ExplorerToolbar = () => {
   return (
     <div
       className={cn(
-        "explorer-chrome-toolbar flex h-12 shrink-0 items-center gap-1 border-b border-[#d7dde4]",
-        "bg-[rgba(248,250,252,0.88)] px-2 text-[#20272f]",
+        "explorer-chrome-toolbar flex h-[58px] shrink-0 items-center gap-2 border-b border-[var(--mf-explorer-border)]",
+        "bg-[var(--mf-explorer-toolbar-bg)] px-4 text-[var(--mf-explorer-text)]",
       )}
     >
       <ExplorerToolbarButton title="戻る" disabled>
@@ -514,11 +514,11 @@ const ExplorerToolbar = () => {
         <ArrowUpIcon />
       </ExplorerToolbarButton>
 
-      <div className="mx-1 h-[18px] w-px shrink-0 bg-[#d7dde4]" />
+      <div className="mx-1 h-[18px] w-px shrink-0 bg-[var(--mf-explorer-border)]" />
 
       <ExplorerPathBar />
 
-      <div className="mx-1 h-[18px] w-px shrink-0 bg-[#d7dde4]" />
+      <div className="mx-1 h-[18px] w-px shrink-0 bg-[var(--mf-explorer-border)]" />
 
       <ExplorerToolbarButton title="更新">
         <RefreshIcon />
@@ -527,8 +527,8 @@ const ExplorerToolbar = () => {
       <TagFilterPopover
         allTags={allTags}
         className={cn(
-          "explorer-chrome-toolbar-button h-7 w-7 shrink-0 rounded-[6px] border-0 bg-transparent px-0 py-0",
-          "text-[#737d87] hover:bg-[#edf4fa] hover:text-[#20272f]",
+          "explorer-chrome-toolbar-button h-8 w-8 shrink-0 rounded-[11px] border border-transparent bg-transparent px-0 py-0",
+          "text-[var(--mf-explorer-text-muted)] hover:border-[var(--mf-explorer-border-soft)] hover:bg-[var(--mf-explorer-control-hover)] hover:text-[var(--mf-explorer-text)]",
         )}
       />
 
@@ -570,12 +570,12 @@ const ExplorerStatusBar = () => {
   return (
     <div
       className={cn(
-        "explorer-chrome-statusbar flex h-7 shrink-0 items-center gap-3 border-t border-[#d7dde4]",
-        "bg-[rgba(248,250,252,0.88)] px-3 text-[11px] text-[#737d87]",
+        "explorer-chrome-statusbar flex h-8 shrink-0 items-center gap-3 border-t border-[var(--mf-explorer-border)]",
+        "bg-[var(--mf-explorer-status-bg)] px-4 text-[11px] text-[var(--mf-explorer-text-muted)]",
       )}
     >
       <span>エクスプローラー</span>
-      <span className="text-[#b6bec7]">│</span>
+      <span className="text-[var(--mf-explorer-border-strong)]">│</span>
       <span>フォルダとカードを管理</span>
 
       <ExplorerToolbarButton
@@ -604,7 +604,7 @@ export const ExplorerWorkspaceFrame = ({
         "relative flex h-full min-h-0 min-w-0 max-w-none flex-col overflow-hidden",
         "rounded-none border-0 shadow-none",
         showExplorerChrome
-          ? "explorer-chrome-shell bg-[var(--explorer-chrome-app-bg)]"
+          ? "explorer-chrome-shell bg-[var(--mf-explorer-app-bg)]"
           : "bg-[var(--app-bg)]",
         className,
       )}
@@ -617,7 +617,7 @@ export const ExplorerWorkspaceFrame = ({
         className={cn(
           "relative flex min-h-0 w-full min-w-0 flex-1 overflow-hidden",
           showExplorerChrome
-            ? "explorer-chrome-body bg-[var(--explorer-chrome-app-bg)]"
+            ? "explorer-chrome-body bg-[var(--mf-explorer-app-bg)]"
             : "bg-transparent",
           bodyClassName,
         )}
