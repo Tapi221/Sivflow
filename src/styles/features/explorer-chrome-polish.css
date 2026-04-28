@@ -9,7 +9,8 @@
     --mf-explorer-sidebar-bg: rgba(251, 253, 248, 0.94);
     --mf-explorer-surface: rgba(255, 255, 252, 0.97);
     --mf-explorer-surface-solid: #fffefa;
-    --mf-explorer-toolbar-bg: rgba(255, 255, 252, 0.78);
+    --mf-explorer-toolbar-bg: rgba(255, 255, 252, 0.92);
+    --mf-explorer-main-chrome-surface: rgba(255, 255, 252, 0.94);
     --mf-explorer-status-bg: rgba(249, 251, 246, 0.92);
     --mf-explorer-control-bg: rgba(255, 255, 252, 0.9);
     --mf-explorer-control-hover: rgba(237, 245, 235, 0.92);
@@ -127,19 +128,39 @@
     left: var(--mf-explorer-sidebar-titlebar-offset, 292px);
     right: 0;
     max-width: calc(100% - var(--mf-explorer-sidebar-titlebar-offset, 292px));
+    overflow: visible;
+    isolation: isolate;
   }
 
   .explorer-workspace-tabs-bar,
   .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font {
+    position: relative;
+    z-index: 2;
     height: 50px !important;
-    border-bottom-color: rgba(223, 229, 220, 0.78) !important;
-    background: rgba(252, 253, 249, 0.9) !important;
+    overflow: visible !important;
+    border-bottom: 0 !important;
+    background: rgba(252, 253, 249, 0.86) !important;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
 
+  .explorer-workspace-tabs-bar::after,
+  .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 0;
+    height: 1px;
+    background: var(--mf-explorer-border);
+    pointer-events: none;
+  }
+
   .explorer-workspace-tabs-list,
   .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font > div:first-child {
+    position: relative;
+    z-index: 1;
     height: 100%;
     align-items: flex-end;
     padding-left: 18px;
@@ -148,33 +169,38 @@
 
   .explorer-workspace-tab,
   .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font .group\/tab {
+    position: relative;
+    z-index: 1;
     border-radius: 15px 15px 0 0 !important;
     font-weight: 600;
     overflow: hidden;
   }
 
   .explorer-workspace-tab--active {
-    height: 40px !important;
+    z-index: 3;
+    height: 41px !important;
+    margin-bottom: -1px !important;
     border-color: var(--mf-explorer-border) !important;
-    border-bottom-color: rgba(255, 255, 252, 0.98) !important;
-    background: rgba(255, 255, 252, 0.98) !important;
+    border-bottom-color: var(--mf-explorer-main-chrome-surface) !important;
+    background: var(--mf-explorer-main-chrome-surface) !important;
     color: var(--mf-explorer-text) !important;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      inset 0 1px 0 rgba(255, 255, 255, 0.94),
       0 -1px 0 rgba(255, 255, 255, 0.64) !important;
   }
 
   .explorer-workspace-tab--inactive {
-    height: 40px !important;
-    border-color: rgba(223, 229, 220, 0.82) !important;
+    height: 38px !important;
+    margin-bottom: 0 !important;
+    border-color: rgba(223, 229, 220, 0.74) !important;
     border-bottom-color: transparent !important;
-    background: rgba(252, 253, 249, 0.78) !important;
+    background: rgba(252, 253, 249, 0.58) !important;
     color: var(--mf-explorer-text-secondary) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
   }
 
   .explorer-workspace-tab--inactive:hover {
-    background: rgba(255, 255, 252, 0.94) !important;
+    background: rgba(255, 255, 252, 0.9) !important;
     color: var(--mf-explorer-text) !important;
   }
 
@@ -192,6 +218,8 @@
   }
 
   .explorer-workspace-tab-add {
+    position: relative;
+    z-index: 2;
     border-radius: 12px !important;
     color: var(--mf-explorer-text-muted) !important;
   }
@@ -202,12 +230,18 @@
   }
 
   .explorer-chrome-toolbar {
+    position: relative;
+    z-index: 1;
     height: 68px !important;
     gap: 10px !important;
+    margin-top: 0 !important;
+    border-top: 0 !important;
     border-bottom: 0 !important;
     border-bottom-color: transparent !important;
-    background: rgba(255, 255, 252, 0.76) !important;
-    box-shadow: none !important;
+    background: var(--mf-explorer-main-chrome-surface) !important;
+    box-shadow:
+      inset 0 1px 0 var(--mf-explorer-border),
+      0 1px 0 rgba(255, 255, 255, 0.58) !important;
     padding: 10px 18px 12px !important;
     color: var(--mf-explorer-text) !important;
     backdrop-filter: blur(14px);
@@ -420,7 +454,7 @@
   .explorer-chrome-shell div:has(> [role="table"][aria-label="エクスプローラー詳細表示"]) {
     box-sizing: border-box;
     min-height: 0;
-    padding: 16px 18px 18px !important;
+    padding: 14px 18px 18px !important;
     background: transparent !important;
   }
 
