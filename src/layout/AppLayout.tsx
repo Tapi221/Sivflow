@@ -1,7 +1,9 @@
-import React, { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 
 import { AppShellLoadingFallback } from "@/components/loading/ScreenSkeletons";
+import { AppSidebar } from "./AppSidebar";
+import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
 
 const LoadingFallback = () => {
@@ -36,14 +38,12 @@ export const AppLayout = () => {
     pathname,
   );
   const isCardEditRoute = /^\/cardedit(?:\/|$)/i.test(pathname);
+  const isStudyRoute = /^\/study(?:\/|$)/i.test(pathname);
 
   const mainRef = useRef<HTMLElement | null>(null);
 
   const isScrollLocked =
-    isFoldersRoute ||
-    isCardEditRoute ||
-    isCardSetViewRoute ||
-    /^\/study(?:\/|$)/i.test(pathname);
+    isFoldersRoute || isCardEditRoute || isCardSetViewRoute || isStudyRoute;
 
   useEffect(() => {
     resetWorkspaceScroll(mainRef.current);
@@ -51,25 +51,25 @@ export const AppLayout = () => {
 
   return (
     <div
-      className={["app-layout", isFoldersRoute ? "app-layout--folders" : ""]
+      className={[
+        "app-layout",
+        isFoldersRoute ? "app-layout--folders" : "",
+        isScrollLocked ? "app-layout--scroll-locked" : "",
+      ]
         .filter(Boolean)
         .join(" ")}
     >
-      <div className="app-layout__content">
-        <main
-          ref={mainRef}
-          className={[
-            "app-layout__main",
-            isScrollLocked ? "app-layout__main--locked" : "",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-        >
-          <Suspense fallback={<LoadingFallback />}>
-            <Outlet />
-          </Suspense>
-        </main>
-      </div>
+      <AppSidebar />
+
+      <WorkspaceShell
+        isScrollLocked={isScrollLocked}
+        mainRef={mainRef}
+        showTabs={isFoldersRoute}
+      >
+        <Suspense fallback={<LoadingFallback />}>
+          <Outlet />
+        </Suspense>
+      </WorkspaceShell>
     </div>
   );
 };
