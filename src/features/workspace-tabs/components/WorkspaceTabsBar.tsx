@@ -32,7 +32,7 @@ const resolveTabWidthClassName = (tab: WorkspaceTab) => {
     return "shrink-0";
   }
 
-  return "min-w-[180px] max-w-[240px] shrink";
+  return "min-w-[220px] max-w-[300px] shrink";
 };
 
 const resolveTabStyle = (tab: WorkspaceTab): CSSProperties | undefined => {
@@ -41,9 +41,9 @@ const resolveTabStyle = (tab: WorkspaceTab): CSSProperties | undefined => {
   }
 
   return {
-    width: "min(var(--workspace-explorer-tab-width, 260px), 280px)",
-    maxWidth: "280px",
-    flexBasis: "min(var(--workspace-explorer-tab-width, 260px), 280px)",
+    width: "min(var(--workspace-explorer-tab-width, 260px), 300px)",
+    maxWidth: "300px",
+    flexBasis: "min(var(--workspace-explorer-tab-width, 260px), 300px)",
   };
 };
 
@@ -71,7 +71,7 @@ export const WorkspaceTabsBar = ({
         isTitlebar
           ? "h-full min-w-0 flex-1 bg-transparent px-0 pt-0"
           : [
-              "h-10 w-full min-w-0 border-b border-[#dddcd5] bg-[rgba(246,246,244,0.98)]",
+              "h-[52px] w-full min-w-0 border-b border-[#dde4db] bg-[rgba(248,250,246,0.92)]",
               "px-0 pt-0",
             ],
         className,
@@ -89,26 +89,24 @@ export const WorkspaceTabsBar = ({
               data-workspace-tab-kind={tab.kind}
               data-workspace-tab-active={selected ? "true" : undefined}
               className={cn(
-                "explorer-workspace-tab group/tab flex min-w-0 items-center overflow-hidden border text-[13px] transition-colors",
+                "explorer-workspace-tab group/tab flex min-w-0 items-center overflow-hidden border text-[13px] transition-[background-color,border-color,color,box-shadow] duration-150",
                 selected
                   ? "explorer-workspace-tab--active"
                   : "explorer-workspace-tab--inactive",
-                index === 0 ? "ml-0" : "ml-1",
-                selected
-                  ? "mb-[-1px] h-10 rounded-t-[10px]"
-                  : "mb-[5px] h-7 rounded-[7px]",
+                index === 0 ? "ml-0" : "ml-2",
+                "mb-0 h-[44px] rounded-t-[18px]",
                 resolveTabWidthClassName(tab),
                 selected
-                  ? "border-[#dddcd5] border-b-white bg-white text-[#24231f]"
-                  : "border-transparent bg-transparent text-[#777671] hover:bg-white/65 hover:text-[#33322f]",
+                  ? "border-[#dde4db] border-b-[rgba(255,255,252,0.98)] bg-[rgba(255,255,252,0.98)] text-[#24231f]"
+                  : "border-[#e7ece5] border-b-transparent bg-[rgba(252,253,249,0.88)] text-[#6f786e] hover:bg-[rgba(255,255,252,0.96)] hover:text-[#33322f]",
               )}
             >
               <button
                 type="button"
                 style={interactiveStyle}
                 className={cn(
-                  "explorer-workspace-tab-button flex h-full min-w-0 flex-1 items-center gap-2 text-left outline-none",
-                  selected ? "px-4" : "px-3",
+                  "explorer-workspace-tab-button flex h-full min-w-0 flex-1 items-center gap-2.5 text-left outline-none",
+                  selected ? "px-5" : "px-4",
                 )}
                 aria-current={selected ? "page" : undefined}
                 title={tab.title}
@@ -117,7 +115,7 @@ export const WorkspaceTabsBar = ({
                 <Icon
                   className={cn(
                     "h-4 w-4 shrink-0",
-                    selected ? "text-[#6f6e69]" : "text-[#9b9a94]",
+                    selected ? "text-[#6a876e]" : "text-[#95a093]",
                   )}
                 />
                 <span className="truncate">{tab.title}</span>
@@ -128,11 +126,11 @@ export const WorkspaceTabsBar = ({
                   type="button"
                   style={interactiveStyle}
                   className={cn(
-                    "explorer-workspace-tab-close mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#aaa9a3] outline-none transition-colors",
-                    "hover:bg-black/10 hover:text-[#55544f]",
+                    "explorer-workspace-tab-close mr-3 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] text-[#9fa69c] outline-none transition-colors",
+                    "hover:bg-black/5 hover:text-[#55544f]",
                     selected
                       ? "opacity-100"
-                      : "opacity-0 group-hover/tab:opacity-100",
+                      : "opacity-80 hover:opacity-100",
                   )}
                   aria-label={`${tab.title} を閉じる`}
                   title="閉じる"
@@ -142,7 +140,7 @@ export const WorkspaceTabsBar = ({
                     closeTab(tab.id);
                   }}
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-4 w-4" />
                 </button>
               ) : null}
             </div>
@@ -153,14 +151,14 @@ export const WorkspaceTabsBar = ({
       <button
         type="button"
         style={interactiveStyle}
-        className="explorer-workspace-tab-add mb-[5px] ml-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[#8b8a84] outline-none transition-colors hover:bg-black/5 hover:text-[#45443f]"
+        className="explorer-workspace-tab-add mb-[2px] ml-3 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-transparent text-[#8b8a84] outline-none transition-colors hover:bg-black/5 hover:text-[#45443f]"
         aria-label="新しいエクスプローラータブを開く"
         title="新しいエクスプローラータブ"
         onClick={() => {
           createExplorerTab();
         }}
       >
-        <Plus className="h-3.5 w-3.5" />
+        <Plus className="h-4 w-4" />
       </button>
 
       <div className="h-full min-w-0 flex-1" />

@@ -131,46 +131,68 @@
 
   .explorer-workspace-tabs-bar,
   .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font {
-    height: 52px !important;
+    height: 56px !important;
     border-bottom-color: rgba(223, 229, 220, 0.76) !important;
-    background: rgba(255, 255, 252, 0.84) !important;
+    background: rgba(252, 253, 249, 0.92) !important;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
 
   .explorer-workspace-tabs-list,
   .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font > div:first-child {
+    height: 100%;
+    align-items: flex-end;
     padding-left: 14px;
+    padding-top: 8px;
   }
 
   .explorer-workspace-tab,
   .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font .group\/tab {
-    border-radius: 13px 13px 0 0 !important;
+    border-radius: 18px 18px 0 0 !important;
     font-weight: 600;
+    overflow: hidden;
   }
 
   .explorer-workspace-tab--active {
-    height: 40px !important;
+    height: 44px !important;
     border-color: var(--mf-explorer-border) !important;
-    border-bottom-color: rgba(255, 255, 252, 0.98) !important;
-    background: rgba(255, 255, 252, 0.98) !important;
+    border-bottom-color: rgba(255, 255, 252, 0.99) !important;
+    background: rgba(255, 255, 252, 0.99) !important;
     color: var(--mf-explorer-text) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.94),
+      0 -1px 0 rgba(255, 255, 255, 0.7) !important;
   }
 
   .explorer-workspace-tab--inactive {
-    height: 29px !important;
-    border-radius: 10px !important;
-    color: var(--mf-explorer-text-muted) !important;
+    height: 44px !important;
+    border-color: rgba(223, 229, 220, 0.92) !important;
+    border-bottom-color: transparent !important;
+    background: rgba(252, 253, 249, 0.88) !important;
+    color: var(--mf-explorer-text-secondary) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
   }
 
   .explorer-workspace-tab--inactive:hover {
-    background: rgba(255, 255, 252, 0.72) !important;
+    background: rgba(255, 255, 252, 0.96) !important;
+    color: var(--mf-explorer-text) !important;
+  }
+
+  .explorer-workspace-tab-button {
+    min-width: 0;
+  }
+
+  .explorer-workspace-tab-close {
+    color: var(--mf-explorer-text-faint) !important;
+  }
+
+  .explorer-workspace-tab-close:hover {
+    background: rgba(38, 49, 39, 0.06) !important;
     color: var(--mf-explorer-text) !important;
   }
 
   .explorer-workspace-tab-add {
-    border-radius: 10px !important;
+    border-radius: 14px !important;
     color: var(--mf-explorer-text-muted) !important;
   }
 
