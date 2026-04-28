@@ -21,7 +21,7 @@ import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
-// eslint-disable-next-line unused-imports/no-unused-imports
+ 
 import { DirectoryMindMapCanvas } from "./directory/DirectoryMindMapCanvas";
 import type {
   DirectoryBadgeVisibility,
@@ -57,7 +57,7 @@ const getCardLabel = (card: Card): string => {
   return plain.length > 10 ? `${plain.slice(0, 10)}...` : plain;
 };
 
-// eslint-disable-next-line unused-imports/no-unused-vars
+ 
 const DirectoryOutlineNode = ({
   node,
   hasParent,
@@ -198,7 +198,7 @@ export const DirectoryDiagramPane = ({
     [cardSets],
   );
   const { tagById, getTagColor } = useTags();
-  // eslint-disable-next-line unused-imports/no-unused-vars
+   
   const [layoutMode, setLayoutMode] = useState<DirectoryLayoutMode>("map");
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
 

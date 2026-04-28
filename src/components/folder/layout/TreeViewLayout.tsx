@@ -36,7 +36,6 @@ import {
 } from "@/platform/web/navigation/toWebPath";
 import type {
   CardSet,
-  DocumentItem,
   Folder,
   SelectedExplorerItem,
 } from "@/types";
