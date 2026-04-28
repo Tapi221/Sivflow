@@ -246,6 +246,7 @@ export const FolderDetailHeader = ({
   const pendingColumnDragRef = useRef<PendingColumnDragState | null>(null);
   const columnDragVisualRef = useRef<ColumnDragVisualState | null>(null);
   const columnClickSuppressedRef = useRef(false);
+  const columnDragAbortControllerRef = useRef<AbortController | null>(null);
   const bodyDragStyleSnapshotRef = useRef<BodyDragStyleSnapshot | null>(null);
   const [columnDragVisual, setColumnDragVisual] =
     useState<ColumnDragVisualState | null>(null);
@@ -384,9 +385,8 @@ export const FolderDetailHeader = ({
       const pendingDrag = pendingColumnDragRef.current;
       if (!pendingDrag || event.pointerId !== pendingDrag.pointerId) return;
 
-      window.removeEventListener("pointermove", handleWindowPointerMove);
-      window.removeEventListener("pointerup", handleWindowPointerEnd);
-      window.removeEventListener("pointercancel", handleWindowPointerEnd);
+      columnDragAbortControllerRef.current?.abort();
+      columnDragAbortControllerRef.current = null;
 
       if (pendingDrag.hasStarted) {
         const visual = columnDragVisualRef.current;
@@ -405,17 +405,16 @@ export const FolderDetailHeader = ({
       setColumnDragVisual(null);
       restoreBodyDragStyle();
     },
-    [handleWindowPointerMove, restoreBodyDragStyle],
+    [restoreBodyDragStyle],
   );
 
   useEffect(() => {
     return () => {
-      window.removeEventListener("pointermove", handleWindowPointerMove);
-      window.removeEventListener("pointerup", handleWindowPointerEnd);
-      window.removeEventListener("pointercancel", handleWindowPointerEnd);
+      columnDragAbortControllerRef.current?.abort();
+      columnDragAbortControllerRef.current = null;
       restoreBodyDragStyle();
     };
-  }, [handleWindowPointerEnd, handleWindowPointerMove, restoreBodyDragStyle]);
+  }, [restoreBodyDragStyle]);
 
   const handleColumnPointerDown = useCallback(
     (
@@ -461,11 +460,20 @@ export const FolderDetailHeader = ({
       columnDragVisualRef.current = null;
       setColumnDragVisual(null);
 
+      columnDragAbortControllerRef.current?.abort();
+      const abortController = new AbortController();
+      columnDragAbortControllerRef.current = abortController;
+
       window.addEventListener("pointermove", handleWindowPointerMove, {
         passive: false,
+        signal: abortController.signal,
       });
-      window.addEventListener("pointerup", handleWindowPointerEnd);
-      window.addEventListener("pointercancel", handleWindowPointerEnd);
+      window.addEventListener("pointerup", handleWindowPointerEnd, {
+        signal: abortController.signal,
+      });
+      window.addEventListener("pointercancel", handleWindowPointerEnd, {
+        signal: abortController.signal,
+      });
     },
     [handleWindowPointerEnd, handleWindowPointerMove],
   );
