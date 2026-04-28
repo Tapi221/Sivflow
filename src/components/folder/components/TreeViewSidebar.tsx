@@ -51,6 +51,8 @@ type InjectionResult = {
 };
 
 const CALENDAR_SECTION_CONTENT_ID = "calendar-sidebar-section-content";
+const EXPLORER_SIDEBAR_TITLEBAR_OFFSET_VAR =
+  "--mf-explorer-sidebar-titlebar-offset";
 
 const isElementWithChildren = (
   node: React.ReactNode,
@@ -478,6 +480,26 @@ export const TreeViewSidebar = ({
     children,
     onCreateRootFolder,
   );
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (!integratedChrome) return;
+
+    const offsetPx = isSidebarOpen
+      ? Math.max(0, Math.round(renderedSidebarWidth + rightGapPx))
+      : 0;
+
+    document.documentElement.style.setProperty(
+      EXPLORER_SIDEBAR_TITLEBAR_OFFSET_VAR,
+      `${offsetPx}px`,
+    );
+
+    return () => {
+      document.documentElement.style.removeProperty(
+        EXPLORER_SIDEBAR_TITLEBAR_OFFSET_VAR,
+      );
+    };
+  }, [integratedChrome, isSidebarOpen, renderedSidebarWidth, rightGapPx]);
 
   const handleCreateRootFolder = useCallback(() => {
     onCreateRootFolder();

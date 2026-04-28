@@ -1,5 +1,10 @@
 @layer components {
   :root {
+    --mf-explorer-window-inset: 10px;
+    --mf-explorer-sidebar-titlebar-offset: 276px;
+    --mf-explorer-main-chrome-height: 122px;
+    --mf-explorer-search-width: clamp(190px, 18vw, 260px);
+
     --mf-explorer-app-bg: #f4f6f1;
     --mf-explorer-window-bg: rgba(255, 255, 252, 0.9);
     --mf-explorer-sidebar-bg: rgba(250, 252, 247, 0.94);
@@ -29,14 +34,14 @@
     --mf-explorer-sidebar-selected-bg: rgba(229, 241, 225, 0.92);
     --mf-explorer-row-hover: rgba(246, 249, 243, 0.94);
     --mf-explorer-row-selected: rgba(232, 242, 228, 0.86);
-    --mf-explorer-selected-border: rgba(95, 138, 106, 0.28);
+    --mf-explorer-selected-border: rgba(95, 138, 106, 0.2);
     --mf-explorer-focus-ring: rgba(95, 138, 106, 0.18);
     --mf-explorer-control-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82),
       0 1px 2px rgba(31, 45, 35, 0.04);
     --mf-explorer-panel-shadow: 0 14px 38px rgba(38, 49, 39, 0.08),
       0 4px 12px rgba(38, 49, 39, 0.05);
-    --mf-explorer-radius-window: 18px;
-    --mf-explorer-radius-panel: 16px;
+    --mf-explorer-radius-window: 22px;
+    --mf-explorer-radius-panel: 18px;
     --mf-explorer-radius-control: 14px;
     --mf-explorer-radius-row: 12px;
     --mf-explorer-icon-folder-fill: #f5f7f1;
@@ -107,9 +112,10 @@
     --explorer-chrome-pdf-highlight: #ffffff;
     --explorer-chrome-pdf-accent: var(--mf-explorer-brand);
     --explorer-chrome-pin-stroke: var(--mf-explorer-icon-stroke);
+    --mf-explorer-logo-text: #355f46;
 
     background:
-      radial-gradient(circle at 20px 20px, rgba(95, 138, 106, 0.08) 0 1px, transparent 1px),
+      radial-gradient(circle at 20px 20px, rgba(95, 138, 106, 0.06) 0 1px, transparent 1px),
       linear-gradient(180deg, #fbfcf7 0%, var(--mf-explorer-app-bg) 100%) !important;
     background-size: 18px 18px, auto;
     color: var(--mf-explorer-text);
@@ -122,6 +128,7 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.92),
       0 1px 0 rgba(38, 49, 39, 0.035);
     backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
   }
 
   .explorer-chrome-toolbar-button {
@@ -129,6 +136,18 @@
   }
 
   .explorer-chrome-toolbar-button:hover {
+    background: var(--mf-explorer-control-hover) !important;
+    color: var(--mf-explorer-text) !important;
+  }
+
+  .explorer-chrome-toolbar-search {
+    width: var(--mf-explorer-search-width);
+    border-color: var(--mf-explorer-border) !important;
+    background: var(--mf-explorer-control-bg) !important;
+    box-shadow: var(--mf-explorer-control-shadow) !important;
+  }
+
+  .explorer-chrome-toolbar-search:hover {
     background: var(--mf-explorer-control-hover) !important;
     color: var(--mf-explorer-text) !important;
   }
@@ -198,6 +217,8 @@
 
   .explorer-chrome-shell [role="table"] {
     position: relative;
+    width: 100%;
+    min-width: 100%;
     overflow: clip;
     border-radius: var(--mf-explorer-radius-panel);
     background: var(--mf-explorer-surface-solid);
@@ -256,9 +277,7 @@
 
   .explorer-chrome-shell [role="row"][data-detail-row="true"][data-selected="true"] {
     background: var(--mf-explorer-row-selected) !important;
-    box-shadow:
-      inset 4px 0 0 var(--mf-explorer-brand),
-      inset 0 0 0 1px var(--mf-explorer-selected-border);
+    box-shadow: inset 0 0 0 1px var(--mf-explorer-selected-border);
   }
 
   .explorer-chrome-shell [role="row"][data-detail-row="true"] [role="cell"] {
@@ -289,6 +308,11 @@
     box-shadow: 0 0 0 3px var(--mf-explorer-focus-ring) !important;
   }
 
+  .explorer-chrome-shell ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
   .explorer-chrome-shell ::-webkit-scrollbar-track {
     background: #f3f6f0;
   }
@@ -296,19 +320,17 @@
   .explorer-chrome-shell ::-webkit-scrollbar-thumb {
     background: #c8d5c6;
     border-radius: 10px;
+    border: 3px solid #f3f6f0;
   }
 
   .explorer-chrome-shell ::-webkit-scrollbar-thumb:hover {
     background: #b7c8b7;
   }
-  .explorer-chrome-shell {
-    --mf-explorer-logo-text: #355f46;
-  }
 
   .explorer-sidebar-brand-header {
     background:
-      radial-gradient(circle at 18px 18px, rgba(95, 138, 106, 0.12) 0 1px, transparent 1px),
-      linear-gradient(180deg, rgba(255, 255, 252, 0.96), rgba(250, 252, 247, 0.88));
+      radial-gradient(circle at 18px 18px, rgba(95, 138, 106, 0.1) 0 1px, transparent 1px),
+      linear-gradient(180deg, rgba(255, 255, 252, 0.94), rgba(250, 252, 247, 0.86));
     background-size: 16px 16px, auto;
   }
 
@@ -318,12 +340,6 @@
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.92),
       0 8px 18px rgba(63, 106, 78, 0.1);
-  }
-
-  .explorer-chrome-shell .group\/sidebar > .explorer-chrome-font {
-    background:
-      linear-gradient(180deg, rgba(255, 255, 252, 0.96), rgba(248, 251, 245, 0.94)) !important;
-    border-radius: 20px !important;
   }
 
   .explorer-chrome-shell .group\/sidebar .flex-1.min-h-0.min-w-0.overflow-hidden {
@@ -367,17 +383,21 @@
 
   /*
    * Brand sidebar owns the titlebar area.
-   * Workspace tabs and explorer toolbar must begin after the sidebar, not above it.
+   * Workspace tabs and explorer toolbar must begin after the actual rendered
+   * sidebar width. TreeViewSidebar publishes that width through the root CSS
+   * variable, so sidebar resizing and closed states stay aligned.
    */
   .explorer-chrome-main-topbar {
     left: var(--mf-explorer-sidebar-titlebar-offset, 276px);
+    max-width: calc(100% - var(--mf-explorer-sidebar-titlebar-offset, 276px));
   }
 
   .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font {
-    height: 48px !important;
-    border-bottom-color: var(--mf-explorer-border-soft) !important;
-    background: rgba(255, 255, 252, 0.78) !important;
-    backdrop-filter: blur(14px);
+    height: 52px !important;
+    border-bottom-color: rgba(223, 229, 220, 0.78) !important;
+    background: rgba(255, 255, 252, 0.8) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
 
   .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font > div:first-child {
@@ -389,11 +409,27 @@
   }
 
   .explorer-chrome-main-topbar .explorer-chrome-toolbar {
-    height: 64px !important;
+    height: 70px !important;
     border-bottom: 0 !important;
-    padding: 10px 16px 10px 16px !important;
-    background: rgba(255, 255, 252, 0.68) !important;
+    padding: 12px 18px !important;
+    background: rgba(255, 255, 252, 0.72) !important;
     box-shadow: none !important;
+  }
+
+  .explorer-chrome-main-topbar .explorer-chrome-pathbar {
+    height: 38px !important;
+    border-radius: 15px !important;
+  }
+
+  .explorer-chrome-main-topbar .explorer-chrome-toolbar-button {
+    height: 38px !important;
+    width: 38px !important;
+    border-radius: 15px !important;
+  }
+
+  .explorer-chrome-main-topbar .explorer-chrome-toolbar-search {
+    height: 38px !important;
+    border-radius: 15px !important;
   }
 
   .explorer-chrome-body {
@@ -415,21 +451,99 @@
   }
 
   .explorer-chrome-body > div > .group\/sidebar ~ * {
-    padding-top: var(--mf-explorer-main-chrome-height, 112px);
+    padding-top: var(--mf-explorer-main-chrome-height, 122px);
   }
 
   .explorer-chrome-body > div > .group\/sidebar ~ * [role="table"] {
     margin-top: 0;
   }
 
+  @media (min-width: 768px) {
+    .explorer-chrome-shell {
+      width: calc(100% - (var(--mf-explorer-window-inset) * 2)) !important;
+      height: calc(100% - (var(--mf-explorer-window-inset) * 2)) !important;
+      margin: var(--mf-explorer-window-inset) !important;
+      border: 1px solid rgba(222, 228, 220, 0.88);
+      border-radius: var(--mf-explorer-radius-window) !important;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 252, 0.96), rgba(247, 249, 244, 0.96)) !important;
+      box-shadow:
+        0 24px 64px rgba(31, 45, 35, 0.1),
+        0 4px 14px rgba(31, 45, 35, 0.06);
+    }
+
+    .explorer-chrome-body > div > .group\/sidebar {
+      padding: 8px 0 8px 8px !important;
+    }
+
+    .explorer-chrome-body > div > .group\/sidebar > .explorer-chrome-font {
+      border-left: 0 !important;
+      border-top: 0 !important;
+      border-bottom: 0 !important;
+      border-right: 1px solid rgba(223, 229, 220, 0.82) !important;
+      border-radius: 18px 0 0 18px !important;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 252, 0.86), rgba(248, 251, 245, 0.78)) !important;
+      box-shadow: none !important;
+    }
+
+    .explorer-chrome-body > div > .group\/sidebar ~ * {
+      padding-top: var(--mf-explorer-main-chrome-height, 122px) !important;
+      padding-right: 18px !important;
+      padding-bottom: 12px !important;
+      padding-left: 16px !important;
+      background: transparent !important;
+    }
+
+    .explorer-chrome-body > div > .group\/sidebar ~ * > div {
+      border: 1px solid var(--mf-explorer-border) !important;
+      border-radius: var(--mf-explorer-radius-panel) !important;
+      background: rgba(255, 255, 252, 0.94) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.88),
+        0 12px 34px rgba(38, 49, 39, 0.06);
+    }
+
+    .explorer-chrome-body > div > .group\/sidebar ~ * > div > [role="table"] {
+      border-radius: var(--mf-explorer-radius-panel) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+  }
+
+  @media (max-width: 1180px) and (min-width: 768px) {
+    .explorer-chrome-main-topbar .explorer-chrome-toolbar {
+      gap: 6px !important;
+      padding-right: 12px !important;
+      padding-left: 12px !important;
+    }
+
+    .explorer-chrome-toolbar-search {
+      width: 178px;
+    }
+  }
+
+  @media (max-width: 1024px) and (min-width: 768px) {
+    .explorer-chrome-toolbar-search span {
+      display: none;
+    }
+
+    .explorer-chrome-toolbar-search {
+      width: 40px;
+      padding-right: 0.75rem !important;
+      padding-left: 0.75rem !important;
+    }
+  }
+
   @media (max-width: 767px) {
     .explorer-chrome-main-topbar {
       left: 0;
+      max-width: 100%;
     }
 
     .explorer-chrome-body > div > .group\/sidebar ~ * {
       padding-top: 0;
     }
   }
-
 }
