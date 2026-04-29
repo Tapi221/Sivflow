@@ -968,7 +968,7 @@ export const FolderListView = ({
   if (rows.length === 0) {
     return (
       <div
-        className="flex h-full min-h-0 w-full items-center justify-center bg-[rgba(255,255,255,0.96)] text-[12px] text-[#8f8d86]"
+        className="flex h-full min-h-0 w-full items-center justify-center bg-transparent text-[12px] text-[#8f8d86]"
         onDragOver={handleViewportDragOver}
         onDragLeave={handleViewportDragLeave}
         onDrop={handleViewportDrop}
@@ -988,7 +988,7 @@ export const FolderListView = ({
       role="grid"
       aria-label="エクスプローラー 一覧表示"
       className={cn(
-        "relative h-full min-h-0 w-full overflow-auto bg-[rgba(255,255,255,0.96)] py-3",
+        "relative h-full min-h-0 w-full overflow-auto bg-transparent py-3",
         LIST_VIEW_PADDING_X_CLASS,
       )}
       onDragOver={handleViewportDragOver}

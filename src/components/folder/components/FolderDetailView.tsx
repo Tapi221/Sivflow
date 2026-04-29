@@ -738,7 +738,7 @@ export const FolderDetailView = ({
 
   return (
     <div
-      className="h-full min-h-0 w-full overflow-auto bg-[rgba(255,255,255,0.96)]"
+      className="h-full min-h-0 w-full overflow-auto bg-transparent"
       onDragOver={(event) => {
         if (!isManualOrder || !dragPayloadRef.current) return;
 

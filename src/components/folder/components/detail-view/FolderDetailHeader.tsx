@@ -159,7 +159,7 @@ const HeaderCell = ({
   const baseClassName = cn(
     "relative flex min-w-0 select-none items-center border-r border-[#e6e4dc] px-3",
     "cursor-grab active:cursor-grabbing",
-    "transition-colors",
+    "bg-transparent transition-colors",
     isLastColumn && "border-r-0",
     isColumnDragging &&
       "z-50 bg-[#eeece4] shadow-[0_2px_10px_rgba(36,35,31,0.10)]",
@@ -499,7 +499,7 @@ export const FolderDetailHeader = ({
       className={cn(
         DETAIL_GRID_CLASS,
         "sticky top-0 z-30 h-9 border-b border-[#dddcd5]",
-        "relative bg-[rgba(250,249,246,0.98)] text-[12px] font-medium text-[#777671]",
+        "relative bg-transparent text-[12px] font-medium text-[#777671]",
       )}
       style={gridStyle}
     >

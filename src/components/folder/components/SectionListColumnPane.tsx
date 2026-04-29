@@ -668,7 +668,7 @@ const ControlledColumnView = ({
               aria-label={
                 column.type === "folder" ? "フォルダ列" : "カードセット列"
               }
-              className="h-full min-h-0 overflow-y-auto border-r border-[#e6e4dc] bg-[rgba(255,255,255,0.96)] px-2 py-3"
+              className="h-full min-h-0 overflow-y-auto border-r border-[#e6e4dc] bg-white px-2 py-3"
               style={CONTROLLED_COLUMN_STYLE}
             >
               <div className="space-y-0.5">
@@ -690,7 +690,7 @@ const ControlledColumnView = ({
           );
         })}
 
-        <div className="min-w-[160px] flex-1 bg-[rgba(255,255,255,0.96)]" />
+        <div className="min-w-[160px] flex-1 bg-white" />
       </div>
     </div>
   );

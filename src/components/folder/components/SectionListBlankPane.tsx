@@ -64,7 +64,7 @@ export const SectionListBlankPane = ({
         className={cn(
           "h-full min-h-0 w-full min-w-0 overflow-hidden",
           "border-l border-[#e6e4dc]",
-          "bg-[rgba(255,255,255,0.96)]",
+          "bg-white",
           contentClassName,
         )}
       >
