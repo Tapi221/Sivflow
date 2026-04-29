@@ -269,7 +269,7 @@ export const FolderIconGridView = ({
 
   if (rows.length === 0) {
     return (
-      <div className="flex h-full min-h-0 w-full items-center justify-center bg-[rgba(255,255,255,0.96)] text-[12px] text-[#8f8d86]">
+      <div className="flex h-full min-h-0 w-full items-center justify-center bg-transparent text-[12px] text-[#8f8d86]">
         この場所には表示できる項目がありません。
       </div>
     );
@@ -280,7 +280,7 @@ export const FolderIconGridView = ({
       ref={gridRef}
       role="grid"
       aria-label="エクスプローラー アイコン表示"
-      className="h-full min-h-0 w-full overflow-auto bg-[rgba(255,255,255,0.96)] px-8 py-8"
+      className="h-full min-h-0 w-full overflow-auto bg-transparent px-8 py-8"
     >
       <div
         className="grid gap-x-8 gap-y-9"
