@@ -417,7 +417,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     <ExplorerWorkspaceFrame
       style={FOLDERS_SCREEN_FILL_STYLE}
       className={cn(!route.isDesktop && "overflow-x-hidden overflow-y-auto")}
-      showExplorerChrome={activeTab.kind === "explorer"}
+      showExplorerChrome={false}
     >
       {workspaceContent}
     </ExplorerWorkspaceFrame>

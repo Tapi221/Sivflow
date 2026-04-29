@@ -76,6 +76,7 @@
     max-width: none;
     overflow: visible;
     isolation: isolate;
+    background: var(--app-sidebar-bg, #f6f6f6) !important;
   }
 
   .explorer-workspace-tabs-bar,
@@ -116,8 +117,8 @@
     min-width: 210px !important;
     max-width: 210px !important;
     padding: 0 !important;
-    border-radius: 10px 10px 0 0 !important;
-    border: 1px solid transparent !important;
+    border-radius: 8px 8px 0 0 !important;
+    border: 0 !important;
     font-size: 12px !important;
     font-weight: 500 !important;
     line-height: normal !important;
@@ -137,35 +138,89 @@
     z-index: 3;
     height: 36px !important;
     margin-bottom: 0 !important;
-    border-color: var(--mf-explorer-border) !important;
-    border-bottom-color: var(--mf-explorer-window-bg) !important;
-    background: var(--mf-explorer-window-bg) !important;
-    color: var(--mf-explorer-text) !important;
-    box-shadow: var(--mf-explorer-panel-shadow) !important;
+    border: 0 !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: var(--app-sidebar-text) !important;
+    box-shadow: none !important;
   }
 
   .explorer-workspace-tab--active::before,
-  .explorer-workspace-tab--active::after,
-  .explorer-workspace-tab--inactive:hover::before,
-  .explorer-workspace-tab--inactive:hover::after,
-  .explorer-workspace-tab--inactive + .explorer-workspace-tab--inactive::before {
-    display: none !important;
+  .explorer-workspace-tab--active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    display: block !important;
+    width: 8px;
+    height: 8px;
+    pointer-events: none;
+  }
+
+  .explorer-workspace-tab--active::before {
+    left: -8px;
+    background: radial-gradient(circle at 0 0, transparent 8px, #ffffff 8.5px);
+  }
+
+  .explorer-workspace-tab--active::after {
+    right: -8px;
+    background: radial-gradient(circle at 8px 0, transparent 8px, #ffffff 8.5px);
   }
 
   .explorer-workspace-tab--inactive {
     height: 36px !important;
     margin-bottom: 0 !important;
-    border: 1px solid transparent !important;
-    background: transparent !important;
-    color: var(--mf-explorer-text-secondary) !important;
+    border: 0 !important;
+    background: rgba(38, 39, 46, 0) !important;
+    color: var(--app-sidebar-text) !important;
     box-shadow: none !important;
   }
 
   .explorer-workspace-tab--inactive:hover {
-    background: var(--mf-explorer-control-hover) !important;
-    color: var(--mf-explorer-text) !important;
-    border-color: var(--mf-explorer-border-soft) !important;
+    background: rgba(255, 255, 255, 0.58) !important;
+    color: var(--app-sidebar-text) !important;
     overflow: visible !important;
+  }
+
+  .explorer-workspace-tab--inactive:hover::before,
+  .explorer-workspace-tab--inactive:hover::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    display: block !important;
+    width: 8px;
+    height: 8px;
+    pointer-events: none;
+  }
+
+  .explorer-workspace-tab--inactive:hover::before {
+    left: -8px;
+    background: radial-gradient(
+      circle at 0 0,
+      transparent 8px,
+      rgba(255, 255, 255, 0.58) 8.5px
+    );
+  }
+
+  .explorer-workspace-tab--inactive:hover::after {
+    right: -8px;
+    background: radial-gradient(
+      circle at 8px 0,
+      transparent 8px,
+      rgba(255, 255, 255, 0.58) 8.5px
+    );
+  }
+
+  .explorer-workspace-tab--inactive + .explorer-workspace-tab--inactive::before {
+    content: "";
+    position: absolute;
+    left: -3px;
+    top: 9px;
+    display: block !important;
+    width: 1px;
+    height: 17px;
+    border-radius: 4px;
+    background: #b5b5b5;
+    pointer-events: none;
   }
 
   .explorer-workspace-tab-button {
@@ -179,38 +234,37 @@
   }
 
   .explorer-workspace-tab-close {
-    width: 18px !important;
-    height: 18px !important;
-    min-width: 18px !important;
-    margin-right: 8px !important;
-    color: var(--mf-explorer-text-muted) !important;
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    margin-right: 12px !important;
+    color: #2b2b2b !important;
     opacity: 1 !important;
-    background: transparent !important;
+    background: var(--app-sidebar-bg, #f6f6f6) !important;
     border: 0 !important;
-    border-radius: 999px !important;
+    border-radius: 4px !important;
   }
 
   .explorer-workspace-tab-close:hover {
-    background: rgba(148, 163, 184, 0.12) !important;
-    color: var(--mf-explorer-text) !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: #000000 !important;
   }
 
   .explorer-workspace-tab-add {
-    margin-left: 8px !important;
+    margin-left: 12px !important;
     margin-bottom: 0 !important;
     width: 36px !important;
     height: 36px !important;
-    border-radius: 10px !important;
-    border: 1px solid transparent !important;
+    border-radius: 8px !important;
+    border: 0 !important;
     background: transparent !important;
-    color: var(--mf-explorer-text-secondary) !important;
+    color: #4a4a4a !important;
     box-shadow: none !important;
   }
 
   .explorer-workspace-tab-add:hover {
-    background: var(--mf-explorer-control-hover) !important;
-    color: var(--mf-explorer-text) !important;
-    border-color: var(--mf-explorer-border-soft) !important;
+    background: rgba(255, 255, 255, 0.35) !important;
+    color: #000000 !important;
   }
 
   .explorer-chrome-toolbar {
