@@ -59,18 +59,6 @@ const Layout = () => {
         },
       },
       {
-        id: "action:tag-map",
-        value: "action:tag-map",
-        kind: "action",
-        iconKind: "tagMap",
-        title: "タグマップ",
-        keywords: ["タグマップ", "tag map", "tagmap", "tags", "タグ"],
-        priority: 98,
-        onSelect: () => {
-          void navigate("/tag-map");
-        },
-      },
-      {
         id: "action:calendar",
         value: "action:calendar",
         kind: "action",
