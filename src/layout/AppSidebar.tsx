@@ -302,6 +302,8 @@ const footerItems: AppSidebarNavItem[] = [
     label: "Settings",
     to: "/folders?settings=true",
     icon: <GearIcon className="app-sidebar__nav-icon" />,
+    match: (pathname, searchParams) =>
+      pathname === "/folders" && searchParams.get("settings") === "true",
   },
 ];
 
