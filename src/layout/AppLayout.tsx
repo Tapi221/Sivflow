@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 
 import { AppShellLoadingFallback } from "@/components/loading/ScreenSkeletons";
@@ -32,6 +32,7 @@ const resetWorkspaceScroll = (mainElement: HTMLElement | null) => {
 
 export const AppLayout = () => {
   const { pathname } = useLocation();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(pathname);
   const isCardSetViewRoute = /^\/(?:cardsetview|cardview)(?:\/|$)/i.test(
@@ -49,12 +50,47 @@ export const AppLayout = () => {
     resetWorkspaceScroll(mainRef.current);
   }, [pathname]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        !event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        event.shiftKey ||
+        event.key.toLowerCase() !== "b"
+      ) {
+        return;
+      }
+
+      const target = event.target;
+
+      if (target instanceof HTMLElement) {
+        const isEditable =
+          target.isContentEditable ||
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT";
+
+        if (isEditable) {
+          return;
+        }
+      }
+
+      event.preventDefault();
+      setIsSidebarCollapsed((current) => !current);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <div
       className={[
         "app-layout",
         isFoldersRoute ? "app-layout--folders" : "",
         isScrollLocked ? "app-layout--scroll-locked" : "",
+        isSidebarCollapsed ? "app-layout--sidebar-collapsed" : "",
       ]
         .filter(Boolean)
         .join(" ")}

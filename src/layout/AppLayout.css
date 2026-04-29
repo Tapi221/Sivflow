@@ -26,6 +26,14 @@
   --app-layout-padding-x: 0px;
 }
 
+.app-layout--sidebar-collapsed {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.app-layout--sidebar-collapsed .app-sidebar {
+  display: none;
+}
+
 .app-sidebar {
   --app-sidebar-bg: #f6f6f6;
   --app-sidebar-hover-bg: rgba(0, 0, 0, 0.04);
