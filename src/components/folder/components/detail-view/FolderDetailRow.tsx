@@ -278,7 +278,7 @@ export const FolderDetailRow = ({
         DETAIL_GRID_CLASS,
         "relative min-h-[38px] cursor-default border-b border-[#efeee8] text-[13px]",
         "text-[#24231f] outline-none transition-colors",
-        selected ? "bg-[#ebe7df]" : "bg-transparent hover:bg-[#f5f3ee]",
+        selected ? "bg-[rgba(0,0,0,0.06)]" : "bg-transparent hover:bg-[rgba(0,0,0,0.04)]",
         dragging && "opacity-45",
         "focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
       )}
