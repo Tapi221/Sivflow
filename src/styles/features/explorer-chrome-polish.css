@@ -148,7 +148,7 @@
   .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font {
     position: relative;
     z-index: 2;
-    height: 36px !important;
+    height: 40px !important;
     overflow: visible !important;
     border-bottom: 0 !important;
     background: #f6f6f6 !important;
@@ -167,7 +167,7 @@
     align-items: flex-end;
     gap: 0;
     padding-left: 0;
-    padding-top: 0;
+    padding-top: 4px;
     padding-bottom: 0;
     margin: 0 !important;
     overflow: visible !important;
@@ -600,7 +600,7 @@
     position: sticky !important;
     top: 0 !important;
     z-index: 90 !important;
-    min-height: 44px;
+    min-height: 36px;
     border-bottom-color: var(--mf-explorer-border) !important;
     background: linear-gradient(
       180deg,
@@ -623,6 +623,8 @@
     background: transparent !important;
     box-shadow: none !important;
     color: var(--mf-explorer-text-secondary) !important;
+    font-size: 12px !important;
+    line-height: 16px !important;
     font-weight: 700;
   }
 
@@ -647,7 +649,7 @@
     [role="table"][aria-label="エクスプローラー詳細表示"]
     [role="row"][data-detail-row="true"] {
     isolation: isolate;
-    min-height: 42px;
+    min-height: 34px;
     border-bottom-color: var(--mf-explorer-border-soft) !important;
     background: transparent !important;
     color: var(--mf-explorer-text-muted) !important;
@@ -688,6 +690,8 @@
     position: relative;
     z-index: 1;
     color: var(--mf-explorer-text-muted) !important;
+    font-size: 12px !important;
+    line-height: 16px !important;
   }
 
   .explorer-chrome-shell
@@ -703,6 +707,15 @@
     [role="cell"]:first-child
     span[title] {
     font-weight: 600;
+  }
+
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    [role="row"][data-detail-row="true"]
+    [role="cell"]
+    * {
+    font-size: inherit !important;
+    line-height: inherit !important;
   }
 
   .explorer-chrome-shell
