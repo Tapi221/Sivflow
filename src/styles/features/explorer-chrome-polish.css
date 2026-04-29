@@ -537,7 +537,7 @@
     min-height: 30px;
     padding-left: 8px;
     padding-right: 8px;
-    border-radius: 10px;
+    border-radius: 4px !important;
   }
 
   .explorer-chrome-shell .sidebar-row .tabular-nums,
@@ -555,11 +555,13 @@
   }
 
   .explorer-chrome-shell .sidebar-row[data-selected="true"] {
-    background: linear-gradient(
-      90deg,
-      rgba(229, 241, 225, 0.96),
-      rgba(244, 248, 241, 0.82)
-    ) !important;
+    background: rgba(0, 0, 0, 0.06) !important;
+    color: var(--app-sidebar-text, #5b5b5b) !important;
+    box-shadow: none !important;
+  }
+
+  .explorer-chrome-shell .sidebar-row[data-selected="true"] .ds-list-item__title {
+    color: var(--app-sidebar-text, #5b5b5b) !important;
   }
 
   .explorer-chrome-shell .border-\[\#dddcd5\],
@@ -662,7 +664,7 @@
     position: absolute;
     inset: 4px 10px;
     z-index: 0;
-    border-radius: 12px;
+    border-radius: 4px;
     background: transparent;
     pointer-events: none;
     transition:
@@ -673,14 +675,25 @@
   .explorer-chrome-shell
     [role="table"][aria-label="エクスプローラー詳細表示"]
     [role="row"][data-detail-row="true"]:hover::before {
-    background: var(--mf-explorer-row-hover);
+    background: rgba(0, 0, 0, 0.04);
   }
 
   .explorer-chrome-shell
     [role="table"][aria-label="エクスプローラー詳細表示"]
     [role="row"][data-detail-row="true"][data-selected="true"]::before {
-    background: var(--mf-explorer-row-selected);
-    box-shadow: inset 0 0 0 1px var(--mf-explorer-selected-border);
+    background: rgba(0, 0, 0, 0.06);
+    box-shadow: none;
+  }
+
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    [role="row"][data-detail-row="true"][data-selected="true"]
+    [role="cell"],
+  .explorer-chrome-shell
+    [role="table"][aria-label="エクスプローラー詳細表示"]
+    [role="row"][data-detail-row="true"][data-selected="true"]
+    [role="cell"]:first-child {
+    color: var(--app-sidebar-text, #5b5b5b) !important;
   }
 
   .explorer-chrome-shell

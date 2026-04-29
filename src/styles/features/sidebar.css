@@ -1,6 +1,7 @@
 @layer components {
   .sidebar-row {
-    --sidebar-row-hover-bg: var(--mf-explorer-sidebar-hover-bg);
+    --sidebar-row-hover-bg: rgba(0, 0, 0, 0.04);
+    --sidebar-row-selected-bg: rgba(0, 0, 0, 0.06);
 
     --explorer-chrome-folder-fill: var(--mf-explorer-icon-folder-fill);
     --explorer-chrome-folder-stroke: var(--mf-explorer-icon-folder-stroke);
@@ -28,7 +29,7 @@
     line-height: var(--row-height-normal, 30px);
     box-sizing: border-box;
     padding-right: 6px;
-    border-radius: 12px;
+    border-radius: 4px;
     overflow: visible;
     background-color: transparent;
     color: var(--mf-explorer-text);
@@ -53,7 +54,7 @@
     left: 5px;
     top: 7px;
     bottom: 7px;
-    width: 3px;
+    width: 0;
     border-radius: 999px;
     background: transparent;
     opacity: 0;
@@ -71,31 +72,28 @@
 
   .sidebar-row--folder:hover,
   .sidebar-row--document:hover {
-    background-color: var(--mf-explorer-sidebar-hover-bg);
+    background-color: var(--sidebar-row-hover-bg);
   }
 
   .sidebar-row[data-selected="true"] {
-    background-color: var(--mf-explorer-sidebar-selected-bg);
-    color: var(--mf-explorer-text);
-    box-shadow:
-      inset 0 0 0 1px var(--mf-explorer-selected-border),
-      0 1px 2px rgba(47, 75, 57, 0.04);
+    background-color: var(--sidebar-row-selected-bg);
+    color: var(--app-sidebar-text, #5b5b5b);
+    box-shadow: none;
   }
 
   .sidebar-row[data-selected="true"]::before {
-    background: var(--mf-explorer-brand);
-    opacity: 1;
-    transform: scaleY(1);
+    opacity: 0;
   }
 
   .sidebar-row[data-selected="true"] .sidebar-title,
   .sidebar-row[data-selected="true"] .ds-list-item__title {
+    color: var(--app-sidebar-text, #5b5b5b);
     font-weight: 650;
   }
 
   .sidebar-row[data-selected="true"] .sidebar-icon,
   .sidebar-row[data-selected="true"] .ds-list-item__icon {
-    color: var(--mf-explorer-brand);
+    color: var(--app-sidebar-icon, #ababab);
   }
 
   .sidebar-row:focus-visible {
