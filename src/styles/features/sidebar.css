@@ -1,24 +1,22 @@
 @layer components {
   .sidebar-row {
-    --sidebar-row-hover-bg: rgba(0, 0, 0, 0.04);
-    --sidebar-row-selected-bg: rgba(0, 0, 0, 0.06);
+    --sidebar-row-hover-bg: rgba(15, 23, 42, 0.04);
+    --sidebar-row-selected-bg: rgba(59, 130, 246, 0.1);
 
-    --explorer-chrome-folder-fill: var(--mf-explorer-icon-folder-fill);
-    --explorer-chrome-folder-stroke: var(--mf-explorer-icon-folder-stroke);
-    --explorer-chrome-folder-highlight: var(
-      --mf-explorer-icon-folder-highlight
-    );
-    --explorer-chrome-cardset-fill: var(--mf-explorer-icon-cardset-fill);
-    --explorer-chrome-cardset-stroke: var(--mf-explorer-icon-stroke);
+    --explorer-chrome-folder-fill: #f8fafc;
+    --explorer-chrome-folder-stroke: #64748b;
+    --explorer-chrome-folder-highlight: #ffffff;
+    --explorer-chrome-cardset-fill: #f8fafc;
+    --explorer-chrome-cardset-stroke: #64748b;
     --explorer-chrome-cardset-highlight: #ffffff;
-    --explorer-chrome-card-fill: var(--mf-explorer-icon-card-fill);
-    --explorer-chrome-card-stroke: var(--mf-explorer-icon-stroke);
+    --explorer-chrome-card-fill: #f8fafc;
+    --explorer-chrome-card-stroke: #64748b;
     --explorer-chrome-card-highlight: #ffffff;
-    --explorer-chrome-pdf-fill: var(--mf-explorer-icon-pdf-fill);
-    --explorer-chrome-pdf-stroke: var(--mf-explorer-icon-stroke);
+    --explorer-chrome-pdf-fill: #f8fafc;
+    --explorer-chrome-pdf-stroke: #64748b;
     --explorer-chrome-pdf-highlight: #ffffff;
-    --explorer-chrome-pdf-accent: var(--mf-explorer-brand);
-    --explorer-chrome-pin-stroke: var(--mf-explorer-icon-stroke);
+    --explorer-chrome-pdf-accent: #2563eb;
+    --explorer-chrome-pin-stroke: #64748b;
 
     position: relative;
     display: flex;
@@ -29,10 +27,10 @@
     line-height: var(--row-height-normal, 30px);
     box-sizing: border-box;
     padding-right: 6px;
-    border-radius: 4px;
+    border-radius: 8px;
     overflow: visible;
     background-color: transparent;
-    color: var(--mf-explorer-text);
+    color: var(--app-sidebar-text, #334155);
     transition:
       background-color 140ms ease,
       color 140ms ease,
@@ -42,10 +40,10 @@
 
   .sidebar-row:hover,
   .sidebar-row[data-selected="true"] {
-    --explorer-chrome-cardset-stroke: var(--mf-explorer-text);
-    --explorer-chrome-card-stroke: var(--mf-explorer-text);
-    --explorer-chrome-pdf-stroke: var(--mf-explorer-text);
-    --explorer-chrome-pin-stroke: var(--mf-explorer-brand);
+    --explorer-chrome-cardset-stroke: currentColor;
+    --explorer-chrome-card-stroke: currentColor;
+    --explorer-chrome-pdf-stroke: currentColor;
+    --explorer-chrome-pin-stroke: currentColor;
   }
 
   .sidebar-row::before {
@@ -77,7 +75,7 @@
 
   .sidebar-row[data-selected="true"] {
     background-color: var(--sidebar-row-selected-bg);
-    color: var(--app-sidebar-text, #5b5b5b);
+    color: var(--app-sidebar-text, #0f172a);
     box-shadow: none;
   }
 
@@ -87,20 +85,20 @@
 
   .sidebar-row[data-selected="true"] .sidebar-title,
   .sidebar-row[data-selected="true"] .ds-list-item__title {
-    color: var(--app-sidebar-text, #5b5b5b);
+    color: var(--app-sidebar-text, #0f172a);
     font-weight: 650;
   }
 
   .sidebar-row[data-selected="true"] .sidebar-icon,
   .sidebar-row[data-selected="true"] .ds-list-item__icon {
-    color: var(--app-sidebar-icon, #ababab);
+    color: var(--app-sidebar-icon, #64748b);
   }
 
   .sidebar-row:focus-visible {
     outline: none;
     box-shadow:
-      inset 0 0 0 1px var(--mf-explorer-brand),
-      0 0 0 3px var(--mf-explorer-focus-ring);
+      inset 0 0 0 1px rgba(59, 130, 246, 0.42),
+      0 0 0 3px rgba(59, 130, 246, 0.16);
   }
 
   .sidebar-row .sidebar-label {
@@ -119,7 +117,7 @@
   .sidebar-row .sidebar-icon {
     transform: translateY(-1px);
     transform-origin: center;
-    color: var(--mf-explorer-text-muted);
+    color: var(--app-sidebar-icon, #94a3b8);
     transition: none;
   }
 

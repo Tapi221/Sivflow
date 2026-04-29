@@ -1,145 +1,79 @@
 @layer components {
   :root {
-    --mf-explorer-sidebar-titlebar-offset: 292px;
-    --mf-explorer-main-chrome-height: 118px;
+    --mf-explorer-sidebar-titlebar-offset: 0px;
+    --mf-explorer-main-chrome-height: 60px;
     --mf-explorer-search-width: clamp(176px, 16vw, 238px);
 
-    --mf-explorer-app-bg: #f6f8f3;
-    --mf-explorer-window-bg: rgba(255, 255, 252, 0.94);
-    --mf-explorer-sidebar-bg: rgba(251, 253, 248, 0.94);
-    --mf-explorer-surface: rgba(255, 255, 252, 0.97);
-    --mf-explorer-surface-solid: #fffefa;
-    --mf-explorer-toolbar-bg: rgba(255, 255, 252, 0.92);
-    --mf-explorer-main-chrome-surface: rgba(255, 255, 252, 0.94);
-    --mf-explorer-status-bg: rgba(249, 251, 246, 0.92);
-    --mf-explorer-control-bg: rgba(255, 255, 252, 0.9);
-    --mf-explorer-control-hover: rgba(237, 245, 235, 0.92);
-    --mf-explorer-header-bg: rgba(250, 251, 247, 0.98);
-    --mf-explorer-border: #e0e5dc;
-    --mf-explorer-border-soft: #edf1ea;
-    --mf-explorer-border-strong: #cfd9cc;
-    --mf-explorer-text: #253127;
-    --mf-explorer-text-secondary: #536252;
-    --mf-explorer-text-muted: #778373;
-    --mf-explorer-text-faint: #a8b0a3;
-    --mf-explorer-brand: #5f8a6a;
-    --mf-explorer-brand-strong: #3f6a4e;
-    --mf-explorer-brand-soft: #edf5eb;
-    --mf-explorer-brand-subtle: #f4f8f1;
-    --mf-explorer-sidebar-hover-bg: rgba(240, 246, 236, 0.86);
-    --mf-explorer-sidebar-selected-bg: rgba(229, 241, 225, 0.92);
-    --mf-explorer-row-hover: rgba(246, 249, 243, 0.95);
-    --mf-explorer-row-selected: rgba(232, 242, 228, 0.88);
-    --mf-explorer-selected-border: rgba(95, 138, 106, 0.18);
-    --mf-explorer-focus-ring: rgba(95, 138, 106, 0.18);
-    --mf-explorer-control-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.86), 0 1px 2px rgba(31, 45, 35, 0.035);
+    --mf-explorer-app-bg: #f8fafc;
+    --mf-explorer-window-bg: #ffffff;
+    --mf-explorer-sidebar-bg: #ffffff;
+    --mf-explorer-surface: #ffffff;
+    --mf-explorer-surface-solid: #ffffff;
+    --mf-explorer-toolbar-bg: rgba(255, 255, 255, 0.92);
+    --mf-explorer-main-chrome-surface: rgba(255, 255, 255, 0.92);
+    --mf-explorer-status-bg: rgba(248, 250, 252, 0.92);
+    --mf-explorer-control-bg: #ffffff;
+    --mf-explorer-control-hover: rgba(148, 163, 184, 0.1);
+    --mf-explorer-header-bg: rgba(255, 255, 255, 0.98);
+    --mf-explorer-border: #e2e8f0;
+    --mf-explorer-border-soft: #eef2f7;
+    --mf-explorer-border-strong: #cbd5e1;
+    --mf-explorer-text: #0f172a;
+    --mf-explorer-text-secondary: #334155;
+    --mf-explorer-text-muted: #64748b;
+    --mf-explorer-text-faint: #94a3b8;
+    --mf-explorer-brand: #2563eb;
+    --mf-explorer-brand-strong: #1d4ed8;
+    --mf-explorer-brand-soft: #dbeafe;
+    --mf-explorer-brand-subtle: #eff6ff;
+    --mf-explorer-sidebar-hover-bg: rgba(148, 163, 184, 0.08);
+    --mf-explorer-sidebar-selected-bg: rgba(59, 130, 246, 0.1);
+    --mf-explorer-row-hover: rgba(148, 163, 184, 0.08);
+    --mf-explorer-row-selected: rgba(59, 130, 246, 0.1);
+    --mf-explorer-selected-border: rgba(59, 130, 246, 0.2);
+    --mf-explorer-focus-ring: rgba(59, 130, 246, 0.18);
+    --mf-explorer-control-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
     --mf-explorer-panel-shadow:
-      0 10px 28px rgba(38, 49, 39, 0.055), 0 2px 8px rgba(38, 49, 39, 0.035);
+      0 8px 24px rgba(15, 23, 42, 0.08),
+      0 2px 8px rgba(15, 23, 42, 0.04);
     --mf-explorer-radius-window: 20px;
     --mf-explorer-radius-panel: 16px;
     --mf-explorer-radius-control: 14px;
     --mf-explorer-radius-row: 10px;
-    --mf-explorer-icon-folder-fill: #f5f7f1;
-    --mf-explorer-icon-folder-stroke: #668a6c;
+    --mf-explorer-icon-folder-fill: #f8fafc;
+    --mf-explorer-icon-folder-stroke: #64748b;
     --mf-explorer-icon-folder-highlight: #ffffff;
-    --mf-explorer-icon-cardset-fill: #f2f7ef;
-    --mf-explorer-icon-card-fill: #f4f8f2;
-    --mf-explorer-icon-pdf-fill: #f4f8f2;
-    --mf-explorer-icon-stroke: #6d8370;
-    --mf-explorer-chip-bg: #f6f8f3;
-    --mf-explorer-success-bg: #edf7ea;
-    --mf-explorer-success-border: #cfe2c9;
-    --mf-explorer-success-text: #4d7358;
-    --mf-explorer-success-dot: #68a06f;
-    --mf-explorer-info-bg: #eef6f1;
-    --mf-explorer-info-border: #c8dfd1;
-    --mf-explorer-info-text: #436c55;
-    --mf-explorer-info-dot: #5f8a6a;
-
-    --explorer-chrome-app-bg: var(--mf-explorer-app-bg);
-    --explorer-chrome-toolbar-bg: var(--mf-explorer-toolbar-bg);
-    --explorer-chrome-sidebar-bg: var(--mf-explorer-sidebar-bg);
-    --explorer-chrome-sidebar-hover-bg: var(--mf-explorer-sidebar-hover-bg);
-    --explorer-chrome-sidebar-selected-bg: var(
-      --mf-explorer-sidebar-selected-bg
-    );
-    --explorer-chrome-panel-bg: var(--mf-explorer-surface-solid);
-    --explorer-chrome-header-bg: var(--mf-explorer-header-bg);
-    --explorer-chrome-border: var(--mf-explorer-border);
-    --explorer-chrome-border-strong: var(--mf-explorer-border-strong);
-    --explorer-chrome-border-soft: var(--mf-explorer-border-soft);
-    --explorer-chrome-text-primary: var(--mf-explorer-text);
-    --explorer-chrome-text-secondary: var(--mf-explorer-text-secondary);
-    --explorer-chrome-text-muted: var(--mf-explorer-text-muted);
-    --explorer-chrome-text-faint: var(--mf-explorer-text-faint);
-    --explorer-chrome-accent: var(--mf-explorer-brand);
-    --explorer-chrome-selected-bg: var(--mf-explorer-row-selected);
-    --explorer-chrome-selected-border: var(--mf-explorer-selected-border);
-    --explorer-chrome-focus-ring: var(--mf-explorer-focus-ring);
-    --explorer-chrome-icon-folder-fill: var(--mf-explorer-icon-folder-fill);
-    --explorer-chrome-icon-folder-stroke: var(--mf-explorer-icon-folder-stroke);
-    --explorer-chrome-icon-folder-highlight: var(
-      --mf-explorer-icon-folder-highlight
-    );
-    --explorer-chrome-icon-cardset-fill: var(--mf-explorer-icon-cardset-fill);
-    --explorer-chrome-icon-card-fill: var(--mf-explorer-icon-card-fill);
-    --explorer-chrome-icon-pdf-fill: var(--mf-explorer-icon-pdf-fill);
-    --explorer-chrome-icon-stroke: var(--mf-explorer-icon-stroke);
+    --mf-explorer-icon-cardset-fill: #f8fafc;
+    --mf-explorer-icon-card-fill: #f8fafc;
+    --mf-explorer-icon-pdf-fill: #f8fafc;
+    --mf-explorer-icon-stroke: #64748b;
+    --mf-explorer-chip-bg: #f8fafc;
+    --mf-explorer-success-bg: #ecfdf5;
+    --mf-explorer-success-border: #a7f3d0;
+    --mf-explorer-success-text: #047857;
+    --mf-explorer-success-dot: #10b981;
+    --mf-explorer-info-bg: #eff6ff;
+    --mf-explorer-info-border: #bfdbfe;
+    --mf-explorer-info-text: #1d4ed8;
+    --mf-explorer-info-dot: #2563eb;
   }
 
   .explorer-chrome-shell {
-    --sidebar-bg: var(--mf-explorer-sidebar-bg);
-    --sidebar-border: var(--mf-explorer-border);
-    --sidebar-text: var(--mf-explorer-text);
-    --sidebar-text-muted: var(--mf-explorer-text-muted);
-    --sidebar-active-bg: var(--mf-explorer-sidebar-selected-bg);
-    --sidebar-active-accent: var(--mf-explorer-brand);
-    --scrollbar-thumb: #c8d5c6;
-    --scrollbar-thumb-hover: #b7c8b7;
-    --scrollbar-thumb-active: #9fb79f;
-    --explorer-chrome-folder-fill: var(--mf-explorer-icon-folder-fill);
-    --explorer-chrome-folder-stroke: var(--mf-explorer-icon-folder-stroke);
-    --explorer-chrome-folder-highlight: var(
-      --mf-explorer-icon-folder-highlight
-    );
-    --explorer-chrome-cardset-fill: var(--mf-explorer-icon-cardset-fill);
-    --explorer-chrome-cardset-stroke: var(--mf-explorer-icon-stroke);
-    --explorer-chrome-cardset-highlight: #ffffff;
-    --explorer-chrome-card-fill: var(--mf-explorer-icon-card-fill);
-    --explorer-chrome-card-stroke: var(--mf-explorer-icon-stroke);
-    --explorer-chrome-card-highlight: #ffffff;
-    --explorer-chrome-pdf-fill: var(--mf-explorer-icon-pdf-fill);
-    --explorer-chrome-pdf-stroke: var(--mf-explorer-icon-stroke);
-    --explorer-chrome-pdf-highlight: #ffffff;
-    --explorer-chrome-pdf-accent: var(--mf-explorer-brand);
-    --explorer-chrome-pin-stroke: var(--mf-explorer-icon-stroke);
-    --mf-explorer-logo-text: #355f46;
-
     width: 100% !important;
     height: 100% !important;
     margin: 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
     overflow: hidden;
-    background:
-      radial-gradient(
-        circle at 20px 20px,
-        rgba(95, 138, 106, 0.035) 0 1px,
-        transparent 1px
-      ),
-      linear-gradient(180deg, #fcfdf9 0%, var(--mf-explorer-app-bg) 100%) !important;
-    background-size:
-      18px 18px,
-      auto;
+    background: var(--mf-explorer-app-bg) !important;
     box-shadow: none !important;
     color: var(--mf-explorer-text);
   }
 
   .explorer-chrome-main-topbar {
-    left: var(--mf-explorer-sidebar-titlebar-offset, 292px);
+    left: 0;
     right: 0;
-    max-width: calc(100% - var(--mf-explorer-sidebar-titlebar-offset, 292px));
+    max-width: none;
     overflow: visible;
     isolation: isolate;
   }
@@ -151,7 +85,7 @@
     height: 40px !important;
     overflow: visible !important;
     border-bottom: 0 !important;
-    background: #f6f6f6 !important;
+    background: transparent !important;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
@@ -165,10 +99,8 @@
     z-index: 1;
     height: 100%;
     align-items: flex-end;
-    gap: 0;
-    padding-left: 0;
-    padding-top: 4px;
-    padding-bottom: 0;
+    gap: 4px;
+    padding: 4px 8px 0 0;
     margin: 0 !important;
     overflow: visible !important;
   }
@@ -184,15 +116,19 @@
     min-width: 210px !important;
     max-width: 210px !important;
     padding: 0 !important;
-    border-radius: 8px 8px 0 0 !important;
-    border: 0 !important;
+    border-radius: 10px 10px 0 0 !important;
+    border: 1px solid transparent !important;
     font-size: 12px !important;
     font-weight: 500 !important;
     line-height: normal !important;
     letter-spacing: normal !important;
     font-family:
-      Inter, var(--explorer-chrome-font-family), -apple-system, BlinkMacSystemFont,
-      "Segoe UI", sans-serif !important;
+      Inter,
+      var(--explorer-chrome-font-family),
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif !important;
     overflow: hidden;
     box-shadow: none !important;
   }
@@ -201,86 +137,35 @@
     z-index: 3;
     height: 36px !important;
     margin-bottom: 0 !important;
-    border: 0 !important;
-    overflow: visible !important;
-    background: #ffffff !important;
-    color: var(--app-sidebar-text) !important;
-    box-shadow: none !important;
+    border-color: var(--mf-explorer-border) !important;
+    border-bottom-color: var(--mf-explorer-window-bg) !important;
+    background: var(--mf-explorer-window-bg) !important;
+    color: var(--mf-explorer-text) !important;
+    box-shadow: var(--mf-explorer-panel-shadow) !important;
   }
 
   .explorer-workspace-tab--active::before,
-  .explorer-workspace-tab--active::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    width: 8px;
-    height: 8px;
-    pointer-events: none;
-  }
-
-  .explorer-workspace-tab--active::before {
-    left: -8px;
-    background: radial-gradient(circle at 0 0, transparent 8px, #ffffff 8.5px);
-  }
-
-  .explorer-workspace-tab--active::after {
-    right: -8px;
-    background: radial-gradient(circle at 8px 0, transparent 8px, #ffffff 8.5px);
+  .explorer-workspace-tab--active::after,
+  .explorer-workspace-tab--inactive:hover::before,
+  .explorer-workspace-tab--inactive:hover::after,
+  .explorer-workspace-tab--inactive + .explorer-workspace-tab--inactive::before {
+    display: none !important;
   }
 
   .explorer-workspace-tab--inactive {
     height: 36px !important;
     margin-bottom: 0 !important;
-    border: 0 !important;
-    background: rgba(38, 39, 46, 0) !important;
-    color: var(--app-sidebar-text) !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    color: var(--mf-explorer-text-secondary) !important;
     box-shadow: none !important;
   }
 
   .explorer-workspace-tab--inactive:hover {
-    background: rgba(255, 255, 255, 0.58) !important;
-    color: var(--app-sidebar-text) !important;
+    background: var(--mf-explorer-control-hover) !important;
+    color: var(--mf-explorer-text) !important;
+    border-color: var(--mf-explorer-border-soft) !important;
     overflow: visible !important;
-  }
-
-  .explorer-workspace-tab--inactive:hover::before,
-  .explorer-workspace-tab--inactive:hover::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    width: 8px;
-    height: 8px;
-    pointer-events: none;
-  }
-
-  .explorer-workspace-tab--inactive:hover::before {
-    left: -8px;
-    background: radial-gradient(
-      circle at 0 0,
-      transparent 8px,
-      rgba(255, 255, 255, 0.58) 8.5px
-    );
-  }
-
-  .explorer-workspace-tab--inactive:hover::after {
-    right: -8px;
-    background: radial-gradient(
-      circle at 8px 0,
-      transparent 8px,
-      rgba(255, 255, 255, 0.58) 8.5px
-    );
-  }
-
-  .explorer-workspace-tab--inactive + .explorer-workspace-tab--inactive::before {
-    content: "";
-    position: absolute;
-    left: -3px;
-    top: 9px;
-    width: 1px;
-    height: 17px;
-    border-radius: 4px;
-    background: #b5b5b5;
-    pointer-events: none;
   }
 
   .explorer-workspace-tab-button {
@@ -290,123 +175,67 @@
     padding-right: 12px !important;
     border: 0 !important;
     background: transparent !important;
+    min-width: 0;
   }
 
   .explorer-workspace-tab-close {
-    width: 8px !important;
-    height: 8px !important;
-    min-width: 8px !important;
-    margin-right: 12px !important;
-    color: #2b2b2b !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    margin-right: 8px !important;
+    color: var(--mf-explorer-text-muted) !important;
     opacity: 1 !important;
     background: transparent !important;
     border: 0 !important;
-  }
-
-  .explorer-workspace-tab-add {
-    margin-left: 12px !important;
-    margin-bottom: 0 !important;
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 8px !important;
-    border: 0 !important;
-    background: transparent !important;
-    color: #4a4a4a !important;
-    box-shadow: none !important;
-  }
-
-  .explorer-workspace-tab-button {
-    min-width: 0;
+    border-radius: 999px !important;
   }
 
   .explorer-workspace-tab-close:hover {
-    background: rgba(0, 0, 0, 0.05) !important;
-    color: #000000 !important;
+    background: rgba(148, 163, 184, 0.12) !important;
+    color: var(--mf-explorer-text) !important;
+  }
+
+  .explorer-workspace-tab-add {
+    margin-left: 8px !important;
+    margin-bottom: 0 !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    color: var(--mf-explorer-text-secondary) !important;
+    box-shadow: none !important;
   }
 
   .explorer-workspace-tab-add:hover {
-    background: rgba(255, 255, 255, 0.35) !important;
-    color: #000000 !important;
+    background: var(--mf-explorer-control-hover) !important;
+    color: var(--mf-explorer-text) !important;
+    border-color: var(--mf-explorer-border-soft) !important;
   }
 
   .explorer-chrome-toolbar {
-    position: relative;
-    z-index: 1;
-    height: 68px !important;
-    gap: 10px !important;
-    margin-top: 0 !important;
-    border-top: 0 !important;
-    border-bottom: 0 !important;
-    border-bottom-color: transparent !important;
-    background: var(--mf-explorer-main-chrome-surface) !important;
-    box-shadow: none !important;
-    padding: 10px 18px 12px !important;
-    color: var(--mf-explorer-text) !important;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
   .explorer-chrome-toolbar-nav {
-    height: 42px;
-    min-width: 0;
-    align-items: center;
-    gap: 2px !important;
-    padding: 0 7px;
     border: 1px solid var(--mf-explorer-border);
-    border-radius: 17px;
     background: var(--mf-explorer-control-bg);
-    box-shadow: var(--mf-explorer-control-shadow);
+    border-radius: 14px;
+    box-shadow: none;
   }
 
-  .explorer-chrome-toolbar-nav .explorer-chrome-toolbar-button {
-    height: 36px !important;
-    width: 36px !important;
-    border-radius: 13px !important;
-    border-color: transparent !important;
-    background: transparent !important;
+  .explorer-chrome-toolbar-nav .explorer-chrome-toolbar-button,
+  .explorer-chrome-toolbar-button,
+  .explorer-chrome-toolbar-search,
+  .explorer-chrome-pathbar {
     box-shadow: none !important;
   }
 
-  .explorer-chrome-toolbar-actions {
-    min-width: 0;
-  }
-
-  .explorer-chrome-toolbar-button {
-    height: 38px !important;
-    width: 38px !important;
-    border-radius: 15px !important;
-    color: var(--mf-explorer-text-muted);
-  }
-
-  .explorer-chrome-toolbar-button:hover {
-    background: var(--mf-explorer-control-hover) !important;
-    color: var(--mf-explorer-text) !important;
-  }
-
-  .explorer-chrome-toolbar-divider {
-    display: none !important;
-  }
-
-  .explorer-chrome-toolbar-search {
-    width: var(--mf-explorer-search-width);
-    height: 42px !important;
-    border-color: var(--mf-explorer-border) !important;
-    border-radius: 16px !important;
-    background: var(--mf-explorer-control-bg) !important;
-    box-shadow: var(--mf-explorer-control-shadow) !important;
-  }
-
-  .explorer-chrome-toolbar-search:hover {
-    background: var(--mf-explorer-control-hover) !important;
-    color: var(--mf-explorer-text) !important;
-  }
-
+  .explorer-chrome-toolbar-search,
   .explorer-chrome-pathbar {
-    height: 42px !important;
-    border-color: var(--mf-explorer-border) !important;
-    border-radius: 16px !important;
     background: var(--mf-explorer-control-bg) !important;
-    box-shadow: var(--mf-explorer-control-shadow) !important;
+    border-color: var(--mf-explorer-border) !important;
   }
 
   .explorer-chrome-body {
@@ -418,435 +247,5 @@
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
-  }
-
-  [data-explorer-sidebar-shell="true"] {
-    box-sizing: border-box !important;
-    padding: 0 !important;
-    align-self: stretch;
-  }
-
-  [data-explorer-sidebar-panel="true"] {
-    --sidebar-text: var(--mf-explorer-text);
-    --sidebar-text-muted: var(--mf-explorer-text-muted);
-    --folder-panel-list-fade-rgb: 251 253 248;
-
-    height: 100%;
-    min-height: 0;
-    border: 0 !important;
-    border-right: 1px solid rgba(223, 229, 220, 0.92) !important;
-    border-radius: 0 !important;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 252, 0.86),
-      rgba(249, 252, 246, 0.78)
-    ) !important;
-    box-shadow: none !important;
-  }
-
-  [data-explorer-sidebar-panel="true"] .explorer-sidebar-brand-header {
-    border-bottom-color: rgba(237, 241, 234, 0.92) !important;
-  }
-
-  [data-explorer-sidebar-panel="true"] .flex-1.min-h-0.min-w-0.overflow-hidden {
-    padding: 10px 10px 6px;
-  }
-
-  .explorer-sidebar-storage-slot {
-    border-top: 1px solid rgba(237, 241, 234, 0.86);
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 252, 0),
-      rgba(249, 252, 246, 0.52)
-    );
-  }
-
-  .explorer-storage-usage-card {
-    color: var(--mf-explorer-text);
-  }
-
-  .explorer-storage-usage-card__icon svg {
-    opacity: 0.95;
-  }
-
-  [data-explorer-sidebar-shell="true"] ~ * {
-    min-width: 0;
-    padding-top: var(--mf-explorer-main-chrome-height, 118px) !important;
-    padding-right: 18px !important;
-    padding-bottom: 12px !important;
-    padding-left: 0 !important;
-    background: transparent !important;
-  }
-
-  [data-explorer-sidebar-shell="true"] ~ * > div {
-    overflow: hidden;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-
-  .explorer-sidebar-brand-header {
-    background:
-      radial-gradient(
-        circle at 18px 18px,
-        rgba(95, 138, 106, 0.055) 0 1px,
-        transparent 1px
-      ),
-      linear-gradient(
-        180deg,
-        rgba(255, 255, 252, 0.86),
-        rgba(250, 252, 247, 0.72)
-      );
-    background-size:
-      16px 16px,
-      auto;
-  }
-
-  .explorer-sidebar-brand-mark {
-    border: 1px solid rgba(95, 138, 106, 0.16);
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 252, 0.92),
-      rgba(237, 245, 235, 0.86)
-    );
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.92),
-      0 6px 14px rgba(63, 106, 78, 0.08);
-  }
-
-  .explorer-chrome-shell #pinned-folder-sidebar-section-header,
-  .explorer-chrome-shell #folder-list-sidebar-section-header,
-  .explorer-chrome-shell [aria-controls="tag-sidebar-section-content"],
-  .explorer-chrome-shell [aria-controls="calendar-sidebar-section-content"] {
-    min-height: 32px;
-    border-radius: 12px;
-    color: var(--mf-explorer-text-secondary) !important;
-    font-weight: 700;
-  }
-
-  .explorer-chrome-shell #pinned-folder-sidebar-section-header:hover,
-  .explorer-chrome-shell #folder-list-sidebar-section-header:hover,
-  .explorer-chrome-shell [aria-controls="tag-sidebar-section-content"]:hover,
-  .explorer-chrome-shell
-    [aria-controls="calendar-sidebar-section-content"]:hover {
-    background: var(--mf-explorer-sidebar-hover-bg);
-  }
-
-  .explorer-chrome-shell .sidebar-row {
-    min-height: 30px;
-    padding-left: 8px;
-    padding-right: 8px;
-    border-radius: 4px !important;
-  }
-
-  .explorer-chrome-shell .sidebar-row .tabular-nums,
-  .explorer-chrome-shell
-    [aria-controls="tag-sidebar-section-content"]
-    .tabular-nums,
-  .explorer-chrome-shell
-    [aria-controls="calendar-sidebar-section-content"]
-    .tabular-nums {
-    min-width: 24px;
-    border-radius: 999px;
-    background: rgba(95, 138, 106, 0.08);
-    color: var(--mf-explorer-text-muted);
-    text-align: center;
-  }
-
-  .explorer-chrome-shell .sidebar-row[data-selected="true"] {
-    background: rgba(0, 0, 0, 0.06) !important;
-    color: var(--app-sidebar-text, #5b5b5b) !important;
-    box-shadow: none !important;
-  }
-
-  .explorer-chrome-shell .sidebar-row[data-selected="true"] .ds-list-item__title {
-    color: var(--app-sidebar-text, #5b5b5b) !important;
-  }
-
-  .explorer-chrome-shell .border-\[\#dddcd5\],
-  .explorer-chrome-shell .border-\[\#e6e4dc\],
-  .explorer-chrome-shell .border-\[\#efeee8\] {
-    border-color: var(--mf-explorer-border-soft) !important;
-  }
-
-  .explorer-chrome-shell .bg-\[rgba\(246\,246\,244\,0\.98\)\],
-  .explorer-chrome-shell .bg-\[rgba\(250\,249\,246\,0\.98\)\] {
-    background: var(--mf-explorer-header-bg) !important;
-  }
-
-  .explorer-chrome-shell
-    div:has(> [role="table"][aria-label="エクスプローラー詳細表示"]) {
-    box-sizing: border-box;
-    min-height: 0;
-    padding: 14px 18px 18px !important;
-    background: transparent !important;
-  }
-
-  .explorer-chrome-shell [role="table"][aria-label="エクスプローラー詳細表示"] {
-    position: relative;
-    width: 100%;
-    min-width: 100%;
-    overflow: clip;
-    border: 1px solid var(--mf-explorer-border);
-    border-radius: 18px;
-    background: rgba(255, 255, 252, 0.98);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.88),
-      0 12px 30px rgba(38, 49, 39, 0.052);
-  }
-
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    > [role="row"]:has([role="columnheader"]) {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 90 !important;
-    min-height: 36px;
-    border-bottom-color: var(--mf-explorer-border) !important;
-    background: linear-gradient(
-      180deg,
-      rgba(252, 253, 249, 0.99),
-      rgba(247, 250, 245, 0.98)
-    ) !important;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.92),
-      inset 0 -1px 0 var(--mf-explorer-border) !important;
-  }
-
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    > [role="row"]:has([role="columnheader"])
-    [role="columnheader"] {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 91 !important;
-    border-right-color: var(--mf-explorer-border) !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    color: var(--mf-explorer-text-secondary) !important;
-    font-size: 12px !important;
-    line-height: 16px !important;
-    font-weight: 700;
-  }
-
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    > [role="row"]:has([role="columnheader"])
-    [role="columnheader"]:hover {
-    background: rgba(237, 245, 235, 0.72) !important;
-    color: var(--mf-explorer-text) !important;
-  }
-
-  .explorer-chrome-shell [data-detail-column-resizer="true"]::after {
-    background: transparent !important;
-  }
-
-  .explorer-chrome-shell [data-detail-column-resizer="true"]:hover::after,
-  .explorer-chrome-shell [data-detail-column-resizer="true"]:active::after {
-    background: rgba(95, 138, 106, 0.48) !important;
-  }
-
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    [role="row"][data-detail-row="true"] {
-    isolation: isolate;
-    min-height: 34px;
-    border-bottom-color: var(--mf-explorer-border-soft) !important;
-    background: transparent !important;
-    color: var(--mf-explorer-text-muted) !important;
-  }
-
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    [role="row"][data-detail-row="true"]::before {
-    content: "";
-    position: absolute;
-    inset: 4px 10px;
-    z-index: 0;
-    border-radius: 4px;
-    background: transparent;
-    pointer-events: none;
-    transition:
-      background-color 120ms ease,
-      box-shadow 120ms ease;
-  }
-
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    [role="row"][data-detail-row="true"]:hover::before {
-    background: rgba(0, 0, 0, 0.04);
-  }
-
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    [role="row"][data-detail-row="true"][data-selected="true"]::before {
-    background: rgba(0, 0, 0, 0.06);
-    box-shadow: none;
-  }
-
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    [role="row"][data-detail-row="true"][data-selected="true"]
-    [role="cell"],
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    [role="row"][data-detail-row="true"][data-selected="true"]
-    [role="cell"]:first-child {
-    color: var(--app-sidebar-text, #5b5b5b) !important;
-  }
-
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    [role="row"][data-detail-row="true"]
-    [role="cell"] {
-    position: relative;
-    z-index: 1;
-    color: var(--mf-explorer-text-muted) !important;
-    font-size: 12px !important;
-    line-height: 16px !important;
-  }
-
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    [role="row"][data-detail-row="true"]
-    [role="cell"]:first-child {
-    color: var(--mf-explorer-text) !important;
-  }
-
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    [role="row"][data-detail-row="true"]
-    [role="cell"]:first-child
-    span[title] {
-    font-weight: 600;
-  }
-
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    [role="row"][data-detail-row="true"]
-    [role="cell"]
-    * {
-    font-size: inherit !important;
-    line-height: inherit !important;
-  }
-
-  .explorer-chrome-shell
-    [role="table"][aria-label="エクスプローラー詳細表示"]
-    [role="row"][data-detail-row="true"]
-    svg {
-    opacity: 1;
-  }
-
-  .explorer-chrome-shell input,
-  .explorer-chrome-shell textarea,
-  .explorer-chrome-shell [contenteditable="true"] {
-    caret-color: var(--mf-explorer-brand);
-  }
-
-  .explorer-chrome-shell input:focus,
-  .explorer-chrome-shell textarea:focus {
-    border-color: rgba(95, 138, 106, 0.48) !important;
-    box-shadow: 0 0 0 3px var(--mf-explorer-focus-ring) !important;
-  }
-
-  .explorer-chrome-shell ::-webkit-scrollbar {
-    width: 11px;
-    height: 11px;
-  }
-
-  .explorer-chrome-shell ::-webkit-scrollbar-track {
-    background: #f3f6f0;
-  }
-
-  .explorer-chrome-shell ::-webkit-scrollbar-thumb {
-    border: 3px solid #f3f6f0;
-    border-radius: 10px;
-    background: #c8d5c6;
-  }
-
-  .explorer-chrome-shell ::-webkit-scrollbar-thumb:hover {
-    background: #b7c8b7;
-  }
-
-  @media (max-width: 1240px) and (min-width: 768px) {
-    .explorer-chrome-toolbar {
-      gap: 7px !important;
-      padding-right: 14px !important;
-      padding-left: 0 !important;
-    }
-
-    .explorer-chrome-toolbar-search {
-      width: 178px;
-    }
-  }
-
-  @media (max-width: 1120px) and (min-width: 768px) {
-    .explorer-chrome-toolbar-search span {
-      display: none;
-    }
-
-    .explorer-chrome-toolbar-search {
-      width: 40px;
-      padding-right: 0.75rem !important;
-      padding-left: 0.75rem !important;
-    }
-  }
-
-  @media (max-width: 980px) and (min-width: 768px) {
-    .explorer-chrome-toolbar-divider {
-      display: none;
-    }
-
-    .explorer-chrome-toolbar {
-      gap: 5px !important;
-    }
-  }
-
-  @media (max-width: 767px) {
-    .explorer-chrome-main-topbar {
-      left: 0;
-      max-width: 100%;
-    }
-
-    .explorer-workspace-tabs-list,
-    .explorer-chrome-main-topbar
-      > div:first-child
-      > .explorer-chrome-font
-      > div:first-child {
-      padding-left: 0;
-    }
-
-    [data-explorer-sidebar-shell="true"] {
-      padding: 0 !important;
-    }
-
-    [data-explorer-sidebar-panel="true"] {
-      border-radius: 0 !important;
-    }
-
-    .explorer-sidebar-storage-slot {
-      display: none;
-    }
-
-    [data-explorer-sidebar-shell="true"] ~ * {
-      padding-top: 0 !important;
-      padding-right: 0 !important;
-      padding-bottom: 0 !important;
-      padding-left: 0 !important;
-    }
-
-    .explorer-chrome-shell
-      div:has(> [role="table"][aria-label="エクスプローラー詳細表示"]) {
-      padding: 0 !important;
-    }
-
-    .explorer-chrome-shell
-      [role="table"][aria-label="エクスプローラー詳細表示"] {
-      border-radius: 0;
-      border-right: 0;
-      border-left: 0;
-      box-shadow: none;
-    }
   }
 }

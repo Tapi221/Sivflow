@@ -122,11 +122,10 @@ const ExplorerToolbarButton = forwardRef<
         disabled={disabled}
         onClick={disabled ? undefined : onClick}
         className={cn(
-          "explorer-chrome-toolbar-button inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[11px]",
-          "border border-transparent bg-transparent text-[var(--mf-explorer-text-muted)] outline-none transition-colors",
+          "explorer-chrome-toolbar-button inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-transparent bg-transparent text-muted-foreground outline-none transition-colors",
           disabled
-            ? "cursor-default text-[var(--mf-explorer-text-faint)]"
-            : "hover:border-[var(--mf-explorer-border-soft)] hover:bg-[var(--mf-explorer-control-hover)] hover:text-[var(--mf-explorer-text)]",
+            ? "cursor-default opacity-50"
+            : "hover:bg-accent hover:text-foreground",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           className,
         )}
@@ -330,8 +329,8 @@ const ExplorerToolbarSearchButton = ({
       aria-label="検索"
       onClick={onClick}
       className={cn(
-        "explorer-chrome-toolbar-search inline-flex h-9 shrink-0 items-center gap-2 rounded-[14px]",
-        "border px-3 text-left text-[12px] text-[var(--mf-explorer-text-muted)] outline-none transition-colors",
+        "explorer-chrome-toolbar-search inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-border bg-background px-3 text-left text-[12px] text-muted-foreground shadow-sm outline-none transition-colors",
+        "hover:bg-accent hover:text-foreground",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
       )}
     >
@@ -351,7 +350,7 @@ const ExplorerToolbarMenuItem = ({
       type="button"
       className={cn(
         "flex w-full min-w-0 flex-col rounded-[10px] px-3 py-2 text-left outline-none transition-colors",
-        "text-[var(--mf-explorer-text)] hover:bg-[var(--mf-explorer-control-hover)]",
+        "text-foreground hover:bg-accent",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
       )}
       onClick={onClick}
@@ -360,7 +359,7 @@ const ExplorerToolbarMenuItem = ({
         {label}
       </span>
       {description ? (
-        <span className="mt-0.5 truncate text-[11px] leading-4 text-[var(--mf-explorer-text-muted)]">
+        <span className="mt-0.5 truncate text-[11px] leading-4 text-muted-foreground">
           {description}
         </span>
       ) : null}
@@ -448,9 +447,7 @@ const ExplorerPathBar = () => {
   return (
     <div
       className={cn(
-        "explorer-chrome-pathbar flex h-9 min-w-0 flex-1 items-center gap-2 rounded-[14px]",
-        "border border-[var(--mf-explorer-border)] bg-[var(--mf-explorer-control-bg)] px-3",
-        "shadow-[var(--mf-explorer-control-shadow)]",
+        "explorer-chrome-pathbar flex h-10 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-background px-3 shadow-sm",
       )}
     >
       {pathCrumbs.map((crumb, index) => {
@@ -460,9 +457,7 @@ const ExplorerPathBar = () => {
         return (
           <Fragment key={`${crumb.label}:${crumb.to ?? "current"}:${index}`}>
             {index > 0 ? (
-              <span className="text-[12px] text-[var(--mf-explorer-text-faint)]">
-                ›
-              </span>
+              <span className="text-[12px] text-muted-foreground">›</span>
             ) : null}
 
             {index === 0 ? <HomeIcon /> : null}
@@ -474,7 +469,7 @@ const ExplorerPathBar = () => {
                 onClick={() => handleCrumbClick(crumb)}
                 className={cn(
                   "min-w-0 truncate rounded-[4px] text-left text-[12px]",
-                  "text-[var(--mf-explorer-text-muted)] hover:text-[var(--mf-explorer-text)]",
+                  "text-muted-foreground hover:text-foreground",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 )}
                 title={crumb.label}
@@ -486,8 +481,8 @@ const ExplorerPathBar = () => {
                 className={cn(
                   "min-w-0 truncate text-[12px]",
                   isLast
-                    ? "font-semibold text-[var(--mf-explorer-text)]"
-                    : "text-[var(--mf-explorer-text-muted)]",
+                    ? "font-semibold text-foreground"
+                    : "text-muted-foreground",
                 )}
                 title={crumb.label}
               >
@@ -517,11 +512,10 @@ export const ExplorerToolbar = () => {
   return (
     <div
       className={cn(
-        "explorer-chrome-toolbar flex h-[58px] shrink-0 items-center gap-2 border-b border-[var(--mf-explorer-border)]",
-        "bg-[var(--mf-explorer-toolbar-bg)] px-4 text-[var(--mf-explorer-text)]",
+        "explorer-chrome-toolbar flex h-[60px] shrink-0 items-center gap-2 border-b border-border bg-background/95 px-4 text-foreground backdrop-blur",
       )}
     >
-      <div className="explorer-chrome-toolbar-nav flex shrink-0 items-center gap-1">
+      <div className="explorer-chrome-toolbar-nav flex shrink-0 items-center gap-1 rounded-xl border border-border bg-background px-1.5 py-1">
         <ExplorerToolbarButton title="戻る" disabled>
           <ChevronLeftIcon />
         </ExplorerToolbarButton>
@@ -545,8 +539,8 @@ export const ExplorerToolbar = () => {
         <TagFilterPopover
           allTags={allTags}
           className={cn(
-            "explorer-chrome-toolbar-button h-8 w-8 shrink-0 rounded-[11px] border border-transparent bg-transparent px-0 py-0",
-            "text-[var(--mf-explorer-text-muted)] hover:border-[var(--mf-explorer-border-soft)] hover:bg-[var(--mf-explorer-control-hover)] hover:text-[var(--mf-explorer-text)]",
+            "explorer-chrome-toolbar-button h-9 w-9 shrink-0 rounded-xl border border-transparent bg-transparent px-0 py-0",
+            "text-muted-foreground hover:bg-accent hover:text-foreground",
           )}
         />
 
