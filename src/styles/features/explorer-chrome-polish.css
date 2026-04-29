@@ -86,7 +86,7 @@
     height: 40px !important;
     overflow: visible !important;
     border-bottom: 0 !important;
-    background: transparent !important;
+    background: var(--app-sidebar-bg, #f6f6f6) !important;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
@@ -104,6 +104,7 @@
     padding: 4px 8px 0 0;
     margin: 0 !important;
     overflow: visible !important;
+    background: var(--app-sidebar-bg, #f6f6f6) !important;
   }
 
   .explorer-workspace-tab,
@@ -141,7 +142,7 @@
     border: 0 !important;
     overflow: visible !important;
     background: #ffffff !important;
-    color: var(--app-sidebar-text) !important;
+    color: var(--app-sidebar-text, #5b5b5b) !important;
     box-shadow: none !important;
   }
 
@@ -170,14 +171,14 @@
     height: 36px !important;
     margin-bottom: 0 !important;
     border: 0 !important;
-    background: rgba(38, 39, 46, 0) !important;
-    color: var(--app-sidebar-text) !important;
+    background: var(--app-sidebar-bg, #f6f6f6) !important;
+    color: var(--app-sidebar-text, #5b5b5b) !important;
     box-shadow: none !important;
   }
 
   .explorer-workspace-tab--inactive:hover {
     background: rgba(255, 255, 255, 0.58) !important;
-    color: var(--app-sidebar-text) !important;
+    color: var(--app-sidebar-text, #5b5b5b) !important;
     overflow: visible !important;
   }
 
@@ -245,6 +246,10 @@
     border-radius: 4px !important;
   }
 
+  .explorer-workspace-tab--active .explorer-workspace-tab-close {
+    background: transparent !important;
+  }
+
   .explorer-workspace-tab-close:hover {
     background: rgba(0, 0, 0, 0.05) !important;
     color: #000000 !important;
@@ -257,7 +262,7 @@
     height: 36px !important;
     border-radius: 8px !important;
     border: 0 !important;
-    background: transparent !important;
+    background: var(--app-sidebar-bg, #f6f6f6) !important;
     color: #4a4a4a !important;
     box-shadow: none !important;
   }

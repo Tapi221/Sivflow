@@ -214,6 +214,9 @@ export const WorkspaceTabsBar = ({
                 className={cn(
                   "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-hidden border text-[13px] transition-[background-color,border-color,color,box-shadow] duration-150",
                   "mb-0 h-[36px] rounded-tl-[8px] rounded-tr-[8px]",
+                  selected
+                    ? "explorer-workspace-tab--active"
+                    : "explorer-workspace-tab--inactive",
                   resolveTabWidthClassName(tab),
                   selected
                     ? "border-black/12 text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]"
