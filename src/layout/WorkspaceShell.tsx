@@ -6,31 +6,18 @@ type WorkspaceShellProps = {
   children: ReactNode;
   isScrollLocked: boolean;
   mainRef: RefObject<HTMLElement | null>;
-  showTabs?: boolean;
 };
 
 export const WorkspaceShell = ({
   children,
   isScrollLocked,
   mainRef,
-  showTabs = false,
 }: WorkspaceShellProps) => {
   return (
-    <div
-      className={[
-        "workspace-shell app-layout__content",
-        showTabs
-          ? "workspace-shell--with-tabs"
-          : "workspace-shell--without-tabs",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      {showTabs ? (
-        <div className="workspace-shell__tabs">
-          <WorkspaceTabsBar />
-        </div>
-      ) : null}
+    <div className="workspace-shell app-layout__content workspace-shell--with-tabs">
+      <div className="workspace-shell__tabs">
+        <WorkspaceTabsBar />
+      </div>
 
       <main
         ref={mainRef}
