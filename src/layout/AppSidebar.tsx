@@ -106,13 +106,6 @@ const GearIcon = ({ className }: SidebarIconProps) => (
   </IconShell>
 );
 
-const HelpIcon = ({ className }: SidebarIconProps) => (
-  <IconShell className={className}>
-    <circle cx="12" cy="12" r="8" fill="currentColor" />
-    <path d="M9.6 9.5a2.5 2.5 0 0 1 4.8 1c0 1.8-2.2 2.1-2.2 3.6M12.1 16.8h.1" stroke="#fff" strokeLinecap="round" strokeWidth="1.8" />
-  </IconShell>
-);
-
 const CloudIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
     <path d="M7.5 17.5h9.3a3.2 3.2 0 0 0 .3-6.4A5.4 5.4 0 0 0 6.8 9.8 3.9 3.9 0 0 0 7.5 17.5Z" fill="currentColor" opacity="0.45" />
@@ -200,13 +193,6 @@ const footerItems: AppSidebarNavItem[] = [
     label: "Settings",
     to: "/folders?settings=true",
     icon: <GearIcon className="app-sidebar__nav-icon" />,
-  },
-  {
-    id: "help-support",
-    label: "Help & support",
-    to: "/trash",
-    icon: <HelpIcon className="app-sidebar__nav-icon" />,
-    exactPath: true,
   },
 ];
 
