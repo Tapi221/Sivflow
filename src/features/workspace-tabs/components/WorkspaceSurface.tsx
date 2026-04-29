@@ -37,7 +37,7 @@ export const WorkspaceSurface = ({
       <div
         className={cn(
           "relative z-10 -mt-px flex min-h-0 w-full min-w-0 flex-1 overflow-hidden",
-          "rounded-b-[14px] border-x border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)]",
+          "rounded-b-[14px] border-x border-b border-border bg-background",
           "[&>div]:rounded-none [&>div]:border-0 [&>div]:bg-transparent [&>div]:shadow-none",
           bodyClassName,
         )}

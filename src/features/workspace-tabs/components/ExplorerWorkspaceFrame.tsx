@@ -24,10 +24,9 @@ export const ExplorerWorkspaceFrame = ({
     <section
       style={style}
       className={cn(
-        "relative flex h-full min-h-0 min-w-0 max-w-none flex-col overflow-hidden",
-        "rounded-none border-0 shadow-none",
+        "relative flex h-full min-h-0 min-w-0 max-w-none flex-col overflow-hidden rounded-none border-0 shadow-none",
         showExplorerChrome
-          ? "explorer-chrome-shell bg-[var(--mf-explorer-app-bg)]"
+          ? "explorer-chrome-shell bg-background"
           : "bg-[var(--app-bg)]",
         className,
       )}
@@ -38,10 +37,8 @@ export const ExplorerWorkspaceFrame = ({
 
       <div
         className={cn(
-          "relative flex min-h-0 w-full min-w-0 flex-1 overflow-hidden",
-          showExplorerChrome
-            ? "explorer-chrome-body bg-[var(--mf-explorer-app-bg)]"
-            : "bg-transparent",
+          "explorer-chrome-body relative flex min-h-0 w-full min-w-0 flex-1 overflow-hidden",
+          showExplorerChrome ? "bg-background" : "bg-transparent",
           bodyClassName,
         )}
       >
