@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import type { MouseEvent, ReactNode } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { useExplorerCalendarViewStore } from "@/features/calendar/store/useExplorerCalendarViewStore";
+import { useWorkspaceTabsStore } from "@/features/workspace-tabs/store/useWorkspaceTabsStore";
 import { cn } from "@/lib/utils";
 
 type AppSidebarNavItem = {
@@ -10,6 +11,7 @@ type AppSidebarNavItem = {
   to: string;
   icon: ReactNode;
   exactPath?: boolean;
+  sectionKey?: "home" | "review" | "library" | "calendar" | "explore";
   onClick?: () => void;
   match?: (pathname: string, searchParams: URLSearchParams) => boolean;
 };
@@ -74,7 +76,7 @@ const MapIcon = ({ className }: SidebarIconProps) => (
   </IconShell>
 );
 
-const LibraryIcon = ({ className }: SidebarIconProps) => (
+const LibraryIcon = ({ className }: { className?: string }) => (
   <svg
     className={className}
     viewBox="0 0 20 20"
@@ -132,6 +134,7 @@ const mainNavItems: AppSidebarNavItem[] = [
     label: "Home",
     to: "/folders?home=1",
     icon: <HomeIcon className="app-sidebar__nav-icon" />,
+    sectionKey: "home",
     match: (pathname, searchParams) =>
       pathname === "/folders" && searchParams.get("home") === "1",
   },
@@ -140,6 +143,7 @@ const mainNavItems: AppSidebarNavItem[] = [
     label: "Review",
     to: "/gallery",
     icon: <InboxIcon className="app-sidebar__nav-icon" />,
+    sectionKey: "review",
     exactPath: true,
   },
   {
@@ -147,17 +151,15 @@ const mainNavItems: AppSidebarNavItem[] = [
     label: "Library",
     to: "/folders?view=section-list",
     icon: <LibraryIcon className="app-sidebar__nav-icon" />,
-    match: (pathname, searchParams) =>
-      pathname === "/folders" &&
-      searchParams.get("view") === "section-list" &&
-      searchParams.get("content") !== "pdf" &&
-      searchParams.get("content") !== "note",
+    sectionKey: "library",
+    match: (pathname) => pathname === "/folders",
   },
   {
     id: "calendar",
     label: "Calendar",
     to: "/calendar",
     icon: <CalendarIcon className="app-sidebar__nav-icon" />,
+    sectionKey: "calendar",
     exactPath: true,
   },
   {
@@ -165,6 +167,7 @@ const mainNavItems: AppSidebarNavItem[] = [
     label: "Explore",
     to: "/tag-map",
     icon: <MapIcon className="app-sidebar__nav-icon" />,
+    sectionKey: "explore",
     exactPath: true,
   },
 ];
@@ -180,7 +183,7 @@ const footerItems: AppSidebarNavItem[] = [
   },
 ];
 
-const isNavItemActive = (
+const isNavItemActiveByLocation = (
   item: AppSidebarNavItem,
   pathname: string,
   search: string,
@@ -213,13 +216,38 @@ const AppSidebarNavLink = ({
   nested?: boolean;
   trailing?: ReactNode;
 }) => {
+  const navigate = useNavigate();
   const { pathname, search } = useLocation();
-  const isActive = isNavItemActive(item, pathname, search);
+  const tabs = useWorkspaceTabsStore((state) => state.tabs);
+  const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
+  const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
+
+  const activeTab =
+    activeTabId === null
+      ? null
+      : tabs.find((tab) => tab.id === activeTabId) ?? null;
+
+  const isActive =
+    (item.sectionKey !== undefined &&
+      activeTab?.sectionKey === item.sectionKey &&
+      pathname !== "/folders" ? true : false) ||
+    isNavItemActiveByLocation(item, pathname, search);
+
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    item.onClick?.();
+
+    if (item.sectionKey) {
+      openSectionTab(item.sectionKey);
+    }
+
+    navigate(item.to);
+  };
 
   return (
-    <NavLink
-      to={item.to}
-      onClick={item.onClick}
+    <button
+      type="button"
+      onClick={handleClick}
       className={cn(
         "app-sidebar__nav-link",
         nested && "app-sidebar__nav-link--nested",
@@ -232,7 +260,7 @@ const AppSidebarNavLink = ({
       {trailing ? (
         <span className="app-sidebar__nav-trailing">{trailing}</span>
       ) : null}
-    </NavLink>
+    </button>
   );
 };
 

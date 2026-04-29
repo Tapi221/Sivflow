@@ -79,7 +79,7 @@ export const WORKSPACE_ROUTE_TABS = [
     kind: "route",
     title: "Home",
     routePath: "/folders?home=1",
-    isClosable: false,
+    isClosable: true,
     sectionKey: "home",
   },
   {
@@ -87,7 +87,7 @@ export const WORKSPACE_ROUTE_TABS = [
     kind: "route",
     title: "Review",
     routePath: "/gallery",
-    isClosable: false,
+    isClosable: true,
     sectionKey: "review",
   },
   {
@@ -95,7 +95,7 @@ export const WORKSPACE_ROUTE_TABS = [
     kind: "route",
     title: "Calendar",
     routePath: "/calendar",
-    isClosable: false,
+    isClosable: true,
     sectionKey: "calendar",
   },
   {
@@ -103,7 +103,7 @@ export const WORKSPACE_ROUTE_TABS = [
     kind: "route",
     title: "Explore",
     routePath: "/tag-map",
-    isClosable: false,
+    isClosable: true,
     sectionKey: "explore",
   },
 ] as const satisfies readonly WorkspaceRouteTab[];
@@ -114,3 +114,17 @@ export const createDefaultExplorerRouteState = (): ExplorerRouteState => ({
   selectedFolderId: null,
   selectedItem: null,
 });
+
+export const resolveRouteTabBySection = (
+  sectionKey: Exclude<WorkspaceSidebarSection, "library">,
+): WorkspaceRouteTab => {
+  const matchedTab = WORKSPACE_ROUTE_TABS.find(
+    (tab) => tab.sectionKey === sectionKey,
+  );
+
+  if (!matchedTab) {
+    throw new Error(`Unknown workspace route section: ${sectionKey}`);
+  }
+
+  return matchedTab;
+};
