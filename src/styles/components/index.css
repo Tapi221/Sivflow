@@ -6,7 +6,6 @@
 @import "./common.css";
 @import "../features/markdown.css";
 @import "../features/pdf-viewer.css";
-@import "./folder-column-resize.css";
 @import "../features/explorer-chrome-polish.css";
 
 @layer components {
