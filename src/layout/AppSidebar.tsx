@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
+import { useExplorerCalendarViewStore } from "@/features/calendar/store/useExplorerCalendarViewStore";
 import { cn } from "@/lib/utils";
 
 type AppSidebarNavItem = {
@@ -9,6 +10,7 @@ type AppSidebarNavItem = {
   to: string;
   icon: ReactNode;
   exactPath?: boolean;
+  onClick?: () => void;
   match?: (pathname: string, searchParams: URLSearchParams) => boolean;
 };
 
@@ -155,10 +157,9 @@ const mainNavItems: AppSidebarNavItem[] = [
   {
     id: "calendar",
     label: "Calendar",
-    to: "/folders?content=note",
+    to: "/calendar",
     icon: <CalendarIcon className="app-sidebar__nav-icon" />,
-    match: (pathname, searchParams) =>
-      pathname === "/folders" && searchParams.get("content") === "note",
+    exactPath: true,
   },
   {
     id: "explore",
@@ -188,10 +189,9 @@ const workspaceItems: AppSidebarNavItem[] = [
   {
     id: "calendar",
     label: "Calendar",
-    to: "/folders?content=note",
+    to: "/calendar",
     icon: <CalendarIcon className="app-sidebar__nav-icon" />,
-    match: (pathname, searchParams) =>
-      pathname === "/folders" && searchParams.get("content") === "note",
+    exactPath: true,
   },
   {
     id: "roadmaps",
@@ -250,6 +250,7 @@ const AppSidebarNavLink = ({
   return (
     <NavLink
       to={item.to}
+      onClick={item.onClick}
       className={cn(
         "app-sidebar__nav-link",
         nested && "app-sidebar__nav-link--nested",
@@ -281,6 +282,16 @@ const AppSidebarSection = ({
 );
 
 export const AppSidebar = () => {
+  const closeCalendar = useExplorerCalendarViewStore((state) => state.close);
+  const mainNavItemsWithActions = mainNavItems.map((item) => ({
+    ...item,
+    onClick: closeCalendar,
+  }));
+  const workspaceItemsWithActions = workspaceItems.map((item) => ({
+    ...item,
+    onClick: closeCalendar,
+  }));
+
   return (
     <aside className="app-sidebar" aria-label="Sidebar">
       <div className="app-sidebar__top">
@@ -299,14 +310,14 @@ export const AppSidebar = () => {
         </div>
 
         <nav className="app-sidebar__nav" aria-label="Primary navigation">
-          {mainNavItems.map((item) => (
+          {mainNavItemsWithActions.map((item) => (
             <AppSidebarNavLink key={item.id} item={item} />
           ))}
         </nav>
 
         <AppSidebarSection title="Workspace">
           <nav className="app-sidebar__nav" aria-label="Workspace navigation">
-            {workspaceItems.map((item) => (
+            {workspaceItemsWithActions.map((item) => (
               <AppSidebarNavLink key={item.id} item={item} />
             ))}
           </nav>
