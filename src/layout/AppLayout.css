@@ -260,7 +260,7 @@
   flex-direction: column;
   gap: 8px;
   border-radius: 8px;
-  background: #eeeaff;
+  background: #e8f4ea;
   padding: 12px;
 }
 
@@ -273,7 +273,7 @@
 }
 
 .app-sidebar__trial strong {
-  color: #694cff;
+  color: #2f7d46;
   font-weight: 568;
 }
 
