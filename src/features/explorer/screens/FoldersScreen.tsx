@@ -20,7 +20,7 @@ import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups
 import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
 import { WorkspaceTabPanel } from "@/features/workspace-tabs/components/WorkspaceTabPanel";
 import { ExplorerWorkspaceFrame } from "@/features/workspace-tabs/components/ExplorerWorkspaceFrame";
-import type { WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
+import type { WorkspaceEntityTab, WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
 import {
   resolveCardSetTabTitle,
   resolveCardTabTitle,
@@ -65,9 +65,13 @@ const buildMapById = <TEntity extends { id: string }>(entities: TEntity[]) => {
 
 const resolveActiveTab = (
   tabs: WorkspaceTab[],
-  activeTabId: WorkspaceTab["id"],
+  activeTabId: WorkspaceTab["id"] | null,
 ): WorkspaceTab | null => {
-  return tabs.find((tab) => tab.id === activeTabId) ?? tabs[0] ?? null;
+  if (activeTabId === null) {
+    return null;
+  }
+
+  return tabs.find((tab) => tab.id === activeTabId) ?? null;
 };
 
 const resolveSelectedExplorerItemId = (item: SelectedExplorerItem) => {
@@ -211,6 +215,70 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
       controller.state.selectedItem,
     ],
   );
+
+  const fallbackEntityTab = useMemo<WorkspaceEntityTab | null>(() => {
+    const selectedItem = controller.state.selectedItem;
+
+    if (!selectedItem) {
+      return null;
+    }
+
+    if (selectedItem.type === "document") {
+      const document = documentById.get(selectedItem.id);
+      return {
+        id: `document:${selectedItem.id}`,
+        kind: "document",
+        title: document ? resolveDocumentTabTitle(document) : "PDF",
+        documentId: selectedItem.id,
+        folderId: document?.folderId ?? controller.state.selectedFolderId,
+        isClosable: true,
+        sectionKey: "library",
+      };
+    }
+
+    if (selectedItem.type === "card") {
+      const card = cardById.get(selectedItem.id);
+      return {
+        id: `card:${selectedItem.id}`,
+        kind: "card",
+        title: card ? resolveCardTabTitle(card) : "カード",
+        cardId: selectedItem.id,
+        folderId: card
+          ? resolveCardFolderId(card, cardSetById)
+          : controller.state.selectedFolderId,
+        isClosable: true,
+        sectionKey: "library",
+      };
+    }
+
+    if (selectedItem.type === "cardSet") {
+      const cardSet = cardSetById.get(selectedItem.id);
+      return {
+        id: `cardSet:${selectedItem.id}`,
+        kind: "cardSet",
+        title: cardSet ? resolveCardSetTabTitle(cardSet) : "カードセット",
+        cardSetId: selectedItem.id,
+        folderId: cardSet?.folderId ?? controller.state.selectedFolderId,
+        isClosable: true,
+        sectionKey: "library",
+      };
+    }
+
+    return null;
+  }, [
+    cardById,
+    cardSetById,
+    controller.state.selectedFolderId,
+    controller.state.selectedItem,
+    documentById,
+  ]);
+
+  const resolvedEntityTab =
+    activeTab?.kind === "document" ||
+    activeTab?.kind === "card" ||
+    activeTab?.kind === "cardSet"
+      ? activeTab
+      : fallbackEntityTab;
 
   useExplorerRouteSync({
     route,
@@ -372,7 +440,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     return <div className="flex min-h-0 h-full w-full bg-transparent" />;
   }
 
-  if (foldersLoading || !activeTab) {
+  if (foldersLoading) {
     return <FoldersScreenSkeleton />;
   }
 
@@ -395,25 +463,22 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     />
   );
 
-  const workspaceContent =
-    activeTab.kind === "document" ||
-    activeTab.kind === "card" ||
-    activeTab.kind === "cardSet" ? (
-      <WorkspaceTabPanel
-        activeTab={activeTab}
-        cards={cards}
-        cardSets={cardSets}
-        documents={documents}
-        cardsLoading={cardsLoading}
-        cardSetsLoading={cardSetsLoading}
-        documentsLoading={documentsLoading}
-        onCardUpdated={() => {
-          // カード更新後の処理は既存実装へ委譲
-        }}
-      />
-    ) : (
-      explorerContent
-    );
+  const workspaceContent = resolvedEntityTab ? (
+    <WorkspaceTabPanel
+      activeTab={resolvedEntityTab}
+      cards={cards}
+      cardSets={cardSets}
+      documents={documents}
+      cardsLoading={cardsLoading}
+      cardSetsLoading={cardSetsLoading}
+      documentsLoading={documentsLoading}
+      onCardUpdated={() => {
+        // カード更新後の処理は既存実装へ委譲
+      }}
+    />
+  ) : (
+    explorerContent
+  );
 
   return (
     <ExplorerWorkspaceFrame

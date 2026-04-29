@@ -2,22 +2,21 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 import { mapExplorerSelectionToSearchParams } from "@/features/explorer/mappers/mapExplorerSelectionToSearchParams";
-import {
-  WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
-  type WorkspaceExplorerTab,
-  type WorkspaceTab,
-} from "@/features/workspace-tabs/domain/workspaceTab";
+import type { WorkspaceExplorerTab } from "@/features/workspace-tabs/domain/workspaceTab";
 import { useWorkspaceTabsStore } from "@/features/workspace-tabs/store/useWorkspaceTabsStore";
 
 const normalizeQuery = (search: string) => {
-  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  const params = new URLSearchParams(
+    search.startsWith("?") ? search.slice(1) : search,
+  );
   return params.toString();
 };
 
 const resolveExplorerTabIdBySearch = (
-  tabs: WorkspaceTab[],
   normalizedSearch: string,
 ): WorkspaceExplorerTab["id"] | null => {
+  const tabs = useWorkspaceTabsStore.getState().tabs;
+
   for (const tab of tabs) {
     if (tab.kind !== "explorer") {
       continue;
@@ -40,36 +39,42 @@ const resolveExplorerTabIdBySearch = (
 
 export const useWorkspaceTabsRouteSync = () => {
   const location = useLocation();
-  const tabs = useWorkspaceTabsStore((state) => state.tabs);
-  const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
-  const selectTab = useWorkspaceTabsStore((state) => state.selectTab);
-  const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
-  const openDocumentTab = useWorkspaceTabsStore((state) => state.openDocumentTab);
-  const openCardTab = useWorkspaceTabsStore((state) => state.openCardTab);
-  const openCardSetTab = useWorkspaceTabsStore((state) => state.openCardSetTab);
 
   useEffect(() => {
     const pathname = location.pathname.toLowerCase();
     const searchParams = new URLSearchParams(location.search);
     const normalizedSearch = normalizeQuery(location.search);
 
+    const {
+      activeTabId,
+      openSectionTab,
+      selectTab,
+      openExplorerTab,
+      openDocumentTab,
+      openCardTab,
+      openCardSetTab,
+    } = useWorkspaceTabsStore.getState();
+
     if (pathname === "/gallery") {
-      if (activeTabId !== "route:review") {
-        selectTab("route:review");
+      const nextTabId = openSectionTab("review");
+      if (activeTabId !== nextTabId) {
+        selectTab(nextTabId);
       }
       return;
     }
 
     if (pathname === "/calendar") {
-      if (activeTabId !== "route:calendar") {
-        selectTab("route:calendar");
+      const nextTabId = openSectionTab("calendar");
+      if (activeTabId !== nextTabId) {
+        selectTab(nextTabId);
       }
       return;
     }
 
     if (pathname === "/tag-map") {
-      if (activeTabId !== "route:explore") {
-        selectTab("route:explore");
+      const nextTabId = openSectionTab("explore");
+      if (activeTabId !== nextTabId) {
+        selectTab(nextTabId);
       }
       return;
     }
@@ -79,8 +84,9 @@ export const useWorkspaceTabsRouteSync = () => {
     }
 
     if (searchParams.get("home") === "1") {
-      if (activeTabId !== "route:home") {
-        selectTab("route:home");
+      const nextTabId = openSectionTab("home");
+      if (activeTabId !== nextTabId) {
+        selectTab(nextTabId);
       }
       return;
     }
@@ -127,7 +133,7 @@ export const useWorkspaceTabsRouteSync = () => {
       return;
     }
 
-    const matchedExplorerTabId = resolveExplorerTabIdBySearch(tabs, normalizedSearch);
+    const matchedExplorerTabId = resolveExplorerTabIdBySearch(normalizedSearch);
 
     if (matchedExplorerTabId) {
       if (activeTabId !== matchedExplorerTabId) {
@@ -136,22 +142,10 @@ export const useWorkspaceTabsRouteSync = () => {
       return;
     }
 
-    const nextTabId = openExplorerTab({
-      id: WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
-    });
+    const nextTabId = openExplorerTab();
 
     if (activeTabId !== nextTabId) {
       selectTab(nextTabId);
     }
-  }, [
-    activeTabId,
-    location.pathname,
-    location.search,
-    openCardSetTab,
-    openCardTab,
-    openDocumentTab,
-    openExplorerTab,
-    selectTab,
-    tabs,
-  ]);
+  }, [location.pathname, location.search]);
 };

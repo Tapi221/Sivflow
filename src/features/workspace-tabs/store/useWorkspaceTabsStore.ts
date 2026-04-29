@@ -3,13 +3,14 @@ import { create } from "zustand";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import {
   createDefaultExplorerRouteState,
+  resolveRouteTabBySection,
   WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
-  WORKSPACE_ROUTE_TABS,
   type WorkspaceCardSetTab,
   type WorkspaceCardTab,
   type WorkspaceDocumentTab,
   type WorkspaceExplorerTab,
   type WorkspaceRouteTab,
+  type WorkspaceSidebarSection,
   type WorkspaceTab,
 } from "@/features/workspace-tabs/domain/workspaceTab";
 
@@ -40,7 +41,7 @@ type OpenCardTabParams = {
 
 type WorkspaceTabsState = {
   tabs: WorkspaceTab[];
-  activeTabId: WorkspaceTab["id"];
+  activeTabId: WorkspaceTab["id"] | null;
   openExplorerTab: (
     params?: OpenExplorerTabParams,
   ) => WorkspaceExplorerTab["id"];
@@ -52,6 +53,7 @@ type WorkspaceTabsState = {
   ) => WorkspaceDocumentTab["id"];
   openCardSetTab: (params: OpenCardSetTabParams) => WorkspaceCardSetTab["id"];
   openCardTab: (params: OpenCardTabParams) => WorkspaceCardTab["id"];
+  openSectionTab: (sectionKey: WorkspaceSidebarSection) => WorkspaceTab["id"];
   selectTab: (tabId: WorkspaceTab["id"]) => void;
   closeTab: (tabId: WorkspaceTab["id"]) => void;
   updateExplorerTabState: (
@@ -63,24 +65,14 @@ type WorkspaceTabsState = {
 
 const EXPLORER_TAB_TITLE = "Library";
 
-const createInitialExplorerTab = (): WorkspaceExplorerTab => ({
+const createRootExplorerTab = (): WorkspaceExplorerTab => ({
   id: WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
   kind: "explorer",
   title: EXPLORER_TAB_TITLE,
   explorerState: createDefaultExplorerRouteState(),
-  isClosable: false,
+  isClosable: true,
   sectionKey: "library",
 });
-
-const createInitialTabs = (): WorkspaceTab[] => {
-  return [
-    WORKSPACE_ROUTE_TABS[0] as WorkspaceRouteTab,
-    WORKSPACE_ROUTE_TABS[1] as WorkspaceRouteTab,
-    createInitialExplorerTab(),
-    WORKSPACE_ROUTE_TABS[2] as WorkspaceRouteTab,
-    WORKSPACE_ROUTE_TABS[3] as WorkspaceRouteTab,
-  ];
-};
 
 const createRandomIdSegment = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -123,12 +115,12 @@ const areExplorerRouteStatesEqual = (
 const resolveNextActiveTabId = (
   tabs: WorkspaceTab[],
   closingTabId: WorkspaceTab["id"],
-): WorkspaceTab["id"] => {
+): WorkspaceTab["id"] | null => {
   const closingIndex = tabs.findIndex((tab) => tab.id === closingTabId);
   const nextTabs = tabs.filter((tab) => tab.id !== closingTabId);
 
   if (nextTabs.length === 0) {
-    return WORKSPACE_DEFAULT_EXPLORER_TAB_ID;
+    return null;
   }
 
   const fallbackIndex = Math.max(
@@ -137,12 +129,33 @@ const resolveNextActiveTabId = (
   );
   const fallbackTab = nextTabs[fallbackIndex];
 
-  return fallbackTab?.id ?? WORKSPACE_DEFAULT_EXPLORER_TAB_ID;
+  return fallbackTab?.id ?? nextTabs[0]?.id ?? null;
+};
+
+const upsertTab = (
+  tabs: WorkspaceTab[],
+  nextTab: WorkspaceTab,
+): WorkspaceTab[] => {
+  const existingIndex = tabs.findIndex((tab) => tab.id === nextTab.id);
+
+  if (existingIndex === -1) {
+    return [...tabs, nextTab];
+  }
+
+  const nextTabs = [...tabs];
+  nextTabs[existingIndex] = nextTab;
+  return nextTabs;
+};
+
+const createRouteTabFromSection = (
+  sectionKey: Exclude<WorkspaceSidebarSection, "library">,
+): WorkspaceRouteTab => {
+  return { ...resolveRouteTabBySection(sectionKey) };
 };
 
 export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
-  tabs: createInitialTabs(),
-  activeTabId: WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
+  tabs: [],
+  activeTabId: null,
 
   openExplorerTab: (params = {}) => {
     const id = params.id ?? WORKSPACE_DEFAULT_EXPLORER_TAB_ID;
@@ -158,12 +171,12 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
       kind: "explorer",
       title: params.title ?? EXPLORER_TAB_TITLE,
       explorerState: params.explorerState ?? createDefaultExplorerRouteState(),
-      isClosable: params.isClosable ?? id !== WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
+      isClosable: params.isClosable ?? true,
       sectionKey: "library",
     };
 
     set((state) => ({
-      tabs: [...state.tabs, nextTab],
+      tabs: upsertTab(state.tabs, nextTab),
       activeTabId: nextTab.id,
     }));
 
@@ -270,6 +283,32 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
     return id;
   },
 
+  openSectionTab: (sectionKey) => {
+    if (sectionKey === "library") {
+      return get().openExplorerTab({
+        id: WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
+        title: EXPLORER_TAB_TITLE,
+        explorerState: createDefaultExplorerRouteState(),
+        isClosable: true,
+      });
+    }
+
+    const nextRouteTab = createRouteTabFromSection(sectionKey);
+    const existing = get().tabs.find((tab) => tab.id === nextRouteTab.id);
+
+    if (existing?.kind === "route") {
+      set({ activeTabId: existing.id });
+      return existing.id;
+    }
+
+    set((state) => ({
+      tabs: upsertTab(state.tabs, nextRouteTab),
+      activeTabId: nextRouteTab.id,
+    }));
+
+    return nextRouteTab.id;
+  },
+
   selectTab: (tabId) => {
     const normalizedTabId = assertWorkspaceTabId(tabId);
     const exists = get().tabs.some((tab) => tab.id === normalizedTabId);
@@ -292,7 +331,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
         : state.activeTabId;
 
     set({
-      tabs: nextTabs.length > 0 ? nextTabs : createInitialTabs(),
+      tabs: nextTabs,
       activeTabId: nextActiveTabId,
     });
   },
