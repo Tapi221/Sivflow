@@ -694,17 +694,16 @@ export const TitleBar: React.FC = () => {
     <div
       className={cn(
         "surface-flat-titlebar",
-        "flex w-full shrink-0 select-none items-center justify-between bg-transparent px-4 text-sm titlebar-text",
+        "pointer-events-none absolute left-0 right-0 top-0 z-50 flex w-full shrink-0 select-none items-center justify-between bg-transparent px-4 text-sm titlebar-text",
       )}
       style={{
         ...dragStyle,
-        zIndex: 20,
         height: `${APP_DESKTOP_TOP_INSET_PX}px`,
       }}
     >
       <div
         className={cn(
-          "flex h-full min-w-0 items-center pl-2 pr-3",
+          "pointer-events-auto flex h-full min-w-0 items-center pl-2 pr-3",
           shouldShowBrandLabel && "gap-2",
         )}
         style={noDragStyle}

@@ -2,6 +2,7 @@ import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 import {
   AppBootLoadingFallback,
   CardEditScreenSkeleton,
+  CalendarScreenSkeleton,
   CardSetViewScreenSkeleton,
   DirectoryScreenSkeleton,
   FoldersScreenSkeleton,
@@ -36,6 +37,7 @@ const Directory = lazy(() => import("./routes/Directory"));
 const Dictionary = lazy(() => import("./routes/Dictionary"));
 const Questions = lazy(() => import("./routes/Questions"));
 const TagMap = lazy(() => import("./routes/TagMap"));
+const Calendar = lazy(() => import("./routes/Calendar"));
 
 const PdfScrollTest = DEV_MODE
   ? lazy(() => import("./routes/PdfScrollTest"))
@@ -317,6 +319,13 @@ const AppContent = () => {
           <Route
             path="tag-map"
             element={withRouteFallback(<TagMap />, <TagMapScreenSkeleton />)}
+          />
+          <Route
+            path="calendar"
+            element={withRouteFallback(
+              <Calendar />,
+              <CalendarScreenSkeleton />,
+            )}
           />
 
           <Route
