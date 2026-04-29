@@ -135,22 +135,37 @@ const mainNavItems: AppSidebarNavItem[] = [
       pathname === "/folders" && searchParams.get("home") === "1",
   },
   {
-    id: "inbox",
-    label: "Inbox",
-    to: "/directory",
+    id: "review",
+    label: "Review",
+    to: "/gallery",
     icon: <InboxIcon className="app-sidebar__nav-icon" />,
     exactPath: true,
   },
   {
-    id: "saved-items",
-    label: "Saved items",
+    id: "library",
+    label: "Library",
     to: "/folders",
-    icon: <ArchiveIcon className="app-sidebar__nav-icon" />,
+    icon: <FolderIcon className="app-sidebar__nav-icon" />,
     match: (pathname, searchParams) =>
       pathname === "/folders" &&
       searchParams.get("home") !== "1" &&
       searchParams.get("content") !== "pdf" &&
       searchParams.get("content") !== "note",
+  },
+  {
+    id: "calendar",
+    label: "Calendar",
+    to: "/folders?content=note",
+    icon: <CalendarIcon className="app-sidebar__nav-icon" />,
+    match: (pathname, searchParams) =>
+      pathname === "/folders" && searchParams.get("content") === "note",
+  },
+  {
+    id: "explore",
+    label: "Explore",
+    to: "/tag-map",
+    icon: <MapIcon className="app-sidebar__nav-icon" />,
+    exactPath: true,
   },
 ];
 
