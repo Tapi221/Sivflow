@@ -2,6 +2,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 
 import { AppShellLoadingFallback } from "@/components/loading/ScreenSkeletons";
+import { useWorkspaceTabsRouteSync } from "@/features/workspace-tabs/hooks/useWorkspaceTabsRouteSync";
 import { AppSidebar } from "./AppSidebar";
 import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
@@ -45,6 +46,8 @@ export const AppLayout = () => {
 
   const isScrollLocked =
     isFoldersRoute || isCardEditRoute || isCardSetViewRoute || isStudyRoute;
+
+  useWorkspaceTabsRouteSync();
 
   useEffect(() => {
     resetWorkspaceScroll(mainRef.current);
@@ -97,11 +100,7 @@ export const AppLayout = () => {
     >
       <AppSidebar />
 
-      <WorkspaceShell
-        isScrollLocked={isScrollLocked}
-        mainRef={mainRef}
-        showTabs={isFoldersRoute}
-      >
+      <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
         <Suspense fallback={<LoadingFallback />}>
           <Outlet />
         </Suspense>

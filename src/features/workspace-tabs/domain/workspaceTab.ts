@@ -2,50 +2,111 @@ import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerR
 
 export const WORKSPACE_DEFAULT_EXPLORER_TAB_ID = "explorer:default" as const;
 
-export type WorkspaceTabKind = "explorer" | "document" | "cardSet" | "card";
+export type WorkspaceSidebarSection =
+  | "home"
+  | "review"
+  | "library"
+  | "calendar"
+  | "explore";
 
-export type WorkspaceExplorerTab = {
+export type WorkspaceRouteTabId =
+  | "route:home"
+  | "route:review"
+  | "route:calendar"
+  | "route:explore";
+
+export type WorkspaceTabKind =
+  | "route"
+  | "explorer"
+  | "document"
+  | "cardSet"
+  | "card";
+
+type WorkspaceTabBase = {
+  title: string;
+  isClosable: boolean;
+  sectionKey: WorkspaceSidebarSection;
+};
+
+export type WorkspaceRouteTab = WorkspaceTabBase & {
+  id: WorkspaceRouteTabId;
+  kind: "route";
+  routePath: string;
+};
+
+export type WorkspaceExplorerTab = WorkspaceTabBase & {
   id: `explorer:${string}`;
   kind: "explorer";
-  title: string;
   explorerState: ExplorerRouteState;
-  isClosable: boolean;
 };
 
-export type WorkspaceDocumentTab = {
+export type WorkspaceDocumentTab = WorkspaceTabBase & {
   id: `document:${string}`;
   kind: "document";
-  title: string;
   documentId: string;
   folderId: string | null;
-  isClosable: boolean;
 };
 
-export type WorkspaceCardSetTab = {
+export type WorkspaceCardSetTab = WorkspaceTabBase & {
   id: `cardSet:${string}`;
   kind: "cardSet";
-  title: string;
   cardSetId: string;
   folderId: string | null;
-  isClosable: boolean;
 };
 
-export type WorkspaceCardTab = {
+export type WorkspaceCardTab = WorkspaceTabBase & {
   id: `card:${string}`;
   kind: "card";
-  title: string;
   cardId: string;
   folderId: string | null;
-  isClosable: boolean;
 };
 
 export type WorkspaceTab =
+  | WorkspaceRouteTab
   | WorkspaceExplorerTab
   | WorkspaceDocumentTab
   | WorkspaceCardSetTab
   | WorkspaceCardTab;
 
-export type WorkspaceEntityTab = Exclude<WorkspaceTab, WorkspaceExplorerTab>;
+export type WorkspaceEntityTab = Exclude<
+  WorkspaceTab,
+  WorkspaceExplorerTab | WorkspaceRouteTab
+>;
+
+export const WORKSPACE_ROUTE_TABS = [
+  {
+    id: "route:home",
+    kind: "route",
+    title: "Home",
+    routePath: "/folders?home=1",
+    isClosable: false,
+    sectionKey: "home",
+  },
+  {
+    id: "route:review",
+    kind: "route",
+    title: "Review",
+    routePath: "/gallery",
+    isClosable: false,
+    sectionKey: "review",
+  },
+  {
+    id: "route:calendar",
+    kind: "route",
+    title: "Calendar",
+    routePath: "/calendar",
+    isClosable: false,
+    sectionKey: "calendar",
+  },
+  {
+    id: "route:explore",
+    kind: "route",
+    title: "Explore",
+    routePath: "/tag-map",
+    isClosable: false,
+    sectionKey: "explore",
+  },
+] as const satisfies readonly WorkspaceRouteTab[];
 
 export const createDefaultExplorerRouteState = (): ExplorerRouteState => ({
   isHomeOnlyMode: false,

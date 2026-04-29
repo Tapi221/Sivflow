@@ -1,8 +1,10 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { FileText, FolderOutlineIcon, Layers, Plus, X } from "@/ui/icons";
+import { FileText, Layers, Plus, X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import type { WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
+import { resolveWorkspaceTabRoute } from "@/features/workspace-tabs/lib/resolveWorkspaceTabRoute";
 import { useWorkspaceTabsStore } from "@/features/workspace-tabs/store/useWorkspaceTabsStore";
 
 type WorkspaceTabsBarVariant = "workspace" | "titlebar";
@@ -17,9 +19,88 @@ type AppRegionStyle = CSSProperties & {
   WebkitAppRegion?: "drag" | "no-drag";
 };
 
+type IconProps = {
+  className?: string;
+};
+
 const TABS_NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
 };
+
+const resolveNextTabOnClose = (
+  tabs: WorkspaceTab[],
+  closingTabId: WorkspaceTab["id"],
+): WorkspaceTab | null => {
+  const closingIndex = tabs.findIndex((tab) => tab.id === closingTabId);
+  const nextTabs = tabs.filter((tab) => tab.id !== closingTabId);
+
+  if (nextTabs.length === 0) {
+    return null;
+  }
+
+  const fallbackIndex = Math.max(
+    0,
+    Math.min(closingIndex, nextTabs.length - 1),
+  );
+
+  return nextTabs[fallbackIndex] ?? null;
+};
+
+const IconShell = ({
+  children,
+  className,
+}: IconProps & { children: ReactNode }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    {children}
+  </svg>
+);
+
+const HomeIcon = ({ className }: IconProps) => (
+  <IconShell className={className}>
+    <path d="M4 10.5 12 4l8 6.5V20h-5v-5H9v5H4v-9.5Z" fill="currentColor" />
+  </IconShell>
+);
+
+const ReviewIcon = ({ className }: IconProps) => (
+  <IconShell className={className}>
+    <path
+      d="M5 7h14l1.5 10H15l-1.3 2h-3.4L9 17H3.5L5 7Z"
+      stroke="currentColor"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+    />
+  </IconShell>
+);
+
+const CalendarIcon = ({ className }: IconProps) => (
+  <IconShell className={className}>
+    <rect
+      x="5"
+      y="6"
+      width="14"
+      height="13"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
+    <path
+      d="M8 4v4M16 4v4M5 10h14"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="1.8"
+    />
+  </IconShell>
+);
+
+const ExploreIcon = ({ className }: IconProps) => (
+  <IconShell className={className}>
+    <path
+      d="M4 6.5 9.5 4l5 2.5L20 4v13.5L14.5 20l-5-2.5L4 20V6.5Z"
+      fill="currentColor"
+      opacity="0.9"
+    />
+  </IconShell>
+);
 
 const LibraryTabIcon = ({ className }: { className?: string }) => (
   <svg
@@ -36,12 +117,23 @@ const LibraryTabIcon = ({ className }: { className?: string }) => (
 );
 
 const resolveTabIcon = (tab: WorkspaceTab) => {
+  if (tab.kind === "route") {
+    if (tab.sectionKey === "home") return HomeIcon;
+    if (tab.sectionKey === "review") return ReviewIcon;
+    if (tab.sectionKey === "calendar") return CalendarIcon;
+    if (tab.sectionKey === "explore") return ExploreIcon;
+  }
+
   if (tab.kind === "explorer") return LibraryTabIcon;
   if (tab.kind === "cardSet") return Layers;
   return FileText;
 };
 
 const resolveTabWidthClassName = (tab: WorkspaceTab) => {
+  if (tab.kind === "route") {
+    return "w-[170px] shrink-0";
+  }
+
   if (tab.kind === "explorer") {
     return "shrink-0";
   }
@@ -50,15 +142,23 @@ const resolveTabWidthClassName = (tab: WorkspaceTab) => {
 };
 
 const resolveTabStyle = (tab: WorkspaceTab): CSSProperties | undefined => {
-  if (tab.kind !== "explorer") {
-    return undefined;
+  if (tab.kind === "explorer") {
+    return {
+      width: "210px",
+      maxWidth: "210px",
+      flexBasis: "210px",
+    };
   }
 
-  return {
-    width: "210px",
-    maxWidth: "210px",
-    flexBasis: "210px",
-  };
+  if (tab.kind === "route") {
+    return {
+      width: "170px",
+      maxWidth: "170px",
+      flexBasis: "170px",
+    };
+  }
+
+  return undefined;
 };
 
 export const WorkspaceTabsBar = ({
@@ -66,6 +166,7 @@ export const WorkspaceTabsBar = ({
   className,
   noDragStyle,
 }: WorkspaceTabsBarProps) => {
+  const navigate = useNavigate();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const selectTab = useWorkspaceTabsStore((state) => state.selectTab);
@@ -123,7 +224,10 @@ export const WorkspaceTabsBar = ({
                   )}
                   aria-current={selected ? "page" : undefined}
                   title={tab.title}
-                  onClick={() => selectTab(tab.id)}
+                  onClick={() => {
+                    selectTab(tab.id);
+                    navigate(resolveWorkspaceTabRoute(tab));
+                  }}
                 >
                   <Icon
                     className={cn(
@@ -148,7 +252,16 @@ export const WorkspaceTabsBar = ({
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
+
+                      const nextTab = selected
+                        ? resolveNextTabOnClose(tabs, tab.id)
+                        : null;
+
                       closeTab(tab.id);
+
+                      if (nextTab) {
+                        navigate(resolveWorkspaceTabRoute(nextTab));
+                      }
                     }}
                   >
                     <X className="h-2.5 w-2.5" />
@@ -168,6 +281,7 @@ export const WorkspaceTabsBar = ({
         title="新しいエクスプローラータブ"
         onClick={() => {
           createExplorerTab();
+          navigate("/folders?view=section-list");
         }}
       >
         <Plus className="h-4 w-4" />

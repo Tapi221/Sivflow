@@ -4,10 +4,12 @@ import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerR
 import {
   createDefaultExplorerRouteState,
   WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
+  WORKSPACE_ROUTE_TABS,
   type WorkspaceCardSetTab,
   type WorkspaceCardTab,
   type WorkspaceDocumentTab,
   type WorkspaceExplorerTab,
+  type WorkspaceRouteTab,
   type WorkspaceTab,
 } from "@/features/workspace-tabs/domain/workspaceTab";
 
@@ -67,7 +69,18 @@ const createInitialExplorerTab = (): WorkspaceExplorerTab => ({
   title: EXPLORER_TAB_TITLE,
   explorerState: createDefaultExplorerRouteState(),
   isClosable: false,
+  sectionKey: "library",
 });
+
+const createInitialTabs = (): WorkspaceTab[] => {
+  return [
+    WORKSPACE_ROUTE_TABS[0] as WorkspaceRouteTab,
+    WORKSPACE_ROUTE_TABS[1] as WorkspaceRouteTab,
+    createInitialExplorerTab(),
+    WORKSPACE_ROUTE_TABS[2] as WorkspaceRouteTab,
+    WORKSPACE_ROUTE_TABS[3] as WorkspaceRouteTab,
+  ];
+};
 
 const createRandomIdSegment = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -128,7 +141,7 @@ const resolveNextActiveTabId = (
 };
 
 export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
-  tabs: [createInitialExplorerTab()],
+  tabs: createInitialTabs(),
   activeTabId: WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
 
   openExplorerTab: (params = {}) => {
@@ -146,6 +159,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
       title: params.title ?? EXPLORER_TAB_TITLE,
       explorerState: params.explorerState ?? createDefaultExplorerRouteState(),
       isClosable: params.isClosable ?? id !== WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
+      sectionKey: "library",
     };
 
     set((state) => ({
@@ -164,6 +178,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
       title: EXPLORER_TAB_TITLE,
       explorerState: explorerState ?? createDefaultExplorerRouteState(),
       isClosable: true,
+      sectionKey: "library",
     };
 
     set((state) => ({
@@ -190,6 +205,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
       documentId,
       folderId,
       isClosable: true,
+      sectionKey: "library",
     };
 
     set((state) => ({
@@ -216,6 +232,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
       cardSetId,
       folderId,
       isClosable: true,
+      sectionKey: "library",
     };
 
     set((state) => ({
@@ -242,6 +259,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
       cardId,
       folderId,
       isClosable: true,
+      sectionKey: "library",
     };
 
     set((state) => ({
@@ -274,7 +292,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
         : state.activeTabId;
 
     set({
-      tabs: nextTabs.length > 0 ? nextTabs : [createInitialExplorerTab()],
+      tabs: nextTabs.length > 0 ? nextTabs : createInitialTabs(),
       activeTabId: nextActiveTabId,
     });
   },

@@ -396,9 +396,9 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   );
 
   const workspaceContent =
-    activeTab.kind === "explorer" ? (
-      explorerContent
-    ) : (
+    activeTab.kind === "document" ||
+    activeTab.kind === "card" ||
+    activeTab.kind === "cardSet" ? (
       <WorkspaceTabPanel
         activeTab={activeTab}
         cards={cards}
@@ -411,6 +411,8 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
           // カード更新後の処理は既存実装へ委譲
         }}
       />
+    ) : (
+      explorerContent
     );
 
   return (

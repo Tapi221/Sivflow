@@ -316,16 +316,6 @@
   grid-template-rows: auto minmax(0, 1fr);
 }
 
-.workspace-shell--without-tabs {
-  grid-template-rows: minmax(0, 1fr);
-}
-
-[data-presentation-target="desktop"]
-  .workspace-shell--without-tabs
-  .app-layout__main {
-  padding-top: var(--app-top-inset, 44px);
-}
-
 .workspace-shell__tabs {
   min-width: 0;
   min-height: 0;
