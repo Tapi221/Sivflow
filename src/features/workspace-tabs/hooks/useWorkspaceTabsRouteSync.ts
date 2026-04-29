@@ -72,10 +72,6 @@ export const useWorkspaceTabsRouteSync = () => {
     }
 
     if (pathname === "/tag-map") {
-      const nextTabId = openSectionTab("explore");
-      if (activeTabId !== nextTabId) {
-        selectTab(nextTabId);
-      }
       return;
     }
 

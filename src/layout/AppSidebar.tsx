@@ -11,7 +11,7 @@ type AppSidebarNavItem = {
   to: string;
   icon: ReactNode;
   exactPath?: boolean;
-  sectionKey?: "home" | "review" | "library" | "calendar" | "explore";
+  sectionKey?: "home" | "review" | "library" | "calendar";
   onClick?: () => void;
   match?: (pathname: string, searchParams: URLSearchParams) => boolean;
 };
@@ -62,16 +62,6 @@ const CalendarIcon = ({ className }: SidebarIconProps) => (
       stroke="currentColor"
       strokeLinecap="round"
       strokeWidth="1.8"
-    />
-  </IconShell>
-);
-
-const MapIcon = ({ className }: SidebarIconProps) => (
-  <IconShell className={className}>
-    <path
-      d="M4 6.5 9.5 4l5 2.5L20 4v13.5L14.5 20l-5-2.5L4 20V6.5Z"
-      fill="currentColor"
-      opacity="0.9"
     />
   </IconShell>
 );
@@ -160,14 +150,6 @@ const mainNavItems: AppSidebarNavItem[] = [
     to: "/calendar",
     icon: <CalendarIcon className="app-sidebar__nav-icon" />,
     sectionKey: "calendar",
-    exactPath: true,
-  },
-  {
-    id: "explore",
-    label: "Explore",
-    to: "/tag-map",
-    icon: <MapIcon className="app-sidebar__nav-icon" />,
-    sectionKey: "explore",
     exactPath: true,
   },
 ];

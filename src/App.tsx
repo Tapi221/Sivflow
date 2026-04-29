@@ -9,7 +9,6 @@ import {
   GalleryScreenSkeleton,
   RedirectPageScreenSkeleton,
   StudyModeScreenSkeleton,
-  TagMapScreenSkeleton,
 } from "@/components/loading/ScreenSkeletons";
 import { BlockNoteSandboxPage } from "@/sandbox/blocknote";
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
@@ -36,7 +35,6 @@ const Gallery = lazy(() => import("./routes/Gallery"));
 const Directory = lazy(() => import("./routes/Directory"));
 const Dictionary = lazy(() => import("./routes/Dictionary"));
 const Questions = lazy(() => import("./routes/Questions"));
-const TagMap = lazy(() => import("./routes/TagMap"));
 const Calendar = lazy(() => import("./routes/Calendar"));
 
 const PdfScrollTest = DEV_MODE
@@ -316,10 +314,7 @@ const AppContent = () => {
             element={withRouteFallback(<Folders />, <FoldersScreenSkeleton />)}
           />
 
-          <Route
-            path="tag-map"
-            element={withRouteFallback(<TagMap />, <TagMapScreenSkeleton />)}
-          />
+          <Route path="tag-map" element={<Navigate to="/folders" replace />} />
           <Route
             path="calendar"
             element={withRouteFallback(

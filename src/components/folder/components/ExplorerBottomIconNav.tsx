@@ -5,7 +5,6 @@ import {
   ExplorerDictionaryNavIcon,
   ExplorerFolderNavIcon,
   ExplorerQuestionNavIcon,
-  ExplorerTagMapNavIcon,
 } from "@/components/explorer/ExplorerNavIcons";
 import { cn } from "@/lib/utils";
 
@@ -22,12 +21,6 @@ const NAV_ITEMS: BottomNavItem[] = [
     label: "フォルダ",
     matcher: /^\/folders(?:\/|$)/i,
     Icon: ExplorerFolderNavIcon,
-  },
-  {
-    to: "/tag-map",
-    label: "タグ",
-    matcher: /^\/tag-map(?:\/|$)/i,
-    Icon: ExplorerTagMapNavIcon,
   },
   {
     to: "/dictionary",
