@@ -27,6 +27,10 @@ const TABS_NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
 };
 
+const TAB_SURFACE_STYLE: CSSProperties = {
+  backgroundColor: "var(--app-sidebar-bg)",
+};
+
 const resolveNextTabOnClose = (
   tabs: WorkspaceTab[],
   closingTabId: WorkspaceTab["id"],
@@ -180,48 +184,46 @@ export const WorkspaceTabsBar = ({
 
   return (
     <div
-      style={interactiveStyle}
+      style={{ ...TAB_SURFACE_STYLE, ...interactiveStyle }}
       className={cn(
         "explorer-chrome-font explorer-workspace-tabs-bar relative z-30 flex shrink-0 items-end gap-0 overflow-hidden",
         isTitlebar
-          ? "h-full min-w-0 flex-1 bg-transparent px-0 pt-0"
+          ? "h-full min-w-0 flex-1 px-0 pt-0"
           : [
-              "h-[40px] w-full min-w-0 border-b border-[#c7c9cc] bg-[#d5d7da]",
+              "h-[40px] w-full min-w-0 border-b border-black/10",
               "px-1.5 pt-0",
             ],
         className,
       )}
     >
       <div className="explorer-workspace-tabs-list flex min-w-0 items-end overflow-hidden gap-0">
-        {tabs.map((tab, index) => {
+        {tabs.map((tab) => {
           const selected = tab.id === activeTabId;
           const Icon = resolveTabIcon(tab);
 
           return (
             <div key={tab.id} className="relative flex items-end">
               <div
-                style={{ ...resolveTabStyle(tab), ...interactiveStyle }}
+                style={{
+                  ...TAB_SURFACE_STYLE,
+                  ...resolveTabStyle(tab),
+                  ...interactiveStyle,
+                }}
                 data-workspace-tab-kind={tab.kind}
                 data-workspace-tab-active={selected ? "true" : undefined}
                 className={cn(
                   "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-hidden border text-[13px] transition-[background-color,border-color,color,box-shadow] duration-150",
-                  selected
-                    ? "explorer-workspace-tab--active"
-                    : "explorer-workspace-tab--inactive",
-                  index === 0 ? "ml-0" : "ml-0",
                   "mb-0 h-[36px] rounded-tl-[8px] rounded-tr-[8px]",
                   resolveTabWidthClassName(tab),
                   selected
-                    ? "border-[#c6c8cb] bg-white text-black"
-                    : "border-[#cfd1d4] bg-[#eceef1] text-black/80 hover:bg-white hover:text-black",
+                    ? "border-black/12 text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]"
+                    : "border-transparent text-black/80 hover:border-black/8 hover:text-black",
                 )}
               >
                 <button
                   type="button"
                   style={interactiveStyle}
-                  className={cn(
-                    "explorer-workspace-tab-button flex h-full min-w-0 flex-1 items-center gap-2 text-left outline-none px-3",
-                  )}
+                  className="explorer-workspace-tab-button flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left outline-none"
                   aria-current={selected ? "page" : undefined}
                   title={tab.title}
                   onClick={() => {
@@ -276,7 +278,7 @@ export const WorkspaceTabsBar = ({
       <button
         type="button"
         style={interactiveStyle}
-        className="explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-transparent text-[#6f7680] outline-none transition-colors hover:bg-white/70 hover:text-[#2c2f35]"
+        className="explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-transparent text-[#6f7680] outline-none transition-colors hover:bg-black/5 hover:text-[#2c2f35]"
         aria-label="新しいエクスプローラータブを開く"
         title="新しいエクスプローラータブ"
         onClick={() => {
