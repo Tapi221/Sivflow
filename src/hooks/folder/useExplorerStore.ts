@@ -12,7 +12,7 @@ type TagMatchMode = "any" | "all";
 type DirectoryBadgeVisibilityKey = "uncertainty" | "bookmarked" | "tags";
 type ExplorerPinnedFolderId = string;
 
-export type ExplorerLayoutMode = "detail" | "list" | "card" | "icon" | "column";
+export type ExplorerLayoutMode = "list" | "card" | "icon" | "column";
 
 type DirectoryBadgeVisibility = {
   uncertainty: boolean;
@@ -60,7 +60,7 @@ export interface ExplorerState {
 }
 
 const DEFAULT_CONTENT_TYPE_FILTER: ContentTypeFilter[] = ["card", "pdf"];
-const DEFAULT_EXPLORER_LAYOUT_MODE: ExplorerLayoutMode = "detail";
+const DEFAULT_EXPLORER_LAYOUT_MODE: ExplorerLayoutMode = "column";
 
 const DEFAULT_DIRECTORY_BADGE_VISIBILITY: DirectoryBadgeVisibility = {
   uncertainty: true,
@@ -84,7 +84,6 @@ const normalizeToggleableFlag = (value: unknown): ToggleableFlag => {
 
 const normalizeExplorerLayoutMode = (value: unknown): ExplorerLayoutMode => {
   if (
-    value === "detail" ||
     value === "list" ||
     value === "card" ||
     value === "icon" ||
