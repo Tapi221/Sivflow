@@ -8,11 +8,7 @@
       var(--ds-semantic-color-text-strong) 82%,
       #62584f 18%
     );
-    --titlebar-text: color-mix(
-      in srgb,
-      var(--sidebar-text-muted) 74%,
-      #8f867d 26%
-    );
+    --titlebar-text: var(--app-sidebar-icon, #ababab);
     --titlebar-text-muted: color-mix(
       in srgb,
       var(--sidebar-text-muted) 56%,
