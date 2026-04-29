@@ -29,7 +29,11 @@
       transparent
     );
     --titlebar-panel-bg: #f6f6f3;
-    --titlebar-panel-border: color-mix(in srgb, var(--sidebar-border) 74%, #d8d6cf 26%);
+    --titlebar-panel-border: color-mix(
+      in srgb,
+      var(--sidebar-border) 74%,
+      #d8d6cf 26%
+    );
 
     width: 100% !important;
     height: var(--desktop-top-inset-height, 44px) !important;

@@ -34,11 +34,7 @@ import {
   createAppDestination,
   createPageUrl,
 } from "@/platform/web/navigation/toWebPath";
-import type {
-  CardSet,
-  Folder,
-  SelectedExplorerItem,
-} from "@/types";
+import type { CardSet, Folder, SelectedExplorerItem } from "@/types";
 import type { DragEvent } from "react";
 import {
   useCallback,

@@ -148,27 +148,12 @@
   .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font {
     position: relative;
     z-index: 2;
-    height: 50px !important;
+    height: 40px !important;
     overflow: visible !important;
-    border-bottom: 0 !important;
-    background: rgba(252, 253, 249, 0.86) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
-
-  .explorer-workspace-tabs-bar::after,
-  .explorer-chrome-main-topbar
-    > div:first-child
-    > .explorer-chrome-font::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 0;
-    height: 1px;
-    background: var(--mf-explorer-border);
-    pointer-events: none;
+    border-bottom: 1px solid #c7c9cc !important;
+    background: #d5d7da !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   .explorer-workspace-tabs-list,
@@ -180,8 +165,9 @@
     z-index: 1;
     height: 100%;
     align-items: flex-end;
-    padding-left: 18px;
-    padding-top: 8px;
+    gap: 4px;
+    padding-left: 6px;
+    padding-top: 4px;
   }
 
   .explorer-workspace-tab,
@@ -191,37 +177,35 @@
     .group\/tab {
     position: relative;
     z-index: 1;
-    border-radius: 15px 15px 0 0 !important;
+    border-radius: 10px !important;
     font-weight: 600;
     overflow: hidden;
   }
 
   .explorer-workspace-tab--active {
     z-index: 3;
-    height: 41px !important;
-    margin-bottom: -1px !important;
-    border-color: var(--mf-explorer-border) !important;
-    border-bottom-color: var(--mf-explorer-main-chrome-surface) !important;
-    background: var(--mf-explorer-main-chrome-surface) !important;
-    color: var(--mf-explorer-text) !important;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.94),
-      0 -1px 0 rgba(255, 255, 255, 0.64) !important;
+    height: 34px !important;
+    margin-bottom: 0 !important;
+    border-color: #c6c8cb !important;
+    border-bottom-color: #c6c8cb !important;
+    background: #ffffff !important;
+    color: #111111 !important;
+    box-shadow: none !important;
   }
 
   .explorer-workspace-tab--inactive {
-    height: 38px !important;
+    height: 34px !important;
     margin-bottom: 0 !important;
-    border-color: rgba(223, 229, 220, 0.74) !important;
-    border-bottom-color: transparent !important;
-    background: rgba(252, 253, 249, 0.58) !important;
-    color: var(--mf-explorer-text-secondary) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
+    border-color: #cfd1d4 !important;
+    border-bottom-color: #cfd1d4 !important;
+    background: #eceef1 !important;
+    color: rgba(17, 17, 17, 0.8) !important;
+    box-shadow: none !important;
   }
 
   .explorer-workspace-tab--inactive:hover {
-    background: rgba(255, 255, 252, 0.9) !important;
-    color: var(--mf-explorer-text) !important;
+    background: #ffffff !important;
+    color: #111111 !important;
   }
 
   .explorer-workspace-tab-button {

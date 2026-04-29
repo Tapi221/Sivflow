@@ -18,7 +18,10 @@ type SidebarIconProps = {
   className?: string;
 };
 
-const IconShell = ({ children, className }: SidebarIconProps & { children: ReactNode }) => (
+const IconShell = ({
+  children,
+  className,
+}: SidebarIconProps & { children: ReactNode }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
     {children}
   </svg>
@@ -32,20 +35,36 @@ const HomeIcon = ({ className }: SidebarIconProps) => (
 
 const InboxIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
-    <path d="M5 7h14l1.5 10H15l-1.3 2h-3.4L9 17H3.5L5 7Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.8" />
+    <path
+      d="M5 7h14l1.5 10H15l-1.3 2h-3.4L9 17H3.5L5 7Z"
+      stroke="currentColor"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+    />
   </IconShell>
 );
 
 const ArchiveIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
-    <path d="M4.5 7h15M6 7l1 12h10l1-12M8.5 11h7" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    <path
+      d="M4.5 7h15M6 7l1 12h10l1-12M8.5 11h7"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+    />
   </IconShell>
 );
 
 const UserPlusIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
     <circle cx="9" cy="9" r="3" fill="currentColor" />
-    <path d="M3.8 19c.8-3.2 2.5-4.8 5.2-4.8 2.4 0 4 1.3 4.9 3.8M17 8v6M14 11h6" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+    <path
+      d="M3.8 19c.8-3.2 2.5-4.8 5.2-4.8 2.4 0 4 1.3 4.9 3.8M17 8v6M14 11h6"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="1.8"
+    />
   </IconShell>
 );
 
@@ -57,27 +76,55 @@ const FileIcon = ({ className }: SidebarIconProps) => (
 
 const CalendarIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
-    <rect x="5" y="6" width="14" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-    <path d="M8 4v4M16 4v4M5 10h14" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+    <rect
+      x="5"
+      y="6"
+      width="14"
+      height="13"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
+    <path
+      d="M8 4v4M16 4v4M5 10h14"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="1.8"
+    />
   </IconShell>
 );
 
 const MapIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
-    <path d="M4 6.5 9.5 4l5 2.5L20 4v13.5L14.5 20l-5-2.5L4 20V6.5Z" fill="currentColor" opacity="0.9" />
+    <path
+      d="M4 6.5 9.5 4l5 2.5L20 4v13.5L14.5 20l-5-2.5L4 20V6.5Z"
+      fill="currentColor"
+      opacity="0.9"
+    />
   </IconShell>
 );
 
 const HashIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
-    <path d="M9 4 7 20M17 4l-2 16M5 9h15M4 15h15" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+    <path
+      d="M9 4 7 20M17 4l-2 16M5 9h15M4 15h15"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="1.8"
+    />
   </IconShell>
 );
 
 const CheckIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
     <rect x="5" y="5" width="14" height="14" rx="2" fill="currentColor" />
-    <path d="m8.5 12 2.2 2.2 4.8-5" stroke="#fff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    <path
+      d="m8.5 12 2.2 2.2 4.8-5"
+      stroke="#fff"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+    />
   </IconShell>
 );
 
@@ -86,7 +133,12 @@ const TeamIcon = ({ className }: SidebarIconProps) => (
     <circle cx="12" cy="8" r="2.4" fill="currentColor" />
     <circle cx="6.8" cy="10.5" r="2" fill="currentColor" opacity="0.75" />
     <circle cx="17.2" cy="10.5" r="2" fill="currentColor" opacity="0.75" />
-    <path d="M7 19c.7-3 2.4-4.5 5-4.5s4.3 1.5 5 4.5M2.8 17.5c.5-2 1.6-3 3.4-3M21.2 17.5c-.5-2-1.6-3-3.4-3" stroke="currentColor" strokeLinecap="round" strokeWidth="1.6" />
+    <path
+      d="M7 19c.7-3 2.4-4.5 5-4.5s4.3 1.5 5 4.5M2.8 17.5c.5-2 1.6-3 3.4-3M21.2 17.5c-.5-2-1.6-3-3.4-3"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="1.6"
+    />
   </IconShell>
 );
 
@@ -98,32 +150,60 @@ const FolderIcon = ({ className }: SidebarIconProps) => (
 
 const PlayIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
-    <path d="M5 7.5 12 12l-7 4.5v-9ZM12 7.5l7 4.5-7 4.5v-9Z" fill="currentColor" />
+    <path
+      d="M5 7.5 12 12l-7 4.5v-9ZM12 7.5l7 4.5-7 4.5v-9Z"
+      fill="currentColor"
+    />
   </IconShell>
 );
 
 const GearIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
-    <path d="M12 8.5A3.5 3.5 0 1 1 12 15.5 3.5 3.5 0 0 1 12 8.5Zm7.5 3.5c0-.5-.1-1-.2-1.5l2-1.5-2-3.4-2.4 1a8.7 8.7 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.6A8.7 8.7 0 0 0 7 6.6l-2.4-1-2 3.4 2 1.5a7.1 7.1 0 0 0 0 3l-2 1.5 2 3.4 2.4-1a8.7 8.7 0 0 0 2.6 1.5L10 21.5h4l.4-2.6a8.7 8.7 0 0 0 2.6-1.5l2.4 1 2-3.4-2-1.5c.1-.5.2-1 .2-1.5Z" fill="currentColor" />
+    <path
+      d="M12 8.5A3.5 3.5 0 1 1 12 15.5 3.5 3.5 0 0 1 12 8.5Zm7.5 3.5c0-.5-.1-1-.2-1.5l2-1.5-2-3.4-2.4 1a8.7 8.7 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.6A8.7 8.7 0 0 0 7 6.6l-2.4-1-2 3.4 2 1.5a7.1 7.1 0 0 0 0 3l-2 1.5 2 3.4 2.4-1a8.7 8.7 0 0 0 2.6 1.5L10 21.5h4l.4-2.6a8.7 8.7 0 0 0 2.6-1.5l2.4 1 2-3.4-2-1.5c.1-.5.2-1 .2-1.5Z"
+      fill="currentColor"
+    />
   </IconShell>
 );
 
 const CloudIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
-    <path d="M7.5 17.5h9.3a3.2 3.2 0 0 0 .3-6.4A5.4 5.4 0 0 0 6.8 9.8 3.9 3.9 0 0 0 7.5 17.5Z" fill="currentColor" opacity="0.45" />
-    <path d="M12 9.5v5M9.8 11.7 12 9.5l2.2 2.2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" />
+    <path
+      d="M7.5 17.5h9.3a3.2 3.2 0 0 0 .3-6.4A5.4 5.4 0 0 0 6.8 9.8 3.9 3.9 0 0 0 7.5 17.5Z"
+      fill="currentColor"
+      opacity="0.45"
+    />
+    <path
+      d="M12 9.5v5M9.8 11.7 12 9.5l2.2 2.2"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.7"
+    />
   </IconShell>
 );
 
 const ChevronDownIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
-    <path d="m8 10 4 4 4-4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    <path
+      d="m8 10 4 4 4-4"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+    />
   </IconShell>
 );
 
 const ChevronRightIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
-    <path d="m10 8 4 4-4 4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    <path
+      d="m10 8 4 4-4 4"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+    />
   </IconShell>
 );
 
@@ -260,7 +340,9 @@ const AppSidebarNavLink = ({
     >
       <span className="app-sidebar__nav-icon-slot">{item.icon}</span>
       <span className="app-sidebar__nav-label">{item.label}</span>
-      {trailing ? <span className="app-sidebar__nav-trailing">{trailing}</span> : null}
+      {trailing ? (
+        <span className="app-sidebar__nav-trailing">{trailing}</span>
+      ) : null}
     </NavLink>
   );
 };
@@ -332,7 +414,9 @@ export const AppSidebar = () => {
                 to: "/folders",
                 icon: <HashIcon className="app-sidebar__nav-icon" />,
               }}
-              trailing={<ChevronDownIcon className="app-sidebar__item-chevron" />}
+              trailing={
+                <ChevronDownIcon className="app-sidebar__item-chevron" />
+              }
             />
             <div className="app-sidebar__nested-group">
               <AppSidebarNavLink
@@ -379,7 +463,9 @@ export const AppSidebar = () => {
                 to: "/folders?content=note",
                 icon: <HashIcon className="app-sidebar__nav-icon" />,
               }}
-              trailing={<ChevronRightIcon className="app-sidebar__item-chevron" />}
+              trailing={
+                <ChevronRightIcon className="app-sidebar__item-chevron" />
+              }
             />
             <AppSidebarNavLink
               item={{
@@ -388,7 +474,9 @@ export const AppSidebar = () => {
                 to: "/trash",
                 icon: <HashIcon className="app-sidebar__nav-icon" />,
               }}
-              trailing={<ChevronRightIcon className="app-sidebar__item-chevron" />}
+              trailing={
+                <ChevronRightIcon className="app-sidebar__item-chevron" />
+              }
             />
           </nav>
         </AppSidebarSection>
