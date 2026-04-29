@@ -6,53 +6,6 @@ import {
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 
-const LayoutDetailIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path
-      d="M7 6H20"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-    />
-    <path
-      d="M7 12H20"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-    />
-    <path
-      d="M7 18H20"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-    />
-    <path
-      d="M4 6H4.01"
-      stroke="currentColor"
-      strokeWidth="2.6"
-      strokeLinecap="round"
-    />
-    <path
-      d="M4 12H4.01"
-      stroke="currentColor"
-      strokeWidth="2.6"
-      strokeLinecap="round"
-    />
-    <path
-      d="M4 18H4.01"
-      stroke="currentColor"
-      strokeWidth="2.6"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
 const LayoutListIcon = () => (
   <svg
     width="18"
@@ -228,7 +181,6 @@ export const LayoutPanel = ({ className }: { className?: string }) => {
   const options = useMemo(
     () =>
       [
-        { value: "detail" as const, label: "詳細", icon: <LayoutDetailIcon /> },
         { value: "list" as const, label: "一覧", icon: <LayoutListIcon /> },
         { value: "card" as const, label: "カード", icon: <LayoutCardIcon /> },
         {
