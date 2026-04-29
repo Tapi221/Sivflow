@@ -144,11 +144,11 @@ const mainNavItems: AppSidebarNavItem[] = [
   {
     id: "library",
     label: "Library",
-    to: "/folders",
+    to: "/folders?view=section-list",
     icon: <FolderIcon className="app-sidebar__nav-icon" />,
     match: (pathname, searchParams) =>
       pathname === "/folders" &&
-      searchParams.get("home") !== "1" &&
+      searchParams.get("view") === "section-list" &&
       searchParams.get("content") !== "pdf" &&
       searchParams.get("content") !== "note",
   },
