@@ -59,7 +59,7 @@ type WorkspaceTabsState = {
   updateTabTitle: (tabId: WorkspaceTab["id"], title: string) => void;
 };
 
-const EXPLORER_TAB_TITLE = "エクスプローラー";
+const EXPLORER_TAB_TITLE = "Library";
 
 const createInitialExplorerTab = (): WorkspaceExplorerTab => ({
   id: WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
