@@ -44,36 +44,6 @@ const InboxIcon = ({ className }: SidebarIconProps) => (
   </IconShell>
 );
 
-const ArchiveIcon = ({ className }: SidebarIconProps) => (
-  <IconShell className={className}>
-    <path
-      d="M4.5 7h15M6 7l1 12h10l1-12M8.5 11h7"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="1.8"
-    />
-  </IconShell>
-);
-
-const UserPlusIcon = ({ className }: SidebarIconProps) => (
-  <IconShell className={className}>
-    <circle cx="9" cy="9" r="3" fill="currentColor" />
-    <path
-      d="M3.8 19c.8-3.2 2.5-4.8 5.2-4.8 2.4 0 4 1.3 4.9 3.8M17 8v6M14 11h6"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeWidth="1.8"
-    />
-  </IconShell>
-);
-
-const FileIcon = ({ className }: SidebarIconProps) => (
-  <IconShell className={className}>
-    <path d="M6 4.5h8l4 4V20H6V4.5Z" fill="currentColor" />
-  </IconShell>
-);
-
 const CalendarIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
     <rect
@@ -104,50 +74,6 @@ const MapIcon = ({ className }: SidebarIconProps) => (
   </IconShell>
 );
 
-const HashIcon = ({ className }: SidebarIconProps) => (
-  <IconShell className={className}>
-    <path
-      d="M9 4 7 20M17 4l-2 16M5 9h15M4 15h15"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeWidth="1.8"
-    />
-  </IconShell>
-);
-
-const CheckIcon = ({ className }: SidebarIconProps) => (
-  <IconShell className={className}>
-    <rect x="5" y="5" width="14" height="14" rx="2" fill="currentColor" />
-    <path
-      d="m8.5 12 2.2 2.2 4.8-5"
-      stroke="#fff"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="1.8"
-    />
-  </IconShell>
-);
-
-const TeamIcon = ({ className }: SidebarIconProps) => (
-  <IconShell className={className}>
-    <circle cx="12" cy="8" r="2.4" fill="currentColor" />
-    <circle cx="6.8" cy="10.5" r="2" fill="currentColor" opacity="0.75" />
-    <circle cx="17.2" cy="10.5" r="2" fill="currentColor" opacity="0.75" />
-    <path
-      d="M7 19c.7-3 2.4-4.5 5-4.5s4.3 1.5 5 4.5M2.8 17.5c.5-2 1.6-3 3.4-3M21.2 17.5c-.5-2-1.6-3-3.4-3"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeWidth="1.6"
-    />
-  </IconShell>
-);
-
-const FolderIcon = ({ className }: SidebarIconProps) => (
-  <IconShell className={className}>
-    <path d="M4 7h6l2 2h8v9H4V7Z" fill="currentColor" />
-  </IconShell>
-);
-
 const LibraryIcon = ({ className }: SidebarIconProps) => (
   <svg
     className={className}
@@ -160,15 +86,6 @@ const LibraryIcon = ({ className }: SidebarIconProps) => (
       fill="currentColor"
     />
   </svg>
-);
-
-const PlayIcon = ({ className }: SidebarIconProps) => (
-  <IconShell className={className}>
-    <path
-      d="M5 7.5 12 12l-7 4.5v-9ZM12 7.5l7 4.5-7 4.5v-9Z"
-      fill="currentColor"
-    />
-  </IconShell>
 );
 
 const GearIcon = ({ className }: SidebarIconProps) => (
@@ -201,18 +118,6 @@ const ChevronDownIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
     <path
       d="m8 10 4 4 4-4"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="1.8"
-    />
-  </IconShell>
-);
-
-const ChevronRightIcon = ({ className }: SidebarIconProps) => (
-  <IconShell className={className}>
-    <path
-      d="m10 8 4 4-4 4"
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -258,38 +163,6 @@ const mainNavItems: AppSidebarNavItem[] = [
   {
     id: "explore",
     label: "Explore",
-    to: "/tag-map",
-    icon: <MapIcon className="app-sidebar__nav-icon" />,
-    exactPath: true,
-  },
-];
-
-const workspaceItems: AppSidebarNavItem[] = [
-  {
-    id: "my-tasks",
-    label: "My tasks",
-    to: "/gallery",
-    icon: <UserPlusIcon className="app-sidebar__nav-icon" />,
-    exactPath: true,
-  },
-  {
-    id: "projects",
-    label: "Projects",
-    to: "/folders?content=pdf",
-    icon: <FileIcon className="app-sidebar__nav-icon" />,
-    match: (pathname, searchParams) =>
-      pathname === "/folders" && searchParams.get("content") === "pdf",
-  },
-  {
-    id: "calendar",
-    label: "Calendar",
-    to: "/calendar",
-    icon: <CalendarIcon className="app-sidebar__nav-icon" />,
-    exactPath: true,
-  },
-  {
-    id: "roadmaps",
-    label: "Roadmaps",
     to: "/tag-map",
     icon: <MapIcon className="app-sidebar__nav-icon" />,
     exactPath: true,
@@ -363,29 +236,9 @@ const AppSidebarNavLink = ({
   );
 };
 
-const AppSidebarSection = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) => (
-  <section className="app-sidebar__section">
-    <div className="app-sidebar__section-title">
-      <span>{title}</span>
-      <ChevronDownIcon className="app-sidebar__section-chevron" />
-    </div>
-    {children}
-  </section>
-);
-
 export const AppSidebar = () => {
   const closeCalendar = useExplorerCalendarViewStore((state) => state.close);
   const mainNavItemsWithActions = mainNavItems.map((item) => ({
-    ...item,
-    onClick: closeCalendar,
-  }));
-  const workspaceItemsWithActions = workspaceItems.map((item) => ({
     ...item,
     onClick: closeCalendar,
   }));
@@ -412,90 +265,6 @@ export const AppSidebar = () => {
             <AppSidebarNavLink key={item.id} item={item} />
           ))}
         </nav>
-
-        <AppSidebarSection title="Workspace">
-          <nav className="app-sidebar__nav" aria-label="Workspace navigation">
-            {workspaceItemsWithActions.map((item) => (
-              <AppSidebarNavLink key={item.id} item={item} />
-            ))}
-          </nav>
-        </AppSidebarSection>
-
-        <AppSidebarSection title="Your channels">
-          <nav className="app-sidebar__nav" aria-label="Channel navigation">
-            <AppSidebarNavLink
-              item={{
-                id: "engineering",
-                label: "Engineering",
-                to: "/folders",
-                icon: <HashIcon className="app-sidebar__nav-icon" />,
-              }}
-              trailing={
-                <ChevronDownIcon className="app-sidebar__item-chevron" />
-              }
-            />
-            <div className="app-sidebar__nested-group">
-              <AppSidebarNavLink
-                nested
-                item={{
-                  id: "docs",
-                  label: "Docs",
-                  to: "/directory",
-                  icon: <CheckIcon className="app-sidebar__nav-icon" />,
-                }}
-              />
-              <AppSidebarNavLink
-                nested
-                item={{
-                  id: "teams",
-                  label: "Teams",
-                  to: "/gallery",
-                  icon: <TeamIcon className="app-sidebar__nav-icon" />,
-                }}
-              />
-              <AppSidebarNavLink
-                nested
-                item={{
-                  id: "initiatives",
-                  label: "Initiatives",
-                  to: "/tag-map",
-                  icon: <FolderIcon className="app-sidebar__nav-icon" />,
-                }}
-              />
-              <AppSidebarNavLink
-                nested
-                item={{
-                  id: "active-sprint",
-                  label: "Active sprint",
-                  to: "/folders?content=pdf",
-                  icon: <PlayIcon className="app-sidebar__nav-icon" />,
-                }}
-              />
-            </div>
-            <AppSidebarNavLink
-              item={{
-                id: "design",
-                label: "Design",
-                to: "/folders?content=note",
-                icon: <HashIcon className="app-sidebar__nav-icon" />,
-              }}
-              trailing={
-                <ChevronRightIcon className="app-sidebar__item-chevron" />
-              }
-            />
-            <AppSidebarNavLink
-              item={{
-                id: "marketing",
-                label: "Marketing",
-                to: "/trash",
-                icon: <HashIcon className="app-sidebar__nav-icon" />,
-              }}
-              trailing={
-                <ChevronRightIcon className="app-sidebar__item-chevron" />
-              }
-            />
-          </nav>
-        </AppSidebarSection>
       </div>
 
       <div className="app-sidebar__bottom">

@@ -13,7 +13,6 @@ import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
 import { SecurityAlertBanner } from "./components/security/SecurityAlertBanner";
 import { LocalDBStatusBanner } from "./components/security/LocalDBStatusBanner";
 import { AppLayout } from "./layout/AppLayout";
-import { TitleBar } from "./layout/TitleBar";
 
 const Layout = () => {
   const location = useLocation();
@@ -164,7 +163,6 @@ const Layout = () => {
         } as React.CSSProperties
       }
     >
-      <TitleBar />
       <GlobalSearchDialog />
 
       <SettingsDialog
