@@ -58,20 +58,6 @@ const formatDateTime = (value: Date | null): string => {
   return `${year}/${month}/${day} ${hours}:${minutes}`;
 };
 
-const formatDateShort = (value: Date | null): string => {
-  if (!value) {
-    return "未記録";
-  }
-
-  const year = value.getFullYear();
-  const month = String(value.getMonth() + 1).padStart(2, "0");
-  const day = String(value.getDate()).padStart(2, "0");
-  const hours = String(value.getHours()).padStart(2, "0");
-  const minutes = String(value.getMinutes()).padStart(2, "0");
-
-  return `${year}/${month}/${day} ${hours}:${minutes}`;
-};
-
 const formatPageCount = (value: number | null): string => {
   if (!value || value <= 0) {
     return "—";
@@ -250,27 +236,6 @@ const TagChip = ({
       {label}
     </span>
   );
-};
-
-const KeyValueRow = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) => {
-  return (
-    <div className="grid grid-cols-[88px_minmax(0,1fr)] items-start gap-3 text-[13px] leading-5">
-      <span className="text-[#7a867f]">{label}</span>
-      <div className="min-w-0 text-right font-medium text-[#48524f]">
-        {value}
-      </div>
-    </div>
-  );
-};
-
-const EmptyText = ({ label }: { label: string }) => {
-  return <span className="text-[#9aa49f]">{label}</span>;
 };
 
 const PdfLibraryDashboard = ({
@@ -508,7 +473,7 @@ const PdfLibraryDashboard = ({
           </h2>
           <p className="mt-3 max-w-xl text-[14px] leading-7 text-[#6f7b78]">
             PDF
-            を取り込むと、この画面で概要カード・一覧テーブル・詳細パネルをまとめて管理できます。
+            を取り込むと、この画面で概要カードと一覧テーブルをまとめて管理できます。
           </p>
           <button
             type="button"
@@ -533,7 +498,7 @@ const PdfLibraryDashboard = ({
         onChange={handleToolbarFileInputChange}
       />
 
-      <div className="grid min-h-0 w-full grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_296px]">
+      <div className="grid min-h-0 w-full grid-cols-1 gap-4">
         <div className="flex min-h-0 min-w-0 flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
             <section className={cardClassName}>
@@ -601,21 +566,18 @@ const PdfLibraryDashboard = ({
                 </span>
               </div>
 
-              <div className="mt-4 space-y-2.5">
+              <div className="mt-4 divide-y divide-[#eef0f3] border-y border-[#e5e7eb]">
                 {recentRows.map((row) => (
                   <button
                     key={row.id}
                     type="button"
-                    className="flex w-full items-start gap-3 text-left"
+                    className="flex h-8 w-full items-center gap-3 text-left transition-colors hover:bg-[#fafafa]"
                     onClick={() => setSelectedDocumentId(row.id)}
                   >
                     <IconBadge label="PDF" tone="rose" />
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-[13px] font-semibold leading-5 text-[#29343b]">
+                      <div className="truncate text-[13px] font-medium leading-[17px] text-[#273038]">
                         {row.title}
-                      </div>
-                      <div className="mt-1 text-[12px] text-[#7d8784]">
-                        {formatDateShort(row.updatedAt)}
                       </div>
                     </div>
                   </button>
@@ -648,6 +610,7 @@ const PdfLibraryDashboard = ({
                         isSelected ? "bg-[#f9fafb]" : "hover:bg-[#fafafa]",
                       )}
                       onClick={() => setSelectedDocumentId(row.id)}
+                      onDoubleClick={() => onOpenDocument(row.id)}
                     >
                       <div className="min-w-0">
                         <div className="flex items-center gap-3">
@@ -731,106 +694,6 @@ const PdfLibraryDashboard = ({
             </div>
           </section>
         </div>
-
-        <aside className="flex min-h-0 min-w-0 flex-col gap-4">
-          <section className={cardClassName}>
-            <div className="flex items-start gap-3">
-              <IconBadge label="PDF" tone="rose" />
-              <div className="min-w-0">
-                <div className="text-[13px] font-semibold text-[#30403d]">
-                  PDFの詳細
-                </div>
-                <div className="mt-3 break-words text-[18px] font-semibold leading-7 text-[#1d2530]">
-                  {selectedRow?.title}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 space-y-2.5">
-              <KeyValueRow
-                label="カテゴリ"
-                value={
-                  selectedRow ? (
-                    <TagChip label={selectedRow.categoryLabel} tone="violet" />
-                  ) : (
-                    <EmptyText label="未分類" />
-                  )
-                }
-              />
-              <KeyValueRow
-                label="ページ数"
-                value={
-                  selectedRow ? (
-                    formatPageCount(selectedRow.pageCount)
-                  ) : (
-                    <EmptyText label="—" />
-                  )
-                }
-              />
-              <KeyValueRow
-                label="タグ"
-                value={
-                  selectedRow && selectedRow.tags.length > 0 ? (
-                    <div className="flex flex-wrap justify-end gap-2">
-                      {selectedRow.tags.map((tag, index) => (
-                        <TagChip
-                          key={`${selectedRow.id}:${tag}:${index}`}
-                          label={tag}
-                          tone={index % 2 === 0 ? "violet" : "green"}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <EmptyText label="タグなし" />
-                  )
-                }
-              />
-              <KeyValueRow
-                label="閲覧位置"
-                value={
-                  selectedRow?.currentPage ? (
-                    `P.${selectedRow.currentPage}`
-                  ) : (
-                    <EmptyText label="未記録" />
-                  )
-                }
-              />
-              <KeyValueRow
-                label="最終閲覧"
-                value={formatDateTime(selectedRow?.lastViewedAt ?? null)}
-              />
-              <KeyValueRow
-                label="更新日"
-                value={formatDateTime(selectedRow?.updatedAt ?? null)}
-              />
-              <KeyValueRow
-                label="保存先"
-                value={
-                  <span className="break-words">
-                    {selectedRow?.storagePathLabel ?? "ライブラリ / PDF"}
-                  </span>
-                }
-              />
-            </div>
-
-            <div className="mt-6 flex justify-center">
-              <button
-                type="button"
-                className="inline-flex h-8 w-fit items-center justify-center rounded-[8px] border-0 bg-[#6A876E] px-5 text-[14px] font-[542] leading-[17px] text-white transition-colors hover:bg-[#5f7963]"
-                disabled={!selectedRow}
-                onClick={() => {
-                  if (!selectedRow) {
-                    return;
-                  }
-
-                  onOpenDocument(selectedRow.id);
-                }}
-              >
-                PDFを開く
-              </button>
-            </div>
-          </section>
-        </aside>
       </div>
     </div>
   );

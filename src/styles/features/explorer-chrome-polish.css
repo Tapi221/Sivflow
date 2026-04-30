@@ -149,7 +149,7 @@
     height: 36px !important;
     margin-bottom: 0 !important;
     border: 0 !important;
-    background: var(--app-sidebar-bg, #f6f6f6) !important;
+    background: var(--app-sidebar-hover-bg, rgba(0, 0, 0, 0.04)) !important;
     color: var(--app-sidebar-text, #5b5b5b) !important;
     box-shadow: none !important;
   }
