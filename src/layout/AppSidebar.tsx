@@ -142,7 +142,10 @@ const mainNavItems: AppSidebarNavItem[] = [
     to: "/folders?view=section-list",
     icon: <LibraryIcon className="app-sidebar__nav-icon" />,
     sectionKey: "library",
-    match: (pathname) => pathname === "/folders",
+    match: (pathname, searchParams) =>
+      pathname === "/folders" &&
+      searchParams.get("home") !== "1" &&
+      searchParams.get("settings") !== "true",
   },
   {
     id: "calendar",
