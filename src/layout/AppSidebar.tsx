@@ -1,14 +1,15 @@
-import type { MouseEvent, ReactNode } from "react";
+import { useState, type MouseEvent, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { useExplorerCalendarViewStore } from "@/features/calendar/store/useExplorerCalendarViewStore";
+import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/workspace-tabs/store/useWorkspaceTabsStore";
 import { cn } from "@/lib/utils";
 
 type AppSidebarNavItem = {
   id: string;
   label: string;
-  to: string;
+  to?: string;
   icon: ReactNode;
   exactPath?: boolean;
   sectionKey?: "home" | "review" | "library" | "calendar";
@@ -80,6 +81,16 @@ const LibraryIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const ExploreIcon = ({ className }: SidebarIconProps) => (
+  <IconShell className={className}>
+    <path
+      d="M4 6.5 9.5 4l5 2.5L20 4v13.5L14.5 20l-5-2.5L4 20V6.5Z"
+      fill="currentColor"
+      opacity="0.9"
+    />
+  </IconShell>
+);
+
 const GearIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
     <path
@@ -121,7 +132,7 @@ const ChevronDownIcon = ({ className }: SidebarIconProps) => (
 const mainNavItems: AppSidebarNavItem[] = [
   {
     id: "home",
-    label: "Home",
+    label: "ホーム",
     to: "/folders?home=1",
     icon: <HomeIcon className="app-sidebar__nav-icon" />,
     sectionKey: "home",
@@ -130,7 +141,7 @@ const mainNavItems: AppSidebarNavItem[] = [
   },
   {
     id: "review",
-    label: "Review",
+    label: "復習",
     to: "/gallery",
     icon: <InboxIcon className="app-sidebar__nav-icon" />,
     sectionKey: "review",
@@ -138,7 +149,7 @@ const mainNavItems: AppSidebarNavItem[] = [
   },
   {
     id: "library",
-    label: "Library",
+    label: "ライブラリ",
     to: "/folders?view=section-list",
     icon: <LibraryIcon className="app-sidebar__nav-icon" />,
     sectionKey: "library",
@@ -149,12 +160,23 @@ const mainNavItems: AppSidebarNavItem[] = [
   },
   {
     id: "calendar",
-    label: "Calendar",
+    label: "カレンダー",
     to: "/calendar",
     icon: <CalendarIcon className="app-sidebar__nav-icon" />,
     sectionKey: "calendar",
     exactPath: true,
   },
+  {
+    id: "explore",
+    label: "探す",
+    icon: <ExploreIcon className="app-sidebar__nav-icon" />,
+  },
+];
+
+const libraryChildItems = [
+  { label: "PDF", value: "pdf" },
+  { label: "フラッシュカード", value: "flashcards" },
+  { label: "ノート", value: "notes" },
 ];
 
 const footerItems: AppSidebarNavItem[] = [
@@ -180,6 +202,10 @@ const isNavItemActiveByLocation = (
     return item.match(normalizedPathname, searchParams);
   }
 
+  if (!item.to) {
+    return false;
+  }
+
   const targetPath = item.to.split("?")[0]?.toLowerCase() ?? item.to;
 
   if (item.exactPath) {
@@ -196,10 +222,12 @@ const AppSidebarNavLink = ({
   item,
   nested = false,
   trailing,
+  ariaExpanded,
 }: {
   item: AppSidebarNavItem;
   nested?: boolean;
   trailing?: ReactNode;
+  ariaExpanded?: boolean;
 }) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
@@ -226,7 +254,9 @@ const AppSidebarNavLink = ({
       openSectionTab(item.sectionKey);
     }
 
-    navigate(item.to);
+    if (item.to) {
+      navigate(item.to);
+    }
   };
 
   return (
@@ -239,6 +269,7 @@ const AppSidebarNavLink = ({
         isActive && "is-active",
       )}
       aria-current={isActive ? "page" : undefined}
+      aria-expanded={ariaExpanded}
     >
       <span className="app-sidebar__nav-icon-slot">{item.icon}</span>
       <span className="app-sidebar__nav-label">{item.label}</span>
@@ -250,11 +281,32 @@ const AppSidebarNavLink = ({
 };
 
 export const AppSidebar = () => {
+  const navigate = useNavigate();
+  const { search } = useLocation();
+  const [isLibraryOpen, setIsLibraryOpen] = useState(true);
+  const selectedLibraryChild = new URLSearchParams(search).get("libraryType");
   const closeCalendar = useExplorerCalendarViewStore((state) => state.close);
+  const openGlobalSearch = useGlobalSearchStore((state) => state.open);
+  const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
   const mainNavItemsWithActions = mainNavItems.map((item) => ({
     ...item,
-    onClick: closeCalendar,
+    onClick: () => {
+      closeCalendar();
+      item.onClick?.();
+      if (item.id === "library") {
+        setIsLibraryOpen((isOpen) => !isOpen);
+      }
+      if (item.id === "explore") {
+        openGlobalSearch();
+      }
+    },
   }));
+
+  const openLibraryChild = (libraryType: string) => {
+    closeCalendar();
+    openSectionTab("library");
+    navigate(`/folders?view=section-list&libraryType=${libraryType}`);
+  };
 
   return (
     <aside className="app-sidebar" aria-label="Sidebar">
@@ -274,9 +326,46 @@ export const AppSidebar = () => {
         </div>
 
         <nav className="app-sidebar__nav" aria-label="Primary navigation">
-          {mainNavItemsWithActions.map((item) => (
-            <AppSidebarNavLink key={item.id} item={item} />
-          ))}
+          {mainNavItemsWithActions.map((item) =>
+            item.id === "library" ? (
+              <div key={item.id} className="app-sidebar__library-group">
+                <AppSidebarNavLink
+                  item={item}
+                  ariaExpanded={isLibraryOpen}
+                  trailing={
+                    <ChevronDownIcon
+                      className={cn(
+                        "app-sidebar__nav-chevron",
+                        isLibraryOpen && "is-open",
+                      )}
+                    />
+                  }
+                />
+                {isLibraryOpen ? (
+                  <div
+                    className="app-sidebar__nested-group app-sidebar__library-children"
+                    aria-label="Library sections"
+                  >
+                    {libraryChildItems.map((item) => (
+                      <button
+                        key={item.value}
+                        type="button"
+                        className={cn(
+                          "app-sidebar__library-child",
+                          selectedLibraryChild === item.value && "is-active",
+                        )}
+                        onClick={() => openLibraryChild(item.value)}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <AppSidebarNavLink key={item.id} item={item} />
+            ),
+          )}
         </nav>
       </div>
 
