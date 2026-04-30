@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
@@ -18,42 +17,59 @@ type PdfDashboardRow = {
   title: string;
   fileName: string;
   folderId: string;
+  categoryLabel: string;
   folderPathLabel: string;
   storagePathLabel: string;
-  categoryLabel: string;
   pageCount: number | null;
   currentPage: number | null;
   progressPercent: number | null;
   updatedAt: Date | null;
   lastViewedAt: Date | null;
-  tagLabels: string[];
+  tags: string[];
   orderIndex: number;
-};
-
-type FolderSummaryItem = {
-  label: string;
-  count: number;
-};
-
-type RelatedPdfItem = PdfDashboardRow & {
-  relatedScore: number;
 };
 
 type ViewerStateWithLastOpenedAt = NonNullable<DocumentItem["viewerState"]> & {
   lastOpenedAt?: unknown;
 };
 
+type SummaryCategory = {
+  label: string;
+  count: number;
+  tone: "violet" | "blue" | "green";
+};
+
+type RelatedRow = PdfDashboardRow & {
+  score: number;
+};
+
 const PAGE_SIZE = 10;
 
-const resolveFolderName = (folder: Folder | undefined): string => {
-  return folder?.folderName?.trim() || "未分類";
-};
+const toneByIndex = ["violet", "blue", "green"] as const;
 
 const toDate = (value: unknown): Date | null => {
   return normalizeDate(value);
 };
 
+const resolveFolderName = (folder: Folder | undefined): string => {
+  return folder?.folderName?.trim() || "未分類";
+};
+
 const formatDateTime = (value: Date | null): string => {
+  if (!value) {
+    return "未記録";
+  }
+
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  const hours = String(value.getHours()).padStart(2, "0");
+  const minutes = String(value.getMinutes()).padStart(2, "0");
+
+  return `${year}/${month}/${day} ${hours}:${minutes}`;
+};
+
+const formatDateShort = (value: Date | null): string => {
   if (!value) {
     return "未記録";
   }
@@ -75,17 +91,10 @@ const formatPageCount = (value: number | null): string => {
   return String(value);
 };
 
-const clampProgress = (value: number): number => {
-  return Math.max(0, Math.min(100, Math.round(value)));
-};
-
 const resolveCurrentPage = (document: DocumentItem): number | null => {
   const currentPage = document.viewerState?.currentPage;
-  if (typeof currentPage !== "number" || !Number.isFinite(currentPage)) {
-    return null;
-  }
 
-  if (currentPage <= 0) {
+  if (typeof currentPage !== "number" || !Number.isFinite(currentPage) || currentPage <= 0) {
     return null;
   }
 
@@ -100,15 +109,12 @@ const resolveProgressPercent = (document: DocumentItem): number | null => {
     return null;
   }
 
-  return clampProgress((currentPage / pageCount) * 100);
+  return Math.max(0, Math.min(100, Math.round((currentPage / pageCount) * 100)));
 };
 
-const buildFolderPath = (
-  folderId: string,
-  folderById: Map<string, Folder>,
-): string[] => {
-  const visited = new Set<string>();
+const buildFolderPath = (folderId: string, folderById: Map<string, Folder>): string[] => {
   const path: string[] = [];
+  const visited = new Set<string>();
   let currentFolderId: string | null | undefined = folderId;
 
   while (currentFolderId && !visited.has(currentFolderId)) {
@@ -125,23 +131,53 @@ const buildFolderPath = (
   return path;
 };
 
-const resolveCategoryLabel = (
-  folderId: string,
-  folderById: Map<string, Folder>,
-): string => {
+const resolveCategoryLabel = (folderId: string, folderById: Map<string, Folder>): string => {
   const path = buildFolderPath(folderId, folderById);
   return path[0] ?? "未分類";
 };
 
-const resolveTagLabels = (
+const resolveDisplayTags = (
   document: DocumentItem,
+  categoryLabel: string,
+  folderPath: string[],
   tagById: ReadonlyMap<string, { name: string }>,
 ): string[] => {
-  const tags = Array.isArray(document.tags) ? document.tags : [];
-
-  return tags
+  const explicitTags = (Array.isArray(document.tags) ? document.tags : [])
     .map((tagIdOrName) => tagById.get(tagIdOrName)?.name ?? tagIdOrName)
     .filter((label): label is string => typeof label === "string" && label.trim().length > 0);
+
+  if (explicitTags.length > 0) {
+    return explicitTags.slice(0, 3);
+  }
+
+  const fallbackTags = [categoryLabel, folderPath[1]].filter(
+    (label): label is string => typeof label === "string" && label.trim().length > 0,
+  );
+
+  return Array.from(new Set(fallbackTags)).slice(0, 3);
+};
+
+const buildSummaryCategories = (rows: PdfDashboardRow[]): SummaryCategory[] => {
+  const bucketMap = new Map<string, number>();
+
+  rows.forEach((row) => {
+    bucketMap.set(row.categoryLabel, (bucketMap.get(row.categoryLabel) ?? 0) + 1);
+  });
+
+  return Array.from(bucketMap.entries())
+    .sort((left, right) => {
+      if (right[1] !== left[1]) {
+        return right[1] - left[1];
+      }
+
+      return left[0].localeCompare(right[0], "ja");
+    })
+    .slice(0, 3)
+    .map(([label, count], index) => ({
+      label,
+      count,
+      tone: toneByIndex[index] ?? "green",
+    }));
 };
 
 const countSharedTags = (left: string[], right: string[]): number => {
@@ -153,49 +189,24 @@ const countSharedTags = (left: string[], right: string[]): number => {
   return left.reduce((count, tag) => count + Number(rightSet.has(tag)), 0);
 };
 
-const buildFolderSummaries = (rows: PdfDashboardRow[]): FolderSummaryItem[] => {
-  const bucketMap = new Map<string, number>();
-
-  rows.forEach((row) => {
-    bucketMap.set(row.categoryLabel, (bucketMap.get(row.categoryLabel) ?? 0) + 1);
-  });
-
-  return Array.from(bucketMap.entries())
-    .map(([label, count]) => ({ label, count }))
-    .sort((left, right) => {
-      if (right.count !== left.count) {
-        return right.count - left.count;
-      }
-
-      return left.label.localeCompare(right.label, "ja");
-    })
-    .slice(0, 3);
-};
-
-const buildRelatedRows = (
-  rows: PdfDashboardRow[],
-  selectedRow: PdfDashboardRow | null,
-): RelatedPdfItem[] => {
+const buildRelatedRows = (rows: PdfDashboardRow[], selectedRow: PdfDashboardRow | null): RelatedRow[] => {
   if (!selectedRow) {
     return [];
   }
 
   return rows
     .filter((row) => row.id !== selectedRow.id)
-    .map((row) => {
-      const sharedTags = countSharedTags(row.tagLabels, selectedRow.tagLabels);
-      const sameFolder = Number(row.folderId === selectedRow.folderId);
-      const score = sameFolder * 100 + sharedTags * 10 + Number(Boolean(row.progressPercent));
-
-      return {
-        ...row,
-        relatedScore: score,
-      };
-    })
-    .filter((row) => row.relatedScore > 0)
+    .map((row) => ({
+      ...row,
+      score:
+        Number(row.folderId === selectedRow.folderId) * 100 +
+        countSharedTags(row.tags, selectedRow.tags) * 10 +
+        Number(Boolean(row.progressPercent)),
+    }))
+    .filter((row) => row.score > 0)
     .sort((left, right) => {
-      if (right.relatedScore !== left.relatedScore) {
-        return right.relatedScore - left.relatedScore;
+      if (right.score !== left.score) {
+        return right.score - left.score;
       }
 
       return (right.updatedAt?.getTime() ?? 0) - (left.updatedAt?.getTime() ?? 0);
@@ -203,39 +214,31 @@ const buildRelatedRows = (
     .slice(0, 4);
 };
 
-const SummaryChip = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number;
-}) => {
-  return (
-    <div className="flex items-center justify-between rounded-[4px] bg-[#f5f5f5] px-3 py-2">
-      <span className="truncate text-[12px] font-medium text-slate-500">{label}</span>
-      <span className="ml-3 text-[13px] font-semibold text-slate-700">{value}</span>
-    </div>
-  );
-};
+const cardClassName =
+  "rounded-[28px] border border-[#e5e9e3] bg-white p-5 xl:p-6";
 
-const Pill = ({
+const IconBadge = ({
   label,
   tone = "slate",
 }: {
   label: string;
-  tone?: "slate" | "green" | "violet";
+  tone?: "slate" | "green" | "violet" | "blue" | "rose";
 }) => {
   const toneClassName =
     tone === "green"
-      ? "bg-slate-100 text-slate-700"
+      ? "bg-[#edf5ef] text-[#5d8166]"
       : tone === "violet"
-        ? "bg-[#f0edfb] text-[#6f60ad]"
-        : "bg-slate-100 text-slate-600";
+        ? "bg-[#f1ecfb] text-[#7664b3]"
+        : tone === "blue"
+          ? "bg-[#edf3fb] text-[#6380b2]"
+          : tone === "rose"
+            ? "bg-[#fdeeee] text-[#cf7570]"
+            : "bg-[#f4f6f5] text-[#6f7f78]";
 
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold",
+        "inline-flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-semibold",
         toneClassName,
       )}
     >
@@ -244,8 +247,51 @@ const Pill = ({
   );
 };
 
-const EmptyValue = ({ label }: { label: string }) => {
-  return <span className="text-slate-400">{label}</span>;
+const TagChip = ({
+  label,
+  tone = "green",
+}: {
+  label: string;
+  tone?: "green" | "violet" | "blue" | "slate";
+}) => {
+  const toneClassName =
+    tone === "green"
+      ? "bg-[#eef5ef] text-[#587d63]"
+      : tone === "violet"
+        ? "bg-[#f2eefc] text-[#7461af]"
+        : tone === "blue"
+          ? "bg-[#ecf2fb] text-[#607fad]"
+          : "bg-[#f3f4f4] text-[#6a7674]";
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none",
+        toneClassName,
+      )}
+    >
+      {label}
+    </span>
+  );
+};
+
+const KeyValueRow = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) => {
+  return (
+    <div className="grid grid-cols-[88px_minmax(0,1fr)] items-start gap-3 text-[13px]">
+      <span className="text-[#7a867f]">{label}</span>
+      <div className="min-w-0 text-right font-medium text-[#48524f]">{value}</div>
+    </div>
+  );
+};
+
+const EmptyText = ({ label }: { label: string }) => {
+  return <span className="text-[#9aa49f]">{label}</span>;
 };
 
 const PdfLibraryDashboard = ({
@@ -269,27 +315,25 @@ const PdfLibraryDashboard = ({
       .filter((document) => document.kind === "pdf")
       .map((document) => {
         const folderPath = buildFolderPath(document.folderId, folderById);
-        const folderPathLabel = folderPath.join(" / ") || "未分類";
-        const storagePathLabel = ["ライブラリ", "PDF", ...folderPath].join(" / ");
+        const categoryLabel = resolveCategoryLabel(document.folderId, folderById);
         const viewerState = (document.viewerState ?? null) as ViewerStateWithLastOpenedAt | null;
         const updatedAt = toDate(document.updatedAt);
         const lastViewedAt = toDate(viewerState?.lastOpenedAt);
-        const currentPage = resolveCurrentPage(document);
 
         return {
           id: document.id,
           title: document.title?.trim() || document.fileName?.trim() || "無題のPDF",
           fileName: document.fileName?.trim() || document.title?.trim() || "無題のPDF",
           folderId: document.folderId,
-          folderPathLabel,
-          storagePathLabel,
-          categoryLabel: resolveCategoryLabel(document.folderId, folderById),
+          categoryLabel,
+          folderPathLabel: folderPath.join(" / ") || "未分類",
+          storagePathLabel: ["ライブラリ", "PDF", ...folderPath].join(" / "),
           pageCount: document.pageCount ?? null,
-          currentPage,
+          currentPage: resolveCurrentPage(document),
           progressPercent: resolveProgressPercent(document),
           updatedAt,
           lastViewedAt,
-          tagLabels: resolveTagLabels(document, tagById),
+          tags: resolveDisplayTags(document, categoryLabel, folderPath, tagById),
           orderIndex: Number(document.orderIndex) || 0,
         };
       })
@@ -316,26 +360,20 @@ const PdfLibraryDashboard = ({
       return;
     }
 
-    setSelectedDocumentId((currentSelectedDocumentId) => {
-      if (currentSelectedDocumentId && rows.some((row) => row.id === currentSelectedDocumentId)) {
-        return currentSelectedDocumentId;
+    setSelectedDocumentId((currentValue) => {
+      if (currentValue && rows.some((row) => row.id === currentValue)) {
+        return currentValue;
       }
 
       return rows[0]?.id ?? null;
     });
   }, [rows]);
 
-  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  const totalPageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
 
   useEffect(() => {
-    setPageIndex((currentPageIndex) => {
-      if (pageCount === 0) {
-        return 0;
-      }
-
-      return Math.max(0, Math.min(currentPageIndex, pageCount - 1));
-    });
-  }, [pageCount]);
+    setPageIndex((currentValue) => Math.max(0, Math.min(currentValue, totalPageCount - 1)));
+  }, [totalPageCount]);
 
   useEffect(() => {
     if (!selectedDocumentId) {
@@ -348,9 +386,7 @@ const PdfLibraryDashboard = ({
     }
 
     const nextPageIndex = Math.floor(selectedIndex / PAGE_SIZE);
-    setPageIndex((currentPageIndex) =>
-      currentPageIndex === nextPageIndex ? currentPageIndex : nextPageIndex,
-    );
+    setPageIndex((currentValue) => (currentValue === nextPageIndex ? currentValue : nextPageIndex));
   }, [rows, selectedDocumentId]);
 
   const selectedRow = useMemo(() => {
@@ -361,30 +397,18 @@ const PdfLibraryDashboard = ({
     return rows.find((row) => row.id === selectedDocumentId) ?? null;
   }, [rows, selectedDocumentId]);
 
-  const importTargetFolderId =
-    selectedRow?.folderId ?? rows[0]?.folderId ?? folders[0]?.id ?? null;
-
-  const importTargetFolderPathLabel = useMemo(() => {
-    if (!importTargetFolderId) {
-      return "インポート先がありません";
-    }
-
-    const folderPath = buildFolderPath(importTargetFolderId, folderById);
-    return folderPath.join(" / ") || "未分類";
-  }, [folderById, importTargetFolderId]);
+  const importTargetFolderId = selectedRow?.folderId ?? rows[0]?.folderId ?? folders[0]?.id ?? null;
 
   const getNextOrderIndex = (folderId: string | null): number => {
     if (!folderId) {
       return 0;
     }
 
-    const maxOrderIndex = documents
-      .filter((document) => document.kind === "pdf" && document.folderId === folderId)
-      .reduce((currentMax, document) => {
-        return Math.max(currentMax, Number(document.orderIndex) || 0);
-      }, -1);
-
-    return maxOrderIndex + 1;
+    return (
+      documents
+        .filter((document) => document.kind === "pdf" && document.folderId === folderId)
+        .reduce((currentMax, document) => Math.max(currentMax, Number(document.orderIndex) || 0), -1) + 1
+    );
   };
 
   const {
@@ -398,13 +422,13 @@ const PdfLibraryDashboard = ({
     setExpandedFolders: setUnusedExpandedFolders,
   });
 
-  const folderSummaries = useMemo(() => buildFolderSummaries(rows), [rows]);
+  const summaryCategories = useMemo(() => buildSummaryCategories(rows), [rows]);
 
-  const continueReadingRows = useMemo(() => {
+  const continueRows = useMemo(() => {
     return rows
       .filter((row) => {
-        const progressPercent = row.progressPercent ?? 0;
-        return progressPercent > 0 && progressPercent < 100;
+        const progress = row.progressPercent ?? 0;
+        return progress > 0 && progress < 100;
       })
       .sort((left, right) => {
         const rightTime = right.lastViewedAt?.getTime() ?? right.updatedAt?.getTime() ?? 0;
@@ -421,9 +445,7 @@ const PdfLibraryDashboard = ({
 
   const recentRows = useMemo(() => {
     return [...rows]
-      .sort((left, right) => {
-        return (right.updatedAt?.getTime() ?? 0) - (left.updatedAt?.getTime() ?? 0);
-      })
+      .sort((left, right) => (right.updatedAt?.getTime() ?? 0) - (left.updatedAt?.getTime() ?? 0))
       .slice(0, 3);
   }, [rows]);
 
@@ -439,7 +461,7 @@ const PdfLibraryDashboard = ({
 
   if (rows.length === 0) {
     return (
-      <div className="flex h-full min-h-0 w-full items-center justify-center bg-white p-8">
+      <div className="flex h-full min-h-0 w-full items-center justify-center bg-[#f7f9f7] p-8">
         <input
           ref={fileInputRef}
           type="file"
@@ -448,39 +470,30 @@ const PdfLibraryDashboard = ({
           className="hidden"
           onChange={handleToolbarFileInputChange}
         />
-        <div className="w-full max-w-xl rounded-[4px] border border-[#e5e7eb] bg-white p-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
-          <div className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-[12px] font-semibold text-slate-700">
+        <div className="w-full max-w-2xl rounded-[32px] border border-[#e4e8e3] bg-white p-8">
+          <div className="inline-flex rounded-full bg-[#edf4ef] px-3 py-1 text-[12px] font-semibold text-[#5f7e68]">
             PDF ライブラリ
           </div>
-          <h2 className="mt-5 text-[28px] font-semibold tracking-[-0.02em] text-slate-800">
+          <h2 className="mt-5 text-[30px] font-semibold tracking-[-0.03em] text-[#20262a]">
             PDF がまだありません
           </h2>
-          <p className="mt-3 text-[14px] leading-7 text-slate-500">
-            まずは PDF を取り込んでライブラリを作成してください。取り込んだ PDF はここに一覧表示され、
-            続きから読む・最近更新した PDF・詳細パネルまで一気に管理できます。
+          <p className="mt-3 max-w-xl text-[14px] leading-7 text-[#6f7b78]">
+            PDF を取り込むと、この画面で概要カード・一覧テーブル・詳細パネルをまとめて管理できます。
           </p>
-          <div className="mt-8 flex items-center gap-3">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-[4px] border border-slate-300 px-5 py-3 text-[14px] font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-              disabled={!importTargetFolderId}
-              onClick={handleToolbarAddDocument}
-            >
-              PDF をインポート
-            </button>
-            <span className="text-[12px] text-slate-400">
-              {folders.length > 0
-                ? `インポート先: ${resolveFolderName(folders[0])}`
-                : "先に保存先フォルダを作成してください"}
-            </span>
-          </div>
+          <button
+            type="button"
+            className="mt-8 inline-flex h-12 items-center justify-center rounded-[18px] border border-[#8ab193] px-5 text-[14px] font-semibold text-[#5c7c65]"
+            onClick={handleToolbarAddDocument}
+          >
+            PDF をインポート
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full bg-white">
+    <div className="flex h-full min-h-0 w-full bg-[#f7f9f7]">
       <input
         ref={fileInputRef}
         type="file"
@@ -490,364 +503,296 @@ const PdfLibraryDashboard = ({
         onChange={handleToolbarFileInputChange}
       />
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col px-5 pb-5 pt-5">
-        <div className="grid shrink-0 grid-cols-1 gap-4 xl:grid-cols-3">
-          <section className="rounded-[4px] border border-[#e5e7eb] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-[14px] font-semibold text-slate-700">PDF の概要</p>
-                <div className="mt-4 flex items-end gap-3">
-                  <span className="text-[54px] font-semibold leading-none tracking-[-0.04em] text-slate-900">
-                    {rows.length}
-                  </span>
-                  <span className="pb-1 text-[14px] text-slate-500">総 PDF 数</span>
+      <div className="grid min-h-0 w-full grid-cols-1 gap-4 px-5 py-5 xl:grid-cols-[minmax(0,1fr)_296px]">
+        <div className="flex min-h-0 min-w-0 flex-col gap-4">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+            <section className={cardClassName}>
+              <div className="flex items-start justify-between gap-5">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <IconBadge label="PDF" tone="green" />
+                    <span className="text-[13px] font-semibold text-[#30403d]">PDFの概要</span>
+                  </div>
+                  <div className="mt-6 flex items-end gap-4">
+                    <span className="text-[60px] font-semibold leading-none tracking-[-0.05em] text-[#17234a]">
+                      {rows.length}
+                    </span>
+                    <span className="pb-1 text-[14px] text-[#77847d]">総PDF数</span>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="mt-5 grid gap-2">
-              {folderSummaries.map((summary, index) => (
-                <SummaryChip
-                  key={`${summary.label}:${index}`}
-                  label={summary.label}
-                  value={summary.count}
-                />
-              ))}
-            </div>
-          </section>
-
-          <section className="rounded-[4px] border border-[#e5e7eb] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-[14px] font-semibold text-slate-700">続きから読む</p>
-              <span className="text-[12px] font-semibold text-slate-500">上位 3 件</span>
-            </div>
-
-            <div className="mt-4 space-y-4">
-              {continueReadingRows.length > 0 ? (
-                continueReadingRows.map((row) => (
-                  <button
-                    key={row.id}
-                    type="button"
-                    className={cn(
-                      "block w-full rounded-[4px] border px-3 py-3 text-left transition-colors",
-                      selectedRow?.id === row.id
-                        ? "border-slate-300 bg-slate-50"
-                        : "border-transparent bg-[#f7f7f7] hover:border-slate-200",
-                    )}
-                    onClick={() => setSelectedDocumentId(row.id)}
-                  >
-                    <div className="truncate text-[14px] font-medium text-slate-800">{row.title}</div>
-                    <div className="mt-2 flex items-center gap-3">
-                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
-                        <div
-                          className="h-full rounded-full bg-slate-400"
-                          style={{ width: `${row.progressPercent ?? 0}%` }}
-                        />
+                <div className="min-w-[130px] space-y-3 pt-2">
+                  {summaryCategories.map((summary, index) => (
+                    <div key={`${summary.label}:${index}`} className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <IconBadge label={String(summary.count)} tone={summary.tone} />
+                        <span className="truncate text-[13px] font-medium text-[#55635f]">{summary.label}</span>
                       </div>
-                      <span className="text-[12px] font-semibold text-slate-500">
-                        {row.progressPercent ?? 0}%
-                      </span>
+                      <span className="text-[13px] font-semibold text-[#41504d]">{summary.count}</span>
                     </div>
-                    <div className="mt-2 text-[12px] text-slate-400">
-                      {row.currentPage ? `P.${row.currentPage} まで閲覧` : "閲覧位置なし"}
-                    </div>
-                  </button>
-                ))
-              ) : (
-                <div className="rounded-[4px] bg-[#f7f7f7] px-4 py-6 text-[13px] text-slate-400">
-                  続きから読める PDF はまだありません。
-                </div>
-              )}
-            </div>
-          </section>
-
-          <section className="rounded-[4px] border border-[#e5e7eb] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-[14px] font-semibold text-slate-700">最近更新した PDF</p>
-              <span className="text-[12px] font-semibold text-slate-500">最新順</span>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              {recentRows.map((row) => (
-                <button
-                  key={row.id}
-                  type="button"
-                  className={cn(
-                    "flex w-full items-start justify-between gap-4 rounded-[4px] border px-3 py-3 text-left transition-colors",
-                    selectedRow?.id === row.id
-                      ? "border-slate-300 bg-slate-50"
-                      : "border-transparent bg-[#f7f7f7] hover:border-slate-200",
-                  )}
-                  onClick={() => setSelectedDocumentId(row.id)}
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[14px] font-medium text-slate-800">{row.title}</div>
-                    <div className="mt-1 truncate text-[12px] text-slate-400">{row.folderPathLabel}</div>
-                  </div>
-                  <div className="shrink-0 text-[12px] font-medium text-slate-500">
-                    {formatDateTime(row.updatedAt)}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </section>
-        </div>
-
-        <section className="mt-4 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[4px] border border-[#e5e7eb] bg-white shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
-          <div className="overflow-x-auto">
-            <table className="min-w-full border-separate border-spacing-0 text-left">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="whitespace-nowrap px-5 py-4 text-[12px] font-semibold text-slate-500">
-                    名前
-                  </th>
-                  <th className="whitespace-nowrap px-4 py-4 text-[12px] font-semibold text-slate-500">
-                    タグ
-                  </th>
-                  <th className="whitespace-nowrap px-4 py-4 text-[12px] font-semibold text-slate-500">
-                    場所
-                  </th>
-                  <th className="whitespace-nowrap px-4 py-4 text-[12px] font-semibold text-slate-500">
-                    ページ
-                  </th>
-                  <th className="whitespace-nowrap px-4 py-4 text-[12px] font-semibold text-slate-500">
-                    最終閲覧
-                  </th>
-                  <th className="whitespace-nowrap px-4 py-4 text-[12px] font-semibold text-slate-500">
-                    更新日時
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedRows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className={cn(
-                      "cursor-pointer transition-colors",
-                      selectedRow?.id === row.id ? "bg-slate-50" : "hover:bg-slate-50",
-                    )}
-                    onClick={() => setSelectedDocumentId(row.id)}
-                    onDoubleClick={() => onOpenDocument(row.id)}
-                  >
-                    <td className="border-t border-slate-100 px-5 py-4">
-                      <div className="min-w-0">
-                        <div className="truncate text-[14px] font-medium text-slate-800">{row.title}</div>
-                        <div className="mt-1 truncate text-[12px] text-slate-400">{row.fileName}</div>
-                      </div>
-                    </td>
-                    <td className="border-t border-slate-100 px-4 py-4">
-                      <div className="flex flex-wrap gap-2">
-                        {row.tagLabels.length > 0 ? (
-                          row.tagLabels.slice(0, 3).map((tagLabel, index) => (
-                            <Pill
-                              key={`${row.id}:${tagLabel}:${index}`}
-                              label={tagLabel}
-                              tone={index % 2 === 0 ? "violet" : "green"}
-                            />
-                          ))
-                        ) : (
-                          <EmptyValue label="タグなし" />
-                        )}
-                        {row.tagLabels.length > 3 ? (
-                          <Pill label={`+${row.tagLabels.length - 3}`} />
-                        ) : null}
-                      </div>
-                    </td>
-                    <td className="border-t border-slate-100 px-4 py-4 text-[13px] text-slate-500">
-                      <span className="truncate">{row.storagePathLabel}</span>
-                    </td>
-                    <td className="border-t border-slate-100 px-4 py-4 text-[13px] font-medium text-slate-600">
-                      {formatPageCount(row.pageCount)}
-                    </td>
-                    <td className="border-t border-slate-100 px-4 py-4 text-[13px] text-slate-500">
-                      {formatDateTime(row.lastViewedAt)}
-                    </td>
-                    <td className="border-t border-slate-100 px-4 py-4 text-[13px] text-slate-500">
-                      {formatDateTime(row.updatedAt)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex items-center justify-between border-t border-slate-100 px-5 py-4">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-[4px] border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                disabled={pageIndex <= 0}
-                onClick={() => setPageIndex((currentPageIndex) => Math.max(0, currentPageIndex - 1))}
-              >
-                ‹
-              </button>
-              {Array.from({ length: pageCount }).map((_, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  className={cn(
-                    "inline-flex h-9 min-w-9 items-center justify-center rounded-[4px] px-3 text-[13px] font-medium transition-colors",
-                    index === pageIndex
-                      ? "bg-slate-100 text-slate-700"
-                      : "text-slate-500 hover:bg-slate-50",
-                  )}
-                  onClick={() => setPageIndex(index)}
-                >
-                  {index + 1}
-                </button>
-              ))}
-              <button
-                type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-[4px] border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                disabled={pageIndex >= pageCount - 1}
-                onClick={() =>
-                  setPageIndex((currentPageIndex) =>
-                    Math.min(pageCount - 1, currentPageIndex + 1),
-                  )
-                }
-              >
-                ›
-              </button>
-            </div>
-
-            <div className="text-[13px] text-slate-400">
-              {visibleStart}–{visibleEnd} / {rows.length} 件
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <aside className="flex h-full w-[340px] shrink-0 flex-col border-l border-[#e5e7eb] bg-white p-5">
-        {selectedRow ? (
-          <>
-            <section className="rounded-[4px] border border-[#e5e7eb] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
-              <div className="flex items-start gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[4px] bg-[#fff3f1] text-[12px] font-bold text-[#d56f60]">
-                  PDF
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[14px] font-semibold text-slate-700">PDF の詳細</p>
-                  <div className="mt-2 max-h-[3.5rem] overflow-hidden text-[20px] font-semibold leading-7 tracking-[-0.02em] text-slate-900">
-                    {selectedRow.title}
-                  </div>
+                  ))}
                 </div>
               </div>
-
-              <div className="mt-6 space-y-4">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-[13px] text-slate-500">カテゴリ</span>
-                  <Pill label={selectedRow.categoryLabel} tone="violet" />
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-[13px] text-slate-500">ページ数</span>
-                  <span className="text-[14px] font-semibold text-slate-700">
-                    {formatPageCount(selectedRow.pageCount)}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <span className="text-[13px] text-slate-500">タグ</span>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedRow.tagLabels.length > 0 ? (
-                      selectedRow.tagLabels.map((tagLabel, index) => (
-                        <Pill
-                          key={`${selectedRow.id}:${tagLabel}:${index}`}
-                          label={tagLabel}
-                          tone={index % 2 === 0 ? "violet" : "green"}
-                        />
-                      ))
-                    ) : (
-                      <EmptyValue label="タグなし" />
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-[13px] text-slate-500">閲覧位置</span>
-                  <span className="text-[14px] font-semibold text-slate-700">
-                    {selectedRow.currentPage ? `P.${selectedRow.currentPage}` : "未記録"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-[13px] text-slate-500">最終閲覧</span>
-                  <span className="text-right text-[13px] text-slate-600">
-                    {formatDateTime(selectedRow.lastViewedAt)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-[13px] text-slate-500">更新日</span>
-                  <span className="text-right text-[13px] text-slate-600">
-                    {formatDateTime(selectedRow.updatedAt)}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <span className="text-[13px] text-slate-500">保存先</span>
-                  <div className="rounded-[4px] bg-[#f7f7f7] px-3 py-3 text-[13px] leading-6 text-slate-600">
-                    {selectedRow.storagePathLabel}
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-[4px] border border-slate-300 text-[14px] font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-                onClick={() => onOpenDocument(selectedRow.id)}
-              >
-                PDF を開く
-              </button>
             </section>
 
-            <section className="mt-4 rounded-[4px] border border-[#e5e7eb] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
+            <section className={cardClassName}>
               <div className="flex items-center justify-between gap-3">
-                <p className="text-[14px] font-semibold text-slate-700">関連 PDF</p>
-                <span className="text-[12px] font-semibold text-slate-500">おすすめ</span>
+                <div className="flex items-center gap-3">
+                  <IconBadge label="読" tone="green" />
+                  <span className="text-[13px] font-semibold text-[#30403d]">続きから読む</span>
+                </div>
+                <span className="text-[12px] font-semibold text-[#6b8b75]">すべて見る</span>
               </div>
 
-              <div className="mt-4 space-y-2">
-                {relatedRows.length > 0 ? (
-                  relatedRows.map((row) => (
+              <div className="mt-5 space-y-4">
+                {continueRows.length > 0 ? (
+                  continueRows.map((row) => (
                     <button
                       key={row.id}
                       type="button"
-                      className="flex w-full items-start gap-3 rounded-[4px] px-3 py-3 text-left transition-colors hover:bg-slate-50"
+                      className="flex w-full items-start gap-3 text-left"
                       onClick={() => setSelectedDocumentId(row.id)}
                     >
-                      <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f1eefb] text-[10px] font-bold text-[#6f60ad]">
-                        PDF
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block truncate text-[13px] font-medium text-slate-700">
-                          {row.title}
-                        </span>
-                        <span className="mt-1 block truncate text-[12px] text-slate-400">
-                          {row.folderPathLabel}
-                        </span>
-                      </span>
+                      <IconBadge label="PDF" tone="rose" />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-[13px] font-semibold text-[#29343b]">{row.title}</div>
+                        <div className="mt-2 h-[6px] overflow-hidden rounded-full bg-[#e5e8e6]">
+                          <div
+                            className="h-full rounded-full bg-[#6c996f]"
+                            style={{ width: `${row.progressPercent ?? 0}%` }}
+                          />
+                        </div>
+                        <div className="mt-2 flex items-center justify-between gap-2 text-[12px] text-[#7d8784]">
+                          <span className="truncate">最終閲覧: {formatDateTime(row.lastViewedAt)}</span>
+                          <span className="font-semibold text-[#5f6f69]">{row.progressPercent ?? 0}%</span>
+                        </div>
+                      </div>
                     </button>
                   ))
                 ) : (
-                  <div className="rounded-[4px] bg-[#f7f7f7] px-4 py-5 text-[13px] text-slate-400">
-                    関連 PDF はまだ見つかりません。
+                  <div className="rounded-[20px] bg-[#f6f8f7] px-4 py-6 text-[13px] leading-6 text-[#94a09a]">
+                    続きから読める PDF はまだありません。
                   </div>
                 )}
               </div>
             </section>
-          </>
-        ) : null}
 
-        <div className="mt-auto rounded-[4px] border border-[#e5e7eb] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
-          <div className="text-[13px] text-slate-500">インポート先</div>
-          <div className="mt-2 text-[14px] font-semibold leading-6 text-slate-700">
-            {importTargetFolderPathLabel}
+            <section className={cardClassName}>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <IconBadge label="更" tone="green" />
+                  <span className="text-[13px] font-semibold text-[#30403d]">最近更新したPDF</span>
+                </div>
+                <span className="text-[12px] font-semibold text-[#6b8b75]">すべて見る</span>
+              </div>
+
+              <div className="mt-5 space-y-4">
+                {recentRows.map((row) => (
+                  <button
+                    key={row.id}
+                    type="button"
+                    className="flex w-full items-start gap-3 text-left"
+                    onClick={() => setSelectedDocumentId(row.id)}
+                  >
+                    <IconBadge label="PDF" tone="rose" />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[13px] font-semibold text-[#29343b]">{row.title}</div>
+                      <div className="mt-1 text-[12px] text-[#7d8784]">{formatDateShort(row.updatedAt)}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
           </div>
+
+          <section className="min-h-0 flex-1 rounded-[30px] border border-[#e5e9e3] bg-white">
+            <div className="overflow-hidden">
+              <div className="grid grid-cols-[minmax(240px,1.9fr)_minmax(160px,1fr)_minmax(190px,1.3fr)_80px_120px_120px_32px] gap-4 border-b border-[#ecefea] px-5 py-4 text-[12px] font-semibold text-[#58635f]">
+                <div>名前</div>
+                <div>タグ</div>
+                <div>場所</div>
+                <div>ページ</div>
+                <div>最終閲覧</div>
+                <div>更新日時</div>
+                <div>…</div>
+              </div>
+
+              <div className="divide-y divide-[#eff2ee]">
+                {paginatedRows.map((row) => {
+                  const isSelected = row.id === selectedRow?.id;
+
+                  return (
+                    <button
+                      key={row.id}
+                      type="button"
+                      className={cn(
+                        "grid w-full grid-cols-[minmax(240px,1.9fr)_minmax(160px,1fr)_minmax(190px,1.3fr)_80px_120px_120px_32px] gap-4 px-5 py-4 text-left transition-colors",
+                        isSelected ? "bg-[#f6f8f6]" : "hover:bg-[#fafcf9]",
+                      )}
+                      onClick={() => setSelectedDocumentId(row.id)}
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-3">
+                          <IconBadge label="PDF" tone="rose" />
+                          <span className="truncate text-[14px] font-semibold text-[#273038]">{row.title}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        {row.tags.length > 0 ? (
+                          row.tags.slice(0, 2).map((tag, index) => (
+                            <TagChip
+                              key={`${row.id}:${tag}:${index}`}
+                              label={tag}
+                              tone={index % 2 === 0 ? "violet" : "green"}
+                            />
+                          ))
+                        ) : (
+                          <span className="text-[13px] text-[#93a09a]">タグなし</span>
+                        )}
+                      </div>
+
+                      <div className="truncate text-[13px] text-[#75817c]">{row.storagePathLabel}</div>
+                      <div className="text-[13px] font-medium text-[#46514f]">{formatPageCount(row.pageCount)}</div>
+                      <div className="text-[13px] text-[#75817c]">{formatDateTime(row.lastViewedAt)}</div>
+                      <div className="text-[13px] text-[#75817c]">{formatDateTime(row.updatedAt)}</div>
+                      <div className="text-[18px] leading-none text-[#9aa59e]">…</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-[#ecefea] px-5 py-4">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-[12px] border border-[#e6ebe5] text-[#8c9690] disabled:opacity-40"
+                  disabled={pageIndex === 0}
+                  onClick={() => setPageIndex((currentValue) => Math.max(0, currentValue - 1))}
+                >
+                  ‹
+                </button>
+                <div className="inline-flex h-9 min-w-[40px] items-center justify-center rounded-[12px] bg-[#eef2ee] px-3 text-[13px] font-semibold text-[#4f5b57]">
+                  {pageIndex + 1}
+                </div>
+                <button
+                  type="button"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-[12px] border border-[#e6ebe5] text-[#8c9690] disabled:opacity-40"
+                  disabled={pageIndex >= totalPageCount - 1}
+                  onClick={() => setPageIndex((currentValue) => Math.min(totalPageCount - 1, currentValue + 1))}
+                >
+                  ›
+                </button>
+              </div>
+
+              <div className="text-[13px] text-[#8c9690]">
+                {visibleStart}–{visibleEnd} / {rows.length} 件
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside className="flex min-h-0 min-w-0 flex-col gap-4">
+          <section className={cardClassName}>
+            <div className="flex items-start gap-3">
+              <IconBadge label="PDF" tone="rose" />
+              <div className="min-w-0">
+                <div className="text-[13px] font-semibold text-[#30403d]">PDFの詳細</div>
+                <div className="mt-3 break-words text-[18px] font-semibold leading-8 text-[#1d2530]">
+                  {selectedRow?.title}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              <KeyValueRow
+                label="カテゴリ"
+                value={selectedRow ? <TagChip label={selectedRow.categoryLabel} tone="violet" /> : <EmptyText label="未分類" />}
+              />
+              <KeyValueRow label="ページ数" value={selectedRow ? formatPageCount(selectedRow.pageCount) : <EmptyText label="—" />} />
+              <KeyValueRow
+                label="タグ"
+                value={
+                  selectedRow && selectedRow.tags.length > 0 ? (
+                    <div className="flex flex-wrap justify-end gap-2">
+                      {selectedRow.tags.map((tag, index) => (
+                        <TagChip
+                          key={`${selectedRow.id}:${tag}:${index}`}
+                          label={tag}
+                          tone={index % 2 === 0 ? "violet" : "green"}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyText label="タグなし" />
+                  )
+                }
+              />
+              <KeyValueRow
+                label="閲覧位置"
+                value={
+                  selectedRow?.currentPage ? `P.${selectedRow.currentPage}` : <EmptyText label="未記録" />
+                }
+              />
+              <KeyValueRow label="最終閲覧" value={formatDateTime(selectedRow?.lastViewedAt ?? null)} />
+              <KeyValueRow label="更新日" value={formatDateTime(selectedRow?.updatedAt ?? null)} />
+              <KeyValueRow label="保存先" value={<span className="break-words">{selectedRow?.storagePathLabel ?? "ライブラリ / PDF"}</span>} />
+            </div>
+
+            <button
+              type="button"
+              className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-[18px] border border-[#8ab193] text-[15px] font-semibold text-[#5b7b64] transition-colors hover:bg-[#f5faf6]"
+              disabled={!selectedRow}
+              onClick={() => {
+                if (!selectedRow) {
+                  return;
+                }
+
+                onOpenDocument(selectedRow.id);
+              }}
+            >
+              PDFを開く
+            </button>
+          </section>
+
+          <section className={cardClassName}>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[13px] font-semibold text-[#30403d]">関連PDF</span>
+              <span className="text-[12px] font-semibold text-[#6b8b75]">すべて見る</span>
+            </div>
+
+            <div className="mt-5 space-y-4">
+              {relatedRows.length > 0 ? (
+                relatedRows.map((row) => (
+                  <button
+                    key={row.id}
+                    type="button"
+                    className="flex w-full items-start gap-3 text-left"
+                    onClick={() => setSelectedDocumentId(row.id)}
+                  >
+                    <IconBadge label="PDF" tone="violet" />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[13px] font-semibold text-[#29343b]">{row.title}</div>
+                      <div className="mt-1 text-[12px] text-[#7d8784]">{row.categoryLabel}</div>
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <div className="text-[13px] leading-6 text-[#94a09a]">関連する PDF はまだありません。</div>
+              )}
+            </div>
+          </section>
+
           <button
             type="button"
-            className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-[4px] border border-slate-300 text-[14px] font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={!importTargetFolderId}
+            className="inline-flex min-h-[88px] items-center justify-center rounded-[24px] border border-[#8ab193] bg-white px-5 text-[16px] font-semibold text-[#5c7c65] transition-colors hover:bg-[#f5faf6]"
             onClick={handleToolbarAddDocument}
           >
-            PDF をインポート
+            PDFをインポート
           </button>
-        </div>
-      </aside>
+        </aside>
+      </div>
     </div>
   );
 };
