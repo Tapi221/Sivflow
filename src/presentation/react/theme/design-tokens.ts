@@ -43,61 +43,62 @@ export const designTokens = {
       "border": "rgba(0, 0, 0, 0.06)"
     },
     "tag": {
-      "slate": {
-        "bg": "#f3f4f6",
-        "fg": "#4b5563",
-        "border": "#d1d5db"
+      "gray": {
+        "bg": "#F1EFE8",
+        "fg": "#444441",
+        "border": "transparent"
       },
-      "red": {
-        "bg": "#fef2f2",
-        "fg": "#b42318",
-        "border": "#f3b5b5"
-      },
-      "orange": {
-        "bg": "#fff7ed",
-        "fg": "#c2410c",
-        "border": "#fdba74"
-      },
-      "amber": {
-        "bg": "#fffbeb",
-        "fg": "#b45309",
-        "border": "#fcd34d"
-      },
-      "lime": {
-        "bg": "#f7fee7",
-        "fg": "#4d7c0f",
-        "border": "#bef264"
-      },
-      "green": {
-        "bg": "#f0fdf4",
-        "fg": "#15803d",
-        "border": "#86efac"
+      "purple": {
+        "bg": "#EEEDFE",
+        "fg": "#3C3489",
+        "border": "transparent"
       },
       "teal": {
-        "bg": "#f0fdfa",
-        "fg": "#0f766e",
-        "border": "#5eead4"
+        "bg": "#E1F5EE",
+        "fg": "#085041",
+        "border": "transparent"
       },
-      "sky": {
-        "bg": "#f0f9ff",
-        "fg": "#0369a1",
-        "border": "#7dd3fc"
+      "pink": {
+        "bg": "#FBEAF0",
+        "fg": "#72243E",
+        "border": "transparent"
+      },
+      "amber": {
+        "bg": "#FAEEDA",
+        "fg": "#633806",
+        "border": "transparent"
       },
       "blue": {
-        "bg": "#eff6ff",
-        "fg": "#1d4ed8",
-        "border": "#93c5fd"
+        "bg": "#E6F1FB",
+        "fg": "#0C447C",
+        "border": "transparent"
       },
-      "violet": {
-        "bg": "#f5f3ff",
-        "fg": "#6d28d9",
-        "border": "#c4b5fd"
+      "green": {
+        "bg": "#EAF3DE",
+        "fg": "#27500A",
+        "border": "transparent"
+      },
+      "red": {
+        "bg": "#FCEBEB",
+        "fg": "#791F1F",
+        "border": "transparent"
+      },
+      "coral": {
+        "bg": "#FAECE7",
+        "fg": "#712B13",
+        "border": "transparent"
+      },
+      "sky": {
+        "bg": "#E1F4FA",
+        "fg": "#0C4A6E",
+        "border": "transparent"
       }
     }
   },
   "spacing": {
     "0": 0,
     "1": 4,
+    "1_8": 7.2,
     "2": 8,
     "3": 12,
     "4": 16,
@@ -107,8 +108,7 @@ export const designTokens = {
     "10": 40,
     "12": 48,
     "16": 64,
-    "20": 80,
-    "1_8": 7.2
+    "20": 80
   },
   "radius": {
     "sm": 8,
@@ -283,6 +283,19 @@ export const designTokens = {
       "interactive": "150ms ease",
       "screenEnter": "300ms ease-out",
       "progress": "500ms ease-out"
+    },
+    "tag": {
+      "fontSize": 12,
+      "fontWeight": 500,
+      "lineHeight": "16px",
+      "paddingInline": 8,
+      "paddingBlock": 1,
+      "gap": 4,
+      "radius": 20,
+      "borderWidth": 0,
+      "removeButtonSize": 16,
+      "removeIconSize": 12,
+      "focusRingWidth": 2
     }
   }
 } as const;

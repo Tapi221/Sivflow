@@ -12,8 +12,6 @@ type TagBadgeSize = "xs" | "sm" | "md";
 interface TagBadgeProps {
   label: string;
   colorKey?: TagColorKey;
-  legacyColor?: string;
-  // 互換用。将来削除予定。
   colorClass?: string;
   size?: TagBadgeSize;
   selected?: boolean;
@@ -24,18 +22,11 @@ interface TagBadgeProps {
   removeAriaLabel?: string;
 }
 
-const sizeClassMap: Record<TagBadgeSize, string> = {
-  xs: "text-[10px] px-2 py-0.5 gap-1 leading-4",
-  sm: "text-[11px] px-2.5 py-1 gap-1.5 leading-4",
-  md: "text-xs px-3 py-1.5 gap-1.5 leading-5",
-};
-
 export const TagBadge = ({
   label,
   colorKey,
-  legacyColor,
   colorClass,
-  size = "sm",
+  size: _size = "sm",
   selected = false,
   className,
   textClassName,
@@ -43,12 +34,12 @@ export const TagBadge = ({
   onRemove,
   removeAriaLabel,
 }: TagBadgeProps) => {
+  void _size;
+
   const resolvedColorStyle =
     colorKey !== undefined
       ? getTagColorStyle(colorKey)
-      : getTagColorStyle(
-          legacyColor ?? colorClass ?? DEFAULT_TAG_COLOR_CLASS_NAME,
-        );
+      : getTagColorStyle(colorClass ?? DEFAULT_TAG_COLOR_CLASS_NAME);
 
   const content = (
     <>
@@ -61,20 +52,18 @@ export const TagBadge = ({
             event.stopPropagation();
             onRemove();
           }}
-          className="ds-tag-badge__remove ml-1 grid h-4 w-4 place-items-center rounded-full"
+          className="ds-tag-badge__remove grid h-[var(--ds-semantic-tag-remove-button-size)] w-[var(--ds-semantic-tag-remove-button-size)] place-items-center rounded-full"
         >
-          <X className="h-3 w-3" />
+          <X className="h-[var(--ds-semantic-tag-remove-icon-size)] w-[var(--ds-semantic-tag-remove-icon-size)]" />
         </button>
       )}
     </>
   );
 
   const rootClassName = cn(
-    "ds-tag-badge inline-flex max-w-full items-center border font-bold",
-    sizeClassMap[size],
-    selected && "scale-[1.02]",
+    "ds-tag-badge inline-flex max-w-full items-center align-middle",
     onClick &&
-      "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50",
+      "cursor-pointer focus-visible:outline-none focus-visible:ring-[var(--ds-semantic-tag-focus-ring-width)] focus-visible:ring-primary-500/40",
     className,
   );
 

@@ -45,61 +45,62 @@ object DesignTokens {
             const val Border = "rgba(0, 0, 0, 0.06)"
         }
         object Tag {
-            object Slate {
-                const val Bg = "#f3f4f6"
-                const val Fg = "#4b5563"
-                const val Border = "#d1d5db"
+            object Gray {
+                const val Bg = "#F1EFE8"
+                const val Fg = "#444441"
+                const val Border = "transparent"
             }
-            object Red {
-                const val Bg = "#fef2f2"
-                const val Fg = "#b42318"
-                const val Border = "#f3b5b5"
-            }
-            object Orange {
-                const val Bg = "#fff7ed"
-                const val Fg = "#c2410c"
-                const val Border = "#fdba74"
-            }
-            object Amber {
-                const val Bg = "#fffbeb"
-                const val Fg = "#b45309"
-                const val Border = "#fcd34d"
-            }
-            object Lime {
-                const val Bg = "#f7fee7"
-                const val Fg = "#4d7c0f"
-                const val Border = "#bef264"
-            }
-            object Green {
-                const val Bg = "#f0fdf4"
-                const val Fg = "#15803d"
-                const val Border = "#86efac"
+            object Purple {
+                const val Bg = "#EEEDFE"
+                const val Fg = "#3C3489"
+                const val Border = "transparent"
             }
             object Teal {
-                const val Bg = "#f0fdfa"
-                const val Fg = "#0f766e"
-                const val Border = "#5eead4"
+                const val Bg = "#E1F5EE"
+                const val Fg = "#085041"
+                const val Border = "transparent"
             }
-            object Sky {
-                const val Bg = "#f0f9ff"
-                const val Fg = "#0369a1"
-                const val Border = "#7dd3fc"
+            object Pink {
+                const val Bg = "#FBEAF0"
+                const val Fg = "#72243E"
+                const val Border = "transparent"
+            }
+            object Amber {
+                const val Bg = "#FAEEDA"
+                const val Fg = "#633806"
+                const val Border = "transparent"
             }
             object Blue {
-                const val Bg = "#eff6ff"
-                const val Fg = "#1d4ed8"
-                const val Border = "#93c5fd"
+                const val Bg = "#E6F1FB"
+                const val Fg = "#0C447C"
+                const val Border = "transparent"
             }
-            object Violet {
-                const val Bg = "#f5f3ff"
-                const val Fg = "#6d28d9"
-                const val Border = "#c4b5fd"
+            object Green {
+                const val Bg = "#EAF3DE"
+                const val Fg = "#27500A"
+                const val Border = "transparent"
+            }
+            object Red {
+                const val Bg = "#FCEBEB"
+                const val Fg = "#791F1F"
+                const val Border = "transparent"
+            }
+            object Coral {
+                const val Bg = "#FAECE7"
+                const val Fg = "#712B13"
+                const val Border = "transparent"
+            }
+            object Sky {
+                const val Bg = "#E1F4FA"
+                const val Fg = "#0C4A6E"
+                const val Border = "transparent"
             }
         }
     }
     object Spacing {
         const val Value0 = 0
         const val Value1 = 4
+        const val Value18 = 7.2
         const val Value2 = 8
         const val Value3 = 12
         const val Value4 = 16
@@ -110,7 +111,6 @@ object DesignTokens {
         const val Value12 = 48
         const val Value16 = 64
         const val Value20 = 80
-        const val Value18 = 7.2
     }
     object Radius {
         const val Sm = 8
@@ -285,6 +285,19 @@ object DesignTokens {
             const val Interactive = "150ms ease"
             const val ScreenEnter = "300ms ease-out"
             const val Progress = "500ms ease-out"
+        }
+        object Tag {
+            const val FontSize = 12
+            const val FontWeight = 500
+            const val LineHeight = "16px"
+            const val PaddingInline = 8
+            const val PaddingBlock = 1
+            const val Gap = 4
+            const val Radius = 20
+            const val BorderWidth = 0
+            const val RemoveButtonSize = 16
+            const val RemoveIconSize = 12
+            const val FocusRingWidth = 2
         }
     }
 }

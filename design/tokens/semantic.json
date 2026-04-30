@@ -67,5 +67,18 @@
     "interactive": "{motion.transition.interactive}",
     "screenEnter": "{motion.transition.screenEnter}",
     "progress": "{motion.transition.progress}"
+  },
+  "tag": {
+    "fontSize": 12,
+    "fontWeight": "{typography.fontWeight.medium}",
+    "lineHeight": "16px",
+    "paddingInline": "{spacing.2}",
+    "paddingBlock": 1,
+    "gap": "{spacing.1}",
+    "radius": 20,
+    "borderWidth": 0,
+    "removeButtonSize": 16,
+    "removeIconSize": 12,
+    "focusRingWidth": 2
   }
 }

@@ -61,12 +61,9 @@ export const TagManagerPanel = ({ className }: TagManagerPanelProps) => {
   const [mergingFromId, setMergingFromId] = useState<string | null>(null);
   const [mergeIntoId, setMergeIntoId] = useState("");
   const [isMerging, setIsMerging] = useState(false);
-  // パス入力: 新規作成
   const [createPathInput, setCreatePathInput] = useState("");
   const [createPathError, setCreatePathError] = useState("");
   const [isCreatingPath, setIsCreatingPath] = useState(false);
-
-  // パス入力: 選択タグ移動
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [movePathInput, setMovePathInput] = useState("");
   const [movePathError, setMovePathError] = useState("");
@@ -234,7 +231,6 @@ export const TagManagerPanel = ({ className }: TagManagerPanelProps) => {
                 </p>
               </div>
 
-              {/* パス入力: 新規作成 */}
               <div className="rounded-xl border border-slate-200 bg-white p-2.5 space-y-2">
                 <p className="text-xs font-medium text-slate-600 flex items-center gap-1">
                   <FolderInput className="h-3.5 w-3.5" />
@@ -268,7 +264,6 @@ export const TagManagerPanel = ({ className }: TagManagerPanelProps) => {
                 )}
               </div>
 
-              {/* パス入力: 選択タグ移動 */}
               <div className="rounded-xl border border-slate-200 bg-white p-2.5 space-y-2">
                 <p className="text-xs font-medium text-slate-600 flex items-center gap-1">
                   <Move className="h-3.5 w-3.5" />
@@ -411,7 +406,7 @@ export const TagManagerPanel = ({ className }: TagManagerPanelProps) => {
                             <TagChip
                               label={expandedTag.name}
                               colorKey={getTagColorKey(expandedTag.color)}
-                              className="w-fit px-2.5 py-1.5"
+                              className="w-fit"
                             />
                           )}
 
@@ -624,8 +619,7 @@ export const TagManagerPanel = ({ className }: TagManagerPanelProps) => {
               タグを削除しますか？
             </AlertDialogTitle>
             <AlertDialogDescription>
-              「{pendingDeleteName}」を削除すると、{pendingUsageCount}{" "}
-              件のカードからこのタグが削除されます。
+              「{pendingDeleteName}」を削除すると、{pendingUsageCount} 件のカードからこのタグが削除されます。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

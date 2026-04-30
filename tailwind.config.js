@@ -105,7 +105,7 @@ export default {
         "gradient-accent":
           "linear-gradient(135deg, var(--ds-color-status-warning) 0%, var(--ds-color-status-danger) 100%)",
         "gradient-purple":
-          "linear-gradient(135deg, var(--ds-color-tag-violet-border) 0%, var(--ds-color-tag-violet-fg) 100%)",
+          "linear-gradient(135deg, var(--ds-color-tag-purple-bg) 0%, var(--ds-color-tag-purple-fg) 100%)",
         "gradient-warm":
           "linear-gradient(135deg, var(--ds-semantic-color-background-app) 0%, var(--ds-semantic-color-action-primary-soft) 100%)",
         "gradient-hero":

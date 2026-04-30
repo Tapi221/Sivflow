@@ -6,8 +6,6 @@ import type { TagColorKey } from "@/lib/tags/tagColor";
 interface TagChipProps {
   label: string;
   colorKey?: TagColorKey;
-  legacyColor?: string;
-  // 互換用。将来削除予定。
   colorClass?: string;
   className?: string;
   badgeClassName?: string;
@@ -19,7 +17,6 @@ interface TagChipProps {
 export const TagChip = ({
   label,
   colorKey,
-  legacyColor,
   colorClass,
   className,
   badgeClassName,
@@ -30,9 +27,7 @@ export const TagChip = ({
   return (
     <TagBadge
       label={label}
-      size="xs"
       colorKey={colorKey}
-      legacyColor={legacyColor}
       colorClass={colorClass}
       className={cn("ds-tag-chip", className, badgeClassName)}
       onClick={onClick}

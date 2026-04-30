@@ -87,28 +87,33 @@
   }
 
   .ds-tag-badge {
-    border-radius: var(--ds-semantic-radius-pill);
-    box-shadow: var(--ds-semantic-elevation-control-raised);
+    gap: var(--ds-semantic-tag-gap);
+    padding-inline: var(--ds-semantic-tag-padding-inline);
+    padding-block: var(--ds-semantic-tag-padding-block);
+    border-style: solid;
+    border-width: var(--ds-semantic-tag-border-width);
+    border-radius: var(--ds-semantic-tag-radius);
+    font-size: var(--ds-semantic-tag-font-size);
+    font-weight: var(--ds-semantic-tag-font-weight);
+    line-height: var(--ds-semantic-tag-line-height);
+    box-shadow: none;
     transition:
-      transform var(--ds-semantic-motion-interactive),
-      box-shadow var(--ds-semantic-motion-interactive),
-      opacity var(--ds-semantic-motion-interactive);
+      opacity var(--ds-semantic-motion-interactive),
+      transform var(--ds-semantic-motion-interactive);
   }
 
   .ds-tag-badge[data-selected="true"] {
-    box-shadow:
-      var(--ds-semantic-elevation-control-raised),
-      0 0 0 2px
-        color-mix(
-          in srgb,
-          var(--ds-semantic-color-action-primary) 28%,
-          transparent
-        );
+    box-shadow: 0 0 0 2px
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-action-primary) 22%,
+        transparent
+      );
   }
 
   .ds-tag-badge__remove {
     color: inherit;
-    opacity: 0.72;
+    opacity: 0.64;
     transition:
       background-color var(--ds-semantic-motion-interactive),
       color var(--ds-semantic-motion-interactive),
@@ -139,7 +144,7 @@
   }
 
   .ds-tag-input__panel {
-    width: 320px;
+    width: var(--ds-semantic-spacing-panel-width);
     padding: 0;
     overflow: hidden;
   }

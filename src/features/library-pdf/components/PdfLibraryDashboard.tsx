@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { TagChip } from "@/components/tag/TagChip";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { useSetBreadcrumbAction } from "@/contexts/BreadcrumbContext";
 import { useTags } from "@/hooks/settings/useTags";
@@ -150,96 +151,6 @@ const resolveDisplayTags = (
 };
 
 const cardClassName = "rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-4";
-const breadcrumbActionIconClassName =
-  "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]";
-
-const BreadcrumbActionSettingsIcon = () => {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M4 7H20"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-      />
-      <path
-        d="M4 12H20"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-      />
-      <path
-        d="M4 17H20"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-      />
-      <circle
-        cx="15"
-        cy="7"
-        r="2.25"
-        fill="#FFFFFF"
-        stroke="currentColor"
-        strokeWidth="1.75"
-      />
-      <circle
-        cx="8"
-        cy="12"
-        r="2.25"
-        fill="#FFFFFF"
-        stroke="currentColor"
-        strokeWidth="1.75"
-      />
-      <circle
-        cx="13"
-        cy="17"
-        r="2.25"
-        fill="#FFFFFF"
-        stroke="currentColor"
-        strokeWidth="1.75"
-      />
-    </svg>
-  );
-};
-
-const BreadcrumbActionFilterIcon = () => {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M4.75 6.75H19.25L13.75 13.125V18.25L10.25 16.25V13.125L4.75 6.75Z"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-};
-
-const BreadcrumbActionIconSlot = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  return (
-    <span aria-hidden="true" className={breadcrumbActionIconClassName}>
-      {children}
-    </span>
-  );
-};
 
 const IconBadge = ({
   label,
@@ -300,40 +211,12 @@ const IconBadge = ({
   );
 };
 
-const TagChip = ({
-  label,
-  tone = "green",
-}: {
-  label: string;
-  tone?: "green" | "violet" | "blue" | "slate";
-}) => {
-  const toneClassName =
-    tone === "green"
-      ? "bg-[#f3f4f6] text-[#4b5563]"
-      : tone === "violet"
-        ? "bg-[#f5f3ff] text-[#6d5ab3]"
-        : tone === "blue"
-          ? "bg-[#eff6ff] text-[#446a9b]"
-          : "bg-[#f3f4f6] text-[#6b7280]";
-
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-[999px] px-2.5 py-1 text-[11px] font-semibold leading-none",
-        toneClassName,
-      )}
-    >
-      {label}
-    </span>
-  );
-};
-
 const PdfLibraryDashboard = ({
   documents,
   folders,
   onOpenDocument,
 }: PdfLibraryDashboardProps) => {
-  const { tagById } = useTags();
+  const { tagById, getTagColor } = useTags();
   const setBreadcrumbAction = useSetBreadcrumbAction();
   const [unusedExpandedFolders, setUnusedExpandedFolders] = useState<
     Set<string>
@@ -488,26 +371,13 @@ const PdfLibraryDashboard = ({
 
   const breadcrumbAction = useMemo(
     () => (
-      <div
-        className="inline-flex items-center gap-2"
-        style={{ WebkitAppRegion: "no-drag" }}
+      <button
+        type="button"
+        className="inline-flex h-8 w-fit items-center justify-center rounded-[8px] border-0 bg-[#6A876E] px-5 text-[12px] font-medium leading-normal text-white transition-colors hover:bg-[#5f7963]"
+        onClick={handleToolbarAddDocument}
       >
-        <button
-          type="button"
-          className="inline-flex h-8 w-fit items-center justify-center rounded-[8px] border-0 bg-[#6A876E] px-5 text-[12px] font-medium leading-normal text-white transition-colors hover:bg-[#5f7963]"
-          onClick={handleToolbarAddDocument}
-        >
-          PDFをインポート
-        </button>
-        <div className="inline-flex items-center gap-1">
-          <BreadcrumbActionIconSlot>
-            <BreadcrumbActionSettingsIcon />
-          </BreadcrumbActionIconSlot>
-          <BreadcrumbActionIconSlot>
-            <BreadcrumbActionFilterIcon />
-          </BreadcrumbActionIconSlot>
-        </div>
-      </div>
+        PDFをインポート
+      </button>
     ),
     [handleToolbarAddDocument],
   );
@@ -726,11 +596,11 @@ const PdfLibraryDashboard = ({
 
                       <div className="flex min-w-0 flex-wrap items-center gap-2">
                         {row.tags.length > 0 ? (
-                          row.tags.slice(0, 2).map((tag, index) => (
+                          row.tags.slice(0, 2).map((tag) => (
                             <TagChip
-                              key={`${row.id}:${tag}:${index}`}
+                              key={`${row.id}:${tag}`}
                               label={tag}
-                              tone={index % 2 === 0 ? "violet" : "green"}
+                              colorClass={getTagColor(tag)}
                             />
                           ))
                         ) : (
