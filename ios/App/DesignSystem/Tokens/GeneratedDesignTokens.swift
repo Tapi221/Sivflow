@@ -45,61 +45,62 @@ enum DesignTokens {
             static let Border = "rgba(0, 0, 0, 0.06)"
         }
         enum Tag {
-            enum Slate {
-                static let Bg = "#f3f4f6"
-                static let Fg = "#4b5563"
-                static let Border = "#d1d5db"
+            enum Gray {
+                static let Bg = "#F1EFE8"
+                static let Fg = "#444441"
+                static let Border = "transparent"
             }
-            enum Red {
-                static let Bg = "#fef2f2"
-                static let Fg = "#b42318"
-                static let Border = "#f3b5b5"
-            }
-            enum Orange {
-                static let Bg = "#fff7ed"
-                static let Fg = "#c2410c"
-                static let Border = "#fdba74"
-            }
-            enum Amber {
-                static let Bg = "#fffbeb"
-                static let Fg = "#b45309"
-                static let Border = "#fcd34d"
-            }
-            enum Lime {
-                static let Bg = "#f7fee7"
-                static let Fg = "#4d7c0f"
-                static let Border = "#bef264"
-            }
-            enum Green {
-                static let Bg = "#f0fdf4"
-                static let Fg = "#15803d"
-                static let Border = "#86efac"
+            enum Purple {
+                static let Bg = "#EEEDFE"
+                static let Fg = "#3C3489"
+                static let Border = "transparent"
             }
             enum Teal {
-                static let Bg = "#f0fdfa"
-                static let Fg = "#0f766e"
-                static let Border = "#5eead4"
+                static let Bg = "#E1F5EE"
+                static let Fg = "#085041"
+                static let Border = "transparent"
             }
-            enum Sky {
-                static let Bg = "#f0f9ff"
-                static let Fg = "#0369a1"
-                static let Border = "#7dd3fc"
+            enum Pink {
+                static let Bg = "#FBEAF0"
+                static let Fg = "#72243E"
+                static let Border = "transparent"
+            }
+            enum Amber {
+                static let Bg = "#FAEEDA"
+                static let Fg = "#633806"
+                static let Border = "transparent"
             }
             enum Blue {
-                static let Bg = "#eff6ff"
-                static let Fg = "#1d4ed8"
-                static let Border = "#93c5fd"
+                static let Bg = "#E6F1FB"
+                static let Fg = "#0C447C"
+                static let Border = "transparent"
             }
-            enum Violet {
-                static let Bg = "#f5f3ff"
-                static let Fg = "#6d28d9"
-                static let Border = "#c4b5fd"
+            enum Green {
+                static let Bg = "#EAF3DE"
+                static let Fg = "#27500A"
+                static let Border = "transparent"
+            }
+            enum Red {
+                static let Bg = "#FCEBEB"
+                static let Fg = "#791F1F"
+                static let Border = "transparent"
+            }
+            enum Coral {
+                static let Bg = "#FAECE7"
+                static let Fg = "#712B13"
+                static let Border = "transparent"
+            }
+            enum Sky {
+                static let Bg = "#E1F4FA"
+                static let Fg = "#0C4A6E"
+                static let Border = "transparent"
             }
         }
     }
     enum Spacing {
         static let Value0 = 0
         static let Value1 = 4
+        static let Value18 = 7.2
         static let Value2 = 8
         static let Value3 = 12
         static let Value4 = 16
@@ -110,7 +111,6 @@ enum DesignTokens {
         static let Value12 = 48
         static let Value16 = 64
         static let Value20 = 80
-        static let Value18 = 7.2
     }
     enum Radius {
         static let Sm = 8
@@ -285,6 +285,19 @@ enum DesignTokens {
             static let Interactive = "150ms ease"
             static let ScreenEnter = "300ms ease-out"
             static let Progress = "500ms ease-out"
+        }
+        enum Tag {
+            static let FontSize = 12
+            static let FontWeight = 500
+            static let LineHeight = "16px"
+            static let PaddingInline = 8
+            static let PaddingBlock = 1
+            static let Gap = 4
+            static let Radius = 20
+            static let BorderWidth = 0
+            static let RemoveButtonSize = 16
+            static let RemoveIconSize = 12
+            static let FocusRingWidth = 2
         }
     }
 }

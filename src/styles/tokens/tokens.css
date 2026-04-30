@@ -121,12 +121,12 @@
 
     --code-token-text: var(--ds-color-code-foreground);
     --code-token-comment: var(--ds-color-neutral-500);
-    --code-token-punctuation: var(--ds-color-tag-slate-fg);
-    --code-token-keyword: var(--ds-color-tag-violet-fg);
+    --code-token-punctuation: var(--ds-color-tag-gray-fg);
+    --code-token-keyword: var(--ds-color-tag-purple-fg);
     --code-token-type: var(--ds-color-tag-sky-fg);
     --code-token-function: var(--ds-color-tag-blue-fg);
     --code-token-string: var(--ds-color-tag-green-fg);
-    --code-token-number: var(--ds-color-tag-orange-fg);
+    --code-token-number: var(--ds-color-tag-amber-fg);
     --code-token-operator: var(--ds-color-neutral-700);
 
     /* Notion/Linear-style dense UI tokens */
@@ -167,7 +167,6 @@
     --font-size-meta: var(--ds-layout-font-size-meta);
 
     --scrollbar-track: transparent;
-    /* Match ExplorerChrome icon fill tone */
     --scrollbar-thumb: #f0efe9;
     --scrollbar-thumb-hover: color-mix(in srgb, #f0efe9 86%, black 14%);
     --scrollbar-thumb-active: color-mix(in srgb, #f0efe9 74%, black 26%);
@@ -230,119 +229,90 @@
       #123126
     );
 
-    /* Tag color tokens */
-    --tag-slate-bg: var(--ds-color-tag-slate-bg);
-    --tag-slate-fg: var(--ds-color-tag-slate-fg);
-    --tag-slate-border: var(--ds-color-tag-slate-border);
+    --tag-gray-bg: var(--ds-color-tag-gray-bg);
+    --tag-gray-fg: var(--ds-color-tag-gray-fg);
+    --tag-gray-border: var(--ds-color-tag-gray-border);
 
-    --tag-red-bg: var(--ds-color-tag-red-bg);
-    --tag-red-fg: var(--ds-color-tag-red-fg);
-    --tag-red-border: var(--ds-color-tag-red-border);
-
-    --tag-orange-bg: var(--ds-color-tag-orange-bg);
-    --tag-orange-fg: var(--ds-color-tag-orange-fg);
-    --tag-orange-border: var(--ds-color-tag-orange-border);
-
-    --tag-amber-bg: var(--ds-color-tag-amber-bg);
-    --tag-amber-fg: var(--ds-color-tag-amber-fg);
-    --tag-amber-border: var(--ds-color-tag-amber-border);
-
-    --tag-lime-bg: var(--ds-color-tag-lime-bg);
-    --tag-lime-fg: var(--ds-color-tag-lime-fg);
-    --tag-lime-border: var(--ds-color-tag-lime-border);
-
-    --tag-green-bg: var(--ds-color-tag-green-bg);
-    --tag-green-fg: var(--ds-color-tag-green-fg);
-    --tag-green-border: var(--ds-color-tag-green-border);
+    --tag-purple-bg: var(--ds-color-tag-purple-bg);
+    --tag-purple-fg: var(--ds-color-tag-purple-fg);
+    --tag-purple-border: var(--ds-color-tag-purple-border);
 
     --tag-teal-bg: var(--ds-color-tag-teal-bg);
     --tag-teal-fg: var(--ds-color-tag-teal-fg);
     --tag-teal-border: var(--ds-color-tag-teal-border);
 
-    --tag-sky-bg: var(--ds-color-tag-sky-bg);
-    --tag-sky-fg: var(--ds-color-tag-sky-fg);
-    --tag-sky-border: var(--ds-color-tag-sky-border);
+    --tag-pink-bg: var(--ds-color-tag-pink-bg);
+    --tag-pink-fg: var(--ds-color-tag-pink-fg);
+    --tag-pink-border: var(--ds-color-tag-pink-border);
+
+    --tag-amber-bg: var(--ds-color-tag-amber-bg);
+    --tag-amber-fg: var(--ds-color-tag-amber-fg);
+    --tag-amber-border: var(--ds-color-tag-amber-border);
 
     --tag-blue-bg: var(--ds-color-tag-blue-bg);
     --tag-blue-fg: var(--ds-color-tag-blue-fg);
     --tag-blue-border: var(--ds-color-tag-blue-border);
 
-    --tag-violet-bg: var(--ds-color-tag-violet-bg);
-    --tag-violet-fg: var(--ds-color-tag-violet-fg);
-    --tag-violet-border: var(--ds-color-tag-violet-border);
+    --tag-green-bg: var(--ds-color-tag-green-bg);
+    --tag-green-fg: var(--ds-color-tag-green-fg);
+    --tag-green-border: var(--ds-color-tag-green-border);
+
+    --tag-red-bg: var(--ds-color-tag-red-bg);
+    --tag-red-fg: var(--ds-color-tag-red-fg);
+    --tag-red-border: var(--ds-color-tag-red-border);
+
+    --tag-coral-bg: var(--ds-color-tag-coral-bg);
+    --tag-coral-fg: var(--ds-color-tag-coral-fg);
+    --tag-coral-border: var(--ds-color-tag-coral-border);
+
+    --tag-sky-bg: var(--ds-color-tag-sky-bg);
+    --tag-sky-fg: var(--ds-color-tag-sky-fg);
+    --tag-sky-border: var(--ds-color-tag-sky-border);
   }
 }
 
 @layer components {
-  .tag-color-slate,
-  .tag-color-red,
-  .tag-color-orange,
-  .tag-color-amber,
-  .tag-color-lime,
-  .tag-color-green,
+  .tag-color-gray,
+  .tag-color-purple,
   .tag-color-teal,
-  .tag-color-sky,
+  .tag-color-pink,
+  .tag-color-amber,
   .tag-color-blue,
-  .tag-color-violet {
+  .tag-color-green,
+  .tag-color-red,
+  .tag-color-coral,
+  .tag-color-sky {
     border-color: var(--tag-border);
     background: var(--tag-bg);
     color: var(--tag-fg);
   }
 
-  .tag-color-swatch-slate,
-  .tag-color-swatch-red,
-  .tag-color-swatch-orange,
-  .tag-color-swatch-amber,
-  .tag-color-swatch-lime,
-  .tag-color-swatch-green,
+  .tag-color-swatch-gray,
+  .tag-color-swatch-purple,
   .tag-color-swatch-teal,
-  .tag-color-swatch-sky,
+  .tag-color-swatch-pink,
+  .tag-color-swatch-amber,
   .tag-color-swatch-blue,
-  .tag-color-swatch-violet {
+  .tag-color-swatch-green,
+  .tag-color-swatch-red,
+  .tag-color-swatch-coral,
+  .tag-color-swatch-sky {
     border-color: var(--tag-border);
     background: var(--tag-fg);
   }
 
-  .tag-color-slate,
-  .tag-color-swatch-slate {
-    --tag-bg: var(--tag-slate-bg);
-    --tag-fg: var(--tag-slate-fg);
-    --tag-border: var(--tag-slate-border);
+  .tag-color-gray,
+  .tag-color-swatch-gray {
+    --tag-bg: var(--tag-gray-bg);
+    --tag-fg: var(--tag-gray-fg);
+    --tag-border: var(--tag-gray-border);
   }
 
-  .tag-color-red,
-  .tag-color-swatch-red {
-    --tag-bg: var(--tag-red-bg);
-    --tag-fg: var(--tag-red-fg);
-    --tag-border: var(--tag-red-border);
-  }
-
-  .tag-color-orange,
-  .tag-color-swatch-orange {
-    --tag-bg: var(--tag-orange-bg);
-    --tag-fg: var(--tag-orange-fg);
-    --tag-border: var(--tag-orange-border);
-  }
-
-  .tag-color-amber,
-  .tag-color-swatch-amber {
-    --tag-bg: var(--tag-amber-bg);
-    --tag-fg: var(--tag-amber-fg);
-    --tag-border: var(--tag-amber-border);
-  }
-
-  .tag-color-lime,
-  .tag-color-swatch-lime {
-    --tag-bg: var(--tag-lime-bg);
-    --tag-fg: var(--tag-lime-fg);
-    --tag-border: var(--tag-lime-border);
-  }
-
-  .tag-color-green,
-  .tag-color-swatch-green {
-    --tag-bg: var(--tag-green-bg);
-    --tag-fg: var(--tag-green-fg);
-    --tag-border: var(--tag-green-border);
+  .tag-color-purple,
+  .tag-color-swatch-purple {
+    --tag-bg: var(--tag-purple-bg);
+    --tag-fg: var(--tag-purple-fg);
+    --tag-border: var(--tag-purple-border);
   }
 
   .tag-color-teal,
@@ -352,11 +322,18 @@
     --tag-border: var(--tag-teal-border);
   }
 
-  .tag-color-sky,
-  .tag-color-swatch-sky {
-    --tag-bg: var(--tag-sky-bg);
-    --tag-fg: var(--tag-sky-fg);
-    --tag-border: var(--tag-sky-border);
+  .tag-color-pink,
+  .tag-color-swatch-pink {
+    --tag-bg: var(--tag-pink-bg);
+    --tag-fg: var(--tag-pink-fg);
+    --tag-border: var(--tag-pink-border);
+  }
+
+  .tag-color-amber,
+  .tag-color-swatch-amber {
+    --tag-bg: var(--tag-amber-bg);
+    --tag-fg: var(--tag-amber-fg);
+    --tag-border: var(--tag-amber-border);
   }
 
   .tag-color-blue,
@@ -366,10 +343,31 @@
     --tag-border: var(--tag-blue-border);
   }
 
-  .tag-color-violet,
-  .tag-color-swatch-violet {
-    --tag-bg: var(--tag-violet-bg);
-    --tag-fg: var(--tag-violet-fg);
-    --tag-border: var(--tag-violet-border);
+  .tag-color-green,
+  .tag-color-swatch-green {
+    --tag-bg: var(--tag-green-bg);
+    --tag-fg: var(--tag-green-fg);
+    --tag-border: var(--tag-green-border);
+  }
+
+  .tag-color-red,
+  .tag-color-swatch-red {
+    --tag-bg: var(--tag-red-bg);
+    --tag-fg: var(--tag-red-fg);
+    --tag-border: var(--tag-red-border);
+  }
+
+  .tag-color-coral,
+  .tag-color-swatch-coral {
+    --tag-bg: var(--tag-coral-bg);
+    --tag-fg: var(--tag-coral-fg);
+    --tag-border: var(--tag-coral-border);
+  }
+
+  .tag-color-sky,
+  .tag-color-swatch-sky {
+    --tag-bg: var(--tag-sky-bg);
+    --tag-fg: var(--tag-sky-fg);
+    --tag-border: var(--tag-sky-border);
   }
 }
