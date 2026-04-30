@@ -1,7 +1,10 @@
 import { Fragment, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
+import {
+  useBreadcrumbAction,
+  useBreadcrumbExtraCrumbs,
+} from "@/contexts/BreadcrumbContext";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
 import type { WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
 import { useWorkspaceTabsStore } from "@/features/workspace-tabs/store/useWorkspaceTabsStore";
@@ -84,6 +87,7 @@ const resolveActiveCrumbs = ({
 export const WorkspaceBreadcrumbBar = () => {
   const navigate = useNavigate();
   const { search } = useLocation();
+  const action = useBreadcrumbAction();
   const extraCrumbs = useBreadcrumbExtraCrumbs();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
@@ -147,6 +151,9 @@ export const WorkspaceBreadcrumbBar = () => {
           );
         })}
       </ol>
+      {action ? (
+        <div className="workspace-breadcrumb-bar__action">{action}</div>
+      ) : null}
     </nav>
   );
 };

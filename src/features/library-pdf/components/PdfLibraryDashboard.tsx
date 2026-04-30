@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+import { useSetBreadcrumbAction } from "@/contexts/BreadcrumbContext";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 import { normalizeDate } from "@/shared/codec/date";
@@ -33,19 +34,11 @@ type ViewerStateWithLastOpenedAt = NonNullable<DocumentItem["viewerState"]> & {
   lastOpenedAt?: unknown;
 };
 
-type SummaryCategory = {
-  label: string;
-  count: number;
-  tone: "violet" | "blue" | "green";
-};
-
 type RelatedRow = PdfDashboardRow & {
   score: number;
 };
 
 const PAGE_SIZE = 10;
-
-const toneByIndex = ["violet", "blue", "green"] as const;
 
 const toDate = (value: unknown): Date | null => {
   return normalizeDate(value);
@@ -174,32 +167,6 @@ const resolveDisplayTags = (
   return Array.from(new Set(fallbackTags)).slice(0, 3);
 };
 
-const buildSummaryCategories = (rows: PdfDashboardRow[]): SummaryCategory[] => {
-  const bucketMap = new Map<string, number>();
-
-  rows.forEach((row) => {
-    bucketMap.set(
-      row.categoryLabel,
-      (bucketMap.get(row.categoryLabel) ?? 0) + 1,
-    );
-  });
-
-  return Array.from(bucketMap.entries())
-    .sort((left, right) => {
-      if (right[1] !== left[1]) {
-        return right[1] - left[1];
-      }
-
-      return left[0].localeCompare(right[0], "ja");
-    })
-    .slice(0, 3)
-    .map(([label, count], index) => ({
-      label,
-      count,
-      tone: toneByIndex[index] ?? "green",
-    }));
-};
-
 const countSharedTags = (left: string[], right: string[]): number => {
   if (left.length === 0 || right.length === 0) {
     return 0;
@@ -239,7 +206,7 @@ const buildRelatedRows = (
     .slice(0, 4);
 };
 
-const cardClassName = "rounded-[16px] border border-[#e5e7eb] bg-[#FFFFFF] p-4";
+const cardClassName = "rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-4";
 
 const IconBadge = ({
   label,
@@ -248,6 +215,35 @@ const IconBadge = ({
   label: string;
   tone?: "slate" | "green" | "violet" | "blue" | "rose";
 }) => {
+  if (label === "PDF") {
+    return (
+      <span
+        className="inline-flex h-8 w-8 items-center justify-center rounded-[999px] bg-[#fff1f2]"
+        aria-label="PDF"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M7 3.5C6.60218 3.5 6.22064 3.65804 5.93934 3.93934C5.65804 4.22064 5.5 4.60218 5.5 5V19C5.5 19.3978 5.65804 19.7794 5.93934 20.0607C6.22064 20.342 6.60218 20.5 7 20.5H17C17.3978 20.5 17.7794 20.342 18.0607 20.0607C18.342 19.7794 18.5 19.3978 18.5 19V9.41411C18.4999 9.28155 18.4473 9.15433 18.3535 9.06061L12.9394 3.64655C12.8457 3.5528 12.7186 3.50006 12.586 3.5H7ZM5.23223 3.23223C5.70107 2.76339 6.33696 2.5 7 2.5H12.586C12.9838 2.50008 13.3653 2.65816 13.6466 2.93945L19.0605 8.35339C19.3418 8.63463 19.4999 9.01613 19.5 9.41389V19C19.5 19.663 19.2366 20.2989 18.7678 20.7678C18.2989 21.2366 17.663 21.5 17 21.5H7C6.33696 21.5 5.70107 21.2366 5.23223 20.7678C4.76339 20.2989 4.5 19.663 4.5 19V5C4.5 4.33696 4.76339 3.70107 5.23223 3.23223Z"
+            fill="#E72A2A"
+          />
+          <path
+            d="M7.2328 14.8V11.0182H8.72484C9.01168 11.0182 9.25604 11.073 9.45794 11.1826C9.65983 11.2909 9.81371 11.4417 9.91958 11.635C10.0267 11.827 10.0802 12.0486 10.0802 12.2998C10.0802 12.5509 10.0261 12.7725 9.91774 12.9645C9.8094 13.1566 9.65244 13.3062 9.44686 13.4133C9.2425 13.5204 8.99506 13.5739 8.70453 13.5739H7.75353V12.9331H8.57527C8.72915 12.9331 8.85595 12.9067 8.95566 12.8537C9.05661 12.7996 9.13171 12.7251 9.18095 12.6303C9.23142 12.5343 9.25666 12.4241 9.25666 12.2998C9.25666 12.1742 9.23142 12.0646 9.18095 11.9711C9.13171 11.8763 9.05661 11.803 8.95566 11.7513C8.85472 11.6984 8.72669 11.6719 8.57157 11.6719H8.03237V14.8H7.2328ZM11.9402 14.8H10.5996V11.0182H11.9513C12.3317 11.0182 12.6592 11.0939 12.9337 11.2454C13.2082 11.3956 13.4193 11.6116 13.5671 11.8935C13.716 12.1754 13.7905 12.5127 13.7905 12.9054C13.7905 13.2994 13.716 13.6379 13.5671 13.9211C13.4193 14.2042 13.207 14.4215 12.93 14.5729C12.6542 14.7243 12.3243 14.8 11.9402 14.8ZM11.3992 14.115H11.907C12.1433 14.115 12.3422 14.0731 12.5034 13.9894C12.6659 13.9045 12.7878 13.7733 12.8691 13.5961C12.9515 13.4176 12.9928 13.1874 12.9928 12.9054C12.9928 12.626 12.9515 12.3976 12.8691 12.2204C12.7878 12.0431 12.6665 11.9126 12.5053 11.8289C12.344 11.7452 12.1452 11.7033 11.9088 11.7033H11.3992V14.115ZM14.3828 14.8V11.0182H16.8868V11.6775H15.1824V12.5786H16.7206V13.2378H15.1824V14.8H14.3828Z"
+            fill="#E72A2A"
+          />
+        </svg>
+      </span>
+    );
+  }
+
   const toneClassName =
     tone === "green"
       ? "bg-[#f3f4f6] text-[#4b5563]"
@@ -326,6 +322,7 @@ const PdfLibraryDashboard = ({
   onOpenDocument,
 }: PdfLibraryDashboardProps) => {
   const { tagById } = useTags();
+  const setBreadcrumbAction = useSetBreadcrumbAction();
   const [unusedExpandedFolders, setUnusedExpandedFolders] = useState<
     Set<string>
   >(new Set());
@@ -477,7 +474,24 @@ const PdfLibraryDashboard = ({
     setExpandedFolders: setUnusedExpandedFolders,
   });
 
-  const summaryCategories = useMemo(() => buildSummaryCategories(rows), [rows]);
+  const breadcrumbAction = useMemo(
+    () => (
+      <button
+        type="button"
+        className="inline-flex h-8 w-fit items-center justify-center rounded-[8px] border-0 bg-[#6A876E] px-5 text-[14px] font-[542] leading-[17px] text-white transition-colors hover:bg-[#5f7963]"
+        onClick={handleToolbarAddDocument}
+      >
+        PDFをインポート
+      </button>
+    ),
+    [handleToolbarAddDocument],
+  );
+
+  useEffect(() => {
+    setBreadcrumbAction(breadcrumbAction);
+
+    return () => setBreadcrumbAction(null);
+  }, [breadcrumbAction, setBreadcrumbAction]);
 
   const continueRows = useMemo(() => {
     return rows
@@ -533,7 +547,7 @@ const PdfLibraryDashboard = ({
           className="hidden"
           onChange={handleToolbarFileInputChange}
         />
-        <div className="w-full max-w-2xl rounded-[16px] border border-[#e5e7eb] bg-[#FFFFFF] p-8">
+        <div className="w-full max-w-2xl rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-8">
           <div className="inline-flex rounded-[999px] bg-[#f3f4f6] px-3 py-1 text-[12px] font-semibold text-[#4b5563]">
             PDF ライブラリ
           </div>
@@ -569,50 +583,7 @@ const PdfLibraryDashboard = ({
 
       <div className="grid min-h-0 w-full grid-cols-1 gap-4 px-4 py-4 xl:grid-cols-[minmax(0,1fr)_296px]">
         <div className="flex min-h-0 min-w-0 flex-col gap-4">
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-            <section className={cardClassName}>
-              <div className="flex items-start justify-between gap-5">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <IconBadge label="PDF" tone="green" />
-                    <span className="text-[13px] font-semibold text-[#30403d]">
-                      PDFの概要
-                    </span>
-                  </div>
-                  <div className="mt-4 flex items-end gap-3">
-                    <span className="text-[60px] font-semibold leading-none tracking-[-0.05em] text-[#17234a]">
-                      {rows.length}
-                    </span>
-                    <span className="pb-1 text-[14px] text-[#77847d]">
-                      総PDF数
-                    </span>
-                  </div>
-                </div>
-
-                <div className="min-w-[130px] space-y-2.5 pt-1">
-                  {summaryCategories.map((summary, index) => (
-                    <div
-                      key={`${summary.label}:${index}`}
-                      className="flex items-center justify-between gap-3"
-                    >
-                      <div className="flex min-w-0 items-center gap-2">
-                        <IconBadge
-                          label={String(summary.count)}
-                          tone={summary.tone}
-                        />
-                        <span className="truncate text-[13px] font-medium text-[#55635f]">
-                          {summary.label}
-                        </span>
-                      </div>
-                      <span className="text-[13px] font-semibold text-[#41504d]">
-                        {summary.count}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
             <section className={cardClassName}>
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -701,9 +672,9 @@ const PdfLibraryDashboard = ({
             </section>
           </div>
 
-          <section className="min-h-0 flex-1 rounded-[16px] border border-[#e5e7eb] bg-[#FFFFFF]">
+          <section className="min-h-0 flex-1 rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF]">
             <div className="overflow-hidden">
-              <div className="grid grid-cols-[minmax(240px,1.9fr)_minmax(160px,1fr)_80px_120px_120px_32px] gap-4 border-b border-[#e5e7eb] px-4 py-3 text-[12px] font-semibold text-[#58635f]">
+              <div className="grid h-8 grid-cols-[minmax(240px,1.9fr)_minmax(160px,1fr)_80px_120px_120px_32px] items-center gap-4 border-b border-[#e5e7eb] px-4 text-[14px] font-[542] leading-[17px] text-[#58635f]">
                 <div>名前</div>
                 <div>タグ</div>
                 <div>ページ</div>
@@ -721,7 +692,7 @@ const PdfLibraryDashboard = ({
                       key={row.id}
                       type="button"
                       className={cn(
-                        "grid w-full grid-cols-[minmax(240px,1.9fr)_minmax(160px,1fr)_80px_120px_120px_32px] gap-4 px-4 py-3 text-left transition-colors",
+                        "grid h-8 w-full grid-cols-[minmax(240px,1.9fr)_minmax(160px,1fr)_80px_120px_120px_32px] items-center gap-4 px-4 text-left text-[14px] font-[542] leading-[17px] transition-colors",
                         isSelected ? "bg-[#f9fafb]" : "hover:bg-[#fafafa]",
                       )}
                       onClick={() => setSelectedDocumentId(row.id)}
@@ -729,7 +700,7 @@ const PdfLibraryDashboard = ({
                       <div className="min-w-0">
                         <div className="flex items-center gap-3">
                           <IconBadge label="PDF" tone="rose" />
-                          <span className="truncate text-[13px] font-semibold text-[#273038]">
+                          <span className="truncate text-[14px] font-[542] leading-[17px] text-[#273038]">
                             {row.title}
                           </span>
                         </div>
@@ -747,19 +718,19 @@ const PdfLibraryDashboard = ({
                               />
                             ))
                         ) : (
-                          <span className="text-[13px] text-[#93a09a]">
+                          <span className="text-[14px] leading-[17px] text-[#93a09a]">
                             タグなし
                           </span>
                         )}
                       </div>
 
-                      <div className="text-[13px] font-medium text-[#46514f]">
+                      <div className="text-[14px] font-[542] leading-[17px] text-[#46514f]">
                         {formatPageCount(row.pageCount)}
                       </div>
-                      <div className="text-[13px] text-[#75817c]">
+                      <div className="text-[14px] leading-[17px] text-[#75817c]">
                         {formatDateTime(row.lastViewedAt)}
                       </div>
-                      <div className="text-[13px] text-[#75817c]">
+                      <div className="text-[14px] leading-[17px] text-[#75817c]">
                         {formatDateTime(row.updatedAt)}
                       </div>
                       <div className="text-[18px] leading-none text-[#9aa59e]">
@@ -890,20 +861,22 @@ const PdfLibraryDashboard = ({
               />
             </div>
 
-            <button
-              type="button"
-              className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-[16px] border border-[#d1d5db] bg-[#FFFFFF] text-[15px] font-semibold text-[#111827] transition-colors hover:bg-[#f9fafb]"
-              disabled={!selectedRow}
-              onClick={() => {
-                if (!selectedRow) {
-                  return;
-                }
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                className="inline-flex h-8 w-fit items-center justify-center rounded-[8px] border-0 bg-[#6A876E] px-5 text-[14px] font-[542] leading-[17px] text-white transition-colors hover:bg-[#5f7963]"
+                disabled={!selectedRow}
+                onClick={() => {
+                  if (!selectedRow) {
+                    return;
+                  }
 
-                onOpenDocument(selectedRow.id);
-              }}
-            >
-              PDFを開く
-            </button>
+                  onOpenDocument(selectedRow.id);
+                }}
+              >
+                PDFを開く
+              </button>
+            </div>
           </section>
 
           <section className={cardClassName}>
@@ -943,14 +916,6 @@ const PdfLibraryDashboard = ({
               )}
             </div>
           </section>
-
-          <button
-            type="button"
-            className="inline-flex min-h-[56px] items-center justify-center rounded-[16px] border border-[#d1d5db] bg-[#FFFFFF] px-5 text-[15px] font-semibold text-[#111827] transition-colors hover:bg-[#f9fafb]"
-            onClick={handleToolbarAddDocument}
-          >
-            PDFをインポート
-          </button>
         </aside>
       </div>
     </div>
