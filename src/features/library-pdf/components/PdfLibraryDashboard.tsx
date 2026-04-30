@@ -34,10 +34,6 @@ type ViewerStateWithLastOpenedAt = NonNullable<DocumentItem["viewerState"]> & {
   lastOpenedAt?: unknown;
 };
 
-type RelatedRow = PdfDashboardRow & {
-  score: number;
-};
-
 const PAGE_SIZE = 10;
 
 const toDate = (value: unknown): Date | null => {
@@ -165,45 +161,6 @@ const resolveDisplayTags = (
   );
 
   return Array.from(new Set(fallbackTags)).slice(0, 3);
-};
-
-const countSharedTags = (left: string[], right: string[]): number => {
-  if (left.length === 0 || right.length === 0) {
-    return 0;
-  }
-
-  const rightSet = new Set(right);
-  return left.reduce((count, tag) => count + Number(rightSet.has(tag)), 0);
-};
-
-const buildRelatedRows = (
-  rows: PdfDashboardRow[],
-  selectedRow: PdfDashboardRow | null,
-): RelatedRow[] => {
-  if (!selectedRow) {
-    return [];
-  }
-
-  return rows
-    .filter((row) => row.id !== selectedRow.id)
-    .map((row) => ({
-      ...row,
-      score:
-        Number(row.folderId === selectedRow.folderId) * 100 +
-        countSharedTags(row.tags, selectedRow.tags) * 10 +
-        Number(Boolean(row.progressPercent)),
-    }))
-    .filter((row) => row.score > 0)
-    .sort((left, right) => {
-      if (right.score !== left.score) {
-        return right.score - left.score;
-      }
-
-      return (
-        (right.updatedAt?.getTime() ?? 0) - (left.updatedAt?.getTime() ?? 0)
-      );
-    })
-    .slice(0, 4);
 };
 
 const cardClassName = "rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-4";
@@ -478,7 +435,7 @@ const PdfLibraryDashboard = ({
     () => (
       <button
         type="button"
-        className="inline-flex h-8 w-fit items-center justify-center rounded-[8px] border-0 bg-[#6A876E] px-5 text-[14px] font-[542] leading-[17px] text-white transition-colors hover:bg-[#5f7963]"
+        className="inline-flex h-8 w-fit items-center justify-center rounded-[8px] border-0 bg-[#6A876E] px-5 text-[12px] font-medium leading-normal text-white transition-colors hover:bg-[#5f7963]"
         onClick={handleToolbarAddDocument}
       >
         PDFをインポート
@@ -522,11 +479,6 @@ const PdfLibraryDashboard = ({
       )
       .slice(0, 3);
   }, [rows]);
-
-  const relatedRows = useMemo(
-    () => buildRelatedRows(rows, selectedRow),
-    [rows, selectedRow],
-  );
 
   const paginatedRows = useMemo(() => {
     const start = pageIndex * PAGE_SIZE;
@@ -581,7 +533,7 @@ const PdfLibraryDashboard = ({
         onChange={handleToolbarFileInputChange}
       />
 
-      <div className="grid min-h-0 w-full grid-cols-1 gap-4 px-4 py-4 xl:grid-cols-[minmax(0,1fr)_296px]">
+      <div className="grid min-h-0 w-full grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_296px]">
         <div className="flex min-h-0 min-w-0 flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
             <section className={cardClassName}>
@@ -672,9 +624,9 @@ const PdfLibraryDashboard = ({
             </section>
           </div>
 
-          <section className="min-h-0 flex-1 rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF]">
+          <section className="min-h-0 flex-1 rounded-[10px] bg-[#FFFFFF]">
             <div className="overflow-hidden">
-              <div className="grid h-8 grid-cols-[minmax(240px,1.9fr)_minmax(160px,1fr)_80px_120px_120px_32px] items-center gap-4 border-b border-[#e5e7eb] px-4 text-[14px] font-[542] leading-[17px] text-[#58635f]">
+              <div className="grid h-8 grid-cols-[minmax(240px,1.9fr)_minmax(160px,1fr)_80px_120px_120px_32px] items-center gap-4 border-b border-[#e5e7eb] text-[12px] font-medium leading-normal text-[#58635f]">
                 <div>名前</div>
                 <div>タグ</div>
                 <div>ページ</div>
@@ -692,7 +644,7 @@ const PdfLibraryDashboard = ({
                       key={row.id}
                       type="button"
                       className={cn(
-                        "grid h-8 w-full grid-cols-[minmax(240px,1.9fr)_minmax(160px,1fr)_80px_120px_120px_32px] items-center gap-4 px-4 text-left text-[14px] font-[542] leading-[17px] transition-colors",
+                        "grid h-8 w-full grid-cols-[minmax(240px,1.9fr)_minmax(160px,1fr)_80px_120px_120px_32px] items-center gap-4 text-left text-[13px] font-[542] leading-[17px] transition-colors",
                         isSelected ? "bg-[#f9fafb]" : "hover:bg-[#fafafa]",
                       )}
                       onClick={() => setSelectedDocumentId(row.id)}
@@ -700,7 +652,7 @@ const PdfLibraryDashboard = ({
                       <div className="min-w-0">
                         <div className="flex items-center gap-3">
                           <IconBadge label="PDF" tone="rose" />
-                          <span className="truncate text-[14px] font-[542] leading-[17px] text-[#273038]">
+                          <span className="truncate text-[13px] font-medium leading-[17px] text-[#273038]">
                             {row.title}
                           </span>
                         </div>
@@ -718,19 +670,19 @@ const PdfLibraryDashboard = ({
                               />
                             ))
                         ) : (
-                          <span className="text-[14px] leading-[17px] text-[#93a09a]">
+                          <span className="text-[13px] leading-[17px] text-[#93a09a]">
                             タグなし
                           </span>
                         )}
                       </div>
 
-                      <div className="text-[14px] font-[542] leading-[17px] text-[#46514f]">
+                      <div className="text-[13px] font-[542] leading-[17px] text-[#46514f]">
                         {formatPageCount(row.pageCount)}
                       </div>
-                      <div className="text-[14px] leading-[17px] text-[#75817c]">
+                      <div className="text-[13px] leading-[17px] text-[#75817c]">
                         {formatDateTime(row.lastViewedAt)}
                       </div>
-                      <div className="text-[14px] leading-[17px] text-[#75817c]">
+                      <div className="text-[13px] leading-[17px] text-[#75817c]">
                         {formatDateTime(row.updatedAt)}
                       </div>
                       <div className="text-[18px] leading-none text-[#9aa59e]">
@@ -742,7 +694,7 @@ const PdfLibraryDashboard = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-t border-[#e5e7eb] px-4 py-3">
+            <div className="flex items-center justify-between border-t border-[#e5e7eb] pt-4">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -879,43 +831,6 @@ const PdfLibraryDashboard = ({
             </div>
           </section>
 
-          <section className={cardClassName}>
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-[13px] font-semibold text-[#30403d]">
-                関連PDF
-              </span>
-              <span className="text-[12px] font-semibold text-[#6b7280]">
-                すべて見る
-              </span>
-            </div>
-
-            <div className="mt-5 space-y-4">
-              {relatedRows.length > 0 ? (
-                relatedRows.map((row) => (
-                  <button
-                    key={row.id}
-                    type="button"
-                    className="flex w-full items-start gap-3 text-left"
-                    onClick={() => setSelectedDocumentId(row.id)}
-                  >
-                    <IconBadge label="PDF" tone="violet" />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-[13px] font-semibold leading-5 text-[#29343b]">
-                        {row.title}
-                      </div>
-                      <div className="mt-1 text-[12px] text-[#7d8784]">
-                        {row.categoryLabel}
-                      </div>
-                    </div>
-                  </button>
-                ))
-              ) : (
-                <div className="text-[13px] leading-5 text-[#94a09a]">
-                  関連する PDF はまだありません。
-                </div>
-              )}
-            </div>
-          </section>
         </aside>
       </div>
     </div>
