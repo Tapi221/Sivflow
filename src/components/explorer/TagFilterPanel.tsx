@@ -9,6 +9,7 @@ import { SurfaceButton } from "@/components/ui/surface-button";
 import { Switch } from "@/components/ui/switch";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useTags } from "@/hooks/settings/useTags";
+import { getTagColorKey, type TagColorKey } from "@/lib/tags/tagColor";
 import { cn } from "@/lib/utils";
 import { Tag } from "@/ui/icons";
 import {
@@ -53,7 +54,7 @@ export const TagFilterPanel = ({
   isOpen = false,
   className,
 }: TagFilterPanelProps) => {
-  const { getTagColor } = useTags();
+  const { tags: tagRecords } = useTags();
   const {
     tagFilter,
     tagMatchMode,
@@ -90,6 +91,23 @@ export const TagFilterPanel = ({
       }
     };
   }, [isOpen]);
+
+  const colorKeyByName = useMemo(() => {
+    const map = new Map<string, TagColorKey>();
+
+    tagRecords.forEach((tag) => {
+      const resolvedColorKey = getTagColorKey(tag.color);
+      map.set(tag.name, resolvedColorKey);
+      map.set(tag.name.toLowerCase(), resolvedColorKey);
+    });
+
+    return map;
+  }, [tagRecords]);
+
+  const resolveTagColor = (tag: string): TagColorKey =>
+    colorKeyByName.get(tag) ??
+    colorKeyByName.get(tag.toLowerCase()) ??
+    getTagColorKey();
 
   const filteredTags = useMemo(() => {
     const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
@@ -256,8 +274,7 @@ export const TagFilterPanel = ({
                 <div className="min-w-0 flex-1">
                   <TagBadge
                     label={tag}
-                    size="xs"
-                    colorClass={getTagColor(tag)}
+                    colorKey={resolveTagColor(tag)}
                     className="max-w-full"
                   />
                 </div>

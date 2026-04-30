@@ -4,6 +4,7 @@ import { TagChip } from "@/components/tag/TagChip";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { useSetBreadcrumbAction } from "@/contexts/BreadcrumbContext";
 import { useTags } from "@/hooks/settings/useTags";
+import { getTagColorKey, type TagColorKey } from "@/lib/tags/tagColor";
 import { cn } from "@/lib/utils";
 import { normalizeDate } from "@/shared/codec/date";
 import type { DocumentItem, Folder } from "@/types";
@@ -216,17 +217,35 @@ const PdfLibraryDashboard = ({
   folders,
   onOpenDocument,
 }: PdfLibraryDashboardProps) => {
-  const { tagById, getTagColor } = useTags();
+  const { tags, tagById } = useTags();
   const setBreadcrumbAction = useSetBreadcrumbAction();
-  const [unusedExpandedFolders, setUnusedExpandedFolders] = useState<
-    Set<string>
-  >(new Set());
+  const [unusedExpandedFolders, setUnusedExpandedFolders] = useState<Set<string>>(
+    new Set(),
+  );
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
   );
   const [pageIndex, setPageIndex] = useState(0);
 
   void unusedExpandedFolders;
+
+  const tagColorMap = useMemo(() => {
+    const map = new Map<string, TagColorKey>();
+
+    tags.forEach((tag) => {
+      const colorKey = getTagColorKey(tag.color);
+      map.set(tag.id, colorKey);
+      map.set(tag.name, colorKey);
+      map.set(tag.nameLower, colorKey);
+    });
+
+    return map;
+  }, [tags]);
+
+  const resolveTagColor = (tagNameOrId: string): TagColorKey =>
+    tagColorMap.get(tagNameOrId) ??
+    tagColorMap.get(tagNameOrId.toLowerCase()) ??
+    getTagColorKey();
 
   const folderById = useMemo(() => {
     return new Map(folders.map((folder) => [folder.id, folder]));
@@ -237,10 +256,7 @@ const PdfLibraryDashboard = ({
       .filter((document) => document.kind === "pdf")
       .map((document) => {
         const folderPath = buildFolderPath(document.folderId, folderById);
-        const categoryLabel = resolveCategoryLabel(
-          document.folderId,
-          folderById,
-        );
+        const categoryLabel = resolveCategoryLabel(document.folderId, folderById);
         const viewerState = (document.viewerState ??
           null) as ViewerStateWithLastOpenedAt | null;
         const updatedAt = toDate(document.updatedAt);
@@ -261,12 +277,7 @@ const PdfLibraryDashboard = ({
           progressPercent: resolveProgressPercent(document),
           updatedAt,
           lastViewedAt,
-          tags: resolveDisplayTags(
-            document,
-            categoryLabel,
-            folderPath,
-            tagById,
-          ),
+          tags: resolveDisplayTags(document, categoryLabel, folderPath, tagById),
           orderIndex: Number(document.orderIndex) || 0,
         };
       })
@@ -315,9 +326,7 @@ const PdfLibraryDashboard = ({
       return;
     }
 
-    const selectedIndex = rows.findIndex(
-      (row) => row.id === selectedDocumentId,
-    );
+    const selectedIndex = rows.findIndex((row) => row.id === selectedDocumentId);
     if (selectedIndex === -1) {
       return;
     }
@@ -384,7 +393,6 @@ const PdfLibraryDashboard = ({
 
   useEffect(() => {
     setBreadcrumbAction(breadcrumbAction);
-
     return () => setBreadcrumbAction(null);
   }, [breadcrumbAction, setBreadcrumbAction]);
 
@@ -445,8 +453,7 @@ const PdfLibraryDashboard = ({
             PDF がまだありません
           </h2>
           <p className="mt-3 max-w-xl text-[14px] leading-7 text-[#6f7b78]">
-            PDF
-            を取り込むと、この画面で概要カードと一覧テーブルをまとめて管理できます。
+            PDF を取り込むと、この画面で概要カードと一覧テーブルをまとめて管理できます。
           </p>
           <button
             type="button"
@@ -600,7 +607,7 @@ const PdfLibraryDashboard = ({
                             <TagChip
                               key={`${row.id}:${tag}`}
                               label={tag}
-                              colorClass={getTagColor(tag)}
+                              colorKey={resolveTagColor(tag)}
                             />
                           ))
                         ) : (

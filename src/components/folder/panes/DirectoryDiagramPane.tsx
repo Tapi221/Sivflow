@@ -20,6 +20,7 @@ import {
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
+import { getTagColorKey, type TagColorKey } from "@/lib/tags/tagColor";
 import { cn } from "@/lib/utils";
 
 import { DirectoryMindMapCanvas } from "./directory/DirectoryMindMapCanvas";
@@ -68,7 +69,7 @@ const DirectoryOutlineNode = ({
   node: DirectoryTreeNode;
   hasParent: boolean;
   isLast: boolean;
-  getTagColor: (tagNameOrId: string) => string;
+  getTagColor: (tagNameOrId: string) => TagColorKey;
   badgeVisibility: DirectoryBadgeVisibility;
   onCardClick: (cardId: string) => void;
 }) => {
@@ -101,8 +102,7 @@ const DirectoryOutlineNode = ({
                 <TagBadge
                   key={`${node.id}:${tag}`}
                   label={tag}
-                  size="xs"
-                  colorClass={getTagColor(tag)}
+                  colorKey={getTagColor(tag)}
                   className="shrink-0 align-middle"
                 />
               ))
@@ -156,7 +156,7 @@ const DirectoryOutlineNode = ({
               labelClassName,
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60",
             )}
-            aria-label={`${node.name} 繧偵・繝ｬ繝薙Η繝ｼ`}
+            aria-label={`${node.name} をプレビュー`}
           >
             {labelContent}
           </button>
@@ -196,7 +196,7 @@ export const DirectoryDiagramPane = ({
     () => buildCardSetById(cardSets.filter((cardSet) => !cardSet.isDeleted)),
     [cardSets],
   );
-  const { tagById, getTagColor } = useTags();
+  const { tags, tagById } = useTags();
 
   const [layoutMode, setLayoutMode] = useState<DirectoryLayoutMode>("map");
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
@@ -218,6 +218,24 @@ export const DirectoryDiagramPane = ({
     bookmarkedFilter !== "any" ||
     draftFilter !== "any" ||
     contentTypeFilter.length < 2;
+
+  const tagColorMap = useMemo(() => {
+    const map = new Map<string, TagColorKey>();
+
+    tags.forEach((tag) => {
+      const colorKey = getTagColorKey(tag.color);
+      map.set(tag.id, colorKey);
+      map.set(tag.name, colorKey);
+      map.set(tag.nameLower, colorKey);
+    });
+
+    return map;
+  }, [tags]);
+
+  const resolveTagColor = (tagNameOrId: string): TagColorKey =>
+    tagColorMap.get(tagNameOrId) ??
+    tagColorMap.get(tagNameOrId.toLowerCase()) ??
+    getTagColorKey();
 
   const allTags = useMemo(() => {
     const tagNames = new Set<string>();
@@ -388,7 +406,7 @@ export const DirectoryDiagramPane = ({
       return {
         id,
         kind: "folder",
-        name: folder.folderName || "辟｡鬘後・繝輔か繝ｫ繝",
+        name: folder.folderName || "無名フォルダ",
         tags: [],
         hasUncertainty: false,
         isBookmarked: false,
@@ -423,7 +441,7 @@ export const DirectoryDiagramPane = ({
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold text-slate-800">
-              繝・ぅ繝ｬ繧ｯ繝医Μ
+              ディレクトリ
             </h2>
             <p className="mt-1 text-xs text-slate-500">
               ドラッグで移動、ホイールで拡大縮小
@@ -469,15 +487,15 @@ export const DirectoryDiagramPane = ({
                   {[
                     {
                       key: "uncertainty" as const,
-                      label: "縺ｯ縺ｦ縺ｪ繝槭・繧ｯ",
+                      label: "はてなマーク",
                       icon: HelpCircle,
                     },
                     {
                       key: "bookmarked" as const,
-                      label: "譏溘・繝ｼ繧ｯ",
+                      label: "お気に入り",
                       icon: Star,
                     },
-                    { key: "tags" as const, label: "繧ｿ繧ｰ", icon: TagIcon },
+                    { key: "tags" as const, label: "タグ", icon: TagIcon },
                   ].map((item) => {
                     const Icon = item.icon;
                     const checked = directoryBadgeVisibility[item.key];
@@ -509,7 +527,7 @@ export const DirectoryDiagramPane = ({
                             checked ? "text-primary-700" : "text-slate-400",
                           )}
                         >
-                          {checked ? "陦ｨ遉ｺ" : "髱櫁｡ｨ遉ｺ"}
+                          {checked ? "表示" : "非表示"}
                         </span>
                       </button>
                     );
@@ -532,7 +550,7 @@ export const DirectoryDiagramPane = ({
             {layoutMode === "map" ? (
               <DirectoryMindMapCanvas
                 rootNodes={rootNodes}
-                getTagColor={getTagColor}
+                getTagColor={resolveTagColor}
                 badgeVisibility={directoryBadgeVisibility}
                 onCardClick={setPreviewCardId}
               />
@@ -543,7 +561,7 @@ export const DirectoryDiagramPane = ({
                   node={node}
                   hasParent={false}
                   isLast={index === rootNodes.length - 1}
-                  getTagColor={getTagColor}
+                  getTagColor={resolveTagColor}
                   badgeVisibility={directoryBadgeVisibility}
                   onCardClick={setPreviewCardId}
                 />
@@ -552,7 +570,7 @@ export const DirectoryDiagramPane = ({
           </div>
         ) : (
           <div className="mt-3 rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
-            陦ｨ遉ｺ縺ｧ縺阪ｋ繝輔か繝ｫ繝縺後≠繧翫∪縺帙ｓ縲・
+            表示できるフォルダがありません。
           </div>
         )}
       </div>
