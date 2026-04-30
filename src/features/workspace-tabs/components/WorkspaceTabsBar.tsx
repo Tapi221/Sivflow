@@ -27,6 +27,10 @@ const TABS_NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
 };
 
+const TABS_DRAG_STYLE: AppRegionStyle = {
+  WebkitAppRegion: "drag",
+};
+
 const TAB_SURFACE_STYLE: CSSProperties = {
   backgroundColor: "var(--app-sidebar-bg)",
 };
@@ -184,7 +188,7 @@ export const WorkspaceTabsBar = ({
 
   return (
     <div
-      style={{ ...TAB_SURFACE_STYLE, ...interactiveStyle }}
+      style={{ ...TAB_SURFACE_STYLE, ...TABS_DRAG_STYLE }}
       className={cn(
         "explorer-chrome-font explorer-workspace-tabs-bar relative z-30 flex shrink-0 items-end gap-0 overflow-hidden",
         isTitlebar

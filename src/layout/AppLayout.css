@@ -2,6 +2,7 @@
   --app-sidebar-width: 256px;
   --app-sidebar-rail-width: 64px;
   --app-layout-padding-x: 0px;
+  --app-active-tab-bg: #ffffff;
 
   display: grid;
   grid-template-columns: var(--app-sidebar-width) minmax(0, 1fr);
@@ -14,7 +15,7 @@
   overflow: hidden;
   box-sizing: border-box;
   padding: 0;
-  background: #fbfcfb;
+  background: var(--app-active-tab-bg);
   align-items: stretch;
 }
 
@@ -64,17 +65,6 @@
     "lnum" 1,
     "tnum" 1;
   user-select: none;
-}
-
-.app-sidebar::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 1px;
-  background: #dddcd5;
-  pointer-events: none;
 }
 
 .app-sidebar__top {
@@ -315,12 +305,23 @@
 
 .workspace-shell,
 .app-layout__content {
+  position: relative;
   display: grid;
   height: 100%;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background: transparent;
+  background: var(--app-active-tab-bg);
+}
+
+.app-layout:not(.app-layout--sidebar-collapsed) .workspace-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 40;
+  width: 1px;
+  background: #dddcd5;
+  pointer-events: none;
 }
 
 .workspace-shell--with-tabs {
@@ -332,6 +333,7 @@
   min-height: 0;
   flex-shrink: 0;
   overflow: visible;
+  -webkit-app-region: drag;
 }
 
 .workspace-shell__main,
@@ -342,11 +344,121 @@
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
-  background: transparent;
+  background: var(--app-active-tab-bg);
 }
 
 .app-layout__main--locked {
   overflow: clip;
+}
+
+.desktop-window-controls {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  width: 138px;
+  height: 40px;
+  align-items: stretch;
+  justify-content: flex-end;
+  background: transparent;
+}
+
+.desktop-window-controls__button {
+  position: relative;
+  display: inline-flex;
+  width: 46px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--app-sidebar-icon, #ababab);
+  outline: none;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.desktop-window-controls__button:hover,
+.desktop-window-controls__button:focus-visible {
+  background: rgba(0, 0, 0, 0.08);
+  color: #111111;
+}
+
+.desktop-window-controls__button--close:hover,
+.desktop-window-controls__button--close:focus-visible {
+  background: #e81123;
+  color: #ffffff;
+}
+
+.desktop-window-controls__minimize,
+.desktop-window-controls__maximize,
+.desktop-window-controls__restore,
+.desktop-window-controls__close {
+  position: relative;
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+
+.desktop-window-controls__minimize::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 6px;
+  height: 1.5px;
+  background: currentColor;
+}
+
+.desktop-window-controls__maximize::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+}
+
+.desktop-window-controls__restore::before,
+.desktop-window-controls__restore::after {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+}
+
+.desktop-window-controls__restore::before {
+  top: 1px;
+  right: 1px;
+}
+
+.desktop-window-controls__restore::after {
+  left: 1px;
+  bottom: 1px;
+  background: var(--app-active-tab-bg, #ffffff);
+}
+
+.desktop-window-controls__close::before,
+.desktop-window-controls__close::after {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 5px;
+  width: 14px;
+  height: 1.5px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.desktop-window-controls__close::before {
+  transform: rotate(45deg);
+}
+
+.desktop-window-controls__close::after {
+  transform: rotate(-45deg);
 }
 
 .workspace-shell
