@@ -100,7 +100,6 @@ object DesignTokens {
     object Spacing {
         const val Value0 = 0
         const val Value1 = 4
-        const val Value18 = 7.2
         const val Value2 = 8
         const val Value3 = 12
         const val Value4 = 16
@@ -111,6 +110,7 @@ object DesignTokens {
         const val Value12 = 48
         const val Value16 = 64
         const val Value20 = 80
+        const val Value18 = 7.2
     }
     object Radius {
         const val Sm = 8
