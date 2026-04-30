@@ -1,5 +1,5 @@
 .app-layout {
-  --app-sidebar-width: 256px;
+  --app-sidebar-width: 240px;
   --app-sidebar-rail-width: 64px;
   --app-layout-padding-x: 0px;
   --app-active-tab-bg: #ffffff;
@@ -78,7 +78,7 @@
 
 .app-sidebar__workspace {
   display: flex;
-  width: 240px;
+  width: 224px;
   min-height: 32px;
   flex-shrink: 0;
   align-items: center;
@@ -162,7 +162,7 @@
 .app-sidebar__nav-link {
   display: flex;
   min-width: 0;
-  width: 240px;
+  width: 224px;
   height: 32px;
   align-items: center;
   gap: 12px;
@@ -200,7 +200,7 @@
 }
 
 .app-sidebar__nav-link--nested {
-  width: 188px;
+  width: 172px;
   padding: 0;
 }
 
@@ -258,7 +258,7 @@
 
 .app-sidebar__library-child {
   display: flex;
-  width: 184px;
+  width: 168px;
   height: 28px;
   align-items: center;
   border-radius: 4px;
@@ -373,18 +373,6 @@
   background: var(--app-active-tab-bg);
 }
 
-.app-layout:not(.app-layout--sidebar-collapsed) .workspace-shell::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  z-index: 40;
-  width: 1px;
-  background: #dddcd5;
-  transform: scaleX(0.5);
-  transform-origin: left center;
-  pointer-events: none;
-}
-
 .workspace-shell--with-tabs {
   grid-template-rows: auto auto minmax(0, 1fr);
 }
@@ -407,7 +395,7 @@
   box-sizing: border-box;
   overflow-y: auto;
   background: var(--app-active-tab-bg);
-  padding: var(--workspace-content-gutter);
+  padding: 0 var(--workspace-content-gutter) var(--workspace-content-gutter);
 }
 
 .workspace-breadcrumb-bar {

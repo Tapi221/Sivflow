@@ -63,7 +63,6 @@ export const SectionListBlankPane = ({
         aria-hidden={hasContent ? undefined : true}
         className={cn(
           "h-full min-h-0 w-full min-w-0 overflow-hidden",
-          "border-l border-[#e6e4dc]",
           "bg-white",
           contentClassName,
         )}
