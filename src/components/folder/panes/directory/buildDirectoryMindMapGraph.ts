@@ -1,4 +1,5 @@
 import { Position, type Edge, type Node } from "@xyflow/react";
+import type { TagColorKey } from "@/lib/tags/tagColor";
 
 import type {
   DirectoryBadgeVisibility,
@@ -108,7 +109,7 @@ const createFolderFlowNode = ({
   folderCount: number;
   itemCount: number;
   badgeVisibility: DirectoryBadgeVisibility;
-  getTagColor: (tagNameOrId: string) => string;
+  getTagColor: (tagNameOrId: string) => TagColorKey;
   onCardClick: (cardId: string) => void;
 }): Node<DirectoryMindMapNodeData> => ({
   id,
@@ -137,7 +138,7 @@ const createRootFlowNode = ({
   onCardClick,
 }: {
   badgeVisibility: DirectoryBadgeVisibility;
-  getTagColor: (tagNameOrId: string) => string;
+  getTagColor: (tagNameOrId: string) => TagColorKey;
   onCardClick: (cardId: string) => void;
 }): Node<DirectoryMindMapNodeData> => ({
   id: ROOT_ID,
@@ -187,7 +188,7 @@ const appendSubtree = ({
   nodes: Array<Node<DirectoryMindMapNodeData>>;
   edges: Edge[];
   badgeVisibility: DirectoryBadgeVisibility;
-  getTagColor: (tagNameOrId: string) => string;
+  getTagColor: (tagNameOrId: string) => TagColorKey;
   onCardClick: (cardId: string) => void;
 }) => {
   const { folders, items } = splitDirectoryChildren(node.children);
@@ -260,7 +261,7 @@ export const buildDirectoryMindMapGraph = ({
 }: {
   rootNodes: DirectoryTreeNode[];
   badgeVisibility: DirectoryBadgeVisibility;
-  getTagColor: (tagNameOrId: string) => string;
+  getTagColor: (tagNameOrId: string) => TagColorKey;
   onCardClick: (cardId: string) => void;
 }) => {
   const compressedRoots = compressRootNodes(rootNodes);

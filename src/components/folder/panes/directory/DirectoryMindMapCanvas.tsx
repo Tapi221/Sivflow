@@ -1,6 +1,7 @@
 import "@xyflow/react/dist/style.css";
 
 import { TagBadge } from "@/components/tag/TagBadge";
+import type { TagColorKey } from "@/lib/tags/tagColor";
 import { cn } from "@/lib/utils";
 import { HelpCircle, Star } from "@/ui/icons";
 import {
@@ -41,7 +42,7 @@ const DirectoryMindMapChip = ({
 }: {
   chip: DirectoryMindMapNodeData["chips"][number];
   badgeVisibility: DirectoryBadgeVisibility;
-  getTagColor: (tagNameOrId: string) => string;
+  getTagColor: (tagNameOrId: string) => TagColorKey;
   onCardClick: (cardId: string) => void;
 }) => {
   const isCardNode =
@@ -60,17 +61,14 @@ const DirectoryMindMapChip = ({
       ) : null}
 
       {badgeVisibility.tags && chip.showTags
-        ? chip.tags
-            .slice(0, 2)
-            .map((tag) => (
-              <TagBadge
-                key={`${chip.id}:${tag}`}
-                label={tag}
-                size="xs"
-                colorClass={getTagColor(tag)}
-                className="shrink-0 align-middle"
-              />
-            ))
+        ? chip.tags.slice(0, 2).map((tag) => (
+            <TagBadge
+              key={`${chip.id}:${tag}`}
+              label={tag}
+              colorKey={getTagColor(tag)}
+              className="shrink-0 align-middle"
+            />
+          ))
         : null}
 
       {badgeVisibility.tags && chip.showTags && chip.tags.length > 2 ? (
@@ -206,7 +204,7 @@ export const DirectoryMindMapCanvas = ({
   onCardClick,
 }: {
   rootNodes: DirectoryTreeNode[];
-  getTagColor: (tagNameOrId: string) => string;
+  getTagColor: (tagNameOrId: string) => TagColorKey;
   badgeVisibility: DirectoryBadgeVisibility;
   onCardClick: (cardId: string) => void;
 }) => {

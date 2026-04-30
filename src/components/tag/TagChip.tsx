@@ -6,7 +6,6 @@ import type { TagColorKey } from "@/lib/tags/tagColor";
 interface TagChipProps {
   label: string;
   colorKey?: TagColorKey;
-  colorClass?: string;
   className?: string;
   badgeClassName?: string;
   onClick?: () => void;
@@ -17,7 +16,6 @@ interface TagChipProps {
 export const TagChip = ({
   label,
   colorKey,
-  colorClass,
   className,
   badgeClassName,
   onClick,
@@ -28,7 +26,6 @@ export const TagChip = ({
     <TagBadge
       label={label}
       colorKey={colorKey}
-      colorClass={colorClass}
       className={cn("ds-tag-chip", className, badgeClassName)}
       onClick={onClick}
       onRemove={onRemove}

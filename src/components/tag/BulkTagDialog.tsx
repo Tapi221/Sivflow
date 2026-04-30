@@ -64,7 +64,6 @@ const BulkTagDialog = ({
           </p>
         )}
 
-        {/* タグ選択 */}
         <div className="mt-2">
           <p className="text-sm font-medium text-slate-700 mb-2">タグを選択</p>
           {tags.length === 0 ? (
@@ -89,7 +88,6 @@ const BulkTagDialog = ({
                 >
                   <TagBadge
                     label={tag.name}
-                    size="md"
                     colorKey={getTagColorKey(tag.color)}
                     className="pointer-events-none"
                   />
@@ -99,7 +97,6 @@ const BulkTagDialog = ({
           )}
         </div>
 
-        {/* サブフォルダオプション */}
         <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer select-none">
           <input
             type="checkbox"
@@ -110,7 +107,6 @@ const BulkTagDialog = ({
           サブフォルダも含める
         </label>
 
-        {/* 結果表示 */}
         {result !== null && (
           <p className="text-sm text-emerald-600 font-medium">
             {result} 件のカードにタグを付与しました

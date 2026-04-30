@@ -1,3 +1,5 @@
+import type { TagColorKey } from "@/lib/tags/tagColor";
+
 export type DirectoryTreeNode = {
   id: string;
   kind: "folder" | "card" | "pdf";
@@ -36,6 +38,6 @@ export type DirectoryMindMapNodeData = {
   side: "left" | "right";
   isRoot?: boolean;
   badgeVisibility: DirectoryBadgeVisibility;
-  getTagColor: (tagNameOrId: string) => string;
+  getTagColor: (tagNameOrId: string) => TagColorKey;
   onCardClick: (cardId: string) => void;
 };

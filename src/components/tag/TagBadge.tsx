@@ -1,19 +1,11 @@
 import React from "react";
 import { X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
-import {
-  DEFAULT_TAG_COLOR_CLASS_NAME,
-  getTagColorStyle,
-  type TagColorKey,
-} from "@/lib/tags/tagColor";
-
-type TagBadgeSize = "xs" | "sm" | "md";
+import { getTagColorStyle, type TagColorKey } from "@/lib/tags/tagColor";
 
 interface TagBadgeProps {
   label: string;
   colorKey?: TagColorKey;
-  colorClass?: string;
-  size?: TagBadgeSize;
   selected?: boolean;
   className?: string;
   textClassName?: string;
@@ -25,8 +17,6 @@ interface TagBadgeProps {
 export const TagBadge = ({
   label,
   colorKey,
-  colorClass,
-  size: _size = "sm",
   selected = false,
   className,
   textClassName,
@@ -34,12 +24,7 @@ export const TagBadge = ({
   onRemove,
   removeAriaLabel,
 }: TagBadgeProps) => {
-  void _size;
-
-  const resolvedColorStyle =
-    colorKey !== undefined
-      ? getTagColorStyle(colorKey)
-      : getTagColorStyle(colorClass ?? DEFAULT_TAG_COLOR_CLASS_NAME);
+  const resolvedColorStyle = getTagColorStyle(colorKey);
 
   const content = (
     <>

@@ -19,7 +19,11 @@ import { PlaceholderText } from "@/components/ui/placeholder-text";
 import { useTags } from "@/hooks/settings/useTags";
 import { TagBadge } from "@/components/tag/TagBadge";
 import { TagChip } from "@/components/tag/TagChip";
-import { getTagColorSwatchStyle, type TagColorKey } from "@/lib/tags/tagColor";
+import {
+  getTagColorKey,
+  getTagColorSwatchStyle,
+  type TagColorKey,
+} from "@/lib/tags/tagColor";
 
 interface TagInputProps {
   tags: string[];
@@ -42,7 +46,7 @@ export const TagInput = ({
     null,
   );
 
-  const { tags: allTags, availableColors, addTag, getTagColor } = useTags();
+  const { tags: allTags, availableColors, addTag } = useTags();
 
   const handleUnselect = (tagToRemove: string) => {
     onChange(tags.filter((tag) => tag !== tagToRemove));
@@ -77,8 +81,29 @@ export const TagInput = ({
   };
 
   const uniqueTags = React.useMemo(() => {
-    return allTags ? allTags.map((t) => t.name).sort() : [];
+    return allTags ? allTags.map((tag) => tag.name).sort() : [];
   }, [allTags]);
+
+  const colorKeyByName = React.useMemo(() => {
+    const map = new Map<string, TagColorKey>();
+
+    (allTags ?? []).forEach((tag) => {
+      const resolvedColorKey = getTagColorKey(tag.color);
+      map.set(tag.name, resolvedColorKey);
+      map.set(tag.name.toLowerCase(), resolvedColorKey);
+    });
+
+    return map;
+  }, [allTags]);
+
+  const resolveTagColorKey = React.useCallback(
+    (tagName: string): TagColorKey =>
+      colorKeyByName.get(tagName) ??
+      colorKeyByName.get(tagName.toLowerCase()) ??
+      availableColors[0] ??
+      getTagColorKey(),
+    [availableColors, colorKeyByName],
+  );
 
   const filteredTags = uniqueTags.filter((tag) =>
     tag.toLowerCase().includes(inputValue.toLowerCase()),
@@ -103,35 +128,31 @@ export const TagInput = ({
                   {...provided.droppableProps}
                   className="flex flex-wrap gap-1.5"
                 >
-                  {tags.map((tag, index) => {
-                    const colorClass = getTagColor(tag);
-                    return (
-                      <Draggable key={tag} draggableId={tag} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            style={{ ...provided.draggableProps.style }}
-                          >
-                            <TagChip
-                              label={tag}
-                              colorClass={colorClass}
-                              badgeClassName={cn(
-                                "select-none",
-                                quietHover &&
-                                  "transition-none shadow-none [&_button]:hover:bg-transparent [&_button]:hover:text-slate-500",
-                                snapshot.isDragging &&
-                                  "scale-105 shadow-md z-50",
-                              )}
-                              onRemove={() => handleUnselect(tag)}
-                              removeAriaLabel={`${tag}を削除`}
-                            />
-                          </div>
-                        )}
-                      </Draggable>
-                    );
-                  })}
+                  {tags.map((tag, index) => (
+                    <Draggable key={tag} draggableId={tag} index={index}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          style={{ ...provided.draggableProps.style }}
+                        >
+                          <TagChip
+                            label={tag}
+                            colorKey={resolveTagColorKey(tag)}
+                            badgeClassName={cn(
+                              "select-none",
+                              quietHover &&
+                                "transition-none shadow-none [&_button]:hover:bg-transparent [&_button]:hover:text-slate-500",
+                              snapshot.isDragging && "scale-105 shadow-md z-50",
+                            )}
+                            onRemove={() => handleUnselect(tag)}
+                            removeAriaLabel={`${tag}を削除`}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
                   {provided.placeholder}
                 </div>
               )}
@@ -165,9 +186,8 @@ export const TagInput = ({
           className="border-none bg-transparent shadow-none"
           onKeyDown={(e) => {
             if (e.key === "Enter" && inputValue.trim()) {
-              // もし既存のタグに一致するものがない新規タグなら作成・追加する
               const exists = uniqueTags.some(
-                (t) => t.toLowerCase() === inputValue.trim().toLowerCase(),
+                (tag) => tag.toLowerCase() === inputValue.trim().toLowerCase(),
               );
               if (!exists) {
                 e.preventDefault();
@@ -187,7 +207,7 @@ export const TagInput = ({
           <CommandList className="max-h-[350px]">
             {inputValue &&
               !uniqueTags.some(
-                (t) => t.toLowerCase() === inputValue.toLowerCase(),
+                (tag) => tag.toLowerCase() === inputValue.toLowerCase(),
               ) && (
                 <div className="p-3 space-y-3">
                   <div
@@ -210,8 +230,7 @@ export const TagInput = ({
                           className={cn(
                             "w-8 h-8 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all",
                             selectedColor === colorKey ||
-                              (!selectedColor &&
-                                colorKey === availableColors[0])
+                              (!selectedColor && colorKey === availableColors[0])
                               ? "ring-2 ring-offset-2 ring-primary-600 scale-110 shadow-md"
                               : "hover:scale-105 hover:ring-slate-400",
                           )}
@@ -244,7 +263,6 @@ export const TagInput = ({
               )}
               <div className="grid grid-cols-1 gap-1 p-1">
                 {filteredTags.map((tag) => {
-                  const colorClass = getTagColor(tag);
                   const isSelected = tags.includes(tag);
                   return (
                     <CommandItem
@@ -258,8 +276,7 @@ export const TagInput = ({
                     >
                       <TagBadge
                         label={tag}
-                        size="xs"
-                        colorClass={colorClass}
+                        colorKey={resolveTagColorKey(tag)}
                         className="max-w-[220px]"
                       />
                       {isSelected && (
