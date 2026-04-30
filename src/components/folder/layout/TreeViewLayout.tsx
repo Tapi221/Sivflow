@@ -631,7 +631,7 @@ const TreeViewLayout = ({
       onDrop={handleImportDrop}
       className={cn(
         "relative flex h-full min-h-0 w-full max-w-none flex-1 items-stretch overflow-hidden",
-        "rounded-b-[14px] border-x border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)]",
+        "rounded-b-[14px] border-r border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)]",
       )}
     >
       <ExplorerSearchSourceBridge

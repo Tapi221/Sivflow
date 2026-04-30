@@ -2,6 +2,7 @@
   --app-sidebar-width: 256px;
   --app-sidebar-rail-width: 64px;
   --app-layout-padding-x: 0px;
+  --app-sidebar-divider: #dddcd5;
 
   display: grid;
   grid-template-columns: var(--app-sidebar-width) minmax(0, 1fr);
@@ -64,6 +65,17 @@
     "lnum" 1,
     "tnum" 1;
   user-select: none;
+}
+
+.app-sidebar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--app-sidebar-divider);
+  pointer-events: none;
 }
 
 .app-sidebar__top {
