@@ -146,27 +146,6 @@
     box-shadow: none !important;
   }
 
-  .explorer-workspace-tab--active::before,
-  .explorer-workspace-tab--active::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    display: block !important;
-    width: 8px;
-    height: 8px;
-    pointer-events: none;
-  }
-
-  .explorer-workspace-tab--active::before {
-    left: -8px;
-    background: radial-gradient(circle at 0 0, transparent 8px, #ffffff 8.5px);
-  }
-
-  .explorer-workspace-tab--active::after {
-    right: -8px;
-    background: radial-gradient(circle at 8px 0, transparent 8px, #ffffff 8.5px);
-  }
-
   .explorer-workspace-tab--inactive {
     height: 36px !important;
     margin-bottom: 0 !important;
@@ -179,36 +158,6 @@
   .explorer-workspace-tab--inactive:hover {
     background: rgba(255, 255, 255, 0.58) !important;
     color: var(--app-sidebar-text, #5b5b5b) !important;
-    overflow: visible !important;
-  }
-
-  .explorer-workspace-tab--inactive:hover::before,
-  .explorer-workspace-tab--inactive:hover::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    display: block !important;
-    width: 8px;
-    height: 8px;
-    pointer-events: none;
-  }
-
-  .explorer-workspace-tab--inactive:hover::before {
-    left: -8px;
-    background: radial-gradient(
-      circle at 0 0,
-      transparent 8px,
-      rgba(255, 255, 255, 0.58) 8.5px
-    );
-  }
-
-  .explorer-workspace-tab--inactive:hover::after {
-    right: -8px;
-    background: radial-gradient(
-      circle at 8px 0,
-      transparent 8px,
-      rgba(255, 255, 255, 0.58) 8.5px
-    );
   }
 
   .explorer-workspace-tab--inactive + .explorer-workspace-tab--inactive::before {

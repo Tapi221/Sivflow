@@ -1,5 +1,5 @@
 import { Fragment, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
@@ -8,18 +8,26 @@ import { useWorkspaceTabsStore } from "@/features/workspace-tabs/store/useWorksp
 import { cn } from "@/lib/utils";
 
 const SECTION_LABELS = {
-  home: "Home",
-  review: "Review",
-  library: "Library",
-  calendar: "Calendar",
+  home: "ホーム",
+  review: "復習",
+  library: "ライブラリ",
+  calendar: "カレンダー",
+} as const;
+
+const LIBRARY_TYPE_LABELS = {
+  pdf: "PDF",
+  flashcards: "フラッシュカード",
+  notes: "ノート",
 } as const;
 
 const resolveActiveCrumbs = ({
   activeTab,
   extraCrumbs,
+  libraryType,
 }: {
   activeTab: WorkspaceTab | null;
   extraCrumbs: BreadcrumbCrumb[];
+  libraryType: string | null;
 }): BreadcrumbCrumb[] => {
   if (!activeTab) {
     return [];
@@ -35,6 +43,21 @@ const resolveActiveCrumbs = ({
 
   if (activeTab.sectionKey !== "library") {
     return [{ ...baseCrumb, to: undefined }];
+  }
+
+  const libraryTypeLabel =
+    libraryType && libraryType in LIBRARY_TYPE_LABELS
+      ? LIBRARY_TYPE_LABELS[libraryType as keyof typeof LIBRARY_TYPE_LABELS]
+      : null;
+
+  if (libraryTypeLabel) {
+    return [
+      baseCrumb,
+      {
+        label: libraryTypeLabel,
+        to: undefined,
+      },
+    ];
   }
 
   if (extraCrumbs.length > 0) {
@@ -60,6 +83,7 @@ const resolveActiveCrumbs = ({
 
 export const WorkspaceBreadcrumbBar = () => {
   const navigate = useNavigate();
+  const { search } = useLocation();
   const extraCrumbs = useBreadcrumbExtraCrumbs();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
@@ -70,8 +94,13 @@ export const WorkspaceBreadcrumbBar = () => {
   );
 
   const crumbs = useMemo(
-    () => resolveActiveCrumbs({ activeTab, extraCrumbs }),
-    [activeTab, extraCrumbs],
+    () =>
+      resolveActiveCrumbs({
+        activeTab,
+        extraCrumbs,
+        libraryType: new URLSearchParams(search).get("libraryType"),
+      }),
+    [activeTab, extraCrumbs, search],
   );
 
   if (!activeTab || crumbs.length === 0) {
