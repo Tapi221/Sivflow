@@ -150,6 +150,8 @@ const resolveDisplayTags = (
 };
 
 const cardClassName = "rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-4";
+const breadcrumbActionIconClassName =
+  "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]";
 
 const BreadcrumbActionSettingsIcon = () => {
   return (
@@ -204,6 +206,38 @@ const BreadcrumbActionSettingsIcon = () => {
         strokeWidth="1.75"
       />
     </svg>
+  );
+};
+
+const BreadcrumbActionFilterIcon = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M4.75 6.75H19.25L13.75 13.125V18.25L10.25 16.25V13.125L4.75 6.75Z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+const BreadcrumbActionIconSlot = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  return (
+    <span aria-hidden="true" className={breadcrumbActionIconClassName}>
+      {children}
+    </span>
   );
 };
 
@@ -465,12 +499,14 @@ const PdfLibraryDashboard = ({
         >
           PDFをインポート
         </button>
-        <span
-          aria-hidden="true"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]"
-        >
-          <BreadcrumbActionSettingsIcon />
-        </span>
+        <div className="inline-flex items-center gap-1">
+          <BreadcrumbActionIconSlot>
+            <BreadcrumbActionSettingsIcon />
+          </BreadcrumbActionIconSlot>
+          <BreadcrumbActionIconSlot>
+            <BreadcrumbActionFilterIcon />
+          </BreadcrumbActionIconSlot>
+        </div>
       </div>
     ),
     [handleToolbarAddDocument],
