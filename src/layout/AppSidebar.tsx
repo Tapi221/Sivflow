@@ -1,3 +1,4 @@
+
 import { useState, type MouseEvent, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -182,7 +183,7 @@ const libraryChildItems = [
 const footerItems: AppSidebarNavItem[] = [
   {
     id: "settings",
-    label: "Settings",
+    label: "設定",
     to: "/folders?settings=true",
     icon: <GearIcon className="app-sidebar__nav-icon" />,
     match: (pathname, searchParams) =>
@@ -242,9 +243,10 @@ const AppSidebarNavLink = ({
 
   const isActive =
     (item.sectionKey !== undefined &&
-      activeTab?.sectionKey === item.sectionKey &&
-      pathname !== "/folders" ? true : false) ||
-    isNavItemActiveByLocation(item, pathname, search);
+    activeTab?.sectionKey === item.sectionKey &&
+    pathname !== "/folders"
+      ? true
+      : false) || isNavItemActiveByLocation(item, pathname, search);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -280,7 +282,7 @@ const AppSidebarNavLink = ({
   );
 };
 
-export const AppSidebar = () => {
+const AppSidebar = () => {
   const navigate = useNavigate();
   const { search } = useLocation();
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
@@ -320,7 +322,7 @@ export const AppSidebar = () => {
             </div>
             <div className="app-sidebar__sync">
               <CloudIcon className="app-sidebar__sync-icon" />
-              <span>Syncing up</span>
+              <span>同期中</span>
             </div>
           </div>
         </div>
@@ -372,10 +374,11 @@ export const AppSidebar = () => {
       <div className="app-sidebar__bottom">
         <div className="app-sidebar__trial">
           <p>
-            There are <strong>6 days</strong> left in your trial. Upgrade for
-            unlimited access.
+            トライアル期間の残り <strong>6 日</strong>
+            <br />
+            すべての機能をお試しいただけます。
           </p>
-          <button type="button">Upgrade</button>
+          <button type="button">アップグレード</button>
         </div>
         <nav className="app-sidebar__nav" aria-label="Support navigation">
           {footerItems.map((item) => (
@@ -386,3 +389,5 @@ export const AppSidebar = () => {
     </aside>
   );
 };
+
+export { AppSidebar };

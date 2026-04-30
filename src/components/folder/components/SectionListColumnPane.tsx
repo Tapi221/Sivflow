@@ -1,3 +1,4 @@
+
 import {
   useCallback,
   useEffect,
@@ -5,8 +6,11 @@ import {
   useRef,
   useState,
 } from "react";
+import { useSearchParams } from "react-router-dom";
+
 import { SectionListBlankPane } from "@/components/folder/components/SectionListBlankPane";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
+import { PdfLibraryDashboard } from "@/features/library-pdf/components/PdfLibraryDashboard";
 import { cn } from "@/lib/utils";
 import type {
   Card,
@@ -214,7 +218,7 @@ const getSelectedItemKey = (item: SelectedExplorerItem): string => {
   return "id" in item ? `${item.type}:${item.id}` : item.type;
 };
 
-export const SectionListColumnPane = ({
+const SectionListColumnPane = ({
   className,
   sidebarWidth,
   topOffsetPx,
@@ -242,7 +246,6 @@ export const SectionListColumnPane = ({
 }: SectionListColumnPaneProps) => {
   void isFiltering;
   void onFolderSelect;
-  void onItemSelect;
   void onMoveFolder;
   void onReorderFolders;
   void onMoveCardSetToFolder;
@@ -251,6 +254,10 @@ export const SectionListColumnPane = ({
   void onReorderDocuments;
   void onMoveCardToSet;
   void onReorderCardsInCardSet;
+
+  const [searchParams] = useSearchParams();
+  const libraryType = searchParams.get("libraryType");
+  const isPdfLibraryView = libraryType === "pdf";
 
   const folderById = useMemo(() => {
     const map = new Map<string, FolderLike>();
@@ -404,7 +411,9 @@ export const SectionListColumnPane = ({
     if (selectedItem?.type === "cardSet") {
       const cardSet = cardSetById.get(selectedItem.id);
 
-      setColumnPathIds(buildFolderPathIds(cardSet ? getCardSetFolderId(cardSet) : null));
+      setColumnPathIds(
+        buildFolderPathIds(cardSet ? getCardSetFolderId(cardSet) : null),
+      );
       setActiveLeafCrumbs(
         cardSet ? [{ label: getCardSetLabel(cardSet) }] : [],
       );
@@ -450,6 +459,13 @@ export const SectionListColumnPane = ({
     setActiveLeafCrumbs([]);
   }, [buildFolderPathIds, cardSetById, cards, documents, selectedItem]);
 
+  const handleOpenDocument = useCallback(
+    (documentId: string) => {
+      onItemSelect({ type: "document", id: documentId });
+    },
+    [onItemSelect],
+  );
+
   return (
     <SectionListBlankPane
       className={cn(className)}
@@ -457,6 +473,16 @@ export const SectionListColumnPane = ({
       topOffsetPx={topOffsetPx}
       leftInsetPx={leftInsetPx}
       rightInsetPx={rightInsetPx}
-    />
+    >
+      {isPdfLibraryView ? (
+        <PdfLibraryDashboard
+          folders={folders}
+          documents={documents}
+          onOpenDocument={handleOpenDocument}
+        />
+      ) : null}
+    </SectionListBlankPane>
   );
 };
+
+export { SectionListColumnPane };
