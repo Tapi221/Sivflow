@@ -24,7 +24,7 @@ export const ExplorerWorkspaceFrame = ({
       style={style}
       className={cn(
         "relative flex h-full min-h-0 min-w-0 max-w-none flex-col overflow-hidden rounded-none border-0 shadow-none",
-        "bg-[var(--app-bg)]",
+        "bg-[var(--app-active-tab-bg,#ffffff)]",
         className,
       )}
     >

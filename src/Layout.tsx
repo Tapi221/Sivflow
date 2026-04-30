@@ -13,6 +13,7 @@ import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
 import { SecurityAlertBanner } from "./components/security/SecurityAlertBanner";
 import { LocalDBStatusBanner } from "./components/security/LocalDBStatusBanner";
 import { AppLayout } from "./layout/AppLayout";
+import { DesktopWindowControls } from "./layout/DesktopWindowControls";
 
 const Layout = () => {
   const location = useLocation();
@@ -161,6 +162,7 @@ const Layout = () => {
 
       <LocalDBStatusBanner />
       <SecurityAlertBanner />
+      <DesktopWindowControls />
 
       <AppLayout />
     </div>
