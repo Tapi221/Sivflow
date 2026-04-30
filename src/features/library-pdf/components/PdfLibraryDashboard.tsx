@@ -151,6 +151,62 @@ const resolveDisplayTags = (
 
 const cardClassName = "rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-4";
 
+const BreadcrumbActionSettingsIcon = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 7H20"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+      <path
+        d="M4 12H20"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+      <path
+        d="M4 17H20"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+      <circle
+        cx="15"
+        cy="7"
+        r="2.25"
+        fill="#F3F4F6"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
+      <circle
+        cx="8"
+        cy="12"
+        r="2.25"
+        fill="#F3F4F6"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
+      <circle
+        cx="13"
+        cy="17"
+        r="2.25"
+        fill="#F3F4F6"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
+    </svg>
+  );
+};
+
 const IconBadge = ({
   label,
   tone = "slate",
@@ -398,13 +454,24 @@ const PdfLibraryDashboard = ({
 
   const breadcrumbAction = useMemo(
     () => (
-      <button
-        type="button"
-        className="inline-flex h-8 w-fit items-center justify-center rounded-[8px] border-0 bg-[#6A876E] px-5 text-[12px] font-medium leading-normal text-white transition-colors hover:bg-[#5f7963]"
-        onClick={handleToolbarAddDocument}
+      <div
+        className="inline-flex items-center gap-2"
+        style={{ WebkitAppRegion: "no-drag" }}
       >
-        PDFをインポート
-      </button>
+        <button
+          type="button"
+          className="inline-flex h-8 w-fit items-center justify-center rounded-[8px] border-0 bg-[#6A876E] px-5 text-[12px] font-medium leading-normal text-white transition-colors hover:bg-[#5f7963]"
+          onClick={handleToolbarAddDocument}
+        >
+          PDFをインポート
+        </button>
+        <span
+          aria-hidden="true"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-[#f3f4f6] text-[#8c9690]"
+        >
+          <BreadcrumbActionSettingsIcon />
+        </span>
+      </div>
     ),
     [handleToolbarAddDocument],
   );
@@ -623,15 +690,13 @@ const PdfLibraryDashboard = ({
 
                       <div className="flex min-w-0 flex-wrap items-center gap-2">
                         {row.tags.length > 0 ? (
-                          row.tags
-                            .slice(0, 2)
-                            .map((tag, index) => (
-                              <TagChip
-                                key={`${row.id}:${tag}:${index}`}
-                                label={tag}
-                                tone={index % 2 === 0 ? "violet" : "green"}
-                              />
-                            ))
+                          row.tags.slice(0, 2).map((tag, index) => (
+                            <TagChip
+                              key={`${row.id}:${tag}:${index}`}
+                              label={tag}
+                              tone={index % 2 === 0 ? "violet" : "green"}
+                            />
+                          ))
                         ) : (
                           <span className="text-[13px] leading-[17px] text-[#93a09a]">
                             タグなし
