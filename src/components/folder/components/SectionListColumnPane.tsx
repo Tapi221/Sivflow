@@ -1,11 +1,4 @@
-
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { SectionListBlankPane } from "@/components/folder/components/SectionListBlankPane";
@@ -414,9 +407,7 @@ const SectionListColumnPane = ({
       setColumnPathIds(
         buildFolderPathIds(cardSet ? getCardSetFolderId(cardSet) : null),
       );
-      setActiveLeafCrumbs(
-        cardSet ? [{ label: getCardSetLabel(cardSet) }] : [],
-      );
+      setActiveLeafCrumbs(cardSet ? [{ label: getCardSetLabel(cardSet) }] : []);
       return;
     }
 

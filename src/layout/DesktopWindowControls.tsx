@@ -34,9 +34,7 @@ export const DesktopWindowControls = () => {
       }
     });
 
-    const unsubscribe = windowControls.onMaximizedStateChange(
-      setIsMaximized,
-    );
+    const unsubscribe = windowControls.onMaximizedStateChange(setIsMaximized);
 
     return () => {
       isMounted = false;
