@@ -65,8 +65,6 @@ export interface RootFolderPanelListProps {
   editingNameRef: React.MutableRefObject<string>;
   handleRenameConfirm: (target?: RenameTarget) => Promise<void>;
   className?: string;
-  enableScrollEdgeFade?: boolean;
-  enableBottomFade?: boolean;
 }
 
 /**
@@ -102,43 +100,8 @@ export const RootFolderPanelList = ({
   editingNameRef,
   handleRenameConfirm,
   className,
-  enableScrollEdgeFade,
-  enableBottomFade = true,
 }: RootFolderPanelListProps) => {
-  const shouldRenderEdgeFade = enableScrollEdgeFade ?? enableBottomFade;
-  const scrollContainerClassName = cn(
-    "h-full overflow-y-auto py-1",
-    shouldRenderEdgeFade && "-mr-1 pr-1",
-  );
-
   const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
-  const scrollContentRef = React.useRef<HTMLDivElement | null>(null);
-  const [showTopFade, setShowTopFade] = React.useState(false);
-  const [showBottomFade, setShowBottomFade] = React.useState(false);
-
-  const updateScrollFade = React.useCallback(() => {
-    if (!shouldRenderEdgeFade) {
-      setShowTopFade(false);
-      setShowBottomFade(false);
-      return;
-    }
-
-    const node = scrollContainerRef.current;
-
-    if (!node) {
-      setShowTopFade(false);
-      setShowBottomFade(false);
-      return;
-    }
-
-    const scrollOverflow = node.scrollHeight - node.clientHeight;
-    const remainingScroll = scrollOverflow - node.scrollTop;
-    const canScroll = scrollOverflow > 2;
-
-    setShowTopFade(canScroll);
-    setShowBottomFade(remainingScroll > 2);
-  }, [shouldRenderEdgeFade]);
 
   const attachInputRef = React.useCallback(
     (node: HTMLInputElement | null) => {
@@ -156,50 +119,6 @@ export const RootFolderPanelList = ({
     },
     [editingId],
   );
-
-  React.useLayoutEffect(() => {
-    if (!shouldRenderEdgeFade) {
-      setShowTopFade(false);
-      setShowBottomFade(false);
-      return;
-    }
-
-    updateScrollFade();
-
-    const animationFrameId = window.requestAnimationFrame(updateScrollFade);
-    const scrollNode = scrollContainerRef.current;
-    const contentNode = scrollContentRef.current;
-
-    if (!scrollNode) {
-      return () => {
-        window.cancelAnimationFrame(animationFrameId);
-      };
-    }
-
-    if (typeof ResizeObserver === "undefined") {
-      window.addEventListener("resize", updateScrollFade);
-
-      return () => {
-        window.cancelAnimationFrame(animationFrameId);
-        window.removeEventListener("resize", updateScrollFade);
-      };
-    }
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateScrollFade();
-    });
-
-    resizeObserver.observe(scrollNode);
-
-    if (contentNode) {
-      resizeObserver.observe(contentNode);
-    }
-
-    return () => {
-      window.cancelAnimationFrame(animationFrameId);
-      resizeObserver.disconnect();
-    };
-  }, [shouldRenderEdgeFade, entries.length, emptyMessage, updateScrollFade]);
 
   const content = (
     <>
@@ -245,44 +164,11 @@ export const RootFolderPanelList = ({
     </>
   );
 
-  if (!shouldRenderEdgeFade) {
-    return (
-      <div
-        className={cn(
-          "folder-panel-list h-full overflow-y-auto py-1",
-          className,
-        )}
-      >
-        {content}
-      </div>
-    );
-  }
-
   return (
-    <div className={cn("folder-panel-list relative h-full min-h-0", className)}>
-      <div
-        ref={scrollContainerRef}
-        className={scrollContainerClassName}
-        onScroll={updateScrollFade}
-      >
-        <div ref={scrollContentRef}>{content}</div>
-      </div>
-
-      <div
-        aria-hidden="true"
-        className={cn(
-          "folder-panel-list__edge-fade folder-panel-list__top-fade pointer-events-none absolute left-0 right-3 top-0 z-10 h-4",
-          showTopFade ? "opacity-100" : "opacity-0",
-        )}
-      />
-
-      <div
-        aria-hidden="true"
-        className={cn(
-          "folder-panel-list__edge-fade folder-panel-list__bottom-fade pointer-events-none absolute bottom-0 left-0 right-3 z-10 h-6",
-          showBottomFade ? "opacity-100" : "opacity-0",
-        )}
-      />
+    <div
+      className={cn("folder-panel-list h-full overflow-y-auto py-1", className)}
+    >
+      {content}
     </div>
   );
 };

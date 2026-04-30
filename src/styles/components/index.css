@@ -11,8 +11,6 @@
 @layer components {
   .explorer-chrome-font,
   .folder-panel-list {
-    --folder-panel-list-fade-rgb: 255 255 255;
-
     font-family: var(--explorer-chrome-font-family);
     font-feature-settings:
       "palt" 1,
@@ -25,29 +23,5 @@
   .folder-panel-list .ds-list-item__title {
     font-weight: 400;
     letter-spacing: 0.005em;
-  }
-
-  .folder-panel-list__edge-fade {
-    transition: opacity 120ms ease;
-    will-change: opacity;
-  }
-
-  .folder-panel-list__top-fade {
-    background: linear-gradient(
-      to bottom,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0.82) 0%,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0.46) 38%,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0) 100%
-    );
-  }
-
-  .folder-panel-list__bottom-fade {
-    background: linear-gradient(
-      to bottom,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0) 0%,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0) 34%,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0.46) 78%,
-      rgb(var(--folder-panel-list-fade-rgb, 255 255 255) / 0.82) 100%
-    );
   }
 }

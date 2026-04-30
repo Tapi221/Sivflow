@@ -35,7 +35,6 @@ export const NavigationListPanel = ({
       <RootFolderPanelList
         {...listProps}
         className={cn("h-auto overflow-visible py-1", listClassName)}
-        enableScrollEdgeFade={false}
       />
     </FilterPanelSurface>
   );

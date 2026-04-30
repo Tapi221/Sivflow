@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { SelectedExplorerItem } from "@/types";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import type { FoldersRouteAdapter } from "@/features/explorer/adapters/web/useFoldersRouteAdapter";
@@ -119,42 +119,32 @@ export const useExplorerRouteSync = ({
     previousRouteKeyRef.current = route.routeKey;
   }, [route.routeKey]);
 
-  useEffect(() => {
-    let cancelled = false;
+  useLayoutEffect(() => {
+    const currentQuery = route.getBaseSearchParams().toString();
+    const pendingQuery = pendingQueryRef.current;
 
-    queueMicrotask(() => {
-      if (cancelled) return;
-
-      const currentQuery = route.getBaseSearchParams().toString();
-      const pendingQuery = pendingQueryRef.current;
-
-      if (pendingQuery !== null) {
-        if (currentQuery !== pendingQuery) {
-          return;
-        }
-
-        pendingQueryRef.current = null;
+    if (pendingQuery !== null) {
+      if (currentQuery !== pendingQuery) {
         return;
       }
 
-      const externalRouteState = route.readRouteState();
-      const localRouteState: ExplorerRouteState = {
-        isHomeOnlyMode,
-        isSectionListMode,
-        selectedFolderId,
-        selectedItem,
-      };
+      pendingQueryRef.current = null;
+      return;
+    }
 
-      if (areRouteStatesEqual(externalRouteState, localRouteState)) {
-        return;
-      }
-
-      applyRouteState(externalRouteState);
-    });
-
-    return () => {
-      cancelled = true;
+    const externalRouteState = route.readRouteState();
+    const localRouteState: ExplorerRouteState = {
+      isHomeOnlyMode,
+      isSectionListMode,
+      selectedFolderId,
+      selectedItem,
     };
+
+    if (areRouteStatesEqual(externalRouteState, localRouteState)) {
+      return;
+    }
+
+    applyRouteState(externalRouteState);
   }, [
     applyRouteState,
     isHomeOnlyMode,
