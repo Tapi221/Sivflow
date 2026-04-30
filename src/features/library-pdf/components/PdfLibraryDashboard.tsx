@@ -830,7 +830,6 @@ const PdfLibraryDashboard = ({
               </button>
             </div>
           </section>
-
         </aside>
       </div>
     </div>

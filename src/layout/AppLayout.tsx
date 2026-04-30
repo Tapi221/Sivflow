@@ -34,6 +34,7 @@ const resetWorkspaceScroll = (mainElement: HTMLElement | null) => {
 export const AppLayout = () => {
   const { pathname } = useLocation();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(pathname);
   const isCardSetViewRoute = /^\/(?:cardsetview|cardview)(?:\/|$)/i.test(
@@ -54,14 +55,19 @@ export const AppLayout = () => {
   }, [pathname]);
 
   useEffect(() => {
+    const isRightSidebarShortcut = (event: KeyboardEvent) => {
+      const key = event.key;
+      return (
+        key === "\\" ||
+        key === "¥" ||
+        key === "￥" ||
+        event.code === "Backslash" ||
+        event.code === "IntlYen"
+      );
+    };
+
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        !event.ctrlKey ||
-        event.metaKey ||
-        event.altKey ||
-        event.shiftKey ||
-        event.key.toLowerCase() !== "b"
-      ) {
+      if (!event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
         return;
       }
 
@@ -79,8 +85,16 @@ export const AppLayout = () => {
         }
       }
 
-      event.preventDefault();
-      setIsSidebarCollapsed((current) => !current);
+      if (event.key.toLowerCase() === "b") {
+        event.preventDefault();
+        setIsSidebarCollapsed((current) => !current);
+        return;
+      }
+
+      if (isRightSidebarShortcut(event)) {
+        event.preventDefault();
+        setIsRightSidebarOpen((current) => !current);
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -94,6 +108,7 @@ export const AppLayout = () => {
         isFoldersRoute ? "app-layout--folders" : "",
         isScrollLocked ? "app-layout--scroll-locked" : "",
         isSidebarCollapsed ? "app-layout--sidebar-collapsed" : "",
+        isRightSidebarOpen ? "app-layout--right-sidebar-open" : "",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -105,6 +120,10 @@ export const AppLayout = () => {
           <Outlet />
         </Suspense>
       </WorkspaceShell>
+
+      {isRightSidebarOpen ? (
+        <aside className="app-right-sidebar" aria-label="Right sidebar" />
+      ) : null}
     </div>
   );
 };
