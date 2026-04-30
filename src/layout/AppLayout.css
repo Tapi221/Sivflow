@@ -327,7 +327,7 @@
 }
 
 .workspace-shell--with-tabs {
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
 }
 
 .workspace-shell__tabs {
@@ -347,6 +347,84 @@
   min-height: 0;
   overflow-y: auto;
   background: var(--app-active-tab-bg);
+}
+
+.workspace-breadcrumb-bar {
+  display: flex;
+  min-width: 0;
+  height: 52px;
+  flex-shrink: 0;
+  align-items: center;
+  overflow: hidden;
+  background: var(--app-active-tab-bg);
+  padding: 0 20px;
+  color: #8a8a8a;
+  font-family:
+    Inter,
+    var(--explorer-chrome-font-family),
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  -webkit-app-region: drag;
+}
+
+.workspace-breadcrumb-bar__list {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: normal;
+}
+
+.workspace-breadcrumb-bar__item {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.workspace-breadcrumb-bar__button,
+.workspace-breadcrumb-bar__label {
+  min-width: 0;
+  max-width: min(46vw, 520px);
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+  padding: 2px 0;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  -webkit-app-region: no-drag;
+}
+
+.workspace-breadcrumb-bar__button {
+  cursor: pointer;
+}
+
+.workspace-breadcrumb-bar__button:hover,
+.workspace-breadcrumb-bar__button:focus-visible {
+  color: #4f4f4f;
+}
+
+.workspace-breadcrumb-bar__label--current {
+  color: #777777;
+}
+
+.workspace-breadcrumb-bar__separator {
+  flex-shrink: 0;
+  color: #8a8a8a;
+  font-weight: 650;
+  user-select: none;
 }
 
 .app-layout__main--locked {
