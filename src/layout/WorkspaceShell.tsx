@@ -1,6 +1,7 @@
 import type { ReactNode, RefObject } from "react";
 
 import { WorkspaceTabsBar } from "@/features/workspace-tabs/components/WorkspaceTabsBar";
+import { WorkspaceBreadcrumbBar } from "./WorkspaceBreadcrumbBar";
 
 type WorkspaceShellProps = {
   children: ReactNode;
@@ -18,6 +19,7 @@ export const WorkspaceShell = ({
       <div className="workspace-shell__tabs">
         <WorkspaceTabsBar />
       </div>
+      <WorkspaceBreadcrumbBar />
 
       <main
         ref={mainRef}
