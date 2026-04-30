@@ -321,6 +321,8 @@
   z-index: 40;
   width: 1px;
   background: #dddcd5;
+  transform: scaleX(0.5);
+  transform-origin: left center;
   pointer-events: none;
 }
 
