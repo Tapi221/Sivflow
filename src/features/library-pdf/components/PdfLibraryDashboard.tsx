@@ -183,7 +183,7 @@ const BreadcrumbActionSettingsIcon = () => {
         cx="15"
         cy="7"
         r="2.25"
-        fill="#F3F4F6"
+        fill="#FFFFFF"
         stroke="currentColor"
         strokeWidth="1.75"
       />
@@ -191,7 +191,7 @@ const BreadcrumbActionSettingsIcon = () => {
         cx="8"
         cy="12"
         r="2.25"
-        fill="#F3F4F6"
+        fill="#FFFFFF"
         stroke="currentColor"
         strokeWidth="1.75"
       />
@@ -199,7 +199,7 @@ const BreadcrumbActionSettingsIcon = () => {
         cx="13"
         cy="17"
         r="2.25"
-        fill="#F3F4F6"
+        fill="#FFFFFF"
         stroke="currentColor"
         strokeWidth="1.75"
       />
@@ -467,7 +467,7 @@ const PdfLibraryDashboard = ({
         </button>
         <span
           aria-hidden="true"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-[#f3f4f6] text-[#8c9690]"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]"
         >
           <BreadcrumbActionSettingsIcon />
         </span>
