@@ -11,11 +11,11 @@ type WorkspaceSurfaceProps = {
 };
 
 /**
- * Owns the workspace chrome boundary.
+ * Owns the workspace panel shell underneath the tabs row.
  *
- * The tabs row remains a chrome row. The active panel body owns the shared
- * border/background/radius underneath it, so feature panels do not draw their
- * own outer shell.
+ * The app layout owns the sidebar/content divider. The active panel body owns
+ * the shared right/bottom border, background, and radius underneath it, so
+ * feature panels do not draw their own outer shell.
  */
 export const WorkspaceSurface = ({
   children,
@@ -37,7 +37,7 @@ export const WorkspaceSurface = ({
       <div
         className={cn(
           "relative z-10 -mt-px flex min-h-0 w-full min-w-0 flex-1 overflow-hidden",
-          "rounded-b-[14px] border-x border-b border-border bg-background",
+          "rounded-b-[14px] border-r border-b border-border bg-background",
           "[&>div]:rounded-none [&>div]:border-0 [&>div]:bg-transparent [&>div]:shadow-none",
           bodyClassName,
         )}
