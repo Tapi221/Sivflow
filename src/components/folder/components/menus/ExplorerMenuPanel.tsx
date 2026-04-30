@@ -46,8 +46,7 @@ const FOLDER_CONTEXT_MENU_ICON_CLASS =
 const FOLDER_CONTEXT_MENU_DANGER_ITEM_CLASS =
   "!text-[#b91c1c] hover:!bg-[#fef2f2] focus:!bg-[#fef2f2] data-[highlighted]:!bg-[#fef2f2] active:!bg-[#fee2e2] [&_svg]:!stroke-[#b91c1c]";
 
-const FOLDER_CONTEXT_MENU_SEPARATOR_CLASS =
-  "!mx-0 !my-[3px] !h-px !bg-border";
+const FOLDER_CONTEXT_MENU_SEPARATOR_CLASS = "!mx-0 !my-[3px] !h-px !bg-border";
 
 const PLAIN_MENU_CONTENT_STYLE = {
   fontFamily: "var(--explorer-chrome-font-family)",

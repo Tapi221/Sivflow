@@ -20,7 +20,10 @@ import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups
 import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
 import { WorkspaceTabPanel } from "@/features/workspace-tabs/components/WorkspaceTabPanel";
 import { ExplorerWorkspaceFrame } from "@/features/workspace-tabs/components/ExplorerWorkspaceFrame";
-import type { WorkspaceEntityTab, WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
+import type {
+  WorkspaceEntityTab,
+  WorkspaceTab,
+} from "@/features/workspace-tabs/domain/workspaceTab";
 import {
   resolveCardSetTabTitle,
   resolveCardTabTitle,
