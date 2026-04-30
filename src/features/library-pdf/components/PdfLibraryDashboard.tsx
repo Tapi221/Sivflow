@@ -211,7 +211,7 @@ const SummaryChip = ({
   value: string | number;
 }) => {
   return (
-    <div className="flex items-center justify-between rounded-2xl bg-[#f6f8f7] px-3 py-2">
+    <div className="flex items-center justify-between rounded-[4px] bg-[#f6f8f7] px-3 py-2">
       <span className="truncate text-[12px] font-medium text-slate-500">{label}</span>
       <span className="ml-3 text-[13px] font-semibold text-slate-700">{value}</span>
     </div>
@@ -448,7 +448,7 @@ const PdfLibraryDashboard = ({
           className="hidden"
           onChange={handleToolbarFileInputChange}
         />
-        <div className="w-full max-w-xl rounded-[32px] border border-[#e6ebe7] bg-white p-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+        <div className="w-full max-w-xl rounded-[4px] border border-[#e6ebe7] bg-white p-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
           <div className="inline-flex items-center rounded-full bg-[#edf6f1] px-3 py-1 text-[12px] font-semibold text-[#4f8061]">
             PDF ライブラリ
           </div>
@@ -462,7 +462,7 @@ const PdfLibraryDashboard = ({
           <div className="mt-8 flex items-center gap-3">
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-2xl border border-[#7aa78c] px-5 py-3 text-[14px] font-semibold text-[#4f8061] transition-colors hover:bg-[#f5faf7]"
+              className="inline-flex items-center justify-center rounded-[4px] border border-[#7aa78c] px-5 py-3 text-[14px] font-semibold text-[#4f8061] transition-colors hover:bg-[#f5faf7]"
               disabled={!importTargetFolderId}
               onClick={handleToolbarAddDocument}
             >
@@ -492,7 +492,7 @@ const PdfLibraryDashboard = ({
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col px-5 pb-5 pt-5">
         <div className="grid shrink-0 grid-cols-1 gap-4 xl:grid-cols-3">
-          <section className="rounded-[28px] border border-[#e6ebe7] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
+          <section className="rounded-[4px] border border-[#e6ebe7] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[14px] font-semibold text-slate-700">PDF の概要</p>
@@ -516,7 +516,7 @@ const PdfLibraryDashboard = ({
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-[#e6ebe7] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
+          <section className="rounded-[4px] border border-[#e6ebe7] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
             <div className="flex items-center justify-between gap-3">
               <p className="text-[14px] font-semibold text-slate-700">続きから読む</p>
               <span className="text-[12px] font-semibold text-[#5b8a6e]">上位 3 件</span>
@@ -529,7 +529,7 @@ const PdfLibraryDashboard = ({
                     key={row.id}
                     type="button"
                     className={cn(
-                      "block w-full rounded-2xl border px-3 py-3 text-left transition-colors",
+                      "block w-full rounded-[4px] border px-3 py-3 text-left transition-colors",
                       selectedRow?.id === row.id
                         ? "border-[#cfe2d6] bg-[#f7fbf8]"
                         : "border-transparent bg-[#fafbfa] hover:border-[#e3ece6]",
@@ -554,14 +554,14 @@ const PdfLibraryDashboard = ({
                   </button>
                 ))
               ) : (
-                <div className="rounded-2xl bg-[#fafbfa] px-4 py-6 text-[13px] text-slate-400">
+                <div className="rounded-[4px] bg-[#fafbfa] px-4 py-6 text-[13px] text-slate-400">
                   続きから読める PDF はまだありません。
                 </div>
               )}
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-[#e6ebe7] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
+          <section className="rounded-[4px] border border-[#e6ebe7] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
             <div className="flex items-center justify-between gap-3">
               <p className="text-[14px] font-semibold text-slate-700">最近更新した PDF</p>
               <span className="text-[12px] font-semibold text-[#5b8a6e]">最新順</span>
@@ -573,7 +573,7 @@ const PdfLibraryDashboard = ({
                   key={row.id}
                   type="button"
                   className={cn(
-                    "flex w-full items-start justify-between gap-4 rounded-2xl border px-3 py-3 text-left transition-colors",
+                    "flex w-full items-start justify-between gap-4 rounded-[4px] border px-3 py-3 text-left transition-colors",
                     selectedRow?.id === row.id
                       ? "border-[#cfe2d6] bg-[#f7fbf8]"
                       : "border-transparent bg-[#fafbfa] hover:border-[#e3ece6]",
@@ -593,7 +593,7 @@ const PdfLibraryDashboard = ({
           </section>
         </div>
 
-        <section className="mt-4 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[28px] border border-[#e6ebe7] bg-white shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
+        <section className="mt-4 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[4px] border border-[#e6ebe7] bg-white shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
           <div className="overflow-x-auto">
             <table className="min-w-full border-separate border-spacing-0 text-left">
               <thead>
@@ -675,7 +675,7 @@ const PdfLibraryDashboard = ({
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[#e5ebe7] text-slate-500 transition-colors hover:bg-[#f7fbf8] disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-[4px] border border-[#e5ebe7] text-slate-500 transition-colors hover:bg-[#f7fbf8] disabled:cursor-not-allowed disabled:opacity-40"
                 disabled={pageIndex <= 0}
                 onClick={() => setPageIndex((currentPageIndex) => Math.max(0, currentPageIndex - 1))}
               >
@@ -686,7 +686,7 @@ const PdfLibraryDashboard = ({
                   key={index}
                   type="button"
                   className={cn(
-                    "inline-flex h-9 min-w-9 items-center justify-center rounded-xl px-3 text-[13px] font-medium transition-colors",
+                    "inline-flex h-9 min-w-9 items-center justify-center rounded-[4px] px-3 text-[13px] font-medium transition-colors",
                     index === pageIndex
                       ? "bg-[#eef6f0] text-[#4f8061]"
                       : "text-slate-500 hover:bg-[#f7fbf8]",
@@ -698,7 +698,7 @@ const PdfLibraryDashboard = ({
               ))}
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[#e5ebe7] text-slate-500 transition-colors hover:bg-[#f7fbf8] disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-[4px] border border-[#e5ebe7] text-slate-500 transition-colors hover:bg-[#f7fbf8] disabled:cursor-not-allowed disabled:opacity-40"
                 disabled={pageIndex >= pageCount - 1}
                 onClick={() =>
                   setPageIndex((currentPageIndex) =>
@@ -720,9 +720,9 @@ const PdfLibraryDashboard = ({
       <aside className="flex h-full w-[340px] shrink-0 flex-col border-l border-[#e6ebe7] bg-white p-5">
         {selectedRow ? (
           <>
-            <section className="rounded-[28px] border border-[#e6ebe7] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
+            <section className="rounded-[4px] border border-[#e6ebe7] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
               <div className="flex items-start gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#fff3f1] text-[12px] font-bold text-[#d56f60]">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[4px] bg-[#fff3f1] text-[12px] font-bold text-[#d56f60]">
                   PDF
                 </div>
                 <div className="min-w-0">
@@ -780,7 +780,7 @@ const PdfLibraryDashboard = ({
                 </div>
                 <div className="space-y-2">
                   <span className="text-[13px] text-slate-500">保存先</span>
-                  <div className="rounded-2xl bg-[#f7faf8] px-3 py-3 text-[13px] leading-6 text-slate-600">
+                  <div className="rounded-[4px] bg-[#f7faf8] px-3 py-3 text-[13px] leading-6 text-slate-600">
                     {selectedRow.storagePathLabel}
                   </div>
                 </div>
@@ -788,14 +788,14 @@ const PdfLibraryDashboard = ({
 
               <button
                 type="button"
-                className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-2xl border border-[#7aa78c] text-[14px] font-semibold text-[#4f8061] transition-colors hover:bg-[#f5faf7]"
+                className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-[4px] border border-[#7aa78c] text-[14px] font-semibold text-[#4f8061] transition-colors hover:bg-[#f5faf7]"
                 onClick={() => onOpenDocument(selectedRow.id)}
               >
                 PDF を開く
               </button>
             </section>
 
-            <section className="mt-4 rounded-[28px] border border-[#e6ebe7] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
+            <section className="mt-4 rounded-[4px] border border-[#e6ebe7] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-[14px] font-semibold text-slate-700">関連 PDF</p>
                 <span className="text-[12px] font-semibold text-[#5b8a6e]">おすすめ</span>
@@ -807,7 +807,7 @@ const PdfLibraryDashboard = ({
                     <button
                       key={row.id}
                       type="button"
-                      className="flex w-full items-start gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-[#f7fbf8]"
+                      className="flex w-full items-start gap-3 rounded-[4px] px-3 py-3 text-left transition-colors hover:bg-[#f7fbf8]"
                       onClick={() => setSelectedDocumentId(row.id)}
                     >
                       <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f1eefb] text-[10px] font-bold text-[#6f60ad]">
@@ -824,7 +824,7 @@ const PdfLibraryDashboard = ({
                     </button>
                   ))
                 ) : (
-                  <div className="rounded-2xl bg-[#fafbfa] px-4 py-5 text-[13px] text-slate-400">
+                  <div className="rounded-[4px] bg-[#fafbfa] px-4 py-5 text-[13px] text-slate-400">
                     関連 PDF はまだ見つかりません。
                   </div>
                 )}
@@ -833,14 +833,14 @@ const PdfLibraryDashboard = ({
           </>
         ) : null}
 
-        <div className="mt-auto rounded-[28px] border border-[#cfe2d6] bg-[#fcfffd] p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
+        <div className="mt-auto rounded-[4px] border border-[#cfe2d6] bg-[#fcfffd] p-5 shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
           <div className="text-[13px] text-slate-500">インポート先</div>
           <div className="mt-2 text-[14px] font-semibold leading-6 text-slate-700">
             {importTargetFolderPathLabel}
           </div>
           <button
             type="button"
-            className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-2xl border border-[#7aa78c] text-[14px] font-semibold text-[#4f8061] transition-colors hover:bg-[#f5faf7] disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-[4px] border border-[#7aa78c] text-[14px] font-semibold text-[#4f8061] transition-colors hover:bg-[#f5faf7] disabled:cursor-not-allowed disabled:opacity-50"
             disabled={!importTargetFolderId}
             onClick={handleToolbarAddDocument}
           >
