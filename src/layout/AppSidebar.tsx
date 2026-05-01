@@ -13,7 +13,8 @@ type AppSidebarNavItem = {
   icon: ReactNode;
   exactPath?: boolean;
   sectionKey?: "home" | "review" | "library" | "calendar";
-  onClick?: () => void;
+    onClick?: () => void;
+  disabled?: boolean;
   match?: (pathname: string, searchParams: URLSearchParams) => boolean;
 };
 
@@ -86,6 +87,14 @@ const ExploreIcon = ({ className }: SidebarIconProps) => (
   </IconShell>
 );
 
+const GearIcon = ({ className }: SidebarIconProps) => (
+  <IconShell className={className}>
+    <path
+      d="M12 8.5A3.5 3.5 0 1 1 12 15.5 3.5 3.5 0 0 1 12 8.5Zm7.5 3.5c0-.5-.1-1-.2-1.5l2-1.5-2-3.4-2.4 1a8.7 8.7 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.6A8.7 8.7 0 0 0 7 6.6l-2.4-1-2 3.4 2 1.5a7.1 7.1 0 0 0 0 3l-2 1.5 2 3.4 2.4-1a8.7 8.7 0 0 0 2.6 1.5L10 21.5h4l.4-2.6a8.7 8.7 0 0 0 2.6-1.5l2.4 1 2-3.4-2-1.5c.1-.5.2-1 .2-1.5Z"
+      fill="currentColor"
+    />
+  </IconShell>
+);
 
 const CloudIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
@@ -165,7 +174,14 @@ const libraryChildItems = [
   { label: "ノート", value: "notes" },
 ];
 
-const footerItems: AppSidebarNavItem[] = [];
+const footerItems: AppSidebarNavItem[] = [
+  {
+    id: "settings",
+    label: "設定",
+    icon: <GearIcon className="app-sidebar__nav-icon" />,
+    disabled: true,
+  },
+];
 
 const isNavItemActiveByLocation = (
   item: AppSidebarNavItem,
@@ -200,11 +216,13 @@ const AppSidebarNavLink = ({
   nested = false,
   trailing,
   ariaExpanded,
+  disabled,
 }: {
   item: AppSidebarNavItem;
   nested?: boolean;
   trailing?: ReactNode;
   ariaExpanded?: boolean;
+  disabled?: boolean;
 }) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
@@ -217,6 +235,8 @@ const AppSidebarNavLink = ({
       ? null
       : (tabs.find((tab) => tab.id === activeTabId) ?? null);
 
+  const isDisabled = disabled ?? item.disabled ?? false;
+
   const isActive =
     (item.sectionKey !== undefined &&
     activeTab?.sectionKey === item.sectionKey &&
@@ -226,8 +246,12 @@ const AppSidebarNavLink = ({
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    item.onClick?.();
 
+    if (isDisabled) {
+      return;
+    }
+
+    item.onClick?.();
     if (item.sectionKey) {
       openSectionTab(item.sectionKey);
     }
@@ -241,10 +265,13 @@ const AppSidebarNavLink = ({
     <button
       type="button"
       onClick={handleClick}
+      disabled={isDisabled}
+      aria-disabled={isDisabled ? true : undefined}
       className={cn(
-        "app-sidebar__nav-link",
+                "app-sidebar__nav-link",
         nested && "app-sidebar__nav-link--nested",
         isActive && "is-active",
+        isDisabled && "cursor-default opacity-60",
       )}
       aria-current={isActive ? "page" : undefined}
       aria-expanded={ariaExpanded}

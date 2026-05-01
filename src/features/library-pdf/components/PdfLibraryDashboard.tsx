@@ -92,7 +92,8 @@ const DEFAULT_COLUMNS: DashboardColumn[] = [
   },
 ];
 
-const cardClassName = "rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-4";
+const cardClassName =
+  "box-border rounded-[10px] border border-[#D1D1D1] bg-[#FFFFFF] p-4 shadow-[0_6px_3px_0_rgba(0,0,0,0.06),0_10px_10px_0_rgba(0,0,0,0.05)]";
 const breadcrumbActionIconClassName =
   "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]";
 
