@@ -8,7 +8,6 @@
 @import "../presentation/react/theme/list-item.css";
 @import "../presentation/react/theme/menu-surfaces.css";
 @import "../presentation/react/theme/navigation-surfaces.css";
-@import "../presentation/react/theme/pdf-thumbnail.css";
 @import "../presentation/react/theme/editor-pane.css";
 @import "../presentation/react/theme/settings-panel.css";
 @import "../presentation/react/theme/tag-and-status.css";
@@ -22,3 +21,5 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
