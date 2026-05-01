@@ -406,6 +406,7 @@ const PdfLibraryDashboard = ({
     const start = pageIndex * PAGE_SIZE;
     return rows.slice(start, start + PAGE_SIZE);
   }, [pageIndex, rows]);
+  const totalPageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
 
   const visibleStart = rows.length === 0 ? 0 : pageIndex * PAGE_SIZE + 1;
   const visibleEnd = Math.min(rows.length, (pageIndex + 1) * PAGE_SIZE);
