@@ -628,12 +628,12 @@ const PdfLibraryDashboard = ({
                               <div className="flex min-w-0 items-center gap-0">
                                 <IconBadge label="PDF" tone="rose" />
                                 <div className="flex min-w-0 flex-1 items-center gap-2">
-                                  <span className="min-w-0 flex-1 truncate text-[13px] font-medium leading-[17px] text-[#273038]">
+                                  <span className="min-w-0 truncate text-[13px] font-medium leading-[17px] text-[#273038]">
                                     {row.title}
                                   </span>
                                   <button
                                     type="button"
-                                    className="ml-auto inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-[#ababab] transition-colors hover:bg-[#f3f4f6] hover:text-[#808192]"
+                                    className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-[#ababab] transition-colors hover:bg-[#f3f4f6] hover:text-[#808192]"
                                     aria-label={`${row.title}を開く`}
                                     title={`${row.title}を開く`}
                                     onClick={(event) => {
