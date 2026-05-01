@@ -79,7 +79,6 @@ const DEFAULT_COLUMNS: DashboardColumn[] = [
     minWidth: 72,
     maxWidth: 140,
     resizable: true,
-    align: "right",
   },
   {
     id: "lastViewed",
@@ -104,7 +103,6 @@ const DEFAULT_COLUMNS: DashboardColumn[] = [
     minWidth: 32,
     maxWidth: 32,
     resizable: false,
-    align: "center",
   },
 ];
 
@@ -908,8 +906,6 @@ const PdfLibraryDashboard = ({
                       key={column.id}
                       className={cn(
                         "relative min-w-0",
-                        column.align === "right" && "text-right",
-                        column.align === "center" && "text-center",
                       )}
                     >
                       <div className="truncate pr-2">{column.label}</div>
@@ -976,7 +972,7 @@ const PdfLibraryDashboard = ({
                           )}
                         </div>
 
-                        <div className="truncate text-right text-[13px] font-[542] leading-[17px] text-[#46514f]">
+                        <div className="truncate text-[13px] font-[542] leading-[17px] text-[#46514f]">
                           {formatPageCount(row.pageCount)}
                         </div>
                         <div className="truncate text-[13px] leading-[17px] text-[#75817c]">
@@ -985,7 +981,7 @@ const PdfLibraryDashboard = ({
                         <div className="truncate text-[13px] leading-[17px] text-[#75817c]">
                           {formatDateTime(row.updatedAt)}
                         </div>
-                        <div className="text-center text-[18px] leading-none text-[#9aa59e]">
+                        <div className="text-[18px] leading-none text-[#9aa59e]">
                           …
                         </div>
                       </button>
