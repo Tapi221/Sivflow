@@ -1,6 +1,3 @@
-import { SettingsRow } from "@/components/settings/SettingsRow";
-import { SettingsSection } from "@/components/settings/SettingsSection";
-import { SettingsNote } from "@/components/settings/settingsUi";
 import {
   Select,
   SelectContent,
@@ -8,6 +5,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SettingsRow } from "@/components/settings/SettingsRow";
+import { SettingsSection } from "@/components/settings/SettingsSection";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import {
@@ -61,7 +60,7 @@ export const MarkdownWhitespaceSettings = () => {
               })
             }
           >
-            <SelectTrigger className="w-full min-w-[180px] bg-white sm:w-[180px]">
+            <SelectTrigger className="w-[160px] bg-white">
               <SelectValue placeholder="Select tab size" />
             </SelectTrigger>
             <SelectContent>
@@ -75,7 +74,7 @@ export const MarkdownWhitespaceSettings = () => {
         }
       />
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
         {TAB_SIZE_OPTIONS.map((option) => {
           const isActive = String(option.value) === currentValue;
 
@@ -83,16 +82,16 @@ export const MarkdownWhitespaceSettings = () => {
             <div
               key={option.value}
               className={cn(
-                "rounded-2xl border px-4 py-4 transition-all",
+                "rounded-2xl border px-4 py-3 transition-colors",
                 isActive
-                  ? "border-primary-300 bg-primary-50/40 shadow-sm ring-1 ring-primary-200/60"
-                  : "border-slate-200 bg-slate-50/60",
+                  ? "border-[var(--settings-accent)] bg-[var(--settings-accent-soft)]"
+                  : "border-slate-200 bg-white",
               )}
             >
-              <div className="text-sm font-semibold text-slate-900">
+              <div className="text-sm font-semibold text-slate-800">
                 {option.label}
               </div>
-              <div className="mt-1 text-sm leading-6 text-slate-500">
+              <div className="mt-1 text-xs leading-5 text-slate-500">
                 {option.description}
               </div>
             </div>
@@ -100,29 +99,25 @@ export const MarkdownWhitespaceSettings = () => {
         })}
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <SettingsNote tone="info">
-          <div className="text-xs font-semibold uppercase tracking-[0.08em]">
-            適用対象
-          </div>
-          <ul className="mt-2 list-disc pl-5 text-sm leading-6">
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <div className="ds-settings-panel__note ds-settings-panel__note--info">
+          <div className="text-xs font-semibold text-slate-700">適用対象</div>
+          <ul className="mt-2 list-disc pl-5 text-xs leading-6 text-slate-600">
             <li>通常本文の段落</li>
             <li>引用ブロック内の本文段落</li>
           </ul>
-        </SettingsNote>
+        </div>
 
-        <SettingsNote>
-          <div className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-700">
-            適用対象外
-          </div>
-          <ul className="mt-2 list-disc pl-5 text-sm leading-6 text-slate-600">
+        <div className="ds-settings-panel__note">
+          <div className="text-xs font-semibold text-slate-700">適用対象外</div>
+          <ul className="mt-2 list-disc pl-5 text-xs leading-6 text-slate-600">
             <li>見出し（ATX 見出し / Setext 見出し）</li>
             <li>リスト / タスクリスト</li>
             <li>表</li>
             <li>インラインコード / コードブロック</li>
             <li>引用内でも、リスト / 表 / コードに属する部分</li>
           </ul>
-        </SettingsNote>
+        </div>
       </div>
     </SettingsSection>
   );

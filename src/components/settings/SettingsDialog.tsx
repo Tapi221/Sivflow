@@ -4,20 +4,16 @@ import { useNavigate } from "react-router-dom";
 
 import { BlockOrdering } from "@/components/settings/BlockOrdering";
 import { DeviceSyncSettings } from "@/components/settings/DeviceSyncSettings";
+import { MarkdownWhitespaceSettings } from "@/components/settings/MarkdownWhitespaceSettings";
 import { SettingsRow } from "@/components/settings/SettingsRow";
 import { SettingsSection } from "@/components/settings/SettingsSection";
-import {
-  SETTINGS_ICON_SURFACE_CLASS_NAME,
-  SettingsBadge,
-  SettingsEmptyState,
-  SettingsKeycap,
-  SettingsNote,
-  type SettingsTone,
-} from "@/components/settings/settingsUi";
-import { MarkdownWhitespaceSettings } from "@/components/settings/MarkdownWhitespaceSettings";
-import { TagManagerPanel } from "@/components/tag/TagManagerPanel";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -26,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { TagManagerPanel } from "@/components/tag/TagManagerPanel";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
@@ -45,6 +42,7 @@ import {
   RefreshCw,
   Tag,
   Volume2,
+  X,
 } from "@/ui/icons";
 import { getAvatarColors, getInitials } from "@/utils/avatarUtils";
 import {
@@ -67,23 +65,6 @@ type SidebarSection = {
   label: string;
   items: readonly SidebarItem[];
 };
-
-type SettingsDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  initialTab?: SettingsTabParam;
-};
-
-type SettingsChoiceCardProps = {
-  title: string;
-  description: string;
-  selected?: boolean;
-  badge?: string;
-  onSelect?: () => void;
-  disabled?: boolean;
-};
-
-type ReviewToggleSettingKey = "showReviewHard" | "showReviewEasy";
 
 const settingsSidebarSections = [
   {
@@ -142,6 +123,37 @@ const settingsSidebarSections = [
 const sidebarItems: readonly SidebarItem[] = settingsSidebarSections.flatMap(
   (section) => section.items,
 );
+
+const getDefaultSidebarItem = (): SidebarItem => {
+  const defaultItem =
+    sidebarItems.find((item) => item.id === DEFAULT_SETTINGS_TAB) ??
+    settingsSidebarSections[0]?.items[0];
+
+  if (!defaultItem) {
+    throw new Error("settingsSidebarSections must include at least one item.");
+  }
+
+  return defaultItem;
+};
+
+const defaultSidebarItem = getDefaultSidebarItem();
+
+type ReviewToggleSettingKey = "showReviewHard" | "showReviewEasy";
+
+type SettingsDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  initialTab?: SettingsTabParam;
+};
+
+type SettingsChoiceCardProps = {
+  title: string;
+  description: string;
+  selected?: boolean;
+  badge?: string;
+  onSelect?: () => void;
+  disabled?: boolean;
+};
 
 const voiceOptions = [
   {
@@ -298,20 +310,6 @@ const shortcutSections = [
 
 const syncIntervalOptions = [5, 15, 30, 60] as const;
 
-const getDefaultSidebarItem = (): SidebarItem => {
-  const defaultItem =
-    sidebarItems.find((item) => item.id === DEFAULT_SETTINGS_TAB) ??
-    settingsSidebarSections[0]?.items[0];
-
-  if (!defaultItem) {
-    throw new Error("settingsSidebarSections must include at least one item.");
-  }
-
-  return defaultItem;
-};
-
-const defaultSidebarItem = getDefaultSidebarItem();
-
 const isSidebarSettingsTab = (
   value?: SettingsTabParam,
 ): value is SettingsTab => {
@@ -337,32 +335,30 @@ const formatLastSyncTime = (value: Date | null) => {
   return value.toLocaleString("ja-JP");
 };
 
-const getSyncStatusMeta = (
-  status: string,
-): { label: string; tone: SettingsTone; description: string } => {
+const getSyncStatusMeta = (status: string) => {
   switch (status) {
     case "syncing":
       return {
         label: "同期中",
-        tone: "info",
+        toneClassName: "ds-settings-panel__status-pill--info",
         description: "ネットワークとローカル変更を照合しています。",
       };
     case "success":
       return {
         label: "正常",
-        tone: "success",
+        toneClassName: "ds-settings-panel__status-pill--success",
         description: "最後の同期は正常に完了しています。",
       };
     case "error":
       return {
         label: "要確認",
-        tone: "danger",
+        toneClassName: "ds-settings-panel__status-pill--danger",
         description: "同期で問題が発生しました。状態を確認してください。",
       };
     default:
       return {
         label: "待機中",
-        tone: "neutral",
+        toneClassName: "ds-settings-panel__status-pill--off",
         description: "必要なときに同期を実行できます。",
       };
   }
@@ -379,38 +375,41 @@ const SettingsChoiceCard = ({
   const content = (
     <>
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="text-sm font-semibold text-slate-900">{title}</div>
-          <div className="mt-1 text-sm leading-6 text-slate-500">
+        <div>
+          <div className="text-sm font-semibold text-slate-800">{title}</div>
+          <div className="mt-1 text-xs leading-5 text-slate-500">
             {description}
           </div>
         </div>
 
         {selected ? (
-          <Check className="mt-0.5 h-4 w-4 text-primary-600" />
+          <Check className="mt-0.5 h-4 w-4 text-[var(--settings-accent)]" />
         ) : null}
       </div>
 
       {badge ? (
         <div className="mt-3">
-          <SettingsBadge tone={selected ? "success" : "neutral"}>
+          <span
+            className={cn(
+              "ds-settings-panel__status-pill",
+              selected && "ds-settings-panel__status-pill--success",
+              !selected && "ds-settings-panel__status-pill--off",
+            )}
+          >
             {badge}
-          </SettingsBadge>
+          </span>
         </div>
       ) : null}
     </>
   );
 
   const className = cn(
-    "w-full rounded-2xl border p-4 text-left transition-all",
-    selected
-      ? "border-primary-300 bg-primary-50/40 ring-1 ring-primary-200/70"
-      : "border-slate-200 bg-slate-50/60",
-    !disabled && onSelect && "hover:border-slate-300 hover:bg-white",
-    disabled && "cursor-default opacity-80",
+    "ds-settings-panel__choice-card",
+    selected && "ds-settings-panel__choice-card--active",
+    disabled && "ds-settings-panel__choice-card--disabled",
   );
 
-  if (!onSelect || disabled) {
+  if (!onSelect) {
     return <div className={className}>{content}</div>;
   }
 
@@ -438,41 +437,31 @@ const SettingsNavButton = ({
     <button
       type="button"
       onClick={onSelect}
-      aria-pressed={active}
+      aria-current={active ? "page" : undefined}
       title={item.label}
       className={cn(
-        "flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-all",
-        active
-          ? "border-primary-300 bg-primary-50/50 text-slate-900 shadow-sm"
-          : "border-transparent bg-transparent text-slate-600 hover:border-slate-200 hover:bg-white",
+        "ds-nav-action ds-settings-panel__nav-item flex w-full items-center gap-3 text-left",
+        active && "ds-nav-action--active",
       )}
     >
-      <div
-        className={cn(
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border",
-          active
-            ? "border-primary-200 bg-white text-primary-700"
-            : "border-slate-200 bg-slate-50 text-slate-500",
-        )}
-      >
-        <Icon className="h-4 w-4" strokeWidth={2.05} />
-      </div>
-      <div className="min-w-0">
-        <div className="truncate text-sm font-semibold">{item.label}</div>
-        <div className="mt-0.5 line-clamp-2 text-xs leading-5 text-slate-500">
-          {item.description}
-        </div>
-      </div>
+      <Icon
+        className="h-4 w-4 shrink-0 ds-nav-action__icon"
+        strokeWidth={2.05}
+      />
+      <span className="ds-settings-panel__nav-label truncate">
+        {item.label}
+      </span>
     </button>
   );
 };
 
-export const SettingsDialog = ({
+const SettingsDialog = ({
   open,
   onOpenChange,
   initialTab,
 }: SettingsDialogProps) => {
   const [selectedTab, setSelectedTab] = useState<SettingsTab | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
 
   const resolvedInitialTab = useMemo(
@@ -503,12 +492,6 @@ export const SettingsDialog = ({
       ? currentUser.displayName.trim()
       : "User";
 
-  const footerEmail =
-    typeof currentUser?.email === "string" &&
-    currentUser.email.trim().length > 0
-      ? currentUser.email.trim()
-      : "Google アカウント";
-
   const { bg: footerAvatarBg, text: footerAvatarText } =
     getAvatarColors(footerDisplayName);
 
@@ -529,18 +512,13 @@ export const SettingsDialog = ({
       });
   }, [folders]);
 
-  const syncEnabledFolderCount = useMemo(() => {
-    return rootFolders.filter((folder) => folder.cloudSyncEnabled).length;
-  }, [rootFolders]);
-
   const isOnline = typeof navigator === "undefined" ? true : navigator.onLine;
   const syncStatusMeta = getSyncStatusMeta(syncStatus);
-
-  const ActiveIcon = activeItem.icon;
 
   const handleDialogOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       setSelectedTab(null);
+      setIsMobileMenuOpen(false);
     }
 
     onOpenChange(nextOpen);
@@ -548,11 +526,13 @@ export const SettingsDialog = ({
 
   const closeDialog = () => {
     setSelectedTab(null);
+    setIsMobileMenuOpen(false);
     onOpenChange(false);
   };
 
   const handleSelectTab = (tabId: SettingsTab) => {
     setSelectedTab(tabId);
+    setIsMobileMenuOpen(false);
   };
 
   const handleLogout = async () => {
@@ -624,22 +604,22 @@ export const SettingsDialog = ({
     return updateSettings({ showReviewEasy: checked });
   };
 
-  const handleSyncSettingChange = <K extends keyof SyncSettings>(
-    key: K,
-    value: SyncSettings[K],
-  ) => {
-    void updateSyncPrefs({ [key]: value } as Pick<SyncSettings, K>);
-  };
-
   const renderStatusSwitch = (
     enabled: boolean,
     onCheckedChange: (checked: boolean) => void,
   ) => {
     return (
       <div className="flex items-center gap-3">
-        <SettingsBadge tone={enabled ? "success" : "neutral"}>
+        <span
+          className={cn(
+            "ds-settings-panel__status-pill",
+            enabled
+              ? "ds-settings-panel__status-pill--success"
+              : "ds-settings-panel__status-pill--off",
+          )}
+        >
           {getOnOffLabel(enabled)}
-        </SettingsBadge>
+        </span>
         <Switch checked={enabled} onCheckedChange={onCheckedChange} />
       </div>
     );
@@ -701,7 +681,7 @@ export const SettingsDialog = ({
                 leading={
                   <span
                     className={cn(
-                      "mt-2 block h-3 w-3 rounded-full",
+                      "mt-1 block h-2.5 w-2.5 rounded-full",
                       item.dotClassName,
                     )}
                   />
@@ -714,7 +694,9 @@ export const SettingsDialog = ({
                         void handleReviewButtonToggle(item.settingKey, checked),
                     )
                   ) : (
-                    <SettingsBadge tone="neutral">{item.badge}</SettingsBadge>
+                    <span className="ds-settings-panel__status-pill ds-settings-panel__status-pill--off">
+                      {item.badge}
+                    </span>
                   )
                 }
               />
@@ -754,13 +736,13 @@ export const SettingsDialog = ({
             title="復習開始日"
             description="新しく作成したカードの初回レビューを当日開始にするか、翌日に送るかを選びます。"
             action={
-              <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-100 p-1">
+              <div className="ds-settings-panel__segmented">
                 <button
                   type="button"
                   className={cn(
-                    "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-colors",
+                    "ds-settings-panel__segmented-button",
                     !(settings?.reviewStartNextDay ?? true) &&
-                      "bg-white text-slate-900 shadow-sm",
+                      "ds-settings-panel__segmented-button--active",
                   )}
                   onClick={() => void handleReviewStartDayChange(false)}
                 >
@@ -769,9 +751,9 @@ export const SettingsDialog = ({
                 <button
                   type="button"
                   className={cn(
-                    "rounded-xl px-4 py-2 text-sm font-medium text-slate-600 transition-colors",
+                    "ds-settings-panel__segmented-button",
                     (settings?.reviewStartNextDay ?? true) &&
-                      "bg-white text-slate-900 shadow-sm",
+                      "ds-settings-panel__segmented-button--active",
                   )}
                   onClick={() => void handleReviewStartDayChange(true)}
                 >
@@ -784,7 +766,6 @@ export const SettingsDialog = ({
       </div>
     );
   };
-
   const renderVoiceTab = () => {
     return (
       <div className="space-y-6">
@@ -814,7 +795,7 @@ export const SettingsDialog = ({
           title="使用する音声"
           description="現行ビルドでは既定音声を使用します。選択式の切り替えUIは将来の拡張用に整理しています。"
         >
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="ds-settings-panel__choice-grid md:grid-cols-2">
             {voiceOptions.map((voice) => (
               <SettingsChoiceCard
                 key={voice.id}
@@ -831,17 +812,6 @@ export const SettingsDialog = ({
     );
   };
 
-  const renderTagsTab = () => {
-    return (
-      <div className="space-y-6">
-        <SettingsNote tone="info">
-          タグの色、カテゴリ、マージ、階層移動をこの画面からまとめて管理できます。
-        </SettingsNote>
-        <TagManagerPanel className="rounded-[28px] border border-slate-200/80 bg-white p-4 shadow-[0_12px_32px_rgba(15,23,42,0.06)]" />
-      </div>
-    );
-  };
-
   const renderShortcutTab = () => {
     return (
       <div className="space-y-6">
@@ -851,24 +821,23 @@ export const SettingsDialog = ({
             title={section.title}
             description="キーボード操作をまとめて確認できます。"
           >
-            <div className="space-y-3">
+            <div className="ds-settings-panel__shortcut-table">
               {section.shortcuts.map((shortcut, index) => (
                 <div
                   key={`${section.title}-${shortcut.key}-${index}`}
-                  className="grid gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 sm:grid-cols-[minmax(0,240px)_1fr] sm:items-center"
+                  className="ds-settings-panel__shortcut-row"
                 >
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {shortcut.key.split(" / ").map((segment) => (
-                      <SettingsKeycap
+                      <span
                         key={`${section.title}-${shortcut.key}-${segment}`}
+                        className="ds-settings-panel__keycap"
                       >
                         {segment}
-                      </SettingsKeycap>
+                      </span>
                     ))}
                   </div>
-                  <div className="text-sm leading-6 text-slate-700">
-                    {shortcut.desc}
-                  </div>
+                  <div className="text-sm text-slate-700">{shortcut.desc}</div>
                 </div>
               ))}
             </div>
@@ -889,7 +858,7 @@ export const SettingsDialog = ({
               type="button"
               onClick={() => void triggerSync()}
               disabled={syncStatus === "syncing" || !isOnline}
-              className="rounded-2xl"
+              className="h-9 rounded-xl border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 shadow-none hover:bg-slate-50"
             >
               {syncStatus === "syncing" ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -903,136 +872,161 @@ export const SettingsDialog = ({
           <SettingsRow
             title="現在の状態"
             description={syncStatusMeta.description}
-            leading={
-              <div className={SETTINGS_ICON_SURFACE_CLASS_NAME}>
-                <Cloud className="h-4 w-4" />
-              </div>
-            }
             action={
-              <SettingsBadge tone={syncStatusMeta.tone}>
+              <span
+                className={cn(
+                  "ds-settings-panel__status-pill",
+                  syncStatusMeta.toneClassName,
+                )}
+              >
                 {syncStatusMeta.label}
-              </SettingsBadge>
+              </span>
             }
           />
           <SettingsRow
             title="最終同期"
             description="最後にローカルとクラウドの差分を同期した日時です。"
             action={
-              <span className="text-sm font-semibold text-slate-700">
+              <span className="text-xs font-semibold text-slate-600">
                 {formatLastSyncTime(lastSyncTime)}
               </span>
             }
           />
 
           {!isOnline ? (
-            <SettingsNote tone="danger">
-              現在オフラインです。ネットワーク接続が戻るまで手動同期は実行できません。
-            </SettingsNote>
+            <div className="ds-settings-panel__note ds-settings-panel__note--danger mt-4">
+              現在オフラインです。インターネット接続を確認してから同期してください。
+            </div>
           ) : null}
         </SettingsSection>
 
         <SettingsSection
-          title="同期ポリシー"
-          description="自動同期の頻度と、ネットワーク利用条件を調整します。"
-          action={
-            <SettingsBadge tone="info">
-              {syncPrefs?.intervalMinutes ?? 5} 分ごと
-            </SettingsBadge>
-          }
+          title="自動同期"
+          description="バックグラウンド同期の間隔と、通信条件を調整します。"
         >
           <SettingsRow
-            title="自動同期"
-            description="ローカル変更を一定間隔でクラウドに反映します。"
-            leading={
-              <div className={SETTINGS_ICON_SURFACE_CLASS_NAME}>
-                <Cloud className="h-4 w-4" />
-              </div>
-            }
-            action={renderStatusSwitch(syncPrefs?.autoSync ?? true, (checked) =>
-              handleSyncSettingChange("autoSync", checked),
-            )}
-          />
-          <SettingsRow
-            title="Wi-Fi 接続時のみ同期"
-            description="モバイル通信中の自動同期を抑えたい場合に有効です。"
-            action={renderStatusSwitch(
-              syncPrefs?.wifiOnly ?? false,
-              (checked) => handleSyncSettingChange("wifiOnly", checked),
-            )}
-          />
-          <SettingsRow
-            title="自動同期の間隔"
-            description="バックグラウンドで差分を確認する頻度を選びます。"
+            title="同期間隔"
+            description="バッテリー消費を抑えたい場合は、間隔を長めにしてください。"
             action={
               <Select
-                value={String(syncPrefs?.intervalMinutes ?? 5)}
+                value={String(syncPrefs.intervalMinutes)}
                 onValueChange={(value) =>
-                  handleSyncSettingChange(
-                    "intervalMinutes",
-                    Number(value) as SyncSettings["intervalMinutes"],
-                  )
+                  void updateSyncPrefs({
+                    intervalMinutes: Number(
+                      value,
+                    ) as SyncSettings["intervalMinutes"],
+                  })
                 }
               >
-                <SelectTrigger className="w-full min-w-[180px] bg-white sm:w-[180px]">
-                  <SelectValue placeholder="同期間隔を選択" />
+                <SelectTrigger className="w-[160px] bg-white">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {syncIntervalOptions.map((minutes) => (
-                    <SelectItem key={minutes} value={String(minutes)}>
-                      {minutes} 分ごと
+                  {syncIntervalOptions.map((value) => (
+                    <SelectItem key={value} value={String(value)}>
+                      {value === 60 ? "1時間ごと" : `${value}分ごと`}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             }
           />
+          <SettingsRow
+            title="Wi-Fi 接続時のみ同期"
+            description="モバイルデータ通信量を抑えたいときに有効にします。"
+            action={renderStatusSwitch(
+              syncPrefs.wifiOnly,
+              (checked) => void updateSyncPrefs({ wifiOnly: checked }),
+            )}
+          />
         </SettingsSection>
 
         <SettingsSection
-          title="クラウド同期フォルダ"
-          description="ルートフォルダ単位でクラウド同期の対象を切り替えられます。"
-          action={
-            <SettingsBadge tone="neutral">
-              {syncEnabledFolderCount} / {rootFolders.length} 有効
-            </SettingsBadge>
-          }
+          title="フォルダごとの同期"
+          description="クラウドに保存するフォルダと、この端末のみに保持するフォルダを切り分けます。"
         >
-          {rootFolders.length <= 0 ? (
-            <SettingsEmptyState
-              title="ルートフォルダがありません。"
-              description="フォルダを作成すると、ここからクラウド同期の対象を選べます。"
-            />
-          ) : (
-            <div className="space-y-3">
-              {rootFolders.map((folder) => (
-                <SettingsRow
+          {rootFolders.length > 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-white">
+              {rootFolders.map((folder, index) => (
+                <div
                   key={folder.id}
-                  title={folder.folderName}
-                  description={
-                    folder.cloudSyncEnabled
-                      ? "このフォルダ配下のデータをクラウド同期に含めます。"
-                      : "このフォルダ配下はローカル専用として扱います。"
-                  }
-                  leading={
-                    <div className={SETTINGS_ICON_SURFACE_CLASS_NAME}>
-                      <Folder className="h-4 w-4" />
-                    </div>
-                  }
-                  action={renderStatusSwitch(
-                    folder.cloudSyncEnabled,
-                    (checked) =>
-                      void updateFolder(folder.id, {
-                        cloudSyncEnabled: checked,
-                      }),
+                  className={cn(
+                    index > 0 && "border-t border-slate-200",
+                    "px-4",
                   )}
-                />
+                >
+                  <SettingsRow
+                    title={folder.folderName}
+                    description={
+                      folder.cloudSyncEnabled
+                        ? "クラウド同期: 有効"
+                        : "このデバイスのみに保存"
+                    }
+                    leading={
+                      <Folder
+                        className={cn(
+                          "h-4 w-4",
+                          folder.cloudSyncEnabled
+                            ? "text-[var(--settings-accent)]"
+                            : "text-slate-400",
+                        )}
+                      />
+                    }
+                    action={renderStatusSwitch(
+                      folder.cloudSyncEnabled !== false,
+                      (checked) =>
+                        void updateFolder(folder.id || folder.folderId, {
+                          cloudSyncEnabled: checked,
+                        }),
+                    )}
+                  />
+                </div>
               ))}
             </div>
+          ) : (
+            <div className="ds-settings-panel__empty-state">
+              フォルダがまだありません。
+            </div>
           )}
+        </SettingsSection>
 
-          <SettingsNote tone="info">
-            フォルダ単位の切り替えはローカルデータを削除しません。同期対象から外したフォルダも端末内には残ります。
-          </SettingsNote>
+        <SettingsSection
+          title="クラウドアカウント"
+          description="ログイン状態を確認し、クラウド同期を有効にします。"
+        >
+          <SettingsRow
+            title={currentUser?.email ?? "ログインしていません"}
+            description={
+              currentUser
+                ? "このアカウントでクラウド同期が有効です。"
+                : "ログインすると端末間でデータを安全に同期できます。"
+            }
+            leading={
+              <Cloud
+                className={cn(
+                  "h-4 w-4",
+                  currentUser
+                    ? "text-[var(--settings-accent)]"
+                    : "text-slate-400",
+                )}
+              />
+            }
+            action={
+              currentUser ? (
+                <span className="ds-settings-panel__status-pill ds-settings-panel__status-pill--success">
+                  有効
+                </span>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  className="h-9 rounded-xl border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 shadow-none hover:bg-slate-50"
+                >
+                  ログイン / アカウント作成
+                </Button>
+              )
+            }
+          />
         </SettingsSection>
 
         <DeviceSyncSettings />
@@ -1040,132 +1034,56 @@ export const SettingsDialog = ({
     );
   };
 
-  const renderAccountCard = () => {
-    if (!currentUser) {
-      return (
-        <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="text-sm font-semibold text-slate-900">
-            Google アカウント
-          </div>
-          <div className="mt-1 text-sm leading-6 text-slate-500">
-            設定はログイン後に端末間で同期できます。
-          </div>
-          <Button
-            type="button"
-            className="mt-4 w-full rounded-2xl"
-            onClick={handleGoogleLogin}
-          >
-            Googleでログイン
-          </Button>
-        </div>
-      );
-    }
-
-    return (
-      <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          {hasResolvedProfileImage && resolvedProfileImageUrl ? (
-            <img
-              src={resolvedProfileImageUrl}
-              alt={footerDisplayName}
-              className="h-12 w-12 rounded-2xl object-cover"
-              onError={() => setImgError(true)}
-            />
-          ) : (
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded-2xl text-sm font-semibold"
-              style={{
-                backgroundColor: footerAvatarBg,
-                color: footerAvatarText,
-              }}
-            >
-              {getInitials(footerDisplayName)}
-            </div>
-          )}
-
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold text-slate-900">
-              {footerDisplayName}
-            </div>
-            <div className="mt-0.5 truncate text-xs text-slate-500">
-              {footerEmail}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 flex items-center gap-2">
-          <SettingsBadge tone={syncStatusMeta.tone}>
-            {syncStatusMeta.label}
-          </SettingsBadge>
-          <span className="text-xs text-slate-500">
-            最終同期 {formatLastSyncTime(lastSyncTime)}
-          </span>
-        </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          className="mt-4 w-full rounded-2xl"
-          onClick={() => void handleLogout()}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          ログアウト
-        </Button>
-      </div>
-    );
-  };
-
-  const renderTabContent = () => {
+  const renderContent = () => {
     switch (activeTab) {
       case "study":
         return renderStudyTab();
+      case "tags":
+        return <TagManagerPanel />;
       case "voice":
         return renderVoiceTab();
-      case "tags":
-        return renderTagsTab();
       case "shortcut":
         return renderShortcutTab();
       case "sync":
         return renderSyncTab();
       default:
-        return renderStudyTab();
+        return null;
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent
-        surface="plain"
-        accessibleTitle="設定"
-        accessibleDescription="設定項目をカテゴリ別に確認し、学習、音声、タグ、同期の各設定を管理します。"
-        className="!w-[min(1160px,calc(100vw-16px))] !max-w-none gap-0 overflow-hidden rounded-[32px] border border-slate-200 bg-slate-50 p-0 shadow-[0_32px_80px_rgba(15,23,42,0.18)]"
-        contentWrapperClassName="px-2 py-2 sm:px-4 sm:py-4"
-        closeButtonClassName="rounded-full border border-slate-200 bg-white/95 p-1.5 text-slate-500 shadow-sm hover:bg-white hover:text-slate-900"
+        surface="panel"
+        className="ds-settings-panel w-full max-w-none h-[100dvh] md:max-w-[1120px] md:w-full md:h-[82vh] md:max-h-[820px] p-0 gap-0 flex flex-col overflow-hidden data-[state=open]:duration-300 ring-0 outline-none rounded-none md:rounded-[24px]"
       >
-        <div className="flex h-[min(88vh,780px)] min-h-0 flex-col lg:flex-row">
-          <aside className="hidden w-[320px] shrink-0 border-r border-slate-200 bg-white lg:flex lg:flex-col">
-            <div className="border-b border-slate-100 px-6 py-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-3 py-1 text-[11px] font-semibold tracking-[0.12em] text-primary-700">
-                Workspace Settings
-              </div>
-              <div className="mt-4">
-                <div className="text-xl font-semibold tracking-tight text-slate-900">
-                  設定
-                </div>
-                <div className="mt-2 text-sm leading-6 text-slate-500">
-                  学習体験と同期まわりの既定値を、カテゴリごとにまとめて調整できます。
-                </div>
-              </div>
-            </div>
+        <DialogTitle className="sr-only">設定</DialogTitle>
+        <DialogDescription className="sr-only">
+          学習、同期、データ管理などの設定を行うダイアログです。
+        </DialogDescription>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5">
-              <nav className="space-y-5">
+        <div className="ds-settings-panel__shell flex flex-1 overflow-hidden">
+          <div
+            className={cn(
+              "ds-settings-panel__sidebar md:w-[260px] flex-shrink-0 flex flex-col border-r",
+              isMobileMenuOpen
+                ? "absolute inset-0 z-50 w-full"
+                : "hidden md:flex",
+            )}
+          >
+            <div className="flex-1 overflow-y-auto px-4 py-4 custom-scrollbar">
+              <div className="ds-settings-panel__nav">
                 {settingsSidebarSections.map((section) => (
-                  <div key={section.id} className="space-y-2">
-                    <div className="px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                  <section
+                    key={section.id}
+                    className="ds-settings-panel__nav-section"
+                    aria-label={section.label}
+                  >
+                    <div className="ds-settings-panel__nav-section-label">
                       {section.label}
                     </div>
-                    <div className="space-y-2">
+
+                    <div className="ds-settings-panel__nav-section-items">
                       {section.items.map((item) => (
                         <SettingsNavButton
                           key={item.id}
@@ -1175,84 +1093,123 @@ export const SettingsDialog = ({
                         />
                       ))}
                     </div>
-                  </div>
+                  </section>
                 ))}
-              </nav>
-            </div>
-
-            <div className="border-t border-slate-100 p-4">
-              {renderAccountCard()}
-            </div>
-          </aside>
-
-          <div className="flex min-h-0 flex-1 flex-col">
-            <div className="border-b border-slate-200 bg-white px-4 py-4 lg:hidden">
-              <div className="pr-12">
-                <div className="text-lg font-semibold tracking-tight text-slate-900">
-                  設定
-                </div>
-                <div className="mt-1 text-sm leading-6 text-slate-500">
-                  カテゴリを切り替えて各設定を調整できます。
-                </div>
               </div>
+            </div>
 
-              <div className="mt-4">
-                <Select
-                  value={activeTab}
-                  onValueChange={(value) =>
-                    handleSelectTab(value as SettingsTab)
+            <div className="ds-settings-panel__footer border-t px-4 py-4">
+              <div className="mb-3 flex items-center gap-3 rounded-xl px-2 py-1.5">
+                <div
+                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-xs font-bold text-white"
+                  style={
+                    hasResolvedProfileImage
+                      ? undefined
+                      : {
+                          backgroundColor: footerAvatarBg,
+                          color: footerAvatarText,
+                        }
                   }
                 >
-                  <SelectTrigger className="w-full bg-white">
-                    <SelectValue placeholder="カテゴリを選択" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sidebarItems.map((item) => (
-                      <SelectItem key={item.id} value={item.id}>
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  {hasResolvedProfileImage ? (
+                    <img
+                      src={resolvedProfileImageUrl ?? undefined}
+                      alt="User avatar"
+                      className="h-full w-full object-cover"
+                      onError={() => setImgError(true)}
+                    />
+                  ) : (
+                    getInitials(footerDisplayName)
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-xs font-semibold text-slate-800">
+                    {footerDisplayName}
+                  </div>
+                  <div className="truncate text-[11px] text-slate-500">
+                    {currentUser?.email ?? "未ログイン"}
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                variant="ghost"
+                className="h-9 w-full justify-start gap-2 rounded-xl px-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                onClick={() => {
+                  if (confirm("ログアウトしてもよろしいですか？")) {
+                    void handleLogout();
+                  }
+                }}
+              >
+                <LogOut className="h-4 w-4" />
+                ログアウト
+              </Button>
+            </div>
+          </div>
+
+          <div className="ds-settings-panel__content relative flex-1 overflow-x-hidden overflow-y-auto">
+            <div className="ds-settings-panel__mobile-header md:hidden sticky top-0 z-20 flex items-center justify-between border-b px-3 py-3">
+              <div>
+                <div className="text-base font-semibold text-slate-900">
+                  {activeItem.label}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+                  className="h-10 w-10 text-slate-600"
+                >
+                  {isMobileMenuOpen ? (
+                    <X className="h-5 w-5" />
+                  ) : (
+                    <BookOpen className="h-5 w-5" />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={closeDialog}
+                  className="h-10 w-10 text-slate-600"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-4 sm:px-6 sm:py-6">
-                <div className="rounded-[28px] border border-slate-200/80 bg-white px-5 py-5 shadow-sm">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex min-w-0 items-start gap-3">
-                      <div className={SETTINGS_ICON_SURFACE_CLASS_NAME}>
-                        <ActiveIcon className="h-4 w-4" />
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="text-xl font-semibold tracking-tight text-slate-900">
-                          {activeItem.label}
-                        </div>
-                        <div className="mt-2 text-sm leading-6 text-slate-500">
-                          {activeItem.description}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2">
-                      <SettingsBadge tone={syncStatusMeta.tone}>
-                        {syncStatusMeta.label}
-                      </SettingsBadge>
-                      {currentUser ? (
-                        <SettingsBadge tone="info">
-                          {footerDisplayName}
-                        </SettingsBadge>
-                      ) : null}
-                    </div>
-                  </div>
+            <div className="hidden md:flex ds-settings-panel__desktop-header sticky top-0 z-10 items-start justify-between border-b px-8 py-6">
+              <div className="min-w-0">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                  Settings
                 </div>
-
-                {renderTabContent()}
-
-                <div className="lg:hidden">{renderAccountCard()}</div>
+                <div className="mt-2 text-2xl font-semibold text-slate-900">
+                  {activeItem.label}
+                </div>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                  {activeItem.description}
+                </p>
               </div>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={closeDialog}
+                className="mt-1 h-10 w-10 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div
+              className={cn(
+                "w-full space-y-6 p-4 pb-[var(--ui-safe-area-bottom-padding)] md:px-8 md:py-6 lg:px-10 lg:py-8",
+                activeTab === "tags" && "space-y-4",
+              )}
+            >
+              {renderContent()}
             </div>
           </div>
         </div>
@@ -1260,3 +1217,5 @@ export const SettingsDialog = ({
     </Dialog>
   );
 };
+
+export default SettingsDialog;

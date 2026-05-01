@@ -1,0 +1,419 @@
+@layer components {
+  .ds-settings-panel {
+    --settings-shell-bg: #f7f8fa;
+    --settings-sidebar-bg: #f4f6f8;
+    --settings-content-bg: #ffffff;
+    --settings-border: #d9dee6;
+    --settings-border-strong: #c7d0dc;
+    --settings-text: #1f2937;
+    --settings-muted: #667085;
+    --settings-accent: var(--ds-semantic-color-action-primary);
+    --settings-accent-soft: color-mix(
+      in srgb,
+      var(--settings-accent) 12%,
+      white 88%
+    );
+    --settings-hover: #eef2f6;
+    --settings-active: #e6ebf2;
+    --settings-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+
+    color: var(--settings-text);
+  }
+
+  .ds-settings-panel__shell {
+    background: var(--settings-shell-bg);
+  }
+
+  .ds-settings-panel__sidebar {
+    background: var(--settings-sidebar-bg);
+    border-color: var(--settings-border);
+  }
+
+  .ds-settings-panel__content {
+    background: var(--settings-content-bg);
+  }
+
+  .ds-settings-panel__desktop-header,
+  .ds-settings-panel__mobile-header {
+    background: color-mix(
+      in srgb,
+      var(--settings-content-bg) 94%,
+      var(--settings-shell-bg) 6%
+    );
+    border-color: var(--settings-border);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .ds-settings-panel__nav {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .ds-settings-panel__nav-section {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .ds-settings-panel__nav-section-label {
+    padding-inline: 0.75rem;
+    color: #94a3b8;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .ds-settings-panel__nav-section-items {
+    display: grid;
+    gap: 0.125rem;
+  }
+
+  .ds-settings-panel .ds-settings-panel__nav-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 2.625rem;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid transparent;
+    border-radius: 0.875rem;
+    background: transparent;
+    color: var(--settings-muted);
+    box-shadow: none;
+    text-align: left;
+  }
+
+  .ds-settings-panel .ds-settings-panel__nav-item:hover {
+    background: var(--settings-hover);
+    color: var(--settings-text);
+  }
+
+  .ds-settings-panel .ds-settings-panel__nav-item:focus-visible {
+    outline: none;
+    border-color: color-mix(in srgb, var(--settings-accent) 48%, white 52%);
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--settings-accent) 16%, transparent);
+  }
+
+  .ds-settings-panel .ds-settings-panel__nav-item.ds-nav-action--active {
+    background: var(--settings-active);
+    color: var(--settings-text);
+    border-color: var(--settings-border-strong);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  }
+
+  .ds-settings-panel .ds-settings-panel__nav-item .ds-nav-action__icon {
+    opacity: 0.84;
+  }
+
+  .ds-settings-panel
+    .ds-settings-panel__nav-item.ds-nav-action--active
+    .ds-nav-action__icon,
+  .ds-settings-panel .ds-settings-panel__nav-item:hover .ds-nav-action__icon {
+    opacity: 1;
+  }
+
+  .ds-settings-panel__nav-label {
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .ds-settings-panel__footer {
+    border-color: var(--settings-border);
+  }
+
+  .ds-settings-panel__section {
+    border: 1px solid var(--settings-border);
+    border-radius: 1.125rem;
+    background: #ffffff;
+    padding: 1rem 1.125rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  }
+
+  .ds-settings-panel__section-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .ds-settings-panel__section-title {
+    color: var(--settings-text);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+  }
+
+  .ds-settings-panel__section-description {
+    margin-top: 0.25rem;
+    color: var(--settings-muted);
+    font-size: 0.78rem;
+    line-height: 1.65;
+  }
+
+  .ds-settings-panel__row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding-block: 0.9rem;
+  }
+
+  .ds-settings-panel__row + .ds-settings-panel__row {
+    border-top: 1px solid
+      color-mix(in srgb, var(--settings-border) 82%, transparent);
+  }
+
+  .ds-settings-panel__row-leading {
+    flex-shrink: 0;
+    color: var(--settings-muted);
+  }
+
+  .ds-settings-panel__row-copy {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .ds-settings-panel__row-title {
+    color: var(--settings-text);
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  .ds-settings-panel__row-description {
+    margin-top: 0.25rem;
+    color: var(--settings-muted);
+    font-size: 0.74rem;
+    line-height: 1.65;
+  }
+
+  .ds-settings-panel__row-action {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .ds-settings-panel__status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    height: 1.6rem;
+    padding-inline: 0.625rem;
+    border-radius: 999px;
+    background: var(--settings-accent-soft);
+    color: var(--settings-accent);
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .ds-settings-panel__status-pill--off {
+    background: #eef1f5;
+    color: #667085;
+  }
+
+  .ds-settings-panel__status-pill--success {
+    background: #eaf7ef;
+    color: #0f8a4b;
+  }
+
+  .ds-settings-panel__status-pill--info {
+    background: #ebf4ff;
+    color: #1d4ed8;
+  }
+
+  .ds-settings-panel__status-pill--danger {
+    background: #fff1f2;
+    color: #c2414c;
+  }
+
+  .ds-settings-panel__choice-grid {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .ds-settings-panel__choice-card {
+    width: 100%;
+    border: 1px solid var(--settings-border);
+    border-radius: 1rem;
+    background: #ffffff;
+    padding: 0.95rem 1rem;
+    text-align: left;
+    transition:
+      border-color 150ms ease,
+      background-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .ds-settings-panel__choice-card:hover {
+    border-color: var(--settings-border-strong);
+    background: #fafbfd;
+  }
+
+  .ds-settings-panel__choice-card--active {
+    border-color: color-mix(in srgb, var(--settings-accent) 48%, white 52%);
+    background: var(--settings-accent-soft);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  }
+
+  .ds-settings-panel__choice-card--disabled {
+    opacity: 0.9;
+    cursor: default;
+  }
+
+  .ds-settings-panel__segmented {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border: 1px solid var(--settings-border);
+    border-radius: 0.875rem;
+    background: #f8fafc;
+  }
+
+  .ds-settings-panel__segmented-button {
+    min-width: 3.75rem;
+    height: 2rem;
+    padding-inline: 0.75rem;
+    border-radius: 0.7rem;
+    color: var(--settings-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .ds-settings-panel__segmented-button:hover {
+    color: var(--settings-text);
+  }
+
+  .ds-settings-panel__segmented-button--active {
+    background: #ffffff;
+    color: var(--settings-text);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  }
+
+  .ds-settings-panel__shortcut-table {
+    overflow: hidden;
+    border: 1px solid var(--settings-border);
+    border-radius: 1rem;
+    background: #ffffff;
+  }
+
+  .ds-settings-panel__shortcut-row {
+    display: grid;
+    grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    align-items: center;
+  }
+
+  .ds-settings-panel__shortcut-row + .ds-settings-panel__shortcut-row {
+    border-top: 1px solid
+      color-mix(in srgb, var(--settings-border) 80%, transparent);
+  }
+
+  .ds-settings-panel__keycap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 1.75rem;
+    min-width: 2rem;
+    padding-inline: 0.55rem;
+    border: 1px solid var(--settings-border);
+    border-radius: 0.65rem;
+    background: #f8fafc;
+    color: var(--settings-text);
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .ds-settings-panel__note {
+    border: 1px solid var(--settings-border);
+    border-radius: 1rem;
+    background: #f8fafc;
+    padding: 0.9rem 1rem;
+    color: var(--settings-muted);
+    font-size: 0.75rem;
+    line-height: 1.7;
+  }
+
+  .ds-settings-panel__note--info {
+    border-color: #cfe0ff;
+    background: #f5f9ff;
+    color: #36506c;
+  }
+
+  .ds-settings-panel__note--danger {
+    border-color: #ffd7db;
+    background: #fff6f7;
+    color: #8b3a3a;
+  }
+
+  .ds-settings-panel__empty-state {
+    border: 1px dashed var(--settings-border);
+    border-radius: 1rem;
+    background: #fafbfd;
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--settings-muted);
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+
+  .ds-settings-panel__meter {
+    height: 0.55rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e9edf2;
+  }
+
+  .ds-settings-panel__meter-bar {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--settings-accent);
+    transition: width 180ms ease;
+  }
+
+  @media (max-width: 767px) {
+    .ds-settings-panel__nav {
+      gap: 0.85rem;
+    }
+
+    .ds-settings-panel__section {
+      padding: 0.95rem 1rem;
+      border-radius: 1rem;
+    }
+
+    .ds-settings-panel__section-head {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ds-settings-panel__row {
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .ds-settings-panel__row-action {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .ds-settings-panel__shortcut-row {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+    }
+  }
+}
