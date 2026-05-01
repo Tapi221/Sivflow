@@ -23,6 +23,14 @@ const LIBRARY_TYPE_LABELS = {
   notes: "ノート",
 } as const;
 
+const buildLibraryTypeRoute = (libraryType: string) => {
+  const searchParams = new URLSearchParams();
+  searchParams.set("view", "section-list");
+  searchParams.set("libraryType", libraryType);
+
+  return `/folders?${searchParams.toString()}`;
+};
+
 const resolveActiveCrumbs = ({
   activeTab,
   extraCrumbs,
@@ -53,11 +61,31 @@ const resolveActiveCrumbs = ({
       ? LIBRARY_TYPE_LABELS[libraryType as keyof typeof LIBRARY_TYPE_LABELS]
       : null;
 
-  if (libraryTypeLabel) {
+  if (libraryTypeLabel && libraryType) {
+    const libraryTypeCrumb: BreadcrumbCrumb = {
+      label: libraryTypeLabel,
+      to: buildLibraryTypeRoute(libraryType),
+    };
+
+    if (
+      activeTab.kind === "document" ||
+      activeTab.kind === "cardSet" ||
+      activeTab.kind === "card"
+    ) {
+      return [
+        baseCrumb,
+        libraryTypeCrumb,
+        {
+          label: activeTab.title,
+          to: undefined,
+        },
+      ];
+    }
+
     return [
       baseCrumb,
       {
-        label: libraryTypeLabel,
+        ...libraryTypeCrumb,
         to: undefined,
       },
     ];

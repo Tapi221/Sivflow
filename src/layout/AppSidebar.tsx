@@ -268,10 +268,10 @@ const AppSidebarNavLink = ({
       disabled={isDisabled}
       aria-disabled={isDisabled ? true : undefined}
       className={cn(
-                "app-sidebar__nav-link",
+        "app-sidebar__nav-link",
         nested && "app-sidebar__nav-link--nested",
         isActive && "is-active",
-        isDisabled && "cursor-default opacity-60",
+        isDisabled && "app-sidebar__nav-link--disabled",
       )}
       aria-current={isActive ? "page" : undefined}
       aria-expanded={ariaExpanded}
