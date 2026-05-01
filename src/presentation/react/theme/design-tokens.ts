@@ -243,7 +243,9 @@ export const designTokens = {
       },
       "interactive": {
         "selectedSubtle": "#e6ebe3",
-        "selectedAccent": "#6a876e"
+        "selectedAccent": "#6a876e",
+        "columnSelectedSubtle": "rgba(106, 135, 110, 0.16)",
+        "columnSelectedAccent": "#4f6b54"
       },
       "status": {
         "danger": "#e11d48",
