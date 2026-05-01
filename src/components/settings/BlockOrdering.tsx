@@ -15,6 +15,11 @@ import {
 import { createPortal } from "react-dom";
 
 import { SettingsSection } from "@/components/settings/SettingsSection";
+import {
+  SETTINGS_ICON_SURFACE_CLASS_NAME,
+  SettingsBadge,
+  SettingsNote,
+} from "@/components/settings/settingsUi";
 import { Switch } from "@/components/ui/switch";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import {
@@ -138,9 +143,9 @@ export const BlockOrdering = () => {
       title="エディタブロック"
       description="カードエディタで表示するブロック候補の順序と、表示 / 非表示を整理します。"
       action={
-        <span className="ds-settings-panel__status-pill ds-settings-panel__status-pill--off">
+        <SettingsBadge tone="neutral">
           {visibleCount} / {blocks.length} 表示
-        </span>
+        </SettingsBadge>
       }
     >
       <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -149,7 +154,7 @@ export const BlockOrdering = () => {
             <div
               {...droppableProvided.droppableProps}
               ref={droppableProvided.innerRef}
-              className="space-y-2"
+              className="space-y-3"
             >
               {blocks.map((block, index) => {
                 const Icon = BLOCK_ICONS[block.type];
@@ -181,10 +186,11 @@ export const BlockOrdering = () => {
                           }}
                           {...draggableProvided.draggableProps}
                           className={cn(
-                            "rounded-2xl border border-slate-200 bg-white px-4 py-3 transition-shadow",
-                            !snapshot.isDragging && "hover:shadow-sm",
+                            "rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition-all",
+                            !snapshot.isDragging &&
+                              "hover:border-slate-300 hover:shadow-md",
                             snapshot.isDragging &&
-                              "border-[var(--settings-accent)] shadow-lg",
+                              "border-primary-300 shadow-[0_18px_44px_rgba(15,23,42,0.18)]",
                           )}
                           style={draggableStyle}
                         >
@@ -193,14 +199,14 @@ export const BlockOrdering = () => {
                               type="button"
                               aria-label={`${block.label} を並び替え`}
                               {...draggableProvided.dragHandleProps}
-                              className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 active:cursor-grabbing"
+                              className="rounded-xl border border-transparent p-2 text-slate-400 transition-colors hover:border-slate-200 hover:bg-slate-50 hover:text-slate-700 active:cursor-grabbing"
                             >
                               <GripVertical className="h-4 w-4 cursor-grab" />
                             </button>
 
                             <div
                               className={cn(
-                                "flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500",
+                                SETTINGS_ICON_SURFACE_CLASS_NAME,
                                 !block.isVisible && "opacity-60",
                               )}
                             >
@@ -210,28 +216,23 @@ export const BlockOrdering = () => {
                             <div className="min-w-0 flex-1">
                               <div
                                 className={cn(
-                                  "text-sm font-semibold text-slate-800",
+                                  "text-sm font-semibold text-slate-900",
                                   !block.isVisible && "text-slate-500",
                                 )}
                               >
                                 {block.label}
                               </div>
-                              <div className="mt-0.5 text-xs text-slate-500">
+                              <div className="mt-1 text-xs text-slate-500">
                                 新規カード作成時の候補順 {index + 1}
                               </div>
                             </div>
 
                             <div className="flex items-center gap-3">
-                              <span
-                                className={cn(
-                                  "ds-settings-panel__status-pill",
-                                  block.isVisible
-                                    ? "ds-settings-panel__status-pill--success"
-                                    : "ds-settings-panel__status-pill--off",
-                                )}
+                              <SettingsBadge
+                                tone={block.isVisible ? "success" : "neutral"}
                               >
                                 {block.isVisible ? "表示" : "非表示"}
-                              </span>
+                              </SettingsBadge>
                               <Switch
                                 checked={block.isVisible}
                                 onCheckedChange={(checked) =>
@@ -262,9 +263,9 @@ export const BlockOrdering = () => {
         </Droppable>
       </DragDropContext>
 
-      <div className="ds-settings-panel__note ds-settings-panel__note--info mt-4">
+      <SettingsNote tone="info">
         ドラッグで順序を変更できます。非表示にしたブロックは候補一覧から外れますが、既存カードの内容は消えません。
-      </div>
+      </SettingsNote>
     </SettingsSection>
   );
 };

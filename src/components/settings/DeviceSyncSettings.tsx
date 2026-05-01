@@ -5,6 +5,13 @@ import { ja } from "date-fns/locale";
 
 import { SettingsRow } from "@/components/settings/SettingsRow";
 import { SettingsSection } from "@/components/settings/SettingsSection";
+import {
+  SETTINGS_ICON_SURFACE_CLASS_NAME,
+  SettingsBadge,
+  SettingsEmptyState,
+  SettingsNote,
+  type SettingsTone,
+} from "@/components/settings/settingsUi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -61,24 +68,26 @@ const formatSize = (bytes: number) => {
   return `${parseFloat((bytes / Math.pow(kilo, unitIndex)).toFixed(2))} ${units[unitIndex]}`;
 };
 
-const getDeviceStatusMeta = (device: DeviceRecord) => {
+const getDeviceStatusMeta = (
+  device: DeviceRecord,
+): { label: string; tone: SettingsTone } => {
   if (device.status === "revoked") {
     return {
       label: "解除済み",
-      toneClassName: "ds-settings-panel__status-pill--off",
+      tone: "neutral",
     };
   }
 
   if (device.isActive) {
     return {
       label: "有効",
-      toneClassName: "ds-settings-panel__status-pill--success",
+      tone: "success",
     };
   }
 
   return {
     label: "停止中",
-    toneClassName: "ds-settings-panel__status-pill--off",
+    tone: "neutral",
   };
 };
 
@@ -252,16 +261,15 @@ export const DeviceSyncSettings = () => {
           description="シークレットモードや古い端末の残骸を自動的に片付けます。"
           action={
             <div className="flex items-center gap-3">
-              <span
-                className={cn(
-                  "ds-settings-panel__status-pill",
+              <SettingsBadge
+                tone={
                   (syncSettings?.autoCleanupDevices ?? true)
-                    ? "ds-settings-panel__status-pill--success"
-                    : "ds-settings-panel__status-pill--off",
-                )}
+                    ? "success"
+                    : "neutral"
+                }
               >
                 {(syncSettings?.autoCleanupDevices ?? true) ? "ON" : "OFF"}
-              </span>
+              </SettingsBadge>
               <Switch
                 checked={syncSettings?.autoCleanupDevices ?? true}
                 onCheckedChange={(checked) =>
@@ -272,13 +280,13 @@ export const DeviceSyncSettings = () => {
           }
         />
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Button
             type="button"
             variant="outline"
             onClick={() => void handleCleanup()}
             disabled={cleaning}
-            className="rounded-xl"
+            className="rounded-2xl"
           >
             <Trash2
               className={cn("mr-2 h-4 w-4", cleaning && "animate-pulse")}
@@ -287,9 +295,7 @@ export const DeviceSyncSettings = () => {
           </Button>
 
           {cleanupMessage ? (
-            <span className="text-xs font-semibold text-emerald-600">
-              {cleanupMessage}
-            </span>
+            <SettingsBadge tone="success">{cleanupMessage}</SettingsBadge>
           ) : null}
         </div>
       </SettingsSection>
@@ -305,7 +311,7 @@ export const DeviceSyncSettings = () => {
               variant="outline"
               onClick={() => void refreshStorageStats()}
               disabled={storageStatsLoading || storageStatsRebuilding}
-              className="rounded-xl"
+              className="rounded-2xl"
             >
               <RefreshCw
                 className={cn(
@@ -318,9 +324,7 @@ export const DeviceSyncSettings = () => {
             </Button>
 
             {storageStatsError ? (
-              <span className="text-xs font-semibold text-rose-600">
-                {storageStatsError}
-              </span>
+              <SettingsBadge tone="danger">{storageStatsError}</SettingsBadge>
             ) : null}
           </div>
 
@@ -331,7 +335,7 @@ export const DeviceSyncSettings = () => {
           ) : (
             <>
               <div className="flex flex-wrap items-end justify-between gap-3">
-                <div className="text-sm font-semibold text-slate-800">
+                <div className="text-sm font-semibold text-slate-900">
                   {formatSize(totalUsed)} / {formatSize(maxQuota)}
                 </div>
                 <div
@@ -344,28 +348,31 @@ export const DeviceSyncSettings = () => {
                 </div>
               </div>
 
-              <div className="ds-settings-panel__meter">
+              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
                 <div
-                  className="ds-settings-panel__meter-bar"
+                  className={cn(
+                    "h-full rounded-full transition-[width]",
+                    quotaPercent >= 90 ? "bg-rose-500" : "bg-primary-500",
+                  )}
                   style={{ width: `${quotaPercent}%` }}
                 />
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
-                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3">
                   <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
                     同期済み画像
                   </div>
-                  <div className="mt-2 text-sm font-semibold text-slate-800">
+                  <div className="mt-2 text-sm font-semibold text-slate-900">
                     {formattedSyncedImageCount}
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3">
                   <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
                     最終集計
                   </div>
-                  <div className="mt-2 text-sm font-semibold text-slate-800">
+                  <div className="mt-2 text-sm font-semibold text-slate-900">
                     {formatDate(storageStatsUpdatedAt, "未集計")}
                   </div>
                 </div>
@@ -383,7 +390,7 @@ export const DeviceSyncSettings = () => {
             type="button"
             variant="outline"
             onClick={() => void fetchDevices()}
-            className="rounded-xl"
+            className="rounded-2xl"
           >
             <RefreshCw className="mr-2 h-4 w-4" />
             一覧を更新
@@ -395,9 +402,10 @@ export const DeviceSyncSettings = () => {
             <RefreshCw className="h-5 w-5 animate-spin text-slate-400" />
           </div>
         ) : devices.length <= 0 ? (
-          <div className="ds-settings-panel__empty-state">
-            同期されているデバイスはありません。
-          </div>
+          <SettingsEmptyState
+            title="同期されているデバイスはありません。"
+            description="このアカウントで同期を開始すると、ここに端末一覧が表示されます。"
+          />
         ) : (
           <div className="space-y-3">
             {devices.map((device) => {
@@ -411,16 +419,16 @@ export const DeviceSyncSettings = () => {
                 <div
                   key={device.deviceId}
                   className={cn(
-                    "rounded-2xl border border-slate-200 bg-white p-4",
+                    "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm",
                     isCurrentDevice &&
-                      "border-[var(--settings-accent)] shadow-sm",
+                      "border-primary-300 ring-1 ring-primary-200/60",
                   )}
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="flex min-w-0 gap-3">
                       <div
                         className={cn(
-                          "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500",
+                          SETTINGS_ICON_SURFACE_CLASS_NAME,
                           device.status !== "revoked" && "text-slate-700",
                         )}
                       >
@@ -445,7 +453,7 @@ export const DeviceSyncSettings = () => {
                                 }
                               }}
                               title="デバイス名"
-                              className="h-9 min-w-[220px] max-w-[320px]"
+                              className="h-9 min-w-[220px] max-w-[320px] bg-white"
                             />
                             <Button
                               type="button"
@@ -453,7 +461,7 @@ export const DeviceSyncSettings = () => {
                               onClick={() =>
                                 void handleUpdateName(device.deviceId)
                               }
-                              className="rounded-lg"
+                              className="rounded-xl"
                             >
                               <Check className="mr-1 h-4 w-4" />
                               保存
@@ -463,7 +471,7 @@ export const DeviceSyncSettings = () => {
                               size="sm"
                               variant="ghost"
                               onClick={() => setEditingId(null)}
-                              className="rounded-lg"
+                              className="rounded-xl"
                             >
                               <X className="mr-1 h-4 w-4" />
                               キャンセル
@@ -473,7 +481,7 @@ export const DeviceSyncSettings = () => {
                           <div className="flex flex-wrap items-center gap-2">
                             <div
                               className={cn(
-                                "min-w-0 text-sm font-semibold text-slate-800",
+                                "min-w-0 text-sm font-semibold text-slate-900",
                                 device.status === "revoked" &&
                                   "text-slate-500 line-through",
                               )}
@@ -482,19 +490,14 @@ export const DeviceSyncSettings = () => {
                             </div>
 
                             {isCurrentDevice ? (
-                              <span className="ds-settings-panel__status-pill ds-settings-panel__status-pill--info">
+                              <SettingsBadge tone="info">
                                 この端末
-                              </span>
+                              </SettingsBadge>
                             ) : null}
 
-                            <span
-                              className={cn(
-                                "ds-settings-panel__status-pill",
-                                statusMeta.toneClassName,
-                              )}
-                            >
+                            <SettingsBadge tone={statusMeta.tone}>
                               {statusMeta.label}
-                            </span>
+                            </SettingsBadge>
                           </div>
                         )}
 
@@ -510,7 +513,7 @@ export const DeviceSyncSettings = () => {
                           <button
                             type="button"
                             onClick={() => startEditing(device)}
-                            className="rounded-lg border border-slate-200 p-2 text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
+                            className="rounded-xl border border-slate-200 p-2 text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
                             aria-label={`${device.deviceName} の名前を編集`}
                           >
                             <Pencil className="h-4 w-4" />
@@ -524,7 +527,7 @@ export const DeviceSyncSettings = () => {
                             onClick={() =>
                               void handleDisconnect(device.deviceId)
                             }
-                            className="rounded-lg border border-slate-200 p-2 text-slate-500 transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
+                            className="rounded-xl border border-slate-200 p-2 text-slate-500 transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
                             aria-label={`${device.deviceName} の同期を解除`}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -534,7 +537,7 @@ export const DeviceSyncSettings = () => {
                     ) : null}
                   </div>
 
-                  <div className="mt-4 grid gap-3 border-t border-slate-200 pt-4 md:grid-cols-2">
+                  <div className="mt-4 grid gap-3 border-t border-slate-100 pt-4 md:grid-cols-2">
                     <div>
                       <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                         最終同期
@@ -560,9 +563,9 @@ export const DeviceSyncSettings = () => {
         )}
       </SettingsSection>
 
-      <div className="ds-settings-panel__note ds-settings-panel__note--info">
+      <SettingsNote tone="info">
         複数端末で同時に学習できます。不要な端末を解除しても、ほかの端末やクラウド上のデータは消えません。
-      </div>
+      </SettingsNote>
     </div>
   );
 };
