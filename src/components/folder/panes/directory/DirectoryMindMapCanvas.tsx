@@ -61,14 +61,16 @@ const DirectoryMindMapChip = ({
       ) : null}
 
       {badgeVisibility.tags && chip.showTags
-        ? chip.tags.slice(0, 2).map((tag) => (
-            <TagBadge
-              key={`${chip.id}:${tag}`}
-              label={tag}
-              colorKey={getTagColor(tag)}
-              className="shrink-0 align-middle"
-            />
-          ))
+        ? chip.tags
+            .slice(0, 2)
+            .map((tag) => (
+              <TagBadge
+                key={`${chip.id}:${tag}`}
+                label={tag}
+                colorKey={getTagColor(tag)}
+                className="shrink-0 align-middle"
+              />
+            ))
         : null}
 
       {badgeVisibility.tags && chip.showTags && chip.tags.length > 2 ? (

@@ -106,8 +106,7 @@ const DEFAULT_COLUMNS: DashboardColumn[] = [
   },
 ];
 
-const cardClassName =
-  "rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-4";
+const cardClassName = "rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-4";
 const breadcrumbActionIconClassName =
   "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]";
 
@@ -160,11 +159,7 @@ const loadStoredColumns = (): DashboardColumn[] => {
 
       return {
         ...column,
-        width: clampColumnWidth(
-          storedWidth,
-          column.minWidth,
-          column.maxWidth,
-        ),
+        width: clampColumnWidth(storedWidth, column.minWidth, column.maxWidth),
       };
     });
   } catch {
@@ -979,9 +974,7 @@ const PdfLibraryDashboard = ({
                               }}
                               onClick={() =>
                                 setSelectedColumnId((currentValue) =>
-                                  currentValue === column.id
-                                    ? null
-                                    : column.id,
+                                  currentValue === column.id ? null : column.id,
                                 )
                               }
                             >
@@ -1039,13 +1032,15 @@ const PdfLibraryDashboard = ({
 
                             <div className="flex min-w-0 items-center gap-2 overflow-hidden">
                               {row.tags.length > 0 ? (
-                                row.tags.slice(0, 2).map((tag) => (
-                                  <TagChip
-                                    key={`${row.id}:${tag}`}
-                                    label={tag}
-                                    colorClass={getTagColor(tag)}
-                                  />
-                                ))
+                                row.tags
+                                  .slice(0, 2)
+                                  .map((tag) => (
+                                    <TagChip
+                                      key={`${row.id}:${tag}`}
+                                      label={tag}
+                                      colorClass={getTagColor(tag)}
+                                    />
+                                  ))
                               ) : (
                                 <span className="truncate text-[13px] leading-[17px] text-[#93a09a]">
                                   タグなし
