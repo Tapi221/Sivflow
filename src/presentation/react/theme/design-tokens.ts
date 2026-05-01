@@ -98,7 +98,6 @@ export const designTokens = {
   "spacing": {
     "0": 0,
     "1": 4,
-    "1_8": 7.2,
     "2": 8,
     "3": 12,
     "4": 16,
@@ -108,7 +107,8 @@ export const designTokens = {
     "10": 40,
     "12": 48,
     "16": 64,
-    "20": 80
+    "20": 80,
+    "1_8": 7.2
   },
   "radius": {
     "sm": 8,
@@ -240,6 +240,10 @@ export const designTokens = {
         "primaryHover": "#6d7d48",
         "primarySoft": "#edf0df",
         "accent": "#96a867"
+      },
+      "interactive": {
+        "selectedSubtle": "#e6ebe3",
+        "selectedAccent": "#6a876e"
       },
       "status": {
         "danger": "#e11d48",

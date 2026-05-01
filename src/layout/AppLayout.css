@@ -50,12 +50,12 @@
 .app-right-sidebar {
   --app-sidebar-bg: #f6f6f6;
   --app-sidebar-hover-bg: rgba(0, 0, 0, 0.04);
-  --app-sidebar-active-bg: #e6ebe3;
+  --app-sidebar-active-bg: var(--ds-semantic-color-interactive-selected-subtle);
   --app-sidebar-text: #5b5b5b;
   --app-sidebar-text-strong: #000000;
   --app-sidebar-text-muted: #7c7c7c;
   --app-sidebar-icon: #ababab;
-  --app-sidebar-icon-active: #6a876e;
+  --app-sidebar-icon-active: var(--ds-semantic-color-interactive-selected-accent);
   --app-sidebar-focus-ring: rgba(105, 76, 255, 0.22);
 }
 

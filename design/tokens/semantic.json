@@ -25,6 +25,10 @@
       "primarySoft": "{color.primary.100}",
       "accent": "{color.primary.500}"
     },
+    "interactive": {
+      "selectedSubtle": "#e6ebe3",
+      "selectedAccent": "#6a876e"
+    },
     "status": {
       "danger": "{color.status.danger}",
       "warning": "{color.status.warning}",
