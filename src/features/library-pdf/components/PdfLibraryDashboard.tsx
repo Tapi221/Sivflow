@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { TagChip } from "@/components/tag/TagChip";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+import { TagChip } from "@/components/tag/TagChip";
 import { useSetBreadcrumbAction } from "@/contexts/BreadcrumbContext";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
@@ -35,10 +35,148 @@ type ViewerStateWithLastOpenedAt = NonNullable<DocumentItem["viewerState"]> & {
   lastOpenedAt?: unknown;
 };
 
+type ColumnId =
+  | "name"
+  | "tags"
+  | "page"
+  | "lastViewed"
+  | "updatedAt"
+  | "actions";
+
+type DashboardColumn = {
+  id: ColumnId;
+  label: string;
+  width: number;
+  minWidth: number;
+  maxWidth?: number;
+  resizable: boolean;
+  align?: "left" | "center" | "right";
+};
+
 const PAGE_SIZE = 10;
+const COLUMN_STORAGE_KEY = "pdf-library-dashboard:column-widths:v1";
+const COLUMN_GAP_PX = 16;
+
+const DEFAULT_COLUMNS: DashboardColumn[] = [
+  {
+    id: "name",
+    label: "名前",
+    width: 420,
+    minWidth: 260,
+    resizable: true,
+  },
+  {
+    id: "tags",
+    label: "タグ",
+    width: 240,
+    minWidth: 160,
+    resizable: true,
+  },
+  {
+    id: "page",
+    label: "ページ",
+    width: 88,
+    minWidth: 72,
+    maxWidth: 140,
+    resizable: true,
+    align: "right",
+  },
+  {
+    id: "lastViewed",
+    label: "最終閲覧",
+    width: 168,
+    minWidth: 140,
+    maxWidth: 260,
+    resizable: true,
+  },
+  {
+    id: "updatedAt",
+    label: "更新日時",
+    width: 168,
+    minWidth: 140,
+    maxWidth: 260,
+    resizable: true,
+  },
+  {
+    id: "actions",
+    label: "…",
+    width: 32,
+    minWidth: 32,
+    maxWidth: 32,
+    resizable: false,
+    align: "center",
+  },
+];
+
+const cardClassName =
+  "rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-4";
+const breadcrumbActionIconClassName =
+  "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]";
 
 const toDate = (value: unknown): Date | null => {
   return normalizeDate(value);
+};
+
+const clampColumnWidth = (
+  width: number,
+  minWidth: number,
+  maxWidth?: number,
+): number => {
+  if (!Number.isFinite(width)) {
+    return minWidth;
+  }
+
+  if (typeof maxWidth === "number") {
+    return Math.min(Math.max(width, minWidth), maxWidth);
+  }
+
+  return Math.max(width, minWidth);
+};
+
+const loadStoredColumns = (): DashboardColumn[] => {
+  if (typeof window === "undefined") {
+    return DEFAULT_COLUMNS;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(COLUMN_STORAGE_KEY);
+
+    if (!raw) {
+      return DEFAULT_COLUMNS;
+    }
+
+    const parsed = JSON.parse(raw) as Partial<Record<ColumnId, number>>;
+
+    return DEFAULT_COLUMNS.map((column) => {
+      const storedWidth = parsed[column.id];
+
+      if (typeof storedWidth !== "number") {
+        return column;
+      }
+
+      return {
+        ...column,
+        width: clampColumnWidth(
+          storedWidth,
+          column.minWidth,
+          column.maxWidth,
+        ),
+      };
+    });
+  } catch {
+    return DEFAULT_COLUMNS;
+  }
+};
+
+const buildGridTemplateColumns = (columns: DashboardColumn[]): string => {
+  return columns.map((column) => `${column.width}px`).join(" ");
+};
+
+const buildGridMinWidth = (columns: DashboardColumn[]): number => {
+  const widthTotal = columns.reduce((sum, column) => sum + column.width, 0);
+  const gapTotal = Math.max(columns.length - 1, 0) * COLUMN_GAP_PX;
+
+  return widthTotal + gapTotal;
 };
 
 const resolveFolderName = (folder: Folder | undefined): string => {
@@ -105,6 +243,7 @@ const buildFolderPath = (
 
   while (currentFolderId && !visited.has(currentFolderId)) {
     const folder = folderById.get(currentFolderId);
+
     if (!folder) {
       break;
     }
@@ -149,10 +288,6 @@ const resolveDisplayTags = (
 
   return Array.from(new Set(fallbackTags)).slice(0, 3);
 };
-
-const cardClassName = "rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-4";
-const breadcrumbActionIconClassName =
-  "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]";
 
 const BreadcrumbActionSettingsIcon = () => {
   return (
@@ -296,19 +431,38 @@ const PdfLibraryDashboard = ({
 }: PdfLibraryDashboardProps) => {
   const { tagById, getTagColor } = useTags();
   const setBreadcrumbAction = useSetBreadcrumbAction();
-  const [unusedExpandedFolders, setUnusedExpandedFolders] = useState<
-    Set<string>
-  >(new Set());
+  const [, setExpandedFolders] = useState<Set<string>>(new Set());
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
   );
   const [pageIndex, setPageIndex] = useState(0);
-
-  void unusedExpandedFolders;
+  const [columns, setColumns] = useState<DashboardColumn[]>(() =>
+    loadStoredColumns(),
+  );
+  const resizeCleanupRef = useRef<(() => void) | null>(null);
 
   const folderById = useMemo(() => {
     return new Map(folders.map((folder) => [folder.id, folder]));
   }, [folders]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const widthMap = Object.fromEntries(
+      columns.map((column) => [column.id, column.width]),
+    );
+
+    window.localStorage.setItem(COLUMN_STORAGE_KEY, JSON.stringify(widthMap));
+  }, [columns]);
+
+  useEffect(() => {
+    return () => {
+      resizeCleanupRef.current?.();
+      resizeCleanupRef.current = null;
+    };
+  }, []);
 
   const rows = useMemo<PdfDashboardRow[]>(() => {
     return documents
@@ -396,6 +550,7 @@ const PdfLibraryDashboard = ({
     const selectedIndex = rows.findIndex(
       (row) => row.id === selectedDocumentId,
     );
+
     if (selectedIndex === -1) {
       return;
     }
@@ -444,7 +599,7 @@ const PdfLibraryDashboard = ({
   } = useFolderDocumentUpload({
     actionFolderId: importTargetFolderId,
     getNextOrderIndex,
-    setExpandedFolders: setUnusedExpandedFolders,
+    setExpandedFolders,
   });
 
   const breadcrumbAction = useMemo(
@@ -516,6 +671,94 @@ const PdfLibraryDashboard = ({
 
   const visibleStart = rows.length === 0 ? 0 : pageIndex * PAGE_SIZE + 1;
   const visibleEnd = Math.min(rows.length, (pageIndex + 1) * PAGE_SIZE);
+  const gridTemplateColumns = useMemo(() => {
+    return buildGridTemplateColumns(columns);
+  }, [columns]);
+  const gridMinWidth = useMemo(() => {
+    return buildGridMinWidth(columns);
+  }, [columns]);
+
+  const handleColumnResizeReset = (columnId: ColumnId) => {
+    setColumns((currentColumns) =>
+      currentColumns.map((column) => {
+        if (column.id !== columnId) {
+          return column;
+        }
+
+        const defaultColumn = DEFAULT_COLUMNS.find(
+          (candidate) => candidate.id === columnId,
+        );
+
+        if (!defaultColumn) {
+          return column;
+        }
+
+        return {
+          ...column,
+          width: defaultColumn.width,
+        };
+      }),
+    );
+  };
+
+  const handleColumnResizeStart = (
+    event: React.PointerEvent<HTMLDivElement>,
+    columnId: ColumnId,
+  ) => {
+    const targetColumn = columns.find((column) => column.id === columnId);
+
+    if (!targetColumn || !targetColumn.resizable) {
+      return;
+    }
+
+    resizeCleanupRef.current?.();
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const startX = event.clientX;
+    const startWidth = targetColumn.width;
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    const handlePointerMove = (moveEvent: PointerEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+
+      setColumns((currentColumns) =>
+        currentColumns.map((column) => {
+          if (column.id !== columnId) {
+            return column;
+          }
+
+          return {
+            ...column,
+            width: clampColumnWidth(
+              startWidth + deltaX,
+              column.minWidth,
+              column.maxWidth,
+            ),
+          };
+        }),
+      );
+    };
+
+    const cleanup = () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      resizeCleanupRef.current = null;
+    };
+
+    const handlePointerUp = () => {
+      cleanup();
+    };
+
+    resizeCleanupRef.current = cleanup;
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp, { once: true });
+  };
 
   if (rows.length === 0) {
     return (
@@ -651,71 +894,104 @@ const PdfLibraryDashboard = ({
           </div>
 
           <section className="min-h-0 flex-1 rounded-[10px] bg-[#FFFFFF]">
-            <div className="overflow-hidden">
-              <div className="grid h-8 grid-cols-[minmax(240px,1.9fr)_minmax(160px,1fr)_80px_120px_120px_32px] items-center gap-4 border-b border-[#e5e7eb] text-[12px] font-medium leading-normal text-[#58635f]">
-                <div>名前</div>
-                <div>タグ</div>
-                <div>ページ</div>
-                <div>最終閲覧</div>
-                <div>更新日時</div>
-                <div>…</div>
-              </div>
-
-              <div className="divide-y divide-[#eef0f3]">
-                {paginatedRows.map((row) => {
-                  const isSelected = row.id === selectedRow?.id;
-
-                  return (
-                    <button
-                      key={row.id}
-                      type="button"
+            <div className="overflow-x-auto overflow-y-hidden">
+              <div
+                className="min-w-max"
+                style={{ minWidth: `${gridMinWidth}px` }}
+              >
+                <div
+                  className="grid h-8 items-center gap-4 border-b border-[#e5e7eb] text-[12px] font-medium leading-normal text-[#58635f]"
+                  style={{ gridTemplateColumns }}
+                >
+                  {columns.map((column) => (
+                    <div
+                      key={column.id}
                       className={cn(
-                        "grid h-8 w-full grid-cols-[minmax(240px,1.9fr)_minmax(160px,1fr)_80px_120px_120px_32px] items-center gap-4 text-left text-[13px] font-[542] leading-[17px] transition-colors",
-                        isSelected ? "bg-[#f9fafb]" : "hover:bg-[#fafafa]",
+                        "relative min-w-0",
+                        column.align === "right" && "text-right",
+                        column.align === "center" && "text-center",
                       )}
-                      onClick={() => setSelectedDocumentId(row.id)}
-                      onDoubleClick={() => onOpenDocument(row.id)}
                     >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-3">
-                          <IconBadge label="PDF" tone="rose" />
-                          <span className="truncate text-[13px] font-medium leading-[17px] text-[#273038]">
-                            {row.title}
-                          </span>
+                      <div className="truncate pr-2">{column.label}</div>
+
+                      {column.resizable ? (
+                        <div
+                          role="separator"
+                          aria-orientation="vertical"
+                          aria-label={`${column.label} の列幅を調整`}
+                          title="ドラッグで列幅調整、ダブルクリックで初期幅に戻す"
+                          className="absolute right-[-8px] top-0 z-10 h-full w-4 cursor-col-resize touch-none"
+                          onDoubleClick={() =>
+                            handleColumnResizeReset(column.id)
+                          }
+                          onPointerDown={(event) =>
+                            handleColumnResizeStart(event, column.id)
+                          }
+                        >
+                          <div className="mx-auto h-full w-[1px] bg-transparent hover:bg-[#d1d5db]" />
                         </div>
-                      </div>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
 
-                      <div className="flex min-w-0 flex-wrap items-center gap-2">
-                        {row.tags.length > 0 ? (
-                          row.tags.slice(0, 2).map((tag) => (
-                            <TagChip
-                              key={`${row.id}:${tag}`}
-                              label={tag}
-                              colorClass={getTagColor(tag)}
-                            />
-                          ))
-                        ) : (
-                          <span className="text-[13px] leading-[17px] text-[#93a09a]">
-                            タグなし
-                          </span>
+                <div className="divide-y divide-[#eef0f3]">
+                  {paginatedRows.map((row) => {
+                    const isSelected = row.id === selectedRow?.id;
+
+                    return (
+                      <button
+                        key={row.id}
+                        type="button"
+                        className={cn(
+                          "grid h-8 w-full items-center gap-4 text-left text-[13px] font-[542] leading-[17px] transition-colors",
+                          isSelected ? "bg-[#f9fafb]" : "hover:bg-[#fafafa]",
                         )}
-                      </div>
+                        style={{ gridTemplateColumns }}
+                        onClick={() => setSelectedDocumentId(row.id)}
+                        onDoubleClick={() => onOpenDocument(row.id)}
+                      >
+                        <div className="min-w-0">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <IconBadge label="PDF" tone="rose" />
+                            <span className="truncate text-[13px] font-medium leading-[17px] text-[#273038]">
+                              {row.title}
+                            </span>
+                          </div>
+                        </div>
 
-                      <div className="text-[13px] font-[542] leading-[17px] text-[#46514f]">
-                        {formatPageCount(row.pageCount)}
-                      </div>
-                      <div className="text-[13px] leading-[17px] text-[#75817c]">
-                        {formatDateTime(row.lastViewedAt)}
-                      </div>
-                      <div className="text-[13px] leading-[17px] text-[#75817c]">
-                        {formatDateTime(row.updatedAt)}
-                      </div>
-                      <div className="text-[18px] leading-none text-[#9aa59e]">
-                        …
-                      </div>
-                    </button>
-                  );
-                })}
+                        <div className="flex min-w-0 items-center gap-2 overflow-hidden">
+                          {row.tags.length > 0 ? (
+                            row.tags.slice(0, 2).map((tag) => (
+                              <TagChip
+                                key={`${row.id}:${tag}`}
+                                label={tag}
+                                colorClass={getTagColor(tag)}
+                              />
+                            ))
+                          ) : (
+                            <span className="truncate text-[13px] leading-[17px] text-[#93a09a]">
+                              タグなし
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="truncate text-right text-[13px] font-[542] leading-[17px] text-[#46514f]">
+                          {formatPageCount(row.pageCount)}
+                        </div>
+                        <div className="truncate text-[13px] leading-[17px] text-[#75817c]">
+                          {formatDateTime(row.lastViewedAt)}
+                        </div>
+                        <div className="truncate text-[13px] leading-[17px] text-[#75817c]">
+                          {formatDateTime(row.updatedAt)}
+                        </div>
+                        <div className="text-center text-[18px] leading-none text-[#9aa59e]">
+                          …
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
@@ -750,7 +1026,7 @@ const PdfLibraryDashboard = ({
                 </button>
               </div>
 
-              <div className="text-[13px] text-[#8c9690]">
+              <div className="text-[13px] leading-[17px] text-[#7d8784]">
                 {visibleStart}–{visibleEnd} / {rows.length} 件
               </div>
             </div>
@@ -761,4 +1037,4 @@ const PdfLibraryDashboard = ({
   );
 };
 
-export { PdfLibraryDashboard };
+export default PdfLibraryDashboard;
