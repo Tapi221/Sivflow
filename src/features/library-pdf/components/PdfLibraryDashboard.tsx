@@ -907,7 +907,7 @@ const PdfLibraryDashboard = ({
                     <div
                       key={column.id}
                       className={cn(
-                        "relative min-w-0",
+                        "relative h-full min-w-0",
                         column.align === "right" && "text-right",
                         column.align === "center" && "text-center",
                       )}
@@ -920,7 +920,7 @@ const PdfLibraryDashboard = ({
                           aria-orientation="vertical"
                           aria-label={`${column.label} の列幅を調整`}
                           title="ドラッグで列幅調整、ダブルクリックで初期幅に戻す"
-                          className="absolute right-[-8px] top-0 z-10 h-full w-4 cursor-col-resize touch-none"
+                          className="group/resize absolute inset-y-0 right-[-8px] z-10 w-4 cursor-col-resize touch-none"
                           onDoubleClick={() =>
                             handleColumnResizeReset(column.id)
                           }
@@ -928,7 +928,7 @@ const PdfLibraryDashboard = ({
                             handleColumnResizeStart(event, column.id)
                           }
                         >
-                          <div className="mx-auto h-full w-[1px] bg-transparent hover:bg-[#d1d5db]" />
+                          <div className="mx-auto h-full w-[1px] bg-[#e5e7eb] transition-colors group-hover/resize:bg-[#9ca3af]" />
                         </div>
                       ) : null}
                     </div>
