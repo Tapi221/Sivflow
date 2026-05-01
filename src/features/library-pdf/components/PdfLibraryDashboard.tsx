@@ -327,7 +327,7 @@ const PdfLibraryDashboard = ({
   folders,
   onOpenDocument,
 }: PdfLibraryDashboardProps) => {
-  const { tagById, getTagColor } = useTags();
+  const { tagById, getTagColorKey } = useTags();
   const setBreadcrumbAction = useSetBreadcrumbAction();
   const [, setExpandedFolders] = useState<Set<string>>(new Set());
 
@@ -686,10 +686,10 @@ const PdfLibraryDashboard = ({
                                   <TagChip
                                     key={`${row.id}:${tag}`}
                                     label={tag}
-                                    colorClass={getTagColor(tag)}
+                                    colorKey={getTagColorKey(tag)}
                                   />
                                 ))
-                              ) : (
+                            ) : (
                                 <span className="truncate text-[13px] leading-[17px] text-[#93a09a]">
                                   タグなし
                                 </span>
