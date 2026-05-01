@@ -113,6 +113,7 @@ const dateTimeTextStyle: CSSProperties = {
   fontFamily:
     '-apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif',
   fontVariantNumeric: "tabular-nums",
+  fontWeight: 400,
 };
 
 const isDateTimeColumn = (columnId: ColumnId): boolean => {
@@ -700,13 +701,13 @@ const PdfLibraryDashboard = ({
                               {formatPageCount(row.pageCount)}
                             </div>
                             <div
-                              className="truncate whitespace-nowrap text-[13px] leading-[17px] text-[#75817c]"
+                              className="truncate whitespace-nowrap text-[13px] font-normal leading-[17px] text-[#75817c]"
                               style={dateTimeTextStyle}
                             >
                               {formatDateTime(row.lastViewedAt)}
                             </div>
                             <div
-                              className="truncate whitespace-nowrap text-[13px] leading-[17px] text-[#75817c]"
+                              className="truncate whitespace-nowrap text-[13px] font-normal leading-[17px] text-[#75817c]"
                               style={dateTimeTextStyle}
                             >
                               {formatDateTime(row.updatedAt)}
