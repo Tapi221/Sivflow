@@ -240,12 +240,12 @@ const IconBadge = ({
   if (label === "PDF") {
     return (
       <span
-        className="inline-flex h-8 w-8 items-center justify-center rounded-[999px] bg-[#fff1f2]"
+        className="inline-flex h-6 w-6 items-center justify-center rounded-[4px] bg-[#fff1f2]"
         aria-label="PDF"
       >
         <svg
-          width="16"
-          height="16"
+          width="15"
+          height="15"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
