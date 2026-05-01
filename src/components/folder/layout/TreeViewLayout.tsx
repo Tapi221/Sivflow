@@ -47,7 +47,6 @@ import { useNavigate } from "react-router-dom";
 
 import { SectionListColumnPane } from "@/components/folder/components/SectionListColumnPane";
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
-import { Skeleton } from "@/components/ui/skeleton";
 
 import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions";
 import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
@@ -614,13 +613,7 @@ const TreeViewLayout = ({
   const isExplorerDataLoading =
     cardsLoading || documentsLoading || cardSetsLoading;
   if (isExplorerDataLoading) {
-    return (
-      <div className="space-y-3 p-4">
-        {[...Array(3)].map((_, index) => (
-          <Skeleton key={index} className="h-16 w-full rounded-2xl" />
-        ))}
-      </div>
-    );
+    return <div className="h-full w-full bg-transparent" />;
   }
 
   return (

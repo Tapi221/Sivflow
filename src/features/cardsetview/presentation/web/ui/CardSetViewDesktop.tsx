@@ -1,4 +1,3 @@
-import { CardSetViewDesktopContentSkeleton } from "@/components/loading/ScreenSkeletons";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getCardText } from "@/domain/card/content";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
@@ -258,7 +257,7 @@ export const CardSetViewDesktop = ({
   );
 
   if (isLoading) {
-    return <CardSetViewDesktopContentSkeleton />;
+    return <div className="h-full min-h-0 w-full" />;
   }
 
   return (

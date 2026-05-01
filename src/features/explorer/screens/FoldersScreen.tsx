@@ -8,7 +8,6 @@ import {
 
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
-import { FoldersScreenSkeleton } from "@/components/loading/ScreenSkeletons";
 import { notifySelectedFolderChanged } from "@/features/explorer/adapters/web/explorerSelectionNotifier";
 import { subscribeSectionListNavigation } from "@/features/explorer/adapters/web/explorerSectionListNavigation";
 import type { FoldersRouteAdapter } from "@/features/explorer/adapters/web/useFoldersRouteAdapter";
@@ -444,7 +443,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   }
 
   if (foldersLoading) {
-    return <FoldersScreenSkeleton />;
+    return null;
   }
 
   const explorerContent = (

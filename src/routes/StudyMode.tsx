@@ -4,7 +4,6 @@ import { addDoc, collection } from "firebase/firestore";
 import confetti from "canvas-confetti";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getCardText } from "@/domain/card/content";
 import { flags } from "@/features/flags";
@@ -365,14 +364,7 @@ const StudyMode = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="h-[100dvh] overflow-hidden p-4 md:p-8">
-        <div className="max-w-[1400px] mx-auto space-y-4">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-[600px] w-full" />
-        </div>
-      </div>
-    );
+    return <div className="h-[100dvh] overflow-hidden bg-[var(--app-bg)]" />;
   }
 
   const practiceCurrentCardId =
