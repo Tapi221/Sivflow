@@ -441,6 +441,7 @@ const PdfLibraryDashboard = ({
   const [columns, setColumns] = useState<DashboardColumn[]>(() =>
     loadStoredColumns(),
   );
+  const [isColumnResizing, setIsColumnResizing] = useState(false);
   const resizeCleanupRef = useRef<(() => void) | null>(null);
 
   const folderById = useMemo(() => {
@@ -465,6 +466,23 @@ const PdfLibraryDashboard = ({
       resizeCleanupRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (!isColumnResizing) {
+      return;
+    }
+
+    const previousCursor = document.body.style.cursor;
+    const previousUserSelect = document.body.style.userSelect;
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    return () => {
+      document.body.style.cursor = previousCursor;
+      document.body.style.userSelect = previousUserSelect;
+    };
+  }, [isColumnResizing]);
 
   const rows = useMemo<PdfDashboardRow[]>(() => {
     return documents
@@ -749,9 +767,7 @@ const PdfLibraryDashboard = ({
 
     const startX = event.clientX;
     const startWidth = targetColumn.width;
-
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
+    setIsColumnResizing(true);
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
       const deltaX = moveEvent.clientX - startX;
@@ -777,8 +793,7 @@ const PdfLibraryDashboard = ({
     const cleanup = () => {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
+      setIsColumnResizing(false);
       resizeCleanupRef.current = null;
     };
 
