@@ -17,7 +17,6 @@ import {
 } from "@/features/library-pdf/model/pdfLibraryRow";
 import { usePdfLibraryDashboardState } from "@/features/library-pdf/hooks/usePdfLibraryDashboardState";
 import { PdfLibraryContinueSection } from "@/features/library-pdf/components/sections/PdfLibraryContinueSection";
-import { PdfLibraryRecentSection } from "@/features/library-pdf/components/sections/PdfLibraryRecentSection";
 import { PdfLibraryTableSection } from "@/features/library-pdf/components/sections/PdfLibraryTableSection";
 import type { DocumentItem, Folder } from "@/types";
 
@@ -429,15 +428,6 @@ const PdfLibraryDashboard = ({
       .slice(0, 3);
   }, [rows]);
 
-  const recentRows = useMemo(() => {
-    return [...rows]
-      .sort(
-        (left, right) =>
-          (right.updatedAt?.getTime() ?? 0) - (left.updatedAt?.getTime() ?? 0),
-      )
-      .slice(0, 3);
-  }, [rows]);
-
   const paginatedRows = useMemo(() => {
     const start = pageIndex * PAGE_SIZE;
     return rows.slice(start, start + PAGE_SIZE);
@@ -505,13 +495,6 @@ const PdfLibraryDashboard = ({
               cardClassName={cardClassName}
               continueRows={continueRows}
               formatDateTime={formatDateTime}
-              onSelectDocument={setSelectedDocumentId}
-              IconBadge={IconBadge}
-            />
-
-            <PdfLibraryRecentSection
-              cardClassName={cardClassName}
-              recentRows={recentRows}
               onSelectDocument={setSelectedDocumentId}
               IconBadge={IconBadge}
             />
@@ -674,20 +657,20 @@ const PdfLibraryDashboard = ({
                                   />
                                 ))
                             ) : (
-                                <span className="truncate text-[13px] leading-[17px] text-[#93a09a]">
+                                <span className="truncate text-[13px] leading-[17px] text-[#484964]">
                                   タグなし
                                 </span>
                               )}
                             </div>
 
                             <div
-                              className="truncate whitespace-nowrap text-[13px] font-normal leading-[17px] text-[#75817c]"
+                              className="truncate whitespace-nowrap text-[13px] font-normal leading-[17px] text-[#484964]"
                               style={dateTimeTextStyle}
                             >
                               {formatDateTime(row.lastViewedAt)}
                             </div>
                             <div
-                              className="truncate whitespace-nowrap text-[13px] font-normal leading-[17px] text-[#75817c]"
+                              className="truncate whitespace-nowrap text-[13px] font-normal leading-[17px] text-[#484964]"
                               style={dateTimeTextStyle}
                             >
                               {formatDateTime(row.updatedAt)}
