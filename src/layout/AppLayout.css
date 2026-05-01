@@ -458,7 +458,7 @@
   overflow: hidden;
   background: var(--app-active-tab-bg);
   padding: 0 var(--workspace-content-gutter);
-  color: var(--app-sidebar-icon);
+  color: var(--app-sidebar-icon, #ababab);
   font-family:
     Inter,
     var(--explorer-chrome-font-family),
@@ -523,11 +523,11 @@
 
 .workspace-breadcrumb-bar__button:hover,
 .workspace-breadcrumb-bar__button:focus-visible {
-  color: var(--app-sidebar-text);
+  color: var(--app-sidebar-text, #5b5b5b);
 }
 
 .workspace-breadcrumb-bar__label--current {
-  color: var(--app-sidebar-text);
+  color: var(--app-sidebar-text-strong, #000000);
 }
 
 .workspace-breadcrumb-bar__separator {
