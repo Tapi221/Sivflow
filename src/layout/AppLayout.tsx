@@ -115,7 +115,7 @@ export const AppLayout = () => {
       <AppSidebar />
 
       <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
-        <Suspense fallback={<LoadingFallback />}>
+        <Suspense fallback={null}>
           <Outlet />
         </Suspense>
       </WorkspaceShell>

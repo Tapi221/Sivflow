@@ -1,6 +1,5 @@
 import React from "react";
 
-import { DirectoryScreenSkeleton } from "@/components/loading/ScreenSkeletons";
 import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagramPane";
 import { useCards } from "@/hooks/card/useCards";
 import { useFolders } from "@/hooks/folder/useFolders";
@@ -31,7 +30,7 @@ const Directory = () => {
   const isLoading = cardsLoading || foldersLoading || documentsLoading;
 
   if (isLoading) {
-    return <DirectoryScreenSkeleton />;
+    return <div className="h-full overflow-y-auto" />;
   }
 
   return (

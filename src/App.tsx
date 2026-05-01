@@ -162,7 +162,7 @@ const LoginPage = () => {
               >
                 {isLoading ? (
                   <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-slate-400" />
                     ログイン中...
                   </>
                 ) : (
@@ -367,11 +367,10 @@ const AppContent = () => {
       </Routes>
 
       {syncProgress ? (
-        <div className="fixed bottom-8 right-8 z-[9999] animate-in fade-in slide-in-from-bottom-6 duration-500">
+        <div className="fixed bottom-8 right-8 z-[9999]">
           <div className="flex min-w-[240px] items-center gap-4 rounded-[24px] border border-white bg-white/80 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-xl">
-            <div className="relative">
-              <div className="h-10 w-10 rounded-full border-4 border-primary-600/10" />
-              <div className="absolute left-0 top-0 h-10 w-10 animate-spin rounded-full border-4 border-primary-600 border-t-transparent" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border-4 border-primary-600/15">
+              <div className="h-2.5 w-2.5 rounded-full bg-primary-600/70" />
             </div>
             <div className="flex-1">
               <p className="mb-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-primary-600">
