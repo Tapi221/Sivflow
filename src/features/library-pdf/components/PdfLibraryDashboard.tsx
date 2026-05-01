@@ -30,7 +30,6 @@ type PdfLibraryDashboardProps = {
 type ColumnId =
   | "name"
   | "tags"
-  | "page"
   | "lastViewed"
   | "updatedAt"
   | "actions";
@@ -62,14 +61,6 @@ const DEFAULT_COLUMNS: DashboardColumn[] = [
     label: "タグ",
     width: 240,
     minWidth: 56,
-    resizable: true,
-  },
-  {
-    id: "page",
-    label: "ページ",
-    width: 88,
-    minWidth: 40,
-    maxWidth: 140,
     resizable: true,
   },
   {
@@ -143,14 +134,6 @@ const formatDateTime = (value: Date | null): string => {
   const minutes = String(value.getMinutes()).padStart(2, "0");
 
   return `${year}/${month}/${day} ${hours}:${minutes}`;
-};
-
-const formatPageCount = (value: number | null): string => {
-  if (!value || value <= 0) {
-    return "—";
-  }
-
-  return String(value);
 };
 
 const BreadcrumbActionSettingsIcon = () => {
@@ -697,9 +680,6 @@ const PdfLibraryDashboard = ({
                               )}
                             </div>
 
-                            <div className="truncate text-[13px] font-[542] leading-[17px] text-[#46514f]">
-                              {formatPageCount(row.pageCount)}
-                            </div>
                             <div
                               className="truncate whitespace-nowrap text-[13px] font-normal leading-[17px] text-[#75817c]"
                               style={dateTimeTextStyle}

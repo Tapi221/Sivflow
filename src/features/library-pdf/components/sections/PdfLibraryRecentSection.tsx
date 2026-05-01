@@ -31,9 +31,6 @@ export const PdfLibraryRecentSection = ({
             最近更新したPDF
           </span>
         </div>
-        <span className="text-[12px] font-semibold text-[#6b7280]">
-          すべて見る
-        </span>
       </div>
 
       <div className="mt-4 divide-y divide-[#eef0f3] border-y border-[#e5e7eb]">

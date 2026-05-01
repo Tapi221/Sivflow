@@ -30,6 +30,10 @@ export const PdfLibraryContinueSection = ({
   onSelectDocument,
   IconBadge,
 }: PdfLibraryContinueSectionProps) => {
+  if (continueRows.length === 0) {
+    return null;
+  }
+
   return (
     <section className={cardClassName}>
       <div className="flex items-center justify-between gap-3">
@@ -45,47 +49,38 @@ export const PdfLibraryContinueSection = ({
       </div>
 
       <div className="mt-4 space-y-2.5">
-        {continueRows.length > 0 ? (
-          continueRows.map((row) => (
-            <button
-              key={row.id}
-              type="button"
-              className="flex w-full items-start gap-3 text-left"
-              onClick={() => onSelectDocument(row.id)}
-            >
-              <IconBadge label="PDF" tone="rose" />
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-[13px] font-semibold leading-5 text-[#29343b]">
-                  {row.title}
-                </div>
-                <div className="mt-2 h-[6px] overflow-hidden rounded-[999px] bg-[#e5e7eb]">
-                  <div
-                    className="h-full rounded-[999px] bg-[#4b5563]"
-                    style={{ width: `${row.progressPercent ?? 0}%` }}
-                  />
-                </div>
-                <div className="mt-1.5 flex items-center justify-between gap-2 text-[12px] text-[#7d8784]">
-                  <span className="truncate">
-                    最終閲覧:{" "}
-                    <span
-                      className="whitespace-nowrap"
-                      style={dateTimeTextStyle}
-                    >
-                      {formatDateTime(row.lastViewedAt)}
-                    </span>
-                  </span>
-                  <span className="font-semibold text-[#5f6f69]">
-                    {row.progressPercent ?? 0}%
-                  </span>
-                </div>
+        {continueRows.map((row) => (
+          <button
+            key={row.id}
+            type="button"
+            className="flex w-full items-start gap-3 text-left"
+            onClick={() => onSelectDocument(row.id)}
+          >
+            <IconBadge label="PDF" tone="rose" />
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[13px] font-semibold leading-5 text-[#29343b]">
+                {row.title}
               </div>
-            </button>
-          ))
-        ) : (
-          <div className="rounded-[16px] bg-[#f8fafc] px-4 py-5 text-[13px] leading-6 text-[#94a09a]">
-            続きから読める PDF はまだありません。
-          </div>
-        )}
+              <div className="mt-2 h-[6px] overflow-hidden rounded-[999px] bg-[#e5e7eb]">
+                <div
+                  className="h-full rounded-[999px] bg-[#4b5563]"
+                  style={{ width: `${row.progressPercent ?? 0}%` }}
+                />
+              </div>
+              <div className="mt-1.5 flex items-center justify-between gap-2 text-[12px] text-[#7d8784]">
+                <span className="truncate">
+                  最終閲覧:{" "}
+                  <span className="whitespace-nowrap" style={dateTimeTextStyle}>
+                    {formatDateTime(row.lastViewedAt)}
+                  </span>
+                </span>
+                <span className="font-semibold text-[#5f6f69]">
+                  {row.progressPercent ?? 0}%
+                </span>
+              </div>
+            </div>
+          </button>
+        ))}
       </div>
     </section>
   );
