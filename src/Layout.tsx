@@ -95,7 +95,7 @@ const Layout = () => {
       },
 
     ],
-    [navigate, setIsSettingsOpen],
+    [navigate],
   );
 
   useEffect(() => {
