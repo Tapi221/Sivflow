@@ -4,7 +4,6 @@ import { TagChip } from "@/components/tag/TagChip";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { useSetBreadcrumbAction } from "@/contexts/BreadcrumbContext";
 import { useTags } from "@/hooks/settings/useTags";
-import { getTagColorKey, type TagColorKey } from "@/lib/tags/tagColor";
 import { cn } from "@/lib/utils";
 import { normalizeDate } from "@/shared/codec/date";
 import type { DocumentItem, Folder } from "@/types";
@@ -152,6 +151,84 @@ const resolveDisplayTags = (
 };
 
 const cardClassName = "rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-4";
+const breadcrumbActionIconClassName =
+  "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]";
+
+const BreadcrumbActionSettingsIcon = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 7H20"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+      <path
+        d="M4 12H20"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+      <path
+        d="M4 17H20"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+      <circle
+        cx="15"
+        cy="7"
+        r="2.25"
+        fill="#FFFFFF"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
+      <circle
+        cx="8"
+        cy="12"
+        r="2.25"
+        fill="#FFFFFF"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
+      <circle
+        cx="13"
+        cy="17"
+        r="2.25"
+        fill="#FFFFFF"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
+    </svg>
+  );
+};
+
+const BreadcrumbActionFilterIcon = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M4.75 6.75H19.25L13.75 13.125V18.25L10.25 16.25V13.125L4.75 6.75Z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
 
 const IconBadge = ({
   label,
@@ -217,35 +294,17 @@ const PdfLibraryDashboard = ({
   folders,
   onOpenDocument,
 }: PdfLibraryDashboardProps) => {
-  const { tags, tagById } = useTags();
+  const { tagById, getTagColor } = useTags();
   const setBreadcrumbAction = useSetBreadcrumbAction();
-  const [unusedExpandedFolders, setUnusedExpandedFolders] = useState<Set<string>>(
-    new Set(),
-  );
+  const [unusedExpandedFolders, setUnusedExpandedFolders] = useState<
+    Set<string>
+  >(new Set());
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
   );
   const [pageIndex, setPageIndex] = useState(0);
 
   void unusedExpandedFolders;
-
-  const tagColorMap = useMemo(() => {
-    const map = new Map<string, TagColorKey>();
-
-    tags.forEach((tag) => {
-      const colorKey = getTagColorKey(tag.color);
-      map.set(tag.id, colorKey);
-      map.set(tag.name, colorKey);
-      map.set(tag.nameLower, colorKey);
-    });
-
-    return map;
-  }, [tags]);
-
-  const resolveTagColor = (tagNameOrId: string): TagColorKey =>
-    tagColorMap.get(tagNameOrId) ??
-    tagColorMap.get(tagNameOrId.toLowerCase()) ??
-    getTagColorKey();
 
   const folderById = useMemo(() => {
     return new Map(folders.map((folder) => [folder.id, folder]));
@@ -256,7 +315,10 @@ const PdfLibraryDashboard = ({
       .filter((document) => document.kind === "pdf")
       .map((document) => {
         const folderPath = buildFolderPath(document.folderId, folderById);
-        const categoryLabel = resolveCategoryLabel(document.folderId, folderById);
+        const categoryLabel = resolveCategoryLabel(
+          document.folderId,
+          folderById,
+        );
         const viewerState = (document.viewerState ??
           null) as ViewerStateWithLastOpenedAt | null;
         const updatedAt = toDate(document.updatedAt);
@@ -277,7 +339,12 @@ const PdfLibraryDashboard = ({
           progressPercent: resolveProgressPercent(document),
           updatedAt,
           lastViewedAt,
-          tags: resolveDisplayTags(document, categoryLabel, folderPath, tagById),
+          tags: resolveDisplayTags(
+            document,
+            categoryLabel,
+            folderPath,
+            tagById,
+          ),
           orderIndex: Number(document.orderIndex) || 0,
         };
       })
@@ -326,7 +393,9 @@ const PdfLibraryDashboard = ({
       return;
     }
 
-    const selectedIndex = rows.findIndex((row) => row.id === selectedDocumentId);
+    const selectedIndex = rows.findIndex(
+      (row) => row.id === selectedDocumentId,
+    );
     if (selectedIndex === -1) {
       return;
     }
@@ -380,19 +449,33 @@ const PdfLibraryDashboard = ({
 
   const breadcrumbAction = useMemo(
     () => (
-      <button
-        type="button"
-        className="inline-flex h-8 w-fit items-center justify-center rounded-[8px] border-0 bg-[#6A876E] px-5 text-[12px] font-medium leading-normal text-white transition-colors hover:bg-[#5f7963]"
-        onClick={handleToolbarAddDocument}
+      <div
+        className="inline-flex items-center gap-2"
+        style={{ WebkitAppRegion: "no-drag" }}
       >
-        PDFをインポート
-      </button>
+        <button
+          type="button"
+          className="inline-flex h-8 w-fit items-center justify-center rounded-[8px] border-0 bg-[#6A876E] px-5 text-[12px] font-medium leading-normal text-white transition-colors hover:bg-[#5f7963]"
+          onClick={handleToolbarAddDocument}
+        >
+          PDFをインポート
+        </button>
+        <div className="inline-flex items-center gap-1">
+          <span aria-hidden="true" className={breadcrumbActionIconClassName}>
+            <BreadcrumbActionSettingsIcon />
+          </span>
+          <span aria-hidden="true" className={breadcrumbActionIconClassName}>
+            <BreadcrumbActionFilterIcon />
+          </span>
+        </div>
+      </div>
     ),
     [handleToolbarAddDocument],
   );
 
   useEffect(() => {
     setBreadcrumbAction(breadcrumbAction);
+
     return () => setBreadcrumbAction(null);
   }, [breadcrumbAction, setBreadcrumbAction]);
 
@@ -453,7 +536,8 @@ const PdfLibraryDashboard = ({
             PDF がまだありません
           </h2>
           <p className="mt-3 max-w-xl text-[14px] leading-7 text-[#6f7b78]">
-            PDF を取り込むと、この画面で概要カードと一覧テーブルをまとめて管理できます。
+            PDF
+            を取り込むと、この画面で概要カードと一覧テーブルをまとめて管理できます。
           </p>
           <button
             type="button"
@@ -607,7 +691,7 @@ const PdfLibraryDashboard = ({
                             <TagChip
                               key={`${row.id}:${tag}`}
                               label={tag}
-                              colorKey={resolveTagColor(tag)}
+                              colorClass={getTagColor(tag)}
                             />
                           ))
                         ) : (
