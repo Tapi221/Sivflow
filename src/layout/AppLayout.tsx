@@ -1,14 +1,13 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 
-import { AppShellLoadingFallback } from "@/components/loading/ScreenSkeletons";
 import { useWorkspaceTabsRouteSync } from "@/features/workspace-tabs/hooks/useWorkspaceTabsRouteSync";
 import { AppSidebar } from "./AppSidebar";
 import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
 
 const LoadingFallback = () => {
-  return <AppShellLoadingFallback />;
+  return null;
 };
 
 const resetWorkspaceScroll = (mainElement: HTMLElement | null) => {
