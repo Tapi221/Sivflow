@@ -26,13 +26,15 @@ export const TagBadge = ({
 }: TagBadgeProps) => {
   const resolvedColorStyle = getTagColorStyle(colorKey);
 
+  const displayLabel = label.startsWith("#") ? label : `#${label}`;
+
   const content = (
     <>
-      <span className={cn("truncate", textClassName)}>{label}</span>
+      <span className={cn("truncate", textClassName)}>{displayLabel}</span>
       {onRemove && (
         <button
           type="button"
-          aria-label={removeAriaLabel ?? `${label}を削除`}
+          aria-label={removeAriaLabel ?? `${displayLabel}を削除`}
           onClick={(event) => {
             event.stopPropagation();
             onRemove();
