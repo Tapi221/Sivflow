@@ -230,7 +230,8 @@ export const TagInput = ({
                           className={cn(
                             "w-8 h-8 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all",
                             selectedColor === colorKey ||
-                              (!selectedColor && colorKey === availableColors[0])
+                              (!selectedColor &&
+                                colorKey === availableColors[0])
                               ? "ring-2 ring-offset-2 ring-primary-600 scale-110 shadow-md"
                               : "hover:scale-105 hover:ring-slate-400",
                           )}

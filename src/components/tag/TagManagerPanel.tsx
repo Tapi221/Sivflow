@@ -619,7 +619,8 @@ export const TagManagerPanel = ({ className }: TagManagerPanelProps) => {
               タグを削除しますか？
             </AlertDialogTitle>
             <AlertDialogDescription>
-              「{pendingDeleteName}」を削除すると、{pendingUsageCount} 件のカードからこのタグが削除されます。
+              「{pendingDeleteName}」を削除すると、{pendingUsageCount}{" "}
+              件のカードからこのタグが削除されます。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -55,7 +55,9 @@
   --app-sidebar-text-strong: #000000;
   --app-sidebar-text-muted: #7c7c7c;
   --app-sidebar-icon: #ababab;
-  --app-sidebar-icon-active: var(--ds-semantic-color-interactive-selected-accent);
+  --app-sidebar-icon-active: var(
+    --ds-semantic-color-interactive-selected-accent
+  );
   --app-sidebar-focus-ring: rgba(105, 76, 255, 0.22);
 }
 
