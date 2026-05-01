@@ -656,10 +656,8 @@ const PdfLibraryDashboard = ({
                                     colorKey={getTagColorKey(tag)}
                                   />
                                 ))
-                            ) : (
-                                <span className="truncate text-[13px] leading-[17px] text-[#484964]">
-                                  タグなし
-                                </span>
+                              ) : (
+                                null
                               )}
                             </div>
 
