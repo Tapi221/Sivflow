@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
-import { Button } from "@/components/ui/button";
 import { useSetBreadcrumbAction } from "@/contexts/BreadcrumbContext";
 import { useTags } from "@/hooks/settings/useTags";
 import type { DocumentItem, Folder } from "@/types";
-import { Filter, Settings2 } from "@/ui/icons";
 
 import { PdfLibraryEmptyState } from "./PdfLibraryEmptyState";
 import { PdfLibrarySummaryCards } from "./PdfLibrarySummaryCards";
@@ -19,7 +17,47 @@ type PdfLibraryDashboardProps = {
 };
 
 const breadcrumbActionIconClassName =
-  "inline-flex h-8 w-8 items-center justify-center rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] text-[#7b8794] transition-colors hover:bg-[#f8fafc]";
+  "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]";
+
+const BreadcrumbActionSettingsIcon = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path d="M4 7H20" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+      <path d="M4 12H20" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+      <path d="M4 17H20" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+      <circle cx="15" cy="7" r="2.25" fill="#FFFFFF" stroke="currentColor" strokeWidth="1.75" />
+      <circle cx="8" cy="12" r="2.25" fill="#FFFFFF" stroke="currentColor" strokeWidth="1.75" />
+      <circle cx="13" cy="17" r="2.25" fill="#FFFFFF" stroke="currentColor" strokeWidth="1.75" />
+    </svg>
+  );
+};
+
+const BreadcrumbActionFilterIcon = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M4.75 6.75H19.25L13.75 13.125V18.25L10.25 16.25V13.125L4.75 6.75Z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
 
 export const PdfLibraryDashboard = ({
   documents,
@@ -97,34 +135,25 @@ export const PdfLibraryDashboard = ({
     setExpandedFolders,
   });
 
-  const handleSelectDocument = (documentId: string) => {
-    setSelectedDocumentId(documentId);
-  };
-
-  const handleOpenDocument = (documentId: string) => {
-    setSelectedDocumentId(documentId);
-    onOpenDocument(documentId);
-  };
-
   const breadcrumbAction = useMemo(
     () => (
       <div
         className="inline-flex items-center gap-2"
         style={{ WebkitAppRegion: "no-drag" }}
       >
-        <Button
-          className="h-8 rounded-[10px] px-4 text-[12px] font-semibold"
+        <button
           type="button"
+          className="inline-flex h-8 w-fit items-center justify-center rounded-[8px] border-0 bg-[#6A876E] px-5 text-[12px] font-medium leading-normal text-white transition-colors hover:bg-[#5f7963]"
           onClick={handleToolbarAddDocument}
         >
-          PDF をインポート
-        </Button>
+          PDFをインポート
+        </button>
         <div className="inline-flex items-center gap-1">
           <span aria-hidden="true" className={breadcrumbActionIconClassName}>
-            <Settings2 size={16} />
+            <BreadcrumbActionSettingsIcon />
           </span>
           <span aria-hidden="true" className={breadcrumbActionIconClassName}>
-            <Filter size={16} />
+            <BreadcrumbActionFilterIcon />
           </span>
         </div>
       </div>
@@ -193,18 +222,18 @@ export const PdfLibraryDashboard = ({
       />
 
       <div className="flex min-h-0 w-full flex-1 flex-col overflow-auto px-6 py-6">
-        <div className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-6">
+        <div className="flex w-full flex-1 flex-col gap-6">
           <PdfLibrarySummaryCards
             continueRows={continueRows}
             recentRows={recentRows}
-            onOpenDocument={handleOpenDocument}
+            onOpenDocument={onOpenDocument}
           />
 
           <PdfLibraryDataTable
             rows={rows}
             selectedDocumentId={selectedDocumentId}
-            onOpenDocument={handleOpenDocument}
-            onSelectDocument={handleSelectDocument}
+            onOpenDocument={onOpenDocument}
+            onSelectDocument={setSelectedDocumentId}
           />
         </div>
       </div>

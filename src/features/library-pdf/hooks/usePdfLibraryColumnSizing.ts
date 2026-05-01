@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ColumnSizingState } from "@tanstack/react-table";
 
-const COLUMN_STORAGE_KEY = "pdf-library-dashboard:column-widths:v2";
+const COLUMN_STORAGE_KEY = "pdf-library-dashboard:column-widths:v3";
 
 const DEFAULT_COLUMN_SIZING: ColumnSizingState = {
   name: 420,
@@ -9,7 +9,7 @@ const DEFAULT_COLUMN_SIZING: ColumnSizingState = {
   page: 88,
   lastViewed: 168,
   updatedAt: 168,
-  actions: 48,
+  actions: 32,
 };
 
 const COLUMN_MIN_SIZES: Record<string, number> = {
@@ -18,7 +18,7 @@ const COLUMN_MIN_SIZES: Record<string, number> = {
   page: 72,
   lastViewed: 140,
   updatedAt: 140,
-  actions: 48,
+  actions: 32,
 };
 
 const COLUMN_MAX_SIZES: Record<string, number | undefined> = {
@@ -27,7 +27,7 @@ const COLUMN_MAX_SIZES: Record<string, number | undefined> = {
   page: 140,
   lastViewed: 260,
   updatedAt: 260,
-  actions: 48,
+  actions: 32,
 };
 
 const clampWidth = (columnId: string, width: number): number => {
