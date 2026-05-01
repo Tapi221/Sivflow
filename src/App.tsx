@@ -1,15 +1,4 @@
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
-import {
-  AppBootLoadingFallback,
-  CardEditScreenSkeleton,
-  CalendarScreenSkeleton,
-  CardSetViewScreenSkeleton,
-  DirectoryScreenSkeleton,
-  FoldersScreenSkeleton,
-  GalleryScreenSkeleton,
-  RedirectPageScreenSkeleton,
-  StudyModeScreenSkeleton,
-} from "@/components/loading/ScreenSkeletons";
 import { BlockNoteSandboxPage } from "@/sandbox/blocknote";
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
@@ -63,14 +52,11 @@ const isTestBypassEnabled = () => {
 };
 
 const LoadingFallback = () => {
-  return <AppBootLoadingFallback />;
+  return null;
 };
 
-const withRouteFallback = (
-  element: React.ReactNode,
-  fallback: React.ReactNode,
-) => {
-  return <Suspense fallback={fallback}>{element}</Suspense>;
+const withRouteFallback = (element: React.ReactNode) => {
+  return <Suspense fallback={null}>{element}</Suspense>;
 };
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -276,7 +262,7 @@ const AppContent = () => {
     window.location.pathname === "/pdf-scroll-test"
   ) {
     return (
-      <Suspense fallback={<LoadingFallback />}>
+      <Suspense fallback={null}>
         <PdfScrollTest />
       </Suspense>
     );
@@ -288,7 +274,7 @@ const AppContent = () => {
     window.location.pathname === "/codeblock-visual-test"
   ) {
     return (
-      <Suspense fallback={<LoadingFallback />}>
+      <Suspense fallback={null}>
         <CodeBlockVisualTest />
       </Suspense>
     );
@@ -309,81 +295,45 @@ const AppContent = () => {
         >
           <Route index element={<DefaultRedirect />} />
 
-          <Route
-            path="folders"
-            element={withRouteFallback(<Folders />, <FoldersScreenSkeleton />)}
-          />
+          <Route path="folders" element={withRouteFallback(<Folders />)} />
 
           <Route path="tag-map" element={<Navigate to="/folders" replace />} />
-          <Route
-            path="calendar"
-            element={withRouteFallback(
-              <Calendar />,
-              <CalendarScreenSkeleton />,
-            )}
-          />
+          <Route path="calendar" element={withRouteFallback(<Calendar />)} />
 
           <Route
             path="dictionary"
-            element={withRouteFallback(
-              <Dictionary />,
-              <RedirectPageScreenSkeleton />,
-            )}
+            element={withRouteFallback(<Dictionary />)}
           />
 
           <Route
             path="questions"
-            element={withRouteFallback(
-              <Questions />,
-              <RedirectPageScreenSkeleton />,
-            )}
+            element={withRouteFallback(<Questions />)}
           />
 
-          <Route
-            path="CardEdit"
-            element={withRouteFallback(
-              <CardEdit />,
-              <CardEditScreenSkeleton />,
-            )}
-          />
+          <Route path="CardEdit" element={withRouteFallback(<CardEdit />)} />
           <Route
             path="CardSetView"
-            element={withRouteFallback(
-              <CardSetView />,
-              <CardSetViewScreenSkeleton />,
-            )}
+            element={withRouteFallback(<CardSetView />)}
           />
           <Route
             path="CardView"
             element={<Navigate to="/CardSetView" replace />}
           />
-          <Route
-            path="study"
-            element={withRouteFallback(
-              <StudyMode />,
-              <StudyModeScreenSkeleton />,
-            )}
-          />
+          <Route path="study" element={withRouteFallback(<StudyMode />)} />
           <Route path="sandbox/blocknote" element={<BlockNoteSandboxPage />} />
 
-          <Route
-            path="gallery"
-            element={withRouteFallback(<Gallery />, <GalleryScreenSkeleton />)}
-          />
+          <Route path="gallery" element={withRouteFallback(<Gallery />)} />
           <Route path="trash" element={<Navigate to="/folders" replace />} />
           <Route
             path="directory"
-            element={withRouteFallback(
-              <Directory />,
-              <DirectoryScreenSkeleton />,
-            )}
+            element={withRouteFallback(<Directory />)}
           />
 
           {PdfScrollTest ? (
             <Route
               path="pdf-scroll-test"
               element={
-                <Suspense fallback={<LoadingFallback />}>
+                <Suspense fallback={null}>
                   <PdfScrollTest />
                 </Suspense>
               }
@@ -394,7 +344,7 @@ const AppContent = () => {
             <Route
               path="codeblock-visual-test"
               element={
-                <Suspense fallback={<LoadingFallback />}>
+                <Suspense fallback={null}>
                   <CodeBlockVisualTest />
                 </Suspense>
               }
@@ -405,7 +355,7 @@ const AppContent = () => {
             <Route
               path="card-layout-test"
               element={
-                <Suspense fallback={<LoadingFallback />}>
+                <Suspense fallback={null}>
                   <CardLayoutConsistencyTest />
                 </Suspense>
               }
@@ -445,7 +395,7 @@ const App = () => {
         <NotificationProvider>
           <BrowserRouter>
             <BreadcrumbProvider>
-              <Suspense fallback={<LoadingFallback />}>
+              <Suspense fallback={null}>
                 <AppContent />
               </Suspense>
             </BreadcrumbProvider>
