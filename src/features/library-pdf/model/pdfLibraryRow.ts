@@ -98,8 +98,6 @@ const resolveCategoryLabel = (
 
 const resolveDisplayTags = (
   document: DocumentItem,
-  categoryLabel: string,
-  folderPath: string[],
   tagById: ReadonlyMap<string, { name: string }>,
 ): string[] => {
   const explicitTags = (Array.isArray(document.tags) ? document.tags : [])
@@ -109,16 +107,7 @@ const resolveDisplayTags = (
         typeof label === "string" && label.trim().length > 0,
     );
 
-  if (explicitTags.length > 0) {
-    return explicitTags.slice(0, 3);
-  }
-
-  const fallbackTags = [categoryLabel, folderPath[1]].filter(
-    (label): label is string =>
-      typeof label === "string" && label.trim().length > 0,
-  );
-
-  return Array.from(new Set(fallbackTags)).slice(0, 3);
+  return Array.from(new Set(explicitTags)).slice(0, 3);
 };
 
 export const buildPdfDashboardRows = ({
@@ -153,7 +142,7 @@ export const buildPdfDashboardRows = ({
         progressPercent: resolveProgressPercent(document),
         updatedAt,
         lastViewedAt,
-        tags: resolveDisplayTags(document, categoryLabel, folderPath, tagById),
+        tags: resolveDisplayTags(document, tagById),
         orderIndex: Number(document.orderIndex) || 0,
       } satisfies PdfDashboardRow;
     })
