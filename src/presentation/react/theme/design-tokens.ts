@@ -98,6 +98,7 @@ export const designTokens = {
   "spacing": {
     "0": 0,
     "1": 4,
+    "1_8": 7.2,
     "2": 8,
     "3": 12,
     "4": 16,
@@ -107,8 +108,7 @@ export const designTokens = {
     "10": 40,
     "12": 48,
     "16": 64,
-    "20": 80,
-    "1_8": 7.2
+    "20": 80
   },
   "radius": {
     "sm": 8,
@@ -283,6 +283,15 @@ export const designTokens = {
       "interactive": "150ms ease",
       "screenEnter": "300ms ease-out",
       "progress": "500ms ease-out"
+    },
+    "breadcrumb": {
+      "height": 52,
+      "gap": 12,
+      "itemColor": "#6e6e80",
+      "itemHoverColor": "#1e293b",
+      "currentColor": "#202123",
+      "separatorColor": "#978d90",
+      "itemMaxWidth": "min(46vw, 520px)"
     },
     "tag": {
       "fontSize": 12,

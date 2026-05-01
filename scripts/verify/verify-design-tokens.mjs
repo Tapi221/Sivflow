@@ -23,12 +23,16 @@ const forbiddenCoreThemeLiterals = [
   "#202123",
   "#6e6e80",
   "#d9d9d9",
+  "#8a8a8a",
+  "#4f4f4f",
+  "#777777",
 ];
 
 const filesThatMustBeTokenDriven = [
   "tailwind.config.js",
   "src/styles/components/common.css",
   "src/components/card/panels/MetaPanelShell.tsx",
+  "src/layout/AppLayout.css",
 ];
 
 const fail = (message) => {

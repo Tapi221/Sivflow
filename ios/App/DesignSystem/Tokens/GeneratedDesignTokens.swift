@@ -100,6 +100,7 @@ enum DesignTokens {
     enum Spacing {
         static let Value0 = 0
         static let Value1 = 4
+        static let Value18 = 7.2
         static let Value2 = 8
         static let Value3 = 12
         static let Value4 = 16
@@ -110,7 +111,6 @@ enum DesignTokens {
         static let Value12 = 48
         static let Value16 = 64
         static let Value20 = 80
-        static let Value18 = 7.2
     }
     enum Radius {
         static let Sm = 8
@@ -285,6 +285,15 @@ enum DesignTokens {
             static let Interactive = "150ms ease"
             static let ScreenEnter = "300ms ease-out"
             static let Progress = "500ms ease-out"
+        }
+        enum Breadcrumb {
+            static let Height = 52
+            static let Gap = 12
+            static let ItemColor = "#6e6e80"
+            static let ItemHoverColor = "#1e293b"
+            static let CurrentColor = "#202123"
+            static let SeparatorColor = "#978d90"
+            static let ItemMaxWidth = "min(46vw, 520px)"
         }
         enum Tag {
             static let FontSize = 12

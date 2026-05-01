@@ -142,6 +142,7 @@ export const WorkspaceBreadcrumbBar = () => {
                       isLast && "workspace-breadcrumb-bar__label--current",
                     )}
                     title={crumb.label}
+                    aria-current={isLast ? "page" : undefined}
                   >
                     {crumb.label}
                   </span>

@@ -100,6 +100,7 @@ object DesignTokens {
     object Spacing {
         const val Value0 = 0
         const val Value1 = 4
+        const val Value18 = 7.2
         const val Value2 = 8
         const val Value3 = 12
         const val Value4 = 16
@@ -110,7 +111,6 @@ object DesignTokens {
         const val Value12 = 48
         const val Value16 = 64
         const val Value20 = 80
-        const val Value18 = 7.2
     }
     object Radius {
         const val Sm = 8
@@ -285,6 +285,15 @@ object DesignTokens {
             const val Interactive = "150ms ease"
             const val ScreenEnter = "300ms ease-out"
             const val Progress = "500ms ease-out"
+        }
+        object Breadcrumb {
+            const val Height = 52
+            const val Gap = 12
+            const val ItemColor = "#6e6e80"
+            const val ItemHoverColor = "#1e293b"
+            const val CurrentColor = "#202123"
+            const val SeparatorColor = "#978d90"
+            const val ItemMaxWidth = "min(46vw, 520px)"
         }
         object Tag {
             const val FontSize = 12
