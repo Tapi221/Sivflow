@@ -1042,9 +1042,11 @@ const SettingsDialog = ({
         surface="plain"
         accessibleTitle="設定"
         accessibleDescription="学習体験と同期まわりの既定値を調整します。"
-        className="!w-[min(1240px,calc(100vw-32px))] !max-w-none h-[min(90vh,860px)] overflow-hidden rounded-[32px] border border-slate-200 bg-slate-50 p-0 shadow-[0_32px_90px_rgba(15,23,42,0.18)]"
+        overlayClassName="bg-slate-900/18 backdrop-blur-[2px]"
+        contentWrapperClassName="items-center justify-center p-4 md:p-8"
+        className="!w-[min(1180px,calc(100vw-96px))] !max-w-none h-[min(86vh,820px)] overflow-hidden rounded-[28px] border border-slate-200/90 bg-white p-0 shadow-[0_32px_90px_rgba(15,23,42,0.22)]"
       >
-        <div className="ds-settings-panel flex h-full min-h-0 overflow-hidden">
+        <div className="ds-settings-panel flex h-full min-h-0 overflow-hidden rounded-[28px] bg-slate-50">
           <aside className="hidden w-[320px] shrink-0 border-r border-slate-200 bg-white lg:flex lg:flex-col">
             <div className="border-b border-slate-200 px-6 py-6">
               <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-bold tracking-[0.16em] text-emerald-700">
@@ -1135,7 +1137,7 @@ const SettingsDialog = ({
           </aside>
 
           <div className="flex min-h-0 flex-1 flex-col">
-            <div className="border-b border-slate-200 bg-white/80 px-5 py-4 backdrop-blur md:px-6">
+            <div className="border-b border-slate-200 bg-white/90 px-5 py-4 backdrop-blur md:px-6">
               <div className="lg:hidden">
                 <Select
                   value={activeTab}
