@@ -1126,4 +1126,5 @@ const PdfLibraryDashboard = ({
   );
 };
 
+export { PdfLibraryDashboard };
 export default PdfLibraryDashboard;
