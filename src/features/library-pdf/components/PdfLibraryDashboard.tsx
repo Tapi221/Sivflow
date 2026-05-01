@@ -1,11 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { TagChip } from "@/components/tag/TagChip";
 import { useSetBreadcrumbAction } from "@/contexts/BreadcrumbContext";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
-import { buildPdfDashboardRows, type PdfDashboardRow } from "@/features/library-pdf/model/pdfLibraryRow";
+import {
+  buildPdfDashboardRows,
+  type PdfDashboardRow,
+} from "@/features/library-pdf/model/pdfLibraryRow";
+import { usePdfLibraryDashboardState } from "@/features/library-pdf/hooks/usePdfLibraryDashboardState";
 import type { DocumentItem, Folder } from "@/types";
 
 type PdfLibraryDashboardProps = {
@@ -94,53 +98,6 @@ const selectedColumnBackground =
 
 const selectedColumnAccent =
   "var(--ds-semantic-color-interactive-column-selected-accent, #4f6b54)";
-
-const clampColumnWidth = (
-  width: number,
-  minWidth: number,
-  maxWidth?: number,
-): number => {
-  if (!Number.isFinite(width)) {
-    return minWidth;
-  }
-
-  if (typeof maxWidth === "number") {
-    return Math.min(Math.max(width, minWidth), maxWidth);
-  }
-
-  return Math.max(width, minWidth);
-};
-
-const loadStoredColumns = (): DashboardColumn[] => {
-  if (typeof window === "undefined") {
-    return DEFAULT_COLUMNS;
-  }
-
-  try {
-    const raw = window.localStorage.getItem(COLUMN_STORAGE_KEY);
-
-    if (!raw) {
-      return DEFAULT_COLUMNS;
-    }
-
-    const parsed = JSON.parse(raw) as Partial<Record<ColumnId, number>>;
-
-    return DEFAULT_COLUMNS.map((column) => {
-      const storedWidth = parsed[column.id];
-
-      if (typeof storedWidth !== "number") {
-        return column;
-      }
-
-      return {
-        ...column,
-        width: clampColumnWidth(storedWidth, column.minWidth, column.maxWidth),
-      };
-    });
-  } catch {
-    return DEFAULT_COLUMNS;
-  }
-};
 
 const buildGridTemplateColumns = (columns: DashboardColumn[]): string => {
   return columns.map((column) => `${column.width}px`).join(" ");
@@ -318,54 +275,6 @@ const PdfLibraryDashboard = ({
   const { tagById, getTagColor } = useTags();
   const setBreadcrumbAction = useSetBreadcrumbAction();
   const [, setExpandedFolders] = useState<Set<string>>(new Set());
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
-    null,
-  );
-  const [selectedColumnId, setSelectedColumnId] = useState<ColumnId | null>(
-    null,
-  );
-  const [pageIndex, setPageIndex] = useState(0);
-  const [columns, setColumns] = useState<DashboardColumn[]>(() =>
-    loadStoredColumns(),
-  );
-  const [isColumnResizing, setIsColumnResizing] = useState(false);
-  const resizeCleanupRef = useRef<(() => void) | null>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const widthMap = Object.fromEntries(
-      columns.map((column) => [column.id, column.width]),
-    );
-
-    window.localStorage.setItem(COLUMN_STORAGE_KEY, JSON.stringify(widthMap));
-  }, [columns]);
-
-  useEffect(() => {
-    return () => {
-      resizeCleanupRef.current?.();
-      resizeCleanupRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isColumnResizing) {
-      return;
-    }
-
-    const previousCursor = document.body.style.cursor;
-    const previousUserSelect = document.body.style.userSelect;
-
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-
-    return () => {
-      document.body.style.cursor = previousCursor;
-      document.body.style.userSelect = previousUserSelect;
-    };
-  }, [isColumnResizing]);
 
   const rows = useMemo<PdfDashboardRow[]>(() => {
     return buildPdfDashboardRows({
@@ -375,85 +284,25 @@ const PdfLibraryDashboard = ({
     });
   }, [documents, folders, tagById]);
 
-  useEffect(() => {
-    if (rows.length === 0) {
-      setSelectedDocumentId(null);
-      setPageIndex(0);
-      return;
-    }
-
-    setSelectedDocumentId((currentValue) => {
-      if (currentValue && rows.some((row) => row.id === currentValue)) {
-        return currentValue;
-      }
-
-      return rows[0]?.id ?? null;
-    });
-  }, [rows]);
-
-  const totalPageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
-
-  useEffect(() => {
-    setPageIndex((currentValue) =>
-      Math.max(0, Math.min(currentValue, totalPageCount - 1)),
-    );
-  }, [totalPageCount]);
-
-  useEffect(() => {
-    if (!selectedDocumentId) {
-      return;
-    }
-
-    const selectedIndex = rows.findIndex(
-      (row) => row.id === selectedDocumentId,
-    );
-
-    if (selectedIndex === -1) {
-      return;
-    }
-
-    const nextPageIndex = Math.floor(selectedIndex / PAGE_SIZE);
-    setPageIndex((currentValue) =>
-      currentValue === nextPageIndex ? currentValue : nextPageIndex,
-    );
-  }, [rows, selectedDocumentId]);
-
-  const selectedRow = useMemo(() => {
-    if (!selectedDocumentId) {
-      return null;
-    }
-
-    return rows.find((row) => row.id === selectedDocumentId) ?? null;
-  }, [rows, selectedDocumentId]);
-
-  const selectedColumnOverlay = useMemo(() => {
-    if (!selectedColumnId) {
-      return null;
-    }
-
-    const selectedIndex = columns.findIndex(
-      (column) => column.id === selectedColumnId,
-    );
-
-    if (selectedIndex === -1) {
-      return null;
-    }
-
-    const left =
-      columns
-        .slice(0, selectedIndex)
-        .reduce((sum, column) => sum + column.width, 0) +
-      selectedIndex * COLUMN_GAP_PX;
-
-    const beforeGap = selectedIndex === 0 ? 0 : COLUMN_GAP_PX / 2;
-    const afterGap =
-      selectedIndex === columns.length - 1 ? 0 : COLUMN_GAP_PX / 2;
-
-    return {
-      left: left - beforeGap,
-      width: columns[selectedIndex].width + beforeGap + afterGap,
-    };
-  }, [columns, selectedColumnId]);
+  const {
+    columns,
+    pageIndex,
+    selectedColumnId,
+    selectedColumnOverlay,
+    selectedDocumentId,
+    selectedRow,
+    setPageIndex,
+    setSelectedColumnId,
+    setSelectedDocumentId,
+    handleColumnResizeReset,
+    handleColumnResizeStart,
+  } = usePdfLibraryDashboardState({
+    rows,
+    defaultColumns: DEFAULT_COLUMNS,
+    columnStorageKey: COLUMN_STORAGE_KEY,
+    pageSize: PAGE_SIZE,
+    columnGapPx: COLUMN_GAP_PX,
+  });
 
   const importTargetFolderId =
     selectedRow?.folderId ?? rows[0]?.folderId ?? folders[0]?.id ?? null;
