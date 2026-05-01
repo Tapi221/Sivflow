@@ -100,7 +100,6 @@ enum DesignTokens {
     enum Spacing {
         static let Value0 = 0
         static let Value1 = 4
-        static let Value18 = 7.2
         static let Value2 = 8
         static let Value3 = 12
         static let Value4 = 16
@@ -111,6 +110,7 @@ enum DesignTokens {
         static let Value12 = 48
         static let Value16 = 64
         static let Value20 = 80
+        static let Value18 = 7.2
     }
     enum Radius {
         static let Sm = 8
@@ -242,6 +242,10 @@ enum DesignTokens {
                 static let PrimaryHover = "#6d7d48"
                 static let PrimarySoft = "#edf0df"
                 static let Accent = "#96a867"
+            }
+            enum Interactive {
+                static let SelectedSubtle = "#e6ebe3"
+                static let SelectedAccent = "#6a876e"
             }
             enum Status {
                 static let Danger = "#e11d48"
