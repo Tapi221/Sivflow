@@ -7,12 +7,10 @@ import { createInitialExplorerState } from "./explorerState";
 
 type UseExplorerControllerParams = {
   initialRouteState: ExplorerRouteState;
-  onOpenSettings: () => void;
 };
 
 export const useExplorerController = ({
   initialRouteState,
-  onOpenSettings,
 }: UseExplorerControllerParams) => {
   const [state, dispatch] = useReducer(
     explorerReducer,
@@ -24,17 +22,9 @@ export const useExplorerController = ({
     dispatch({ type: "SELECT_FOLDER", payload: { folderId } });
   }, []);
 
-  const selectItem = useCallback(
-    (item: SelectedExplorerItem) => {
-      if (item?.type === "settings") {
-        onOpenSettings();
-        return;
-      }
-
-      dispatch({ type: "SELECT_ITEM", payload: { item } });
-    },
-    [onOpenSettings],
-  );
+  const selectItem = useCallback((item: SelectedExplorerItem) => {
+    dispatch({ type: "SELECT_ITEM", payload: { item } });
+  }, []);
 
   const applyRouteState = useCallback((nextRouteState: ExplorerRouteState) => {
     dispatch({ type: "APPLY_ROUTE_STATE", payload: nextRouteState });

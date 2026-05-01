@@ -86,14 +86,6 @@ const ExploreIcon = ({ className }: SidebarIconProps) => (
   </IconShell>
 );
 
-const GearIcon = ({ className }: SidebarIconProps) => (
-  <IconShell className={className}>
-    <path
-      d="M12 8.5A3.5 3.5 0 1 1 12 15.5 3.5 3.5 0 0 1 12 8.5Zm7.5 3.5c0-.5-.1-1-.2-1.5l2-1.5-2-3.4-2.4 1a8.7 8.7 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.6A8.7 8.7 0 0 0 7 6.6l-2.4-1-2 3.4 2 1.5a7.1 7.1 0 0 0 0 3l-2 1.5 2 3.4 2.4-1a8.7 8.7 0 0 0 2.6 1.5L10 21.5h4l.4-2.6a8.7 8.7 0 0 0 2.6-1.5l2.4 1 2-3.4-2-1.5c.1-.5.2-1 .2-1.5Z"
-      fill="currentColor"
-    />
-  </IconShell>
-);
 
 const CloudIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
@@ -150,8 +142,7 @@ const mainNavItems: AppSidebarNavItem[] = [
     sectionKey: "library",
     match: (pathname, searchParams) =>
       pathname === "/folders" &&
-      searchParams.get("home") !== "1" &&
-      searchParams.get("settings") !== "true",
+      searchParams.get("home") !== "1",
   },
   {
     id: "calendar",
@@ -174,16 +165,7 @@ const libraryChildItems = [
   { label: "ノート", value: "notes" },
 ];
 
-const footerItems: AppSidebarNavItem[] = [
-  {
-    id: "settings",
-    label: "設定",
-    to: "/folders?settings=true",
-    icon: <GearIcon className="app-sidebar__nav-icon" />,
-    match: (pathname, searchParams) =>
-      pathname === "/folders" && searchParams.get("settings") === "true",
-  },
-];
+const footerItems: AppSidebarNavItem[] = [];
 
 const isNavItemActiveByLocation = (
   item: AppSidebarNavItem,

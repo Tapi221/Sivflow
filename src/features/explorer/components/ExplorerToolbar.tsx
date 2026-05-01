@@ -18,7 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
-import { useExplorerSettingsOpener } from "@/features/explorer/adapters/web/useExplorerSettingsOpener";
+
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useTags } from "@/hooks/settings/useTags";
@@ -499,7 +499,7 @@ const ExplorerPathBar = () => {
 export const ExplorerToolbar = () => {
   const { tags } = useTags();
   const openGlobalSearch = useGlobalSearchStore((state) => state.open);
-  const openSettings = useExplorerSettingsOpener();
+
   const panelPreset = floatingPanelPresets.filter;
   const allTags = useMemo(
     () =>
@@ -566,11 +566,7 @@ export const ExplorerToolbar = () => {
                 description="フォルダ・カード・PDFを横断検索"
                 onClick={openGlobalSearch}
               />
-              <ExplorerToolbarMenuItem
-                label="エクスプローラー設定"
-                description="表示と動作を調整"
-                onClick={openSettings}
-              />
+
             </div>
           </PopoverContent>
         </Popover>

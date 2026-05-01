@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import SettingsDialog from "@/components/settings/SettingsDialog";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import { GlobalSearchDialog } from "@/features/global-search/components/GlobalSearchDialog";
 import type { GlobalSearchItem } from "@/features/global-search/model/globalSearchTypes";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { cn } from "@/lib/utils";
 import { UI_TYPO } from "@/styles/tokens/typography";
-import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
+
 import { useKatexLoader } from "@/hooks/platform/useKatexLoader";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
@@ -18,7 +18,7 @@ import { DesktopWindowControls } from "./layout/DesktopWindowControls";
 const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(location.pathname);
   const presentationTarget = usePresentationTarget();
   const isDesktopPresentation = presentationTarget === "desktop";
@@ -34,8 +34,6 @@ const Layout = () => {
     document.body.scrollTop = 0;
   }, [location.pathname]);
 
-  const { isSettingsOpen, settingsTab, setIsSettingsOpen } =
-    useSettingsQueryParam(searchParams, setSearchParams);
 
   useKatexLoader();
 
@@ -95,18 +93,7 @@ const Layout = () => {
           void navigate("/directory");
         },
       },
-      {
-        id: "action:settings",
-        value: "action:settings",
-        kind: "action",
-        iconKind: "settings",
-        title: "設定",
-        keywords: ["設定", "settings", "preferences", "option", "options"],
-        priority: 88,
-        onSelect: () => {
-          setIsSettingsOpen(true);
-        },
-      },
+
     ],
     [navigate, setIsSettingsOpen],
   );
@@ -154,11 +141,6 @@ const Layout = () => {
     >
       <GlobalSearchDialog />
 
-      <SettingsDialog
-        open={isSettingsOpen}
-        onOpenChange={setIsSettingsOpen}
-        initialTab={settingsTab ?? "study"}
-      />
 
       <LocalDBStatusBanner />
       <SecurityAlertBanner />

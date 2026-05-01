@@ -7,7 +7,7 @@ import {
   getLastSelectedFolderId,
   setLastSelectedFolderId,
 } from "./explorerStorage";
-import { useExplorerSettingsOpener } from "./useExplorerSettingsOpener";
+
 
 export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 
@@ -17,13 +17,13 @@ export type FoldersRouteAdapter = {
   readRouteState: () => ExplorerRouteState;
   writeRouteState: (next: URLSearchParams) => void;
   persistLastSelectedFolderId: (folderId: string | null) => void;
-  openSettings: () => void;
+
   getBaseSearchParams: () => URLSearchParams;
 };
 
 export const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const openSettings = useExplorerSettingsOpener();
+
   const presentationTarget = usePresentationTarget();
   const isDesktop = presentationTarget === "desktop";
 
@@ -59,13 +59,13 @@ export const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
       readRouteState,
       writeRouteState,
       persistLastSelectedFolderId: persistLastFolder,
-      openSettings,
+
       getBaseSearchParams,
     }),
     [
       getBaseSearchParams,
       isDesktop,
-      openSettings,
+
       persistLastFolder,
       readRouteState,
       searchParams,
