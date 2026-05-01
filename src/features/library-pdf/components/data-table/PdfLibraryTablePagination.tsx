@@ -15,27 +15,6 @@ type PdfLibraryTablePaginationProps = {
   totalRowCount: number;
 };
 
-const buildVisiblePageNumbers = (
-  currentPage: number,
-  totalPageCount: number,
-): number[] => {
-  if (totalPageCount <= 1) {
-    return [0];
-  }
-
-  const pages = new Set<number>([0, totalPageCount - 1]);
-
-  for (let offset = -1; offset <= 1; offset += 1) {
-    const page = currentPage + offset;
-
-    if (page >= 0 && page < totalPageCount) {
-      pages.add(page);
-    }
-  }
-
-  return Array.from(pages).sort((left, right) => left - right);
-};
-
 export const PdfLibraryTablePagination = ({
   table,
   totalRowCount,
@@ -45,15 +24,10 @@ export const PdfLibraryTablePagination = ({
   const pageSize = table.getState().pagination.pageSize;
   const visibleStart = totalRowCount === 0 ? 0 : currentPage * pageSize + 1;
   const visibleEnd = Math.min(totalRowCount, (currentPage + 1) * pageSize);
-  const pageNumbers = buildVisiblePageNumbers(currentPage, totalPageCount);
 
   return (
-    <div className="flex flex-col gap-3 border-t border-[#eef2f7] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="text-sm text-[#6b7280]">
-        {visibleStart}-{visibleEnd} / {totalRowCount} 件
-      </div>
-
-      <Pagination className="mx-0 w-auto justify-start sm:justify-end">
+    <div className="flex items-center justify-between border-t border-[#eef1f4] px-4 py-3">
+      <Pagination className="mx-0 w-auto justify-start">
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
@@ -63,22 +37,18 @@ export const PdfLibraryTablePagination = ({
               }}
             />
           </PaginationItem>
-
-          {pageNumbers.map((pageNumber) => (
-            <PaginationItem key={pageNumber}>
-              <PaginationButton
-                isActive={pageNumber === currentPage}
-                size="icon"
-                type="button"
-                onClick={() => {
-                  table.setPageIndex(pageNumber);
-                }}
-              >
-                {pageNumber + 1}
-              </PaginationButton>
-            </PaginationItem>
-          ))}
-
+          <PaginationItem>
+            <PaginationButton
+              isActive
+              size="icon"
+              type="button"
+              onClick={() => {
+                table.setPageIndex(currentPage);
+              }}
+            >
+              {currentPage + 1}
+            </PaginationButton>
+          </PaginationItem>
           <PaginationItem>
             <PaginationNext
               disabled={!table.getCanNextPage()}
@@ -89,6 +59,10 @@ export const PdfLibraryTablePagination = ({
           </PaginationItem>
         </PaginationContent>
       </Pagination>
+
+      <div className="text-[14px] font-medium text-[#7b8794]">
+        {visibleStart}-{visibleEnd} / {totalRowCount}件
+      </div>
     </div>
   );
 };

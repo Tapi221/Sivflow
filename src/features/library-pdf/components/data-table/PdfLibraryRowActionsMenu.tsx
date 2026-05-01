@@ -6,7 +6,6 @@ import {
   DropdownMenuItemLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import type { PdfLibraryRow } from "@/features/library-pdf/model/pdfLibraryRow";
 import { Copy, ExternalLink, MoreVertical } from "@/ui/icons";
 
@@ -34,20 +33,18 @@ export const PdfLibraryRowActionsMenu = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          aria-label={`${row.fileName} の操作`}
-          className="h-8 w-8 rounded-full p-0"
-          size="icon"
+        <button
           type="button"
-          variant="ghost"
+          aria-label={`${row.fileName} の操作`}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-[#7b8794] transition-colors hover:bg-[rgba(0,0,0,0.04)]"
           onClick={(event) => {
             event.stopPropagation();
           }}
         >
           <MoreVertical size={16} />
-        </Button>
+        </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52">
+      <DropdownMenuContent align="end" className="w-52" onClick={(event) => event.stopPropagation()}>
         <DropdownMenuItem
           onClick={() => {
             onOpenDocument(row.id);
@@ -70,13 +67,13 @@ export const PdfLibraryRowActionsMenu = ({
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
-            void writeClipboard(row.storagePathLabel);
+            void writeClipboard(row.folderPathLabel);
           }}
         >
           <DropdownMenuItemIcon>
             <Copy size={16} />
           </DropdownMenuItemIcon>
-          <DropdownMenuItemLabel>保存先パスをコピー</DropdownMenuItemLabel>
+          <DropdownMenuItemLabel>保存先フォルダをコピー</DropdownMenuItemLabel>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -23,7 +23,7 @@ const PaginationContent = ({
 }: React.ComponentProps<"ul">) => {
   return (
     <ul
-      className={cn("flex flex-row items-center gap-1", className)}
+      className={cn("flex flex-row items-center gap-2", className)}
       {...props}
     />
   );
@@ -51,7 +51,11 @@ const PaginationButton = ({
   return (
     <Button
       aria-current={isActive ? "page" : undefined}
-      className={cn("h-8 w-8 rounded-full p-0", className)}
+      className={cn(
+        "h-8 min-w-8 rounded-full border border-[#e5e7eb] bg-[#ffffff] px-3 text-[12px] font-semibold text-[#52606d] shadow-none hover:bg-[#f8fafc]",
+        isActive && "border-transparent bg-[#f3f4f6] text-[#4b5563] hover:bg-[#eef2f6]",
+        className,
+      )}
       size={size}
       variant={variant}
       {...props}
@@ -66,7 +70,7 @@ const PaginationPrevious = ({
   return (
     <PaginationButton
       aria-label="前のページ"
-      className={cn(className)}
+      className={cn("w-8 px-0", className)}
       {...props}
     >
       <ChevronLeft size={16} />
@@ -81,7 +85,7 @@ const PaginationNext = ({
   return (
     <PaginationButton
       aria-label="次のページ"
-      className={cn(className)}
+      className={cn("w-8 px-0", className)}
       {...props}
     >
       <ChevronRight size={16} />
@@ -89,26 +93,10 @@ const PaginationNext = ({
   );
 };
 
-const PaginationEllipsis = ({
-  className,
-  ...props
-}: React.ComponentProps<"span">) => {
-  return (
-    <span
-      aria-hidden="true"
-      className={cn("flex h-8 w-8 items-center justify-center text-sm", className)}
-      {...props}
-    >
-      …
-    </span>
-  );
-};
-
 export {
   Pagination,
   PaginationButton,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationNext,
   PaginationPrevious,
