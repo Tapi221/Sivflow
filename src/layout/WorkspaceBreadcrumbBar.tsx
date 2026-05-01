@@ -1,4 +1,4 @@
-import { Fragment, useMemo } from "react";
+import { Fragment, useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import {
@@ -6,7 +6,10 @@ import {
   useBreadcrumbExtraCrumbs,
 } from "@/contexts/BreadcrumbContext";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
-import type { WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
+import type {
+  WorkspaceSidebarSection,
+  WorkspaceTab,
+} from "@/features/workspace-tabs/domain/workspaceTab";
 import { useWorkspaceTabsStore } from "@/features/workspace-tabs/store/useWorkspaceTabsStore";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +32,28 @@ const buildLibraryTypeRoute = (libraryType: string) => {
   searchParams.set("libraryType", libraryType);
 
   return `/folders?${searchParams.toString()}`;
+};
+
+const resolveSectionKeyForTarget = (
+  target: string,
+): WorkspaceSidebarSection | null => {
+  const [pathname = "", search = ""] = target.split("?");
+  const normalizedPathname = pathname.toLowerCase();
+  const searchParams = new URLSearchParams(search);
+
+  if (normalizedPathname === "/folders") {
+    return searchParams.get("home") === "1" ? "home" : "library";
+  }
+
+  if (normalizedPathname === "/gallery") {
+    return "review";
+  }
+
+  if (normalizedPathname === "/calendar") {
+    return "calendar";
+  }
+
+  return null;
 };
 
 const resolveActiveCrumbs = ({
@@ -119,6 +144,7 @@ export const WorkspaceBreadcrumbBar = () => {
   const extraCrumbs = useBreadcrumbExtraCrumbs();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
+  const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
 
   const activeTab = useMemo(
     () => tabs.find((tab) => tab.id === activeTabId) ?? null,
@@ -133,6 +159,19 @@ export const WorkspaceBreadcrumbBar = () => {
         libraryType: new URLSearchParams(search).get("libraryType"),
       }),
     [activeTab, extraCrumbs, search],
+  );
+
+  const handleCrumbNavigate = useCallback(
+    (target: string) => {
+      const sectionKey = resolveSectionKeyForTarget(target);
+
+      if (sectionKey) {
+        openSectionTab(sectionKey);
+      }
+
+      navigate(target);
+    },
+    [navigate, openSectionTab],
   );
 
   if (!activeTab || crumbs.length === 0) {
@@ -159,7 +198,7 @@ export const WorkspaceBreadcrumbBar = () => {
                     type="button"
                     className="workspace-breadcrumb-bar__button"
                     title={crumb.label}
-                    onClick={() => navigate(target)}
+                    onClick={() => handleCrumbNavigate(target)}
                   >
                     {crumb.label}
                   </button>
