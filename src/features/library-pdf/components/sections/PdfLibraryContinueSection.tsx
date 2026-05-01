@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import type { CSSProperties, ComponentType } from "react";
 
 import type { PdfDashboardRow } from "@/features/library-pdf/model/pdfLibraryRow";
 
@@ -15,6 +15,12 @@ type PdfLibraryContinueSectionProps = {
   formatDateTime: (value: Date | null) => string;
   onSelectDocument: (documentId: string) => void;
   IconBadge: IconBadgeComponent;
+};
+
+const dateTimeTextStyle: CSSProperties = {
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif',
+  fontVariantNumeric: "tabular-nums",
 };
 
 export const PdfLibraryContinueSection = ({
@@ -60,7 +66,13 @@ export const PdfLibraryContinueSection = ({
                 </div>
                 <div className="mt-1.5 flex items-center justify-between gap-2 text-[12px] text-[#7d8784]">
                   <span className="truncate">
-                    最終閲覧: {formatDateTime(row.lastViewedAt)}
+                    最終閲覧:{" "}
+                    <span
+                      className="whitespace-nowrap"
+                      style={dateTimeTextStyle}
+                    >
+                      {formatDateTime(row.lastViewedAt)}
+                    </span>
                   </span>
                   <span className="font-semibold text-[#5f6f69]">
                     {row.progressPercent ?? 0}%

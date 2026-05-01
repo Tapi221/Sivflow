@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from "react";
 
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { TagChip } from "@/components/tag/TagChip";
@@ -102,6 +108,16 @@ const selectedColumnBackground =
 
 const selectedColumnAccent =
   "var(--ds-semantic-color-interactive-column-selected-accent, #4f6b54)";
+
+const dateTimeTextStyle: CSSProperties = {
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif',
+  fontVariantNumeric: "tabular-nums",
+};
+
+const isDateTimeColumn = (columnId: ColumnId): boolean => {
+  return columnId === "lastViewed" || columnId === "updatedAt";
+};
 
 const buildGridTemplateColumns = (columns: DashboardColumn[]): string => {
   return columns.map((column) => `${column.width}px`).join(" ");
@@ -571,7 +587,16 @@ const PdfLibraryDashboard = ({
                                 )
                               }
                             >
-                              <span className="truncate">{column.label}</span>
+                              <span
+                                className="truncate"
+                                style={
+                                  isDateTimeColumn(column.id)
+                                    ? dateTimeTextStyle
+                                    : undefined
+                                }
+                              >
+                                {column.label}
+                              </span>
                             </button>
 
                             {column.resizable ? (
@@ -641,7 +666,7 @@ const PdfLibraryDashboard = ({
                                   </span>
                                   <button
                                     type="button"
-                                    className="ml-auto inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-[#808192] transition-colors hover:bg-[#f3f4f6]"
+                                    className="ml-auto inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-[#ababab] transition-colors hover:bg-[#f3f4f6] hover:text-[#808192]"
                                     aria-label={`${row.title}を開く`}
                                     title={`${row.title}を開く`}
                                     onClick={(event) => {
@@ -674,10 +699,16 @@ const PdfLibraryDashboard = ({
                             <div className="truncate text-[13px] font-[542] leading-[17px] text-[#46514f]">
                               {formatPageCount(row.pageCount)}
                             </div>
-                            <div className="truncate text-[13px] leading-[17px] text-[#75817c]">
+                            <div
+                              className="truncate whitespace-nowrap text-[13px] leading-[17px] text-[#75817c]"
+                              style={dateTimeTextStyle}
+                            >
                               {formatDateTime(row.lastViewedAt)}
                             </div>
-                            <div className="truncate text-[13px] leading-[17px] text-[#75817c]">
+                            <div
+                              className="truncate whitespace-nowrap text-[13px] leading-[17px] text-[#75817c]"
+                              style={dateTimeTextStyle}
+                            >
                               {formatDateTime(row.updatedAt)}
                             </div>
                             <div className="text-[18px] leading-none text-[#9aa59e]">
