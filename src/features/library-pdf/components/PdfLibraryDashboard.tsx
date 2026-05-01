@@ -111,6 +111,12 @@ const cardClassName =
 const breadcrumbActionIconClassName =
   "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]";
 
+const selectedInteractiveBackground =
+  "var(--ds-semantic-color-interactive-selected-subtle, var(--app-sidebar-active-bg, #e6ebe3))";
+
+const selectedInteractiveAccent =
+  "var(--ds-semantic-color-interactive-selected-accent, var(--app-sidebar-icon-active, #6a876e))";
+
 const toDate = (value: unknown): Date | null => {
   return normalizeDate(value);
 };
@@ -902,12 +908,7 @@ const PdfLibraryDashboard = ({
                   style={{ gridTemplateColumns }}
                 >
                   {columns.map((column) => (
-                    <div
-                      key={column.id}
-                      className={cn(
-                        "relative min-w-0",
-                      )}
-                    >
+                    <div key={column.id} className="relative min-w-0">
                       <div className="truncate pr-2">{column.label}</div>
 
                       {column.resizable ? (
@@ -935,15 +936,25 @@ const PdfLibraryDashboard = ({
                   {paginatedRows.map((row) => {
                     const isSelected = row.id === selectedRow?.id;
 
+                    const selectedRowStyle = isSelected
+                      ? {
+                          backgroundColor: selectedInteractiveBackground,
+                          boxShadow: `inset 2px 0 0 ${selectedInteractiveAccent}`,
+                        }
+                      : undefined;
+
                     return (
                       <button
                         key={row.id}
                         type="button"
                         className={cn(
                           "grid h-8 w-full items-center gap-4 text-left text-[13px] font-[542] leading-[17px] transition-colors",
-                          isSelected ? "bg-[#f9fafb]" : "hover:bg-[#fafafa]",
+                          isSelected ? "hover:brightness-[0.985]" : "hover:bg-[#fafafa]",
                         )}
-                        style={{ gridTemplateColumns }}
+                        style={{
+                          gridTemplateColumns,
+                          ...selectedRowStyle,
+                        }}
                         onClick={() => setSelectedDocumentId(row.id)}
                         onDoubleClick={() => onOpenDocument(row.id)}
                       >
@@ -981,7 +992,14 @@ const PdfLibraryDashboard = ({
                         <div className="truncate text-[13px] leading-[17px] text-[#75817c]">
                           {formatDateTime(row.updatedAt)}
                         </div>
-                        <div className="text-[18px] leading-none text-[#9aa59e]">
+                        <div
+                          className="text-[18px] leading-none"
+                          style={{
+                            color: isSelected
+                              ? selectedInteractiveAccent
+                              : "#9aa59e",
+                          }}
+                        >
                           …
                         </div>
                       </button>
