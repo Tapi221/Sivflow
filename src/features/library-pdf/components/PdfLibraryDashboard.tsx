@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { TagChip } from "@/components/tag/TagChip";
@@ -206,6 +206,41 @@ const BreadcrumbActionFilterIcon = () => {
         d="M4.75 6.75H19.25L13.75 13.125V18.25L10.25 16.25V13.125L4.75 6.75Z"
         stroke="currentColor"
         strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+const PdfOpenActionIcon = () => {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M15.9999 12.6671V16.667C15.9999 17.0206 15.8594 17.3598 15.6094 17.6098C15.3594 17.8599 15.0202 18.0003 14.6666 18.0003H7.33332C6.9797 18.0003 6.64057 17.8599 6.39052 17.6098C6.14047 17.3598 6 17.0206 6 16.667V9.33375C6 8.98013 6.14047 8.641 6.39052 8.39095C6.64057 8.1409 6.9797 8.00043 7.33332 8.00043H11.3333"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14 6H18V9.99997"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10.6667 13.3333L18 6"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
     </svg>
@@ -466,7 +501,7 @@ const PdfLibraryDashboard = ({
       <div className="grid min-h-0 w-full grid-cols-1 gap-4">
         <div className="flex min-h-0 min-w-0 flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                        <PdfLibraryContinueSection
+            <PdfLibraryContinueSection
               cardClassName={cardClassName}
               continueRows={continueRows}
               formatDateTime={formatDateTime}
@@ -474,7 +509,7 @@ const PdfLibraryDashboard = ({
               IconBadge={IconBadge}
             />
 
-                        <PdfLibraryRecentSection
+            <PdfLibraryRecentSection
               cardClassName={cardClassName}
               recentRows={recentRows}
               onSelectDocument={setSelectedDocumentId}
@@ -565,12 +600,29 @@ const PdfLibraryDashboard = ({
                       {paginatedRows.map((row) => {
                         const isSelected = row.id === selectedRow?.id;
 
+                        const handleRowKeyDown = (
+                          event: KeyboardEvent<HTMLDivElement>,
+                        ) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            onOpenDocument(row.id);
+                            return;
+                          }
+
+                          if (event.key === " ") {
+                            event.preventDefault();
+                            setSelectedDocumentId(row.id);
+                          }
+                        };
+
                         return (
-                          <button
+                          <div
                             key={row.id}
-                            type="button"
+                            role="button"
+                            tabIndex={0}
                             className={cn(
                               "grid h-8 w-full items-center gap-4 text-left text-[13px] font-[542] leading-[17px] transition-colors",
+                              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6A876E]/30",
                               isSelected && !selectedColumnId
                                 ? "bg-[#f9fafb]"
                                 : "hover:bg-[#fafafa]",
@@ -578,27 +630,40 @@ const PdfLibraryDashboard = ({
                             style={{ gridTemplateColumns }}
                             onClick={() => setSelectedDocumentId(row.id)}
                             onDoubleClick={() => onOpenDocument(row.id)}
+                            onKeyDown={handleRowKeyDown}
                           >
                             <div className="min-w-0">
                               <div className="flex min-w-0 items-center gap-3">
                                 <IconBadge label="PDF" tone="rose" />
-                                <span className="truncate text-[13px] font-medium leading-[17px] text-[#273038]">
-                                  {row.title}
-                                </span>
+                                <div className="flex min-w-0 flex-1 items-center gap-2">
+                                  <span className="min-w-0 flex-1 truncate text-[13px] font-medium leading-[17px] text-[#273038]">
+                                    {row.title}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className="ml-auto inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-[#808192] transition-colors hover:bg-[#f3f4f6]"
+                                    aria-label={`${row.title}を開く`}
+                                    title={`${row.title}を開く`}
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      onOpenDocument(row.id);
+                                    }}
+                                  >
+                                    <PdfOpenActionIcon />
+                                  </button>
+                                </div>
                               </div>
                             </div>
 
                             <div className="flex min-w-0 items-center gap-2 overflow-hidden">
                               {row.tags.length > 0 ? (
-                                row.tags
-                                  .slice(0, 2)
-                                  .map((tag) => (
-                                    <TagChip
-                                      key={`${row.id}:${tag}`}
-                                      label={tag}
-                                      colorClass={getTagColor(tag)}
-                                    />
-                                  ))
+                                row.tags.slice(0, 2).map((tag) => (
+                                  <TagChip
+                                    key={`${row.id}:${tag}`}
+                                    label={tag}
+                                    colorClass={getTagColor(tag)}
+                                  />
+                                ))
                               ) : (
                                 <span className="truncate text-[13px] leading-[17px] text-[#93a09a]">
                                   タグなし
@@ -618,7 +683,7 @@ const PdfLibraryDashboard = ({
                             <div className="text-[18px] leading-none text-[#9aa59e]">
                               …
                             </div>
-                          </button>
+                          </div>
                         );
                       })}
                     </div>
@@ -671,4 +736,3 @@ const PdfLibraryDashboard = ({
 
 export { PdfLibraryDashboard };
 export default PdfLibraryDashboard;
-
