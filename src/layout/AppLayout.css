@@ -427,13 +427,13 @@
 .workspace-breadcrumb-bar {
   display: flex;
   min-width: 0;
-  height: 52px;
+  height: var(--ds-semantic-breadcrumb-height);
   flex-shrink: 0;
   align-items: center;
   overflow: hidden;
   background: var(--app-active-tab-bg);
   padding: 0 var(--workspace-content-gutter);
-  color: #8a8a8a;
+  color: var(--ds-semantic-breadcrumb-item-color);
   font-family:
     Inter,
     var(--explorer-chrome-font-family),
@@ -450,12 +450,12 @@
   max-width: 100%;
   flex: 1;
   align-items: center;
-  gap: 12px;
+  gap: var(--ds-semantic-breadcrumb-gap);
   padding: 0;
   margin: 0;
   list-style: none;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--ds-layout-font-size-meta);
+  font-weight: var(--ds-typography-font-weight-medium);
   letter-spacing: normal;
   line-height: normal;
 }
@@ -477,7 +477,7 @@
 .workspace-breadcrumb-bar__button,
 .workspace-breadcrumb-bar__label {
   min-width: 0;
-  max-width: min(46vw, 520px);
+  max-width: var(--ds-semantic-breadcrumb-item-max-width);
   overflow: hidden;
   border: 0;
   background: transparent;
@@ -488,6 +488,7 @@
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color var(--ds-semantic-motion-interactive);
   -webkit-app-region: no-drag;
 }
 
@@ -497,17 +498,17 @@
 
 .workspace-breadcrumb-bar__button:hover,
 .workspace-breadcrumb-bar__button:focus-visible {
-  color: #4f4f4f;
+  color: var(--ds-semantic-breadcrumb-item-hover-color);
 }
 
 .workspace-breadcrumb-bar__label--current {
-  color: #777777;
+  color: var(--ds-semantic-breadcrumb-current-color);
 }
 
 .workspace-breadcrumb-bar__separator {
   flex-shrink: 0;
-  color: #8a8a8a;
-  font-weight: 650;
+  color: var(--ds-semantic-breadcrumb-separator-color);
+  font-weight: var(--ds-typography-font-weight-semibold);
   user-select: none;
 }
 

@@ -157,6 +157,17 @@
   --ds-radius-pill: 999px;
   --ds-radius-sm: 8px;
   --ds-radius-xl: 16px;
+  --ds-semantic-breadcrumb-current-color: #202123;
+  --ds-semantic-breadcrumb-current-color-rgb: 32 33 35;
+  --ds-semantic-breadcrumb-gap: 12px;
+  --ds-semantic-breadcrumb-height: 52px;
+  --ds-semantic-breadcrumb-item-color: #6e6e80;
+  --ds-semantic-breadcrumb-item-color-rgb: 110 110 128;
+  --ds-semantic-breadcrumb-item-hover-color: #1e293b;
+  --ds-semantic-breadcrumb-item-hover-color-rgb: 30 41 59;
+  --ds-semantic-breadcrumb-item-max-width: min(46vw, 520px);
+  --ds-semantic-breadcrumb-separator-color: #978d90;
+  --ds-semantic-breadcrumb-separator-color-rgb: 151 141 144;
   --ds-semantic-color-action-accent: #96a867;
   --ds-semantic-color-action-accent-rgb: 150 168 103;
   --ds-semantic-color-action-primary: #8a9a5b;

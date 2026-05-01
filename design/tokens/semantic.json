@@ -68,6 +68,15 @@
     "screenEnter": "{motion.transition.screenEnter}",
     "progress": "{motion.transition.progress}"
   },
+  "breadcrumb": {
+    "height": 52,
+    "gap": "{spacing.3}",
+    "itemColor": "{semantic.color.text.secondary}",
+    "itemHoverColor": "{semantic.color.text.strong}",
+    "currentColor": "{semantic.color.text.primary}",
+    "separatorColor": "{semantic.color.text.placeholder}",
+    "itemMaxWidth": "min(46vw, 520px)"
+  },
   "tag": {
     "fontSize": 12,
     "fontWeight": "{typography.fontWeight.medium}",
