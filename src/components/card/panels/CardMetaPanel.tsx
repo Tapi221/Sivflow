@@ -1040,7 +1040,6 @@ const CardMetaPanelContent = ({
       (prev) => {
         const next = new URLSearchParams(prev);
         next.set("settings", "true");
-        next.set("settingsTab", "tags");
         return next;
       },
       { replace: true },
