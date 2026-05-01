@@ -246,6 +246,8 @@ enum DesignTokens {
             enum Interactive {
                 static let SelectedSubtle = "#e6ebe3"
                 static let SelectedAccent = "#6a876e"
+                static let ColumnSelectedSubtle = "rgba(106, 135, 110, 0.16)"
+                static let ColumnSelectedAccent = "#4f6b54"
             }
             enum Status {
                 static let Danger = "#e11d48"

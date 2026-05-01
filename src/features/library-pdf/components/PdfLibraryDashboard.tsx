@@ -111,11 +111,11 @@ const cardClassName =
 const breadcrumbActionIconClassName =
   "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]";
 
-const selectedInteractiveBackground =
-  "var(--ds-semantic-color-interactive-selected-subtle, var(--app-sidebar-active-bg, #e6ebe3))";
+const selectedColumnBackground =
+  "var(--ds-semantic-color-interactive-column-selected-subtle, rgba(106, 135, 110, 0.16))";
 
-const selectedInteractiveAccent =
-  "var(--ds-semantic-color-interactive-selected-accent, var(--app-sidebar-icon-active, #6a876e))";
+const selectedColumnAccent =
+  "var(--ds-semantic-color-interactive-column-selected-accent, #4f6b54)";
 
 const toDate = (value: unknown): Date | null => {
   return normalizeDate(value);
@@ -439,6 +439,9 @@ const PdfLibraryDashboard = ({
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
   );
+  const [selectedColumnId, setSelectedColumnId] = useState<ColumnId | null>(
+    null,
+  );
   const [pageIndex, setPageIndex] = useState(0);
   const [columns, setColumns] = useState<DashboardColumn[]>(() =>
     loadStoredColumns(),
@@ -572,6 +575,35 @@ const PdfLibraryDashboard = ({
 
     return rows.find((row) => row.id === selectedDocumentId) ?? null;
   }, [rows, selectedDocumentId]);
+
+  const selectedColumnOverlay = useMemo(() => {
+    if (!selectedColumnId) {
+      return null;
+    }
+
+    const selectedIndex = columns.findIndex(
+      (column) => column.id === selectedColumnId,
+    );
+
+    if (selectedIndex === -1) {
+      return null;
+    }
+
+    const left =
+      columns
+        .slice(0, selectedIndex)
+        .reduce((sum, column) => sum + column.width, 0) +
+      selectedIndex * COLUMN_GAP_PX;
+
+    const beforeGap = selectedIndex === 0 ? 0 : COLUMN_GAP_PX / 2;
+    const afterGap =
+      selectedIndex === columns.length - 1 ? 0 : COLUMN_GAP_PX / 2;
+
+    return {
+      left: left - beforeGap,
+      width: columns[selectedIndex].width + beforeGap + afterGap,
+    };
+  }, [columns, selectedColumnId]);
 
   const importTargetFolderId =
     selectedRow?.folderId ?? rows[0]?.folderId ?? folders[0]?.id ?? null;
@@ -903,108 +935,141 @@ const PdfLibraryDashboard = ({
                 className="min-w-max"
                 style={{ minWidth: `${gridMinWidth}px` }}
               >
-                <div
-                  className="grid h-8 items-center gap-4 border-b border-[#e5e7eb] text-[12px] font-medium leading-normal text-[#58635f]"
-                  style={{ gridTemplateColumns }}
-                >
-                  {columns.map((column) => (
-                    <div key={column.id} className="relative min-w-0">
-                      <div className="truncate pr-2">{column.label}</div>
-
-                      {column.resizable ? (
-                        <div
-                          role="separator"
-                          aria-orientation="vertical"
-                          aria-label={`${column.label} の列幅を調整`}
-                          title="ドラッグで列幅調整、ダブルクリックで初期幅に戻す"
-                          className="group/resize absolute inset-y-0 right-[-8px] z-10 flex w-4 items-center justify-center cursor-col-resize touch-none"
-                          onDoubleClick={() =>
-                            handleColumnResizeReset(column.id)
-                          }
-                          onPointerDown={(event) =>
-                            handleColumnResizeStart(event, column.id)
-                          }
-                        >
-                          <div className="h-[1em] w-[1px] bg-[#e5e7eb] transition-colors group-hover/resize:bg-[#9ca3af]" />
-                        </div>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="divide-y divide-[#eef0f3]">
-                  {paginatedRows.map((row) => {
-                    const isSelected = row.id === selectedRow?.id;
-
-                    const selectedRowStyle = isSelected
-                      ? {
-                          backgroundColor: selectedInteractiveBackground,
-                          boxShadow: `inset 2px 0 0 ${selectedInteractiveAccent}`,
-                        }
-                      : undefined;
-
-                    return (
-                      <button
-                        key={row.id}
-                        type="button"
-                        className={cn(
-                          "grid h-8 w-full items-center gap-4 text-left text-[13px] font-[542] leading-[17px] transition-colors",
-                          isSelected ? "hover:brightness-[0.985]" : "hover:bg-[#fafafa]",
-                        )}
+                <div className="relative">
+                  {selectedColumnOverlay ? (
+                    <>
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-y-0 z-0"
                         style={{
-                          gridTemplateColumns,
-                          ...selectedRowStyle,
+                          left: `${selectedColumnOverlay.left}px`,
+                          width: `${selectedColumnOverlay.width}px`,
+                          backgroundColor: selectedColumnBackground,
                         }}
-                        onClick={() => setSelectedDocumentId(row.id)}
-                        onDoubleClick={() => onOpenDocument(row.id)}
-                      >
-                        <div className="min-w-0">
-                          <div className="flex min-w-0 items-center gap-3">
-                            <IconBadge label="PDF" tone="rose" />
-                            <span className="truncate text-[13px] font-medium leading-[17px] text-[#273038]">
-                              {row.title}
-                            </span>
+                      />
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute top-0 z-0 h-[3px]"
+                        style={{
+                          left: `${selectedColumnOverlay.left}px`,
+                          width: `${selectedColumnOverlay.width}px`,
+                          backgroundColor: selectedColumnAccent,
+                        }}
+                      />
+                    </>
+                  ) : null}
+
+                  <div className="relative z-[1]">
+                    <div
+                      className="grid h-8 items-center gap-4 border-b border-[#e5e7eb] text-[12px] font-medium leading-normal text-[#58635f]"
+                      style={{ gridTemplateColumns }}
+                    >
+                      {columns.map((column) => {
+                        const isSelectedColumn = column.id === selectedColumnId;
+
+                        return (
+                          <div key={column.id} className="relative min-w-0">
+                            <button
+                              type="button"
+                              className="flex h-full w-full items-center pr-2 text-left"
+                              style={{
+                                color: isSelectedColumn
+                                  ? selectedColumnAccent
+                                  : undefined,
+                              }}
+                              onClick={() =>
+                                setSelectedColumnId((currentValue) =>
+                                  currentValue === column.id
+                                    ? null
+                                    : column.id,
+                                )
+                              }
+                            >
+                              <span className="truncate">{column.label}</span>
+                            </button>
+
+                            {column.resizable ? (
+                              <div
+                                role="separator"
+                                aria-orientation="vertical"
+                                aria-label={`${column.label} の列幅を調整`}
+                                title="ドラッグで列幅調整、ダブルクリックで初期幅に戻す"
+                                className="group/resize absolute inset-y-0 right-[-8px] z-10 flex w-4 items-center justify-center cursor-col-resize touch-none"
+                                onDoubleClick={() =>
+                                  handleColumnResizeReset(column.id)
+                                }
+                                onPointerDown={(event) =>
+                                  handleColumnResizeStart(event, column.id)
+                                }
+                              >
+                                <div className="h-[1em] w-[1px] bg-[#e5e7eb] transition-colors group-hover/resize:bg-[#9ca3af]" />
+                              </div>
+                            ) : null}
                           </div>
-                        </div>
+                        );
+                      })}
+                    </div>
 
-                        <div className="flex min-w-0 items-center gap-2 overflow-hidden">
-                          {row.tags.length > 0 ? (
-                            row.tags.slice(0, 2).map((tag) => (
-                              <TagChip
-                                key={`${row.id}:${tag}`}
-                                label={tag}
-                                colorClass={getTagColor(tag)}
-                              />
-                            ))
-                          ) : (
-                            <span className="truncate text-[13px] leading-[17px] text-[#93a09a]">
-                              タグなし
-                            </span>
-                          )}
-                        </div>
+                    <div className="divide-y divide-[#eef0f3]">
+                      {paginatedRows.map((row) => {
+                        const isSelected = row.id === selectedRow?.id;
 
-                        <div className="truncate text-[13px] font-[542] leading-[17px] text-[#46514f]">
-                          {formatPageCount(row.pageCount)}
-                        </div>
-                        <div className="truncate text-[13px] leading-[17px] text-[#75817c]">
-                          {formatDateTime(row.lastViewedAt)}
-                        </div>
-                        <div className="truncate text-[13px] leading-[17px] text-[#75817c]">
-                          {formatDateTime(row.updatedAt)}
-                        </div>
-                        <div
-                          className="text-[18px] leading-none"
-                          style={{
-                            color: isSelected
-                              ? selectedInteractiveAccent
-                              : "#9aa59e",
-                          }}
-                        >
-                          …
-                        </div>
-                      </button>
-                    );
-                  })}
+                        return (
+                          <button
+                            key={row.id}
+                            type="button"
+                            className={cn(
+                              "grid h-8 w-full items-center gap-4 text-left text-[13px] font-[542] leading-[17px] transition-colors",
+                              isSelected && !selectedColumnId
+                                ? "bg-[#f9fafb]"
+                                : "hover:bg-[#fafafa]",
+                            )}
+                            style={{ gridTemplateColumns }}
+                            onClick={() => setSelectedDocumentId(row.id)}
+                            onDoubleClick={() => onOpenDocument(row.id)}
+                          >
+                            <div className="min-w-0">
+                              <div className="flex min-w-0 items-center gap-3">
+                                <IconBadge label="PDF" tone="rose" />
+                                <span className="truncate text-[13px] font-medium leading-[17px] text-[#273038]">
+                                  {row.title}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex min-w-0 items-center gap-2 overflow-hidden">
+                              {row.tags.length > 0 ? (
+                                row.tags.slice(0, 2).map((tag) => (
+                                  <TagChip
+                                    key={`${row.id}:${tag}`}
+                                    label={tag}
+                                    colorClass={getTagColor(tag)}
+                                  />
+                                ))
+                              ) : (
+                                <span className="truncate text-[13px] leading-[17px] text-[#93a09a]">
+                                  タグなし
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="truncate text-[13px] font-[542] leading-[17px] text-[#46514f]">
+                              {formatPageCount(row.pageCount)}
+                            </div>
+                            <div className="truncate text-[13px] leading-[17px] text-[#75817c]">
+                              {formatDateTime(row.lastViewedAt)}
+                            </div>
+                            <div className="truncate text-[13px] leading-[17px] text-[#75817c]">
+                              {formatDateTime(row.updatedAt)}
+                            </div>
+                            <div className="text-[18px] leading-none text-[#9aa59e]">
+                              …
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

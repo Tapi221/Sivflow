@@ -190,6 +190,9 @@
   --ds-semantic-color-border-floating: rgba(226, 232, 240, 0.8);
   --ds-semantic-color-border-strong: #cfd9e8;
   --ds-semantic-color-border-strong-rgb: 207 217 232;
+  --ds-semantic-color-interactive-column-selected-accent: #4f6b54;
+  --ds-semantic-color-interactive-column-selected-accent-rgb: 79 107 84;
+  --ds-semantic-color-interactive-column-selected-subtle: rgba(106, 135, 110, 0.16);
   --ds-semantic-color-interactive-selected-accent: #6a876e;
   --ds-semantic-color-interactive-selected-accent-rgb: 106 135 110;
   --ds-semantic-color-interactive-selected-subtle: #e6ebe3;
