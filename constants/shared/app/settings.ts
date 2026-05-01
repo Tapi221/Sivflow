@@ -1,7 +1,6 @@
 export const SETTINGS_TAB_PARAMS = [
   "study",
   "display",
-  "tags",
   "voice",
   "shortcut",
   "sync",
