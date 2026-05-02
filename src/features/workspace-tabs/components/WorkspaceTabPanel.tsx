@@ -5,6 +5,7 @@ import { CardPane } from "@/components/folder/panes/CardPane";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { PdfPane } from "@/components/pdf/PdfPane";
 import { PdfWorkspaceProvider } from "@/components/pdf/PdfWorkspaceProvider";
+import { CalendarWorkspaceToolbar } from "@/features/calendar/ui/ExplorerCalendarPane";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem } from "@/types";
@@ -106,7 +107,18 @@ export const WorkspaceTabPanel = ({
         doc={document}
         onDocumentUpdate={handleDocumentUpdate}
       >
-        <PdfPane doc={document} onDocumentUpdate={handleDocumentUpdate} />
+        <div className="flex h-full min-h-0 w-full flex-col bg-white">
+          <CalendarWorkspaceToolbar
+            activeMode="calendar"
+            onSelectCalendar={() => undefined}
+            onSelectTimeline={() => undefined}
+          />
+          <PdfPane
+            doc={document}
+            className="min-h-0 flex-1"
+            onDocumentUpdate={handleDocumentUpdate}
+          />
+        </div>
       </PdfWorkspaceProvider>
     );
   }
