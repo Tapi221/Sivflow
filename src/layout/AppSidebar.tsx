@@ -13,7 +13,7 @@ type AppSidebarNavItem = {
   icon: ReactNode;
   exactPath?: boolean;
   sectionKey?: "home" | "review" | "library" | "calendar";
-    onClick?: () => void;
+  onClick?: () => void;
   disabled?: boolean;
   match?: (pathname: string, searchParams: URLSearchParams) => boolean;
 };
@@ -50,20 +50,12 @@ const InboxIcon = ({ className }: SidebarIconProps) => (
 
 const CalendarIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
-    <rect
-      x="5"
-      y="6"
-      width="14"
-      height="13"
-      rx="1.5"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    />
     <path
-      d="M8 4v4M16 4v4M5 10h14"
+      d="M5.5 8.91425H19.5M7.30952 3V4.54304M17.5 3V4.54285M17.5 4.54285H7.5C5.84315 4.54285 4.5 5.92436 4.5 7.62855V17.9143C4.5 19.6185 5.84315 21 7.5 21H17.5C19.1569 21 20.5 19.6185 20.5 17.9143L20.5 7.62855C20.5 5.92436 19.1569 4.54285 17.5 4.54285ZM11.5 13.5428L13 12V17.1428M13 17.1428H11.5M13 17.1428H14.5"
       stroke="currentColor"
       strokeLinecap="round"
-      strokeWidth="1.8"
+      strokeLinejoin="round"
+      strokeWidth="2"
     />
   </IconShell>
 );
@@ -150,8 +142,7 @@ const mainNavItems: AppSidebarNavItem[] = [
     icon: <LibraryIcon className="app-sidebar__nav-icon" />,
     sectionKey: "library",
     match: (pathname, searchParams) =>
-      pathname === "/folders" &&
-      searchParams.get("home") !== "1",
+      pathname === "/folders" && searchParams.get("home") !== "1",
   },
   {
     id: "calendar",
