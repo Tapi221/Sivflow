@@ -100,12 +100,20 @@ const CalendarIcon = ({ className }: IconProps) => (
   </IconShell>
 );
 
-const ExploreIcon = ({ className }: IconProps) => (
+const TaskIcon = ({ className }: IconProps) => (
   <IconShell className={className}>
     <path
-      d="M4 6.5 9.5 4l5 2.5L20 4v13.5L14.5 20l-5-2.5L4 20V6.5Z"
-      fill="currentColor"
-      opacity="0.9"
+      d="M7.2 7.5H16.8M7.2 12H16.8M7.2 16.5H13.6"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="1.9"
+    />
+    <path
+      d="M3.8 7.5 4.55 8.25 6.2 6.45M3.8 12 4.55 12.75 6.2 10.95M3.8 16.5 4.55 17.25 6.2 15.45"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.9"
     />
   </IconShell>
 );
@@ -124,7 +132,7 @@ const resolveTabIcon = (tab: WorkspaceTab) => {
     if (tab.sectionKey === "home") return HomeIcon;
     if (tab.sectionKey === "review") return ReviewIcon;
     if (tab.sectionKey === "calendar") return CalendarIcon;
-    if (tab.sectionKey === "explore") return ExploreIcon;
+    if (tab.sectionKey === "tasks") return TaskIcon;
   }
 
   if (tab.kind === "explorer") return LibraryTabIcon;

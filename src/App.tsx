@@ -25,6 +25,7 @@ const Directory = lazy(() => import("./routes/Directory"));
 const Dictionary = lazy(() => import("./routes/Dictionary"));
 const Questions = lazy(() => import("./routes/Questions"));
 const Calendar = lazy(() => import("./routes/Calendar"));
+const Tasks = lazy(() => import("./routes/Tasks"));
 
 const PdfScrollTest = DEV_MODE
   ? lazy(() => import("./routes/PdfScrollTest"))
@@ -299,16 +300,14 @@ const AppContent = () => {
 
           <Route path="tag-map" element={<Navigate to="/folders" replace />} />
           <Route path="calendar" element={withRouteFallback(<Calendar />)} />
+          <Route path="tasks" element={withRouteFallback(<Tasks />)} />
 
           <Route
             path="dictionary"
             element={withRouteFallback(<Dictionary />)}
           />
 
-          <Route
-            path="questions"
-            element={withRouteFallback(<Questions />)}
-          />
+          <Route path="questions" element={withRouteFallback(<Questions />)} />
 
           <Route path="CardEdit" element={withRouteFallback(<CardEdit />)} />
           <Route
@@ -324,10 +323,7 @@ const AppContent = () => {
 
           <Route path="gallery" element={withRouteFallback(<Gallery />)} />
           <Route path="trash" element={<Navigate to="/folders" replace />} />
-          <Route
-            path="directory"
-            element={withRouteFallback(<Directory />)}
-          />
+          <Route path="directory" element={withRouteFallback(<Directory />)} />
 
           {PdfScrollTest ? (
             <Route

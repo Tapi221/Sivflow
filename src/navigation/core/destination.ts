@@ -6,6 +6,7 @@ export type AppScreen =
   | "uncertainMode"
   | "bookmarkMode"
   | "calendar"
+  | "tasks"
   | "gallery"
   | "statistics"
   | "trash";
@@ -56,6 +57,8 @@ const PAGE_NAME_ALIASES: Record<string, AppScreen> = {
   bookmark: "bookmarkMode",
   Calendar: "calendar",
   calendar: "calendar",
+  Tasks: "tasks",
+  tasks: "tasks",
   Gallery: "gallery",
   gallery: "gallery",
   Statistics: "statistics",

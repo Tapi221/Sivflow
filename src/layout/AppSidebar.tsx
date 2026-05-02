@@ -12,7 +12,7 @@ type AppSidebarNavItem = {
   to?: string;
   icon: ReactNode;
   exactPath?: boolean;
-  sectionKey?: "home" | "review" | "library" | "calendar";
+  sectionKey?: "home" | "review" | "library" | "calendar" | "tasks";
   onClick?: () => void;
   disabled?: boolean;
   match?: (pathname: string, searchParams: URLSearchParams) => boolean;
@@ -56,6 +56,24 @@ const CalendarIcon = ({ className }: SidebarIconProps) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth="2"
+    />
+  </IconShell>
+);
+
+const TaskIcon = ({ className }: SidebarIconProps) => (
+  <IconShell className={className}>
+    <path
+      d="M7.2 7.5H16.8M7.2 12H16.8M7.2 16.5H13.6"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="1.9"
+    />
+    <path
+      d="M3.8 7.5 4.55 8.25 6.2 6.45M3.8 12 4.55 12.75 6.2 10.95M3.8 16.5 4.55 17.25 6.2 15.45"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.9"
     />
   </IconShell>
 );
@@ -150,6 +168,14 @@ const mainNavItems: AppSidebarNavItem[] = [
     to: "/calendar",
     icon: <CalendarIcon className="app-sidebar__nav-icon" />,
     sectionKey: "calendar",
+    exactPath: true,
+  },
+  {
+    id: "tasks",
+    label: "タスク",
+    to: "/tasks",
+    icon: <TaskIcon className="app-sidebar__nav-icon" />,
+    sectionKey: "tasks",
     exactPath: true,
   },
   {

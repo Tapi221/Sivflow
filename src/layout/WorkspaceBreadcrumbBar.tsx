@@ -18,6 +18,7 @@ const SECTION_LABELS = {
   review: "復習",
   library: "ライブラリ",
   calendar: "カレンダー",
+  tasks: "タスク",
 } as const;
 
 const LIBRARY_TYPE_LABELS = {
@@ -51,6 +52,10 @@ const resolveSectionKeyForTarget = (
 
   if (normalizedPathname === "/calendar") {
     return "calendar";
+  }
+
+  if (normalizedPathname === "/tasks") {
+    return "tasks";
   }
 
   return null;
@@ -151,6 +156,9 @@ export const WorkspaceBreadcrumbBar = () => {
     [activeTabId, tabs],
   );
 
+  const shouldHideBreadcrumb =
+    activeTab?.sectionKey === "calendar" || activeTab?.sectionKey === "tasks";
+
   const crumbs = useMemo(
     () =>
       resolveActiveCrumbs({
@@ -174,7 +182,22 @@ export const WorkspaceBreadcrumbBar = () => {
     [navigate, openSectionTab],
   );
 
-  if (!activeTab || crumbs.length === 0) {
+  if (!activeTab) {
+    return null;
+  }
+
+  if (shouldHideBreadcrumb) {
+    return action ? (
+      <nav
+        className="workspace-breadcrumb-bar workspace-breadcrumb-bar--toolbar"
+        aria-label="Workspace toolbar"
+      >
+        <div className="workspace-breadcrumb-bar__toolbar">{action}</div>
+      </nav>
+    ) : null;
+  }
+
+  if (crumbs.length === 0) {
     return null;
   }
 

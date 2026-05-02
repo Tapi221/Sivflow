@@ -6,12 +6,14 @@ export type WorkspaceSidebarSection =
   | "home"
   | "review"
   | "library"
-  | "calendar";
+  | "calendar"
+  | "tasks";
 
 export type WorkspaceRouteTabId =
   | "route:home"
   | "route:review"
-  | "route:calendar";
+  | "route:calendar"
+  | "route:tasks";
 
 export type WorkspaceTabKind =
   | "route"
@@ -95,6 +97,14 @@ export const WORKSPACE_ROUTE_TABS = [
     routePath: "/calendar",
     isClosable: true,
     sectionKey: "calendar",
+  },
+  {
+    id: "route:tasks",
+    kind: "route",
+    title: "Tasks",
+    routePath: "/tasks",
+    isClosable: true,
+    sectionKey: "tasks",
   },
 ] as const satisfies readonly WorkspaceRouteTab[];
 
