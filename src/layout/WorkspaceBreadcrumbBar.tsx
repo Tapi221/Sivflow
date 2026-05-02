@@ -187,14 +187,7 @@ export const WorkspaceBreadcrumbBar = () => {
   }
 
   if (shouldHideBreadcrumb) {
-    return action ? (
-      <nav
-        className="workspace-breadcrumb-bar workspace-breadcrumb-bar--toolbar"
-        aria-label="Workspace toolbar"
-      >
-        <div className="workspace-breadcrumb-bar__toolbar">{action}</div>
-      </nav>
-    ) : null;
+    return null;
   }
 
   if (crumbs.length === 0) {
