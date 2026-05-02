@@ -1148,8 +1148,7 @@ export const ExplorerCalendarPane = ({
     );
   }, []);
 
-  const calendarToolbarMode: CalendarToolbarMode =
-    selectedViewMode === "month" ? "calendar" : "timeline";
+  const calendarToolbarMode: CalendarToolbarMode = "calendar";
 
   return (
     <section className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa] text-[#24231f]">
