@@ -46,7 +46,7 @@ type ExplorerCalendarPaneProps = {
   onClose?: () => void;
 };
 
-type CalendarViewMode = "month" | "week" | "days";
+export type CalendarViewMode = "month" | "week" | "days";
 
 type CalendarDemoEvent = {
   id: string;
@@ -99,12 +99,6 @@ const MONTH_NAVIGATION_STEP = 1;
 const INITIAL_TIMELINE_BUFFER_DAYS = 7;
 const TIMELINE_EXTEND_DAYS = 14;
 const TIMELINE_EDGE_THRESHOLD_PX = 320;
-
-const VIEW_MODE_OPTIONS = [
-  { value: "month", label: "月" },
-  { value: "week", label: "週" },
-  { value: "days", label: "日数" },
-] satisfies Array<{ value: CalendarViewMode; label: string }>;
 
 const TimelineToolbarIcon = ({
   className,
@@ -182,8 +176,10 @@ export type CalendarToolbarMode = "calendar" | "timeline";
 
 export type CalendarWorkspaceToolbarProps = {
   activeMode: CalendarToolbarMode;
+  viewMode?: CalendarViewMode;
   onSelectCalendar: () => void;
   onSelectTimeline: () => void;
+  onSelectViewMode?: (viewMode: CalendarViewMode) => void;
 };
 
 const CALENDAR_TOOLBAR_ACTIONS = [
@@ -193,10 +189,18 @@ const CALENDAR_TOOLBAR_ACTIONS = [
   { label: "Fields", icon: FieldsToolbarIcon },
 ] as const;
 
+const CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS = [
+  { value: "month", label: "Month" },
+  { value: "week", label: "Week" },
+  { value: "days", label: "Day" },
+] as const satisfies Array<{ value: CalendarViewMode; label: string }>;
+
 export const CalendarWorkspaceToolbar = ({
   activeMode,
+  viewMode,
   onSelectCalendar,
   onSelectTimeline,
+  onSelectViewMode,
 }: CalendarWorkspaceToolbarProps) => {
   const tabs = [
     {
@@ -244,6 +248,29 @@ export const CalendarWorkspaceToolbar = ({
             </div>
           );
         })}
+
+        {onSelectViewMode && viewMode ? (
+          <div className="ml-3 flex h-7 shrink-0 items-center gap-1">
+            {CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.map((option) => {
+              const isActive = viewMode === option.value;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={cn(
+                    "flex h-7 items-center rounded px-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    isActive ? "text-[#25272d]" : "text-[#8f929c]",
+                  )}
+                  aria-pressed={isActive}
+                  onClick={() => onSelectViewMode(option.value)}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
 
       <div className="flex h-7 shrink-0 items-center justify-end gap-[6px]">
@@ -1127,8 +1154,10 @@ export const ExplorerCalendarPane = ({
     <section className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa] text-[#24231f]">
       <CalendarWorkspaceToolbar
         activeMode={calendarToolbarMode}
+        viewMode={selectedViewMode}
         onSelectCalendar={() => handleViewModeChange("month")}
         onSelectTimeline={() => handleViewModeChange("week")}
+        onSelectViewMode={handleViewModeChange}
       />
       <header className="flex h-[84px] shrink-0 items-center gap-4 border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)] px-5 shadow-[0_1px_0_rgba(255,255,255,0.72)_inset]">
         <div className="flex min-w-0 flex-1 items-center gap-5">
@@ -1136,24 +1165,6 @@ export const ExplorerCalendarPane = ({
             <h1 className="truncate text-[26px] font-semibold tracking-[-0.035em] text-[#24231f]">
               {monthLabel}
             </h1>
-          </div>
-
-          <div className="hidden h-10 items-center rounded-[10px] border border-[#dddcd5] bg-[#f1f0ec] p-1 shadow-[inset_0_1px_2px_rgba(86,72,74,0.08)] md:flex">
-            {VIEW_MODE_OPTIONS.map((item) => (
-              <button
-                key={item.value}
-                type="button"
-                className={cn(
-                  "h-8 rounded-[8px] px-4 text-[13px] font-medium transition-colors",
-                  selectedViewMode === item.value
-                    ? "bg-white text-[#24231f] shadow-[0_1px_4px_rgba(15,23,42,0.12)]"
-                    : "text-[#777671] hover:text-[#33322f]",
-                )}
-                onClick={() => handleViewModeChange(item.value)}
-              >
-                {item.label}
-              </button>
-            ))}
           </div>
 
           {selectedViewMode === "days" ? (
