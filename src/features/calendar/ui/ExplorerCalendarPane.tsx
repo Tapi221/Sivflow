@@ -30,7 +30,6 @@ import {
   useState,
 } from "react";
 
-import { useSetBreadcrumbAction } from "@/contexts/BreadcrumbContext";
 import { cn } from "@/lib/utils";
 import type { IconProps } from "@/ui/icons";
 import {
@@ -215,8 +214,8 @@ export const CalendarWorkspaceToolbar = ({
   ] as const;
 
   return (
-    <div className="relative flex h-9 shrink-0 flex-wrap items-start justify-between overflow-hidden bg-white after:absolute after:bottom-1 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']">
-      <div className="flex h-9 shrink-0 items-start gap-[6px]">
+    <div className="relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 flex-wrap items-center justify-between overflow-hidden bg-white after:absolute after:bottom-1 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']">
+      <div className="flex h-7 shrink-0 items-start gap-[6px]">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeMode === tab.value;
@@ -449,7 +448,6 @@ const calculateEventStyle = (event: CalendarDemoEvent): CalendarEventStyle => {
 export const ExplorerCalendarPane = ({
   onClose,
 }: ExplorerCalendarPaneProps) => {
-  const setBreadcrumbAction = useSetBreadcrumbAction();
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const rangeDaysMenuRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -1124,24 +1122,14 @@ export const ExplorerCalendarPane = ({
 
   const calendarToolbarMode: CalendarToolbarMode =
     selectedViewMode === "month" ? "calendar" : "timeline";
-  const breadcrumbToolbar = useMemo(
-    () => (
+
+  return (
+    <section className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa] text-[#24231f]">
       <CalendarWorkspaceToolbar
         activeMode={calendarToolbarMode}
         onSelectCalendar={() => handleViewModeChange("month")}
         onSelectTimeline={() => handleViewModeChange("week")}
       />
-    ),
-    [calendarToolbarMode, handleViewModeChange],
-  );
-
-  useEffect(() => {
-    setBreadcrumbAction(breadcrumbToolbar);
-    return () => setBreadcrumbAction(null);
-  }, [breadcrumbToolbar, setBreadcrumbAction]);
-
-  return (
-    <section className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa] text-[#24231f]">
       <header className="flex h-[84px] shrink-0 items-center gap-4 border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)] px-5 shadow-[0_1px_0_rgba(255,255,255,0.72)_inset]">
         <div className="flex min-w-0 flex-1 items-center gap-5">
           <div className="min-w-0">
