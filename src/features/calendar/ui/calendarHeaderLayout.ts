@@ -1,0 +1,1 @@
+export const CALENDAR_DAY_HEADER_CELL_HEIGHT = 112;
