@@ -1,11 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from "react";
 
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { TagChip } from "@/components/tag/TagChip";
 import { useSetBreadcrumbAction } from "@/contexts/BreadcrumbContext";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
-import { normalizeDate } from "@/shared/codec/date";
+import {
+  buildPdfDashboardRows,
+  type PdfDashboardRow,
+} from "@/features/library-pdf/model/pdfLibraryRow";
+import { usePdfLibraryDashboardState } from "@/features/library-pdf/hooks/usePdfLibraryDashboardState";
+import { PdfLibraryContinueSection } from "@/features/library-pdf/components/sections/PdfLibraryContinueSection";
+import { PdfLibraryTableSection } from "@/features/library-pdf/components/sections/PdfLibraryTableSection";
 import type { DocumentItem, Folder } from "@/types";
 
 type PdfLibraryDashboardProps = {
@@ -14,31 +26,9 @@ type PdfLibraryDashboardProps = {
   onOpenDocument: (documentId: string) => void;
 };
 
-type PdfDashboardRow = {
-  id: string;
-  title: string;
-  fileName: string;
-  folderId: string;
-  categoryLabel: string;
-  folderPathLabel: string;
-  storagePathLabel: string;
-  pageCount: number | null;
-  currentPage: number | null;
-  progressPercent: number | null;
-  updatedAt: Date | null;
-  lastViewedAt: Date | null;
-  tags: string[];
-  orderIndex: number;
-};
-
-type ViewerStateWithLastOpenedAt = NonNullable<DocumentItem["viewerState"]> & {
-  lastOpenedAt?: unknown;
-};
-
 type ColumnId =
   | "name"
   | "tags"
-  | "page"
   | "lastViewed"
   | "updatedAt"
   | "actions";
@@ -62,29 +52,21 @@ const DEFAULT_COLUMNS: DashboardColumn[] = [
     id: "name",
     label: "名前",
     width: 420,
-    minWidth: 260,
+    minWidth: 96,
     resizable: true,
   },
   {
     id: "tags",
     label: "タグ",
     width: 240,
-    minWidth: 160,
-    resizable: true,
-  },
-  {
-    id: "page",
-    label: "ページ",
-    width: 88,
-    minWidth: 72,
-    maxWidth: 140,
+    minWidth: 56,
     resizable: true,
   },
   {
     id: "lastViewed",
     label: "最終閲覧",
     width: 168,
-    minWidth: 140,
+    minWidth: 72,
     maxWidth: 260,
     resizable: true,
   },
@@ -92,7 +74,7 @@ const DEFAULT_COLUMNS: DashboardColumn[] = [
     id: "updatedAt",
     label: "更新日時",
     width: 168,
-    minWidth: 140,
+    minWidth: 72,
     maxWidth: 260,
     resizable: true,
   },
@@ -107,7 +89,7 @@ const DEFAULT_COLUMNS: DashboardColumn[] = [
 ];
 
 const cardClassName =
-  "rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-4";
+  "box-border rounded-[10px] border border-[#D1D1D1] bg-[#FFFFFF] p-4 shadow-[0_6px_3px_0_rgba(0,0,0,0.06),0_10px_10px_0_rgba(0,0,0,0.05)]";
 const breadcrumbActionIconClassName =
   "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]";
 
@@ -117,59 +99,15 @@ const selectedColumnBackground =
 const selectedColumnAccent =
   "var(--ds-semantic-color-interactive-column-selected-accent, #4f6b54)";
 
-const toDate = (value: unknown): Date | null => {
-  return normalizeDate(value);
+const dateTimeTextStyle: CSSProperties = {
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif',
+  fontVariantNumeric: "tabular-nums",
+  fontWeight: 400,
 };
 
-const clampColumnWidth = (
-  width: number,
-  minWidth: number,
-  maxWidth?: number,
-): number => {
-  if (!Number.isFinite(width)) {
-    return minWidth;
-  }
-
-  if (typeof maxWidth === "number") {
-    return Math.min(Math.max(width, minWidth), maxWidth);
-  }
-
-  return Math.max(width, minWidth);
-};
-
-const loadStoredColumns = (): DashboardColumn[] => {
-  if (typeof window === "undefined") {
-    return DEFAULT_COLUMNS;
-  }
-
-  try {
-    const raw = window.localStorage.getItem(COLUMN_STORAGE_KEY);
-
-    if (!raw) {
-      return DEFAULT_COLUMNS;
-    }
-
-    const parsed = JSON.parse(raw) as Partial<Record<ColumnId, number>>;
-
-    return DEFAULT_COLUMNS.map((column) => {
-      const storedWidth = parsed[column.id];
-
-      if (typeof storedWidth !== "number") {
-        return column;
-      }
-
-      return {
-        ...column,
-        width: clampColumnWidth(
-          storedWidth,
-          column.minWidth,
-          column.maxWidth,
-        ),
-      };
-    });
-  } catch {
-    return DEFAULT_COLUMNS;
-  }
+const isDateTimeColumn = (columnId: ColumnId): boolean => {
+  return columnId === "lastViewed" || columnId === "updatedAt";
 };
 
 const buildGridTemplateColumns = (columns: DashboardColumn[]): string => {
@@ -181,10 +119,6 @@ const buildGridMinWidth = (columns: DashboardColumn[]): number => {
   const gapTotal = Math.max(columns.length - 1, 0) * COLUMN_GAP_PX;
 
   return widthTotal + gapTotal;
-};
-
-const resolveFolderName = (folder: Folder | undefined): string => {
-  return folder?.folderName?.trim() || "未分類";
 };
 
 const formatDateTime = (value: Date | null): string => {
@@ -199,98 +133,6 @@ const formatDateTime = (value: Date | null): string => {
   const minutes = String(value.getMinutes()).padStart(2, "0");
 
   return `${year}/${month}/${day} ${hours}:${minutes}`;
-};
-
-const formatPageCount = (value: number | null): string => {
-  if (!value || value <= 0) {
-    return "—";
-  }
-
-  return String(value);
-};
-
-const resolveCurrentPage = (document: DocumentItem): number | null => {
-  const currentPage = document.viewerState?.currentPage;
-
-  if (
-    typeof currentPage !== "number" ||
-    !Number.isFinite(currentPage) ||
-    currentPage <= 0
-  ) {
-    return null;
-  }
-
-  return Math.floor(currentPage);
-};
-
-const resolveProgressPercent = (document: DocumentItem): number | null => {
-  const currentPage = resolveCurrentPage(document);
-  const pageCount = document.pageCount ?? null;
-
-  if (!currentPage || !pageCount || pageCount <= 0) {
-    return null;
-  }
-
-  return Math.max(
-    0,
-    Math.min(100, Math.round((currentPage / pageCount) * 100)),
-  );
-};
-
-const buildFolderPath = (
-  folderId: string,
-  folderById: Map<string, Folder>,
-): string[] => {
-  const path: string[] = [];
-  const visited = new Set<string>();
-  let currentFolderId: string | null | undefined = folderId;
-
-  while (currentFolderId && !visited.has(currentFolderId)) {
-    const folder = folderById.get(currentFolderId);
-
-    if (!folder) {
-      break;
-    }
-
-    path.unshift(resolveFolderName(folder));
-    visited.add(currentFolderId);
-    currentFolderId = folder.parentFolderId ?? null;
-  }
-
-  return path;
-};
-
-const resolveCategoryLabel = (
-  folderId: string,
-  folderById: Map<string, Folder>,
-): string => {
-  const path = buildFolderPath(folderId, folderById);
-  return path[0] ?? "未分類";
-};
-
-const resolveDisplayTags = (
-  document: DocumentItem,
-  categoryLabel: string,
-  folderPath: string[],
-  tagById: ReadonlyMap<string, { name: string }>,
-): string[] => {
-  const explicitTags = (Array.isArray(document.tags) ? document.tags : [])
-    .map((tagIdOrName) => tagById.get(tagIdOrName)?.name ?? tagIdOrName)
-    .filter(
-      (label): label is string =>
-        typeof label === "string" && label.trim().length > 0,
-    );
-
-  if (explicitTags.length > 0) {
-    return explicitTags.slice(0, 3);
-  }
-
-  const fallbackTags = [categoryLabel, folderPath[1]].filter(
-    (label): label is string =>
-      typeof label === "string" && label.trim().length > 0,
-  );
-
-  return Array.from(new Set(fallbackTags)).slice(0, 3);
 };
 
 const BreadcrumbActionSettingsIcon = () => {
@@ -369,6 +211,41 @@ const BreadcrumbActionFilterIcon = () => {
   );
 };
 
+const PdfOpenActionIcon = () => {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M15.9999 12.6671V16.667C15.9999 17.0206 15.8594 17.3598 15.6094 17.6098C15.3594 17.8599 15.0202 18.0003 14.6666 18.0003H7.33332C6.9797 18.0003 6.64057 17.8599 6.39052 17.6098C6.14047 17.3598 6 17.0206 6 16.667V9.33375C6 8.98013 6.14047 8.641 6.39052 8.39095C6.64057 8.1409 6.9797 8.00043 7.33332 8.00043H11.3333"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14 6H18V9.99997"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10.6667 13.3333L18 6"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
 const IconBadge = ({
   label,
   tone = "slate",
@@ -379,7 +256,7 @@ const IconBadge = ({
   if (label === "PDF") {
     return (
       <span
-        className="inline-flex h-6 w-6 items-center justify-center rounded-[4px] bg-[#fff1f2]"
+        className="inline-flex h-6 w-6 items-center justify-center"
         aria-label="PDF"
       >
         <svg
@@ -433,148 +310,37 @@ const PdfLibraryDashboard = ({
   folders,
   onOpenDocument,
 }: PdfLibraryDashboardProps) => {
-  const { tagById, getTagColor } = useTags();
+  const { tagById, getTagColorKey } = useTags();
   const setBreadcrumbAction = useSetBreadcrumbAction();
   const [, setExpandedFolders] = useState<Set<string>>(new Set());
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
-    null,
-  );
-  const [selectedColumnId, setSelectedColumnId] = useState<ColumnId | null>(
-    null,
-  );
-  const [pageIndex, setPageIndex] = useState(0);
-  const [columns, setColumns] = useState<DashboardColumn[]>(() =>
-    loadStoredColumns(),
-  );
-  const resizeCleanupRef = useRef<(() => void) | null>(null);
-
-  const folderById = useMemo(() => {
-    return new Map(folders.map((folder) => [folder.id, folder]));
-  }, [folders]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const widthMap = Object.fromEntries(
-      columns.map((column) => [column.id, column.width]),
-    );
-
-    window.localStorage.setItem(COLUMN_STORAGE_KEY, JSON.stringify(widthMap));
-  }, [columns]);
-
-  useEffect(() => {
-    return () => {
-      resizeCleanupRef.current?.();
-      resizeCleanupRef.current = null;
-    };
-  }, []);
 
   const rows = useMemo<PdfDashboardRow[]>(() => {
-    return documents
-      .filter((document) => document.kind === "pdf")
-      .map((document) => {
-        const folderPath = buildFolderPath(document.folderId, folderById);
-        const categoryLabel = resolveCategoryLabel(
-          document.folderId,
-          folderById,
-        );
-        const viewerState = (document.viewerState ??
-          null) as ViewerStateWithLastOpenedAt | null;
-        const updatedAt = toDate(document.updatedAt);
-        const lastViewedAt = toDate(viewerState?.lastOpenedAt);
-
-        return {
-          id: document.id,
-          title:
-            document.title?.trim() || document.fileName?.trim() || "無題のPDF",
-          fileName:
-            document.fileName?.trim() || document.title?.trim() || "無題のPDF",
-          folderId: document.folderId,
-          categoryLabel,
-          folderPathLabel: folderPath.join(" / ") || "未分類",
-          storagePathLabel: ["ライブラリ", "PDF", ...folderPath].join(" / "),
-          pageCount: document.pageCount ?? null,
-          currentPage: resolveCurrentPage(document),
-          progressPercent: resolveProgressPercent(document),
-          updatedAt,
-          lastViewedAt,
-          tags: resolveDisplayTags(
-            document,
-            categoryLabel,
-            folderPath,
-            tagById,
-          ),
-          orderIndex: Number(document.orderIndex) || 0,
-        };
-      })
-      .sort((left, right) => {
-        const rightTime = right.updatedAt?.getTime() ?? 0;
-        const leftTime = left.updatedAt?.getTime() ?? 0;
-
-        if (rightTime !== leftTime) {
-          return rightTime - leftTime;
-        }
-
-        if (right.orderIndex !== left.orderIndex) {
-          return right.orderIndex - left.orderIndex;
-        }
-
-        return left.title.localeCompare(right.title, "ja");
-      });
-  }, [documents, folderById, tagById]);
-
-  useEffect(() => {
-    if (rows.length === 0) {
-      setSelectedDocumentId(null);
-      setPageIndex(0);
-      return;
-    }
-
-    setSelectedDocumentId((currentValue) => {
-      if (currentValue && rows.some((row) => row.id === currentValue)) {
-        return currentValue;
-      }
-
-      return rows[0]?.id ?? null;
+    return buildPdfDashboardRows({
+      documents,
+      folders,
+      tagById,
     });
-  }, [rows]);
+  }, [documents, folders, tagById]);
 
-  const totalPageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
-
-  useEffect(() => {
-    setPageIndex((currentValue) =>
-      Math.max(0, Math.min(currentValue, totalPageCount - 1)),
-    );
-  }, [totalPageCount]);
-
-  useEffect(() => {
-    if (!selectedDocumentId) {
-      return;
-    }
-
-    const selectedIndex = rows.findIndex(
-      (row) => row.id === selectedDocumentId,
-    );
-
-    if (selectedIndex === -1) {
-      return;
-    }
-
-    const nextPageIndex = Math.floor(selectedIndex / PAGE_SIZE);
-    setPageIndex((currentValue) =>
-      currentValue === nextPageIndex ? currentValue : nextPageIndex,
-    );
-  }, [rows, selectedDocumentId]);
-
-  const selectedRow = useMemo(() => {
-    if (!selectedDocumentId) {
-      return null;
-    }
-
-    return rows.find((row) => row.id === selectedDocumentId) ?? null;
-  }, [rows, selectedDocumentId]);
+  const {
+    columns,
+    pageIndex,
+    selectedColumnId,
+    selectedColumnOverlay,
+    selectedDocumentId,
+    selectedRow,
+    setPageIndex,
+    setSelectedColumnId,
+    setSelectedDocumentId,
+    handleColumnResizeReset,
+    handleColumnResizeStart,
+  } = usePdfLibraryDashboardState({
+    rows,
+    defaultColumns: DEFAULT_COLUMNS,
+    columnStorageKey: COLUMN_STORAGE_KEY,
+    pageSize: PAGE_SIZE,
+    columnGapPx: COLUMN_GAP_PX,
+  });
 
   const importTargetFolderId =
     selectedRow?.folderId ?? rows[0]?.folderId ?? folders[0]?.id ?? null;
@@ -662,19 +428,11 @@ const PdfLibraryDashboard = ({
       .slice(0, 3);
   }, [rows]);
 
-  const recentRows = useMemo(() => {
-    return [...rows]
-      .sort(
-        (left, right) =>
-          (right.updatedAt?.getTime() ?? 0) - (left.updatedAt?.getTime() ?? 0),
-      )
-      .slice(0, 3);
-  }, [rows]);
-
   const paginatedRows = useMemo(() => {
     const start = pageIndex * PAGE_SIZE;
     return rows.slice(start, start + PAGE_SIZE);
   }, [pageIndex, rows]);
+  const totalPageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
 
   const visibleStart = rows.length === 0 ? 0 : pageIndex * PAGE_SIZE + 1;
   const visibleEnd = Math.min(rows.length, (pageIndex + 1) * PAGE_SIZE);
@@ -684,88 +442,6 @@ const PdfLibraryDashboard = ({
   const gridMinWidth = useMemo(() => {
     return buildGridMinWidth(columns);
   }, [columns]);
-
-  const handleColumnResizeReset = (columnId: ColumnId) => {
-    setColumns((currentColumns) =>
-      currentColumns.map((column) => {
-        if (column.id !== columnId) {
-          return column;
-        }
-
-        const defaultColumn = DEFAULT_COLUMNS.find(
-          (candidate) => candidate.id === columnId,
-        );
-
-        if (!defaultColumn) {
-          return column;
-        }
-
-        return {
-          ...column,
-          width: defaultColumn.width,
-        };
-      }),
-    );
-  };
-
-  const handleColumnResizeStart = (
-    event: React.PointerEvent<HTMLDivElement>,
-    columnId: ColumnId,
-  ) => {
-    const targetColumn = columns.find((column) => column.id === columnId);
-
-    if (!targetColumn || !targetColumn.resizable) {
-      return;
-    }
-
-    resizeCleanupRef.current?.();
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const startX = event.clientX;
-    const startWidth = targetColumn.width;
-
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-
-    const handlePointerMove = (moveEvent: PointerEvent) => {
-      const deltaX = moveEvent.clientX - startX;
-
-      setColumns((currentColumns) =>
-        currentColumns.map((column) => {
-          if (column.id !== columnId) {
-            return column;
-          }
-
-          return {
-            ...column,
-            width: clampColumnWidth(
-              startWidth + deltaX,
-              column.minWidth,
-              column.maxWidth,
-            ),
-          };
-        }),
-      );
-    };
-
-    const cleanup = () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerup", handlePointerUp);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-      resizeCleanupRef.current = null;
-    };
-
-    const handlePointerUp = () => {
-      cleanup();
-    };
-
-    resizeCleanupRef.current = cleanup;
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerup", handlePointerUp, { once: true });
-  };
 
   if (rows.length === 0) {
     return (
@@ -815,240 +491,196 @@ const PdfLibraryDashboard = ({
       <div className="grid min-h-0 w-full grid-cols-1 gap-4">
         <div className="flex min-h-0 min-w-0 flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-            <section className={cardClassName}>
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <IconBadge label="読" tone="green" />
-                  <span className="text-[13px] font-semibold text-[#30403d]">
-                    続きから読む
-                  </span>
-                </div>
-                <span className="text-[12px] font-semibold text-[#6b7280]">
-                  すべて見る
-                </span>
-              </div>
-
-              <div className="mt-4 space-y-2.5">
-                {continueRows.length > 0 ? (
-                  continueRows.map((row) => (
-                    <button
-                      key={row.id}
-                      type="button"
-                      className="flex w-full items-start gap-3 text-left"
-                      onClick={() => setSelectedDocumentId(row.id)}
-                    >
-                      <IconBadge label="PDF" tone="rose" />
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-[13px] font-semibold leading-5 text-[#29343b]">
-                          {row.title}
-                        </div>
-                        <div className="mt-2 h-[6px] overflow-hidden rounded-[999px] bg-[#e5e7eb]">
-                          <div
-                            className="h-full rounded-[999px] bg-[#4b5563]"
-                            style={{ width: `${row.progressPercent ?? 0}%` }}
-                          />
-                        </div>
-                        <div className="mt-1.5 flex items-center justify-between gap-2 text-[12px] text-[#7d8784]">
-                          <span className="truncate">
-                            最終閲覧: {formatDateTime(row.lastViewedAt)}
-                          </span>
-                          <span className="font-semibold text-[#5f6f69]">
-                            {row.progressPercent ?? 0}%
-                          </span>
-                        </div>
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  <div className="rounded-[16px] bg-[#f8fafc] px-4 py-5 text-[13px] leading-6 text-[#94a09a]">
-                    続きから読める PDF はまだありません。
-                  </div>
-                )}
-              </div>
-            </section>
-
-            <section className={cardClassName}>
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <IconBadge label="更" tone="green" />
-                  <span className="text-[13px] font-semibold text-[#30403d]">
-                    最近更新したPDF
-                  </span>
-                </div>
-                <span className="text-[12px] font-semibold text-[#6b7280]">
-                  すべて見る
-                </span>
-              </div>
-
-              <div className="mt-4 divide-y divide-[#eef0f3] border-y border-[#e5e7eb]">
-                {recentRows.map((row) => (
-                  <button
-                    key={row.id}
-                    type="button"
-                    className="flex h-8 w-full items-center gap-3 text-left transition-colors hover:bg-[#fafafa]"
-                    onClick={() => setSelectedDocumentId(row.id)}
-                  >
-                    <IconBadge label="PDF" tone="rose" />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-[13px] font-medium leading-[17px] text-[#273038]">
-                        {row.title}
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </section>
+            <PdfLibraryContinueSection
+              cardClassName={cardClassName}
+              continueRows={continueRows}
+              formatDateTime={formatDateTime}
+              onSelectDocument={setSelectedDocumentId}
+              IconBadge={IconBadge}
+            />
           </div>
 
-          <section className="min-h-0 flex-1 rounded-[10px] bg-[#FFFFFF]">
+          <PdfLibraryTableSection>
             <div className="overflow-x-auto overflow-y-hidden">
               <div
                 className="min-w-max"
                 style={{ minWidth: `${gridMinWidth}px` }}
               >
-                <div
-                  className="grid h-8 items-center gap-4 border-b border-[#e5e7eb] text-[12px] font-medium leading-normal text-[#58635f]"
-                  style={{ gridTemplateColumns }}
-                >
-                  {columns.map((column) => {
-                    const isSelectedColumn = column.id === selectedColumnId;
-
-                    return (
+                <div className="relative">
+                  {selectedColumnOverlay ? (
+                    <>
                       <div
-                        key={column.id}
-                        className="relative h-full min-w-0"
-                        style={
-                          isSelectedColumn
-                            ? {
-                                backgroundColor: selectedColumnBackground,
-                                boxShadow: `inset 0 3px 0 ${selectedColumnAccent}`,
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-y-0 z-0"
+                        style={{
+                          left: `${selectedColumnOverlay.left}px`,
+                          width: `${selectedColumnOverlay.width}px`,
+                          backgroundColor: selectedColumnBackground,
+                        }}
+                      />
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute top-0 z-0 h-[3px]"
+                        style={{
+                          left: `${selectedColumnOverlay.left}px`,
+                          width: `${selectedColumnOverlay.width}px`,
+                          backgroundColor: selectedColumnAccent,
+                        }}
+                      />
+                    </>
+                  ) : null}
+
+                  <div className="relative z-[1]">
+                    <div
+                      className="grid h-8 items-center gap-4 border-b border-[#e5e7eb] text-[12px] font-medium leading-normal text-[#58635f]"
+                      style={{ gridTemplateColumns }}
+                    >
+                      {columns.map((column) => {
+                        const isSelectedColumn = column.id === selectedColumnId;
+
+                        return (
+                          <div key={column.id} className="relative min-w-0">
+                            <button
+                              type="button"
+                              className="flex h-full w-full items-center pr-2 text-left"
+                              style={{
+                                color: isSelectedColumn
+                                  ? selectedColumnAccent
+                                  : undefined,
+                              }}
+                              onClick={() =>
+                                setSelectedColumnId((currentValue) =>
+                                  currentValue === column.id ? null : column.id,
+                                )
                               }
-                            : undefined
-                        }
-                      >
-                        <button
-                          type="button"
-                          className="flex h-full w-full items-center pr-2 text-left"
-                          style={{
-                            color: isSelectedColumn
-                              ? selectedColumnAccent
-                              : undefined,
-                          }}
-                          onClick={() =>
-                            setSelectedColumnId((currentValue) =>
-                              currentValue === column.id ? null : column.id,
-                            )
+                            >
+                              <span
+                                className="truncate"
+                                style={
+                                  isDateTimeColumn(column.id)
+                                    ? dateTimeTextStyle
+                                    : undefined
+                                }
+                              >
+                                {column.label}
+                              </span>
+                            </button>
+
+                            {column.resizable ? (
+                              <div
+                                role="separator"
+                                aria-orientation="vertical"
+                                aria-label={`${column.label} の列幅を調整`}
+                                title="ドラッグで列幅調整、ダブルクリックで初期幅に戻す"
+                                className="group/resize absolute inset-y-0 right-[-8px] z-10 flex w-4 items-center justify-center cursor-col-resize touch-none"
+                                onDoubleClick={() =>
+                                  handleColumnResizeReset(column.id)
+                                }
+                                onPointerDown={(event) =>
+                                  handleColumnResizeStart(event, column.id)
+                                }
+                              >
+                                <div className="h-[1em] w-[1px] bg-[#e5e7eb] transition-colors group-hover/resize:bg-[#9ca3af]" />
+                              </div>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="divide-y divide-[#eef0f3]">
+                      {paginatedRows.map((row) => {
+                        const isSelected = row.id === selectedRow?.id;
+
+                        const handleRowKeyDown = (
+                          event: KeyboardEvent<HTMLDivElement>,
+                        ) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            onOpenDocument(row.id);
+                            return;
                           }
-                        >
-                          <span className="truncate">{column.label}</span>
-                        </button>
 
-                        {column.resizable ? (
+                          if (event.key === " ") {
+                            event.preventDefault();
+                            setSelectedDocumentId(row.id);
+                          }
+                        };
+
+                        return (
                           <div
-                            role="separator"
-                            aria-orientation="vertical"
-                            aria-label={`${column.label} の列幅を調整`}
-                            title="ドラッグで列幅調整、ダブルクリックで初期幅に戻す"
-                            className="group/resize absolute inset-y-0 right-[-8px] z-10 flex w-4 items-center justify-center cursor-col-resize touch-none"
-                            onDoubleClick={() =>
-                              handleColumnResizeReset(column.id)
-                            }
-                            onPointerDown={(event) =>
-                              handleColumnResizeStart(event, column.id)
-                            }
+                            key={row.id}
+                            role="button"
+                            tabIndex={0}
+                            className={cn(
+                              "grid h-8 w-full items-center gap-4 text-left text-[13px] font-[542] leading-[17px] transition-colors",
+                              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6A876E]/30",
+                              isSelected && !selectedColumnId
+                                ? "bg-[#f9fafb]"
+                                : "hover:bg-[#fafafa]",
+                            )}
+                            style={{ gridTemplateColumns }}
+                            onClick={() => setSelectedDocumentId(row.id)}
+                            onDoubleClick={() => onOpenDocument(row.id)}
+                            onKeyDown={handleRowKeyDown}
                           >
-                            <div className="h-[1em] w-[1px] bg-[#e5e7eb] transition-colors group-hover/resize:bg-[#9ca3af]" />
+                            <div className="min-w-0">
+                              <div className="flex min-w-0 items-center gap-0">
+                                <IconBadge label="PDF" tone="rose" />
+                                <div className="flex min-w-0 flex-1 items-center gap-0">
+                                  <span className="min-w-0 flex-1 truncate text-[13px] font-medium leading-[17px] text-[#273038]">
+                                    {row.title}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className="ml-auto inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-[#ababab] transition-colors hover:bg-[#f3f4f6] hover:text-[#808192]"
+                                    aria-label={`${row.title}を開く`}
+                                    title={`${row.title}を開く`}
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      onOpenDocument(row.id);
+                                    }}
+                                  >
+                                    <PdfOpenActionIcon />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex min-w-0 items-center gap-2 overflow-hidden">
+                              {row.tags.length > 0 ? (
+                                row.tags.slice(0, 2).map((tag) => (
+                                  <TagChip
+                                    key={`${row.id}:${tag}`}
+                                    label={tag}
+                                    colorKey={getTagColorKey(tag)}
+                                  />
+                                ))
+                              ) : (
+                                null
+                              )}
+                            </div>
+
+                            <div
+                              className="truncate whitespace-nowrap text-[13px] font-normal leading-[17px] text-[#484964]"
+                              style={dateTimeTextStyle}
+                            >
+                              {formatDateTime(row.lastViewedAt)}
+                            </div>
+                            <div
+                              className="truncate whitespace-nowrap text-[13px] font-normal leading-[17px] text-[#484964]"
+                              style={dateTimeTextStyle}
+                            >
+                              {formatDateTime(row.updatedAt)}
+                            </div>
+                            <div className="text-[18px] leading-none text-[#9aa59e]">
+                              …
+                            </div>
                           </div>
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="divide-y divide-[#eef0f3]">
-                  {paginatedRows.map((row) => {
-                    const isSelected = row.id === selectedRow?.id;
-
-                    const resolveCellStyle = (columnId: ColumnId) => {
-                      if (columnId === selectedColumnId) {
-                        return { backgroundColor: selectedColumnBackground };
-                      }
-
-                      return undefined;
-                    };
-
-                    return (
-                      <button
-                        key={row.id}
-                        type="button"
-                        className={cn(
-                          "grid h-8 w-full items-center gap-4 text-left text-[13px] font-[542] leading-[17px] transition-colors",
-                          isSelected && !selectedColumnId
-                            ? "bg-[#f9fafb]"
-                            : "hover:bg-[#fafafa]",
-                        )}
-                        style={{ gridTemplateColumns }}
-                        onClick={() => setSelectedDocumentId(row.id)}
-                        onDoubleClick={() => onOpenDocument(row.id)}
-                      >
-                        <div
-                          className="flex h-full min-w-0 items-center"
-                          style={resolveCellStyle("name")}
-                        >
-                          <div className="flex min-w-0 items-center gap-3">
-                            <IconBadge label="PDF" tone="rose" />
-                            <span className="truncate text-[13px] font-medium leading-[17px] text-[#273038]">
-                              {row.title}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div
-                          className="flex h-full min-w-0 items-center gap-2 overflow-hidden"
-                          style={resolveCellStyle("tags")}
-                        >
-                          {row.tags.length > 0 ? (
-                            row.tags.slice(0, 2).map((tag) => (
-                              <TagChip
-                                key={`${row.id}:${tag}`}
-                                label={tag}
-                                colorClass={getTagColor(tag)}
-                              />
-                            ))
-                          ) : (
-                            <span className="truncate text-[13px] leading-[17px] text-[#93a09a]">
-                              タグなし
-                            </span>
-                          )}
-                        </div>
-
-                        <div
-                          className="flex h-full min-w-0 items-center truncate text-[13px] font-[542] leading-[17px] text-[#46514f]"
-                          style={resolveCellStyle("page")}
-                        >
-                          {formatPageCount(row.pageCount)}
-                        </div>
-                        <div
-                          className="flex h-full min-w-0 items-center truncate text-[13px] leading-[17px] text-[#75817c]"
-                          style={resolveCellStyle("lastViewed")}
-                        >
-                          {formatDateTime(row.lastViewedAt)}
-                        </div>
-                        <div
-                          className="flex h-full min-w-0 items-center truncate text-[13px] leading-[17px] text-[#75817c]"
-                          style={resolveCellStyle("updatedAt")}
-                        >
-                          {formatDateTime(row.updatedAt)}
-                        </div>
-                        <div
-                          className="flex h-full items-center text-[18px] leading-none text-[#9aa59e]"
-                          style={resolveCellStyle("actions")}
-                        >
-                          …
-                        </div>
-                      </button>
-                    );
-                  })}
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1088,11 +720,12 @@ const PdfLibraryDashboard = ({
                 {visibleStart}–{visibleEnd} / {rows.length} 件
               </div>
             </div>
-          </section>
+          </PdfLibraryTableSection>
         </div>
       </div>
     </div>
   );
 };
 
+export { PdfLibraryDashboard };
 export default PdfLibraryDashboard;
