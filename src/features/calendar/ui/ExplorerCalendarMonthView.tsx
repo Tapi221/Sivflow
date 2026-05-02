@@ -22,6 +22,7 @@ import {
   type CalendarMonthWeek,
 } from "@/features/calendar/model/monthGrid";
 import { cn } from "@/lib/utils";
+import { CALENDAR_DAY_HEADER_CELL_HEIGHT } from "./calendarHeaderLayout";
 
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 const WEEKDAY_HEADER_HEIGHT_PX = 32;
@@ -29,7 +30,7 @@ const INITIAL_MONTH_BUFFER = 2;
 const MONTH_EXTEND_COUNT = 4;
 const MONTH_SCROLL_EDGE_THRESHOLD_PX = 560;
 const MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX = 56;
-const DEFAULT_MONTH_ROW_HEIGHT = 112;
+const DEFAULT_MONTH_ROW_HEIGHT = CALENDAR_DAY_HEADER_CELL_HEIGHT;
 const MIN_MONTH_ROW_HEIGHT = 72;
 const MAX_MONTH_ROW_HEIGHT = 260;
 const MONTH_ROW_HEIGHT_STEP = 4;
