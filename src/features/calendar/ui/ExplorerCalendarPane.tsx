@@ -31,7 +31,15 @@ import {
 } from "react";
 
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, X } from "@/ui/icons";
+import type { IconProps } from "@/ui/icons";
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Search,
+  X,
+} from "@/ui/icons";
 import { ExplorerCalendarMonthView } from "./ExplorerCalendarMonthView";
 
 type ExplorerCalendarPaneProps = {
@@ -97,6 +105,166 @@ const VIEW_MODE_OPTIONS = [
   { value: "week", label: "週" },
   { value: "days", label: "日数" },
 ] satisfies Array<{ value: CalendarViewMode; label: string }>;
+
+const TimelineToolbarIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M2 3H11C11.5523 3 12 3.44772 12 4V5C12 5.55228 11.5523 6 11 6H2C1.44772 6 1 5.55228 1 5V4C1 3.44772 1.44772 3 2 3ZM0 4C0 2.89543 0.895431 2 2 2H11C12.1046 2 13 2.89543 13 4V5C13 6.10457 12.1046 7 11 7H2C0.89543 7 0 6.10457 0 5V4ZM5 10H14C14.5523 10 15 10.4477 15 11V12C15 12.5523 14.5523 13 14 13H5C4.44772 13 4 12.5523 4 12V11C4 10.4477 4.44772 10 5 10ZM3 11C3 9.89543 3.89543 9 5 9H14C15.1046 9 16 9.89543 16 11V12C16 13.1046 15.1046 14 14 14H5C3.89543 14 3 13.1046 3 12V11Z"
+      fill="#74798B"
+    />
+  </svg>
+);
+
+const SortToolbarIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M11.9337 5.49595L8.00095 2.125L4.06817 5.49595C3.78932 5.73497 3.75703 6.15478 3.99604 6.43363C4.23506 6.71248 4.65487 6.74478 4.93373 6.50576L8.00095 3.87671L11.0682 6.50576C11.347 6.74478 11.7668 6.71248 12.0059 6.43363C12.2449 6.15478 12.2126 5.73497 11.9337 5.49595ZM4.06823 10.506L8.001 13.877L11.9338 10.506C12.2126 10.267 12.2449 9.84717 12.0059 9.56832C11.7669 9.28947 11.3471 9.25717 11.0682 9.49619L8.001 12.1252L4.93378 9.49619C4.65493 9.25717 4.23511 9.28947 3.9961 9.56832C3.75708 9.84717 3.78938 10.267 4.06823 10.506Z"
+      fill="#8F929C"
+    />
+  </svg>
+);
+
+const FieldsToolbarIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M2.00094 3.33594C1.63367 3.33594 1.33594 3.63367 1.33594 4.00094C1.33594 4.36821 1.63367 4.66594 2.00094 4.66594H2.0076C2.37487 4.66594 2.6726 4.36821 2.6726 4.00094C2.6726 3.63367 2.37487 3.33594 2.0076 3.33594H2.00094ZM5.33443 3.33594C4.96716 3.33594 4.66943 3.63367 4.66943 4.00094C4.66943 4.36821 4.96716 4.66594 5.33443 4.66594H14.0011C14.3684 4.66594 14.6661 4.36821 14.6661 4.00094C14.6661 3.63367 14.3684 3.33594 14.0011 3.33594H5.33443ZM5.33443 7.33594C4.96716 7.33594 4.66943 7.63367 4.66943 8.00094C4.66943 8.36821 4.96716 8.66594 5.33443 8.66594H14.0011C14.3684 8.66594 14.6661 8.36821 14.6661 8.00094C14.6661 7.63367 14.3684 7.33594 14.0011 7.33594H5.33443ZM4.66943 12.0009C4.66943 11.6337 4.96716 11.3359 5.33443 11.3359H14.0011C14.3684 11.3359 14.6661 11.6337 14.6661 12.0009C14.6661 12.3682 14.3684 12.6659 14.0011 12.6659H5.33443C4.96716 12.6659 4.66943 12.3682 4.66943 12.0009ZM1.33594 8.00094C1.33594 7.63367 1.63367 7.33594 2.00094 7.33594H2.0076C2.37487 7.33594 2.6726 7.63367 2.6726 8.00094C2.6726 8.36821 2.37487 8.66594 2.0076 8.66594H2.00094C1.63367 8.66594 1.33594 8.36821 1.33594 8.00094ZM2.00094 11.3359C1.63367 11.3359 1.33594 11.6337 1.33594 12.0009C1.33594 12.3682 1.63367 12.6659 2.00094 12.6659H2.0076C2.37487 12.6659 2.6726 12.3682 2.6726 12.0009C2.6726 11.6337 2.37487 11.3359 2.0076 11.3359H2.00094Z"
+      fill="#74798B"
+    />
+  </svg>
+);
+
+type CalendarToolbarMode = "calendar" | "timeline";
+
+type CalendarWorkspaceToolbarProps = {
+  activeMode: CalendarToolbarMode;
+  onSelectCalendar: () => void;
+  onSelectTimeline: () => void;
+};
+
+const CALENDAR_TOOLBAR_ACTIONS = [
+  { label: "Search", icon: Search },
+  { label: "Filter", icon: Filter },
+  { label: "Sort", icon: SortToolbarIcon },
+  { label: "Fields", icon: FieldsToolbarIcon },
+] as const;
+
+const CalendarWorkspaceToolbar = ({
+  activeMode,
+  onSelectCalendar,
+  onSelectTimeline,
+}: CalendarWorkspaceToolbarProps) => {
+  const tabs = [
+    {
+      value: "calendar",
+      label: "Calendar",
+      icon: CalendarIcon,
+      onClick: onSelectCalendar,
+    },
+    {
+      value: "timeline",
+      label: "Timeline",
+      icon: TimelineToolbarIcon,
+      onClick: onSelectTimeline,
+    },
+  ] as const;
+
+  return (
+    <div className="flex h-9 shrink-0 flex-wrap items-start justify-between overflow-hidden border-b border-[#e2e4e9] bg-white pl-[var(--workspace-content-gutter)] pr-8">
+      <div className="flex h-9 shrink-0 items-start gap-[6px]">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeMode === tab.value;
+
+          return (
+            <div key={tab.value} className="flex flex-col items-start pb-2">
+              <button
+                type="button"
+                className={cn(
+                  "flex h-7 items-center gap-[6px] rounded px-2 py-[3px] text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  isActive ? "text-[#25272d]" : "text-[#8f929c]",
+                )}
+                aria-pressed={isActive}
+                onClick={tab.onClick}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span
+                  className={cn(
+                    "flex h-7 items-center whitespace-nowrap",
+                    isActive && "border-b-2 border-[#74798b]",
+                  )}
+                >
+                  {tab.label}
+                </span>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="flex h-7 shrink-0 items-center justify-end gap-[6px]">
+        {CALENDAR_TOOLBAR_ACTIONS.map((action) => {
+          const Icon = action.icon;
+
+          return (
+            <button
+              key={action.label}
+              type="button"
+              className="flex h-7 items-center gap-[6px] rounded px-2 py-[3px] text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal text-[#8f929c] transition-colors hover:bg-[#f6f7f9] hover:text-[#25272d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="whitespace-nowrap">{action.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 const createInitialTimelineBuffer = (): TimelineBufferDays => ({
   before: INITIAL_TIMELINE_BUFFER_DAYS,
@@ -939,8 +1107,16 @@ export const ExplorerCalendarPane = ({
     );
   }, []);
 
+  const calendarToolbarMode: CalendarToolbarMode =
+    selectedViewMode === "month" ? "calendar" : "timeline";
+
   return (
     <section className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa] text-[#24231f]">
+      <CalendarWorkspaceToolbar
+        activeMode={calendarToolbarMode}
+        onSelectCalendar={() => handleViewModeChange("month")}
+        onSelectTimeline={() => handleViewModeChange("week")}
+      />
       <header className="flex h-[84px] shrink-0 items-center gap-4 border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)] px-5 shadow-[0_1px_0_rgba(255,255,255,0.72)_inset]">
         <div className="flex min-w-0 flex-1 items-center gap-5">
           <div className="min-w-0">
