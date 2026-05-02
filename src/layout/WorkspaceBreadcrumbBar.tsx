@@ -157,7 +157,9 @@ export const WorkspaceBreadcrumbBar = () => {
   );
 
   const shouldHideBreadcrumb =
-    activeTab?.sectionKey === "calendar" || activeTab?.sectionKey === "tasks";
+    activeTab?.kind === "document" ||
+    activeTab?.sectionKey === "calendar" ||
+    activeTab?.sectionKey === "tasks";
 
   const crumbs = useMemo(
     () =>

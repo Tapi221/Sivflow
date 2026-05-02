@@ -568,11 +568,11 @@ export const ExplorerCalendarMonthView = ({
         className="calendar-month-scroll min-h-0 flex-1 overflow-y-auto bg-white"
         onScroll={handleMonthScroll}
       >
-        <div className="sticky top-0 z-20 grid h-8 grid-cols-7 border-b border-[#ebeae4] bg-white">
+        <div className="sticky top-0 z-20 grid h-8 grid-cols-7 border-b border-[#e5e7eb] bg-white">
           {WEEKDAY_LABELS.map((label) => (
             <div
               key={label}
-              className="flex items-center justify-center border-r border-[#f0efea] text-[12px] font-medium leading-normal text-[#8f929c] last:border-r-0"
+              className="flex items-center justify-center border-r border-[#eef0f3] text-[12px] font-medium leading-normal text-[#8f929c] last:border-r-0"
             >
               {label}
             </div>
@@ -597,7 +597,7 @@ export const ExplorerCalendarMonthView = ({
                   <div
                     key={day.key}
                     className={cn(
-                      "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#ebeae4] bg-white text-left transition-colors",
+                      "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#eef0f3] bg-white text-left transition-colors",
                       !isLastColumn && "border-r",
                       todayCell && "bg-[#f4f8f1]",
                       selected && !todayCell && "bg-[#fbfaf7]",
