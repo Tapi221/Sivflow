@@ -619,7 +619,7 @@ export const ExplorerCalendarMonthView = ({
                     >
                       <span
                         className={cn(
-                          "absolute left-4 top-4 inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[15px] font-semibold tabular-nums transition-colors",
+                          "absolute left-4 top-4 inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[length:var(--ds-layout-font-size-meta)] font-semibold tabular-nums transition-colors",
                           todayCell
                             ? "bg-[#6A876E] text-white shadow-[0_7px_18px_rgba(106,135,110,0.24)]"
                             : selected
