@@ -627,7 +627,7 @@ const PdfLibraryDashboard = ({
                             <div className="min-w-0">
                               <div className="flex min-w-0 items-center gap-0">
                                 <IconBadge label="PDF" tone="rose" />
-                                <div className="flex min-w-0 flex-1 items-center gap-2">
+                                <div className="flex min-w-0 flex-1 items-center gap-0">
                                   <span className="min-w-0 flex-1 truncate text-[13px] font-medium leading-[17px] text-[#273038]">
                                     {row.title}
                                   </span>
