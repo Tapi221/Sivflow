@@ -214,7 +214,7 @@ const CalendarWorkspaceToolbar = ({
   ] as const;
 
   return (
-    <div className="flex h-9 shrink-0 flex-wrap items-start justify-between overflow-hidden border-b border-[#e2e4e9] bg-white pl-[var(--workspace-content-gutter)] pr-8">
+    <div className="relative flex h-9 shrink-0 flex-wrap items-start justify-between overflow-hidden bg-white after:absolute after:bottom-1 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']">
       <div className="flex h-9 shrink-0 items-start gap-[6px]">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -225,7 +225,7 @@ const CalendarWorkspaceToolbar = ({
               <button
                 type="button"
                 className={cn(
-                  "flex h-7 items-center gap-[6px] rounded px-2 py-[3px] text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "flex h-7 items-center gap-[6px] rounded py-[3px] pl-0 pr-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   isActive ? "text-[#25272d]" : "text-[#8f929c]",
                 )}
                 aria-pressed={isActive}
@@ -247,14 +247,18 @@ const CalendarWorkspaceToolbar = ({
       </div>
 
       <div className="flex h-7 shrink-0 items-center justify-end gap-[6px]">
-        {CALENDAR_TOOLBAR_ACTIONS.map((action) => {
+        {CALENDAR_TOOLBAR_ACTIONS.map((action, index) => {
           const Icon = action.icon;
+          const isLast = index === CALENDAR_TOOLBAR_ACTIONS.length - 1;
 
           return (
             <button
               key={action.label}
               type="button"
-              className="flex h-7 items-center gap-[6px] rounded px-2 py-[3px] text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal text-[#8f929c] transition-colors hover:bg-[#f6f7f9] hover:text-[#25272d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className={cn(
+                "flex h-7 items-center gap-[6px] rounded py-[3px] pl-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal text-[#8f929c] transition-colors hover:bg-[#f6f7f9] hover:text-[#25272d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                isLast ? "pr-0" : "pr-2",
+              )}
             >
               <Icon className="h-4 w-4 shrink-0" />
               <span className="whitespace-nowrap">{action.label}</span>

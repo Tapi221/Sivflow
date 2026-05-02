@@ -24,7 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
-const WEEKDAY_HEADER_HEIGHT_PX = 48;
+const WEEKDAY_HEADER_HEIGHT_PX = 32;
 const INITIAL_MONTH_BUFFER = 2;
 const MONTH_EXTEND_COUNT = 4;
 const MONTH_SCROLL_EDGE_THRESHOLD_PX = 560;
@@ -568,11 +568,11 @@ export const ExplorerCalendarMonthView = ({
         className="calendar-month-scroll min-h-0 flex-1 overflow-y-auto bg-white"
         onScroll={handleMonthScroll}
       >
-        <div className="sticky top-0 z-20 grid h-[48px] grid-cols-7 border-b border-[#ebeae4] bg-white">
+        <div className="sticky top-0 z-20 grid h-8 grid-cols-7 border-b border-[#ebeae4] bg-white">
           {WEEKDAY_LABELS.map((label) => (
             <div
               key={label}
-              className="flex items-center justify-center border-r border-[#f0efea] text-[13px] font-semibold text-[#9b9a94] last:border-r-0"
+              className="flex items-center justify-center border-r border-[#f0efea] text-[12px] font-medium leading-normal text-[#8f929c] last:border-r-0"
             >
               {label}
             </div>
