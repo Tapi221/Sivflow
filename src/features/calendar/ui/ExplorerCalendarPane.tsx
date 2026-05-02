@@ -40,6 +40,7 @@ import {
   Search,
   X,
 } from "@/ui/icons";
+import { CALENDAR_WEEKDAY_HEADER_HEIGHT } from "./calendarHeaderLayout";
 import { ExplorerCalendarMonthView } from "./ExplorerCalendarMonthView";
 
 type ExplorerCalendarPaneProps = {
@@ -1291,16 +1292,17 @@ export const ExplorerCalendarPane = ({
                   <div
                     key={day.toISOString()}
                     className={cn(
-                      "sticky top-0 z-20 flex h-[56px] items-center justify-center gap-2 border-b border-r border-[#e8e7e1] bg-white text-[13px]",
+                      "sticky top-0 z-20 flex items-center justify-center gap-2 border-b border-r border-[#e8e7e1] bg-white text-[12px]",
                       selected && "bg-[#fff8f8]",
                     )}
+                    style={{ height: `${CALENDAR_WEEKDAY_HEADER_HEIGHT}px` }}
                   >
                     <span className="font-semibold text-[#9b9a94]">
                       {WEEKDAY_LABELS[day.getDay()]}
                     </span>
                     <span
                       className={cn(
-                        "inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 font-bold tabular-nums",
+                        "inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[13px] font-bold tabular-nums",
                         selected
                           ? "bg-[#ef5555] text-white shadow-[0_5px_14px_rgba(239,85,85,0.28)]"
                           : today
