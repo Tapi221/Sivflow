@@ -30,6 +30,7 @@ import {
   useState,
 } from "react";
 
+import { useSetBreadcrumbAction } from "@/contexts/BreadcrumbContext";
 import { cn } from "@/lib/utils";
 import type { IconProps } from "@/ui/icons";
 import {
@@ -178,9 +179,9 @@ const FieldsToolbarIcon = ({
   </svg>
 );
 
-type CalendarToolbarMode = "calendar" | "timeline";
+export type CalendarToolbarMode = "calendar" | "timeline";
 
-type CalendarWorkspaceToolbarProps = {
+export type CalendarWorkspaceToolbarProps = {
   activeMode: CalendarToolbarMode;
   onSelectCalendar: () => void;
   onSelectTimeline: () => void;
@@ -193,7 +194,7 @@ const CALENDAR_TOOLBAR_ACTIONS = [
   { label: "Fields", icon: FieldsToolbarIcon },
 ] as const;
 
-const CalendarWorkspaceToolbar = ({
+export const CalendarWorkspaceToolbar = ({
   activeMode,
   onSelectCalendar,
   onSelectTimeline,
@@ -448,6 +449,7 @@ const calculateEventStyle = (event: CalendarDemoEvent): CalendarEventStyle => {
 export const ExplorerCalendarPane = ({
   onClose,
 }: ExplorerCalendarPaneProps) => {
+  const setBreadcrumbAction = useSetBreadcrumbAction();
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const rangeDaysMenuRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -1027,22 +1029,31 @@ export const ExplorerCalendarPane = ({
     commitHourRowHeight(DEFAULT_HOUR_ROW_HEIGHT);
   };
 
-  const handleViewModeChange = (nextViewMode: CalendarViewMode) => {
-    if (nextViewMode === selectedViewMode) {
-      return;
-    }
+  const handleViewModeChange = useCallback(
+    (nextViewMode: CalendarViewMode) => {
+      if (nextViewMode === selectedViewMode) {
+        return;
+      }
 
-    setSelectedViewMode(nextViewMode);
-    setIsRangeDaysMenuOpen(false);
-    resetTimelinePosition();
+      setSelectedViewMode(nextViewMode);
+      setIsRangeDaysMenuOpen(false);
+      resetTimelinePosition();
 
-    if (nextViewMode === "month") {
-      setMonthTitleDate(startOfMonth(currentDate));
-      requestMonthScrollTarget();
-    }
+      if (nextViewMode === "month") {
+        setMonthTitleDate(startOfMonth(currentDate));
+        requestMonthScrollTarget();
+      }
 
-    scheduleRenderedViewMode(nextViewMode);
-  };
+      scheduleRenderedViewMode(nextViewMode);
+    },
+    [
+      currentDate,
+      requestMonthScrollTarget,
+      resetTimelinePosition,
+      scheduleRenderedViewMode,
+      selectedViewMode,
+    ],
+  );
 
   const handleRangeDaysChange = (nextRangeDays: number) => {
     const clampedRangeDays = clampRangeDays(nextRangeDays);
@@ -1113,14 +1124,24 @@ export const ExplorerCalendarPane = ({
 
   const calendarToolbarMode: CalendarToolbarMode =
     selectedViewMode === "month" ? "calendar" : "timeline";
-
-  return (
-    <section className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa] text-[#24231f]">
+  const breadcrumbToolbar = useMemo(
+    () => (
       <CalendarWorkspaceToolbar
         activeMode={calendarToolbarMode}
         onSelectCalendar={() => handleViewModeChange("month")}
         onSelectTimeline={() => handleViewModeChange("week")}
       />
+    ),
+    [calendarToolbarMode, handleViewModeChange],
+  );
+
+  useEffect(() => {
+    setBreadcrumbAction(breadcrumbToolbar);
+    return () => setBreadcrumbAction(null);
+  }, [breadcrumbToolbar, setBreadcrumbAction]);
+
+  return (
+    <section className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa] text-[#24231f]">
       <header className="flex h-[84px] shrink-0 items-center gap-4 border-b border-[#dddcd5] bg-[rgba(255,255,255,0.96)] px-5 shadow-[0_1px_0_rgba(255,255,255,0.72)_inset]">
         <div className="flex min-w-0 flex-1 items-center gap-5">
           <div className="min-w-0">

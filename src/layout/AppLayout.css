@@ -493,6 +493,12 @@
   margin-left: auto;
 }
 
+.workspace-breadcrumb-bar__toolbar {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+}
+
 .workspace-breadcrumb-bar__item {
   display: flex;
   min-width: 0;

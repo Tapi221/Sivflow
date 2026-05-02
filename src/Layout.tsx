@@ -34,7 +34,6 @@ const Layout = () => {
     document.body.scrollTop = 0;
   }, [location.pathname]);
 
-
   useKatexLoader();
 
   const navigationItems = useMemo<GlobalSearchItem[]>(
@@ -70,6 +69,18 @@ const Layout = () => {
         },
       },
       {
+        id: "action:tasks",
+        value: "action:tasks",
+        kind: "action",
+        iconKind: "directory",
+        title: "タスク",
+        keywords: ["タスク", "tasks", "task", "todo", "to-do"],
+        priority: 95,
+        onSelect: () => {
+          void navigate("/tasks");
+        },
+      },
+      {
         id: "action:gallery",
         value: "action:gallery",
         kind: "action",
@@ -93,7 +104,6 @@ const Layout = () => {
           void navigate("/directory");
         },
       },
-
     ],
     [navigate],
   );
@@ -140,7 +150,6 @@ const Layout = () => {
       }
     >
       <GlobalSearchDialog />
-
 
       <LocalDBStatusBanner />
       <SecurityAlertBanner />
