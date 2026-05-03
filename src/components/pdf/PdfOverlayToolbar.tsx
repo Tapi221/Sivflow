@@ -11,6 +11,7 @@ import {
 } from "@/components/overlay-toolbar/OverlayToolbarGlyphs";
 import { OverlayToolbarIndexNavigator } from "@/components/overlay-toolbar/OverlayToolbarIndexNavigator";
 import { OverlayToolbarZoomControl } from "@/components/overlay-toolbar/OverlayToolbarZoomControl";
+import { cn } from "@/lib/utils";
 
 type PdfFitMode = "width" | "manual";
 
@@ -63,7 +64,7 @@ export const PdfOverlayToolbar = ({
       : "2枚表示。タップで単一表示に切り替え";
 
   const toolbarClassName =
-    "border-[#E2E4E9] bg-[#FFFFFF] shadow-[0_8px_24px_rgba(37,39,45,0.08)]";
+    "translate-y-[8px] border-[#E2E4E9] bg-[#FFFFFF] shadow-[0_8px_24px_rgba(37,39,45,0.08)]";
   const buttonClassName =
     "h-6 w-6 border-[#E2E4E9] bg-[#FFFFFF] text-[#74798B] shadow-none hover:bg-[#FFFFFF] hover:text-[#25272D] disabled:border-[#E2E4E9] disabled:bg-[#FFFFFF] disabled:text-[#E2E4E9] disabled:hover:bg-[#FFFFFF] disabled:hover:text-[#E2E4E9]";
   const activeButtonClassName =
@@ -79,12 +80,12 @@ export const PdfOverlayToolbar = ({
     "[&::-webkit-slider-thumb]:border-[#E2E4E9] [&::-webkit-slider-thumb]:bg-[#FFFFFF] [&::-webkit-slider-thumb]:shadow-[0_3px_8px_rgba(37,39,45,0.14)] [&::-moz-range-thumb]:border-[#E2E4E9] [&::-moz-range-thumb]:bg-[#FFFFFF] [&::-moz-range-thumb]:shadow-[0_3px_8px_rgba(37,39,45,0.14)]";
 
   return (
-    <OverlayToolbar>
+    <OverlayToolbar className={toolbarClassName}>
       <OverlayToolbarButton
         onClick={onPrevPage}
         label="前のページ"
         disabled={disabled || !canGoToPrevPage}
-        className="h-6 w-6"
+        className={buttonClassName}
       >
         <PdfPrevGlyph />
       </OverlayToolbarButton>
@@ -93,33 +94,39 @@ export const PdfOverlayToolbar = ({
         onClick={onNextPage}
         label="次のページ"
         disabled={disabled || !canGoToNextPage}
-        className="h-6 w-6"
+        className={buttonClassName}
       >
         <PdfNextGlyph />
       </OverlayToolbarButton>
 
-      <OverlayToolbarDivider />
+      <OverlayToolbarDivider className={dividerClassName} />
 
       <OverlayToolbarIndexNavigator
         value={currentPage}
         total={numPages}
         onCommit={onCommitPage}
         inputAriaLabel="PDFページ番号"
+        className={navigatorClassName}
+        inputClassName={navigatorInputClassName}
+        totalClassName={totalClassName}
       />
 
-      <OverlayToolbarDivider />
+      <OverlayToolbarDivider className={dividerClassName} />
 
       <OverlayToolbarButton
         onClick={onFitWidth}
         label="幅に合わせる"
         disabled={disabled}
         active={isFitWidthActive}
-        className="h-6 w-6"
+        className={cn(
+          buttonClassName,
+          isFitWidthActive && activeButtonClassName,
+        )}
       >
         <PdfFitWidthGlyph />
       </OverlayToolbarButton>
 
-      <OverlayToolbarDivider />
+      <OverlayToolbarDivider className={dividerClassName} />
 
       <OverlayToolbarButton
         onClick={() => {
@@ -128,7 +135,12 @@ export const PdfOverlayToolbar = ({
         label={pageLayoutModeToggleLabel}
         disabled={disabled || !canTogglePageLayoutMode}
         active={canTogglePageLayoutMode && pageLayoutMode === "double"}
-        className="h-6 w-6"
+        className={cn(
+          buttonClassName,
+          canTogglePageLayoutMode &&
+            pageLayoutMode === "double" &&
+            activeButtonClassName,
+        )}
       >
         {pageLayoutMode === "single" ? (
           <PdfSinglePageGlyph />
@@ -137,7 +149,7 @@ export const PdfOverlayToolbar = ({
         )}
       </OverlayToolbarButton>
 
-      <OverlayToolbarDivider />
+      <OverlayToolbarDivider className={dividerClassName} />
 
       <OverlayToolbarZoomControl
         value={zoomPercent}
@@ -148,6 +160,10 @@ export const PdfOverlayToolbar = ({
         label="PDFズーム"
         disabled={disabled}
         sliderWrapperClassName="w-14 px-0.5 sm:w-16"
+        valueClassName={totalClassName}
+        trackClassName={sliderTrackClassName}
+        rangeClassName={sliderRangeClassName}
+        thumbClassName={sliderThumbClassName}
       />
     </OverlayToolbar>
   );
