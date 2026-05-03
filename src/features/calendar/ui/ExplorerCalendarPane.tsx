@@ -546,7 +546,7 @@ export const ExplorerCalendarPane = ({
     selectedViewMode === "month" ? monthTitleDate : currentDate;
   const monthLabel =
     activeMode === "timeline" && selectedViewMode === "month"
-      ? format(titleDate, "yyyy")
+      ? null
       : format(titleDate, "MMMM yyyy");
 
   const viewportDayCount = getViewportDayCount(currentDate, selectedViewMode);
@@ -765,9 +765,13 @@ export const ExplorerCalendarPane = ({
         className="flex min-h-0 flex-1 flex-col bg-white px-5 pb-5 pt-4"
       >
         <div className="mb-4 flex shrink-0 items-center justify-between">
-          <h1 className="text-[16px] font-semibold text-[#24272f]">
-            {monthLabel}
-          </h1>
+          {monthLabel ? (
+            <h1 className="text-[16px] font-semibold text-[#24272f]">
+              {monthLabel}
+            </h1>
+          ) : (
+            <div aria-hidden="true" className="h-6 w-24" />
+          )}
 
           <div className="flex items-center gap-2">
             <button
@@ -897,3 +901,4 @@ export const ExplorerCalendarPane = ({
     </div>
   );
 };
+
