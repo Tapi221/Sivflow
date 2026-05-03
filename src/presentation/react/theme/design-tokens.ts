@@ -2,16 +2,16 @@
 export const designTokens = {
   "color": {
     "primary": {
-      "50": "#f7f8ef",
-      "100": "#edf0df",
-      "200": "#dce3c2",
-      "300": "#c3cc99",
-      "400": "#a7b275",
-      "500": "#96a867",
-      "600": "#8a9a5b",
-      "700": "#6d7d48",
-      "800": "#586539",
-      "900": "#374023"
+      "50": "#f4f7fb",
+      "100": "#e7eef8",
+      "200": "#cfdbef",
+      "300": "#aabfe0",
+      "400": "#7f9ecb",
+      "500": "#5d7fb6",
+      "600": "#45679d",
+      "700": "#35507b",
+      "800": "#25395a",
+      "900": "#17253d"
     },
     "neutral": {
       "0": "#ffffff",
@@ -98,6 +98,7 @@ export const designTokens = {
   "spacing": {
     "0": 0,
     "1": 4,
+    "1_8": 7.2,
     "2": 8,
     "3": 12,
     "4": 16,
@@ -107,8 +108,7 @@ export const designTokens = {
     "10": 40,
     "12": 48,
     "16": 64,
-    "20": 80,
-    "1_8": 7.2
+    "20": 80
   },
   "radius": {
     "sm": 8,
@@ -179,9 +179,9 @@ export const designTokens = {
       "convex": "0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 -1px 0 rgba(86, 72, 74, 0.08) inset, 0 1px 2px rgba(86, 72, 74, 0.16)",
       "floating": "0 8px 24px rgba(15, 23, 42, 0.08)",
       "panel": "0 10px 24px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(148, 163, 184, 0.25)",
-      "soft": "0 2px 15px -3px rgba(104, 154, 152, 0.15), 0 10px 20px -2px rgba(104, 154, 152, 0.08)",
+      "soft": "0 2px 15px -3px rgba(69, 103, 157, 0.15), 0 10px 20px -2px rgba(69, 103, 157, 0.08)",
       "card": "0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.04)",
-      "cardHover": "0 8px 30px -4px rgba(104, 154, 152, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)"
+      "cardHover": "0 8px 30px -4px rgba(69, 103, 157, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)"
     },
     "blur": {
       "floating": 12
@@ -219,7 +219,7 @@ export const designTokens = {
       "background": {
         "app": "#ffffff",
         "sidebar": "#f6f1eb",
-        "sidebarActive": "#ece2d7",
+        "sidebarActive": "#e7edf6",
         "floating": "rgba(255, 255, 255, 0.82)",
         "code": "#f7f8f9"
       },
@@ -236,16 +236,16 @@ export const designTokens = {
         "onPrimary": "#ffffff"
       },
       "action": {
-        "primary": "#8a9a5b",
-        "primaryHover": "#6d7d48",
-        "primarySoft": "#edf0df",
-        "accent": "#96a867"
+        "primary": "#45679d",
+        "primaryHover": "#35507b",
+        "primarySoft": "#e7eef8",
+        "accent": "#5d7fb6"
       },
       "interactive": {
-        "selectedSubtle": "#e6ebe3",
-        "selectedAccent": "#6a876e",
-        "columnSelectedSubtle": "rgba(106, 135, 110, 0.16)",
-        "columnSelectedAccent": "#4f6b54"
+        "selectedSubtle": "#e7edf6",
+        "selectedAccent": "#35507b",
+        "columnSelectedSubtle": "rgba(53, 80, 123, 0.14)",
+        "columnSelectedAccent": "#25395a"
       },
       "status": {
         "danger": "#e11d48",
@@ -283,7 +283,7 @@ export const designTokens = {
       "floating": "0 8px 24px rgba(15, 23, 42, 0.08)",
       "panel": "0 10px 24px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(148, 163, 184, 0.25)",
       "card": "0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.04)",
-      "cardHover": "0 8px 30px -4px rgba(104, 154, 152, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)"
+      "cardHover": "0 8px 30px -4px rgba(69, 103, 157, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)"
     },
     "motion": {
       "interactive": "150ms ease",

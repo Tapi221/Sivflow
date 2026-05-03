@@ -3,7 +3,7 @@
     "background": {
       "app": "{color.neutral.0}",
       "sidebar": "#f6f1eb",
-      "sidebarActive": "#ece2d7",
+      "sidebarActive": "#e7edf6",
       "floating": "rgba(255, 255, 255, 0.82)",
       "code": "{color.code.background}"
     },
@@ -26,10 +26,10 @@
       "accent": "{color.primary.500}"
     },
     "interactive": {
-      "selectedSubtle": "#e6ebe3",
-      "selectedAccent": "#6a876e",
-      "columnSelectedSubtle": "rgba(106, 135, 110, 0.16)",
-      "columnSelectedAccent": "#4f6b54"
+      "selectedSubtle": "#e7edf6",
+      "selectedAccent": "{color.primary.700}",
+      "columnSelectedSubtle": "rgba(53, 80, 123, 0.14)",
+      "columnSelectedAccent": "{color.primary.800}"
     },
     "status": {
       "danger": "{color.status.danger}",
