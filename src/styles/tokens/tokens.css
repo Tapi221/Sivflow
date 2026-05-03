@@ -91,7 +91,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 172 26% 51%;
+    --ring: 217 39% 44%;
 
     --surface-border: var(--ds-semantic-color-border-default);
     --surface-placeholder-text: var(--ds-semantic-color-text-placeholder);
@@ -181,13 +181,13 @@
     --card-selected-outline-neutral: rgba(84, 95, 105, 0.42);
     --card-selected-outline-accent: color-mix(
       in srgb,
-      var(--sidebar-active-accent, #7aa6a1) 44%,
+      var(--sidebar-active-accent, #35507b) 44%,
       transparent
     );
     --card-selected-surface: color-mix(
       in srgb,
       #f3f4f6 94%,
-      var(--sidebar-active-accent, #7aa6a1) 6%
+      var(--sidebar-active-accent, #35507b) 6%
     );
     --card-border-selected: var(--card-selected-outline-neutral);
     --card-shadow-default:
@@ -203,29 +203,29 @@
       0 0 96px rgba(15, 23, 42, 0.12);
     --card-focus-ring: color-mix(
       in srgb,
-      var(--sidebar-active-accent, #7aa6a1) 52%,
+      var(--sidebar-active-accent, #35507b) 52%,
       white
     );
     --card-focus-ring-shadow: 0 0 0 2px
       color-mix(in srgb, var(--card-focus-ring) 34%, transparent);
     --card-editing-badge-bg: color-mix(
       in srgb,
-      var(--sidebar-active-accent, #7aa6a1) 12%,
+      var(--sidebar-active-accent, #35507b) 12%,
       white
     );
     --card-editing-badge-border: color-mix(
       in srgb,
-      var(--sidebar-active-accent, #7aa6a1) 24%,
+      var(--sidebar-active-accent, #35507b) 24%,
       rgba(15, 23, 42, 0.08)
     );
     --card-editing-badge-text: color-mix(
       in srgb,
-      var(--sidebar-active-accent, #7aa6a1) 70%,
+      var(--sidebar-active-accent, #35507b) 70%,
       #3f4a53
     );
     --card-editing-outline: color-mix(
       in srgb,
-      var(--sidebar-active-accent, #7aa6a1) 42%,
+      var(--sidebar-active-accent, #35507b) 42%,
       #123126
     );
 
@@ -371,3 +371,4 @@
     --tag-border: var(--tag-sky-border);
   }
 }
+
