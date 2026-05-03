@@ -142,7 +142,11 @@ const resolveActiveCrumbs = ({
   return [{ ...baseCrumb, to: undefined }];
 };
 
-export const WorkspaceBreadcrumbBar = () => {
+export const WorkspaceBreadcrumbBar = ({
+  hideCrumbs = false,
+}: {
+  hideCrumbs?: boolean;
+}) => {
   const navigate = useNavigate();
   const { search } = useLocation();
   const action = useBreadcrumbAction();
@@ -188,55 +192,65 @@ export const WorkspaceBreadcrumbBar = () => {
     return null;
   }
 
-  if (shouldHideBreadcrumb) {
+  if (!hideCrumbs && shouldHideBreadcrumb) {
     return null;
   }
 
-  if (crumbs.length === 0) {
+  if (!hideCrumbs && crumbs.length === 0) {
+    return null;
+  }
+
+  // When crumbs are hidden, still render the bar so toolbar actions remain visible.
+  if (hideCrumbs && !action) {
     return null;
   }
 
   return (
     <nav className="workspace-breadcrumb-bar" aria-label="Breadcrumb">
-      <ol className="workspace-breadcrumb-bar__list">
-        {crumbs.map((crumb, index) => {
-          const isLast = index === crumbs.length - 1;
-          const target = isLast ? undefined : crumb.to;
+      {hideCrumbs ? null : (
+        <ol className="workspace-breadcrumb-bar__list">
+          {crumbs.map((crumb, index) => {
+            const isLast = index === crumbs.length - 1;
+            const target = isLast ? undefined : crumb.to;
 
-          return (
-            <Fragment key={`${crumb.label}:${crumb.to ?? ""}:${index}`}>
-              {index > 0 ? (
-                <li className="workspace-breadcrumb-bar__separator" aria-hidden>
-                  /
+            return (
+              <Fragment key={`${crumb.label}:${crumb.to ?? ""}:${index}`}>
+                {index > 0 ? (
+                  <li
+                    className="workspace-breadcrumb-bar__separator"
+                    aria-hidden
+                  >
+                    /
+                  </li>
+                ) : null}
+                <li className="workspace-breadcrumb-bar__item">
+                  {target ? (
+                    <button
+                      type="button"
+                      className="workspace-breadcrumb-bar__button"
+                      title={crumb.label}
+                      onClick={() => handleCrumbNavigate(target)}
+                    >
+                      {crumb.label}
+                    </button>
+                  ) : (
+                    <span
+                      className={cn(
+                        "workspace-breadcrumb-bar__label",
+                        isLast && "workspace-breadcrumb-bar__label--current",
+                      )}
+                      title={crumb.label}
+                      aria-current={isLast ? "page" : undefined}
+                    >
+                      {crumb.label}
+                    </span>
+                  )}
                 </li>
-              ) : null}
-              <li className="workspace-breadcrumb-bar__item">
-                {target ? (
-                  <button
-                    type="button"
-                    className="workspace-breadcrumb-bar__button"
-                    title={crumb.label}
-                    onClick={() => handleCrumbNavigate(target)}
-                  >
-                    {crumb.label}
-                  </button>
-                ) : (
-                  <span
-                    className={cn(
-                      "workspace-breadcrumb-bar__label",
-                      isLast && "workspace-breadcrumb-bar__label--current",
-                    )}
-                    title={crumb.label}
-                    aria-current={isLast ? "page" : undefined}
-                  >
-                    {crumb.label}
-                  </span>
-                )}
-              </li>
-            </Fragment>
-          );
-        })}
-      </ol>
+              </Fragment>
+            );
+          })}
+        </ol>
+      )}
       {action ? (
         <div className="workspace-breadcrumb-bar__action">{action}</div>
       ) : null}

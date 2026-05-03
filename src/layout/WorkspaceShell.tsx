@@ -19,7 +19,7 @@ export const WorkspaceShell = ({
       <div className="workspace-shell__tabs">
         <WorkspaceTabsBar />
       </div>
-      <WorkspaceBreadcrumbBar />
+      <WorkspaceBreadcrumbBar hideCrumbs />
 
       <main
         ref={mainRef}
