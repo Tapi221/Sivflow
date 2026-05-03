@@ -436,7 +436,8 @@ export const ExplorerCalendarPane = ({
         )
       : DAY_COLUMN_MIN_WIDTH;
 
-  const gridWidth = TIME_COLUMN_WIDTH + visibleDays.length * calendarDayColumnWidth;
+  const gridWidth =
+    TIME_COLUMN_WIDTH + visibleDays.length * calendarDayColumnWidth;
   const timelineGridStyle: TimelineGridStyle = {
     "--calendar-hour-row-height": `${DEFAULT_HOUR_ROW_HEIGHT}px`,
     gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${calendarDayColumnWidth}px)`,
@@ -452,42 +453,47 @@ export const ExplorerCalendarPane = ({
     setMonthScrollTargetToken((current) => current + 1);
   }, []);
 
-  const handleTimelineScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
-    const scrollContainer = event.currentTarget;
+  const handleTimelineScroll = useCallback(
+    (event: UIEvent<HTMLDivElement>) => {
+      const scrollContainer = event.currentTarget;
 
-    const distanceToLeft = scrollContainer.scrollLeft;
-    const distanceToRight =
-      scrollContainer.scrollWidth -
-      scrollContainer.clientWidth -
-      scrollContainer.scrollLeft;
+      const distanceToLeft = scrollContainer.scrollLeft;
+      const distanceToRight =
+        scrollContainer.scrollWidth -
+        scrollContainer.clientWidth -
+        scrollContainer.scrollLeft;
 
-    if (
-      distanceToLeft < TIMELINE_EDGE_THRESHOLD_PX &&
-      !isExtendingLeftRef.current
-    ) {
-      isExtendingLeftRef.current = true;
-      prependScrollCorrectionRef.current =
-        TIMELINE_EXTEND_DAYS *
-        (activeMode === "timeline" ? TIMELINE_DAY_COLUMN_WIDTH : calendarDayColumnWidth);
+      if (
+        distanceToLeft < TIMELINE_EDGE_THRESHOLD_PX &&
+        !isExtendingLeftRef.current
+      ) {
+        isExtendingLeftRef.current = true;
+        prependScrollCorrectionRef.current =
+          TIMELINE_EXTEND_DAYS *
+          (activeMode === "timeline"
+            ? TIMELINE_DAY_COLUMN_WIDTH
+            : calendarDayColumnWidth);
 
-      setTimelineBuffer((current) => ({
-        before: current.before + TIMELINE_EXTEND_DAYS,
-        after: current.after,
-      }));
-    }
+        setTimelineBuffer((current) => ({
+          before: current.before + TIMELINE_EXTEND_DAYS,
+          after: current.after,
+        }));
+      }
 
-    if (
-      distanceToRight < TIMELINE_EDGE_THRESHOLD_PX &&
-      !isExtendingRightRef.current
-    ) {
-      isExtendingRightRef.current = true;
+      if (
+        distanceToRight < TIMELINE_EDGE_THRESHOLD_PX &&
+        !isExtendingRightRef.current
+      ) {
+        isExtendingRightRef.current = true;
 
-      setTimelineBuffer((current) => ({
-        before: current.before,
-        after: current.after + TIMELINE_EXTEND_DAYS,
-      }));
-    }
-  }, [activeMode, calendarDayColumnWidth]);
+        setTimelineBuffer((current) => ({
+          before: current.before,
+          after: current.after + TIMELINE_EXTEND_DAYS,
+        }));
+      }
+    },
+    [activeMode, calendarDayColumnWidth],
+  );
 
   useEffect(() => {
     const viewport = contentViewportRef.current;
@@ -527,9 +533,16 @@ export const ExplorerCalendarPane = ({
 
     scrollContainer.scrollLeft =
       timelineBuffer.before *
-      (activeMode === "timeline" ? TIMELINE_DAY_COLUMN_WIDTH : calendarDayColumnWidth);
+      (activeMode === "timeline"
+        ? TIMELINE_DAY_COLUMN_WIDTH
+        : calendarDayColumnWidth);
     shouldSyncScrollRef.current = false;
-  }, [activeMode, calendarDayColumnWidth, timelineBuffer.before, visibleDays.length]);
+  }, [
+    activeMode,
+    calendarDayColumnWidth,
+    timelineBuffer.before,
+    visibleDays.length,
+  ]);
 
   useLayoutEffect(() => {
     isExtendingRightRef.current = false;
@@ -598,7 +611,10 @@ export const ExplorerCalendarPane = ({
         onSelectViewMode={handleSelectViewMode}
       />
 
-      <div ref={contentViewportRef} className="flex min-h-0 flex-1 flex-col bg-white px-5 pb-5 pt-4">
+      <div
+        ref={contentViewportRef}
+        className="flex min-h-0 flex-1 flex-col bg-white px-5 pb-5 pt-4"
+      >
         <div className="mb-4 flex shrink-0 items-center justify-between">
           <h1 className="text-[16px] font-semibold text-[#24272f]">
             {monthLabel}
