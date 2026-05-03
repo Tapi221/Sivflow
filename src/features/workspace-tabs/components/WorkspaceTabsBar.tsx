@@ -241,7 +241,7 @@ export const WorkspaceTabsBar = ({
                   <Icon
                     className={cn(
                       "h-4 w-4 shrink-0",
-                      selected ? "text-[#6a876e]" : "text-[#7e8791]",
+                      selected ? "text-[var(--ds-semantic-color-interactive-selected-accent)]" : "text-[#7e8791]",
                     )}
                   />
                   <span className="truncate">{tab.title}</span>
@@ -300,3 +300,4 @@ export const WorkspaceTabsBar = ({
     </div>
   );
 };
+
