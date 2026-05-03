@@ -7,6 +7,7 @@ import {
 
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { TagChip } from "@/components/tag/TagChip";
+import { CalendarWorkspaceToolbar } from "@/features/calendar/ui/ExplorerCalendarPane";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 import {
@@ -24,11 +25,7 @@ type PdfLibraryDashboardProps = {
   onOpenDocument: (documentId: string) => void;
 };
 
-type ColumnId =
-  | "name"
-  | "tags"
-  | "lastViewed"
-  | "updatedAt";
+type ColumnId = "name" | "tags" | "lastViewed" | "updatedAt";
 
 type DashboardColumn = {
   id: ColumnId;
@@ -79,8 +76,6 @@ const DEFAULT_COLUMNS: DashboardColumn[] = [
 
 const cardClassName =
   "box-border rounded-[10px] border border-[#D1D1D1] bg-[#FFFFFF] p-4 shadow-[0_6px_3px_0_rgba(0,0,0,0.06),0_10px_10px_0_rgba(0,0,0,0.05)]";
-const toolbarIconButtonClassName =
-  "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)] hover:text-[#808192] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 const selectedColumnBackground =
   "var(--ds-semantic-color-interactive-column-selected-subtle, rgba(106, 135, 110, 0.16))";
@@ -124,82 +119,6 @@ const formatDateTime = (value: Date | null): string => {
   return `${year}/${month}/${day} ${hours}:${minutes}`;
 };
 
-const ToolbarSettingsIcon = () => {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M4 7H20"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-      />
-      <path
-        d="M4 12H20"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-      />
-      <path
-        d="M4 17H20"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-      />
-      <circle
-        cx="15"
-        cy="7"
-        r="2.25"
-        fill="#FFFFFF"
-        stroke="currentColor"
-        strokeWidth="1.75"
-      />
-      <circle
-        cx="8"
-        cy="12"
-        r="2.25"
-        fill="#FFFFFF"
-        stroke="currentColor"
-        strokeWidth="1.75"
-      />
-      <circle
-        cx="13"
-        cy="17"
-        r="2.25"
-        fill="#FFFFFF"
-        stroke="currentColor"
-        strokeWidth="1.75"
-      />
-    </svg>
-  );
-};
-
-const ToolbarFilterIcon = () => {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M4.75 6.75H19.25L13.75 13.125V18.25L10.25 16.25V13.125L4.75 6.75Z"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-};
-
 const PdfOpenActionIcon = () => {
   return (
     <svg
@@ -232,56 +151,6 @@ const PdfOpenActionIcon = () => {
         strokeLinejoin="round"
       />
     </svg>
-  );
-};
-
-const PdfLibraryWorkspaceToolbar = ({
-  onImport,
-}: {
-  onImport: () => void;
-}) => {
-  return (
-    <div className="relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 flex-wrap items-center justify-between overflow-hidden bg-white after:absolute after:bottom-1 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']">
-      <div className="flex h-7 shrink-0 items-start gap-[6px]">
-        <div className="flex flex-col items-start pb-2">
-          <button
-            type="button"
-            className="flex h-7 items-center gap-[6px] rounded py-[3px] pl-0 pr-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal text-[#25272d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-current="page"
-          >
-            <span className="flex h-7 items-center whitespace-nowrap border-b-2 border-[#74798b]">
-              PDF
-            </span>
-          </button>
-        </div>
-      </div>
-
-      <div className="flex h-8 shrink-0 items-center justify-end gap-[6px]">
-        <button
-          type="button"
-          className="inline-flex h-8 items-center justify-center rounded-[10px] border-0 bg-[#6A876E] px-5 text-[12px] font-medium leading-normal text-white transition-colors hover:bg-[#5f7963] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          onClick={onImport}
-        >
-          PDFをインポート
-        </button>
-        <button
-          type="button"
-          className={toolbarIconButtonClassName}
-          aria-label="表示設定"
-          title="表示設定"
-        >
-          <ToolbarSettingsIcon />
-        </button>
-        <button
-          type="button"
-          className={toolbarIconButtonClassName}
-          aria-label="フィルター"
-          title="フィルター"
-        >
-          <ToolbarFilterIcon />
-        </button>
-      </div>
-    </div>
   );
 };
 
@@ -452,6 +321,11 @@ const PdfLibraryDashboard = ({
   if (rows.length === 0) {
     return (
       <div className="flex h-full min-h-0 w-full flex-col bg-[#FFFFFF]">
+        <CalendarWorkspaceToolbar
+          activeMode="calendar"
+          onSelectCalendar={() => undefined}
+          onSelectTimeline={() => undefined}
+        />
         <input
           ref={fileInputRef}
           type="file"
@@ -460,7 +334,6 @@ const PdfLibraryDashboard = ({
           className="hidden"
           onChange={handleToolbarFileInputChange}
         />
-        <PdfLibraryWorkspaceToolbar onImport={handleToolbarAddDocument} />
         <div className="flex flex-1 items-center justify-center p-8">
           <div className="w-full max-w-2xl rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-8">
             <div className="inline-flex rounded-[999px] bg-[#f3f4f6] px-3 py-1 text-[12px] font-semibold text-[#4b5563]">
@@ -488,6 +361,11 @@ const PdfLibraryDashboard = ({
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-[#FFFFFF]">
+      <CalendarWorkspaceToolbar
+        activeMode="calendar"
+        onSelectCalendar={() => undefined}
+        onSelectTimeline={() => undefined}
+      />
       <input
         ref={fileInputRef}
         type="file"
@@ -496,8 +374,6 @@ const PdfLibraryDashboard = ({
         className="hidden"
         onChange={handleToolbarFileInputChange}
       />
-
-      <PdfLibraryWorkspaceToolbar onImport={handleToolbarAddDocument} />
 
       <div className="grid min-h-0 w-full grid-cols-1 gap-4 pt-4">
         <div className="flex min-h-0 min-w-0 flex-col gap-4">
@@ -659,25 +535,27 @@ const PdfLibraryDashboard = ({
                             </div>
 
                             <div className="flex min-w-0 items-center gap-2 overflow-hidden">
-                              {row.tags.length > 0 ? (
-                                row.tags.slice(0, 2).map((tag) => (
-                                  <TagChip
-                                    key={`${row.id}:${tag}`}
-                                    label={tag}
-                                    colorKey={getTagColorKey(tag)}
-                                  />
-                                ))
-                              ) : null}
+                              {row.tags.length > 0
+                                ? row.tags
+                                    .slice(0, 2)
+                                    .map((tag) => (
+                                      <TagChip
+                                        key={`${row.id}:${tag}`}
+                                        label={tag}
+                                        colorKey={getTagColorKey(tag)}
+                                      />
+                                    ))
+                                : null}
                             </div>
 
                             <div
-                              className="truncate whitespace-nowrap text-[13px] font-normal leading-[17px] text-[#484964]"
+                              className="truncate whitespace-nowrap text-[13px] font-normal leading-[17px] text-[#8f929c]"
                               style={dateTimeTextStyle}
                             >
                               {formatDateTime(row.lastViewedAt)}
                             </div>
                             <div
-                              className="truncate whitespace-nowrap text-[13px] font-normal leading-[17px] text-[#484964]"
+                              className="truncate whitespace-nowrap text-[13px] font-normal leading-[17px] text-[#8f929c]"
                               style={dateTimeTextStyle}
                             >
                               {formatDateTime(row.updatedAt)}
