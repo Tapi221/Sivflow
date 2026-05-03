@@ -64,7 +64,7 @@ export const PdfOverlayToolbar = ({
       : "2枚表示。タップで単一表示に切り替え";
 
   const toolbarClassName =
-    "border-[#E2E4E9] bg-[#FFFFFF] shadow-[0_8px_24px_rgba(37,39,45,0.08)]";
+    "translate-y-[8px] border-[#E2E4E9] bg-[#FFFFFF] shadow-[0_8px_24px_rgba(37,39,45,0.08)]";
   const buttonClassName =
     "h-6 w-6 border-[#E2E4E9] bg-[#FFFFFF] text-[#74798B] shadow-none hover:bg-[#FFFFFF] hover:text-[#25272D] disabled:border-[#E2E4E9] disabled:bg-[#FFFFFF] disabled:text-[#E2E4E9] disabled:hover:bg-[#FFFFFF] disabled:hover:text-[#E2E4E9]";
   const activeButtonClassName =
