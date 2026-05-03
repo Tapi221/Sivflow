@@ -62,6 +62,22 @@ export const PdfOverlayToolbar = ({
       ? "単一表示。タップで2枚表示に切り替え"
       : "2枚表示。タップで単一表示に切り替え";
 
+  const toolbarClassName =
+    "border-[#E2E4E9] bg-[#FFFFFF] shadow-[0_8px_24px_rgba(37,39,45,0.08)]";
+  const buttonClassName =
+    "h-6 w-6 border-[#E2E4E9] bg-[#FFFFFF] text-[#74798B] shadow-none hover:bg-[#FFFFFF] hover:text-[#25272D] disabled:border-[#E2E4E9] disabled:bg-[#FFFFFF] disabled:text-[#E2E4E9] disabled:hover:bg-[#FFFFFF] disabled:hover:text-[#E2E4E9]";
+  const activeButtonClassName =
+    "border-[#E2E4E9] bg-[#FFFFFF] text-[#25272D] shadow-[inset_0_0_0_1px_#E2E4E9]";
+  const dividerClassName = "bg-[#E2E4E9]";
+  const navigatorClassName = "text-[#74798B]";
+  const navigatorInputClassName =
+    "border-[#E2E4E9] bg-[#FFFFFF] text-[#25272D] focus:border-[#74798B] focus:bg-[#FFFFFF]";
+  const totalClassName = "text-[#74798B]";
+  const sliderTrackClassName = "bg-[#E2E4E9]";
+  const sliderRangeClassName = "bg-[#74798B]";
+  const sliderThumbClassName =
+    "[&::-webkit-slider-thumb]:border-[#E2E4E9] [&::-webkit-slider-thumb]:bg-[#FFFFFF] [&::-webkit-slider-thumb]:shadow-[0_3px_8px_rgba(37,39,45,0.14)] [&::-moz-range-thumb]:border-[#E2E4E9] [&::-moz-range-thumb]:bg-[#FFFFFF] [&::-moz-range-thumb]:shadow-[0_3px_8px_rgba(37,39,45,0.14)]";
+
   return (
     <OverlayToolbar>
       <OverlayToolbarButton
