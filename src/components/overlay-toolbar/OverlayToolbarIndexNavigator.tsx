@@ -85,6 +85,20 @@ export const OverlayToolbarIndexNavigator = ({
     commitInput();
   }, [commitInput]);
 
+  const handleFocus = React.useCallback(
+    (event: React.FocusEvent<HTMLInputElement>) => {
+      event.currentTarget.select();
+    },
+    [],
+  );
+
+  const handleClick = React.useCallback(
+    (event: React.MouseEvent<HTMLInputElement>) => {
+      event.currentTarget.select();
+    },
+    [],
+  );
+
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.nativeEvent.isComposing) {
@@ -102,6 +116,7 @@ export const OverlayToolbarIndexNavigator = ({
       if (event.key === "Escape") {
         event.preventDefault();
         setDraftValue(String(value));
+        event.currentTarget.select();
       }
     },
     [commitInput, value],
@@ -121,6 +136,8 @@ export const OverlayToolbarIndexNavigator = ({
         value={draftValue}
         onChange={handleChange}
         onBlur={handleBlur}
+        onFocus={handleFocus}
+        onClick={handleClick}
         onKeyDown={handleKeyDown}
         className={cn(
           "h-6 w-12 rounded-full border border-[rgba(225,214,203,0.9)] bg-[rgba(255,250,244,0.84)] px-2 text-center text-[10px] font-semibold text-[#463c35] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none transition focus:border-[rgba(189,166,144,0.92)] focus:bg-[rgba(255,252,247,0.98)] sm:w-14",
