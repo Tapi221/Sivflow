@@ -100,7 +100,6 @@ object DesignTokens {
     object Spacing {
         const val Value0 = 0
         const val Value1 = 4
-        const val Value18 = 7.2
         const val Value2 = 8
         const val Value3 = 12
         const val Value4 = 16
@@ -111,6 +110,7 @@ object DesignTokens {
         const val Value12 = 48
         const val Value16 = 64
         const val Value20 = 80
+        const val Value18 = 7.2
     }
     object Radius {
         const val Sm = 8
@@ -124,10 +124,10 @@ object DesignTokens {
     }
     object Typography {
         object FontFamily {
-            const val Ui = ["Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"]
-            const val Content = ["Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP", "MS PMincho", "serif"]
-            const val Numeric = ["Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"]
-            const val Code = ["Fira Code", "Fira Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"]
+            const val Ui = listOf("Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif")
+            const val Content = listOf("Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP", "MS PMincho", "serif")
+            const val Numeric = listOf("Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif")
+            const val Code = listOf("Fira Code", "Fira Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace")
         }
         object FontSize {
             const val Xs = 12.8
@@ -274,10 +274,10 @@ object DesignTokens {
             const val Pill = 999
         }
         object Typography {
-            const val Ui = ["Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"]
-            const val Content = ["Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP", "MS PMincho", "serif"]
-            const val Numeric = ["Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"]
-            const val Code = ["Fira Code", "Fira Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"]
+            const val Ui = listOf("Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif")
+            const val Content = listOf("Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP", "MS PMincho", "serif")
+            const val Numeric = listOf("Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif")
+            const val Code = listOf("Fira Code", "Fira Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace")
         }
         object Elevation {
             const val ControlInset = "inset 0 1px 2px rgba(86, 72, 74, 0.16)"
