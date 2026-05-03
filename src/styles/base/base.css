@@ -69,6 +69,12 @@
     background-position: 0 0;
   }
 
+  input,
+  textarea,
+  [contenteditable="true"] {
+    caret-color: #35507b;
+  }
+
   input:focus,
   textarea:focus {
     scroll-margin-top: 100px;
