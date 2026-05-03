@@ -155,10 +155,8 @@ const FieldsToolbarIcon = ({
 
 export type CalendarWorkspaceToolbarProps = {
   activeMode: CalendarToolbarMode;
-  viewMode?: CalendarViewMode;
   onSelectCalendar: () => void;
   onSelectTimeline: () => void;
-  onSelectViewMode?: (viewMode: CalendarViewMode) => void;
 };
 
 const CALENDAR_TOOLBAR_ACTIONS = [
@@ -290,10 +288,8 @@ const getTimelineUnitExtendCount = (viewMode: CalendarViewMode) => {
 
 export const CalendarWorkspaceToolbar = ({
   activeMode,
-  viewMode,
   onSelectCalendar,
   onSelectTimeline,
-  onSelectViewMode,
 }: CalendarWorkspaceToolbarProps) => {
   const tabs = [
     {
@@ -341,13 +337,6 @@ export const CalendarWorkspaceToolbar = ({
             </div>
           );
         })}
-
-        {onSelectViewMode && viewMode ? (
-          <CalendarViewModeSegmentedControl
-            viewMode={viewMode}
-            onSelectViewMode={onSelectViewMode}
-          />
-        ) : null}
       </div>
 
       <div className="flex h-7 shrink-0 items-center justify-end gap-[6px]">
@@ -732,20 +721,25 @@ export const ExplorerCalendarPane = ({
     <div className="flex h-full min-h-0 w-full flex-col bg-white">
       <CalendarWorkspaceToolbar
         activeMode={activeMode}
-        viewMode={selectedViewMode}
         onSelectCalendar={() => setActiveMode("calendar")}
         onSelectTimeline={() => setActiveMode("timeline")}
-        onSelectViewMode={handleSelectViewMode}
       />
 
       <div
         ref={contentViewportRef}
         className="flex min-h-0 flex-1 flex-col bg-white px-5 pb-5 pt-4"
       >
-        <div className="mb-4 flex shrink-0 items-center justify-between">
-          <h1 className="text-[16px] font-semibold text-[#24272f]">
-            {monthLabel}
-          </h1>
+        <div className="mb-4 flex shrink-0 items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <h1 className="whitespace-nowrap text-[16px] font-semibold text-[#24272f]">
+              {monthLabel}
+            </h1>
+
+            <CalendarViewModeSegmentedControl
+              viewMode={selectedViewMode}
+              onSelectViewMode={handleSelectViewMode}
+            />
+          </div>
 
           <div className="flex items-center gap-2">
             <button
