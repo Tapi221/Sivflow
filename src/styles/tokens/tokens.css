@@ -64,8 +64,8 @@
     --sidebar-bg: var(--ds-semantic-color-background-sidebar);
     --sidebar-border: color-mix(
       in srgb,
-      var(--ds-semantic-color-border-default) 76%,
-      #d8c7b7 24%
+      var(--ds-semantic-color-border-default) 84%,
+      var(--ds-color-primary-200) 16%
     );
     --sidebar-text: var(--ds-semantic-color-text-primary);
     --sidebar-text-muted: var(--ds-semantic-color-text-secondary);
@@ -81,12 +81,12 @@
     --foreground: 222.2 47.4% 11.2%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 214 33% 97%;
+    --muted-foreground: 222 15% 43%;
+    --accent: 216 45% 94%;
+    --accent-foreground: 220 39% 21%;
+    --secondary: 216 45% 94%;
+    --secondary-foreground: 214 39% 42%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
@@ -371,4 +371,3 @@
     --tag-border: var(--tag-sky-border);
   }
 }
-

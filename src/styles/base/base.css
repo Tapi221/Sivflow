@@ -115,11 +115,25 @@
   }
 
   ::selection {
-    background-color: rgba(236, 225, 212, 0.92);
+    background-color: rgba(69, 103, 157, 0.28);
+    color: #17253d;
   }
 
   ::-moz-selection {
-    background-color: rgba(236, 225, 212, 0.92);
+    background-color: rgba(69, 103, 157, 0.28);
+    color: #17253d;
+  }
+
+  input::selection,
+  textarea::selection {
+    background-color: rgba(69, 103, 157, 0.36);
+    color: #17253d;
+  }
+
+  input::-moz-selection,
+  textarea::-moz-selection {
+    background-color: rgba(69, 103, 157, 0.36);
+    color: #17253d;
   }
 
   html.no-page-scroll,
