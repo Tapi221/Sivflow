@@ -18,6 +18,10 @@ type AppSidebarNavItem = {
   match?: (pathname: string, searchParams: URLSearchParams) => boolean;
 };
 
+type AppSidebarProps = {
+  onOpenSettings?: () => void;
+};
+
 type SidebarIconProps = {
   className?: string;
 };
@@ -191,15 +195,6 @@ const libraryChildItems = [
   { label: "ノート", value: "notes" },
 ];
 
-const footerItems: AppSidebarNavItem[] = [
-  {
-    id: "settings",
-    label: "設定",
-    icon: <GearIcon className="app-sidebar__nav-icon" />,
-    disabled: true,
-  },
-];
-
 const isNavItemActiveByLocation = (
   item: AppSidebarNavItem,
   pathname: string,
@@ -302,7 +297,7 @@ const AppSidebarNavLink = ({
   );
 };
 
-const AppSidebar = () => {
+const AppSidebar = ({ onOpenSettings }: AppSidebarProps) => {
   const navigate = useNavigate();
   const { search } = useLocation();
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
@@ -323,6 +318,14 @@ const AppSidebar = () => {
       }
     },
   }));
+  const footerItems: AppSidebarNavItem[] = [
+    {
+      id: "settings",
+      label: "設定",
+      icon: <GearIcon className="app-sidebar__nav-icon" />,
+      onClick: onOpenSettings,
+    },
+  ];
 
   const openLibraryChild = (libraryType: string) => {
     closeCalendar();

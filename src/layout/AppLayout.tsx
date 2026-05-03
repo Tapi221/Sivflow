@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 
+import { SettingsPanelDialog } from "@/features/settings/components/SettingsPanelDialog";
 import { useWorkspaceTabsRouteSync } from "@/features/workspace-tabs/hooks/useWorkspaceTabsRouteSync";
 import { AppSidebar } from "./AppSidebar";
 import { WorkspaceShell } from "./WorkspaceShell";
@@ -34,6 +35,7 @@ export const AppLayout = () => {
   const { pathname } = useLocation();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(pathname);
   const isCardSetViewRoute = /^\/(?:cardsetview|cardview)(?:\/|$)/i.test(
@@ -101,28 +103,35 @@ export const AppLayout = () => {
   }, []);
 
   return (
-    <div
-      className={[
-        "app-layout",
-        isFoldersRoute ? "app-layout--folders" : "",
-        isScrollLocked ? "app-layout--scroll-locked" : "",
-        isSidebarCollapsed ? "app-layout--sidebar-collapsed" : "",
-        isRightSidebarOpen ? "app-layout--right-sidebar-open" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <AppSidebar />
+    <>
+      <div
+        className={[
+          "app-layout",
+          isFoldersRoute ? "app-layout--folders" : "",
+          isScrollLocked ? "app-layout--scroll-locked" : "",
+          isSidebarCollapsed ? "app-layout--sidebar-collapsed" : "",
+          isRightSidebarOpen ? "app-layout--right-sidebar-open" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <AppSidebar onOpenSettings={() => setIsSettingsOpen(true)} />
 
-      <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
-        <Suspense fallback={null}>
-          <Outlet />
-        </Suspense>
-      </WorkspaceShell>
+        <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
+          <Suspense fallback={null}>
+            <Outlet />
+          </Suspense>
+        </WorkspaceShell>
 
-      {isRightSidebarOpen ? (
-        <aside className="app-right-sidebar" aria-label="Right sidebar" />
-      ) : null}
-    </div>
+        {isRightSidebarOpen ? (
+          <aside className="app-right-sidebar" aria-label="Right sidebar" />
+        ) : null}
+      </div>
+
+      <SettingsPanelDialog
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+      />
+    </>
   );
 };
