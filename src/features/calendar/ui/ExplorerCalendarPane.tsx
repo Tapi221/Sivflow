@@ -147,7 +147,7 @@ const FieldsToolbarIcon = ({
   </svg>
 );
 
-type CalendarWorkspaceToolbarProps = {
+export type CalendarWorkspaceToolbarProps = {
   activeMode: CalendarToolbarMode;
   viewMode?: CalendarViewMode;
   onSelectCalendar: () => void;
@@ -168,7 +168,7 @@ const CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS = [
   { value: "days", label: "Day" },
 ] as const satisfies Array<{ value: CalendarViewMode; label: string }>;
 
-const CalendarWorkspaceToolbar = ({
+export const CalendarWorkspaceToolbar = ({
   activeMode,
   viewMode,
   onSelectCalendar,
