@@ -3,6 +3,9 @@ import {
   addMonths,
   format,
   getDaysInMonth,
+  isSameDay,
+  setHours,
+  setMinutes,
   startOfDay,
   startOfMonth,
   startOfWeek,
@@ -10,8 +13,15 @@ import {
   subMonths,
 } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { UIEvent } from "react";
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties, UIEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "@/lib/utils";
 import type { IconProps } from "@/ui/icons";
@@ -22,6 +32,7 @@ import {
   Filter,
   Search,
 } from "@/ui/icons";
+import { ExplorerCalendarMonthView } from "./ExplorerCalendarMonthView";
 import { ExplorerCalendarTimelineDayView } from "./ExplorerCalendarTimelineDayView";
 
 type ExplorerCalendarPaneProps = {
@@ -31,12 +42,32 @@ type ExplorerCalendarPaneProps = {
 export type CalendarViewMode = "month" | "week" | "days";
 export type CalendarToolbarMode = "calendar" | "timeline";
 
+type CalendarDemoEvent = {
+  id: string;
+  title: string;
+  startsAt: Date;
+  minutes: number;
+};
+
 type TimelineBufferDays = {
   before: number;
   after: number;
 };
 
+type TimelineGridStyle = CSSProperties & {
+  "--calendar-hour-row-height": string;
+};
+
+type CalendarEventStyle = CSSProperties & {
+  "--calendar-event-start-hour": number;
+  "--calendar-event-duration-hours": number;
+};
+
+const HOURS = Array.from({ length: 24 }, (_, index) => index);
 const WEEK_STARTS_ON_MONDAY = 1;
+const TIME_COLUMN_WIDTH = 74;
+const DAY_COLUMN_MIN_WIDTH = 136;
+const DEFAULT_HOUR_ROW_HEIGHT = 88;
 const INITIAL_TIMELINE_BUFFER_DAYS = 7;
 const TIMELINE_EXTEND_DAYS = 14;
 const TIMELINE_EDGE_THRESHOLD_PX = 320;
@@ -68,17 +99,67 @@ const TimelineToolbarIcon = ({
   </svg>
 );
 
+const SortToolbarIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M11.9337 5.49595L8.00095 2.125L4.06817 5.49595C3.78932 5.73497 3.75703 6.15478 3.99604 6.43363C4.23506 6.71248 4.65487 6.74478 4.93373 6.50576L8.00095 3.87671L11.0682 6.50576C11.347 6.74478 11.7668 6.71248 12.0059 6.43363C12.2449 6.15478 12.2126 5.73497 11.9337 5.49595ZM4.06823 10.506L8.001 13.877L11.9338 10.506C12.2126 10.267 12.2449 9.84717 12.0059 9.56832C11.7669 9.28947 11.3471 9.25717 11.0682 9.49619L8.001 12.1252L4.93378 9.49619C4.65493 9.25717 4.23511 9.28947 3.9961 9.56832C3.75708 9.84717 3.78938 10.267 4.06823 10.506Z"
+      fill="#8F929C"
+    />
+  </svg>
+);
+
+const FieldsToolbarIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M2.00094 3.33594C1.63367 3.33594 1.33594 3.63367 1.33594 4.00094C1.33594 4.36821 1.63367 4.66594 2.00094 4.66594H2.0076C2.37487 4.66594 2.6726 4.36821 2.6726 4.00094C2.6726 3.63367 2.37487 3.33594 2.0076 3.33594H2.00094ZM5.33443 3.33594C4.96716 3.33594 4.66943 3.63367 4.66943 4.00094C4.66943 4.36821 4.96716 4.66594 5.33443 4.66594H14.0011C14.3684 4.66594 14.6661 4.36821 14.6661 4.00094C14.6661 3.63367 14.3684 3.33594 14.0011 3.33594H5.33443ZM5.33443 7.33594C4.96716 7.33594 4.66943 7.63367 4.66943 8.00094C4.66943 8.36821 4.96716 8.66594 5.33443 8.66594H14.0011C14.3684 8.66594 14.6661 8.36821 14.6661 8.00094C14.6661 7.63367 14.3684 7.33594 14.0011 7.33594H5.33443ZM4.66943 12.0009C4.66943 11.6337 4.96716 11.3359 5.33443 11.3359H14.0011C14.3684 11.3359 14.6661 11.6337 14.6661 12.0009C14.6661 12.3682 14.3684 12.6659 14.0011 12.6659H5.33443C4.96716 12.6659 4.66943 12.3682 4.66943 12.0009ZM1.33594 8.00094C1.33594 7.63367 1.63367 7.33594 2.00094 7.33594H2.0076C2.37487 7.33594 2.6726 7.63367 2.6726 8.00094C2.6726 8.36821 2.37487 8.66594 2.0076 8.66594H2.00094C1.63367 8.66594 1.33594 8.36821 1.33594 8.00094ZM2.00094 11.3359C1.63367 11.3359 1.33594 11.6337 1.33594 12.0009C1.33594 12.3682 1.63367 12.6659 2.00094 12.6659H2.0076C2.37487 12.6659 2.6726 12.3682 2.6726 12.0009C2.6726 11.6337 2.37487 11.3359 2.0076 11.3359H2.00094Z"
+      fill="#74798B"
+    />
+  </svg>
+);
+
 type CalendarWorkspaceToolbarProps = {
   activeMode: CalendarToolbarMode;
-  viewMode: CalendarViewMode;
+  viewMode?: CalendarViewMode;
   onSelectCalendar: () => void;
   onSelectTimeline: () => void;
-  onSelectViewMode: (viewMode: CalendarViewMode) => void;
+  onSelectViewMode?: (viewMode: CalendarViewMode) => void;
 };
 
 const CALENDAR_TOOLBAR_ACTIONS = [
   { label: "Search", icon: Search },
   { label: "Filter", icon: Filter },
+  { label: "Sort", icon: SortToolbarIcon },
+  { label: "Fields", icon: FieldsToolbarIcon },
 ] as const;
 
 const CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS = [
@@ -141,37 +222,43 @@ const CalendarWorkspaceToolbar = ({
           );
         })}
 
-        <div className="ml-3 flex h-7 shrink-0 items-center gap-1">
-          {CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.map((option) => {
-            const isActive = viewMode === option.value;
+        {onSelectViewMode && viewMode ? (
+          <div className="ml-3 flex h-7 shrink-0 items-center gap-1">
+            {CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.map((option) => {
+              const isActive = viewMode === option.value;
 
-            return (
-              <button
-                key={option.value}
-                type="button"
-                className={cn(
-                  "flex h-7 items-center rounded px-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  isActive ? "text-[#25272d]" : "text-[#8f929c]",
-                )}
-                aria-pressed={isActive}
-                onClick={() => onSelectViewMode(option.value)}
-              >
-                {option.label}
-              </button>
-            );
-          })}
-        </div>
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={cn(
+                    "flex h-7 items-center rounded px-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    isActive ? "text-[#25272d]" : "text-[#8f929c]",
+                  )}
+                  aria-pressed={isActive}
+                  onClick={() => onSelectViewMode(option.value)}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
 
       <div className="flex h-7 shrink-0 items-center justify-end gap-[6px]">
-        {CALENDAR_TOOLBAR_ACTIONS.map((action) => {
+        {CALENDAR_TOOLBAR_ACTIONS.map((action, index) => {
           const Icon = action.icon;
+          const isLast = index === CALENDAR_TOOLBAR_ACTIONS.length - 1;
 
           return (
             <button
               key={action.label}
               type="button"
-              className="flex h-7 items-center gap-[6px] rounded py-[3px] pl-2 pr-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal text-[#8f929c] transition-colors hover:bg-[#f6f7f9] hover:text-[#25272d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className={cn(
+                "flex h-7 items-center gap-[6px] rounded py-[3px] pl-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal text-[#8f929c] transition-colors hover:bg-[#f6f7f9] hover:text-[#25272d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                isLast ? "pr-0" : "pr-2",
+              )}
             >
               <Icon className="h-4 w-4 shrink-0" />
               <span className="whitespace-nowrap">{action.label}</span>
@@ -188,12 +275,26 @@ const createInitialTimelineBuffer = (): TimelineBufferDays => ({
   after: INITIAL_TIMELINE_BUFFER_DAYS,
 });
 
-const getRangeDayCount = (baseDate: Date, viewMode: CalendarViewMode) => {
+const getRangeDayCount = (
+  baseDate: Date,
+  viewMode: CalendarViewMode,
+) => {
   if (viewMode === "month") {
     return getDaysInMonth(baseDate);
   }
 
   return viewMode === "week" ? 7 : 1;
+};
+
+const getViewportDayCount = (
+  baseDate: Date,
+  viewMode: CalendarViewMode,
+) => {
+  if (viewMode === "month") {
+    return 7;
+  }
+
+  return getRangeDayCount(baseDate, viewMode);
 };
 
 const createVisibleDays = (
@@ -216,6 +317,48 @@ const createVisibleDays = (
   return Array.from({ length: timelineDayCount }, (_, index) =>
     addDays(timelineStartDate, index),
   );
+};
+
+const createHourLabel = (hour: number) => {
+  return `${String(hour).padStart(2, "0")}:00`;
+};
+
+const createDemoEvents = (baseDate: Date): CalendarDemoEvent[] => {
+  const selectedDate = startOfDay(baseDate);
+  const nextDate = addDays(selectedDate, 1);
+
+  return [
+    {
+      id: "review-core",
+      title: "復習キュー",
+      startsAt: setMinutes(setHours(selectedDate, 9), 0),
+      minutes: 45,
+    },
+    {
+      id: "deck-maintenance",
+      title: "カード整理",
+      startsAt: setMinutes(setHours(selectedDate, 14), 30),
+      minutes: 60,
+    },
+    {
+      id: "next-preview",
+      title: "次回確認",
+      startsAt: setMinutes(setHours(nextDate, 11), 0),
+      minutes: 30,
+    },
+  ];
+};
+
+const calculateEventStyle = (event: CalendarDemoEvent): CalendarEventStyle => {
+  const startHour =
+    event.startsAt.getHours() + event.startsAt.getMinutes() / 60;
+
+  return {
+    "--calendar-event-start-hour": Math.max(0, startHour - HOURS[0]),
+    "--calendar-event-duration-hours": event.minutes / 60,
+    top: `calc(var(--calendar-event-start-hour) * var(--calendar-hour-row-height) + 40px)`,
+    height: `calc(var(--calendar-event-duration-hours) * var(--calendar-hour-row-height) - 8px)`,
+  };
 };
 
 const getNextDate = (currentDate: Date, viewMode: CalendarViewMode) => {
@@ -245,6 +388,7 @@ const getPreviousDate = (currentDate: Date, viewMode: CalendarViewMode) => {
 export const ExplorerCalendarPane = ({
   onClose: _onClose,
 }: ExplorerCalendarPaneProps) => {
+  const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const prependScrollCorrectionRef = useRef(0);
   const isExtendingLeftRef = useRef(false);
@@ -252,10 +396,15 @@ export const ExplorerCalendarPane = ({
   const shouldSyncScrollRef = useRef(true);
 
   const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [monthTitleDate, setMonthTitleDate] = useState(() =>
+    startOfMonth(new Date()),
+  );
+  const [monthScrollTargetToken, setMonthScrollTargetToken] = useState(0);
   const [selectedViewMode, setSelectedViewMode] =
     useState<CalendarViewMode>("days");
   const [activeMode, setActiveMode] =
     useState<CalendarToolbarMode>("timeline");
+  const [viewportWidth, setViewportWidth] = useState(0);
   const [timelineBuffer, setTimelineBuffer] = useState(
     createInitialTimelineBuffer,
   );
@@ -264,14 +413,43 @@ export const ExplorerCalendarPane = ({
     () => createVisibleDays(currentDate, selectedViewMode, timelineBuffer),
     [currentDate, selectedViewMode, timelineBuffer],
   );
+  const demoEvents = useMemo(
+    () => createDemoEvents(currentDate),
+    [currentDate],
+  );
 
   const titleDate =
-    selectedViewMode === "month" ? startOfMonth(currentDate) : currentDate;
+    selectedViewMode === "month" ? monthTitleDate : currentDate;
   const monthLabel = format(titleDate, "yyyy年 M月", { locale: ja });
+
+  const viewportDayCount = getViewportDayCount(currentDate, selectedViewMode);
+  const measuredViewportWidth =
+    viewportWidth > 0
+      ? viewportWidth
+      : (contentViewportRef.current?.clientWidth ?? 0);
+  const calendarDayColumnWidth =
+    measuredViewportWidth > TIME_COLUMN_WIDTH
+      ? Math.max(
+          1,
+          (measuredViewportWidth - TIME_COLUMN_WIDTH) /
+            Math.max(1, viewportDayCount),
+        )
+      : DAY_COLUMN_MIN_WIDTH;
+
+  const gridWidth = TIME_COLUMN_WIDTH + visibleDays.length * calendarDayColumnWidth;
+  const timelineGridStyle: TimelineGridStyle = {
+    "--calendar-hour-row-height": `${DEFAULT_HOUR_ROW_HEIGHT}px`,
+    gridTemplateColumns: `${TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${calendarDayColumnWidth}px)`,
+    minWidth: `${gridWidth}px`,
+  };
 
   const resetTimelinePosition = useCallback(() => {
     shouldSyncScrollRef.current = true;
     setTimelineBuffer(createInitialTimelineBuffer());
+  }, []);
+
+  const requestMonthScrollTarget = useCallback(() => {
+    setMonthScrollTargetToken((current) => current + 1);
   }, []);
 
   const handleTimelineScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
@@ -289,7 +467,8 @@ export const ExplorerCalendarPane = ({
     ) {
       isExtendingLeftRef.current = true;
       prependScrollCorrectionRef.current =
-        TIMELINE_EXTEND_DAYS * TIMELINE_DAY_COLUMN_WIDTH;
+        TIMELINE_EXTEND_DAYS *
+        (activeMode === "timeline" ? TIMELINE_DAY_COLUMN_WIDTH : calendarDayColumnWidth);
 
       setTimelineBuffer((current) => ({
         before: current.before + TIMELINE_EXTEND_DAYS,
@@ -308,6 +487,24 @@ export const ExplorerCalendarPane = ({
         after: current.after + TIMELINE_EXTEND_DAYS,
       }));
     }
+  }, [activeMode, calendarDayColumnWidth]);
+
+  useEffect(() => {
+    const viewport = contentViewportRef.current;
+    if (!viewport) {
+      return undefined;
+    }
+
+    const updateViewportWidth = () => {
+      setViewportWidth(viewport.clientWidth);
+    };
+
+    updateViewportWidth();
+
+    const observer = new ResizeObserver(updateViewportWidth);
+    observer.observe(viewport);
+
+    return () => observer.disconnect();
   }, []);
 
   useLayoutEffect(() => {
@@ -329,9 +526,10 @@ export const ExplorerCalendarPane = ({
     }
 
     scrollContainer.scrollLeft =
-      timelineBuffer.before * TIMELINE_DAY_COLUMN_WIDTH;
+      timelineBuffer.before *
+      (activeMode === "timeline" ? TIMELINE_DAY_COLUMN_WIDTH : calendarDayColumnWidth);
     shouldSyncScrollRef.current = false;
-  }, [timelineBuffer.before, visibleDays.length]);
+  }, [activeMode, calendarDayColumnWidth, timelineBuffer.before, visibleDays.length]);
 
   useLayoutEffect(() => {
     isExtendingRightRef.current = false;
@@ -339,21 +537,54 @@ export const ExplorerCalendarPane = ({
 
   const handleSelectViewMode = (nextViewMode: CalendarViewMode) => {
     setSelectedViewMode(nextViewMode);
-    resetTimelinePosition();
+    if (nextViewMode === "month") {
+      setMonthTitleDate(startOfMonth(currentDate));
+      requestMonthScrollTarget();
+    } else {
+      resetTimelinePosition();
+    }
   };
 
   const handleToday = () => {
-    setCurrentDate(new Date());
+    const nextDate = new Date();
+    setCurrentDate(nextDate);
+    setMonthTitleDate(startOfMonth(nextDate));
+
+    if (selectedViewMode === "month") {
+      requestMonthScrollTarget();
+      return;
+    }
+
     resetTimelinePosition();
   };
 
   const handlePrevious = () => {
-    setCurrentDate((current) => getPreviousDate(current, selectedViewMode));
+    setCurrentDate((current) => {
+      const nextDate = getPreviousDate(current, selectedViewMode);
+      setMonthTitleDate(startOfMonth(nextDate));
+      return nextDate;
+    });
+
+    if (selectedViewMode === "month") {
+      requestMonthScrollTarget();
+      return;
+    }
+
     resetTimelinePosition();
   };
 
   const handleNext = () => {
-    setCurrentDate((current) => getNextDate(current, selectedViewMode));
+    setCurrentDate((current) => {
+      const nextDate = getNextDate(current, selectedViewMode);
+      setMonthTitleDate(startOfMonth(nextDate));
+      return nextDate;
+    });
+
+    if (selectedViewMode === "month") {
+      requestMonthScrollTarget();
+      return;
+    }
+
     resetTimelinePosition();
   };
 
@@ -367,7 +598,7 @@ export const ExplorerCalendarPane = ({
         onSelectViewMode={handleSelectViewMode}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col bg-white px-5 pb-5 pt-4">
+      <div ref={contentViewportRef} className="flex min-h-0 flex-1 flex-col bg-white px-5 pb-5 pt-4">
         <div className="mb-4 flex shrink-0 items-center justify-between">
           <h1 className="text-[16px] font-semibold text-[#24272f]">
             {monthLabel}
@@ -413,9 +644,86 @@ export const ExplorerCalendarPane = ({
             onScroll={handleTimelineScroll}
             onSelectDate={setCurrentDate}
           />
+        ) : selectedViewMode === "month" ? (
+          <ExplorerCalendarMonthView
+            currentDate={currentDate}
+            selectedDate={currentDate}
+            scrollTargetToken={monthScrollTargetToken}
+            onSelectDate={setCurrentDate}
+            onVisibleMonthChange={setMonthTitleDate}
+          />
         ) : (
-          <div className="flex min-h-0 flex-1 items-center justify-center rounded-xl border border-dashed border-[#d9dee7] bg-[#fbfcfd] text-[14px] text-[#8a94a6]">
-            Calendar view placeholder
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-[#e6eaf0] bg-white">
+            <div
+              ref={scrollContainerRef}
+              className="min-h-0 flex-1 overflow-auto bg-white"
+              onScroll={handleTimelineScroll}
+            >
+              <div className="grid" style={timelineGridStyle}>
+                <div className="sticky left-0 top-0 z-20 border-b border-r border-[#e5e7eb] bg-white" />
+                {visibleDays.map((day) => {
+                  const isToday = isSameDay(day, new Date());
+
+                  return (
+                    <div
+                      key={day.toISOString()}
+                      className={cn(
+                        "sticky top-0 z-10 flex h-10 flex-col items-center justify-center border-b border-r border-[#e5e7eb] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
+                        isToday && "bg-[#fdf2f2]",
+                      )}
+                    >
+                      <span className="font-semibold text-[#25272d]">
+                        {format(day, "d", { locale: ja })}
+                      </span>
+                      <span>{format(day, "E", { locale: ja })}</span>
+                    </div>
+                  );
+                })}
+
+                <div className="sticky left-0 z-10 border-r border-[#e5e7eb] bg-white">
+                  {HOURS.map((hour) => (
+                    <div
+                      key={hour}
+                      className="flex items-start justify-center border-b border-[#eef0f3] pt-2 text-[12px] text-[#8f929c]"
+                      style={{ height: `var(--calendar-hour-row-height)` }}
+                    >
+                      {createHourLabel(hour)}
+                    </div>
+                  ))}
+                </div>
+
+                {visibleDays.map((day) => {
+                  const eventsForDay = demoEvents.filter((event) =>
+                    isSameDay(event.startsAt, day),
+                  );
+
+                  return (
+                    <div
+                      key={`${day.toISOString()}-column`}
+                      className="relative border-r border-[#eef0f3] last:border-r-0"
+                    >
+                      {HOURS.map((hour) => (
+                        <div
+                          key={`${day.toISOString()}-${hour}`}
+                          className="border-b border-[#eef0f3]"
+                          style={{ height: `var(--calendar-hour-row-height)` }}
+                        />
+                      ))}
+
+                      {eventsForDay.map((event) => (
+                        <div
+                          key={event.id}
+                          className="absolute left-2 right-2 rounded-md border border-[#bfd3ff] bg-[#dceaff] px-2 py-1 text-[12px] font-medium text-[#2c3440] shadow-sm"
+                          style={calculateEventStyle(event)}
+                        >
+                          {event.title}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
       </div>
