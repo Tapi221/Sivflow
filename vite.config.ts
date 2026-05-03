@@ -30,7 +30,7 @@ export default defineConfig({
         name: "manifolmia",
         short_name: "manifolmia",
         description: "Advanced learning app for serious learners",
-        theme_color: "#689A98",
+        theme_color: "#35507b",
         background_color: "#F8FAFB",
         display: "standalone",
         orientation: "portrait",
@@ -82,3 +82,4 @@ export default defineConfig({
     "process.env.FORCE_COLOR": true,
   },
 });
+

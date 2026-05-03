@@ -113,9 +113,9 @@ const LoginPage = () => {
       <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center justify-center px-4 py-8">
         <div className="grid w-full max-w-5xl overflow-hidden rounded-[32px] border border-slate-200/70 bg-white/80 shadow-[0_24px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl md:grid-cols-[1.2fr_0.8fr]">
           <div className="relative px-7 py-9 md:px-10 md:py-12">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#7BACAA]/25 bg-[#7BACAA]/10 px-3 py-1">
-              <span className="h-2 w-2 rounded-full bg-[#689A98]" />
-              <span className="text-[10px] font-bold tracking-[0.22em] text-[#5A8684]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#5d7fb6]/25 bg-[#5d7fb6]/10 px-3 py-1">
+              <span className="h-2 w-2 rounded-full bg-[#45679d]" />
+              <span className="text-[10px] font-bold tracking-[0.22em] text-[#35507b]">
                 MANIFOLMIA
               </span>
             </div>
@@ -144,7 +144,7 @@ const LoginPage = () => {
             </div>
           </div>
 
-          <div className="flex items-center bg-[linear-gradient(160deg,rgba(104,154,152,0.06),rgba(104,154,152,0.14))] px-6 py-9 md:px-8">
+          <div className="flex items-center bg-[linear-gradient(160deg,rgba(69,103,157,0.06),rgba(69,103,157,0.14))] px-6 py-9 md:px-8">
             <div className="w-full rounded-[28px] border border-slate-200/70 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.08)] md:p-7">
               <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
                 Sign In
@@ -402,3 +402,4 @@ const App = () => {
 };
 
 export default App;
+
