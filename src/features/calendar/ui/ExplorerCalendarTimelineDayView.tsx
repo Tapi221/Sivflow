@@ -103,7 +103,6 @@ export const ExplorerCalendarTimelineDayView = ({
                   }}
                 >
                   {visibleDays.map((date) => {
-                    const today = isSameDay(date, new Date());
                     const weekend = isWeekend(date);
 
                     return (
@@ -113,11 +112,7 @@ export const ExplorerCalendarTimelineDayView = ({
                           "relative border-r border-[#eceff3] last:border-r-0",
                           weekend && "bg-[#fcfcfd]",
                         )}
-                      >
-                        {today ? (
-                          <div className="absolute inset-y-0 left-1/2 w-[68px] -translate-x-1/2 bg-[#f9ecec]" />
-                        ) : null}
-                      </div>
+                      />
                     );
                   })}
                 </div>
