@@ -672,7 +672,7 @@ export const ExplorerCalendarPane = ({
          <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
             <div
               ref={scrollContainerRef}
-              className="min-h-0 flex-1 overflow-auto bg-white"
+              className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
               onScroll={handleTimelineScroll}
             >
               <div className="grid" style={timelineGridStyle}>
