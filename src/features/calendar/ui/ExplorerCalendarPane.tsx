@@ -13,7 +13,7 @@ import {
   subMonths,
 } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { CSSProperties, UIEvent } from "react";
+import type { CSSProperties, KeyboardEvent, UIEvent } from "react";
 import {
   useCallback,
   useEffect,
@@ -174,6 +174,89 @@ const CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS = [
   { value: "days", label: "Day" },
 ] as const satisfies Array<{ value: CalendarViewMode; label: string }>;
 
+type CalendarViewModeSegmentedControlProps = {
+  viewMode: CalendarViewMode;
+  onSelectViewMode: (viewMode: CalendarViewMode) => void;
+};
+
+const CalendarViewModeSegmentedControl = ({
+  viewMode,
+  onSelectViewMode,
+}: CalendarViewModeSegmentedControlProps) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const currentIndex = CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.findIndex(
+      (option) => option.value === viewMode,
+    );
+
+    if (currentIndex === -1) {
+      return;
+    }
+
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      event.preventDefault();
+      const nextIndex =
+        (currentIndex + 1) % CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.length;
+      onSelectViewMode(CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS[nextIndex].value);
+    }
+
+    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      event.preventDefault();
+      const nextIndex =
+        (currentIndex - 1 + CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.length) %
+        CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.length;
+      onSelectViewMode(CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS[nextIndex].value);
+    }
+
+    if (event.key === "Home") {
+      event.preventDefault();
+      onSelectViewMode(CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS[0].value);
+    }
+
+    if (event.key === "End") {
+      event.preventDefault();
+      onSelectViewMode(
+        CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS[
+          CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.length - 1
+        ].value,
+      );
+    }
+  };
+
+  return (
+    <div className="ml-3 flex shrink-0 items-center">
+      <div
+        role="tablist"
+        aria-label="Calendar range"
+        className="inline-flex items-center gap-[3px] rounded-[12px] border border-black/[0.04] bg-[#e7e7e7] p-1 shadow-[0_1px_1px_rgba(0,0,0,0.04),0_3px_8px_rgba(0,0,0,0.03)]"
+        onKeyDown={handleKeyDown}
+      >
+        {CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.map((option) => {
+          const isActive = viewMode === option.value;
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              tabIndex={isActive ? 0 : -1}
+              className={cn(
+                "inline-flex h-8 min-w-[78px] items-center justify-center rounded-[10px] px-[18px] text-[14px] font-semibold leading-none tracking-[-0.01em] transition-[background-color,box-shadow,color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/10",
+                isActive
+                  ? "bg-[#fdfdfd] text-[#2f2f2f] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.05)]"
+                  : "text-[#7b7b7b] hover:bg-white/45 active:translate-y-px",
+              )}
+              onClick={() => onSelectViewMode(option.value)}
+            >
+              <span className="relative top-[0.5px]">{option.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const createInitialCalendarBuffer = (): TimelineBufferDays => ({
   before: INITIAL_CALENDAR_BUFFER_DAYS,
   after: INITIAL_CALENDAR_BUFFER_DAYS,
@@ -260,26 +343,10 @@ export const CalendarWorkspaceToolbar = ({
         })}
 
         {onSelectViewMode && viewMode ? (
-          <div className="ml-3 flex h-7 shrink-0 items-center gap-1">
-            {CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.map((option) => {
-              const isActive = viewMode === option.value;
-
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={cn(
-                    "flex h-7 items-center rounded px-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    isActive ? "text-[#25272d]" : "text-[#8f929c]",
-                  )}
-                  aria-pressed={isActive}
-                  onClick={() => onSelectViewMode(option.value)}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
+          <CalendarViewModeSegmentedControl
+            viewMode={viewMode}
+            onSelectViewMode={onSelectViewMode}
+          />
         ) : null}
       </div>
 
@@ -307,10 +374,7 @@ export const CalendarWorkspaceToolbar = ({
   );
 };
 
-const getRangeDayCount = (
-  baseDate: Date,
-  viewMode: CalendarViewMode,
-) => {
+const getRangeDayCount = (baseDate: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "month") {
     return getDaysInMonth(baseDate);
   }
@@ -318,10 +382,7 @@ const getRangeDayCount = (
   return viewMode === "week" ? 7 : 1;
 };
 
-const getViewportDayCount = (
-  baseDate: Date,
-  viewMode: CalendarViewMode,
-) => {
+const getViewportDayCount = (baseDate: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "month") {
     return 7;
   }
@@ -434,8 +495,7 @@ export const ExplorerCalendarPane = ({
   const [monthScrollTargetToken, setMonthScrollTargetToken] = useState(0);
   const [selectedViewMode, setSelectedViewMode] =
     useState<CalendarViewMode>("days");
-  const [activeMode, setActiveMode] =
-    useState<CalendarToolbarMode>("timeline");
+  const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
   const [viewportWidth, setViewportWidth] = useState(0);
   const [calendarBuffer, setCalendarBuffer] = useState(
     createInitialCalendarBuffer,
@@ -466,8 +526,7 @@ export const ExplorerCalendarPane = ({
     return getTimelineAnchorColumnIndex(timelineColumns, currentDate);
   }, [currentDate, timelineColumns]);
 
-  const titleDate =
-    selectedViewMode === "month" ? monthTitleDate : currentDate;
+  const titleDate = selectedViewMode === "month" ? monthTitleDate : currentDate;
   const monthLabel =
     activeMode === "timeline" && selectedViewMode === "month"
       ? format(titleDate, "yyyy年", { locale: ja })
@@ -562,12 +621,7 @@ export const ExplorerCalendarPane = ({
         }
       }
     },
-    [
-      activeMode,
-      calendarDayColumnWidth,
-      selectedViewMode,
-      timelineColumnWidth,
-    ],
+    [activeMode, calendarDayColumnWidth, selectedViewMode, timelineColumnWidth],
   );
 
   useEffect(() => {
