@@ -39,7 +39,7 @@ export const ExplorerCalendarTimelineDayView = ({
   const gridWidth = visibleDays.length * dayColumnWidth;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-[#e6eaf0] bg-white">
+   <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
       <div
         ref={scrollContainerRef}
         className="min-h-0 flex-1 overflow-auto bg-white"
