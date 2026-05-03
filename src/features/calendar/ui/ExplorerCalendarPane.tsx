@@ -223,11 +223,11 @@ const CalendarViewModeSegmentedControl = ({
   };
 
   return (
-    <div className="ml-3 flex shrink-0 items-center">
+    <div className="ml-1.5 flex shrink-0 items-center">
       <div
         role="tablist"
         aria-label="Calendar range"
-        className="inline-flex items-center gap-[3px] rounded-[12px] border border-black/[0.04] bg-[#e7e7e7] p-1 shadow-[0_1px_1px_rgba(0,0,0,0.04),0_3px_8px_rgba(0,0,0,0.03)]"
+        className="inline-flex items-center gap-px rounded-[9px] border border-black/[0.03] bg-[#e7e7e7] p-[2px] shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
         onKeyDown={handleKeyDown}
       >
         {CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.map((option) => {
@@ -241,9 +241,9 @@ const CalendarViewModeSegmentedControl = ({
               aria-selected={isActive}
               tabIndex={isActive ? 0 : -1}
               className={cn(
-                "inline-flex h-8 min-w-[78px] items-center justify-center rounded-[10px] px-[18px] text-[14px] font-semibold leading-none tracking-[-0.01em] transition-[background-color,box-shadow,color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/10",
+                "inline-flex h-6 items-center justify-center rounded-[7px] px-3 text-[12px] font-medium leading-none tracking-[-0.01em] transition-[background-color,box-shadow,color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/10",
                 isActive
-                  ? "bg-[#fdfdfd] text-[#2f2f2f] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.05)]"
+                  ? "bg-[#fdfdfd] text-[#2f2f2f] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05),0_1px_1px_rgba(0,0,0,0.03)]"
                   : "text-[#7b7b7b] hover:bg-white/45 active:translate-y-px",
               )}
               onClick={() => onSelectViewMode(option.value)}
