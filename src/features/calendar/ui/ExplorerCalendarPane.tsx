@@ -546,8 +546,8 @@ export const ExplorerCalendarPane = ({
     selectedViewMode === "month" ? monthTitleDate : currentDate;
   const monthLabel =
     activeMode === "timeline" && selectedViewMode === "month"
-      ? format(titleDate, "yyyy年", { locale: ja })
-      : format(titleDate, "yyyy年 M月", { locale: ja });
+      ? format(titleDate, "yyyy")
+      : format(titleDate, "MMMM yyyy");
 
   const viewportDayCount = getViewportDayCount(currentDate, selectedViewMode);
   const measuredViewportWidth =
@@ -774,7 +774,7 @@ export const ExplorerCalendarPane = ({
               type="button"
               className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#dde2ea] bg-white text-[#667085] transition-colors hover:bg-[#f8fafc]"
               onClick={handlePrevious}
-              aria-label="前へ"
+              aria-label="Previous"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -784,14 +784,14 @@ export const ExplorerCalendarPane = ({
               className="rounded-lg border border-[#dde2ea] bg-white px-4 py-[7px] text-[14px] font-semibold text-[#20242c] transition-colors hover:bg-[#f8fafc]"
               onClick={handleToday}
             >
-              今日
+              Today
             </button>
 
             <button
               type="button"
               className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#dde2ea] bg-white text-[#667085] transition-colors hover:bg-[#f8fafc]"
               onClick={handleNext}
-              aria-label="次へ"
+              aria-label="Next"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
