@@ -30,8 +30,7 @@ type ColumnId =
   | "name"
   | "tags"
   | "lastViewed"
-  | "updatedAt"
-  | "actions";
+  | "updatedAt";
 
 type DashboardColumn = {
   id: ColumnId;
@@ -77,14 +76,6 @@ const DEFAULT_COLUMNS: DashboardColumn[] = [
     minWidth: 72,
     maxWidth: 260,
     resizable: true,
-  },
-  {
-    id: "actions",
-    label: "…",
-    width: 32,
-    minWidth: 32,
-    maxWidth: 32,
-    resizable: false,
   },
 ];
 
@@ -672,9 +663,6 @@ const PdfLibraryDashboard = ({
                               style={dateTimeTextStyle}
                             >
                               {formatDateTime(row.updatedAt)}
-                            </div>
-                            <div className="text-[18px] leading-none text-[#9aa59e]">
-                              …
                             </div>
                           </div>
                         );
