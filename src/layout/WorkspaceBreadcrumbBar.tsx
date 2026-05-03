@@ -156,25 +156,19 @@ export const WorkspaceBreadcrumbBar = () => {
     [activeTabId, tabs],
   );
 
-  const libraryType = useMemo(
-    () => new URLSearchParams(search).get("libraryType"),
-    [search],
-  );
-
   const shouldHideBreadcrumb =
     activeTab?.kind === "document" ||
     activeTab?.sectionKey === "calendar" ||
-    activeTab?.sectionKey === "tasks" ||
-    (activeTab?.sectionKey === "library" && libraryType === "pdf");
+    activeTab?.sectionKey === "tasks";
 
   const crumbs = useMemo(
     () =>
       resolveActiveCrumbs({
         activeTab,
         extraCrumbs,
-        libraryType,
+        libraryType: new URLSearchParams(search).get("libraryType"),
       }),
-    [activeTab, extraCrumbs, libraryType],
+    [activeTab, extraCrumbs, search],
   );
 
   const handleCrumbNavigate = useCallback(
