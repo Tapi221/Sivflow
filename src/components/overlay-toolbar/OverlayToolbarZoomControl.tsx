@@ -15,6 +15,9 @@ type OverlayToolbarZoomControlBaseProps = {
   disabled?: boolean;
   sliderWrapperClassName?: string;
   valueClassName?: string;
+  trackClassName?: string;
+  rangeClassName?: string;
+  thumbClassName?: string;
   formatValue?: (value: number) => string;
 };
 
@@ -51,6 +54,9 @@ export const OverlayToolbarZoomControl = (
     disabled = false,
     sliderWrapperClassName,
     valueClassName,
+    trackClassName,
+    rangeClassName,
+    thumbClassName,
     formatValue = DEFAULT_FORMAT_VALUE,
   } = props;
 
@@ -100,6 +106,9 @@ export const OverlayToolbarZoomControl = (
           onValueCommit={handleSliderChange}
           aria-label={label}
           disabled={disabled}
+          trackClassName={trackClassName}
+          rangeClassName={rangeClassName}
+          thumbClassName={thumbClassName}
         />
       </div>
 
