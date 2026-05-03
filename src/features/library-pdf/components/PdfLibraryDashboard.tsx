@@ -82,7 +82,7 @@ const DEFAULT_COLUMNS: DashboardColumn[] = [
 const cardClassName =
   "box-border rounded-[10px] border border-[#D1D1D1] bg-[#FFFFFF] p-4 shadow-[0_6px_3px_0_rgba(0,0,0,0.06),0_10px_10px_0_rgba(0,0,0,0.05)]";
 const breadcrumbActionIconClassName =
-  "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)]";
+  "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 const selectedColumnBackground =
   "var(--ds-semantic-color-interactive-column-selected-subtle, rgba(106, 135, 110, 0.16))";
@@ -234,6 +234,56 @@ const PdfOpenActionIcon = () => {
         strokeLinejoin="round"
       />
     </svg>
+  );
+};
+
+const PdfLibraryWorkspaceToolbar = ({
+  onImport,
+}: {
+  onImport: () => void;
+}) => {
+  return (
+    <div className="relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 flex-wrap items-center justify-between overflow-hidden bg-white after:absolute after:bottom-1 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']">
+      <div className="flex h-7 shrink-0 items-start gap-[6px]">
+        <div className="flex flex-col items-start pb-2">
+          <button
+            type="button"
+            className="flex h-7 items-center gap-[6px] rounded py-[3px] pl-0 pr-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal text-[#25272d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-current="page"
+          >
+            <span className="flex h-7 items-center whitespace-nowrap border-b-2 border-[#74798b]">
+              PDF
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div className="flex h-8 shrink-0 items-center justify-end gap-[6px]">
+        <button
+          type="button"
+          className="inline-flex h-8 items-center justify-center rounded-[10px] border-0 bg-[#6A876E] px-5 text-[12px] font-medium leading-normal text-white transition-colors hover:bg-[#5f7963] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          onClick={onImport}
+        >
+          PDFをインポート
+        </button>
+        <button
+          type="button"
+          className={breadcrumbActionIconClassName}
+          aria-label="表示設定"
+          title="表示設定"
+        >
+          <BreadcrumbActionSettingsIcon />
+        </button>
+        <button
+          type="button"
+          className={breadcrumbActionIconClassName}
+          aria-label="フィルター"
+          title="フィルター"
+        >
+          <BreadcrumbActionFilterIcon />
+        </button>
+      </div>
+    </div>
   );
 };
 
@@ -436,7 +486,7 @@ const PdfLibraryDashboard = ({
 
   if (rows.length === 0) {
     return (
-      <div className="flex h-full min-h-0 w-full items-center justify-center bg-[#FFFFFF] p-8">
+      <div className="flex h-full min-h-0 w-full flex-col bg-[#FFFFFF]">
         <input
           ref={fileInputRef}
           type="file"
@@ -445,31 +495,34 @@ const PdfLibraryDashboard = ({
           className="hidden"
           onChange={handleToolbarFileInputChange}
         />
-        <div className="w-full max-w-2xl rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-8">
-          <div className="inline-flex rounded-[999px] bg-[#f3f4f6] px-3 py-1 text-[12px] font-semibold text-[#4b5563]">
-            PDF ライブラリ
+        <PdfLibraryWorkspaceToolbar onImport={handleToolbarAddDocument} />
+        <div className="flex flex-1 items-center justify-center p-8">
+          <div className="w-full max-w-2xl rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-8">
+            <div className="inline-flex rounded-[999px] bg-[#f3f4f6] px-3 py-1 text-[12px] font-semibold text-[#4b5563]">
+              PDF ライブラリ
+            </div>
+            <h2 className="mt-5 text-[30px] font-semibold tracking-[-0.03em] text-[#20262a]">
+              PDF がまだありません
+            </h2>
+            <p className="mt-3 max-w-xl text-[14px] leading-7 text-[#6f7b78]">
+              PDF
+              を取り込むと、この画面で概要カードと一覧テーブルをまとめて管理できます。
+            </p>
+            <button
+              type="button"
+              className="mt-8 inline-flex h-11 items-center justify-center rounded-[16px] border border-[#d1d5db] bg-[#FFFFFF] px-5 text-[14px] font-semibold text-[#111827] hover:bg-[#f9fafb]"
+              onClick={handleToolbarAddDocument}
+            >
+              PDF をインポート
+            </button>
           </div>
-          <h2 className="mt-5 text-[30px] font-semibold tracking-[-0.03em] text-[#20262a]">
-            PDF がまだありません
-          </h2>
-          <p className="mt-3 max-w-xl text-[14px] leading-7 text-[#6f7b78]">
-            PDF
-            を取り込むと、この画面で概要カードと一覧テーブルをまとめて管理できます。
-          </p>
-          <button
-            type="button"
-            className="mt-8 inline-flex h-11 items-center justify-center rounded-[16px] border border-[#d1d5db] bg-[#FFFFFF] px-5 text-[14px] font-semibold text-[#111827] hover:bg-[#f9fafb]"
-            onClick={handleToolbarAddDocument}
-          >
-            PDF をインポート
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full bg-[#FFFFFF]">
+    <div className="flex h-full min-h-0 w-full flex-col bg-[#FFFFFF]">
       <input
         ref={fileInputRef}
         type="file"
@@ -479,7 +532,9 @@ const PdfLibraryDashboard = ({
         onChange={handleToolbarFileInputChange}
       />
 
-      <div className="grid min-h-0 w-full grid-cols-1 gap-4">
+      <PdfLibraryWorkspaceToolbar onImport={handleToolbarAddDocument} />
+
+      <div className="grid min-h-0 w-full grid-cols-1 gap-4 pt-4">
         <div className="flex min-h-0 min-w-0 flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
             <PdfLibraryContinueSection
