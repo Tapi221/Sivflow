@@ -260,23 +260,31 @@ export const CalendarWorkspaceToolbar = ({
         })}
 
         {onSelectViewMode && viewMode ? (
-          <div className="ml-3 flex h-7 shrink-0 items-center gap-1">
+          <div className="ml-3 flex h-7 shrink-0 items-start gap-1">
             {CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.map((option) => {
               const isActive = viewMode === option.value;
 
               return (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={cn(
-                    "flex h-7 items-center rounded px-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    isActive ? "text-[#25272d]" : "text-[#8f929c]",
-                  )}
-                  aria-pressed={isActive}
-                  onClick={() => onSelectViewMode(option.value)}
-                >
-                  {option.label}
-                </button>
+                <div key={option.value} className="flex flex-col items-start pb-2">
+                  <button
+                    type="button"
+                    className={cn(
+                      "flex h-7 items-center rounded px-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      isActive ? "text-[#25272d]" : "text-[#8f929c]",
+                    )}
+                    aria-pressed={isActive}
+                    onClick={() => onSelectViewMode(option.value)}
+                  >
+                    <span
+                      className={cn(
+                        "flex h-7 items-center whitespace-nowrap",
+                        isActive && "border-b-2 border-[#74798b]",
+                      )}
+                    >
+                      {option.label}
+                    </span>
+                  </button>
+                </div>
               );
             })}
           </div>
