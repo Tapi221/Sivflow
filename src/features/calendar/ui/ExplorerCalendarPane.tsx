@@ -153,6 +153,68 @@ const FieldsToolbarIcon = ({
   </svg>
 );
 
+const MonthViewToolbarIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+    <path d="M2 6.5H14" stroke="currentColor" strokeWidth="1.25" />
+    <path d="M6 6.5V13" stroke="currentColor" strokeWidth="1.25" />
+    <path d="M10 6.5V13" stroke="currentColor" strokeWidth="1.25" />
+  </svg>
+);
+
+const WeekViewToolbarIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+    <path d="M6 3V13" stroke="currentColor" strokeWidth="1.25" />
+    <path d="M10 3V13" stroke="currentColor" strokeWidth="1.25" />
+  </svg>
+);
+
+const DayViewToolbarIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <rect x="4" y="3" width="8" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+  </svg>
+);
+
 export type CalendarWorkspaceToolbarProps = {
   activeMode: CalendarToolbarMode;
   viewMode?: CalendarViewMode;
@@ -169,10 +231,14 @@ const CALENDAR_TOOLBAR_ACTIONS = [
 ] as const;
 
 const CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS = [
-  { value: "month", label: "Month" },
-  { value: "week", label: "Week" },
-  { value: "days", label: "Day" },
-] as const satisfies Array<{ value: CalendarViewMode; label: string }>;
+  { value: "month", label: "Month", icon: MonthViewToolbarIcon },
+  { value: "week", label: "Week", icon: WeekViewToolbarIcon },
+  { value: "days", label: "Day", icon: DayViewToolbarIcon },
+] as const satisfies Array<{
+  value: CalendarViewMode;
+  label: string;
+  icon: (props: IconProps) => JSX.Element;
+}>;
 
 const createInitialCalendarBuffer = (): TimelineBufferDays => ({
   before: INITIAL_CALENDAR_BUFFER_DAYS,
@@ -263,18 +329,20 @@ export const CalendarWorkspaceToolbar = ({
           <div className="ml-3 flex h-7 shrink-0 items-start gap-1">
             {CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.map((option) => {
               const isActive = viewMode === option.value;
+              const Icon = option.icon;
 
               return (
                 <div key={option.value} className="flex flex-col items-start pb-2">
                   <button
                     type="button"
                     className={cn(
-                      "flex h-7 items-center rounded px-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      "flex h-7 items-center gap-[6px] rounded px-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                       isActive ? "text-[#25272d]" : "text-[#8f929c]",
                     )}
                     aria-pressed={isActive}
                     onClick={() => onSelectViewMode(option.value)}
                   >
+                    <Icon className="h-4 w-4 shrink-0" />
                     <span
                       className={cn(
                         "flex h-7 items-center whitespace-nowrap",
