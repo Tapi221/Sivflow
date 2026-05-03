@@ -468,7 +468,10 @@ export const ExplorerCalendarPane = ({
 
   const titleDate =
     selectedViewMode === "month" ? monthTitleDate : currentDate;
-  const monthLabel = format(titleDate, "yyyy年 M月", { locale: ja });
+  const monthLabel =
+    activeMode === "timeline" && selectedViewMode === "month"
+      ? format(titleDate, "yyyy年", { locale: ja })
+      : format(titleDate, "yyyy年 M月", { locale: ja });
 
   const viewportDayCount = getViewportDayCount(currentDate, selectedViewMode);
   const measuredViewportWidth =
