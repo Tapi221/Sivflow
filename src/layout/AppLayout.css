@@ -469,6 +469,11 @@
   -webkit-app-region: drag;
 }
 
+.workspace-breadcrumb-bar--collapsed {
+  height: 0;
+  padding: 0;
+}
+
 .workspace-breadcrumb-bar__list {
   display: flex;
   min-width: 0;

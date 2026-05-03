@@ -188,21 +188,40 @@ export const WorkspaceBreadcrumbBar = ({
     [navigate, openSectionTab],
   );
 
+  // Always render the bar element so the workspace grid layout keeps its row structure.
+  // When there is nothing to show, render an empty bar (still draggable region).
   if (!activeTab) {
-    return null;
+    return <nav className="workspace-breadcrumb-bar" aria-label="Breadcrumb" />;
+  }
+
+  // For sections where breadcrumbs are suppressed, keep the grid row but collapse its height
+  // so content doesn't get pushed down.
+  if (shouldHideBreadcrumb && !action) {
+    return (
+      <nav
+        className="workspace-breadcrumb-bar workspace-breadcrumb-bar--collapsed"
+        aria-label="Breadcrumb"
+      />
+    );
+  }
+
+  // When crumbs are explicitly hidden (e.g. to avoid duplicate in-content toolbars),
+  // collapse the bar unless it has an action to show.
+  if (hideCrumbs && !action) {
+    return (
+      <nav
+        className="workspace-breadcrumb-bar workspace-breadcrumb-bar--collapsed"
+        aria-label="Breadcrumb"
+      />
+    );
   }
 
   if (!hideCrumbs && shouldHideBreadcrumb) {
-    return null;
+    return <nav className="workspace-breadcrumb-bar" aria-label="Breadcrumb" />;
   }
 
   if (!hideCrumbs && crumbs.length === 0) {
-    return null;
-  }
-
-  // When crumbs are hidden, still render the bar so toolbar actions remain visible.
-  if (hideCrumbs && !action) {
-    return null;
+    return <nav className="workspace-breadcrumb-bar" aria-label="Breadcrumb" />;
   }
 
   return (
