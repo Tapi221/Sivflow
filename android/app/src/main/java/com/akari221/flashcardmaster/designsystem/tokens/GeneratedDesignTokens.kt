@@ -4,16 +4,16 @@ package com.akari221.flashcardmaster.designsystem.tokens
 object DesignTokens {
     object Color {
         object Primary {
-            const val Value50 = "#f7f8ef"
-            const val Value100 = "#edf0df"
-            const val Value200 = "#dce3c2"
-            const val Value300 = "#c3cc99"
-            const val Value400 = "#a7b275"
-            const val Value500 = "#96a867"
-            const val Value600 = "#8a9a5b"
-            const val Value700 = "#6d7d48"
-            const val Value800 = "#586539"
-            const val Value900 = "#374023"
+            const val Value50 = "#f4f7fb"
+            const val Value100 = "#e7eef8"
+            const val Value200 = "#cfdbef"
+            const val Value300 = "#aabfe0"
+            const val Value400 = "#7f9ecb"
+            const val Value500 = "#5d7fb6"
+            const val Value600 = "#45679d"
+            const val Value700 = "#35507b"
+            const val Value800 = "#25395a"
+            const val Value900 = "#17253d"
         }
         object Neutral {
             const val Value0 = "#ffffff"
@@ -100,6 +100,7 @@ object DesignTokens {
     object Spacing {
         const val Value0 = 0
         const val Value1 = 4
+        const val Value18 = 7.2
         const val Value2 = 8
         const val Value3 = 12
         const val Value4 = 16
@@ -110,7 +111,6 @@ object DesignTokens {
         const val Value12 = 48
         const val Value16 = 64
         const val Value20 = 80
-        const val Value18 = 7.2
     }
     object Radius {
         const val Sm = 8
@@ -124,10 +124,10 @@ object DesignTokens {
     }
     object Typography {
         object FontFamily {
-            const val Ui = listOf("Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif")
-            const val Content = listOf("Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP", "MS PMincho", "serif")
-            const val Numeric = listOf("Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif")
-            const val Code = listOf("Fira Code", "Fira Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace")
+            const val Ui = ["Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"]
+            const val Content = ["Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP", "MS PMincho", "serif"]
+            const val Numeric = ["Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"]
+            const val Code = ["Fira Code", "Fira Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"]
         }
         object FontSize {
             const val Xs = 12.8
@@ -181,9 +181,9 @@ object DesignTokens {
             const val Convex = "0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 -1px 0 rgba(86, 72, 74, 0.08) inset, 0 1px 2px rgba(86, 72, 74, 0.16)"
             const val Floating = "0 8px 24px rgba(15, 23, 42, 0.08)"
             const val Panel = "0 10px 24px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(148, 163, 184, 0.25)"
-            const val Soft = "0 2px 15px -3px rgba(104, 154, 152, 0.15), 0 10px 20px -2px rgba(104, 154, 152, 0.08)"
+            const val Soft = "0 2px 15px -3px rgba(69, 103, 157, 0.15), 0 10px 20px -2px rgba(69, 103, 157, 0.08)"
             const val Card = "0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.04)"
-            const val CardHover = "0 8px 30px -4px rgba(104, 154, 152, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)"
+            const val CardHover = "0 8px 30px -4px rgba(69, 103, 157, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)"
         }
         object Blur {
             const val Floating = 12
@@ -221,7 +221,7 @@ object DesignTokens {
             object Background {
                 const val App = "#ffffff"
                 const val Sidebar = "#f6f1eb"
-                const val SidebarActive = "#ece2d7"
+                const val SidebarActive = "#e7edf6"
                 const val Floating = "rgba(255, 255, 255, 0.82)"
                 const val Code = "#f7f8f9"
             }
@@ -238,16 +238,16 @@ object DesignTokens {
                 const val OnPrimary = "#ffffff"
             }
             object Action {
-                const val Primary = "#8a9a5b"
-                const val PrimaryHover = "#6d7d48"
-                const val PrimarySoft = "#edf0df"
-                const val Accent = "#96a867"
+                const val Primary = "#45679d"
+                const val PrimaryHover = "#35507b"
+                const val PrimarySoft = "#e7eef8"
+                const val Accent = "#5d7fb6"
             }
             object Interactive {
-                const val SelectedSubtle = "#e6ebe3"
-                const val SelectedAccent = "#6a876e"
-                const val ColumnSelectedSubtle = "rgba(106, 135, 110, 0.16)"
-                const val ColumnSelectedAccent = "#4f6b54"
+                const val SelectedSubtle = "#e7edf6"
+                const val SelectedAccent = "#35507b"
+                const val ColumnSelectedSubtle = "rgba(53, 80, 123, 0.14)"
+                const val ColumnSelectedAccent = "#25395a"
             }
             object Status {
                 const val Danger = "#e11d48"
@@ -274,10 +274,10 @@ object DesignTokens {
             const val Pill = 999
         }
         object Typography {
-            const val Ui = listOf("Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif")
-            const val Content = listOf("Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP", "MS PMincho", "serif")
-            const val Numeric = listOf("Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif")
-            const val Code = listOf("Fira Code", "Fira Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace")
+            const val Ui = ["Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"]
+            const val Content = ["Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP", "MS PMincho", "serif"]
+            const val Numeric = ["Zen Kaku Gothic New", "Noto Sans JP", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"]
+            const val Code = ["Fira Code", "Fira Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"]
         }
         object Elevation {
             const val ControlInset = "inset 0 1px 2px rgba(86, 72, 74, 0.16)"
@@ -285,7 +285,7 @@ object DesignTokens {
             const val Floating = "0 8px 24px rgba(15, 23, 42, 0.08)"
             const val Panel = "0 10px 24px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(148, 163, 184, 0.25)"
             const val Card = "0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.04)"
-            const val CardHover = "0 8px 30px -4px rgba(104, 154, 152, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)"
+            const val CardHover = "0 8px 30px -4px rgba(69, 103, 157, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)"
         }
         object Motion {
             const val Interactive = "150ms ease"

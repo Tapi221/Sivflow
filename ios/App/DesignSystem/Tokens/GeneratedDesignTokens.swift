@@ -4,16 +4,16 @@ import Foundation
 enum DesignTokens {
     enum Color {
         enum Primary {
-            static let Value50 = "#f7f8ef"
-            static let Value100 = "#edf0df"
-            static let Value200 = "#dce3c2"
-            static let Value300 = "#c3cc99"
-            static let Value400 = "#a7b275"
-            static let Value500 = "#96a867"
-            static let Value600 = "#8a9a5b"
-            static let Value700 = "#6d7d48"
-            static let Value800 = "#586539"
-            static let Value900 = "#374023"
+            static let Value50 = "#f4f7fb"
+            static let Value100 = "#e7eef8"
+            static let Value200 = "#cfdbef"
+            static let Value300 = "#aabfe0"
+            static let Value400 = "#7f9ecb"
+            static let Value500 = "#5d7fb6"
+            static let Value600 = "#45679d"
+            static let Value700 = "#35507b"
+            static let Value800 = "#25395a"
+            static let Value900 = "#17253d"
         }
         enum Neutral {
             static let Value0 = "#ffffff"
@@ -100,6 +100,7 @@ enum DesignTokens {
     enum Spacing {
         static let Value0 = 0
         static let Value1 = 4
+        static let Value18 = 7.2
         static let Value2 = 8
         static let Value3 = 12
         static let Value4 = 16
@@ -110,7 +111,6 @@ enum DesignTokens {
         static let Value12 = 48
         static let Value16 = 64
         static let Value20 = 80
-        static let Value18 = 7.2
     }
     enum Radius {
         static let Sm = 8
@@ -181,9 +181,9 @@ enum DesignTokens {
             static let Convex = "0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 -1px 0 rgba(86, 72, 74, 0.08) inset, 0 1px 2px rgba(86, 72, 74, 0.16)"
             static let Floating = "0 8px 24px rgba(15, 23, 42, 0.08)"
             static let Panel = "0 10px 24px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(148, 163, 184, 0.25)"
-            static let Soft = "0 2px 15px -3px rgba(104, 154, 152, 0.15), 0 10px 20px -2px rgba(104, 154, 152, 0.08)"
+            static let Soft = "0 2px 15px -3px rgba(69, 103, 157, 0.15), 0 10px 20px -2px rgba(69, 103, 157, 0.08)"
             static let Card = "0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.04)"
-            static let CardHover = "0 8px 30px -4px rgba(104, 154, 152, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)"
+            static let CardHover = "0 8px 30px -4px rgba(69, 103, 157, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)"
         }
         enum Blur {
             static let Floating = 12
@@ -221,7 +221,7 @@ enum DesignTokens {
             enum Background {
                 static let App = "#ffffff"
                 static let Sidebar = "#f6f1eb"
-                static let SidebarActive = "#ece2d7"
+                static let SidebarActive = "#e7edf6"
                 static let Floating = "rgba(255, 255, 255, 0.82)"
                 static let Code = "#f7f8f9"
             }
@@ -238,16 +238,16 @@ enum DesignTokens {
                 static let OnPrimary = "#ffffff"
             }
             enum Action {
-                static let Primary = "#8a9a5b"
-                static let PrimaryHover = "#6d7d48"
-                static let PrimarySoft = "#edf0df"
-                static let Accent = "#96a867"
+                static let Primary = "#45679d"
+                static let PrimaryHover = "#35507b"
+                static let PrimarySoft = "#e7eef8"
+                static let Accent = "#5d7fb6"
             }
             enum Interactive {
-                static let SelectedSubtle = "#e6ebe3"
-                static let SelectedAccent = "#6a876e"
-                static let ColumnSelectedSubtle = "rgba(106, 135, 110, 0.16)"
-                static let ColumnSelectedAccent = "#4f6b54"
+                static let SelectedSubtle = "#e7edf6"
+                static let SelectedAccent = "#35507b"
+                static let ColumnSelectedSubtle = "rgba(53, 80, 123, 0.14)"
+                static let ColumnSelectedAccent = "#25395a"
             }
             enum Status {
                 static let Danger = "#e11d48"
@@ -285,7 +285,7 @@ enum DesignTokens {
             static let Floating = "0 8px 24px rgba(15, 23, 42, 0.08)"
             static let Panel = "0 10px 24px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(148, 163, 184, 0.25)"
             static let Card = "0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.04)"
-            static let CardHover = "0 8px 30px -4px rgba(104, 154, 152, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)"
+            static let CardHover = "0 8px 30px -4px rgba(69, 103, 157, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08)"
         }
         enum Motion {
             static let Interactive = "150ms ease"
