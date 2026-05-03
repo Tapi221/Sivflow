@@ -114,7 +114,7 @@ export const OverlayToolbarZoomControl = (
 
       <div
         className={cn(
-          "min-w-[2.25rem] text-center text-[10px] font-semibold tabular-nums text-[#6b5f55]",
+          "min-w-[2.25rem] text-center text-[10px] font-semibold tabular-nums text-[#74798B]",
           valueClassName,
         )}
       >
