@@ -1,5 +1,4 @@
 import {
-  useEffect,
   useMemo,
   useState,
   type CSSProperties,
@@ -8,7 +7,6 @@ import {
 
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { TagChip } from "@/components/tag/TagChip";
-import { useSetBreadcrumbAction } from "@/contexts/BreadcrumbContext";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 import {
@@ -81,8 +79,8 @@ const DEFAULT_COLUMNS: DashboardColumn[] = [
 
 const cardClassName =
   "box-border rounded-[10px] border border-[#D1D1D1] bg-[#FFFFFF] p-4 shadow-[0_6px_3px_0_rgba(0,0,0,0.06),0_10px_10px_0_rgba(0,0,0,0.05)]";
-const breadcrumbActionIconClassName =
-  "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+const toolbarIconButtonClassName =
+  "inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-transparent text-[#ababab] transition-colors hover:bg-[rgba(0,0,0,0.04)] hover:text-[#808192] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 const selectedColumnBackground =
   "var(--ds-semantic-color-interactive-column-selected-subtle, rgba(106, 135, 110, 0.16))";
@@ -126,7 +124,7 @@ const formatDateTime = (value: Date | null): string => {
   return `${year}/${month}/${day} ${hours}:${minutes}`;
 };
 
-const BreadcrumbActionSettingsIcon = () => {
+const ToolbarSettingsIcon = () => {
   return (
     <svg
       width="18"
@@ -182,7 +180,7 @@ const BreadcrumbActionSettingsIcon = () => {
   );
 };
 
-const BreadcrumbActionFilterIcon = () => {
+const ToolbarFilterIcon = () => {
   return (
     <svg
       width="18"
@@ -268,19 +266,19 @@ const PdfLibraryWorkspaceToolbar = ({
         </button>
         <button
           type="button"
-          className={breadcrumbActionIconClassName}
+          className={toolbarIconButtonClassName}
           aria-label="表示設定"
           title="表示設定"
         >
-          <BreadcrumbActionSettingsIcon />
+          <ToolbarSettingsIcon />
         </button>
         <button
           type="button"
-          className={breadcrumbActionIconClassName}
+          className={toolbarIconButtonClassName}
           aria-label="フィルター"
           title="フィルター"
         >
-          <BreadcrumbActionFilterIcon />
+          <ToolbarFilterIcon />
         </button>
       </div>
     </div>
@@ -352,7 +350,6 @@ const PdfLibraryDashboard = ({
   onOpenDocument,
 }: PdfLibraryDashboardProps) => {
   const { tagById, getTagColorKey } = useTags();
-  const setBreadcrumbAction = useSetBreadcrumbAction();
   const [, setExpandedFolders] = useState<Set<string>>(new Set());
 
   const rows = useMemo<PdfDashboardRow[]>(() => {
@@ -415,38 +412,6 @@ const PdfLibraryDashboard = ({
     getNextOrderIndex,
     setExpandedFolders,
   });
-
-  const breadcrumbAction = useMemo(
-    () => (
-      <div
-        className="inline-flex items-center gap-2"
-        style={{ WebkitAppRegion: "no-drag" }}
-      >
-        <button
-          type="button"
-          className="inline-flex h-8 w-fit items-center justify-center rounded-[8px] border-0 bg-[#6A876E] px-5 text-[12px] font-medium leading-normal text-white transition-colors hover:bg-[#5f7963]"
-          onClick={handleToolbarAddDocument}
-        >
-          PDFをインポート
-        </button>
-        <div className="inline-flex items-center gap-1">
-          <span aria-hidden="true" className={breadcrumbActionIconClassName}>
-            <BreadcrumbActionSettingsIcon />
-          </span>
-          <span aria-hidden="true" className={breadcrumbActionIconClassName}>
-            <BreadcrumbActionFilterIcon />
-          </span>
-        </div>
-      </div>
-    ),
-    [handleToolbarAddDocument],
-  );
-
-  useEffect(() => {
-    setBreadcrumbAction(breadcrumbAction);
-
-    return () => setBreadcrumbAction(null);
-  }, [breadcrumbAction, setBreadcrumbAction]);
 
   const continueRows = useMemo(() => {
     return rows
@@ -702,9 +667,7 @@ const PdfLibraryDashboard = ({
                                     colorKey={getTagColorKey(tag)}
                                   />
                                 ))
-                              ) : (
-                                null
-                              )}
+                              ) : null}
                             </div>
 
                             <div
