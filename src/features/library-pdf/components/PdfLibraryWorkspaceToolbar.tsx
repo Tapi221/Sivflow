@@ -1,6 +1,10 @@
-import type { SVGProps } from "react";
+import type { ComponentType } from "react";
 
-import { cn } from "@/lib/utils";
+import { Filter, Search } from "@/ui/icons";
+import {
+  WorkspaceHeaderToolbar,
+  type WorkspaceHeaderToolbarIconProps,
+} from "@/features/workspace/components/WorkspaceHeaderToolbar";
 
 type PdfLibraryWorkspaceSection = "explorer" | "pdf" | "flashcard" | "notes";
 
@@ -9,11 +13,134 @@ type PdfLibraryWorkspaceToolbarProps = {
   onSelectSection: (section: PdfLibraryWorkspaceSection) => void;
 };
 
-type ToolbarIconProps = SVGProps<SVGSVGElement> & {
-  className?: string;
-};
+const ExplorerTabIcon = ({
+  className,
+  ...props
+}: WorkspaceHeaderToolbarIconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      d="M1.75 4.25C1.75 3.69772 2.19772 3.25 2.75 3.25H6.81066C7.07587 3.25 7.33023 3.35536 7.51777 3.54289L8.20711 4.23223C8.30088 4.326 8.42809 4.37868 8.56066 4.37868H13.25C13.8023 4.37868 14.25 4.82639 14.25 5.37868V11.25C14.25 11.8023 13.8023 12.25 13.25 12.25H2.75C2.19772 12.25 1.75 11.8023 1.75 11.25V4.25Z"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
-const ExplorerTabIcon = ({ className, ...props }: ToolbarIconProps) => (
+const PdfTabIcon = ({
+  className,
+  ...props
+}: WorkspaceHeaderToolbarIconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      d="M4 2.5H8.93934C9.20455 2.5 9.45891 2.60536 9.64645 2.79289L12.2071 5.35355C12.3946 5.54109 12.5 5.79544 12.5 6.06066V13C12.5 13.5523 12.0523 14 11.5 14H4C3.44772 14 3 13.5523 3 13V3.5C3 2.94772 3.44772 2.5 4 2.5Z"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M8.75 2.75V5.25C8.75 5.66421 9.08579 6 9.5 6H12"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const FlashcardTabIcon = ({
+  className,
+  ...props
+}: WorkspaceHeaderToolbarIconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <rect
+      x="2.25"
+      y="4"
+      width="8.5"
+      height="6.5"
+      rx="1.25"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
+    <rect
+      x="5.25"
+      y="5.5"
+      width="8.5"
+      height="6.5"
+      rx="1.25"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
+  </svg>
+);
+
+const NotesTabIcon = ({
+  className,
+  ...props
+}: WorkspaceHeaderToolbarIconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <rect
+      x="3"
+      y="2.5"
+      width="10"
+      height="11"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
+    <path
+      d="M5.5 5.5H10.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5.5 8H10.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5.5 10.5H8.75"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const SortToolbarIcon = ({
+  className,
+  ...props
+}: WorkspaceHeaderToolbarIconProps) => (
   <svg
     viewBox="0 0 16 16"
     fill="none"
@@ -25,13 +152,16 @@ const ExplorerTabIcon = ({ className, ...props }: ToolbarIconProps) => (
     <path
       fillRule="evenodd"
       clipRule="evenodd"
-      d="M2.25 3.25C1.83579 3.25 1.5 3.58579 1.5 4V11.9999C1.5 12.4142 1.83579 12.75 2.25 12.75H13.75C14.1642 12.75 14.5 12.4142 14.5 11.9999V5.5C14.5 5.08579 14.1642 4.75 13.75 4.75H8.68566C8.48675 4.75 8.29598 4.67098 8.15533 4.53033L7.46967 3.84467C7.32902 3.70402 7.13825 3.625 6.93934 3.625H2.25ZM0.5 4C0.5 3.0335 1.2835 2.25 2.25 2.25H6.93934C7.40344 2.25 7.84859 2.43437 8.17678 2.76256L8.86244 3.44822C8.81556 3.40134 8.87915 3.375 8.68566 3.375H13.75C14.7165 3.375 15.5 4.1585 15.5 5.125V11.9999C15.5 12.9665 14.7165 13.75 13.75 13.75H2.25C1.2835 13.75 0.5 12.9665 0.5 11.9999V4Z"
-      fill="currentColor"
+      d="M11.9337 5.49595L8.00095 2.125L4.06817 5.49595C3.78932 5.73497 3.75703 6.15478 3.99604 6.43363C4.23506 6.71248 4.65487 6.74478 4.93373 6.50576L8.00095 3.87671L11.0682 6.50576C11.347 6.74478 11.7668 6.71248 12.0059 6.43363C12.2449 6.15478 12.2126 5.73497 11.9337 5.49595ZM4.06823 10.506L8.001 13.877L11.9338 10.506C12.2126 10.267 12.2449 9.84717 12.0059 9.56832C11.7669 9.28947 11.3471 9.25717 11.0682 9.49619L8.001 12.1252L4.93378 9.49619C4.65493 9.25717 4.23511 9.28947 3.9961 9.56832C3.75708 9.84717 3.78938 10.267 4.06823 10.506Z"
+      fill="#8F929C"
     />
   </svg>
 );
 
-const PdfTabIcon = ({ className, ...props }: ToolbarIconProps) => (
+const FieldsToolbarIcon = ({
+  className,
+  ...props
+}: WorkspaceHeaderToolbarIconProps) => (
   <svg
     viewBox="0 0 16 16"
     fill="none"
@@ -43,112 +173,9 @@ const PdfTabIcon = ({ className, ...props }: ToolbarIconProps) => (
     <path
       fillRule="evenodd"
       clipRule="evenodd"
-      d="M4.25 1.5C3.42157 1.5 2.75 2.17157 2.75 3V13C2.75 13.8284 3.42157 14.5 4.25 14.5H11.75C12.5784 14.5 13.25 13.8284 13.25 13V5.56066C13.25 5.16283 13.0919 4.7813 12.8107 4.5L10.25 1.93934C9.9687 1.65804 9.58717 1.5 9.18934 1.5H4.25ZM4.25 2.5C3.97386 2.5 3.75 2.72386 3.75 3V13C3.75 13.2761 3.97386 13.5 4.25 13.5H11.75C12.0261 13.5 12.25 13.2761 12.25 13V5.56066C12.25 5.42798 12.1973 5.30087 12.1036 5.20711L9.54289 2.64645C9.44913 2.55268 9.32202 2.5 9.18934 2.5H4.25Z"
-      fill="currentColor"
+      d="M2.00094 3.33594C1.63367 3.33594 1.33594 3.63367 1.33594 4.00094C1.33594 4.36821 1.63367 4.66594 2.00094 4.66594H2.0076C2.37487 4.66594 2.6726 4.36821 2.6726 4.00094C2.6726 3.63367 2.37487 3.33594 2.0076 3.33594H2.00094ZM5.33443 3.33594C4.96716 3.33594 4.66943 3.63367 4.66943 4.00094C4.66943 4.36821 4.96716 4.66594 5.33443 4.66594H14.0011C14.3684 4.66594 14.6661 4.36821 14.6661 4.00094C14.6661 3.63367 14.3684 3.33594 14.0011 3.33594H5.33443ZM5.33443 7.33594C4.96716 7.33594 4.66943 7.63367 4.66943 8.00094C4.66943 8.36821 4.96716 8.66594 5.33443 8.66594H14.0011C14.3684 8.66594 14.6661 8.36821 14.6661 8.00094C14.6661 7.63367 14.3684 7.33594 14.0011 7.33594H5.33443ZM4.66943 12.0009C4.66943 11.6337 4.96716 11.3359 5.33443 11.3359H14.0011C14.3684 11.3359 14.6661 11.6337 14.6661 12.0009C14.6661 12.3682 14.3684 12.6659 14.0011 12.6659H5.33443C4.96716 12.6659 4.66943 12.3682 4.66943 12.0009ZM1.33594 8.00094C1.33594 7.63367 1.63367 7.33594 2.00094 7.33594H2.0076C2.37487 7.33594 2.6726 7.63367 2.6726 8.00094C2.6726 8.36821 2.37487 8.66594 2.0076 8.66594H2.00094C1.63367 8.66594 1.33594 8.36821 1.33594 8.00094ZM2.00094 11.3359C1.63367 11.3359 1.33594 11.6337 1.33594 12.0009C1.33594 12.3682 1.63367 12.6659 2.00094 12.6659H2.0076C2.37487 12.6659 2.6726 12.3682 2.6726 12.0009C2.6726 11.6337 2.37487 11.3359 2.0076 11.3359H2.00094Z"
+      fill="#74798B"
     />
-    <path
-      d="M5.25 10.55V6.95H6.71C7.0104 6.95 7.25547 7.01867 7.4452 7.156C7.63747 7.2908 7.7336 7.50133 7.7336 7.7876C7.7336 8.07387 7.63747 8.28693 7.4452 8.4268C7.25547 8.56413 7.0104 8.6328 6.71 8.6328H5.95V10.55H5.25ZM5.95 8.0692H6.5988C6.7612 8.0692 6.88587 8.04127 6.9728 7.9854C7.05973 7.927 7.1032 7.82707 7.1032 7.6856C7.1032 7.54413 7.05973 7.44547 6.9728 7.3896C6.88587 7.3312 6.7612 7.302 6.5988 7.302H5.95V8.0692Z"
-      fill="currentColor"
-    />
-    <path
-      d="M8.32949 10.55V6.95H9.61749C10.0084 6.95 10.3142 7.05067 10.5349 7.252C10.7582 7.45333 10.8699 7.74213 10.8699 8.1184V9.3816C10.8699 9.75787 10.7582 10.0467 10.5349 10.248C10.3142 10.4493 10.0084 10.55 9.61749 10.55H8.32949ZM9.02949 9.9864H9.56169C9.76289 9.9864 9.91769 9.9356 10.0261 9.834C10.137 9.72987 10.1925 9.5776 10.1925 9.3772V8.1228C10.1925 7.9224 10.137 7.7714 10.0261 7.6698C9.91769 7.56567 9.76289 7.5136 9.56169 7.5136H9.02949V9.9864Z"
-      fill="currentColor"
-    />
-  </svg>
-);
-
-const FlashcardTabIcon = ({ className, ...props }: ToolbarIconProps) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <rect x="2.5" y="4" width="9.5" height="7" rx="1.25" stroke="currentColor" strokeWidth="1.25" />
-    <rect x="5" y="6" width="8.5" height="7" rx="1.25" fill="white" stroke="currentColor" strokeWidth="1.25" />
-    <path d="M7 8.5H11.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
-    <path d="M7 10.5H10.25" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
-  </svg>
-);
-
-const NotesTabIcon = ({ className, ...props }: ToolbarIconProps) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <rect x="3" y="2.5" width="10" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
-    <path d="M5.25 5.5H10.75" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
-    <path d="M5.25 8H10.75" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
-    <path d="M5.25 10.5H8.75" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
-  </svg>
-);
-
-const SearchActionIcon = ({ className, ...props }: ToolbarIconProps) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <circle cx="7" cy="7" r="4.75" stroke="currentColor" strokeWidth="1.5" />
-    <path d="M10.5 10.5L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-  </svg>
-);
-
-const FilterActionIcon = ({ className, ...props }: ToolbarIconProps) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <path d="M2.5 4H13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    <path d="M4.5 8H11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    <path d="M6.5 12H9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-  </svg>
-);
-
-const SortActionIcon = ({ className, ...props }: ToolbarIconProps) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <path d="M5 3L2.75 5.25L5 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M11 8.5L13.25 10.75L11 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M3 5.25H10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    <path d="M5.5 10.75H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-  </svg>
-);
-
-const FieldsActionIcon = ({ className, ...props }: ToolbarIconProps) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <path d="M2.5 3.5H13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    <path d="M2.5 8H13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    <path d="M2.5 12.5H13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    <circle cx="4.25" cy="3.5" r="1" fill="currentColor" />
-    <circle cx="8" cy="8" r="1" fill="currentColor" />
-    <circle cx="11.75" cy="12.5" r="1" fill="currentColor" />
   </svg>
 );
 
@@ -157,13 +184,17 @@ const PDF_LIBRARY_TABS = [
   { value: "pdf", label: "PDF", icon: PdfTabIcon },
   { value: "flashcard", label: "Flashcard", icon: FlashcardTabIcon },
   { value: "notes", label: "Notes", icon: NotesTabIcon },
-] as const;
+] as const satisfies ReadonlyArray<{
+  value: PdfLibraryWorkspaceSection;
+  label: string;
+  icon: ComponentType<WorkspaceHeaderToolbarIconProps>;
+}>;
 
 const PDF_LIBRARY_ACTIONS = [
-  { label: "Search", icon: SearchActionIcon },
-  { label: "Filter", icon: FilterActionIcon },
-  { label: "Sort", icon: SortActionIcon },
-  { label: "Fields", icon: FieldsActionIcon },
+  { label: "Search", icon: Search },
+  { label: "Filter", icon: Filter },
+  { label: "Sort", icon: SortToolbarIcon },
+  { label: "Fields", icon: FieldsToolbarIcon },
 ] as const;
 
 export const PdfLibraryWorkspaceToolbar = ({
@@ -171,58 +202,13 @@ export const PdfLibraryWorkspaceToolbar = ({
   onSelectSection,
 }: PdfLibraryWorkspaceToolbarProps) => {
   return (
-    <div className="relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 flex-wrap items-center justify-between overflow-hidden bg-white after:absolute after:bottom-1 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']">
-      <div className="flex h-7 shrink-0 items-start gap-[6px]">
-        {PDF_LIBRARY_TABS.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeSection === tab.value;
-
-          return (
-            <div key={tab.value} className="flex flex-col items-start pb-2">
-              <button
-                type="button"
-                className={cn(
-                  "flex h-7 items-center gap-[6px] rounded py-[3px] pl-0 pr-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  isActive ? "text-[#25272d]" : "text-[#8f929c]",
-                )}
-                aria-pressed={isActive}
-                onClick={() => onSelectSection(tab.value)}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span
-                  className={cn(
-                    "flex h-7 items-center whitespace-nowrap",
-                    isActive && "border-b-2 border-[#74798b]",
-                  )}
-                >
-                  {tab.label}
-                </span>
-              </button>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="flex h-7 shrink-0 items-center justify-end gap-[6px]">
-        {PDF_LIBRARY_ACTIONS.map((action, index) => {
-          const Icon = action.icon;
-          const isLast = index === PDF_LIBRARY_ACTIONS.length - 1;
-
-          return (
-            <button
-              key={action.label}
-              type="button"
-              className={cn(
-                "flex h-7 items-center gap-[6px] rounded py-[3px] pl-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal text-[#8f929c] transition-colors hover:bg-[#f6f7f9] hover:text-[#25272d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                isLast ? "pr-0" : "pr-2",
-              )}
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              <span className="whitespace-nowrap">{action.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <WorkspaceHeaderToolbar
+      activeValue={activeSection}
+      tabs={PDF_LIBRARY_TABS.map((tab) => ({
+        ...tab,
+        onClick: () => onSelectSection(tab.value),
+      }))}
+      actions={PDF_LIBRARY_ACTIONS}
+    />
   );
 };
