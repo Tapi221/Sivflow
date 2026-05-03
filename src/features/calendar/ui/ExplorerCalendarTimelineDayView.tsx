@@ -66,7 +66,7 @@ const buildMonthColumns = (
       id: `month-${start.toISOString()}`,
       start,
       end,
-      topLabel: format(start, "yyyy/M", { locale: ja }),
+      topLabel: format(start, "M", { locale: ja }),
       bottomLabel: "月",
       isToday: isSameMonth(start, today),
       kind: "month",

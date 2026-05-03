@@ -85,6 +85,11 @@ export const OverlayToolbarIndexNavigator = ({
     commitInput();
   }, [commitInput]);
 
+  const selectInputValue = React.useCallback((input: HTMLInputElement) => {
+    input.focus();
+    input.select();
+  }, []);
+
   const handleFocus = React.useCallback(
     (event: React.FocusEvent<HTMLInputElement>) => {
       event.currentTarget.select();
@@ -92,11 +97,20 @@ export const OverlayToolbarIndexNavigator = ({
     [],
   );
 
+  const handlePointerDown = React.useCallback(
+    (event: React.PointerEvent<HTMLInputElement>) => {
+      event.preventDefault();
+      selectInputValue(event.currentTarget);
+    },
+    [selectInputValue],
+  );
+
   const handleClick = React.useCallback(
     (event: React.MouseEvent<HTMLInputElement>) => {
-      event.currentTarget.select();
+      event.preventDefault();
+      selectInputValue(event.currentTarget);
     },
-    [],
+    [selectInputValue],
   );
 
   const handleKeyDown = React.useCallback(
@@ -137,6 +151,7 @@ export const OverlayToolbarIndexNavigator = ({
         onChange={handleChange}
         onBlur={handleBlur}
         onFocus={handleFocus}
+        onPointerDown={handlePointerDown}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         className={cn(
