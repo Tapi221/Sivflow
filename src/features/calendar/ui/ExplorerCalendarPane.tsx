@@ -33,7 +33,13 @@ import {
   Search,
 } from "@/ui/icons";
 import { ExplorerCalendarMonthView } from "./ExplorerCalendarMonthView";
-import { ExplorerCalendarTimelineDayView } from "./ExplorerCalendarTimelineDayView";
+import {
+  buildTimelineColumns,
+  ExplorerCalendarTimelineDayView,
+  getTimelineAnchorColumnIndex,
+  getTimelineColumnWidth,
+  type TimelineUnitBuffer,
+} from "./ExplorerCalendarTimelineDayView";
 
 type ExplorerCalendarPaneProps = {
   onClose?: () => void;
@@ -68,8 +74,8 @@ const WEEK_STARTS_ON_MONDAY = 1;
 const TIME_COLUMN_WIDTH = 74;
 const DAY_COLUMN_MIN_WIDTH = 136;
 const DEFAULT_HOUR_ROW_HEIGHT = 88;
-const INITIAL_TIMELINE_BUFFER_DAYS = 7;
-const TIMELINE_EXTEND_DAYS = 14;
+const INITIAL_CALENDAR_BUFFER_DAYS = 7;
+const CALENDAR_EXTEND_DAYS = 14;
 const TIMELINE_EDGE_THRESHOLD_PX = 320;
 const TIMELINE_DAY_COLUMN_WIDTH = 104;
 const TIMELINE_LANE_LABEL_WIDTH = 168;
@@ -167,6 +173,37 @@ const CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS = [
   { value: "week", label: "Week" },
   { value: "days", label: "Day" },
 ] as const satisfies Array<{ value: CalendarViewMode; label: string }>;
+
+const createInitialCalendarBuffer = (): TimelineBufferDays => ({
+  before: INITIAL_CALENDAR_BUFFER_DAYS,
+  after: INITIAL_CALENDAR_BUFFER_DAYS,
+});
+
+const createInitialTimelineUnitBuffer = (
+  viewMode: CalendarViewMode,
+): TimelineUnitBuffer => {
+  if (viewMode === "month") {
+    return { before: 3, after: 8 };
+  }
+
+  if (viewMode === "week") {
+    return { before: 4, after: 8 };
+  }
+
+  return { before: 7, after: 14 };
+};
+
+const getTimelineUnitExtendCount = (viewMode: CalendarViewMode) => {
+  if (viewMode === "month") {
+    return 3;
+  }
+
+  if (viewMode === "week") {
+    return 4;
+  }
+
+  return 7;
+};
 
 export const CalendarWorkspaceToolbar = ({
   activeMode,
@@ -269,11 +306,6 @@ export const CalendarWorkspaceToolbar = ({
     </div>
   );
 };
-
-const createInitialTimelineBuffer = (): TimelineBufferDays => ({
-  before: INITIAL_TIMELINE_BUFFER_DAYS,
-  after: INITIAL_TIMELINE_BUFFER_DAYS,
-});
 
 const getRangeDayCount = (
   baseDate: Date,
@@ -405,18 +437,34 @@ export const ExplorerCalendarPane = ({
   const [activeMode, setActiveMode] =
     useState<CalendarToolbarMode>("timeline");
   const [viewportWidth, setViewportWidth] = useState(0);
-  const [timelineBuffer, setTimelineBuffer] = useState(
-    createInitialTimelineBuffer,
+  const [calendarBuffer, setCalendarBuffer] = useState(
+    createInitialCalendarBuffer,
+  );
+  const [timelineUnitBuffer, setTimelineUnitBuffer] = useState(() =>
+    createInitialTimelineUnitBuffer("days"),
   );
 
   const visibleDays = useMemo(
-    () => createVisibleDays(currentDate, selectedViewMode, timelineBuffer),
-    [currentDate, selectedViewMode, timelineBuffer],
+    () => createVisibleDays(currentDate, selectedViewMode, calendarBuffer),
+    [calendarBuffer, currentDate, selectedViewMode],
   );
   const demoEvents = useMemo(
     () => createDemoEvents(currentDate),
     [currentDate],
   );
+  const timelineColumns = useMemo(() => {
+    return buildTimelineColumns(
+      selectedViewMode,
+      currentDate,
+      timelineUnitBuffer,
+    );
+  }, [currentDate, selectedViewMode, timelineUnitBuffer]);
+  const timelineColumnWidth = useMemo(() => {
+    return getTimelineColumnWidth(selectedViewMode, TIMELINE_DAY_COLUMN_WIDTH);
+  }, [selectedViewMode]);
+  const timelineAnchorColumnIndex = useMemo(() => {
+    return getTimelineAnchorColumnIndex(timelineColumns, currentDate);
+  }, [currentDate, timelineColumns]);
 
   const titleDate =
     selectedViewMode === "month" ? monthTitleDate : currentDate;
@@ -444,9 +492,10 @@ export const ExplorerCalendarPane = ({
     minWidth: `${gridWidth}px`,
   };
 
-  const resetTimelinePosition = useCallback(() => {
+  const resetTimelinePosition = useCallback((viewMode: CalendarViewMode) => {
     shouldSyncScrollRef.current = true;
-    setTimelineBuffer(createInitialTimelineBuffer());
+    setCalendarBuffer(createInitialCalendarBuffer());
+    setTimelineUnitBuffer(createInitialTimelineUnitBuffer(viewMode));
   }, []);
 
   const requestMonthScrollTarget = useCallback(() => {
@@ -468,16 +517,25 @@ export const ExplorerCalendarPane = ({
         !isExtendingLeftRef.current
       ) {
         isExtendingLeftRef.current = true;
-        prependScrollCorrectionRef.current =
-          TIMELINE_EXTEND_DAYS *
-          (activeMode === "timeline"
-            ? TIMELINE_DAY_COLUMN_WIDTH
-            : calendarDayColumnWidth);
 
-        setTimelineBuffer((current) => ({
-          before: current.before + TIMELINE_EXTEND_DAYS,
-          after: current.after,
-        }));
+        if (activeMode === "timeline") {
+          const extendCount = getTimelineUnitExtendCount(selectedViewMode);
+          prependScrollCorrectionRef.current =
+            extendCount * timelineColumnWidth;
+
+          setTimelineUnitBuffer((current) => ({
+            before: current.before + extendCount,
+            after: current.after,
+          }));
+        } else {
+          prependScrollCorrectionRef.current =
+            CALENDAR_EXTEND_DAYS * calendarDayColumnWidth;
+
+          setCalendarBuffer((current) => ({
+            before: current.before + CALENDAR_EXTEND_DAYS,
+            after: current.after,
+          }));
+        }
       }
 
       if (
@@ -486,13 +544,27 @@ export const ExplorerCalendarPane = ({
       ) {
         isExtendingRightRef.current = true;
 
-        setTimelineBuffer((current) => ({
-          before: current.before,
-          after: current.after + TIMELINE_EXTEND_DAYS,
-        }));
+        if (activeMode === "timeline") {
+          const extendCount = getTimelineUnitExtendCount(selectedViewMode);
+
+          setTimelineUnitBuffer((current) => ({
+            before: current.before,
+            after: current.after + extendCount,
+          }));
+        } else {
+          setCalendarBuffer((current) => ({
+            before: current.before,
+            after: current.after + CALENDAR_EXTEND_DAYS,
+          }));
+        }
       }
     },
-    [activeMode, calendarDayColumnWidth],
+    [
+      activeMode,
+      calendarDayColumnWidth,
+      selectedViewMode,
+      timelineColumnWidth,
+    ],
   );
 
   useEffect(() => {
@@ -532,30 +604,31 @@ export const ExplorerCalendarPane = ({
     }
 
     scrollContainer.scrollLeft =
-      timelineBuffer.before *
-      (activeMode === "timeline"
-        ? TIMELINE_DAY_COLUMN_WIDTH
-        : calendarDayColumnWidth);
+      activeMode === "timeline"
+        ? timelineAnchorColumnIndex * timelineColumnWidth
+        : calendarBuffer.before * calendarDayColumnWidth;
     shouldSyncScrollRef.current = false;
   }, [
     activeMode,
+    calendarBuffer.before,
     calendarDayColumnWidth,
-    timelineBuffer.before,
+    timelineAnchorColumnIndex,
+    timelineColumnWidth,
+    timelineColumns.length,
     visibleDays.length,
   ]);
 
   useLayoutEffect(() => {
     isExtendingRightRef.current = false;
-  }, [timelineBuffer.after]);
+  }, [calendarBuffer.after, timelineUnitBuffer.after]);
 
   const handleSelectViewMode = (nextViewMode: CalendarViewMode) => {
     setSelectedViewMode(nextViewMode);
     if (nextViewMode === "month") {
       setMonthTitleDate(startOfMonth(currentDate));
       requestMonthScrollTarget();
-    } else {
-      resetTimelinePosition();
     }
+    resetTimelinePosition(nextViewMode);
   };
 
   const handleToday = () => {
@@ -565,10 +638,9 @@ export const ExplorerCalendarPane = ({
 
     if (selectedViewMode === "month") {
       requestMonthScrollTarget();
-      return;
     }
 
-    resetTimelinePosition();
+    resetTimelinePosition(selectedViewMode);
   };
 
   const handlePrevious = () => {
@@ -580,10 +652,9 @@ export const ExplorerCalendarPane = ({
 
     if (selectedViewMode === "month") {
       requestMonthScrollTarget();
-      return;
     }
 
-    resetTimelinePosition();
+    resetTimelinePosition(selectedViewMode);
   };
 
   const handleNext = () => {
@@ -595,10 +666,9 @@ export const ExplorerCalendarPane = ({
 
     if (selectedViewMode === "month") {
       requestMonthScrollTarget();
-      return;
     }
 
-    resetTimelinePosition();
+    resetTimelinePosition(selectedViewMode);
   };
 
   return (
@@ -651,7 +721,9 @@ export const ExplorerCalendarPane = ({
 
         {activeMode === "timeline" ? (
           <ExplorerCalendarTimelineDayView
-            visibleDays={visibleDays}
+            viewMode={selectedViewMode}
+            anchorDate={currentDate}
+            timelineUnitBuffer={timelineUnitBuffer}
             selectedDate={currentDate}
             dayColumnWidth={TIMELINE_DAY_COLUMN_WIDTH}
             laneLabelWidth={TIMELINE_LANE_LABEL_WIDTH}
@@ -669,7 +741,7 @@ export const ExplorerCalendarPane = ({
             onVisibleMonthChange={setMonthTitleDate}
           />
         ) : (
-         <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
             <div
               ref={scrollContainerRef}
               className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
