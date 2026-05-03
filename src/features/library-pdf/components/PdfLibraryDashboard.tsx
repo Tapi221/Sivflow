@@ -7,7 +7,7 @@ import {
 
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { TagChip } from "@/components/tag/TagChip";
-import { CalendarWorkspaceToolbar } from "@/features/calendar/ui/ExplorerCalendarPane";
+import { PdfLibraryWorkspaceToolbar } from "@/features/library-pdf/components/PdfLibraryWorkspaceToolbar";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 import {
@@ -321,10 +321,9 @@ const PdfLibraryDashboard = ({
   if (rows.length === 0) {
     return (
       <div className="flex h-full min-h-0 w-full flex-col bg-[#FFFFFF]">
-        <CalendarWorkspaceToolbar
-          activeMode="calendar"
-          onSelectCalendar={() => undefined}
-          onSelectTimeline={() => undefined}
+        <PdfLibraryWorkspaceToolbar
+          activeSection="pdf"
+          onSelectSection={() => undefined}
         />
         <input
           ref={fileInputRef}
@@ -361,10 +360,9 @@ const PdfLibraryDashboard = ({
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-[#FFFFFF]">
-      <CalendarWorkspaceToolbar
-        activeMode="calendar"
-        onSelectCalendar={() => undefined}
-        onSelectTimeline={() => undefined}
+      <PdfLibraryWorkspaceToolbar
+        activeSection="pdf"
+        onSelectSection={() => undefined}
       />
       <input
         ref={fileInputRef}
