@@ -64,21 +64,20 @@ export const PdfOverlayToolbar = ({
       : "2枚表示。タップで単一表示に切り替え";
 
   const toolbarClassName =
-    "border-[rgba(212,214,221,0.92)] bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(243,244,247,0.9)_100%)] shadow-[0_8px_22px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.96),inset_0_-1px_0_rgba(215,219,228,0.68)]";
+    "border-[#E2E4E9] bg-[#FFFFFF] shadow-[0_8px_24px_rgba(37,39,45,0.08)]";
   const buttonClassName =
-    "h-6 w-6 border-[rgba(210,214,223,0.96)] bg-[rgba(255,255,255,0.82)] text-[#6f7483] shadow-[inset_0_1px_0_rgba(255,255,255,0.94)] hover:bg-[rgba(246,247,250,0.98)] hover:text-[#4e5565] disabled:border-[rgba(228,231,237,0.94)] disabled:bg-[rgba(249,250,252,0.68)] disabled:text-[#b4b9c5] disabled:hover:bg-[rgba(249,250,252,0.68)] disabled:hover:text-[#b4b9c5]";
+    "h-6 w-6 border-[#E2E4E9] bg-[#FFFFFF] text-[#74798B] shadow-none hover:bg-[#FFFFFF] hover:text-[#25272D] disabled:border-[#E2E4E9] disabled:bg-[#FFFFFF] disabled:text-[#E2E4E9] disabled:hover:bg-[#FFFFFF] disabled:hover:text-[#E2E4E9]";
   const activeButtonClassName =
-    "border-[rgba(189,195,210,0.98)] bg-[rgba(248,249,252,0.98)] text-[#434a59] shadow-[inset_0_0_0_1px_rgba(115,123,145,0.1)]";
-  const dividerClassName = "bg-[rgba(199,204,214,0.92)]";
-  const navigatorClassName = "text-[#676d7b]";
+    "border-[#E2E4E9] bg-[#FFFFFF] text-[#25272D] shadow-[inset_0_0_0_1px_#E2E4E9]";
+  const dividerClassName = "bg-[#E2E4E9]";
+  const navigatorClassName = "text-[#74798B]";
   const navigatorInputClassName =
-    "border-[rgba(210,214,223,0.96)] bg-[rgba(255,255,255,0.84)] text-[#4b5261] focus:border-[rgba(164,171,190,0.96)] focus:bg-[rgba(250,251,253,0.98)]";
-  const totalClassName = "text-[#5e6574]";
-  const sliderTrackClassName = "bg-[rgba(213,216,224,0.9)]";
-  const sliderRangeClassName =
-    "bg-[linear-gradient(90deg,rgba(170,175,197,0.96)_0%,rgba(150,156,184,0.96)_100%)]";
+    "border-[#E2E4E9] bg-[#FFFFFF] text-[#25272D] focus:border-[#74798B] focus:bg-[#FFFFFF]";
+  const totalClassName = "text-[#74798B]";
+  const sliderTrackClassName = "bg-[#E2E4E9]";
+  const sliderRangeClassName = "bg-[#74798B]";
   const sliderThumbClassName =
-    "[&::-webkit-slider-thumb]:border-[rgba(198,203,214,0.94)] [&::-webkit-slider-thumb]:bg-[rgba(255,255,255,0.98)] [&::-webkit-slider-thumb]:shadow-[0_3px_8px_rgba(15,23,42,0.14)] [&::-moz-range-thumb]:border-[rgba(198,203,214,0.94)] [&::-moz-range-thumb]:bg-[rgba(255,255,255,0.98)] [&::-moz-range-thumb]:shadow-[0_3px_8px_rgba(15,23,42,0.14)]";
+    "[&::-webkit-slider-thumb]:border-[#E2E4E9] [&::-webkit-slider-thumb]:bg-[#FFFFFF] [&::-webkit-slider-thumb]:shadow-[0_3px_8px_rgba(37,39,45,0.14)] [&::-moz-range-thumb]:border-[#E2E4E9] [&::-moz-range-thumb]:bg-[#FFFFFF] [&::-moz-range-thumb]:shadow-[0_3px_8px_rgba(37,39,45,0.14)]";
 
   return (
     <OverlayToolbar className={toolbarClassName}>
