@@ -400,7 +400,7 @@ const ActionButton = ({
           overlayGlassActionButtonClassName,
           "group/toolbar shrink-0",
           "focus-visible:outline-none focus-visible:ring-2",
-          "focus-visible:ring-[var(--sidebar-active-accent,#7aa6a1)]/35",
+          "focus-visible:ring-[var(--sidebar-active-accent,#35507b)]/35",
         )}
       >
         <Icon
@@ -631,3 +631,4 @@ export const BlockToolbar = React.memo(
   areBlockToolbarPropsEqual,
 );
 BlockToolbar.displayName = "BlockToolbar";
+
