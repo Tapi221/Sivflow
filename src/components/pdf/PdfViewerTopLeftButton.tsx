@@ -17,7 +17,7 @@ const pdfViewerTopLeftButtonStyle = {
 const pdfViewerTopLeftIconStyle = {
   width: "18px",
   height: "18px",
-  stroke: "#161616",
+  stroke: "#1E2A44",
   strokeWidth: 2.4,
   fill: "none",
   strokeLinecap: "round" as const,
