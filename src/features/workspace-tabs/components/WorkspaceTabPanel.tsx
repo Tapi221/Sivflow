@@ -109,20 +109,18 @@ export const WorkspaceTabPanel = ({
         onDocumentUpdate={handleDocumentUpdate}
       >
         <div className="relative flex h-full min-h-0 w-full flex-col bg-white">
-          <div className="relative">
-            <div className="[&>div]:!justify-end [&>div>div:first-child]:hidden">
-              <CalendarWorkspaceToolbar
-                activeMode="calendar"
-                onSelectCalendar={() => undefined}
-                onSelectTimeline={() => undefined}
-              />
+          <div className="pointer-events-none absolute left-4 top-[10px] z-30">
+            <div className="pointer-events-auto">
+              <PdfViewerTopLeftButton />
             </div>
+          </div>
 
-            <div className="pointer-events-none absolute left-4 top-full z-30">
-              <div className="pointer-events-auto -translate-y-px">
-                <PdfViewerTopLeftButton />
-              </div>
-            </div>
+          <div className="[&>div]:!justify-end [&>div>div:first-child]:hidden">
+            <CalendarWorkspaceToolbar
+              activeMode="calendar"
+              onSelectCalendar={() => undefined}
+              onSelectTimeline={() => undefined}
+            />
           </div>
 
           <PdfPane
