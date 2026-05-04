@@ -2,9 +2,10 @@ import type { ComponentProps } from "react";
 import { useMemo } from "react";
 
 import { CardPane } from "@/components/folder/panes/CardPane";
-import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { PdfPane } from "@/components/pdf/PdfPane";
+import { PdfViewerTopLeftButton } from "@/components/pdf/PdfViewerTopLeftButton";
 import { PdfWorkspaceProvider } from "@/components/pdf/PdfWorkspaceProvider";
+import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { CalendarWorkspaceToolbar } from "@/features/calendar/ui/ExplorerCalendarPane";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { cn } from "@/lib/utils";
@@ -107,14 +108,23 @@ export const WorkspaceTabPanel = ({
         doc={document}
         onDocumentUpdate={handleDocumentUpdate}
       >
-        <div className="flex h-full min-h-0 w-full flex-col bg-white">
-          <div className="[&>div]:!justify-end [&>div>div:first-child]:hidden">
-            <CalendarWorkspaceToolbar
-              activeMode="calendar"
-              onSelectCalendar={() => undefined}
-              onSelectTimeline={() => undefined}
-            />
+        <div className="relative flex h-full min-h-0 w-full flex-col bg-white">
+          <div className="relative">
+            <div className="[&>div]:!justify-end [&>div>div:first-child]:hidden">
+              <CalendarWorkspaceToolbar
+                activeMode="calendar"
+                onSelectCalendar={() => undefined}
+                onSelectTimeline={() => undefined}
+              />
+            </div>
+
+            <div className="pointer-events-none absolute left-4 top-full z-30">
+              <div className="pointer-events-auto -translate-y-px">
+                <PdfViewerTopLeftButton />
+              </div>
+            </div>
           </div>
+
           <PdfPane
             doc={document}
             className="min-h-0 flex-1"
