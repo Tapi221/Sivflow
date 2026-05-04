@@ -5,6 +5,7 @@ import { CardPane } from "@/components/folder/panes/CardPane";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { PdfPane } from "@/components/pdf/PdfPane";
 import { PdfWorkspaceProvider } from "@/components/pdf/PdfWorkspaceProvider";
+import { PdfViewerTopLeftButton } from "@/components/pdf/PdfViewerTopLeftButton";
 import { CalendarWorkspaceToolbar } from "@/features/calendar/ui/ExplorerCalendarPane";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { cn } from "@/lib/utils";
@@ -107,13 +108,23 @@ export const WorkspaceTabPanel = ({
         doc={document}
         onDocumentUpdate={handleDocumentUpdate}
       >
-        <div className="flex h-full min-h-0 w-full flex-col bg-white">
-          <CalendarWorkspaceToolbar
-            activeMode="calendar"
-            hideTabs
-            onSelectCalendar={() => undefined}
-            onSelectTimeline={() => undefined}
-          />
+        <div className="relative flex h-full min-h-0 w-full flex-col bg-white">
+          <div className="relative">
+            <div className="[&>div]:!justify-end [&>div>div:first-child]:hidden">
+              <CalendarWorkspaceToolbar
+                activeMode="calendar"
+                onSelectCalendar={() => undefined}
+                onSelectTimeline={() => undefined}
+              />
+            </div>
+
+            <div className="pointer-events-none absolute left-4 top-full z-30 translate-y-0">
+              <div className="pointer-events-auto">
+                <PdfViewerTopLeftButton />
+              </div>
+            </div>
+          </div>
+
           <PdfPane
             doc={document}
             className="min-h-0 flex-1"
@@ -126,90 +137,48 @@ export const WorkspaceTabPanel = ({
 
   if (activeTab.kind === "card") {
     const card = cardById.get(activeTab.cardId);
-
     if (!card) {
       return cardsLoading ? (
         <WorkspacePanelStatus title="カードを読み込んでいます" />
       ) : (
-        <WorkspacePanelStatus
-          title="カードが見つかりません"
-          description="タブに対応するカードが削除されたか、同期がまだ完了していません。"
-        />
+        <WorkspacePanelStatus title="カードが見つかりません" />
       );
     }
 
-    return <CardPane selectedCardId={card.id} onCardUpdated={onCardUpdated} />;
+    return (
+      <CardPane
+        card={card}
+        cards={cards}
+        cardSets={cardSets}
+        onCardUpdated={onCardUpdated}
+        onOpenCard={openCardTab}
+      />
+    );
   }
 
   if (activeTab.kind === "cardSet") {
     const cardSet = cardSetById.get(activeTab.cardSetId);
-
     if (!cardSet) {
       return cardSetsLoading ? (
         <WorkspacePanelStatus title="カードセットを読み込んでいます" />
       ) : (
-        <WorkspacePanelStatus
-          title="カードセットが見つかりません"
-          description="タブに対応するカードセットが削除されたか、同期がまだ完了していません。"
-        />
+        <WorkspacePanelStatus title="カードセットが見つかりません" />
       );
     }
 
-    const cardSetCards = cards.filter((card) => card.cardSetId === cardSet.id);
-
     return (
-      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa]">
-        <div className="shrink-0 border-b border-[#e5e4df] bg-white px-5 py-4">
-          <div className="text-[13px] text-[#8b8a84]">カードセット</div>
-          <div className="mt-1 text-[20px] font-semibold text-[#2f2e2a]">
-            {resolveCardSetTabTitle(cardSet)}
-          </div>
-          <div className="mt-1 text-[12px] text-[#8b8a84]">
-            {cardSetCards.length} 件のカード
-          </div>
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          {cardSetCards.length > 0 ? (
-            <div className="mx-auto flex max-w-3xl flex-col gap-2">
-              {cardSetCards.map((card, index) => {
-                const title = resolveCardTabTitle(card);
-                return (
-                  <button
-                    key={card.id}
-                    type="button"
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-xl border border-[#e5e4df] bg-white px-4 py-3 text-left",
-                      "shadow-[0_8px_20px_rgba(15,23,42,0.04)] transition-colors hover:bg-[#f7f6f2]",
-                    )}
-                    onClick={() => {
-                      openCardTab({
-                        cardId: card.id,
-                        title,
-                        folderId: resolveCardFolderId(card, cardSetById),
-                      });
-                    }}
-                  >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f0efea] text-[12px] text-[#777671]">
-                      {index + 1}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate text-[13px] text-[#2f2e2a]">
-                      {title}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <WorkspacePanelStatus
-              title="カードがありません"
-              description="このカードセットにはまだ表示できるカードがありません。"
-            />
-          )}
-        </div>
-      </div>
+      <CardPane
+        card={null}
+        cards={cards.filter(
+          (card) => resolveCardFolderId(card) === activeTab.cardSetId,
+        )}
+        cardSets={cardSets}
+        onCardUpdated={onCardUpdated}
+        onOpenCard={openCardTab}
+        initialCardSet={cardSet}
+      />
     );
   }
 
-  return null;
+  return <WorkspacePanelStatus title="表示できる内容がありません" />;
 };
