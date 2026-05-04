@@ -1,35 +1,51 @@
-export const pdfOverlayToolbarClassName =
-  "translate-y-[8px] gap-1.5 rounded-[999px] border border-[rgba(214,219,226,0.96)] bg-[linear-gradient(180deg,#ffffff_0%,#f4f6f9_100%)] px-2.5 py-1.5 shadow-[0_14px_30px_rgba(37,39,45,0.12),0_3px_8px_rgba(37,39,45,0.06),inset_0_1px_0_rgba(255,255,255,0.98),inset_0_-1px_0_rgba(214,219,226,0.88)]";
+import { cn } from "@/lib/utils";
 
-export const pdfOverlayToolbarButtonClassName =
-  "h-7 w-7 rounded-full border border-[rgba(210,215,223,0.98)] bg-[linear-gradient(180deg,#ffffff_0%,#f5f7fa_100%)] text-[#6b7280] shadow-[0_4px_10px_rgba(37,39,45,0.10),0_1px_2px_rgba(37,39,45,0.06),inset_0_1px_0_rgba(255,255,255,0.96)] transition duration-150 hover:bg-[linear-gradient(180deg,#ffffff_0%,#f7f9fc_100%)] hover:text-[#25272D] hover:shadow-[0_6px_14px_rgba(37,39,45,0.12),0_2px_4px_rgba(37,39,45,0.06),inset_0_1px_0_rgba(255,255,255,0.98)] disabled:border-[#E2E4E9] disabled:bg-[linear-gradient(180deg,#ffffff_0%,#f7f8fa_100%)] disabled:text-[#D1D5DB] disabled:shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] disabled:hover:text-[#D1D5DB]";
+export const pdfOverlayToolbarShellClassName = cn(
+  "translate-y-[8px] rounded-[999px] border border-[#E2E4E9]",
+  "bg-[linear-gradient(180deg,#FFFFFF_0%,#F7F8FA_100%)]",
+  "shadow-[0_8px_24px_rgba(37,39,45,0.08),inset_0_1px_0_rgba(255,255,255,0.96),inset_0_-1px_0_rgba(226,228,233,0.9)]",
+);
 
-export const pdfOverlayToolbarButtonActiveClassName =
-  "border-[rgba(200,206,216,0.98)] bg-[linear-gradient(180deg,#eef2f7_0%,#ffffff_100%)] text-[#25272D] shadow-[inset_0_2px_4px_rgba(148,163,184,0.18),inset_0_-1px_0_rgba(255,255,255,0.92),0_1px_2px_rgba(37,39,45,0.05)]";
+export const pdfOverlayToolbarButtonClassName = cn(
+  "h-7 w-7 rounded-full border border-[#DDE1E7]",
+  "bg-[linear-gradient(180deg,#FFFFFF_0%,#F6F7F9_100%)] text-[#74798B]",
+  "shadow-[0_2px_6px_rgba(37,39,45,0.08),inset_0_1px_0_rgba(255,255,255,0.96)]",
+  "hover:bg-[linear-gradient(180deg,#FFFFFF_0%,#F4F6F8_100%)] hover:text-[#25272D]",
+  "disabled:border-[#E2E4E9] disabled:bg-[#FBFBFC] disabled:text-[#C6CBD4] disabled:shadow-none",
+  "disabled:hover:bg-[#FBFBFC] disabled:hover:text-[#C6CBD4]",
+);
+
+export const pdfOverlayToolbarButtonActiveClassName = cn(
+  "border-[#D8DDE5] bg-[linear-gradient(180deg,#FDFDFE_0%,#F2F4F7_100%)] text-[#25272D]",
+  "shadow-[inset_0_1px_2px_rgba(37,39,45,0.08),inset_0_1px_0_rgba(255,255,255,0.75)]",
+);
 
 export const pdfOverlayToolbarDividerClassName =
-  "h-5 w-px shrink-0 bg-[linear-gradient(180deg,rgba(215,220,228,0.0)_0%,rgba(210,215,223,0.95)_20%,rgba(210,215,223,0.95)_80%,rgba(215,220,228,0.0)_100%)]";
+  "h-4 w-px shrink-0 bg-[#E2E4E9]";
 
 export const pdfOverlayToolbarNavigatorClassName =
-  "text-[#7A8191]";
+  "text-[#74798B]";
 
-export const pdfOverlayToolbarNavigatorInputClassName =
-  "h-7 rounded-[14px] border-[rgba(210,215,223,0.98)] bg-[linear-gradient(180deg,#ffffff_0%,#f5f7fa_100%)] text-[#25272D] shadow-[0_3px_8px_rgba(37,39,45,0.08),inset_0_1px_0_rgba(255,255,255,0.96)] focus:border-[#A8B0BF] focus:bg-[linear-gradient(180deg,#ffffff_0%,#f7f9fc_100%)] focus:shadow-[0_4px_10px_rgba(37,39,45,0.10),inset_0_1px_0_rgba(255,255,255,0.98)]";
+export const pdfOverlayToolbarNavigatorInputClassName = cn(
+  "h-7 rounded-full border border-[#DDE1E7] bg-[linear-gradient(180deg,#FFFFFF_0%,#F7F8FA_100%)]",
+  "text-[#25272D] shadow-[0_1px_4px_rgba(37,39,45,0.06),inset_0_1px_0_rgba(255,255,255,0.94)]",
+  "focus:border-[#C9CED8] focus:bg-[linear-gradient(180deg,#FFFFFF_0%,#F8F9FB_100%)]",
+);
 
 export const pdfOverlayToolbarTotalClassName =
-  "text-[#7A8191]";
+  "text-[#74798B]";
 
-export const pdfOverlayToolbarSliderTrackClassName =
-  "h-1.5 bg-[linear-gradient(180deg,#d7dbe2_0%,#e6e9ee_100%)] shadow-[inset_0_1px_2px_rgba(148,163,184,0.18),inset_0_1px_0_rgba(255,255,255,0.72)]";
+export const pdfOverlayToolbarSliderTrackClassName = cn(
+  "bg-[#D9DDE4]",
+  "shadow-[inset_0_1px_2px_rgba(37,39,45,0.10)]",
+);
 
 export const pdfOverlayToolbarSliderRangeClassName =
-  "bg-[linear-gradient(180deg,#74839b_0%,#66758f_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]";
+  "bg-[#6F7F9E]";
 
-export const pdfOverlayToolbarSliderThumbClassName =
-  "[&::-webkit-slider-thumb]:border-[rgba(214,219,226,0.98)] [&::-webkit-slider-thumb]:bg-[linear-gradient(180deg,#ffffff_0%,#f4f6f9_100%)] [&::-webkit-slider-thumb]:shadow-[0_6px_12px_rgba(37,39,45,0.18),0_2px_4px_rgba(37,39,45,0.08),inset_0_1px_0_rgba(255,255,255,0.98)] [&::-moz-range-thumb]:border-[rgba(214,219,226,0.98)] [&::-moz-range-thumb]:bg-[linear-gradient(180deg,#ffffff_0%,#f4f6f9_100%)] [&::-moz-range-thumb]:shadow-[0_6px_12px_rgba(37,39,45,0.18),0_2px_4px_rgba(37,39,45,0.08),inset_0_1px_0_rgba(255,255,255,0.98)]";
-
-export const pdfOverlayToolbarSliderWrapperClassName =
-  "w-[7.25rem] px-0.5 sm:w-[8rem]";
-
-export const pdfOverlayToolbarValueClassName =
-  "min-w-[2.5rem] text-[#586174]";
+export const pdfOverlayToolbarSliderThumbClassName = cn(
+  "[&::-webkit-slider-thumb]:border-[#DDE1E7] [&::-webkit-slider-thumb]:bg-[linear-gradient(180deg,#FFFFFF_0%,#F5F6F8_100%)]",
+  "[&::-webkit-slider-thumb]:shadow-[0_3px_8px_rgba(37,39,45,0.16),inset_0_1px_0_rgba(255,255,255,0.96)]",
+  "[&::-moz-range-thumb]:border-[#DDE1E7] [&::-moz-range-thumb]:bg-[linear-gradient(180deg,#FFFFFF_0%,#F5F6F8_100%)]",
+  "[&::-moz-range-thumb]:shadow-[0_3px_8px_rgba(37,39,45,0.16),inset_0_1px_0_rgba(255,255,255,0.96)]",
+);
