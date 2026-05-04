@@ -5,10 +5,6 @@ type SettingsPanelDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const panelStyle = {
-  backgroundColor: "var(--app-sidebar-bg, #f6f6f6)",
-};
-
 const SettingsPanelDialog = ({
   open,
   onOpenChange,
@@ -20,15 +16,11 @@ const SettingsPanelDialog = ({
         accessibleTitle="設定"
         accessibleDescription="設定パネル"
         showCloseButton={false}
-        className="!w-[min(920px,calc(100vw-48px))] !max-w-none !gap-0 !overflow-hidden !border-[rgba(0,0,0,0.08)] !p-0 shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
+        className="ds-settings-panel-dialog !w-[min(920px,calc(100vw-48px))] !max-w-none !gap-0 !overflow-hidden !p-0"
         overlayClassName="bg-black/40"
         contentWrapperClassName="p-6"
-        style={panelStyle}
       >
-        <div
-          className="w-full min-h-[560px] h-[min(680px,calc(100vh-80px))]"
-          style={panelStyle}
-        />
+        <div className="ds-settings-panel-dialog__surface w-full min-h-[560px] h-[min(680px,calc(100vh-80px))]" />
       </DialogContent>
     </Dialog>
   );
