@@ -15,16 +15,14 @@ import { cn } from "@/lib/utils";
 import {
   pdfOverlayToolbarButtonActiveClassName,
   pdfOverlayToolbarButtonClassName,
-  pdfOverlayToolbarClassName,
   pdfOverlayToolbarDividerClassName,
   pdfOverlayToolbarNavigatorClassName,
   pdfOverlayToolbarNavigatorInputClassName,
+  pdfOverlayToolbarShellClassName,
   pdfOverlayToolbarSliderRangeClassName,
   pdfOverlayToolbarSliderThumbClassName,
   pdfOverlayToolbarSliderTrackClassName,
-  pdfOverlayToolbarSliderWrapperClassName,
   pdfOverlayToolbarTotalClassName,
-  pdfOverlayToolbarValueClassName,
 } from "./pdfOverlayToolbarClassNames";
 
 type PdfFitMode = "width" | "manual";
@@ -78,7 +76,7 @@ export const PdfOverlayToolbar = ({
       : "2枚表示。タップで単一表示に切り替え";
 
   return (
-    <OverlayToolbar className={pdfOverlayToolbarClassName}>
+    <OverlayToolbar className={pdfOverlayToolbarShellClassName}>
       <OverlayToolbarButton
         onClick={onPrevPage}
         label="前のページ"
@@ -155,11 +153,8 @@ export const PdfOverlayToolbar = ({
         onChange={onZoomPercentChange}
         label="PDFズーム"
         disabled={disabled}
-        sliderWrapperClassName={pdfOverlayToolbarSliderWrapperClassName}
-        valueClassName={cn(
-          pdfOverlayToolbarTotalClassName,
-          pdfOverlayToolbarValueClassName,
-        )}
+        sliderWrapperClassName="w-16 px-0.5 sm:w-20"
+        valueClassName={pdfOverlayToolbarTotalClassName}
         trackClassName={pdfOverlayToolbarSliderTrackClassName}
         rangeClassName={pdfOverlayToolbarSliderRangeClassName}
         thumbClassName={pdfOverlayToolbarSliderThumbClassName}
