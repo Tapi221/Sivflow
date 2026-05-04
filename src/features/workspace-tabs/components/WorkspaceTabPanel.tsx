@@ -108,11 +108,13 @@ export const WorkspaceTabPanel = ({
         onDocumentUpdate={handleDocumentUpdate}
       >
         <div className="flex h-full min-h-0 w-full flex-col bg-white">
-          <CalendarWorkspaceToolbar
-            activeMode="calendar"
-            onSelectCalendar={() => undefined}
-            onSelectTimeline={() => undefined}
-          />
+          <div className="[&>div]:!justify-end [&>div>div:first-child]:hidden">
+            <CalendarWorkspaceToolbar
+              activeMode="calendar"
+              onSelectCalendar={() => undefined}
+              onSelectTimeline={() => undefined}
+            />
+          </div>
           <PdfPane
             doc={document}
             className="min-h-0 flex-1"
