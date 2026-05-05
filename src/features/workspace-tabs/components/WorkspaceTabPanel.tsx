@@ -109,11 +109,6 @@ export const WorkspaceTabPanel = ({
         onDocumentUpdate={handleDocumentUpdate}
       >
         <div className="relative flex h-full min-h-0 w-full flex-col bg-white">
-          <div className="pointer-events-none absolute left-4 top-[10px] z-30">
-            <div className="pointer-events-auto">
-              <PdfViewerTopLeftButton />
-            </div>
-          </div>
 
           <div className="[&>div]:!justify-end [&>div>div:first-child]:hidden">
             <CalendarWorkspaceToolbar
