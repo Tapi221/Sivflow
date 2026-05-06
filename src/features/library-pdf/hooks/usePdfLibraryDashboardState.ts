@@ -49,7 +49,10 @@ const clampColumnWidth = (
   return Math.max(width, minWidth);
 };
 
-const loadStoredColumns = <TColumnId extends string, TColumn extends ColumnBase<TColumnId>>(
+const loadStoredColumns = <
+  TColumnId extends string,
+  TColumn extends ColumnBase<TColumnId>,
+>(
   defaultColumns: TColumn[],
   columnStorageKey: string,
 ): TColumn[] => {
@@ -75,11 +78,7 @@ const loadStoredColumns = <TColumnId extends string, TColumn extends ColumnBase<
 
       return {
         ...column,
-        width: clampColumnWidth(
-          storedWidth,
-          column.minWidth,
-          column.maxWidth,
-        ),
+        width: clampColumnWidth(storedWidth, column.minWidth, column.maxWidth),
       };
     });
   } catch {
@@ -101,8 +100,9 @@ export const usePdfLibraryDashboardState = <
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
   );
-  const [selectedColumnId, setSelectedColumnId] =
-    useState<TColumnId | null>(null);
+  const [selectedColumnId, setSelectedColumnId] = useState<TColumnId | null>(
+    null,
+  );
   const [pageIndex, setPageIndex] = useState(0);
   const [columns, setColumns] = useState<TColumn[]>(() =>
     loadStoredColumns(defaultColumns, columnStorageKey),
@@ -217,8 +217,7 @@ export const usePdfLibraryDashboardState = <
       selectedIndex * columnGapPx;
 
     const beforeGap = selectedIndex === 0 ? 0 : columnGapPx / 2;
-    const afterGap =
-      selectedIndex === columns.length - 1 ? 0 : columnGapPx / 2;
+    const afterGap = selectedIndex === columns.length - 1 ? 0 : columnGapPx / 2;
 
     return {
       left: left - beforeGap,

@@ -566,7 +566,6 @@ export const ExplorerToolbar = () => {
                 description="フォルダ・カード・PDFを横断検索"
                 onClick={openGlobalSearch}
               />
-
             </div>
           </PopoverContent>
         </Popover>

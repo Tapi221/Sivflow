@@ -8,7 +8,6 @@ import {
   setLastSelectedFolderId,
 } from "./explorerStorage";
 
-
 export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 
 export type FoldersRouteAdapter = {

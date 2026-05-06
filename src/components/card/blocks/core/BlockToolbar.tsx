@@ -631,4 +631,3 @@ export const BlockToolbar = React.memo(
   areBlockToolbarPropsEqual,
 );
 BlockToolbar.displayName = "BlockToolbar";
-

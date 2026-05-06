@@ -12,6 +12,5 @@ export type SelectedExplorerItem =
   | { type: "directory" }
   | { type: "gallery" }
   | { type: "calendar" }
-
   | { type: "trash" }
   | null;

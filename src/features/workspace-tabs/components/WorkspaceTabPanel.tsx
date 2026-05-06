@@ -107,7 +107,6 @@ export const WorkspaceTabPanel = ({
         onDocumentUpdate={handleDocumentUpdate}
       >
         <div className="relative flex h-full min-h-0 w-full flex-col bg-white">
-
           <div className="[&>div]:!justify-end [&>div>div:first-child]:hidden">
             <CalendarWorkspaceToolbar
               activeMode="calendar"

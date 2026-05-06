@@ -18,10 +18,9 @@ export type PdfDashboardRow = {
   orderIndex: number;
 };
 
-type ViewerStateWithLastOpenedAt =
-  NonNullable<DocumentItem["viewerState"]> & {
-    lastOpenedAt?: unknown;
-  };
+type ViewerStateWithLastOpenedAt = NonNullable<DocumentItem["viewerState"]> & {
+  lastOpenedAt?: unknown;
+};
 
 type BuildPdfDashboardRowsParams = {
   documents: DocumentItem[];
@@ -122,8 +121,8 @@ export const buildPdfDashboardRows = ({
     .map((document) => {
       const folderPath = buildFolderPath(document.folderId, folderById);
       const categoryLabel = resolveCategoryLabel(document.folderId, folderById);
-      const viewerState =
-        (document.viewerState ?? null) as ViewerStateWithLastOpenedAt | null;
+      const viewerState = (document.viewerState ??
+        null) as ViewerStateWithLastOpenedAt | null;
       const updatedAt = toDate(document.updatedAt);
       const lastViewedAt = toDate(viewerState?.lastOpenedAt);
 

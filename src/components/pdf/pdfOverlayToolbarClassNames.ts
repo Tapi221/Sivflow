@@ -23,8 +23,7 @@ export const pdfOverlayToolbarButtonActiveClassName = cn(
 export const pdfOverlayToolbarDividerClassName =
   "h-4 w-px shrink-0 bg-[#E2E4E9]";
 
-export const pdfOverlayToolbarNavigatorClassName =
-  "text-[#74798B]";
+export const pdfOverlayToolbarNavigatorClassName = "text-[#74798B]";
 
 export const pdfOverlayToolbarNavigatorInputClassName = cn(
   "h-7 rounded-full border border-[#DDE1E7] bg-[linear-gradient(180deg,#FFFFFF_0%,#F6F7F9_100%)]",
@@ -32,16 +31,14 @@ export const pdfOverlayToolbarNavigatorInputClassName = cn(
   "focus:border-[#C9CED8] focus:bg-[linear-gradient(180deg,#FFFFFF_0%,#F7F8FA_100%)]",
 );
 
-export const pdfOverlayToolbarTotalClassName =
-  "text-[#74798B]";
+export const pdfOverlayToolbarTotalClassName = "text-[#74798B]";
 
 export const pdfOverlayToolbarSliderTrackClassName = cn(
   "bg-[#D9DDE4]",
   "shadow-[inset_0_1px_2px_rgba(37,39,45,0.10)]",
 );
 
-export const pdfOverlayToolbarSliderRangeClassName =
-  "bg-[#6F7F9E]";
+export const pdfOverlayToolbarSliderRangeClassName = "bg-[#6F7F9E]";
 
 export const pdfOverlayToolbarSliderThumbClassName = cn(
   "[&::-webkit-slider-thumb]:border-[#DDE1E7] [&::-webkit-slider-thumb]:bg-[linear-gradient(180deg,#FFFFFF_0%,#F5F6F8_100%)]",

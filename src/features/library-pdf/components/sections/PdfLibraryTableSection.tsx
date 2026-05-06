@@ -7,5 +7,9 @@ type PdfLibraryTableSectionProps = {
 export const PdfLibraryTableSection = ({
   children,
 }: PdfLibraryTableSectionProps) => {
-  return <section className="min-h-0 flex-1 rounded-[10px] bg-[#FFFFFF]">{children}</section>;
+  return (
+    <section className="min-h-0 flex-1 rounded-[10px] bg-[#FFFFFF]">
+      {children}
+    </section>
+  );
 };
