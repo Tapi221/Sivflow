@@ -1,9 +1,7 @@
 import type { ComponentProps } from "react";
 import { useMemo } from "react";
-
 import { CardPane } from "@/components/folder/panes/CardPane";
 import { PdfPane } from "@/components/pdf/PdfPane";
-import { PdfViewerTopLeftButton } from "@/components/pdf/PdfViewerTopLeftButton";
 import { PdfWorkspaceProvider } from "@/components/pdf/PdfWorkspaceProvider";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { CalendarWorkspaceToolbar } from "@/features/calendar/ui/ExplorerCalendarPane";
