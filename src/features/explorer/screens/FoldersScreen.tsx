@@ -124,7 +124,6 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
 
   const controller = useExplorerController({
     initialRouteState,
-
   });
 
   const {

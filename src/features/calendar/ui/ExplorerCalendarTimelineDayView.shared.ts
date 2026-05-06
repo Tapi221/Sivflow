@@ -31,10 +31,7 @@ export type TimelineColumn = {
   kind: "month" | "week" | "day";
 };
 
-const buildMonthColumns = (
-  anchorDate: Date,
-  buffer: TimelineUnitBuffer,
-) => {
+const buildMonthColumns = (anchorDate: Date, buffer: TimelineUnitBuffer) => {
   const columns: TimelineColumn[] = [];
   const anchorStart = startOfMonth(anchorDate);
   const today = new Date();
@@ -57,10 +54,7 @@ const buildMonthColumns = (
   return columns;
 };
 
-const buildWeekColumns = (
-  anchorDate: Date,
-  buffer: TimelineUnitBuffer,
-) => {
+const buildWeekColumns = (anchorDate: Date, buffer: TimelineUnitBuffer) => {
   const columns: TimelineColumn[] = [];
   const anchorStart = startOfWeek(anchorDate, {
     weekStartsOn: WEEK_STARTS_ON_MONDAY,
@@ -87,10 +81,7 @@ const buildWeekColumns = (
   return columns;
 };
 
-const buildDayColumns = (
-  anchorDate: Date,
-  buffer: TimelineUnitBuffer,
-) => {
+const buildDayColumns = (anchorDate: Date, buffer: TimelineUnitBuffer) => {
   const columns: TimelineColumn[] = [];
   const anchorStart = startOfDay(anchorDate);
   const today = new Date();

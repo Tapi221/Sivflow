@@ -33,13 +33,13 @@ import {
   Search,
 } from "@/ui/icons";
 import { ExplorerCalendarMonthView } from "./ExplorerCalendarMonthView";
+import { ExplorerCalendarTimelineDayView } from "./ExplorerCalendarTimelineDayView";
 import {
   buildTimelineColumns,
-  ExplorerCalendarTimelineDayView,
   getTimelineAnchorColumnIndex,
   getTimelineColumnWidth,
   type TimelineUnitBuffer,
-} from "./ExplorerCalendarTimelineDayView";
+} from "./ExplorerCalendarTimelineDayView.shared";
 
 type ExplorerCalendarPaneProps = {
   onClose?: () => void;
@@ -168,7 +168,15 @@ const MonthViewToolbarIcon = ({
     aria-hidden="true"
     {...props}
   >
-    <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+    <rect
+      x="2"
+      y="3"
+      width="12"
+      height="10"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
     <path d="M2 6.5H14" stroke="currentColor" strokeWidth="1.25" />
     <path d="M6 6.5V13" stroke="currentColor" strokeWidth="1.25" />
     <path d="M10 6.5V13" stroke="currentColor" strokeWidth="1.25" />
@@ -190,7 +198,15 @@ const WeekViewToolbarIcon = ({
     aria-hidden="true"
     {...props}
   >
-    <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+    <rect
+      x="2"
+      y="3"
+      width="12"
+      height="10"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
     <path d="M6 3V13" stroke="currentColor" strokeWidth="1.25" />
     <path d="M10 3V13" stroke="currentColor" strokeWidth="1.25" />
   </svg>
@@ -211,7 +227,15 @@ const DayViewToolbarIcon = ({
     aria-hidden="true"
     {...props}
   >
-    <rect x="4" y="3" width="8" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+    <rect
+      x="4"
+      y="3"
+      width="8"
+      height="10"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
   </svg>
 );
 
@@ -332,7 +356,10 @@ export const CalendarWorkspaceToolbar = ({
               const Icon = option.icon;
 
               return (
-                <div key={option.value} className="flex flex-col items-start pb-2">
+                <div
+                  key={option.value}
+                  className="flex flex-col items-start pb-2"
+                >
                   <button
                     type="button"
                     className={cn(
@@ -383,10 +410,7 @@ export const CalendarWorkspaceToolbar = ({
   );
 };
 
-const getRangeDayCount = (
-  baseDate: Date,
-  viewMode: CalendarViewMode,
-) => {
+const getRangeDayCount = (baseDate: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "month") {
     return getDaysInMonth(baseDate);
   }
@@ -394,10 +418,7 @@ const getRangeDayCount = (
   return viewMode === "week" ? 7 : 1;
 };
 
-const getViewportDayCount = (
-  baseDate: Date,
-  viewMode: CalendarViewMode,
-) => {
+const getViewportDayCount = (baseDate: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "month") {
     return 7;
   }
@@ -510,8 +531,7 @@ export const ExplorerCalendarPane = ({
   const [monthScrollTargetToken, setMonthScrollTargetToken] = useState(0);
   const [selectedViewMode, setSelectedViewMode] =
     useState<CalendarViewMode>("days");
-  const [activeMode, setActiveMode] =
-    useState<CalendarToolbarMode>("timeline");
+  const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
   const [viewportWidth, setViewportWidth] = useState(0);
   const [calendarBuffer, setCalendarBuffer] = useState(
     createInitialCalendarBuffer,
@@ -542,8 +562,7 @@ export const ExplorerCalendarPane = ({
     return getTimelineAnchorColumnIndex(timelineColumns, currentDate);
   }, [currentDate, timelineColumns]);
 
-  const titleDate =
-    selectedViewMode === "month" ? monthTitleDate : currentDate;
+  const titleDate = selectedViewMode === "month" ? monthTitleDate : currentDate;
   const monthLabel =
     activeMode === "timeline" && selectedViewMode === "month"
       ? null
@@ -638,12 +657,7 @@ export const ExplorerCalendarPane = ({
         }
       }
     },
-    [
-      activeMode,
-      calendarDayColumnWidth,
-      selectedViewMode,
-      timelineColumnWidth,
-    ],
+    [activeMode, calendarDayColumnWidth, selectedViewMode, timelineColumnWidth],
   );
 
   useEffect(() => {
@@ -901,4 +915,3 @@ export const ExplorerCalendarPane = ({
     </div>
   );
 };
-
