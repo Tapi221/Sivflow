@@ -1,41 +1,19 @@
-import {
-  addDays,
-  addMonths,
-  endOfMonth,
-  endOfWeek,
-  format,
-  isSameDay,
-  isSameMonth,
-  startOfDay,
-  startOfMonth,
-  startOfWeek,
-} from "date-fns";
-import { ja } from "date-fns/locale";
 import type { RefObject, UIEvent } from "react";
 import { Fragment, useMemo } from "react";
+
+import {
+  buildTimelineColumns,
+  getTimelineColumnWidth,
+} from "./ExplorerCalendarTimelineDayView.shared";
+import type {
+  TimelineUnitBuffer,
+  TimelineViewMode,
+} from "./ExplorerCalendarTimelineDayView.shared";
 
 const HEADER_HEIGHT = 40;
 const ROW_HEIGHT = 168;
 const DEFAULT_LANE_LABEL_WIDTH = 168;
 const DEFAULT_ROW_COUNT = 4;
-const WEEK_STARTS_ON_MONDAY = 1;
-
-export type TimelineViewMode = "month" | "week" | "days";
-
-export type TimelineUnitBuffer = {
-  before: number;
-  after: number;
-};
-
-export type TimelineColumn = {
-  id: string;
-  start: Date;
-  end: Date;
-  topLabel: string;
-  bottomLabel: string;
-  isToday: boolean;
-  kind: "month" | "week" | "day";
-};
 
 type ExplorerCalendarTimelineDayViewProps = {
   viewMode: TimelineViewMode;
@@ -50,138 +28,10 @@ type ExplorerCalendarTimelineDayViewProps = {
   onSelectDate?: (date: Date) => void;
 };
 
-const buildMonthColumns = (
-  anchorDate: Date,
-  buffer: TimelineUnitBuffer,
-) => {
-  const columns: TimelineColumn[] = [];
-  const anchorStart = startOfMonth(anchorDate);
-  const today = new Date();
-
-  for (let offset = -buffer.before; offset <= buffer.after; offset += 1) {
-    const start = addMonths(anchorStart, offset);
-    const end = endOfMonth(start);
-
-    columns.push({
-      id: `month-${start.toISOString()}`,
-      start,
-      end,
-      topLabel: format(start, "M", { locale: ja }),
-      bottomLabel: "月",
-      isToday: isSameMonth(start, today),
-      kind: "month",
-    });
-  }
-
-  return columns;
-};
-
-const buildWeekColumns = (
-  anchorDate: Date,
-  buffer: TimelineUnitBuffer,
-) => {
-  const columns: TimelineColumn[] = [];
-  const anchorStart = startOfWeek(anchorDate, {
-    weekStartsOn: WEEK_STARTS_ON_MONDAY,
-  });
-  const today = new Date();
-
-  for (let offset = -buffer.before; offset <= buffer.after; offset += 1) {
-    const start = addDays(anchorStart, offset * 7);
-    const end = endOfWeek(start, {
-      weekStartsOn: WEEK_STARTS_ON_MONDAY,
-    });
-
-    columns.push({
-      id: `week-${start.toISOString()}`,
-      start,
-      end,
-      topLabel: format(start, "M/d", { locale: ja }),
-      bottomLabel: format(end, "M/d", { locale: ja }),
-      isToday: today >= start && today <= end,
-      kind: "week",
-    });
-  }
-
-  return columns;
-};
-
-const buildDayColumns = (
-  anchorDate: Date,
-  buffer: TimelineUnitBuffer,
-) => {
-  const columns: TimelineColumn[] = [];
-  const anchorStart = startOfDay(anchorDate);
-  const today = new Date();
-
-  for (let offset = -buffer.before; offset <= buffer.after; offset += 1) {
-    const start = addDays(anchorStart, offset);
-
-    columns.push({
-      id: `day-${start.toISOString()}`,
-      start,
-      end: start,
-      topLabel: format(start, "d", { locale: ja }),
-      bottomLabel: format(start, "E", { locale: ja }),
-      isToday: isSameDay(start, today),
-      kind: "day",
-    });
-  }
-
-  return columns;
-};
-
-export const buildTimelineColumns = (
-  viewMode: TimelineViewMode,
-  anchorDate: Date,
-  buffer: TimelineUnitBuffer,
-) => {
-  if (viewMode === "month") {
-    return buildMonthColumns(anchorDate, buffer);
-  }
-
-  if (viewMode === "week") {
-    return buildWeekColumns(anchorDate, buffer);
-  }
-
-  return buildDayColumns(anchorDate, buffer);
-};
-
-export const getTimelineColumnWidth = (
-  viewMode: TimelineViewMode,
-  dayColumnWidth: number,
-) => {
-  if (viewMode === "month") {
-    return Math.max(168, Math.round(dayColumnWidth * 1.6));
-  }
-
-  if (viewMode === "week") {
-    return Math.max(132, Math.round(dayColumnWidth * 1.2));
-  }
-
-  return dayColumnWidth;
-};
-
-export const getTimelineAnchorColumnIndex = (
-  columns: TimelineColumn[],
-  selectedDate: Date,
-) => {
-  const selectedTime = selectedDate.getTime();
-  const matchIndex = columns.findIndex((column) => {
-    return (
-      selectedTime >= column.start.getTime() &&
-      selectedTime <= column.end.getTime()
-    );
-  });
-
-  return matchIndex >= 0 ? matchIndex : 0;
-};
-
 export const ExplorerCalendarTimelineDayView = ({
   viewMode,
   anchorDate,
   timelineUnitBuffer,
-  selectedDate,
   dayColumnWidth,
   laneLabelWidth = DEFAULT_LANE_LABEL_WIDTH,
   rowCount = DEFAULT_ROW_COUNT,
@@ -231,7 +81,9 @@ export const ExplorerCalendarTimelineDayView = ({
                   className={[
                     "flex h-10 flex-col items-center justify-center border-r border-[#e5e7eb] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
                     column.isToday ? "bg-[#fdf2f2]" : "",
-                  ].join(" ").trim()}
+                  ]
+                    .join(" ")
+                    .trim()}
                   onClick={() => onSelectDate?.(column.start)}
                 >
                   <span className="font-semibold text-[#25272d]">
