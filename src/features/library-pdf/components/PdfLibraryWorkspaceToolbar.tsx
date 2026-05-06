@@ -137,6 +137,78 @@ const NotesTabIcon = ({
   </svg>
 );
 
+const ThumbnailToolbarIcon = ({
+  className,
+  ...props
+}: WorkspaceHeaderToolbarIconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <rect
+      x="2.5"
+      y="2.5"
+      width="11"
+      height="11"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
+    <path
+      d="M6 2.75V13.25"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
+    <rect
+      x="3.4"
+      y="4"
+      width="1.2"
+      height="1.2"
+      rx="0.4"
+      fill="currentColor"
+    />
+    <rect
+      x="3.4"
+      y="6.9"
+      width="1.2"
+      height="1.2"
+      rx="0.4"
+      fill="currentColor"
+    />
+    <rect
+      x="3.4"
+      y="9.8"
+      width="1.2"
+      height="1.2"
+      rx="0.4"
+      fill="currentColor"
+    />
+    <path
+      d="M7.75 5H11.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
+    <path
+      d="M7.75 8H11.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
+    <path
+      d="M7.75 11H10.25"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 const SortToolbarIcon = ({
   className,
   ...props
@@ -190,6 +262,15 @@ const PDF_LIBRARY_TABS = [
   icon: ComponentType<WorkspaceHeaderToolbarIconProps>;
 }>;
 
+const PDF_LIBRARY_LEADING_ACTIONS = [
+  {
+    label: "Thumbnails",
+    ariaLabel: "サムネイル",
+    icon: ThumbnailToolbarIcon,
+    onClick: () => undefined,
+  },
+] as const;
+
 const PDF_LIBRARY_ACTIONS = [
   { label: "Search", icon: Search },
   { label: "Filter", icon: Filter },
@@ -208,6 +289,7 @@ export const PdfLibraryWorkspaceToolbar = ({
         ...tab,
         onClick: () => onSelectSection(tab.value),
       }))}
+      leadingActions={PDF_LIBRARY_LEADING_ACTIONS}
       actions={PDF_LIBRARY_ACTIONS}
     />
   );
