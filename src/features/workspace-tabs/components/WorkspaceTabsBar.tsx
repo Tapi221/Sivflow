@@ -31,9 +31,45 @@ const TABS_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "drag",
 };
 
-const TAB_SURFACE_STYLE: CSSProperties = {
-  backgroundColor: "var(--app-sidebar-bg)",
-};
+const resolveTabsSurfaceStyle = (
+  isTitlebar: boolean,
+): CSSProperties => ({
+  background: isTitlebar
+    ? "var(--app-titlebar-bg, var(--app-sidebar-bg))"
+    : "var(--app-sidebar-bg)",
+});
+
+const resolveInactiveTabTextClassName = (isTitlebar: boolean): string =>
+  isTitlebar
+    ? "text-[var(--app-titlebar-text)] hover:border-white/10 hover:text-[var(--app-titlebar-text-strong)]"
+    : "text-[var(--app-sidebar-text)] hover:border-black/8 hover:text-[var(--app-sidebar-text-strong)]";
+
+const resolveInactiveTabIconClassName = (isTitlebar: boolean): string =>
+  isTitlebar
+    ? "text-[var(--app-titlebar-icon)]"
+    : "text-[var(--app-sidebar-icon)]";
+
+const resolveCloseButtonClassName = (isTitlebar: boolean): string =>
+  isTitlebar
+    ? [
+        "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
+        "text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
+      ].join(" ")
+    : [
+        "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
+        "text-[var(--app-sidebar-icon)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
+      ].join(" ");
+
+const resolveAddButtonClassName = (isTitlebar: boolean): string =>
+  isTitlebar
+    ? [
+        "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-transparent outline-none transition-colors",
+        "bg-transparent text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
+      ].join(" ")
+    : [
+        "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-transparent outline-none transition-colors",
+        "text-[var(--app-sidebar-text)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
+      ].join(" ");
 
 const resolveNextTabOnClose = (
   tabs: WorkspaceTab[],
@@ -188,10 +224,13 @@ export const WorkspaceTabsBar = ({
 
   const isTitlebar = variant === "titlebar";
   const interactiveStyle = noDragStyle ?? TABS_NO_DRAG_STYLE;
+  const tabsSurfaceStyle = resolveTabsSurfaceStyle(isTitlebar);
+  const closeButtonClassName = resolveCloseButtonClassName(isTitlebar);
+  const addButtonClassName = resolveAddButtonClassName(isTitlebar);
 
   return (
     <div
-      style={{ ...TAB_SURFACE_STYLE, ...TABS_DRAG_STYLE }}
+      style={{ ...tabsSurfaceStyle, ...TABS_DRAG_STYLE }}
       className={cn(
         "explorer-chrome-font explorer-workspace-tabs-bar relative z-30 flex shrink-0 items-end gap-0 overflow-hidden",
         isTitlebar
@@ -204,12 +243,14 @@ export const WorkspaceTabsBar = ({
         {tabs.map((tab) => {
           const selected = tab.id === activeTabId;
           const Icon = resolveTabIcon(tab);
+          const inactiveTextClassName = resolveInactiveTabTextClassName(isTitlebar);
+          const inactiveIconClassName = resolveInactiveTabIconClassName(isTitlebar);
 
           return (
             <div key={tab.id} className="relative flex items-end">
               <div
                 style={{
-                  ...TAB_SURFACE_STYLE,
+                  ...tabsSurfaceStyle,
                   ...resolveTabStyle(tab),
                   ...interactiveStyle,
                 }}
@@ -219,12 +260,9 @@ export const WorkspaceTabsBar = ({
                   "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-hidden border text-[13px] transition-[background-color,border-color,color,box-shadow] duration-150",
                   "mb-0 h-[36px] rounded-tl-[8px] rounded-tr-[8px]",
                   selected
-                    ? "explorer-workspace-tab--active"
-                    : "explorer-workspace-tab--inactive",
+                    ? "explorer-workspace-tab--active border-black/12 text-[var(--app-sidebar-text-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]"
+                    : cn("explorer-workspace-tab--inactive border-transparent", inactiveTextClassName),
                   resolveTabWidthClassName(tab),
-                  selected
-                    ? "border-black/10 text-[var(--app-sidebar-text-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]"
-                    : "border-transparent text-[var(--app-sidebar-text)] hover:border-black/8 hover:text-[var(--app-sidebar-text-strong)]",
                 )}
               >
                 <button
@@ -242,8 +280,8 @@ export const WorkspaceTabsBar = ({
                     className={cn(
                       "h-4 w-4 shrink-0",
                       selected
-                        ? "text-[var(--app-sidebar-icon-active)]"
-                        : "text-[var(--app-sidebar-icon)]",
+                        ? "text-[var(--ds-semantic-color-interactive-selected-accent)]"
+                        : inactiveIconClassName,
                     )}
                   />
                   <span className="truncate">{tab.title}</span>
@@ -254,8 +292,7 @@ export const WorkspaceTabsBar = ({
                     type="button"
                     style={interactiveStyle}
                     className={cn(
-                      "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
-                      "text-[var(--app-sidebar-icon)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
+                      closeButtonClassName,
                       selected ? "opacity-100" : "opacity-80 hover:opacity-100",
                     )}
                     aria-label={`${tab.title} を閉じる`}
@@ -287,7 +324,7 @@ export const WorkspaceTabsBar = ({
       <button
         type="button"
         style={interactiveStyle}
-        className="explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-transparent text-[var(--app-sidebar-text)] outline-none transition-colors hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]"
+        className={addButtonClassName}
         aria-label="新しいエクスプローラータブを開く"
         title="新しいエクスプローラータブ"
         onClick={() => {
