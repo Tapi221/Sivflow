@@ -4,6 +4,7 @@ import type { PdfViewerState } from "@/types";
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 import { useEffect } from "react";
 import { PdfOverlayToolbar } from "./PdfOverlayToolbar";
+import { PdfTopAppToolbar } from "./PdfTopAppToolbar";
 import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
 import { FIT_MAX_SCALE, FIT_MIN_SCALE } from "./pdfViewerStateStorage";
@@ -105,10 +106,12 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
     };
   }, [viewerRef]);
 
-  const shouldRenderOverlayToolbar = !sourceUnavailable && numPages > 0;
+  const shouldRenderToolbar = !sourceUnavailable && numPages > 0;
 
   return (
     <div className={cn("flex h-full min-h-0 min-w-0 flex-col", className)}>
+      {shouldRenderToolbar ? <PdfTopAppToolbar className="hidden sm:flex" /> : null}
+
       <div className="relative flex-1 min-h-0 min-w-0 w-full overflow-hidden bg-transparent">
         {sourceUnavailable ? (
           <div className="p-4 text-sm text-slate-500">
@@ -138,9 +141,9 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
               className="h-full w-full"
             />
 
-            {shouldRenderOverlayToolbar ? (
+            {shouldRenderToolbar ? (
               <div
-                className="pointer-events-none absolute z-20 flex items-end gap-2"
+                className="pointer-events-none absolute z-20 flex items-end gap-2 sm:hidden"
                 style={{
                   right: "max(1rem, env(safe-area-inset-right))",
                   bottom:
