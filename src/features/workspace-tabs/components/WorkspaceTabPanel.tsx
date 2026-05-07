@@ -4,9 +4,13 @@ import { CardPane } from "@/components/folder/panes/CardPane";
 import { PdfPane } from "@/components/pdf/PdfPane";
 import { PdfWorkspaceProvider } from "@/components/pdf/PdfWorkspaceProvider";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
-import { CalendarWorkspaceToolbar } from "@/features/calendar/ui/ExplorerCalendarPane";
+import {
+  WorkspaceHeaderToolbar,
+  type WorkspaceHeaderToolbarIconProps,
+} from "@/features/workspace/components/WorkspaceHeaderToolbar";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { cn } from "@/lib/utils";
+import { Filter, Search } from "@/ui/icons";
 import type { Card, CardSet, DocumentItem } from "@/types";
 import type { WorkspaceEntityTab } from "@/features/workspace-tabs/domain/workspaceTab";
 import {
@@ -35,6 +39,136 @@ type WorkspacePanelStatusProps = {
   title: string;
   description?: string;
 };
+
+const ThumbnailToolbarIcon = ({
+  className,
+  ...props
+}: WorkspaceHeaderToolbarIconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <rect
+      x="2.25"
+      y="2.25"
+      width="11.5"
+      height="11.5"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
+    <path
+      d="M5.75 2.75V13.25"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
+    <rect
+      x="3.35"
+      y="3.7"
+      width="1.45"
+      height="2.1"
+      rx="0.45"
+      fill="currentColor"
+    />
+    <rect
+      x="3.35"
+      y="6.95"
+      width="1.45"
+      height="2.1"
+      rx="0.45"
+      fill="currentColor"
+    />
+    <rect
+      x="3.35"
+      y="10.2"
+      width="1.45"
+      height="2.1"
+      rx="0.45"
+      fill="currentColor"
+    />
+    <path
+      d="M7.35 4.75H11.4"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
+    <path
+      d="M7.35 8H11.4"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
+    <path
+      d="M7.35 11.25H10.1"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const SortToolbarIcon = ({
+  className,
+  ...props
+}: WorkspaceHeaderToolbarIconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M11.9337 5.49595L8.00095 2.125L4.06817 5.49595C3.78932 5.73497 3.75703 6.15478 3.99604 6.43363C4.23506 6.71248 4.65487 6.74478 4.93373 6.50576L8.00095 3.87671L11.0682 6.50576C11.347 6.74478 11.7668 6.71248 12.0059 6.43363C12.2449 6.15478 12.2126 5.73497 11.9337 5.49595ZM4.06823 10.506L8.001 13.877L11.9338 10.506C12.2126 10.267 12.2449 9.84717 12.0059 9.56832C11.7669 9.28947 11.3471 9.25717 11.0682 9.49619L8.001 12.1252L4.93378 9.49619C4.65493 9.25717 4.23511 9.28947 3.9961 9.56832C3.75708 9.84717 3.78938 10.267 4.06823 10.506Z"
+      fill="#8F929C"
+    />
+  </svg>
+);
+
+const FieldsToolbarIcon = ({
+  className,
+  ...props
+}: WorkspaceHeaderToolbarIconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M2.00094 3.33594C1.63367 3.33594 1.33594 3.63367 1.33594 4.00094C1.33594 4.36821 1.63367 4.66594 2.00094 4.66594H2.0076C2.37487 4.66594 2.6726 4.36821 2.6726 4.00094C2.6726 3.63367 2.37487 3.33594 2.0076 3.33594H2.00094ZM5.33443 3.33594C4.96716 3.33594 4.66943 3.63367 4.66943 4.00094C4.66943 4.36821 4.96716 4.66594 5.33443 4.66594H14.0011C14.3684 4.66594 14.6661 4.36821 14.6661 4.00094C14.6661 3.63367 14.3684 3.33594 14.0011 3.33594H5.33443ZM5.33443 7.33594C4.96716 7.33594 4.66943 7.63367 4.66943 8.00094C4.66943 8.36821 4.96716 8.66594 5.33443 8.66594H14.0011C14.3684 8.66594 14.6661 8.36821 14.6661 8.00094C14.6661 7.63367 14.3684 7.33594 14.0011 7.33594H5.33443ZM4.66943 12.0009C4.66943 11.6337 4.96716 11.3359 5.33443 11.3359H14.0011C14.3684 11.3359 14.6661 11.6337 14.6661 12.0009C14.6661 12.3682 14.3684 12.6659 14.0011 12.6659H5.33443C4.96716 12.6659 4.66943 12.3682 4.66943 12.0009ZM1.33594 8.00094C1.33594 7.63367 1.63367 7.33594 2.00094 7.33594H2.0076C2.37487 7.33594 2.6726 7.63367 2.6726 8.00094C2.6726 8.36821 2.37487 8.66594 2.0076 8.66594H2.00094C1.63367 8.66594 1.33594 8.36821 1.33594 8.00094ZM2.00094 11.3359C1.63367 11.3359 1.33594 11.6337 1.33594 12.0009C1.33594 12.3682 1.63367 12.6659 2.00094 12.6659H2.0076C2.37487 12.6659 2.6726 12.3682 2.6726 12.0009C2.6726 11.6337 2.37487 11.3359 2.0076 11.3359H2.00094Z"
+      fill="#74798B"
+    />
+  </svg>
+);
+
+const PDF_DOCUMENT_TOOLBAR_LEADING_ACTIONS = [
+  {
+    label: "Thumbnails",
+    ariaLabel: "サムネイル",
+    icon: ThumbnailToolbarIcon,
+    onClick: () => undefined,
+  },
+] as const;
+
+const PDF_DOCUMENT_TOOLBAR_ACTIONS = [
+  { label: "Search", icon: Search, onClick: () => undefined },
+  { label: "Filter", icon: Filter, onClick: () => undefined },
+  { label: "Sort", icon: SortToolbarIcon, onClick: () => undefined },
+  { label: "Fields", icon: FieldsToolbarIcon, onClick: () => undefined },
+] as const;
 
 const WorkspacePanelStatus = ({
   title,
@@ -107,13 +241,12 @@ export const WorkspaceTabPanel = ({
         onDocumentUpdate={handleDocumentUpdate}
       >
         <div className="relative flex h-full min-h-0 w-full flex-col bg-white">
-          <div className="[&>div]:!justify-end [&>div>div:first-child]:hidden">
-            <CalendarWorkspaceToolbar
-              activeMode="calendar"
-              onSelectCalendar={() => undefined}
-              onSelectTimeline={() => undefined}
-            />
-          </div>
+          <WorkspaceHeaderToolbar
+            activeValue=""
+            tabs={[]}
+            leadingActions={PDF_DOCUMENT_TOOLBAR_LEADING_ACTIONS}
+            actions={PDF_DOCUMENT_TOOLBAR_ACTIONS}
+          />
 
           <PdfPane
             doc={document}
