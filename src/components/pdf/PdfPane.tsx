@@ -110,7 +110,7 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
 
   return (
     <div className={cn("flex h-full min-h-0 min-w-0 flex-col", className)}>
-      {shouldRenderToolbar ? <PdfTopAppToolbar className="hidden sm:flex" /> : null}
+      {shouldRenderToolbar ? <PdfTopAppToolbar /> : null}
 
       <div className="relative flex-1 min-h-0 min-w-0 w-full overflow-hidden bg-transparent">
         {sourceUnavailable ? (
@@ -143,7 +143,7 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
 
             {shouldRenderToolbar ? (
               <div
-                className="pointer-events-none absolute z-20 flex items-end gap-2 sm:hidden"
+                className="pointer-events-none absolute z-20 flex items-end gap-2"
                 style={{
                   right: "max(1rem, env(safe-area-inset-right))",
                   bottom:
