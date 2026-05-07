@@ -4,6 +4,20 @@
   --app-layout-padding-x: 0px;
   --app-active-tab-bg: #ffffff;
   --app-sidebar-bg: #ececee;
+  --app-titlebar-bg: linear-gradient(
+    90deg,
+    var(--ds-semantic-color-chrome-titlebar-start) 0%,
+    var(--ds-semantic-color-chrome-titlebar-accent) 46%,
+    var(--ds-semantic-color-chrome-titlebar-end) 100%
+  );
+  --app-titlebar-text: var(--ds-semantic-color-chrome-titlebar-text);
+  --app-titlebar-text-strong: var(--ds-semantic-color-chrome-titlebar-text-strong);
+  --app-titlebar-icon: var(--ds-semantic-color-chrome-titlebar-icon);
+  --app-titlebar-divider: var(--ds-semantic-color-chrome-titlebar-divider);
+  --app-titlebar-surface: var(--ds-semantic-color-chrome-titlebar-surface);
+  --app-titlebar-surface-hover: var(
+    --ds-semantic-color-chrome-titlebar-surface-hover
+  );
 
   display: grid;
   grid-template-columns: var(--app-sidebar-width) minmax(0, 1fr);
@@ -50,14 +64,16 @@
 .app-right-sidebar {
   --app-sidebar-bg: #ececee;
   --app-sidebar-hover-bg: rgba(31, 41, 55, 0.04);
-  --app-sidebar-active-bg: #f7f7f8;
+  --app-sidebar-active-bg: var(--ds-semantic-color-interactive-selected-subtle);
   --app-sidebar-text: #6f7681;
   --app-sidebar-text-strong: #2f3640;
   --app-sidebar-text-muted: #939aa4;
   --app-sidebar-text-hover: #2f3640;
   --app-sidebar-icon: #939aa4;
-  --app-sidebar-icon-active: #2f4f83;
-  --app-sidebar-focus-ring: rgba(47, 79, 131, 0.18);
+  --app-sidebar-icon-active: var(
+    --ds-semantic-color-interactive-selected-accent
+  );
+  --app-sidebar-focus-ring: rgba(47, 79, 131, 0.22);
 }
 
 .app-sidebar {
@@ -159,7 +175,7 @@
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-  color: var(--app-sidebar-icon);
+  color: #ababab;
 }
 
 .app-sidebar__sync {
@@ -173,7 +189,7 @@
 .app-sidebar__sync-icon {
   width: 16px;
   height: 16px;
-  color: var(--app-sidebar-icon);
+  color: #ababab;
 }
 
 .app-sidebar__nav {
@@ -298,7 +314,7 @@
 
 .app-sidebar__library-children {
   margin-left: 42px;
-  border-left-color: rgba(31, 41, 55, 0.12);
+  border-left-color: rgba(0, 0, 0, 0.14);
   padding-left: 14px;
 }
 
@@ -323,7 +339,7 @@
 }
 
 .app-sidebar__library-child.is-active {
-  background: rgba(31, 41, 55, 0.05);
+  background: rgba(0, 0, 0, 0.05);
   color: var(--app-sidebar-text-hover);
 }
 
@@ -355,7 +371,7 @@
   flex-direction: column;
   gap: 4px;
   margin-left: 28px;
-  border-left: 1px solid rgba(31, 41, 55, 0.14);
+  border-left: 1px solid rgba(0, 0, 0, 0.2);
   padding-left: 24px;
 }
 
@@ -431,6 +447,7 @@
   min-height: 0;
   flex-shrink: 0;
   overflow: visible;
+  background: var(--app-titlebar-bg);
   -webkit-app-region: drag;
 }
 
@@ -456,7 +473,7 @@
   overflow: hidden;
   background: var(--app-active-tab-bg);
   padding: 0 var(--workspace-content-gutter);
-  color: var(--app-sidebar-icon, #939aa4);
+  color: var(--app-sidebar-icon, #ababab);
   font-family:
     Inter,
     var(--explorer-chrome-font-family),
@@ -526,11 +543,11 @@
 
 .workspace-breadcrumb-bar__button:hover,
 .workspace-breadcrumb-bar__button:focus-visible {
-  color: var(--app-sidebar-text-strong, #2f3640);
+  color: var(--app-sidebar-text, #5b5b5b);
 }
 
 .workspace-breadcrumb-bar__label--current {
-  color: var(--app-sidebar-text-strong, #2f3640);
+  color: var(--app-sidebar-text-strong, #000000);
 }
 
 .workspace-breadcrumb-bar__separator {
@@ -566,7 +583,7 @@
   justify-content: center;
   border: 0;
   background: transparent;
-  color: var(--app-sidebar-icon, #939aa4);
+  color: var(--app-titlebar-icon, var(--app-sidebar-icon, #ababab));
   outline: none;
   transition:
     background-color 120ms ease,
@@ -575,8 +592,8 @@
 
 .desktop-window-controls__button:hover,
 .desktop-window-controls__button:focus-visible {
-  background: rgba(31, 41, 55, 0.06);
-  color: #2f3640;
+  background: var(--app-titlebar-surface, rgba(255, 255, 255, 0.08));
+  color: var(--app-titlebar-text-strong, #ffffff);
 }
 
 .desktop-window-controls__button--close:hover,
@@ -631,7 +648,7 @@
 .desktop-window-controls__restore::after {
   left: 1px;
   bottom: 1px;
-  background: var(--app-active-tab-bg, #ffffff);
+  background: transparent;
 }
 
 .desktop-window-controls__close::before,

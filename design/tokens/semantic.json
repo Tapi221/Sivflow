@@ -3,39 +3,50 @@
     "background": {
       "app": "{color.neutral.0}",
       "sidebar": "#ececee",
-      "sidebarActive": "#f7f7f8",
-      "floating": "rgba(255, 255, 255, 0.9)",
+      "sidebarActive": "#e7edf6",
+      "floating": "rgba(255, 255, 255, 0.82)",
       "code": "{color.code.background}"
     },
     "border": {
-      "default": "#d7d9de",
-      "floating": "rgba(215, 217, 222, 0.82)",
-      "strong": "#c7cad1"
+      "default": "{color.neutral.300}",
+      "floating": "rgba(226, 232, 240, 0.8)",
+      "strong": "{color.neutral.400}"
     },
     "text": {
-      "primary": "#2f3640",
-      "secondary": "#6f7681",
-      "strong": "#202734",
-      "placeholder": "#939aa4",
+      "primary": "{color.neutral.900}",
+      "secondary": "{color.neutral.600}",
+      "strong": "{color.neutral.800}",
+      "placeholder": "{color.neutral.500}",
       "onPrimary": "{color.neutral.0}"
     },
     "action": {
-      "primary": "#3f5f90",
-      "primaryHover": "#2f4f83",
-      "primarySoft": "#edf2fa",
-      "accent": "#2f4f83"
+      "primary": "{color.primary.600}",
+      "primaryHover": "{color.primary.700}",
+      "primarySoft": "{color.primary.100}",
+      "accent": "{color.primary.500}"
     },
     "interactive": {
-      "selectedSubtle": "#f1f4f8",
-      "selectedAccent": "#2f4f83",
-      "columnSelectedSubtle": "rgba(47, 79, 131, 0.08)",
-      "columnSelectedAccent": "#223b62"
+      "selectedSubtle": "#e7edf6",
+      "selectedAccent": "{color.primary.700}",
+      "columnSelectedSubtle": "rgba(53, 80, 123, 0.14)",
+      "columnSelectedAccent": "{color.primary.800}"
     },
     "status": {
       "danger": "{color.status.danger}",
       "warning": "{color.status.warning}",
       "success": "{color.status.success}",
       "info": "{color.status.info}"
+    },
+    "chrome": {
+      "titlebarStart": "#08111f",
+      "titlebarAccent": "#0c1d42",
+      "titlebarEnd": "#050812",
+      "titlebarText": "rgba(255, 255, 255, 0.92)",
+      "titlebarTextStrong": "{color.neutral.0}",
+      "titlebarIcon": "rgba(255, 255, 255, 0.78)",
+      "titlebarDivider": "rgba(255, 255, 255, 0.16)",
+      "titlebarSurface": "rgba(255, 255, 255, 0.08)",
+      "titlebarSurfaceHover": "rgba(255, 255, 255, 0.14)"
     }
   },
   "spacing": {
