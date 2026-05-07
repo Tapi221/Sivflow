@@ -16,13 +16,16 @@ type PdfTopAppToolbarProps = {
   className?: string;
 };
 
-type ToolbarButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+type PdfToolbarButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   active?: boolean;
   compact?: boolean;
   children: ReactNode;
 };
 
-type ToolbarInputProps = InputHTMLAttributes<HTMLInputElement>;
+type PdfToolbarInputProps = InputHTMLAttributes<HTMLInputElement>;
+
+const toolbarTextClassName =
+  "text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal";
 
 const clampPercent = (value: number) => {
   if (!Number.isFinite(value)) {
@@ -32,28 +35,29 @@ const clampPercent = (value: number) => {
   return Math.min(100, Math.max(0, Math.round(value)));
 };
 
-const ToolbarDivider = () => {
-  return <div className="mx-1 h-5 w-px shrink-0 bg-gray-200" aria-hidden="true" />;
+const PdfToolbarDivider = () => {
+  return <div className="mx-1 h-5 w-px shrink-0 bg-[#e2e4e9]" aria-hidden="true" />;
 };
 
-const ToolbarButton = ({
+const PdfToolbarButton = ({
   className,
   active = false,
   compact = false,
   children,
   ...props
-}: ToolbarButtonProps) => {
+}: PdfToolbarButtonProps) => {
   return (
     <button
       type="button"
       className={cn(
-        "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border text-sm transition-colors",
-        "border-transparent bg-transparent text-gray-600",
-        "hover:bg-gray-100 hover:text-gray-900",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300",
-        "disabled:pointer-events-none disabled:opacity-40",
-        compact ? "h-8 min-w-8 px-2" : "h-8 px-2.5",
-        active && "border-gray-300 bg-gray-100 text-gray-900",
+        "rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+        toolbarTextClassName,
+        compact
+          ? "inline-flex h-7 w-7 shrink-0 items-center justify-center text-[#8f929c] hover:bg-[#f6f7f9] hover:text-[#25272d]"
+          : "inline-flex h-9 shrink-0 items-center gap-[6px] rounded-[10px] border border-[#d9dde5] bg-white px-4 text-[#25272d] hover:bg-[#f6f7f9]",
+        active &&
+          !compact &&
+          "border-[#cfd5df] bg-[#f6f7f9] text-[#25272d]",
         className,
       )}
       {...props}
@@ -63,12 +67,12 @@ const ToolbarButton = ({
   );
 };
 
-const ToolbarInput = ({ className, ...props }: ToolbarInputProps) => {
+const PdfToolbarInput = ({ className, ...props }: PdfToolbarInputProps) => {
   return (
     <input
       className={cn(
-        "h-8 w-14 rounded-md border border-gray-300 bg-white px-2 text-center text-sm text-gray-800 shadow-none outline-none transition",
-        "focus:border-gray-400 focus:ring-2 focus:ring-gray-200",
+        "h-9 w-[96px] rounded-[10px] border border-[#d9dde5] bg-white px-3 text-center text-[#25272d] shadow-none outline-none transition focus:border-[#c7cdd8] focus:ring-2 focus:ring-ring/20",
+        toolbarTextClassName,
         className,
       )}
       {...props}
@@ -76,7 +80,7 @@ const ToolbarInput = ({ className, ...props }: ToolbarInputProps) => {
   );
 };
 
-const IconBase = ({
+const ToolbarIconBase = ({
   className,
   children,
   ...props
@@ -85,10 +89,7 @@ const IconBase = ({
     <svg
       viewBox="0 0 16 16"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      xmlns="http://www.w3.org/2000/svg"
       className={cn("h-4 w-4 shrink-0", className)}
       aria-hidden="true"
       {...props}
@@ -100,63 +101,144 @@ const IconBase = ({
 
 const ChevronLeftIcon = () => {
   return (
-    <IconBase>
-      <path d="M9.5 3.5 5 8l4.5 4.5" />
-    </IconBase>
+    <ToolbarIconBase>
+      <path
+        d="M10 3.5L5.5 8L10 12.5"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </ToolbarIconBase>
   );
 };
 
 const ChevronRightIcon = () => {
   return (
-    <IconBase>
-      <path d="M6.5 3.5 11 8l-4.5 4.5" />
-    </IconBase>
+    <ToolbarIconBase>
+      <path
+        d="M6 3.5L10.5 8L6 12.5"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </ToolbarIconBase>
   );
 };
 
 const MinusIcon = () => {
   return (
-    <IconBase>
-      <path d="M4 8h8" />
-    </IconBase>
+    <ToolbarIconBase>
+      <path
+        d="M4 8H12"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+    </ToolbarIconBase>
   );
 };
 
 const PlusIcon = () => {
   return (
-    <IconBase>
-      <path d="M8 4v8" />
-      <path d="M4 8h8" />
-    </IconBase>
+    <ToolbarIconBase>
+      <path
+        d="M8 4V12"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+      <path
+        d="M4 8H12"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+    </ToolbarIconBase>
   );
 };
 
 const FitWidthIcon = () => {
   return (
-    <IconBase>
-      <rect x="2.75" y="3" width="10.5" height="10" rx="1.75" />
-      <path d="M5 8H3.5" />
-      <path d="M4.5 7.25 3.5 8l1 0.75" />
-      <path d="M11 8h1.5" />
-      <path d="M11.5 7.25 12.5 8l-1 0.75" />
-    </IconBase>
+    <ToolbarIconBase>
+      <rect
+        x="2.25"
+        y="2.75"
+        width="11.5"
+        height="10.5"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.25"
+      />
+      <path
+        d="M5.5 8H3.75"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+      />
+      <path
+        d="M4.6 7.1L3.5 8L4.6 8.9"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10.5 8H12.25"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+      />
+      <path
+        d="M11.4 7.1L12.5 8L11.4 8.9"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </ToolbarIconBase>
   );
 };
 
 const SinglePageIcon = () => {
   return (
-    <IconBase>
-      <rect x="3.75" y="2.75" width="8.5" height="10.5" rx="1.5" />
-    </IconBase>
+    <ToolbarIconBase>
+      <rect
+        x="3.75"
+        y="2.5"
+        width="8.5"
+        height="11"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+      />
+    </ToolbarIconBase>
   );
 };
 
 const DoublePageIcon = () => {
   return (
-    <IconBase>
-      <rect x="2.5" y="3.25" width="4.75" height="9.5" rx="1.25" />
-      <rect x="8.75" y="3.25" width="4.75" height="9.5" rx="1.25" />
-    </IconBase>
+    <ToolbarIconBase>
+      <rect
+        x="2.25"
+        y="3"
+        width="4.75"
+        height="10"
+        rx="1.25"
+        stroke="currentColor"
+        strokeWidth="1.25"
+      />
+      <rect
+        x="9"
+        y="3"
+        width="4.75"
+        height="10"
+        rx="1.25"
+        stroke="currentColor"
+        strokeWidth="1.25"
+      />
+    </ToolbarIconBase>
   );
 };
 
@@ -190,19 +272,19 @@ export const PdfTopAppToolbar = ({ className }: PdfTopAppToolbarProps) => {
       return;
     }
 
-    const trimmed = pageInput.trim();
-    if (trimmed.length === 0) {
+    const trimmedValue = pageInput.trim();
+    if (trimmedValue.length === 0) {
       setPageInput(String(alignedCurrentPage));
       return;
     }
 
-    const parsed = Number(trimmed);
-    if (!Number.isFinite(parsed)) {
+    const parsedValue = Number(trimmedValue);
+    if (!Number.isFinite(parsedValue)) {
       setPageInput(String(alignedCurrentPage));
       return;
     }
 
-    const nextPage = Math.min(numPages, Math.max(1, Math.trunc(parsed)));
+    const nextPage = Math.min(numPages, Math.max(1, Math.trunc(parsedValue)));
     setPageInput(String(nextPage));
     handleCommitPage(nextPage);
   }, [alignedCurrentPage, handleCommitPage, numPages, pageInput]);
@@ -225,36 +307,36 @@ export const PdfTopAppToolbar = ({ className }: PdfTopAppToolbarProps) => {
   return (
     <div
       className={cn(
-        "flex h-12 w-full items-center gap-1 overflow-x-auto border-b border-gray-200 bg-white px-3 text-gray-700",
+        "relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center overflow-x-auto bg-white px-4 after:absolute after:bottom-1 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']",
         className,
       )}
     >
-      <div className="flex min-w-max items-center gap-0.5">
-        <ToolbarButton
+      <div className="flex min-w-max items-center gap-[6px]">
+        <PdfToolbarButton
           compact
-          onClick={handlePrev}
-          disabled={!canGoToPrevPage}
           aria-label="前のページ"
           title="前のページ"
+          onClick={handlePrev}
+          disabled={!canGoToPrevPage}
         >
           <ChevronLeftIcon />
-        </ToolbarButton>
+        </PdfToolbarButton>
 
-        <ToolbarButton
+        <PdfToolbarButton
           compact
-          onClick={handleNext}
-          disabled={!canGoToNextPage}
           aria-label="次のページ"
           title="次のページ"
+          onClick={handleNext}
+          disabled={!canGoToNextPage}
         >
           <ChevronRightIcon />
-        </ToolbarButton>
+        </PdfToolbarButton>
       </div>
 
-      <ToolbarDivider />
+      <div className="ml-3 flex min-w-max items-center gap-[6px]">
+        <PdfToolbarDivider />
 
-      <div className="flex min-w-max items-center gap-2">
-        <ToolbarInput
+        <PdfToolbarInput
           value={pageInput}
           inputMode="numeric"
           aria-label="ページ番号"
@@ -285,70 +367,73 @@ export const PdfTopAppToolbar = ({ className }: PdfTopAppToolbarProps) => {
           }}
         />
 
-        <span className="shrink-0 text-sm text-gray-500">/ {numPages}</span>
-      </div>
+        <span className={cn("shrink-0 text-[#8f929c]", toolbarTextClassName)}>
+          / {numPages}
+        </span>
 
-      <div className="flex min-w-max items-center gap-0.5">
-        <ToolbarButton
+        <PdfToolbarButton
           compact
-          onClick={handleZoomOut}
           aria-label="縮小"
           title="縮小"
+          onClick={handleZoomOut}
         >
           <MinusIcon />
-        </ToolbarButton>
+        </PdfToolbarButton>
 
-        <ToolbarButton
+        <PdfToolbarButton
           compact
-          onClick={handleZoomIn}
           aria-label="拡大"
           title="拡大"
+          onClick={handleZoomIn}
         >
           <PlusIcon />
-        </ToolbarButton>
+        </PdfToolbarButton>
 
-        <div className="inline-flex h-8 min-w-[3.75rem] items-center justify-center rounded-md px-2 text-sm text-gray-700">
+        <span
+          className={cn(
+            "inline-flex min-w-[52px] items-center justify-center text-[#25272d]",
+            toolbarTextClassName,
+          )}
+        >
           {zoomLabel}
-        </div>
-      </div>
+        </span>
 
-      <ToolbarDivider />
+        <PdfToolbarDivider />
 
-      <div className="flex min-w-max items-center gap-0.5">
-        <ToolbarButton
-          onClick={handleFitWidth}
+        <PdfToolbarButton
           active={fitMode === "width"}
           aria-label="幅に合わせる"
           title="幅に合わせる"
+          onClick={handleFitWidth}
         >
           <FitWidthIcon />
           <span>幅に合わせる</span>
-        </ToolbarButton>
+        </PdfToolbarButton>
 
-        <ToolbarButton
-          onClick={() => {
-            handlePageLayoutChange("single");
-          }}
+        <PdfToolbarButton
           active={pageLayoutMode === "single"}
           aria-label="1ページ表示"
           title="1ページ表示"
+          onClick={() => {
+            handlePageLayoutChange("single");
+          }}
         >
           <SinglePageIcon />
           <span>1ページ</span>
-        </ToolbarButton>
+        </PdfToolbarButton>
 
-        <ToolbarButton
+        <PdfToolbarButton
+          active={pageLayoutMode === "double"}
+          aria-label="2ページ表示"
+          title="2ページ表示"
+          disabled={numPages <= 1}
           onClick={() => {
             handlePageLayoutChange("double");
           }}
-          active={pageLayoutMode === "double"}
-          disabled={numPages <= 1}
-          aria-label="2ページ表示"
-          title="2ページ表示"
         >
           <DoublePageIcon />
           <span>2ページ</span>
-        </ToolbarButton>
+        </PdfToolbarButton>
       </div>
     </div>
   );
