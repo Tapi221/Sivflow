@@ -178,30 +178,30 @@ const resolveTabIcon = (tab: WorkspaceTab) => {
 
 const resolveTabWidthClassName = (tab: WorkspaceTab) => {
   if (tab.kind === "route") {
-    return "w-[170px] shrink-0";
+    return "w-[150px] shrink-0";
   }
 
   if (tab.kind === "explorer") {
     return "shrink-0";
   }
 
-  return "w-[210px] shrink-0";
+  return "w-[180px] shrink-0";
 };
 
 const resolveTabStyle = (tab: WorkspaceTab): CSSProperties | undefined => {
   if (tab.kind === "explorer") {
     return {
-      width: "210px",
-      maxWidth: "210px",
-      flexBasis: "210px",
+      width: "180px",
+      maxWidth: "180px",
+      flexBasis: "180px",
     };
   }
 
   if (tab.kind === "route") {
     return {
-      width: "170px",
-      maxWidth: "170px",
-      flexBasis: "170px",
+      width: "150px",
+      maxWidth: "150px",
+      flexBasis: "150px",
     };
   }
 
