@@ -2,22 +2,14 @@
   --app-sidebar-width: 240px;
   --app-sidebar-rail-width: 64px;
   --app-layout-padding-x: 0px;
-  --app-active-tab-bg: #ffffff;
-  --app-sidebar-bg: #ececee;
   --app-titlebar-bg: linear-gradient(
     90deg,
-    var(--ds-semantic-color-chrome-titlebar-start) 0%,
-    var(--ds-semantic-color-chrome-titlebar-accent) 46%,
-    var(--ds-semantic-color-chrome-titlebar-end) 100%
+    #08111f 0%,
+    #0c1d42 46%,
+    #050812 100%
   );
-  --app-titlebar-text: var(--ds-semantic-color-chrome-titlebar-text);
-  --app-titlebar-text-strong: var(--ds-semantic-color-chrome-titlebar-text-strong);
-  --app-titlebar-icon: var(--ds-semantic-color-chrome-titlebar-icon);
-  --app-titlebar-divider: var(--ds-semantic-color-chrome-titlebar-divider);
-  --app-titlebar-surface: var(--ds-semantic-color-chrome-titlebar-surface);
-  --app-titlebar-surface-hover: var(
-    --ds-semantic-color-chrome-titlebar-surface-hover
-  );
+  --app-active-tab-bg: #ffffff;
+  --app-sidebar-bg: #08111f;
 
   display: grid;
   grid-template-columns: var(--app-sidebar-width) minmax(0, 1fr);
@@ -62,18 +54,21 @@
 
 .app-sidebar,
 .app-right-sidebar {
-  --app-sidebar-bg: #ececee;
-  --app-sidebar-hover-bg: rgba(31, 41, 55, 0.04);
-  --app-sidebar-active-bg: var(--ds-semantic-color-interactive-selected-subtle);
-  --app-sidebar-text: #6f7681;
-  --app-sidebar-text-strong: #2f3640;
-  --app-sidebar-text-muted: #939aa4;
-  --app-sidebar-text-hover: #2f3640;
-  --app-sidebar-icon: #939aa4;
-  --app-sidebar-icon-active: var(
-    --ds-semantic-color-interactive-selected-accent
+  --app-sidebar-bg: linear-gradient(
+    180deg,
+    #08111f 0%,
+    #0b1630 38%,
+    #050812 100%
   );
-  --app-sidebar-focus-ring: rgba(47, 79, 131, 0.22);
+  --app-sidebar-hover-bg: rgba(255, 255, 255, 0.06);
+  --app-sidebar-active-bg: rgba(255, 255, 255, 0.1);
+  --app-sidebar-text: rgba(235, 241, 252, 0.78);
+  --app-sidebar-text-strong: #ffffff;
+  --app-sidebar-text-muted: rgba(235, 241, 252, 0.56);
+  --app-sidebar-text-hover: #ffffff;
+  --app-sidebar-icon: rgba(235, 241, 252, 0.58);
+  --app-sidebar-icon-active: #8fb4ff;
+  --app-sidebar-focus-ring: rgba(93, 127, 182, 0.3);
 }
 
 .app-sidebar {
@@ -175,7 +170,7 @@
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-  color: #ababab;
+  color: rgba(235, 241, 252, 0.38);
 }
 
 .app-sidebar__sync {
@@ -189,7 +184,7 @@
 .app-sidebar__sync-icon {
   width: 16px;
   height: 16px;
-  color: #ababab;
+  color: rgba(235, 241, 252, 0.32);
 }
 
 .app-sidebar__nav {
@@ -314,7 +309,7 @@
 
 .app-sidebar__library-children {
   margin-left: 42px;
-  border-left-color: rgba(0, 0, 0, 0.14);
+  border-left-color: rgba(255, 255, 255, 0.12);
   padding-left: 14px;
 }
 
@@ -339,7 +334,7 @@
 }
 
 .app-sidebar__library-child.is-active {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.08);
   color: var(--app-sidebar-text-hover);
 }
 
@@ -371,7 +366,7 @@
   flex-direction: column;
   gap: 4px;
   margin-left: 28px;
-  border-left: 1px solid rgba(0, 0, 0, 0.2);
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
   padding-left: 24px;
 }
 
@@ -390,20 +385,23 @@
   flex-direction: column;
   gap: 8px;
   border-radius: 8px;
-  background: #e8f4ea;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
   padding: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .app-sidebar__trial p {
   margin: 0;
-  color: var(--app-sidebar-text-muted);
+  color: rgba(235, 241, 252, 0.72);
   font-size: 12px;
   font-weight: 568;
   line-height: normal;
 }
 
 .app-sidebar__trial strong {
-  color: #35507b;
+  color: #ffffff;
   font-weight: 568;
 }
 
@@ -415,8 +413,8 @@
   justify-content: center;
   border: 0;
   border-radius: 8px;
-  background: #ffffff;
-  color: #000000;
+  background: rgba(255, 255, 255, 0.96);
+  color: #08111f;
   font-size: 14px;
   font-weight: 542;
   letter-spacing: -0.0476px;
@@ -447,7 +445,6 @@
   min-height: 0;
   flex-shrink: 0;
   overflow: visible;
-  background: var(--app-titlebar-bg);
   -webkit-app-region: drag;
 }
 
@@ -583,7 +580,7 @@
   justify-content: center;
   border: 0;
   background: transparent;
-  color: var(--app-titlebar-icon, var(--app-sidebar-icon, #ababab));
+  color: var(--app-sidebar-icon, #ababab);
   outline: none;
   transition:
     background-color 120ms ease,
@@ -592,8 +589,8 @@
 
 .desktop-window-controls__button:hover,
 .desktop-window-controls__button:focus-visible {
-  background: var(--app-titlebar-surface, rgba(255, 255, 255, 0.08));
-  color: var(--app-titlebar-text-strong, #ffffff);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
 }
 
 .desktop-window-controls__button--close:hover,
@@ -648,7 +645,7 @@
 .desktop-window-controls__restore::after {
   left: 1px;
   bottom: 1px;
-  background: transparent;
+  background: var(--app-active-tab-bg, #ffffff);
 }
 
 .desktop-window-controls__close::before,
