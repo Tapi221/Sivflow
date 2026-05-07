@@ -37,7 +37,20 @@ const IconShell = ({
 
 const HomeIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
-    <path d="M4 10.5 12 4l8 6.5V20h-5v-5H9v5H4v-9.5Z" fill="currentColor" />
+    <path
+      d="M20 8.5V13.5C20 17.271 20 19.157 18.828 20.328C17.656 21.499 15.771 21.5 12 21.5C8.229 21.5 6.343 21.5 5.172 20.328C4.001 19.156 4 17.271 4 13.5V8.5"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M22 10.5L17.657 6.335C14.99 3.778 13.657 2.5 12 2.5C10.343 2.5 9.01 3.778 6.343 6.335L2 10.5"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </IconShell>
 );
 
