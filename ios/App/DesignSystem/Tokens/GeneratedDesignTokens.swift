@@ -220,34 +220,34 @@ enum DesignTokens {
         enum Color {
             enum Background {
                 static let App = "#ffffff"
-                static let Sidebar = "#f6f1eb"
-                static let SidebarActive = "#e7edf6"
-                static let Floating = "rgba(255, 255, 255, 0.82)"
+                static let Sidebar = "#ececee"
+                static let SidebarActive = "#f7f7f8"
+                static let Floating = "rgba(255, 255, 255, 0.9)"
                 static let Code = "#f7f8f9"
             }
             enum Border {
-                static let Default = "#d9d9d9"
-                static let Floating = "rgba(226, 232, 240, 0.8)"
-                static let Strong = "#cfd9e8"
+                static let Default = "#d7d9de"
+                static let Floating = "rgba(215, 217, 222, 0.82)"
+                static let Strong = "#c7cad1"
             }
             enum Text {
-                static let Primary = "#202123"
-                static let Secondary = "#6e6e80"
-                static let Strong = "#1e293b"
-                static let Placeholder = "#978d90"
+                static let Primary = "#2f3640"
+                static let Secondary = "#6f7681"
+                static let Strong = "#202734"
+                static let Placeholder = "#939aa4"
                 static let OnPrimary = "#ffffff"
             }
             enum Action {
-                static let Primary = "#45679d"
-                static let PrimaryHover = "#35507b"
-                static let PrimarySoft = "#e7eef8"
-                static let Accent = "#5d7fb6"
+                static let Primary = "#3f5f90"
+                static let PrimaryHover = "#2f4f83"
+                static let PrimarySoft = "#edf2fa"
+                static let Accent = "#2f4f83"
             }
             enum Interactive {
-                static let SelectedSubtle = "#e7edf6"
-                static let SelectedAccent = "#35507b"
-                static let ColumnSelectedSubtle = "rgba(53, 80, 123, 0.14)"
-                static let ColumnSelectedAccent = "#25395a"
+                static let SelectedSubtle = "#f1f4f8"
+                static let SelectedAccent = "#2f4f83"
+                static let ColumnSelectedSubtle = "rgba(47, 79, 131, 0.08)"
+                static let ColumnSelectedAccent = "#223b62"
             }
             enum Status {
                 static let Danger = "#e11d48"
@@ -295,10 +295,10 @@ enum DesignTokens {
         enum Breadcrumb {
             static let Height = 52
             static let Gap = 12
-            static let ItemColor = "#6e6e80"
-            static let ItemHoverColor = "#1e293b"
-            static let CurrentColor = "#202123"
-            static let SeparatorColor = "#978d90"
+            static let ItemColor = "#6f7681"
+            static let ItemHoverColor = "#202734"
+            static let CurrentColor = "#2f3640"
+            static let SeparatorColor = "#939aa4"
             static let ItemMaxWidth = "min(46vw, 520px)"
         }
         enum Tag {

@@ -220,34 +220,34 @@ object DesignTokens {
         object Color {
             object Background {
                 const val App = "#ffffff"
-                const val Sidebar = "#f6f1eb"
-                const val SidebarActive = "#e7edf6"
-                const val Floating = "rgba(255, 255, 255, 0.82)"
+                const val Sidebar = "#ececee"
+                const val SidebarActive = "#f7f7f8"
+                const val Floating = "rgba(255, 255, 255, 0.9)"
                 const val Code = "#f7f8f9"
             }
             object Border {
-                const val Default = "#d9d9d9"
-                const val Floating = "rgba(226, 232, 240, 0.8)"
-                const val Strong = "#cfd9e8"
+                const val Default = "#d7d9de"
+                const val Floating = "rgba(215, 217, 222, 0.82)"
+                const val Strong = "#c7cad1"
             }
             object Text {
-                const val Primary = "#202123"
-                const val Secondary = "#6e6e80"
-                const val Strong = "#1e293b"
-                const val Placeholder = "#978d90"
+                const val Primary = "#2f3640"
+                const val Secondary = "#6f7681"
+                const val Strong = "#202734"
+                const val Placeholder = "#939aa4"
                 const val OnPrimary = "#ffffff"
             }
             object Action {
-                const val Primary = "#45679d"
-                const val PrimaryHover = "#35507b"
-                const val PrimarySoft = "#e7eef8"
-                const val Accent = "#5d7fb6"
+                const val Primary = "#3f5f90"
+                const val PrimaryHover = "#2f4f83"
+                const val PrimarySoft = "#edf2fa"
+                const val Accent = "#2f4f83"
             }
             object Interactive {
-                const val SelectedSubtle = "#e7edf6"
-                const val SelectedAccent = "#35507b"
-                const val ColumnSelectedSubtle = "rgba(53, 80, 123, 0.14)"
-                const val ColumnSelectedAccent = "#25395a"
+                const val SelectedSubtle = "#f1f4f8"
+                const val SelectedAccent = "#2f4f83"
+                const val ColumnSelectedSubtle = "rgba(47, 79, 131, 0.08)"
+                const val ColumnSelectedAccent = "#223b62"
             }
             object Status {
                 const val Danger = "#e11d48"
@@ -295,10 +295,10 @@ object DesignTokens {
         object Breadcrumb {
             const val Height = 52
             const val Gap = 12
-            const val ItemColor = "#6e6e80"
-            const val ItemHoverColor = "#1e293b"
-            const val CurrentColor = "#202123"
-            const val SeparatorColor = "#978d90"
+            const val ItemColor = "#6f7681"
+            const val ItemHoverColor = "#202734"
+            const val CurrentColor = "#2f3640"
+            const val SeparatorColor = "#939aa4"
             const val ItemMaxWidth = "min(46vw, 520px)"
         }
         object Tag {

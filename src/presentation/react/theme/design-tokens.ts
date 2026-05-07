@@ -218,34 +218,34 @@ export const designTokens = {
     "color": {
       "background": {
         "app": "#ffffff",
-        "sidebar": "#f6f1eb",
-        "sidebarActive": "#e7edf6",
-        "floating": "rgba(255, 255, 255, 0.82)",
+        "sidebar": "#ececee",
+        "sidebarActive": "#f7f7f8",
+        "floating": "rgba(255, 255, 255, 0.9)",
         "code": "#f7f8f9"
       },
       "border": {
-        "default": "#d9d9d9",
-        "floating": "rgba(226, 232, 240, 0.8)",
-        "strong": "#cfd9e8"
+        "default": "#d7d9de",
+        "floating": "rgba(215, 217, 222, 0.82)",
+        "strong": "#c7cad1"
       },
       "text": {
-        "primary": "#202123",
-        "secondary": "#6e6e80",
-        "strong": "#1e293b",
-        "placeholder": "#978d90",
+        "primary": "#2f3640",
+        "secondary": "#6f7681",
+        "strong": "#202734",
+        "placeholder": "#939aa4",
         "onPrimary": "#ffffff"
       },
       "action": {
-        "primary": "#45679d",
-        "primaryHover": "#35507b",
-        "primarySoft": "#e7eef8",
-        "accent": "#5d7fb6"
+        "primary": "#3f5f90",
+        "primaryHover": "#2f4f83",
+        "primarySoft": "#edf2fa",
+        "accent": "#2f4f83"
       },
       "interactive": {
-        "selectedSubtle": "#e7edf6",
-        "selectedAccent": "#35507b",
-        "columnSelectedSubtle": "rgba(53, 80, 123, 0.14)",
-        "columnSelectedAccent": "#25395a"
+        "selectedSubtle": "#f1f4f8",
+        "selectedAccent": "#2f4f83",
+        "columnSelectedSubtle": "rgba(47, 79, 131, 0.08)",
+        "columnSelectedAccent": "#223b62"
       },
       "status": {
         "danger": "#e11d48",
@@ -293,10 +293,10 @@ export const designTokens = {
     "breadcrumb": {
       "height": 52,
       "gap": 12,
-      "itemColor": "#6e6e80",
-      "itemHoverColor": "#1e293b",
-      "currentColor": "#202123",
-      "separatorColor": "#978d90",
+      "itemColor": "#6f7681",
+      "itemHoverColor": "#202734",
+      "currentColor": "#2f3640",
+      "separatorColor": "#939aa4",
       "itemMaxWidth": "min(46vw, 520px)"
     },
     "tag": {
