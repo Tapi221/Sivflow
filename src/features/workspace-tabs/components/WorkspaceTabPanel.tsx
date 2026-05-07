@@ -45,69 +45,54 @@ const ThumbnailToolbarIcon = ({
   ...props
 }: WorkspaceHeaderToolbarIconProps) => (
   <svg
-    viewBox="0 0 16 16"
+    viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
     aria-hidden="true"
     {...props}
   >
-    <rect
-      x="2.25"
-      y="2.25"
-      width="11.5"
-      height="11.5"
-      rx="2"
+    <path
+      d="M2 12C2 7.757 2 5.636 3.464 4.318C4.93 3 7.286 3 12 3C16.714 3 19.071 3 20.535 4.318C21.999 5.636 22 7.758 22 12C22 16.242 22 18.364 20.535 19.682C19.072 21 16.714 21 12 21C7.286 21 4.929 21 3.464 19.682C1.999 18.364 2 16.242 2 12Z"
       stroke="currentColor"
-      strokeWidth="1.25"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
-      d="M5.75 2.75V13.25"
+      d="M6 16H10"
       stroke="currentColor"
-      strokeWidth="1.25"
+      strokeWidth="1.5"
       strokeLinecap="round"
-    />
-    <rect
-      x="3.35"
-      y="3.7"
-      width="1.45"
-      height="2.1"
-      rx="0.45"
-      fill="currentColor"
-    />
-    <rect
-      x="3.35"
-      y="6.95"
-      width="1.45"
-      height="2.1"
-      rx="0.45"
-      fill="currentColor"
-    />
-    <rect
-      x="3.35"
-      y="10.2"
-      width="1.45"
-      height="2.1"
-      rx="0.45"
-      fill="currentColor"
+      strokeLinejoin="round"
     />
     <path
-      d="M7.35 4.75H11.4"
+      d="M14 8H18"
       stroke="currentColor"
-      strokeWidth="1.25"
+      strokeWidth="1.5"
       strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
-      d="M7.35 8H11.4"
+      d="M14 12H18"
       stroke="currentColor"
-      strokeWidth="1.25"
+      strokeWidth="1.5"
       strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
-      d="M7.35 11.25H10.1"
+      d="M14 16H18"
       stroke="currentColor"
-      strokeWidth="1.25"
+      strokeWidth="1.5"
       strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M8.4 8H7.6C6.846 8 6.469 8 6.234 8.234C6 8.47 6 8.846 6 9.6V10.4C6 11.154 6 11.531 6.234 11.766C6.47 12 6.846 12 7.6 12H8.4C9.154 12 9.531 12 9.766 11.766C10 11.53 10 11.154 10 10.4V9.6C10 8.846 10 8.469 9.766 8.234C9.53 8 9.154 8 8.4 8Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
