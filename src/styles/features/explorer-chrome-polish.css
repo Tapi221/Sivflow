@@ -100,9 +100,9 @@
     height: 100%;
     align-items: flex-end;
     gap: 0;
-    padding: 8px 8px 0 0;
+    padding: 8px 8px 0 12px;
     margin: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     background: var(--app-titlebar-bg, var(--app-sidebar-bg, #f6f6f6)) !important;
   }
 
@@ -144,13 +144,36 @@
     padding-top: 0 !important;
     border: 0 !important;
     border-radius: 8px 8px 0 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     isolation: isolate;
     background: #ffffff !important;
     background-clip: padding-box;
 
     color: var(--app-sidebar-text-strong, #2f3640) !important;
     box-shadow: none !important;
+  }
+
+  .explorer-workspace-tab--active::before,
+  .explorer-workspace-tab--active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    width: 12px;
+    height: 12px;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .explorer-workspace-tab--active::before {
+    left: -12px;
+    border-bottom-right-radius: 12px;
+    box-shadow: 6px 6px 0 6px #ffffff;
+  }
+
+  .explorer-workspace-tab--active::after {
+    right: -12px;
+    border-bottom-left-radius: 12px;
+    box-shadow: -6px 6px 0 6px #ffffff;
   }
 
   .explorer-workspace-tab--active .explorer-workspace-tab-button,
