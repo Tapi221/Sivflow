@@ -762,7 +762,7 @@ const getPreviousDate = (currentDate: Date, viewMode: CalendarViewMode) => {
   return subDays(currentDate, 1);
 };
 
-export const ExplorerCalendarPane = ({
+export const CalendarPane = ({
   onClose: _onClose,
 }: ExplorerCalendarPaneProps) => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
