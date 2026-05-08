@@ -65,7 +65,6 @@ export const RightPane = ({
   handlers,
   folderSelectionNonce,
 }: RightPaneProps) => {
-
   if (selectedItem?.type === "directory") {
     return (
       <DirectoryDiagramPane

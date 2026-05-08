@@ -22,59 +22,7 @@ import {
   type CalendarMonthWeek,
 } from "@/features/calendar/model/monthGrid";
 import { cn } from "@/lib/utils";
-import {
-  CALENDAR_DAY_HEADER_CELL_HEIGHT,
-  CALENDAR_WEEKDAY_HEADER_HEIGHT,
-} from "constants/desktop/calendarLayout";
-
-const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
-const WEEKDAY_HEADER_HEIGHT_PX = CALENDAR_WEEKDAY_HEADER_HEIGHT;
-const INITIAL_MONTH_BUFFER = 2;
-const MONTH_EXTEND_COUNT = 4;
-const MONTH_SCROLL_EDGE_THRESHOLD_PX = 560;
-const MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX = 56;
-const DEFAULT_MONTH_ROW_HEIGHT = CALENDAR_DAY_HEADER_CELL_HEIGHT;
-const MIN_MONTH_ROW_HEIGHT = 72;
-const MAX_MONTH_ROW_HEIGHT = 260;
-const MONTH_ROW_HEIGHT_STEP = 4;
-const MONTH_ROW_HEIGHT_STORAGE_KEY = "flashcard-master.calendar.monthRowHeight";
-
-const createInitialMonthOffsetRange = () => ({
-  startOffset: -INITIAL_MONTH_BUFFER,
-  endOffset: INITIAL_MONTH_BUFFER,
-});
-
-const clampMonthRowHeight = (value: number) => {
-  return Math.min(MAX_MONTH_ROW_HEIGHT, Math.max(MIN_MONTH_ROW_HEIGHT, value));
-};
-
-const normalizeStoredMonthRowHeight = (value: number) => {
-  return Math.round(value);
-};
-
-const readStoredMonthRowHeight = () => {
-  if (typeof window === "undefined") {
-    return DEFAULT_MONTH_ROW_HEIGHT;
-  }
-
-  const rawValue = window.localStorage.getItem(MONTH_ROW_HEIGHT_STORAGE_KEY);
-  const parsedValue = rawValue === null ? Number.NaN : Number(rawValue);
-
-  return Number.isFinite(parsedValue)
-    ? normalizeStoredMonthRowHeight(clampMonthRowHeight(parsedValue))
-    : DEFAULT_MONTH_ROW_HEIGHT;
-};
-
-const writeStoredMonthRowHeight = (value: number) => {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.localStorage.setItem(
-    MONTH_ROW_HEIGHT_STORAGE_KEY,
-    String(normalizeStoredMonthRowHeight(value)),
-  );
-};
+import * as Calendar from "@constants/desktop/calendar";
 
 const getMonthAnnotation = (date: Date): string | null => {
   if (date.getDate() !== 1) return null;
@@ -96,7 +44,7 @@ type MonthViewStyle = CSSProperties & {
   "--calendar-month-row-height": string;
 };
 
-type ExplorerCalendarMonthViewProps = {
+type CalendarMonthViewProps = {
   currentDate: Date;
   selectedDate: Date;
   scrollTargetToken?: number;
@@ -104,13 +52,13 @@ type ExplorerCalendarMonthViewProps = {
   onVisibleMonthChange?: (date: Date) => void;
 };
 
-export const ExplorerCalendarMonthView = ({
+export const CalendarMonthView = ({
   currentDate,
   selectedDate,
   scrollTargetToken = 0,
   onSelectDate,
   onVisibleMonthChange,
-}: ExplorerCalendarMonthViewProps) => {
+}: CalendarMonthViewProps) => {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const weekRowRefs = useRef<Map<string, HTMLElement>>(new Map());
@@ -124,16 +72,16 @@ export const ExplorerCalendarMonthView = ({
   const lastScrollTargetTokenRef = useRef(scrollTargetToken);
   const visibleMonthKeyRef = useRef(getCalendarMonthKey(currentDate));
   const monthRowResizeStateRef = useRef<MonthRowResizeState | null>(null);
-  const monthRowHeightRef = useRef(DEFAULT_MONTH_ROW_HEIGHT);
-  const pendingMonthRowHeightRef = useRef(DEFAULT_MONTH_ROW_HEIGHT);
+  const monthRowHeightRef = useRef(Calendar.DEFAULT_MONTH_ROW_HEIGHT);
+  const pendingMonthRowHeightRef = useRef(Calendar.DEFAULT_MONTH_ROW_HEIGHT);
   const monthRowResizeFrameRef = useRef<number | null>(null);
 
   const [anchorMonth, setAnchorMonth] = useState(() => currentDate);
   const [monthOffsetRange, setMonthOffsetRange] = useState(
-    createInitialMonthOffsetRange,
+    Calendar.createInitialMonthOffsetRange,
   );
   const [monthRowHeight, setMonthRowHeight] = useState(
-    readStoredMonthRowHeight,
+    Calendar.readStoredMonthRowHeight,
   );
   const today = useMemo(() => new Date(), []);
 
@@ -167,7 +115,7 @@ export const ExplorerCalendarMonthView = ({
       if (monthWeeks.length === 0) return null;
 
       const scrollerRect = scroller.getBoundingClientRect();
-      const sampleY = scrollerRect.top + MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
+      const sampleY = scrollerRect.top + Calendar.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
       let closestWeek: CalendarMonthWeek | null = null;
       let closestDistance = Number.POSITIVE_INFINITY;
 
@@ -246,7 +194,7 @@ export const ExplorerCalendarMonthView = ({
       if (!onVisibleMonthChange || monthWeeks.length === 0) return;
 
       const scrollerRect = scroller.getBoundingClientRect();
-      const sampleY = scrollerRect.top + MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
+      const sampleY = scrollerRect.top + Calendar.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
       let closestWeek: CalendarMonthWeek | null = null;
       let closestDistance = Number.POSITIVE_INFINITY;
 
@@ -294,7 +242,7 @@ export const ExplorerCalendarMonthView = ({
 
   const scheduleMonthRowHeightVariable = useCallback(
     (nextHeight: number) => {
-      const clampedHeight = clampMonthRowHeight(nextHeight);
+      const clampedHeight = Calendar.clampMonthRowHeight(nextHeight);
       pendingMonthRowHeightRef.current = clampedHeight;
 
       if (monthRowResizeFrameRef.current !== null) {
@@ -314,8 +262,8 @@ export const ExplorerCalendarMonthView = ({
 
   const commitMonthRowHeight = useCallback(
     (nextHeight: number, anchor?: MonthRowResizeAnchor | null) => {
-      const clampedHeight = clampMonthRowHeight(nextHeight);
-      const committedHeight = normalizeStoredMonthRowHeight(clampedHeight);
+      const clampedHeight = Calendar.clampMonthRowHeight(nextHeight);
+      const committedHeight = Calendar.normalizeStoredMonthRowHeight(clampedHeight);
       const scrollAnchor =
         anchor === undefined && scrollContainerRef.current
           ? getMonthResizeAnchor(scrollContainerRef.current)
@@ -329,7 +277,7 @@ export const ExplorerCalendarMonthView = ({
       monthRowHeightRef.current = committedHeight;
       pendingMonthRowHeightRef.current = committedHeight;
       applyMonthRowHeightVariable(committedHeight, scrollAnchor);
-      writeStoredMonthRowHeight(committedHeight);
+      Calendar.writeStoredMonthRowHeight(committedHeight);
       setMonthRowHeight(committedHeight);
 
       const scroller = scrollContainerRef.current;
@@ -375,7 +323,7 @@ export const ExplorerCalendarMonthView = ({
     isExtendingAfterRef.current = false;
 
     setAnchorMonth(currentDate);
-    setMonthOffsetRange(createInitialMonthOffsetRange());
+    setMonthOffsetRange(Calendar.createInitialMonthOffsetRange());
   }, [currentDate, scrollTargetToken]);
 
   useLayoutEffect(() => {
@@ -388,7 +336,7 @@ export const ExplorerCalendarMonthView = ({
 
     scroller.scrollTop = Math.max(
       0,
-      targetRow.offsetTop - WEEKDAY_HEADER_HEIGHT_PX,
+      targetRow.offsetTop - Calendar.WEEKDAY_HEADER_HEIGHT_PX,
     );
     pendingScrollWeekKeyRef.current = null;
     syncVisibleMonthFromScroll(scroller);
@@ -423,14 +371,14 @@ export const ExplorerCalendarMonthView = ({
       const scroller = event.currentTarget;
 
       if (
-        scroller.scrollTop < MONTH_SCROLL_EDGE_THRESHOLD_PX &&
+        scroller.scrollTop < Calendar.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
         !isExtendingBeforeRef.current
       ) {
         isExtendingBeforeRef.current = true;
         prependScrollHeightRef.current = scroller.scrollHeight;
         setMonthOffsetRange((current) => ({
           ...current,
-          startOffset: current.startOffset - MONTH_EXTEND_COUNT,
+          startOffset: current.startOffset - Calendar.MONTH_EXTEND_COUNT,
         }));
       }
 
@@ -438,13 +386,13 @@ export const ExplorerCalendarMonthView = ({
         scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
 
       if (
-        distanceToBottom < MONTH_SCROLL_EDGE_THRESHOLD_PX &&
+        distanceToBottom < Calendar.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
         !isExtendingAfterRef.current
       ) {
         isExtendingAfterRef.current = true;
         setMonthOffsetRange((current) => ({
           ...current,
-          endOffset: current.endOffset + MONTH_EXTEND_COUNT,
+          endOffset: current.endOffset + Calendar.MONTH_EXTEND_COUNT,
         }));
       }
 
@@ -519,20 +467,20 @@ export const ExplorerCalendarMonthView = ({
   ) => {
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      commitMonthRowHeight(monthRowHeightRef.current - MONTH_ROW_HEIGHT_STEP);
+      commitMonthRowHeight(monthRowHeightRef.current - Calendar.MONTH_ROW_HEIGHT_STEP);
       return;
     }
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      commitMonthRowHeight(monthRowHeightRef.current + MONTH_ROW_HEIGHT_STEP);
+      commitMonthRowHeight(monthRowHeightRef.current + Calendar.MONTH_ROW_HEIGHT_STEP);
       return;
     }
 
     if (event.key === "PageUp") {
       event.preventDefault();
       commitMonthRowHeight(
-        monthRowHeightRef.current - MONTH_ROW_HEIGHT_STEP * 4,
+        monthRowHeightRef.current - Calendar.MONTH_ROW_HEIGHT_STEP * 4,
       );
       return;
     }
@@ -540,25 +488,25 @@ export const ExplorerCalendarMonthView = ({
     if (event.key === "PageDown") {
       event.preventDefault();
       commitMonthRowHeight(
-        monthRowHeightRef.current + MONTH_ROW_HEIGHT_STEP * 4,
+        monthRowHeightRef.current + Calendar.MONTH_ROW_HEIGHT_STEP * 4,
       );
       return;
     }
 
     if (event.key === "Home") {
       event.preventDefault();
-      commitMonthRowHeight(MIN_MONTH_ROW_HEIGHT);
+      commitMonthRowHeight(Calendar.MIN_MONTH_ROW_HEIGHT);
       return;
     }
 
     if (event.key === "End") {
       event.preventDefault();
-      commitMonthRowHeight(MAX_MONTH_ROW_HEIGHT);
+      commitMonthRowHeight(Calendar.MAX_MONTH_ROW_HEIGHT);
     }
   };
 
   const handleMonthRowResizeReset = () => {
-    commitMonthRowHeight(DEFAULT_MONTH_ROW_HEIGHT);
+    commitMonthRowHeight(Calendar.DEFAULT_MONTH_ROW_HEIGHT);
   };
 
   return (
@@ -573,7 +521,7 @@ export const ExplorerCalendarMonthView = ({
         onScroll={handleMonthScroll}
       >
         <div className="sticky top-0 z-20 grid h-8 grid-cols-7 border-b border-[#e5e7eb] bg-white">
-          {WEEKDAY_LABELS.map((label) => (
+          {Calendar.WEEKDAY_LABELS.map((label: string) => (
             <div
               key={label}
               className="flex items-center justify-center border-r border-[#eef0f3] text-[12px] font-medium leading-normal text-[#8f929c] last:border-r-0"
@@ -643,8 +591,8 @@ export const ExplorerCalendarMonthView = ({
                       role="separator"
                       aria-label="月表示の日付セルの高さを調整"
                       aria-orientation="horizontal"
-                      aria-valuemin={MIN_MONTH_ROW_HEIGHT}
-                      aria-valuemax={MAX_MONTH_ROW_HEIGHT}
+                      aria-valuemin={Calendar.MIN_MONTH_ROW_HEIGHT}
+                      aria-valuemax={Calendar.MAX_MONTH_ROW_HEIGHT}
                       aria-valuenow={monthRowHeight}
                       tabIndex={0}
                       className="calendar-month-row-boundary-resize-handle"
