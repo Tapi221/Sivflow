@@ -27,9 +27,14 @@ import { cn } from "@/lib/utils";
 import type { IconProps } from "@/ui/icons";
 import {
   Calendar as CalendarIcon,
+  CheckCircle,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  Circle,
   Filter,
+  Plus,
   Search,
 } from "@/ui/icons";
 import { ExplorerCalendarMonthView } from "./ExplorerCalendarMonthView";
@@ -80,6 +85,33 @@ const TIMELINE_EDGE_THRESHOLD_PX = 320;
 const TIMELINE_DAY_COLUMN_WIDTH = 104;
 const TIMELINE_LANE_LABEL_WIDTH = 168;
 const TIMELINE_SKELETON_ROW_COUNT = 4;
+const MINI_CALENDAR_WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"] as const;
+const MINI_CALENDAR_CELL_COUNT = 42;
+
+type MiniCalendarDay = {
+  date: Date;
+  dayNumber: string;
+  isCurrentMonth: boolean;
+  isSelected: boolean;
+  isToday: boolean;
+};
+
+type CalendarSidebarProps = {
+  monthDate: Date;
+  selectedDate: Date;
+  onSelectDate: (date: Date) => void;
+  onPreviousMonth: () => void;
+  onNextMonth: () => void;
+  onClose: () => void;
+};
+
+type SidebarCalendarItem = {
+  label: string;
+  icon: (props: IconProps) => JSX.Element;
+  color?: string;
+  checked?: boolean;
+  expanded?: boolean;
+};
 
 const TimelineToolbarIcon = ({
   className,
@@ -239,6 +271,71 @@ const DayViewToolbarIcon = ({
   </svg>
 );
 
+const SidebarCalendarIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      d="M18 2V4M6 2V4M10 17V13.347C10 13.156 9.863 13 9.695 13H9M13.63 17L14.984 13.35C15.047 13.179 14.913 13 14.721 13H13"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M6 8H18M2.5 12.243C2.5 7.886 2.5 5.707 3.752 4.353C5.004 3 7.02 3 11.05 3H12.95C16.98 3 18.996 3 20.248 4.354C21.5 5.707 21.5 7.886 21.5 12.244V12.757C21.5 17.114 21.5 19.293 20.248 20.647C18.996 22 16.98 22 12.95 22H11.05C7.02 22 5.004 22 3.752 20.646C2.5 19.293 2.5 17.114 2.5 12.756V12.243Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const SidebarPanelIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <rect
+      x="2"
+      y="2.75"
+      width="12"
+      height="10.5"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
+    <path
+      d="M6 3V13"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 export type CalendarWorkspaceToolbarProps = {
   activeMode: CalendarToolbarMode;
   viewMode?: CalendarViewMode;
@@ -293,6 +390,157 @@ const getTimelineUnitExtendCount = (viewMode: CalendarViewMode) => {
   }
 
   return 7;
+};
+
+const buildMiniCalendarDays = (
+  monthDate: Date,
+  selectedDate: Date,
+): MiniCalendarDay[] => {
+  const monthStart = startOfMonth(monthDate);
+  const gridStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+  const today = startOfDay(new Date());
+
+  return Array.from({ length: MINI_CALENDAR_CELL_COUNT }, (_, index) => {
+    const date = addDays(gridStart, index);
+
+    return {
+      date,
+      dayNumber: format(date, "d"),
+      isCurrentMonth: date.getMonth() === monthStart.getMonth(),
+      isSelected: isSameDay(date, selectedDate),
+      isToday: isSameDay(date, today),
+    };
+  });
+};
+
+const SIDEBAR_CALENDAR_ITEMS: SidebarCalendarItem[] = [
+  { label: "My calendars", icon: SidebarCalendarIcon, expanded: true },
+  { label: "Routine", icon: CheckCircle, color: "#ff73f6", checked: true },
+  { label: "Events", icon: CheckCircle, color: "#ffc86b", checked: true },
+  { label: "Other calendars", icon: SidebarCalendarIcon, expanded: true },
+  { label: "Holidays", icon: CheckCircle, color: "#8c78ff", checked: true },
+  { label: "School", icon: Circle, color: "#39d64d" },
+  { label: "Add calendar", icon: Plus },
+];
+
+const CalendarSidebar = ({
+  monthDate,
+  selectedDate,
+  onSelectDate,
+  onPreviousMonth,
+  onNextMonth,
+  onClose,
+}: CalendarSidebarProps) => {
+  const miniCalendarDays = useMemo(
+    () => buildMiniCalendarDays(monthDate, selectedDate),
+    [monthDate, selectedDate],
+  );
+
+  return (
+    <aside className="flex w-[292px] shrink-0 flex-col gap-6 overflow-y-auto bg-[#f7f8fa] px-3 py-4 text-[#24272f]">
+      <section className="flex w-full flex-col gap-3">
+        <div className="flex w-full items-center justify-between overflow-hidden px-2">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#dde2ea] bg-white text-[#667085] transition-colors hover:bg-[#f8fafc] hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={onClose}
+              aria-label="Hide calendar sidebar"
+              title="Hide calendar sidebar"
+            >
+              <SidebarPanelIcon className="h-4 w-4" />
+            </button>
+            <h2 className="truncate text-[16px] font-semibold leading-normal text-[#24272f]">
+              {format(monthDate, "MMMM yyyy")}
+            </h2>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-[#667085] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={onPreviousMonth}
+              aria-label="Previous month"
+            >
+              <ChevronUp className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-[#667085] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={onNextMonth}
+              aria-label="Next month"
+            >
+              <ChevronDown className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex w-full flex-col gap-3 rounded-[16px] bg-[#eef4ff] px-2.5 py-4">
+          <div className="grid grid-cols-7 gap-y-2 px-1">
+            {MINI_CALENDAR_WEEKDAYS.map((weekday, index) => (
+              <span
+                key={`${weekday}-${index}`}
+                className="flex h-4 items-center justify-center text-[13px] font-medium leading-none text-[#667085]"
+              >
+                {weekday}
+              </span>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-y-2">
+            {miniCalendarDays.map((day) => (
+              <button
+                key={day.date.toISOString()}
+                type="button"
+                className={cn(
+                  "flex h-7 w-8 items-center justify-center justify-self-center rounded-full text-[14px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  day.isSelected
+                    ? "bg-[#accfff] font-semibold text-[#20242c]"
+                    : day.isToday
+                      ? "bg-[#accfff]/50 text-[#20242c]"
+                      : day.isCurrentMonth
+                        ? "text-[#20242c] hover:bg-[#accfff]/25"
+                        : "text-[#8f929c] hover:bg-[#accfff]/15",
+                )}
+                onClick={() => onSelectDate(day.date)}
+                aria-pressed={day.isSelected}
+              >
+                {day.dayNumber}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <nav className="flex w-full flex-col gap-2" aria-label="Calendar lists">
+        {SIDEBAR_CALENDAR_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const isSection = typeof item.expanded === "boolean";
+
+          return (
+            <button
+              key={item.label}
+              type="button"
+              className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="flex shrink-0 items-center">
+                {isSection ? (
+                  <ChevronDown className="h-4 w-4 text-[#667085]" />
+                ) : null}
+                <Icon
+                  className={cn(
+                    "h-5 w-5 shrink-0",
+                    item.checked ? "text-white" : "text-black",
+                  )}
+                  style={item.color ? { color: item.color } : undefined}
+                />
+              </span>
+              <span className="truncate">{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+    </aside>
+  );
 };
 
 export const CalendarWorkspaceToolbar = ({
@@ -532,6 +780,7 @@ export const ExplorerCalendarPane = ({
   const [selectedViewMode, setSelectedViewMode] =
     useState<CalendarViewMode>("days");
   const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
+  const [isCalendarSidebarOpen, setIsCalendarSidebarOpen] = useState(true);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [calendarBuffer, setCalendarBuffer] = useState(
     createInitialCalendarBuffer,
@@ -764,6 +1013,45 @@ export const ExplorerCalendarPane = ({
     resetTimelinePosition(selectedViewMode);
   };
 
+  const handleSidebarPreviousMonth = () => {
+    setCurrentDate((current) => {
+      const nextDate = subMonths(current, 1);
+      setMonthTitleDate(startOfMonth(nextDate));
+      return nextDate;
+    });
+
+    if (selectedViewMode === "month") {
+      requestMonthScrollTarget();
+    }
+
+    resetTimelinePosition(selectedViewMode);
+  };
+
+  const handleSidebarNextMonth = () => {
+    setCurrentDate((current) => {
+      const nextDate = addMonths(current, 1);
+      setMonthTitleDate(startOfMonth(nextDate));
+      return nextDate;
+    });
+
+    if (selectedViewMode === "month") {
+      requestMonthScrollTarget();
+    }
+
+    resetTimelinePosition(selectedViewMode);
+  };
+
+  const handleSidebarSelectDate = (date: Date) => {
+    setCurrentDate(date);
+    setMonthTitleDate(startOfMonth(date));
+
+    if (selectedViewMode === "month") {
+      requestMonthScrollTarget();
+    }
+
+    resetTimelinePosition(selectedViewMode);
+  };
+
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-white">
       <CalendarWorkspaceToolbar
@@ -774,143 +1062,172 @@ export const ExplorerCalendarPane = ({
         onSelectViewMode={handleSelectViewMode}
       />
 
-      <div
-        ref={contentViewportRef}
-        className="flex min-h-0 flex-1 flex-col bg-white px-5 pb-5 pt-4"
-      >
-        <div className="mb-4 flex shrink-0 items-center justify-between">
-          {monthLabel ? (
-            <h1 className="text-[16px] font-semibold text-[#24272f]">
-              {monthLabel}
-            </h1>
-          ) : (
-            <div aria-hidden="true" className="h-6 w-24" />
-          )}
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#dde2ea] bg-white text-[#667085] transition-colors hover:bg-[#f8fafc]"
-              onClick={handlePrevious}
-              aria-label="Previous"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-
-            <button
-              type="button"
-              className="rounded-lg border border-[#dde2ea] bg-white px-4 py-[7px] text-[14px] font-semibold text-[#20242c] transition-colors hover:bg-[#f8fafc]"
-              onClick={handleToday}
-            >
-              Today
-            </button>
-
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#dde2ea] bg-white text-[#667085] transition-colors hover:bg-[#f8fafc]"
-              onClick={handleNext}
-              aria-label="Next"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-        {activeMode === "timeline" ? (
-          <ExplorerCalendarTimelineDayView
-            viewMode={selectedViewMode}
-            anchorDate={currentDate}
-            timelineUnitBuffer={timelineUnitBuffer}
+      <div className="flex min-h-0 flex-1 bg-white">
+        {isCalendarSidebarOpen ? (
+          <CalendarSidebar
+            monthDate={currentDate}
             selectedDate={currentDate}
-            dayColumnWidth={TIMELINE_DAY_COLUMN_WIDTH}
-            laneLabelWidth={TIMELINE_LANE_LABEL_WIDTH}
-            rowCount={TIMELINE_SKELETON_ROW_COUNT}
-            scrollContainerRef={scrollContainerRef}
-            onScroll={handleTimelineScroll}
-            onSelectDate={setCurrentDate}
+            onSelectDate={handleSidebarSelectDate}
+            onPreviousMonth={handleSidebarPreviousMonth}
+            onNextMonth={handleSidebarNextMonth}
+            onClose={() => setIsCalendarSidebarOpen(false)}
           />
-        ) : selectedViewMode === "month" ? (
-          <ExplorerCalendarMonthView
-            currentDate={currentDate}
-            selectedDate={currentDate}
-            scrollTargetToken={monthScrollTargetToken}
-            onSelectDate={setCurrentDate}
-            onVisibleMonthChange={setMonthTitleDate}
-          />
-        ) : (
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-            <div
-              ref={scrollContainerRef}
-              className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
-              onScroll={handleTimelineScroll}
-            >
-              <div className="grid" style={timelineGridStyle}>
-                <div className="sticky left-0 top-0 z-20 border-b border-r border-[#e5e7eb] bg-white" />
-                {visibleDays.map((day) => {
-                  const isToday = isSameDay(day, new Date());
+        ) : null}
 
-                  return (
-                    <div
-                      key={day.toISOString()}
-                      className={cn(
-                        "sticky top-0 z-10 flex h-10 flex-col items-center justify-center border-b border-r border-[#e5e7eb] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
-                        isToday && "bg-[#fdf2f2]",
-                      )}
-                    >
-                      <span className="font-semibold text-[#25272d]">
-                        {format(day, "d", { locale: ja })}
-                      </span>
-                      <span>{format(day, "E", { locale: ja })}</span>
-                    </div>
-                  );
-                })}
+        <div
+          ref={contentViewportRef}
+          className="flex min-w-0 flex-1 flex-col bg-white px-5 pb-5 pt-4"
+        >
+          <div className="mb-4 flex shrink-0 items-center justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              {!isCalendarSidebarOpen ? (
+                <button
+                  type="button"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#dde2ea] bg-white text-[#667085] transition-colors hover:bg-[#f8fafc] hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  onClick={() => setIsCalendarSidebarOpen(true)}
+                  aria-label="Show calendar sidebar"
+                  title="Show calendar sidebar"
+                >
+                  <SidebarPanelIcon className="h-4 w-4" />
+                </button>
+              ) : null}
 
-                <div className="sticky left-0 z-10 border-r border-[#e5e7eb] bg-white">
-                  {HOURS.map((hour) => (
-                    <div
-                      key={hour}
-                      className="flex items-start justify-center border-b border-[#eef0f3] pt-2 text-[12px] text-[#8f929c]"
-                      style={{ height: `var(--calendar-hour-row-height)` }}
-                    >
-                      {createHourLabel(hour)}
-                    </div>
-                  ))}
-                </div>
+              {monthLabel ? (
+                <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
+                  {monthLabel}
+                </h1>
+              ) : (
+                <div aria-hidden="true" className="h-6 w-24" />
+              )}
+            </div>
 
-                {visibleDays.map((day) => {
-                  const eventsForDay = demoEvents.filter((event) =>
-                    isSameDay(event.startsAt, day),
-                  );
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#dde2ea] bg-white text-[#667085] transition-colors hover:bg-[#f8fafc]"
+                onClick={handlePrevious}
+                aria-label="Previous"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
 
-                  return (
-                    <div
-                      key={`${day.toISOString()}-column`}
-                      className="relative border-r border-[#eef0f3] last:border-r-0"
-                    >
-                      {HOURS.map((hour) => (
-                        <div
-                          key={`${day.toISOString()}-${hour}`}
-                          className="border-b border-[#eef0f3]"
-                          style={{ height: `var(--calendar-hour-row-height)` }}
-                        />
-                      ))}
+              <button
+                type="button"
+                className="rounded-lg border border-[#dde2ea] bg-white px-4 py-[7px] text-[14px] font-semibold text-[#20242c] transition-colors hover:bg-[#f8fafc]"
+                onClick={handleToday}
+              >
+                Today
+              </button>
 
-                      {eventsForDay.map((event) => (
-                        <div
-                          key={event.id}
-                          className="absolute left-2 right-2 rounded-md border border-[#bfd3ff] bg-[#dceaff] px-2 py-1 text-[12px] font-medium text-[#2c3440] shadow-sm"
-                          style={calculateEventStyle(event)}
-                        >
-                          {event.title}
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
+              <button
+                type="button"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#dde2ea] bg-white text-[#667085] transition-colors hover:bg-[#f8fafc]"
+                onClick={handleNext}
+                aria-label="Next"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
             </div>
           </div>
-        )}
+
+          {activeMode === "timeline" ? (
+            <ExplorerCalendarTimelineDayView
+              viewMode={selectedViewMode}
+              anchorDate={currentDate}
+              timelineUnitBuffer={timelineUnitBuffer}
+              selectedDate={currentDate}
+              dayColumnWidth={TIMELINE_DAY_COLUMN_WIDTH}
+              laneLabelWidth={TIMELINE_LANE_LABEL_WIDTH}
+              rowCount={TIMELINE_SKELETON_ROW_COUNT}
+              scrollContainerRef={scrollContainerRef}
+              onScroll={handleTimelineScroll}
+              onSelectDate={handleSidebarSelectDate}
+            />
+          ) : selectedViewMode === "month" ? (
+            <ExplorerCalendarMonthView
+              currentDate={currentDate}
+              selectedDate={currentDate}
+              scrollTargetToken={monthScrollTargetToken}
+              onSelectDate={handleSidebarSelectDate}
+              onVisibleMonthChange={setMonthTitleDate}
+            />
+          ) : (
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
+              <div
+                ref={scrollContainerRef}
+                className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
+                onScroll={handleTimelineScroll}
+              >
+                <div className="grid" style={timelineGridStyle}>
+                  <div className="sticky left-0 top-0 z-20 border-b border-r border-[#e5e7eb] bg-white" />
+                  {visibleDays.map((day) => {
+                    const isToday = isSameDay(day, new Date());
+
+                    return (
+                      <div
+                        key={day.toISOString()}
+                        className={cn(
+                          "sticky top-0 z-10 flex h-10 flex-col items-center justify-center border-b border-r border-[#e5e7eb] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
+                          isToday && "bg-[#fdf2f2]",
+                        )}
+                      >
+                        <span className="font-semibold text-[#25272d]">
+                          {format(day, "d", { locale: ja })}
+                        </span>
+                        <span>{format(day, "E", { locale: ja })}</span>
+                      </div>
+                    );
+                  })}
+
+                  <div className="sticky left-0 z-10 border-r border-[#e5e7eb] bg-white">
+                    {HOURS.map((hour) => (
+                      <div
+                        key={hour}
+                        className="flex items-start justify-center border-b border-[#eef0f3] pt-2 text-[12px] text-[#8f929c]"
+                        style={{ height: `var(--calendar-hour-row-height)` }}
+                      >
+                        {createHourLabel(hour)}
+                      </div>
+                    ))}
+                  </div>
+
+                  {visibleDays.map((day) => {
+                    const eventsForDay = demoEvents.filter((event) =>
+                      isSameDay(event.startsAt, day),
+                    );
+
+                    return (
+                      <div
+                        key={`${day.toISOString()}-column`}
+                        className="relative border-r border-[#eef0f3] last:border-r-0"
+                      >
+                        {HOURS.map((hour) => (
+                          <div
+                            key={`${day.toISOString()}-${hour}`}
+                            className="border-b border-[#eef0f3]"
+                            style={{
+                              height: `var(--calendar-hour-row-height)`,
+                            }}
+                          />
+                        ))}
+
+                        {eventsForDay.map((event) => (
+                          <div
+                            key={event.id}
+                            className="absolute left-2 right-2 rounded-md border border-[#bfd3ff] bg-[#dceaff] px-2 py-1 text-[12px] font-medium text-[#2c3440] shadow-sm"
+                            style={calculateEventStyle(event)}
+                          >
+                            {event.title}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

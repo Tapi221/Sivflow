@@ -1,4 +1,9 @@
-import { useState, type MouseEvent, type ReactNode } from "react";
+import {
+  useState,
+  type FocusEvent,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { useExplorerCalendarViewStore } from "@/features/calendar/store/useExplorerCalendarViewStore";
@@ -19,6 +24,7 @@ type AppSidebarNavItem = {
 };
 
 type AppSidebarProps = {
+  collapsed?: boolean;
   onOpenSettings?: () => void;
 };
 
@@ -249,12 +255,14 @@ const AppSidebarNavLink = ({
   trailing,
   ariaExpanded,
   disabled,
+  compact,
 }: {
   item: AppSidebarNavItem;
   nested?: boolean;
   trailing?: ReactNode;
   ariaExpanded?: boolean;
   disabled?: boolean;
+  compact?: boolean;
 }) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
@@ -304,9 +312,11 @@ const AppSidebarNavLink = ({
         nested && "app-sidebar__nav-link--nested",
         isActive && "is-active",
         isDisabled && "app-sidebar__nav-link--disabled",
+        compact && "app-sidebar__nav-link--collapsed",
       )}
       aria-current={isActive ? "page" : undefined}
       aria-expanded={ariaExpanded}
+      aria-label={compact ? item.label : undefined}
     >
       <span className="app-sidebar__nav-icon-slot">{item.icon}</span>
       <span className="app-sidebar__nav-label">{item.label}</span>
@@ -317,20 +327,23 @@ const AppSidebarNavLink = ({
   );
 };
 
-const AppSidebar = ({ onOpenSettings }: AppSidebarProps) => {
+const AppSidebar = ({ collapsed = false, onOpenSettings }: AppSidebarProps) => {
   const navigate = useNavigate();
   const { search } = useLocation();
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
+  const [isRailExpanded, setIsRailExpanded] = useState(false);
   const selectedLibraryChild = new URLSearchParams(search).get("libraryType");
   const closeCalendar = useExplorerCalendarViewStore((state) => state.close);
   const openGlobalSearch = useGlobalSearchStore((state) => state.open);
   const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
+
+  const isCompact = collapsed && !isRailExpanded;
   const mainNavItemsWithActions = mainNavItems.map((item) => ({
     ...item,
     onClick: () => {
       closeCalendar();
       item.onClick?.();
-      if (item.id === "library") {
+      if (item.id === "library" && !isCompact) {
         setIsLibraryOpen((isOpen) => !isOpen);
       }
       if (item.id === "explore") {
@@ -353,8 +366,28 @@ const AppSidebar = ({ onOpenSettings }: AppSidebarProps) => {
     navigate(`/folders?view=section-list&libraryType=${libraryType}`);
   };
 
+  const handleBlurCapture = (event: FocusEvent<HTMLElement>) => {
+    if (!collapsed) return;
+    const next = event.relatedTarget;
+    if (!(next instanceof Node) || !event.currentTarget.contains(next)) {
+      setIsRailExpanded(false);
+    }
+  };
+
   return (
-    <aside className="app-sidebar" aria-label="Sidebar">
+    <aside
+      className={cn(
+        "app-sidebar",
+        isCompact && "app-sidebar--collapsed",
+        collapsed && isRailExpanded && "app-sidebar--rail-expanded",
+      )}
+      aria-label="Sidebar"
+      data-collapsed={collapsed ? "1" : undefined}
+      onMouseEnter={collapsed ? () => setIsRailExpanded(true) : undefined}
+      onMouseLeave={collapsed ? () => setIsRailExpanded(false) : undefined}
+      onFocusCapture={collapsed ? () => setIsRailExpanded(true) : undefined}
+      onBlurCapture={handleBlurCapture}
+    >
       <div className="app-sidebar__top">
         <div className="app-sidebar__workspace">
           <div className="app-sidebar__workspace-avatar">C</div>
@@ -376,7 +409,8 @@ const AppSidebar = ({ onOpenSettings }: AppSidebarProps) => {
               <div key={item.id} className="app-sidebar__library-group">
                 <AppSidebarNavLink
                   item={item}
-                  ariaExpanded={isLibraryOpen}
+                  ariaExpanded={!isCompact ? isLibraryOpen : undefined}
+                  compact={isCompact}
                   trailing={
                     <ChevronDownIcon
                       className={cn(
@@ -386,7 +420,7 @@ const AppSidebar = ({ onOpenSettings }: AppSidebarProps) => {
                     />
                   }
                 />
-                {isLibraryOpen ? (
+                {!isCompact && isLibraryOpen ? (
                   <div
                     className="app-sidebar__nested-group app-sidebar__library-children"
                     aria-label="Library sections"
@@ -408,7 +442,11 @@ const AppSidebar = ({ onOpenSettings }: AppSidebarProps) => {
                 ) : null}
               </div>
             ) : (
-              <AppSidebarNavLink key={item.id} item={item} />
+              <AppSidebarNavLink
+                key={item.id}
+                item={item}
+                compact={isCompact}
+              />
             ),
           )}
         </nav>
@@ -425,7 +463,7 @@ const AppSidebar = ({ onOpenSettings }: AppSidebarProps) => {
         </div>
         <nav className="app-sidebar__nav" aria-label="Support navigation">
           {footerItems.map((item) => (
-            <AppSidebarNavLink key={item.id} item={item} />
+            <AppSidebarNavLink key={item.id} item={item} compact={isCompact} />
           ))}
         </nav>
       </div>

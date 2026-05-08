@@ -7,6 +7,8 @@ import { AppSidebar } from "./AppSidebar";
 import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
 
+const SIDEBAR_COLLAPSE_STORAGE_KEY = "mf.ui.sidebarCollapsed";
+
 const LoadingFallback = () => {
   return null;
 };
@@ -33,7 +35,14 @@ const resetWorkspaceScroll = (mainElement: HTMLElement | null) => {
 
 export const AppLayout = () => {
   const { pathname } = useLocation();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    try {
+      const stored = window.localStorage.getItem(SIDEBAR_COLLAPSE_STORAGE_KEY);
+      return stored === "1";
+    } catch {
+      return false;
+    }
+  });
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -54,6 +63,17 @@ export const AppLayout = () => {
   useEffect(() => {
     resetWorkspaceScroll(mainRef.current);
   }, [pathname]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        SIDEBAR_COLLAPSE_STORAGE_KEY,
+        isSidebarCollapsed ? "1" : "0",
+      );
+    } catch {
+      // ignore
+    }
+  }, [isSidebarCollapsed]);
 
   useEffect(() => {
     const isRightSidebarShortcut = (event: KeyboardEvent) => {
@@ -115,7 +135,10 @@ export const AppLayout = () => {
           .filter(Boolean)
           .join(" ")}
       >
-        <AppSidebar onOpenSettings={() => setIsSettingsOpen(true)} />
+        <AppSidebar
+          collapsed={isSidebarCollapsed}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+        />
 
         <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
           <Suspense fallback={null}>
