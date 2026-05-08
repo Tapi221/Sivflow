@@ -37,7 +37,7 @@ import {
   Plus,
   Search,
 } from "@/ui/icons";
-import { ExplorerCalendarMonthView } from "./ExplorerCalendarMonthView";
+import { CalendarMonthView } from "./CalendarMonthView";
 import { ExplorerCalendarTimelineDayView } from "./ExplorerCalendarTimelineDayView";
 import {
   buildTimelineColumns,
@@ -46,7 +46,7 @@ import {
   type TimelineUnitBuffer,
 } from "./ExplorerCalendarTimelineDayView.shared";
 
-type ExplorerCalendarPaneProps = {
+type CalendarPaneProps = {
   onClose?: () => void;
 };
 
@@ -762,9 +762,7 @@ const getPreviousDate = (currentDate: Date, viewMode: CalendarViewMode) => {
   return subDays(currentDate, 1);
 };
 
-export const CalendarPane = ({
-  onClose: _onClose,
-}: ExplorerCalendarPaneProps) => {
+export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const prependScrollCorrectionRef = useRef(0);
@@ -1144,7 +1142,7 @@ export const CalendarPane = ({
               onSelectDate={handleSidebarSelectDate}
             />
           ) : selectedViewMode === "month" ? (
-            <ExplorerCalendarMonthView
+            <CalendarMonthView
               currentDate={currentDate}
               selectedDate={currentDate}
               scrollTargetToken={monthScrollTargetToken}
