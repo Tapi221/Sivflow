@@ -31,9 +31,7 @@ const TABS_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "drag",
 };
 
-const resolveTabsSurfaceStyle = (
-  isTitlebar: boolean,
-): CSSProperties => ({
+const resolveTabsSurfaceStyle = (isTitlebar: boolean): CSSProperties => ({
   background: isTitlebar
     ? "var(--app-titlebar-bg, var(--app-sidebar-bg))"
     : "var(--app-sidebar-bg)",
@@ -243,8 +241,10 @@ export const WorkspaceTabsBar = ({
         {tabs.map((tab) => {
           const selected = tab.id === activeTabId;
           const Icon = resolveTabIcon(tab);
-          const inactiveTextClassName = resolveInactiveTabTextClassName(isTitlebar);
-          const inactiveIconClassName = resolveInactiveTabIconClassName(isTitlebar);
+          const inactiveTextClassName =
+            resolveInactiveTabTextClassName(isTitlebar);
+          const inactiveIconClassName =
+            resolveInactiveTabIconClassName(isTitlebar);
 
           return (
             <div key={tab.id} className="relative flex items-end">
@@ -261,7 +261,10 @@ export const WorkspaceTabsBar = ({
                   "mb-0 h-[36px] rounded-tl-[8px] rounded-tr-[8px]",
                   selected
                     ? "explorer-workspace-tab--active border-black/12 text-[var(--app-sidebar-text-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]"
-                    : cn("explorer-workspace-tab--inactive border-transparent", inactiveTextClassName),
+                    : cn(
+                        "explorer-workspace-tab--inactive border-transparent",
+                        inactiveTextClassName,
+                      ),
                   resolveTabWidthClassName(tab),
                 )}
               >

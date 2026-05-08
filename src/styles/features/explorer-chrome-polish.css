@@ -78,7 +78,10 @@
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     background-clip: padding-box;
-    background: var(--app-titlebar-bg, var(--app-sidebar-bg, #f6f6f6)) !important;
+    background: var(
+      --app-titlebar-bg,
+      var(--app-sidebar-bg, #f6f6f6)
+    ) !important;
   }
 
   /* Round the inner corner where the titlebar meets the active (white) surface. */
@@ -105,7 +108,10 @@
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     background-clip: padding-box;
-    background: var(--app-titlebar-bg, var(--app-sidebar-bg, #f6f6f6)) !important;
+    background: var(
+      --app-titlebar-bg,
+      var(--app-sidebar-bg, #f6f6f6)
+    ) !important;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
@@ -123,7 +129,10 @@
     padding: 8px 8px 0 16px;
     margin: 0 !important;
     overflow: visible !important;
-    background: var(--app-titlebar-bg, var(--app-sidebar-bg, #f6f6f6)) !important;
+    background: var(
+      --app-titlebar-bg,
+      var(--app-sidebar-bg, #f6f6f6)
+    ) !important;
   }
 
   .explorer-workspace-tab,
@@ -216,7 +225,10 @@
   }
 
   .explorer-workspace-tab--inactive:hover {
-    background: var(--app-titlebar-surface, rgba(255, 255, 255, 0.08)) !important;
+    background: var(
+      --app-titlebar-surface,
+      rgba(255, 255, 255, 0.08)
+    ) !important;
     color: var(--app-titlebar-text-strong, #ffffff) !important;
   }
 
@@ -287,7 +299,10 @@
   }
 
   .explorer-workspace-tab-add:hover {
-    background: var(--app-titlebar-surface, rgba(255, 255, 255, 0.08)) !important;
+    background: var(
+      --app-titlebar-surface,
+      rgba(255, 255, 255, 0.08)
+    ) !important;
     color: var(--app-titlebar-text-strong, #ffffff) !important;
   }
 
