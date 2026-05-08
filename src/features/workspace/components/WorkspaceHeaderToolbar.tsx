@@ -37,7 +37,9 @@ export const WorkspaceHeaderToolbar = ({
 }: WorkspaceHeaderToolbarProps) => {
   const hasTabs = tabs.length > 0;
   const hasSecondaryTabs = Boolean(secondaryTabs && secondaryTabs.length > 0);
-  const hasLeadingActions = Boolean(leadingActions && leadingActions.length > 0);
+  const hasLeadingActions = Boolean(
+    leadingActions && leadingActions.length > 0,
+  );
   const hasLeadingContentBeforeActions = hasTabs || hasSecondaryTabs;
 
   return (
