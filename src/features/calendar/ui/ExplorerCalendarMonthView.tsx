@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import {
   CALENDAR_DAY_HEADER_CELL_HEIGHT,
   CALENDAR_WEEKDAY_HEADER_HEIGHT,
-} from "./calendarHeaderLayout";
+} from "constants/desktop/calendarLayout";
 
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 const WEEKDAY_HEADER_HEIGHT_PX = CALENDAR_WEEKDAY_HEADER_HEIGHT;
