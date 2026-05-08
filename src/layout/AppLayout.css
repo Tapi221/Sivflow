@@ -83,6 +83,8 @@
   justify-content: space-between;
   overflow-y: auto;
   overflow-x: hidden;
+  border-top-right-radius: 10px;
+  background-clip: padding-box;
   background: var(--app-sidebar-bg);
   color: var(--app-sidebar-text);
   padding: 24px 8px 16px;
@@ -434,6 +436,7 @@
   overflow: hidden;
   background: var(--app-active-tab-bg);
   border-radius: 10px 10px 0 0;
+  background-clip: padding-box;
 }
 
 .workspace-shell--with-tabs {

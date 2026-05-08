@@ -62,7 +62,7 @@
     height: 100% !important;
     margin: 0 !important;
     border: 0 !important;
-    border-radius: 0 !important;
+    border-radius: 10px 10px 0 0 !important;
     overflow: hidden;
     background: var(--mf-explorer-app-bg) !important;
     box-shadow: none !important;
@@ -75,7 +75,24 @@
     max-width: none;
     overflow: visible;
     isolation: isolate;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background-clip: padding-box;
     background: var(--app-titlebar-bg, var(--app-sidebar-bg, #f6f6f6)) !important;
+  }
+
+  /* Round the inner corner where the titlebar meets the active (white) surface. */
+  .explorer-chrome-main-topbar::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+    background: transparent;
+    border-bottom-left-radius: 16px;
+    box-shadow: -8px 8px 0 8px var(--app-active-tab-bg, #ffffff);
   }
 
   .explorer-workspace-tabs-bar,
@@ -85,6 +102,9 @@
     height: 40px !important;
     overflow: visible !important;
     border-bottom: 0 !important;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background-clip: padding-box;
     background: var(--app-titlebar-bg, var(--app-sidebar-bg, #f6f6f6)) !important;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -100,7 +120,7 @@
     height: 100%;
     align-items: flex-end;
     gap: 0;
-    padding: 8px 8px 0 12px;
+    padding: 8px 8px 0 16px;
     margin: 0 !important;
     overflow: visible !important;
     background: var(--app-titlebar-bg, var(--app-sidebar-bg, #f6f6f6)) !important;
@@ -143,7 +163,7 @@
     margin-bottom: 0 !important;
     padding-top: 0 !important;
     border: 0 !important;
-    border-radius: 8px 8px 0 0 !important;
+    border-radius: 8px 8px 10px 10px !important;
     overflow: visible !important;
     isolation: isolate;
     background: #ffffff !important;
@@ -157,23 +177,27 @@
   .explorer-workspace-tab--active::after {
     content: "";
     position: absolute;
-    bottom: 0;
-    width: 12px;
-    height: 12px;
+    bottom: -1px;
+    width: 14px;
+    height: 14px;
     background: transparent;
     pointer-events: none;
   }
 
   .explorer-workspace-tab--active::before {
-    left: -12px;
-    border-bottom-right-radius: 12px;
-    box-shadow: 6px 6px 0 6px #ffffff;
+    left: -14px;
+    border-bottom-right-radius: 14px;
+    box-shadow: 8px 8px 0 8px #ffffff;
   }
 
   .explorer-workspace-tab--active::after {
-    right: -12px;
-    border-bottom-left-radius: 12px;
-    box-shadow: -6px 6px 0 6px #ffffff;
+    right: -14px;
+    border-bottom-left-radius: 14px;
+    box-shadow: -8px 8px 0 8px #ffffff;
+  }
+
+  .explorer-workspace-tab[data-workspace-tab-active="true"] {
+    border-top-left-radius: 10px !important;
   }
 
   .explorer-workspace-tab--active .explorer-workspace-tab-button,
@@ -299,7 +323,8 @@
 
   .explorer-chrome-body > div {
     border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
+    border-radius: 10px 10px 0 0 !important;
+    overflow: hidden !important;
+    background: var(--app-active-tab-bg, #ffffff) !important;
   }
 }
