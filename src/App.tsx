@@ -20,9 +20,7 @@ const Folders = lazy(() => import("./routes/Folders"));
 const CardEdit = lazy(() => import("./routes/CardEdit"));
 const CardSetView = lazy(() => import("./routes/CardSetView"));
 const StudyMode = lazy(() => import("./routes/StudyMode"));
-const Gallery = lazy(() => import("./routes/Gallery"));
 const Directory = lazy(() => import("./routes/Directory"));
-const Dictionary = lazy(() => import("./routes/Dictionary"));
 const Questions = lazy(() => import("./routes/Questions"));
 const Calendar = lazy(() => import("./routes/Calendar"));
 const Tasks = lazy(() => import("./routes/Tasks"));
@@ -302,11 +300,6 @@ const AppContent = () => {
           <Route path="calendar" element={withRouteFallback(<Calendar />)} />
           <Route path="tasks" element={withRouteFallback(<Tasks />)} />
 
-          <Route
-            path="dictionary"
-            element={withRouteFallback(<Dictionary />)}
-          />
-
           <Route path="questions" element={withRouteFallback(<Questions />)} />
 
           <Route path="CardEdit" element={withRouteFallback(<CardEdit />)} />
@@ -321,7 +314,6 @@ const AppContent = () => {
           <Route path="study" element={withRouteFallback(<StudyMode />)} />
           <Route path="sandbox/blocknote" element={<BlockNoteSandboxPage />} />
 
-          <Route path="gallery" element={withRouteFallback(<Gallery />)} />
           <Route path="trash" element={<Navigate to="/folders" replace />} />
           <Route path="directory" element={withRouteFallback(<Directory />)} />
 
