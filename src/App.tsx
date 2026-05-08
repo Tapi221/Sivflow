@@ -21,7 +21,6 @@ const CardEdit = lazy(() => import("./routes/CardEdit"));
 const CardSetView = lazy(() => import("./routes/CardSetView"));
 const StudyMode = lazy(() => import("./routes/StudyMode"));
 const Directory = lazy(() => import("./routes/Directory"));
-const Questions = lazy(() => import("./routes/Questions"));
 const Calendar = lazy(() => import("./routes/Calendar"));
 const Tasks = lazy(() => import("./routes/Tasks"));
 
@@ -299,8 +298,6 @@ const AppContent = () => {
           <Route path="tag-map" element={<Navigate to="/folders" replace />} />
           <Route path="calendar" element={withRouteFallback(<Calendar />)} />
           <Route path="tasks" element={withRouteFallback(<Tasks />)} />
-
-          <Route path="questions" element={withRouteFallback(<Questions />)} />
 
           <Route path="CardEdit" element={withRouteFallback(<CardEdit />)} />
           <Route
