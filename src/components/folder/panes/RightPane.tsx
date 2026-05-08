@@ -2,7 +2,6 @@ import { FolderDashboard } from "@/components/folder/components/views/FolderDash
 import { CardPane } from "@/components/folder/panes/CardPane";
 import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagramPane";
 import { PdfPane } from "@/components/pdf/PdfPane";
-import Gallery from "@/routes/Gallery";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 type PdfPaneUpdateHandler = NonNullable<
@@ -66,9 +65,6 @@ export const RightPane = ({
   handlers,
   folderSelectionNonce,
 }: RightPaneProps) => {
-  if (selectedItem?.type === "gallery") {
-    return <Gallery />;
-  }
 
   if (selectedItem?.type === "directory") {
     return (
