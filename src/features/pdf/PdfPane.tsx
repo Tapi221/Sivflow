@@ -8,6 +8,7 @@ import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
 import { FIT_MAX_SCALE, FIT_MIN_SCALE } from "./pdfViewerStateStorage";
 import { usePdfWorkspace } from "./usePdfWorkspace";
+import * as C from "@/features/pdf/pdf.constants.desktop";
 
 interface PdfPaneDoc {
   id: string;

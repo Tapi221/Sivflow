@@ -6,7 +6,6 @@ import { usePdfDocument } from "@/features/pdf/hooks/usePdfDocument";
 import { usePdfSourceResolver } from "@/features/pdf/hooks/usePdfSourceResolver";
 import { usePdfViewerPersistence } from "@/features/pdf/hooks/usePdfViewerPersistence";
 import {
-  FIT_MAX_SCALE,
   FIT_MIN_SCALE,
   FIT_PADDING_X,
   clampScale,
@@ -34,18 +33,14 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
+import * as C from "@/features/pdf/pdf.constants.desktop";
 
 interface PdfWorkspaceProviderProps extends PropsWithChildren {
   doc: DocumentItem;
   onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
 }
 
-const PDF_DOUBLE_PAGE_GAP = 16;
-const PDF_ZOOM_UI_MIN_PERCENT = 0;
-const PDF_ZOOM_UI_MAX_PERCENT = 100;
-const PDF_ZOOM_UI_RANGE_PERCENT =
-  PDF_ZOOM_UI_MAX_PERCENT - PDF_ZOOM_UI_MIN_PERCENT;
-const PDF_SCALE_RANGE = FIT_MAX_SCALE - FIT_MIN_SCALE;
+
 
 const normalizePageForLayout = (
   page: number,
@@ -61,29 +56,29 @@ const normalizePageForLayout = (
 
 const clampZoomUiPercent = (value: number) => {
   if (!Number.isFinite(value)) {
-    return PDF_ZOOM_UI_MIN_PERCENT;
+    return C.PDF_ZOOM_UI_MIN_PERCENT;
   }
 
   return Math.min(
-    PDF_ZOOM_UI_MAX_PERCENT,
-    Math.max(PDF_ZOOM_UI_MIN_PERCENT, value),
+    C.PDF_ZOOM_UI_MAX_PERCENT,
+    Math.max(C.PDF_ZOOM_UI_MIN_PERCENT, value),
   );
 };
 
 const scaleToZoomUiPercent = (value: number) => {
   const clampedScale = clampScale(value);
 
-  if (PDF_SCALE_RANGE <= 0 || PDF_ZOOM_UI_RANGE_PERCENT <= 0) {
-    return PDF_ZOOM_UI_MAX_PERCENT;
+  if (C.PDF_SCALE_RANGE <= 0 || C.PDF_ZOOM_UI_RANGE_PERCENT <= 0) {
+    return C.PDF_ZOOM_UI_MAX_PERCENT;
   }
 
-  const ratio = (clampedScale - FIT_MIN_SCALE) / PDF_SCALE_RANGE;
+  const ratio = (clampedScale - FIT_MIN_SCALE) / C.PDF_SCALE_RANGE;
   const normalizedRatio = Math.min(1, Math.max(0, ratio));
 
   return Number(
     (
-      PDF_ZOOM_UI_MIN_PERCENT +
-      normalizedRatio * PDF_ZOOM_UI_RANGE_PERCENT
+      C.PDF_ZOOM_UI_MIN_PERCENT +
+      normalizedRatio * C.PDF_ZOOM_UI_RANGE_PERCENT
     ).toFixed(0),
   );
 };
@@ -91,15 +86,15 @@ const scaleToZoomUiPercent = (value: number) => {
 const zoomUiPercentToScale = (value: number) => {
   const clampedUiPercent = clampZoomUiPercent(value);
 
-  if (PDF_SCALE_RANGE <= 0 || PDF_ZOOM_UI_RANGE_PERCENT <= 0) {
+  if (C.PDF_SCALE_RANGE <= 0 || C.PDF_ZOOM_UI_RANGE_PERCENT <= 0) {
     return clampScale(FIT_MIN_SCALE);
   }
 
   const ratio =
-    (clampedUiPercent - PDF_ZOOM_UI_MIN_PERCENT) / PDF_ZOOM_UI_RANGE_PERCENT;
+    (clampedUiPercent - C.PDF_ZOOM_UI_MIN_PERCENT) / C.PDF_ZOOM_UI_RANGE_PERCENT;
 
   return clampScale(
-    Number((FIT_MIN_SCALE + ratio * PDF_SCALE_RANGE).toFixed(3)),
+    Number((FIT_MIN_SCALE + ratio * C.PDF_SCALE_RANGE).toFixed(3)),
   );
 };
 
@@ -237,7 +232,7 @@ export const PdfWorkspaceProvider = ({
 
       const pagesPerRow = nextPageLayoutMode === "double" ? 2 : 1;
       const horizontalGap =
-        nextPageLayoutMode === "double" ? PDF_DOUBLE_PAGE_GAP : 0;
+        nextPageLayoutMode === "double" ? C.PDF_DOUBLE_PAGE_GAP : 0;
       const usableWidth = Math.max(
         1,
         containerWidth - FIT_PADDING_X - horizontalGap,

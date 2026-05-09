@@ -1,13 +1,4 @@
-import {
-  FIT_MAX_SCALE,
-  FIT_MIN_SCALE,
-  PDF_BAR_MAX_PERCENT,
-  PDF_BAR_MAX_RENDER_RATIO,
-  PDF_BAR_MIN_PERCENT,
-  PDF_BAR_MIN_RENDER_RATIO,
-  PDF_GESTURE_MAX_SCALE,
-  PDF_GESTURE_MIN_SCALE,
-} from "@constants/web/pdf";
+import * as C from "@/features/pdf/pdf.constants.desktop";
 
 const clampRange = (value: number, min: number, max: number) => {
   const lower = Math.min(min, max);
@@ -25,28 +16,28 @@ const resolveSafeFitScale = (fitScale: number) => {
     return 1;
   }
 
-  return clampRange(fitScale, FIT_MIN_SCALE, FIT_MAX_SCALE);
+  return clampRange(fitScale, C.FIT_MIN_SCALE, C.FIT_MAX_SCALE);
 };
 
 export const clampPdfBarZoomPercent = (value: number) => {
   if (!Number.isFinite(value)) {
-    return PDF_BAR_MIN_PERCENT;
+    return C.PDF_BAR_MIN_PERCENT;
   }
 
   return clampRange(
     Math.round(value),
-    PDF_BAR_MIN_PERCENT,
-    PDF_BAR_MAX_PERCENT,
+    C.PDF_BAR_MIN_PERCENT,
+    C.PDF_BAR_MAX_PERCENT,
   );
 };
 
 export const clampPdfGestureZoomScale = (value: number) => {
   if (!Number.isFinite(value) || value <= 0) {
-    return PDF_GESTURE_MIN_SCALE;
+    return C.PDF_GESTURE_MIN_SCALE;
   }
 
   return roundNumber(
-    clampRange(value, PDF_GESTURE_MIN_SCALE, PDF_GESTURE_MAX_SCALE),
+    clampRange(value, C.PDF_GESTURE_MIN_SCALE, C.PDF_GESTURE_MAX_SCALE),
     3,
   );
 };
@@ -58,14 +49,14 @@ export const resolvePdfBarRenderRatio = ({
 }) => {
   const clampedPercent = clampPdfBarZoomPercent(zoomPercent);
   const normalizedPercent = clampedPercent / 100;
-  const ratioRange = PDF_BAR_MAX_RENDER_RATIO - PDF_BAR_MIN_RENDER_RATIO;
+  const ratioRange = C.PDF_BAR_MAX_RENDER_RATIO - C.PDF_BAR_MIN_RENDER_RATIO;
 
   if (!Number.isFinite(ratioRange) || ratioRange <= 0) {
-    return PDF_BAR_MAX_RENDER_RATIO;
+    return C.PDF_BAR_MAX_RENDER_RATIO;
   }
 
   return roundNumber(
-    PDF_BAR_MIN_RENDER_RATIO + normalizedPercent * ratioRange,
+    C.PDF_BAR_MIN_RENDER_RATIO + normalizedPercent * ratioRange,
     4,
   );
 };
@@ -93,21 +84,21 @@ export const resolvePdfBarZoomPercentFromRenderScale = ({
   const safeFitScale = resolveSafeFitScale(fitScale);
   const safeRenderScale =
     Number.isFinite(renderScale) && renderScale > 0
-      ? clampRange(renderScale, FIT_MIN_SCALE, FIT_MAX_SCALE)
+      ? clampRange(renderScale, C.FIT_MIN_SCALE, C.FIT_MAX_SCALE)
       : safeFitScale;
-  const ratioRange = PDF_BAR_MAX_RENDER_RATIO - PDF_BAR_MIN_RENDER_RATIO;
+  const ratioRange = C.PDF_BAR_MAX_RENDER_RATIO - C.PDF_BAR_MIN_RENDER_RATIO;
 
   if (!Number.isFinite(ratioRange) || ratioRange <= 0) {
-    return PDF_BAR_MAX_PERCENT;
+    return C.PDF_BAR_MAX_PERCENT;
   }
 
   const boundedRatio = clampRange(
     safeRenderScale / safeFitScale,
-    PDF_BAR_MIN_RENDER_RATIO,
-    PDF_BAR_MAX_RENDER_RATIO,
+    C.PDF_BAR_MIN_RENDER_RATIO,
+    C.PDF_BAR_MAX_RENDER_RATIO,
   );
   const normalizedPercent =
-    ((boundedRatio - PDF_BAR_MIN_RENDER_RATIO) / ratioRange) * 100;
+    ((boundedRatio - C.PDF_BAR_MIN_RENDER_RATIO) / ratioRange) * 100;
 
   return clampPdfBarZoomPercent(normalizedPercent);
 };

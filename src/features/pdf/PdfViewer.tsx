@@ -14,7 +14,7 @@ import {
   PDF_PAGE_PREFETCH_EXTRA_PAGES,
   PDF_PAGE_PREFETCH_OVERSCAN_VIEWPORTS,
   PDF_PAGE_RENDER_OVERSCAN_VIEWPORTS,
-} from "@constants/web/pdf";
+} from "@/features/pdf";
 import { usePdfCurrentPage } from "./hooks/usePdfCurrentPage";
 import {
   usePdfDocument,
