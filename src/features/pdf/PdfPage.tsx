@@ -8,24 +8,24 @@ import type {
   PdfJsRenderTask,
   PdfJsTextContent,
   PdfPageSearchMatch,
-} from "@/components/pdf/pdfViewerTypes";
+} from "@/features/pdf/pdfViewerTypes";
 import {
   getPdfErrorDetails,
   isPdfAbortError,
   isPdfTextItem,
-} from "@/components/pdf/pdfViewerTypes";
-import { resolvePdfRenderBackingStore } from "@/components/pdf/pdfRenderQuality";
+} from "@/features/pdf/pdfViewerTypes";
+import { resolvePdfRenderBackingStore } from "@/features/pdf/pdfRenderQuality";
 import {
   getCachedPdfPageBitmap,
   setCachedPdfPageBitmap,
-} from "@/components/pdf/pdfPageBitmapCache";
+} from "@/features/pdf/pdfPageBitmapCache";
 import {
   applyPdfOverlayViewportStyles,
   applyPdfTextLayerViewportStyles,
   commitPdfBitmapToCanvas,
   createDetachedPdfCanvasSurface,
   prepareDetachedPdfCanvasSurfaceForRender,
-} from "@/components/pdf/pdfCanvasRenderUtils";
+} from "@/features/pdf/pdfCanvasRenderUtils";
 
 interface PdfPageProps {
   documentKey: string;

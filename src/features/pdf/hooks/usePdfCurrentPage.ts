@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { PdfScrollDiagnostics } from "@/components/pdf/pdfViewerTypes";
+import type { PdfScrollDiagnostics } from "@/features/pdf/pdfViewerTypes";
 
 interface UsePdfCurrentPageOptions {
   numPages: number;

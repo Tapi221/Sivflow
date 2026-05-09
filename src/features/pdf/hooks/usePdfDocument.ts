@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { acquirePdfDocumentSession } from "@/components/pdf/pdfDocumentSessionRegistry";
-import { createPdfPageResourceCache } from "@/components/pdf/pdfPageResourceCache";
+import { acquirePdfDocumentSession } from "@/features/pdf/pdfDocumentSessionRegistry";
+import { createPdfPageResourceCache } from "@/features/pdf/pdfPageResourceCache";
 import { getPdfOcrPageRecord } from "@/lib/pdf/pdfOcrStore";
 import {
   buildPdfTextSelection,
@@ -21,12 +21,12 @@ import type {
   PdfViewerOptions,
   PdfViewerSourceMeta,
   SourceLoadErrorKind,
-} from "@/components/pdf/pdfViewerTypes";
+} from "@/features/pdf/pdfViewerTypes";
 import {
   getErrorMessage,
   isPdfAbortError,
   isPdfTextItem,
-} from "@/components/pdf/pdfViewerTypes";
+} from "@/features/pdf/pdfViewerTypes";
 
 interface UsePdfDocumentOptions {
   docId?: string;
