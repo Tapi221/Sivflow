@@ -1,17 +1,17 @@
 import { useAuthSession } from "@/contexts/AuthContext";
-import { defaultPdfViewerOptions } from "@/components/pdf/defaultPdfViewerOptions";
-import type { PdfViewerHandle } from "@/components/pdf/PdfViewer";
-import { usePdfContainerWidth } from "@/components/pdf/hooks/usePdfContainerWidth";
-import { usePdfDocument } from "@/components/pdf/hooks/usePdfDocument";
-import { usePdfSourceResolver } from "@/components/pdf/hooks/usePdfSourceResolver";
-import { usePdfViewerPersistence } from "@/components/pdf/hooks/usePdfViewerPersistence";
+import { defaultPdfViewerOptions } from "@/features/pdf/defaultPdfViewerOptions";
+import type { PdfViewerHandle } from "@/features/pdf/PdfViewer";
+import { usePdfContainerWidth } from "@/features/pdf/hooks/usePdfContainerWidth";
+import { usePdfDocument } from "@/features/pdf/hooks/usePdfDocument";
+import { usePdfSourceResolver } from "@/features/pdf/hooks/usePdfSourceResolver";
+import { usePdfViewerPersistence } from "@/features/pdf/hooks/usePdfViewerPersistence";
 import {
   FIT_MAX_SCALE,
   FIT_MIN_SCALE,
   FIT_PADDING_X,
   clampScale,
   getViewerStateFromSession,
-} from "@/components/pdf/pdfViewerStateStorage";
+} from "@/features/pdf/pdfViewerStateStorage";
 import {
   PdfWorkspaceContext,
   PdfWorkspaceDocumentContext,
@@ -19,7 +19,7 @@ import {
   type PdfWorkspaceContextValue,
   type PdfWorkspaceDocumentContextValue,
   type PdfWorkspaceNavigationContextValue,
-} from "@/components/pdf/PdfWorkspaceContexts";
+} from "@/features/pdf/PdfWorkspaceContexts";
 import type {
   DocumentItem,
   PdfPageLayoutMode,

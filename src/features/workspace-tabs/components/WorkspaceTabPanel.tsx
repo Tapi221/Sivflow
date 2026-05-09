@@ -1,8 +1,8 @@
 import type { ComponentProps } from "react";
 import { useMemo } from "react";
 import { CardPane } from "@/components/folder/panes/CardPane";
-import { PdfPane } from "@/components/pdf/PdfPane";
-import { PdfWorkspaceProvider } from "@/components/pdf/PdfWorkspaceProvider";
+import { PdfPane } from "@/features/pdf/PdfPane";
+import { PdfWorkspaceProvider } from "@/features/pdf/PdfWorkspaceProvider";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import {
   WorkspaceHeaderToolbar,

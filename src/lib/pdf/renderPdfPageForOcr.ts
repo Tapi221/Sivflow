@@ -1,4 +1,4 @@
-import type { PdfDocumentController } from "@/components/pdf/hooks/usePdfDocument";
+import type { PdfDocumentController } from "@/features/pdf/hooks/usePdfDocument";
 
 export type PdfOcrPreprocessMode = "none" | "grayscale" | "binary";
 

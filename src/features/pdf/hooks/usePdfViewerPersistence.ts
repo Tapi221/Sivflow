@@ -5,7 +5,7 @@ import {
   saveViewerStateToSession,
   VIEWER_STATE_DEBOUNCE_MS,
   ZOOM_STEP,
-} from "@/components/pdf/pdfViewerStateStorage";
+} from "@/features/pdf/pdfViewerStateStorage";
 import type {
   PdfPageLayoutMode,
   PdfSidePanelTab,

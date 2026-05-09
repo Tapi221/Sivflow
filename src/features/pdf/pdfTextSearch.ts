@@ -2,8 +2,8 @@ import type {
   PdfJsTextContent,
   PdfJsTextItem,
   PdfPageSearchMatch,
-} from "@/components/pdf/pdfViewerTypes";
-import { isPdfTextItem } from "@/components/pdf/pdfViewerTypes";
+} from "@/features/pdf/pdfViewerTypes";
+import { isPdfTextItem } from "@/features/pdf/pdfViewerTypes";
 
 type SearchSegment = {
   itemIndex: number;
