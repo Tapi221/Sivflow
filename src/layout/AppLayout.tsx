@@ -3,7 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 
 import { SettingsPanelDialog } from "@/features/settings/components/SettingsPanelDialog";
 import { useWorkspaceTabsRouteSync } from "@/features/workspace-tabs/hooks/useWorkspaceTabsRouteSync";
-import { AppSidebar } from "./AppSidebar";
+import { AppSidebar } from "../features/sidebar/Sidebar.desktop";
 import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
 
