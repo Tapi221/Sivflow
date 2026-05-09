@@ -18,7 +18,7 @@ export type TimelineViewMode = "month" | "week" | "days";
 
 export type TimelineUnitBuffer = {
   before: number;
-  after: number;
+  after: number;columnWidth
 };
 
 export type TimelineColumn = {

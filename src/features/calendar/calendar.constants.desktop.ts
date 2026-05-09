@@ -1,10 +1,8 @@
+//
 export const CALENDAR_WEEKDAY_HEADER_HEIGHT = 32;
+export const WEEKDAY_HEADER_HEIGHT_PX = CALENDAR_WEEKDAY_HEADER_HEIGHT;
 export const CALENDAR_DAY_HEADER_CELL_HEIGHT = 112;
 
-export const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
-
-export const WEEKDAY_HEADER_HEIGHT_PX =
-  CALENDAR_WEEKDAY_HEADER_HEIGHT;
 
 export const INITIAL_MONTH_BUFFER = 2;
 export const MONTH_EXTEND_COUNT = 4;
@@ -12,9 +10,7 @@ export const MONTH_EXTEND_COUNT = 4;
 export const MONTH_SCROLL_EDGE_THRESHOLD_PX = 560;
 export const MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX = 56;
 
-export const DEFAULT_MONTH_ROW_HEIGHT =
-  CALENDAR_DAY_HEADER_CELL_HEIGHT;
-
+export const DEFAULT_MONTH_ROW_HEIGHT = CALENDAR_DAY_HEADER_CELL_HEIGHT;
 export const MIN_MONTH_ROW_HEIGHT = 72;
 export const MAX_MONTH_ROW_HEIGHT = 260;
 
@@ -28,6 +24,7 @@ export const clampMonthRowHeight = (value: number) =>
     MAX_MONTH_ROW_HEIGHT,
     Math.max(MIN_MONTH_ROW_HEIGHT, value),
   );
+
 
 export const readStoredMonthRowHeight = () => {
   if (typeof window === "undefined") {
@@ -75,3 +72,26 @@ export const createInitialMonthOffsetRange = () => ({
   startOffset: -INITIAL_MONTH_BUFFER,
   endOffset: INITIAL_MONTH_BUFFER,
 });
+
+//Timeline View
+export const TIMELINE_HEADER_HEIGHT = 40;
+
+export const TIMELINE_DEFAULT_ROW_HEIGHT = 168;
+
+export const TIMELINE_DEFAULT_LANE_LABEL_WIDTH = 168;
+export const TIMELINE_DEFAULT_ROW_COUNT = 4;
+
+
+
+//Side Calendar
+export const WEEK_STARTS_ON_MONDAY = 1;
+export const TIME_COLUMN_WIDTH = 74;
+export const DAY_COLUMN_MIN_WIDTH = 136;
+export const DEFAULT_HOUR_ROW_HEIGHT = 88;
+export const INITIAL_CALENDAR_BUFFER_DAYS = 7;
+export const CALENDAR_EXTEND_DAYS = 14;
+export const TIMELINE_EDGE_THRESHOLD_PX = 320;
+export const TIMELINE_DAY_COLUMN_WIDTH = 104;
+export const TIMELINE_LANE_LABEL_WIDTH = 168;
+export const TIMELINE_SKELETON_ROW_COUNT = 4;
+export const MINI_CALENDAR_CELL_COUNT = 42;

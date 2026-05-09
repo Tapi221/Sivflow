@@ -5,7 +5,7 @@ import {
   useBreadcrumbAction,
   useBreadcrumbExtraCrumbs,
 } from "@/contexts/BreadcrumbContext";
-import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
+import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
 import type {
   WorkspaceSidebarSection,
   WorkspaceTab,

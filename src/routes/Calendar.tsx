@@ -1,4 +1,4 @@
-import { CalendarPane } from "@/features/calendar/ui/CalendarPane";
+import { CalendarPane } from "@/features/calendar/CalendarPane";
 
 const Calendar = () => {
   return (
