@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/popover";
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 
-import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
+import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";

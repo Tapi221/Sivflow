@@ -1,4 +1,4 @@
-import { CalendarWorkspaceToolbar } from "@/features/calendar/ui/CalendarPane";
+import { CalendarWorkspaceToolbar } from "@/features/calendar/CalendarPane";
 
 const Tasks = () => {
   return (

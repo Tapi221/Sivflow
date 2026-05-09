@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo } from "react";
 
 import { buildCardSetViewBreadcrumbs } from "@/features/breadcrumbs/builders";
-import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
+import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 

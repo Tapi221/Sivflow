@@ -1,5 +1,5 @@
 import { useToast } from "@/contexts/ToastContext";
-import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/types";
+import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
 import { ExplorerSearchSourceBridge } from "@/features/global-search/components/ExplorerSearchSourceBridge";
 import { MfCardImportDialog } from "@/features/cardFile/presentation/web/MfCardImportDialog";
 import { MfDeckImportDialog } from "@/features/deckFile/presentation/web/MfDeckImportDialog";

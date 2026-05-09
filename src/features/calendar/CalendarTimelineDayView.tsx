@@ -4,18 +4,14 @@ import { Fragment, useMemo } from "react";
 import {
   buildTimelineColumns,
   getTimelineColumnWidth,
-} from "./ExplorerCalendarTimelineDayView.shared";
+} from "./CalendarTimelineDayView.shared";
 import type {
   TimelineUnitBuffer,
   TimelineViewMode,
-} from "./ExplorerCalendarTimelineDayView.shared";
+} from "./CalendarTimelineDayView.shared";
+import * as C from "@/features/calendar/calendar.constants.desktop";
 
-const HEADER_HEIGHT = 40;
-const ROW_HEIGHT = 168;
-const DEFAULT_LANE_LABEL_WIDTH = 168;
-const DEFAULT_ROW_COUNT = 4;
-
-type ExplorerCalendarTimelineDayViewProps = {
+type CalendarTimelineDayViewProps = {
   viewMode: TimelineViewMode;
   anchorDate: Date;
   timelineUnitBuffer: TimelineUnitBuffer;
@@ -28,17 +24,17 @@ type ExplorerCalendarTimelineDayViewProps = {
   onSelectDate?: (date: Date) => void;
 };
 
-export const ExplorerCalendarTimelineDayView = ({
+export const CalendarTimelineDayView = ({
   viewMode,
   anchorDate,
   timelineUnitBuffer,
   dayColumnWidth,
-  laneLabelWidth = DEFAULT_LANE_LABEL_WIDTH,
-  rowCount = DEFAULT_ROW_COUNT,
+  laneLabelWidth = C.TIMELINE_DEFAULT_LANE_LABEL_WIDTH,
+  rowCount = C.TIMELINE_DEFAULT_ROW_COUNT,
   scrollContainerRef,
   onScroll,
   onSelectDate,
-}: ExplorerCalendarTimelineDayViewProps) => {
+}: CalendarTimelineDayViewProps) => {
   const columns = useMemo(() => {
     return buildTimelineColumns(viewMode, anchorDate, timelineUnitBuffer);
   }, [anchorDate, timelineUnitBuffer, viewMode]);
@@ -71,7 +67,7 @@ export const ExplorerCalendarTimelineDayView = ({
               style={{
                 gridTemplateColumns: `repeat(${columns.length}, ${columnWidth}px)`,
                 width: `${gridWidth}px`,
-                height: `${HEADER_HEIGHT}px`,
+                height: `${C.TIMELINE_HEADER_HEIGHT}px`,
               }}
             >
               {columns.map((column) => (
@@ -99,13 +95,13 @@ export const ExplorerCalendarTimelineDayView = ({
             <Fragment key={index}>
               <div
                 className="sticky left-0 z-10 border-b border-r border-[#e5e7eb] bg-white"
-                style={{ height: `${ROW_HEIGHT}px` }}
+                style={{ height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px` }}
               />
 
               <div
                 className="relative border-b border-[#e5e7eb] bg-white"
                 style={{
-                  height: `${ROW_HEIGHT}px`,
+                  height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px` ,
                   width: `${gridWidth}px`,
                 }}
               >

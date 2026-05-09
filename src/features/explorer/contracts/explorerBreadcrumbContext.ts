@@ -2,4 +2,4 @@ export {
   EMPTY_EXPLORER_BREADCRUMB_CONTEXT,
   areExplorerBreadcrumbContextsEqual,
   type ExplorerBreadcrumbContext,
-} from "@/features/breadcrumbs/types";
+} from "@/features/breadcrumbs/breadcrumbs.types";

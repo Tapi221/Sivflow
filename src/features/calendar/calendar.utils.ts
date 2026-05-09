@@ -10,7 +10,7 @@ import type {
   CalendarStudyLogLike,
   CalendarTimestampLike,
   CalendarWeekStartDay,
-} from "./calendarTypes";
+} from "./calendar.types";
 
 type CalendarArrowKey = keyof typeof CALENDAR_ARROW_DIFF_MAP;
 

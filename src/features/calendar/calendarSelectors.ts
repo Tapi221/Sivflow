@@ -26,7 +26,7 @@ import type {
   CalendarStudyLogLike,
   CalendarSummaryViewModel,
   CalendarWeekStartDay,
-} from "@/features/calendar/domain/calendarTypes";
+} from "@/features/calendar/calendar.types";
 import {
   getCalendarIntensity,
   getStreakFromLogs,
@@ -35,7 +35,7 @@ import {
   normalizeDateOnly,
   toDate,
   toDateKey,
-} from "@/features/calendar/domain/calendarUtils";
+} from "@/features/calendar/calendar.utils";
 
 const isDeletedCard = (card: CalendarCardLike) => {
   return Boolean(

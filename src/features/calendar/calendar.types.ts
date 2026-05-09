@@ -108,3 +108,34 @@ export type CalendarScreenViewModel = {
   grid: CalendarGridViewModel;
   selectedDateLabel: string;
 };
+
+
+//CalendarPane.tsx
+export type CalendarViewMode =
+  | "month"
+  | "week"
+  | "days";
+
+export type CalendarToolbarMode =
+  | "calendar"
+  | "timeline";
+
+export type CalendarDemoEvent = {
+  id: string;
+  title: string;
+  startsAt: Date;
+  minutes: number;
+};
+
+export type TimelineBufferDays = {
+  before: number;
+  after: number;
+};
+
+export type MiniCalendarDay = {
+  date: Date;
+  dayNumber: string;
+  isCurrentMonth: boolean;
+  isSelected: boolean;
+  isToday: boolean;
+};
