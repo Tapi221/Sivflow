@@ -9,7 +9,7 @@ import { SurfaceButton } from "@/components/ui/surface-button";
 import { Switch } from "@/components/ui/switch";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useTags } from "@/hooks/settings/useTags";
-import { getTagColorKey, type TagColorKey } from "@/lib/tags/tagColor";
+import { getTagColorKey, type TagColorKey } from "@/features/tag/tagColor";
 import { cn } from "@/lib/utils";
 import { Tag } from "@/ui/icons";
 import {

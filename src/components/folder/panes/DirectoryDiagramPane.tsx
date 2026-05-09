@@ -20,7 +20,7 @@ import {
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
-import { getTagColorKey, type TagColorKey } from "@/lib/tags/tagColor";
+import { getTagColorKey, type TagColorKey } from "@/features/tag/tagColor";
 import { cn } from "@/lib/utils";
 
 import { DirectoryMindMapCanvas } from "./directory/DirectoryMindMapCanvas";

@@ -1,4 +1,4 @@
-import type { TagColorKey } from "@/lib/tags/tagColor";
+import type { TagColorKey } from "@/features/tag/tagColor";
 
 export type DirectoryTreeNode = {
   id: string;
