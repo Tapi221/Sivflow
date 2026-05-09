@@ -10,7 +10,7 @@ import {
   FIT_PADDING_X,
   VIEWER_STATE_DEBOUNCE_MS,
   ZOOM_STEP,
-} from "@constants/web/pdf";
+} from "@/features/pdf";
 
 export {
   EPSILON,

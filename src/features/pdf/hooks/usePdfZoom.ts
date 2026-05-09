@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import type { PdfScaleChangeSource } from "@/features/pdf/pdfViewerTypes";
-import { PDF_GESTURE_WHEEL_ZOOM_INTENSITY } from "@constants/web/pdf";
+import { PDF_GESTURE_WHEEL_ZOOM_INTENSITY } from "@/features/pdf";
 import {
   DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR,
   shouldHandleZoomInputTarget,
