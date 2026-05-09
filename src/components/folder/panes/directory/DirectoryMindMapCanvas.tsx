@@ -1,7 +1,7 @@
 import "@xyflow/react/dist/style.css";
 
 import { TagBadge } from "@/components/tag/TagBadge";
-import type { TagColorKey } from "@/lib/tags/tagColor";
+import type { TagColorKey } from "@/features/tag/tagColor";
 import { cn } from "@/lib/utils";
 import { HelpCircle, Star } from "@/ui/icons";
 import {

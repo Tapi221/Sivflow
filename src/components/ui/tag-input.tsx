@@ -23,7 +23,7 @@ import {
   getTagColorKey,
   getTagColorSwatchStyle,
   type TagColorKey,
-} from "@/lib/tags/tagColor";
+} from "@/features/tag/tagColor";
 
 interface TagInputProps {
   tags: string[];

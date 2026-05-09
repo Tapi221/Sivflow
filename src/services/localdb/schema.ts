@@ -1,5 +1,5 @@
 import type { LocalDB } from "./LocalDB";
-import { getTagColorKey } from "@/lib/tags/tagColor";
+import { getTagColorKey } from "@/features/tag/tagColor";
 
 export const defineSchema = (db: LocalDB): void => {
   db.version(1).stores({

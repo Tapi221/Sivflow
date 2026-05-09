@@ -9,7 +9,7 @@ import {
   getTagColorKey as normalizeTagColorKey,
   TAG_COLOR_KEYS,
   type TagColorKey,
-} from "@/lib/tags/tagColor";
+} from "@/features/tag/tagColor";
 
 export type TagCategory = string;
 export type Tag = TagRecord;

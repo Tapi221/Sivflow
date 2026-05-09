@@ -1,5 +1,5 @@
 import { Position, type Edge, type Node } from "@xyflow/react";
-import type { TagColorKey } from "@/lib/tags/tagColor";
+import type { TagColorKey } from "@/features/tag/tagColor";
 
 import type {
   DirectoryBadgeVisibility,

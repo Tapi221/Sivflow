@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTags } from "@/hooks/settings/useTags";
 import { TagBadge } from "@/components/tag/TagBadge";
-import { getTagColorKey } from "@/lib/tags/tagColor";
+import { getTagColorKey } from "@/features/tag/tagColor";
 
 interface BulkTagDialogProps {
   open: boolean;
