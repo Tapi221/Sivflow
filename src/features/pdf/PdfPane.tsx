@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 import { useEffect } from "react";
-import { PdfOverlayToolbar } from "./PdfOverlayToolbar";
+import { PdfOverlayToolbar } from "./PdfToolbar";
 import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
-import { FIT_MAX_SCALE, FIT_MIN_SCALE } from "./pdfViewerStateStorage";
+import * as C from "@/features/pdf/pdf.constants.desktop";
 import { usePdfWorkspace } from "./usePdfWorkspace";
 
 
@@ -129,8 +129,8 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
               navigationIdentity={workspaceDoc.id}
               pageOrder={normalizedThumbnailOrder}
               scale={scale}
-              minScale={FIT_MIN_SCALE}
-              maxScale={FIT_MAX_SCALE}
+              minScale={C.FIT_MIN_SCALE}
+              maxScale={C.FIT_MAX_SCALE}
               opaqueCanvas={opaqueCanvas}
               pageLayoutMode={pageLayoutMode}
               spreadGap={16}

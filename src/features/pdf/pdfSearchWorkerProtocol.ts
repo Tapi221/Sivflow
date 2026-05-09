@@ -1,7 +1,7 @@
 import type {
   PdfJsTextContent,
   PdfPageSearchMatch,
-} from "@/features/pdf/pdfViewerTypes";
+} from "@/features/pdf/pdfViewer.types";
 
 export type PdfSearchWorkerIndexPageRequest = {
   type: "index-page";

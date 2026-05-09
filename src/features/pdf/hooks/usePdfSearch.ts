@@ -7,7 +7,7 @@ import type {
   PdfJsDocument,
   PdfJsTextContent,
   PdfPageSearchMatch,
-} from "@/features/pdf/pdfViewerTypes";
+} from "@/features/pdf/pdfViewer.types";
 import type {
   PdfSearchWorkerRequest,
   PdfSearchWorkerResponse,

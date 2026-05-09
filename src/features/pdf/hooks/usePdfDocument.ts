@@ -21,12 +21,12 @@ import type {
   PdfViewerOptions,
   PdfViewerSourceMeta,
   SourceLoadErrorKind,
-} from "@/features/pdf/pdfViewerTypes";
+} from "@/features/pdf/pdfViewer.types";
 import {
   getErrorMessage,
   isPdfAbortError,
   isPdfTextItem,
-} from "@/features/pdf/pdfViewerTypes";
+} from "@/features/pdf/pdfViewer.types";
 
 interface UsePdfDocumentOptions {
   docId?: string;

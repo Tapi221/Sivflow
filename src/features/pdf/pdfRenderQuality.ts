@@ -1,4 +1,4 @@
-import type { PageSize } from "@/features/pdf/pdfViewerTypes";
+import type { PageSize } from "@/features/pdf/pdfViewer.types";
 
 export interface PdfRenderBackingStoreConstraints {
   readonly maxPreferredDevicePixelRatio: number;

@@ -3,23 +3,10 @@
  * キーは docId 単位で分離しているため、複数 PDF を跨いで状態が混ざらない。
  */
 import type { PdfViewerState } from "@/types";
-import {
-  EPSILON,
-  FIT_MAX_SCALE,
-  FIT_MIN_SCALE,
-  FIT_PADDING_X,
-  VIEWER_STATE_DEBOUNCE_MS,
-  ZOOM_STEP,
-} from "@/features/pdf";
+import * as C from "@/features/pdf/pdf.constants.desktop";
 
-export {
-  EPSILON,
-  FIT_MAX_SCALE,
-  FIT_MIN_SCALE,
-  FIT_PADDING_X,
-  VIEWER_STATE_DEBOUNCE_MS,
-  ZOOM_STEP,
-};
+
+
 
 // ✅ ドキュメント切替保護：呼び出し側で docId を指定する
 export const getViewerStateFromSession = (
@@ -52,5 +39,5 @@ export const clampScale = (value: number): number => {
     return 1;
   }
 
-  return Math.min(Math.max(value, FIT_MIN_SCALE), FIT_MAX_SCALE);
+  return Math.min(Math.max(value, C.FIT_MIN_SCALE), C.FIT_MAX_SCALE);
 };

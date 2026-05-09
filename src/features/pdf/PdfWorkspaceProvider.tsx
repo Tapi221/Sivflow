@@ -6,12 +6,6 @@ import { usePdfDocument } from "@/features/pdf/hooks/usePdfDocument";
 import { usePdfSourceResolver } from "@/features/pdf/hooks/usePdfSourceResolver";
 import { usePdfViewerPersistence } from "@/features/pdf/hooks/usePdfViewerPersistence";
 import {
-  FIT_MIN_SCALE,
-  FIT_PADDING_X,
-  clampScale,
-  getViewerStateFromSession,
-} from "@/features/pdf/pdfViewerStateStorage";
-import {
   PdfWorkspaceContext,
   PdfWorkspaceDocumentContext,
   PdfWorkspaceNavigationContext,
@@ -72,7 +66,7 @@ const scaleToZoomUiPercent = (value: number) => {
     return C.PDF_ZOOM_UI_MAX_PERCENT;
   }
 
-  const ratio = (clampedScale - FIT_MIN_SCALE) / C.PDF_SCALE_RANGE;
+  const ratio = (clampedScale - C.FIT_MIN_SCALE) / C.PDF_SCALE_RANGE;
   const normalizedRatio = Math.min(1, Math.max(0, ratio));
 
   return Number(
@@ -87,14 +81,14 @@ const zoomUiPercentToScale = (value: number) => {
   const clampedUiPercent = clampZoomUiPercent(value);
 
   if (C.PDF_SCALE_RANGE <= 0 || C.PDF_ZOOM_UI_RANGE_PERCENT <= 0) {
-    return clampScale(FIT_MIN_SCALE);
+    return clampScale(C.FIT_MIN_SCALE);
   }
 
   const ratio =
     (clampedUiPercent - C.PDF_ZOOM_UI_MIN_PERCENT) / C.PDF_ZOOM_UI_RANGE_PERCENT;
 
   return clampScale(
-    Number((FIT_MIN_SCALE + ratio * C.PDF_SCALE_RANGE).toFixed(3)),
+    Number((C.FIT_MIN_SCALE + ratio * C.PDF_SCALE_RANGE).toFixed(3)),
   );
 };
 
@@ -235,7 +229,7 @@ export const PdfWorkspaceProvider = ({
         nextPageLayoutMode === "double" ? C.PDF_DOUBLE_PAGE_GAP : 0;
       const usableWidth = Math.max(
         1,
-        containerWidth - FIT_PADDING_X - horizontalGap,
+        containerWidth - C.FIT_PADDING_X - horizontalGap,
       );
 
       return clampScale(

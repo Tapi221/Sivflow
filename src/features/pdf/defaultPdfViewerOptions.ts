@@ -1,4 +1,4 @@
-import type { PdfViewerOptions } from "./pdfViewerTypes";
+import type { PdfViewerOptions } from "./pdfViewer.types";
 
 export const defaultPdfViewerOptions: PdfViewerOptions = {
   enableXfa: false,
