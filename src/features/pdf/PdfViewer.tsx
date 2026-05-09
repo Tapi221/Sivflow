@@ -28,9 +28,9 @@ import type {
   PdfViewerOptions,
   PdfViewerSourceMeta,
   SourceLoadErrorKind,
-} from "./pdfViewerTypes";
+} from "./pdfViewer.types";
 
-export type { PdfViewerHandle } from "./pdfViewerTypes";
+export type { PdfViewerHandle } from "./pdfViewer.types";
 
 interface PdfViewerCommonProps {
   scale: number;

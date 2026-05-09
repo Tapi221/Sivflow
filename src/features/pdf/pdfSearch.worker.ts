@@ -8,7 +8,7 @@ import type {
   PdfJsTextContent,
   PdfJsTextItem,
   PdfPageSearchMatch,
-} from "./pdfViewerTypes";
+} from "./pdfViewer.types";
 
 type SearchSegment = {
   itemIndex: number;

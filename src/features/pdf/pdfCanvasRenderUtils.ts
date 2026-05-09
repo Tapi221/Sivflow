@@ -1,6 +1,6 @@
 import type { PdfPageBitmap } from "./pdfPageBitmapCache";
 import type { PdfRenderBackingStore } from "./pdfRenderQuality";
-import type { PdfJsViewport } from "./pdfViewerTypes";
+import type { PdfJsViewport } from "./pdfViewer.types";
 
 export interface PdfDetachedCanvasSurface {
   readonly canvas: HTMLCanvasElement;

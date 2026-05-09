@@ -23,7 +23,7 @@ import {
   pdfOverlayToolbarSliderThumbClassName,
   pdfOverlayToolbarSliderTrackClassName,
   pdfOverlayToolbarTotalClassName,
-} from "./pdfOverlayToolbarClassNames";
+} from "./pdfToolbar.classname";
 
 type PdfFitMode = "width" | "manual";
 

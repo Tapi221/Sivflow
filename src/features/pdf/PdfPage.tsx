@@ -8,12 +8,12 @@ import type {
   PdfJsRenderTask,
   PdfJsTextContent,
   PdfPageSearchMatch,
-} from "@/features/pdf/pdfViewerTypes";
+} from "@/features/pdf/pdfViewer.types";
 import {
   getPdfErrorDetails,
   isPdfAbortError,
   isPdfTextItem,
-} from "@/features/pdf/pdfViewerTypes";
+} from "@/features/pdf/pdfViewer.types";
 import { resolvePdfRenderBackingStore } from "@/features/pdf/pdfRenderQuality";
 import {
   getCachedPdfPageBitmap,
