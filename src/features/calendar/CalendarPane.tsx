@@ -123,6 +123,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
               currentDate={pane.currentDate}
               selectedDate={pane.currentDate}
               scrollTargetToken={pane.monthScrollTargetToken}
+              visibleEvents={pane.googleCalendarEvents}
               onSelectDate={pane.handleSidebarSelectDate}
               onVisibleMonthChange={pane.setMonthTitleDate}
             />
