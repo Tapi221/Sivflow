@@ -8,6 +8,8 @@ export const IPC_CHANNELS = {
   oauthCancel: "oauth:cancel",
   oauthExchangeIdToken: "oauth:exchangeIdToken",
   oauthExchangeTokens: "oauth:exchangeTokens",
+  // refresh_token を使った silent なトークン更新チャンネル
+  oauthRefreshTokens: "oauth:refreshTokens",
   oauthCallback: "oauth:callback",
   windowMinimize: "window:minimize",
   windowMaximizeToggle: "window:maximizeToggle",

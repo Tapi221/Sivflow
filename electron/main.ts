@@ -38,6 +38,8 @@ type GoogleOauthTokenExchangeInput = {
 type GoogleOauthTokenExchangeResult = {
   accessToken?: string;
   idToken?: string;
+  // refresh_token は offline_access スコープ付きの初回認証時のみ返却される
+  refreshToken?: string;
 };
 
 app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
@@ -374,6 +376,7 @@ const exchangeGoogleOauthTokens = async (
     error?: string;
     error_description?: string;
     id_token?: string;
+    refresh_token?: string;
   } = {};
 
   try {
@@ -382,6 +385,7 @@ const exchangeGoogleOauthTokens = async (
       error?: string;
       error_description?: string;
       id_token?: string;
+      refresh_token?: string;
     };
   } catch {
     payload = {};
@@ -400,6 +404,75 @@ const exchangeGoogleOauthTokens = async (
       payload.error_description ||
         payload.error ||
         `Google token exchange failed (${response.status})`,
+    );
+  }
+
+  return {
+    accessToken: payload.access_token,
+    idToken: payload.id_token,
+    // Google は初回同意時のみ refresh_token を返す
+    refreshToken: payload.refresh_token,
+  };
+};
+
+/**
+ * refresh_token を使って新しい access_token を取得する。
+ * ポップアップ不要で呼び出せるため、アプリ再起動後の自動復元に使用する。
+ */
+const refreshGoogleOauthAccessToken = async ({
+  clientId,
+  refreshToken,
+}: {
+  clientId: string;
+  refreshToken: string;
+}): Promise<GoogleOauthTokenExchangeResult> => {
+  const clientSecret = getDesktopOauthClientSecret();
+  const requestBody = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
+  });
+
+  console.info("[electron][oauth] refresh_token request", {
+    client_id: clientId,
+    client_secret_present: clientSecret.length > 0,
+  });
+
+  const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: requestBody,
+  });
+
+  const responseText = await response.text();
+  let payload: {
+    access_token?: string;
+    id_token?: string;
+    error?: string;
+    error_description?: string;
+  } = {};
+
+  try {
+    payload = JSON.parse(responseText) as typeof payload;
+  } catch {
+    payload = {};
+  }
+
+  console.info("[electron][oauth] refresh_token response", {
+    status: response.status,
+    ok: response.ok,
+    access_token_present: Boolean(payload.access_token),
+    error: payload.error,
+  });
+
+  if (!response.ok || payload.error) {
+    throw new Error(
+      payload.error_description ||
+        payload.error ||
+        `Google token refresh failed (${response.status})`,
     );
   }
 
@@ -612,6 +685,17 @@ const registerIpcHandlers = (): void => {
     IPC_CHANNELS.oauthExchangeTokens,
     async (_event, input: GoogleOauthTokenExchangeInput) => {
       return exchangeGoogleOauthTokens(input);
+    },
+  );
+
+  // refresh_token を使った silent なトークン更新ハンドラ
+  ipcMain.handle(
+    IPC_CHANNELS.oauthRefreshTokens,
+    async (
+      _event,
+      input: { clientId: string; refreshToken: string },
+    ) => {
+      return refreshGoogleOauthAccessToken(input);
     },
   );
 

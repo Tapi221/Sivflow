@@ -44,6 +44,16 @@ export interface PlatformOauthApi {
   }): Promise<{
     accessToken?: string;
     idToken?: string;
+    // 初回認証時にのみ返却されるリフレッシュトークン
+    refreshToken?: string;
+  }>;
+  // refresh_token を使った silent なトークン更新
+  refreshTokens(input: {
+    clientId: string;
+    refreshToken: string;
+  }): Promise<{
+    accessToken?: string;
+    idToken?: string;
   }>;
   onCallback(handler: DesktopOauthCallbackHandler): () => void;
 }

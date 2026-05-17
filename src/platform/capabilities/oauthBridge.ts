@@ -6,5 +6,7 @@ export const oauthBridge: OAuthBridgePort = {
   cancel: () => platform.oauth.cancel(),
   exchangeIdToken: (input) => platform.oauth.exchangeIdToken(input),
   exchangeTokens: (input) => platform.oauth.exchangeTokens(input),
+  // refresh_token を使った silent なトークン更新
+  refreshTokens: (input) => platform.oauth.refreshTokens(input),
   onCallback: (handler) => platform.oauth.onCallback(handler),
 };
