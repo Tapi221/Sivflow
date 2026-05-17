@@ -5,7 +5,7 @@ import { CalendarTimelineDayView } from "./TimelineDayView";
 import { CalendarSidebar } from "./CalendarSidebar";
 import { CalendarWeekDayGrid } from "./CalendarWeekDayGrid";
 import { CalendarWorkspaceToolbar } from "./CalendarToolbar";
-import { useCalendarPane } from "./useCalendarPane";
+import { useCalendarPane } from "./hooks/useCalendarPane";
 import { SidebarPanelIcon } from "./calendar.icons";
 import type { CalendarPaneProps } from "./calendarPane.types";
 import * as C from "@/features/calendar/calendar.constants.desktop";
