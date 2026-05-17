@@ -1,5 +1,10 @@
 import { addDays } from "date-fns";
-import { GoogleAuthProvider, signInWithPopup, type Auth } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  reauthenticateWithPopup,
+  signInWithPopup,
+  type Auth,
+} from "firebase/auth";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/electron/app";
@@ -8,7 +13,7 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { auth } from "@/services/firebase";
 
 // ─────────────────────────────────────────────────────────────
-// 永続化ユーティリティ
+// 永続化ユーティリティ（すべて localStorage に統一）
 // ─────────────────────────────────────────────────────────────
 
 const LOCAL_TOKEN_KEY = "flashcard-master.gcal.access_token";
@@ -21,10 +26,7 @@ const PERSIST_WAS_CONNECTED_KEY = "flashcard-master.gcal.was_connected";
 // 期限の 5 分前にリフレッシュを試みる。
 const TOKEN_LIFETIME_MS = 55 * 60 * 1000; // 55分
 
-// タブ復帰時：残り 2 分以内ならリフレッシュをトリガーする
-const VISIBILITY_REFRESH_THRESHOLD_MS = 2 * 60 * 1000;
-
-// ── モジュールスコープのメモリキャッシュ（同一セッション内の重複読み取りを防ぐ）
+// ── モジュールスコープのメモリキャッシュ
 let _cachedToken: string | null = null;
 
 const readLocalToken = (): string | null => {
@@ -32,7 +34,6 @@ const readLocalToken = (): string | null => {
   try {
     const expiry = localStorage.getItem(LOCAL_TOKEN_EXPIRY_KEY);
     if (expiry && Date.now() > Number(expiry)) {
-      // 期限切れ → キャッシュを破棄
       localStorage.removeItem(LOCAL_TOKEN_KEY);
       localStorage.removeItem(LOCAL_TOKEN_EXPIRY_KEY);
       _cachedToken = null;
@@ -174,7 +175,7 @@ type GoogleCalendarApiEventsResponse = {
   }>;
 };
 
-type GoogleCalendarApiEvent = NonNullable<
+type GoogleCalendarApiEvent = NonNullable
   GoogleCalendarApiEventsResponse["items"]
 >[number];
 
@@ -382,7 +383,14 @@ const requestDesktopCalendarAccessToken = async (
 };
 
 // ─────────────────────────────────────────────────────────────
-// Firebase Web 向け：サイレント再認証
+// Firebase Web 向け認証
+//
+// silent=true のとき：
+//   - Firebase currentUser が存在すれば reauthenticateWithPopup を試みる
+//   - currentUser がいない場合は失敗扱い（ユーザーに明示的接続を促す）
+//
+// silent=false のとき：
+//   - 通常の signInWithPopup で同意画面を表示
 // ─────────────────────────────────────────────────────────────
 
 const requestCalendarAccessToken = async (
@@ -395,11 +403,35 @@ const requestCalendarAccessToken = async (
 
   const provider = new GoogleAuthProvider();
   provider.addScope(GOOGLE_CALENDAR_READONLY_SCOPE);
+  provider.setCustomParameters({ include_granted_scopes: "true" });
+
+  // ── サイレント再接続：currentUser がいる場合のみ試みる
+  if (silent) {
+    const user = authInstance.currentUser;
+    if (!user) {
+      throw new Error("No current user for silent reconnect");
+    }
+    try {
+      const result = await reauthenticateWithPopup(user, provider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      if (!credential?.accessToken) {
+        throw new Error("Google Calendar access token was not returned");
+      }
+      return {
+        accessToken: credential.accessToken,
+        accountEmail: result.user.email,
+      };
+    } catch (error) {
+      // ポップアップブロック・キャンセル等はすべて失敗として上に伝播
+      throw error;
+    }
+  }
+
+  // ── 明示的接続：同意画面を必ず表示
   provider.setCustomParameters({
     include_granted_scopes: "true",
-    ...(silent ? {} : { prompt: "consent" }),
+    prompt: "consent",
   });
-
   const result = await signInWithPopup(authInstance, provider);
   const credential = GoogleAuthProvider.credentialFromResult(result);
   const accessToken = credential?.accessToken;
@@ -550,7 +582,6 @@ const fetchEventsForCalendar = async ({
 export const useGoogleCalendarIntegration = ({
   authInstance = auth,
 }: UseGoogleCalendarIntegrationOptions = {}) => {
-  // ── 起動時に永続化ストレージから状態を復元
   const [accessToken, setAccessToken] = useState<string | null>(() =>
     readLocalToken(),
   );
@@ -567,24 +598,16 @@ export const useGoogleCalendarIntegration = ({
   const [error, setError] = useState<string | null>(null);
   const [isTokenExpired, setIsTokenExpired] = useState(false);
 
-  // ── サイレント再接続中は isConnected を true のまま維持するためのフラグ
-  const [isSilentReconnecting, setIsSilentReconnecting] = useState(false);
-
   const hasAutoRestored = useRef(false);
   const isSilentReconnectingRef = useRef(false);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── サイレント再接続（ユーザー操作なしでトークンを更新）
-  //
-  // ポイント：setAccessToken(null) を呼ばない。
-  // 再接続中も accessToken は古い値のまま保持し、isConnected が false に
-  // ならないようにする。成功したら新しいトークンで上書きする。
+  // ── サイレント再接続
   const silentReconnect = useCallback(async (): Promise<boolean> => {
     if (isSilentReconnectingRef.current) return false;
     if (!readWasConnected()) return false;
 
     isSilentReconnectingRef.current = true;
-    setIsSilentReconnecting(true);
 
     try {
       const { accessToken: nextToken, accountEmail: nextEmail } =
@@ -604,18 +627,14 @@ export const useGoogleCalendarIntegration = ({
 
       return true;
     } catch {
-      // サイレント再接続に失敗しても UI にはエラーを出さない
+      // サイレント再接続失敗は UI に出さない
       return false;
     } finally {
       isSilentReconnectingRef.current = false;
-      setIsSilentReconnecting(false);
     }
   }, [authInstance]);
 
-  // ── 自動リフレッシュタイマーの設定
-  //
-  // アクセストークンの有効期限の 5 分前に自動でトークンを更新する。
-  // これにより「突然切れる」体験をなくす。
+  // ── 自動リフレッシュタイマー
   const scheduleTokenRefresh = useCallback(() => {
     if (refreshTimerRef.current !== null) {
       clearTimeout(refreshTimerRef.current);
@@ -625,67 +644,25 @@ export const useGoogleCalendarIntegration = ({
     const expiry = readLocalTokenExpiry();
     if (!expiry) return;
 
-    // 期限の 5 分前にリフレッシュ（最短でも 10 秒後）
-    const msUntilRefresh = Math.max(
-      10_000,
-      expiry - Date.now() - 5 * 60 * 1000,
-    );
+    const msUntilRefresh = Math.max(10_000, expiry - Date.now() - 5 * 60 * 1000);
 
     refreshTimerRef.current = setTimeout(() => {
       refreshTimerRef.current = null;
       void silentReconnect().then((success) => {
-        if (success) {
-          scheduleTokenRefresh();
-        }
+        if (success) scheduleTokenRefresh();
       });
     }, msUntilRefresh);
   }, [silentReconnect]);
 
-  // ── アクセストークンが変わったら自動リフレッシュタイマーをリセット
   useEffect(() => {
     if (!accessToken) return;
     scheduleTokenRefresh();
-
     return () => {
-      if (refreshTimerRef.current !== null) {
-        clearTimeout(refreshTimerRef.current);
-      }
+      if (refreshTimerRef.current !== null) clearTimeout(refreshTimerRef.current);
     };
   }, [accessToken, scheduleTokenRefresh]);
 
-  // ── Page Visibility API：タブ復帰時にトークン期限を確認してリフレッシュ
-  //
-  // setTimeout はバックグラウンドタブでスロットリングされるため、
-  // タブに戻ってきたタイミングで期限切れ・期限間近なら即リフレッシュする。
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState !== "visible") return;
-      if (!readWasConnected()) return;
-
-      const expiry = readLocalTokenExpiry();
-      const isExpiredOrSoon =
-        !expiry || Date.now() > expiry - VISIBILITY_REFRESH_THRESHOLD_MS;
-
-      if (isExpiredOrSoon) {
-        void silentReconnect().then((success) => {
-          if (success) {
-            scheduleTokenRefresh();
-          }
-        });
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [silentReconnect, scheduleTokenRefresh]);
-
   // ── アプリ起動時の自動復元
-  //
-  // 「前回接続済み」の場合:
-  //   (a) localStorage にトークンがあれば → そのまま使う（カレンダー一覧だけ取得）
-  //   (b) トークンが期限切れ or 存在しない → サイレント再接続を試みる
   useEffect(() => {
     if (hasAutoRestored.current) return;
     if (!readWasConnected()) return;
@@ -695,7 +672,6 @@ export const useGoogleCalendarIntegration = ({
     const token = readLocalToken();
 
     if (token) {
-      // (a) 有効なトークンあり → カレンダー一覧だけ取得
       void fetchCalendarList(token)
         .then((nextCalendars) => {
           setCalendars(nextCalendars);
@@ -703,27 +679,20 @@ export const useGoogleCalendarIntegration = ({
           scheduleTokenRefresh();
         })
         .catch(async () => {
-          // 401 等 → accessToken を null にせずサイレント再接続を試みる
+          writeLocalToken(null);
+          setAccessToken(null);
           const success = await silentReconnect();
-          if (!success) {
-            // 本当に失敗した場合のみトークンを破棄
-            writeLocalToken(null);
-            setAccessToken(null);
-            setIsTokenExpired(true);
-          }
+          if (!success) setIsTokenExpired(true);
         });
     } else {
-      // (b) トークンなし（期限切れ含む）→ サイレント再接続
       void silentReconnect().then((success) => {
-        if (!success) {
-          setIsTokenExpired(true);
-        }
+        if (!success) setIsTokenExpired(true);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // マウント時に1回だけ実行
+  }, []);
 
-  // ── 明示的な接続（OAuth フロー実行）
+  // ── 明示的な接続（OAuth フロー）
   const connect = useCallback(async () => {
     setIsConnecting(true);
     setError(null);
@@ -740,9 +709,7 @@ export const useGoogleCalendarIntegration = ({
       const defaultIds = nextCalendars
         .filter((c) => c.selected || c.primary)
         .map((c) => c.id);
-      const restoredIds = isNewAccount
-        ? defaultIds
-        : readPersistedCalendarIds();
+      const restoredIds = isNewAccount ? defaultIds : readPersistedCalendarIds();
       const nextSelectedIds = new Set(restoredIds);
 
       setAccessToken(nextToken);
@@ -767,27 +734,21 @@ export const useGoogleCalendarIntegration = ({
     }
   }, [authInstance, scheduleTokenRefresh]);
 
-  // ── カレンダーのトグル選択（選択状態を永続化）
+  // ── カレンダーのトグル選択
   const toggleCalendar = useCallback((calendarId: string) => {
     setSelectedCalendarIds((previous) => {
       const next = new Set(previous);
-
       if (next.has(calendarId)) {
         next.delete(calendarId);
       } else {
         next.add(calendarId);
       }
-
       writePersistedCalendarIds(Array.from(next));
       return next;
     });
   }, []);
 
-  // ── イベント読み込み
-  //
-  // 401 が返った場合はサイレント再接続を試み、成功したら同じリクエストを再試行する。
-  // accessToken を即 null にしないことで、再接続中に isConnected が false に
-  // ならないようにする。本当に再接続不可能な場合のみ null にする。
+  // ── イベント読み込み（401 時はサイレント再接続してリトライ）
   const loadEvents = useCallback(
     async (rangeStart: Date, rangeEnd: Date) => {
       if (!accessToken || selectedCalendarIds.size === 0) {
@@ -827,9 +788,9 @@ export const useGoogleCalendarIntegration = ({
         const message = loadError instanceof Error ? loadError.message : "";
 
         if (message.includes("401")) {
-          // トークン期限切れ → accessToken を null にせずサイレント再接続してリトライ。
-          // これにより再接続中も isConnected が true のまま保たれ、
-          // タブ切り替えで接続が切れたように見える問題を防ぐ。
+          writeLocalToken(null);
+          setAccessToken(null);
+
           const success = await silentReconnect();
 
           if (success) {
@@ -841,14 +802,11 @@ export const useGoogleCalendarIntegration = ({
                 setIsLoadingEvents(false);
                 return;
               } catch {
-                // リトライも失敗した場合はフォールスルー
+                // リトライも失敗
               }
             }
           }
 
-          // 自動再接続に本当に失敗した場合のみトークンを破棄してユーザーに通知
-          writeLocalToken(null);
-          setAccessToken(null);
           setIsTokenExpired(true);
           setError("Google Calendar の接続が切れました。再接続してください。");
         } else {
@@ -885,7 +843,6 @@ export const useGoogleCalendarIntegration = ({
     setEvents([]);
     setSelectedCalendarIds(new Set());
     setIsTokenExpired(false);
-    setIsSilentReconnecting(false);
   }, []);
 
   const selectedCalendarIdList = useMemo(
@@ -900,8 +857,7 @@ export const useGoogleCalendarIntegration = ({
     disconnect,
     error,
     events,
-    // サイレント再接続中も接続済みとして扱う（タブ切り替えで切断して見える問題の防止）
-    isConnected: Boolean(accessToken) || isSilentReconnecting,
+    isConnected: Boolean(accessToken),
     isConnecting,
     isLoadingEvents,
     isTokenExpired,
