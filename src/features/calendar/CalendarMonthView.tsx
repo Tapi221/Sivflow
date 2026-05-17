@@ -5,19 +5,54 @@ import { useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
+import { generateColorTokens } from "@/features/calendar/calendar.color-tokens";
+import type { GoogleCalendarEvent } from "@/features/calendar/hooks/useGoogleCalendarIntegration";
 
 import { useMonthInfiniteScroll } from "./hooks/useMonthInfiniteScroll";
 import { useMonthRowResize } from "./hooks/useMonthRowResize";
 
+// ── 月初ラベル（例: "8月"）を返す純粋関数
 const getMonthAnnotation = (date: Date): string | null => {
   if (date.getDate() !== 1) return null;
   return format(date, "M月", { locale: ja });
 };
 
+// ── 1日のイベント一覧から表示用データを生成する
+//    MAX_VISIBLE_EVENTS 件を超えた場合は "+N件" バッジを出す
+const MAX_VISIBLE_EVENTS = 3;
+
+type MonthEventChipProps = {
+  event: GoogleCalendarEvent;
+};
+
+const MonthEventChip = ({ event }: MonthEventChipProps) => {
+  const tokens = generateColorTokens(event.accentColor);
+  const timeLabel = format(event.startsAt, "H:mm");
+
+  return (
+    <div
+      className="flex items-center gap-1 truncate rounded px-1 py-[2px] text-[11px] font-medium leading-[1.3]"
+      style={{
+        background: tokens.bg,
+        borderLeft: `3px solid ${tokens.border}`,
+        color: tokens.text,
+      }}
+      title={`${timeLabel} ${event.title}`}
+    >
+      <span className="shrink-0 tabular-nums opacity-80">{timeLabel}</span>
+      <span className="truncate">{event.title}</span>
+    </div>
+  );
+};
+
+// ── Props 型定義
+
 type CalendarMonthViewProps = {
   currentDate: Date;
   selectedDate: Date;
   scrollTargetToken?: number;
+  /** Google Calendar などの外部イベント一覧 */
+  visibleEvents?: GoogleCalendarEvent[];
   onSelectDate: (date: Date) => void;
   onVisibleMonthChange?: (date: Date) => void;
 };
@@ -26,6 +61,7 @@ export const CalendarMonthView = ({
   currentDate,
   selectedDate,
   scrollTargetToken = 0,
+  visibleEvents = [],
   onSelectDate,
   onVisibleMonthChange,
 }: CalendarMonthViewProps) => {
@@ -87,6 +123,17 @@ export const CalendarMonthView = ({
                 const monthAnnotation = getMonthAnnotation(day.date);
                 const isLastColumn = index % 7 === 6;
 
+                // ── この日のイベントを抽出
+                const eventsForDay = visibleEvents.filter((e) =>
+                  isSameDay(e.startsAt, day.date),
+                );
+                // 時刻順に並べる（fetch 済みだが念のため）
+                const sortedEvents = eventsForDay.sort(
+                  (a, b) => a.startsAt.getTime() - b.startsAt.getTime(),
+                );
+                const visibleChips = sortedEvents.slice(0, MAX_VISIBLE_EVENTS);
+                const overflowCount = sortedEvents.length - visibleChips.length;
+
                 return (
                   <div
                     key={day.key}
@@ -98,6 +145,7 @@ export const CalendarMonthView = ({
                       !selected && !isToday && "hover:bg-[#fbfaf7]",
                     )}
                   >
+                    {/* 日付ボタン（クリックで日付選択） */}
                     <button
                       type="button"
                       aria-label={format(day.date, "yyyy年M月d日", {
@@ -107,6 +155,7 @@ export const CalendarMonthView = ({
                       className="relative h-full w-full overflow-hidden text-left outline-none focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                       onClick={() => onSelectDate(day.date)}
                     >
+                      {/* 日付番号バッジ */}
                       <span
                         className={cn(
                           "absolute left-4 top-4 inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[length:var(--ds-layout-font-size-meta)] font-semibold tabular-nums transition-colors",
@@ -122,13 +171,29 @@ export const CalendarMonthView = ({
                         {day.dayOfMonth}
                       </span>
 
+                      {/* 月初ラベル（例: "9月"） */}
                       {monthAnnotation ? (
                         <span className="absolute right-4 top-[18px] text-[12px] font-semibold text-[#a09f98]">
                           {monthAnnotation}
                         </span>
                       ) : null}
+
+                      {/* ── イベントチップ一覧 ── */}
+                      {sortedEvents.length > 0 && (
+                        <div className="absolute inset-x-1 top-14 flex flex-col gap-[3px]">
+                          {visibleChips.map((event) => (
+                            <MonthEventChip key={event.id} event={event} />
+                          ))}
+                          {overflowCount > 0 && (
+                            <div className="pl-1 text-[11px] font-medium text-[#8f929c]">
+                              +{overflowCount}件
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </button>
 
+                    {/* 行高リサイズハンドル */}
                     <div
                       role="separator"
                       aria-label={T.MONTH_ROW_RESIZE_ARIA_LABEL}
