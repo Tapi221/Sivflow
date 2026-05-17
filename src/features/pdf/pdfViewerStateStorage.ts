@@ -5,12 +5,6 @@
 import type { PdfViewerState } from "@/types";
 import * as C from "@/features/pdf/pdf.constants.desktop";
 
-export const EPSILON = C.EPSILON;
-export const VIEWER_STATE_DEBOUNCE_MS = C.VIEWER_STATE_DEBOUNCE_MS;
-export const ZOOM_STEP = C.ZOOM_STEP;
-
-
-
 
 // ✅ ドキュメント切替保護：呼び出し側で docId を指定する
 export const getViewerStateFromSession = (

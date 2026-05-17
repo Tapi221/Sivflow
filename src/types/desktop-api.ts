@@ -13,6 +13,11 @@ export type DesktopOauthExchangeInput = {
   redirectUri: string;
 };
 
+export type DesktopOauthExchangeResult = {
+  accessToken?: string;
+  idToken?: string;
+};
+
 export type DesktopImportFileOpenPayload = {
   paths: string[];
 };
@@ -28,6 +33,9 @@ export interface DesktopOauthApi {
   start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
   exchangeIdToken(input: DesktopOauthExchangeInput): Promise<string>;
+  exchangeTokens(
+    input: DesktopOauthExchangeInput,
+  ): Promise<DesktopOauthExchangeResult>;
   onCallback(
     handler: (payload: DesktopOauthCallbackPayload) => void,
   ): () => void;

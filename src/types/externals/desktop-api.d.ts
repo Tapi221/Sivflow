@@ -36,6 +36,15 @@ export interface PlatformOauthApi {
     codeVerifier: string;
     redirectUri: string;
   }): Promise<string>;
+  exchangeTokens(input: {
+    clientId: string;
+    code: string;
+    codeVerifier: string;
+    redirectUri: string;
+  }): Promise<{
+    accessToken?: string;
+    idToken?: string;
+  }>;
   onCallback(handler: DesktopOauthCallbackHandler): () => void;
 }
 
