@@ -4,11 +4,11 @@ import { Fragment, useMemo } from "react";
 import {
   buildTimelineColumns,
   getTimelineColumnWidth,
-} from "./CalendarTimelineDayView.shared";
+} from "./TimelineDayView.shared";
 import type {
   TimelineUnitBuffer,
   TimelineViewMode,
-} from "./CalendarTimelineDayView.shared";
+} from "./TimelineDayView.shared";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 
 type CalendarTimelineDayViewProps = {

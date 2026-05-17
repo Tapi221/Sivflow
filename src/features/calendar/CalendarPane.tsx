@@ -36,13 +36,13 @@ import {
   Search,
 } from "@/ui/icons";
 import { CalendarMonthView } from "./CalendarMonthView";
-import { CalendarTimelineDayView } from "./CalendarTimelineDayView";
+import { CalendarTimelineDayView } from "./TimelineDayView";
 import {
   buildTimelineColumns,
   getTimelineAnchorColumnIndex,
   getTimelineColumnWidth,
   type TimelineUnitBuffer,
-} from "./CalendarTimelineDayView.shared";
+} from "./TimelineDayView.shared";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
