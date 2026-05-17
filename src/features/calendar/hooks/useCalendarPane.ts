@@ -1,7 +1,7 @@
 import {
   addDays,
   addMonths,
-  endOfMonth,   
+  endOfMonth,
   getDaysInMonth,
   startOfDay,
   startOfMonth,
@@ -126,8 +126,8 @@ export type UseCalendarPaneReturn = {
   googleCalendars: ReturnType<typeof useGoogleCalendarIntegration>["calendars"];
   googleCalendarError: string | null;
   googleCalendarEvents: ReturnType<
-  typeof useGoogleCalendarIntegration
->["events"];
+    typeof useGoogleCalendarIntegration
+  >["events"];
   isGoogleCalendarConnected: boolean;
   isGoogleCalendarConnecting: boolean;
   selectedCalendarIds: Set<string>;

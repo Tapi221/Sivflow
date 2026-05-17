@@ -175,9 +175,8 @@ type GoogleCalendarApiEventsResponse = {
   }>;
 };
 
-type GoogleCalendarApiEvent = NonNullable
-  GoogleCalendarApiEventsResponse["items"]
->[number];
+type GoogleCalendarApiEvent = NonNullable;
+GoogleCalendarApiEventsResponse["items"] > [number];
 
 type UseGoogleCalendarIntegrationOptions = {
   authInstance?: Auth;
@@ -412,20 +411,16 @@ const requestCalendarAccessToken = async (
       throw new Error("No current user for silent reconnect");
     }
     try {
-      const result = await reauthenticateWithPopup(user, provider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      if (!credential?.accessToken) {
-        throw new Error("Google Calendar access token was not returned");
-      }
-      return {
-        accessToken: credential.accessToken,
-        accountEmail: result.user.email,
-      };
-    } catch (error) {
-      // ポップアップブロック・キャンセル等はすべて失敗として上に伝播
-      throw error;
-    }
+const result = await reauthenticateWithPopup(user, provider);
+  const credential = GoogleAuthProvider.credentialFromResult(result);
+  if (!credential?.accessToken) {
+    throw new Error("Google Calendar access token was not returned");
   }
+  return {
+    accessToken: credential.accessToken,
+    accountEmail: result.user.email,
+  };
+}
 
   // ── 明示的接続：同意画面を必ず表示
   provider.setCustomParameters({
@@ -644,7 +639,10 @@ export const useGoogleCalendarIntegration = ({
     const expiry = readLocalTokenExpiry();
     if (!expiry) return;
 
-    const msUntilRefresh = Math.max(10_000, expiry - Date.now() - 5 * 60 * 1000);
+    const msUntilRefresh = Math.max(
+      10_000,
+      expiry - Date.now() - 5 * 60 * 1000,
+    );
 
     refreshTimerRef.current = setTimeout(() => {
       refreshTimerRef.current = null;
@@ -658,7 +656,8 @@ export const useGoogleCalendarIntegration = ({
     if (!accessToken) return;
     scheduleTokenRefresh();
     return () => {
-      if (refreshTimerRef.current !== null) clearTimeout(refreshTimerRef.current);
+      if (refreshTimerRef.current !== null)
+        clearTimeout(refreshTimerRef.current);
     };
   }, [accessToken, scheduleTokenRefresh]);
 
@@ -709,7 +708,9 @@ export const useGoogleCalendarIntegration = ({
       const defaultIds = nextCalendars
         .filter((c) => c.selected || c.primary)
         .map((c) => c.id);
-      const restoredIds = isNewAccount ? defaultIds : readPersistedCalendarIds();
+      const restoredIds = isNewAccount
+        ? defaultIds
+        : readPersistedCalendarIds();
       const nextSelectedIds = new Set(restoredIds);
 
       setAccessToken(nextToken);
