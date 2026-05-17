@@ -3,7 +3,6 @@ export const CALENDAR_WEEKDAY_HEADER_HEIGHT = 32;
 export const WEEKDAY_HEADER_HEIGHT_PX = CALENDAR_WEEKDAY_HEADER_HEIGHT;
 export const CALENDAR_DAY_HEADER_CELL_HEIGHT = 112;
 
-
 export const INITIAL_MONTH_BUFFER = 2;
 export const MONTH_EXTEND_COUNT = 4;
 
@@ -20,51 +19,34 @@ export const MONTH_ROW_HEIGHT_STORAGE_KEY =
   "flashcard-master.calendar.monthRowHeight";
 
 export const clampMonthRowHeight = (value: number) =>
-  Math.min(
-    MAX_MONTH_ROW_HEIGHT,
-    Math.max(MIN_MONTH_ROW_HEIGHT, value),
-  );
-
+  Math.min(MAX_MONTH_ROW_HEIGHT, Math.max(MIN_MONTH_ROW_HEIGHT, value));
 
 export const readStoredMonthRowHeight = () => {
   if (typeof window === "undefined") {
     return DEFAULT_MONTH_ROW_HEIGHT;
   }
 
-  const rawValue = window.localStorage.getItem(
-    MONTH_ROW_HEIGHT_STORAGE_KEY,
-  );
+  const rawValue = window.localStorage.getItem(MONTH_ROW_HEIGHT_STORAGE_KEY);
 
-  const parsedValue =
-    rawValue === null ? Number.NaN : Number(rawValue);
+  const parsedValue = rawValue === null ? Number.NaN : Number(rawValue);
 
   return Number.isFinite(parsedValue)
-    ? normalizeStoredMonthRowHeight(
-        clampMonthRowHeight(parsedValue),
-      )
+    ? normalizeStoredMonthRowHeight(clampMonthRowHeight(parsedValue))
     : DEFAULT_MONTH_ROW_HEIGHT;
 };
 
-export const normalizeStoredMonthRowHeight = (
-  value: number,
-) => {
+export const normalizeStoredMonthRowHeight = (value: number) => {
   return Math.round(value);
 };
 
-export const writeStoredMonthRowHeight = (
-  value: number,
-) => {
+export const writeStoredMonthRowHeight = (value: number) => {
   if (typeof window === "undefined") {
     return;
   }
 
   window.localStorage.setItem(
     MONTH_ROW_HEIGHT_STORAGE_KEY,
-    String(
-      normalizeStoredMonthRowHeight(
-        clampMonthRowHeight(value),
-      ),
-    ),
+    String(normalizeStoredMonthRowHeight(clampMonthRowHeight(value))),
   );
 };
 
@@ -80,8 +62,6 @@ export const TIMELINE_DEFAULT_ROW_HEIGHT = 168;
 
 export const TIMELINE_DEFAULT_LANE_LABEL_WIDTH = 168;
 export const TIMELINE_DEFAULT_ROW_COUNT = 4;
-
-
 
 //Side Calendar
 export const WEEK_STARTS_ON_MONDAY = 1;

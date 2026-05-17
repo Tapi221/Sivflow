@@ -117,7 +117,8 @@ export const CalendarMonthView = ({
       if (monthWeeks.length === 0) return null;
 
       const scrollerRect = scroller.getBoundingClientRect();
-      const sampleY = scrollerRect.top + C.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
+      const sampleY =
+        scrollerRect.top + C.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
       let closestWeek: CalendarMonthWeek | null = null;
       let closestDistance = Number.POSITIVE_INFINITY;
 
@@ -196,7 +197,8 @@ export const CalendarMonthView = ({
       if (!onVisibleMonthChange || monthWeeks.length === 0) return;
 
       const scrollerRect = scroller.getBoundingClientRect();
-      const sampleY = scrollerRect.top + C.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
+      const sampleY =
+        scrollerRect.top + C.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
       let closestWeek: CalendarMonthWeek | null = null;
       let closestDistance = Number.POSITIVE_INFINITY;
 

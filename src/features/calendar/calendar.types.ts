@@ -109,16 +109,10 @@ export type CalendarScreenViewModel = {
   selectedDateLabel: string;
 };
 
-
 //CalendarPane.tsx
-export type CalendarViewMode =
-  | "month"
-  | "week"
-  | "days";
+export type CalendarViewMode = "month" | "week" | "days";
 
-export type CalendarToolbarMode =
-  | "calendar"
-  | "timeline";
+export type CalendarToolbarMode = "calendar" | "timeline";
 
 export type CalendarDemoEvent = {
   id: string;

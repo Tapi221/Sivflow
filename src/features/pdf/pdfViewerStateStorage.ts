@@ -5,7 +5,6 @@
 import type { PdfViewerState } from "@/types";
 import * as C from "@/features/pdf/pdf.constants.desktop";
 
-
 // ✅ ドキュメント切替保護：呼び出し側で docId を指定する
 export const getViewerStateFromSession = (
   docId: string,
