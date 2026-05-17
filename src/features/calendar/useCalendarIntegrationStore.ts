@@ -15,7 +15,7 @@ let _cachedToken: string | null = null;
 export const readSessionToken = (): string | null => {
   if (_cachedToken) return _cachedToken;
   try {
-    const raw = localStorage.getItem(SESSION_TOKEN_KEY);
+    const raw = sessionStorage.getItem(SESSION_TOKEN_KEY);
     _cachedToken = raw;
     return raw;
   } catch {
