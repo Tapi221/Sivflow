@@ -1221,6 +1221,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
               scrollTargetToken={monthScrollTargetToken}
               onSelectDate={handleSidebarSelectDate}
               onVisibleMonthChange={setMonthTitleDate}
+              events={visibleEvents}
             />
           ) : (
             // ── カレンダービュー（週 / 日） ──

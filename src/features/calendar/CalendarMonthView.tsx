@@ -1,49 +1,17 @@
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import type {
-  CSSProperties,
-  KeyboardEvent,
-  PointerEvent as ReactPointerEvent,
-  UIEvent,
-} from "react";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useMemo, useRef } from "react";
 
-import {
-  buildCalendarMonthWeeks,
-  getCalendarMonthKey,
-  getCalendarWeekKey,
-  type CalendarMonthWeek,
-} from "@/features/calendar/monthGrid";
 import { cn } from "@/lib/utils";
-
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
+
+import { useMonthInfiniteScroll } from "./useMonthInfiniteScroll";
+import { useMonthRowResize } from "./useMonthRowResize";
 
 const getMonthAnnotation = (date: Date): string | null => {
   if (date.getDate() !== 1) return null;
   return format(date, "M月", { locale: ja });
-};
-
-type MonthRowResizeAnchor = {
-  weekKey: string;
-  offsetTop: number;
-};
-
-type MonthRowResizeState = {
-  startY: number;
-  startHeight: number;
-  anchor: MonthRowResizeAnchor | null;
-};
-
-type MonthViewStyle = CSSProperties & {
-  "--calendar-month-row-height": string;
 };
 
 type CalendarMonthViewProps = {
@@ -61,469 +29,38 @@ export const CalendarMonthView = ({
   onSelectDate,
   onVisibleMonthChange,
 }: CalendarMonthViewProps) => {
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const weekRowRefs = useRef<Map<string, HTMLElement>>(new Map());
-  const prependScrollHeightRef = useRef<number | null>(null);
-  const isExtendingBeforeRef = useRef(false);
-  const isExtendingAfterRef = useRef(false);
-  const isMonthRowResizingRef = useRef(false);
-  const pendingScrollWeekKeyRef = useRef<string | null>(
-    getCalendarWeekKey(currentDate),
-  );
-  const lastScrollTargetTokenRef = useRef(scrollTargetToken);
-  const visibleMonthKeyRef = useRef(getCalendarMonthKey(currentDate));
-  const monthRowResizeStateRef = useRef<MonthRowResizeState | null>(null);
-  const monthRowHeightRef = useRef(C.DEFAULT_MONTH_ROW_HEIGHT);
-  const pendingMonthRowHeightRef = useRef(C.DEFAULT_MONTH_ROW_HEIGHT);
-  const monthRowResizeFrameRef = useRef<number | null>(null);
-
-  const [anchorMonth, setAnchorMonth] = useState(() => currentDate);
-  const [monthOffsetRange, setMonthOffsetRange] = useState(
-    C.createInitialMonthOffsetRange,
-  );
-  const [monthRowHeight, setMonthRowHeight] = useState(
-    C.readStoredMonthRowHeight,
-  );
   const today = useMemo(() => new Date(), []);
 
-  const monthWeeks = useMemo(
-    () =>
-      buildCalendarMonthWeeks({
-        anchorDate: anchorMonth,
-        startOffset: monthOffsetRange.startOffset,
-        endOffset: monthOffsetRange.endOffset,
-      }),
-    [anchorMonth, monthOffsetRange.endOffset, monthOffsetRange.startOffset],
-  );
-  const monthViewStyle: MonthViewStyle = {
-    "--calendar-month-row-height": `${monthRowHeight}px`,
-  };
-
-  const setWeekRowRef = useCallback(
-    (weekKey: string, node: HTMLElement | null) => {
-      if (node) {
-        weekRowRefs.current.set(weekKey, node);
-        return;
-      }
-
-      weekRowRefs.current.delete(weekKey);
-    },
-    [],
-  );
-
-  const getMonthResizeAnchor = useCallback(
-    (scroller: HTMLElement): MonthRowResizeAnchor | null => {
-      if (monthWeeks.length === 0) return null;
-
-      const scrollerRect = scroller.getBoundingClientRect();
-      const sampleY =
-        scrollerRect.top + C.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
-      let closestWeek: CalendarMonthWeek | null = null;
-      let closestDistance = Number.POSITIVE_INFINITY;
-
-      for (const week of monthWeeks) {
-        const row = weekRowRefs.current.get(week.key);
-        if (!row) continue;
-
-        const rect = row.getBoundingClientRect();
-        if (rect.top <= sampleY && rect.bottom > sampleY) {
-          closestWeek = week;
-          break;
-        }
-
-        const distance = Math.min(
-          Math.abs(rect.top - sampleY),
-          Math.abs(rect.bottom - sampleY),
-        );
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestWeek = week;
-        }
-      }
-
-      if (!closestWeek) return null;
-
-      const row = weekRowRefs.current.get(closestWeek.key);
-      if (!row) return null;
-
-      return {
-        weekKey: closestWeek.key,
-        offsetTop: row.getBoundingClientRect().top - scrollerRect.top,
-      };
-    },
-    [monthWeeks],
-  );
-
-  const preserveMonthResizeAnchor = useCallback(
-    (anchor: MonthRowResizeAnchor | null) => {
-      if (!anchor) return;
-
-      const scroller = scrollContainerRef.current;
-      const row = weekRowRefs.current.get(anchor.weekKey);
-      if (!scroller || !row) return;
-
-      const scrollerRect = scroller.getBoundingClientRect();
-      const nextOffsetTop = row.getBoundingClientRect().top - scrollerRect.top;
-      scroller.scrollTop += nextOffsetTop - anchor.offsetTop;
-    },
-    [],
-  );
-
-  const getMonthResizeAnchorFromElement = useCallback(
-    (element: HTMLElement): MonthRowResizeAnchor | null => {
-      const scroller = scrollContainerRef.current;
-      const row = element.closest(
-        "[data-calendar-week-key]",
-      ) as HTMLElement | null;
-      const weekKey = row?.dataset.calendarWeekKey;
-
-      if (!scroller || !row || !weekKey) {
-        return null;
-      }
-
-      const scrollerRect = scroller.getBoundingClientRect();
-
-      return {
-        weekKey,
-        offsetTop: row.getBoundingClientRect().top - scrollerRect.top,
-      };
-    },
-    [],
-  );
-
-  const syncVisibleMonthFromScroll = useCallback(
-    (scroller: HTMLElement) => {
-      if (!onVisibleMonthChange || monthWeeks.length === 0) return;
-
-      const scrollerRect = scroller.getBoundingClientRect();
-      const sampleY =
-        scrollerRect.top + C.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
-      let closestWeek: CalendarMonthWeek | null = null;
-      let closestDistance = Number.POSITIVE_INFINITY;
-
-      for (const week of monthWeeks) {
-        const row = weekRowRefs.current.get(week.key);
-        if (!row) continue;
-
-        const rect = row.getBoundingClientRect();
-        if (rect.top <= sampleY && rect.bottom > sampleY) {
-          closestWeek = week;
-          break;
-        }
-
-        const distance = Math.min(
-          Math.abs(rect.top - sampleY),
-          Math.abs(rect.bottom - sampleY),
-        );
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestWeek = week;
-        }
-      }
-
-      if (!closestWeek) return;
-
-      const nextMonthKey = getCalendarMonthKey(closestWeek.visibleMonthDate);
-      if (nextMonthKey === visibleMonthKeyRef.current) return;
-
-      visibleMonthKeyRef.current = nextMonthKey;
-      onVisibleMonthChange(closestWeek.visibleMonthDate);
-    },
-    [monthWeeks, onVisibleMonthChange],
-  );
-
-  const applyMonthRowHeightVariable = useCallback(
-    (nextHeight: number, anchor: MonthRowResizeAnchor | null = null) => {
-      rootRef.current?.style.setProperty(
-        "--calendar-month-row-height",
-        `${nextHeight}px`,
-      );
-      preserveMonthResizeAnchor(anchor);
-    },
-    [preserveMonthResizeAnchor],
-  );
-
-  const scheduleMonthRowHeightVariable = useCallback(
-    (nextHeight: number) => {
-      const clampedHeight = C.clampMonthRowHeight(nextHeight);
-      pendingMonthRowHeightRef.current = clampedHeight;
-
-      if (monthRowResizeFrameRef.current !== null) {
-        return;
-      }
-
-      monthRowResizeFrameRef.current = window.requestAnimationFrame(() => {
-        monthRowResizeFrameRef.current = null;
-        applyMonthRowHeightVariable(
-          pendingMonthRowHeightRef.current,
-          monthRowResizeStateRef.current?.anchor ?? null,
-        );
-      });
-    },
-    [applyMonthRowHeightVariable],
-  );
-
-  const commitMonthRowHeight = useCallback(
-    (nextHeight: number, anchor?: MonthRowResizeAnchor | null) => {
-      const clampedHeight = C.clampMonthRowHeight(nextHeight);
-      const committedHeight = C.normalizeStoredMonthRowHeight(clampedHeight);
-      const scrollAnchor =
-        anchor === undefined && scrollContainerRef.current
-          ? getMonthResizeAnchor(scrollContainerRef.current)
-          : (anchor ?? null);
-
-      if (monthRowResizeFrameRef.current !== null) {
-        window.cancelAnimationFrame(monthRowResizeFrameRef.current);
-        monthRowResizeFrameRef.current = null;
-      }
-
-      monthRowHeightRef.current = committedHeight;
-      pendingMonthRowHeightRef.current = committedHeight;
-      applyMonthRowHeightVariable(committedHeight, scrollAnchor);
-      C.writeStoredMonthRowHeight(committedHeight);
-      setMonthRowHeight(committedHeight);
-
-      const scroller = scrollContainerRef.current;
-      if (scroller) {
-        window.requestAnimationFrame(() =>
-          syncVisibleMonthFromScroll(scroller),
-        );
-      }
-    },
-    [
-      applyMonthRowHeightVariable,
-      getMonthResizeAnchor,
-      syncVisibleMonthFromScroll,
-    ],
-  );
-
-  useEffect(() => {
-    monthRowHeightRef.current = monthRowHeight;
-    pendingMonthRowHeightRef.current = monthRowHeight;
-    applyMonthRowHeightVariable(monthRowHeight);
-  }, [applyMonthRowHeightVariable, monthRowHeight]);
-
-  useEffect(() => {
-    return () => {
-      if (monthRowResizeFrameRef.current !== null) {
-        window.cancelAnimationFrame(monthRowResizeFrameRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (lastScrollTargetTokenRef.current === scrollTargetToken) {
-      return;
-    }
-
-    lastScrollTargetTokenRef.current = scrollTargetToken;
-
-    const targetMonthKey = getCalendarMonthKey(currentDate);
-    visibleMonthKeyRef.current = targetMonthKey;
-    pendingScrollWeekKeyRef.current = getCalendarWeekKey(currentDate);
-    prependScrollHeightRef.current = null;
-    isExtendingBeforeRef.current = false;
-    isExtendingAfterRef.current = false;
-
-    setAnchorMonth(currentDate);
-    setMonthOffsetRange(C.createInitialMonthOffsetRange());
-  }, [currentDate, scrollTargetToken]);
-
-  useLayoutEffect(() => {
-    const targetWeekKey = pendingScrollWeekKeyRef.current;
-    if (!targetWeekKey) return;
-
-    const scroller = scrollContainerRef.current;
-    const targetRow = weekRowRefs.current.get(targetWeekKey);
-    if (!scroller || !targetRow) return;
-
-    scroller.scrollTop = Math.max(
-      0,
-      targetRow.offsetTop - C.WEEKDAY_HEADER_HEIGHT_PX,
-    );
-    pendingScrollWeekKeyRef.current = null;
-    syncVisibleMonthFromScroll(scroller);
-  }, [monthWeeks, syncVisibleMonthFromScroll]);
-
-  useLayoutEffect(() => {
-    const previousScrollHeight = prependScrollHeightRef.current;
-    if (previousScrollHeight === null) return;
-
-    const scroller = scrollContainerRef.current;
-    if (!scroller) {
-      prependScrollHeightRef.current = null;
-      isExtendingBeforeRef.current = false;
-      return;
-    }
-
-    scroller.scrollTop += scroller.scrollHeight - previousScrollHeight;
-    prependScrollHeightRef.current = null;
-    isExtendingBeforeRef.current = false;
-  }, [monthWeeks.length]);
-
-  useEffect(() => {
-    isExtendingAfterRef.current = false;
-  }, [monthOffsetRange.endOffset]);
-
-  const handleMonthScroll = useCallback(
-    (event: UIEvent<HTMLDivElement>) => {
-      if (isMonthRowResizingRef.current) {
-        return;
-      }
-
-      const scroller = event.currentTarget;
-
-      if (
-        scroller.scrollTop < C.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
-        !isExtendingBeforeRef.current
-      ) {
-        isExtendingBeforeRef.current = true;
-        prependScrollHeightRef.current = scroller.scrollHeight;
-        setMonthOffsetRange((current) => ({
-          ...current,
-          startOffset: current.startOffset - C.MONTH_EXTEND_COUNT,
-        }));
-      }
-
-      const distanceToBottom =
-        scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
-
-      if (
-        distanceToBottom < C.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
-        !isExtendingAfterRef.current
-      ) {
-        isExtendingAfterRef.current = true;
-        setMonthOffsetRange((current) => ({
-          ...current,
-          endOffset: current.endOffset + C.MONTH_EXTEND_COUNT,
-        }));
-      }
-
-      syncVisibleMonthFromScroll(scroller);
-    },
-    [syncVisibleMonthFromScroll],
-  );
-
-  const handleMonthRowResizePointerDown = useCallback(
-    (event: ReactPointerEvent<HTMLElement>) => {
-      if (event.button !== 0) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      const startHeight = monthRowHeightRef.current;
-      isMonthRowResizingRef.current = true;
-      monthRowResizeStateRef.current = {
-        startY: event.clientY,
-        startHeight,
-        anchor: getMonthResizeAnchorFromElement(event.currentTarget),
-      };
-      pendingMonthRowHeightRef.current = startHeight;
-
-      const previousCursor = document.body.style.cursor;
-      const previousUserSelect = document.body.style.userSelect;
-      document.body.style.cursor = "row-resize";
-      document.body.style.userSelect = "none";
-
-      const handlePointerMove = (moveEvent: PointerEvent) => {
-        const resizeState = monthRowResizeStateRef.current;
-
-        if (!resizeState) {
-          return;
-        }
-
-        scheduleMonthRowHeightVariable(
-          resizeState.startHeight + moveEvent.clientY - resizeState.startY,
-        );
-      };
-
-      const handlePointerUp = () => {
-        const resizeState = monthRowResizeStateRef.current;
-        commitMonthRowHeight(
-          pendingMonthRowHeightRef.current,
-          resizeState?.anchor ?? null,
-        );
-        monthRowResizeStateRef.current = null;
-        isMonthRowResizingRef.current = false;
-        document.body.style.cursor = previousCursor;
-        document.body.style.userSelect = previousUserSelect;
-        window.removeEventListener("pointermove", handlePointerMove);
-        window.removeEventListener("pointerup", handlePointerUp);
-        window.removeEventListener("pointercancel", handlePointerUp);
-      };
-
-      window.addEventListener("pointermove", handlePointerMove);
-      window.addEventListener("pointerup", handlePointerUp);
-      window.addEventListener("pointercancel", handlePointerUp);
-    },
-    [
-      commitMonthRowHeight,
-      getMonthResizeAnchorFromElement,
-      scheduleMonthRowHeightVariable,
-    ],
-  );
-
-  const handleMonthRowResizeKeyDown = (
-    event: KeyboardEvent<HTMLDivElement>,
-  ) => {
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      commitMonthRowHeight(monthRowHeightRef.current - C.MONTH_ROW_HEIGHT_STEP);
-      return;
-    }
-
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      commitMonthRowHeight(monthRowHeightRef.current + C.MONTH_ROW_HEIGHT_STEP);
-      return;
-    }
-
-    if (event.key === "PageUp") {
-      event.preventDefault();
-      commitMonthRowHeight(
-        monthRowHeightRef.current - C.MONTH_ROW_HEIGHT_STEP * 4,
-      );
-      return;
-    }
-
-    if (event.key === "PageDown") {
-      event.preventDefault();
-      commitMonthRowHeight(
-        monthRowHeightRef.current + C.MONTH_ROW_HEIGHT_STEP * 4,
-      );
-      return;
-    }
-
-    if (event.key === "Home") {
-      event.preventDefault();
-      commitMonthRowHeight(C.MIN_MONTH_ROW_HEIGHT);
-      return;
-    }
-
-    if (event.key === "End") {
-      event.preventDefault();
-      commitMonthRowHeight(C.MAX_MONTH_ROW_HEIGHT);
-    }
-  };
-
-  const handleMonthRowResizeReset = () => {
-    commitMonthRowHeight(C.DEFAULT_MONTH_ROW_HEIGHT);
-  };
+  // リサイズ中フラグを両フック間で共有
+  const isResizingRef = useRef(false);
+
+  const scroll = useMonthInfiniteScroll({
+    currentDate,
+    scrollTargetToken,
+    isResizingRef,
+    onVisibleMonthChange,
+  });
+
+  const resize = useMonthRowResize({
+    scrollContainerRef: scroll.scrollContainerRef,
+    weekRowRefsMap: scroll.weekRowRefsMap,
+    monthWeeks: scroll.monthWeeks,
+    isResizingRef,
+    onAfterCommit: scroll.syncVisibleMonth,
+  });
 
   return (
     <div
-      ref={rootRef}
+      ref={resize.rootRef}
       className="calendar-month-view flex min-h-0 flex-1 flex-col overflow-hidden bg-white"
-      style={monthViewStyle}
+      style={resize.monthViewStyle}
     >
       <div
-        ref={scrollContainerRef}
+        ref={scroll.scrollContainerRef}
         className="calendar-month-scroll min-h-0 flex-1 overflow-y-auto bg-white"
-        onScroll={handleMonthScroll}
+        onScroll={scroll.handleScroll}
       >
+        {/* 曜日ヘッダー */}
         <div className="sticky top-0 z-20 grid h-8 grid-cols-7 border-b border-[#e5e7eb] bg-white">
           {T.WEEKDAY_LABELS.map((label: string) => (
             <div
@@ -535,17 +72,18 @@ export const CalendarMonthView = ({
           ))}
         </div>
 
+        {/* 月グリッド */}
         <div className="bg-white">
-          {monthWeeks.map((week) => (
+          {scroll.monthWeeks.map((week) => (
             <div
               key={week.key}
-              ref={(node) => setWeekRowRef(week.key, node)}
+              ref={(node) => scroll.setWeekRowRef(week.key, node)}
               data-calendar-week-key={week.key}
               className="grid grid-cols-7 bg-white"
             >
               {week.days.map((day, index) => {
                 const selected = isSameDay(day.date, selectedDate);
-                const todayCell = isSameDay(day.date, today);
+                const isToday = isSameDay(day.date, today);
                 const monthAnnotation = getMonthAnnotation(day.date);
                 const isLastColumn = index % 7 === 6;
 
@@ -555,16 +93,14 @@ export const CalendarMonthView = ({
                     className={cn(
                       "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#eef0f3] bg-white text-left transition-colors",
                       !isLastColumn && "border-r",
-                      todayCell && "bg-[#f4f8f1]",
-                      selected && !todayCell && "bg-[#fbfaf7]",
-                      !selected && !todayCell && "hover:bg-[#fbfaf7]",
+                      isToday && "bg-[#f4f8f1]",
+                      selected && !isToday && "bg-[#fbfaf7]",
+                      !selected && !isToday && "hover:bg-[#fbfaf7]",
                     )}
                   >
                     <button
                       type="button"
-                      aria-label={format(day.date, "yyyy年M月d日", {
-                        locale: ja,
-                      })}
+                      aria-label={format(day.date, "yyyy年M月d日", { locale: ja })}
                       aria-pressed={selected}
                       className="relative h-full w-full overflow-hidden text-left outline-none focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                       onClick={() => onSelectDate(day.date)}
@@ -572,7 +108,7 @@ export const CalendarMonthView = ({
                       <span
                         className={cn(
                           "absolute left-4 top-4 inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[length:var(--ds-layout-font-size-meta)] font-semibold tabular-nums transition-colors",
-                          todayCell
+                          isToday
                             ? "bg-[#6A876E] text-white shadow-[0_7px_18px_rgba(106,135,110,0.24)]"
                             : selected
                               ? "bg-[#f0efea] text-[#24231f] ring-1 ring-[#d8d6ce]"
@@ -597,14 +133,14 @@ export const CalendarMonthView = ({
                       aria-orientation="horizontal"
                       aria-valuemin={C.MIN_MONTH_ROW_HEIGHT}
                       aria-valuemax={C.MAX_MONTH_ROW_HEIGHT}
-                      aria-valuenow={monthRowHeight}
+                      aria-valuenow={resize.monthRowHeight}
                       tabIndex={0}
                       className="calendar-month-row-boundary-resize-handle"
                       title={T.MONTH_ROW_RESIZE_TITLE}
-                      onClick={(event) => event.stopPropagation()}
-                      onDoubleClick={handleMonthRowResizeReset}
-                      onKeyDown={handleMonthRowResizeKeyDown}
-                      onPointerDown={handleMonthRowResizePointerDown}
+                      onClick={(e) => e.stopPropagation()}
+                      onDoubleClick={resize.handleResizeReset}
+                      onKeyDown={resize.handleResizeKeyDown}
+                      onPointerDown={resize.handleResizePointerDown}
                     />
                   </div>
                 );
