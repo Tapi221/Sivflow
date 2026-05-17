@@ -16,6 +16,8 @@ export type DesktopOauthExchangeInput = {
 export type DesktopOauthExchangeResult = {
   accessToken?: string;
   idToken?: string;
+  // 初回認証時のみ返却されるリフレッシュトークン
+  refreshToken?: string;
 };
 
 export type DesktopImportFileOpenPayload = {
@@ -36,6 +38,11 @@ export interface DesktopOauthApi {
   exchangeTokens(
     input: DesktopOauthExchangeInput,
   ): Promise<DesktopOauthExchangeResult>;
+  // refresh_token を使った silent なトークン更新
+  refreshTokens(input: {
+    clientId: string;
+    refreshToken: string;
+  }): Promise<{ accessToken?: string; idToken?: string }>;
   onCallback(
     handler: (payload: DesktopOauthCallbackPayload) => void,
   ): () => void;

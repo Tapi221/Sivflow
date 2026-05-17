@@ -27,6 +27,8 @@ export const desktopPlatform: PlatformApi = {
     cancel: () => getDesktopBridge().oauth.cancel(),
     exchangeIdToken: (input) => getDesktopBridge().oauth.exchangeIdToken(input),
     exchangeTokens: (input) => getDesktopBridge().oauth.exchangeTokens(input),
+    // refresh_token を使った silent なトークン更新
+    refreshTokens: (input) => getDesktopBridge().oauth.refreshTokens(input),
     onCallback: (handler) => getDesktopBridge().oauth.onCallback(handler),
   },
 };

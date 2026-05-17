@@ -18,6 +18,8 @@ import { auth } from "@/services/firebase";
 
 const LOCAL_TOKEN_KEY = "flashcard-master.gcal.access_token";
 const LOCAL_TOKEN_EXPIRY_KEY = "flashcard-master.gcal.access_token_expiry";
+// refresh_token は認証後永続的に保持する
+const LOCAL_REFRESH_TOKEN_KEY = "flashcard-master.gcal.refresh_token";
 const PERSIST_EMAIL_KEY = "flashcard-master.gcal.account_email";
 const PERSIST_CALENDAR_IDS_KEY = "flashcard-master.gcal.selected_calendar_ids";
 const PERSIST_WAS_CONNECTED_KEY = "flashcard-master.gcal.was_connected";
@@ -129,6 +131,25 @@ const writeWasConnected = (value: boolean): void => {
   } catch {}
 };
 
+// ── refresh_token の読み書き（Desktop 専用）
+const readLocalRefreshToken = (): string | null => {
+  try {
+    return localStorage.getItem(LOCAL_REFRESH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const writeLocalRefreshToken = (token: string | null): void => {
+  try {
+    if (token) {
+      localStorage.setItem(LOCAL_REFRESH_TOKEN_KEY, token);
+    } else {
+      localStorage.removeItem(LOCAL_REFRESH_TOKEN_KEY);
+    }
+  } catch {}
+};
+
 // ─────────────────────────────────────────────────────────────
 // 型定義
 // ─────────────────────────────────────────────────────────────
@@ -185,6 +206,8 @@ type UseGoogleCalendarIntegrationOptions = {
 type GoogleCalendarAccess = {
   accessToken: string;
   accountEmail: string | null;
+  // Desktop フローでは初回認証時に refresh_token が返ってくる
+  refreshToken?: string;
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -258,11 +281,14 @@ const buildDesktopAuthorizeUrl = ({
     client_id: clientId,
     redirect_uri: redirectUri,
     response_type: "code",
+    // offline_access で refresh_token を確実に取得する
     scope: `openid email profile ${GOOGLE_CALENDAR_READONLY_SCOPE}`,
     state,
     include_granted_scopes: "true",
     code_challenge: codeChallenge,
     code_challenge_method: "S256",
+    // refresh_token を取得するために access_type=offline が必要
+    access_type: "offline",
     ...(silent ? {} : { prompt: "consent select_account" }),
   });
 
@@ -374,6 +400,8 @@ const requestDesktopCalendarAccessToken = async (
     return {
       accessToken: tokens.accessToken,
       accountEmail: getEmailFromIdToken(tokens.idToken),
+      // refresh_token は初回同意時のみ返ってくる
+      refreshToken: tokens.refreshToken,
     };
   } catch (error) {
     await oauthBridge.cancel().catch(() => undefined);
@@ -411,16 +439,19 @@ const requestCalendarAccessToken = async (
       throw new Error("No current user for silent reconnect");
     }
     try {
-const result = await reauthenticateWithPopup(user, provider);
-  const credential = GoogleAuthProvider.credentialFromResult(result);
-  if (!credential?.accessToken) {
-    throw new Error("Google Calendar access token was not returned");
+      const result = await reauthenticateWithPopup(user, provider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      if (!credential?.accessToken) {
+        throw new Error("Google Calendar access token was not returned");
+      }
+      return {
+        accessToken: credential.accessToken,
+        accountEmail: result.user.email,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
-  return {
-    accessToken: credential.accessToken,
-    accountEmail: result.user.email,
-  };
-}
 
   // ── 明示的接続：同意画面を必ず表示
   provider.setCustomParameters({
@@ -440,6 +471,7 @@ const result = await reauthenticateWithPopup(user, provider);
     accountEmail: result.user.email,
   };
 };
+
 
 // ─────────────────────────────────────────────────────────────
 // Google Calendar API ラッパー
@@ -598,6 +630,8 @@ export const useGoogleCalendarIntegration = ({
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── サイレント再接続
+  // Desktop: refresh_token でポップアップなしに access_token を更新
+  // Web: Firebase reauthenticateWithPopup（ポップアップが必要）
   const silentReconnect = useCallback(async (): Promise<boolean> => {
     if (isSilentReconnectingRef.current) return false;
     if (!readWasConnected()) return false;
@@ -605,8 +639,40 @@ export const useGoogleCalendarIntegration = ({
     isSilentReconnectingRef.current = true;
 
     try {
-      const { accessToken: nextToken, accountEmail: nextEmail } =
-        await requestCalendarAccessToken(authInstance, /* silent= */ true);
+      let nextToken: string;
+      let nextEmail: string | null;
+
+      if (isDesktopLikeRuntime()) {
+        // Desktop: refresh_token があればポップアップなしで更新できる
+        const storedRefreshToken = readLocalRefreshToken();
+        if (!storedRefreshToken) {
+          // refresh_token がない場合はサイレント更新不可
+          return false;
+        }
+
+        const clientId = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_CLIENT_ID;
+        if (!clientId) return false;
+
+        const result = await oauthBridge.refreshTokens({
+          clientId,
+          refreshToken: storedRefreshToken,
+        });
+
+        if (!result.accessToken) {
+          // refresh_token が失効している場合はクリアして再認証を促す
+          writeLocalRefreshToken(null);
+          return false;
+        }
+
+        nextToken = result.accessToken;
+        nextEmail = readPersistedEmail();
+      } else {
+        // Web: Firebase reauthenticateWithPopup
+        const { accessToken: webToken, accountEmail: webEmail } =
+          await requestCalendarAccessToken(authInstance, /* silent= */ true);
+        nextToken = webToken;
+        nextEmail = webEmail;
+      }
 
       const nextCalendars = await fetchCalendarList(nextToken);
 
@@ -698,8 +764,12 @@ export const useGoogleCalendarIntegration = ({
     setIsTokenExpired(false);
 
     try {
-      const { accessToken: nextToken, accountEmail: nextEmail } =
-        await requestCalendarAccessToken(authInstance, /* silent= */ false);
+      const {
+        accessToken: nextToken,
+        accountEmail: nextEmail,
+        // Desktop フローでは初回同意時に refresh_token が返ってくる
+        refreshToken: nextRefreshToken,
+      } = await requestCalendarAccessToken(authInstance, /* silent= */ false);
 
       const nextCalendars = await fetchCalendarList(nextToken);
 
@@ -722,6 +792,10 @@ export const useGoogleCalendarIntegration = ({
       writePersistedEmail(nextEmail);
       writePersistedCalendarIds(restoredIds);
       writeWasConnected(true);
+      // refresh_token を永続化（次回起動時のサイレント更新に使う）
+      if (nextRefreshToken) {
+        writeLocalRefreshToken(nextRefreshToken);
+      }
 
       scheduleTokenRefresh();
     } catch (connectError) {
@@ -832,6 +906,7 @@ export const useGoogleCalendarIntegration = ({
     }
 
     writeLocalToken(null);
+    writeLocalRefreshToken(null); // refresh_token もクリアする
     writePersistedEmail(null);
     writePersistedCalendarIds([]);
     writeWasConnected(false);

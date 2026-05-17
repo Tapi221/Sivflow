@@ -16,6 +16,8 @@ export interface OAuthBridgeTokenExchangeInput {
 export interface OAuthBridgeTokenExchangeResult {
   accessToken?: string;
   idToken?: string;
+  // 初回認証時のみ返却されるリフレッシュトークン
+  refreshToken?: string;
 }
 
 export interface OAuthBridgePort {
@@ -25,6 +27,11 @@ export interface OAuthBridgePort {
   exchangeTokens(
     input: OAuthBridgeTokenExchangeInput,
   ): Promise<OAuthBridgeTokenExchangeResult>;
+  // refresh_token を使った silent なトークン更新
+  refreshTokens(input: {
+    clientId: string;
+    refreshToken: string;
+  }): Promise<{ accessToken?: string; idToken?: string }>;
   onCallback(
     handler: (payload: OAuthBridgeCallbackPayload) => void,
   ): () => void;
