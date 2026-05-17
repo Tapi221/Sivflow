@@ -46,6 +46,7 @@ import {
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
+import { generateColorTokens } from "./calendar.color-tokens";
 import {
   useGoogleCalendarIntegration,
   type GoogleCalendarEvent,
@@ -77,6 +78,14 @@ type CalendarEventStyle = CSSProperties & {
   "--calendar-event-duration-hours": number;
 };
 
+type CalendarEventLabelStyle = CalendarEventStyle & {
+  backgroundColor: string;
+  borderLeftColor: string;
+  borderLeftStyle: "solid";
+  borderLeftWidth: number;
+  color: string;
+};
+
 const HOURS = Array.from({ length: 24 }, (_, index) => index);
 
 type MiniCalendarDay = {
@@ -91,6 +100,7 @@ type CalendarSidebarProps = {
   monthDate: Date;
   selectedDate: Date;
   calendars: GoogleCalendarListItem[];
+  googleAccountEmail: string | null;
   selectedCalendarIds: Set<string>;
   calendarError: string | null;
   isCalendarConnected: boolean;
@@ -101,6 +111,13 @@ type CalendarSidebarProps = {
   onClose: () => void;
   onConnectCalendar: () => void;
   onToggleCalendar: (calendarId: string) => void;
+};
+
+type AppCalendarItem = {
+  id: string;
+  label: string;
+  color: string;
+  checked: boolean;
 };
 
 /* --------------------------------
@@ -499,10 +516,20 @@ const buildMiniCalendarDays = (
   });
 };
 
+const APP_CALENDAR_ITEMS: AppCalendarItem[] = [
+  {
+    id: "app-calendar-test",
+    label: "Test",
+    color: "#ff3b30",
+    checked: true,
+  },
+];
+
 const CalendarSidebar = ({
   monthDate,
   selectedDate,
   calendars,
+  googleAccountEmail,
   selectedCalendarIds,
   calendarError,
   isCalendarConnected,
@@ -518,31 +545,7 @@ const CalendarSidebar = ({
     () => buildMiniCalendarDays(monthDate, selectedDate),
     [monthDate, selectedDate],
   );
-  const primaryCalendars = useMemo(
-    () => calendars.filter((calendar) => calendar.primary),
-    [calendars],
-  );
-  const secondaryCalendars = useMemo(
-    () =>
-      primaryCalendars.length > 0
-        ? calendars.filter((calendar) => !calendar.primary)
-        : calendars,
-    [calendars, primaryCalendars.length],
-  );
-  const calendarSections = useMemo(
-    () => [
-      {
-        label: "My calendars",
-        calendars:
-          primaryCalendars.length > 0 ? primaryCalendars : secondaryCalendars,
-      },
-      {
-        label: "Other calendars",
-        calendars: primaryCalendars.length > 0 ? secondaryCalendars : [],
-      },
-    ],
-    [primaryCalendars, secondaryCalendars],
-  );
+  const googleCalendarSectionLabel = googleAccountEmail ?? "Google Calendar";
 
   return (
     <aside className="flex w-[292px] shrink-0 flex-col gap-6 overflow-y-auto bg-[#f7f8fa] px-3 py-4 text-[#24272f]">
@@ -620,48 +623,75 @@ const CalendarSidebar = ({
       </section>
 
       <nav className="flex w-full flex-col gap-2" aria-label="Calendar lists">
-        {calendarSections.map((section) => {
-          if (isCalendarConnected && section.calendars.length === 0) {
-            return null;
-          }
+        <div className="flex flex-col gap-1">
+          <button
+            type="button"
+            className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className="flex shrink-0 items-center">
+              <ChevronDown className="h-4 w-4 text-[#667085]" />
+              <SidebarCalendarIcon className="h-5 w-5 shrink-0 text-black" />
+            </span>
+            <span className="truncate">My calendars</span>
+          </button>
 
-          return (
-            <div key={section.label} className="flex flex-col gap-1">
+          {APP_CALENDAR_ITEMS.map((calendar) => {
+            const Icon = calendar.checked ? CheckCircle : Circle;
+
+            return (
               <button
+                key={calendar.id}
                 type="button"
                 className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <span className="flex shrink-0 items-center">
-                  <ChevronDown className="h-4 w-4 text-[#667085]" />
-                  <SidebarCalendarIcon className="h-5 w-5 shrink-0 text-black" />
+                <span className="flex shrink-0 items-center pl-4">
+                  <Icon
+                    className="h-5 w-5 shrink-0"
+                    style={{ color: calendar.color }}
+                  />
                 </span>
-                <span className="truncate">{section.label}</span>
+                <span className="truncate">{calendar.label}</span>
               </button>
+            );
+          })}
+        </div>
 
-              {section.calendars.map((calendar) => {
-                const checked = selectedCalendarIds.has(calendar.id);
-                const Icon = checked ? CheckCircle : Circle;
+        {isCalendarConnected ? (
+          <div className="flex flex-col gap-1">
+            <button
+              type="button"
+              className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="flex shrink-0 items-center">
+                <ChevronDown className="h-4 w-4 text-[#667085]" />
+                <SidebarCalendarIcon className="h-5 w-5 shrink-0 text-black" />
+              </span>
+              <span className="truncate">{googleCalendarSectionLabel}</span>
+            </button>
 
-                return (
-                  <button
-                    key={calendar.id}
-                    type="button"
-                    className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    onClick={() => onToggleCalendar(calendar.id)}
-                  >
-                    <span className="flex shrink-0 items-center pl-4">
-                      <Icon
-                        className="h-5 w-5 shrink-0"
-                        style={{ color: calendar.backgroundColor }}
-                      />
-                    </span>
-                    <span className="truncate">{calendar.summary}</span>
-                  </button>
-                );
-              })}
-            </div>
-          );
-        })}
+            {calendars.map((calendar) => {
+              const checked = selectedCalendarIds.has(calendar.id);
+              const Icon = checked ? CheckCircle : Circle;
+
+              return (
+                <button
+                  key={calendar.id}
+                  type="button"
+                  className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  onClick={() => onToggleCalendar(calendar.id)}
+                >
+                  <span className="flex shrink-0 items-center pl-4">
+                    <Icon
+                      className="h-5 w-5 shrink-0"
+                      style={{ color: calendar.backgroundColor }}
+                    />
+                  </span>
+                  <span className="truncate">{calendar.summary}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
 
         <button
           type="button"
@@ -750,16 +780,26 @@ const createHourLabel = (hour: number) => {
 
 const calculateEventStyle = (
   event: GoogleCalendarEvent,
-): CalendarEventStyle => {
+): CalendarEventLabelStyle => {
   const startHour =
     event.startsAt.getHours() + event.startsAt.getMinutes() / 60;
+  const tokens = generateColorTokens(event.accentColor);
 
   return {
     "--calendar-event-start-hour": Math.max(0, startHour - HOURS[0]),
     "--calendar-event-duration-hours": event.minutes / 60,
     top: `calc(var(--calendar-event-start-hour) * var(--calendar-hour-row-height) + 40px)`,
     height: `calc(var(--calendar-event-duration-hours) * var(--calendar-hour-row-height) - 8px)`,
+    backgroundColor: tokens.bg,
+    borderLeftColor: tokens.border,
+    borderLeftStyle: "solid",
+    borderLeftWidth: 4,
+    color: tokens.text,
   };
+};
+
+const createEventTimeLabel = (event: GoogleCalendarEvent) => {
+  return format(event.startsAt, "H:mm");
 };
 
 const getNextDate = (currentDate: Date, viewMode: CalendarViewMode) => {
@@ -803,6 +843,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
     createInitialTimelineUnitBuffer("days"),
   );
   const {
+    accountEmail: googleAccountEmail,
     calendars: googleCalendars,
     connect: connectGoogleCalendar,
     error: googleCalendarError,
@@ -1063,6 +1104,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
             monthDate={currentDate}
             selectedDate={currentDate}
             calendars={googleCalendars}
+            googleAccountEmail={googleAccountEmail}
             selectedCalendarIds={selectedCalendarIds}
             calendarError={googleCalendarError}
             isCalendarConnected={isGoogleCalendarConnected}
@@ -1217,10 +1259,15 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
                         {eventsForDay.map((event) => (
                           <div
                             key={event.id}
-                            className="absolute left-2 right-2 rounded-md border border-[#bfd3ff] bg-[#dceaff] px-2 py-1 text-[12px] font-medium text-[#2c3440] shadow-sm"
+                            className="absolute left-2 right-2 min-h-12 overflow-hidden rounded border-0 px-[6px] py-1 pl-2 text-[12px] font-medium leading-[1.35] shadow-none"
                             style={calculateEventStyle(event)}
                           >
-                            {event.title}
+                            <div className="truncate text-[11px] font-medium leading-[1.25] opacity-90">
+                              {createEventTimeLabel(event)}
+                            </div>
+                            <div className="line-clamp-2 break-words">
+                              {event.title}
+                            </div>
                           </div>
                         ))}
                       </div>

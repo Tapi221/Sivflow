@@ -1,16 +1,21 @@
 import {
   clampScale,
-  EPSILON,
   getViewerStateFromSession,
   saveViewerStateToSession,
+} from "@/features/pdf/pdfViewerStateStorage";
+
+import {
+  EPSILON,
   VIEWER_STATE_DEBOUNCE_MS,
   ZOOM_STEP,
-} from "@/features/pdf/pdfViewerStateStorage";
+} from "@/features/pdf/pdf.constants.desktop";
+
 import type {
   PdfPageLayoutMode,
   PdfSidePanelTab,
   PdfViewerState,
 } from "@/types";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UsePdfViewerPersistenceOptions {

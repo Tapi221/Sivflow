@@ -28,6 +28,18 @@ let pendingOauthCallbackUrl: string | null = null;
 let oauthLoopbackServer: http.Server | null = null;
 let pendingDesktopImportFilePaths: string[] = [];
 
+type GoogleOauthTokenExchangeInput = {
+  clientId: string;
+  code: string;
+  codeVerifier: string;
+  redirectUri: string;
+};
+
+type GoogleOauthTokenExchangeResult = {
+  accessToken?: string;
+  idToken?: string;
+};
+
 app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
 app.commandLine.appendSwitch("disable-renderer-backgrounding");
 app.commandLine.appendSwitch("disable-background-timer-throttling");
@@ -326,6 +338,77 @@ const getDesktopOauthClientSecret = (): string => {
   return secret;
 };
 
+const exchangeGoogleOauthTokens = async (
+  input: GoogleOauthTokenExchangeInput,
+): Promise<GoogleOauthTokenExchangeResult> => {
+  const clientSecret = getDesktopOauthClientSecret();
+  const requestBody = new URLSearchParams({
+    client_id: input.clientId,
+    client_secret: clientSecret,
+    code: input.code,
+    code_verifier: input.codeVerifier,
+    grant_type: "authorization_code",
+    redirect_uri: input.redirectUri,
+  });
+
+  console.info("[electron][oauth] token request", {
+    client_id: input.clientId,
+    redirect_uri: input.redirectUri,
+    grant_type: "authorization_code",
+    code_verifier_length: input.codeVerifier.length,
+    client_secret_present: clientSecret.length > 0,
+    client_secret_length: clientSecret.length,
+  });
+
+  const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: requestBody,
+  });
+
+  const responseText = await response.text();
+  let payload: {
+    access_token?: string;
+    error?: string;
+    error_description?: string;
+    id_token?: string;
+  } = {};
+
+  try {
+    payload = JSON.parse(responseText) as {
+      access_token?: string;
+      error?: string;
+      error_description?: string;
+      id_token?: string;
+    };
+  } catch {
+    payload = {};
+  }
+
+  console.info("[electron][oauth] token response", {
+    status: response.status,
+    ok: response.ok,
+    access_token_present: Boolean(payload.access_token),
+    id_token_present: Boolean(payload.id_token),
+    error: payload.error,
+  });
+
+  if (!response.ok || payload.error) {
+    throw new Error(
+      payload.error_description ||
+        payload.error ||
+        `Google token exchange failed (${response.status})`,
+    );
+  }
+
+  return {
+    accessToken: payload.access_token,
+    idToken: payload.id_token,
+  };
+};
+
 const createMainWindow = (): BrowserWindow => {
   const windowRef = new BrowserWindow({
     width: 1280,
@@ -514,79 +597,21 @@ const registerIpcHandlers = (): void => {
 
   ipcMain.handle(
     IPC_CHANNELS.oauthExchangeIdToken,
-    async (
-      _event,
-      input: {
-        clientId: string;
-        code: string;
-        codeVerifier: string;
-        redirectUri: string;
-      },
-    ) => {
-      const clientSecret = getDesktopOauthClientSecret();
-      const requestBody = new URLSearchParams({
-        client_id: input.clientId,
-        client_secret: clientSecret,
-        code: input.code,
-        code_verifier: input.codeVerifier,
-        grant_type: "authorization_code",
-        redirect_uri: input.redirectUri,
-      });
+    async (_event, input: GoogleOauthTokenExchangeInput) => {
+      const payload = await exchangeGoogleOauthTokens(input);
 
-      console.info("[electron][oauth] token request", {
-        client_id: input.clientId,
-        redirect_uri: input.redirectUri,
-        grant_type: "authorization_code",
-        code_verifier_length: input.codeVerifier.length,
-        client_secret_present: clientSecret.length > 0,
-        client_secret_length: clientSecret.length,
-      });
-
-      const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: requestBody,
-      });
-
-      const responseText = await response.text();
-
-      console.info("[electron][oauth] token response", {
-        status: response.status,
-        ok: response.ok,
-        body: responseText,
-      });
-
-      let payload: {
-        error?: string;
-        error_description?: string;
-        id_token?: string;
-      } = {};
-
-      try {
-        payload = JSON.parse(responseText) as {
-          error?: string;
-          error_description?: string;
-          id_token?: string;
-        };
-      } catch {
-        payload = {};
-      }
-
-      if (!response.ok || payload.error) {
-        throw new Error(
-          payload.error_description ||
-            payload.error ||
-            `Google token exchange failed (${response.status})`,
-        );
-      }
-
-      if (!payload.id_token) {
+      if (!payload.idToken) {
         throw new Error("Google token exchange did not return id_token");
       }
 
-      return payload.id_token;
+      return payload.idToken;
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.oauthExchangeTokens,
+    async (_event, input: GoogleOauthTokenExchangeInput) => {
+      return exchangeGoogleOauthTokens(input);
     },
   );
 

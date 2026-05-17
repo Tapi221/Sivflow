@@ -7,6 +7,7 @@ export const IPC_CHANNELS = {
   oauthStart: "oauth:start",
   oauthCancel: "oauth:cancel",
   oauthExchangeIdToken: "oauth:exchangeIdToken",
+  oauthExchangeTokens: "oauth:exchangeTokens",
   oauthCallback: "oauth:callback",
   windowMinimize: "window:minimize",
   windowMaximizeToggle: "window:maximizeToggle",

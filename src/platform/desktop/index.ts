@@ -26,6 +26,7 @@ export const desktopPlatform: PlatformApi = {
       getDesktopBridge().oauth.start(authorizeUrl),
     cancel: () => getDesktopBridge().oauth.cancel(),
     exchangeIdToken: (input) => getDesktopBridge().oauth.exchangeIdToken(input),
+    exchangeTokens: (input) => getDesktopBridge().oauth.exchangeTokens(input),
     onCallback: (handler) => getDesktopBridge().oauth.onCallback(handler),
   },
 };

@@ -41,6 +41,8 @@ const desktopApi: DesktopBridgeApi = {
     cancel: () => ipcRenderer.invoke(IPC_CHANNELS.oauthCancel),
     exchangeIdToken: (input) =>
       ipcRenderer.invoke(IPC_CHANNELS.oauthExchangeIdToken, input),
+    exchangeTokens: (input) =>
+      ipcRenderer.invoke(IPC_CHANNELS.oauthExchangeTokens, input),
     onCallback: (handler) => {
       const listener = (
         _event: Electron.IpcRendererEvent,

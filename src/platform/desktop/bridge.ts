@@ -8,5 +8,11 @@ export const getDesktopBridge = (): DesktopBridgeApi => {
   if (!hasDesktopBridge() || !hasWindowDesktop()) {
     throw new Error("Desktop bridge is not available");
   }
-  return window.desktop;
+
+  const bridge = window.desktop;
+  if (!bridge) {
+    throw new Error("Desktop bridge is not available");
+  }
+
+  return bridge;
 };
