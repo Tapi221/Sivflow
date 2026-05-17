@@ -45,6 +45,9 @@ import {
   getTimelineColumnWidth,
   type TimelineUnitBuffer,
 } from "./CalendarTimelineDayView.shared";
+
+import type { CalendarEventVariant } from "./calendar.event-tokens";
+import { CalendarEventLabel } from "./CalendarEventLabel";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
 
@@ -64,6 +67,8 @@ type CalendarDemoEvent = {
   title: string;
   startsAt: Date;
   minutes: number;
+  variant?: CalendarEventVariant; 
+  hasVideo?: boolean;  
 };
 
 type TimelineBufferDays = {
