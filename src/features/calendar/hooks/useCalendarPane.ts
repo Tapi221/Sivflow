@@ -125,9 +125,9 @@ export type UseCalendarPaneReturn = {
   googleAccountEmail: string | null;
   googleCalendars: ReturnType<typeof useGoogleCalendarIntegration>["calendars"];
   googleCalendarError: string | null;
-  googleCalendarEvents: ReturnType
-    typeof useGoogleCalendarIntegration
-  >["events"];
+  googleCalendarEvents: ReturnType<
+  typeof useGoogleCalendarIntegration
+>["events"];
   isGoogleCalendarConnected: boolean;
   isGoogleCalendarConnecting: boolean;
   selectedCalendarIds: Set<string>;
