@@ -20,6 +20,7 @@ import {
   useState,
 } from "react";
 
+import { ja } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { IconProps } from "@/ui/icons";
 import {
@@ -799,7 +800,8 @@ const calculateEventStyle = (
 };
 
 const createEventTimeLabel = (event: GoogleCalendarEvent) => {
-  return format(event.startsAt, "H:mm");
+  const endsAt = new Date(event.startsAt.getTime() + event.minutes * 60_000);
+  return `${format(event.startsAt, "H:mm")} ~ ${format(endsAt, "H:mm")}`;
 };
 
 const getNextDate = (currentDate: Date, viewMode: CalendarViewMode) => {
