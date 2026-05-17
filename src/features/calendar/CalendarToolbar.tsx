@@ -1,9 +1,5 @@
 import { cn } from "@/lib/utils";
-import {
-  Calendar as CalendarIcon,
-  Filter,
-  Search,
-} from "@/ui/icons";
+import { Calendar as CalendarIcon, Filter, Search } from "@/ui/icons";
 import type { IconProps } from "@/ui/icons";
 import {
   FieldsToolbarIcon,
@@ -97,7 +93,10 @@ export const CalendarWorkspaceToolbar = ({
               const isActive = viewMode === option.value;
               const Icon = option.icon;
               return (
-                <div key={option.value} className="flex flex-col items-start pb-2">
+                <div
+                  key={option.value}
+                  className="flex flex-col items-start pb-2"
+                >
                   <button
                     type="button"
                     className={cn(

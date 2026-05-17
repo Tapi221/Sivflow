@@ -65,7 +65,9 @@ export const useMonthRowResize = ({
   const resizeStateRef = useRef<MonthRowResizeState | null>(null);
   const rafRef = useRef<number | null>(null);
 
-  const [monthRowHeight, setMonthRowHeight] = useState(C.readStoredMonthRowHeight);
+  const [monthRowHeight, setMonthRowHeight] = useState(
+    C.readStoredMonthRowHeight,
+  );
 
   // ── anchor 計算
 
@@ -73,7 +75,8 @@ export const useMonthRowResize = ({
     (scroller: HTMLElement): MonthRowResizeAnchor | null => {
       if (monthWeeks.length === 0) return null;
       const scrollerRect = scroller.getBoundingClientRect();
-      const sampleY = scrollerRect.top + C.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
+      const sampleY =
+        scrollerRect.top + C.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
       let best: CalendarMonthWeek | null = null;
       let bestDist = Number.POSITIVE_INFINITY;
 
@@ -81,9 +84,18 @@ export const useMonthRowResize = ({
         const row = weekRowRefsMap.current.get(week.key);
         if (!row) continue;
         const rect = row.getBoundingClientRect();
-        if (rect.top <= sampleY && rect.bottom > sampleY) { best = week; break; }
-        const dist = Math.min(Math.abs(rect.top - sampleY), Math.abs(rect.bottom - sampleY));
-        if (dist < bestDist) { bestDist = dist; best = week; }
+        if (rect.top <= sampleY && rect.bottom > sampleY) {
+          best = week;
+          break;
+        }
+        const dist = Math.min(
+          Math.abs(rect.top - sampleY),
+          Math.abs(rect.bottom - sampleY),
+        );
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = week;
+        }
       }
 
       if (!best) return null;
@@ -100,12 +112,16 @@ export const useMonthRowResize = ({
   const getAnchorFromElement = useCallback(
     (element: HTMLElement): MonthRowResizeAnchor | null => {
       const scroller = scrollContainerRef.current;
-      const row = element.closest("[data-calendar-week-key]") as HTMLElement | null;
+      const row = element.closest(
+        "[data-calendar-week-key]",
+      ) as HTMLElement | null;
       const weekKey = row?.dataset.calendarWeekKey;
       if (!scroller || !row || !weekKey) return null;
       return {
         weekKey,
-        offsetTop: row.getBoundingClientRect().top - scroller.getBoundingClientRect().top,
+        offsetTop:
+          row.getBoundingClientRect().top -
+          scroller.getBoundingClientRect().top,
       };
     },
     [scrollContainerRef],
@@ -117,7 +133,8 @@ export const useMonthRowResize = ({
       const scroller = scrollContainerRef.current;
       const row = weekRowRefsMap.current.get(anchor.weekKey);
       if (!scroller || !row) return;
-      const nextTop = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+      const nextTop =
+        row.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
       scroller.scrollTop += nextTop - anchor.offsetTop;
     },
     [scrollContainerRef, weekRowRefsMap],
@@ -127,7 +144,10 @@ export const useMonthRowResize = ({
 
   const applyVariable = useCallback(
     (height: number, anchor: MonthRowResizeAnchor | null = null) => {
-      rootRef.current?.style.setProperty("--calendar-month-row-height", `${height}px`);
+      rootRef.current?.style.setProperty(
+        "--calendar-month-row-height",
+        `${height}px`,
+      );
       preserveAnchor(anchor);
     },
     [preserveAnchor],
@@ -139,7 +159,10 @@ export const useMonthRowResize = ({
       if (rafRef.current !== null) return;
       rafRef.current = window.requestAnimationFrame(() => {
         rafRef.current = null;
-        applyVariable(pendingMonthRowHeightRef.current, resizeStateRef.current?.anchor ?? null);
+        applyVariable(
+          pendingMonthRowHeightRef.current,
+          resizeStateRef.current?.anchor ?? null,
+        );
       });
     },
     [applyVariable],
@@ -147,7 +170,9 @@ export const useMonthRowResize = ({
 
   const commitHeight = useCallback(
     (height: number, anchor?: MonthRowResizeAnchor | null) => {
-      const committed = C.normalizeStoredMonthRowHeight(C.clampMonthRowHeight(height));
+      const committed = C.normalizeStoredMonthRowHeight(
+        C.clampMonthRowHeight(height),
+      );
       const scrollAnchor =
         anchor === undefined && scrollContainerRef.current
           ? getAnchorFromScroller(scrollContainerRef.current)
@@ -214,7 +239,10 @@ export const useMonthRowResize = ({
       };
 
       const onUp = () => {
-        commitHeight(pendingMonthRowHeightRef.current, resizeStateRef.current?.anchor ?? null);
+        commitHeight(
+          pendingMonthRowHeightRef.current,
+          resizeStateRef.current?.anchor ?? null,
+        );
         resizeStateRef.current = null;
         isResizingRef.current = false;
         document.body.style.cursor = prevCursor;

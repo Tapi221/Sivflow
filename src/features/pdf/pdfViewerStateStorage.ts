@@ -5,7 +5,7 @@
 import type { PdfViewerState } from "@/types";
 import * as C from "@/features/pdf/pdf.constants.desktop";
 
-// ✅ ドキュメント切替保護：呼び出し側で docId を指定する
+//  ドキュメント切替保護：呼び出し側で docId を指定する
 export const getViewerStateFromSession = (
   docId: string,
 ): PdfViewerState | null => {
@@ -18,7 +18,7 @@ export const getViewerStateFromSession = (
   }
 };
 
-// ✅ ドキュメント切替保護：docId パラメータで正しいキーを保証
+//  ドキュメント切替保護：docId パラメータで正しいキーを保証
 export const saveViewerStateToSession = (
   docId: string,
   state: PdfViewerState,

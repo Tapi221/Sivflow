@@ -1,4 +1,11 @@
-import { addDays, format, isSameDay, startOfDay, startOfMonth, startOfWeek } from "date-fns";
+import {
+  addDays,
+  format,
+  isSameDay,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
+} from "date-fns";
 import { useMemo } from "react";
 
 import { cn } from "@/lib/utils";
@@ -8,7 +15,10 @@ import * as T from "@/features/calendar/calendar.text";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 
 import { SidebarCalendarIcon, SidebarPanelIcon } from "./calendar.icons";
-import type { AppCalendarItem, CalendarSidebarProps } from "./calendarPane.types";
+import type {
+  AppCalendarItem,
+  CalendarSidebarProps,
+} from "./calendarPane.types";
 
 // ── ミニカレンダー構築（純粋関数 → 将来 utils に切り出し可能）
 const buildMiniCalendarDays = (
@@ -154,7 +164,10 @@ export const CalendarSidebar = ({
                 className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <span className="flex shrink-0 items-center pl-4">
-                  <Icon className="h-5 w-5 shrink-0" style={{ color: calendar.color }} />
+                  <Icon
+                    className="h-5 w-5 shrink-0"
+                    style={{ color: calendar.color }}
+                  />
                 </span>
                 <span className="truncate">{calendar.label}</span>
               </button>
@@ -186,7 +199,10 @@ export const CalendarSidebar = ({
                   onClick={() => onToggleCalendar(calendar.id)}
                 >
                   <span className="flex shrink-0 items-center pl-4">
-                    <Icon className="h-5 w-5 shrink-0" style={{ color: calendar.backgroundColor }} />
+                    <Icon
+                      className="h-5 w-5 shrink-0"
+                      style={{ color: calendar.backgroundColor }}
+                    />
                   </span>
                   <span className="truncate">{calendar.summary}</span>
                 </button>
