@@ -69,7 +69,9 @@ const isDateLike = (value: unknown): value is DateLike =>
   value instanceof Date ||
   (isRecord(value) && typeof value.toDate === "function");
 
-const hasBaseEntityShape = (value: unknown): value is { id: string } =>
+  const hasBaseEntityShape = (
+  value: unknown,
+): value is Record<string, unknown> =>
   isRecord(value) &&
   hasString(value, "id") &&
   hasString(value, "userId") &&
