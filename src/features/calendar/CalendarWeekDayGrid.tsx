@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { generateColorTokens } from "@/features/calendar/calendar.color-tokens";
 import { computeEventLayout, toLayoutEvent } from "@/features/calendar/calendarEventLayout";
-import type { GoogleCalendarEvent } from "@/features/calendar/useGoogleCalendarIntegration";
+import type { GoogleCalendarEvent } from "@/features/calendar/hooks/useGoogleCalendarIntegration";
 import type { CalendarEventLabelStyle, CalendarWeekDayGridProps } from "./calendarPane.types";
 
 const HOURS = Array.from({ length: 24 }, (_, index) => index);

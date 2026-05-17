@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
 
-import { useMonthInfiniteScroll } from "./useMonthInfiniteScroll";
-import { useMonthRowResize } from "./useMonthRowResize";
+import { useMonthInfiniteScroll } from "./hooks/useMonthInfiniteScroll";
+import { useMonthRowResize } from "./hooks/useMonthRowResize";
 
 const getMonthAnnotation = (date: Date): string | null => {
   if (date.getDate() !== 1) return null;

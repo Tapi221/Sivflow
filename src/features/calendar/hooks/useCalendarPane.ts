@@ -25,14 +25,14 @@ import {
   getTimelineColumnWidth,
 } from "@/features/calendar/TimelineDayView.shared";
 import type { TimelineUnitBuffer } from "@/features/calendar/TimelineDayView.shared";
-import { useGoogleCalendarIntegration } from "@/features/calendar/useGoogleCalendarIntegration";
+import { useGoogleCalendarIntegration } from "@/features/calendar/hooks/useGoogleCalendarIntegration";
 
 import type {
   CalendarToolbarMode,
   CalendarViewMode,
   TimelineBufferDays,
   TimelineGridStyle,
-} from "./calendarPane.types";
+} from "../calendarPane.types";
 
 // ── 純粋ユーティリティ関数群（将来: calendarPane.utils.ts に切り出し可）
 

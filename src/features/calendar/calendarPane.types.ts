@@ -6,7 +6,7 @@ import type {
 import type {
   GoogleCalendarEvent,
   GoogleCalendarListItem,
-} from "@/features/calendar/useGoogleCalendarIntegration";
+} from "@/features/calendar/hooks/useGoogleCalendarIntegration";
 
 // calendar.types.ts から re-export（後方互換のため）
 export type { CalendarToolbarMode, CalendarViewMode };
