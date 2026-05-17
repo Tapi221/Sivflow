@@ -4,8 +4,6 @@ import {
   format,
   getDaysInMonth,
   isSameDay,
-  setHours,
-  setMinutes,
   startOfDay,
   startOfMonth,
   startOfWeek,
@@ -46,10 +44,13 @@ import {
   type TimelineUnitBuffer,
 } from "./CalendarTimelineDayView.shared";
 
-import type { CalendarEventVariant } from "./calendar.event-tokens";
-import { CalendarEventLabel } from "./CalendarEventLabel";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
+import {
+  useGoogleCalendarIntegration,
+  type GoogleCalendarEvent,
+  type GoogleCalendarListItem,
+} from "./useGoogleCalendarIntegration";
 
 /* --------------------------------
  * 基本タイプ
@@ -61,15 +62,6 @@ type CalendarPaneProps = {
 
 export type CalendarViewMode = "month" | "week" | "days";
 export type CalendarToolbarMode = "calendar" | "timeline";
-
-type CalendarDemoEvent = {
-  id: string;
-  title: string;
-  startsAt: Date;
-  minutes: number;
-  variant?: CalendarEventVariant; 
-  hasVideo?: boolean;  
-};
 
 type TimelineBufferDays = {
   before: number;
@@ -98,18 +90,17 @@ type MiniCalendarDay = {
 type CalendarSidebarProps = {
   monthDate: Date;
   selectedDate: Date;
+  calendars: GoogleCalendarListItem[];
+  selectedCalendarIds: Set<string>;
+  calendarError: string | null;
+  isCalendarConnected: boolean;
+  isCalendarConnecting: boolean;
   onSelectDate: (date: Date) => void;
   onPreviousMonth: () => void;
   onNextMonth: () => void;
   onClose: () => void;
-};
-
-type SidebarCalendarItem = {
-  label: string;
-  icon: React.ComponentType<IconProps>;
-  color?: string;
-  checked?: boolean;
-  expanded?: boolean;
+  onConnectCalendar: () => void;
+  onToggleCalendar: (calendarId: string) => void;
 };
 
 /* --------------------------------
@@ -203,7 +194,15 @@ const MonthViewToolbarIcon = ({
     aria-hidden="true"
     {...props}
   >
-    <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+    <rect
+      x="2"
+      y="3"
+      width="12"
+      height="10"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
     <path d="M2 6.5H14" stroke="currentColor" strokeWidth="1.25" />
     <path d="M6 6.5V13" stroke="currentColor" strokeWidth="1.25" />
     <path d="M10 6.5V13" stroke="currentColor" strokeWidth="1.25" />
@@ -225,7 +224,15 @@ const WeekViewToolbarIcon = ({
     aria-hidden="true"
     {...props}
   >
-    <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+    <rect
+      x="2"
+      y="3"
+      width="12"
+      height="10"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
     <path d="M6 3V13" stroke="currentColor" strokeWidth="1.25" />
     <path d="M10 3V13" stroke="currentColor" strokeWidth="1.25" />
   </svg>
@@ -246,7 +253,15 @@ const DayViewToolbarIcon = ({
     aria-hidden="true"
     {...props}
   >
-    <rect x="4" y="3" width="8" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+    <rect
+      x="4"
+      y="3"
+      width="8"
+      height="10"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
   </svg>
 );
 
@@ -297,8 +312,21 @@ const SidebarPanelIcon = ({
     aria-hidden="true"
     {...props}
   >
-    <rect x="2" y="2.75" width="12" height="10.5" rx="2" stroke="currentColor" strokeWidth="1.25" />
-    <path d="M6 3V13" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+    <rect
+      x="2"
+      y="2.75"
+      width="12"
+      height="10.5"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
+    <path
+      d="M6 3V13"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
@@ -339,8 +367,18 @@ export const CalendarWorkspaceToolbar = ({
   onSelectViewMode,
 }: CalendarWorkspaceToolbarProps) => {
   const tabs = [
-    { value: "calendar", label: "Calendar", icon: CalendarIcon, onClick: onSelectCalendar },
-    { value: "timeline", label: "Timeline", icon: TimelineToolbarIcon, onClick: onSelectTimeline },
+    {
+      value: "calendar",
+      label: "Calendar",
+      icon: CalendarIcon,
+      onClick: onSelectCalendar,
+    },
+    {
+      value: "timeline",
+      label: "Timeline",
+      icon: TimelineToolbarIcon,
+      onClick: onSelectTimeline,
+    },
   ] as const;
 
   return (
@@ -382,7 +420,10 @@ export const CalendarWorkspaceToolbar = ({
               const Icon = option.icon;
 
               return (
-                <div key={option.value} className="flex flex-col items-start pb-2">
+                <div
+                  key={option.value}
+                  className="flex flex-col items-start pb-2"
+                >
                   <button
                     type="button"
                     className={cn(
@@ -437,16 +478,6 @@ export const CalendarWorkspaceToolbar = ({
  * Sidebar
  * -------------------------------- */
 
-const SIDEBAR_CALENDAR_ITEMS: SidebarCalendarItem[] = [
-  { label: "My calendars", icon: SidebarCalendarIcon, expanded: true },
-  { label: "Routine", icon: CheckCircle, color: "#ff73f6", checked: true },
-  { label: "Events", icon: CheckCircle, color: "#ffc86b", checked: true },
-  { label: "Other calendars", icon: SidebarCalendarIcon, expanded: true },
-  { label: "Holidays", icon: CheckCircle, color: "#8c78ff", checked: true },
-  { label: "School", icon: Circle, color: "#39d64d" },
-  { label: "Add calendar", icon: Plus },
-];
-
 const buildMiniCalendarDays = (
   monthDate: Date,
   selectedDate: Date,
@@ -471,14 +502,46 @@ const buildMiniCalendarDays = (
 const CalendarSidebar = ({
   monthDate,
   selectedDate,
+  calendars,
+  selectedCalendarIds,
+  calendarError,
+  isCalendarConnected,
+  isCalendarConnecting,
   onSelectDate,
   onPreviousMonth,
   onNextMonth,
   onClose,
+  onConnectCalendar,
+  onToggleCalendar,
 }: CalendarSidebarProps) => {
   const miniCalendarDays = useMemo(
     () => buildMiniCalendarDays(monthDate, selectedDate),
     [monthDate, selectedDate],
+  );
+  const primaryCalendars = useMemo(
+    () => calendars.filter((calendar) => calendar.primary),
+    [calendars],
+  );
+  const secondaryCalendars = useMemo(
+    () =>
+      primaryCalendars.length > 0
+        ? calendars.filter((calendar) => !calendar.primary)
+        : calendars,
+    [calendars, primaryCalendars.length],
+  );
+  const calendarSections = useMemo(
+    () => [
+      {
+        label: "My calendars",
+        calendars:
+          primaryCalendars.length > 0 ? primaryCalendars : secondaryCalendars,
+      },
+      {
+        label: "Other calendars",
+        calendars: primaryCalendars.length > 0 ? secondaryCalendars : [],
+      },
+    ],
+    [primaryCalendars, secondaryCalendars],
   );
 
   return (
@@ -557,32 +620,70 @@ const CalendarSidebar = ({
       </section>
 
       <nav className="flex w-full flex-col gap-2" aria-label="Calendar lists">
-        {SIDEBAR_CALENDAR_ITEMS.map((item) => {
-          const Icon = item.icon;
-          const isSection = typeof item.expanded === "boolean";
+        {calendarSections.map((section) => {
+          if (isCalendarConnected && section.calendars.length === 0) {
+            return null;
+          }
 
           return (
-            <button
-              key={item.label}
-              type="button"
-              className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <span className="flex shrink-0 items-center">
-                {isSection ? (
+            <div key={section.label} className="flex flex-col gap-1">
+              <button
+                type="button"
+                className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="flex shrink-0 items-center">
                   <ChevronDown className="h-4 w-4 text-[#667085]" />
-                ) : null}
-                <Icon
-                  className={cn(
-                    "h-5 w-5 shrink-0",
-                    item.checked ? "text-white" : "text-black",
-                  )}
-                  style={item.color ? { color: item.color } : undefined}
-                />
-              </span>
-              <span className="truncate">{item.label}</span>
-            </button>
+                  <SidebarCalendarIcon className="h-5 w-5 shrink-0 text-black" />
+                </span>
+                <span className="truncate">{section.label}</span>
+              </button>
+
+              {section.calendars.map((calendar) => {
+                const checked = selectedCalendarIds.has(calendar.id);
+                const Icon = checked ? CheckCircle : Circle;
+
+                return (
+                  <button
+                    key={calendar.id}
+                    type="button"
+                    className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    onClick={() => onToggleCalendar(calendar.id)}
+                  >
+                    <span className="flex shrink-0 items-center pl-4">
+                      <Icon
+                        className="h-5 w-5 shrink-0"
+                        style={{ color: calendar.backgroundColor }}
+                      />
+                    </span>
+                    <span className="truncate">{calendar.summary}</span>
+                  </button>
+                );
+              })}
+            </div>
           );
         })}
+
+        <button
+          type="button"
+          className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          onClick={onConnectCalendar}
+          disabled={isCalendarConnecting}
+        >
+          <Plus className="h-5 w-5 shrink-0 text-black" />
+          <span className="truncate">
+            {isCalendarConnected
+              ? "Reconnect Google Calendar"
+              : isCalendarConnecting
+                ? "Connecting..."
+                : "Add Google Calendar"}
+          </span>
+        </button>
+
+        {calendarError ? (
+          <p className="px-2 pt-1 text-[12px] leading-normal text-[#b42318]">
+            {calendarError}
+          </p>
+        ) : null}
       </nav>
     </aside>
   );
@@ -647,33 +748,9 @@ const createHourLabel = (hour: number) => {
   return `${String(hour).padStart(2, "0")}:00`;
 };
 
-const createDemoEvents = (baseDate: Date): CalendarDemoEvent[] => {
-  const selectedDate = startOfDay(baseDate);
-  const nextDate = addDays(selectedDate, 1);
-
-  return [
-    {
-      id: "review-core",
-      title: "復習キュー",
-      startsAt: setMinutes(setHours(selectedDate, 9), 0),
-      minutes: 45,
-    },
-    {
-      id: "deck-maintenance",
-      title: "カード整理",
-      startsAt: setMinutes(setHours(selectedDate, 14), 30),
-      minutes: 60,
-    },
-    {
-      id: "next-preview",
-      title: "次回確認",
-      startsAt: setMinutes(setHours(nextDate, 11), 0),
-      minutes: 30,
-    },
-  ];
-};
-
-const calculateEventStyle = (event: CalendarDemoEvent): CalendarEventStyle => {
+const calculateEventStyle = (
+  event: GoogleCalendarEvent,
+): CalendarEventStyle => {
   const startHour =
     event.startsAt.getHours() + event.startsAt.getMinutes() / 60;
 
@@ -725,17 +802,27 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
   const [timelineUnitBuffer, setTimelineUnitBuffer] = useState(() =>
     createInitialTimelineUnitBuffer("days"),
   );
+  const {
+    calendars: googleCalendars,
+    connect: connectGoogleCalendar,
+    error: googleCalendarError,
+    events: googleCalendarEvents,
+    isConnected: isGoogleCalendarConnected,
+    isConnecting: isGoogleCalendarConnecting,
+    loadEvents: loadGoogleCalendarEvents,
+    selectedCalendarIds,
+    selectedCalendarIdList,
+    toggleCalendar: toggleGoogleCalendar,
+  } = useGoogleCalendarIntegration();
 
   const visibleDays = useMemo(
     () => createVisibleDays(currentDate, selectedViewMode, calendarBuffer),
     [calendarBuffer, currentDate, selectedViewMode],
   );
-  const demoEvents = useMemo(
-    () => createDemoEvents(currentDate),
-    [currentDate],
-  );
+  const visibleEvents = googleCalendarEvents;
   const timelineColumns = useMemo(
-    () => buildTimelineColumns(selectedViewMode, currentDate, timelineUnitBuffer),
+    () =>
+      buildTimelineColumns(selectedViewMode, currentDate, timelineUnitBuffer),
     [currentDate, selectedViewMode, timelineUnitBuffer],
   );
   const timelineColumnWidth = useMemo(
@@ -755,7 +842,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
 
   const viewportDayCount = getViewportDayCount(currentDate, selectedViewMode);
   const measuredViewportWidth = viewportWidth;
-  
+
   const calendarDayColumnWidth =
     measuredViewportWidth > C.TIME_COLUMN_WIDTH
       ? Math.max(
@@ -767,6 +854,15 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
 
   const gridWidth =
     C.TIME_COLUMN_WIDTH + visibleDays.length * calendarDayColumnWidth;
+
+  useEffect(() => {
+    const rangeStart = visibleDays[0];
+    const rangeEnd = visibleDays[visibleDays.length - 1];
+
+    if (!rangeStart || !rangeEnd) return;
+
+    void loadGoogleCalendarEvents(rangeStart, rangeEnd);
+  }, [loadGoogleCalendarEvents, selectedCalendarIdList, visibleDays]);
 
   const timelineGridStyle: TimelineGridStyle = {
     "--calendar-hour-row-height": `${C.DEFAULT_HOUR_ROW_HEIGHT}px`,
@@ -801,7 +897,8 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
 
         if (activeMode === "timeline") {
           const extendCount = getTimelineUnitExtendCount(selectedViewMode);
-          prependScrollCorrectionRef.current = extendCount * timelineColumnWidth;
+          prependScrollCorrectionRef.current =
+            extendCount * timelineColumnWidth;
           setTimelineUnitBuffer((current) => ({
             before: current.before + extendCount,
             after: current.after,
@@ -965,10 +1062,17 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
           <CalendarSidebar
             monthDate={currentDate}
             selectedDate={currentDate}
+            calendars={googleCalendars}
+            selectedCalendarIds={selectedCalendarIds}
+            calendarError={googleCalendarError}
+            isCalendarConnected={isGoogleCalendarConnected}
+            isCalendarConnecting={isGoogleCalendarConnecting}
             onSelectDate={handleSidebarSelectDate}
             onPreviousMonth={handleSidebarPreviousMonth}
             onNextMonth={handleSidebarNextMonth}
             onClose={() => setIsCalendarSidebarOpen(false)}
+            onConnectCalendar={connectGoogleCalendar}
+            onToggleCalendar={toggleGoogleCalendar}
           />
         ) : null}
 
@@ -1091,7 +1195,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
                   </div>
 
                   {visibleDays.map((day) => {
-                    const eventsForDay = demoEvents.filter((event) =>
+                    const eventsForDay = visibleEvents.filter((event) =>
                       isSameDay(event.startsAt, day),
                     );
 
@@ -1104,7 +1208,9 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
                           <div
                             key={`${day.toISOString()}-${hour}`}
                             className="border-b border-[#eef0f3]"
-                            style={{ height: `var(--calendar-hour-row-height)` }}
+                            style={{
+                              height: `var(--calendar-hour-row-height)`,
+                            }}
                           />
                         ))}
 
