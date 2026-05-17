@@ -34,8 +34,6 @@ interface PdfWorkspaceProviderProps extends PropsWithChildren {
   onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
 }
 
-
-
 const normalizePageForLayout = (
   page: number,
   pageLayoutMode: PdfPageLayoutMode,
@@ -85,7 +83,8 @@ const zoomUiPercentToScale = (value: number) => {
   }
 
   const ratio =
-    (clampedUiPercent - C.PDF_ZOOM_UI_MIN_PERCENT) / C.PDF_ZOOM_UI_RANGE_PERCENT;
+    (clampedUiPercent - C.PDF_ZOOM_UI_MIN_PERCENT) /
+    C.PDF_ZOOM_UI_RANGE_PERCENT;
 
   return clampScale(
     Number((C.FIT_MIN_SCALE + ratio * C.PDF_SCALE_RANGE).toFixed(3)),

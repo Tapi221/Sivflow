@@ -629,8 +629,7 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
     } = usePdfCurrentPage({
       numPages,
       pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
-      pageNavigationPageNumbers:
-        pageLayoutMetrics.visualPageAnchorPageNumbers,
+      pageNavigationPageNumbers: pageLayoutMetrics.visualPageAnchorPageNumbers,
       onPageChange,
     });
 

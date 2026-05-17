@@ -101,7 +101,7 @@ export const CalendarTimelineDayView = ({
               <div
                 className="relative border-b border-[#e5e7eb] bg-white"
                 style={{
-                  height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px` ,
+                  height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px`,
                   width: `${gridWidth}px`,
                 }}
               >

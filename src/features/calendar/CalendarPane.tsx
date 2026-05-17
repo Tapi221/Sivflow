@@ -10,7 +10,6 @@ import {
   subDays,
   subMonths,
 } from "date-fns";
-import { ja } from "date-fns/locale";
 import type { CSSProperties, UIEvent } from "react";
 import {
   useCallback,
@@ -52,6 +51,7 @@ import {
   type GoogleCalendarEvent,
   type GoogleCalendarListItem,
 } from "./useGoogleCalendarIntegration";
+import { computeEventLayout, toLayoutEvent } from "./calendarEventLayout";
 
 /* --------------------------------
  * 基本タイプ
@@ -1206,39 +1206,15 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
                   <div className="sticky left-0 top-0 z-20 border-b border-r border-[#e5e7eb] bg-white" />
 
                   {visibleDays.map((day) => {
-                    const isToday = isSameDay(day, new Date());
-
-                    return (
-                      <div
-                        key={day.toISOString()}
-                        className={cn(
-                          "sticky top-0 z-10 flex h-10 flex-col items-center justify-center border-b border-r border-[#e5e7eb] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
-                          isToday && "bg-[#fdf2f2]",
-                        )}
-                      >
-                        <span className="font-semibold text-[#25272d]">
-                          {format(day, "d", { locale: ja })}
-                        </span>
-                        <span>{format(day, "E", { locale: ja })}</span>
-                      </div>
-                    );
-                  })}
-
-                  <div className="sticky left-0 z-10 border-r border-[#e5e7eb] bg-white">
-                    {HOURS.map((hour) => (
-                      <div
-                        key={hour}
-                        className="flex items-start justify-center border-b border-[#eef0f3] pt-2 text-[12px] text-[#8f929c]"
-                        style={{ height: `var(--calendar-hour-row-height)` }}
-                      >
-                        {createHourLabel(hour)}
-                      </div>
-                    ))}
-                  </div>
-
-                  {visibleDays.map((day) => {
                     const eventsForDay = visibleEvents.filter((event) =>
                       isSameDay(event.startsAt, day),
+                    );
+
+                    // ★ レイアウト計算（この日のイベント全体を一括処理）
+                    const layout = computeEventLayout(
+                      eventsForDay.map((e) =>
+                        toLayoutEvent(e.id, e.startsAt, e.minutes),
+                      ),
                     );
 
                     return (
@@ -1256,20 +1232,34 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
                           />
                         ))}
 
-                        {eventsForDay.map((event) => (
-                          <div
-                            key={event.id}
-                            className="absolute left-2 right-2 min-h-12 overflow-hidden rounded border-0 px-[6px] py-1 pl-2 text-[12px] font-medium leading-[1.35] shadow-none"
-                            style={calculateEventStyle(event)}
-                          >
-                            <div className="truncate text-[11px] font-medium leading-[1.25] opacity-90">
-                              {createEventTimeLabel(event)}
+                        {eventsForDay.map((event) => {
+                          // ★ left/width をレイアウト結果から取得
+                          const pos = layout.get(event.id) ?? {
+                            left: 0,
+                            width: 1,
+                          };
+
+                          return (
+                            <div
+                              key={event.id}
+                              className="absolute min-h-12 overflow-hidden rounded px-[6px] py-1 text-[12px] font-medium leading-[1.35]"
+                              style={{
+                                ...calculateEventStyle(event),
+                                // ★ left-2 / right-2 を廃止してレイアウト計算値を使う
+                                left: `calc(${pos.left * 100}% + 2px)`,
+                                width: `calc(${pos.width * 100}% - 4px)`,
+                                right: "unset",
+                              }}
+                            >
+                              <div className="truncate text-[11px] font-medium leading-[1.25] opacity-90">
+                                {createEventTimeLabel(event)}
+                              </div>
+                              <div className="line-clamp-2 break-words">
+                                {event.title}
+                              </div>
                             </div>
-                            <div className="line-clamp-2 break-words">
-                              {event.title}
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     );
                   })}

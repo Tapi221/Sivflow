@@ -9,7 +9,6 @@ import { PdfViewer } from "./PdfViewer";
 import * as C from "@/features/pdf/pdf.constants.desktop";
 import { usePdfWorkspace } from "./usePdfWorkspace";
 
-
 interface PdfPaneDoc {
   id: string;
   name?: string;
