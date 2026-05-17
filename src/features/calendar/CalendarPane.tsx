@@ -20,10 +20,10 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
         viewMode={pane.selectedViewMode}
         onSelectCalendar={() => {
           pane.setActiveMode("calendar");
-          pane.setIsCalendarSidebarOpen(true); 
+          pane.setIsCalendarSidebarOpen(true);
         }}
         onSelectTimeline={() => {
-          pane.setActiveMode("timeline");  
+          pane.setActiveMode("timeline");
           pane.setIsCalendarSidebarOpen(false);
         }}
         onSelectViewMode={pane.handleSelectViewMode}
@@ -33,7 +33,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
         {pane.isCalendarSidebarOpen ? (
           <CalendarSidebar
             monthDate={pane.currentDate}
-            selectedDate={pane.currentDate}
+            selectedDate={pane.selectedDate}
             calendars={pane.googleCalendars}
             googleAccountEmail={pane.googleAccountEmail}
             selectedCalendarIds={pane.selectedCalendarIds}
@@ -121,11 +121,11 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
           ) : pane.selectedViewMode === "month" ? (
             <CalendarMonthView
               currentDate={pane.currentDate}
-              selectedDate={pane.currentDate}
+              selectedDate={pane.selectedDate}
               scrollTargetToken={pane.monthScrollTargetToken}
               visibleEvents={pane.googleCalendarEvents}
               onSelectDate={pane.handleSidebarSelectDate}
-              onVisibleMonthChange={pane.setMonthTitleDate}
+              onVisibleMonthChange={pane.handleVisibleMonthChange}
             />
           ) : (
             <CalendarWeekDayGrid
