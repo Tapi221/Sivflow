@@ -913,6 +913,10 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
     minWidth: `${gridWidth}px`,
   };
 
+  const MIN_LAYOUT_MINUTES = Math.ceil(
+  (48 / C.DEFAULT_HOUR_ROW_HEIGHT) * 60  // ≈ 33分
+);
+
   const resetTimelinePosition = useCallback((viewMode: CalendarViewMode) => {
     shouldSyncScrollRef.current = true;
     setCalendarBuffer(createInitialCalendarBuffer());
@@ -1214,10 +1218,11 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
 
                     // ★ レイアウト計算（この日のイベント全体を一括処理）
                     const layout = computeEventLayout(
-                      eventsForDay.map((e) =>
-                        toLayoutEvent(e.id, e.startsAt, e.minutes),
-                      ),
-                    );
+  eventsForDay.map((e) =>
+    // 重複判定は「視覚的な最小高さ」を考慮した長さで行う
+    toLayoutEvent(e.id, e.startsAt, Math.max(e.minutes, MIN_LAYOUT_MINUTES))
+  ),
+);
 
                     return (
                       <div
