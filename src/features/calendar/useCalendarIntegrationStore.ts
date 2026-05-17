@@ -7,7 +7,7 @@ import { persist } from "zustand/middleware";
 // Electron では OS キーチェーンを使うのが理想（将来対応）。
 
 const SESSION_TOKEN_KEY = "flashcard-master.gcal.access_token";
-const SESSION_EMAIL_KEY  = "flashcard-master.gcal.account_email";
+const SESSION_EMAIL_KEY = "flashcard-master.gcal.account_email";
 
 /** セッション内メモリキャッシュ（モジュールスコープ） */
 let _cachedToken: string | null = null;
@@ -57,49 +57,47 @@ type CalendarIntegrationActions = {
 type CalendarIntegrationStore = CalendarIntegrationPersistedState &
   CalendarIntegrationActions;
 
-export const useCalendarIntegrationStore =
-  create<CalendarIntegrationStore>()(
-    persist(
-      (set, get) => ({
-        wasConnected: false,
-        accountEmail: null,
-        selectedCalendarIds: [],
+export const useCalendarIntegrationStore = create<CalendarIntegrationStore>()(
+  persist(
+    (set, get) => ({
+      wasConnected: false,
+      accountEmail: null,
+      selectedCalendarIds: [],
 
-        markConnected: (email, calendarIds) =>
-          set({
-            wasConnected: true,
-            accountEmail: email,
-            selectedCalendarIds: calendarIds,
-          }),
-
-        markDisconnected: () => {
-          writeSessionToken(null);
-          set({
-            wasConnected: false,
-            accountEmail: null,
-            selectedCalendarIds: [],
-          });
-        },
-
-        setSelectedCalendarIds: (ids) =>
-          set({ selectedCalendarIds: ids }),
-
-        toggleCalendarId: (id) => {
-          const current = get().selectedCalendarIds;
-          const next = current.includes(id)
-            ? current.filter((x) => x !== id)
-            : [...current, id];
-          set({ selectedCalendarIds: next });
-        },
-      }),
-      {
-        name: "flashcard-master.calendar-integration",
-        // accessToken はここに含めない（セキュリティ + 有効期限があるため）
-        partialize: (state) => ({
-          wasConnected: state.wasConnected,
-          accountEmail: state.accountEmail,
-          selectedCalendarIds: state.selectedCalendarIds,
+      markConnected: (email, calendarIds) =>
+        set({
+          wasConnected: true,
+          accountEmail: email,
+          selectedCalendarIds: calendarIds,
         }),
+
+      markDisconnected: () => {
+        writeSessionToken(null);
+        set({
+          wasConnected: false,
+          accountEmail: null,
+          selectedCalendarIds: [],
+        });
       },
-    ),
-  );
+
+      setSelectedCalendarIds: (ids) => set({ selectedCalendarIds: ids }),
+
+      toggleCalendarId: (id) => {
+        const current = get().selectedCalendarIds;
+        const next = current.includes(id)
+          ? current.filter((x) => x !== id)
+          : [...current, id];
+        set({ selectedCalendarIds: next });
+      },
+    }),
+    {
+      name: "flashcard-master.calendar-integration",
+      // accessToken はここに含めない（セキュリティ + 有効期限があるため）
+      partialize: (state) => ({
+        wasConnected: state.wasConnected,
+        accountEmail: state.accountEmail,
+        selectedCalendarIds: state.selectedCalendarIds,
+      }),
+    },
+  ),
+);

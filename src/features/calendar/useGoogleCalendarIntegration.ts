@@ -525,11 +525,11 @@ export const useGoogleCalendarIntegration = ({
   authInstance = auth,
 }: UseGoogleCalendarIntegrationOptions = {}) => {
   // ── 起動時に永続化ストレージから状態を復元
-  const [accessToken, setAccessToken] = useState<string | null>(
-    () => readSessionToken(),
+  const [accessToken, setAccessToken] = useState<string | null>(() =>
+    readSessionToken(),
   );
-  const [accountEmail, setAccountEmail] = useState<string | null>(
-    () => readPersistedEmail(),
+  const [accountEmail, setAccountEmail] = useState<string | null>(() =>
+    readPersistedEmail(),
   );
   const [selectedCalendarIds, setSelectedCalendarIds] = useState<Set<string>>(
     () => new Set(readPersistedCalendarIds()),
@@ -572,7 +572,7 @@ export const useGoogleCalendarIntegration = ({
         setAccessToken(null);
         setIsTokenExpired(true);
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // マウント時に1回だけ実行
 
   // ── 接続（OAuth フロー実行）
@@ -672,17 +672,14 @@ export const useGoogleCalendarIntegration = ({
           }),
         );
       } catch (loadError) {
-        const message =
-          loadError instanceof Error ? loadError.message : "";
+        const message = loadError instanceof Error ? loadError.message : "";
 
         // 401 Unauthorized = アクセストークンの期限切れ
         if (message.includes("401")) {
           writeSessionToken(null);
           setAccessToken(null);
           setIsTokenExpired(true);
-          setError(
-            "Google Calendar の接続が切れました。再接続してください。",
-          );
+          setError("Google Calendar の接続が切れました。再接続してください。");
         } else {
           setError(
             loadError instanceof Error

@@ -779,6 +779,10 @@ const createHourLabel = (hour: number) => {
   return `${String(hour).padStart(2, "0")}:00`;
 };
 
+/**
+ * イベントの表示スタイルを計算する。
+ * ヘッダー行はスクロール領域の外に出したため、top に 40px のオフセットは不要。
+ */
 const calculateEventStyle = (
   event: GoogleCalendarEvent,
 ): CalendarEventLabelStyle => {
@@ -789,7 +793,8 @@ const calculateEventStyle = (
   return {
     "--calendar-event-start-hour": Math.max(0, startHour - HOURS[0]),
     "--calendar-event-duration-hours": event.minutes / 60,
-    top: `calc(var(--calendar-event-start-hour) * var(--calendar-hour-row-height) + 40px)`,
+    // ヘッダーがスクロール外に出たので + 40px は不要
+    top: `calc(var(--calendar-event-start-hour) * var(--calendar-hour-row-height))`,
     height: `calc(var(--calendar-event-duration-hours) * var(--calendar-hour-row-height) - 8px)`,
     backgroundColor: tokens.bg,
     borderLeftColor: tokens.border,
@@ -816,6 +821,8 @@ const getPreviousDate = (currentDate: Date, viewMode: CalendarViewMode) => {
   return subDays(currentDate, 1);
 };
 
+const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
+
 /* --------------------------------
  * Main Pane
  * -------------------------------- */
@@ -823,6 +830,8 @@ const getPreviousDate = (currentDate: Date, viewMode: CalendarViewMode) => {
 export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  // ★ 追加：日付ヘッダーの横スクロールを本体と同期するための ref
+  const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const prependScrollCorrectionRef = useRef(0);
   const isExtendingLeftRef = useRef(false);
   const isExtendingRightRef = useRef(false);
@@ -913,10 +922,6 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
     minWidth: `${gridWidth}px`,
   };
 
-  const MIN_LAYOUT_MINUTES = Math.ceil(
-  (48 / C.DEFAULT_HOUR_ROW_HEIGHT) * 60  // ≈ 33分
-);
-
   const resetTimelinePosition = useCallback((viewMode: CalendarViewMode) => {
     shouldSyncScrollRef.current = true;
     setCalendarBuffer(createInitialCalendarBuffer());
@@ -930,6 +935,12 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
   const handleTimelineScroll = useCallback(
     (event: UIEvent<HTMLDivElement>) => {
       const scrollContainer = event.currentTarget;
+
+      // ★ 日付ヘッダーの横スクロールを本体と同期
+      if (headerScrollRef.current) {
+        headerScrollRef.current.scrollLeft = scrollContainer.scrollLeft;
+      }
+
       const distanceToLeft = scrollContainer.scrollLeft;
       const distanceToRight =
         scrollContainer.scrollWidth -
@@ -1004,6 +1015,10 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
 
     if (prependScrollCorrectionRef.current > 0) {
       scrollContainer.scrollLeft += prependScrollCorrectionRef.current;
+      // ★ ヘッダーも同期
+      if (headerScrollRef.current) {
+        headerScrollRef.current.scrollLeft = scrollContainer.scrollLeft;
+      }
       prependScrollCorrectionRef.current = 0;
       isExtendingLeftRef.current = false;
       return;
@@ -1011,10 +1026,16 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
 
     if (!shouldSyncScrollRef.current) return;
 
-    scrollContainer.scrollLeft =
+    const nextScrollLeft =
       activeMode === "timeline"
         ? timelineAnchorColumnIndex * timelineColumnWidth
         : calendarBuffer.before * calendarDayColumnWidth;
+
+    scrollContainer.scrollLeft = nextScrollLeft;
+    // ★ ヘッダーも同期
+    if (headerScrollRef.current) {
+      headerScrollRef.current.scrollLeft = nextScrollLeft;
+    }
     shouldSyncScrollRef.current = false;
   }, [
     activeMode,
@@ -1202,33 +1223,106 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
               onVisibleMonthChange={setMonthTitleDate}
             />
           ) : (
+            // ── カレンダービュー（週 / 日） ──
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
+
+              {/* ── 日付ヘッダー行（縦スクロールに追従しない） ── */}
+              <div className="flex shrink-0 border-b border-[#e5e7eb] bg-white">
+                {/* 左上コーナー：時刻列と幅を揃える */}
+                <div
+                  className="shrink-0 border-r border-[#e5e7eb] bg-white"
+                  style={{ width: C.TIME_COLUMN_WIDTH }}
+                />
+                {/* 日付ヘッダー群：overflow-hidden で見た目を制御し JS で scrollLeft を同期 */}
+                <div
+                  ref={headerScrollRef}
+                  className="overflow-hidden"
+                  style={{ flex: 1 }}
+                >
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: `repeat(${visibleDays.length}, ${calendarDayColumnWidth}px)`,
+                      minWidth: `${visibleDays.length * calendarDayColumnWidth}px`,
+                    }}
+                  >
+                    {visibleDays.map((day) => {
+                      const isDayToday = isSameDay(day, new Date());
+                      return (
+                        <div
+                          key={`${day.toISOString()}-header`}
+                          className={cn(
+                            "flex h-10 shrink-0 flex-col items-center justify-center border-r border-[#eef0f3] last:border-r-0",
+                            isDayToday && "bg-[#fdf4f4]",
+                          )}
+                        >
+                          <span className="text-[11px] font-medium leading-none text-[#8f929c]">
+                            {format(day, "E", { locale: ja })}
+                          </span>
+                          <span
+                            className={cn(
+                              "mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-[13px] font-semibold tabular-nums",
+                              isDayToday
+                                ? "bg-[#6A876E] text-white"
+                                : "text-[#24231f]",
+                            )}
+                          >
+                            {format(day, "d")}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── スクロール可能な本体（時刻ラベル + イベントグリッド） ── */}
               <div
                 ref={scrollContainerRef}
                 className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
                 onScroll={handleTimelineScroll}
               >
                 <div className="grid" style={timelineGridStyle}>
-                  <div className="sticky left-0 top-0 z-20 border-b border-r border-[#e5e7eb] bg-white" />
 
+                  {/* 時刻ラベル列（左固定） */}
+                  <div className="sticky left-0 z-20 border-r border-[#e5e7eb] bg-white">
+                    {HOURS.map((hour) => (
+                      <div
+                        key={`time-${hour}`}
+                        className="relative border-b border-[#eef0f3] bg-white"
+                        style={{ height: `var(--calendar-hour-row-height)` }}
+                      >
+                        {hour > 0 && (
+                          <span className="absolute -top-[9px] right-2 text-[11px] leading-none text-[#8f929c]">
+                            {createHourLabel(hour)}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 各日付列（ヘッダーなし） */}
                   {visibleDays.map((day) => {
                     const eventsForDay = visibleEvents.filter((event) =>
                       isSameDay(event.startsAt, day),
                     );
 
-                    // ★ レイアウト計算（この日のイベント全体を一括処理）
                     const layout = computeEventLayout(
-  eventsForDay.map((e) =>
-    // 重複判定は「視覚的な最小高さ」を考慮した長さで行う
-    toLayoutEvent(e.id, e.startsAt, Math.max(e.minutes, MIN_LAYOUT_MINUTES))
-  ),
-);
+                      eventsForDay.map((e) =>
+                        toLayoutEvent(
+                          e.id,
+                          e.startsAt,
+                          Math.max(e.minutes, MIN_LAYOUT_MINUTES),
+                        ),
+                      ),
+                    );
 
                     return (
                       <div
                         key={`${day.toISOString()}-column`}
                         className="relative border-r border-[#eef0f3] last:border-r-0"
                       >
+                        {/* 時間グリッド線 */}
                         {HOURS.map((hour) => (
                           <div
                             key={`${day.toISOString()}-${hour}`}
@@ -1239,8 +1333,8 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
                           />
                         ))}
 
+                        {/* イベント */}
                         {eventsForDay.map((event) => {
-                          // ★ left/width をレイアウト結果から取得
                           const pos = layout.get(event.id) ?? {
                             left: 0,
                             width: 1,
@@ -1252,7 +1346,6 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
                               className="absolute min-h-12 overflow-hidden rounded px-[6px] py-1 text-[12px] font-medium leading-[1.35]"
                               style={{
                                 ...calculateEventStyle(event),
-                                // ★ left-2 / right-2 を廃止してレイアウト計算値を使う
                                 left: `calc(${pos.left * 100}% + 2px)`,
                                 width: `calc(${pos.width * 100}% - 4px)`,
                                 right: "unset",
