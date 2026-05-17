@@ -18,8 +18,14 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
       <CalendarWorkspaceToolbar
         activeMode={pane.activeMode}
         viewMode={pane.selectedViewMode}
-        onSelectCalendar={() => pane.setIsCalendarSidebarOpen(true)}
-        onSelectTimeline={() => pane.setIsCalendarSidebarOpen(false)}
+        onSelectCalendar={() => {
+          pane.setActiveMode("calendar");
+          pane.setIsCalendarSidebarOpen(true); 
+        }}
+        onSelectTimeline={() => {
+          pane.setActiveMode("timeline");  
+          pane.setIsCalendarSidebarOpen(false);
+        }}
         onSelectViewMode={pane.handleSelectViewMode}
       />
 

@@ -110,7 +110,7 @@ export type UseCalendarPaneReturn = {
   monthScrollTargetToken: number;
   selectedViewMode: CalendarViewMode;
   activeMode: CalendarToolbarMode;
-  isCalendarSidebarOpen: boolean;
+  setActiveMode: (mode: CalendarToolbarMode) => void;
   // Computed
   visibleDays: Date[];
   timelineColumns: ReturnType<typeof buildTimelineColumns>;
@@ -448,6 +448,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     selectedViewMode,
     activeMode,
     isCalendarSidebarOpen,
+    setActiveMode,
     visibleDays,
     timelineColumns,
     timelineColumnWidth,
