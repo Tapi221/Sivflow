@@ -39,6 +39,8 @@ type UseMonthRowResizeOptions = {
   isResizingRef: RefObject<boolean>;
   /** commitHeight 完了後のコールバック（表示月再同期などに使用） */
   onAfterCommit?: () => void;
+  /** ドラッグ中の RAF ごとに呼ばれるコールバック（ライブプレビュー用） */
+  onLiveResize?: (height: number) => void;
 };
 
 export type UseMonthRowResizeReturn = {
@@ -58,6 +60,7 @@ export const useMonthRowResize = ({
   monthWeeks,
   isResizingRef,
   onAfterCommit,
+  onLiveResize,
 }: UseMonthRowResizeOptions): UseMonthRowResizeReturn => {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const monthRowHeightRef = useRef(C.DEFAULT_MONTH_ROW_HEIGHT);
@@ -149,8 +152,9 @@ export const useMonthRowResize = ({
         `${height}px`,
       );
       preserveAnchor(anchor);
+      onLiveResize?.(height);
     },
-    [preserveAnchor],
+    [preserveAnchor, onLiveResize],
   );
 
   const scheduleVariable = useCallback(

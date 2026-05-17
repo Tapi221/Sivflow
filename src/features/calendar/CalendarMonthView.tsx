@@ -1,6 +1,6 @@
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -17,9 +17,12 @@ const getMonthAnnotation = (date: Date): string | null => {
   return format(date, "M月", { locale: ja });
 };
 
-// ── 1日のイベント一覧から表示用データを生成する
-//    MAX_VISIBLE_EVENTS 件を超えた場合は "+N件" バッジを出す
-const MAX_VISIBLE_EVENTS = 3;
+// チップ1件の高さ（py-[2px] × 2 + leading-[1.3] × 11px ≈ 18px）+ gap 3px
+const CHIP_HEIGHT_PX = 21;
+// 日付バッジ top-4(16px) + h-8(32px) + 余白 12px
+const CHIPS_TOP_OFFSET_PX = 60;
+// 下端の余白
+const CHIPS_BOTTOM_MARGIN_PX = 4;
 
 type MonthEventChipProps = {
   event: GoogleCalendarEvent;
@@ -70,6 +73,11 @@ export const CalendarMonthView = ({
   // リサイズ中フラグを両フック間で共有
   const isResizingRef = useRef(false);
 
+  // ドラッグ中のリアルタイム高さ（RAF ごとに更新）
+  const [liveRowHeight, setLiveRowHeight] = useState(
+    C.readStoredMonthRowHeight,
+  );
+
   const scroll = useMonthInfiniteScroll({
     currentDate,
     scrollTargetToken,
@@ -83,7 +91,17 @@ export const CalendarMonthView = ({
     monthWeeks: scroll.monthWeeks,
     isResizingRef,
     onAfterCommit: scroll.syncVisibleMonth,
+    onLiveResize: setLiveRowHeight,
   });
+
+  // 現在の行高から表示できるチップ数を計算
+  const maxVisibleChips = Math.max(
+    0,
+    Math.floor(
+      (liveRowHeight - CHIPS_TOP_OFFSET_PX - CHIPS_BOTTOM_MARGIN_PX) /
+        CHIP_HEIGHT_PX,
+    ),
+  );
 
   return (
     <div
@@ -123,15 +141,12 @@ export const CalendarMonthView = ({
                 const monthAnnotation = getMonthAnnotation(day.date);
                 const isLastColumn = index % 7 === 6;
 
-                // ── この日のイベントを抽出
-                const eventsForDay = visibleEvents.filter((e) =>
-                  isSameDay(e.startsAt, day.date),
-                );
-                // 時刻順に並べる（fetch 済みだが念のため）
-                const sortedEvents = eventsForDay.sort(
-                  (a, b) => a.startsAt.getTime() - b.startsAt.getTime(),
-                );
-                const visibleChips = sortedEvents.slice(0, MAX_VISIBLE_EVENTS);
+                // ── この日のイベントを抽出・時刻順ソート
+                const sortedEvents = visibleEvents
+                  .filter((e) => isSameDay(e.startsAt, day.date))
+                  .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+
+                const visibleChips = sortedEvents.slice(0, maxVisibleChips);
                 const overflowCount = sortedEvents.length - visibleChips.length;
 
                 return (
