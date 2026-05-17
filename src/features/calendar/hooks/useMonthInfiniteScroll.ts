@@ -98,9 +98,18 @@ export const useMonthInfiniteScroll = ({
       const row = weekRowRefsMap.current.get(week.key);
       if (!row) continue;
       const rect = row.getBoundingClientRect();
-      if (rect.top <= sampleY && rect.bottom > sampleY) { best = week; break; }
-      const dist = Math.min(Math.abs(rect.top - sampleY), Math.abs(rect.bottom - sampleY));
-      if (dist < bestDist) { bestDist = dist; best = week; }
+      if (rect.top <= sampleY && rect.bottom > sampleY) {
+        best = week;
+        break;
+      }
+      const dist = Math.min(
+        Math.abs(rect.top - sampleY),
+        Math.abs(rect.bottom - sampleY),
+      );
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = week;
+      }
     }
 
     if (!best) return;
@@ -118,16 +127,29 @@ export const useMonthInfiniteScroll = ({
       if (isResizingRef.current) return;
       const scroller = event.currentTarget;
 
-      if (scroller.scrollTop < C.MONTH_SCROLL_EDGE_THRESHOLD_PX && !isExtendingBeforeRef.current) {
+      if (
+        scroller.scrollTop < C.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
+        !isExtendingBeforeRef.current
+      ) {
         isExtendingBeforeRef.current = true;
         prependScrollHeightRef.current = scroller.scrollHeight;
-        setMonthOffsetRange((c) => ({ ...c, startOffset: c.startOffset - C.MONTH_EXTEND_COUNT }));
+        setMonthOffsetRange((c) => ({
+          ...c,
+          startOffset: c.startOffset - C.MONTH_EXTEND_COUNT,
+        }));
       }
 
-      const distToBottom = scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
-      if (distToBottom < C.MONTH_SCROLL_EDGE_THRESHOLD_PX && !isExtendingAfterRef.current) {
+      const distToBottom =
+        scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
+      if (
+        distToBottom < C.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
+        !isExtendingAfterRef.current
+      ) {
         isExtendingAfterRef.current = true;
-        setMonthOffsetRange((c) => ({ ...c, endOffset: c.endOffset + C.MONTH_EXTEND_COUNT }));
+        setMonthOffsetRange((c) => ({
+          ...c,
+          endOffset: c.endOffset + C.MONTH_EXTEND_COUNT,
+        }));
       }
 
       syncVisibleMonth();
@@ -160,7 +182,10 @@ export const useMonthInfiniteScroll = ({
     const targetRow = weekRowRefsMap.current.get(targetWeekKey);
     if (!scroller || !targetRow) return;
 
-    scroller.scrollTop = Math.max(0, targetRow.offsetTop - C.WEEKDAY_HEADER_HEIGHT_PX);
+    scroller.scrollTop = Math.max(
+      0,
+      targetRow.offsetTop - C.WEEKDAY_HEADER_HEIGHT_PX,
+    );
     pendingScrollWeekKeyRef.current = null;
     syncVisibleMonth();
   }, [monthWeeks, syncVisibleMonth]);
@@ -171,7 +196,11 @@ export const useMonthInfiniteScroll = ({
     const prevHeight = prependScrollHeightRef.current;
     if (prevHeight === null) return;
     const scroller = scrollContainerRef.current;
-    if (!scroller) { prependScrollHeightRef.current = null; isExtendingBeforeRef.current = false; return; }
+    if (!scroller) {
+      prependScrollHeightRef.current = null;
+      isExtendingBeforeRef.current = false;
+      return;
+    }
 
     scroller.scrollTop += scroller.scrollHeight - prevHeight;
     prependScrollHeightRef.current = null;

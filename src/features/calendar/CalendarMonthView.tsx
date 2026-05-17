@@ -100,7 +100,9 @@ export const CalendarMonthView = ({
                   >
                     <button
                       type="button"
-                      aria-label={format(day.date, "yyyy年M月d日", { locale: ja })}
+                      aria-label={format(day.date, "yyyy年M月d日", {
+                        locale: ja,
+                      })}
                       aria-pressed={selected}
                       className="relative h-full w-full overflow-hidden text-left outline-none focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                       onClick={() => onSelectDate(day.date)}

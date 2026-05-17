@@ -87,7 +87,15 @@ export const MonthViewToolbarIcon = ({
     aria-hidden="true"
     {...props}
   >
-    <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+    <rect
+      x="2"
+      y="3"
+      width="12"
+      height="10"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
     <path d="M2 6.5H14" stroke="currentColor" strokeWidth="1.25" />
     <path d="M6 6.5V13" stroke="currentColor" strokeWidth="1.25" />
     <path d="M10 6.5V13" stroke="currentColor" strokeWidth="1.25" />
@@ -109,7 +117,15 @@ export const WeekViewToolbarIcon = ({
     aria-hidden="true"
     {...props}
   >
-    <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+    <rect
+      x="2"
+      y="3"
+      width="12"
+      height="10"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
     <path d="M6 3V13" stroke="currentColor" strokeWidth="1.25" />
     <path d="M10 3V13" stroke="currentColor" strokeWidth="1.25" />
   </svg>
@@ -130,7 +146,15 @@ export const DayViewToolbarIcon = ({
     aria-hidden="true"
     {...props}
   >
-    <rect x="4" y="3" width="8" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+    <rect
+      x="4"
+      y="3"
+      width="8"
+      height="10"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
   </svg>
 );
 
@@ -181,7 +205,20 @@ export const SidebarPanelIcon = ({
     aria-hidden="true"
     {...props}
   >
-    <rect x="2" y="2.75" width="12" height="10.5" rx="2" stroke="currentColor" strokeWidth="1.25" />
-    <path d="M6 3V13" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+    <rect
+      x="2"
+      y="2.75"
+      width="12"
+      height="10.5"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.25"
+    />
+    <path
+      d="M6 3V13"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+    />
   </svg>
 );

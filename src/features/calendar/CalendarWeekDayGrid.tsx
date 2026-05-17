@@ -4,18 +4,26 @@ import { ja } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { generateColorTokens } from "@/features/calendar/calendar.color-tokens";
-import { computeEventLayout, toLayoutEvent } from "@/features/calendar/calendarEventLayout";
+import {
+  computeEventLayout,
+  toLayoutEvent,
+} from "@/features/calendar/calendarEventLayout";
 import type { GoogleCalendarEvent } from "@/features/calendar/hooks/useGoogleCalendarIntegration";
-import type { CalendarEventLabelStyle, CalendarWeekDayGridProps } from "./calendarPane.types";
+import type {
+  CalendarEventLabelStyle,
+  CalendarWeekDayGridProps,
+} from "./calendarPane.types";
 
 const HOURS = Array.from({ length: 24 }, (_, index) => index);
 const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
 
-const createHourLabel = (hour: number) =>
-  `${String(hour).padStart(2, "0")}:00`;
+const createHourLabel = (hour: number) => `${String(hour).padStart(2, "0")}:00`;
 
-const calculateEventStyle = (event: GoogleCalendarEvent): CalendarEventLabelStyle => {
-  const startHour = event.startsAt.getHours() + event.startsAt.getMinutes() / 60;
+const calculateEventStyle = (
+  event: GoogleCalendarEvent,
+): CalendarEventLabelStyle => {
+  const startHour =
+    event.startsAt.getHours() + event.startsAt.getMinutes() / 60;
   const tokens = generateColorTokens(event.accentColor);
   return {
     "--calendar-event-start-hour": Math.max(0, startHour - HOURS[0]),
@@ -46,7 +54,6 @@ export const CalendarWeekDayGrid = ({
 }: CalendarWeekDayGridProps) => {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-
       {/* ── 日付ヘッダー（縦スクロールに追従しない固定行） ── */}
       <div className="flex shrink-0 border-b border-[#e5e7eb] bg-white">
         <div
@@ -54,7 +61,11 @@ export const CalendarWeekDayGrid = ({
           style={{ width: C.TIME_COLUMN_WIDTH }}
         />
         {/* JS で scrollLeft を本体と同期するため overflow-hidden */}
-        <div ref={headerScrollRef} className="overflow-hidden" style={{ flex: 1 }}>
+        <div
+          ref={headerScrollRef}
+          className="overflow-hidden"
+          style={{ flex: 1 }}
+        >
           <div
             style={{
               display: "grid",
@@ -97,7 +108,6 @@ export const CalendarWeekDayGrid = ({
         onScroll={onScroll}
       >
         <div className="grid" style={timelineGridStyle}>
-
           {/* 時刻ラベル列（左固定） */}
           <div className="sticky left-0 z-20 border-r border-[#e5e7eb] bg-white">
             {HOURS.map((hour) => (
@@ -117,10 +127,16 @@ export const CalendarWeekDayGrid = ({
 
           {/* 各日付列 */}
           {visibleDays.map((day) => {
-            const eventsForDay = visibleEvents.filter((e) => isSameDay(e.startsAt, day));
+            const eventsForDay = visibleEvents.filter((e) =>
+              isSameDay(e.startsAt, day),
+            );
             const layout = computeEventLayout(
               eventsForDay.map((e) =>
-                toLayoutEvent(e.id, e.startsAt, Math.max(e.minutes, MIN_LAYOUT_MINUTES)),
+                toLayoutEvent(
+                  e.id,
+                  e.startsAt,
+                  Math.max(e.minutes, MIN_LAYOUT_MINUTES),
+                ),
               ),
             );
 
@@ -153,7 +169,9 @@ export const CalendarWeekDayGrid = ({
                       <div className="truncate text-[11px] font-medium leading-[1.25] opacity-90">
                         {createEventTimeLabel(event)}
                       </div>
-                      <div className="line-clamp-2 break-words">{event.title}</div>
+                      <div className="line-clamp-2 break-words">
+                        {event.title}
+                      </div>
                     </div>
                   );
                 })}

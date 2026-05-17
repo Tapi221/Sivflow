@@ -80,7 +80,9 @@ const createVisibleDays = (
   const visibleCount = getRangeDayCount(normalized, viewMode);
   const timelineStart = subDays(startDate, buffer.before);
   const totalCount = buffer.before + visibleCount + buffer.after;
-  return Array.from({ length: totalCount }, (_, i) => addDays(timelineStart, i));
+  return Array.from({ length: totalCount }, (_, i) =>
+    addDays(timelineStart, i),
+  );
 };
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
@@ -122,7 +124,9 @@ export type UseCalendarPaneReturn = {
   googleAccountEmail: string | null;
   googleCalendars: ReturnType<typeof useGoogleCalendarIntegration>["calendars"];
   googleCalendarError: string | null;
-  googleCalendarEvents: ReturnType<typeof useGoogleCalendarIntegration>["events"];
+  googleCalendarEvents: ReturnType<
+    typeof useGoogleCalendarIntegration
+  >["events"];
   isGoogleCalendarConnected: boolean;
   isGoogleCalendarConnecting: boolean;
   selectedCalendarIds: Set<string>;
@@ -153,13 +157,18 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
 
   // ── State
   const [currentDate, setCurrentDate] = useState(() => new Date());
-  const [monthTitleDate, setMonthTitleDate] = useState(() => startOfMonth(new Date()));
+  const [monthTitleDate, setMonthTitleDate] = useState(() =>
+    startOfMonth(new Date()),
+  );
   const [monthScrollTargetToken, setMonthScrollTargetToken] = useState(0);
-  const [selectedViewMode, setSelectedViewMode] = useState<CalendarViewMode>("days");
+  const [selectedViewMode, setSelectedViewMode] =
+    useState<CalendarViewMode>("days");
   const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
   const [isCalendarSidebarOpen, setIsCalendarSidebarOpen] = useState(true);
   const [viewportWidth, setViewportWidth] = useState(0);
-  const [calendarBuffer, setCalendarBuffer] = useState(createInitialCalendarBuffer);
+  const [calendarBuffer, setCalendarBuffer] = useState(
+    createInitialCalendarBuffer,
+  );
   const [timelineUnitBuffer, setTimelineUnitBuffer] = useState(() =>
     createInitialTimelineUnitBuffer("days"),
   );
@@ -186,7 +195,8 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   );
 
   const timelineColumns = useMemo(
-    () => buildTimelineColumns(selectedViewMode, currentDate, timelineUnitBuffer),
+    () =>
+      buildTimelineColumns(selectedViewMode, currentDate, timelineUnitBuffer),
     [currentDate, selectedViewMode, timelineUnitBuffer],
   );
 
@@ -204,7 +214,10 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   const monthLabel =
     activeMode === "timeline" && selectedViewMode === "month"
       ? null
-      : new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(titleDate);
+      : new Intl.DateTimeFormat("en-US", {
+          month: "long",
+          year: "numeric",
+        }).format(titleDate);
 
   const viewportDayCount = getViewportDayCount(currentDate, selectedViewMode);
 
@@ -216,7 +229,8 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
         )
       : C.DAY_COLUMN_MIN_WIDTH;
 
-  const gridWidth = C.TIME_COLUMN_WIDTH + visibleDays.length * calendarDayColumnWidth;
+  const gridWidth =
+    C.TIME_COLUMN_WIDTH + visibleDays.length * calendarDayColumnWidth;
 
   const timelineGridStyle: TimelineGridStyle = {
     "--calendar-hour-row-height": `${C.DEFAULT_HOUR_ROW_HEIGHT}px`,
@@ -306,28 +320,48 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
       }
 
       const distLeft = scroller.scrollLeft;
-      const distRight = scroller.scrollWidth - scroller.clientWidth - scroller.scrollLeft;
+      const distRight =
+        scroller.scrollWidth - scroller.clientWidth - scroller.scrollLeft;
 
-      if (distLeft < C.TIMELINE_EDGE_THRESHOLD_PX && !isExtendingLeftRef.current) {
+      if (
+        distLeft < C.TIMELINE_EDGE_THRESHOLD_PX &&
+        !isExtendingLeftRef.current
+      ) {
         isExtendingLeftRef.current = true;
         if (activeMode === "timeline") {
           const extendCount = getTimelineUnitExtendCount(selectedViewMode);
-          prependScrollCorrectionRef.current = extendCount * timelineColumnWidth;
-          setTimelineUnitBuffer((c) => ({ ...c, before: c.before + extendCount }));
+          prependScrollCorrectionRef.current =
+            extendCount * timelineColumnWidth;
+          setTimelineUnitBuffer((c) => ({
+            ...c,
+            before: c.before + extendCount,
+          }));
         } else {
           prependScrollCorrectionRef.current =
             C.CALENDAR_EXTEND_DAYS * calendarDayColumnWidth;
-          setCalendarBuffer((c) => ({ ...c, before: c.before + C.CALENDAR_EXTEND_DAYS }));
+          setCalendarBuffer((c) => ({
+            ...c,
+            before: c.before + C.CALENDAR_EXTEND_DAYS,
+          }));
         }
       }
 
-      if (distRight < C.TIMELINE_EDGE_THRESHOLD_PX && !isExtendingRightRef.current) {
+      if (
+        distRight < C.TIMELINE_EDGE_THRESHOLD_PX &&
+        !isExtendingRightRef.current
+      ) {
         isExtendingRightRef.current = true;
         if (activeMode === "timeline") {
           const extendCount = getTimelineUnitExtendCount(selectedViewMode);
-          setTimelineUnitBuffer((c) => ({ ...c, after: c.after + extendCount }));
+          setTimelineUnitBuffer((c) => ({
+            ...c,
+            after: c.after + extendCount,
+          }));
         } else {
-          setCalendarBuffer((c) => ({ ...c, after: c.after + C.CALENDAR_EXTEND_DAYS }));
+          setCalendarBuffer((c) => ({
+            ...c,
+            after: c.after + C.CALENDAR_EXTEND_DAYS,
+          }));
         }
       }
     },
@@ -350,4 +384,96 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     const next = new Date();
     setCurrentDate(next);
     setMonthTitleDate(startOfMonth(next));
-    if (selecte
+    if (selectedViewMode === "month") requestMonthScrollTarget();
+    resetTimelinePosition(selectedViewMode);
+  }, [requestMonthScrollTarget, resetTimelinePosition, selectedViewMode]);
+
+  const handlePrevious = useCallback(() => {
+    setCurrentDate((c) => {
+      const next = getPreviousDate(c, selectedViewMode);
+      setMonthTitleDate(startOfMonth(next));
+      return next;
+    });
+    if (selectedViewMode === "month") requestMonthScrollTarget();
+    resetTimelinePosition(selectedViewMode);
+  }, [requestMonthScrollTarget, resetTimelinePosition, selectedViewMode]);
+
+  const handleNext = useCallback(() => {
+    setCurrentDate((c) => {
+      const next = getNextDate(c, selectedViewMode);
+      setMonthTitleDate(startOfMonth(next));
+      return next;
+    });
+    if (selectedViewMode === "month") requestMonthScrollTarget();
+    resetTimelinePosition(selectedViewMode);
+  }, [requestMonthScrollTarget, resetTimelinePosition, selectedViewMode]);
+
+  const handleSidebarPreviousMonth = useCallback(() => {
+    setCurrentDate((c) => {
+      const next = subMonths(c, 1);
+      setMonthTitleDate(startOfMonth(next));
+      return next;
+    });
+    if (selectedViewMode === "month") requestMonthScrollTarget();
+    resetTimelinePosition(selectedViewMode);
+  }, [requestMonthScrollTarget, resetTimelinePosition, selectedViewMode]);
+
+  const handleSidebarNextMonth = useCallback(() => {
+    setCurrentDate((c) => {
+      const next = addMonths(c, 1);
+      setMonthTitleDate(startOfMonth(next));
+      return next;
+    });
+    if (selectedViewMode === "month") requestMonthScrollTarget();
+    resetTimelinePosition(selectedViewMode);
+  }, [requestMonthScrollTarget, resetTimelinePosition, selectedViewMode]);
+
+  const handleSidebarSelectDate = useCallback(
+    (date: Date) => {
+      setCurrentDate(date);
+      setMonthTitleDate(startOfMonth(date));
+      if (selectedViewMode === "month") requestMonthScrollTarget();
+      resetTimelinePosition(selectedViewMode);
+    },
+    [requestMonthScrollTarget, resetTimelinePosition, selectedViewMode],
+  );
+
+  return {
+    contentViewportRef,
+    scrollContainerRef,
+    headerScrollRef,
+    currentDate,
+    monthTitleDate,
+    monthScrollTargetToken,
+    selectedViewMode,
+    activeMode,
+    isCalendarSidebarOpen,
+    visibleDays,
+    timelineColumns,
+    timelineColumnWidth,
+    timelineAnchorColumnIndex,
+    titleDate,
+    monthLabel,
+    calendarDayColumnWidth,
+    timelineGridStyle,
+    googleAccountEmail,
+    googleCalendars,
+    googleCalendarError,
+    googleCalendarEvents,
+    isGoogleCalendarConnected,
+    isGoogleCalendarConnecting,
+    selectedCalendarIds,
+    connectGoogleCalendar,
+    toggleGoogleCalendar,
+    handleTimelineScroll,
+    handleSelectViewMode,
+    handleToday,
+    handlePrevious,
+    handleNext,
+    handleSidebarPreviousMonth,
+    handleSidebarNextMonth,
+    handleSidebarSelectDate,
+    setIsCalendarSidebarOpen,
+    setMonthTitleDate,
+  };
+};
