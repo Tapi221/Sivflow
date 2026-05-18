@@ -112,7 +112,7 @@ export type CalendarScreenViewModel = {
 //CalendarPane.tsx
 export type CalendarViewMode = "month" | "week" | "days";
 
-export type CalendarToolbarMode = "calendar" | "timeline";
+export type CalendarToolbarMode = "calendar" | "timeline" | "task";
 
 export type CalendarDemoEvent = {
   id: string;

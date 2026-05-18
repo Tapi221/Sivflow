@@ -204,6 +204,37 @@ export const SidebarCalendarIcon = ({
   </svg>
 );
 
+export const TaskToolbarIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      d="M7.2 7.5H16.8M7.2 12H16.8M7.2 16.5H13.6"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="1.9"
+    />
+    <path
+      d="M3.8 7.5 4.55 8.25 6.2 6.45M3.8 12 4.55 12.75 6.2 10.95M3.8 16.5 4.55 17.25 6.2 15.45"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.9"
+    />
+  </svg>
+);
+
 export const SidebarPanelIcon = ({
   className,
   label: _label,
