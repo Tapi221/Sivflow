@@ -110,31 +110,33 @@ export const CalendarSidebar = ({
           </div>
         </div>
 
-        <div className="flex w-full flex-col gap-3 rounded-[16px] bg-[#eef4ff] px-2.5 py-4">
-          <div className="grid grid-cols-7 gap-y-2 px-1">
+        <div className="flex w-full flex-col gap-1 rounded-xl border border-[#e8eaf0] bg-white px-2 py-2.5">
+          {/* 曜日ヘッダー */}
+          <div className="grid grid-cols-7">
             {T.MINI_CALENDAR_WEEKDAYS.map((weekday, index) => (
               <span
                 key={`${weekday}-${index}`}
-                className="flex h-4 items-center justify-center text-[13px] font-medium leading-none text-[#667085]"
+                className="flex h-5 items-center justify-center text-[10px] font-medium uppercase tracking-wide text-[#a0a4b0]"
               >
                 {weekday}
               </span>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-y-2">
+          {/* 日付グリッド */}
+          <div className="grid grid-cols-7">
             {miniCalendarDays.map((day) => (
               <button
                 key={day.date.toISOString()}
                 type="button"
                 className={cn(
-                  "flex h-7 w-8 items-center justify-center justify-self-center rounded-full text-[14px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "flex h-6 w-full items-center justify-center rounded-md text-[11px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                   day.isSelected
-                    ? "bg-[#accfff] font-semibold text-[#20242c]"
+                    ? "bg-[#24272f] text-white"
                     : day.isToday
-                      ? "bg-[#accfff]/50 text-[#20242c]"
+                      ? "text-[#185FA5] ring-1 ring-inset ring-[#185FA5]/40"
                       : day.isCurrentMonth
-                        ? "text-[#20242c] hover:bg-[#accfff]/25"
-                        : "text-[#8f929c] hover:bg-[#accfff]/15",
+                        ? "text-[#24272f] hover:bg-[#f0f1f4]"
+                        : "text-[#c0c3cc] hover:bg-[#f5f6f8]",
                 )}
                 onClick={() => onSelectDate(day.date)}
                 aria-pressed={day.isSelected}
