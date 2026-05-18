@@ -157,7 +157,26 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   const prependScrollCorrectionRef = useRef(0);
   const isExtendingLeftRef = useRef(false);
   const isExtendingRightRef = useRef(false);
-  const shouldSyncScrollRef = useRef(true);
+
+  // ── スクロールトリガー
+  //
+  //    【変更点】shouldSyncScrollRef（boolean ref）を廃止し、
+  //    scrollTriggerToken（state）＋ lastSeenScrollTriggerToken（ref）に置き換え。
+  //
+  //    旧実装の問題：
+  //    shouldSyncScrollRef は ref のため deps に含められず、
+  //    Today / 前後ナビで resetTimelinePosition を呼んでも calendarBuffer.before が
+  //    既に初期値（7）だった場合に useLayoutEffect の deps が変化しない。
+  //    その結果 useLayoutEffect が発火せず、横スクロールが実行されないバグが生じていた。
+  //
+  //    新実装：
+  //    scrollTriggerToken を deps に加えることで、resetTimelinePosition を呼ぶたびに
+  //    必ず useLayoutEffect が発火するよう保証する。
+  //    lastSeenScrollTriggerToken を -1 に初期化することで、
+  //    初回マウント時（token = 0）にも初期スクロールが実行される。
+  //
+  const [scrollTriggerToken, setScrollTriggerToken] = useState(0);
+  const lastSeenScrollTriggerToken = useRef(-1);
 
   // ── State
   const [currentDate, setCurrentDate] = useState(() => new Date());
@@ -247,13 +266,10 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
 
   useEffect(() => {
     if (activeMode === "calendar" && selectedViewMode === "month") {
-      // 月表示：スクロールで変化する monthTitleDate を基準に前後3ヶ月分を取得
-      // イベントはマージされるためスクロールしても過去に取得した分は消えない
       const rangeStart = startOfMonth(addMonths(monthTitleDate, -3));
       const rangeEnd = endOfMonth(addMonths(monthTitleDate, 3));
       void loadGoogleCalendarEvents(rangeStart, rangeEnd);
     } else {
-      // 週・日表示 / タイムライン：visibleDays を基準に取得
       const rangeStart = visibleDays[0];
       const rangeEnd = visibleDays[visibleDays.length - 1];
       if (!rangeStart || !rangeEnd) return;
@@ -278,10 +294,24 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     return () => observer.disconnect();
   }, []);
 
+  // ── 横スクロール位置の同期
+  //
+  //    【変更点】shouldSyncScrollRef のチェックを廃止し、
+  //    scrollTriggerToken の変化を lastSeenScrollTriggerToken と比較する方式に変更。
+  //
+  //    動作:
+  //    ① prepend 補正（無限スクロール左拡張後の位置調整）→ 従来通り
+  //    ② scrollTriggerToken が変化した場合（Today / 前後ナビ / 表示切替）→ スクロール実行
+  //    ③ その他の deps 変化（ビューポートリサイズ・列数変化など）→ 何もしない
+  //
+  //    lastSeenScrollTriggerToken の初期値 -1 により、
+  //    初回マウント時（token = 0）に ② が必ず実行される（旧 useRef(true) の代替）。
+  //
   useLayoutEffect(() => {
     const scroller = scrollContainerRef.current;
     if (!scroller) return;
 
+    // ① 無限スクロール左拡張後の位置補正（最優先）
     if (prependScrollCorrectionRef.current > 0) {
       scroller.scrollLeft += prependScrollCorrectionRef.current;
       if (headerScrollRef.current) {
@@ -292,7 +322,9 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
       return;
     }
 
-    if (!shouldSyncScrollRef.current) return;
+    // ② Today / ナビゲーション / 表示切替によるスクロール
+    if (lastSeenScrollTriggerToken.current === scrollTriggerToken) return;
+    lastSeenScrollTriggerToken.current = scrollTriggerToken;
 
     const nextScrollLeft =
       activeMode === "timeline"
@@ -303,11 +335,11 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     if (headerScrollRef.current) {
       headerScrollRef.current.scrollLeft = nextScrollLeft;
     }
-    shouldSyncScrollRef.current = false;
   }, [
     activeMode,
     calendarBuffer.before,
     calendarDayColumnWidth,
+    scrollTriggerToken,
     timelineAnchorColumnIndex,
     timelineColumnWidth,
     timelineColumns.length,
@@ -321,7 +353,8 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   // ── Internal helpers
 
   const resetTimelinePosition = useCallback((viewMode: CalendarViewMode) => {
-    shouldSyncScrollRef.current = true;
+    // トークンをインクリメントして useLayoutEffect を確実に発火させる
+    setScrollTriggerToken((n) => n + 1);
     setCalendarBuffer(createInitialCalendarBuffer());
     setTimelineUnitBuffer(createInitialTimelineUnitBuffer(viewMode));
   }, []);
@@ -460,9 +493,6 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
       setSelectedDate(date);
       setMonthTitleDate(startOfMonth(date));
 
-      // 月表示の場合：同じ月内のセルクリックではスクロールリセット不要。
-      // リセットすると画面がずれる原因になる。
-      // 別の月（サイドバーのミニカレンダー操作など）のときだけリセットする。
       if (selectedViewMode === "month") {
         const isSameVisibleMonth =
           startOfMonth(date).getTime() === startOfMonth(currentDate).getTime();
@@ -479,9 +509,6 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     ],
   );
 
-  // ── 月表示でスクロールにより表示月が変わったときに呼ばれるコールバック
-  // monthTitleDate を更新することで useEffect が発火し、未取得範囲を追加ロードする。
-  // loadEvents 側でキャッシュ済み範囲はスキップするため API の無駄呼び出しは発生しない。
   const handleVisibleMonthChange = useCallback((date: Date) => {
     setMonthTitleDate(startOfMonth(date));
   }, []);
