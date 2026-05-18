@@ -107,6 +107,7 @@ export type UseCalendarPaneReturn = {
   headerScrollRef: React.RefObject<HTMLDivElement | null>;
   // State
   currentDate: Date;
+  selectedDate: Date;
   monthTitleDate: Date;
   monthScrollTargetToken: number;
   selectedViewMode: CalendarViewMode;
@@ -142,6 +143,7 @@ export type UseCalendarPaneReturn = {
   handleSidebarPreviousMonth: () => void;
   handleSidebarNextMonth: () => void;
   handleSidebarSelectDate: (date: Date) => void;
+  handleVisibleMonthChange: (date: Date) => void;
   setIsCalendarSidebarOpen: (open: boolean) => void;
   setMonthTitleDate: (date: Date) => void;
 };
@@ -158,6 +160,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
 
   // ── State
   const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [monthTitleDate, setMonthTitleDate] = useState(() =>
     startOfMonth(new Date()),
   );
@@ -243,10 +246,10 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
 
   useEffect(() => {
     if (activeMode === "calendar" && selectedViewMode === "month") {
-      // 月表示：スクロールで変化する monthTitleDate を基準に前後1ヶ月分を取得
-      // （前後1ヶ月バッファを持つことでスクロール時のちらつきを抑える）
-      const rangeStart = startOfMonth(addMonths(monthTitleDate, -1));
-      const rangeEnd = endOfMonth(addMonths(monthTitleDate, 1));
+      // 月表示：スクロールで変化する monthTitleDate を基準に前後3ヶ月分を取得
+      // イベントはマージされるためスクロールしても過去に取得した分は消えない
+      const rangeStart = startOfMonth(addMonths(monthTitleDate, -3));
+      const rangeEnd = endOfMonth(addMonths(monthTitleDate, 3));
       void loadGoogleCalendarEvents(rangeStart, rangeEnd);
     } else {
       // 週・日表示 / タイムライン：visibleDays を基準に取得
@@ -400,6 +403,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   const handleToday = useCallback(() => {
     const next = new Date();
     setCurrentDate(next);
+    setSelectedDate(next);
     setMonthTitleDate(startOfMonth(next));
     if (selectedViewMode === "month") requestMonthScrollTarget();
     resetTimelinePosition(selectedViewMode);
@@ -408,6 +412,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   const handlePrevious = useCallback(() => {
     setCurrentDate((c) => {
       const next = getPreviousDate(c, selectedViewMode);
+      setSelectedDate(next);
       setMonthTitleDate(startOfMonth(next));
       return next;
     });
@@ -418,6 +423,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   const handleNext = useCallback(() => {
     setCurrentDate((c) => {
       const next = getNextDate(c, selectedViewMode);
+      setSelectedDate(next);
       setMonthTitleDate(startOfMonth(next));
       return next;
     });
@@ -428,6 +434,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   const handleSidebarPreviousMonth = useCallback(() => {
     setCurrentDate((c) => {
       const next = subMonths(c, 1);
+      setSelectedDate(next);
       setMonthTitleDate(startOfMonth(next));
       return next;
     });
@@ -438,6 +445,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   const handleSidebarNextMonth = useCallback(() => {
     setCurrentDate((c) => {
       const next = addMonths(c, 1);
+      setSelectedDate(next);
       setMonthTitleDate(startOfMonth(next));
       return next;
     });
@@ -448,6 +456,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   const handleSidebarSelectDate = useCallback(
     (date: Date) => {
       setCurrentDate(date);
+      setSelectedDate(date);
       setMonthTitleDate(startOfMonth(date));
       if (selectedViewMode === "month") requestMonthScrollTarget();
       resetTimelinePosition(selectedViewMode);
@@ -455,11 +464,19 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     [requestMonthScrollTarget, resetTimelinePosition, selectedViewMode],
   );
 
+  // ── 月表示でスクロールにより表示月が変わったときに呼ばれるコールバック
+  // monthTitleDate を更新することで useEffect が発火し、未取得範囲を追加ロードする。
+  // loadEvents 側でキャッシュ済み範囲はスキップするため API の無駄呼び出しは発生しない。
+  const handleVisibleMonthChange = useCallback((date: Date) => {
+    setMonthTitleDate(startOfMonth(date));
+  }, []);
+
   return {
     contentViewportRef,
     scrollContainerRef,
     headerScrollRef,
     currentDate,
+    selectedDate,
     monthTitleDate,
     monthScrollTargetToken,
     selectedViewMode,
@@ -491,6 +508,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     handleSidebarPreviousMonth,
     handleSidebarNextMonth,
     handleSidebarSelectDate,
+    handleVisibleMonthChange,
     setIsCalendarSidebarOpen,
     setMonthTitleDate,
   };

@@ -691,10 +691,7 @@ const registerIpcHandlers = (): void => {
   // refresh_token を使った silent なトークン更新ハンドラ
   ipcMain.handle(
     IPC_CHANNELS.oauthRefreshTokens,
-    async (
-      _event,
-      input: { clientId: string; refreshToken: string },
-    ) => {
+    async (_event, input: { clientId: string; refreshToken: string }) => {
       return refreshGoogleOauthAccessToken(input);
     },
   );
