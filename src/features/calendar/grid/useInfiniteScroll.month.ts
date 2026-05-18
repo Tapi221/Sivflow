@@ -14,7 +14,7 @@ import {
   getCalendarMonthKey,
   getCalendarWeekKey,
   type CalendarMonthWeek,
-} from "@/features/calendar/monthGrid";
+} from "@/features/calendar/model/calendarMonth.model";
 
 // ── 公開型
 

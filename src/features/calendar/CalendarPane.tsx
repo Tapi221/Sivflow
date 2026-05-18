@@ -1,71 +1,112 @@
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
-import { CalendarMonthView } from "./CalendarMonthView";
+import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarTimelineDayView } from "./TimelineDayView";
-import { CalendarSidebar } from "./CalendarSidebar";
-import { CalendarWeekDayGrid } from "./CalendarWeekDayGrid";
+import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
+import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
 import { CalendarWorkspaceToolbar } from "./CalendarToolbar";
 import { useCalendarPane } from "./hooks/useCalendarPane";
-import { SidebarPanelIcon } from "./calendar.icons";
+import { SidebarPanelIcon } from "./ui/calendar.icons";
 import type { CalendarPaneProps } from "./calendarPane.types";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 
 export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
   const pane = useCalendarPane();
 
+  const {
+    activeMode,
+    selectedViewMode,
+    currentDate,
+    selectedDate,
+    monthLabel,
+    titleDate,
+    monthScrollTargetToken,
+    visibleDays,
+    googleCalendarEvents,
+    googleCalendars,
+    googleAccountEmail,
+    selectedCalendarIds,
+    googleCalendarError,
+    isGoogleCalendarConnected,
+    isGoogleCalendarConnecting,
+    isCalendarSidebarOpen,
+    calendarDayColumnWidth,
+    timelineGridStyle,
+    headerScrollRef,
+    scrollContainerRef,
+    contentViewportRef,
+
+    setActiveMode,
+    setIsCalendarSidebarOpen,
+
+    handleSelectViewMode,
+    handleSidebarSelectDate,
+    handleSidebarPreviousMonth,
+    handleSidebarNextMonth,
+    handleVisibleMonthChange,
+
+    handlePrevious,
+    handleNext,
+    handleToday,
+
+    handleTimelineScroll,
+
+    connectGoogleCalendar,
+    toggleGoogleCalendar,
+  } = pane;
+
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-white">
       <CalendarWorkspaceToolbar
-        activeMode={pane.activeMode}
-        viewMode={pane.selectedViewMode}
+        activeMode={activeMode}
+        viewMode={selectedViewMode}
         onSelectCalendar={() => {
-          pane.setActiveMode("calendar");
-          pane.setIsCalendarSidebarOpen(true);
+          setActiveMode("calendar");
+          setIsCalendarSidebarOpen(true);
         }}
         onSelectTimeline={() => {
-          pane.setActiveMode("timeline");
-          pane.setIsCalendarSidebarOpen(false);
+          setActiveMode("timeline");
+          setIsCalendarSidebarOpen(false);
         }}
         onSelectTask={() => {
-          pane.setActiveMode("task");
-          pane.setIsCalendarSidebarOpen(false);
+          setActiveMode("task");
+          setIsCalendarSidebarOpen(false);
         }}
-        onSelectViewMode={pane.handleSelectViewMode}
+        onSelectViewMode={handleSelectViewMode}
       />
 
       <div className="flex min-h-0 flex-1 bg-white">
-        {pane.isCalendarSidebarOpen ? (
+        {isCalendarSidebarOpen ? (
           <CalendarSidebar
-            monthDate={pane.titleDate}
-            selectedDate={pane.selectedDate}
-            calendars={pane.googleCalendars}
-            googleAccountEmail={pane.googleAccountEmail}
-            selectedCalendarIds={pane.selectedCalendarIds}
-            calendarError={pane.googleCalendarError}
-            isCalendarConnected={pane.isGoogleCalendarConnected}
-            isCalendarConnecting={pane.isGoogleCalendarConnecting}
-            onSelectDate={pane.handleSidebarSelectDate}
-            onPreviousMonth={pane.handleSidebarPreviousMonth}
-            onNextMonth={pane.handleSidebarNextMonth}
-            onClose={() => pane.setIsCalendarSidebarOpen(false)}
-            onConnectCalendar={pane.connectGoogleCalendar}
-            onToggleCalendar={pane.toggleGoogleCalendar}
+            monthDate={titleDate}
+            selectedDate={selectedDate}
+            calendars={googleCalendars}
+            googleAccountEmail={googleAccountEmail}
+            selectedCalendarIds={selectedCalendarIds}
+            calendarError={googleCalendarError}
+            isCalendarConnected={isGoogleCalendarConnected}
+            isCalendarConnecting={isGoogleCalendarConnecting}
+            onSelectDate={handleSidebarSelectDate}
+            onPreviousMonth={handleSidebarPreviousMonth}
+            onNextMonth={handleSidebarNextMonth}
+            onClose={() => setIsCalendarSidebarOpen(false)}
+            onConnectCalendar={connectGoogleCalendar}
+            onToggleCalendar={toggleGoogleCalendar}
           />
         ) : null}
 
         <div
-          ref={pane.contentViewportRef}
+          ref={contentViewportRef}
           className="flex min-w-0 flex-1 flex-col bg-white px-5 pb-5 pt-4"
         >
-          {/* ── ナビゲーションヘッダー（Task モード時は非表示） ── */}
-          {pane.activeMode !== "task" && (
+          {activeMode !== "task" && (
             <div className="mb-4 flex shrink-0 items-center justify-between">
               <div className="flex min-w-0 items-center gap-3">
-                {!pane.isCalendarSidebarOpen ? (
+                {!isCalendarSidebarOpen ? (
                   <button
                     type="button"
                     className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#dde2ea] bg-white text-[#667085] transition-colors hover:bg-[#f8fafc] hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    onClick={() => pane.setIsCalendarSidebarOpen(true)}
+                    onClick={() => setIsCalendarSidebarOpen(true)}
                     aria-label="Show calendar sidebar"
                     title="Show calendar sidebar"
                   >
@@ -73,36 +114,37 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
                   </button>
                 ) : null}
 
-                {pane.monthLabel ? (
+                {monthLabel ? (
                   <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
-                    {pane.monthLabel}
+                    {monthLabel}
                   </h1>
                 ) : (
                   <div aria-hidden="true" className="h-6 w-24" />
                 )}
               </div>
 
-              {/* ── 前後ナビ＋Today ── */}
               <div className="flex items-center overflow-hidden rounded-lg border border-[#e2e4e9] bg-white">
                 <button
                   type="button"
                   className="flex h-8 w-8 items-center justify-center border-r border-[#e2e4e9] text-[#8f929c] transition-colors hover:bg-[#f5f6f8] hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-                  onClick={pane.handlePrevious}
+                  onClick={handlePrevious}
                   aria-label="Previous"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </button>
+
                 <button
                   type="button"
                   className="px-3 py-[7px] text-[13px] font-medium text-[#20242c] transition-colors hover:bg-[#f5f6f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-                  onClick={pane.handleToday}
+                  onClick={handleToday}
                 >
                   Today
                 </button>
+
                 <button
                   type="button"
                   className="flex h-8 w-8 items-center justify-center border-l border-[#e2e4e9] text-[#8f929c] transition-colors hover:bg-[#f5f6f8] hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-                  onClick={pane.handleNext}
+                  onClick={handleNext}
                   aria-label="Next"
                 >
                   <ChevronRight className="h-3.5 w-3.5" />
@@ -111,43 +153,41 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
             </div>
           )}
 
-          {/* ── メインビュー切り替え ── */}
-          {pane.activeMode === "task" ? (
-            // TODO: 既存のタスクコンポーネントに差し替える
+          {activeMode === "task" ? (
             <div className="flex min-h-0 flex-1 items-center justify-center text-[14px] text-[#8f929c]">
               Task view coming soon
             </div>
-          ) : pane.activeMode === "timeline" ? (
+          ) : activeMode === "timeline" ? (
             <CalendarTimelineDayView
-              viewMode={pane.selectedViewMode}
-              anchorDate={pane.currentDate}
+              viewMode={selectedViewMode}
+              anchorDate={currentDate}
               timelineUnitBuffer={{ before: 7, after: 14 }}
-              selectedDate={pane.currentDate}
+              selectedDate={currentDate}
               dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
               laneLabelWidth={C.TIMELINE_LANE_LABEL_WIDTH}
               rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
-              scrollContainerRef={pane.scrollContainerRef}
-              onScroll={pane.handleTimelineScroll}
-              onSelectDate={pane.handleSidebarSelectDate}
+              scrollContainerRef={scrollContainerRef}
+              onScroll={handleTimelineScroll}
+              onSelectDate={handleSidebarSelectDate}
             />
-          ) : pane.selectedViewMode === "month" ? (
+          ) : selectedViewMode === "month" ? (
             <CalendarMonthView
-              currentDate={pane.currentDate}
-              selectedDate={pane.selectedDate}
-              scrollTargetToken={pane.monthScrollTargetToken}
-              visibleEvents={pane.googleCalendarEvents}
-              onSelectDate={pane.handleSidebarSelectDate}
-              onVisibleMonthChange={pane.handleVisibleMonthChange}
+              currentDate={currentDate}
+              selectedDate={selectedDate}
+              scrollTargetToken={monthScrollTargetToken}
+              visibleEvents={googleCalendarEvents}
+              onSelectDate={handleSidebarSelectDate}
+              onVisibleMonthChange={handleVisibleMonthChange}
             />
           ) : (
             <CalendarWeekDayGrid
-              headerScrollRef={pane.headerScrollRef}
-              scrollContainerRef={pane.scrollContainerRef}
-              visibleDays={pane.visibleDays}
-              visibleEvents={pane.googleCalendarEvents}
-              calendarDayColumnWidth={pane.calendarDayColumnWidth}
-              timelineGridStyle={pane.timelineGridStyle}
-              onScroll={pane.handleTimelineScroll}
+              headerScrollRef={headerScrollRef}
+              scrollContainerRef={scrollContainerRef}
+              visibleDays={visibleDays}
+              visibleEvents={googleCalendarEvents}
+              calendarDayColumnWidth={calendarDayColumnWidth}
+              timelineGridStyle={timelineGridStyle}
+              onScroll={handleTimelineScroll}
             />
           )}
         </div>

@@ -91,7 +91,8 @@ const zoomUiPercentToScale = (value: number) => {
     (clampedUiPercent - C.PDF_ZOOM_UI_MIN_PERCENT) /
     C.PDF_ZOOM_UI_RANGE_PERCENT;
 
-  return clampScale( // ★ 修正: clampScale はインポート済み
+  return clampScale(
+    // ★ 修正: clampScale はインポート済み
     Number((C.FIT_MIN_SCALE + ratio * C.PDF_SCALE_RANGE).toFixed(3)),
   );
 };

@@ -19,8 +19,13 @@ export const WorkspaceBreadcrumbBar = ({
 }: {
   hideCrumbs?: boolean;
 }) => {
-  const { crumbs, shouldHideBreadcrumb, hasNoActiveTab, action, handleCrumbNavigate } =
-    useBreadcrumbs();
+  const {
+    crumbs,
+    shouldHideBreadcrumb,
+    hasNoActiveTab,
+    action,
+    handleCrumbNavigate,
+  } = useBreadcrumbs();
 
   // アクティブタブなし → 空バー（グリッド行の構造だけ維持）
   if (hasNoActiveTab) {

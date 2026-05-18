@@ -24,9 +24,9 @@ import {
   buildTimelineColumns,
   getTimelineAnchorColumnIndex,
   getTimelineColumnWidth,
-} from "@/features/calendar/TimelineDayView.shared";
-import type { TimelineUnitBuffer } from "@/features/calendar/TimelineDayView.shared";
-import { useGoogleCalendarIntegration } from "@/features/calendar/hooks/useGoogleCalendarIntegration";
+} from "@/features/calendar/grid/TimelineDayView.shared";
+import type { TimelineUnitBuffer } from "@/features/calendar/grid/TimelineDayView.shared";
+import { useGoogleCalendarIntegration } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
 
 import type {
   CalendarToolbarMode,
