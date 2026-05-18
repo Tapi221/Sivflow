@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
 import { CalendarMonthView } from "./grid/CalendarView.month";
-import { CalendarTimelineDayView } from "./TimelineDayView";
+import { CalendarTimelineDayView } from "./grid/TimelineDayView";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
 import { CalendarWorkspaceToolbar } from "./CalendarToolbar";
