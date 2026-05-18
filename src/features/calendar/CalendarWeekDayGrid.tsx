@@ -29,7 +29,7 @@ const calculateEventStyle = (
     "--calendar-event-start-hour": Math.max(0, startHour - HOURS[0]),
     "--calendar-event-duration-hours": event.minutes / 60,
     top: `calc(var(--calendar-event-start-hour) * var(--calendar-hour-row-height))`,
-    height: `calc(var(--calendar-event-duration-hours) * var(--calendar-hour-row-height) - 8px)`,
+    height: `calc(var(--calendar-event-duration-hours) * var(--calendar-hour-row-height) - 2px)`,
     backgroundColor: tokens.bg,
     borderLeftColor: tokens.border,
     borderLeftStyle: "solid",
