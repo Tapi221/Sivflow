@@ -113,6 +113,7 @@ export type UseCalendarPaneReturn = {
   selectedViewMode: CalendarViewMode;
   activeMode: CalendarToolbarMode;
   setActiveMode: (mode: CalendarToolbarMode) => void;
+  isCalendarSidebarOpen: boolean;
   // Computed
   visibleDays: Date[];
   timelineColumns: ReturnType<typeof buildTimelineColumns>;
@@ -458,10 +459,24 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
       setCurrentDate(date);
       setSelectedDate(date);
       setMonthTitleDate(startOfMonth(date));
-      if (selectedViewMode === "month") requestMonthScrollTarget();
-      resetTimelinePosition(selectedViewMode);
+
+      // 月表示の場合：同じ月内のセルクリックではスクロールリセット不要。
+      // リセットすると画面がずれる原因になる。
+      // 別の月（サイドバーのミニカレンダー操作など）のときだけリセットする。
+      if (selectedViewMode === "month") {
+        const isSameVisibleMonth =
+          startOfMonth(date).getTime() === startOfMonth(currentDate).getTime();
+        if (!isSameVisibleMonth) requestMonthScrollTarget();
+      } else {
+        resetTimelinePosition(selectedViewMode);
+      }
     },
-    [requestMonthScrollTarget, resetTimelinePosition, selectedViewMode],
+    [
+      currentDate,
+      requestMonthScrollTarget,
+      resetTimelinePosition,
+      selectedViewMode,
+    ],
   );
 
   // ── 月表示でスクロールにより表示月が変わったときに呼ばれるコールバック
