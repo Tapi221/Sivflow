@@ -645,15 +645,18 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
       [],
     );
 
+    // ★ 修正: previewTarget を削除（UsePdfZoomOptions に存在しないプロパティ）
     usePdfZoom({
       container: scrollContainerEl,
-      previewTarget: contentViewportEl,
       scale,
       minScale,
       maxScale,
       zoomStep,
       onScaleChange,
     });
+
+    // contentViewportEl は将来 previewTarget が UsePdfZoomOptions に追加された際に使用
+    void contentViewportEl;
 
     const prioritizedSearchPageNumbers = useMemo(
       () =>

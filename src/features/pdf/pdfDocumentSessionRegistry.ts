@@ -261,12 +261,13 @@ const createPdfDocumentSessionEntry = (
   const key = buildPdfDocumentSessionKey(options);
   const loadingTask = getPdfDocument(options.getDocumentParams);
 
+  // ★ 修正: satisfies による過度な型推論を防ぐため null as PdfDocumentSessionValue | null を明示
   const entry = {
     key,
     loadingTask,
     referenceCount: 0,
     pendingDisposeTimerId: null,
-    resolvedValue: null,
+    resolvedValue: null as PdfDocumentSessionValue | null,
     disposed: false,
     documentPromise: Promise.resolve({
       pdf: null as unknown as PdfJsDocument,
