@@ -63,6 +63,7 @@ export type CalendarWorkspaceToolbarProps = {
   viewMode?: CalendarViewMode;
   onSelectCalendar: () => void;
   onSelectTimeline: () => void;
+  onSelectTask: () => void;
   onSelectViewMode?: (viewMode: CalendarViewMode) => void;
 };
 

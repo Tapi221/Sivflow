@@ -8,6 +8,7 @@ import {
   DayViewToolbarIcon,
   MonthViewToolbarIcon,
   WeekViewToolbarIcon,
+  TaskToolbarIcon,  
 } from "./calendar.icons";
 import type {
   CalendarToolbarMode,
@@ -39,6 +40,7 @@ export const CalendarWorkspaceToolbar = ({
   viewMode,
   onSelectCalendar,
   onSelectTimeline,
+  onSelectTask,
   onSelectViewMode,
 }: CalendarWorkspaceToolbarProps) => {
   const tabs = [
@@ -54,6 +56,13 @@ export const CalendarWorkspaceToolbar = ({
       icon: TimelineToolbarIcon,
       onClick: onSelectTimeline,
     },
+    {
+    value: "task" as CalendarToolbarMode,   
+    label: "Task",
+    icon: TaskToolbarIcon,
+    onClick: onSelectTask,
+  },
+
   ];
 
   return (
@@ -87,7 +96,7 @@ export const CalendarWorkspaceToolbar = ({
           );
         })}
 
-        {onSelectViewMode && viewMode ? (
+        {onSelectViewMode && viewMode && activeMode !== "task" ? (
           <div className="ml-3 flex h-7 shrink-0 items-start gap-1">
             {CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.map((option) => {
               const isActive = viewMode === option.value;
