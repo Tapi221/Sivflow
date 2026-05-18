@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { format } from "date-fns";
 
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
 import { toDateKey } from "./calendarKey";
