@@ -78,7 +78,7 @@ export const CalendarWeekDayGrid = ({
                   key={`${day.toISOString()}-header`}
                   className={cn(
                     "flex h-10 shrink-0 flex-col items-center justify-center border-r border-[#eef0f3] last:border-r-0",
-                    isDayToday && "bg-[#fdf4f4]",
+                    isDayToday && "bg-[#f0f6ff]",
                   )}
                 >
                   <span className="text-[11px] font-medium leading-none text-[#8f929c]">
@@ -87,7 +87,7 @@ export const CalendarWeekDayGrid = ({
                   <span
                     className={cn(
                       "mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-[13px] font-semibold tabular-nums",
-                      isDayToday ? "bg-[#6A876E] text-white" : "text-[#24231f]",
+                      isDayToday ? "bg-[#185FA5] text-white" : "text-[#24231f]",
                     )}
                   >
                     {format(day, "d")}

@@ -155,7 +155,7 @@ export const CalendarMonthView = ({
                     className={cn(
                       "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#eef0f3] bg-white text-left transition-colors",
                       !isLastColumn && "border-r",
-                      isToday && "bg-[#f4f8f1]",
+                      isToday && "bg-[#f0f6ff]",
                       selected && !isToday && "bg-[#fbfaf7]",
                       !selected && !isToday && "hover:bg-[#fbfaf7]",
                     )}
@@ -175,7 +175,7 @@ export const CalendarMonthView = ({
                         className={cn(
                           "absolute left-4 top-4 inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[length:var(--ds-layout-font-size-meta)] font-semibold tabular-nums transition-colors",
                           isToday
-                            ? "bg-[#6A876E] text-white shadow-[0_7px_18px_rgba(106,135,110,0.24)]"
+                            ? "bg-[#185FA5] text-white shadow-[0_7px_18px_rgba(24,95,165,0.22)]"
                             : selected
                               ? "bg-[#f0efea] text-[#24231f] ring-1 ring-[#d8d6ce]"
                               : day.isCurrentMonth
