@@ -22,7 +22,10 @@ let _gisLoaded = false;
 const loadGisScript = (): Promise<void> => {
   return new Promise((resolve, reject) => {
     // 既にロード済みの場合はスキップ
-    if (_gisLoaded || (typeof window !== "undefined" && window.google?.accounts)) {
+    if (
+      _gisLoaded ||
+      (typeof window !== "undefined" && window.google?.accounts)
+    ) {
       _gisLoaded = true;
       resolve();
       return;
@@ -94,11 +97,7 @@ export const requestWebAccessTokenViaGis = async ({
       callback: (response) => {
         if (response.error) {
           // サイレント失敗（login_required, interaction_required 等）
-          reject(
-            new Error(
-              response.error_description ?? response.error,
-            ),
-          );
+          reject(new Error(response.error_description ?? response.error));
           return;
         }
         resolve(response.access_token);
@@ -107,7 +106,8 @@ export const requestWebAccessTokenViaGis = async ({
       error_callback: (error) => {
         reject(
           new Error(
-            (error as { message?: string }).message ?? "GIS token request failed",
+            (error as { message?: string }).message ??
+              "GIS token request failed",
           ),
         );
       },
@@ -121,7 +121,10 @@ export const requestWebAccessTokenViaGis = async ({
             // ヒント: 直前に接続したアカウントのメールを渡すとサイレント成功率が上がる
             hint: (() => {
               try {
-                return localStorage.getItem("flashcard-master.gcal.account_email") ?? undefined;
+                return (
+                  localStorage.getItem("flashcard-master.gcal.account_email") ??
+                  undefined
+                );
               } catch {
                 return undefined;
               }

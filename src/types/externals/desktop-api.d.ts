@@ -48,10 +48,7 @@ export interface PlatformOauthApi {
     refreshToken?: string;
   }>;
   // refresh_token を使った silent なトークン更新
-  refreshTokens(input: {
-    clientId: string;
-    refreshToken: string;
-  }): Promise<{
+  refreshTokens(input: { clientId: string; refreshToken: string }): Promise<{
     accessToken?: string;
     idToken?: string;
   }>;

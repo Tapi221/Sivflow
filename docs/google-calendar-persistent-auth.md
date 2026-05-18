@@ -23,18 +23,19 @@
 
 ### localStorage のキー
 
-| キー | 内容 | 削除タイミング |
-|------|------|----------------|
-| `flashcard-master.gcal.access_token` | access_token | 期限切れ・切断時 |
-| `flashcard-master.gcal.access_token_expiry` | access_token 期限 | 期限切れ・切断時 |
-| `flashcard-master.gcal.refresh_token` | **refresh_token（新規）** | 切断時のみ |
-| `flashcard-master.gcal.account_email` | 接続アカウントのメール | 切断時 |
-| `flashcard-master.gcal.selected_calendar_ids` | 選択カレンダー ID リスト | 切断時 |
-| `flashcard-master.gcal.was_connected` | 接続履歴フラグ | 切断時 |
+| キー                                          | 内容                      | 削除タイミング   |
+| --------------------------------------------- | ------------------------- | ---------------- |
+| `flashcard-master.gcal.access_token`          | access_token              | 期限切れ・切断時 |
+| `flashcard-master.gcal.access_token_expiry`   | access_token 期限         | 期限切れ・切断時 |
+| `flashcard-master.gcal.refresh_token`         | **refresh_token（新規）** | 切断時のみ       |
+| `flashcard-master.gcal.account_email`         | 接続アカウントのメール    | 切断時           |
+| `flashcard-master.gcal.selected_calendar_ids` | 選択カレンダー ID リスト  | 切断時           |
+| `flashcard-master.gcal.was_connected`         | 接続履歴フラグ            | 切断時           |
 
 ## 変更ファイル一覧
 
 ### Electron メインプロセス
+
 - `constants/electron/app/ipc.ts`
   - `oauthRefreshTokens` IPC チャンネルを追加
 - `electron/main.ts`
@@ -45,6 +46,7 @@
   - `oauth.refreshTokens()` メソッドを追加
 
 ### 型定義
+
 - `src/application/ports/OAuthBridgePort.ts`
   - `OAuthBridgeTokenExchangeResult.refreshToken` を追加
   - `OAuthBridgePort.refreshTokens()` を追加
@@ -55,6 +57,7 @@
   - 同上
 
 ### プラットフォーム実装
+
 - `src/platform/desktop/index.ts`
   - `oauth.refreshTokens()` を Electron IPC にブリッジ
 - `src/platform/web/index.ts`
@@ -63,6 +66,7 @@
   - `refreshTokens()` デリゲートを追加
 
 ### フック
+
 - `src/features/calendar/hooks/useGoogleCalendarIntegration.ts`
   - `LOCAL_REFRESH_TOKEN_KEY` 定数を追加
   - `readLocalRefreshToken` / `writeLocalRefreshToken` ユーティリティを追加
