@@ -1,201 +1,33 @@
-import { Fragment, useCallback, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+/**
+ * WorkspaceBreadcrumbBar.tsx
+ *
+ * 責務：パンくずバーの「描画のみ」。
+ * ロジックはすべて useBreadcrumbs() に委譲している。
+ *
+ * hideCrumbs=true のとき：
+ *   - action があれば右端に表示しつつ高さを確保
+ *   - action もなければ高さゼロで collapse
+ */
 
-import {
-  useBreadcrumbAction,
-  useBreadcrumbExtraCrumbs,
-} from "@/contexts/BreadcrumbContext";
+import { Fragment } from "react";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
-import type {
-  WorkspaceSidebarSection,
-  WorkspaceTab,
-} from "@/features/workspace-tabs/domain/workspaceTab";
-import { useWorkspaceTabsStore } from "@/features/workspace-tabs/store/useWorkspaceTabsStore";
 import { cn } from "@/lib/utils";
-
-const SECTION_LABELS = {
-  home: "ホーム",
-  review: "復習",
-  library: "ライブラリ",
-  calendar: "カレンダー",
-  tasks: "タスク",
-} as const;
-
-const LIBRARY_TYPE_LABELS = {
-  pdf: "PDF",
-  flashcards: "フラッシュカード",
-  notes: "ノート",
-} as const;
-
-const buildLibraryTypeRoute = (libraryType: string) => {
-  const searchParams = new URLSearchParams();
-  searchParams.set("view", "section-list");
-  searchParams.set("libraryType", libraryType);
-
-  return `/folders?${searchParams.toString()}`;
-};
-
-const resolveSectionKeyForTarget = (
-  target: string,
-): WorkspaceSidebarSection | null => {
-  const [pathname = "", search = ""] = target.split("?");
-  const normalizedPathname = pathname.toLowerCase();
-  const searchParams = new URLSearchParams(search);
-
-  if (normalizedPathname === "/folders") {
-    return searchParams.get("home") === "1" ? "home" : "library";
-  }
-
-  if (normalizedPathname === "/gallery") {
-    return "review";
-  }
-
-  if (normalizedPathname === "/calendar") {
-    return "calendar";
-  }
-
-  if (normalizedPathname === "/tasks") {
-    return "tasks";
-  }
-
-  return null;
-};
-
-const resolveActiveCrumbs = ({
-  activeTab,
-  extraCrumbs,
-  libraryType,
-}: {
-  activeTab: WorkspaceTab | null;
-  extraCrumbs: BreadcrumbCrumb[];
-  libraryType: string | null;
-}): BreadcrumbCrumb[] => {
-  if (!activeTab) {
-    return [];
-  }
-
-  const baseCrumb: BreadcrumbCrumb = {
-    label: SECTION_LABELS[activeTab.sectionKey],
-    to:
-      activeTab.sectionKey === "library"
-        ? "/folders?view=section-list"
-        : undefined,
-  };
-
-  if (activeTab.sectionKey !== "library") {
-    return [{ ...baseCrumb, to: undefined }];
-  }
-
-  const libraryTypeLabel =
-    libraryType && libraryType in LIBRARY_TYPE_LABELS
-      ? LIBRARY_TYPE_LABELS[libraryType as keyof typeof LIBRARY_TYPE_LABELS]
-      : null;
-
-  if (libraryTypeLabel && libraryType) {
-    const libraryTypeCrumb: BreadcrumbCrumb = {
-      label: libraryTypeLabel,
-      to: buildLibraryTypeRoute(libraryType),
-    };
-
-    if (
-      activeTab.kind === "document" ||
-      activeTab.kind === "cardSet" ||
-      activeTab.kind === "card"
-    ) {
-      return [
-        baseCrumb,
-        libraryTypeCrumb,
-        {
-          label: activeTab.title,
-          to: undefined,
-        },
-      ];
-    }
-
-    return [
-      baseCrumb,
-      {
-        ...libraryTypeCrumb,
-        to: undefined,
-      },
-    ];
-  }
-
-  if (extraCrumbs.length > 0) {
-    return [baseCrumb, ...extraCrumbs];
-  }
-
-  if (
-    activeTab.kind === "document" ||
-    activeTab.kind === "cardSet" ||
-    activeTab.kind === "card"
-  ) {
-    return [
-      baseCrumb,
-      {
-        label: activeTab.title,
-        to: undefined,
-      },
-    ];
-  }
-
-  return [{ ...baseCrumb, to: undefined }];
-};
+import { useBreadcrumbs } from "@/features/breadcrumbs/useBreadcrumbs";
 
 export const WorkspaceBreadcrumbBar = ({
   hideCrumbs = false,
 }: {
   hideCrumbs?: boolean;
 }) => {
-  const navigate = useNavigate();
-  const { search } = useLocation();
-  const action = useBreadcrumbAction();
-  const extraCrumbs = useBreadcrumbExtraCrumbs();
-  const tabs = useWorkspaceTabsStore((state) => state.tabs);
-  const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
-  const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
+  const { crumbs, shouldHideBreadcrumb, hasNoActiveTab, action, handleCrumbNavigate } =
+    useBreadcrumbs();
 
-  const activeTab = useMemo(
-    () => tabs.find((tab) => tab.id === activeTabId) ?? null,
-    [activeTabId, tabs],
-  );
-
-  const shouldHideBreadcrumb =
-    activeTab?.kind === "document" ||
-    activeTab?.sectionKey === "calendar" ||
-    activeTab?.sectionKey === "tasks";
-
-  const crumbs = useMemo(
-    () =>
-      resolveActiveCrumbs({
-        activeTab,
-        extraCrumbs,
-        libraryType: new URLSearchParams(search).get("libraryType"),
-      }),
-    [activeTab, extraCrumbs, search],
-  );
-
-  const handleCrumbNavigate = useCallback(
-    (target: string) => {
-      const sectionKey = resolveSectionKeyForTarget(target);
-
-      if (sectionKey) {
-        openSectionTab(sectionKey);
-      }
-
-      navigate(target);
-    },
-    [navigate, openSectionTab],
-  );
-
-  // Always render the bar element so the workspace grid layout keeps its row structure.
-  // When there is nothing to show, render an empty bar (still draggable region).
-  if (!activeTab) {
+  // アクティブタブなし → 空バー（グリッド行の構造だけ維持）
+  if (hasNoActiveTab) {
     return <nav className="workspace-breadcrumb-bar" aria-label="Breadcrumb" />;
   }
 
-  // For sections where breadcrumbs are suppressed, keep the grid row but collapse its height
-  // so content doesn't get pushed down.
+  // パンくず非表示セクション（calendar, tasks, document）かつ action もなし → 高さゼロ
   if (shouldHideBreadcrumb && !action) {
     return (
       <nav
@@ -205,8 +37,7 @@ export const WorkspaceBreadcrumbBar = ({
     );
   }
 
-  // When crumbs are explicitly hidden (e.g. to avoid duplicate in-content toolbars),
-  // collapse the bar unless it has an action to show.
+  // hideCrumbs=true（WorkspaceShell 側の指定）かつ action もなし → 高さゼロ
   if (hideCrumbs && !action) {
     return (
       <nav
@@ -216,19 +47,22 @@ export const WorkspaceBreadcrumbBar = ({
     );
   }
 
+  // パンくず非表示セクションだが hideCrumbs=false → 空バー（高さは確保）
   if (!hideCrumbs && shouldHideBreadcrumb) {
     return <nav className="workspace-breadcrumb-bar" aria-label="Breadcrumb" />;
   }
 
+  // パンくずなし → 空バー
   if (!hideCrumbs && crumbs.length === 0) {
     return <nav className="workspace-breadcrumb-bar" aria-label="Breadcrumb" />;
   }
 
+  // ── 通常描画 ──
   return (
     <nav className="workspace-breadcrumb-bar" aria-label="Breadcrumb">
       {hideCrumbs ? null : (
         <ol className="workspace-breadcrumb-bar__list">
-          {crumbs.map((crumb, index) => {
+          {crumbs.map((crumb: BreadcrumbCrumb, index: number) => {
             const isLast = index === crumbs.length - 1;
             const target = isLast ? undefined : crumb.to;
 
