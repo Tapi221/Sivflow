@@ -1,7 +1,6 @@
 import {
   addDays,
   addMonths,
-  endOfMonth,
   getDaysInMonth,
   startOfDay,
   startOfMonth,
@@ -18,7 +17,7 @@ import {
   useRef,
   useState,
 } from "react";
-
+import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import {
   buildTimelineColumns,
@@ -210,6 +209,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     selectedCalendarIds,
     selectedCalendarIdList,
     toggleCalendar: toggleGoogleCalendar,
+    forceSync,
   } = useGoogleCalendarIntegration();
 
   // ── Computed
@@ -264,25 +264,18 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
 
   // ── Effects
 
-  useEffect(() => {
-    if (activeMode === "calendar" && selectedViewMode === "month") {
-      const rangeStart = startOfMonth(addMonths(monthTitleDate, -3));
-      const rangeEnd = endOfMonth(addMonths(monthTitleDate, 3));
-      void loadGoogleCalendarEvents(rangeStart, rangeEnd);
-    } else {
-      const rangeStart = visibleDays[0];
-      const rangeEnd = visibleDays[visibleDays.length - 1];
-      if (!rangeStart || !rangeEnd) return;
-      void loadGoogleCalendarEvents(rangeStart, rangeEnd);
-    }
-  }, [
-    activeMode,
-    loadGoogleCalendarEvents,
-    monthTitleDate,
+useCalendarEventSync({
+  activeMode,
+  selectedViewMode,
+  visibleDays,
+  monthTitleDate,
+  googleCalendar: {
+    loadEvents: loadGoogleCalendarEvents,
+    forceSync,
+    selectedCalendarIds,
     selectedCalendarIdList,
-    selectedViewMode,
-    visibleDays,
-  ]);
+  },
+});
 
   useEffect(() => {
     const viewport = contentViewportRef.current;
