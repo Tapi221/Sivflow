@@ -13,6 +13,7 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { auth } from "@/services/firebase";
 import { GoogleCalendarSyncEngine } from "./GoogleCalendarSyncEngine";
 import type { GCalSyncState } from "./gcalSync.types";
+import { GoogleCalendarWatchManager } from "./GoogleCalendarWatchManager";
 
 // ─────────────────────────────────────────────────────────────
 // 永続化ユーティリティ（すべて localStorage に統一）
@@ -1099,6 +1100,25 @@ export const useGoogleCalendarIntegration = ({
     () => Array.from(selectedCalendarIds),
     [selectedCalendarIds],
   );
+
+  useEffect(() => {
+  if (!accessToken || selectedCalendarIds.size === 0) return;
+
+  const watchManager = new GoogleCalendarWatchManager();
+
+  const calendarIds = Array.from(selectedCalendarIds);
+
+  // 非同期実行（useEffect内でawaitしない）
+  void (async () => {
+    try {
+      for (const calendarId of calendarIds) {
+        await watchManager.registerWatch(calendarId, accessToken);
+      }
+    } catch (err) {
+      console.error("Watch registration failed:", err);
+    }
+  })();
+}, [accessToken, selectedCalendarIds]);
 
   return {
     accountEmail,
