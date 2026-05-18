@@ -32,7 +32,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
       <div className="flex min-h-0 flex-1 bg-white">
         {pane.isCalendarSidebarOpen ? (
           <CalendarSidebar
-            monthDate={pane.currentDate}
+            monthDate={pane.titleDate}
             selectedDate={pane.selectedDate}
             calendars={pane.googleCalendars}
             googleAccountEmail={pane.googleAccountEmail}
@@ -77,29 +77,30 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* ── 前後ナビ＋Today をひとつのカプセルにまとめる ── */}
+            <div className="flex items-center overflow-hidden rounded-lg border border-[#e2e4e9] bg-white">
               <button
                 type="button"
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#dde2ea] bg-white text-[#667085] transition-colors hover:bg-[#f8fafc]"
+                className="flex h-8 w-8 items-center justify-center border-r border-[#e2e4e9] text-[#8f929c] transition-colors hover:bg-[#f5f6f8] hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                 onClick={pane.handlePrevious}
                 aria-label="Previous"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-3.5 w-3.5" />
               </button>
               <button
                 type="button"
-                className="rounded-lg border border-[#dde2ea] bg-white px-4 py-[7px] text-[14px] font-semibold text-[#20242c] transition-colors hover:bg-[#f8fafc]"
+                className="px-3 py-[7px] text-[13px] font-medium text-[#20242c] transition-colors hover:bg-[#f5f6f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                 onClick={pane.handleToday}
               >
                 Today
               </button>
               <button
                 type="button"
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#dde2ea] bg-white text-[#667085] transition-colors hover:bg-[#f8fafc]"
+                className="flex h-8 w-8 items-center justify-center border-l border-[#e2e4e9] text-[#8f929c] transition-colors hover:bg-[#f5f6f8] hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                 onClick={pane.handleNext}
                 aria-label="Next"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
