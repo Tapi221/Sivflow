@@ -164,6 +164,7 @@ export type GoogleCalendarEvent = {
   title: string;
   startsAt: Date;
   minutes: number;
+  isAllDay: boolean; // ← 追加
 };
 
 type GoogleCalendarApiListResponse = {
@@ -576,6 +577,9 @@ const fetchEventsForCalendar = async ({
     const startsAt = parseEventStart(event.start);
     if (!event.id || !startsAt) return [];
 
+    // start.date のみ存在し start.dateTime がない場合は終日イベント
+    const isAllDay = Boolean(event.start?.date && !event.start?.dateTime);
+
     return [
       {
         id: `${calendarId}:${event.id}`,
@@ -584,6 +588,7 @@ const fetchEventsForCalendar = async ({
         title: event.summary || "(No title)",
         startsAt,
         minutes: parseEventMinutes(startsAt, event.end),
+        isAllDay, // ← 追加
       },
     ];
   });
@@ -849,9 +854,6 @@ export const useGoogleCalendarIntegration = ({
   }, []);
 
   // ── イベント読み込み
-  // - 既に読み込み済みの範囲はスキップ
-  // - 新規取得したイベントは既存イベントにマージ（上書きしない）
-  // - 選択カレンダーが変わった場合はキャッシュをリセットして再取得
   const loadEvents = useCallback(
     async (rangeStart: Date, rangeEnd: Date) => {
       if (!accessToken || selectedCalendarIds.size === 0) {
