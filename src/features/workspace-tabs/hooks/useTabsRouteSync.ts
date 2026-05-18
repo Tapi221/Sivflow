@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 import { mapExplorerSelectionToSearchParams } from "@/features/explorer/mappers/mapExplorerSelectionToSearchParams";
-import type { WorkspaceExplorerTab } from "@/features/workspace-tabs/domain/workspaceTab";
-import { useWorkspaceTabsStore } from "@/features/workspace-tabs/store/useWorkspaceTabsStore";
+import type { WorkspaceExplorerTab } from "@/features/workspace-tabs/Tab";
+import { useWorkspaceTabsStore } from "@/features/workspace-tabs/hooks/useTabsStore";
 
 const normalizeQuery = (search: string) => {
   const params = new URLSearchParams(
