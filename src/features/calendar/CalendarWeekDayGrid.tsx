@@ -19,9 +19,10 @@ const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
 
 const createHourLabel = (hour: number) => `${String(hour).padStart(2, "0")}:00`;
 
+// borderLeft 関連を除去し、アクセントバーは JSX 側で描画する
 const calculateEventStyle = (
   event: GoogleCalendarEvent,
-): CalendarEventLabelStyle => {
+): Omit<CalendarEventLabelStyle, "borderLeftColor" | "borderLeftStyle" | "borderLeftWidth"> => {
   const startHour =
     event.startsAt.getHours() + event.startsAt.getMinutes() / 60;
   const tokens = generateColorTokens(event.accentColor);
@@ -31,9 +32,6 @@ const calculateEventStyle = (
     top: `calc(var(--calendar-event-start-hour) * var(--calendar-hour-row-height))`,
     height: `calc(var(--calendar-event-duration-hours) * var(--calendar-hour-row-height) - 2px)`,
     backgroundColor: tokens.bg,
-    borderLeftColor: tokens.border,
-    borderLeftStyle: "solid",
-    borderLeftWidth: 4,
     color: tokens.text,
   };
 };
@@ -155,10 +153,12 @@ export const CalendarWeekDayGrid = ({
 
                 {eventsForDay.map((event) => {
                   const pos = layout.get(event.id) ?? { left: 0, width: 1 };
+                  const tokens = generateColorTokens(event.accentColor);
+
                   return (
                     <div
                       key={event.id}
-                      className="absolute min-h-12 overflow-hidden rounded px-[6px] py-1 text-[12px] font-medium leading-[1.35]"
+                      className="absolute min-h-12 overflow-hidden rounded pl-[10px] pr-[6px] py-1 text-[12px] font-medium leading-[1.35]"
                       style={{
                         ...calculateEventStyle(event),
                         left: `calc(${pos.left * 100}% + 2px)`,
@@ -166,6 +166,12 @@ export const CalendarWeekDayGrid = ({
                         right: "unset",
                       }}
                     >
+                      {/* 月表示チップと同じカーブ感のアクセントバー */}
+                      <span
+                        className="absolute left-[3px] top-[6px] bottom-[6px] w-[3px] rounded-full"
+                        style={{ backgroundColor: tokens.border }}
+                      />
+
                       <div className="truncate text-[11px] font-medium leading-[1.25] opacity-90">
                         {createEventTimeLabel(event)}
                       </div>
