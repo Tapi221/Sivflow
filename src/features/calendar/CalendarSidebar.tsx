@@ -146,23 +146,23 @@ export const CalendarSidebar = ({
         </div>
       </section>
 
-      <nav className="flex w-full flex-col gap-2" aria-label="Calendar lists">
+      <nav className="flex w-full flex-col gap-1" aria-label="Calendar lists">
         {/* ── My calendars セクション */}
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col">
           <button
             type="button"
-            className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex h-7 w-full items-center gap-1.5 overflow-hidden rounded-md px-2 text-left text-[13px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={() => setMyCalendarsOpen((prev) => !prev)}
             aria-expanded={myCalendarsOpen}
           >
             <span className="flex shrink-0 items-center">
               <ChevronDown
                 className={cn(
-                  "h-4 w-4 text-[#667085] transition-transform duration-200",
+                  "h-3.5 w-3.5 text-[#667085] transition-transform duration-200",
                   !myCalendarsOpen && "-rotate-90",
                 )}
               />
-              <SidebarCalendarIcon className="h-5 w-5 shrink-0 text-black" />
+              <SidebarCalendarIcon className="h-4 w-4 shrink-0 text-black" />
             </span>
             <span className="truncate">My calendars</span>
           </button>
@@ -174,11 +174,11 @@ export const CalendarSidebar = ({
                 <button
                   key={calendar.id}
                   type="button"
-                  className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex h-7 w-full items-center gap-1.5 overflow-hidden rounded-md px-2 text-left text-[13px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <span className="flex shrink-0 items-center pl-4">
+                  <span className="flex shrink-0 items-center pl-3.5">
                     <Icon
-                      className="h-5 w-5 shrink-0"
+                      className="h-4 w-4 shrink-0"
                       style={{ color: calendar.color }}
                     />
                   </span>
@@ -190,21 +190,21 @@ export const CalendarSidebar = ({
 
         {/* ── Google Calendar セクション */}
         {isCalendarConnected ? (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col">
             <button
               type="button"
-              className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-7 w-full items-center gap-1.5 overflow-hidden rounded-md px-2 text-left text-[13px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               onClick={() => setGoogleCalendarOpen((prev) => !prev)}
               aria-expanded={googleCalendarOpen}
             >
               <span className="flex shrink-0 items-center">
                 <ChevronDown
                   className={cn(
-                    "h-4 w-4 text-[#667085] transition-transform duration-200",
+                    "h-3.5 w-3.5 text-[#667085] transition-transform duration-200",
                     !googleCalendarOpen && "-rotate-90",
                   )}
                 />
-                <SidebarCalendarIcon className="h-5 w-5 shrink-0 text-black" />
+                <SidebarCalendarIcon className="h-4 w-4 shrink-0 text-black" />
               </span>
               <span className="truncate">{googleCalendarSectionLabel}</span>
             </button>
@@ -217,12 +217,12 @@ export const CalendarSidebar = ({
                   <button
                     key={calendar.id}
                     type="button"
-                    className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex h-7 w-full items-center gap-1.5 overflow-hidden rounded-md px-2 text-left text-[13px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     onClick={() => onToggleCalendar(calendar.id)}
                   >
-                    <span className="flex shrink-0 items-center pl-4">
+                    <span className="flex shrink-0 items-center pl-3.5">
                       <Icon
-                        className="h-5 w-5 shrink-0"
+                        className="h-4 w-4 shrink-0"
                         style={{ color: calendar.backgroundColor }}
                       />
                     </span>
@@ -235,7 +235,7 @@ export const CalendarSidebar = ({
 
         <button
           type="button"
-          className="flex h-9 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-[14px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex h-7 w-full items-center gap-1.5 overflow-hidden rounded-md px-2 text-left text-[13px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           onClick={onConnectCalendar}
           disabled={isCalendarConnecting}
         >
