@@ -13,6 +13,11 @@ import {
   type PdfWorkspaceDocumentContextValue,
   type PdfWorkspaceNavigationContextValue,
 } from "@/features/pdf/PdfWorkspaceContexts";
+// ★ 修正: clampScale と getViewerStateFromSession のインポートを追加
+import {
+  clampScale,
+  getViewerStateFromSession,
+} from "@/features/pdf/pdfViewerStateStorage";
 import type {
   DocumentItem,
   PdfPageLayoutMode,
@@ -58,7 +63,7 @@ const clampZoomUiPercent = (value: number) => {
 };
 
 const scaleToZoomUiPercent = (value: number) => {
-  const clampedScale = clampScale(value);
+  const clampedScale = clampScale(value); // ★ 修正: clampScale はインポート済み
 
   if (C.PDF_SCALE_RANGE <= 0 || C.PDF_ZOOM_UI_RANGE_PERCENT <= 0) {
     return C.PDF_ZOOM_UI_MAX_PERCENT;
@@ -79,14 +84,14 @@ const zoomUiPercentToScale = (value: number) => {
   const clampedUiPercent = clampZoomUiPercent(value);
 
   if (C.PDF_SCALE_RANGE <= 0 || C.PDF_ZOOM_UI_RANGE_PERCENT <= 0) {
-    return clampScale(C.FIT_MIN_SCALE);
+    return clampScale(C.FIT_MIN_SCALE); // ★ 修正: clampScale はインポート済み
   }
 
   const ratio =
     (clampedUiPercent - C.PDF_ZOOM_UI_MIN_PERCENT) /
     C.PDF_ZOOM_UI_RANGE_PERCENT;
 
-  return clampScale(
+  return clampScale( // ★ 修正: clampScale はインポート済み
     Number((C.FIT_MIN_SCALE + ratio * C.PDF_SCALE_RANGE).toFixed(3)),
   );
 };
@@ -140,7 +145,8 @@ const normalizeThumbnailOrder = (
   const seen = new Set<number>();
   const nextOrder: number[] = [];
 
-  value.forEach((pageNumber) => {
+  // ★ 修正: pageNumber に unknown 型を明示して暗黙的 any を回避
+  value.forEach((pageNumber: unknown) => {
     if (typeof pageNumber !== "number" || !Number.isFinite(pageNumber)) {
       return;
     }
@@ -179,6 +185,7 @@ const readInitialViewerState = (
   docId: string,
   viewerState?: PdfViewerState | null,
 ) => {
+  // ★ 修正: getViewerStateFromSession はインポート済み
   return getViewerStateFromSession(docId) ?? viewerState ?? null;
 };
 
@@ -231,6 +238,7 @@ export const PdfWorkspaceProvider = ({
         containerWidth - C.FIT_PADDING_X - horizontalGap,
       );
 
+      // ★ 修正: clampScale はインポート済み
       return clampScale(
         Number((usableWidth / (basePageWidth * pagesPerRow)).toFixed(3)),
       );
