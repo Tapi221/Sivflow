@@ -72,6 +72,10 @@ export const FieldsToolbarIcon = ({
   </svg>
 );
 
+/**
+ * Month view — Lucide `calendar-days` (v0.383.0, ISC License)
+ * https://lucide.dev/icons/calendar-days
+ */
 export const MonthViewToolbarIcon = ({
   className,
   label: _label,
@@ -80,28 +84,34 @@ export const MonthViewToolbarIcon = ({
   ...props
 }: IconProps) => (
   <svg
-    viewBox="0 0 16 16"
+    viewBox="0 0 24 24"
     fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
     aria-hidden="true"
     {...props}
   >
-    <rect
-      x="2"
-      y="3"
-      width="12"
-      height="10"
-      rx="1.5"
-      stroke="currentColor"
-      strokeWidth="1.25"
-    />
-    <path d="M2 6.5H14" stroke="currentColor" strokeWidth="1.25" />
-    <path d="M6 6.5V13" stroke="currentColor" strokeWidth="1.25" />
-    <path d="M10 6.5V13" stroke="currentColor" strokeWidth="1.25" />
+    <path d="M8 2v4" />
+    <path d="M16 2v4" />
+    <rect width="18" height="18" x="3" y="4" rx="2" />
+    <path d="M3 10h18" />
+    <path d="M8 14h.01" />
+    <path d="M12 14h.01" />
+    <path d="M16 14h.01" />
+    <path d="M8 18h.01" />
+    <path d="M12 18h.01" />
+    <path d="M16 18h.01" />
   </svg>
 );
 
+/**
+ * Week view — Lucide `calendar-range` (v0.383.0, ISC License)
+ * https://lucide.dev/icons/calendar-range
+ */
 export const WeekViewToolbarIcon = ({
   className,
   label: _label,
@@ -110,27 +120,32 @@ export const WeekViewToolbarIcon = ({
   ...props
 }: IconProps) => (
   <svg
-    viewBox="0 0 16 16"
+    viewBox="0 0 24 24"
     fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
     aria-hidden="true"
     {...props}
   >
-    <rect
-      x="2"
-      y="3"
-      width="12"
-      height="10"
-      rx="1.5"
-      stroke="currentColor"
-      strokeWidth="1.25"
-    />
-    <path d="M6 3V13" stroke="currentColor" strokeWidth="1.25" />
-    <path d="M10 3V13" stroke="currentColor" strokeWidth="1.25" />
+    <rect width="18" height="18" x="3" y="4" rx="2" />
+    <path d="M16 2v4" />
+    <path d="M3 10h18" />
+    <path d="M8 2v4" />
+    <path d="M17 14h-6" />
+    <path d="M13 18H7" />
+    <path d="M7 14h.01" />
+    <path d="M17 18h.01" />
   </svg>
 );
 
+/**
+ * Day view — Lucide `calendar` (v0.383.0, ISC License)
+ * https://lucide.dev/icons/calendar
+ */
 export const DayViewToolbarIcon = ({
   className,
   label: _label,
@@ -139,22 +154,21 @@ export const DayViewToolbarIcon = ({
   ...props
 }: IconProps) => (
   <svg
-    viewBox="0 0 16 16"
+    viewBox="0 0 24 24"
     fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
     aria-hidden="true"
     {...props}
   >
-    <rect
-      x="4"
-      y="3"
-      width="8"
-      height="10"
-      rx="1.5"
-      stroke="currentColor"
-      strokeWidth="1.25"
-    />
+    <path d="M8 2v4" />
+    <path d="M16 2v4" />
+    <rect width="18" height="18" x="3" y="4" rx="2" />
+    <path d="M3 10h18" />
   </svg>
 );
 
