@@ -100,11 +100,12 @@
     transition: background-color 120ms ease;
   }
 
+  /* 修正: rgba(127, 45, 40, 0.42) → アプリのボーダー色ベースのグレー */
   .calendar-all-day-boundary-resize-handle:hover::after,
   .calendar-all-day-boundary-resize-handle:focus-visible::after,
   .calendar-hour-boundary-resize-handle:hover::after,
   .calendar-hour-boundary-resize-handle:focus-visible::after {
-    background: rgba(127, 45, 40, 0.42);
+    background: #dde2ea;
   }
 
   .calendar-all-day-boundary-resize-handle:focus-visible,
@@ -153,9 +154,10 @@
     opacity: 0;
   }
 
+  /* 修正: rgba(127, 45, 40, 0.42) → アプリのボーダー色ベースのグレー */
   .calendar-month-row-boundary-resize-handle:hover::after,
   .calendar-month-row-boundary-resize-handle:focus-visible::after {
-    background: rgba(127, 45, 40, 0.42);
+    background: #dde2ea;
     opacity: 1;
   }
 
