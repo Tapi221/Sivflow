@@ -7,7 +7,7 @@ import { PdfOverlayToolbar } from "./PdfToolbar";
 import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
 import * as C from "@/features/pdf/pdf.constants.desktop";
-import { usePdfWorkspace } from "./usePdfWorkspace";
+import { usePdfWorkspace } from "./hooks/usePdfWorkspace";
 
 interface PdfPaneDoc {
   id: string;

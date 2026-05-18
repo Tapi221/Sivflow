@@ -115,7 +115,7 @@ export const CalendarWeekDayGrid = ({
                 style={{ height: "var(--calendar-hour-row-height)" }}
               >
                 {hour > 0 && (
-                  <span className="absolute -top-[9px] right-2 text-[11px] leading-none text-[#8f929c]">
+                  <span className="absolute bottom-0 right-0 z-10 translate-y-1/2 select-none bg-white pr-2.5 pl-1 text-[11px] font-medium leading-none tabular-nums text-[#b0b4be]">
                     {createHourLabel(hour)}
                   </span>
                 )}
