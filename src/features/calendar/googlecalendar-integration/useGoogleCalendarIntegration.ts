@@ -11,6 +11,8 @@ import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/electron/app";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { auth } from "@/services/firebase";
+import { GoogleCalendarSyncEngine } from "./GoogleCalendarSyncEngine";
+import type { GCalSyncState } from "./gcalSync.types";
 
 // ─────────────────────────────────────────────────────────────
 // 永続化ユーティリティ（すべて localStorage に統一）
@@ -655,9 +657,17 @@ export const useGoogleCalendarIntegration = ({
   const [error, setError] = useState<string | null>(null);
   const [isTokenExpired, setIsTokenExpired] = useState(false);
 
+  // ── 同期エンジン専用 state
+  const [syncState, setSyncState] = useState<GCalSyncState>("idle");
+  const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
+
   const hasAutoRestored = useRef(false);
   const isSilentReconnectingRef = useRef(false);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── 同期エンジンのインスタンス（ライフサイクル全体で同一インスタンスを使う）
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const syncEngineRef = useRef<GoogleCalendarSyncEngine | null>(null);
 
   // ── 読み込み済み範囲のキャッシュ（カレンダーIDが変わったらリセット）
   const loadedRangesRef = useRef<LoadedRange[]>([]);
@@ -721,6 +731,56 @@ export const useGoogleCalendarIntegration = ({
       isSilentReconnectingRef.current = false;
     }
   }, [authInstance]);
+
+  // ── 同期エンジンを遅延初期化する（silentReconnect が確定してから）
+  const ensureSyncEngine = useCallback((): GoogleCalendarSyncEngine => {
+    if (!syncEngineRef.current) {
+      syncEngineRef.current = new GoogleCalendarSyncEngine({
+        // ── イベント追加コールバック
+        onEventAdded: (event) => {
+          setEvents((prev) => {
+            if (prev.some((e) => e.id === event.id)) return prev;
+            return [...prev, event].sort(
+              (a, b) => a.startsAt.getTime() - b.startsAt.getTime(),
+            );
+          });
+        },
+        // ── イベント更新コールバック（追加/更新を統合して処理）
+        onEventUpdated: (event) => {
+          setEvents((prev) => {
+            const map = new Map(prev.map((e) => [e.id, e]));
+            map.set(event.id, event);
+            return Array.from(map.values()).sort(
+              (a, b) => a.startsAt.getTime() - b.startsAt.getTime(),
+            );
+          });
+        },
+        // ── イベント削除コールバック
+        onEventDeleted: (compositeId) => {
+          setEvents((prev) => prev.filter((e) => e.id !== compositeId));
+        },
+        // ── 同期状態変化コールバック
+        onSyncStateChange: (state) => {
+          setSyncState(state);
+        },
+        // ── 最終同期日時更新コールバック
+        onLastSyncedAtChange: (at) => {
+          setLastSyncedAt(at);
+        },
+        // ── エラーコールバック（既存のエラー state を上書き）
+        onError: (err) => {
+          setError(err.message);
+        },
+        // ── 現在の accessToken を取得する関数
+        getAccessToken: () => readLocalToken(),
+        // ── サイレント再接続
+        silentReconnect,
+        // ── ポーリング間隔（60 秒）
+        pollIntervalMs: 60_000,
+      });
+    }
+    return syncEngineRef.current;
+  }, [silentReconnect]);
 
   // ── 自動リフレッシュタイマー
   const scheduleTokenRefresh = useCallback(() => {
@@ -976,12 +1036,44 @@ export const useGoogleCalendarIntegration = ({
     [accessToken, calendars, selectedCalendarIds, silentReconnect],
   );
 
+  // ── 同期エンジンを accessToken / selectedCalendarIds / calendars の変化に応じて起動・停止
+  useEffect(() => {
+    if (!accessToken || selectedCalendarIds.size === 0 || calendars.length === 0) {
+      // 接続が切れているか、カレンダーが未選択ならエンジンを停止
+      syncEngineRef.current?.stop();
+      return;
+    }
+
+    const engine = ensureSyncEngine();
+    engine.start({
+      accessToken,
+      selectedCalendarIds,
+      calendars,
+    });
+
+    return () => {
+      // クリーンアップ時はエンジンを停止（カレンダー再選択時のリセット含む）
+      engine.stop();
+    };
+  }, [accessToken, selectedCalendarIds, calendars, ensureSyncEngine]);
+
+  // ── 強制同期（UI からの手動トリガー）
+  const forceSync = useCallback(async () => {
+    if (!syncEngineRef.current) return;
+    await syncEngineRef.current.forceSync();
+  }, []);
+
   // ── 切断（全永続化データをクリア）
   const disconnect = useCallback(() => {
     if (refreshTimerRef.current !== null) {
       clearTimeout(refreshTimerRef.current);
       refreshTimerRef.current = null;
     }
+
+    // 同期エンジンを停止し、syncToken もクリア
+    syncEngineRef.current?.stop();
+    syncEngineRef.current?.clearAllSyncTokens();
+    syncEngineRef.current = null;
 
     writeLocalToken(null);
     writeLocalRefreshToken(null);
@@ -999,6 +1091,8 @@ export const useGoogleCalendarIntegration = ({
     setEvents([]);
     setSelectedCalendarIds(new Set());
     setIsTokenExpired(false);
+    setSyncState("idle");
+    setLastSyncedAt(null);
   }, []);
 
   const selectedCalendarIdList = useMemo(
@@ -1021,5 +1115,12 @@ export const useGoogleCalendarIntegration = ({
     selectedCalendarIds,
     selectedCalendarIdList,
     toggleCalendar,
+    // ── 同期エンジン公開 API
+    /** 現在の同期状態（'idle' | 'syncing' | 'error'） */
+    syncState,
+    /** 最後に正常同期が完了した日時 */
+    lastSyncedAt,
+    /** 手動強制同期 */
+    forceSync,
   };
 };
