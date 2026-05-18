@@ -14,11 +14,11 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 
-import { SidebarCalendarIcon, SidebarPanelIcon } from "./calendar.icons";
+import { SidebarCalendarIcon, SidebarPanelIcon } from "../ui/calendar.icons";
 import type {
   AppCalendarItem,
   CalendarSidebarProps,
-} from "./calendarPane.types";
+} from "../calendarPane.types";
 
 // ── ミニカレンダー構築（純粋関数 → 将来 utils に切り出し可能）
 const buildMiniCalendarDays = (

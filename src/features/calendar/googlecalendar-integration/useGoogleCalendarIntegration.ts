@@ -425,22 +425,22 @@ const requestCalendarAccessToken = async (
 
   if (silent) {
     const user = authInstance.currentUser;
+
     if (!user) {
       throw new Error("No current user for silent reconnect");
     }
-    try {
-      const result = await reauthenticateWithPopup(user, provider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      if (!credential?.accessToken) {
-        throw new Error("Google Calendar access token was not returned");
-      }
-      return {
-        accessToken: credential.accessToken,
-        accountEmail: result.user.email,
-      };
-    } catch (error) {
-      throw error;
+
+    const result = await reauthenticateWithPopup(user, provider);
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+
+    if (!credential?.accessToken) {
+      throw new Error("Google Calendar access token was not returned");
     }
+
+    return {
+      accessToken: credential.accessToken,
+      accountEmail: result.user.email,
+    };
   }
 
   provider.setCustomParameters({

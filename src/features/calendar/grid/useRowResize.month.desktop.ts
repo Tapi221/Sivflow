@@ -7,7 +7,7 @@ import type {
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import type { CalendarMonthWeek } from "@/features/calendar/monthGrid";
+import type { CalendarMonthWeek } from "@/features/calendar/model/calendarMonth.model";
 
 // ── 内部型
 
