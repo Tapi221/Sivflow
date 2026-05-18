@@ -4,7 +4,7 @@ import { Filter, Search } from "@/ui/icons";
 import {
   WorkspaceHeaderToolbar,
   type WorkspaceHeaderToolbarIconProps,
-} from "@/features/workspace/components/WorkspaceHeaderToolbar";
+} from "@/features/workspace/WorkspaceHeaderToolbar";
 
 type PdfLibraryWorkspaceSection = "explorer" | "pdf" | "flashcard" | "notes";
 

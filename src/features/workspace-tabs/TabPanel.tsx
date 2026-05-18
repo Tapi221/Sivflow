@@ -7,17 +7,17 @@ import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import {
   WorkspaceHeaderToolbar,
   type WorkspaceHeaderToolbarIconProps,
-} from "@/features/workspace/components/WorkspaceHeaderToolbar";
+} from "@/features/workspace/WorkspaceHeaderToolbar";
 import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { cn } from "@/lib/utils";
 import { Filter, Search } from "@/ui/icons";
 import type { Card, CardSet, DocumentItem } from "@/types";
-import type { WorkspaceEntityTab } from "@/features/workspace-tabs/domain/workspaceTab";
+import type { WorkspaceEntityTab } from "@/features/workspace-tabs/Tab";
 import {
   resolveCardSetTabTitle,
   resolveCardTabTitle,
-} from "@/features/workspace-tabs/lib/resolveWorkspaceTabTitle";
-import { useWorkspaceTabsStore } from "@/features/workspace-tabs/store/useWorkspaceTabsStore";
+} from "@/features/workspace-tabs/resolveTabTitle";
+import { useWorkspaceTabsStore } from "@/features/workspace-tabs/hooks/useTabsStore";
 
 type PdfPaneUpdateHandler = NonNullable<
   ComponentProps<typeof PdfPane>["onDocumentUpdate"]

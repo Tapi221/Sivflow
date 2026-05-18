@@ -24,8 +24,8 @@ import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
 import type {
   WorkspaceSidebarSection,
   WorkspaceTab,
-} from "@/features/workspace-tabs/domain/workspaceTab";
-import { useWorkspaceTabsStore } from "@/features/workspace-tabs/store/useWorkspaceTabsStore";
+} from "@/features/workspace-tabs/Tab";
+import { useWorkspaceTabsStore } from "@/features/workspace-tabs/hooks/useTabsStore";
 
 // ─────────────────────────────────────────
 // 定数（WorkspaceBreadcrumbBar から移動）

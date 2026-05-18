@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 
 import { FileText, Layers, Plus, X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
-import type { WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
-import { resolveWorkspaceTabRoute } from "@/features/workspace-tabs/lib/resolveWorkspaceTabRoute";
-import { useWorkspaceTabsStore } from "@/features/workspace-tabs/store/useWorkspaceTabsStore";
+import type { WorkspaceTab } from "@/features/workspace-tabs/Tab";
+import { resolveWorkspaceTabRoute } from "@/features/workspace-tabs/resolveTabRoute";
+import { useWorkspaceTabsStore } from "@/features/workspace-tabs/hooks/useTabsStore";
 
 type WorkspaceTabsBarVariant = "workspace" | "titlebar";
 

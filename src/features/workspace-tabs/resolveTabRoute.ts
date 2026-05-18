@@ -1,5 +1,5 @@
 import { mapExplorerSelectionToSearchParams } from "@/features/explorer/mappers/mapExplorerSelectionToSearchParams";
-import type { WorkspaceTab } from "@/features/workspace-tabs/domain/workspaceTab";
+import type { WorkspaceTab } from "@/features/workspace-tabs/Tab";
 
 const buildFoldersPath = (searchParams: URLSearchParams) => {
   const query = searchParams.toString();
