@@ -260,7 +260,7 @@ export const WorkspaceTabsBar = ({
                   "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-hidden border text-[13px] transition-[background-color,border-color,color,box-shadow] duration-150",
                   "mb-0 h-[36px] rounded-tl-[8px] rounded-tr-[8px]",
                   selected
-                    ? "explorer-workspace-tab--active border-black/12 text-[var(--app-sidebar-text-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]"
+                    ? "explorer-workspace-tab--active border-black/12 border-b-[var(--app-active-tab-bg,#ffffff)] text-[var(--app-sidebar-text-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]"
                     : cn(
                         "explorer-workspace-tab--inactive border-transparent",
                         inactiveTextClassName,
