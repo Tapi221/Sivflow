@@ -97,10 +97,7 @@ export const GridCalendarMonthDesktop = ({
 
               const sortedEvents = normalizedEvents
                 .filter((e) => isSameDay(e.startsAt, day.date))
-                .sort(
-                  (a, b) =>
-                    a.startsAt.getTime() - b.startsAt.getTime()
-                );
+                .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
 
               const visibleChips = sortedEvents.slice(0, maxVisibleChips);
               const overflowCount = sortedEvents.length - visibleChips.length;

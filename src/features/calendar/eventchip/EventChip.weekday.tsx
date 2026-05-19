@@ -15,9 +15,7 @@ export const CalendarEventChipWeekday = ({
 
   // Date 化
   const startsAt =
-    event.startsAt instanceof Date
-      ? event.startsAt
-      : new Date(event.startsAt);
+    event.startsAt instanceof Date ? event.startsAt : new Date(event.startsAt);
 
   const endsAt =
     event.endsAt instanceof Date

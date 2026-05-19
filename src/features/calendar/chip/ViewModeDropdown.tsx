@@ -128,9 +128,7 @@ export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
                   outline-none
                 "
               >
-                <span className={isSelected ? "font-medium" : ""}>
-                  {label}
-                </span>
+                <span className={isSelected ? "font-medium" : ""}>{label}</span>
 
                 {isSelected && (
                   <span className="ml-2 h-1.5 w-1.5 rounded-full bg-[#25272d] shrink-0" />

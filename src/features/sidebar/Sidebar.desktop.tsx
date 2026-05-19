@@ -5,6 +5,8 @@ import {
   type ReactNode,
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { UpgradePanel } from "./upgradepanel";
+import "./sidebar.desktop.css";
 
 import { useExplorerCalendarViewStore } from "@/features/calendar/header/useExplorerCalendarViewStore";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
@@ -90,7 +92,7 @@ const CalendarIcon = ({ className }: SidebarIconProps) => (
   </IconShell>
 );
 
-const LibraryIcon = ({ className }: { className?: string }) => (
+const LibraryIcon = ({ className }: SidebarIconProps) => (
   <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden="true">
     <path
       d="M3.75 3C3.28587 3 2.84075 3.18437 2.51256 3.51256C2.18437 3.84075 2 4.28587 2 4.75V8.01C2.52239 7.67577 3.12984 7.49875 3.75 7.5H16.25C16.894 7.5 17.495 7.688 18 8.01V6.75C18 6.28587 17.8156 5.84075 17.4874 5.51256C17.1592 5.18437 16.7141 5 16.25 5H11.414C11.3811 5.00006 11.3486 4.99364 11.3182 4.98112C11.2879 4.96859 11.2603 4.9502 11.237 4.927L9.823 3.513C9.49499 3.18476 9.05004 3.00023 8.586 3H3.75ZM3.75 9C3.28587 9 2.84075 9.18437 2.51256 9.51256C2.18437 9.84075 2 10.2859 2 10.75V15.25C2 16.216 2.784 17 3.75 17H16.25C16.7141 17 17.1592 16.8156 17.4874 16.4874C17.8156 16.1592 18 15.7141 18 15.25V10.75C18 10.2859 17.8156 9.84075 17.4874 9.51256C17.1592 9.18437 16.7141 9 16.25 9H3.75Z"
@@ -240,6 +242,7 @@ const AppSidebarNavLink = ({
 }) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
+
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
@@ -294,6 +297,7 @@ const AppSidebarNavLink = ({
       aria-label={compact ? item.label : undefined}
     >
       <span className="app-sidebar__nav-icon-slot">{item.icon}</span>
+
       <span className="app-sidebar__nav-label">{item.label}</span>
 
       {trailing ? (
@@ -313,7 +317,9 @@ const AppSidebar = ({ collapsed = false, onOpenSettings }: AppSidebarProps) => {
   const selectedLibraryChild = new URLSearchParams(search).get("libraryType");
 
   const closeCalendar = useExplorerCalendarViewStore((state) => state.close);
+
   const openGlobalSearch = useGlobalSearchStore((state) => state.open);
+
   const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
 
   const isCompact = collapsed && !isRailExpanded;
@@ -445,23 +451,11 @@ const AppSidebar = ({ collapsed = false, onOpenSettings }: AppSidebarProps) => {
       </div>
 
       <div className="app-sidebar__bottom">
-        <div className="app-sidebar__trial">
-          <p>
-            トライアル期間の残り <strong>6 日</strong>
-            <br />
-            すべての機能をお試しいただけます。
-          </p>
-
-          <button type="button">アップグレード</button>
-        </div>
+        <UpgradePanel compact={isCompact} />
 
         <nav className="app-sidebar__nav" aria-label="Support navigation">
           {footerItems.map((item) => (
-            <AppSidebarNavLink
-              key={item.id}
-              item={item}
-              compact={isCompact}
-            />
+            <AppSidebarNavLink key={item.id} item={item} compact={isCompact} />
           ))}
         </nav>
       </div>

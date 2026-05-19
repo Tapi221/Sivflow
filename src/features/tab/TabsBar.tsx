@@ -38,23 +38,17 @@ const resolveTabsSurfaceStyle = (isTitlebar: boolean): CSSProperties => ({
     : "var(--app-sidebar-bg)",
 });
 
-const resolveInactiveTabTextClassName = (
-  isTitlebar: boolean,
-): string =>
+const resolveInactiveTabTextClassName = (isTitlebar: boolean): string =>
   isTitlebar
     ? "text-[var(--app-titlebar-text)] hover:border-white/10 hover:text-[var(--app-titlebar-text-strong)]"
     : "text-[var(--app-sidebar-text)] hover:border-black/8 hover:text-[var(--app-sidebar-text-strong)]";
 
-const resolveInactiveTabIconClassName = (
-  isTitlebar: boolean,
-): string =>
+const resolveInactiveTabIconClassName = (isTitlebar: boolean): string =>
   isTitlebar
     ? "text-[var(--app-titlebar-icon)]"
     : "text-[var(--app-sidebar-icon)]";
 
-const resolveCloseButtonClassName = (
-  isTitlebar: boolean,
-): string =>
+const resolveCloseButtonClassName = (isTitlebar: boolean): string =>
   isTitlebar
     ? [
         "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
@@ -65,9 +59,7 @@ const resolveCloseButtonClassName = (
         "text-[var(--app-sidebar-icon)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
       ].join(" ");
 
-const resolveAddButtonClassName = (
-  isTitlebar: boolean,
-): string =>
+const resolveAddButtonClassName = (isTitlebar: boolean): string =>
   isTitlebar
     ? [
         "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-transparent outline-none transition-colors",
@@ -82,13 +74,9 @@ const resolveNextTabOnClose = (
   tabs: WorkspaceTab[],
   closingTabId: WorkspaceTab["id"],
 ): WorkspaceTab | null => {
-  const closingIndex = tabs.findIndex(
-    (tab) => tab.id === closingTabId,
-  );
+  const closingIndex = tabs.findIndex((tab) => tab.id === closingTabId);
 
-  const nextTabs = tabs.filter(
-    (tab) => tab.id !== closingTabId,
-  );
+  const nextTabs = tabs.filter((tab) => tab.id !== closingTabId);
 
   if (nextTabs.length === 0) {
     return null;
@@ -106,22 +94,14 @@ const IconShell = ({
   children,
   className,
 }: IconProps & { children: ReactNode }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden="true"
-  >
+  <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
     {children}
   </svg>
 );
 
 const HomeIcon = ({ className }: IconProps) => (
   <IconShell className={className}>
-    <path
-      d="M4 10.5 12 4l8 6.5V20h-5v-5H9v5H4v-9.5Z"
-      fill="currentColor"
-    />
+    <path d="M4 10.5 12 4l8 6.5V20h-5v-5H9v5H4v-9.5Z" fill="currentColor" />
   </IconShell>
 );
 
@@ -155,17 +135,8 @@ const CalendarIcon = ({ className }: IconProps) => (
   </IconShell>
 );
 
-const LibraryTabIcon = ({
-  className,
-}: {
-  className?: string;
-}) => (
-  <svg
-    className={className}
-    viewBox="0 0 20 20"
-    fill="none"
-    aria-hidden="true"
-  >
+const LibraryTabIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden="true">
     <path
       d="M3.75 3C3.28587 3 2.84075 3.18437 2.51256 3.51256C2.18437 3.84075 2 4.28587 2 4.75V8.01C2.52239 7.67577 3.12984 7.49875 3.75 7.5H16.25C16.894 7.5 17.495 7.688 18 8.01V6.75C18 6.28587 17.8156 5.84075 17.4874 5.51256C17.1592 5.18437 16.7141 5 16.25 5H11.414C11.3811 5.00006 11.3486 4.99364 11.3182 4.98112C11.2879 4.96859 11.2603 4.9502 11.237 4.927L9.823 3.513C9.49499 3.18476 9.05004 3.00023 8.586 3H3.75ZM3.75 9C3.28587 9 2.84075 9.18437 2.51256 9.51256C2.18437 9.84075 2 10.2859 2 10.75V15.25C2 16.216 2.784 17 3.75 17H16.25C16.7141 17 17.1592 16.8156 17.4874 16.4874C17.8156 16.1592 18 15.7141 18 15.25V10.75C18 10.2859 17.8156 9.84075 17.4874 9.51256C17.1592 9.18437 16.7141 9 16.25 9H3.75Z"
       fill="currentColor"
@@ -198,9 +169,7 @@ const resolveTabWidthClassName = (tab: WorkspaceTab) => {
   return "w-[180px] shrink-0";
 };
 
-const resolveTabStyle = (
-  tab: WorkspaceTab,
-): CSSProperties | undefined => {
+const resolveTabStyle = (tab: WorkspaceTab): CSSProperties | undefined => {
   if (tab.kind === "explorer") {
     return {
       width: "180px",
@@ -227,21 +196,13 @@ export const WorkspaceTabsBar = ({
 }: WorkspaceTabsBarProps) => {
   const navigate = useNavigate();
 
-  const tabs = useWorkspaceTabsStore(
-    (state) => state.tabs,
-  );
+  const tabs = useWorkspaceTabsStore((state) => state.tabs);
 
-  const activeTabId = useWorkspaceTabsStore(
-    (state) => state.activeTabId,
-  );
+  const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
 
-  const selectTab = useWorkspaceTabsStore(
-    (state) => state.selectTab,
-  );
+  const selectTab = useWorkspaceTabsStore((state) => state.selectTab);
 
-  const closeTab = useWorkspaceTabsStore(
-    (state) => state.closeTab,
-  );
+  const closeTab = useWorkspaceTabsStore((state) => state.closeTab);
 
   const createExplorerTab = useWorkspaceTabsStore(
     (state) => state.createExplorerTab,
@@ -249,17 +210,13 @@ export const WorkspaceTabsBar = ({
 
   const isTitlebar = variant === "titlebar";
 
-  const interactiveStyle =
-    noDragStyle ?? TABS_NO_DRAG_STYLE;
+  const interactiveStyle = noDragStyle ?? TABS_NO_DRAG_STYLE;
 
-  const tabsSurfaceStyle =
-    resolveTabsSurfaceStyle(isTitlebar);
+  const tabsSurfaceStyle = resolveTabsSurfaceStyle(isTitlebar);
 
-  const closeButtonClassName =
-    resolveCloseButtonClassName(isTitlebar);
+  const closeButtonClassName = resolveCloseButtonClassName(isTitlebar);
 
-  const addButtonClassName =
-    resolveAddButtonClassName(isTitlebar);
+  const addButtonClassName = resolveAddButtonClassName(isTitlebar);
 
   return (
     <div
@@ -271,35 +228,24 @@ export const WorkspaceTabsBar = ({
         "explorer-chrome-font explorer-tab-bar relative z-30 flex shrink-0 items-end gap-0 overflow-hidden",
         isTitlebar
           ? "h-full min-w-0 flex-1 px-0 pt-0"
-          : [
-              "h-[40px] w-full min-w-0 border-b border-black/10",
-              "px-1.5 pt-0",
-            ],
+          : ["h-[40px] w-full min-w-0 border-b border-black/10", "px-1.5 pt-0"],
         className,
       )}
     >
       <div className="explorer-tab-list flex min-w-0 items-end overflow-hidden gap-0">
         {tabs.map((tab) => {
-          const selected =
-            tab.id === activeTabId;
+          const selected = tab.id === activeTabId;
 
           const Icon = resolveTabIcon(tab);
 
           const inactiveTextClassName =
-            resolveInactiveTabTextClassName(
-              isTitlebar,
-            );
+            resolveInactiveTabTextClassName(isTitlebar);
 
           const inactiveIconClassName =
-            resolveInactiveTabIconClassName(
-              isTitlebar,
-            );
+            resolveInactiveTabIconClassName(isTitlebar);
 
           return (
-            <div
-              key={tab.id}
-              className="relative flex items-end"
-            >
+            <div key={tab.id} className="relative flex items-end">
               <div
                 style={{
                   ...tabsSurfaceStyle,
@@ -307,9 +253,7 @@ export const WorkspaceTabsBar = ({
                   ...interactiveStyle,
                 }}
                 data-workspace-tab-kind={tab.kind}
-                data-workspace-tab-active={
-                  selected ? "true" : undefined
-                }
+                data-workspace-tab-active={selected ? "true" : undefined}
                 className={cn(
                   "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-hidden border text-[13px] transition-[background-color,border-color,color,box-shadow] duration-150",
                   "mb-0 h-[36px] rounded-tl-[8px] rounded-tr-[8px]",
@@ -326,16 +270,12 @@ export const WorkspaceTabsBar = ({
                   type="button"
                   style={interactiveStyle}
                   className="explorer-workspace-tab-button flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left outline-none"
-                  aria-current={
-                    selected ? "page" : undefined
-                  }
+                  aria-current={selected ? "page" : undefined}
                   title={tab.title}
                   onClick={() => {
                     selectTab(tab.id);
 
-                    navigate(
-                      resolveWorkspaceTabRoute(tab),
-                    );
+                    navigate(resolveWorkspaceTabRoute(tab));
                   }}
                 >
                   <Icon
@@ -347,9 +287,7 @@ export const WorkspaceTabsBar = ({
                     )}
                   />
 
-                  <span className="truncate">
-                    {tab.title}
-                  </span>
+                  <span className="truncate">{tab.title}</span>
                 </button>
 
                 {tab.isClosable ? (
@@ -358,9 +296,7 @@ export const WorkspaceTabsBar = ({
                     style={interactiveStyle}
                     className={cn(
                       closeButtonClassName,
-                      selected
-                        ? "opacity-100"
-                        : "opacity-80 hover:opacity-100",
+                      selected ? "opacity-100" : "opacity-80 hover:opacity-100",
                     )}
                     aria-label={`${tab.title} を閉じる`}
                     title="閉じる"
@@ -370,20 +306,13 @@ export const WorkspaceTabsBar = ({
                       event.stopPropagation();
 
                       const nextTab = selected
-                        ? resolveNextTabOnClose(
-                            tabs,
-                            tab.id,
-                          )
+                        ? resolveNextTabOnClose(tabs, tab.id)
                         : null;
 
                       closeTab(tab.id);
 
                       if (nextTab) {
-                        navigate(
-                          resolveWorkspaceTabRoute(
-                            nextTab,
-                          ),
-                        );
+                        navigate(resolveWorkspaceTabRoute(nextTab));
                       }
                     }}
                   >
