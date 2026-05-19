@@ -1,12 +1,3 @@
-import {
-  CalendarIcon,
-  TimelineToolbarIcon,
-  TaskIcon,
-  MonthViewIcon,
-  WeekViewIcon,
-  DayViewIcon,
-} from "../../ui/calendar.icons";
-
 export type CalendarViewMode = "month" | "week" | "days";
 
 type Params = {
@@ -26,19 +17,16 @@ export const useCalendarToolbar = ({
     {
       value: "calendar" as const,
       label: "Calendar",
-      icon: CalendarIcon,
       onClick: onSelectCalendar,
     },
     {
       value: "timeline" as const,
       label: "Timeline",
-      icon: TimelineToolbarIcon,
       onClick: onSelectTimeline,
     },
     {
       value: "task" as const,
       label: "Task",
-      icon: TaskIcon,
       onClick: onSelectTask,
     },
   ] as const;
@@ -47,19 +35,16 @@ export const useCalendarToolbar = ({
     {
       value: "month" as const,
       label: "Month",
-      icon: MonthViewIcon,
       onClick: () => onSelectViewMode?.("month"),
     },
     {
       value: "week" as const,
       label: "Week",
-      icon: WeekViewIcon,
       onClick: () => onSelectViewMode?.("week"),
     },
     {
       value: "days" as const,
       label: "Day",
-      icon: DayViewIcon,
       onClick: () => onSelectViewMode?.("days"),
     },
   ] as const;

@@ -1,30 +1,29 @@
 import * as Popover from "@radix-ui/react-popover";
 import { useRef, useState } from "react";
-import { ChevronDown } from "@/ui/icons";
-import type { ComponentType } from "react";
 
 export type ViewMode = "month" | "week" | "days";
 
 export type ViewModeOption = {
   value: ViewMode;
   label: string;
-  Icon: ComponentType<{ className?: string }>;
 };
 
 type Props = {
   value: ViewMode;
   onChange: (value: ViewMode) => void;
-  options: ViewModeOption[];
+  options: readonly ViewModeOption[];
 };
 
 export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
   const [open, setOpen] = useState(false);
+
+  // browser timerなので number | null
   const timerRef = useRef<number | null>(null);
 
   const selected = options.find((o) => o.value === value);
 
   const clearTimer = () => {
-    if (timerRef.current) {
+    if (timerRef.current !== null) {
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
     }
@@ -44,7 +43,6 @@ export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
-      {/* Trigger */}
       <Popover.Trigger asChild>
         <button
           type="button"
@@ -53,7 +51,7 @@ export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
           onClick={() => setOpen((v) => !v)}
           onMouseDown={(e) => e.preventDefault()}
           className="
-            inline-flex items-center gap-1.5
+            inline-flex items-center
             rounded-full border border-[#e2e4e9]
             bg-white px-2.5 py-1
 
@@ -75,19 +73,10 @@ export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
             focus-visible:shadow-none
           "
         >
-          {selected?.Icon && (
-            <selected.Icon className="h-3.5 w-3.5 text-[#6b7280] shrink-0" />
-          )}
-
-          <span className="leading-none">
-            {selected?.label}
-          </span>
-
-          <ChevronDown className="h-3 w-3 text-[#9aa0aa]" />
+          <span className="leading-none">{selected?.label}</span>
         </button>
       </Popover.Trigger>
 
-      {/* Portal */}
       <Popover.Portal>
         <Popover.Content
           side="bottom"
@@ -108,13 +97,11 @@ export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
             origin-top-right
           "
         >
-          {/* header */}
           <div className="px-2 py-1 text-[10px] font-medium text-[#a0a4b0] whitespace-nowrap">
             Views
           </div>
 
-          {/* items */}
-          {options.map(({ value: v, label, Icon }) => {
+          {options.map(({ value: v, label }) => {
             const isSelected = v === value;
 
             return (
@@ -141,16 +128,10 @@ export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
                   outline-none
                 "
               >
-                {/* left */}
-                <div className="flex items-center gap-2 min-w-0">
-                  <Icon className="h-3.5 w-3.5 text-[#6b7280] shrink-0" />
+                <span className={isSelected ? "font-medium" : ""}>
+                  {label}
+                </span>
 
-                  <span className={isSelected ? "font-medium" : ""}>
-                    {label}
-                  </span>
-                </div>
-
-                {/* right dot */}
                 {isSelected && (
                   <span className="ml-2 h-1.5 w-1.5 rounded-full bg-[#25272d] shrink-0" />
                 )}

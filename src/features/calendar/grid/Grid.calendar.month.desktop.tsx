@@ -89,9 +89,18 @@ export const GridCalendarMonthDesktop = ({
               const monthAnnotation = getMonthAnnotation(day.date);
               const isLastColumn = index % 7 === 6;
 
-              const sortedEvents = visibleEvents
+              // ★安全化：Date保証（string混入対策）
+              const normalizedEvents = visibleEvents.map((e) => ({
+                ...e,
+                startsAt: new Date(e.startsAt),
+              }));
+
+              const sortedEvents = normalizedEvents
                 .filter((e) => isSameDay(e.startsAt, day.date))
-                .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+                .sort(
+                  (a, b) =>
+                    a.startsAt.getTime() - b.startsAt.getTime()
+                );
 
               const visibleChips = sortedEvents.slice(0, maxVisibleChips);
               const overflowCount = sortedEvents.length - visibleChips.length;
@@ -133,11 +142,11 @@ export const GridCalendarMonthDesktop = ({
                     </span>
 
                     {/* 月初ラベル */}
-                    {monthAnnotation ? (
+                    {monthAnnotation && (
                       <span className="absolute right-4 top-[18px] text-[12px] font-semibold text-[#a09f98]">
                         {monthAnnotation}
                       </span>
-                    ) : null}
+                    )}
 
                     {/* イベント */}
                     {sortedEvents.length > 0 && (
@@ -165,7 +174,7 @@ export const GridCalendarMonthDesktop = ({
                     aria-orientation="horizontal"
                     aria-valuemin={C.MIN_MONTH_ROW_HEIGHT}
                     aria-valuemax={C.MAX_MONTH_ROW_HEIGHT}
-                    aria-valuenow={monthRowHeight}
+                    aria-valuenow={Number(monthRowHeight)}
                     tabIndex={0}
                     className="calendar-month-row-boundary-resize-handle"
                     title={T.MONTH_ROW_RESIZE_TITLE}

@@ -13,11 +13,13 @@ export const CalendarEventChipWeekday = ({
 }: CalendarEventChipWeekdayProps) => {
   const tokens = generateColorTokens(event.accentColor);
 
-  const endsAt = new Date(event.startsAt.getTime() + event.minutes * 60_000);
+  // Google Calendar系は基本 start/end を持つ前提に寄せる
+  const startsAt = event.startsAt;
+  const endsAt = event.endsAt ?? startsAt;
 
   const timeLabel = event.isAllDay
     ? "終日"
-    : `${format(event.startsAt, "H:mm")} ~ ${format(endsAt, "H:mm")}`;
+    : `${format(startsAt, "H:mm")} ~ ${format(endsAt, "H:mm")}`;
 
   return (
     <div
