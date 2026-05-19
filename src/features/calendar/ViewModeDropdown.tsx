@@ -1,5 +1,5 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ChevronDown, Check } from "@/ui/icons";
+import { Check, ChevronDown } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import type { ComponentType } from "react";
 
@@ -30,26 +30,26 @@ export const ViewModeDropdown = ({
         <button
           type="button"
           className="
-            flex h-8 items-center gap-1.5
-            rounded-lg border border-[#e2e4e9]
-            bg-white px-3
-            text-[13px] font-medium text-[#25272d]
-            transition-colors
+            inline-flex items-center gap-1.5
+            rounded-full border border-[#e2e4e9]
+            bg-white px-2.5 py-1
+            text-[12px] font-medium text-[#25272d]
+            shadow-sm
+            transition
             hover:bg-[#f5f6f8]
-            focus:outline-none
-            focus-visible:outline-none
-            focus:ring-0
-            focus-visible:ring-0
+            active:scale-[0.98]
+            outline-none
           "
         >
-          {selected && (
-            <>
-              <selected.Icon className="h-3.5 w-3.5 text-[#8f929c]" />
-              <span>{selected.label}</span>
-            </>
+          {selected?.Icon && (
+            <selected.Icon className="h-3.5 w-3.5 text-[#6b7280]" />
           )}
 
-          <ChevronDown className="h-3 w-3 text-[#8f929c]" />
+          <span className="leading-none">
+            {selected?.label}
+          </span>
+
+          <ChevronDown className="h-3 w-3 text-[#9aa0aa]" />
         </button>
       </DropdownMenu.Trigger>
 
@@ -58,14 +58,14 @@ export const ViewModeDropdown = ({
           align="end"
           sideOffset={6}
           className="
-            z-50 min-w-[160px]
+            z-50 min-w-[150px]
             overflow-hidden
-            rounded-xl border border-[#e2e4e9]
+            rounded-lg border border-[#e2e4e9]
             bg-white py-1
-            shadow-[0_8px_24px_rgba(0,0,0,0.12)]
+            shadow-[0_10px_25px_rgba(0,0,0,0.12)]
           "
         >
-          <div className="px-3 py-1.5 text-[11px] font-medium text-[#a0a4b0]">
+          <div className="px-2 py-1 text-[10px] font-medium text-[#a0a4b0]">
             Views
           </div>
 
@@ -77,20 +77,21 @@ export const ViewModeDropdown = ({
                 key={v}
                 onSelect={() => onChange(v)}
                 className={cn(
-                  "flex cursor-pointer items-center justify-between px-3 py-2 text-[13px] text-[#24272f] outline-none transition-colors",
+                  "flex cursor-pointer items-center gap-2 justify-between",
+                  "px-2 py-1.5 text-[12px]",
+                  "outline-none transition-colors",
                   "data-[highlighted]:bg-[#f5f6f8]"
                 )}
               >
-                <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4 text-[#8f929c]" />
-
+                <span className="flex items-center gap-2">
+                  <Icon className="h-3.5 w-3.5 text-[#6b7280]" />
                   <span className={isSelected ? "font-medium" : ""}>
                     {label}
                   </span>
-                </div>
+                </span>
 
                 {isSelected && (
-                  <Check className="h-4 w-4 text-[#25272d]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#25272d]" />
                 )}
               </DropdownMenu.Item>
             );
