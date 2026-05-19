@@ -1,9 +1,3 @@
-import {
-  MonthViewIcon,
-  WeekViewIcon,
-  DayViewIcon,
-} from "@/features/calendar/ui/calendar.icons";
-
 import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarTimelineDayView } from "./grid/TimelineDayView";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
@@ -19,9 +13,9 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import { cn } from "@/lib/utils";
 
 const VIEW_OPTIONS = [
-  { value: "month", label: "Month", Icon: MonthViewIcon },
-  { value: "week", label: "Week", Icon: WeekViewIcon },
-  { value: "days", label: "Day", Icon: DayViewIcon },
+  { value: "month", label: "Month" },
+  { value: "week", label: "Week" },
+  { value: "days", label: "Day" },
 ] as const;
 
 export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
