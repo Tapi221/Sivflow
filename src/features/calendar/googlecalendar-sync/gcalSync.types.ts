@@ -63,18 +63,14 @@ export interface UseGoogleCalendarIntegrationOptions {
 // ─────────────────────────────────────────────────────────────
 
 /** エンジンの現在の動作状態 */
-export type GCalSyncState =
-  | "idle"
-  | "syncing"
-  | "error";
+export type GCalSyncState = "idle" | "syncing" | "error";
 
 // ─────────────────────────────────────────────────────────────
 // カレンダー ID → syncToken のマップ
 // ─────────────────────────────────────────────────────────────
 
 /** カレンダー ID をキーとした syncToken の辞書 */
-export type GCalSyncTokenMap =
-  Record<string, string>;
+export type GCalSyncTokenMap = Record<string, string>;
 
 // ─────────────────────────────────────────────────────────────
 // Google Calendar API の生レスポンス型
@@ -94,10 +90,7 @@ export interface GCalRawIncrementalEvent {
 
   location?: string;
 
-  status?:
-    | "confirmed"
-    | "tentative"
-    | "cancelled";
+  status?: "confirmed" | "tentative" | "cancelled";
 
   start?: {
     date?: string;
@@ -136,44 +129,32 @@ export interface GCalSyncEngineOptions {
   /**
    * イベント追加
    */
-  onEventAdded: (
-    event: GoogleCalendarEvent,
-  ) => void;
+  onEventAdded: (event: GoogleCalendarEvent) => void;
 
   /**
    * イベント更新
    */
-  onEventUpdated: (
-    event: GoogleCalendarEvent,
-  ) => void;
+  onEventUpdated: (event: GoogleCalendarEvent) => void;
 
   /**
    * イベント削除
    */
-  onEventDeleted: (
-    compositeId: string,
-  ) => void;
+  onEventDeleted: (compositeId: string) => void;
 
   /**
    * 同期状態変更
    */
-  onSyncStateChange: (
-    state: GCalSyncState,
-  ) => void;
+  onSyncStateChange: (state: GCalSyncState) => void;
 
   /**
    * 最終同期時刻変更
    */
-  onLastSyncedAtChange: (
-    at: Date,
-  ) => void;
+  onLastSyncedAtChange: (at: Date) => void;
 
   /**
    * エラー通知
    */
-  onError: (
-    error: Error,
-  ) => void;
+  onError: (error: Error) => void;
 
   /**
    * ポーリング間隔

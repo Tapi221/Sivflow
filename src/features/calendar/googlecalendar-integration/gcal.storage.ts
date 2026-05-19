@@ -7,8 +7,7 @@ const LOCAL_TOKEN_EXPIRY_KEY = "flashcard-master.gcal.access_token_expiry";
 const LOCAL_REFRESH_TOKEN_KEY = "flashcard-master.gcal.refresh_token";
 
 const PERSIST_EMAIL_KEY = "flashcard-master.gcal.account_email";
-const PERSIST_CALENDAR_IDS_KEY =
-  "flashcard-master.gcal.selected_calendar_ids";
+const PERSIST_CALENDAR_IDS_KEY = "flashcard-master.gcal.selected_calendar_ids";
 const PERSIST_WAS_CONNECTED_KEY = "flashcard-master.gcal.was_connected";
 
 const TOKEN_LIFETIME_MS = 55 * 60 * 1000;

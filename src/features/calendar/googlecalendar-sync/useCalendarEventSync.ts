@@ -35,9 +35,7 @@ import type { useGoogleCalendarIntegration } from "@/features/calendar/googlecal
 
 type GoogleCalendarSlice = Pick<
   ReturnType<typeof useGoogleCalendarIntegration>,
-  | "forceSync"
-  | "selectedCalendarIds"
-  | "selectedCalendarIdList"
+  "forceSync" | "selectedCalendarIds" | "selectedCalendarIdList"
 >;
 
 export type UseCalendarEventSyncOptions = {
@@ -76,33 +74,21 @@ export type UseCalendarEventSyncOptions = {
 export const useCalendarEventSync = ({
   googleCalendar,
 }: UseCalendarEventSyncOptions): void => {
-  const {
-    forceSync,
-    selectedCalendarIds,
-    selectedCalendarIdList,
-  } = googleCalendar;
+  const { forceSync, selectedCalendarIds, selectedCalendarIdList } =
+    googleCalendar;
 
   // ───────────────────────────────────────────────────────────
   // 認証ユーザーID
   // ───────────────────────────────────────────────────────────
 
-  const [userId, setUserId] =
-    useState<string | null>(
-      () =>
-        auth.currentUser?.uid ??
-        null,
-    );
+  const [userId, setUserId] = useState<string | null>(
+    () => auth.currentUser?.uid ?? null,
+  );
 
   useEffect(() => {
-    const unsubscribe =
-      onAuthStateChanged(
-        auth,
-        (user) => {
-          setUserId(
-            user?.uid ?? null,
-          );
-        },
-      );
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUserId(user?.uid ?? null);
+    });
 
     return unsubscribe;
   }, []);
@@ -111,11 +97,9 @@ export const useCalendarEventSync = ({
   // forceSync ref stabilization
   // ───────────────────────────────────────────────────────────
 
-  const forceSyncRef =
-    useRef(forceSync);
+  const forceSyncRef = useRef(forceSync);
 
-  forceSyncRef.current =
-    forceSync;
+  forceSyncRef.current = forceSync;
 
   // ───────────────────────────────────────────────────────────
   // Calendar selection changed
@@ -123,10 +107,7 @@ export const useCalendarEventSync = ({
 
   useEffect(() => {
     void forceSync();
-  }, [
-    forceSync,
-    selectedCalendarIdList,
-  ]);
+  }, [forceSync, selectedCalendarIdList]);
 
   // ───────────────────────────────────────────────────────────
   // Push notification → immediate sync
@@ -137,9 +118,7 @@ export const useCalendarEventSync = ({
 
     selectedCalendarIds,
 
-    onNotification: (
-      calendarId,
-    ) => {
+    onNotification: (calendarId) => {
       console.info(
         `[CalendarEventSync] Push通知受信: calendarId=${calendarId} → 即時同期開始`,
       );

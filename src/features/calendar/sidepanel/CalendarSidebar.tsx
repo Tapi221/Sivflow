@@ -58,7 +58,7 @@ export const CalendarSidebar = ({
   onNextMonth,
   onConnectCalendar,
   onToggleCalendar,
-}: Omit<CalendarSidebarProps, "onClose">) => {
+}: CalendarSidebarProps) => {
   const miniCalendarDays = useMemo(
     () => buildMiniCalendarDays(monthDate, selectedDate),
     [monthDate, selectedDate],
@@ -111,10 +111,10 @@ export const CalendarSidebar = ({
                 type="button"
                 className={cn(
                   "flex aspect-square w-full items-center justify-center rounded-full text-[11px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                  day.isSelected
-                    ? "bg-[#24272f] text-white"
-                    : day.isToday
-                      ? "text-[#185FA5] ring-1 ring-inset ring-[#185FA5]/40"
+                  day.isToday
+                    ? "bg-[#185FA5] text-white"
+                    : day.isSelected
+                      ? "bg-[#24272f] text-white"
                       : day.isCurrentMonth
                         ? "text-[#24272f] hover:bg-[#f0f1f4]"
                         : "text-[#c0c3cc] hover:bg-[#f5f6f8]",

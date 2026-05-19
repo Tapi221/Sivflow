@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import { auth } from "@/services/firebase";
 
@@ -60,33 +54,21 @@ const reduceEvents = (
 ): GoogleCalendarEvent[] => {
   switch (action.type) {
     case "upsert": {
-      const index =
-        state.findIndex(
-          (e) =>
-            e.id ===
-            action.event.id,
-        );
+      const index = state.findIndex((e) => e.id === action.event.id);
 
       if (index === -1) {
-        return [
-          ...state,
-          action.event,
-        ];
+        return [...state, action.event];
       }
 
       const next = [...state];
 
-      next[index] =
-        action.event;
+      next[index] = action.event;
 
       return next;
     }
 
     case "delete":
-      return state.filter(
-        (e) =>
-          e.id !== action.id,
-      );
+      return state.filter((e) => e.id !== action.id);
 
     case "clear":
       return [];
@@ -100,530 +82,322 @@ const reduceEvents = (
 // Hook
 // ─────────────────────────────────────
 
-export const useGoogleCalendarIntegration =
-  ({
-    authInstance = auth,
-  }: UseGoogleCalendarIntegrationOptions = {}) => {
-    const [
-      accessToken,
-      setAccessToken,
-    ] = useState<
-      string | null
-    >(() => readToken());
+export const useGoogleCalendarIntegration = ({
+  authInstance = auth,
+}: UseGoogleCalendarIntegrationOptions = {}) => {
+  const [accessToken, setAccessToken] = useState<string | null>(() =>
+    readToken(),
+  );
 
-    const [
-      accountEmail,
-      setAccountEmail,
-    ] = useState<
-      string | null
-    >(() => readEmail());
+  const [accountEmail, setAccountEmail] = useState<string | null>(() =>
+    readEmail(),
+  );
 
-    const [
-      selectedCalendarIds,
-      setSelectedCalendarIds,
-    ] = useState<
-      Set<string>
-    >(
-      () =>
-        new Set(
-          readCalendarIds(),
-        ),
-    );
+  const [selectedCalendarIds, setSelectedCalendarIds] = useState<Set<string>>(
+    () => new Set(readCalendarIds()),
+  );
 
-    const [
-      calendars,
-      setCalendars,
-    ] = useState<
-      GoogleCalendarListItem[]
-    >([]);
+  const [calendars, setCalendars] = useState<GoogleCalendarListItem[]>([]);
 
-    const [
-      events,
-      dispatchEvents,
-    ] = useReducer(
-      reduceEvents,
-      [],
-    );
+  const [events, dispatchEvents] = useReducer(reduceEvents, []);
 
-    const [
-      isConnecting,
-      setIsConnecting,
-    ] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
 
-    const [
-      isLoadingEvents,
-    ] = useState(false);
+  const [isLoadingEvents] = useState(false);
 
-    const [error, setError] =
-      useState<string | null>(
-        null,
-      );
+  const [error, setError] = useState<string | null>(null);
 
-    const [
-      isTokenExpired,
-    ] = useState(false);
+  const [isTokenExpired] = useState(false);
 
-    const [
-      syncState,
-      setSyncState,
-    ] = useState<GCalSyncState>(
-      "idle",
-    );
+  const [syncState, setSyncState] = useState<GCalSyncState>("idle");
 
-    const [
-      lastSyncedAt,
-      setLastSyncedAt,
-    ] = useState<Date | null>(
-      null,
-    );
+  const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
 
-    const syncEngineRef =
-      useRef<GoogleCalendarSyncEngine | null>(
-        null,
-      );
+  const syncEngineRef = useRef<GoogleCalendarSyncEngine | null>(null);
 
-    // ─────────────────────────────────────
-    // Stable refs
-    // ─────────────────────────────────────
+  // ─────────────────────────────────────
+  // Stable refs
+  // ─────────────────────────────────────
 
-    const calendarsRef =
-      useRef(calendars);
+  const calendarsRef = useRef(calendars);
 
-    const selectedCalendarIdsRef =
-      useRef(
-        selectedCalendarIds,
-      );
+  const selectedCalendarIdsRef = useRef(selectedCalendarIds);
 
-    useEffect(() => {
-      calendarsRef.current =
-        calendars;
-    }, [calendars]);
+  useEffect(() => {
+    calendarsRef.current = calendars;
+  }, [calendars]);
 
-    useEffect(() => {
-      selectedCalendarIdsRef.current =
-        selectedCalendarIds;
-    }, [selectedCalendarIds]);
+  useEffect(() => {
+    selectedCalendarIdsRef.current = selectedCalendarIds;
+  }, [selectedCalendarIds]);
 
-    // ─────────────────────────────────────
-    // Silent reconnect
-    // ─────────────────────────────────────
+  // ─────────────────────────────────────
+  // Silent reconnect
+  // ─────────────────────────────────────
 
-    const silentReconnect =
-      useCallback(
-        async (): Promise<boolean> => {
-          try {
-            const refreshToken =
-              readRefreshToken();
+  const silentReconnect = useCallback(async (): Promise<boolean> => {
+    try {
+      const refreshToken = readRefreshToken();
 
-            if (
-              !refreshToken
-            ) {
-              return false;
-            }
+      if (!refreshToken) {
+        return false;
+      }
 
-            const result =
-              await refreshCalendarAccessToken(
-                {
-                  refreshToken,
-                },
-              );
+      const result = await refreshCalendarAccessToken({
+        refreshToken,
+      });
 
-            writeToken(
-              result.accessToken,
-            );
+      writeToken(result.accessToken);
 
-            if (
-              result.refreshToken
-            ) {
-              writeRefreshToken(
-                result.refreshToken,
-              );
-            }
+      if (result.refreshToken) {
+        writeRefreshToken(result.refreshToken);
+      }
 
-            setAccessToken(
-              result.accessToken,
-            );
+      setAccessToken(result.accessToken);
 
-            return true;
-          } catch {
-            return false;
-          }
-        },
-        [],
-      );
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
 
-    // ─────────────────────────────────────
-    // Connect
-    // ─────────────────────────────────────
+  // ─────────────────────────────────────
+  // Connect
+  // ─────────────────────────────────────
 
-    const connect =
-      useCallback(async () => {
-        setIsConnecting(true);
+  const connect = useCallback(async () => {
+    setIsConnecting(true);
 
-        setError(null);
+    setError(null);
 
-        try {
-          const result =
-            await requestCalendarAccessToken(
-              authInstance,
-            );
+    try {
+      const result = await requestCalendarAccessToken(authInstance);
 
-          writeToken(
-            result.accessToken,
-          );
+      writeToken(result.accessToken);
 
-          if (
-            result.refreshToken
-          ) {
-            writeRefreshToken(
-              result.refreshToken,
-            );
-          }
+      if (result.refreshToken) {
+        writeRefreshToken(result.refreshToken);
+      }
 
-          writeEmail(
-            result.accountEmail,
-          );
+      writeEmail(result.accountEmail);
 
-          writeWasConnected(
-            true,
-          );
+      writeWasConnected(true);
 
-          setAccessToken(
-            result.accessToken,
-          );
+      setAccessToken(result.accessToken);
 
-          setAccountEmail(
-            result.accountEmail,
-          );
+      setAccountEmail(result.accountEmail);
 
-          const nextCalendars =
-            await fetchCalendarList(
-              result.accessToken,
-            );
+      const nextCalendars = await fetchCalendarList(result.accessToken);
 
-          setCalendars(
-            nextCalendars,
-          );
+      setCalendars(nextCalendars);
 
-          const restoredIds =
-            readCalendarIds();
+      const restoredIds = readCalendarIds();
 
-          const ids =
-            restoredIds.length >
-            0
-              ? restoredIds
-              : nextCalendars
-                  .filter(
-                    (
-                      c: GoogleCalendarListItem,
-                    ) =>
-                      c.selected ||
-                      c.primary,
-                  )
-                  .map(
-                    (
-                      c: GoogleCalendarListItem,
-                    ) =>
-                      c.id,
-                  );
+      const ids =
+        restoredIds.length > 0
+          ? restoredIds
+          : nextCalendars
+              .filter((c: GoogleCalendarListItem) => c.selected || c.primary)
+              .map((c: GoogleCalendarListItem) => c.id);
 
-          setSelectedCalendarIds(
-            new Set(ids),
-          );
+      setSelectedCalendarIds(new Set(ids));
 
-          writeCalendarIds(
-            ids,
-          );
-        } catch (err) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Connection failed",
-          );
-        } finally {
-          setIsConnecting(
-            false,
-          );
-        }
-      }, [authInstance]);
+      writeCalendarIds(ids);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Connection failed");
+    } finally {
+      setIsConnecting(false);
+    }
+  }, [authInstance]);
 
-    // ─────────────────────────────────────
-    // Disconnect
-    // ─────────────────────────────────────
+  // ─────────────────────────────────────
+  // Disconnect
+  // ─────────────────────────────────────
 
-    const disconnect =
-      useCallback(() => {
-        writeToken(null);
+  const disconnect = useCallback(() => {
+    writeToken(null);
 
-        writeRefreshToken(
-          null,
-        );
+    writeRefreshToken(null);
 
-        writeEmail(null);
+    writeEmail(null);
 
-        writeCalendarIds([]);
+    writeCalendarIds([]);
 
-        writeWasConnected(
-          false,
-        );
+    writeWasConnected(false);
 
-        setAccessToken(null);
+    setAccessToken(null);
 
-        setAccountEmail(
-          null,
-        );
+    setAccountEmail(null);
 
-        setCalendars([]);
+    setCalendars([]);
 
+    dispatchEvents({
+      type: "clear",
+    });
+
+    setSelectedCalendarIds(new Set());
+
+    syncEngineRef.current?.stop();
+
+    syncEngineRef.current?.clearAllSyncTokens();
+  }, []);
+
+  // ─────────────────────────────────────
+  // Toggle calendar
+  // ─────────────────────────────────────
+
+  const toggleCalendar = useCallback((calendarId: string) => {
+    setSelectedCalendarIds((prev) => {
+      const next = new Set(prev);
+
+      if (next.has(calendarId)) {
+        next.delete(calendarId);
+      } else {
+        next.add(calendarId);
+      }
+
+      writeCalendarIds(Array.from(next));
+
+      return next;
+    });
+  }, []);
+
+  // ─────────────────────────────────────
+  // Create sync engine (mount once)
+  // ─────────────────────────────────────
+
+  useEffect(() => {
+    if (syncEngineRef.current) {
+      return;
+    }
+
+    syncEngineRef.current = new GoogleCalendarSyncEngine({
+      onEventAdded: (event: GoogleCalendarEvent) => {
         dispatchEvents({
-          type: "clear",
+          type: "upsert",
+          event,
         });
+      },
 
-        setSelectedCalendarIds(
-          new Set(),
-        );
-
-        syncEngineRef.current?.stop();
-
-        syncEngineRef.current?.clearAllSyncTokens();
-      }, []);
-
-    // ─────────────────────────────────────
-    // Toggle calendar
-    // ─────────────────────────────────────
-
-    const toggleCalendar =
-      useCallback(
-        (
-          calendarId: string,
-        ) => {
-          setSelectedCalendarIds(
-            (prev) => {
-              const next =
-                new Set(prev);
-
-              if (
-                next.has(
-                  calendarId,
-                )
-              ) {
-                next.delete(
-                  calendarId,
-                );
-              } else {
-                next.add(
-                  calendarId,
-                );
-              }
-
-              writeCalendarIds(
-                Array.from(
-                  next,
-                ),
-              );
-
-              return next;
-            },
-          );
-        },
-        [],
-      );
-
-    // ─────────────────────────────────────
-    // Create sync engine (mount once)
-    // ─────────────────────────────────────
-
-    useEffect(() => {
-      if (
-        syncEngineRef.current
-      ) {
-        return;
-      }
-
-      syncEngineRef.current =
-        new GoogleCalendarSyncEngine(
-          {
-            onEventAdded:
-              (
-                event: GoogleCalendarEvent,
-              ) => {
-                dispatchEvents(
-                  {
-                    type:
-                      "upsert",
-                    event,
-                  },
-                );
-              },
-
-            onEventUpdated:
-              (
-                event: GoogleCalendarEvent,
-              ) => {
-                dispatchEvents(
-                  {
-                    type:
-                      "upsert",
-                    event,
-                  },
-                );
-              },
-
-            onEventDeleted:
-              (
-                id: string,
-              ) => {
-                dispatchEvents(
-                  {
-                    type:
-                      "delete",
-                    id,
-                  },
-                );
-              },
-
-            onSyncStateChange:
-              (
-                state: GCalSyncState,
-              ) => {
-                setSyncState(
-                  state,
-                );
-              },
-
-            onLastSyncedAtChange:
-              (
-                date: Date,
-              ) => {
-                setLastSyncedAt(
-                  date,
-                );
-              },
-
-            onError: (
-              err: Error,
-            ) => {
-              setError(
-                err.message,
-              );
-            },
-
-            getAccessToken:
-              () =>
-                readToken(),
-
-            silentReconnect,
-          },
-        );
-    }, [silentReconnect]);
-
-    // ─────────────────────────────────────
-    // Start / stop sync engine
-    // ─────────────────────────────────────
-
-    useEffect(() => {
-      if (!accessToken) {
-        syncEngineRef.current?.stop();
-
-        return;
-      }
-
-      if (
-        selectedCalendarIdsRef.current
-          .size === 0
-      ) {
-        syncEngineRef.current?.stop();
-
+      onEventUpdated: (event: GoogleCalendarEvent) => {
         dispatchEvents({
-          type: "clear",
+          type: "upsert",
+          event,
         });
+      },
 
-        return;
-      }
+      onEventDeleted: (id: string) => {
+        dispatchEvents({
+          type: "delete",
+          id,
+        });
+      },
 
-      syncEngineRef.current?.start(
-        {
-          accessToken,
+      onSyncStateChange: (state: GCalSyncState) => {
+        setSyncState(state);
+      },
 
-          selectedCalendarIds:
-            selectedCalendarIdsRef.current,
+      onLastSyncedAtChange: (date: Date) => {
+        setLastSyncedAt(date);
+      },
 
-          calendars:
-            calendarsRef.current,
-        },
-      );
+      onError: (err: Error) => {
+        setError(err.message);
+      },
 
-      return () => {
-        syncEngineRef.current?.stop();
-      };
-    }, [accessToken]);
+      getAccessToken: () => readToken(),
 
-    // ─────────────────────────────────────
-    // Auto reconnect
-    // ─────────────────────────────────────
-
-    useEffect(() => {
-      if (
-        !readWasConnected()
-      ) {
-        return;
-      }
-
-      if (accessToken) {
-        return;
-      }
-
-      void silentReconnect();
-    }, [
-      accessToken,
       silentReconnect,
-    ]);
+    });
+  }, [silentReconnect]);
 
-    // ─────────────────────────────────────
-    // Force sync
-    // ─────────────────────────────────────
+  // ─────────────────────────────────────
+  // Start / stop sync engine
+  // ─────────────────────────────────────
 
-    const forceSync =
-      useCallback(
-        async () => {
-          await syncEngineRef.current?.forceSync();
-        },
-        [],
-      );
+  useEffect(() => {
+    if (!accessToken) {
+      syncEngineRef.current?.stop();
 
-    // ─────────────────────────────────────
-    // Return
-    // ─────────────────────────────────────
+      return;
+    }
 
-    return {
-      accountEmail,
-      calendars,
-      connect,
-      disconnect,
-      error,
-      events,
-      forceSync,
+    if (selectedCalendarIdsRef.current.size === 0) {
+      syncEngineRef.current?.stop();
 
-      isConnected:
-        Boolean(accessToken),
+      dispatchEvents({
+        type: "clear",
+      });
 
-      isConnecting,
+      return;
+    }
 
-      isLoadingEvents,
+    syncEngineRef.current?.start({
+      accessToken,
 
-      isTokenExpired,
+      selectedCalendarIds: selectedCalendarIdsRef.current,
 
-      lastSyncedAt,
+      calendars: calendarsRef.current,
+    });
 
-      selectedCalendarIds,
-
-      selectedCalendarIdList:
-        Array.from(
-          selectedCalendarIds,
-        ),
-
-      syncState,
-
-      toggleCalendar,
+    return () => {
+      syncEngineRef.current?.stop();
     };
+  }, [accessToken]);
+
+  // ─────────────────────────────────────
+  // Auto reconnect
+  // ─────────────────────────────────────
+
+  useEffect(() => {
+    if (!readWasConnected()) {
+      return;
+    }
+
+    if (accessToken) {
+      return;
+    }
+
+    void silentReconnect();
+  }, [accessToken, silentReconnect]);
+
+  // ─────────────────────────────────────
+  // Force sync
+  // ─────────────────────────────────────
+
+  const forceSync = useCallback(async () => {
+    await syncEngineRef.current?.forceSync();
+  }, []);
+
+  // ─────────────────────────────────────
+  // Return
+  // ─────────────────────────────────────
+
+  return {
+    accountEmail,
+    calendars,
+    connect,
+    disconnect,
+    error,
+    events,
+    forceSync,
+
+    isConnected: Boolean(accessToken),
+
+    isConnecting,
+
+    isLoadingEvents,
+
+    isTokenExpired,
+
+    lastSyncedAt,
+
+    selectedCalendarIds,
+
+    selectedCalendarIdList: Array.from(selectedCalendarIds),
+
+    syncState,
+
+    toggleCalendar,
   };
+};

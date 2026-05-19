@@ -8,7 +8,6 @@ import type {
   GoogleCalendarListItem,
 } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
 
-// calendar.types.ts から re-export（後方互換のため）
 export type { CalendarToolbarMode, CalendarViewMode };
 
 export type TimelineBufferDays = {
@@ -53,7 +52,6 @@ export type CalendarSidebarProps = {
   onSelectDate: (date: Date) => void;
   onPreviousMonth: () => void;
   onNextMonth: () => void;
-  onClose: () => void;
   onConnectCalendar: () => void;
   onToggleCalendar: (calendarId: string) => void;
 };

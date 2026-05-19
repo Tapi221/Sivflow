@@ -9,17 +9,13 @@ import type {
 // constants
 // ─────────────────────────────────────
 
-const GOOGLE_CALENDAR_API_BASE =
-  "https://www.googleapis.com/calendar/v3";
+const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
 
 // ─────────────────────────────────────
 // core fetch
 // ─────────────────────────────────────
 
-const getJson = async <T>(
-  accessToken: string,
-  url: string,
-): Promise<T> => {
+const getJson = async <T>(accessToken: string, url: string): Promise<T> => {
   const res = await fetch(url, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -46,9 +42,10 @@ const parseGoogleDate = (raw: string): Date => {
   return new Date(Number(y), Number(m) - 1, Number(d));
 };
 
-const parseEventStart = (
-  start?: { date?: string; dateTime?: string },
-): Date | null => {
+const parseEventStart = (start?: {
+  date?: string;
+  dateTime?: string;
+}): Date | null => {
   const raw = start?.dateTime ?? start?.date;
   if (!raw) return null;
 
@@ -141,8 +138,7 @@ export const fetchEventsForCalendar = async ({
       const startsAt = parseEventStart(event.start);
       if (!startsAt) return null;
 
-      const isAllDay =
-        Boolean(event.start?.date && !event.start?.dateTime);
+      const isAllDay = Boolean(event.start?.date && !event.start?.dateTime);
 
       return {
         id: `${calendarId}:${event.id}`,

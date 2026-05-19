@@ -46,10 +46,7 @@ export class GoogleCalendarWatchManager {
    * カレンダーの Push通知チャンネルを登録する。
    * すでに有効なチャンネルがある場合はスキップ。
    */
-  async registerWatch(
-    calendarId: string,
-    accessToken: string,
-  ): Promise<void> {
+  async registerWatch(calendarId: string, accessToken: string): Promise<void> {
     if (!WEBHOOK_URL) {
       console.warn(
         "[WatchManager] VITE_GCAL_WEBHOOK_URL が未設定のため Push通知をスキップ",
@@ -182,9 +179,7 @@ export class GoogleCalendarWatchManager {
     );
 
     const timer = setTimeout(async () => {
-      console.info(
-        `[WatchManager] ${calendarId} のチャンネルを更新します`,
-      );
+      console.info(`[WatchManager] ${calendarId} のチャンネルを更新します`);
       // 古いチャンネルを停止してから新しく登録
       await this.stopWatch(calendarId, accessToken);
       await this.createWatch(calendarId, accessToken);
@@ -204,13 +199,7 @@ export class GoogleCalendarWatchManager {
   // ── Firestore 永続化
 
   private getChannelDocRef(calendarId: string) {
-    return doc(
-      db,
-      "gcal_watch_channels",
-      this.userId,
-      "calendars",
-      calendarId,
-    );
+    return doc(db, "gcal_watch_channels", this.userId, "calendars", calendarId);
   }
 
   private async loadChannelFromFirestore(
