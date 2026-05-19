@@ -1,105 +1,15 @@
-import {
-  addDays,
-  addMonths,
-  getDaysInMonth,
-  startOfDay,
-  startOfMonth,
-  startOfWeek,
-  subDays,
-  subMonths,
-} from "date-fns";
-import type { CSSProperties, UIEvent } from "react";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import type { UIEvent } from "react";
+import { useCalendarNavigation } from "./useCalendarNavigation";
+import { useCalendarLayout } from "./useCalendarLayout";
+import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
+import { useTimelineGrid } from "./useTimelineGrid";
+import { useCalendarScrollController } from "./useCalendarScrollController";
+import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
-import * as C from "@/features/calendar/calendar.constants.desktop";
-import {
-  buildTimelineColumns,
-  getTimelineAnchorColumnIndex,
-  getTimelineColumnWidth,
-} from "@/features/calendar/grid/TimelineDayView.shared";
-import type { TimelineUnitBuffer } from "@/features/calendar/grid/TimelineDayView.shared";
-import { useGoogleCalendarIntegration } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
-
 import type {
   CalendarToolbarMode,
   CalendarViewMode,
-  TimelineBufferDays,
-  TimelineGridStyle,
 } from "../calendarPane.types";
-
-// ── 純粋ユーティリティ関数群
-
-const createInitialCalendarBuffer = (): TimelineBufferDays => ({
-  before: C.INITIAL_CALENDAR_BUFFER_DAYS,
-  after: C.INITIAL_CALENDAR_BUFFER_DAYS,
-});
-
-const createInitialTimelineUnitBuffer = (
-  viewMode: CalendarViewMode,
-): TimelineUnitBuffer => {
-  if (viewMode === "month") return { before: 3, after: 8 };
-  if (viewMode === "week") return { before: 4, after: 8 };
-  return { before: 7, after: 14 };
-};
-
-const getTimelineUnitExtendCount = (viewMode: CalendarViewMode) => {
-  if (viewMode === "month") return 3;
-  if (viewMode === "week") return 4;
-  return 7;
-};
-
-const getRangeDayCount = (baseDate: Date, viewMode: CalendarViewMode) => {
-  if (viewMode === "month") return getDaysInMonth(baseDate);
-  return viewMode === "week" ? 7 : 1;
-};
-
-const getViewportDayCount = (baseDate: Date, viewMode: CalendarViewMode) => {
-  if (viewMode === "month") return 7;
-  return getRangeDayCount(baseDate, viewMode);
-};
-
-const createVisibleDays = (
-  baseDate: Date,
-  viewMode: CalendarViewMode,
-  buffer: TimelineBufferDays,
-): Date[] => {
-  const normalized = startOfDay(baseDate);
-  const startDate =
-    viewMode === "month"
-      ? startOfMonth(normalized)
-      : viewMode === "week"
-        ? startOfWeek(normalized, { weekStartsOn: C.WEEK_STARTS_ON_MONDAY })
-        : normalized;
-
-  const visibleCount = getRangeDayCount(normalized, viewMode);
-  const timelineStart = subDays(startDate, buffer.before);
-  const totalCount = buffer.before + visibleCount + buffer.after;
-
-  return Array.from({ length: totalCount }, (_, i) =>
-    addDays(timelineStart, i),
-  );
-};
-
-const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
-  if (viewMode === "month") return addMonths(current, 1);
-  if (viewMode === "week") return addDays(current, 7);
-  return addDays(current, 1);
-};
-
-const getPreviousDate = (current: Date, viewMode: CalendarViewMode) => {
-  if (viewMode === "month") return subMonths(current, 1);
-  if (viewMode === "week") return subDays(current, 7);
-  return subDays(current, 1);
-};
-
-// ── フック本体
 
 export type UseCalendarPaneReturn = {
   contentViewportRef: React.RefObject<HTMLDivElement | null>;
@@ -110,39 +20,38 @@ export type UseCalendarPaneReturn = {
   selectedDate: Date;
   monthTitleDate: Date;
   monthScrollTargetToken: number;
+
   selectedViewMode: CalendarViewMode;
   activeMode: CalendarToolbarMode;
   setActiveMode: (mode: CalendarToolbarMode) => void;
 
-  // Computed
   visibleDays: Date[];
-  timelineColumns: ReturnType<typeof buildTimelineColumns>;
+  timelineColumns: ReturnType<typeof import("../grid/TimelineDayView.shared").buildTimelineColumns>;
   timelineColumnWidth: number;
   timelineAnchorColumnIndex: number;
+
   titleDate: Date;
   monthLabel: string | null;
-  calendarDayColumnWidth: number;
-  timelineGridStyle: CSSProperties & { "--calendar-hour-row-height": string };
 
-  // Google Calendar
+  calendarDayColumnWidth: number;
+  timelineGridStyle: React.CSSProperties;
+
   googleAccountEmail: string | null;
-  googleCalendars: ReturnType<typeof useGoogleCalendarIntegration>["calendars"];
+  googleCalendars: any;
   googleCalendarError: string | null;
-  googleCalendarEvents: ReturnType<
-    typeof useGoogleCalendarIntegration
-  >["events"];
+  googleCalendarEvents: any;
   isGoogleCalendarConnected: boolean;
   isGoogleCalendarConnecting: boolean;
   selectedCalendarIds: Set<string>;
   connectGoogleCalendar: () => Promise<void>;
   toggleGoogleCalendar: (id: string) => void;
 
-  // Handlers
   handleTimelineScroll: (event: UIEvent<HTMLDivElement>) => void;
   handleSelectViewMode: (viewMode: CalendarViewMode) => void;
   handleToday: () => void;
   handlePrevious: () => void;
   handleNext: () => void;
+
   handleSidebarPreviousMonth: () => void;
   handleSidebarNextMonth: () => void;
   handleSidebarSelectDate: (date: Date) => void;
@@ -152,385 +61,125 @@ export type UseCalendarPaneReturn = {
 };
 
 export const useCalendarPane = (): UseCalendarPaneReturn => {
-  // ── DOM Refs
-  const contentViewportRef = useRef<HTMLDivElement | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const headerScrollRef = useRef<HTMLDivElement | null>(null);
+  // ─────────────────────────────
+  // navigation（唯一の状態源）
+  // ─────────────────────────────
+  const navigation = useCalendarNavigation();
 
-  const prependScrollCorrectionRef = useRef(0);
-  const isExtendingLeftRef = useRef(false);
-  const isExtendingRightRef = useRef(false);
+  // ─────────────────────────────
+  // visible range（派生）
+  // ─────────────────────────────
+  const visibleRange = useCalendarVisibleRange({
+    currentDate: navigation.currentDate,
+    selectedViewMode: navigation.selectedViewMode,
+    calendarBuffer: navigation.calendarBuffer,
+  });
 
-  // ── スクロールトリガー
-  const [scrollTriggerToken, setScrollTriggerToken] = useState(0);
-  const lastSeenScrollTriggerToken = useRef(-1);
+  // ─────────────────────────────
+  // layout（派生）
+  // ─────────────────────────────
+  const layout = useCalendarLayout({
+    viewportWidth: navigation.viewportWidth,
+    visibleDays: visibleRange.visibleDays,
+    selectedViewMode: navigation.selectedViewMode,
+    currentDate: navigation.currentDate,
+    calendarBuffer: navigation.calendarBuffer,
+  });
 
-  // ── State
-  const [currentDate, setCurrentDate] = useState(() => new Date());
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const [monthTitleDate, setMonthTitleDate] = useState(() =>
-    startOfMonth(new Date()),
-  );
-  const [monthScrollTargetToken, setMonthScrollTargetToken] = useState(0);
-  const [selectedViewMode, setSelectedViewMode] =
-    useState<CalendarViewMode>("days");
-  const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
+  // ─────────────────────────────
+  // timeline grid（派生）
+  // ─────────────────────────────
+  const timeline = useTimelineGrid({
+    currentDate: navigation.currentDate,
+    selectedViewMode: navigation.selectedViewMode,
+    timelineUnitBuffer: navigation.timelineUnitBuffer,
+  });
 
-  const [viewportWidth, setViewportWidth] = useState(0);
-  const [calendarBuffer, setCalendarBuffer] = useState(
-    createInitialCalendarBuffer,
-  );
-  const [timelineUnitBuffer, setTimelineUnitBuffer] = useState(() =>
-    createInitialTimelineUnitBuffer("days"),
-  );
+  // ─────────────────────────────
+  // scroll controller（副作用）
+  // ─────────────────────────────
+  const scroll = useCalendarScrollController({
+    activeMode: navigation.activeMode,
+    selectedViewMode: navigation.selectedViewMode,
+    visibleDays: visibleRange.visibleDays,
+    timelineColumns: timeline.timelineColumns,
+    timelineColumnWidth: timeline.timelineColumnWidth,
+    timelineAnchorColumnIndex: timeline.timelineAnchorColumnIndex,
+    calendarBuffer: navigation.calendarBuffer,
+    viewportWidth: navigation.viewportWidth,
+  });
 
-  // ── Google Calendar
-  const {
-    accountEmail: googleAccountEmail,
-    calendars: googleCalendars,
-    connect: connectGoogleCalendar,
-    error: googleCalendarError,
-    events: googleCalendarEvents,
-    isConnected: isGoogleCalendarConnected,
-    isConnecting: isGoogleCalendarConnecting,
-    loadEvents: loadGoogleCalendarEvents,
-    selectedCalendarIds,
-    selectedCalendarIdList,
-    toggleCalendar: toggleGoogleCalendar,
-    forceSync,
-  } = useGoogleCalendarIntegration();
+  // ─────────────────────────────
+  // google layer（外部統合）
+  // ─────────────────────────────
+  const google = useGoogleCalendarLayer();
 
-  // ── Computed
-  const visibleDays = useMemo(
-    () => createVisibleDays(currentDate, selectedViewMode, calendarBuffer),
-    [calendarBuffer, currentDate, selectedViewMode],
-  );
+  // Set → Array 正規化（境界のみ）
+  const selectedCalendarIdList = Array.from(google.selectedCalendarIds);
 
-  const timelineColumns = useMemo(
-    () =>
-      buildTimelineColumns(selectedViewMode, currentDate, timelineUnitBuffer),
-    [currentDate, selectedViewMode, timelineUnitBuffer],
-  );
-
-  const timelineColumnWidth = useMemo(
-    () => getTimelineColumnWidth(selectedViewMode, C.TIMELINE_DAY_COLUMN_WIDTH),
-    [selectedViewMode],
-  );
-
-  const timelineAnchorColumnIndex = useMemo(
-    () => getTimelineAnchorColumnIndex(timelineColumns, currentDate),
-    [currentDate, timelineColumns],
-  );
-
-  const titleDate = selectedViewMode === "month" ? monthTitleDate : currentDate;
-
-  const monthLabel =
-    activeMode === "timeline" && selectedViewMode === "month"
-      ? null
-      : new Intl.DateTimeFormat("en-US", {
-          month: "long",
-          year: "numeric",
-        }).format(titleDate);
-
-  const viewportDayCount = getViewportDayCount(currentDate, selectedViewMode);
-
-  const calendarDayColumnWidth =
-    viewportWidth > C.TIME_COLUMN_WIDTH
-      ? Math.max(
-          1,
-          (viewportWidth - C.TIME_COLUMN_WIDTH) / Math.max(1, viewportDayCount),
-        )
-      : C.DAY_COLUMN_MIN_WIDTH;
-
-  const gridWidth =
-    C.TIME_COLUMN_WIDTH + visibleDays.length * calendarDayColumnWidth;
-
-  const timelineGridStyle: TimelineGridStyle = {
-    "--calendar-hour-row-height": `${C.DEFAULT_HOUR_ROW_HEIGHT}px`,
-    gridTemplateColumns: `${C.TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${calendarDayColumnWidth}px)`,
-    minWidth: `${gridWidth}px`,
-  };
-
-  // ── Effects
+  // ─────────────────────────────
+  // event sync（副作用）
+  // ─────────────────────────────
   useCalendarEventSync({
-    activeMode,
-    selectedViewMode,
-    visibleDays,
-    monthTitleDate,
+    activeMode: navigation.activeMode,
+    selectedViewMode: navigation.selectedViewMode,
+    visibleDays: visibleRange.visibleDays,
+    monthTitleDate: navigation.monthTitleDate,
     googleCalendar: {
-      loadEvents: loadGoogleCalendarEvents,
-      forceSync,
-      selectedCalendarIds,
-      selectedCalendarIdList,
+      forceSync: google.forceSync,
+      selectedCalendarIds: selectedCalendarIdList,
     },
   });
 
-  useEffect(() => {
-    const viewport = contentViewportRef.current;
-    if (!viewport) return;
-
-    const update = () => setViewportWidth(viewport.clientWidth);
-    update();
-
-    const observer = new ResizeObserver(update);
-    observer.observe(viewport);
-    return () => observer.disconnect();
-  }, []);
-
-  // ── スクロール同期
-  useLayoutEffect(() => {
-    const scroller = scrollContainerRef.current;
-    if (!scroller) return;
-
-    if (prependScrollCorrectionRef.current > 0) {
-      scroller.scrollLeft += prependScrollCorrectionRef.current;
-      if (headerScrollRef.current) {
-        headerScrollRef.current.scrollLeft = scroller.scrollLeft;
-      }
-      prependScrollCorrectionRef.current = 0;
-      isExtendingLeftRef.current = false;
-      return;
-    }
-
-    if (lastSeenScrollTriggerToken.current === scrollTriggerToken) return;
-    lastSeenScrollTriggerToken.current = scrollTriggerToken;
-
-    const nextScrollLeft =
-      activeMode === "timeline"
-        ? timelineAnchorColumnIndex * timelineColumnWidth
-        : calendarBuffer.before * calendarDayColumnWidth;
-
-    scroller.scrollLeft = nextScrollLeft;
-
-    if (headerScrollRef.current) {
-      headerScrollRef.current.scrollLeft = nextScrollLeft;
-    }
-  }, [
-    activeMode,
-    calendarBuffer.before,
-    calendarDayColumnWidth,
-    scrollTriggerToken,
-    timelineAnchorColumnIndex,
-    timelineColumnWidth,
-    timelineColumns.length,
-    visibleDays.length,
-  ]);
-
-  // ── handlers
-  const resetTimelinePosition = useCallback((viewMode: CalendarViewMode) => {
-    setScrollTriggerToken((n) => n + 1);
-    setCalendarBuffer(createInitialCalendarBuffer());
-    setTimelineUnitBuffer(createInitialTimelineUnitBuffer(viewMode));
-  }, []);
-
-  const requestMonthScrollTarget = useCallback(() => {
-    setMonthScrollTargetToken((n) => n + 1);
-  }, []);
-
-  const handleTimelineScroll = useCallback(
-    (event: UIEvent<HTMLDivElement>) => {
-      const scroller = event.currentTarget;
-
-      if (headerScrollRef.current) {
-        headerScrollRef.current.scrollLeft = scroller.scrollLeft;
-      }
-
-      const distLeft = scroller.scrollLeft;
-      const distRight =
-        scroller.scrollWidth - scroller.clientWidth - scroller.scrollLeft;
-
-      if (
-        distLeft < C.TIMELINE_EDGE_THRESHOLD_PX &&
-        !isExtendingLeftRef.current
-      ) {
-        isExtendingLeftRef.current = true;
-
-        if (activeMode === "timeline") {
-          const extendCount = getTimelineUnitExtendCount(selectedViewMode);
-
-          prependScrollCorrectionRef.current =
-            extendCount * timelineColumnWidth;
-
-          setTimelineUnitBuffer((c) => ({
-            ...c,
-            before: c.before + extendCount,
-          }));
-        } else {
-          prependScrollCorrectionRef.current =
-            C.CALENDAR_EXTEND_DAYS * calendarDayColumnWidth;
-
-          setCalendarBuffer((c) => ({
-            ...c,
-            before: c.before + C.CALENDAR_EXTEND_DAYS,
-          }));
-        }
-      }
-
-      if (
-        distRight < C.TIMELINE_EDGE_THRESHOLD_PX &&
-        !isExtendingRightRef.current
-      ) {
-        isExtendingRightRef.current = true;
-
-        if (activeMode === "timeline") {
-          const extendCount = getTimelineUnitExtendCount(selectedViewMode);
-
-          setTimelineUnitBuffer((c) => ({
-            ...c,
-            after: c.after + extendCount,
-          }));
-        } else {
-          setCalendarBuffer((c) => ({
-            ...c,
-            after: c.after + C.CALENDAR_EXTEND_DAYS,
-          }));
-        }
-      }
-    },
-    [activeMode, calendarDayColumnWidth, selectedViewMode, timelineColumnWidth],
-  );
-
-  const handleSelectViewMode = useCallback(
-    (nextViewMode: CalendarViewMode) => {
-      setSelectedViewMode(nextViewMode);
-
-      if (nextViewMode === "month") {
-        setMonthTitleDate(startOfMonth(currentDate));
-        requestMonthScrollTarget();
-      }
-
-      resetTimelinePosition(nextViewMode);
-    },
-    [currentDate, requestMonthScrollTarget, resetTimelinePosition],
-  );
-
-  const handleToday = useCallback(() => {
-    const next = new Date();
-    setCurrentDate(next);
-    setSelectedDate(next);
-    setMonthTitleDate(startOfMonth(next));
-
-    if (selectedViewMode === "month") requestMonthScrollTarget();
-
-    resetTimelinePosition(selectedViewMode);
-  }, [requestMonthScrollTarget, resetTimelinePosition, selectedViewMode]);
-
-  const handlePrevious = useCallback(() => {
-    setCurrentDate((c) => {
-      const next = getPreviousDate(c, selectedViewMode);
-      setSelectedDate(next);
-      setMonthTitleDate(startOfMonth(next));
-      return next;
-    });
-
-    if (selectedViewMode === "month") requestMonthScrollTarget();
-    resetTimelinePosition(selectedViewMode);
-  }, [requestMonthScrollTarget, resetTimelinePosition, selectedViewMode]);
-
-  const handleNext = useCallback(() => {
-    setCurrentDate((c) => {
-      const next = getNextDate(c, selectedViewMode);
-      setSelectedDate(next);
-      setMonthTitleDate(startOfMonth(next));
-      return next;
-    });
-
-    if (selectedViewMode === "month") requestMonthScrollTarget();
-
-    resetTimelinePosition(selectedViewMode);
-  }, [requestMonthScrollTarget, resetTimelinePosition, selectedViewMode]);
-
-  const handleSidebarPreviousMonth = useCallback(() => {
-    setCurrentDate((c) => {
-      const next = subMonths(c, 1);
-      setSelectedDate(next);
-      setMonthTitleDate(startOfMonth(next));
-      return next;
-    });
-
-    if (selectedViewMode === "month") requestMonthScrollTarget();
-    resetTimelinePosition(selectedViewMode);
-  }, [requestMonthScrollTarget, resetTimelinePosition, selectedViewMode]);
-
-  const handleSidebarNextMonth = useCallback(() => {
-    setCurrentDate((c) => {
-      const next = addMonths(c, 1);
-      setSelectedDate(next);
-      setMonthTitleDate(startOfMonth(next));
-      return next;
-    });
-
-    if (selectedViewMode === "month") requestMonthScrollTarget();
-    resetTimelinePosition(selectedViewMode);
-  }, [requestMonthScrollTarget, resetTimelinePosition, selectedViewMode]);
-
-  const handleSidebarSelectDate = useCallback(
-    (date: Date) => {
-      setCurrentDate(date);
-      setSelectedDate(date);
-      setMonthTitleDate(startOfMonth(date));
-
-      if (selectedViewMode === "month") {
-        const isSameVisibleMonth =
-          startOfMonth(date).getTime() === startOfMonth(currentDate).getTime();
-
-        if (!isSameVisibleMonth) requestMonthScrollTarget();
-      } else {
-        resetTimelinePosition(selectedViewMode);
-      }
-    },
-    [
-      currentDate,
-      requestMonthScrollTarget,
-      resetTimelinePosition,
-      selectedViewMode,
-    ],
-  );
-
-  const handleVisibleMonthChange = useCallback((date: Date) => {
-    setMonthTitleDate(startOfMonth(date));
-  }, []);
-
+  // ─────────────────────────────
+  // handle bindings（薄い委譲）
+  // ─────────────────────────────
   return {
-    contentViewportRef,
-    scrollContainerRef,
-    headerScrollRef,
+    contentViewportRef: navigation.contentViewportRef,
+    scrollContainerRef: navigation.scrollContainerRef,
+    headerScrollRef: navigation.headerScrollRef,
 
-    currentDate,
-    selectedDate,
-    monthTitleDate,
-    monthScrollTargetToken,
-    selectedViewMode,
-    activeMode,
-    setActiveMode,
-    visibleDays,
-    timelineColumns,
-    timelineColumnWidth,
-    timelineAnchorColumnIndex,
-    titleDate,
-    monthLabel,
-    calendarDayColumnWidth,
-    timelineGridStyle,
+    currentDate: navigation.currentDate,
+    selectedDate: navigation.selectedDate,
+    monthTitleDate: navigation.monthTitleDate,
+    monthScrollTargetToken: navigation.monthScrollTargetToken,
 
-    googleAccountEmail,
-    googleCalendars,
-    googleCalendarError,
-    googleCalendarEvents,
-    isGoogleCalendarConnected,
-    isGoogleCalendarConnecting,
-    selectedCalendarIds,
-    connectGoogleCalendar,
-    toggleGoogleCalendar,
+    selectedViewMode: navigation.selectedViewMode,
+    activeMode: navigation.activeMode,
+    setActiveMode: navigation.setActiveMode,
 
-    handleTimelineScroll,
-    handleSelectViewMode,
-    handleToday,
-    handlePrevious,
-    handleNext,
-    handleSidebarPreviousMonth,
-    handleSidebarNextMonth,
-    handleSidebarSelectDate,
-    handleVisibleMonthChange,
-    setMonthTitleDate,
+    visibleDays: visibleRange.visibleDays,
+
+    timelineColumns: timeline.timelineColumns,
+    timelineColumnWidth: timeline.timelineColumnWidth,
+    timelineAnchorColumnIndex: timeline.timelineAnchorColumnIndex,
+
+    titleDate: layout.titleDate,
+    monthLabel: layout.monthLabel,
+    calendarDayColumnWidth: layout.calendarDayColumnWidth,
+    timelineGridStyle: layout.timelineGridStyle,
+
+    googleAccountEmail: google.accountEmail,
+    googleCalendars: google.calendars,
+    googleCalendarError: google.error,
+    googleCalendarEvents: google.events,
+    isGoogleCalendarConnected: google.isConnected,
+    isGoogleCalendarConnecting: google.isConnecting,
+    selectedCalendarIds: google.selectedCalendarIds,
+    connectGoogleCalendar: google.connect,
+    toggleGoogleCalendar: google.toggleCalendar,
+
+    handleTimelineScroll: scroll.handleTimelineScroll,
+    handleSelectViewMode: navigation.handleSelectViewMode,
+    handleToday: navigation.handleToday,
+    handlePrevious: navigation.handlePrevious,
+    handleNext: navigation.handleNext,
+
+    handleSidebarPreviousMonth: navigation.handleSidebarPreviousMonth,
+    handleSidebarNextMonth: navigation.handleSidebarNextMonth,
+    handleSidebarSelectDate: navigation.handleSidebarSelectDate,
+    handleVisibleMonthChange: navigation.handleVisibleMonthChange,
+
+    setMonthTitleDate: navigation.setMonthTitleDate,
   };
 };
