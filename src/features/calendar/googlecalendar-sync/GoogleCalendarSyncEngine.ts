@@ -9,7 +9,7 @@ import type {
   GCalSyncTokenMap,
   GoogleCalendarEvent,
   GoogleCalendarListItem,
-} from "./gcalSync.types";
+} from "../googlecalendar-integration/gcalSync.types";
 
 // ─────────────────────────────────────────────────────────────
 // 定数

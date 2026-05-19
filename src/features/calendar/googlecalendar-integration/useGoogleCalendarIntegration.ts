@@ -29,7 +29,7 @@ import type {
   UseGoogleCalendarIntegrationOptions,
 } from "./gcalSync.types";
 
-import { GoogleCalendarSyncEngine } from "./GoogleCalendarSyncEngine";
+import { GoogleCalendarSyncEngine } from "../googlecalendar-sync/GoogleCalendarSyncEngine";
 
 // ─────────────────────────────────────
 // Events reducer
