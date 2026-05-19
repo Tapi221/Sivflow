@@ -81,9 +81,7 @@ export const CalendarToolbar = ({
               >
                 <Icon className="h-4 w-4 shrink-0" />
 
-                <span className="whitespace-nowrap">
-                  {tab.label}
-                </span>
+                <span className="whitespace-nowrap">{tab.label}</span>
 
                 {isActive && (
                   <motion.span
@@ -131,9 +129,7 @@ export const CalendarToolbar = ({
             >
               <Icon className="h-4 w-4 shrink-0" />
 
-              <span className="whitespace-nowrap">
-                {action.label}
-              </span>
+              <span className="whitespace-nowrap">{action.label}</span>
             </button>
           );
         })}

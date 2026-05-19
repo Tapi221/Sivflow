@@ -40,20 +40,34 @@ export type AppCalendarItem = {
   checked: boolean;
 };
 
+// ─────────────────────────────────────────────────────────────
+// マルチアカウント対応の型
+// ─────────────────────────────────────────────────────────────
+
+/** サイドバーに表示するための Google アカウント情報 */
+export type GoogleAccountDisplay = {
+  accountId: string;
+  email: string | null;
+  calendars: GoogleCalendarListItem[];
+  selectedCalendarIds: Set<string>;
+  syncState: "idle" | "syncing" | "error";
+  error: string | null;
+};
+
 export type CalendarSidebarProps = {
   monthDate: Date;
   selectedDate: Date;
-  calendars: GoogleCalendarListItem[];
-  googleAccountEmail: string | null;
-  selectedCalendarIds: Set<string>;
-  calendarError: string | null;
-  isCalendarConnected: boolean;
-  isCalendarConnecting: boolean;
+
+  // マルチアカウント
+  googleAccounts: GoogleAccountDisplay[];
+  isAnyCalendarConnecting: boolean;
+
   onSelectDate: (date: Date) => void;
   onPreviousMonth: () => void;
   onNextMonth: () => void;
-  onConnectCalendar: () => void;
-  onToggleCalendar: (calendarId: string) => void;
+  onAddCalendar: () => void;
+  onRemoveAccount: (accountId: string) => void;
+  onToggleCalendar: (accountId: string, calendarId: string) => void;
 };
 
 export type CalendarWorkspaceToolbarProps = {

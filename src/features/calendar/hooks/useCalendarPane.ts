@@ -1,5 +1,4 @@
 import type { RefObject, UIEvent } from "react";
-
 import { useCalendarNavigation } from "./useCalendarNavigation";
 import { useCalendarLayout } from "./useCalendarLayout";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
@@ -7,17 +6,13 @@ import { useTimelineGrid } from "./useTimelineGrid";
 import { useCalendarScrollController } from "./useCalendarScrollController";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
-
 import type {
   CalendarToolbarMode,
   CalendarViewMode,
+  GoogleAccountDisplay,
   TimelineGridStyle,
 } from "../calendarPane.types";
-import type {
-  GoogleCalendarEvent,
-  GoogleCalendarListItem,
-} from "../googlecalendar-integration/gcalSync.types";
-
+import type { GoogleCalendarEvent } from "../googlecalendar-integration/gcalSync.types";
 import type { buildTimelineColumns } from "../grid/TimelineDayView.shared";
 
 export type UseCalendarPaneReturn = {
@@ -45,18 +40,16 @@ export type UseCalendarPaneReturn = {
   monthLabel: string | null;
 
   calendarDayColumnWidth: number;
-
   timelineGridStyle: TimelineGridStyle;
 
-  googleAccountEmail: string | null;
-  googleCalendars: GoogleCalendarListItem[];
-  googleCalendarError: string | null;
+  // マルチアカウント
+  googleAccounts: GoogleAccountDisplay[];
   googleCalendarEvents: GoogleCalendarEvent[];
-  isGoogleCalendarConnected: boolean;
-  isGoogleCalendarConnecting: boolean;
-  selectedCalendarIds: Set<string>;
-  connectGoogleCalendar: () => Promise<void>;
-  toggleGoogleCalendar: (id: string) => void;
+  isAnyCalendarConnecting: boolean;
+
+  addGoogleCalendar: () => Promise<void>;
+  removeGoogleAccount: (accountId: string) => void;
+  toggleGoogleCalendar: (accountId: string, calendarId: string) => void;
 
   handleTimelineScroll: (event: UIEvent<HTMLDivElement>) => void;
   handleSelectViewMode: (viewMode: CalendarViewMode) => void;
@@ -68,7 +61,6 @@ export type UseCalendarPaneReturn = {
   handleSidebarNextMonth: () => void;
   handleSidebarSelectDate: (date: Date) => void;
   handleVisibleMonthChange: (date: Date) => void;
-
   handleMonthCellSelectDate: (date: Date) => void;
 
   setMonthTitleDate: (date: Date) => void;
@@ -125,6 +117,18 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     },
   });
 
+  // GoogleAccountEntry → GoogleAccountDisplay に変換
+  const googleAccounts: GoogleAccountDisplay[] = google.googleAccounts.map(
+    (account) => ({
+      accountId: account.id,
+      email: account.email,
+      calendars: account.calendars,
+      selectedCalendarIds: account.selectedCalendarIds,
+      syncState: account.syncState,
+      error: account.error,
+    }),
+  );
+
   return {
     contentViewportRef: navigation.contentViewportRef,
     scrollContainerRef: scroll.scrollContainerRef,
@@ -152,14 +156,12 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
     timelineGridStyle: layout.timelineGridStyle,
 
-    googleAccountEmail: google.accountEmail,
-    googleCalendars: google.calendars,
-    googleCalendarError: google.error,
+    googleAccounts,
     googleCalendarEvents: google.events,
-    isGoogleCalendarConnected: google.isConnected,
-    isGoogleCalendarConnecting: google.isConnecting,
-    selectedCalendarIds: google.selectedCalendarIds,
-    connectGoogleCalendar: google.connect,
+    isAnyCalendarConnecting: google.isAnyConnecting,
+
+    addGoogleCalendar: google.addAccount,
+    removeGoogleAccount: google.removeAccount,
     toggleGoogleCalendar: google.toggleCalendar,
 
     handleTimelineScroll: scroll.handleTimelineScroll,
@@ -172,7 +174,6 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     handleSidebarNextMonth: navigation.handleSidebarNextMonth,
     handleSidebarSelectDate: navigation.handleSidebarSelectDate,
     handleVisibleMonthChange: navigation.handleVisibleMonthChange,
-
     handleMonthCellSelectDate: navigation.handleMonthCellSelectDate,
 
     setMonthTitleDate: navigation.setMonthTitleDate,

@@ -45,8 +45,7 @@ export const useCalendarNavigation = () => {
   const [selectedViewMode, setSelectedViewMode] =
     useState<CalendarViewMode>("days");
 
-  const [activeMode, setActiveMode] =
-    useState<CalendarToolbarMode>("timeline");
+  const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
 
   const [calendarBuffer, setCalendarBuffer] = useState(
     createInitialCalendarBuffer,

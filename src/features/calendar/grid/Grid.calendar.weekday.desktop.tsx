@@ -22,8 +22,7 @@ type CalendarEventPositionStyle = React.CSSProperties & {
 const HOURS = Array.from({ length: 24 }, (_, index) => index);
 const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
 
-const createHourLabel = (hour: number) =>
-  `${String(hour).padStart(2, "0")}:00`;
+const createHourLabel = (hour: number) => `${String(hour).padStart(2, "0")}:00`;
 
 const calculateEventPositionStyle = (
   event: GoogleCalendarEvent,
