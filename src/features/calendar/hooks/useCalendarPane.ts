@@ -1,4 +1,5 @@
-import type { UIEvent } from "react";
+import type { RefObject, UIEvent } from "react";
+
 import { useCalendarNavigation } from "./useCalendarNavigation";
 import { useCalendarLayout } from "./useCalendarLayout";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
@@ -6,20 +7,24 @@ import { useTimelineGrid } from "./useTimelineGrid";
 import { useCalendarScrollController } from "./useCalendarScrollController";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
+
 import type {
   CalendarToolbarMode,
   CalendarViewMode,
+  TimelineGridStyle, 
 } from "../calendarPane.types";
+
 import type {
   GoogleCalendarEvent,
   GoogleCalendarListItem,
 } from "../googlecalendar-integration/useGoogleCalendarIntegration";
+
 import type { buildTimelineColumns } from "../grid/TimelineDayView.shared";
 
 export type UseCalendarPaneReturn = {
-  contentViewportRef: React.RefObject<HTMLDivElement | null>;
-  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
-  headerScrollRef: React.RefObject<HTMLDivElement | null>;
+  contentViewportRef: RefObject<HTMLDivElement | null>;
+  scrollContainerRef: RefObject<HTMLDivElement | null>;
+  headerScrollRef: RefObject<HTMLDivElement | null>;
 
   currentDate: Date;
   selectedDate: Date;
@@ -41,7 +46,8 @@ export type UseCalendarPaneReturn = {
   monthLabel: string | null;
 
   calendarDayColumnWidth: number;
-  timelineGridStyle: React.CSSProperties;
+
+  timelineGridStyle: TimelineGridStyle; // ← 変更
 
   googleAccountEmail: string | null;
   googleCalendars: GoogleCalendarListItem[];
@@ -120,31 +126,24 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
 
   return {
     contentViewportRef: navigation.contentViewportRef,
-
     scrollContainerRef: scroll.scrollContainerRef,
     headerScrollRef: scroll.headerScrollRef,
-
     currentDate: navigation.currentDate,
     selectedDate: navigation.selectedDate,
     monthTitleDate: navigation.monthTitleDate,
     monthScrollTargetToken: navigation.monthScrollTargetToken,
-
     selectedViewMode: navigation.selectedViewMode,
     activeMode: navigation.activeMode,
     setActiveMode: navigation.setActiveMode,
-
     visibleDays: visibleRange.visibleDays,
     displayDays: visibleRange.displayDays,
-
     timelineColumns: timeline.timelineColumns,
     timelineColumnWidth: timeline.timelineColumnWidth,
     timelineAnchorColumnIndex: timeline.timelineAnchorColumnIndex,
-
     titleDate: layout.titleDate,
     monthLabel: layout.monthLabel,
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
     timelineGridStyle: layout.timelineGridStyle,
-
     googleAccountEmail: google.accountEmail,
     googleCalendars: google.calendars,
     googleCalendarError: google.error,
@@ -152,21 +151,17 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     isGoogleCalendarConnected: google.isConnected,
     isGoogleCalendarConnecting: google.isConnecting,
     selectedCalendarIds: google.selectedCalendarIds,
-
     connectGoogleCalendar: google.connect,
     toggleGoogleCalendar: google.toggleCalendar,
-
     handleTimelineScroll: scroll.handleTimelineScroll,
     handleSelectViewMode: navigation.handleSelectViewMode,
     handleToday: navigation.handleToday,
     handlePrevious: navigation.handlePrevious,
     handleNext: navigation.handleNext,
-
     handleSidebarPreviousMonth: navigation.handleSidebarPreviousMonth,
     handleSidebarNextMonth: navigation.handleSidebarNextMonth,
     handleSidebarSelectDate: navigation.handleSidebarSelectDate,
     handleVisibleMonthChange: navigation.handleVisibleMonthChange,
-
     setMonthTitleDate: navigation.setMonthTitleDate,
   };
 };

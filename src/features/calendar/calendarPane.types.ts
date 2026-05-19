@@ -6,7 +6,7 @@ import type {
 import type {
   GoogleCalendarEvent,
   GoogleCalendarListItem,
-} from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
+} from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 
 export type { CalendarToolbarMode, CalendarViewMode };
 
@@ -73,4 +73,5 @@ export type CalendarWeekDayGridProps = {
   calendarDayColumnWidth: number;
   timelineGridStyle: TimelineGridStyle;
   onScroll: (event: UIEvent<HTMLDivElement>) => void;
+  selectedDate: Date;
 };

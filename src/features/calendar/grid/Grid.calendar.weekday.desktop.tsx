@@ -1,15 +1,13 @@
 import React from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
-
 import { cn } from "@/lib/utils";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import {
   computeEventLayout,
   toLayoutEvent,
 } from "@/features/calendar/eventchip/EventChip.layout.weekday.desktop";
-
-import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
+import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import type { CalendarWeekDayGridProps } from "@/features/calendar/calendarPane.types";
 
 import { CalendarEventChipWeekday } from "../eventchip/EventChip.weekday";
@@ -20,10 +18,10 @@ type CalendarEventPositionStyle = React.CSSProperties & {
 };
 
 const HOURS = Array.from({ length: 24 }, (_, index) => index);
-
 const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
 
-const createHourLabel = (hour: number) => `${String(hour).padStart(2, "0")}:00`;
+const createHourLabel = (hour: number) =>
+  `${String(hour).padStart(2, "0")}:00`;
 
 const calculateEventPositionStyle = (
   event: GoogleCalendarEvent,
@@ -47,7 +45,10 @@ export const CalendarWeekDayGrid = ({
   calendarDayColumnWidth,
   timelineGridStyle,
   onScroll,
+  selectedDate,
 }: CalendarWeekDayGridProps) => {
+  const today = new Date();
+
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
       {/* ── 日付ヘッダー ── */}
@@ -70,7 +71,9 @@ export const CalendarWeekDayGrid = ({
             }}
           >
             {visibleDays.map((day: Date) => {
-              const isDayToday = isSameDay(day, new Date());
+              const isDayToday = isSameDay(day, today);
+              const isDaySelected =
+                !!selectedDate && isSameDay(day, selectedDate);
 
               return (
                 <div
@@ -78,16 +81,28 @@ export const CalendarWeekDayGrid = ({
                   className={cn(
                     "flex h-10 shrink-0 flex-col items-center justify-center border-r border-[#eef0f3] last:border-r-0",
                     isDayToday && "bg-[#f0f6ff]",
+                    !isDayToday && isDaySelected && "bg-[#f4f5f7]",
                   )}
                 >
-                  <span className="text-[11px] font-medium leading-none text-[#8f929c]">
+                  <span
+                    className={cn(
+                      "text-[11px] font-medium leading-none",
+                      isDayToday || isDaySelected
+                        ? "text-[#24231f]"
+                        : "text-[#8f929c]",
+                    )}
+                  >
                     {format(day, "E", { locale: ja })}
                   </span>
 
                   <span
                     className={cn(
                       "mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-[13px] font-semibold tabular-nums",
-                      isDayToday ? "bg-[#185FA5] text-white" : "text-[#24231f]",
+                      isDayToday
+                        ? "bg-[#185FA5] text-white shadow-[0_2px_8px_rgba(24,95,165,0.35)]"
+                        : isDaySelected
+                          ? "bg-[#2d3039] text-white"
+                          : "text-[#24231f]",
                     )}
                   >
                     {format(day, "d")}
