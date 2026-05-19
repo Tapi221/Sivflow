@@ -171,7 +171,9 @@ const SidebarNavLink = ({
     >
       <span className="app-sidebar__nav-icon-slot">{item.icon}</span>
       <span className="app-sidebar__nav-label">{item.label}</span>
-      {trailing ? <span className="app-sidebar__nav-trailing">{trailing}</span> : null}
+      {trailing ? (
+        <span className="app-sidebar__nav-trailing">{trailing}</span>
+      ) : null}
     </button>
   );
 };

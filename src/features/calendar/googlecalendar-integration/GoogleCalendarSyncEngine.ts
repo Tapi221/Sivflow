@@ -109,9 +109,7 @@ const parseEventStart = (
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-const parseEventEnd = (
-  end: GCalRawIncrementalEvent["end"],
-): Date | null => {
+const parseEventEnd = (end: GCalRawIncrementalEvent["end"]): Date | null => {
   const rawValue = end?.dateTime ?? end?.date;
 
   if (!rawValue) return null;
@@ -376,15 +374,9 @@ export class GoogleCalendarSyncEngine {
   ): Promise<void> {
     const now = new Date();
 
-    const timeMin = subDays(
-      now,
-      this.options.fullSyncPastDays,
-    ).toISOString();
+    const timeMin = subDays(now, this.options.fullSyncPastDays).toISOString();
 
-    const timeMax = addDays(
-      now,
-      this.options.fullSyncFutureDays,
-    ).toISOString();
+    const timeMax = addDays(now, this.options.fullSyncFutureDays).toISOString();
 
     const params = new URLSearchParams({
       singleEvents: "true",
@@ -404,10 +396,7 @@ export class GoogleCalendarSyncEngine {
 
       const url = `${GCAL_API_BASE}/calendars/${encodedId}/events?${params.toString()}`;
 
-      const response = await gcalGet<GCalEventsListResponse>(
-        accessToken,
-        url,
-      );
+      const response = await gcalGet<GCalEventsListResponse>(accessToken, url);
 
       allEvents.push(...(response.items ?? []));
 
