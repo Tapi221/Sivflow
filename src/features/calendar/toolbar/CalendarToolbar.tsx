@@ -9,35 +9,17 @@ import {
   TimelineToolbarIcon,
   SortToolbarIcon,
   FieldsToolbarIcon,
-  MonthViewIcon,
-  WeekViewIcon,
-  DayViewIcon,
   TaskIcon,
   SearchIcon,
   FilterIcon,
 } from "../ui/calendar.icons";
 
-/**
- * Tab icon mapping
- */
 const TAB_ICON_MAP = {
   calendar: CalendarIcon,
   timeline: TimelineToolbarIcon,
   task: TaskIcon,
 } as const;
 
-/**
- * View icon mapping
- */
-const VIEW_ICON_MAP = {
-  month: MonthViewIcon,
-  week: WeekViewIcon,
-  days: DayViewIcon,
-} as const;
-
-/**
- * Action icon mapping（修正ポイント）
- */
 const ACTION_ICON_MAP = {
   search: SearchIcon,
   filter: FilterIcon,
@@ -46,21 +28,17 @@ const ACTION_ICON_MAP = {
 } as const;
 
 const TAB_INDICATOR_ID = "calendar-tab-indicator";
-const VIEW_INDICATOR_ID = "calendar-view-indicator";
 
 export const CalendarToolbar = ({
   activeMode,
-  viewMode,
   onSelectCalendar,
   onSelectTimeline,
   onSelectTask,
-  onSelectViewMode,
 }: CalendarWorkspaceToolbarProps) => {
-  const { tabs, viewOptions, actions } = useCalendarToolbar({
+  const { tabs, actions } = useCalendarToolbar({
     onSelectCalendar,
     onSelectTimeline,
     onSelectTask,
-    onSelectViewMode,
   });
 
   return (
@@ -78,6 +56,7 @@ export const CalendarToolbar = ({
             return (
               <button
                 key={tab.value}
+                type="button"
                 onClick={tab.onClick}
                 className={cn(
                   "relative flex h-7 items-center gap-[6px] rounded px-2 w-fit",
@@ -99,39 +78,6 @@ export const CalendarToolbar = ({
             );
           })}
         </div>
-
-        {/* VIEW MODE */}
-        {onSelectViewMode && viewMode && activeMode !== "task" && (
-          <div className="relative flex h-7 items-center gap-1 ml-3">
-            {viewOptions.map((option) => {
-              const Icon = VIEW_ICON_MAP[option.value];
-              const isActive = viewMode === option.value;
-
-              return (
-                <button
-                  key={option.value}
-                  onClick={option.onClick}
-                  className={cn(
-                    "relative flex h-7 items-center gap-[6px] rounded px-2 w-fit",
-                    "text-[12px] font-medium leading-none transition-colors",
-                    isActive ? "text-[#25272d]" : "text-[#8f929c]",
-                    "hover:bg-[#f6f7f9]"
-                  )}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="whitespace-nowrap">{option.label}</span>
-
-                  {isActive && (
-                    <motion.span
-                      layoutId={VIEW_INDICATOR_ID}
-                      className="absolute bottom-[-2px] left-0 right-0 h-[2px] bg-[#74798b] rounded-full"
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {/* RIGHT ACTIONS */}
@@ -155,7 +101,4 @@ export const CalendarToolbar = ({
   );
 };
 
-/**
- * 互換用エイリアス（これでエラー潰す）
- */
 export const CalendarWorkspaceToolbar = CalendarToolbar;
