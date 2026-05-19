@@ -309,10 +309,7 @@ export const FilterIcon = ({ className, ...props }: IconProps) => (
 );
 
 //Vuesax-Icons
-export const SearchIcon = ({
-  className,
-  ...props
-}: IconProps) => (
+export const SearchIcon = ({ className, ...props }: IconProps) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"

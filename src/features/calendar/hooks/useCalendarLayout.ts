@@ -23,23 +23,18 @@ export const useCalendarLayout = ({
     viewportWidth > C.TIME_COLUMN_WIDTH
       ? Math.max(
           1,
-          (viewportWidth - C.TIME_COLUMN_WIDTH) /
-            Math.max(1, viewportDayCount),
+          (viewportWidth - C.TIME_COLUMN_WIDTH) / Math.max(1, viewportDayCount),
         )
       : C.DAY_COLUMN_MIN_WIDTH;
 
   const renderDayCount =
-    selectedViewMode === "month"
-      ? displayDays.length
-      : visibleDays.length;
+    selectedViewMode === "month" ? displayDays.length : visibleDays.length;
 
   const gridWidth =
     C.TIME_COLUMN_WIDTH + renderDayCount * calendarDayColumnWidth;
 
   const titleDate =
-    selectedViewMode === "month"
-      ? new Date(currentDate)
-      : currentDate;
+    selectedViewMode === "month" ? new Date(currentDate) : currentDate;
 
   const monthLabel = null;
 

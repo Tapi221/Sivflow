@@ -1,13 +1,10 @@
-import {
-  addDays,
-  addMonths,
-  startOfMonth,
-  subDays,
-  subMonths,
-} from "date-fns";
+import { addDays, addMonths, startOfMonth, subDays, subMonths } from "date-fns";
 import { useCallback, useRef, useState } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import type { CalendarToolbarMode, CalendarViewMode } from "../calendarPane.types";
+import type {
+  CalendarToolbarMode,
+  CalendarViewMode,
+} from "../calendarPane.types";
 
 const createInitialCalendarBuffer = () => ({
   before: C.INITIAL_CALENDAR_BUFFER_DAYS,
@@ -48,10 +45,11 @@ export const useCalendarNavigation = () => {
   const [selectedViewMode, setSelectedViewMode] =
     useState<CalendarViewMode>("days");
 
-  const [activeMode, setActiveMode] =
-    useState<CalendarToolbarMode>("timeline");
+  const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
 
-  const [calendarBuffer, setCalendarBuffer] = useState(createInitialCalendarBuffer);
+  const [calendarBuffer, setCalendarBuffer] = useState(
+    createInitialCalendarBuffer,
+  );
   const [timelineUnitBuffer, setTimelineUnitBuffer] = useState(() =>
     createInitialTimelineUnitBuffer("days"),
   );
