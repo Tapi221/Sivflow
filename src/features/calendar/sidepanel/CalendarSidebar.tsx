@@ -8,7 +8,7 @@ import {
 } from "date-fns";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import { CheckCircle, ChevronDown, ChevronUp, Circle } from "@/ui/icons";
+import { CheckCircle, ChevronLeft, ChevronRight, Circle } from "@/ui/icons";
 import { PlusIcon, CalendarIcon } from "../ui/calendar.icons";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
@@ -17,6 +17,48 @@ import type {
   AppCalendarItem,
   CalendarSidebarProps,
 } from "../calendarPane.types";
+
+// ────────────────────────────────────────
+// ChevronLeft / ChevronRight を ui/icons から
+// インポートしていない場合はインライン SVG で代替
+// ────────────────────────────────────────
+const IconChevronLeft = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <path
+      d="M10 12L6 8L10 4"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const IconChevronRight = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <path
+      d="M6 4L10 8L6 12"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+// ────────────────────────────────────────
+// Mini calendar helpers
+// ────────────────────────────────────────
 
 const buildMiniCalendarDays = (
   monthDate: Date,
@@ -42,6 +84,10 @@ const APP_CALENDAR_ITEMS: AppCalendarItem[] = [
   { id: "app-calendar-test", label: "Test", color: "#ff3b30", checked: true },
 ];
 
+// ────────────────────────────────────────
+// Component
+// ────────────────────────────────────────
+
 export const CalendarSidebar = ({
   monthDate,
   selectedDate,
@@ -61,117 +107,158 @@ export const CalendarSidebar = ({
     () => buildMiniCalendarDays(monthDate, selectedDate),
     [monthDate, selectedDate],
   );
+
   const googleCalendarSectionLabel = googleAccountEmail ?? "Google Calendar";
   const [googleCalendarOpen, setGoogleCalendarOpen] = useState(true);
 
   return (
-    <aside className="flex w-[220px] shrink-0 flex-col gap-6 overflow-y-auto bg-[#f7f8fa] px-3 py-4 text-[#24272f]">
-      <section className="flex w-full flex-col gap-3">
-        <div className="flex w-full items-center justify-between overflow-hidden px-2">
-          <h2 className="truncate text-[16px] font-semibold leading-normal text-[#24272f]">
+    <aside className="flex w-[220px] shrink-0 flex-col gap-5 overflow-y-auto bg-[#f7f8fa] px-3 py-5 text-[#24272f]">
+
+      {/* ── Mini Calendar ─────────────────────── */}
+      <section className="flex w-full flex-col gap-2">
+
+        {/* Month label + navigation */}
+        <div className="flex w-full items-center justify-between px-1">
+          <span className="text-[12px] font-semibold tracking-wide text-[#3d4049]">
             {format(monthDate, "MMMM yyyy")}
-          </h2>
-          <div className="flex shrink-0 items-center gap-2">
+          </span>
+
+          <div className="flex items-center gap-0.5">
             <button
               type="button"
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-[#667085] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] transition-colors hover:bg-[#e8eaee] hover:text-[#3d4049] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               onClick={onPreviousMonth}
               aria-label="Previous month"
             >
-              <ChevronUp className="h-4 w-4" />
+              <IconChevronLeft className="h-3.5 w-3.5" />
             </button>
             <button
               type="button"
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-[#667085] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] transition-colors hover:bg-[#e8eaee] hover:text-[#3d4049] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               onClick={onNextMonth}
               aria-label="Next month"
             >
-              <ChevronDown className="h-4 w-4" />
+              <IconChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
 
-        <div className="flex w-full flex-col gap-1 rounded-xl border border-[#e8eaf0] bg-white px-2 py-2.5">
-          <div className="grid grid-cols-7">
-            {T.MINI_CALENDAR_WEEKDAYS.map((weekday, index) => (
-              <span
-                key={`${weekday}-${index}`}
-                className="flex h-5 items-center justify-center text-[10px] font-medium uppercase tracking-wide text-[#a0a4b0]"
-              >
-                {weekday}
-              </span>
-            ))}
-          </div>
-          <div className="grid grid-cols-7">
-            {miniCalendarDays.map((day) => (
+        {/* Weekday labels */}
+        <div className="grid grid-cols-7 px-0.5">
+          {T.MINI_CALENDAR_WEEKDAYS.map((weekday, index) => (
+            <span
+              key={`${weekday}-${index}`}
+              className="flex h-6 items-center justify-center text-[10px] font-medium uppercase tracking-wider text-[#b0b5bf]"
+            >
+              {weekday}
+            </span>
+          ))}
+        </div>
+
+        {/* Day cells — no border wrapper, floats on sidebar bg */}
+        <div className="grid grid-cols-7 px-0.5">
+          {miniCalendarDays.map((day) => {
+            const isActive = day.isToday || day.isSelected;
+
+            return (
               <button
                 key={day.date.toISOString()}
                 type="button"
-                className={cn(
-                  "flex aspect-square w-full items-center justify-center rounded-full text-[11px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                  day.isToday
-                    ? "bg-[#185FA5] text-white"
-                    : day.isSelected
-                      ? "bg-[#24272f] text-white"
-                      : day.isCurrentMonth
-                        ? "text-[#24272f] hover:bg-[#f0f1f4]"
-                        : "text-[#c0c3cc] hover:bg-[#f5f6f8]",
-                )}
-                onClick={() => onSelectDate(day.date)}
                 aria-pressed={day.isSelected}
+                onClick={() => onSelectDate(day.date)}
+                className={cn(
+                  // base layout
+                  "flex aspect-square w-full items-center justify-center rounded-full",
+                  "text-[11px] font-medium leading-none",
+                  "transition-colors duration-100",
+                  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                  // today → blue filled
+                  day.isToday &&
+                    "bg-[#185FA5] text-white shadow-[0_2px_8px_rgba(24,95,165,0.35)]",
+                  // selected (not today) → charcoal filled
+                  day.isSelected &&
+                    !day.isToday &&
+                    "bg-[#2d3039] text-white",
+                  // default current month
+                  !isActive &&
+                    day.isCurrentMonth &&
+                    "text-[#2d3039] hover:bg-[#e8eaee]",
+                  // out-of-month
+                  !isActive &&
+                    !day.isCurrentMonth &&
+                    "text-[#c5c8d0] hover:bg-[#eceef1]",
+                )}
               >
                 {day.dayNumber}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <nav className="flex w-full flex-col gap-1" aria-label="Calendar lists">
-        <div className="flex flex-col">
-          <div className="flex h-7 w-full items-center gap-1.5 overflow-hidden px-2 text-[13px] font-medium leading-normal text-[#24272f]">
-            <CalendarIcon className="h-4 w-4 shrink-0 text-black" />
-            <span className="truncate">My calendars</span>
-          </div>
-
-          {APP_CALENDAR_ITEMS.map((calendar) => {
-            const Icon = calendar.checked ? CheckCircle : Circle;
-            return (
-              <button
-                key={calendar.id}
-                type="button"
-                className="flex h-7 w-full items-center gap-1.5 overflow-hidden rounded-md px-2 text-left text-[13px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <span className="flex shrink-0 items-center pl-3.5">
-                  <Icon
-                    className="h-4 w-4 shrink-0"
-                    style={{ color: calendar.color }}
-                  />
-                </span>
-                <span className="truncate">{calendar.label}</span>
               </button>
             );
           })}
         </div>
+      </section>
 
-        {isCalendarConnected ? (
-          <div className="flex flex-col">
+      {/* ── Divider ───────────────────────────── */}
+      <div className="h-px w-full bg-[#e4e6eb]" />
+
+      {/* ── Calendar lists ────────────────────── */}
+      <nav className="flex w-full flex-col gap-0.5" aria-label="Calendar lists">
+
+        {/* My Calendars header */}
+        <div className="mb-1 flex h-6 items-center gap-1.5 px-2">
+          <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-[#74798b]" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9aa0aa]">
+            My Calendars
+          </span>
+        </div>
+
+        {APP_CALENDAR_ITEMS.map((calendar) => {
+          const Icon = calendar.checked ? CheckCircle : Circle;
+          return (
+            <button
+              key={calendar.id}
+              type="button"
+              className="group flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 text-left transition-colors hover:bg-[#e8eaee] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              <span className="flex shrink-0 items-center">
+                <Icon
+                  className="h-3.5 w-3.5 shrink-0"
+                  style={{ color: calendar.color }}
+                />
+              </span>
+              <span className="truncate text-[12px] font-medium text-[#3d4049]">
+                {calendar.label}
+              </span>
+            </button>
+          );
+        })}
+
+        {/* Google Calendar section */}
+        {isCalendarConnected && (
+          <>
+            <div className="mt-3 mb-1 flex h-6 items-center gap-1.5 px-2">
+              <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-[#74798b]" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9aa0aa]">
+                Google
+              </span>
+            </div>
+
             <button
               type="button"
-              className="flex h-7 w-full items-center gap-1.5 overflow-hidden rounded-md px-2 text-left text-[13px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="group flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 text-left transition-colors hover:bg-[#e8eaee] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               onClick={() => setGoogleCalendarOpen((prev) => !prev)}
               aria-expanded={googleCalendarOpen}
             >
-              <span className="flex shrink-0 items-center">
-                <ChevronDown
-                  className={cn(
-                    "h-3.5 w-3.5 text-[#667085] transition-transform duration-200",
-                    !googleCalendarOpen && "-rotate-90",
-                  )}
-                />
-                <CalendarIcon className="h-4 w-4 shrink-0 text-black" />
+              {/* Animated chevron */}
+              <span
+                className={cn(
+                  "flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform duration-200",
+                  !googleCalendarOpen && "-rotate-90",
+                )}
+              >
+                <IconChevronRight className="h-3 w-3 text-[#9aa0aa]" />
               </span>
-              <span className="truncate">{googleCalendarSectionLabel}</span>
+              <span className="truncate text-[12px] font-medium text-[#3d4049]">
+                {googleCalendarSectionLabel}
+              </span>
             </button>
 
             {googleCalendarOpen &&
@@ -182,43 +269,47 @@ export const CalendarSidebar = ({
                   <button
                     key={calendar.id}
                     type="button"
-                    className="flex h-7 w-full items-center gap-1.5 overflow-hidden rounded-md px-2 text-left text-[13px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 pl-5 text-left transition-colors hover:bg-[#e8eaee] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     onClick={() => onToggleCalendar(calendar.id)}
                   >
-                    <span className="flex shrink-0 items-center pl-3.5">
-                      <Icon
-                        className="h-4 w-4 shrink-0"
-                        style={{ color: calendar.backgroundColor }}
-                      />
+                    <Icon
+                      className="h-3.5 w-3.5 shrink-0"
+                      style={{ color: calendar.backgroundColor }}
+                    />
+                    <span className="truncate text-[12px] font-medium text-[#3d4049]">
+                      {calendar.summary}
                     </span>
-                    <span className="truncate">{calendar.summary}</span>
                   </button>
                 );
               })}
-          </div>
-        ) : null}
+          </>
+        )}
 
-        <button
-          type="button"
-          className="flex h-7 w-full items-center gap-1.5 overflow-hidden rounded-md px-2 text-left text-[13px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          onClick={onConnectCalendar}
-          disabled={isCalendarConnecting}
-        >
-          <PlusIcon className="h-5 w-5 shrink-0 text-black" />
-          <span className="truncate">
-            {isCalendarConnected
-              ? "Reconnect Google Calendar"
-              : isCalendarConnecting
-                ? "Connecting..."
-                : "Add Google Calendar"}
-          </span>
-        </button>
+        {/* ── Add / Reconnect button ─── */}
+        <div className="mt-2">
+          <button
+            type="button"
+            className="flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 text-left transition-colors hover:bg-[#e8eaee] disabled:cursor-wait disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            onClick={onConnectCalendar}
+            disabled={isCalendarConnecting}
+          >
+            <PlusIcon className="h-4 w-4 shrink-0 text-[#74798b]" />
+            <span className="truncate text-[12px] font-medium text-[#74798b]">
+              {isCalendarConnected
+                ? "Reconnect Google Calendar"
+                : isCalendarConnecting
+                  ? "Connecting…"
+                  : "Add Google Calendar"}
+            </span>
+          </button>
+        </div>
 
-        {calendarError ? (
-          <p className="px-2 pt-1 text-[12px] leading-normal text-[#b42318]">
+        {/* Error */}
+        {calendarError && (
+          <p className="mt-1 px-2 text-[11px] leading-relaxed text-[#b42318]">
             {calendarError}
           </p>
-        ) : null}
+        )}
       </nav>
     </aside>
   );
