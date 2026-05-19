@@ -156,6 +156,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
               timelineGridStyle={timelineGridStyle}
               onScroll={handleTimelineScroll}
               selectedDate={selectedDate}
+              onSelectDate={handleSidebarSelectDate}
             />
           )}
         </div>
