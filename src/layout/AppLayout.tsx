@@ -2,7 +2,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 
 import { SettingDialog } from "@/features/settings/SettingDialog";
-import { useWorkspaceTabsRouteSync } from "@/features/workspace-tabs/hooks/useTabsRouteSync";
+import { useWorkspaceTabsRouteSync } from "@/features/tab/hooks/useTabsRouteSync";
 import { AppSidebar } from "../features/sidebar/Sidebar.desktop";
 import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
@@ -151,10 +151,7 @@ export const AppLayout = () => {
         ) : null}
       </div>
 
-      <SettingDialog
-        open={isSettingsOpen}
-        onOpenChange={setIsSettingsOpen}
-      />
+      <SettingDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
     </>
   );
 };

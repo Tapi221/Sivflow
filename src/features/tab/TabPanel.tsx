@@ -12,12 +12,12 @@ import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
 import { cn } from "@/lib/utils";
 import { Filter, Search } from "@/ui/icons";
 import type { Card, CardSet, DocumentItem } from "@/types";
-import type { WorkspaceEntityTab } from "@/features/workspace-tabs/Tab";
+import type { WorkspaceEntityTab } from "@/features/tab/Tab";
 import {
   resolveCardSetTabTitle,
   resolveCardTabTitle,
-} from "@/features/workspace-tabs/resolveTabTitle";
-import { useWorkspaceTabsStore } from "@/features/workspace-tabs/hooks/useTabsStore";
+} from "@/features/tab/resolveTabTitle";
+import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 
 type PdfPaneUpdateHandler = NonNullable<
   ComponentProps<typeof PdfPane>["onDocumentUpdate"]

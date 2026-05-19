@@ -174,8 +174,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   const [monthScrollTargetToken, setMonthScrollTargetToken] = useState(0);
   const [selectedViewMode, setSelectedViewMode] =
     useState<CalendarViewMode>("days");
-  const [activeMode, setActiveMode] =
-    useState<CalendarToolbarMode>("timeline");
+  const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
 
   const [viewportWidth, setViewportWidth] = useState(0);
   const [calendarBuffer, setCalendarBuffer] = useState(
@@ -223,8 +222,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     [currentDate, timelineColumns],
   );
 
-  const titleDate =
-    selectedViewMode === "month" ? monthTitleDate : currentDate;
+  const titleDate = selectedViewMode === "month" ? monthTitleDate : currentDate;
 
   const monthLabel =
     activeMode === "timeline" && selectedViewMode === "month"
@@ -234,23 +232,18 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
           year: "numeric",
         }).format(titleDate);
 
-  const viewportDayCount = getViewportDayCount(
-    currentDate,
-    selectedViewMode,
-  );
+  const viewportDayCount = getViewportDayCount(currentDate, selectedViewMode);
 
   const calendarDayColumnWidth =
     viewportWidth > C.TIME_COLUMN_WIDTH
       ? Math.max(
           1,
-          (viewportWidth - C.TIME_COLUMN_WIDTH) /
-            Math.max(1, viewportDayCount),
+          (viewportWidth - C.TIME_COLUMN_WIDTH) / Math.max(1, viewportDayCount),
         )
       : C.DAY_COLUMN_MIN_WIDTH;
 
   const gridWidth =
-    C.TIME_COLUMN_WIDTH +
-    visibleDays.length * calendarDayColumnWidth;
+    C.TIME_COLUMN_WIDTH + visibleDays.length * calendarDayColumnWidth;
 
   const timelineGridStyle: TimelineGridStyle = {
     "--calendar-hour-row-height": `${C.DEFAULT_HOUR_ROW_HEIGHT}px`,
@@ -324,14 +317,11 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   ]);
 
   // ── handlers
-  const resetTimelinePosition = useCallback(
-    (viewMode: CalendarViewMode) => {
-      setScrollTriggerToken((n) => n + 1);
-      setCalendarBuffer(createInitialCalendarBuffer());
-      setTimelineUnitBuffer(createInitialTimelineUnitBuffer(viewMode));
-    },
-    [],
-  );
+  const resetTimelinePosition = useCallback((viewMode: CalendarViewMode) => {
+    setScrollTriggerToken((n) => n + 1);
+    setCalendarBuffer(createInitialCalendarBuffer());
+    setTimelineUnitBuffer(createInitialTimelineUnitBuffer(viewMode));
+  }, []);
 
   const requestMonthScrollTarget = useCallback(() => {
     setMonthScrollTargetToken((n) => n + 1);
@@ -347,9 +337,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
 
       const distLeft = scroller.scrollLeft;
       const distRight =
-        scroller.scrollWidth -
-        scroller.clientWidth -
-        scroller.scrollLeft;
+        scroller.scrollWidth - scroller.clientWidth - scroller.scrollLeft;
 
       if (
         distLeft < C.TIMELINE_EDGE_THRESHOLD_PX &&
@@ -358,8 +346,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
         isExtendingLeftRef.current = true;
 
         if (activeMode === "timeline") {
-          const extendCount =
-            getTimelineUnitExtendCount(selectedViewMode);
+          const extendCount = getTimelineUnitExtendCount(selectedViewMode);
 
           prependScrollCorrectionRef.current =
             extendCount * timelineColumnWidth;
@@ -386,8 +373,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
         isExtendingRightRef.current = true;
 
         if (activeMode === "timeline") {
-          const extendCount =
-            getTimelineUnitExtendCount(selectedViewMode);
+          const extendCount = getTimelineUnitExtendCount(selectedViewMode);
 
           setTimelineUnitBuffer((c) => ({
             ...c,
@@ -486,15 +472,19 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
 
       if (selectedViewMode === "month") {
         const isSameVisibleMonth =
-          startOfMonth(date).getTime() ===
-          startOfMonth(currentDate).getTime();
+          startOfMonth(date).getTime() === startOfMonth(currentDate).getTime();
 
         if (!isSameVisibleMonth) requestMonthScrollTarget();
       } else {
         resetTimelinePosition(selectedViewMode);
       }
     },
-    [currentDate, requestMonthScrollTarget, resetTimelinePosition, selectedViewMode],
+    [
+      currentDate,
+      requestMonthScrollTarget,
+      resetTimelinePosition,
+      selectedViewMode,
+    ],
   );
 
   const handleVisibleMonthChange = useCallback((date: Date) => {
@@ -512,7 +502,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     monthScrollTargetToken,
     selectedViewMode,
     activeMode,
-    setActiveMode,    
+    setActiveMode,
     visibleDays,
     timelineColumns,
     timelineColumnWidth,

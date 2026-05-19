@@ -2,9 +2,9 @@ import type { CSSProperties, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { FileText, Layers, Plus, X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
-import type { WorkspaceTab } from "@/features/workspace-tabs/Tab";
-import { resolveWorkspaceTabRoute } from "@/features/workspace-tabs/resolveTabRoute";
-import { useWorkspaceTabsStore } from "@/features/workspace-tabs/hooks/useTabsStore";
+import type { WorkspaceTab } from "@/features/tab/Tab";
+import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
+import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 
 type WorkspaceTabsBarVariant = "workspace" | "titlebar";
 
@@ -228,14 +228,14 @@ export const WorkspaceTabsBar = ({
     <div
       style={{ ...tabsSurfaceStyle, ...TABS_DRAG_STYLE }}
       className={cn(
-        "explorer-chrome-font explorer-workspace-tabs-bar relative z-30 flex shrink-0 items-end gap-0 overflow-hidden",
+        "explorer-chrome-font explorer-tab-bar relative z-30 flex shrink-0 items-end gap-0 overflow-hidden",
         isTitlebar
           ? "h-full min-w-0 flex-1 px-0 pt-0"
           : ["h-[40px] w-full min-w-0 border-b border-black/10", "px-1.5 pt-0"],
         className,
       )}
     >
-      <div className="explorer-workspace-tabs-list flex min-w-0 items-end overflow-hidden gap-0">
+      <div className="explorer-tab-list flex min-w-0 items-end overflow-hidden gap-0">
         {tabs.map((tab) => {
           const selected = tab.id === activeTabId;
           const Icon = resolveTabIcon(tab);

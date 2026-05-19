@@ -21,11 +21,8 @@ import {
   useBreadcrumbExtraCrumbs,
 } from "@/contexts/BreadcrumbContext";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
-import type {
-  WorkspaceSidebarSection,
-  WorkspaceTab,
-} from "@/features/workspace-tabs/Tab";
-import { useWorkspaceTabsStore } from "@/features/workspace-tabs/hooks/useTabsStore";
+import type { WorkspaceSidebarSection, WorkspaceTab } from "@/features/tab/Tab";
+import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 
 // ─────────────────────────────────────────
 // 定数（WorkspaceBreadcrumbBar から移動）

@@ -5,10 +5,7 @@ type SettingDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const SettingDialog = ({
-  open,
-  onOpenChange,
-}: SettingDialogProps) => {
+const SettingDialog = ({ open, onOpenChange }: SettingDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
