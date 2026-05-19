@@ -5,7 +5,7 @@ import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
 
 import { SettingDialog } from "@/features/settings/SettingDialog";
 
-import { AppSidebar } from "@/features/sidebar/Sidebar.desktop";
+import { Sidebar } from "@/features/sidebar/Sidebar.desktop";
 import { RightSidebarDesktop } from "@/features/sidebar/RightSidebar.desktop";
 
 import { useWorkspaceTabsRouteSync } from "@/features/tab/hooks/useTabsRouteSync";
@@ -73,7 +73,7 @@ export const AppLayout = () => {
           .filter(Boolean)
           .join(" ")}
       >
-        <AppSidebar
+        <Sidebar
           collapsed={isSidebarCollapsed}
           onOpenSettings={() => setIsSettingsOpen(true)}
         />
