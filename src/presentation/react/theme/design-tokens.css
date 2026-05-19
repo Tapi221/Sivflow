@@ -65,73 +65,64 @@
   --ds-color-status-warning-rgb: 245 158 11;
   --ds-color-status-warning-soft: #fffbeb;
   --ds-color-status-warning-soft-rgb: 255 251 235;
-  --ds-color-tag-amber-bg: #faeeda;
+  --ds-color-tag-amber-bg: #FAEEDA;
   --ds-color-tag-amber-bg-rgb: 250 238 218;
   --ds-color-tag-amber-border: transparent;
   --ds-color-tag-amber-fg: #633806;
   --ds-color-tag-amber-fg-rgb: 99 56 6;
-  --ds-color-tag-blue-bg: #e6f1fb;
+  --ds-color-tag-blue-bg: #E6F1FB;
   --ds-color-tag-blue-bg-rgb: 230 241 251;
   --ds-color-tag-blue-border: transparent;
-  --ds-color-tag-blue-fg: #0c447c;
+  --ds-color-tag-blue-fg: #0C447C;
   --ds-color-tag-blue-fg-rgb: 12 68 124;
-  --ds-color-tag-coral-bg: #faece7;
+  --ds-color-tag-coral-bg: #FAECE7;
   --ds-color-tag-coral-bg-rgb: 250 236 231;
   --ds-color-tag-coral-border: transparent;
-  --ds-color-tag-coral-fg: #712b13;
+  --ds-color-tag-coral-fg: #712B13;
   --ds-color-tag-coral-fg-rgb: 113 43 19;
-  --ds-color-tag-gray-bg: #f1efe8;
+  --ds-color-tag-gray-bg: #F1EFE8;
   --ds-color-tag-gray-bg-rgb: 241 239 232;
   --ds-color-tag-gray-border: transparent;
   --ds-color-tag-gray-fg: #444441;
   --ds-color-tag-gray-fg-rgb: 68 68 65;
-  --ds-color-tag-green-bg: #eaf3de;
+  --ds-color-tag-green-bg: #EAF3DE;
   --ds-color-tag-green-bg-rgb: 234 243 222;
   --ds-color-tag-green-border: transparent;
-  --ds-color-tag-green-fg: #27500a;
+  --ds-color-tag-green-fg: #27500A;
   --ds-color-tag-green-fg-rgb: 39 80 10;
-  --ds-color-tag-pink-bg: #fbeaf0;
+  --ds-color-tag-pink-bg: #FBEAF0;
   --ds-color-tag-pink-bg-rgb: 251 234 240;
   --ds-color-tag-pink-border: transparent;
-  --ds-color-tag-pink-fg: #72243e;
+  --ds-color-tag-pink-fg: #72243E;
   --ds-color-tag-pink-fg-rgb: 114 36 62;
-  --ds-color-tag-purple-bg: #eeedfe;
+  --ds-color-tag-purple-bg: #EEEDFE;
   --ds-color-tag-purple-bg-rgb: 238 237 254;
   --ds-color-tag-purple-border: transparent;
-  --ds-color-tag-purple-fg: #3c3489;
+  --ds-color-tag-purple-fg: #3C3489;
   --ds-color-tag-purple-fg-rgb: 60 52 137;
-  --ds-color-tag-red-bg: #fcebeb;
+  --ds-color-tag-red-bg: #FCEBEB;
   --ds-color-tag-red-bg-rgb: 252 235 235;
   --ds-color-tag-red-border: transparent;
-  --ds-color-tag-red-fg: #791f1f;
+  --ds-color-tag-red-fg: #791F1F;
   --ds-color-tag-red-fg-rgb: 121 31 31;
-  --ds-color-tag-sky-bg: #e1f4fa;
+  --ds-color-tag-sky-bg: #E1F4FA;
   --ds-color-tag-sky-bg-rgb: 225 244 250;
   --ds-color-tag-sky-border: transparent;
-  --ds-color-tag-sky-fg: #0c4a6e;
+  --ds-color-tag-sky-fg: #0C4A6E;
   --ds-color-tag-sky-fg-rgb: 12 74 110;
-  --ds-color-tag-teal-bg: #e1f5ee;
+  --ds-color-tag-teal-bg: #E1F5EE;
   --ds-color-tag-teal-bg-rgb: 225 245 238;
   --ds-color-tag-teal-border: transparent;
   --ds-color-tag-teal-fg: #085041;
   --ds-color-tag-teal-fg-rgb: 8 80 65;
   --ds-elevation-blur-floating: 12px;
-  --ds-elevation-shadow-card:
-    0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.04);
-  --ds-elevation-shadow-card-hover:
-    0 8px 30px -4px rgba(69, 103, 157, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+  --ds-elevation-shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.04);
+  --ds-elevation-shadow-card-hover: 0 8px 30px -4px rgba(69, 103, 157, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08);
   --ds-elevation-shadow-concave: inset 0 1px 2px rgba(86, 72, 74, 0.16);
-  --ds-elevation-shadow-convex:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 -1px 0 rgba(86, 72, 74, 0.08) inset, 0 1px 2px rgba(86, 72, 74, 0.16);
+  --ds-elevation-shadow-convex: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 -1px 0 rgba(86, 72, 74, 0.08) inset, 0 1px 2px rgba(86, 72, 74, 0.16);
   --ds-elevation-shadow-floating: 0 8px 24px rgba(15, 23, 42, 0.08);
-  --ds-elevation-shadow-panel:
-    0 10px 24px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(148, 163, 184, 0.25);
-  --ds-elevation-shadow-soft:
-    0 2px 15px -3px rgba(69, 103, 157, 0.15),
-    0 10px 20px -2px rgba(69, 103, 157, 0.08);
+  --ds-elevation-shadow-panel: 0 10px 24px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(148, 163, 184, 0.25);
+  --ds-elevation-shadow-soft: 0 2px 15px -3px rgba(69, 103, 157, 0.15), 0 10px 20px -2px rgba(69, 103, 157, 0.08);
   --ds-layout-card-base-width: 480px;
   --ds-layout-card-display-max-height: min(70vh, 560px);
   --ds-layout-card-row-px: 24px;
@@ -214,12 +205,7 @@
   --ds-semantic-color-chrome-titlebar-text-strong-rgb: 255 255 255;
   --ds-semantic-color-interactive-column-selected-accent: #25395a;
   --ds-semantic-color-interactive-column-selected-accent-rgb: 37 57 90;
-  --ds-semantic-color-interactive-column-selected-subtle: rgba(
-    53,
-    80,
-    123,
-    0.14
-  );
+  --ds-semantic-color-interactive-column-selected-subtle: rgba(53, 80, 123, 0.14);
   --ds-semantic-color-interactive-selected-accent: #35507b;
   --ds-semantic-color-interactive-selected-accent-rgb: 53 80 123;
   --ds-semantic-color-interactive-selected-subtle: #e7edf6;
@@ -242,19 +228,12 @@
   --ds-semantic-color-text-secondary-rgb: 110 110 128;
   --ds-semantic-color-text-strong: #1e293b;
   --ds-semantic-color-text-strong-rgb: 30 41 59;
-  --ds-semantic-elevation-card:
-    0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.04);
-  --ds-semantic-elevation-card-hover:
-    0 8px 30px -4px rgba(69, 103, 157, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+  --ds-semantic-elevation-card: 0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.04);
+  --ds-semantic-elevation-card-hover: 0 8px 30px -4px rgba(69, 103, 157, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.08);
   --ds-semantic-elevation-control-inset: inset 0 1px 2px rgba(86, 72, 74, 0.16);
-  --ds-semantic-elevation-control-raised:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 -1px 0 rgba(86, 72, 74, 0.08) inset, 0 1px 2px rgba(86, 72, 74, 0.16);
+  --ds-semantic-elevation-control-raised: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 -1px 0 rgba(86, 72, 74, 0.08) inset, 0 1px 2px rgba(86, 72, 74, 0.16);
   --ds-semantic-elevation-floating: 0 8px 24px rgba(15, 23, 42, 0.08);
-  --ds-semantic-elevation-panel:
-    0 10px 24px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(148, 163, 184, 0.25);
+  --ds-semantic-elevation-panel: 0 10px 24px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(148, 163, 184, 0.25);
   --ds-semantic-motion-interactive: 150ms ease;
   --ds-semantic-motion-progress: 500ms ease-out;
   --ds-semantic-motion-screen-enter: 300ms ease-out;
@@ -282,18 +261,10 @@
   --ds-semantic-tag-radius: 20px;
   --ds-semantic-tag-remove-button-size: 16px;
   --ds-semantic-tag-remove-icon-size: 12px;
-  --ds-semantic-typography-code:
-    "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
-    Consolas, monospace;
-  --ds-semantic-typography-content:
-    "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP",
-    "MS PMincho", serif;
-  --ds-semantic-typography-numeric:
-    "Zen Kaku Gothic New", "Noto Sans JP", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, sans-serif;
-  --ds-semantic-typography-ui:
-    "Zen Kaku Gothic New", "Noto Sans JP", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, sans-serif;
+  --ds-semantic-typography-code: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --ds-semantic-typography-content: "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP", "MS PMincho", serif;
+  --ds-semantic-typography-numeric: "Zen Kaku Gothic New", "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --ds-semantic-typography-ui: "Zen Kaku Gothic New", "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --ds-spacing-0: 0px;
   --ds-spacing-1: 4px;
   --ds-spacing-1-8: 7.2px;
@@ -307,18 +278,10 @@
   --ds-spacing-5: 20px;
   --ds-spacing-6: 24px;
   --ds-spacing-8: 32px;
-  --ds-typography-font-family-code:
-    "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
-    Consolas, monospace;
-  --ds-typography-font-family-content:
-    "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP",
-    "MS PMincho", serif;
-  --ds-typography-font-family-numeric:
-    "Zen Kaku Gothic New", "Noto Sans JP", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, sans-serif;
-  --ds-typography-font-family-ui:
-    "Zen Kaku Gothic New", "Noto Sans JP", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, sans-serif;
+  --ds-typography-font-family-code: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --ds-typography-font-family-content: "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP", "MS PMincho", serif;
+  --ds-typography-font-family-numeric: "Zen Kaku Gothic New", "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --ds-typography-font-family-ui: "Zen Kaku Gothic New", "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --ds-typography-font-size-2xl: 32px;
   --ds-typography-font-size-lg: 20px;
   --ds-typography-font-size-md: 16px;
