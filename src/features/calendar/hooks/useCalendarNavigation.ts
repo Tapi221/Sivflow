@@ -71,6 +71,9 @@ export const useCalendarNavigation = () => {
     (next: CalendarViewMode) => {
       setSelectedViewMode(next);
 
+      // 追加：必ずカレンダーモードに戻す
+      setActiveMode("calendar");
+
       if (next === "month") {
         setMonthTitleDate(startOfMonth(currentDate));
         requestMonthScrollTarget();
