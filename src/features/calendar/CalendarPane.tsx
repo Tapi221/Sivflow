@@ -5,7 +5,6 @@ import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
 import { CalendarWorkspaceToolbar } from "./CalendarToolbar";
 import { useCalendarPane } from "./hooks/useCalendarPane";
-import { SidebarPanelIcon } from "./ui/calendar.icons";
 import type { CalendarPaneProps } from "./calendarPane.types";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { cn } from "@/lib/utils";
@@ -55,47 +54,43 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
         viewMode={selectedViewMode}
         onSelectCalendar={() => {
           setActiveMode("calendar");
-          setIsCalendarSidebarOpen(true);
         }}
         onSelectTimeline={() => {
           setActiveMode("timeline");
-          
         }}
         onSelectTask={() => {
           setActiveMode("task");
-          
         }}
         onSelectViewMode={handleSelectViewMode}
       />
 
       <div className="flex min-h-0 flex-1 bg-white">
-          <CalendarSidebar
-            monthDate={titleDate}
-            selectedDate={selectedDate}
-            calendars={googleCalendars}
-            googleAccountEmail={googleAccountEmail}
-            selectedCalendarIds={selectedCalendarIds}
-            calendarError={googleCalendarError}
-            isCalendarConnected={isGoogleCalendarConnected}
-            isCalendarConnecting={isGoogleCalendarConnecting}
-            onSelectDate={handleSidebarSelectDate}
-            onPreviousMonth={handleSidebarPreviousMonth}
-            onNextMonth={handleSidebarNextMonth}
-            onConnectCalendar={connectGoogleCalendar}
-            onToggleCalendar={toggleGoogleCalendar}
-          />
+        <CalendarSidebar
+          monthDate={titleDate}
+          selectedDate={selectedDate}
+          calendars={googleCalendars}
+          googleAccountEmail={googleAccountEmail}
+          selectedCalendarIds={selectedCalendarIds}
+          calendarError={googleCalendarError}
+          isCalendarConnected={isGoogleCalendarConnected}
+          isCalendarConnecting={isGoogleCalendarConnecting}
+          onSelectDate={handleSidebarSelectDate}
+          onPreviousMonth={handleSidebarPreviousMonth}
+          onNextMonth={handleSidebarNextMonth}
+          onConnectCalendar={connectGoogleCalendar}
+          onToggleCalendar={toggleGoogleCalendar}
+        />
 
         <div
           ref={contentViewportRef}
           className={cn(
             "flex min-w-0 flex-1 flex-col bg-white px-5 pt-4",
             activeMode === "task" && "pb-5",
-          )}  
+          )}
         >
           {activeMode !== "task" && (
             <div className="mb-4 flex shrink-0 items-center justify-between">
               <div className="flex min-w-0 items-center gap-3">
-
                 {monthLabel ? (
                   <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
                     {monthLabel}
@@ -108,7 +103,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
               <div className="flex items-center overflow-hidden rounded-lg border border-[#e2e4e9] bg-white">
                 <button
                   type="button"
-                  className="flex h-8 w-8 items-center justify-center border-r border-[#e2e4e9] text-[#8f929c] transition-colors hover:bg-[#f5f6f8] hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                  className="flex h-8 w-8 items-center justify-center border-r border-[#e2e4e9] text-[#8f929c] transition-colors hover:bg-[#f5f6f8] hover:text-[#20242c]"
                   onClick={handlePrevious}
                   aria-label="Previous"
                 >
@@ -117,7 +112,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
 
                 <button
                   type="button"
-                  className="px-3 py-[7px] text-[13px] font-medium text-[#20242c] transition-colors hover:bg-[#f5f6f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                  className="px-3 py-[7px] text-[13px] font-medium text-[#20242c] transition-colors hover:bg-[#f5f6f8]"
                   onClick={handleToday}
                 >
                   Today
@@ -125,7 +120,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
 
                 <button
                   type="button"
-                  className="flex h-8 w-8 items-center justify-center border-l border-[#e2e4e9] text-[#8f929c] transition-colors hover:bg-[#f5f6f8] hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                  className="flex h-8 w-8 items-center justify-center border-l border-[#e2e4e9] text-[#8f929c] transition-colors hover:bg-[#f5f6f8] hover:text-[#20242c]"
                   onClick={handleNext}
                   aria-label="Next"
                 >
