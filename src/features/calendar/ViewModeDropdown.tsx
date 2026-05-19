@@ -1,5 +1,5 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { Check, ChevronDown } from "@/ui/icons";
+import { ChevronDown } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import type { ComponentType } from "react";
 
@@ -17,11 +17,7 @@ type Props = {
   options: ViewModeOption[];
 };
 
-export const ViewModeDropdown = ({
-  value,
-  onChange,
-  options,
-}: Props) => {
+export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
   const selected = options.find((o) => o.value === value);
 
   return (
@@ -39,6 +35,7 @@ export const ViewModeDropdown = ({
             hover:bg-[#f5f6f8]
             active:scale-[0.98]
             outline-none
+            whitespace-nowrap
           "
         >
           {selected?.Icon && (
@@ -58,14 +55,17 @@ export const ViewModeDropdown = ({
           align="end"
           sideOffset={6}
           className="
-            z-50 min-w-[150px]
+            z-50
+            w-fit
+            min-w-0
+            max-w-none
             overflow-hidden
             rounded-lg border border-[#e2e4e9]
             bg-white py-1
             shadow-[0_10px_25px_rgba(0,0,0,0.12)]
           "
         >
-          <div className="px-2 py-1 text-[10px] font-medium text-[#a0a4b0]">
+          <div className="px-2 py-1 text-[10px] font-medium text-[#a0a4b0] whitespace-nowrap">
             Views
           </div>
 
@@ -77,21 +77,21 @@ export const ViewModeDropdown = ({
                 key={v}
                 onSelect={() => onChange(v)}
                 className={cn(
-                  "flex cursor-pointer items-center gap-2 justify-between",
+                  "flex items-center gap-2",
                   "px-2 py-1.5 text-[12px]",
+                  "whitespace-nowrap",
                   "outline-none transition-colors",
                   "data-[highlighted]:bg-[#f5f6f8]"
                 )}
               >
-                <span className="flex items-center gap-2">
-                  <Icon className="h-3.5 w-3.5 text-[#6b7280]" />
-                  <span className={isSelected ? "font-medium" : ""}>
-                    {label}
-                  </span>
+                <Icon className="h-3.5 w-3.5 text-[#6b7280]" />
+
+                <span className={isSelected ? "font-medium" : ""}>
+                  {label}
                 </span>
 
                 {isSelected && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#25272d]" />
+                  <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#25272d]" />
                 )}
               </DropdownMenu.Item>
             );

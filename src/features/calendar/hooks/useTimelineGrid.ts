@@ -20,10 +20,7 @@ export const useTimelineGrid = ({
     timelineUnitBuffer,
   );
 
-  const timelineColumnWidth = getTimelineColumnWidth(
-    selectedViewMode,
-    60,
-  );
+  const timelineColumnWidth = getTimelineColumnWidth(selectedViewMode, 60);
 
   const timelineAnchorColumnIndex = getTimelineAnchorColumnIndex(
     timelineColumns,

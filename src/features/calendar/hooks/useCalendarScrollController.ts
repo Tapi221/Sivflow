@@ -1,8 +1,4 @@
-import {
-  useCallback,
-  useLayoutEffect,
-  useRef,
-} from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 import type { UIEvent } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarViewMode } from "../calendarPane.types";

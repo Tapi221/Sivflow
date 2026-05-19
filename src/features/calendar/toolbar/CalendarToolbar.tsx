@@ -43,10 +43,8 @@ export const CalendarToolbar = ({
 
   return (
     <div className="relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full items-center justify-between bg-white overflow-hidden after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']">
-
       {/* LEFT */}
       <div className="flex items-center gap-3">
-
         {/* TAB GROUP */}
         <div className="relative flex h-7 items-center gap-[6px]">
           {tabs.map((tab) => {
@@ -62,7 +60,7 @@ export const CalendarToolbar = ({
                   "relative flex h-7 items-center gap-[6px] rounded px-2 w-fit",
                   "text-[12px] font-medium leading-none transition-colors",
                   isActive ? "text-[#25272d]" : "text-[#8f929c]",
-                  "hover:bg-[#f6f7f9]"
+                  "hover:bg-[#f6f7f9]",
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
