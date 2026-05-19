@@ -12,7 +12,7 @@ import {
   type WorkspaceRouteTab,
   type WorkspaceSidebarSection,
   type WorkspaceTab,
-} from "@/features/workspace-tabs/Tab";
+} from "@/features/tab/Tab";
 
 type OpenExplorerTabParams = {
   id?: WorkspaceExplorerTab["id"];

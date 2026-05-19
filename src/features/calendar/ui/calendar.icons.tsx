@@ -208,13 +208,7 @@ export const TaskIcon = ({
     aria-hidden="true"
     {...props}
   >
-    <circle
-      cx="12"
-      cy="12"
-      r="9"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    />
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
 
     <path
       d="M8 12.2L10.5 14.7L16 9.2"

@@ -17,18 +17,15 @@ import { useExplorerController } from "@/features/explorer/controller/useExplore
 import { useExplorerBreadcrumbSync } from "@/features/explorer/hooks/useExplorerBreadcrumbSync";
 import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups";
 import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
-import { WorkspaceTabPanel } from "@/features/workspace-tabs/TabPanel";
-import { ExplorerWorkspaceFrame } from "@/features/workspace-tabs/ExplorerWorkspaceFrame";
-import type {
-  WorkspaceEntityTab,
-  WorkspaceTab,
-} from "@/features/workspace-tabs/Tab";
+import { WorkspaceTabPanel } from "@/features/tab/TabPanel";
+import { ExplorerWorkspaceFrame } from "@/features/tab/ExplorerWorkspaceFrame";
+import type { WorkspaceEntityTab, WorkspaceTab } from "@/features/tab/Tab";
 import {
   resolveCardSetTabTitle,
   resolveCardTabTitle,
   resolveDocumentTabTitle,
-} from "@/features/workspace-tabs/resolveTabTitle";
-import { useWorkspaceTabsStore } from "@/features/workspace-tabs/hooks/useTabsStore";
+} from "@/features/tab/resolveTabTitle";
+import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { useCardsRead } from "@/hooks/card/useCardsRead";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";

@@ -1,6 +1,6 @@
 import type { ReactNode, RefObject } from "react";
 
-import { WorkspaceTabsBar } from "@/features/workspace-tabs/TabsBar";
+import { WorkspaceTabsBar } from "@/features/tab/TabsBar";
 import { WorkspaceBreadcrumbBar } from "./WorkspaceBreadcrumbBar";
 
 type WorkspaceShellProps = {

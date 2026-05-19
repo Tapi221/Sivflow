@@ -8,8 +8,8 @@ import {
 } from "date-fns";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import { CheckCircle, ChevronDown, ChevronUp, Circle} from "@/ui/icons";
-import { PlusIcon, CalendarIcon } from "../ui/calendar.icons"; 
+import { CheckCircle, ChevronDown, ChevronUp, Circle } from "@/ui/icons";
+import { PlusIcon, CalendarIcon } from "../ui/calendar.icons";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";

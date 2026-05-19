@@ -2,6 +2,9 @@ import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerR
 
 export const WORKSPACE_DEFAULT_EXPLORER_TAB_ID = "explorer:default" as const;
 
+/**
+ * サイドバーのセクション定義
+ */
 export type WorkspaceSidebarSection =
   | "home"
   | "review"
@@ -9,12 +12,18 @@ export type WorkspaceSidebarSection =
   | "calendar"
   | "tasks";
 
+/**
+ * ルートタブID（固定ページ）
+ */
 export type WorkspaceRouteTabId =
   | "route:home"
   | "route:review"
   | "route:calendar"
   | "route:tasks";
 
+/**
+ * タブ種別
+ */
 export type WorkspaceTabKind =
   | "route"
   | "explorer"
@@ -22,24 +31,36 @@ export type WorkspaceTabKind =
   | "cardSet"
   | "card";
 
+/**
+ * 全タブ共通ベース
+ */
 type WorkspaceTabBase = {
   title: string;
   isClosable: boolean;
   sectionKey: WorkspaceSidebarSection;
 };
 
+/**
+ * ルートタブ（画面遷移系）
+ */
 export type WorkspaceRouteTab = WorkspaceTabBase & {
   id: WorkspaceRouteTabId;
   kind: "route";
   routePath: string;
 };
 
+/**
+ * エクスプローラタブ（状態保持型）
+ */
 export type WorkspaceExplorerTab = WorkspaceTabBase & {
   id: `explorer:${string}`;
   kind: "explorer";
   explorerState: ExplorerRouteState;
 };
 
+/**
+ * ドキュメントタブ
+ */
 export type WorkspaceDocumentTab = WorkspaceTabBase & {
   id: `document:${string}`;
   kind: "document";
@@ -47,6 +68,9 @@ export type WorkspaceDocumentTab = WorkspaceTabBase & {
   folderId: string | null;
 };
 
+/**
+ * カードセットタブ
+ */
 export type WorkspaceCardSetTab = WorkspaceTabBase & {
   id: `cardSet:${string}`;
   kind: "cardSet";
@@ -54,6 +78,9 @@ export type WorkspaceCardSetTab = WorkspaceTabBase & {
   folderId: string | null;
 };
 
+/**
+ * カードタブ
+ */
 export type WorkspaceCardTab = WorkspaceTabBase & {
   id: `card:${string}`;
   kind: "card";
@@ -61,6 +88,9 @@ export type WorkspaceCardTab = WorkspaceTabBase & {
   folderId: string | null;
 };
 
+/**
+ * 全タブユニオン
+ */
 export type WorkspaceTab =
   | WorkspaceRouteTab
   | WorkspaceExplorerTab
@@ -68,11 +98,17 @@ export type WorkspaceTab =
   | WorkspaceCardSetTab
   | WorkspaceCardTab;
 
+/**
+ * エンティティ系タブ（ルート・explorer除外）
+ */
 export type WorkspaceEntityTab = Exclude<
   WorkspaceTab,
   WorkspaceExplorerTab | WorkspaceRouteTab
 >;
 
+/**
+ * ルートタブ定義
+ */
 export const WORKSPACE_ROUTE_TABS = [
   {
     id: "route:home",
@@ -108,6 +144,9 @@ export const WORKSPACE_ROUTE_TABS = [
   },
 ] as const satisfies readonly WorkspaceRouteTab[];
 
+/**
+ * Explorer初期状態
+ */
 export const createDefaultExplorerRouteState = (): ExplorerRouteState => ({
   isHomeOnlyMode: false,
   isSectionListMode: true,
@@ -115,6 +154,9 @@ export const createDefaultExplorerRouteState = (): ExplorerRouteState => ({
   selectedItem: null,
 });
 
+/**
+ * section → routeタブ解決
+ */
 export const resolveRouteTabBySection = (
   sectionKey: Exclude<WorkspaceSidebarSection, "library">,
 ): WorkspaceRouteTab => {
