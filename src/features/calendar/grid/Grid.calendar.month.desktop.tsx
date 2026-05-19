@@ -35,25 +35,15 @@ type CalendarMonthGridWeek = {
 
 type GridCalendarMonthDesktopProps = {
   today: Date;
-
   selectedDate: Date;
-
   visibleEvents: GoogleCalendarEvent[];
-
   monthWeeks: CalendarMonthGridWeek[];
-
   maxVisibleChips: number;
-
   monthRowHeight: number;
-
   setWeekRowRef: (key: string, node: HTMLDivElement | null) => void;
-
   onSelectDate: (date: Date) => void;
-
   handleResizeReset: () => void;
-
   handleResizeKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => void;
-
   handleResizePointerDown: (event: React.PointerEvent<HTMLDivElement>) => void;
 };
 
@@ -95,11 +85,8 @@ export const GridCalendarMonthDesktop = ({
           >
             {week.days.map((day, index) => {
               const selected = isSameDay(day.date, selectedDate);
-
               const isToday = isSameDay(day.date, today);
-
               const monthAnnotation = getMonthAnnotation(day.date);
-
               const isLastColumn = index % 7 === 6;
 
               const sortedEvents = visibleEvents
@@ -107,7 +94,6 @@ export const GridCalendarMonthDesktop = ({
                 .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
 
               const visibleChips = sortedEvents.slice(0, maxVisibleChips);
-
               const overflowCount = sortedEvents.length - visibleChips.length;
 
               return (
@@ -117,8 +103,8 @@ export const GridCalendarMonthDesktop = ({
                     "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#eef0f3] bg-white text-left transition-colors",
                     !isLastColumn && "border-r",
                     isToday && "bg-[#f0f6ff]",
-                    selected && !isToday && "bg-[#fbfaf7]",
-                    !selected && !isToday && "hover:bg-[#fbfaf7]",
+                    selected && !isToday && "bg-[#f4f5f7]",
+                    !selected && !isToday && "hover:bg-[#eceef1]",
                   )}
                 >
                   <button
@@ -137,7 +123,7 @@ export const GridCalendarMonthDesktop = ({
                         isToday
                           ? "bg-[#185FA5] text-white shadow-[0_7px_18px_rgba(24,95,165,0.22)]"
                           : selected
-                            ? "bg-[#f0efea] text-[#24231f] ring-1 ring-[#d8d6ce]"
+                            ? "bg-[#2d3039] text-white"
                             : day.isCurrentMonth
                               ? "text-[#24231f]"
                               : "text-[#b0aea8]",

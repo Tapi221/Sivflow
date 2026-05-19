@@ -18,10 +18,6 @@ import type {
   CalendarSidebarProps,
 } from "../calendarPane.types";
 
-// ────────────────────────────────────────
-// ChevronLeft / ChevronRight を ui/icons から
-// インポートしていない場合はインライン SVG で代替
-// ────────────────────────────────────────
 const IconChevronLeft = ({ className }: { className?: string }) => (
   <svg
     viewBox="0 0 16 16"
@@ -56,10 +52,6 @@ const IconChevronRight = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// ────────────────────────────────────────
-// Mini calendar helpers
-// ────────────────────────────────────────
-
 const buildMiniCalendarDays = (
   monthDate: Date,
   selectedDate: Date,
@@ -83,10 +75,6 @@ const buildMiniCalendarDays = (
 const APP_CALENDAR_ITEMS: AppCalendarItem[] = [
   { id: "app-calendar-test", label: "Test", color: "#ff3b30", checked: true },
 ];
-
-// ────────────────────────────────────────
-// Component
-// ────────────────────────────────────────
 
 export const CalendarSidebar = ({
   monthDate,
@@ -114,10 +102,8 @@ export const CalendarSidebar = ({
   return (
     <aside className="flex w-[220px] shrink-0 flex-col gap-5 overflow-y-auto bg-[#f7f8fa] px-3 py-5 text-[#24272f]">
 
-      {/* ── Mini Calendar ─────────────────────── */}
       <section className="flex w-full flex-col gap-2">
 
-        {/* Month label + navigation */}
         <div className="flex w-full items-center justify-between px-1">
           <span className="text-[12px] font-semibold tracking-wide text-[#3d4049]">
             {format(monthDate, "MMMM yyyy")}
@@ -126,7 +112,7 @@ export const CalendarSidebar = ({
           <div className="flex items-center gap-0.5">
             <button
               type="button"
-              className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] transition-colors hover:bg-[#e8eaee] hover:text-[#3d4049] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] transition-colors hover:bg-[#eceef1] hover:text-[#3d4049] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               onClick={onPreviousMonth}
               aria-label="Previous month"
             >
@@ -134,7 +120,7 @@ export const CalendarSidebar = ({
             </button>
             <button
               type="button"
-              className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] transition-colors hover:bg-[#e8eaee] hover:text-[#3d4049] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] transition-colors hover:bg-[#eceef1] hover:text-[#3d4049] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               onClick={onNextMonth}
               aria-label="Next month"
             >
@@ -143,7 +129,6 @@ export const CalendarSidebar = ({
           </div>
         </div>
 
-        {/* Weekday labels */}
         <div className="grid grid-cols-7 px-0.5">
           {T.MINI_CALENDAR_WEEKDAYS.map((weekday, index) => (
             <span
@@ -155,7 +140,6 @@ export const CalendarSidebar = ({
           ))}
         </div>
 
-        {/* Day cells — no border wrapper, floats on sidebar bg */}
         <div className="grid grid-cols-7 px-0.5">
           {miniCalendarDays.map((day) => {
             const isActive = day.isToday || day.isSelected;
@@ -167,23 +151,22 @@ export const CalendarSidebar = ({
                 aria-pressed={day.isSelected}
                 onClick={() => onSelectDate(day.date)}
                 className={cn(
-                  // base layout
                   "flex aspect-square w-full items-center justify-center rounded-full",
                   "text-[11px] font-medium leading-none",
                   "transition-colors duration-100",
                   "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                  // today → blue filled
+
                   day.isToday &&
                     "bg-[#185FA5] text-white shadow-[0_2px_8px_rgba(24,95,165,0.35)]",
-                  // selected (not today) → charcoal filled
+
                   day.isSelected &&
                     !day.isToday &&
                     "bg-[#2d3039] text-white",
-                  // default current month
+
                   !isActive &&
                     day.isCurrentMonth &&
-                    "text-[#2d3039] hover:bg-[#e8eaee]",
-                  // out-of-month
+                    "text-[#2d3039] hover:bg-[#eceef1]",
+
                   !isActive &&
                     !day.isCurrentMonth &&
                     "text-[#c5c8d0] hover:bg-[#eceef1]",
@@ -196,13 +179,10 @@ export const CalendarSidebar = ({
         </div>
       </section>
 
-      {/* ── Divider ───────────────────────────── */}
       <div className="h-px w-full bg-[#e4e6eb]" />
 
-      {/* ── Calendar lists ────────────────────── */}
       <nav className="flex w-full flex-col gap-0.5" aria-label="Calendar lists">
 
-        {/* My Calendars header */}
         <div className="mb-1 flex h-6 items-center gap-1.5 px-2">
           <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-[#74798b]" />
           <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9aa0aa]">
@@ -216,7 +196,7 @@ export const CalendarSidebar = ({
             <button
               key={calendar.id}
               type="button"
-              className="group flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 text-left transition-colors hover:bg-[#e8eaee] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="group flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 text-left transition-colors hover:bg-[#eceef1] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <span className="flex shrink-0 items-center">
                 <Icon
@@ -231,7 +211,6 @@ export const CalendarSidebar = ({
           );
         })}
 
-        {/* Google Calendar section */}
         {isCalendarConnected && (
           <>
             <div className="mt-3 mb-1 flex h-6 items-center gap-1.5 px-2">
@@ -243,11 +222,10 @@ export const CalendarSidebar = ({
 
             <button
               type="button"
-              className="group flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 text-left transition-colors hover:bg-[#e8eaee] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="group flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 text-left transition-colors hover:bg-[#eceef1] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               onClick={() => setGoogleCalendarOpen((prev) => !prev)}
               aria-expanded={googleCalendarOpen}
             >
-              {/* Animated chevron */}
               <span
                 className={cn(
                   "flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform duration-200",
@@ -269,7 +247,7 @@ export const CalendarSidebar = ({
                   <button
                     key={calendar.id}
                     type="button"
-                    className="flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 pl-5 text-left transition-colors hover:bg-[#e8eaee] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 pl-5 text-left transition-colors hover:bg-[#eceef1] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     onClick={() => onToggleCalendar(calendar.id)}
                   >
                     <Icon
@@ -285,11 +263,10 @@ export const CalendarSidebar = ({
           </>
         )}
 
-        {/* ── Add / Reconnect button ─── */}
         <div className="mt-2">
           <button
             type="button"
-            className="flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 text-left transition-colors hover:bg-[#e8eaee] disabled:cursor-wait disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 text-left transition-colors hover:bg-[#eceef1] disabled:cursor-wait disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             onClick={onConnectCalendar}
             disabled={isCalendarConnecting}
           >
@@ -304,7 +281,6 @@ export const CalendarSidebar = ({
           </button>
         </div>
 
-        {/* Error */}
         {calendarError && (
           <p className="mt-1 px-2 text-[11px] leading-relaxed text-[#b42318]">
             {calendarError}
