@@ -26,7 +26,9 @@ export type UseCalendarPaneReturn = {
   setActiveMode: (mode: CalendarToolbarMode) => void;
 
   visibleDays: Date[];
-  timelineColumns: ReturnType<typeof import("../grid/TimelineDayView.shared").buildTimelineColumns>;
+  timelineColumns: ReturnType<
+    typeof import("../grid/TimelineDayView.shared").buildTimelineColumns
+  >;
   timelineColumnWidth: number;
   timelineAnchorColumnIndex: number;
 
@@ -61,23 +63,14 @@ export type UseCalendarPaneReturn = {
 };
 
 export const useCalendarPane = (): UseCalendarPaneReturn => {
-  // ─────────────────────────────
-  // navigation（唯一の状態源）
-  // ─────────────────────────────
   const navigation = useCalendarNavigation();
 
-  // ─────────────────────────────
-  // visible range（派生）
-  // ─────────────────────────────
   const visibleRange = useCalendarVisibleRange({
     currentDate: navigation.currentDate,
     selectedViewMode: navigation.selectedViewMode,
     calendarBuffer: navigation.calendarBuffer,
   });
 
-  // ─────────────────────────────
-  // layout（派生）
-  // ─────────────────────────────
   const layout = useCalendarLayout({
     viewportWidth: navigation.viewportWidth,
     visibleDays: visibleRange.visibleDays,
@@ -86,18 +79,12 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     calendarBuffer: navigation.calendarBuffer,
   });
 
-  // ─────────────────────────────
-  // timeline grid（派生）
-  // ─────────────────────────────
   const timeline = useTimelineGrid({
     currentDate: navigation.currentDate,
     selectedViewMode: navigation.selectedViewMode,
     timelineUnitBuffer: navigation.timelineUnitBuffer,
   });
 
-  // ─────────────────────────────
-  // scroll controller（副作用）
-  // ─────────────────────────────
   const scroll = useCalendarScrollController({
     activeMode: navigation.activeMode,
     selectedViewMode: navigation.selectedViewMode,
@@ -109,17 +96,10 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     viewportWidth: navigation.viewportWidth,
   });
 
-  // ─────────────────────────────
-  // google layer（外部統合）
-  // ─────────────────────────────
   const google = useGoogleCalendarLayer();
 
-  // Set → Array 正規化（境界のみ）
   const selectedCalendarIdList = Array.from(google.selectedCalendarIds);
 
-  // ─────────────────────────────
-  // event sync（副作用）
-  // ─────────────────────────────
   useCalendarEventSync({
     activeMode: navigation.activeMode,
     selectedViewMode: navigation.selectedViewMode,
@@ -131,13 +111,12 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     },
   });
 
-  // ─────────────────────────────
-  // handle bindings（薄い委譲）
-  // ─────────────────────────────
   return {
     contentViewportRef: navigation.contentViewportRef,
-    scrollContainerRef: navigation.scrollContainerRef,
-    headerScrollRef: navigation.headerScrollRef,
+
+    // ★修正ポイント：navigation → scroll
+    scrollContainerRef: scroll.scrollContainerRef,
+    headerScrollRef: scroll.headerScrollRef,
 
     currentDate: navigation.currentDate,
     selectedDate: navigation.selectedDate,
