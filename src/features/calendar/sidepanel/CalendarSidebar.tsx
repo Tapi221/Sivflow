@@ -14,13 +14,12 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 
-import { SidebarCalendarIcon, SidebarPanelIcon } from "../ui/calendar.icons";
+import { SidebarCalendarIcon } from "../ui/calendar.icons";
 import type {
   AppCalendarItem,
   CalendarSidebarProps,
 } from "../calendarPane.types";
 
-// ── ミニカレンダー構築（純粋関数 → 将来 utils に切り出し可能）
 const buildMiniCalendarDays = (
   monthDate: Date,
   selectedDate: Date,
@@ -41,7 +40,6 @@ const buildMiniCalendarDays = (
   });
 };
 
-// ── アプリ内カレンダー定義（将来: Firestore / ローカルDBから取得）
 const APP_CALENDAR_ITEMS: AppCalendarItem[] = [
   { id: "app-calendar-test", label: "Test", color: "#ff3b30", checked: true },
 ];
@@ -58,38 +56,23 @@ export const CalendarSidebar = ({
   onSelectDate,
   onPreviousMonth,
   onNextMonth,
-  onClose,
   onConnectCalendar,
   onToggleCalendar,
-}: CalendarSidebarProps) => {
+}: Omit<CalendarSidebarProps, "onClose">) => {
   const miniCalendarDays = useMemo(
     () => buildMiniCalendarDays(monthDate, selectedDate),
     [monthDate, selectedDate],
   );
   const googleCalendarSectionLabel = googleAccountEmail ?? "Google Calendar";
-
-  // ── セクションの開閉状態
-  const [myCalendarsOpen, setMyCalendarsOpen] = useState(true);
   const [googleCalendarOpen, setGoogleCalendarOpen] = useState(true);
 
   return (
     <aside className="flex w-[220px] shrink-0 flex-col gap-6 overflow-y-auto bg-[#f7f8fa] px-3 py-4 text-[#24272f]">
       <section className="flex w-full flex-col gap-3">
         <div className="flex w-full items-center justify-between overflow-hidden px-2">
-          <div className="flex min-w-0 items-center gap-3">
-            <button
-              type="button"
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#9ea3b0] transition-colors hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              onClick={onClose}
-              aria-label="Hide calendar sidebar"
-              title="Hide calendar sidebar"
-            >
-              <SidebarPanelIcon className="h-4 w-4" />
-            </button>
-            <h2 className="truncate text-[16px] font-semibold leading-normal text-[#24272f]">
-              {format(monthDate, "MMMM yyyy")}
-            </h2>
-          </div>
+          <h2 className="truncate text-[16px] font-semibold leading-normal text-[#24272f]">
+            {format(monthDate, "MMMM yyyy")}
+          </h2>
           <div className="flex shrink-0 items-center gap-2">
             <button
               type="button"
@@ -111,7 +94,6 @@ export const CalendarSidebar = ({
         </div>
 
         <div className="flex w-full flex-col gap-1 rounded-xl border border-[#e8eaf0] bg-white px-2 py-2.5">
-          {/* 曜日ヘッダー */}
           <div className="grid grid-cols-7">
             {T.MINI_CALENDAR_WEEKDAYS.map((weekday, index) => (
               <span
@@ -122,14 +104,13 @@ export const CalendarSidebar = ({
               </span>
             ))}
           </div>
-          {/* 日付グリッド */}
           <div className="grid grid-cols-7">
             {miniCalendarDays.map((day) => (
               <button
                 key={day.date.toISOString()}
                 type="button"
                 className={cn(
-                  "flex aspect-square w-full items-center justify-center rounded-md text-[11px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                  "flex aspect-square w-full items-center justify-center rounded-full text-[11px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                   day.isSelected
                     ? "bg-[#24272f] text-white"
                     : day.isToday
@@ -149,48 +130,32 @@ export const CalendarSidebar = ({
       </section>
 
       <nav className="flex w-full flex-col gap-1" aria-label="Calendar lists">
-        {/* ── My calendars セクション */}
         <div className="flex flex-col">
-          <button
-            type="button"
-            className="flex h-7 w-full items-center gap-1.5 overflow-hidden rounded-md px-2 text-left text-[13px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            onClick={() => setMyCalendarsOpen((prev) => !prev)}
-            aria-expanded={myCalendarsOpen}
-          >
-            <span className="flex shrink-0 items-center">
-              <ChevronDown
-                className={cn(
-                  "h-3.5 w-3.5 text-[#667085] transition-transform duration-200",
-                  !myCalendarsOpen && "-rotate-90",
-                )}
-              />
-              <SidebarCalendarIcon className="h-4 w-4 shrink-0 text-black" />
-            </span>
+          <div className="flex h-7 w-full items-center gap-1.5 overflow-hidden px-2 text-[13px] font-medium leading-normal text-[#24272f]">
+            <SidebarCalendarIcon className="h-4 w-4 shrink-0 text-black" />
             <span className="truncate">My calendars</span>
-          </button>
+          </div>
 
-          {myCalendarsOpen &&
-            APP_CALENDAR_ITEMS.map((calendar) => {
-              const Icon = calendar.checked ? CheckCircle : Circle;
-              return (
-                <button
-                  key={calendar.id}
-                  type="button"
-                  className="flex h-7 w-full items-center gap-1.5 overflow-hidden rounded-md px-2 text-left text-[13px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <span className="flex shrink-0 items-center pl-3.5">
-                    <Icon
-                      className="h-4 w-4 shrink-0"
-                      style={{ color: calendar.color }}
-                    />
-                  </span>
-                  <span className="truncate">{calendar.label}</span>
-                </button>
-              );
-            })}
+          {APP_CALENDAR_ITEMS.map((calendar) => {
+            const Icon = calendar.checked ? CheckCircle : Circle;
+            return (
+              <button
+                key={calendar.id}
+                type="button"
+                className="flex h-7 w-full items-center gap-1.5 overflow-hidden rounded-md px-2 text-left text-[13px] font-medium leading-normal text-[#24272f] transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="flex shrink-0 items-center pl-3.5">
+                  <Icon
+                    className="h-4 w-4 shrink-0"
+                    style={{ color: calendar.color }}
+                  />
+                </span>
+                <span className="truncate">{calendar.label}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* ── Google Calendar セクション */}
         {isCalendarConnected ? (
           <div className="flex flex-col">
             <button
