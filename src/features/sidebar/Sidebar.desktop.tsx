@@ -17,7 +17,7 @@ type AppSidebarNavItem = {
   to?: string;
   icon: ReactNode;
   exactPath?: boolean;
-  sectionKey?: "home" | "review" | "library" | "calendar" | "tasks";
+  sectionKey?: "home" | "review" | "library" | "calendar";
   onClick?: () => void;
   disabled?: boolean;
   match?: (pathname: string, searchParams: URLSearchParams) => boolean;
@@ -86,24 +86,6 @@ const CalendarIcon = ({ className }: SidebarIconProps) => (
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-    />
-  </IconShell>
-);
-
-const TaskIcon = ({ className }: SidebarIconProps) => (
-  <IconShell className={className}>
-    <path
-      d="M7.2 7.5H16.8M7.2 12H16.8M7.2 16.5H13.6"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeWidth="1.9"
-    />
-    <path
-      d="M3.8 7.5 4.55 8.25 6.2 6.45M3.8 12 4.55 12.75 6.2 10.95M3.8 16.5 4.55 17.25 6.2 15.45"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="1.9"
     />
   </IconShell>
 );
@@ -201,14 +183,6 @@ const mainNavItems: AppSidebarNavItem[] = [
     exactPath: true,
   },
   {
-    id: "tasks",
-    label: "タスク",
-    to: "/tasks",
-    icon: <TaskIcon className="app-sidebar__nav-icon" />,
-    sectionKey: "tasks",
-    exactPath: true,
-  },
-  {
     id: "explore",
     label: "探す",
     icon: <ExploreIcon className="app-sidebar__nav-icon" />,
@@ -292,6 +266,7 @@ const AppSidebarNavLink = ({
     }
 
     item.onClick?.();
+
     if (item.sectionKey) {
       openSectionTab(item.sectionKey);
     }
@@ -320,6 +295,7 @@ const AppSidebarNavLink = ({
     >
       <span className="app-sidebar__nav-icon-slot">{item.icon}</span>
       <span className="app-sidebar__nav-label">{item.label}</span>
+
       {trailing ? (
         <span className="app-sidebar__nav-trailing">{trailing}</span>
       ) : null}
@@ -330,27 +306,35 @@ const AppSidebarNavLink = ({
 const AppSidebar = ({ collapsed = false, onOpenSettings }: AppSidebarProps) => {
   const navigate = useNavigate();
   const { search } = useLocation();
+
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
   const [isRailExpanded, setIsRailExpanded] = useState(false);
+
   const selectedLibraryChild = new URLSearchParams(search).get("libraryType");
+
   const closeCalendar = useExplorerCalendarViewStore((state) => state.close);
   const openGlobalSearch = useGlobalSearchStore((state) => state.open);
   const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
 
   const isCompact = collapsed && !isRailExpanded;
+
   const mainNavItemsWithActions = mainNavItems.map((item) => ({
     ...item,
     onClick: () => {
       closeCalendar();
+
       item.onClick?.();
+
       if (item.id === "library" && !isCompact) {
         setIsLibraryOpen((isOpen) => !isOpen);
       }
+
       if (item.id === "explore") {
         openGlobalSearch();
       }
     },
   }));
+
   const footerItems: AppSidebarNavItem[] = [
     {
       id: "settings",
@@ -362,13 +346,17 @@ const AppSidebar = ({ collapsed = false, onOpenSettings }: AppSidebarProps) => {
 
   const openLibraryChild = (libraryType: string) => {
     closeCalendar();
+
     openSectionTab("library");
+
     navigate(`/folders?view=section-list&libraryType=${libraryType}`);
   };
 
   const handleBlurCapture = (event: FocusEvent<HTMLElement>) => {
     if (!collapsed) return;
+
     const next = event.relatedTarget;
+
     if (!(next instanceof Node) || !event.currentTarget.contains(next)) {
       setIsRailExpanded(false);
     }
@@ -391,11 +379,14 @@ const AppSidebar = ({ collapsed = false, onOpenSettings }: AppSidebarProps) => {
       <div className="app-sidebar__top">
         <div className="app-sidebar__workspace">
           <div className="app-sidebar__workspace-avatar">C</div>
+
           <div className="app-sidebar__workspace-copy">
             <div className="app-sidebar__workspace-name">
               <span>Atlas, Inc</span>
+
               <ChevronDownIcon className="app-sidebar__workspace-chevron" />
             </div>
+
             <div className="app-sidebar__sync">
               <CloudIcon className="app-sidebar__sync-icon" />
               <span>同期中</span>
@@ -420,6 +411,7 @@ const AppSidebar = ({ collapsed = false, onOpenSettings }: AppSidebarProps) => {
                     />
                   }
                 />
+
                 {!isCompact && isLibraryOpen ? (
                   <div
                     className="app-sidebar__nested-group app-sidebar__library-children"
@@ -459,11 +451,17 @@ const AppSidebar = ({ collapsed = false, onOpenSettings }: AppSidebarProps) => {
             <br />
             すべての機能をお試しいただけます。
           </p>
+
           <button type="button">アップグレード</button>
         </div>
+
         <nav className="app-sidebar__nav" aria-label="Support navigation">
           {footerItems.map((item) => (
-            <AppSidebarNavLink key={item.id} item={item} compact={isCompact} />
+            <AppSidebarNavLink
+              key={item.id}
+              item={item}
+              compact={isCompact}
+            />
           ))}
         </nav>
       </div>
