@@ -1,5 +1,11 @@
-import { addDays, addMonths, startOfMonth, subDays, subMonths } from "date-fns";
-import { useCallback, useRef, useState } from "react";
+import {
+  addDays,
+  addMonths,
+  startOfMonth,
+  subDays,
+  subMonths,
+} from "date-fns";
+import { useCallback, useEffect, useRef, useState } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type {
   CalendarToolbarMode,
@@ -82,6 +88,27 @@ export const useCalendarNavigation = () => {
       after: prev.after + C.CALENDAR_EXTEND_DAYS,
     }));
   }, []);
+
+  // ─────────────────────────────────────────────
+  // ResizeObserver: viewport 幅監視
+  // ─────────────────────────────────────────────
+  useEffect(() => {
+    const el = contentViewportRef.current;
+    if (!el) return;
+
+    const ro = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width ?? 0;
+      setViewportWidth(width);
+    });
+
+    ro.observe(el);
+
+    // 初期値を即時確定（初回ResizeObserver待ちを回避）
+    setViewportWidth(el.getBoundingClientRect().width);
+
+    return () => ro.disconnect();
+  }, []);
+  // ─────────────────────────────────────────────
 
   const handleSelectViewMode = useCallback(
     (next: CalendarViewMode) => {

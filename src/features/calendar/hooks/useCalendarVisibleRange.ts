@@ -17,7 +17,7 @@ const getRangeDayCount = (baseDate: Date, viewMode: CalendarViewMode) => {
       return getDaysInMonth(baseDate);
     case "week":
       return 7;
-    case "day":
+    case "days":
     default:
       return 1;
   }
