@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Filter, Search } from "@/ui/icons";
-import type { IconProps } from "@/ui/icons";
+import { useLayoutEffect, useRef, useState } from "react";
+
 import {
   CalendarIcon,
   FieldsToolbarIcon,
@@ -11,9 +12,9 @@ import {
   WeekViewIcon,
   TaskIcon,
 } from "./ui/calendar.icons";
+
 import type {
   CalendarToolbarMode,
-  CalendarViewMode,
   CalendarWorkspaceToolbarProps,
 } from "./calendarPane.types";
 
@@ -30,11 +31,7 @@ const CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS = [
   { value: "month", label: "Month", icon: MonthViewIcon },
   { value: "week", label: "Week", icon: WeekViewIcon },
   { value: "days", label: "Day", icon: DayViewIcon },
-] as const satisfies Array<{
-  value: CalendarViewMode;
-  label: string;
-  icon: React.ComponentType<IconProps>;
-}>;
+] as const;
 
 export const CalendarWorkspaceToolbar = ({
   activeMode,
@@ -65,85 +62,129 @@ export const CalendarWorkspaceToolbar = ({
     },
   ];
 
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const viewRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  const [tabIndicator, setTabIndicator] = useState({ left: 0, width: 0 });
+  const [viewIndicator, setViewIndicator] = useState({ left: 0, width: 0 });
+
+  // TAB indicator
+  useLayoutEffect(() => {
+    const el = tabRefs.current[activeMode];
+    if (!el) return;
+
+    setTabIndicator({
+      left: el.offsetLeft,
+      width: el.offsetWidth,
+    });
+  }, [activeMode]);
+
+  // VIEW indicator
+  useLayoutEffect(() => {
+    if (!viewMode) return;
+
+    const el = viewRefs.current[viewMode];
+    if (!el) return;
+
+    setViewIndicator({
+      left: el.offsetLeft,
+      width: el.offsetWidth,
+    });
+  }, [viewMode]);
+
   return (
-    <div className="relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 flex-wrap items-center justify-between overflow-hidden bg-white after:absolute after:bottom-1 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']">
-      <div className="flex h-7 shrink-0 items-start gap-[6px]">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeMode === tab.value;
-          return (
-            <div key={tab.value} className="flex flex-col items-start pb-2">
+    <div className="relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full items-center justify-between bg-white overflow-hidden after:absolute after:bottom-1 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']">
+
+      {/* LEFT */}
+      <div className="flex items-center gap-3">
+
+        {/* TAB GROUP */}
+        <div className="relative flex h-7 items-center gap-[6px]">
+
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeMode === tab.value;
+
+            return (
               <button
-                type="button"
-                className={cn(
-                  "flex h-7 items-center gap-[6px] rounded py-[3px] pl-0 pr-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  isActive ? "text-[#25272d]" : "text-[#8f929c]",
-                )}
-                aria-pressed={isActive}
+                key={tab.value}
+                ref={(el) => {
+                  tabRefs.current[tab.value] = el;
+                }}
                 onClick={tab.onClick}
+                className={cn(
+                  "relative flex h-7 items-center gap-[6px] rounded px-2 w-fit",
+                  "text-[12px] font-medium leading-none transition-colors",
+                  isActive ? "text-[#25272d]" : "text-[#8f929c]",
+                  "hover:bg-[#f6f7f9]"
+                )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                <span
+                <span className="whitespace-nowrap">{tab.label}</span>
+              </button>
+            );
+          })}
+
+          {/* TAB INDICATOR */}
+          <span
+            className="absolute bottom-[-2px] h-[2px] bg-[#74798b] rounded-full transition-all duration-300 ease-out"
+            style={{
+              left: tabIndicator.left,
+              width: tabIndicator.width,
+            }}
+          />
+        </div>
+
+        {/* VIEW MODE */}
+        {onSelectViewMode && viewMode && activeMode !== "task" && (
+          <div className="relative flex h-7 items-center gap-1 ml-3">
+
+            {CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.map((option) => {
+              const Icon = option.icon;
+              const isActive = viewMode === option.value;
+
+              return (
+                <button
+                  key={option.value}
+                  ref={(el) => {
+                    viewRefs.current[option.value] = el;
+                  }}
+                  onClick={() => onSelectViewMode(option.value)}
                   className={cn(
-                    "flex h-7 items-center whitespace-nowrap",
-                    isActive && "border-b-2 border-[#74798b]",
+                    "relative flex h-7 items-center gap-[6px] rounded px-2 w-fit",
+                    "text-[12px] font-medium leading-none transition-colors",
+                    isActive ? "text-[#25272d]" : "text-[#8f929c]",
+                    "hover:bg-[#f6f7f9]"
                   )}
                 >
-                  {tab.label}
-                </span>
-              </button>
-            </div>
-          );
-        })}
-
-        {onSelectViewMode && viewMode && activeMode !== "task" ? (
-          <div className="ml-3 flex h-7 shrink-0 items-start gap-1">
-            {CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS.map((option) => {
-              const isActive = viewMode === option.value;
-              const Icon = option.icon;
-              return (
-                <div
-                  key={option.value}
-                  className="flex flex-col items-start pb-2"
-                >
-                  <button
-                    type="button"
-                    className={cn(
-                      "flex h-7 items-center gap-[6px] rounded px-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                      isActive ? "text-[#25272d]" : "text-[#8f929c]",
-                    )}
-                    aria-pressed={isActive}
-                    onClick={() => onSelectViewMode(option.value)}
-                  >
-                    <Icon className="h-4 w-4 shrink-0" />
-                    <span
-                      className={cn(
-                        "flex h-7 items-center whitespace-nowrap",
-                        isActive && "border-b-2 border-[#74798b]",
-                      )}
-                    >
-                      {option.label}
-                    </span>
-                  </button>
-                </div>
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="whitespace-nowrap">{option.label}</span>
+                </button>
               );
             })}
+
+            {/* VIEW INDICATOR */}
+            <span
+              className="absolute bottom-[-2px] h-[2px] bg-[#74798b] rounded-full transition-all duration-300 ease-out"
+              style={{
+                left: viewIndicator.left,
+                width: viewIndicator.width,
+              }}
+            />
           </div>
-        ) : null}
+        )}
       </div>
 
-      <div className="flex h-7 shrink-0 items-center justify-end gap-[6px]">
-        {CALENDAR_TOOLBAR_ACTIONS.map((action, index) => {
+      {/* RIGHT ACTIONS */}
+      <div className="flex h-7 items-center gap-[6px]">
+        {CALENDAR_TOOLBAR_ACTIONS.map((action) => {
           const Icon = action.icon;
-          const isLast = index === CALENDAR_TOOLBAR_ACTIONS.length - 1;
+
           return (
             <button
               key={action.label}
               type="button"
-              className={cn(
-                "flex h-7 items-center gap-[6px] rounded py-[3px] pl-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal text-[#8f929c] transition-colors hover:bg-[#f6f7f9] hover:text-[#25272d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                isLast ? "pr-0" : "pr-2",
-              )}
+              className="flex h-7 items-center gap-[6px] rounded px-2 text-[12px] font-medium text-[#8f929c] transition-colors hover:bg-[#f6f7f9] hover:text-[#25272d]"
             >
               <Icon className="h-4 w-4 shrink-0" />
               <span className="whitespace-nowrap">{action.label}</span>
