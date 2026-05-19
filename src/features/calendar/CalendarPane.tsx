@@ -20,8 +20,8 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
     monthLabel,
     titleDate,
     monthScrollTargetToken,
-    visibleDays,
-    displayDays,
+    visibleDays,        // ← バッファ込みの全日数（CalendarWeekDayGrid に渡す）
+
     googleCalendarEvents,
     googleCalendars,
     googleAccountEmail,
@@ -161,7 +161,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
             <CalendarWeekDayGrid
               headerScrollRef={headerScrollRef}
               scrollContainerRef={scrollContainerRef}
-              visibleDays={displayDays}
+              visibleDays={visibleDays}
               visibleEvents={googleCalendarEvents}
               calendarDayColumnWidth={calendarDayColumnWidth}
               timelineGridStyle={timelineGridStyle}

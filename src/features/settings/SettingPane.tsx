@@ -5,11 +5,12 @@ type Props = {
   selected: SettingSection;
 };
 
+const paneMap: Record<SettingSection, React.ReactNode> = {
+  language: <LanguagePane />,
+};
+
 const SettingPane = ({ selected }: Props) => {
-  switch (selected) {
-    case "language":
-      return <LanguagePane />;
-  }
+  return paneMap[selected] ?? null;
 };
 
 export default SettingPane;
