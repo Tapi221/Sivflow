@@ -9,7 +9,7 @@ import {
   DayViewToolbarIcon,
   MonthViewToolbarIcon,
   WeekViewToolbarIcon,
-  TaskToolbarIcon,
+  TaskIcon,
 } from "./ui/calendar.icons";
 import type {
   CalendarToolbarMode,
@@ -60,7 +60,7 @@ export const CalendarWorkspaceToolbar = ({
     {
       value: "task" as CalendarToolbarMode,
       label: "Task",
-      icon: TaskToolbarIcon,
+      icon: TaskIcon,
       onClick: onSelectTask,
     },
   ];

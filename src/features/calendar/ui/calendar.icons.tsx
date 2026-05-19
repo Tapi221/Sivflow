@@ -108,10 +108,6 @@ export const MonthViewToolbarIcon = ({
   </svg>
 );
 
-/**
- * Week view — Lucide `calendar-range` (v0.383.0, ISC License)
- * https://lucide.dev/icons/calendar-range
- */
 export const WeekViewToolbarIcon = ({
   className,
   label: _label,
@@ -142,10 +138,6 @@ export const WeekViewToolbarIcon = ({
   </svg>
 );
 
-/**
- * Day view — Lucide `calendar` (v0.383.0, ISC License)
- * https://lucide.dev/icons/calendar
- */
 export const DayViewToolbarIcon = ({
   className,
   label: _label,
@@ -204,7 +196,7 @@ export const SidebarCalendarIcon = ({
   </svg>
 );
 
-export const TaskToolbarIcon = ({
+export const TaskIcon = ({
   className,
   label: _label,
   size: _size,
@@ -219,18 +211,20 @@ export const TaskToolbarIcon = ({
     aria-hidden="true"
     {...props}
   >
-    <path
-      d="M7.2 7.5H16.8M7.2 12H16.8M7.2 16.5H13.6"
+    <circle
+      cx="12"
+      cy="12"
+      r="9"
       stroke="currentColor"
-      strokeLinecap="round"
-      strokeWidth="1.9"
+      strokeWidth="2"
     />
+
     <path
-      d="M3.8 7.5 4.55 8.25 6.2 6.45M3.8 12 4.55 12.75 6.2 10.95M3.8 16.5 4.55 17.25 6.2 15.45"
+      d="M8 12.2L10.5 14.7L16 9.2"
       stroke="currentColor"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth="1.9"
     />
   </svg>
 );
