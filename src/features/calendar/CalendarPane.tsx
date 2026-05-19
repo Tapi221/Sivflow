@@ -154,6 +154,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
               calendarDayColumnWidth={calendarDayColumnWidth}
               timelineGridStyle={timelineGridStyle}
               onScroll={handleTimelineScroll}
+              selectedDate={selectedDate}
             />
           )}
         </div>
