@@ -29,28 +29,21 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
     googleCalendarError,
     isGoogleCalendarConnected,
     isGoogleCalendarConnecting,
-    isCalendarSidebarOpen,
     calendarDayColumnWidth,
     timelineGridStyle,
     headerScrollRef,
     scrollContainerRef,
     contentViewportRef,
-
     setActiveMode,
-    setIsCalendarSidebarOpen,
-
     handleSelectViewMode,
     handleSidebarSelectDate,
     handleSidebarPreviousMonth,
     handleSidebarNextMonth,
     handleVisibleMonthChange,
-
     handlePrevious,
     handleNext,
     handleToday,
-
     handleTimelineScroll,
-
     connectGoogleCalendar,
     toggleGoogleCalendar,
   } = pane;
@@ -66,17 +59,16 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
         }}
         onSelectTimeline={() => {
           setActiveMode("timeline");
-          setIsCalendarSidebarOpen(false);
+          
         }}
         onSelectTask={() => {
           setActiveMode("task");
-          setIsCalendarSidebarOpen(false);
+          
         }}
         onSelectViewMode={handleSelectViewMode}
       />
 
       <div className="flex min-h-0 flex-1 bg-white">
-        {isCalendarSidebarOpen ? (
           <CalendarSidebar
             monthDate={titleDate}
             selectedDate={selectedDate}
@@ -92,7 +84,6 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
             onConnectCalendar={connectGoogleCalendar}
             onToggleCalendar={toggleGoogleCalendar}
           />
-        ) : null}
 
         <div
           ref={contentViewportRef}
@@ -104,17 +95,6 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
           {activeMode !== "task" && (
             <div className="mb-4 flex shrink-0 items-center justify-between">
               <div className="flex min-w-0 items-center gap-3">
-                {!isCalendarSidebarOpen ? (
-                  <button
-                    type="button"
-                    className="flex h-6 w-6 items-center justify-center rounded text-[#9ea3b0] transition-colors hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    onClick={() => setIsCalendarSidebarOpen(true)}
-                    aria-label="Show calendar sidebar"
-                    title="Show calendar sidebar"
-                  >
-                    <SidebarPanelIcon className="h-4 w-4" />
-                  </button>
-                ) : null}
 
                 {monthLabel ? (
                   <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
