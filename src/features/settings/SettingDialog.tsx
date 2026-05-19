@@ -39,12 +39,14 @@ const SettingDialog = ({
             overflow-hidden
           "
         >
-          <div className="w-[280px] shrink-0 bg-muted/30">
-          </div>
+          {/* sidebar */}
+          <div className="w-[240px] shrink-0 bg-muted/30" />
 
-          <div className="w-px bg-border" />
-          <div className="flex-1 bg-background">
-          </div>
+          {/* separator (grid line tone match) */}
+          <div className="w-0 border-l border-[#eef0f3]" />
+
+          {/* main content */}
+          <div className="flex-1 bg-background" />
         </div>
       </DialogContent>
     </Dialog>

@@ -512,7 +512,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     monthScrollTargetToken,
     selectedViewMode,
     activeMode,
-
+    setActiveMode,    
     visibleDays,
     timelineColumns,
     timelineColumnWidth,
