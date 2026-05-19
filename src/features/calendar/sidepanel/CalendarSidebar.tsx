@@ -141,7 +141,6 @@ const GoogleAccountSection = ({
   onRemove,
 }: GoogleAccountSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const label = account.email ?? "Google Calendar";
 
@@ -163,7 +162,7 @@ const GoogleAccountSection = ({
         {syncIndicator}
       </div>
 
-      {/* アカウント行（展開トグル + 削除ボタン） */}
+      {/* アカウント行（展開トグルのみ） */}
       <div className="group flex h-7 w-full items-center gap-1 rounded-md px-2 hover:bg-[#eceef1]">
         <button
           type="button"
@@ -183,38 +182,6 @@ const GoogleAccountSection = ({
             {label}
           </span>
         </button>
-
-        {/* 削除ボタン */}
-        {!showDeleteConfirm ? (
-          <button
-            type="button"
-            title="このアカウントを削除"
-            className="hidden h-5 w-5 shrink-0 items-center justify-center rounded text-[#9aa0aa] hover:bg-[#fce8e8] hover:text-[#c53030] group-hover:flex"
-            onClick={() => setShowDeleteConfirm(true)}
-          >
-            <IconTrash className="h-3.5 w-3.5" />
-          </button>
-        ) : (
-          <div className="flex shrink-0 items-center gap-1 text-[10px]">
-            <button
-              type="button"
-              className="rounded px-1 py-0.5 font-medium text-[#c53030] hover:bg-[#fce8e8]"
-              onClick={() => {
-                onRemove();
-                setShowDeleteConfirm(false);
-              }}
-            >
-              削除
-            </button>
-            <button
-              type="button"
-              className="rounded px-1 py-0.5 text-[#6b7280] hover:bg-[#eceef1]"
-              onClick={() => setShowDeleteConfirm(false)}
-            >
-              取消
-            </button>
-          </div>
-        )}
       </div>
 
       {/* カレンダー一覧 */}
@@ -227,7 +194,7 @@ const GoogleAccountSection = ({
             <button
               key={calendar.id}
               type="button"
-              className="flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 pl-7 text-left transition-colors hover:bg-[#eceef1] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 pl-7 text-left transition-colors hover:bg-[#eceef1]"
               onClick={() => onToggleCalendar(calendar.id)}
             >
               <Icon
@@ -241,14 +208,12 @@ const GoogleAccountSection = ({
           );
         })}
 
-      {/* カレンダーが未取得のとき */}
       {isOpen && account.calendars.length === 0 && (
         <p className="px-7 py-1 text-[11px] text-[#b0b5bf]">
           {account.syncState === "syncing" ? "読み込み中…" : "カレンダーなし"}
         </p>
       )}
 
-      {/* エラー表示 */}
       {account.error && (
         <p className="mt-1 px-2 text-[11px] leading-relaxed text-[#b42318]">
           {account.error}
@@ -293,18 +258,16 @@ export const CalendarSidebar = ({
           <div className="flex items-center gap-0.5">
             <button
               type="button"
-              className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] transition-colors hover:bg-[#eceef1] hover:text-[#3d4049] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
               onClick={onPreviousMonth}
-              aria-label="Previous month"
             >
               <IconChevronLeft className="h-3.5 w-3.5" />
             </button>
 
             <button
               type="button"
-              className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] transition-colors hover:bg-[#eceef1] hover:text-[#3d4049] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
               onClick={onNextMonth}
-              aria-label="Next month"
             >
               <IconChevronRight className="h-3.5 w-3.5" />
             </button>
@@ -315,7 +278,7 @@ export const CalendarSidebar = ({
           {T.MINI_CALENDAR_WEEKDAYS.map((weekday, index) => (
             <span
               key={`${weekday}-${index}`}
-              className="flex h-6 items-center justify-center text-[10px] font-medium uppercase tracking-wider text-[#b0b5bf]"
+              className="flex h-6 items-center justify-center text-[10px] font-medium uppercase text-[#b0b5bf]"
             >
               {weekday}
             </span>
@@ -330,19 +293,14 @@ export const CalendarSidebar = ({
               <button
                 key={day.date.toISOString()}
                 type="button"
-                aria-pressed={day.isSelected}
                 onClick={() => onSelectDate(day.date)}
                 className={cn(
-                  "flex aspect-square w-full items-center justify-center rounded-full",
-                  "text-[11px] font-medium leading-none",
-                  "transition-colors duration-100",
-                  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                  day.isToday &&
-                    "bg-[#185FA5] text-white shadow-[0_2px_8px_rgba(24,95,165,0.35)]",
+                  "flex aspect-square w-full items-center justify-center rounded-full text-[11px]",
+                  day.isToday && "bg-[#185FA5] text-white",
                   day.isSelected && !day.isToday && "bg-[#2d3039] text-white",
                   !isActive &&
                     day.isCurrentMonth &&
-                    "text-[#2d3039] hover:bg-[#eceef1]",
+                    "hover:bg-[#eceef1] text-[#2d3039]",
                   !isActive &&
                     !day.isCurrentMonth &&
                     "text-[#c5c8d0] hover:bg-[#eceef1]",
@@ -358,38 +316,14 @@ export const CalendarSidebar = ({
       <div className="h-px w-full bg-[#e4e6eb]" />
 
       {/* カレンダーリスト */}
-      <nav className="flex w-full flex-col gap-0.5" aria-label="Calendar lists">
-        {/* My Calendars */}
+      <nav className="flex w-full flex-col gap-0.5">
         <div className="mb-1 flex h-6 items-center gap-1.5 px-2">
-          <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-[#74798b]" />
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9aa0aa]">
+          <CalendarIcon className="h-3.5 w-3.5 text-[#74798b]" />
+          <span className="text-[11px] font-semibold uppercase text-[#9aa0aa]">
             My Calendars
           </span>
         </div>
 
-        {APP_CALENDAR_ITEMS.map((calendar) => {
-          const Icon = calendar.checked
-            ? CheckCircleFilledIcon
-            : CircleOutlineIcon;
-
-          return (
-            <button
-              key={calendar.id}
-              type="button"
-              className="group flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 text-left transition-colors hover:bg-[#eceef1] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-              <Icon
-                className="h-3.5 w-3.5 shrink-0"
-                style={{ color: calendar.color }}
-              />
-              <span className="truncate text-[12px] font-medium text-[#3d4049]">
-                {calendar.label}
-              </span>
-            </button>
-          );
-        })}
-
-        {/* Google アカウントセクション（複数） */}
         {googleAccounts.map((account) => (
           <GoogleAccountSection
             key={account.accountId}
@@ -401,21 +335,15 @@ export const CalendarSidebar = ({
           />
         ))}
 
-        {/* アカウント追加ボタン */}
-        <div
-          className={cn(
-            "mt-2",
-            hasGoogleAccounts && "border-t border-[#e4e6eb] pt-2",
-          )}
-        >
+        <div className={cn("mt-2", hasGoogleAccounts && "pt-2 border-t")}>
           <button
             type="button"
-            className="flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 text-left transition-colors hover:bg-[#eceef1] disabled:cursor-wait disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-7 w-full items-center gap-2 px-2 text-left hover:bg-[#eceef1]"
             onClick={onAddCalendar}
             disabled={isAnyCalendarConnecting}
           >
-            <PlusIcon className="h-4 w-4 shrink-0 text-[#74798b]" />
-            <span className="truncate text-[12px] font-medium text-[#74798b]">
+            <PlusIcon className="h-4 w-4 text-[#74798b]" />
+            <span className="text-[12px] text-[#74798b]">
               {isAnyCalendarConnecting
                 ? "接続中…"
                 : hasGoogleAccounts
