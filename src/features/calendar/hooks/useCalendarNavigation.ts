@@ -67,11 +67,31 @@ export const useCalendarNavigation = () => {
     setTimelineUnitBuffer(createInitialTimelineUnitBuffer(viewMode));
   }, []);
 
+  // ─────────────────────────────────────────────────────────
+  // 無限横スクロール用バッファ拡張コールバック
+  // ─────────────────────────────────────────────────────────
+
+  /** 左端到達時：before バッファを CALENDAR_EXTEND_DAYS 日分増やす */
+  const extendCalendarBufferLeft = useCallback(() => {
+    setCalendarBuffer((prev) => ({
+      ...prev,
+      before: prev.before + C.CALENDAR_EXTEND_DAYS,
+    }));
+  }, []);
+
+  /** 右端到達時：after バッファを CALENDAR_EXTEND_DAYS 日分増やす */
+  const extendCalendarBufferRight = useCallback(() => {
+    setCalendarBuffer((prev) => ({
+      ...prev,
+      after: prev.after + C.CALENDAR_EXTEND_DAYS,
+    }));
+  }, []);
+
+  // ─────────────────────────────────────────────────────────
+
   const handleSelectViewMode = useCallback(
     (next: CalendarViewMode) => {
       setSelectedViewMode(next);
-
-      // 追加：必ずカレンダーモードに戻す
       setActiveMode("calendar");
 
       if (next === "month") {
@@ -166,6 +186,7 @@ export const useCalendarNavigation = () => {
     currentDate,
     selectedDate,
     monthTitleDate,
+    setMonthTitleDate,
     monthScrollTargetToken,
 
     selectedViewMode,
@@ -187,5 +208,9 @@ export const useCalendarNavigation = () => {
     handleVisibleMonthChange,
 
     resetTimelinePosition,
+
+    // 無限横スクロール用
+    extendCalendarBufferLeft,
+    extendCalendarBufferRight,
   };
 };

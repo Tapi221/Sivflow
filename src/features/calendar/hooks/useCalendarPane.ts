@@ -10,7 +10,13 @@ import type {
   CalendarToolbarMode,
   CalendarViewMode,
 } from "../calendarPane.types";
+import type {
+  GoogleCalendarEvent,
+  GoogleCalendarListItem,
+} from "../googlecalendar-integration/useGoogleCalendarIntegration";
+import type { buildTimelineColumns } from "../grid/TimelineDayView.shared";
 
+// ── 戻り値の型を明示することで TS7022（循環推論エラー）を解消 ──
 export type UseCalendarPaneReturn = {
   contentViewportRef: React.RefObject<HTMLDivElement | null>;
   scrollContainerRef: React.RefObject<HTMLDivElement | null>;
@@ -28,9 +34,8 @@ export type UseCalendarPaneReturn = {
   visibleDays: Date[];
   displayDays: Date[];
 
-  timelineColumns: ReturnType<
-    typeof import("../grid/TimelineDayView.shared").buildTimelineColumns
-  >;
+  // ReturnType の動的 import をやめ、明示的な型エイリアスを使用
+  timelineColumns: ReturnType<typeof buildTimelineColumns>;
   timelineColumnWidth: number;
   timelineAnchorColumnIndex: number;
 
@@ -41,9 +46,10 @@ export type UseCalendarPaneReturn = {
   timelineGridStyle: React.CSSProperties;
 
   googleAccountEmail: string | null;
-  googleCalendars: any;
+  // any → 具体的な型に変更（TS no-explicit-any 解消）
+  googleCalendars: GoogleCalendarListItem[];
   googleCalendarError: string | null;
-  googleCalendarEvents: any;
+  googleCalendarEvents: GoogleCalendarEvent[];
   isGoogleCalendarConnected: boolean;
   isGoogleCalendarConnecting: boolean;
   selectedCalendarIds: Set<string>;
@@ -97,11 +103,12 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     timelineAnchorColumnIndex: timeline.timelineAnchorColumnIndex,
     calendarBuffer: navigation.calendarBuffer,
     viewportWidth: navigation.viewportWidth,
+    calendarDayColumnWidth: layout.calendarDayColumnWidth,
+    onExtendLeft: navigation.extendCalendarBufferLeft,
+    onExtendRight: navigation.extendCalendarBufferRight,
   });
 
   const google = useGoogleCalendarLayer();
-
-  const selectedCalendarIdList = Array.from(google.selectedCalendarIds);
 
   useCalendarEventSync({
     activeMode: navigation.activeMode,
@@ -110,7 +117,9 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     monthTitleDate: navigation.monthTitleDate,
     googleCalendar: {
       forceSync: google.forceSync,
-      selectedCalendarIds: selectedCalendarIdList,
+      // useCalendarEventSync の GoogleCalendarSlice は selectedCalendarIds: string[]
+      // Set<string> → string[] に変換して渡す
+      selectedCalendarIds: Array.from(google.selectedCalendarIds),
     },
   });
 
@@ -147,7 +156,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     googleCalendarEvents: google.events,
     isGoogleCalendarConnected: google.isConnected,
     isGoogleCalendarConnecting: google.isConnecting,
-    selectedCalendarIds: google.selectedCalendarIds,
+    selectedCalendarIds: google.selectedCalendarIds, // Set<string> のまま外部に渡す
     connectGoogleCalendar: google.connect,
     toggleGoogleCalendar: google.toggleCalendar,
 
