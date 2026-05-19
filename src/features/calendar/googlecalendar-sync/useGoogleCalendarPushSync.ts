@@ -1,19 +1,3 @@
-/**
- * useGoogleCalendarPushSync
- *
- * Firestore の /gcal_notifications/{userId}/calendars を監視し、
- * Google Calendar から Push通知が届いたら即座に SyncEngine を起動する。
- *
- * useGoogleCalendarIntegration.ts の中で呼び出すこと。
- *
- * --- 使い方 ---
- * useGoogleCalendarPushSync({
- *   userId,
- *   selectedCalendarIds,
- *   onNotification: (calendarId) => syncEngine.forceSync(),
- * });
- */
-
 import { useEffect, useRef } from "react";
 import {
   collection,
@@ -21,13 +5,16 @@ import {
   query,
   type Unsubscribe,
 } from "firebase/firestore";
+
 import { firestoreDb } from "@/services/firebase";
 
 type UseGoogleCalendarPushSyncOptions = {
   /** Firebase Auth の UID。null の場合はリスナーを張らない */
   userId: string | null;
+
   /** 監視対象のカレンダーID一覧 */
   selectedCalendarIds: Set<string>;
+
   /** Push通知を受け取ったときのコールバック */
   onNotification: (calendarId: string) => void;
 };
@@ -37,58 +24,101 @@ export const useGoogleCalendarPushSync = ({
   selectedCalendarIds,
   onNotification,
 }: UseGoogleCalendarPushSyncOptions): void => {
-  // コールバックは毎レンダーで参照が変わるため ref で安定化
+  /**
+   * コールバックは毎レンダーで参照が変わる可能性があるため、
+   * ref に保持して stale closure を防ぐ
+   */
   const onNotificationRef = useRef(onNotification);
+
   onNotificationRef.current = onNotification;
 
   useEffect(() => {
-    if (!userId || selectedCalendarIds.size === 0) return;
+    /**
+     * 初期化前や未ログイン時は何もしない
+     */
+    if (
+      !userId ||
+      selectedCalendarIds.size === 0 ||
+      !firestoreDb
+    ) {
+      return;
+    }
 
-    // /gcal_notifications/{userId}/calendars コレクションを購読
+    /**
+     * /gcal_notifications/{userId}/calendars
+     */
     const colRef = collection(
-      db,
+      firestoreDb,
       "gcal_notifications",
       userId,
       "calendars",
     );
 
-    // 初回のスナップショット（マウント時）はスキップして、
-    // その後の変更のみをトリガーとして扱う
+    /**
+     * Firestore の初回 snapshot は
+     * 現在状態の同期なので Push通知として扱わない
+     */
     let isInitialSnapshot = true;
 
     const unsubscribe: Unsubscribe = onSnapshot(
       query(colRef),
+
       (snapshot) => {
+        /**
+         * 初回同期は無視
+         */
         if (isInitialSnapshot) {
           isInitialSnapshot = false;
           return;
         }
 
         snapshot.docChanges().forEach((change) => {
-          // 新規 or 変更（削除は無視）
-          if (change.type === "added" || change.type === "modified") {
-            const calendarId = change.doc.id;
-
-            // 選択中のカレンダーのみ反応
-            if (selectedCalendarIds.has(calendarId)) {
-              console.info(
-                `[PushSync] ${calendarId} の変更通知を受信 → 即時同期`,
-              );
-              onNotificationRef.current(calendarId);
-            }
+          /**
+           * 削除イベントは無視
+           */
+          if (
+            change.type !== "added" &&
+            change.type !== "modified"
+          ) {
+            return;
           }
+
+          const calendarId = change.doc.id;
+
+          /**
+           * 現在選択中のカレンダーのみ同期
+           */
+          if (!selectedCalendarIds.has(calendarId)) {
+            return;
+          }
+
+          console.info(
+            `[PushSync] ${calendarId} の変更通知を受信 → 即時同期`,
+          );
+
+          onNotificationRef.current(calendarId);
         });
       },
+
       (error) => {
-        console.warn("[PushSync] Firestoreリスナーエラー:", error);
+        console.warn(
+          "[PushSync] Firestoreリスナーエラー:",
+          error,
+        );
       },
     );
 
+    /**
+     * unmount 時に listener cleanup
+     */
     return () => {
       unsubscribe();
     };
 
-    // selectedCalendarIds は Set のため依存配列に直接入れると比較できない
+    /**
+     * selectedCalendarIds は Set のため
+     * 直接依存配列に入れると比較が壊れる
+     */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, selectedCalendarIds.size]);
 };
