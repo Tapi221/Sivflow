@@ -3,7 +3,7 @@ import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarTimelineDayView } from "./grid/TimelineDayView";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
-import { CalendarWorkspaceToolbar } from "./CalendarToolbar";
+import { CalendarWorkspaceToolbar } from "./toolbar/CalendarToolbar";
 import { useCalendarPane } from "./hooks/useCalendarPane";
 import type { CalendarPaneProps } from "./calendarPane.types";
 import * as C from "@/features/calendar/calendar.constants.desktop";
