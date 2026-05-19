@@ -11,9 +11,10 @@ export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
     <div
       className="
         inline-flex items-center
-        rounded-full border border-[#e2e4e9]
-        bg-white
-        shadow-sm
+        rounded-full
+        border border-[#e2e4e9]
+        bg-transparent
+        shadow-none
         overflow-hidden
       "
     >
@@ -24,7 +25,8 @@ export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
           flex h-7 w-7 items-center justify-center
           text-[#8f929c]
           transition-colors
-          hover:bg-[#f5f6f8] hover:text-[#20242c]
+          hover:bg-[#eef0f3]
+          hover:text-[#20242c]
         "
         aria-label="Previous"
       >
@@ -41,7 +43,7 @@ export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
           text-[#20242c]
           whitespace-nowrap
           transition-colors
-          hover:bg-[#f5f6f8]
+          hover:bg-[#eef0f3]
         "
       >
         Today
@@ -54,7 +56,8 @@ export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
           flex h-7 w-7 items-center justify-center
           text-[#8f929c]
           transition-colors
-          hover:bg-[#f5f6f8] hover:text-[#20242c]
+          hover:bg-[#eef0f3]
+          hover:text-[#20242c]
         "
         aria-label="Next"
       >
