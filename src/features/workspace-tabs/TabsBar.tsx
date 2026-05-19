@@ -1,6 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { FileText, Layers, Plus, X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import type { WorkspaceTab } from "@/features/workspace-tabs/Tab";
@@ -116,20 +115,19 @@ const ReviewIcon = ({ className }: IconProps) => (
 
 const CalendarIcon = ({ className }: IconProps) => (
   <IconShell className={className}>
-    <rect
-      x="5"
-      y="6"
-      width="14"
-      height="13"
-      rx="1.5"
+    <path
+      d="M18 2V4M6 2V4M10 17V13.347C10 13.156 9.863 13 9.695 13H9M13.63 17L14.984 13.35C15.047 13.179 14.913 13 14.721 13H13"
       stroke="currentColor"
-      strokeWidth="1.8"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
-      d="M8 4v4M16 4v4M5 10h14"
+      d="M6 8H18M2.5 12.243C2.5 7.886 2.5 5.707 3.752 4.353C5.004 3 7.02 3 11.05 3H12.95C16.98 3 18.996 3 20.248 4.354C21.5 5.707 21.5 7.886 21.5 12.244V12.757C21.5 17.114 21.5 19.293 20.248 20.647C18.996 22 16.98 22 12.95 22H11.05C7.02 22 5.004 22 3.752 20.646C2.5 19.293 2.5 17.114 2.5 12.756V12.243Z"
       stroke="currentColor"
+      strokeWidth="1.5"
       strokeLinecap="round"
-      strokeWidth="1.8"
+      strokeLinejoin="round"
     />
   </IconShell>
 );

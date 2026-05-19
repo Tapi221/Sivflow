@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
-import { Calendar as CalendarIcon, Filter, Search } from "@/ui/icons";
+import { Filter, Search } from "@/ui/icons";
 import type { IconProps } from "@/ui/icons";
 import {
+  SidebarCalendarIcon,
   FieldsToolbarIcon,
   SortToolbarIcon,
   TimelineToolbarIcon,
@@ -47,7 +48,7 @@ export const CalendarWorkspaceToolbar = ({
     {
       value: "calendar" as CalendarToolbarMode,
       label: "Calendar",
-      icon: CalendarIcon,
+      icon: SidebarCalendarIcon,
       onClick: onSelectCalendar,
     },
     {
