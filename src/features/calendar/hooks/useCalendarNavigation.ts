@@ -45,11 +45,13 @@ export const useCalendarNavigation = () => {
   const [selectedViewMode, setSelectedViewMode] =
     useState<CalendarViewMode>("days");
 
-  const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
+  const [activeMode, setActiveMode] =
+    useState<CalendarToolbarMode>("timeline");
 
   const [calendarBuffer, setCalendarBuffer] = useState(
     createInitialCalendarBuffer,
   );
+
   const [timelineUnitBuffer, setTimelineUnitBuffer] = useState(() =>
     createInitialTimelineUnitBuffer("days"),
   );
@@ -65,11 +67,10 @@ export const useCalendarNavigation = () => {
     setTimelineUnitBuffer(createInitialTimelineUnitBuffer(viewMode));
   }, []);
 
-  // ─────────────────────────────────────────────────────────
-  // 無限横スクロール用バッファ拡張コールバック
-  // ─────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────
+  // 無限横スクロール用バッファ拡張
+  // ─────────────────────────────────────────────
 
-  /** 左端到達時：before バッファを CALENDAR_EXTEND_DAYS 日分増やす */
   const extendCalendarBufferLeft = useCallback(() => {
     setCalendarBuffer((prev) => ({
       ...prev,
@@ -77,7 +78,6 @@ export const useCalendarNavigation = () => {
     }));
   }, []);
 
-  /** 右端到達時：after バッファを CALENDAR_EXTEND_DAYS 日分増やす */
   const extendCalendarBufferRight = useCallback(() => {
     setCalendarBuffer((prev) => ({
       ...prev,
@@ -85,7 +85,7 @@ export const useCalendarNavigation = () => {
     }));
   }, []);
 
-  // ─────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────
 
   const handleSelectViewMode = useCallback(
     (next: CalendarViewMode) => {
@@ -176,6 +176,14 @@ export const useCalendarNavigation = () => {
     setMonthTitleDate(startOfMonth(date));
   }, []);
 
+  // ─────────────────────────────────────────────
+  // 月セル選択（副作用なし）
+  // ─────────────────────────────────────────────
+  const handleMonthCellSelectDate = useCallback((date: Date) => {
+    setSelectedDate(date);
+    setCurrentDate(date);
+  }, []);
+
   return {
     contentViewportRef,
     scrollContainerRef,
@@ -204,10 +212,10 @@ export const useCalendarNavigation = () => {
     handleSidebarNextMonth,
     handleSidebarSelectDate,
     handleVisibleMonthChange,
+    handleMonthCellSelectDate,
 
     resetTimelinePosition,
 
-    // 無限横スクロール用
     extendCalendarBufferLeft,
     extendCalendarBufferRight,
   };

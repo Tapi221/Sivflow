@@ -52,6 +52,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
     handleNext,
     handleToday,
     handleTimelineScroll,
+    handleMonthCellSelectDate,
     connectGoogleCalendar,
     toggleGoogleCalendar,
   } = pane;
@@ -142,7 +143,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
               selectedDate={selectedDate}
               scrollTargetToken={monthScrollTargetToken}
               visibleEvents={googleCalendarEvents}
-              onSelectDate={handleSidebarSelectDate}
+              onSelectDate={handleMonthCellSelectDate}
               onVisibleMonthChange={handleVisibleMonthChange}
             />
           ) : (
