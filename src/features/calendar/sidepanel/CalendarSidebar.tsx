@@ -73,13 +73,13 @@ export const CalendarSidebar = ({
   const [googleCalendarOpen, setGoogleCalendarOpen] = useState(true);
 
   return (
-    <aside className="flex w-[292px] shrink-0 flex-col gap-6 overflow-y-auto bg-[#f7f8fa] px-3 py-4 text-[#24272f]">
+    <aside className="flex w-[220px] shrink-0 flex-col gap-6 overflow-y-auto bg-[#f7f8fa] px-3 py-4 text-[#24272f]">
       <section className="flex w-full flex-col gap-3">
         <div className="flex w-full items-center justify-between overflow-hidden px-2">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#dde2ea] bg-white text-[#667085] transition-colors hover:bg-[#f8fafc] hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#9ea3b0] transition-colors hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               onClick={onClose}
               aria-label="Hide calendar sidebar"
               title="Hide calendar sidebar"
@@ -129,7 +129,7 @@ export const CalendarSidebar = ({
                 key={day.date.toISOString()}
                 type="button"
                 className={cn(
-                  "flex h-6 w-full items-center justify-center rounded-md text-[11px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                  "flex aspect-square w-full items-center justify-center rounded-md text-[11px] font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                   day.isSelected
                     ? "bg-[#24272f] text-white"
                     : day.isToday

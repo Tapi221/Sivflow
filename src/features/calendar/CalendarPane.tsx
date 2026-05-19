@@ -105,7 +105,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
                 {!isCalendarSidebarOpen ? (
                   <button
                     type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#dde2ea] bg-white text-[#667085] transition-colors hover:bg-[#f8fafc] hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex h-6 w-6 items-center justify-center rounded text-[#9ea3b0] transition-colors hover:text-[#20242c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     onClick={() => setIsCalendarSidebarOpen(true)}
                     aria-label="Show calendar sidebar"
                     title="Show calendar sidebar"
