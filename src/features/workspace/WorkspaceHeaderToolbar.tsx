@@ -43,7 +43,7 @@ export const WorkspaceHeaderToolbar = ({
   const hasLeadingContentBeforeActions = hasTabs || hasSecondaryTabs;
 
   return (
-    <div className="relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 flex-wrap items-center justify-between overflow-hidden bg-white after:absolute after:bottom-1 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']">
+    <div className="relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 flex-wrap items-center justify-between overflow-hidden bg-white after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']">
       <div
         className={cn(
           "flex min-w-0 items-center",

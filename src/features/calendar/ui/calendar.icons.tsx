@@ -279,3 +279,59 @@ export const PlusIcon = ({
     />
   </svg>
 );
+
+//Vuesax-Icons
+export const FilterIcon = ({ className, ...props }: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      d="M10.94 22.65C10.46 22.65 9.99002 22.53 9.55002 22.29C8.67002 21.8 8.14002 20.91 8.14002 19.91V14.61C8.14002 14.11 7.81002 13.36 7.50002 12.98L3.76002 9.02001C3.13002 8.39001 2.65002 7.31001 2.65002 6.50001V4.20001C2.65002 2.60001 3.86002 1.35001 5.40002 1.35001H18.6C20.12 1.35001 21.35 2.58001 21.35 4.10001V6.30001C21.35 7.35001 20.72 8.54001 20.13 9.13001L15.8 12.96C15.38 13.31 15.05 14.08 15.05 14.7V19C15.05 19.89 14.49 20.92 13.79 21.34L12.41 22.23C11.96 22.51 11.45 22.65 10.94 22.65Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+
+    <path
+      d="M5.99998 10.75C5.85998 10.75 5.72998 10.71 5.59998 10.64C5.24998 10.42 5.13998 9.94999 5.35998 9.59999L10.29 1.69999C10.51 1.34999 10.97 1.23999 11.32 1.45999C11.67 1.67999 11.78 2.13999 11.56 2.48999L6.62998 10.39C6.48998 10.62 6.24998 10.75 5.99998 10.75Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+//Vuesax-Icons
+export const SearchIcon = ({
+  className,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      d="M11.5 21.75C5.85 21.75 1.25 17.15 1.25 11.5C1.25 5.85 5.85 1.25 11.5 1.25C17.15 1.25 21.75 5.85 21.75 11.5C21.75 17.15 17.15 21.75 11.5 21.75Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      fill="none"
+    />
+    <path
+      d="M22 22.75L19.47 20.53"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
