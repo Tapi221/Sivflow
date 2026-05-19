@@ -13,9 +13,16 @@ export const CalendarEventChipWeekday = ({
 }: CalendarEventChipWeekdayProps) => {
   const tokens = generateColorTokens(event.accentColor);
 
-  // Google Calendar系は基本 start/end を持つ前提に寄せる
-  const startsAt = event.startsAt;
-  const endsAt = event.endsAt ?? startsAt;
+  // Date 化
+  const startsAt =
+    event.startsAt instanceof Date
+      ? event.startsAt
+      : new Date(event.startsAt);
+
+  const endsAt =
+    event.endsAt instanceof Date
+      ? event.endsAt
+      : new Date(event.endsAt ?? event.startsAt);
 
   const timeLabel = event.isAllDay
     ? "終日"
@@ -24,7 +31,7 @@ export const CalendarEventChipWeekday = ({
   return (
     <div
       className={[
-        "flex h-full w-full flex-col overflow-hidden rounded-md px-1.5 py-1 text-left",
+        "flex w-full flex-col rounded-md px-1.5 py-1 text-left",
         compact ? "gap-0.5" : "gap-1",
       ].join(" ")}
       style={{
@@ -44,13 +51,8 @@ export const CalendarEventChipWeekday = ({
       </span>
 
       {!compact && (
-        <span
-          className={[
-            "truncate font-medium leading-snug",
-            compact ? "text-[10px]" : "text-[12px]",
-          ].join(" ")}
-        >
-          {event.title}
+        <span className="truncate text-[12px] font-medium leading-snug">
+          {event.title || "Untitled"}
         </span>
       )}
     </div>
