@@ -1,5 +1,3 @@
-import { ChevronLeft, ChevronRight } from "@/ui/icons";
-
 import {
   MonthViewIcon,
   WeekViewIcon,
@@ -12,7 +10,8 @@ import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
 import { CalendarWorkspaceToolbar } from "./toolbar/CalendarToolbar";
 
-import { ViewModeDropdown } from "@/features/calendar/ViewModeDropdown";
+import { ViewModeDropdown } from "@/features/calendar/chip/ViewModeDropdown";
+import { TodayBar } from "@/features/calendar/chip/TodayBar";
 
 import { useCalendarPane } from "./hooks/useCalendarPane";
 import type { CalendarPaneProps } from "./calendarPane.types";
@@ -111,41 +110,17 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
               </div>
 
               <div className="flex items-center gap-2">
-                {/* View Mode Dropdown（分離済み） */}
                 <ViewModeDropdown
                   value={selectedViewMode}
                   onChange={handleSelectViewMode}
                   options={VIEW_OPTIONS}
                 />
 
-                {/* Navigation */}
-                <div className="flex items-center overflow-hidden rounded-lg border border-[#e2e4e9] bg-white">
-                  <button
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center border-r border-[#e2e4e9] text-[#8f929c] transition-colors hover:bg-[#f5f6f8] hover:text-[#20242c]"
-                    onClick={handlePrevious}
-                    aria-label="Previous"
-                  >
-                    <ChevronLeft className="h-3.5 w-3.5" />
-                  </button>
-
-                  <button
-                    type="button"
-                    className="px-3 py-[7px] text-[13px] font-medium text-[#20242c] transition-colors hover:bg-[#f5f6f8]"
-                    onClick={handleToday}
-                  >
-                    Today
-                  </button>
-
-                  <button
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center border-l border-[#e2e4e9] text-[#8f929c] transition-colors hover:bg-[#f5f6f8] hover:text-[#20242c]"
-                    onClick={handleNext}
-                    aria-label="Next"
-                  >
-                    <ChevronRight className="h-3.5 w-3.5" />
-                  </button>
-                </div>
+                <TodayBar
+                  onPrevious={handlePrevious}
+                  onNext={handleNext}
+                  onToday={handleToday}
+                />
               </div>
             </div>
           )}
