@@ -41,14 +41,13 @@ export const useCalendarNavigation = () => {
   );
 
   const [monthScrollTargetToken, setMonthScrollTargetToken] = useState(0);
-
-  // 追加: スクロール再初期化トークン
   const [calendarScrollToken, setCalendarScrollToken] = useState(0);
 
   const [selectedViewMode, setSelectedViewMode] =
     useState<CalendarViewMode>("days");
 
-  const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
+  const [activeMode, setActiveMode] =
+    useState<CalendarToolbarMode>("timeline");
 
   const [calendarBuffer, setCalendarBuffer] = useState(
     createInitialCalendarBuffer,
@@ -77,10 +76,12 @@ export const useCalendarNavigation = () => {
     }));
   }, []);
 
-  const extendCalendarBufferRight = useCallback(() => ({
-    ...prev,
-    after: prev.after + C.CALENDAR_EXTEND_DAYS,
-  }), []);
+  const extendCalendarBufferRight = useCallback(() => {
+    setCalendarBuffer((prev) => ({
+      ...prev,
+      after: prev.after + C.CALENDAR_EXTEND_DAYS,
+    }));
+  }, []);
 
   const handleSelectViewMode = useCallback(
     (next: CalendarViewMode) => {
