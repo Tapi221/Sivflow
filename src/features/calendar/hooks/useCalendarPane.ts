@@ -42,7 +42,6 @@ export type UseCalendarPaneReturn = {
   calendarDayColumnWidth: number;
   timelineGridStyle: TimelineGridStyle;
 
-  // マルチアカウント
   googleAccounts: GoogleAccountDisplay[];
   googleCalendarEvents: GoogleCalendarEvent[];
   isAnyCalendarConnecting: boolean;
@@ -102,6 +101,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
     onExtendLeft: navigation.extendCalendarBufferLeft,
     onExtendRight: navigation.extendCalendarBufferRight,
+    scrollTargetToken: navigation.calendarScrollToken, // ← 追加
   });
 
   const google = useGoogleCalendarLayer();
@@ -117,7 +117,6 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     },
   });
 
-  // GoogleAccountEntry → GoogleAccountDisplay に変換
   const googleAccounts: GoogleAccountDisplay[] = google.googleAccounts.map(
     (account) => ({
       accountId: account.id,

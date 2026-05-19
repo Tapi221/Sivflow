@@ -42,6 +42,9 @@ export const useCalendarNavigation = () => {
 
   const [monthScrollTargetToken, setMonthScrollTargetToken] = useState(0);
 
+  // 追加: スクロール再初期化トークン
+  const [calendarScrollToken, setCalendarScrollToken] = useState(0);
+
   const [selectedViewMode, setSelectedViewMode] =
     useState<CalendarViewMode>("days");
 
@@ -64,11 +67,8 @@ export const useCalendarNavigation = () => {
   const resetTimelinePosition = useCallback((viewMode: CalendarViewMode) => {
     setCalendarBuffer(createInitialCalendarBuffer());
     setTimelineUnitBuffer(createInitialTimelineUnitBuffer(viewMode));
+    setCalendarScrollToken((n) => n + 1);
   }, []);
-
-  // ─────────────────────────────────────────────
-  // 無限横スクロール用バッファ拡張
-  // ─────────────────────────────────────────────
 
   const extendCalendarBufferLeft = useCallback(() => {
     setCalendarBuffer((prev) => ({
@@ -77,14 +77,10 @@ export const useCalendarNavigation = () => {
     }));
   }, []);
 
-  const extendCalendarBufferRight = useCallback(() => {
-    setCalendarBuffer((prev) => ({
-      ...prev,
-      after: prev.after + C.CALENDAR_EXTEND_DAYS,
-    }));
-  }, []);
-
-  // ─────────────────────────────────────────────
+  const extendCalendarBufferRight = useCallback(() => ({
+    ...prev,
+    after: prev.after + C.CALENDAR_EXTEND_DAYS,
+  }), []);
 
   const handleSelectViewMode = useCallback(
     (next: CalendarViewMode) => {
@@ -175,9 +171,6 @@ export const useCalendarNavigation = () => {
     setMonthTitleDate(startOfMonth(date));
   }, []);
 
-  // ─────────────────────────────────────────────
-  // 月セル選択（副作用なし）
-  // ─────────────────────────────────────────────
   const handleMonthCellSelectDate = useCallback((date: Date) => {
     setSelectedDate(date);
     setCurrentDate(date);
@@ -192,7 +185,9 @@ export const useCalendarNavigation = () => {
     selectedDate,
     monthTitleDate,
     setMonthTitleDate,
+
     monthScrollTargetToken,
+    calendarScrollToken,
 
     selectedViewMode,
     activeMode,
