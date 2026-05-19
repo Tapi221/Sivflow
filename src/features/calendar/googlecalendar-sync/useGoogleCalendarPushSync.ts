@@ -21,7 +21,7 @@ import {
   query,
   type Unsubscribe,
 } from "firebase/firestore";
-import { db } from "@/services/firebase";
+import { firestoreDb } from "@/services/firebase";
 
 type UseGoogleCalendarPushSyncOptions = {
   /** Firebase Auth の UID。null の場合はリスナーを張らない */
