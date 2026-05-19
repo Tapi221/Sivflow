@@ -21,6 +21,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
     titleDate,
     monthScrollTargetToken,
     visibleDays,
+    displayDays,
     googleCalendarEvents,
     googleCalendars,
     googleAccountEmail,
@@ -160,7 +161,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
             <CalendarWeekDayGrid
               headerScrollRef={headerScrollRef}
               scrollContainerRef={scrollContainerRef}
-              visibleDays={visibleDays}
+              visibleDays={displayDays}
               visibleEvents={googleCalendarEvents}
               calendarDayColumnWidth={calendarDayColumnWidth}
               timelineGridStyle={timelineGridStyle}
