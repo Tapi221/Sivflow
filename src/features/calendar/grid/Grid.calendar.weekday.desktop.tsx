@@ -2,11 +2,13 @@ import React from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import {
   computeEventLayout,
   toLayoutEvent,
 } from "@/features/calendar/eventchip/EventChip.layout.weekday.desktop";
+
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import type { CalendarWeekDayGridProps } from "@/features/calendar/calendarPane.types";
 
@@ -46,6 +48,7 @@ export const CalendarWeekDayGrid = ({
   timelineGridStyle,
   onScroll,
   selectedDate,
+  onSelectDate,
 }: CalendarWeekDayGridProps) => {
   const today = new Date();
 
@@ -76,10 +79,14 @@ export const CalendarWeekDayGrid = ({
                 !!selectedDate && isSameDay(day, selectedDate);
 
               return (
-                <div
+                <button
                   key={`${day.toISOString()}-header`}
+                  type="button"
+                  onClick={() => onSelectDate?.(day)}
                   className={cn(
                     "flex h-10 shrink-0 flex-col items-center justify-center border-r border-[#eef0f3] last:border-r-0",
+                    "transition-colors hover:bg-[#f4f5f7]",
+                    "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                     isDayToday && "bg-[#f0f6ff]",
                     !isDayToday && isDaySelected && "bg-[#f4f5f7]",
                   )}
@@ -107,7 +114,7 @@ export const CalendarWeekDayGrid = ({
                   >
                     {format(day, "d")}
                   </span>
-                </div>
+                </button>
               );
             })}
           </div>

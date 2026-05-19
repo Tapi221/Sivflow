@@ -74,4 +74,5 @@ export type CalendarWeekDayGridProps = {
   timelineGridStyle: TimelineGridStyle;
   onScroll: (event: UIEvent<HTMLDivElement>) => void;
   selectedDate: Date;
+  onSelectDate?: (date: Date) => void;
 };
