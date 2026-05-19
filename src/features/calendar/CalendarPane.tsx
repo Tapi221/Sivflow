@@ -31,12 +31,8 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
     monthScrollTargetToken,
     visibleDays,
     googleCalendarEvents,
-    googleCalendars,
-    googleAccountEmail,
-    selectedCalendarIds,
-    googleCalendarError,
-    isGoogleCalendarConnected,
-    isGoogleCalendarConnecting,
+    googleAccounts,
+    isAnyCalendarConnecting,
     calendarDayColumnWidth,
     timelineGridStyle,
     headerScrollRef,
@@ -53,7 +49,8 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
     handleToday,
     handleTimelineScroll,
     handleMonthCellSelectDate,
-    connectGoogleCalendar,
+    addGoogleCalendar,
+    removeGoogleAccount,
     toggleGoogleCalendar,
   } = pane;
 
@@ -72,16 +69,13 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
         <CalendarSidebar
           monthDate={titleDate}
           selectedDate={selectedDate}
-          calendars={googleCalendars}
-          googleAccountEmail={googleAccountEmail}
-          selectedCalendarIds={selectedCalendarIds}
-          calendarError={googleCalendarError}
-          isCalendarConnected={isGoogleCalendarConnected}
-          isCalendarConnecting={isGoogleCalendarConnecting}
+          googleAccounts={googleAccounts}
+          isAnyCalendarConnecting={isAnyCalendarConnecting}
           onSelectDate={handleSidebarSelectDate}
           onPreviousMonth={handleSidebarPreviousMonth}
           onNextMonth={handleSidebarNextMonth}
-          onConnectCalendar={connectGoogleCalendar}
+          onAddCalendar={addGoogleCalendar}
+          onRemoveAccount={removeGoogleAccount}
           onToggleCalendar={toggleGoogleCalendar}
         />
 
