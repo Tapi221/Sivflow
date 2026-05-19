@@ -8,6 +8,7 @@ import { useCalendarPane } from "./hooks/useCalendarPane";
 import { SidebarPanelIcon } from "./ui/calendar.icons";
 import type { CalendarPaneProps } from "./calendarPane.types";
 import * as C from "@/features/calendar/calendar.constants.desktop";
+import { cn } from "@/lib/utils";
 
 export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
   const pane = useCalendarPane();
@@ -95,7 +96,10 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
 
         <div
           ref={contentViewportRef}
-          className="flex min-w-0 flex-1 flex-col bg-white px-5 pb-5 pt-4"
+          className={cn(
+            "flex min-w-0 flex-1 flex-col bg-white px-5 pt-4",
+            activeMode === "task" && "pb-5",
+          )}  
         >
           {activeMode !== "task" && (
             <div className="mb-4 flex shrink-0 items-center justify-between">
