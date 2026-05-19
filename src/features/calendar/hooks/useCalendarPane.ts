@@ -26,6 +26,8 @@ export type UseCalendarPaneReturn = {
   setActiveMode: (mode: CalendarToolbarMode) => void;
 
   visibleDays: Date[];
+  displayDays: Date[];
+
   timelineColumns: ReturnType<
     typeof import("../grid/TimelineDayView.shared").buildTimelineColumns
   >;
@@ -74,6 +76,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   const layout = useCalendarLayout({
     viewportWidth: navigation.viewportWidth,
     visibleDays: visibleRange.visibleDays,
+    displayDays: visibleRange.displayDays,
     selectedViewMode: navigation.selectedViewMode,
     currentDate: navigation.currentDate,
     calendarBuffer: navigation.calendarBuffer,
@@ -114,7 +117,6 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
   return {
     contentViewportRef: navigation.contentViewportRef,
 
-    // ★修正ポイント：navigation → scroll
     scrollContainerRef: scroll.scrollContainerRef,
     headerScrollRef: scroll.headerScrollRef,
 
@@ -128,6 +130,7 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     setActiveMode: navigation.setActiveMode,
 
     visibleDays: visibleRange.visibleDays,
+    displayDays: visibleRange.displayDays,
 
     timelineColumns: timeline.timelineColumns,
     timelineColumnWidth: timeline.timelineColumnWidth,

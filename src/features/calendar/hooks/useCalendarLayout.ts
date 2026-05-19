@@ -4,17 +4,20 @@ import type { CalendarViewMode } from "../calendarPane.types";
 export const useCalendarLayout = ({
   viewportWidth,
   visibleDays,
+  displayDays,
   selectedViewMode,
   currentDate,
   calendarBuffer,
 }: {
   viewportWidth: number;
   visibleDays: Date[];
+  displayDays: Date[];
   selectedViewMode: CalendarViewMode;
   currentDate: Date;
   calendarBuffer: { before: number; after: number };
 }) => {
-  const viewportDayCount = selectedViewMode === "month" ? 7 : visibleDays.length;
+  const viewportDayCount =
+    selectedViewMode === "month" ? 7 : displayDays.length;
 
   const calendarDayColumnWidth =
     viewportWidth > C.TIME_COLUMN_WIDTH
@@ -26,7 +29,7 @@ export const useCalendarLayout = ({
       : C.DAY_COLUMN_MIN_WIDTH;
 
   const gridWidth =
-    C.TIME_COLUMN_WIDTH + visibleDays.length * calendarDayColumnWidth;
+    C.TIME_COLUMN_WIDTH + displayDays.length * calendarDayColumnWidth;
 
   const titleDate =
     selectedViewMode === "month"
@@ -37,7 +40,7 @@ export const useCalendarLayout = ({
 
   const timelineGridStyle = {
     "--calendar-hour-row-height": `${C.DEFAULT_HOUR_ROW_HEIGHT}px`,
-    gridTemplateColumns: `${C.TIME_COLUMN_WIDTH}px repeat(${visibleDays.length}, ${calendarDayColumnWidth}px)`,
+    gridTemplateColumns: `${C.TIME_COLUMN_WIDTH}px repeat(${displayDays.length}, ${calendarDayColumnWidth}px)`,
     minWidth: `${gridWidth}px`,
   } as const;
 
