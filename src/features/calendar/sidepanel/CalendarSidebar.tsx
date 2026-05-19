@@ -7,14 +7,12 @@ import {
   startOfWeek,
 } from "date-fns";
 import { useMemo, useState } from "react";
-
 import { cn } from "@/lib/utils";
-import { CheckCircle, ChevronDown, ChevronUp, Circle, Plus } from "@/ui/icons";
+import { CheckCircle, ChevronDown, ChevronUp, Circle} from "@/ui/icons";
+import { PlusIcon, CalendarIcon } from "../ui/calendar.icons"; 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
-
-import { CalendarIcon } from "../ui/calendar.icons";
 import type {
   AppCalendarItem,
   CalendarSidebarProps,
@@ -206,7 +204,7 @@ export const CalendarSidebar = ({
           onClick={onConnectCalendar}
           disabled={isCalendarConnecting}
         >
-          <Plus className="h-5 w-5 shrink-0 text-black" />
+          <PlusIcon className="h-5 w-5 shrink-0 text-black" />
           <span className="truncate">
             {isCalendarConnected
               ? "Reconnect Google Calendar"
