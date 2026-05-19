@@ -109,8 +109,7 @@ export const CalendarSidebar = ({
     [monthDate, selectedDate],
   );
 
-  const googleCalendarSectionLabel =
-    googleAccountEmail ?? "Google Calendar";
+  const googleCalendarSectionLabel = googleAccountEmail ?? "Google Calendar";
 
   const [googleCalendarOpen, setGoogleCalendarOpen] = useState(true);
 
@@ -173,9 +172,7 @@ export const CalendarSidebar = ({
                   day.isToday &&
                     "bg-[#185FA5] text-white shadow-[0_2px_8px_rgba(24,95,165,0.35)]",
 
-                  day.isSelected &&
-                    !day.isToday &&
-                    "bg-[#2d3039] text-white",
+                  day.isSelected && !day.isToday && "bg-[#2d3039] text-white",
 
                   !isActive &&
                     day.isCurrentMonth &&
@@ -195,10 +192,7 @@ export const CalendarSidebar = ({
 
       <div className="h-px w-full bg-[#e4e6eb]" />
 
-      <nav
-        className="flex w-full flex-col gap-0.5"
-        aria-label="Calendar lists"
-      >
+      <nav className="flex w-full flex-col gap-0.5" aria-label="Calendar lists">
         <div className="mb-1 flex h-6 items-center gap-1.5 px-2">
           <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-[#74798b]" />
 
