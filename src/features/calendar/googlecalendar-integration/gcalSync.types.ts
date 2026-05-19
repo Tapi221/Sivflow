@@ -38,28 +38,21 @@ export type GoogleCalendarListItem = {
   backgroundColor?: string;
 };
 
-export type UseGoogleCalendarIntegrationOptions =
-  {
-    authInstance?: unknown;
-  };
+export type UseGoogleCalendarIntegrationOptions = {
+  authInstance?: unknown;
+};
 
 // ─────────────────────────────────────────────────────────────
 // 同期状態
 // ─────────────────────────────────────────────────────────────
 
-export type GCalSyncState =
-  | "idle"
-  | "syncing"
-  | "error";
+export type GCalSyncState = "idle" | "syncing" | "error";
 
 // ─────────────────────────────────────────────────────────────
 // syncToken map
 // ─────────────────────────────────────────────────────────────
 
-export type GCalSyncTokenMap = Record<
-  string,
-  string
->;
+export type GCalSyncTokenMap = Record<string, string>;
 
 // ─────────────────────────────────────────────────────────────
 // Raw incremental event
@@ -70,10 +63,7 @@ export interface GCalRawIncrementalEvent {
 
   summary?: string;
 
-  status?:
-    | "confirmed"
-    | "tentative"
-    | "cancelled";
+  status?: "confirmed" | "tentative" | "cancelled";
 
   start?: {
     date?: string;
@@ -99,25 +89,15 @@ export interface GCalEventsListResponse {
 // ─────────────────────────────────────────────────────────────
 
 export interface GCalSyncEngineOptions {
-  onEventAdded: (
-    event: GoogleCalendarEvent,
-  ) => void;
+  onEventAdded: (event: GoogleCalendarEvent) => void;
 
-  onEventUpdated: (
-    event: GoogleCalendarEvent,
-  ) => void;
+  onEventUpdated: (event: GoogleCalendarEvent) => void;
 
-  onEventDeleted: (
-    compositeId: string,
-  ) => void;
+  onEventDeleted: (compositeId: string) => void;
 
-  onSyncStateChange: (
-    state: GCalSyncState,
-  ) => void;
+  onSyncStateChange: (state: GCalSyncState) => void;
 
-  onLastSyncedAtChange: (
-    at: Date,
-  ) => void;
+  onLastSyncedAtChange: (at: Date) => void;
 
   onError: (error: Error) => void;
 

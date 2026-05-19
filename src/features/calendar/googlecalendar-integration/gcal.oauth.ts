@@ -20,8 +20,7 @@ const GOOGLE_CALENDAR_SCOPE =
 const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT =
   "https://accounts.google.com/o/oauth2/v2/auth";
 
-const GOOGLE_OAUTH_TOKEN_ENDPOINT =
-  "https://oauth2.googleapis.com/token";
+const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 
 const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 
@@ -30,9 +29,7 @@ const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 // ─────────────────────────────────────
 
 const toBase64Url = (bytes: Uint8Array): string => {
-  const binary = Array.from(bytes, (v) =>
-    String.fromCharCode(v),
-  ).join("");
+  const binary = Array.from(bytes, (v) => String.fromCharCode(v)).join("");
 
   return btoa(binary)
     .replace(/\+/g, "-")
@@ -48,15 +45,10 @@ const randomBase64Url = (len: number): string => {
   return toBase64Url(bytes);
 };
 
-const createCodeChallenge = async (
-  verifier: string,
-): Promise<string> => {
+const createCodeChallenge = async (verifier: string): Promise<string> => {
   const data = new TextEncoder().encode(verifier);
 
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    data,
-  );
+  const digest = await crypto.subtle.digest("SHA-256", data);
 
   return toBase64Url(new Uint8Array(digest));
 };
@@ -65,45 +57,32 @@ const createCodeChallenge = async (
 // JWT util
 // ─────────────────────────────────────
 
-const parseJwtPayload = (
-  token: string,
-): Record<string, unknown> | null => {
+const parseJwtPayload = (token: string): Record<string, unknown> | null => {
   const [, payload] = token.split(".");
 
   if (!payload) {
     return null;
   }
 
-  const base64 = payload
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
+  const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
 
-  const padded = base64.padEnd(
-    Math.ceil(base64.length / 4) * 4,
-    "=",
-  );
+  const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
 
   try {
-    return JSON.parse(
-      atob(padded),
-    ) as Record<string, unknown>;
+    return JSON.parse(atob(padded)) as Record<string, unknown>;
   } catch {
     return null;
   }
 };
 
-const getEmailFromIdToken = (
-  idToken?: string,
-): string | null => {
+const getEmailFromIdToken = (idToken?: string): string | null => {
   if (!idToken) {
     return null;
   }
 
   const payload = parseJwtPayload(idToken);
 
-  return typeof payload?.email === "string"
-    ? payload.email
-    : null;
+  return typeof payload?.email === "string" ? payload.email : null;
 };
 
 // ─────────────────────────────────────
@@ -111,23 +90,17 @@ const getEmailFromIdToken = (
 // ─────────────────────────────────────
 
 const getClientId = (): string => {
-  const clientId =
-    import.meta.env
-      .VITE_DESKTOP_GOOGLE_OAUTH_CLIENT_ID;
+  const clientId = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_CLIENT_ID;
 
   if (!clientId) {
-    throw new Error(
-      "Missing Google OAuth client id",
-    );
+    throw new Error("Missing Google OAuth client id");
   }
 
   return clientId;
 };
 
 const getRedirectUri = (): string => {
-  const uri =
-    import.meta.env
-      .VITE_DESKTOP_GOOGLE_OAUTH_REDIRECT_URI;
+  const uri = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_REDIRECT_URI;
 
   if (!uri) {
     throw new Error("Missing redirect uri");
@@ -162,82 +135,61 @@ const buildAuthorizeUrl = ({
     ...(silent
       ? {}
       : {
-          prompt:
-            "consent select_account",
+          prompt: "consent select_account",
         }),
   });
 
   return `${GOOGLE_OAUTH_AUTHORIZE_ENDPOINT}?${params.toString()}`;
 };
 
-const waitForDesktopCode = (
-  state: string,
-  redirectUri: string,
-) => {
-  return new Promise<string>(
-    (resolve, reject) => {
-      const timer = window.setTimeout(() => {
-        unsubscribe();
+const waitForDesktopCode = (state: string, redirectUri: string) => {
+  return new Promise<string>((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      unsubscribe();
 
-        reject(new Error("OAuth timeout"));
-      }, DESKTOP_CALLBACK_TIMEOUT_MS);
+      reject(new Error("OAuth timeout"));
+    }, DESKTOP_CALLBACK_TIMEOUT_MS);
 
-      const unsubscribe =
-        oauthBridge.onCallback((payload) => {
-          const url = new URL(payload.url);
+    const unsubscribe = oauthBridge.onCallback((payload) => {
+      const url = new URL(payload.url);
 
-          const expected = new URL(
-            redirectUri,
-          );
+      const expected = new URL(redirectUri);
 
-          if (
-            url.pathname !== expected.pathname
-          ) {
-            return;
-          }
+      if (url.pathname !== expected.pathname) {
+        return;
+      }
 
-          const returnedState =
-            payload.state ??
-            url.searchParams.get("state");
+      const returnedState = payload.state ?? url.searchParams.get("state");
 
-          if (returnedState !== state) {
-            return;
-          }
+      if (returnedState !== state) {
+        return;
+      }
 
-          window.clearTimeout(timer);
+      window.clearTimeout(timer);
 
-          unsubscribe();
+      unsubscribe();
 
-          const error =
-            payload.error ??
-            url.searchParams.get("error");
+      const error = payload.error ?? url.searchParams.get("error");
 
-          if (error) {
-            reject(new Error(error));
-            return;
-          }
+      if (error) {
+        reject(new Error(error));
+        return;
+      }
 
-          const code =
-            payload.code ??
-            url.searchParams.get("code");
+      const code = payload.code ?? url.searchParams.get("code");
 
-          if (!code) {
-            reject(
-              new Error("No auth code"),
-            );
+      if (!code) {
+        reject(new Error("No auth code"));
 
-            return;
-          }
+        return;
+      }
 
-          resolve(code);
-        });
-    },
-  );
+      resolve(code);
+    });
+  });
 };
 
-const requestDesktopToken = async (
-  silent: boolean,
-) => {
+const requestDesktopToken = async (silent: boolean) => {
   const clientId = getClientId();
 
   const redirectUri = getRedirectUri();
@@ -246,8 +198,7 @@ const requestDesktopToken = async (
 
   const verifier = randomBase64Url(48);
 
-  const challenge =
-    await createCodeChallenge(verifier);
+  const challenge = await createCodeChallenge(verifier);
 
   const url = buildAuthorizeUrl({
     clientId,
@@ -257,35 +208,27 @@ const requestDesktopToken = async (
     silent,
   });
 
-  const codePromise = waitForDesktopCode(
-    state,
-    redirectUri,
-  );
+  const codePromise = waitForDesktopCode(state, redirectUri);
 
   await oauthBridge.start(url);
 
   const code = await codePromise;
 
-  const tokens =
-    await oauthBridge.exchangeTokens({
-      clientId,
-      code,
-      codeVerifier: verifier,
-      redirectUri,
-    });
+  const tokens = await oauthBridge.exchangeTokens({
+    clientId,
+    code,
+    codeVerifier: verifier,
+    redirectUri,
+  });
 
   if (!tokens.accessToken) {
-    throw new Error(
-      "Google OAuth failed: accessToken is missing",
-    );
+    throw new Error("Google OAuth failed: accessToken is missing");
   }
 
   return {
     accessToken: tokens.accessToken,
     refreshToken: tokens.refreshToken,
-    accountEmail: getEmailFromIdToken(
-      tokens.idToken,
-    ),
+    accountEmail: getEmailFromIdToken(tokens.idToken),
   };
 };
 
@@ -293,99 +236,68 @@ const requestDesktopToken = async (
 // refresh token
 // ─────────────────────────────────────
 
-export const refreshCalendarAccessToken =
-  async ({
-    refreshToken,
-  }: {
-    refreshToken: string;
-  }): Promise<GoogleCalendarAccess> => {
-    const clientId = getClientId();
+export const refreshCalendarAccessToken = async ({
+  refreshToken,
+}: {
+  refreshToken: string;
+}): Promise<GoogleCalendarAccess> => {
+  const clientId = getClientId();
 
-    const response = await fetch(
-      GOOGLE_OAUTH_TOKEN_ENDPOINT,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          client_id: clientId,
-          grant_type: "refresh_token",
-          refresh_token: refreshToken,
-        }),
-      },
-    );
+  const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      client_id: clientId,
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }),
+  });
 
-    if (!response.ok) {
-      throw new Error(
-        "Failed to refresh Google token",
-      );
-    }
+  if (!response.ok) {
+    throw new Error("Failed to refresh Google token");
+  }
 
-    const json = (await response.json()) as {
-      access_token?: string;
-      refresh_token?: string;
-      id_token?: string;
-    };
-
-    if (!json.access_token) {
-      throw new Error(
-        "Missing refreshed access token",
-      );
-    }
-
-    return {
-      accessToken: json.access_token,
-      refreshToken:
-        json.refresh_token ?? refreshToken,
-      accountEmail: getEmailFromIdToken(
-        json.id_token,
-      ),
-    };
+  const json = (await response.json()) as {
+    access_token?: string;
+    refresh_token?: string;
+    id_token?: string;
   };
+
+  if (!json.access_token) {
+    throw new Error("Missing refreshed access token");
+  }
+
+  return {
+    accessToken: json.access_token,
+    refreshToken: json.refresh_token ?? refreshToken,
+    accountEmail: getEmailFromIdToken(json.id_token),
+  };
+};
 
 // ─────────────────────────────────────
 // firebase OAuth (web)
 // ─────────────────────────────────────
 
-const requestWebToken = async (
-  auth: Auth,
-  silent: boolean,
-) => {
-  const provider =
-    new GoogleAuthProvider();
+const requestWebToken = async (auth: Auth, silent: boolean) => {
+  const provider = new GoogleAuthProvider();
 
-  provider.addScope(
-    GOOGLE_CALENDAR_SCOPE,
-  );
+  provider.addScope(GOOGLE_CALENDAR_SCOPE);
 
   provider.setCustomParameters({
     include_granted_scopes: "true",
-    ...(silent
-      ? {}
-      : { prompt: "consent" }),
+    ...(silent ? {} : { prompt: "consent" }),
   });
 
   const result = silent
-    ? await reauthenticateWithPopup(
-        auth.currentUser!,
-        provider,
-      )
-    : await signInWithPopup(
-        auth,
-        provider,
-      );
+    ? await reauthenticateWithPopup(auth.currentUser!, provider)
+    : await signInWithPopup(auth, provider);
 
-  const cred =
-    GoogleAuthProvider.credentialFromResult(
-      result,
-    );
+  const cred = GoogleAuthProvider.credentialFromResult(result);
 
   if (!cred?.accessToken) {
-    throw new Error(
-      "No access token",
-    );
+    throw new Error("No access token");
   }
 
   return {
@@ -404,25 +316,17 @@ export type GoogleCalendarAccess = {
   refreshToken?: string;
 };
 
-export const requestCalendarAccessToken =
-  async (
-    auth: Auth,
-    silent = false,
-  ): Promise<GoogleCalendarAccess> => {
-    if (isDesktopLikeRuntime()) {
-      return requestDesktopToken(
-        silent,
-      );
-    }
+export const requestCalendarAccessToken = async (
+  auth: Auth,
+  silent = false,
+): Promise<GoogleCalendarAccess> => {
+  if (isDesktopLikeRuntime()) {
+    return requestDesktopToken(silent);
+  }
 
-    return requestWebToken(
-      auth,
-      silent,
-    );
-  };
+  return requestWebToken(auth, silent);
+};
 
-export const getStoredEmail = ():
-  | string
-  | null => {
+export const getStoredEmail = (): string | null => {
   return readEmail();
 };

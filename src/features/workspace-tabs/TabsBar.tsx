@@ -335,7 +335,6 @@ export const WorkspaceTabsBar = ({
       >
         <Plus className="h-4 w-4" />
       </button>
-
       <div className="h-full min-w-0 flex-1" />
     </div>
   );

@@ -15,63 +15,45 @@ import type {
 // 定数
 // ─────────────────────────────────────────────────────────────
 
-const GCAL_API_BASE =
-  "https://www.googleapis.com/calendar/v3";
+const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
 
-const SYNC_TOKENS_STORAGE_KEY =
-  "flashcard-master.gcal.sync_tokens";
+const SYNC_TOKENS_STORAGE_KEY = "flashcard-master.gcal.sync_tokens";
 
-const DEFAULT_POLL_INTERVAL_MS =
-  60_000;
+const DEFAULT_POLL_INTERVAL_MS = 60_000;
 
-const MAX_BACKOFF_MS =
-  10 * 60 * 1000;
+const MAX_BACKOFF_MS = 10 * 60 * 1000;
 
-const INITIAL_BACKOFF_MS =
-  60_000;
+const INITIAL_BACKOFF_MS = 60_000;
 
-const DEFAULT_FULL_SYNC_PAST_DAYS =
-  30;
+const DEFAULT_FULL_SYNC_PAST_DAYS = 30;
 
-const DEFAULT_FULL_SYNC_FUTURE_DAYS =
-  180;
+const DEFAULT_FULL_SYNC_FUTURE_DAYS = 180;
 
 // ─────────────────────────────────────────────────────────────
 // localStorage helpers
 // ─────────────────────────────────────────────────────────────
 
-const readSyncTokens =
-  (): GCalSyncTokenMap => {
-    try {
-      const raw =
-        localStorage.getItem(
-          SYNC_TOKENS_STORAGE_KEY,
-        );
+const readSyncTokens = (): GCalSyncTokenMap => {
+  try {
+    const raw = localStorage.getItem(SYNC_TOKENS_STORAGE_KEY);
 
-      if (!raw) {
-        return {};
-      }
-
-      const parsed =
-        JSON.parse(raw);
-
-      return typeof parsed ===
-        "object" && parsed !== null
-        ? (parsed as GCalSyncTokenMap)
-        : {};
-    } catch {
+    if (!raw) {
       return {};
     }
-  };
 
-const writeSyncTokens = (
-  map: GCalSyncTokenMap,
-): void => {
+    const parsed = JSON.parse(raw);
+
+    return typeof parsed === "object" && parsed !== null
+      ? (parsed as GCalSyncTokenMap)
+      : {};
+  } catch {
+    return {};
+  }
+};
+
+const writeSyncTokens = (map: GCalSyncTokenMap): void => {
   try {
-    localStorage.setItem(
-      SYNC_TOKENS_STORAGE_KEY,
-      JSON.stringify(map),
-    );
+    localStorage.setItem(SYNC_TOKENS_STORAGE_KEY, JSON.stringify(map));
   } catch {
     // ignore
   }
@@ -81,16 +63,12 @@ const writeSyncTokens = (
 // API helper
 // ─────────────────────────────────────────────────────────────
 
-const gcalGet = async <T>(
-  accessToken: string,
-  url: string,
-): Promise<T> => {
-  const response =
-    await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+const gcalGet = async <T>(accessToken: string, url: string): Promise<T> => {
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   if (!response.ok) {
     const error = new Error(
@@ -113,27 +91,13 @@ const gcalGet = async <T>(
 // Date parser
 // ─────────────────────────────────────────────────────────────
 
-const parseGoogleDate = (
-  rawValue: string,
-): Date => {
-  const dateOnlyMatch =
-    /^(\d{4})-(\d{2})-(\d{2})$/.exec(
-      rawValue,
-    );
+const parseGoogleDate = (rawValue: string): Date => {
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(rawValue);
 
   if (dateOnlyMatch) {
-    const [
-      ,
-      year,
-      month,
-      day,
-    ] = dateOnlyMatch;
+    const [, year, month, day] = dateOnlyMatch;
 
-    return new Date(
-      Number(year),
-      Number(month) - 1,
-      Number(day),
-    );
+    return new Date(Number(year), Number(month) - 1, Number(day));
   }
 
   return new Date(rawValue);
@@ -142,43 +106,27 @@ const parseGoogleDate = (
 const parseEventStart = (
   start: GCalRawIncrementalEvent["start"],
 ): Date | null => {
-  const rawValue =
-    start?.dateTime ??
-    start?.date;
+  const rawValue = start?.dateTime ?? start?.date;
 
   if (!rawValue) {
     return null;
   }
 
-  const date =
-    parseGoogleDate(rawValue);
+  const date = parseGoogleDate(rawValue);
 
-  return Number.isNaN(
-    date.getTime(),
-  )
-    ? null
-    : date;
+  return Number.isNaN(date.getTime()) ? null : date;
 };
 
-const parseEventEnd = (
-  end: GCalRawIncrementalEvent["end"],
-): Date | null => {
-  const rawValue =
-    end?.dateTime ??
-    end?.date;
+const parseEventEnd = (end: GCalRawIncrementalEvent["end"]): Date | null => {
+  const rawValue = end?.dateTime ?? end?.date;
 
   if (!rawValue) {
     return null;
   }
 
-  const date =
-    parseGoogleDate(rawValue);
+  const date = parseGoogleDate(rawValue);
 
-  return Number.isNaN(
-    date.getTime(),
-  )
-    ? null
-    : date;
+  return Number.isNaN(date.getTime()) ? null : date;
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -198,32 +146,25 @@ const toCalendarEvent = (
     return null;
   }
 
-  const startsAt =
-    parseEventStart(raw.start);
+  const startsAt = parseEventStart(raw.start);
 
   if (!startsAt) {
     return null;
   }
 
-  const endsAt =
-    parseEventEnd(raw.end);
+  const endsAt = parseEventEnd(raw.end);
 
   if (!endsAt) {
     return null;
   }
 
-  const isAllDay = Boolean(
-    raw.start?.date &&
-      !raw.start?.dateTime,
-  );
+  const isAllDay = Boolean(raw.start?.date && !raw.start?.dateTime);
 
   return {
     id: `${calendarId}:${raw.id}`,
     calendarId,
     accentColor,
-    title:
-      raw.summary ||
-      "(No title)",
+    title: raw.summary || "(No title)",
     startsAt,
     endsAt,
     isAllDay,
@@ -238,78 +179,53 @@ export class GoogleCalendarSyncEngine {
   private readonly options: Required<
     Pick<
       GCalSyncEngineOptions,
-      | "pollIntervalMs"
-      | "fullSyncPastDays"
-      | "fullSyncFutureDays"
+      "pollIntervalMs" | "fullSyncPastDays" | "fullSyncFutureDays"
     >
   > &
     GCalSyncEngineOptions;
 
-  private context: GCalSyncStartContext | null =
-    null;
+  private context: GCalSyncStartContext | null = null;
 
-  private syncState: GCalSyncState =
-    "idle";
+  private syncState: GCalSyncState = "idle";
 
-  private lastSyncedAt: Date | null =
-    null;
+  private lastSyncedAt: Date | null = null;
 
-  private syncTokenMap: GCalSyncTokenMap =
-    {};
+  private syncTokenMap: GCalSyncTokenMap = {};
 
   private isRunning = false;
 
-  private currentBackoffMs =
-    INITIAL_BACKOFF_MS;
+  private currentBackoffMs = INITIAL_BACKOFF_MS;
 
-  private pollTimerId:
-    | ReturnType<
-        typeof setTimeout
-      >
-    | null = null;
+  private pollTimerId: ReturnType<typeof setTimeout> | null = null;
 
   private isSyncing = false;
 
-  private visibilityChangeListener:
-    | (() => void)
-    | null = null;
+  private visibilityChangeListener: (() => void) | null = null;
 
-  constructor(
-    options: GCalSyncEngineOptions,
-  ) {
+  constructor(options: GCalSyncEngineOptions) {
     this.options = {
-      pollIntervalMs:
-        DEFAULT_POLL_INTERVAL_MS,
+      pollIntervalMs: DEFAULT_POLL_INTERVAL_MS,
 
-      fullSyncPastDays:
-        DEFAULT_FULL_SYNC_PAST_DAYS,
+      fullSyncPastDays: DEFAULT_FULL_SYNC_PAST_DAYS,
 
-      fullSyncFutureDays:
-        DEFAULT_FULL_SYNC_FUTURE_DAYS,
+      fullSyncFutureDays: DEFAULT_FULL_SYNC_FUTURE_DAYS,
 
       ...options,
     };
 
-    this.syncTokenMap =
-      readSyncTokens();
+    this.syncTokenMap = readSyncTokens();
   }
 
-  start(
-    context: GCalSyncStartContext,
-  ): void {
+  start(context: GCalSyncStartContext): void {
     this.stop();
 
     this.context = context;
 
     this.isRunning = true;
 
-    this.currentBackoffMs =
-      INITIAL_BACKOFF_MS;
+    this.currentBackoffMs = INITIAL_BACKOFF_MS;
 
-    this.visibilityChangeListener =
-      this.handleVisibilityChange.bind(
-        this,
-      );
+    this.visibilityChangeListener = this.handleVisibilityChange.bind(this);
 
     document.addEventListener(
       "visibilitychange",
@@ -319,9 +235,7 @@ export class GoogleCalendarSyncEngine {
     void this.runSync();
   }
 
-  updateContext(
-    context: Partial<GCalSyncStartContext>,
-  ): void {
+  updateContext(context: Partial<GCalSyncStartContext>): void {
     if (!this.context) {
       return;
     }
@@ -339,18 +253,13 @@ export class GoogleCalendarSyncEngine {
 
     this.context = null;
 
-    if (
-      this
-        .visibilityChangeListener
-    ) {
+    if (this.visibilityChangeListener) {
       document.removeEventListener(
         "visibilitychange",
-        this
-          .visibilityChangeListener,
+        this.visibilityChangeListener,
       );
 
-      this.visibilityChangeListener =
-        null;
+      this.visibilityChangeListener = null;
     }
 
     this.setSyncState("idle");
@@ -362,46 +271,32 @@ export class GoogleCalendarSyncEngine {
     await this.runSync();
   }
 
-  resetSyncTokensForCalendars(
-    calendarIds: string[],
-  ): void {
+  resetSyncTokensForCalendars(calendarIds: string[]): void {
     for (const id of calendarIds) {
       delete this.syncTokenMap[id];
     }
 
-    writeSyncTokens(
-      this.syncTokenMap,
-    );
+    writeSyncTokens(this.syncTokenMap);
   }
 
   clearAllSyncTokens(): void {
     this.syncTokenMap = {};
 
-    writeSyncTokens(
-      this.syncTokenMap,
-    );
+    writeSyncTokens(this.syncTokenMap);
   }
 
   private clearPollTimer(): void {
-    if (
-      this.pollTimerId !== null
-    ) {
-      clearTimeout(
-        this.pollTimerId,
-      );
+    if (this.pollTimerId !== null) {
+      clearTimeout(this.pollTimerId);
 
       this.pollTimerId = null;
     }
   }
 
-  private setSyncState(
-    state: GCalSyncState,
-  ): void {
+  private setSyncState(state: GCalSyncState): void {
     this.syncState = state;
 
-    this.options.onSyncStateChange(
-      state,
-    );
+    this.options.onSyncStateChange(state);
   }
 
   private handleVisibilityChange(): void {
@@ -409,10 +304,7 @@ export class GoogleCalendarSyncEngine {
       return;
     }
 
-    if (
-      document.visibilityState ===
-      "visible"
-    ) {
+    if (document.visibilityState === "visible") {
       this.clearPollTimer();
 
       void this.runSync();
@@ -434,35 +326,19 @@ export class GoogleCalendarSyncEngine {
       return;
     }
 
-    if (
-      document.visibilityState !==
-      "visible"
-    ) {
+    if (document.visibilityState !== "visible") {
       return;
     }
 
-    const {
-      accessToken,
-      selectedCalendarIds,
-      calendars,
-    } = this.context;
+    const { accessToken, selectedCalendarIds, calendars } = this.context;
 
     this.isSyncing = true;
 
-    this.setSyncState(
-      "syncing",
-    );
+    this.setSyncState("syncing");
 
-    const calendarMap =
-      new Map<
-        string,
-        GoogleCalendarListItem
-      >(
-        calendars.map((c) => [
-          c.id,
-          c,
-        ]),
-      );
+    const calendarMap = new Map<string, GoogleCalendarListItem>(
+      calendars.map((c) => [c.id, c]),
+    );
 
     try {
       for (const calendarId of selectedCalendarIds) {
@@ -470,24 +346,14 @@ export class GoogleCalendarSyncEngine {
           break;
         }
 
-        const token =
-          this.options.getAccessToken() ??
-          accessToken;
+        const token = this.options.getAccessToken() ?? accessToken;
 
         const accentColor =
-          calendarMap.get(
-            calendarId,
-          )?.backgroundColor ??
-          "#185FA5";
+          calendarMap.get(calendarId)?.backgroundColor ?? "#185FA5";
 
-        const existingSyncToken =
-          this.syncTokenMap[
-            calendarId
-          ];
+        const existingSyncToken = this.syncTokenMap[calendarId];
 
-        if (
-          existingSyncToken
-        ) {
+        if (existingSyncToken) {
           await this.doIncrementalSync(
             calendarId,
             existingSyncToken,
@@ -495,37 +361,21 @@ export class GoogleCalendarSyncEngine {
             token,
           );
         } else {
-          await this.doFullSync(
-            calendarId,
-            accentColor,
-            token,
-          );
+          await this.doFullSync(calendarId, accentColor, token);
         }
       }
 
-      this.currentBackoffMs =
-        INITIAL_BACKOFF_MS;
+      this.currentBackoffMs = INITIAL_BACKOFF_MS;
 
-      this.lastSyncedAt =
-        new Date();
+      this.lastSyncedAt = new Date();
 
-      this.options.onLastSyncedAtChange(
-        this.lastSyncedAt,
-      );
+      this.options.onLastSyncedAtChange(this.lastSyncedAt);
 
-      this.setSyncState(
-        "idle",
-      );
+      this.setSyncState("idle");
 
-      this.schedulePoll(
-        this.options
-          .pollIntervalMs,
-      );
+      this.schedulePoll(this.options.pollIntervalMs);
     } catch (error) {
-      console.error(
-        "[GCalSyncEngine] 同期エラー:",
-        error,
-      );
+      console.error("[GCalSyncEngine] 同期エラー:", error);
 
       const isUnauthorized =
         error instanceof Error &&
@@ -535,18 +385,11 @@ export class GoogleCalendarSyncEngine {
           }
         ).status === 401;
 
-      if (
-        isUnauthorized
-      ) {
-        const reconnected =
-          await this.options.silentReconnect();
+      if (isUnauthorized) {
+        const reconnected = await this.options.silentReconnect();
 
-        if (
-          reconnected &&
-          this.isRunning
-        ) {
-          this.isSyncing =
-            false;
+        if (reconnected && this.isRunning) {
+          this.isSyncing = false;
 
           void this.runSync();
 
@@ -554,59 +397,41 @@ export class GoogleCalendarSyncEngine {
         }
       }
 
-      this.setSyncState(
-        "error",
-      );
+      this.setSyncState("error");
 
       this.options.onError(
-        error instanceof Error
-          ? error
-          : new Error(
-              String(error),
-            ),
+        error instanceof Error ? error : new Error(String(error)),
       );
 
-      const backoffMs =
-        this.currentBackoffMs;
+      const backoffMs = this.currentBackoffMs;
 
-      this.currentBackoffMs =
-        Math.min(
-          this.currentBackoffMs *
-            2,
-          MAX_BACKOFF_MS,
-        );
-
-      this.schedulePoll(
-        backoffMs,
+      this.currentBackoffMs = Math.min(
+        this.currentBackoffMs * 2,
+        MAX_BACKOFF_MS,
       );
+
+      this.schedulePoll(backoffMs);
     } finally {
       this.isSyncing = false;
     }
   }
 
-  private schedulePoll(
-    delayMs: number,
-  ): void {
+  private schedulePoll(delayMs: number): void {
     if (!this.isRunning) {
       return;
     }
 
-    if (
-      document.visibilityState !==
-      "visible"
-    ) {
+    if (document.visibilityState !== "visible") {
       return;
     }
 
     this.clearPollTimer();
 
-    this.pollTimerId =
-      setTimeout(() => {
-        this.pollTimerId =
-          null;
+    this.pollTimerId = setTimeout(() => {
+      this.pollTimerId = null;
 
-        void this.runSync();
-      }, delayMs);
+      void this.runSync();
+    }, delayMs);
   }
 
   private async doFullSync(
@@ -616,94 +441,52 @@ export class GoogleCalendarSyncEngine {
   ): Promise<void> {
     const now = new Date();
 
-    const timeMin = subDays(
-      now,
-      this.options
-        .fullSyncPastDays,
-    ).toISOString();
+    const timeMin = subDays(now, this.options.fullSyncPastDays).toISOString();
 
-    const timeMax = addDays(
-      now,
-      this.options
-        .fullSyncFutureDays,
-    ).toISOString();
+    const timeMax = addDays(now, this.options.fullSyncFutureDays).toISOString();
 
-    const params =
-      new URLSearchParams({
-        singleEvents: "true",
-        orderBy: "startTime",
-        timeMin,
-        timeMax,
-      });
+    const params = new URLSearchParams({
+      singleEvents: "true",
+      orderBy: "startTime",
+      timeMin,
+      timeMax,
+    });
 
-    const encodedId =
-      encodeURIComponent(
-        calendarId,
-      );
+    const encodedId = encodeURIComponent(calendarId);
 
-    let pageToken:
-      | string
-      | undefined;
+    let pageToken: string | undefined;
 
-    const allEvents:
-      GCalRawIncrementalEvent[] =
-      [];
+    const allEvents: GCalRawIncrementalEvent[] = [];
 
-    let syncToken:
-      | string
-      | undefined;
+    let syncToken: string | undefined;
 
     do {
       if (pageToken) {
-        params.set(
-          "pageToken",
-          pageToken,
-        );
+        params.set("pageToken", pageToken);
       }
 
       const url = `${GCAL_API_BASE}/calendars/${encodedId}/events?${params.toString()}`;
 
-      const response =
-        await gcalGet<GCalEventsListResponse>(
-          accessToken,
-          url,
-        );
+      const response = await gcalGet<GCalEventsListResponse>(accessToken, url);
 
-      allEvents.push(
-        ...(response.items ??
-          []),
-      );
+      allEvents.push(...(response.items ?? []));
 
-      pageToken =
-        response.nextPageToken;
+      pageToken = response.nextPageToken;
 
-      syncToken =
-        response.nextSyncToken ??
-        syncToken;
+      syncToken = response.nextSyncToken ?? syncToken;
     } while (pageToken);
 
     if (syncToken) {
-      this.syncTokenMap[
-        calendarId
-      ] = syncToken;
+      this.syncTokenMap[calendarId] = syncToken;
 
-      writeSyncTokens(
-        this.syncTokenMap,
-      );
+      writeSyncTokens(this.syncTokenMap);
     }
 
     for (const raw of allEvents) {
-      const event =
-        toCalendarEvent(
-          raw,
-          calendarId,
-          accentColor,
-        );
+      const event = toCalendarEvent(raw, calendarId, accentColor);
 
       if (event) {
-        this.options.onEventAdded(
-          event,
-        );
+        this.options.onEventAdded(event);
       }
     }
   }
@@ -714,56 +497,36 @@ export class GoogleCalendarSyncEngine {
     accentColor: string,
     accessToken: string,
   ): Promise<void> {
-    const encodedId =
-      encodeURIComponent(
-        calendarId,
-      );
+    const encodedId = encodeURIComponent(calendarId);
 
-    const params =
-      new URLSearchParams({
-        syncToken,
-      });
+    const params = new URLSearchParams({
+      syncToken,
+    });
 
-    let pageToken:
-      | string
-      | undefined;
+    let pageToken: string | undefined;
 
-    const diffEvents:
-      GCalRawIncrementalEvent[] =
-      [];
+    const diffEvents: GCalRawIncrementalEvent[] = [];
 
-    let nextSyncToken:
-      | string
-      | undefined;
+    let nextSyncToken: string | undefined;
 
     try {
       do {
         if (pageToken) {
-          params.set(
-            "pageToken",
-            pageToken,
-          );
+          params.set("pageToken", pageToken);
         }
 
         const url = `${GCAL_API_BASE}/calendars/${encodedId}/events?${params.toString()}`;
 
-        const response =
-          await gcalGet<GCalEventsListResponse>(
-            accessToken,
-            url,
-          );
-
-        diffEvents.push(
-          ...(response.items ??
-            []),
+        const response = await gcalGet<GCalEventsListResponse>(
+          accessToken,
+          url,
         );
 
-        pageToken =
-          response.nextPageToken;
+        diffEvents.push(...(response.items ?? []));
 
-        nextSyncToken =
-          response.nextSyncToken ??
-          nextSyncToken;
+        pageToken = response.nextPageToken;
+
+        nextSyncToken = response.nextSyncToken ?? nextSyncToken;
       } while (pageToken);
     } catch (error) {
       const is410 =
@@ -775,20 +538,11 @@ export class GoogleCalendarSyncEngine {
         ).status === 410;
 
       if (is410) {
-        delete this
-          .syncTokenMap[
-          calendarId
-        ];
+        delete this.syncTokenMap[calendarId];
 
-        writeSyncTokens(
-          this.syncTokenMap,
-        );
+        writeSyncTokens(this.syncTokenMap);
 
-        await this.doFullSync(
-          calendarId,
-          accentColor,
-          accessToken,
-        );
+        await this.doFullSync(calendarId, accentColor, accessToken);
 
         return;
       }
@@ -797,20 +551,12 @@ export class GoogleCalendarSyncEngine {
     }
 
     if (nextSyncToken) {
-      this.syncTokenMap[
-        calendarId
-      ] = nextSyncToken;
+      this.syncTokenMap[calendarId] = nextSyncToken;
 
-      writeSyncTokens(
-        this.syncTokenMap,
-      );
+      writeSyncTokens(this.syncTokenMap);
     }
 
-    this.applyDiff(
-      calendarId,
-      accentColor,
-      diffEvents,
-    );
+    this.applyDiff(calendarId, accentColor, diffEvents);
   }
 
   private applyDiff(
@@ -825,31 +571,19 @@ export class GoogleCalendarSyncEngine {
 
       const compositeId = `${calendarId}:${raw.id}`;
 
-      if (
-        raw.status ===
-        "cancelled"
-      ) {
-        this.options.onEventDeleted(
-          compositeId,
-        );
+      if (raw.status === "cancelled") {
+        this.options.onEventDeleted(compositeId);
 
         continue;
       }
 
-      const event =
-        toCalendarEvent(
-          raw,
-          calendarId,
-          accentColor,
-        );
+      const event = toCalendarEvent(raw, calendarId, accentColor);
 
       if (!event) {
         continue;
       }
 
-      this.options.onEventUpdated(
-        event,
-      );
+      this.options.onEventUpdated(event);
     }
   }
 }

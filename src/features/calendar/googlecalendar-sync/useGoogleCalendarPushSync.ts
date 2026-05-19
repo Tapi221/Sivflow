@@ -36,11 +36,7 @@ export const useGoogleCalendarPushSync = ({
     /**
      * 初期化前や未ログイン時は何もしない
      */
-    if (
-      !userId ||
-      selectedCalendarIds.size === 0 ||
-      !firestoreDb
-    ) {
+    if (!userId || selectedCalendarIds.size === 0 || !firestoreDb) {
       return;
     }
 
@@ -76,10 +72,7 @@ export const useGoogleCalendarPushSync = ({
           /**
            * 削除イベントは無視
            */
-          if (
-            change.type !== "added" &&
-            change.type !== "modified"
-          ) {
+          if (change.type !== "added" && change.type !== "modified") {
             return;
           }
 
@@ -92,19 +85,14 @@ export const useGoogleCalendarPushSync = ({
             return;
           }
 
-          console.info(
-            `[PushSync] ${calendarId} の変更通知を受信 → 即時同期`,
-          );
+          console.info(`[PushSync] ${calendarId} の変更通知を受信 → 即時同期`);
 
           onNotificationRef.current(calendarId);
         });
       },
 
       (error) => {
-        console.warn(
-          "[PushSync] Firestoreリスナーエラー:",
-          error,
-        );
+        console.warn("[PushSync] Firestoreリスナーエラー:", error);
       },
     );
 

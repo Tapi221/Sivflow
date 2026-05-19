@@ -1,5 +1,4 @@
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
-
 import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarTimelineDayView } from "./grid/TimelineDayView";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
@@ -89,7 +88,6 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
             onSelectDate={handleSidebarSelectDate}
             onPreviousMonth={handleSidebarPreviousMonth}
             onNextMonth={handleSidebarNextMonth}
-            onClose={() => setIsCalendarSidebarOpen(false)}
             onConnectCalendar={connectGoogleCalendar}
             onToggleCalendar={toggleGoogleCalendar}
           />

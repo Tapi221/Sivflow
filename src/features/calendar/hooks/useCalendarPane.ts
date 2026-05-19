@@ -264,18 +264,18 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
 
   // ── Effects
 
-useCalendarEventSync({
-  activeMode,
-  selectedViewMode,
-  visibleDays,
-  monthTitleDate,
-  googleCalendar: {
-    loadEvents: loadGoogleCalendarEvents,
-    forceSync,
-    selectedCalendarIds,
-    selectedCalendarIdList,
-  },
-});
+  useCalendarEventSync({
+    activeMode,
+    selectedViewMode,
+    visibleDays,
+    monthTitleDate,
+    googleCalendar: {
+      loadEvents: loadGoogleCalendarEvents,
+      forceSync,
+      selectedCalendarIds,
+      selectedCalendarIdList,
+    },
+  });
 
   useEffect(() => {
     const viewport = contentViewportRef.current;
