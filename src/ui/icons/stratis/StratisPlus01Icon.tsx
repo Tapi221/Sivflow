@@ -19,7 +19,7 @@ export const StratisPlus01Icon = forwardRef<
       <path
         d="M12.0001 4.80005L12 19.2M19.2 12L4.80005 12"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.5"
         strokeLinecap="round"
       />
     </svg>

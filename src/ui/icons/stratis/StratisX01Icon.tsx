@@ -17,7 +17,7 @@ export const StratisX01Icon = forwardRef<SVGSVGElement, StratisX01IconProps>(
         <path
           d="M20 4L4 20M20 20L4 4"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.5"
           strokeLinecap="round"
         />
       </svg>

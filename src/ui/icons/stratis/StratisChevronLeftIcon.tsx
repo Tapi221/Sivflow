@@ -19,7 +19,7 @@ export const StratisChevronLeftIcon = forwardRef<
       <path
         d="M15 17L10 12L15 7"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

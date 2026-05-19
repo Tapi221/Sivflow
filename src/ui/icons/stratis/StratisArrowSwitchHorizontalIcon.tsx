@@ -19,7 +19,7 @@ export const StratisArrowSwitchHorizontalIcon = forwardRef<
       <path
         d="M14.25 6.375L17.625 3M17.625 3L21 6.375M17.625 3L17.625 21M9.75 17.625L6.375 21M6.375 21L3 17.625M6.375 21L6.375 3"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
