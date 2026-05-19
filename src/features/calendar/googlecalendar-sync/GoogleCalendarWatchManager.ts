@@ -12,7 +12,7 @@
  */
 
 import { doc, getDoc, setDoc, deleteDoc, collection } from "firebase/firestore";
-import { db } from "@/services/firebase";
+import { firestoreDb } from "@/services/firebase";
 
 const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
 
