@@ -11,6 +11,7 @@ import type {
   CalendarTimestampLike,
   CalendarWeekStartDay,
 } from "./calendar.types";
+import type { Translations } from "@/i18n/translations";
 
 type CalendarArrowKey = keyof typeof CALENDAR_ARROW_DIFF_MAP;
 
@@ -45,10 +46,15 @@ export const getCalendarIntensity = (count: number) => {
   return Math.min(5, Math.ceil(count / 5));
 };
 
-export const getTodayDescription = (todayDueCount: number) => {
-  return todayDueCount === 0
-    ? "今日の復習はありません。"
-    : "忘れる前に復習しましょう。";
+/**
+ * 今日の復習説明文を返す。
+ * t（翻訳辞書）を受け取ることでロケール対応する。
+ */
+export const getTodayDescription = (
+  todayDueCount: number,
+  t: Pick<Translations, "todayDescriptionEmpty" | "todayDescriptionDue">,
+) => {
+  return todayDueCount === 0 ? t.todayDescriptionEmpty : t.todayDescriptionDue;
 };
 
 export const isFocusableInputTarget = (target: EventTarget | null) => {
