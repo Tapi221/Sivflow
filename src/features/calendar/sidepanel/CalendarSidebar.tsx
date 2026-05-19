@@ -14,7 +14,7 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 
-import { SidebarCalendarIcon } from "../ui/calendar.icons";
+import { CalendarIcon } from "../ui/calendar.icons";
 import type {
   AppCalendarItem,
   CalendarSidebarProps,
@@ -132,7 +132,7 @@ export const CalendarSidebar = ({
       <nav className="flex w-full flex-col gap-1" aria-label="Calendar lists">
         <div className="flex flex-col">
           <div className="flex h-7 w-full items-center gap-1.5 overflow-hidden px-2 text-[13px] font-medium leading-normal text-[#24272f]">
-            <SidebarCalendarIcon className="h-4 w-4 shrink-0 text-black" />
+            <CalendarIcon className="h-4 w-4 shrink-0 text-black" />
             <span className="truncate">My calendars</span>
           </div>
 
@@ -171,7 +171,7 @@ export const CalendarSidebar = ({
                     !googleCalendarOpen && "-rotate-90",
                   )}
                 />
-                <SidebarCalendarIcon className="h-4 w-4 shrink-0 text-black" />
+                <CalendarIcon className="h-4 w-4 shrink-0 text-black" />
               </span>
               <span className="truncate">{googleCalendarSectionLabel}</span>
             </button>

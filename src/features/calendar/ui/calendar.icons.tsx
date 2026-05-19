@@ -72,11 +72,7 @@ export const FieldsToolbarIcon = ({
   </svg>
 );
 
-/**
- * Month view — Lucide `calendar-days` (v0.383.0, ISC License)
- * https://lucide.dev/icons/calendar-days
- */
-export const MonthViewToolbarIcon = ({
+export const MonthViewIcon = ({
   className,
   label: _label,
   size: _size,
@@ -108,7 +104,7 @@ export const MonthViewToolbarIcon = ({
   </svg>
 );
 
-export const WeekViewToolbarIcon = ({
+export const WeekViewIcon = ({
   className,
   label: _label,
   size: _size,
@@ -138,7 +134,7 @@ export const WeekViewToolbarIcon = ({
   </svg>
 );
 
-export const DayViewToolbarIcon = ({
+export const DayViewIcon = ({
   className,
   label: _label,
   size: _size,
@@ -164,7 +160,7 @@ export const DayViewToolbarIcon = ({
   </svg>
 );
 
-export const SidebarCalendarIcon = ({
+export const CalendarIcon = ({
   className,
   label: _label,
   size: _size,

@@ -2,13 +2,13 @@ import { cn } from "@/lib/utils";
 import { Filter, Search } from "@/ui/icons";
 import type { IconProps } from "@/ui/icons";
 import {
-  SidebarCalendarIcon,
+  CalendarIcon,
   FieldsToolbarIcon,
   SortToolbarIcon,
   TimelineToolbarIcon,
-  DayViewToolbarIcon,
-  MonthViewToolbarIcon,
-  WeekViewToolbarIcon,
+  DayViewIcon,
+  MonthViewIcon,
+  WeekViewIcon,
   TaskIcon,
 } from "./ui/calendar.icons";
 import type {
@@ -27,9 +27,9 @@ const CALENDAR_TOOLBAR_ACTIONS = [
 ] as const;
 
 const CALENDAR_VIEW_MODE_TOOLBAR_OPTIONS = [
-  { value: "month", label: "Month", icon: MonthViewToolbarIcon },
-  { value: "week", label: "Week", icon: WeekViewToolbarIcon },
-  { value: "days", label: "Day", icon: DayViewToolbarIcon },
+  { value: "month", label: "Month", icon: MonthViewIcon },
+  { value: "week", label: "Week", icon: WeekViewIcon },
+  { value: "days", label: "Day", icon: DayViewIcon },
 ] as const satisfies Array<{
   value: CalendarViewMode;
   label: string;
@@ -48,7 +48,7 @@ export const CalendarWorkspaceToolbar = ({
     {
       value: "calendar" as CalendarToolbarMode,
       label: "Calendar",
-      icon: SidebarCalendarIcon,
+      icon: CalendarIcon,
       onClick: onSelectCalendar,
     },
     {
