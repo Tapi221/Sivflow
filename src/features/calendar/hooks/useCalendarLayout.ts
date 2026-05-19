@@ -28,8 +28,13 @@ export const useCalendarLayout = ({
         )
       : C.DAY_COLUMN_MIN_WIDTH;
 
+  const renderDayCount =
+    selectedViewMode === "month"
+      ? displayDays.length
+      : visibleDays.length;
+
   const gridWidth =
-    C.TIME_COLUMN_WIDTH + displayDays.length * calendarDayColumnWidth;
+    C.TIME_COLUMN_WIDTH + renderDayCount * calendarDayColumnWidth;
 
   const titleDate =
     selectedViewMode === "month"
@@ -40,7 +45,7 @@ export const useCalendarLayout = ({
 
   const timelineGridStyle = {
     "--calendar-hour-row-height": `${C.DEFAULT_HOUR_ROW_HEIGHT}px`,
-    gridTemplateColumns: `${C.TIME_COLUMN_WIDTH}px repeat(${displayDays.length}, ${calendarDayColumnWidth}px)`,
+    gridTemplateColumns: `${C.TIME_COLUMN_WIDTH}px repeat(${renderDayCount}, ${calendarDayColumnWidth}px)`,
     minWidth: `${gridWidth}px`,
   } as const;
 

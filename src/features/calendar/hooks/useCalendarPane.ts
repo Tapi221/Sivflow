@@ -16,7 +16,6 @@ import type {
 } from "../googlecalendar-integration/useGoogleCalendarIntegration";
 import type { buildTimelineColumns } from "../grid/TimelineDayView.shared";
 
-// ── 戻り値の型を明示することで TS7022（循環推論エラー）を解消 ──
 export type UseCalendarPaneReturn = {
   contentViewportRef: React.RefObject<HTMLDivElement | null>;
   scrollContainerRef: React.RefObject<HTMLDivElement | null>;
@@ -34,7 +33,6 @@ export type UseCalendarPaneReturn = {
   visibleDays: Date[];
   displayDays: Date[];
 
-  // ReturnType の動的 import をやめ、明示的な型エイリアスを使用
   timelineColumns: ReturnType<typeof buildTimelineColumns>;
   timelineColumnWidth: number;
   timelineAnchorColumnIndex: number;
@@ -46,7 +44,6 @@ export type UseCalendarPaneReturn = {
   timelineGridStyle: React.CSSProperties;
 
   googleAccountEmail: string | null;
-  // any → 具体的な型に変更（TS no-explicit-any 解消）
   googleCalendars: GoogleCalendarListItem[];
   googleCalendarError: string | null;
   googleCalendarEvents: GoogleCalendarEvent[];
@@ -117,8 +114,6 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     monthTitleDate: navigation.monthTitleDate,
     googleCalendar: {
       forceSync: google.forceSync,
-      // useCalendarEventSync の GoogleCalendarSlice は selectedCalendarIds: string[]
-      // Set<string> → string[] に変換して渡す
       selectedCalendarIds: Array.from(google.selectedCalendarIds),
     },
   });
@@ -156,7 +151,8 @@ export const useCalendarPane = (): UseCalendarPaneReturn => {
     googleCalendarEvents: google.events,
     isGoogleCalendarConnected: google.isConnected,
     isGoogleCalendarConnecting: google.isConnecting,
-    selectedCalendarIds: google.selectedCalendarIds, // Set<string> のまま外部に渡す
+    selectedCalendarIds: google.selectedCalendarIds,
+
     connectGoogleCalendar: google.connect,
     toggleGoogleCalendar: google.toggleCalendar,
 
