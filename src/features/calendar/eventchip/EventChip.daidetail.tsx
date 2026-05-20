@@ -1,7 +1,9 @@
 import { format } from "date-fns";
 
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
 import { generateColorTokens } from "@/features/calendar/ui/calendar.color-tokens";
+import { cn } from "@/lib/utils";
 
 // ─────────────────────────────────────────────
 
@@ -59,7 +61,7 @@ export const EventChipDayDetail = ({
     (startMin / 60) *
     HOUR_ROW_HEIGHT;
 
-  const height =
+  const calculatedHeight =
     (durationMin / 60) *
     HOUR_ROW_HEIGHT;
 
@@ -80,26 +82,31 @@ export const EventChipDayDetail = ({
         "H:mm",
       )}`;
 
+  const height = event.isAllDay
+    ? undefined
+    : calculatedHeight;
+
   return (
     <div
-      className="
-        absolute
-        left-[6px]
-        right-[8px]
-        flex
-        flex-col
-        gap-0.5
-        overflow-hidden
-        rounded-md
-        px-1.5
-        py-1
-        text-left
-      "
+      className={cn(
+        eventChipAllDayClass,
+        `
+          absolute
+          left-[6px]
+          right-[8px]
+          flex
+          flex-col
+          gap-0
+          text-left
+        `,
+      )}
       style={{
         top,
         height,
         background: tokens.bg,
-        borderLeft: `3px solid ${tokens.border}`,
+        borderLeft: event.isAllDay
+          ? undefined
+          : `3px solid ${tokens.border}`,
         color: tokens.text,
       }}
       title={`${timeLabel} ${event.title}`}
@@ -107,8 +114,6 @@ export const EventChipDayDetail = ({
       <span
         className="
           truncate
-          text-[10px]
-          font-semibold
           tabular-nums
           opacity-80
         "
@@ -116,16 +121,17 @@ export const EventChipDayDetail = ({
         {timeLabel}
       </span>
 
-      <span
-        className="
-          truncate
-          text-[11px]
-          font-medium
-          leading-snug
-        "
-      >
-        {event.title || "Untitled"}
-      </span>
+      {!event.isAllDay && (
+        <span className="truncate">
+          {event.title || "Untitled"}
+        </span>
+      )}
+
+      {event.isAllDay && (
+        <span className="truncate">
+          {event.title || "Untitled"}
+        </span>
+      )}
     </div>
   );
 };

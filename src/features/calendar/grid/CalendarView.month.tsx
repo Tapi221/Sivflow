@@ -5,7 +5,7 @@ import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-int
 import { GridCalendarMonthDesktop } from "@/features/calendar/grid/Grid.calendar.month.desktop";
 
 import { useMonthInfiniteScroll } from "../scroll/useInfiniteScroll.month.desktop";
-import { useMonthRowResize } from "./useRowResize.month.desktop";
+import { useMonthRowResize } from "./height/useRowResize.month.desktop";
 
 const CHIP_HEIGHT_PX = 21;
 const CHIPS_TOP_OFFSET_PX = 60;
