@@ -18,46 +18,11 @@ const isEditableElement = (target: EventTarget | null) => {
   );
 };
 
-const isRightSidebarShortcut = (event: KeyboardEvent) => {
-  const key = event.key;
-
-  return (
-    key === "\\" ||
-    key === "¥" ||
-    key === "￥" ||
-    event.code === "Backslash" ||
-    event.code === "IntlYen"
-  );
-};
-
-export const useHotKeyDesktop = ({
-  onToggleSidebar,
-  onToggleRightSidebar,
-}: UseHotKeyParams) => {
+export const useHotKeyDesktop = (_params: UseHotKeyParams) => {
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!event.ctrlKey) {
-        return;
-      }
+    const handleKeyDown = (_event: KeyboardEvent) => {
 
-      if (event.metaKey || event.altKey || event.shiftKey) {
-        return;
-      }
-
-      if (isEditableElement(event.target)) {
-        return;
-      }
-
-      if (event.key.toLowerCase() === "b") {
-        event.preventDefault();
-        onToggleSidebar?.();
-        return;
-      }
-
-      if (isRightSidebarShortcut(event)) {
-        event.preventDefault();
-        onToggleRightSidebar?.();
-      }
+      if (isEditableElement(_event.target)) return;
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -65,5 +30,5 @@ export const useHotKeyDesktop = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onToggleSidebar, onToggleRightSidebar]);
+  }, []);
 };
