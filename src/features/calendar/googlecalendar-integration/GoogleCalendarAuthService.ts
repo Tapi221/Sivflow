@@ -9,7 +9,8 @@ import { refreshCalendarAccessToken } from "./gcal.oauth";
 import type { GoogleCalendarListItem } from "./gcalSync.types";
 
 /**
- * トークン再取得 + カレンダー再同期
+ * OAuth再接続 + 状態更新
+ * ただし「同期処理は呼ばない」
  */
 export async function silentReconnect(accountId: string): Promise<{
   accessToken: string;
@@ -32,18 +33,17 @@ export async function silentReconnect(accountId: string): Promise<{
       result.refreshToken,
     );
 
-    const list = await fetchCalendarList(result.accessToken);
+    const calendars = await fetchCalendarList(result.accessToken);
 
-    updateStoredAccountCalendarIds(
-      accountId,
-      list
-        .filter((c: GoogleCalendarListItem) => c.selected || c.primary)
-        .map((c: GoogleCalendarListItem) => c.id),
-    );
+    const selectedIds = calendars
+      .filter((c) => c.selected || c.primary)
+      .map((c) => c.id);
+
+    updateStoredAccountCalendarIds(accountId, selectedIds);
 
     return {
       accessToken: result.accessToken,
-      calendars: list,
+      calendars,
     };
   } catch (e) {
     console.error("[silentReconnect]", e);

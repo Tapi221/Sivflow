@@ -11,7 +11,7 @@ import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
 import { CalendarTaskView } from "./taskview/TaskView";
 import { CalendarTimelineDayView } from "./grid/TimelineDayView";
-import { useSchedulePane } from "./hooks/useSchedulePane";
+import { useSchedulePane } from "./useSchedulePane";
 import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
