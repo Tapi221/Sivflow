@@ -4,26 +4,19 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
 import { GridCalendarMonthDesktop } from "@/features/calendar/grid/Grid.calendar.month.desktop";
 
-import { useMonthInfiniteScroll } from "./useInfiniteScroll.month";
+import { useMonthInfiniteScroll } from "../scroll/useInfiniteScroll.month.desktop";
 import { useMonthRowResize } from "./useRowResize.month.desktop";
 
 const CHIP_HEIGHT_PX = 21;
-
 const CHIPS_TOP_OFFSET_PX = 60;
-
 const CHIPS_BOTTOM_MARGIN_PX = 4;
 
 type CalendarMonthViewProps = {
   currentDate: Date;
-
   selectedDate: Date;
-
   scrollTargetToken?: number;
-
   visibleEvents?: GoogleCalendarEvent[];
-
   onSelectDate: (date: Date) => void;
-
   onVisibleMonthChange?: (date: Date) => void;
 };
 

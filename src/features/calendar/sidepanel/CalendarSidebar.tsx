@@ -27,9 +27,6 @@ import {
 
 import { cn } from "@/lib/utils";
 
-// ─────────────────────────────────────────────────────────────
-// Icons
-// ─────────────────────────────────────────────────────────────
 
 const IconChevronLeft = ({ className }: { className?: string }) => (
   <svg
@@ -65,23 +62,6 @@ const IconChevronRight = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const IconTrash = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-  >
-    <path
-      d="M2 4h12M6 4V2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V4M5.5 4v8.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5V4"
-      stroke="currentColor"
-      strokeWidth="1.25"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
 const IconSync = ({ className }: { className?: string }) => (
   <svg
     viewBox="0 0 16 16"
@@ -98,10 +78,6 @@ const IconSync = ({ className }: { className?: string }) => (
     />
   </svg>
 );
-
-// ─────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────
 
 const buildMiniCalendarDays = (
   monthDate: Date,
@@ -127,10 +103,6 @@ const APP_CALENDAR_ITEMS: AppCalendarItem[] = [
   { id: "app-calendar-test", label: "Test", color: "#ff3b30", checked: true },
 ];
 
-// ─────────────────────────────────────────────────────────────
-// GoogleAccountSection
-// ─────────────────────────────────────────────────────────────
-
 type GoogleAccountSectionProps = {
   account: GoogleAccountDisplay;
   onToggleCalendar: (calendarId: string) => void;
@@ -144,8 +116,6 @@ const GoogleAccountSection = ({
 }: GoogleAccountSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
 
-  const label = account.email ?? "Google Calendar";
-
   const syncIndicator =
     account.syncState === "syncing" ? (
       <IconSync className="h-3 w-3 shrink-0 animate-spin text-[#185FA5]" />
@@ -155,36 +125,32 @@ const GoogleAccountSection = ({
 
   return (
     <div className="mt-3">
-      {/* アカウントヘッダー行 */}
-      <div className="group flex h-6 w-full items-center gap-1 px-2">
+      {/* ヘッダー行：トグル + カレンダーアイコン + GOOGLE + メール */}
+      <button
+        type="button"
+        className="group flex h-6 w-full items-center gap-1 px-2 text-left"
+        onClick={() => setIsOpen((v) => !v)}
+        aria-expanded={isOpen}
+      >
+        <span
+          className={cn(
+            "flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform duration-200",
+            !isOpen && "-rotate-90",
+          )}
+        >
+          <IconChevronRight className="h-3 w-3 text-[#9aa0aa]" />
+        </span>
         <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-[#74798b]" />
-        <span className="flex-1 truncate text-[11px] font-semibold uppercase tracking-wider text-[#9aa0aa]">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9aa0aa]">
           Google
         </span>
+        {account.email && (
+          <span className="truncate text-[11px] font-semibold uppercase tracking-wider text-[#9aa0aa]">
+            {account.email}
+          </span>
+        )}
         {syncIndicator}
-      </div>
-
-      {/* アカウント行（展開トグルのみ） */}
-      <div className="group flex h-7 w-full items-center gap-1 rounded-md px-2 hover:bg-[#eceef1]">
-        <button
-          type="button"
-          className="flex flex-1 min-w-0 items-center gap-1.5 text-left"
-          onClick={() => setIsOpen((v) => !v)}
-          aria-expanded={isOpen}
-        >
-          <span
-            className={cn(
-              "flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform duration-200",
-              !isOpen && "-rotate-90",
-            )}
-          >
-            <IconChevronRight className="h-3 w-3 text-[#9aa0aa]" />
-          </span>
-          <span className="truncate text-[12px] font-medium text-[#3d4049]">
-            {label}
-          </span>
-        </button>
-      </div>
+      </button>
 
       {/* カレンダー一覧 */}
       {isOpen &&
@@ -212,15 +178,12 @@ const GoogleAccountSection = ({
 
       {isOpen && account.calendars.length === 0 && (
         <p className="px-7 py-1 text-[11px] text-[#b0b5bf]">
-          {/* syncingかつcalendarsが空の場合のみスピナー、それ以外は非表示 */}
-          {
-            account.syncState === "syncing" ? (
-              <span className="flex items-center gap-1">
-                <IconSync className="h-3 w-3 animate-spin" />
-                読み込み中…
-              </span>
-            ) : null /* 「カレンダーなし」は表示しない */
-          }
+          {account.syncState === "syncing" ? (
+            <span className="flex items-center gap-1">
+              <IconSync className="h-3 w-3 animate-spin" />
+              読み込み中…
+            </span>
+          ) : null}
         </p>
       )}
 
@@ -232,10 +195,6 @@ const GoogleAccountSection = ({
     </div>
   );
 };
-
-// ─────────────────────────────────────────────────────────────
-// CalendarSidebar
-// ─────────────────────────────────────────────────────────────
 
 export const CalendarSidebar = ({
   monthDate,
