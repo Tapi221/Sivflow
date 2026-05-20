@@ -1,3 +1,9 @@
+/* ============================================================
+   sidebar.desktop.css
+   レール幅（アイコンのみ）を常時デフォルトとする設計。
+   collapsed/expanded の切り替えは廃止。
+   ============================================================ */
+
 .app-sidebar,
 .app-right-sidebar {
   --app-sidebar-bg: linear-gradient(
@@ -17,6 +23,8 @@
   --app-sidebar-focus-ring: rgba(93, 127, 182, 0.3);
 }
 
+/* ── レール本体 ─────────────────────────────────────────── */
+
 .app-sidebar {
   position: sticky;
   top: 0;
@@ -26,7 +34,8 @@
   flex-direction: column;
   justify-content: space-between;
 
-  width: var(--app-sidebar-width);
+  /* レール幅を常時適用 */
+  width: var(--app-sidebar-rail-width, 56px);
 
   min-width: 0;
   min-height: 0;
@@ -36,7 +45,8 @@
   overflow-y: auto;
   overflow-x: hidden;
 
-  padding: 24px 8px 16px;
+  /* レール用の狭いpadding */
+  padding: 16px 6px 12px;
 
   border-top-right-radius: 10px;
 
@@ -53,10 +63,6 @@
     "tnum" 1;
 
   user-select: none;
-
-  transition:
-    width 160ms ease,
-    padding 160ms ease;
 }
 
 .app-right-sidebar {
@@ -74,6 +80,8 @@
   background: var(--app-sidebar-bg);
 }
 
+/* ── レイアウト構造 ──────────────────────────────────────── */
+
 .app-sidebar__top {
   display: flex;
   flex-direction: column;
@@ -81,7 +89,8 @@
   width: 100%;
   min-width: 0;
 
-  gap: 32px;
+  /* レール用の狭いgap */
+  gap: 20px;
 }
 
 .app-sidebar__bottom {
@@ -94,21 +103,25 @@
 
   gap: 8px;
 
-  padding: 8px 8px 0;
+  /* レール用padding */
+  padding: 8px 6px 0;
 }
+
+/* ── ワークスペース（アバターのみ表示） ───────────────────── */
 
 .app-sidebar__workspace {
   display: flex;
   align-items: center;
 
-  width: 224px;
+  /* レール: 中央揃え、padding なし */
+  width: auto;
   min-height: 32px;
 
   flex-shrink: 0;
 
-  gap: 12px;
+  justify-content: center;
 
-  padding: 0 16px;
+  padding: 0;
 
   border-radius: 9px;
 }
@@ -134,14 +147,9 @@
   letter-spacing: -0.4px;
 }
 
+/* ワークスペース名・同期テキストはレールでは非表示 */
 .app-sidebar__workspace-copy {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  min-width: 0;
-
-  gap: 4px;
+  display: none;
 }
 
 .app-sidebar__workspace-name,
@@ -192,6 +200,8 @@
   color: rgba(235, 241, 252, 0.32);
 }
 
+/* ── ナビゲーション ──────────────────────────────────────── */
+
 .app-sidebar__nav {
   display: flex;
   flex-direction: column;
@@ -210,7 +220,8 @@
   display: flex;
   align-items: center;
 
-  width: 224px;
+  /* レール: 全幅、左寄せ */
+  width: 100%;
   min-width: 0;
   height: 32px;
 
@@ -301,21 +312,12 @@
   color: var(--app-sidebar-icon);
 }
 
-.app-sidebar__nav-label {
-  min-width: 0;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.app-sidebar__nav-trailing {
-  display: flex;
-
-  margin-left: auto;
-
-  flex-shrink: 0;
+/* レール: ラベル・トレーリング・ネスト・アップグレードパネルは非表示 */
+.app-sidebar__nav-trailing,
+.app-sidebar__nav-label,
+.app-sidebar__nested-group,
+.app-sidebar__trial {
+  display: none;
 }
 
 .app-sidebar__nav-chevron {
@@ -331,6 +333,8 @@
   transform: rotate(180deg);
 }
 
+/* ── ライブラリグループ（レールでは非表示） ──────────────── */
+
 .app-sidebar__library-group {
   display: flex;
   flex-direction: column;
@@ -342,16 +346,7 @@
 }
 
 .app-sidebar__library-children {
-  display: flex;
-  flex-direction: column;
-
-  gap: 4px;
-
-  margin-left: 42px;
-
-  padding-left: 14px;
-
-  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  display: none;
 }
 
 .app-sidebar__library-child {
@@ -404,108 +399,13 @@
   border-left: 1px solid rgba(255, 255, 255, 0.14);
 }
 
+/* ── トライアルパネル（レールでは非表示） ────────────────── */
+
 .app-sidebar__trial {
-  display: flex;
-  flex-direction: column;
-
-  width: 100%;
-
-  gap: 8px;
-
-  padding: 12px;
-
-  border-radius: 8px;
-
-  border: 1px solid rgba(255, 255, 255, 0.08);
-
-  background: rgba(255, 255, 255, 0.06);
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.app-sidebar__trial p {
-  margin: 0;
-
-  color: rgba(235, 241, 252, 0.72);
-
-  font-size: 12px;
-  font-weight: 568;
-  line-height: normal;
-}
-
-.app-sidebar__trial strong {
-  color: #ffffff;
-  font-weight: 568;
-}
-
-.app-sidebar__trial button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 100%;
-  height: 32px;
-
-  border: 0;
-  border-radius: 8px;
-
-  background: rgba(255, 255, 255, 0.96);
-
-  color: #08111f;
-
-  font-size: 14px;
-  font-weight: 542;
-  line-height: 17px;
-  letter-spacing: -0.0476px;
-
-  cursor: pointer;
-}
-
-/* collapsed — アイコンのみのレール表示（ホバー展開なし） */
-
-.app-layout--sidebar-collapsed .app-sidebar {
-  width: var(--app-sidebar-rail-width);
-
-  padding: 16px 6px 12px;
-}
-
-.app-layout--sidebar-collapsed .app-sidebar__top {
-  gap: 20px;
-}
-
-.app-layout--sidebar-collapsed .app-sidebar__bottom {
-  padding: 8px 6px 0;
-}
-
-.app-layout--sidebar-collapsed .app-sidebar__workspace {
-  width: auto;
-
-  justify-content: center;
-
-  padding: 0;
-}
-
-.app-layout--sidebar-collapsed .app-sidebar__workspace-copy {
   display: none;
 }
 
-.app-layout--sidebar-collapsed .app-sidebar__nav-link {
-  width: 100%;
-
-  justify-content: flex-start;
-
-  gap: 8px;
-
-  padding: 0 10px;
-}
-
-.app-layout--sidebar-collapsed .app-sidebar__nav-trailing,
-.app-layout--sidebar-collapsed .app-sidebar__nav-label,
-.app-layout--sidebar-collapsed .app-sidebar__nested-group,
-.app-layout--sidebar-collapsed .app-sidebar__trial {
-  display: none;
-}
+/* ── モバイル ────────────────────────────────────────────── */
 
 @media (max-width: 767px) {
   .app-sidebar,

@@ -1,3 +1,15 @@
+/**
+ * Sidebar.desktop.tsx
+ *
+ * 常時レール表示（アイコンのみ）。
+ * collapsed / expanded の切り替えロジックを廃止し、
+ * コンポーネントは常に compact=true で動作する。
+ *
+ * 将来の拡張: Electron / Swift / Android では
+ * --app-sidebar-rail-width CSS変数を各プラットフォームの
+ * レイアウトファイルで上書きすることで幅を調整できる。
+ */
+
 import {
   type MouseEvent,
   type ReactNode,
@@ -20,9 +32,10 @@ import {
   InboxIcon,
   LibraryIcon,
 } from "./sidebar.icons";
-import { UpgradePanel } from "./upgradepanel";
 
 import { cn } from "@/lib/utils";
+
+// ── 型定義 ───────────────────────────────────────────────────
 
 type SidebarNavItem = {
   id: string;
@@ -37,9 +50,10 @@ type SidebarNavItem = {
 };
 
 type SidebarProps = {
-  collapsed?: boolean;
   onOpenSettings?: () => void;
 };
+
+// ── ナビゲーション定義 ──────────────────────────────────────
 
 const mainNavItems: SidebarNavItem[] = [
   {
@@ -83,6 +97,8 @@ const mainNavItems: SidebarNavItem[] = [
   },
 ];
 
+// ── アクティブ状態の判定 ─────────────────────────────────────
+
 const isNavItemActiveByLocation = (
   item: SidebarNavItem,
   pathname: string,
@@ -92,7 +108,6 @@ const isNavItemActiveByLocation = (
   const searchParams = new URLSearchParams(search);
 
   if (item.match) return item.match(normalizedPathname, searchParams);
-
   if (!item.to) return false;
 
   const targetPath = item.to.split("?")[0]?.toLowerCase() ?? item.to;
@@ -105,18 +120,14 @@ const isNavItemActiveByLocation = (
   );
 };
 
+// ── ナビリンク（レール: アイコン＋aria-label） ───────────────
+
 const SidebarNavLink = ({
   item,
-  trailing,
-  ariaExpanded,
   disabled,
-  compact,
 }: {
   item: SidebarNavItem;
-  trailing?: ReactNode;
-  ariaExpanded?: boolean;
   disabled?: boolean;
-  compact?: boolean;
 }) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
@@ -158,29 +169,32 @@ const SidebarNavLink = ({
         "app-sidebar__nav-link",
         isActive && "is-active",
         isDisabled && "app-sidebar__nav-link--disabled",
-        compact && "app-sidebar__nav-link--collapsed",
+        // レール表示では常に collapsed クラスを適用
+        "app-sidebar__nav-link--collapsed",
       )}
       aria-current={isActive ? "page" : undefined}
-      aria-expanded={ariaExpanded}
-      aria-label={compact ? item.label : undefined}
+      // レール: ラベルが非表示なのでアクセシビリティのためaria-labelを必ず付与
+      aria-label={item.label}
+      title={item.label}
     >
       <span className="app-sidebar__nav-icon-slot">{item.icon}</span>
+      {/* ラベルはCSSで display:none だが、DOM上に残しておくことで
+          将来の展開アニメーション実装やスクリーンリーダー対応が容易になる */}
       <span className="app-sidebar__nav-label">{item.label}</span>
-      {trailing ? (
-        <span className="app-sidebar__nav-trailing">{trailing}</span>
-      ) : null}
     </button>
   );
 };
 
-const Sidebar = ({ collapsed = false, onOpenSettings }: SidebarProps) => {
-  const navigate = useNavigate();
+// ── Sidebar本体 ──────────────────────────────────────────────
 
-  const [isCompact] = [collapsed];
-
+/**
+ * @example
+ * // 呼び出し側: collapsed propは不要になった
+ * <Sidebar onOpenSettings={() => setSettingsOpen(true)} />
+ */
+const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   const closeCalendar = useExplorerCalendarViewStore((s) => s.close);
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
-  const openSectionTab = useWorkspaceTabsStore((s) => s.openSectionTab);
 
   const mainNavItemsWithActions = mainNavItems.map((item) => ({
     ...item,
@@ -207,18 +221,17 @@ const Sidebar = ({ collapsed = false, onOpenSettings }: SidebarProps) => {
     <aside
       className="app-sidebar"
       aria-label="Sidebar"
-      data-collapsed={collapsed ? "1" : undefined}
     >
       <div className="app-sidebar__top">
+        {/* ワークスペースアバター（レール: アバターのみ表示） */}
         <div className="app-sidebar__workspace">
           <div className="app-sidebar__workspace-avatar">C</div>
-
+          {/* workspace-copy は CSS で display:none */}
           <div className="app-sidebar__workspace-copy">
             <div className="app-sidebar__workspace-name">
               <span>Atlas, Inc</span>
               <ChevronDownIcon className="app-sidebar__workspace-chevron" />
             </div>
-
             <div className="app-sidebar__sync">
               <CloudIcon className="app-sidebar__sync-icon" />
               <span>同期中</span>
@@ -226,23 +239,21 @@ const Sidebar = ({ collapsed = false, onOpenSettings }: SidebarProps) => {
           </div>
         </div>
 
-        <nav className="app-sidebar__nav">
+        <nav className="app-sidebar__nav" aria-label="メインナビゲーション">
           {mainNavItemsWithActions.map((item) => (
-            <SidebarNavLink
-              key={item.id}
-              item={item}
-              compact={isCompact}
-            />
+            <SidebarNavLink key={item.id} item={item} />
           ))}
         </nav>
       </div>
 
       <div className="app-sidebar__bottom">
-        <UpgradePanel compact={isCompact} />
+        {/* UpgradePanel は compact=true で null を返すため省略
+            将来、レール用のアイコンバッジ表示に変更する場合は
+            UpgradePanel に railIcon prop を追加する */}
 
-        <nav className="app-sidebar__nav">
+        <nav className="app-sidebar__nav" aria-label="フッターナビゲーション">
           {footerItems.map((item) => (
-            <SidebarNavLink key={item.id} item={item} compact={isCompact} />
+            <SidebarNavLink key={item.id} item={item} />
           ))}
         </nav>
       </div>
