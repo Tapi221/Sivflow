@@ -287,7 +287,7 @@ export const CalendarSidebar = ({
         <div className="mb-1 flex h-6 items-center gap-1.5 px-2">
           <CalendarIcon className="h-3.5 w-3.5 text-[#74798b]" />
           <span className="text-[11px] font-semibold uppercase text-[#9aa0aa]">
-            My Calendars
+            My Projects
           </span>
         </div>
 
