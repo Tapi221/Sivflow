@@ -11,7 +11,7 @@ import {
   LibraryIcon,
 } from "./sidebar.icons";
 
-import { useExplorerCalendarViewStore } from "@/features/calendar/header/useExplorerCalendarViewStore";
+import { useSchedulePaneStore } from "@/features/calendar/header/useSchedulePaneStore";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 
@@ -78,7 +78,7 @@ export const SidebarMobile = ({
 
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
 
-  const closeCalendar = useExplorerCalendarViewStore((s) => s.close);
+  const closeCalendar = useSchedulePaneStore((s) => s.close);
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
   const openSectionTab = useWorkspaceTabsStore((s) => s.openSectionTab);
 

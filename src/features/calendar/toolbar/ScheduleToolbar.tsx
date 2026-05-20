@@ -10,7 +10,7 @@ import {
   TaskIcon,
   TimelineToolbarIcon,
 } from "../ui/calendar.icons";
-import { useCalendarToolbar } from "./hooks/useCalendarToolbar";
+import { useCalendarToolbar } from "./hooks/useScheduleToolbar";
 
 import { cn } from "@/lib/utils";
 

@@ -16,7 +16,7 @@ import {
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { useExplorerCalendarViewStore } from "@/features/calendar/header/useExplorerCalendarViewStore";
+import { useSchedulePaneStore } from "@/features/calendar/header/useSchedulePaneStore";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 
@@ -193,7 +193,7 @@ const SidebarNavLink = ({
  * <Sidebar onOpenSettings={() => setSettingsOpen(true)} />
  */
 const Sidebar = ({ onOpenSettings }: SidebarProps) => {
-  const closeCalendar = useExplorerCalendarViewStore((s) => s.close);
+  const closeCalendar = useSchedulePaneStore((s) => s.close);
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
 
   const mainNavItemsWithActions = mainNavItems.map((item) => ({
