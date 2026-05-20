@@ -1,9 +1,9 @@
-import { CalendarPane } from "@/features/calendar/CalendarPane";
+import { SchedulePane } from "@/features/calendar/SchedulePane";
 
 const Calendar = () => {
   return (
     <div className="h-full min-h-0 w-full">
-      <CalendarPane />
+      <SchedulePane />
     </div>
   );
 };

@@ -14,7 +14,7 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import type {
   CalendarToolbarMode,
   CalendarViewMode,
-} from "../calendarPane.types";
+} from "../schedulePane.types";
 
 const createInitialCalendarBuffer = () => ({
   before: C.INITIAL_CALENDAR_BUFFER_DAYS,

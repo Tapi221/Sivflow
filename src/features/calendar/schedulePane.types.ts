@@ -30,7 +30,7 @@ export type CalendarEventLabelStyle = CSSProperties & {
   color: string;
 };
 
-export type CalendarPaneProps = {
+export type SchedulePaneProps = {
   onClose?: () => void;
 };
 

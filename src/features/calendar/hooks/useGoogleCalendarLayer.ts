@@ -26,7 +26,7 @@ export const useGoogleCalendarLayer = () => {
     forceSync,
     isAnyConnecting,
 
-    // CalendarPane / useCalendarEventSync との後方互換
+    // SchedulePane / useCalendarEventSync との後方互換
     isConnected: accounts.length > 0,
     isConnecting: isAnyConnecting,
 
