@@ -15,7 +15,11 @@ type Props = {
   options: readonly ViewModeOption[];
 };
 
-export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
+export const ViewModeDropdown = ({
+  value,
+  onChange,
+  options,
+}: Props) => {
   const [open, setOpen] = useState(false);
 
   // browser timerなので number | null
@@ -37,6 +41,7 @@ export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
 
   const closeMenu = () => {
     clearTimer();
+
     timerRef.current = window.setTimeout(() => {
       setOpen(false);
     }, 120);
@@ -74,7 +79,9 @@ export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
             focus-visible:shadow-none
           "
         >
-          <span className="leading-none">{selected?.label}</span>
+          <span className="leading-none">
+            {selected?.label}
+          </span>
         </button>
       </Popover.Trigger>
 
@@ -87,7 +94,7 @@ export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
           onMouseLeave={closeMenu}
           className="
             z-50
-            w-[180px]
+            w-fit min-w-[90px]
 
             overflow-hidden
             rounded-lg border border-[#e2e4e9]
@@ -98,7 +105,15 @@ export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
             origin-top-right
           "
         >
-          <div className="px-2 py-1 text-[10px] font-medium text-[#a0a4b0] whitespace-nowrap">
+          <div
+            className="
+              px-1.5 py-1
+              text-[10px]
+              font-medium
+              text-[#a0a4b0]
+              whitespace-nowrap
+            "
+          >
             Views
           </div>
 
@@ -116,7 +131,7 @@ export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
                 className="
                   flex w-full items-center justify-between
 
-                  px-2 py-1.5
+                  px-1.5 py-1
 
                   text-[12px]
                   leading-none
@@ -129,10 +144,20 @@ export const ViewModeDropdown = ({ value, onChange, options }: Props) => {
                   outline-none
                 "
               >
-                <span className={isSelected ? "font-medium" : ""}>{label}</span>
+                <span className={isSelected ? "font-medium" : ""}>
+                  {label}
+                </span>
 
                 {isSelected && (
-                  <span className="ml-2 h-1.5 w-1.5 rounded-full bg-[#25272d] shrink-0" />
+                  <span
+                    className="
+                      ml-1.5
+                      h-1.5 w-1.5
+                      shrink-0
+                      rounded-full
+                      bg-[#25272d]
+                    "
+                  />
                 )}
               </button>
             );

@@ -1,16 +1,13 @@
-/**
- * DayDetailPanel.tsx
- * 画像完全寄せ版
- */
-
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useLayoutEffect, useRef } from "react";
 
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import { DayDetailCreateButton } from "@/features/calendar/chip/DayDetailCreateButton";
+import { EventChipDayDetail } from "@/features/calendar/eventchip/EventChip.daidetail";
 import { generateColorTokens } from "@/features/calendar/ui/calendar.color-tokens";
 
-// ─────────────────────────────────────────────
+// ==============================================
 
 const HOUR_ROW_HEIGHT = 40;
 
@@ -21,38 +18,7 @@ const HOURS = Array.from(
 
 const DEFAULT_SCROLL_HOUR = 0;
 
-// ─────────────────────────────────────────────
-
-const getStartMinutes = (
-  event: GoogleCalendarEvent,
-): number => {
-  const d = new Date(event.startsAt);
-
-  return (
-    d.getHours() * 60 +
-    d.getMinutes()
-  );
-};
-
-const getDurationMinutes = (
-  event: GoogleCalendarEvent,
-): number => {
-  const start = new Date(
-    event.startsAt,
-  ).getTime();
-
-  const end = new Date(
-    event.endsAt,
-  ).getTime();
-
-  const diff = end - start;
-
-  return diff > 0
-    ? Math.max(30, diff / 60000)
-    : 30;
-};
-
-// ─────────────────────────────────────────────
+// ==============================================
 
 const AllDayChip = ({
   event,
@@ -65,53 +31,20 @@ const AllDayChip = ({
 
   return (
     <div
-      className="truncate rounded-[4px] px-2 py-[5px] text-[11px] font-medium"
+      className="
+        truncate
+        rounded-[4px]
+        px-2
+        py-[5px]
+        text-[11px]
+        font-medium
+      "
       style={{
         background: tokens.bg,
         color: tokens.text,
       }}
     >
       {event.title}
-    </div>
-  );
-};
-
-// ─────────────────────────────────────────────
-
-const TimedEventChip = ({
-  event,
-}: {
-  event: GoogleCalendarEvent;
-}) => {
-  const tokens = generateColorTokens(
-    event.accentColor,
-  );
-
-  const startMin =
-    getStartMinutes(event);
-
-  const top =
-    (startMin / 60) *
-    HOUR_ROW_HEIGHT;
-
-  const timeLabel = format(
-    new Date(event.startsAt),
-    "H:mm",
-  );
-
-  return (
-    <div
-      className="absolute left-[6px] right-[8px] overflow-hidden rounded-[4px] px-2 py-[5px]"
-      style={{
-        top,
-        background: tokens.bg,
-        color: tokens.text,
-      }}
-    >
-      <span className="truncate text-[11px] font-medium leading-none">
-        {timeLabel}{" "}
-        {event.title}
-      </span>
     </div>
   );
 };
@@ -186,7 +119,7 @@ export const DayDetailPanel = ({
     <aside
       className="
         flex
-        w-[320px]
+        w-[260px]
         shrink-0
         flex-col
         overflow-hidden
@@ -201,14 +134,14 @@ export const DayDetailPanel = ({
           flex
           items-center
           justify-between
-          px-6
-          pt-6
-          pb-4
+          px-4
+          pt-5
+          pb-3
         "
       >
         <span
           className="
-            text-[15px]
+            text-[14px]
             font-semibold
             text-[#3f3f46]
           "
@@ -268,10 +201,10 @@ export const DayDetailPanel = ({
           <div
             className="
               flex
-              w-[36px]
+              w-[30px]
               shrink-0
               justify-end
-              pr-2
+              pr-1
               pt-[8px]
             "
           >
@@ -290,7 +223,7 @@ export const DayDetailPanel = ({
           <div
             className="
               flex-1
-              px-3
+              px-2
               py-1.5
             "
           >
@@ -375,7 +308,7 @@ export const DayDetailPanel = ({
 
             {/* Events */}
             {timedEvents.map((ev) => (
-              <TimedEventChip
+              <EventChipDayDetail
                 key={ev.id}
                 event={ev}
               />
@@ -389,45 +322,11 @@ export const DayDetailPanel = ({
         className="
           border-t
           border-[#f5f5f5]
-          px-6
-          py-5
+          px-4
+          py-4
         "
       >
-        <button
-          type="button"
-          className="
-            flex
-            h-[38px]
-            w-full
-            items-center
-            justify-center
-            gap-1.5
-            rounded-md
-            bg-[#f5f6fa]
-            text-[13px]
-            font-medium
-            text-[#8b8fa3]
-            transition-colors
-            hover:bg-[#eceef5]
-          "
-        >
-          <svg
-            viewBox="0 0 16 16"
-            fill="none"
-            className="h-4 w-4"
-          >
-            <path
-              d="M8 3V13M3 8H13"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-            />
-          </svg>
-
-          <span>
-            新しい予定を作成
-          </span>
-        </button>
+        <DayDetailCreateButton />
       </div>
     </aside>
   );
