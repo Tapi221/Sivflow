@@ -10,7 +10,7 @@ import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
 import { CalendarTimelineDayView } from "./grid/TimelineDayView";
 import { useCalendarPane } from "./hooks/useCalendarPane";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
-import { DayDetailPanel } from "./sidepanel/DayDetailPanel";
+import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
 import { CalendarWorkspaceToolbar } from "./toolbar/CalendarToolbar";
 
 import { cn } from "@/lib/utils";
