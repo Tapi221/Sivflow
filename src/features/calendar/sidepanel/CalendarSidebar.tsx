@@ -125,32 +125,29 @@ const GoogleAccountSection = ({
 
   return (
     <div className="mt-3">
-      {/* ヘッダー行：トグル + カレンダーアイコン + GOOGLE + メール */}
-      <button
-        type="button"
-        className="group flex h-6 w-full items-center gap-1 px-2 text-left"
-        onClick={() => setIsOpen((v) => !v)}
-        aria-expanded={isOpen}
-      >
-        <span
-          className={cn(
-            "flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform duration-200",
-            !isOpen && "-rotate-90",
-          )}
-        >
-          <IconChevronRight className="h-3 w-3 text-[#9aa0aa]" />
-        </span>
-        <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-[#74798b]" />
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9aa0aa]">
-          Google
-        </span>
-        {account.email && (
-          <span className="truncate text-[11px] font-semibold uppercase tracking-wider text-[#9aa0aa]">
-            {account.email}
-          </span>
-        )}
-        {syncIndicator}
-      </button>
+      {/* ヘッダー行：カレンダーアイコン + トグル + メール(小文字) */}
+<button
+  type="button"
+  className="group flex h-6 w-full items-center gap-1 px-2 text-left"
+  onClick={() => setIsOpen((v) => !v)}
+  aria-expanded={isOpen}
+>
+  <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-[#74798b]" />
+  {account.email && (
+    <span className="truncate text-[11px] font-semibold tracking-wider text-[#9aa0aa]">
+      {account.email}
+    </span>
+  )}
+  {syncIndicator}
+  <span
+    className={cn(
+      "ml-auto flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform duration-200",
+      !isOpen && "-rotate-90",
+    )}
+  >
+    <IconChevronRight className="h-3 w-3 text-[#9aa0aa]" />
+  </span>
+</button>
 
       {/* カレンダー一覧 */}
       {isOpen &&
