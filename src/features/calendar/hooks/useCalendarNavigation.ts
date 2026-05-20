@@ -112,7 +112,11 @@ export const useCalendarNavigation = () => {
   const handleSelectViewMode = useCallback(
     (next: CalendarViewMode) => {
       setSelectedViewMode(next);
-      setActiveMode("calendar");
+
+      // timeline中は維持、それ以外はcalendarへ
+      setActiveMode((current) =>
+        current === "timeline" ? "timeline" : "calendar",
+      );
 
       const normalized =
         next === "week" ? normalizeWeek(currentDate) : currentDate;
