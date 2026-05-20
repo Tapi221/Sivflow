@@ -46,7 +46,12 @@ type AccountsAction =
   | { type: "ADD"; account: GoogleAccountEntry }
   | { type: "REMOVE"; id: string }
   | { type: "SET_CONNECTING"; id: string; value: boolean }
-  | { type: "SET_TOKEN"; id: string; accessToken: string; refreshToken?: string }
+  | {
+      type: "SET_TOKEN";
+      id: string;
+      accessToken: string;
+      refreshToken?: string;
+    }
   | { type: "SET_CALENDARS"; id: string; calendars: GoogleCalendarListItem[] }
   | { type: "SET_CALENDAR_IDS"; id: string; ids: string[] }
   | { type: "TOGGLE_CALENDAR"; id: string; calendarId: string }
@@ -111,9 +116,11 @@ const reduceAccounts = (
       return state.map((a) => {
         if (a.id !== action.id) return a;
         const next = new Set(a.selectedCalendarIds);
-        next.has(action.calendarId)
-          ? next.delete(action.calendarId)
-          : next.add(action.calendarId);
+        if (next.has(action.calendarId)) {
+          next.delete(action.calendarId);
+        } else {
+          next.add(action.calendarId);
+        }
         return { ...a, selectedCalendarIds: next };
       });
 
@@ -234,6 +241,9 @@ export const useMultiAccountGoogleCalendar = () => {
               id: accountId,
               syncState,
             }),
+          onLastSyncedAtChange: (_at: Date) => {
+            // マルチアカウントでは最終同期時刻をアカウント単位で管理しないため無視
+          },
 
           onError: (err) =>
             dispatchAccounts({
@@ -448,7 +458,11 @@ export const useMultiAccountGoogleCalendar = () => {
       if (!stored) return;
 
       const next = new Set(stored.selectedCalendarIds);
-      next.has(calendarId) ? next.delete(calendarId) : next.add(calendarId);
+      if (next.has(calendarId)) {
+        next.delete(calendarId);
+      } else {
+        next.add(calendarId);
+      }
 
       updateStoredAccountCalendarIds(accountId, Array.from(next));
     },
