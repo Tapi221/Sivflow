@@ -36,8 +36,7 @@ const getPreviousDate = (current: Date, viewMode: CalendarViewMode) => {
   return subDays(current, 1);
 };
 
-const normalizeWeek = (date: Date) =>
-  startOfWeek(date, { weekStartsOn: 1 });
+const normalizeWeek = (date: Date) => startOfWeek(date, { weekStartsOn: 1 });
 
 export const useCalendarNavigation = () => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
@@ -56,8 +55,7 @@ export const useCalendarNavigation = () => {
   const [selectedViewMode, setSelectedViewMode] =
     useState<CalendarViewMode>("days");
 
-  const [activeMode, setActiveMode] =
-    useState<CalendarToolbarMode>("timeline");
+  const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
 
   const [calendarBuffer, setCalendarBuffer] = useState(
     createInitialCalendarBuffer,
@@ -131,8 +129,7 @@ export const useCalendarNavigation = () => {
 
   const handleToday = useCallback(() => {
     const now = new Date();
-    const normalized =
-      selectedViewMode === "week" ? normalizeWeek(now) : now;
+    const normalized = selectedViewMode === "week" ? normalizeWeek(now) : now;
 
     setCurrentDate(normalized);
     setSelectedDate(normalized);

@@ -88,6 +88,10 @@ export class GoogleCalendarEngineManager {
     return this.engines.has(accountId);
   }
 
+  getEngine(accountId: string): GoogleCalendarSyncEngine | undefined {
+    return this.engines.get(accountId);
+  }
+
   // ─────────────────────────────────────────────
   // Internal
   // ─────────────────────────────────────────────
