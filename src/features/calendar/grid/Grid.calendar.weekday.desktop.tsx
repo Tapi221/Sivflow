@@ -12,7 +12,6 @@ import {
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 
 import { CalendarEventChipWeekday } from "../eventchip/EventChip.weekday";
-
 import { cn } from "@/lib/utils";
 
 type CalendarEventPositionStyle = React.CSSProperties & {
@@ -23,7 +22,8 @@ type CalendarEventPositionStyle = React.CSSProperties & {
 const HOURS = Array.from({ length: 24 }, (_, index) => index);
 const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
 
-const createHourLabel = (hour: number) => `${String(hour).padStart(2, "0")}:00`;
+const createHourLabel = (hour: number) =>
+  `${String(hour).padStart(2, "0")}:00`;
 
 const calculateEventPositionStyle = (
   event: GoogleCalendarEvent,
@@ -34,14 +34,15 @@ const calculateEventPositionStyle = (
   return {
     "--calendar-event-start-hour": Math.max(0, startHour - HOURS[0]),
     "--calendar-event-duration-hours": event.minutes / 60,
-    top: "calc(var(--calendar-event-start-hour) * var(--calendar-hour-row-height))",
-    height: "calc(var(--calendar-event-duration-hours) * var(--calendar-hour-row-height) - 2px)",
+    top:
+      "calc(var(--calendar-event-start-hour) * var(--calendar-hour-row-height))",
+    height:
+      "calc(var(--calendar-event-duration-hours) * var(--calendar-hour-row-height) - 2px)",
   };
 };
 
 // ─────────────────────────────────────────────────────────────
 // 現在時刻フック
-// 1分ごとに更新し、0時からの経過分数を返す
 // ─────────────────────────────────────────────────────────────
 
 const useCurrentTimeMinutes = (): number => {
@@ -53,20 +54,21 @@ const useCurrentTimeMinutes = (): number => {
   const [minutes, setMinutes] = useState(getNow);
 
   useEffect(() => {
-    // 次の「ちょうど1分」まで待ってから interval を開始することで
-    // 時計と同期したタイミングで更新される
     const now = new Date();
     const msUntilNextMinute =
       (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
 
-    const initialTimer = window.setTimeout(() => {
+    const timeoutId = window.setTimeout(() => {
       setMinutes(getNow());
-      const id = window.setInterval(() => setMinutes(getNow()), 60_000);
-      // setInterval の cleanup は返せないのでクロージャで保持
-      return () => window.clearInterval(id);
+
+      const intervalId = window.setInterval(() => {
+        setMinutes(getNow());
+      }, 60_000);
+
+      return () => window.clearInterval(intervalId);
     }, msUntilNextMinute);
 
-    return () => window.clearTimeout(initialTimer);
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   return minutes;
@@ -77,14 +79,12 @@ const useCurrentTimeMinutes = (): number => {
 // ─────────────────────────────────────────────────────────────
 
 type CurrentTimeIndicatorProps = {
-  /** true のとき左端にドットを表示（今日の列、または最左列） */
-  showDot: boolean;
-  /** 0時からの経過分数 */
+  isToday: boolean;
   currentMinutes: number;
 };
 
 const CurrentTimeIndicator = ({
-  showDot,
+  isToday,
   currentMinutes,
 }: CurrentTimeIndicatorProps) => {
   return (
@@ -95,26 +95,15 @@ const CurrentTimeIndicator = ({
         top: `calc(${currentMinutes / 60} * var(--calendar-hour-row-height))`,
       }}
     >
-      {/* ドット（今日の列のみ） */}
-      {showDot && (
-        <span
-          className="absolute top-1/2 -translate-y-1/2"
-          style={{
-            left: -4,
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            background: "#185FA5",
-          }}
-        />
-      )}
-
-      {/* 横線 */}
       <div
         style={{
           height: 1.5,
-          background: "rgba(24, 95, 165, 0.55)",
-          marginLeft: showDot ? 2 : 0,
+          background: isToday
+            ? "rgba(24, 95, 165, 0.85)"
+            : "transparent",
+          borderTop: isToday
+            ? "none"
+            : "1.5px dashed rgba(24, 95, 165, 0.45)",
         }}
       />
     </div>
@@ -122,7 +111,7 @@ const CurrentTimeIndicator = ({
 };
 
 // ─────────────────────────────────────────────────────────────
-// メインコンポーネント
+// メイン
 // ─────────────────────────────────────────────────────────────
 
 export const CalendarWeekDayGrid = ({
@@ -139,26 +128,21 @@ export const CalendarWeekDayGrid = ({
   const today = new Date();
   const currentMinutes = useCurrentTimeMinutes();
 
-  // 表示範囲内に今日が含まれているか
   const isTodayVisible = visibleDays.some((d) => isSameDay(d, today));
-
-  // 今日の列のインデックス（線の左端のドット位置を決めるため）
-  const todayColumnIndex = visibleDays.findIndex((d) => isSameDay(d, today));
+  const todayColumnIndex = visibleDays.findIndex((d) =>
+    isSameDay(d, today),
+  );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-      {/* ── 日付ヘッダー ── */}
+      {/* ── ヘッダー ── */}
       <div className="flex shrink-0 border-b border-[#e5e7eb] bg-white">
         <div
-          className="shrink-0 border-r border-[#e5e7eb] bg-white"
+          className="shrink-0 border-r border-[#e5e7eb]"
           style={{ width: C.TIME_COLUMN_WIDTH }}
         />
 
-        <div
-          ref={headerScrollRef}
-          className="overflow-hidden"
-          style={{ flex: 1 }}
-        >
+        <div ref={headerScrollRef} className="overflow-hidden flex-1">
           <div
             style={{
               display: "grid",
@@ -166,14 +150,14 @@ export const CalendarWeekDayGrid = ({
               minWidth: `${visibleDays.length * calendarDayColumnWidth}px`,
             }}
           >
-            {visibleDays.map((day: Date) => {
+            {visibleDays.map((day) => {
               const isDayToday = isSameDay(day, today);
               const isDaySelected =
                 !!selectedDate && isSameDay(day, selectedDate);
 
               return (
                 <button
-                  key={`${day.toISOString()}-header`}
+                  key={day.toISOString()}
                   type="button"
                   onClick={() => onSelectDate?.(day)}
                   className={cn(
@@ -184,6 +168,7 @@ export const CalendarWeekDayGrid = ({
                     !isDayToday && isDaySelected && "bg-[#f4f5f7]",
                   )}
                 >
+                  {/* 曜日 */}
                   <span
                     className={cn(
                       "text-[11px] font-medium leading-none",
@@ -195,6 +180,7 @@ export const CalendarWeekDayGrid = ({
                     {format(day, "E", { locale: ja })}
                   </span>
 
+                  {/* 日付 */}
                   <span
                     className={cn(
                       "mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-[13px] font-semibold tabular-nums",
@@ -214,7 +200,7 @@ export const CalendarWeekDayGrid = ({
         </div>
       </div>
 
-      {/* ── スクロール本体 ── */}
+      {/* ── 本体 ── */}
       <div
         ref={scrollContainerRef}
         className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
@@ -225,7 +211,7 @@ export const CalendarWeekDayGrid = ({
           <div className="sticky left-0 z-20 border-r border-[#e5e7eb] bg-white">
             {HOURS.map((hour) => (
               <div
-                key={`time-${hour}`}
+                key={hour}
                 className="relative border-b border-[#eef0f3] bg-white"
                 style={{ height: "var(--calendar-hour-row-height)" }}
               >
@@ -238,15 +224,17 @@ export const CalendarWeekDayGrid = ({
             ))}
           </div>
 
-          {/* 日ごとの列 */}
-          {visibleDays.map((day: Date, colIndex: number) => {
+          {/* 日別カラム */}
+          {visibleDays.map((day) => {
+            const isDayToday = isSameDay(day, today);
+
             const eventsForDay = visibleEvents.filter(
-              (event: GoogleCalendarEvent) =>
+              (event) =>
                 !event.isAllDay && isSameDay(event.startsAt, day),
             );
 
             const layout = computeEventLayout(
-              eventsForDay.map((event: GoogleCalendarEvent) =>
+              eventsForDay.map((event) =>
                 toLayoutEvent(
                   event.id,
                   event.startsAt,
@@ -255,17 +243,9 @@ export const CalendarWeekDayGrid = ({
               ),
             );
 
-            const isDayToday = isSameDay(day, today);
-
-            // ドットは今日の列に表示。
-            // 今日が表示範囲内にない場合は最左列にドットを出す（線だけでも視認しやすくするため）
-            const showDot = isTodayVisible
-              ? isDayToday
-              : colIndex === 0;
-
             return (
               <div
-                key={`${day.toISOString()}-column`}
+                key={day.toISOString()}
                 className="relative border-r border-[#eef0f3] last:border-r-0"
               >
                 {HOURS.map((hour) => (
@@ -276,15 +256,16 @@ export const CalendarWeekDayGrid = ({
                   />
                 ))}
 
-                {/* ── 現在時刻インジケーター ── */}
-                {(isTodayVisible ? isDayToday || todayColumnIndex !== -1 : true) && (
+                {(isTodayVisible
+                  ? isDayToday || todayColumnIndex !== -1
+                  : true) && (
                   <CurrentTimeIndicator
-                    showDot={showDot}
+                    isToday={isDayToday}
                     currentMinutes={currentMinutes}
                   />
                 )}
 
-                {eventsForDay.map((event: GoogleCalendarEvent) => {
+                {eventsForDay.map((event) => {
                   const pos = layout.get(event.id) ?? {
                     left: 0,
                     width: 1,
