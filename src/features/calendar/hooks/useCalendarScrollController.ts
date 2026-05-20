@@ -60,8 +60,14 @@ export const useCalendarScrollController = ({
 
   const prevBufferBeforeRef = useRef(calendarBuffer.before);
 
-  // 追加: トークンガード用
-  const lastScrollTargetTokenRef = useRef<number | null>(null);
+  // token + viewportWidth をセットで記録（ここが今回の本体）
+  const lastScrollStateRef = useRef<{
+    token: number | null;
+    viewportWidth: number;
+  }>({
+    token: null,
+    viewportWidth: 0,
+  });
 
   const syncHeader = useCallback((scrollLeft: number) => {
     if (headerScrollRef.current) {
@@ -140,12 +146,23 @@ export const useCalendarScrollController = ({
     const scroller = scrollContainerRef.current;
     if (!scroller) return;
 
+    // viewport未確定は計算不能なので捨てる
+    if (viewportWidth <= 0) return;
+
     const currentToken = scrollTargetToken ?? 0;
 
-    // 追加ガード: 同じトークンなら何もしない
-    if (lastScrollTargetTokenRef.current === currentToken) return;
-    lastScrollTargetTokenRef.current = currentToken;
+    const { token: lastToken, viewportWidth: lastViewportWidth } =
+      lastScrollStateRef.current;
 
+    const tokenChanged = lastToken !== currentToken;
+
+    const viewportChangedAfterToken =
+      lastToken === currentToken && lastViewportWidth !== viewportWidth;
+
+    // 何も変わってないなら終了
+    if (!tokenChanged && !viewportChangedAfterToken) return;
+
+    // 途中で拡張処理中なら触らない
     if (prependScrollWidthRef.current !== null) return;
 
     let nextScrollLeft = 0;
@@ -165,6 +182,11 @@ export const useCalendarScrollController = ({
 
     scroller.scrollLeft = nextScrollLeft;
     syncHeader(nextScrollLeft);
+
+    lastScrollStateRef.current = {
+      token: currentToken,
+      viewportWidth,
+    };
   }, [
     activeMode,
     calendarBuffer.before,
