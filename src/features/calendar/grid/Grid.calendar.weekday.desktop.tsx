@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
-
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
+import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
+
 import type { CalendarWeekDayGridProps } from "@/features/calendar/calendarPane.types";
-import {
-  computeEventLayout,
-  toLayoutEvent,
-} from "@/features/calendar/eventchip/EventChip.layout.weekday.desktop";
+import { computeEventLayout, toLayoutEvent } from "@/features/calendar/eventchip/EventChip.layout.weekday.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 
 import { CalendarEventChipWeekday } from "../eventchip/EventChip.weekday";
@@ -19,7 +17,7 @@ type CalendarEventPositionStyle = React.CSSProperties & {
   "--calendar-event-duration-hours": number;
 };
 
-const HOURS = Array.from({ length: 24 }, (_, index) => index);
+const HOURS = Array.from({ length: C.WEEKDAY_HOURS }, (_, index) => index);
 const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
 
 const createHourLabel = (hour: number) =>
@@ -29,15 +27,15 @@ const calculateEventPositionStyle = (
   event: GoogleCalendarEvent,
 ): CalendarEventPositionStyle => {
   const startHour =
-    event.startsAt.getHours() + event.startsAt.getMinutes() / 60;
+    event.startsAt.getHours() +
+    event.startsAt.getMinutes() / C.WEEKDAY_MINUTES_PER_HOUR;
 
   return {
-    "--calendar-event-start-hour": Math.max(0, startHour - HOURS[0]),
-    "--calendar-event-duration-hours": event.minutes / 60,
-    top:
-      "calc(var(--calendar-event-start-hour) * var(--calendar-hour-row-height))",
-    height:
-      "calc(var(--calendar-event-duration-hours) * var(--calendar-hour-row-height) - 2px)",
+    "--calendar-event-start-hour": Math.max(0, startHour),
+    "--calendar-event-duration-hours":
+      event.minutes / C.WEEKDAY_MINUTES_PER_HOUR,
+    top: `calc(var(${C.WEEKDAY_CSS_VAR_EVENT_START_HOUR}) * var(--calendar-hour-row-height))`,
+    height: `calc(var(${C.WEEKDAY_CSS_VAR_EVENT_DURATION_HOURS}) * var(--calendar-hour-row-height) - 2px)`,
   };
 };
 
@@ -48,22 +46,25 @@ const calculateEventPositionStyle = (
 const useCurrentTimeMinutes = (): number => {
   const getNow = () => {
     const d = new Date();
-    return d.getHours() * 60 + d.getMinutes();
+    return d.getHours() * C.WEEKDAY_MINUTES_PER_HOUR + d.getMinutes();
   };
 
   const [minutes, setMinutes] = useState(getNow);
 
   useEffect(() => {
     const now = new Date();
+
     const msUntilNextMinute =
-      (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+      (C.WEEKDAY_SECONDS_PER_MINUTE - now.getSeconds()) *
+        C.WEEKDAY_MS_PER_SECOND -
+      now.getMilliseconds();
 
     const timeoutId = window.setTimeout(() => {
-      setMinutes(getNow());
+      setMinutes(getNow);
 
       const intervalId = window.setInterval(() => {
-        setMinutes(getNow());
-      }, 60_000);
+        setMinutes(getNow);
+      }, C.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS);
 
       return () => window.clearInterval(intervalId);
     }, msUntilNextMinute);
@@ -92,18 +93,18 @@ const CurrentTimeIndicator = ({
       aria-hidden="true"
       className="pointer-events-none absolute inset-x-0 z-20"
       style={{
-        top: `calc(${currentMinutes / 60} * var(--calendar-hour-row-height))`,
+        top: `calc(${currentMinutes / C.WEEKDAY_MINUTES_PER_HOUR} * var(--calendar-hour-row-height))`,
       }}
     >
       <div
         style={{
-          height: 1.5,
+          height: C.WEEKDAY_CURRENT_TIME_INDICATOR_HEIGHT,
           background: isToday
-            ? "rgba(24, 95, 165, 0.85)"
+            ? GRID.WEEKDAY_COLOR_PRIMARY
             : "transparent",
           borderTop: isToday
             ? "none"
-            : "1.5px dashed rgba(24, 95, 165, 0.45)",
+            : `${C.WEEKDAY_CURRENT_TIME_INDICATOR_HEIGHT}px ${C.WEEKDAY_CURRENT_TIME_DASHED_STYLE} ${GRID.WEEKDAY_COLOR_PRIMARY_SOFT}`,
         }}
       />
     </div>
@@ -164,34 +165,34 @@ export const CalendarWeekDayGrid = ({
                     "flex h-10 shrink-0 flex-col items-center justify-center border-r border-[#eef0f3] last:border-r-0",
                     "transition-colors hover:bg-[#f4f5f7]",
                     "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
-                    isDayToday && "bg-[#f0f6ff]",
-                    !isDayToday && isDaySelected && "bg-[#f4f5f7]",
+                    isDayToday && `bg-[${GRID.WEEKDAY_COLOR_TODAY_BG}]`,
+                    !isDayToday &&
+                      isDaySelected &&
+                      `bg-[${GRID.WEEKDAY_COLOR_HOVER_BG}]`,
                   )}
                 >
-                  {/* 曜日 */}
                   <span
                     className={cn(
                       "text-[11px] font-medium leading-none",
                       isDayToday || isDaySelected
-                        ? "text-[#24231f]"
-                        : "text-[#8f929c]",
+                        ? `text-[${GRID.WEEKDAY_COLOR_TEXT_PRIMARY}]`
+                        : `text-[${GRID.WEEKDAY_COLOR_TEXT_SECONDARY}]`,
                     )}
                   >
-                    {format(day, "E", { locale: ja })}
+                    {format(day, C.WEEKDAY_DAY_FORMAT, { locale: ja })}
                   </span>
 
-                  {/* 日付 */}
                   <span
                     className={cn(
                       "mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-[13px] font-semibold tabular-nums",
                       isDayToday
-                        ? "bg-[#185FA5] text-white shadow-[0_2px_8px_rgba(24,95,165,0.35)]"
+                        ? `bg-[${GRID.WEEKDAY_COLOR_PRIMARY}] text-white shadow-[0_2px_8px_rgba(24,95,165,0.35)]`
                         : isDaySelected
-                          ? "bg-[#2d3039] text-white"
-                          : "text-[#24231f]",
+                          ? `bg-[${GRID.WEEKDAY_COLOR_SELECTED_BG}] text-white`
+                          : `text-[${GRID.WEEKDAY_COLOR_TEXT_PRIMARY}]`,
                     )}
                   >
-                    {format(day, "d")}
+                    {format(day, C.WEEKDAY_DATE_FORMAT)}
                   </span>
                 </button>
               );
@@ -216,7 +217,12 @@ export const CalendarWeekDayGrid = ({
                 style={{ height: "var(--calendar-hour-row-height)" }}
               >
                 {hour > 0 && (
-                  <span className="absolute bottom-0 right-0 z-10 translate-y-1/2 select-none bg-white pr-2.5 pl-1 text-[11px] font-medium leading-none tabular-nums text-[#b0b4be]">
+                  <span
+                    className={cn(
+                      "absolute bottom-0 right-0 z-10 translate-y-1/2 select-none bg-white pl-1 text-[11px] font-medium leading-none tabular-nums",
+                      `text-[${GRID.WEEKDAY_COLOR_TEXT_MUTED}]`,
+                    )}
+                  >
                     {createHourLabel(hour)}
                   </span>
                 )}
