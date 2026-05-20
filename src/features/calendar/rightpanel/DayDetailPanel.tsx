@@ -2,19 +2,22 @@ import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useLayoutEffect, useRef } from "react";
 
+import {
+  GridCalendarDayDetailDesktop,
+  HOUR_ROW_HEIGHT,
+} from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
+
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+
 import { DayDetailCreateButton } from "@/features/calendar/chip/DayDetailCreateButton";
-import { EventChipDayDetail } from "@/features/calendar/eventchip/EventChip.daidetail";
+
+import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
+
 import { generateColorTokens } from "@/features/calendar/ui/calendar.color-tokens";
 
+import { cn } from "@/lib/utils";
+
 // ==============================================
-
-const HOUR_ROW_HEIGHT = 40;
-
-const HOURS = Array.from(
-  { length: 24 },
-  (_, i) => i,
-);
 
 const DEFAULT_SCROLL_HOUR = 0;
 
@@ -31,25 +34,21 @@ const AllDayChip = ({
 
   return (
     <div
-      className="
-        truncate
-        rounded-[4px]
-        px-2
-        py-[5px]
-        text-[11px]
-        font-medium
-      "
+      className={cn(
+        eventChipAllDayClass,
+        "truncate",
+      )}
       style={{
         background: tokens.bg,
         color: tokens.text,
       }}
     >
-      {event.title}
+      {event.title || "Untitled"}
     </div>
   );
 };
 
-// ─────────────────────────────────────────────
+// ==============================================
 
 export type DayDetailPanelProps = {
   selectedDate: Date;
@@ -57,7 +56,7 @@ export type DayDetailPanelProps = {
   onClose?: () => void;
 };
 
-// ─────────────────────────────────────────────
+// ==============================================
 
 export const DayDetailPanel = ({
   selectedDate,
@@ -227,94 +226,21 @@ export const DayDetailPanel = ({
               py-1.5
             "
           >
-            {allDayEvents.map((ev) => (
-              <AllDayChip
-                key={ev.id}
-                event={ev}
-              />
-            ))}
+            <div className="flex flex-col gap-1">
+              {allDayEvents.map((ev) => (
+                <AllDayChip
+                  key={ev.id}
+                  event={ev}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Grid */}
-        <div className="flex">
-          {/* Time */}
-          <div
-            className="
-              w-[36px]
-              shrink-0
-            "
-            style={{
-              height:
-                HOURS.length *
-                HOUR_ROW_HEIGHT,
-            }}
-          >
-            {HOURS.map((hour) => (
-              <div
-                key={hour}
-                className="
-                  relative
-                  border-b
-                  border-[#f7f7f7]
-                "
-                style={{
-                  height:
-                    HOUR_ROW_HEIGHT,
-                }}
-              >
-                <span
-                  className="
-                    absolute
-                    right-2
-                    top-[-7px]
-                    text-[10px]
-                    font-medium
-                    text-[#b6b6be]
-                  "
-                >
-                  {hour}:00
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Content */}
-          <div
-            className="
-              relative
-              flex-1
-            "
-            style={{
-              height:
-                HOURS.length *
-                HOUR_ROW_HEIGHT,
-            }}
-          >
-            {/* Lines */}
-            {HOURS.map((hour) => (
-              <div
-                key={hour}
-                className="
-                  border-b
-                  border-[#f7f7f7]
-                "
-                style={{
-                  height:
-                    HOUR_ROW_HEIGHT,
-                }}
-              />
-            ))}
-
-            {/* Events */}
-            {timedEvents.map((ev) => (
-              <EventChipDayDetail
-                key={ev.id}
-                event={ev}
-              />
-            ))}
-          </div>
-        </div>
+        <GridCalendarDayDetailDesktop
+          events={timedEvents}
+        />
       </div>
 
       {/* Footer */}

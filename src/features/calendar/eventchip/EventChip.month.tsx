@@ -1,7 +1,9 @@
 import { format } from "date-fns";
 
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
 import { generateColorTokens } from "@/features/calendar/ui/calendar.color-tokens";
+import { cn } from "@/lib/utils";
 
 type CalendarEventChipMonthProps = {
   event: GoogleCalendarEvent;
@@ -10,7 +12,9 @@ type CalendarEventChipMonthProps = {
 export const CalendarEventChipMonth = ({
   event,
 }: CalendarEventChipMonthProps) => {
-  const tokens = generateColorTokens(event.accentColor);
+  const tokens = generateColorTokens(
+    event.accentColor,
+  );
 
   const isAllDay = event.isAllDay;
 
@@ -20,7 +24,15 @@ export const CalendarEventChipMonth = ({
 
   return (
     <div
-      className="flex items-center gap-1 truncate rounded px-1 py-[2px] text-[11px] font-medium leading-[1.3]"
+      className={cn(
+        eventChipAllDayClass,
+        `
+          flex
+          items-center
+          gap-1
+          truncate
+        `,
+      )}
       style={{
         background: tokens.bg,
         borderLeft: isAllDay
@@ -30,11 +42,19 @@ export const CalendarEventChipMonth = ({
       }}
       title={`${timeLabel} ${event.title}`}
     >
-      <span className="shrink-0 tabular-nums opacity-80">
+      <span
+        className="
+          shrink-0
+          tabular-nums
+          opacity-80
+        "
+      >
         {timeLabel}
       </span>
 
-      <span className="truncate">{event.title}</span>
+      <span className="truncate">
+        {event.title}
+      </span>
     </div>
   );
 };
