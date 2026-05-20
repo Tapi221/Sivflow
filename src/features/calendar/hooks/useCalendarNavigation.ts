@@ -4,6 +4,7 @@ import {
   startOfMonth,
   subDays,
   subMonths,
+  startOfWeek,
 } from "date-fns";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -34,6 +35,9 @@ const getPreviousDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "week") return subDays(current, 7);
   return subDays(current, 1);
 };
+
+const normalizeWeek = (date: Date) =>
+  startOfWeek(date, { weekStartsOn: 1 });
 
 export const useCalendarNavigation = () => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
@@ -89,9 +93,6 @@ export const useCalendarNavigation = () => {
     }));
   }, []);
 
-  // ─────────────────────────────────────────────
-  // ResizeObserver: viewport 幅監視
-  // ─────────────────────────────────────────────
   useEffect(() => {
     const el = contentViewportRef.current;
     if (!el) return;
@@ -102,21 +103,24 @@ export const useCalendarNavigation = () => {
     });
 
     ro.observe(el);
-
-    // 初期値を即時確定（初回ResizeObserver待ちを回避）
     setViewportWidth(el.getBoundingClientRect().width);
 
     return () => ro.disconnect();
   }, []);
-  // ─────────────────────────────────────────────
 
   const handleSelectViewMode = useCallback(
     (next: CalendarViewMode) => {
       setSelectedViewMode(next);
       setActiveMode("calendar");
 
+      const normalized =
+        next === "week" ? normalizeWeek(currentDate) : currentDate;
+
+      setCurrentDate(normalized);
+      setSelectedDate(normalized);
+
       if (next === "month") {
-        setMonthTitleDate(startOfMonth(currentDate));
+        setMonthTitleDate(startOfMonth(normalized));
         requestMonthScrollTarget();
       }
 
@@ -127,9 +131,12 @@ export const useCalendarNavigation = () => {
 
   const handleToday = useCallback(() => {
     const now = new Date();
-    setCurrentDate(now);
-    setSelectedDate(now);
-    setMonthTitleDate(startOfMonth(now));
+    const normalized =
+      selectedViewMode === "week" ? normalizeWeek(now) : now;
+
+    setCurrentDate(normalized);
+    setSelectedDate(normalized);
+    setMonthTitleDate(startOfMonth(normalized));
 
     requestMonthScrollTarget();
     resetTimelinePosition(selectedViewMode);
@@ -137,9 +144,15 @@ export const useCalendarNavigation = () => {
 
   const handlePrevious = useCallback(() => {
     setCurrentDate((c) => {
-      const next = getPreviousDate(c, selectedViewMode);
+      let next = getPreviousDate(c, selectedViewMode);
+
+      if (selectedViewMode === "week") {
+        next = normalizeWeek(next);
+      }
+
       setSelectedDate(next);
       setMonthTitleDate(startOfMonth(next));
+
       return next;
     });
 
@@ -149,9 +162,15 @@ export const useCalendarNavigation = () => {
 
   const handleNext = useCallback(() => {
     setCurrentDate((c) => {
-      const next = getNextDate(c, selectedViewMode);
+      let next = getNextDate(c, selectedViewMode);
+
+      if (selectedViewMode === "week") {
+        next = normalizeWeek(next);
+      }
+
       setSelectedDate(next);
       setMonthTitleDate(startOfMonth(next));
+
       return next;
     });
 
