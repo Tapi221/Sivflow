@@ -12,7 +12,7 @@ import type { GoogleCalendarEvent } from "../googlecalendar-integration/gcalSync
 import type { buildTimelineColumns } from "../grid/TimelineDayView.shared";
 import { useCalendarLayout } from "./useCalendarLayout";
 import { useCalendarNavigation } from "./useCalendarNavigation";
-import { useCalendarScrollController } from "./useCalendarScrollController";
+import { useCalendarScrollController } from "../scroll/hooks/useCalendarScrollController";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 import { useTimelineGrid } from "./useTimelineGrid";
