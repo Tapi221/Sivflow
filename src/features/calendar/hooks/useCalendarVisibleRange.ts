@@ -12,7 +12,7 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import type {
   CalendarViewMode,
   TimelineBufferDays,
-} from "../calendarPane.types";
+} from "../schedulePane.types";
 const getRangeDayCount = (baseDate: Date, viewMode: CalendarViewMode) => {
   switch (viewMode) {
     case "month":

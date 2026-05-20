@@ -6,12 +6,12 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import { TodayBar } from "@/features/calendar/chip/TodayBar";
 import { ViewModeDropdown } from "@/features/calendar/chip/ViewModeDropdown";
 
-import type { CalendarPaneProps } from "./calendarPane.types";
+import type { SchedulePaneProps } from "./schedulePane.types";
 import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
 import { CalendarTaskView } from "./TaskView";
 import { CalendarTimelineDayView } from "./grid/TimelineDayView";
-import { useCalendarPane } from "./hooks/useCalendarPane";
+import { useSchedulePane } from "./hooks/useSchedulePane";
 import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/CalendarToolbar";
@@ -62,11 +62,11 @@ const VIEW_OPTIONS = [
 ] as const;
 
 // ─────────────────────────────────────────────
-// CalendarPane
+// SchedulePane
 // ─────────────────────────────────────────────
 
-export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
-  const pane = useCalendarPane();
+export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
+  const pane = useSchedulePane();
   const currentMinutes = useCurrentTimeMinutes();
 
   const {

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-import type { CalendarWorkspaceToolbarProps } from "../calendarPane.types";
+import type { CalendarWorkspaceToolbarProps } from "../schedulePane.types";
 import {
   CalendarIcon,
   FieldsToolbarIcon,

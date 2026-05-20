@@ -4,7 +4,7 @@ import {
   getTimelineColumnWidth,
 } from "@/features/calendar/grid/TimelineDayView.shared";
 
-import type { CalendarViewMode } from "../calendarPane.types";
+import type { CalendarViewMode } from "../schedulePane.types";
 import type { TimelineUnitBuffer } from "../grid/TimelineDayView.shared";
 export const useTimelineGrid = ({
   currentDate,

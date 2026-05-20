@@ -17,7 +17,7 @@ import type {
   AppCalendarItem,
   CalendarSidebarProps,
   GoogleAccountDisplay,
-} from "../calendarPane.types";
+} from "../schedulePane.types";
 import {
   CalendarIcon,
   CheckCircleFilledIcon,

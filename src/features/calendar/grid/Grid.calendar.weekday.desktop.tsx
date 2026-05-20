@@ -7,7 +7,7 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
 
-import type { CalendarWeekDayGridProps } from "@/features/calendar/calendarPane.types";
+import type { CalendarWeekDayGridProps } from "@/features/calendar/schedulePane.types";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 
 import { computeEventLayout,toLayoutEvent } from "@/features/calendar/eventchip/EventChip.layout.weekday.desktop";
