@@ -7,15 +7,19 @@ import type {
   CalendarViewMode,
   GoogleAccountDisplay,
   TimelineGridStyle,
-} from "../schedulePane.types";
-import type { GoogleCalendarEvent } from "../googlecalendar-integration/gcalSync.types";
-import type { buildTimelineColumns } from "../grid/TimelineDayView.shared";
-import { useCalendarLayout } from "./useCalendarLayout";
-import { useCalendarNavigation } from "./useCalendarNavigation";
-import { useCalendarScrollController } from "../scroll/hooks/useCalendarScrollController";
-import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
+} from "./schedulePane.types";
+
+import type { GoogleCalendarEvent } from "./googlecalendar-integration/gcalSync.types";
+import type { buildTimelineColumns } from "./grid/TimelineDayView.shared";
+
+import { useCalendarLayout } from "./layout/calendar/useCalendarLayout";
+import { useCalendarNavigation } from "./hooks/useCalendarNavigation";
+import { useCalendarScrollController } from "./scroll/hooks/useCalendarScrollController";
+import { useCalendarVisibleRange } from "./hooks/useCalendarVisibleRange";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
-import { useTimelineGrid } from "./useTimelineGrid";
+import { useTimelineGrid } from "./grid/useTimelineGrid";
+
+// ==============================================
 
 export type UseSchedulePaneReturn = {
   contentViewportRef: RefObject<HTMLDivElement | null>;
@@ -103,19 +107,20 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
     onExtendLeft: navigation.extendCalendarBufferLeft,
     onExtendRight: navigation.extendCalendarBufferRight,
-    scrollTargetToken: navigation.calendarScrollToken, // ← 追加
+    scrollTargetToken: navigation.calendarScrollToken,
   });
 
   const google = useGoogleCalendarLayer();
 
+  // ★ 修正ポイント：forceSync廃止 → rangeControllerベースへ
   useCalendarEventSync({
     activeMode: navigation.activeMode,
     selectedViewMode: navigation.selectedViewMode,
     visibleDays: visibleRange.visibleDays,
     monthTitleDate: navigation.monthTitleDate,
     googleCalendar: {
-      forceSync: google.forceSync,
       selectedCalendarIds: google.selectedCalendarIds,
+      rangeController: google.rangeController,
     },
   });
 

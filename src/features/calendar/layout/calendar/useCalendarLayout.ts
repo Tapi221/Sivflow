@@ -1,6 +1,6 @@
 import * as C from "@/features/calendar/calendar.constants.desktop";
 
-import type { CalendarViewMode } from "../schedulePane.types";
+import type { CalendarViewMode } from "../../schedulePane.types";
 
 export const useCalendarLayout = ({
   viewportWidth,
