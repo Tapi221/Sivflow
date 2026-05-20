@@ -14,7 +14,7 @@ export type Translations = {
   todayDescriptionDue: string;
 
   // カレンダーサイドバー
-  myCalendars: string;
+  myProjects: string;
   google: string;
   addGoogleCalendar: string;
   reconnectGoogleCalendar: string;
@@ -68,7 +68,7 @@ const ja: Translations = {
   todayDescriptionEmpty: "今日の復習はありません。",
   todayDescriptionDue: "忘れる前に復習しましょう。",
 
-  myCalendars: "My Calendars",
+  myProjects: "myPlojects",
   google: "Google",
   addGoogleCalendar: "Google カレンダーを追加",
   reconnectGoogleCalendar: "Google カレンダーを再接続",
@@ -116,7 +116,7 @@ const en: Translations = {
   todayDescriptionEmpty: "No reviews due today.",
   todayDescriptionDue: "Review before you forget.",
 
-  myCalendars: "My Calendars",
+  myProjects: "myPlojects",
   google: "Google",
   addGoogleCalendar: "Add Google Calendar",
   reconnectGoogleCalendar: "Reconnect Google Calendar",
