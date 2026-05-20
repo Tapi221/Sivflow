@@ -2,10 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { onAuthStateChanged } from "firebase/auth";
 
-import type {
-  CalendarToolbarMode,
-  CalendarViewMode,
-} from "@/features/calendar/calendar.types";
+import type {CalendarToolbarMode,CalendarViewMode } from "@/features/calendar/calendar.types";
 import type { useGoogleCalendarIntegration } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
 
 import { useGoogleCalendarPushSync } from "./useGoogleCalendarPushSync";
@@ -45,7 +42,14 @@ export const useCalendarEventSync = ({
   const forceSyncRef = useRef(forceSync);
   forceSyncRef.current = forceSync;
 
+  const prevKeyRef = useRef<string>("");
+
   useEffect(() => {
+    const key = Array.from(selectedCalendarIds).sort().join("|");
+
+    if (prevKeyRef.current === key) return;
+
+    prevKeyRef.current = key;
     void forceSync();
   }, [forceSync, selectedCalendarIds]);
 

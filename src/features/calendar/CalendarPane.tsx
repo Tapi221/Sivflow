@@ -11,6 +11,7 @@ import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/CalendarToolbar";
 
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const VIEW_OPTIONS = [
   { value: "month", label: "Month" },
@@ -28,6 +29,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
     selectedDate,
     monthLabel,
     titleDate,
+    monthTitleDate,
     monthScrollTargetToken,
     visibleDays,
     googleCalendarEvents,
@@ -54,6 +56,9 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
     toggleGoogleCalendar,
   } = pane;
 
+  const sidebarMonthDate =
+    selectedViewMode === "month" ? monthTitleDate : titleDate;
+
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-white">
       <CalendarWorkspaceToolbar
@@ -67,7 +72,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
 
       <div className="flex min-h-0 flex-1 bg-white">
         <CalendarSidebar
-          monthDate={titleDate}
+          monthDate={sidebarMonthDate}
           selectedDate={selectedDate}
           googleAccounts={googleAccounts}
           isAnyCalendarConnecting={isAnyCalendarConnecting}
@@ -89,7 +94,11 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
           {activeMode !== "task" && (
             <div className="mb-4 flex shrink-0 items-center justify-between">
               <div className="flex min-w-0 items-center gap-3">
-                {monthLabel ? (
+                {selectedViewMode === "month" ? (
+                  <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
+                    {format(monthTitleDate, "MMMM yyyy")}
+                  </h1>
+                ) : monthLabel ? (
                   <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
                     {monthLabel}
                   </h1>

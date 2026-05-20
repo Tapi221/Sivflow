@@ -44,11 +44,11 @@ type AccountsAction =
   | { type: "REMOVE"; id: string }
   | { type: "SET_CONNECTING"; id: string; value: boolean }
   | {
-      type: "SET_TOKEN";
-      id: string;
-      accessToken: string;
-      refreshToken?: string;
-    }
+    type: "SET_TOKEN";
+    id: string;
+    accessToken: string;
+    refreshToken?: string;
+  }
   | { type: "SET_CALENDARS"; id: string; calendars: GoogleCalendarListItem[] }
   | { type: "SET_CALENDAR_IDS"; id: string; ids: string[] }
   | { type: "TOGGLE_CALENDAR"; id: string; calendarId: string }
@@ -90,10 +90,10 @@ const reduceAccounts = (
       return state.map((a) =>
         a.id === action.id
           ? {
-              ...a,
-              accessToken: action.accessToken,
-              refreshToken: action.refreshToken ?? a.refreshToken,
-            }
+            ...a,
+            accessToken: action.accessToken,
+            refreshToken: action.refreshToken ?? a.refreshToken,
+          }
           : a,
       );
 
