@@ -2,8 +2,7 @@ import { Suspense, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
-import { SettingDialog } from "@/features/settings/SettingDialog";
-import { RightSidebarDesktop } from "@/features/sidebar/RightSidebar.desktop";
+import { SettingDialog } from "@/features/settings/SettingDialog.desktop";
 import { Sidebar } from "@/features/sidebar/Sidebar.desktop";
 import { useWorkspaceTabsRouteSync } from "@/features/tab/hooks/useTabsRouteSync";
 
@@ -79,8 +78,6 @@ export const AppLayout = () => {
             <Outlet />
           </Suspense>
         </WorkspaceShell>
-
-        <RightSidebarDesktop open={isRightSidebarOpen} />
       </div>
 
       <SettingDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
