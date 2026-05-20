@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
@@ -39,6 +39,92 @@ const calculateEventPositionStyle = (
   };
 };
 
+// ─────────────────────────────────────────────────────────────
+// 現在時刻フック
+// 1分ごとに更新し、0時からの経過分数を返す
+// ─────────────────────────────────────────────────────────────
+
+const useCurrentTimeMinutes = (): number => {
+  const getNow = () => {
+    const d = new Date();
+    return d.getHours() * 60 + d.getMinutes();
+  };
+
+  const [minutes, setMinutes] = useState(getNow);
+
+  useEffect(() => {
+    // 次の「ちょうど1分」まで待ってから interval を開始することで
+    // 時計と同期したタイミングで更新される
+    const now = new Date();
+    const msUntilNextMinute =
+      (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+
+    const initialTimer = window.setTimeout(() => {
+      setMinutes(getNow());
+      const id = window.setInterval(() => setMinutes(getNow()), 60_000);
+      // setInterval の cleanup は返せないのでクロージャで保持
+      return () => window.clearInterval(id);
+    }, msUntilNextMinute);
+
+    return () => window.clearTimeout(initialTimer);
+  }, []);
+
+  return minutes;
+};
+
+// ─────────────────────────────────────────────────────────────
+// 現在時刻インジケーター
+// ─────────────────────────────────────────────────────────────
+
+type CurrentTimeIndicatorProps = {
+  /** true のとき左端にドットを表示（今日の列、または最左列） */
+  showDot: boolean;
+  /** 0時からの経過分数 */
+  currentMinutes: number;
+};
+
+const CurrentTimeIndicator = ({
+  showDot,
+  currentMinutes,
+}: CurrentTimeIndicatorProps) => {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-x-0 z-20"
+      style={{
+        top: `calc(${currentMinutes / 60} * var(--calendar-hour-row-height))`,
+      }}
+    >
+      {/* ドット（今日の列のみ） */}
+      {showDot && (
+        <span
+          className="absolute top-1/2 -translate-y-1/2"
+          style={{
+            left: -4,
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: "#185FA5",
+          }}
+        />
+      )}
+
+      {/* 横線 */}
+      <div
+        style={{
+          height: 1.5,
+          background: "rgba(24, 95, 165, 0.55)",
+          marginLeft: showDot ? 2 : 0,
+        }}
+      />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────
+// メインコンポーネント
+// ─────────────────────────────────────────────────────────────
+
 export const CalendarWeekDayGrid = ({
   headerScrollRef,
   scrollContainerRef,
@@ -51,6 +137,13 @@ export const CalendarWeekDayGrid = ({
   onSelectDate,
 }: CalendarWeekDayGridProps) => {
   const today = new Date();
+  const currentMinutes = useCurrentTimeMinutes();
+
+  // 表示範囲内に今日が含まれているか
+  const isTodayVisible = visibleDays.some((d) => isSameDay(d, today));
+
+  // 今日の列のインデックス（線の左端のドット位置を決めるため）
+  const todayColumnIndex = visibleDays.findIndex((d) => isSameDay(d, today));
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
@@ -146,7 +239,7 @@ export const CalendarWeekDayGrid = ({
           </div>
 
           {/* 日ごとの列 */}
-          {visibleDays.map((day: Date) => {
+          {visibleDays.map((day: Date, colIndex: number) => {
             const eventsForDay = visibleEvents.filter(
               (event: GoogleCalendarEvent) =>
                 !event.isAllDay && isSameDay(event.startsAt, day),
@@ -162,6 +255,14 @@ export const CalendarWeekDayGrid = ({
               ),
             );
 
+            const isDayToday = isSameDay(day, today);
+
+            // ドットは今日の列に表示。
+            // 今日が表示範囲内にない場合は最左列にドットを出す（線だけでも視認しやすくするため）
+            const showDot = isTodayVisible
+              ? isDayToday
+              : colIndex === 0;
+
             return (
               <div
                 key={`${day.toISOString()}-column`}
@@ -174,6 +275,14 @@ export const CalendarWeekDayGrid = ({
                     style={{ height: "var(--calendar-hour-row-height)" }}
                   />
                 ))}
+
+                {/* ── 現在時刻インジケーター ── */}
+                {(isTodayVisible ? isDayToday || todayColumnIndex !== -1 : true) && (
+                  <CurrentTimeIndicator
+                    showDot={showDot}
+                    currentMinutes={currentMinutes}
+                  />
+                )}
 
                 {eventsForDay.map((event: GoogleCalendarEvent) => {
                   const pos = layout.get(event.id) ?? {

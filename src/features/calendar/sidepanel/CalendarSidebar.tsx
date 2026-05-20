@@ -213,7 +213,8 @@ export const CalendarSidebar = ({
   const hasGoogleAccounts = googleAccounts.length > 0;
 
   return (
-    <aside className="flex w-[220px] shrink-0 flex-col gap-5 overflow-y-auto bg-[#f7f8fa] px-3 py-5 text-[#24272f]">
+    <aside className="flex h-full w-[220px] shrink-0 flex-col gap-5 overflow-y-auto bg-[#f7f8fa] px-3 py-5 text-[#24272f]">
+
       {/* ミニカレンダー */}
       <section className="flex w-full flex-col gap-2">
         <div className="flex w-full items-center justify-between px-1">
