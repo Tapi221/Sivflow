@@ -1,7 +1,6 @@
 import {
   type MouseEvent,
   type ReactNode,
-  useState,
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -63,7 +62,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "library",
     label: "Library",
-    to: "/folders?view=section-list",
+    to: "/folders?view=section-list&libraryType=pdf",
     icon: <LibraryIcon className="app-sidebar__nav-icon" />,
     sectionKey: "library",
     match: (pathname, searchParams) =>
@@ -82,12 +81,6 @@ const mainNavItems: SidebarNavItem[] = [
     label: "探す",
     icon: <ExploreIcon className="app-sidebar__nav-icon" />,
   },
-];
-
-const libraryChildItems = [
-  { label: "PDF", value: "pdf" },
-  { label: "フラッシュカード", value: "flashcards" },
-  { label: "ノート", value: "notes" },
 ];
 
 const isNavItemActiveByLocation = (
@@ -161,7 +154,6 @@ const SidebarNavLink = ({
       type="button"
       onClick={handleClick}
       disabled={isDisabled}
-      aria-disabled={isDisabled ? true : undefined}
       className={cn(
         "app-sidebar__nav-link",
         isActive && "is-active",
@@ -183,14 +175,8 @@ const SidebarNavLink = ({
 
 const Sidebar = ({ collapsed = false, onOpenSettings }: SidebarProps) => {
   const navigate = useNavigate();
-  const { search } = useLocation();
 
-  const [isLibraryOpen, setIsLibraryOpen] = useState(true);
-
-  // collapsed のときは常にコンパクト表示（ホバー展開なし）
-  const isCompact = collapsed;
-
-  const selectedLibraryChild = new URLSearchParams(search).get("libraryType");
+  const [isCompact] = [collapsed];
 
   const closeCalendar = useExplorerCalendarViewStore((s) => s.close);
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
@@ -201,10 +187,6 @@ const Sidebar = ({ collapsed = false, onOpenSettings }: SidebarProps) => {
     onClick: () => {
       closeCalendar();
       item.onClick?.();
-
-      if (item.id === "library" && !isCompact) {
-        setIsLibraryOpen((v) => !v);
-      }
 
       if (item.id === "explore") {
         openGlobalSearch();
@@ -220,12 +202,6 @@ const Sidebar = ({ collapsed = false, onOpenSettings }: SidebarProps) => {
       onClick: onOpenSettings,
     },
   ];
-
-  const openLibraryChild = (libraryType: string) => {
-    closeCalendar();
-    openSectionTab("library");
-    navigate(`/folders?view=section-list&libraryType=${libraryType}`);
-  };
 
   return (
     <aside
@@ -251,41 +227,13 @@ const Sidebar = ({ collapsed = false, onOpenSettings }: SidebarProps) => {
         </div>
 
         <nav className="app-sidebar__nav">
-          {mainNavItemsWithActions.map((item) =>
-            item.id === "library" ? (
-              <div key={item.id}>
-                <SidebarNavLink
-                  item={item}
-                  ariaExpanded={!isCompact ? isLibraryOpen : undefined}
-                  compact={isCompact}
-                  trailing={
-                    <ChevronDownIcon
-                      className={cn(isLibraryOpen && "is-open")}
-                    />
-                  }
-                />
-
-                {!isCompact && isLibraryOpen && (
-                  <div className="app-sidebar__library-children">
-                    {libraryChildItems.map((child) => (
-                      <button
-                        key={child.value}
-                        type="button"
-                        className={cn(
-                          selectedLibraryChild === child.value && "is-active",
-                        )}
-                        onClick={() => openLibraryChild(child.value)}
-                      >
-                        {child.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <SidebarNavLink key={item.id} item={item} compact={isCompact} />
-            ),
-          )}
+          {mainNavItemsWithActions.map((item) => (
+            <SidebarNavLink
+              key={item.id}
+              item={item}
+              compact={isCompact}
+            />
+          ))}
         </nav>
       </div>
 

@@ -88,7 +88,7 @@ describe("mergeTitleBarBreadcrumbs", () => {
 
     expect(merged[1]).toEqual({
       label: "フォルダ一覧",
-      to: "/folders?view=section-list",
+      to: "/folders?view=section-list&libraryType=pdf",
     });
   });
 });
