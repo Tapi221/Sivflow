@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { TodayBar } from "@/features/calendar/chip/TodayBar";
 import { ViewModeDropdown } from "@/features/calendar/chip/ViewModeDropdown";
@@ -8,10 +10,48 @@ import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
 import { CalendarTimelineDayView } from "./grid/TimelineDayView";
 import { useCalendarPane } from "./hooks/useCalendarPane";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
+import { DayDetailPanel } from "./sidepanel/DayDetailPanel";
 import { CalendarWorkspaceToolbar } from "./toolbar/CalendarToolbar";
 
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+
+// ─────────────────────────────────────────────
+// 現在時刻フック（DayDetailPanel へ渡す）
+// ─────────────────────────────────────────────
+
+const useCurrentTimeMinutes = (): number => {
+  const getNow = () => {
+    const d = new Date();
+    return d.getHours() * 60 + d.getMinutes();
+  };
+
+  const [minutes, setMinutes] = useState(getNow);
+
+  useEffect(() => {
+    const now = new Date();
+    const msUntilNextMinute =
+      (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+
+    const timeoutId = window.setTimeout(() => {
+      setMinutes(getNow());
+
+      const intervalId = window.setInterval(() => {
+        setMinutes(getNow());
+      }, 60_000);
+
+      return () => window.clearInterval(intervalId);
+    }, msUntilNextMinute);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  return minutes;
+};
+
+// ─────────────────────────────────────────────
+// ビュー選択肢
+// ─────────────────────────────────────────────
 
 const VIEW_OPTIONS = [
   { value: "month", label: "Month" },
@@ -19,8 +59,13 @@ const VIEW_OPTIONS = [
   { value: "days", label: "Day" },
 ] as const;
 
+// ─────────────────────────────────────────────
+// CalendarPane
+// ─────────────────────────────────────────────
+
 export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
   const pane = useCalendarPane();
+  const currentMinutes = useCurrentTimeMinutes();
 
   const {
     activeMode,
@@ -59,6 +104,13 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
   const sidebarMonthDate =
     selectedViewMode === "month" ? monthTitleDate : titleDate;
 
+  /**
+   * 月表示 + Calendar モードのときだけ右パネルを表示する。
+   * Timeline / Task は不要。
+   */
+  const showDayDetailPanel =
+    activeMode === "calendar" && selectedViewMode === "month";
+
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-white">
       <CalendarWorkspaceToolbar
@@ -71,6 +123,7 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
       />
 
       <div className="flex min-h-0 flex-1 bg-white">
+        {/* ── 左サイドバー ── */}
         <CalendarSidebar
           monthDate={sidebarMonthDate}
           selectedDate={selectedDate}
@@ -84,10 +137,13 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
           onToggleCalendar={toggleGoogleCalendar}
         />
 
+        {/* ── メインコンテンツ ── */}
         <div
           ref={contentViewportRef}
           className={cn(
-            "flex min-w-0 flex-1 flex-col bg-white px-5 pt-4",
+            "flex min-w-0 flex-1 flex-col bg-white",
+            // 月表示で右パネルがある場合は px を小さめに
+            showDayDetailPanel ? "px-3 pt-4" : "px-5 pt-4",
             activeMode === "task" && "pb-5",
           )}
         >
@@ -163,6 +219,16 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
             />
           )}
         </div>
+
+        {/* ── 右サイドパネル（月表示時のみ） ── */}
+        {showDayDetailPanel && (
+          <DayDetailPanel
+            selectedDate={selectedDate}
+            events={googleCalendarEvents}
+            currentMinutes={currentMinutes}
+            onClose={() => setActiveMode("calendar")}
+          />
+        )}
       </div>
     </div>
   );
