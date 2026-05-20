@@ -1,5 +1,4 @@
 import {
-  type FocusEvent,
   type MouseEvent,
   type ReactNode,
   useState,
@@ -187,15 +186,15 @@ const Sidebar = ({ collapsed = false, onOpenSettings }: SidebarProps) => {
   const { search } = useLocation();
 
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
-  const [isRailExpanded, setIsRailExpanded] = useState(false);
+
+  // collapsed のときは常にコンパクト表示（ホバー展開なし）
+  const isCompact = collapsed;
 
   const selectedLibraryChild = new URLSearchParams(search).get("libraryType");
 
   const closeCalendar = useExplorerCalendarViewStore((s) => s.close);
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
   const openSectionTab = useWorkspaceTabsStore((s) => s.openSectionTab);
-
-  const isCompact = collapsed && !isRailExpanded;
 
   const mainNavItemsWithActions = mainNavItems.map((item) => ({
     ...item,
@@ -228,29 +227,11 @@ const Sidebar = ({ collapsed = false, onOpenSettings }: SidebarProps) => {
     navigate(`/folders?view=section-list&libraryType=${libraryType}`);
   };
 
-  const handleBlurCapture = (event: FocusEvent<HTMLElement>) => {
-    if (!collapsed) return;
-
-    const next = event.relatedTarget;
-
-    if (!(next instanceof Node) || !event.currentTarget.contains(next)) {
-      setIsRailExpanded(false);
-    }
-  };
-
   return (
     <aside
-      className={cn(
-        "app-sidebar",
-        isCompact && "app-sidebar--collapsed",
-        collapsed && isRailExpanded && "app-sidebar--rail-expanded",
-      )}
+      className="app-sidebar"
       aria-label="Sidebar"
       data-collapsed={collapsed ? "1" : undefined}
-      onMouseEnter={collapsed ? () => setIsRailExpanded(true) : undefined}
-      onMouseLeave={collapsed ? () => setIsRailExpanded(false) : undefined}
-      onFocusCapture={collapsed ? () => setIsRailExpanded(true) : undefined}
-      onBlurCapture={handleBlurCapture}
     >
       <div className="app-sidebar__top">
         <div className="app-sidebar__workspace">

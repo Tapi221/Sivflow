@@ -56,8 +56,7 @@
 
   transition:
     width 160ms ease,
-    padding 160ms ease,
-    box-shadow 160ms ease;
+    padding 160ms ease;
 }
 
 .app-right-sidebar {
@@ -463,14 +462,12 @@
   cursor: pointer;
 }
 
-/* collapsed */
+/* collapsed — アイコンのみのレール表示（ホバー展開なし） */
 
 .app-layout--sidebar-collapsed .app-sidebar {
   width: var(--app-sidebar-rail-width);
 
   padding: 16px 6px 12px;
-
-  z-index: 10;
 }
 
 .app-layout--sidebar-collapsed .app-sidebar__top {
@@ -508,83 +505,6 @@
 .app-layout--sidebar-collapsed .app-sidebar__nested-group,
 .app-layout--sidebar-collapsed .app-sidebar__trial {
   display: none;
-}
-
-/* rail expanded */
-
-.app-layout--sidebar-collapsed .app-sidebar.app-sidebar--rail-expanded {
-  width: var(--app-sidebar-width);
-
-  padding: 24px 8px 16px;
-
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.48),
-    0 2px 12px rgba(0, 0, 0, 0.22);
-}
-
-.app-layout--sidebar-collapsed
-  .app-sidebar.app-sidebar--rail-expanded
-  .app-sidebar__top {
-  gap: 32px;
-}
-
-.app-layout--sidebar-collapsed
-  .app-sidebar.app-sidebar--rail-expanded
-  .app-sidebar__bottom {
-  padding: 8px 8px 0;
-}
-
-.app-layout--sidebar-collapsed
-  .app-sidebar.app-sidebar--rail-expanded
-  .app-sidebar__workspace {
-  padding: 0 16px;
-
-  justify-content: flex-start;
-}
-
-.app-layout--sidebar-collapsed
-  .app-sidebar.app-sidebar--rail-expanded
-  .app-sidebar__workspace-copy {
-  display: flex;
-}
-
-.app-layout--sidebar-collapsed
-  .app-sidebar.app-sidebar--rail-expanded
-  .app-sidebar__nav-link {
-  width: 224px;
-
-  justify-content: flex-start;
-
-  gap: 8px;
-
-  padding: 0 10px;
-}
-
-.app-layout--sidebar-collapsed
-  .app-sidebar.app-sidebar--rail-expanded
-  .app-sidebar__nav-trailing {
-  display: flex;
-}
-
-.app-layout--sidebar-collapsed
-  .app-sidebar.app-sidebar--rail-expanded
-  .app-sidebar__nav-label {
-  display: block;
-}
-
-.app-layout--sidebar-collapsed
-  .app-sidebar.app-sidebar--rail-expanded
-  .app-sidebar__nested-group {
-  display: flex;
-}
-
-.app-layout--sidebar-collapsed
-  .app-sidebar.app-sidebar--rail-expanded
-  .app-sidebar__trial {
-  display: flex;
-  width: 100%;
-
-  flex-direction: column;
 }
 
 @media (max-width: 767px) {
