@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { format } from "date-fns";
+
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { TodayBar } from "@/features/calendar/chip/TodayBar";
 import { ViewModeDropdown } from "@/features/calendar/chip/ViewModeDropdown";
@@ -7,14 +9,14 @@ import { ViewModeDropdown } from "@/features/calendar/chip/ViewModeDropdown";
 import type { CalendarPaneProps } from "./calendarPane.types";
 import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
+import { CalendarTaskView } from "./TaskView";
 import { CalendarTimelineDayView } from "./grid/TimelineDayView";
 import { useCalendarPane } from "./hooks/useCalendarPane";
-import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
+import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/CalendarToolbar";
 
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 
 // ─────────────────────────────────────────────
 // 現在時刻フック（DayDetailPanel へ渡す）
@@ -104,10 +106,6 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
   const sidebarMonthDate =
     selectedViewMode === "month" ? monthTitleDate : titleDate;
 
-  /**
-   * 月表示 + Calendar モードのときだけ右パネルを表示する。
-   * Timeline / Task は不要。
-   */
   const showDayDetailPanel =
     activeMode === "calendar" && selectedViewMode === "month";
 
@@ -142,11 +140,11 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
           ref={contentViewportRef}
           className={cn(
             "flex min-w-0 flex-1 flex-col bg-white",
-            // 月表示で右パネルがある場合は px を小さめに
             showDayDetailPanel ? "px-3 pt-4" : "px-5 pt-4",
             activeMode === "task" && "pb-5",
           )}
         >
+          {/* ヘッダー */}
           {activeMode !== "task" && (
             <div className="mb-4 flex shrink-0 items-center justify-between">
               <div className="flex min-w-0 items-center gap-3">
@@ -179,10 +177,19 @@ export const CalendarPane = ({ onClose: _onClose }: CalendarPaneProps) => {
             </div>
           )}
 
+          {/* ── メイン分岐 ── */}
           {activeMode === "task" ? (
-            <div className="flex min-h-0 flex-1 items-center justify-center text-[14px] text-[#8f929c]">
-              Task view coming soon
-            </div>
+            <CalendarTaskView
+              viewMode={selectedViewMode as any}
+              anchorDate={currentDate}
+              timelineUnitBuffer={{ before: 7, after: 14 }}
+              selectedDate={selectedDate}
+              dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
+              rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
+              scrollContainerRef={scrollContainerRef}
+              onScroll={handleTimelineScroll}
+              onSelectDate={handleSidebarSelectDate}
+            />
           ) : activeMode === "timeline" ? (
             <CalendarTimelineDayView
               viewMode={selectedViewMode}

@@ -12,24 +12,11 @@ import { useLayoutRouteStateDesktop } from "./hooks/useLayoutRouteState.desktop"
 import { useResetWorkspaceScrollDesktop } from "./hooks/useResetWorkspaceScroll.desktop";
 import { WorkspaceShell } from "./WorkspaceShell";
 
-const SIDEBAR_COLLAPSE_STORAGE_KEY = "mf.ui.sidebarCollapsed";
-
 export const AppLayout = () => {
   const { pathname, isFoldersRoute, isScrollLocked } =
     useLayoutRouteStateDesktop();
 
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-    try {
-      const stored = window.localStorage.getItem(SIDEBAR_COLLAPSE_STORAGE_KEY);
-
-      return stored === "1";
-    } catch {
-      return false;
-    }
-  });
-
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
-
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const mainRef = useRef<HTMLElement | null>(null);
@@ -37,41 +24,26 @@ export const AppLayout = () => {
   useWorkspaceTabsRouteSync();
 
   useHotKeyDesktop({
-    onToggleSidebar: () => {
-      setIsSidebarCollapsed((current) => !current);
-    },
-
     onToggleRightSidebar: () => {
       setIsRightSidebarOpen((current) => !current);
     },
   });
 
-  useResetWorkspaceScrollDesktop({
-    pathname,
-    mainRef,
-  });
+  useResetWorkspaceScrollDesktop({ pathname, mainRef });
+
+  const className = [
+    "app-layout",
+    isFoldersRoute ? "app-layout--folders" : "",
+    isScrollLocked ? "app-layout--scroll-locked" : "",
+    isRightSidebarOpen ? "app-layout--right-sidebar-open" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <>
-      <div
-        className={[
-          "app-layout",
-
-          isFoldersRoute ? "app-layout--folders" : "",
-
-          isScrollLocked ? "app-layout--scroll-locked" : "",
-
-          isSidebarCollapsed ? "app-layout--sidebar-collapsed" : "",
-
-          isRightSidebarOpen ? "app-layout--right-sidebar-open" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-      >
-        <Sidebar
-          collapsed={isSidebarCollapsed}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-        />
+      <div className={className}>
+        <Sidebar onOpenSettings={() => setIsSettingsOpen(true)} />
 
         <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
           <Suspense fallback={null}>

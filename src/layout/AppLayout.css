@@ -15,8 +15,9 @@
 
   display: grid;
 
+  /* ← デフォルトも rail 幅に統一 */
   grid-template-columns:
-    var(--app-sidebar-width)
+    var(--app-sidebar-rail-width)
     minmax(0, 1fr);
 
   grid-template-rows: minmax(0, 1fr);
@@ -48,20 +49,8 @@
   --app-layout-padding-x: 0px;
 }
 
-.app-layout--sidebar-collapsed {
-  grid-template-columns:
-    var(--app-sidebar-rail-width)
-    minmax(0, 1fr);
-}
-
+/* 右サイドバーのみ考慮（collapsedロジック削除済み） */
 .app-layout--right-sidebar-open {
-  grid-template-columns:
-    var(--app-sidebar-width)
-    minmax(0, 1fr)
-    var(--app-sidebar-width);
-}
-
-.app-layout--sidebar-collapsed.app-layout--right-sidebar-open {
   grid-template-columns:
     var(--app-sidebar-rail-width)
     minmax(0, 1fr)
