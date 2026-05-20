@@ -3,7 +3,7 @@ import { ja } from "date-fns/locale";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
-import { CalendarEventChipMonth } from "@/features/calendar/eventchip/EventChip.month";
+import { CalendarEventChipMonth } from "@/features/calendar/eventchip/EventChip.schedule.month";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
 import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
 

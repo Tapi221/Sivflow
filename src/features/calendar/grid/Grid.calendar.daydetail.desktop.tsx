@@ -1,4 +1,4 @@
-import { EventChipDayDetail } from "@/features/calendar/eventchip/EventChip.daidetail";
+import { EventChipDayDetail } from "@/features/calendar/eventchip/EventChip.schedule.daidetail";
 
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 
