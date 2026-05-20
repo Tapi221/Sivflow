@@ -44,11 +44,11 @@ type AccountsAction =
   | { type: "REMOVE"; id: string }
   | { type: "SET_CONNECTING"; id: string; value: boolean }
   | {
-    type: "SET_TOKEN";
-    id: string;
-    accessToken: string;
-    refreshToken?: string;
-  }
+      type: "SET_TOKEN";
+      id: string;
+      accessToken: string;
+      refreshToken?: string;
+    }
   | { type: "SET_CALENDARS"; id: string; calendars: GoogleCalendarListItem[] }
   | { type: "SET_CALENDAR_IDS"; id: string; ids: string[] }
   | { type: "TOGGLE_CALENDAR"; id: string; calendarId: string }
@@ -90,10 +90,10 @@ const reduceAccounts = (
       return state.map((a) =>
         a.id === action.id
           ? {
-            ...a,
-            accessToken: action.accessToken,
-            refreshToken: action.refreshToken ?? a.refreshToken,
-          }
+              ...a,
+              accessToken: action.accessToken,
+              refreshToken: action.refreshToken ?? a.refreshToken,
+            }
           : a,
       );
 
@@ -113,11 +113,8 @@ const reduceAccounts = (
       return state.map((a) => {
         if (a.id !== action.id) return a;
         const next = new Set(a.selectedCalendarIds);
-        if (next.has(action.calendarId)) {
-          next.delete(action.calendarId);
-        } else {
-          next.add(action.calendarId);
-        }
+        if (next.has(action.calendarId)) next.delete(action.calendarId);
+        else next.add(action.calendarId);
         return { ...a, selectedCalendarIds: next };
       });
 
@@ -207,7 +204,6 @@ export const useMultiAccountGoogleCalendar = () => {
 
   const managerRef = useRef<GoogleCalendarEngineManager | null>(null);
 
-  // ★ state参照を安定化
   const accountsRef = useRef(accounts);
   useEffect(() => {
     accountsRef.current = accounts;
@@ -238,9 +234,8 @@ export const useMultiAccountGoogleCalendar = () => {
               id: accountId,
               syncState,
             }),
-          onLastSyncedAtChange: (_at: Date) => {
-            // マルチアカウントでは最終同期時刻をアカウント単位で管理しないため無視
-          },
+
+          onLastSyncedAtChange: () => {},
 
           onError: (err) =>
             dispatchAccounts({
@@ -284,7 +279,6 @@ export const useMultiAccountGoogleCalendar = () => {
               });
 
               managerRef.current?.getEngine(accountId)?.forceSync?.();
-
               return true;
             } catch {
               return false;
@@ -455,16 +449,26 @@ export const useMultiAccountGoogleCalendar = () => {
       if (!stored) return;
 
       const next = new Set(stored.selectedCalendarIds);
-      if (next.has(calendarId)) {
-        next.delete(calendarId);
-      } else {
-        next.add(calendarId);
-      }
+      if (next.has(calendarId)) next.delete(calendarId);
+      else next.add(calendarId);
 
       updateStoredAccountCalendarIds(accountId, Array.from(next));
     },
     [],
   );
+
+  // ─────────────────────────────
+  // added
+  // ─────────────────────────────
+
+  const forceSync = useCallback(async () => {
+    const ids = managerRef.current?.getActiveIds() ?? [];
+    await Promise.allSettled(
+      ids.map((id) => managerRef.current?.getEngine(id)?.forceSync()),
+    );
+  }, []);
+
+  const isAnyConnecting = accounts.some((a) => a.isConnecting);
 
   return {
     accounts,
@@ -473,5 +477,7 @@ export const useMultiAccountGoogleCalendar = () => {
     addAccount,
     removeAccount,
     toggleCalendar,
+    forceSync,
+    isAnyConnecting,
   };
 };
