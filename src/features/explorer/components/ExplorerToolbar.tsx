@@ -68,7 +68,7 @@ const EXPLORER_HOME_CRUMB: BreadcrumbCrumb = {
 
 const EXPLORER_ROOT_CRUMB: BreadcrumbCrumb = {
   label: "エクスプローラー",
-  to: "/folders?view=section-list",
+  to: "/folders?view=section-list&libraryType=pdf",
 };
 
 const readInitialExplorerColumnPathCrumbs = (): BreadcrumbCrumb[] => {
