@@ -33,6 +33,7 @@ export type StoredGoogleAccount = {
   accessTokenExpiry: number | null;
   refreshToken: string | null;
   selectedCalendarIds: string[];
+  cachedCalendars?: { id: string; summary: string; backgroundColor?: string }[];
 };
 
 // ─────────────────────────────────────────────────────────────

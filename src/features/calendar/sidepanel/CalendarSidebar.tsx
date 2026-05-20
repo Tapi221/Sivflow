@@ -209,10 +209,16 @@ const GoogleAccountSection = ({
         })}
 
       {isOpen && account.calendars.length === 0 && (
-        <p className="px-7 py-1 text-[11px] text-[#b0b5bf]">
-          {account.syncState === "syncing" ? "読み込み中…" : "カレンダーなし"}
-        </p>
-      )}
+  <p className="px-7 py-1 text-[11px] text-[#b0b5bf]">
+    {/* syncingかつcalendarsが空の場合のみスピナー、それ以外は非表示 */}
+    {account.syncState === "syncing" ? (
+      <span className="flex items-center gap-1">
+        <IconSync className="h-3 w-3 animate-spin" />
+        読み込み中…
+      </span>
+    ) : null /* 「カレンダーなし」は表示しない */}
+  </p>
+)}
 
       {account.error && (
         <p className="mt-1 px-2 text-[11px] leading-relaxed text-[#b42318]">
