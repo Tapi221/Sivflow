@@ -9,7 +9,7 @@ import { ViewModeDropdown } from "@/features/calendar/chip/ViewModeDropdown";
 import type { SchedulePaneProps } from "./schedulePane.types";
 import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
-import { CalendarTaskView } from "./TaskView";
+import { CalendarTaskView } from "./taskview/TaskView";
 import { CalendarTimelineDayView } from "./grid/TimelineDayView";
 import { useSchedulePane } from "./hooks/useSchedulePane";
 import { DayDetailPanel } from "./rightpanel/DayDetailPanel";

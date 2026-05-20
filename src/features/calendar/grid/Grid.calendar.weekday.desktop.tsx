@@ -12,7 +12,7 @@ import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-int
 
 import { computeEventLayout,toLayoutEvent } from "@/features/calendar/eventchip/EventChip.layout.weekday.desktop";
 
-import { CalendarEventChipWeekday } from "../eventchip/EventChip.weekday";
+import { CalendarEventChipWeekday } from "../eventchip/EventChip.schedule.weekday";
 import { cn } from "@/lib/utils";
 
 // ==============================================
