@@ -1,7 +1,7 @@
 import {
+  type CardDisplayMode,
   DEFAULT_CARD_DISPLAY_MODE,
   normalizeCardDisplayMode,
-  type CardDisplayMode,
 } from "@/types/domain/cardSet";
 
 const currentDisplayModeByCardSet = new Map<string, CardDisplayMode>();

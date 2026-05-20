@@ -9,5 +9,4 @@ export * from "./domain/storageStats";
 export * from "./domain/sync";
 export * from "./domain/user";
 export * from "./style";
-
 export type { TagRecord } from "@/services/localdb/types";

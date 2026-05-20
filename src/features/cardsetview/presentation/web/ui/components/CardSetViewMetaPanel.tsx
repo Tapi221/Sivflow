@@ -1,5 +1,7 @@
-import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
 import { useCardSetViewMetaPanelActions } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewMetaPanelActions";
+
+import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
+
 import type { Card, UserSettings } from "@/types";
 
 interface CardSetViewMetaPanelProps {

@@ -1,16 +1,17 @@
-import type { Card, Folder } from "@/types";
-import type {
-  DeleteEntity,
-  UpsertEntity,
-} from "@/application/usecases/syncQueuePayloadGuards";
 import { assertNoBlobUrlInCardPayload } from "./blobUrl";
+import type { DocDbCtx } from "./documentsLifecycle";
 import {
   cleanupBeforeDocumentDelete,
   cleanupBeforeDocumentSoftDelete,
   cleanupBeforeDocumentUpdate,
 } from "./documentsLifecycle";
-import type { DocDbCtx } from "./documentsLifecycle";
 import { CURRENT_TAG_STORE } from "./tagStoreNames";
+
+import type {
+  DeleteEntity,
+  UpsertEntity,
+} from "@/application/usecases/syncQueuePayloadGuards";
+import type { Card, Folder } from "@/types";
 
 export type EnqueueSync = (
   table: string,

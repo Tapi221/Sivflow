@@ -1,14 +1,16 @@
 import {
+  toVirtualMfCardDisplayName,
+  toVirtualMfDeckDisplayName,
+} from "@/features/fileDisplay/virtualFileExtensions";
+
+import {
+  type FolderTreeNode,
   getEntityTime,
   getFolderId,
   getParentFolderId,
   normalizeFolderId,
-  type FolderTreeNode,
 } from "@/components/folder/explorer/model/utils";
-import {
-  toVirtualMfCardDisplayName,
-  toVirtualMfDeckDisplayName,
-} from "@/features/fileDisplay/virtualFileExtensions";
+
 import type {
   Card,
   CardSet,

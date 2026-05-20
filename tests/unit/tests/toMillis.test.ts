@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { normalizeDate } from "@/shared/codec/date";
 import {
   toDateOrNull,
   toIsoStringOrNull,
   toMillis,
   toMillisOrNull,
 } from "@/utils/toMillis";
-import { normalizeDate } from "@/shared/codec/date";
 
 describe("toMillis utilities", () => {
   it("treats numeric epoch seconds as seconds", () => {

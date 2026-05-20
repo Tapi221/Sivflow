@@ -2,20 +2,16 @@ import { Suspense, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
-
 import { SettingDialog } from "@/features/settings/SettingDialog";
-
-import { Sidebar } from "@/features/sidebar/Sidebar.desktop";
 import { RightSidebarDesktop } from "@/features/sidebar/RightSidebar.desktop";
-
+import { Sidebar } from "@/features/sidebar/Sidebar.desktop";
 import { useWorkspaceTabsRouteSync } from "@/features/tab/hooks/useTabsRouteSync";
+
+import "./AppLayout.css";
 
 import { useLayoutRouteStateDesktop } from "./hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "./hooks/useResetWorkspaceScroll.desktop";
-
 import { WorkspaceShell } from "./WorkspaceShell";
-
-import "./AppLayout.css";
 
 const SIDEBAR_COLLAPSE_STORAGE_KEY = "mf.ui.sidebarCollapsed";
 

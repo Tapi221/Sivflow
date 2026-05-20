@@ -1,7 +1,8 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+
 import { useSettingDialog } from "./hooks/useSettingDialog";
-import { settingSections } from "./settingSections";
 import SettingPane from "./SettingPane";
+import { settingSections } from "./settingSections";
 
 type SettingDialogProps = {
   open: boolean;

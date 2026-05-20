@@ -1,12 +1,14 @@
 import * as React from "react";
+
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+
+import {
+  type FloatingSurfaceVariantProps,
+  floatingSurfaceVariants,
+} from "@/components/ui/floating-surface";
 import { Check, Circle } from "@/ui/icons";
 
 import { cn } from "@/lib/utils";
-import {
-  floatingSurfaceVariants,
-  type FloatingSurfaceVariantProps,
-} from "@/components/ui/floating-surface";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
@@ -191,10 +193,10 @@ DropdownMenuItemLabel.displayName = "DropdownMenuItemLabel";
 
 export {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuItemIcon,
   DropdownMenuItemLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 };

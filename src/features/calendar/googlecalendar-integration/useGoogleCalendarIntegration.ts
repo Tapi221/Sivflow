@@ -1,27 +1,23 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
-import { auth } from "@/services/firebase";
-
+import { GoogleCalendarSyncEngine } from "../googlecalendar-sync/GoogleCalendarSyncEngine";
+import { fetchCalendarList } from "./gcal.api";
 import {
-  requestCalendarAccessToken,
   refreshCalendarAccessToken,
+  requestCalendarAccessToken,
 } from "./gcal.oauth";
-
 import {
-  readToken,
-  writeToken,
-  readEmail,
-  writeEmail,
   readCalendarIds,
-  writeCalendarIds,
+  readEmail,
   readRefreshToken,
-  writeRefreshToken,
+  readToken,
   readWasConnected,
+  writeCalendarIds,
+  writeEmail,
+  writeRefreshToken,
+  writeToken,
   writeWasConnected,
 } from "./gcal.storage";
-
-import { fetchCalendarList } from "./gcal.api";
-
 import type {
   GCalSyncState,
   GoogleCalendarEvent,
@@ -29,7 +25,7 @@ import type {
   UseGoogleCalendarIntegrationOptions,
 } from "./gcalSync.types";
 
-import { GoogleCalendarSyncEngine } from "../googlecalendar-sync/GoogleCalendarSyncEngine";
+import { auth } from "@/services/firebase";
 
 // ─────────────────────────────────────
 // Events reducer
@@ -37,16 +33,16 @@ import { GoogleCalendarSyncEngine } from "../googlecalendar-sync/GoogleCalendarS
 
 type EventsAction =
   | {
-      type: "upsert";
-      event: GoogleCalendarEvent;
-    }
+    type: "upsert";
+    event: GoogleCalendarEvent;
+  }
   | {
-      type: "delete";
-      id: string;
-    }
+    type: "delete";
+    id: string;
+  }
   | {
-      type: "clear";
-    };
+    type: "clear";
+  };
 
 const reduceEvents = (
   state: GoogleCalendarEvent[],
@@ -197,8 +193,8 @@ export const useGoogleCalendarIntegration = ({
         restoredIds.length > 0
           ? restoredIds
           : nextCalendars
-              .filter((c: GoogleCalendarListItem) => c.selected || c.primary)
-              .map((c: GoogleCalendarListItem) => c.id);
+            .filter((c: GoogleCalendarListItem) => c.selected || c.primary)
+            .map((c: GoogleCalendarListItem) => c.id);
 
       setSelectedCalendarIds(new Set(ids));
 

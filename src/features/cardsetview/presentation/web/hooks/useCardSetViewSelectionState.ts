@@ -1,10 +1,10 @@
 import {
+  type SetStateAction,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type SetStateAction,
 } from "react";
 
 import {
@@ -14,6 +14,7 @@ import {
   resolveCardsForPager,
   toggleFlippedCardId,
 } from "@/features/cardsetview/domain/cardSetViewState";
+
 import { useCardEntity } from "@/hooks/card/useCardEntity";
 import {
   getCardSetViewFlippedCardIds,

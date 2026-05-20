@@ -1,19 +1,19 @@
-import type { SyncChange } from "@/services/interfaces/ISyncService";
 import {
-  getDoc,
-  getDocs,
   type DocumentData,
   type Firestore,
+  getDoc,
+  getDocs,
 } from "firebase/firestore";
 
-import {
-  COLLECTION_BY_TYPE,
-  sanitizeSyncDataFromCloud,
-  type CloudEntityType,
-  type PullableEntityType,
-} from "@/application/usecases/cloudSyncShared";
-
 import { getUserSettingsRef, queryEntityById } from "./cloudSyncFirestoreRefs";
+
+import {
+  type CloudEntityType,
+  COLLECTION_BY_TYPE,
+  type PullableEntityType,
+  sanitizeSyncDataFromCloud,
+} from "@/application/usecases/cloudSyncShared";
+import type { SyncChange } from "@/services/interfaces/ISyncService";
 
 type LookupContext = {
   firestore: Firestore;

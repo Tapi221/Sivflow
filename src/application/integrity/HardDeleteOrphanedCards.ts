@@ -1,13 +1,13 @@
 import { deleteDoc, doc } from "firebase/firestore";
 
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";
-import type { SyncError } from "@/types";
-import { cardDocPathSegments } from "@/services/firestorePaths";
-import { getLocalDb } from "@/services/localDB";
 import type {
   IntegrityIssue,
   IntegrityReport,
 } from "@/services/dataIntegrityTypes";
+import { cardDocPathSegments } from "@/services/firestorePaths";
+import { getLocalDb } from "@/services/localDB";
+import type { SyncError } from "@/types";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
 export interface HardDeleteOrphanedCardsResult {

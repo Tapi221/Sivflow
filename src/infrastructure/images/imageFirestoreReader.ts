@@ -1,13 +1,14 @@
-import { auth, requireFirestoreDb } from "@/infrastructure/firebase/client";
-import type { UploadedImage } from "@/types";
 import { doc, getDoc } from "firebase/firestore";
 
-import { imageDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
 import {
   createImageDocRef,
   isImageFirestoreDiagnosticsEnabled,
 } from "./imageFirestoreWriter";
 import { touchMigrateLegacyImageToUserScope } from "./imageLegacyTouchMigration";
+
+import { auth, requireFirestoreDb } from "@/infrastructure/firebase/client";
+import { imageDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
+import type { UploadedImage } from "@/types";
 
 export const getImageFromFirestore = async ({
   imageId,

@@ -1,3 +1,5 @@
+import React from "react";
+
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import {
   Dialog,
@@ -6,10 +8,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
+import { MathRenderer } from "./MathBlockContent";
+
 import { cn } from "@/lib/utils";
 import type { MathBlockData } from "@/types/domain/base";
-import React from "react";
-import { MathRenderer } from "./MathBlockContent";
 
 type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;
 

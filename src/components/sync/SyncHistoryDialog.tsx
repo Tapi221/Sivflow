@@ -1,20 +1,22 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback,useEffect, useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import {
-  Clock,
-  CheckCircle2 as CheckCircle,
-  AlertTriangle,
   AlertCircle as XCircle,
-  ChevronUp,
+  AlertTriangle,
+  CheckCircle2 as CheckCircle,
   ChevronDown,
+  ChevronUp,
+  Clock,
 } from "@/ui/icons";
+
 import { getLocalDb } from "@/services/localDB";
 import type { SyncHistory } from "@/types";
 

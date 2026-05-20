@@ -1,12 +1,13 @@
+import { bundleMediaInMfDeckCards } from "@/features/deckFile/application/mfDeckMediaBundler";
 import {
   MF_DECK_FORMAT,
   MF_DECK_VERSION,
   type MfDeckArchiveV1,
   type MfDeckCardV1,
-  type MfDeckIssue,
   MfDeckExportError,
+  type MfDeckIssue,
 } from "@/features/deckFile/domain/mfDeckTypes";
-import { bundleMediaInMfDeckCards } from "@/features/deckFile/application/mfDeckMediaBundler";
+
 import type { Card, CardBlock, CardSet } from "@/types";
 
 export type MfDeckTagLookup = ReadonlyMap<string, { name: string }>;

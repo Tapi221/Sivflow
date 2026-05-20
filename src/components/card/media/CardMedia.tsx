@@ -1,10 +1,10 @@
-import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
+
+import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
 import type { ImageGalleryItem } from "@/components/card/media/types";
 import { Button } from "@/components/ui/button";
-import { useAuthSession } from "@/contexts/AuthContext";
-import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
-import { resolveCardImageUrl } from "@/services/cardImageResolver";
 import {
   Copy,
   Download,
@@ -13,7 +13,10 @@ import {
   Play,
   Volume2,
 } from "@/ui/icons";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+
+import { useAuthSession } from "@/contexts/AuthContext";
+import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
+import { resolveCardImageUrl } from "@/services/cardImageResolver";
 import type { ResolvableImageRef } from "@/types/domain/assets";
 
 const IMAGE_BLOCK_INSET_PX = 4;

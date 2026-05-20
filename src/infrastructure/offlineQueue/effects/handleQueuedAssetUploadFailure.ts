@@ -1,11 +1,10 @@
-import { auth } from "@/infrastructure/firebase/client";
-import { getLocalDb } from "@/infrastructure/localdb/client";
-
 import {
   makeAssetRecord,
-  toAssetLikeRecord,
   type QueueItem,
+  toAssetLikeRecord,
 } from "@/application/usecases/persistentOfflineQueueModels";
+import { auth } from "@/infrastructure/firebase/client";
+import { getLocalDb } from "@/infrastructure/localdb/client";
 
 export const handleQueuedAssetUploadFailure = async (
   item: QueueItem,

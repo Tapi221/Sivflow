@@ -1,28 +1,29 @@
 import { ImageGallery } from "@/components/card/media/CardMedia";
 import MediaUploader from "@/components/card/media/MediaUploader";
 import type { ImageGalleryItem } from "@/components/card/media/types";
+
 import type { UploadedImage } from "@/types/domain/assets";
 
 type ImageBlockContentProps =
   | {
-      mode: "view";
-      urls: string[];
-      items?: ImageGalleryItem[];
-      onFullscreenChange?: (isFullscreen: boolean) => void;
-      displayMode?: "fixed" | "fluid";
-      zoom?: number;
-    }
+    mode: "view";
+    urls: string[];
+    items?: ImageGalleryItem[];
+    onFullscreenChange?: (isFullscreen: boolean) => void;
+    displayMode?: "fixed" | "fluid";
+    zoom?: number;
+  }
   | {
-      mode: "edit";
-      urls: UploadedImage[];
-      onChange: (data: UploadedImage[]) => void;
-      initialFile?: File;
-      onConsumeInitialFile?: () => void;
-      onFilesExcess?: (files: File[]) => void;
-      maxFiles?: number;
-      displayMode?: "fixed" | "fluid";
-      zoom?: number;
-    };
+    mode: "edit";
+    urls: UploadedImage[];
+    onChange: (data: UploadedImage[]) => void;
+    initialFile?: File;
+    onConsumeInitialFile?: () => void;
+    onFilesExcess?: (files: File[]) => void;
+    maxFiles?: number;
+    displayMode?: "fixed" | "fluid";
+    zoom?: number;
+  };
 
 export const ImageBlockContent = (props: ImageBlockContentProps) => {
   if (props.mode === "view") {

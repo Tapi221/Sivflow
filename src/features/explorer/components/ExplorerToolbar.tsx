@@ -1,13 +1,16 @@
 import {
-  Fragment,
+  type ButtonHTMLAttributes,
   forwardRef,
+  Fragment,
+  type ReactNode,
   useEffect,
   useMemo,
   useState,
-  type ButtonHTMLAttributes,
-  type ReactNode,
 } from "react";
 import { useNavigate } from "react-router-dom";
+
+import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
+import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
@@ -17,10 +20,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 
-import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
-import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
+import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 

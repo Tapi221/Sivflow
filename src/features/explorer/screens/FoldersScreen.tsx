@@ -6,10 +6,10 @@ import {
   useState,
 } from "react";
 
-import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
-import { notifySelectedFolderChanged } from "@/features/explorer/adapters/web/explorerSelectionNotifier";
+
 import { subscribeSectionListNavigation } from "@/features/explorer/adapters/web/explorerSectionListNavigation";
+import { notifySelectedFolderChanged } from "@/features/explorer/adapters/web/explorerSelectionNotifier";
 import type { FoldersRouteAdapter } from "@/features/explorer/adapters/web/useFoldersRouteAdapter";
 import { useWorkspaceScrollController } from "@/features/explorer/adapters/web/useWorkspaceScrollController";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
@@ -17,15 +17,18 @@ import { useExplorerController } from "@/features/explorer/controller/useExplore
 import { useExplorerBreadcrumbSync } from "@/features/explorer/hooks/useExplorerBreadcrumbSync";
 import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups";
 import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
-import { WorkspaceTabPanel } from "@/features/tab/TabPanel";
 import { ExplorerWorkspaceFrame } from "@/features/tab/ExplorerWorkspaceFrame";
-import type { WorkspaceEntityTab, WorkspaceTab } from "@/features/tab/Tab";
+import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import {
   resolveCardSetTabTitle,
   resolveCardTabTitle,
   resolveDocumentTabTitle,
 } from "@/features/tab/resolveTabTitle";
-import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
+import type { WorkspaceEntityTab, WorkspaceTab } from "@/features/tab/Tab";
+import { WorkspaceTabPanel } from "@/features/tab/TabPanel";
+
+import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
+
 import { useCardsRead } from "@/hooks/card/useCardsRead";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";

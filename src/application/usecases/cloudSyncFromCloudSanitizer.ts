@@ -1,9 +1,9 @@
-import { sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
-import { sanitizeForLog } from "@/utils/logSanitizer";
-
 import { stripCloudSyncLocalOnlyFields } from "./cloudSyncLocalFieldStripping";
 import { getCloudSyncSanitizerLogPayload } from "./cloudSyncSanitizerLogging";
 import { deepStripUndefined } from "./cloudSyncValueCleaning";
+
+import { sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
+import { sanitizeForLog } from "@/utils/logSanitizer";
 
 export const sanitizeSyncDataFromCloud = (
   type: string,
@@ -15,8 +15,8 @@ export const sanitizeSyncDataFromCloud = (
   const record =
     stripped && typeof stripped === "object"
       ? stripCloudSyncLocalOnlyFields(type, {
-          ...(stripped as Record<string, unknown>),
-        })
+        ...(stripped as Record<string, unknown>),
+      })
       : stripped;
 
   const sanitized = sanitizeBlobUrlsDeep(record);

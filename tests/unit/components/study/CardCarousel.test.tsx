@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import React from "react";
-import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
-import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
+import { createRoot } from "react-dom/client";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { Card } from "@/types";
 
 vi.mock("framer-motion", () => ({

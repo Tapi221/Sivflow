@@ -1,3 +1,23 @@
+import { nanoid } from "nanoid";
+
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
+
+import { CURRENT_TAG_STORE } from "./localdb/tagStoreNames";
+import type {
+  LocalDBTableMap,
+  SyncableEntityTable,
+  TagRecord,
+} from "./localdb/types";
+
+import {
+  createDeleteQueueItem,
+  createUpsertQueueItem,
+} from "@/application/usecases/syncQueueItemFactory";
+import type {
+  DeleteEntity,
+  UpsertEntity,
+} from "@/application/usecases/syncQueuePayloadGuards";
 import type {
   AssetRecord,
   Card,
@@ -14,26 +34,9 @@ import type {
   UserSettings,
   UserStats,
 } from "@/types";
-import {
-  createDeleteQueueItem,
-  createUpsertQueueItem,
-} from "@/application/usecases/syncQueueItemFactory";
-import type {
-  DeleteEntity,
-  UpsertEntity,
-} from "@/application/usecases/syncQueuePayloadGuards";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
-import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
-import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 import { toDateOrNull, toMillis } from "@/utils/toMillis";
-import { nanoid } from "nanoid";
-import type {
-  LocalDBTableMap,
-  SyncableEntityTable,
-  TagRecord,
-} from "./localdb/types";
-import { CURRENT_TAG_STORE } from "./localdb/tagStoreNames";
 
 type KeyPath = string | readonly string[];
 type Predicate<T> = (value: T) => boolean;

@@ -6,22 +6,22 @@ import React, {
   useRef,
   useState,
 } from "react";
-import type { PdfPageLayoutMode } from "@/types";
-import { cn } from "@/lib/utils";
-import { PdfPage } from "./PdfPage";
+
 import {
   PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT,
   PDF_PAGE_PREFETCH_EXTRA_PAGES,
   PDF_PAGE_PREFETCH_OVERSCAN_VIEWPORTS,
   PDF_PAGE_RENDER_OVERSCAN_VIEWPORTS,
 } from "@/features/pdf";
+
 import { usePdfCurrentPage } from "./hooks/usePdfCurrentPage";
 import {
-  usePdfDocument,
   type PdfDocumentController,
+  usePdfDocument,
 } from "./hooks/usePdfDocument";
-import { usePdfZoom } from "./hooks/usePdfZoom";
 import { usePdfSearch } from "./hooks/usePdfSearch";
+import { usePdfZoom } from "./hooks/usePdfZoom";
+import { PdfPage } from "./PdfPage";
 import type {
   PageSize,
   PdfViewerHandle,
@@ -29,6 +29,9 @@ import type {
   PdfViewerSourceMeta,
   SourceLoadErrorKind,
 } from "./pdfViewer.types";
+
+import { cn } from "@/lib/utils";
+import type { PdfPageLayoutMode } from "@/types";
 
 export type { PdfViewerHandle } from "./pdfViewer.types";
 

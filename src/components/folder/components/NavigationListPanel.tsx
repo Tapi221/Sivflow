@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 
 import { FilterPanelSurface } from "@/components/panel/FilterPanelSurface";
-import { cn } from "@/lib/utils";
 
 import {
   RootFolderPanelList,
   type RootFolderPanelListProps,
 } from "./RootFolderPanelList";
+
+import { cn } from "@/lib/utils";
 
 type NavigationListPanelProps = RootFolderPanelListProps & {
   title?: string;

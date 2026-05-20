@@ -1,15 +1,17 @@
 import {
+  type ComponentProps,
   useCallback,
   useEffect,
   useRef,
   useState,
-  type ComponentProps,
 } from "react";
+
+import { Flashcard } from "@/components/card/frame/Flashcard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Flashcard } from "@/components/card/frame/Flashcard";
-import type { Card } from "@/types";
 import { Volume2 } from "@/ui/icons";
+
+import type { Card } from "@/types";
 import { toIsoStringOrNull } from "@/utils/toMillis";
 
 type FlashcardCardLike = ComponentProps<typeof Flashcard>["card"];

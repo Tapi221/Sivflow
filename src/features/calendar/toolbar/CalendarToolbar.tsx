@@ -1,18 +1,18 @@
-import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
-import { useCalendarToolbar } from "./hooks/useCalendarToolbar";
 import type { CalendarWorkspaceToolbarProps } from "../calendarPane.types";
-
 import {
   CalendarIcon,
-  TimelineToolbarIcon,
-  SortToolbarIcon,
   FieldsToolbarIcon,
-  TaskIcon,
-  SearchIcon,
   FilterIcon,
+  SearchIcon,
+  SortToolbarIcon,
+  TaskIcon,
+  TimelineToolbarIcon,
 } from "../ui/calendar.icons";
+import { useCalendarToolbar } from "./hooks/useCalendarToolbar";
+
+import { cn } from "@/lib/utils";
 
 const TAB_ICON_MAP = {
   calendar: CalendarIcon,

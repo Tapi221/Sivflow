@@ -9,11 +9,12 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GoogleCalendarSyncEngine } from "@/features/calendar/googlecalendar-integration/GoogleCalendarSyncEngine";
+
 import type {
   GCalSyncEngineOptions,
   GCalSyncStartContext,
 } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import { GoogleCalendarSyncEngine } from "@/features/calendar/googlecalendar-integration/GoogleCalendarSyncEngine";
 import type { GoogleCalendarListItem } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
 
 // ─────────────────────────────────────────────────────────────

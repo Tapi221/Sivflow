@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
-import { BlockRenderer } from "@/components/card/blocks/render/BlockRenderer";
-import { MathBlockContent } from "@/components/card/blocks/math/MathBlockContent";
-import type { CardBlock } from "@/types/domain/card";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+
+import { MathBlockContent } from "@/components/card/blocks/math/MathBlockContent";
+import { BlockRenderer } from "@/components/card/blocks/render/BlockRenderer";
+import type { CardBlock } from "@/types/domain/card";
 
 describe("Math block consistency", () => {
   it("viewer and editor-preview path both use mathBlockRoot frame", () => {

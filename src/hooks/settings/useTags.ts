@@ -1,15 +1,19 @@
 import { useMemo } from "react";
+
 import { useLiveQuery } from "dexie-react-hooks";
-import { getLocalDb } from "@/services/localDB";
-import { useAuthSession } from "@/contexts/AuthContext";
-import type { TagRecord } from "@/services/localdb/types";
-import { useUserSettings } from "./useUserSettings";
+
 import {
   getTagColorClassName as resolveTagColorClassName,
   getTagColorKey as normalizeTagColorKey,
   TAG_COLOR_KEYS,
   type TagColorKey,
 } from "@/features/tag/tagColor";
+
+import { useUserSettings } from "./useUserSettings";
+
+import { useAuthSession } from "@/contexts/AuthContext";
+import { getLocalDb } from "@/services/localDB";
+import type { TagRecord } from "@/services/localdb/types";
 
 export type TagCategory = string;
 export type Tag = TagRecord;

@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { acquirePdfDocumentSession } from "@/features/pdf/pdfDocumentSessionRegistry";
 import { createPdfPageResourceCache } from "@/features/pdf/pdfPageResourceCache";
-import { getPdfOcrPageRecord } from "@/lib/pdf/pdfOcrStore";
-import {
-  buildPdfTextSelection,
-  normalizePdfExtractedText,
-  splitPdfTextIntoLines,
-} from "@/lib/pdf/pdfTextExtraction";
 import type {
   PageSize,
   PdfJsDestinationReference,
@@ -27,6 +22,13 @@ import {
   isPdfAbortError,
   isPdfTextItem,
 } from "@/features/pdf/pdfViewer.types";
+
+import { getPdfOcrPageRecord } from "@/lib/pdf/pdfOcrStore";
+import {
+  buildPdfTextSelection,
+  normalizePdfExtractedText,
+  splitPdfTextIntoLines,
+} from "@/lib/pdf/pdfTextExtraction";
 
 interface UsePdfDocumentOptions {
   docId?: string;

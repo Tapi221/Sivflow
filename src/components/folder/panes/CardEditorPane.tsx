@@ -7,33 +7,41 @@ import React, {
   useState,
 } from "react";
 
-import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
-import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
 import {
   CANONICAL_CARD_WIDTH,
   CARD_ROW_PX,
   layoutRowsToCardHeightPx,
 } from "@constants/shared/flashcard";
+
+import { normalizeLayoutRows } from "@/domain/card/extraRows";
+
+import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
+import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
+import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
+
+import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
+import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
 import {
   CardEditorLoadingState,
   NewCardIdleState,
 } from "@/components/card/editor/CardEditorPaneStates";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
-import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
 import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";
+import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
 import {
   buildCardChromeClassName,
   buildCardShellClassName,
-  resolveCardPresentationState,
   type CardPresentationContext,
   type CardPresentationContextInput,
   type CardPresentationState,
+  resolveCardPresentationState,
 } from "@/components/card/presentation/cardPresentation";
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
-import { useCardSyncStatusReporter } from "@/components/card/shell/useCardSyncStatusReporter";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
+import { useCardSyncStatusReporter } from "@/components/card/shell/useCardSyncStatusReporter";
 import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
 import { CardEditorPaneReadonlySurface } from "@/components/folder/panes/CardEditorPaneReadonlySurface";
 import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
@@ -42,15 +50,11 @@ import {
   CARD_PANE_WIDTH_STEP_PX,
   useCardEditorPaneWidth,
 } from "@/components/folder/panes/useCardEditorPaneWidth";
-import { normalizeLayoutRows } from "@/domain/card/extraRows";
-import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
-import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
-import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
+import { X } from "@/ui/icons";
+
 import { cn } from "@/lib/utils";
 import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { X } from "@/ui/icons";
 import { toMillisOrNull } from "@/utils/toMillis";
 
 type CardEditorPaneSettings = {
@@ -739,20 +743,20 @@ export const CardEditorPane = ({
 
   const widthControlProps = showWidthControl
     ? {
-        modeLabel: isEditing ? "編集幅" : "閲覧幅",
-        value: activePaneWidthPx,
-        min: activePaneMinWidthPx,
-        max: activePaneMaxWidthPx,
-        defaultValue: activePaneDisplayedDefaultWidthPx,
-        onPreviewChange: (value: number) =>
-          previewPaneWidth(activePaneModeValue, value),
-        onCommit: (value: number) => {
-          void persistPaneWidth(activePaneModeValue, value);
-        },
-        onStepDown: () => stepPaneWidth(-CARD_PANE_WIDTH_STEP_PX),
-        onStepUp: () => stepPaneWidth(CARD_PANE_WIDTH_STEP_PX),
-        onReset: resetActivePaneWidth,
-      }
+      modeLabel: isEditing ? "編集幅" : "閲覧幅",
+      value: activePaneWidthPx,
+      min: activePaneMinWidthPx,
+      max: activePaneMaxWidthPx,
+      defaultValue: activePaneDisplayedDefaultWidthPx,
+      onPreviewChange: (value: number) =>
+        previewPaneWidth(activePaneModeValue, value),
+      onCommit: (value: number) => {
+        void persistPaneWidth(activePaneModeValue, value);
+      },
+      onStepDown: () => stepPaneWidth(-CARD_PANE_WIDTH_STEP_PX),
+      onStepUp: () => stepPaneWidth(CARD_PANE_WIDTH_STEP_PX),
+      onReset: resetActivePaneWidth,
+    }
     : null;
 
   const metaPanelNode = hideMetaPanel ? null : (

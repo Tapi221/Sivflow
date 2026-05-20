@@ -1,15 +1,15 @@
+import { groupParsedRowsToCards } from "@/features/import/application/groupParsedRowsToCards";
 import {
-  isImportBlockType,
-  isImportSide,
   type ImportBlock,
   type ImportColumnKey,
   type ImportIssue,
   type ImportParseResult,
   type ImportSheetName,
   type ImportSide,
+  isImportBlockType,
+  isImportSide,
   type ParsedImportRow,
 } from "@/features/import/domain/importTypes";
-import { groupParsedRowsToCards } from "@/features/import/application/groupParsedRowsToCards";
 
 type HeaderMap = Partial<Record<ImportColumnKey, number>>;
 type RowCellMap = Partial<Record<ImportColumnKey, string>>;
@@ -229,7 +229,7 @@ const buildRowBlock = ({
           rowNumber,
           columnKey: "side",
           message:
-            'side は "front" | "back" のいずれかで指定してください。未指定なら front 扱いです。',
+            "side は \"front\" | \"back\" のいずれかで指定してください。未指定なら front 扱いです。",
         }),
       ],
     };
@@ -266,7 +266,7 @@ const buildRowBlock = ({
           rowNumber,
           columnKey: "type",
           message:
-            'type は "text" | "markdown" | "math" | "code" | "image" のいずれかで指定してください。',
+            "type は \"text\" | \"markdown\" | \"math\" | \"code\" | \"image\" のいずれかで指定してください。",
         }),
       ],
     };

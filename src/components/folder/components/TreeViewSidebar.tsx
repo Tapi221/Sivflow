@@ -1,5 +1,6 @@
-import { cn } from "@/lib/utils";
 import React from "react";
+
+import { cn } from "@/lib/utils";
 
 interface TreeViewSidebarProps {
   sidebarRef: React.RefObject<HTMLDivElement | null>;
@@ -119,10 +120,10 @@ export const TreeViewSidebar = ({
           integratedChrome
             ? "bg-[rgba(255,255,255,0.92)]"
             : [
-                "md:rounded-[14px] md:border md:border-[#dddcd5]",
-                "md:bg-[rgba(255,255,255,0.92)]",
-                "md:shadow-[0_16px_36px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.04)]",
-              ],
+              "md:rounded-[14px] md:border md:border-[#dddcd5]",
+              "md:bg-[rgba(255,255,255,0.92)]",
+              "md:shadow-[0_16px_36px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.04)]",
+            ],
         )}
       >
         <div

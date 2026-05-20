@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
 } from "react";
+
 import { SIDEBAR_WIDTH_LIMITS } from "@constants/web/app";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 

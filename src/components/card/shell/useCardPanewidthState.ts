@@ -1,14 +1,14 @@
 import {
+  type DependencyList,
   useCallback,
   useEffect,
   useRef,
   useState,
-  type DependencyList,
 } from "react";
 
 import {
-  clampPaneWidthPx,
   type CardPaneMode,
+  clampPaneWidthPx,
 } from "@constants/shared/flashcard";
 
 type PaneWidthMap<T> = {
@@ -127,26 +127,26 @@ export const useCardPaneWidthState = ({
   const availableViewportWidthPx =
     contentViewportWidth > 0
       ? Math.max(
-          activePaneMinWidthPx,
-          contentViewportWidth - reservedViewportInsetPx,
-        )
+        activePaneMinWidthPx,
+        contentViewportWidth - reservedViewportInsetPx,
+      )
       : 0;
 
   const activePaneMaxWidthPx =
     availableViewportWidthPx > 0
       ? allowStoredWidthBeyondViewport
         ? Math.max(
-            activePaneMinWidthPx,
-            availableViewportWidthPx,
-            activePaneStoredWidthPx,
-            activePaneDefaultWidthPx,
-          )
-        : Math.max(activePaneMinWidthPx, availableViewportWidthPx)
-      : Math.max(
           activePaneMinWidthPx,
+          availableViewportWidthPx,
           activePaneStoredWidthPx,
           activePaneDefaultWidthPx,
-        );
+        )
+        : Math.max(activePaneMinWidthPx, availableViewportWidthPx)
+      : Math.max(
+        activePaneMinWidthPx,
+        activePaneStoredWidthPx,
+        activePaneDefaultWidthPx,
+      );
 
   const activePaneWidthPx = clampPaneWidthPx(
     activePaneStoredWidthPx,

@@ -1,4 +1,8 @@
 import type {
+  DeleteEntity,
+  UpsertEntity,
+} from "@/application/usecases/syncQueuePayloadGuards";
+import type {
   AssetRecord,
   Card,
   CardSet,
@@ -13,10 +17,6 @@ import type {
   UserSettings,
   UserStats,
 } from "@/types";
-import type {
-  DeleteEntity,
-  UpsertEntity,
-} from "@/application/usecases/syncQueuePayloadGuards";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 
 export type CardRelation = {

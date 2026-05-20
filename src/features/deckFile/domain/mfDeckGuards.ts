@@ -1,3 +1,4 @@
+import { isMfDeckMediaPath } from "@/features/deckFile/domain/mfDeckMedia";
 import {
   MF_DECK_FORMAT,
   MF_DECK_MAX_BLOCKS_PER_FACE,
@@ -12,7 +13,6 @@ import {
   type MfDeckMediaManifestV1,
   type MfDeckValidationResult,
 } from "@/features/deckFile/domain/mfDeckTypes";
-import { isMfDeckMediaPath } from "@/features/deckFile/domain/mfDeckMedia";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);

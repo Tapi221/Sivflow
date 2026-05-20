@@ -1,8 +1,11 @@
+import React from "react";
+
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
+
+import { RootFolderPanelRow } from "./RootFolderPanelRow";
+
 import { cn } from "@/lib/utils";
 import type { SelectedExplorerItem } from "@/types";
-import React from "react";
-import { RootFolderPanelRow } from "./RootFolderPanelRow";
 
 type RenameTarget = {
   id: string;
@@ -11,23 +14,23 @@ type RenameTarget = {
 
 export type NavigationListEntry =
   | {
-      kind: "folder";
-      id: string;
-      name: string;
-      folder: FolderTreeNode;
-      contentCount?: number;
-    }
+    kind: "folder";
+    id: string;
+    name: string;
+    folder: FolderTreeNode;
+    contentCount?: number;
+  }
   | {
-      kind: "cardSet";
-      id: string;
-      name: string;
-      contentCount?: number;
-    }
+    kind: "cardSet";
+    id: string;
+    name: string;
+    contentCount?: number;
+  }
   | {
-      kind: "card" | "document";
-      id: string;
-      name: string;
-    };
+    kind: "card" | "document";
+    id: string;
+    name: string;
+  };
 
 export interface RootFolderPanelListProps {
   entries: NavigationListEntry[];

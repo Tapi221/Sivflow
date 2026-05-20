@@ -1,13 +1,16 @@
-import type { BlobUrl } from "@/types/core/branded";
-import { cn } from "@/lib/utils";
-import type { PdfViewerState } from "@/types";
-import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 import { useEffect } from "react";
+
+import * as C from "@/features/pdf/pdf.constants.desktop";
+
+import { usePdfWorkspace } from "./hooks/usePdfWorkspace";
 import { PdfOverlayToolbar } from "./PdfToolbar";
 import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
-import * as C from "@/features/pdf/pdf.constants.desktop";
-import { usePdfWorkspace } from "./hooks/usePdfWorkspace";
+
+import { cn } from "@/lib/utils";
+import type { PdfViewerState } from "@/types";
+import type { BlobUrl } from "@/types/core/branded";
+import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 
 interface PdfPaneDoc {
   id: string;

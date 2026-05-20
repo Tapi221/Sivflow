@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it } from "vitest";
+
 import {
   buildCardSetById,
   didUseLegacyFolderFallback,
@@ -9,7 +11,6 @@ import {
   resolveCardFolderIdStrict,
 } from "@/domain/card/selectors/cardFolder";
 import type { Card, CardSet } from "@/types";
-import { beforeEach, describe, expect, it } from "vitest";
 
 type CardLike = Pick<Card, "id" | "cardSetId" | "folderId">;
 type CardSetLike = Pick<CardSet, "id" | "folderId">;

@@ -1,13 +1,13 @@
+import {
+  createQueueItemFromSyncTask,
+  queueItemToSyncTask,
+} from "@/application/usecases/syncQueueItemFactory";
 import type {
   BatchConstraint,
   IQueueManager,
   SyncTask,
 } from "@/services/interfaces/ISyncService";
 import type { LocalDBLike } from "@/services/localDB";
-import {
-  createQueueItemFromSyncTask,
-  queueItemToSyncTask,
-} from "@/application/usecases/syncQueueItemFactory";
 import type { SyncQueueItem } from "@/types/domain/sync";
 
 const PRIORITY_ORDER: Record<SyncTask["priority"], number> = {

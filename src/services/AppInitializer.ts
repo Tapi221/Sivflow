@@ -1,5 +1,12 @@
+import {
+  notifyLocalDbFallbackMode,
+  notifyRebuildLoopDetected,
+  notifyStartupDegraded,
+} from "./appInitStartupNotifier";
 import { contextService } from "./ContextService";
 import { IndexedDBMetadataService } from "./IndexedDBMetadataService";
+import { rebuildIndexedDb } from "./indexedDbRebuildCoordinator";
+import { ensureLegacyCardsBackfilled } from "./legacyCardSetMigrationBackfill";
 import {
   getLocalDb,
   getLocalDBRuntimeStatus,
@@ -7,13 +14,6 @@ import {
 } from "./localDB";
 // NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 import { warnOncePerSession } from "./localDBRuntimeState";
-import {
-  notifyLocalDbFallbackMode,
-  notifyRebuildLoopDetected,
-  notifyStartupDegraded,
-} from "./appInitStartupNotifier";
-import { rebuildIndexedDb } from "./indexedDbRebuildCoordinator";
-import { ensureLegacyCardsBackfilled } from "./legacyCardSetMigrationBackfill";
 
 /**
  * アプリ起動時の初期化処理

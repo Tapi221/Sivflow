@@ -1,5 +1,5 @@
-import LanguagePane from "./panes/LanguagePane";
 import { SettingSection } from "./hooks/useSettingDialog";
+import LanguagePane from "./panes/LanguagePane";
 
 type Props = {
   selected: SettingSection;

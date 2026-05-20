@@ -1,13 +1,13 @@
+import type { PdfOcrPageKind } from "@/lib/pdf/pdfOcrPageClassification";
 import {
   buildPdfTextSelection,
   normalizePdfExtractedText,
-  splitPdfTextIntoLines,
   type PdfOcrLineRecord,
   type PdfOcrRecordStatus,
   type PdfOcrTextSource,
+  splitPdfTextIntoLines,
 } from "@/lib/pdf/pdfTextExtraction";
 import type { PdfOcrPreprocessMode } from "@/lib/pdf/renderPdfPageForOcr";
-import type { PdfOcrPageKind } from "@/lib/pdf/pdfOcrPageClassification";
 
 export interface PdfOcrAttemptRecord {
   attemptIndex: number;
@@ -231,14 +231,14 @@ const normalizeStoredPdfOcrPageRecord = (
       : "native";
   const lines = Array.isArray(candidate.lines)
     ? candidate.lines.filter(isPdfOcrLineRecord).map((line, index) => ({
-        ...line,
-        order: index,
-      }))
+      ...line,
+      order: index,
+    }))
     : splitPdfTextIntoLines(finalText).map((text, index) => ({
-        order: index,
-        text,
-        origin: normalizedSource === "hybrid" ? "native" : normalizedSource,
-      }));
+      order: index,
+      text,
+      origin: normalizedSource === "hybrid" ? "native" : normalizedSource,
+    }));
 
   const fallbackSelection = buildPdfTextSelection({
     nativeText,

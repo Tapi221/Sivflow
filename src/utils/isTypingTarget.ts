@@ -17,7 +17,7 @@ export const isTypingTarget = (target: EventTarget | null) => {
   const role = target.getAttribute("role");
   if (role === "textbox" || role === "combobox") return true;
 
-  if (target.closest('[data-prevent-hotkeys="true"]')) return true;
+  if (target.closest("[data-prevent-hotkeys=\"true\"]")) return true;
 
   return false;
 };

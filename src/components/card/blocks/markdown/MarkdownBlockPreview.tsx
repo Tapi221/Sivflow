@@ -1,7 +1,10 @@
-import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
-import { cn } from "@/lib/utils";
 import React from "react";
+
+import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
+
 import { MarkdownBlockDisplay } from "./MarkdownBlockDisplay";
+
+import { cn } from "@/lib/utils";
 
 interface MarkdownBlockViewProps {
   md: string;

@@ -1,4 +1,5 @@
 import * as C from "@/features/calendar/calendar.constants.desktop";
+
 import type { CalendarViewMode } from "../calendarPane.types";
 
 export const useCalendarLayout = ({
@@ -22,9 +23,9 @@ export const useCalendarLayout = ({
   const calendarDayColumnWidth =
     viewportWidth > C.TIME_COLUMN_WIDTH
       ? Math.max(
-          1,
-          (viewportWidth - C.TIME_COLUMN_WIDTH) / Math.max(1, viewportDayCount),
-        )
+        1,
+        (viewportWidth - C.TIME_COLUMN_WIDTH) / Math.max(1, viewportDayCount),
+      )
       : C.DAY_COLUMN_MIN_WIDTH;
 
   const renderDayCount =

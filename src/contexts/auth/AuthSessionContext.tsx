@@ -1,17 +1,19 @@
 import {
   createContext,
+  type ReactNode,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
-import { type User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
+
+import { onAuthStateChanged,type User as FirebaseUser } from "firebase/auth";
+
+import { bootstrapUser } from "@/hooks/bootstrap/useUserBootstrap";
 import { auth } from "@/services/firebase";
 import { initializeDB, resetLocalDBForLogout } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-import { bootstrapUser } from "@/hooks/bootstrap/useUserBootstrap";
 
 interface AuthSessionContextType {
   currentUser: FirebaseUser | null;

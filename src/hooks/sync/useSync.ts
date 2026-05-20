@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { SyncServiceFactory } from "@/services/SyncServiceFactory";
+
 import { useAuthSession } from "@/contexts/AuthContext";
 import type { ISyncService } from "@/services/interfaces/ISyncService";
+import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 
 export const useSync = () => {
   const { currentUser } = useAuthSession();

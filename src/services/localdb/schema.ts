@@ -1,5 +1,6 @@
-import type { LocalDB } from "./LocalDB";
 import { getTagColorKey } from "@/features/tag/tagColor";
+
+import type { LocalDB } from "./LocalDB";
 
 export const defineSchema = (db: LocalDB): void => {
   db.version(1).stores({
@@ -583,14 +584,14 @@ export const defineSchema = (db: LocalDB): void => {
 
         const existingTagIds = Array.isArray(c.tagIds)
           ? (c.tagIds as unknown[]).filter(
-              (x): x is string => typeof x === "string",
-            )
+            (x): x is string => typeof x === "string",
+          )
           : [];
 
         const nameTags = Array.isArray(c.tags)
           ? (c.tags as unknown[]).filter(
-              (x): x is string => typeof x === "string",
-            )
+            (x): x is string => typeof x === "string",
+          )
           : [];
 
         if (nameTags.length === 0) return; // 処理不要
@@ -1185,14 +1186,14 @@ export const defineSchema = (db: LocalDB): void => {
           sameFolderNonMigrated.length === 1
             ? sameFolderNonMigrated[0]
             : [...migratedSets].sort((a, b) => {
-                const orderA = Number.isFinite(a.orderIndex)
-                  ? Number(a.orderIndex)
-                  : 0;
-                const orderB = Number.isFinite(b.orderIndex)
-                  ? Number(b.orderIndex)
-                  : 0;
-                return orderA - orderB;
-              })[0];
+              const orderA = Number.isFinite(a.orderIndex)
+                ? Number(a.orderIndex)
+                : 0;
+              const orderB = Number.isFinite(b.orderIndex)
+                ? Number(b.orderIndex)
+                : 0;
+              return orderA - orderB;
+            })[0];
 
         const targetId = targetSet.id;
         const sourceSets = migratedSets.filter((set) => set.id !== targetId);
@@ -1407,9 +1408,9 @@ export const defineSchema = (db: LocalDB): void => {
             ? activeNonMigrated[0]
             : activeNonMigrated.length > 1
               ? [...activeNonMigrated].sort(
-                  (a, b) =>
-                    getOrderValue(a.orderIndex) - getOrderValue(b.orderIndex),
-                )[0]
+                (a, b) =>
+                  getOrderValue(a.orderIndex) - getOrderValue(b.orderIndex),
+              )[0]
               : sortedByOrder[0];
 
         if (!targetSet?.id) continue;
@@ -1676,28 +1677,28 @@ export const defineSchema = (db: LocalDB): void => {
       const sanitizeImages = (images: unknown) =>
         Array.isArray(images)
           ? images.map((image) => {
-              if (!image || typeof image !== "object") return image;
-              const record = image as Record<string, unknown>;
-              const assetId = record.assetId ?? record.id ?? null;
-              const remoteUrl =
-                typeof record.remoteUrl === "string" &&
+            if (!image || typeof image !== "object") return image;
+            const record = image as Record<string, unknown>;
+            const assetId = record.assetId ?? record.id ?? null;
+            const remoteUrl =
+              typeof record.remoteUrl === "string" &&
                 record.remoteUrl.startsWith("http")
-                  ? record.remoteUrl
-                  : null;
-              return {
-                id: record.id ?? assetId,
-                assetId,
-                localFileId: record.localFileId ?? assetId,
-                remoteUrl,
-                storagePath: record.storagePath ?? null,
-                status: record.status ?? (remoteUrl ? "ready" : "uploading"),
-                error: record.error ?? undefined,
-                scale: record.scale ?? 1,
-                x: record.x ?? 0,
-                naturalW: record.naturalW ?? null,
-                naturalH: record.naturalH ?? null,
-              };
-            })
+                ? record.remoteUrl
+                : null;
+            return {
+              id: record.id ?? assetId,
+              assetId,
+              localFileId: record.localFileId ?? assetId,
+              remoteUrl,
+              storagePath: record.storagePath ?? null,
+              status: record.status ?? (remoteUrl ? "ready" : "uploading"),
+              error: record.error ?? undefined,
+              scale: record.scale ?? 1,
+              x: record.x ?? 0,
+              naturalW: record.naturalW ?? null,
+              naturalH: record.naturalH ?? null,
+            };
+          })
           : [];
 
       const normalizeBlocks = (blocks: unknown) => {

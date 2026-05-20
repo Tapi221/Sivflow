@@ -1,10 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect,it } from "vitest";
+
+import type { UploadedImage } from "@/types";
 import {
   assertImageInvariant,
   assertNoBase64InImage,
   ImageInvariantViolation,
 } from "@/utils/imageAssertions";
-import type { UploadedImage } from "@/types";
 
 describe("Image Invariants", () => {
   describe("assertNoBase64InImage", () => {

@@ -1,21 +1,25 @@
 import { useEffect } from "react";
-import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
-import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
+
+import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
+
 import { ExportMfCardButton } from "@/features/cardFile/presentation/web/ExportMfCardButton";
-import { ExportMfDeckButton } from "@/features/deckFile/presentation/web/ExportMfDeckButton";
+import { dispatchCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
+import type { CardSetViewContentProps } from "@/features/cardsetview/presentation/web/ui/components/cardSetViewContentProps";
 import { CardSetViewDesktopContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewDesktopContent";
 import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMetaPanel";
 import { CardSetViewMobileContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMobileContent";
 import { CardViewCompactToolbar } from "@/features/cardsetview/presentation/web/ui/components/CardViewCompactToolbar";
-import type { CardSetViewContentProps } from "@/features/cardsetview/presentation/web/ui/components/cardSetViewContentProps";
-import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
-import { dispatchCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
+import { ExportMfDeckButton } from "@/features/deckFile/presentation/web/ExportMfDeckButton";
+
+import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
+import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
+
+import { useTags } from "@/hooks/settings/useTags";
+import { cn } from "@/lib/utils";
 import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
-import { useTags } from "@/hooks/settings/useTags";
-import { cn } from "@/lib/utils";
 
 const CARD_SET_VIEW_CONTENT_COMPONENTS = {
   desktop: CardSetViewDesktopContent,
@@ -76,10 +80,10 @@ export const CardSetViewScreen = () => {
   const indexNavigator =
     state.cardsForPager.length > 0
       ? {
-          current: state.safeCurrentIndex + 1,
-          total: state.cardsForPager.length,
-          onCommit: handleJumpToCard,
-        }
+        current: state.safeCurrentIndex + 1,
+        total: state.cardsForPager.length,
+        onCommit: handleJumpToCard,
+      }
       : null;
 
   const compactToolbar = (
@@ -93,12 +97,12 @@ export const CardSetViewScreen = () => {
       zoom={
         topLeftZoomControl
           ? {
-              value: topLeftZoomControl.value,
-              min: topLeftZoomControl.min,
-              max: topLeftZoomControl.max,
-              step: topLeftZoomControl.step,
-              onChange: topLeftZoomControl.onChange,
-            }
+            value: topLeftZoomControl.value,
+            min: topLeftZoomControl.min,
+            max: topLeftZoomControl.max,
+            step: topLeftZoomControl.step,
+            onChange: topLeftZoomControl.onChange,
+          }
           : null
       }
     />

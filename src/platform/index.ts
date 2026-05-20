@@ -1,7 +1,8 @@
 import { desktopPlatform } from "./desktop";
 import { hasDesktopBridge } from "./runtime";
-import type { PlatformApi } from "@/types/desktop-api";
 import { webPlatform } from "./web";
+
+import type { PlatformApi } from "@/types/desktop-api";
 
 export const platform: PlatformApi = hasDesktopBridge()
   ? desktopPlatform

@@ -1,9 +1,9 @@
-import { processPersistentOfflineQueue } from "@/application/usecases/processPersistentOfflineQueue";
 import {
-  createAssetQueueImage,
   type AssetUploadRequest,
+  createAssetQueueImage,
   type QueueItem,
 } from "@/application/usecases/persistentOfflineQueueModels";
+import { processPersistentOfflineQueue } from "@/application/usecases/processPersistentOfflineQueue";
 import { IndexedDbPersistentOfflineQueueStore } from "@/infrastructure/offlineQueue/IndexedDbPersistentOfflineQueueStore";
 import {
   handleQueuedUploadPermanentFailure,

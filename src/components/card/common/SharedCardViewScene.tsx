@@ -1,7 +1,9 @@
+import React from "react";
+
 import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
 import { filterRenderableCardBlocks } from "@/components/card/blocks/shared/isRenderableCardBlock";
 import { useViewerSceneProps } from "@/components/card/blocks/shared/useViewerSceneProps";
-import React from "react";
+
 import type { SharedCardContentViewProps } from "./SharedCardContent.types";
 
 export const SharedCardViewScene = ({

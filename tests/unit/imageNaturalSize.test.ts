@@ -1,5 +1,6 @@
-import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize";
 
 type MockImageOptions = {
   naturalWidth?: number;

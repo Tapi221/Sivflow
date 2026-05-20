@@ -1,16 +1,19 @@
 import React from "react";
-import { cn } from "@/lib/utils";
-import { ScaleToFitFrame } from "@/components/card/frame/ScaleToFitFrame";
-import { CardShell } from "@/components/card/frame/CardShell";
-import { CardSurface } from "@/components/card/frame/CardSurface";
-import type { CssVars } from "@/types/style";
+
 import {
   CARD_BASE_WIDTH,
   CARD_DISPLAY_SCALE,
-  CARD_RULED_OFFSET_BOTTOM_PX,
   CARD_ROW_PX,
+  CARD_RULED_OFFSET_BOTTOM_PX,
   CARD_RULED_OFFSET_TOP_PX,
 } from "@constants/shared/flashcard";
+
+import { CardShell } from "@/components/card/frame/CardShell";
+import { CardSurface } from "@/components/card/frame/CardSurface";
+import { ScaleToFitFrame } from "@/components/card/frame/ScaleToFitFrame";
+
+import { cn } from "@/lib/utils";
+import type { CssVars } from "@/types/style";
 
 type CardShellProps = React.ComponentProps<typeof CardShell>;
 
@@ -108,15 +111,15 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
               ...(style as React.CSSProperties | undefined),
               ...(stretchWidth
                 ? {
-                    width: "100%",
-                    maxWidth: "100%",
-                    minWidth: 0,
-                  }
+                  width: "100%",
+                  maxWidth: "100%",
+                  minWidth: 0,
+                }
                 : {}),
               ...(fitHeight
                 ? {
-                    height: "100%",
-                  }
+                  height: "100%",
+                }
                 : {}),
               "--card-base-width": `${Math.max(1, baseWidth)}px`,
             };

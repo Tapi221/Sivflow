@@ -1,5 +1,5 @@
 import React from "react";
-import { resolveInkDocument } from "@/components/ink/inkStorage";
+
 import { resolveSideBlocks } from "@/components/card/frame/flashcardBlocks";
 import {
   type FlashcardCardLike,
@@ -21,6 +21,8 @@ import {
   resolveQuestionCode,
   resolveQuestionText,
 } from "@/components/card/frame/flashcardDerived";
+import { resolveInkDocument } from "@/components/ink/inkStorage";
+
 import type { CardBlock } from "@/types/domain/card";
 
 export type FlashcardSideDerivedSnapshot = {

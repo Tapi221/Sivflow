@@ -5,12 +5,12 @@ export type CalendarTimestampLike =
   | string
   | number
   | {
-      toDate?: () => Date;
-      seconds?: number;
-      nanoseconds?: number;
-      _seconds?: number;
-      _nanoseconds?: number;
-    }
+    toDate?: () => Date;
+    seconds?: number;
+    nanoseconds?: number;
+    _seconds?: number;
+    _nanoseconds?: number;
+  }
   | null
   | undefined;
 

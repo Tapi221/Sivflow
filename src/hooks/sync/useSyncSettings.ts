@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
-import { SyncServiceFactory } from "@/services/SyncServiceFactory";
+import { useCallback,useEffect, useState } from "react";
+
+import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
+import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import type { SyncSettings } from "@/types";
 import { DEFAULT_SYNC_SETTINGS } from "@/types";
-import { useAuthSession } from "@/contexts/AuthContext";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;

@@ -1,6 +1,7 @@
 import { format } from "date-fns";
-import { generateColorTokens } from "@/features/calendar/ui/calendar.color-tokens";
+
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import { generateColorTokens } from "@/features/calendar/ui/calendar.color-tokens";
 
 type CalendarEventChipMonthProps = {
   event: GoogleCalendarEvent;

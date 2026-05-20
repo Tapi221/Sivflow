@@ -13,16 +13,16 @@ export type AppScreen =
 
 export type AppDestination =
   | {
-      kind: "screen";
-      screen: AppScreen;
-      params?: Record<string, string>;
-      sourceName: string;
-    }
+    kind: "screen";
+    screen: AppScreen;
+    params?: Record<string, string>;
+    sourceName: string;
+  }
   | {
-      kind: "unknown";
-      sourceName: string;
-      params?: Record<string, string>;
-    };
+    kind: "unknown";
+    sourceName: string;
+    params?: Record<string, string>;
+  };
 
 const parseQueryParams = (query: string | undefined) => {
   if (!query) return undefined;
@@ -92,10 +92,10 @@ export const createAppDestination = (
 ): AppDestination => {
   const normalizedParams = params
     ? Object.fromEntries(
-        Object.entries(params)
-          .filter(([, value]) => value !== undefined && value !== null)
-          .map(([key, value]) => [key, String(value)]),
-      )
+      Object.entries(params)
+        .filter(([, value]) => value !== undefined && value !== null)
+        .map(([key, value]) => [key, String(value)]),
+    )
     : undefined;
 
   return {

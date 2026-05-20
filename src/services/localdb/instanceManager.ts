@@ -1,17 +1,5 @@
-import { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
 import { Dexie } from "dexie";
-// NOTE: createLocalDBInternal import creates a circular dependency with LocalDB.ts.
-// This is safe in ESM because both modules only use each other inside function bodies,
-// never at module initialization time.
-import {
-  getStoredLocalDBResetFailureReason,
-  markLocalDBGenerationBumped,
-  saveLocalDBResetFailureReason,
-  updateLocalDBRuntimeStatus,
-  warnOncePerSession,
-} from "@/services/localDBRuntimeState";
-import type { LocalDB } from "./LocalDB";
-import { createLocalDBInternal } from "./LocalDB";
+
 import {
   classifyFallbackReasonCode,
   isBackingStoreOpenError,
@@ -22,7 +10,21 @@ import {
   deleteUserPersistentDatabases,
   getFallbackDatabaseNameForUser,
 } from "./generation";
+import type { LocalDB } from "./LocalDB";
+import { createLocalDBInternal } from "./LocalDB";
 import type { LocalDBInstance } from "./types";
+
+import { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
+// NOTE: createLocalDBInternal import creates a circular dependency with LocalDB.ts.
+// This is safe in ESM because both modules only use each other inside function bodies,
+// never at module initialization time.
+import {
+  getStoredLocalDBResetFailureReason,
+  markLocalDBGenerationBumped,
+  saveLocalDBResetFailureReason,
+  updateLocalDBRuntimeStatus,
+  warnOncePerSession,
+} from "@/services/localDBRuntimeState";
 
 // --- シングルトン状態 ---
 let instance: LocalDBInstance | null = null;
@@ -58,7 +60,7 @@ const activateFallback = (userId: string, error: unknown) => {
 
   warnOncePerSession(
     "localdb:fallback-mode",
-    `[LocalDB] Running in fallback mode (non-persistent). Recovery guide: https://support.google.com/chrome/answer/2392709`,
+    "[LocalDB] Running in fallback mode (non-persistent). Recovery guide: https://support.google.com/chrome/answer/2392709",
   );
 
   return fallback;
@@ -182,7 +184,7 @@ export const getInstance = async (userId?: string) => {
         );
         warnOncePerSession(
           "localdb:backing-store-open-error",
-          `[LocalDB] Fatal IndexedDB backing store error detected. Persistent mode disabled for this session. Recovery guide: https://support.google.com/chrome/answer/2392709`,
+          "[LocalDB] Fatal IndexedDB backing store error detected. Persistent mode disabled for this session. Recovery guide: https://support.google.com/chrome/answer/2392709",
           error,
         );
       } else {

@@ -1,15 +1,18 @@
+import React from "react";
+
+import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
+
+import type { FlashcardCardLike } from "@/components/card/frame/Flashcard";
+import { useFlashcardCornerControls } from "@/components/card/frame/FlashcardCornerControls";
 import { FlashcardInkOverlay } from "@/components/card/frame/FlashcardInkOverlay";
 import { FlashcardMediaDialogs } from "@/components/card/frame/FlashcardMediaDialogs";
-import { useFlashcardCornerControls } from "@/components/card/frame/FlashcardCornerControls";
-import type { FlashcardCardLike } from "@/components/card/frame/Flashcard";
 import { useCardFlipBehavior } from "@/components/card/frame/useCardFlipBehavior";
 import { useFlashcardDerived } from "@/components/card/frame/useFlashcardDerived";
 import { useFlashcardInk } from "@/components/card/frame/useFlashcardInk";
 import { useFlashcardMediaState } from "@/components/card/frame/useFlashcardMediaState";
-import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
+
 import type { Card } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import React from "react";
 
 type Side = "question" | "answer";
 
@@ -131,13 +134,13 @@ export const ViewCardFaceScene = ({
     extraHeaderLeft: undefined,
     onToggleUncertainty: onToggleUncertainty
       ? () => {
-          handleToggleUncertaintyInternal();
-        }
+        handleToggleUncertaintyInternal();
+      }
       : undefined,
     onToggleBookmark: onToggleBookmark
       ? () => {
-          handleToggleBookmarkInternal();
-        }
+        handleToggleBookmarkInternal();
+      }
       : undefined,
     onOpenImagePopup: () => media.setIsImagePopupOpen(true),
     onOpenAudioPopup: () => media.setIsAudioPopupOpen(true),

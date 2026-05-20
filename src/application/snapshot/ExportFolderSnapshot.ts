@@ -2,11 +2,13 @@ import {
   buildCardSetById,
   filterCardsByFolderId,
 } from "@/domain/card/selectors/cardFolder";
+
+import { createCreateSnapshotUseCase } from "./CreateSnapshot";
+
 import type { JsonFileExportPort } from "@/application/ports/JsonFileExportPort";
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
-import type { AppSnapshot } from "@/types/domain/snapshot";
 import type { Card } from "@/types";
-import { createCreateSnapshotUseCase } from "./CreateSnapshot";
+import type { AppSnapshot } from "@/types/domain/snapshot";
 
 export interface ExportFolderSnapshotDependencies {
   fileExporter: JsonFileExportPort;

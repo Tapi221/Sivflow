@@ -1,3 +1,5 @@
+import React from "react";
+
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
 import { BlockList } from "@/components/card/blocks/core/BlockList";
 import {
@@ -5,8 +7,8 @@ import {
   type EditorProps,
   type ViewerProps,
 } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
+
 import type { CardBlock } from "@/types/domain/card";
-import React from "react";
 
 type RowContainerProps = Readonly<Record<string, unknown>>;
 
@@ -27,13 +29,13 @@ type SharedSceneProps = Readonly<{
 
 export type CardBlocksSceneResolvedProps =
   | Readonly<{
-      mode: "view";
-      viewerProps: ViewerProps;
-    }>
+    mode: "view";
+    viewerProps: ViewerProps;
+  }>
   | Readonly<{
-      mode: "edit";
-      editorProps: EditorProps;
-    }>;
+    mode: "edit";
+    editorProps: EditorProps;
+  }>;
 
 export type CardBlocksSceneProps = SharedSceneProps &
   Readonly<{

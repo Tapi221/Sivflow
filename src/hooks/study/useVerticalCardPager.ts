@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+
 import { isTypingTarget } from "@/utils/isTypingTarget";
 
 const SCROLL_IDLE_COMMIT_DELAY_MS = 110;

@@ -1,6 +1,5 @@
 import { useCallback, useLayoutEffect, useState } from "react";
 
-import { type Card } from "@/types";
 import {
   canGoToNextCardCarouselItem,
   canGoToPreviousCardCarouselItem,
@@ -9,6 +8,8 @@ import {
   shouldNotifyCardCarouselIndexChange,
 } from "@/features/review/domain/cardCarouselIndexRules";
 import { useCardCarousel3DWebBridge } from "@/features/review/infra/web/useCardCarousel3DWebBridge";
+
+import { type Card } from "@/types";
 
 const CARD_WIDTH = 560;
 const PEEK = 60;

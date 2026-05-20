@@ -1,26 +1,30 @@
 import {
-  useState,
   type FocusEvent,
   type MouseEvent,
   type ReactNode,
+  useState,
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { UpgradePanel } from "./upgradepanel";
-import "./sidebar.desktop.css";
-import { cn } from "@/lib/utils";
+
 import { useExplorerCalendarViewStore } from "@/features/calendar/header/useExplorerCalendarViewStore";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
+
+import "./sidebar.desktop.css";
+
 import {
-  HomeIcon,
-  InboxIcon,
   CalendarIcon,
-  LibraryIcon,
+  ChevronDownIcon,
+  CloudIcon,
   ExploreIcon,
   GearIcon,
-  CloudIcon,
-  ChevronDownIcon,
+  HomeIcon,
+  InboxIcon,
+  LibraryIcon,
 } from "./sidebar.icons";
+import { UpgradePanel } from "./upgradepanel";
+
+import { cn } from "@/lib/utils";
 
 type SidebarNavItem = {
   id: string;

@@ -7,8 +7,9 @@
  */
 
 import { useMemo } from "react";
-import { ja, enUS } from "date-fns/locale";
+
 import type { Locale as DateFnsLocale } from "date-fns";
+import { enUS,ja } from "date-fns/locale";
 
 import { useLocaleStore } from "./locale.store";
 import { TRANSLATIONS } from "./translations";

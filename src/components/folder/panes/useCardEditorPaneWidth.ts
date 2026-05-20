@@ -8,10 +8,14 @@ import {
   CARD_PANE_WIDTH_STEP_PX,
   clampPaneWidthPx,
 } from "@constants/shared/flashcard";
-import { resolveEditorCardFitScale } from "@/domain/card/resolveEditorCardFitScale";
-import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthState";
 import { CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX } from "@constants/shared/flashcard";
+
+import { resolveEditorCardFitScale } from "@/domain/card/resolveEditorCardFitScale";
+
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+
+import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthState";
+
 import {
   getCardSetWidthPreference,
   setCardSetWidthPreference,
@@ -193,9 +197,9 @@ export const useCardEditorPaneWidth = ({
 
   const activePaneWidthStyle = shouldApplyPaneWidth
     ? {
-        width: `${resolvedPaneWidthPx}px`,
-        maxWidth: "100%",
-      }
+      width: `${resolvedPaneWidthPx}px`,
+      maxWidth: "100%",
+    }
     : undefined;
 
   return {

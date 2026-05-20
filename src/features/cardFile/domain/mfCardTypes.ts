@@ -28,14 +28,14 @@ export type MfCardFileV1 = {
 
 export type MfCardValidationResult =
   | {
-      ok: true;
-      value: MfCardFileV1;
-      issues: MfCardIssue[];
-    }
+    ok: true;
+    value: MfCardFileV1;
+    issues: MfCardIssue[];
+  }
   | {
-      ok: false;
-      issues: MfCardIssue[];
-    };
+    ok: false;
+    issues: MfCardIssue[];
+  };
 
 export class MfCardValidationError extends Error {
   readonly issues: MfCardIssue[];

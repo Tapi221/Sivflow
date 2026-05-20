@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
-import type { Notification } from "@/types/notification";
+
 import { Info } from "@/ui/icons";
+
+import type { Notification } from "@/types/notification";
 
 interface InfoToastProps {
   notification: Notification;

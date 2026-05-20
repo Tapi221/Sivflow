@@ -1,4 +1,5 @@
 import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
+
 import {
   DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE,
   normalizeSplitFallbackCardLayoutMode,

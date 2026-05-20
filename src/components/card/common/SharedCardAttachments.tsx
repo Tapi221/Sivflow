@@ -1,9 +1,11 @@
-import { AudioPlayer } from "@/components/card/media/CardMedia";
-import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
-import { cn } from "@/lib/utils";
-import type { CardFaceAttachments } from "@/types/domain/card";
-import type { ReferenceBlockData } from "@/types/domain/base";
 import React from "react";
+
+import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
+import { AudioPlayer } from "@/components/card/media/CardMedia";
+
+import { cn } from "@/lib/utils";
+import type { ReferenceBlockData } from "@/types/domain/base";
+import type { CardFaceAttachments } from "@/types/domain/card";
 
 type SharedCardAttachmentsProps = Readonly<{
   attachments?: CardFaceAttachments | null;

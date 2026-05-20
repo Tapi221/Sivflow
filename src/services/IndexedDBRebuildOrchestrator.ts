@@ -1,12 +1,14 @@
-import { getLocalDb } from "./localDB";
 import { Dexie } from "dexie";
-import { CloudSyncAdapter } from "./logic/CloudSyncAdapter";
-import { sanitizeForLog } from "@/utils/logSanitizer";
-import {
-  sanitizeBlobUrlsDeep,
-  type BlobUrlFix,
-} from "@/utils/blobUrlSanitizer";
+
+import { getLocalDb } from "./localDB";
 import { CURRENT_TAG_STORE } from "./localdb/tagStoreNames";
+import { CloudSyncAdapter } from "./logic/CloudSyncAdapter";
+
+import {
+  type BlobUrlFix,
+  sanitizeBlobUrlsDeep,
+} from "@/utils/blobUrlSanitizer";
+import { sanitizeForLog } from "@/utils/logSanitizer";
 
 const REBUILD_TABLE_BY_TYPE = {
   card: "cards",

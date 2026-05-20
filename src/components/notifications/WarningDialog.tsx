@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+
+import { AlertTriangle, ChevronDown,X } from "@/ui/icons";
+
 import type { Notification } from "@/types/notification";
-import { AlertTriangle, X, ChevronDown } from "@/ui/icons";
 
 interface WarningDialogProps {
   notification: Notification;

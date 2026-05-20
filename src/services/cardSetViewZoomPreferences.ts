@@ -1,8 +1,10 @@
 import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
+
 import type {
   CardLayoutMode,
   CardSetInteractionMode,
 } from "@/features/cardsetview/domain/cardLayoutMode";
+
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 interface CardSetViewZoomPreferencesStore {

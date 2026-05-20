@@ -1,12 +1,14 @@
 import { useMemo, useState } from "react";
+
 import { useLiveQuery } from "dexie-react-hooks";
 
-import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { normalizeCardFolderId } from "@/domain/card/normalizers/cardShape";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import {
   buildCardSetById,
   filterCardsByFolderId,
 } from "@/domain/card/selectors/cardFolder";
+
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
 import type { Card } from "@/types";

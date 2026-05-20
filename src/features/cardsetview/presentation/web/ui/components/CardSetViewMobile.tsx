@@ -1,13 +1,17 @@
+import { type ReactNode,useCallback } from "react";
+
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
+
+import { CardCarousel3D } from "@/features/review/presentation/web/ui/components/CardCarousel3D";
+
 import {
   Flashcard,
   type FlashcardCardLike,
 } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
-import { CardCarousel3D } from "@/features/review/presentation/web/ui/components/CardCarousel3D";
+
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { useCallback, type ReactNode } from "react";
 
 interface CardSetViewMobileProps {
   cardsForPager: Card[];

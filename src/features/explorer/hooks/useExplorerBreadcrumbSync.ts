@@ -1,8 +1,10 @@
 import { useLayoutEffect, useMemo } from "react";
-import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
+
 import { buildExplorerBreadcrumbs } from "@/features/breadcrumbs/builders";
-import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import type { ExplorerBreadcrumbContext } from "@/features/explorer/contracts/explorerBreadcrumbContext";
+
+import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 type Params = {
   selectedFolderId: string | null;

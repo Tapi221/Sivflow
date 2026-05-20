@@ -1,5 +1,8 @@
+import React from "react";
+
 import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
 import { MarkdownEditorDialog } from "@/components/card/blocks/markdown/MarkdownEditorDialog";
+
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import {
   clampMarkdownTabSize,
@@ -7,7 +10,6 @@ import {
   normalizeMarkdownInsertionText,
   resolveMarkdownTabKeyText,
 } from "@/utils/markdownWhitespace";
-import React from "react";
 
 export type MarkdownReplaceBlock =
   | { type: "markdown"; markdown: string }
@@ -19,23 +21,23 @@ export type MarkdownReplaceFocus = Readonly<{
 
 type MarkdownBlockContentProps =
   | Readonly<{
-      mode: "view";
-      markdown: string;
-      zoom?: number;
-    }>
+    mode: "view";
+    markdown: string;
+    zoom?: number;
+  }>
   | Readonly<{
-      mode: "edit";
-      markdown: string;
-      open: boolean;
-      onOpenChange: (open: boolean) => void;
-      onChange: (next: string) => void;
-      onReplaceWithBlocks?: (
-        blocks: MarkdownReplaceBlock[],
-        focus?: MarkdownReplaceFocus,
-      ) => void;
-      accentColor?: string;
-      zoom?: number;
-    }>;
+    mode: "edit";
+    markdown: string;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onChange: (next: string) => void;
+    onReplaceWithBlocks?: (
+      blocks: MarkdownReplaceBlock[],
+      focus?: MarkdownReplaceFocus,
+    ) => void;
+    accentColor?: string;
+    zoom?: number;
+  }>;
 
 const MAX_LENGTH = 50000;
 
@@ -289,13 +291,13 @@ const parseAndSplitFencesWithRanges = (
       const dedented =
         fenceIndent.length > 0
           ? raw
-              .split("\n")
-              .map((value) =>
-                value.startsWith(fenceIndent)
-                  ? value.slice(fenceIndent.length)
-                  : value,
-              )
-              .join("\n")
+            .split("\n")
+            .map((value) =>
+              value.startsWith(fenceIndent)
+                ? value.slice(fenceIndent.length)
+                : value,
+            )
+            .join("\n")
           : raw;
 
       blocks.push({

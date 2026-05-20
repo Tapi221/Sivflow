@@ -1,15 +1,17 @@
+import type {
+  CSSProperties,
+  KeyboardEventHandler,
+  MouseEventHandler,
+} from "react";
+
 import { MarkdownBlockView } from "@/components/card/blocks/markdown/MarkdownBlockPreview";
 import { TEXT_BLOCK_CONTENT_CLASS } from "@/components/card/blocks/text/textBlockStyles";
 import {
   buildTypographyStyle,
   mergeStyles,
 } from "@/components/card/common/cardSetViewZoom";
+
 import { cn } from "@/lib/utils";
-import type {
-  CSSProperties,
-  KeyboardEventHandler,
-  MouseEventHandler,
-} from "react";
 
 type MarkdownBlockDisplayProps = {
   markdown: string;

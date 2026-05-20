@@ -1,22 +1,24 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback,useEffect, useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   AlertCircle,
-  RefreshCw,
-  Trash2,
   ChevronDown,
   ChevronUp,
+  RefreshCw,
+  Trash2,
 } from "@/ui/icons";
-import { getLocalDb } from "@/services/localDB";
+
 import { useSyncContext } from "@/contexts/sync/SyncContext";
+import { getLocalDb } from "@/services/localDB";
 import type { SyncError } from "@/types";
 
 interface SyncErrorDialogProps {

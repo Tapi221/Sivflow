@@ -1,8 +1,8 @@
-import { auth, storage } from "@/infrastructure/firebase/client";
-import type { UploadedImage } from "@/types";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
 import type { QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
+import { auth, storage } from "@/infrastructure/firebase/client";
+import type { UploadedImage } from "@/types";
 
 export const uploadQueuedAsset = async (
   item: QueueItem,

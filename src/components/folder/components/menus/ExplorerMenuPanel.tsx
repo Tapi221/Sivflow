@@ -1,3 +1,5 @@
+import React from "react";
+
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -6,9 +8,10 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { floatingPanelPresets } from "@/components/ui/menu-styles";
-import { cn } from "@/lib/utils";
-import React from "react";
+
 import type { MenuAction } from "./menuActions";
+
+import { cn } from "@/lib/utils";
 
 export type ExplorerMenuPanelVariant = "default" | "create" | "folderContext";
 
@@ -50,8 +53,8 @@ const FOLDER_CONTEXT_MENU_SEPARATOR_CLASS = "!mx-0 !my-[3px] !h-px !bg-border";
 
 const PLAIN_MENU_CONTENT_STYLE = {
   fontFamily: "var(--explorer-chrome-font-family)",
-  fontFeatureSettings: '"palt" 1, "lnum" 1, "tnum" 1',
-  fontVariationSettings: '"opsz" 14',
+  fontFeatureSettings: "\"palt\" 1, \"lnum\" 1, \"tnum\" 1",
+  fontVariationSettings: "\"opsz\" 14",
   textRendering: "auto",
 } satisfies React.CSSProperties;
 
@@ -114,9 +117,9 @@ export const ExplorerMenuPanel = ({
       style={
         isPlainVariant
           ? {
-              ...PLAIN_MENU_CONTENT_STYLE,
-              ...style,
-            }
+            ...PLAIN_MENU_CONTENT_STYLE,
+            ...style,
+          }
           : style
       }
       {...contentProps}

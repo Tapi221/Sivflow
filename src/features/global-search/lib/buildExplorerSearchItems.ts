@@ -2,6 +2,9 @@ import {
   buildCardSetById,
   resolveCardFolderId,
 } from "@/domain/card/selectors/cardFolder";
+
+import type { GlobalSearchItem } from "@/features/global-search/model/globalSearchTypes";
+
 import type {
   Card,
   CardSet,
@@ -9,7 +12,6 @@ import type {
   Folder,
   SelectedExplorerItem,
 } from "@/types";
-import type { GlobalSearchItem } from "@/features/global-search/model/globalSearchTypes";
 
 type BuildExplorerSearchItemsParams = {
   folders: Folder[];

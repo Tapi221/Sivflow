@@ -1,20 +1,22 @@
-import "@xyflow/react/dist/style.css";
+import { memo, useMemo } from "react";
 
-import { TagBadge } from "@/components/tag/TagBadge";
-import type { TagColorKey } from "@/features/tag/tagColor";
-import { cn } from "@/lib/utils";
-import { HelpCircle, Star } from "@/ui/icons";
 import {
   Background,
   Controls,
   Handle,
-  Position,
-  ReactFlow,
   type Node,
   type NodeProps,
   type NodeTypes,
+  Position,
+  ReactFlow,
 } from "@xyflow/react";
-import { memo, useMemo } from "react";
+
+import type { TagColorKey } from "@/features/tag/tagColor";
+
+import { TagBadge } from "@/components/tag/TagBadge";
+import { HelpCircle, Star } from "@/ui/icons";
+
+import "@xyflow/react/dist/style.css";
 
 import { buildDirectoryMindMapGraph } from "./buildDirectoryMindMapGraph";
 import type {
@@ -22,6 +24,8 @@ import type {
   DirectoryMindMapNodeData,
   DirectoryTreeNode,
 } from "./directoryTypes";
+
+import { cn } from "@/lib/utils";
 
 const HANDLE_CLASS_NAME = "!h-2 !w-2 !border-0 !bg-transparent";
 
@@ -62,15 +66,15 @@ const DirectoryMindMapChip = ({
 
       {badgeVisibility.tags && chip.showTags
         ? chip.tags
-            .slice(0, 2)
-            .map((tag) => (
-              <TagBadge
-                key={`${chip.id}:${tag}`}
-                label={tag}
-                colorKey={getTagColor(tag)}
-                className="shrink-0 align-middle"
-              />
-            ))
+          .slice(0, 2)
+          .map((tag) => (
+            <TagBadge
+              key={`${chip.id}:${tag}`}
+              label={tag}
+              colorKey={getTagColor(tag)}
+              className="shrink-0 align-middle"
+            />
+          ))
         : null}
 
       {badgeVisibility.tags && chip.showTags && chip.tags.length > 2 ? (

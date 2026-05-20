@@ -1,6 +1,7 @@
+import { generateUploadedImageId } from "@/domain/assets/uploadedImageFactory";
+
 import type { UploadFallbackReason, UploadSource } from "@/types";
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
-import { generateUploadedImageId } from "@/domain/assets/uploadedImageFactory";
 
 export type NormalizeUploadedImageOptions = {
   onInvalid?: "skip" | "throw";
@@ -148,9 +149,9 @@ const normalizeUploadedImage = (
     layout:
       baseWidthPx != null || cropX != null
         ? {
-            baseWidthPx: baseWidthPx ?? null,
-            cropX: cropX ?? null,
-          }
+          baseWidthPx: baseWidthPx ?? null,
+          cropX: cropX ?? null,
+        }
         : null,
     naturalW: naturalW ?? null,
     naturalH: naturalH ?? null,
@@ -190,39 +191,39 @@ const denormalizeUploadedImage = (
   const output: Record<string, unknown> =
     options.case === "snake"
       ? {
-          id: image.id,
-          asset_id: image.assetId ?? image.id,
-          local_file_id: image.localFileId ?? image.assetId ?? image.id,
-          url: image.remoteUrl ?? null,
-          content_type: image.contentType ?? null,
-          size: image.size ?? null,
-          storage_path: image.storagePath ?? null,
-          status: image.status,
-          layout:
+        id: image.id,
+        asset_id: image.assetId ?? image.id,
+        local_file_id: image.localFileId ?? image.assetId ?? image.id,
+        url: image.remoteUrl ?? null,
+        content_type: image.contentType ?? null,
+        size: image.size ?? null,
+        storage_path: image.storagePath ?? null,
+        status: image.status,
+        layout:
             image.layout != null
               ? {
-                  base_width_px: image.layout.baseWidthPx ?? null,
-                  crop_x: image.layout.cropX ?? null,
-                }
+                base_width_px: image.layout.baseWidthPx ?? null,
+                crop_x: image.layout.cropX ?? null,
+              }
               : null,
-        }
+      }
       : {
-          id: image.id,
-          assetId: image.assetId ?? image.id,
-          localFileId: image.localFileId ?? image.assetId ?? image.id,
-          url: image.remoteUrl ?? null,
-          contentType: image.contentType ?? null,
-          size: image.size ?? null,
-          storagePath: image.storagePath ?? null,
-          status: image.status,
-          layout:
+        id: image.id,
+        assetId: image.assetId ?? image.id,
+        localFileId: image.localFileId ?? image.assetId ?? image.id,
+        url: image.remoteUrl ?? null,
+        contentType: image.contentType ?? null,
+        size: image.size ?? null,
+        storagePath: image.storagePath ?? null,
+        status: image.status,
+        layout:
             image.layout != null
               ? {
-                  baseWidthPx: image.layout.baseWidthPx ?? null,
-                  cropX: image.layout.cropX ?? null,
-                }
+                baseWidthPx: image.layout.baseWidthPx ?? null,
+                cropX: image.layout.cropX ?? null,
+              }
               : null,
-        };
+      };
 
   if (options.stripUndefined) {
     for (const key of Object.keys(output)) {

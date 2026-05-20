@@ -1,22 +1,24 @@
 import {
-  useMemo,
-  useState,
   type CSSProperties,
   type KeyboardEvent,
+  useMemo,
+  useState,
 } from "react";
 
-import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
-import { TagChip } from "@/components/tag/TagChip";
 import { PdfLibraryWorkspaceToolbar } from "@/features/library-pdf/components/PdfLibraryWorkspaceToolbar";
-import { useTags } from "@/hooks/settings/useTags";
-import { cn } from "@/lib/utils";
+import { PdfLibraryContinueSection } from "@/features/library-pdf/components/sections/PdfLibraryContinueSection";
+import { PdfLibraryTableSection } from "@/features/library-pdf/components/sections/PdfLibraryTableSection";
+import { usePdfLibraryDashboardState } from "@/features/library-pdf/hooks/usePdfLibraryDashboardState";
 import {
   buildPdfDashboardRows,
   type PdfDashboardRow,
 } from "@/features/library-pdf/model/pdfLibraryRow";
-import { usePdfLibraryDashboardState } from "@/features/library-pdf/hooks/usePdfLibraryDashboardState";
-import { PdfLibraryContinueSection } from "@/features/library-pdf/components/sections/PdfLibraryContinueSection";
-import { PdfLibraryTableSection } from "@/features/library-pdf/components/sections/PdfLibraryTableSection";
+
+import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+import { TagChip } from "@/components/tag/TagChip";
+
+import { useTags } from "@/hooks/settings/useTags";
+import { cn } from "@/lib/utils";
 import type { DocumentItem, Folder } from "@/types";
 
 type PdfLibraryDashboardProps = {
@@ -85,7 +87,7 @@ const selectedColumnAccent =
 
 const dateTimeTextStyle: CSSProperties = {
   fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif',
+    "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Hiragino Sans\", \"Noto Sans JP\", system-ui, sans-serif",
   fontVariantNumeric: "tabular-nums",
   fontWeight: 400,
 };
@@ -535,14 +537,14 @@ const PdfLibraryDashboard = ({
                             <div className="flex min-w-0 items-center gap-2 overflow-hidden">
                               {row.tags.length > 0
                                 ? row.tags
-                                    .slice(0, 2)
-                                    .map((tag) => (
-                                      <TagChip
-                                        key={`${row.id}:${tag}`}
-                                        label={tag}
-                                        colorKey={getTagColorKey(tag)}
-                                      />
-                                    ))
+                                  .slice(0, 2)
+                                  .map((tag) => (
+                                    <TagChip
+                                      key={`${row.id}:${tag}`}
+                                      label={tag}
+                                      colorKey={getTagColorKey(tag)}
+                                    />
+                                  ))
                                 : null}
                             </div>
 

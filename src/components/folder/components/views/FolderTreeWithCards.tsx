@@ -1,41 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps -- large legacy explorer handlers intentionally stabilized to avoid interaction regressions. */
-import { ExplorerEmptyState } from "@/components/folder/components/ExplorerEmptyState";
-import { ExplorerNoResultsState } from "@/components/folder/components/ExplorerNoResultsState";
-import { ExplorerTreeNodeRenderer } from "@/components/folder/components/ExplorerTreeNode";
-import { RootFolderPanelList } from "@/components/folder/components/RootFolderPanelList";
-import {
-  getFolderId,
-  type FolderTreeNode,
-} from "@/components/folder/explorer/model/utils";
-import {
-  buildExplorerTreeData,
-  parseSelectedTreeId,
-  toExpandedTreeIds,
-  toSelectedTreeId,
-  type ExplorerTreeNode,
-} from "@/components/folder/explorer/tree/arboristAdapter";
-import { useEnsureAncestorFoldersExpanded } from "@/components/folder/hooks/useEnsureAncestorFoldersExpanded";
-import { useExpandedFolders } from "@/components/folder/hooks/useExpandedFolders";
-import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
-import { useExplorerDialogs } from "@/components/folder/hooks/useExplorerDialogs";
-import { useExplorerKeyboardNavigation } from "@/components/folder/hooks/useExplorerKeyboardNavigation";
-import { useFolderActions } from "@/components/folder/hooks/useFolderActions";
-import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
-import { shouldDisableExplorerDrop } from "@/components/folder/components/views/explorerDropRules";
-import { FolderTreeArborist } from "@/components/sidebar/FolderTreeArborist";
-import BulkTagDialog from "@/components/tag/BulkTagDialog";
-import {
-  toVirtualMfCardDisplayName,
-  toVirtualMfDeckDisplayName,
-} from "@/features/fileDisplay/virtualFileExtensions";
-import { cn } from "@/lib/utils";
-import type {
-  Card,
-  CardSet,
-  DocumentItem,
-  ExplorerItem,
-  SelectedExplorerItem,
-} from "@/types";
 import React, {
   useCallback,
   useEffect,
@@ -44,6 +7,46 @@ import React, {
   useState,
 } from "react";
 import type { NodeApi } from "react-arborist";
+
+import {
+  toVirtualMfCardDisplayName,
+  toVirtualMfDeckDisplayName,
+} from "@/features/fileDisplay/virtualFileExtensions";
+
+import { ExplorerEmptyState } from "@/components/folder/components/ExplorerEmptyState";
+import { ExplorerNoResultsState } from "@/components/folder/components/ExplorerNoResultsState";
+import { ExplorerTreeNodeRenderer } from "@/components/folder/components/ExplorerTreeNode";
+import { RootFolderPanelList } from "@/components/folder/components/RootFolderPanelList";
+import { shouldDisableExplorerDrop } from "@/components/folder/components/views/explorerDropRules";
+import {
+  type FolderTreeNode,
+  getFolderId,
+} from "@/components/folder/explorer/model/utils";
+import {
+  buildExplorerTreeData,
+  type ExplorerTreeNode,
+  parseSelectedTreeId,
+  toExpandedTreeIds,
+  toSelectedTreeId,
+} from "@/components/folder/explorer/tree/arboristAdapter";
+import { useEnsureAncestorFoldersExpanded } from "@/components/folder/hooks/useEnsureAncestorFoldersExpanded";
+import { useExpandedFolders } from "@/components/folder/hooks/useExpandedFolders";
+import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
+import { useExplorerDialogs } from "@/components/folder/hooks/useExplorerDialogs";
+import { useExplorerKeyboardNavigation } from "@/components/folder/hooks/useExplorerKeyboardNavigation";
+import { useFolderActions } from "@/components/folder/hooks/useFolderActions";
+import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+import { FolderTreeArborist } from "@/components/sidebar/FolderTreeArborist";
+import BulkTagDialog from "@/components/tag/BulkTagDialog";
+
+import { cn } from "@/lib/utils";
+import type {
+  Card,
+  CardSet,
+  DocumentItem,
+  ExplorerItem,
+  SelectedExplorerItem,
+} from "@/types";
 
 interface FolderTreeWithCardsProps {
   sidebarDisplayMode?: "tree" | "navigation";

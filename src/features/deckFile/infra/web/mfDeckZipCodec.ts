@@ -1,5 +1,11 @@
 import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
 
+import { validateMfDeckArchive } from "@/features/deckFile/domain/mfDeckGuards";
+import {
+  isMfDeckMediaPath,
+  MF_DECK_MAX_MEDIA_ENTRY_BYTES,
+  MF_DECK_MAX_MEDIA_TOTAL_BYTES,
+} from "@/features/deckFile/domain/mfDeckMedia";
 import {
   MF_DECK_CARDS_PATH,
   MF_DECK_MANIFEST_PATH,
@@ -8,12 +14,6 @@ import {
   type MfDeckArchiveV1,
   MfDeckValidationError,
 } from "@/features/deckFile/domain/mfDeckTypes";
-import {
-  isMfDeckMediaPath,
-  MF_DECK_MAX_MEDIA_ENTRY_BYTES,
-  MF_DECK_MAX_MEDIA_TOTAL_BYTES,
-} from "@/features/deckFile/domain/mfDeckMedia";
-import { validateMfDeckArchive } from "@/features/deckFile/domain/mfDeckGuards";
 
 export const MF_DECK_MAX_FILE_BYTES = 128 * 1024 * 1024;
 export const MF_DECK_MAX_JSON_BYTES = 24 * 1024 * 1024;

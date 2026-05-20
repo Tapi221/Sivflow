@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import type { PdfScrollDiagnostics } from "@/features/pdf/pdfViewer.types";
 
 interface UsePdfCurrentPageOptions {
@@ -436,8 +437,8 @@ export const usePdfCurrentPage = ({
       typeof ResizeObserver === "undefined"
         ? null
         : new ResizeObserver(() => {
-            handleViewportResize();
-          });
+          handleViewportResize();
+        });
 
     resizeObserver?.observe(container);
     window.addEventListener("resize", handleViewportResize, { passive: true });

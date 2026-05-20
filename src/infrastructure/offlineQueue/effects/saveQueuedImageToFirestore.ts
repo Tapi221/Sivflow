@@ -1,7 +1,6 @@
+import type { QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
 import { writeQueuedImageToFirestore } from "@/infrastructure/images/queuedImageFirestoreWriter";
 import type { UploadedImage } from "@/types";
-
-import type { QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
 
 export const saveQueuedImageToFirestore = async (
   item: QueueItem,

@@ -1,23 +1,27 @@
 import type { ComponentProps } from "react";
 import { useMemo } from "react";
-import { CardPane } from "@/components/folder/panes/CardPane";
+
+import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
+
 import { PdfPane } from "@/features/pdf/PdfPane";
 import { PdfWorkspaceProvider } from "@/features/pdf/PdfWorkspaceProvider";
-import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
-import {
-  WorkspaceHeaderToolbar,
-  type WorkspaceHeaderToolbarIconProps,
-} from "@/features/workspace/WorkspaceHeaderToolbar";
-import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
-import { cn } from "@/lib/utils";
-import { Filter, Search } from "@/ui/icons";
-import type { Card, CardSet, DocumentItem } from "@/types";
-import type { WorkspaceEntityTab } from "@/features/tab/Tab";
+import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import {
   resolveCardSetTabTitle,
   resolveCardTabTitle,
 } from "@/features/tab/resolveTabTitle";
-import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
+import type { WorkspaceEntityTab } from "@/features/tab/Tab";
+import {
+  WorkspaceHeaderToolbar,
+  type WorkspaceHeaderToolbarIconProps,
+} from "@/features/workspace/WorkspaceHeaderToolbar";
+
+import { CardPane } from "@/components/folder/panes/CardPane";
+import { Filter, Search } from "@/ui/icons";
+
+import { useDocumentCommands } from "@/hooks/platform/useDocumentCommands";
+import { cn } from "@/lib/utils";
+import type { Card, CardSet, DocumentItem } from "@/types";
 
 type PdfPaneUpdateHandler = NonNullable<
   ComponentProps<typeof PdfPane>["onDocumentUpdate"]

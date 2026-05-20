@@ -1,8 +1,9 @@
+import type { MfCardFileV1 } from "@/features/cardFile/domain/mfCardTypes";
 import {
-  importMfDeckArchive,
   type CreateMfDeckCard,
   type CreateMfDeckCardSet,
   type EnsureMfDeckTagByName,
+  importMfDeckArchive,
   type ImportMfDeckArchiveResult,
   type MfDeckImportDestination,
   type UpdateMfDeckCardSet,
@@ -12,7 +13,6 @@ import {
   MF_DECK_VERSION,
   type MfDeckArchiveV1,
 } from "@/features/deckFile/domain/mfDeckTypes";
-import type { MfCardFileV1 } from "@/features/cardFile/domain/mfCardTypes";
 
 export type ImportMfCardFileParams = {
   cardFile: MfCardFileV1;

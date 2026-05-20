@@ -8,7 +8,7 @@ export const shouldIgnoreFlipTarget = (target: EventTarget | null): boolean => {
 
   return Boolean(
     element.closest(
-      'button, a, input, textarea, select, label, [data-card-no-flip="true"]',
+      "button, a, input, textarea, select, label, [data-card-no-flip=\"true\"]",
     ),
   );
 };

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
+import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
 import { describe, expect, it, vi } from "vitest";
 
-import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
 import {
   dispatchCardSetViewWindowEvent,
   subscribeCardSetViewWindowEvent,

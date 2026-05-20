@@ -54,69 +54,69 @@ export const normalizeInkDocument = (value: unknown): InkDocument => {
   const maybe = value as Partial<InkDocument>;
   const strokes = Array.isArray(maybe.strokes)
     ? maybe.strokes
-        .map((stroke): InkStroke | null => {
-          if (!stroke || typeof stroke !== "object") return null;
+      .map((stroke): InkStroke | null => {
+        if (!stroke || typeof stroke !== "object") return null;
 
-          const raw = stroke as Partial<InkStroke>;
-          const tool: InkTool =
-            raw.tool === "highlighter" ? "highlighter" : "pen";
-          const color =
-            typeof raw.color === "string" && raw.color.trim().length > 0
-              ? raw.color
-              : "#1f2937";
-          const width = isFiniteNumber(raw.width) ? clamp(raw.width, 1, 96) : 3;
-          const opacity = isFiniteNumber(raw.opacity)
-            ? clamp(raw.opacity, 0.05, 1)
-            : 1;
-          const createdAt = isFiniteNumber(raw.createdAt)
-            ? raw.createdAt
-            : Date.now();
+        const raw = stroke as Partial<InkStroke>;
+        const tool: InkTool =
+          raw.tool === "highlighter" ? "highlighter" : "pen";
+        const color =
+          typeof raw.color === "string" && raw.color.trim().length > 0
+            ? raw.color
+            : "#1f2937";
+        const width = isFiniteNumber(raw.width) ? clamp(raw.width, 1, 96) : 3;
+        const opacity = isFiniteNumber(raw.opacity)
+          ? clamp(raw.opacity, 0.05, 1)
+          : 1;
+        const createdAt = isFiniteNumber(raw.createdAt)
+          ? raw.createdAt
+          : Date.now();
 
-          const points = Array.isArray(raw.points)
-            ? raw.points
-                .map((point): InkPoint | null => {
-                  if (!point || typeof point !== "object") return null;
-                  const maybePoint = point as Partial<InkPoint>;
-                  if (
-                    !isFiniteNumber(maybePoint.x) ||
+        const points = Array.isArray(raw.points)
+          ? raw.points
+            .map((point): InkPoint | null => {
+              if (!point || typeof point !== "object") return null;
+              const maybePoint = point as Partial<InkPoint>;
+              if (
+                !isFiniteNumber(maybePoint.x) ||
                     !isFiniteNumber(maybePoint.y)
-                  ) {
-                    return null;
-                  }
+              ) {
+                return null;
+              }
 
-                  const t = isFiniteNumber(maybePoint.t)
-                    ? maybePoint.t
-                    : Date.now();
-                  const p = isFiniteNumber(maybePoint.p)
-                    ? clamp(maybePoint.p, 0, 1)
-                    : 0.5;
-                  return { x: maybePoint.x, y: maybePoint.y, t, p };
-                })
-                .filter((point): point is InkPoint => point !== null)
-            : [];
+              const t = isFiniteNumber(maybePoint.t)
+                ? maybePoint.t
+                : Date.now();
+              const p = isFiniteNumber(maybePoint.p)
+                ? clamp(maybePoint.p, 0, 1)
+                : 0.5;
+              return { x: maybePoint.x, y: maybePoint.y, t, p };
+            })
+            .filter((point): point is InkPoint => point !== null)
+          : [];
 
-          if (points.length === 0) return null;
+        if (points.length === 0) return null;
 
-          return {
-            id:
+        return {
+          id:
               typeof raw.id === "string" && raw.id.trim().length > 0
                 ? raw.id
                 : `${createdAt}-${Math.random().toString(16).slice(2)}`,
-            tool,
-            color,
-            width,
-            opacity,
-            points,
-            createdAt,
-          };
-        })
-        .filter((stroke): stroke is InkStroke => stroke !== null)
+          tool,
+          color,
+          width,
+          opacity,
+          points,
+          createdAt,
+        };
+      })
+      .filter((stroke): stroke is InkStroke => stroke !== null)
     : [];
 
   const deletedStrokeIds = Array.isArray(maybe.deletedStrokeIds)
     ? maybe.deletedStrokeIds.filter(
-        (id): id is string => typeof id === "string",
-      )
+      (id): id is string => typeof id === "string",
+    )
     : undefined;
 
   return {

@@ -1,4 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+
+import type {
+  PdfSearchWorkerRequest,
+  PdfSearchWorkerResponse,
+} from "@/features/pdf/pdfSearchWorkerProtocol";
 import {
   buildPageSearchIndex,
   findPageSearchMatches,
@@ -8,10 +13,6 @@ import type {
   PdfJsTextContent,
   PdfPageSearchMatch,
 } from "@/features/pdf/pdfViewer.types";
-import type {
-  PdfSearchWorkerRequest,
-  PdfSearchWorkerResponse,
-} from "@/features/pdf/pdfSearchWorkerProtocol";
 
 type SearchState = {
   pageMatches: Record<number, PdfPageSearchMatch[]>;
@@ -203,10 +204,10 @@ export const usePdfSearch = ({
     () =>
       normalizedSearchQuery
         ? buildPrioritizedPageNumbers({
-            numPages,
-            currentPage,
-            renderedPageNumbers,
-          })
+          numPages,
+          currentPage,
+          renderedPageNumbers,
+        })
         : [],
     [currentPage, numPages, normalizedSearchQuery, renderedPageNumbers],
   );

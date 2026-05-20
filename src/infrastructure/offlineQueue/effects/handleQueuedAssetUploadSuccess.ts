@@ -1,14 +1,13 @@
-import { auth } from "@/infrastructure/firebase/client";
-import { getLocalDb } from "@/infrastructure/localdb/client";
-import type { UploadedImage } from "@/types";
+import { cleanupQueuedAssetSyncItems } from "./cleanupQueuedAssetSyncItems";
 
 import {
   makeAssetRecord,
-  toAssetLikeRecord,
   type QueueItem,
+  toAssetLikeRecord,
 } from "@/application/usecases/persistentOfflineQueueModels";
-
-import { cleanupQueuedAssetSyncItems } from "./cleanupQueuedAssetSyncItems";
+import { auth } from "@/infrastructure/firebase/client";
+import { getLocalDb } from "@/infrastructure/localdb/client";
+import type { UploadedImage } from "@/types";
 
 export const handleQueuedAssetUploadSuccess = async (
   item: QueueItem,

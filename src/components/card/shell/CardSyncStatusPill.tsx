@@ -1,9 +1,10 @@
 import React from "react";
 
-import { cn } from "@/lib/utils";
-import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
 import { formatLastSyncedAt } from "@/components/card/shell/formatLastSyncedAt";
+import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
 import { RefreshCw } from "@/ui/icons";
+
+import { cn } from "@/lib/utils";
 
 interface CardSyncStatusPillProps {
   lastSyncedAtMs: number | null;

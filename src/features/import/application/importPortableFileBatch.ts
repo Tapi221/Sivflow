@@ -1,10 +1,10 @@
 import { importMfCardFile } from "@/features/cardFile/application/importMfCard";
 import { readMfCardFile } from "@/features/cardFile/infra/web/readMfCardFile";
 import {
-  importMfDeckArchive,
   type CreateMfDeckCard,
   type CreateMfDeckCardSet,
   type EnsureMfDeckTagByName,
+  importMfDeckArchive,
   type ImportMfDeckArchiveResult,
   type UpdateMfDeckCardSet,
 } from "@/features/deckFile/application/importMfDeck";
@@ -223,21 +223,21 @@ export const importPortableFileBatch = async ({
       const result =
         item.kind === "mfdeck"
           ? await importMfDeckItem({
-              item,
-              folderId,
-              createCardSet,
-              updateCardSet,
-              createCard,
-              ensureTagByName,
-            })
+            item,
+            folderId,
+            createCardSet,
+            updateCardSet,
+            createCard,
+            ensureTagByName,
+          })
           : await importMfCardItem({
-              item,
-              folderId,
-              createCardSet,
-              updateCardSet,
-              createCard,
-              ensureTagByName,
-            });
+            item,
+            folderId,
+            createCardSet,
+            updateCardSet,
+            createCard,
+            ensureTagByName,
+          });
 
       item.status = "imported";
       item.createdCardSetId = result.createdCardSetId;

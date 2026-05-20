@@ -1,27 +1,29 @@
-import type { Card, Folder } from "@/types";
 import {
   collection,
+  type CollectionReference,
   doc,
+  type DocumentData,
   getDocs,
   limit,
   orderBy,
   query,
+  type QueryConstraint,
+  type QueryDocumentSnapshot,
   setDoc,
   startAfter,
   Timestamp,
   where,
-  type CollectionReference,
-  type DocumentData,
-  type QueryConstraint,
-  type QueryDocumentSnapshot,
 } from "firebase/firestore";
-import { requireFirestoreDb } from "@/infrastructure/firebase/client";
+
 import {
   cardDocPathSegments,
   cardsPathSegments,
   folderDocPathSegments,
   foldersPathSegments,
 } from "./firestorePaths";
+
+import { requireFirestoreDb } from "@/infrastructure/firebase/client";
+import type { Card, Folder } from "@/types";
 
 const denormalizeCardForCloud = (card: Card) => {
   return { ...card };

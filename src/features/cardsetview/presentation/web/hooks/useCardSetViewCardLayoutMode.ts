@@ -2,10 +2,11 @@ import { useCallback, useMemo, useState } from "react";
 
 import {
   buildCardLayoutPreferenceScopeKey,
-  resolveDefaultCardLayoutMode,
   type CardLayoutMode,
   type CardSetInteractionMode,
+  resolveDefaultCardLayoutMode,
 } from "@/features/cardsetview/domain/cardLayoutMode";
+
 import {
   resolveCardLayoutModePreference,
   setCardLayoutModePreference,

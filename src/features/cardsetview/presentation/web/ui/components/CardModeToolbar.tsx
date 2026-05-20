@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
 
+import {
+  CARD_LAYOUT_MODE_LABELS,
+  type CardLayoutMode,
+} from "@/features/cardsetview/domain/cardLayoutMode";
+
 import { OverlayToolbar } from "@/components/overlay-toolbar/OverlayToolbar";
 import { OverlayToolbarButton } from "@/components/overlay-toolbar/OverlayToolbarButton";
 import { OverlayToolbarDivider } from "@/components/overlay-toolbar/OverlayToolbarDivider";
@@ -10,10 +15,7 @@ import {
   SplitGlyph,
   StackGlyph,
 } from "@/components/overlay-toolbar/OverlayToolbarGlyphs";
-import {
-  CARD_LAYOUT_MODE_LABELS,
-  type CardLayoutMode,
-} from "@/features/cardsetview/domain/cardLayoutMode";
+
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type CardModeToolbarProps = {

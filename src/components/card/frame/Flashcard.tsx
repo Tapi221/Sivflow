@@ -1,24 +1,28 @@
-import { SharedCardContent } from "@/components/card/common/SharedCardContent";
+import React, { useEffect, useRef, useState } from "react";
+
 import {
   CANONICAL_CARD_WIDTH,
   CARD_DISPLAY_SCALE,
   layoutRowsToCardHeightPx,
 } from "@constants/shared/flashcard";
+
+import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import type { InkDocument } from "@/components/ink/inkTypes";
-import { cn } from "@/lib/utils";
-import type { CardDisplayMode } from "@/types/domain/cardSet";
-import React, { useEffect, useRef, useState } from "react";
+
 import { CardFrame } from "./CardFrame";
 import { CARD_SHELL_COMMON_CLASS_NAME } from "./cardShellClassNames";
 import { useFlashcardCornerControls } from "./FlashcardCornerControls";
+import { type FlashcardCardLike } from "./flashcardDerived";
 import { FlashcardInkOverlay } from "./FlashcardInkOverlay";
 import { FlashcardMediaDialogs } from "./FlashcardMediaDialogs";
 import { FlashcardNavigation } from "./FlashcardNavigation";
-import { type FlashcardCardLike } from "./flashcardDerived";
 import { useCardFlipBehavior } from "./useCardFlipBehavior";
 import { useFlashcardDerived } from "./useFlashcardDerived";
 import { useFlashcardInk } from "./useFlashcardInk";
 import { useFlashcardMediaState } from "./useFlashcardMediaState";
+
+import { cn } from "@/lib/utils";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 export type { FlashcardCardLike };
 
@@ -136,8 +140,8 @@ const FlashcardInner = ({
     onFlip,
     onPreviewFlip: previewMode
       ? () => {
-          setPreviewFlipped((prev) => !prev);
-        }
+        setPreviewFlipped((prev) => !prev);
+      }
       : undefined,
     isModalBlockingFlip: media.isModalBlockingFlip,
     isInkEditingActive,

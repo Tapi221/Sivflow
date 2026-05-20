@@ -1,13 +1,18 @@
-import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
+import React from "react";
+
 import { layoutRowsToCardHeightPx } from "@constants/shared/flashcard";
+
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
+
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
+import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 import { ViewCardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/ViewCardFaceScene";
+
+import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
+
 import type { Card } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import React from "react";
 
 type Side = "question" | "answer";
 

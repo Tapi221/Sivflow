@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import {
   collection,
   deleteDoc,
@@ -12,9 +13,6 @@ import { deleteObject, ref } from "firebase/storage";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAuthSession } from "@/contexts/AuthContext";
-import { getFirebaseStorage, getFirestoreDb } from "@/services/firebaseGateway";
-import type { UploadMetadata } from "@/types";
 import {
   AlertCircle,
   Database,
@@ -24,6 +22,10 @@ import {
   Loader2,
   Trash2,
 } from "@/ui/icons";
+
+import { useAuthSession } from "@/contexts/AuthContext";
+import { getFirebaseStorage, getFirestoreDb } from "@/services/firebaseGateway";
+import type { UploadMetadata } from "@/types";
 import { formatBytes } from "@/utils/fileUtils";
 import { toDateOrNull } from "@/utils/toMillis";
 

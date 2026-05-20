@@ -107,10 +107,10 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
 
     const currentValue = isControlled
       ? clampValue(
-          toSingleValue(value, internalValue),
-          resolvedMin,
-          resolvedMax,
-        )
+        toSingleValue(value, internalValue),
+        resolvedMin,
+        resolvedMax,
+      )
       : clampValue(internalValue, resolvedMin, resolvedMax);
 
     const rangeRatio =

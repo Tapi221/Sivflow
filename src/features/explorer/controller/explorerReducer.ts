@@ -1,9 +1,11 @@
 import { areExplorerBreadcrumbContextsEqual } from "@/features/explorer/contracts/explorerBreadcrumbContext";
 import type { ExplorerControllerState } from "@/features/explorer/contracts/explorerControllerState";
 import { isSameSelectedExplorerItem } from "@/features/explorer/utils/isSameSelectedExplorerItem";
-import type { SelectedExplorerItem } from "@/types";
+
 import type { ExplorerAction } from "./explorerActionTypes";
 import { resetBreadcrumbContext } from "./explorerState";
+
+import type { SelectedExplorerItem } from "@/types";
 
 const shouldClearSelectionFolder = (item: SelectedExplorerItem) =>
   item?.type === "directory" ||
@@ -174,9 +176,9 @@ export const explorerReducer = (
       )
         ? state
         : {
-            ...state,
-            explorerBreadcrumbContext: action.payload.context,
-          };
+          ...state,
+          explorerBreadcrumbContext: action.payload.context,
+        };
 
     case "INCREMENT_SECTION_LIST_TOKEN":
       return {

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef } from "react";
 import type { Dispatch, SetStateAction } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import {
   CARD_HEIGHT_PHASE_PX,
@@ -8,6 +8,7 @@ import {
   layoutRowsToCardHeightPx,
   minCardHeightPxToLayoutRows,
 } from "@constants/shared/flashcard";
+
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 
 type Side = "question" | "answer";

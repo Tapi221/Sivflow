@@ -1,3 +1,5 @@
+import React, { useMemo, useState } from "react";
+
 import { QuestionBlockLayout } from "@/components/card/blocks/question/QuestionBlockLayout";
 import {
   QUESTION_BLOCK_ANSWER_TEXT_CLASS,
@@ -10,30 +12,29 @@ import {
   scaleTypographyNumberPx,
 } from "@/components/card/common/cardSetViewZoom";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
-import React, { useMemo, useState } from "react";
 
 type QuestionBlockContentProps =
   | {
-      mode: "view";
-      questionTitle?: string;
-      questionAnswer?: string;
-      answerDisplayMode?: "always" | "tap_to_reveal";
-      containerProps?: React.HTMLAttributes<HTMLDivElement>;
-      zoom?: number;
-    }
+    mode: "view";
+    questionTitle?: string;
+    questionAnswer?: string;
+    answerDisplayMode?: "always" | "tap_to_reveal";
+    containerProps?: React.HTMLAttributes<HTMLDivElement>;
+    zoom?: number;
+  }
   | {
-      mode: "edit";
-      blockId: string;
-      questionTitle?: string;
-      questionAnswer?: string;
-      onChangeQuestionTitle: (value: string) => void;
-      onChangeQuestionAnswer: (value: string) => void;
-      containerRef?: React.Ref<HTMLDivElement>;
-      containerProps?: React.HTMLAttributes<HTMLDivElement>;
-      onContainerFocus?: () => void;
-      onContainerBlur?: (e: React.FocusEvent<HTMLDivElement>) => void;
-      zoom?: number;
-    };
+    mode: "edit";
+    blockId: string;
+    questionTitle?: string;
+    questionAnswer?: string;
+    onChangeQuestionTitle: (value: string) => void;
+    onChangeQuestionAnswer: (value: string) => void;
+    containerRef?: React.Ref<HTMLDivElement>;
+    containerProps?: React.HTMLAttributes<HTMLDivElement>;
+    onContainerFocus?: () => void;
+    onContainerBlur?: (e: React.FocusEvent<HTMLDivElement>) => void;
+    zoom?: number;
+  };
 
 const buildQuestionFieldStyle = (zoom?: number) =>
   buildTypographyStyle({
@@ -47,20 +48,20 @@ const resolveQuestionFieldLineHeight = (zoom?: number) =>
 
 type QuestionFieldProps =
   | Readonly<{
-      mode: "view";
-      value?: string;
-      className: string;
-      zoom?: number;
-      fallbackText?: string;
-    }>
+    mode: "view";
+    value?: string;
+    className: string;
+    zoom?: number;
+    fallbackText?: string;
+  }>
   | Readonly<{
-      mode: "edit";
-      value?: string;
-      onChange: (value: string) => void;
-      className: string;
-      placeholder: string;
-      zoom?: number;
-    }>;
+    mode: "edit";
+    value?: string;
+    onChange: (value: string) => void;
+    className: string;
+    placeholder: string;
+    zoom?: number;
+  }>;
 
 const QuestionField = (props: QuestionFieldProps) => {
   const style = buildQuestionFieldStyle(props.zoom);

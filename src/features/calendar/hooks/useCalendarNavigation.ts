@@ -1,13 +1,16 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import {
   addDays,
   addMonths,
   startOfMonth,
+  startOfWeek,
   subDays,
   subMonths,
-  startOfWeek,
 } from "date-fns";
-import { useCallback, useEffect, useRef, useState } from "react";
+
 import * as C from "@/features/calendar/calendar.constants.desktop";
+
 import type {
   CalendarToolbarMode,
   CalendarViewMode,

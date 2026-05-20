@@ -9,9 +9,9 @@ import {
 
 export type ReadXlsxImportRowsResult =
   | {
-      sheetName: ImportSheetName;
-      rows: unknown[][];
-    }
+    sheetName: ImportSheetName;
+    rows: unknown[][];
+  }
   | ImportParseResult;
 
 const buildIssue = ({

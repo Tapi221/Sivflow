@@ -1,3 +1,4 @@
+import type { Card, Folder } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 import type { Document } from "@/types/domain/document";
 import type {
@@ -9,7 +10,6 @@ import type {
   TagSyncPayload,
 } from "@/types/domain/sync";
 import type { UserSettings } from "@/types/domain/user";
-import type { Card, Folder } from "@/types";
 
 export type UpsertEntity = keyof SyncPayloadByEntity;
 export type DeleteEntity = Extract<

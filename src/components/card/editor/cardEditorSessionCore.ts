@@ -1,20 +1,20 @@
-import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
-import {
-  makeEmptyCardFaceAttachments,
-  normalizeOrderIndex,
-  sanitizeReferences,
-  type EditorDraft,
-} from "@/components/card/editor/cardEditorUtils";
+import { getCardBlocks } from "@/domain/card/content";
 import {
   LEGACY_BASE_LAYOUT_ROWS,
   normalizeExtraRows,
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
-import { getCardBlocks } from "@/domain/card/content";
+
+import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
+import {
+  type EditorDraft,
+  makeEmptyCardFaceAttachments,
+  normalizeOrderIndex,
+  sanitizeReferences,
+} from "@/components/card/editor/cardEditorUtils";
+
 import { resolveCardTagNames } from "@/hooks/settings/useTags";
 export { toDateOrNull } from "@/utils/toMillis";
-import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
-
 import type { UploadedImage } from "@/types/domain/assets";
 import type {
   Card,
@@ -22,6 +22,7 @@ import type {
   CardFaceAttachments,
   CardPatch,
 } from "@/types/domain/card";
+import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 
 export const NEW_SENTINEL = "__new__" as const;
 export const AUTOSAVE_DELAY_MS = 700;

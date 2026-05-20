@@ -1,11 +1,10 @@
-import { getLocalDb } from "@/infrastructure/localdb/client";
-
 import {
   getDocumentKindLabel,
   isDocumentUploadReady,
-  toDocumentLike,
   type QueueItem,
+  toDocumentLike,
 } from "@/application/usecases/persistentOfflineQueueModels";
+import { getLocalDb } from "@/infrastructure/localdb/client";
 
 export const handleQueuedDocumentUploadFailure = async (
   item: QueueItem,

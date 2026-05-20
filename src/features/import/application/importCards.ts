@@ -2,6 +2,7 @@ import type {
   ImportBlock,
   ImportPayload,
 } from "@/features/import/domain/importTypes";
+
 import type { Card, CardBlock, CardSet } from "@/types";
 
 type CreateCardSet = (
@@ -20,14 +21,14 @@ type CreateCard = (
 
 export type ImportDestination =
   | {
-      kind: "new-card-set";
-      cardSetName?: string;
-    }
+    kind: "new-card-set";
+    cardSetName?: string;
+  }
   | {
-      kind: "existing-card-set";
-      cardSetId: string;
-      cardSetName: string;
-    };
+    kind: "existing-card-set";
+    cardSetId: string;
+    cardSetName: string;
+  };
 
 type ImportCardsFromPayloadParams = {
   payload: ImportPayload;
@@ -113,13 +114,13 @@ export const importCardsFromPayload = async ({
   const resolvedDestination =
     destination.kind === "existing-card-set"
       ? {
-          id: destination.cardSetId,
-          name: destination.cardSetName,
-        }
+        id: destination.cardSetId,
+        name: destination.cardSetName,
+      }
       : await createCardSet(
-          destination.cardSetName?.trim() || buildImportCardSetName(fileName),
-          folderId,
-        );
+        destination.cardSetName?.trim() || buildImportCardSetName(fileName),
+        folderId,
+      );
 
   let createdCount = 0;
   const baseOrderIndex = Date.now() * 1000;

@@ -1,9 +1,11 @@
 import { contextBridge, ipcRenderer } from "electron";
+
 import type {
   DesktopBridgeApi,
   DesktopImportFileOpenPayload,
   DesktopOauthCallbackPayload,
 } from "@/types/externals/desktop-api";
+
 import { IPC_CHANNELS } from "../constants/electron/app";
 
 const desktopApi: DesktopBridgeApi = {

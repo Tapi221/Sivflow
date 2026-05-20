@@ -1,9 +1,9 @@
 import {
+  type PointerEvent as ReactPointerEvent,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type PointerEvent as ReactPointerEvent,
 } from "react";
 
 type ColumnBase<TColumnId extends string> = {

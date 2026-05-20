@@ -1,9 +1,10 @@
+import type { Timestamp } from "firebase/firestore";
+
+import { normalizeDate as toDate } from "@/shared/codec/date";
 import type { ReviewLog } from "@/types/domain/base";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import type { SubjectiveScore } from "@/utils/reviewUtils";
-import { normalizeDate as toDate } from "@/shared/codec/date";
 import { toMillis } from "@/utils/toMillis";
-import type { Timestamp } from "firebase/firestore";
 
 export type ReviewAlgorithmInput = {
   card: {
@@ -504,12 +505,12 @@ const buildCardStateBeforeLatestReview = ({
 
   const previousNextReviewDate = previousLatestLog
     ? buildNextReviewDate(
-        toDate(previousLatestLog.reviewedAt) ??
+      toDate(previousLatestLog.reviewedAt) ??
           new Date(previousLatestLog.reviewedAt),
-        estimateIntervalDaysFromResistanceScore(
-          previousLatestLog.resistanceScore,
-        ),
-      )
+      estimateIntervalDaysFromResistanceScore(
+        previousLatestLog.resistanceScore,
+      ),
+    )
     : estimateInitialNextReviewDate({ card, reviewStartNextDay });
 
   const delayDays = delayBonusEnabled
@@ -545,22 +546,22 @@ const buildCardStateBeforeLatestReview = ({
 
 type LatestReviewLogPatchParams =
   | {
-      action: "update";
-      card: ReviewHistoryCard;
-      delayBonusEnabled?: boolean;
-      reviewLogs?: ReviewLog[] | null;
-      reviewStartNextDay?: boolean;
-      reviewedAt: Date;
-      rating: ReviewLog["rating"];
-      durationMinutes?: number | null;
-    }
+    action: "update";
+    card: ReviewHistoryCard;
+    delayBonusEnabled?: boolean;
+    reviewLogs?: ReviewLog[] | null;
+    reviewStartNextDay?: boolean;
+    reviewedAt: Date;
+    rating: ReviewLog["rating"];
+    durationMinutes?: number | null;
+  }
   | {
-      action: "delete";
-      card: ReviewHistoryCard;
-      delayBonusEnabled?: boolean;
-      reviewLogs?: ReviewLog[] | null;
-      reviewStartNextDay?: boolean;
-    };
+    action: "delete";
+    card: ReviewHistoryCard;
+    delayBonusEnabled?: boolean;
+    reviewLogs?: ReviewLog[] | null;
+    reviewStartNextDay?: boolean;
+  };
 
 export const createLatestReviewLogPatch = (
   params: LatestReviewLogPatchParams,

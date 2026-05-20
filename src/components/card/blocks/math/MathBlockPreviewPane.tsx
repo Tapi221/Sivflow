@@ -2,8 +2,10 @@ import {
   buildTypographyStyle,
   mergeStyles,
 } from "@/components/card/common/cardSetViewZoom";
-import { cn } from "@/lib/utils";
+
 import { MathRenderer } from "./MathBlockContent";
+
+import { cn } from "@/lib/utils";
 
 type MathBlockPreviewPaneProps = {
   latex: string;
@@ -43,10 +45,10 @@ export const MathBlockPreviewPane = ({
       onKeyDown={
         interactive
           ? (event) => {
-              if (event.key !== "Enter" && event.key !== " ") return;
-              event.preventDefault();
-              onActivate?.();
-            }
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            onActivate?.();
+          }
           : undefined
       }
     >

@@ -1,6 +1,8 @@
+import React from "react";
+
 import {
-  ExplorerChromeCardSetIcon,
   ExplorerChromeCardIcon,
+  ExplorerChromeCardSetIcon,
   ExplorerChromeFolderIcon,
   ExplorerChromePdfIcon,
   ExplorerChromePinIcon,
@@ -11,7 +13,6 @@ import {
 } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
 import type { MenuAction } from "@/components/folder/components/menus/menuActions";
-import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
 import {
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
@@ -20,11 +21,13 @@ import {
   FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
+import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
+
+import type { NavigationListEntry } from "./RootFolderPanelList";
+
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import type { SelectedExplorerItem } from "@/types";
-import React from "react";
-import type { NavigationListEntry } from "./RootFolderPanelList";
 
 type RenameTarget = {
   id: string;
@@ -244,33 +247,33 @@ export const RootFolderPanelRow = ({
     () =>
       entry.kind === "folder"
         ? buildFolderMenuActions({
-            onCreateSubfolder: canCreateFolder
-              ? () => {
-                  void handleCreateFolderAction(entry.id);
-                }
-              : undefined,
-            onCreateCardSet: canCreateCardSet
-              ? () => {
-                  void handleCreateCardSetAction(entry.id);
-                }
-              : undefined,
-            onRename: canRenameFolder
-              ? () => {
-                  beginInlineRename({
-                    id: entry.id,
-                    name: entry.name,
-                    closeMenu,
-                    setEditingId,
-                    setEditingName,
-                  });
-                }
-              : undefined,
-            onDelete: canDeleteFolder
-              ? () => {
-                  handleDelete(entry.id, "folder");
-                }
-              : undefined,
-          })
+          onCreateSubfolder: canCreateFolder
+            ? () => {
+              void handleCreateFolderAction(entry.id);
+            }
+            : undefined,
+          onCreateCardSet: canCreateCardSet
+            ? () => {
+              void handleCreateCardSetAction(entry.id);
+            }
+            : undefined,
+          onRename: canRenameFolder
+            ? () => {
+              beginInlineRename({
+                id: entry.id,
+                name: entry.name,
+                closeMenu,
+                setEditingId,
+                setEditingName,
+              });
+            }
+            : undefined,
+          onDelete: canDeleteFolder
+            ? () => {
+              handleDelete(entry.id, "folder");
+            }
+            : undefined,
+        })
         : [],
     [
       canCreateCardSet,
@@ -291,13 +294,13 @@ export const RootFolderPanelRow = ({
     () =>
       entry.kind === "folder"
         ? [
-            {
-              id: isFolderPinned ? "unpin-folder" : "pin-folder",
-              label: isFolderPinned ? "ピン留めを外す" : "ピン留めする",
-              icon: <ExplorerChromePinIcon className="h-4 w-4" />,
-              onSelect: handleTogglePinnedFolder,
-            },
-          ]
+          {
+            id: isFolderPinned ? "unpin-folder" : "pin-folder",
+            label: isFolderPinned ? "ピン留めを外す" : "ピン留めする",
+            icon: <ExplorerChromePinIcon className="h-4 w-4" />,
+            onSelect: handleTogglePinnedFolder,
+          },
+        ]
         : [],
     [entry.kind, handleTogglePinnedFolder, isFolderPinned],
   );
@@ -321,8 +324,8 @@ export const RootFolderPanelRow = ({
         canRename: canRenameCardSet,
         onDelete: canDeleteCardSet
           ? (id, type) => {
-              handleDelete(id, type);
-            }
+            handleDelete(id, type);
+          }
           : undefined,
       });
     }
@@ -341,8 +344,8 @@ export const RootFolderPanelRow = ({
         canRename: canRenameDocument,
         onDelete: canDeleteDocument
           ? (id, type) => {
-              handleDelete(id, type);
-            }
+            handleDelete(id, type);
+          }
           : undefined,
       });
     }

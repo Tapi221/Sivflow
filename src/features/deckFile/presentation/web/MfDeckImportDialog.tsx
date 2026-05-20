@@ -1,10 +1,23 @@
 import {
+  type ChangeEvent,
   useCallback,
   useEffect,
   useMemo,
   useState,
-  type ChangeEvent,
 } from "react";
+
+import {
+  type CreateMfDeckCard,
+  type CreateMfDeckCardSet,
+  type EnsureMfDeckTagByName,
+  importMfDeckArchive,
+  type UpdateMfDeckCardSet,
+} from "@/features/deckFile/application/importMfDeck";
+import { MF_DECK_MIME_TYPE } from "@/features/deckFile/domain/mfDeckTypes";
+import {
+  type LoadMfDeckFileResult,
+  readMfDeckFile,
+} from "@/features/deckFile/infra/web/readMfDeckFile";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,19 +36,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import { useToast } from "@/contexts/ToastContext";
-import {
-  importMfDeckArchive,
-  type CreateMfDeckCard,
-  type CreateMfDeckCardSet,
-  type EnsureMfDeckTagByName,
-  type UpdateMfDeckCardSet,
-} from "@/features/deckFile/application/importMfDeck";
-import { MF_DECK_MIME_TYPE } from "@/features/deckFile/domain/mfDeckTypes";
-import {
-  readMfDeckFile,
-  type LoadMfDeckFileResult,
-} from "@/features/deckFile/infra/web/readMfDeckFile";
 import type { CardSet } from "@/types";
 
 export type MfDeckImportCompletedPayload = {
@@ -230,14 +232,14 @@ export const MfDeckImportDialog = ({
         destination:
           destinationMode === "existing" && selectedExistingCardSet
             ? {
-                kind: "existing-card-set",
-                cardSetId: selectedExistingCardSet.id,
-                cardSetName: selectedExistingCardSet.name,
-              }
+              kind: "existing-card-set",
+              cardSetId: selectedExistingCardSet.id,
+              cardSetName: selectedExistingCardSet.name,
+            }
             : {
-                kind: "new-card-set",
-                cardSetName: newCardSetName,
-              },
+              kind: "new-card-set",
+              cardSetName: newCardSetName,
+            },
       });
 
       toast.success(

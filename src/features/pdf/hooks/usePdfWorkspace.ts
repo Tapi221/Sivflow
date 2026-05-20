@@ -1,9 +1,10 @@
+import { useContext } from "react";
+
 import {
   PdfWorkspaceContext,
   PdfWorkspaceDocumentContext,
   PdfWorkspaceNavigationContext,
 } from "@/features/pdf/PdfWorkspaceContexts";
-import { useContext } from "react";
 
 export const usePdfWorkspace = () => {
   const contextValue = useContext(PdfWorkspaceContext);

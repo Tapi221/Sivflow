@@ -1,4 +1,5 @@
 import { getLocalDb } from "./localDB";
+
 import type { Card, CardSet, Folder } from "@/types";
 
 const backfillPromiseByUserId = new Map<string, Promise<void>>();

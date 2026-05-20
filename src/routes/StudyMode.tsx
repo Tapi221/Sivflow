@@ -1,31 +1,35 @@
-import React, { useMemo, useEffect, useCallback, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { addDoc, collection } from "firebase/firestore";
-import confetti from "canvas-confetti";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { useAuthSession } from "@/contexts/AuthContext";
+import { useMutation } from "@tanstack/react-query";
+import confetti from "canvas-confetti";
+import { addDoc, collection } from "firebase/firestore";
+
 import { getCardText } from "@/domain/card/content";
+
 import { flags } from "@/features/flags";
 import { PracticeCards } from "@/features/study/PracticeCards";
 import { PracticeSummary } from "@/features/study/PracticeSummary";
 import { StudyComplete } from "@/features/study/StudyComplete";
 import { StudyEmpty } from "@/features/study/StudyEmpty";
 import { StudyReview } from "@/features/study/StudyReview";
+
+import { ArrowLeft } from "@/ui/icons";
+
+import { useAuthSession } from "@/contexts/AuthContext";
 import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { usePracticeMode } from "@/hooks/study/usePracticeMode";
 import type { PracticeFilterRating } from "@/hooks/study/usePracticeMode";
+import { usePracticeMode } from "@/hooks/study/usePracticeMode";
 import { useStudyCards } from "@/hooks/study/useStudyCards";
 import { useStudySession } from "@/hooks/study/useStudySession";
 import { createPageUrl } from "@/platform/web/navigation/toWebPath";
 import { getFirestoreDb } from "@/services/firebaseGateway";
-import { TelemetryService } from "@/services/logic/TelemetryService";
 import { getLocalDb } from "@/services/localDB";
+import { TelemetryService } from "@/services/logic/TelemetryService";
 import type { Card } from "@/types";
-import { ArrowLeft } from "@/ui/icons";
 
 type StudyLogPayload = {
   userId: string;
@@ -401,11 +405,11 @@ const StudyMode = () => {
 
   const counterCurrent = isActivePracticeMode
     ? Math.min(
-        activePracticeState.roundTotal ?? 0,
-        (activePracticeState.roundTotal ?? 0) -
+      activePracticeState.roundTotal ?? 0,
+      (activePracticeState.roundTotal ?? 0) -
           (activePracticeState.roundQueue?.length ?? 0) +
           1,
-      )
+    )
     : currentIndex + 1;
 
   const counterTotal = isActivePracticeMode

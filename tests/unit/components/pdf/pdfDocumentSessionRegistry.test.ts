@@ -1,15 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import {
+  acquirePdfDocumentSession,
+  PDF_DOCUMENT_SESSION_RELEASE_GRACE_MS,
+  resetPdfDocumentSessionRegistryForTests,
+} from "@/components/pdf/pdfDocumentSessionRegistry";
+import { clearPdfPageBitmapCacheForDocument } from "@/components/pdf/pdfPageBitmapCache";
 import type {
   PdfJsDocument,
   PdfJsGetDocumentParams,
   PdfJsLoadingTask,
 } from "@/components/pdf/pdfViewerTypes";
-import { clearPdfPageBitmapCacheForDocument } from "@/components/pdf/pdfPageBitmapCache";
-import {
-  PDF_DOCUMENT_SESSION_RELEASE_GRACE_MS,
-  acquirePdfDocumentSession,
-  resetPdfDocumentSessionRegistryForTests,
-} from "@/components/pdf/pdfDocumentSessionRegistry";
 import {
   destroyPdfResource,
   disposePdfDocumentResource,

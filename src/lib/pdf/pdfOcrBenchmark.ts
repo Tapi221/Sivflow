@@ -101,18 +101,18 @@ export const summarizePdfOcrBenchmark = (
     avgQualityScore:
       pageCount > 0
         ? round(
-            safeSamples.reduce(
-              (sum, sample) => sum + sample.finalQualityScore,
-              0,
-            ) / pageCount,
-          )
+          safeSamples.reduce(
+            (sum, sample) => sum + sample.finalQualityScore,
+            0,
+          ) / pageCount,
+        )
         : 0,
     avgProcessingMs:
       pageCount > 0
         ? round(
-            safeSamples.reduce((sum, sample) => sum + sample.processingMs, 0) /
+          safeSamples.reduce((sum, sample) => sum + sample.processingMs, 0) /
               pageCount,
-          )
+        )
         : 0,
     p50ProcessingMs: round(percentile(processingValues, 0.5)),
     p95ProcessingMs: round(percentile(processingValues, 0.95)),

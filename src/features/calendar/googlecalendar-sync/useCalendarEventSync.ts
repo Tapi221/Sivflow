@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from "react";
+
 import { onAuthStateChanged } from "firebase/auth";
-
-import { auth } from "@/services/firebase";
-
-import { useGoogleCalendarPushSync } from "./useGoogleCalendarPushSync";
 
 import type {
   CalendarToolbarMode,
   CalendarViewMode,
 } from "@/features/calendar/calendar.types";
-
 import type { useGoogleCalendarIntegration } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
+
+import { useGoogleCalendarPushSync } from "./useGoogleCalendarPushSync";
+
+import { auth } from "@/services/firebase";
 
 type GoogleCalendarSlice = Pick<
   ReturnType<typeof useGoogleCalendarIntegration>,

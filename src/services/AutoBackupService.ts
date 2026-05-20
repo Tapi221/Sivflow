@@ -1,5 +1,5 @@
-import type { AutoBackupRecord } from "@/application/ports/BackupStorePort";
 import { createPerformAutoBackupUseCase } from "@/application/backup/PerformAutoBackup";
+import type { AutoBackupRecord } from "@/application/ports/BackupStorePort";
 import { localStorageBackupStore } from "@/infrastructure/browser-storage/LocalStorageBackupStore";
 
 export type AutoBackup = AutoBackupRecord;

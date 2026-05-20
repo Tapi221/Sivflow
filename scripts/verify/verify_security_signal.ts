@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
+
 import type { SecurityEventType } from "../../functions/src/security/policy";
 
 // Initialize Admin SDK

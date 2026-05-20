@@ -5,9 +5,10 @@
  * - effectiveIsFlipped に基づく active-side 選択を一元管理
  * - useMemo の deps は既存パターンに準拠
  */
-import { resolveInkDocument } from "@/components/ink/inkStorage";
-import type { CardBlock } from "@/types/domain/card";
 import React from "react";
+
+import { resolveInkDocument } from "@/components/ink/inkStorage";
+
 import { resolveSideBlocks } from "./flashcardBlocks";
 import {
   type FlashcardCardLike,
@@ -31,6 +32,8 @@ import {
   resolveQuestionCode,
   resolveQuestionText,
 } from "./flashcardDerived";
+
+import type { CardBlock } from "@/types/domain/card";
 
 export interface FlashcardDerived {
   cardId: string | null;

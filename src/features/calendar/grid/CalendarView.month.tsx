@@ -1,9 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
-
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
-
 import { GridCalendarMonthDesktop } from "@/features/calendar/grid/Grid.calendar.month.desktop";
 
 import { useMonthInfiniteScroll } from "./useInfiniteScroll.month";

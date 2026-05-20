@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
-import { SharedCardContent } from "@/components/card/common/SharedCardContent";
-import type { CardBlock } from "@/types/domain/card";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+
+import { SharedCardContent } from "@/components/card/common/SharedCardContent";
+import type { CardBlock } from "@/types/domain/card";
 
 vi.mock("@/components/card/common/SharedCardViewScene", () => ({
   SharedCardViewScene: () => <div data-testid="shared-card-view-scene" />,

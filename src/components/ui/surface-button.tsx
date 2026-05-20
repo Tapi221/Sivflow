@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
@@ -27,8 +28,8 @@ const surfaceButtonVariants = cva(
 
 export interface SurfaceButtonProps
   extends
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof surfaceButtonVariants> {}
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  VariantProps<typeof surfaceButtonVariants> {}
 
 export const SurfaceButton = React.forwardRef<
   HTMLButtonElement,

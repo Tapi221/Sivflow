@@ -1,10 +1,12 @@
 import React from "react";
-import { cn } from "@/lib/utils";
+
 import {
   detectCssZoomSupport,
   resolveCardScaleRenderingStrategy,
 } from "@/components/card/frame/cardScaleRenderingStrategy";
 import { observeElementRect } from "@/components/card/frame/elementRectObserver";
+
+import { cn } from "@/lib/utils";
 
 export interface ScaleToFitFrameProps {
   children: React.ReactNode;
@@ -223,20 +225,20 @@ export const ScaleToFitFrame = ({
           style={
             disableScale
               ? {
-                  width: "100%",
-                  maxWidth: "100%",
-                  minWidth: 0,
-                  height: fitHeight ? "100%" : undefined,
-                }
+                width: "100%",
+                maxWidth: "100%",
+                minWidth: 0,
+                height: fitHeight ? "100%" : undefined,
+              }
               : visualWidthPx != null
                 ? {
-                    width: `${visualWidthPx.toFixed(3)}px`,
-                    height: fitHeight ? "100%" : undefined,
-                  }
+                  width: `${visualWidthPx.toFixed(3)}px`,
+                  height: fitHeight ? "100%" : undefined,
+                }
                 : fitHeight
                   ? {
-                      height: "100%",
-                    }
+                    height: "100%",
+                  }
                   : undefined
           }
         >

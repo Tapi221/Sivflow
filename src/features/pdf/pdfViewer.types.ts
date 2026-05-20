@@ -295,9 +295,9 @@ export const destroyPdfResource = (
 export const disposePdfDocumentResource = (
   resource:
     | {
-        cleanup?: (keepLoadedFonts?: boolean) => void | Promise<void>;
-        destroy?: () => void | Promise<void>;
-      }
+      cleanup?: (keepLoadedFonts?: boolean) => void | Promise<void>;
+      destroy?: () => void | Promise<void>;
+    }
     | null
     | undefined,
 ) => {

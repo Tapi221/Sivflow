@@ -1,27 +1,29 @@
 import React from "react";
+
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { Eraser, PenLine, Redo2, Trash2, Undo2 } from "@/ui/icons";
 
+import { saveInkToStorage } from "./inkStorage";
 import {
+  cloneInkDocument,
+  createEmptyInkDocument,
   INK_DOCUMENT_VERSION,
   INK_PAPER_H,
   INK_PAPER_W,
-  cloneInkDocument,
-  createEmptyInkDocument,
-  normalizeInkDocument,
   type InkDocument,
   type InkEditTool,
   type InkPoint,
   type InkSide,
   type InkStroke,
+  normalizeInkDocument,
 } from "./inkTypes";
-import { saveInkToStorage } from "./inkStorage";
+
+import { cn } from "@/lib/utils";
 import {
   clientPointToPaperPoint,
   paperPointToCanvasPoint,
-  squaredDistance,
   type RectLike,
+  squaredDistance,
 } from "@/utils/inkCoords";
 
 const TOOL_STYLE: Record<

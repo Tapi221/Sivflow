@@ -1,15 +1,15 @@
+import * as C from "@/features/calendar/calendar.constants.desktop";
+import { TodayBar } from "@/features/calendar/chip/TodayBar";
+import { ViewModeDropdown } from "@/features/calendar/chip/ViewModeDropdown";
+
+import type { CalendarPaneProps } from "./calendarPane.types";
 import { CalendarMonthView } from "./grid/CalendarView.month";
-import { CalendarTimelineDayView } from "./grid/TimelineDayView";
-import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
+import { CalendarTimelineDayView } from "./grid/TimelineDayView";
+import { useCalendarPane } from "./hooks/useCalendarPane";
+import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/CalendarToolbar";
 
-import { ViewModeDropdown } from "@/features/calendar/chip/ViewModeDropdown";
-import { TodayBar } from "@/features/calendar/chip/TodayBar";
-
-import { useCalendarPane } from "./hooks/useCalendarPane";
-import type { CalendarPaneProps } from "./calendarPane.types";
-import * as C from "@/features/calendar/calendar.constants.desktop";
 import { cn } from "@/lib/utils";
 
 const VIEW_OPTIONS = [

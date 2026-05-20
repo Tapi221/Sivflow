@@ -1,15 +1,17 @@
 import { useCallback } from "react";
 
+import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
+
+import {
+  type CardSetViewEditingDraftPatch,
+  dispatchCardSetViewWindowEvent,
+} from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
+
 import {
   createLatestReviewLogPatch,
   createReviewPatchFromRating,
 } from "@/services/reviewAlgorithm";
 import type { Card, ReviewLog, UserSettings } from "@/types";
-import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
-import {
-  dispatchCardSetViewWindowEvent,
-  type CardSetViewEditingDraftPatch,
-} from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 
 type EditingDraftPatch = CardSetViewEditingDraftPatch["patch"];
 

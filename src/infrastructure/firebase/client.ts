@@ -1,3 +1,4 @@
+import { FIREBASE_EMULATORS } from "@constants/shared/firebase";
 import { initializeApp } from "firebase/app";
 import { connectAuthEmulator, getAuth } from "firebase/auth";
 import type { Firestore } from "firebase/firestore";
@@ -11,7 +12,6 @@ import {
 } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
-import { FIREBASE_EMULATORS } from "@constants/shared/firebase";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,

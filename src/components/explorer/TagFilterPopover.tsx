@@ -1,14 +1,17 @@
+import { useState } from "react";
+
+import { floatingPanelPresets } from "@/components/ui/menu-styles";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { floatingPanelPresets } from "@/components/ui/menu-styles";
+import { Filter } from "@/ui/icons";
+
+import { TagFilterPanel } from "./TagFilterPanel";
+
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
-import { Filter } from "@/ui/icons";
-import { useState } from "react";
-import { TagFilterPanel } from "./TagFilterPanel";
 
 interface TagFilterPopoverProps {
   allTags: string[];

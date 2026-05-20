@@ -1,11 +1,11 @@
-import { describe, expect, it } from "vitest";
-
-import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
 import {
   CARD_VIEW_DEFAULT_ZOOM_PERCENT,
   CARD_VIEW_MIN_ZOOM_PERCENT,
   CARD_VIEW_ZOOM_STEP_PERCENT,
 } from "@constants/shared/cardSetView";
+import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
+import { describe, expect, it } from "vitest";
+
 import {
   clampZoomPercent,
   computeDynamicMaxZoomPercent,

@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
+
 import {
   CODE_BLOCK_MAX_RECENT_LANGUAGES,
   CODE_BLOCK_RECENT_LANGUAGE_STORAGE_KEY,
-  CODE_BLOCK_SUPPORTED_LANGUAGES,
   CODE_BLOCK_SUPPORTED_LANGUAGE_VALUES,
+  CODE_BLOCK_SUPPORTED_LANGUAGES,
 } from "@constants/web/flashcard";
+
 import {
   Select,
   SelectContent,
@@ -15,9 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { CodeBlockData } from "@/types/core/code-block";
+
 import { CodeBlockContent } from "./CodeBlockContent";
 import { normalizeEditorLanguage } from "./codeBlockLanguage";
+
+import type { CodeBlockData } from "@/types/core/code-block";
 
 const canUseLocalStorage = () => {
   try {

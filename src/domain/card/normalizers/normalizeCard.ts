@@ -1,5 +1,5 @@
-import { isGridOffsetType } from "@/domain/card/blockOffset";
 import { normalizeUploadedImages } from "@/domain/assets/uploadedImageNormalizer";
+import { isGridOffsetType } from "@/domain/card/blockOffset";
 import {
   LEGACY_BASE_LAYOUT_ROWS,
   normalizeExtraRows,
@@ -7,6 +7,9 @@ import {
 } from "@/domain/card/extraRows";
 import { normalizeInkDocument } from "@/domain/card/inkDocument";
 import { normalizeMemoryStability } from "@/domain/card/review/stability";
+
+import { normalizeReviewLogs } from "./reviewLogs";
+
 import { normalizeDate } from "@/shared/codec/date";
 import {
   toArrayOr,
@@ -17,7 +20,6 @@ import {
 import { makeFallbackId } from "@/shared/lib/fallbackId";
 import { asRecord, pick, type UnknownRecord } from "@/shared/lib/records";
 import type { Card, CardBlock } from "@/types/domain/card";
-import { normalizeReviewLogs } from "./reviewLogs";
 
 type GridBlockType = Parameters<typeof isGridOffsetType>[0];
 
@@ -493,10 +495,10 @@ export const normalizeCard = (raw: unknown): Card => {
     ),
     ...(Array.isArray(record.tagIds)
       ? {
-          tagIds: record.tagIds.filter(
-            (value: unknown): value is string => typeof value === "string",
-          ),
-        }
+        tagIds: record.tagIds.filter(
+          (value: unknown): value is string => typeof value === "string",
+        ),
+      }
       : {}),
     reviewCount: toFiniteNumber(
       pick(record.reviewCount, record.review_count),
