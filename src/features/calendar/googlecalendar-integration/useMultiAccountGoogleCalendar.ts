@@ -1,29 +1,26 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 
-import {
-  requestCalendarAccessToken,
-  refreshCalendarAccessToken,
-} from "./gcal.oauth";
-import { fetchCalendarList } from "./gcal.api";
 import { GoogleCalendarSyncEngine } from "../googlecalendar-sync/GoogleCalendarSyncEngine";
-
+import { fetchCalendarList } from "./gcal.api";
 import {
+  buildTokenExpiry,
   isStoredTokenValid,
   readStoredAccounts,
+  removeStoredAccount,
+  type StoredGoogleAccount,
   updateStoredAccountCalendarIds,
   updateStoredAccountToken,
   upsertStoredAccount,
-  removeStoredAccount,
-  buildTokenExpiry,
-  type StoredGoogleAccount,
 } from "./gcal.multi-storage";
-
+import {
+  refreshCalendarAccessToken,
+  requestCalendarAccessToken,
+} from "./gcal.oauth";
 import type {
   GCalSyncState,
   GoogleCalendarEvent,
   GoogleCalendarListItem,
 } from "./gcalSync.types";
-
 import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
 
 // ─────────────────────────────
@@ -47,11 +44,11 @@ type AccountsAction =
   | { type: "REMOVE"; id: string }
   | { type: "SET_CONNECTING"; id: string; value: boolean }
   | {
-      type: "SET_TOKEN";
-      id: string;
-      accessToken: string;
-      refreshToken?: string;
-    }
+    type: "SET_TOKEN";
+    id: string;
+    accessToken: string;
+    refreshToken?: string;
+  }
   | { type: "SET_CALENDARS"; id: string; calendars: GoogleCalendarListItem[] }
   | { type: "SET_CALENDAR_IDS"; id: string; ids: string[] }
   | { type: "TOGGLE_CALENDAR"; id: string; calendarId: string }
@@ -93,10 +90,10 @@ const reduceAccounts = (
       return state.map((a) =>
         a.id === action.id
           ? {
-              ...a,
-              accessToken: action.accessToken,
-              refreshToken: action.refreshToken ?? a.refreshToken,
-            }
+            ...a,
+            accessToken: action.accessToken,
+            refreshToken: action.refreshToken ?? a.refreshToken,
+          }
           : a,
       );
 

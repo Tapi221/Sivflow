@@ -1,16 +1,20 @@
 import { useCallback, useMemo, useState } from "react";
+
 import { Timestamp } from "firebase/firestore";
-import {
-  computeNextReview,
-  createReviewLogEntry,
-} from "@/services/reviewAlgorithm";
-import { normalizeMemoryStability } from "@/utils/reviewUtils";
-import { getLocalDb } from "@/services/localDB";
-import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
+
 import {
   buildCardSetById,
   resolveCardFolderIdStrict,
 } from "@/domain/card/selectors/cardFolder";
+
+import type { PracticeFilterRating } from "./usePracticeMode";
+
+import { getLocalDb } from "@/services/localDB";
+import {
+  computeNextReview,
+  createReviewLogEntry,
+} from "@/services/reviewAlgorithm";
+import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 import type {
   Card,
   CardPatch,
@@ -18,7 +22,7 @@ import type {
   SubjectiveScoreValue,
   UserSettings,
 } from "@/types";
-import type { PracticeFilterRating } from "./usePracticeMode";
+import { normalizeMemoryStability } from "@/utils/reviewUtils";
 
 export type StudySessionRating = PracticeFilterRating;
 
@@ -39,8 +43,8 @@ type ResultsState = {
 
 type AuthUserLike =
   | {
-      uid: string;
-    }
+    uid: string;
+  }
   | null
   | undefined;
 

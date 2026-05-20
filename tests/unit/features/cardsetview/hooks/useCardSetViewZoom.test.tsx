@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
-import { renderHook, act } from "@testing-library/react";
+import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
+import { act,renderHook } from "@testing-library/react";
 import type { RefObject } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { useCardSetViewZoom } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoom";
 import { buildCardSetViewZoomPreferenceScopeKey } from "@/services/cardSetViewZoomPreferences";
-import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 
 const createViewportRef = (width: number): RefObject<HTMLDivElement> => {
   const element = document.createElement("div");

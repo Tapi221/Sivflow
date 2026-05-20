@@ -1,8 +1,8 @@
 import type { Card } from "@/types";
 import {
-  normalizeCardDisplayMode,
   type CardDisplayMode,
   type CardSet,
+  normalizeCardDisplayMode,
 } from "@/types/domain/cardSet";
 
 type UpdateCardSetInput = Partial<

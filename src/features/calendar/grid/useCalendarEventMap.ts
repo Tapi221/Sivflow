@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
+
 import { toDateKey } from "./calendarKey";
 
 export type CalendarEventMap = Map<string, GoogleCalendarEvent[]>;

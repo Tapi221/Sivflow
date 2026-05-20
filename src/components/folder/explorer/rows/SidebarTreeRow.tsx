@@ -1,9 +1,11 @@
+import React from "react";
+
 import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
 import type { ExplorerMenuPanelVariant } from "@/components/folder/components/menus/ExplorerMenuPanel";
 import type { MenuAction } from "@/components/folder/components/menus/menuActions";
 import { useContextMenuAnchor } from "@/components/folder/components/menus/useContextMenuAnchor";
+
 import { cn } from "@/lib/utils";
-import React from "react";
 
 interface SidebarTreeRowProps {
   menuOpen: boolean;
@@ -91,40 +93,40 @@ export const SidebarTreeRow = ({
       onMouseDownCapture={
         canOpenContextMenu
           ? (event) => {
-              if (event.button !== 2) return;
-              suppressNextClickRef.current = true;
-            }
+            if (event.button !== 2) return;
+            suppressNextClickRef.current = true;
+          }
           : undefined
       }
       onClickCapture={
         canOpenContextMenu
           ? (event) => {
-              if (!suppressNextClickRef.current) return;
-              event.preventDefault();
-              event.stopPropagation();
-              clearSuppressedClick();
-            }
+            if (!suppressNextClickRef.current) return;
+            event.preventDefault();
+            event.stopPropagation();
+            clearSuppressedClick();
+          }
           : undefined
       }
       onAuxClickCapture={
         canOpenContextMenu
           ? (event) => {
-              if (!suppressNextClickRef.current) return;
-              event.preventDefault();
-              event.stopPropagation();
-              clearSuppressedClick();
-            }
+            if (!suppressNextClickRef.current) return;
+            event.preventDefault();
+            event.stopPropagation();
+            clearSuppressedClick();
+          }
           : undefined
       }
       onContextMenu={
         canOpenContextMenu
           ? (event) => {
-              suppressNextClickRef.current = true;
-              handleContextMenu(event);
-              onContextMenuSelect?.();
-              onMenuOpenChange(true);
-              scheduleSuppressedClickClear();
-            }
+            suppressNextClickRef.current = true;
+            handleContextMenu(event);
+            onContextMenuSelect?.();
+            onMenuOpenChange(true);
+            scheduleSuppressedClickClear();
+          }
           : undefined
       }
     >

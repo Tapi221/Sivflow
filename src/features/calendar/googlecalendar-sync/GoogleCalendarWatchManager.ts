@@ -11,8 +11,8 @@
  * 参考: https://developers.google.com/calendar/api/guides/push
  */
 
-import { doc, getDoc, setDoc, deleteDoc, collection } from "firebase/firestore";
-import { firestoreDb } from "@/services/firebase";
+import {deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
+
 
 const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
 

@@ -1,11 +1,7 @@
 import type { RefObject, UIEvent } from "react";
-import { useCalendarNavigation } from "./useCalendarNavigation";
-import { useCalendarLayout } from "./useCalendarLayout";
-import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
-import { useTimelineGrid } from "./useTimelineGrid";
-import { useCalendarScrollController } from "./useCalendarScrollController";
-import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
+
 import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
+
 import type {
   CalendarToolbarMode,
   CalendarViewMode,
@@ -14,6 +10,12 @@ import type {
 } from "../calendarPane.types";
 import type { GoogleCalendarEvent } from "../googlecalendar-integration/gcalSync.types";
 import type { buildTimelineColumns } from "../grid/TimelineDayView.shared";
+import { useCalendarLayout } from "./useCalendarLayout";
+import { useCalendarNavigation } from "./useCalendarNavigation";
+import { useCalendarScrollController } from "./useCalendarScrollController";
+import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
+import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
+import { useTimelineGrid } from "./useTimelineGrid";
 
 export type UseCalendarPaneReturn = {
   contentViewportRef: RefObject<HTMLDivElement | null>;

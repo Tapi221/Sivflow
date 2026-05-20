@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { layoutRowsToCardHeightPx } from "@constants/shared/flashcard";
-import { Flashcard } from "@/components/card/frame/Flashcard";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
+
+import { Flashcard } from "@/components/card/frame/Flashcard";
 
 vi.mock("../frame/CardFrame", () => ({
   CardFrame: ({

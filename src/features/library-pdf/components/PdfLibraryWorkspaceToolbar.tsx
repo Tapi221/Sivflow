@@ -1,10 +1,11 @@
 import type { ComponentType } from "react";
 
-import { Filter, Search } from "@/ui/icons";
 import {
   WorkspaceHeaderToolbar,
   type WorkspaceHeaderToolbarIconProps,
 } from "@/features/workspace/WorkspaceHeaderToolbar";
+
+import { Filter, Search } from "@/ui/icons";
 
 type PdfLibraryWorkspaceSection = "explorer" | "pdf" | "flashcard" | "notes";
 

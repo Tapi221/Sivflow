@@ -1,15 +1,17 @@
-import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import {
   resolveBlocksFromCardData,
   resolveExtraRowsFromCardData,
   resolveInkFromCardData,
 } from "@/domain/card/normalizers/cardShape";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import {
   cloneStorageRecord,
   isStorageRecord,
 } from "@/domain/shared/storage/storageRecordUtils";
+
 import { cleanupLegacyCardStorageFields } from "./cardStorageFieldCleanup";
 import { sanitizeCardStorageBlockImages } from "./cardStorageImageTransforms";
+
 import type { Card } from "@/types";
 
 type StorageLike = Record<string, unknown>;

@@ -6,8 +6,9 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { areBreadcrumbCrumbsEqual } from "@/features/breadcrumbs/builders";
+
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
+import { areBreadcrumbCrumbsEqual } from "@/features/breadcrumbs/builders";
 
 type BreadcrumbContextValue = {
   extraCrumbs: BreadcrumbCrumb[];

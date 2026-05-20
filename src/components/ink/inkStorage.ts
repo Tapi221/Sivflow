@@ -1,9 +1,9 @@
 import {
   cloneInkDocument,
   createEmptyInkDocument,
-  normalizeInkDocument,
   type InkDocument,
   type InkSide,
+  normalizeInkDocument,
 } from "./inkTypes";
 
 const INK_STORAGE_PREFIX = "ink:";

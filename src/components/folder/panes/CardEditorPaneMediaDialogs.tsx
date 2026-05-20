@@ -1,4 +1,6 @@
 import React from "react";
+import { memo } from "react";
+
 import { LinkEditor } from "@/components/card/editor/LinkEditor";
 import MediaUploader from "@/components/card/media/MediaUploader";
 import {
@@ -7,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { memo } from "react";
+
 import type { UploadedImage } from "@/types";
 import type { ReferenceBlockData } from "@/types/domain/base";
 

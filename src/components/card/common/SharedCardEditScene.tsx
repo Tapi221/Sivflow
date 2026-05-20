@@ -1,5 +1,7 @@
-import { BlockEditor } from "@/components/card/blocks/editor/BlockEditor";
 import React from "react";
+
+import { BlockEditor } from "@/components/card/blocks/editor/BlockEditor";
+
 import type { SharedCardContentEditProps } from "./SharedCardContent.types";
 
 const SharedCardEditSceneInner = ({

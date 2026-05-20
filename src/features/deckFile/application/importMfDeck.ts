@@ -1,12 +1,14 @@
 import { normalizeInkDocument } from "@/domain/card/inkDocument";
+
 import { restoreMfDeckMediaInBlocks } from "@/features/deckFile/application/mfDeckMediaRestorer";
-import type { Card, CardBlock, CardSet } from "@/types";
-import type { CardDisplayMode } from "@/types/domain/cardSet";
 import type {
   MfDeckArchiveV1,
   MfDeckCardV1,
   MfDeckIssue,
 } from "@/features/deckFile/domain/mfDeckTypes";
+
+import type { Card, CardBlock, CardSet } from "@/types";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 export type CreateMfDeckCardSet = (
   name: string,
@@ -33,14 +35,14 @@ export type EnsureMfDeckTagByName = (name: string) => Promise<string | null>;
 
 export type MfDeckImportDestination =
   | {
-      kind: "new-card-set";
-      cardSetName?: string;
-    }
+    kind: "new-card-set";
+    cardSetName?: string;
+  }
   | {
-      kind: "existing-card-set";
-      cardSetId: string;
-      cardSetName: string;
-    };
+    kind: "existing-card-set";
+    cardSetId: string;
+    cardSetName: string;
+  };
 
 export type ImportMfDeckArchiveParams = {
   archive: MfDeckArchiveV1;
@@ -222,16 +224,16 @@ export const importMfDeckArchive = async ({
   const targetCardSet =
     destination.kind === "existing-card-set"
       ? {
-          id: destination.cardSetId,
-          name: destination.cardSetName,
-        }
+        id: destination.cardSetId,
+        name: destination.cardSetName,
+      }
       : await createCardSet(
-          destination.cardSetName?.trim() || manifestDeck.name,
-          folderId,
-          {
-            description: manifestDeck.description,
-          },
-        );
+        destination.cardSetName?.trim() || manifestDeck.name,
+        folderId,
+        {
+          description: manifestDeck.description,
+        },
+      );
 
   if (destination.kind === "new-card-set" && updateCardSet) {
     const displayModePatch = normalizeDisplayModePatch(

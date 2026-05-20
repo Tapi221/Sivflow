@@ -1,7 +1,9 @@
+import { PdfPane } from "@/features/pdf/PdfPane";
+
 import { FolderDashboard } from "@/components/folder/components/views/FolderDashboard";
 import { CardPane } from "@/components/folder/panes/CardPane";
 import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagramPane";
-import { PdfPane } from "@/features/pdf/PdfPane";
+
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 type PdfPaneUpdateHandler = NonNullable<
@@ -89,11 +91,11 @@ export const RightPane = ({
         onDocumentUpdate={
           onDocumentUpdated
             ? async (updates: PdfPaneUpdates) => {
-                await onDocumentUpdated(
-                  selectedDocument.id,
-                  updates as Partial<DocumentItem>,
-                );
-              }
+              await onDocumentUpdated(
+                selectedDocument.id,
+                updates as Partial<DocumentItem>,
+              );
+            }
             : undefined
         }
       />

@@ -8,26 +8,28 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 
-import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
-import { BlockToolbar } from "@/components/card/blocks/core/BlockToolbar";
+import { CARD_ROW_PX } from "@constants/shared/flashcard";
+
 import { hasRuledLine } from "@/components/card/blocks/core/blockDisplayPolicy";
+import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
+import { BlockToolbar } from "@/components/card/blocks/core/BlockToolbar";
 import {
   createEditorBlock,
   isEditorInsertableBlockType,
 } from "@/components/card/blocks/editor/blockEditorInsertPolicy";
-import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
 import {
   type CardBlockLayoutReplaceBlock,
   type EditorProps,
 } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
-import { CARD_ROW_PX } from "@constants/shared/flashcard";
+import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
 import {
   getNormalizedGridOffsetRows,
   getNormalizedRowOffset,
   isGridOffsetType,
   isRowPositionableType,
 } from "@/components/card/frame/rowOffset";
+
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
@@ -205,7 +207,7 @@ export const BlockEditor = React.forwardRef<
       }
 
       const surfaceEl = rowEl.closest(
-        '[data-card-surface="true"]',
+        "[data-card-surface=\"true\"]",
       ) as HTMLElement | null;
       if (!surfaceEl) {
         return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };

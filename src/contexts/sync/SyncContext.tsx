@@ -1,19 +1,20 @@
 import {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
-import { getLocalDb } from "@/services/localDB";
-import { SyncServiceFactory } from "@/services/SyncServiceFactory";
+
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
 import type { ISyncService } from "@/services/interfaces/ISyncService";
-import type { SyncSettings } from "@/types/domain/sync";
+import { getLocalDb } from "@/services/localDB";
+import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import type { SyncConflict } from "@/types";
+import type { SyncSettings } from "@/types/domain/sync";
 
 type SyncStatus = "idle" | "syncing" | "success" | "error";
 type SyncNotice = "none" | "wifi_wait";

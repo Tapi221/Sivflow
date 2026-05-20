@@ -4,16 +4,17 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { GlobalSearchDialog } from "@/features/global-search/components/GlobalSearchDialog";
 import type { GlobalSearchItem } from "@/features/global-search/model/globalSearchTypes";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
-import { cn } from "@/lib/utils";
-import { UI_TYPO } from "@/styles/tokens/typography";
 
-import { useKatexLoader } from "@/hooks/platform/useKatexLoader";
-import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
-import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
-import { SecurityAlertBanner } from "./components/security/SecurityAlertBanner";
 import { LocalDBStatusBanner } from "./components/security/LocalDBStatusBanner";
+import { SecurityAlertBanner } from "./components/security/SecurityAlertBanner";
 import { AppLayout } from "./layout/AppLayout";
 import { DesktopWindowControls } from "./layout/DesktopWindowControls";
+
+import { useKatexLoader } from "@/hooks/platform/useKatexLoader";
+import { cn } from "@/lib/utils";
+import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
+import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
+import { UI_TYPO } from "@/styles/tokens/typography";
 
 const Layout = () => {
   const location = useLocation();

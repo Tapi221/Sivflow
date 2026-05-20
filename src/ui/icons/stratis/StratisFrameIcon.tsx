@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components -- shared SVG prop constants are co-located with icon component to keep API stable. */
-import { forwardRef } from "react";
 import type { ReactNode, SVGProps } from "react";
+import { forwardRef } from "react";
 
 export type StratisFrameIconProps = SVGProps<SVGSVGElement> & {
   children?: ReactNode;

@@ -1,13 +1,12 @@
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 
-import { cn } from "@/lib/utils";
-
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
-
-import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
 import { CalendarEventChipMonth } from "@/features/calendar/eventchip/EventChip.month";
+import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
+
+import { cn } from "@/lib/utils";
 
 const CHIP_HEIGHT_PX = 21;
 const CHIPS_TOP_OFFSET_PX = 60;

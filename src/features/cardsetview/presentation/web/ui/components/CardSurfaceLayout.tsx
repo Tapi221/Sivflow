@@ -1,7 +1,9 @@
 import type { CSSProperties } from "react";
-import { cn } from "@/lib/utils";
-import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import React from "react";
+
+import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+
+import { cn } from "@/lib/utils";
 
 export type CardSurfaceLayoutProps = {
   cardLayoutMode: CardLayoutMode;
@@ -35,19 +37,19 @@ export const CardSurfaceLayout = ({
 
   const leftSlotStyle = isSplitLayout
     ? {
-        clipPath: `inset(-${SPLIT_INNER_SHADOW_CLIP_PX}px 0 -${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px)`,
-      }
+      clipPath: `inset(-${SPLIT_INNER_SHADOW_CLIP_PX}px 0 -${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px)`,
+    }
     : ({
-        ["--card-stack-shell-clip" as string]: `inset(-${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px 0 -${STACK_INNER_SHADOW_CLIP_PX}px)`,
-      } as CSSProperties);
+      ["--card-stack-shell-clip" as string]: `inset(-${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px 0 -${STACK_INNER_SHADOW_CLIP_PX}px)`,
+    } as CSSProperties);
 
   const rightSlotStyle = isSplitLayout
     ? {
-        clipPath: `inset(-${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px 0)`,
-      }
+      clipPath: `inset(-${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px -${SPLIT_INNER_SHADOW_CLIP_PX}px 0)`,
+    }
     : ({
-        ["--card-stack-shell-clip" as string]: `inset(0 -${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px)`,
-      } as CSSProperties);
+      ["--card-stack-shell-clip" as string]: `inset(0 -${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px -${STACK_INNER_SHADOW_CLIP_PX}px)`,
+    } as CSSProperties);
 
   return (
     <div

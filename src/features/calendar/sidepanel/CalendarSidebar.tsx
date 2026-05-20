@@ -1,3 +1,5 @@
+import { useMemo, useState } from "react";
+
 import {
   addDays,
   format,
@@ -6,24 +8,24 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import { useMemo, useState } from "react";
-import { cn } from "@/lib/utils";
-import {
-  PlusIcon,
-  CalendarIcon,
-  CheckCircleFilledIcon,
-  CircleOutlineIcon,
-} from "../ui/calendar.icons";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
-
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
+
 import type {
   AppCalendarItem,
   CalendarSidebarProps,
   GoogleAccountDisplay,
 } from "../calendarPane.types";
+import {
+  CalendarIcon,
+  CheckCircleFilledIcon,
+  CircleOutlineIcon,
+  PlusIcon,
+} from "../ui/calendar.icons";
+
+import { cn } from "@/lib/utils";
 
 // ─────────────────────────────────────────────────────────────
 // Icons

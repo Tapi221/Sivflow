@@ -1,13 +1,21 @@
-import { useToast } from "@/contexts/ToastContext";
+import type { DragEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
+import { useNavigate } from "react-router-dom";
+
 import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
-import { ExplorerSearchSourceBridge } from "@/features/global-search/components/ExplorerSearchSourceBridge";
 import { MfCardImportDialog } from "@/features/cardFile/presentation/web/MfCardImportDialog";
 import { MfDeckImportDialog } from "@/features/deckFile/presentation/web/MfDeckImportDialog";
-import { PortableImportBatchDialog } from "@/features/import/presentation/web/PortableImportBatchDialog";
+import { ExplorerSearchSourceBridge } from "@/features/global-search/components/ExplorerSearchSourceBridge";
 import {
-  ImportFormatDialog,
-  type ImportFormat,
-} from "@/features/import/presentation/web/ImportFormatDialog";
+  readDesktopImportFiles,
+  subscribeDesktopImportFileOpen,
+} from "@/features/import/desktop/desktopImportFiles";
 import {
   detectImportFileKind,
   getPortableImportFiles,
@@ -16,10 +24,19 @@ import {
   isSupportedImportFileKind,
 } from "@/features/import/domain/importFileKind";
 import {
-  readDesktopImportFiles,
-  subscribeDesktopImportFileOpen,
-} from "@/features/import/desktop/desktopImportFiles";
+  type ImportFormat,
+  ImportFormatDialog,
+} from "@/features/import/presentation/web/ImportFormatDialog";
+import { PortableImportBatchDialog } from "@/features/import/presentation/web/PortableImportBatchDialog";
 import { XlsxImportDialog } from "@/features/import/presentation/web/XlsxImportDialog";
+
+import { SectionListColumnPane } from "@/components/folder/components/SectionListColumnPane";
+import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
+import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions";
+import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
+import { useTreeViewFilters } from "@/components/folder/hooks/useTreeViewFilters";
+
+import { useToast } from "@/contexts/ToastContext";
 import { useCardCommands } from "@/hooks/card/useCardCommands";
 import { useCardsRead } from "@/hooks/card/useCardsRead";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
@@ -35,22 +52,6 @@ import {
   createPageUrl,
 } from "@/platform/web/navigation/toWebPath";
 import type { CardSet, Folder, SelectedExplorerItem } from "@/types";
-import type { DragEvent } from "react";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from "react";
-import { useNavigate } from "react-router-dom";
-
-import { SectionListColumnPane } from "@/components/folder/components/SectionListColumnPane";
-import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
-
-import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions";
-import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
-import { useTreeViewFilters } from "@/components/folder/hooks/useTreeViewFilters";
 
 interface TreeViewLayoutProps {
   folders: Folder[];
@@ -301,9 +302,9 @@ const TreeViewLayout = ({
       cardSet:
         activeSelectedCardSetId && activeSelectedCardSetLabel
           ? {
-              id: activeSelectedCardSetId,
-              label: activeSelectedCardSetLabel,
-            }
+            id: activeSelectedCardSetId,
+            label: activeSelectedCardSetLabel,
+          }
           : null,
     });
   }, [
@@ -699,8 +700,8 @@ const TreeViewLayout = ({
         onRenameFolder={
           selectedFolderId
             ? async (newName: string) => {
-                await updateFolder(selectedFolderId, { folderName: newName });
-              }
+              await updateFolder(selectedFolderId, { folderName: newName });
+            }
             : undefined
         }
         handlers={{
@@ -724,8 +725,8 @@ const TreeViewLayout = ({
         folderName={
           currentHeaderActionFolderId
             ? (folders.find(
-                (folder) => folder.id === currentHeaderActionFolderId,
-              )?.folderName ?? null)
+              (folder) => folder.id === currentHeaderActionFolderId,
+            )?.folderName ?? null)
             : null
         }
         cardSets={importTargetCardSets}
@@ -741,8 +742,8 @@ const TreeViewLayout = ({
         folderName={
           currentHeaderActionFolderId
             ? (folders.find(
-                (folder) => folder.id === currentHeaderActionFolderId,
-              )?.folderName ?? null)
+              (folder) => folder.id === currentHeaderActionFolderId,
+            )?.folderName ?? null)
             : null
         }
         files={queuedPortableImportFiles}
@@ -761,8 +762,8 @@ const TreeViewLayout = ({
         folderName={
           currentHeaderActionFolderId
             ? (folders.find(
-                (folder) => folder.id === currentHeaderActionFolderId,
-              )?.folderName ?? null)
+              (folder) => folder.id === currentHeaderActionFolderId,
+            )?.folderName ?? null)
             : null
         }
         cardSets={importTargetCardSets}
@@ -782,8 +783,8 @@ const TreeViewLayout = ({
         folderName={
           currentHeaderActionFolderId
             ? (folders.find(
-                (folder) => folder.id === currentHeaderActionFolderId,
-              )?.folderName ?? null)
+              (folder) => folder.id === currentHeaderActionFolderId,
+            )?.folderName ?? null)
             : null
         }
         cardSets={importTargetCardSets}

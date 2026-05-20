@@ -1,19 +1,21 @@
-import { useCallback, useRef } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
+import { useCallback, useRef } from "react";
+
 import {
+  type FolderTreeNode,
   getFolderId,
   normalizeFolderId,
-  type FolderTreeNode,
 } from "@/components/folder/explorer/model/utils";
+
 import type { CardSet, SelectedExplorerItem } from "@/types";
 
 type RenameTargetKind = "folder" | "cardSet" | "card" | "document";
 
 type DeleteLikeTarget =
   | {
-      type?: RenameTargetKind | null;
-      id?: string | null;
-    }
+    type?: RenameTargetKind | null;
+    id?: string | null;
+  }
   | null
   | undefined;
 
@@ -295,11 +297,11 @@ export const useFolderActions = ({
         prev.map((folder) =>
           getFolderId(folder) === id
             ? {
-                ...folder,
-                folderName: nextName,
-                folder_name: nextName,
-                updatedAt: new Date(),
-              }
+              ...folder,
+              folderName: nextName,
+              folder_name: nextName,
+              updatedAt: new Date(),
+            }
             : folder,
         ),
       );
@@ -313,10 +315,10 @@ export const useFolderActions = ({
         prev.map((cardSet) =>
           cardSet.id === id
             ? {
-                ...cardSet,
-                name: nextName,
-                updatedAt: new Date(),
-              }
+              ...cardSet,
+              name: nextName,
+              updatedAt: new Date(),
+            }
             : cardSet,
         ),
       );

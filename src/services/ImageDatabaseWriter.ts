@@ -1,15 +1,15 @@
+import { getImageFromFirestore } from "@/infrastructure/images/imageFirestoreReader";
 import {
+  type FirestoreTarget,
   isImageFirestoreDiagnosticsEnabled,
   resolveImageFirestoreTarget,
   saveImageBatchToFirestore,
   saveImageToFirestore,
-  type FirestoreTarget,
 } from "@/infrastructure/images/imageFirestoreWriter";
 import {
   getImageFromIndexedDb,
   saveImageToIndexedDb,
 } from "@/infrastructure/images/imageIndexedDbStore";
-import { getImageFromFirestore } from "@/infrastructure/images/imageFirestoreReader";
 import type { UploadedImage } from "@/types";
 
 class ImageDatabaseWriter {

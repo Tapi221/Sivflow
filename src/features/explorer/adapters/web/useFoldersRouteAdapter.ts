@@ -1,12 +1,15 @@
 import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
+
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
-import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { mapSearchParamsToExplorerRouteState } from "@/features/explorer/mappers/mapSearchParamsToExplorerRouteState";
+
 import {
   getLastSelectedFolderId,
   setLastSelectedFolderId,
 } from "./explorerStorage";
+
+import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 
 export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 

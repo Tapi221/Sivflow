@@ -6,7 +6,9 @@ import {
   startOfWeek,
   subDays,
 } from "date-fns";
+
 import * as C from "@/features/calendar/calendar.constants.desktop";
+
 import type {
   CalendarViewMode,
   TimelineBufferDays,
@@ -37,8 +39,8 @@ export const useCalendarVisibleRange = ({
       ? startOfMonth(normalized)
       : selectedViewMode === "week"
         ? startOfWeek(normalized, {
-            weekStartsOn: C.WEEK_STARTS_ON_MONDAY,
-          })
+          weekStartsOn: C.WEEK_STARTS_ON_MONDAY,
+        })
         : normalized;
   const visibleCount = getRangeDayCount(normalized, selectedViewMode);
   const displayDays = Array.from({ length: visibleCount }, (_, i) =>

@@ -1,18 +1,19 @@
 import React from "react";
+
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import { cn } from "@/lib/utils";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
+import type { CalendarWeekDayGridProps } from "@/features/calendar/calendarPane.types";
 import {
   computeEventLayout,
   toLayoutEvent,
 } from "@/features/calendar/eventchip/EventChip.layout.weekday.desktop";
-
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
-import type { CalendarWeekDayGridProps } from "@/features/calendar/calendarPane.types";
 
 import { CalendarEventChipWeekday } from "../eventchip/EventChip.weekday";
+
+import { cn } from "@/lib/utils";
 
 type CalendarEventPositionStyle = React.CSSProperties & {
   "--calendar-event-start-hour": number;
@@ -33,8 +34,8 @@ const calculateEventPositionStyle = (
   return {
     "--calendar-event-start-hour": Math.max(0, startHour - HOURS[0]),
     "--calendar-event-duration-hours": event.minutes / 60,
-    top: `calc(var(--calendar-event-start-hour) * var(--calendar-hour-row-height))`,
-    height: `calc(var(--calendar-event-duration-hours) * var(--calendar-hour-row-height) - 2px)`,
+    top: "calc(var(--calendar-event-start-hour) * var(--calendar-hour-row-height))",
+    height: "calc(var(--calendar-event-duration-hours) * var(--calendar-hour-row-height) - 2px)",
   };
 };
 

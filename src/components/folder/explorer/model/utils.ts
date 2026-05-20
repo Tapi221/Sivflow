@@ -63,7 +63,7 @@ export const isTextInputTarget = (target: HTMLElement | null): boolean => {
   if (!target) return false;
   if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return true;
   if (target.isContentEditable) return true;
-  return Boolean(target.closest('[contenteditable="true"]'));
+  return Boolean(target.closest("[contenteditable=\"true\"]"));
 };
 
 export const isFileDragEvent = (
@@ -78,10 +78,10 @@ export const isFileDragEvent = (
 
 export const hasOpenModalDialog = (): boolean =>
   Boolean(
-    document.querySelector('[role="dialog"][data-state="open"]') ||
-    document.querySelector('[role="dialog"][aria-modal="true"]') ||
-    document.querySelector('[role="alertdialog"][data-state="open"]') ||
-    document.querySelector('[role="alertdialog"][aria-modal="true"]'),
+    document.querySelector("[role=\"dialog\"][data-state=\"open\"]") ||
+    document.querySelector("[role=\"dialog\"][aria-modal=\"true\"]") ||
+    document.querySelector("[role=\"alertdialog\"][data-state=\"open\"]") ||
+    document.querySelector("[role=\"alertdialog\"][aria-modal=\"true\"]"),
   );
 
 export const extractPdfFiles = (fileList: FileList | null): File[] => {

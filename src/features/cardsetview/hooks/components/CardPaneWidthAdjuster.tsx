@@ -1,6 +1,7 @@
+import React from "react";
+
 import { Slider } from "@/components/ui/slider";
 import { Minus, Plus, RefreshCw } from "@/ui/icons";
-import React from "react";
 
 const clampValue = (value: number, min: number, max: number) => {
   const safeMin = Math.min(min, max);

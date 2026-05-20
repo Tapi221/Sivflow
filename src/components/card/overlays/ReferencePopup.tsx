@@ -1,13 +1,15 @@
 import React from "react";
+
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
+import { ExternalLink, Globe, Link as LinkIcon } from "@/ui/icons";
+
 import type { ReferenceBlockData } from "@/types";
-import { Globe, ExternalLink, Link as LinkIcon } from "@/ui/icons";
 
 interface ReferencePopupProps {
   isOpen: boolean;

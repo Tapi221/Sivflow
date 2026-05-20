@@ -1,9 +1,12 @@
+import { deleteDoc, doc, Timestamp, updateDoc } from "firebase/firestore";
+
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import {
   buildCardSetById,
   resolveCardFolderIdStrict,
 } from "@/domain/card/selectors/cardFolder";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
+
 import { firestoreDb } from "@/services/firebase";
 import {
   cardDocPathSegments,
@@ -11,7 +14,6 @@ import {
 } from "@/services/firestorePaths";
 import { getLocalDb } from "@/services/localDB";
 import type { Card, Folder } from "@/types";
-import { deleteDoc, doc, Timestamp, updateDoc } from "firebase/firestore";
 
 export type TrashItems = {
   folders: Folder[];

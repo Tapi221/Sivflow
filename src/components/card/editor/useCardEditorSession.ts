@@ -1,22 +1,15 @@
 import {
+  type SetStateAction,
   useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type SetStateAction,
 } from "react";
 
 import {
-  makeNewDraft,
-  normalizeSelectedCardId,
-  shouldAutoOpenEditorForCard,
-  type EditorDraft,
-} from "@/components/card/editor/cardEditorUtils";
-import {
   AUTOSAVE_DELAY_MS,
-  NEW_SENTINEL,
   buildCardPatchForToggle,
   buildDraftFromCard,
   buildSavePayload,
@@ -24,13 +17,20 @@ import {
   draftSignature,
   extractCreatedCardId,
   hasMeaningfulDraft,
-  snapshotDraft,
-  toDateOrNull,
+  NEW_SENTINEL,
   type PersistOperation,
   type PersistResult,
+  snapshotDraft,
+  toDateOrNull,
 } from "@/components/card/editor/cardEditorSessionCore";
-import { useCardEntity } from "@/hooks/card/useCardEntity";
+import {
+  type EditorDraft,
+  makeNewDraft,
+  normalizeSelectedCardId,
+  shouldAutoOpenEditorForCard,
+} from "@/components/card/editor/cardEditorUtils";
 
+import { useCardEntity } from "@/hooks/card/useCardEntity";
 import type { Card, CardPatch } from "@/types/domain/card";
 
 type UseCardEditorSessionParams = {
@@ -132,8 +132,8 @@ export const useCardEditorSession = ({
       const resolved =
         typeof next === "function"
           ? (next as (prevState: EditorDraft | null) => EditorDraft | null)(
-              previous,
-            )
+            previous,
+          )
           : next;
 
       draftRef.current = resolved;

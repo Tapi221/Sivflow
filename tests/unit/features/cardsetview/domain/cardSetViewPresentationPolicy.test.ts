@@ -1,6 +1,6 @@
+import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
 import { describe, expect, it } from "vitest";
 
-import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
 import {
   resolvePresentationWidthPx,
   resolveSplitMinimumRequiredWidthPx,

@@ -1,8 +1,11 @@
 import React from "react";
+
+import { RatingCountTiles } from "@/features/study/RatingCountTiles";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+
 import { createPageUrl } from "@/platform/web/navigation/toWebPath";
-import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 
 type Tile = { rating: string; score: number; Icon: unknown };
 

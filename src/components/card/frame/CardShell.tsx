@@ -1,18 +1,20 @@
 import React from "react";
 
 import {
+  cardHeightPxToLayoutRows,
+  layoutRowsToCardHeightPx,
+  snapMinCardHeightPx,
+} from "@constants/shared/flashcard";
+
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import { cn } from "@/lib/utils";
 import type { CssVars } from "@/types/style";
-import {
-  cardHeightPxToLayoutRows,
-  layoutRowsToCardHeightPx,
-  snapMinCardHeightPx,
-} from "@constants/shared/flashcard";
 
 interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
   actions?: React.ReactNode;
@@ -91,11 +93,11 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       if (!body) return baseMin;
 
       const blockRows = Array.from(
-        body.querySelectorAll('[data-block-row="true"]'),
+        body.querySelectorAll("[data-block-row=\"true\"]"),
       ) as HTMLElement[];
       if (blockRows.length > 0) {
         const surface = body.querySelector(
-          '[data-card-surface="true"]',
+          "[data-card-surface=\"true\"]",
         ) as HTMLElement | null;
         const surfaceStyle = surface ? window.getComputedStyle(surface) : null;
         const ruledBottomOffsetPx = Math.max(
@@ -113,7 +115,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         for (const row of blockRows) {
           const measureTarget =
             (row.querySelector(
-              '[data-block-measure-root="true"]',
+              "[data-block-measure-root=\"true\"]",
             ) as HTMLElement | null) ?? row;
           const rowStyle = window.getComputedStyle(row);
           const marginBottom =
@@ -223,21 +225,21 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     const resolvedShellStyle: CssVars =
       resolvedHeightPx != null
         ? {
-            ...(style ?? {}),
-            ...enforcedShellOverflowStyle,
-            "--card-resize-height": `${resolvedHeightPx}px`,
-            minHeight: `${resolvedHeightPx}px`,
-            ...(lockHeight
-              ? {
-                  height: `${resolvedHeightPx}px`,
-                  maxHeight: `${resolvedHeightPx}px`,
-                }
-              : {}),
-          }
+          ...(style ?? {}),
+          ...enforcedShellOverflowStyle,
+          "--card-resize-height": `${resolvedHeightPx}px`,
+          minHeight: `${resolvedHeightPx}px`,
+          ...(lockHeight
+            ? {
+              height: `${resolvedHeightPx}px`,
+              maxHeight: `${resolvedHeightPx}px`,
+            }
+            : {}),
+        }
         : {
-            ...(style ?? {}),
-            ...enforcedShellOverflowStyle,
-          };
+          ...(style ?? {}),
+          ...enforcedShellOverflowStyle,
+        };
 
     return (
       <div
@@ -351,17 +353,17 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
                 const snappedSteps =
                   deltaY >= 0
                     ? Math.max(
-                        0,
-                        Math.floor(
-                          (deltaY + resizeStepPx * 0.75) / resizeStepPx,
-                        ),
-                      )
+                      0,
+                      Math.floor(
+                        (deltaY + resizeStepPx * 0.75) / resizeStepPx,
+                      ),
+                    )
                     : Math.min(
-                        0,
-                        Math.ceil(
-                          (deltaY - resizeStepPx * 0.25) / resizeStepPx,
-                        ),
-                      );
+                      0,
+                      Math.ceil(
+                        (deltaY - resizeStepPx * 0.25) / resizeStepPx,
+                      ),
+                    );
                 const nextRowsRaw = resizeRef.current.baseRows + snappedSteps;
                 const nextHeightRaw = layoutRowsToCardHeightPx(nextRowsRaw);
                 const nextHeight = clampHeight(nextHeightRaw);

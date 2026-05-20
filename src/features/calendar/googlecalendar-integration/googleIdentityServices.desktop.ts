@@ -118,18 +118,18 @@ export const requestWebAccessTokenViaGis = async ({
     client.requestAccessToken(
       silent
         ? {
-            // ヒント: 直前に接続したアカウントのメールを渡すとサイレント成功率が上がる
-            hint: (() => {
-              try {
-                return (
-                  localStorage.getItem("flashcard-master.gcal.account_email") ??
+          // ヒント: 直前に接続したアカウントのメールを渡すとサイレント成功率が上がる
+          hint: (() => {
+            try {
+              return (
+                localStorage.getItem("flashcard-master.gcal.account_email") ??
                   undefined
-                );
-              } catch {
-                return undefined;
-              }
-            })(),
-          }
+              );
+            } catch {
+              return undefined;
+            }
+          })(),
+        }
         : undefined,
     );
   });

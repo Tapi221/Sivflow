@@ -31,7 +31,7 @@ const makeRepeatSvg = (
     `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="${rowPx}">` +
     `<line x1="0" y1="${y + linePx / 2}" x2="1" y2="${y + linePx / 2}" ` +
     `stroke="${color}" stroke-width="${linePx}"/>` +
-    `</svg>`;
+    "</svg>";
   return toDataUri(svg);
 };
 
@@ -40,7 +40,7 @@ const makeLineSvg = (color: string, linePx: number) => {
     `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="${linePx}">` +
     `<line x1="0" y1="${linePx / 2}" x2="1" y2="${linePx / 2}" ` +
     `stroke="${color}" stroke-width="${linePx}"/>` +
-    `</svg>`;
+    "</svg>";
   return toDataUri(svg);
 };
 

@@ -1,6 +1,8 @@
 import React from "react";
-import { cn } from "@/lib/utils";
+
 import { getRuledStyle, type RuledStyleKind } from "./ruledStyles";
+
+import { cn } from "@/lib/utils";
 
 type CSSVars = React.CSSProperties & Record<`--${string}`, string>;
 

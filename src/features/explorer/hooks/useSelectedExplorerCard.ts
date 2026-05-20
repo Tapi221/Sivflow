@@ -1,7 +1,8 @@
 import { useLiveQuery } from "dexie-react-hooks";
 
-import { useAuthSession } from "@/contexts/AuthContext";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+
+import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
 
 export const useSelectedExplorerCard = (cardId: string | null) => {

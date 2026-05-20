@@ -1,6 +1,5 @@
 import { Pencil, Tag, Trash2 } from "@/ui/icons";
-import { beginInlineRename } from "./explorerMenuStateHelpers";
-import type { MenuAction } from "./menuActions";
+
 import {
   AddDocumentIcon,
   BulkImportIcon,
@@ -12,6 +11,8 @@ import {
   FolderContextRenameIcon,
   FolderContextTrashIcon,
 } from "./explorerMenuActionIcons";
+import { beginInlineRename } from "./explorerMenuStateHelpers";
+import type { MenuAction } from "./menuActions";
 
 interface BuildFolderMenuActionsParams {
   onCreateSubfolder?: () => void;
@@ -102,20 +103,20 @@ export const buildEntityRenameDeleteMenuActions = ({
     deleteLabel,
     onRename: canRename
       ? () => {
-          beginInlineRename({
-            id,
-            name,
-            closeMenu,
-            setEditingId,
-            setEditingName,
-            beforeStart: beforeRename,
-          });
-        }
+        beginInlineRename({
+          id,
+          name,
+          closeMenu,
+          setEditingId,
+          setEditingName,
+          beforeStart: beforeRename,
+        });
+      }
       : undefined,
     onDelete: onDelete
       ? () => {
-          onDelete(id, type);
-        }
+        onDelete(id, type);
+      }
       : undefined,
   });
 

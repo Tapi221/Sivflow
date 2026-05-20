@@ -4,13 +4,14 @@
  *
  * Flashcard.tsx から overlay 部分を分離している。
  */
+import React from "react";
+
 import type {
   InkHistoryState,
   InkLayerHandle,
 } from "@/components/ink/InkLayer";
 import { InkLayer, InkToolbar } from "@/components/ink/InkLayer";
 import type { InkDocument, InkEditTool } from "@/components/ink/inkTypes";
-import React from "react";
 
 interface FlashcardInkOverlayProps {
   // extraHeader / footer

@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
+import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
 import { act, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMetaPanel";
 import type { Card } from "@/types";
-import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
 
 const cardMetaPanelPropsSpy = vi.hoisted(() => vi.fn());
 

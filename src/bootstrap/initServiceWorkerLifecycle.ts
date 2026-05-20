@@ -1,6 +1,7 @@
 import { BOOTSTRAP_RELOAD_KEYS } from "@constants/shared/app";
-import { logBootstrapFault } from "./logBootstrapFault";
+
 import { toErrorText } from "./errorUtils";
+import { logBootstrapFault } from "./logBootstrapFault";
 import { hardReloadOnce } from "./reloadGuard";
 
 let started = false;

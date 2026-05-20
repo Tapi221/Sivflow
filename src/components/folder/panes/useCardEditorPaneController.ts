@@ -1,5 +1,14 @@
 import React from "react";
 
+import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
+
+import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
+
+import {
+  type CardSetViewEditingDraftPatch,
+  subscribeCardSetViewWindowEvent,
+} from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
+
 import { useCardEditorContentController } from "@/components/card/editor/useCardEditorContentController";
 import { useCardEditorSession } from "@/components/card/editor/useCardEditorSession";
 import { useLayoutRowsController } from "@/components/card/editor/useLayoutRowsController";
@@ -11,13 +20,8 @@ import {
   resolveSelectedCardSnapshot,
   writeStoredMetaPanelOpen,
 } from "@/components/folder/panes/cardEditorPaneControllerCore";
+
 import { useToast } from "@/contexts/ToastContext";
-import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
-import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
-import {
-  subscribeCardSetViewWindowEvent,
-  type CardSetViewEditingDraftPatch,
-} from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { useCards } from "@/hooks/card/useCards";
 import { useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
@@ -137,10 +141,10 @@ export const useCardEditorPaneController = ({
           const nextDraft = applyEditingDraftPatch({
             currentDraft: prev
               ? {
-                  title: prev.title,
-                  isDraft: prev.isDraft,
-                  tags: prev.tags,
-                }
+                title: prev.title,
+                isDraft: prev.isDraft,
+                tags: prev.tags,
+              }
               : null,
             detail,
             selectedCardId: sessionSelectedCard?.id ?? null,

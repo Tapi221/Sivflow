@@ -1,9 +1,9 @@
-import { Plus } from "@/ui/icons";
-import { Link } from "@/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Plus } from "@/ui/icons";
+import { Link } from "@/ui/icons";
 
+import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
 
 type LinkEditorProps = {

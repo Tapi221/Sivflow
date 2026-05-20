@@ -1,19 +1,22 @@
+import { useCallback, useMemo } from "react";
+
+import {
+  buildCardSetById,
+  resolveCardFolderIdStrict,
+} from "@/domain/card/selectors/cardFolder";
+
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import {
-  ROOT_FOLDER_ID,
   getEntityTime,
   getFolderId,
   getParentFolderId,
   isSameFolder,
   normalizeFolderId,
+  ROOT_FOLDER_ID,
 } from "@/components/folder/explorer/model/utils";
-import {
-  buildCardSetById,
-  resolveCardFolderIdStrict,
-} from "@/domain/card/selectors/cardFolder";
+
 import { compareOrderableEntities } from "@/lib/orderableEntity";
 import type { Card, CardSet, DocumentItem, ExplorerItem } from "@/types";
-import { useCallback, useMemo } from "react";
 
 type LegacyEntityFields = {
   isDeleted?: boolean;

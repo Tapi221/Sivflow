@@ -1,12 +1,13 @@
 import type { CSSProperties, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { FileText, Layers, Plus, X } from "@/ui/icons";
-import { cn } from "@/lib/utils";
-
-import type { WorkspaceTab } from "@/features/tab/Tab";
-import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
+import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
+import type { WorkspaceTab } from "@/features/tab/Tab";
+
+import { FileText, Layers, Plus, X } from "@/ui/icons";
+
+import { cn } from "@/lib/utils";
 
 type WorkspaceTabsBarVariant = "workspace" | "titlebar";
 
@@ -51,24 +52,24 @@ const resolveInactiveTabIconClassName = (isTitlebar: boolean): string =>
 const resolveCloseButtonClassName = (isTitlebar: boolean): string =>
   isTitlebar
     ? [
-        "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
-        "text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
-      ].join(" ")
+      "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
+      "text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
+    ].join(" ")
     : [
-        "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
-        "text-[var(--app-sidebar-icon)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
-      ].join(" ");
+      "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
+      "text-[var(--app-sidebar-icon)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
+    ].join(" ");
 
 const resolveAddButtonClassName = (isTitlebar: boolean): string =>
   isTitlebar
     ? [
-        "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-transparent outline-none transition-colors",
-        "bg-transparent text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
-      ].join(" ")
+      "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-transparent outline-none transition-colors",
+      "bg-transparent text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
+    ].join(" ")
     : [
-        "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-transparent outline-none transition-colors",
-        "text-[var(--app-sidebar-text)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
-      ].join(" ");
+      "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-transparent outline-none transition-colors",
+      "text-[var(--app-sidebar-text)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
+    ].join(" ");
 
 const resolveNextTabOnClose = (
   tabs: WorkspaceTab[],
@@ -260,9 +261,9 @@ export const WorkspaceTabsBar = ({
                   selected
                     ? "explorer-workspace-tab--active border-black/12 border-b-[var(--app-active-tab-bg,#ffffff)] text-[var(--app-sidebar-text-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]"
                     : cn(
-                        "explorer-workspace-tab--inactive border-transparent",
-                        inactiveTextClassName,
-                      ),
+                      "explorer-workspace-tab--inactive border-transparent",
+                      inactiveTextClassName,
+                    ),
                   resolveTabWidthClassName(tab),
                 )}
               >

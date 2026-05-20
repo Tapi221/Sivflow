@@ -1,9 +1,3 @@
-import type { Card, CardSet, Folder } from "@/types";
-import type {
-  SyncConflict as StoredSyncConflict,
-  SyncResult,
-} from "@/types/domain/sync";
-import type { SyncContextSource } from "@/types/domain/telemetry";
 import {
   collection,
   deleteDoc,
@@ -16,7 +10,7 @@ import {
   where,
 } from "firebase/firestore";
 import { nanoid } from "nanoid";
-import { requireFirestoreDb } from "@/infrastructure/firebase/client";
+
 import type {
   ICloudSyncAdapter,
   IDiffEngine,
@@ -35,6 +29,14 @@ import type {
 import type { LocalDBLike } from "./localDB";
 import { SecurityMonitor } from "./logic/SecurityMonitor";
 import { TelemetryService } from "./logic/TelemetryService";
+
+import { requireFirestoreDb } from "@/infrastructure/firebase/client";
+import type { Card, CardSet, Folder } from "@/types";
+import type {
+  SyncConflict as StoredSyncConflict,
+  SyncResult,
+} from "@/types/domain/sync";
+import type { SyncContextSource } from "@/types/domain/telemetry";
 
 const SYNC_TABLE_BY_TYPE = {
   card: "cards",
@@ -673,9 +675,9 @@ export class SyncServiceV2 implements ISyncService {
         const nextRecord =
           changeType === "card"
             ? applyLocalCardSyncMetadata(remoteData, {
-                syncedAt,
-                syncState: "synced",
-              })
+              syncedAt,
+              syncState: "synced",
+            })
             : remoteData;
 
         await this.localDB.upsert(table, nextRecord as never, true);
@@ -697,9 +699,9 @@ export class SyncServiceV2 implements ISyncService {
       const nextRecord =
         changeType === "card"
           ? applyLocalCardSyncMetadata(mergedWithLocalFields, {
-              syncedAt,
-              syncState: conflict ? "conflict" : "synced",
-            })
+            syncedAt,
+            syncState: conflict ? "conflict" : "synced",
+          })
           : mergedWithLocalFields;
 
       if (conflict) {
@@ -776,9 +778,9 @@ export class SyncServiceV2 implements ISyncService {
           const nextRecord =
             changeType === "card"
               ? applyLocalCardSyncMetadata(data, {
-                  syncedAt: resyncedAt,
-                  syncState: "synced",
-                })
+                syncedAt: resyncedAt,
+                syncState: "synced",
+              })
               : data;
 
           await this.localDB.putSyncRecord(
@@ -966,18 +968,18 @@ export class SyncServiceV2 implements ISyncService {
       updatedAt: Date.now(),
       data: settings
         ? {
-            id: settings.id,
-            autoSync: settings.autoSync,
-            intervalMinutes: settings.intervalMinutes,
-            wifiOnly: settings.wifiOnly,
-            autoCleanupDevices: settings.autoCleanupDevices,
-          }
+          id: settings.id,
+          autoSync: settings.autoSync,
+          intervalMinutes: settings.intervalMinutes,
+          wifiOnly: settings.wifiOnly,
+          autoCleanupDevices: settings.autoCleanupDevices,
+        }
         : {
-            autoSync: true,
-            intervalMinutes: 30,
-            wifiOnly: false,
-            autoCleanupDevices: true,
-          },
+          autoSync: true,
+          intervalMinutes: 30,
+          wifiOnly: false,
+          autoCleanupDevices: true,
+        },
     };
   }
 

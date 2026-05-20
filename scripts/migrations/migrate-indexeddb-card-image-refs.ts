@@ -3,8 +3,8 @@
  * 既存 IndexedDB の cards を assetId 参照へ正規化する。
  */
 
-import { getLocalDb } from "@/services/localDB";
 import { normalizeCardImageRefs } from "@/domain/assets/cardImageRefNormalizer";
+import { getLocalDb } from "@/services/localDB";
 
 const migrateIndexedDbCardImages = async (userId: string) => {
   const db = await getLocalDb(userId);

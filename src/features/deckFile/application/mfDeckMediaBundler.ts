@@ -12,6 +12,7 @@ import type {
   MfDeckMediaEntryV1,
   MfDeckMediaManifestV1,
 } from "@/features/deckFile/domain/mfDeckTypes";
+
 import type { CardBlock } from "@/types";
 
 export type MfDeckMediaBundle = {

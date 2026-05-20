@@ -1,8 +1,8 @@
 import { getImageFromFirestore } from "@/infrastructure/images/imageFirestoreReader";
 import { getLocalDb } from "@/infrastructure/localdb/client";
-import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import { getImageBlob } from "@/services/imageFileStore";
 import { scrubBlobUrlsDeep } from "@/services/localdb/blobUrl";
+import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import type {
   AssetRecord,
   AssetRemoteStatus,
@@ -604,12 +604,12 @@ const migrateFace = async ({
     Array.isArray(face.attachments?.images) &&
     face.attachments.images.length > 0
       ? await migrateImageArray({
-          userId,
-          images: face.attachments.images,
-          summary,
-          migratedAssetIds,
-          cardId,
-        })
+        userId,
+        images: face.attachments.images,
+        summary,
+        migratedAssetIds,
+        cardId,
+      })
       : face.attachments?.images;
 
   return {
@@ -617,9 +617,9 @@ const migrateFace = async ({
     blocks: nextBlocks,
     attachments: face.attachments
       ? {
-          ...face.attachments,
-          images: nextAttachmentImages,
-        }
+        ...face.attachments,
+        images: nextAttachmentImages,
+      }
       : face.attachments,
   };
 };

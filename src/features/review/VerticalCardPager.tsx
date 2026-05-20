@@ -6,12 +6,15 @@ import React, {
   useRef,
   useState,
 } from "react";
+
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
+
 import {
   buildVerticalCardPagerItemStyle,
   resolveVerticalCardPagerItemWidthSpec,
   type VerticalCardPagerItemWidthSpec,
 } from "./verticalCardPagerWidthSpec";
+
 import { cn } from "@/lib/utils";
 import { isTypingTarget } from "@/utils/isTypingTarget";
 
@@ -608,10 +611,10 @@ const VerticalCardPagerFn = <T,>({
   const bottomSpacerHeight =
     renderRange && renderRange.end < cards.length - 1
       ? Math.max(
-          0,
-          layoutSnapshot.totalHeight -
+        0,
+        layoutSnapshot.totalHeight -
             (layoutSnapshot.offsets[renderRange.end + 1] ?? 0),
-        )
+      )
       : 0;
 
   const scrollToIndex = useCallback(
@@ -938,9 +941,9 @@ const VerticalCardPagerFn = <T,>({
       renderRange == null
         ? null
         : {
-            start: renderRange.start,
-            end: renderRange.end,
-          };
+          start: renderRange.start,
+          end: renderRange.end,
+        };
 
     if (isSameRenderRange(emittedRenderRangeRef.current, nextEffectiveRange)) {
       return;

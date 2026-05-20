@@ -14,18 +14,18 @@ const normalizeTextBlockContent = (content: string) =>
 
 type TextBlockContentProps =
   | {
-      mode: "view";
-      content: string;
-      zoom?: number;
-    }
+    mode: "view";
+    content: string;
+    zoom?: number;
+  }
   | {
-      mode: "edit";
-      content: string;
-      onChange: (content: string) => void;
-      placeholder?: string;
-      autoFocus?: boolean;
-      zoom?: number;
-    };
+    mode: "edit";
+    content: string;
+    onChange: (content: string) => void;
+    placeholder?: string;
+    autoFocus?: boolean;
+    zoom?: number;
+  };
 
 const buildTextBlockPresentation = (zoom?: number) => ({
   textStyle: buildTypographyStyle({

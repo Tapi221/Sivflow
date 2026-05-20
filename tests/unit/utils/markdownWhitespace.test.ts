@@ -1,9 +1,10 @@
+import { describe, expect, it } from "vitest";
+
 import {
   expandTabsInEligibleMarkdownLines,
   normalizeMarkdownEditorValue,
   resolveMarkdownTabKeyText,
 } from "@/utils/markdownWhitespace";
-import { describe, expect, it } from "vitest";
 
 describe("markdownWhitespace", () => {
   it("本文段落ではタブを設定値のスペースへ展開する", () => {

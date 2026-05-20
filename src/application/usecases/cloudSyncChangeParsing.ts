@@ -1,9 +1,9 @@
-import type { SyncChange } from "@/services/interfaces/ISyncService";
-
 import {
-  isCloudEntityType,
   type CloudEntityType,
+  isCloudEntityType,
 } from "./cloudSyncEntityMetadata";
+
+import type { SyncChange } from "@/services/interfaces/ISyncService";
 
 export const getChangeParts = (
   change: SyncChange,

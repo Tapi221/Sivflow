@@ -1,16 +1,17 @@
 /* eslint-disable react-refresh/only-export-components -- context hook/provider are intentionally co-located exports. */
-import { useMemo, type ReactNode } from "react";
+import { type ReactNode,useMemo } from "react";
+
 import {
   AuthSessionProvider,
   useAuthSession,
 } from "@/contexts/auth/AuthSessionContext";
-import { SyncProvider, useSyncContext } from "@/contexts/sync/SyncContext";
 import {
   SecurityProvider,
   useSecurity,
 } from "@/contexts/security/SecurityContext";
+import { SyncProvider, useSyncContext } from "@/contexts/sync/SyncContext";
 
-export { useAuthSession, useSyncContext, useSecurity };
+export { useAuthSession, useSecurity,useSyncContext };
 
 interface AuthProviderProps {
   children: ReactNode;

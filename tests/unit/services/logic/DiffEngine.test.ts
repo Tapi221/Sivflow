@@ -1,5 +1,6 @@
-import { DiffEngine } from "@/services/logic/DiffEngine";
 import { describe, expect, it } from "vitest";
+
+import { DiffEngine } from "@/services/logic/DiffEngine";
 
 // Note: This test file requires 'vitest' to be installed and configured.
 // Since vitest is not in package.json yet, this serves as the implementation

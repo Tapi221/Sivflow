@@ -22,13 +22,13 @@ export const normalizeFolder = (raw: unknown): Folder => {
     ? normalizeDate(rawDeletedAt)
     : isDeleted
       ? (normalizeDate(
-          pick(
-            record.updatedAt,
-            record.updated_at,
-            record.createdAt,
-            record.created_at,
-          ),
-        ) ?? new Date(0))
+        pick(
+          record.updatedAt,
+          record.updated_at,
+          record.createdAt,
+          record.created_at,
+        ),
+      ) ?? new Date(0))
       : null;
 
   const rawParentFolderId = pick(

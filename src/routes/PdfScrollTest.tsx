@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { PdfViewer } from "@/features/pdf/PdfViewer";
+
 import type { PdfViewerHandle } from "@/features/pdf/PdfViewer";
+import { PdfViewer } from "@/features/pdf/PdfViewer";
+
+import { Button } from "@/components/ui/button";
+
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 
 const createE2EPdfData = (pageCount = 14): Uint8Array => {

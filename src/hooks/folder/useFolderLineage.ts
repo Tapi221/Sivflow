@@ -1,7 +1,8 @@
 import { useLiveQuery } from "dexie-react-hooks";
 
-import { useAuthSession } from "@/contexts/AuthContext";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
+
+import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
 import type { Folder } from "@/types/domain/folder";
 

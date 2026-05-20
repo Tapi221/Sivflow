@@ -1,11 +1,3 @@
-import type { SyncTask } from "@/services/interfaces/ISyncService";
-import type {
-  SyncDirection,
-  SyncOperationType,
-  SyncPriority,
-  SyncQueueItem,
-} from "@/types/domain/sync";
-
 import type {
   DeleteEntity,
   UpsertEntity,
@@ -15,6 +7,14 @@ import {
   assertDeletePayload,
   assertUpsertPayload,
 } from "./syncQueuePayloadGuards";
+
+import type { SyncTask } from "@/services/interfaces/ISyncService";
+import type {
+  SyncDirection,
+  SyncOperationType,
+  SyncPriority,
+  SyncQueueItem,
+} from "@/types/domain/sync";
 
 const normalizeForStableHash = (value: unknown): unknown => {
   if (value instanceof Date) {

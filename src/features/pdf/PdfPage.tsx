@@ -1,6 +1,17 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-import { pdfjsLib } from "@/lib/pdfjs";
+
+import {
+  applyPdfOverlayViewportStyles,
+  applyPdfTextLayerViewportStyles,
+  commitPdfBitmapToCanvas,
+  createDetachedPdfCanvasSurface,
+  prepareDetachedPdfCanvasSurfaceForRender,
+} from "@/features/pdf/pdfCanvasRenderUtils";
+import {
+  getCachedPdfPageBitmap,
+  setCachedPdfPageBitmap,
+} from "@/features/pdf/pdfPageBitmapCache";
+import { resolvePdfRenderBackingStore } from "@/features/pdf/pdfRenderQuality";
 import type {
   PageSize,
   PdfJsDocument,
@@ -14,18 +25,9 @@ import {
   isPdfAbortError,
   isPdfTextItem,
 } from "@/features/pdf/pdfViewer.types";
-import { resolvePdfRenderBackingStore } from "@/features/pdf/pdfRenderQuality";
-import {
-  getCachedPdfPageBitmap,
-  setCachedPdfPageBitmap,
-} from "@/features/pdf/pdfPageBitmapCache";
-import {
-  applyPdfOverlayViewportStyles,
-  applyPdfTextLayerViewportStyles,
-  commitPdfBitmapToCanvas,
-  createDetachedPdfCanvasSurface,
-  prepareDetachedPdfCanvasSurfaceForRender,
-} from "@/features/pdf/pdfCanvasRenderUtils";
+
+import { pdfjsLib } from "@/lib/pdfjs";
+import { cn } from "@/lib/utils";
 
 interface PdfPageProps {
   documentKey: string;
@@ -297,19 +299,19 @@ const PdfPageComponent = ({
     canvasRenderState.renderIdentity === renderIdentity
       ? canvasRenderState
       : {
-          renderIdentity,
-          rendered: false,
-          error: null,
-        };
+        renderIdentity,
+        rendered: false,
+        error: null,
+      };
 
   const activeTextLayerState =
     textLayerState.textLayerIdentity === textLayerIdentity
       ? textLayerState
       : {
-          textLayerIdentity,
-          ready: false,
-          warning: null,
-        };
+        textLayerIdentity,
+        ready: false,
+        warning: null,
+      };
 
   useEffect(() => {
     if (typeof window === "undefined") {

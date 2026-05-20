@@ -1,14 +1,14 @@
 import {
+  type Auth,
   GoogleAuthProvider,
   reauthenticateWithPopup,
   signInWithPopup,
-  type Auth,
 } from "firebase/auth";
+
+import { readEmail } from "./gcal.storage";
 
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
-
-import { readEmail } from "./gcal.storage";
 
 // ─────────────────────────────────────
 // constants
@@ -135,8 +135,8 @@ const buildAuthorizeUrl = ({
     ...(silent
       ? {}
       : {
-          prompt: "consent select_account",
-        }),
+        prompt: "consent select_account",
+      }),
   });
 
   return `${GOOGLE_OAUTH_AUTHORIZE_ENDPOINT}?${params.toString()}`;

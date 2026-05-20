@@ -1,7 +1,7 @@
 import {
-  resolveAppDestination,
   type AppDestination,
   type AppScreen,
+  resolveAppDestination,
 } from "@/navigation/core/destination";
 
 const WEB_SCREEN_PATHS: Record<AppScreen, string> = {

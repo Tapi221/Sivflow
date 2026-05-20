@@ -1,5 +1,12 @@
 import React from "react";
 
+import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@constants/shared/flashcard";
+
+import {
+  CARD_LAYOUT_MODE_LABELS,
+  type CardLayoutMode,
+} from "@/features/cardsetview/domain/cardLayoutMode";
+
 import { OverlayToolbar } from "@/components/overlay-toolbar/OverlayToolbar";
 import { OverlayToolbarButton } from "@/components/overlay-toolbar/OverlayToolbarButton";
 import { OverlayToolbarDivider } from "@/components/overlay-toolbar/OverlayToolbarDivider";
@@ -12,11 +19,7 @@ import {
 } from "@/components/overlay-toolbar/OverlayToolbarGlyphs";
 import { OverlayToolbarIndexNavigator } from "@/components/overlay-toolbar/OverlayToolbarIndexNavigator";
 import { OverlayToolbarZoomControl } from "@/components/overlay-toolbar/OverlayToolbarZoomControl";
-import {
-  CARD_LAYOUT_MODE_LABELS,
-  type CardLayoutMode,
-} from "@/features/cardsetview/domain/cardLayoutMode";
-import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@constants/shared/flashcard";
+
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type ZoomControlProps = {

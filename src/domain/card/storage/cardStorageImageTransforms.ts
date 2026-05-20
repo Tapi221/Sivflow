@@ -1,7 +1,8 @@
 import { isStorageRecord } from "@/domain/shared/storage/storageRecordUtils";
+
 import { sanitizeCardStorageImageRef } from "./cardStorageImageRefTransforms";
-export { sanitizeCardStorageLayout } from "./cardStorageLayoutTransforms";
 export { sanitizeCardStorageImageRef } from "./cardStorageImageRefTransforms";
+export { sanitizeCardStorageLayout } from "./cardStorageLayoutTransforms";
 
 export const sanitizeCardStorageBlockImages = (
   blocks: unknown[] | undefined,

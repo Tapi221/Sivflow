@@ -1,6 +1,5 @@
-import { Plus } from "@/ui/icons";
-
 import { Button } from "@/components/ui/button";
+import { Plus } from "@/ui/icons";
 
 type NewCardIdleStateProps = {
   onStartEditing: () => void;

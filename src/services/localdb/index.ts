@@ -1,12 +1,6 @@
 // Public API entry point for localdb module
 
-export type {
-  CardRelation,
-  LocalDBInstance,
-  LocalDBLike,
-  ProjectMap,
-} from "./types";
-
+export { isBackingStoreOpenError } from "./errors";
 export {
   getLocalDb,
   getLocalDbSync,
@@ -14,11 +8,12 @@ export {
   resetLocalDBForLogout,
 } from "./instanceManager";
 export { LocalDB } from "./LocalDB";
-
-export { isBackingStoreOpenError } from "./errors";
-
-export { LOCALDB_RECOVERY_GUIDE_URL } from "@constants/shared/storage";
-
+export type {
+  CardRelation,
+  LocalDBInstance,
+  LocalDBLike,
+  ProjectMap,
+} from "./types";
 export {
   clearLocalDBResetFailureReason,
   getLocalDBRuntimeStatus,
@@ -26,6 +21,7 @@ export {
   subscribeLocalDBRuntimeStatus,
   telemetryOncePerSession,
 } from "@/services/localDBRuntimeState";
+export { LOCALDB_RECOVERY_GUIDE_URL } from "@constants/shared/storage";
 
 if (import.meta.env.DEV) {
   void import("./devtools").then((module) => {

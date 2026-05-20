@@ -1,6 +1,8 @@
 import { createContext, type RefObject } from "react";
-import type { PdfViewerHandle } from "@/features/pdf/PdfViewer";
+
 import type { PdfDocumentController } from "@/features/pdf/hooks/usePdfDocument";
+import type { PdfViewerHandle } from "@/features/pdf/PdfViewer";
+
 import type { DocumentItem, PdfPageLayoutMode } from "@/types";
 
 export interface PdfWorkspaceDocumentContextValue {
@@ -42,8 +44,8 @@ export interface PdfWorkspaceNavigationContextValue {
 
 export interface PdfWorkspaceContextValue
   extends
-    PdfWorkspaceDocumentContextValue,
-    PdfWorkspaceNavigationContextValue {}
+  PdfWorkspaceDocumentContextValue,
+  PdfWorkspaceNavigationContextValue {}
 
 export const PdfWorkspaceDocumentContext =
   createContext<PdfWorkspaceDocumentContextValue | null>(null);

@@ -1,5 +1,6 @@
-import type { PlatformApi } from "@/types/desktop-api";
 import { getDesktopBridge } from "./bridge";
+
+import type { PlatformApi } from "@/types/desktop-api";
 
 const canUseDesktopShell = (url: string): boolean =>
   /^(https?:|mailto:)/i.test(url);

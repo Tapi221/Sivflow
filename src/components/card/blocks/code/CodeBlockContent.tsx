@@ -1,16 +1,3 @@
-import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
-import {
-  buildTypographyStyle,
-  mergeStyles,
-  scaleTypographyNumberPx,
-} from "@/components/card/common/cardSetViewZoom";
-import { cn } from "@/lib/utils";
-import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
-import { codeTheme } from "@/theme/codeTheme";
-import { Check, Copy } from "@/ui/icons";
-import type { RenderProps } from "prism-react-renderer";
-import { Highlight } from "prism-react-renderer";
-import Prism from "prismjs";
 import {
   useCallback,
   useEffect,
@@ -20,12 +7,18 @@ import {
   useState,
 } from "react";
 import Editor from "react-simple-code-editor";
-import { CodeBlockFrame } from "./CodeBlockFrame";
+
+import type { RenderProps } from "prism-react-renderer";
+import { Highlight } from "prism-react-renderer";
+import Prism from "prismjs";
+
+import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import {
-  getViewerLanguageLabels,
-  normalizeEditorLanguage,
-  normalizeViewerLanguage,
-} from "./codeBlockLanguage";
+  buildTypographyStyle,
+  mergeStyles,
+  scaleTypographyNumberPx,
+} from "@/components/card/common/cardSetViewZoom";
+import { Check, Copy } from "@/ui/icons";
 
 import "prismjs/components/prism-bash";
 import "prismjs/components/prism-c";
@@ -44,23 +37,34 @@ import "prismjs/components/prism-rust";
 import "prismjs/components/prism-sql";
 import "prismjs/components/prism-typescript";
 
+import { CodeBlockFrame } from "./CodeBlockFrame";
+import {
+  getViewerLanguageLabels,
+  normalizeEditorLanguage,
+  normalizeViewerLanguage,
+} from "./codeBlockLanguage";
+
+import { cn } from "@/lib/utils";
+import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
+import { codeTheme } from "@/theme/codeTheme";
+
 type CodeBlockContentProps =
   | {
-      mode: "viewer";
-      code: string;
-      language?: string;
-      className?: string;
-      zoom?: number;
-    }
+    mode: "viewer";
+    code: string;
+    language?: string;
+    className?: string;
+    zoom?: number;
+  }
   | {
-      mode: "editor";
-      code: string;
-      language?: string;
-      className?: string;
-      headerLeft?: React.ReactNode;
-      onCodeChange: (nextCode: string) => void;
-      zoom?: number;
-    };
+    mode: "editor";
+    code: string;
+    language?: string;
+    className?: string;
+    headerLeft?: React.ReactNode;
+    onCodeChange: (nextCode: string) => void;
+    zoom?: number;
+  };
 
 export const CodeBlockContent = (props: CodeBlockContentProps) => {
   const [copied, setCopied] = useState(false);

@@ -1,6 +1,6 @@
-import type { UploadedImage } from "@/types";
-
 import type { AssetUploadRequest } from "./persistentOfflineQueueTypes";
+
+import type { UploadedImage } from "@/types";
 
 export const createAssetQueueImage = (
   request: AssetUploadRequest,

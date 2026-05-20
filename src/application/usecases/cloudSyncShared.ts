@@ -1,9 +1,10 @@
+export { getChangeId, getChangeParts } from "./cloudSyncChangeParsing";
 export {
+  type CloudEntityType,
   COLLECTION_BY_TYPE,
   CURRENT_TAG_COLLECTION,
-  PULLABLE_ENTITY_TYPES,
   isCloudEntityType,
-  type CloudEntityType,
+  PULLABLE_ENTITY_TYPES,
   type PullableEntityType,
 } from "./cloudSyncEntityMetadata";
 export {
@@ -11,5 +12,4 @@ export {
   sanitizeSyncDataForCloud,
   sanitizeSyncDataFromCloud,
 } from "./cloudSyncSanitizers";
-export { getChangeId, getChangeParts } from "./cloudSyncChangeParsing";
 export { getUpdatedAtMillis } from "./cloudSyncTimestamps";

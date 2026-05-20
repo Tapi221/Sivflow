@@ -1,5 +1,6 @@
-import { isReviewed, calculateAverageStability } from "../utils/statistics";
 import assert from "assert";
+
+import { calculateAverageStability,isReviewed } from "../utils/statistics";
 
 // Mock Card type for testing
 type MockCard = {

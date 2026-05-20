@@ -4,11 +4,16 @@
  * カード一覧の「表示前プリロード」を担うフック。
  */
 
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import {
   CARD_IMAGE_PRELOAD,
   CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY,
 } from "@constants/web/app";
+import { getDownloadURL, ref as storageRef } from "firebase/storage";
+
 import { getCardImages } from "@/domain/card/content";
+
 import { storage } from "@/services/firebase";
 import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 import { getBlobCacheStats } from "@/services/imageBlobUrlSessionCache";
@@ -21,8 +26,6 @@ import {
 } from "@/services/imagePreloadCache";
 import { getLocalDb } from "@/services/localDB";
 import type { Card, UploadedImage } from "@/types/domain/card";
-import { getDownloadURL, ref as storageRef } from "firebase/storage";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const isDebug = (): boolean =>
   typeof localStorage !== "undefined" &&
@@ -161,13 +164,13 @@ const resolvePreloadWindow = ({
 
   const eagerEnd = renderRange
     ? Math.min(
-        cardsLength - 1,
-        renderRange.end + CARD_IMAGE_PRELOAD.eagerBuffer,
-      )
+      cardsLength - 1,
+      renderRange.end + CARD_IMAGE_PRELOAD.eagerBuffer,
+    )
     : Math.min(
-        cardsLength - 1,
-        activeIndex + CARD_IMAGE_PRELOAD.eagerRadiusFallback,
-      );
+      cardsLength - 1,
+      activeIndex + CARD_IMAGE_PRELOAD.eagerRadiusFallback,
+    );
 
   const idleStart = Math.max(0, eagerStart - CARD_IMAGE_PRELOAD.idleExtra);
   const idleEnd = Math.min(
@@ -427,22 +430,22 @@ export const useCardImagePreloader = (
     const ric =
       typeof window !== "undefined" && "requestIdleCallback" in window
         ? (
-            window as unknown as {
-              requestIdleCallback: (
-                cb: () => void,
-                opts?: { timeout: number },
-              ) => IdleHandle;
-            }
-          ).requestIdleCallback
+          window as unknown as {
+            requestIdleCallback: (
+              cb: () => void,
+              opts?: { timeout: number },
+            ) => IdleHandle;
+          }
+        ).requestIdleCallback
         : null;
 
     const cic =
       typeof window !== "undefined" && "cancelIdleCallback" in window
         ? (
-            window as unknown as {
-              cancelIdleCallback: (id: IdleHandle) => void;
-            }
-          ).cancelIdleCallback
+          window as unknown as {
+            cancelIdleCallback: (id: IdleHandle) => void;
+          }
+        ).cancelIdleCallback
         : null;
 
     const idleHandles: IdleHandle[] = [];

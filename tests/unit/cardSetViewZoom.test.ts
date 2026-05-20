@@ -1,10 +1,11 @@
+import { describe, expect, it } from "vitest";
+
 import {
   buildTypographyStyle,
   normalizeCardSetViewZoom,
   scaleTypographyNumberPx,
   scaleTypographyValuePx,
 } from "@/components/card/common/cardSetViewZoom";
-import { describe, expect, it } from "vitest";
 
 describe("cardSetViewZoom", () => {
   it("normalizes invalid values to 1", () => {

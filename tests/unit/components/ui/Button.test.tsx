@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { Button, buttonVariants } from "@/components/ui/button";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+
+import { Button, buttonVariants } from "@/components/ui/button";
 
 describe("Button", () => {
   it("keeps the default public variant contract while using token classes", () => {

@@ -1,6 +1,6 @@
 import {
-  calculateRetentionProbability,
   calculateResistanceScore,
+  calculateRetentionProbability,
 } from "@/utils/reviewMetrics";
 import { getStabilityPhase } from "@/utils/reviewUtils";
 

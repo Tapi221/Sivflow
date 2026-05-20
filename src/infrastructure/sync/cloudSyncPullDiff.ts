@@ -1,4 +1,3 @@
-import type { SyncChange } from "@/services/interfaces/ISyncService";
 import type {
   DocumentData,
   QueryConstraint,
@@ -16,18 +15,19 @@ import {
 } from "firebase/firestore";
 
 import {
-  COLLECTION_BY_TYPE,
-  PULLABLE_ENTITY_TYPES,
-  getUpdatedAtMillis,
-  sanitizeSyncDataFromCloud,
-  type PullableEntityType,
-} from "@/application/usecases/cloudSyncShared";
-
-import {
   getPullableCollectionRef,
   getUserSettingsRef,
   requireCloudSyncFirestore,
 } from "./cloudSyncFirestoreRefs";
+
+import {
+  COLLECTION_BY_TYPE,
+  getUpdatedAtMillis,
+  PULLABLE_ENTITY_TYPES,
+  type PullableEntityType,
+  sanitizeSyncDataFromCloud,
+} from "@/application/usecases/cloudSyncShared";
+import type { SyncChange } from "@/services/interfaces/ISyncService";
 
 const PAGE_SIZE = 500;
 
@@ -49,8 +49,8 @@ export const pullCloudSyncDiff = async (
     const startAfterFn =
       typeof startAfterValue === "function"
         ? (startAfterValue as (
-            snapshot: QueryDocumentSnapshot<DocumentData>,
-          ) => QueryConstraint)
+          snapshot: QueryDocumentSnapshot<DocumentData>,
+        ) => QueryConstraint)
         : null;
 
     const pullCollectionDiff = async (type: PullableEntityType) => {

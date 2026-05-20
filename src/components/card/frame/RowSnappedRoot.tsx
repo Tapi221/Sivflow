@@ -1,5 +1,7 @@
 import React from "react";
+
 import { RowSnap } from "./RowSnap";
+
 import type { CssVars } from "@/types/style";
 
 type RowSnappedRootProps = {

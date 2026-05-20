@@ -1,6 +1,7 @@
+import { useMemo } from "react";
+
 import { resolveCardTagNames } from "@/hooks/settings/useTags";
 import type { Card, DocumentItem } from "@/types";
-import { useMemo } from "react";
 
 type TagMapLike = Parameters<typeof resolveCardTagNames>[1];
 

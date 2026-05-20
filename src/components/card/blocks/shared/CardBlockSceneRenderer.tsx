@@ -1,6 +1,5 @@
 import React from "react";
 
-import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import { CodeBlockContent } from "@/components/card/blocks/code/CodeBlockContent";
 import { normalizeEditorLanguage } from "@/components/card/blocks/code/codeBlockLanguage";
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
@@ -11,10 +10,11 @@ import {
   MarkdownBlockContent,
   type MarkdownReplaceBlock,
 } from "@/components/card/blocks/markdown/MarkdownBlockContent";
-import { MathEditorDialog } from "@/components/card/blocks/math/MathEditorDialog";
 import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
+import { MathEditorDialog } from "@/components/card/blocks/math/MathEditorDialog";
 import { QuestionBlockContent } from "@/components/card/blocks/question/QuestionBlockContent";
 import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent";
+import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import { AudioPlayer } from "@/components/card/media/CardMedia";
 import {
   Select,
@@ -24,11 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import type { CodeBlockData } from "@/types/core/code-block";
-import type { UploadedImage } from "@/types/domain/assets";
-import type { MathBlockData, ReferenceBlockData } from "@/types/domain/base";
-import type { CardBlock } from "@/types/domain/card";
 import {
   Code,
   HelpCircle,
@@ -39,6 +34,12 @@ import {
   Volume2,
 } from "@/ui/icons";
 
+import { cn } from "@/lib/utils";
+import type { CodeBlockData } from "@/types/core/code-block";
+import type { UploadedImage } from "@/types/domain/assets";
+import type { MathBlockData, ReferenceBlockData } from "@/types/domain/base";
+import type { CardBlock } from "@/types/domain/card";
+
 export type CardBlockLayoutReplaceBlock = MarkdownReplaceBlock;
 
 export type ViewerProps = Readonly<{
@@ -48,10 +49,10 @@ export type ViewerProps = Readonly<{
     item:
       | string
       | {
-          url?: string | null;
-          remoteUrl?: string | null;
-          localUrl?: string | null;
-        }
+        url?: string | null;
+        remoteUrl?: string | null;
+        localUrl?: string | null;
+      }
       | null
       | undefined,
   ) => string | null;
@@ -83,17 +84,17 @@ export type EditorProps = Readonly<{
 
 type CardBlockSceneRendererProps =
   | Readonly<{
-      mode: "edit";
-      block: CardBlock;
-      meta: BlockListRowMeta;
-      editorProps: EditorProps;
-    }>
+    mode: "edit";
+    block: CardBlock;
+    meta: BlockListRowMeta;
+    editorProps: EditorProps;
+  }>
   | Readonly<{
-      mode: "view";
-      block: CardBlock;
-      meta: BlockListRowMeta;
-      viewerProps: ViewerProps;
-    }>;
+    mode: "view";
+    block: CardBlock;
+    meta: BlockListRowMeta;
+    viewerProps: ViewerProps;
+  }>;
 
 type SharedShellProps = Readonly<{
   mode: "edit" | "view";
@@ -519,15 +520,15 @@ const AudioBlockScene = ({
   const audioUrls =
     mode === "view"
       ? (block.audios ?? [])
-          .map(
-            viewerProps?.toMediaUrl ??
+        .map(
+          viewerProps?.toMediaUrl ??
               ((item) =>
                 typeof item === "string" ? item : (item?.url ?? null)),
-          )
-          .filter((item): item is string => Boolean(item))
+        )
+        .filter((item): item is string => Boolean(item))
       : (block.audios ?? [])
-          .map((item) => item?.url?.trim() ?? "")
-          .filter((item): item is string => item.length > 0);
+        .map((item) => item?.url?.trim() ?? "")
+        .filter((item): item is string => item.length > 0);
 
   return (
     <SharedBlockShell

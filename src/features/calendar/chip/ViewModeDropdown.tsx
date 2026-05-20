@@ -1,5 +1,6 @@
-import * as Popover from "@radix-ui/react-popover";
 import { useRef, useState } from "react";
+
+import * as Popover from "@radix-ui/react-popover";
 
 export type ViewMode = "month" | "week" | "days";
 

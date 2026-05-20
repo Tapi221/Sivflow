@@ -343,9 +343,9 @@ const buildSelectionResult = ({
     lines.length > 0
       ? lines.map((line, index) => ({ ...line, order: index }))
       : buildOriginLines(
-          normalizedFinalText,
-          source === "hybrid" ? "native" : source,
-        );
+        normalizedFinalText,
+        source === "hybrid" ? "native" : source,
+      );
   const qualityScore = Math.max(nativeQualityScore, ocrQualityScore);
 
   return {

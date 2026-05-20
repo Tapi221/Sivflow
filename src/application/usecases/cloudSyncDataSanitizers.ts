@@ -1,2 +1,2 @@
-export { sanitizeSyncDataForCloud } from "./cloudSyncToCloudSanitizer";
 export { sanitizeSyncDataFromCloud } from "./cloudSyncFromCloudSanitizer";
+export { sanitizeSyncDataForCloud } from "./cloudSyncToCloudSanitizer";

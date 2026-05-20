@@ -1,11 +1,14 @@
 import React, { useState } from "react";
-import { Tag as TagIcon } from "@/ui/icons";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { useTags } from "@/hooks/settings/useTags";
-import { TagBadge } from "@/components/tag/TagBadge";
+
 import { getTagColorKey } from "@/features/tag/tagColor";
+
+import { TagBadge } from "@/components/tag/TagBadge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Tag as TagIcon } from "@/ui/icons";
+
+import { useTags } from "@/hooks/settings/useTags";
+import { cn } from "@/lib/utils";
 
 interface BulkTagDialogProps {
   open: boolean;

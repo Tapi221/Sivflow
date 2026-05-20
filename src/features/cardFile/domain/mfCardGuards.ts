@@ -1,5 +1,3 @@
-import { isMfDeckCardsJsonV1 } from "@/features/deckFile/domain/mfDeckGuards";
-import { MF_DECK_VERSION } from "@/features/deckFile/domain/mfDeckTypes";
 import {
   MF_CARD_FORMAT,
   MF_CARD_VERSION,
@@ -7,6 +5,8 @@ import {
   type MfCardIssue,
   type MfCardValidationResult,
 } from "@/features/cardFile/domain/mfCardTypes";
+import { isMfDeckCardsJsonV1 } from "@/features/deckFile/domain/mfDeckGuards";
+import { MF_DECK_VERSION } from "@/features/deckFile/domain/mfDeckTypes";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);

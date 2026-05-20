@@ -1,5 +1,5 @@
-import type { Notification, NotificationOptions } from "@/types/notification";
 import platform from "@/platform";
+import type { Notification, NotificationOptions } from "@/types/notification";
 
 type NotificationListener = (notification: Notification) => void;
 

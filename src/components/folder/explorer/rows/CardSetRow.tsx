@@ -1,10 +1,10 @@
+import React from "react";
+
+import { ExplorerChromeCardSetIcon } from "@/components/explorer/icons";
 import { buildEntityRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
-import { ExplorerChromeCardSetIcon } from "@/components/explorer/icons";
-import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight } from "@/ui/icons";
-import React from "react";
-import { SidebarEntityRow } from "./SidebarEntityRow";
+
 import {
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
@@ -16,6 +16,9 @@ import {
   FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "./shared";
+import { SidebarEntityRow } from "./SidebarEntityRow";
+
+import { cn } from "@/lib/utils";
 
 interface CardSetRowProps {
   treeNode: TreeNode & { kind: "cardSet" };
@@ -94,8 +97,8 @@ export const CardSetRow = ({
         canRename,
         onDelete: canDelete
           ? (id, type) => {
-              handleDelete(id, type);
-            }
+            handleDelete(id, type);
+          }
           : undefined,
       }),
     [

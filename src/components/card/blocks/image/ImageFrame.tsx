@@ -1,5 +1,6 @@
-import { cn } from "@/lib/utils";
 import React from "react";
+
+import { cn } from "@/lib/utils";
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
@@ -115,9 +116,9 @@ export const ImageFrame = ({
     layoutBaseWidthPx > 0
       ? layoutBaseWidthPx
       : inferBaseWidthFromLegacyScale(
-          resolvedReferenceWidthPx,
-          safeLegacyScale,
-        );
+        resolvedReferenceWidthPx,
+        safeLegacyScale,
+      );
 
   const normalizedScale = clamp(
     resolvedBaseWidthPx / Math.max(1, resolvedReferenceWidthPx),
@@ -141,16 +142,16 @@ export const ImageFrame = ({
     displayMode === "fluid"
       ? Math.max(1, resolvedAvailableWidthPx)
       : Math.min(
-          Math.max(1, resolvedReferenceWidthPx),
-          Math.max(1, resolvedAvailableWidthPx),
-        );
+        Math.max(1, resolvedReferenceWidthPx),
+        Math.max(1, resolvedAvailableWidthPx),
+      );
 
   const imageWidthPx =
     displayMode === "fluid"
       ? Math.min(
-          Math.max(1, resolvedBaseWidthPx * safeZoom),
-          Math.max(1, slotWidthPx),
-        )
+        Math.max(1, resolvedBaseWidthPx * safeZoom),
+        Math.max(1, slotWidthPx),
+      )
       : Math.min(Math.max(1, resolvedBaseWidthPx), Math.max(1, slotWidthPx));
 
   const imageHeightPx = Math.max(1, imageWidthPx * ratio);

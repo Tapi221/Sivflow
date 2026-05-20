@@ -1,24 +1,25 @@
-import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
-import { getLocalDb } from "@/services/localDB";
+import { getDownloadURL, ref as storageRef } from "firebase/storage";
+
 import { storage } from "@/services/firebase";
+import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 import {
   getCachedRemoteUrl,
   setCachedRemoteUrl,
 } from "@/services/imagePreloadCache";
+import { getLocalDb } from "@/services/localDB";
 import type { AssetRecord, ResolvableImageRef, UploadedImage } from "@/types";
-import { getDownloadURL, ref as storageRef } from "firebase/storage";
 
 type ImageRecordLike =
   | {
-      remoteUrlCache?: string | null;
-      remoteUrl?: string | null;
-      remoteKey?: string | null;
-      storagePath?: string | null;
-      localBlobId?: string | null;
-      localFileId?: string | null;
-      remoteStatus?: "pending" | "uploading" | "ready" | "failed" | null;
-      status?: "pending" | "uploading" | "ready" | "failed" | null;
-    }
+    remoteUrlCache?: string | null;
+    remoteUrl?: string | null;
+    remoteKey?: string | null;
+    storagePath?: string | null;
+    localBlobId?: string | null;
+    localFileId?: string | null;
+    remoteStatus?: "pending" | "uploading" | "ready" | "failed" | null;
+    status?: "pending" | "uploading" | "ready" | "failed" | null;
+  }
   | undefined;
 
 const isNonEmptyString = (value: unknown): value is string =>

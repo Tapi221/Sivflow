@@ -16,13 +16,14 @@
 import { useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
+import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
+import type { WorkspaceSidebarSection, WorkspaceTab } from "@/features/tab/Tab";
+
 import {
   useBreadcrumbAction,
   useBreadcrumbExtraCrumbs,
 } from "@/contexts/BreadcrumbContext";
-import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
-import type { WorkspaceSidebarSection, WorkspaceTab } from "@/features/tab/Tab";
-import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 
 // ─────────────────────────────────────────
 // 定数（WorkspaceBreadcrumbBar から移動）

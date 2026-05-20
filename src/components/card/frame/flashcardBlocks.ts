@@ -7,8 +7,10 @@
  *   本文ブロックには自動挿入しない
  */
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
-import type { CardBlock } from "@/types/domain/card";
+
 import type { FlashcardMediaLike } from "./flashcardDerived";
+
+import type { CardBlock } from "@/types/domain/card";
 
 interface SideData {
   blocks: CardBlock[];

@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
-import { getTagColorKey } from "./tag.parser";
+
 import { TAG_COLOR_PALETTE } from "./tag.palette";
+import { getTagColorKey } from "./tag.parser";
 
 const getPalette = (input?: string) => TAG_COLOR_PALETTE[getTagColorKey(input)];
 

@@ -20,16 +20,16 @@ const defaultCollectUserData = async (userId: string): Promise<unknown> => {
 
 const defaultBuildSnapshot =
   (collectUserData: (userId: string) => Promise<unknown>) =>
-  async (userId: string): Promise<AutoBackupRecord> => {
-    const payload = await collectUserData(userId);
+    async (userId: string): Promise<AutoBackupRecord> => {
+      const payload = await collectUserData(userId);
 
-    return {
-      id: crypto.randomUUID(),
-      userId,
-      createdAt: new Date().toISOString(),
-      payload,
+      return {
+        id: crypto.randomUUID(),
+        userId,
+        createdAt: new Date().toISOString(),
+        payload,
+      };
     };
-  };
 
 export const createPerformAutoBackupUseCase = ({
   backupStore,

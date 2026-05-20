@@ -5,25 +5,26 @@
  * - legacy extra rows 吸収
  * - ink document resolve は含まない（副作用のある resolveInkDocument は呼び出し側）
  */
+import { extractCardTextFromBlocks } from "@/domain/card/content";
 import {
   DEFAULT_LAYOUT_ROWS,
   LEGACY_BASE_LAYOUT_ROWS,
   normalizeExtraRows,
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
-import { extractCardTextFromBlocks } from "@/domain/card/content";
-import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
+
 import type { ReferenceBlockData } from "@/types/domain/base";
+import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
 export type FlashcardMediaLike =
   | string
   | {
-      remoteUrl?: string | null;
-      localUrl?: string | null;
-      url?: string | null;
-      localFileId?: string | null;
-      assetId?: string | null;
-    };
+    remoteUrl?: string | null;
+    localUrl?: string | null;
+    url?: string | null;
+    localFileId?: string | null;
+    assetId?: string | null;
+  };
 
 export type FlashcardCardLike = {
   id?: string;

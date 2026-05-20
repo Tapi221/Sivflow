@@ -1,7 +1,7 @@
+import type { QueueItem } from "./persistentOfflineQueueModels";
+
 import type { UploadedImage } from "@/types";
 import { assertImageInvariant } from "@/utils/imageAssertions";
-
-import type { QueueItem } from "./persistentOfflineQueueModels";
 
 interface PersistentOfflineQueueProcessingDeps {
   uploadItem: (item: QueueItem) => Promise<UploadedImage>;

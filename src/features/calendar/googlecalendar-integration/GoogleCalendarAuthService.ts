@@ -1,12 +1,11 @@
+import { fetchCalendarList } from "./gcal.api";
 import {
   readStoredAccounts,
-  updateStoredAccountToken,
-  updateStoredAccountCalendarIds,
   type StoredGoogleAccount,
+  updateStoredAccountCalendarIds,
+  updateStoredAccountToken,
 } from "./gcal.multi-storage";
-
 import { refreshCalendarAccessToken } from "./gcal.oauth";
-import { fetchCalendarList } from "./gcal.api";
 import type { GoogleCalendarListItem } from "./gcalSync.types";
 
 /**

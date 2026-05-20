@@ -1,8 +1,24 @@
-import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
+
+import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Check, RotateCcw, Upload, X } from "@/ui/icons";
+
 import { useAuthSession } from "@/contexts/AuthContext";
+import {
+  resolveCardImageUrl,
+  type ResolvedCardImage,
+} from "@/services/cardImageResolver";
 import {
   getOrCreateImageBlobUrl,
   removeImageBlobUrl,
@@ -14,21 +30,8 @@ import {
 } from "@/services/imageFileStore";
 import { getLocalDb } from "@/services/localDB";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
-import {
-  resolveCardImageUrl,
-  type ResolvedCardImage,
-} from "@/services/cardImageResolver";
 import type { AssetRecord, UploadedImage } from "@/types";
-import { Check, RotateCcw, Upload, X } from "@/ui/icons";
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize";
-import React, {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
@@ -43,24 +46,24 @@ type ResolvedEditableImageStatus = "pending" | "uploading" | "ready" | "failed";
 
 type ImageRecordLike =
   | {
-      remoteStatus?: "none" | "uploading" | "ready" | "failed" | null;
-      status?: "pending" | "uploading" | "ready" | "failed" | null;
-      remoteUrlCache?: string | null;
-      remoteUrl?: string | null;
-      localBlobId?: string | null;
-      localFileId?: string | null;
-      remoteKey?: string | null;
-      storagePath?: string | null;
-      mime?: string | null;
-      contentType?: string | null;
-      userId?: string | null;
-      width?: number | null;
-      naturalW?: number | null;
-      height?: number | null;
-      naturalH?: number | null;
-      createdAt?: Date | null;
-      retryCount?: number | null;
-    }
+    remoteStatus?: "none" | "uploading" | "ready" | "failed" | null;
+    status?: "pending" | "uploading" | "ready" | "failed" | null;
+    remoteUrlCache?: string | null;
+    remoteUrl?: string | null;
+    localBlobId?: string | null;
+    localFileId?: string | null;
+    remoteKey?: string | null;
+    storagePath?: string | null;
+    mime?: string | null;
+    contentType?: string | null;
+    userId?: string | null;
+    width?: number | null;
+    naturalW?: number | null;
+    height?: number | null;
+    naturalH?: number | null;
+    createdAt?: Date | null;
+    retryCount?: number | null;
+  }
   | null
   | undefined;
 

@@ -1,12 +1,12 @@
-import { notificationService } from "./NotificationService";
 import { openSupportContact } from "./appInitSupportContact";
+import { notificationService } from "./NotificationService";
 
 export const notifyLocalDbFallbackMode = (args: {
   recoveryGuideUrl: string;
 }): void => {
   notificationService.warning(
     "ローカル保存が利用できません",
-    `このセッションではメモリ保存で継続します。再読み込みで未同期データが消える可能性があります。Chrome のサイトデータ削除で復旧できます。`,
+    "このセッションではメモリ保存で継続します。再読み込みで未同期データが消える可能性があります。Chrome のサイトデータ削除で復旧できます。",
     {
       details: `復旧手順: ${args.recoveryGuideUrl}`,
       closeable: true,

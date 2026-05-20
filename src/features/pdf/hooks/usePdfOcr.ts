@@ -1,14 +1,28 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { createWorker, type Worker as TesseractWorker } from "tesseract.js";
+
 import type { PdfDocumentController } from "./usePdfDocument";
+
+import {
+  formatPdfOcrBenchmarkSummary,
+  type PdfOcrBenchmarkSample,
+  type PdfOcrBenchmarkSummary,
+  summarizePdfOcrBenchmark,
+} from "@/lib/pdf/pdfOcrBenchmark";
+import {
+  classifyPdfOcrPage,
+  type PdfOcrPageClassification,
+} from "@/lib/pdf/pdfOcrPageClassification";
+import { segmentCanvasIntoTextRegions } from "@/lib/pdf/pdfOcrRegionDetection";
 import {
   clearPdfOcrRecords,
   getPdfOcrPageRecord,
   listPdfOcrPageRecords,
-  putPdfOcrPageRecord,
-  trimPdfOcrRecordsForDoc,
   type PdfOcrAttemptRecord,
   type PdfOcrPageRecord,
+  putPdfOcrPageRecord,
+  trimPdfOcrRecordsForDoc,
 } from "@/lib/pdf/pdfOcrStore";
 import {
   buildPdfTextSelection,
@@ -19,20 +33,9 @@ import {
   selectBestPdfTextSelection,
 } from "@/lib/pdf/pdfTextExtraction";
 import {
-  renderPdfPageForOcr,
   type PdfOcrRenderProfile,
+  renderPdfPageForOcr,
 } from "@/lib/pdf/renderPdfPageForOcr";
-import { segmentCanvasIntoTextRegions } from "@/lib/pdf/pdfOcrRegionDetection";
-import {
-  classifyPdfOcrPage,
-  type PdfOcrPageClassification,
-} from "@/lib/pdf/pdfOcrPageClassification";
-import {
-  formatPdfOcrBenchmarkSummary,
-  summarizePdfOcrBenchmark,
-  type PdfOcrBenchmarkSample,
-  type PdfOcrBenchmarkSummary,
-} from "@/lib/pdf/pdfOcrBenchmark";
 
 const OCR_DEFAULT_LANGUAGE = "jpn+eng";
 const OCR_NATIVE_TEXT_SKIP_THRESHOLD = 32;
@@ -908,18 +911,18 @@ export const usePdfOcr = ({
 
           const recognition = plan.enableRegionSegmentation
             ? await recognizeSegmentedRegions({
+              worker,
+              canvas: renderedPage.canvas,
+              timeoutMs: plan.timeoutMs ?? OCR_ATTEMPT_TIMEOUT_MS,
+            })
+            : {
+              recognizedText: await recognizeCanvasText({
                 worker,
                 canvas: renderedPage.canvas,
                 timeoutMs: plan.timeoutMs ?? OCR_ATTEMPT_TIMEOUT_MS,
-              })
-            : {
-                recognizedText: await recognizeCanvasText({
-                  worker,
-                  canvas: renderedPage.canvas,
-                  timeoutMs: plan.timeoutMs ?? OCR_ATTEMPT_TIMEOUT_MS,
-                }),
-                regionCount: 0,
-              };
+              }),
+              regionCount: 0,
+            };
 
           const selection = buildPdfTextSelection({
             nativeText,

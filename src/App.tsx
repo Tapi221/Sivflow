@@ -1,7 +1,6 @@
-import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
-import { BlockNoteSandboxPage } from "@/sandbox/blocknote";
-import { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+
 import { NotificationProvider } from "./components/notifications/NotificationProvider";
 import { AccountLockedScreen } from "./components/security/AccountLockedScreen";
 import { useAuthSession } from "./contexts/auth/AuthSessionContext";
@@ -9,12 +8,15 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { useSync } from "./hooks/sync/useSync";
 import Layout from "./Layout";
+import { signInWithGoogle } from "./services/auth/googleSignIn";
+import { DEV_MODE, isLocalHost } from "./utils/envGuards";
+
 import {
   resetStartupTasks,
   runStartupTasks,
 } from "@/application/startup/RunStartupTasks";
-import { signInWithGoogle } from "./services/auth/googleSignIn";
-import { DEV_MODE, isLocalHost } from "./utils/envGuards";
+import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
+import { BlockNoteSandboxPage } from "@/sandbox/blocknote";
 
 const Folders = lazy(() => import("./routes/Folders"));
 const CardEdit = lazy(() => import("./routes/CardEdit"));

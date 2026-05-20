@@ -1,9 +1,10 @@
-import { describe, it, expect } from "vitest";
-import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+import { describe, expect,it } from "vitest";
+
 import {
   LEGACY_BASE_LAYOUT_ROWS,
   MAX_LAYOUT_ROWS,
 } from "@/domain/card/extraRows";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 
 describe("normalizeCard", () => {
   it("should filter out empty math blocks from questionBlocks and answerBlocks", () => {

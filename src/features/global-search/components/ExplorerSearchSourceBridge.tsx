@@ -1,4 +1,8 @@
 import { useEffect, useMemo } from "react";
+
+import { buildExplorerSearchItems } from "@/features/global-search/lib/buildExplorerSearchItems";
+import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
+
 import type {
   Card,
   CardSet,
@@ -6,8 +10,6 @@ import type {
   Folder,
   SelectedExplorerItem,
 } from "@/types";
-import { buildExplorerSearchItems } from "@/features/global-search/lib/buildExplorerSearchItems";
-import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 
 type ExplorerSearchSourceBridgeProps = {
   folders: Folder[];

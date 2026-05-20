@@ -1,11 +1,13 @@
+import React from "react";
+
+import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import {
   buildTypographyStyle,
   mergeStyles,
   normalizeCardSetViewZoom,
 } from "@/components/card/common/cardSetViewZoom";
-import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
+
 import { cn } from "@/lib/utils";
-import React from "react";
 
 type DivDataAttributes = {
   [key: `data-${string}`]: string | number | boolean | undefined;

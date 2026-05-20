@@ -1,38 +1,40 @@
-import { useAuthSession } from "@/contexts/AuthContext";
+import {
+  type PropsWithChildren,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
 import { defaultPdfViewerOptions } from "@/features/pdf/defaultPdfViewerOptions";
-import type { PdfViewerHandle } from "@/features/pdf/PdfViewer";
 import { usePdfContainerWidth } from "@/features/pdf/hooks/usePdfContainerWidth";
 import { usePdfDocument } from "@/features/pdf/hooks/usePdfDocument";
 import { usePdfSourceResolver } from "@/features/pdf/hooks/usePdfSourceResolver";
 import { usePdfViewerPersistence } from "@/features/pdf/hooks/usePdfViewerPersistence";
-import {
-  PdfWorkspaceContext,
-  PdfWorkspaceDocumentContext,
-  PdfWorkspaceNavigationContext,
-  type PdfWorkspaceContextValue,
-  type PdfWorkspaceDocumentContextValue,
-  type PdfWorkspaceNavigationContextValue,
-} from "@/features/pdf/PdfWorkspaceContexts";
+import * as C from "@/features/pdf/pdf.constants.desktop";
+import type { PdfViewerHandle } from "@/features/pdf/PdfViewer";
 // ★ 修正: clampScale と getViewerStateFromSession のインポートを追加
 import {
   clampScale,
   getViewerStateFromSession,
 } from "@/features/pdf/pdfViewerStateStorage";
+import {
+  PdfWorkspaceContext,
+  type PdfWorkspaceContextValue,
+  PdfWorkspaceDocumentContext,
+  type PdfWorkspaceDocumentContextValue,
+  PdfWorkspaceNavigationContext,
+  type PdfWorkspaceNavigationContextValue,
+} from "@/features/pdf/PdfWorkspaceContexts";
+
+import { useAuthSession } from "@/contexts/AuthContext";
 import type {
   DocumentItem,
   PdfPageLayoutMode,
   PdfSidePanelTab,
   PdfViewerState,
 } from "@/types";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type PropsWithChildren,
-} from "react";
-import * as C from "@/features/pdf/pdf.constants.desktop";
 
 interface PdfWorkspaceProviderProps extends PropsWithChildren {
   doc: DocumentItem;
@@ -218,8 +220,8 @@ export const PdfWorkspaceProvider = ({
   const [thumbnailOrder, setThumbnailOrder] = useState<number[]>(() => {
     return Array.isArray(initialViewerState?.thumbnailOrder)
       ? initialViewerState.thumbnailOrder.filter(
-          (pageNumber): pageNumber is number => typeof pageNumber === "number",
-        )
+        (pageNumber): pageNumber is number => typeof pageNumber === "number",
+      )
       : [];
   });
 
@@ -271,10 +273,10 @@ export const PdfWorkspaceProvider = ({
     getFitScale,
     onDocumentUpdate: onDocumentUpdate
       ? async (updates) => {
-          await Promise.resolve(
-            onDocumentUpdate(updates as Partial<DocumentItem>),
-          );
-        }
+        await Promise.resolve(
+          onDocumentUpdate(updates as Partial<DocumentItem>),
+        );
+      }
       : undefined,
   });
 

@@ -1,14 +1,16 @@
 "use client";
 
 import * as React from "react";
+
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+
+import {
+  type FloatingSurfaceVariantProps,
+  floatingSurfaceVariants,
+} from "@/components/ui/floating-surface";
 import { X } from "@/ui/icons";
 
 import { cn } from "@/lib/utils";
-import {
-  floatingSurfaceVariants,
-  type FloatingSurfaceVariantProps,
-} from "@/components/ui/floating-surface";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -167,11 +169,11 @@ DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
 export {
   Dialog,
-  DialogPortal,
-  DialogOverlay,
   DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
   DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
 };

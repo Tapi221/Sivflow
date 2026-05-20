@@ -1,16 +1,16 @@
+import React from "react";
+
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { buildFolderMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
 import {
+  type FolderTreeNode,
   getParentFolderId,
   normalizeFolderId,
   ROOT_FOLDER_ID,
-  type FolderTreeNode,
 } from "@/components/folder/explorer/model/utils";
-import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight } from "@/ui/icons";
-import React from "react";
-import { SidebarEntityRow } from "./SidebarEntityRow";
+
 import {
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
@@ -23,6 +23,9 @@ import {
   FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "./shared";
+import { SidebarEntityRow } from "./SidebarEntityRow";
+
+import { cn } from "@/lib/utils";
 
 type FolderRowFolder = FolderTreeNode & {
   id?: string;
@@ -123,32 +126,32 @@ export const FolderRow: React.FC<FolderRowProps> = ({
       buildFolderMenuActions({
         onCreateSubfolder: canCreateFolder
           ? () => {
-              void handleCreateFolderAction(folderId);
-            }
+            void handleCreateFolderAction(folderId);
+          }
           : undefined,
         onCreateCardSet: canCreateCardSet
           ? () => {
-              void handleCreateCardSetAction(folderId);
-            }
+            void handleCreateCardSetAction(folderId);
+          }
           : undefined,
         onRename: canRename
           ? () => {
-              beginInlineRename({
-                id: folderId,
-                name: folderName,
-                closeMenu: () => {
-                  onMenuOpenChange(false);
-                },
-                setEditingId,
-                setEditingName,
-                beforeStart: onSelect,
-              });
-            }
+            beginInlineRename({
+              id: folderId,
+              name: folderName,
+              closeMenu: () => {
+                onMenuOpenChange(false);
+              },
+              setEditingId,
+              setEditingName,
+              beforeStart: onSelect,
+            });
+          }
           : undefined,
         onDelete: canDelete
           ? () => {
-              handleDelete(folderId, "folder");
-            }
+            handleDelete(folderId, "folder");
+          }
           : undefined,
         onBulkTag,
       }),

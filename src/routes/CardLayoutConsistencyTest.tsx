@@ -1,14 +1,17 @@
-import { SharedCardContent } from "@/components/card/common/SharedCardContent";
+import React from "react";
+
 import {
   CANONICAL_CARD_WIDTH,
   CARD_SAFE_PADDING_PX,
 } from "@constants/shared/flashcard";
+import { DragDropContext } from "@hello-pangea/dnd";
+
+import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import { CardFrame } from "@/components/card/frame/CardFrame";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
+
 import type { CardBlock } from "@/types/domain/card";
-import { DragDropContext } from "@hello-pangea/dnd";
-import React from "react";
 
 const FIXTURE_BLOCKS: CardBlock[] = [
   {
@@ -17,7 +20,7 @@ const FIXTURE_BLOCKS: CardBlock[] = [
     orderIndex: 0,
     code: {
       language: "typescript",
-      code: `export const sum = (a: number, b: number) => a + b;\nconsole.log(sum(2, 3));`,
+      code: "export const sum = (a: number, b: number) => a + b;\nconsole.log(sum(2, 3));",
     },
   },
 ];

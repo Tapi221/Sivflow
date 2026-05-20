@@ -1,15 +1,14 @@
-import type { UploadedImage } from "@/types";
-
-import {
-  isDocumentQueueItem,
-  type QueueItem,
-} from "@/application/usecases/persistentOfflineQueueModels";
-
 import { handleQueuedAssetUploadFailure } from "./effects/handleQueuedAssetUploadFailure";
 import { handleQueuedAssetUploadSuccess } from "./effects/handleQueuedAssetUploadSuccess";
 import { handleQueuedDocumentUploadFailure } from "./effects/handleQueuedDocumentUploadFailure";
 import { handleQueuedDocumentUploadSuccess } from "./effects/handleQueuedDocumentUploadSuccess";
 import { shouldSkipQueuedDocumentUpload } from "./effects/shouldSkipQueuedDocumentUpload";
+
+import {
+  isDocumentQueueItem,
+  type QueueItem,
+} from "@/application/usecases/persistentOfflineQueueModels";
+import type { UploadedImage } from "@/types";
 
 const isAssetLikeImageQueueItem = (item: QueueItem): boolean =>
   !isDocumentQueueItem(item) && item.fileType.startsWith("image/");

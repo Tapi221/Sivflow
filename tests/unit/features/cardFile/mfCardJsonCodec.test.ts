@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   MF_CARD_FORMAT,
   MF_CARD_VERSION,
-  MfCardValidationError,
   type MfCardFileV1,
+  MfCardValidationError,
 } from "@/features/cardFile/domain/mfCardTypes";
 import {
   decodeMfCardFile,

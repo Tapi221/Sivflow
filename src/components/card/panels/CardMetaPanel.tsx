@@ -1,15 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
-import { useLiveQuery } from "dexie-react-hooks";
-import { collection, getDocs, limit, query, where } from "firebase/firestore";
 import {
   memo,
+  type ReactElement,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type ReactElement,
 } from "react";
 import { useSearchParams } from "react-router-dom";
+
+import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "dexie-react-hooks";
+import { collection, getDocs, limit, query, where } from "firebase/firestore";
 import {
   Area,
   CartesianGrid,
@@ -21,8 +22,10 @@ import {
   YAxis,
 } from "recharts";
 
-import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
+import { RatingCountTiles } from "@/features/study/RatingCountTiles";
+
 import { CardMetaPanelSkeleton } from "@/components/card/panels/CardMetaPanelSkeleton";
+import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
 import {
   MetaPanelActionRow,
   MetaPanelInfoRow,
@@ -44,8 +47,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TagInput } from "@/components/ui/tag-input";
+
 import { useAuthSession } from "@/contexts/AuthContext";
-import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { firestoreDb } from "@/services/firebase";
 import { getLocalDb } from "@/services/localDB";
@@ -1407,8 +1410,8 @@ const CardMetaPanelContent = ({
                 latestReview
                   ? formatDateLabel(latestReview.reviewedAt)
                   : formatDateLabel(
-                      card?.lastReviewAt ?? asRecord(card)?.last_review_at,
-                    )
+                    card?.lastReviewAt ?? asRecord(card)?.last_review_at,
+                  )
               }
             />
             <MetaPanelInfoRow
@@ -1940,78 +1943,78 @@ const CardMetaPanelContent = ({
                             </div>
                           ) : row.editableLogIndex != null &&
                             onUpdateReviewLogDuration ? (
-                            <div className="flex items-center gap-0">
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                value={
-                                  durationDrafts[row.editableLogIndex] ??
+                              <div className="flex items-center gap-0">
+                                <input
+                                  type="text"
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
+                                  value={
+                                    durationDrafts[row.editableLogIndex] ??
                                   (row.durationMinutes != null
                                     ? String(row.durationMinutes)
                                     : "")
-                                }
-                                onChange={(e) =>
-                                  handleChangeDurationDraft(
-                                    row.editableLogIndex,
-                                    e.target.value,
-                                  )
-                                }
-                                onFocus={(e) => e.currentTarget.select()}
-                                onBlur={(e) =>
-                                  handleSaveReviewDuration(
-                                    row.editableLogIndex,
-                                    e.target.value,
-                                  )
-                                }
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter") {
-                                    e.preventDefault();
+                                  }
+                                  onChange={(e) =>
+                                    handleChangeDurationDraft(
+                                      row.editableLogIndex,
+                                      e.target.value,
+                                    )
+                                  }
+                                  onFocus={(e) => e.currentTarget.select()}
+                                  onBlur={(e) =>
                                     handleSaveReviewDuration(
                                       row.editableLogIndex,
-                                      e.currentTarget.value,
-                                    );
-                                    e.currentTarget.blur();
+                                      e.target.value,
+                                    )
                                   }
-                                  if (e.key === "Escape") {
-                                    e.preventDefault();
-                                    setDurationDrafts((prev) => ({
-                                      ...prev,
-                                      [row.editableLogIndex]:
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      e.preventDefault();
+                                      handleSaveReviewDuration(
+                                        row.editableLogIndex,
+                                        e.currentTarget.value,
+                                      );
+                                      e.currentTarget.blur();
+                                    }
+                                    if (e.key === "Escape") {
+                                      e.preventDefault();
+                                      setDurationDrafts((prev) => ({
+                                        ...prev,
+                                        [row.editableLogIndex]:
                                         row.durationMinutes != null
                                           ? String(row.durationMinutes)
                                           : "",
-                                    }));
-                                    e.currentTarget.blur();
-                                  }
-                                }}
-                                disabled={
-                                  isMutatingLatestReview ||
+                                      }));
+                                      e.currentTarget.blur();
+                                    }
+                                  }}
+                                  disabled={
+                                    isMutatingLatestReview ||
                                   durationSavingIndex === row.editableLogIndex
-                                }
-                                className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
-                                style={{
-                                  width: getDurationInputWidthCh(
-                                    durationDrafts[row.editableLogIndex] ??
+                                  }
+                                  className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
+                                  style={{
+                                    width: getDurationInputWidthCh(
+                                      durationDrafts[row.editableLogIndex] ??
                                       (row.durationMinutes != null
                                         ? String(row.durationMinutes)
                                         : ""),
-                                  ),
-                                  minWidth: "1.65rem",
-                                  fontVariantNumeric:
+                                    ),
+                                    minWidth: "1.65rem",
+                                    fontVariantNumeric:
                                     "tabular-nums lining-nums",
-                                }}
-                                placeholder="-"
-                              />
-                              <span className={`text-[11px] ${mutedTextClass}`}>
-                                min.
+                                  }}
+                                  placeholder="-"
+                                />
+                                <span className={`text-[11px] ${mutedTextClass}`}>
+                                  min.
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="tabular-nums">
+                                {row.durationLabel}
                               </span>
-                            </div>
-                          ) : (
-                            <span className="tabular-nums">
-                              {row.durationLabel}
-                            </span>
-                          )}
+                            )}
                         </TableCell>
                       </TableRow>
                     ))}

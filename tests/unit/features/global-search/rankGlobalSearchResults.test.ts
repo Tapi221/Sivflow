@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { GlobalSearchItem } from "@/features/global-search/model/globalSearchTypes";
+
 import { rankGlobalSearchResults } from "@/features/global-search/lib/rankGlobalSearchResults";
+import type { GlobalSearchItem } from "@/features/global-search/model/globalSearchTypes";
 
 const createSearchItem = (
   overrides: Partial<GlobalSearchItem>,

@@ -1,8 +1,4 @@
 import {
-  buildCardSetById,
-  resolveCardFolderIdStrict,
-} from "@/domain/card/selectors/cardFolder";
-import {
   addDays,
   endOfMonth,
   endOfWeek,
@@ -13,6 +9,11 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
+
+import {
+  buildCardSetById,
+  resolveCardFolderIdStrict,
+} from "@/domain/card/selectors/cardFolder";
 
 import type {
   CalendarCardLike,

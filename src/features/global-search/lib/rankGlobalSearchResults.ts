@@ -1,4 +1,5 @@
 import type { GlobalSearchItem } from "@/features/global-search/model/globalSearchTypes";
+
 import { toMillis } from "@/utils/toMillis";
 
 type RankGlobalSearchResultsParams = {

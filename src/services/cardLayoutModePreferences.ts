@@ -1,11 +1,13 @@
 import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
-import type { CardDisplayMode } from "@/types/domain/cardSet";
+
 import {
-  normalizeCardLayoutMode,
-  resolveDefaultCardLayoutMode,
   type CardLayoutMode,
   type CardSetInteractionMode,
+  normalizeCardLayoutMode,
+  resolveDefaultCardLayoutMode,
 } from "@/features/cardsetview/domain/cardLayoutMode";
+
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 export interface CardLayoutModePreferenceScope {
   deviceScope: string;

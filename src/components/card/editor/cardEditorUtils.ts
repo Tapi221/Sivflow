@@ -1,7 +1,7 @@
 import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 
-import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { ReferenceBlockData } from "@/types/domain/base";
+import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
 const NEW_SENTINEL = "__new__" as const;
 

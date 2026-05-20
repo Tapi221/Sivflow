@@ -1,10 +1,10 @@
+import React from "react";
+
+import { ExplorerChromePdfIcon } from "@/components/explorer/icons";
 import { buildRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
 import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
-import { ExplorerChromePdfIcon } from "@/components/explorer/icons";
-import { cn } from "@/lib/utils";
-import React from "react";
-import { SidebarEntityRow } from "./SidebarEntityRow";
+
 import {
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
@@ -14,6 +14,9 @@ import {
   FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "./shared";
+import { SidebarEntityRow } from "./SidebarEntityRow";
+
+import { cn } from "@/lib/utils";
 
 type ExplorerItemType = "folder" | "cardSet" | "card" | "document";
 
@@ -75,22 +78,22 @@ export const DocumentRow = ({
       buildRenameDeleteMenuActions({
         onRename: canRename
           ? () => {
-              onItemSelect({ type: "document", id: treeNode.rawId });
-              beginInlineRename({
-                id: treeNode.rawId,
-                name: treeNode.name,
-                closeMenu: () => {
-                  setOpenRowMenuId(null);
-                },
-                setEditingId,
-                setEditingName,
-              });
-            }
+            onItemSelect({ type: "document", id: treeNode.rawId });
+            beginInlineRename({
+              id: treeNode.rawId,
+              name: treeNode.name,
+              closeMenu: () => {
+                setOpenRowMenuId(null);
+              },
+              setEditingId,
+              setEditingName,
+            });
+          }
           : undefined,
         onDelete: canDelete
           ? () => {
-              handleDelete(treeNode.rawId, "document");
-            }
+            handleDelete(treeNode.rawId, "document");
+          }
           : undefined,
       }),
     [

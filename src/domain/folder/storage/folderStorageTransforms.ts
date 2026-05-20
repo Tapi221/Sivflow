@@ -3,6 +3,7 @@ import {
   normalizeFolderWithSilent,
 } from "@/domain/folder/normalizers/normalizeFolder";
 import { cloneStorageRecord } from "@/domain/shared/storage/storageRecordUtils";
+
 import type { Folder } from "@/types";
 
 type StorageLike = Record<string, unknown>;

@@ -1,3 +1,7 @@
+import { useCallback, useEffect, useMemo } from "react";
+
+import { useLiveQuery } from "dexie-react-hooks";
+
 import { useAuthSession } from "@/contexts/AuthContext";
 import {
   createDefaultEditorBlockSettings,
@@ -5,8 +9,6 @@ import {
 } from "@/lib/editorBlockSettings";
 import { getLocalDb } from "@/services/localDB";
 import type { UserSettings } from "@/types";
-import { useLiveQuery } from "dexie-react-hooks";
-import { useCallback, useEffect, useMemo } from "react";
 
 const LEGACY_SETTING_KEYS = [
   "displayName",
@@ -173,12 +175,12 @@ export const useUserSettings = () => {
           "editorBlockSettings",
         )
           ? {
-              editorBlockSettings: parseEditorBlockSettings(
-                Array.isArray(newSettings.editorBlockSettings)
-                  ? newSettings.editorBlockSettings
-                  : undefined,
-              ),
-            }
+            editorBlockSettings: parseEditorBlockSettings(
+              Array.isArray(newSettings.editorBlockSettings)
+                ? newSettings.editorBlockSettings
+                : undefined,
+            ),
+          }
           : {}),
       };
 

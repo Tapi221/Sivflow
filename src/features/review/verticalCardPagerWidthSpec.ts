@@ -60,8 +60,8 @@ export const buildVerticalCardPagerItemStyle = (
   widthSpec.mode === "stretch"
     ? { width: "100%", maxWidth: "100%", minWidth: 0, alignSelf: "stretch" }
     : {
-        width: widthSpec.widthPx,
-        maxWidth: "100%",
-        minWidth: 0,
-        alignSelf: "center",
-      };
+      width: widthSpec.widthPx,
+      maxWidth: "100%",
+      minWidth: 0,
+      alignSelf: "center",
+    };

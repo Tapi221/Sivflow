@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { normalizeMemoryStability } from "@/domain/card/review/stability";
+
 import { normalizeUploadedImages } from "@/domain/assets/uploadedImageNormalizer";
+import { normalizeMemoryStability } from "@/domain/card/review/stability";
 
 describe("domain-owned normalizers", () => {
   it("preserves memory stability normalization behavior", () => {

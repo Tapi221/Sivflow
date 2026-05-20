@@ -1,15 +1,16 @@
 import type { RefObject, UIEvent } from "react";
 import { Fragment, useMemo } from "react";
 
-import {
-  buildTimelineColumns,
-  getTimelineColumnWidth,
-} from "./TimelineDayView.shared";
+import * as C from "@/features/calendar/calendar.constants.desktop";
+
 import type {
   TimelineUnitBuffer,
   TimelineViewMode,
 } from "./TimelineDayView.shared";
-import * as C from "@/features/calendar/calendar.constants.desktop";
+import {
+  buildTimelineColumns,
+  getTimelineColumnWidth,
+} from "./TimelineDayView.shared";
 
 type CalendarTimelineDayViewProps = {
   viewMode: TimelineViewMode;

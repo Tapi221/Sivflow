@@ -1,18 +1,21 @@
+import React from "react";
+
+import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
+
+import type { FlashcardCardLike } from "@/components/card/frame/Flashcard";
+import { useFlashcardCornerControls } from "@/components/card/frame/FlashcardCornerControls";
 import { FlashcardInkOverlay } from "@/components/card/frame/FlashcardInkOverlay";
 import { FlashcardMediaDialogs } from "@/components/card/frame/FlashcardMediaDialogs";
-import { useFlashcardCornerControls } from "@/components/card/frame/FlashcardCornerControls";
-import type { FlashcardCardLike } from "@/components/card/frame/Flashcard";
 import { useCardFlipBehavior } from "@/components/card/frame/useCardFlipBehavior";
-import { useFlashcardInk } from "@/components/card/frame/useFlashcardInk";
-import { useFlashcardMediaState } from "@/components/card/frame/useFlashcardMediaState";
 import type {
   FlashcardSharedDerivedSnapshot,
   FlashcardSideDerivedSnapshot,
 } from "@/components/card/frame/useFlashcardDualDerived";
-import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
+import { useFlashcardInk } from "@/components/card/frame/useFlashcardInk";
+import { useFlashcardMediaState } from "@/components/card/frame/useFlashcardMediaState";
+
 import type { Card } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import React from "react";
 
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
@@ -133,13 +136,13 @@ export const PreparedViewCardFaceScene = ({
     extraHeaderLeft: undefined,
     onToggleUncertainty: onToggleUncertainty
       ? () => {
-          handleToggleUncertaintyInternal();
-        }
+        handleToggleUncertaintyInternal();
+      }
       : undefined,
     onToggleBookmark: onToggleBookmark
       ? () => {
-          handleToggleBookmarkInternal();
-        }
+        handleToggleBookmarkInternal();
+      }
       : undefined,
     onOpenImagePopup: () => media.setIsImagePopupOpen(true),
     onOpenAudioPopup: () => media.setIsAudioPopupOpen(true),

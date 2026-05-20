@@ -1,4 +1,5 @@
 export * from "./assets";
+export type { ReviewLog } from "./base";
 export * from "./card";
 export * from "./cardSet";
 export * from "./document";
@@ -6,13 +7,11 @@ export * from "./explorer";
 export * from "./folder";
 export * from "./media";
 export * from "./notification";
+export { CURRENT_SCHEMA_VERSION } from "./storage";
 export * from "./storageStats";
 export * from "./sync";
 export * from "./telemetry";
-
-export type { ReviewLog } from "./base";
 export type { UserSettings, UserStats } from "./user";
-export { CURRENT_SCHEMA_VERSION } from "./storage";
 
 /**
  * snapshot.ts の重複名は別名でのみ公開する
@@ -22,5 +21,4 @@ export type {
   ReviewLog as SnapshotReviewLog,
   UserSettings as SnapshotUserSettings,
 } from "./snapshot";
-
 export { CURRENT_SCHEMA_VERSION as SNAPSHOT_SCHEMA_VERSION } from "./snapshot";
