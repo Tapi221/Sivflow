@@ -31,7 +31,7 @@ import {
   HomeIcon,
   InboxIcon,
   LibraryIcon,
-} from "./sidebar.icons";
+} from "../../icons/sidebar.icons";
 
 import { cn } from "@/lib/utils";
 
