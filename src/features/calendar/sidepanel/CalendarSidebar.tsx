@@ -23,7 +23,7 @@ import {
   CheckCircleFilledIcon,
   CircleOutlineIcon,
   PlusIcon,
-} from "../ui/calendar.icons";
+} from "../../../icons/calendar.icons";
 
 import { cn } from "@/lib/utils";
 
