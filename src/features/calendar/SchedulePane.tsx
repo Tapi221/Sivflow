@@ -14,7 +14,7 @@ import { CalendarTimelineDayView } from "./grid/TimelineDayView";
 import { useSchedulePane } from "./hooks/useSchedulePane";
 import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
-import { CalendarWorkspaceToolbar } from "./toolbar/CalendarToolbar";
+import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
 
 import { cn } from "@/lib/utils";
 
