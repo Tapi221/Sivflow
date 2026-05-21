@@ -18,7 +18,7 @@ type TaskViewProps = {
 };
 
 export const TaskView = ({ googleAccounts = [] }: TaskViewProps) => {
-  const { tasks, addTask, deleteTask, moveTask } = useTaskStore();
+  const { tasks, addTask, deleteTask, moveTask, reorderTask } = useTaskStore();
   const [viewMode, setViewMode] = useState<BoardListViewMode>("board");
   const [showModal, setShowModal] = useState(false);
   const [newTaskStatus, setNewTaskStatus] =
@@ -86,6 +86,7 @@ export const TaskView = ({ googleAccounts = [] }: TaskViewProps) => {
           onAddTask={handleAddTask}
           onDeleteTask={deleteTask}
           onToggleTaskDone={handleToggleTaskDone}
+          onReorderTask={reorderTask}
         />
       ) : (
         <TaskListView tasks={tasks} onToggleTaskDone={handleToggleTaskDone} />
