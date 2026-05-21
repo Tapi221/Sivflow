@@ -114,7 +114,7 @@ export const DayDetailPanel = ({
         overflow-hidden
         border-l
         border-[#ececec]
-        bg-white
+        bg-transparent
       "
     >
       {/* Header */}
