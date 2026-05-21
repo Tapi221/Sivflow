@@ -59,7 +59,7 @@ export type Translations = {
 
 const ja: Translations = {
   weekdayLabels: ["日", "月", "火", "水", "木", "金", "土"],
-  miniCalendarWeekdays: ["S", "M", "T", "W", "T", "F", "S"],
+  miniCalendarWeekdays: ["日", "月", "火", "水", "木", "金", "土"],
 
   monthRowResizeTitle:
     "ドラッグで月表示の縦幅を変更。ダブルクリックで初期値に戻します。",
