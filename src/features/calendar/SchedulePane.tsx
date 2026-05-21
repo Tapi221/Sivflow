@@ -178,7 +178,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           className={cn(
             "flex min-h-0 min-w-0 flex-1 flex-col bg-white",
             activeMode === "task"
-              ? "overflow-hidden"
+              ? "pl-4 pr-0 pt-0 pb-0"
               : isMonthCalendarView
                 ? isDayDetailPanelCollapsed
                   ? "pl-4 pr-0 pt-0 pb-0"
@@ -187,7 +187,14 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           )}
         >
           {activeMode === "task" ? (
-            <TaskView googleAccounts={googleAccounts} />
+            <div
+              className={cn(
+                "flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[24px] rounded-tr-none border border-r-0 border-b-0 border-[#e3e5ea] bg-[#f0f2f5]",
+                CALENDAR_PANEL_SHADOW_CLASS,
+              )}
+            >
+              <TaskView googleAccounts={googleAccounts} />
+            </div>
           ) : isMonthCalendarView ? (
             <div
               className={cn(
