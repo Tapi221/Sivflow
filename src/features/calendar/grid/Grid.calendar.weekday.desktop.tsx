@@ -226,8 +226,8 @@ export const CalendarWeekDayGrid = ({
                 {hour > 0 && (
                   <span
                     className={cn(
-                      "absolute bottom-0 right-0 z-10 translate-y-1/2 select-none bg-white pl-1 text-[11px] font-medium leading-none tabular-nums",
-                      "text-[#b0b4be]",
+                      "absolute bottom-0 right-0 z-10 translate-y-1/2 select-none bg-white pl-1 text-[12px] font-semibold leading-none tabular-nums",
+                      "text-[#b8bcc5]",
                     )}
                   >
                     {createHourLabel(hour)}
