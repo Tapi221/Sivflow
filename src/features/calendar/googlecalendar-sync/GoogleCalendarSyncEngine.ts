@@ -338,13 +338,13 @@ export class GoogleCalendarSyncEngine {
 
     return options.rangeStart <= options.rangeEnd
       ? {
-          rangeStart: options.rangeStart,
-          rangeEnd: options.rangeEnd,
-        }
+        rangeStart: options.rangeStart,
+        rangeEnd: options.rangeEnd,
+      }
       : {
-          rangeStart: options.rangeEnd,
-          rangeEnd: options.rangeStart,
-        };
+        rangeStart: options.rangeEnd,
+        rangeEnd: options.rangeStart,
+      };
   }
 
   private getDefaultFullSyncRange(): GCalSyncRange {
