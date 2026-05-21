@@ -138,6 +138,20 @@ const resolveNextTabOnClose = (
   return nextTabs[fallbackIndex] ?? null;
 };
 
+const resolveTabSlotLayoutStyle = (
+  tab: WorkspaceTab,
+  interactiveStyle: AppRegionStyle,
+): AppRegionStyle => {
+  const style: AppRegionStyle = { ...interactiveStyle };
+
+  if (tab.kind === "route") {
+    style.flexBasis = 152;
+    style.minWidth = 136;
+  }
+
+  return style;
+};
+
 const HomeIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path d="M4 10.5 12 4l8 6.5V20h-5v-5H9v5H4z" fill="currentColor" />
@@ -267,13 +281,14 @@ export const WorkspaceTabsBar = ({
                   }, 0);
                 }}
                 transition={{ type: "spring", stiffness: 520, damping: 42 }}
-                style={interactiveStyle}
+                style={resolveTabSlotLayoutStyle(tab, interactiveStyle)}
                 className={cn(
                   "explorer-workspace-tab-slot relative flex min-w-[92px] max-w-[180px] flex-[1_1_150px] items-end overflow-visible",
                   canReorderTabs
                     ? "cursor-grab active:cursor-grabbing"
                     : "cursor-default",
                 )}
+                data-workspace-tab-kind={tab.kind}
                 data-workspace-tab-slot-active={selected ? "true" : undefined}
               >
                 <div
