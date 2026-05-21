@@ -103,13 +103,13 @@
   .explorer-workspace-tabs-list,
   .explorer-tab-list,
   .explorer-chrome-main-topbar
-  > div:first-child
-  > .explorer-chrome-font
-  > div:first-child {
-  position: relative;
-  z-index: 1;
-  flex: 0 1 auto;
-  min-width: 0;
+    > div:first-child
+    > .explorer-chrome-font
+    > div:first-child {
+    position: relative;
+    z-index: 1;
+    flex: 0 1 auto;
+    min-width: 0;
     height: 100%;
     align-items: flex-end;
     gap: 0;
@@ -120,12 +120,12 @@
   }
 
   .explorer-workspace-tab-slot {
-  position: relative;
-  flex: 1 1 150px;
-  min-width: 92px;
-  max-width: 180px;
-  overflow: visible !important;
-}
+    position: relative;
+    flex: 1 1 150px;
+    min-width: 92px;
+    max-width: 180px;
+    overflow: visible !important;
+  }
 
   .explorer-workspace-tab-slot::before {
     content: "";
@@ -294,7 +294,7 @@
   }
 
   .explorer-workspace-tab-add {
-    margin-left: 12px !important;
+    margin-left: 4px !important;
     margin-bottom: 0 !important;
     width: 32px !important;
     height: 32px !important;
