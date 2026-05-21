@@ -4,7 +4,7 @@ import { format } from "date-fns";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { TodayBar } from "@/features/calendar/chip/TodayBar";
-import { ViewModeDropdown } from "@/features/calendar/chip/ViewModeDropdown";
+import { ViewModeDropdown } from "@/features/calendar/chip/ViewModeDropdownChip";
 
 import type { SchedulePaneProps } from "./schedulePane.types";
 import { CalendarMonthView } from "./grid/CalendarView.month";

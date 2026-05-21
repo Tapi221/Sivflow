@@ -9,7 +9,7 @@ import {
 
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 
-import { DayDetailCreateButton } from "@/features/calendar/chip/DayDetailCreateButton";
+import { DayDetailCreateButton } from "@/features/calendar/chip/AddScheduleButton.daydetail";
 
 import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
 
