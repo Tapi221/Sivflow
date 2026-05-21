@@ -134,16 +134,9 @@ const GoogleAccountSection = ({
 
         {syncIndicator}
 
-        {account.lastSyncedAt && (
-          <span className="ml-auto shrink-0 text-[10px] font-medium text-[#b0b5bf]">
-            {format(account.lastSyncedAt, "HH:mm")}
-          </span>
-        )}
-
         <span
           className={cn(
-            "flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform duration-200",
-            !account.lastSyncedAt && "ml-auto",
+            "ml-auto flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform duration-200",
             !isOpen && "-rotate-90",
           )}
         >

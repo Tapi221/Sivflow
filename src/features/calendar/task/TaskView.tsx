@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { TASK_COLUMNS } from "./task.types";
 import type { TaskStatus } from "./task.types";
@@ -72,13 +73,16 @@ export const TaskView = () => {
         <TaskListView tasks={tasks} />
       )}
 
-      {showModal && (
-        <NewTaskModal
-          defaultStatus={newTaskStatus}
-          onClose={() => setShowModal(false)}
-          onSave={addTask}
-        />
-      )}
+      <AnimatePresence>
+        {showModal && (
+          <NewTaskModal
+            key="new-task-modal"
+            defaultStatus={newTaskStatus}
+            onClose={() => setShowModal(false)}
+            onSave={addTask}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
