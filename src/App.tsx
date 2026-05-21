@@ -23,7 +23,7 @@ const CardEdit = lazy(() => import("./routes/CardEdit"));
 const CardSetView = lazy(() => import("./routes/CardSetView"));
 const StudyMode = lazy(() => import("./routes/StudyMode"));
 const Directory = lazy(() => import("./routes/Directory"));
-const Calendar = lazy(() => import("./routes/Calendar"));
+const Schedule = lazy(() => import("./routes/Calendar"));
 const Tasks = lazy(() => import("./routes/Tasks"));
 
 const PdfScrollTest = DEV_MODE
@@ -298,7 +298,8 @@ const AppContent = () => {
           <Route path="folders" element={withRouteFallback(<Folders />)} />
 
           <Route path="tag-map" element={<Navigate to="/folders" replace />} />
-          <Route path="calendar" element={withRouteFallback(<Calendar />)} />
+          <Route path="schedule" element={withRouteFallback(<Schedule />)} />
+          <Route path="calendar" element={<Navigate to="/schedule" replace />} />
           <Route path="tasks" element={withRouteFallback(<Tasks />)} />
 
           <Route path="CardEdit" element={withRouteFallback(<CardEdit />)} />

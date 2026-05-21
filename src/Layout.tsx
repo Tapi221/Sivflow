@@ -62,11 +62,11 @@ const Layout = () => {
         value: "action:calendar",
         kind: "action",
         iconKind: "calendar",
-        title: "カレンダー",
-        keywords: ["カレンダー", "calendar", "schedule", "予定"],
+        title: "スケジュール",
+        keywords: ["スケジュール", "schedule", "予定", "カレンダー", "calendar"],
         priority: 96,
         onSelect: () => {
-          void navigate("/calendar");
+          void navigate("/schedule");
         },
       },
       {
