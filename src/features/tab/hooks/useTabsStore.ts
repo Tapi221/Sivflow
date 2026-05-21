@@ -42,6 +42,7 @@ type OpenCardTabParams = {
 type WorkspaceTabsState = {
   tabs: WorkspaceTab[];
   activeTabId: WorkspaceTab["id"] | null;
+  lastOpenedTabId: WorkspaceTab["id"] | null;
   openExplorerTab: (
     params?: OpenExplorerTabParams,
   ) => WorkspaceExplorerTab["id"];
@@ -156,6 +157,7 @@ const createRouteTabFromSection = (
 export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
   tabs: [],
   activeTabId: null,
+  lastOpenedTabId: null,
 
   openExplorerTab: (params = {}) => {
     const id = params.id ?? WORKSPACE_DEFAULT_EXPLORER_TAB_ID;
@@ -178,6 +180,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
     set((state) => ({
       tabs: upsertTab(state.tabs, nextTab),
       activeTabId: nextTab.id,
+      lastOpenedTabId: nextTab.id,
     }));
 
     return nextTab.id;
@@ -197,6 +200,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
     set((state) => ({
       tabs: [...state.tabs, nextTab],
       activeTabId: nextTab.id,
+      lastOpenedTabId: nextTab.id,
     }));
 
     return id;
@@ -224,6 +228,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
     set((state) => ({
       tabs: [...state.tabs, nextTab],
       activeTabId: nextTab.id,
+      lastOpenedTabId: nextTab.id,
     }));
 
     return id;
@@ -251,6 +256,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
     set((state) => ({
       tabs: [...state.tabs, nextTab],
       activeTabId: nextTab.id,
+      lastOpenedTabId: nextTab.id,
     }));
 
     return id;
@@ -278,6 +284,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
     set((state) => ({
       tabs: [...state.tabs, nextTab],
       activeTabId: nextTab.id,
+      lastOpenedTabId: nextTab.id,
     }));
 
     return id;
@@ -304,6 +311,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
     set((state) => ({
       tabs: upsertTab(state.tabs, nextRouteTab),
       activeTabId: nextRouteTab.id,
+      lastOpenedTabId: nextRouteTab.id,
     }));
 
     return nextRouteTab.id;
@@ -329,10 +337,13 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
       state.activeTabId === normalizedTabId
         ? resolveNextActiveTabId(state.tabs, normalizedTabId)
         : state.activeTabId;
+    const nextLastOpenedTabId =
+      state.lastOpenedTabId === normalizedTabId ? null : state.lastOpenedTabId;
 
     set({
       tabs: nextTabs,
       activeTabId: nextActiveTabId,
+      lastOpenedTabId: nextLastOpenedTabId,
     });
   },
 

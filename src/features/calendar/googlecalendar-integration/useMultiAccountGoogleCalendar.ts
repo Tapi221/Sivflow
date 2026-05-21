@@ -23,8 +23,6 @@ import type {
 } from "./gcalSync.types";
 import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
 
-// ==============================================
-
 export type GoogleAccountEntry = {
   id: string;
   email: string | null;
@@ -37,7 +35,6 @@ export type GoogleAccountEntry = {
   error: string | null;
 };
 
-
 type AccountsAction =
   | { type: "ADD"; account: GoogleAccountEntry }
   | { type: "REMOVE"; id: string }
@@ -46,7 +43,7 @@ type AccountsAction =
     type: "SET_TOKEN";
     id: string;
     accessToken: string;
-    refreshToken?: string;
+    refreshToken?: string | null;
   }
   | { type: "SET_CALENDARS"; id: string; calendars: GoogleCalendarListItem[] }
   | { type: "SET_CALENDAR_IDS"; id: string; ids: string[] }
@@ -61,18 +58,16 @@ type EventsAction =
   | { type: "DELETE"; eventId: string }
   | { type: "CLEAR_ACCOUNT"; accountId: string };
 
-// ==============================================
-
 const reduceAccounts = (
   state: GoogleAccountEntry[],
   action: AccountsAction,
 ): GoogleAccountEntry[] => {
   switch (action.type) {
     case "ADD": {
-      // 同一 id が既に存在する場合は上書きしない（接続完了後に REMOVE→ADD するため）
       const exists = state.some((a) => a.id === action.account.id);
       return exists ? state : [...state, action.account];
     }
+
     case "REMOVE":
       return state.filter((a) => a.id !== action.id);
 
@@ -84,6 +79,7 @@ const reduceAccounts = (
     case "SET_TOKEN":
       return state.map((a) => {
         if (a.id !== action.id) return a;
+
         return {
           ...a,
           accessToken: action.accessToken,
@@ -108,12 +104,15 @@ const reduceAccounts = (
     case "TOGGLE_CALENDAR":
       return state.map((a) => {
         if (a.id !== action.id) return a;
+
         const next = new Set(a.selectedCalendarIds);
+
         if (next.has(action.calendarId)) {
           next.delete(action.calendarId);
         } else {
           next.add(action.calendarId);
         }
+
         return { ...a, selectedCalendarIds: next };
       });
 
@@ -140,32 +139,62 @@ const reduceEvents = (
     case "UPSERT": {
       const next = new Map(state);
       const bucket = new Map(next.get(action.accountId) ?? []);
+
       bucket.set(action.event.id, action.event);
       next.set(action.accountId, bucket);
+
       return next;
     }
+
     case "DELETE": {
       const next = new Map(state);
+
       for (const [accountId, bucket] of next) {
-        if (bucket.has(action.eventId)) {
-          const newBucket = new Map(bucket);
-          newBucket.delete(action.eventId);
-          next.set(accountId, newBucket);
-        }
+        if (!bucket.has(action.eventId)) continue;
+
+        const newBucket = new Map(bucket);
+
+        newBucket.delete(action.eventId);
+        next.set(accountId, newBucket);
       }
+
       return next;
     }
+
     case "CLEAR_ACCOUNT": {
       const next = new Map(state);
+
       next.delete(action.accountId);
+
       return next;
     }
+
     default:
       return state;
   }
 };
 
-// ==============================================
+const toCachedCalendars = (calendars: GoogleCalendarListItem[]) =>
+  calendars.map(({ id, summary, backgroundColor }) => ({
+    id,
+    summary,
+    backgroundColor,
+  }));
+
+const getDefaultCalendarIds = (
+  calendars: GoogleCalendarListItem[],
+): string[] => {
+  return calendars
+    .filter((calendar) => calendar.primary || calendar.selected)
+    .map((calendar) => calendar.id);
+};
+
+const resolveSelectedCalendarIds = (
+  storedIds: string[],
+  calendars: GoogleCalendarListItem[],
+): string[] => {
+  return storedIds.length > 0 ? storedIds : getDefaultCalendarIds(calendars);
+};
 
 const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => ({
   id: stored.id,
@@ -178,8 +207,6 @@ const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => ({
   isConnecting: false,
   error: null,
 });
-
-// ==============================================
 
 export const useMultiAccountGoogleCalendar = () => {
   const [accounts, dispatchAccounts] = useReducer(
@@ -196,11 +223,10 @@ export const useMultiAccountGoogleCalendar = () => {
   const managerRef = useRef<GoogleCalendarEngineManager | null>(null);
 
   const accountsRef = useRef(accounts);
+
   useEffect(() => {
     accountsRef.current = accounts;
   }, [accounts]);
-
-  // ==============================================
 
   useEffect(() => {
     if (managerRef.current) return;
@@ -234,17 +260,23 @@ export const useMultiAccountGoogleCalendar = () => {
             }),
 
           getAccessToken: () => {
-            const a = accountsRef.current.find((x) => x.id === accountId);
-            return a?.accessToken ?? null;
+            const account = accountsRef.current.find(
+              (x) => x.id === accountId,
+            );
+
+            return account?.accessToken ?? null;
           },
 
           silentReconnect: async () => {
-            const a = accountsRef.current.find((x) => x.id === accountId);
-            if (!a?.refreshToken) return false;
+            const account = accountsRef.current.find(
+              (x) => x.id === accountId,
+            );
+
+            if (!account?.refreshToken) return false;
 
             try {
               const result = await refreshCalendarAccessToken({
-                refreshToken: a.refreshToken,
+                refreshToken: account.refreshToken,
               });
 
               updateStoredAccountToken(
@@ -259,12 +291,19 @@ export const useMultiAccountGoogleCalendar = () => {
                 type: "SET_TOKEN",
                 id: accountId,
                 accessToken: result.accessToken,
+                refreshToken: result.refreshToken,
               });
 
               dispatchAccounts({
                 type: "SET_CALENDARS",
                 id: accountId,
                 calendars: list,
+              });
+
+              dispatchAccounts({
+                type: "SET_ERROR",
+                id: accountId,
+                error: null,
               });
 
               return true;
@@ -276,48 +315,104 @@ export const useMultiAccountGoogleCalendar = () => {
     });
   }, []);
 
-  // ==============================================
-
   useEffect(() => {
     const storedAccounts = readStoredAccounts();
 
     for (const stored of storedAccounts) {
       const accountId = stored.id;
 
+      const applyAccessToken = async (
+        accessToken: string,
+        refreshToken: string | null,
+        accessTokenExpiry: number | null,
+      ) => {
+        const list = await fetchCalendarList(accessToken);
+        const ids = resolveSelectedCalendarIds(stored.selectedCalendarIds, list);
+
+        upsertStoredAccount({
+          ...stored,
+          accessToken,
+          accessTokenExpiry,
+          refreshToken,
+          selectedCalendarIds: ids,
+          cachedCalendars: toCachedCalendars(list),
+        });
+
+        dispatchAccounts({
+          type: "SET_TOKEN",
+          id: accountId,
+          accessToken,
+          refreshToken,
+        });
+
+        dispatchAccounts({
+          type: "SET_CALENDARS",
+          id: accountId,
+          calendars: list,
+        });
+
+        dispatchAccounts({
+          type: "SET_CALENDAR_IDS",
+          id: accountId,
+          ids,
+        });
+
+        dispatchAccounts({
+          type: "SET_ERROR",
+          id: accountId,
+          error: null,
+        });
+      };
+
       if (isStoredTokenValid(stored) && stored.accessToken) {
-        fetchCalendarList(stored.accessToken)
-          .then((list) => {
-            dispatchAccounts({
-              type: "SET_CALENDARS",
-              id: accountId,
-              calendars: list,
-            });
+        void applyAccessToken(
+          stored.accessToken,
+          stored.refreshToken,
+          stored.accessTokenExpiry,
+        ).catch((error) => {
+          dispatchAccounts({
+            type: "SET_ERROR",
+            id: accountId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        });
 
-            const defaultIds = list
-              .filter((c) => c.primary || c.selected)
-              .map((c) => c.id);
-
-            updateStoredAccountCalendarIds(accountId, defaultIds);
-
-            dispatchAccounts({
-              type: "SET_CALENDAR_IDS",
-              id: accountId,
-              ids: defaultIds,
-            });
-          })
-          .catch(() => {});
+        continue;
       }
+
+      if (!stored.refreshToken) continue;
+
+      void refreshCalendarAccessToken({
+        refreshToken: stored.refreshToken,
+      })
+        .then((result) =>
+          applyAccessToken(
+            result.accessToken,
+            result.refreshToken ?? stored.refreshToken,
+            buildTokenExpiry(),
+          ),
+        )
+        .catch((error) => {
+          dispatchAccounts({
+            type: "SET_ERROR",
+            id: accountId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        });
     }
   }, []);
 
-  // ==============================================
-
   useEffect(() => {
-    for (const a of accounts) {
-      managerRef.current?.upsert(a.id, {
-        accessToken: a.accessToken!,
-        selectedCalendarIds: a.selectedCalendarIds,
-        calendars: a.calendars,
+    for (const account of accounts) {
+      if (!account.accessToken || account.selectedCalendarIds.size === 0) {
+        managerRef.current?.stop(account.id);
+        continue;
+      }
+
+      managerRef.current?.upsert(account.id, {
+        accessToken: account.accessToken,
+        selectedCalendarIds: account.selectedCalendarIds,
+        calendars: account.calendars,
       });
     }
   }, [accounts]);
@@ -326,25 +421,39 @@ export const useMultiAccountGoogleCalendar = () => {
     return () => managerRef.current?.stopAll();
   }, []);
 
-  // ==============================================
-
   const events = useMemo(() => {
+    const selectedByAccount = new Map(
+      accounts.map((account) => [account.id, account.selectedCalendarIds]),
+    );
+
     const all: GoogleCalendarEvent[] = [];
-    for (const bucket of eventsState.values()) {
-      for (const e of bucket.values()) all.push(e);
+
+    for (const [accountId, bucket] of eventsState) {
+      const selectedCalendarIds = selectedByAccount.get(accountId);
+
+      if (!selectedCalendarIds) continue;
+
+      for (const event of bucket.values()) {
+        if (selectedCalendarIds.has(event.calendarId)) {
+          all.push(event);
+        }
+      }
     }
+
     return all;
-  }, [eventsState]);
+  }, [accounts, eventsState]);
 
   const selectedCalendarIds = useMemo(() => {
     const set = new Set<string>();
-    for (const a of accounts) {
-      for (const id of a.selectedCalendarIds) set.add(id);
+
+    for (const account of accounts) {
+      for (const id of account.selectedCalendarIds) {
+        set.add(id);
+      }
     }
+
     return set;
   }, [accounts]);
-
-  // ==============================================
 
   const addAccount = useCallback(async () => {
     const { auth } = await import("@/services/firebase");
@@ -374,9 +483,7 @@ export const useMultiAccountGoogleCalendar = () => {
 
       dispatchAccounts({ type: "REMOVE", id: tempId });
 
-      const defaultIds = list
-        .filter((c) => c.primary || c.selected)
-        .map((c) => c.id);
+      const defaultIds = getDefaultCalendarIds(list);
 
       const entry: GoogleAccountEntry = {
         id: accountId,
@@ -399,11 +506,7 @@ export const useMultiAccountGoogleCalendar = () => {
         accessTokenExpiry: buildTokenExpiry(),
         refreshToken: result.refreshToken ?? null,
         selectedCalendarIds: defaultIds,
-        cachedCalendars: list.map(({ id, summary, backgroundColor }) => ({
-          id,
-          summary,
-          backgroundColor,
-        })),
+        cachedCalendars: toCachedCalendars(list),
       });
     } catch {
       dispatchAccounts({ type: "REMOVE", id: tempId });
@@ -429,15 +532,23 @@ export const useMultiAccountGoogleCalendar = () => {
       if (!stored) return;
 
       const next = new Set(stored.selectedCalendarIds);
-      if (next.has(calendarId)) next.delete(calendarId);
-      else next.add(calendarId);
+
+      if (next.has(calendarId)) {
+        next.delete(calendarId);
+      } else {
+        next.add(calendarId);
+      }
 
       updateStoredAccountCalendarIds(accountId, Array.from(next));
     },
     [],
   );
 
-  const isAnyConnecting = accounts.some((a) => a.isConnecting);
+  const forceSync = useCallback(async () => {
+    await managerRef.current?.forceSyncAll();
+  }, []);
+
+  const isAnyConnecting = accounts.some((account) => account.isConnecting);
 
   return {
     accounts,
@@ -446,6 +557,7 @@ export const useMultiAccountGoogleCalendar = () => {
     addAccount,
     removeAccount,
     toggleCalendar,
+    forceSync,
     isAnyConnecting,
   };
 };

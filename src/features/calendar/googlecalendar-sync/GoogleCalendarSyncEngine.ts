@@ -237,6 +237,11 @@ export class GoogleCalendarSyncEngine {
     await this.runSync();
   }
 
+  clearAllSyncTokens(): void {
+    this.syncTokenMap = {};
+    writeSyncTokens(this.syncTokenMap);
+  }
+
   // ─────────────────────────────────────────────
   // sync state
   // ─────────────────────────────────────────────

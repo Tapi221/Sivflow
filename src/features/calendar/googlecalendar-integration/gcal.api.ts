@@ -5,15 +5,7 @@ import type {
   GoogleCalendarListItem,
 } from "./gcalSync.types";
 
-// ─────────────────────────────────────
-// constants
-// ─────────────────────────────────────
-
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
-
-// ─────────────────────────────────────
-// core fetch
-// ─────────────────────────────────────
 
 const getJson = async <T>(accessToken: string, url: string): Promise<T> => {
   const res = await fetch(url, {
@@ -29,10 +21,6 @@ const getJson = async <T>(accessToken: string, url: string): Promise<T> => {
   return (await res.json()) as T;
 };
 
-// ─────────────────────────────────────
-// date parsing
-// ─────────────────────────────────────
-
 const parseGoogleDate = (raw: string): Date => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
 
@@ -42,38 +30,16 @@ const parseGoogleDate = (raw: string): Date => {
   return new Date(Number(y), Number(m) - 1, Number(d));
 };
 
-const parseEventStart = (start?: {
+const parseEventDate = (value?: {
   date?: string;
   dateTime?: string;
 }): Date | null => {
-  const raw = start?.dateTime ?? start?.date;
+  const raw = value?.dateTime ?? value?.date;
   if (!raw) return null;
 
   const date = parseGoogleDate(raw);
   return Number.isNaN(date.getTime()) ? null : date;
 };
-
-const parseEventMinutes = (
-  start: Date,
-  end?: { date?: string; dateTime?: string },
-): number => {
-  if (end?.date && !end.dateTime) return 60;
-
-  const raw = end?.dateTime ?? end?.date;
-  if (!raw) return 30;
-
-  const endDate = parseGoogleDate(raw);
-  if (Number.isNaN(endDate.getTime())) return 30;
-
-  return Math.max(
-    15,
-    Math.round((endDate.getTime() - start.getTime()) / 60000),
-  );
-};
-
-// ─────────────────────────────────────
-// calendar list
-// ─────────────────────────────────────
 
 export const fetchCalendarList = async (
   accessToken: string,
@@ -94,15 +60,13 @@ export const fetchCalendarList = async (
     .map((i) => ({
       id: i.id!,
       summary: i.summary!,
+      description: i.description,
       backgroundColor: i.backgroundColor ?? "#4f7cff",
+      foregroundColor: i.foregroundColor,
       primary: i.primary ?? false,
       selected: i.selected ?? true,
     }));
 };
-
-// ─────────────────────────────────────
-// events
-// ─────────────────────────────────────
 
 export const fetchEventsForCalendar = async ({
   accessToken,
@@ -134,20 +98,23 @@ export const fetchEventsForCalendar = async ({
   return (data.items ?? [])
     .map((event) => {
       if (!event.id) return null;
+      if (event.status === "cancelled") return null;
 
-      const startsAt = parseEventStart(event.start);
-      if (!startsAt) return null;
+      const startsAt = parseEventDate(event.start);
+      const endsAt = parseEventDate(event.end);
 
-      const isAllDay = Boolean(event.start?.date && !event.start?.dateTime);
+      if (!startsAt || !endsAt) return null;
 
       return {
         id: `${calendarId}:${event.id}`,
         calendarId,
         accentColor,
         title: event.summary || "(No title)",
+        description: event.description,
+        location: event.location,
         startsAt,
-        minutes: parseEventMinutes(startsAt, event.end),
-        isAllDay,
+        endsAt,
+        isAllDay: Boolean(event.start?.date && !event.start?.dateTime),
       } satisfies GoogleCalendarEvent;
     })
     .filter(Boolean) as GoogleCalendarEvent[];

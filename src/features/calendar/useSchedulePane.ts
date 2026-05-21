@@ -11,13 +11,11 @@ import type { GoogleCalendarEvent } from "./googlecalendar-integration/gcalSync.
 import type { buildTimelineColumns } from "./grid/TimelineDayView.shared";
 
 import { useCalendarLayout } from "./layout/calendar/useCalendarLayout";
-import { useCalendarNavigation } from "./useCalendarNavigation";           // ✅ 修正
+import { useCalendarNavigation } from "./useCalendarNavigation";
 import { useCalendarScrollController } from "./scroll/hooks/useCalendarScrollController";
-import { useCalendarVisibleRange } from "./useCalendarVisibleRange";       // ✅ 修正
+import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 import { useTimelineGrid } from "./grid/useTimelineGrid";
-
-// ==============================================
 
 export type UseSchedulePaneReturn = {
   contentViewportRef: RefObject<HTMLDivElement | null>;
@@ -78,9 +76,6 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     calendarBuffer: navigation.calendarBuffer,
   });
 
-  // ✅ useCalendarVisibleRange の戻り値に合わせてマッピング
-  // interactionDays  = バッファを含む操作対象全日（スクロール・イベント同期用）→ visibleDays として公開
-  // displayDays      = UI描画上の表示範囲のみ
   const visibleDays = visibleRange.interactionDays;
   const displayDays = visibleRange.displayDays;
 
@@ -123,7 +118,7 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     monthTitleDate: navigation.monthTitleDate,
     googleCalendar: {
       selectedCalendarIds: google.selectedCalendarIds,
-      rangeController: google.rangeController,
+      forceSync: google.forceSync,
     },
   });
 

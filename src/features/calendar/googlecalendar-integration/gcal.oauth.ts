@@ -10,10 +10,6 @@ import { readEmail } from "./gcal.storage";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
-// ─────────────────────────────────────
-// constants
-// ─────────────────────────────────────
-
 const GOOGLE_CALENDAR_SCOPE =
   "https://www.googleapis.com/auth/calendar.readonly";
 
@@ -23,10 +19,6 @@ const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT =
 const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 
 const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
-
-// ─────────────────────────────────────
-// PKCE utils
-// ─────────────────────────────────────
 
 const toBase64Url = (bytes: Uint8Array): string => {
   const binary = Array.from(bytes, (v) => String.fromCharCode(v)).join("");
@@ -52,10 +44,6 @@ const createCodeChallenge = async (verifier: string): Promise<string> => {
 
   return toBase64Url(new Uint8Array(digest));
 };
-
-// ─────────────────────────────────────
-// JWT util
-// ─────────────────────────────────────
 
 const parseJwtPayload = (token: string): Record<string, unknown> | null => {
   const [, payload] = token.split(".");
@@ -84,10 +72,6 @@ const getEmailFromIdToken = (idToken?: string): string | null => {
 
   return typeof payload?.email === "string" ? payload.email : null;
 };
-
-// ─────────────────────────────────────
-// desktop OAuth
-// ─────────────────────────────────────
 
 const getClientId = (): string => {
   const clientId = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_CLIENT_ID;
@@ -232,9 +216,11 @@ const requestDesktopToken = async (silent: boolean) => {
   };
 };
 
-// ─────────────────────────────────────
-// refresh token
-// ─────────────────────────────────────
+export type GoogleCalendarAccess = {
+  accessToken: string;
+  accountEmail: string | null;
+  refreshToken?: string;
+};
 
 export const refreshCalendarAccessToken = async ({
   refreshToken,
@@ -242,6 +228,23 @@ export const refreshCalendarAccessToken = async ({
   refreshToken: string;
 }): Promise<GoogleCalendarAccess> => {
   const clientId = getClientId();
+
+  if (isDesktopLikeRuntime()) {
+    const tokens = await oauthBridge.refreshTokens({
+      clientId,
+      refreshToken,
+    });
+
+    if (!tokens.accessToken) {
+      throw new Error("Missing refreshed access token");
+    }
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken,
+      accountEmail: getEmailFromIdToken(tokens.idToken),
+    };
+  }
 
   const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, {
     method: "POST",
@@ -276,10 +279,6 @@ export const refreshCalendarAccessToken = async ({
   };
 };
 
-// ─────────────────────────────────────
-// firebase OAuth (web)
-// ─────────────────────────────────────
-
 const requestWebToken = async (auth: Auth, silent: boolean) => {
   const provider = new GoogleAuthProvider();
 
@@ -289,6 +288,10 @@ const requestWebToken = async (auth: Auth, silent: boolean) => {
     include_granted_scopes: "true",
     ...(silent ? {} : { prompt: "consent" }),
   });
+
+  if (silent && !auth.currentUser) {
+    throw new Error("No current user for silent reauthentication");
+  }
 
   const result = silent
     ? await reauthenticateWithPopup(auth.currentUser!, provider)
@@ -304,16 +307,6 @@ const requestWebToken = async (auth: Auth, silent: boolean) => {
     accessToken: cred.accessToken,
     accountEmail: result.user.email,
   };
-};
-
-// ─────────────────────────────────────
-// public API
-// ─────────────────────────────────────
-
-export type GoogleCalendarAccess = {
-  accessToken: string;
-  accountEmail: string | null;
-  refreshToken?: string;
 };
 
 export const requestCalendarAccessToken = async (

@@ -59,6 +59,32 @@ const ACTIVE_TAB_RIGHT_CURVE_STYLE: CSSProperties = {
   mask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
 };
 
+const TAB_OPEN_ANIMATION_STYLE = `
+@keyframes workspace-tab-open {
+  from {
+    opacity: 0;
+    transform: translateY(7px) scaleX(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleX(1);
+  }
+}
+
+.explorer-workspace-tab--opening {
+  animation: workspace-tab-open 240ms cubic-bezier(.22, 1, .36, 1);
+  transform-origin: bottom center;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .explorer-workspace-tab--opening {
+    animation: none;
+  }
+}
+`;
+
 const resolveTabsSurfaceStyle = (isTitlebar: boolean): CSSProperties => ({
   background: isTitlebar
     ? "var(--app-titlebar-bg, var(--app-sidebar-bg))"
@@ -232,6 +258,9 @@ export const WorkspaceTabsBar = ({
   const navigate = useNavigate();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
+  const lastOpenedTabId = useWorkspaceTabsStore(
+    (state) => state.lastOpenedTabId,
+  );
   const selectTab = useWorkspaceTabsStore((state) => state.selectTab);
   const closeTab = useWorkspaceTabsStore((state) => state.closeTab);
   const createExplorerTab = useWorkspaceTabsStore(
@@ -324,168 +353,181 @@ export const WorkspaceTabsBar = ({
   }, [tabs, updateIndicator]);
 
   return (
-    <div
-      style={{
-        ...tabsSurfaceStyle,
-        ...TABS_DRAG_STYLE,
-      }}
-      className={cn(
-        "explorer-chrome-font explorer-tab-bar explorer-workspace-tabs-bar relative z-30 flex shrink-0 items-end gap-0 overflow-visible border-b-0",
-        isTitlebar
-          ? "h-full min-w-0 flex-1 px-0 pt-0"
-          : "h-[40px] w-full min-w-0 px-1.5 pt-0",
-        className,
-      )}
-    >
+    <>
+      <style>{TAB_OPEN_ANIMATION_STYLE}</style>
+
       <div
-        ref={listRef}
-        className="explorer-tab-list explorer-workspace-tabs-list relative flex min-w-0 items-end gap-0 overflow-visible"
+        style={{
+          ...tabsSurfaceStyle,
+          ...TABS_DRAG_STYLE,
+        }}
+        className={cn(
+          "explorer-chrome-font explorer-tab-bar explorer-workspace-tabs-bar relative z-30 flex shrink-0 items-end gap-0 overflow-visible border-b-0",
+          isTitlebar
+            ? "h-full min-w-0 flex-1 px-0 pt-0"
+            : "h-[40px] w-full min-w-0 px-1.5 pt-0",
+          className,
+        )}
       >
         <div
-          aria-hidden="true"
-          style={{
-            ...ACTIVE_TAB_SURFACE_STYLE,
-            ...ACTIVE_TAB_JOIN_STYLE,
-            width: indicator.width,
-            transform: `translate3d(${indicator.left}px, 0, 0)`,
-          }}
-          className={cn(
-            "pointer-events-none absolute bottom-0 left-0 z-0 h-8 rounded-t-[10px]",
-            "transition-[opacity,transform,width] duration-[320ms] ease-[cubic-bezier(.22,1,.36,1)]",
-            "motion-reduce:transition-none",
-            indicator.visible ? "opacity-100" : "opacity-0",
-          )}
+          ref={listRef}
+          className="explorer-tab-list explorer-workspace-tabs-list relative flex min-w-0 items-end gap-0 overflow-visible"
         >
-          <span
+          <div
             aria-hidden="true"
-            className="absolute bottom-0 left-[-16px] h-4 w-4"
-            style={ACTIVE_TAB_LEFT_CURVE_STYLE}
-          />
+            style={{
+              ...ACTIVE_TAB_SURFACE_STYLE,
+              ...ACTIVE_TAB_JOIN_STYLE,
+              width: indicator.width,
+              transform: `translate3d(${indicator.left}px, 0, 0)`,
+            }}
+            className={cn(
+              "pointer-events-none absolute bottom-0 left-0 z-0 h-8 rounded-t-[10px]",
+              "transition-[opacity,transform,width] duration-[320ms] ease-[cubic-bezier(.22,1,.36,1)]",
+              "motion-reduce:transition-none",
+              indicator.visible ? "opacity-100" : "opacity-0",
+            )}
+          >
+            <span
+              aria-hidden="true"
+              className="absolute bottom-0 left-[-16px] h-4 w-4"
+              style={ACTIVE_TAB_LEFT_CURVE_STYLE}
+            />
 
-          <span
-            aria-hidden="true"
-            className="absolute bottom-0 right-[-16px] h-4 w-4"
-            style={ACTIVE_TAB_RIGHT_CURVE_STYLE}
-          />
-        </div>
+            <span
+              aria-hidden="true"
+              className="absolute bottom-0 right-[-16px] h-4 w-4"
+              style={ACTIVE_TAB_RIGHT_CURVE_STYLE}
+            />
+          </div>
 
-        {tabs.map((tab) => {
-          const selected = tab.id === activeTabId;
-          const Icon = resolveTabIcon(tab);
-          const inactiveTextClassName =
-            resolveInactiveTabTextClassName(isTitlebar);
-          const inactiveIconClassName =
-            resolveInactiveTabIconClassName(isTitlebar);
-          const tabStateClassName = selected
-            ? "z-[3] text-[var(--app-sidebar-text-strong)] shadow-none"
-            : cn("explorer-workspace-tab--inactive", inactiveTextClassName);
-          const iconStateClassName = selected
-            ? "text-[var(--ds-semantic-color-interactive-selected-accent)]"
-            : inactiveIconClassName;
-          const closeButtonStateClassName = selected
-            ? "opacity-100 !text-[#6f7681] hover:!bg-black/5 hover:!text-[#2f3640]"
-            : "opacity-80 hover:opacity-100";
+          {tabs.map((tab) => {
+            const selected = tab.id === activeTabId;
+            const isOpening = tab.id === lastOpenedTabId;
+            const Icon = resolveTabIcon(tab);
+            const inactiveTextClassName =
+              resolveInactiveTabTextClassName(isTitlebar);
+            const inactiveIconClassName =
+              resolveInactiveTabIconClassName(isTitlebar);
 
-          return (
-            <div
-              key={tab.id}
-              className="explorer-workspace-tab-slot relative flex items-end overflow-visible"
-              data-workspace-tab-slot-active={selected ? "true" : undefined}
-            >
+            let tabStateClassName = cn(
+              "explorer-workspace-tab--inactive",
+              inactiveTextClassName,
+            );
+            let iconStateClassName = inactiveIconClassName;
+            let closeButtonStateClassName = "opacity-80 hover:opacity-100";
+
+            if (selected) {
+              tabStateClassName =
+                "z-[3] text-[var(--app-sidebar-text-strong)] shadow-none";
+              iconStateClassName =
+                "text-[var(--ds-semantic-color-interactive-selected-accent)]";
+              closeButtonStateClassName =
+                "opacity-100 !text-[#6f7681] hover:!bg-black/5 hover:!text-[#2f3640]";
+            }
+
+            return (
               <div
-                ref={(node) => {
-                  tabRefs.current[tab.id] = node;
-
-                  if (!node) {
-                    delete tabRefs.current[tab.id];
-                  }
-                }}
-                style={{
-                  ...tabsSurfaceStyle,
-                  ...resolveTabStyle(tab),
-                  ...interactiveStyle,
-                  background: "transparent",
-                }}
-                data-workspace-tab-kind={tab.kind}
-                data-workspace-tab-active={selected ? "true" : undefined}
-                className={cn(
-                  "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-visible border-0 text-[13px]",
-                  "mb-0 h-[36px] rounded-tl-[8px] rounded-tr-[8px]",
-                  "transition-[color,transform] duration-300 ease-[cubic-bezier(.22,1,.36,1)]",
-                  tabStateClassName,
-                  resolveTabWidthClassName(tab),
-                )}
+                key={tab.id}
+                className="explorer-workspace-tab-slot relative flex items-end overflow-visible"
+                data-workspace-tab-slot-active={selected ? "true" : undefined}
               >
-                <button
-                  type="button"
-                  style={interactiveStyle}
-                  className="explorer-workspace-tab-button flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left outline-none"
-                  aria-current={selected ? "page" : undefined}
-                  title={tab.title}
-                  onClick={() => {
-                    selectTab(tab.id);
-                    navigate(resolveWorkspaceTabRoute(tab));
+                <div
+                  ref={(node) => {
+                    tabRefs.current[tab.id] = node;
+
+                    if (!node) {
+                      delete tabRefs.current[tab.id];
+                    }
                   }}
+                  style={{
+                    ...tabsSurfaceStyle,
+                    ...resolveTabStyle(tab),
+                    ...interactiveStyle,
+                    background: "transparent",
+                  }}
+                  data-workspace-tab-kind={tab.kind}
+                  data-workspace-tab-active={selected ? "true" : undefined}
+                  className={cn(
+                    "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-visible border-0 text-[13px]",
+                    "mb-0 h-[36px] rounded-tl-[8px] rounded-tr-[8px]",
+                    "transition-[color,transform] duration-300 ease-[cubic-bezier(.22,1,.36,1)]",
+                    tabStateClassName,
+                    isOpening && "explorer-workspace-tab--opening",
+                    resolveTabWidthClassName(tab),
+                  )}
                 >
-                  <Icon
-                    className={cn(
-                      "h-4 w-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)]",
-                      iconStateClassName,
-                    )}
-                  />
-
-                  <span className="truncate">{tab.title}</span>
-                </button>
-
-                {tab.isClosable ? (
                   <button
                     type="button"
                     style={interactiveStyle}
-                    className={cn(
-                      closeButtonClassName,
-                      closeButtonStateClassName,
-                    )}
-                    aria-label={`${tab.title} を閉じる`}
-                    title="閉じる"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-
-                      const nextTab = selected
-                        ? resolveNextTabOnClose(tabs, tab.id)
-                        : null;
-
-                      closeTab(tab.id);
-
-                      if (nextTab) {
-                        navigate(resolveWorkspaceTabRoute(nextTab));
-                      }
+                    className="explorer-workspace-tab-button flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left outline-none"
+                    aria-current={selected ? "page" : undefined}
+                    title={tab.title}
+                    onClick={() => {
+                      selectTab(tab.id);
+                      navigate(resolveWorkspaceTabRoute(tab));
                     }}
                   >
-                    <X className="h-2.5 w-2.5" />
+                    <Icon
+                      className={cn(
+                        "h-4 w-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)]",
+                        iconStateClassName,
+                      )}
+                    />
+
+                    <span className="truncate">{tab.title}</span>
                   </button>
-                ) : null}
+
+                  {tab.isClosable ? (
+                    <button
+                      type="button"
+                      style={interactiveStyle}
+                      className={cn(
+                        closeButtonClassName,
+                        closeButtonStateClassName,
+                      )}
+                      aria-label={`${tab.title} を閉じる`}
+                      title="閉じる"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        const nextTab = selected
+                          ? resolveNextTabOnClose(tabs, tab.id)
+                          : null;
+
+                        closeTab(tab.id);
+
+                        if (nextTab) {
+                          navigate(resolveWorkspaceTabRoute(nextTab));
+                        }
+                      }}
+                    >
+                      <X className="h-2.5 w-2.5" />
+                    </button>
+                  ) : null}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          style={interactiveStyle}
+          className={addButtonClassName}
+          aria-label="新しいエクスプローラータブを開く"
+          title="新しいエクスプローラータブ"
+          onClick={() => {
+            createExplorerTab();
+            navigate("/folders?view=section-list");
+          }}
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+
+        <div className="h-full min-w-0 flex-1" />
       </div>
-
-      <button
-        type="button"
-        style={interactiveStyle}
-        className={addButtonClassName}
-        aria-label="新しいエクスプローラータブを開く"
-        title="新しいエクスプローラータブ"
-        onClick={() => {
-          createExplorerTab();
-          navigate("/folders?view=section-list");
-        }}
-      >
-        <Plus className="h-4 w-4" />
-      </button>
-
-      <div className="h-full min-w-0 flex-1" />
-    </div>
+    </>
   );
 };
