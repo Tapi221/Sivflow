@@ -15,6 +15,7 @@ import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
 import { useTaskCalendarEvents } from "./task/useTaskCalendarEvents";
+import { SidebarPanelIcon } from "@/components/icons/schedule.icons";
 
 import { cn } from "@/lib/utils";
 
@@ -78,6 +79,9 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const showDayDetailPanel =
     canShowDayDetailPanel && isDayDetailPanelOpen;
 
+  const isDayDetailPanelCollapsed =
+    canShowDayDetailPanel && !showDayDetailPanel;
+
   const isMonthCalendarView =
     activeMode === "calendar" && selectedViewMode === "month";
 
@@ -136,6 +140,18 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           onNext={handleNext}
           onToday={handleToday}
         />
+
+        {isDayDetailPanelCollapsed ? (
+          <button
+            type="button"
+            aria-label="日付詳細を開く"
+            title="日付詳細を開く"
+            onClick={handleOpenDayDetailPanel}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e1e4ea] bg-white text-[#8f96a3] shadow-[0_1px_3px_rgba(15,23,42,0.08)] hover:bg-[#f4f6f8]"
+          >
+            <SidebarPanelIcon className="h-3.5 w-3.5" />
+          </button>
+        ) : null}
       </div>
     </div>
   );
@@ -178,7 +194,9 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             activeMode === "task"
               ? "overflow-hidden"
               : isMonthCalendarView
-                ? "px-4 pt-0 pb-0"
+                ? isDayDetailPanelCollapsed
+                  ? "pl-4 pr-0 pt-0 pb-0"
+                  : "px-4 pt-0 pb-0"
                 : showDayDetailPanel
                   ? "px-3 pt-4"
                   : "px-5 pt-4",
@@ -187,12 +205,26 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           {activeMode === "task" ? (
             <TaskView googleAccounts={googleAccounts} />
           ) : isMonthCalendarView ? (
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-[24px] border border-b-0 border-[#e3e5ea] bg-[#f0f2f5] shadow-[0_10px_30px_rgba(15,23,42,0.12)]">
+            <div
+              className={cn(
+                "flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-[#e3e5ea] bg-[#f0f2f5] shadow-[0_10px_30px_rgba(15,23,42,0.12)]",
+                isDayDetailPanelCollapsed
+                  ? "rounded-tl-[24px] rounded-tr-none border-r-0"
+                  : "rounded-t-[24px]",
+              )}
+            >
               {renderViewHeader(
                 "mb-3 flex shrink-0 items-center justify-between px-4 pt-4",
               )}
 
-              <div className="mx-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-2xl border border-b-0 border-[#e9eaed] bg-white">
+              <div
+                className={cn(
+                  "ml-4 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-[#e9eaed] bg-white",
+                  isDayDetailPanelCollapsed
+                    ? "mr-0 rounded-tl-2xl rounded-tr-none border-r-0"
+                    : "mr-4 rounded-t-2xl",
+                )}
+              >
                 <CalendarMonthView
                   currentDate={currentDate}
                   selectedDate={selectedDate}
