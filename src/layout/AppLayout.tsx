@@ -16,7 +16,7 @@ export const AppLayout = () => {
   const { pathname, isFoldersRoute, isScrollLocked } =
     useLayoutRouteStateDesktop();
 
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -36,7 +36,7 @@ export const AppLayout = () => {
     "app-layout",
     isFoldersRoute ? "app-layout--folders" : "",
     isScrollLocked ? "app-layout--scroll-locked" : "",
-    isSidebarExpanded ? "app-layout--sidebar-expanded" : "",
+    isSidebarClosed ? "app-layout--sidebar-closed" : "",
     isRightSidebarOpen ? "app-layout--right-sidebar-open" : "",
   ]
     .filter(Boolean)
@@ -46,8 +46,8 @@ export const AppLayout = () => {
     <>
       <div className={className}>
         <Sidebar
-          isExpanded={isSidebarExpanded}
-          onToggleExpanded={() => setIsSidebarExpanded((current) => !current)}
+          isClosed={isSidebarClosed}
+          onToggleClosed={() => setIsSidebarClosed((current) => !current)}
           onOpenSettings={() => setIsSettingsOpen(true)}
         />
 
