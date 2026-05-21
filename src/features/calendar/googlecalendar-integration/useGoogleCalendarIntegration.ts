@@ -38,6 +38,13 @@ type EventsAction =
     id: string;
   }
   | {
+    type: "replaceRange";
+    calendarId: string;
+    rangeStart: Date;
+    rangeEnd: Date;
+    events: GoogleCalendarEvent[];
+  }
+  | {
     type: "clear";
   };
 
@@ -62,6 +69,17 @@ const reduceEvents = (
 
     case "delete":
       return state.filter((e) => e.id !== action.id);
+
+    case "replaceRange":
+      return [
+        ...state.filter(
+          (event) =>
+            event.calendarId !== action.calendarId ||
+            event.startsAt >= action.rangeEnd ||
+            event.endsAt <= action.rangeStart,
+        ),
+        ...action.events,
+      ];
 
     case "clear":
       return [];
@@ -251,6 +269,7 @@ export const useGoogleCalendarIntegration = ({
     }
 
     syncEngineRef.current = new GoogleCalendarSyncEngine({
+      accountId: accountEmail ?? "legacy",
       onEventAdded: (event: GoogleCalendarEvent) => {
         dispatchEvents({
           type: "upsert",
@@ -272,6 +291,16 @@ export const useGoogleCalendarIntegration = ({
         });
       },
 
+      onEventsRangeReplaced: ({ calendarId, rangeStart, rangeEnd, events }) => {
+        dispatchEvents({
+          type: "replaceRange",
+          calendarId,
+          rangeStart,
+          rangeEnd,
+          events,
+        });
+      },
+
       onSyncStateChange: (state: GCalSyncState) => {
         setSyncState(state);
       },
@@ -288,7 +317,7 @@ export const useGoogleCalendarIntegration = ({
 
       silentReconnect,
     });
-  }, [silentReconnect]);
+  }, [accountEmail, silentReconnect]);
 
   useEffect(() => {
     if (!accessToken) {
@@ -333,7 +362,12 @@ export const useGoogleCalendarIntegration = ({
   }, [accessToken, silentReconnect]);
 
   const forceSync = useCallback(async (options: GCalForceSyncOptions = {}) => {
-    await syncEngineRef.current?.forceSync(options);
+    if (options.rangeStart && options.rangeEnd) {
+      await syncEngineRef.current?.forceSyncRange(options);
+      return;
+    }
+
+    await syncEngineRef.current?.forceSync();
   }, []);
 
   return {

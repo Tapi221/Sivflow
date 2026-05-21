@@ -95,13 +95,17 @@ const buildMiniCalendarDays = (
 type GoogleAccountSectionProps = {
   account: GoogleAccountDisplay;
   onToggleCalendar: (calendarId: string) => void;
+  onReconnect: () => void;
+  onRetry: () => void;
   onRemove: () => void;
 };
 
 const GoogleAccountSection = ({
   account,
   onToggleCalendar,
-  onRemove: _onRemove,
+  onReconnect,
+  onRetry,
+  onRemove,
 }: GoogleAccountSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -132,9 +136,16 @@ const GoogleAccountSection = ({
 
         {syncIndicator}
 
+        {account.lastSyncedAt && (
+          <span className="ml-auto shrink-0 text-[10px] font-medium text-[#b0b5bf]">
+            {format(account.lastSyncedAt, "HH:mm")}
+          </span>
+        )}
+
         <span
           className={cn(
-            "ml-auto flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform duration-200",
+            "flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform duration-200",
+            !account.lastSyncedAt && "ml-auto",
             !isOpen && "-rotate-90",
           )}
         >
@@ -178,9 +189,18 @@ const GoogleAccountSection = ({
       )}
 
       {account.connectionStatus === "needsReconnect" && (
-        <p className="mt-1 px-2 text-[11px] leading-relaxed text-[#a16207]">
-          再連携が必要です。Google Calendar を追加から接続し直してください。
-        </p>
+        <div className="mt-1 px-2">
+          <p className="text-[11px] leading-relaxed text-[#a16207]">
+            再連携が必要です。
+          </p>
+          <button
+            type="button"
+            className="mt-1 rounded-md bg-[#fff7ed] px-2 py-1 text-[11px] font-semibold text-[#9a3412] hover:bg-[#ffedd5]"
+            onClick={onReconnect}
+          >
+            再連携
+          </button>
+        </div>
       )}
 
       {account.error && (
@@ -188,6 +208,28 @@ const GoogleAccountSection = ({
           {account.error}
         </p>
       )}
+
+      {account.connectionStatus === "error" && (
+        <div className="mt-1 px-2">
+          <button
+            type="button"
+            className="rounded-md bg-[#fef2f2] px-2 py-1 text-[11px] font-semibold text-[#b42318] hover:bg-[#fee2e2]"
+            onClick={onRetry}
+          >
+            再試行
+          </button>
+        </div>
+      )}
+
+      <div className="mt-1 px-2">
+        <button
+          type="button"
+          className="text-[11px] font-medium text-[#9aa0aa] hover:text-[#b42318]"
+          onClick={onRemove}
+        >
+          接続解除
+        </button>
+      </div>
     </div>
   );
 };
@@ -201,6 +243,8 @@ export const CalendarSidebar = ({
   onPreviousMonth,
   onNextMonth,
   onAddCalendar,
+  onReconnectAccount,
+  onRetryAccount,
   onRemoveAccount,
   onToggleCalendar,
 }: CalendarSidebarProps) => {
@@ -306,6 +350,8 @@ export const CalendarSidebar = ({
             onToggleCalendar={(calendarId) =>
               onToggleCalendar(account.accountId, calendarId)
             }
+            onReconnect={() => onReconnectAccount(account.accountId)}
+            onRetry={() => onRetryAccount(account.accountId)}
             onRemove={() => onRemoveAccount(account.accountId)}
           />
         ))}

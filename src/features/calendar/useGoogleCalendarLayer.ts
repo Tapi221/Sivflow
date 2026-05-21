@@ -13,6 +13,9 @@ export const useGoogleCalendarLayer = () => {
     removeAccount,
     toggleCalendar,
     forceSync,
+    forceSyncRange,
+    retrySync,
+    reconnectAccount,
     isAnyConnecting,
   } = useMultiAccountGoogleCalendar();
 
@@ -42,6 +45,9 @@ export const useGoogleCalendarLayer = () => {
     removeAccount,
     toggleCalendar,
     forceSync,
+    forceSyncRange,
+    retrySync,
+    reconnectAccount,
     isAnyConnecting,
     connectionStatus,
 

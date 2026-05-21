@@ -50,6 +50,8 @@ export type UseSchedulePaneReturn = {
 
   addGoogleCalendar: () => Promise<void>;
   removeGoogleAccount: (accountId: string) => void;
+  reconnectGoogleAccount: (accountId: string) => Promise<void>;
+  retryGoogleAccountSync: (accountId: string) => Promise<void>;
   toggleGoogleCalendar: (accountId: string, calendarId: string) => void;
 
   handleTimelineScroll: (event: UIEvent<HTMLDivElement>) => void;
@@ -118,7 +120,7 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     monthTitleDate: navigation.monthTitleDate,
     googleCalendar: {
       selectedCalendarIds: google.selectedCalendarIds,
-      forceSync: google.forceSync,
+      forceSyncRange: google.forceSyncRange,
     },
   });
 
@@ -130,6 +132,7 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
       selectedCalendarIds: account.selectedCalendarIds,
       syncState: account.syncState,
       connectionStatus: account.connectionStatus,
+      lastSyncedAt: account.lastSyncedAt,
       error: account.error,
     }),
   );
@@ -167,6 +170,8 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
 
     addGoogleCalendar: google.addAccount,
     removeGoogleAccount: google.removeAccount,
+    reconnectGoogleAccount: google.reconnectAccount,
+    retryGoogleAccountSync: google.retrySync,
     toggleGoogleCalendar: google.toggleCalendar,
 
     handleTimelineScroll: scroll.handleTimelineScroll,

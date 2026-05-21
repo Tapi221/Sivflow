@@ -78,9 +78,16 @@ export type GoogleCalendarApiEventsResponse = {
 };
 
 export type GCalSyncEngineOptions = {
+  accountId?: string;
   onEventAdded: (event: GoogleCalendarEvent) => void;
   onEventUpdated: (event: GoogleCalendarEvent) => void;
   onEventDeleted: (compositeId: string) => void;
+  onEventsRangeReplaced?: (input: {
+    calendarId: string;
+    rangeStart: Date;
+    rangeEnd: Date;
+    events: GoogleCalendarEvent[];
+  }) => void;
   onSyncStateChange: (state: GCalSyncState) => void;
   onLastSyncedAtChange: (at: Date) => void;
   onError: (error: Error) => void;

@@ -58,6 +58,20 @@ const writeSyncTokens = (map: GCalSyncTokenMap): void => {
   }
 };
 
+const buildSyncTokenKey = (accountId: string | undefined, calendarId: string) =>
+  accountId ? `${accountId}:${calendarId}` : calendarId;
+
+const mergeWriteSyncTokens = (map: GCalSyncTokenMap): GCalSyncTokenMap => {
+  const next = {
+    ...readSyncTokens(),
+    ...map,
+  };
+
+  writeSyncTokens(next);
+
+  return next;
+};
+
 // ─────────────────────────────────────────────────────────────
 // API helper
 // ─────────────────────────────────────────────────────────────
@@ -237,14 +251,23 @@ export class GoogleCalendarSyncEngine {
     };
   }
 
-  async forceSync(options: GCalForceSyncOptions = {}): Promise<void> {
+  async forceSync(): Promise<void> {
     this.clearPollTimer();
     this.isFullSyncAllowed = true;
-    await this.runSync(this.normalizeRange(options));
+    await this.runSync();
+  }
+
+  async forceSyncRange(options: GCalForceSyncOptions): Promise<void> {
+    const range = this.normalizeRange(options);
+
+    if (!range) return;
+
+    this.clearPollTimer();
+    await this.runSync(range);
   }
 
   async ensureRange(rangeStart: Date, rangeEnd: Date): Promise<void> {
-    await this.forceSync({ rangeStart, rangeEnd });
+    await this.forceSyncRange({ rangeStart, rangeEnd });
   }
 
   clearAllSyncTokens(): void {
@@ -357,10 +380,20 @@ export class GoogleCalendarSyncEngine {
         const accentColor =
           calendarMap.get(calendarId)?.backgroundColor ?? "#185FA5";
 
-        const existingSyncToken = this.syncTokenMap[calendarId];
+        const syncTokenKey = buildSyncTokenKey(
+          this.options.accountId,
+          calendarId,
+        );
+        const existingSyncToken = this.syncTokenMap[syncTokenKey];
 
         if (range) {
-          await this.doFullSync(calendarId, accentColor, token, range, false);
+          await this.doFullSync(
+            calendarId,
+            accentColor,
+            token,
+            range,
+            false,
+          );
         } else if (existingSyncToken && !this.isFullSyncAllowed) {
           await this.doIncrementalSync(
             calendarId,
@@ -491,13 +524,28 @@ export class GoogleCalendarSyncEngine {
     } while (pageToken);
 
     if (syncToken && shouldStoreSyncToken) {
-      this.syncTokenMap[calendarId] = syncToken;
-      writeSyncTokens(this.syncTokenMap);
+      this.syncTokenMap[
+        buildSyncTokenKey(this.options.accountId, calendarId)
+      ] = syncToken;
+      this.syncTokenMap = mergeWriteSyncTokens(this.syncTokenMap);
     }
 
-    for (const raw of allEvents) {
-      const event = toCalendarEvent(raw, calendarId, accentColor);
-      if (event) this.options.onEventAdded(event);
+    const events = allEvents
+      .map((raw) => toCalendarEvent(raw, calendarId, accentColor))
+      .filter((event): event is GoogleCalendarEvent => Boolean(event));
+
+    if (!shouldStoreSyncToken) {
+      this.options.onEventsRangeReplaced?.({
+        calendarId,
+        rangeStart: range.rangeStart,
+        rangeEnd: range.rangeEnd,
+        events,
+      });
+      return;
+    }
+
+    for (const event of events) {
+      this.options.onEventAdded(event);
     }
   }
 
@@ -540,8 +588,16 @@ export class GoogleCalendarSyncEngine {
         (error as Error & { status?: number }).status === 410;
 
       if (is410) {
-        delete this.syncTokenMap[calendarId];
-        writeSyncTokens(this.syncTokenMap);
+        const latestSyncTokenMap = readSyncTokens();
+        const syncTokenKey = buildSyncTokenKey(
+          this.options.accountId,
+          calendarId,
+        );
+
+        delete latestSyncTokenMap[syncTokenKey];
+        delete this.syncTokenMap[syncTokenKey];
+        writeSyncTokens(latestSyncTokenMap);
+        this.syncTokenMap = latestSyncTokenMap;
 
         await this.doFullSync(
           calendarId,
@@ -557,8 +613,10 @@ export class GoogleCalendarSyncEngine {
     }
 
     if (nextSyncToken) {
-      this.syncTokenMap[calendarId] = nextSyncToken;
-      writeSyncTokens(this.syncTokenMap);
+      this.syncTokenMap[
+        buildSyncTokenKey(this.options.accountId, calendarId)
+      ] = nextSyncToken;
+      this.syncTokenMap = mergeWriteSyncTokens(this.syncTokenMap);
     }
 
     this.applyDiff(calendarId, accentColor, diffEvents);

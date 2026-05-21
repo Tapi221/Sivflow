@@ -34,6 +34,7 @@ export type GoogleAccountEntry = {
   selectedCalendarIds: Set<string>;
   syncState: GCalSyncState;
   connectionStatus: GCalConnectionStatus;
+  lastSyncedAt: Date | null;
   isConnecting: boolean;
   error: string | null;
 };
@@ -52,6 +53,7 @@ type AccountsAction =
   | { type: "SET_CALENDAR_IDS"; id: string; ids: string[] }
   | { type: "TOGGLE_CALENDAR"; id: string; calendarId: string }
   | { type: "SET_SYNC_STATE"; id: string; syncState: GCalSyncState }
+  | { type: "SET_LAST_SYNCED_AT"; id: string; at: Date }
   | { type: "NEEDS_RECONNECT"; id: string; error?: string | null }
   | { type: "SET_ERROR"; id: string; error: string | null };
 
@@ -59,8 +61,22 @@ type EventsState = Map<string, Map<string, GoogleCalendarEvent>>;
 
 type EventsAction =
   | { type: "UPSERT"; accountId: string; event: GoogleCalendarEvent }
-  | { type: "DELETE"; eventId: string }
+  | { type: "DELETE"; accountId: string; eventId: string }
+  | {
+    type: "REPLACE_RANGE";
+    accountId: string;
+    calendarId: string;
+    rangeStart: Date;
+    rangeEnd: Date;
+    events: GoogleCalendarEvent[];
+  }
   | { type: "CLEAR_ACCOUNT"; accountId: string };
+
+const overlapsRange = (
+  event: GoogleCalendarEvent,
+  rangeStart: Date,
+  rangeEnd: Date,
+) => event.startsAt < rangeEnd && event.endsAt > rangeStart;
 
 const reduceAccounts = (
   state: GoogleAccountEntry[],
@@ -69,7 +85,10 @@ const reduceAccounts = (
   switch (action.type) {
     case "ADD": {
       const exists = state.some((a) => a.id === action.account.id);
-      return exists ? state : [...state, action.account];
+
+      return exists
+        ? state.map((a) => (a.id === action.account.id ? action.account : a))
+        : [...state, action.account];
     }
 
     case "REMOVE":
@@ -145,6 +164,11 @@ const reduceAccounts = (
           : a,
       );
 
+    case "SET_LAST_SYNCED_AT":
+      return state.map((a) =>
+        a.id === action.id ? { ...a, lastSyncedAt: action.at } : a,
+      );
+
     case "NEEDS_RECONNECT":
       return state.map((a) =>
         a.id === action.id
@@ -194,15 +218,36 @@ const reduceEvents = (
 
     case "DELETE": {
       const next = new Map(state);
+      const bucket = next.get(action.accountId);
 
-      for (const [accountId, bucket] of next) {
-        if (!bucket.has(action.eventId)) continue;
+      if (!bucket?.has(action.eventId)) return next;
 
-        const newBucket = new Map(bucket);
+      const newBucket = new Map(bucket);
 
-        newBucket.delete(action.eventId);
-        next.set(accountId, newBucket);
+      newBucket.delete(action.eventId);
+      next.set(action.accountId, newBucket);
+
+      return next;
+    }
+
+    case "REPLACE_RANGE": {
+      const next = new Map(state);
+      const bucket = new Map(next.get(action.accountId) ?? []);
+
+      for (const [eventId, event] of bucket) {
+        if (
+          event.calendarId === action.calendarId &&
+          overlapsRange(event, action.rangeStart, action.rangeEnd)
+        ) {
+          bucket.delete(eventId);
+        }
       }
+
+      for (const event of action.events) {
+        bucket.set(event.id, event);
+      }
+
+      next.set(action.accountId, bucket);
 
       return next;
     }
@@ -255,6 +300,7 @@ const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => ({
     isStoredTokenValid(stored) || stored.refreshToken
       ? "connected"
       : "needsReconnect",
+  lastSyncedAt: null,
   isConnecting: false,
   error:
     isStoredTokenValid(stored) || stored.refreshToken
@@ -288,6 +334,7 @@ export const useMultiAccountGoogleCalendar = () => {
     managerRef.current = new GoogleCalendarEngineManager({
       createEngine: (accountId: string) =>
         new GoogleCalendarSyncEngine({
+          accountId,
           onEventAdded: (event) =>
             dispatchEvents({ type: "UPSERT", accountId, event }),
 
@@ -295,7 +342,22 @@ export const useMultiAccountGoogleCalendar = () => {
             dispatchEvents({ type: "UPSERT", accountId, event }),
 
           onEventDeleted: (eventId) =>
-            dispatchEvents({ type: "DELETE", eventId }),
+            dispatchEvents({ type: "DELETE", accountId, eventId }),
+
+          onEventsRangeReplaced: ({
+            calendarId,
+            rangeStart,
+            rangeEnd,
+            events,
+          }) =>
+            dispatchEvents({
+              type: "REPLACE_RANGE",
+              accountId,
+              calendarId,
+              rangeStart,
+              rangeEnd,
+              events,
+            }),
 
           onSyncStateChange: (syncState) =>
             dispatchAccounts({
@@ -304,7 +366,8 @@ export const useMultiAccountGoogleCalendar = () => {
               syncState,
             }),
 
-          onLastSyncedAtChange: () => {},
+          onLastSyncedAtChange: (at) =>
+            dispatchAccounts({ type: "SET_LAST_SYNCED_AT", id: accountId, at }),
 
           onError: (err) =>
             dispatchAccounts({
@@ -532,6 +595,7 @@ export const useMultiAccountGoogleCalendar = () => {
         selectedCalendarIds: new Set(),
         syncState: "idle",
         connectionStatus: "connected",
+        lastSyncedAt: null,
         isConnecting: true,
         error: null,
       },
@@ -556,6 +620,7 @@ export const useMultiAccountGoogleCalendar = () => {
         selectedCalendarIds: new Set(defaultIds),
         syncState: "idle",
         connectionStatus: "connected",
+        lastSyncedAt: null,
         isConnecting: false,
         error: null,
       };
@@ -611,6 +676,18 @@ export const useMultiAccountGoogleCalendar = () => {
     await managerRef.current?.forceSyncAll(options);
   }, []);
 
+  const forceSyncRange = useCallback(async (options: GCalForceSyncOptions) => {
+    await managerRef.current?.forceSyncAll(options);
+  }, []);
+
+  const retrySync = useCallback(async (accountId: string) => {
+    await managerRef.current?.forceSync(accountId);
+  }, []);
+
+  const reconnectAccount = useCallback(async () => {
+    await addAccount();
+  }, [addAccount]);
+
   const isAnyConnecting = accounts.some((account) => account.isConnecting);
 
   return {
@@ -621,6 +698,9 @@ export const useMultiAccountGoogleCalendar = () => {
     removeAccount,
     toggleCalendar,
     forceSync,
+    forceSyncRange,
+    retrySync,
+    reconnectAccount,
     isAnyConnecting,
   };
 };
