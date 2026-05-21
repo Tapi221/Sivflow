@@ -138,15 +138,24 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           onToday={handleToday}
         />
 
-        {canShowDayDetailPanel && !showDayDetailPanel ? (
+        {canShowDayDetailPanel ? (
           <button
             type="button"
-            aria-label="日付詳細を開く"
-            title="日付詳細を開く"
-            onClick={handleOpenDayDetailPanel}
+            aria-label={showDayDetailPanel ? "日付詳細を閉じる" : "日付詳細を開く"}
+            title={showDayDetailPanel ? "日付詳細を閉じる" : "日付詳細を開く"}
+            onClick={
+              showDayDetailPanel
+                ? handleCloseDayDetailPanel
+                : handleOpenDayDetailPanel
+            }
             className="flex h-7 w-7 items-center justify-center rounded-full border border-[#e2e4e9] bg-white text-[#8f929c] transition-colors hover:bg-[#eef0f3] hover:text-[#20242c]"
           >
-            <SidebarPanelIcon className="h-4 w-4 -scale-x-100" />
+            <SidebarPanelIcon
+              className={cn(
+                "h-4 w-4",
+                showDayDetailPanel && "-scale-x-100",
+              )}
+            />
           </button>
         ) : null}
       </div>
@@ -256,7 +265,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           <DayDetailPanel
             selectedDate={selectedDate}
             events={calendarEvents}
-            onClose={handleCloseDayDetailPanel}
           />
         ) : null}
       </div>
