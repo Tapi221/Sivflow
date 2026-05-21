@@ -1,10 +1,7 @@
 import { format } from "date-fns";
+import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/schedule.icons";
+import { AnimatedSquareCheckbox } from "@/features/calendar/chip/checkbox/AnimatedSquareCheckbox";
 import { GoogleAccountChip } from "@/features/calendar/chip/GoogleAccountChip";
-import {
-  CalendarIcon as ScheduleCalendarIcon,
-  CheckSquareFilledIcon,
-  SquareOutlineIcon,
-} from "@/components/icons/schedule.icons";
 import { CATEGORY_CONFIG, PRIORITY_CONFIG } from "./task.types";
 import type { Task } from "./task.types";
 
@@ -50,6 +47,7 @@ export const TaskCard = ({
   }
 
   const isDone = task.status === "done";
+  const checkboxColor = isDone ? "#193a5c" : "#9ca3af";
   const chipName = accountName ?? task.assignee ?? "Google account";
 
   let dateContent = <span />;
@@ -67,7 +65,7 @@ export const TaskCard = ({
       <div className="flex items-start gap-3">
         <button
           type="button"
-          className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center text-[#9ca3af] hover:text-[#193a5c]"
+          className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center"
           aria-label="Complete task"
           onClick={() => {
             if (onToggleDone) {
@@ -75,11 +73,7 @@ export const TaskCard = ({
             }
           }}
         >
-          {isDone ? (
-            <CheckSquareFilledIcon className="h-4 w-4 text-[#193a5c]" />
-          ) : (
-            <SquareOutlineIcon className="h-4 w-4" />
-          )}
+          <AnimatedSquareCheckbox checked={isDone} color={checkboxColor} />
         </button>
 
         <div className="min-w-0 flex-1">
