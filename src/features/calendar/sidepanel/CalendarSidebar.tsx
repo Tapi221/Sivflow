@@ -212,7 +212,7 @@ export const CalendarSidebar = ({
           </span>
 
           <div className="flex items-center gap-0.5">
-            <HoverTooltip label="前の月" side="top" >
+            <HoverTooltip label="前の月" side="top">
               <button
                 type="button"
                 className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
@@ -240,7 +240,7 @@ export const CalendarSidebar = ({
           {T.MINI_CALENDAR_WEEKDAYS.map((weekday, index) => (
             <span
               key={`${weekday}-${index}`}
-              className="flex h-6 items-center justify-center text-[10px] font-medium uppercase text-[#b0b5bf]"
+              className="flex h-6 items-center justify-center text-[11px] font-semibold uppercase text-[#9aa0aa]"
             >
               {weekday}
             </span>
@@ -257,15 +257,15 @@ export const CalendarSidebar = ({
                 type="button"
                 onClick={() => onSelectDate(day.date)}
                 className={cn(
-                  "flex aspect-square w-full items-center justify-center rounded-full text-[11px]",
-                  day.isToday && "bg-[#185FA5] text-white",
-                  day.isSelected && !day.isToday && "bg-[#2d3039] text-white",
+                  "flex aspect-square w-full items-center justify-center rounded-full text-[12px] font-medium",
+                  day.isToday && "bg-[#185FA5] font-semibold text-white",
+                  day.isSelected && !day.isToday && "bg-[#2d3039] font-semibold text-white",
                   !isActive &&
                     day.isCurrentMonth &&
-                    "hover:bg-[#eceef1] text-[#2d3039]",
+                    "text-[#2d3039] hover:bg-[#eceef1]",
                   !isActive &&
                     !day.isCurrentMonth &&
-                    "text-[#c5c8d0] hover:bg-[#eceef1]",
+                    "text-[#b8bcc5] hover:bg-[#eceef1]",
                 )}
               >
                 {day.dayNumber}

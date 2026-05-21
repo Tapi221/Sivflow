@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import {
   collection,
@@ -10,13 +10,8 @@ import {
 import { firestoreDb } from "@/services/firebase";
 
 type UseGoogleCalendarPushSyncOptions = {
-  /** Firebase Auth の UID。null の場合はリスナーを張らない */
   userId: string | null;
-
-  /** 監視対象のカレンダーID一覧 */
   selectedCalendarIds: Set<string>;
-
-  /** Push通知を受け取ったときのコールバック */
   onNotification: (calendarId: string) => void;
 };
 
@@ -25,25 +20,19 @@ export const useGoogleCalendarPushSync = ({
   selectedCalendarIds,
   onNotification,
 }: UseGoogleCalendarPushSyncOptions): void => {
-  /**
-   * コールバックは毎レンダーで参照が変わる可能性があるため、
-   * ref に保持して stale closure を防ぐ
-   */
   const onNotificationRef = useRef(onNotification);
 
   onNotificationRef.current = onNotification;
 
+  const calendarKey = useMemo(() => {
+    return Array.from(selectedCalendarIds).slice().sort().join("|");
+  }, [selectedCalendarIds]);
+
   useEffect(() => {
-    /**
-     * 初期化前や未ログイン時は何もしない
-     */
     if (!userId || selectedCalendarIds.size === 0 || !firestoreDb) {
       return;
     }
 
-    /**
-     * /gcal_notifications/{userId}/calendars
-     */
     const colRef = collection(
       firestoreDb,
       "gcal_notifications",
@@ -51,37 +40,24 @@ export const useGoogleCalendarPushSync = ({
       "calendars",
     );
 
-    /**
-     * Firestore の初回 snapshot は
-     * 現在状態の同期なので Push通知として扱わない
-     */
     let isInitialSnapshot = true;
 
     const unsubscribe: Unsubscribe = onSnapshot(
       query(colRef),
 
       (snapshot) => {
-        /**
-         * 初回同期は無視
-         */
         if (isInitialSnapshot) {
           isInitialSnapshot = false;
           return;
         }
 
         snapshot.docChanges().forEach((change) => {
-          /**
-           * 削除イベントは無視
-           */
           if (change.type !== "added" && change.type !== "modified") {
             return;
           }
 
           const calendarId = change.doc.id;
 
-          /**
-           * 現在選択中のカレンダーのみ同期
-           */
           if (!selectedCalendarIds.has(calendarId)) {
             return;
           }
@@ -97,17 +73,8 @@ export const useGoogleCalendarPushSync = ({
       },
     );
 
-    /**
-     * unmount 時に listener cleanup
-     */
     return () => {
       unsubscribe();
     };
-
-    /**
-     * selectedCalendarIds は Set のため
-     * 直接依存配列に入れると比較が壊れる
-     */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, selectedCalendarIds.size]);
+  }, [userId, calendarKey, selectedCalendarIds]);
 };

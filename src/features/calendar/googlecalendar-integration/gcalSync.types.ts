@@ -1,125 +1,89 @@
-/**
- * Google Calendar インクリメンタル同期エンジン 専用型定義
- */
-
-// ─────────────────────────────────────────────────────────────
-// 基本型
-// ─────────────────────────────────────────────────────────────
+import type { Auth } from "firebase/auth";
 
 export type GoogleCalendarEvent = {
   id: string;
-
   calendarId: string;
-
   title: string;
-
   description?: string;
-
   location?: string;
-
   startsAt: Date;
-
   endsAt: Date;
-
   isAllDay: boolean;
-
   accentColor: string;
 };
 
 export type GoogleCalendarListItem = {
   id: string;
-
   summary: string;
-
-  primary?: boolean;
-
-  selected?: boolean;
-
+  description?: string;
   backgroundColor?: string;
+  foregroundColor?: string;
+  primary?: boolean;
+  selected?: boolean;
 };
 
 export type UseGoogleCalendarIntegrationOptions = {
-  authInstance?: unknown;
+  authInstance?: Auth;
 };
-
-// ─────────────────────────────────────────────────────────────
-// 同期状態
-// ─────────────────────────────────────────────────────────────
 
 export type GCalSyncState = "idle" | "syncing" | "error";
 
-// ─────────────────────────────────────────────────────────────
-// syncToken map
-// ─────────────────────────────────────────────────────────────
-
 export type GCalSyncTokenMap = Record<string, string>;
 
-// ─────────────────────────────────────────────────────────────
-// Raw incremental event
-// ─────────────────────────────────────────────────────────────
-
-export interface GCalRawIncrementalEvent {
+export type GCalRawIncrementalEvent = {
   id?: string;
-
   summary?: string;
-
+  description?: string;
+  location?: string;
   status?: "confirmed" | "tentative" | "cancelled";
-
   start?: {
     date?: string;
     dateTime?: string;
   };
-
   end?: {
     date?: string;
     dateTime?: string;
   };
-}
+};
 
-export interface GCalEventsListResponse {
+export type GCalEventsListResponse = {
   items?: GCalRawIncrementalEvent[];
-
   nextSyncToken?: string;
-
   nextPageToken?: string;
-}
+};
 
-// ─────────────────────────────────────────────────────────────
-// Engine options
-// ─────────────────────────────────────────────────────────────
+export type GoogleCalendarApiListResponse = {
+  items?: Array<{
+    id?: string;
+    summary?: string;
+    description?: string;
+    backgroundColor?: string;
+    foregroundColor?: string;
+    primary?: boolean;
+    selected?: boolean;
+  }>;
+};
 
-export interface GCalSyncEngineOptions {
+export type GoogleCalendarApiEventsResponse = {
+  items?: GCalRawIncrementalEvent[];
+};
+
+export type GCalSyncEngineOptions = {
   onEventAdded: (event: GoogleCalendarEvent) => void;
-
   onEventUpdated: (event: GoogleCalendarEvent) => void;
-
   onEventDeleted: (compositeId: string) => void;
-
   onSyncStateChange: (state: GCalSyncState) => void;
-
   onLastSyncedAtChange: (at: Date) => void;
-
   onError: (error: Error) => void;
-
   pollIntervalMs?: number;
-
   getAccessToken: () => string | null;
-
   silentReconnect: () => Promise<boolean>;
-
   fullSyncPastDays?: number;
-
   fullSyncFutureDays?: number;
-}
+};
 
-// ─────────────────────────────────────────────────────────────
-// Sync start context
-// ─────────────────────────────────────────────────────────────
-
-export interface GCalSyncStartContext {
+export type GCalSyncStartContext = {
   accessToken: string;
-
   selectedCalendarIds: Set<string>;
-
   calendars: GoogleCalendarListItem[];
-}
+};

@@ -1,4 +1,5 @@
 import { GoogleCalendarSyncEngine } from "../googlecalendar-sync/GoogleCalendarSyncEngine";
+
 import type { GoogleCalendarListItem } from "./gcalSync.types";
 
 type EngineContext = {
@@ -10,10 +11,12 @@ type EngineContext = {
 type EngineState = {
   token: string;
   calIds: string;
+  calendars: string;
 };
 
 export class GoogleCalendarEngineManager {
   private engines = new Map<string, GoogleCalendarSyncEngine>();
+
   private state = new Map<string, EngineState>();
 
   constructor(
@@ -22,21 +25,21 @@ export class GoogleCalendarEngineManager {
     },
   ) {}
 
-  // ─────────────────────────────────────────────
-  // Public API
-  // ─────────────────────────────────────────────
-
-  upsert(accountId: string, ctx: EngineContext) {
+  upsert(accountId: string, ctx: EngineContext): void {
     if (!ctx.accessToken || ctx.selectedCalendarIds.size === 0) {
       this.stop(accountId);
       return;
     }
 
     const calIdsKey = this.buildCalKey(ctx.selectedCalendarIds);
+    const calendarsKey = this.buildCalendarsKey(ctx.calendars);
     const prev = this.state.get(accountId);
 
-    // idempotent check（超重要）
-    if (prev?.token === ctx.accessToken && prev?.calIds === calIdsKey) {
+    if (
+      prev?.token === ctx.accessToken &&
+      prev.calIds === calIdsKey &&
+      prev.calendars === calendarsKey
+    ) {
       return;
     }
 
@@ -56,28 +59,42 @@ export class GoogleCalendarEngineManager {
     this.state.set(accountId, {
       token: ctx.accessToken,
       calIds: calIdsKey,
+      calendars: calendarsKey,
     });
   }
 
-  stop(accountId: string) {
+  stop(accountId: string): void {
     const engine = this.engines.get(accountId);
+
     if (engine) {
       engine.stop();
       this.engines.delete(accountId);
     }
+
     this.state.delete(accountId);
   }
 
-  stopAll() {
+  stopAll(): void {
     for (const engine of this.engines.values()) {
       engine.stop();
     }
+
     this.engines.clear();
     this.state.clear();
   }
 
-  removeAccount(accountId: string) {
+  removeAccount(accountId: string): void {
     this.stop(accountId);
+  }
+
+  async forceSync(accountId: string): Promise<void> {
+    await this.engines.get(accountId)?.forceSync();
+  }
+
+  async forceSyncAll(): Promise<void> {
+    await Promise.all(
+      Array.from(this.engines.values()).map((engine) => engine.forceSync()),
+    );
   }
 
   getActiveIds(): string[] {
@@ -92,11 +109,14 @@ export class GoogleCalendarEngineManager {
     return this.engines.get(accountId);
   }
 
-  // ─────────────────────────────────────────────
-  // Internal
-  // ─────────────────────────────────────────────
-
   private buildCalKey(set: Set<string>): string {
     return [...set].sort().join(",");
+  }
+
+  private buildCalendarsKey(calendars: GoogleCalendarListItem[]): string {
+    return calendars
+      .map((calendar) => `${calendar.id}:${calendar.backgroundColor ?? ""}`)
+      .sort()
+      .join(",");
   }
 }

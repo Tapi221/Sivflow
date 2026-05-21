@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
+import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 
 import { toDateKey } from "./calendarKey";
 
@@ -23,7 +23,6 @@ export const useCalendarEventMap = (
       }
     }
 
-    // sort only once per day bucket
     for (const arr of map.values()) {
       arr.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
     }
