@@ -45,15 +45,16 @@ const ACTIVE_TAB_JOIN_STYLE: CSSProperties = {};
 
 const ACTIVE_TAB_LEFT_CURVE_STYLE: CSSProperties = {
   ...ACTIVE_TAB_SURFACE_STYLE,
-  WebkitMask: "radial-gradient(circle at 0 0, transparent 0 16px, #000 16px)",
-  mask: "radial-gradient(circle at 0 0, transparent 0 16px, #000 16px)",
+  WebkitMask:
+    "radial-gradient(circle at 0 0, transparent 0 16px, #000 16.5px)",
+  mask: "radial-gradient(circle at 0 0, transparent 0 16px, #000 16.5px)",
 };
 
 const ACTIVE_TAB_RIGHT_CURVE_STYLE: CSSProperties = {
   ...ACTIVE_TAB_SURFACE_STYLE,
   WebkitMask:
-    "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16px)",
-  mask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16px)",
+    "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
+  mask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
 };
 
 const TAB_OPEN_ANIMATION_STYLE = `
@@ -293,8 +294,8 @@ export const WorkspaceTabsBar = ({
     const listRect = listEl.getBoundingClientRect();
     const tabRect = activeTabEl.getBoundingClientRect();
     const nextIndicator = {
-      left: tabRect.left - listRect.left,
-      width: tabRect.width,
+      left: Math.round(tabRect.left - listRect.left),
+      width: Math.round(tabRect.width),
       visible: true,
     };
 
@@ -375,25 +376,25 @@ export const WorkspaceTabsBar = ({
             style={{
               ...ACTIVE_TAB_SURFACE_STYLE,
               ...ACTIVE_TAB_JOIN_STYLE,
+              left: indicator.left,
               width: indicator.width,
-              transform: `translate3d(${indicator.left}px, 0, 0)`,
             }}
             className={cn(
-              "pointer-events-none absolute bottom-[-1px] left-0 z-0 h-[33px] rounded-t-[10px]",
-              "transition-[opacity,transform,width] duration-[320ms] ease-[cubic-bezier(.22,1,.36,1)]",
+              "pointer-events-none absolute bottom-[-1px] z-0 h-[33px] rounded-t-[10px]",
+              "transition-[opacity,left,width] duration-[320ms] ease-[cubic-bezier(.22,1,.36,1)]",
               "motion-reduce:transition-none",
               indicator.visible ? "opacity-100" : "opacity-0",
             )}
           >
             <span
               aria-hidden="true"
-              className="absolute bottom-[-1px] left-[-15px] h-[17px] w-[17px]"
+              className="absolute bottom-[-1px] left-[-16px] h-[18px] w-[18px]"
               style={ACTIVE_TAB_LEFT_CURVE_STYLE}
             />
 
             <span
               aria-hidden="true"
-              className="absolute bottom-[-1px] right-[-15px] h-[17px] w-[17px]"
+              className="absolute bottom-[-1px] right-[-16px] h-[18px] w-[18px]"
               style={ACTIVE_TAB_RIGHT_CURVE_STYLE}
             />
           </div>
