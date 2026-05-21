@@ -243,7 +243,11 @@ export const WorkspaceTabsBar = ({
             resolveInactiveTabIconClassName(isTitlebar);
 
           return (
-            <div key={tab.id} className="relative flex items-end overflow-visible">
+            <div
+              key={tab.id}
+              className="explorer-workspace-tab-slot relative flex items-end overflow-visible"
+              data-workspace-tab-slot-active={selected ? "true" : undefined}
+            >
               <div
                 style={{
                   ...tabsSurfaceStyle,
