@@ -69,8 +69,23 @@ export const TaskCard = ({
         </button>
 
         <div className="min-w-0 flex-1">
-          <div className="truncate text-[13px] font-medium leading-[18px] text-[#24262d]">
-            {task.title}
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1 truncate text-[13px] font-medium leading-[18px] text-[#24262d]">
+              {task.title}
+            </div>
+
+            <button
+              type="button"
+              className="-mr-1 -mt-1 rounded p-1 text-[#9ca3af] hover:bg-[#f3f4f6]"
+              aria-label="Task menu"
+              onClick={() => {
+                if (onDelete) {
+                  onDelete(task.id);
+                }
+              }}
+            >
+              ⋮
+            </button>
           </div>
 
           <div className="mt-2.5 flex flex-wrap items-center gap-2">
@@ -100,19 +115,6 @@ export const TaskCard = ({
             )}
           </div>
         </div>
-
-        <button
-          type="button"
-          className="rounded p-1 text-[#9ca3af] hover:bg-[#f3f4f6]"
-          aria-label="Task menu"
-          onClick={() => {
-            if (onDelete) {
-              onDelete(task.id);
-            }
-          }}
-        >
-          ⋮
-        </button>
       </div>
     </div>
   );
