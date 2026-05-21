@@ -88,7 +88,7 @@ export const TaskView = ({ googleAccounts = [] }: TaskViewProps) => {
           onToggleTaskDone={handleToggleTaskDone}
         />
       ) : (
-        <TaskListView tasks={tasks} />
+        <TaskListView tasks={tasks} onToggleTaskDone={handleToggleTaskDone} />
       )}
 
       <AnimatePresence>
