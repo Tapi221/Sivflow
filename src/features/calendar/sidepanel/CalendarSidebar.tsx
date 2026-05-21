@@ -1,32 +1,12 @@
 import { useMemo, useState } from "react";
-
-import {
-  addDays,
-  format,
-  isSameDay,
-  startOfDay,
-  startOfMonth,
-  startOfWeek,
-} from "date-fns";
-
+import { addDays, format, isSameDay, startOfDay, startOfMonth, startOfWeek } from "date-fns";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
-
-import type {
-  AppCalendarItem,
-  CalendarSidebarProps,
-  GoogleAccountDisplay,
-} from "../schedulePane.types";
-import {
-  CalendarIcon,
-  CheckCircleFilledIcon,
-  CircleOutlineIcon,
-  PlusIcon,
-} from "../../../icons/schedule.icons";
-
+import { AnimatedCalendarCircleCheckbox } from "@/features/calendar/chip/checkbox/AnimatedCircleCheckbox";
+import { CalendarIcon, PlusIcon } from "@/icons/schedule.icons";
 import { cn } from "@/lib/utils";
-
+import type { CalendarSidebarProps, GoogleAccountDisplay } from "../schedulePane.types";
 
 const IconChevronLeft = ({ className }: { className?: string }) => (
   <svg
@@ -89,6 +69,7 @@ const buildMiniCalendarDays = (
 
   return Array.from({ length: C.MINI_CALENDAR_CELL_COUNT }, (_, index) => {
     const date = addDays(gridStart, index);
+
     return {
       date,
       dayNumber: format(date, "d"),
@@ -99,10 +80,6 @@ const buildMiniCalendarDays = (
   });
 };
 
-const APP_CALENDAR_ITEMS: AppCalendarItem[] = [
-  { id: "app-calendar-test", label: "Test", color: "#ff3b30", checked: true },
-];
-
 type GoogleAccountSectionProps = {
   account: GoogleAccountDisplay;
   onToggleCalendar: (calendarId: string) => void;
@@ -112,7 +89,7 @@ type GoogleAccountSectionProps = {
 const GoogleAccountSection = ({
   account,
   onToggleCalendar,
-  onRemove,
+  onRemove: _onRemove,
 }: GoogleAccountSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -125,7 +102,6 @@ const GoogleAccountSection = ({
 
   return (
     <div className="mt-3">
-      {/* ヘッダー行：カレンダーアイコン + トグル + メール(小文字) */}
       <button
         type="button"
         className="group flex h-6 w-full items-center gap-1 px-2 text-left"
@@ -133,12 +109,15 @@ const GoogleAccountSection = ({
         aria-expanded={isOpen}
       >
         <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-[#74798b]" />
+
         {account.email && (
           <span className="truncate text-[11px] font-semibold tracking-wider text-[#9aa0aa]">
             {account.email}
           </span>
         )}
+
         {syncIndicator}
+
         <span
           className={cn(
             "ml-auto flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform duration-200",
@@ -149,11 +128,9 @@ const GoogleAccountSection = ({
         </span>
       </button>
 
-      {/* カレンダー一覧 */}
       {isOpen &&
         account.calendars.map((calendar) => {
           const checked = account.selectedCalendarIds.has(calendar.id);
-          const Icon = checked ? CheckCircleFilledIcon : CircleOutlineIcon;
 
           return (
             <button
@@ -161,11 +138,13 @@ const GoogleAccountSection = ({
               type="button"
               className="flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 pl-7 text-left transition-colors hover:bg-[#eceef1]"
               onClick={() => onToggleCalendar(calendar.id)}
+              aria-pressed={checked}
             >
-              <Icon
-                className="h-3.5 w-3.5 shrink-0"
-                style={{ color: calendar.backgroundColor }}
+              <AnimatedCalendarCircleCheckbox
+                checked={checked}
+                color={calendar.backgroundColor}
               />
+
               <span className="truncate text-[12px] font-medium text-[#3d4049]">
                 {calendar.summary}
               </span>
@@ -214,8 +193,6 @@ export const CalendarSidebar = ({
 
   return (
     <aside className="flex h-full w-[220px] shrink-0 flex-col gap-5 overflow-y-auto bg-[#f7f8fa] px-3 py-5 text-[#24272f]">
-
-      {/* ミニカレンダー */}
       <section className="flex w-full flex-col gap-2">
         <div className="flex w-full items-center justify-between px-1">
           <span className="text-[12px] font-semibold tracking-wide text-[#3d4049]">
@@ -282,7 +259,6 @@ export const CalendarSidebar = ({
 
       <div className="h-px w-full bg-[#e4e6eb]" />
 
-      {/* カレンダーリスト */}
       <nav className="flex w-full flex-col gap-0.5">
         <div className="mb-1 flex h-6 items-center gap-1.5 px-2">
           <CalendarIcon className="h-3.5 w-3.5 text-[#74798b]" />
@@ -302,7 +278,7 @@ export const CalendarSidebar = ({
           />
         ))}
 
-        <div className={cn("mt-2", hasGoogleAccounts && "pt-2 border-t")}>
+        <div className={cn("mt-2", hasGoogleAccounts && "border-t pt-2")}>
           <button
             type="button"
             className="flex h-7 w-full items-center gap-2 px-2 text-left hover:bg-[#eceef1]"
@@ -310,6 +286,7 @@ export const CalendarSidebar = ({
             disabled={isAnyCalendarConnecting}
           >
             <PlusIcon className="h-4 w-4 text-[#74798b]" />
+
             <span className="text-[12px] text-[#74798b]">
               {isAnyCalendarConnecting
                 ? "接続中…"
