@@ -138,6 +138,10 @@
     background: #eceef1;
   }
 
+  .calendar-month-view.is-month-row-resizing .calendar-month-day-cell-hoverable:hover {
+    background: white;
+  }
+
   .calendar-month-row-boundary-resize-handle {
     position: absolute;
     bottom: -5px;
