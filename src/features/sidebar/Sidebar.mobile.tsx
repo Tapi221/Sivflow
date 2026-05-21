@@ -41,9 +41,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "review",
     label: "Review",
-    to: "/study",
     icon: <InboxIcon className="sidebar-nav-icon" />,
-    sectionKey: "review",
   },
   {
     id: "library",
@@ -82,9 +80,7 @@ export const SidebarMobile = ({
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
   const openSectionTab = useWorkspaceTabsStore((s) => s.openSectionTab);
 
-  const selectedLibraryChild = new URLSearchParams(search).get(
-    "libraryType",
-  );
+  const selectedLibraryChild = new URLSearchParams(search).get("libraryType");
 
   const handleClick = (item: SidebarNavItem) => {
     closeCalendar();
@@ -122,17 +118,11 @@ export const SidebarMobile = ({
               className="sidebar-nav-link"
               onClick={() => handleClick(item)}
             >
-              <span className="sidebar-nav-icon-slot">
-                {item.icon}
-              </span>
-              <span className="sidebar-nav-label">
-                {item.label}
-              </span>
+              <span className="sidebar-nav-icon-slot">{item.icon}</span>
+              <span className="sidebar-nav-label">{item.label}</span>
 
               {item.id === "library" && (
-                <ChevronDownIcon
-                  className={cn(isLibraryOpen && "is-open")}
-                />
+                <ChevronDownIcon className={cn(isLibraryOpen && "is-open")} />
               )}
             </button>
 
@@ -141,9 +131,7 @@ export const SidebarMobile = ({
                 {["pdf", "flashcards", "notes"].map((type) => (
                   <button
                     key={type}
-                    className={cn(
-                      selectedLibraryChild === type && "is-active",
-                    )}
+                    className={cn(selectedLibraryChild === type && "is-active")}
                     onClick={() => openLibraryChild(type)}
                   >
                     {type}
@@ -155,10 +143,7 @@ export const SidebarMobile = ({
         ))}
       </nav>
 
-      <button
-        className="sidebar-nav-link"
-        onClick={onOpenSettings}
-      >
+      <button className="sidebar-nav-link" onClick={onOpenSettings}>
         <span className="sidebar-nav-icon-slot">
           <GearIcon className="sidebar-nav-icon" />
         </span>
