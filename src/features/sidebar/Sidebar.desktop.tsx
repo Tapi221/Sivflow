@@ -43,7 +43,7 @@ type SidebarNavItem = {
   to?: string;
   icon: ReactNode;
   exactPath?: boolean;
-  sectionKey?: "home" | "review" | "library" | "calendar";
+  sectionKey?: "home" | "review" | "library" | "schedule";
   onClick?: () => void;
   disabled?: boolean;
   match?: (pathname: string, searchParams: URLSearchParams) => boolean;
@@ -87,7 +87,7 @@ const mainNavItems: SidebarNavItem[] = [
     label: "Schedule",
     to: "/schedule",
     icon: <CalendarIcon className="app-sidebar__nav-icon" />,
-    sectionKey: "calendar",
+    sectionKey: "schedule",
     exactPath: true,
   },
   {

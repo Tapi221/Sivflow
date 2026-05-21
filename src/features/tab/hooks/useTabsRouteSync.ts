@@ -67,7 +67,7 @@ export const useWorkspaceTabsRouteSync = () => {
     }
 
     if (pathname === "/schedule") {
-      const nextTabId = openSectionTab("calendar");
+      const nextTabId = openSectionTab("schedule");
 
       if (activeTabId !== nextTabId) {
         selectTab(nextTabId);
