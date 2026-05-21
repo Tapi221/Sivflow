@@ -53,7 +53,7 @@ export const GridCalendarDayDetailDesktop = ({
                 absolute
                 right-2
                 top-[-6px]
-                bg-white
+                bg-transparent
                 px-[2px]
                 text-[10px]
                 leading-none
