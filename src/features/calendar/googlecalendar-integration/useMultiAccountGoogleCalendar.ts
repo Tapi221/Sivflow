@@ -609,8 +609,17 @@ export const useMultiAccountGoogleCalendar = () => {
             result.accountPhotoUrl,
           );
         } catch (error) {
+          if (isUnauthorizedError(error)) {
+            dispatchAccounts({
+              type: "NEEDS_RECONNECT",
+              id: accountId,
+              error: toErrorMessage(error),
+            });
+            return;
+          }
+
           dispatchAccounts({
-            type: isUnauthorizedError(error) ? "NEEDS_RECONNECT" : "SET_ERROR",
+            type: "SET_ERROR",
             id: accountId,
             error: toErrorMessage(error),
           });
