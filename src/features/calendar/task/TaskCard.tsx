@@ -16,6 +16,20 @@ type TaskCardProps = {
   onToggleDone?: (id: string, done: boolean) => void;
 };
 
+const TaskMenuIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+  >
+    <circle cx="8" cy="4" r="1.15" fill="currentColor" />
+    <circle cx="8" cy="8" r="1.15" fill="currentColor" />
+    <circle cx="8" cy="12" r="1.15" fill="currentColor" />
+  </svg>
+);
+
 export const TaskCard = ({
   task,
   accountName,
@@ -69,14 +83,14 @@ export const TaskCard = ({
         </button>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1 truncate text-[13px] font-medium leading-[18px] text-[#24262d]">
               {task.title}
             </div>
 
             <button
               type="button"
-              className="-mr-1 -mt-1 rounded p-1 text-[#9ca3af] hover:bg-[#f3f4f6]"
+              className="-mr-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded text-[#9ca3af] hover:bg-[#f3f4f6]"
               aria-label="Task menu"
               onClick={() => {
                 if (onDelete) {
@@ -84,7 +98,7 @@ export const TaskCard = ({
                 }
               }}
             >
-              ⋮
+              <TaskMenuIcon className="h-4 w-4" />
             </button>
           </div>
 
