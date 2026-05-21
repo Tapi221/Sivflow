@@ -181,9 +181,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                 ? isDayDetailPanelCollapsed
                   ? "pl-4 pr-0 pt-0 pb-0"
                   : "px-4 pt-0 pb-0"
-                : showDayDetailPanel
-                  ? "px-3 pt-4"
-                  : "px-5 pt-4",
+                : "px-4 pt-0 pb-0",
           )}
         >
           {activeMode === "task" ? (
@@ -220,38 +218,40 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
               </div>
             </div>
           ) : (
-            <>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-[24px] border border-b-0 border-[#e3e5ea] bg-[#f0f2f5] shadow-[0_10px_30px_rgba(15,23,42,0.12)]">
               {renderViewHeader(
-                "mb-4 flex shrink-0 items-center justify-between",
+                "mb-3 flex shrink-0 items-center justify-between px-4 pt-4",
               )}
 
-              {activeMode === "timeline" ? (
-                <CalendarTimelineDayView
-                  viewMode={selectedViewMode}
-                  anchorDate={currentDate}
-                  timelineUnitBuffer={{ before: 7, after: 14 }}
-                  selectedDate={currentDate}
-                  dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
-                  laneLabelWidth={C.TIMELINE_LANE_LABEL_WIDTH}
-                  rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
-                  scrollContainerRef={scrollContainerRef}
-                  onScroll={handleTimelineScroll}
-                  onSelectDate={handleSidebarSelectDate}
-                />
-              ) : (
-                <CalendarWeekDayGrid
-                  headerScrollRef={headerScrollRef}
-                  scrollContainerRef={scrollContainerRef}
-                  visibleDays={visibleDays}
-                  visibleEvents={calendarEvents}
-                  calendarDayColumnWidth={calendarDayColumnWidth}
-                  timelineGridStyle={timelineGridStyle}
-                  onScroll={handleTimelineScroll}
-                  selectedDate={selectedDate}
-                  onSelectDate={handleSidebarSelectDate}
-                />
-              )}
-            </>
+              <div className="mx-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-2xl border border-b-0 border-[#e9eaed] bg-white">
+                {activeMode === "timeline" ? (
+                  <CalendarTimelineDayView
+                    viewMode={selectedViewMode}
+                    anchorDate={currentDate}
+                    timelineUnitBuffer={{ before: 7, after: 14 }}
+                    selectedDate={currentDate}
+                    dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
+                    laneLabelWidth={C.TIMELINE_LANE_LABEL_WIDTH}
+                    rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
+                    scrollContainerRef={scrollContainerRef}
+                    onScroll={handleTimelineScroll}
+                    onSelectDate={handleSidebarSelectDate}
+                  />
+                ) : (
+                  <CalendarWeekDayGrid
+                    headerScrollRef={headerScrollRef}
+                    scrollContainerRef={scrollContainerRef}
+                    visibleDays={visibleDays}
+                    visibleEvents={calendarEvents}
+                    calendarDayColumnWidth={calendarDayColumnWidth}
+                    timelineGridStyle={timelineGridStyle}
+                    onScroll={handleTimelineScroll}
+                    selectedDate={selectedDate}
+                    onSelectDate={handleSidebarSelectDate}
+                  />
+                )}
+              </div>
+            </div>
           )}
         </div>
 
