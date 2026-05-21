@@ -16,7 +16,6 @@ import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
 import { useTaskCalendarEvents } from "./task/useTaskCalendarEvents";
 
-import { SidebarPanelIcon } from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
 
 const VIEW_OPTIONS = [
@@ -24,9 +23,6 @@ const VIEW_OPTIONS = [
   { value: "week", label: "Week" },
   { value: "days", label: "Day" },
 ] as const;
-
-const DAY_DETAIL_PANEL_WIDTH = 260;
-const MONTH_HEADER_RIGHT_PADDING = DAY_DETAIL_PANEL_WIDTH + 16;
 
 export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const pane = useSchedulePane();
@@ -113,14 +109,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   }, []);
 
   const renderViewHeader = (className: string) => (
-    <div
-      className={className}
-      style={
-        canShowDayDetailPanel && !showDayDetailPanel
-          ? { paddingRight: MONTH_HEADER_RIGHT_PADDING }
-          : undefined
-      }
-    >
+    <div className={className}>
       <div className="flex min-w-0 items-center gap-3">
         {selectedViewMode === "month" ? (
           <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
@@ -147,27 +136,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           onNext={handleNext}
           onToday={handleToday}
         />
-
-        {canShowDayDetailPanel ? (
-          <button
-            type="button"
-            aria-label={showDayDetailPanel ? "日付詳細を閉じる" : "日付詳細を開く"}
-            title={showDayDetailPanel ? "日付詳細を閉じる" : "日付詳細を開く"}
-            onClick={
-              showDayDetailPanel
-                ? handleCloseDayDetailPanel
-                : handleOpenDayDetailPanel
-            }
-            className="flex h-7 w-7 items-center justify-center rounded-full border border-[#e2e4e9] bg-white text-[#8f929c] transition-colors hover:bg-[#eef0f3] hover:text-[#20242c]"
-          >
-            <SidebarPanelIcon
-              className={cn(
-                "h-4 w-4",
-                showDayDetailPanel && "-scale-x-100",
-              )}
-            />
-          </button>
-        ) : null}
       </div>
     </div>
   );
@@ -271,10 +239,16 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           )}
         </div>
 
-        {showDayDetailPanel ? (
+        {canShowDayDetailPanel ? (
           <DayDetailPanel
             selectedDate={selectedDate}
             events={calendarEvents}
+            isOpen={showDayDetailPanel}
+            onToggle={
+              showDayDetailPanel
+                ? handleCloseDayDetailPanel
+                : handleOpenDayDetailPanel
+            }
           />
         ) : null}
       </div>
