@@ -118,7 +118,7 @@
 
   box-sizing: border-box;
 
-  padding: 0 var(--workspace-content-gutter) 10px;
+  padding: 0 var(--workspace-content-gutter) 0;
 
   background: var(--app-active-tab-bg);
 }
