@@ -4,6 +4,8 @@ import { TaskCard } from "./TaskCard";
 type TaskColumnProps = {
   column: TaskColumnType;
   tasks: Task[];
+  accountName?: string | null;
+  accountPhotoUrl?: string | null;
   onAddTask: (status: string) => void;
   onDeleteTask: (id: string) => void;
   onToggleTaskDone: (id: string, done: boolean) => void;
@@ -12,6 +14,8 @@ type TaskColumnProps = {
 export const TaskColumn = ({
   column,
   tasks,
+  accountName,
+  accountPhotoUrl,
   onAddTask,
   onDeleteTask,
   onToggleTaskDone,
@@ -56,6 +60,8 @@ export const TaskColumn = ({
             <TaskCard
               key={task.id}
               task={task}
+              accountName={accountName}
+              accountPhotoUrl={accountPhotoUrl}
               onDelete={onDeleteTask}
               onToggleDone={onToggleTaskDone}
             />

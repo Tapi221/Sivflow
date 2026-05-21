@@ -147,7 +147,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           )}
 
           {activeMode === "task" ? (
-            <TaskView />
+            <TaskView googleAccounts={googleAccounts} />
           ) : activeMode === "timeline" ? (
             <CalendarTimelineDayView
               viewMode={selectedViewMode}
