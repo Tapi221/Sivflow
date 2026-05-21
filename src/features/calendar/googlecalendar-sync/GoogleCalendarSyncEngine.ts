@@ -154,7 +154,8 @@ export class GoogleCalendarSyncEngine {
       GCalSyncEngineOptions,
       "pollIntervalMs" | "fullSyncPastDays" | "fullSyncFutureDays"
     >
-  > & GCalSyncEngineOptions;
+  > &
+    GCalSyncEngineOptions;
 
   private context: GCalSyncStartContext | null = null;
 
@@ -172,7 +173,7 @@ export class GoogleCalendarSyncEngine {
 
   private visibilityChangeListener: (() => void) | null = null;
 
-  // UI制御フラグ（フル同期暴発防止）
+  // 起動直後は必ずフル同期して、React state にイベント本体を復元する
   private isFullSyncAllowed = true;
 
   constructor(options: GCalSyncEngineOptions) {
@@ -285,9 +286,7 @@ export class GoogleCalendarSyncEngine {
     this.isSyncing = true;
     this.setSyncState("syncing");
 
-    const calendarMap = new Map(
-      calendars.map((c) => [c.id, c]),
-    );
+    const calendarMap = new Map(calendars.map((c) => [c.id, c]));
 
     let shouldRetryAfterReconnect = false;
 
@@ -305,8 +304,7 @@ export class GoogleCalendarSyncEngine {
 
         const existingSyncToken = this.syncTokenMap[calendarId];
 
-        // フル同期は初回または明示許可時のみ
-        if (existingSyncToken && this.isFullSyncAllowed) {
+        if (existingSyncToken && !this.isFullSyncAllowed) {
           await this.doIncrementalSync(
             calendarId,
             existingSyncToken,
@@ -326,7 +324,6 @@ export class GoogleCalendarSyncEngine {
 
       this.setSyncState("idle");
       this.schedulePoll(this.options.pollIntervalMs);
-
     } catch (error) {
       console.error("[GCalSyncEngine] sync error:", error);
 
@@ -378,7 +375,7 @@ export class GoogleCalendarSyncEngine {
   }
 
   // ─────────────────────────────────────────────
-  // full sync (固定範囲)
+  // full sync
   // ─────────────────────────────────────────────
 
   private async doFullSync(
@@ -388,8 +385,8 @@ export class GoogleCalendarSyncEngine {
   ): Promise<void> {
     const now = new Date();
 
-    const timeMin = subDays(now, 365).toISOString();
-    const timeMax = addDays(now, 365).toISOString();
+    const timeMin = subDays(now, this.options.fullSyncPastDays).toISOString();
+    const timeMax = addDays(now, this.options.fullSyncFutureDays).toISOString();
 
     const params = new URLSearchParams({
       singleEvents: "true",
@@ -414,7 +411,6 @@ export class GoogleCalendarSyncEngine {
       allEvents.push(...(response.items ?? []));
       pageToken = response.nextPageToken;
       syncToken = response.nextSyncToken ?? syncToken;
-
     } while (pageToken);
 
     if (syncToken) {
@@ -460,9 +456,7 @@ export class GoogleCalendarSyncEngine {
         diffEvents.push(...(response.items ?? []));
         pageToken = response.nextPageToken;
         nextSyncToken = response.nextSyncToken ?? nextSyncToken;
-
       } while (pageToken);
-
     } catch (error) {
       const is410 =
         error instanceof Error &&
