@@ -52,6 +52,10 @@
   padding-top: 0;
 }
 
+.app-layout-route--schedule .app-layout {
+  background: transparent;
+}
+
 .app-layout--folders {
   --app-layout-padding-x: 0px;
 }
