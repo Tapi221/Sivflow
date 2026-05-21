@@ -84,19 +84,6 @@
     ) !important;
   }
 
-  .explorer-chrome-main-topbar::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 16px;
-    height: 16px;
-    pointer-events: none;
-    background: transparent;
-    border-bottom-left-radius: 16px;
-    box-shadow: -8px 8px 0 8px var(--app-active-tab-bg, #ffffff);
-  }
-
   .explorer-workspace-tabs-bar,
   .explorer-tab-bar,
   .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font {
@@ -105,10 +92,6 @@
     height: 40px !important;
     overflow: visible !important;
     border: 0 !important;
-    border-bottom: 0 !important;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    background-clip: padding-box;
     background: var(
       --app-titlebar-bg,
       var(--app-sidebar-bg, #f6f6f6)
@@ -131,10 +114,7 @@
     padding: 8px 8px 0 16px;
     margin: 0 !important;
     overflow: visible !important;
-    background: var(
-      --app-titlebar-bg,
-      var(--app-sidebar-bg, #f6f6f6)
-    ) !important;
+    background: transparent !important;
   }
 
   .explorer-workspace-tab,
@@ -147,9 +127,13 @@
     width: 180px !important;
     min-width: 180px !important;
     max-width: 180px !important;
+    height: 32px !important;
+    margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
-    border-radius: 10px 10px 0 0 !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    box-shadow: none !important;
     font-size: 12px !important;
     font-weight: 500 !important;
     line-height: normal !important;
@@ -161,29 +145,14 @@
       BlinkMacSystemFont,
       "Segoe UI",
       sans-serif !important;
-    overflow: visible !important;
-    box-shadow: none !important;
   }
 
   .explorer-workspace-tab--active {
-    position: relative;
     z-index: 4;
-
-    height: 32px !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding-top: 0 !important;
-
-    border: 0 !important;
     border-radius: 12px 12px 0 0 !important;
-    overflow: visible !important;
-    isolation: isolate;
-
     background: var(--app-active-tab-bg, #ffffff) !important;
-    background-clip: padding-box;
-
     color: var(--app-sidebar-text-strong, #2f3640) !important;
-    box-shadow: none !important;
+    isolation: isolate;
   }
 
   .explorer-workspace-tab--active::before,
@@ -191,42 +160,46 @@
     content: "";
     position: absolute;
     bottom: 0;
+    z-index: 0;
     width: 16px;
     height: 16px;
-    background: transparent;
     pointer-events: none;
+    background: var(--app-active-tab-bg, #ffffff);
   }
 
   .explorer-workspace-tab--active::before {
     left: -16px;
-    border-bottom-right-radius: 16px;
-    box-shadow: 8px 8px 0 8px var(--app-active-tab-bg, #ffffff);
+    -webkit-mask: radial-gradient(
+      circle at 0 0,
+      transparent 0 16px,
+      #000 16.5px
+    );
+    mask: radial-gradient(
+      circle at 0 0,
+      transparent 0 16px,
+      #000 16.5px
+    );
   }
 
   .explorer-workspace-tab--active::after {
     right: -16px;
-    border-bottom-left-radius: 16px;
-    box-shadow: -8px 8px 0 8px var(--app-active-tab-bg, #ffffff);
-  }
-
-  .explorer-workspace-tab[data-workspace-tab-active="true"] {
-    border-top-left-radius: 12px !important;
-    border-top-right-radius: 12px !important;
-  }
-
-  .explorer-workspace-tab--active .explorer-workspace-tab-button,
-  .explorer-workspace-tab--active .explorer-workspace-tab-close {
-    background: transparent !important;
-    box-shadow: none !important;
+    -webkit-mask: radial-gradient(
+      circle at 100% 0,
+      transparent 0 16px,
+      #000 16.5px
+    );
+    mask: radial-gradient(
+      circle at 100% 0,
+      transparent 0 16px,
+      #000 16.5px
+    );
   }
 
   .explorer-workspace-tab--inactive {
     height: 32px !important;
-    margin-bottom: 0 !important;
-    border: 0 !important;
+    border-radius: 10px 10px 0 0 !important;
     background: transparent !important;
     color: var(--app-titlebar-text, rgba(255, 255, 255, 0.92)) !important;
-    box-shadow: none !important;
   }
 
   .explorer-workspace-tab--inactive:hover {
@@ -237,21 +210,9 @@
     color: var(--app-titlebar-text-strong, #ffffff) !important;
   }
 
-  .explorer-workspace-tab--inactive
-    + .explorer-workspace-tab--inactive::before {
-    content: "";
-    position: absolute;
-    left: -1px;
-    top: 8px;
-    display: block !important;
-    width: 1px;
-    height: 16px;
-    border-radius: 4px;
-    background: var(--app-titlebar-divider, rgba(255, 255, 255, 0.16));
-    pointer-events: none;
-  }
-
   .explorer-workspace-tab-button {
+    position: relative;
+    z-index: 1;
     height: 32px !important;
     gap: 8px !important;
     padding-left: 12px !important;
@@ -259,22 +220,43 @@
     border: 0 !important;
     background: transparent !important;
     min-width: 0;
+    overflow: visible !important;
+  }
+
+  .explorer-workspace-tab-button svg {
+    overflow: visible !important;
+  }
+
+  .explorer-workspace-tab--active .explorer-workspace-tab-button,
+  .explorer-workspace-tab--active .explorer-workspace-tab-close {
+    position: relative;
+    z-index: 1;
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   .explorer-workspace-tab-close {
-    width: 8px !important;
-    height: 8px !important;
-    min-width: 8px !important;
-    margin-right: 12px !important;
+    position: relative;
+    z-index: 1;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    margin-right: 8px !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    background: transparent !important;
     color: var(--app-titlebar-icon, rgba(255, 255, 255, 0.78)) !important;
     opacity: 1 !important;
-    background: transparent !important;
-    border: 0 !important;
-    border-radius: 4px !important;
+    overflow: visible !important;
+  }
+
+  .explorer-workspace-tab-close svg {
+    width: 10px !important;
+    height: 10px !important;
+    overflow: visible !important;
   }
 
   .explorer-workspace-tab--active .explorer-workspace-tab-close {
-    background: transparent !important;
     color: #6f7681 !important;
   }
 
@@ -296,11 +278,12 @@
     margin-bottom: 0 !important;
     width: 32px !important;
     height: 32px !important;
-    border-radius: 8px !important;
     border: 0 !important;
+    border-radius: 8px !important;
     background: transparent !important;
     color: var(--app-titlebar-icon, rgba(255, 255, 255, 0.78)) !important;
     box-shadow: none !important;
+    overflow: visible !important;
   }
 
   .explorer-workspace-tab-add:hover {
@@ -309,6 +292,10 @@
       rgba(255, 255, 255, 0.08)
     ) !important;
     color: var(--app-titlebar-text-strong, #ffffff) !important;
+  }
+
+  .explorer-workspace-tab-add svg {
+    overflow: visible !important;
   }
 
   .explorer-chrome-toolbar {
