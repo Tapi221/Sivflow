@@ -189,30 +189,24 @@
 
   .explorer-workspace-tab--active::before,
   .explorer-workspace-tab--active::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    z-index: 0;
-    width: 16px;
-    height: 17px;
-    pointer-events: none;
-    background: var(--app-active-tab-bg, #ffffff);
+    content: none !important;
+    display: none !important;
   }
 
   .explorer-workspace-tab--active::before {
     left: -16px;
-    -webkit-mask: radial-gradient(circle at 0 0, transparent 0 16px, #000 16px);
-    mask: radial-gradient(circle at 0 0, transparent 0 16px, #000 16px);
+    -webkit-mask: none;
+    mask: none;
   }
 
   .explorer-workspace-tab--active::after {
     right: -16px;
-    -webkit-mask: radial-gradient(
-      circle at 100% 0,
-      transparent 0 16px,
-      #000 16px
-    );
-    mask: radial-gradient(circle at 100% 0, transparent 0 16px, #000 16px);
+    -webkit-mask: none;
+    mask: none;
+  }
+
+  .explorer-workspace-tab[data-workspace-tab-active="true"] > div[aria-hidden="true"] > span {
+    display: none !important;
   }
 
   .explorer-workspace-tab--inactive {
