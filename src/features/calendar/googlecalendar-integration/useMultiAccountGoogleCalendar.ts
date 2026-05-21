@@ -140,7 +140,7 @@ const reduceAccounts = (
         const next = new Set(a.selectedCalendarIds);
 
         if (next.has(action.calendarId)) {
-          next.delete(action.calendarId);
+          next.delete(actionId);
         } else {
           next.add(action.calendarId);
         }
@@ -640,20 +640,39 @@ export const useMultiAccountGoogleCalendar = () => {
         replaceAccountId ??
         `account-${Date.now()}`;
 
+      const matchesResolvedAccount = (account: {
+        id: string;
+        email: string | null;
+      }): boolean =>
+        account.id === accountId ||
+        (result.accountEmail !== null && account.email === result.accountEmail);
+
+      const storedAccount = readStoredAccounts().find(matchesResolvedAccount);
+      const existingAccount =
+        replacingAccount ?? accountsRef.current.find(matchesResolvedAccount);
+
       dispatchAccounts({ type: "REMOVE", id: tempId });
 
       const defaultIds = resolveSelectedCalendarIds(
-        replacingAccount ? Array.from(replacingAccount.selectedCalendarIds) : [],
+        existingAccount
+          ? Array.from(existingAccount.selectedCalendarIds)
+          : (storedAccount?.selectedCalendarIds ?? []),
         list,
       );
 
+      const refreshToken =
+        result.refreshToken ??
+        existingAccount?.refreshToken ??
+        storedAccount?.refreshToken ??
+        null;
+
       const entry: GoogleAccountEntry = {
         id: accountId,
-        email: result.accountEmail ?? replacingAccount?.email ?? null,
-        name: result.accountName ?? replacingAccount?.name ?? null,
-        photoUrl: result.accountPhotoUrl ?? replacingAccount?.photoUrl ?? null,
+        email: result.accountEmail ?? existingAccount?.email ?? null,
+        name: result.accountName ?? existingAccount?.name ?? null,
+        photoUrl: result.accountPhotoUrl ?? existingAccount?.photoUrl ?? null,
         accessToken: result.accessToken,
-        refreshToken: result.refreshToken ?? null,
+        refreshToken,
         calendars: list,
         selectedCalendarIds: new Set(defaultIds),
         syncState: "idle",
@@ -674,12 +693,12 @@ export const useMultiAccountGoogleCalendar = () => {
 
       upsertStoredAccount({
         id: accountId,
-        email: result.accountEmail ?? replacingAccount?.email ?? null,
-        name: result.accountName ?? replacingAccount?.name ?? null,
-        photoUrl: result.accountPhotoUrl ?? replacingAccount?.photoUrl ?? null,
+        email: result.accountEmail ?? existingAccount?.email ?? null,
+        name: result.accountName ?? existingAccount?.name ?? null,
+        photoUrl: result.accountPhotoUrl ?? existingAccount?.photoUrl ?? null,
         accessToken: result.accessToken,
         accessTokenExpiry: buildTokenExpiry(),
-        refreshToken: result.refreshToken ?? null,
+        refreshToken,
         selectedCalendarIds: defaultIds,
         cachedCalendars: toCachedCalendars(list),
       });
