@@ -128,11 +128,11 @@ const toAudioDialogUrl = (value: unknown): string | null => {
   return resolved ?? null;
 };
 
-type OverlayTopRightProps = Readonly<{
+type _OverlayTopRightProps = Readonly<{
   children?: React.ReactNode;
 }>;
 
-const OverlayTopRight = ({ children }: OverlayTopRightProps) => {
+const _OverlayTopRight = ({ children }: _OverlayTopRightProps) => {
   if (!children) return null;
 
   return (
@@ -220,7 +220,7 @@ const EditorSidePaneInner = ({
       "rounded-none border-none bg-transparent shadow-none",
   );
 
-  const [internalToolbarMount, setInternalToolbarMount] =
+  const [internalToolbarMount, _setInternalToolbarMount] =
     useState<HTMLDivElement | null>(null);
 
   const resolvedToolbarMount = toolbarMount ?? internalToolbarMount;
