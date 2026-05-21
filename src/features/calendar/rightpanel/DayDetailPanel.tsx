@@ -119,46 +119,54 @@ export const DayDetailPanel = ({
       {/* Header */}
       <div
         className="
-          flex
-          items-center
-          justify-between
           px-4
           pt-5
           pb-3
         "
       >
-        <span
-          className="
-            text-[14px]
-            font-semibold
-            text-[#3f3f46]
-          "
-        >
-          {format(
-            selectedDate,
-            "yyyy年M月d日(E)",
-            {
-              locale: ja,
-            },
-          )}
-        </span>
-
-        <button
-          type="button"
-          onClick={onClose}
+        <div
           className="
             flex
-            h-7
-            w-7
+            h-6
             items-center
-            justify-center
-            rounded-full
-            text-[#b4b4bc]
-            hover:bg-[#f5f5f5]
+            justify-between
+            px-1
           "
         >
-          <SidebarPanelIcon className="h-4 w-4 -scale-x-100" />
-        </button>
+          <span
+            className="
+              text-[12px]
+              font-semibold
+              tracking-wide
+              text-[#3d4049]
+            "
+          >
+            {format(
+              selectedDate,
+              "yyyy年M月d日(E)",
+              {
+                locale: ja,
+              },
+            )}
+          </span>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="
+              flex
+              h-6
+              w-6
+              items-center
+              justify-center
+              rounded-md
+              text-[#9aa0aa]
+              hover:bg-[#eceef1]
+            "
+          >
+            <SidebarPanelIcon className="h-3.5 w-3.5 -scale-x-100" />
+          </button>
+        </div>
       </div>
 
       {/* Scroll */}
