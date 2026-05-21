@@ -1,6 +1,7 @@
 .app-layout {
   --app-sidebar-rail-width: 48px;
   --app-sidebar-closed-width: 0px;
+  --app-right-sidebar-width: 240px;
   --app-layout-padding-x: 0px;
 
   --app-titlebar-bg: linear-gradient(
@@ -65,14 +66,14 @@
   grid-template-columns:
     var(--app-sidebar-rail-width)
     minmax(0, 1fr)
-    var(--app-sidebar-rail-width);
+    var(--app-right-sidebar-width);
 }
 
 .app-layout--sidebar-closed.app-layout--right-sidebar-open {
   grid-template-columns:
     var(--app-sidebar-closed-width)
     minmax(0, 1fr)
-    var(--app-sidebar-rail-width);
+    var(--app-right-sidebar-width);
 }
 
 .workspace-shell,
