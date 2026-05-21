@@ -1,4 +1,3 @@
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { Reorder } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -22,12 +21,6 @@ type AppRegionStyle = CSSProperties & {
 
 type IconProps = {
   className?: string;
-};
-
-type TabIndicator = {
-  left: number;
-  width: number;
-  visible: boolean;
 };
 
 const TABS_NO_DRAG_STYLE: AppRegionStyle = {
@@ -235,90 +228,12 @@ export const WorkspaceTabsBar = ({
     (state) => state.createExplorerTab,
   );
 
-  const listRef = useRef<HTMLDivElement | null>(null);
-  const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const [indicator, setIndicator] = useState<TabIndicator>({
-    left: 0,
-    width: 0,
-    visible: false,
-  });
-
   const isTitlebar = variant === "titlebar";
+  const canReorderTabs = tabs.length > 1;
   const interactiveStyle = noDragStyle ?? TABS_NO_DRAG_STYLE;
   const tabsSurfaceStyle = resolveTabsSurfaceStyle(isTitlebar);
   const closeButtonClassName = resolveCloseButtonClassName(isTitlebar);
   const addButtonClassName = resolveAddButtonClassName(isTitlebar);
-
-  const updateIndicator = useCallback(() => {
-    const listEl = listRef.current;
-    const activeTabEl = activeTabId ? tabRefs.current[activeTabId] : null;
-
-    if (!listEl || !activeTabEl) {
-      setIndicator((current) =>
-        current.visible ? { ...current, visible: false } : current,
-      );
-
-      return;
-    }
-
-    const listRect = listEl.getBoundingClientRect();
-    const tabRect = activeTabEl.getBoundingClientRect();
-    const nextIndicator = {
-      left: Math.round(tabRect.left - listRect.left),
-      width: Math.round(tabRect.width),
-      visible: true,
-    };
-
-    setIndicator((current) => {
-      const sameLeft = Math.abs(current.left - nextIndicator.left) < 0.5;
-      const sameWidth = Math.abs(current.width - nextIndicator.width) < 0.5;
-
-      if (sameLeft && sameWidth && current.visible === nextIndicator.visible) {
-        return current;
-      }
-
-      return nextIndicator;
-    });
-  }, [activeTabId]);
-
-  useLayoutEffect(() => {
-    const frameId = window.requestAnimationFrame(updateIndicator);
-
-    return () => {
-      window.cancelAnimationFrame(frameId);
-    };
-  }, [tabs, updateIndicator]);
-
-  useLayoutEffect(() => {
-    if (typeof ResizeObserver === "undefined") {
-      window.addEventListener("resize", updateIndicator);
-
-      return () => {
-        window.removeEventListener("resize", updateIndicator);
-      };
-    }
-
-    const resizeObserver = new ResizeObserver(updateIndicator);
-
-    if (listRef.current) {
-      resizeObserver.observe(listRef.current);
-    }
-
-    tabs.forEach((tab) => {
-      const tabEl = tabRefs.current[tab.id];
-
-      if (tabEl) {
-        resizeObserver.observe(tabEl);
-      }
-    });
-
-    window.addEventListener("resize", updateIndicator);
-
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updateIndicator);
-    };
-  }, [tabs, updateIndicator]);
 
   return (
     <>
@@ -338,41 +253,15 @@ export const WorkspaceTabsBar = ({
         )}
       >
         <Reorder.Group
-          ref={listRef}
           as="div"
           axis="x"
           values={tabs}
-          onReorder={reorderTabs}
+          onReorder={(nextTabs) => {
+            if (!canReorderTabs) return;
+            reorderTabs(nextTabs);
+          }}
           className="explorer-tab-list explorer-workspace-tabs-list relative flex min-w-0 items-end gap-0 overflow-visible"
         >
-          <div
-            aria-hidden="true"
-            style={{
-              ...ACTIVE_TAB_SURFACE_STYLE,
-              ...ACTIVE_TAB_JOIN_STYLE,
-              left: indicator.left,
-              width: indicator.width,
-            }}
-            className={cn(
-              "pointer-events-none absolute bottom-[-1px] z-0 h-[33px] rounded-t-[10px]",
-              "transition-[opacity,left,width] duration-[320ms] ease-[cubic-bezier(.22,1,.36,1)]",
-              "motion-reduce:transition-none",
-              indicator.visible ? "opacity-100" : "opacity-0",
-            )}
-          >
-            <span
-              aria-hidden="true"
-              className="absolute bottom-[-1px] left-[-16px] h-[18px] w-[18px]"
-              style={ACTIVE_TAB_LEFT_CURVE_STYLE}
-            />
-
-            <span
-              aria-hidden="true"
-              className="absolute bottom-[-1px] right-[-16px] h-[18px] w-[18px]"
-              style={ACTIVE_TAB_RIGHT_CURVE_STYLE}
-            />
-          </div>
-
           {tabs.map((tab) => {
             const selected = tab.id === activeTabId;
             const isOpening = tab.id === lastOpenedTabId;
@@ -403,21 +292,21 @@ export const WorkspaceTabsBar = ({
                 key={tab.id}
                 as="div"
                 value={tab}
-                dragElastic={0.08}
+                drag={canReorderTabs ? "x" : false}
+                dragListener={canReorderTabs}
+                dragElastic={canReorderTabs ? 0.08 : 0}
                 dragMomentum={false}
                 transition={{ type: "spring", stiffness: 520, damping: 42 }}
                 style={interactiveStyle}
-                className="explorer-workspace-tab-slot relative flex min-w-[92px] max-w-[180px] flex-[1_1_150px] cursor-grab items-end overflow-visible active:cursor-grabbing"
+                className={cn(
+                  "explorer-workspace-tab-slot relative flex min-w-[92px] max-w-[180px] flex-[1_1_150px] items-end overflow-visible",
+                  canReorderTabs
+                    ? "cursor-grab active:cursor-grabbing"
+                    : "cursor-default",
+                )}
                 data-workspace-tab-slot-active={selected ? "true" : undefined}
               >
                 <div
-                  ref={(node) => {
-                    tabRefs.current[tab.id] = node;
-
-                    if (!node) {
-                      delete tabRefs.current[tab.id];
-                    }
-                  }}
                   style={{
                     ...tabsSurfaceStyle,
                     ...interactiveStyle,
@@ -433,10 +322,37 @@ export const WorkspaceTabsBar = ({
                     isOpening && "explorer-workspace-tab--opening",
                   )}
                 >
+                  {selected ? (
+                    <div
+                      aria-hidden="true"
+                      style={{
+                        ...ACTIVE_TAB_SURFACE_STYLE,
+                        ...ACTIVE_TAB_JOIN_STYLE,
+                      }}
+                      className={cn(
+                        "pointer-events-none absolute bottom-[-1px] left-0 right-0 z-0 h-[33px] rounded-t-[10px]",
+                        "transition-opacity duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
+                        "motion-reduce:transition-none",
+                      )}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="absolute bottom-[-1px] left-[-16px] h-[18px] w-[18px]"
+                        style={ACTIVE_TAB_LEFT_CURVE_STYLE}
+                      />
+
+                      <span
+                        aria-hidden="true"
+                        className="absolute bottom-[-1px] right-[-16px] h-[18px] w-[18px]"
+                        style={ACTIVE_TAB_RIGHT_CURVE_STYLE}
+                      />
+                    </div>
+                  ) : null}
+
                   <button
                     type="button"
                     style={interactiveStyle}
-                    className="explorer-workspace-tab-button flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left outline-none"
+                    className="explorer-workspace-tab-button relative z-[2] flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left outline-none"
                     aria-current={selected ? "page" : undefined}
                     title={tab.title}
                     onClick={() => {
@@ -459,6 +375,7 @@ export const WorkspaceTabsBar = ({
                       type="button"
                       style={interactiveStyle}
                       className={cn(
+                        "relative z-[2]",
                         closeButtonClassName,
                         closeButtonStateClassName,
                       )}
