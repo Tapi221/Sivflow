@@ -210,6 +210,7 @@ export const PdfLibraryWorkspaceToolbar = ({
         onClick: () => onSelectSection(tab.value),
       }))}
       actions={PDF_LIBRARY_ACTIONS}
+      variant="segmented"
     />
   );
 };
