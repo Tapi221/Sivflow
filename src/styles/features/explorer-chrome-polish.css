@@ -122,16 +122,17 @@
     overflow: visible !important;
   }
 
-  .explorer-workspace-tab-slot::before {
+    .explorer-workspace-tab-slot::before {
     content: "";
     position: absolute;
     left: 0;
-    top: 14px;
+    top: 6px;
     z-index: 0;
     width: 1px;
-    height: 16px;
+    height: 22px;
     border-radius: 999px;
-    background: var(--app-titlebar-divider, rgba(255, 255, 255, 0.18));
+    background: var(--app-sidebar-icon, rgba(235, 241, 252, 0.58));
+    opacity: 1;
     pointer-events: none;
   }
 
