@@ -23,7 +23,7 @@ const CardEdit = lazy(() => import("./routes/CardEdit"));
 const CardSetView = lazy(() => import("./routes/CardSetView"));
 const StudyMode = lazy(() => import("./routes/StudyMode"));
 const Directory = lazy(() => import("./routes/Directory"));
-const Schedule = lazy(() => import("./routes/Calendar"));
+const Schedule = lazy(() => import("./routes/Schedule"));
 const Tasks = lazy(() => import("./routes/Tasks"));
 
 const PdfScrollTest = DEV_MODE

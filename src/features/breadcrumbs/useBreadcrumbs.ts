@@ -33,8 +33,7 @@ const SECTION_LABELS: Record<WorkspaceSidebarSection, string> = {
   home: "ホーム",
   review: "復習",
   library: "ライブラリ",
-  calendar: "カレンダー",
-  tasks: "タスク",
+  schedule: "スケジュール",
 };
 
 const LIBRARY_TYPE_LABELS: Record<string, string> = {
@@ -65,7 +64,7 @@ const resolveSectionKeyForTarget = (
     return searchParams.get("home") === "1" ? "home" : "library";
   }
   if (normalizedPathname === "/gallery") return "review";
-  if (normalizedPathname === "/calendar") return "calendar";
+  if (normalizedPathname === "/schedule") return "schedule";
   if (normalizedPathname === "/tasks") return "tasks";
 
   return null;
@@ -169,8 +168,8 @@ export const useBreadcrumbs = (): UseBreadcrumbsReturn => {
 
   const shouldHideBreadcrumb =
     activeTab?.kind === "document" ||
-    activeTab?.sectionKey === "calendar" ||
-    activeTab?.sectionKey === "tasks";
+    activeTab?.sectionKey === "schedule";
+
 
   const crumbs = useMemo(
     () =>

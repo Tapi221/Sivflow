@@ -9,8 +9,7 @@ export type WorkspaceSidebarSection =
   | "home"
   | "review"
   | "library"
-  | "calendar"
-  | "tasks";
+  | "schedule";
 
 /**
  * ルートタブID（固定ページ）
@@ -18,8 +17,7 @@ export type WorkspaceSidebarSection =
 export type WorkspaceRouteTabId =
   | "route:home"
   | "route:review"
-  | "route:calendar"
-  | "route:tasks";
+  | "route:calendar";
 
 /**
  * タブ種別

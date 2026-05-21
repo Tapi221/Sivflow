@@ -1,12 +1,9 @@
 import type { CSSProperties, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
 import type { WorkspaceTab } from "@/features/tab/Tab";
-
 import { FileText, Layers, Plus, X } from "@/ui/icons";
-
 import { cn } from "@/lib/utils";
 
 type WorkspaceTabsBarVariant = "workspace" | "titlebar";
@@ -149,7 +146,7 @@ const resolveTabIcon = (tab: WorkspaceTab) => {
   if (tab.kind === "route") {
     if (tab.sectionKey === "home") return HomeIcon;
     if (tab.sectionKey === "review") return ReviewIcon;
-    if (tab.sectionKey === "calendar") return CalendarIcon;
+    if (tab.sectionKey === "schedule") return CalendarIcon;
   }
 
   if (tab.kind === "explorer") return LibraryTabIcon;
