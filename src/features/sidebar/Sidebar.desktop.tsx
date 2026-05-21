@@ -216,7 +216,7 @@ const Sidebar = ({
           aria-label={isClosed ? "サイドバーを開く" : "サイドバーを閉じる"}
           aria-pressed={!isClosed}
         >
-          <SidebarToggleIcon className="app-sidebar__toggle-icon" />
+          <SidebarToggleIcon className="app-sidebar__toggle-icon app-sidebar__nav-icon" />
         </button>
 
         <nav className="app-sidebar__nav" aria-label="メインナビゲーション">
