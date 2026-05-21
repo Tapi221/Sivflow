@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react";
-import type { UIEvent } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 type Params = {
@@ -12,9 +11,7 @@ export const useScrollEdgeDetector = ({ onExtendLeft, onExtendRight }: Params) =
   const isExtendingRightRef = useRef(false);
 
   const handleScroll = useCallback(
-    (event: UIEvent<HTMLDivElement>) => {
-      const scroller = event.currentTarget;
-
+    (scroller: HTMLDivElement) => {
       const distLeft = scroller.scrollLeft;
       const distRight =
         scroller.scrollWidth - scroller.clientWidth - scroller.scrollLeft;
