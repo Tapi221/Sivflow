@@ -13,7 +13,7 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { AnimatedCircleCheckbox } from "@/features/calendar/chip/checkbox/AnimatedCircleCheckbox";
-import { CalendarIcon, PlusIcon } from "@/icons/schedule.icons";
+import { CalendarIcon, PlusIcon } from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
 
 import type { CalendarSidebarProps, GoogleAccountDisplay } from "../schedulePane.types";

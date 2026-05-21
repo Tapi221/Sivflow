@@ -195,16 +195,8 @@
 
   .explorer-workspace-tab--active::before {
     left: -16px;
-    -webkit-mask: radial-gradient(
-      circle at 0 0,
-      transparent 0 16px,
-      #000 16.5px
-    );
-    mask: radial-gradient(
-      circle at 0 0,
-      transparent 0 16px,
-      #000 16.5px
-    );
+    -webkit-mask: radial-gradient(circle at 0 0, transparent 0 16px, #000 16px);
+    mask: radial-gradient(circle at 0 0, transparent 0 16px, #000 16px);
   }
 
   .explorer-workspace-tab--active::after {
@@ -212,13 +204,9 @@
     -webkit-mask: radial-gradient(
       circle at 100% 0,
       transparent 0 16px,
-      #000 16.5px
+      #000 16px
     );
-    mask: radial-gradient(
-      circle at 100% 0,
-      transparent 0 16px,
-      #000 16.5px
-    );
+    mask: radial-gradient(circle at 100% 0, transparent 0 16px, #000 16px);
   }
 
   .explorer-workspace-tab--inactive {
