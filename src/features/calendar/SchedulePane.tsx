@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { format } from "date-fns";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -139,12 +138,12 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
         <div
           ref={contentViewportRef}
           className={cn(
-            "flex min-w-0 flex-1 flex-col bg-white",
+            "flex min-h-0 min-w-0 flex-1 flex-col bg-white",
             activeMode === "task"
               ? "overflow-hidden"
               : showDayDetailPanel
                 ? "px-3 pt-4"
-                : "px-5 pt-4",    
+                : "px-5 pt-4",
           )}
         >
           {/* ヘッダー */}

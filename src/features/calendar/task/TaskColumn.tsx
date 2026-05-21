@@ -17,9 +17,9 @@ export const TaskColumn = ({
   onToggleTaskDone,
 }: TaskColumnProps) => {
   return (
-    <div className="flex min-w-0 flex-1 flex-col rounded-xl bg-[#f7f8fa] p-3">
+    <div className="flex h-full min-h-0 min-w-[260px] flex-1 flex-col rounded-xl bg-[#f7f8fa] p-3">
       {/* カラムヘッダー */}
-      <div className="mb-3 flex items-center gap-2">
+      <div className="mb-3 flex shrink-0 items-center gap-2">
         <span
           className="h-2 w-2 shrink-0 rounded-full"
           style={{ backgroundColor: column.dotColor }}
@@ -33,27 +33,34 @@ export const TaskColumn = ({
       </div>
 
       {/* タスクリスト */}
-      <div className="flex flex-1 flex-col gap-2">
-        {/* Add task ボタン（上部） */}
-        <button
-          type="button"
-          className="flex h-8 w-full items-center gap-1.5 rounded-lg px-2 text-[12px] text-[#b0b4be] transition-colors hover:bg-[#eceef1] hover:text-[#6b7280]"
-          onClick={() => onAddTask(column.id)}
-        >
-          <svg viewBox="0 0 14 14" fill="none" className="h-3.5 w-3.5">
-            <path d="M7 2.5v9M2.5 7h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          Add task
-        </button>
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
+        <div className="flex flex-col gap-2">
+          {/* Add task ボタン（上部） */}
+          <button
+            type="button"
+            className="flex h-8 w-full items-center gap-1.5 rounded-lg px-2 text-[12px] text-[#b0b4be] transition-colors hover:bg-[#eceef1] hover:text-[#6b7280]"
+            onClick={() => onAddTask(column.id)}
+          >
+            <svg viewBox="0 0 14 14" fill="none" className="h-3.5 w-3.5">
+              <path
+                d="M7 2.5v9M2.5 7h9"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+            Add task
+          </button>
 
-        {tasks.map((task) => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            onDelete={onDeleteTask}
-            onToggleDone={onToggleTaskDone}
-          />
-        ))}
+          {tasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              onDelete={onDeleteTask}
+              onToggleDone={onToggleTaskDone}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
