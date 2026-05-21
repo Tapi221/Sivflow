@@ -25,6 +25,9 @@ const VIEW_OPTIONS = [
   { value: "days", label: "Day" },
 ] as const;
 
+const CALENDAR_PANEL_SHADOW_CLASS =
+  "shadow-[0_-4px_14px_rgba(15,23,42,0.05),0_10px_30px_rgba(15,23,42,0.12)]";
+
 export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const pane = useSchedulePane();
   const taskCalendarEvents = useTaskCalendarEvents();
@@ -185,7 +188,8 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           ) : isMonthCalendarView ? (
             <div
               className={cn(
-                "flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-[#e3e5ea] bg-[#f0f2f5] shadow-[0_10px_30px_rgba(15,23,42,0.12)]",
+                "flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-[#e3e5ea] bg-[#f0f2f5]",
+                CALENDAR_PANEL_SHADOW_CLASS,
                 isDayDetailPanelCollapsed
                   ? "rounded-tl-[24px] rounded-tr-none border-r-0"
                   : "rounded-t-[24px]",
@@ -214,7 +218,12 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
               </div>
             </div>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[24px] rounded-tr-none border border-r-0 border-b-0 border-[#e3e5ea] bg-[#f0f2f5] shadow-[0_10px_30px_rgba(15,23,42,0.12)]">
+            <div
+              className={cn(
+                "flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[24px] rounded-tr-none border border-r-0 border-b-0 border-[#e3e5ea] bg-[#f0f2f5]",
+                CALENDAR_PANEL_SHADOW_CLASS,
+              )}
+            >
               {renderViewHeader(
                 "mb-3 flex shrink-0 items-center justify-between px-4 pt-4",
               )}
