@@ -189,7 +189,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           {activeMode === "task" ? (
             <div
               className={cn(
-                "flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[24px] rounded-tr-none border border-r-0 border-b-0 border-[#e3e5ea] bg-[#f0f2f5]",
+                "flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[24px] rounded-tr-none border border-r-0 border-b-0 border-[#e3e5ea] bg-[#f7f8fa]",
                 CALENDAR_PANEL_SHADOW_CLASS,
               )}
             >
@@ -198,7 +198,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           ) : isMonthCalendarView ? (
             <div
               className={cn(
-                "flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-[#e3e5ea] bg-[#f0f2f5]",
+                "flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-[#e3e5ea] bg-[#f7f8fa]",
                 CALENDAR_PANEL_SHADOW_CLASS,
                 isDayDetailPanelCollapsed
                   ? "rounded-tl-[24px] rounded-tr-none border-r-0"
@@ -230,7 +230,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           ) : (
             <div
               className={cn(
-                "flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[24px] rounded-tr-none border border-r-0 border-b-0 border-[#e3e5ea] bg-[#f0f2f5]",
+                "flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[24px] rounded-tr-none border border-r-0 border-b-0 border-[#e3e5ea] bg-[#f7f8fa]",
                 CALENDAR_PANEL_SHADOW_CLASS,
               )}
             >
