@@ -1,4 +1,6 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useT } from "@/i18n/useT";
+
 import type { Task, TaskColumn as TaskColumnType } from "./task.types";
 import { TaskCard } from "./TaskCard";
 
@@ -21,6 +23,8 @@ export const TaskColumn = ({
   onDeleteTask,
   onToggleTaskDone,
 }: TaskColumnProps) => {
+  const t = useT();
+
   return (
     <div className="flex h-full min-h-0 min-w-[260px] flex-1 flex-col rounded-xl bg-[#f7f8fa] p-3">
       {/* カラムヘッダー */}
@@ -54,7 +58,7 @@ export const TaskColumn = ({
                 strokeLinecap="round"
               />
             </svg>
-            Add task
+            {t.addTask}
           </button>
 
           {tasks.map((task) => (
