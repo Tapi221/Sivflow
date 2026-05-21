@@ -78,7 +78,8 @@
 
   overflow: hidden;
 
-  border-radius: 10px 10px 0 0;
+  /* 左上の直角そのものを丸める */
+  border-radius: 18px 10px 0 0;
 
   background: var(--app-active-tab-bg);
   background-clip: padding-box;
