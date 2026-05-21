@@ -187,6 +187,7 @@ export const WorkspaceTabsBar = ({
   );
 
   const tabsListRef = useRef<HTMLDivElement | null>(null);
+  const suppressTabClickRef = useRef(false);
   const isTitlebar = variant === "titlebar";
   const canReorderTabs = tabs.length > 1;
   const interactiveStyle = noDragStyle ?? TABS_NO_DRAG_STYLE;
@@ -257,6 +258,14 @@ export const WorkspaceTabsBar = ({
                 dragConstraints={tabsListRef}
                 dragElastic={canReorderTabs ? 0.08 : 0}
                 dragMomentum={false}
+                onDragStart={() => {
+                  suppressTabClickRef.current = true;
+                }}
+                onDragEnd={() => {
+                  window.setTimeout(() => {
+                    suppressTabClickRef.current = false;
+                  }, 0);
+                }}
                 transition={{ type: "spring", stiffness: 520, damping: 42 }}
                 style={interactiveStyle}
                 className={cn(
@@ -316,7 +325,13 @@ export const WorkspaceTabsBar = ({
                     className="explorer-workspace-tab-button relative z-[2] flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left outline-none"
                     aria-current={selected ? "page" : undefined}
                     title={tab.title}
-                    onClick={() => {
+                    onClick={(event) => {
+                      if (suppressTabClickRef.current) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        return;
+                      }
+
                       selectTab(tab.id);
                       navigate(resolveWorkspaceTabRoute(tab));
                     }}
