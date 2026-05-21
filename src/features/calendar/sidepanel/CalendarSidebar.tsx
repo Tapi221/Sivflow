@@ -123,7 +123,7 @@ const GoogleAccountSection = ({
   const accountName = account.name ?? account.email ?? "Google";
 
   return (
-    <div className="mt-3">
+    <div className="mt-2">
       <button
         type="button"
         className="group flex h-7 w-full items-center gap-1.5 px-2 text-left"
