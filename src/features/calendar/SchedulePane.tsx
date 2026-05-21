@@ -1,10 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { format } from "date-fns";
-
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { TodayBar } from "@/features/calendar/chip/TodayBar";
 import { ViewModeDropdown } from "@/features/calendar/chip/ViewModeDropdownChip";
-
 import type { SchedulePaneProps } from "./schedulePane.types";
 import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
@@ -17,7 +15,6 @@ import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
 import { useTaskCalendarEvents } from "./task/useTaskCalendarEvents";
 import { SidebarPanelIcon } from "@/components/icons/schedule.icons";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
-
 import { cn } from "@/lib/utils";
 
 const CALENDAR_PANEL_SHADOW_CLASS =
@@ -238,7 +235,8 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
               )}
             >
               {renderViewHeader(
-                "mb-3 flex shrink-0 items-center justify-between px-4 pt-4",
+                // task view の toolbar 境界線位置 (48px) と揃える
+                "mb-1 flex shrink-0 items-center justify-between px-4 pt-4",
               )}
 
               <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-2xl rounded-tr-none border border-r-0 border-b-0 border-[#e9eaed] bg-white">
