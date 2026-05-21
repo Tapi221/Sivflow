@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { GoogleAccountChip } from "@/features/calendar/chip/GoogleAccountChip";
 import { TaskPriorityBadge } from "@/features/calendar/chip/TaskPriorityBadge";
+import { CheckSquareFilledIcon, SquareOutlineIcon} from "@/icons/schedule.icons";
 import { CATEGORY_CONFIG } from "./task.types";
 import type { Task } from "./task.types";
 // ==============================================
@@ -24,14 +25,25 @@ export const TaskCard = ({ task, onDelete, onToggleDone }: TaskCardProps) => {
     formattedDate = format(new Date(task.dueDate), "MMM d");
   }
 
-  let titleClassName = "min-w-0 text-[13px] font-medium leading-snug text-[#1f2329]";
+  let titleClassName =
+    "min-w-0 text-[13px] font-medium leading-snug text-[#1f2329]";
   if (isDone) {
-    titleClassName = "min-w-0 text-[13px] font-medium leading-snug text-[#9aa0aa] line-through";
+    titleClassName =
+      "min-w-0 text-[13px] font-medium leading-snug text-[#9aa0aa] line-through";
   }
 
   let checkboxLabel = "Mark task as done";
   if (isDone) {
     checkboxLabel = "Mark task as not started";
+  }
+
+  let checkboxIcon = (
+    <SquareOutlineIcon className="h-[16.8px] w-[16.8px] text-[#d1d5db]" />
+  );
+  if (isDone) {
+    checkboxIcon = (
+      <CheckSquareFilledIcon className="h-3.5 w-3.5 text-[#4b36a8]" />
+    );
   }
 
   const handleToggleDone = () => {
@@ -82,13 +94,16 @@ export const TaskCard = ({ task, onDelete, onToggleDone }: TaskCardProps) => {
 
       {/* タイトル + チェックボックス */}
       <div className="mb-2 flex items-start gap-2 pr-5">
-        <input
-          type="checkbox"
-          checked={isDone}
+        <button
+          type="button"
           aria-label={checkboxLabel}
-          className="mt-[1px] h-3.5 w-3.5 shrink-0 cursor-pointer rounded border-[#d1d5db] accent-[#4b36a8]"
-          onChange={handleToggleDone}
-        />
+          aria-pressed={isDone}
+          className="mt-[1px] flex h-3.5 w-3.5 shrink-0 cursor-pointer items-center justify-center rounded"
+          onClick={handleToggleDone}
+        >
+          {checkboxIcon}
+        </button>
+
         <p className={titleClassName}>{task.title}</p>
       </div>
 
