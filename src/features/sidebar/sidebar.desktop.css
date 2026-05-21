@@ -44,7 +44,7 @@
   overflow-y: auto;
   overflow-x: hidden;
 
-  padding: 12px 4px;
+  padding: 4px 4px 12px;
 
   border-top-right-radius: 10px;
 
@@ -81,7 +81,7 @@
 
   width: var(--app-sidebar-rail-width, 48px);
   overflow: visible;
-  padding: 12px 4px;
+  padding: 4px 4px 12px;
 
   pointer-events: none;
 
