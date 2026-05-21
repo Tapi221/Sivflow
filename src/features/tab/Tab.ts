@@ -9,7 +9,8 @@ export type WorkspaceSidebarSection =
   | "home"
   | "review"
   | "library"
-  | "schedule";
+  | "schedule"
+  | "tasks";
 
 /**
  * ルートタブID（固定ページ）
@@ -17,7 +18,8 @@ export type WorkspaceSidebarSection =
 export type WorkspaceRouteTabId =
   | "route:home"
   | "route:review"
-  | "route:schedule";
+  | "route:schedule"
+  | "route:tasks";
 
 /**
  * タブ種別
@@ -131,6 +133,14 @@ export const WORKSPACE_ROUTE_TABS = [
     routePath: "/schedule",
     isClosable: true,
     sectionKey: "schedule",
+  },
+  {
+    id: "route:tasks",
+    kind: "route",
+    title: "Tasks",
+    routePath: "/tasks",
+    isClosable: true,
+    sectionKey: "tasks",
   },
 ] as const satisfies readonly WorkspaceRouteTab[];
 
