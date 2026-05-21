@@ -101,7 +101,7 @@ describe("GoogleCalendarSyncEngine", () => {
   });
 
   describe("フル同期（初回）", () => {
-    it("syncToken がない場合、フル同期を実行して onEventAdded を呼ぶ", async () => {
+    it("syncToken がない場合、フル同期を実行して範囲置換を呼ぶ", async () => {
       const fetchMock = vi.spyOn(globalThis, "fetch").mockReturnValue(
         mockEventsListResponse(
           [
@@ -127,13 +127,14 @@ describe("GoogleCalendarSyncEngine", () => {
       engine.start(testContext);
 
       await vi.waitFor(() => {
-        expect(onEventAdded).toHaveBeenCalledTimes(2);
+        expect(onEventsRangeReplaced).toHaveBeenCalledTimes(1);
       });
 
       engine.stop();
 
       expect(fetchMock).toHaveBeenCalledTimes(1);
-      expect(onEventAdded.mock.calls[0][0]).toMatchObject({
+      expect(onEventAdded).not.toHaveBeenCalled();
+      expect(onEventsRangeReplaced.mock.calls[0][0].events[0]).toMatchObject({
         id: `${CALENDAR_ID}:event-1`,
         title: "ミーティング",
         calendarId: CALENDAR_ID,
@@ -146,7 +147,7 @@ describe("GoogleCalendarSyncEngine", () => {
       expect(tokenMap[CALENDAR_ID]).toBe("initial-sync-token");
     });
 
-    it("status: 'cancelled' のイベントは onEventAdded を呼ばない", async () => {
+    it("status: 'cancelled' のイベントは範囲置換の events に含めない", async () => {
       const fetchMock = vi.spyOn(globalThis, "fetch").mockReturnValue(
         mockEventsListResponse(
           [{ id: "event-deleted", status: "cancelled" }],
@@ -162,6 +163,8 @@ describe("GoogleCalendarSyncEngine", () => {
 
       engine.stop();
 
+      expect(onEventsRangeReplaced).toHaveBeenCalledTimes(1);
+      expect(onEventsRangeReplaced.mock.calls[0][0].events).toEqual([]);
       expect(onEventAdded).not.toHaveBeenCalled();
       expect(onEventDeleted).not.toHaveBeenCalled();
     });
@@ -276,13 +279,14 @@ describe("GoogleCalendarSyncEngine", () => {
       document.dispatchEvent(new Event("visibilitychange"));
 
       await vi.waitFor(() => {
-        expect(onEventAdded).toHaveBeenCalledTimes(1);
+        expect(onEventsRangeReplaced).toHaveBeenCalledTimes(2);
       });
 
       engine.stop();
 
       expect(fetchMock).toHaveBeenCalledTimes(3);
-      expect(onEventAdded.mock.calls[0][0]).toMatchObject({
+      expect(onEventAdded).not.toHaveBeenCalled();
+      expect(onEventsRangeReplaced.mock.calls[1][0].events[0]).toMatchObject({
         id: `${CALENDAR_ID}:full-sync-event`,
       });
 
