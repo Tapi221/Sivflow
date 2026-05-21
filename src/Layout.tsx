@@ -21,6 +21,9 @@ const Layout = () => {
   const navigate = useNavigate();
 
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(location.pathname);
+  const isScheduleRoute = /^\/(?:schedule|calendar)(?:\/|$)/i.test(
+    location.pathname,
+  );
   const presentationTarget = usePresentationTarget();
   const isDesktopPresentation = presentationTarget === "desktop";
   const appTopInsetPx = getAppTopInsetPx({ presentationTarget });
@@ -140,6 +143,7 @@ const Layout = () => {
     <div
       className={cn(
         "relative flex flex-col h-[100dvh] w-full overflow-hidden",
+        isScheduleRoute ? "app-layout-route--schedule" : "",
         UI_TYPO,
       )}
       data-presentation-target={presentationTarget}
