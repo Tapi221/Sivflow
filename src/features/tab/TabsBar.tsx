@@ -322,7 +322,7 @@ export const WorkspaceTabsBar = ({
                   <button
                     type="button"
                     style={interactiveStyle}
-                    className="explorer-workspace-tab-button relative z-[2] flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left outline-none"
+                    className="explorer-workspace-tab-button relative z-[2] flex h-full w-full min-w-0 flex-1 items-center gap-2 px-3 text-left outline-none"
                     aria-current={selected ? "page" : undefined}
                     title={tab.title}
                     onClick={(event) => {
@@ -343,7 +343,7 @@ export const WorkspaceTabsBar = ({
                       )}
                     />
 
-                    <span className="truncate">{tab.title}</span>
+                    <span className="min-w-0 flex-1 truncate">{tab.title}</span>
                   </button>
 
                   {tab.isClosable ? (
