@@ -141,7 +141,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   );
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col bg-white">
+    <div className="flex h-full min-h-0 w-full flex-col bg-transparent">
       <CalendarWorkspaceToolbar
         activeMode={activeMode}
         viewMode={selectedViewMode}
@@ -151,7 +151,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
         onSelectViewMode={handleSelectViewMode}
       />
 
-      <div className="flex min-h-0 flex-1 bg-white">
+      <div className="flex min-h-0 flex-1 bg-transparent">
         <CalendarSidebar
           monthDate={sidebarMonthDate}
           selectedDate={selectedDate}
@@ -251,7 +251,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             aria-label="日付詳細を開く"
             title="日付詳細を開く"
             onClick={handleOpenDayDetailPanel}
-            className="flex w-8 shrink-0 items-center justify-center border-l border-[#ececec] bg-white text-[#b4b4bc] hover:bg-[#f7f7f7]"
+            className="flex w-8 shrink-0 items-center justify-center border-l border-[#ececec] bg-transparent text-[#b4b4bc] hover:bg-[#f7f7f7]"
           >
             <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
               <path
