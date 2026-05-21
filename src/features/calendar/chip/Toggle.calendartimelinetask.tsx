@@ -36,7 +36,7 @@ export const ToggleCalendarTimelineTask = ({
     0,
     ...tabs.map((tab) => tab.label.length),
   );
-  const tabColumnWidth = `calc(${longestLabelLength}ch + 2.25rem)`;
+  const tabColumnWidth = `calc(${longestLabelLength}ch + 1.5rem)`;
 
   return (
     <div
