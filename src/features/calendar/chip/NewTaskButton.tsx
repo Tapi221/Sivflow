@@ -7,7 +7,7 @@ export const NewTaskButton = ({ onClick }: NewTaskButtonProps) => {
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-1.5 rounded-lg bg-[#185FA5] px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
+      className="flex items-center gap-1.5 rounded-lg bg-[#193a5c] px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
     >
       <svg viewBox="0 0 14 14" fill="none" className="h-3.5 w-3.5">
         <path

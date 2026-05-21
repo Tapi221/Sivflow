@@ -78,7 +78,7 @@ export const NewTaskModal = ({
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="タスク名を入力..."
-              className="w-full rounded-lg border border-[#e9eaed] bg-[#f9fafb] px-3 py-2 text-[13px] text-[#1f2329] outline-none placeholder:text-[#c5c8d0] focus:border-[#185FA5] focus:bg-white"
+              className="w-full rounded-lg border border-[#e9eaed] bg-[#f9fafb] px-3 py-2 text-[13px] text-[#1f2329] outline-none placeholder:text-[#c5c8d0] focus:border-[#193a5c] focus:bg-white"
             />
           </div>
 
@@ -91,7 +91,7 @@ export const NewTaskModal = ({
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as TaskStatus)}
-                className="w-full rounded-lg border border-[#e9eaed] bg-[#f9fafb] px-3 py-2 text-[13px] text-[#1f2329] outline-none focus:border-[#185FA5]"
+                className="w-full rounded-lg border border-[#e9eaed] bg-[#f9fafb] px-3 py-2 text-[13px] text-[#1f2329] outline-none focus:border-[#193a5c]"
               >
                 {TASK_COLUMNS.map((col) => (
                   <option key={col.id} value={col.id}>{col.label}</option>
@@ -107,7 +107,7 @@ export const NewTaskModal = ({
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as TaskPriority)}
-                className="w-full rounded-lg border border-[#e9eaed] bg-[#f9fafb] px-3 py-2 text-[13px] text-[#1f2329] outline-none focus:border-[#185FA5]"
+                className="w-full rounded-lg border border-[#e9eaed] bg-[#f9fafb] px-3 py-2 text-[13px] text-[#1f2329] outline-none focus:border-[#193a5c]"
               >
                 {Object.entries(PRIORITY_CONFIG).map(([key, val]) => (
                   <option key={key} value={key}>{val.label}</option>
@@ -123,7 +123,7 @@ export const NewTaskModal = ({
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-lg border border-[#e9eaed] bg-[#f9fafb] px-3 py-2 text-[13px] text-[#1f2329] outline-none focus:border-[#185FA5]"
+                className="w-full rounded-lg border border-[#e9eaed] bg-[#f9fafb] px-3 py-2 text-[13px] text-[#1f2329] outline-none focus:border-[#193a5c]"
               >
                 {Object.keys(CATEGORY_CONFIG).map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -140,7 +140,7 @@ export const NewTaskModal = ({
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full rounded-lg border border-[#e9eaed] bg-[#f9fafb] px-3 py-2 text-[13px] text-[#1f2329] outline-none focus:border-[#185FA5]"
+                className="w-full rounded-lg border border-[#e9eaed] bg-[#f9fafb] px-3 py-2 text-[13px] text-[#1f2329] outline-none focus:border-[#193a5c]"
               />
             </div>
           </div>
@@ -159,7 +159,7 @@ export const NewTaskModal = ({
             type="button"
             onClick={handleSave}
             disabled={!title.trim()}
-            className="rounded-lg bg-[#185FA5] px-4 py-1.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+            className="rounded-lg bg-[#193a5c] px-4 py-1.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
           >
             作成
           </button>
