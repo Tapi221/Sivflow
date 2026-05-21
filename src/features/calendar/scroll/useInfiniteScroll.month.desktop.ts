@@ -1,4 +1,4 @@
-import type { RefObject, UIEvent } from "react";
+import type { RefObject } from "react";
 import {
   useCallback,
   useEffect,
@@ -11,7 +11,6 @@ import {
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import {
   buildCalendarMonthWeeks,
-  type CalendarMonthWeek,
   getCalendarMonthKey,
   getCalendarWeekKey,
 } from "@/features/calendar/model/calendarMonth.model";
@@ -27,11 +26,10 @@ type UseMonthInfiniteScrollOptions = {
 };
 
 export type UseMonthInfiniteScrollReturn = {
-  monthWeeks: CalendarMonthWeek[];
+  monthWeeks: ReturnType<typeof buildCalendarMonthWeeks>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   weekRowRefsMap: RefObject<Map<string, HTMLElement>>;
   setWeekRowRef: (weekKey: string, node: HTMLElement | null) => void;
-  handleScroll: (event: UIEvent<HTMLDivElement>) => void;
   /** リサイズ完了後など、外部から表示月を再同期する必要があるときに呼ぶ */
   syncVisibleMonth: () => void;
 };
@@ -85,44 +83,36 @@ export const useMonthInfiniteScroll = ({
 
   const syncVisibleMonth = useCallback(() => {
     const scroller = scrollContainerRef.current;
-    if (!scroller || !onVisibleMonthChange || monthWeeks.length === 0) return;
+    const firstWeek = monthWeeks[0];
 
-    const scrollerRect = scroller.getBoundingClientRect();
-    const sampleY =
-      scrollerRect.top + C.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
+    if (!scroller || !firstWeek || !onVisibleMonthChange) return;
 
-    let best: CalendarMonthWeek | null = null;
-    let bestDist = Number.POSITIVE_INFINITY;
+    const firstRow = weekRowRefsMap.current.get(firstWeek.key);
+    if (!firstRow) return;
 
-    for (const week of monthWeeks) {
-      const row = weekRowRefsMap.current.get(week.key);
-      if (!row) continue;
+    const rowHeight = firstRow.offsetHeight;
+    if (rowHeight <= 0) return;
 
-      const rect = row.getBoundingClientRect();
+    const sampleOffsetTop =
+      scroller.scrollTop + C.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
 
-      if (rect.top <= sampleY && rect.bottom > sampleY) {
-        best = week;
-        break;
-      }
+    const rawWeekIndex = Math.floor(
+      (sampleOffsetTop - firstRow.offsetTop) / rowHeight,
+    );
 
-      const dist = Math.min(
-        Math.abs(rect.top - sampleY),
-        Math.abs(rect.bottom - sampleY),
-      );
+    const weekIndex = Math.min(
+      monthWeeks.length - 1,
+      Math.max(0, rawWeekIndex),
+    );
 
-      if (dist < bestDist) {
-        bestDist = dist;
-        best = week;
-      }
-    }
+    const visibleWeek = monthWeeks[weekIndex];
+    if (!visibleWeek) return;
 
-    if (!best) return;
-
-    const nextKey = getCalendarMonthKey(best.visibleMonthDate);
+    const nextKey = getCalendarMonthKey(visibleWeek.visibleMonthDate);
     if (nextKey === visibleMonthKeyRef.current) return;
 
     visibleMonthKeyRef.current = nextKey;
-    onVisibleMonthChange(best.visibleMonthDate);
+    onVisibleMonthChange(visibleWeek.visibleMonthDate);
   }, [monthWeeks, onVisibleMonthChange]);
 
   const scheduleVisibleMonthSync = useCallback(() => {
@@ -142,9 +132,8 @@ export const useMonthInfiniteScroll = ({
   }, []);
 
   const handleScroll = useCallback(
-    (event: UIEvent<HTMLDivElement>) => {
+    (scroller: HTMLDivElement) => {
       if (isResizingRef.current) return;
-      const scroller = event.currentTarget;
 
       if (
         scroller.scrollTop < C.MONTH_SCROLL_EDGE_THRESHOLD_PX &&
@@ -252,6 +241,21 @@ export const useMonthInfiniteScroll = ({
   }, [monthWeeks.length]);
 
   useEffect(() => {
+    const scroller = scrollContainerRef.current;
+    if (!scroller) return;
+
+    const handlePassiveScroll = () => handleScroll(scroller);
+
+    scroller.addEventListener("scroll", handlePassiveScroll, {
+      passive: true,
+    });
+
+    return () => {
+      scroller.removeEventListener("scroll", handlePassiveScroll);
+    };
+  }, [handleScroll]);
+
+  useEffect(() => {
     isExtendingAfterRef.current = false;
   }, [monthOffsetRange.endOffset]);
 
@@ -262,7 +266,6 @@ export const useMonthInfiniteScroll = ({
     scrollContainerRef,
     weekRowRefsMap,
     setWeekRowRef,
-    handleScroll,
     syncVisibleMonth,
   };
 };
