@@ -6,6 +6,7 @@ type TaskColumnProps = {
   tasks: Task[];
   onAddTask: (status: string) => void;
   onDeleteTask: (id: string) => void;
+  onToggleTaskDone: (id: string, done: boolean) => void;
 };
 
 export const TaskColumn = ({
@@ -13,6 +14,7 @@ export const TaskColumn = ({
   tasks,
   onAddTask,
   onDeleteTask,
+  onToggleTaskDone,
 }: TaskColumnProps) => {
   return (
     <div className="flex min-w-0 flex-1 flex-col rounded-xl bg-[#f7f8fa] p-3">
@@ -45,7 +47,12 @@ export const TaskColumn = ({
         </button>
 
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} onDelete={onDeleteTask} />
+          <TaskCard
+            key={task.id}
+            task={task}
+            onDelete={onDeleteTask}
+            onToggleDone={onToggleTaskDone}
+          />
         ))}
       </div>
     </div>
