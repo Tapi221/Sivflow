@@ -17,7 +17,10 @@ import { GoogleAccountChip } from "@/features/calendar/chip/GoogleAccountChip";
 import { CalendarIcon, PlusIcon } from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
 
-import type { CalendarSidebarProps, GoogleAccountDisplay } from "../schedulePane.types";
+import type {
+  CalendarSidebarProps,
+  GoogleAccountDisplay,
+} from "../schedulePane.types";
 
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 
@@ -318,7 +321,7 @@ export const CalendarSidebar = ({
 
       <div className="mt-5 h-px w-full shrink-0 bg-[#e4e6eb]" />
 
-      <nav className="mt-5 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto">
+      <nav className="mt-5 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto pb-2">
         <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
           <CalendarIcon className="h-3.5 w-3.5 text-[#74798b]" />
           <span className="text-[11px] font-semibold uppercase text-[#9aa0aa]">
@@ -337,22 +340,27 @@ export const CalendarSidebar = ({
             onRetry={() => onRetryAccount(account.accountId)}
           />
         ))}
-
-        <div className={cn("mt-2 shrink-0", hasGoogleAccounts && "border-t pt-2")}>
-          <button
-            type="button"
-            className="flex h-7 w-full items-center gap-2 px-2 text-left hover:bg-[#eceef1]"
-            onClick={onAddCalendar}
-            disabled={isAnyCalendarConnecting}
-          >
-            <PlusIcon className="h-4 w-4 text-[#74798b]" />
-
-            <span className="text-[12px] text-[#74798b]">
-              {hasGoogleAccounts ? "別のアカウントを追加" : "Google Calendar を追加"}
-            </span>
-          </button>
-        </div>
       </nav>
+
+      <div
+        className={cn(
+          "mt-auto w-full shrink-0 pt-2",
+          hasGoogleAccounts && "border-t border-[#e4e6eb]",
+        )}
+      >
+        <button
+          type="button"
+          className="flex h-7 w-full items-center gap-2 px-2 text-left hover:bg-[#eceef1]"
+          onClick={onAddCalendar}
+          disabled={isAnyCalendarConnecting}
+        >
+          <PlusIcon className="h-4 w-4 text-[#74798b]" />
+
+          <span className="text-[12px] text-[#74798b]">
+            {hasGoogleAccounts ? "別のアカウントを追加" : "Google Calendar を追加"}
+          </span>
+        </button>
+      </div>
     </aside>
   );
 };
