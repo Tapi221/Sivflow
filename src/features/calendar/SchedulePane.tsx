@@ -269,7 +269,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             aria-label={showDayDetailPanel ? "日付詳細を閉じる" : "日付詳細を開く"}
             title={showDayDetailPanel ? "日付詳細を閉じる" : "日付詳細を開く"}
             onClick={handleToggleDayDetailPanel}
-            className="absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-[#e1e4ea] bg-white text-[#8f96a3] shadow-[0_1px_3px_rgba(15,23,42,0.08)] hover:bg-[#f4f6f8]"
+            className="absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center bg-transparent text-[#8f96a3] hover:text-[#6f7784]"
           >
             <SidebarPanelIcon
               className={cn("h-3.5 w-3.5", showDayDetailPanel && "-scale-x-100")}
