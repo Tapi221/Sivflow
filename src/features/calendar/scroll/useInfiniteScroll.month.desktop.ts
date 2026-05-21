@@ -49,6 +49,7 @@ export const useMonthInfiniteScroll = ({
   const prependScrollHeightRef = useRef<number | null>(null);
   const isExtendingBeforeRef = useRef(false);
   const isExtendingAfterRef = useRef(false);
+  const visibleMonthSyncRafRef = useRef<number | null>(null);
   const pendingScrollWeekKeyRef = useRef<string | null>(
     getCalendarWeekKey(currentDate),
   );
@@ -124,6 +125,22 @@ export const useMonthInfiniteScroll = ({
     onVisibleMonthChange(best.visibleMonthDate);
   }, [monthWeeks, onVisibleMonthChange]);
 
+  const scheduleVisibleMonthSync = useCallback(() => {
+    if (visibleMonthSyncRafRef.current !== null) return;
+
+    visibleMonthSyncRafRef.current = requestAnimationFrame(() => {
+      visibleMonthSyncRafRef.current = null;
+      syncVisibleMonth();
+    });
+  }, [syncVisibleMonth]);
+
+  const cancelVisibleMonthSync = useCallback(() => {
+    if (visibleMonthSyncRafRef.current === null) return;
+
+    cancelAnimationFrame(visibleMonthSyncRafRef.current);
+    visibleMonthSyncRafRef.current = null;
+  }, []);
+
   const handleScroll = useCallback(
     (event: UIEvent<HTMLDivElement>) => {
       if (isResizingRef.current) return;
@@ -157,9 +174,9 @@ export const useMonthInfiniteScroll = ({
         }));
       }
 
-      syncVisibleMonth();
+      scheduleVisibleMonthSync();
     },
-    [isResizingRef, syncVisibleMonth],
+    [isResizingRef, scheduleVisibleMonthSync],
   );
 
   useLayoutEffect(() => {
@@ -237,6 +254,8 @@ export const useMonthInfiniteScroll = ({
   useEffect(() => {
     isExtendingAfterRef.current = false;
   }, [monthOffsetRange.endOffset]);
+
+  useEffect(() => cancelVisibleMonthSync, [cancelVisibleMonthSync]);
 
   return {
     monthWeeks,
