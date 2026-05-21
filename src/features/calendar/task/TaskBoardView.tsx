@@ -20,7 +20,7 @@ export const TaskBoardView = ({
   onToggleTaskDone,
 }: TaskBoardViewProps) => {
   return (
-    <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden p-4">
+    <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden py-4 pl-4 pr-0">
       <div className="flex h-full min-h-0 gap-3">
         {TASK_COLUMNS.map((col) => (
           <TaskColumn
