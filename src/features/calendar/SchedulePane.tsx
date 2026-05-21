@@ -58,6 +58,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
     handleTimelineScroll,
     handleMonthCellSelectDate,
     addGoogleCalendar,
+    removeGoogleAccount,
     reconnectGoogleAccount,
     retryGoogleAccountSync,
     toggleGoogleCalendar,
@@ -94,6 +95,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           onPreviousMonth={handleSidebarPreviousMonth}
           onNextMonth={handleSidebarNextMonth}
           onAddCalendar={addGoogleCalendar}
+          onRemoveAccount={removeGoogleAccount}
           onReconnectAccount={(accountId) => {
             void reconnectGoogleAccount(accountId);
           }}
