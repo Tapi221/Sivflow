@@ -1,27 +1,10 @@
-/**
- * Sidebar.desktop.tsx
- *
- * 常時レール表示（アイコンのみ）。
- * collapsed / expanded の切り替えロジックを廃止し、
- * コンポーネントは常に compact=true で動作する。
- *
- * 将来の拡張: Electron / Swift / Android では
- * --app-sidebar-rail-width CSS変数を各プラットフォームの
- * レイアウトファイルで上書きすることで幅を調整できる。
- */
-
-import {
-  type MouseEvent,
-  type ReactNode,
-} from "react";
+import { type MouseEvent, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { useSchedulePaneStore } from "@/features/calendar/header/useSchedulePaneStore";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
-
-import "./sidebar.desktop.css";
-
+import { cn } from "@/lib/utils";
 import {
   CalendarIcon,
   ChevronDownIcon,
@@ -33,7 +16,7 @@ import {
   LibraryIcon,
 } from "../../icons/sidebar.icons";
 
-import { cn } from "@/lib/utils";
+import "./sidebar.desktop.css";
 
 // ── 型定義 ───────────────────────────────────────────────────
 
@@ -167,23 +150,24 @@ const SidebarNavLink = ({
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={isDisabled}
-      className={cn(
-        "app-sidebar__nav-link",
-        isActive && "is-active",
-        isDisabled && "app-sidebar__nav-link--disabled",
-        "app-sidebar__nav-link--collapsed",
-      )}
-      aria-current={isActive ? "page" : undefined}
-      aria-label={item.label}
-      title={item.label}
-    >
-      <span className="app-sidebar__nav-icon-slot">{item.icon}</span>
-      <span className="app-sidebar__nav-label">{item.label}</span>
-    </button>
+    <HoverTooltip label={item.label} side="right" className="w-full">
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={isDisabled}
+        className={cn(
+          "app-sidebar__nav-link",
+          isActive && "is-active",
+          isDisabled && "app-sidebar__nav-link--disabled",
+          "app-sidebar__nav-link--collapsed",
+        )}
+        aria-current={isActive ? "page" : undefined}
+        aria-label={item.label}
+      >
+        <span className="app-sidebar__nav-icon-slot">{item.icon}</span>
+        <span className="app-sidebar__nav-label">{item.label}</span>
+      </button>
+    </HoverTooltip>
   );
 };
 
@@ -215,10 +199,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   ];
 
   return (
-    <aside
-      className="app-sidebar"
-      aria-label="Sidebar"
-    >
+    <aside className="app-sidebar" aria-label="Sidebar">
       <div className="app-sidebar__top">
         <div className="app-sidebar__workspace">
           <div className="app-sidebar__workspace-avatar">C</div>
