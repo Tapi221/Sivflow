@@ -41,6 +41,10 @@ const ACTIVE_TAB_SURFACE_STYLE: CSSProperties = {
   background: "var(--app-active-tab-bg, #ffffff)",
 };
 
+const ACTIVE_TAB_JOIN_STYLE: CSSProperties = {
+  filter: "drop-shadow(0 1px 0 var(--app-active-tab-bg, #ffffff))",
+};
+
 const ACTIVE_TAB_LEFT_CURVE_STYLE: CSSProperties = {
   ...ACTIVE_TAB_SURFACE_STYLE,
   WebkitMask:
@@ -71,27 +75,33 @@ const resolveInactiveTabIconClassName = (isTitlebar: boolean): string =>
     ? "text-[var(--app-titlebar-icon)]"
     : "text-[var(--app-sidebar-icon)]";
 
-const resolveCloseButtonClassName = (isTitlebar: boolean): string =>
-  isTitlebar
-    ? [
-        "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
-        "text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
-      ].join(" ")
-    : [
-        "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
-        "text-[var(--app-sidebar-icon)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
-      ].join(" ");
+const resolveCloseButtonClassName = (isTitlebar: boolean): string => {
+  if (isTitlebar) {
+    return cn(
+      "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
+      "text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
+    );
+  }
 
-const resolveAddButtonClassName = (isTitlebar: boolean): string =>
-  isTitlebar
-    ? [
-        "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border-0 outline-none transition-colors",
-        "bg-transparent text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
-      ].join(" ")
-    : [
-        "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border-0 outline-none transition-colors",
-        "text-[var(--app-sidebar-text)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
-      ].join(" ");
+  return cn(
+    "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
+    "text-[var(--app-sidebar-icon)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
+  );
+};
+
+const resolveAddButtonClassName = (isTitlebar: boolean): string => {
+  if (isTitlebar) {
+    return cn(
+      "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border-0 outline-none transition-colors",
+      "bg-transparent text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
+    );
+  }
+
+  return cn(
+    "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border-0 outline-none transition-colors",
+    "text-[var(--app-sidebar-text)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
+  );
+};
 
 const resolveNextTabOnClose = (
   tabs: WorkspaceTab[],
@@ -275,8 +285,6 @@ export const WorkspaceTabsBar = ({
   }, [activeTabId]);
 
   useLayoutEffect(() => {
-    updateIndicator();
-
     const frameId = window.requestAnimationFrame(updateIndicator);
 
     return () => {
@@ -285,8 +293,6 @@ export const WorkspaceTabsBar = ({
   }, [tabs, updateIndicator]);
 
   useLayoutEffect(() => {
-    updateIndicator();
-
     if (typeof ResizeObserver === "undefined") {
       window.addEventListener("resize", updateIndicator);
 
@@ -339,6 +345,7 @@ export const WorkspaceTabsBar = ({
           aria-hidden="true"
           style={{
             ...ACTIVE_TAB_SURFACE_STYLE,
+            ...ACTIVE_TAB_JOIN_STYLE,
             width: indicator.width,
             transform: `translate3d(${indicator.left}px, 0, 0)`,
           }}
@@ -354,6 +361,7 @@ export const WorkspaceTabsBar = ({
             className="absolute bottom-0 left-[-16px] h-4 w-4"
             style={ACTIVE_TAB_LEFT_CURVE_STYLE}
           />
+
           <span
             aria-hidden="true"
             className="absolute bottom-0 right-[-16px] h-4 w-4"
@@ -368,6 +376,15 @@ export const WorkspaceTabsBar = ({
             resolveInactiveTabTextClassName(isTitlebar);
           const inactiveIconClassName =
             resolveInactiveTabIconClassName(isTitlebar);
+          const tabStateClassName = selected
+            ? "z-[3] text-[var(--app-sidebar-text-strong)] shadow-none"
+            : cn("explorer-workspace-tab--inactive", inactiveTextClassName);
+          const iconStateClassName = selected
+            ? "text-[var(--ds-semantic-color-interactive-selected-accent)]"
+            : inactiveIconClassName;
+          const closeButtonStateClassName = selected
+            ? "opacity-100 !text-[#6f7681] hover:!bg-black/5 hover:!text-[#2f3640]"
+            : "opacity-80 hover:opacity-100";
 
           return (
             <div
@@ -395,12 +412,7 @@ export const WorkspaceTabsBar = ({
                   "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-visible border-0 text-[13px]",
                   "mb-0 h-[36px] rounded-tl-[8px] rounded-tr-[8px]",
                   "transition-[color,transform] duration-300 ease-[cubic-bezier(.22,1,.36,1)]",
-                  selected
-                    ? "z-[3] text-[var(--app-sidebar-text-strong)] shadow-none"
-                    : cn(
-                        "explorer-workspace-tab--inactive",
-                        inactiveTextClassName,
-                      ),
+                  tabStateClassName,
                   resolveTabWidthClassName(tab),
                 )}
               >
@@ -418,9 +430,7 @@ export const WorkspaceTabsBar = ({
                   <Icon
                     className={cn(
                       "h-4 w-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)]",
-                      selected
-                        ? "text-[var(--ds-semantic-color-interactive-selected-accent)]"
-                        : inactiveIconClassName,
+                      iconStateClassName,
                     )}
                   />
 
@@ -433,9 +443,7 @@ export const WorkspaceTabsBar = ({
                     style={interactiveStyle}
                     className={cn(
                       closeButtonClassName,
-                      selected
-                        ? "opacity-100 !text-[#6f7681] hover:!bg-black/5 hover:!text-[#2f3640]"
-                        : "opacity-80 hover:opacity-100",
+                      closeButtonStateClassName,
                     )}
                     aria-label={`${tab.title} を閉じる`}
                     title="閉じる"
