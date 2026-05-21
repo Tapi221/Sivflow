@@ -37,7 +37,7 @@ export const TaskColumn = ({
       </div>
 
       {/* タスクリスト */}
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
+      <div className="min-h-0 flex-1 overflow-y-scroll overscroll-contain pr-1">
         <div className="flex flex-col gap-2">
           {/* Add task ボタン（上部） */}
           <button
