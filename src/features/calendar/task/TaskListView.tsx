@@ -1,8 +1,5 @@
 import { format } from "date-fns";
-import {
-  CheckSquareFilledIcon,
-  SquareOutlineIcon,
-} from "@/components/icons/schedule.icons";
+import { AnimatedSquareCheckbox } from "@/features/calendar/chip/checkbox/AnimatedSquareCheckbox";
 import { TASK_COLUMNS } from "./task.types";
 import type { Task } from "./task.types";
 
@@ -42,6 +39,7 @@ export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => 
           {tasks.map((task) => {
             const col = TASK_COLUMNS.find((c) => c.id === task.status);
             const isDone = task.status === "done";
+            const checkboxColor = isDone ? "#193a5c" : "#9ca3af";
 
             return (
               <tr
@@ -51,15 +49,11 @@ export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => 
                 <td className="w-7 py-2.5 pr-2 align-top">
                   <button
                     type="button"
-                    className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center text-[#9ca3af] hover:text-[#193a5c]"
+                    className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center"
                     aria-label={isDone ? "Mark task as not done" : "Complete task"}
                     onClick={() => onToggleTaskDone(task.id, !isDone)}
                   >
-                    {isDone ? (
-                      <CheckSquareFilledIcon className="h-4 w-4 text-[#193a5c]" />
-                    ) : (
-                      <SquareOutlineIcon className="h-4 w-4" />
-                    )}
+                    <AnimatedSquareCheckbox checked={isDone} color={checkboxColor} />
                   </button>
                 </td>
 
