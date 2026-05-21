@@ -1,3 +1,4 @@
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Task, TaskColumn as TaskColumnType } from "./task.types";
 import { TaskCard } from "./TaskCard";
 
@@ -37,8 +38,8 @@ export const TaskColumn = ({
       </div>
 
       {/* タスクリスト */}
-      <div className="min-h-0 flex-1 overflow-y-scroll overscroll-contain pr-1">
-        <div className="flex flex-col gap-2">
+      <ScrollArea className="-mr-3 min-h-0 flex-1 overscroll-contain">
+        <div className="flex flex-col gap-2 pr-3">
           {/* Add task ボタン（上部） */}
           <button
             type="button"
@@ -67,7 +68,7 @@ export const TaskColumn = ({
             />
           ))}
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 };
