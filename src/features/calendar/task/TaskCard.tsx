@@ -53,7 +53,7 @@ export const TaskCard = ({
       <div className="flex items-start gap-3">
         <button
           type="button"
-          className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center text-[#9ca3af] hover:text-[#185FA5]"
+          className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center text-[#9ca3af] hover:text-[#193a5c]"
           aria-label="Complete task"
           onClick={() => {
             if (onToggleDone) {
@@ -62,7 +62,7 @@ export const TaskCard = ({
           }}
         >
           {isDone ? (
-            <CheckSquareFilledIcon className="h-4 w-4 text-[#185FA5]" />
+            <CheckSquareFilledIcon className="h-4 w-4 text-[#193a5c]" />
           ) : (
             <SquareOutlineIcon className="h-4 w-4" />
           )}
