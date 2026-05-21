@@ -212,7 +212,7 @@ export const CalendarSidebar = ({
           </span>
 
           <div className="flex items-center gap-0.5">
-            <HoverTooltip label="前の月" side="top">
+            <HoverTooltip label="前の月" side="top" showOnFocus={false}>
               <button
                 type="button"
                 className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
@@ -223,7 +223,7 @@ export const CalendarSidebar = ({
               </button>
             </HoverTooltip>
 
-            <HoverTooltip label="次の月" side="top">
+            <HoverTooltip label="次の月" side="top" showOnFocus={false}>
               <button
                 type="button"
                 className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"

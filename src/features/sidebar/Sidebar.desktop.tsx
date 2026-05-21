@@ -51,10 +51,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "review",
     label: "Review",
-    to: "/study",
     icon: <InboxIcon className="app-sidebar__nav-icon" />,
-    sectionKey: "review",
-    exactPath: true,
   },
   {
     id: "library",
