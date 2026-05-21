@@ -9,9 +9,6 @@ export type LayoutResult = {
   width: number;
 };
 
-const overlaps = (a: LayoutEvent, b: LayoutEvent): boolean =>
-  a.startMinutes < b.endMinutes && b.startMinutes < a.endMinutes;
-
 const buildClusters = (events: LayoutEvent[]): LayoutEvent[][] => {
   if (events.length === 0) return [];
 
