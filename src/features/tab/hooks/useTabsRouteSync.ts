@@ -9,6 +9,7 @@ const normalizeQuery = (search: string) => {
   const params = new URLSearchParams(
     search.startsWith("?") ? search.slice(1) : search,
   );
+
   return params.toString();
 };
 
@@ -55,27 +56,33 @@ export const useWorkspaceTabsRouteSync = () => {
       openCardSetTab,
     } = useWorkspaceTabsStore.getState();
 
-    if (pathname === "/gallery") {
+    if (pathname === "/study") {
       const nextTabId = openSectionTab("review");
+
       if (activeTabId !== nextTabId) {
         selectTab(nextTabId);
       }
+
       return;
     }
 
-    if (pathname === "/calendar") {
+    if (pathname === "/schedule") {
       const nextTabId = openSectionTab("calendar");
+
       if (activeTabId !== nextTabId) {
         selectTab(nextTabId);
       }
+
       return;
     }
 
     if (pathname === "/tasks") {
       const nextTabId = openSectionTab("tasks");
+
       if (activeTabId !== nextTabId) {
         selectTab(nextTabId);
       }
+
       return;
     }
 
@@ -89,13 +96,16 @@ export const useWorkspaceTabsRouteSync = () => {
 
     if (searchParams.get("home") === "1") {
       const nextTabId = openSectionTab("home");
+
       if (activeTabId !== nextTabId) {
         selectTab(nextTabId);
       }
+
       return;
     }
 
     const documentId = searchParams.get("docId");
+
     if (documentId) {
       const nextTabId = openDocumentTab({
         documentId,
@@ -106,10 +116,12 @@ export const useWorkspaceTabsRouteSync = () => {
       if (activeTabId !== nextTabId) {
         selectTab(nextTabId);
       }
+
       return;
     }
 
     const cardSetId = searchParams.get("cardSetId");
+
     if (cardSetId) {
       const nextTabId = openCardSetTab({
         cardSetId,
@@ -120,10 +132,12 @@ export const useWorkspaceTabsRouteSync = () => {
       if (activeTabId !== nextTabId) {
         selectTab(nextTabId);
       }
+
       return;
     }
 
     const cardId = searchParams.get("cardId");
+
     if (cardId) {
       const nextTabId = openCardTab({
         cardId,
@@ -134,6 +148,7 @@ export const useWorkspaceTabsRouteSync = () => {
       if (activeTabId !== nextTabId) {
         selectTab(nextTabId);
       }
+
       return;
     }
 
@@ -143,6 +158,7 @@ export const useWorkspaceTabsRouteSync = () => {
       if (activeTabId !== matchedExplorerTabId) {
         selectTab(matchedExplorerTabId);
       }
+
       return;
     }
 
