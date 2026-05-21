@@ -3,11 +3,11 @@ import {
   type AnimatedCheckboxBaseProps,
 } from "./AnimatedCheckboxBase";
 
-type AnimatedCheckboxProps = Omit<
+type AnimatedCircleCheckboxProps = Omit<
   AnimatedCheckboxBaseProps,
   "shape" | "variant" | "indeterminate"
 >;
 
-export const AnimatedCheckbox = (props: AnimatedCheckboxProps) => {
+export const AnimatedCircleCheckbox = (props: AnimatedCircleCheckboxProps) => {
   return <AnimatedCheckboxBase {...props} shape="circle" variant="filled" />;
 };
