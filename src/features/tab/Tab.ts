@@ -9,7 +9,8 @@ export type WorkspaceSidebarSection =
   | "home"
   | "review"
   | "library"
-  | "schedule";
+  | "calendar"
+  | "tasks";
 
 /**
  * ルートタブID（固定ページ）
@@ -17,7 +18,8 @@ export type WorkspaceSidebarSection =
 export type WorkspaceRouteTabId =
   | "route:home"
   | "route:review"
-  | "route:calendar";
+  | "route:calendar"
+  | "route:tasks";
 
 /**
  * タブ種別
@@ -120,7 +122,7 @@ export const WORKSPACE_ROUTE_TABS = [
     id: "route:review",
     kind: "route",
     title: "Review",
-    routePath: "/gallery",
+    routePath: "/study",
     isClosable: true,
     sectionKey: "review",
   },
@@ -128,7 +130,7 @@ export const WORKSPACE_ROUTE_TABS = [
     id: "route:calendar",
     kind: "route",
     title: "Calendar",
-    routePath: "/calendar",
+    routePath: "/schedule",
     isClosable: true,
     sectionKey: "calendar",
   },

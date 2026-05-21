@@ -68,7 +68,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "review",
     label: "Review",
-    to: "/gallery",
+    to: "/study",
     icon: <InboxIcon className="app-sidebar__nav-icon" />,
     sectionKey: "review",
     exactPath: true,
@@ -85,7 +85,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "calendar",
     label: "Schedule",
-    to: "/calendar",
+    to: "/schedule",
     icon: <CalendarIcon className="app-sidebar__nav-icon" />,
     sectionKey: "calendar",
     exactPath: true,
@@ -152,12 +152,18 @@ const SidebarNavLink = ({
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
+
     if (isDisabled) return;
 
     item.onClick?.();
 
-    if (item.sectionKey) openSectionTab(item.sectionKey);
-    if (item.to) navigate(item.to);
+    if (item.sectionKey) {
+      openSectionTab(item.sectionKey);
+    }
+
+    if (item.to) {
+      navigate(item.to);
+    }
   };
 
   return (
@@ -169,17 +175,13 @@ const SidebarNavLink = ({
         "app-sidebar__nav-link",
         isActive && "is-active",
         isDisabled && "app-sidebar__nav-link--disabled",
-        // レール表示では常に collapsed クラスを適用
         "app-sidebar__nav-link--collapsed",
       )}
       aria-current={isActive ? "page" : undefined}
-      // レール: ラベルが非表示なのでアクセシビリティのためaria-labelを必ず付与
       aria-label={item.label}
       title={item.label}
     >
       <span className="app-sidebar__nav-icon-slot">{item.icon}</span>
-      {/* ラベルはCSSで display:none だが、DOM上に残しておくことで
-          将来の展開アニメーション実装やスクリーンリーダー対応が容易になる */}
       <span className="app-sidebar__nav-label">{item.label}</span>
     </button>
   );
@@ -187,11 +189,6 @@ const SidebarNavLink = ({
 
 // ── Sidebar本体 ──────────────────────────────────────────────
 
-/**
- * @example
- * // 呼び出し側: collapsed propは不要になった
- * <Sidebar onOpenSettings={() => setSettingsOpen(true)} />
- */
 const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   const closeCalendar = useSchedulePaneStore((s) => s.close);
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
@@ -223,10 +220,8 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
       aria-label="Sidebar"
     >
       <div className="app-sidebar__top">
-        {/* ワークスペースアバター（レール: アバターのみ表示） */}
         <div className="app-sidebar__workspace">
           <div className="app-sidebar__workspace-avatar">C</div>
-          {/* workspace-copy は CSS で display:none */}
           <div className="app-sidebar__workspace-copy">
             <div className="app-sidebar__workspace-name">
               <span>Atlas, Inc</span>
@@ -247,10 +242,6 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
       </div>
 
       <div className="app-sidebar__bottom">
-        {/* UpgradePanel は compact=true で null を返すため省略
-            将来、レール用のアイコンバッジ表示に変更する場合は
-            UpgradePanel に railIcon prop を追加する */}
-
         <nav className="app-sidebar__nav" aria-label="フッターナビゲーション">
           {footerItems.map((item) => (
             <SidebarNavLink key={item.id} item={item} />

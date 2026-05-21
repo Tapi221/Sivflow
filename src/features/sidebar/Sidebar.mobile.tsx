@@ -41,7 +41,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "review",
     label: "Review",
-    to: "/gallery",
+    to: "/study",
     icon: <InboxIcon className="sidebar-nav-icon" />,
     sectionKey: "review",
   },
@@ -55,7 +55,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "calendar",
     label: "Schedule",
-    to: "/calendar",
+    to: "/schedule",
     icon: <CalendarIcon className="sidebar-nav-icon" />,
     sectionKey: "calendar",
   },
