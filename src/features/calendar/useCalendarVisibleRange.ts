@@ -54,8 +54,8 @@ export const useCalendarVisibleRange = ({
       ? startOfMonth(normalized)
       : selectedViewMode === "week"
         ? startOfWeek(normalized, {
-            weekStartsOn: C.WEEK_STARTS_ON_MONDAY,
-          })
+          weekStartsOn: C.WEEK_STARTS_ON_MONDAY,
+        })
         : normalized;
 
   const visibleCount = getRangeDayCount(normalized, selectedViewMode);

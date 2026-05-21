@@ -1,22 +1,12 @@
+import { useLayoutEffect, useRef } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import { useLayoutEffect, useRef } from "react";
-
-import {
-  GridCalendarDayDetailDesktop,
-  HOUR_ROW_HEIGHT,
-} from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
-
-import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
-
 import { DayDetailCreateButton } from "@/features/calendar/chip/AddScheduleButton.daydetail";
-
 import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
-
-import { generateColorTokens } from "@/features/calendar/ui/calendar.color-tokens";
-
+import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
+import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import { cn } from "@/lib/utils";
-
 // ==============================================
 
 const DEFAULT_SCROLL_HOUR = 0;

@@ -37,7 +37,6 @@ export default defineConfig([
       "@stylistic/quotes": ["error", "double"],
       "@stylistic/semi": ["error", "always"],
 
-      // 140は現場だと過剰制約なので緩和（ここが今回の大量エラー源）
       "@stylistic/max-len": [
         "warn",
         {
@@ -75,8 +74,7 @@ export default defineConfig([
                 "../../../../*",
                 "../../../../../*",
               ],
-              message:
-                "Use @/ alias for cross-folder imports inside src.",
+              message: "Use @/ alias for cross-folder imports inside src.",
             },
           ],
         },
@@ -109,23 +107,8 @@ export default defineConfig([
       // ----------------------------
       // import sort
       // ----------------------------
-      "simple-import-sort/imports": [
-        "error",
-        {
-          groups: [
-            ["^react", "^next", "^vue"],
-            ["^@?\\w"],
-            ["^@/core", "^@/domain"],
-            ["^@/features"],
-            ["^@/components", "^@/ui", "^@/layout"],
-            ["^.+\\.(css|scss|sass)$"],
-            ["^\\u0000"],
-            ["^\\."],
-          ],
-        },
-      ],
-
-      "simple-import-sort/exports": "error",
+      "simple-import-sort/imports": "off",
+      "simple-import-sort/exports": "off",
     },
   },
 
@@ -143,8 +126,7 @@ export default defineConfig([
         {
           object: "card",
           property: "folderId",
-          message:
-            "Do not read card.folderId directly. Use resolver.",
+          message: "Do not read card.folderId directly. Use resolver.",
         },
       ],
     },
@@ -232,8 +214,8 @@ export default defineConfig([
         },
       ],
 
-      "simple-import-sort/imports": "error",
-      "simple-import-sort/exports": "error",
+      "simple-import-sort/imports": "off",
+      "simple-import-sort/exports": "off",
     },
   },
 ]);

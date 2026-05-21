@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { TaskPriority, TaskStatus } from "./task.types";
-import { TASK_COLUMNS, PRIORITY_CONFIG, CATEGORY_CONFIG } from "./task.types";
+import type { TaskPriority, TaskStatus } from "../task/task.types";
+import { TASK_COLUMNS, PRIORITY_CONFIG, CATEGORY_CONFIG } from "../task/task.types";
 
 type NewTaskModalProps = {
   defaultStatus?: TaskStatus;

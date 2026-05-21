@@ -8,7 +8,6 @@ import type {
   GCalSyncState,
   GCalSyncTokenMap,
   GoogleCalendarEvent,
-  GoogleCalendarListItem,
 } from "../googlecalendar-integration/gcalSync.types";
 
 // ─────────────────────────────────────────────────────────────
