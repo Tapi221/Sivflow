@@ -99,14 +99,6 @@
   background-clip: padding-box;
 }
 
-.app-layout-route--schedule .workspace-shell,
-.app-layout-route--schedule .app-layout__content,
-.app-layout-route--schedule .workspace-shell__main,
-.app-layout-route--schedule .app-layout__main,
-.app-layout-route--schedule .workspace-breadcrumb-bar {
-  background: transparent;
-}
-
 .workspace-shell--with-tabs {
   grid-template-rows:
     auto
