@@ -204,8 +204,8 @@ export const CalendarSidebar = ({
   const hasGoogleAccounts = googleAccounts.length > 0;
 
   return (
-    <aside className="flex h-full w-[220px] shrink-0 flex-col gap-5 overflow-y-auto bg-[#f7f8fa] px-3 py-5 text-[#24272f]">
-      <section className="flex w-full flex-col gap-2">
+    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-[#f7f8fa] px-3 py-5 text-[#24272f]">
+      <section className="flex w-full shrink-0 flex-col gap-2">
         <div className="flex w-full items-center justify-between px-1">
           <span className="text-[12px] font-semibold tracking-wide text-[#3d4049]">
             {format(monthDate, "MMMM yyyy")}
@@ -281,10 +281,10 @@ export const CalendarSidebar = ({
         </div>
       </section>
 
-      <div className="h-px w-full bg-[#e4e6eb]" />
+      <div className="mt-5 h-px w-full shrink-0 bg-[#e4e6eb]" />
 
-      <nav className="flex w-full flex-col gap-0.5">
-        <div className="mb-1 flex h-6 items-center gap-1.5 px-2">
+      <nav className="mt-5 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto">
+        <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
           <CalendarIcon className="h-3.5 w-3.5 text-[#74798b]" />
           <span className="text-[11px] font-semibold uppercase text-[#9aa0aa]">
             My Projects
@@ -302,7 +302,7 @@ export const CalendarSidebar = ({
           />
         ))}
 
-        <div className={cn("mt-2", hasGoogleAccounts && "border-t pt-2")}>
+        <div className={cn("mt-2 shrink-0", hasGoogleAccounts && "border-t pt-2")}>
           <button
             type="button"
             className="flex h-7 w-full items-center gap-2 px-2 text-left hover:bg-[#eceef1]"

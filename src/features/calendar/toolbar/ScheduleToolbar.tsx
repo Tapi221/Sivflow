@@ -9,7 +9,7 @@ import {
   SortToolbarIcon,
   TaskIcon,
   TimelineToolbarIcon,
-} from "../../../icons/schedule.icons";
+} from "../../../components/icons/schedule.icons";
 import { useCalendarToolbar } from "./hooks/useScheduleToolbar";
 
 import { cn } from "@/lib/utils";
