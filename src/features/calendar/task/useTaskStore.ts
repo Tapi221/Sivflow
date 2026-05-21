@@ -2,12 +2,20 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Task, TaskCreateInput, TaskStatus } from "./task.types";
 
+type TaskInsertPosition = "before" | "after";
+
 type TaskStore = {
   tasks: Task[];
   addTask: (task: TaskCreateInput) => void;
   updateTask: (id: string, patch: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   moveTask: (id: string, status: TaskStatus) => void;
+  reorderTask: (
+    id: string,
+    status: TaskStatus,
+    overId?: string | null,
+    position?: TaskInsertPosition,
+  ) => void;
 };
 
 const createDemoTask = (
@@ -157,6 +165,16 @@ const normalizeTask = (task: Task): Task => ({
   googleEventId: task.googleEventId ?? null,
 });
 
+const findLastIndex = <T>(items: T[], predicate: (item: T) => boolean) => {
+  for (let index = items.length - 1; index >= 0; index -= 1) {
+    if (predicate(items[index])) {
+      return index;
+    }
+  }
+
+  return -1;
+};
+
 export const useTaskStore = create<TaskStore>()(
   persist(
     (set) => ({
@@ -196,6 +214,45 @@ export const useTaskStore = create<TaskStore>()(
             task.id === id ? normalizeTask({ ...task, status }) : normalizeTask(task),
           ),
         })),
+
+      reorderTask: (id, status, overId = null, position = "before") =>
+        set((state) => {
+          const activeTask = state.tasks.find((task) => task.id === id);
+
+          if (!activeTask) {
+            return { tasks: state.tasks };
+          }
+
+          const reorderedTask = normalizeTask({ ...activeTask, status });
+          const otherTasks = state.tasks
+            .filter((task) => task.id !== id)
+            .map(normalizeTask);
+
+          let insertIndex = otherTasks.length;
+
+          if (overId) {
+            const overIndex = otherTasks.findIndex((task) => task.id === overId);
+
+            if (overIndex >= 0) {
+              insertIndex = position === "after" ? overIndex + 1 : overIndex;
+            }
+          } else {
+            const lastSameStatusIndex = findLastIndex(
+              otherTasks,
+              (task) => task.status === status,
+            );
+            insertIndex =
+              lastSameStatusIndex >= 0 ? lastSameStatusIndex + 1 : otherTasks.length;
+          }
+
+          return {
+            tasks: [
+              ...otherTasks.slice(0, insertIndex),
+              reorderedTask,
+              ...otherTasks.slice(insertIndex),
+            ],
+          };
+        }),
     }),
     {
       name: "flashcard-master.tasks.v1",
