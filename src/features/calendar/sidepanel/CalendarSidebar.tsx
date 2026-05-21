@@ -320,9 +320,9 @@ export const CalendarSidebar = ({
         </div>
       </section>
 
-      <div className="mt-5 h-px w-full shrink-0 bg-[#e4e6eb]" />
+      <div className="mt-2 h-px w-full shrink-0 bg-[#e4e6eb]" />
 
-      <nav className="mt-5 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto pb-2">
+      <nav className="mt-2 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto pb-2">
         <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
           <CalendarIcon className="h-3.5 w-3.5 text-[#74798b]" />
           <span className="text-[11px] font-semibold uppercase text-[#9aa0aa]">
