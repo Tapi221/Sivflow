@@ -27,10 +27,6 @@ import type {
 
 import { auth } from "@/services/firebase";
 
-// ─────────────────────────────────────
-// Events reducer
-// ─────────────────────────────────────
-
 type EventsAction =
   | {
     type: "upsert";
@@ -74,10 +70,6 @@ const reduceEvents = (
   }
 };
 
-// ─────────────────────────────────────
-// Hook
-// ─────────────────────────────────────
-
 export const useGoogleCalendarIntegration = ({
   authInstance = auth,
 }: UseGoogleCalendarIntegrationOptions = {}) => {
@@ -87,6 +79,10 @@ export const useGoogleCalendarIntegration = ({
 
   const [accountEmail, setAccountEmail] = useState<string | null>(() =>
     readEmail(),
+  );
+
+  const [accountPhotoUrl, setAccountPhotoUrl] = useState<string | null>(() =>
+    authInstance.currentUser?.photoURL ?? null,
   );
 
   const [selectedCalendarIds, setSelectedCalendarIds] = useState<Set<string>>(
@@ -111,10 +107,6 @@ export const useGoogleCalendarIntegration = ({
 
   const syncEngineRef = useRef<GoogleCalendarSyncEngine | null>(null);
 
-  // ─────────────────────────────────────
-  // Stable refs
-  // ─────────────────────────────────────
-
   const calendarsRef = useRef(calendars);
 
   const selectedCalendarIdsRef = useRef(selectedCalendarIds);
@@ -126,10 +118,6 @@ export const useGoogleCalendarIntegration = ({
   useEffect(() => {
     selectedCalendarIdsRef.current = selectedCalendarIds;
   }, [selectedCalendarIds]);
-
-  // ─────────────────────────────────────
-  // Silent reconnect
-  // ─────────────────────────────────────
 
   const silentReconnect = useCallback(async (): Promise<boolean> => {
     try {
@@ -151,15 +139,13 @@ export const useGoogleCalendarIntegration = ({
 
       setAccessToken(result.accessToken);
 
+      setAccountPhotoUrl(authInstance.currentUser?.photoURL ?? null);
+
       return true;
     } catch {
       return false;
     }
-  }, []);
-
-  // ─────────────────────────────────────
-  // Connect
-  // ─────────────────────────────────────
+  }, [authInstance]);
 
   const connect = useCallback(async () => {
     setIsConnecting(true);
@@ -182,6 +168,8 @@ export const useGoogleCalendarIntegration = ({
       setAccessToken(result.accessToken);
 
       setAccountEmail(result.accountEmail);
+
+      setAccountPhotoUrl(authInstance.currentUser?.photoURL ?? null);
 
       const nextCalendars = await fetchCalendarList(result.accessToken);
 
@@ -206,10 +194,6 @@ export const useGoogleCalendarIntegration = ({
     }
   }, [authInstance]);
 
-  // ─────────────────────────────────────
-  // Disconnect
-  // ─────────────────────────────────────
-
   const disconnect = useCallback(() => {
     writeToken(null);
 
@@ -225,6 +209,8 @@ export const useGoogleCalendarIntegration = ({
 
     setAccountEmail(null);
 
+    setAccountPhotoUrl(null);
+
     setCalendars([]);
 
     dispatchEvents({
@@ -237,10 +223,6 @@ export const useGoogleCalendarIntegration = ({
 
     syncEngineRef.current?.clearAllSyncTokens();
   }, []);
-
-  // ─────────────────────────────────────
-  // Toggle calendar
-  // ─────────────────────────────────────
 
   const toggleCalendar = useCallback((calendarId: string) => {
     setSelectedCalendarIds((prev) => {
@@ -257,10 +239,6 @@ export const useGoogleCalendarIntegration = ({
       return next;
     });
   }, []);
-
-  // ─────────────────────────────────────
-  // Create sync engine (mount once)
-  // ─────────────────────────────────────
 
   useEffect(() => {
     if (syncEngineRef.current) {
@@ -307,10 +285,6 @@ export const useGoogleCalendarIntegration = ({
     });
   }, [silentReconnect]);
 
-  // ─────────────────────────────────────
-  // Start / stop sync engine
-  // ─────────────────────────────────────
-
   useEffect(() => {
     if (!accessToken) {
       syncEngineRef.current?.stop();
@@ -341,10 +315,6 @@ export const useGoogleCalendarIntegration = ({
     };
   }, [accessToken]);
 
-  // ─────────────────────────────────────
-  // Auto reconnect
-  // ─────────────────────────────────────
-
   useEffect(() => {
     if (!readWasConnected()) {
       return;
@@ -357,20 +327,13 @@ export const useGoogleCalendarIntegration = ({
     void silentReconnect();
   }, [accessToken, silentReconnect]);
 
-  // ─────────────────────────────────────
-  // Force sync
-  // ─────────────────────────────────────
-
   const forceSync = useCallback(async () => {
     await syncEngineRef.current?.forceSync();
   }, []);
 
-  // ─────────────────────────────────────
-  // Return
-  // ─────────────────────────────────────
-
   return {
     accountEmail,
+    accountPhotoUrl,
     calendars,
     connect,
     disconnect,
