@@ -16,15 +16,9 @@ import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
 import { useTaskCalendarEvents } from "./task/useTaskCalendarEvents";
 import { SidebarPanelIcon } from "@/components/icons/schedule.icons";
-import { useDateFnsLocale, useMonthLabelFormat } from "@/i18n/useT";
+import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 
 import { cn } from "@/lib/utils";
-
-const VIEW_OPTIONS = [
-  { value: "month", label: "Month" },
-  { value: "week", label: "Week" },
-  { value: "days", label: "Day" },
-] as const;
 
 const CALENDAR_PANEL_SHADOW_CLASS =
   "shadow-[0_-4px_14px_rgba(15,23,42,0.05),0_10px_30px_rgba(15,23,42,0.12)]";
@@ -32,9 +26,19 @@ const CALENDAR_PANEL_SHADOW_CLASS =
 export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const pane = useSchedulePane();
   const taskCalendarEvents = useTaskCalendarEvents();
+  const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
   const [isDayDetailPanelOpen, setIsDayDetailPanelOpen] = useState(true);
+
+  const viewOptions = useMemo(
+    () => [
+      { value: "month", label: t.viewMonth },
+      { value: "week", label: t.viewWeek },
+      { value: "days", label: t.viewDay },
+    ] as const,
+    [t.viewDay, t.viewMonth, t.viewWeek],
+  );
 
   const {
     activeMode,
@@ -129,7 +133,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           <ViewModeDropdown
             value={selectedViewMode}
             onChange={handleSelectViewMode}
-            options={VIEW_OPTIONS}
+            options={viewOptions}
           />
 
           <TodayBar
