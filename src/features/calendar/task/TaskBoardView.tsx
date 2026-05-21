@@ -16,17 +16,19 @@ export const TaskBoardView = ({
   onToggleTaskDone,
 }: TaskBoardViewProps) => {
   return (
-    <div className="flex min-h-0 flex-1 gap-3 overflow-auto p-4">
-      {TASK_COLUMNS.map((col) => (
-        <TaskColumn
-          key={col.id}
-          column={col}
-          tasks={tasksByStatus[col.id] ?? []}
-          onAddTask={onAddTask}
-          onDeleteTask={onDeleteTask}
-          onToggleTaskDone={onToggleTaskDone}
-        />
-      ))}
+    <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden p-4">
+      <div className="flex h-full min-h-0 gap-3">
+        {TASK_COLUMNS.map((col) => (
+          <TaskColumn
+            key={col.id}
+            column={col}
+            tasks={tasksByStatus[col.id] ?? []}
+            onAddTask={onAddTask}
+            onDeleteTask={onDeleteTask}
+            onToggleTaskDone={onToggleTaskDone}
+          />
+        ))}
+      </div>
     </div>
   );
 };
