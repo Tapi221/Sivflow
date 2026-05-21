@@ -181,7 +181,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                 ? isDayDetailPanelCollapsed
                   ? "pl-4 pr-0 pt-0 pb-0"
                   : "px-4 pt-0 pb-0"
-                : "px-4 pt-0 pb-0",
+                : "pl-4 pr-0 pt-0 pb-0",
           )}
         >
           {activeMode === "task" ? (
@@ -218,12 +218,12 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
               </div>
             </div>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-[24px] border border-b-0 border-[#e3e5ea] bg-[#f0f2f5] shadow-[0_10px_30px_rgba(15,23,42,0.12)]">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[24px] rounded-tr-none border border-r-0 border-b-0 border-[#e3e5ea] bg-[#f0f2f5] shadow-[0_10px_30px_rgba(15,23,42,0.12)]">
               {renderViewHeader(
                 "mb-3 flex shrink-0 items-center justify-between px-4 pt-4",
               )}
 
-              <div className="mx-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-2xl border border-b-0 border-[#e9eaed] bg-white">
+              <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-2xl rounded-tr-none border border-r-0 border-b-0 border-[#e9eaed] bg-white">
                 {activeMode === "timeline" ? (
                   <CalendarTimelineDayView
                     viewMode={selectedViewMode}
