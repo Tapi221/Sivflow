@@ -23,6 +23,7 @@ export type Translations = {
 
   // カレンダービュー
   taskViewComingSoon: string;
+  addTask: string;
   overflowEvents: (count: number) => string;
   allDay: string;
 
@@ -77,6 +78,7 @@ const ja: Translations = {
   connecting: "接続中…",
 
   taskViewComingSoon: "タスクビューは近日公開予定",
+  addTask: "タスクを追加",
   overflowEvents: (count) => `+${count}件`,
   allDay: "終日",
 
@@ -126,6 +128,7 @@ const en: Translations = {
   connecting: "Connecting…",
 
   taskViewComingSoon: "Task view coming soon",
+  addTask: "Add task",
   overflowEvents: (count) => `+${count} more`,
   allDay: "All day",
 
