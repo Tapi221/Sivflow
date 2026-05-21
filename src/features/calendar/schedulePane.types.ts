@@ -50,6 +50,8 @@ export type AppCalendarItem = {
 export type GoogleAccountDisplay = {
   accountId: string;
   email: string | null;
+  name: string | null;
+  photoUrl: string | null;
   calendars: GoogleCalendarListItem[];
   selectedCalendarIds: Set<string>;
   syncState: "idle" | "syncing" | "needsReconnect" | "error";
