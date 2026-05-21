@@ -76,15 +76,7 @@ type CalendarMonthDayCellProps = {
   isToday: boolean;
   selected: boolean;
   maxVisibleChips: number;
-  monthRowHeight: number;
   onSelectDate: (date: Date) => void;
-  handleResizeReset: () => void;
-  handleResizeKeyDown: (
-    event: React.KeyboardEvent<HTMLDivElement>,
-  ) => void;
-  handleResizePointerDown: (
-    event: React.PointerEvent<HTMLDivElement>,
-  ) => void;
 };
 
 const CalendarMonthDayCell = memo(({
@@ -94,11 +86,7 @@ const CalendarMonthDayCell = memo(({
   isToday,
   selected,
   maxVisibleChips,
-  monthRowHeight,
   onSelectDate,
-  handleResizeReset,
-  handleResizeKeyDown,
-  handleResizePointerDown,
 }: CalendarMonthDayCellProps) => {
   const monthAnnotation = getMonthAnnotation(day.date);
 
@@ -200,25 +188,6 @@ const CalendarMonthDayCell = memo(({
           </div>
         )}
       </button>
-
-      {/* リサイズ */}
-      <div
-        role="separator"
-        aria-label={T.MONTH_ROW_RESIZE_ARIA_LABEL}
-        aria-orientation="horizontal"
-        aria-valuemin={C.MIN_MONTH_ROW_HEIGHT}
-        aria-valuemax={C.MAX_MONTH_ROW_HEIGHT}
-        aria-valuenow={Number(monthRowHeight)}
-        tabIndex={0}
-        className="calendar-month-row-boundary-resize-handle"
-        title={T.MONTH_ROW_RESIZE_TITLE}
-        onClick={(e) =>
-          e.stopPropagation()
-        }
-        onDoubleClick={handleResizeReset}
-        onKeyDown={handleResizeKeyDown}
-        onPointerDown={handleResizePointerDown}
-      />
     </div>
   );
 });
@@ -286,6 +255,7 @@ const CalendarMonthWeekRow = memo(({
       data-calendar-week-key={week.key}
       className="
         calendar-month-week-row
+        relative
         grid
         grid-cols-7
         bg-white
@@ -305,14 +275,29 @@ const CalendarMonthWeekRow = memo(({
             isToday={isToday}
             selected={selected}
             maxVisibleChips={maxVisibleChips}
-            monthRowHeight={monthRowHeight}
             onSelectDate={onSelectDate}
-            handleResizeReset={handleResizeReset}
-            handleResizeKeyDown={handleResizeKeyDown}
-            handleResizePointerDown={handleResizePointerDown}
           />
         );
       })}
+
+      {/* リサイズ */}
+      <div
+        role="separator"
+        aria-label={T.MONTH_ROW_RESIZE_ARIA_LABEL}
+        aria-orientation="horizontal"
+        aria-valuemin={C.MIN_MONTH_ROW_HEIGHT}
+        aria-valuemax={C.MAX_MONTH_ROW_HEIGHT}
+        aria-valuenow={Number(monthRowHeight)}
+        tabIndex={0}
+        className="calendar-month-row-boundary-resize-handle"
+        title={T.MONTH_ROW_RESIZE_TITLE}
+        onClick={(e) =>
+          e.stopPropagation()
+        }
+        onDoubleClick={handleResizeReset}
+        onKeyDown={handleResizeKeyDown}
+        onPointerDown={handleResizePointerDown}
+      />
     </div>
   );
 }, (previous, next) => {
