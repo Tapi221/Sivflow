@@ -63,7 +63,7 @@ export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => 
                   </button>
                 </td>
 
-                <td className="py-2.5 pr-4 font-medium text-[#1f2329]">
+                <td className="py-2.5 pr-4 font-medium leading-[18px] text-[#24262d]">
                   {task.title}
                 </td>
 
