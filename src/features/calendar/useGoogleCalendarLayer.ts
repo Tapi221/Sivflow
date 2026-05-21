@@ -20,6 +20,14 @@ export const useGoogleCalendarLayer = () => {
   } = useMultiAccountGoogleCalendar();
 
   const connectionStatus: GCalConnectionStatus | "disconnected" = (() => {
+    const hasRecoverableAccount = accounts.some(
+      (account) =>
+        account.connectionStatus === "connected" &&
+        (account.accessToken || account.refreshToken),
+    );
+
+    if (hasRecoverableAccount) return "connected";
+
     if (accounts.some((account) => account.connectionStatus === "needsReconnect")) {
       return "needsReconnect";
     }
@@ -28,14 +36,12 @@ export const useGoogleCalendarLayer = () => {
       return "error";
     }
 
-    const hasRecoverableAccount = accounts.some(
-      (account) =>
-        account.connectionStatus === "connected" &&
-        (account.accessToken || account.refreshToken),
-    );
-
-    return hasRecoverableAccount ? "connected" : "disconnected";
+    return "disconnected";
   })();
+
+  const needsReconnect = accounts.some(
+    (account) => account.connectionStatus === "needsReconnect",
+  );
 
   return {
     googleAccounts: accounts,
@@ -52,7 +58,7 @@ export const useGoogleCalendarLayer = () => {
     connectionStatus,
 
     isConnected: connectionStatus === "connected",
-    needsReconnect: connectionStatus === "needsReconnect",
+    needsReconnect,
     isConnecting: isAnyConnecting,
 
     accountEmail: accounts[0]?.email ?? null,

@@ -579,10 +579,13 @@ export const useMultiAccountGoogleCalendar = () => {
     return set;
   }, [accounts]);
 
-  const addAccount = useCallback(async () => {
+  const connectAccount = useCallback(async (replaceAccountId?: string) => {
     const { auth } = await import("@/services/firebase");
 
     const tempId = `connecting-${Date.now()}`;
+    const replacingAccount = replaceAccountId
+      ? accountsRef.current.find((account) => account.id === replaceAccountId)
+      : null;
 
     dispatchAccounts({
       type: "ADD",
@@ -605,11 +608,18 @@ export const useMultiAccountGoogleCalendar = () => {
       const result = await requestCalendarAccessToken(auth);
       const list = await fetchCalendarList(result.accessToken);
 
-      const accountId = result.accountEmail ?? `account-${Date.now()}`;
+      const accountId =
+        result.accountEmail ??
+        replacingAccount?.email ??
+        replaceAccountId ??
+        `account-${Date.now()}`;
 
       dispatchAccounts({ type: "REMOVE", id: tempId });
 
-      const defaultIds = getDefaultCalendarIds(list);
+      const defaultIds = resolveSelectedCalendarIds(
+        replacingAccount ? Array.from(replacingAccount.selectedCalendarIds) : [],
+        list,
+      );
 
       const entry: GoogleAccountEntry = {
         id: accountId,
@@ -627,6 +637,13 @@ export const useMultiAccountGoogleCalendar = () => {
 
       dispatchAccounts({ type: "ADD", account: entry });
 
+      if (replaceAccountId && replaceAccountId !== accountId) {
+        managerRef.current?.stop(replaceAccountId);
+        dispatchAccounts({ type: "REMOVE", id: replaceAccountId });
+        dispatchEvents({ type: "CLEAR_ACCOUNT", accountId: replaceAccountId });
+        removeStoredAccount(replaceAccountId);
+      }
+
       upsertStoredAccount({
         id: accountId,
         email: result.accountEmail,
@@ -640,6 +657,10 @@ export const useMultiAccountGoogleCalendar = () => {
       dispatchAccounts({ type: "REMOVE", id: tempId });
     }
   }, []);
+
+  const addAccount = useCallback(async () => {
+    await connectAccount();
+  }, [connectAccount]);
 
   const removeAccount = useCallback((accountId: string) => {
     managerRef.current?.stop(accountId);
@@ -684,9 +705,12 @@ export const useMultiAccountGoogleCalendar = () => {
     await managerRef.current?.forceSync(accountId);
   }, []);
 
-  const reconnectAccount = useCallback(async () => {
-    await addAccount();
-  }, [addAccount]);
+  const reconnectAccount = useCallback(
+    async (accountId: string) => {
+      await connectAccount(accountId);
+    },
+    [connectAccount],
+  );
 
   const isAnyConnecting = accounts.some((account) => account.isConnecting);
 
