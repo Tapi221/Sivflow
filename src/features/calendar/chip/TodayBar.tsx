@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
+import { useT } from "@/i18n/useT";
 
 type Props = {
   onPrevious: () => void;
@@ -7,6 +8,8 @@ type Props = {
 };
 
 export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
+  const t = useT();
+
   return (
     <div
       className="
@@ -28,7 +31,8 @@ export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
           hover:bg-[#eef0f3]
           hover:text-[#20242c]
         "
-        aria-label="Previous"
+        aria-label={t.previousLabel}
+        title={t.previousLabel}
       >
         <ChevronLeft className="h-3 w-3" />
       </button>
@@ -46,7 +50,7 @@ export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
           hover:bg-[#eef0f3]
         "
       >
-        Today
+        {t.todayButton}
       </button>
 
       <button
@@ -59,7 +63,8 @@ export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
           hover:bg-[#eef0f3]
           hover:text-[#20242c]
         "
-        aria-label="Next"
+        aria-label={t.nextLabel}
+        title={t.nextLabel}
       >
         <ChevronRight className="h-3 w-3" />
       </button>
