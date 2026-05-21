@@ -35,7 +35,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
     selectedViewMode,
     currentDate,
     selectedDate,
-    monthLabel,
     titleDate,
     monthTitleDate,
     monthScrollTargetToken,
@@ -108,37 +107,34 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
     setIsDayDetailPanelOpen((isOpen) => !isOpen);
   }, []);
 
-  const renderViewHeader = (className: string) => (
-    <div className={className}>
-      <div className="flex min-w-0 items-center gap-3">
-        {selectedViewMode === "month" ? (
-          <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
-            {format(monthTitleDate, "MMMM yyyy")}
-          </h1>
-        ) : monthLabel ? (
-          <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
-            {monthLabel}
-          </h1>
-        ) : (
-          <div aria-hidden="true" className="h-6 w-24" />
-        )}
-      </div>
+  const renderViewHeader = (className: string) => {
+    const headerTitleDate =
+      selectedViewMode === "month" ? monthTitleDate : titleDate;
 
-      <div className="flex items-center gap-2">
-        <ViewModeDropdown
-          value={selectedViewMode}
-          onChange={handleSelectViewMode}
-          options={VIEW_OPTIONS}
-        />
+    return (
+      <div className={className}>
+        <div className="flex min-w-0 items-center gap-3">
+          <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
+            {format(headerTitleDate, "MMMM yyyy")}
+          </h1>
+        </div>
 
-        <TodayBar
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-          onToday={handleToday}
-        />
+        <div className="flex items-center gap-2">
+          <ViewModeDropdown
+            value={selectedViewMode}
+            onChange={handleSelectViewMode}
+            options={VIEW_OPTIONS}
+          />
+
+          <TodayBar
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            onToday={handleToday}
+          />
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-transparent">
