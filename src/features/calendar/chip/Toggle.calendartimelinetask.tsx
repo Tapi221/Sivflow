@@ -32,8 +32,19 @@ export const ToggleCalendarTimelineTask = ({
   activeMode,
   tabs,
 }: ToggleCalendarTimelineTaskProps) => {
+  const longestLabelLength = Math.max(
+    0,
+    ...tabs.map((tab) => tab.label.length),
+  );
+  const tabColumnMinWidth = `calc(${longestLabelLength}ch + 2.75rem)`;
+
   return (
-    <div className="relative flex h-8 items-center gap-1 rounded-xl bg-[#f6f8fb] p-0.5">
+    <div
+      className="relative inline-grid h-8 items-center gap-1 rounded-xl bg-[#f6f8fb] p-0.5"
+      style={{
+        gridTemplateColumns: `repeat(${tabs.length}, minmax(${tabColumnMinWidth}, 1fr))`,
+      }}
+    >
       {tabs.map((tab) => {
         const Icon = TAB_ICON_MAP[tab.value];
         const isActive = activeMode === tab.value;
@@ -44,7 +55,7 @@ export const ToggleCalendarTimelineTask = ({
             type="button"
             onClick={tab.onClick}
             className={cn(
-              "relative z-10 flex h-7 min-w-0 items-center gap-1.5 rounded-lg px-2.5",
+              "relative z-10 flex h-7 w-full min-w-0 items-center justify-center gap-1.5 rounded-lg px-2.5",
               "appearance-none select-none",
               "text-[12px] font-medium leading-none",
               "outline-none ring-0 transition-colors duration-200",
