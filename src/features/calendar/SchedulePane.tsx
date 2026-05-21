@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { format } from "date-fns";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -27,6 +27,7 @@ const VIEW_OPTIONS = [
 export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const pane = useSchedulePane();
   const taskCalendarEvents = useTaskCalendarEvents();
+  const [isDayDetailPanelOpen, setIsDayDetailPanelOpen] = useState(true);
 
   const {
     activeMode,
@@ -71,8 +72,38 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const sidebarMonthDate =
     selectedViewMode === "month" ? monthTitleDate : titleDate;
 
-  const showDayDetailPanel =
+  const canShowDayDetailPanel =
     activeMode === "calendar" && selectedViewMode === "month";
+
+  const showDayDetailPanel =
+    canShowDayDetailPanel && isDayDetailPanelOpen;
+
+  const handleSidebarSelectDateAndOpen = useCallback(
+    (date: Date) => {
+      handleSidebarSelectDate(date);
+
+      if (canShowDayDetailPanel) {
+        setIsDayDetailPanelOpen(true);
+      }
+    },
+    [canShowDayDetailPanel, handleSidebarSelectDate],
+  );
+
+  const handleMonthCellSelectDateAndOpen = useCallback(
+    (date: Date) => {
+      handleMonthCellSelectDate(date);
+      setIsDayDetailPanelOpen(true);
+    },
+    [handleMonthCellSelectDate],
+  );
+
+  const handleCloseDayDetailPanel = useCallback(() => {
+    setIsDayDetailPanelOpen(false);
+  }, []);
+
+  const handleOpenDayDetailPanel = useCallback(() => {
+    setIsDayDetailPanelOpen(true);
+  }, []);
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-white">
@@ -91,7 +122,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           selectedDate={selectedDate}
           googleAccounts={googleAccounts}
           isAnyCalendarConnecting={isAnyCalendarConnecting}
-          onSelectDate={handleSidebarSelectDate}
+          onSelectDate={handleSidebarSelectDateAndOpen}
           onPreviousMonth={handleSidebarPreviousMonth}
           onNextMonth={handleSidebarNextMonth}
           onAddCalendar={addGoogleCalendar}
@@ -169,7 +200,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
               selectedDate={selectedDate}
               scrollTargetToken={monthScrollTargetToken}
               visibleEvents={calendarEvents}
-              onSelectDate={handleMonthCellSelectDate}
+              onSelectDate={handleMonthCellSelectDateAndOpen}
               onVisibleMonthChange={handleVisibleMonthChange}
             />
           ) : (
@@ -187,13 +218,31 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           )}
         </div>
 
-        {showDayDetailPanel && (
+        {showDayDetailPanel ? (
           <DayDetailPanel
             selectedDate={selectedDate}
             events={calendarEvents}
-            onClose={() => setActiveMode("calendar")}
+            onClose={handleCloseDayDetailPanel}
           />
-        )}
+        ) : canShowDayDetailPanel ? (
+          <button
+            type="button"
+            aria-label="日付詳細を開く"
+            title="日付詳細を開く"
+            onClick={handleOpenDayDetailPanel}
+            className="flex w-8 shrink-0 items-center justify-center border-l border-[#ececec] bg-white text-[#b4b4bc] hover:bg-[#f7f7f7]"
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
+              <path
+                d="M9.5 4.5L6 8L9.5 11.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        ) : null}
       </div>
     </div>
   );
