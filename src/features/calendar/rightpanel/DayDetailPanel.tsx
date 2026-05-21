@@ -112,8 +112,6 @@ export const DayDetailPanel = ({
         shrink-0
         flex-col
         overflow-hidden
-        border-l
-        border-[#ececec]
         bg-transparent
       "
     >
