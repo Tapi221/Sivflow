@@ -1,10 +1,8 @@
-import type { UIEvent } from "react";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import type { CalendarViewMode } from "../../schedulePane.types";
 
 import { useScrollEdgeDetector } from "./useScrollEdgeDetector";
-import { useSyncHorizontalScroll } from "./useSyncHorizontalScroll";
 import { usePreserveScrollOnPrepend } from "./usePreserveScrollOnPrepend";
 import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync";
 
@@ -54,6 +52,7 @@ export const useCalendarScrollController = ({
 }: Props) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
+  const syncRafRef = useRef<number | null>(null);
 
   /**
    * ① エッジ検知（無限スクロールトリガー）
@@ -63,14 +62,6 @@ export const useCalendarScrollController = ({
       onExtendLeft,
       onExtendRight,
     });
-
-  /**
-   * ② ヘッダー同期
-   */
-  const { syncFromSource } = useSyncHorizontalScroll(
-    scrollContainerRef,
-    headerScrollRef,
-  );
 
   /**
    * ③ prepend後のスクロール位置維持
@@ -95,24 +86,43 @@ export const useCalendarScrollController = ({
     headerRef: headerScrollRef,
   });
 
-  /**
-   * スクロールイベント統合
-   * - edge detection + header sync
-   */
-  const handleTimelineScroll = useCallback(
-    (event: UIEvent<HTMLDivElement>) => {
-      const scroller = event.currentTarget;
+  const syncHeaderScroll = useCallback((scrollLeft: number) => {
+    if (syncRafRef.current !== null) return;
 
-      handleEdgeScroll(event);
-      syncFromSource();
+    syncRafRef.current = window.requestAnimationFrame(() => {
+      syncRafRef.current = null;
 
-      // 外部syncの保険（直接同期）
       if (headerScrollRef.current) {
-        headerScrollRef.current.scrollLeft = scroller.scrollLeft;
+        headerScrollRef.current.scrollLeft = scrollLeft;
       }
-    },
-    [handleEdgeScroll, syncFromSource],
-  );
+    });
+  }, []);
+
+  useEffect(() => {
+    const scroller = scrollContainerRef.current;
+    if (!scroller) return;
+
+    const handlePassiveScroll = () => {
+      handleEdgeScroll(scroller);
+      syncHeaderScroll(scroller.scrollLeft);
+    };
+
+    scroller.addEventListener("scroll", handlePassiveScroll, {
+      passive: true,
+    });
+
+    return () => {
+      scroller.removeEventListener("scroll", handlePassiveScroll);
+    };
+  }, [handleEdgeScroll, syncHeaderScroll]);
+
+  useEffect(() => {
+    return () => {
+      if (syncRafRef.current !== null) {
+        window.cancelAnimationFrame(syncRafRef.current);
+      }
+    };
+  }, []);
 
   /**
    * buffer変化などでのリセット統合
@@ -125,7 +135,6 @@ export const useCalendarScrollController = ({
   return {
     scrollContainerRef,
     headerScrollRef,
-    handleTimelineScroll,
     resetAll,
   };
 };
