@@ -18,6 +18,8 @@ import {
 } from "./gcal.oauth";
 import type {
   GCalSyncState,
+  GCalConnectionStatus,
+  GCalForceSyncOptions,
   GoogleCalendarEvent,
   GoogleCalendarListItem,
 } from "./gcalSync.types";
@@ -31,6 +33,7 @@ export type GoogleAccountEntry = {
   calendars: GoogleCalendarListItem[];
   selectedCalendarIds: Set<string>;
   syncState: GCalSyncState;
+  connectionStatus: GCalConnectionStatus;
   isConnecting: boolean;
   error: string | null;
 };
@@ -49,6 +52,7 @@ type AccountsAction =
   | { type: "SET_CALENDAR_IDS"; id: string; ids: string[] }
   | { type: "TOGGLE_CALENDAR"; id: string; calendarId: string }
   | { type: "SET_SYNC_STATE"; id: string; syncState: GCalSyncState }
+  | { type: "NEEDS_RECONNECT"; id: string; error?: string | null }
   | { type: "SET_ERROR"; id: string; error: string | null };
 
 type EventsState = Map<string, Map<string, GoogleCalendarEvent>>;
@@ -83,6 +87,9 @@ const reduceAccounts = (
         return {
           ...a,
           accessToken: action.accessToken,
+          connectionStatus: "connected",
+          syncState: a.syncState === "needsReconnect" ? "idle" : a.syncState,
+          error: null,
           ...(action.refreshToken !== undefined
             ? { refreshToken: action.refreshToken }
             : {}),
@@ -118,12 +125,51 @@ const reduceAccounts = (
 
     case "SET_SYNC_STATE":
       return state.map((a) =>
-        a.id === action.id ? { ...a, syncState: action.syncState } : a,
+        a.id === action.id
+          ? {
+            ...a,
+            syncState: action.syncState,
+            connectionStatus:
+              action.syncState === "needsReconnect"
+                ? "needsReconnect"
+                : action.syncState === "error"
+                  ? "error"
+                  : a.accessToken
+                    ? "connected"
+                    : a.connectionStatus,
+            error:
+              action.syncState === "idle" && a.connectionStatus === "error"
+                ? null
+                : a.error,
+          }
+          : a,
+      );
+
+    case "NEEDS_RECONNECT":
+      return state.map((a) =>
+        a.id === action.id
+          ? {
+            ...a,
+            accessToken: null,
+            connectionStatus: "needsReconnect",
+            syncState: "needsReconnect",
+            error: action.error ?? "Google Calendar の再連携が必要です",
+          }
+          : a,
       );
 
     case "SET_ERROR":
       return state.map((a) =>
-        a.id === action.id ? { ...a, error: action.error } : a,
+        a.id === action.id
+          ? {
+            ...a,
+            error: action.error,
+            connectionStatus:
+              action.error && a.syncState !== "needsReconnect"
+                ? "error"
+                : a.connectionStatus,
+          }
+          : a,
       );
 
     default:
@@ -203,9 +249,17 @@ const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => ({
   refreshToken: stored.refreshToken,
   calendars: stored.cachedCalendars ?? [],
   selectedCalendarIds: new Set(stored.selectedCalendarIds),
-  syncState: "idle",
+  syncState:
+    isStoredTokenValid(stored) || stored.refreshToken ? "idle" : "needsReconnect",
+  connectionStatus:
+    isStoredTokenValid(stored) || stored.refreshToken
+      ? "connected"
+      : "needsReconnect",
   isConnecting: false,
-  error: null,
+  error:
+    isStoredTokenValid(stored) || stored.refreshToken
+      ? null
+      : "Google Calendar の再連携が必要です",
 });
 
 export const useMultiAccountGoogleCalendar = () => {
@@ -272,7 +326,10 @@ export const useMultiAccountGoogleCalendar = () => {
               (x) => x.id === accountId,
             );
 
-            if (!account?.refreshToken) return false;
+            if (!account?.refreshToken) {
+              dispatchAccounts({ type: "NEEDS_RECONNECT", id: accountId });
+              return false;
+            }
 
             try {
               const result = await refreshCalendarAccessToken({
@@ -308,6 +365,7 @@ export const useMultiAccountGoogleCalendar = () => {
 
               return true;
             } catch {
+              dispatchAccounts({ type: "NEEDS_RECONNECT", id: accountId });
               return false;
             }
           },
@@ -364,41 +422,44 @@ export const useMultiAccountGoogleCalendar = () => {
         });
       };
 
+      const refreshStoredAccount = async () => {
+        if (!stored.refreshToken) {
+          dispatchAccounts({ type: "NEEDS_RECONNECT", id: accountId });
+          return;
+        }
+
+        try {
+          const result = await refreshCalendarAccessToken({
+            refreshToken: stored.refreshToken,
+          });
+
+          await applyAccessToken(
+            result.accessToken,
+            result.refreshToken ?? stored.refreshToken,
+            buildTokenExpiry(),
+          );
+        } catch (error) {
+          dispatchAccounts({
+            type: "NEEDS_RECONNECT",
+            id: accountId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      };
+
       if (isStoredTokenValid(stored) && stored.accessToken) {
         void applyAccessToken(
           stored.accessToken,
           stored.refreshToken,
           stored.accessTokenExpiry,
-        ).catch((error) => {
-          dispatchAccounts({
-            type: "SET_ERROR",
-            id: accountId,
-            error: error instanceof Error ? error.message : String(error),
-          });
+        ).catch(() => {
+          void refreshStoredAccount();
         });
 
         continue;
       }
 
-      if (!stored.refreshToken) continue;
-
-      void refreshCalendarAccessToken({
-        refreshToken: stored.refreshToken,
-      })
-        .then((result) =>
-          applyAccessToken(
-            result.accessToken,
-            result.refreshToken ?? stored.refreshToken,
-            buildTokenExpiry(),
-          ),
-        )
-        .catch((error) => {
-          dispatchAccounts({
-            type: "SET_ERROR",
-            id: accountId,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        });
+      void refreshStoredAccount();
     }
   }, []);
 
@@ -470,6 +531,7 @@ export const useMultiAccountGoogleCalendar = () => {
         calendars: [],
         selectedCalendarIds: new Set(),
         syncState: "idle",
+        connectionStatus: "connected",
         isConnecting: true,
         error: null,
       },
@@ -493,6 +555,7 @@ export const useMultiAccountGoogleCalendar = () => {
         calendars: list,
         selectedCalendarIds: new Set(defaultIds),
         syncState: "idle",
+        connectionStatus: "connected",
         isConnecting: false,
         error: null,
       };
@@ -544,8 +607,8 @@ export const useMultiAccountGoogleCalendar = () => {
     [],
   );
 
-  const forceSync = useCallback(async () => {
-    await managerRef.current?.forceSyncAll();
+  const forceSync = useCallback(async (options: GCalForceSyncOptions = {}) => {
+    await managerRef.current?.forceSyncAll(options);
   }, []);
 
   const isAnyConnecting = accounts.some((account) => account.isConnecting);

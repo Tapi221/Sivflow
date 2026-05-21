@@ -63,7 +63,16 @@ export interface UseGoogleCalendarIntegrationOptions {
 // ─────────────────────────────────────────────────────────────
 
 /** エンジンの現在の動作状態 */
-export type GCalSyncState = "idle" | "syncing" | "error";
+export type GCalSyncState = "idle" | "syncing" | "needsReconnect" | "error";
+
+export type GCalConnectionStatus = "connected" | "needsReconnect" | "error";
+
+export type GCalSyncRange = {
+  rangeStart: Date;
+  rangeEnd: Date;
+};
+
+export type GCalForceSyncOptions = Partial<GCalSyncRange>;
 
 // ─────────────────────────────────────────────────────────────
 // カレンダー ID → syncToken のマップ

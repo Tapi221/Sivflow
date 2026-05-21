@@ -1,6 +1,9 @@
 import { GoogleCalendarSyncEngine } from "../googlecalendar-sync/GoogleCalendarSyncEngine";
 
-import type { GoogleCalendarListItem } from "./gcalSync.types";
+import type {
+  GCalForceSyncOptions,
+  GoogleCalendarListItem,
+} from "./gcalSync.types";
 
 type EngineContext = {
   accessToken: string;
@@ -87,13 +90,18 @@ export class GoogleCalendarEngineManager {
     this.stop(accountId);
   }
 
-  async forceSync(accountId: string): Promise<void> {
-    await this.engines.get(accountId)?.forceSync();
+  async forceSync(
+    accountId: string,
+    options: GCalForceSyncOptions = {},
+  ): Promise<void> {
+    await this.engines.get(accountId)?.forceSync(options);
   }
 
-  async forceSyncAll(): Promise<void> {
+  async forceSyncAll(options: GCalForceSyncOptions = {}): Promise<void> {
     await Promise.all(
-      Array.from(this.engines.values()).map((engine) => engine.forceSync()),
+      Array.from(this.engines.values()).map((engine) =>
+        engine.forceSync(options),
+      ),
     );
   }
 

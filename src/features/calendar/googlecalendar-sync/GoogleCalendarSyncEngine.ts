@@ -2,7 +2,9 @@ import { addDays, subDays } from "date-fns";
 
 import type {
   GCalEventsListResponse,
+  GCalForceSyncOptions,
   GCalRawIncrementalEvent,
+  GCalSyncRange,
   GCalSyncEngineOptions,
   GCalSyncStartContext,
   GCalSyncState,
@@ -166,6 +168,9 @@ export class GoogleCalendarSyncEngine {
 
   private isRunning = false;
   private isSyncing = false;
+  private hasPendingSync = false;
+  private pendingSyncRange: GCalSyncRange | null = null;
+  private pendingSyncResolvers: Array<() => void> = [];
 
   private currentBackoffMs = INITIAL_BACKOFF_MS;
 
@@ -209,6 +214,7 @@ export class GoogleCalendarSyncEngine {
   stop(): void {
     this.isRunning = false;
     this.clearPollTimer();
+    this.resolvePendingSync();
     this.context = null;
 
     if (this.visibilityChangeListener) {
@@ -231,10 +237,14 @@ export class GoogleCalendarSyncEngine {
     };
   }
 
-  async forceSync(): Promise<void> {
+  async forceSync(options: GCalForceSyncOptions = {}): Promise<void> {
     this.clearPollTimer();
     this.isFullSyncAllowed = true;
-    await this.runSync();
+    await this.runSync(this.normalizeRange(options));
+  }
+
+  async ensureRange(rangeStart: Date, rangeEnd: Date): Promise<void> {
+    await this.forceSync({ rangeStart, rangeEnd });
   }
 
   clearAllSyncTokens(): void {
@@ -255,6 +265,17 @@ export class GoogleCalendarSyncEngine {
     if (this.pollTimerId) {
       clearTimeout(this.pollTimerId);
       this.pollTimerId = null;
+    }
+  }
+
+  private resolvePendingSync(): void {
+    const resolvers = this.pendingSyncResolvers.splice(0);
+
+    this.hasPendingSync = false;
+    this.pendingSyncRange = null;
+
+    for (const resolve of resolvers) {
+      resolve();
     }
   }
 
@@ -281,8 +302,37 @@ export class GoogleCalendarSyncEngine {
   // main sync loop
   // ─────────────────────────────────────────────
 
-  private async runSync(): Promise<void> {
-    if (this.isSyncing) return;
+  private normalizeRange(options: GCalForceSyncOptions): GCalSyncRange | null {
+    if (!options.rangeStart || !options.rangeEnd) return null;
+
+    return options.rangeStart <= options.rangeEnd
+      ? {
+        rangeStart: options.rangeStart,
+        rangeEnd: options.rangeEnd,
+      }
+      : {
+        rangeStart: options.rangeEnd,
+        rangeEnd: options.rangeStart,
+      };
+  }
+
+  private getDefaultFullSyncRange(): GCalSyncRange {
+    const now = new Date();
+
+    return {
+      rangeStart: subDays(now, this.options.fullSyncPastDays),
+      rangeEnd: addDays(now, this.options.fullSyncFutureDays),
+    };
+  }
+
+  private async runSync(range: GCalSyncRange | null = null): Promise<void> {
+    if (this.isSyncing) {
+      this.hasPendingSync = true;
+      this.pendingSyncRange = range ?? this.pendingSyncRange;
+      return new Promise<void>((resolve) => {
+        this.pendingSyncResolvers.push(resolve);
+      });
+    }
     if (!this.isRunning) return;
     if (!this.context) return;
 
@@ -309,7 +359,9 @@ export class GoogleCalendarSyncEngine {
 
         const existingSyncToken = this.syncTokenMap[calendarId];
 
-        if (existingSyncToken && !this.isFullSyncAllowed) {
+        if (range) {
+          await this.doFullSync(calendarId, accentColor, token, range, false);
+        } else if (existingSyncToken && !this.isFullSyncAllowed) {
           await this.doIncrementalSync(
             calendarId,
             existingSyncToken,
@@ -317,7 +369,13 @@ export class GoogleCalendarSyncEngine {
             token,
           );
         } else {
-          await this.doFullSync(calendarId, accentColor, token);
+          await this.doFullSync(
+            calendarId,
+            accentColor,
+            token,
+            this.getDefaultFullSyncRange(),
+            true,
+          );
           this.isFullSyncAllowed = false;
         }
       }
@@ -343,6 +401,10 @@ export class GoogleCalendarSyncEngine {
           shouldRetryAfterReconnect = true;
           return;
         }
+
+        this.setSyncState("needsReconnect");
+        this.options.onError(new Error("Google Calendar の再連携が必要です"));
+        return;
       }
 
       this.setSyncState("error");
@@ -362,7 +424,20 @@ export class GoogleCalendarSyncEngine {
       this.isSyncing = false;
 
       if (shouldRetryAfterReconnect) {
-        void this.runSync();
+        void this.runSync(range);
+      } else if (this.hasPendingSync) {
+        const pendingRange = this.pendingSyncRange;
+        const pendingResolvers = this.pendingSyncResolvers.splice(0);
+
+        this.hasPendingSync = false;
+        this.pendingSyncRange = null;
+        this.clearPollTimer();
+
+        void this.runSync(pendingRange).finally(() => {
+          for (const resolve of pendingResolvers) {
+            resolve();
+          }
+        });
       }
     }
   }
@@ -387,17 +462,14 @@ export class GoogleCalendarSyncEngine {
     calendarId: string,
     accentColor: string,
     accessToken: string,
+    range: GCalSyncRange,
+    shouldStoreSyncToken: boolean,
   ): Promise<void> {
-    const now = new Date();
-
-    const timeMin = subDays(now, this.options.fullSyncPastDays).toISOString();
-    const timeMax = addDays(now, this.options.fullSyncFutureDays).toISOString();
-
     const params = new URLSearchParams({
       singleEvents: "true",
       orderBy: "startTime",
-      timeMin,
-      timeMax,
+      timeMin: range.rangeStart.toISOString(),
+      timeMax: range.rangeEnd.toISOString(),
     });
 
     const encodedId = encodeURIComponent(calendarId);
@@ -418,7 +490,7 @@ export class GoogleCalendarSyncEngine {
       syncToken = response.nextSyncToken ?? syncToken;
     } while (pageToken);
 
-    if (syncToken) {
+    if (syncToken && shouldStoreSyncToken) {
       this.syncTokenMap[calendarId] = syncToken;
       writeSyncTokens(this.syncTokenMap);
     }
@@ -471,7 +543,13 @@ export class GoogleCalendarSyncEngine {
         delete this.syncTokenMap[calendarId];
         writeSyncTokens(this.syncTokenMap);
 
-        await this.doFullSync(calendarId, accentColor, accessToken);
+        await this.doFullSync(
+          calendarId,
+          accentColor,
+          accessToken,
+          this.getDefaultFullSyncRange(),
+          true,
+        );
         return;
       }
 

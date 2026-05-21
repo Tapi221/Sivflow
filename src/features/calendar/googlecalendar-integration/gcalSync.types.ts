@@ -26,7 +26,16 @@ export type UseGoogleCalendarIntegrationOptions = {
   authInstance?: Auth;
 };
 
-export type GCalSyncState = "idle" | "syncing" | "error";
+export type GCalSyncState = "idle" | "syncing" | "needsReconnect" | "error";
+
+export type GCalConnectionStatus = "connected" | "needsReconnect" | "error";
+
+export type GCalSyncRange = {
+  rangeStart: Date;
+  rangeEnd: Date;
+};
+
+export type GCalForceSyncOptions = Partial<GCalSyncRange>;
 
 export type GCalSyncTokenMap = Record<string, string>;
 
