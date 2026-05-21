@@ -1,5 +1,13 @@
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useT } from "@/i18n/useT";
+import { cn } from "@/lib/utils";
 
 import type { Task, TaskColumn as TaskColumnType } from "./task.types";
 import { TaskCard } from "./TaskCard";
@@ -12,6 +20,60 @@ type TaskColumnProps = {
   onAddTask: (status: string) => void;
   onDeleteTask: (id: string) => void;
   onToggleTaskDone: (id: string, done: boolean) => void;
+};
+
+type SortableTaskCardProps = {
+  task: Task;
+  accountName?: string | null;
+  accountPhotoUrl?: string | null;
+  onDeleteTask: (id: string) => void;
+  onToggleTaskDone: (id: string, done: boolean) => void;
+};
+
+const SortableTaskCard = ({
+  task,
+  accountName,
+  accountPhotoUrl,
+  onDeleteTask,
+  onToggleTaskDone,
+}: SortableTaskCardProps) => {
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({
+    id: task.id,
+    data: {
+      type: "task",
+      task,
+      status: task.status,
+    },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
+      className={cn("touch-none", isDragging && "z-10 opacity-70")}
+      {...attributes}
+      {...listeners}
+    >
+      <TaskCard
+        task={task}
+        accountName={accountName}
+        accountPhotoUrl={accountPhotoUrl}
+        isDragging={isDragging}
+        onDelete={onDeleteTask}
+        onToggleDone={onToggleTaskDone}
+      />
+    </div>
+  );
 };
 
 export const TaskColumn = ({
@@ -65,18 +127,24 @@ export const TaskColumn = ({
 
       {/* タスクリスト */}
       <ScrollArea className="-mr-3 min-h-0 flex-1 overscroll-contain">
-        <div className="flex flex-col gap-2 pr-3">
-          {tasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              accountName={accountName}
-              accountPhotoUrl={accountPhotoUrl}
-              onDelete={onDeleteTask}
-              onToggleDone={onToggleTaskDone}
-            />
-          ))}
-        </div>
+        <SortableContext
+          id={column.id}
+          items={tasks.map((task) => task.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="flex min-h-8 flex-col gap-2 pr-3">
+            {tasks.map((task) => (
+              <SortableTaskCard
+                key={task.id}
+                task={task}
+                accountName={accountName}
+                accountPhotoUrl={accountPhotoUrl}
+                onDeleteTask={onDeleteTask}
+                onToggleTaskDone={onToggleTaskDone}
+              />
+            ))}
+          </div>
+        </SortableContext>
       </ScrollArea>
     </div>
   );
