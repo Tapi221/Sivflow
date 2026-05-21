@@ -64,7 +64,7 @@
 
 .workspace-shell,
 .app-layout__content {
-  --workspace-content-gutter: 20px;
+  --workspace-content-gutter: 10px;
 
   position: relative;
 
@@ -118,7 +118,7 @@
 
   box-sizing: border-box;
 
-  padding: 0 var(--workspace-content-gutter) var(--workspace-content-gutter);
+  padding: 0 var(--workspace-content-gutter) 10px;
 
   background: var(--app-active-tab-bg);
 }
