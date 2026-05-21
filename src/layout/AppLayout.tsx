@@ -16,6 +16,7 @@ export const AppLayout = () => {
   const { pathname, isFoldersRoute, isScrollLocked } =
     useLayoutRouteStateDesktop();
 
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -35,6 +36,7 @@ export const AppLayout = () => {
     "app-layout",
     isFoldersRoute ? "app-layout--folders" : "",
     isScrollLocked ? "app-layout--scroll-locked" : "",
+    isSidebarExpanded ? "app-layout--sidebar-expanded" : "",
     isRightSidebarOpen ? "app-layout--right-sidebar-open" : "",
   ]
     .filter(Boolean)
@@ -43,7 +45,11 @@ export const AppLayout = () => {
   return (
     <>
       <div className={className}>
-        <Sidebar onOpenSettings={() => setIsSettingsOpen(true)} />
+        <Sidebar
+          isExpanded={isSidebarExpanded}
+          onToggleExpanded={() => setIsSidebarExpanded((current) => !current)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+        />
 
         <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
           <Suspense fallback={null}>

@@ -13,6 +13,26 @@ const IconShell = ({
   </svg>
 );
 
+export const SidebarToggleIcon = ({ className }: SidebarIconProps) => (
+  <IconShell className={className}>
+    <rect
+      x="4"
+      y="4"
+      width="16"
+      height="16"
+      rx="4"
+      stroke="currentColor"
+      strokeWidth="1.7"
+    />
+    <path
+      d="M9.5 4.5V19.5"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+    />
+  </IconShell>
+);
+
 export const HomeIcon = ({ className }: SidebarIconProps) => (
   <IconShell className={className}>
     <path
