@@ -127,7 +127,15 @@
 
   overflow: visible;
 
+  padding-left: 0;
+
+  transition: padding-left 180ms ease;
+
   -webkit-app-region: drag;
+}
+
+.app-layout--sidebar-closed .workspace-shell__tabs {
+  padding-left: calc(var(--app-sidebar-rail-width) + 8px);
 }
 
 .workspace-shell__main,
@@ -298,5 +306,9 @@
   .workspace-shell,
   .app-layout__content {
     grid-column: 1;
+  }
+
+  .app-layout--sidebar-closed .workspace-shell__tabs {
+    padding-left: 0;
   }
 }
