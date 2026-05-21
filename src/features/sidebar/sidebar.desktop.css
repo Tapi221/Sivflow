@@ -1,7 +1,6 @@
 /* ============================================================
    sidebar.desktop.css
-   レール幅（アイコンのみ）を常時デフォルトとする設計。
-   collapsed/expanded の切り替えは廃止。
+   レール幅をデフォルトにし、上部トグルで展開/折りたたみを切り替える。
    ============================================================ */
 
 .app-sidebar,
@@ -34,7 +33,6 @@
   flex-direction: column;
   justify-content: space-between;
 
-  /* レール幅を常時適用 */
   width: var(--app-sidebar-rail-width, 48px);
 
   min-width: 0;
@@ -45,8 +43,7 @@
   overflow-y: auto;
   overflow-x: hidden;
 
-  /* レール用の狭いpadding */
-  padding: 16px 4px 12px;
+  padding: 12px 4px;
 
   border-top-right-radius: 10px;
 
@@ -69,6 +66,15 @@
     "tnum" 1;
 
   user-select: none;
+
+  transition:
+    width 180ms ease,
+    padding 180ms ease;
+}
+
+.app-sidebar--expanded {
+  width: var(--app-sidebar-width, 240px);
+  padding: 12px 12px;
 }
 
 .app-right-sidebar {
@@ -101,8 +107,11 @@
   width: 100%;
   min-width: 0;
 
-  /* レール用の狭いgap */
   gap: 20px;
+}
+
+.app-sidebar--expanded .app-sidebar__top {
+  gap: 14px;
 }
 
 .app-sidebar__bottom {
@@ -115,17 +124,64 @@
 
   gap: 8px;
 
-  /* レール用padding */
   padding: 8px 4px 0;
 }
 
-/* ── ワークスペース（アバター領域だけ保持） ───────────────────── */
+.app-sidebar--expanded .app-sidebar__bottom {
+  padding: 8px 0 0;
+}
+
+.app-sidebar__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 32px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: transparent;
+  color: var(--app-sidebar-icon);
+
+  outline: none;
+
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.app-sidebar__toggle:hover {
+  background: var(--app-sidebar-hover-bg);
+  color: var(--app-sidebar-text-hover);
+}
+
+.app-sidebar__toggle:focus-visible {
+  box-shadow: 0 0 0 3px var(--app-sidebar-focus-ring);
+}
+
+.app-sidebar__toggle-icon {
+  width: 20px;
+  height: 20px;
+
+  flex-shrink: 0;
+}
+
+.app-sidebar--expanded .app-sidebar__toggle {
+  justify-content: flex-start;
+  padding: 0 8px;
+}
+
+/* ── ワークスペース ─────────────────────────────────────── */
 
 .app-sidebar__workspace {
   display: flex;
   align-items: center;
 
-  /* レール: 中央揃え、padding なし */
   width: auto;
   min-height: 32px;
 
@@ -136,6 +192,12 @@
   padding: 0;
 
   border-radius: 9px;
+}
+
+.app-sidebar--expanded .app-sidebar__workspace {
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 0 8px;
 }
 
 .app-sidebar__workspace-avatar {
@@ -158,13 +220,22 @@
   font-weight: 500;
   letter-spacing: -0.4px;
 
-  /* 表示だけ消す。領域は残すので他のアイコン位置は変わらない */
   visibility: hidden;
 }
 
-/* ワークスペース名・同期テキストはレールでは非表示 */
+.app-sidebar--expanded .app-sidebar__workspace-avatar {
+  visibility: visible;
+}
+
 .app-sidebar__workspace-copy {
   display: none;
+}
+
+.app-sidebar--expanded .app-sidebar__workspace-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .app-sidebar__workspace-name,
@@ -185,6 +256,12 @@
   font-weight: 542;
   line-height: 17px;
   letter-spacing: -0.0476px;
+}
+
+.app-sidebar__workspace-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-sidebar__workspace-chevron,
@@ -236,7 +313,6 @@
   align-items: center;
   justify-content: center;
 
-  /* レール: 全幅、中央寄せ */
   width: 100%;
   min-width: 0;
   height: 32px;
@@ -262,6 +338,11 @@
     background-color 160ms ease,
     color 160ms ease,
     box-shadow 160ms ease;
+}
+
+.app-sidebar--expanded .app-sidebar__nav-link {
+  justify-content: flex-start;
+  padding: 0 10px;
 }
 
 .app-sidebar__nav-link:hover {
@@ -328,12 +409,19 @@
   color: var(--app-sidebar-icon);
 }
 
-/* レール: ラベル・トレーリング・ネスト・アップグレードパネルは非表示 */
 .app-sidebar__nav-trailing,
 .app-sidebar__nav-label,
 .app-sidebar__nested-group,
 .app-sidebar__trial {
   display: none;
+}
+
+.app-sidebar--expanded .app-sidebar__nav-label {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-sidebar__nav-chevron {
