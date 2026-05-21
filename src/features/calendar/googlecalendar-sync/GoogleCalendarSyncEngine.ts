@@ -61,6 +61,12 @@ const writeSyncTokens = (map: GCalSyncTokenMap): void => {
 const buildSyncTokenKey = (accountId: string | undefined, calendarId: string) =>
   accountId ? `${accountId}:${calendarId}` : calendarId;
 
+const buildCompositeEventId = (
+  accountId: string | undefined,
+  calendarId: string,
+  eventId: string,
+) => (accountId ? `${accountId}:${calendarId}:${eventId}` : `${calendarId}:${eventId}`);
+
 const mergeWriteSyncTokens = (map: GCalSyncTokenMap): GCalSyncTokenMap => {
   const next = {
     ...readSyncTokens(),
@@ -139,6 +145,7 @@ const toCalendarEvent = (
   raw: GCalRawIncrementalEvent,
   calendarId: string,
   accentColor: string,
+  accountId?: string,
 ): GoogleCalendarEvent | null => {
   if (raw.status === "cancelled") return null;
   if (!raw.id) return null;
@@ -150,7 +157,7 @@ const toCalendarEvent = (
   if (!endsAt) return null;
 
   return {
-    id: `${calendarId}:${raw.id}`,
+    id: buildCompositeEventId(accountId, calendarId, raw.id),
     calendarId,
     accentColor,
     title: raw.summary || "(No title)",
@@ -531,7 +538,9 @@ export class GoogleCalendarSyncEngine {
     }
 
     const events = allEvents
-      .map((raw) => toCalendarEvent(raw, calendarId, accentColor))
+      .map((raw) =>
+        toCalendarEvent(raw, calendarId, accentColor, this.options.accountId),
+      )
       .filter((event): event is GoogleCalendarEvent => Boolean(event));
 
     if (!shouldStoreSyncToken) {
@@ -630,14 +639,23 @@ export class GoogleCalendarSyncEngine {
     for (const raw of rawEvents) {
       if (!raw.id) continue;
 
-      const compositeId = `${calendarId}:${raw.id}`;
+      const compositeId = buildCompositeEventId(
+        this.options.accountId,
+        calendarId,
+        raw.id,
+      );
 
       if (raw.status === "cancelled") {
         this.options.onEventDeleted(compositeId);
         continue;
       }
 
-      const event = toCalendarEvent(raw, calendarId, accentColor);
+      const event = toCalendarEvent(
+        raw,
+        calendarId,
+        accentColor,
+        this.options.accountId,
+      );
       if (!event) continue;
 
       this.options.onEventUpdated(event);

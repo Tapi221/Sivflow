@@ -67,6 +67,7 @@ export const useMonthRowResize = ({
   const pendingMonthRowHeightRef = useRef(C.DEFAULT_MONTH_ROW_HEIGHT);
   const resizeStateRef = useRef<MonthRowResizeState | null>(null);
   const rafRef = useRef<number | null>(null);
+  const activePointerCleanupRef = useRef<(() => void) | null>(null);
 
   const [monthRowHeight, setMonthRowHeight] = useState(
     C.readStoredMonthRowHeight,
@@ -157,48 +158,42 @@ export const useMonthRowResize = ({
     [preserveAnchor, onLiveResize],
   );
 
-  const scheduleVariable = useCallback(
-    (height: number) => {
-      pendingMonthRowHeightRef.current = C.clampMonthRowHeight(height);
-      if (rafRef.current !== null) return;
-      rafRef.current = window.requestAnimationFrame(() => {
-        rafRef.current = null;
-        applyVariable(
-          pendingMonthRowHeightRef.current,
-          resizeStateRef.current?.anchor ?? null,
-        );
-      });
-    },
-    [applyVariable],
-  );
-
-  const commitHeight = useCallback(
-    (height: number, anchor?: MonthRowResizeAnchor | null) => {
-      const committed = C.normalizeStoredMonthRowHeight(
-        C.clampMonthRowHeight(height),
+  const scheduleVariable = useCallback((height: number) => {
+    pendingMonthRowHeightRef.current = C.clampMonthRowHeight(height);
+    if (rafRef.current !== null) return;
+    rafRef.current = window.requestAnimationFrame(() => {
+      rafRef.current = null;
+      applyVariable(
+        pendingMonthRowHeightRef.current,
+        resizeStateRef.current?.anchor ?? null,
       );
-      const scrollAnchor =
-        anchor === undefined && scrollContainerRef.current
-          ? getAnchorFromScroller(scrollContainerRef.current)
-          : (anchor ?? null);
+    });
+  }, [applyVariable]);
 
-      if (rafRef.current !== null) {
-        window.cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
+  const commitHeight = useCallback((height: number, anchor?: MonthRowResizeAnchor | null) => {
+    const committed = C.normalizeStoredMonthRowHeight(
+      C.clampMonthRowHeight(height),
+    );
+    const scrollAnchor =
+      anchor === undefined && scrollContainerRef.current
+        ? getAnchorFromScroller(scrollContainerRef.current)
+        : (anchor ?? null);
 
-      monthRowHeightRef.current = committed;
-      pendingMonthRowHeightRef.current = committed;
-      applyVariable(committed, scrollAnchor);
-      C.writeStoredMonthRowHeight(committed);
-      setMonthRowHeight(committed);
+    if (rafRef.current !== null) {
+      window.cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
 
-      if (onAfterCommit) {
-        window.requestAnimationFrame(onAfterCommit);
-      }
-    },
-    [applyVariable, getAnchorFromScroller, onAfterCommit, scrollContainerRef],
-  );
+    monthRowHeightRef.current = committed;
+    pendingMonthRowHeightRef.current = committed;
+    applyVariable(committed, scrollAnchor);
+    C.writeStoredMonthRowHeight(committed);
+    setMonthRowHeight(committed);
+
+    if (onAfterCommit) {
+      window.requestAnimationFrame(onAfterCommit);
+    }
+  }, [applyVariable, getAnchorFromScroller, onAfterCommit, scrollContainerRef]);
 
   // ── 初期化・クリーンアップ
 
@@ -211,6 +206,7 @@ export const useMonthRowResize = ({
   useEffect(() => {
     return () => {
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
+      activePointerCleanupRef.current?.();
     };
   }, []);
 
@@ -221,6 +217,8 @@ export const useMonthRowResize = ({
       if (event.button !== 0) return;
       event.preventDefault();
       event.stopPropagation();
+
+      activePointerCleanupRef.current?.();
 
       const startHeight = monthRowHeightRef.current;
       isResizingRef.current = true;
@@ -247,6 +245,10 @@ export const useMonthRowResize = ({
           pendingMonthRowHeightRef.current,
           resizeStateRef.current?.anchor ?? null,
         );
+        cleanup();
+      };
+
+      const cleanup = () => {
         resizeStateRef.current = null;
         isResizingRef.current = false;
         document.body.style.cursor = prevCursor;
@@ -254,7 +256,13 @@ export const useMonthRowResize = ({
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
         window.removeEventListener("pointercancel", onUp);
+
+        if (activePointerCleanupRef.current === cleanup) {
+          activePointerCleanupRef.current = null;
+        }
       };
+
+      activePointerCleanupRef.current = cleanup;
 
       window.addEventListener("pointermove", onMove);
       window.addEventListener("pointerup", onUp);
