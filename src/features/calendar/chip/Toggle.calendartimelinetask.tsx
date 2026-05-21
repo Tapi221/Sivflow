@@ -1,4 +1,4 @@
-import { motion, useReducedMotion, type Transition } from "framer-motion";
+import { motion, type Transition } from "framer-motion";
 
 import type { CalendarWorkspaceToolbarProps } from "../schedulePane.types";
 import {
@@ -15,22 +15,11 @@ const TAB_ICON_MAP = {
   task: TaskIcon,
 } as const;
 
+const TAB_INDICATOR_ID = "calendar-tab-indicator";
 const TAB_MOTION_TRANSITION: Transition = {
   type: "tween",
-  duration: 0.24,
+  duration: 0.3,
   ease: [0.22, 1, 0.36, 1],
-};
-
-const ACTIVE_TAB_INITIAL = {
-  opacity: 0,
-  y: 7,
-  scaleX: 0.96,
-};
-
-const ACTIVE_TAB_ANIMATE = {
-  opacity: 1,
-  y: 0,
-  scaleX: 1,
 };
 
 type CalendarTimelineTaskTab = {
@@ -48,7 +37,6 @@ export const ToggleCalendarTimelineTask = ({
   activeMode,
   tabs,
 }: ToggleCalendarTimelineTaskProps) => {
-  const prefersReducedMotion = useReducedMotion();
   const longestLabelLength = Math.max(
     0,
     ...tabs.map((tab) => tab.label.length),
@@ -75,32 +63,24 @@ export const ToggleCalendarTimelineTask = ({
               "relative z-10 flex h-7 w-full min-w-0 items-center justify-center gap-1.5 rounded-lg px-2",
               "appearance-none select-none",
               "text-[12px] font-medium leading-none",
-              "outline-none ring-0 transition-[color,transform] duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+              "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
               "focus:outline-none focus:ring-0 focus-visible:outline-none",
               isActive
                 ? "text-[#193a5c]"
                 : "text-[#8f929c] hover:text-[#193a5c]",
             )}
           >
-            {isActive ? (
+            {isActive && (
               <motion.span
-                aria-hidden="true"
-                className={cn(
-                  "pointer-events-none absolute inset-0 -z-10 rounded-lg border border-[#e4eaf1] bg-white",
-                  "transition-opacity duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
-                )}
-                initial={prefersReducedMotion ? false : ACTIVE_TAB_INITIAL}
-                animate={ACTIVE_TAB_ANIMATE}
-                transition={
-                  prefersReducedMotion ? { duration: 0 } : TAB_MOTION_TRANSITION
-                }
-                style={{ transformOrigin: "bottom center" }}
+                layoutId={TAB_INDICATOR_ID}
+                className="absolute inset-0 -z-10 rounded-lg border border-[#e4eaf1] bg-white"
+                transition={TAB_MOTION_TRANSITION}
               />
-            ) : null}
+            )}
 
             <Icon
               className={cn(
-                "block h-4 w-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+                "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
                 isActive ? "text-[#193a5c]" : "text-[#9aa3b1]",
               )}
             />
