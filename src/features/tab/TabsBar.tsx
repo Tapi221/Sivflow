@@ -1,3 +1,4 @@
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
@@ -22,12 +23,36 @@ type IconProps = {
   className?: string;
 };
 
+type TabIndicator = {
+  left: number;
+  width: number;
+  visible: boolean;
+};
+
 const TABS_NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
 };
 
 const TABS_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "drag",
+};
+
+const ACTIVE_TAB_SURFACE_STYLE: CSSProperties = {
+  background: "var(--app-active-tab-bg, #ffffff)",
+};
+
+const ACTIVE_TAB_LEFT_CURVE_STYLE: CSSProperties = {
+  ...ACTIVE_TAB_SURFACE_STYLE,
+  WebkitMask:
+    "radial-gradient(circle at 0 0, transparent 0 16px, #000 16.5px)",
+  mask: "radial-gradient(circle at 0 0, transparent 0 16px, #000 16.5px)",
+};
+
+const ACTIVE_TAB_RIGHT_CURVE_STYLE: CSSProperties = {
+  ...ACTIVE_TAB_SURFACE_STYLE,
+  WebkitMask:
+    "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
+  mask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
 };
 
 const resolveTabsSurfaceStyle = (isTitlebar: boolean): CSSProperties => ({
@@ -49,31 +74,30 @@ const resolveInactiveTabIconClassName = (isTitlebar: boolean): string =>
 const resolveCloseButtonClassName = (isTitlebar: boolean): string =>
   isTitlebar
     ? [
-      "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
-      "text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
-    ].join(" ")
+        "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
+        "text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
+      ].join(" ")
     : [
-      "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
-      "text-[var(--app-sidebar-icon)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
-    ].join(" ");
+        "explorer-workspace-tab-close mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded outline-none transition-colors",
+        "text-[var(--app-sidebar-icon)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
+      ].join(" ");
 
 const resolveAddButtonClassName = (isTitlebar: boolean): string =>
   isTitlebar
     ? [
-      "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border-0 outline-none transition-colors",
-      "bg-transparent text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
-    ].join(" ")
+        "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border-0 outline-none transition-colors",
+        "bg-transparent text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
+      ].join(" ")
     : [
-      "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border-0 outline-none transition-colors",
-      "text-[var(--app-sidebar-text)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
-    ].join(" ");
+        "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border-0 outline-none transition-colors",
+        "text-[var(--app-sidebar-text)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
+      ].join(" ");
 
 const resolveNextTabOnClose = (
   tabs: WorkspaceTab[],
   closingTabId: WorkspaceTab["id"],
 ): WorkspaceTab | null => {
   const closingIndex = tabs.findIndex((tab) => tab.id === closingTabId);
-
   const nextTabs = tabs.filter((tab) => tab.id !== closingTabId);
 
   if (nextTabs.length === 0) {
@@ -99,7 +123,10 @@ const IconShell = ({
 
 const HomeIcon = ({ className }: IconProps) => (
   <IconShell className={className}>
-    <path d="M4 10.5 12 4l8 6.5V20h-5v-5H9v5H4v-9.5Z" fill="currentColor" />
+    <path
+      d="M4 10.5 12 4l8 6.5V20h-5v-5H9v5H4v-9.5Z"
+      fill="currentColor"
+    />
   </IconShell>
 );
 
@@ -193,28 +220,102 @@ export const WorkspaceTabsBar = ({
   noDragStyle,
 }: WorkspaceTabsBarProps) => {
   const navigate = useNavigate();
-
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
-
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
-
   const selectTab = useWorkspaceTabsStore((state) => state.selectTab);
-
   const closeTab = useWorkspaceTabsStore((state) => state.closeTab);
-
   const createExplorerTab = useWorkspaceTabsStore(
     (state) => state.createExplorerTab,
   );
 
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [indicator, setIndicator] = useState<TabIndicator>({
+    left: 0,
+    width: 0,
+    visible: false,
+  });
+
   const isTitlebar = variant === "titlebar";
-
   const interactiveStyle = noDragStyle ?? TABS_NO_DRAG_STYLE;
-
   const tabsSurfaceStyle = resolveTabsSurfaceStyle(isTitlebar);
-
   const closeButtonClassName = resolveCloseButtonClassName(isTitlebar);
-
   const addButtonClassName = resolveAddButtonClassName(isTitlebar);
+
+  const updateIndicator = useCallback(() => {
+    const listEl = listRef.current;
+    const activeTabEl = activeTabId ? tabRefs.current[activeTabId] : null;
+
+    if (!listEl || !activeTabEl) {
+      setIndicator((current) =>
+        current.visible ? { ...current, visible: false } : current,
+      );
+
+      return;
+    }
+
+    const listRect = listEl.getBoundingClientRect();
+    const tabRect = activeTabEl.getBoundingClientRect();
+    const nextIndicator = {
+      left: tabRect.left - listRect.left,
+      width: tabRect.width,
+      visible: true,
+    };
+
+    setIndicator((current) => {
+      const sameLeft = Math.abs(current.left - nextIndicator.left) < 0.5;
+      const sameWidth = Math.abs(current.width - nextIndicator.width) < 0.5;
+
+      if (sameLeft && sameWidth && current.visible === nextIndicator.visible) {
+        return current;
+      }
+
+      return nextIndicator;
+    });
+  }, [activeTabId]);
+
+  useLayoutEffect(() => {
+    updateIndicator();
+
+    const frameId = window.requestAnimationFrame(updateIndicator);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [tabs, updateIndicator]);
+
+  useLayoutEffect(() => {
+    updateIndicator();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateIndicator);
+
+      return () => {
+        window.removeEventListener("resize", updateIndicator);
+      };
+    }
+
+    const resizeObserver = new ResizeObserver(updateIndicator);
+
+    if (listRef.current) {
+      resizeObserver.observe(listRef.current);
+    }
+
+    tabs.forEach((tab) => {
+      const tabEl = tabRefs.current[tab.id];
+
+      if (tabEl) {
+        resizeObserver.observe(tabEl);
+      }
+    });
+
+    window.addEventListener("resize", updateIndicator);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateIndicator);
+    };
+  }, [tabs, updateIndicator]);
 
   return (
     <div
@@ -230,15 +331,41 @@ export const WorkspaceTabsBar = ({
         className,
       )}
     >
-      <div className="explorer-tab-list explorer-workspace-tabs-list flex min-w-0 items-end gap-0 overflow-visible">
+      <div
+        ref={listRef}
+        className="explorer-tab-list explorer-workspace-tabs-list relative flex min-w-0 items-end gap-0 overflow-visible"
+      >
+        <div
+          aria-hidden="true"
+          style={{
+            ...ACTIVE_TAB_SURFACE_STYLE,
+            width: indicator.width,
+            transform: `translate3d(${indicator.left}px, 0, 0)`,
+          }}
+          className={cn(
+            "pointer-events-none absolute bottom-0 left-0 z-0 h-8 rounded-t-[10px]",
+            "transition-[opacity,transform,width] duration-[320ms] ease-[cubic-bezier(.22,1,.36,1)]",
+            "motion-reduce:transition-none",
+            indicator.visible ? "opacity-100" : "opacity-0",
+          )}
+        >
+          <span
+            aria-hidden="true"
+            className="absolute bottom-0 left-[-16px] h-4 w-4"
+            style={ACTIVE_TAB_LEFT_CURVE_STYLE}
+          />
+          <span
+            aria-hidden="true"
+            className="absolute bottom-0 right-[-16px] h-4 w-4"
+            style={ACTIVE_TAB_RIGHT_CURVE_STYLE}
+          />
+        </div>
+
         {tabs.map((tab) => {
           const selected = tab.id === activeTabId;
-
           const Icon = resolveTabIcon(tab);
-
           const inactiveTextClassName =
             resolveInactiveTabTextClassName(isTitlebar);
-
           const inactiveIconClassName =
             resolveInactiveTabIconClassName(isTitlebar);
 
@@ -249,22 +376,31 @@ export const WorkspaceTabsBar = ({
               data-workspace-tab-slot-active={selected ? "true" : undefined}
             >
               <div
+                ref={(node) => {
+                  tabRefs.current[tab.id] = node;
+
+                  if (!node) {
+                    delete tabRefs.current[tab.id];
+                  }
+                }}
                 style={{
                   ...tabsSurfaceStyle,
                   ...resolveTabStyle(tab),
                   ...interactiveStyle,
+                  background: "transparent",
                 }}
                 data-workspace-tab-kind={tab.kind}
                 data-workspace-tab-active={selected ? "true" : undefined}
                 className={cn(
-                  "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-visible border-0 text-[13px] transition-[background-color,color,box-shadow] duration-150",
+                  "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-visible border-0 text-[13px]",
                   "mb-0 h-[36px] rounded-tl-[8px] rounded-tr-[8px]",
+                  "transition-[color,transform] duration-300 ease-[cubic-bezier(.22,1,.36,1)]",
                   selected
-                    ? "explorer-workspace-tab--active text-[var(--app-sidebar-text-strong)] shadow-none"
+                    ? "z-[3] text-[var(--app-sidebar-text-strong)] shadow-none"
                     : cn(
-                      "explorer-workspace-tab--inactive",
-                      inactiveTextClassName,
-                    ),
+                        "explorer-workspace-tab--inactive",
+                        inactiveTextClassName,
+                      ),
                   resolveTabWidthClassName(tab),
                 )}
               >
@@ -276,13 +412,12 @@ export const WorkspaceTabsBar = ({
                   title={tab.title}
                   onClick={() => {
                     selectTab(tab.id);
-
                     navigate(resolveWorkspaceTabRoute(tab));
                   }}
                 >
                   <Icon
                     className={cn(
-                      "h-4 w-4 shrink-0",
+                      "h-4 w-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)]",
                       selected
                         ? "text-[var(--ds-semantic-color-interactive-selected-accent)]"
                         : inactiveIconClassName,
@@ -298,13 +433,14 @@ export const WorkspaceTabsBar = ({
                     style={interactiveStyle}
                     className={cn(
                       closeButtonClassName,
-                      selected ? "opacity-100" : "opacity-80 hover:opacity-100",
+                      selected
+                        ? "opacity-100 !text-[#6f7681] hover:!bg-black/5 hover:!text-[#2f3640]"
+                        : "opacity-80 hover:opacity-100",
                     )}
                     aria-label={`${tab.title} を閉じる`}
                     title="閉じる"
                     onClick={(event) => {
                       event.preventDefault();
-
                       event.stopPropagation();
 
                       const nextTab = selected
@@ -335,7 +471,6 @@ export const WorkspaceTabsBar = ({
         title="新しいエクスプローラータブ"
         onClick={() => {
           createExplorerTab();
-
           navigate("/folders?view=section-list");
         }}
       >

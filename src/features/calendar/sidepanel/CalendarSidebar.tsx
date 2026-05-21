@@ -223,7 +223,7 @@ export const CalendarSidebar = ({
               </button>
             </HoverTooltip>
 
-            <HoverTooltip label="次の月" side="top" >
+            <HoverTooltip label="次の月" side="top">
               <button
                 type="button"
                 className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
