@@ -65,7 +65,8 @@ const buildCompositeEventId = (
   accountId: string | undefined,
   calendarId: string,
   eventId: string,
-) => (accountId ? `${accountId}:${calendarId}:${eventId}` : `${calendarId}:${eventId}`);
+) =>
+  accountId ? `${accountId}:${calendarId}:${eventId}` : `${calendarId}:${eventId}`;
 
 const mergeWriteSyncTokens = (map: GCalSyncTokenMap): GCalSyncTokenMap => {
   const next = {
@@ -337,13 +338,13 @@ export class GoogleCalendarSyncEngine {
 
     return options.rangeStart <= options.rangeEnd
       ? {
-        rangeStart: options.rangeStart,
-        rangeEnd: options.rangeEnd,
-      }
+          rangeStart: options.rangeStart,
+          rangeEnd: options.rangeEnd,
+        }
       : {
-        rangeStart: options.rangeEnd,
-        rangeEnd: options.rangeStart,
-      };
+          rangeStart: options.rangeEnd,
+          rangeEnd: options.rangeStart,
+        };
   }
 
   private getDefaultFullSyncRange(): GCalSyncRange {
@@ -543,8 +544,8 @@ export class GoogleCalendarSyncEngine {
       )
       .filter((event): event is GoogleCalendarEvent => Boolean(event));
 
-    if (!shouldStoreSyncToken) {
-      this.options.onEventsRangeReplaced?.({
+    if (this.options.onEventsRangeReplaced) {
+      this.options.onEventsRangeReplaced({
         calendarId,
         rangeStart: range.rangeStart,
         rangeEnd: range.rangeEnd,
