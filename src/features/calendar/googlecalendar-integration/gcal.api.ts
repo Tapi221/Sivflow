@@ -15,7 +15,11 @@ const getJson = async <T>(accessToken: string, url: string): Promise<T> => {
   });
 
   if (!res.ok) {
-    throw new Error(`Google Calendar API failed (${res.status})`);
+    const error = new Error(`Google Calendar API failed (${res.status})`);
+
+    (error as Error & { status: number }).status = res.status;
+
+    throw error;
   }
 
   return (await res.json()) as T;
