@@ -1,5 +1,7 @@
-import { motion } from "framer-motion";
+import { motion, type Transition } from "framer-motion";
+
 import { cn } from "@/lib/utils";
+
 export type BoardListViewMode = "board" | "list";
 
 type BoardListToggleButtonProps = {
@@ -8,6 +10,11 @@ type BoardListToggleButtonProps = {
 };
 
 const TOGGLE_INDICATOR_ID = "board-list-toggle-indicator";
+const TOGGLE_MOTION_TRANSITION: Transition = {
+  type: "tween",
+  duration: 0.3,
+  ease: [0.22, 1, 0.36, 1],
+};
 
 const toggleItems = [
   {
@@ -56,8 +63,19 @@ export const BoardListToggleButton = ({
   viewMode,
   onChange,
 }: BoardListToggleButtonProps) => {
+  const longestLabelLength = Math.max(
+    0,
+    ...toggleItems.map((item) => item.label.length),
+  );
+  const itemColumnWidth = `calc(${longestLabelLength}ch + 1.5rem)`;
+
   return (
-    <div className="relative flex h-8 items-center gap-1 rounded-xl bg-[#f6f8fb] p-0.5">
+    <div
+      className="relative inline-grid h-8 w-max items-center gap-1 rounded-xl bg-[#f6f8fb] p-0.5"
+      style={{
+        gridTemplateColumns: `repeat(${toggleItems.length}, ${itemColumnWidth})`,
+      }}
+    >
       {toggleItems.map((item) => {
         const isActive = viewMode === item.value;
 
@@ -67,10 +85,10 @@ export const BoardListToggleButton = ({
             type="button"
             onClick={() => onChange(item.value)}
             className={cn(
-              "relative z-10 flex h-7 min-w-0 items-center gap-1.5 rounded-lg px-2.5",
+              "relative z-10 flex h-7 w-full min-w-0 items-center justify-center gap-1.5 rounded-lg px-2",
               "appearance-none select-none",
               "text-[12px] font-medium leading-none",
-              "outline-none ring-0 transition-colors duration-200",
+              "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
               "focus:outline-none focus:ring-0 focus-visible:outline-none",
               isActive
                 ? "text-[#193a5c]"
@@ -81,17 +99,13 @@ export const BoardListToggleButton = ({
               <motion.span
                 layoutId={TOGGLE_INDICATOR_ID}
                 className="absolute inset-0 -z-10 rounded-lg border border-[#e4eaf1] bg-white"
-                transition={{
-                  type: "spring",
-                  stiffness: 420,
-                  damping: 34,
-                }}
+                transition={TOGGLE_MOTION_TRANSITION}
               />
             )}
 
             <span
               className={cn(
-                "shrink-0 transition-colors duration-200",
+                "shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
                 isActive ? "text-[#193a5c]" : "text-[#9aa3b1]",
               )}
             >
