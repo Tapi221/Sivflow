@@ -135,7 +135,7 @@
 }
 
 .app-layout--sidebar-closed .workspace-shell__tabs {
-  padding-left: calc(var(--app-sidebar-rail-width) + 8px);
+  padding-left: 40px;
 }
 
 .workspace-shell__main,
