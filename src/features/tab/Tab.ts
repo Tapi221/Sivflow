@@ -145,7 +145,7 @@ export const createDefaultExplorerRouteState = (): ExplorerRouteState => ({
 });
 
 /**
- * section → routeタブ解決
+ * section → routeタブ解決if (pathname === "/schedule") {
  */
 export const resolveRouteTabBySection = (
   sectionKey: Exclude<WorkspaceSidebarSection, "library">,

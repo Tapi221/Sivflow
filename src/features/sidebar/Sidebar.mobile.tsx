@@ -24,7 +24,7 @@ type SidebarNavItem = {
   label: string;
   to?: string;
   icon: ReactNode;
-  sectionKey?: "home" | "review" | "library" | "calendar";
+  sectionKey?: "home" | "review" | "library" | "schedule";
   onClick?: () => void;
 };
 
@@ -57,7 +57,7 @@ const mainNavItems: SidebarNavItem[] = [
     label: "Schedule",
     to: "/schedule",
     icon: <CalendarIcon className="sidebar-nav-icon" />,
-    sectionKey: "calendar",
+    sectionKey: "schedule",
   },
   {
     id: "explore",
