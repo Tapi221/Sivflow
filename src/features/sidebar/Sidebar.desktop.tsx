@@ -7,8 +7,6 @@ import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
 import {
   CalendarIcon,
-  ChevronDownIcon,
-  CloudIcon,
   ExploreIcon,
   GearIcon,
   HomeIcon,
@@ -34,8 +32,8 @@ type SidebarNavItem = {
 };
 
 type SidebarProps = {
-  isExpanded?: boolean;
-  onToggleExpanded?: () => void;
+  isClosed?: boolean;
+  onToggleClosed?: () => void;
   onOpenSettings?: () => void;
 };
 
@@ -177,8 +175,8 @@ const SidebarNavLink = ({
 // ── Sidebar本体 ──────────────────────────────────────────────
 
 const Sidebar = ({
-  isExpanded = false,
-  onToggleExpanded,
+  isClosed = false,
+  onToggleClosed,
   onOpenSettings,
 }: SidebarProps) => {
   const closeCalendar = useSchedulePaneStore((s) => s.close);
@@ -207,39 +205,25 @@ const Sidebar = ({
 
   return (
     <aside
-      className={cn("app-sidebar", isExpanded && "app-sidebar--expanded")}
+      className={cn("app-sidebar", isClosed && "app-sidebar--closed")}
       aria-label="Sidebar"
     >
       <div className="app-sidebar__top">
         <HoverTooltip
-          label={isExpanded ? "サイドバーを閉じる" : "サイドバーを開く"}
+          label={isClosed ? "サイドバーを開く" : "サイドバーを閉じる"}
           side="right"
           className="w-full"
         >
           <button
             type="button"
             className="app-sidebar__toggle"
-            onClick={onToggleExpanded}
-            aria-label={isExpanded ? "サイドバーを閉じる" : "サイドバーを開く"}
-            aria-pressed={isExpanded}
+            onClick={onToggleClosed}
+            aria-label={isClosed ? "サイドバーを開く" : "サイドバーを閉じる"}
+            aria-pressed={!isClosed}
           >
             <SidebarToggleIcon className="app-sidebar__toggle-icon" />
           </button>
         </HoverTooltip>
-
-        <div className="app-sidebar__workspace">
-          <div className="app-sidebar__workspace-avatar">C</div>
-          <div className="app-sidebar__workspace-copy">
-            <div className="app-sidebar__workspace-name">
-              <span>Atlas, Inc</span>
-              <ChevronDownIcon className="app-sidebar__workspace-chevron" />
-            </div>
-            <div className="app-sidebar__sync">
-              <CloudIcon className="app-sidebar__sync-icon" />
-              <span>同期中</span>
-            </div>
-          </div>
-        </div>
 
         <nav className="app-sidebar__nav" aria-label="メインナビゲーション">
           {mainNavItemsWithActions.map((item) => (
