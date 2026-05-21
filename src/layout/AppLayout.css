@@ -11,7 +11,12 @@
   );
 
   --app-active-tab-bg: #ffffff;
-  --app-sidebar-bg: #08111f;
+  --app-sidebar-bg: linear-gradient(
+    180deg,
+    #08111f 0%,
+    #0b1a3a 46%,
+    #050812 100%
+  );
 
   display: grid;
 

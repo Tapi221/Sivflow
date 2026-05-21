@@ -97,7 +97,6 @@ type GoogleAccountSectionProps = {
   onToggleCalendar: (calendarId: string) => void;
   onReconnect: () => void;
   onRetry: () => void;
-  onRemove: () => void;
 };
 
 const GoogleAccountSection = ({
@@ -105,7 +104,6 @@ const GoogleAccountSection = ({
   onToggleCalendar,
   onReconnect,
   onRetry,
-  onRemove,
 }: GoogleAccountSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -220,16 +218,6 @@ const GoogleAccountSection = ({
           </button>
         </div>
       )}
-
-      <div className="mt-1 px-2">
-        <button
-          type="button"
-          className="text-[11px] font-medium text-[#9aa0aa] hover:text-[#b42318]"
-          onClick={onRemove}
-        >
-          接続解除
-        </button>
-      </div>
     </div>
   );
 };
@@ -245,7 +233,6 @@ export const CalendarSidebar = ({
   onAddCalendar,
   onReconnectAccount,
   onRetryAccount,
-  onRemoveAccount,
   onToggleCalendar,
 }: CalendarSidebarProps) => {
   const miniCalendarDays = useMemo(
@@ -352,7 +339,6 @@ export const CalendarSidebar = ({
             }
             onReconnect={() => onReconnectAccount(account.accountId)}
             onRetry={() => onRetryAccount(account.accountId)}
-            onRemove={() => onRemoveAccount(account.accountId)}
           />
         ))}
 
@@ -366,11 +352,7 @@ export const CalendarSidebar = ({
             <PlusIcon className="h-4 w-4 text-[#74798b]" />
 
             <span className="text-[12px] text-[#74798b]">
-              {isAnyCalendarConnecting
-                ? "接続中…"
-                : hasGoogleAccounts
-                  ? "別のアカウントを追加"
-                  : "Google Calendar を追加"}
+              {hasGoogleAccounts ? "別のアカウントを追加" : "Google Calendar を追加"}
             </span>
           </button>
         </div>
