@@ -17,6 +17,7 @@ export type Translations = {
   myProjects: string;
   google: string;
   addGoogleCalendar: string;
+  addAnotherGoogleAccount: string;
   reconnectGoogleCalendar: string;
   connecting: string;
 
@@ -71,6 +72,7 @@ const ja: Translations = {
   myProjects: "myPlojects",
   google: "Google",
   addGoogleCalendar: "Google カレンダーを追加",
+  addAnotherGoogleAccount: "別のアカウントを追加",
   reconnectGoogleCalendar: "Google カレンダーを再接続",
   connecting: "接続中…",
 
@@ -119,6 +121,7 @@ const en: Translations = {
   myProjects: "myPlojects",
   google: "Google",
   addGoogleCalendar: "Add Google Calendar",
+  addAnotherGoogleAccount: "Add another account",
   reconnectGoogleCalendar: "Reconnect Google Calendar",
   connecting: "Connecting…",
 
