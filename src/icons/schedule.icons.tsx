@@ -72,6 +72,7 @@ export const FieldsToolbarIcon = ({
   </svg>
 );
 
+//Animated navigation bar
 export const CalendarIcon = ({
   className,
   label: _label,

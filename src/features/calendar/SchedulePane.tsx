@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { format } from "date-fns";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -14,45 +14,9 @@ import { useSchedulePane } from "./useSchedulePane";
 import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
+import { useTaskCalendarEvents } from "./task/useTaskCalendarEvents";
 
 import { cn } from "@/lib/utils";
-
-// ─────────────────────────────────────────────
-// 現在時刻フック（DayDetailPanel へ渡す）
-// ─────────────────────────────────────────────
-
-const useCurrentTimeMinutes = (): number => {
-  const getNow = () => {
-    const d = new Date();
-    return d.getHours() * 60 + d.getMinutes();
-  };
-
-  const [minutes, setMinutes] = useState(getNow);
-
-  useEffect(() => {
-    const now = new Date();
-    const msUntilNextMinute =
-      (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
-
-    const timeoutId = window.setTimeout(() => {
-      setMinutes(getNow());
-
-      const intervalId = window.setInterval(() => {
-        setMinutes(getNow());
-      }, 60_000);
-
-      return () => window.clearInterval(intervalId);
-    }, msUntilNextMinute);
-
-    return () => window.clearTimeout(timeoutId);
-  }, []);
-
-  return minutes;
-};
-
-// ─────────────────────────────────────────────
-// ビュー選択肢
-// ─────────────────────────────────────────────
 
 const VIEW_OPTIONS = [
   { value: "month", label: "Month" },
@@ -60,13 +24,9 @@ const VIEW_OPTIONS = [
   { value: "days", label: "Day" },
 ] as const;
 
-// ─────────────────────────────────────────────
-// SchedulePane
-// ─────────────────────────────────────────────
-
 export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const pane = useSchedulePane();
-  const currentMinutes = useCurrentTimeMinutes();
+  const taskCalendarEvents = useTaskCalendarEvents();
 
   const {
     activeMode,
@@ -102,6 +62,10 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
     toggleGoogleCalendar,
   } = pane;
 
+  const calendarEvents = useMemo(() => {
+    return [...googleCalendarEvents, ...taskCalendarEvents];
+  }, [googleCalendarEvents, taskCalendarEvents]);
+
   const sidebarMonthDate =
     selectedViewMode === "month" ? monthTitleDate : titleDate;
 
@@ -120,7 +84,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
       />
 
       <div className="flex min-h-0 flex-1 bg-white">
-        {/* ── 左サイドバー ── */}
         <CalendarSidebar
           monthDate={sidebarMonthDate}
           selectedDate={selectedDate}
@@ -134,7 +97,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           onToggleCalendar={toggleGoogleCalendar}
         />
 
-        {/* ── メインコンテンツ ── */}
         <div
           ref={contentViewportRef}
           className={cn(
@@ -146,7 +108,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                 : "px-5 pt-4",
           )}
         >
-          {/* ヘッダー */}
           {activeMode !== "task" && (
             <div className="mb-4 flex shrink-0 items-center justify-between">
               <div className="flex min-w-0 items-center gap-3">
@@ -179,7 +140,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             </div>
           )}
 
-          {/* ── メイン分岐 ── */}
           {activeMode === "task" ? (
             <TaskView />
           ) : activeMode === "timeline" ? (
@@ -200,7 +160,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
               currentDate={currentDate}
               selectedDate={selectedDate}
               scrollTargetToken={monthScrollTargetToken}
-              visibleEvents={googleCalendarEvents}
+              visibleEvents={calendarEvents}
               onSelectDate={handleMonthCellSelectDate}
               onVisibleMonthChange={handleVisibleMonthChange}
             />
@@ -209,7 +169,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
               headerScrollRef={headerScrollRef}
               scrollContainerRef={scrollContainerRef}
               visibleDays={visibleDays}
-              visibleEvents={googleCalendarEvents}
+              visibleEvents={calendarEvents}
               calendarDayColumnWidth={calendarDayColumnWidth}
               timelineGridStyle={timelineGridStyle}
               onScroll={handleTimelineScroll}
@@ -219,12 +179,10 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           )}
         </div>
 
-        {/* ── 右サイドパネル（月表示時のみ） ── */}
         {showDayDetailPanel && (
           <DayDetailPanel
             selectedDate={selectedDate}
-            events={googleCalendarEvents}
-            currentMinutes={currentMinutes}
+            events={calendarEvents}
             onClose={() => setActiveMode("calendar")}
           />
         )}
