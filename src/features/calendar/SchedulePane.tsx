@@ -178,7 +178,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             activeMode === "task"
               ? "overflow-hidden"
               : isMonthCalendarView
-                ? "px-4 pt-2 pb-0"
+                ? "px-4 pt-0 pb-0"
                 : showDayDetailPanel
                   ? "px-3 pt-4"
                   : "px-5 pt-4",
