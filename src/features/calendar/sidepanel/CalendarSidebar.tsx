@@ -253,23 +253,23 @@ export const CalendarSidebar = ({
           </span>
 
           <div className="flex items-center gap-0.5">
-            <HoverTooltip label="前の月" side="top">
+            <HoverTooltip label={t.previousMonthLabel} side="top">
               <button
                 type="button"
                 className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
                 onClick={onPreviousMonth}
-                aria-label="前の月"
+                aria-label={t.previousMonthLabel}
               >
                 <IconChevronLeft className="h-3.5 w-3.5" />
               </button>
             </HoverTooltip>
 
-            <HoverTooltip label="次の月" side="top">
+            <HoverTooltip label={t.nextMonthLabel} side="top">
               <button
                 type="button"
                 className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
                 onClick={onNextMonth}
-                aria-label="次の月"
+                aria-label={t.nextMonthLabel}
               >
                 <IconChevronRight className="h-3.5 w-3.5" />
               </button>
@@ -328,7 +328,7 @@ export const CalendarSidebar = ({
         <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
           <CalendarIcon className="h-3.5 w-3.5 text-[#74798b]" />
           <span className="text-[11px] font-semibold uppercase text-[#9aa0aa]">
-            My Projects
+            {t.myProjects}
           </span>
         </div>
 
@@ -360,7 +360,7 @@ export const CalendarSidebar = ({
           <PlusIcon className="h-4 w-4 text-[#74798b]" />
 
           <span className="text-[12px] text-[#74798b]">
-            {hasGoogleAccounts ? "別のアカウントを追加" : "Google Calendar を追加"}
+            {hasGoogleAccounts ? t.addAnotherGoogleAccount : t.addGoogleCalendar}
           </span>
         </button>
       </div>
