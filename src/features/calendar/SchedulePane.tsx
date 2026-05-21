@@ -137,6 +137,18 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           onNext={handleNext}
           onToday={handleToday}
         />
+
+        {canShowDayDetailPanel && !showDayDetailPanel ? (
+          <button
+            type="button"
+            aria-label="日付詳細を開く"
+            title="日付詳細を開く"
+            onClick={handleOpenDayDetailPanel}
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-[#e2e4e9] bg-white text-[#8f929c] transition-colors hover:bg-[#eef0f3] hover:text-[#20242c]"
+          >
+            <SidebarPanelIcon className="h-4 w-4 -scale-x-100" />
+          </button>
+        ) : null}
       </div>
     </div>
   );
@@ -246,16 +258,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             events={calendarEvents}
             onClose={handleCloseDayDetailPanel}
           />
-        ) : canShowDayDetailPanel ? (
-          <button
-            type="button"
-            aria-label="日付詳細を開く"
-            title="日付詳細を開く"
-            onClick={handleOpenDayDetailPanel}
-            className="flex w-8 shrink-0 items-center justify-center border-l border-[#ececec] bg-transparent text-[#b4b4bc] hover:bg-[#f7f7f7]"
-          >
-            <SidebarPanelIcon className="h-4 w-4 -translate-x-1 -scale-x-100" />
-          </button>
         ) : null}
       </div>
     </div>
