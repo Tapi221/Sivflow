@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { format } from "date-fns";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
@@ -8,18 +9,19 @@ type CalendarEventChipMonthProps = {
   event: GoogleCalendarEvent;
 };
 
-export const CalendarEventChipMonth = ({
+export const CalendarEventChipMonth = memo(({
   event,
 }: CalendarEventChipMonthProps) => {
-  const tokens = generateColorTokens(
-    event.accentColor,
+  const tokens = useMemo(
+    () => generateColorTokens(event.accentColor),
+    [event.accentColor],
   );
 
-  const isAllDay = event.isAllDay;
-
-  const timeLabel = isAllDay
-    ? "終日"
-    : format(event.startsAt, "H:mm");
+  const timeLabel = useMemo(() => {
+    return event.isAllDay
+      ? "終日"
+      : format(event.startsAt, "H:mm");
+  }, [event.isAllDay, event.startsAt]);
 
   return (
     <div
@@ -34,7 +36,7 @@ export const CalendarEventChipMonth = ({
       )}
       style={{
         background: tokens.bg,
-        borderLeft: isAllDay
+        borderLeft: event.isAllDay
           ? undefined
           : `3px solid ${tokens.border}`,
         color: tokens.text,
@@ -56,4 +58,6 @@ export const CalendarEventChipMonth = ({
       </span>
     </div>
   );
-};
+});
+
+CalendarEventChipMonth.displayName = "CalendarEventChipMonth";
