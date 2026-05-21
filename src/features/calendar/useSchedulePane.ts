@@ -1,4 +1,4 @@
-import type { RefObject, UIEvent } from "react";
+import type { RefObject } from "react";
 
 import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
 import type {
@@ -54,7 +54,6 @@ export type UseSchedulePaneReturn = {
   retryGoogleAccountSync: (accountId: string) => Promise<void>;
   toggleGoogleCalendar: (accountId: string, calendarId: string) => void;
 
-  handleTimelineScroll: (event: UIEvent<HTMLDivElement>) => void;
   handleSelectViewMode: (viewMode: CalendarViewMode) => void;
   handleToday: () => void;
   handlePrevious: () => void;
@@ -176,7 +175,6 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     retryGoogleAccountSync: google.retrySync,
     toggleGoogleCalendar: google.toggleCalendar,
 
-    handleTimelineScroll: scroll.handleTimelineScroll,
     handleSelectViewMode: navigation.handleSelectViewMode,
     handleToday: navigation.handleToday,
     handlePrevious: navigation.handlePrevious,
