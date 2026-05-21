@@ -1,6 +1,7 @@
 .app-layout {
-  --app-sidebar-width: 240px;
   --app-sidebar-rail-width: 48px;
+  --app-sidebar-closed-width: 0px;
+  --app-right-sidebar-width: 240px;
   --app-layout-padding-x: 0px;
 
   --app-titlebar-bg: linear-gradient(
@@ -55,9 +56,9 @@
   --app-layout-padding-x: 0px;
 }
 
-.app-layout--sidebar-expanded {
+.app-layout--sidebar-closed {
   grid-template-columns:
-    var(--app-sidebar-width)
+    var(--app-sidebar-closed-width)
     minmax(0, 1fr);
 }
 
@@ -65,14 +66,14 @@
   grid-template-columns:
     var(--app-sidebar-rail-width)
     minmax(0, 1fr)
-    var(--app-sidebar-width);
+    var(--app-right-sidebar-width);
 }
 
-.app-layout--sidebar-expanded.app-layout--right-sidebar-open {
+.app-layout--sidebar-closed.app-layout--right-sidebar-open {
   grid-template-columns:
-    var(--app-sidebar-width)
+    var(--app-sidebar-closed-width)
     minmax(0, 1fr)
-    var(--app-sidebar-width);
+    var(--app-right-sidebar-width);
 }
 
 .workspace-shell,
@@ -283,9 +284,9 @@
 
 @media (max-width: 767px) {
   .app-layout,
-  .app-layout--sidebar-expanded,
+  .app-layout--sidebar-closed,
   .app-layout--right-sidebar-open,
-  .app-layout--sidebar-expanded.app-layout--right-sidebar-open {
+  .app-layout--sidebar-closed.app-layout--right-sidebar-open {
     grid-template-columns: minmax(0, 1fr);
   }
 }
