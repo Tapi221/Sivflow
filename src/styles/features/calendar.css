@@ -122,9 +122,20 @@
     overflow-anchor: none;
   }
 
+  .calendar-month-week-row {
+    contain: layout paint style;
+    content-visibility: auto;
+    contain-intrinsic-size: 784px var(--calendar-month-row-height);
+  }
+
   .calendar-month-day-cell {
     overflow: visible;
     min-height: var(--calendar-month-row-height);
+    contain: paint style;
+  }
+
+  .calendar-month-day-cell-hoverable:hover {
+    background: #eceef1;
   }
 
   .calendar-month-row-boundary-resize-handle {
