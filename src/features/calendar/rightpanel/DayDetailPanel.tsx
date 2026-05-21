@@ -6,6 +6,7 @@ import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.al
 import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
+import { SidebarPanelIcon } from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_SCROLL_HOUR = 0;
@@ -26,11 +27,15 @@ const AllDayChip = ({ event }: { event: GoogleCalendarEvent }) => {
 export type DayDetailPanelProps = {
   selectedDate: Date;
   events: GoogleCalendarEvent[];
+  isOpen: boolean;
+  onToggle: () => void;
 };
 
 export const DayDetailPanel = ({
   selectedDate,
   events,
+  isOpen,
+  onToggle,
 }: DayDetailPanelProps) => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const prevDateKeyRef = useRef("");
@@ -62,30 +67,46 @@ export const DayDetailPanel = ({
           <span className="text-[12px] font-semibold tracking-wide text-[#3d4049]">
             {format(selectedDate, "yyyy年M月d日(E)", { locale: ja })}
           </span>
+
+          <button
+            type="button"
+            aria-label={isOpen ? "日付詳細を閉じる" : "日付詳細を開く"}
+            title={isOpen ? "日付詳細を閉じる" : "日付詳細を開く"}
+            onClick={onToggle}
+            className="ml-2 flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
+          >
+            <SidebarPanelIcon
+              className={cn("h-3.5 w-3.5", isOpen && "-scale-x-100")}
+            />
+          </button>
         </div>
       </div>
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
-        <div className="flex border-b border-[#f5f5f5]">
-          <div className="flex w-[30px] shrink-0 justify-end pr-1 pt-[8px]">
-            <span className="text-[10px] font-medium text-[#b6b6be]">終日</span>
-          </div>
+      {isOpen ? (
+        <>
+          <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+            <div className="flex border-b border-[#f5f5f5]">
+              <div className="flex w-[30px] shrink-0 justify-end pr-1 pt-[8px]">
+                <span className="text-[10px] font-medium text-[#b6b6be]">終日</span>
+              </div>
 
-          <div className="flex-1 px-2 py-1.5">
-            <div className="flex flex-col gap-1">
-              {allDayEvents.map((ev) => (
-                <AllDayChip key={ev.id} event={ev} />
-              ))}
+              <div className="flex-1 px-2 py-1.5">
+                <div className="flex flex-col gap-1">
+                  {allDayEvents.map((ev) => (
+                    <AllDayChip key={ev.id} event={ev} />
+                  ))}
+                </div>
+              </div>
             </div>
+
+            <GridCalendarDayDetailDesktop events={timedEvents} />
           </div>
-        </div>
 
-        <GridCalendarDayDetailDesktop events={timedEvents} />
-      </div>
-
-      <div className="border-t border-[#f5f5f5] px-4 py-4">
-        <DayDetailCreateButton />
-      </div>
+          <div className="border-t border-[#f5f5f5] px-4 py-4">
+            <DayDetailCreateButton />
+          </div>
+        </>
+      ) : null}
     </aside>
   );
 };
