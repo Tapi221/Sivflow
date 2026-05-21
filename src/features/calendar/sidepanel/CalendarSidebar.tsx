@@ -126,7 +126,7 @@ const GoogleAccountSection = ({
     <div className="mt-2">
       <button
         type="button"
-        className="group flex h-7 w-full items-center gap-1.5 px-2 text-left"
+        className="group flex h-7 w-full items-center gap-1.5 px-1 text-left"
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
       >
