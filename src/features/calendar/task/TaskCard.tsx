@@ -48,6 +48,7 @@ export const TaskCard = ({
 
   const isDone = task.status === "done";
   const checkboxColor = isDone ? "#193a5c" : "#9ca3af";
+  const checkboxLabel = isDone ? "Mark task as not done" : "Complete task";
   const chipName = accountName ?? task.assignee ?? "Google account";
 
   let dateContent = <span />;
@@ -66,14 +67,19 @@ export const TaskCard = ({
         <button
           type="button"
           className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center"
-          aria-label="Complete task"
+          aria-label={checkboxLabel}
+          title={checkboxLabel}
           onClick={() => {
             if (onToggleDone) {
               onToggleDone(task.id, !isDone);
             }
           }}
         >
-          <AnimatedSquareCheckbox checked={isDone} color={checkboxColor} />
+          <AnimatedSquareCheckbox
+            checked={isDone}
+            color={checkboxColor}
+            className="h-3.5 w-3.5"
+          />
         </button>
 
         <div className="min-w-0 flex-1">
