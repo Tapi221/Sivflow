@@ -14,6 +14,7 @@ import {
   HomeIcon,
   InboxIcon,
   LibraryIcon,
+  SidebarToggleIcon,
 } from "../../components/icons/sidebar.icons";
 
 import "./sidebar.desktop.css";
@@ -33,6 +34,8 @@ type SidebarNavItem = {
 };
 
 type SidebarProps = {
+  isExpanded?: boolean;
+  onToggleExpanded?: () => void;
   onOpenSettings?: () => void;
 };
 
@@ -173,7 +176,11 @@ const SidebarNavLink = ({
 
 // ── Sidebar本体 ──────────────────────────────────────────────
 
-const Sidebar = ({ onOpenSettings }: SidebarProps) => {
+const Sidebar = ({
+  isExpanded = false,
+  onToggleExpanded,
+  onOpenSettings,
+}: SidebarProps) => {
   const closeCalendar = useSchedulePaneStore((s) => s.close);
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
 
@@ -199,8 +206,27 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   ];
 
   return (
-    <aside className="app-sidebar" aria-label="Sidebar">
+    <aside
+      className={cn("app-sidebar", isExpanded && "app-sidebar--expanded")}
+      aria-label="Sidebar"
+    >
       <div className="app-sidebar__top">
+        <HoverTooltip
+          label={isExpanded ? "サイドバーを閉じる" : "サイドバーを開く"}
+          side="right"
+          className="w-full"
+        >
+          <button
+            type="button"
+            className="app-sidebar__toggle"
+            onClick={onToggleExpanded}
+            aria-label={isExpanded ? "サイドバーを閉じる" : "サイドバーを開く"}
+            aria-pressed={isExpanded}
+          >
+            <SidebarToggleIcon className="app-sidebar__toggle-icon" />
+          </button>
+        </HoverTooltip>
+
         <div className="app-sidebar__workspace">
           <div className="app-sidebar__workspace-avatar">C</div>
           <div className="app-sidebar__workspace-copy">
