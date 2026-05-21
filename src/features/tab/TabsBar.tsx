@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useRef, type CSSProperties, type ReactNode } from "react";
 import { Reorder } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
@@ -228,6 +228,7 @@ export const WorkspaceTabsBar = ({
     (state) => state.createExplorerTab,
   );
 
+  const tabsListRef = useRef<HTMLDivElement | null>(null);
   const isTitlebar = variant === "titlebar";
   const canReorderTabs = tabs.length > 1;
   const interactiveStyle = noDragStyle ?? TABS_NO_DRAG_STYLE;
@@ -253,6 +254,7 @@ export const WorkspaceTabsBar = ({
         )}
       >
         <Reorder.Group
+          ref={tabsListRef}
           as="div"
           axis="x"
           values={tabs}
@@ -294,7 +296,8 @@ export const WorkspaceTabsBar = ({
                 value={tab}
                 drag={canReorderTabs ? "x" : false}
                 dragListener={canReorderTabs}
-                dragElastic={canReorderTabs ? 0.08 : 0}
+                dragConstraints={tabsListRef}
+                dragElastic={0}
                 dragMomentum={false}
                 transition={{ type: "spring", stiffness: 520, damping: 42 }}
                 style={interactiveStyle}
