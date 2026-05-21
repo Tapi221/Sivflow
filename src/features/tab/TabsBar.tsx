@@ -41,22 +41,19 @@ const ACTIVE_TAB_SURFACE_STYLE: CSSProperties = {
   background: "var(--app-active-tab-bg, #ffffff)",
 };
 
-const ACTIVE_TAB_JOIN_STYLE: CSSProperties = {
-  filter: "drop-shadow(0 1px 0 var(--app-active-tab-bg, #ffffff))",
-};
+const ACTIVE_TAB_JOIN_STYLE: CSSProperties = {};
 
 const ACTIVE_TAB_LEFT_CURVE_STYLE: CSSProperties = {
   ...ACTIVE_TAB_SURFACE_STYLE,
-  WebkitMask:
-    "radial-gradient(circle at 0 0, transparent 0 16px, #000 16.5px)",
-  mask: "radial-gradient(circle at 0 0, transparent 0 16px, #000 16.5px)",
+  WebkitMask: "radial-gradient(circle at 0 0, transparent 0 16px, #000 16px)",
+  mask: "radial-gradient(circle at 0 0, transparent 0 16px, #000 16px)",
 };
 
 const ACTIVE_TAB_RIGHT_CURVE_STYLE: CSSProperties = {
   ...ACTIVE_TAB_SURFACE_STYLE,
   WebkitMask:
-    "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
-  mask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
+    "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16px)",
+  mask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16px)",
 };
 
 const TAB_OPEN_ANIMATION_STYLE = `
@@ -390,13 +387,13 @@ export const WorkspaceTabsBar = ({
           >
             <span
               aria-hidden="true"
-              className="absolute bottom-[-1px] left-[-16px] h-[17px] w-4"
+              className="absolute bottom-[-1px] left-[-15px] h-[17px] w-[17px]"
               style={ACTIVE_TAB_LEFT_CURVE_STYLE}
             />
 
             <span
               aria-hidden="true"
-              className="absolute bottom-[-1px] right-[-16px] h-[17px] w-4"
+              className="absolute bottom-[-1px] right-[-15px] h-[17px] w-[17px]"
               style={ACTIVE_TAB_RIGHT_CURVE_STYLE}
             />
           </div>

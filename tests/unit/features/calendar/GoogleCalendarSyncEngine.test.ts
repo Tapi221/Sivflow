@@ -1,16 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GoogleCalendarSyncEngine } from "../../../../src/features/calendar/googlecalendar-sync/GoogleCalendarSyncEngine";
-import type { GCalSyncEngineOptions, GCalSyncStartContext, GoogleCalendarListItem } from "../../../../src/features/calendar/googlecalendar-integration/gcalSync.types";
-
-// ─────────────────────────────────────────────────────────────
-// テスト用定数
-// ─────────────────────────────────────────────────────────────
+import type { GCalSyncEngineOptions, GCalSyncStartContext, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "../../../../src/features/calendar/googlecalendar-integration/gcalSync.types";
 
 const CALENDAR_ID = "primary";
 const ACCENT_COLOR = "#4285f4";
 const ACCESS_TOKEN = "test-access-token";
 
-/** テスト用カレンダーリスト */
 const testCalendars: GoogleCalendarListItem[] = [
   {
     id: CALENDAR_ID,
@@ -21,22 +16,12 @@ const testCalendars: GoogleCalendarListItem[] = [
   },
 ];
 
-/** テスト用コンテキスト */
 const testContext: GCalSyncStartContext = {
   accessToken: ACCESS_TOKEN,
   selectedCalendarIds: new Set([CALENDAR_ID]),
   calendars: testCalendars,
 };
 
-// ─────────────────────────────────────────────────────────────
-// モックヘルパー
-// ─────────────────────────────────────────────────────────────
-
-/**
- * Google Calendar API の events.list レスポンスをモックする。
- * @param items イベント配列
- * @param nextSyncToken 次回インクリメンタル同期に使う syncToken
- */
 const mockEventsListResponse = (
   items: object[] = [],
   nextSyncToken = "sync-token-1",
@@ -45,43 +30,32 @@ const mockEventsListResponse = (
     new Response(JSON.stringify({ items, nextSyncToken }), { status: 200 }),
   );
 
-/** 401 Unauthorized レスポンスをモックする */
 const mock401Response = () =>
   Promise.resolve(
     new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 }),
   );
 
-/** 410 Gone レスポンスをモックする（syncToken 失効） */
 const mock410Response = () =>
   Promise.resolve(
     new Response(JSON.stringify({ error: "Gone" }), { status: 410 }),
   );
-
-// ─────────────────────────────────────────────────────────────
-// document.visibilityState を "visible" に固定（jsdom はデフォルト "visible"）
-// ─────────────────────────────────────────────────────────────
 
 Object.defineProperty(document, "visibilityState", {
   configurable: true,
   get: () => "visible",
 });
 
-// ─────────────────────────────────────────────────────────────
-// テスト
-// ─────────────────────────────────────────────────────────────
-
 describe("GoogleCalendarSyncEngine", () => {
-  let onEventAdded: ReturnType<typeof vi.fn>;
-  let onEventUpdated: ReturnType<typeof vi.fn>;
-  let onEventDeleted: ReturnType<typeof vi.fn>;
-  let onSyncStateChange: ReturnType<typeof vi.fn>;
-  let onLastSyncedAtChange: ReturnType<typeof vi.fn>;
-  let onError: ReturnType<typeof vi.fn>;
-  let silentReconnect: ReturnType<typeof vi.fn>;
-  let getAccessToken: ReturnType<typeof vi.fn>;
+  let onEventAdded: ReturnType<typeof vi.fn<(event: GoogleCalendarEvent) => void>>;
+  let onEventUpdated: ReturnType<typeof vi.fn<(event: GoogleCalendarEvent) => void>>;
+  let onEventDeleted: ReturnType<typeof vi.fn<(compositeId: string) => void>>;
+  let onSyncStateChange: ReturnType<typeof vi.fn<(state: GCalSyncState) => void>>;
+  let onLastSyncedAtChange: ReturnType<typeof vi.fn<(at: Date) => void>>;
+  let onError: ReturnType<typeof vi.fn<(error: Error) => void>>;
+  let silentReconnect: ReturnType<typeof vi.fn<() => Promise<boolean>>>;
+  let getAccessToken: ReturnType<typeof vi.fn<() => string | null>>;
   let engine: GoogleCalendarSyncEngine;
 
-  /** エンジンを標準オプションで生成するヘルパー */
   const buildEngine = () =>
     new GoogleCalendarSyncEngine({
       onEventAdded,
@@ -92,30 +66,24 @@ describe("GoogleCalendarSyncEngine", () => {
       onError,
       silentReconnect,
       getAccessToken,
-      // テスト中はポーリングタイマーを起動しない（手動で forceSync を呼ぶ）
       pollIntervalMs: 999_999,
     } satisfies GCalSyncEngineOptions);
 
   beforeEach(() => {
-    onEventAdded = vi.fn();
-    onEventUpdated = vi.fn();
-    onEventDeleted = vi.fn();
-    onSyncStateChange = vi.fn();
-    onLastSyncedAtChange = vi.fn();
-    onError = vi.fn();
-    silentReconnect = vi.fn().mockResolvedValue(true);
-    getAccessToken = vi.fn().mockReturnValue(ACCESS_TOKEN);
+    onEventAdded = vi.fn<(event: GoogleCalendarEvent) => void>();
+    onEventUpdated = vi.fn<(event: GoogleCalendarEvent) => void>();
+    onEventDeleted = vi.fn<(compositeId: string) => void>();
+    onSyncStateChange = vi.fn<(state: GCalSyncState) => void>();
+    onLastSyncedAtChange = vi.fn<(at: Date) => void>();
+    onError = vi.fn<(error: Error) => void>();
+    silentReconnect = vi.fn<() => Promise<boolean>>().mockResolvedValue(true);
+    getAccessToken = vi.fn<() => string | null>().mockReturnValue(ACCESS_TOKEN);
 
-    // jsdom の localStorage をリセット
     localStorage.clear();
     vi.restoreAllMocks();
 
     engine = buildEngine();
   });
-
-  // ─────────────────────────────────────────────────────────
-  // フル同期（syncToken なし）
-  // ─────────────────────────────────────────────────────────
 
   describe("フル同期（初回）", () => {
     it("syncToken がない場合、フル同期を実行して onEventAdded を呼ぶ", async () => {
@@ -142,17 +110,13 @@ describe("GoogleCalendarSyncEngine", () => {
       );
 
       engine.start(testContext);
-      // 非同期処理が完了するまで複数 tick 待つ
       await Promise.resolve();
       await Promise.resolve();
       await Promise.resolve();
 
       engine.stop();
 
-      // フル同期で fetch が 1 回呼ばれる
       expect(fetchMock).toHaveBeenCalledTimes(1);
-
-      // 2 件のイベントが追加コールバックで通知される
       expect(onEventAdded).toHaveBeenCalledTimes(2);
       expect(onEventAdded.mock.calls[0][0]).toMatchObject({
         id: `${CALENDAR_ID}:event-1`,
@@ -160,9 +124,9 @@ describe("GoogleCalendarSyncEngine", () => {
         calendarId: CALENDAR_ID,
       });
 
-      // syncToken が localStorage に保存される
       const stored = localStorage.getItem("flashcard-master.gcal.sync_tokens");
       expect(stored).not.toBeNull();
+
       const tokenMap = JSON.parse(stored!) as Record<string, string>;
       expect(tokenMap[CALENDAR_ID]).toBe("initial-sync-token");
     });
@@ -187,18 +151,13 @@ describe("GoogleCalendarSyncEngine", () => {
     });
   });
 
-  // ─────────────────────────────────────────────────────────
-  // インクリメンタル同期（syncToken あり）
-  // ─────────────────────────────────────────────────────────
-
   describe("インクリメンタル同期（syncToken あり）", () => {
     beforeEach(() => {
-      // syncToken を事前に localStorage に設定
       localStorage.setItem(
         "flashcard-master.gcal.sync_tokens",
         JSON.stringify({ [CALENDAR_ID]: "existing-sync-token" }),
       );
-      // コンストラクタで localStorage を読むため再生成する
+
       engine = buildEngine();
     });
 
@@ -225,14 +184,12 @@ describe("GoogleCalendarSyncEngine", () => {
 
       engine.stop();
 
-      // インクリメンタル同期では onEventUpdated が呼ばれる
       expect(onEventUpdated).toHaveBeenCalledTimes(1);
       expect(onEventUpdated.mock.calls[0][0]).toMatchObject({
         id: `${CALENDAR_ID}:event-1`,
         title: "ミーティング（更新）",
       });
 
-      // 新しい syncToken が保存される
       const stored = localStorage.getItem("flashcard-master.gcal.sync_tokens");
       const tokenMap = JSON.parse(stored!) as Record<string, string>;
       expect(tokenMap[CALENDAR_ID]).toBe("next-sync-token");
@@ -253,7 +210,6 @@ describe("GoogleCalendarSyncEngine", () => {
 
       engine.stop();
 
-      // 削除コールバックが複合 ID で呼ばれる
       expect(onEventDeleted).toHaveBeenCalledTimes(1);
       expect(onEventDeleted).toHaveBeenCalledWith(
         `${CALENDAR_ID}:event-to-delete`,
@@ -263,25 +219,20 @@ describe("GoogleCalendarSyncEngine", () => {
     });
   });
 
-  // ─────────────────────────────────────────────────────────
-  // 410 Gone → フル同期フォールバック
-  // ─────────────────────────────────────────────────────────
-
   describe("410 Gone → フル同期フォールバック", () => {
     beforeEach(() => {
       localStorage.setItem(
         "flashcard-master.gcal.sync_tokens",
         JSON.stringify({ [CALENDAR_ID]: "expired-sync-token" }),
       );
+
       engine = buildEngine();
     });
 
     it("410 が返ったとき syncToken をクリアしてフル同期を実行する", async () => {
       const fetchMock = vi
         .spyOn(globalThis, "fetch")
-        // 1 回目：インクリメンタル同期 → 410
         .mockReturnValueOnce(mock410Response())
-        // 2 回目：フル同期 → 成功
         .mockReturnValueOnce(
           mockEventsListResponse(
             [
@@ -298,7 +249,6 @@ describe("GoogleCalendarSyncEngine", () => {
         );
 
       engine.start(testContext);
-      // 410 → フル同期の非同期チェーンが完了するまで待つ
       await Promise.resolve();
       await Promise.resolve();
       await Promise.resolve();
@@ -307,25 +257,17 @@ describe("GoogleCalendarSyncEngine", () => {
 
       engine.stop();
 
-      // fetch は 2 回呼ばれる（インクリメンタル→410→フル同期）
       expect(fetchMock).toHaveBeenCalledTimes(2);
-
-      // フル同期で onEventAdded が呼ばれる
       expect(onEventAdded).toHaveBeenCalledTimes(1);
       expect(onEventAdded.mock.calls[0][0]).toMatchObject({
         id: `${CALENDAR_ID}:full-sync-event`,
       });
 
-      // 新しい syncToken が保存される
       const stored = localStorage.getItem("flashcard-master.gcal.sync_tokens");
       const tokenMap = JSON.parse(stored!) as Record<string, string>;
       expect(tokenMap[CALENDAR_ID]).toBe("fresh-sync-token");
     });
   });
-
-  // ─────────────────────────────────────────────────────────
-  // 401 → サイレント再接続
-  // ─────────────────────────────────────────────────────────
 
   describe("401 Unauthorized → サイレント再接続", () => {
     it("401 が返ったとき silentReconnect を呼ぶ", async () => {
@@ -341,10 +283,6 @@ describe("GoogleCalendarSyncEngine", () => {
       expect(silentReconnect).toHaveBeenCalled();
     });
   });
-
-  // ─────────────────────────────────────────────────────────
-  // stop()
-  // ─────────────────────────────────────────────────────────
 
   describe("stop()", () => {
     it("stop() 後は同期状態が idle になる", async () => {
@@ -364,19 +302,14 @@ describe("GoogleCalendarSyncEngine", () => {
     });
   });
 
-  // ─────────────────────────────────────────────────────────
-  // clearAllSyncTokens()
-  // ─────────────────────────────────────────────────────────
-
   describe("clearAllSyncTokens()", () => {
     it("clearAllSyncTokens() 後は localStorage の syncToken が空になる", () => {
       localStorage.setItem(
         "flashcard-master.gcal.sync_tokens",
         JSON.stringify({ [CALENDAR_ID]: "some-token" }),
       );
-      // コンストラクタでトークンを読み込ませる
-      engine = buildEngine();
 
+      engine = buildEngine();
       engine.clearAllSyncTokens();
 
       const stored = localStorage.getItem("flashcard-master.gcal.sync_tokens");
