@@ -14,7 +14,7 @@ import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { AnimatedCircleCheckbox } from "@/features/calendar/chip/checkbox/AnimatedCircleCheckbox";
 import { GoogleAccountChip } from "@/features/calendar/chip/GoogleAccountChip";
 import { CalendarIcon, PlusIcon } from "@/components/icons/schedule.icons";
-import { useT } from "@/i18n/useT";
+import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
 import type {
@@ -235,6 +235,8 @@ export const CalendarSidebar = ({
   onToggleCalendar,
 }: CalendarSidebarProps) => {
   const t = useT();
+  const dateFnsLocale = useDateFnsLocale();
+  const monthLabelFormat = useMonthLabelFormat();
   const miniCalendarDays = useMemo(
     () => buildMiniCalendarDays(monthDate, selectedDate),
     [monthDate, selectedDate],
@@ -247,7 +249,7 @@ export const CalendarSidebar = ({
       <section className="flex w-full shrink-0 flex-col gap-2">
         <div className="flex w-full items-center justify-between px-1">
           <span className="text-[12px] font-semibold tracking-wide text-[#3d4049]">
-            {format(monthDate, "MMMM yyyy")}
+            {format(monthDate, monthLabelFormat, { locale: dateFnsLocale })}
           </span>
 
           <div className="flex items-center gap-0.5">
