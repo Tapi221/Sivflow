@@ -28,6 +28,8 @@ import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
 export type GoogleAccountEntry = {
   id: string;
   email: string | null;
+  name: string | null;
+  photoUrl: string | null;
   accessToken: string | null;
   refreshToken: string | null;
   calendars: GoogleCalendarListItem[];
@@ -44,11 +46,13 @@ type AccountsAction =
   | { type: "REMOVE"; id: string }
   | { type: "SET_CONNECTING"; id: string; value: boolean }
   | {
-    type: "SET_TOKEN";
-    id: string;
-    accessToken: string;
-    refreshToken?: string | null;
-  }
+      type: "SET_TOKEN";
+      id: string;
+      accessToken: string;
+      refreshToken?: string | null;
+      accountName?: string | null;
+      accountPhotoUrl?: string | null;
+    }
   | { type: "SET_CALENDARS"; id: string; calendars: GoogleCalendarListItem[] }
   | { type: "SET_CALENDAR_IDS"; id: string; ids: string[] }
   | { type: "TOGGLE_CALENDAR"; id: string; calendarId: string }
@@ -63,13 +67,13 @@ type EventsAction =
   | { type: "UPSERT"; accountId: string; event: GoogleCalendarEvent }
   | { type: "DELETE"; accountId: string; eventId: string }
   | {
-    type: "REPLACE_RANGE";
-    accountId: string;
-    calendarId: string;
-    rangeStart: Date;
-    rangeEnd: Date;
-    events: GoogleCalendarEvent[];
-  }
+      type: "REPLACE_RANGE";
+      accountId: string;
+      calendarId: string;
+      rangeStart: Date;
+      rangeEnd: Date;
+      events: GoogleCalendarEvent[];
+    }
   | { type: "CLEAR_ACCOUNT"; accountId: string };
 
 const overlapsRange = (
@@ -106,6 +110,8 @@ const reduceAccounts = (
         return {
           ...a,
           accessToken: action.accessToken,
+          name: action.accountName ?? a.name,
+          photoUrl: action.accountPhotoUrl ?? a.photoUrl,
           connectionStatus: "connected",
           syncState: a.syncState === "needsReconnect" ? "idle" : a.syncState,
           error: null,
@@ -146,21 +152,21 @@ const reduceAccounts = (
       return state.map((a) =>
         a.id === action.id
           ? {
-            ...a,
-            syncState: action.syncState,
-            connectionStatus:
-              action.syncState === "needsReconnect"
-                ? "needsReconnect"
-                : action.syncState === "error"
-                  ? "error"
-                  : a.accessToken
-                    ? "connected"
-                    : a.connectionStatus,
-            error:
-              action.syncState === "idle" && a.connectionStatus === "error"
-                ? null
-                : a.error,
-          }
+              ...a,
+              syncState: action.syncState,
+              connectionStatus:
+                action.syncState === "needsReconnect"
+                  ? "needsReconnect"
+                  : action.syncState === "error"
+                    ? "error"
+                    : a.accessToken
+                      ? "connected"
+                      : a.connectionStatus,
+              error:
+                action.syncState === "idle" && a.connectionStatus === "error"
+                  ? null
+                  : a.error,
+            }
           : a,
       );
 
@@ -173,12 +179,12 @@ const reduceAccounts = (
       return state.map((a) =>
         a.id === action.id
           ? {
-            ...a,
-            accessToken: null,
-            connectionStatus: "needsReconnect",
-            syncState: "needsReconnect",
-            error: action.error ?? "Google Calendar の再連携が必要です",
-          }
+              ...a,
+              accessToken: null,
+              connectionStatus: "needsReconnect",
+              syncState: "needsReconnect",
+              error: action.error ?? "Google Calendar の再連携が必要です",
+            }
           : a,
       );
 
@@ -186,13 +192,13 @@ const reduceAccounts = (
       return state.map((a) =>
         a.id === action.id
           ? {
-            ...a,
-            error: action.error,
-            connectionStatus:
-              action.error && a.syncState !== "needsReconnect"
-                ? "error"
-                : a.connectionStatus,
-          }
+              ...a,
+              error: action.error,
+              connectionStatus:
+                action.error && a.syncState !== "needsReconnect"
+                  ? "error"
+                  : a.connectionStatus,
+            }
           : a,
       );
 
@@ -290,6 +296,8 @@ const resolveSelectedCalendarIds = (
 const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => ({
   id: stored.id,
   email: stored.email,
+  name: stored.name ?? null,
+  photoUrl: stored.photoUrl ?? null,
   accessToken: isStoredTokenValid(stored) ? stored.accessToken : null,
   refreshToken: stored.refreshToken,
   calendars: stored.cachedCalendars ?? [],
@@ -403,6 +411,10 @@ export const useMultiAccountGoogleCalendar = () => {
                 accountId,
                 result.accessToken,
                 result.refreshToken,
+                {
+                  name: result.accountName,
+                  photoUrl: result.accountPhotoUrl,
+                },
               );
 
               const list = await fetchCalendarList(result.accessToken);
@@ -412,6 +424,8 @@ export const useMultiAccountGoogleCalendar = () => {
                 id: accountId,
                 accessToken: result.accessToken,
                 refreshToken: result.refreshToken,
+                accountName: result.accountName,
+                accountPhotoUrl: result.accountPhotoUrl,
               });
 
               dispatchAccounts({
@@ -446,12 +460,16 @@ export const useMultiAccountGoogleCalendar = () => {
         accessToken: string,
         refreshToken: string | null,
         accessTokenExpiry: number | null,
+        accountName?: string | null,
+        accountPhotoUrl?: string | null,
       ) => {
         const list = await fetchCalendarList(accessToken);
         const ids = resolveSelectedCalendarIds(stored.selectedCalendarIds, list);
 
         upsertStoredAccount({
           ...stored,
+          name: accountName ?? stored.name ?? null,
+          photoUrl: accountPhotoUrl ?? stored.photoUrl ?? null,
           accessToken,
           accessTokenExpiry,
           refreshToken,
@@ -464,6 +482,8 @@ export const useMultiAccountGoogleCalendar = () => {
           id: accountId,
           accessToken,
           refreshToken,
+          accountName,
+          accountPhotoUrl,
         });
 
         dispatchAccounts({
@@ -500,6 +520,8 @@ export const useMultiAccountGoogleCalendar = () => {
             result.accessToken,
             result.refreshToken ?? stored.refreshToken,
             buildTokenExpiry(),
+            result.accountName,
+            result.accountPhotoUrl,
           );
         } catch (error) {
           dispatchAccounts({
@@ -515,6 +537,8 @@ export const useMultiAccountGoogleCalendar = () => {
           stored.accessToken,
           stored.refreshToken,
           stored.accessTokenExpiry,
+          stored.name,
+          stored.photoUrl,
         ).catch(() => {
           void refreshStoredAccount();
         });
@@ -592,6 +616,8 @@ export const useMultiAccountGoogleCalendar = () => {
       account: {
         id: tempId,
         email: null,
+        name: null,
+        photoUrl: null,
         accessToken: null,
         refreshToken: null,
         calendars: [],
@@ -623,7 +649,9 @@ export const useMultiAccountGoogleCalendar = () => {
 
       const entry: GoogleAccountEntry = {
         id: accountId,
-        email: result.accountEmail,
+        email: result.accountEmail ?? replacingAccount?.email ?? null,
+        name: result.accountName ?? replacingAccount?.name ?? null,
+        photoUrl: result.accountPhotoUrl ?? replacingAccount?.photoUrl ?? null,
         accessToken: result.accessToken,
         refreshToken: result.refreshToken ?? null,
         calendars: list,
@@ -646,7 +674,9 @@ export const useMultiAccountGoogleCalendar = () => {
 
       upsertStoredAccount({
         id: accountId,
-        email: result.accountEmail,
+        email: result.accountEmail ?? replacingAccount?.email ?? null,
+        name: result.accountName ?? replacingAccount?.name ?? null,
+        photoUrl: result.accountPhotoUrl ?? replacingAccount?.photoUrl ?? null,
         accessToken: result.accessToken,
         accessTokenExpiry: buildTokenExpiry(),
         refreshToken: result.refreshToken ?? null,

@@ -29,11 +29,18 @@ export type StoredGoogleAccount = {
   /** メールアドレス or ランダムUUID（メール不明時） */
   id: string;
   email: string | null;
+  name?: string | null;
+  photoUrl?: string | null;
   accessToken: string | null;
   accessTokenExpiry: number | null;
   refreshToken: string | null;
   selectedCalendarIds: string[];
   cachedCalendars?: { id: string; summary: string; backgroundColor?: string }[];
+};
+
+export type StoredGoogleAccountProfile = {
+  name?: string | null;
+  photoUrl?: string | null;
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -74,6 +81,8 @@ const migrateFromLegacy = (): StoredGoogleAccount[] => {
     const account: StoredGoogleAccount = {
       id: email ?? `account-${Date.now()}`,
       email,
+      name: null,
+      photoUrl: null,
       accessToken,
       accessTokenExpiry,
       refreshToken,
@@ -132,6 +141,7 @@ export const updateStoredAccountToken = (
   accountId: string,
   accessToken: string,
   refreshToken?: string | null,
+  profile?: StoredGoogleAccountProfile,
 ): void => {
   const accounts = readStoredAccounts();
   const idx = accounts.findIndex((a) => a.id === accountId);
@@ -144,6 +154,8 @@ export const updateStoredAccountToken = (
     ...(refreshToken !== undefined && refreshToken !== null
       ? { refreshToken }
       : {}),
+    ...(profile?.name ? { name: profile.name } : {}),
+    ...(profile?.photoUrl ? { photoUrl: profile.photoUrl } : {}),
   };
   writeStoredAccounts(accounts);
 };

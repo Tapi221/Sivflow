@@ -128,6 +128,8 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     (account) => ({
       accountId: account.id,
       email: account.email,
+      name: account.name,
+      photoUrl: account.photoUrl,
       calendars: account.calendars,
       selectedCalendarIds: account.selectedCalendarIds,
       syncState: account.syncState,

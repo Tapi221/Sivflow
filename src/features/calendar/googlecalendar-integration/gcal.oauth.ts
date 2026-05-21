@@ -26,7 +26,7 @@ const toBase64Url = (bytes: Uint8Array): string => {
   return btoa(binary)
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
-    .replace(/=+$/g, "");
+    .replace(/=+$/, "");
 };
 
 const randomBase64Url = (len: number): string => {
@@ -63,15 +63,25 @@ const parseJwtPayload = (token: string): Record<string, unknown> | null => {
   }
 };
 
-const getEmailFromIdToken = (idToken?: string): string | null => {
+const getStringFromIdToken = (
+  idToken: string | undefined,
+  key: "email" | "name" | "picture",
+): string | null => {
   if (!idToken) {
     return null;
   }
 
   const payload = parseJwtPayload(idToken);
+  const value = payload?.[key];
 
-  return typeof payload?.email === "string" ? payload.email : null;
+  return typeof value === "string" ? value : null;
 };
+
+const getGoogleProfileFromIdToken = (idToken?: string) => ({
+  accountEmail: getStringFromIdToken(idToken, "email"),
+  accountName: getStringFromIdToken(idToken, "name"),
+  accountPhotoUrl: getStringFromIdToken(idToken, "picture"),
+});
 
 const getClientId = (): string => {
   const clientId = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_CLIENT_ID;
@@ -119,8 +129,8 @@ const buildAuthorizeUrl = ({
     ...(silent
       ? {}
       : {
-        prompt: "consent select_account",
-      }),
+          prompt: "consent select_account",
+        }),
   });
 
   return `${GOOGLE_OAUTH_AUTHORIZE_ENDPOINT}?${params.toString()}`;
@@ -209,16 +219,20 @@ const requestDesktopToken = async (silent: boolean) => {
     throw new Error("Google OAuth failed: accessToken is missing");
   }
 
+  const profile = getGoogleProfileFromIdToken(tokens.idToken);
+
   return {
     accessToken: tokens.accessToken,
     refreshToken: tokens.refreshToken,
-    accountEmail: getEmailFromIdToken(tokens.idToken),
+    ...profile,
   };
 };
 
 export type GoogleCalendarAccess = {
   accessToken: string;
   accountEmail: string | null;
+  accountName: string | null;
+  accountPhotoUrl: string | null;
   refreshToken?: string;
 };
 
@@ -239,10 +253,12 @@ export const refreshCalendarAccessToken = async ({
       throw new Error("Missing refreshed access token");
     }
 
+    const profile = getGoogleProfileFromIdToken(tokens.idToken);
+
     return {
       accessToken: tokens.accessToken,
       refreshToken,
-      accountEmail: getEmailFromIdToken(tokens.idToken),
+      ...profile,
     };
   }
 
@@ -272,10 +288,12 @@ export const refreshCalendarAccessToken = async ({
     throw new Error("Missing refreshed access token");
   }
 
+  const profile = getGoogleProfileFromIdToken(json.id_token);
+
   return {
     accessToken: json.access_token,
     refreshToken: json.refresh_token ?? refreshToken,
-    accountEmail: getEmailFromIdToken(json.id_token),
+    ...profile,
   };
 };
 
@@ -306,6 +324,8 @@ const requestWebToken = async (auth: Auth, silent: boolean) => {
   return {
     accessToken: cred.accessToken,
     accountEmail: result.user.email,
+    accountName: result.user.displayName,
+    accountPhotoUrl: result.user.photoURL,
   };
 };
 

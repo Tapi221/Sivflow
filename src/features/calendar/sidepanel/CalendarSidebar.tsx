@@ -13,6 +13,7 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { AnimatedCircleCheckbox } from "@/features/calendar/chip/checkbox/AnimatedCircleCheckbox";
+import { GoogleAccountChip } from "@/features/calendar/chip/GoogleAccountChip";
 import { CalendarIcon, PlusIcon } from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
 
@@ -116,15 +117,17 @@ const GoogleAccountSection = ({
       <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#e53e3e]" />
     ) : null;
 
+  const accountName = account.name ?? account.email ?? "Google";
+
   return (
     <div className="mt-3">
       <button
         type="button"
-        className="group flex h-6 w-full items-center gap-1 px-2 text-left"
+        className="group flex h-7 w-full items-center gap-1.5 px-2 text-left"
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
       >
-        <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-[#74798b]" />
+        <GoogleAccountChip name={accountName} photoUrl={account.photoUrl} />
 
         {account.email && (
           <span className="truncate text-[11px] font-semibold tracking-wider text-[#9aa0aa]">
