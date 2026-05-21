@@ -1,5 +1,6 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
@@ -216,38 +217,6 @@ const resolveTabIcon = (tab: WorkspaceTab) => {
   return FileText;
 };
 
-const resolveTabWidthClassName = (tab: WorkspaceTab) => {
-  if (tab.kind === "route") {
-    return "w-[150px] shrink-0";
-  }
-
-  if (tab.kind === "explorer") {
-    return "shrink-0";
-  }
-
-  return "w-[180px] shrink-0";
-};
-
-const resolveTabStyle = (tab: WorkspaceTab): CSSProperties | undefined => {
-  if (tab.kind === "explorer") {
-    return {
-      width: "180px",
-      maxWidth: "180px",
-      flexBasis: "180px",
-    };
-  }
-
-  if (tab.kind === "route") {
-    return {
-      width: "150px",
-      maxWidth: "150px",
-      flexBasis: "150px",
-    };
-  }
-
-  return undefined;
-};
-
 export const WorkspaceTabsBar = ({
   variant = "workspace",
   className,
@@ -425,9 +394,11 @@ export const WorkspaceTabsBar = ({
             }
 
             return (
-              <div
+              <motion.div
                 key={tab.id}
-                className="explorer-workspace-tab-slot relative flex items-end overflow-visible"
+                layout
+                transition={{ type: "spring", stiffness: 520, damping: 42 }}
+                className="explorer-workspace-tab-slot relative flex min-w-[92px] max-w-[180px] flex-[1_1_150px] items-end overflow-visible"
                 data-workspace-tab-slot-active={selected ? "true" : undefined}
               >
                 <div
@@ -440,7 +411,6 @@ export const WorkspaceTabsBar = ({
                   }}
                   style={{
                     ...tabsSurfaceStyle,
-                    ...resolveTabStyle(tab),
                     ...interactiveStyle,
                     background: "transparent",
                   }}
@@ -452,7 +422,6 @@ export const WorkspaceTabsBar = ({
                     "transition-[color,transform] duration-300 ease-[cubic-bezier(.22,1,.36,1)]",
                     tabStateClassName,
                     isOpening && "explorer-workspace-tab--opening",
-                    resolveTabWidthClassName(tab),
                   )}
                 >
                   <button
@@ -505,7 +474,7 @@ export const WorkspaceTabsBar = ({
                     </button>
                   ) : null}
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
