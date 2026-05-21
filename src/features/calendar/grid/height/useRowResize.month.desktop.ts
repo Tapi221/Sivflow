@@ -11,6 +11,8 @@ import type { CalendarMonthWeek } from "@/features/calendar/model/calendarMonth.
 
 // ── 内部型
 
+const MONTH_ROW_RESIZING_CLASS = "is-month-row-resizing";
+
 type MonthRowResizeAnchor = {
   weekKey: string;
   offsetTop: number;
@@ -222,6 +224,7 @@ export const useMonthRowResize = ({
 
       const startHeight = monthRowHeightRef.current;
       isResizingRef.current = true;
+      rootRef.current?.classList.add(MONTH_ROW_RESIZING_CLASS);
       resizeStateRef.current = {
         startY: event.clientY,
         startHeight,
@@ -251,6 +254,7 @@ export const useMonthRowResize = ({
       const cleanup = () => {
         resizeStateRef.current = null;
         isResizingRef.current = false;
+        rootRef.current?.classList.remove(MONTH_ROW_RESIZING_CLASS);
         document.body.style.cursor = prevCursor;
         document.body.style.userSelect = prevSelect;
         window.removeEventListener("pointermove", onMove);
