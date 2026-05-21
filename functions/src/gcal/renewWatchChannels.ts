@@ -1,3 +1,9 @@
+import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
+
+// admin は functions/src/index.ts で一度だけ初期化すること
+const db = admin.firestore();
+
 export const renewExpiredWatchChannels = functions
   .region("asia-northeast1")
   .pubsub.schedule("every 24 hours")
@@ -18,7 +24,6 @@ export const renewExpiredWatchChannels = functions
       try {
         await docSnap.ref.delete();
 
-        // 再登録はクライアント or 別workerに任せる
         await db.collection("gcal_renew_queue").add({
           userId: data.userId,
           calendarId: data.calendarId,
