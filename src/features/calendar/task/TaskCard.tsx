@@ -69,20 +69,20 @@ export const TaskCard = ({
         </button>
 
         <div className="min-w-0 flex-1">
-          <div className="truncate text-sm font-medium text-[#24262d]">
+          <div className="truncate text-[13px] font-medium leading-[18px] text-[#24262d]">
             {task.title}
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
+          <div className="mt-2.5 flex flex-wrap items-center gap-2">
             <span
-              className="rounded px-2 py-1 text-xs font-medium"
+              className="inline-flex h-5 items-center rounded px-2 text-[11px] font-medium"
               style={{ backgroundColor: category.bg, color: category.text }}
             >
               {task.category}
             </span>
 
             <span
-              className="rounded px-2 py-1 text-xs font-medium"
+              className="inline-flex h-5 items-center rounded px-2 text-[11px] font-medium"
               style={{ backgroundColor: priority.bg, color: priority.text }}
             >
               {priority.label}
