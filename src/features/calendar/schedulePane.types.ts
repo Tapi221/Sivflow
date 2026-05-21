@@ -54,6 +54,7 @@ export type GoogleAccountDisplay = {
   selectedCalendarIds: Set<string>;
   syncState: "idle" | "syncing" | "needsReconnect" | "error";
   connectionStatus: GCalConnectionStatus;
+  lastSyncedAt: Date | null;
   error: string | null;
 };
 
@@ -69,6 +70,8 @@ export type CalendarSidebarProps = {
   onPreviousMonth: () => void;
   onNextMonth: () => void;
   onAddCalendar: () => void;
+  onReconnectAccount: (accountId: string) => void;
+  onRetryAccount: (accountId: string) => void;
   onRemoveAccount: (accountId: string) => void;
   onToggleCalendar: (accountId: string, calendarId: string) => void;
 };

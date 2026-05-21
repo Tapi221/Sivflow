@@ -1,6 +1,58 @@
 @layer components {
+  @keyframes gsOverlayIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes gsOverlayOut {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes gsDialogIn {
+    from {
+      opacity: 0;
+      transform: translateY(-12px) scale(0.96);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes gsDialogOut {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    to {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.98);
+    }
+  }
+
   .gs-dialog__overlay {
     background: rgba(15, 15, 15, 0.12);
+  }
+
+  .gs-dialog__overlay[data-state="open"] {
+    animation: gsOverlayIn 90ms ease-out both;
+  }
+
+  .gs-dialog__overlay[data-state="closed"] {
+    animation: gsOverlayOut 80ms ease-in both;
   }
 
   .gs-dialog__positioner {
@@ -21,6 +73,17 @@
       0 12px 32px rgba(15, 15, 15, 0.12),
       0 2px 8px rgba(15, 15, 15, 0.06);
     max-height: min(500px, calc(100vh - 128px));
+    transform-origin: top center;
+    will-change: opacity, transform;
+    backface-visibility: hidden;
+  }
+
+  .gs-dialog[data-state="open"] {
+    animation: gsDialogIn 170ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .gs-dialog[data-state="closed"] {
+    animation: gsDialogOut 100ms ease-in both;
   }
 
   .gs-command {

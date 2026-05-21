@@ -51,6 +51,16 @@ describe("GoogleCalendarSyncEngine", () => {
   let onEventAdded: ReturnType<typeof vi.fn<(event: GoogleCalendarEvent) => void>>;
   let onEventUpdated: ReturnType<typeof vi.fn<(event: GoogleCalendarEvent) => void>>;
   let onEventDeleted: ReturnType<typeof vi.fn<(compositeId: string) => void>>;
+  let onEventsRangeReplaced: ReturnType<
+    typeof vi.fn<
+      (input: {
+        calendarId: string;
+        rangeStart: Date;
+        rangeEnd: Date;
+        events: GoogleCalendarEvent[];
+      }) => void
+    >
+  >;
   let onSyncStateChange: ReturnType<typeof vi.fn<(state: GCalSyncState) => void>>;
   let onLastSyncedAtChange: ReturnType<typeof vi.fn<(at: Date) => void>>;
   let onError: ReturnType<typeof vi.fn<(error: Error) => void>>;
@@ -58,11 +68,13 @@ describe("GoogleCalendarSyncEngine", () => {
   let getAccessToken: ReturnType<typeof vi.fn<() => string | null>>;
   let engine: GoogleCalendarSyncEngine;
 
-  const buildEngine = () =>
+  const buildEngine = (accountId?: string) =>
     new GoogleCalendarSyncEngine({
+      accountId,
       onEventAdded,
       onEventUpdated,
       onEventDeleted,
+      onEventsRangeReplaced,
       onSyncStateChange,
       onLastSyncedAtChange,
       onError,
@@ -78,6 +90,7 @@ describe("GoogleCalendarSyncEngine", () => {
     onEventAdded = vi.fn<(event: GoogleCalendarEvent) => void>();
     onEventUpdated = vi.fn<(event: GoogleCalendarEvent) => void>();
     onEventDeleted = vi.fn<(compositeId: string) => void>();
+    onEventsRangeReplaced = vi.fn();
     onSyncStateChange = vi.fn<(state: GCalSyncState) => void>();
     onLastSyncedAtChange = vi.fn<(at: Date) => void>();
     onError = vi.fn<(error: Error) => void>();
@@ -325,7 +338,7 @@ describe("GoogleCalendarSyncEngine", () => {
       const rangeStart = new Date("2028-01-01T00:00:00.000Z");
       const rangeEnd = new Date("2028-02-01T00:00:00.000Z");
 
-      await engine.forceSync({ rangeStart, rangeEnd });
+      await engine.forceSyncRange({ rangeStart, rangeEnd });
 
       engine.stop();
 
@@ -341,6 +354,164 @@ describe("GoogleCalendarSyncEngine", () => {
       const stored = localStorage.getItem("flashcard-master.gcal.sync_tokens");
       const tokenMap = JSON.parse(stored!) as Record<string, string>;
       expect(tokenMap[CALENDAR_ID]).toBe("initial-token");
+    });
+
+    it("range sync 後、API に存在しない古いイベントが削除される", async () => {
+      const eventState = new Map<string, GoogleCalendarEvent>();
+      const staleEvent: GoogleCalendarEvent = {
+        id: `${CALENDAR_ID}:stale-event`,
+        calendarId: CALENDAR_ID,
+        accentColor: ACCENT_COLOR,
+        title: "削除済み予定",
+        startsAt: new Date("2028-01-10T10:00:00.000Z"),
+        endsAt: new Date("2028-01-10T11:00:00.000Z"),
+        isAllDay: false,
+      };
+
+      eventState.set(staleEvent.id, staleEvent);
+
+      onEventsRangeReplaced.mockImplementation(
+        ({ calendarId, rangeStart, rangeEnd, events }) => {
+          for (const [eventId, event] of eventState) {
+            if (
+              event.calendarId === calendarId &&
+              event.startsAt < rangeEnd &&
+              event.endsAt > rangeStart
+            ) {
+              eventState.delete(eventId);
+            }
+          }
+
+          for (const event of events) {
+            eventState.set(event.id, event);
+          }
+        },
+      );
+
+      vi.spyOn(globalThis, "fetch")
+        .mockReturnValueOnce(mockEventsListResponse([], "initial-token"))
+        .mockReturnValueOnce(
+          mockEventsListResponse(
+            [
+              {
+                id: "fresh-event",
+                summary: "残る予定",
+                status: "confirmed",
+                start: { dateTime: "2028-01-12T10:00:00Z" },
+                end: { dateTime: "2028-01-12T11:00:00Z" },
+              },
+            ],
+            "range-token",
+          ),
+        );
+
+      engine.start(testContext);
+
+      await vi.waitFor(() => {
+        expect(onLastSyncedAtChange).toHaveBeenCalledTimes(1);
+      });
+
+      await engine.forceSyncRange({
+        rangeStart: new Date("2028-01-01T00:00:00.000Z"),
+        rangeEnd: new Date("2028-02-01T00:00:00.000Z"),
+      });
+
+      engine.stop();
+
+      expect(eventState.has(staleEvent.id)).toBe(false);
+      expect(eventState.has(`${CALENDAR_ID}:fresh-event`)).toBe(true);
+    });
+
+    it("forceSyncRange 後の polling が不要な full sync にならない", async () => {
+      const fetchMock = vi
+        .spyOn(globalThis, "fetch")
+        .mockReturnValueOnce(mockEventsListResponse([], "initial-token"))
+        .mockReturnValueOnce(mockEventsListResponse([], "range-token"))
+        .mockReturnValueOnce(mockEventsListResponse([], "next-token"));
+
+      engine.start(testContext);
+
+      await vi.waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      });
+
+      await engine.forceSyncRange({
+        rangeStart: new Date("2028-01-01T00:00:00.000Z"),
+        rangeEnd: new Date("2028-02-01T00:00:00.000Z"),
+      });
+
+      document.dispatchEvent(new Event("visibilitychange"));
+
+      await vi.waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledTimes(3);
+      });
+
+      engine.stop();
+
+      const pollingUrl = new URL(String(fetchMock.mock.calls[2][0]));
+
+      expect(pollingUrl.searchParams.get("syncToken")).toBe("initial-token");
+      expect(pollingUrl.searchParams.has("timeMin")).toBe(false);
+    });
+
+    it("lastSyncedAt が同期完了時に反映される", async () => {
+      vi.spyOn(globalThis, "fetch").mockReturnValue(
+        mockEventsListResponse([], "token"),
+      );
+
+      engine.start(testContext);
+
+      await vi.waitFor(() => {
+        expect(onLastSyncedAtChange).toHaveBeenCalled();
+      });
+
+      engine.stop();
+
+      expect(onLastSyncedAtChange.mock.calls[0][0]).toBeInstanceOf(Date);
+    });
+
+    it("複数 account で同じ calendarId を持っても syncToken が衝突しない", async () => {
+      const fetchMock = vi
+        .spyOn(globalThis, "fetch")
+        .mockReturnValueOnce(mockEventsListResponse([], "account-a-token"))
+        .mockReturnValueOnce(mockEventsListResponse([], "account-b-token"));
+
+      const accountAEngine = buildEngine("account-a");
+      const accountBEngine = buildEngine("account-b");
+
+      accountAEngine.start(testContext);
+
+      await vi.waitFor(() => {
+        const stored = localStorage.getItem("flashcard-master.gcal.sync_tokens");
+        const tokenMap = JSON.parse(stored ?? "{}") as Record<string, string>;
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(tokenMap["account-a:primary"]).toBe("account-a-token");
+      });
+
+      accountAEngine.stop();
+
+      accountBEngine.start({
+        ...testContext,
+        accessToken: "account-b-access-token",
+      });
+
+      await vi.waitFor(() => {
+        const stored = localStorage.getItem("flashcard-master.gcal.sync_tokens");
+        const tokenMap = JSON.parse(stored ?? "{}") as Record<string, string>;
+
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(tokenMap["account-b:primary"]).toBe("account-b-token");
+      });
+
+      accountBEngine.stop();
+
+      const stored = localStorage.getItem("flashcard-master.gcal.sync_tokens");
+      const tokenMap = JSON.parse(stored!) as Record<string, string>;
+
+      expect(tokenMap["account-a:primary"]).toBe("account-a-token");
+      expect(tokenMap["account-b:primary"]).toBe("account-b-token");
+      expect(tokenMap.primary).toBeUndefined();
     });
   });
 

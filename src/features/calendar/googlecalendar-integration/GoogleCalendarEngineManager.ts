@@ -94,14 +94,27 @@ export class GoogleCalendarEngineManager {
     accountId: string,
     options: GCalForceSyncOptions = {},
   ): Promise<void> {
-    await this.engines.get(accountId)?.forceSync(options);
+    const engine = this.engines.get(accountId);
+
+    if (!engine) return;
+
+    if (options.rangeStart && options.rangeEnd) {
+      await engine.forceSyncRange(options);
+      return;
+    }
+
+    await engine.forceSync();
   }
 
   async forceSyncAll(options: GCalForceSyncOptions = {}): Promise<void> {
     await Promise.all(
-      Array.from(this.engines.values()).map((engine) =>
-        engine.forceSync(options),
-      ),
+      Array.from(this.engines.values()).map((engine) => {
+        if (options.rangeStart && options.rangeEnd) {
+          return engine.forceSyncRange(options);
+        }
+
+        return engine.forceSync();
+      }),
     );
   }
 

@@ -135,6 +135,8 @@ export interface GCalEventsListResponse {
 // ─────────────────────────────────────────────────────────────
 
 export interface GCalSyncEngineOptions {
+  accountId?: string;
+
   /**
    * イベント追加
    */
@@ -149,6 +151,13 @@ export interface GCalSyncEngineOptions {
    * イベント削除
    */
   onEventDeleted: (compositeId: string) => void;
+
+  onEventsRangeReplaced?: (input: {
+    calendarId: string;
+    rangeStart: Date;
+    rangeEnd: Date;
+    events: GoogleCalendarEvent[];
+  }) => void;
 
   /**
    * 同期状態変更

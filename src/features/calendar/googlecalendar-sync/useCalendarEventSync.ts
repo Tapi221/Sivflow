@@ -22,7 +22,7 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 
 type GoogleCalendarSlice = {
   selectedCalendarIds: Set<string>;
-  forceSync?: (options?: {
+  forceSyncRange?: (options: {
     rangeStart?: Date;
     rangeEnd?: Date;
   }) => Promise<void> | void;
@@ -42,7 +42,7 @@ export const useCalendarEventSync = ({
   monthTitleDate,
   googleCalendar,
 }: UseCalendarEventSyncOptions): void => {
-  const { selectedCalendarIds, forceSync } = googleCalendar;
+  const { selectedCalendarIds, forceSyncRange } = googleCalendar;
 
   const [userId, setUserId] = useState<string | null>(
     () => auth.currentUser?.uid ?? null,
@@ -102,14 +102,14 @@ export const useCalendarEventSync = ({
   useEffect(() => {
     if (!calendarKey) return;
 
-    void forceSync?.(syncRange);
-  }, [calendarKey, forceSync, syncRange, syncRangeKey]);
+    void forceSyncRange?.(syncRange);
+  }, [calendarKey, forceSyncRange, syncRange, syncRangeKey]);
 
   useGoogleCalendarPushSync({
     userId,
     selectedCalendarIds,
     onNotification: () => {
-      void forceSync?.(syncRange);
+      void forceSyncRange?.(syncRange);
     },
   });
 };
