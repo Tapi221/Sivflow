@@ -42,7 +42,7 @@ export const CalendarToolbar = ({
   });
 
   return (
-    <div className="relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full items-center justify-between overflow-hidden bg-white after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']">
+    <div className="relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center justify-between overflow-hidden bg-white after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']">
       {/* LEFT */}
       <div className="flex items-center gap-3">
         {/* TAB GROUP */}
