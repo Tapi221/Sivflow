@@ -209,21 +209,15 @@ const Sidebar = ({
       aria-label="Sidebar"
     >
       <div className="app-sidebar__top">
-        <HoverTooltip
-          label={isClosed ? "サイドバーを開く" : "サイドバーを閉じる"}
-          side="right"
-          className="w-full"
+        <button
+          type="button"
+          className="app-sidebar__toggle"
+          onClick={onToggleClosed}
+          aria-label={isClosed ? "サイドバーを開く" : "サイドバーを閉じる"}
+          aria-pressed={!isClosed}
         >
-          <button
-            type="button"
-            className="app-sidebar__toggle"
-            onClick={onToggleClosed}
-            aria-label={isClosed ? "サイドバーを開く" : "サイドバーを閉じる"}
-            aria-pressed={!isClosed}
-          >
-            <SidebarToggleIcon className="app-sidebar__toggle-icon" />
-          </button>
-        </HoverTooltip>
+          <SidebarToggleIcon className="app-sidebar__toggle-icon" />
+        </button>
 
         <nav className="app-sidebar__nav" aria-label="メインナビゲーション">
           {mainNavItemsWithActions.map((item) => (
