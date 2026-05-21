@@ -1,4 +1,4 @@
-import type { ReactNode, RefObject } from "react";
+import type { CSSProperties, ReactNode, RefObject } from "react";
 
 import { WorkspaceTabsBar } from "@/features/tab/TabsBar";
 
@@ -10,6 +10,10 @@ type WorkspaceShellProps = {
   mainRef: RefObject<HTMLElement | null>;
 };
 
+const tabsBackgroundStyle: CSSProperties = {
+  background: "var(--app-sidebar-bg)",
+};
+
 export const WorkspaceShell = ({
   children,
   isScrollLocked,
@@ -17,7 +21,7 @@ export const WorkspaceShell = ({
 }: WorkspaceShellProps) => {
   return (
     <div className="workspace-shell app-layout__content workspace-shell--with-tabs">
-      <div className="workspace-shell__tabs">
+      <div className="workspace-shell__tabs" style={tabsBackgroundStyle}>
         <WorkspaceTabsBar />
       </div>
       <WorkspaceBreadcrumbBar hideCrumbs />
