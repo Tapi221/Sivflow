@@ -6,7 +6,6 @@ import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.al
 import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
-import { SidebarPanelIcon } from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_SCROLL_HOUR = 0;
@@ -28,14 +27,12 @@ export type DayDetailPanelProps = {
   selectedDate: Date;
   events: GoogleCalendarEvent[];
   isOpen: boolean;
-  onToggle: () => void;
 };
 
 export const DayDetailPanel = ({
   selectedDate,
   events,
   isOpen,
-  onToggle,
 }: DayDetailPanelProps) => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const prevDateKeyRef = useRef("");
@@ -71,16 +68,6 @@ export const DayDetailPanel = ({
           <span className="text-[12px] font-semibold tracking-wide text-[#3d4049]">
             {format(selectedDate, "yyyy年M月d日(E)", { locale: ja })}
           </span>
-
-          <button
-            type="button"
-            aria-label="日付詳細を閉じる"
-            title="日付詳細を閉じる"
-            onClick={onToggle}
-            className="ml-2 flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
-          >
-            <SidebarPanelIcon className="h-3.5 w-3.5 -scale-x-100" />
-          </button>
         </div>
       </div>
 
