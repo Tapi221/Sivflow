@@ -5,7 +5,7 @@ import { TASK_COLUMNS } from "./task.types";
 import type { TaskStatus } from "./task.types";
 import { useTaskStore } from "./useTaskStore";
 import { NewTaskModal } from "../modal/NewTaskModal";
-import { type BoardListViewMode } from "../chip/BoardListToggleButton";
+import { type BoardListViewMode } from "../chip/Toggle.boardlist";
 import { TaskToolbar } from "../toolbar/TaskToolbar";
 import { TaskBoardView } from "./TaskBoardView";
 import { TaskListView } from "./TaskListView";

@@ -1,7 +1,7 @@
 import {
   BoardListToggleButton,
   type BoardListViewMode,
-} from "../chip/BoardListToggleButton";
+} from "../chip/Toggle.boardlist";
 import { DateFilterChip } from "../chip/DateFilterChip";
 import { FilterChip } from "../chip/FilterChip";
 import { MoreMenuButton } from "../chip/MoreMenuButton";
