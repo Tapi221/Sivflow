@@ -1,26 +1,26 @@
 import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
-export type AnimatedCalendarCheckboxShape = "circle" | "square";
-export type AnimatedCalendarCheckboxVariant = "filled" | "soft" | "outline" | "radio";
+export type AnimatedCheckboxShape = "circle" | "square";
+export type AnimatedCheckboxVariant = "filled" | "soft" | "outline" | "radio";
 
-export type AnimatedCalendarCheckboxBaseProps = {
+export type AnimatedCheckboxBaseProps = {
   checked: boolean;
   color: string;
   className?: string;
-  shape?: AnimatedCalendarCheckboxShape;
-  variant?: AnimatedCalendarCheckboxVariant;
+  shape?: AnimatedCheckboxShape;
+  variant?: AnimatedCheckboxVariant;
   indeterminate?: boolean;
 };
 
-export const AnimatedCalendarCheckboxBase = ({
+export const AnimatedCheckboxBase = ({
   checked,
   color,
   className,
   shape = "circle",
   variant = "filled",
   indeterminate = false,
-}: AnimatedCalendarCheckboxBaseProps) => {
+}: AnimatedCheckboxBaseProps) => {
   const active = checked || indeterminate;
 
   let radiusClass = "rounded-full";

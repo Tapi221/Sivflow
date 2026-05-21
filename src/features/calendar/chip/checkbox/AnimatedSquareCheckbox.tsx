@@ -1,13 +1,13 @@
 import {
-  AnimatedCalendarCheckboxBase,
-  type AnimatedCalendarCheckboxBaseProps,
+  AnimatedCheckboxBase,
+  type AnimatedCheckboxBaseProps,
 } from "./AnimatedCheckboxBase";
 
-type AnimatedCalendarSquareCheckboxProps = Omit<
-  AnimatedCalendarCheckboxBaseProps,
+type AnimatedSquareCheckboxProps = Omit<
+  AnimatedCheckboxBaseProps,
   "shape" | "variant" | "indeterminate"
 >;
 
-export const AnimatedCalendarSquareCheckbox = (props: AnimatedCalendarSquareCheckboxProps) => {
-  return <AnimatedCalendarCheckboxBase {...props} shape="square" variant="filled" />;
+export const AnimatedSquareCheckbox = (props: AnimatedSquareCheckboxProps) => {
+  return <AnimatedCheckboxBase {...props} shape="square" variant="filled" />;
 };

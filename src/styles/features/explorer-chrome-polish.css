@@ -84,7 +84,6 @@
     ) !important;
   }
 
-  /* Round the inner corner where the titlebar meets the active (white) surface. */
   .explorer-chrome-main-topbar::before {
     content: "";
     position: absolute;
@@ -99,11 +98,13 @@
   }
 
   .explorer-workspace-tabs-bar,
+  .explorer-tab-bar,
   .explorer-chrome-main-topbar > div:first-child > .explorer-chrome-font {
     position: relative;
     z-index: 2;
     height: 40px !important;
     overflow: visible !important;
+    border: 0 !important;
     border-bottom: 0 !important;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
@@ -117,6 +118,7 @@
   }
 
   .explorer-workspace-tabs-list,
+  .explorer-tab-list,
   .explorer-chrome-main-topbar
     > div:first-child
     > .explorer-chrome-font
@@ -146,8 +148,8 @@
     min-width: 180px !important;
     max-width: 180px !important;
     padding: 0 !important;
-    border-radius: 8px 8px 0 0 !important;
     border: 0 !important;
+    border-radius: 10px 10px 0 0 !important;
     font-size: 12px !important;
     font-weight: 500 !important;
     line-height: normal !important;
@@ -159,7 +161,7 @@
       BlinkMacSystemFont,
       "Segoe UI",
       sans-serif !important;
-    overflow: hidden;
+    overflow: visible !important;
     box-shadow: none !important;
   }
 
@@ -171,11 +173,13 @@
     margin-top: 0 !important;
     margin-bottom: 0 !important;
     padding-top: 0 !important;
+
     border: 0 !important;
-    border-radius: 8px 8px 10px 10px !important;
+    border-radius: 12px 12px 0 0 !important;
     overflow: visible !important;
     isolation: isolate;
-    background: #ffffff !important;
+
+    background: var(--app-active-tab-bg, #ffffff) !important;
     background-clip: padding-box;
 
     color: var(--app-sidebar-text-strong, #2f3640) !important;
@@ -186,27 +190,28 @@
   .explorer-workspace-tab--active::after {
     content: "";
     position: absolute;
-    bottom: -1px;
-    width: 14px;
-    height: 14px;
+    bottom: 0;
+    width: 16px;
+    height: 16px;
     background: transparent;
     pointer-events: none;
   }
 
   .explorer-workspace-tab--active::before {
-    left: -14px;
-    border-bottom-right-radius: 14px;
-    box-shadow: 8px 8px 0 8px #ffffff;
+    left: -16px;
+    border-bottom-right-radius: 16px;
+    box-shadow: 8px 8px 0 8px var(--app-active-tab-bg, #ffffff);
   }
 
   .explorer-workspace-tab--active::after {
-    right: -14px;
-    border-bottom-left-radius: 14px;
-    box-shadow: -8px 8px 0 8px #ffffff;
+    right: -16px;
+    border-bottom-left-radius: 16px;
+    box-shadow: -8px 8px 0 8px var(--app-active-tab-bg, #ffffff);
   }
 
   .explorer-workspace-tab[data-workspace-tab-active="true"] {
-    border-top-left-radius: 10px !important;
+    border-top-left-radius: 12px !important;
+    border-top-right-radius: 12px !important;
   }
 
   .explorer-workspace-tab--active .explorer-workspace-tab-button,
