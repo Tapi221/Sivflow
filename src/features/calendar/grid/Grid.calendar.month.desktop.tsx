@@ -176,7 +176,7 @@ export const GridCalendarMonthDesktop = ({
                   <div
                     key={day.key}
                     className={cn(
-                      "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#eef0f3] bg-white text-left transition-colors",
+                      "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#eef0f3] bg-white text-left",
                       !isLastColumn &&
                         "border-r",
                       isToday &&
