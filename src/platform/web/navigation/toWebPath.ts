@@ -1,8 +1,4 @@
-import {
-  type AppDestination,
-  type AppScreen,
-  resolveAppDestination,
-} from "@/navigation/core/destination";
+import { type AppDestination, type AppScreen, resolveAppDestination } from "@/navigation/core/destination";
 
 const WEB_SCREEN_PATHS: Record<AppScreen, string> = {
   folders: "/folders",
@@ -11,7 +7,7 @@ const WEB_SCREEN_PATHS: Record<AppScreen, string> = {
   studyMode: "/study",
   uncertainMode: "/uncertain",
   bookmarkMode: "/bookmark",
-  calendar: "/calendar",
+  calendar: "/schedule",
   tasks: "/tasks",
   gallery: "/gallery",
   statistics: "/statistics",
