@@ -27,6 +27,7 @@
 .app-sidebar {
   position: sticky;
   top: 0;
+  z-index: 20;
   align-self: start;
 
   display: flex;
@@ -73,9 +74,17 @@
 }
 
 .app-sidebar--closed {
-  width: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+
+  width: var(--app-sidebar-rail-width, 48px);
   overflow: visible;
-  padding: 12px 0;
+  padding: 12px 4px;
+
+  pointer-events: none;
+
   background: transparent !important;
 }
 
@@ -166,12 +175,12 @@
 }
 
 .app-sidebar--closed .app-sidebar__toggle {
-  position: absolute;
-  top: 12px;
-  left: 8px;
-  z-index: 40;
+  position: relative;
+  z-index: 1;
 
-  width: 32px;
+  width: 100%;
+
+  pointer-events: auto;
 
   background: var(--app-active-tab-bg, #ffffff);
   color: var(--app-sidebar-icon, #ababab);
