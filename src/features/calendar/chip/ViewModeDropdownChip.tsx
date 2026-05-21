@@ -1,6 +1,8 @@
 import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 
+import { useT } from "@/i18n/useT";
+
 export type ViewMode = "month" | "week" | "days";
 
 export type ViewModeOption = {
@@ -19,6 +21,7 @@ export const ViewModeDropdown = ({
   onChange,
   options,
 }: Props) => {
+  const t = useT();
   const [open, setOpen] = useState(false);
 
   const selected = options.find((o) => o.value === value);
@@ -69,7 +72,7 @@ export const ViewModeDropdown = ({
           "
         >
           <div className="px-1.5 py-1 text-[10px] font-medium text-[#a0a4b0]">
-            Views
+            {t.viewsLabel}
           </div>
 
           {options.map(({ value: v, label }) => {
