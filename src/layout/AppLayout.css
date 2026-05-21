@@ -48,6 +48,11 @@
   transition: grid-template-columns 180ms ease;
 }
 
+.app-sidebar {
+  grid-column: 1;
+  grid-row: 1;
+}
+
 [data-presentation-target="desktop"] .app-layout {
   padding-top: 0;
 }
@@ -76,11 +81,19 @@
     var(--app-right-sidebar-width);
 }
 
+.app-right-sidebar {
+  grid-column: 3;
+  grid-row: 1;
+}
+
 .workspace-shell,
 .app-layout__content {
   --workspace-content-gutter: 10px;
 
   position: relative;
+
+  grid-column: 2;
+  grid-row: 1;
 
   display: grid;
 
@@ -280,5 +293,10 @@
   .app-layout--right-sidebar-open,
   .app-layout--sidebar-closed.app-layout--right-sidebar-open {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workspace-shell,
+  .app-layout__content {
+    grid-column: 1;
   }
 }
