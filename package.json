@@ -37,12 +37,12 @@
     "typecheck:all": "npm exec tsc -- -p tsconfig.app.json --noEmit --pretty false && npm exec tsc -- -p tsconfig.node.json --noEmit --pretty false && npm exec tsc -- -p tsconfig.electron.json --noEmit --pretty false",
     "preflight": "npm run verify:design-tokens && npm run typecheck && npm run build && npx vitest run tests/unit/pdfZoomUtils.test.ts tests/unit/parseXlsxImport.test.ts tests/unit/importCardsFromPayload.test.ts tests/unit/features/import/XlsxImportDialog.test.tsx tests/unit/platformIndex.test.ts tests/unit/platformDesktopShellOpenExternal.test.ts tests/unit/signInWithGoogleUseCase.test.ts",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "test": "vitest",
     "test:e2e:codeblock": "playwright test tests/e2e/codeblock_visual.spec.ts",
     "test:e2e:card-layout": "playwright test tests/e2e/card_layout_consistency.spec.ts",
-    "test:e2e:pdf": "playwright test tests/e2e/pdf_text_selection.spec.ts",
-    "format": "prettier . --write"
+    "test:e2e:pdf": "playwright test tests/e2e/pdf_text_selection.spec.ts"
   },
   "dependencies": {
     "@blocknote/core": "^0.47.3",
@@ -130,7 +130,6 @@
     "electron": "^40.8.0",
     "esbuild": "^0.25.3",
     "eslint": "^9.39.4",
-    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "eslint-plugin-simple-import-sort": "^13.0.0",

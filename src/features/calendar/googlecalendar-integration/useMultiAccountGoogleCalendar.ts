@@ -200,7 +200,7 @@ export const useMultiAccountGoogleCalendar = () => {
     accountsRef.current = accounts;
   }, [accounts]);
 
-// ==============================================
+  // ==============================================
 
   useEffect(() => {
     if (managerRef.current) return;
@@ -276,7 +276,7 @@ export const useMultiAccountGoogleCalendar = () => {
     });
   }, []);
 
-// ==============================================
+  // ==============================================
 
   useEffect(() => {
     const storedAccounts = readStoredAccounts();
@@ -310,7 +310,7 @@ export const useMultiAccountGoogleCalendar = () => {
     }
   }, []);
 
-// ==============================================
+  // ==============================================
 
   useEffect(() => {
     for (const a of accounts) {
@@ -326,7 +326,7 @@ export const useMultiAccountGoogleCalendar = () => {
     return () => managerRef.current?.stopAll();
   }, []);
 
-// ==============================================
+  // ==============================================
 
   const events = useMemo(() => {
     const all: GoogleCalendarEvent[] = [];
@@ -344,7 +344,7 @@ export const useMultiAccountGoogleCalendar = () => {
     return set;
   }, [accounts]);
 
-// ==============================================
+  // ==============================================
 
   const addAccount = useCallback(async () => {
     const { auth } = await import("@/services/firebase");

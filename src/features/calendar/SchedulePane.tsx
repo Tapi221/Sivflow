@@ -9,7 +9,7 @@ import { ViewModeDropdown } from "@/features/calendar/chip/ViewModeDropdownChip"
 import type { SchedulePaneProps } from "./schedulePane.types";
 import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
-import { CalendarTaskView } from "./taskview/TaskView";
+import { TaskView } from "./task/TaskView";
 import { CalendarTimelineDayView } from "./grid/TimelineDayView";
 import { useSchedulePane } from "./useSchedulePane";
 import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
@@ -140,8 +140,11 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           ref={contentViewportRef}
           className={cn(
             "flex min-w-0 flex-1 flex-col bg-white",
-            showDayDetailPanel ? "px-3 pt-4" : "px-5 pt-4",
-            activeMode === "task" && "pb-5",
+            activeMode === "task"
+              ? "overflow-hidden"
+              : showDayDetailPanel
+                ? "px-3 pt-4"
+                : "px-5 pt-4",    
           )}
         >
           {/* ヘッダー */}
@@ -179,17 +182,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
 
           {/* ── メイン分岐 ── */}
           {activeMode === "task" ? (
-            <CalendarTaskView
-              viewMode={selectedViewMode as any}
-              anchorDate={currentDate}
-              timelineUnitBuffer={{ before: 7, after: 14 }}
-              selectedDate={selectedDate}
-              dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
-              rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
-              scrollContainerRef={scrollContainerRef}
-              onScroll={handleTimelineScroll}
-              onSelectDate={handleSidebarSelectDate}
-            />
+            <TaskView />
           ) : activeMode === "timeline" ? (
             <CalendarTimelineDayView
               viewMode={selectedViewMode}

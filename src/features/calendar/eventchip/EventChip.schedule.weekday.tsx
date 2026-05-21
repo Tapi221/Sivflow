@@ -1,7 +1,6 @@
 import { format } from "date-fns";
-
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
-import { generateColorTokens } from "@/features/calendar/ui/calendar.color-tokens";
+import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 
 type CalendarEventChipWeekdayProps = {
   event: GoogleCalendarEvent;

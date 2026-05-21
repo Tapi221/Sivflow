@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Task, TaskPriority, TaskStatus } from "./task.types";
+import type { Task, TaskStatus } from "./task.types";
 
 type TaskStore = {
   tasks: Task[];
