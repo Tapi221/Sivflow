@@ -6,7 +6,6 @@ import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.al
 import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
-import { SidebarPanelIcon } from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_SCROLL_HOUR = 0;
@@ -27,13 +26,11 @@ const AllDayChip = ({ event }: { event: GoogleCalendarEvent }) => {
 export type DayDetailPanelProps = {
   selectedDate: Date;
   events: GoogleCalendarEvent[];
-  onClose?: () => void;
 };
 
 export const DayDetailPanel = ({
   selectedDate,
   events,
-  onClose,
 }: DayDetailPanelProps) => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const prevDateKeyRef = useRef("");
@@ -61,18 +58,10 @@ export const DayDetailPanel = ({
   return (
     <aside className="flex w-[260px] shrink-0 flex-col overflow-hidden bg-transparent">
       <div className="px-4 pb-3 pt-2">
-        <div className="flex h-6 items-center justify-between px-1">
+        <div className="flex h-6 items-center px-1">
           <span className="text-[12px] font-semibold tracking-wide text-[#3d4049]">
             {format(selectedDate, "yyyy年M月d日(E)", { locale: ja })}
           </span>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
-          >
-            <SidebarPanelIcon className="h-3.5 w-3.5 -scale-x-100" />
-          </button>
         </div>
       </div>
 
