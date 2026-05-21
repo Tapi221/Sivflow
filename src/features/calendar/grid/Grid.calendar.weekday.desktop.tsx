@@ -66,17 +66,23 @@ const useCurrentTimeMinutes = (): number => {
         GRID.WEEKDAY_MS_PER_SECOND -
       now.getMilliseconds();
 
+    let intervalId: number | null = null;
+
     const timeoutId = window.setTimeout(() => {
       setMinutes(getNow());
 
-      const intervalId = window.setInterval(() => {
+      intervalId = window.setInterval(() => {
         setMinutes(getNow());
       }, GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS);
-
-      return () => window.clearInterval(intervalId);
     }, msUntilNextMinute);
 
-    return () => window.clearTimeout(timeoutId);
+    return () => {
+      window.clearTimeout(timeoutId);
+
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
+      }
+    };
   }, []);
 
   return minutes;
