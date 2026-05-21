@@ -23,9 +23,7 @@ import type {
 } from "./gcalSync.types";
 import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
 
-// ─────────────────────────────
-// Types
-// ─────────────────────────────
+// ==============================================
 
 export type GoogleAccountEntry = {
   id: string;
@@ -39,16 +37,17 @@ export type GoogleAccountEntry = {
   error: string | null;
 };
 
+
 type AccountsAction =
   | { type: "ADD"; account: GoogleAccountEntry }
   | { type: "REMOVE"; id: string }
   | { type: "SET_CONNECTING"; id: string; value: boolean }
   | {
-      type: "SET_TOKEN";
-      id: string;
-      accessToken: string;
-      refreshToken?: string;
-    }
+    type: "SET_TOKEN";
+    id: string;
+    accessToken: string;
+    refreshToken?: string;
+  }
   | { type: "SET_CALENDARS"; id: string; calendars: GoogleCalendarListItem[] }
   | { type: "SET_CALENDAR_IDS"; id: string; ids: string[] }
   | { type: "TOGGLE_CALENDAR"; id: string; calendarId: string }
@@ -62,14 +61,111 @@ type EventsAction =
   | { type: "DELETE"; eventId: string }
   | { type: "CLEAR_ACCOUNT"; accountId: string };
 
-// ─────────────────────────────
-// reducers（変更なし）
-// ─────────────────────────────
-/* ここはそのまま */
+// ==============================================
 
-// ─────────────────────────────
-// helpers（変更なし）
-// ─────────────────────────────
+const reduceAccounts = (
+  state: GoogleAccountEntry[],
+  action: AccountsAction,
+): GoogleAccountEntry[] => {
+  switch (action.type) {
+    case "ADD": {
+      // 同一 id が既に存在する場合は上書きしない（接続完了後に REMOVE→ADD するため）
+      const exists = state.some((a) => a.id === action.account.id);
+      return exists ? state : [...state, action.account];
+    }
+    case "REMOVE":
+      return state.filter((a) => a.id !== action.id);
+
+    case "SET_CONNECTING":
+      return state.map((a) =>
+        a.id === action.id ? { ...a, isConnecting: action.value } : a,
+      );
+
+    case "SET_TOKEN":
+      return state.map((a) => {
+        if (a.id !== action.id) return a;
+        return {
+          ...a,
+          accessToken: action.accessToken,
+          ...(action.refreshToken !== undefined
+            ? { refreshToken: action.refreshToken }
+            : {}),
+        };
+      });
+
+    case "SET_CALENDARS":
+      return state.map((a) =>
+        a.id === action.id ? { ...a, calendars: action.calendars } : a,
+      );
+
+    case "SET_CALENDAR_IDS":
+      return state.map((a) =>
+        a.id === action.id
+          ? { ...a, selectedCalendarIds: new Set(action.ids) }
+          : a,
+      );
+
+    case "TOGGLE_CALENDAR":
+      return state.map((a) => {
+        if (a.id !== action.id) return a;
+        const next = new Set(a.selectedCalendarIds);
+        if (next.has(action.calendarId)) {
+          next.delete(action.calendarId);
+        } else {
+          next.add(action.calendarId);
+        }
+        return { ...a, selectedCalendarIds: next };
+      });
+
+    case "SET_SYNC_STATE":
+      return state.map((a) =>
+        a.id === action.id ? { ...a, syncState: action.syncState } : a,
+      );
+
+    case "SET_ERROR":
+      return state.map((a) =>
+        a.id === action.id ? { ...a, error: action.error } : a,
+      );
+
+    default:
+      return state;
+  }
+};
+
+const reduceEvents = (
+  state: EventsState,
+  action: EventsAction,
+): EventsState => {
+  switch (action.type) {
+    case "UPSERT": {
+      const next = new Map(state);
+      const bucket = new Map(next.get(action.accountId) ?? []);
+      bucket.set(action.event.id, action.event);
+      next.set(action.accountId, bucket);
+      return next;
+    }
+    case "DELETE": {
+      const next = new Map(state);
+      for (const [accountId, bucket] of next) {
+        if (bucket.has(action.eventId)) {
+          const newBucket = new Map(bucket);
+          newBucket.delete(action.eventId);
+          next.set(accountId, newBucket);
+        }
+      }
+      return next;
+    }
+    case "CLEAR_ACCOUNT": {
+      const next = new Map(state);
+      next.delete(action.accountId);
+      return next;
+    }
+    default:
+      return state;
+  }
+};
+
+// ==============================================
 
 const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => ({
   id: stored.id,
@@ -83,9 +179,7 @@ const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => ({
   error: null,
 });
 
-// ─────────────────────────────
-// Hook
-// ─────────────────────────────
+// ==============================================
 
 export const useMultiAccountGoogleCalendar = () => {
   const [accounts, dispatchAccounts] = useReducer(
@@ -106,9 +200,7 @@ export const useMultiAccountGoogleCalendar = () => {
     accountsRef.current = accounts;
   }, [accounts]);
 
-  // ─────────────────────────────
-  // engine init
-  // ─────────────────────────────
+// ==============================================
 
   useEffect(() => {
     if (managerRef.current) return;
@@ -184,9 +276,7 @@ export const useMultiAccountGoogleCalendar = () => {
     });
   }, []);
 
-  // ─────────────────────────────
-  // hydration（変更なし）
-  // ─────────────────────────────
+// ==============================================
 
   useEffect(() => {
     const storedAccounts = readStoredAccounts();
@@ -220,9 +310,7 @@ export const useMultiAccountGoogleCalendar = () => {
     }
   }, []);
 
-  // ─────────────────────────────
-  // engine sync（重要変更）
-  // ─────────────────────────────
+// ==============================================
 
   useEffect(() => {
     for (const a of accounts) {
@@ -238,9 +326,7 @@ export const useMultiAccountGoogleCalendar = () => {
     return () => managerRef.current?.stopAll();
   }, []);
 
-  // ─────────────────────────────
-  // derived
-  // ─────────────────────────────
+// ==============================================
 
   const events = useMemo(() => {
     const all: GoogleCalendarEvent[] = [];
@@ -258,9 +344,7 @@ export const useMultiAccountGoogleCalendar = () => {
     return set;
   }, [accounts]);
 
-  // ─────────────────────────────
-  // actions（forceSync削除）
-  // ─────────────────────────────
+// ==============================================
 
   const addAccount = useCallback(async () => {
     const { auth } = await import("@/services/firebase");
