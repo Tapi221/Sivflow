@@ -12,7 +12,7 @@ import { TaskListView } from "./TaskListView";
 // ==============================================
 
 export const TaskView = () => {
-  const { tasks, addTask, deleteTask } = useTaskStore();
+  const { tasks, addTask, deleteTask, moveTask } = useTaskStore();
   const [viewMode, setViewMode] = useState<BoardListViewMode>("board");
   const [showModal, setShowModal] = useState(false);
   const [newTaskStatus, setNewTaskStatus] =
@@ -41,6 +41,16 @@ export const TaskView = () => {
     setShowModal(true);
   };
 
+  const handleToggleTaskDone = (taskId: string, done: boolean) => {
+    let nextStatus: TaskStatus = "not_started";
+
+    if (done) {
+      nextStatus = "done";
+    }
+
+    moveTask(taskId, nextStatus);
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
       <TaskToolbar
@@ -56,6 +66,7 @@ export const TaskView = () => {
           tasksByStatus={tasksByStatus}
           onAddTask={handleAddTask}
           onDeleteTask={deleteTask}
+          onToggleTaskDone={handleToggleTaskDone}
         />
       ) : (
         <TaskListView tasks={tasks} />

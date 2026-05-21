@@ -72,94 +72,6 @@ export const FieldsToolbarIcon = ({
   </svg>
 );
 
-export const MonthViewIcon = ({
-  className,
-  label: _label,
-  size: _size,
-  title: _title,
-  ...props
-}: IconProps) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <path d="M8 2v4" />
-    <path d="M16 2v4" />
-    <rect width="18" height="18" x="3" y="4" rx="2" />
-    <path d="M3 10h18" />
-    <path d="M8 14h.01" />
-    <path d="M12 14h.01" />
-    <path d="M16 14h.01" />
-    <path d="M8 18h.01" />
-    <path d="M12 18h.01" />
-    <path d="M16 18h.01" />
-  </svg>
-);
-
-export const WeekViewIcon = ({
-  className,
-  label: _label,
-  size: _size,
-  title: _title,
-  ...props
-}: IconProps) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <rect width="18" height="18" x="3" y="4" rx="2" />
-    <path d="M16 2v4" />
-    <path d="M3 10h18" />
-    <path d="M8 2v4" />
-    <path d="M17 14h-6" />
-    <path d="M13 18H7" />
-    <path d="M7 14h.01" />
-    <path d="M17 18h.01" />
-  </svg>
-);
-
-export const DayViewIcon = ({
-  className,
-  label: _label,
-  size: _size,
-  title: _title,
-  ...props
-}: IconProps) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <path d="M8 2v4" />
-    <path d="M16 2v4" />
-    <rect width="18" height="18" x="3" y="4" rx="2" />
-    <path d="M3 10h18" />
-  </svg>
-);
-
 export const CalendarIcon = ({
   className,
   label: _label,
@@ -192,7 +104,7 @@ export const CalendarIcon = ({
   </svg>
 );
 
-//https://www.figma.com/design/Ut6x9ZMV1go2L7nyP9y0U9/Vuesax-Icons--Community-?node-id=201-7665&m=dev
+//Vuesax-Icons
 export const TaskIcon = ({
   className,
   label: _label,
@@ -253,7 +165,7 @@ export const SidebarPanelIcon = ({
   </svg>
 );
 
-//https://www.figma.com/design/Ut6x9ZMV1go2L7nyP9y0U9/Vuesax-Icons--Community-?node-id=201-7672&m=dev
+//Vuesax-Icons
 export const PlusIcon = ({
   className,
   label: _label,
@@ -374,6 +286,53 @@ export const CircleOutlineIcon = ({
   >
     <path
       d="M12 22C10.6167 22 9.31667 21.7375 8.1 21.2125C6.88333 20.6875 5.825 19.975 4.925 19.075C4.025 18.175 3.3125 17.1167 2.7875 15.9C2.2625 14.6833 2 13.3833 2 12C2 10.6167 2.2625 9.31667 2.7875 8.1C3.3125 6.88333 4.025 5.825 4.925 4.925C5.825 4.025 6.88333 3.3125 8.1 2.7875C9.31667 2.2625 10.6167 2 12 2C13.3833 2 14.6833 2.2625 15.9 2.7875C17.1167 3.3125 18.175 4.025 19.075 4.925C19.975 5.825 20.6875 6.88333 21.2125 8.1C21.7375 9.31667 22 10.6167 22 12C22 13.3833 21.7375 14.6833 21.2125 15.9C20.6875 17.1167 19.975 18.175 19.075 19.075C18.175 19.975 17.1167 20.6875 15.9 21.2125C14.6833 21.7375 13.3833 22 12 22ZM12 20C14.2333 20 16.125 19.225 17.675 17.675C19.225 16.125 20 14.2333 20 12C20 9.76667 19.225 7.875 17.675 6.325C16.125 4.775 14.2333 4 12 4C9.76667 4 7.875 4.775 6.325 6.325C4.775 7.875 4 9.76667 4 12C4 14.2333 4.775 16.125 6.325 17.675C7.875 19.225 9.76667 20 12 20Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+//自作
+export const CheckSquareFilledIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <rect width="20" height="20" rx="4" fill="currentColor" />
+    <path
+      d="M8.4 12.35L5.95 9.9C5.76667 9.71667 5.53333 9.625 5.25 9.625C4.96667 9.625 4.73333 9.71667 4.55 9.9C4.36667 10.0833 4.275 10.3167 4.275 10.6C4.275 10.8833 4.36667 11.1167 4.55 11.3L7.7 14.45C7.9 14.65 8.13333 14.75 8.4 14.75C8.66667 14.75 8.9 14.65 9.1 14.45L15.45 8.1C15.6333 7.91667 15.725 7.68333 15.725 7.4C15.725 7.11667 15.6333 6.88333 15.45 6.7C15.2667 6.51667 15.0333 6.425 14.75 6.425C14.4667 6.425 14.2333 6.51667 14.05 6.7L8.4 12.35Z"
+      fill="white"
+    />
+  </svg>
+);
+
+//自作
+export const SquareOutlineIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      d="M6 22C4.9 22 3.95833 21.6083 3.175 20.825C2.39167 20.0417 2 19.1 2 18V6C2 4.9 2.39167 3.95833 3.175 3.175C3.95833 2.39167 4.9 2 6 2H18C19.1 2 20.0417 2.39167 20.825 3.175C21.6083 3.95833 22 4.9 22 6V18C22 19.1 21.6083 20.0417 20.825 20.825C20.0417 21.6083 19.1 22 18 22H6ZM6 20H18C18.55 20 19.0208 19.8042 19.4125 19.4125C19.8042 19.0208 20 18.55 20 18V6C20 5.45 19.8042 4.97917 19.4125 4.5875C19.0208 4.19583 18.55 4 18 4H6C5.45 4 4.97917 4.19583 4.5875 4.5875C4.19583 4.97917 4 5.45 4 6V18C4 18.55 4.19583 19.0208 4.5875 19.4125C4.97917 19.8042 5.45 20 6 20Z"
       fill="currentColor"
     />
   </svg>

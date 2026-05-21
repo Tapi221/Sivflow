@@ -8,9 +8,12 @@ import type { Task } from "./task.types";
 type TaskCardProps = {
   task: Task;
   onDelete?: (id: string) => void;
+  onToggleDone?: (id: string, done: boolean) => void;
 };
 
-export const TaskCard = ({ task, onDelete }: TaskCardProps) => {
+export const TaskCard = ({ task, onDelete, onToggleDone }: TaskCardProps) => {
+  const isDone = task.status === "done";
+
   let category = CATEGORY_CONFIG[task.category];
   if (!category) {
     category = { bg: "#f3f4f6", text: "#6b7280" };
@@ -20,6 +23,20 @@ export const TaskCard = ({ task, onDelete }: TaskCardProps) => {
   if (task.dueDate) {
     formattedDate = format(new Date(task.dueDate), "MMM d");
   }
+
+  let titleClassName = "min-w-0 text-[13px] font-medium leading-snug text-[#1f2329]";
+  if (isDone) {
+    titleClassName = "min-w-0 text-[13px] font-medium leading-snug text-[#9aa0aa] line-through";
+  }
+
+  let checkboxLabel = "Mark task as done";
+  if (isDone) {
+    checkboxLabel = "Mark task as not started";
+  }
+
+  const handleToggleDone = () => {
+    onToggleDone?.(task.id, !isDone);
+  };
 
   let dateContent = <span />;
   if (formattedDate) {
@@ -63,10 +80,17 @@ export const TaskCard = ({ task, onDelete }: TaskCardProps) => {
         </svg>
       </button>
 
-      {/* タイトル */}
-      <p className="mb-2 pr-5 text-[13px] font-medium leading-snug text-[#1f2329]">
-        {task.title}
-      </p>
+      {/* タイトル + チェックボックス */}
+      <div className="mb-2 flex items-start gap-2 pr-5">
+        <input
+          type="checkbox"
+          checked={isDone}
+          aria-label={checkboxLabel}
+          className="mt-[1px] h-3.5 w-3.5 shrink-0 cursor-pointer rounded border-[#d1d5db] accent-[#4b36a8]"
+          onChange={handleToggleDone}
+        />
+        <p className={titleClassName}>{task.title}</p>
+      </div>
 
       {/* タグ行 */}
       <div className="mb-2.5 flex flex-wrap gap-1">
