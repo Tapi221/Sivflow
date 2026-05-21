@@ -90,7 +90,7 @@ export const TaskCard = ({
 
             <button
               type="button"
-              className="-mr-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded text-[#9ca3af] hover:bg-[#f3f4f6]"
+              className="-mr-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded text-[#9ca3af] opacity-0 transition-opacity hover:bg-[#f3f4f6] group-hover:opacity-100 focus-visible:opacity-100"
               aria-label="Task menu"
               onClick={() => {
                 if (onDelete) {
