@@ -30,7 +30,7 @@ export const CalendarToolbar = ({
   });
 
   return (
-    <div className="flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center justify-between overflow-hidden bg-white">
+    <div className="flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center justify-between overflow-hidden bg-white pr-[var(--workspace-content-gutter)]">
       {/* LEFT */}
       <div className="flex items-center gap-3">
         <ToggleCalendarTimelineTask activeMode={activeMode} tabs={tabs} />
