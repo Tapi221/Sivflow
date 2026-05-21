@@ -1,21 +1,19 @@
 import type { RefObject, UIEvent } from "react";
 
 import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
-
 import type {
   CalendarToolbarMode,
   CalendarViewMode,
   GoogleAccountDisplay,
   TimelineGridStyle,
 } from "./schedulePane.types";
-
 import type { GoogleCalendarEvent } from "./googlecalendar-integration/gcalSync.types";
 import type { buildTimelineColumns } from "./grid/TimelineDayView.shared";
 
 import { useCalendarLayout } from "./layout/calendar/useCalendarLayout";
-import { useCalendarNavigation } from "./hooks/useCalendarNavigation";
+import { useCalendarNavigation } from "./useCalendarNavigation";           // ✅ 修正
 import { useCalendarScrollController } from "./scroll/hooks/useCalendarScrollController";
-import { useCalendarVisibleRange } from "./hooks/useCalendarVisibleRange";
+import { useCalendarVisibleRange } from "./useCalendarVisibleRange";       // ✅ 修正
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 import { useTimelineGrid } from "./grid/useTimelineGrid";
 
@@ -80,10 +78,16 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     calendarBuffer: navigation.calendarBuffer,
   });
 
+  // ✅ useCalendarVisibleRange の戻り値に合わせてマッピング
+  // interactionDays  = バッファを含む操作対象全日（スクロール・イベント同期用）→ visibleDays として公開
+  // displayDays      = UI描画上の表示範囲のみ
+  const visibleDays = visibleRange.interactionDays;
+  const displayDays = visibleRange.displayDays;
+
   const layout = useCalendarLayout({
     viewportWidth: navigation.viewportWidth,
-    visibleDays: visibleRange.visibleDays,
-    displayDays: visibleRange.displayDays,
+    visibleDays,
+    displayDays,
     selectedViewMode: navigation.selectedViewMode,
     currentDate: navigation.currentDate,
     calendarBuffer: navigation.calendarBuffer,
@@ -98,7 +102,7 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
   const scroll = useCalendarScrollController({
     activeMode: navigation.activeMode,
     selectedViewMode: navigation.selectedViewMode,
-    visibleDays: visibleRange.visibleDays,
+    visibleDays,
     timelineColumns: timeline.timelineColumns,
     timelineColumnWidth: timeline.timelineColumnWidth,
     timelineAnchorColumnIndex: timeline.timelineAnchorColumnIndex,
@@ -112,11 +116,10 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
 
   const google = useGoogleCalendarLayer();
 
-  // ★ 修正ポイント：forceSync廃止 → rangeControllerベースへ
   useCalendarEventSync({
     activeMode: navigation.activeMode,
     selectedViewMode: navigation.selectedViewMode,
-    visibleDays: visibleRange.visibleDays,
+    visibleDays,
     monthTitleDate: navigation.monthTitleDate,
     googleCalendar: {
       selectedCalendarIds: google.selectedCalendarIds,
@@ -149,8 +152,8 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     activeMode: navigation.activeMode,
     setActiveMode: navigation.setActiveMode,
 
-    visibleDays: visibleRange.visibleDays,
-    displayDays: visibleRange.displayDays,
+    visibleDays,
+    displayDays,
 
     timelineColumns: timeline.timelineColumns,
     timelineColumnWidth: timeline.timelineColumnWidth,
