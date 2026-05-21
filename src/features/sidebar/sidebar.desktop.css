@@ -35,7 +35,7 @@
   justify-content: space-between;
 
   /* レール幅を常時適用 */
-  width: var(--app-sidebar-rail-width, 56px);
+  width: var(--app-sidebar-rail-width, 48px);
 
   min-width: 0;
   min-height: 0;
@@ -46,7 +46,7 @@
   overflow-x: hidden;
 
   /* レール用の狭いpadding */
-  padding: 16px 6px 12px;
+  padding: 16px 4px 12px;
 
   border-top-right-radius: 10px;
 
@@ -116,7 +116,7 @@
   gap: 8px;
 
   /* レール用padding */
-  padding: 8px 6px 0;
+  padding: 8px 4px 0;
 }
 
 /* ── ワークスペース（アバターのみ表示） ───────────────────── */
@@ -231,15 +231,16 @@
 
   display: flex;
   align-items: center;
+  justify-content: center;
 
-  /* レール: 全幅、左寄せ */
+  /* レール: 全幅、中央寄せ */
   width: 100%;
   min-width: 0;
   height: 32px;
 
   gap: 8px;
 
-  padding: 0 10px;
+  padding: 0;
 
   border-radius: 4px;
 

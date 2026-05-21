@@ -1,6 +1,6 @@
 .app-layout {
   --app-sidebar-width: 240px;
-  --app-sidebar-rail-width: 56px;
+  --app-sidebar-rail-width: 48px;
   --app-layout-padding-x: 0px;
 
   --app-titlebar-bg: linear-gradient(
