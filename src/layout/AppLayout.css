@@ -288,11 +288,6 @@
   overflow: clip;
 }
 
-.app-layout-route--schedule .workspace-shell__main,
-.app-layout-route--schedule .app-layout__main {
-  padding-right: 0;
-}
-
 .workspace-shell
   .explorer-chrome-body
   [data-explorer-sidebar-shell="true"]
