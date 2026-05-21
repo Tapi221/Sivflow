@@ -66,7 +66,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
     handlePrevious,
     handleNext,
     handleToday,
-    handleTimelineScroll,
     handleMonthCellSelectDate,
     addGoogleCalendar,
     removeGoogleAccount,
@@ -253,7 +252,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                     laneLabelWidth={C.TIMELINE_LANE_LABEL_WIDTH}
                     rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
                     scrollContainerRef={scrollContainerRef}
-                    onScroll={handleTimelineScroll}
                     onSelectDate={handleSidebarSelectDate}
                   />
                 ) : (
@@ -264,7 +262,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                     visibleEvents={calendarEvents}
                     calendarDayColumnWidth={calendarDayColumnWidth}
                     timelineGridStyle={timelineGridStyle}
-                    onScroll={handleTimelineScroll}
                     selectedDate={selectedDate}
                     onSelectDate={handleSidebarSelectDate}
                   />
