@@ -6,6 +6,7 @@ import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.al
 import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
+import { SidebarPanelIcon } from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
 // ==============================================
 
@@ -156,18 +157,7 @@ export const DayDetailPanel = ({
             hover:bg-[#f5f5f5]
           "
         >
-          <svg
-            viewBox="0 0 16 16"
-            fill="none"
-            className="h-4 w-4"
-          >
-            <path
-              d="M4 4L12 12M12 4L4 12"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
+          <SidebarPanelIcon className="h-4 w-4 -scale-x-100" />
         </button>
       </div>
 
