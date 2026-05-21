@@ -1,13 +1,13 @@
 import {
-  AnimatedCalendarCheckboxBase,
-  type AnimatedCalendarCheckboxBaseProps,
+  AnimatedCheckboxBase,
+  type AnimatedCheckboxBaseProps,
 } from "./AnimatedCheckboxBase";
 
-type AnimatedCalendarRadioCheckboxProps = Omit<
-  AnimatedCalendarCheckboxBaseProps,
+type AnimatedRadioCheckboxProps = Omit<
+  AnimatedCheckboxBaseProps,
   "shape" | "variant" | "indeterminate"
 >;
 
-export const AnimatedCalendarRadioCheckbox = (props: AnimatedCalendarRadioCheckboxProps) => {
-  return <AnimatedCalendarCheckboxBase {...props} shape="circle" variant="radio" />;
+export const AnimatedRadioCheckbox = (props: AnimatedRadioCheckboxProps) => {
+  return <AnimatedCheckboxBase {...props} shape="circle" variant="radio" />;
 };

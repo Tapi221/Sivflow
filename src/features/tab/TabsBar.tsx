@@ -38,8 +38,8 @@ const resolveTabsSurfaceStyle = (isTitlebar: boolean): CSSProperties => ({
 
 const resolveInactiveTabTextClassName = (isTitlebar: boolean): string =>
   isTitlebar
-    ? "text-[var(--app-titlebar-text)] hover:border-white/10 hover:text-[var(--app-titlebar-text-strong)]"
-    : "text-[var(--app-sidebar-text)] hover:border-black/8 hover:text-[var(--app-sidebar-text-strong)]";
+    ? "text-[var(--app-titlebar-text)] hover:text-[var(--app-titlebar-text-strong)]"
+    : "text-[var(--app-sidebar-text)] hover:text-[var(--app-sidebar-text-strong)]";
 
 const resolveInactiveTabIconClassName = (isTitlebar: boolean): string =>
   isTitlebar
@@ -60,11 +60,11 @@ const resolveCloseButtonClassName = (isTitlebar: boolean): string =>
 const resolveAddButtonClassName = (isTitlebar: boolean): string =>
   isTitlebar
     ? [
-      "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-transparent outline-none transition-colors",
+      "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border-0 outline-none transition-colors",
       "bg-transparent text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
     ].join(" ")
     : [
-      "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-transparent outline-none transition-colors",
+      "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border-0 outline-none transition-colors",
       "text-[var(--app-sidebar-text)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
     ].join(" ");
 
@@ -223,14 +223,14 @@ export const WorkspaceTabsBar = ({
         ...TABS_DRAG_STYLE,
       }}
       className={cn(
-        "explorer-chrome-font explorer-tab-bar relative z-30 flex shrink-0 items-end gap-0 overflow-hidden",
+        "explorer-chrome-font explorer-tab-bar explorer-workspace-tabs-bar relative z-30 flex shrink-0 items-end gap-0 overflow-visible border-b-0",
         isTitlebar
           ? "h-full min-w-0 flex-1 px-0 pt-0"
-          : ["h-[40px] w-full min-w-0 border-b border-black/10", "px-1.5 pt-0"],
+          : "h-[40px] w-full min-w-0 px-1.5 pt-0",
         className,
       )}
     >
-      <div className="explorer-tab-list flex min-w-0 items-end overflow-hidden gap-0">
+      <div className="explorer-tab-list explorer-workspace-tabs-list flex min-w-0 items-end gap-0 overflow-visible">
         {tabs.map((tab) => {
           const selected = tab.id === activeTabId;
 
@@ -243,7 +243,7 @@ export const WorkspaceTabsBar = ({
             resolveInactiveTabIconClassName(isTitlebar);
 
           return (
-            <div key={tab.id} className="relative flex items-end">
+            <div key={tab.id} className="relative flex items-end overflow-visible">
               <div
                 style={{
                   ...tabsSurfaceStyle,
@@ -253,12 +253,12 @@ export const WorkspaceTabsBar = ({
                 data-workspace-tab-kind={tab.kind}
                 data-workspace-tab-active={selected ? "true" : undefined}
                 className={cn(
-                  "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-hidden border text-[13px] transition-[background-color,border-color,color,box-shadow] duration-150",
+                  "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-visible border-0 text-[13px] transition-[background-color,color,box-shadow] duration-150",
                   "mb-0 h-[36px] rounded-tl-[8px] rounded-tr-[8px]",
                   selected
-                    ? "explorer-workspace-tab--active border-black/12 border-b-[var(--app-active-tab-bg,#ffffff)] text-[var(--app-sidebar-text-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]"
+                    ? "explorer-workspace-tab--active text-[var(--app-sidebar-text-strong)] shadow-none"
                     : cn(
-                      "explorer-workspace-tab--inactive border-transparent",
+                      "explorer-workspace-tab--inactive",
                       inactiveTextClassName,
                     ),
                   resolveTabWidthClassName(tab),
