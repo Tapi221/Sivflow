@@ -52,13 +52,19 @@ export const GridCalendarDayDetailDesktop = ({
               className="
                 absolute
                 right-2
-                top-[-6px]
+                top-0
+                flex
+                h-6
+                -translate-y-1/2
+                select-none
+                items-center
+                justify-end
                 bg-transparent
                 px-[2px]
-                text-[10px]
-                leading-none
-                font-medium
-                text-[#b6b6be]
+                text-[12px]
+                font-semibold
+                tabular-nums
+                text-[#b8bcc5]
               "
             >
               {hour}:00
