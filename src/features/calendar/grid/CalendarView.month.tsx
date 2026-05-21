@@ -69,7 +69,6 @@ export const CalendarMonthView = ({
       <div
         ref={scroll.scrollContainerRef}
         className="calendar-month-scroll min-h-0 flex-1 overflow-y-auto bg-white"
-        onScroll={scroll.handleScroll}
       >
         <GridCalendarMonthDesktop
           today={today}
