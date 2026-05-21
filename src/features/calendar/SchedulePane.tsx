@@ -78,6 +78,9 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const showDayDetailPanel =
     canShowDayDetailPanel && isDayDetailPanelOpen;
 
+  const isMonthCalendarView =
+    activeMode === "calendar" && selectedViewMode === "month";
+
   const handleSidebarSelectDateAndOpen = useCallback(
     (date: Date) => {
       handleSidebarSelectDate(date);
@@ -104,6 +107,38 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const handleOpenDayDetailPanel = useCallback(() => {
     setIsDayDetailPanelOpen(true);
   }, []);
+
+  const renderViewHeader = (className: string) => (
+    <div className={className}>
+      <div className="flex min-w-0 items-center gap-3">
+        {selectedViewMode === "month" ? (
+          <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
+            {format(monthTitleDate, "MMMM yyyy")}
+          </h1>
+        ) : monthLabel ? (
+          <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
+            {monthLabel}
+          </h1>
+        ) : (
+          <div aria-hidden="true" className="h-6 w-24" />
+        )}
+      </div>
+
+      <div className="flex items-center gap-2">
+        <ViewModeDropdown
+          value={selectedViewMode}
+          onChange={handleSelectViewMode}
+          options={VIEW_OPTIONS}
+        />
+
+        <TodayBar
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          onToday={handleToday}
+        />
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-white">
@@ -142,79 +177,65 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             "flex min-h-0 min-w-0 flex-1 flex-col bg-white",
             activeMode === "task"
               ? "overflow-hidden"
-              : showDayDetailPanel
-                ? "px-3 pt-4"
-                : "px-5 pt-4",
+              : isMonthCalendarView
+                ? "px-4 pt-4 pb-0"
+                : showDayDetailPanel
+                  ? "px-3 pt-4"
+                  : "px-5 pt-4",
           )}
         >
-          {activeMode !== "task" && (
-            <div className="mb-4 flex shrink-0 items-center justify-between">
-              <div className="flex min-w-0 items-center gap-3">
-                {selectedViewMode === "month" ? (
-                  <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
-                    {format(monthTitleDate, "MMMM yyyy")}
-                  </h1>
-                ) : monthLabel ? (
-                  <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
-                    {monthLabel}
-                  </h1>
-                ) : (
-                  <div aria-hidden="true" className="h-6 w-24" />
-                )}
-              </div>
+          {activeMode === "task" ? (
+            <TaskView googleAccounts={googleAccounts} />
+          ) : isMonthCalendarView ? (
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-[24px] border border-b-0 border-[#e3e5ea] bg-[#f0f2f5] shadow-[0_10px_30px_rgba(15,23,42,0.12)]">
+              {renderViewHeader(
+                "mb-3 flex shrink-0 items-center justify-between px-4 pt-4",
+              )}
 
-              <div className="flex items-center gap-2">
-                <ViewModeDropdown
-                  value={selectedViewMode}
-                  onChange={handleSelectViewMode}
-                  options={VIEW_OPTIONS}
-                />
-
-                <TodayBar
-                  onPrevious={handlePrevious}
-                  onNext={handleNext}
-                  onToday={handleToday}
+              <div className="mx-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-2xl border border-b-0 border-[#e9eaed] bg-white">
+                <CalendarMonthView
+                  currentDate={currentDate}
+                  selectedDate={selectedDate}
+                  scrollTargetToken={monthScrollTargetToken}
+                  visibleEvents={calendarEvents}
+                  onSelectDate={handleMonthCellSelectDateAndOpen}
+                  onVisibleMonthChange={handleVisibleMonthChange}
                 />
               </div>
             </div>
-          )}
-
-          {activeMode === "task" ? (
-            <TaskView googleAccounts={googleAccounts} />
-          ) : activeMode === "timeline" ? (
-            <CalendarTimelineDayView
-              viewMode={selectedViewMode}
-              anchorDate={currentDate}
-              timelineUnitBuffer={{ before: 7, after: 14 }}
-              selectedDate={currentDate}
-              dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
-              laneLabelWidth={C.TIMELINE_LANE_LABEL_WIDTH}
-              rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
-              scrollContainerRef={scrollContainerRef}
-              onScroll={handleTimelineScroll}
-              onSelectDate={handleSidebarSelectDate}
-            />
-          ) : selectedViewMode === "month" ? (
-            <CalendarMonthView
-              currentDate={currentDate}
-              selectedDate={selectedDate}
-              scrollTargetToken={monthScrollTargetToken}
-              visibleEvents={calendarEvents}
-              onSelectDate={handleMonthCellSelectDateAndOpen}
-              onVisibleMonthChange={handleVisibleMonthChange}
-            />
           ) : (
-            <CalendarWeekDayGrid
-              headerScrollRef={headerScrollRef}
-              scrollContainerRef={scrollContainerRef}
-              visibleDays={visibleDays}
-              visibleEvents={calendarEvents}
-              calendarDayColumnWidth={calendarDayColumnWidth}
-              timelineGridStyle={timelineGridStyle}
-              onScroll={handleTimelineScroll}
-              selectedDate={selectedDate}
-              onSelectDate={handleSidebarSelectDate}
-            />
+            <>
+              {renderViewHeader(
+                "mb-4 flex shrink-0 items-center justify-between",
+              )}
+
+              {activeMode === "timeline" ? (
+                <CalendarTimelineDayView
+                  viewMode={selectedViewMode}
+                  anchorDate={currentDate}
+                  timelineUnitBuffer={{ before: 7, after: 14 }}
+                  selectedDate={currentDate}
+                  dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
+                  laneLabelWidth={C.TIMELINE_LANE_LABEL_WIDTH}
+                  rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
+                  scrollContainerRef={scrollContainerRef}
+                  onScroll={handleTimelineScroll}
+                  onSelectDate={handleSidebarSelectDate}
+                />
+              ) : (
+                <CalendarWeekDayGrid
+                  headerScrollRef={headerScrollRef}
+                  scrollContainerRef={scrollContainerRef}
+                  visibleDays={visibleDays}
+                  visibleEvents={calendarEvents}
+                  calendarDayColumnWidth={calendarDayColumnWidth}
+                  timelineGridStyle={timelineGridStyle}
+                  onScroll={handleTimelineScroll}
+                  selectedDate={selectedDate}
+                  onSelectDate={handleSidebarSelectDate}
+                />
+              )}
+            </>
           )}
         </div>
 

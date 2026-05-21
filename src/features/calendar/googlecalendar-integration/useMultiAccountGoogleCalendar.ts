@@ -46,13 +46,13 @@ type AccountsAction =
   | { type: "REMOVE"; id: string }
   | { type: "SET_CONNECTING"; id: string; value: boolean }
   | {
-      type: "SET_TOKEN";
-      id: string;
-      accessToken: string;
-      refreshToken?: string | null;
-      accountName?: string | null;
-      accountPhotoUrl?: string | null;
-    }
+    type: "SET_TOKEN";
+    id: string;
+    accessToken: string;
+    refreshToken?: string | null;
+    accountName?: string | null;
+    accountPhotoUrl?: string | null;
+  }
   | { type: "SET_CALENDARS"; id: string; calendars: GoogleCalendarListItem[] }
   | { type: "SET_CALENDAR_IDS"; id: string; ids: string[] }
   | { type: "TOGGLE_CALENDAR"; id: string; calendarId: string }
@@ -67,13 +67,13 @@ type EventsAction =
   | { type: "UPSERT"; accountId: string; event: GoogleCalendarEvent }
   | { type: "DELETE"; accountId: string; eventId: string }
   | {
-      type: "REPLACE_RANGE";
-      accountId: string;
-      calendarId: string;
-      rangeStart: Date;
-      rangeEnd: Date;
-      events: GoogleCalendarEvent[];
-    }
+    type: "REPLACE_RANGE";
+    accountId: string;
+    calendarId: string;
+    rangeStart: Date;
+    rangeEnd: Date;
+    events: GoogleCalendarEvent[];
+  }
   | { type: "CLEAR_ACCOUNT"; accountId: string };
 
 const overlapsRange = (
@@ -152,9 +152,9 @@ const reduceAccounts = (
       return state.map((a) =>
         a.id === action.id
           ? {
-              ...a,
-              syncState: action.syncState,
-              connectionStatus:
+            ...a,
+            syncState: action.syncState,
+            connectionStatus:
                 action.syncState === "needsReconnect"
                   ? "needsReconnect"
                   : action.syncState === "error"
@@ -162,11 +162,11 @@ const reduceAccounts = (
                     : a.accessToken
                       ? "connected"
                       : a.connectionStatus,
-              error:
+            error:
                 action.syncState === "idle" && a.connectionStatus === "error"
                   ? null
                   : a.error,
-            }
+          }
           : a,
       );
 
@@ -179,12 +179,12 @@ const reduceAccounts = (
       return state.map((a) =>
         a.id === action.id
           ? {
-              ...a,
-              accessToken: null,
-              connectionStatus: "needsReconnect",
-              syncState: "needsReconnect",
-              error: action.error ?? "Google Calendar の再連携が必要です",
-            }
+            ...a,
+            accessToken: null,
+            connectionStatus: "needsReconnect",
+            syncState: "needsReconnect",
+            error: action.error ?? "Google Calendar の再連携が必要です",
+          }
           : a,
       );
 
@@ -192,13 +192,13 @@ const reduceAccounts = (
       return state.map((a) =>
         a.id === action.id
           ? {
-              ...a,
-              error: action.error,
-              connectionStatus:
+            ...a,
+            error: action.error,
+            connectionStatus:
                 action.error && a.syncState !== "needsReconnect"
                   ? "error"
                   : a.connectionStatus,
-            }
+          }
           : a,
       );
 
@@ -439,18 +439,18 @@ export const useMultiAccountGoogleCalendar = () => {
             accountsRef.current = accountsRef.current.map((current) =>
               current.id === accountId
                 ? {
-                    ...current,
-                    accessToken: result.accessToken,
-                    refreshToken,
-                    name: result.accountName ?? current.name,
-                    photoUrl: result.accountPhotoUrl ?? current.photoUrl,
-                    connectionStatus: "connected",
-                    syncState:
+                  ...current,
+                  accessToken: result.accessToken,
+                  refreshToken,
+                  name: result.accountName ?? current.name,
+                  photoUrl: result.accountPhotoUrl ?? current.photoUrl,
+                  connectionStatus: "connected",
+                  syncState:
                       current.syncState === "needsReconnect"
                         ? "idle"
                         : current.syncState,
-                    error: null,
-                  }
+                  error: null,
+                }
                 : current,
             );
 
@@ -488,10 +488,10 @@ export const useMultiAccountGoogleCalendar = () => {
             accountsRef.current = accountsRef.current.map((current) =>
               current.id === accountId
                 ? {
-                    ...current,
-                    calendars: list,
-                    error: null,
-                  }
+                  ...current,
+                  calendars: list,
+                  error: null,
+                }
                 : current,
             );
 
