@@ -57,6 +57,7 @@ type WorkspaceTabsState = {
   openSectionTab: (sectionKey: WorkspaceSidebarSection) => WorkspaceTab["id"];
   selectTab: (tabId: WorkspaceTab["id"]) => void;
   closeTab: (tabId: WorkspaceTab["id"]) => void;
+  reorderTabs: (nextTabs: WorkspaceTab[]) => void;
   updateExplorerTabState: (
     tabId: WorkspaceExplorerTab["id"],
     explorerState: ExplorerRouteState,
@@ -146,6 +147,23 @@ const upsertTab = (
   const nextTabs = [...tabs];
   nextTabs[existingIndex] = nextTab;
   return nextTabs;
+};
+
+const reorderTabsByIds = (
+  currentTabs: WorkspaceTab[],
+  nextTabs: WorkspaceTab[],
+): WorkspaceTab[] | null => {
+  if (currentTabs.length !== nextTabs.length) return null;
+
+  const currentTabsById = new Map(
+    currentTabs.map((tab) => [tab.id, tab]),
+  );
+
+  const reorderedTabs = nextTabs.map((tab) => currentTabsById.get(tab.id));
+
+  if (reorderedTabs.some((tab) => !tab)) return null;
+
+  return reorderedTabs as WorkspaceTab[];
 };
 
 const createRouteTabFromSection = (
@@ -344,6 +362,16 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
       tabs: nextTabs,
       activeTabId: nextActiveTabId,
       lastOpenedTabId: nextLastOpenedTabId,
+    });
+  },
+
+  reorderTabs: (nextTabs) => {
+    set((state) => {
+      const reorderedTabs = reorderTabsByIds(state.tabs, nextTabs);
+
+      if (!reorderedTabs) return state;
+
+      return { tabs: reorderedTabs };
     });
   },
 

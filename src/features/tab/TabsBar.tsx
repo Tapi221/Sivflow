@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import { motion } from "framer-motion";
+import { Reorder } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
@@ -230,6 +230,7 @@ export const WorkspaceTabsBar = ({
   );
   const selectTab = useWorkspaceTabsStore((state) => state.selectTab);
   const closeTab = useWorkspaceTabsStore((state) => state.closeTab);
+  const reorderTabs = useWorkspaceTabsStore((state) => state.reorderTabs);
   const createExplorerTab = useWorkspaceTabsStore(
     (state) => state.createExplorerTab,
   );
@@ -336,8 +337,12 @@ export const WorkspaceTabsBar = ({
           className,
         )}
       >
-        <div
+        <Reorder.Group
           ref={listRef}
+          as="div"
+          axis="x"
+          values={tabs}
+          onReorder={reorderTabs}
           className="explorer-tab-list explorer-workspace-tabs-list relative flex min-w-0 items-end gap-0 overflow-visible"
         >
           <div
@@ -394,11 +399,15 @@ export const WorkspaceTabsBar = ({
             }
 
             return (
-              <motion.div
+              <Reorder.Item
                 key={tab.id}
-                layout
+                as="div"
+                value={tab}
+                dragElastic={0.08}
+                dragMomentum={false}
                 transition={{ type: "spring", stiffness: 520, damping: 42 }}
-                className="explorer-workspace-tab-slot relative flex min-w-[92px] max-w-[180px] flex-[1_1_150px] items-end overflow-visible"
+                style={interactiveStyle}
+                className="explorer-workspace-tab-slot relative flex min-w-[92px] max-w-[180px] flex-[1_1_150px] cursor-grab items-end overflow-visible active:cursor-grabbing"
                 data-workspace-tab-slot-active={selected ? "true" : undefined}
               >
                 <div
@@ -474,10 +483,10 @@ export const WorkspaceTabsBar = ({
                     </button>
                   ) : null}
                 </div>
-              </motion.div>
+              </Reorder.Item>
             );
           })}
-        </div>
+        </Reorder.Group>
 
         <button
           type="button"
