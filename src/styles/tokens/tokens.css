@@ -167,9 +167,21 @@
     --font-size-meta: var(--ds-layout-font-size-meta);
 
     --scrollbar-track: transparent;
-    --scrollbar-thumb: #f0efe9;
-    --scrollbar-thumb-hover: color-mix(in srgb, #f0efe9 86%, black 14%);
-    --scrollbar-thumb-active: color-mix(in srgb, #f0efe9 74%, black 26%);
+    --scrollbar-thumb: color-mix(
+      in srgb,
+      var(--ds-color-neutral-200) 88%,
+      var(--ds-color-primary-100) 12%
+    );
+    --scrollbar-thumb-hover: color-mix(
+      in srgb,
+      var(--ds-color-neutral-300) 82%,
+      var(--ds-color-primary-200) 18%
+    );
+    --scrollbar-thumb-active: color-mix(
+      in srgb,
+      var(--ds-color-neutral-400) 74%,
+      var(--ds-color-primary-300) 26%
+    );
     --scrollbar-size: calc(var(--ds-layout-scrollbar-size) * var(--ui-scale));
 
     /* Card interaction state tokens */
