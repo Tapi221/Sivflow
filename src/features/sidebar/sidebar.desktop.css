@@ -182,13 +182,13 @@
 
   pointer-events: auto;
 
-  background: var(--app-active-tab-bg, #ffffff);
-  color: var(--app-sidebar-icon, #ababab);
+  background: transparent;
+  color: var(--app-sidebar-icon);
 }
 
 .app-sidebar--closed .app-sidebar__toggle:hover {
-  background: rgba(15, 23, 42, 0.06);
-  color: var(--app-sidebar-text, #5b5b5b);
+  background: var(--app-sidebar-hover-bg);
+  color: var(--app-sidebar-text-hover);
 }
 
 .app-sidebar--closed .app-sidebar__nav,
