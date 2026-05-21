@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 
@@ -68,11 +69,45 @@ export const GridCalendarMonthDesktop = ({
   handleResizeKeyDown,
   handleResizePointerDown,
 }: GridCalendarMonthDesktopProps) => {
-  const normalizedEvents =
-    visibleEvents.map((e) => ({
-      ...e,
-      startsAt: new Date(e.startsAt),
-    }));
+  const eventsByDay = useMemo(() => {
+    const groupedEvents = new Map<string, GoogleCalendarEvent[]>();
+
+    for (const event of visibleEvents) {
+      const startsAt =
+        event.startsAt instanceof Date
+          ? event.startsAt
+          : new Date(event.startsAt);
+
+      if (!Number.isFinite(startsAt.getTime())) continue;
+
+      const eventWithDate =
+        startsAt === event.startsAt
+          ? event
+          : {
+              ...event,
+              startsAt,
+            };
+
+      const dayKey = format(startsAt, "yyyy-MM-dd");
+      const dayEvents = groupedEvents.get(dayKey);
+
+      if (dayEvents) {
+        dayEvents.push(eventWithDate);
+      } else {
+        groupedEvents.set(dayKey, [eventWithDate]);
+      }
+    }
+
+    for (const dayEvents of groupedEvents.values()) {
+      dayEvents.sort(
+        (a, b) =>
+          a.startsAt.getTime() -
+          b.startsAt.getTime(),
+      );
+    }
+
+    return groupedEvents;
+  }, [visibleEvents]);
 
   return (
     <>
@@ -121,6 +156,7 @@ export const GridCalendarMonthDesktop = ({
               week.key
             }
             className="
+              calendar-month-week-row
               grid
               grid-cols-7
               bg-white
@@ -149,18 +185,7 @@ export const GridCalendarMonthDesktop = ({
                   index % 7 === 6;
 
                 const sortedEvents =
-                  normalizedEvents
-                    .filter((e) =>
-                      isSameDay(
-                        e.startsAt,
-                        day.date,
-                      ),
-                    )
-                    .sort(
-                      (a, b) =>
-                        a.startsAt.getTime() -
-                        b.startsAt.getTime(),
-                    );
+                  eventsByDay.get(day.key) ?? [];
 
                 const visibleChips =
                   sortedEvents.slice(
@@ -186,7 +211,7 @@ export const GridCalendarMonthDesktop = ({
                         "bg-[#f4f5f7]",
                       !selected &&
                         !isToday &&
-                        "hover:bg-[#eceef1]",
+                        "calendar-month-day-cell-hoverable",
                     )}
                   >
                     <button
