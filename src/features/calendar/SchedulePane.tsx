@@ -16,6 +16,7 @@ import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
 import { useTaskCalendarEvents } from "./task/useTaskCalendarEvents";
 import { SidebarPanelIcon } from "@/components/icons/schedule.icons";
+import { useDateFnsLocale, useMonthLabelFormat } from "@/i18n/useT";
 
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,8 @@ const CALENDAR_PANEL_SHADOW_CLASS =
 export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const pane = useSchedulePane();
   const taskCalendarEvents = useTaskCalendarEvents();
+  const dateFnsLocale = useDateFnsLocale();
+  const monthLabelFormat = useMonthLabelFormat();
   const [isDayDetailPanelOpen, setIsDayDetailPanelOpen] = useState(true);
 
   const {
@@ -118,7 +121,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
       <div className={className}>
         <div className="flex min-w-0 items-center gap-3">
           <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
-            {format(headerTitleDate, "MMMM yyyy")}
+            {format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale })}
           </h1>
         </div>
 
