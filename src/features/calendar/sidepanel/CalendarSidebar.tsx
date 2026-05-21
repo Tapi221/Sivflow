@@ -10,11 +10,11 @@ import {
 
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import * as T from "@/features/calendar/calendar.text";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { AnimatedCircleCheckbox } from "@/features/calendar/chip/checkbox/AnimatedCircleCheckbox";
 import { GoogleAccountChip } from "@/features/calendar/chip/GoogleAccountChip";
 import { CalendarIcon, PlusIcon } from "@/components/icons/schedule.icons";
+import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
 import type {
@@ -234,6 +234,7 @@ export const CalendarSidebar = ({
   onRetryAccount,
   onToggleCalendar,
 }: CalendarSidebarProps) => {
+  const t = useT();
   const miniCalendarDays = useMemo(
     () => buildMiniCalendarDays(monthDate, selectedDate),
     [monthDate, selectedDate],
@@ -275,7 +276,7 @@ export const CalendarSidebar = ({
         </div>
 
         <div className="grid grid-cols-7 px-0.5">
-          {T.MINI_CALENDAR_WEEKDAYS.map((weekday, index) => (
+          {t.miniCalendarWeekdays.map((weekday, index) => (
             <span
               key={`${weekday}-${index}`}
               className="flex h-6 items-center justify-center text-[11px] font-semibold uppercase text-[#9aa0aa]"
