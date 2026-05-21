@@ -129,8 +129,8 @@ const buildAuthorizeUrl = ({
     ...(silent
       ? {}
       : {
-          prompt: "consent select_account",
-        }),
+        prompt: "consent select_account",
+      }),
   });
 
   return `${GOOGLE_OAUTH_AUTHORIZE_ENDPOINT}?${params.toString()}`;
