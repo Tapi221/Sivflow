@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/schedule.icons";
 import { AnimatedSquareCheckbox } from "@/features/calendar/chip/checkbox/AnimatedSquareCheckbox";
 import { GoogleAccountChip } from "@/features/calendar/chip/GoogleAccountChip";
+import { cn } from "@/lib/utils";
 import { CATEGORY_CONFIG, PRIORITY_CONFIG } from "./task.types";
 import type { Task } from "./task.types";
 
@@ -9,6 +10,7 @@ type TaskCardProps = {
   task: Task;
   accountName?: string | null;
   accountPhotoUrl?: string | null;
+  isDragging?: boolean;
   onDelete?: (id: string) => void;
   onToggleDone?: (id: string, done: boolean) => void;
 };
@@ -31,6 +33,7 @@ export const TaskCard = ({
   task,
   accountName,
   accountPhotoUrl,
+  isDragging = false,
   onDelete,
   onToggleDone,
 }: TaskCardProps) => {
@@ -62,7 +65,12 @@ export const TaskCard = ({
   }
 
   return (
-    <div className="group relative rounded-lg border border-[#e9eaed] bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+    <div
+      className={cn(
+        "group relative rounded-lg border border-[#e9eaed] bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)]",
+        isDragging && "shadow-[0_8px_20px_rgba(15,23,42,0.16)]",
+      )}
+    >
       <div className="flex items-start gap-3">
         <button
           type="button"
