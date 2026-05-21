@@ -4,6 +4,8 @@ import { TaskColumn } from "./TaskColumn";
 
 type TaskBoardViewProps = {
   tasksByStatus: Record<TaskStatus, Task[]>;
+  accountName?: string | null;
+  accountPhotoUrl?: string | null;
   onAddTask: (status: string) => void;
   onDeleteTask: (taskId: string) => void;
   onToggleTaskDone: (taskId: string, done: boolean) => void;
@@ -11,6 +13,8 @@ type TaskBoardViewProps = {
 
 export const TaskBoardView = ({
   tasksByStatus,
+  accountName,
+  accountPhotoUrl,
   onAddTask,
   onDeleteTask,
   onToggleTaskDone,
@@ -23,6 +27,8 @@ export const TaskBoardView = ({
             key={col.id}
             column={col}
             tasks={tasksByStatus[col.id] ?? []}
+            accountName={accountName}
+            accountPhotoUrl={accountPhotoUrl}
             onAddTask={onAddTask}
             onDeleteTask={onDeleteTask}
             onToggleTaskDone={onToggleTaskDone}

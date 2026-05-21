@@ -3,6 +3,7 @@ import { AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { TASK_COLUMNS } from "./task.types";
 import type { TaskStatus } from "./task.types";
+import type { GoogleAccountDisplay } from "../schedulePane.types";
 import { useTaskStore } from "./useTaskStore";
 import { NewTaskModal } from "../modal/NewTaskModal";
 import { type BoardListViewMode } from "../chip/Toggle.boardlist";
@@ -12,7 +13,11 @@ import { TaskListView } from "./TaskListView";
 
 // ==============================================
 
-export const TaskView = () => {
+type TaskViewProps = {
+  googleAccounts?: GoogleAccountDisplay[];
+};
+
+export const TaskView = ({ googleAccounts = [] }: TaskViewProps) => {
   const { tasks, addTask, deleteTask, moveTask } = useTaskStore();
   const [viewMode, setViewMode] = useState<BoardListViewMode>("board");
   const [showModal, setShowModal] = useState(false);
@@ -21,6 +26,17 @@ export const TaskView = () => {
   const [filterDate, setFilterDate] = useState<string | null>(
     format(new Date(), "MMM d"),
   );
+
+  const taskAccount = useMemo(() => {
+    return (
+      googleAccounts.find((account) => account.photoUrl) ??
+      googleAccounts[0] ??
+      null
+    );
+  }, [googleAccounts]);
+
+  const taskAccountName = taskAccount?.name ?? taskAccount?.email ?? null;
+  const taskAccountPhotoUrl = taskAccount?.photoUrl ?? null;
 
   const tasksByStatus = useMemo(() => {
     return TASK_COLUMNS.reduce(
@@ -65,6 +81,8 @@ export const TaskView = () => {
       {viewMode === "board" ? (
         <TaskBoardView
           tasksByStatus={tasksByStatus}
+          accountName={taskAccountName}
+          accountPhotoUrl={taskAccountPhotoUrl}
           onAddTask={handleAddTask}
           onDeleteTask={deleteTask}
           onToggleTaskDone={handleToggleTaskDone}
