@@ -17,7 +17,6 @@ type HoverTooltipProps = {
   className?: string;
   tooltipClassName?: string;
   disabled?: boolean;
-  showOnFocus?: boolean;
 };
 
 const getTransform = (side: TooltipSide) => {
@@ -83,7 +82,6 @@ export const HoverTooltip = ({
   className,
   tooltipClassName,
   disabled = false,
-  showOnFocus = true,
 }: HoverTooltipProps) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
   const [position, setPosition] = useState<TooltipPosition | null>(null);
@@ -124,8 +122,6 @@ export const HoverTooltip = ({
         className={cn("relative flex", className)}
         onMouseEnter={showTooltip}
         onMouseLeave={hideTooltip}
-        onFocus={showOnFocus ? showTooltip : undefined}
-        onBlur={showOnFocus ? hideTooltip : undefined}
       >
         {children}
       </div>
