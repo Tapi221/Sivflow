@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, type Transition } from "framer-motion";
 
 import type { CalendarWorkspaceToolbarProps } from "../schedulePane.types";
 import {
@@ -16,6 +16,11 @@ const TAB_ICON_MAP = {
 } as const;
 
 const TAB_INDICATOR_ID = "calendar-tab-indicator";
+const TAB_MOTION_TRANSITION: Transition = {
+  type: "tween",
+  duration: 0.3,
+  ease: [0.22, 1, 0.36, 1],
+};
 
 type CalendarTimelineTaskTab = {
   value: CalendarWorkspaceToolbarProps["activeMode"];
@@ -58,7 +63,7 @@ export const ToggleCalendarTimelineTask = ({
               "relative z-10 flex h-7 w-full min-w-0 items-center justify-center gap-1.5 rounded-lg px-2",
               "appearance-none select-none",
               "text-[12px] font-medium leading-none",
-              "outline-none ring-0 transition-colors duration-200",
+              "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
               "focus:outline-none focus:ring-0 focus-visible:outline-none",
               isActive
                 ? "text-[#193a5c]"
@@ -69,17 +74,13 @@ export const ToggleCalendarTimelineTask = ({
               <motion.span
                 layoutId={TAB_INDICATOR_ID}
                 className="absolute inset-0 -z-10 rounded-lg border border-[#e4eaf1] bg-white"
-                transition={{
-                  type: "spring",
-                  stiffness: 420,
-                  damping: 34,
-                }}
+                transition={TAB_MOTION_TRANSITION}
               />
             )}
 
             <Icon
               className={cn(
-                "block h-4 w-4 shrink-0 transition-colors duration-200",
+                "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
                 isActive ? "text-[#193a5c]" : "text-[#9aa3b1]",
               )}
             />
