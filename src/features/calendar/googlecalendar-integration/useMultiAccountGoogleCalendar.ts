@@ -293,6 +293,17 @@ const resolveSelectedCalendarIds = (
   return storedIds.length > 0 ? storedIds : getDefaultCalendarIds(calendars);
 };
 
+const getErrorStatus = (error: unknown): number | undefined => {
+  if (!(error instanceof Error)) return undefined;
+  return (error as Error & { status?: number }).status;
+};
+
+const isUnauthorizedError = (error: unknown): boolean =>
+  getErrorStatus(error) === 401;
+
+const toErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => ({
   id: stored.id,
   email: stored.email,
@@ -402,69 +413,101 @@ export const useMultiAccountGoogleCalendar = () => {
               return false;
             }
 
+            let result: Awaited<ReturnType<typeof refreshCalendarAccessToken>>;
+
             try {
-              const result = await refreshCalendarAccessToken({
+              result = await refreshCalendarAccessToken({
                 refreshToken: account.refreshToken,
               });
-
-              updateStoredAccountToken(
-                accountId,
-                result.accessToken,
-                result.refreshToken,
-                {
-                  name: result.accountName,
-                  photoUrl: result.accountPhotoUrl,
-                },
-              );
-
-              const list = await fetchCalendarList(result.accessToken);
-              const refreshToken = result.refreshToken ?? account.refreshToken;
-
-              accountsRef.current = accountsRef.current.map((current) =>
-                current.id === accountId
-                  ? {
-                      ...current,
-                      accessToken: result.accessToken,
-                      refreshToken,
-                      name: result.accountName ?? current.name,
-                      photoUrl: result.accountPhotoUrl ?? current.photoUrl,
-                      calendars: list,
-                      connectionStatus: "connected",
-                      syncState:
-                        current.syncState === "needsReconnect"
-                          ? "idle"
-                          : current.syncState,
-                      error: null,
-                    }
-                  : current,
-              );
-
-              dispatchAccounts({
-                type: "SET_TOKEN",
-                id: accountId,
-                accessToken: result.accessToken,
-                refreshToken: result.refreshToken,
-                accountName: result.accountName,
-                accountPhotoUrl: result.accountPhotoUrl,
-              });
-
-              dispatchAccounts({
-                type: "SET_CALENDARS",
-                id: accountId,
-                calendars: list,
-              });
-
-              dispatchAccounts({
-                type: "SET_ERROR",
-                id: accountId,
-                error: null,
-              });
-
-              return true;
             } catch {
               dispatchAccounts({ type: "NEEDS_RECONNECT", id: accountId });
               return false;
             }
+
+            const refreshToken = result.refreshToken ?? account.refreshToken;
+
+            updateStoredAccountToken(
+              accountId,
+              result.accessToken,
+              refreshToken,
+              {
+                name: result.accountName,
+                photoUrl: result.accountPhotoUrl,
+              },
+            );
+
+            accountsRef.current = accountsRef.current.map((current) =>
+              current.id === accountId
+                ? {
+                    ...current,
+                    accessToken: result.accessToken,
+                    refreshToken,
+                    name: result.accountName ?? current.name,
+                    photoUrl: result.accountPhotoUrl ?? current.photoUrl,
+                    connectionStatus: "connected",
+                    syncState:
+                      current.syncState === "needsReconnect"
+                        ? "idle"
+                        : current.syncState,
+                    error: null,
+                  }
+                : current,
+            );
+
+            dispatchAccounts({
+              type: "SET_TOKEN",
+              id: accountId,
+              accessToken: result.accessToken,
+              refreshToken,
+              accountName: result.accountName,
+              accountPhotoUrl: result.accountPhotoUrl,
+            });
+
+            let list: GoogleCalendarListItem[];
+
+            try {
+              list = await fetchCalendarList(result.accessToken);
+            } catch (error) {
+              if (isUnauthorizedError(error)) {
+                dispatchAccounts({
+                  type: "NEEDS_RECONNECT",
+                  id: accountId,
+                  error: toErrorMessage(error),
+                });
+                return false;
+              }
+
+              dispatchAccounts({
+                type: "SET_ERROR",
+                id: accountId,
+                error: toErrorMessage(error),
+              });
+              return true;
+            }
+
+            accountsRef.current = accountsRef.current.map((current) =>
+              current.id === accountId
+                ? {
+                    ...current,
+                    calendars: list,
+                    error: null,
+                  }
+                : current,
+            );
+
+            dispatchAccounts({
+              type: "SET_CALENDARS",
+              id: accountId,
+              calendars: list,
+            });
+
+            dispatchAccounts({
+              type: "SET_ERROR",
+              id: accountId,
+              error: null,
+            });
+
+            return true;
           },
         }),
     });
@@ -483,6 +526,26 @@ export const useMultiAccountGoogleCalendar = () => {
         accountName?: string | null,
         accountPhotoUrl?: string | null,
       ) => {
+        const resolvedRefreshToken = refreshToken ?? stored.refreshToken;
+
+        upsertStoredAccount({
+          ...stored,
+          name: accountName ?? stored.name ?? null,
+          photoUrl: accountPhotoUrl ?? stored.photoUrl ?? null,
+          accessToken,
+          accessTokenExpiry,
+          refreshToken: resolvedRefreshToken,
+        });
+
+        dispatchAccounts({
+          type: "SET_TOKEN",
+          id: accountId,
+          accessToken,
+          refreshToken: resolvedRefreshToken,
+          accountName,
+          accountPhotoUrl,
+        });
+
         const list = await fetchCalendarList(accessToken);
         const ids = resolveSelectedCalendarIds(stored.selectedCalendarIds, list);
 
@@ -492,18 +555,9 @@ export const useMultiAccountGoogleCalendar = () => {
           photoUrl: accountPhotoUrl ?? stored.photoUrl ?? null,
           accessToken,
           accessTokenExpiry,
-          refreshToken,
+          refreshToken: resolvedRefreshToken,
           selectedCalendarIds: ids,
           cachedCalendars: toCachedCalendars(list),
-        });
-
-        dispatchAccounts({
-          type: "SET_TOKEN",
-          id: accountId,
-          accessToken,
-          refreshToken,
-          accountName,
-          accountPhotoUrl,
         });
 
         dispatchAccounts({
@@ -531,11 +585,22 @@ export const useMultiAccountGoogleCalendar = () => {
           return;
         }
 
+        let result: Awaited<ReturnType<typeof refreshCalendarAccessToken>>;
+
         try {
-          const result = await refreshCalendarAccessToken({
+          result = await refreshCalendarAccessToken({
             refreshToken: stored.refreshToken,
           });
+        } catch (error) {
+          dispatchAccounts({
+            type: "NEEDS_RECONNECT",
+            id: accountId,
+            error: toErrorMessage(error),
+          });
+          return;
+        }
 
+        try {
           await applyAccessToken(
             result.accessToken,
             result.refreshToken ?? stored.refreshToken,
@@ -545,9 +610,9 @@ export const useMultiAccountGoogleCalendar = () => {
           );
         } catch (error) {
           dispatchAccounts({
-            type: "NEEDS_RECONNECT",
+            type: isUnauthorizedError(error) ? "NEEDS_RECONNECT" : "SET_ERROR",
             id: accountId,
-            error: error instanceof Error ? error.message : String(error),
+            error: toErrorMessage(error),
           });
         }
       };
@@ -559,8 +624,17 @@ export const useMultiAccountGoogleCalendar = () => {
           stored.accessTokenExpiry,
           stored.name,
           stored.photoUrl,
-        ).catch(() => {
-          void refreshStoredAccount();
+        ).catch((error) => {
+          if (isUnauthorizedError(error)) {
+            void refreshStoredAccount();
+            return;
+          }
+
+          dispatchAccounts({
+            type: "SET_ERROR",
+            id: accountId,
+            error: toErrorMessage(error),
+          });
         });
 
         continue;
