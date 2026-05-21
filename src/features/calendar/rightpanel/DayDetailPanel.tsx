@@ -60,6 +60,10 @@ export const DayDetailPanel = ({
     (e) => !e.isAllDay && isSameDay(new Date(e.startsAt), selectedDate),
   );
 
+  if (!isOpen) {
+    return <aside className="w-0 shrink-0 overflow-hidden" aria-hidden="true" />;
+  }
+
   return (
     <aside className="flex w-[260px] shrink-0 flex-col overflow-hidden bg-transparent">
       <div className="px-4 pb-3 pt-2">
@@ -70,43 +74,37 @@ export const DayDetailPanel = ({
 
           <button
             type="button"
-            aria-label={isOpen ? "日付詳細を閉じる" : "日付詳細を開く"}
-            title={isOpen ? "日付詳細を閉じる" : "日付詳細を開く"}
+            aria-label="日付詳細を閉じる"
+            title="日付詳細を閉じる"
             onClick={onToggle}
             className="ml-2 flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
           >
-            <SidebarPanelIcon
-              className={cn("h-3.5 w-3.5", isOpen && "-scale-x-100")}
-            />
+            <SidebarPanelIcon className="h-3.5 w-3.5 -scale-x-100" />
           </button>
         </div>
       </div>
 
-      {isOpen ? (
-        <>
-          <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
-            <div className="flex border-b border-[#f5f5f5]">
-              <div className="flex w-[30px] shrink-0 justify-end pr-1 pt-[8px]">
-                <span className="text-[10px] font-medium text-[#b6b6be]">終日</span>
-              </div>
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+        <div className="flex border-b border-[#f5f5f5]">
+          <div className="flex w-[30px] shrink-0 justify-end pr-1 pt-[8px]">
+            <span className="text-[10px] font-medium text-[#b6b6be]">終日</span>
+          </div>
 
-              <div className="flex-1 px-2 py-1.5">
-                <div className="flex flex-col gap-1">
-                  {allDayEvents.map((ev) => (
-                    <AllDayChip key={ev.id} event={ev} />
-                  ))}
-                </div>
-              </div>
+          <div className="flex-1 px-2 py-1.5">
+            <div className="flex flex-col gap-1">
+              {allDayEvents.map((ev) => (
+                <AllDayChip key={ev.id} event={ev} />
+              ))}
             </div>
-
-            <GridCalendarDayDetailDesktop events={timedEvents} />
           </div>
+        </div>
 
-          <div className="border-t border-[#f5f5f5] px-4 py-4">
-            <DayDetailCreateButton />
-          </div>
-        </>
-      ) : null}
+        <GridCalendarDayDetailDesktop events={timedEvents} />
+      </div>
+
+      <div className="border-t border-[#f5f5f5] px-4 py-4">
+        <DayDetailCreateButton />
+      </div>
     </aside>
   );
 };
