@@ -35,8 +35,10 @@ export class RangeController {
     this.inflight = true;
 
     try {
-      this.state = this.mergeRange(start, end);
-      await this.loadRange(this.state);
+      const nextRange = this.mergeRange(start, end);
+
+      this.state = nextRange;
+      await this.loadRange(nextRange);
     } finally {
       this.inflight = false;
     }

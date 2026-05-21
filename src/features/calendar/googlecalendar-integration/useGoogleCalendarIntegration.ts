@@ -19,6 +19,7 @@ import {
   writeWasConnected,
 } from "./gcal.storage";
 import type {
+  GCalForceSyncOptions,
   GCalSyncState,
   GoogleCalendarEvent,
   GoogleCalendarListItem,
@@ -124,6 +125,8 @@ export const useGoogleCalendarIntegration = ({
       const refreshToken = readRefreshToken();
 
       if (!refreshToken) {
+        setSyncState("needsReconnect");
+        setError("Google Calendar の再連携が必要です");
         return false;
       }
 
@@ -143,6 +146,8 @@ export const useGoogleCalendarIntegration = ({
 
       return true;
     } catch {
+      setSyncState("needsReconnect");
+      setError("Google Calendar の再連携が必要です");
       return false;
     }
   }, [authInstance]);
@@ -327,8 +332,8 @@ export const useGoogleCalendarIntegration = ({
     void silentReconnect();
   }, [accessToken, silentReconnect]);
 
-  const forceSync = useCallback(async () => {
-    await syncEngineRef.current?.forceSync();
+  const forceSync = useCallback(async (options: GCalForceSyncOptions = {}) => {
+    await syncEngineRef.current?.forceSync(options);
   }, []);
 
   return {
@@ -341,7 +346,16 @@ export const useGoogleCalendarIntegration = ({
     events,
     forceSync,
 
-    isConnected: Boolean(accessToken),
+    connectionStatus:
+      syncState === "needsReconnect"
+        ? "needsReconnect"
+        : error
+          ? "error"
+          : accessToken
+            ? "connected"
+            : "needsReconnect",
+
+    isConnected: Boolean(accessToken) && syncState !== "needsReconnect" && !error,
 
     isConnecting,
 

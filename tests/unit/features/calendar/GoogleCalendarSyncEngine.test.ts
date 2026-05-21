@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 
-
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GoogleCalendarSyncEngine } from "../../../../src/features/calendar/googlecalendar-sync/GoogleCalendarSyncEngine";
 import type { GCalSyncEngineOptions, GCalSyncStartContext, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "../../../../src/features/calendar/googlecalendar-integration/gcalSync.types";
@@ -73,6 +72,9 @@ describe("GoogleCalendarSyncEngine", () => {
     } satisfies GCalSyncEngineOptions);
 
   beforeEach(() => {
+    localStorage.clear();
+    vi.restoreAllMocks();
+
     onEventAdded = vi.fn<(event: GoogleCalendarEvent) => void>();
     onEventUpdated = vi.fn<(event: GoogleCalendarEvent) => void>();
     onEventDeleted = vi.fn<(compositeId: string) => void>();
@@ -81,9 +83,6 @@ describe("GoogleCalendarSyncEngine", () => {
     onError = vi.fn<(error: Error) => void>();
     silentReconnect = vi.fn<() => Promise<boolean>>().mockResolvedValue(true);
     getAccessToken = vi.fn<() => string | null>().mockReturnValue(ACCESS_TOKEN);
-
-    localStorage.clear();
-    vi.restoreAllMocks();
 
     engine = buildEngine();
   });
@@ -113,14 +112,14 @@ describe("GoogleCalendarSyncEngine", () => {
       );
 
       engine.start(testContext);
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
+
+      await vi.waitFor(() => {
+        expect(onEventAdded).toHaveBeenCalledTimes(2);
+      });
 
       engine.stop();
 
       expect(fetchMock).toHaveBeenCalledTimes(1);
-      expect(onEventAdded).toHaveBeenCalledTimes(2);
       expect(onEventAdded.mock.calls[0][0]).toMatchObject({
         id: `${CALENDAR_ID}:event-1`,
         title: "ミーティング",
@@ -135,7 +134,7 @@ describe("GoogleCalendarSyncEngine", () => {
     });
 
     it("status: 'cancelled' のイベントは onEventAdded を呼ばない", async () => {
-      vi.spyOn(globalThis, "fetch").mockReturnValue(
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockReturnValue(
         mockEventsListResponse(
           [{ id: "event-deleted", status: "cancelled" }],
           "token-after-cancel",
@@ -143,9 +142,10 @@ describe("GoogleCalendarSyncEngine", () => {
       );
 
       engine.start(testContext);
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
+
+      await vi.waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      });
 
       engine.stop();
 
@@ -155,39 +155,40 @@ describe("GoogleCalendarSyncEngine", () => {
   });
 
   describe("インクリメンタル同期（syncToken あり）", () => {
-    beforeEach(() => {
-      localStorage.setItem(
-        "flashcard-master.gcal.sync_tokens",
-        JSON.stringify({ [CALENDAR_ID]: "existing-sync-token" }),
-      );
-
-      engine = buildEngine();
-    });
-
     it("変更イベントで onEventUpdated が呼ばれる", async () => {
-      vi.spyOn(globalThis, "fetch").mockReturnValue(
-        mockEventsListResponse(
-          [
-            {
-              id: "event-1",
-              summary: "ミーティング（更新）",
-              status: "confirmed",
-              start: { dateTime: "2026-05-18T14:00:00+09:00" },
-              end: { dateTime: "2026-05-18T15:00:00+09:00" },
-            },
-          ],
-          "next-sync-token",
-        ),
-      );
+      const fetchMock = vi
+        .spyOn(globalThis, "fetch")
+        .mockReturnValueOnce(mockEventsListResponse([], "existing-sync-token"))
+        .mockReturnValueOnce(
+          mockEventsListResponse(
+            [
+              {
+                id: "event-1",
+                summary: "ミーティング（更新）",
+                status: "confirmed",
+                start: { dateTime: "2026-05-18T14:00:00+09:00" },
+                end: { dateTime: "2026-05-18T15:00:00+09:00" },
+              },
+            ],
+            "next-sync-token",
+          ),
+        );
 
       engine.start(testContext);
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
+
+      await vi.waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      });
+
+      document.dispatchEvent(new Event("visibilitychange"));
+
+      await vi.waitFor(() => {
+        expect(onEventUpdated).toHaveBeenCalledTimes(1);
+      });
 
       engine.stop();
 
-      expect(onEventUpdated).toHaveBeenCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(onEventUpdated.mock.calls[0][0]).toMatchObject({
         id: `${CALENDAR_ID}:event-1`,
         title: "ミーティング（更新）",
@@ -199,21 +200,31 @@ describe("GoogleCalendarSyncEngine", () => {
     });
 
     it("status: 'cancelled' のイベントで onEventDeleted が呼ばれる", async () => {
-      vi.spyOn(globalThis, "fetch").mockReturnValue(
-        mockEventsListResponse(
-          [{ id: "event-to-delete", status: "cancelled" }],
-          "after-delete-token",
-        ),
-      );
+      const fetchMock = vi
+        .spyOn(globalThis, "fetch")
+        .mockReturnValueOnce(mockEventsListResponse([], "existing-sync-token"))
+        .mockReturnValueOnce(
+          mockEventsListResponse(
+            [{ id: "event-to-delete", status: "cancelled" }],
+            "after-delete-token",
+          ),
+        );
 
       engine.start(testContext);
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
+
+      await vi.waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      });
+
+      document.dispatchEvent(new Event("visibilitychange"));
+
+      await vi.waitFor(() => {
+        expect(onEventDeleted).toHaveBeenCalledTimes(1);
+      });
 
       engine.stop();
 
-      expect(onEventDeleted).toHaveBeenCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(onEventDeleted).toHaveBeenCalledWith(
         `${CALENDAR_ID}:event-to-delete`,
       );
@@ -223,18 +234,10 @@ describe("GoogleCalendarSyncEngine", () => {
   });
 
   describe("410 Gone → フル同期フォールバック", () => {
-    beforeEach(() => {
-      localStorage.setItem(
-        "flashcard-master.gcal.sync_tokens",
-        JSON.stringify({ [CALENDAR_ID]: "expired-sync-token" }),
-      );
-
-      engine = buildEngine();
-    });
-
     it("410 が返ったとき syncToken をクリアしてフル同期を実行する", async () => {
       const fetchMock = vi
         .spyOn(globalThis, "fetch")
+        .mockReturnValueOnce(mockEventsListResponse([], "expired-sync-token"))
         .mockReturnValueOnce(mock410Response())
         .mockReturnValueOnce(
           mockEventsListResponse(
@@ -252,16 +255,20 @@ describe("GoogleCalendarSyncEngine", () => {
         );
 
       engine.start(testContext);
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
+
+      await vi.waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      });
+
+      document.dispatchEvent(new Event("visibilitychange"));
+
+      await vi.waitFor(() => {
+        expect(onEventAdded).toHaveBeenCalledTimes(1);
+      });
 
       engine.stop();
 
-      expect(fetchMock).toHaveBeenCalledTimes(2);
-      expect(onEventAdded).toHaveBeenCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
       expect(onEventAdded.mock.calls[0][0]).toMatchObject({
         id: `${CALENDAR_ID}:full-sync-event`,
       });
@@ -274,16 +281,66 @@ describe("GoogleCalendarSyncEngine", () => {
 
   describe("401 Unauthorized → サイレント再接続", () => {
     it("401 が返ったとき silentReconnect を呼ぶ", async () => {
-      vi.spyOn(globalThis, "fetch").mockReturnValue(mock401Response());
+      vi.spyOn(globalThis, "fetch")
+        .mockReturnValueOnce(mock401Response())
+        .mockReturnValueOnce(mockEventsListResponse([], "after-reconnect-token"));
 
       engine.start(testContext);
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
+
+      await vi.waitFor(() => {
+        expect(silentReconnect).toHaveBeenCalled();
+      });
+
+      engine.stop();
+    });
+
+    it("サイレント再接続できない場合は needsReconnect になる", async () => {
+      silentReconnect.mockResolvedValue(false);
+
+      vi.spyOn(globalThis, "fetch").mockReturnValueOnce(mock401Response());
+
+      engine.start(testContext);
+
+      await vi.waitFor(() => {
+        expect(onSyncStateChange).toHaveBeenCalledWith("needsReconnect");
+      });
+
+      engine.stop();
+    });
+  });
+
+  describe("表示範囲ベースの forceSync", () => {
+    it("rangeStart/rangeEnd を指定した範囲で events.list を実行する", async () => {
+      const fetchMock = vi
+        .spyOn(globalThis, "fetch")
+        .mockReturnValueOnce(mockEventsListResponse([], "initial-token"))
+        .mockReturnValueOnce(mockEventsListResponse([], "range-token"));
+
+      engine.start(testContext);
+
+      await vi.waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      });
+
+      const rangeStart = new Date("2028-01-01T00:00:00.000Z");
+      const rangeEnd = new Date("2028-02-01T00:00:00.000Z");
+
+      await engine.forceSync({ rangeStart, rangeEnd });
 
       engine.stop();
 
-      expect(silentReconnect).toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+
+      const rangeUrl = new URL(String(fetchMock.mock.calls[1][0]));
+
+      expect(rangeUrl.searchParams.get("timeMin")).toBe(
+        rangeStart.toISOString(),
+      );
+      expect(rangeUrl.searchParams.get("timeMax")).toBe(rangeEnd.toISOString());
+
+      const stored = localStorage.getItem("flashcard-master.gcal.sync_tokens");
+      const tokenMap = JSON.parse(stored!) as Record<string, string>;
+      expect(tokenMap[CALENDAR_ID]).toBe("initial-token");
     });
   });
 
@@ -294,9 +351,10 @@ describe("GoogleCalendarSyncEngine", () => {
       );
 
       engine.start(testContext);
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
+
+      await vi.waitFor(() => {
+        expect(onSyncStateChange).toHaveBeenCalledWith("syncing");
+      });
 
       engine.stop();
 

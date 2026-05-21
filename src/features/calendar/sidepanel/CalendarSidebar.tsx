@@ -108,6 +108,8 @@ const GoogleAccountSection = ({
   const syncIndicator =
     account.syncState === "syncing" ? (
       <IconSync className="h-3 w-3 shrink-0 animate-spin text-[#185FA5]" />
+    ) : account.connectionStatus === "needsReconnect" ? (
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#f59e0b]" />
     ) : account.syncState === "error" ? (
       <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#e53e3e]" />
     ) : null;
@@ -172,6 +174,12 @@ const GoogleAccountSection = ({
               読み込み中…
             </span>
           ) : null}
+        </p>
+      )}
+
+      {account.connectionStatus === "needsReconnect" && (
+        <p className="mt-1 px-2 text-[11px] leading-relaxed text-[#a16207]">
+          再連携が必要です。Google Calendar を追加から接続し直してください。
         </p>
       )}
 

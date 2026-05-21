@@ -5,6 +5,7 @@ import type {
   CalendarViewMode,
 } from "@/features/calendar/calendar.types";
 import type {
+  GCalConnectionStatus,
   GoogleCalendarEvent,
   GoogleCalendarListItem,
 } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
@@ -51,7 +52,8 @@ export type GoogleAccountDisplay = {
   email: string | null;
   calendars: GoogleCalendarListItem[];
   selectedCalendarIds: Set<string>;
-  syncState: "idle" | "syncing" | "error";
+  syncState: "idle" | "syncing" | "needsReconnect" | "error";
+  connectionStatus: GCalConnectionStatus;
   error: string | null;
 };
 

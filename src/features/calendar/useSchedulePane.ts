@@ -129,6 +129,7 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
       calendars: account.calendars,
       selectedCalendarIds: account.selectedCalendarIds,
       syncState: account.syncState,
+      connectionStatus: account.connectionStatus,
       error: account.error,
     }),
   );
