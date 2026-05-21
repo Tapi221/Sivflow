@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
+import { motion } from "framer-motion";
 import type { TaskPriority, TaskStatus } from "../task/task.types";
-import { TASK_COLUMNS, PRIORITY_CONFIG, CATEGORY_CONFIG } from "../task/task.types";
+import {
+  CATEGORY_CONFIG,
+  PRIORITY_CONFIG,
+  TASK_COLUMNS,
+} from "../task/task.types";
 
 type NewTaskModalProps = {
   defaultStatus?: TaskStatus;
@@ -28,6 +33,7 @@ export const NewTaskModal = ({
 
   const handleSave = () => {
     if (!title.trim()) return;
+
     onSave({
       title: title.trim(),
       status,
@@ -36,30 +42,69 @@ export const NewTaskModal = ({
       dueDate: dueDate || null,
       assignee: "A",
     });
+
     onClose();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSave();
-    if (e.key === "Escape") onClose();
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      handleSave();
+    }
+
+    if (e.key === "Escape") {
+      onClose();
+    }
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px]"
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/20"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{
+        duration: 0.16,
+        ease: "easeOut",
+      }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-[480px] rounded-2xl border border-[#e9eaed] bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]">
+      <motion.div
+        className="w-[480px] rounded-2xl border border-[#e9eaed] bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
+        initial={{
+          opacity: 0,
+          scale: 0.86,
+        }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+        }}
+        exit={{
+          opacity: 0,
+          scale: 0.92,
+        }}
+        transition={{
+          duration: 0.22,
+          ease: [0.16, 1, 0.3, 1],
+        }}
+      >
         {/* ヘッダー */}
         <div className="flex items-center justify-between border-b border-[#f3f4f6] px-5 py-4">
-          <h2 className="text-[14px] font-semibold text-[#1f2329]">新しいタスク</h2>
+          <h2 className="text-[14px] font-semibold text-[#1f2329]">
+            新しいタスク
+          </h2>
+
           <button
             type="button"
             onClick={onClose}
             className="flex h-7 w-7 items-center justify-center rounded-full text-[#b0b4be] hover:bg-[#f3f4f6]"
           >
             <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
-              <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <path
+                d="M4 4l8 8M12 4l-8 8"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
           </button>
         </div>
@@ -71,6 +116,7 @@ export const NewTaskModal = ({
             <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#9aa0aa]">
               タイトル
             </label>
+
             <input
               autoFocus
               type="text"
@@ -88,13 +134,16 @@ export const NewTaskModal = ({
               <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#9aa0aa]">
                 ステータス
               </label>
+
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as TaskStatus)}
                 className="w-full rounded-lg border border-[#e9eaed] bg-[#f9fafb] px-3 py-2 text-[13px] text-[#1f2329] outline-none focus:border-[#193a5c]"
               >
                 {TASK_COLUMNS.map((col) => (
-                  <option key={col.id} value={col.id}>{col.label}</option>
+                  <option key={col.id} value={col.id}>
+                    {col.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -104,13 +153,16 @@ export const NewTaskModal = ({
               <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#9aa0aa]">
                 優先度
               </label>
+
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as TaskPriority)}
                 className="w-full rounded-lg border border-[#e9eaed] bg-[#f9fafb] px-3 py-2 text-[13px] text-[#1f2329] outline-none focus:border-[#193a5c]"
               >
                 {Object.entries(PRIORITY_CONFIG).map(([key, val]) => (
-                  <option key={key} value={key}>{val.label}</option>
+                  <option key={key} value={key}>
+                    {val.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -120,13 +172,16 @@ export const NewTaskModal = ({
               <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#9aa0aa]">
                 カテゴリ
               </label>
+
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full rounded-lg border border-[#e9eaed] bg-[#f9fafb] px-3 py-2 text-[13px] text-[#1f2329] outline-none focus:border-[#193a5c]"
               >
                 {Object.keys(CATEGORY_CONFIG).map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
                 ))}
               </select>
             </div>
@@ -136,6 +191,7 @@ export const NewTaskModal = ({
               <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#9aa0aa]">
                 期日
               </label>
+
               <input
                 type="date"
                 value={dueDate}
@@ -155,6 +211,7 @@ export const NewTaskModal = ({
           >
             キャンセル
           </button>
+
           <button
             type="button"
             onClick={handleSave}
@@ -164,7 +221,7 @@ export const NewTaskModal = ({
             作成
           </button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };

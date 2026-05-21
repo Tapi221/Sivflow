@@ -16,7 +16,7 @@ export const BoardListToggleButton = ({
         onClick={() => onChange("board")}
         className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium transition-colors ${
           viewMode === "board"
-            ? "bg-[#f0f6ff] text-[#185FA5]"
+            ? "bg-[#f0f6ff] text-[#193a5c]"
             : "text-[#8f929c] hover:bg-[#f7f8fa]"
         }`}
       >
@@ -50,7 +50,7 @@ export const BoardListToggleButton = ({
         onClick={() => onChange("list")}
         className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium transition-colors ${
           viewMode === "list"
-            ? "bg-[#f0f6ff] text-[#185FA5]"
+            ? "bg-[#f0f6ff] text-[#193a5c]"
             : "text-[#8f929c] hover:bg-[#f7f8fa]"
         }`}
       >

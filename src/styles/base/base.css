@@ -71,8 +71,9 @@
 
   input,
   textarea,
-  [contenteditable="true"] {
-    caret-color: #35507b;
+  [contenteditable],
+  [role="textbox"] {
+    caret-color: #193a5c;
   }
 
   input:focus,
