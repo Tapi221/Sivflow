@@ -5,6 +5,7 @@ export type CalendarColorTokens = {
 };
 
 const FALLBACK_ACCENT_COLOR = "#185FA5";
+const colorTokensCache = new Map<string, CalendarColorTokens>();
 
 type RgbColor = {
   red: number;
@@ -65,16 +66,27 @@ const getRelativeLuminance = ({ red, green, blue }: RgbColor) => {
 };
 
 export const generateColorTokens = (hex: string): CalendarColorTokens => {
-  const border = normalizeHexColor(hex) ?? FALLBACK_ACCENT_COLOR;
+  const cacheKey = normalizeHexColor(hex) ?? FALLBACK_ACCENT_COLOR;
+  const cachedTokens = colorTokensCache.get(cacheKey);
+
+  if (cachedTokens) {
+    return cachedTokens;
+  }
+
+  const border = cacheKey;
   const base = hexToRgb(border) ?? hexToRgb(FALLBACK_ACCENT_COLOR);
   const accent = base ?? { red: 24, green: 95, blue: 165 };
   const bg = mixColors(accent, { red: 255, green: 255, blue: 255 }, 0.88);
   const textMixAmount = getRelativeLuminance(accent) > 0.55 ? 0.62 : 0.32;
   const text = mixColors(accent, { red: 0, green: 0, blue: 0 }, textMixAmount);
 
-  return {
+  const tokens = {
     bg: rgbToHex(bg),
     border,
     text: rgbToHex(text),
   };
+
+  colorTokensCache.set(cacheKey, tokens);
+
+  return tokens;
 };
