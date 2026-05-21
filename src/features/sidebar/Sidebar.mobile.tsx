@@ -9,7 +9,7 @@ import {
   HomeIcon,
   InboxIcon,
   LibraryIcon,
-} from "../../icons/sidebar.icons";
+} from "../../components/icons/sidebar.icons";
 
 import { useSchedulePaneStore } from "@/features/calendar/header/useSchedulePaneStore";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";

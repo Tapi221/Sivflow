@@ -4,7 +4,7 @@ import {
   CalendarIcon as ScheduleCalendarIcon,
   CheckSquareFilledIcon,
   SquareOutlineIcon,
-} from "@/icons/schedule.icons";
+} from "@/components/icons/schedule.icons";
 import { CATEGORY_CONFIG, PRIORITY_CONFIG } from "./task.types";
 import type { Task } from "./task.types";
 

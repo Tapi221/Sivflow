@@ -14,7 +14,7 @@ import {
   HomeIcon,
   InboxIcon,
   LibraryIcon,
-} from "../../icons/sidebar.icons";
+} from "../../components/icons/sidebar.icons";
 
 import "./sidebar.desktop.css";
 
