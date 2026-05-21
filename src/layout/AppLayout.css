@@ -20,7 +20,6 @@
 
   display: grid;
 
-  /* ← デフォルトも rail 幅に統一 */
   grid-template-columns:
     var(--app-sidebar-rail-width)
     minmax(0, 1fr);
@@ -44,6 +43,8 @@
   background: var(--app-sidebar-bg);
 
   align-items: stretch;
+
+  transition: grid-template-columns 180ms ease;
 }
 
 [data-presentation-target="desktop"] .app-layout {
@@ -54,10 +55,22 @@
   --app-layout-padding-x: 0px;
 }
 
-/* 右サイドバーのみ考慮（collapsedロジック削除済み） */
+.app-layout--sidebar-expanded {
+  grid-template-columns:
+    var(--app-sidebar-width)
+    minmax(0, 1fr);
+}
+
 .app-layout--right-sidebar-open {
   grid-template-columns:
     var(--app-sidebar-rail-width)
+    minmax(0, 1fr)
+    var(--app-sidebar-width);
+}
+
+.app-layout--sidebar-expanded.app-layout--right-sidebar-open {
+  grid-template-columns:
+    var(--app-sidebar-width)
     minmax(0, 1fr)
     var(--app-sidebar-width);
 }
@@ -261,7 +274,10 @@
 }
 
 @media (max-width: 767px) {
-  .app-layout {
+  .app-layout,
+  .app-layout--sidebar-expanded,
+  .app-layout--right-sidebar-open,
+  .app-layout--sidebar-expanded.app-layout--right-sidebar-open {
     grid-template-columns: minmax(0, 1fr);
   }
 }
