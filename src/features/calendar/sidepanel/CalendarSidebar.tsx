@@ -257,18 +257,24 @@ export const CalendarSidebar = ({
                 type="button"
                 onClick={() => onSelectDate(day.date)}
                 className={cn(
-                  "flex aspect-square w-full items-center justify-center rounded-full text-[12px] font-medium",
-                  day.isToday && "bg-[#185FA5] font-semibold text-white",
-                  day.isSelected && !day.isToday && "bg-[#2d3039] font-semibold text-white",
-                  !isActive &&
-                    day.isCurrentMonth &&
-                    "text-[#2d3039] hover:bg-[#eceef1]",
-                  !isActive &&
-                    !day.isCurrentMonth &&
-                    "text-[#b8bcc5] hover:bg-[#eceef1]",
+                  "flex h-7 w-full items-center justify-center rounded-md transition-colors",
+                  !isActive && "hover:bg-[#eceef1]",
                 )}
               >
-                {day.dayNumber}
+                <span
+                  className={cn(
+                    "flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-semibold tabular-nums",
+                    day.isToday &&
+                      "bg-[#185FA5] text-white shadow-[0_2px_8px_rgba(24,95,165,0.35)]",
+                    day.isSelected &&
+                      !day.isToday &&
+                      "bg-[#2d3039] text-white",
+                    !isActive && day.isCurrentMonth && "text-[#24231f]",
+                    !isActive && !day.isCurrentMonth && "text-[#b8bcc5]",
+                  )}
+                >
+                  {day.dayNumber}
+                </span>
               </button>
             );
           })}

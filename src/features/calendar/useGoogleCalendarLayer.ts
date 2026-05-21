@@ -11,30 +11,20 @@ export const useGoogleCalendarLayer = () => {
     addAccount,
     removeAccount,
     toggleCalendar,
+    forceSync,
     isAnyConnecting,
-    rangeController,
   } = useMultiAccountGoogleCalendar();
 
   return {
-    // ─────────────────────────────
-    // マルチアカウント
-    // ─────────────────────────────
     googleAccounts: accounts,
     events,
     selectedCalendarIds,
     addAccount,
     removeAccount,
     toggleCalendar,
+    forceSync,
     isAnyConnecting,
 
-    // ─────────────────────────────
-    // RangeController（今回の主役）
-    // ─────────────────────────────
-    rangeController,
-
-    // ─────────────────────────────
-    // SchedulePane互換レイヤー
-    // ─────────────────────────────
     isConnected: accounts.length > 0,
     isConnecting: isAnyConnecting,
 

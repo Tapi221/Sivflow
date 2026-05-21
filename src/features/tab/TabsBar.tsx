@@ -382,7 +382,7 @@ export const WorkspaceTabsBar = ({
               transform: `translate3d(${indicator.left}px, 0, 0)`,
             }}
             className={cn(
-              "pointer-events-none absolute bottom-0 left-0 z-0 h-8 rounded-t-[10px]",
+              "pointer-events-none absolute bottom-[-1px] left-0 z-0 h-[33px] rounded-t-[10px]",
               "transition-[opacity,transform,width] duration-[320ms] ease-[cubic-bezier(.22,1,.36,1)]",
               "motion-reduce:transition-none",
               indicator.visible ? "opacity-100" : "opacity-0",
@@ -390,13 +390,13 @@ export const WorkspaceTabsBar = ({
           >
             <span
               aria-hidden="true"
-              className="absolute bottom-0 left-[-16px] h-4 w-4"
+              className="absolute bottom-[-1px] left-[-16px] h-[17px] w-4"
               style={ACTIVE_TAB_LEFT_CURVE_STYLE}
             />
 
             <span
               aria-hidden="true"
-              className="absolute bottom-0 right-[-16px] h-4 w-4"
+              className="absolute bottom-[-1px] right-[-16px] h-[17px] w-4"
               style={ACTIVE_TAB_RIGHT_CURVE_STYLE}
             />
           </div>
