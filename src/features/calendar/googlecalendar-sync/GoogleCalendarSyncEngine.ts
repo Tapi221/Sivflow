@@ -421,6 +421,8 @@ export class GoogleCalendarSyncEngine {
         }
       }
 
+      if (!this.isRunning) return;
+
       this.currentBackoffMs = INITIAL_BACKOFF_MS;
 
       this.lastSyncedAt = new Date();
@@ -429,6 +431,8 @@ export class GoogleCalendarSyncEngine {
       this.setSyncState("idle");
       this.schedulePoll(this.options.pollIntervalMs);
     } catch (error) {
+      if (!this.isRunning) return;
+
       console.error("[GCalSyncEngine] sync error:", error);
 
       const isUnauthorized =
@@ -442,6 +446,8 @@ export class GoogleCalendarSyncEngine {
           shouldRetryAfterReconnect = true;
           return;
         }
+
+        if (!this.isRunning) return;
 
         this.setSyncState("needsReconnect");
         this.options.onError(new Error("Google Calendar の再連携が必要です"));
@@ -526,10 +532,14 @@ export class GoogleCalendarSyncEngine {
 
       const response = await gcalGet<GCalEventsListResponse>(accessToken, url);
 
+      if (!this.isRunning) return;
+
       allEvents.push(...(response.items ?? []));
       pageToken = response.nextPageToken;
       syncToken = response.nextSyncToken ?? syncToken;
     } while (pageToken);
+
+    if (!this.isRunning) return;
 
     if (syncToken && shouldStoreSyncToken) {
       this.syncTokenMap[
@@ -544,6 +554,8 @@ export class GoogleCalendarSyncEngine {
       )
       .filter((event): event is GoogleCalendarEvent => Boolean(event));
 
+    if (!this.isRunning) return;
+
     if (this.options.onEventsRangeReplaced) {
       this.options.onEventsRangeReplaced({
         calendarId,
@@ -555,6 +567,7 @@ export class GoogleCalendarSyncEngine {
     }
 
     for (const event of events) {
+      if (!this.isRunning) return;
       this.options.onEventAdded(event);
     }
   }
@@ -588,11 +601,15 @@ export class GoogleCalendarSyncEngine {
           url,
         );
 
+        if (!this.isRunning) return;
+
         diffEvents.push(...(response.items ?? []));
         pageToken = response.nextPageToken;
         nextSyncToken = response.nextSyncToken ?? nextSyncToken;
       } while (pageToken);
     } catch (error) {
+      if (!this.isRunning) return;
+
       const is410 =
         error instanceof Error &&
         (error as Error & { status?: number }).status === 410;
@@ -622,12 +639,16 @@ export class GoogleCalendarSyncEngine {
       throw error;
     }
 
+    if (!this.isRunning) return;
+
     if (nextSyncToken) {
       this.syncTokenMap[
         buildSyncTokenKey(this.options.accountId, calendarId)
       ] = nextSyncToken;
       this.syncTokenMap = mergeWriteSyncTokens(this.syncTokenMap);
     }
+
+    if (!this.isRunning) return;
 
     this.applyDiff(calendarId, accentColor, diffEvents);
   }
@@ -637,7 +658,10 @@ export class GoogleCalendarSyncEngine {
     accentColor: string,
     rawEvents: GCalRawIncrementalEvent[],
   ): void {
+    if (!this.isRunning) return;
+
     for (const raw of rawEvents) {
+      if (!this.isRunning) return;
       if (!raw.id) continue;
 
       const compositeId = buildCompositeEventId(
