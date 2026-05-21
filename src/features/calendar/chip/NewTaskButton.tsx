@@ -1,6 +1,8 @@
 import { useState, type MouseEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
+import { useT } from "@/i18n/useT";
+
 type NewTaskButtonProps = {
   onClick: () => void;
 };
@@ -12,6 +14,7 @@ type Ripple = {
 };
 
 export const NewTaskButton = ({ onClick }: NewTaskButtonProps) => {
+  const t = useT();
   const [ripples, setRipples] = useState<Ripple[]>([]);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -78,7 +81,7 @@ export const NewTaskButton = ({ onClick }: NewTaskButtonProps) => {
         />
       </svg>
 
-      <span className="relative z-10">New Task</span>
+      <span className="relative z-10">{t.addTask}</span>
     </motion.button>
   );
 };
