@@ -25,6 +25,9 @@ const VIEW_OPTIONS = [
   { value: "days", label: "Day" },
 ] as const;
 
+const DAY_DETAIL_PANEL_WIDTH = 260;
+const MONTH_HEADER_RIGHT_PADDING = DAY_DETAIL_PANEL_WIDTH + 16;
+
 export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const pane = useSchedulePane();
   const taskCalendarEvents = useTaskCalendarEvents();
@@ -110,7 +113,14 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   }, []);
 
   const renderViewHeader = (className: string) => (
-    <div className={className}>
+    <div
+      className={className}
+      style={
+        canShowDayDetailPanel && !showDayDetailPanel
+          ? { paddingRight: MONTH_HEADER_RIGHT_PADDING }
+          : undefined
+      }
+    >
       <div className="flex min-w-0 items-center gap-3">
         {selectedViewMode === "month" ? (
           <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
