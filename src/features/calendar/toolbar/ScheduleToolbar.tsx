@@ -57,7 +57,7 @@ export const CalendarToolbar = ({
                 type="button"
                 onClick={tab.onClick}
                 className={cn(
-                  "relative flex h-7 w-fit items-center gap-[6px] rounded px-2",
+                  "relative flex h-7 min-h-0 w-fit min-w-0 items-center gap-[6px] rounded px-2",
                   "appearance-none select-none",
                   "text-[12px] font-medium leading-none transition-colors",
 
@@ -79,7 +79,7 @@ export const CalendarToolbar = ({
                   "hover:bg-[#f6f7f9]",
                 )}
               >
-                <Icon className="h-4 w-4 shrink-0" />
+                <Icon className="block h-4 w-4 shrink-0" />
 
                 <span className="whitespace-nowrap">{tab.label}</span>
 
@@ -105,9 +105,9 @@ export const CalendarToolbar = ({
               key={action.key}
               type="button"
               className={cn(
-                "flex h-7 items-center gap-[6px] rounded px-2",
+                "flex h-7 min-h-0 min-w-0 items-center gap-[6px] rounded px-2",
                 "appearance-none select-none",
-                "text-[12px] font-medium transition-colors",
+                "text-[12px] font-medium leading-none transition-colors",
 
                 // focus completely disabled
                 "outline-none ring-0 shadow-none",
@@ -127,7 +127,7 @@ export const CalendarToolbar = ({
                 "hover:bg-[#f6f7f9] hover:text-[#25272d]",
               )}
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              <Icon className="block h-4 w-4 shrink-0" />
 
               <span className="whitespace-nowrap">{action.label}</span>
             </button>

@@ -1,12 +1,24 @@
 import { useMemo, useState } from "react";
-import { addDays, format, isSameDay, startOfDay, startOfMonth, startOfWeek } from "date-fns";
+import {
+  addDays,
+  format,
+  isSameDay,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
+} from "date-fns";
+
+import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { AnimatedCircleCheckbox } from "@/features/calendar/chip/checkbox/AnimatedCircleCheckbox";
 import { CalendarIcon, PlusIcon } from "@/icons/schedule.icons";
 import { cn } from "@/lib/utils";
+
 import type { CalendarSidebarProps, GoogleAccountDisplay } from "../schedulePane.types";
+
+const DEFAULT_CALENDAR_COLOR = "#74798b";
 
 const IconChevronLeft = ({ className }: { className?: string }) => (
   <svg
@@ -142,7 +154,7 @@ const GoogleAccountSection = ({
             >
               <AnimatedCircleCheckbox
                 checked={checked}
-                color={calendar.backgroundColor}
+                color={calendar.backgroundColor ?? DEFAULT_CALENDAR_COLOR}
               />
 
               <span className="truncate text-[12px] font-medium text-[#3d4049]">
@@ -200,21 +212,27 @@ export const CalendarSidebar = ({
           </span>
 
           <div className="flex items-center gap-0.5">
-            <button
-              type="button"
-              className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
-              onClick={onPreviousMonth}
-            >
-              <IconChevronLeft className="h-3.5 w-3.5" />
-            </button>
+            <HoverTooltip label="前の月" side="top">
+              <button
+                type="button"
+                className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
+                onClick={onPreviousMonth}
+                aria-label="前の月"
+              >
+                <IconChevronLeft className="h-3.5 w-3.5" />
+              </button>
+            </HoverTooltip>
 
-            <button
-              type="button"
-              className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
-              onClick={onNextMonth}
-            >
-              <IconChevronRight className="h-3.5 w-3.5" />
-            </button>
+            <HoverTooltip label="次の月" side="top">
+              <button
+                type="button"
+                className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
+                onClick={onNextMonth}
+                aria-label="次の月"
+              >
+                <IconChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </HoverTooltip>
           </div>
         </div>
 
