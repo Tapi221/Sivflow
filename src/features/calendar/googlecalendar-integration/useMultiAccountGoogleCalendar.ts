@@ -140,7 +140,7 @@ const reduceAccounts = (
         const next = new Set(a.selectedCalendarIds);
 
         if (next.has(action.calendarId)) {
-          next.delete(actionId);
+          next.delete(action.calendarId);
         } else {
           next.add(action.calendarId);
         }
