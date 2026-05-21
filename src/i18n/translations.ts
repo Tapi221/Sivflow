@@ -24,6 +24,10 @@ export type Translations = {
   // カレンダービュー
   taskViewComingSoon: string;
   addTask: string;
+  taskStatusNotStarted: string;
+  taskStatusInProgress: string;
+  taskStatusReview: string;
+  taskStatusDone: string;
   overflowEvents: (count: number) => string;
   allDay: string;
 
@@ -79,6 +83,10 @@ const ja: Translations = {
 
   taskViewComingSoon: "タスクビューは近日公開予定",
   addTask: "タスクを追加",
+  taskStatusNotStarted: "未着手",
+  taskStatusInProgress: "進行中",
+  taskStatusReview: "レビュー",
+  taskStatusDone: "完了",
   overflowEvents: (count) => `+${count}件`,
   allDay: "終日",
 
@@ -129,6 +137,10 @@ const en: Translations = {
 
   taskViewComingSoon: "Task view coming soon",
   addTask: "Add task",
+  taskStatusNotStarted: "Not started",
+  taskStatusInProgress: "In progress",
+  taskStatusReview: "Review",
+  taskStatusDone: "Done",
   overflowEvents: (count) => `+${count} more`,
   allDay: "All day",
 
