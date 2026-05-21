@@ -418,6 +418,26 @@ export const useMultiAccountGoogleCalendar = () => {
               );
 
               const list = await fetchCalendarList(result.accessToken);
+              const refreshToken = result.refreshToken ?? account.refreshToken;
+
+              accountsRef.current = accountsRef.current.map((current) =>
+                current.id === accountId
+                  ? {
+                      ...current,
+                      accessToken: result.accessToken,
+                      refreshToken,
+                      name: result.accountName ?? current.name,
+                      photoUrl: result.accountPhotoUrl ?? current.photoUrl,
+                      calendars: list,
+                      connectionStatus: "connected",
+                      syncState:
+                        current.syncState === "needsReconnect"
+                          ? "idle"
+                          : current.syncState,
+                      error: null,
+                    }
+                  : current,
+              );
 
               dispatchAccounts({
                 type: "SET_TOKEN",
