@@ -122,7 +122,7 @@
     overflow: visible !important;
   }
 
-    .explorer-workspace-tab-slot::before {
+  .explorer-workspace-tab-slot::before {
     content: "";
     position: absolute;
     left: 0;
@@ -185,10 +185,10 @@
   .explorer-workspace-tab--active::after {
     content: "";
     position: absolute;
-    bottom: 0;
+    bottom: -1px;
     z-index: 0;
     width: 16px;
-    height: 16px;
+    height: 17px;
     pointer-events: none;
     background: var(--app-active-tab-bg, #ffffff);
   }
@@ -356,7 +356,7 @@
 
   .explorer-chrome-body > div {
     border: 0 !important;
-    border-radius: 10px 10px 0 0 !important;
+    border-radius: 0 !important;
     overflow: hidden !important;
     background: var(--app-active-tab-bg, #ffffff) !important;
   }

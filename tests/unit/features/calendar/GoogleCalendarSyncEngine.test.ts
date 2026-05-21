@@ -1,21 +1,6 @@
-// @vitest-environment jsdom
-
-/**
- * GoogleCalendarSyncEngine の単体テスト
- *
- * fetch / document.visibilityState をモックして
- * エンジンの各動作を検証する。
- * localStorage は jsdom が提供するものをそのまま使用する。
- */
-
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import type {
-  GCalSyncEngineOptions,
-  GCalSyncStartContext,
-} from "@/features/calendar/googlecalendar-integration/gcalSync.types";
-import { GoogleCalendarSyncEngine } from "@/features/calendar/googlecalendar-integration/GoogleCalendarSyncEngine";
-import type { GoogleCalendarListItem } from "@/features/calendar/googlecalendar-integration/useGoogleCalendarIntegration";
+import { GoogleCalendarSyncEngine } from "../../../../src/features/calendar/googlecalendar-sync/GoogleCalendarSyncEngine";
+import type { GCalSyncEngineOptions, GCalSyncStartContext, GoogleCalendarListItem } from "../../../../src/features/calendar/googlecalendar-integration/gcalSync.types";
 
 // ─────────────────────────────────────────────────────────────
 // テスト用定数
