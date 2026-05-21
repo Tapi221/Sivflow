@@ -16,6 +16,7 @@ import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
 import { useTaskCalendarEvents } from "./task/useTaskCalendarEvents";
 
+import { SidebarPanelIcon } from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
 
 const VIEW_OPTIONS = [
@@ -253,15 +254,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             onClick={handleOpenDayDetailPanel}
             className="flex w-8 shrink-0 items-center justify-center border-l border-[#ececec] bg-transparent text-[#b4b4bc] hover:bg-[#f7f7f7]"
           >
-            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
-              <path
-                d="M9.5 4.5L6 8L9.5 11.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <SidebarPanelIcon className="h-4 w-4 -translate-x-1 -scale-x-100" />
           </button>
         ) : null}
       </div>
