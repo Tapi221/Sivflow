@@ -32,15 +32,15 @@ export const ViewModeDropdown = ({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
+          onMouseDown={(e) => e.preventDefault()}
           className="
             inline-flex items-center
-            rounded-full border border-[#e2e4e9]
+            rounded-full border border-[#d7dae0]
             bg-white px-2.5 py-1
 
             text-[12px] font-medium text-[#25272d]
             leading-none
 
-            shadow-sm
             transition
             hover:bg-[#f5f6f8]
             active:scale-[0.98]
@@ -59,19 +59,41 @@ export const ViewModeDropdown = ({
         <Popover.Content
           side="bottom"
           align="end"
-          sideOffset={6}
+          sideOffset={10}
           className="
+            relative
             z-50
-            w-fit min-w-[90px]
 
-            overflow-hidden
-            rounded-lg border border-[#e2e4e9]
-            bg-white py-1
+            min-w-[84px]
+            overflow-visible
 
+            rounded-md
+            border border-[#e2e4e9]
+            bg-white
+            py-1
+
+            text-[#25272d]
             shadow-[0_10px_25px_rgba(0,0,0,0.12)]
+
+            animate-in fade-in-0 zoom-in-95 duration-150
+            outline-none
           "
         >
-          <div className="px-1.5 py-1 text-[10px] font-medium text-[#a0a4b0]">
+          {/* arrow */}
+          <span
+            className="
+              absolute
+              top-[-5px]
+              right-3
+              h-2 w-2
+              rotate-45
+
+              border-l border-t border-[#e2e4e9]
+              bg-white
+            "
+          />
+
+          <div className="px-2 py-1 text-[10px] font-medium text-[#a0a4b0]">
             {t.viewsLabel}
           </div>
 
@@ -88,24 +110,26 @@ export const ViewModeDropdown = ({
                 }}
                 className="
                   flex w-full items-center justify-between
-                  px-1.5 py-1
+                  gap-3
 
-                  text-[12px]
+                  px-2 py-1
+
+                  text-[11px]
+                  font-medium
                   leading-none
                   text-left
+                  text-[#25272d]
 
+                  transition
                   hover:bg-[#f5f6f8]
                   outline-none
                 "
               >
-                <span className={isSelected ? "font-medium" : ""}>
-                  {label}
-                </span>
+                <span>{label}</span>
 
                 {isSelected && (
                   <span
                     className="
-                      ml-1.5
                       h-1.5 w-1.5
                       shrink-0
                       rounded-full
