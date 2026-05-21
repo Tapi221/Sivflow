@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from "react";
-
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
-
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
-
 import type { CalendarWeekDayGridProps } from "@/features/calendar/schedulePane.types";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
-
 import { computeEventLayout,toLayoutEvent } from "@/features/calendar/eventchip/EventChip.layout.weekday.desktop";
-
 import { CalendarEventChipWeekday } from "../eventchip/EventChip.schedule.weekday";
 import { cn } from "@/lib/utils";
-
 // ==============================================
 
 type CalendarEventPositionStyle = React.CSSProperties & {
@@ -220,7 +214,7 @@ export const CalendarWeekDayGrid = ({
             {HOURS.map((hour) => (
               <div
                 key={hour}
-                className="relative border-b border-[#eef0f3] bg-white"
+                className="relative bg-white"
                 style={{ height: "var(--calendar-hour-row-height)" }}
               >
                 {hour > 0 && (
