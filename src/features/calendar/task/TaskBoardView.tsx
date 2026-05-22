@@ -8,6 +8,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { useCallback, type WheelEvent } from "react";
 
 import { TASK_COLUMNS } from "./task.types";
 import type { Task, TaskStatus } from "./task.types";
@@ -51,7 +52,7 @@ const DroppableTaskColumn = ({
   });
 
   return (
-    <div ref={setNodeRef} className="flex h-full min-h-0 min-w-[260px] flex-1">
+    <div ref={setNodeRef} className="flex h-full min-h-0 min-w-0">
       <TaskColumn
         column={column}
         tasks={tasks}
@@ -100,6 +101,37 @@ export const TaskBoardView = ({
       },
     }),
   );
+
+  const handleBoardWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
+    const horizontalDelta = event.shiftKey ? event.deltaY : event.deltaX;
+
+    if (horizontalDelta === 0) {
+      return;
+    }
+
+    if (!event.shiftKey && Math.abs(horizontalDelta) <= Math.abs(event.deltaY)) {
+      return;
+    }
+
+    const container = event.currentTarget;
+    const maxScrollLeft = container.scrollWidth - container.clientWidth;
+
+    if (maxScrollLeft <= 0) {
+      return;
+    }
+
+    const nextScrollLeft = Math.min(
+      maxScrollLeft,
+      Math.max(0, container.scrollLeft + horizontalDelta),
+    );
+
+    if (nextScrollLeft === container.scrollLeft) {
+      return;
+    }
+
+    event.preventDefault();
+    container.scrollLeft = nextScrollLeft;
+  }, []);
 
   const handleDragOver = (event: DragOverEvent) => {
     const activeId = String(event.active.id);
@@ -168,8 +200,11 @@ export const TaskBoardView = ({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden px-4 pt-4 pb-0">
-        <div className="flex h-full min-h-0 gap-3">
+      <div
+        className="min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 pt-4 pb-0"
+        onWheelCapture={handleBoardWheel}
+      >
+        <div className="grid h-full min-h-0 min-w-full grid-flow-col auto-cols-[minmax(260px,1fr)] gap-3">
           {TASK_COLUMNS.map((col) => (
             <DroppableTaskColumn
               key={col.id}
