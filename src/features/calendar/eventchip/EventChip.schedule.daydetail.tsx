@@ -40,11 +40,15 @@ const getDurationMinutes = (
 
 // ==============================================
 
+type EventChipDayDetailProps = {
+  event: GoogleCalendarEvent;
+  compact?: boolean;
+};
+
 export const EventChipDayDetail = ({
   event,
-}: {
-  event: GoogleCalendarEvent;
-}) => {
+  compact = false,
+}: EventChipDayDetailProps) => {
   const tokens = generateColorTokens(
     event.accentColor,
   );
@@ -88,19 +92,30 @@ export const EventChipDayDetail = ({
     <div
       className={cn(
         eventChipAllDayClass,
-        `
-          absolute
-          left-[6px]
-          right-[8px]
-          flex
-          flex-col
-          gap-0
-          text-left
-        `,
+        event.isAllDay
+          ? `
+            absolute
+            left-[6px]
+            right-[8px]
+            flex
+            flex-col
+            gap-0
+            text-left
+          `
+          : `
+            flex
+            h-full
+            w-full
+            min-w-0
+            flex-col
+            gap-0
+            text-left
+          `,
+        compact && "px-1 py-[1px]",
       )}
       style={{
-        top,
-        height,
+        top: event.isAllDay ? top : undefined,
+        height: event.isAllDay ? height : undefined,
         background: tokens.bg,
         borderLeft: event.isAllDay
           ? undefined
@@ -119,13 +134,7 @@ export const EventChipDayDetail = ({
         {timeLabel}
       </span>
 
-      {!event.isAllDay && (
-        <span className="truncate">
-          {event.title || "Untitled"}
-        </span>
-      )}
-
-      {event.isAllDay && (
+      {!compact && (
         <span className="truncate">
           {event.title || "Untitled"}
         </span>
