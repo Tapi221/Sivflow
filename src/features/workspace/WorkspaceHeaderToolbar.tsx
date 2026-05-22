@@ -53,7 +53,7 @@ const resolveSegmentedTabColumnWidth = (
     ...tabs.map((tab) => tab.label.length),
   );
 
-  return `calc(${longestLabelLength}ch + 1.5rem)`;
+  return `calc(${longestLabelLength}ch + 2.35rem)`;
 };
 
 export const WorkspaceHeaderToolbar = ({
@@ -78,7 +78,7 @@ export const WorkspaceHeaderToolbar = ({
   ) => {
     return (
       <div
-        className="relative inline-grid h-8 w-max items-center gap-1 rounded-xl bg-[#f6f8fb] p-0.5"
+        className="relative inline-grid h-9 w-max items-center gap-0 rounded-full border border-[#d1d1d6]/70 bg-[#f2f2f7]/85 p-1 shadow-[inset_0_0_0_0.5px_rgba(60,60,67,0.10)] backdrop-blur-xl"
         style={{
           gridTemplateColumns: `repeat(${segmentedTabs.length}, ${resolveSegmentedTabColumnWidth(
             segmentedTabs,
@@ -94,14 +94,14 @@ export const WorkspaceHeaderToolbar = ({
               key={tab.value}
               type="button"
               className={cn(
-                "relative z-10 flex h-7 w-full min-w-0 items-center justify-center gap-1.5 rounded-lg px-2",
+                "relative z-10 flex h-7 w-full min-w-0 items-center justify-center gap-1.5 rounded-full px-2.5",
                 "appearance-none select-none",
-                "text-[12px] font-medium leading-none",
-                "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
-                "focus:outline-none focus:ring-0 focus-visible:outline-none",
+                "text-[12px] font-semibold leading-none tracking-[-0.01em]",
+                "outline-none ring-0 transition-[color,transform] duration-200 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+                "focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25",
                 isActive
-                  ? "text-[#193a5c]"
-                  : "text-[#8f929c] hover:text-[#193a5c]",
+                  ? "text-[#007aff]"
+                  : "text-[#3c3c43]/60 hover:text-[#007aff] active:scale-[0.98]",
               )}
               aria-pressed={isActive}
               onClick={tab.onClick}
@@ -109,15 +109,15 @@ export const WorkspaceHeaderToolbar = ({
               {isActive && (
                 <motion.span
                   layoutId={indicatorId}
-                  className="absolute inset-0 -z-10 rounded-lg border border-[#e4eaf1] bg-white"
+                  className="absolute inset-0 -z-10 rounded-full border border-white/80 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08),0_6px_18px_rgba(0,0,0,0.10)]"
                   transition={WORKSPACE_TAB_MOTION_TRANSITION}
                 />
               )}
 
               <Icon
                 className={cn(
-                  "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
-                  isActive ? "text-[#193a5c]" : "text-[#9aa3b1]",
+                  "block h-[17px] w-[17px] shrink-0 text-current transition-[opacity,transform] duration-200 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+                  isActive ? "opacity-100" : "opacity-70",
                 )}
               />
 
