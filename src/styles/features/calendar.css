@@ -125,13 +125,11 @@
   }
 
   .calendar-month-weekday-header {
-    border-color: rgb(60 60 67 / 18%) !important;
-    background: rgb(248 248 248 / 82%) !important;
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    backdrop-filter: saturate(180%) blur(20px);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 70%),
-      0 1px 0 rgb(60 60 67 / 10%);
+    border-color: #e5e5ea !important;
+    background: #f9f9fb !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
   }
 
   .calendar-month-weekday-cell {
@@ -163,9 +161,7 @@
     min-height: var(--calendar-month-row-height);
     contain: paint style;
     border-color: #e5e5ea !important;
-    transition:
-      background-color 150ms ease,
-      box-shadow 150ms ease;
+    transition: background-color 120ms ease;
   }
 
   .calendar-month-day-cell > button {
@@ -178,11 +174,11 @@
   }
 
   .calendar-month-day-cell-hoverable:hover {
-    background: #f7f7fa !important;
+    background: #fafafa !important;
   }
 
   .calendar-month-day-cell:focus-within {
-    box-shadow: inset 0 0 0 1px rgb(0 122 255 / 24%);
+    box-shadow: none;
   }
 
   .calendar-month-view.is-month-row-resizing .calendar-month-day-cell-hoverable:hover {
