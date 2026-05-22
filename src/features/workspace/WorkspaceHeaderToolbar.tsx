@@ -1,6 +1,7 @@
 import { motion, type Transition } from "framer-motion";
 import type { ComponentType, SVGProps } from "react";
 
+import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 
 export type WorkspaceHeaderToolbarIconProps = SVGProps<SVGSVGElement> & {
@@ -45,16 +46,10 @@ const toolbarIconClassName =
 const toolbarTooltipClassName =
   "pointer-events-none absolute left-1/2 top-[calc(100%+8px)] z-20 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-full border border-[#d1d1d6]/70 bg-white/95 px-2.5 py-1 text-[11px] font-medium leading-none tracking-[-0.01em] text-[#3c3c43]/72 opacity-0 shadow-[0_8px_18px_rgba(60,60,67,0.12)] backdrop-blur-xl transition-all duration-150 ease-out group-hover/action:translate-y-0 group-hover/action:opacity-100 group-focus-visible/action:translate-y-0 group-focus-visible/action:opacity-100 motion-reduce:transition-none";
 
-const resolveSegmentedTabColumnWidth = (
-  tabs: readonly WorkspaceHeaderToolbarItem[],
-) => {
-  const longestLabelLength = Math.max(
-    0,
-    ...tabs.map((tab) => tab.label.length),
-  );
-
-  return `calc(${longestLabelLength}ch + 2.35rem)`;
-};
+const segmentedTabTooltipClassName =
+  "rounded-lg border border-[#e4eaf1] bg-white px-2.5 py-[5px] text-[12px] font-medium text-[#193a5c] shadow-[0_8px_18px_rgba(25,58,92,0.12)]";
+const segmentedTabTooltipArrowClassName =
+  "border-b border-r border-[#e4eaf1] bg-white";
 
 export const WorkspaceHeaderToolbar = ({
   activeValue,
@@ -77,52 +72,52 @@ export const WorkspaceHeaderToolbar = ({
     indicatorId: string,
   ) => {
     return (
-      <div
-        className="relative inline-grid h-9 w-max items-center gap-0 rounded-full border border-[#d1d1d6]/70 bg-[#f2f2f7]/85 p-1 shadow-[inset_0_0_0_0.5px_rgba(60,60,67,0.10)] backdrop-blur-xl"
-        style={{
-          gridTemplateColumns: `repeat(${segmentedTabs.length}, ${resolveSegmentedTabColumnWidth(
-            segmentedTabs,
-          )})`,
-        }}
-      >
+      <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f6f8fb] p-0.5">
         {segmentedTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeValue === tab.value;
 
           return (
-            <button
+            <HoverTooltip
               key={tab.value}
-              type="button"
-              className={cn(
-                "relative z-10 flex h-7 w-full min-w-0 items-center justify-center gap-1.5 rounded-full px-2.5",
-                "appearance-none select-none",
-                "text-[12px] font-semibold leading-none tracking-[-0.01em]",
-                "outline-none ring-0 transition-[color,transform] duration-200 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
-                "focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25",
-                isActive
-                  ? "text-[#007aff]"
-                  : "text-[#3c3c43]/60 hover:text-[#007aff] active:scale-[0.98]",
-              )}
-              aria-pressed={isActive}
-              onClick={tab.onClick}
+              label={tab.label}
+              side="top"
+              offset={6}
+              tooltipClassName={segmentedTabTooltipClassName}
+              arrowClassName={segmentedTabTooltipArrowClassName}
             >
-              {isActive && (
-                <motion.span
-                  layoutId={indicatorId}
-                  className="absolute inset-0 -z-10 rounded-full border border-white/80 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08),0_6px_18px_rgba(0,0,0,0.10)]"
-                  transition={WORKSPACE_TAB_MOTION_TRANSITION}
-                />
-              )}
-
-              <Icon
+              <button
+                type="button"
                 className={cn(
-                  "block h-[17px] w-[17px] shrink-0 text-current transition-[opacity,transform] duration-200 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
-                  isActive ? "opacity-100" : "opacity-70",
+                  "relative z-10 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg p-0",
+                  "appearance-none select-none",
+                  "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+                  "focus:outline-none focus:ring-0 focus-visible:outline-none",
+                  isActive
+                    ? "text-[#193a5c]"
+                    : "text-[#8f929c] hover:text-[#193a5c]",
                 )}
-              />
+                aria-label={tab.label}
+                aria-pressed={isActive}
+                onClick={tab.onClick}
+              >
+                {isActive && (
+                  <motion.span
+                    layoutId={indicatorId}
+                    className="absolute inset-0 -z-10 rounded-lg border border-[#e4eaf1] bg-white"
+                    transition={WORKSPACE_TAB_MOTION_TRANSITION}
+                  />
+                )}
 
-              <span className="whitespace-nowrap">{tab.label}</span>
-            </button>
+                <Icon
+                  aria-hidden="true"
+                  className={cn(
+                    "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+                    isActive ? "text-[#193a5c]" : "text-[#9aa3b1]",
+                  )}
+                />
+              </button>
+            </HoverTooltip>
           );
         })}
       </div>
