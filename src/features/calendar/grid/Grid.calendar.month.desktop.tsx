@@ -106,10 +106,10 @@ const CalendarMonthDayCell = memo(({
   return (
     <div
       className={cn(
-        "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#eef0f3] bg-white text-left",
+        "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#e5e5ea] bg-white text-left",
         !isLastColumn && "border-r",
-        isToday && "bg-[#f0f6ff]",
-        selected && !isToday && "bg-[#f4f5f7]",
+        isToday && "bg-[#f2f8ff]",
+        selected && !isToday && "bg-[#f6f6f8]",
         !selected &&
           !isToday &&
           "calendar-month-day-cell-hoverable",
@@ -141,9 +141,9 @@ const CalendarMonthDayCell = memo(({
             "absolute inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[length:var(--ds-layout-font-size-meta)] font-semibold tabular-nums transition-colors",
             GD.MONTH_GRID_DAY_NUMBER_POSITION_CLASS,
             isToday
-              ? "bg-[#007aff] text-white shadow-[0_5px_12px_rgba(0,122,255,0.28)]"
+              ? "bg-[#007aff] text-white shadow-[0_6px_14px_rgba(0,122,255,0.28)]"
               : selected
-                ? "bg-[#2d3039] text-white"
+                ? "bg-[#3a3a3c] text-white"
                 : day.isCurrentMonth
                   ? "text-[#24231f]"
                   : "text-[#b0aea8]",
@@ -156,7 +156,7 @@ const CalendarMonthDayCell = memo(({
         {monthAnnotation && (
           <span
             className={cn(
-              "absolute text-[12px] font-semibold text-[#a09f98]",
+              "absolute text-[12px] font-semibold text-[#8e8e93]",
               GD.MONTH_GRID_MONTH_ANNOTATION_POSITION_CLASS,
             )}
           >
@@ -415,7 +415,7 @@ export const GridCalendarMonthDesktop = ({
       {/* 曜日ヘッダー */}
       <div
         className={cn(
-          "sticky top-0 z-20 grid grid-cols-7 border-b border-[#e5e7eb] bg-white",
+          "calendar-month-weekday-header sticky top-0 z-20 grid grid-cols-7 border-b",
           GD.MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS,
         )}
       >
@@ -424,16 +424,15 @@ export const GridCalendarMonthDesktop = ({
             <div
               key={label}
               className="
+                calendar-month-weekday-cell
                 flex
                 items-center
                 justify-center
-                border-r
-                border-[#eef0f3]
-                text-[12px]
-                leading-normal
-                font-medium
-                text-[#8f929c]
-                last:border-r-0
+                text-[11px]
+                leading-none
+                font-semibold
+                tracking-[0.03em]
+                text-[#8e8e93]
               "
             >
               {label}
@@ -443,7 +442,7 @@ export const GridCalendarMonthDesktop = ({
       </div>
 
       {/* 月グリッド */}
-      <div className="bg-white">
+      <div className="calendar-month-grid bg-white">
         {monthWeeks.map((week) => (
           <CalendarMonthWeekRow
             key={week.key}
