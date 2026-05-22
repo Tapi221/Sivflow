@@ -2,7 +2,6 @@ import {
   closestCenter,
   DndContext,
   type DragEndEvent,
-  type DragOverEvent,
   PointerSensor,
   useDroppable,
   useSensor,
@@ -165,28 +164,6 @@ export const TaskBoardView = ({
     container.scrollLeft = nextScrollLeft;
   }, []);
 
-  const handleDragOver = (event: DragOverEvent) => {
-    const activeId = String(event.active.id);
-    const over = event.over;
-
-    if (!over) {
-      return;
-    }
-
-    const activeTask = findTask(tasksByStatus, activeId);
-
-    if (!activeTask) {
-      return;
-    }
-
-    const overType = over.data.current?.type;
-    const overStatus = over.data.current?.status;
-
-    if (overType === "column" && isTaskStatus(overStatus) && activeTask.status !== overStatus) {
-      onReorderTask(activeId, overStatus);
-    }
-  };
-
   const handleDragEnd = (event: DragEndEvent) => {
     const activeId = String(event.active.id);
     const over = event.over;
@@ -225,7 +202,6 @@ export const TaskBoardView = ({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
       <div
