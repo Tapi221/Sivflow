@@ -59,7 +59,7 @@ export const TaskCard = ({
   let dateContent = <span />;
   if (formattedDate) {
     dateContent = (
-      <span className="inline-flex items-center gap-1 rounded-full border border-white/70 bg-[#f2f2f7] px-1.5 text-[11px] font-medium tabular-nums text-[#8e8e93] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
+      <span className="inline-flex items-center gap-1 rounded-full border border-white/70 bg-[#f2f2f7] px-1.5 text-[11px] font-medium tabular-nums text-[#8e8e93]">
         <ScheduleCalendarIcon className="h-4 w-4 shrink-0 text-[#9da3af]" />
         {formattedDate}
       </span>
@@ -69,12 +69,12 @@ export const TaskCard = ({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-[14px] border border-white/80 bg-white/90 px-3 pt-3 pb-2",
-        "shadow-[0_1px_2px_rgba(15,23,42,0.04),0_4px_12px_rgba(15,23,42,0.055)] backdrop-blur-xl",
-        "transition-[transform,box-shadow,background-color,border-color] duration-200 ease-out",
-        "hover:border-white hover:bg-white hover:shadow-[0_2px_4px_rgba(15,23,42,0.05),0_6px_16px_rgba(15,23,42,0.07)]",
+        "group relative overflow-hidden rounded border border-white/80 bg-white/90 px-3 pt-3 pb-2",
+        "backdrop-blur-xl",
+        "transition-[transform,background-color,border-color] duration-200 ease-out",
+        "hover:border-white hover:bg-white",
         "active:scale-[0.998]",
-        isDragging && "shadow-[0_8px_20px_rgba(15,23,42,0.14)]",
+        isDragging && "",
       )}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/90" />
@@ -134,14 +134,14 @@ export const TaskCard = ({
               {dateContent}
 
               <span
-                className="inline-flex h-5 items-center rounded-full border border-white/70 px-2 text-[11px] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]"
+                className="inline-flex h-5 items-center rounded-full border border-white/70 px-2 text-[11px] font-semibold"
                 style={{ backgroundColor: category.bg, color: category.text }}
               >
                 {task.category}
               </span>
 
               <span
-                className="inline-flex h-5 items-center rounded-full border border-white/70 px-2 text-[11px] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]"
+                className="inline-flex h-5 items-center rounded-full border border-white/70 px-2 text-[11px] font-semibold"
                 style={{ backgroundColor: priority.bg, color: priority.text }}
               >
                 {priority.label}
@@ -149,7 +149,7 @@ export const TaskCard = ({
             </div>
 
             {task.assignee && (
-              <div className="pointer-events-none absolute right-0 top-0 rounded-full shadow-[0_2px_8px_rgba(15,23,42,0.12)] ring-1 ring-white">
+              <div className="pointer-events-none absolute right-0 top-0 rounded-full ring-1 ring-white">
                 <GoogleAccountChip
                   name={chipName}
                   photoUrl={accountPhotoUrl}
