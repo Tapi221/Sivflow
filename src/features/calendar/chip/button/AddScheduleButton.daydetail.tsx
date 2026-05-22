@@ -1,4 +1,3 @@
-import { PlusIcon } from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
 
 type DayDetailCreateButtonProps = {
@@ -22,10 +21,12 @@ export const DayDetailCreateButton = ({
       )}
       aria-label="予定を追加"
     >
-      <PlusIcon
+      <span
         aria-hidden="true"
-        className="h-4 w-4 text-current transition-transform duration-150 ease-out group-hover:scale-105"
-      />
+        className="text-[18px] leading-none text-current transition-transform duration-150 ease-out group-hover:scale-105"
+      >
+        +
+      </span>
       <span>予定を追加</span>
     </button>
   );
