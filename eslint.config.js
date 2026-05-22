@@ -114,11 +114,21 @@ export default defineConfig([
 
   {
     files: [
+      "src/features/calendar/chip/dropdownchip/TaskScheduleDropdownChip.tsx",
+      "src/features/calendar/googlecalendar-integration/gcal.oauth.ts",
+      "src/features/calendar/googlecalendar-integration/useMultiAccountGoogleCalendar.ts",
       "src/features/calendar/grid/Grid.calendar.month.desktop.tsx",
       "src/features/calendar/task/TaskBoardView.tsx",
     ],
     rules: {
       "@stylistic/indent": "off",
+    },
+  },
+
+  {
+    files: ["src/features/calendar/chip/icon/CalendarDayNumberCircle.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
     },
   },
 
