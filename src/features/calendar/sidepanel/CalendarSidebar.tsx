@@ -24,6 +24,7 @@ import type {
 
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 const DEFAULT_TASK_LIST_COLOR = "#7c8cf8";
+const SIDEBAR_DIVIDER_CLASS = "h-px w-full shrink-0 bg-[#e4e6eb]";
 
 const IconChevronLeft = ({ className }: { className?: string }) => (
   <svg
@@ -332,7 +333,7 @@ export const CalendarSidebar = ({
         </div>
       </section>
 
-      <div className="mt-2 h-px w-full shrink-0 bg-[#e4e6eb]" />
+      <div className={cn("mt-2", SIDEBAR_DIVIDER_CLASS)} />
 
       <nav className="mt-2 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto pb-2">
         <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
@@ -362,12 +363,15 @@ export const CalendarSidebar = ({
 
       <div className="mt-auto w-full shrink-0">
         {hasGoogleAccounts && (
-          <div className="mb-2 h-px w-full shrink-0 bg-[#e4e6eb]" />
+          <div className={cn("mt-2", SIDEBAR_DIVIDER_CLASS)} />
         )}
 
         <button
           type="button"
-          className="flex h-7 w-full items-center gap-2 px-2 text-left hover:bg-[#eceef1]"
+          className={cn(
+            "flex h-7 w-full items-center gap-2 px-2 text-left hover:bg-[#eceef1]",
+            hasGoogleAccounts && "mt-2",
+          )}
           onClick={onAddCalendar}
           disabled={isAnyCalendarConnecting}
         >
