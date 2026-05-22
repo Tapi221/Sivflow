@@ -24,9 +24,9 @@ import type {
   GoogleAccountDisplay,
 } from "../schedulePane.types";
 
-const DEFAULT_CALENDAR_COLOR = "#74798b";
-const DEFAULT_TASK_LIST_COLOR = "#7c8cf8";
-const SIDEBAR_DIVIDER_CLASS = "h-px w-full shrink-0 bg-[#e4e6eb]";
+const DEFAULT_CALENDAR_COLOR = "#8c8c8c";
+const DEFAULT_TASK_LIST_COLOR = "#b3b3b3";
+const SIDEBAR_DIVIDER_CLASS = "h-px w-full shrink-0 bg-[#eeeeee]";
 const GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME =
   "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-5 text-left";
 const GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME = "px-5";
@@ -110,24 +110,24 @@ const GoogleAccountSection = ({
     account.taskLists.length === 0;
 
   return (
-    <div className="mt-2 overflow-hidden rounded-[14px] border border-white/70 bg-white/80 p-0.5 shadow-[0_4px_12px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+    <div className="mt-2 overflow-hidden rounded-[14px] border border-[#eeeeee] bg-white p-0.5 shadow-[0_8px_18px_rgba(0,0,0,0.04)]">
       <button
         type="button"
-        className="group flex h-7 w-full items-center gap-1.5 rounded-[10px] px-1.5 text-left transition-all duration-150 hover:bg-[#f5f7fb] active:scale-[0.985] active:bg-[#eef2f7]"
+        className="group flex h-7 w-full items-center gap-1.5 rounded-[10px] px-1.5 text-left transition-all duration-150 hover:bg-[#f7f7f7] active:scale-[0.985] active:bg-[#f1f1f1]"
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
       >
         <GoogleAccountChip name={accountName} photoUrl={account.photoUrl} />
 
         {account.email && (
-          <span className="truncate text-[11px] font-semibold tracking-wider text-[#8d93a1]">
+          <span className="truncate text-[11px] font-semibold tracking-wider text-[#9a9a9a]">
             {account.email}
           </span>
         )}
 
         <span
           className={cn(
-            "ml-auto flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-[#a2a8b3] transition-all duration-200 group-hover:bg-white/80 group-hover:text-[#6b7280]",
+            "ml-auto flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-[#b3b3b3] transition-all duration-200 group-hover:bg-white group-hover:text-[#8c8c8c]",
             !isOpen && "-rotate-90",
           )}
         >
@@ -146,7 +146,7 @@ const GoogleAccountSection = ({
                 type="button"
                 className={cn(
                   GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME,
-                  "transition-all duration-150 hover:bg-[#f5f7fb] active:scale-[0.99] active:bg-[#eef2f7]",
+                  "transition-all duration-150 hover:bg-[#f7f7f7] active:scale-[0.99] active:bg-[#f1f1f1]",
                 )}
                 onClick={() => onToggleCalendar(calendar.id)}
                 aria-pressed={checked}
@@ -156,7 +156,7 @@ const GoogleAccountSection = ({
                   color={calendar.backgroundColor ?? DEFAULT_CALENDAR_COLOR}
                 />
 
-                <span className="truncate text-[12px] font-medium text-[#24272f]">
+                <span className="truncate text-[12px] font-medium text-[#2f2f2f]">
                   {calendar.summary}
                 </span>
               </button>
@@ -171,7 +171,7 @@ const GoogleAccountSection = ({
             <p
               className={cn(
                 GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
-                "py-1 text-[11px] text-[#8d93a1]",
+                "py-1 text-[11px] text-[#9a9a9a]",
               )}
             >
               読み込み中…
@@ -182,7 +182,7 @@ const GoogleAccountSection = ({
             <p
               className={cn(
                 GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
-                "py-1 text-[11px] text-[#8d93a1]",
+                "py-1 text-[11px] text-[#9a9a9a]",
               )}
             >
               Google ToDo リストはありません
@@ -196,7 +196,7 @@ const GoogleAccountSection = ({
             >
               <AnimatedCircleCheckbox checked color={DEFAULT_TASK_LIST_COLOR} />
 
-              <span className="truncate text-[12px] font-medium text-[#24272f]">
+              <span className="truncate text-[12px] font-medium text-[#2f2f2f]">
                 {taskList.title}
               </span>
             </div>
@@ -205,16 +205,16 @@ const GoogleAccountSection = ({
           {account.taskListsError && (
             <div
               className={cn(
-                "mt-1 rounded-[12px] bg-[#fff4e5] py-1.5",
+                "mt-1 rounded-[12px] bg-[#f7f7f7] py-1.5",
                 GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
               )}
             >
-              <p className="text-[11px] leading-relaxed text-[#9a6700]">
+              <p className="text-[11px] leading-relaxed text-[#8c8c8c]">
                 {account.taskListsError}
               </p>
               <button
                 type="button"
-                className="mt-1 rounded-full bg-white/80 px-2.5 py-0.5 text-[11px] font-semibold text-[#a14d00] shadow-sm transition-colors hover:bg-white"
+                className="mt-1 rounded-full border border-[#eeeeee] bg-white px-2.5 py-0.5 text-[11px] font-semibold text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#f7f7f7]"
                 onClick={onReconnect}
               >
                 再連携
@@ -225,13 +225,13 @@ const GoogleAccountSection = ({
       )}
 
       {account.connectionStatus === "needsReconnect" && (
-        <div className="mt-1 rounded-[12px] bg-[#fff4e5] px-3 py-1.5">
-          <p className="text-[11px] leading-relaxed text-[#9a6700]">
+        <div className="mt-1 rounded-[12px] bg-[#f7f7f7] px-3 py-1.5">
+          <p className="text-[11px] leading-relaxed text-[#8c8c8c]">
             再連携が必要です。
           </p>
           <button
             type="button"
-            className="mt-1 rounded-full bg-white/80 px-2.5 py-0.5 text-[11px] font-semibold text-[#a14d00] shadow-sm transition-colors hover:bg-white"
+            className="mt-1 rounded-full border border-[#eeeeee] bg-white px-2.5 py-0.5 text-[11px] font-semibold text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#f7f7f7]"
             onClick={onReconnect}
           >
             再連携
@@ -240,7 +240,7 @@ const GoogleAccountSection = ({
       )}
 
       {account.error && (
-        <p className="mt-1 rounded-[12px] bg-[#fff1f0] px-3 py-1.5 text-[11px] leading-relaxed text-[#b42318]">
+        <p className="mt-1 rounded-[12px] bg-[#f7f7f7] px-3 py-1.5 text-[11px] leading-relaxed text-[#8c8c8c]">
           {account.error}
         </p>
       )}
@@ -249,7 +249,7 @@ const GoogleAccountSection = ({
         <div className="mt-1 px-3 pb-1">
           <button
             type="button"
-            className="rounded-full bg-[#fff1f0] px-2.5 py-0.5 text-[11px] font-semibold text-[#b42318] transition-colors hover:bg-[#fee4e2]"
+            className="rounded-full border border-[#eeeeee] bg-white px-2.5 py-0.5 text-[11px] font-semibold text-[#8c8c8c] transition-colors hover:bg-[#f7f7f7]"
             onClick={onRetry}
           >
             再試行
@@ -286,10 +286,10 @@ export const CalendarSidebar = ({
   const isTaskMode = activeMode === "task";
 
   return (
-    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent px-3 pb-5 pt-2 text-[#24272f]">
+    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent px-3 pb-5 pt-2 text-[#2f2f2f]">
       <section className="flex w-full shrink-0 flex-col px-2.5 pb-2.5 pt-2.5">
         <div className="flex w-full items-center justify-between px-0.5">
-          <span className="text-[13px] font-bold tracking-[-0.01em] text-[#1f2937]">
+          <span className="text-[13px] font-bold tracking-[-0.01em] text-[#2f2f2f]">
             {format(monthDate, monthLabelFormat, { locale: dateFnsLocale })}
           </span>
 
@@ -297,7 +297,7 @@ export const CalendarSidebar = ({
             <HoverTooltip label={t.previousMonthLabel} side="top">
               <button
                 type="button"
-                className="flex h-7 w-7 items-center justify-center rounded-full text-[#8f96a3] transition-all hover:bg-[#f1f3f7] hover:text-[#1f2937] active:scale-[0.94] active:bg-[#e8ecf3]"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-[#b3b3b3] transition-all hover:bg-[#f7f7f7] hover:text-[#8c8c8c] active:scale-[0.94] active:bg-[#f1f1f1]"
                 onClick={onPreviousMonth}
                 aria-label={t.previousMonthLabel}
               >
@@ -308,7 +308,7 @@ export const CalendarSidebar = ({
             <HoverTooltip label={t.nextMonthLabel} side="top">
               <button
                 type="button"
-                className="flex h-7 w-7 items-center justify-center rounded-full text-[#8f96a3] transition-all hover:bg-[#f1f3f7] hover:text-[#1f2937] active:scale-[0.94] active:bg-[#e8ecf3]"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-[#b3b3b3] transition-all hover:bg-[#f7f7f7] hover:text-[#8c8c8c] active:scale-[0.94] active:bg-[#f1f1f1]"
                 onClick={onNextMonth}
                 aria-label={t.nextMonthLabel}
               >
@@ -322,7 +322,7 @@ export const CalendarSidebar = ({
           {t.miniCalendarWeekdays.map((weekday, index) => (
             <span
               key={`${weekday}-${index}`}
-              className="flex h-6 items-center justify-center text-[11px] font-bold uppercase text-[#9aa0aa]"
+              className="flex h-6 items-center justify-center text-[11px] font-bold uppercase text-[#9a9a9a]"
             >
               {weekday}
             </span>
@@ -340,7 +340,7 @@ export const CalendarSidebar = ({
                 onClick={() => onSelectDate(day.date)}
                 className={cn(
                   "flex h-7 w-full items-center justify-center rounded-full transition-all duration-150 active:scale-[0.92]",
-                  !isActive && "hover:bg-[#f1f3f7]",
+                  !isActive && "hover:bg-[#f7f7f7]",
                 )}
               >
                 <CalendarDayNumberCircle
@@ -361,11 +361,11 @@ export const CalendarSidebar = ({
       <nav className="mt-2 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto pb-2">
         <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
           {isTaskMode ? (
-            <TaskIcon className="h-3.5 w-3.5 text-[#8d93a1]" />
+            <TaskIcon className="h-3.5 w-3.5 text-[#9a9a9a]" />
           ) : (
-            <CalendarIcon className="h-3.5 w-3.5 text-[#8d93a1]" />
+            <CalendarIcon className="h-3.5 w-3.5 text-[#9a9a9a]" />
           )}
-          <span className="text-[11px] font-bold uppercase tracking-[0.04em] text-[#9aa0aa]">
+          <span className="text-[11px] font-bold uppercase tracking-[0.04em] text-[#9a9a9a]">
             {isTaskMode ? "MY TODO LISTS" : t.myProjects}
           </span>
         </div>
