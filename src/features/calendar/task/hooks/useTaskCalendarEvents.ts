@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
-import type { Task, TaskStatus } from "./task.types";
+import type { Task, TaskStatus } from "../task.types";
 import { useTaskStore } from "./useTaskStore";
 
 const TASK_CALENDAR_ID = "manifolia-tasks";
