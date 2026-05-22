@@ -1,5 +1,7 @@
 import { motion, type Transition } from "framer-motion";
 
+import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
+
 import type { CalendarWorkspaceToolbarProps } from "../schedulePane.types";
 import {
   CalendarIcon,
@@ -44,38 +46,38 @@ export const ToggleCalendarTimelineTask = ({
         const isActive = activeMode === tab.value;
 
         return (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={tab.onClick}
-            aria-label={tab.label}
-            title={tab.label}
-            className={cn(
-              "relative z-10 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg p-0",
-              "appearance-none select-none",
-              "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
-              "focus:outline-none focus:ring-0 focus-visible:outline-none",
-              isActive
-                ? "text-[#193a5c]"
-                : "text-[#8f929c] hover:text-[#193a5c]",
-            )}
-          >
-            {isActive && (
-              <motion.span
-                layoutId={TAB_INDICATOR_ID}
-                className="absolute inset-0 -z-10 rounded-lg border border-[#e4eaf1] bg-white"
-                transition={TAB_MOTION_TRANSITION}
-              />
-            )}
-
-            <Icon
-              aria-hidden="true"
+          <HoverTooltip key={tab.value} label={tab.label} side="bottom" offset={6}>
+            <button
+              type="button"
+              onClick={tab.onClick}
+              aria-label={tab.label}
               className={cn(
-                "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
-                isActive ? "text-[#193a5c]" : "text-[#9aa3b1]",
+                "relative z-10 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg p-0",
+                "appearance-none select-none",
+                "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+                "focus:outline-none focus:ring-0 focus-visible:outline-none",
+                isActive
+                  ? "text-[#193a5c]"
+                  : "text-[#8f929c] hover:text-[#193a5c]",
               )}
-            />
-          </button>
+            >
+              {isActive && (
+                <motion.span
+                  layoutId={TAB_INDICATOR_ID}
+                  className="absolute inset-0 -z-10 rounded-lg border border-[#e4eaf1] bg-white"
+                  transition={TAB_MOTION_TRANSITION}
+                />
+              )}
+
+              <Icon
+                aria-hidden="true"
+                className={cn(
+                  "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+                  isActive ? "text-[#193a5c]" : "text-[#9aa3b1]",
+                )}
+              />
+            </button>
+          </HoverTooltip>
         );
       })}
     </div>
