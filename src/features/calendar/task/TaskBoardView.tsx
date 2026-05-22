@@ -128,9 +128,9 @@ const taskBoardCollisionDetection: CollisionDetection = (args) => {
     pointerColumnCollisions.length > 0
       ? pointerColumnCollisions
       : rectIntersection({
-          ...args,
-          droppableContainers: columnContainers,
-        });
+        ...args,
+        droppableContainers: columnContainers,
+      });
 
   const overColumn = columnContainers.find(
     (container) => container.id === columnCollisions[0]?.id,
