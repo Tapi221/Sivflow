@@ -125,18 +125,25 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
   });
 
   const googleAccounts: GoogleAccountDisplay[] = google.googleAccounts.map(
-    (account) => ({
-      accountId: account.id,
-      email: account.email,
-      name: account.name,
-      photoUrl: account.photoUrl,
-      calendars: account.calendars,
-      selectedCalendarIds: account.selectedCalendarIds,
-      syncState: account.syncState,
-      connectionStatus: account.connectionStatus,
-      lastSyncedAt: account.lastSyncedAt,
-      error: account.error,
-    }),
+    (account) => {
+      const taskListState = google.taskListsByAccount[account.id];
+
+      return {
+        accountId: account.id,
+        email: account.email,
+        name: account.name,
+        photoUrl: account.photoUrl,
+        calendars: account.calendars,
+        taskLists: taskListState?.taskLists ?? [],
+        isTaskListsLoading: taskListState?.isLoading ?? false,
+        taskListsError: taskListState?.error ?? null,
+        selectedCalendarIds: account.selectedCalendarIds,
+        syncState: account.syncState,
+        connectionStatus: account.connectionStatus,
+        lastSyncedAt: account.lastSyncedAt,
+        error: account.error,
+      };
+    },
   );
 
   return {
