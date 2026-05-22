@@ -46,6 +46,7 @@ type VerticalRect = {
   height: number;
 };
 
+const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-[#f7f8fa]";
 const TASK_CARD_OVERLAY_CLASS_NAME = "w-[236px] max-w-[calc(100vw-2rem)]";
 
 const DroppableTaskColumn = ({
@@ -280,7 +281,7 @@ export const TaskBoardView = ({
       onDragEnd={handleDragEnd}
     >
       <div
-        className="min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 pt-4 pb-0"
+        className={`min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 pt-4 pb-0 ${CALENDAR_PANEL_BACKGROUND_CLASS_NAME}`}
         onWheelCapture={handleBoardWheel}
       >
         <div className="grid h-full min-h-0 min-w-full grid-flow-col auto-cols-[260px] gap-3">
