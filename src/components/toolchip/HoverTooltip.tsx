@@ -140,15 +140,17 @@ export const HoverTooltip = ({
               zIndex: 9999,
               pointerEvents: "none",
             }}
-            className="animate-in fade-in-0 zoom-in-95 duration-150"
+            className="animate-in fade-in-0 zoom-in-95 overflow-visible duration-150"
           >
             <div
               className={cn(
-                "relative whitespace-nowrap rounded-md bg-[#24272f] px-2 py-1 text-[11px] font-medium leading-none text-white shadow-lg",
+                "relative inline-flex min-h-6 items-center overflow-visible whitespace-nowrap rounded-md bg-[#24272f] px-2.5 py-[5px] text-[12px] font-medium leading-[1.25] text-white shadow-lg",
                 tooltipClassName,
               )}
             >
-              {tooltipLabel}
+              <span className="block overflow-visible leading-[inherit]">
+                {tooltipLabel}
+              </span>
 
               <span
                 className={cn(
