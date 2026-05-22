@@ -1,9 +1,9 @@
-export const IconCheck = ({ className }: { className?: string }) => (
+export const IconCheck = () => (
   <svg
     viewBox="0 0 16 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    className={className}
+    className="h-3.5 w-3.5 text-[#007aff]"
     aria-hidden="true"
   >
     <path
