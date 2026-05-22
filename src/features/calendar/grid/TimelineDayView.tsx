@@ -2,6 +2,8 @@ import type { RefObject, UIEvent } from "react";
 import { Fragment, useMemo } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
+import { CalendarDayNumberCircle } from "@/features/calendar/dayNumber/CalendarDayNumberCircle";
+import { cn } from "@/lib/utils";
 
 import type {
   TimelineUnitBuffer,
@@ -29,6 +31,7 @@ export const CalendarTimelineDayView = ({
   viewMode,
   anchorDate,
   timelineUnitBuffer,
+  selectedDate,
   dayColumnWidth,
   laneLabelWidth = C.TIMELINE_DEFAULT_LANE_LABEL_WIDTH,
   rowCount = C.TIMELINE_DEFAULT_ROW_COUNT,
@@ -44,6 +47,7 @@ export const CalendarTimelineDayView = ({
     return getTimelineColumnWidth(viewMode, dayColumnWidth);
   }, [dayColumnWidth, viewMode]);
 
+  const selectedTime = selectedDate.getTime();
   const gridWidth = columns.length * columnWidth;
 
   return (
@@ -71,24 +75,47 @@ export const CalendarTimelineDayView = ({
                 height: `${C.TIMELINE_HEADER_HEIGHT}px`,
               }}
             >
-              {columns.map((column) => (
-                <button
-                  key={column.id}
-                  type="button"
-                  className={[
-                    "flex h-10 flex-col items-center justify-center border-r border-[#e5e7eb] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
-                    column.isToday ? "bg-[#fdf2f2]" : "",
-                  ]
-                    .join(" ")
-                    .trim()}
-                  onClick={() => onSelectDate?.(column.start)}
-                >
-                  <span className="font-semibold text-[#25272d]">
-                    {column.topLabel}
-                  </span>
-                  <span>{column.bottomLabel}</span>
-                </button>
-              ))}
+              {columns.map((column) => {
+                const isSelected =
+                  selectedTime >= column.start.getTime() &&
+                  selectedTime <= column.end.getTime();
+
+                return (
+                  <button
+                    key={column.id}
+                    type="button"
+                    className={cn(
+                      "flex h-10 flex-col items-center justify-center border-r border-[#e5e7eb] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
+                      "transition-colors hover:bg-[#f4f5f7]",
+                      "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                      column.isToday && "bg-[#f0f6ff]",
+                      !column.isToday && isSelected && "bg-[#f4f5f7]",
+                    )}
+                    onClick={() => onSelectDate?.(column.start)}
+                  >
+                    {column.kind === "day" ? (
+                      <>
+                        <CalendarDayNumberCircle
+                          isToday={column.isToday}
+                          isSelected={isSelected}
+                        >
+                          {column.topLabel}
+                        </CalendarDayNumberCircle>
+                        <span className="mt-0.5 text-[11px] font-medium leading-none text-[#8f929c]">
+                          {column.bottomLabel}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-semibold text-[#25272d]">
+                          {column.topLabel}
+                        </span>
+                        <span>{column.bottomLabel}</span>
+                      </>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
