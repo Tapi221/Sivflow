@@ -72,10 +72,16 @@ const reduceGoogleTaskLists = (
       };
 
     case "REMOVE_MISSING_ACCOUNTS": {
-      const next: GoogleTaskListsState = {};
       const ids = new Set(action.accountIds);
+      const entries = Object.entries(state);
 
-      for (const [accountId, accountState] of Object.entries(state)) {
+      if (entries.every(([accountId]) => ids.has(accountId))) {
+        return state;
+      }
+
+      const next: GoogleTaskListsState = {};
+
+      for (const [accountId, accountState] of entries) {
         if (ids.has(accountId)) {
           next[accountId] = accountState;
         }
@@ -89,8 +95,17 @@ const reduceGoogleTaskLists = (
   }
 };
 
+const buildAccountTokenKey = (accounts: GoogleAccountEntry[]) =>
+  accounts
+    .map((account) =>
+      [account.id, account.accessToken ?? "", account.connectionStatus].join("\t"),
+    )
+    .join("\n");
+
 export const useGoogleTaskLists = (accounts: GoogleAccountEntry[]) => {
   const [state, dispatch] = useReducer(reduceGoogleTaskLists, {});
+
+  const accountTokenKey = buildAccountTokenKey(accounts);
 
   const accountTokens = useMemo(
     () =>
@@ -99,7 +114,8 @@ export const useGoogleTaskLists = (accounts: GoogleAccountEntry[]) => {
         accessToken: account.accessToken,
         connectionStatus: account.connectionStatus,
       })),
-    [accounts],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [accountTokenKey],
   );
 
   useEffect(() => {
