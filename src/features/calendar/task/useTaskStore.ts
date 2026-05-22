@@ -175,6 +175,13 @@ const findLastIndex = <T>(items: T[], predicate: (item: T) => boolean) => {
   return -1;
 };
 
+const resolveSameStatusInsertPosition = (
+  activeIndex: number,
+  overIndex: number,
+): TaskInsertPosition => {
+  return activeIndex < overIndex ? "after" : "before";
+};
+
 export const useTaskStore = create<TaskStore>()(
   persist(
     (set) => ({
@@ -217,7 +224,8 @@ export const useTaskStore = create<TaskStore>()(
 
       reorderTask: (id, status, overId = null, position = "before") =>
         set((state) => {
-          const activeTask = state.tasks.find((task) => task.id === id);
+          const activeIndex = state.tasks.findIndex((task) => task.id === id);
+          const activeTask = activeIndex >= 0 ? state.tasks[activeIndex] : null;
 
           if (!activeTask) {
             return { tasks: state.tasks };
@@ -231,10 +239,19 @@ export const useTaskStore = create<TaskStore>()(
           let insertIndex = otherTasks.length;
 
           if (overId) {
+            const overOriginalIndex = state.tasks.findIndex(
+              (task) => task.id === overId,
+            );
             const overIndex = otherTasks.findIndex((task) => task.id === overId);
 
             if (overIndex >= 0) {
-              insertIndex = position === "after" ? overIndex + 1 : overIndex;
+              const overTask = otherTasks[overIndex];
+              const insertPosition =
+                activeTask.status === overTask.status && overTask.status === status
+                  ? resolveSameStatusInsertPosition(activeIndex, overOriginalIndex)
+                  : position;
+
+              insertIndex = insertPosition === "after" ? overIndex + 1 : overIndex;
             }
           } else {
             const lastSameStatusIndex = findLastIndex(
