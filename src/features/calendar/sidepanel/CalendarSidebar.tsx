@@ -13,6 +13,7 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { AnimatedCircleCheckbox } from "@/features/calendar/chip/checkbox/AnimatedCircleCheckbox";
 import { GoogleAccountChip } from "@/features/calendar/chip/GoogleAccountChip";
+import { CalendarDayNumberCircle } from "@/features/calendar/dayNumber/CalendarDayNumberCircle";
 import { CalendarIcon, TaskIcon } from "@/components/icons/schedule.icons";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
@@ -340,20 +341,13 @@ export const CalendarSidebar = ({
                   !isActive && "hover:bg-[#f1f3f7]",
                 )}
               >
-                <span
-                  className={cn(
-                    "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[12px] font-semibold tabular-nums transition-all duration-150",
-                    day.isToday &&
-                      "bg-[#007aff] text-white shadow-[0_5px_12px_rgba(0,122,255,0.28)]",
-                    day.isSelected &&
-                      !day.isToday &&
-                      "bg-[#1f2937] text-white shadow-[0_4px_10px_rgba(15,23,42,0.2)]",
-                    !isActive && day.isCurrentMonth && "text-[#111827]",
-                    !isActive && !day.isCurrentMonth && "text-[#c2c7d0]",
-                  )}
+                <CalendarDayNumberCircle
+                  isToday={day.isToday}
+                  isSelected={day.isSelected}
+                  isCurrentMonth={day.isCurrentMonth}
                 >
                   {day.dayNumber}
-                </span>
+                </CalendarDayNumberCircle>
               </button>
             );
           })}
