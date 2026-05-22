@@ -69,7 +69,7 @@ export const TaskView = ({ googleAccounts = [] }: TaskViewProps) => {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white">
+    <div className="flex h-full min-h-0 flex-col bg-[#f7f8fa]">
       <TaskToolbar
         filterDate={filterDate}
         viewMode={viewMode}
