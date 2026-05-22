@@ -113,7 +113,7 @@ const GoogleAccountSection = ({
     <div className="mt-2">
       <button
         type="button"
-        className="group flex h-7 w-full items-center gap-1.5 rounded-[10px] px-1.5 text-left transition-all duration-150 hover:bg-[#f7f7f7] active:scale-[0.985] active:bg-[#f1f1f1]"
+        className="group flex h-7 w-full items-center gap-1.5 rounded-[10px] px-1.5 text-left transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1]"
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
       >
@@ -146,7 +146,7 @@ const GoogleAccountSection = ({
                 type="button"
                 className={cn(
                   GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME,
-                  "transition-all duration-150 hover:bg-[#f7f7f7] active:scale-[0.99] active:bg-[#f1f1f1]",
+                  "transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1]",
                 )}
                 onClick={() => onToggleCalendar(calendar.id)}
                 aria-pressed={checked}
