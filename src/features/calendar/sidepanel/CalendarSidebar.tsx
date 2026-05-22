@@ -104,6 +104,10 @@ const GoogleAccountSection = ({
   const [isOpen, setIsOpen] = useState(true);
   const accountName = account.name ?? account.email ?? "Google";
   const isTaskMode = mode === "task";
+  const hasNoTaskLists =
+    !account.isTaskListsLoading &&
+    !account.taskListsError &&
+    account.taskLists.length === 0;
 
   return (
     <div className="mt-2 overflow-hidden rounded-[14px] border border-white/70 bg-white/80 p-0.5 shadow-[0_4px_12px_rgba(15,23,42,0.06)] backdrop-blur-xl">
@@ -174,18 +178,16 @@ const GoogleAccountSection = ({
             </p>
           )}
 
-          {!account.isTaskListsLoading &&
-            !account.taskListsError &&
-            account.taskLists.length === 0 && (
-              <p
-                className={cn(
-                  GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
-                  "py-1 text-[11px] text-[#8d93a1]",
-                )}
-              >
-                Google ToDo リストはありません
-              </p>
-            )}
+          {hasNoTaskLists && (
+            <p
+              className={cn(
+                GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
+                "py-1 text-[11px] text-[#8d93a1]",
+              )}
+            >
+              Google ToDo リストはありません
+            </p>
+          )}
 
           {account.taskLists.map((taskList) => (
             <div
