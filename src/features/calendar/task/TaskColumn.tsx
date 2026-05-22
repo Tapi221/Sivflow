@@ -31,7 +31,7 @@ type SortableTaskCardProps = {
 };
 
 const taskColumnGradient =
-  "linear-gradient(180deg, #08111f 0%, #0b1a3a 46%, #050812 100%)";
+  "linear-gradient(180deg, #f7f8fa 0%, #f4f6f9 46%, #f7f8fa 100%)";
 
 const SortableTaskCard = ({
   task,
@@ -108,15 +108,15 @@ export const TaskColumn = ({
           className="h-2 w-2 shrink-0 rounded-full"
           style={{ backgroundColor: column.dotColor }}
         />
-        <span className="text-[13px] font-semibold text-white">
+        <span className="text-[13px] font-semibold text-[#1f2329]">
           {statusLabelMap[column.id]}
         </span>
-        <span className="ml-0.5 flex h-4 min-w-4 items-center justify-center rounded px-1 text-[10px] font-semibold text-[rgba(235,241,252,0.56)]">
+        <span className="ml-0.5 flex h-4 min-w-4 items-center justify-center rounded px-1 text-[10px] font-semibold text-[#8f929c]">
           {tasks.length}
         </span>
         <button
           type="button"
-          className="ml-auto flex h-6 w-6 items-center justify-center rounded-md text-[rgba(235,241,252,0.58)] transition-colors hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
+          className="ml-auto flex h-6 w-6 items-center justify-center rounded-md text-[#9aa3b1] transition-colors hover:bg-[#eceef1] hover:text-[#193a5c]"
           onClick={() => onAddTask(column.id)}
           aria-label={t.addTask}
           title={t.addTask}
