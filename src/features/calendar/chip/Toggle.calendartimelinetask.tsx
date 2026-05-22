@@ -37,17 +37,8 @@ export const ToggleCalendarTimelineTask = ({
   activeMode,
   tabs,
 }: ToggleCalendarTimelineTaskProps) => {
-  const tabColumnWidths = tabs
-    .map((tab) => `calc(${tab.label.length}ch + 1.5rem)`)
-    .join(" ");
-
   return (
-    <div
-      className="relative inline-grid h-8 w-max items-center gap-1 rounded-xl bg-[#f6f8fb] p-0.5"
-      style={{
-        gridTemplateColumns: tabColumnWidths,
-      }}
-    >
+    <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f6f8fb] p-0.5">
       {tabs.map((tab) => {
         const Icon = TAB_ICON_MAP[tab.value];
         const isActive = activeMode === tab.value;
@@ -57,10 +48,11 @@ export const ToggleCalendarTimelineTask = ({
             key={tab.value}
             type="button"
             onClick={tab.onClick}
+            aria-label={tab.label}
+            title={tab.label}
             className={cn(
-              "relative z-10 flex h-7 w-full min-w-0 items-center justify-center gap-1.5 rounded-lg px-2",
+              "relative z-10 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg p-0",
               "appearance-none select-none",
-              "text-[12px] font-medium leading-none",
               "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
               "focus:outline-none focus:ring-0 focus-visible:outline-none",
               isActive
@@ -77,13 +69,12 @@ export const ToggleCalendarTimelineTask = ({
             )}
 
             <Icon
+              aria-hidden="true"
               className={cn(
                 "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
                 isActive ? "text-[#193a5c]" : "text-[#9aa3b1]",
               )}
             />
-
-            <span className="whitespace-nowrap">{tab.label}</span>
           </button>
         );
       })}
