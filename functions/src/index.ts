@@ -1,13 +1,20 @@
 import crypto from "node:crypto";
 
-import { initializeApp } from "firebase-admin/app";
+import { getApps, initializeApp } from "firebase-admin/app";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
+import { onInit } from "firebase-functions/v2/core";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { renewExpiredWatchChannels } from "./gcal/renewWatchChannels.js";
 
-initializeApp();
+const ensureFirebaseAdmin = () => {
+  if (getApps().length === 0) {
+    initializeApp();
+  }
+};
+
+onInit(ensureFirebaseAdmin);
 
 const GOOGLE_OAUTH_WEB_CLIENT_ID = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_ID");
 const GOOGLE_OAUTH_WEB_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_SECRET");
@@ -92,8 +99,13 @@ const fetchUserInfo = async (accessToken: string) => {
   };
 };
 
+const getDb = () => {
+  ensureFirebaseAdmin();
+  return getFirestore();
+};
+
 const accountDoc = (uid: string, accountId: string) =>
-  getFirestore().doc(`users/${uid}/googleCalendarAccounts/${accountId}`);
+  getDb().doc(`users/${uid}/googleCalendarAccounts/${accountId}`);
 
 export const exchangeGoogleCalendarCode = onCall(
   {
