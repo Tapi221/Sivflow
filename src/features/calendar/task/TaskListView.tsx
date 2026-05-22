@@ -64,7 +64,7 @@ export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => 
                 <td className="py-2.5 pr-4">
                   <span className="flex items-center gap-1.5 text-[#4c5361]">
                     <span
-                      className="h-1.5 w-1.5 rounded-full"
+                      className="h-2 w-2 shrink-0 rounded-full"
                       style={{ backgroundColor: col?.dotColor }}
                     />
                     {col?.label}
