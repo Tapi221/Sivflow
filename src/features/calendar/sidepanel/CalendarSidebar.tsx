@@ -17,7 +17,7 @@ import { CalendarIcon, TaskIcon } from "@/components/icons/schedule.icons";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
-import { AddGoogleCalendarButton } from "./AddGoogleCalendarButton";
+import { AddGoogleCalendarButton } from "../chip/AddGoogleCalendarButton";
 import type {
   CalendarSidebarProps,
   GoogleAccountDisplay,
