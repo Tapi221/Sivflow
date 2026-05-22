@@ -1,7 +1,7 @@
 {
   "functions": {
     "source": "functions",
-    "runtime": "nodejs22",
+    "runtime": "nodejs20",
     "predeploy": [
       "npm --prefix functions ci",
       "npm --prefix functions run build"
