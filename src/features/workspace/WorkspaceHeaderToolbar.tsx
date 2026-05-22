@@ -89,7 +89,7 @@ export const WorkspaceHeaderToolbar = ({
               <button
                 type="button"
                 className={cn(
-                  "relative z-10 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg p-0",
+                  "relative z-10 flex h-7 w-11 min-w-0 items-center justify-center rounded-lg p-0",
                   "appearance-none select-none",
                   "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
                   "focus:outline-none focus:ring-0 focus-visible:outline-none",
@@ -127,9 +127,10 @@ export const WorkspaceHeaderToolbar = ({
   return (
     <div
       className={cn(
-        "relative flex h-[var(--ds-semantic-breadcrumb-height)] min-h-11 w-full shrink-0 flex-wrap items-center justify-between overflow-visible bg-white/85 px-2 backdrop-blur-xl",
-        !isSegmented &&
-          "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-[rgba(60,60,67,0.18)] after:content-['']",
+        "relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 flex-wrap items-center justify-between overflow-visible",
+        isSegmented
+          ? "bg-white pr-[var(--workspace-content-gutter)]"
+          : "min-h-11 bg-white/85 px-2 backdrop-blur-xl after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-[rgba(60,60,67,0.18)] after:content-['']",
       )}
     >
       <div
