@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { TASK_COLUMNS } from "./task.types";
 import type { TaskStatus } from "./task.types";
 import type { GoogleAccountDisplay } from "../schedulePane.types";
-import { useTaskStore } from "./useTaskStore";
+import { useTaskStore } from "./hooks/useTaskStore";
 import { NewTaskModal } from "../modal/NewTaskModal";
 import { type BoardListViewMode } from "../chip/toggle/Toggle.boardlist";
 import { TaskToolbar } from "../toolbar/TaskToolbar";
