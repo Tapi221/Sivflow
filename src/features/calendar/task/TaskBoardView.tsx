@@ -3,6 +3,8 @@ import {
   type CollisionDetection,
   DndContext,
   type DragEndEvent,
+  DragOverlay,
+  type DragStartEvent,
   PointerSensor,
   pointerWithin,
   rectIntersection,
@@ -10,10 +12,11 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useCallback, type WheelEvent } from "react";
+import { useCallback, useMemo, useState, type WheelEvent } from "react";
 
 import { TASK_COLUMNS } from "./task.types";
 import type { Task, TaskStatus } from "./task.types";
+import { TaskCard } from "./TaskCard";
 import { TaskColumn } from "./TaskColumn";
 
 type TaskBoardViewProps = {
@@ -42,6 +45,8 @@ type VerticalRect = {
   top: number;
   height: number;
 };
+
+const TASK_CARD_OVERLAY_CLASS_NAME = "w-[236px] max-w-[calc(100vw-2rem)]";
 
 const DroppableTaskColumn = ({
   column,
@@ -174,6 +179,7 @@ export const TaskBoardView = ({
   onToggleTaskDone,
   onReorderTask,
 }: TaskBoardViewProps) => {
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -181,6 +187,22 @@ export const TaskBoardView = ({
       },
     }),
   );
+
+  const activeTask = useMemo(() => {
+    if (!activeTaskId) {
+      return null;
+    }
+
+    return findTask(tasksByStatus, activeTaskId);
+  }, [activeTaskId, tasksByStatus]);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveTaskId(String(event.active.id));
+  };
+
+  const handleDragCancel = () => {
+    setActiveTaskId(null);
+  };
 
   const handleBoardWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
     const horizontalDelta = event.shiftKey ? event.deltaY : event.deltaX;
@@ -214,6 +236,8 @@ export const TaskBoardView = ({
   }, []);
 
   const handleDragEnd = (event: DragEndEvent) => {
+    setActiveTaskId(null);
+
     const activeId = String(event.active.id);
     const over = event.over;
 
@@ -251,6 +275,8 @@ export const TaskBoardView = ({
     <DndContext
       sensors={sensors}
       collisionDetection={taskBoardCollisionDetection}
+      onDragStart={handleDragStart}
+      onDragCancel={handleDragCancel}
       onDragEnd={handleDragEnd}
     >
       <div
@@ -272,6 +298,19 @@ export const TaskBoardView = ({
           ))}
         </div>
       </div>
+
+      <DragOverlay adjustScale={false} dropAnimation={null}>
+        {activeTask ? (
+          <div className={TASK_CARD_OVERLAY_CLASS_NAME}>
+            <TaskCard
+              task={activeTask}
+              accountName={accountName}
+              accountPhotoUrl={accountPhotoUrl}
+              isDragging
+            />
+          </div>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 };
