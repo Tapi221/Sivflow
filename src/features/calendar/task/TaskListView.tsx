@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { AnimatedSquareCheckbox } from "@/features/calendar/chip/checkbox/AnimatedSquareCheckbox";
+import { useT } from "@/i18n/useT";
 import { TASK_COLUMNS } from "./task.types";
 import type { Task } from "./task.types";
 import { TaskStatusDot } from "../chip/TaskStatusDot";
@@ -10,6 +11,14 @@ type TaskListViewProps = {
 };
 
 export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => {
+  const t = useT();
+  const statusLabelMap = {
+    not_started: t.taskStatusNotStarted,
+    in_progress: t.taskStatusInProgress,
+    review: t.taskStatusReview,
+    done: t.taskStatusDone,
+  };
+
   return (
     <div className="min-h-0 flex-1 overflow-auto p-4">
       <table className="w-full border-collapse text-[13px]">
@@ -65,7 +74,7 @@ export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => 
                 <td className="py-2.5 pr-4">
                   <span className="flex items-center gap-1.5 text-[#4c5361]">
                     <TaskStatusDot color={col?.dotColor} />
-                    {col?.label}
+                    {statusLabelMap[task.status]}
                   </span>
                 </td>
 
