@@ -13,7 +13,7 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { AnimatedCircleCheckbox } from "@/features/calendar/chip/checkbox/AnimatedCircleCheckbox";
 import { GoogleAccountChip } from "@/features/calendar/chip/GoogleAccountChip";
-import { CalendarIcon, PlusIcon } from "@/components/icons/schedule.icons";
+import { CalendarIcon, PlusIcon, TaskIcon } from "@/components/icons/schedule.icons";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,7 @@ import type {
 } from "../schedulePane.types";
 
 const DEFAULT_CALENDAR_COLOR = "#74798b";
+const DEFAULT_TASK_LIST_COLOR = "#7c8cf8";
 
 const IconChevronLeft = ({ className }: { className?: string }) => (
   <svg
@@ -81,6 +82,7 @@ const buildMiniCalendarDays = (
 
 type GoogleAccountSectionProps = {
   account: GoogleAccountDisplay;
+  mode: "calendar" | "task";
   onToggleCalendar: (calendarId: string) => void;
   onReconnect: () => void;
   onRetry: () => void;
@@ -88,12 +90,14 @@ type GoogleAccountSectionProps = {
 
 const GoogleAccountSection = ({
   account,
+  mode,
   onToggleCalendar,
   onReconnect,
   onRetry,
 }: GoogleAccountSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
   const accountName = account.name ?? account.email ?? "Google";
+  const isTaskMode = mode === "task";
 
   return (
     <div className="mt-2">
@@ -121,7 +125,7 @@ const GoogleAccountSection = ({
         </span>
       </button>
 
-      {isOpen &&
+      {isOpen && !isTaskMode &&
         account.calendars.map((calendar) => {
           const checked = account.selectedCalendarIds.has(calendar.id);
 
@@ -144,6 +148,50 @@ const GoogleAccountSection = ({
             </button>
           );
         })}
+
+      {isOpen && isTaskMode && (
+        <div className="mt-0.5">
+          {account.isTaskListsLoading && account.taskLists.length === 0 && (
+            <p className="px-7 py-1 text-[11px] text-[#9aa0aa]">読み込み中…</p>
+          )}
+
+          {!account.isTaskListsLoading &&
+            !account.taskListsError &&
+            account.taskLists.length === 0 && (
+              <p className="px-7 py-1 text-[11px] text-[#9aa0aa]">
+                Google ToDo リストはありません
+              </p>
+            )}
+
+          {account.taskLists.map((taskList) => (
+            <div
+              key={taskList.id}
+              className="flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 pl-7 text-left"
+            >
+              <AnimatedCircleCheckbox checked color={DEFAULT_TASK_LIST_COLOR} />
+
+              <span className="truncate text-[12px] font-medium text-[#3d4049]">
+                {taskList.title}
+              </span>
+            </div>
+          ))}
+
+          {account.taskListsError && (
+            <div className="mt-1 px-7">
+              <p className="text-[11px] leading-relaxed text-[#a16207]">
+                {account.taskListsError}
+              </p>
+              <button
+                type="button"
+                className="mt-1 rounded-md bg-[#fff7ed] px-2 py-1 text-[11px] font-semibold text-[#9a3412] hover:bg-[#ffedd5]"
+                onClick={onReconnect}
+              >
+                再連携
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {account.connectionStatus === "needsReconnect" && (
         <div className="mt-1 px-2">
@@ -184,6 +232,7 @@ const GoogleAccountSection = ({
 export const CalendarSidebar = ({
   monthDate,
   selectedDate,
+  activeMode,
   googleAccounts,
   isAnyCalendarConnecting,
   onSelectDate,
@@ -203,6 +252,7 @@ export const CalendarSidebar = ({
   );
 
   const hasGoogleAccounts = googleAccounts.length > 0;
+  const isTaskMode = activeMode === "task";
 
   return (
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent px-3 pb-5 pt-2 text-[#24272f]">
@@ -286,9 +336,13 @@ export const CalendarSidebar = ({
 
       <nav className="mt-2 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto pb-2">
         <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
-          <CalendarIcon className="h-3.5 w-3.5 text-[#74798b]" />
+          {isTaskMode ? (
+            <TaskIcon className="h-3.5 w-3.5 text-[#74798b]" />
+          ) : (
+            <CalendarIcon className="h-3.5 w-3.5 text-[#74798b]" />
+          )}
           <span className="text-[11px] font-semibold uppercase text-[#9aa0aa]">
-            {t.myProjects}
+            {isTaskMode ? "MY TODO LISTS" : t.myProjects}
           </span>
         </div>
 
@@ -296,6 +350,7 @@ export const CalendarSidebar = ({
           <GoogleAccountSection
             key={account.accountId}
             account={account}
+            mode={isTaskMode ? "task" : "calendar"}
             onToggleCalendar={(calendarId) =>
               onToggleCalendar(account.accountId, calendarId)
             }
