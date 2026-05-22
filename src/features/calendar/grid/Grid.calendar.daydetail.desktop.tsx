@@ -19,6 +19,7 @@ const COMPACT_EVENT_HEIGHT_PX = 34;
 const EVENT_OUTER_LEFT_PX = 6;
 const EVENT_OUTER_RIGHT_PX = 8;
 const EVENT_COLUMN_GAP_PX = 2;
+const MONTH_VIEW_DIVIDER_BORDER_CLASS = "border-[#eef0f3]";
 
 // ==============================================
 
@@ -76,11 +77,11 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
         {HOURS.map((hour) => (
           <div
             key={hour}
-            className="
+            className={`
               relative
               border-t
-              border-[#f7f7f7]
-            "
+              ${MONTH_VIEW_DIVIDER_BORDER_CLASS}
+            `}
             style={{
               height: HOUR_ROW_HEIGHT,
             }}
@@ -124,10 +125,10 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
         {HOURS.map((hour) => (
           <div
             key={hour}
-            className="
+            className={`
               border-t
-              border-[#f7f7f7]
-            "
+              ${MONTH_VIEW_DIVIDER_BORDER_CLASS}
+            `}
             style={{
               height: HOUR_ROW_HEIGHT,
             }}
