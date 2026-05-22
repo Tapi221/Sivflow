@@ -23,6 +23,6 @@
     "constants",
     "config",
     "functions/src/security/contract.ts"
-, "functions/src/gcal/Gcalwebhook .tsx"  ],
+  ],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "tests/**"]
 }
