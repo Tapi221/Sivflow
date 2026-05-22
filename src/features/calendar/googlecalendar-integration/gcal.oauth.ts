@@ -27,7 +27,8 @@ const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 const GOOGLE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_TASKS_SCOPE] as const;
 const GOOGLE_SCOPE_PARAM = `openid email profile ${GOOGLE_SCOPES.join(" ")}`;
 
-export const GOOGLE_SERVER_CODE_REDIRECT_URI = "postmessage";
+export const GOOGLE_SERVER_CODE_REDIRECT_URI =
+  typeof window === "undefined" ? "postmessage" : window.location.origin;
 
 type GoogleTokenResponse = {
   access_token?: string;
@@ -72,6 +73,7 @@ type GoogleCodeClient = {
 };
 
 type GoogleCodeClientConfig = GoogleCodeClientOverrideConfig & {
+  redirect_uri?: string;
   callback: (response: GoogleCodeResponse) => void;
   client_id: string;
   error_callback?: (error: { type?: string; message?: string }) => void;
@@ -394,9 +396,12 @@ export const requestGoogleCalendarServerCode = async (
   const hint = auth.currentUser?.email ?? readEmail() ?? undefined;
 
   const response = await new Promise<GoogleCodeResponse>((resolve, reject) => {
-    const client = window.google!.accounts!.oauth2!.initCodeClient({
+    const redirectUri = window.location.origin;
+
+  const client = window.google!.accounts!.oauth2!.initCodeClient({
       callback: resolve,
       client_id: clientId,
+      redirect_uri: redirectUri,
       hint,
       include_granted_scopes: true,
       prompt: "consent select_account",
@@ -426,7 +431,7 @@ export const requestGoogleCalendarServerCode = async (
 
   return {
     code: response.code,
-    redirectUri: GOOGLE_SERVER_CODE_REDIRECT_URI,
+    redirectUri: window.location.origin,
   };
 };
 

@@ -15,7 +15,14 @@ import {
 import {
   refreshCalendarAccessToken,
   requestCalendarAccessToken,
+  requestGoogleCalendarServerCode,
 } from "./gcal.oauth";
+import {
+  disconnectServerStoredGoogleCalendarAccount,
+  exchangeGoogleCalendarCode,
+  getServerStoredGoogleCalendarAccessToken,
+  isServerStoredGoogleOAuthEnabled,
+} from "./gcal.server-oauth";
 import type {
   GCalSyncState,
   GCalConnectionStatus,
@@ -304,6 +311,8 @@ const isUnauthorizedError = (error: unknown): boolean =>
 const toErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+const useServerStoredTokens = isServerStoredGoogleOAuthEnabled();
+
 const requestSilentAccessToken = async () => {
   const { auth } = await import("@/services/firebase");
   return requestCalendarAccessToken(auth, true);
@@ -319,15 +328,17 @@ const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => ({
   calendars: stored.cachedCalendars ?? [],
   selectedCalendarIds: new Set(stored.selectedCalendarIds),
   syncState:
-    isStoredTokenValid(stored) || stored.refreshToken ? "idle" : "needsReconnect",
+    isStoredTokenValid(stored) || stored.refreshToken || useServerStoredTokens
+      ? "idle"
+      : "needsReconnect",
   connectionStatus:
-    isStoredTokenValid(stored) || stored.refreshToken
+    isStoredTokenValid(stored) || stored.refreshToken || useServerStoredTokens
       ? "connected"
       : "needsReconnect",
   lastSyncedAt: null,
   isConnecting: false,
   error:
-    isStoredTokenValid(stored) || stored.refreshToken
+    isStoredTokenValid(stored) || stored.refreshToken || useServerStoredTokens
       ? null
       : "Google Calendar の再連携が必要です",
 });
@@ -421,17 +432,21 @@ export const useMultiAccountGoogleCalendar = () => {
             let result: Awaited<ReturnType<typeof requestCalendarAccessToken>>;
 
             try {
-              result = account.refreshToken
-                ? await refreshCalendarAccessToken({
-                  refreshToken: account.refreshToken,
-                })
-                : await requestSilentAccessToken();
+              result = useServerStoredTokens
+                ? await getServerStoredGoogleCalendarAccessToken({ accountId })
+                : account.refreshToken
+                  ? await refreshCalendarAccessToken({
+                    refreshToken: account.refreshToken,
+                  })
+                  : await requestSilentAccessToken();
             } catch {
               dispatchAccounts({ type: "NEEDS_RECONNECT", id: accountId });
               return false;
             }
 
-            const refreshToken = result.refreshToken ?? account.refreshToken ?? null;
+            const refreshToken = useServerStoredTokens
+              ? null
+              : result.refreshToken ?? account.refreshToken ?? null;
 
             updateStoredAccountToken(
               accountId,
@@ -591,11 +606,13 @@ export const useMultiAccountGoogleCalendar = () => {
         let result: Awaited<ReturnType<typeof requestCalendarAccessToken>>;
 
         try {
-          result = stored.refreshToken
-            ? await refreshCalendarAccessToken({
-              refreshToken: stored.refreshToken,
-            })
-            : await requestSilentAccessToken();
+          result = useServerStoredTokens
+            ? await getServerStoredGoogleCalendarAccessToken({ accountId })
+            : stored.refreshToken
+              ? await refreshCalendarAccessToken({
+                refreshToken: stored.refreshToken,
+              })
+              : await requestSilentAccessToken();
         } catch (error) {
           dispatchAccounts({
             type: "NEEDS_RECONNECT",
@@ -608,7 +625,7 @@ export const useMultiAccountGoogleCalendar = () => {
         try {
           await applyAccessToken(
             result.accessToken,
-            result.refreshToken ?? stored.refreshToken,
+useServerStoredTokens ? null : (result.refreshToken ?? stored.refreshToken),
             buildTokenExpiry(result.expiresInSeconds),
             result.accountName,
             result.accountPhotoUrl,
@@ -739,7 +756,12 @@ export const useMultiAccountGoogleCalendar = () => {
     });
 
     try {
-      const result = await requestCalendarAccessToken(auth);
+      const result = useServerStoredTokens
+        ? await (async () => {
+          const { code, redirectUri } = await requestGoogleCalendarServerCode(auth);
+          return exchangeGoogleCalendarCode({ code, redirectUri });
+        })()
+        : await requestCalendarAccessToken(auth);
       const list = await fetchCalendarList(result.accessToken);
 
       const accountId =
@@ -768,11 +790,12 @@ export const useMultiAccountGoogleCalendar = () => {
         list,
       );
 
-      const refreshToken =
-        result.refreshToken ??
-        existingAccount?.refreshToken ??
-        storedAccount?.refreshToken ??
-        null;
+      const refreshToken = useServerStoredTokens
+        ? null
+        : result.refreshToken ??
+          existingAccount?.refreshToken ??
+          storedAccount?.refreshToken ??
+          null;
 
       const entry: GoogleAccountEntry = {
         id: accountId,
@@ -824,6 +847,10 @@ export const useMultiAccountGoogleCalendar = () => {
     dispatchAccounts({ type: "REMOVE", id: accountId });
     dispatchEvents({ type: "CLEAR_ACCOUNT", accountId });
     removeStoredAccount(accountId);
+
+    if (useServerStoredTokens) {
+      void disconnectServerStoredGoogleCalendarAccount({ accountId }).catch(() => undefined);
+    }
   }, []);
 
   const toggleCalendar = useCallback(
