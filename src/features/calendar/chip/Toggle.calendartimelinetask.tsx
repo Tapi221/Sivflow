@@ -37,17 +37,15 @@ export const ToggleCalendarTimelineTask = ({
   activeMode,
   tabs,
 }: ToggleCalendarTimelineTaskProps) => {
-  const longestLabelLength = Math.max(
-    0,
-    ...tabs.map((tab) => tab.label.length),
-  );
-  const tabColumnWidth = `calc(${longestLabelLength}ch + 1.5rem)`;
+  const tabColumnWidths = tabs
+    .map((tab) => `calc(${tab.label.length}ch + 1.5rem)`)
+    .join(" ");
 
   return (
     <div
       className="relative inline-grid h-8 w-max items-center gap-1 rounded-xl bg-[#f6f8fb] p-0.5"
       style={{
-        gridTemplateColumns: `repeat(${tabs.length}, ${tabColumnWidth})`,
+        gridTemplateColumns: tabColumnWidths,
       }}
     >
       {tabs.map((tab) => {
