@@ -27,6 +27,7 @@ type PickerOption<T extends string> = {
 
 type IOSPickerProps<T extends string> = {
   id: string;
+  title: string;
   value: T;
   options: PickerOption<T>[];
   isOpen: boolean;
@@ -36,6 +37,7 @@ type IOSPickerProps<T extends string> = {
 
 const IOSPicker = <T extends string,>({
   id,
+  title,
   value,
   options,
   isOpen,
@@ -46,7 +48,7 @@ const IOSPicker = <T extends string,>({
     options.find((option) => option.value === value)?.label ?? value;
 
   return (
-    <div className="relative">
+    <div className={`relative ${isOpen ? "z-30" : "z-0"}`}>
       <button
         type="button"
         onClick={() => onOpen(isOpen ? "" : id)}
@@ -73,42 +75,51 @@ const IOSPicker = <T extends string,>({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 overflow-hidden rounded-xl border border-white/70 bg-white/95 shadow-[0_12px_28px_rgba(0,0,0,0.16)] backdrop-blur-xl">
-          {options.map((option, index) => {
-            const selected = option.value === value;
+        <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-30 rounded-[18px] bg-white/95 px-3 py-3 shadow-[0_18px_44px_rgba(0,0,0,0.14)] ring-1 ring-black/[0.04] backdrop-blur-xl">
+          <span
+            className="absolute -top-1 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 rounded-[2px] bg-white/95 ring-1 ring-black/[0.03]"
+            aria-hidden="true"
+          />
 
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => onChange(option.value)}
-                className={`flex w-full items-center justify-between px-3 py-2 text-left text-[13px] transition-colors ${
-                  selected
-                    ? "bg-[#007aff] text-white"
-                    : "text-[#1c1c1e] hover:bg-[#f2f2f7]"
-                } ${index > 0 && !selected ? "border-t border-[#e5e5ea]/70" : ""}`}
-              >
-                <span>{option.label}</span>
+          <div className="relative mb-1 px-1 text-[11px] font-semibold tracking-wide text-[#8e8e93]">
+            {title}
+          </div>
 
-                {selected && (
-                  <svg
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    className="h-4 w-4"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M3.5 8.3l2.8 2.8 6.2-6.2"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-              </button>
-            );
-          })}
+          <div className="relative">
+            {options.map((option) => {
+              const selected = option.value === value;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => onChange(option.value)}
+                  className="flex w-full items-center justify-between rounded-[10px] px-1 py-2 text-left text-[13px] text-[#1c1c1e] transition-colors hover:bg-[#f2f2f7]"
+                >
+                  <span>{option.label}</span>
+
+                  <span className="flex h-4 w-4 items-center justify-center text-[#007aff]">
+                    {selected && (
+                      <svg
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        className="h-4 w-4"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M3.5 8.3l2.8 2.8 6.2-6.2"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
@@ -234,6 +245,7 @@ export const NewTaskModal = ({
 
               <IOSPicker
                 id="status"
+                title="ステータス"
                 value={status}
                 options={TASK_COLUMNS.map((col) => ({
                   value: col.id,
@@ -256,6 +268,7 @@ export const NewTaskModal = ({
 
               <IOSPicker
                 id="priority"
+                title="優先度"
                 value={priority}
                 options={Object.entries(PRIORITY_CONFIG).map(([key, val]) => ({
                   value: key as TaskPriority,
@@ -278,6 +291,7 @@ export const NewTaskModal = ({
 
               <IOSPicker
                 id="category"
+                title="カテゴリ"
                 value={category}
                 options={Object.keys(CATEGORY_CONFIG).map((cat) => ({
                   value: cat,
