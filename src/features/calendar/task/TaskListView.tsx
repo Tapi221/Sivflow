@@ -10,6 +10,9 @@ type TaskListViewProps = {
   onToggleTaskDone: (taskId: string, done: boolean) => void;
 };
 
+const TABLE_HEADER_CLASS =
+  "pb-2 text-left text-[12px] font-medium tracking-normal text-[#b8bcc5]";
+
 export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => {
   const t = useT();
   const statusLabelMap = {
@@ -27,21 +30,11 @@ export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => 
             <th className="w-7 pb-2 pr-2 text-left">
               <span className="sr-only">完了</span>
             </th>
-            <th className="pb-2 text-left text-[11px] font-semibold uppercase tracking-wide text-[#9aa0aa]">
-              タイトル
-            </th>
-            <th className="pb-2 text-left text-[11px] font-semibold uppercase tracking-wide text-[#9aa0aa]">
-              ステータス
-            </th>
-            <th className="pb-2 text-left text-[11px] font-semibold uppercase tracking-wide text-[#9aa0aa]">
-              優先度
-            </th>
-            <th className="pb-2 text-left text-[11px] font-semibold uppercase tracking-wide text-[#9aa0aa]">
-              カテゴリ
-            </th>
-            <th className="pb-2 text-left text-[11px] font-semibold uppercase tracking-wide text-[#9aa0aa]">
-              期日
-            </th>
+            <th className={TABLE_HEADER_CLASS}>タイトル</th>
+            <th className={TABLE_HEADER_CLASS}>ステータス</th>
+            <th className={TABLE_HEADER_CLASS}>優先度</th>
+            <th className={TABLE_HEADER_CLASS}>カテゴリ</th>
+            <th className={TABLE_HEADER_CLASS}>期日</th>
           </tr>
         </thead>
 
