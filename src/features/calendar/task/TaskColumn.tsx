@@ -30,8 +30,10 @@ type SortableTaskCardProps = {
   onToggleTaskDone: (id: string, done: boolean) => void;
 };
 
-const taskColumnGradient =
-  "linear-gradient(180deg, #f7f8fa 0%, #f4f6f9 46%, #f7f8fa 100%)";
+const taskColumnGradient = [
+  "radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 34%)",
+  "linear-gradient(180deg, #fbfcfd 0%, #f7f8fa 30%, #eef2f7 100%)",
+].join(", ");
 
 const SortableTaskCard = ({
   task,
