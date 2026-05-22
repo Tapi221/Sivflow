@@ -136,7 +136,7 @@ export const TaskCard = ({
             </span>
           </div>
 
-          <div className="mt-4 flex items-center justify-between gap-2">
+          <div className="mt-2 flex items-center justify-between gap-2">
             <div className="min-w-0">{dateContent}</div>
 
             {task.assignee && (
