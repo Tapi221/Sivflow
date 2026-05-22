@@ -108,7 +108,7 @@ export const TaskColumn = ({
           className="h-2 w-2 shrink-0 rounded-full"
           style={{ backgroundColor: column.dotColor }}
         />
-        <span className="text-[13px] font-semibold text-[#1f2329]">
+        <span className="text-[13px] font-medium text-[#3f4652]">
           {statusLabelMap[column.id]}
         </span>
         <span className="ml-0.5 flex h-4 min-w-4 items-center justify-center rounded px-1 text-[10px] font-semibold text-[#8f929c]">
