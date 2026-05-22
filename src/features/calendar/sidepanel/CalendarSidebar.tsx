@@ -284,7 +284,7 @@ export const CalendarSidebar = ({
 
   return (
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent px-3 pb-5 pt-2 text-[#24272f]">
-      <section className="flex w-full shrink-0 flex-col rounded-[20px] border border-white/70 bg-white/80 px-2.5 pb-2.5 pt-2.5 shadow-[0_10px_28px_rgba(15,23,42,0.08),0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-2xl">
+      <section className="flex w-full shrink-0 flex-col px-2.5 pb-2.5 pt-2.5">
         <div className="flex w-full items-center justify-between px-0.5">
           <span className="text-[13px] font-bold tracking-[-0.01em] text-[#1f2937]">
             {format(monthDate, monthLabelFormat, { locale: dateFnsLocale })}
