@@ -37,6 +37,7 @@ type TaskBoardViewProps = {
 type DroppableTaskColumnProps = Omit<TaskBoardViewProps, "tasksByStatus" | "onReorderTask"> & {
   column: (typeof TASK_COLUMNS)[number];
   tasks: Task[];
+  showDivider?: boolean;
 };
 
 type VerticalDropPosition = "before" | "after";
@@ -48,10 +49,13 @@ type VerticalRect = {
 
 const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-[#f7f8fa]";
 const TASK_CARD_OVERLAY_CLASS_NAME = "w-[236px] max-w-[calc(100vw-2rem)]";
+const TASK_COLUMN_DIVIDER_CLASS_NAME =
+  "before:pointer-events-none before:absolute before:-left-1.5 before:top-0 before:bottom-0 before:w-px before:bg-[#e3e5ea] before:content-['']";
 
 const DroppableTaskColumn = ({
   column,
   tasks,
+  showDivider = false,
   accountName,
   accountPhotoUrl,
   onAddTask,
@@ -67,7 +71,12 @@ const DroppableTaskColumn = ({
   });
 
   return (
-    <div ref={setNodeRef} className="flex h-full min-h-0 min-w-0">
+    <div
+      ref={setNodeRef}
+      className={`relative flex h-full min-h-0 min-w-0 ${
+        showDivider ? TASK_COLUMN_DIVIDER_CLASS_NAME : ""
+      }`}
+    >
       <TaskColumn
         column={column}
         tasks={tasks}
@@ -285,11 +294,12 @@ export const TaskBoardView = ({
         onWheelCapture={handleBoardWheel}
       >
         <div className="grid h-full min-h-0 min-w-full grid-flow-col auto-cols-[260px] gap-3">
-          {TASK_COLUMNS.map((col) => (
+          {TASK_COLUMNS.map((col, index) => (
             <DroppableTaskColumn
               key={col.id}
               column={col}
               tasks={tasksByStatus[col.id] ?? []}
+              showDivider={index > 0}
               accountName={accountName}
               accountPhotoUrl={accountPhotoUrl}
               onAddTask={onAddTask}
