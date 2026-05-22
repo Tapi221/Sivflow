@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import { DayDetailCreateButton } from "@/features/calendar/chip/AddScheduleButton.daydetail";
+import { DayDetailCreateButton } from "@/features/calendar/chip/button/AddScheduleButton.daydetail";
 import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
 import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";

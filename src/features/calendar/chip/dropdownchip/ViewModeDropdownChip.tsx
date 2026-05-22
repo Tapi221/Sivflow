@@ -3,7 +3,7 @@ import * as Popover from "@radix-ui/react-popover";
 
 import { useT } from "@/i18n/useT";
 
-import { IconCheck } from "./IconCheck";
+import { IconCheck } from "../icon/IconCheck";
 
 export type ViewMode = "month" | "week" | "days";
 

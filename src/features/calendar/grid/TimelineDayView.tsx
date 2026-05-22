@@ -2,7 +2,7 @@ import type { RefObject, UIEvent } from "react";
 import { Fragment, useMemo } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import { CalendarDayNumberCircle } from "@/features/calendar/dayNumber/CalendarDayNumberCircle";
+import { CalendarDayNumberCircle } from "@/features/calendar/chip/icon/CalendarDayNumberCircle";
 import { cn } from "@/lib/utils";
 
 import type {

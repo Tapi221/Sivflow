@@ -3,7 +3,7 @@ import { AnimatedSquareCheckbox } from "@/features/calendar/chip/checkbox/Animat
 import { useT } from "@/i18n/useT";
 import { TASK_COLUMNS } from "./task.types";
 import type { Task } from "./task.types";
-import { TaskStatusDot } from "../chip/TaskStatusDot";
+import { TaskStatusDot } from "../chip/icon/TaskStatusDot";
 
 type TaskListViewProps = {
   tasks: Task[];

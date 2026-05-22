@@ -1,11 +1,11 @@
 import {
   BoardListToggleButton,
   type BoardListViewMode,
-} from "../chip/Toggle.boardlist";
-import { DateFilterChip } from "../chip/DateFilterChip";
-import { FilterChip } from "../chip/FilterChip";
-import { MoreMenuButton } from "../chip/MoreMenuButton";
-import { NewTaskButton } from "../chip/NewTaskButton";
+} from "../chip/toggle/Toggle.boardlist";
+import { DateFilterChip } from "../chip/chip/DateFilterChip";
+import { FilterChip } from "../chip/chip/FilterChip";
+import { MoreMenuButton } from "../chip/button/MoreMenuButton";
+import { NewTaskButton } from "../chip/button/NewTaskButton";
 
 type TaskToolbarProps = {
   filterDate: string | null;

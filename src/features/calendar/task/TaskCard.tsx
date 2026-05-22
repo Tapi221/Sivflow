@@ -2,7 +2,7 @@ import { format } from "date-fns";
 
 import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/schedule.icons";
 import { AnimatedSquareCheckbox } from "@/features/calendar/chip/checkbox/AnimatedSquareCheckbox";
-import { GoogleAccountChip } from "@/features/calendar/chip/GoogleAccountChip";
+import { GoogleAccountChip } from "@/features/calendar/chip/budge/GoogleAccountChip";
 import { cn } from "@/lib/utils";
 
 import { CATEGORY_CONFIG, PRIORITY_CONFIG } from "./task.types";
