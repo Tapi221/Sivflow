@@ -17,9 +17,9 @@ const TOGGLE_MOTION_TRANSITION: Transition = {
   ease: [0.22, 1, 0.36, 1],
 };
 const TOGGLE_TOOLTIP_CLASS_NAME =
-  "rounded-lg border border-[#26384d] bg-[#2f4054] px-2.5 py-[5px] text-[12px] font-semibold text-white shadow-[0_8px_18px_rgba(25,58,92,0.18)]";
+  "rounded-lg border border-[#e4eaf1] bg-white px-2.5 py-[5px] text-[12px] font-semibold text-[#193a5c] shadow-[0_8px_18px_rgba(25,58,92,0.12)]";
 const TOGGLE_TOOLTIP_ARROW_CLASS_NAME =
-  "border-b border-r border-[#26384d] bg-[#2f4054]";
+  "border-b border-r border-[#e4eaf1] bg-white";
 const TOGGLE_ACTIVE_ICON_CLASS_NAME = "text-[#193a5c]";
 const TOGGLE_INACTIVE_ICON_CLASS_NAME = "text-[#9aa3b1]";
 
