@@ -1,13 +1,25 @@
-import * as functions from "firebase-functions/v1";
-import * as admin from "firebase-admin";
+import { getApps, initializeApp } from "firebase-admin/app";
+import { FieldValue, getFirestore } from "firebase-admin/firestore";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 
-// admin は functions/src/index.ts で一度だけ初期化されるため、
-// import 時点では Firestore を取得せず、関数実行時に遅延取得する。
-export const renewExpiredWatchChannels = functions
-  .region("asia-northeast1")
-  .pubsub.schedule("every 24 hours")
-  .onRun(async () => {
-    const db = admin.firestore();
+const ensureFirebaseAdmin = () => {
+  if (getApps().length === 0) {
+    initializeApp();
+  }
+};
+
+const getDb = () => {
+  ensureFirebaseAdmin();
+  return getFirestore();
+};
+
+export const renewExpiredWatchChannels = onSchedule(
+  {
+    region: "asia-northeast1",
+    schedule: "every 24 hours",
+  },
+  async () => {
+    const db = getDb();
     const now = Date.now();
     const threshold = now + 24 * 60 * 60 * 1000;
 
@@ -27,10 +39,11 @@ export const renewExpiredWatchChannels = functions
         await db.collection("gcal_renew_queue").add({
           userId: data.userId,
           calendarId: data.calendarId,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          createdAt: FieldValue.serverTimestamp(),
         });
       } catch (e) {
         console.error("[renew]", e);
       }
     }
-  });
+  },
+);
