@@ -47,9 +47,9 @@ const toolbarTooltipClassName =
   "pointer-events-none absolute left-1/2 top-[calc(100%+8px)] z-20 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-full border border-[#d1d1d6]/70 bg-white/95 px-2.5 py-1 text-[11px] font-medium leading-none tracking-[-0.01em] text-[#3c3c43]/72 opacity-0 shadow-[0_8px_18px_rgba(60,60,67,0.12)] backdrop-blur-xl transition-all duration-150 ease-out group-hover/action:translate-y-0 group-hover/action:opacity-100 group-focus-visible/action:translate-y-0 group-focus-visible/action:opacity-100 motion-reduce:transition-none";
 
 const segmentedTabTooltipClassName =
-  "rounded-lg border border-[#e4eaf1] bg-white px-2.5 py-[5px] text-[12px] font-medium text-[#193a5c] shadow-[0_8px_18px_rgba(25,58,92,0.12)]";
+  "rounded-lg border border-[#eeeeee] bg-white px-2.5 py-[5px] text-[12px] font-medium text-[#8c8c8c] shadow-[0_8px_18px_rgba(0,0,0,0.08)]";
 const segmentedTabTooltipArrowClassName =
-  "border-b border-r border-[#e4eaf1] bg-white";
+  "border-b border-r border-[#eeeeee] bg-white";
 
 export const WorkspaceHeaderToolbar = ({
   activeValue,
@@ -72,7 +72,7 @@ export const WorkspaceHeaderToolbar = ({
     indicatorId: string,
   ) => {
     return (
-      <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f6f8fb] p-0.5">
+      <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5">
         {segmentedTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeValue === tab.value;
@@ -94,8 +94,8 @@ export const WorkspaceHeaderToolbar = ({
                   "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
                   "focus:outline-none focus:ring-0 focus-visible:outline-none",
                   isActive
-                    ? "text-[#193a5c]"
-                    : "text-[#8f929c] hover:text-[#193a5c]",
+                    ? "text-[#8c8c8c]"
+                    : "text-[#b3b3b3] hover:text-[#8c8c8c]",
                 )}
                 aria-label={tab.label}
                 aria-pressed={isActive}
@@ -104,7 +104,7 @@ export const WorkspaceHeaderToolbar = ({
                 {isActive && (
                   <motion.span
                     layoutId={indicatorId}
-                    className="absolute inset-0 -z-10 rounded-lg border border-[#e4eaf1] bg-white"
+                    className="absolute inset-0 -z-10 rounded-lg border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
                     transition={WORKSPACE_TAB_MOTION_TRANSITION}
                   />
                 )}
@@ -113,7 +113,7 @@ export const WorkspaceHeaderToolbar = ({
                   aria-hidden="true"
                   className={cn(
                     "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
-                    isActive ? "text-[#193a5c]" : "text-[#9aa3b1]",
+                    isActive ? "text-[#8c8c8c]" : "text-[#b7b7b7]",
                   )}
                 />
               </button>
