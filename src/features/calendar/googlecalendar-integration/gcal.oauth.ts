@@ -12,6 +12,8 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 const GOOGLE_CALENDAR_SCOPE =
   "https://www.googleapis.com/auth/calendar.readonly";
+const GOOGLE_TASKS_SCOPE =
+  "https://www.googleapis.com/auth/tasks.readonly";
 
 const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT =
   "https://accounts.google.com/o/oauth2/v2/auth";
@@ -19,6 +21,9 @@ const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT =
 const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 
 const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
+
+const GOOGLE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_TASKS_SCOPE] as const;
+const GOOGLE_SCOPE_PARAM = `openid email profile ${GOOGLE_SCOPES.join(" ")}`;
 
 const toBase64Url = (bytes: Uint8Array): string => {
   const binary = Array.from(bytes, (v) => String.fromCharCode(v)).join("");
@@ -120,7 +125,7 @@ const buildAuthorizeUrl = ({
     client_id: clientId,
     redirect_uri: redirectUri,
     response_type: "code",
-    scope: `openid email profile ${GOOGLE_CALENDAR_SCOPE}`,
+    scope: GOOGLE_SCOPE_PARAM,
     state,
     include_granted_scopes: "true",
     code_challenge: codeChallenge,
@@ -300,7 +305,9 @@ export const refreshCalendarAccessToken = async ({
 const requestWebToken = async (auth: Auth, silent: boolean) => {
   const provider = new GoogleAuthProvider();
 
-  provider.addScope(GOOGLE_CALENDAR_SCOPE);
+  for (const scope of GOOGLE_SCOPES) {
+    provider.addScope(scope);
+  }
 
   provider.setCustomParameters({
     include_granted_scopes: "true",
