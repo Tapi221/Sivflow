@@ -24,8 +24,8 @@ import type {
   GoogleAccountDisplay,
 } from "../schedulePane.types";
 
-const DEFAULT_CALENDAR_COLOR = "#8c8c8c";
-const DEFAULT_TASK_LIST_COLOR = "#b3b3b3";
+const DEFAULT_CALENDAR_COLOR = "#74798b";
+const DEFAULT_TASK_LIST_COLOR = "#7c8cf8";
 const SIDEBAR_DIVIDER_CLASS = "h-px w-full shrink-0 bg-[#eeeeee]";
 const GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME =
   "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-5 text-left";
