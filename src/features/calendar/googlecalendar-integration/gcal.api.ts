@@ -3,9 +3,12 @@ import type {
   GoogleCalendarApiListResponse,
   GoogleCalendarEvent,
   GoogleCalendarListItem,
+  GoogleTaskListItem,
+  GoogleTasksApiTaskListsResponse,
 } from "./gcalSync.types";
 
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
+const GOOGLE_TASKS_API_BASE = "https://tasks.googleapis.com/tasks/v1";
 
 const getJson = async <T>(accessToken: string, url: string): Promise<T> => {
   const res = await fetch(url, {
@@ -15,7 +18,7 @@ const getJson = async <T>(accessToken: string, url: string): Promise<T> => {
   });
 
   if (!res.ok) {
-    const error = new Error(`Google Calendar API failed (${res.status})`);
+    const error = new Error(`Google API failed (${res.status})`);
 
     (error as Error & { status: number }).status = res.status;
 
@@ -69,6 +72,23 @@ export const fetchCalendarList = async (
       foregroundColor: i.foregroundColor,
       primary: i.primary ?? false,
       selected: i.selected ?? true,
+    }));
+};
+
+export const fetchGoogleTaskLists = async (
+  accessToken: string,
+): Promise<GoogleTaskListItem[]> => {
+  const data = await getJson<GoogleTasksApiTaskListsResponse>(
+    accessToken,
+    `${GOOGLE_TASKS_API_BASE}/users/@me/lists`,
+  );
+
+  return (data.items ?? [])
+    .filter((item) => item.id && item.title)
+    .map((item) => ({
+      id: item.id!,
+      title: item.title!,
+      updated: item.updated,
     }));
 };
 
