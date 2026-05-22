@@ -35,7 +35,6 @@ export const TaskCard = ({
   task,
   accountName,
   accountPhotoUrl,
-  isDragging = false,
   onDelete,
   onToggleDone,
 }: TaskCardProps) => {
@@ -74,7 +73,6 @@ export const TaskCard = ({
         "transition-[transform,background-color,border-color] duration-200 ease-out",
         "hover:border-white hover:bg-white",
         "active:scale-[0.998]",
-        isDragging && "",
       )}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/90" />
