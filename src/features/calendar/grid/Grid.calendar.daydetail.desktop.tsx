@@ -89,7 +89,7 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
             <span
               className="
                 absolute
-                right-2
+                right-3
                 top-0
                 flex
                 h-6
