@@ -50,15 +50,15 @@ export const TaskCard = ({
   }
 
   const isDone = task.status === "done";
-  const checkboxColor = isDone ? "#193a5c" : "#b8c0cc";
+  const checkboxColor = isDone ? "#193a5c" : "#9ca3af";
   const checkboxLabel = isDone ? "Mark task as not done" : "Complete task";
   const chipName = accountName ?? task.assignee ?? "Google account";
 
   let dateContent = <span />;
   if (formattedDate) {
     dateContent = (
-      <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-[#f5f6f9] px-2 text-[11px] font-medium tabular-nums text-[#8f96a3]">
-        <ScheduleCalendarIcon className="h-3.5 w-3.5 shrink-0 text-[#a3abb8]" />
+      <span className="inline-flex items-center gap-1 rounded-full bg-[#f6f7fa] px-1.5 text-[11px] font-medium tabular-nums text-[#9aa3b1]">
+        <ScheduleCalendarIcon className="h-4 w-4 shrink-0 text-[#a8b0bc]" />
         {formattedDate}
       </span>
     );
@@ -67,19 +67,19 @@ export const TaskCard = ({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-[18px] border border-white/80 bg-white/95 p-3.5",
-        "shadow-[0_1px_1px_rgba(15,23,42,0.04),0_10px_28px_rgba(15,23,42,0.07)] backdrop-blur-xl",
-        "transition-[box-shadow,transform,background-color,border-color] duration-200 ease-out",
-        "hover:-translate-y-[1px] hover:border-white hover:bg-white hover:shadow-[0_2px_4px_rgba(15,23,42,0.05),0_16px_34px_rgba(15,23,42,0.10)]",
-        isDragging &&
-          "scale-[1.01] shadow-[0_10px_30px_rgba(15,23,42,0.18)]",
+        "group relative overflow-hidden rounded-[14px] border border-[#eef0f4] bg-white p-3",
+        "shadow-[0_1px_2px_rgba(15,23,42,0.04),0_7px_18px_rgba(15,23,42,0.06)]",
+        "transition-[box-shadow,background-color,border-color] duration-200 ease-out",
+        "hover:border-[#e5e8ef] hover:bg-white hover:shadow-[0_1px_2px_rgba(15,23,42,0.05),0_10px_24px_rgba(15,23,42,0.08)]",
+        isDragging && "shadow-[0_8px_20px_rgba(15,23,42,0.16)]",
       )}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/95" />
-      <div className="flex items-start gap-3.5">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white" />
+
+      <div className="flex items-start gap-3">
         <button
           type="button"
-          className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[7px] transition-transform active:scale-90"
+          className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform active:scale-90"
           aria-label={checkboxLabel}
           title={checkboxLabel}
           onClick={() => {
@@ -91,39 +91,52 @@ export const TaskCard = ({
           <AnimatedSquareCheckbox
             checked={isDone}
             color={checkboxColor}
-            className="h-5 w-5"
+            className="h-3.5 w-3.5"
           />
         </button>
 
-        <div className="min-w-0 flex-1 pr-5">
-          <div className="flex min-h-5 items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
             <div
               className={cn(
-                "min-w-0 flex-1 truncate text-[14px] font-semibold leading-5 tracking-[-0.01em] text-[#20242c]",
+                "min-w-0 flex-1 truncate text-[13px] font-semibold leading-[18px] tracking-[-0.01em] text-[#24262d]",
                 isDone && "text-[#9aa3b1] line-through decoration-[#b8c0cc]",
               )}
             >
               {task.title}
             </div>
+
+            <button
+              type="button"
+              className="-mr-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full text-[#a1a8b3] opacity-0 transition-[background-color,color,opacity] hover:bg-[#f3f4f7] hover:text-[#657080] group-hover:opacity-100 focus-visible:opacity-100"
+              aria-label="Task menu"
+              onClick={() => {
+                if (onDelete) {
+                  onDelete(task.id);
+                }
+              }}
+            >
+              <TaskMenuIcon className="h-4 w-4" />
+            </button>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <div className="mt-2.5 flex flex-wrap items-center gap-2">
             <span
-              className="inline-flex h-6 items-center rounded-full px-2.5 text-[11px] font-semibold"
+              className="inline-flex h-5 items-center rounded-full px-2 text-[11px] font-semibold"
               style={{ backgroundColor: category.bg, color: category.text }}
             >
               {task.category}
             </span>
 
             <span
-              className="inline-flex h-6 items-center rounded-full px-2.5 text-[11px] font-semibold"
+              className="inline-flex h-5 items-center rounded-full px-2 text-[11px] font-semibold"
               style={{ backgroundColor: priority.bg, color: priority.text }}
             >
               {priority.label}
             </span>
           </div>
 
-          <div className="mt-5 flex items-center justify-between gap-2">
+          <div className="mt-4 flex items-center justify-between gap-2">
             <div className="min-w-0">{dateContent}</div>
 
             {task.assignee && (
@@ -134,19 +147,6 @@ export const TaskCard = ({
             )}
           </div>
         </div>
-
-        <button
-          type="button"
-          className="absolute right-2.5 top-2.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#a1a8b3] opacity-70 transition-[background-color,color,opacity] hover:bg-[#f1f3f6] hover:text-[#657080] hover:opacity-100 focus-visible:opacity-100"
-          aria-label="Task menu"
-          onClick={() => {
-            if (onDelete) {
-              onDelete(task.id);
-            }
-          }}
-        >
-          <TaskMenuIcon className="h-4 w-4" />
-        </button>
       </div>
     </div>
   );
