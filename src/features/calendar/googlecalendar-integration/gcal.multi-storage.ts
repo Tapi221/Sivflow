@@ -11,6 +11,7 @@
 
 const MULTI_ACCOUNTS_KEY = "flashcard-master.gcal.accounts.v2";
 const TOKEN_LIFETIME_MS = 55 * 60 * 1000;
+const TOKEN_EXPIRY_SAFETY_MARGIN_MS = 5 * 60 * 1000;
 
 // Legacy keys（マイグレーション用）
 const LEGACY_ACCESS_TOKEN_KEY = "flashcard-master.gcal.access_token";
@@ -54,7 +55,13 @@ export const isStoredTokenValid = (account: StoredGoogleAccount): boolean => {
   return Date.now() < account.accessTokenExpiry;
 };
 
-export const buildTokenExpiry = (): number => Date.now() + TOKEN_LIFETIME_MS;
+export const buildTokenExpiry = (expiresInSeconds?: number | null): number => {
+  if (!expiresInSeconds) {
+    return Date.now() + TOKEN_LIFETIME_MS;
+  }
+
+  return Date.now() + Math.max(0, expiresInSeconds * 1000 - TOKEN_EXPIRY_SAFETY_MARGIN_MS);
+};
 
 // ─────────────────────────────────────────────────────────────
 // Legacy migration
@@ -142,6 +149,7 @@ export const updateStoredAccountToken = (
   accessToken: string,
   refreshToken?: string | null,
   profile?: StoredGoogleAccountProfile,
+  expiresInSeconds?: number | null,
 ): void => {
   const accounts = readStoredAccounts();
   const idx = accounts.findIndex((a) => a.id === accountId);
@@ -150,7 +158,7 @@ export const updateStoredAccountToken = (
   accounts[idx] = {
     ...accounts[idx],
     accessToken,
-    accessTokenExpiry: buildTokenExpiry(),
+    accessTokenExpiry: buildTokenExpiry(expiresInSeconds),
     ...(refreshToken !== undefined && refreshToken !== null
       ? { refreshToken }
       : {}),
