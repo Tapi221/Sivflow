@@ -34,6 +34,13 @@ type DroppableTaskColumnProps = Omit<TaskBoardViewProps, "tasksByStatus" | "onRe
   tasks: Task[];
 };
 
+type VerticalDropPosition = "before" | "after";
+
+type VerticalRect = {
+  top: number;
+  height: number;
+};
+
 const DroppableTaskColumn = ({
   column,
   tasks,
@@ -83,6 +90,31 @@ const findTask = (
 
 const isTaskStatus = (value: unknown): value is TaskStatus => {
   return TASK_COLUMNS.some((column) => column.id === value);
+};
+
+const getActiveVerticalRect = (event: DragEndEvent): VerticalRect => {
+  const initialRect = event.active.rect.current.initial;
+  const translatedRect = event.active.rect.current.translated;
+
+  return {
+    top: translatedRect?.top ?? initialRect.top + event.delta.y,
+    height: translatedRect?.height ?? initialRect.height,
+  };
+};
+
+const getDropPosition = (
+  event: DragEndEvent,
+  overRect: VerticalRect,
+): VerticalDropPosition => {
+  const activeRect = getActiveVerticalRect(event);
+  const activeBottom = activeRect.top + activeRect.height;
+  const overMiddleY = overRect.top + overRect.height / 2;
+
+  if (activeRect.top < overRect.top) {
+    return activeBottom >= overMiddleY ? "after" : "before";
+  }
+
+  return activeRect.top <= overMiddleY ? "before" : "after";
 };
 
 export const TaskBoardView = ({
@@ -184,11 +216,7 @@ export const TaskBoardView = ({
       return;
     }
 
-    const activeRect = event.active.rect.current.translated ?? event.active.rect.current.initial;
-    const overRect = over.rect;
-    const activeCenterY = activeRect.top + activeRect.height / 2;
-    const overCenterY = overRect.top + overRect.height / 2;
-    const position = activeCenterY >= overCenterY ? "after" : "before";
+    const position = getDropPosition(event, over.rect);
 
     onReorderTask(activeId, overTask.status, overId, position);
   };
