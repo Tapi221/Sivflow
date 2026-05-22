@@ -24,9 +24,9 @@ const TAB_MOTION_TRANSITION: Transition = {
 };
 
 const TAB_TOOLTIP_CLASS_NAME =
-  "rounded-lg border border-[#e4eaf1] bg-white px-2.5 py-[5px] text-[12px] font-medium text-[#193a5c] shadow-[0_8px_18px_rgba(25,58,92,0.12)]";
+  "rounded-lg border border-[#eeeeee] bg-white px-2.5 py-[5px] text-[12px] font-medium text-[#8c8c8c] shadow-[0_8px_18px_rgba(0,0,0,0.08)]";
 const TAB_TOOLTIP_ARROW_CLASS_NAME =
-  "border-b border-r border-[#e4eaf1] bg-white";
+  "border-b border-r border-[#eeeeee] bg-white";
 
 type CalendarTimelineTaskTab = {
   value: CalendarWorkspaceToolbarProps["activeMode"];
@@ -44,7 +44,7 @@ export const ToggleCalendarTimelineTask = ({
   tabs,
 }: ToggleCalendarTimelineTaskProps) => {
   return (
-    <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f6f8fb] p-0.5">
+    <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5">
       {tabs.map((tab) => {
         const Icon = TAB_ICON_MAP[tab.value];
         const isActive = activeMode === tab.value;
@@ -67,15 +67,13 @@ export const ToggleCalendarTimelineTask = ({
                 "appearance-none select-none",
                 "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
                 "focus:outline-none focus:ring-0 focus-visible:outline-none",
-                isActive
-                  ? "text-[#193a5c]"
-                  : "text-[#8f929c] hover:text-[#193a5c]",
+                isActive ? "text-[#8c8c8c]" : "text-[#b3b3b3] hover:text-[#8c8c8c]",
               )}
             >
               {isActive && (
                 <motion.span
                   layoutId={TAB_INDICATOR_ID}
-                  className="absolute inset-0 -z-10 rounded-lg border border-[#e4eaf1] bg-white"
+                  className="absolute inset-0 -z-10 rounded-lg border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
                   transition={TAB_MOTION_TRANSITION}
                 />
               )}
@@ -84,7 +82,7 @@ export const ToggleCalendarTimelineTask = ({
                 aria-hidden="true"
                 className={cn(
                   "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
-                  isActive ? "text-[#193a5c]" : "text-[#9aa3b1]",
+                  isActive ? "text-[#8c8c8c]" : "text-[#b7b7b7]",
                 )}
               />
             </button>
