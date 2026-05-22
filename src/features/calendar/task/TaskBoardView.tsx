@@ -1,8 +1,11 @@
 import {
   closestCorners,
+  type CollisionDetection,
   DndContext,
   type DragEndEvent,
   PointerSensor,
+  pointerWithin,
+  rectIntersection,
   useDroppable,
   useSensor,
   useSensors,
@@ -89,6 +92,56 @@ const findTask = (
 
 const isTaskStatus = (value: unknown): value is TaskStatus => {
   return TASK_COLUMNS.some((column) => column.id === value);
+};
+
+const taskBoardCollisionDetection: CollisionDetection = (args) => {
+  const activeId = args.active.id;
+  const columnContainers = args.droppableContainers.filter(
+    (container) => container.data.current?.type === "column",
+  );
+  const taskContainers = args.droppableContainers.filter(
+    (container) =>
+      container.id !== activeId && container.data.current?.type === "task",
+  );
+
+  const pointerColumnCollisions = pointerWithin({
+    ...args,
+    droppableContainers: columnContainers,
+  });
+  const columnCollisions =
+    pointerColumnCollisions.length > 0
+      ? pointerColumnCollisions
+      : rectIntersection({
+          ...args,
+          droppableContainers: columnContainers,
+        });
+
+  const overColumn = columnContainers.find(
+    (container) => container.id === columnCollisions[0]?.id,
+  );
+  const overStatus = overColumn?.data.current?.status;
+
+  if (isTaskStatus(overStatus)) {
+    const targetColumnTasks = taskContainers.filter(
+      (container) => container.data.current?.status === overStatus,
+    );
+
+    if (targetColumnTasks.length > 0) {
+      return closestCorners({
+        ...args,
+        droppableContainers: targetColumnTasks,
+      });
+    }
+
+    return columnCollisions;
+  }
+
+  const taskCollisions = closestCorners({
+    ...args,
+    droppableContainers: taskContainers,
+  });
+
+  return taskCollisions.length > 0 ? taskCollisions : closestCorners(args);
 };
 
 const getActiveVerticalRect = (event: DragEndEvent): VerticalRect => {
@@ -197,7 +250,7 @@ export const TaskBoardView = ({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={taskBoardCollisionDetection}
       onDragEnd={handleDragEnd}
     >
       <div
