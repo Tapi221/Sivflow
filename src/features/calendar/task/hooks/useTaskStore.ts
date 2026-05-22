@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Task, TaskCreateInput, TaskStatus } from "./task.types";
+import type { Task, TaskCreateInput, TaskStatus } from "../task.types";
 
 type TaskInsertPosition = "before" | "after";
 
