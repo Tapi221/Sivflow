@@ -39,6 +39,12 @@ const WORKSPACE_TAB_MOTION_TRANSITION: Transition = {
   ease: [0.22, 1, 0.36, 1],
 };
 
+const toolbarIconClassName =
+  "h-[17px] w-[17px] shrink-0 text-current transition-transform duration-200 ease-out group-hover/action:scale-[1.06] group-focus-visible/action:scale-[1.06] motion-reduce:transition-none";
+
+const toolbarTooltipClassName =
+  "pointer-events-none absolute left-1/2 top-[calc(100%+7px)] z-20 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-full bg-[#1c1c1e]/90 px-2 py-1 text-[11px] font-medium leading-none tracking-[-0.01em] text-white opacity-0 shadow-[0_8px_18px_rgba(0,0,0,0.16)] transition-all duration-150 ease-out group-hover/action:translate-y-0 group-hover/action:opacity-100 group-focus-visible/action:translate-y-0 group-focus-visible/action:opacity-100 motion-reduce:transition-none";
+
 const resolveSegmentedTabColumnWidth = (
   tabs: readonly WorkspaceHeaderToolbarItem[],
 ) => {
@@ -126,7 +132,7 @@ export const WorkspaceHeaderToolbar = ({
   return (
     <div
       className={cn(
-        "relative flex h-[var(--ds-semantic-breadcrumb-height)] min-h-11 w-full shrink-0 flex-wrap items-center justify-between overflow-hidden bg-white/85 px-2 backdrop-blur-xl",
+        "relative flex h-[var(--ds-semantic-breadcrumb-height)] min-h-11 w-full shrink-0 flex-wrap items-center justify-between overflow-visible bg-white/85 px-2 backdrop-blur-xl",
         !isSegmented &&
           "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-[rgba(60,60,67,0.18)] after:content-['']",
       )}
@@ -217,7 +223,7 @@ export const WorkspaceHeaderToolbar = ({
         {hasLeadingActions ? (
           <div
             className={cn(
-              "flex h-9 shrink-0 items-center gap-1 rounded-full bg-[#f2f2f7]/80 p-1 shadow-[inset_0_0_0_0.5px_rgba(60,60,67,0.12)] backdrop-blur-xl",
+              "relative z-10 flex h-10 shrink-0 items-center gap-1 rounded-full bg-[#f2f2f7]/80 p-1 shadow-[inset_0_0_0_0.5px_rgba(60,60,67,0.12)] backdrop-blur-xl",
               hasLeadingContentBeforeActions ? "ml-2" : "ml-0",
             )}
           >
@@ -230,10 +236,13 @@ export const WorkspaceHeaderToolbar = ({
                   type="button"
                   aria-label={action.ariaLabel ?? action.label}
                   title={action.ariaLabel ?? action.label}
-                  className="group/leading inline-flex h-7 w-7 items-center justify-center rounded-full text-[#3c3c43]/60 transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:bg-white/90 hover:text-[#007aff] hover:shadow-[0_1px_3px_rgba(0,0,0,0.08)] active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
+                  className="group/action relative inline-flex h-8 w-8 items-center justify-center rounded-full text-[#3c3c43]/60 transition-[background-color,color,box-shadow] duration-150 ease-out hover:bg-white/95 hover:text-[#007aff] hover:shadow-[0_1px_4px_rgba(0,0,0,0.1)] active:bg-white active:text-[#0066d6] motion-reduce:transition-none focus-visible:bg-white focus-visible:text-[#007aff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
                   onClick={action.onClick}
                 >
-                  <Icon className="h-[17px] w-[17px] shrink-0 transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover/leading:-translate-y-px group-hover/leading:scale-110 group-focus-visible/leading:scale-110 motion-reduce:transition-none" />
+                  <Icon className={toolbarIconClassName} />
+                  <span className={toolbarTooltipClassName}>
+                    {action.ariaLabel ?? action.label}
+                  </span>
                 </button>
               );
             })}
@@ -242,7 +251,7 @@ export const WorkspaceHeaderToolbar = ({
       </div>
 
       {actions && actions.length > 0 ? (
-        <div className="flex h-9 shrink-0 items-center justify-end gap-1 rounded-full bg-[#f2f2f7]/80 p-1 shadow-[0_1px_2px_rgba(0,0,0,0.04),inset_0_0_0_0.5px_rgba(60,60,67,0.12)] backdrop-blur-xl">
+        <div className="relative z-10 flex h-10 shrink-0 items-center justify-end gap-1 rounded-full bg-[#f2f2f7]/80 p-1 shadow-[0_1px_2px_rgba(0,0,0,0.04),inset_0_0_0_0.5px_rgba(60,60,67,0.12)] backdrop-blur-xl">
           {actions.map((action) => {
             const Icon = action.icon;
 
@@ -252,13 +261,11 @@ export const WorkspaceHeaderToolbar = ({
                 type="button"
                 aria-label={action.ariaLabel ?? action.label}
                 title={action.ariaLabel ?? action.label}
-                className="group/action flex h-7 max-w-7 items-center justify-start overflow-hidden rounded-full px-[5.5px] text-[13px] font-medium leading-none tracking-[-0.01em] text-[#3c3c43]/65 transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:max-w-[108px] hover:bg-white/90 hover:text-[#007aff] hover:shadow-[0_1px_3px_rgba(0,0,0,0.08)] active:scale-[0.97] motion-reduce:transition-none focus-visible:max-w-[108px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
+                className="group/action relative flex h-8 w-8 items-center justify-center rounded-full text-[#3c3c43]/65 transition-[background-color,color,box-shadow] duration-150 ease-out hover:bg-white/95 hover:text-[#007aff] hover:shadow-[0_1px_4px_rgba(0,0,0,0.1)] active:bg-white active:text-[#0066d6] motion-reduce:transition-none focus-visible:bg-white focus-visible:text-[#007aff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
                 onClick={action.onClick}
               >
-                <Icon className="h-[17px] w-[17px] shrink-0 transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover/action:-translate-y-px group-hover/action:scale-110 group-focus-visible/action:scale-110 motion-reduce:transition-none" />
-                <span className="ml-0 max-w-0 translate-x-1 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover/action:ml-1.5 group-hover/action:max-w-[72px] group-hover/action:translate-x-0 group-hover/action:opacity-100 group-focus-visible/action:ml-1.5 group-focus-visible/action:max-w-[72px] group-focus-visible/action:translate-x-0 group-focus-visible/action:opacity-100 motion-reduce:transition-none">
-                  {action.label}
-                </span>
+                <Icon className={toolbarIconClassName} />
+                <span className={toolbarTooltipClassName}>{action.label}</span>
               </button>
             );
           })}
