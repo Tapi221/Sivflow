@@ -85,6 +85,7 @@ export type GoogleTasksApiTaskListsResponse = {
     title?: string;
     updated?: string;
   }>;
+  nextPageToken?: string;
 };
 
 export type GoogleCalendarApiEventsResponse = {
