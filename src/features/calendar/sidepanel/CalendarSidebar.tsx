@@ -275,49 +275,49 @@ export const CalendarSidebar = ({
 
   return (
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent px-3 pb-5 pt-2 text-[#24272f]">
-      <section className="flex w-full shrink-0 flex-col gap-2">
-        <div className="flex w-full items-center justify-between px-1">
-          <span className="text-[12px] font-semibold tracking-wide text-[#3d4049]">
+      <section className="flex w-full shrink-0 flex-col rounded-[20px] border border-white/70 bg-white/80 px-2.5 pb-2.5 pt-2.5 shadow-[0_10px_28px_rgba(15,23,42,0.08),0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-2xl">
+        <div className="flex w-full items-center justify-between px-0.5">
+          <span className="text-[13px] font-bold tracking-[-0.01em] text-[#1f2937]">
             {format(monthDate, monthLabelFormat, { locale: dateFnsLocale })}
           </span>
 
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-1">
             <HoverTooltip label={t.previousMonthLabel} side="top">
               <button
                 type="button"
-                className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-[#8f96a3] transition-all hover:bg-[#f1f3f7] hover:text-[#1f2937] active:scale-[0.94] active:bg-[#e8ecf3]"
                 onClick={onPreviousMonth}
                 aria-label={t.previousMonthLabel}
               >
-                <IconChevronLeft className="h-3.5 w-3.5" />
+                <IconChevronLeft className="h-4 w-4" />
               </button>
             </HoverTooltip>
 
             <HoverTooltip label={t.nextMonthLabel} side="top">
               <button
                 type="button"
-                className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-[#8f96a3] transition-all hover:bg-[#f1f3f7] hover:text-[#1f2937] active:scale-[0.94] active:bg-[#e8ecf3]"
                 onClick={onNextMonth}
                 aria-label={t.nextMonthLabel}
               >
-                <IconChevronRight className="h-3.5 w-3.5" />
+                <IconChevronRight className="h-4 w-4" />
               </button>
             </HoverTooltip>
           </div>
         </div>
 
-        <div className="grid grid-cols-7 px-0.5">
+        <div className="mt-2 grid grid-cols-7 px-0.5">
           {t.miniCalendarWeekdays.map((weekday, index) => (
             <span
               key={`${weekday}-${index}`}
-              className="flex h-6 items-center justify-center text-[11px] font-semibold uppercase text-[#9aa0aa]"
+              className="flex h-6 items-center justify-center text-[11px] font-bold uppercase text-[#9aa0aa]"
             >
               {weekday}
             </span>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 px-0.5">
+        <div className="grid grid-cols-7 gap-y-0.5 px-0.5">
           {miniCalendarDays.map((day) => {
             const isActive = day.isToday || day.isSelected;
 
@@ -327,20 +327,20 @@ export const CalendarSidebar = ({
                 type="button"
                 onClick={() => onSelectDate(day.date)}
                 className={cn(
-                  "flex h-7 w-full items-center justify-center rounded-md transition-colors",
-                  !isActive && "hover:bg-[#eceef1]",
+                  "flex h-7 w-full items-center justify-center rounded-full transition-all duration-150 active:scale-[0.92]",
+                  !isActive && "hover:bg-[#f1f3f7]",
                 )}
               >
                 <span
                   className={cn(
-                    "flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-semibold tabular-nums",
+                    "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[12px] font-semibold tabular-nums transition-all duration-150",
                     day.isToday &&
-                      "bg-[#185FA5] text-white shadow-[0_2px_8px_rgba(24,95,165,0.35)]",
+                      "bg-[#007aff] text-white shadow-[0_5px_12px_rgba(0,122,255,0.28)]",
                     day.isSelected &&
                       !day.isToday &&
-                      "bg-[#2d3039] text-white",
-                    !isActive && day.isCurrentMonth && "text-[#24231f]",
-                    !isActive && !day.isCurrentMonth && "text-[#b8bcc5]",
+                      "bg-[#1f2937] text-white shadow-[0_4px_10px_rgba(15,23,42,0.2)]",
+                    !isActive && day.isCurrentMonth && "text-[#111827]",
+                    !isActive && !day.isCurrentMonth && "text-[#c2c7d0]",
                   )}
                 >
                   {day.dayNumber}
