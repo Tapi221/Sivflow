@@ -1,9 +1,9 @@
 import { format } from "date-fns";
-import { AnimatedSquareCheckbox } from "@/features/calendar/chip/checkbox/AnimatedSquareCheckbox";
+import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { useT } from "@/i18n/useT";
 import { TASK_COLUMNS } from "./task.types";
 import type { Task } from "./task.types";
-import { TaskStatusDot } from "../chip/icon/TaskStatusDot";
+import { TaskStatusDot } from "../../../chip/icon/TaskStatusDot";
 
 type TaskListViewProps = {
   tasks: Task[];

@@ -8,7 +8,7 @@ import {
 } from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
 
-import type { CalendarWorkspaceToolbarProps } from "../../schedulePane.types";
+import type { CalendarWorkspaceToolbarProps } from "../../features/calendar/schedulePane.types";
 
 const TAB_ICON_MAP = {
   calendar: CalendarIcon,

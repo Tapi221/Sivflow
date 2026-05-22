@@ -4,7 +4,7 @@ import { ja } from "date-fns/locale";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
-import { CalendarDayNumberCircle } from "@/features/calendar/chip/icon/CalendarDayNumberCircle";
+import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import { CalendarEventChipMonth } from "@/features/calendar/eventchip/EventChip.schedule.month";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";

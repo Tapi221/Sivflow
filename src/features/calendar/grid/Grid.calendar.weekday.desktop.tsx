@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import { CalendarDayNumberCircle } from "@/features/calendar/chip/icon/CalendarDayNumberCircle";
+import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
 import type { CalendarWeekDayGridProps } from "@/features/calendar/schedulePane.types";
