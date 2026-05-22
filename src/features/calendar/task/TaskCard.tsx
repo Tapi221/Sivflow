@@ -120,24 +120,24 @@ export const TaskCard = ({
             </button>
           </div>
 
-          <div className="mt-2.5 flex flex-wrap items-center gap-2">
-            <span
-              className="inline-flex h-5 items-center rounded-full px-2 text-[11px] font-semibold"
-              style={{ backgroundColor: category.bg, color: category.text }}
-            >
-              {task.category}
-            </span>
-
-            <span
-              className="inline-flex h-5 items-center rounded-full px-2 text-[11px] font-semibold"
-              style={{ backgroundColor: priority.bg, color: priority.text }}
-            >
-              {priority.label}
-            </span>
-          </div>
-
           <div className="mt-3 flex items-center justify-between gap-2">
-            <div className="-ml-[26px] min-w-0">{dateContent}</div>
+            <div className="-ml-[26px] flex min-w-0 flex-wrap items-center gap-2">
+              {dateContent}
+
+              <span
+                className="inline-flex h-5 items-center rounded-full px-2 text-[11px] font-semibold"
+                style={{ backgroundColor: category.bg, color: category.text }}
+              >
+                {task.category}
+              </span>
+
+              <span
+                className="inline-flex h-5 items-center rounded-full px-2 text-[11px] font-semibold"
+                style={{ backgroundColor: priority.bg, color: priority.text }}
+              >
+                {priority.label}
+              </span>
+            </div>
 
             {task.assignee && (
               <GoogleAccountChip
