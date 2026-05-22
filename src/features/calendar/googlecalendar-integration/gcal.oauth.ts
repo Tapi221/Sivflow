@@ -27,6 +27,8 @@ const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 const GOOGLE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_TASKS_SCOPE] as const;
 const GOOGLE_SCOPE_PARAM = `openid email profile ${GOOGLE_SCOPES.join(" ")}`;
 
+export const GOOGLE_SERVER_CODE_REDIRECT_URI = "postmessage";
+
 type GoogleTokenResponse = {
   access_token?: string;
   error?: string;
@@ -34,6 +36,12 @@ type GoogleTokenResponse = {
   expires_in?: number;
   scope?: string;
   token_type?: string;
+};
+
+type GoogleCodeResponse = {
+  code?: string;
+  error?: string;
+  error_description?: string;
 };
 
 type GoogleTokenClientOverrideConfig = {
@@ -53,11 +61,30 @@ type GoogleTokenClientConfig = GoogleTokenClientOverrideConfig & {
   error_callback?: (error: { type?: string; message?: string }) => void;
 };
 
+type GoogleCodeClientOverrideConfig = {
+  hint?: string;
+  prompt?: string;
+  scope?: string;
+};
+
+type GoogleCodeClient = {
+  requestCode: (overrideConfig?: GoogleCodeClientOverrideConfig) => void;
+};
+
+type GoogleCodeClientConfig = GoogleCodeClientOverrideConfig & {
+  callback: (response: GoogleCodeResponse) => void;
+  client_id: string;
+  error_callback?: (error: { type?: string; message?: string }) => void;
+  include_granted_scopes?: boolean;
+  ux_mode: "popup";
+};
+
 declare global {
   interface Window {
     google?: {
       accounts?: {
         oauth2?: {
+          initCodeClient: (config: GoogleCodeClientConfig) => GoogleCodeClient;
           initTokenClient: (config: GoogleTokenClientConfig) => GoogleTokenClient;
         };
       };
@@ -355,6 +382,51 @@ const fetchGoogleUserInfo = async (accessToken: string) => {
     accountEmail: json.email ?? null,
     accountName: json.name ?? null,
     accountPhotoUrl: json.picture ?? null,
+  };
+};
+
+export const requestGoogleCalendarServerCode = async (
+  auth: Auth,
+): Promise<{ code: string; redirectUri: string }> => {
+  await loadGoogleIdentityServices();
+
+  const clientId = getWebClientId();
+  const hint = auth.currentUser?.email ?? readEmail() ?? undefined;
+
+  const response = await new Promise<GoogleCodeResponse>((resolve, reject) => {
+    const client = window.google!.accounts!.oauth2!.initCodeClient({
+      callback: resolve,
+      client_id: clientId,
+      hint,
+      include_granted_scopes: true,
+      prompt: "consent select_account",
+      scope: GOOGLE_SCOPE_PARAM,
+      ux_mode: "popup",
+      error_callback: (error) => {
+        reject(new Error(error.message ?? error.type ?? "Google OAuth failed"));
+      },
+    });
+
+    client.requestCode({
+      hint,
+      prompt: "consent select_account",
+      scope: GOOGLE_SCOPE_PARAM,
+    });
+  });
+
+  if (response.error) {
+    throw new Error(
+      response.error_description ?? response.error ?? "Google OAuth failed",
+    );
+  }
+
+  if (!response.code) {
+    throw new Error("No authorization code");
+  }
+
+  return {
+    code: response.code,
+    redirectUri: GOOGLE_SERVER_CODE_REDIRECT_URI,
   };
 };
 
