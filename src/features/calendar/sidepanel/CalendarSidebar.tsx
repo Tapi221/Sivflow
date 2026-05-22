@@ -345,12 +345,11 @@ export const CalendarSidebar = ({
         ))}
       </nav>
 
-      <div
-        className={cn(
-          "mt-auto w-full shrink-0 pt-2",
-          hasGoogleAccounts && "border-t border-[#e4e6eb]",
+      <div className="mt-auto w-full shrink-0">
+        {hasGoogleAccounts && (
+          <div className="mb-2 h-px w-full shrink-0 bg-[#e4e6eb]" />
         )}
-      >
+
         <button
           type="button"
           className="flex h-7 w-full items-center gap-2 px-2 text-left hover:bg-[#eceef1]"
