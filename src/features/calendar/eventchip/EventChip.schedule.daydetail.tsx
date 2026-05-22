@@ -122,8 +122,14 @@ export const EventChipDayDetail = ({
           : `3px solid ${tokens.border}`,
         color: tokens.text,
       }}
-      title={`${timeLabel} ${event.title}`}
+      title={`${event.title || "Untitled"} ${timeLabel}`}
     >
+      {!compact && (
+        <span className="truncate">
+          {event.title || "Untitled"}
+        </span>
+      )}
+
       <span
         className="
           truncate
@@ -133,12 +139,6 @@ export const EventChipDayDetail = ({
       >
         {timeLabel}
       </span>
-
-      {!compact && (
-        <span className="truncate">
-          {event.title || "Untitled"}
-        </span>
-      )}
     </div>
   );
 };
