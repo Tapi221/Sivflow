@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { AnimatedSquareCheckbox } from "@/features/calendar/chip/checkbox/AnimatedSquareCheckbox";
 import { TASK_COLUMNS } from "./task.types";
 import type { Task } from "./task.types";
+import { TaskStatusDot } from "./TaskStatusDot";
 
 type TaskListViewProps = {
   tasks: Task[];
@@ -63,10 +64,7 @@ export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => 
 
                 <td className="py-2.5 pr-4">
                   <span className="flex items-center gap-1.5 text-[#4c5361]">
-                    <span
-                      className="h-2 w-2 shrink-0 rounded-full"
-                      style={{ backgroundColor: col?.dotColor }}
-                    />
+                    <TaskStatusDot color={col?.dotColor} />
                     {col?.label}
                   </span>
                 </td>
