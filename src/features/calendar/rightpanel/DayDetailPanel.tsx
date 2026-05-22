@@ -15,15 +15,8 @@ const AllDayChip = ({ event }: { event: GoogleCalendarEvent }) => {
 
   return (
     <div
-      className={cn(
-        eventChipAllDayClass,
-        "truncate rounded-[12px] border shadow-[0_2px_8px_rgba(0,0,0,0.04)]",
-      )}
-      style={{
-        background: tokens.bg,
-        borderColor: tokens.border,
-        color: tokens.text,
-      }}
+      className={cn(eventChipAllDayClass, "truncate")}
+      style={{ background: tokens.bg, color: tokens.text }}
     >
       {event.title || "Untitled"}
     </div>
@@ -69,29 +62,23 @@ export const DayDetailPanel = ({
   }
 
   return (
-    <aside
-      className="flex w-[260px] shrink-0 flex-col overflow-hidden bg-[#f2f2f7]"
-      style={{
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif",
-      }}
-    >
-      <div className="px-4 pb-2 pt-3">
-        <div className="flex h-7 items-center rounded-full bg-white/80 px-3 shadow-[0_1px_0_rgba(255,255,255,0.72),0_4px_16px_rgba(0,0,0,0.03)] backdrop-blur-xl">
-          <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
+    <aside className="flex w-[260px] shrink-0 flex-col overflow-hidden bg-transparent">
+      <div className="px-4 pb-3 pt-2">
+        <div className="flex h-6 items-center px-1">
+          <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#3d4049]">
             {format(selectedDate, "yyyy年M月d日(E)", { locale: ja })}
           </span>
         </div>
       </div>
 
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-1 mb-1 flex rounded-[18px] border border-[rgba(60,60,67,0.12)] bg-white/90 shadow-[0_4px_16px_rgba(0,0,0,0.035)] backdrop-blur-xl">
-          <div className="flex w-16 shrink-0 justify-end pr-3 pt-[9px]">
-            <span className="text-[10px] font-semibold tracking-[-0.01em] text-[rgba(60,60,67,0.48)]">終日</span>
+        <div className="flex border-b border-[#f5f5f5]">
+          <div className="flex w-16 shrink-0 justify-end pr-4 pt-[8px]">
+            <span className="text-[10px] font-medium tracking-[-0.01em] text-[rgba(60,60,67,0.45)]">終日</span>
           </div>
 
-          <div className="flex-1 px-2 py-2">
-            <div className="flex min-h-[22px] flex-col gap-1">
+          <div className="flex-1 px-2 py-1.5">
+            <div className="flex flex-col gap-1">
               {allDayEvents.map((ev) => (
                 <AllDayChip key={ev.id} event={ev} />
               ))}
@@ -102,7 +89,7 @@ export const DayDetailPanel = ({
         <GridCalendarDayDetailDesktop events={timedEvents} />
       </div>
 
-      <div className="border-t border-[rgba(60,60,67,0.12)] bg-[#f2f2f7]/90 px-4 py-4 backdrop-blur-xl">
+      <div className="border-t border-[#f5f5f5] px-4 py-4">
         <DayDetailCreateButton />
       </div>
     </aside>
