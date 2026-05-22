@@ -92,12 +92,6 @@ export const EventChipDayDetail = ({
     <div
       className={cn(
         eventChipAllDayClass,
-        `
-          rounded-[13px]
-          border
-          shadow-[0_2px_8px_rgba(0,0,0,0.05)]
-          backdrop-blur-xl
-        `,
         event.isAllDay
           ? `
             absolute
@@ -123,7 +117,6 @@ export const EventChipDayDetail = ({
         top: event.isAllDay ? top : undefined,
         height: event.isAllDay ? height : undefined,
         background: tokens.bg,
-        borderColor: tokens.border,
         borderLeft: event.isAllDay
           ? undefined
           : `3px solid ${tokens.border}`,
@@ -134,19 +127,15 @@ export const EventChipDayDetail = ({
       <span
         className="
           truncate
-          text-[10px]
-          font-medium
-          leading-tight
-          tracking-[-0.01em]
           tabular-nums
-          opacity-75
+          opacity-80
         "
       >
         {timeLabel}
       </span>
 
       {!compact && (
-        <span className="truncate text-[11px] font-semibold leading-tight tracking-[-0.01em]">
+        <span className="truncate">
           {event.title || "Untitled"}
         </span>
       )}
