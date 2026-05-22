@@ -108,8 +108,8 @@ const CalendarMonthDayCell = memo(({
       className={cn(
         "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#e5e5ea] bg-white text-left",
         !isLastColumn && "border-r",
-        isToday && "bg-[#f2f8ff]",
-        selected && !isToday && "bg-[#f6f6f8]",
+        isToday && "bg-[#f7fbff]",
+        selected && !isToday && "bg-[#f7f7f8]",
         !selected &&
           !isToday &&
           "calendar-month-day-cell-hoverable",
@@ -141,9 +141,9 @@ const CalendarMonthDayCell = memo(({
             "absolute inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[length:var(--ds-layout-font-size-meta)] font-semibold tabular-nums transition-colors",
             GD.MONTH_GRID_DAY_NUMBER_POSITION_CLASS,
             isToday
-              ? "bg-[#007aff] text-white shadow-[0_6px_14px_rgba(0,122,255,0.28)]"
+              ? "bg-[#007aff] text-white"
               : selected
-                ? "bg-[#3a3a3c] text-white"
+                ? "bg-[#d1d1d6] text-[#1c1c1e]"
                 : day.isCurrentMonth
                   ? "text-[#24231f]"
                   : "text-[#b0aea8]",
