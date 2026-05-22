@@ -37,12 +37,10 @@ export const CalendarToolbar = ({
 
   return (
     <div className="flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center justify-between overflow-visible bg-white pr-[var(--workspace-content-gutter)]">
-      {/* LEFT */}
       <div className="flex items-center gap-3">
         <ToggleCalendarTimelineTask activeMode={activeMode} tabs={tabs} />
       </div>
 
-      {/* RIGHT ACTIONS */}
       <div className="relative z-10 flex h-10 shrink-0 items-center justify-end gap-1 rounded-full bg-[#f2f2f7]/80 p-1 shadow-[0_1px_2px_rgba(0,0,0,0.04),inset_0_0_0_0.5px_rgba(60,60,67,0.12)] backdrop-blur-xl">
         {actions.map((action) => {
           const Icon = ACTION_ICON_MAP[action.key];
