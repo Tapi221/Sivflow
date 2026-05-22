@@ -26,8 +26,8 @@ const DEFAULT_CALENDAR_COLOR = "#74798b";
 const DEFAULT_TASK_LIST_COLOR = "#7c8cf8";
 const SIDEBAR_DIVIDER_CLASS = "h-px w-full shrink-0 bg-[#e4e6eb]";
 const GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME =
-  "flex min-h-9 w-full items-center gap-2.5 overflow-hidden rounded-[12px] px-3 pl-4 text-left";
-const GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME = "px-4";
+  "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-5 text-left";
+const GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME = "px-5";
 
 const IconChevronLeft = ({ className }: { className?: string }) => (
   <svg
@@ -104,33 +104,33 @@ const GoogleAccountSection = ({
   const isTaskMode = mode === "task";
 
   return (
-    <div className="mt-2 overflow-hidden rounded-[20px] border border-white/75 bg-white/85 p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.07),0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-2xl">
+    <div className="mt-2 overflow-hidden rounded-[14px] border border-white/70 bg-white/80 p-0.5 shadow-[0_4px_12px_rgba(15,23,42,0.06)] backdrop-blur-xl">
       <button
         type="button"
-        className="group flex h-10 w-full items-center gap-2 rounded-[15px] px-2.5 text-left transition-all duration-150 hover:bg-[#f5f7fb] active:scale-[0.985] active:bg-[#eef2f7]"
+        className="group flex h-7 w-full items-center gap-1.5 rounded-[10px] px-1.5 text-left transition-all duration-150 hover:bg-[#f5f7fb] active:scale-[0.985] active:bg-[#eef2f7]"
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
       >
         <GoogleAccountChip name={accountName} photoUrl={account.photoUrl} />
 
         {account.email && (
-          <span className="truncate text-[12px] font-semibold tracking-[-0.01em] text-[#8d93a1]">
+          <span className="truncate text-[11px] font-semibold tracking-wider text-[#8d93a1]">
             {account.email}
           </span>
         )}
 
         <span
           className={cn(
-            "ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[#a2a8b3] transition-all duration-200 group-hover:bg-white/80 group-hover:text-[#6b7280]",
+            "ml-auto flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-[#a2a8b3] transition-all duration-200 group-hover:bg-white/80 group-hover:text-[#6b7280]",
             !isOpen && "-rotate-90",
           )}
         >
-          <IconChevronRight className="h-3.5 w-3.5" />
+          <IconChevronRight className="h-3 w-3" />
         </span>
       </button>
 
       {isOpen && !isTaskMode && (
-        <div className="mt-1 flex flex-col gap-0.5">
+        <div className="mt-0.5 flex flex-col gap-0.5">
           {account.calendars.map((calendar) => {
             const checked = account.selectedCalendarIds.has(calendar.id);
 
@@ -150,7 +150,7 @@ const GoogleAccountSection = ({
                   color={calendar.backgroundColor ?? DEFAULT_CALENDAR_COLOR}
                 />
 
-                <span className="truncate text-[13px] font-medium tracking-[-0.01em] text-[#24272f]">
+                <span className="truncate text-[12px] font-medium text-[#24272f]">
                   {calendar.summary}
                 </span>
               </button>
@@ -160,12 +160,12 @@ const GoogleAccountSection = ({
       )}
 
       {isOpen && isTaskMode && (
-        <div className="mt-1 flex flex-col gap-0.5">
+        <div className="mt-0.5 flex flex-col gap-0.5">
           {account.isTaskListsLoading && account.taskLists.length === 0 && (
             <p
               className={cn(
                 GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
-                "py-2 text-[12px] text-[#8d93a1]",
+                "py-1 text-[11px] text-[#8d93a1]",
               )}
             >
               読み込み中…
@@ -178,7 +178,7 @@ const GoogleAccountSection = ({
               <p
                 className={cn(
                   GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
-                  "py-2 text-[12px] text-[#8d93a1]",
+                  "py-1 text-[11px] text-[#8d93a1]",
                 )}
               >
                 Google ToDo リストはありません
@@ -192,7 +192,7 @@ const GoogleAccountSection = ({
             >
               <AnimatedCircleCheckbox checked color={DEFAULT_TASK_LIST_COLOR} />
 
-              <span className="truncate text-[13px] font-medium tracking-[-0.01em] text-[#24272f]">
+              <span className="truncate text-[12px] font-medium text-[#24272f]">
                 {taskList.title}
               </span>
             </div>
@@ -201,7 +201,7 @@ const GoogleAccountSection = ({
           {account.taskListsError && (
             <div
               className={cn(
-                "mt-1 rounded-[14px] bg-[#fff4e5] py-2",
+                "mt-1 rounded-[12px] bg-[#fff4e5] py-1.5",
                 GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
               )}
             >
@@ -210,7 +210,7 @@ const GoogleAccountSection = ({
               </p>
               <button
                 type="button"
-                className="mt-1.5 rounded-full bg-white/80 px-3 py-1 text-[11px] font-semibold text-[#a14d00] shadow-sm transition-colors hover:bg-white"
+                className="mt-1 rounded-full bg-white/80 px-2.5 py-0.5 text-[11px] font-semibold text-[#a14d00] shadow-sm transition-colors hover:bg-white"
                 onClick={onReconnect}
               >
                 再連携
@@ -221,13 +221,13 @@ const GoogleAccountSection = ({
       )}
 
       {account.connectionStatus === "needsReconnect" && (
-        <div className="mt-1 rounded-[14px] bg-[#fff4e5] px-4 py-2">
+        <div className="mt-1 rounded-[12px] bg-[#fff4e5] px-3 py-1.5">
           <p className="text-[11px] leading-relaxed text-[#9a6700]">
             再連携が必要です。
           </p>
           <button
             type="button"
-            className="mt-1.5 rounded-full bg-white/80 px-3 py-1 text-[11px] font-semibold text-[#a14d00] shadow-sm transition-colors hover:bg-white"
+            className="mt-1 rounded-full bg-white/80 px-2.5 py-0.5 text-[11px] font-semibold text-[#a14d00] shadow-sm transition-colors hover:bg-white"
             onClick={onReconnect}
           >
             再連携
@@ -236,16 +236,16 @@ const GoogleAccountSection = ({
       )}
 
       {account.error && (
-        <p className="mt-1 rounded-[14px] bg-[#fff1f0] px-4 py-2 text-[11px] leading-relaxed text-[#b42318]">
+        <p className="mt-1 rounded-[12px] bg-[#fff1f0] px-3 py-1.5 text-[11px] leading-relaxed text-[#b42318]">
           {account.error}
         </p>
       )}
 
       {account.connectionStatus === "error" && (
-        <div className="mt-1 px-4 pb-1">
+        <div className="mt-1 px-3 pb-1">
           <button
             type="button"
-            className="rounded-full bg-[#fff1f0] px-3 py-1 text-[11px] font-semibold text-[#b42318] transition-colors hover:bg-[#fee4e2]"
+            className="rounded-full bg-[#fff1f0] px-2.5 py-0.5 text-[11px] font-semibold text-[#b42318] transition-colors hover:bg-[#fee4e2]"
             onClick={onRetry}
           >
             再試行
@@ -361,8 +361,8 @@ export const CalendarSidebar = ({
 
       <div className={cn("mt-2", SIDEBAR_DIVIDER_CLASS)} />
 
-      <nav className="mt-3 flex min-h-0 w-full flex-1 flex-col overflow-y-auto pb-2">
-        <div className="mb-0.5 flex h-6 shrink-0 items-center gap-1.5 px-3">
+      <nav className="mt-2 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto pb-2">
+        <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
           {isTaskMode ? (
             <TaskIcon className="h-3.5 w-3.5 text-[#8d93a1]" />
           ) : (
@@ -395,14 +395,14 @@ export const CalendarSidebar = ({
         <button
           type="button"
           className={cn(
-            "flex h-9 w-full items-center gap-2 rounded-[16px] border border-white/70 bg-white/80 px-3 text-left shadow-[0_6px_18px_rgba(15,23,42,0.06)] transition-all duration-150 hover:bg-white active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-55",
+            "flex h-7 w-full items-center gap-2 rounded-[12px] border border-white/70 bg-white/80 px-2 text-left shadow-[0_4px_12px_rgba(15,23,42,0.05)] transition-all duration-150 hover:bg-white active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-55",
             hasGoogleAccounts && "mt-2",
           )}
           onClick={onAddCalendar}
           disabled={isAnyCalendarConnecting}
         >
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#007aff] text-white shadow-[0_4px_10px_rgba(0,122,255,0.24)]">
-            <PlusIcon className="h-3.5 w-3.5" />
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#007aff] text-white shadow-[0_3px_8px_rgba(0,122,255,0.22)]">
+            <PlusIcon className="h-3 w-3" />
           </span>
 
           <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#4b5563]">
