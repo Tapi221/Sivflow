@@ -1,15 +1,14 @@
 import { motion, type Transition } from "framer-motion";
 
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
-
-import type { CalendarWorkspaceToolbarProps } from "../schedulePane.types";
 import {
   CalendarIcon,
   TaskIcon,
   TimelineToolbarIcon,
-} from "../../../components/icons/schedule.icons";
-
+} from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
+
+import type { CalendarWorkspaceToolbarProps } from "../../schedulePane.types";
 
 const TAB_ICON_MAP = {
   calendar: CalendarIcon,
