@@ -50,7 +50,7 @@ type VerticalRect = {
 const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-[#f7f8fa]";
 const TASK_CARD_OVERLAY_CLASS_NAME = "w-[236px] max-w-[calc(100vw-2rem)]";
 const TASK_COLUMN_DIVIDER_CLASS_NAME =
-  "before:pointer-events-none before:absolute before:-left-1.5 before:top-0 before:bottom-0 before:w-px before:bg-[#e3e5ea] before:content-['']";
+  "before:pointer-events-none before:absolute before:-left-1.5 before:top-0 before:bottom-0 before:w-[0.5px] before:bg-[#e9eaed] before:content-['']";
 
 const DroppableTaskColumn = ({
   column,
