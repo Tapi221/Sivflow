@@ -20,13 +20,10 @@ const EVENT_OUTER_LEFT_PX = 6;
 const EVENT_OUTER_RIGHT_PX = 8;
 const EVENT_COLUMN_GAP_PX = 2;
 const EVENT_VERTICAL_INSET_PX = 1;
-const GRID_TOP_INSET_PX = 10;
-const GRID_HORIZONTAL_INSET_PX = 12;
-const IOS_CALENDAR_BACKGROUND = "#f2f2f7";
-const IOS_GRID_SURFACE = "rgba(255, 255, 255, 0.94)";
-const IOS_SEPARATOR = "rgba(60, 60, 67, 0.14)";
-const IOS_SECONDARY_SEPARATOR = "rgba(60, 60, 67, 0.06)";
-const IOS_LABEL = "rgba(60, 60, 67, 0.48)";
+const HALF_HOUR_LINE_INSET_PX = 12;
+const IOS_SEPARATOR = "rgba(60, 60, 67, 0.16)";
+const IOS_SECONDARY_SEPARATOR = "rgba(60, 60, 67, 0.08)";
+const IOS_LABEL = "rgba(60, 60, 67, 0.45)";
 
 // ==============================================
 
@@ -58,7 +55,6 @@ const getEventHeight = (durationMinutes: number): number =>
 
 export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
   const timelineHeight = HOURS.length * HOUR_ROW_HEIGHT;
-  const gridHeight = timelineHeight + GRID_TOP_INSET_PX;
 
   const layout = computeEventLayout(
     events.map((event) =>
@@ -72,7 +68,7 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
 
   return (
     <div
-      className="flex bg-[#f2f2f7] px-1 pb-2 pt-1"
+      className="flex"
       style={{
         fontFamily:
           "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif",
@@ -85,12 +81,9 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
           shrink-0
         `}
         style={{
-          height: gridHeight,
-          background: IOS_CALENDAR_BACKGROUND,
+          height: timelineHeight,
         }}
       >
-        <div style={{ height: GRID_TOP_INSET_PX }} />
-
         {HOURS.map((hour) => (
           <div
             key={hour}
@@ -102,7 +95,7 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
             <span
               className="
                 absolute
-                right-3
+                right-4
                 top-0
                 flex
                 h-5
@@ -110,18 +103,13 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
                 select-none
                 items-center
                 justify-end
-                rounded-full
-                px-1
                 text-[11px]
                 font-medium
                 leading-none
                 tracking-[-0.01em]
                 tabular-nums
               "
-              style={{
-                background: IOS_CALENDAR_BACKGROUND,
-                color: IOS_LABEL,
-              }}
+              style={{ color: IOS_LABEL }}
             >
               {hour}:00
             </span>
@@ -134,34 +122,13 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
         className="
           relative
           flex-1
-          overflow-hidden
-          rounded-[24px]
-          border
         "
         style={{
-          height: gridHeight,
-          background: IOS_GRID_SURFACE,
-          borderColor: IOS_SEPARATOR,
-          boxShadow:
-            "inset 0 1px 0 rgba(255, 255, 255, 0.78), 0 8px 22px rgba(0, 0, 0, 0.04)",
+          height: timelineHeight,
         }}
       >
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-3"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(242, 242, 247, 0.82), rgba(242, 242, 247, 0))",
-          }}
-        />
-
         {/* Lines */}
-        <div
-          className="absolute inset-x-0"
-          style={{
-            top: GRID_TOP_INSET_PX,
-            height: timelineHeight,
-          }}
-        >
+        <div className="absolute inset-0">
           {HOURS.map((hour) => (
             <div
               key={hour}
@@ -173,7 +140,7 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
               <div
                 className="absolute left-0 right-0 top-0 h-px origin-top"
                 style={{
-                  background: hour === 0 ? IOS_SEPARATOR : IOS_SECONDARY_SEPARATOR,
+                  background: IOS_SEPARATOR,
                   transform: "scaleY(0.5)",
                 }}
               />
@@ -182,8 +149,8 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
                 <div
                   className="absolute h-px origin-top"
                   style={{
-                    left: GRID_HORIZONTAL_INSET_PX,
-                    right: GRID_HORIZONTAL_INSET_PX,
+                    left: HALF_HOUR_LINE_INSET_PX,
+                    right: HALF_HOUR_LINE_INSET_PX,
                     top: "50%",
                     background: IOS_SECONDARY_SEPARATOR,
                     transform: "scaleY(0.5)",
@@ -211,7 +178,7 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
               key={ev.id}
               className="absolute min-h-0 overflow-hidden"
               style={{
-                top: GRID_TOP_INSET_PX + getEventTop(ev) + EVENT_VERTICAL_INSET_PX,
+                top: getEventTop(ev) + EVENT_VERTICAL_INSET_PX,
                 height: eventHeight,
                 left: `calc(${position.left * 100}% + ${leftInset}px)`,
                 width: `calc(${position.width * 100}% - ${leftInset + rightInset}px)`,
