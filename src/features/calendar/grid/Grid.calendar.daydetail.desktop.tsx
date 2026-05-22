@@ -20,6 +20,7 @@ const EVENT_OUTER_LEFT_PX = 6;
 const EVENT_OUTER_RIGHT_PX = 8;
 const EVENT_COLUMN_GAP_PX = 2;
 const EVENT_VERTICAL_INSET_PX = 1;
+const TIMELINE_TOP_PADDING_PX = 16;
 const HALF_HOUR_LINE_INSET_PX = 12;
 const IOS_SEPARATOR = "rgba(60, 60, 67, 0.16)";
 const IOS_SECONDARY_SEPARATOR = "rgba(60, 60, 67, 0.08)";
@@ -55,6 +56,7 @@ const getEventHeight = (durationMinutes: number): number =>
 
 export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
   const timelineHeight = HOURS.length * HOUR_ROW_HEIGHT;
+  const gridHeight = timelineHeight + TIMELINE_TOP_PADDING_PX;
 
   const layout = computeEventLayout(
     events.map((event) =>
@@ -81,9 +83,11 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
           shrink-0
         `}
         style={{
-          height: timelineHeight,
+          height: gridHeight,
         }}
       >
+        <div style={{ height: TIMELINE_TOP_PADDING_PX }} />
+
         {HOURS.map((hour) => (
           <div
             key={hour}
@@ -124,11 +128,17 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
           flex-1
         "
         style={{
-          height: timelineHeight,
+          height: gridHeight,
         }}
       >
         {/* Lines */}
-        <div className="absolute inset-0">
+        <div
+          className="absolute inset-x-0"
+          style={{
+            top: TIMELINE_TOP_PADDING_PX,
+            height: timelineHeight,
+          }}
+        >
           {HOURS.map((hour) => (
             <div
               key={hour}
@@ -178,7 +188,7 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
               key={ev.id}
               className="absolute min-h-0 overflow-hidden"
               style={{
-                top: getEventTop(ev) + EVENT_VERTICAL_INSET_PX,
+                top: TIMELINE_TOP_PADDING_PX + getEventTop(ev) + EVENT_VERTICAL_INSET_PX,
                 height: eventHeight,
                 left: `calc(${position.left * 100}% + ${leftInset}px)`,
                 width: `calc(${position.width * 100}% - ${leftInset + rightInset}px)`,
