@@ -22,6 +22,12 @@ export type GoogleCalendarListItem = {
   selected?: boolean;
 };
 
+export type GoogleTaskListItem = {
+  id: string;
+  title: string;
+  updated?: string;
+};
+
 export type UseGoogleCalendarIntegrationOptions = {
   authInstance?: Auth;
 };
@@ -70,6 +76,14 @@ export type GoogleCalendarApiListResponse = {
     foregroundColor?: string;
     primary?: boolean;
     selected?: boolean;
+  }>;
+};
+
+export type GoogleTasksApiTaskListsResponse = {
+  items?: Array<{
+    id?: string;
+    title?: string;
+    updated?: string;
   }>;
 };
 
