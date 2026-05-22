@@ -1,5 +1,8 @@
-import { ChevronLeft, ChevronRight } from "@/ui/icons";
+import { format } from "date-fns";
+
+import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { useT } from "@/i18n/useT";
+import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
 type Props = {
   onPrevious: () => void;
@@ -9,6 +12,7 @@ type Props = {
 
 export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
   const t = useT();
+  const todayTooltipLabel = format(new Date(), "M月d日");
 
   return (
     <div
@@ -37,21 +41,24 @@ export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
         <ChevronLeft className="h-3 w-3" />
       </button>
 
-      <button
-        type="button"
-        onClick={onToday}
-        className="
-          px-2.5 py-1
-          text-[11px] font-medium
-          leading-none
-          text-[#20242c]
-          whitespace-nowrap
-          transition-colors
-          hover:bg-[#eef0f3]
-        "
-      >
-        {t.todayButton}
-      </button>
+      <HoverTooltip label={todayTooltipLabel} side="bottom" className="contents">
+        <button
+          type="button"
+          onClick={onToday}
+          className="
+            px-2.5 py-1
+            text-[11px] font-medium
+            leading-none
+            text-[#20242c]
+            whitespace-nowrap
+            transition-colors
+            hover:bg-[#eef0f3]
+          "
+          aria-label={todayTooltipLabel}
+        >
+          {t.todayButton}
+        </button>
+      </HoverTooltip>
 
       <button
         type="button"
