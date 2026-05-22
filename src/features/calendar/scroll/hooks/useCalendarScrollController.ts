@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, type UIEvent } from "react";
 
 import type { CalendarViewMode } from "../../schedulePane.types";
 
@@ -98,22 +98,11 @@ export const useCalendarScrollController = ({
     });
   }, []);
 
-  useEffect(() => {
-    const scroller = scrollContainerRef.current;
-    if (!scroller) return;
+  const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
+    const scroller = event.currentTarget;
 
-    const handlePassiveScroll = () => {
-      handleEdgeScroll(scroller);
-      syncHeaderScroll(scroller.scrollLeft);
-    };
-
-    scroller.addEventListener("scroll", handlePassiveScroll, {
-      passive: true,
-    });
-
-    return () => {
-      scroller.removeEventListener("scroll", handlePassiveScroll);
-    };
+    handleEdgeScroll(scroller);
+    syncHeaderScroll(scroller.scrollLeft);
   }, [handleEdgeScroll, syncHeaderScroll]);
 
   useEffect(() => {
@@ -135,6 +124,7 @@ export const useCalendarScrollController = ({
   return {
     scrollContainerRef,
     headerScrollRef,
+    handleScroll,
     resetAll,
   };
 };
