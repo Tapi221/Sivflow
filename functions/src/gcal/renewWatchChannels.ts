@@ -1,13 +1,13 @@
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 
-// admin は functions/src/index.ts で一度だけ初期化すること
-const db = admin.firestore();
-
+// admin は functions/src/index.ts で一度だけ初期化されるため、
+// import 時点では Firestore を取得せず、関数実行時に遅延取得する。
 export const renewExpiredWatchChannels = functions
   .region("asia-northeast1")
   .pubsub.schedule("every 24 hours")
   .onRun(async () => {
+    const db = admin.firestore();
     const now = Date.now();
     const threshold = now + 24 * 60 * 60 * 1000;
 
