@@ -17,9 +17,11 @@ const TOGGLE_MOTION_TRANSITION: Transition = {
   ease: [0.22, 1, 0.36, 1],
 };
 const TOGGLE_TOOLTIP_CLASS_NAME =
-  "rounded-lg border border-[#e4eaf1] bg-white px-2.5 py-[5px] text-[12px] font-semibold text-[#193a5c] shadow-[0_8px_18px_rgba(25,58,92,0.12)]";
-const TOGGLE_TOOLTIP_ARROW_CLASS_NAME =
-  "border-b border-r border-[#e4eaf1] bg-white";
+  "rounded-lg border border-transparent px-2.5 py-[5px] text-[12px] font-semibold text-white shadow-[0_8px_18px_rgba(25,58,92,0.12)]";
+const TOGGLE_ACTIVE_ICON_CLASS_NAME = "text-[#193a5c]";
+const TOGGLE_INACTIVE_ICON_CLASS_NAME = "text-[#9aa3b1]";
+const TOGGLE_ACTIVE_TOOLTIP_BG_CLASS_NAME = "bg-[#193a5c]";
+const TOGGLE_INACTIVE_TOOLTIP_BG_CLASS_NAME = "bg-[#9aa3b1]";
 
 const toggleItems = [
   {
@@ -82,6 +84,12 @@ export const BoardListToggleButton = ({
     <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f6f8fb] p-0.5">
       {toggleItems.map((item) => {
         const isActive = viewMode === item.value;
+        const iconClassName = isActive
+          ? TOGGLE_ACTIVE_ICON_CLASS_NAME
+          : TOGGLE_INACTIVE_ICON_CLASS_NAME;
+        const tooltipBgClassName = isActive
+          ? TOGGLE_ACTIVE_TOOLTIP_BG_CLASS_NAME
+          : TOGGLE_INACTIVE_TOOLTIP_BG_CLASS_NAME;
 
         return (
           <HoverTooltip
@@ -89,8 +97,11 @@ export const BoardListToggleButton = ({
             label={item.label}
             side="top"
             offset={6}
-            tooltipClassName={TOGGLE_TOOLTIP_CLASS_NAME}
-            arrowClassName={TOGGLE_TOOLTIP_ARROW_CLASS_NAME}
+            tooltipClassName={cn(
+              TOGGLE_TOOLTIP_CLASS_NAME,
+              tooltipBgClassName,
+            )}
+            arrowClassName={tooltipBgClassName}
           >
             <button
               type="button"
@@ -117,7 +128,7 @@ export const BoardListToggleButton = ({
               <span
                 className={cn(
                   "shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
-                  isActive ? "text-[#193a5c]" : "text-[#9aa3b1]",
+                  iconClassName,
                 )}
               >
                 {item.icon}
