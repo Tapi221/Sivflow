@@ -53,31 +53,31 @@ export const ViewModeDropdown = ({
           onMouseDown={(e) => e.preventDefault()}
           className="
             inline-flex
-            h-8
-            min-w-[54px]
+            h-7
+            min-w-[48px]
             items-center
             justify-center
             rounded-full
             border
             border-[#d8dce5]
             bg-white/90
-            px-3
-            text-[13px]
+            px-2.5
+            text-[12px]
             font-semibold
             leading-none
             text-[#1f2937]
-            shadow-[0_1px_2px_rgba(15,23,42,0.05)]
+            shadow-[0_1px_2px_rgba(15,23,42,0.04)]
             outline-none
             backdrop-blur-xl
             transition-all
             duration-150
             hover:bg-white
-            hover:shadow-[0_2px_6px_rgba(15,23,42,0.08)]
+            hover:shadow-[0_2px_5px_rgba(15,23,42,0.07)]
             active:scale-[0.97]
             active:bg-[#f6f7fb]
             data-[state=open]:border-[#cfd5e0]
             data-[state=open]:bg-white
-            data-[state=open]:shadow-[0_2px_8px_rgba(15,23,42,0.1)]
+            data-[state=open]:shadow-[0_2px_6px_rgba(15,23,42,0.08)]
             whitespace-nowrap
           "
         >
@@ -91,19 +91,19 @@ export const ViewModeDropdown = ({
         <Popover.Content
           side="bottom"
           align="end"
-          sideOffset={8}
+          sideOffset={7}
           className="
             relative
             z-50
-            min-w-[124px]
+            min-w-[106px]
             overflow-visible
-            rounded-[18px]
+            rounded-[15px]
             border
             border-white/70
             bg-white/92
-            p-1.5
+            p-1
             text-[#1f2937]
-            shadow-[0_16px_40px_rgba(15,23,42,0.16),0_2px_8px_rgba(15,23,42,0.06)]
+            shadow-[0_12px_30px_rgba(15,23,42,0.14),0_2px_7px_rgba(15,23,42,0.05)]
             backdrop-blur-2xl
             outline-none
             animate-in
@@ -116,10 +116,10 @@ export const ViewModeDropdown = ({
           <span
             className="
               absolute
-              right-5
-              top-[-5px]
-              h-3
-              w-3
+              right-4
+              top-[-4px]
+              h-2.5
+              w-2.5
               rotate-45
               rounded-[3px]
               border-l
@@ -131,11 +131,11 @@ export const ViewModeDropdown = ({
             aria-hidden="true"
           />
 
-          <div className="px-2.5 pb-1.5 pt-1 text-[11px] font-semibold text-[#9aa0aa]">
+          <div className="px-2 pb-1 pt-0.5 text-[10px] font-semibold text-[#9aa0aa]">
             {t.viewsLabel}
           </div>
 
-          <div className="overflow-hidden rounded-[13px]">
+          <div className="overflow-hidden rounded-[12px]">
             {options.map(({ value: v, label }) => {
               const isSelected = v === value;
 
@@ -149,14 +149,14 @@ export const ViewModeDropdown = ({
                   }}
                   className="
                     flex
-                    h-9
+                    h-8
                     w-full
                     items-center
                     justify-between
-                    gap-4
-                    px-3
+                    gap-3
+                    px-2.5
                     text-left
-                    text-[13px]
+                    text-[12px]
                     font-medium
                     leading-none
                     text-[#1f2937]
@@ -168,9 +168,9 @@ export const ViewModeDropdown = ({
                 >
                   <span>{label}</span>
 
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center">
+                  <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center">
                     {isSelected && (
-                      <IconCheck className="h-4 w-4 text-[#007aff]" />
+                      <IconCheck className="h-3.5 w-3.5 text-[#007aff]" />
                     )}
                   </span>
                 </button>
