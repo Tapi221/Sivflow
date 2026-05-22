@@ -90,9 +90,14 @@ const CalendarMonthDayCell = memo(({
 }: CalendarMonthDayCellProps) => {
   const monthAnnotation = getMonthAnnotation(day.date);
 
+  const shouldShowOverflow = events.length > maxVisibleChips;
+  const visibleChipCount = shouldShowOverflow
+    ? Math.max(0, maxVisibleChips - 1)
+    : maxVisibleChips;
+
   const visibleChips = events.slice(
     0,
-    maxVisibleChips,
+    visibleChipCount,
   );
 
   const overflowCount =
