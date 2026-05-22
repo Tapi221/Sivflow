@@ -65,17 +65,14 @@ export const buildTokenExpiry = (expiresInSeconds?: number | null): number => {
   return Date.now() + Math.max(0, expiresInSeconds * 1000 - TOKEN_EXPIRY_SAFETY_MARGIN_MS);
 };
 
-const isServerStoredGoogleOAuthEnabled = (): boolean => {
-  return (
-    import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true" &&
-    !isDesktopLikeRuntime()
-  );
+const shouldStripLocalRefreshTokens = (): boolean => {
+  return !isDesktopLikeRuntime();
 };
 
-const stripLocalRefreshTokensForServerMode = (
+const stripLocalRefreshTokensOutsideDesktop = (
   accounts: StoredGoogleAccount[],
 ): StoredGoogleAccount[] => {
-  if (!isServerStoredGoogleOAuthEnabled()) return accounts;
+  if (!shouldStripLocalRefreshTokens()) return accounts;
 
   return accounts.map((account) =>
     account.refreshToken === null ? account : { ...account, refreshToken: null },
@@ -100,7 +97,7 @@ const migrateFromLegacy = (): StoredGoogleAccount[] => {
     const accessToken = localStorage.getItem(LEGACY_ACCESS_TOKEN_KEY);
     const expiryRaw = localStorage.getItem(LEGACY_ACCESS_TOKEN_EXPIRY_KEY);
     const accessTokenExpiry = expiryRaw ? Number(expiryRaw) : null;
-    const refreshToken = isServerStoredGoogleOAuthEnabled()
+    const refreshToken = shouldStripLocalRefreshTokens()
       ? null
       : localStorage.getItem(LEGACY_REFRESH_TOKEN_KEY);
     const calIdsRaw = localStorage.getItem(LEGACY_CALENDAR_IDS_KEY);
@@ -121,7 +118,7 @@ const migrateFromLegacy = (): StoredGoogleAccount[] => {
       selectedCalendarIds,
     };
 
-    const accounts = stripLocalRefreshTokensForServerMode([account]);
+    const accounts = stripLocalRefreshTokensOutsideDesktop([account]);
 
     writeStoredAccounts(accounts);
     console.info(
@@ -145,9 +142,9 @@ export const readStoredAccounts = (): StoredGoogleAccount[] => {
     if (!Array.isArray(parsed)) return [];
 
     const accounts = parsed as StoredGoogleAccount[];
-    const sanitizedAccounts = stripLocalRefreshTokensForServerMode(accounts);
+    const sanitizedAccounts = stripLocalRefreshTokensOutsideDesktop(accounts);
 
-    if (hasLocalRefreshToken(accounts) && isServerStoredGoogleOAuthEnabled()) {
+    if (hasLocalRefreshToken(accounts) && shouldStripLocalRefreshTokens()) {
       writeStoredAccounts(sanitizedAccounts);
     }
 
@@ -161,7 +158,7 @@ export const writeStoredAccounts = (accounts: StoredGoogleAccount[]): void => {
   try {
     localStorage.setItem(
       MULTI_ACCOUNTS_KEY,
-      JSON.stringify(stripLocalRefreshTokensForServerMode(accounts)),
+      JSON.stringify(stripLocalRefreshTokensOutsideDesktop(accounts)),
     );
   } catch {
     // ignore quota errors
