@@ -10,7 +10,7 @@ import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
 
 // ==============================================
 
-export const HOUR_ROW_HEIGHT = 40;
+export const HOUR_ROW_HEIGHT = 48;
 
 export const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
@@ -19,7 +19,14 @@ const COMPACT_EVENT_HEIGHT_PX = 34;
 const EVENT_OUTER_LEFT_PX = 6;
 const EVENT_OUTER_RIGHT_PX = 8;
 const EVENT_COLUMN_GAP_PX = 2;
-const MONTH_VIEW_DIVIDER_BORDER_CLASS = "border-[#eef0f3]";
+const EVENT_VERTICAL_INSET_PX = 1;
+const GRID_TOP_INSET_PX = 10;
+const GRID_HORIZONTAL_INSET_PX = 12;
+const IOS_CALENDAR_BACKGROUND = "#f2f2f7";
+const IOS_GRID_SURFACE = "rgba(255, 255, 255, 0.94)";
+const IOS_SEPARATOR = "rgba(60, 60, 67, 0.14)";
+const IOS_SECONDARY_SEPARATOR = "rgba(60, 60, 67, 0.06)";
+const IOS_LABEL = "rgba(60, 60, 67, 0.48)";
 
 // ==============================================
 
@@ -51,6 +58,7 @@ const getEventHeight = (durationMinutes: number): number =>
 
 export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
   const timelineHeight = HOURS.length * HOUR_ROW_HEIGHT;
+  const gridHeight = timelineHeight + GRID_TOP_INSET_PX;
 
   const layout = computeEventLayout(
     events.map((event) =>
@@ -63,7 +71,13 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
   );
 
   return (
-    <div className="flex">
+    <div
+      className="flex bg-[#f2f2f7] px-1 pb-2 pt-1"
+      style={{
+        fontFamily:
+          "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif",
+      }}
+    >
       {/* Time */}
       <div
         className={`
@@ -71,17 +85,16 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
           shrink-0
         `}
         style={{
-          height: timelineHeight,
+          height: gridHeight,
+          background: IOS_CALENDAR_BACKGROUND,
         }}
       >
+        <div style={{ height: GRID_TOP_INSET_PX }} />
+
         {HOURS.map((hour) => (
           <div
             key={hour}
-            className={`
-              relative
-              border-t
-              ${MONTH_VIEW_DIVIDER_BORDER_CLASS}
-            `}
+            className="relative"
             style={{
               height: HOUR_ROW_HEIGHT,
             }}
@@ -89,21 +102,26 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
             <span
               className="
                 absolute
-                right-5
+                right-3
                 top-0
                 flex
-                h-6
+                h-5
                 -translate-y-1/2
                 select-none
                 items-center
                 justify-end
-                bg-transparent
-                px-[2px]
-                text-[12px]
-                font-semibold
+                rounded-full
+                px-1
+                text-[11px]
+                font-medium
+                leading-none
+                tracking-[-0.01em]
                 tabular-nums
-                text-[#b8bcc5]
               "
+              style={{
+                background: IOS_CALENDAR_BACKGROUND,
+                color: IOS_LABEL,
+              }}
             >
               {hour}:00
             </span>
@@ -116,29 +134,71 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
         className="
           relative
           flex-1
+          overflow-hidden
+          rounded-[24px]
+          border
         "
         style={{
-          height: timelineHeight,
+          height: gridHeight,
+          background: IOS_GRID_SURFACE,
+          borderColor: IOS_SEPARATOR,
+          boxShadow:
+            "inset 0 1px 0 rgba(255, 255, 255, 0.78), 0 8px 22px rgba(0, 0, 0, 0.04)",
         }}
       >
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-3"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(242, 242, 247, 0.82), rgba(242, 242, 247, 0))",
+          }}
+        />
+
         {/* Lines */}
-        {HOURS.map((hour) => (
-          <div
-            key={hour}
-            className={`
-              border-t
-              ${MONTH_VIEW_DIVIDER_BORDER_CLASS}
-            `}
-            style={{
-              height: HOUR_ROW_HEIGHT,
-            }}
-          />
-        ))}
+        <div
+          className="absolute inset-x-0"
+          style={{
+            top: GRID_TOP_INSET_PX,
+            height: timelineHeight,
+          }}
+        >
+          {HOURS.map((hour) => (
+            <div
+              key={hour}
+              className="relative"
+              style={{
+                height: HOUR_ROW_HEIGHT,
+              }}
+            >
+              <div
+                className="absolute left-0 right-0 top-0 h-px origin-top"
+                style={{
+                  background: hour === 0 ? IOS_SEPARATOR : IOS_SECONDARY_SEPARATOR,
+                  transform: "scaleY(0.5)",
+                }}
+              />
+
+              {hour < HOURS.length - 1 && (
+                <div
+                  className="absolute h-px origin-top"
+                  style={{
+                    left: GRID_HORIZONTAL_INSET_PX,
+                    right: GRID_HORIZONTAL_INSET_PX,
+                    top: "50%",
+                    background: IOS_SECONDARY_SEPARATOR,
+                    transform: "scaleY(0.5)",
+                  }}
+                />
+              )}
+            </div>
+          ))}
+        </div>
 
         {/* Events */}
         {events.map((ev) => {
           const durationMinutes = getDurationMinutes(ev);
           const height = getEventHeight(durationMinutes);
+          const eventHeight = Math.max(18, height - EVENT_VERTICAL_INSET_PX * 2);
           const position = layout.get(ev.id) ?? { left: 0, width: 1 };
           const leftInset = position.left === 0 ? EVENT_OUTER_LEFT_PX : EVENT_COLUMN_GAP_PX;
           const rightInset =
@@ -151,8 +211,8 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
               key={ev.id}
               className="absolute min-h-0 overflow-hidden"
               style={{
-                top: getEventTop(ev),
-                height,
+                top: GRID_TOP_INSET_PX + getEventTop(ev) + EVENT_VERTICAL_INSET_PX,
+                height: eventHeight,
                 left: `calc(${position.left * 100}% + ${leftInset}px)`,
                 width: `calc(${position.width * 100}% - ${leftInset + rightInset}px)`,
               }}
