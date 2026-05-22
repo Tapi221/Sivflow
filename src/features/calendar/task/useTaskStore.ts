@@ -175,13 +175,6 @@ const findLastIndex = <T>(items: T[], predicate: (item: T) => boolean) => {
   return -1;
 };
 
-const resolveSameStatusInsertPosition = (
-  activeIndex: number,
-  overIndex: number,
-): TaskInsertPosition => {
-  return activeIndex < overIndex ? "after" : "before";
-};
-
 export const useTaskStore = create<TaskStore>()(
   persist(
     (set) => ({
@@ -239,19 +232,10 @@ export const useTaskStore = create<TaskStore>()(
           let insertIndex = otherTasks.length;
 
           if (overId) {
-            const overOriginalIndex = state.tasks.findIndex(
-              (task) => task.id === overId,
-            );
             const overIndex = otherTasks.findIndex((task) => task.id === overId);
 
             if (overIndex >= 0) {
-              const overTask = otherTasks[overIndex];
-              const insertPosition =
-                activeTask.status === overTask.status && overTask.status === status
-                  ? resolveSameStatusInsertPosition(activeIndex, overOriginalIndex)
-                  : position;
-
-              insertIndex = insertPosition === "after" ? overIndex + 1 : overIndex;
+              insertIndex = position === "after" ? overIndex + 1 : overIndex;
             }
           } else {
             const lastSameStatusIndex = findLastIndex(
