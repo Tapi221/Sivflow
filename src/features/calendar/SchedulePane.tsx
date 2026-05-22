@@ -187,11 +187,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             "flex min-h-0 min-w-0 flex-1 flex-col bg-white",
             activeMode === "task"
               ? "pl-4 pr-0 pt-0 pb-0"
-              : isMonthCalendarView
-                ? isDayDetailPanelCollapsed
-                  ? "pl-4 pr-0 pt-0 pb-0"
-                  : "px-4 pt-0 pb-0"
-                : "pl-4 pr-0 pt-0 pb-0",
+              : "px-0 pt-0 pb-0",
           )}
         >
           {activeMode === "task" ? (
@@ -221,11 +217,11 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
 
               <div
                 className={cn(
-                  "ml-4 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0",
+                  "mx-0 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0",
                   IOS_CALENDAR_SURFACE_CLASS,
                   isDayDetailPanelCollapsed
-                    ? "mr-0 rounded-tl-[22px] rounded-tr-none border-r-0"
-                    : "mr-4 rounded-t-[22px]",
+                    ? "rounded-tl-[22px] rounded-tr-none border-r-0"
+                    : "rounded-t-[22px]",
                 )}
               >
                 <CalendarMonthView
@@ -253,7 +249,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
 
               <div
                 className={cn(
-                  "ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border border-r-0 border-b-0",
+                  "mx-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border border-r-0 border-b-0",
                   IOS_CALENDAR_SURFACE_CLASS,
                 )}
               >
