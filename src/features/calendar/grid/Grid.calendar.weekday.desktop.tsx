@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import * as C from "@/features/calendar/calendar.constants.desktop";
+import { CalendarDayNumberCircle } from "@/features/calendar/dayNumber/CalendarDayNumberCircle";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
 import type { CalendarWeekDayGridProps } from "@/features/calendar/schedulePane.types";
@@ -189,18 +190,13 @@ export const CalendarWeekDayGrid = ({
                     {format(day, GRID.WEEKDAY_DAY_FORMAT, { locale: ja })}
                   </span>
 
-                  <span
-                    className={cn(
-                      "mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-[13px] font-semibold tabular-nums",
-                      isDayToday
-                        ? "bg-[#185FA5] text-white shadow-[0_2px_8px_rgba(24,95,165,0.35)]"
-                        : isDaySelected
-                          ? "bg-[#2d3039] text-white"
-                          : "text-[#24231f]",
-                    )}
+                  <CalendarDayNumberCircle
+                    isToday={isDayToday}
+                    isSelected={isDaySelected}
+                    className="mt-0.5"
                   >
                     {format(day, GRID.WEEKDAY_DATE_FORMAT)}
-                  </span>
+                  </CalendarDayNumberCircle>
                 </button>
               );
             })}
