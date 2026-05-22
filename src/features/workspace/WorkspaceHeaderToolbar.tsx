@@ -126,9 +126,9 @@ export const WorkspaceHeaderToolbar = ({
   return (
     <div
       className={cn(
-        "relative flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 flex-wrap items-center justify-between overflow-hidden bg-white",
+        "relative flex h-[var(--ds-semantic-breadcrumb-height)] min-h-11 w-full shrink-0 flex-wrap items-center justify-between overflow-hidden bg-white/85 px-2 backdrop-blur-xl",
         !isSegmented &&
-          "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-[#e2e4e9] after:content-['']",
+          "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-[rgba(60,60,67,0.18)] after:content-['']",
       )}
     >
       <div
@@ -217,7 +217,7 @@ export const WorkspaceHeaderToolbar = ({
         {hasLeadingActions ? (
           <div
             className={cn(
-              "flex h-7 shrink-0 items-center gap-1",
+              "flex h-9 shrink-0 items-center gap-1 rounded-full bg-[#f2f2f7]/80 p-1 shadow-[inset_0_0_0_0.5px_rgba(60,60,67,0.12)] backdrop-blur-xl",
               hasLeadingContentBeforeActions ? "ml-2" : "ml-0",
             )}
           >
@@ -230,10 +230,10 @@ export const WorkspaceHeaderToolbar = ({
                   type="button"
                   aria-label={action.ariaLabel ?? action.label}
                   title={action.ariaLabel ?? action.label}
-                  className="inline-flex h-7 w-7 items-center justify-center rounded text-[#8f929c] transition-colors hover:bg-[#f6f7f9] hover:text-[#25272d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[#3c3c43]/60 transition-[background-color,color,box-shadow,transform] duration-200 hover:bg-white/90 hover:text-[#007aff] hover:shadow-[0_1px_3px_rgba(0,0,0,0.08)] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
                   onClick={action.onClick}
                 >
-                  <Icon className="h-4 w-4 shrink-0" />
+                  <Icon className="h-[17px] w-[17px] shrink-0" />
                 </button>
               );
             })}
@@ -242,22 +242,20 @@ export const WorkspaceHeaderToolbar = ({
       </div>
 
       {actions && actions.length > 0 ? (
-        <div className="flex h-7 shrink-0 items-center justify-end gap-[6px]">
-          {actions.map((action, index) => {
+        <div className="flex h-9 shrink-0 items-center justify-end gap-1 rounded-full bg-[#f2f2f7]/80 p-1 shadow-[0_1px_2px_rgba(0,0,0,0.04),inset_0_0_0_0.5px_rgba(60,60,67,0.12)] backdrop-blur-xl">
+          {actions.map((action) => {
             const Icon = action.icon;
-            const isLast = index === actions.length - 1;
 
             return (
               <button
                 key={action.label}
                 type="button"
-                className={cn(
-                  "flex h-7 items-center gap-[6px] rounded py-[3px] pl-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal text-[#8f929c] transition-colors hover:bg-[#f6f7f9] hover:text-[#25272d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  isLast ? "pr-0" : "pr-2",
-                )}
+                aria-label={action.ariaLabel ?? action.label}
+                title={action.ariaLabel ?? action.label}
+                className="flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[13px] font-medium leading-none tracking-[-0.01em] text-[#3c3c43]/65 transition-[background-color,color,box-shadow,transform] duration-200 hover:bg-white/90 hover:text-[#007aff] hover:shadow-[0_1px_3px_rgba(0,0,0,0.08)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
                 onClick={action.onClick}
               >
-                <Icon className="h-4 w-4 shrink-0" />
+                <Icon className="h-[17px] w-[17px] shrink-0" />
                 <span className="whitespace-nowrap">{action.label}</span>
               </button>
             );
