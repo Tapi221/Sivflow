@@ -9,7 +9,6 @@ import { renewExpiredWatchChannels } from "./gcal/renewWatchChannels.js";
 
 initializeApp();
 
-const db = getFirestore();
 const GOOGLE_OAUTH_WEB_CLIENT_ID = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_ID");
 const GOOGLE_OAUTH_WEB_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_SECRET");
 const GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY = defineSecret(
@@ -94,7 +93,7 @@ const fetchUserInfo = async (accessToken: string) => {
 };
 
 const accountDoc = (uid: string, accountId: string) =>
-  db.doc(`users/${uid}/googleCalendarAccounts/${accountId}`);
+  getFirestore().doc(`users/${uid}/googleCalendarAccounts/${accountId}`);
 
 export const exchangeGoogleCalendarCode = onCall(
   {
