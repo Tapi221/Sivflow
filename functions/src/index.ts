@@ -1,34 +1,10 @@
 import crypto from "node:crypto";
 
-import { onInit } from "firebase-functions/v2/core";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
+import { getDb, serverTimestamp } from "./firebaseAdmin.js";
 import { renewExpiredWatchChannels } from "./gcal/renewWatchChannels.js";
-
-let adminAppReady: Promise<void> | null = null;
-let firestoreModulePromise: Promise<typeof import("firebase-admin/firestore")> | null = null;
-
-const ensureFirebaseAdmin = async (): Promise<void> => {
-  adminAppReady ??= (async () => {
-    const { getApps, initializeApp } = await import("firebase-admin/app");
-
-    if (getApps().length === 0) {
-      initializeApp();
-    }
-  })();
-
-  await adminAppReady;
-};
-
-const getFirestoreModule = async () => {
-  firestoreModulePromise ??= import("firebase-admin/firestore");
-  return await firestoreModulePromise;
-};
-
-onInit(async () => {
-  await ensureFirebaseAdmin();
-});
 
 const GOOGLE_OAUTH_WEB_CLIENT_ID = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_ID");
 const GOOGLE_OAUTH_WEB_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_SECRET");
@@ -110,17 +86,6 @@ const fetchUserInfo = async (accessToken: string) => {
     accountName: data.name ?? null,
     accountPhotoUrl: data.picture ?? null,
   };
-};
-
-const getDb = async () => {
-  await ensureFirebaseAdmin();
-  const { getFirestore } = await getFirestoreModule();
-  return getFirestore();
-};
-
-const serverTimestamp = async () => {
-  const { FieldValue } = await getFirestoreModule();
-  return FieldValue.serverTimestamp();
 };
 
 const accountDoc = async (uid: string, accountId: string) =>
