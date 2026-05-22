@@ -99,7 +99,7 @@ export const TaskCard = ({
           <div className="flex items-center justify-between gap-2">
             <div
               className={cn(
-                "min-w-0 flex-1 truncate text-[13px] font-medium leading-[18px] text-[#24262d]",
+                "min-w-0 flex-1 truncate text-[12px] font-medium leading-none text-[#24262d]",
                 isDone && "text-[#9aa3b1] line-through decoration-[#b8c0cc]",
               )}
             >
