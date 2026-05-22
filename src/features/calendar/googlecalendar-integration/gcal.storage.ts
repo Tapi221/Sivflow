@@ -1,3 +1,5 @@
+import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
+
 // ─────────────────────────────────────────────
 // keys
 // ─────────────────────────────────────────────
@@ -11,6 +13,8 @@ const PERSIST_CALENDAR_IDS_KEY = "flashcard-master.gcal.selected_calendar_ids";
 const PERSIST_WAS_CONNECTED_KEY = "flashcard-master.gcal.was_connected";
 
 const TOKEN_LIFETIME_MS = 55 * 60 * 1000;
+
+const shouldStoreLocalRefreshToken = (): boolean => isDesktopLikeRuntime();
 
 // ─────────────────────────────────────────────
 // internal cache
@@ -88,6 +92,11 @@ export const clearToken = (): void => {
 
 export const readRefreshToken = (): string | null => {
   try {
+    if (!shouldStoreLocalRefreshToken()) {
+      localStorage.removeItem(LOCAL_REFRESH_TOKEN_KEY);
+      return null;
+    }
+
     return localStorage.getItem(LOCAL_REFRESH_TOKEN_KEY);
   } catch {
     return null;
@@ -96,10 +105,11 @@ export const readRefreshToken = (): string | null => {
 
 export const writeRefreshToken = (token: string | null): void => {
   try {
-    if (!token) {
+    if (!shouldStoreLocalRefreshToken() || !token) {
       localStorage.removeItem(LOCAL_REFRESH_TOKEN_KEY);
       return;
     }
+
     localStorage.setItem(LOCAL_REFRESH_TOKEN_KEY, token);
   } catch {
     // ignore
