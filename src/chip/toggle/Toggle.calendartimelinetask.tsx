@@ -83,6 +83,7 @@ export const ToggleCalendarTimelineTask = ({
                 className={cn(
                   "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
                   isActive ? "text-[#8c8c8c]" : "text-[#b7b7b7]",
+                  tab.value === "timeline" ? "[&>path]:fill-current" : null,
                 )}
               />
             </button>
