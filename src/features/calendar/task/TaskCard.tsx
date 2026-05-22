@@ -121,7 +121,7 @@ export const TaskCard = ({
           </div>
 
           <div className="relative mt-3 min-h-5">
-            <div className="-ml-[26px] flex w-[calc(100%+26px)] min-w-0 flex-wrap items-center gap-2">
+            <div className="-ml-[26px] flex w-[calc(100%+26px)] min-w-0 flex-wrap items-center gap-1">
               {dateContent}
 
               <span
