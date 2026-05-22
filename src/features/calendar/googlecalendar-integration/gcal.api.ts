@@ -78,18 +78,35 @@ export const fetchCalendarList = async (
 export const fetchGoogleTaskLists = async (
   accessToken: string,
 ): Promise<GoogleTaskListItem[]> => {
-  const data = await getJson<GoogleTasksApiTaskListsResponse>(
-    accessToken,
-    `${GOOGLE_TASKS_API_BASE}/users/@me/lists`,
-  );
+  const taskLists: GoogleTaskListItem[] = [];
+  let pageToken: string | undefined;
 
-  return (data.items ?? [])
-    .filter((item) => item.id && item.title)
-    .map((item) => ({
-      id: item.id!,
-      title: item.title!,
-      updated: item.updated,
-    }));
+  do {
+    const params = new URLSearchParams({ maxResults: "100" });
+
+    if (pageToken) {
+      params.set("pageToken", pageToken);
+    }
+
+    const data = await getJson<GoogleTasksApiTaskListsResponse>(
+      accessToken,
+      `${GOOGLE_TASKS_API_BASE}/users/@me/lists?${params}`,
+    );
+
+    taskLists.push(
+      ...(data.items ?? [])
+        .filter((item) => item.id && item.title)
+        .map((item) => ({
+          id: item.id!,
+          title: item.title!,
+          updated: item.updated,
+        })),
+    );
+
+    pageToken = data.nextPageToken;
+  } while (pageToken);
+
+  return taskLists;
 };
 
 export const fetchEventsForCalendar = async ({
