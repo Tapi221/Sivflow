@@ -5,7 +5,7 @@ import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import { cn } from "@/lib/utils";
 // ==============================================
 
-const HOUR_ROW_HEIGHT = 40;
+const HOUR_ROW_HEIGHT = 48;
 
 // ==============================================
 
@@ -92,6 +92,12 @@ export const EventChipDayDetail = ({
     <div
       className={cn(
         eventChipAllDayClass,
+        `
+          rounded-[13px]
+          border
+          shadow-[0_2px_8px_rgba(0,0,0,0.05)]
+          backdrop-blur-xl
+        `,
         event.isAllDay
           ? `
             absolute
@@ -117,6 +123,7 @@ export const EventChipDayDetail = ({
         top: event.isAllDay ? top : undefined,
         height: event.isAllDay ? height : undefined,
         background: tokens.bg,
+        borderColor: tokens.border,
         borderLeft: event.isAllDay
           ? undefined
           : `3px solid ${tokens.border}`,
@@ -127,15 +134,19 @@ export const EventChipDayDetail = ({
       <span
         className="
           truncate
+          text-[10px]
+          font-medium
+          leading-tight
+          tracking-[-0.01em]
           tabular-nums
-          opacity-80
+          opacity-75
         "
       >
         {timeLabel}
       </span>
 
       {!compact && (
-        <span className="truncate">
+        <span className="truncate text-[11px] font-semibold leading-tight tracking-[-0.01em]">
           {event.title || "Untitled"}
         </span>
       )}
