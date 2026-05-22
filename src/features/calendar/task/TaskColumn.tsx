@@ -64,7 +64,10 @@ const SortableTaskCard = ({
         transform: CSS.Transform.toString(verticalTransform),
         transition,
       }}
-      className={cn("touch-none", isDragging && "z-10 opacity-70")}
+      className={cn(
+        "touch-none",
+        isDragging && "relative z-10 opacity-0",
+      )}
       {...attributes}
       {...listeners}
     >
