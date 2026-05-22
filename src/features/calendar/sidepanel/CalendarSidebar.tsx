@@ -13,10 +13,11 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { AnimatedCircleCheckbox } from "@/features/calendar/chip/checkbox/AnimatedCircleCheckbox";
 import { GoogleAccountChip } from "@/features/calendar/chip/GoogleAccountChip";
-import { CalendarIcon, PlusIcon, TaskIcon } from "@/components/icons/schedule.icons";
+import { CalendarIcon, TaskIcon } from "@/components/icons/schedule.icons";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
+import { AddGoogleCalendarButton } from "./AddGoogleCalendarButton";
 import type {
   CalendarSidebarProps,
   GoogleAccountDisplay,
@@ -392,23 +393,11 @@ export const CalendarSidebar = ({
           <div className={cn("mt-2", SIDEBAR_DIVIDER_CLASS)} />
         )}
 
-        <button
-          type="button"
-          className={cn(
-            "flex h-7 w-full items-center gap-2 rounded-[12px] border border-white/70 bg-white/80 px-2 text-left shadow-[0_4px_12px_rgba(15,23,42,0.05)] transition-all duration-150 hover:bg-white active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-55",
-            hasGoogleAccounts && "mt-2",
-          )}
-          onClick={onAddCalendar}
-          disabled={isAnyCalendarConnecting}
-        >
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#007aff] text-white shadow-[0_3px_8px_rgba(0,122,255,0.22)]">
-            <PlusIcon className="h-3 w-3" />
-          </span>
-
-          <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#4b5563]">
-            {hasGoogleAccounts ? t.addAnotherGoogleAccount : t.addGoogleCalendar}
-          </span>
-        </button>
+        <AddGoogleCalendarButton
+          hasGoogleAccounts={hasGoogleAccounts}
+          isConnecting={isAnyCalendarConnecting}
+          onAddCalendar={onAddCalendar}
+        />
       </div>
     </aside>
   );
