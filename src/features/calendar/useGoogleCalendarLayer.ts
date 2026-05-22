@@ -1,6 +1,7 @@
 import type { GoogleAccountEntry } from "@/features/calendar/googlecalendar-integration/useMultiAccountGoogleCalendar";
 import { useMultiAccountGoogleCalendar } from "@/features/calendar/googlecalendar-integration/useMultiAccountGoogleCalendar";
 import type { GCalConnectionStatus } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import { useGoogleTaskLists } from "@/features/calendar/googlecalendar-integration/useGoogleTaskLists";
 
 export type { GoogleAccountEntry };
 
@@ -18,6 +19,8 @@ export const useGoogleCalendarLayer = () => {
     reconnectAccount,
     isAnyConnecting,
   } = useMultiAccountGoogleCalendar();
+
+  const taskListsByAccount = useGoogleTaskLists(accounts);
 
   const connectionStatus: GCalConnectionStatus | "disconnected" = (() => {
     const hasRecoverableAccount = accounts.some(
@@ -45,6 +48,7 @@ export const useGoogleCalendarLayer = () => {
 
   return {
     googleAccounts: accounts,
+    taskListsByAccount,
     events,
     selectedCalendarIds,
     addAccount,
