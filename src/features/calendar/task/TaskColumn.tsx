@@ -52,16 +52,20 @@ const SortableTaskCard = ({
       status: task.status,
     },
   });
-  const verticalTransform = transform ? { ...transform, x: 0 } : null;
+  const cardTransform = transform
+    ? isDragging
+      ? transform
+      : { ...transform, x: 0 }
+    : null;
 
   return (
     <div
       ref={setNodeRef}
       style={{
-        transform: CSS.Transform.toString(verticalTransform),
+        transform: CSS.Transform.toString(cardTransform),
         transition,
       }}
-      className={cn("touch-auto", isDragging && "z-10 opacity-70")}
+      className={cn("touch-none", isDragging && "z-10 opacity-70")}
       {...attributes}
       {...listeners}
     >
