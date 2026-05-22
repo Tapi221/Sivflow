@@ -120,8 +120,8 @@ export const TaskCard = ({
             </button>
           </div>
 
-          <div className="mt-3 flex items-center justify-between gap-2">
-            <div className="-ml-[26px] flex min-w-0 flex-wrap items-center gap-2">
+          <div className="relative mt-3 min-h-5">
+            <div className="-ml-[26px] flex w-[calc(100%+26px)] min-w-0 flex-wrap items-center gap-2">
               {dateContent}
 
               <span
@@ -140,10 +140,12 @@ export const TaskCard = ({
             </div>
 
             {task.assignee && (
-              <GoogleAccountChip
-                name={chipName}
-                photoUrl={accountPhotoUrl}
-              />
+              <div className="pointer-events-none absolute right-0 top-0">
+                <GoogleAccountChip
+                  name={chipName}
+                  photoUrl={accountPhotoUrl}
+                />
+              </div>
             )}
           </div>
         </div>
