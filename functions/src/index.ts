@@ -1,13 +1,15 @@
 import crypto from "node:crypto";
 
-import * as admin from "firebase-admin";
+import { initializeApp } from "firebase-admin/app";
+import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { renewExpiredWatchChannels } from "./gcal/renewWatchChannels.js";
 
-admin.initializeApp();
+initializeApp();
 
+const db = getFirestore();
 const GOOGLE_OAUTH_WEB_CLIENT_ID = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_ID");
 const GOOGLE_OAUTH_WEB_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_SECRET");
 const GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY = defineSecret(
@@ -17,14 +19,15 @@ const GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY = defineSecret(
 const REGION = "asia-northeast1";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
+type FirestoreServerTimestamp = ReturnType<typeof FieldValue.serverTimestamp>;
 
 type StoredGoogleCalendarAccount = {
   email: string;
   name: string | null;
   photoUrl: string | null;
   encryptedRefreshToken: string;
-  createdAt: FirebaseFirestore.FieldValue;
-  updatedAt: FirebaseFirestore.FieldValue;
+  createdAt: FirestoreServerTimestamp;
+  updatedAt: FirestoreServerTimestamp;
 };
 
 const requireUid = (request: { auth?: { uid?: string } }) => {
@@ -91,7 +94,7 @@ const fetchUserInfo = async (accessToken: string) => {
 };
 
 const accountDoc = (uid: string, accountId: string) =>
-  admin.firestore().doc(`users/${uid}/googleCalendarAccounts/${accountId}`);
+  db.doc(`users/${uid}/googleCalendarAccounts/${accountId}`);
 
 export const exchangeGoogleCalendarCode = onCall(
   {
@@ -131,7 +134,7 @@ export const exchangeGoogleCalendarCode = onCall(
 
     const profile = await fetchUserInfo(accessToken);
     const accountId = profile.accountEmail;
-    const now = admin.firestore.FieldValue.serverTimestamp();
+    const now = FieldValue.serverTimestamp();
 
     const payload: StoredGoogleCalendarAccount = {
       email: profile.accountEmail,
@@ -187,7 +190,7 @@ export const getGoogleCalendarAccessToken = onCall(
 
     if (!accessToken) throw new HttpsError("internal", "Google token response missing access_token.");
 
-    const updates: Record<string, unknown> = { updatedAt: admin.firestore.FieldValue.serverTimestamp() };
+    const updates: Record<string, unknown> = { updatedAt: FieldValue.serverTimestamp() };
     if (rotatedRefreshToken) updates.encryptedRefreshToken = encryptRefreshToken(rotatedRefreshToken);
     await accountDoc(uid, accountId).set(updates, { merge: true });
 
