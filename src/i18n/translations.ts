@@ -48,6 +48,7 @@ export type Translations = {
 
   // ナビゲーション
   todayButton: string;
+  todayTooltipDateFormat: string;
   previousLabel: string;
   nextLabel: string;
   previousMonthLabel: string;
@@ -104,6 +105,7 @@ const ja: Translations = {
   viewsLabel: "表示形式",
 
   todayButton: "今日",
+  todayTooltipDateFormat: "M月d日",
   previousLabel: "前へ",
   nextLabel: "次へ",
   previousMonthLabel: "前の月",
@@ -158,6 +160,7 @@ const en: Translations = {
   viewsLabel: "Views",
 
   todayButton: "Today",
+  todayTooltipDateFormat: "MMMM d",
   previousLabel: "Previous",
   nextLabel: "Next",
   previousMonthLabel: "Previous month",
