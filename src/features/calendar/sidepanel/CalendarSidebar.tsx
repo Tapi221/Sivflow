@@ -110,7 +110,7 @@ const GoogleAccountSection = ({
     account.taskLists.length === 0;
 
   return (
-    <div className="mt-2 overflow-hidden rounded-[14px] border border-[#eeeeee] bg-white p-0.5 shadow-[0_8px_18px_rgba(0,0,0,0.04)]">
+    <div className="mt-2">
       <button
         type="button"
         className="group flex h-7 w-full items-center gap-1.5 rounded-[10px] px-1.5 text-left transition-all duration-150 hover:bg-[#f7f7f7] active:scale-[0.985] active:bg-[#f1f1f1]"
