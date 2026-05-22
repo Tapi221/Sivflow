@@ -12,7 +12,7 @@ import { useSchedulePane } from "./useSchedulePane";
 import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
-import { useTaskCalendarEvents } from "./task/useTaskCalendarEvents";
+import { useTaskCalendarEvents } from "./task/hooks/useTaskCalendarEvents";
 import { SidebarPanelIcon } from "@/components/icons/schedule.icons";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
