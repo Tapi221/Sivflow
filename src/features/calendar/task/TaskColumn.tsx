@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 import type { Task, TaskColumn as TaskColumnType } from "./task.types";
 import { TaskCard } from "./TaskCard";
-import { TaskStatusDot } from "../chip/TaskStatusDot";
+import { TaskStatusDot } from "../chip/icon/TaskStatusDot";
 
 type TaskColumnProps = {
   column: TaskColumnType;
