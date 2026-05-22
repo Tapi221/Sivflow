@@ -137,7 +137,7 @@ export const TaskCard = ({
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-2">
-            <div className="-ml-6 min-w-0">{dateContent}</div>
+            <div className="-ml-[26px] min-w-0">{dateContent}</div>
 
             {task.assignee && (
               <GoogleAccountChip
