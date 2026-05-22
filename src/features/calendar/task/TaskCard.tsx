@@ -51,7 +51,7 @@ export const TaskCard = ({
   }
 
   const isDone = task.status === "done";
-  const checkboxColor = isDone ? "#34c759" : "#aeb4bf";
+  const checkboxColor = isDone ? "#007aff" : "#aeb4bf";
   const checkboxLabel = isDone ? "Mark task as not done" : "Complete task";
   const chipName = accountName ?? task.assignee ?? "Google account";
 
