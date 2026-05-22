@@ -58,7 +58,14 @@ export const CalendarMonthView = ({
     onVisibleMonthChange,
   });
 
-  const resize = useMonthRowResize({
+  const {
+    rootRef,
+    monthRowHeight,
+    monthViewStyle,
+    handleResizeReset,
+    handleResizeKeyDown,
+    handleResizePointerDown,
+  } = useMonthRowResize({
     scrollContainerRef: scroll.scrollContainerRef,
     weekRowRefsMap: scroll.weekRowRefsMap,
     monthWeeks: scroll.monthWeeks,
@@ -104,9 +111,9 @@ export const CalendarMonthView = ({
 
   return (
     <div
-      ref={resize.rootRef}
+      ref={rootRef}
       className="calendar-month-view flex min-h-0 flex-1 flex-col overflow-hidden bg-white"
-      style={resize.monthViewStyle}
+      style={monthViewStyle}
     >
       <div
         ref={scroll.scrollContainerRef}
@@ -118,12 +125,12 @@ export const CalendarMonthView = ({
           visibleEvents={renderedEvents}
           monthWeeks={scroll.monthWeeks}
           maxVisibleChips={maxVisibleChips}
-          monthRowHeight={resize.monthRowHeight}
+          monthRowHeight={monthRowHeight}
           setWeekRowRef={scroll.setWeekRowRef}
           onSelectDate={onSelectDate}
-          handleResizeReset={resize.handleResizeReset}
-          handleResizeKeyDown={resize.handleResizeKeyDown}
-          handleResizePointerDown={resize.handleResizePointerDown}
+          handleResizeReset={handleResizeReset}
+          handleResizeKeyDown={handleResizeKeyDown}
+          handleResizePointerDown={handleResizePointerDown}
         />
       </div>
     </div>
