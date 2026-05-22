@@ -31,7 +31,8 @@ type SortableTaskCardProps = {
   onToggleTaskDone: (id: string, done: boolean) => void;
 };
 
-const IOS_TASK_COLUMN_BACKGROUND = "#f2f2f7";
+const taskColumnGradient =
+  "linear-gradient(180deg, #f7f8fa 0%, #f4f6f9 46%, #f7f8fa 100%)";
 
 const SortableTaskCard = ({
   task,
@@ -103,7 +104,7 @@ export const TaskColumn = ({
   return (
     <div
       className="flex h-full min-h-0 w-full min-w-0 flex-col rounded-xl p-3"
-      style={{ background: IOS_TASK_COLUMN_BACKGROUND }}
+      style={{ background: taskColumnGradient }}
     >
       {/* カラムヘッダー */}
       <div className="mb-3 flex shrink-0 items-center gap-2">
@@ -116,7 +117,7 @@ export const TaskColumn = ({
         </span>
         <button
           type="button"
-          className="ml-auto flex h-6 w-6 items-center justify-center rounded-md text-[#9aa3b1] transition-colors hover:bg-[#e5e5ea] hover:text-[#193a5c]"
+          className="ml-auto flex h-6 w-6 items-center justify-center rounded-md text-[#9aa3b1] transition-colors hover:bg-[#eceef1] hover:text-[#193a5c]"
           onClick={() => onAddTask(column.id)}
           aria-label={t.addTask}
           title={t.addTask}
