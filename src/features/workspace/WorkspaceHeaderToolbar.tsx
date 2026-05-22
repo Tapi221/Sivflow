@@ -230,10 +230,10 @@ export const WorkspaceHeaderToolbar = ({
                   type="button"
                   aria-label={action.ariaLabel ?? action.label}
                   title={action.ariaLabel ?? action.label}
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[#3c3c43]/60 transition-[background-color,color,box-shadow,transform] duration-200 hover:bg-white/90 hover:text-[#007aff] hover:shadow-[0_1px_3px_rgba(0,0,0,0.08)] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
+                  className="group/leading inline-flex h-7 w-7 items-center justify-center rounded-full text-[#3c3c43]/60 transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:bg-white/90 hover:text-[#007aff] hover:shadow-[0_1px_3px_rgba(0,0,0,0.08)] active:scale-[0.96] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
                   onClick={action.onClick}
                 >
-                  <Icon className="h-[17px] w-[17px] shrink-0" />
+                  <Icon className="h-[17px] w-[17px] shrink-0 transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover/leading:-translate-y-px group-hover/leading:scale-110 group-focus-visible/leading:scale-110 motion-reduce:transition-none" />
                 </button>
               );
             })}
@@ -252,11 +252,13 @@ export const WorkspaceHeaderToolbar = ({
                 type="button"
                 aria-label={action.ariaLabel ?? action.label}
                 title={action.ariaLabel ?? action.label}
-                className="flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[13px] font-medium leading-none tracking-[-0.01em] text-[#3c3c43]/65 transition-[background-color,color,box-shadow,transform] duration-200 hover:bg-white/90 hover:text-[#007aff] hover:shadow-[0_1px_3px_rgba(0,0,0,0.08)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
+                className="group/action flex h-7 max-w-7 items-center justify-start overflow-hidden rounded-full px-[5.5px] text-[13px] font-medium leading-none tracking-[-0.01em] text-[#3c3c43]/65 transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:max-w-[108px] hover:bg-white/90 hover:text-[#007aff] hover:shadow-[0_1px_3px_rgba(0,0,0,0.08)] active:scale-[0.97] motion-reduce:transition-none focus-visible:max-w-[108px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
                 onClick={action.onClick}
               >
-                <Icon className="h-[17px] w-[17px] shrink-0" />
-                <span className="whitespace-nowrap">{action.label}</span>
+                <Icon className="h-[17px] w-[17px] shrink-0 transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover/action:-translate-y-px group-hover/action:scale-110 group-focus-visible/action:scale-110 motion-reduce:transition-none" />
+                <span className="ml-0 max-w-0 translate-x-1 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-300 ease-[cubic-bezier(.22,1,.36,1)] group-hover/action:ml-1.5 group-hover/action:max-w-[72px] group-hover/action:translate-x-0 group-hover/action:opacity-100 group-focus-visible/action:ml-1.5 group-focus-visible/action:max-w-[72px] group-focus-visible/action:translate-x-0 group-focus-visible/action:opacity-100 motion-reduce:transition-none">
+                  {action.label}
+                </span>
               </button>
             );
           })}
