@@ -46,7 +46,7 @@ export const ToggleCalendarTimelineTask = ({
         const isActive = activeMode === tab.value;
 
         return (
-          <HoverTooltip key={tab.value} label={tab.label} side="bottom" offset={6}>
+          <HoverTooltip key={tab.value} label={tab.label} side="top" offset={6}>
             <button
               type="button"
               onClick={tab.onClick}
