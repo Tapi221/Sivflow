@@ -20,6 +20,101 @@ type NewTaskModalProps = {
   }) => void;
 };
 
+type PickerOption<T extends string> = {
+  value: T;
+  label: string;
+};
+
+type IOSPickerProps<T extends string> = {
+  id: string;
+  value: T;
+  options: PickerOption<T>[];
+  isOpen: boolean;
+  onOpen: (id: string) => void;
+  onChange: (value: T) => void;
+};
+
+const IOSPicker = <T extends string,>({
+  id,
+  value,
+  options,
+  isOpen,
+  onOpen,
+  onChange,
+}: IOSPickerProps<T>) => {
+  const selectedLabel =
+    options.find((option) => option.value === value)?.label ?? value;
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => onOpen(isOpen ? "" : id)}
+        className="flex w-full items-center justify-between rounded-lg border border-[#e5e5ea] bg-white/95 px-3 py-2 text-left text-[13px] text-[#1c1c1e] outline-none transition-colors hover:bg-white focus:border-[#007aff] focus:bg-white"
+      >
+        <span>{selectedLabel}</span>
+
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          className={`h-4 w-4 text-[#1c1c1e] transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+          aria-hidden="true"
+        >
+          <path
+            d="M4 6l4 4 4-4"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 overflow-hidden rounded-xl border border-white/70 bg-white/95 shadow-[0_12px_28px_rgba(0,0,0,0.16)] backdrop-blur-xl">
+          {options.map((option, index) => {
+            const selected = option.value === value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => onChange(option.value)}
+                className={`flex w-full items-center justify-between px-3 py-2 text-left text-[13px] transition-colors ${
+                  selected
+                    ? "bg-[#007aff] text-white"
+                    : "text-[#1c1c1e] hover:bg-[#f2f2f7]"
+                } ${index > 0 && !selected ? "border-t border-[#e5e5ea]/70" : ""}`}
+              >
+                <span>{option.label}</span>
+
+                {selected && (
+                  <svg
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    className="h-4 w-4"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M3.5 8.3l2.8 2.8 6.2-6.2"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const NewTaskModal = ({
   defaultStatus = "not_started",
   onClose,
@@ -30,6 +125,7 @@ export const NewTaskModal = ({
   const [priority, setPriority] = useState<TaskPriority>("medium");
   const [category, setCategory] = useState("Programming");
   const [dueDate, setDueDate] = useState("");
+  const [openPicker, setOpenPicker] = useState("");
 
   const handleSave = () => {
     if (!title.trim()) return;
@@ -69,7 +165,7 @@ export const NewTaskModal = ({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
-        className="w-[480px] overflow-hidden rounded-2xl border border-white/70 bg-[#f2f2f7]/95 shadow-[0_20px_60px_rgba(0,0,0,0.18)] backdrop-blur-2xl"
+        className="w-[480px] rounded-2xl border border-white/70 bg-[#f2f2f7]/95 shadow-[0_20px_60px_rgba(0,0,0,0.18)] backdrop-blur-2xl"
         initial={{
           opacity: 0,
           scale: 0.86,
@@ -136,17 +232,20 @@ export const NewTaskModal = ({
                 ステータス
               </label>
 
-              <select
+              <IOSPicker
+                id="status"
                 value={status}
-                onChange={(e) => setStatus(e.target.value as TaskStatus)}
-                className="w-full rounded-lg border border-[#e5e5ea] bg-white/95 px-3 py-2 text-[13px] text-[#1c1c1e] outline-none transition-colors focus:border-[#007aff] focus:bg-white"
-              >
-                {TASK_COLUMNS.map((col) => (
-                  <option key={col.id} value={col.id}>
-                    {col.label}
-                  </option>
-                ))}
-              </select>
+                options={TASK_COLUMNS.map((col) => ({
+                  value: col.id,
+                  label: col.label,
+                }))}
+                isOpen={openPicker === "status"}
+                onOpen={setOpenPicker}
+                onChange={(value) => {
+                  setStatus(value);
+                  setOpenPicker("");
+                }}
+              />
             </div>
 
             {/* 優先度 */}
@@ -155,17 +254,20 @@ export const NewTaskModal = ({
                 優先度
               </label>
 
-              <select
+              <IOSPicker
+                id="priority"
                 value={priority}
-                onChange={(e) => setPriority(e.target.value as TaskPriority)}
-                className="w-full rounded-lg border border-[#e5e5ea] bg-white/95 px-3 py-2 text-[13px] text-[#1c1c1e] outline-none transition-colors focus:border-[#007aff] focus:bg-white"
-              >
-                {Object.entries(PRIORITY_CONFIG).map(([key, val]) => (
-                  <option key={key} value={key}>
-                    {val.label}
-                  </option>
-                ))}
-              </select>
+                options={Object.entries(PRIORITY_CONFIG).map(([key, val]) => ({
+                  value: key as TaskPriority,
+                  label: val.label,
+                }))}
+                isOpen={openPicker === "priority"}
+                onOpen={setOpenPicker}
+                onChange={(value) => {
+                  setPriority(value);
+                  setOpenPicker("");
+                }}
+              />
             </div>
 
             {/* カテゴリ */}
@@ -174,17 +276,20 @@ export const NewTaskModal = ({
                 カテゴリ
               </label>
 
-              <select
+              <IOSPicker
+                id="category"
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-lg border border-[#e5e5ea] bg-white/95 px-3 py-2 text-[13px] text-[#1c1c1e] outline-none transition-colors focus:border-[#007aff] focus:bg-white"
-              >
-                {Object.keys(CATEGORY_CONFIG).map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+                options={Object.keys(CATEGORY_CONFIG).map((cat) => ({
+                  value: cat,
+                  label: cat,
+                }))}
+                isOpen={openPicker === "category"}
+                onOpen={setOpenPicker}
+                onChange={(value) => {
+                  setCategory(value);
+                  setOpenPicker("");
+                }}
+              />
             </div>
 
             {/* 期日 */}
