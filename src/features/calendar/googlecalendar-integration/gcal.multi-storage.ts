@@ -1,3 +1,5 @@
+import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
+
 /**
  * gcal.multi-storage.ts
  *
@@ -64,7 +66,10 @@ export const buildTokenExpiry = (expiresInSeconds?: number | null): number => {
 };
 
 const isServerStoredGoogleOAuthEnabled = (): boolean => {
-  return import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true";
+  return (
+    import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true" &&
+    !isDesktopLikeRuntime()
+  );
 };
 
 const stripLocalRefreshTokensForServerMode = (
@@ -95,7 +100,9 @@ const migrateFromLegacy = (): StoredGoogleAccount[] => {
     const accessToken = localStorage.getItem(LEGACY_ACCESS_TOKEN_KEY);
     const expiryRaw = localStorage.getItem(LEGACY_ACCESS_TOKEN_EXPIRY_KEY);
     const accessTokenExpiry = expiryRaw ? Number(expiryRaw) : null;
-    const refreshToken = localStorage.getItem(LEGACY_REFRESH_TOKEN_KEY);
+    const refreshToken = isServerStoredGoogleOAuthEnabled()
+      ? null
+      : localStorage.getItem(LEGACY_REFRESH_TOKEN_KEY);
     const calIdsRaw = localStorage.getItem(LEGACY_CALENDAR_IDS_KEY);
     const selectedCalendarIds: string[] = calIdsRaw
       ? (JSON.parse(calIdsRaw) as string[])
