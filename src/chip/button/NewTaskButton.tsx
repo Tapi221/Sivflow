@@ -1,12 +1,13 @@
-import { CreateActionPlusIcon } from "@/features/calendar/chip/icon/CreateActionPlusIcon";
+import { CreateActionPlusIcon } from "@/chip/icon/CreateActionPlusIcon";
+import { useT } from "@/i18n/useT";
 
-type DayDetailCreateButtonProps = {
-  onClick?: () => void;
+type NewTaskButtonProps = {
+  onClick: () => void;
 };
 
-export const DayDetailCreateButton = ({
-  onClick,
-}: DayDetailCreateButtonProps) => {
+export const NewTaskButton = ({ onClick }: NewTaskButtonProps) => {
+  const t = useT();
+
   return (
     <button
       type="button"
@@ -15,7 +16,6 @@ export const DayDetailCreateButton = ({
         group
         flex
         h-[40px]
-        w-full
         items-center
         justify-center
         gap-2
@@ -23,6 +23,7 @@ export const DayDetailCreateButton = ({
         border
         border-[#dfe3eb]
         bg-white/95
+        px-4
         text-[13px]
         font-semibold
         text-[#007aff]
@@ -38,9 +39,7 @@ export const DayDetailCreateButton = ({
     >
       <CreateActionPlusIcon />
 
-      <span>
-        新しい予定を作成
-      </span>
+      <span>{t.addTask}</span>
     </button>
   );
 };

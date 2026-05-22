@@ -11,9 +11,9 @@ import {
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
-import { AnimatedCircleCheckbox } from "@/features/calendar/chip/checkbox/AnimatedCircleCheckbox";
-import { GoogleAccountChip } from "@/features/calendar/chip/budge/GoogleAccountChip";
-import { CalendarDayNumberCircle } from "@/features/calendar/chip/icon/CalendarDayNumberCircle";
+import { AnimatedCircleCheckbox } from "@/chip/checkbox/AnimatedCircleCheckbox";
+import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
+import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import { CalendarIcon, TaskIcon } from "@/components/icons/schedule.icons";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";

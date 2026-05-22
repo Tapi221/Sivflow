@@ -1,4 +1,4 @@
-import { CreateActionPlusIcon } from "@/features/calendar/chip/icon/CreateActionPlusIcon";
+import { CreateActionPlusIcon } from "@/chip/icon/CreateActionPlusIcon";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 

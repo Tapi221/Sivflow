@@ -6,7 +6,7 @@ import type { TaskStatus } from "./task.types";
 import type { GoogleAccountDisplay } from "../schedulePane.types";
 import { useTaskStore } from "./hooks/useTaskStore";
 import { NewTaskModal } from "../modal/NewTaskModal";
-import { type BoardListViewMode } from "../chip/toggle/Toggle.boardlist";
+import { type BoardListViewMode } from "../../../chip/toggle/Toggle.boardlist";
 import { TaskToolbar } from "../toolbar/TaskToolbar";
 import { TaskBoardView } from "./TaskBoardView";
 import { TaskListView } from "./TaskListView";

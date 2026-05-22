@@ -5,7 +5,7 @@ import {
   SearchIcon,
   SortToolbarIcon,
 } from "../../../components/icons/schedule.icons";
-import { ToggleCalendarTimelineTask } from "../chip/toggle/Toggle.calendartimelinetask";
+import { ToggleCalendarTimelineTask } from "../../../chip/toggle/Toggle.calendartimelinetask";
 import { useCalendarToolbar } from "./hooks/useScheduleToolbar";
 
 import { cn } from "@/lib/utils";
