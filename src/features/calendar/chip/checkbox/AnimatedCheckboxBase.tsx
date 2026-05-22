@@ -44,7 +44,7 @@ export const AnimatedCheckboxBase = ({
     <span className={cn("relative h-3.5 w-3.5 shrink-0", className)} style={rootStyle}>
       <span
         className={cn(
-          "absolute inset-0 border transition-all duration-200 ease-out",
+          "absolute inset-0 border-[1.5px] transition-all duration-200 ease-out",
           radiusClass,
           active && variant === "filled" && "scale-75 opacity-0",
           (!active || variant !== "filled") && "scale-100 opacity-100",
@@ -91,7 +91,7 @@ export const AnimatedCheckboxBase = ({
               d="M5.5 10H14.5"
               fill="none"
               stroke={strokeColor}
-              strokeWidth="2.2"
+              strokeWidth="1.5"
               strokeLinecap="round"
               style={{
                 strokeDasharray: 10,
@@ -104,7 +104,7 @@ export const AnimatedCheckboxBase = ({
               d="M5.25 10.4L8.4 13.55L14.75 7.2"
               fill="none"
               stroke={strokeColor}
-              strokeWidth="2.2"
+              strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
               style={{
