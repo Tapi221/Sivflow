@@ -116,30 +116,57 @@
   .calendar-month-view {
     --calendar-month-row-height: 112px;
     overflow-anchor: none;
+    background: #f2f2f7;
   }
 
   .calendar-month-scroll {
     overflow-anchor: none;
+    background: #f2f2f7;
+  }
+
+  .calendar-month-scroll > div:first-child {
+    border-color: #d1d1d6 !important;
+    background: rgb(255 255 255 / 86%) !important;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 72%),
+      0 10px 24px rgb(0 0 0 / 3%);
+  }
+
+  .calendar-month-scroll > div:first-child > div {
+    border-color: #e5e5ea !important;
+    color: #8e8e93 !important;
+    font-weight: 600;
   }
 
   .calendar-month-week-row {
     contain: layout paint style;
     content-visibility: auto;
     contain-intrinsic-size: 784px var(--calendar-month-row-height);
+    background: #ffffff;
   }
 
   .calendar-month-day-cell {
     overflow: visible;
     min-height: var(--calendar-month-row-height);
     contain: paint style;
+    border-color: #e5e5ea !important;
+    transition:
+      background-color 150ms ease,
+      box-shadow 150ms ease;
   }
 
   .calendar-month-day-cell-hoverable:hover {
-    background: #eceef1;
+    background: #f7f7fa !important;
+  }
+
+  .calendar-month-day-cell:focus-within {
+    box-shadow: inset 0 0 0 1px rgb(0 122 255 / 24%);
   }
 
   .calendar-month-view.is-month-row-resizing .calendar-month-day-cell-hoverable:hover {
-    background: white;
+    background: white !important;
   }
 
   .calendar-month-row-boundary-resize-handle {
@@ -169,11 +196,10 @@
     opacity: 0;
   }
 
-  /* 修正: rgba(127, 45, 40, 0.42) → アプリのボーダー色ベースのグレー */
   .calendar-month-row-boundary-resize-handle:hover::after,
   .calendar-month-row-boundary-resize-handle:focus-visible::after {
-    background: #dde2ea;
-    opacity: 1;
+    background: #c7c7cc;
+    opacity: 0.86;
   }
 
   .calendar-month-row-boundary-resize-handle:focus-visible {
