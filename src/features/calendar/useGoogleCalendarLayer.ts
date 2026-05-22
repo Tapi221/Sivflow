@@ -23,13 +23,11 @@ export const useGoogleCalendarLayer = () => {
   const taskListsByAccount = useGoogleTaskLists(accounts);
 
   const connectionStatus: GCalConnectionStatus | "disconnected" = (() => {
-    const hasRecoverableAccount = accounts.some(
-      (account) =>
-        account.connectionStatus === "connected" &&
-        (account.accessToken || account.refreshToken),
+    const hasConnectedAccount = accounts.some(
+      (account) => account.connectionStatus === "connected",
     );
 
-    if (hasRecoverableAccount) return "connected";
+    if (hasConnectedAccount) return "connected";
 
     if (accounts.some((account) => account.connectionStatus === "needsReconnect")) {
       return "needsReconnect";
