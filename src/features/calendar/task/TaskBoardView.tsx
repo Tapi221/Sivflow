@@ -208,7 +208,7 @@ export const TaskBoardView = ({
         className="min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 pt-4 pb-0"
         onWheelCapture={handleBoardWheel}
       >
-        <div className="grid h-full min-h-0 min-w-full grid-flow-col auto-cols-[320px] gap-3">
+        <div className="grid h-full min-h-0 min-w-full grid-flow-col auto-cols-[260px] gap-3">
           {TASK_COLUMNS.map((col) => (
             <DroppableTaskColumn
               key={col.id}
