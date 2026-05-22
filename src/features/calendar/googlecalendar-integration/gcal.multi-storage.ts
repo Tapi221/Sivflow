@@ -63,6 +63,24 @@ export const buildTokenExpiry = (expiresInSeconds?: number | null): number => {
   return Date.now() + Math.max(0, expiresInSeconds * 1000 - TOKEN_EXPIRY_SAFETY_MARGIN_MS);
 };
 
+const isServerStoredGoogleOAuthEnabled = (): boolean => {
+  return import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true";
+};
+
+const stripLocalRefreshTokensForServerMode = (
+  accounts: StoredGoogleAccount[],
+): StoredGoogleAccount[] => {
+  if (!isServerStoredGoogleOAuthEnabled()) return accounts;
+
+  return accounts.map((account) =>
+    account.refreshToken === null ? account : { ...account, refreshToken: null },
+  );
+};
+
+const hasLocalRefreshToken = (accounts: StoredGoogleAccount[]): boolean => {
+  return accounts.some((account) => account.refreshToken !== null);
+};
+
 // ─────────────────────────────────────────────────────────────
 // Legacy migration
 // ─────────────────────────────────────────────────────────────
@@ -96,11 +114,13 @@ const migrateFromLegacy = (): StoredGoogleAccount[] => {
       selectedCalendarIds,
     };
 
-    writeStoredAccounts([account]);
+    const accounts = stripLocalRefreshTokensForServerMode([account]);
+
+    writeStoredAccounts(accounts);
     console.info(
       "[gcal.multi-storage] Migrated single account to multi format",
     );
-    return [account];
+    return accounts;
   } catch {
     return [];
   }
@@ -115,7 +135,16 @@ export const readStoredAccounts = (): StoredGoogleAccount[] => {
     const raw = localStorage.getItem(MULTI_ACCOUNTS_KEY);
     if (!raw) return migrateFromLegacy();
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as StoredGoogleAccount[]) : [];
+    if (!Array.isArray(parsed)) return [];
+
+    const accounts = parsed as StoredGoogleAccount[];
+    const sanitizedAccounts = stripLocalRefreshTokensForServerMode(accounts);
+
+    if (hasLocalRefreshToken(accounts) && isServerStoredGoogleOAuthEnabled()) {
+      writeStoredAccounts(sanitizedAccounts);
+    }
+
+    return sanitizedAccounts;
   } catch {
     return [];
   }
@@ -123,7 +152,10 @@ export const readStoredAccounts = (): StoredGoogleAccount[] => {
 
 export const writeStoredAccounts = (accounts: StoredGoogleAccount[]): void => {
   try {
-    localStorage.setItem(MULTI_ACCOUNTS_KEY, JSON.stringify(accounts));
+    localStorage.setItem(
+      MULTI_ACCOUNTS_KEY,
+      JSON.stringify(stripLocalRefreshTokensForServerMode(accounts)),
+    );
   } catch {
     // ignore quota errors
   }
@@ -159,9 +191,7 @@ export const updateStoredAccountToken = (
     ...accounts[idx],
     accessToken,
     accessTokenExpiry: buildTokenExpiry(expiresInSeconds),
-    ...(refreshToken !== undefined && refreshToken !== null
-      ? { refreshToken }
-      : {}),
+    ...(refreshToken !== undefined ? { refreshToken } : {}),
     ...(profile?.name ? { name: profile.name } : {}),
     ...(profile?.photoUrl ? { photoUrl: profile.photoUrl } : {}),
   };
