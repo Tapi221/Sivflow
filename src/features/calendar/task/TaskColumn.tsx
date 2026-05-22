@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 import type { Task, TaskColumn as TaskColumnType } from "./task.types";
 import { TaskCard } from "./TaskCard";
+import { TaskStatusDot } from "./TaskStatusDot";
 
 type TaskColumnProps = {
   column: TaskColumnType;
@@ -107,10 +108,7 @@ export const TaskColumn = ({
     >
       {/* カラムヘッダー */}
       <div className="mb-3 flex shrink-0 items-center gap-2">
-        <span
-          className="h-2 w-2 shrink-0 rounded-full"
-          style={{ backgroundColor: column.dotColor }}
-        />
+        <TaskStatusDot color={column.dotColor} />
         <span className="text-[13px] font-medium text-[#3f4652]">
           {statusLabelMap[column.id]}
         </span>
