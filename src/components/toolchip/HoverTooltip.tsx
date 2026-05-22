@@ -20,6 +20,9 @@ type HoverTooltipProps = {
   disabled?: boolean;
 };
 
+const tooltipSurfaceClassName =
+  "bg-[rgba(44,44,46,0.82)] backdrop-blur-xl";
+
 const getTransform = (side: TooltipSide) => {
   if (side === "top") return "translate(-50%, -100%)";
   if (side === "bottom") return "translate(-50%, 0)";
@@ -61,25 +64,33 @@ const getPosition = (
 
 const getArrowClassName = (side: TooltipSide) => {
   if (side === "top") {
-    return "bottom-[-3px] left-1/2 -translate-x-1/2";
+    return "bottom-[-4px] left-1/2 -translate-x-1/2";
   }
 
   if (side === "bottom") {
-    return "top-[-3px] left-1/2 -translate-x-1/2";
+    return "top-[-4px] left-1/2 -translate-x-1/2";
   }
 
   if (side === "left") {
-    return "right-[-3px] top-1/2 -translate-y-1/2";
+    return "right-[-4px] top-1/2 -translate-y-1/2";
   }
 
-  return "left-[-3px] top-1/2 -translate-y-1/2";
+  return "left-[-4px] top-1/2 -translate-y-1/2";
+};
+
+const getArrowBorderClassName = (side: TooltipSide) => {
+  if (side === "top") return "border-b border-r";
+  if (side === "bottom") return "border-l border-t";
+  if (side === "left") return "border-r border-t";
+
+  return "border-b border-l";
 };
 
 export const HoverTooltip = ({
   label,
   children,
   side = "top",
-  offset = 8,
+  offset = 10,
   className,
   tooltipClassName,
   arrowClassName,
@@ -142,11 +153,12 @@ export const HoverTooltip = ({
               zIndex: 9999,
               pointerEvents: "none",
             }}
-            className="animate-in fade-in-0 zoom-in-95 overflow-visible duration-150"
+            className="animate-in fade-in-0 zoom-in-95 origin-center overflow-visible duration-200 ease-out will-change-transform"
           >
             <div
               className={cn(
-                "relative inline-flex min-h-6 items-center overflow-visible whitespace-nowrap rounded-md bg-[#24272f] px-2.5 py-[5px] text-[12px] font-medium leading-[1.25] text-white shadow-lg",
+                "relative inline-flex min-h-7 items-center overflow-visible whitespace-nowrap rounded-[13px] border border-white/20 px-3 py-1.5 text-[12px] font-semibold leading-[1.25] tracking-[-0.01em] text-white shadow-[0_12px_28px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.18)]",
+                tooltipSurfaceClassName,
                 tooltipClassName,
               )}
             >
@@ -156,8 +168,10 @@ export const HoverTooltip = ({
 
               <span
                 className={cn(
-                  "absolute h-2 w-2 rotate-45 bg-[#24272f]",
+                  "absolute h-2.5 w-2.5 rotate-45 border-white/20",
+                  tooltipSurfaceClassName,
                   getArrowClassName(side),
+                  getArrowBorderClassName(side),
                   arrowClassName,
                 )}
               />
