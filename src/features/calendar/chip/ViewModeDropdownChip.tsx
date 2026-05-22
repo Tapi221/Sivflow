@@ -3,6 +3,8 @@ import * as Popover from "@radix-ui/react-popover";
 
 import { useT } from "@/i18n/useT";
 
+import { IconCheck } from "./IconCheck";
+
 export type ViewMode = "month" | "week" | "days";
 
 export type ViewModeOption = {
@@ -15,24 +17,6 @@ type Props = {
   onChange: (value: ViewMode) => void;
   options: readonly ViewModeOption[];
 };
-
-const IconCheck = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-  >
-    <path
-      d="M3.5 8.25L6.5 11.25L12.75 4.75"
-      stroke="currentColor"
-      strokeWidth="1.9"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 export const ViewModeDropdown = ({
   value,
