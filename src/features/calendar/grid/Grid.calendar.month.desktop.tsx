@@ -138,12 +138,12 @@ const CalendarMonthDayCell = memo(({
         {/* 日付 */}
         <span
           className={cn(
-            "absolute inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[length:var(--ds-layout-font-size-meta)] font-semibold tabular-nums transition-colors",
+            "absolute inline-flex h-[25px] w-[25px] items-center justify-center rounded-full text-[12px] font-semibold tabular-nums transition-all duration-150",
             GD.MONTH_GRID_DAY_NUMBER_POSITION_CLASS,
             isToday
-              ? "bg-[#007aff] text-white"
+              ? "bg-[#007aff] text-white shadow-[0_5px_12px_rgba(0,122,255,0.28)]"
               : selected
-                ? "bg-[#d1d1d6] text-[#1c1c1e]"
+                ? "bg-[#1f2937] text-white shadow-[0_4px_10px_rgba(15,23,42,0.2)]"
                 : day.isCurrentMonth
                   ? "text-[#24231f]"
                   : "text-[#b0aea8]",
