@@ -25,7 +25,7 @@ const TAB_MOTION_TRANSITION: Transition = {
 };
 
 const TAB_TOOLTIP_CLASS_NAME =
-  "rounded-lg border border-[#e4eaf1] bg-white px-2.5 py-[5px] text-[12px] font-semibold text-[#193a5c] shadow-[0_8px_18px_rgba(25,58,92,0.12)]";
+  "rounded-lg border border-[#e4eaf1] bg-white px-2.5 py-[5px] text-[12px] font-medium text-[#193a5c] shadow-[0_8px_18px_rgba(25,58,92,0.12)]";
 const TAB_TOOLTIP_ARROW_CLASS_NAME =
   "border-b border-r border-[#e4eaf1] bg-white";
 
