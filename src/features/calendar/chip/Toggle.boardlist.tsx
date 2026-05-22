@@ -41,7 +41,7 @@ const toggleItems = [
           height="12"
           rx="1"
           stroke="currentColor"
-          strokeWidth="1.2"
+          strokeWidth="1.5"
         />
         <rect
           x="8"
@@ -50,7 +50,7 @@ const toggleItems = [
           height="12"
           rx="1"
           stroke="currentColor"
-          strokeWidth="1.2"
+          strokeWidth="1.5"
         />
       </svg>
     ),
@@ -68,7 +68,7 @@ const toggleItems = [
         <path
           d="M1.5 3.5h11M1.5 7h11M1.5 10.5h11"
           stroke="currentColor"
-          strokeWidth="1.3"
+          strokeWidth="1.5"
           strokeLinecap="round"
         />
       </svg>
