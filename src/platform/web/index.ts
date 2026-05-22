@@ -1,4 +1,4 @@
-import type { PlatformApi } from "@/types/desktop-api";
+import type { PlatformApi } from "@/types/externals/desktop-api";
 
 const WEB_APP_VERSION =
   import.meta.env.VITE_BUILD_VERSION ?? import.meta.env.MODE;
@@ -26,7 +26,6 @@ export const webPlatform: PlatformApi = {
     exchangeTokens: async () => {
       throw new Error("OAuth desktop bridge is not available in web runtime");
     },
-    // Web 版は refresh_token フロー非対応
     refreshTokens: async () => {
       throw new Error("OAuth desktop bridge is not available in web runtime");
     },
