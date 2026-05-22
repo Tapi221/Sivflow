@@ -54,6 +54,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
     headerScrollRef,
     scrollContainerRef,
     contentViewportRef,
+    handleCalendarScroll,
     setActiveMode,
     handleSelectViewMode,
     handleSidebarSelectDate,
@@ -250,6 +251,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                     laneLabelWidth={C.TIMELINE_LANE_LABEL_WIDTH}
                     rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
                     scrollContainerRef={scrollContainerRef}
+                    onScroll={handleCalendarScroll}
                     onSelectDate={handleSidebarSelectDate}
                   />
                 ) : (
@@ -260,6 +262,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                     visibleEvents={calendarEvents}
                     calendarDayColumnWidth={calendarDayColumnWidth}
                     timelineGridStyle={timelineGridStyle}
+                    onScroll={handleCalendarScroll}
                     selectedDate={selectedDate}
                     onSelectDate={handleSidebarSelectDate}
                   />
