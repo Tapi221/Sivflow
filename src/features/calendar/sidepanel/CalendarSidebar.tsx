@@ -8,17 +8,17 @@ import {
   startOfWeek,
 } from "date-fns";
 
+import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
+import { AddGoogleCalendarButton } from "@/chip/button/AddGoogleCalendarButton";
+import { AnimatedCircleCheckbox } from "@/chip/checkbox/AnimatedCircleCheckbox";
+import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
+import { CalendarIcon, TaskIcon } from "@/components/icons/schedule.icons";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
-import { AnimatedCircleCheckbox } from "@/chip/checkbox/AnimatedCircleCheckbox";
-import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
-import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
-import { CalendarIcon, TaskIcon } from "@/components/icons/schedule.icons";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
-import { AddGoogleCalendarButton } from "../chip/button/AddGoogleCalendarButton";
 import type {
   CalendarSidebarProps,
   GoogleAccountDisplay,
