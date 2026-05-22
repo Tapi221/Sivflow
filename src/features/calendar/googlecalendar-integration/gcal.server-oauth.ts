@@ -2,7 +2,9 @@ import { httpsCallable } from "firebase/functions";
 
 import { functionsClient } from "@/services/firebase";
 
-type ServerGoogleCalendarAccess = {
+import type { GoogleCalendarAccess } from "./gcal.oauth";
+
+type ServerGoogleCalendarAccess = GoogleCalendarAccess & {
   accessToken: string;
   accountEmail: string | null;
   accountName: string | null;
