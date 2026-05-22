@@ -1,5 +1,6 @@
 import { httpsCallable } from "firebase/functions";
 
+import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { functionsClient } from "@/services/firebase";
 
 import type { GoogleCalendarAccess } from "./gcal.oauth";
@@ -42,7 +43,10 @@ const disconnectGoogleCalendarAccountCallable = httpsCallable<
 >(functionsClient, "disconnectGoogleCalendarAccount");
 
 export const isServerStoredGoogleOAuthEnabled = (): boolean => {
-  return import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true";
+  return (
+    import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true" &&
+    !isDesktopLikeRuntime()
+  );
 };
 
 export const exchangeGoogleCalendarCode = async (
