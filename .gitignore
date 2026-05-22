@@ -58,6 +58,7 @@ secrets/
 
 # Functions build output
 functions/lib/
+functions/functions.yaml
 functions/.env*
 
 # Service worker
