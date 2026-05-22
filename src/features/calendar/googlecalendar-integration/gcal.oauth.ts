@@ -19,11 +19,53 @@ const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT =
   "https://accounts.google.com/o/oauth2/v2/auth";
 
 const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+const GOOGLE_IDENTITY_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
+const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
 
 const DESKTOP_CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 
 const GOOGLE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_TASKS_SCOPE] as const;
 const GOOGLE_SCOPE_PARAM = `openid email profile ${GOOGLE_SCOPES.join(" ")}`;
+
+type GoogleTokenResponse = {
+  access_token?: string;
+  error?: string;
+  error_description?: string;
+  expires_in?: number;
+  scope?: string;
+  token_type?: string;
+};
+
+type GoogleTokenClientOverrideConfig = {
+  include_granted_scopes?: boolean;
+  login_hint?: string;
+  prompt?: string;
+  scope?: string;
+};
+
+type GoogleTokenClient = {
+  requestAccessToken: (overrideConfig?: GoogleTokenClientOverrideConfig) => void;
+};
+
+type GoogleTokenClientConfig = GoogleTokenClientOverrideConfig & {
+  callback: (response: GoogleTokenResponse) => void;
+  client_id: string;
+  error_callback?: (error: { type?: string; message?: string }) => void;
+};
+
+declare global {
+  interface Window {
+    google?: {
+      accounts?: {
+        oauth2?: {
+          initTokenClient: (config: GoogleTokenClientConfig) => GoogleTokenClient;
+        };
+      };
+    };
+  }
+}
+
+let googleIdentityScriptPromise: Promise<void> | null = null;
 
 const toBase64Url = (bytes: Uint8Array): string => {
   const binary = Array.from(bytes, (v) => String.fromCharCode(v)).join("");
@@ -93,6 +135,16 @@ const getClientId = (): string => {
 
   if (!clientId) {
     throw new Error("Missing Google OAuth client id");
+  }
+
+  return clientId;
+};
+
+const getWebClientId = (): string => {
+  const clientId = import.meta.env.VITE_WEB_GOOGLE_OAUTH_CLIENT_ID;
+
+  if (!clientId) {
+    throw new Error("Missing Web Google OAuth client id");
   }
 
   return clientId;
@@ -238,7 +290,135 @@ export type GoogleCalendarAccess = {
   accountEmail: string | null;
   accountName: string | null;
   accountPhotoUrl: string | null;
+  expiresInSeconds?: number | null;
   refreshToken?: string;
+};
+
+const loadGoogleIdentityServices = async (): Promise<void> => {
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    throw new Error("Google Identity Services is not available");
+  }
+
+  if (window.google?.accounts?.oauth2?.initTokenClient) {
+    return;
+  }
+
+  googleIdentityScriptPromise ??= new Promise<void>((resolve, reject) => {
+    const existingScript = document.querySelector<HTMLScriptElement>(
+      `script[src="${GOOGLE_IDENTITY_SCRIPT_SRC}"]`,
+    );
+
+    if (existingScript) {
+      existingScript.addEventListener("load", () => resolve(), { once: true });
+      existingScript.addEventListener(
+        "error",
+        () => reject(new Error("Failed to load Google Identity Services")),
+        { once: true },
+      );
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = GOOGLE_IDENTITY_SCRIPT_SRC;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load Google Identity Services"));
+    document.head.append(script);
+  });
+
+  await googleIdentityScriptPromise;
+
+  if (!window.google?.accounts?.oauth2?.initTokenClient) {
+    throw new Error("Google Identity Services did not initialize");
+  }
+};
+
+const fetchGoogleUserInfo = async (accessToken: string) => {
+  const response = await fetch(GOOGLE_USERINFO_ENDPOINT, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Google profile (${response.status})`);
+  }
+
+  const json = (await response.json()) as {
+    email?: string;
+    name?: string;
+    picture?: string;
+  };
+
+  return {
+    accountEmail: json.email ?? null,
+    accountName: json.name ?? null,
+    accountPhotoUrl: json.picture ?? null,
+  };
+};
+
+const requestWebGisToken = async (
+  auth: Auth,
+  silent: boolean,
+): Promise<GoogleCalendarAccess> => {
+  await loadGoogleIdentityServices();
+
+  const clientId = getWebClientId();
+  const loginHint = auth.currentUser?.email ?? readEmail() ?? undefined;
+  const prompt = silent ? "none" : "consent select_account";
+
+  const tokenResponse = await new Promise<GoogleTokenResponse>((resolve, reject) => {
+    const client = window.google!.accounts!.oauth2!.initTokenClient({
+      callback: resolve,
+      client_id: clientId,
+      include_granted_scopes: true,
+      login_hint: loginHint,
+      prompt,
+      scope: GOOGLE_SCOPE_PARAM,
+      error_callback: (error) => {
+        reject(new Error(error.message ?? error.type ?? "Google OAuth failed"));
+      },
+    });
+
+    client.requestAccessToken({
+      include_granted_scopes: true,
+      login_hint: loginHint,
+      prompt,
+      scope: GOOGLE_SCOPE_PARAM,
+    });
+  });
+
+  if (tokenResponse.error) {
+    throw new Error(
+      tokenResponse.error_description ?? tokenResponse.error ?? "Google OAuth failed",
+    );
+  }
+
+  if (!tokenResponse.access_token) {
+    throw new Error("No access token");
+  }
+
+  let profile = {
+    accountEmail: auth.currentUser?.email ?? null,
+    accountName: auth.currentUser?.displayName ?? null,
+    accountPhotoUrl: auth.currentUser?.photoURL ?? null,
+  };
+
+  try {
+    profile = await fetchGoogleUserInfo(tokenResponse.access_token);
+  } catch {
+    // UserInfo が取れない場合も Google API の access token は利用できるため、
+    // Firebase Auth の表示情報をフォールバックとして使う。
+  }
+
+  return {
+    accessToken: tokenResponse.access_token,
+    accountEmail: profile.accountEmail,
+    accountName: profile.accountName,
+    accountPhotoUrl: profile.accountPhotoUrl,
+    expiresInSeconds: tokenResponse.expires_in ?? null,
+  };
 };
 
 export const refreshCalendarAccessToken = async ({
@@ -285,6 +465,7 @@ export const refreshCalendarAccessToken = async ({
 
   const json = (await response.json()) as {
     access_token?: string;
+    expires_in?: number;
     refresh_token?: string;
     id_token?: string;
   };
@@ -297,12 +478,13 @@ export const refreshCalendarAccessToken = async ({
 
   return {
     accessToken: json.access_token,
+    expiresInSeconds: json.expires_in ?? null,
     refreshToken: json.refresh_token ?? refreshToken,
     ...profile,
   };
 };
 
-const requestWebToken = async (auth: Auth, silent: boolean) => {
+const requestWebTokenWithFirebase = async (auth: Auth, silent: boolean) => {
   const provider = new GoogleAuthProvider();
 
   for (const scope of GOOGLE_SCOPES) {
@@ -334,6 +516,17 @@ const requestWebToken = async (auth: Auth, silent: boolean) => {
     accountName: result.user.displayName,
     accountPhotoUrl: result.user.photoURL,
   };
+};
+
+const requestWebToken = async (
+  auth: Auth,
+  silent: boolean,
+): Promise<GoogleCalendarAccess> => {
+  if (import.meta.env.VITE_WEB_GOOGLE_OAUTH_CLIENT_ID) {
+    return requestWebGisToken(auth, silent);
+  }
+
+  return requestWebTokenWithFirebase(auth, silent);
 };
 
 export const requestCalendarAccessToken = async (
