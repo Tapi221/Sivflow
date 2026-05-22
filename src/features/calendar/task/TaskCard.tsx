@@ -67,7 +67,7 @@ export const TaskCard = ({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-[14px] border border-[#eef0f4] bg-white p-3",
+        "group relative overflow-hidden rounded-[14px] border border-[#eef0f4] bg-white px-3 pt-3 pb-2",
         "shadow-[0_1px_2px_rgba(15,23,42,0.04),0_7px_18px_rgba(15,23,42,0.06)]",
         "transition-[box-shadow,background-color,border-color] duration-200 ease-out",
         "hover:border-[#e5e8ef] hover:bg-white hover:shadow-[0_1px_2px_rgba(15,23,42,0.05),0_10px_24px_rgba(15,23,42,0.08)]",
@@ -136,8 +136,8 @@ export const TaskCard = ({
             </span>
           </div>
 
-          <div className="mt-2 flex items-center justify-between gap-2">
-            <div className="min-w-0">{dateContent}</div>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <div className="-ml-6 min-w-0">{dateContent}</div>
 
             {task.assignee && (
               <GoogleAccountChip
