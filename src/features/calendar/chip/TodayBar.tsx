@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
-import { useT } from "@/i18n/useT";
+import { useDateFnsLocale, useT } from "@/i18n/useT";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
 type Props = {
@@ -12,7 +12,10 @@ type Props = {
 
 export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
   const t = useT();
-  const todayTooltipLabel = format(new Date(), "M月d日");
+  const dateFnsLocale = useDateFnsLocale();
+  const todayTooltipLabel = format(new Date(), t.todayTooltipDateFormat, {
+    locale: dateFnsLocale,
+  });
 
   return (
     <div
