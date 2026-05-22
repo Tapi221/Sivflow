@@ -152,9 +152,11 @@ export const TaskBoardView = ({
       return;
     }
 
-    const activeRectTop = event.active.rect.current.translated?.top ?? event.active.rect.current.initial?.top ?? 0;
-    const overRectTop = over.rect?.top ?? 0;
-    const position = activeRectTop > overRectTop ? "after" : "before";
+    const activeRect = event.active.rect.current.translated ?? event.active.rect.current.initial;
+    const overRect = over.rect;
+    const activeCenterY = activeRect.top + activeRect.height / 2;
+    const overCenterY = overRect.top + overRect.height / 2;
+    const position = activeCenterY >= overCenterY ? "after" : "before";
 
     onReorderTask(activeId, overTask.status, overId, position);
   };
