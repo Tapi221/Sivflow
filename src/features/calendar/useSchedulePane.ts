@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import type { RefObject, UIEvent } from "react";
 
 import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
 import type {
@@ -21,6 +21,7 @@ export type UseSchedulePaneReturn = {
   contentViewportRef: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   headerScrollRef: RefObject<HTMLDivElement | null>;
+  handleCalendarScroll: (event: UIEvent<HTMLDivElement>) => void;
 
   currentDate: Date;
   selectedDate: Date;
@@ -142,6 +143,7 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     contentViewportRef: navigation.contentViewportRef,
     scrollContainerRef: scroll.scrollContainerRef,
     headerScrollRef: scroll.headerScrollRef,
+    handleCalendarScroll: scroll.handleScroll,
 
     currentDate: navigation.currentDate,
     selectedDate: navigation.selectedDate,
