@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 import {
+  startTransition,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -22,6 +23,8 @@ type UseMonthInfiniteScrollOptions = {
   scrollTargetToken: number;
   /** リサイズ中はスクロールイベントを無視するためのフラグ */
   isResizingRef: RefObject<boolean>;
+  /** スクロール中のレイアウト計算で DOM 計測を避けるための行高キャッシュ */
+  monthRowHeightRef?: RefObject<number>;
   onVisibleMonthChange?: (date: Date) => void;
 };
 
@@ -39,12 +42,16 @@ type MonthRangeAnchor = {
   offsetTop: number;
 };
 
+const MONTH_GRID_FIRST_WEEK_OFFSET_PX = C.CALENDAR_WEEKDAY_HEADER_HEIGHT;
+const VISIBLE_MONTH_SYNC_DELAY_MS = 96;
+
 // ── フック本体
 
 export const useMonthInfiniteScroll = ({
   currentDate,
   scrollTargetToken,
   isResizingRef,
+  monthRowHeightRef,
   onVisibleMonthChange,
 }: UseMonthInfiniteScrollOptions): UseMonthInfiniteScrollReturn => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -54,6 +61,7 @@ export const useMonthInfiniteScroll = ({
   const isExtendingBeforeRef = useRef(false);
   const isExtendingAfterRef = useRef(false);
   const visibleMonthSyncRafRef = useRef<number | null>(null);
+  const visibleMonthSyncTimeoutRef = useRef<number | null>(null);
   const pendingScrollWeekKeyRef = useRef<string | null>(
     getCalendarWeekKey(currentDate),
   );
@@ -87,66 +95,75 @@ export const useMonthInfiniteScroll = ({
     [],
   );
 
-  const getCurrentRangeAnchor = useCallback(
-    (scroller: HTMLDivElement): MonthRangeAnchor | null => {
-      const firstWeek = monthWeeks[0];
-      if (!firstWeek) return null;
+  const getMonthRowHeight = useCallback(() => {
+    const cachedHeight = monthRowHeightRef?.current;
 
-      const firstRow = weekRowRefsMap.current.get(firstWeek.key);
-      if (!firstRow) return null;
+    if (
+      typeof cachedHeight === "number" &&
+      Number.isFinite(cachedHeight) &&
+      cachedHeight > 0
+    ) {
+      return cachedHeight;
+    }
 
-      const rowHeight = firstRow.offsetHeight;
-      if (rowHeight <= 0) return null;
+    const firstWeek = monthWeeks[0];
+    const firstRow = firstWeek
+      ? weekRowRefsMap.current.get(firstWeek.key)
+      : null;
+    const measuredHeight = firstRow?.offsetHeight ?? 0;
 
+    return measuredHeight > 0 ? measuredHeight : C.DEFAULT_MONTH_ROW_HEIGHT;
+  }, [monthRowHeightRef, monthWeeks]);
+
+  const getWeekIndexFromScrollTop = useCallback(
+    (scrollTop: number) => {
+      const rowHeight = getMonthRowHeight();
       const rawWeekIndex = Math.floor(
-        (scroller.scrollTop - firstRow.offsetTop) / rowHeight,
+        (scrollTop - MONTH_GRID_FIRST_WEEK_OFFSET_PX) / rowHeight,
       );
 
-      const weekIndex = Math.min(
+      return Math.min(
         monthWeeks.length - 1,
         Math.max(0, rawWeekIndex),
       );
+    },
+    [getMonthRowHeight, monthWeeks.length],
+  );
 
+  const getWeekOffsetTop = useCallback(
+    (weekIndex: number) =>
+      MONTH_GRID_FIRST_WEEK_OFFSET_PX + weekIndex * getMonthRowHeight(),
+    [getMonthRowHeight],
+  );
+
+  const getCurrentRangeAnchor = useCallback(
+    (scroller: HTMLDivElement): MonthRangeAnchor | null => {
+      if (monthWeeks.length === 0) return null;
+
+      const weekIndex = getWeekIndexFromScrollTop(scroller.scrollTop);
       const anchorWeek = monthWeeks[weekIndex];
-      const anchorRow = anchorWeek
-        ? weekRowRefsMap.current.get(anchorWeek.key)
-        : null;
 
-      if (!anchorWeek || !anchorRow) return null;
+      if (!anchorWeek) return null;
 
       return {
         weekKey: anchorWeek.key,
-        offsetTop: anchorRow.offsetTop - scroller.scrollTop,
+        offsetTop: getWeekOffsetTop(weekIndex) - scroller.scrollTop,
       };
     },
-    [monthWeeks],
+    [getWeekIndexFromScrollTop, getWeekOffsetTop, monthWeeks],
   );
 
   const syncVisibleMonth = useCallback(() => {
     const scroller = scrollContainerRef.current;
-    const firstWeek = monthWeeks[0];
 
-    if (!scroller || !firstWeek || !onVisibleMonthChange) return;
-
-    const firstRow = weekRowRefsMap.current.get(firstWeek.key);
-    if (!firstRow) return;
-
-    const rowHeight = firstRow.offsetHeight;
-    if (rowHeight <= 0) return;
+    if (!scroller || monthWeeks.length === 0 || !onVisibleMonthChange) return;
 
     const sampleOffsetTop =
       scroller.scrollTop + C.MONTH_SCROLL_VISIBLE_SAMPLE_OFFSET_PX;
 
-    const rawWeekIndex = Math.floor(
-      (sampleOffsetTop - firstRow.offsetTop) / rowHeight,
-    );
-
-    const weekIndex = Math.min(
-      monthWeeks.length - 1,
-      Math.max(0, rawWeekIndex),
-    );
-
+    const weekIndex = getWeekIndexFromScrollTop(sampleOffsetTop);
     const visibleWeek = monthWeeks[weekIndex];
+
     if (!visibleWeek) return;
 
     const nextKey = getCalendarMonthKey(visibleWeek.visibleMonthDate);
@@ -154,18 +171,31 @@ export const useMonthInfiniteScroll = ({
 
     visibleMonthKeyRef.current = nextKey;
     onVisibleMonthChange(visibleWeek.visibleMonthDate);
-  }, [monthWeeks, onVisibleMonthChange]);
+  }, [getWeekIndexFromScrollTop, monthWeeks, onVisibleMonthChange]);
 
   const scheduleVisibleMonthSync = useCallback(() => {
-    if (visibleMonthSyncRafRef.current !== null) return;
+    if (visibleMonthSyncTimeoutRef.current !== null) {
+      window.clearTimeout(visibleMonthSyncTimeoutRef.current);
+    }
 
-    visibleMonthSyncRafRef.current = requestAnimationFrame(() => {
-      visibleMonthSyncRafRef.current = null;
-      syncVisibleMonth();
-    });
+    visibleMonthSyncTimeoutRef.current = window.setTimeout(() => {
+      visibleMonthSyncTimeoutRef.current = null;
+
+      if (visibleMonthSyncRafRef.current !== null) return;
+
+      visibleMonthSyncRafRef.current = requestAnimationFrame(() => {
+        visibleMonthSyncRafRef.current = null;
+        syncVisibleMonth();
+      });
+    }, VISIBLE_MONTH_SYNC_DELAY_MS);
   }, [syncVisibleMonth]);
 
   const cancelVisibleMonthSync = useCallback(() => {
+    if (visibleMonthSyncTimeoutRef.current !== null) {
+      window.clearTimeout(visibleMonthSyncTimeoutRef.current);
+      visibleMonthSyncTimeoutRef.current = null;
+    }
+
     if (visibleMonthSyncRafRef.current === null) return;
 
     cancelAnimationFrame(visibleMonthSyncRafRef.current);
@@ -184,16 +214,18 @@ export const useMonthInfiniteScroll = ({
         prependScrollHeightRef.current = scroller.scrollHeight;
         rangeAnchorRef.current = null;
 
-        setMonthOffsetRange((currentRange) => ({
-          startOffset: currentRange.startOffset - C.MONTH_EXTEND_COUNT,
-          endOffset:
-            currentRange.endOffset - currentRange.startOffset +
-              1 +
-              C.MONTH_EXTEND_COUNT >
-            C.MONTH_MAX_RENDERED_MONTHS
-              ? currentRange.endOffset
-              : currentRange.endOffset,
-        }));
+        startTransition(() => {
+          setMonthOffsetRange((currentRange) => ({
+            startOffset: currentRange.startOffset - C.MONTH_EXTEND_COUNT,
+            endOffset:
+              currentRange.endOffset - currentRange.startOffset +
+                1 +
+                C.MONTH_EXTEND_COUNT >
+              C.MONTH_MAX_RENDERED_MONTHS
+                ? currentRange.endOffset
+                : currentRange.endOffset,
+          }));
+        });
       }
 
       const distToBottom =
@@ -206,16 +238,18 @@ export const useMonthInfiniteScroll = ({
         isExtendingAfterRef.current = true;
         rangeAnchorRef.current = getCurrentRangeAnchor(scroller);
 
-        setMonthOffsetRange((currentRange) => ({
-          startOffset:
-            currentRange.endOffset - currentRange.startOffset +
-              1 +
-              C.MONTH_EXTEND_COUNT >
-            C.MONTH_MAX_RENDERED_MONTHS
-              ? currentRange.startOffset + C.MONTH_EXTEND_COUNT
-              : currentRange.startOffset,
-          endOffset: currentRange.endOffset + C.MONTH_EXTEND_COUNT,
-        }));
+        startTransition(() => {
+          setMonthOffsetRange((currentRange) => ({
+            startOffset:
+              currentRange.endOffset - currentRange.startOffset +
+                1 +
+                C.MONTH_EXTEND_COUNT >
+              C.MONTH_MAX_RENDERED_MONTHS
+                ? currentRange.startOffset + C.MONTH_EXTEND_COUNT
+                : currentRange.startOffset,
+            endOffset: currentRange.endOffset + C.MONTH_EXTEND_COUNT,
+          }));
+        });
       }
 
       scheduleVisibleMonthSync();
@@ -235,10 +269,11 @@ export const useMonthInfiniteScroll = ({
     rangeAnchorRef.current = null;
     isExtendingBeforeRef.current = false;
     isExtendingAfterRef.current = false;
+    cancelVisibleMonthSync();
 
     setAnchorMonth(currentDate);
     setMonthOffsetRange(C.createInitialMonthOffsetRange());
-  }, [currentDate, scrollTargetToken]);
+  }, [cancelVisibleMonthSync, currentDate, scrollTargetToken]);
 
   useLayoutEffect(() => {
     const targetWeekKey = pendingScrollWeekKeyRef.current;
@@ -246,13 +281,14 @@ export const useMonthInfiniteScroll = ({
 
     const attemptScroll = (): boolean => {
       const scroller = scrollContainerRef.current;
-      const targetRow = weekRowRefsMap.current.get(targetWeekKey);
+      const targetWeekIndex = monthWeeks.findIndex(
+        (week) => week.key === targetWeekKey,
+      );
 
-      if (!scroller || !targetRow) return false;
+      if (!scroller || targetWeekIndex === -1) return false;
 
-      // ── 修正後：対象行をビューポート中央へ
       const rowCenter =
-        targetRow.offsetTop + targetRow.offsetHeight / 2;
+        getWeekOffsetTop(targetWeekIndex) + getMonthRowHeight() / 2;
 
       const viewCenter = scroller.clientHeight / 2;
 
@@ -277,7 +313,7 @@ export const useMonthInfiniteScroll = ({
     rafId = requestAnimationFrame(retryScroll);
 
     return () => cancelAnimationFrame(rafId);
-  }, [monthWeeks, syncVisibleMonth]);
+  }, [getMonthRowHeight, getWeekOffsetTop, monthWeeks, syncVisibleMonth]);
 
   useLayoutEffect(() => {
     const prevHeight = prependScrollHeightRef.current;
@@ -301,18 +337,21 @@ export const useMonthInfiniteScroll = ({
     if (!rangeAnchor) return;
 
     const scroller = scrollContainerRef.current;
-    const anchorRow = weekRowRefsMap.current.get(rangeAnchor.weekKey);
-    if (!scroller || !anchorRow) {
+    const anchorWeekIndex = monthWeeks.findIndex(
+      (week) => week.key === rangeAnchor.weekKey,
+    );
+
+    if (!scroller || anchorWeekIndex === -1) {
       rangeAnchorRef.current = null;
       isExtendingAfterRef.current = false;
       return;
     }
 
-    scroller.scrollTop = anchorRow.offsetTop - rangeAnchor.offsetTop;
+    scroller.scrollTop = getWeekOffsetTop(anchorWeekIndex) - rangeAnchor.offsetTop;
 
     rangeAnchorRef.current = null;
     isExtendingAfterRef.current = false;
-  }, [monthWeeks.length]);
+  }, [getWeekOffsetTop, monthWeeks]);
 
   useEffect(() => {
     const scroller = scrollContainerRef.current;
