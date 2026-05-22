@@ -58,23 +58,6 @@ const IconChevronRight = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const IconSync = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-  >
-    <path
-      d="M13.5 8A5.5 5.5 0 1 1 8 2.5M13.5 2.5V6H10"
-      stroke="currentColor"
-      strokeWidth="1.25"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
 const buildMiniCalendarDays = (
   monthDate: Date,
   selectedDate: Date,
@@ -110,16 +93,6 @@ const GoogleAccountSection = ({
   onRetry,
 }: GoogleAccountSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
-
-  const syncIndicator =
-    account.syncState === "syncing" ? (
-      <IconSync className="h-3 w-3 shrink-0 animate-spin text-[#185FA5]" />
-    ) : account.connectionStatus === "needsReconnect" ? (
-      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#f59e0b]" />
-    ) : account.syncState === "error" ? (
-      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#e53e3e]" />
-    ) : null;
-
   const accountName = account.name ?? account.email ?? "Google";
 
   return (
@@ -137,8 +110,6 @@ const GoogleAccountSection = ({
             {account.email}
           </span>
         )}
-
-        {syncIndicator}
 
         <span
           className={cn(
@@ -173,17 +144,6 @@ const GoogleAccountSection = ({
             </button>
           );
         })}
-
-      {isOpen && account.calendars.length === 0 && (
-        <p className="px-7 py-1 text-[11px] text-[#b0b5bf]">
-          {account.syncState === "syncing" ? (
-            <span className="flex items-center gap-1">
-              <IconSync className="h-3 w-3 animate-spin" />
-              読み込み中…
-            </span>
-          ) : null}
-        </p>
-      )}
 
       {account.connectionStatus === "needsReconnect" && (
         <div className="mt-1 px-2">
