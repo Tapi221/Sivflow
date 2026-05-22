@@ -304,6 +304,11 @@ const isUnauthorizedError = (error: unknown): boolean =>
 const toErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+const requestSilentAccessToken = async () => {
+  const { auth } = await import("@/services/firebase");
+  return requestCalendarAccessToken(auth, true);
+};
+
 const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => ({
   id: stored.id,
   email: stored.email,
@@ -408,23 +413,25 @@ export const useMultiAccountGoogleCalendar = () => {
               (x) => x.id === accountId,
             );
 
-            if (!account?.refreshToken) {
+            if (!account) {
               dispatchAccounts({ type: "NEEDS_RECONNECT", id: accountId });
               return false;
             }
 
-            let result: Awaited<ReturnType<typeof refreshCalendarAccessToken>>;
+            let result: Awaited<ReturnType<typeof requestCalendarAccessToken>>;
 
             try {
-              result = await refreshCalendarAccessToken({
-                refreshToken: account.refreshToken,
-              });
+              result = account.refreshToken
+                ? await refreshCalendarAccessToken({
+                  refreshToken: account.refreshToken,
+                })
+                : await requestSilentAccessToken();
             } catch {
               dispatchAccounts({ type: "NEEDS_RECONNECT", id: accountId });
               return false;
             }
 
-            const refreshToken = result.refreshToken ?? account.refreshToken;
+            const refreshToken = result.refreshToken ?? account.refreshToken ?? null;
 
             updateStoredAccountToken(
               accountId,
@@ -434,6 +441,7 @@ export const useMultiAccountGoogleCalendar = () => {
                 name: result.accountName,
                 photoUrl: result.accountPhotoUrl,
               },
+              result.expiresInSeconds,
             );
 
             accountsRef.current = accountsRef.current.map((current) =>
@@ -580,17 +588,14 @@ export const useMultiAccountGoogleCalendar = () => {
       };
 
       const refreshStoredAccount = async () => {
-        if (!stored.refreshToken) {
-          dispatchAccounts({ type: "NEEDS_RECONNECT", id: accountId });
-          return;
-        }
-
-        let result: Awaited<ReturnType<typeof refreshCalendarAccessToken>>;
+        let result: Awaited<ReturnType<typeof requestCalendarAccessToken>>;
 
         try {
-          result = await refreshCalendarAccessToken({
-            refreshToken: stored.refreshToken,
-          });
+          result = stored.refreshToken
+            ? await refreshCalendarAccessToken({
+              refreshToken: stored.refreshToken,
+            })
+            : await requestSilentAccessToken();
         } catch (error) {
           dispatchAccounts({
             type: "NEEDS_RECONNECT",
@@ -604,7 +609,7 @@ export const useMultiAccountGoogleCalendar = () => {
           await applyAccessToken(
             result.accessToken,
             result.refreshToken ?? stored.refreshToken,
-            buildTokenExpiry(),
+            buildTokenExpiry(result.expiresInSeconds),
             result.accountName,
             result.accountPhotoUrl,
           );
@@ -800,7 +805,7 @@ export const useMultiAccountGoogleCalendar = () => {
         name: result.accountName ?? existingAccount?.name ?? null,
         photoUrl: result.accountPhotoUrl ?? existingAccount?.photoUrl ?? null,
         accessToken: result.accessToken,
-        accessTokenExpiry: buildTokenExpiry(),
+        accessTokenExpiry: buildTokenExpiry(result.expiresInSeconds),
         refreshToken,
         selectedCalendarIds: defaultIds,
         cachedCalendars: toCachedCalendars(list),
