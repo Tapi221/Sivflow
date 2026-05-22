@@ -13,6 +13,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { useCallback, useMemo, useState, type WheelEvent } from "react";
+import { createPortal } from "react-dom";
 
 import { TASK_COLUMNS } from "./task.types";
 import type { Task, TaskStatus } from "./task.types";
@@ -48,7 +49,7 @@ type VerticalRect = {
 };
 
 const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-[#f7f8fa]";
-const TASK_CARD_OVERLAY_CLASS_NAME = "w-[236px] max-w-[calc(100vw-2rem)]";
+const TASK_CARD_OVERLAY_CLASS_NAME = "max-w-[calc(100vw-2rem)]";
 const TASK_COLUMN_DIVIDER_CLASS_NAME =
   "before:pointer-events-none before:absolute before:-left-1.5 before:top-0 before:bottom-0 before:w-[0.5px] before:bg-[#e9eaed] before:content-['']";
 
@@ -190,6 +191,7 @@ export const TaskBoardView = ({
   onReorderTask,
 }: TaskBoardViewProps) => {
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [activeTaskWidth, setActiveTaskWidth] = useState<number | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -208,10 +210,12 @@ export const TaskBoardView = ({
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveTaskId(String(event.active.id));
+    setActiveTaskWidth(event.active.rect.current.initial?.width ?? null);
   };
 
   const handleDragCancel = () => {
     setActiveTaskId(null);
+    setActiveTaskWidth(null);
   };
 
   const handleBoardWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
@@ -247,6 +251,7 @@ export const TaskBoardView = ({
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveTaskId(null);
+    setActiveTaskWidth(null);
 
     const activeId = String(event.active.id);
     const over = event.over;
@@ -281,6 +286,24 @@ export const TaskBoardView = ({
     onReorderTask(activeId, overTask.status, overId, position);
   };
 
+  const dragOverlay = (
+    <DragOverlay adjustScale={false} dropAnimation={null}>
+      {activeTask ? (
+        <div
+          className={TASK_CARD_OVERLAY_CLASS_NAME}
+          style={activeTaskWidth ? { width: activeTaskWidth } : undefined}
+        >
+          <TaskCard
+            task={activeTask}
+            accountName={accountName}
+            accountPhotoUrl={accountPhotoUrl}
+            isDragging
+          />
+        </div>
+      ) : null}
+    </DragOverlay>
+  );
+
   return (
     <DndContext
       sensors={sensors}
@@ -310,18 +333,9 @@ export const TaskBoardView = ({
         </div>
       </div>
 
-      <DragOverlay adjustScale={false} dropAnimation={null}>
-        {activeTask ? (
-          <div className={TASK_CARD_OVERLAY_CLASS_NAME}>
-            <TaskCard
-              task={activeTask}
-              accountName={accountName}
-              accountPhotoUrl={accountPhotoUrl}
-              isDragging
-            />
-          </div>
-        ) : null}
-      </DragOverlay>
+      {typeof document === "undefined"
+        ? dragOverlay
+        : createPortal(dragOverlay, document.body)}
     </DndContext>
   );
 };
