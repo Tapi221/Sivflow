@@ -68,10 +68,10 @@ export const TaskCard = ({
     <div
       className={cn(
         "group relative overflow-hidden rounded-[14px] border border-[#eef0f4] bg-white px-3 pt-3 pb-2",
-        "shadow-[0_1px_2px_rgba(15,23,42,0.04),0_7px_18px_rgba(15,23,42,0.06)]",
+        "shadow-[0_1px_2px_rgba(15,23,42,0.04),0_3px_8px_rgba(15,23,42,0.035)]",
         "transition-[box-shadow,background-color,border-color] duration-200 ease-out",
-        "hover:border-[#e5e8ef] hover:bg-white hover:shadow-[0_1px_2px_rgba(15,23,42,0.05),0_10px_24px_rgba(15,23,42,0.08)]",
-        isDragging && "shadow-[0_8px_20px_rgba(15,23,42,0.16)]",
+        "hover:border-[#e5e8ef] hover:bg-white hover:shadow-[0_1px_2px_rgba(15,23,42,0.045),0_5px_12px_rgba(15,23,42,0.045)]",
+        isDragging && "shadow-[0_5px_14px_rgba(15,23,42,0.10)]",
       )}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white" />
