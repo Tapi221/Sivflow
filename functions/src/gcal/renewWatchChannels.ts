@@ -1,16 +1,34 @@
-import { getApps, initializeApp } from "firebase-admin/app";
-import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
-const ensureFirebaseAdmin = () => {
-  if (getApps().length === 0) {
-    initializeApp();
-  }
+let adminAppReady: Promise<void> | null = null;
+let firestoreModulePromise: Promise<typeof import("firebase-admin/firestore")> | null = null;
+
+const ensureFirebaseAdmin = async (): Promise<void> => {
+  adminAppReady ??= (async () => {
+    const { getApps, initializeApp } = await import("firebase-admin/app");
+
+    if (getApps().length === 0) {
+      initializeApp();
+    }
+  })();
+
+  await adminAppReady;
 };
 
-const getDb = () => {
-  ensureFirebaseAdmin();
+const getFirestoreModule = async () => {
+  firestoreModulePromise ??= import("firebase-admin/firestore");
+  return await firestoreModulePromise;
+};
+
+const getDb = async () => {
+  await ensureFirebaseAdmin();
+  const { getFirestore } = await getFirestoreModule();
   return getFirestore();
+};
+
+const serverTimestamp = async () => {
+  const { FieldValue } = await getFirestoreModule();
+  return FieldValue.serverTimestamp();
 };
 
 export const renewExpiredWatchChannels = onSchedule(
@@ -19,7 +37,7 @@ export const renewExpiredWatchChannels = onSchedule(
     schedule: "every 24 hours",
   },
   async () => {
-    const db = getDb();
+    const db = await getDb();
     const now = Date.now();
     const threshold = now + 24 * 60 * 60 * 1000;
 
@@ -39,7 +57,7 @@ export const renewExpiredWatchChannels = onSchedule(
         await db.collection("gcal_renew_queue").add({
           userId: data.userId,
           calendarId: data.calendarId,
-          createdAt: FieldValue.serverTimestamp(),
+          createdAt: await serverTimestamp(),
         });
       } catch (e) {
         console.error("[renew]", e);
