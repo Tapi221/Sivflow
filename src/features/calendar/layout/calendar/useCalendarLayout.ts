@@ -8,7 +8,7 @@ export const useCalendarLayout = ({
   displayDays,
   selectedViewMode,
   currentDate,
-  calendarBuffer,
+  calendarBuffer: _calendarBuffer,
 }: {
   viewportWidth: number;
   visibleDays: Date[];
