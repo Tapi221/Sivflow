@@ -275,17 +275,17 @@ export const CalendarSidebar = ({
 
   return (
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent px-3 pb-5 pt-2 text-[#24272f]">
-      <section className="flex w-full shrink-0 flex-col rounded-[18px] border border-[#eef0f4] bg-white px-2.5 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <div className="flex w-full items-center justify-between px-0.5">
-          <span className="text-[13px] font-semibold tracking-normal text-[#1c1c1e]">
+      <section className="flex w-full shrink-0 flex-col gap-2">
+        <div className="flex w-full items-center justify-between px-1">
+          <span className="text-[12px] font-semibold tracking-wide text-[#3d4049]">
             {format(monthDate, monthLabelFormat, { locale: dateFnsLocale })}
           </span>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <HoverTooltip label={t.previousMonthLabel} side="top">
               <button
                 type="button"
-                className="flex h-7 w-7 items-center justify-center rounded-full text-[#8e8e93] transition-colors hover:bg-[#f2f2f7] hover:text-[#3a3a3c]"
+                className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
                 onClick={onPreviousMonth}
                 aria-label={t.previousMonthLabel}
               >
@@ -296,7 +296,7 @@ export const CalendarSidebar = ({
             <HoverTooltip label={t.nextMonthLabel} side="top">
               <button
                 type="button"
-                className="flex h-7 w-7 items-center justify-center rounded-full text-[#8e8e93] transition-colors hover:bg-[#f2f2f7] hover:text-[#3a3a3c]"
+                className="flex h-6 w-6 items-center justify-center rounded-md text-[#9aa0aa] hover:bg-[#eceef1]"
                 onClick={onNextMonth}
                 aria-label={t.nextMonthLabel}
               >
@@ -306,45 +306,41 @@ export const CalendarSidebar = ({
           </div>
         </div>
 
-        <div className="mt-2 grid grid-cols-7 px-0.5">
+        <div className="grid grid-cols-7 px-0.5">
           {t.miniCalendarWeekdays.map((weekday, index) => (
             <span
               key={`${weekday}-${index}`}
-              className="flex h-7 items-center justify-center text-[11px] font-semibold uppercase text-[#8e8e93]"
+              className="flex h-6 items-center justify-center text-[11px] font-semibold uppercase text-[#9aa0aa]"
             >
               {weekday}
             </span>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-y-1 px-0.5">
+        <div className="grid grid-cols-7 px-0.5">
           {miniCalendarDays.map((day) => {
+            const isActive = day.isToday || day.isSelected;
+
             return (
               <button
                 key={day.date.toISOString()}
                 type="button"
                 onClick={() => onSelectDate(day.date)}
                 className={cn(
-                  "flex h-8 w-full items-center justify-center rounded-full transition-colors",
-                  !day.isSelected && "hover:bg-[#f2f2f7]",
+                  "flex h-7 w-full items-center justify-center rounded-md transition-colors",
+                  !isActive && "hover:bg-[#eceef1]",
                 )}
               >
                 <span
                   className={cn(
-                    "flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-medium tabular-nums transition-colors",
+                    "flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-semibold tabular-nums",
+                    day.isToday &&
+                      "bg-[#185FA5] text-white shadow-[0_2px_8px_rgba(24,95,165,0.35)]",
                     day.isSelected &&
-                      "bg-[#007aff] text-white shadow-[0_4px_12px_rgba(0,122,255,0.22)]",
-                    !day.isSelected &&
-                      day.isToday &&
-                      "bg-[#eaf4ff] text-[#007aff]",
-                    !day.isSelected &&
                       !day.isToday &&
-                      day.isCurrentMonth &&
-                      "text-[#1c1c1e]",
-                    !day.isSelected &&
-                      !day.isToday &&
-                      !day.isCurrentMonth &&
-                      "text-[#c7c7cc]",
+                      "bg-[#2d3039] text-white",
+                    !isActive && day.isCurrentMonth && "text-[#24231f]",
+                    !isActive && !day.isCurrentMonth && "text-[#b8bcc5]",
                   )}
                 >
                   {day.dayNumber}
