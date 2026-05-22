@@ -61,7 +61,7 @@ const SortableTaskCard = ({
         transform: CSS.Transform.toString(verticalTransform),
         transition,
       }}
-      className={cn("touch-none", isDragging && "z-10 opacity-70")}
+      className={cn("touch-auto", isDragging && "z-10 opacity-70")}
       {...attributes}
       {...listeners}
     >
@@ -95,7 +95,7 @@ export const TaskColumn = ({
   };
 
   return (
-    <div className="flex h-full min-h-0 min-w-[260px] flex-1 flex-col rounded-xl bg-[#f7f8fa] p-3">
+    <div className="flex h-full min-h-0 w-full min-w-0 flex-col rounded-xl bg-[#f7f8fa] p-3">
       {/* カラムヘッダー */}
       <div className="mb-3 flex shrink-0 items-center gap-2">
         <span
