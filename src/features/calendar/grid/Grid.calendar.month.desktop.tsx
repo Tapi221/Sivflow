@@ -4,6 +4,7 @@ import { ja } from "date-fns/locale";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
+import { CalendarDayNumberCircle } from "@/features/calendar/dayNumber/CalendarDayNumberCircle";
 import { CalendarEventChipMonth } from "@/features/calendar/eventchip/EventChip.schedule.month";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
@@ -136,21 +137,14 @@ const CalendarMonthDayCell = memo(({
         }
       >
         {/* 日付 */}
-        <span
-          className={cn(
-            "absolute inline-flex h-[25px] w-[25px] items-center justify-center rounded-full text-[12px] font-semibold tabular-nums transition-all duration-150",
-            GD.MONTH_GRID_DAY_NUMBER_POSITION_CLASS,
-            isToday
-              ? "bg-[#007aff] text-white shadow-[0_5px_12px_rgba(0,122,255,0.28)]"
-              : selected
-                ? "bg-[#1f2937] text-white shadow-[0_4px_10px_rgba(15,23,42,0.2)]"
-                : day.isCurrentMonth
-                  ? "text-[#24231f]"
-                  : "text-[#b0aea8]",
-          )}
+        <CalendarDayNumberCircle
+          isToday={isToday}
+          isSelected={selected}
+          isCurrentMonth={day.isCurrentMonth}
+          className={cn("absolute", GD.MONTH_GRID_DAY_NUMBER_POSITION_CLASS)}
         >
           {day.dayOfMonth}
-        </span>
+        </CalendarDayNumberCircle>
 
         {/* 月初ラベル */}
         {monthAnnotation && (
