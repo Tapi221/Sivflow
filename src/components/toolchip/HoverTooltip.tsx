@@ -16,6 +16,7 @@ type HoverTooltipProps = {
   offset?: number;
   className?: string;
   tooltipClassName?: string;
+  arrowClassName?: string;
   disabled?: boolean;
 };
 
@@ -81,6 +82,7 @@ export const HoverTooltip = ({
   offset = 8,
   className,
   tooltipClassName,
+  arrowClassName,
   disabled = false,
 }: HoverTooltipProps) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
@@ -156,6 +158,7 @@ export const HoverTooltip = ({
                 className={cn(
                   "absolute h-2 w-2 rotate-45 bg-[#24272f]",
                   getArrowClassName(side),
+                  arrowClassName,
                 )}
               />
             </div>
