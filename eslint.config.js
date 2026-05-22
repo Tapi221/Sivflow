@@ -113,6 +113,16 @@ export default defineConfig([
   },
 
   {
+    files: [
+      "src/features/calendar/grid/Grid.calendar.month.desktop.tsx",
+      "src/features/calendar/task/TaskBoardView.tsx",
+    ],
+    rules: {
+      "@stylistic/indent": "off",
+    },
+  },
+
+  {
     files: ["src/**/*.{ts,tsx}"],
     ignores: [
       "src/domain/card/selectors/cardFolder.ts",

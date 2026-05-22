@@ -1,4 +1,4 @@
-import { PlusIcon } from "@/components/icons/schedule.icons";
+import { CreateActionPlusIcon } from "@/features/calendar/chip/button/CreateActionPlusIcon";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
@@ -25,9 +25,7 @@ export const AddGoogleCalendarButton = ({
       onClick={onAddCalendar}
       disabled={isConnecting}
     >
-      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#007aff] text-white">
-        <PlusIcon className="h-3 w-3" />
-      </span>
+      <CreateActionPlusIcon className="h-5 w-5 shadow-none" />
 
       <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#4b5563]">
         {hasGoogleAccounts ? t.addAnotherGoogleAccount : t.addGoogleCalendar}
