@@ -124,20 +124,31 @@
     background: #f2f2f7;
   }
 
-  .calendar-month-scroll > div:first-child {
-    border-color: #d1d1d6 !important;
-    background: rgb(255 255 255 / 86%) !important;
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+  .calendar-month-weekday-header {
+    border-color: rgb(60 60 67 / 18%) !important;
+    background: rgb(248 248 248 / 82%) !important;
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
     box-shadow:
-      0 1px 0 rgb(255 255 255 / 72%),
-      0 10px 24px rgb(0 0 0 / 3%);
+      inset 0 1px 0 rgb(255 255 255 / 70%),
+      0 1px 0 rgb(60 60 67 / 10%);
   }
 
-  .calendar-month-scroll > div:first-child > div {
-    border-color: #e5e5ea !important;
+  .calendar-month-weekday-cell {
+    border-right: 0 !important;
     color: #8e8e93 !important;
-    font-weight: 600;
+    font-family:
+      -apple-system,
+      BlinkMacSystemFont,
+      "SF Pro Text",
+      "Helvetica Neue",
+      sans-serif;
+    letter-spacing: 0.02em;
+  }
+
+  .calendar-month-grid {
+    border-top: 0;
+    background: #ffffff;
   }
 
   .calendar-month-week-row {
@@ -155,6 +166,15 @@
     transition:
       background-color 150ms ease,
       box-shadow 150ms ease;
+  }
+
+  .calendar-month-day-cell > button {
+    font-family:
+      -apple-system,
+      BlinkMacSystemFont,
+      "SF Pro Text",
+      "Helvetica Neue",
+      sans-serif;
   }
 
   .calendar-month-day-cell-hoverable:hover {
