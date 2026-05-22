@@ -18,7 +18,13 @@ import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
 const CALENDAR_PANEL_SHADOW_CLASS =
-  "shadow-[0_-4px_14px_rgba(15,23,42,0.05),0_10px_30px_rgba(15,23,42,0.12)]";
+  "shadow-[0_18px_48px_rgba(15,23,42,0.10),0_1px_0_rgba(255,255,255,0.85)_inset]";
+
+const IOS_CALENDAR_PANEL_CLASS =
+  "border-[#d8dbe2] bg-[rgba(245,245,247,0.92)] backdrop-blur-xl";
+
+const IOS_CALENDAR_SURFACE_CLASS =
+  "border-[#e5e5ea] bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 
 export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const pane = useSchedulePane();
@@ -121,7 +127,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
     return (
       <div className={className}>
         <div className="flex min-w-0 items-center gap-3">
-          <h1 className="truncate text-[16px] font-semibold text-[#24272f]">
+          <h1 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
             {format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale })}
           </h1>
         </div>
@@ -191,7 +197,8 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           {activeMode === "task" ? (
             <div
               className={cn(
-                "flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[24px] rounded-tr-none border border-r-0 border-b-0 border-[#e3e5ea] bg-[#f7f8fa]",
+                "flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[28px] rounded-tr-none border border-r-0 border-b-0",
+                IOS_CALENDAR_PANEL_CLASS,
                 CALENDAR_PANEL_SHADOW_CLASS,
               )}
             >
@@ -200,23 +207,25 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           ) : isMonthCalendarView ? (
             <div
               className={cn(
-                "flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-[#e3e5ea] bg-[#f7f8fa]",
+                "flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0",
+                IOS_CALENDAR_PANEL_CLASS,
                 CALENDAR_PANEL_SHADOW_CLASS,
                 isDayDetailPanelCollapsed
-                  ? "rounded-tl-[24px] rounded-tr-none border-r-0"
-                  : "rounded-t-[24px]",
+                  ? "rounded-tl-[28px] rounded-tr-none border-r-0"
+                  : "rounded-t-[28px]",
               )}
             >
               {renderViewHeader(
-                "mb-3 flex shrink-0 items-center justify-between px-4 pt-4 pr-14",
+                "mb-2 flex shrink-0 items-center justify-between px-5 pt-4 pr-14",
               )}
 
               <div
                 className={cn(
-                  "ml-4 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-[#e9eaed] bg-white",
+                  "ml-4 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0",
+                  IOS_CALENDAR_SURFACE_CLASS,
                   isDayDetailPanelCollapsed
-                    ? "mr-0 rounded-tl-2xl rounded-tr-none border-r-0"
-                    : "mr-4 rounded-t-2xl",
+                    ? "mr-0 rounded-tl-[22px] rounded-tr-none border-r-0"
+                    : "mr-4 rounded-t-[22px]",
                 )}
               >
                 <CalendarMonthView
@@ -232,16 +241,22 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           ) : (
             <div
               className={cn(
-                "flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[24px] rounded-tr-none border border-r-0 border-b-0 border-[#e3e5ea] bg-[#f7f8fa]",
+                "flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[28px] rounded-tr-none border border-r-0 border-b-0",
+                IOS_CALENDAR_PANEL_CLASS,
                 CALENDAR_PANEL_SHADOW_CLASS,
               )}
             >
               {renderViewHeader(
                 // task view の toolbar 境界線位置 (48px) と揃える
-                "mb-1 flex shrink-0 items-center justify-between px-4 pt-4",
+                "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
               )}
 
-              <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-2xl rounded-tr-none border border-r-0 border-b-0 border-[#e9eaed] bg-white">
+              <div
+                className={cn(
+                  "ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border border-r-0 border-b-0",
+                  IOS_CALENDAR_SURFACE_CLASS,
+                )}
+              >
                 {activeMode === "timeline" ? (
                   <CalendarTimelineDayView
                     viewMode={selectedViewMode}
