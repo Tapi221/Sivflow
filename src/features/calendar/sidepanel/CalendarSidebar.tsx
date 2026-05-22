@@ -25,6 +25,9 @@ import type {
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 const DEFAULT_TASK_LIST_COLOR = "#7c8cf8";
 const SIDEBAR_DIVIDER_CLASS = "h-px w-full shrink-0 bg-[#e4e6eb]";
+const GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME =
+  "flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 pl-5 text-left";
+const GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME = "px-5";
 
 const IconChevronLeft = ({ className }: { className?: string }) => (
   <svg
@@ -134,7 +137,10 @@ const GoogleAccountSection = ({
             <button
               key={calendar.id}
               type="button"
-              className="flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 pl-7 text-left transition-colors hover:bg-[#eceef1]"
+              className={cn(
+                GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME,
+                "transition-colors hover:bg-[#eceef1]",
+              )}
               onClick={() => onToggleCalendar(calendar.id)}
               aria-pressed={checked}
             >
@@ -153,13 +159,25 @@ const GoogleAccountSection = ({
       {isOpen && isTaskMode && (
         <div className="mt-0.5">
           {account.isTaskListsLoading && account.taskLists.length === 0 && (
-            <p className="px-7 py-1 text-[11px] text-[#9aa0aa]">読み込み中…</p>
+            <p
+              className={cn(
+                GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
+                "py-1 text-[11px] text-[#9aa0aa]",
+              )}
+            >
+              読み込み中…
+            </p>
           )}
 
           {!account.isTaskListsLoading &&
             !account.taskListsError &&
             account.taskLists.length === 0 && (
-              <p className="px-7 py-1 text-[11px] text-[#9aa0aa]">
+              <p
+                className={cn(
+                  GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
+                  "py-1 text-[11px] text-[#9aa0aa]",
+                )}
+              >
                 Google ToDo リストはありません
               </p>
             )}
@@ -167,7 +185,7 @@ const GoogleAccountSection = ({
           {account.taskLists.map((taskList) => (
             <div
               key={taskList.id}
-              className="flex h-7 w-full items-center gap-2 overflow-hidden rounded-md px-2 pl-7 text-left"
+              className={GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME}
             >
               <AnimatedCircleCheckbox checked color={DEFAULT_TASK_LIST_COLOR} />
 
@@ -178,7 +196,7 @@ const GoogleAccountSection = ({
           ))}
 
           {account.taskListsError && (
-            <div className="mt-1 px-7">
+            <div className={cn("mt-1", GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME)}>
               <p className="text-[11px] leading-relaxed text-[#a16207]">
                 {account.taskListsError}
               </p>
