@@ -1,4 +1,10 @@
-import { type MouseEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { useSchedulePaneStore } from "@/features/calendar/header/useSchedulePaneStore";
@@ -36,6 +42,10 @@ type SidebarProps = {
   onToggleClosed?: () => void;
   onOpenSettings?: () => void;
 };
+
+type SidebarMotionState = "idle" | "opening" | "closing";
+
+const SIDEBAR_MOTION_RESET_MS = 420;
 
 // ── ナビゲーション定義 ──────────────────────────────────────
 
@@ -181,6 +191,21 @@ const Sidebar = ({
 }: SidebarProps) => {
   const closeCalendar = useSchedulePaneStore((s) => s.close);
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
+  const [motionState, setMotionState] = useState<SidebarMotionState>("idle");
+  const previousClosedRef = useRef(isClosed);
+
+  useEffect(() => {
+    if (previousClosedRef.current === isClosed) return;
+
+    previousClosedRef.current = isClosed;
+    setMotionState(isClosed ? "closing" : "opening");
+
+    const resetMotionTimer = window.setTimeout(() => {
+      setMotionState("idle");
+    }, SIDEBAR_MOTION_RESET_MS);
+
+    return () => window.clearTimeout(resetMotionTimer);
+  }, [isClosed]);
 
   const mainNavItemsWithActions = mainNavItems.map((item) => ({
     ...item,
@@ -205,7 +230,12 @@ const Sidebar = ({
 
   return (
     <aside
-      className={cn("app-sidebar", isClosed && "app-sidebar--closed")}
+      className={cn(
+        "app-sidebar",
+        isClosed && "app-sidebar--closed",
+        motionState !== "idle" && `app-sidebar--motion-${motionState}`,
+      )}
+      data-sidebar-motion={motionState}
       aria-label="Sidebar"
     >
       <div className="app-sidebar__top">
