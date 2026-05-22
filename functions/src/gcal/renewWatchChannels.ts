@@ -1,35 +1,6 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
-let adminAppReady: Promise<void> | null = null;
-let firestoreModulePromise: Promise<typeof import("firebase-admin/firestore")> | null = null;
-
-const ensureFirebaseAdmin = async (): Promise<void> => {
-  adminAppReady ??= (async () => {
-    const { getApps, initializeApp } = await import("firebase-admin/app");
-
-    if (getApps().length === 0) {
-      initializeApp();
-    }
-  })();
-
-  await adminAppReady;
-};
-
-const getFirestoreModule = async () => {
-  firestoreModulePromise ??= import("firebase-admin/firestore");
-  return await firestoreModulePromise;
-};
-
-const getDb = async () => {
-  await ensureFirebaseAdmin();
-  const { getFirestore } = await getFirestoreModule();
-  return getFirestore();
-};
-
-const serverTimestamp = async () => {
-  const { FieldValue } = await getFirestoreModule();
-  return FieldValue.serverTimestamp();
-};
+import { getDb, serverTimestamp } from "../firebaseAdmin.js";
 
 export const renewExpiredWatchChannels = onSchedule(
   {
