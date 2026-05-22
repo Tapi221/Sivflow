@@ -1,6 +1,6 @@
 import { getDesktopBridge } from "./bridge";
 
-import type { PlatformApi } from "@/types/desktop-api";
+import type { PlatformApi } from "@/types/externals/desktop-api";
 
 const canUseDesktopShell = (url: string): boolean =>
   /^(https?:|mailto:)/i.test(url);
@@ -28,7 +28,6 @@ export const desktopPlatform: PlatformApi = {
     cancel: () => getDesktopBridge().oauth.cancel(),
     exchangeIdToken: (input) => getDesktopBridge().oauth.exchangeIdToken(input),
     exchangeTokens: (input) => getDesktopBridge().oauth.exchangeTokens(input),
-    // refresh_token を使った silent なトークン更新
     refreshTokens: (input) => getDesktopBridge().oauth.refreshTokens(input),
     onCallback: (handler) => getDesktopBridge().oauth.onCallback(handler),
   },
