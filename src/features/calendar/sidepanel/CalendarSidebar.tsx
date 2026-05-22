@@ -322,7 +322,7 @@ export const CalendarSidebar = ({
           {t.miniCalendarWeekdays.map((weekday, index) => (
             <span
               key={`${weekday}-${index}`}
-              className="flex h-6 items-center justify-center text-[11px] font-bold uppercase text-[#9a9a9a]"
+              className="flex h-6 items-center justify-center text-[11px] font-bold uppercase text-[#8c8c8c]"
             >
               {weekday}
             </span>
@@ -347,6 +347,9 @@ export const CalendarSidebar = ({
                   isToday={day.isToday}
                   isSelected={day.isSelected}
                   isCurrentMonth={day.isCurrentMonth}
+                  className={cn(
+                    !day.isCurrentMonth && !isActive && "text-[#b3b3b3]",
+                  )}
                 >
                   {day.dayNumber}
                 </CalendarDayNumberCircle>
