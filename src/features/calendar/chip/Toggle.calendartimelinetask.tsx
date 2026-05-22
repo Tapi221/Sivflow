@@ -24,6 +24,11 @@ const TAB_MOTION_TRANSITION: Transition = {
   ease: [0.22, 1, 0.36, 1],
 };
 
+const TAB_TOOLTIP_CLASS_NAME =
+  "rounded-lg border border-[#e4eaf1] bg-white px-2.5 py-[5px] text-[12px] font-semibold text-[#193a5c] shadow-[0_8px_18px_rgba(25,58,92,0.12)]";
+const TAB_TOOLTIP_ARROW_CLASS_NAME =
+  "border-b border-r border-[#e4eaf1] bg-white";
+
 type CalendarTimelineTaskTab = {
   value: CalendarWorkspaceToolbarProps["activeMode"];
   label: string;
@@ -46,7 +51,14 @@ export const ToggleCalendarTimelineTask = ({
         const isActive = activeMode === tab.value;
 
         return (
-          <HoverTooltip key={tab.value} label={tab.label} side="top" offset={6}>
+          <HoverTooltip
+            key={tab.value}
+            label={tab.label}
+            side="top"
+            offset={6}
+            tooltipClassName={TAB_TOOLTIP_CLASS_NAME}
+            arrowClassName={TAB_TOOLTIP_ARROW_CLASS_NAME}
+          >
             <button
               type="button"
               onClick={tab.onClick}
