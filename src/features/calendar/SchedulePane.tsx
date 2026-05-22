@@ -158,6 +158,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
         <CalendarSidebar
           monthDate={sidebarMonthDate}
           selectedDate={selectedDate}
+          activeMode={activeMode}
           googleAccounts={googleAccounts}
           isAnyCalendarConnecting={isAnyCalendarConnecting}
           onSelectDate={handleSidebarSelectDateAndOpen}
