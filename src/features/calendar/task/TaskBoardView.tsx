@@ -1,5 +1,5 @@
 import {
-  closestCenter,
+  closestCorners,
   DndContext,
   type DragEndEvent,
   PointerSensor,
@@ -106,14 +106,10 @@ const getDropPosition = (
   overRect: VerticalRect,
 ): VerticalDropPosition => {
   const activeRect = getActiveVerticalRect(event);
-  const activeBottom = activeRect.top + activeRect.height;
+  const activeMiddleY = activeRect.top + activeRect.height / 2;
   const overMiddleY = overRect.top + overRect.height / 2;
 
-  if (activeRect.top < overRect.top) {
-    return activeBottom >= overMiddleY ? "after" : "before";
-  }
-
-  return activeRect.top <= overMiddleY ? "before" : "after";
+  return activeMiddleY >= overMiddleY ? "after" : "before";
 };
 
 export const TaskBoardView = ({
@@ -201,7 +197,7 @@ export const TaskBoardView = ({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={closestCorners}
       onDragEnd={handleDragEnd}
     >
       <div
