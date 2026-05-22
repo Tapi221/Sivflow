@@ -42,7 +42,7 @@ export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => 
           {tasks.map((task) => {
             const col = TASK_COLUMNS.find((c) => c.id === task.status);
             const isDone = task.status === "done";
-            const checkboxColor = isDone ? "#193a5c" : "#9ca3af";
+            const checkboxColor = isDone ? "#007aff" : "#9ca3af";
 
             return (
               <tr
