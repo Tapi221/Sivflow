@@ -1,4 +1,4 @@
-import { CreateActionPlusIcon } from "@/features/calendar/chip/button/CreateActionPlusIcon";
+import { CreateActionPlusIcon } from "@/features/calendar/chip/icon/CreateActionPlusIcon";
 
 type DayDetailCreateButtonProps = {
   onClick?: () => void;
