@@ -1,20 +1,34 @@
 import crypto from "node:crypto";
 
-import { getApps, initializeApp } from "firebase-admin/app";
-import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { onInit } from "firebase-functions/v2/core";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { renewExpiredWatchChannels } from "./gcal/renewWatchChannels.js";
 
-const ensureFirebaseAdmin = () => {
-  if (getApps().length === 0) {
-    initializeApp();
-  }
+let adminAppReady: Promise<void> | null = null;
+let firestoreModulePromise: Promise<typeof import("firebase-admin/firestore")> | null = null;
+
+const ensureFirebaseAdmin = async (): Promise<void> => {
+  adminAppReady ??= (async () => {
+    const { getApps, initializeApp } = await import("firebase-admin/app");
+
+    if (getApps().length === 0) {
+      initializeApp();
+    }
+  })();
+
+  await adminAppReady;
 };
 
-onInit(ensureFirebaseAdmin);
+const getFirestoreModule = async () => {
+  firestoreModulePromise ??= import("firebase-admin/firestore");
+  return await firestoreModulePromise;
+};
+
+onInit(async () => {
+  await ensureFirebaseAdmin();
+});
 
 const GOOGLE_OAUTH_WEB_CLIENT_ID = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_ID");
 const GOOGLE_OAUTH_WEB_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_WEB_CLIENT_SECRET");
@@ -25,15 +39,14 @@ const GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY = defineSecret(
 const REGION = "asia-northeast1";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
-type FirestoreServerTimestamp = ReturnType<typeof FieldValue.serverTimestamp>;
 
 type StoredGoogleCalendarAccount = {
   email: string;
   name: string | null;
   photoUrl: string | null;
   encryptedRefreshToken: string;
-  createdAt: FirestoreServerTimestamp;
-  updatedAt: FirestoreServerTimestamp;
+  createdAt: unknown;
+  updatedAt: unknown;
 };
 
 const requireUid = (request: { auth?: { uid?: string } }) => {
@@ -99,13 +112,19 @@ const fetchUserInfo = async (accessToken: string) => {
   };
 };
 
-const getDb = () => {
-  ensureFirebaseAdmin();
+const getDb = async () => {
+  await ensureFirebaseAdmin();
+  const { getFirestore } = await getFirestoreModule();
   return getFirestore();
 };
 
-const accountDoc = (uid: string, accountId: string) =>
-  getDb().doc(`users/${uid}/googleCalendarAccounts/${accountId}`);
+const serverTimestamp = async () => {
+  const { FieldValue } = await getFirestoreModule();
+  return FieldValue.serverTimestamp();
+};
+
+const accountDoc = async (uid: string, accountId: string) =>
+  (await getDb()).doc(`users/${uid}/googleCalendarAccounts/${accountId}`);
 
 export const exchangeGoogleCalendarCode = onCall(
   {
@@ -145,7 +164,7 @@ export const exchangeGoogleCalendarCode = onCall(
 
     const profile = await fetchUserInfo(accessToken);
     const accountId = profile.accountEmail;
-    const now = FieldValue.serverTimestamp();
+    const now = await serverTimestamp();
 
     const payload: StoredGoogleCalendarAccount = {
       email: profile.accountEmail,
@@ -156,7 +175,8 @@ export const exchangeGoogleCalendarCode = onCall(
       updatedAt: now,
     };
 
-    await accountDoc(uid, accountId).set(payload, { merge: true });
+    const ref = await accountDoc(uid, accountId);
+    await ref.set(payload, { merge: true });
 
     return {
       accessToken,
@@ -181,7 +201,8 @@ export const getGoogleCalendarAccessToken = onCall(
     const { accountId } = request.data as { accountId?: string };
     if (!accountId) throw new HttpsError("invalid-argument", "accountId is required.");
 
-    const snap = await accountDoc(uid, accountId).get();
+    const ref = await accountDoc(uid, accountId);
+    const snap = await ref.get();
     if (!snap.exists) throw new HttpsError("not-found", "Google Calendar account not found.");
     const data = snap.data() as { encryptedRefreshToken?: string; email?: string; name?: string | null; photoUrl?: string | null };
     if (!data.encryptedRefreshToken) throw new HttpsError("failed-precondition", "Stored refresh token is missing.");
@@ -201,9 +222,9 @@ export const getGoogleCalendarAccessToken = onCall(
 
     if (!accessToken) throw new HttpsError("internal", "Google token response missing access_token.");
 
-    const updates: Record<string, unknown> = { updatedAt: FieldValue.serverTimestamp() };
+    const updates: Record<string, unknown> = { updatedAt: await serverTimestamp() };
     if (rotatedRefreshToken) updates.encryptedRefreshToken = encryptRefreshToken(rotatedRefreshToken);
-    await accountDoc(uid, accountId).set(updates, { merge: true });
+    await ref.set(updates, { merge: true });
 
     return {
       accessToken,
@@ -222,7 +243,8 @@ export const disconnectGoogleCalendarAccount = onCall(
     const uid = requireUid(request);
     const { accountId } = request.data as { accountId?: string };
     if (!accountId) throw new HttpsError("invalid-argument", "accountId is required.");
-    await accountDoc(uid, accountId).delete();
+    const ref = await accountDoc(uid, accountId);
+    await ref.delete();
     return { ok: true };
   },
 );
