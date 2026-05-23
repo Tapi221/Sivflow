@@ -35,6 +35,8 @@ export type UseMonthInfiniteScrollReturn = {
   setWeekRowRef: (weekKey: string, node: HTMLElement | null) => void;
   /** リサイズ完了後など、外部から表示月を再同期する必要があるときに呼ぶ */
   syncVisibleMonth: () => void;
+  /** リサイズ開始時など、遅延中の表示月同期をキャンセルしたいときに呼ぶ */
+  cancelVisibleMonthSync: () => void;
 };
 
 type MonthRangeAnchor = {
@@ -380,5 +382,6 @@ export const useMonthInfiniteScroll = ({
     weekRowRefsMap,
     setWeekRowRef,
     syncVisibleMonth,
+    cancelVisibleMonthSync,
   };
 };
