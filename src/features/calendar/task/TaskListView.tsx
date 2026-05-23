@@ -8,11 +8,10 @@ import {
 } from "react";
 import { format } from "date-fns";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
-import { useT } from "@/i18n/useT";
+import { TaskStatusDot } from "@/chip/icon/TaskStatusDot";
 import { cn } from "@/lib/utils";
 import { TASK_COLUMNS, CATEGORY_CONFIG, PRIORITY_CONFIG } from "./task.types";
 import type { Task, TaskStatus } from "./task.types";
-import { TaskStatusDot } from "../../../chip/icon/TaskStatusDot";
 
 type TaskListViewProps = {
   tasks: Task[];
@@ -100,7 +99,7 @@ type SectionHeaderProps = {
   cols: ColDef[];
 };
 
-const SectionHeader = ({ status, count, open, onToggle, onAdd, cols }: SectionHeaderProps) => {
+const SectionHeader = ({ status, count, open, onToggle, onAdd: _onAdd, cols }: SectionHeaderProps) => {
   const meta = STATUS_META[status];
   const gridStyle: CSSProperties = {
     display: "grid",
@@ -285,7 +284,6 @@ const Row = ({
 // ── メインコンポーネント ────────────────────────────────────
 
 export const TaskListView = ({ tasks, onToggleTaskDone, onRenameTask }: TaskListViewProps) => {
-  const t = useT();
   const titleInputRef = useRef<HTMLInputElement | null>(null);
   const resizeCleanupRef = useRef<(() => void) | null>(null);
 
@@ -325,7 +323,7 @@ export const TaskListView = ({ tasks, onToggleTaskDone, onRenameTask }: TaskList
   const grouped = useMemo(() => {
     return TASK_COLUMNS.map((col) => ({
       status: col.id as TaskStatus,
-      tasks: tasks.filter((t) => t.status === col.id),
+      tasks: tasks.filter((task) => task.status === col.id),
     }));
   }, [tasks]);
 
@@ -379,7 +377,11 @@ export const TaskListView = ({ tasks, onToggleTaskDone, onRenameTask }: TaskList
   const toggleSection = (status: TaskStatus) => {
     setClosedSections((prev) => {
       const next = new Set(prev);
-      next.has(status) ? next.delete(status) : next.add(status);
+      if (next.has(status)) {
+        next.delete(status);
+      } else {
+        next.add(status);
+      }
       return next;
     });
   };
