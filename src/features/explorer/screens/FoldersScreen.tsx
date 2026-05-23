@@ -430,6 +430,33 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   };
 
   const handleItemSelect = (item: SelectedExplorerItem) => {
+    if (item?.type === "cardSet") {
+      const cardSet = cardSetById.get(item.id);
+      const cardSetViewUrl = createPageUrl(
+        createAppDestination("cardSetView", {
+          cardSetId: item.id,
+          folderId: cardSet?.folderId ?? null,
+        }),
+      );
+      const activateCardSetTab = () => {
+        openCardSetTab({
+          cardSetId: item.id,
+          title: cardSet ? resolveCardSetTabTitle(cardSet) : "カードセット",
+          folderId: cardSet?.folderId ?? null,
+        });
+      };
+
+      navigate(cardSetViewUrl);
+
+      if (typeof window === "undefined") {
+        activateCardSetTab();
+      } else {
+        window.setTimeout(activateCardSetTab, 0);
+      }
+
+      return;
+    }
+
     selectItem(item);
 
     if (item?.type === "document") {
@@ -450,24 +477,6 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
         folderId: card ? resolveCardFolderId(card, cardSetById) : null,
       });
       return;
-    }
-
-    if (item?.type === "cardSet") {
-      const cardSet = cardSetById.get(item.id);
-      openCardSetTab({
-        cardSetId: item.id,
-        title: cardSet ? resolveCardSetTabTitle(cardSet) : "カードセット",
-        folderId: cardSet?.folderId ?? null,
-      });
-
-      navigate(
-        createPageUrl(
-          createAppDestination("cardSetView", {
-            cardSetId: item.id,
-            folderId: cardSet?.folderId ?? null,
-          }),
-        ),
-      );
     }
   };
 
