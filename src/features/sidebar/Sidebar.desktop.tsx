@@ -12,7 +12,6 @@ import {
   InboxIcon,
   LibraryIcon,
   SettingIcon,
-  SidebarToggleIcon,
 } from "../../components/icons/icons.sidebar";
 
 import "./sidebar.desktop.css";
@@ -177,7 +176,7 @@ const SidebarNavLink = ({
 
 const Sidebar = ({
   isClosed = false,
-  onToggleClosed,
+  onToggleClosed: _onToggleClosed,
   onOpenSettings,
 }: SidebarProps) => {
   const closeCalendar = useSchedulePaneStore((s) => s.close);
@@ -210,16 +209,6 @@ const Sidebar = ({
       aria-label="Sidebar"
     >
       <div className="app-sidebar__top">
-        <button
-          type="button"
-          className="app-sidebar__toggle"
-          onClick={onToggleClosed}
-          aria-label={isClosed ? "サイドバーを開く" : "サイドバーを閉じる"}
-          aria-pressed={!isClosed}
-        >
-          <SidebarToggleIcon className="app-sidebar__toggle-icon app-sidebar__nav-icon" />
-        </button>
-
         <nav className="app-sidebar__nav" aria-label="メインナビゲーション">
           {mainNavItemsWithActions.map((item) => (
             <SidebarNavLink key={item.id} item={item} />
