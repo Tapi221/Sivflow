@@ -1,8 +1,6 @@
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
-
 import { subscribeSectionListNavigation } from "@/features/explorer/adapters/web/explorerSectionListNavigation";
 import { notifySelectedFolderChanged } from "@/features/explorer/adapters/web/explorerSelectionNotifier";
 import type { FoldersRouteAdapter } from "@/features/explorer/adapters/web/useFoldersRouteAdapter";
