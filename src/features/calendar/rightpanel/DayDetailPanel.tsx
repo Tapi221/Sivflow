@@ -89,7 +89,7 @@ export const DayDetailPanel = ({
         <GridCalendarDayDetailDesktop events={timedEvents} />
       </div>
 
-      <div className="border-t border-[#f5f5f5] px-4 py-4">
+      <div className="flex justify-center border-t border-[#f5f5f5] px-4 py-4">
         <DayDetailCreateButton />
       </div>
     </aside>
