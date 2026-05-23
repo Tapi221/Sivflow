@@ -12,6 +12,7 @@ import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { AddGoogleCalendarButton } from "@/chip/button/AddGoogleCalendarButton";
 import { AnimatedCircleCheckbox } from "@/chip/checkbox/AnimatedCircleCheckbox";
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
+import { GcalRelinkPanel } from "@/chip/minipanel/GcalRelinkPanel";
 import { CalendarIcon, TaskIcon } from "@/components/icons/schedule.icons";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -227,18 +228,7 @@ const GoogleAccountSection = ({
       )}
 
       {account.connectionStatus === "needsReconnect" && (
-        <div className="mt-1 rounded-[12px] bg-[#f7f7f7] px-3 py-1.5">
-          <p className="text-[11px] leading-relaxed text-[#8c8c8c]">
-            再連携が必要です。
-          </p>
-          <button
-            type="button"
-            className="mt-1 rounded-full border border-[#eeeeee] bg-white px-2.5 py-0.5 text-[11px] font-semibold text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#f7f7f7]"
-            onClick={onReconnect}
-          >
-            再連携
-          </button>
-        </div>
+        <GcalRelinkPanel onReconnect={onReconnect} />
       )}
 
       {account.error && (
