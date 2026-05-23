@@ -103,31 +103,34 @@ export const TaskListView = ({
                 <td className="py-2.5 pr-4 font-medium text-[#24262d]">
                   <div className="relative h-[18px] min-w-0 leading-[18px]">
                     {isEditingTitle ? (
-                      <input
-                        ref={titleInputRef}
-                        type="text"
-                        value={editingTitle}
-                        aria-label="Task title"
-                        className="absolute -left-1 top-1/2 z-10 h-7 w-[calc(100%+0.25rem)] -translate-y-1/2 rounded-md border border-[#d1d5db] bg-white px-2 text-[13px] font-medium leading-[18px] text-[#24262d] outline-none transition-[border-color,box-shadow] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/15"
-                        onChange={(event) => setEditingTitle(event.target.value)}
-                        onBlur={() => finishEditingTaskTitle(task)}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter") {
-                            event.preventDefault();
-                            finishEditingTaskTitle(task);
-                            return;
-                          }
+                      <>
+                        <div className="pointer-events-none absolute -inset-x-2 top-1/2 h-8 -translate-y-1/2 rounded-md border border-[#007aff] bg-white shadow-[0_0_0_2px_rgba(0,122,255,0.15)]" />
+                        <input
+                          ref={titleInputRef}
+                          type="text"
+                          value={editingTitle}
+                          aria-label="Task title"
+                          className="absolute inset-0 z-10 h-[18px] w-full border-0 bg-transparent p-0 text-[13px] font-medium leading-[18px] text-[#24262d] outline-none"
+                          onChange={(event) => setEditingTitle(event.target.value)}
+                          onBlur={() => finishEditingTaskTitle(task)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") {
+                              event.preventDefault();
+                              finishEditingTaskTitle(task);
+                              return;
+                            }
 
-                          if (event.key === "Escape") {
-                            event.preventDefault();
-                            cancelEditingTaskTitle();
-                          }
-                        }}
-                      />
+                            if (event.key === "Escape") {
+                              event.preventDefault();
+                              cancelEditingTaskTitle();
+                            }
+                          }}
+                        />
+                      </>
                     ) : (
                       <button
                         type="button"
-                        className="-ml-1 block h-[18px] w-[calc(100%+0.25rem)] truncate rounded px-1 text-left font-medium leading-[18px] text-[#24262d] transition-colors hover:bg-[#eef6ff] focus-visible:bg-[#eef6ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
+                        className="block h-[18px] w-full truncate rounded p-0 text-left font-medium leading-[18px] text-[#24262d] transition-colors hover:bg-[#eef6ff] focus-visible:bg-[#eef6ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
                         aria-label={`Rename ${task.title}`}
                         title="Click to rename"
                         onClick={() => startEditingTaskTitle(task)}
