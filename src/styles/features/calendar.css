@@ -114,7 +114,6 @@
   }
 
   .calendar-month-view {
-    --calendar-month-grid-line-size: 1px;
     --calendar-month-row-height: 112px;
     overflow-anchor: none;
     background: #f2f2f7;
@@ -158,27 +157,15 @@
     background: #ffffff;
   }
 
-  .calendar-month-week-row::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 3;
-    height: var(--calendar-month-grid-line-size);
-    pointer-events: none;
-    background: #e5e5ea;
-  }
-
   .calendar-month-column-separator {
     position: absolute;
     top: 0;
     bottom: 0;
     z-index: 3;
-    width: var(--calendar-month-grid-line-size);
+    width: 0;
     pointer-events: none;
-    background: #e5e5ea;
-    transform: translateX(-50%);
+    border-left: 1px solid #e5e5ea;
+    background: transparent;
   }
 
   .calendar-month-day-cell {
@@ -187,7 +174,6 @@
     contain: layout style;
     border-color: #e5e5ea !important;
     border-right-width: 0 !important;
-    border-bottom-width: 0 !important;
     transition: background-color 120ms ease;
   }
 
