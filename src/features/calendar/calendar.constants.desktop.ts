@@ -76,6 +76,7 @@ export const TIMELINE_DAY_COLUMN_WIDTH = 104;
 export const TIMELINE_LANE_LABEL_WIDTH = 168;
 export const TIMELINE_SKELETON_ROW_COUNT = 4;
 export const MINI_CALENDAR_CELL_COUNT = 42;
+export const WEEKDAY_SURFACE_LEFT_INSET_PX = 16;
 
 //
 export const MIN_EVENT_DISPLAY_HEIGHT_PX = 48; // min-h-12 に対応
