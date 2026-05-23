@@ -36,7 +36,8 @@ export const areDropTargetsEqual = (
   return (
     left.status === right.status &&
     left.overTaskId === right.overTaskId &&
-    left.position === right.position
+    left.position === right.position &&
+    left.insertIndex === right.insertIndex
   );
 };
 
@@ -80,9 +81,12 @@ export const createTaskDragPreview = (
     {} as Record<TaskStatus, Task[]>,
   );
   const targetTasks = nextTasksByStatus[target.status] ?? [];
-  let insertIndex = targetTasks.length;
+  let insertIndex = Math.max(
+    0,
+    Math.min(target.insertIndex ?? targetTasks.length, targetTasks.length),
+  );
 
-  if (target.overTaskId) {
+  if (target.insertIndex === undefined && target.overTaskId) {
     const overIndex = targetTasks.findIndex((task) => task.id === target.overTaskId);
 
     if (overIndex >= 0) {
