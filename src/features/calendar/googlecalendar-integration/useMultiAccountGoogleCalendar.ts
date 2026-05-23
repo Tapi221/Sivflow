@@ -736,24 +736,32 @@ export const useMultiAccountGoogleCalendar = () => {
       ? accountsRef.current.find((account) => account.id === replaceAccountId)
       : null;
 
-    dispatchAccounts({
-      type: "ADD",
-      account: {
-        id: tempId,
-        email: null,
-        name: null,
-        photoUrl: null,
-        accessToken: null,
-        refreshToken: null,
-        calendars: [],
-        selectedCalendarIds: new Set(),
-        syncState: "idle",
-        connectionStatus: "connected",
-        lastSyncedAt: null,
-        isConnecting: true,
-        error: null,
-      },
-    });
+    if (replaceAccountId) {
+      dispatchAccounts({
+        type: "SET_CONNECTING",
+        id: replaceAccountId,
+        value: true,
+      });
+    } else {
+      dispatchAccounts({
+        type: "ADD",
+        account: {
+          id: tempId,
+          email: null,
+          name: null,
+          photoUrl: null,
+          accessToken: null,
+          refreshToken: null,
+          calendars: [],
+          selectedCalendarIds: new Set(),
+          syncState: "idle",
+          connectionStatus: "connected",
+          lastSyncedAt: null,
+          isConnecting: true,
+          error: null,
+        },
+      });
+    }
 
     try {
       const result = useServerStoredTokens
@@ -781,7 +789,9 @@ export const useMultiAccountGoogleCalendar = () => {
       const existingAccount =
         replacingAccount ?? accountsRef.current.find(matchesResolvedAccount);
 
-      dispatchAccounts({ type: "REMOVE", id: tempId });
+      if (!replaceAccountId) {
+        dispatchAccounts({ type: "REMOVE", id: tempId });
+      }
 
       const defaultIds = resolveSelectedCalendarIds(
         existingAccount
@@ -834,7 +844,15 @@ export const useMultiAccountGoogleCalendar = () => {
         cachedCalendars: toCachedCalendars(list),
       });
     } catch {
-      dispatchAccounts({ type: "REMOVE", id: tempId });
+      if (replaceAccountId) {
+        dispatchAccounts({
+          type: "SET_CONNECTING",
+          id: replaceAccountId,
+          value: false,
+        });
+      } else {
+        dispatchAccounts({ type: "REMOVE", id: tempId });
+      }
     }
   }, []);
 
