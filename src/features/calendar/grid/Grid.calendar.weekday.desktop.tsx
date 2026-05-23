@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import {
   clipEventToDay,
@@ -16,6 +15,10 @@ import type { CalendarWeekDayGridProps } from "@/features/calendar/schedulePane.
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 
 import { CalendarEventChipWeekday } from "../../../chip/eventchip/EventChip.schedule.weekday";
+import {
+  CalendarDateHeaderButton,
+  CalendarDateHeaderDayContent,
+} from "./CalendarDateHeaderButton";
 import { cn } from "@/lib/utils";
 
 type CalendarEventPositionStyle = React.CSSProperties & {
@@ -189,37 +192,22 @@ export const CalendarWeekDayGrid = ({
                 !!selectedDate && isSameDay(day, selectedDate);
 
               return (
-                <button
+                <CalendarDateHeaderButton
                   key={day.toISOString()}
-                  type="button"
+                  isToday={isDayToday}
+                  isSelected={isDaySelected}
                   onClick={() => onSelectDate?.(day)}
-                  className={cn(
-                    "flex h-10 shrink-0 flex-col items-center justify-center bg-white",
-                    "transition-colors hover:bg-[#f4f5f7]",
-                    "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
-                    isDayToday && "bg-[#f0f6ff]",
-                    !isDayToday && isDaySelected && "bg-[#f4f5f7]",
-                  )}
                 >
-                  <span
-                    className={cn(
-                      "text-[11px] font-medium leading-none",
-                      isDayToday || isDaySelected
-                        ? "text-[#24231f]"
-                        : "text-[#8f929c]",
-                    )}
-                  >
-                    {format(day, GRID.WEEKDAY_DAY_FORMAT, { locale: ja })}
-                  </span>
-
-                  <CalendarDayNumberCircle
+                  <CalendarDateHeaderDayContent
+                    dateLabel={format(day, GRID.WEEKDAY_DATE_FORMAT)}
+                    weekdayLabel={format(day, GRID.WEEKDAY_DAY_FORMAT, {
+                      locale: ja,
+                    })}
                     isToday={isDayToday}
                     isSelected={isDaySelected}
-                    className="mt-0.5"
-                  >
-                    {format(day, GRID.WEEKDAY_DATE_FORMAT)}
-                  </CalendarDayNumberCircle>
-                </button>
+                    layout="weekday-date"
+                  />
+                </CalendarDateHeaderButton>
               );
             })}
           </div>
