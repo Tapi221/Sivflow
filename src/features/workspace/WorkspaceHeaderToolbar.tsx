@@ -52,11 +52,6 @@ const WORKSPACE_TAB_MOTION_TRANSITION: Transition = {
   ease: [0.22, 1, 0.36, 1],
 };
 
-const segmentedTabTooltipClassName =
-  "rounded-lg border border-[#eeeeee] bg-white px-2.5 py-[5px] text-[12px] font-medium text-[#8c8c8c] shadow-[0_8px_18px_rgba(0,0,0,0.08)]";
-const segmentedTabTooltipArrowClassName =
-  "border-b border-r border-[#eeeeee] bg-white";
-
 const segmentedActionGroupClassName =
   "relative z-10 inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5";
 
@@ -105,8 +100,7 @@ export const WorkspaceHeaderToolbar = ({
               label={tab.label}
               side="top"
               offset={6}
-              tooltipClassName={segmentedTabTooltipClassName}
-              arrowClassName={segmentedTabTooltipArrowClassName}
+              preset="segmented"
             >
               <button
                 type="button"
