@@ -70,8 +70,6 @@ export const useCardSetViewState = ({
     isGlobalEditing: viewState.isGlobalEditing,
     setIsGlobalEditing: viewState.setIsGlobalEditing,
     setInteractionMode: viewState.setInteractionMode,
-    isMetaOpen: viewState.isMetaOpen,
-    setIsMetaOpen: viewState.setIsMetaOpen,
     selectedCard: viewState.selectedCard,
     cardsForPager: viewState.cardsForPager,
     createAndFocusCard: actions.createAndFocusCard,
