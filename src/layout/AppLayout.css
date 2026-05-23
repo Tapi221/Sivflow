@@ -135,11 +135,11 @@
 }
 
 .app-layout--sidebar-closed .workspace-shell__tabs {
-  padding-left: 24px;
+  padding-left: calc(var(--app-sidebar-rail-width, 48px) + 8px);
 }
 
 .app-layout--sidebar-closed .calendar-workspace-toolbar {
-  padding-left: 54px;
+  padding-left: calc(var(--app-sidebar-rail-width, 48px) + 16px);
 }
 
 .workspace-shell__main,
