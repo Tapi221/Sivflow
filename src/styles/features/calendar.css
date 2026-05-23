@@ -160,7 +160,7 @@
     overflow: visible;
     min-height: var(--calendar-month-row-height);
     contain: paint style;
-    border-color: #b7b7b7 !important;
+    border-color: #e5e5ea !important;
     transition: background-color 120ms ease;
   }
 
