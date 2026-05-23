@@ -8,19 +8,29 @@ import { getLocalDb } from "@/services/localDB";
 import type { CardSet } from "@/types";
 import { DEFAULT_CARD_DISPLAY_MODE } from "@/types/domain/cardSet";
 
-export const useCardSets = (folderId?: string | null) => {
+type UseCardSetsOptions = {
+  enabled?: boolean;
+};
+
+export const useCardSets = (
+  folderId?: string | null,
+  options?: UseCardSetsOptions,
+) => {
   const { currentUser } = useAuthSession();
+  const userId = currentUser?.uid ?? null;
+  const enabled = options?.enabled ?? true;
 
   const rawSets = useLiveQuery(async () => {
-    if (!currentUser) return [];
+    if (!enabled) return [];
+    if (!userId) return [];
     try {
-      const db = await getLocalDb(currentUser.uid);
-      return db.cardSets.where("userId").equals(currentUser.uid).toArray();
+      const db = await getLocalDb(userId);
+      return db.cardSets.where("userId").equals(userId).toArray();
     } catch (err) {
       console.error("[useCardSets] Error:", err);
       return [];
     }
-  }, [currentUser?.uid]);
+  }, [enabled, userId]);
 
   const cardSets = useMemo(() => {
     if (!rawSets) return [];
@@ -42,7 +52,7 @@ export const useCardSets = (folderId?: string | null) => {
     );
   }, [rawSets, folderId]);
 
-  const loading = rawSets === undefined;
+  const loading = enabled && rawSets === undefined;
 
   const createCardSet = async (
     name: string,
