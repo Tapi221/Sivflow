@@ -140,6 +140,12 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                           {column.bottomLabel}
                         </span>
                       </>
+                    ) : column.kind === "week" ? (
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap font-semibold text-[#25272d]">
+                        <span>{column.topLabel}</span>
+                        <span className="text-[#8f929c]">~</span>
+                        <span>{column.bottomLabel}</span>
+                      </span>
                     ) : (
                       <>
                         <span className="font-semibold text-[#25272d]">
