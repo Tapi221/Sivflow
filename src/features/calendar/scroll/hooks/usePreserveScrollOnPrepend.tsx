@@ -1,19 +1,23 @@
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type RefObject } from "react";
 
 type Params = {
-  scrollerRef: React.RefObject<HTMLDivElement | null>;
-  trigger: number; // visibleDays.length など
+  scrollerRef: RefObject<HTMLDivElement | null>;
+  /** スクロール対象の総量。append/prepend どちらでも snapshot 更新に使う */
+  trigger: number;
+  /** 左側に追加された量。これが増えた時だけ scrollLeft を補正する */
+  prependTrigger?: number;
   enabled?: boolean;
 };
 
 export const usePreserveScrollOnPrepend = ({
   scrollerRef,
   trigger,
+  prependTrigger = trigger,
   enabled = true,
 }: Params) => {
   const prevSnapshotRef = useRef<{
     scrollWidth: number;
-    scrollLeft: number;
+    prependTrigger: number;
   } | null>(null);
 
   useLayoutEffect(() => {
@@ -29,22 +33,23 @@ export const usePreserveScrollOnPrepend = ({
     if (prevSnapshot === null) {
       prevSnapshotRef.current = {
         scrollWidth: scroller.scrollWidth,
-        scrollLeft: scroller.scrollLeft,
+        prependTrigger,
       };
       return;
     }
 
-    const diff = scroller.scrollWidth - prevSnapshot.scrollWidth;
+    const widthDiff = scroller.scrollWidth - prevSnapshot.scrollWidth;
+    const didPrepend = prependTrigger > prevSnapshot.prependTrigger;
 
-    if (diff > 0 && prevSnapshot.scrollLeft < scroller.scrollLeft) {
-      scroller.scrollLeft += diff;
+    if (didPrepend && widthDiff > 0) {
+      scroller.scrollLeft += widthDiff;
     }
 
     prevSnapshotRef.current = {
       scrollWidth: scroller.scrollWidth,
-      scrollLeft: scroller.scrollLeft,
+      prependTrigger,
     };
-  }, [trigger, scrollerRef, enabled]);
+  }, [trigger, prependTrigger, scrollerRef, enabled]);
 
   const reset = () => {
     prevSnapshotRef.current = null;
