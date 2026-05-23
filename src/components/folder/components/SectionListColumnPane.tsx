@@ -173,7 +173,7 @@ const getCardLabel = (card: Card): string => {
 const buildFolderRoute = (folderId: string): string => {
   const searchParams = new URLSearchParams();
   searchParams.set("folderId", folderId);
-  return `/folders?${searchParams.toString()}`;
+  return `/library?${searchParams.toString()}`;
 };
 
 const dispatchExplorerColumnPathChange = (crumbs: BreadcrumbCrumb[]) => {
