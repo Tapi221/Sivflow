@@ -625,7 +625,7 @@ export const useMultiAccountGoogleCalendar = () => {
         try {
           await applyAccessToken(
             result.accessToken,
-useServerStoredTokens ? null : (result.refreshToken ?? stored.refreshToken),
+            useServerStoredTokens ? null : (result.refreshToken ?? stored.refreshToken),
             buildTokenExpiry(result.expiresInSeconds),
             result.accountName,
             result.accountPhotoUrl,

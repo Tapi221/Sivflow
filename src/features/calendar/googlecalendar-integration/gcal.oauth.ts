@@ -398,7 +398,7 @@ export const requestGoogleCalendarServerCode = async (
   const response = await new Promise<GoogleCodeResponse>((resolve, reject) => {
     const redirectUri = window.location.origin;
 
-  const client = window.google!.accounts!.oauth2!.initCodeClient({
+    const client = window.google!.accounts!.oauth2!.initCodeClient({
       callback: resolve,
       client_id: clientId,
       redirect_uri: redirectUri,

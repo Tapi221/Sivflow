@@ -397,9 +397,9 @@ export const GridCalendarMonthDesktop = ({
         startsAt === event.startsAt
           ? event
           : {
-              ...event,
-              startsAt,
-            };
+            ...event,
+            startsAt,
+          };
 
       const dayKey = getDayKey(startsAt);
       const dayEvents = groupedEvents.get(dayKey);
