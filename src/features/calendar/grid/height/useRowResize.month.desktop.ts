@@ -39,6 +39,8 @@ type UseMonthRowResizeOptions = {
   monthWeeks: CalendarMonthWeek[];
   /** リサイズ中フラグ（スクロール抑制のため外部と共有） */
   isResizingRef: RefObject<boolean>;
+  /** resize lock 取得時のコールバック（遅延スクロール同期のキャンセルなどに使用） */
+  onResizeStart?: () => void;
   /** commitHeight 完了後のコールバック（表示月再同期などに使用） */
   onAfterCommit?: () => void;
   /** ドラッグ中の RAF ごとに呼ばれるコールバック（ライブプレビュー用） */
@@ -61,6 +63,7 @@ export const useMonthRowResize = ({
   weekRowRefsMap,
   monthWeeks,
   isResizingRef,
+  onResizeStart,
   onAfterCommit,
   onLiveResize,
 }: UseMonthRowResizeOptions): UseMonthRowResizeReturn => {
@@ -86,6 +89,7 @@ export const useMonthRowResize = ({
 
   const acquireResizeLock = useCallback(() => {
     cancelPendingResizeLockRelease();
+    onResizeStart?.();
 
     const sessionId = resizeSessionIdRef.current + 1;
     resizeSessionIdRef.current = sessionId;
@@ -93,7 +97,7 @@ export const useMonthRowResize = ({
     rootRef.current?.classList.add(MONTH_ROW_RESIZING_CLASS);
 
     return sessionId;
-  }, [cancelPendingResizeLockRelease, isResizingRef]);
+  }, [cancelPendingResizeLockRelease, isResizingRef, onResizeStart]);
 
   const releaseResizeLockAfterLayout = useCallback(
     (sessionId: number) => {
