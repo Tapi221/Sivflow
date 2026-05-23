@@ -100,7 +100,6 @@
     transition: background-color 120ms ease;
   }
 
-  /* 修正: rgba(127, 45, 40, 0.42) → アプリのボーダー色ベースのグレー */
   .calendar-all-day-boundary-resize-handle:hover::after,
   .calendar-all-day-boundary-resize-handle:focus-visible::after,
   .calendar-hour-boundary-resize-handle:hover::after,
@@ -126,7 +125,7 @@
 
   .calendar-month-weekday-header {
     border-color: #e5e5ea !important;
-    background: transparent !important;
+    background: #ffffff !important;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     box-shadow: none;
@@ -134,7 +133,7 @@
 
   .calendar-month-weekday-cell {
     border-right: 0 !important;
-    background: transparent !important;
+    background: #ffffff !important;
     color: #8e8e93 !important;
     font-family:
       -apple-system,
