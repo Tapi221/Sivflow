@@ -40,6 +40,7 @@ type Props = {
 
 export const useCalendarScrollController = ({
   activeMode,
+  selectedViewMode,
   visibleDays,
   timelineColumnWidth,
   timelineAnchorColumnIndex,
@@ -77,6 +78,7 @@ export const useCalendarScrollController = ({
    */
   useCalendarScrollPositionSync({
     activeMode,
+    selectedViewMode,
     calendarBufferBefore: calendarBuffer.before,
     calendarDayColumnWidth,
     viewportWidth,
