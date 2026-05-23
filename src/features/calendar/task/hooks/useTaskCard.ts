@@ -21,6 +21,7 @@ export const useTaskCard = ({
 
   const category = useMemo(() => {
     return CATEGORY_CONFIG[task.category] ?? {
+      label: task.category,
       bg: "#f3f4f6",
       text: "#6b7280",
     };
