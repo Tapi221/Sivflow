@@ -38,7 +38,7 @@ const SECTION_LABELS: Record<WorkspaceSidebarSection, string> = {
 };
 
 const LIBRARY_TYPE_LABELS: Record<string, string> = {
-  pdf: "/library",
+  pdf: "PDF",
   flashcards: "フラッシュカード",
   notes: "ノート",
 };
@@ -51,7 +51,7 @@ const buildLibraryTypeRoute = (libraryType: string): string => {
   const searchParams = new URLSearchParams();
   searchParams.set("view", "section-list");
   searchParams.set("libraryType", libraryType);
-  return `/folders?${searchParams.toString()}`;
+  return `/library?${searchParams.toString()}`;
 };
 
 const resolveSectionKeyForTarget = (
@@ -61,7 +61,7 @@ const resolveSectionKeyForTarget = (
   const normalizedPathname = pathname.toLowerCase();
   const searchParams = new URLSearchParams(search);
 
-  if (normalizedPathname === "/folders") {
+  if (normalizedPathname === "/library") {
     return searchParams.get("home") === "1" ? "home" : "library";
   }
   if (normalizedPathname === "/gallery") return "review";
@@ -87,7 +87,7 @@ const resolveActiveCrumbs = ({
     label: SECTION_LABELS[activeTab.sectionKey],
     to:
       activeTab.sectionKey === "library"
-        ? "/folders?view=section-list"
+        ? "/library?view=section-list"
         : undefined,
   };
 
