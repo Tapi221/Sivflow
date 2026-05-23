@@ -1,7 +1,9 @@
 import {
+  defaultAnimateLayoutChanges,
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
+  type AnimateLayoutChanges,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -16,6 +18,7 @@ import { TaskStatusDot } from "../../../chip/icon/TaskStatusDot";
 type TaskColumnProps = {
   column: TaskColumnType;
   tasks: Task[];
+  activeTaskId?: string | null;
   accountName?: string | null;
   accountPhotoUrl?: string | null;
   onAddTask: (status: string) => void;
@@ -25,6 +28,7 @@ type TaskColumnProps = {
 
 type SortableTaskCardProps = {
   task: Task;
+  activeTaskId?: string | null;
   accountName?: string | null;
   accountPhotoUrl?: string | null;
   onDeleteTask: (id: string) => void;
@@ -32,9 +36,21 @@ type SortableTaskCardProps = {
 };
 
 const taskColumnBackground = "#ffffff";
+const TASK_SORTABLE_TRANSITION = {
+  duration: 180,
+  easing: "cubic-bezier(0.2, 0, 0, 1)",
+};
+const TASK_SORTABLE_ANIMATE_LAYOUT_CHANGES: AnimateLayoutChanges = (args) => {
+  if (args.isSorting || args.wasDragging) {
+    return defaultAnimateLayoutChanges(args);
+  }
+
+  return true;
+};
 
 const SortableTaskCard = ({
   task,
+  activeTaskId,
   accountName,
   accountPhotoUrl,
   onDeleteTask,
@@ -49,23 +65,30 @@ const SortableTaskCard = ({
     transition,
   } = useSortable({
     id: task.id,
+    animateLayoutChanges: TASK_SORTABLE_ANIMATE_LAYOUT_CHANGES,
+    transition: TASK_SORTABLE_TRANSITION,
     data: {
       type: "task",
       task,
       status: task.status,
     },
   });
+  const isActivePreview = activeTaskId === task.id;
 
   return (
     <div
       ref={setNodeRef}
       style={{
-        transform: CSS.Transform.toString(transform),
-        transition: isDragging ? undefined : transition,
+        transform: CSS.Translate.toString(transform),
+        transition: isDragging
+          ? undefined
+          : transition ?? "transform 180ms cubic-bezier(0.2, 0, 0, 1)",
         willChange: transform ? "transform" : undefined,
       }}
       className={cn(
-        "touch-none",
+        "touch-none rounded-xl",
+        "transition-[opacity,filter] duration-150 ease-[cubic-bezier(0.2,0,0,1)]",
+        isActivePreview && "opacity-40 saturate-75",
         isDragging && "relative z-10 opacity-0",
       )}
       {...attributes}
@@ -86,6 +109,7 @@ const SortableTaskCard = ({
 export const TaskColumn = ({
   column,
   tasks,
+  activeTaskId,
   accountName,
   accountPhotoUrl,
   onAddTask,
@@ -99,10 +123,15 @@ export const TaskColumn = ({
     review: t.taskStatusReview,
     done: t.taskStatusDone,
   };
+  const isDragActive = activeTaskId !== null && activeTaskId !== undefined;
 
   return (
     <div
-      className="flex h-full min-h-0 w-full min-w-0 flex-col rounded-xl p-3"
+      className={cn(
+        "flex h-full min-h-0 w-full min-w-0 flex-col rounded-xl p-3",
+        "transition-[background-color,box-shadow] duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
+        isDragActive && "shadow-[inset_0_0_0_1px_rgba(17,24,39,0.04)]",
+      )}
       style={{ background: taskColumnBackground }}
     >
       <div className="mb-3 flex shrink-0 items-center gap-2">
@@ -137,11 +166,18 @@ export const TaskColumn = ({
           items={tasks.map((task) => task.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="flex min-h-8 flex-col gap-2 pr-3">
+          <div
+            className={cn(
+              "flex min-h-8 flex-col gap-2 pr-3",
+              "transition-[padding] duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
+              tasks.length === 0 && isDragActive && "rounded-xl border border-dashed border-[#dfe3ea] bg-[#f8fafc] p-2",
+            )}
+          >
             {tasks.map((task) => (
               <SortableTaskCard
                 key={task.id}
                 task={task}
+                activeTaskId={activeTaskId}
                 accountName={accountName}
                 accountPhotoUrl={accountPhotoUrl}
                 onDeleteTask={onDeleteTask}
