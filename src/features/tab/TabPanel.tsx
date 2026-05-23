@@ -44,7 +44,23 @@ type WorkspacePanelStatusProps = {
   description?: string;
 };
 
+type CardWithLegacyCardSetId = Card & {
+  card_set_id?: string | null;
+};
+
 const PDF_TOGGLE_THUMBNAILS_EVENT = "flashcard-master:pdf-toggle-thumbnails";
+
+const resolveCardSetId = (card: Card): string | null => {
+  const normalizedCard = card as CardWithLegacyCardSetId;
+  const cardSetId = normalizedCard.cardSetId ?? normalizedCard.card_set_id ?? null;
+
+  if (typeof cardSetId !== "string") {
+    return null;
+  }
+
+  const trimmed = cardSetId.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
 
 const ThumbnailToolbarIcon = ({
   className,
@@ -285,7 +301,9 @@ export const WorkspaceTabPanel = ({
       );
     }
 
-    const cardSetCards = cards.filter((card) => card.cardSetId === cardSet.id);
+    const cardSetCards = cards.filter(
+      (card) => resolveCardSetId(card) === cardSet.id,
+    );
 
     return (
       <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fbfbfa]">
