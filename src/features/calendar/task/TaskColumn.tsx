@@ -202,7 +202,6 @@ export const TaskColumn = ({
             className={cn(
               "flex min-h-8 flex-col pr-3",
               "transition-[padding,border-color,background-color] duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
-              tasks.length === 0 && isDragActive && "rounded-xl border border-dashed border-[#dfe3ea] bg-[#fafafa] p-2",
             )}
           >
             <TaskInsertionSlot
