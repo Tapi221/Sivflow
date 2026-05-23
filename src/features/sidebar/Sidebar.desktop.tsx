@@ -5,10 +5,10 @@ import { useSchedulePaneStore } from "@/features/calendar/header/useSchedulePane
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
+import { SettingIcon } from "../../components/icons/schedule.icons";
 import {
   CalendarIcon,
   ExploreIcon,
-  GearIcon,
   HomeIcon,
   InboxIcon,
   LibraryIcon,
@@ -198,7 +198,7 @@ const Sidebar = ({
     {
       id: "settings",
       label: "設定",
-      icon: <GearIcon className="app-sidebar__nav-icon" />,
+      icon: <SettingIcon className="app-sidebar__nav-icon" />,
       onClick: onOpenSettings,
     },
   ];
