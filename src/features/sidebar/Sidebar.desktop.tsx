@@ -60,7 +60,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "library",
     label: "Library",
-    to: "/folders?view=section-list&libraryType=pdf",
+    to: "/library",
     icon: <LibraryIcon className="app-sidebar__nav-icon" />,
     sectionKey: "library",
     match: (pathname, searchParams) =>
