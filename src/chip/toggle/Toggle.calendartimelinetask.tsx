@@ -22,6 +22,10 @@ const TAB_MOTION_TRANSITION: Transition = {
 
 const TAB_TOOLTIP_CLASS_NAME =
   "rounded-lg border border-[#eeeeee] bg-white px-2.5 py-[5px] text-[12px] font-medium text-[#8c8c8c] shadow-[0_8px_18px_rgba(0,0,0,0.08)]";
+const TAB_EDGE_TOOLTIP_CLASS_NAME = cn(
+  TAB_TOOLTIP_CLASS_NAME,
+  "rounded-l-[4px] rounded-r-lg pl-2 pr-2.5",
+);
 const TAB_TOOLTIP_ARROW_CLASS_NAME =
   "border-b border-r border-[#eeeeee] bg-white";
 
@@ -42,17 +46,23 @@ export const ToggleCalendarTimelineTask = ({
 }: ToggleCalendarTimelineTaskProps) => {
   return (
     <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5">
-      {tabs.map((tab) => {
+      {tabs.map((tab, index) => {
         const Icon = TAB_ICON_MAP[tab.value];
         const isActive = activeMode === tab.value;
+        const isStartEdgeTab = index === 0;
 
         return (
           <HoverTooltip
             key={tab.value}
             label={tab.label}
             side="top"
+            align={isStartEdgeTab ? "start" : "center"}
             offset={6}
-            tooltipClassName={TAB_TOOLTIP_CLASS_NAME}
+            tooltipClassName={
+              isStartEdgeTab
+                ? TAB_EDGE_TOOLTIP_CLASS_NAME
+                : TAB_TOOLTIP_CLASS_NAME
+            }
             arrowClassName={TAB_TOOLTIP_ARROW_CLASS_NAME}
           >
             <button
