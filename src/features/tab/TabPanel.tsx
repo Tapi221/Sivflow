@@ -235,18 +235,19 @@ export const WorkspaceTabPanel = ({
         doc={document}
         onDocumentUpdate={handleDocumentUpdate}
       >
-        <div className="relative flex h-full min-h-0 w-full flex-col bg-white">
+        <div className="relative h-full min-h-0 w-full overflow-hidden bg-white">
+          <PdfPane
+            doc={document}
+            className="h-full min-h-0"
+            onDocumentUpdate={handleDocumentUpdate}
+          />
+
           <WorkspaceHeaderToolbar
             activeValue=""
             tabs={[]}
             leadingActions={PDF_DOCUMENT_TOOLBAR_LEADING_ACTIONS}
             actions={PDF_DOCUMENT_TOOLBAR_ACTIONS}
-          />
-
-          <PdfPane
-            doc={document}
-            className="min-h-0 flex-1"
-            onDocumentUpdate={handleDocumentUpdate}
+            variant="floating"
           />
         </div>
       </PdfWorkspaceProvider>
