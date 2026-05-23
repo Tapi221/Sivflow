@@ -90,7 +90,7 @@ export const DayDetailPanel = ({
       </div>
 
       <div className="border-t border-[#f5f5f5] px-4 py-4">
-        <DayDetailCreateButton />
+        <DayDetailCreateButton className="w-fit" />
       </div>
     </aside>
   );
