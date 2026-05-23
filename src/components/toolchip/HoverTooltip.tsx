@@ -5,7 +5,7 @@ import {
   TOOLTIP_PRESET_CLASS_NAMES,
   type TooltipPreset,
   type TooltipSize,
-} from "@/components/toolchip/tooltip.size";
+} from "@/components/toolchip/tooltip.size.desktop";
 
 type TooltipSide = "top" | "right" | "bottom" | "left";
 type TooltipAlign = "center" | "start" | "end";
