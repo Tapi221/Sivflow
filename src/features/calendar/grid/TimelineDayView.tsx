@@ -103,9 +103,9 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
             minWidth: `${laneLabelWidth + gridWidth}px`,
           }}
         >
-          <div className="sticky left-0 top-0 z-20 border-b border-r border-[#e5e7eb] bg-white" />
+          <div className="sticky left-0 top-0 z-20 border-b border-r border-[#eeeeee] bg-white" />
 
-          <div className="sticky top-0 z-10 border-b border-[#e5e7eb] bg-white">
+          <div className="sticky top-0 z-10 border-b border-[#eeeeee] bg-white">
             <div className="grid" style={timelineHeaderStyle}>
               {columns.map((column) => {
                 const isSelected =
@@ -158,18 +158,18 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
           {rowIndexes.map((index) => (
             <Fragment key={index}>
               <div
-                className="sticky left-0 z-10 border-b border-r border-[#e5e7eb] bg-white"
+                className="sticky left-0 z-10 border-b border-r border-[#eeeeee] bg-white"
                 style={{ height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px` }}
               />
 
               <div
-                className="grid border-b border-[#e5e7eb] bg-white"
+                className="grid border-b border-[#eeeeee] bg-white"
                 style={timelineRowStyle}
               >
                 {columns.map((column) => (
                   <div
                     key={column.id}
-                    className="border-r border-[#e5e7eb] last:border-r-0"
+                    className="border-r border-[#eeeeee] last:border-r-0"
                   />
                 ))}
               </div>
