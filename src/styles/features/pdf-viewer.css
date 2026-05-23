@@ -38,6 +38,10 @@
   background: rgb(59 130 246 / 28%);
 }
 
+[data-testid="pdf-scroll-container"] > div {
+  padding-left: 0;
+}
+
 .pdf-search-layer {
   position: absolute;
   inset: 0;
