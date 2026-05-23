@@ -141,7 +141,11 @@ const loadStoredTaskColumns = (): TaskColumn[] => {
   }
 };
 
-const buildTaskTableMinWidth = (columns: TaskColumn[]): number => {
+const buildTaskGridTemplateColumns = (columns: TaskColumn[]): string => {
+  return columns.map((column) => `${column.width}px`).join(" ");
+};
+
+const buildTaskGridMinWidth = (columns: TaskColumn[]): number => {
   return columns.reduce((sum, column) => sum + column.width, 0);
 };
 
@@ -175,16 +179,21 @@ export const TaskListView = ({
     done: t.taskStatusDone,
   };
 
-  const tableMinWidth = useMemo(() => {
-    return buildTaskTableMinWidth(columns);
+  const gridTemplateColumns = useMemo(() => {
+    return buildTaskGridTemplateColumns(columns);
   }, [columns]);
 
-  const tableStyle = useMemo<CSSProperties>(() => {
+  const gridMinWidth = useMemo(() => {
+    return buildTaskGridMinWidth(columns);
+  }, [columns]);
+
+  const gridStyle = useMemo<CSSProperties>(() => {
     return {
-      minWidth: `${tableMinWidth}px`,
-      tableLayout: "fixed",
+      gridTemplateColumns,
+      minWidth: `${gridMinWidth}px`,
+      width: `max(100%, ${gridMinWidth}px)`,
     };
-  }, [tableMinWidth]);
+  }, [gridMinWidth, gridTemplateColumns]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -354,143 +363,181 @@ export const TaskListView = ({
     );
   };
 
+  const renderTaskCell = (columnId: TaskColumnId, task: Task) => {
+    const col = TASK_COLUMNS.find((candidate) => candidate.id === task.status);
+    const isDone = task.status === "done";
+    const checkboxColor = isDone ? "#007aff" : "#9ca3af";
+    const isEditingTitle = editingTaskId === task.id;
+
+    switch (columnId) {
+      case "done":
+        return (
+          <div className="py-2.5 pr-2 align-top" role="cell">
+            <button
+              type="button"
+              className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center"
+              aria-label={isDone ? "Mark task as not done" : "Complete task"}
+              onClick={() => onToggleTaskDone(task.id, !isDone)}
+            >
+              <AnimatedSquareCheckbox checked={isDone} color={checkboxColor} />
+            </button>
+          </div>
+        );
+
+      case "title":
+        return (
+          <div
+            className="min-w-0 overflow-hidden py-2.5 pr-4 font-medium leading-[18px] text-[#24262d]"
+            role="cell"
+          >
+            {isEditingTitle ? (
+              <div className="min-w-0">
+                <input
+                  ref={titleInputRef}
+                  type="text"
+                  value={editingTitle}
+                  aria-label="Task title"
+                  className="h-[18px] w-full border-0 bg-transparent p-0 text-[13px] font-medium leading-[18px] text-[#24262d] outline-none placeholder:text-[#9ca3af]"
+                  onChange={(event) => setEditingTitle(event.target.value)}
+                  onBlur={() => finishEditingTaskTitle(task)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      finishEditingTaskTitle(task);
+                      return;
+                    }
+
+                    if (event.key === "Escape") {
+                      event.preventDefault();
+                      cancelEditingTaskTitle();
+                    }
+                  }}
+                />
+
+                <button
+                  type="button"
+                  className="mt-2 flex items-center gap-1.5 text-[13px] font-medium leading-[18px] text-[#6b7280] transition-colors hover:text-[#24262d]"
+                >
+                  <DetailIcon />
+                  <span>詳細</span>
+                </button>
+
+                <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[12px] font-medium leading-none text-[#4c5361]">
+                  {task.dueDate && (
+                    <span className="inline-flex h-6 items-center rounded-full border border-[#eeeeee] px-2 text-[#8f929c]">
+                      {format(new Date(task.dueDate), "MMM d")}
+                    </span>
+                  )}
+                  <span className="inline-flex h-6 items-center rounded-full border border-[#eeeeee] px-2 capitalize">
+                    {task.category}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="block w-full truncate rounded text-left font-medium leading-[18px] text-[#24262d] transition-colors hover:bg-[#f4f5f7] focus-visible:bg-[#f4f5f7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eeeeee]"
+                aria-label={`Rename ${task.title}`}
+                title="Click to rename"
+                onClick={() => startEditingTaskTitle(task)}
+              >
+                {task.title}
+              </button>
+            )}
+          </div>
+        );
+
+      case "status":
+        return (
+          <div className="min-w-0 overflow-hidden py-2.5 pr-4 align-top" role="cell">
+            <span className="flex min-w-0 items-center gap-1.5 text-[#4c5361]">
+              <TaskStatusDot color={col?.dotColor} />
+              <span className="truncate">{statusLabelMap[task.status]}</span>
+            </span>
+          </div>
+        );
+
+      case "priority":
+        return (
+          <div
+            className="truncate py-2.5 pr-4 align-top capitalize text-[#4c5361]"
+            role="cell"
+          >
+            {task.priority}
+          </div>
+        );
+
+      case "category":
+        return (
+          <div
+            className="truncate py-2.5 pr-4 align-top text-[#4c5361]"
+            role="cell"
+          >
+            {task.category}
+          </div>
+        );
+
+      case "dueDate":
+        return (
+          <div className="truncate py-2.5 align-top text-[#8f929c]" role="cell">
+            {task.dueDate ? format(new Date(task.dueDate), "MMM d") : "—"}
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="explorer-chrome-font min-h-0 flex-1 overflow-auto p-4">
-      <table className="w-full border-collapse text-[13px]" style={tableStyle}>
-        <colgroup>
-          {columns.map((column) => (
-            <col key={column.id} style={{ width: `${column.width}px` }} />
-          ))}
-        </colgroup>
-
-        <thead>
-          <tr className="border-b border-[#eeeeee]">
-            {columns.map((column) => {
-              if (column.id === "done") {
-                return (
-                  <th
-                    key={column.id}
-                    className="relative w-7 pb-2 pr-2 text-left"
-                  >
-                    <span className="sr-only">完了</span>
-                    {renderColumnResizeHandle(column)}
-                  </th>
-                );
-              }
-
+      <div className="min-w-max" role="table" aria-label="タスク一覧">
+        <div
+          className="grid border-b border-[#eeeeee] text-[13px]"
+          role="row"
+          style={gridStyle}
+        >
+          {columns.map((column) => {
+            if (column.id === "done") {
               return (
-                <th key={column.id} className={`${TABLE_HEADER_CLASS} relative pr-4`}>
-                  <span className="block truncate pr-2">{column.label}</span>
+                <div
+                  key={column.id}
+                  className="relative pb-2 pr-2 text-left"
+                  role="columnheader"
+                >
+                  <span className="sr-only">完了</span>
                   {renderColumnResizeHandle(column)}
-                </th>
+                </div>
               );
-            })}
-          </tr>
-        </thead>
-
-        <tbody>
-          {tasks.map((task) => {
-            const col = TASK_COLUMNS.find((c) => c.id === task.status);
-            const isDone = task.status === "done";
-            const checkboxColor = isDone ? "#007aff" : "#9ca3af";
-            const isEditingTitle = editingTaskId === task.id;
+            }
 
             return (
-              <tr
-                key={task.id}
-                className="border-b border-[#eeeeee] hover:bg-[#fafafa]"
+              <div
+                key={column.id}
+                className={`${TABLE_HEADER_CLASS} relative min-w-0 pr-4`}
+                role="columnheader"
               >
-                <td className="w-7 py-2.5 pr-2 align-top">
-                  <button
-                    type="button"
-                    className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center"
-                    aria-label={isDone ? "Mark task as not done" : "Complete task"}
-                    onClick={() => onToggleTaskDone(task.id, !isDone)}
-                  >
-                    <AnimatedSquareCheckbox checked={isDone} color={checkboxColor} />
-                  </button>
-                </td>
-
-                <td className="overflow-hidden py-2.5 pr-4 font-medium leading-[18px] text-[#24262d]">
-                  {isEditingTitle ? (
-                    <div className="min-w-0">
-                      <input
-                        ref={titleInputRef}
-                        type="text"
-                        value={editingTitle}
-                        aria-label="Task title"
-                        className="h-[18px] w-full border-0 bg-transparent p-0 text-[13px] font-medium leading-[18px] text-[#24262d] outline-none placeholder:text-[#9ca3af]"
-                        onChange={(event) => setEditingTitle(event.target.value)}
-                        onBlur={() => finishEditingTaskTitle(task)}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter") {
-                            event.preventDefault();
-                            finishEditingTaskTitle(task);
-                            return;
-                          }
-
-                          if (event.key === "Escape") {
-                            event.preventDefault();
-                            cancelEditingTaskTitle();
-                          }
-                        }}
-                      />
-
-                      <button
-                        type="button"
-                        className="mt-2 flex items-center gap-1.5 text-[13px] font-medium leading-[18px] text-[#6b7280] transition-colors hover:text-[#24262d]"
-                      >
-                        <DetailIcon />
-                        <span>詳細</span>
-                      </button>
-
-                      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[12px] font-medium leading-none text-[#4c5361]">
-                        {task.dueDate && (
-                          <span className="inline-flex h-6 items-center rounded-full border border-[#eeeeee] px-2 text-[#8f929c]">
-                            {format(new Date(task.dueDate), "MMM d")}
-                          </span>
-                        )}
-                        <span className="inline-flex h-6 items-center rounded-full border border-[#eeeeee] px-2 capitalize">
-                          {task.category}
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="block w-full truncate rounded text-left font-medium leading-[18px] text-[#24262d] transition-colors hover:bg-[#f4f5f7] focus-visible:bg-[#f4f5f7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eeeeee]"
-                      aria-label={`Rename ${task.title}`}
-                      title="Click to rename"
-                      onClick={() => startEditingTaskTitle(task)}
-                    >
-                      {task.title}
-                    </button>
-                  )}
-                </td>
-
-                <td className="overflow-hidden py-2.5 pr-4 align-top">
-                  <span className="flex min-w-0 items-center gap-1.5 text-[#4c5361]">
-                    <TaskStatusDot color={col?.dotColor} />
-                    <span className="truncate">{statusLabelMap[task.status]}</span>
-                  </span>
-                </td>
-
-                <td className="truncate py-2.5 pr-4 align-top capitalize text-[#4c5361]">
-                  {task.priority}
-                </td>
-
-                <td className="truncate py-2.5 pr-4 align-top text-[#4c5361]">
-                  {task.category}
-                </td>
-
-                <td className="truncate py-2.5 align-top text-[#8f929c]">
-                  {task.dueDate ? format(new Date(task.dueDate), "MMM d") : "—"}
-                </td>
-              </tr>
+                <span className="block truncate pr-2">{column.label}</span>
+                {renderColumnResizeHandle(column)}
+              </div>
             );
           })}
-        </tbody>
-      </table>
+        </div>
+
+        <div role="rowgroup">
+          {tasks.map((task) => (
+            <div
+              key={task.id}
+              className="grid border-b border-[#eeeeee] text-[13px] hover:bg-[#fafafa]"
+              role="row"
+              style={gridStyle}
+            >
+              {columns.map((column) => (
+                <div key={`${task.id}:${column.id}`} className="min-w-0">
+                  {renderTaskCell(column.id, task)}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
