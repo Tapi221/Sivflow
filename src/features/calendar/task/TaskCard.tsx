@@ -2,6 +2,7 @@ import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/icons.s
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { cn } from "@/lib/utils";
+import { TASK_TYPO } from "@/styles/tokens/typography";
 
 import type { Task } from "./task.types";
 import { useTaskCard } from "./hooks/useTaskCard";
@@ -90,7 +91,8 @@ export const TaskCard = ({
           <div className="flex min-w-0 items-center justify-between gap-2">
             <div
               className={cn(
-                "min-w-0 flex-1 truncate text-[12px] font-medium leading-none tracking-[-0.005em] text-[#1c1c1e]",
+                "min-w-0 flex-1 truncate",
+                TASK_TYPO.cardTitle,
                 isDone && "text-[#8e8e93] line-through decoration-[#c7c7cc]",
               )}
             >
@@ -115,21 +117,21 @@ export const TaskCard = ({
               )}
             >
               {formattedDate && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/70 bg-[#f2f2f7] px-1.5 text-[11px] font-medium tabular-nums text-[#8e8e93]">
+                <span className={cn("inline-flex items-center gap-1 rounded-full border border-white/70 bg-[#f2f2f7] px-1.5 tabular-nums", TASK_TYPO.metaChip)}>
                   <ScheduleCalendarIcon className="h-4 w-4 shrink-0 text-[#9da3af]" />
                   {formattedDate}
                 </span>
               )}
 
               <span
-                className="inline-flex h-5 items-center rounded-full border border-white/70 px-2 text-[11px] font-semibold"
+                className={cn("inline-flex h-5 items-center rounded-full border border-white/70 px-2", TASK_TYPO.metaPill)}
                 style={{ backgroundColor: category.bg, color: category.text }}
               >
                 {task.category}
               </span>
 
               <span
-                className="inline-flex h-5 items-center rounded-full border border-white/70 px-2 text-[11px] font-semibold"
+                className={cn("inline-flex h-5 items-center rounded-full border border-white/70 px-2", TASK_TYPO.metaPill)}
                 style={{ backgroundColor: priority.bg, color: priority.text }}
               >
                 {priority.label}
