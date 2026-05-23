@@ -76,7 +76,7 @@ export const TaskListView = ({
     <div className="explorer-chrome-font min-h-0 flex-1 overflow-auto p-4">
       <table className="w-full border-collapse text-[13px]">
         <thead>
-          <tr className="border-b border-[#e9eaed]">
+          <tr className="border-b border-[#eeeeee]">
             <th className="w-7 pb-2 pr-2 text-left">
               <span className="sr-only">完了</span>
             </th>
@@ -98,7 +98,7 @@ export const TaskListView = ({
             return (
               <tr
                 key={task.id}
-                className="border-b border-[#f3f4f6] hover:bg-[#f9fafb]"
+                className="border-b border-[#eeeeee] hover:bg-[#fafafa]"
               >
                 <td className="w-7 py-2.5 pr-2 align-top">
                   <button
@@ -146,11 +146,11 @@ export const TaskListView = ({
 
                       <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[12px] font-medium leading-none text-[#4c5361]">
                         {task.dueDate && (
-                          <span className="inline-flex h-6 items-center rounded-full border border-[#e5e7eb] px-2 text-[#8f929c]">
+                          <span className="inline-flex h-6 items-center rounded-full border border-[#eeeeee] px-2 text-[#8f929c]">
                             {format(new Date(task.dueDate), "MMM d")}
                           </span>
                         )}
-                        <span className="inline-flex h-6 items-center rounded-full border border-[#e5e7eb] px-2 capitalize">
+                        <span className="inline-flex h-6 items-center rounded-full border border-[#eeeeee] px-2 capitalize">
                           {task.category}
                         </span>
                       </div>
@@ -158,7 +158,7 @@ export const TaskListView = ({
                   ) : (
                     <button
                       type="button"
-                      className="block w-full truncate rounded text-left font-medium leading-[18px] text-[#24262d] transition-colors hover:bg-[#eef6ff] focus-visible:bg-[#eef6ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
+                      className="block w-full truncate rounded text-left font-medium leading-[18px] text-[#24262d] transition-colors hover:bg-[#f4f5f7] focus-visible:bg-[#f4f5f7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eeeeee]"
                       aria-label={`Rename ${task.title}`}
                       title="Click to rename"
                       onClick={() => startEditingTaskTitle(task)}
