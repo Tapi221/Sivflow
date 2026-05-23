@@ -252,7 +252,7 @@ const SectionListColumnPane = ({
   void onReorderCardsInCardSet;
 
   const [searchParams] = useSearchParams();
-  const libraryType = searchParams.get("libraryType");
+  const libraryType = searchParams.get("libraryType") ?? "pdf";
   const isPdfLibraryView = libraryType === "pdf";
   const isFlashcardLibraryView = libraryType === "flashcards";
 
