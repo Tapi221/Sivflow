@@ -44,6 +44,8 @@ type WorkspacePanelStatusProps = {
   description?: string;
 };
 
+const PDF_TOGGLE_THUMBNAILS_EVENT = "flashcard-master:pdf-toggle-thumbnails";
+
 const ThumbnailToolbarIcon = ({
   className,
   ...props
@@ -143,12 +145,16 @@ const FieldsToolbarIcon = ({
   </svg>
 );
 
+const togglePdfThumbnailsPanel = () => {
+  window.dispatchEvent(new CustomEvent(PDF_TOGGLE_THUMBNAILS_EVENT));
+};
+
 const PDF_DOCUMENT_TOOLBAR_LEADING_ACTIONS = [
   {
     label: "Thumbnails",
     ariaLabel: "サムネイル",
     icon: ThumbnailToolbarIcon,
-    onClick: () => undefined,
+    onClick: togglePdfThumbnailsPanel,
   },
 ] as const;
 
