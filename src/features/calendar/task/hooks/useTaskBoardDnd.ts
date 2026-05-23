@@ -27,6 +27,7 @@ import {
 import type {
   TaskDropTarget,
   TaskInsertPosition,
+  VerticalDragDirection,
 } from "../dnd/taskDnd.types";
 
 type UseTaskBoardDndArgs = {
@@ -37,6 +38,20 @@ type UseTaskBoardDndArgs = {
     overTaskId?: string | null,
     position?: TaskInsertPosition,
   ) => void;
+};
+
+const resolveVerticalDragDirection = (
+  deltaY: number,
+): VerticalDragDirection | null => {
+  if (deltaY < 0) {
+    return "up";
+  }
+
+  if (deltaY > 0) {
+    return "down";
+  }
+
+  return null;
 };
 
 export const useTaskBoardDnd = ({
@@ -144,6 +159,7 @@ export const useTaskBoardDnd = ({
       visibleTasksByStatus,
       activeId,
       latestDropTargetRef.current,
+      resolveVerticalDragDirection(event.delta.y),
     );
 
     if (!target) {
@@ -166,6 +182,7 @@ export const useTaskBoardDnd = ({
       visibleTasksByStatus,
       activeId,
       latestDropTargetRef.current,
+      resolveVerticalDragDirection(event.delta.y),
     );
 
     resetDragState();
