@@ -8,6 +8,7 @@ import {
   type DragOverEvent,
   type DragStartEvent,
   type DropAnimation,
+  KeyboardSensor,
   MeasuringStrategy,
   PointerSensor,
   pointerWithin,
@@ -16,6 +17,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useCallback, useMemo, useRef, useState, type WheelEvent } from "react";
 import { createPortal } from "react-dom";
 
@@ -415,6 +417,9 @@ export const TaskBoardView = ({
       activationConstraint: {
         distance: 4,
       },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
 
