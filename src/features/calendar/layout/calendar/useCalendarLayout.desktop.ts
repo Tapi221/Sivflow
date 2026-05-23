@@ -20,11 +20,15 @@ export const useCalendarLayout = ({
   const viewportDayCount =
     selectedViewMode === "month" ? 7 : displayDays.length;
 
+  const viewportInlineInset =
+    selectedViewMode === "month" ? 0 : C.WEEKDAY_SURFACE_LEFT_INSET_PX;
+
   const calendarDayColumnWidth =
-    viewportWidth > C.TIME_COLUMN_WIDTH
+    viewportWidth > C.TIME_COLUMN_WIDTH + viewportInlineInset
       ? Math.max(
         1,
-        (viewportWidth - C.TIME_COLUMN_WIDTH) / Math.max(1, viewportDayCount),
+        (viewportWidth - viewportInlineInset - C.TIME_COLUMN_WIDTH) /
+          Math.max(1, viewportDayCount),
       )
       : C.DAY_COLUMN_MIN_WIDTH;
 
