@@ -3,7 +3,6 @@ import { findTask, isTaskStatus } from "./taskDnd.preview";
 import type {
   TaskDragEvent,
   TaskDropTarget,
-  VerticalDragDirection,
   VerticalDropPosition,
   VerticalRect,
 } from "./taskDnd.types";
@@ -21,16 +20,7 @@ const getActiveVerticalRect = (event: TaskDragEvent): VerticalRect => {
 const getDropPosition = (
   event: TaskDragEvent,
   overRect: VerticalRect,
-  dragDirection: VerticalDragDirection | null = null,
 ): VerticalDropPosition => {
-  if (dragDirection === "up") {
-    return "before";
-  }
-
-  if (dragDirection === "down") {
-    return "after";
-  }
-
   const activeRect = getActiveVerticalRect(event);
   const activeMiddleY = activeRect.top + activeRect.height / 2;
   const overMiddleY = overRect.top + overRect.height / 2;
@@ -43,7 +33,6 @@ export const resolveDropTarget = (
   tasksByStatus: Record<TaskStatus, Task[]>,
   activeTaskId: string,
   fallbackTarget: TaskDropTarget | null = null,
-  dragDirection: VerticalDragDirection | null = null,
 ): TaskDropTarget | null => {
   const over = event.over;
 
@@ -73,6 +62,6 @@ export const resolveDropTarget = (
   return {
     status: overTask.status,
     overTaskId,
-    position: getDropPosition(event, over.rect, dragDirection),
+    position: getDropPosition(event, over.rect),
   };
 };
