@@ -106,9 +106,7 @@ const GoogleAccountSection = ({
   const accountName = account.name ?? account.email ?? "Google";
   const isTaskMode = mode === "task";
   const hasNoTaskLists =
-    !account.isTaskListsLoading &&
-    !account.taskListsError &&
-    account.taskLists.length === 0;
+    !account.isTaskListsLoading && account.taskLists.length === 0;
 
   return (
     <div className="mt-2">
