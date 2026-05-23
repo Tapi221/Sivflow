@@ -18,7 +18,8 @@ type TaskViewProps = {
 };
 
 export const TaskView = ({ googleAccounts = [] }: TaskViewProps) => {
-  const { tasks, addTask, deleteTask, moveTask, reorderTask } = useTaskStore();
+  const { tasks, addTask, deleteTask, moveTask, reorderTask, updateTask } =
+    useTaskStore();
   const [viewMode, setViewMode] = useState<BoardListViewMode>("board");
   const [showModal, setShowModal] = useState(false);
   const [newTaskStatus, setNewTaskStatus] =
@@ -68,6 +69,10 @@ export const TaskView = ({ googleAccounts = [] }: TaskViewProps) => {
     moveTask(taskId, nextStatus);
   };
 
+  const handleRenameTask = (taskId: string, title: string) => {
+    updateTask(taskId, { title });
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
       <TaskToolbar
@@ -89,7 +94,11 @@ export const TaskView = ({ googleAccounts = [] }: TaskViewProps) => {
           onReorderTask={reorderTask}
         />
       ) : (
-        <TaskListView tasks={tasks} onToggleTaskDone={handleToggleTaskDone} />
+        <TaskListView
+          tasks={tasks}
+          onToggleTaskDone={handleToggleTaskDone}
+          onRenameTask={handleRenameTask}
+        />
       )}
 
       <AnimatePresence>
