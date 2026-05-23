@@ -116,6 +116,7 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     timelineColumns: timeline.timelineColumns,
     timelineColumnWidth: timeline.timelineColumnWidth,
     timelineAnchorColumnIndex: timeline.timelineAnchorColumnIndex,
+    timelineUnitBuffer: navigation.timelineUnitBuffer,
     calendarBuffer: navigation.calendarBuffer,
     viewportWidth: navigation.viewportWidth,
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
