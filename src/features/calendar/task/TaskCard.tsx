@@ -2,8 +2,6 @@ import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/icons.s
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { cn } from "@/lib/utils";
-import { TASK_TYPO } from "@/styles/tokens/typography";
-
 import type { Task } from "./task.types";
 import { useTaskCard } from "./hooks/useTaskCard";
 
@@ -58,20 +56,21 @@ export const TaskCard = ({
   return (
     <div
       className={cn(
-        "group relative w-full min-w-0 overflow-hidden rounded-xl border border-[rgba(15,23,42,0.08)] bg-white px-3 py-2.5",
-        "shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_2px_6px_rgba(15,23,42,0.07),0_0.5px_1px_rgba(15,23,42,0.06)]",
-        "transition-[transform,background-color,border-color,box-shadow,filter] duration-[180ms] ease-[cubic-bezier(.22,1,.36,1)]",
-        "hover:border-[rgba(15,23,42,0.12)] hover:shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_4px_12px_rgba(15,23,42,0.10),0_1px_2px_rgba(15,23,42,0.08)]",
-        "active:scale-[0.999]",
+        // ─ Notion風: フラット・角丸小・影なし ─
+        "group relative w-full min-w-0 overflow-hidden rounded-md border border-[#e9eaed] bg-white px-3 py-2",
+        // hover は背景のみ変化（影を足さない）
+        "transition-[background-color,border-color] duration-100",
+        "hover:bg-[#f7f7f5] hover:border-[#e2e3e6]",
         isDragging
-          ? "cursor-grabbing border-[rgba(15,23,42,0.10)] bg-white shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_2px_6px_rgba(15,23,42,0.07),0_0.5px_1px_rgba(15,23,42,0.06)]"
-          : "cursor-grab",
+          ? "cursor-grabbing bg-white shadow-[0_4px_16px_rgba(15,23,42,0.10)] border-[#d5d6d9]"
+          : "cursor-grab shadow-none",
       )}
     >
-      <div className="relative flex min-w-0 items-start gap-3">
+      <div className="relative flex min-w-0 items-start gap-2.5">
+        {/* チェックボックス */}
         <button
           type="button"
-          className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform active:scale-90"
+          className="mt-[3px] flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform active:scale-90"
           aria-label={checkboxLabel}
           title={checkboxLabel}
           onClick={handleToggleDone}
@@ -84,61 +83,57 @@ export const TaskCard = ({
         </button>
 
         <div className="min-w-0 flex-1">
+          {/* タイトル行 */}
           <div className="flex min-w-0 items-center justify-between gap-2">
             <div
               className={cn(
-                "min-w-0 flex-1 truncate",
-                TASK_TYPO.cardTitle,
-                isDone && "text-[#8e8e93] line-through decoration-[#c7c7cc]",
+                "min-w-0 flex-1 truncate text-[13px] font-medium leading-snug text-[#1c1c1e]",
+                isDone && "text-[#a8a8a8] line-through decoration-[#c7c7cc]",
               )}
             >
               {task.title}
             </div>
 
+            {/* メニューボタン */}
             <button
               type="button"
-              className="-mr-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full text-[#8e8e93] opacity-0 transition-[background-color,color,opacity,transform] duration-150 hover:bg-[#f5f5f7] hover:text-[#4a4a4d] active:scale-95 group-hover:opacity-80 focus-visible:opacity-100"
+              className="-mr-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded text-[#a8a9ae] opacity-0 transition-[background-color,color,opacity] duration-100 hover:bg-[#ebebea] hover:text-[#4a4a4d] active:scale-95 group-hover:opacity-100 focus-visible:opacity-100"
               aria-label="Task menu"
               onClick={handleDelete}
             >
-              <TaskMenuIcon className="h-4 w-4" />
+              <TaskMenuIcon className="h-3.5 w-3.5" />
             </button>
           </div>
 
-          <div className="mt-2.5 min-h-5">
-            <div
-              className={cn(
-                "-ml-[26px] flex w-[calc(100%+26px)] min-w-0 flex-wrap items-center gap-1",
-                task.assignee && "pr-7",
-              )}
+          {/* メタ情報行 */}
+          <div className="mt-1.5 flex flex-wrap items-center gap-1">
+            {formattedDate && (
+              <span className="inline-flex items-center gap-[3px] rounded px-1 py-0.5 text-[11px] font-medium text-[#8a8f98] bg-transparent">
+                <ScheduleCalendarIcon className="h-3 w-3 shrink-0" />
+                {formattedDate}
+              </span>
+            )}
+
+            {/* カテゴリタグ: Notion風は背景薄め・角丸小 */}
+            <span
+              className="inline-flex h-[18px] items-center rounded px-1.5 text-[11px] font-medium"
+              style={{ backgroundColor: category.bg, color: category.text }}
             >
-              {formattedDate && (
-                <span className={cn("inline-flex items-center gap-1 rounded-full border border-[#eceef1] bg-[#f7f8fa] px-1.5 tabular-nums", TASK_TYPO.metaChip)}>
-                  <ScheduleCalendarIcon className="h-4 w-4 shrink-0 text-[#9da3af]" />
-                  {formattedDate}
-                </span>
-              )}
+              {category.label}
+            </span>
 
-              <span
-                className={cn("inline-flex h-5 items-center rounded-full border border-transparent px-2", TASK_TYPO.metaPill)}
-                style={{ backgroundColor: category.bg, color: category.text }}
-              >
-                {category.label}
-              </span>
-
-              <span
-                className={cn("inline-flex h-5 items-center rounded-full border border-transparent px-2", TASK_TYPO.metaPill)}
-                style={{ backgroundColor: priority.bg, color: priority.text }}
-              >
-                {priority.label}
-              </span>
-            </div>
+            <span
+              className="inline-flex h-[18px] items-center rounded px-1.5 text-[11px] font-medium"
+              style={{ backgroundColor: priority.bg, color: priority.text }}
+            >
+              {priority.label}
+            </span>
           </div>
         </div>
       </div>
 
       {task.assignee && (
-        <div className="pointer-events-none absolute right-3 bottom-2 rounded-full ring-1 ring-white">
+        <div className="pointer-events-none absolute right-2.5 bottom-2 rounded-full ring-1 ring-white">
           <GoogleAccountChip name={chipName} photoUrl={accountPhotoUrl} />
         </div>
       )}

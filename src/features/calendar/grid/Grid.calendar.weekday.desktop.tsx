@@ -18,7 +18,7 @@ import { CalendarEventChipWeekday } from "../../../chip/eventchip/EventChip.sche
 import {
   CalendarDateHeaderButton,
   CalendarDateHeaderDayContent,
-} from "./CalendarDateHeaderButton";
+} from "../../../chip/button/CalendarDateHeaderButton";
 import { cn } from "@/lib/utils";
 
 type CalendarEventPositionStyle = React.CSSProperties & {
