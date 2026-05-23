@@ -6,6 +6,7 @@ import {
   commitPdfBitmapToCanvas,
   createDetachedPdfCanvasSurface,
   prepareDetachedPdfCanvasSurfaceForRender,
+  resolvePdfRenderTransform,
 } from "@/features/pdf/pdfCanvasRenderUtils";
 import {
   getCachedPdfPageBitmap,
@@ -513,11 +514,6 @@ const PdfPageComponent = ({
         activePageRelease = pageLease.release;
         const page = pageLease.page;
         const viewport = page.getViewport({ scale });
-        const visibleCanvas = canvasRef.current;
-        if (visibleCanvas) {
-          visibleCanvas.style.width = `${viewport.width}px`;
-          visibleCanvas.style.height = `${viewport.height}px`;
-        }
 
         const renderBackingStore = resolvePdfRenderBackingStore({
           viewportWidthPx: viewport.width,
@@ -559,6 +555,7 @@ const PdfPageComponent = ({
         renderTask = page.render({
           canvasContext: renderSurface.context,
           viewport,
+          transform: resolvePdfRenderTransform(renderBackingStore),
           intent: "display",
         });
 
