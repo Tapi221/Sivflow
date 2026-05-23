@@ -60,9 +60,15 @@ export type GoogleAccountDisplay = {
   connectionStatus: GCalConnectionStatus;
 };
 
+export type CalendarSelectionRange = {
+  start: Date;
+  end: Date;
+};
+
 export type CalendarSidebarProps = {
   monthDate: Date;
   selectedDate: Date;
+  selectedRange?: CalendarSelectionRange | null;
   activeMode: CalendarToolbarMode;
 
   // マルチアカウント
