@@ -10,7 +10,7 @@ import type {
 import type { GoogleCalendarEvent } from "./googlecalendar-integration/gcalSync.types";
 import type { buildTimelineColumns } from "./grid/TimelineDayView.shared";
 
-import { useCalendarLayout } from "./layout/calendar/useCalendarLayout";
+import { useCalendarLayout } from "./layout/calendar/useCalendarLayout.desktop";
 import { useCalendarNavigation } from "./useCalendarNavigation";
 import { useCalendarScrollController } from "./scroll/hooks/useCalendarScrollController";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
