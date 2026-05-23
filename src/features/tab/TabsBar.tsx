@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
 import type { WorkspaceTab } from "@/features/tab/Tab";
-import { Calendar, FileText, FolderIcon, Layers, Plus, X } from "@/ui/icons";
+import { Calendar, FileText, FolderIcon, Layers, X } from "@/ui/icons";
+import { PlusLineIcon } from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
 
 type WorkspaceTabsBarVariant = "workspace" | "titlebar";
@@ -407,7 +408,7 @@ export const WorkspaceTabsBar = ({
             navigate("/folders?view=section-list");
           }}
         >
-          <Plus className="h-4 w-4" />
+          <PlusLineIcon className="h-4 w-4" />
         </button>
 
         <div className="h-full min-w-0 flex-1" />
