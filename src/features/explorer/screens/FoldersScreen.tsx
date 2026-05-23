@@ -18,6 +18,7 @@ import { resolveCardTabTitle, resolveDocumentTabTitle } from "@/features/tab/res
 import type { WorkspaceEntityTab, WorkspaceTab } from "@/features/tab/Tab";
 import { WorkspaceTabPanel } from "@/features/tab/TabPanel";
 
+import { CarvePanel, CarvePanelViewport } from "@/components/panel/CarvePanel.desktop";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 
 import { useCardsRead } from "@/hooks/card/useCardsRead";
@@ -340,7 +341,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     explorerContent
   );
 
-  return (
+  const workspaceFrame = (
     <ExplorerWorkspaceFrame
       style={FOLDERS_SCREEN_FILL_STYLE}
       className={cn(!route.isDesktop && "overflow-x-hidden overflow-y-auto")}
@@ -348,5 +349,15 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     >
       {workspaceContent}
     </ExplorerWorkspaceFrame>
+  );
+
+  if (!route.isDesktop) {
+    return workspaceFrame;
+  }
+
+  return (
+    <CarvePanelViewport>
+      <CarvePanel>{workspaceFrame}</CarvePanel>
+    </CarvePanelViewport>
   );
 };
