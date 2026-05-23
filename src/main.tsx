@@ -5,6 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 
 import "katex/dist/katex.min.css";
 import "./styles/index.css";
+import "@/features/calendar/scroll/weekdayHeaderScrollBridge";
 
 import "@/services/localDB";
 
