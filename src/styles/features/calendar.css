@@ -115,6 +115,7 @@
 
   .calendar-month-view {
     --calendar-month-row-height: 112px;
+    --calendar-month-grid-line-color: #b7b7b7;
     overflow-anchor: none;
     background: #f2f2f7;
   }
@@ -125,7 +126,7 @@
   }
 
   .calendar-month-weekday-header {
-    border-color: #e5e5ea !important;
+    border-color: var(--calendar-month-grid-line-color) !important;
     background: #f9f9fb !important;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -160,7 +161,7 @@
     overflow: visible;
     min-height: var(--calendar-month-row-height);
     contain: paint style;
-    border-color: #e5e5ea !important;
+    border-color: var(--calendar-month-grid-line-color) !important;
     transition: background-color 120ms ease;
   }
 
