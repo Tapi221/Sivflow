@@ -38,15 +38,19 @@ type SortableTaskCardProps = {
 
 const taskColumnBackground = "#ffffff";
 const TASK_SORTABLE_TRANSITION = {
-  duration: 180,
+  duration: 150,
   easing: "cubic-bezier(0.2, 0, 0, 1)",
 };
 const TASK_SORTABLE_ANIMATE_LAYOUT_CHANGES: AnimateLayoutChanges = (args) => {
+  if (args.isDragging) {
+    return false;
+  }
+
   if (args.isSorting || args.wasDragging) {
     return defaultAnimateLayoutChanges(args);
   }
 
-  return true;
+  return false;
 };
 
 const SortableTaskCard = ({
@@ -83,11 +87,11 @@ const SortableTaskCard = ({
         transform: CSS.Translate.toString(transform),
         transition: isDragging
           ? undefined
-          : transition ?? "transform 180ms cubic-bezier(0.2, 0, 0, 1)",
+          : transition ?? "transform 150ms cubic-bezier(0.2, 0, 0, 1)",
         willChange: transform ? "transform" : undefined,
       }}
       className={cn(
-        "rounded-xl touch-none",
+        "rounded-xl touch-none transform-gpu",
         "transition-[opacity,filter] duration-150 ease-[cubic-bezier(0.2,0,0,1)]",
         isActivePreview && "opacity-40 saturate-75",
         isDragging && "relative z-10 opacity-0",
