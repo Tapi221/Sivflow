@@ -138,6 +138,7 @@ export const TaskColumn = ({
     done: t.taskStatusDone,
   };
   const isDragActive = activeTaskId !== null && activeTaskId !== undefined;
+  const nonActiveTasks = tasks.filter((task) => task.id !== activeTaskId);
   let insertIndex = 0;
 
   return (
@@ -191,13 +192,13 @@ export const TaskColumn = ({
             <TaskInsertionSlot
               status={column.id}
               insertIndex={0}
-              overTaskId={tasks.find((task) => task.id !== activeTaskId)?.id ?? null}
+              overTaskId={nonActiveTasks[0]?.id ?? null}
               isFirst
             />
             {tasks.map((task) => {
-              const currentInsertIndex = insertIndex;
+              const isActiveTask = task.id === activeTaskId;
 
-              if (task.id !== activeTaskId) {
+              if (!isActiveTask) {
                 insertIndex += 1;
               }
 
@@ -211,15 +212,13 @@ export const TaskColumn = ({
                     onDeleteTask={onDeleteTask}
                     onToggleTaskDone={onToggleTaskDone}
                   />
-                  <TaskInsertionSlot
-                    status={column.id}
-                    insertIndex={insertIndex}
-                    overTaskId={
-                      tasks
-                        .slice(tasks.indexOf(task) + 1)
-                        .find((nextTask) => nextTask.id !== activeTaskId)?.id ?? null
-                    }
-                  />
+                  {!isActiveTask && (
+                    <TaskInsertionSlot
+                      status={column.id}
+                      insertIndex={insertIndex}
+                      overTaskId={nonActiveTasks[insertIndex]?.id ?? null}
+                    />
+                  )}
                 </div>
               );
             })}
