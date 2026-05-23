@@ -69,10 +69,46 @@ export const useMonthRowResize = ({
   const pendingMonthRowHeightRef = useRef(C.DEFAULT_MONTH_ROW_HEIGHT);
   const resizeStateRef = useRef<MonthRowResizeState | null>(null);
   const rafRef = useRef<number | null>(null);
+  const releaseResizeLockRafRef = useRef<number | null>(null);
   const activePointerCleanupRef = useRef<(() => void) | null>(null);
+  const resizeSessionIdRef = useRef(0);
 
   const [monthRowHeight, setMonthRowHeight] = useState(
     C.readStoredMonthRowHeight,
+  );
+
+  const cancelPendingResizeLockRelease = useCallback(() => {
+    if (releaseResizeLockRafRef.current === null) return;
+
+    window.cancelAnimationFrame(releaseResizeLockRafRef.current);
+    releaseResizeLockRafRef.current = null;
+  }, []);
+
+  const acquireResizeLock = useCallback(() => {
+    cancelPendingResizeLockRelease();
+
+    const sessionId = resizeSessionIdRef.current + 1;
+    resizeSessionIdRef.current = sessionId;
+    isResizingRef.current = true;
+    rootRef.current?.classList.add(MONTH_ROW_RESIZING_CLASS);
+
+    return sessionId;
+  }, [cancelPendingResizeLockRelease, isResizingRef]);
+
+  const releaseResizeLockAfterLayout = useCallback(
+    (sessionId: number) => {
+      cancelPendingResizeLockRelease();
+
+      releaseResizeLockRafRef.current = window.requestAnimationFrame(() => {
+        releaseResizeLockRafRef.current = null;
+
+        if (resizeSessionIdRef.current !== sessionId) return;
+
+        isResizingRef.current = false;
+        rootRef.current?.classList.remove(MONTH_ROW_RESIZING_CLASS);
+      });
+    },
+    [cancelPendingResizeLockRelease, isResizingRef],
   );
 
   // ── anchor 計算
@@ -172,7 +208,11 @@ export const useMonthRowResize = ({
     });
   }, [applyVariable]);
 
-  const commitHeight = useCallback((height: number, anchor?: MonthRowResizeAnchor | null) => {
+  const commitHeight = useCallback((
+    height: number,
+    anchor?: MonthRowResizeAnchor | null,
+    resizeSessionId = acquireResizeLock(),
+  ) => {
     const committed = C.normalizeStoredMonthRowHeight(
       C.clampMonthRowHeight(height),
     );
@@ -192,10 +232,18 @@ export const useMonthRowResize = ({
     C.writeStoredMonthRowHeight(committed);
     setMonthRowHeight(committed);
 
-    if (onAfterCommit) {
-      window.requestAnimationFrame(onAfterCommit);
-    }
-  }, [applyVariable, getAnchorFromScroller, onAfterCommit, scrollContainerRef]);
+    window.requestAnimationFrame(() => {
+      onAfterCommit?.();
+      releaseResizeLockAfterLayout(resizeSessionId);
+    });
+  }, [
+    acquireResizeLock,
+    applyVariable,
+    getAnchorFromScroller,
+    onAfterCommit,
+    releaseResizeLockAfterLayout,
+    scrollContainerRef,
+  ]);
 
   // ── 初期化・クリーンアップ
 
@@ -209,8 +257,11 @@ export const useMonthRowResize = ({
     return () => {
       if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
       activePointerCleanupRef.current?.();
+      cancelPendingResizeLockRelease();
+      isResizingRef.current = false;
+      rootRef.current?.classList.remove(MONTH_ROW_RESIZING_CLASS);
     };
-  }, []);
+  }, [cancelPendingResizeLockRelease, isResizingRef]);
 
   // ── イベントハンドラ
 
@@ -222,9 +273,8 @@ export const useMonthRowResize = ({
 
       activePointerCleanupRef.current?.();
 
+      const resizeSessionId = acquireResizeLock();
       const startHeight = monthRowHeightRef.current;
-      isResizingRef.current = true;
-      rootRef.current?.classList.add(MONTH_ROW_RESIZING_CLASS);
       resizeStateRef.current = {
         startY: event.clientY,
         startHeight,
@@ -247,14 +297,13 @@ export const useMonthRowResize = ({
         commitHeight(
           pendingMonthRowHeightRef.current,
           resizeStateRef.current?.anchor ?? null,
+          resizeSessionId,
         );
         cleanup();
       };
 
       const cleanup = () => {
         resizeStateRef.current = null;
-        isResizingRef.current = false;
-        rootRef.current?.classList.remove(MONTH_ROW_RESIZING_CLASS);
         document.body.style.cursor = prevCursor;
         document.body.style.userSelect = prevSelect;
         window.removeEventListener("pointermove", onMove);
@@ -272,7 +321,7 @@ export const useMonthRowResize = ({
       window.addEventListener("pointerup", onUp);
       window.addEventListener("pointercancel", onUp);
     },
-    [commitHeight, getAnchorFromElement, isResizingRef, scheduleVariable],
+    [acquireResizeLock, commitHeight, getAnchorFromElement, scheduleVariable],
   );
 
   const handleResizeKeyDown = useCallback(
