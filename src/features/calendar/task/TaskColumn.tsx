@@ -3,7 +3,6 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useT } from "@/i18n/useT";
@@ -46,7 +45,6 @@ const SortableTaskCard = ({
     isDragging,
     listeners,
     setNodeRef,
-    transform,
     transition,
   } = useSortable({
     id: task.id,
@@ -56,13 +54,11 @@ const SortableTaskCard = ({
       status: task.status,
     },
   });
-  const verticalTransform = transform ? { ...transform, x: 0 } : null;
 
   return (
     <div
       ref={setNodeRef}
       style={{
-        transform: CSS.Transform.toString(verticalTransform),
         transition,
       }}
       className={cn(
