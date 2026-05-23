@@ -65,7 +65,10 @@ const TaskInsertionSlot = ({
   return (
     <div
       ref={setNodeRef}
-      className={cn("shrink-0", isFirst ? "h-1" : "h-2")}
+      className={cn(
+        "relative z-0 shrink-0",
+        isFirst ? "h-4 -mb-1" : "h-6 -my-2",
+      )}
       aria-hidden="true"
     />
   );
@@ -100,10 +103,10 @@ const SortableTaskCard = ({
       layout="position"
       transition={TASK_LAYOUT_MOTION_TRANSITION}
       className={cn(
-        "rounded-xl touch-none transform-gpu",
+        "relative z-10 rounded-xl touch-none transform-gpu",
         "transition-[opacity,filter] duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
         isActivePreview && "opacity-40 saturate-75",
-        isDragging && "relative z-10 opacity-0",
+        isDragging && "relative z-20 opacity-0",
       )}
       {...attributes}
       {...listeners}
