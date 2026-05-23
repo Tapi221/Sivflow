@@ -14,7 +14,7 @@ import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
 import { useTaskCalendarEvents } from "./task/hooks/useTaskCalendarEvents";
-import { CalendarPanel } from "./panel/CalendarPanel";
+import { CarvePanel } from "../../components/panel/CarvePanel.desktop";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
@@ -219,11 +219,11 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           )}
         >
           {activeMode === "task" ? (
-            <CalendarPanel>
+            <CarvePanel>
               <TaskView googleAccounts={googleAccounts} />
-            </CalendarPanel>
+            </CarvePanel>
           ) : isMonthCalendarView ? (
-            <CalendarPanel edge={isDayDetailPanelCollapsed ? "trailing" : "top"}>
+            <CarvePanel edge={isDayDetailPanelCollapsed ? "trailing" : "top"}>
               {renderViewHeader(
                 "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
               )}
@@ -246,9 +246,9 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                   onVisibleMonthChange={handleVisibleMonthChange}
                 />
               </div>
-            </CalendarPanel>
+            </CarvePanel>
           ) : (
-            <CalendarPanel>
+            <CarvePanel>
               {renderViewHeader(
                 "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
               )}
@@ -287,7 +287,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                   />
                 )}
               </div>
-            </CalendarPanel>
+            </CarvePanel>
           )}
         </div>
 
