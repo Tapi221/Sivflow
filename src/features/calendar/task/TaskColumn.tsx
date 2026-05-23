@@ -1,6 +1,7 @@
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { motion } from "framer-motion";
 
+import { TaskStatusDot } from "@/chip/icon/TaskStatusDot";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
@@ -13,7 +14,6 @@ import {
   TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS,
   TASK_DND_LAYOUT_ANIMATION_DURATION_MS,
 } from "./dnd/taskDnd.config";
-import { TaskStatusDot } from "../../../chip/icon/TaskStatusDot";
 
 type TaskColumnProps = {
   column: TaskColumnType;
@@ -120,7 +120,6 @@ export const TaskColumn = ({
   };
   const isDragActive = activeTaskId !== null && activeTaskId !== undefined;
   const nonActiveTasks = tasks.filter((task) => task.id !== activeTaskId);
-  let insertIndex = 0;
 
   return (
     <div
@@ -177,10 +176,9 @@ export const TaskColumn = ({
             />
             {tasks.map((task) => {
               const isActiveTask = task.id === activeTaskId;
-
-              if (!isActiveTask) {
-                insertIndex += 1;
-              }
+              const insertIndex = isActiveTask
+                ? -1
+                : nonActiveTasks.findIndex((nonActiveTask) => nonActiveTask.id === task.id) + 1;
 
               return (
                 <div key={task.id}>
