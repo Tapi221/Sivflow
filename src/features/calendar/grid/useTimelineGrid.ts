@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import {
   buildTimelineColumns,
   getTimelineAnchorColumnIndex,
@@ -15,17 +17,24 @@ export const useTimelineGrid = ({
   selectedViewMode: CalendarViewMode;
   timelineUnitBuffer: TimelineUnitBuffer;
 }) => {
-  const timelineColumns = buildTimelineColumns(
-    selectedViewMode,
-    currentDate,
-    timelineUnitBuffer,
+  const timelineColumns = useMemo(
+    () =>
+      buildTimelineColumns(
+        selectedViewMode,
+        currentDate,
+        timelineUnitBuffer,
+      ),
+    [currentDate, selectedViewMode, timelineUnitBuffer],
   );
 
-  const timelineColumnWidth = getTimelineColumnWidth(selectedViewMode, 60);
+  const timelineColumnWidth = useMemo(
+    () => getTimelineColumnWidth(selectedViewMode, 60),
+    [selectedViewMode],
+  );
 
-  const timelineAnchorColumnIndex = getTimelineAnchorColumnIndex(
-    timelineColumns,
-    currentDate,
+  const timelineAnchorColumnIndex = useMemo(
+    () => getTimelineAnchorColumnIndex(timelineColumns, currentDate),
+    [currentDate, timelineColumns],
   );
 
   return {
