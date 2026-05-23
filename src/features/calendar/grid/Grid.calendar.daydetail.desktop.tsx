@@ -22,15 +22,18 @@ const EVENT_COLUMN_GAP_PX = 2;
 const EVENT_VERTICAL_INSET_PX = 1;
 const TIMELINE_TOP_PADDING_PX = 16;
 const HALF_HOUR_LINE_INSET_PX = 12;
-const IOS_SEPARATOR = "rgba(60, 60, 67, 0.16)";
-const IOS_SECONDARY_SEPARATOR = "rgba(60, 60, 67, 0.08)";
-const IOS_LABEL = "rgba(60, 60, 67, 0.45)";
+const IOS_SEPARATOR = "#eeeeee";
+const IOS_SECONDARY_SEPARATOR = "rgba(238, 238, 238, 0.72)";
+const IOS_LABEL = "#b3b3b3";
 
 // ==============================================
 
 type Props = {
   events: GoogleCalendarEvent[];
 };
+
+const createHourLabel = (hour: number) =>
+  `${String(hour).padStart(2, "0")}:00`;
 
 const getStartMinutes = (event: GoogleCalendarEvent): number => {
   const d = new Date(event.startsAt);
@@ -91,7 +94,7 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
         {HOURS.map((hour) => (
           <div
             key={hour}
-            className="relative"
+            className="relative bg-white"
             style={{
               height: HOUR_ROW_HEIGHT,
             }}
@@ -99,7 +102,7 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
             <span
               className="
                 absolute
-                right-4
+                right-2
                 top-0
                 flex
                 h-5
@@ -107,15 +110,18 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
                 select-none
                 items-center
                 justify-end
-                text-[11px]
-                font-medium
+                rounded-md
+                bg-white
+                px-1
+                text-[12px]
+                font-semibold
                 leading-none
                 tracking-[-0.01em]
                 tabular-nums
               "
               style={{ color: IOS_LABEL }}
             >
-              {hour}:00
+              {createHourLabel(hour)}
             </span>
           </div>
         ))}
