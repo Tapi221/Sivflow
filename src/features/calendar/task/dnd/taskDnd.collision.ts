@@ -24,36 +24,42 @@ const getPointerTaskCollisions = (
     });
   }
 
-  return taskContainers
-    .map((container): CollisionDescriptor | null => {
+  const orderedTaskRects = taskContainers
+    .map((container) => {
       const rect = args.droppableRects.get(container.id);
 
-      if (!rect) {
-        return null;
-      }
-
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const outsideTop = Math.max(0, rect.top - pointerCoordinates.y);
-      const outsideBottom = Math.max(
-        0,
-        pointerCoordinates.y - (rect.top + rect.height),
-      );
-      const verticalDistance = Math.abs(pointerCoordinates.y - centerY);
-      const horizontalDistance = Math.abs(pointerCoordinates.x - centerX);
-      const value =
-        (outsideTop + outsideBottom) * 4 + verticalDistance + horizontalDistance * 0.01;
-
-      return {
-        id: container.id,
-        data: {
-          droppableContainer: container,
-          value,
-        },
-      };
+      return rect ? { container, rect } : null;
     })
-    .filter((collision): collision is CollisionDescriptor => collision !== null)
-    .sort((left, right) => left.data.value - right.data.value);
+    .filter(
+      (entry): entry is NonNullable<typeof entry> => entry !== null,
+    )
+    .sort((left, right) => left.rect.top - right.rect.top);
+
+  if (orderedTaskRects.length === 0) {
+    return [];
+  }
+
+  const targetEntry =
+    orderedTaskRects.find(
+      ({ rect }) => pointerCoordinates.y < rect.top + rect.height / 2,
+    ) ?? orderedTaskRects.at(-1);
+
+  if (!targetEntry) {
+    return [];
+  }
+
+  const centerY = targetEntry.rect.top + targetEntry.rect.height / 2;
+  const value = Math.abs(pointerCoordinates.y - centerY);
+
+  return [
+    {
+      id: targetEntry.container.id,
+      data: {
+        droppableContainer: targetEntry.container,
+        value,
+      },
+    },
+  ];
 };
 
 export const taskBoardCollisionDetection: CollisionDetection = (args) => {
