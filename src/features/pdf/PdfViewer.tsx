@@ -24,6 +24,7 @@ import { usePdfZoom } from "./hooks/usePdfZoom";
 import { PdfPage } from "./PdfPage";
 import type {
   PageSize,
+  PdfPageSearchMatch,
   PdfViewerHandle,
   PdfViewerOptions,
   PdfViewerSourceMeta,
@@ -103,6 +104,31 @@ type PageLayoutMetrics = {
 interface PdfViewerInnerProps extends PdfViewerCommonProps {
   documentController: PdfDocumentController;
 }
+
+const EMPTY_PAGE_NUMBERS: number[] = [];
+const EMPTY_SEARCH_MATCHES: PdfPageSearchMatch[] = [];
+
+const areNumberArraysEqual = (left: number[], right: number[]) => {
+  if (left === right) {
+    return true;
+  }
+
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  return left.every((value, index) => value === right[index]);
+};
+
+const useStableNumberArray = (values: number[]) => {
+  const stableRef = useRef(values);
+
+  if (!areNumberArraysEqual(stableRef.current, values)) {
+    stableRef.current = values;
+  }
+
+  return stableRef.current;
+};
 
 const normalizePageOrder = (
   pageOrder: number[] | undefined,
@@ -538,8 +564,9 @@ const buildPrefetchPageNumbers = ({
     });
   }
 
+  const windowPageSet = new Set(windowPages);
   const sortedWindowPages = visualPageNumbers.filter((pageNumber) =>
-    windowPages.includes(pageNumber),
+    windowPageSet.has(pageNumber),
   );
   const firstPage = sortedWindowPages[0] ?? currentPage;
   const lastPage =
@@ -571,7 +598,6 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
       scale,
       minScale = 0.5,
       maxScale = 3,
-      zoomStep = 0.1,
       searchQuery = "",
       searchNavToken = 0,
       searchNavDirection = "next",
@@ -600,6 +626,9 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
       getPageTextContent,
       prefetchPageResources,
     } = documentController;
+
+    const normalizedSearchQuery = searchQuery.trim();
+    const hasSearchQuery = normalizedSearchQuery.length > 0;
 
     const orderedPageNumbers = useMemo(
       () => normalizePageOrder(pageOrder, numPages),
@@ -648,14 +677,12 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
       [],
     );
 
-    // ★ 修正: previewTarget を削除（UsePdfZoomOptions に存在しないプロパティ）
     usePdfZoom({
       container: scrollContainerEl,
-      scale,
-      minScale,
-      maxScale,
-      zoomStep,
-      onScaleChange,
+      gestureScale: scale,
+      minGestureScale: minScale,
+      maxGestureScale: maxScale,
+      onGestureScaleChange: onScaleChange,
     });
 
     // contentViewportEl は将来 previewTarget が UsePdfZoomOptions に追加された際に使用
@@ -663,18 +690,21 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
 
     const prioritizedSearchPageNumbers = useMemo(
       () =>
-        buildRenderedPageNumbers({
-          currentPage,
-          activeMatchPageNumber: null,
-          numPages,
-          pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
-          pageBottomOffsets: pageLayoutMetrics.visualPageBottomOffsets,
-          visualPageNumbers: pageLayoutMetrics.visualPageNumbers,
-          scrollTop: scrollViewport.scrollTop,
-          viewportHeight: scrollViewport.clientHeight,
-        }),
+        hasSearchQuery
+          ? buildRenderedPageNumbers({
+            currentPage,
+            activeMatchPageNumber: null,
+            numPages,
+            pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
+            pageBottomOffsets: pageLayoutMetrics.visualPageBottomOffsets,
+            visualPageNumbers: pageLayoutMetrics.visualPageNumbers,
+            scrollTop: scrollViewport.scrollTop,
+            viewportHeight: scrollViewport.clientHeight,
+          })
+          : EMPTY_PAGE_NUMBERS,
       [
         currentPage,
+        hasSearchQuery,
         numPages,
         pageLayoutMetrics.visualPageBottomOffsets,
         pageLayoutMetrics.visualPageNumbers,
@@ -683,13 +713,16 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
         scrollViewport.scrollTop,
       ],
     );
+    const stablePrioritizedSearchPageNumbers = useStableNumberArray(
+      prioritizedSearchPageNumbers,
+    );
 
     const searchState = usePdfSearch({
       doc,
       numPages,
       currentPage,
-      renderedPageNumbers: prioritizedSearchPageNumbers,
-      searchQuery,
+      renderedPageNumbers: stablePrioritizedSearchPageNumbers,
+      searchQuery: normalizedSearchQuery,
       searchNavToken,
       searchNavDirection,
       getPageTextContent,
@@ -709,76 +742,82 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
       );
     }, [searchState.activeMatchIndex, searchState.flattenedMatches]);
 
-    const renderedPageNumbers = useMemo(
-      () =>
-        buildRenderedPageNumbers({
-          currentPage,
+    const renderedPageNumbers = useStableNumberArray(
+      useMemo(
+        () =>
+          buildRenderedPageNumbers({
+            currentPage,
+            activeMatchPageNumber,
+            numPages,
+            pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
+            pageBottomOffsets: pageLayoutMetrics.visualPageBottomOffsets,
+            visualPageNumbers: pageLayoutMetrics.visualPageNumbers,
+            scrollTop: scrollViewport.scrollTop,
+            viewportHeight: scrollViewport.clientHeight,
+          }),
+        [
           activeMatchPageNumber,
+          currentPage,
           numPages,
-          pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
-          pageBottomOffsets: pageLayoutMetrics.visualPageBottomOffsets,
-          visualPageNumbers: pageLayoutMetrics.visualPageNumbers,
-          scrollTop: scrollViewport.scrollTop,
-          viewportHeight: scrollViewport.clientHeight,
-        }),
-      [
-        activeMatchPageNumber,
-        currentPage,
-        numPages,
-        pageLayoutMetrics.visualPageBottomOffsets,
-        pageLayoutMetrics.visualPageNumbers,
-        pageLayoutMetrics.visualPageTopOffsets,
-        scrollViewport.clientHeight,
-        scrollViewport.scrollTop,
-      ],
+          pageLayoutMetrics.visualPageBottomOffsets,
+          pageLayoutMetrics.visualPageNumbers,
+          pageLayoutMetrics.visualPageTopOffsets,
+          scrollViewport.clientHeight,
+          scrollViewport.scrollTop,
+        ],
+      ),
     );
 
-    const textLayerPageNumbers = useMemo(
-      () =>
-        buildVisibleTextLayerPageNumbers({
-          currentPage,
+    const textLayerPageNumbers = useStableNumberArray(
+      useMemo(
+        () =>
+          buildVisibleTextLayerPageNumbers({
+            currentPage,
+            activeMatchPageNumber,
+            numPages,
+            pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
+            pageBottomOffsets: pageLayoutMetrics.visualPageBottomOffsets,
+            visualPageNumbers: pageLayoutMetrics.visualPageNumbers,
+            scrollTop: scrollViewport.scrollTop,
+            viewportHeight: scrollViewport.clientHeight,
+          }),
+        [
           activeMatchPageNumber,
+          currentPage,
           numPages,
-          pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
-          pageBottomOffsets: pageLayoutMetrics.visualPageBottomOffsets,
-          visualPageNumbers: pageLayoutMetrics.visualPageNumbers,
-          scrollTop: scrollViewport.scrollTop,
-          viewportHeight: scrollViewport.clientHeight,
-        }),
-      [
-        activeMatchPageNumber,
-        currentPage,
-        numPages,
-        pageLayoutMetrics.visualPageBottomOffsets,
-        pageLayoutMetrics.visualPageNumbers,
-        pageLayoutMetrics.visualPageTopOffsets,
-        scrollViewport.clientHeight,
-        scrollViewport.scrollTop,
-      ],
+          pageLayoutMetrics.visualPageBottomOffsets,
+          pageLayoutMetrics.visualPageNumbers,
+          pageLayoutMetrics.visualPageTopOffsets,
+          scrollViewport.clientHeight,
+          scrollViewport.scrollTop,
+        ],
+      ),
     );
 
-    const prefetchPageNumbers = useMemo(
-      () =>
-        buildPrefetchPageNumbers({
-          currentPage,
+    const prefetchPageNumbers = useStableNumberArray(
+      useMemo(
+        () =>
+          buildPrefetchPageNumbers({
+            currentPage,
+            activeMatchPageNumber,
+            numPages,
+            pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
+            pageBottomOffsets: pageLayoutMetrics.visualPageBottomOffsets,
+            visualPageNumbers: pageLayoutMetrics.visualPageNumbers,
+            scrollTop: scrollViewport.scrollTop,
+            viewportHeight: scrollViewport.clientHeight,
+          }),
+        [
           activeMatchPageNumber,
+          currentPage,
           numPages,
-          pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
-          pageBottomOffsets: pageLayoutMetrics.visualPageBottomOffsets,
-          visualPageNumbers: pageLayoutMetrics.visualPageNumbers,
-          scrollTop: scrollViewport.scrollTop,
-          viewportHeight: scrollViewport.clientHeight,
-        }),
-      [
-        activeMatchPageNumber,
-        currentPage,
-        numPages,
-        pageLayoutMetrics.visualPageBottomOffsets,
-        pageLayoutMetrics.visualPageNumbers,
-        pageLayoutMetrics.visualPageTopOffsets,
-        scrollViewport.clientHeight,
-        scrollViewport.scrollTop,
-      ],
+          pageLayoutMetrics.visualPageBottomOffsets,
+          pageLayoutMetrics.visualPageNumbers,
+          pageLayoutMetrics.visualPageTopOffsets,
+          scrollViewport.clientHeight,
+          scrollViewport.scrollTop,
+        ],
+      ),
     );
 
     const renderedRows = useMemo(() => {
@@ -980,7 +1019,8 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
                   >
                     {rowPageNumbers.map((pageNumber) => {
                       const pageSearchMatches =
-                        searchState.pageMatches[pageNumber] ?? [];
+                        searchState.pageMatches[pageNumber] ??
+                        EMPTY_SEARCH_MATCHES;
                       const activeSearchMatchIndexForPage =
                         activeMatchPageNumber === pageNumber
                           ? searchState.activeMatchIndex
