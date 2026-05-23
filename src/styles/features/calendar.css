@@ -218,6 +218,19 @@
     content: none;
   }
 
+  .calendar-month-row-boundary-resize-handle.is-month-row-resize-active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 4px;
+    height: 3px;
+    background: #c7c7cc;
+    border-radius: 0;
+    opacity: 1;
+    pointer-events: none;
+  }
+
   .calendar-month-row-boundary-resize-handle:focus-visible {
     outline: none;
   }
