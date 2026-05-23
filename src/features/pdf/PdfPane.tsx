@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import * as C from "@/features/pdf/pdf.constants.desktop";
 
 import { usePdfWorkspace } from "./hooks/usePdfWorkspace";
 import { PdfOverlayToolbar } from "./PdfToolbar";
+import { PdfThumbnailSidePanel } from "./PdfThumbnailSidePanel";
 import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
 
@@ -40,6 +41,8 @@ interface PdfPaneProps {
   onDocumentUpdate?: (updates: Partial<PdfPaneDoc>) => Promise<void>;
 }
 
+const PDF_TOGGLE_THUMBNAILS_EVENT = "flashcard-master:pdf-toggle-thumbnails";
+
 export const PdfPane = ({ doc, className }: PdfPaneProps) => {
   const {
     doc: workspaceDoc,
@@ -51,11 +54,14 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
     opaqueCanvas,
     numPages,
     alignedCurrentPage,
+    currentPage,
+    firstPageSize,
     scale,
     fitMode,
     pageLayoutMode,
     zoomPercent,
     normalizedThumbnailOrder,
+    scrollToPage,
     handleFitWidth,
     handleViewerScaleChange,
     handlePageLayoutModeChange,
@@ -67,6 +73,7 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
     canGoToNextPage,
     setCurrentPage,
   } = usePdfWorkspace();
+  const [isThumbnailPanelOpen, setIsThumbnailPanelOpen] = useState(false);
 
   useEffect(() => {
     if (workspaceDoc.id === doc.id) {
@@ -78,6 +85,24 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
       workspaceDocId: workspaceDoc.id,
     });
   }, [doc.id, workspaceDoc.id]);
+
+  useEffect(() => {
+    const handleToggleThumbnails = () => {
+      setIsThumbnailPanelOpen((isOpen) => !isOpen);
+    };
+
+    window.addEventListener(
+      PDF_TOGGLE_THUMBNAILS_EVENT,
+      handleToggleThumbnails,
+    );
+
+    return () => {
+      window.removeEventListener(
+        PDF_TOGGLE_THUMBNAILS_EVENT,
+        handleToggleThumbnails,
+      );
+    };
+  }, []);
 
   useEffect(() => {
     if (!DEV_MODE) {
@@ -109,6 +134,7 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
   }, [viewerRef]);
 
   const shouldRenderToolbar = !sourceUnavailable && numPages > 0;
+  const shouldRenderThumbnailPanel = shouldRenderToolbar && isThumbnailPanelOpen;
 
   return (
     <div className={cn("flex h-full min-h-0 min-w-0 flex-col", className)}>
@@ -121,57 +147,73 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
             {localDataStatus === "idle" && "PDFソースがありません。"}
           </div>
         ) : (
-          <div
-            ref={containerRef}
-            className="relative flex h-full min-h-0 min-w-0 w-full overflow-hidden bg-transparent"
-          >
-            <PdfViewer
-              ref={viewerRef}
-              documentController={documentController}
-              navigationIdentity={workspaceDoc.id}
-              pageOrder={normalizedThumbnailOrder}
-              scale={scale}
-              minScale={C.FIT_MIN_SCALE}
-              maxScale={C.FIT_MAX_SCALE}
-              opaqueCanvas={opaqueCanvas}
-              pageLayoutMode={pageLayoutMode}
-              spreadGap={16}
-              onScaleChange={handleViewerScaleChange}
-              onPageChange={setCurrentPage}
-              className="h-full w-full"
-            />
-
-            {shouldRenderToolbar ? (
-              <div
-                className="pointer-events-none absolute z-20 flex items-end gap-2"
-                style={{
-                  right: "max(1rem, env(safe-area-inset-right))",
-                  bottom:
-                    "max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))",
-                }}
-              >
-                <div className="pointer-events-auto">
-                  <PdfOverlayToolbar
-                    currentPage={alignedCurrentPage}
-                    numPages={numPages}
-                    zoomPercent={zoomPercent}
-                    minZoomPercent={0}
-                    maxZoomPercent={100}
-                    fitMode={fitMode}
-                    pageLayoutMode={pageLayoutMode}
-                    zoomStepPercent={1}
-                    onCommitPage={handleCommitPage}
-                    onPrevPage={handlePrev}
-                    onNextPage={handleNext}
-                    onFitWidth={handleFitWidth}
-                    onZoomPercentChange={handleZoomPercentChange}
-                    onPageLayoutModeChange={handlePageLayoutModeChange}
-                    canGoToPrevPage={canGoToPrevPage}
-                    canGoToNextPage={canGoToNextPage}
-                  />
-                </div>
-              </div>
+          <div className="relative flex h-full min-h-0 min-w-0 w-full overflow-hidden bg-transparent">
+            {shouldRenderThumbnailPanel ? (
+              <PdfThumbnailSidePanel
+                documentController={documentController}
+                numPages={numPages}
+                normalizedThumbnailOrder={normalizedThumbnailOrder}
+                firstPageSize={firstPageSize}
+                currentPage={currentPage}
+                alignedCurrentPage={alignedCurrentPage}
+                opaqueCanvas={opaqueCanvas}
+                scrollToPage={scrollToPage}
+                onClose={() => setIsThumbnailPanelOpen(false)}
+              />
             ) : null}
+
+            <div
+              ref={containerRef}
+              className="relative min-h-0 min-w-0 flex-1 overflow-hidden bg-transparent"
+            >
+              <PdfViewer
+                ref={viewerRef}
+                documentController={documentController}
+                navigationIdentity={workspaceDoc.id}
+                pageOrder={normalizedThumbnailOrder}
+                scale={scale}
+                minScale={C.FIT_MIN_SCALE}
+                maxScale={C.FIT_MAX_SCALE}
+                opaqueCanvas={opaqueCanvas}
+                pageLayoutMode={pageLayoutMode}
+                spreadGap={16}
+                onScaleChange={handleViewerScaleChange}
+                onPageChange={setCurrentPage}
+                className="h-full w-full"
+              />
+
+              {shouldRenderToolbar ? (
+                <div
+                  className="pointer-events-none absolute z-20 flex items-end gap-2"
+                  style={{
+                    right: "max(1rem, env(safe-area-inset-right))",
+                    bottom:
+                      "max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))",
+                  }}
+                >
+                  <div className="pointer-events-auto">
+                    <PdfOverlayToolbar
+                      currentPage={alignedCurrentPage}
+                      numPages={numPages}
+                      zoomPercent={zoomPercent}
+                      minZoomPercent={0}
+                      maxZoomPercent={100}
+                      fitMode={fitMode}
+                      pageLayoutMode={pageLayoutMode}
+                      zoomStepPercent={1}
+                      onCommitPage={handleCommitPage}
+                      onPrevPage={handlePrev}
+                      onNextPage={handleNext}
+                      onFitWidth={handleFitWidth}
+                      onZoomPercentChange={handleZoomPercentChange}
+                      onPageLayoutModeChange={handlePageLayoutModeChange}
+                      canGoToPrevPage={canGoToPrevPage}
+                      canGoToNextPage={canGoToNextPage}
+                    />
+                  </div>
+                </div>
+              ) : null}
+            </div>
           </div>
         )}
       </div>
