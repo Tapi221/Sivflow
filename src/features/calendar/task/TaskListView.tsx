@@ -9,10 +9,9 @@ import {
 import { format } from "date-fns";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { useT } from "@/i18n/useT";
-import { TASK_TYPO } from "@/styles/tokens/typography";
 import { cn } from "@/lib/utils";
-import { TASK_COLUMNS } from "./task.types";
-import type { Task } from "./task.types";
+import { TASK_COLUMNS, CATEGORY_CONFIG, PRIORITY_CONFIG } from "./task.types";
+import type { Task, TaskStatus } from "./task.types";
 import { TaskStatusDot } from "../../../chip/icon/TaskStatusDot";
 
 type TaskListViewProps = {
@@ -21,16 +20,12 @@ type TaskListViewProps = {
   onRenameTask: (taskId: string, title: string) => void;
 };
 
-type TaskColumnId =
-  | "done"
-  | "title"
-  | "status"
-  | "priority"
-  | "category"
-  | "dueDate";
+// ── カラム定義 ──────────────────────────────────────────────
 
-type TaskColumn = {
-  id: TaskColumnId;
+type ColId = "done" | "title" | "priority" | "category" | "dueDate";
+
+type ColDef = {
+  id: ColId;
   label: string;
   width: number;
   minWidth: number;
@@ -38,522 +33,442 @@ type TaskColumn = {
   resizable: boolean;
 };
 
-const TASK_COLUMN_STORAGE_KEY = "task-list-view:column-widths:v1";
+const STORAGE_KEY = "task-list-view:col-widths:v2";
 
-const DEFAULT_TASK_COLUMNS: TaskColumn[] = [
-  {
-    id: "done",
-    label: "完了",
-    width: 28,
-    minWidth: 28,
-    maxWidth: 28,
-    resizable: false,
-  },
-  {
-    id: "title",
-    label: "タイトル",
-    width: 520,
-    minWidth: 160,
-    resizable: true,
-  },
-  {
-    id: "status",
-    label: "ステータス",
-    width: 220,
-    minWidth: 116,
-    maxWidth: 320,
-    resizable: true,
-  },
-  {
-    id: "priority",
-    label: "優先度",
-    width: 200,
-    minWidth: 96,
-    maxWidth: 260,
-    resizable: true,
-  },
-  {
-    id: "category",
-    label: "カテゴリ",
-    width: 260,
-    minWidth: 116,
-    resizable: true,
-  },
-  {
-    id: "dueDate",
-    label: "期日",
-    width: 150,
-    minWidth: 82,
-    maxWidth: 220,
-    resizable: true,
-  },
+const DEFAULT_COLS: ColDef[] = [
+  { id: "done",     label: "",         width: 32,  minWidth: 32,  maxWidth: 32,  resizable: false },
+  { id: "title",    label: "タイトル", width: 480, minWidth: 160,               resizable: true  },
+  { id: "priority", label: "優先度",   width: 96,  minWidth: 72,  maxWidth: 160, resizable: true  },
+  { id: "category", label: "カテゴリ", width: 160, minWidth: 100, maxWidth: 260, resizable: true  },
+  { id: "dueDate",  label: "期日",     width: 120, minWidth: 80,  maxWidth: 180, resizable: true  },
 ];
 
-const TABLE_HEADER_CLASS = `pb-2 text-left ${TASK_TYPO.listHeader}`;
+const clamp = (v: number, min: number, max?: number) =>
+  max !== undefined ? Math.min(Math.max(v, min), max) : Math.max(v, min);
 
-const clampTaskColumnWidth = (
-  width: number,
-  minWidth: number,
-  maxWidth?: number,
-): number => {
-  if (!Number.isFinite(width)) {
-    return minWidth;
-  }
-
-  if (typeof maxWidth === "number") {
-    return Math.min(Math.max(width, minWidth), maxWidth);
-  }
-
-  return Math.max(width, minWidth);
-};
-
-const loadStoredTaskColumns = (): TaskColumn[] => {
-  if (typeof window === "undefined") {
-    return DEFAULT_TASK_COLUMNS;
-  }
-
+const loadCols = (): ColDef[] => {
   try {
-    const raw = window.localStorage.getItem(TASK_COLUMN_STORAGE_KEY);
-
-    if (!raw) {
-      return DEFAULT_TASK_COLUMNS;
-    }
-
-    const parsed = JSON.parse(raw) as Partial<Record<TaskColumnId, number>>;
-
-    return DEFAULT_TASK_COLUMNS.map((column) => {
-      const storedWidth = parsed[column.id];
-
-      if (typeof storedWidth !== "number") {
-        return column;
-      }
-
-      return {
-        ...column,
-        width: clampTaskColumnWidth(
-          storedWidth,
-          column.minWidth,
-          column.maxWidth,
-        ),
-      };
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULT_COLS;
+    const stored = JSON.parse(raw) as Partial<Record<ColId, number>>;
+    return DEFAULT_COLS.map((c) => {
+      const w = stored[c.id];
+      return typeof w === "number" ? { ...c, width: clamp(w, c.minWidth, c.maxWidth) } : c;
     });
   } catch {
-    return DEFAULT_TASK_COLUMNS;
+    return DEFAULT_COLS;
   }
 };
 
-const buildTaskGridTemplateColumns = (columns: TaskColumn[]): string => {
-  return columns.map((column) => `${column.width}px`).join(" ");
+// ── ステータスごとのラベル・カラー ──────────────────────────
+
+const STATUS_META: Record<TaskStatus, { label: string; color: string; dot: string }> = {
+  not_started: { label: "未着手",  color: "#8f929c", dot: "#d1d5db" },
+  in_progress: { label: "進行中",  color: "#185FA5", dot: "#185FA5" },
+  review:      { label: "レビュー",color: "#d97706", dot: "#f59e0b" },
+  done:        { label: "完了",    color: "#16a34a", dot: "#22c55e" },
 };
 
-const buildTaskGridMinWidth = (columns: TaskColumn[]): number => {
-  return columns.reduce((sum, column) => sum + column.width, 0);
+// ── リサイズハンドル ────────────────────────────────────────
+
+type ResizeHandleProps = {
+  colId: ColId;
+  onStart: (e: ReactPointerEvent<HTMLDivElement>, id: ColId) => void;
+  onReset: (id: ColId) => void;
 };
 
-const getColumnStartPaddingClass = (columnId: TaskColumnId): string => {
-  if (columnId === "done" || columnId === "title") {
-    return "";
-  }
-
-  return "pl-4";
-};
-
-const DetailIcon = () => (
-  <svg viewBox="0 0 18 18" fill="none" className="h-4 w-4" aria-hidden="true">
-    <path
-      d="M4 5.25h10M4 9h10M4 12.75h6"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-  </svg>
+const ResizeHandle = ({ colId, onStart, onReset }: ResizeHandleProps) => (
+  <div
+    role="separator"
+    aria-orientation="vertical"
+    className="absolute right-0 top-0 h-full w-3 cursor-col-resize touch-none select-none flex items-center justify-center z-10 group/rh"
+    onDoubleClick={() => onReset(colId)}
+    onPointerDown={(e) => onStart(e, colId)}
+  >
+    <div className="w-px h-4 bg-[#e5e7eb] group-hover/rh:bg-[#c8cbd1] transition-colors" />
+  </div>
 );
 
-export const TaskListView = ({
-  tasks,
-  onToggleTaskDone,
-  onRenameTask,
-}: TaskListViewProps) => {
-  const t = useT();
-  const titleInputRef = useRef<HTMLInputElement | null>(null);
-  const resizeCleanupRef = useRef<(() => void) | null>(null);
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState("");
-  const [columns, setColumns] = useState<TaskColumn[]>(loadStoredTaskColumns);
-  const [isColumnResizing, setIsColumnResizing] = useState(false);
-  const statusLabelMap = {
-    not_started: t.taskStatusNotStarted,
-    in_progress: t.taskStatusInProgress,
-    review: t.taskStatusReview,
-    done: t.taskStatusDone,
-  };
+// ── セクションヘッダー ──────────────────────────────────────
 
-  const gridTemplateColumns = useMemo(() => {
-    return buildTaskGridTemplateColumns(columns);
-  }, [columns]);
+type SectionHeaderProps = {
+  status: TaskStatus;
+  count: number;
+  open: boolean;
+  onToggle: () => void;
+  onAdd: () => void;
+  cols: ColDef[];
+};
 
-  const gridMinWidth = useMemo(() => {
-    return buildTaskGridMinWidth(columns);
-  }, [columns]);
-
-  const gridStyle = useMemo<CSSProperties>(() => {
-    return {
-      gridTemplateColumns,
-      minWidth: `${gridMinWidth}px`,
-      width: `max(100%, ${gridMinWidth}px)`,
-    };
-  }, [gridMinWidth, gridTemplateColumns]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const widthMap = Object.fromEntries(
-      columns.map((column) => [column.id, column.width]),
-    );
-
-    window.localStorage.setItem(
-      TASK_COLUMN_STORAGE_KEY,
-      JSON.stringify(widthMap),
-    );
-  }, [columns]);
-
-  useEffect(() => {
-    return () => {
-      resizeCleanupRef.current?.();
-      resizeCleanupRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isColumnResizing) {
-      return;
-    }
-
-    const previousCursor = document.body.style.cursor;
-    const previousUserSelect = document.body.style.userSelect;
-
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-
-    return () => {
-      document.body.style.cursor = previousCursor;
-      document.body.style.userSelect = previousUserSelect;
-    };
-  }, [isColumnResizing]);
-
-  useEffect(() => {
-    if (!editingTaskId) {
-      return;
-    }
-
-    titleInputRef.current?.focus();
-    titleInputRef.current?.select();
-  }, [editingTaskId]);
-
-  const startEditingTaskTitle = (task: Task) => {
-    setEditingTaskId(task.id);
-    setEditingTitle(task.title);
-  };
-
-  const finishEditingTaskTitle = (task: Task) => {
-    const nextTitle = editingTitle.trim();
-
-    if (nextTitle && nextTitle !== task.title) {
-      onRenameTask(task.id, nextTitle);
-    }
-
-    setEditingTaskId(null);
-    setEditingTitle("");
-  };
-
-  const cancelEditingTaskTitle = () => {
-    setEditingTaskId(null);
-    setEditingTitle("");
-  };
-
-  const handleColumnResizeReset = (columnId: TaskColumnId) => {
-    setColumns((currentColumns) =>
-      currentColumns.map((column) => {
-        if (column.id !== columnId) {
-          return column;
-        }
-
-        const defaultColumn = DEFAULT_TASK_COLUMNS.find(
-          (candidate) => candidate.id === columnId,
-        );
-
-        if (!defaultColumn) {
-          return column;
-        }
-
-        return {
-          ...column,
-          width: defaultColumn.width,
-        };
-      }),
-    );
-  };
-
-  const handleColumnResizeStart = (
-    event: ReactPointerEvent<HTMLDivElement>,
-    columnId: TaskColumnId,
-  ) => {
-    const targetColumn = columns.find((column) => column.id === columnId);
-
-    if (!targetColumn || !targetColumn.resizable) {
-      return;
-    }
-
-    resizeCleanupRef.current?.();
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const startX = event.clientX;
-    const startWidth = targetColumn.width;
-    setIsColumnResizing(true);
-
-    const handlePointerMove = (moveEvent: PointerEvent) => {
-      const deltaX = moveEvent.clientX - startX;
-
-      setColumns((currentColumns) =>
-        currentColumns.map((column) => {
-          if (column.id !== columnId) {
-            return column;
-          }
-
-          return {
-            ...column,
-            width: clampTaskColumnWidth(
-              startWidth + deltaX,
-              column.minWidth,
-              column.maxWidth,
-            ),
-          };
-        }),
-      );
-    };
-
-    const cleanup = () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerup", handlePointerUp);
-      setIsColumnResizing(false);
-      resizeCleanupRef.current = null;
-    };
-
-    const handlePointerUp = () => {
-      cleanup();
-    };
-
-    resizeCleanupRef.current = cleanup;
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerup", handlePointerUp, { once: true });
-  };
-
-  const renderColumnResizeHandle = (column: TaskColumn) => {
-    if (!column.resizable) {
-      return null;
-    }
-
-    return (
-      <div
-        role="separator"
-        aria-orientation="vertical"
-        aria-label={`${column.label} の列幅を調整`}
-        title="ドラッグで列幅調整、ダブルクリックで初期幅に戻す"
-        className="group/resize absolute right-[-6px] top-1/2 z-20 flex h-[1em] w-3 -translate-y-1/2 items-center justify-center cursor-col-resize touch-none"
-        onDoubleClick={() => handleColumnResizeReset(column.id)}
-        onPointerDown={(event) => handleColumnResizeStart(event, column.id)}
-      >
-        <div className="h-full bg-[#eeeeee]" style={{ width: "0.5px" }} />
-      </div>
-    );
-  };
-
-  const renderTaskCell = (columnId: TaskColumnId, task: Task) => {
-    const col = TASK_COLUMNS.find((candidate) => candidate.id === task.status);
-    const isDone = task.status === "done";
-    const checkboxColor = isDone ? "#007aff" : "#9ca3af";
-    const isEditingTitle = editingTaskId === task.id;
-
-    switch (columnId) {
-      case "done":
-        return (
-          <div className="py-2.5 pr-2 align-top" role="cell">
-            <button
-              type="button"
-              className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center"
-              aria-label={isDone ? "Mark task as not done" : "Complete task"}
-              onClick={() => onToggleTaskDone(task.id, !isDone)}
-            >
-              <AnimatedSquareCheckbox checked={isDone} color={checkboxColor} />
-            </button>
-          </div>
-        );
-
-      case "title":
-        return (
-          <div
-            className={cn("min-w-0 overflow-hidden py-2.5 pr-4", TASK_TYPO.listTitle)}
-            role="cell"
-          >
-            {isEditingTitle ? (
-              <div className="min-w-0">
-                <input
-                  ref={titleInputRef}
-                  type="text"
-                  value={editingTitle}
-                  aria-label="Task title"
-                  className={cn("h-[18px] w-full border-0 bg-transparent p-0 outline-none placeholder:text-[#9ca3af]", TASK_TYPO.listTitleInput)}
-                  onChange={(event) => setEditingTitle(event.target.value)}
-                  onBlur={() => finishEditingTaskTitle(task)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      finishEditingTaskTitle(task);
-                      return;
-                    }
-
-                    if (event.key === "Escape") {
-                      event.preventDefault();
-                      cancelEditingTaskTitle();
-                    }
-                  }}
-                />
-
-                <button
-                  type="button"
-                  className={cn("mt-2 flex items-center gap-1.5 transition-colors hover:text-[#1c1c1e]", TASK_TYPO.detailAction)}
-                >
-                  <DetailIcon />
-                  <span>詳細</span>
-                </button>
-
-                <div className={cn("mt-2 flex flex-wrap items-center gap-1.5", TASK_TYPO.metaCluster)}>
-                  {task.dueDate && (
-                    <span className={cn("inline-flex h-5 items-center rounded-full border border-white/70 bg-[#f2f2f7] px-1.5 tabular-nums", TASK_TYPO.metaChip)}>
-                      {format(new Date(task.dueDate), "MMM d")}
-                    </span>
-                  )}
-                  <span className="inline-flex h-5 items-center rounded-full border border-white/70 bg-[#f2f2f7] px-2 font-semibold capitalize text-[#4c5361]">
-                    {task.category}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                className={cn("block w-full truncate rounded text-left transition-colors hover:bg-[#f4f5f7] focus-visible:bg-[#f4f5f7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eeeeee]", TASK_TYPO.listTitle)}
-                aria-label={`Rename ${task.title}`}
-                title="Click to rename"
-                onClick={() => startEditingTaskTitle(task)}
-              >
-                {task.title}
-              </button>
-            )}
-          </div>
-        );
-
-      case "status":
-        return (
-          <div
-            className="min-w-0 overflow-hidden py-2.5 pl-4 pr-4 align-top"
-            role="cell"
-          >
-            <span className="flex min-w-0 items-center gap-1.5 text-[#4c5361]">
-              <TaskStatusDot color={col?.dotColor} />
-              <span className="truncate">{statusLabelMap[task.status]}</span>
-            </span>
-          </div>
-        );
-
-      case "priority":
-        return (
-          <div
-            className="truncate py-2.5 pl-4 pr-4 align-top capitalize text-[#4c5361]"
-            role="cell"
-          >
-            {task.priority}
-          </div>
-        );
-
-      case "category":
-        return (
-          <div
-            className="truncate py-2.5 pl-4 pr-4 align-top text-[#4c5361]"
-            role="cell"
-          >
-            {task.category}
-          </div>
-        );
-
-      case "dueDate":
-        return (
-          <div
-            className="truncate py-2.5 pl-4 pr-4 align-top tabular-nums text-[#8f929c]"
-            role="cell"
-          >
-            {task.dueDate ? format(new Date(task.dueDate), "MMM d") : "—"}
-          </div>
-        );
-    }
+const SectionHeader = ({ status, count, open, onToggle, onAdd, cols }: SectionHeaderProps) => {
+  const meta = STATUS_META[status];
+  const gridStyle: CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: cols.map((c) => `${c.width}px`).join(" "),
   };
 
   return (
-    <div className="explorer-chrome-font min-h-0 flex-1 overflow-auto p-4">
-      <div className="min-w-max" role="table" aria-label="タスク一覧">
-        <div
-          className="grid border-b border-[#eeeeee]"
-          role="row"
-          style={gridStyle}
+    <div
+      className="sticky top-0 z-10 bg-white border-b border-[#f0f0f0] group/sh"
+      style={gridStyle}
+    >
+      {/* done cell */}
+      <div className="flex items-center justify-center">
+        <button
+          type="button"
+          aria-label={open ? "セクションを閉じる" : "セクションを開く"}
+          onClick={onToggle}
+          className="flex items-center justify-center w-4 h-4 rounded text-[#b0b4be] hover:text-[#6b7280] transition-colors"
         >
-          {columns.map((column) => {
-            if (column.id === "done") {
-              return (
-                <div
-                  key={column.id}
-                  className="relative pb-2 pr-2 text-left"
-                  role="columnheader"
-                >
-                  <span className="sr-only">完了</span>
-                  {renderColumnResizeHandle(column)}
-                </div>
-              );
-            }
+          <svg
+            viewBox="0 0 10 10"
+            className="w-2.5 h-2.5 transition-transform duration-150"
+            style={{ transform: open ? "rotate(90deg)" : "rotate(0deg)" }}
+          >
+            <path d="M3 2l4 3-4 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          </svg>
+        </button>
+      </div>
 
-            return (
-              <div
-                key={column.id}
-                className={`${TABLE_HEADER_CLASS} ${getColumnStartPaddingClass(
-                  column.id,
-                )} relative min-w-0 pr-4`}
-                role="columnheader"
-              >
-                <span className="block truncate pr-2">{column.label}</span>
-                {renderColumnResizeHandle(column)}
-              </div>
-            );
-          })}
+      {/* title cell */}
+      <div className="flex items-center gap-2 py-2 pr-3">
+        <TaskStatusDot color={meta.dot} />
+        <span
+          className="text-[12px] font-semibold tracking-[0.02em] select-none"
+          style={{ color: meta.color }}
+        >
+          {meta.label}
+        </span>
+        <span className="text-[11px] font-medium text-[#b0b4be] tabular-nums select-none">
+          {count}
+        </span>
+      </div>
+
+      {/* remaining cells are empty */}
+      {cols.slice(2).map((c) => (
+        <div key={c.id} className="py-2" />
+      ))}
+    </div>
+  );
+};
+
+// ── 行コンポーネント ────────────────────────────────────────
+
+type RowProps = {
+  task: Task;
+  cols: ColDef[];
+  isEditing: boolean;
+  editingTitle: string;
+  titleInputRef: React.RefObject<HTMLInputElement | null>;
+  onToggleDone: (id: string, done: boolean) => void;
+  onStartEdit: (task: Task) => void;
+  onFinishEdit: (task: Task) => void;
+  onCancelEdit: () => void;
+  onEditingChange: (v: string) => void;
+  onDelete: (id: string) => void;
+};
+
+const Row = ({
+  task,
+  cols,
+  isEditing,
+  editingTitle,
+  titleInputRef,
+  onToggleDone,
+  onStartEdit,
+  onFinishEdit,
+  onCancelEdit,
+  onEditingChange,
+  onDelete,
+}: RowProps) => {
+  const isDone = task.status === "done";
+  const category = CATEGORY_CONFIG[task.category] ?? { label: task.category, bg: "#f3f4f6", text: "#6b7280" };
+  const priority = PRIORITY_CONFIG[task.priority];
+  const dueLabel = task.dueDate ? format(new Date(task.dueDate), "MMM d") : null;
+
+  const gridStyle: CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: cols.map((c) => `${c.width}px`).join(" "),
+  };
+
+  return (
+    <div
+      className={cn(
+        "group/row border-b border-[#f5f5f5] hover:bg-[#fafafa] transition-colors duration-75",
+        isDone && "opacity-50",
+      )}
+      style={gridStyle}
+    >
+      {/* done */}
+      <div className="flex items-center justify-center">
+        <button
+          type="button"
+          aria-label={isDone ? "未完了に戻す" : "完了にする"}
+          onClick={() => onToggleDone(task.id, !isDone)}
+          className="flex items-center justify-center w-3.5 h-3.5 opacity-40 group-hover/row:opacity-100 transition-opacity"
+        >
+          <AnimatedSquareCheckbox checked={isDone} color={isDone ? "#007aff" : "#9ca3af"} className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      {/* title */}
+      <div className="flex items-center min-w-0 pr-3 py-[9px]">
+        {isEditing ? (
+          <input
+            ref={titleInputRef}
+            type="text"
+            value={editingTitle}
+            onChange={(e) => onEditingChange(e.target.value)}
+            onBlur={() => onFinishEdit(task)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") { e.preventDefault(); onFinishEdit(task); }
+              if (e.key === "Escape") { e.preventDefault(); onCancelEdit(); }
+            }}
+            className="w-full bg-transparent border-0 outline-none text-[13px] font-medium text-[#1c1c1e] placeholder:text-[#c7c7cc] p-0 leading-snug"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => onStartEdit(task)}
+            className={cn(
+              "w-full text-left text-[13px] font-medium leading-snug truncate rounded hover:bg-[#f4f5f7] px-1 -mx-1 transition-colors",
+              isDone ? "text-[#8e8e93] line-through decoration-[#c7c7cc]" : "text-[#1c1c1e]",
+            )}
+          >
+            {task.title}
+          </button>
+        )}
+
+        {/* 削除ボタン - hover時のみ */}
+        <button
+          type="button"
+          aria-label="削除"
+          onClick={() => onDelete(task.id)}
+          className="ml-2 flex-shrink-0 opacity-0 group-hover/row:opacity-100 transition-opacity text-[#c7c7cc] hover:text-[#ff3b30]"
+        >
+          <svg viewBox="0 0 14 14" className="w-3.5 h-3.5">
+            <path d="M2.5 2.5l9 9M11.5 2.5l-9 9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          </svg>
+        </button>
+      </div>
+
+      {/* priority */}
+      <div className="flex items-center py-[9px] pr-3">
+        <span
+          className="inline-flex items-center h-5 rounded-full px-2 text-[11px] font-medium"
+          style={{ backgroundColor: priority.bg, color: priority.text }}
+        >
+          {priority.label}
+        </span>
+      </div>
+
+      {/* category */}
+      <div className="flex items-center py-[9px] pr-3">
+        <span
+          className="inline-flex items-center h-5 rounded-full px-2 text-[11px] font-medium truncate max-w-full"
+          style={{ backgroundColor: category.bg, color: category.text }}
+        >
+          {category.label}
+        </span>
+      </div>
+
+      {/* dueDate */}
+      <div className="flex items-center py-[9px] pr-3">
+        {dueLabel && (
+          <span className="text-[12px] tabular-nums text-[#8f929c]">{dueLabel}</span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── メインコンポーネント ────────────────────────────────────
+
+export const TaskListView = ({ tasks, onToggleTaskDone, onRenameTask }: TaskListViewProps) => {
+  const t = useT();
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
+  const resizeCleanupRef = useRef<(() => void) | null>(null);
+
+  const [cols, setCols] = useState<ColDef[]>(loadCols);
+  const [isResizing, setIsResizing] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
+  const [closedSections, setClosedSections] = useState<Set<TaskStatus>>(new Set());
+
+  // カラム幅を localStorage に永続化
+  useEffect(() => {
+    const map = Object.fromEntries(cols.map((c) => [c.id, c.width]));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+  }, [cols]);
+
+  // リサイズ中はカーソルを固定
+  useEffect(() => {
+    if (!isResizing) return;
+    const prev = { cursor: document.body.style.cursor, select: document.body.style.userSelect };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    return () => {
+      document.body.style.cursor = prev.cursor;
+      document.body.style.userSelect = prev.select;
+    };
+  }, [isResizing]);
+
+  // 編集開始時にフォーカス
+  useEffect(() => {
+    if (editingId) titleInputRef.current?.focus();
+  }, [editingId]);
+
+  // クリーンアップ
+  useEffect(() => () => { resizeCleanupRef.current?.(); }, []);
+
+  // ステータス順にグループ化
+  const grouped = useMemo(() => {
+    return TASK_COLUMNS.map((col) => ({
+      status: col.id as TaskStatus,
+      tasks: tasks.filter((t) => t.status === col.id),
+    }));
+  }, [tasks]);
+
+  const gridMinWidth = useMemo(() => cols.reduce((s, c) => s + c.width, 0), [cols]);
+  const gridTemplate = useMemo(() => cols.map((c) => `${c.width}px`).join(" "), [cols]);
+
+  // リサイズ開始
+  const handleResizeStart = (e: ReactPointerEvent<HTMLDivElement>, colId: ColId) => {
+    const target = cols.find((c) => c.id === colId);
+    if (!target?.resizable) return;
+    resizeCleanupRef.current?.();
+    e.preventDefault();
+    e.stopPropagation();
+
+    const startX = e.clientX;
+    const startW = target.width;
+    setIsResizing(true);
+
+    const onMove = (ev: PointerEvent) => {
+      setCols((prev) => prev.map((c) =>
+        c.id !== colId ? c : { ...c, width: clamp(startW + ev.clientX - startX, c.minWidth, c.maxWidth) }
+      ));
+    };
+    const cleanup = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      setIsResizing(false);
+      resizeCleanupRef.current = null;
+    };
+    const onUp = () => cleanup();
+    resizeCleanupRef.current = cleanup;
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp, { once: true });
+  };
+
+  const handleResizeReset = (colId: ColId) => {
+    const def = DEFAULT_COLS.find((c) => c.id === colId);
+    if (!def) return;
+    setCols((prev) => prev.map((c) => c.id === colId ? { ...c, width: def.width } : c));
+  };
+
+  // タイトル編集
+  const startEdit = (task: Task) => { setEditingId(task.id); setEditingTitle(task.title); };
+  const finishEdit = (task: Task) => {
+    const next = editingTitle.trim();
+    if (next && next !== task.title) onRenameTask(task.id, next);
+    setEditingId(null); setEditingTitle("");
+  };
+  const cancelEdit = () => { setEditingId(null); setEditingTitle(""); };
+
+  const toggleSection = (status: TaskStatus) => {
+    setClosedSections((prev) => {
+      const next = new Set(prev);
+      next.has(status) ? next.delete(status) : next.add(status);
+      return next;
+    });
+  };
+
+  return (
+    <div className="min-h-0 flex-1 overflow-auto bg-white">
+      {/* テーブルヘッダー */}
+      <div
+        className="sticky top-0 z-20 bg-white border-b border-[#eeeeee]"
+        style={{ minWidth: `${gridMinWidth}px` }}
+      >
+        <div
+          className="grid"
+          style={{ gridTemplateColumns: gridTemplate }}
+        >
+          {/* done */}
+          <div className="h-8" />
+
+          {/* title */}
+          <div className="relative flex items-center h-8 pr-3 text-[11px] font-semibold text-[#8f929c] tracking-[0.04em] uppercase">
+            タイトル
+            <ResizeHandle colId="title" onStart={handleResizeStart} onReset={handleResizeReset} />
+          </div>
+
+          {/* priority */}
+          <div className="relative flex items-center h-8 pr-3 text-[11px] font-semibold text-[#8f929c] tracking-[0.04em] uppercase">
+            優先度
+            <ResizeHandle colId="priority" onStart={handleResizeStart} onReset={handleResizeReset} />
+          </div>
+
+          {/* category */}
+          <div className="relative flex items-center h-8 pr-3 text-[11px] font-semibold text-[#8f929c] tracking-[0.04em] uppercase">
+            カテゴリ
+            <ResizeHandle colId="category" onStart={handleResizeStart} onReset={handleResizeReset} />
+          </div>
+
+          {/* dueDate */}
+          <div className="relative flex items-center h-8 pr-3 text-[11px] font-semibold text-[#8f929c] tracking-[0.04em] uppercase">
+            期日
+          </div>
         </div>
+      </div>
 
-        <div role="rowgroup">
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              className={cn("grid border-b border-[#eeeeee] hover:bg-[#fafafa]", TASK_TYPO.listRow)}
-              role="row"
-              style={gridStyle}
-            >
-              {columns.map((column) => (
-                <div key={`${task.id}:${column.id}`} className="min-w-0">
-                  {renderTaskCell(column.id, task)}
-                </div>
+      {/* グループ別行 */}
+      <div style={{ minWidth: `${gridMinWidth}px` }}>
+        {grouped.map(({ status, tasks: groupTasks }) => {
+          const isOpen = !closedSections.has(status);
+          return (
+            <div key={status}>
+              <SectionHeader
+                status={status}
+                count={groupTasks.length}
+                open={isOpen}
+                onToggle={() => toggleSection(status)}
+                onAdd={() => {}}
+                cols={cols}
+              />
+
+              {isOpen && groupTasks.map((task) => (
+                <Row
+                  key={task.id}
+                  task={task}
+                  cols={cols}
+                  isEditing={editingId === task.id}
+                  editingTitle={editingTitle}
+                  titleInputRef={titleInputRef}
+                  onToggleDone={onToggleTaskDone}
+                  onStartEdit={startEdit}
+                  onFinishEdit={finishEdit}
+                  onCancelEdit={cancelEdit}
+                  onEditingChange={setEditingTitle}
+                  onDelete={() => {}}
+                />
               ))}
+
+              {isOpen && groupTasks.length === 0 && (
+                <div
+                  className="grid border-b border-[#f5f5f5]"
+                  style={{ gridTemplateColumns: cols.map((c) => `${c.width}px`).join(" ") }}
+                >
+                  <div />
+                  <div className="py-2 pr-3 text-[12px] text-[#c7c7cc] italic">
+                    タスクなし
+                  </div>
+                </div>
+              )}
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
     </div>
   );
