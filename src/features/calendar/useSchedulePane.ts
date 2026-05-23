@@ -95,6 +95,15 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     timelineUnitBuffer: navigation.timelineUnitBuffer,
   });
 
+  const extendScrollLeft =
+    navigation.activeMode === "timeline"
+      ? navigation.extendTimelineUnitBufferLeft
+      : navigation.extendCalendarBufferLeft;
+  const extendScrollRight =
+    navigation.activeMode === "timeline"
+      ? navigation.extendTimelineUnitBufferRight
+      : navigation.extendCalendarBufferRight;
+
   const scroll = useCalendarScrollController({
     activeMode: navigation.activeMode,
     selectedViewMode: navigation.selectedViewMode,
@@ -105,8 +114,8 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     calendarBuffer: navigation.calendarBuffer,
     viewportWidth: navigation.viewportWidth,
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
-    onExtendLeft: navigation.extendCalendarBufferLeft,
-    onExtendRight: navigation.extendCalendarBufferRight,
+    onExtendLeft: extendScrollLeft,
+    onExtendRight: extendScrollRight,
     scrollTargetToken: navigation.calendarScrollToken,
   });
 

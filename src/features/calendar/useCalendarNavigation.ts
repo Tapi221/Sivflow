@@ -14,7 +14,7 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import type {
   CalendarToolbarMode,
   CalendarViewMode,
-} from "../schedulePane.types";
+} from "./schedulePane.types";
 
 const createInitialCalendarBuffer = () => ({
   before: C.INITIAL_CALENDAR_BUFFER_DAYS,
@@ -25,6 +25,12 @@ const createInitialTimelineUnitBuffer = (viewMode: CalendarViewMode) => {
   if (viewMode === "month") return { before: 3, after: 8 };
   if (viewMode === "week") return { before: 4, after: 8 };
   return { before: 7, after: 14 };
+};
+
+const getTimelineExtendUnitCount = (viewMode: CalendarViewMode) => {
+  if (viewMode === "month") return 6;
+  if (viewMode === "week") return 8;
+  return C.CALENDAR_EXTEND_DAYS;
 };
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
@@ -93,6 +99,20 @@ export const useCalendarNavigation = () => {
       after: prev.after + C.CALENDAR_EXTEND_DAYS,
     }));
   }, []);
+
+  const extendTimelineUnitBufferLeft = useCallback(() => {
+    setTimelineUnitBuffer((prev) => ({
+      ...prev,
+      before: prev.before + getTimelineExtendUnitCount(selectedViewMode),
+    }));
+  }, [selectedViewMode]);
+
+  const extendTimelineUnitBufferRight = useCallback(() => {
+    setTimelineUnitBuffer((prev) => ({
+      ...prev,
+      after: prev.after + getTimelineExtendUnitCount(selectedViewMode),
+    }));
+  }, [selectedViewMode]);
 
   useEffect(() => {
     const el = contentViewportRef.current;
@@ -263,5 +283,7 @@ export const useCalendarNavigation = () => {
 
     extendCalendarBufferLeft,
     extendCalendarBufferRight,
+    extendTimelineUnitBufferLeft,
+    extendTimelineUnitBufferRight,
   };
 };
