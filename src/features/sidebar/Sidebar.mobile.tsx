@@ -46,7 +46,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "library",
     label: "Library",
-    to: "/library",
+    to: "/folders?view=section-list&libraryType=pdf",
     icon: <LibraryIcon className="sidebar-nav-icon" />,
     sectionKey: "library",
   },
@@ -109,7 +109,7 @@ export const SidebarMobile = ({
   const openLibraryChild = (type: string) => {
     closeCalendar();
     openSectionTab("library");
-    navigate(type === "pdf" ? "/library" : `/library?libraryType=${type}`);
+    navigate(`/folders?view=section-list&libraryType=${type}`);
   };
 
   return (
