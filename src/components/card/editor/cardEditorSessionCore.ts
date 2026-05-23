@@ -6,6 +6,7 @@ import {
 } from "@/domain/card/extraRows";
 
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
+import { waitForDraftImageUploads } from "@/components/card/editor/cardImageUploadSaveBarrier";
 import {
   type EditorDraft,
   makeEmptyCardFaceAttachments,
@@ -252,7 +253,8 @@ export const buildSavePayload = async ({
   draft: EditorDraft;
   addTag: (name: string) => Promise<{ id: string }>;
 }): Promise<Partial<Card>> => {
-  const normalizedTags = draft.tags
+  const uploadReadyDraft = await waitForDraftImageUploads(draft);
+  const normalizedTags = uploadReadyDraft.tags
     .map((tag) => tag.trim())
     .filter((tag) => tag.length > 0);
   const uniqueTags = [...new Set(normalizedTags)];
@@ -261,18 +263,18 @@ export const buildSavePayload = async ({
   );
 
   return {
-    title: draft.title,
+    title: uploadReadyDraft.title,
     tagIds: resolvedTags.map((tag) => tag.id),
-    isDraft: draft.isDraft,
+    isDraft: uploadReadyDraft.isDraft,
     front: {
-      blocks: sanitizeBlocksForSave(draft.frontBlocks),
-      attachments: sanitizeAttachmentsForSave(draft.frontAttachments),
+      blocks: sanitizeBlocksForSave(uploadReadyDraft.frontBlocks),
+      attachments: sanitizeAttachmentsForSave(uploadReadyDraft.frontAttachments),
     },
     back: {
-      blocks: sanitizeBlocksForSave(draft.backBlocks),
-      attachments: sanitizeAttachmentsForSave(draft.backAttachments),
+      blocks: sanitizeBlocksForSave(uploadReadyDraft.backBlocks),
+      attachments: sanitizeAttachmentsForSave(uploadReadyDraft.backAttachments),
     },
-    layoutRows: normalizeLayoutRows(draft.layoutRows),
+    layoutRows: normalizeLayoutRows(uploadReadyDraft.layoutRows),
   };
 };
 
