@@ -12,6 +12,7 @@ import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
 import { cn } from "@/lib/utils";
 
 const EMPTY_EVENTS: GoogleCalendarEvent[] = [];
+const MONTH_GRID_COLUMN_SEPARATOR_INDICES = [1, 2, 3, 4, 5, 6] as const;
 
 const getDayKey = (date: Date): string => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -279,6 +280,17 @@ const CalendarMonthWeekRow = memo(({
           />
         );
       })}
+
+      {MONTH_GRID_COLUMN_SEPARATOR_INDICES.map((columnIndex) => (
+        <div
+          key={columnIndex}
+          aria-hidden="true"
+          className="calendar-month-column-separator"
+          style={{
+            left: `${(columnIndex / 7) * 100}%`,
+          }}
+        />
+      ))}
 
       {/* リサイズ */}
       <div
