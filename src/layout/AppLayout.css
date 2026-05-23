@@ -1,6 +1,6 @@
 .app-layout {
   --app-sidebar-rail-width: 48px;
-  --app-sidebar-closed-width: var(--app-sidebar-rail-width);
+  --app-sidebar-closed-width: 0px;
   --app-right-sidebar-width: 240px;
   --app-layout-padding-x: 0px;
 
