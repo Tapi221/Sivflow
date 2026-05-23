@@ -1,5 +1,5 @@
-import type { RefObject, UIEvent } from "react";
-import { Fragment, useMemo } from "react";
+import type { CSSProperties, RefObject, UIEvent } from "react";
+import { Fragment, memo, useMemo } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
@@ -27,7 +27,13 @@ type CalendarTimelineDayViewProps = {
   onSelectDate?: (date: Date) => void;
 };
 
-export const CalendarTimelineDayView = ({
+const buildColumnGridBackground = (columnWidth: number) => {
+  const borderStart = Math.max(0, columnWidth - 1);
+
+  return `repeating-linear-gradient(to right, transparent 0, transparent ${borderStart}px, #eef0f3 ${borderStart}px, #eef0f3 ${columnWidth}px)`;
+};
+
+export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
   viewMode,
   anchorDate,
   timelineUnitBuffer,
@@ -38,7 +44,7 @@ export const CalendarTimelineDayView = ({
   scrollContainerRef,
   onScroll,
   onSelectDate,
-}: CalendarTimelineDayViewProps) => {
+}: CalendarTimelineDayViewProps) {
   const columns = useMemo(() => {
     return buildTimelineColumns(viewMode, anchorDate, timelineUnitBuffer);
   }, [anchorDate, timelineUnitBuffer, viewMode]);
@@ -47,8 +53,36 @@ export const CalendarTimelineDayView = ({
     return getTimelineColumnWidth(viewMode, dayColumnWidth);
   }, [dayColumnWidth, viewMode]);
 
+  const rowIndexes = useMemo(() => {
+    return Array.from({ length: rowCount }, (_, index) => index);
+  }, [rowCount]);
+
   const selectedTime = selectedDate.getTime();
   const gridWidth = columns.length * columnWidth;
+
+  const columnGridBackground = useMemo(() => {
+    return buildColumnGridBackground(columnWidth);
+  }, [columnWidth]);
+
+  const scrollSurfaceStyle = useMemo<CSSProperties>(
+    () => ({
+      overscrollBehaviorX: "contain",
+      willChange: "scroll-position",
+    }),
+    [],
+  );
+
+  const timelineRowStyle = useMemo<CSSProperties>(
+    () => ({
+      backgroundImage: columnGridBackground,
+      backgroundSize: `${columnWidth}px 100%`,
+      contain: "layout paint",
+      height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px`,
+      transform: "translateZ(0)",
+      width: `${gridWidth}px`,
+    }),
+    [columnGridBackground, columnWidth, gridWidth],
+  );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
@@ -56,6 +90,7 @@ export const CalendarTimelineDayView = ({
         ref={scrollContainerRef}
         className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
         onScroll={onScroll}
+        style={scrollSurfaceStyle}
       >
         <div
           className="grid"
@@ -119,7 +154,7 @@ export const CalendarTimelineDayView = ({
             </div>
           </div>
 
-          {Array.from({ length: rowCount }, (_, index) => (
+          {rowIndexes.map((index) => (
             <Fragment key={index}>
               <div
                 className="sticky left-0 z-10 border-b border-r border-[#e5e7eb] bg-white"
@@ -128,29 +163,12 @@ export const CalendarTimelineDayView = ({
 
               <div
                 className="relative border-b border-[#e5e7eb] bg-white"
-                style={{
-                  height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px`,
-                  width: `${gridWidth}px`,
-                }}
-              >
-                <div
-                  className="absolute inset-0 grid"
-                  style={{
-                    gridTemplateColumns: `repeat(${columns.length}, ${columnWidth}px)`,
-                  }}
-                >
-                  {columns.map((column) => (
-                    <div
-                      key={`${index}-${column.id}`}
-                      className="relative border-r border-[#eef0f3] last:border-r-0"
-                    />
-                  ))}
-                </div>
-              </div>
+                style={timelineRowStyle}
+              />
             </Fragment>
           ))}
         </div>
       </div>
     </div>
   );
-};
+});
