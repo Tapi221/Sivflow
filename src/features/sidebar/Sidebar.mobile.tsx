@@ -1,13 +1,14 @@
 import { ReactNode, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { GalleryIcon, SettingIcon } from "../../components/icons/schedule.icons";
 import {
   CalendarIcon,
   ChevronDownIcon,
+  GalleryIcon,
   HomeIcon,
   InboxIcon,
   LibraryIcon,
+  SettingIcon,
 } from "../../components/icons/sidebar.icons";
 
 import { useSchedulePaneStore } from "@/features/calendar/header/useSchedulePaneStore";
