@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 
 import { TagFilterPopover } from "@/chip/popover/TagFilterPopover";
 import {
-  WorkspaceHeaderToolbar,
-  type WorkspaceHeaderToolbarIconProps,
-} from "@/features/workspace/WorkspaceHeaderToolbar";
+  LibraryHeaderToolbar,
+  type LibraryHeaderToolbarIconProps,
+} from "@/features/toolbar/LibraryHeaderToolbar";
 
 import { useTags } from "@/hooks/settings/useTags";
 import { Search } from "@/ui/icons";
@@ -20,7 +20,7 @@ type PdfLibraryWorkspaceToolbarProps = {
 const ExplorerTabIcon = ({
   className,
   ...props
-}: WorkspaceHeaderToolbarIconProps) => (
+}: LibraryHeaderToolbarIconProps) => (
   <svg
     viewBox="0 0 18 18"
     fill="none"
@@ -48,7 +48,7 @@ const ExplorerTabIcon = ({
 const PdfTabIcon = ({
   className,
   ...props
-}: WorkspaceHeaderToolbarIconProps) => (
+}: LibraryHeaderToolbarIconProps) => (
   <svg
     viewBox="0 0 18 18"
     fill="none"
@@ -83,7 +83,7 @@ const PdfTabIcon = ({
 const FlashcardTabIcon = ({
   className,
   ...props
-}: WorkspaceHeaderToolbarIconProps) => (
+}: LibraryHeaderToolbarIconProps) => (
   <svg
     viewBox="0 0 18 18"
     fill="none"
@@ -119,7 +119,7 @@ const FlashcardTabIcon = ({
 const NotesTabIcon = ({
   className,
   ...props
-}: WorkspaceHeaderToolbarIconProps) => (
+}: LibraryHeaderToolbarIconProps) => (
   <svg
     viewBox="0 0 18 18"
     fill="none"
@@ -147,7 +147,7 @@ const NotesTabIcon = ({
 const SortToolbarIcon = ({
   className,
   ...props
-}: WorkspaceHeaderToolbarIconProps) => (
+}: LibraryHeaderToolbarIconProps) => (
   <svg
     viewBox="0 0 16 16"
     fill="none"
@@ -168,7 +168,7 @@ const SortToolbarIcon = ({
 const FieldsToolbarIcon = ({
   className,
   ...props
-}: WorkspaceHeaderToolbarIconProps) => (
+}: LibraryHeaderToolbarIconProps) => (
   <svg
     viewBox="0 0 16 16"
     fill="none"
@@ -194,7 +194,7 @@ const PDF_LIBRARY_TABS = [
 ] as const satisfies ReadonlyArray<{
   value: PdfLibraryWorkspaceSection;
   label: string;
-  icon: ComponentType<WorkspaceHeaderToolbarIconProps>;
+  icon: ComponentType<LibraryHeaderToolbarIconProps>;
 }>;
 
 const resolveLibrarySectionRoute = (
@@ -249,7 +249,7 @@ export const PdfLibraryWorkspaceToolbar = ({
   );
 
   return (
-    <WorkspaceHeaderToolbar
+    <LibraryHeaderToolbar
       activeValue={activeSection}
       tabs={PDF_LIBRARY_TABS.map((tab) => ({
         ...tab,
