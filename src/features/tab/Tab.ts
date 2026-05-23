@@ -114,7 +114,7 @@ export const WORKSPACE_ROUTE_TABS = [
     id: "route:home",
     kind: "route",
     title: "Home",
-    routePath: "/folders?home=1",
+    routePath: "/library?home=1",
     isClosable: true,
     sectionKey: "home",
   },
@@ -155,7 +155,7 @@ export const createDefaultExplorerRouteState = (): ExplorerRouteState => ({
 });
 
 /**
- * section → routeタブ解決if (pathname === "/schedule") {
+ * section → routeタブ解決
  */
 export const resolveRouteTabBySection = (
   sectionKey: Exclude<WorkspaceSidebarSection, "library">,
