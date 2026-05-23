@@ -9,7 +9,10 @@ import { TASK_TYPO } from "@/styles/tokens/typography";
 
 import type { Task, TaskColumn as TaskColumnType } from "./task.types";
 import { TaskCard } from "./TaskCard";
-import { TASK_DND_LAYOUT_ANIMATION_DURATION_MS } from "./dnd/taskDnd.config";
+import {
+  TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS,
+  TASK_DND_LAYOUT_ANIMATION_DURATION_MS,
+} from "./dnd/taskDnd.config";
 import { TaskStatusDot } from "../../../chip/icon/TaskStatusDot";
 
 type TaskColumnProps = {
@@ -33,6 +36,7 @@ type TaskInsertionSlotProps = {
 type SortableTaskCardProps = {
   task: Task;
   activeTaskId?: string | null;
+  isDragActive?: boolean;
   accountName?: string | null;
   accountPhotoUrl?: string | null;
   onDeleteTask: (id: string) => void;
@@ -43,6 +47,10 @@ const taskColumnBackground = "#ffffff";
 const TASK_LAYOUT_MOTION_EASING = [0.16, 1, 0.3, 1] as const;
 const TASK_LAYOUT_MOTION_TRANSITION = {
   duration: TASK_DND_LAYOUT_ANIMATION_DURATION_MS / 1000,
+  ease: TASK_LAYOUT_MOTION_EASING,
+};
+const TASK_DRAG_LAYOUT_MOTION_TRANSITION = {
+  duration: TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS / 1000,
   ease: TASK_LAYOUT_MOTION_EASING,
 };
 
@@ -77,6 +85,7 @@ const TaskInsertionSlot = ({
 const SortableTaskCard = ({
   task,
   activeTaskId,
+  isDragActive = false,
   accountName,
   accountPhotoUrl,
   onDeleteTask,
@@ -101,7 +110,11 @@ const SortableTaskCard = ({
     <motion.div
       ref={setNodeRef}
       layout="position"
-      transition={TASK_LAYOUT_MOTION_TRANSITION}
+      transition={
+        isDragActive
+          ? TASK_DRAG_LAYOUT_MOTION_TRANSITION
+          : TASK_LAYOUT_MOTION_TRANSITION
+      }
       className={cn(
         "relative z-10 rounded-xl touch-none transform-gpu",
         "transition-[opacity,filter] duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
@@ -210,6 +223,7 @@ export const TaskColumn = ({
                   <SortableTaskCard
                     task={task}
                     activeTaskId={activeTaskId}
+                    isDragActive={isDragActive}
                     accountName={accountName}
                     accountPhotoUrl={accountPhotoUrl}
                     onDeleteTask={onDeleteTask}
