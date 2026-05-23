@@ -64,7 +64,7 @@ export const TaskCard = ({
         "hover:border-[rgba(15,23,42,0.12)] hover:shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_4px_12px_rgba(15,23,42,0.10),0_1px_2px_rgba(15,23,42,0.08)]",
         "active:scale-[0.999]",
         isDragging
-          ? "cursor-grabbing scale-[1.01] border-[rgba(15,23,42,0.10)] bg-white shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_10px_28px_rgba(15,23,42,0.14),0_2px_6px_rgba(15,23,42,0.08)] ring-1 ring-black/[0.035]"
+          ? "cursor-grabbing border-[rgba(15,23,42,0.10)] bg-white shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_2px_6px_rgba(15,23,42,0.07),0_0.5px_1px_rgba(15,23,42,0.06)]"
           : "cursor-grab",
       )}
     >
