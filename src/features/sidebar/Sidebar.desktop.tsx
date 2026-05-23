@@ -13,7 +13,7 @@ import {
   LibraryIcon,
   SettingIcon,
   SidebarToggleIcon,
-} from "../../components/icons/sidebar.icons";
+} from "../../components/icons/icons.sidebar";
 
 import "./sidebar.desktop.css";
 

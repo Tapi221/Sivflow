@@ -1,4 +1,4 @@
-import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/schedule.icons";
+import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/icons.schedule";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { cn } from "@/lib/utils";
