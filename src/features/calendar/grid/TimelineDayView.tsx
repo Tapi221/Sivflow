@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import {
   CalendarDateHeaderButton,
   CalendarDateHeaderDayContent,
-} from "./CalendarDateHeaderButton";
+} from "../../../chip/button/CalendarDateHeaderButton";
 import type {
   TimelineUnitBuffer,
   TimelineViewMode,
