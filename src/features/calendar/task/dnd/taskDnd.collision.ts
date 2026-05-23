@@ -50,9 +50,6 @@ export const taskBoardCollisionDetection: CollisionDetection = (args) => {
   const columnContainers = args.droppableContainers.filter(
     (container) => container.data.current?.type === "column",
   );
-  const taskContainers = args.droppableContainers.filter(
-    (container) => container.data.current?.type === "task",
-  );
   const slotContainers = args.droppableContainers.filter(
     (container) => container.data.current?.type === "task-slot",
   );
@@ -86,10 +83,7 @@ export const taskBoardCollisionDetection: CollisionDetection = (args) => {
     return columnCollisions;
   }
 
-  const taskCollisions = closestCorners({
-    ...args,
-    droppableContainers: taskContainers,
-  });
+  const slotCollisions = getNearestSlotCollision(args, slotContainers);
 
-  return taskCollisions.length > 0 ? taskCollisions : closestCorners(args);
+  return slotCollisions.length > 0 ? slotCollisions : closestCorners(args);
 };
