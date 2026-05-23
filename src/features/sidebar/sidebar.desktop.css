@@ -1,16 +1,6 @@
-/* ============================================================
-   sidebar.desktop.css
-   48px のアイコンレールを通常表示とし、上部トグルで完全に閉じる。
-   ============================================================ */
-
 .app-sidebar,
 .app-right-sidebar {
-  --app-sidebar-bg: linear-gradient(
-    180deg,
-    #08111f 0%,
-    #0b1a3a 46%,
-    #050812 100%
-  );
+  --app-sidebar-bg: linear-gradient(180deg, #08111f 0%, #0b1a3a 46%, #050812 100%);
   --app-sidebar-hover-bg: rgba(255, 255, 255, 0.06);
   --app-sidebar-active-bg: rgba(255, 255, 255, 0.1);
   --app-sidebar-text: rgba(235, 241, 252, 0.78);
@@ -22,69 +12,41 @@
   --app-sidebar-focus-ring: rgba(93, 127, 182, 0.3);
 }
 
-/* ── レール本体 ─────────────────────────────────────────── */
-
 .app-sidebar {
   position: sticky;
   top: 0;
   z-index: 20;
   align-self: start;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
   width: var(--app-sidebar-rail-width, 48px);
-
   min-width: 0;
   min-height: 0;
-
   height: 100dvh;
-
   overflow-y: auto;
   overflow-x: hidden;
-
   padding: 4px 4px 12px;
-
   border-top-right-radius: 10px;
-
-  background:
-    linear-gradient(
-      180deg,
-      #08111f 0%,
-      #0b1a3a 46%,
-      #050812 100%
-    ) !important;
+  background: var(--app-sidebar-bg) !important;
   background-clip: padding-box;
-
   color: var(--app-sidebar-text);
-
   font-family: Inter, var(--explorer-chrome-font-family), sans-serif;
-
-  font-feature-settings:
-    "palt" 1,
-    "lnum" 1,
-    "tnum" 1;
-
+  font-feature-settings: "palt" 1, "lnum" 1, "tnum" 1;
   user-select: none;
-
-  transition:
-    width 180ms ease,
-    padding 180ms ease;
+  transition: width 180ms ease, padding 180ms ease;
 }
 
 .app-sidebar--closed {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 40px;
+  left: 10px;
   z-index: 1000;
-
-  width: var(--app-sidebar-rail-width, 48px);
+  width: 42px;
+  height: var(--ds-semantic-breadcrumb-height, 52px);
   overflow: visible;
-  padding: 4px 4px 12px;
-
+  padding: 10px 0;
   pointer-events: none;
-
   background: transparent !important;
 }
 
@@ -92,45 +54,27 @@
   position: sticky;
   top: 0;
   align-self: start;
-
   min-width: 0;
   min-height: 0;
-
   height: 100dvh;
-
   overflow: hidden;
-
-  background:
-    linear-gradient(
-      180deg,
-      #08111f 0%,
-      #0b1a3a 46%,
-      #050812 100%
-    ) !important;
+  background: var(--app-sidebar-bg) !important;
 }
-
-/* ── レイアウト構造 ──────────────────────────────────────── */
 
 .app-sidebar__top {
   display: flex;
   flex-direction: column;
-
   width: 100%;
   min-width: 0;
-
   gap: 20px;
 }
 
 .app-sidebar__bottom {
   display: flex;
   flex-direction: column;
-
   width: 100%;
-
   flex-shrink: 0;
-
   gap: 8px;
-
   padding: 8px 4px 0;
 }
 
@@ -138,28 +82,18 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   width: 100%;
   height: 32px;
-
   padding: 0;
-
   border: 0;
   border-radius: 6px;
-
   background: transparent;
   color: var(--app-sidebar-icon);
-
   outline: none;
-
-  transition:
-    background-color 160ms ease,
-    color 160ms ease,
-    box-shadow 160ms ease;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
 .app-sidebar__toggle:hover {
@@ -174,62 +108,49 @@
 .app-sidebar__toggle-icon {
   position: relative;
   z-index: 1;
-
   width: 20px;
   height: 20px;
-
   flex-shrink: 0;
 }
 
 .app-sidebar--closed .app-sidebar__toggle {
   position: relative;
   z-index: 1;
-
-  width: 100%;
+  width: 42px;
   height: 32px;
-
   padding: 2px;
-
   pointer-events: auto;
-
   border-radius: 12px;
-  background: #f7f7f7;
-  color: #8c8c8c;
+  background: var(--ds-color-neutral-150, #f7f7f8);
+  color: var(--ds-color-neutral-600, #6e6e80);
 }
 
 .app-sidebar--closed .app-sidebar__toggle::before {
   content: "";
-
   position: absolute;
   inset: 2px;
   z-index: 0;
-
-  border: 1px solid #eeeeee;
+  border: 1px solid var(--ds-semantic-color-border-floating, rgba(226, 232, 240, 0.8));
   border-radius: 8px;
-
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease;
+  background: var(--ds-color-neutral-0, #ffffff);
+  box-shadow: var(--ds-elevation-shadow-convex, 0 1px 2px rgba(86, 72, 74, 0.16));
+  transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .app-sidebar--closed .app-sidebar__toggle:hover {
-  background: #f7f7f7;
-  color: #8c8c8c;
+  background: var(--ds-color-neutral-150, #f7f7f8);
+  color: var(--ds-semantic-color-action-primary, #45679d);
 }
 
 .app-sidebar--closed .app-sidebar__toggle:hover::before {
-  border-color: #e8e8e8;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  border-color: var(--ds-semantic-color-border-strong, #cfd9e8);
+  box-shadow: var(--ds-elevation-shadow-floating, 0 8px 24px rgba(15, 23, 42, 0.08));
 }
 
 .app-sidebar--closed .app-sidebar__toggle-icon {
   width: 16px;
   height: 16px;
-
-  color: #8c8c8c;
+  color: currentColor;
 }
 
 .app-sidebar--closed .app-sidebar__nav,
@@ -237,52 +158,34 @@
   display: none;
 }
 
-/* ── ナビゲーション ──────────────────────────────────────── */
-
 .app-sidebar__nav {
   display: flex;
   flex-direction: column;
-
   width: 100%;
   min-width: 0;
-
   gap: 4px;
-
   padding: 0;
 }
 
 .app-sidebar__nav-link {
   position: relative;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   width: 100%;
   min-width: 0;
   height: 32px;
-
   gap: 8px;
-
   padding: 0;
-
   border-radius: 4px;
-
   color: var(--app-sidebar-text);
-
   font-size: 14px;
   font-weight: 542;
   line-height: 17px;
   letter-spacing: -0.0476px;
-
   text-decoration: none;
-
   outline: none;
-
-  transition:
-    background-color 160ms ease,
-    color 160ms ease,
-    box-shadow 160ms ease;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
 .app-sidebar__nav-link:hover {
@@ -332,20 +235,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
   width: 20px;
   min-width: 20px;
   height: 20px;
-
   flex-shrink: 0;
 }
 
 .app-sidebar__nav-icon {
   width: 20px;
   height: 20px;
-
   flex-shrink: 0;
-
   color: var(--app-sidebar-icon);
 }
 
@@ -359,9 +258,7 @@
 .app-sidebar__nav-chevron {
   width: 16px;
   height: 16px;
-
   color: var(--app-sidebar-icon);
-
   transition: transform 160ms ease;
 }
 
@@ -369,15 +266,11 @@
   transform: rotate(180deg);
 }
 
-/* ── ライブラリグループ（レールでは非表示） ──────────────── */
-
 .app-sidebar__library-group {
   display: flex;
   flex-direction: column;
-
   width: 100%;
   min-width: 0;
-
   gap: 4px;
 }
 
@@ -388,21 +281,15 @@
 .app-sidebar__library-child {
   display: flex;
   align-items: center;
-
   width: 168px;
   height: 28px;
-
   padding: 0 10px;
-
   border-radius: 4px;
-
   color: var(--app-sidebar-text);
-
   font-size: 13px;
   font-weight: 542;
   line-height: 17px;
   letter-spacing: -0.0476px;
-
   outline: none;
 }
 
@@ -423,25 +310,16 @@
 .app-sidebar__nested-group {
   display: flex;
   flex-direction: column;
-
   width: 100%;
-
   gap: 4px;
-
   margin-left: 28px;
-
   padding-left: 24px;
-
   border-left: 1px solid rgba(255, 255, 255, 0.14);
 }
-
-/* ── トライアルパネル（レールでは非表示） ────────────────── */
 
 .app-sidebar__trial {
   display: none;
 }
-
-/* ── モバイル ────────────────────────────────────────────── */
 
 @media (max-width: 767px) {
   .app-sidebar,
