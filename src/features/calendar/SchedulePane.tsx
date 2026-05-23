@@ -13,7 +13,7 @@ import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
 import { useTaskCalendarEvents } from "./task/hooks/useTaskCalendarEvents";
-import { SidebarPanelIcon } from "@/components/icons/schedule.icons";
+import { SidebarOpenIcon } from "@/components/icons/schedule.icons";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
@@ -321,7 +321,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             className="absolute right-4 z-20 flex h-8 w-8 items-center justify-center bg-transparent text-[#8f96a3] hover:text-[#6f7784]"
             style={{ top: DAY_DETAIL_TOGGLE_TOP_OFFSET }}
           >
-            <SidebarPanelIcon
+            <SidebarOpenIcon
               className={cn("h-3.5 w-3.5", showDayDetailPanel && "-scale-x-100")}
             />
           </button>
