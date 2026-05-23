@@ -1,4 +1,4 @@
-import { forwardRef, type ReactNode, type Ref } from "react";
+import { forwardRef, memo, type ReactNode, type Ref } from "react";
 import { cn } from "@/lib/utils";
 
 type CarvePanelProps = {
@@ -54,7 +54,7 @@ const CARVE_PANEL_STANDALONE_CLASS =
 
 const CARVE_PANEL_WITH_TRAILING_PANEL_CLASS = "rounded-t-[28px]";
 
-export const CarvePanelViewport = forwardRef<HTMLDivElement, CarvePanelViewportProps>(
+const CarvePanelViewportBase = forwardRef<HTMLDivElement, CarvePanelViewportProps>(
   ({ children, hasTrailingPanel = false, className }, ref) => {
     return (
       <div
@@ -73,9 +73,13 @@ export const CarvePanelViewport = forwardRef<HTMLDivElement, CarvePanelViewportP
   },
 );
 
+CarvePanelViewportBase.displayName = "CarvePanelViewportBase";
+
+export const CarvePanelViewport = memo(CarvePanelViewportBase);
+
 CarvePanelViewport.displayName = "CarvePanelViewport";
 
-export const CarvePanel = ({
+const CarvePanelBase = ({
   children,
   hasTrailingPanel = false,
   className,
@@ -94,6 +98,12 @@ export const CarvePanel = ({
     </div>
   );
 };
+
+CarvePanelBase.displayName = "CarvePanelBase";
+
+export const CarvePanel = memo(CarvePanelBase);
+
+CarvePanel.displayName = "CarvePanel";
 
 export const CarvePanelShell = ({
   children,
