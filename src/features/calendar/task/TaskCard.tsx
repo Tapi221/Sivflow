@@ -60,7 +60,7 @@ export const TaskCard = ({
         "group relative w-full min-w-0 overflow-hidden rounded-lg border border-[#eeeeee] bg-white/95 px-3 pt-3 pb-2",
         "backdrop-blur-xl",
         "shadow-[0_1px_2px_rgba(16,24,40,0.035)]",
-        "transition-[transform,background-color,border-color,box-shadow,filter] duration-150 ease-[cubic-bezier(0.2,0,0,1)]",
+        "transition-[transform,background-color,border-color,box-shadow,filter] duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
         "hover:border-[#e9e9e9] hover:bg-white hover:shadow-[0_2px_8px_rgba(17,24,39,0.045)]",
         "active:scale-[0.999]",
         isDragging
