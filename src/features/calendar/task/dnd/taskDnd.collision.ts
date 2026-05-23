@@ -16,58 +16,45 @@ const getActiveMiddleY = (args: CollisionDetectionArgs): number => {
   return activeRect.top + activeRect.height / 2;
 };
 
-const getPointerTaskCollisions = (
+const getNearestSlotCollision = (
   args: CollisionDetectionArgs,
-  taskContainers: CollisionDetectionArgs["droppableContainers"],
+  slotContainers: CollisionDetectionArgs["droppableContainers"],
 ): CollisionDescriptor[] => {
   const activeMiddleY = getActiveMiddleY(args);
 
-  const orderedTaskRects = taskContainers
-    .map((container) => {
+  const slotCollisions = slotContainers
+    .map((container): CollisionDescriptor | null => {
       const rect = args.droppableRects.get(container.id);
 
-      return rect ? { container, rect } : null;
+      if (!rect) {
+        return null;
+      }
+
+      const centerY = rect.top + rect.height / 2;
+
+      return {
+        id: container.id,
+        data: {
+          droppableContainer: container,
+          value: Math.abs(activeMiddleY - centerY),
+        },
+      };
     })
-    .filter(
-      (entry): entry is NonNullable<typeof entry> => entry !== null,
-    )
-    .sort((left, right) => left.rect.top - right.rect.top);
+    .filter((collision): collision is CollisionDescriptor => collision !== null)
+    .sort((left, right) => left.data.value - right.data.value);
 
-  if (orderedTaskRects.length === 0) {
-    return [];
-  }
-
-  const targetEntry =
-    orderedTaskRects.find(
-      ({ rect }) => activeMiddleY < rect.top + rect.height / 2,
-    ) ?? orderedTaskRects.at(-1);
-
-  if (!targetEntry) {
-    return [];
-  }
-
-  const centerY = targetEntry.rect.top + targetEntry.rect.height / 2;
-  const value = Math.abs(activeMiddleY - centerY);
-
-  return [
-    {
-      id: targetEntry.container.id,
-      data: {
-        droppableContainer: targetEntry.container,
-        value,
-      },
-    },
-  ];
+  return slotCollisions.slice(0, 1);
 };
 
 export const taskBoardCollisionDetection: CollisionDetection = (args) => {
-  const activeId = args.active.id;
   const columnContainers = args.droppableContainers.filter(
     (container) => container.data.current?.type === "column",
   );
   const taskContainers = args.droppableContainers.filter(
-    (container) =>
-      container.id !== activeId && container.data.current?.type === "task",
+    (container) => container.data.current?.type === "task",
+  );
+  const slotContainers = args.droppableContainers.filter(
+    (container) => container.data.current?.type === "task-slot",
   );
 
   const pointerColumnCollisions = pointerWithin({
@@ -88,18 +75,21 @@ export const taskBoardCollisionDetection: CollisionDetection = (args) => {
   const overStatus = overColumn?.data.current?.status;
 
   if (isTaskStatus(overStatus)) {
-    const targetColumnTasks = taskContainers.filter(
+    const targetColumnSlots = slotContainers.filter(
       (container) => container.data.current?.status === overStatus,
     );
 
-    if (targetColumnTasks.length > 0) {
-      return getPointerTaskCollisions(args, targetColumnTasks);
+    if (targetColumnSlots.length > 0) {
+      return getNearestSlotCollision(args, targetColumnSlots);
     }
 
     return columnCollisions;
   }
 
-  const taskCollisions = getPointerTaskCollisions(args, taskContainers);
+  const taskCollisions = closestCorners({
+    ...args,
+    droppableContainers: taskContainers,
+  });
 
   return taskCollisions.length > 0 ? taskCollisions : closestCorners(args);
 };

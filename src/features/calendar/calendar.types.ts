@@ -132,4 +132,7 @@ export type MiniCalendarDay = {
   isCurrentMonth: boolean;
   isSelected: boolean;
   isToday: boolean;
+  isRangeStart?: boolean;
+  isRangeEnd?: boolean;
+  isInSelectedRange?: boolean;
 };
