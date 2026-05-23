@@ -145,15 +145,15 @@ export const CalendarWeekDayGrid = ({
   const todayColumnIndex = visibleDays.findIndex((d) => isSameDay(d, today));
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
       {/* ── ヘッダー ── */}
-      <div className="flex shrink-0 border-b border-[#e5e7eb] bg-transparent">
+      <div className="flex shrink-0 border-b border-[#e5e7eb] bg-white">
         <div
-          className="shrink-0 border-r border-[#e5e7eb] bg-transparent"
+          className="shrink-0 border-r border-[#e5e7eb] bg-white"
           style={{ width: C.TIME_COLUMN_WIDTH }}
         />
 
-        <div ref={headerScrollRef} className="flex-1 overflow-hidden bg-transparent">
+        <div ref={headerScrollRef} className="flex-1 overflow-hidden bg-white">
           <div
             style={{
               display: "grid",
@@ -172,7 +172,7 @@ export const CalendarWeekDayGrid = ({
                   type="button"
                   onClick={() => onSelectDate?.(day)}
                   className={cn(
-                    "flex h-10 shrink-0 flex-col items-center justify-center border-r border-[#eef0f3] last:border-r-0",
+                    "flex h-10 shrink-0 flex-col items-center justify-center border-r border-[#eef0f3] bg-white last:border-r-0",
                     "transition-colors hover:bg-[#f4f5f7]",
                     "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                     isDayToday && "bg-[#f0f6ff]",
@@ -207,22 +207,22 @@ export const CalendarWeekDayGrid = ({
       {/* ── 本体 ── */}
       <div
         ref={scrollContainerRef}
-        className="min-h-0 flex-1 overflow-auto bg-transparent scrollbar-hidden"
+        className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
         onScroll={onScroll}
       >
-        <div className="grid bg-transparent" style={timelineGridStyle}>
+        <div className="grid bg-white" style={timelineGridStyle}>
           {/* 時刻列 */}
-          <div className="sticky left-0 z-20 border-r border-[#e5e7eb] bg-transparent">
+          <div className="sticky left-0 z-20 border-r border-[#e5e7eb] bg-white">
             {HOURS.map((hour) => (
               <div
                 key={hour}
-                className="relative bg-transparent"
+                className="relative bg-white"
                 style={{ height: "var(--calendar-hour-row-height)" }}
               >
                 {hour > 0 && (
                   <span
                     className={cn(
-                      "absolute bottom-0 right-0 z-10 flex h-6 translate-y-1/2 select-none items-center justify-end bg-transparent pl-1 text-[12px] font-semibold tabular-nums",
+                      "absolute bottom-0 right-0 z-10 flex h-6 translate-y-1/2 select-none items-center justify-end bg-white pl-1 text-[12px] font-semibold tabular-nums",
                       "text-[#b8bcc5]",
                     )}
                   >
@@ -255,12 +255,12 @@ export const CalendarWeekDayGrid = ({
             return (
               <div
                 key={day.toISOString()}
-                className="relative border-r border-[#eef0f3] bg-transparent last:border-r-0"
+                className="relative border-r border-[#eef0f3] bg-white last:border-r-0"
               >
                 {HOURS.map((hour) => (
                   <div
                     key={`${day.toISOString()}-${hour}`}
-                    className="border-b border-[#eef0f3] bg-transparent"
+                    className="border-b border-[#eef0f3] bg-white"
                     style={{ height: "var(--calendar-hour-row-height)" }}
                   />
                 ))}
