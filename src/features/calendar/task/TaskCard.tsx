@@ -57,7 +57,7 @@ export const TaskCard = ({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-lg border border-[#eeeeee] bg-white/95 px-3 pt-3 pb-2",
+        "group relative w-full min-w-0 overflow-hidden rounded-lg border border-[#eeeeee] bg-white/95 px-3 pt-3 pb-2",
         "backdrop-blur-xl",
         "shadow-[0_1px_2px_rgba(16,24,40,0.04)]",
         "transition-[transform,background-color,border-color,box-shadow,filter] duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
@@ -71,7 +71,7 @@ export const TaskCard = ({
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/90" />
       <div className="pointer-events-none absolute inset-x-3 top-0 h-6 rounded-full bg-white/30 blur-xl" />
 
-      <div className="relative flex items-start gap-3">
+      <div className="relative flex min-w-0 items-start gap-3">
         <button
           type="button"
           className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform active:scale-90"
@@ -87,7 +87,7 @@ export const TaskCard = ({
         </button>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center justify-between gap-2">
             <div
               className={cn(
                 "min-w-0 flex-1 truncate text-[12px] font-medium leading-none tracking-[-0.005em] text-[#1c1c1e]",
