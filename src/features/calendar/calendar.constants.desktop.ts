@@ -57,7 +57,7 @@ export const createInitialMonthOffsetRange = () => ({
 });
 
 //Timeline View
-export const TIMELINE_HEADER_HEIGHT = 40;
+export const TIMELINE_HEADER_HEIGHT = CALENDAR_WEEKDAY_HEADER_HEIGHT;
 
 export const TIMELINE_DEFAULT_ROW_HEIGHT = 168;
 
