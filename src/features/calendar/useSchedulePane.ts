@@ -8,7 +8,10 @@ import type {
   TimelineGridStyle,
 } from "./schedulePane.types";
 import type { GoogleCalendarEvent } from "./googlecalendar-integration/gcalSync.types";
-import type { buildTimelineColumns } from "./grid/TimelineDayView.shared";
+import type {
+  buildTimelineColumns,
+  TimelineUnitBuffer,
+} from "./grid/TimelineDayView.shared";
 
 import { useCalendarLayout } from "./layout/calendar/useCalendarLayout.desktop";
 import { useCalendarNavigation } from "./useCalendarNavigation";
@@ -26,8 +29,10 @@ export type UseSchedulePaneReturn = {
 
   currentDate: Date;
   selectedDate: Date;
+  timelineTitleDate: Date;
   monthTitleDate: Date;
   monthScrollTargetToken: number;
+  timelineUnitBuffer: TimelineUnitBuffer;
 
   selectedViewMode: CalendarViewMode;
   activeMode: CalendarToolbarMode;
@@ -116,6 +121,7 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     calendarDayColumnWidth: layout.calendarDayColumnWidth,
     onExtendLeft: extendScrollLeft,
     onExtendRight: extendScrollRight,
+    onTimelineVisibleDateChange: navigation.handleTimelineVisibleDateChange,
     scrollTargetToken: navigation.calendarScrollToken,
   });
 
@@ -159,8 +165,10 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
 
     currentDate: navigation.currentDate,
     selectedDate: navigation.selectedDate,
+    timelineTitleDate: navigation.timelineTitleDate,
     monthTitleDate: navigation.monthTitleDate,
     monthScrollTargetToken: navigation.monthScrollTargetToken,
+    timelineUnitBuffer: navigation.timelineUnitBuffer,
 
     selectedViewMode: navigation.selectedViewMode,
     activeMode: navigation.activeMode,
@@ -173,7 +181,10 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     timelineColumnWidth: timeline.timelineColumnWidth,
     timelineAnchorColumnIndex: timeline.timelineAnchorColumnIndex,
 
-    titleDate: layout.titleDate,
+    titleDate:
+      navigation.activeMode === "timeline"
+        ? navigation.timelineTitleDate
+        : layout.titleDate,
     monthLabel: layout.monthLabel,
 
     calendarDayColumnWidth: layout.calendarDayColumnWidth,

@@ -64,6 +64,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
     titleDate,
     monthTitleDate,
     monthScrollTargetToken,
+    timelineUnitBuffer,
     visibleDays,
     googleCalendarEvents,
     googleAccounts,
@@ -254,7 +255,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
               )}
             >
               {renderViewHeader(
-                // task view の toolbar 境界線位置 (48px) と揃える
                 "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
               )}
 
@@ -270,7 +270,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                   <CalendarTimelineDayView
                     viewMode={selectedViewMode}
                     anchorDate={currentDate}
-                    timelineUnitBuffer={{ before: 7, after: 14 }}
+                    timelineUnitBuffer={timelineUnitBuffer}
                     selectedDate={currentDate}
                     dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
                     laneLabelWidth={C.TIMELINE_LANE_LABEL_WIDTH}
