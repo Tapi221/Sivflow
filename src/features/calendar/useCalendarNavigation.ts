@@ -15,9 +15,9 @@ import type {
   CalendarViewMode,
 } from "./schedulePane.types";
 import {
-  createScrollWindowBuffer,
-  getScrollWindowExtendUnits,
-} from "./scroll/calendarScrollWindow";
+  createCalendarScrollBuffer,
+  getCalendarScrollBufferExtendUnits,
+} from "./scroll/calendarScrollBuffer";
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "month") return addMonths(current, 1);
@@ -57,11 +57,11 @@ export const useCalendarNavigation = () => {
   const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
 
   const [calendarBuffer, setCalendarBuffer] = useState(() =>
-    createScrollWindowBuffer("calendar", "days"),
+    createCalendarScrollBuffer("calendar", "days"),
   );
 
   const [timelineUnitBuffer, setTimelineUnitBuffer] = useState(() =>
-    createScrollWindowBuffer("timeline", "days"),
+    createCalendarScrollBuffer("timeline", "days"),
   );
 
   const [viewportWidth, setViewportWidth] = useState(0);
@@ -71,8 +71,8 @@ export const useCalendarNavigation = () => {
   }, []);
 
   const resetTimelinePosition = useCallback((viewMode: CalendarViewMode) => {
-    setCalendarBuffer(createScrollWindowBuffer("calendar", viewMode));
-    setTimelineUnitBuffer(createScrollWindowBuffer("timeline", viewMode));
+    setCalendarBuffer(createCalendarScrollBuffer("calendar", viewMode));
+    setTimelineUnitBuffer(createCalendarScrollBuffer("timeline", viewMode));
     setCalendarScrollToken((n) => n + 1);
   }, []);
 
@@ -81,7 +81,7 @@ export const useCalendarNavigation = () => {
       ...prev,
       before:
         prev.before +
-        getScrollWindowExtendUnits("calendar", selectedViewMode),
+        getCalendarScrollBufferExtendUnits("calendar", selectedViewMode),
     }));
   }, [selectedViewMode]);
 
@@ -90,7 +90,7 @@ export const useCalendarNavigation = () => {
       ...prev,
       after:
         prev.after +
-        getScrollWindowExtendUnits("calendar", selectedViewMode),
+        getCalendarScrollBufferExtendUnits("calendar", selectedViewMode),
     }));
   }, [selectedViewMode]);
 
@@ -99,7 +99,7 @@ export const useCalendarNavigation = () => {
       ...prev,
       before:
         prev.before +
-        getScrollWindowExtendUnits("timeline", selectedViewMode),
+        getCalendarScrollBufferExtendUnits("timeline", selectedViewMode),
     }));
   }, [selectedViewMode]);
 
@@ -108,7 +108,7 @@ export const useCalendarNavigation = () => {
       ...prev,
       after:
         prev.after +
-        getScrollWindowExtendUnits("timeline", selectedViewMode),
+        getCalendarScrollBufferExtendUnits("timeline", selectedViewMode),
     }));
   }, [selectedViewMode]);
 
