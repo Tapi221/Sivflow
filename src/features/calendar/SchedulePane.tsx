@@ -24,13 +24,13 @@ const IOS_CALENDAR_PANEL_CLASS =
   "border-[#d8dbe2] bg-white backdrop-blur-xl";
 
 const IOS_CALENDAR_SURFACE_CLASS =
-  "border-[#e5e5ea] bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
+  "border-transparent bg-white shadow-none";
 
 const IOS_CALENDAR_MONTH_SURFACE_CLASS =
   "border-transparent bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
-  "border-transparent bg-transparent shadow-none";
+  "border-transparent bg-white shadow-none";
 
 export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const pane = useSchedulePane();
@@ -253,7 +253,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
 
               <div
                 className={cn(
-                  "ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border border-r-0 border-b-0",
+                  "ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border-0",
                   activeMode === "timeline"
                     ? IOS_CALENDAR_SURFACE_CLASS
                     : IOS_CALENDAR_WEEKDAY_SURFACE_CLASS,
