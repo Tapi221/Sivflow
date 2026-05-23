@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 type TooltipSide = "top" | "right" | "bottom" | "left";
+type TooltipAlign = "center" | "start" | "end";
 
 type TooltipPosition = {
   x: number;
@@ -13,6 +14,7 @@ type HoverTooltipProps = {
   label?: string | null;
   children: ReactNode;
   side?: TooltipSide;
+  align?: TooltipAlign;
   offset?: number;
   className?: string;
   tooltipClassName?: string;
@@ -22,10 +24,27 @@ type HoverTooltipProps = {
 
 const tooltipSurfaceClassName = "bg-[#1c1c1e]/95 backdrop-blur-md";
 
-const getTransform = (side: TooltipSide) => {
-  if (side === "top") return "translate(-50%, -100%)";
-  if (side === "bottom") return "translate(-50%, 0)";
-  if (side === "left") return "translate(-100%, -50%)";
+const getTransform = (side: TooltipSide, align: TooltipAlign) => {
+  if (side === "top") {
+    if (align === "start") return "translate(0, -100%)";
+    if (align === "end") return "translate(-100%, -100%)";
+    return "translate(-50%, -100%)";
+  }
+
+  if (side === "bottom") {
+    if (align === "start") return "translate(0, 0)";
+    if (align === "end") return "translate(-100%, 0)";
+    return "translate(-50%, 0)";
+  }
+
+  if (side === "left") {
+    if (align === "start") return "translate(-100%, 0)";
+    if (align === "end") return "translate(-100%, -100%)";
+    return "translate(-100%, -50%)";
+  }
+
+  if (align === "start") return "translate(0, 0)";
+  if (align === "end") return "translate(0, -100%)";
   return "translate(0, -50%)";
 };
 
@@ -33,17 +52,28 @@ const getPosition = (
   rect: DOMRect,
   side: TooltipSide,
   offset: number,
+  align: TooltipAlign,
 ): TooltipPosition => {
   if (side === "top") {
     return {
-      x: rect.left + rect.width / 2,
+      x:
+        align === "start"
+          ? rect.left
+          : align === "end"
+            ? rect.right
+            : rect.left + rect.width / 2,
       y: rect.top - offset,
     };
   }
 
   if (side === "bottom") {
     return {
-      x: rect.left + rect.width / 2,
+      x:
+        align === "start"
+          ? rect.left
+          : align === "end"
+            ? rect.right
+            : rect.left + rect.width / 2,
       y: rect.bottom + offset,
     };
   }
@@ -51,36 +81,75 @@ const getPosition = (
   if (side === "left") {
     return {
       x: rect.left - offset,
-      y: rect.top + rect.height / 2,
+      y:
+        align === "start"
+          ? rect.top
+          : align === "end"
+            ? rect.bottom
+            : rect.top + rect.height / 2,
     };
   }
 
   return {
     x: rect.right + offset,
-    y: rect.top + rect.height / 2,
+    y:
+      align === "start"
+        ? rect.top
+        : align === "end"
+          ? rect.bottom
+          : rect.top + rect.height / 2,
   };
 };
 
-const getArrowClassName = (side: TooltipSide) => {
+const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
   if (side === "top") {
-    return "bottom-[-3px] left-1/2 -translate-x-1/2";
+    return cn(
+      "bottom-[-3px]",
+      align === "start"
+        ? "left-4"
+        : align === "end"
+          ? "right-4"
+          : "left-1/2 -translate-x-1/2",
+    );
   }
 
   if (side === "bottom") {
-    return "top-[-3px] left-1/2 -translate-x-1/2";
+    return cn(
+      "top-[-3px]",
+      align === "start"
+        ? "left-4"
+        : align === "end"
+          ? "right-4"
+          : "left-1/2 -translate-x-1/2",
+    );
   }
 
   if (side === "left") {
-    return "right-[-3px] top-1/2 -translate-y-1/2";
+    return cn(
+      "right-[-3px]",
+      align === "start"
+        ? "top-4"
+        : align === "end"
+          ? "bottom-4"
+          : "top-1/2 -translate-y-1/2",
+    );
   }
 
-  return "left-[-3px] top-1/2 -translate-y-1/2";
+  return cn(
+    "left-[-3px]",
+    align === "start"
+      ? "top-4"
+      : align === "end"
+        ? "bottom-4"
+        : "top-1/2 -translate-y-1/2",
+  );
 };
 
 export const HoverTooltip = ({
   label,
   children,
   side = "top",
+  align = "center",
   offset = 8,
   className,
   tooltipClassName,
@@ -96,7 +165,7 @@ export const HoverTooltip = ({
     if (disabled || !tooltipLabel || !anchorRef.current) return;
 
     const rect = anchorRef.current.getBoundingClientRect();
-    setPosition(getPosition(rect, side, offset));
+    setPosition(getPosition(rect, side, offset, align));
   };
 
   const hideTooltip = () => {
@@ -140,7 +209,7 @@ export const HoverTooltip = ({
               position: "fixed",
               left: position.x,
               top: position.y,
-              transform: getTransform(side),
+              transform: getTransform(side, align),
               zIndex: 9999,
               pointerEvents: "none",
             }}
@@ -161,7 +230,7 @@ export const HoverTooltip = ({
                 className={cn(
                   "absolute h-2 w-2 rotate-45",
                   tooltipSurfaceClassName,
-                  getArrowClassName(side),
+                  getArrowClassName(side, align),
                   arrowClassName,
                 )}
               />
