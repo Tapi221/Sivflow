@@ -10,23 +10,14 @@ import {
   subMonths,
 } from "date-fns";
 
-import * as C from "@/features/calendar/calendar.constants.desktop";
-
 import type {
   CalendarToolbarMode,
   CalendarViewMode,
 } from "./schedulePane.types";
-
-const createInitialCalendarBuffer = () => ({
-  before: C.INITIAL_CALENDAR_BUFFER_DAYS,
-  after: C.INITIAL_CALENDAR_BUFFER_DAYS,
-});
-
-const createInitialTimelineUnitBuffer = (viewMode: CalendarViewMode) => {
-  if (viewMode === "month") return { before: 3, after: 8 };
-  if (viewMode === "week") return { before: 4, after: 8 };
-  return { before: 7, after: 14 };
-};
+import {
+  createScrollWindowBuffer,
+  getScrollWindowExtendUnits,
+} from "./scroll/calendarScrollWindow";
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "month") return addMonths(current, 1);
@@ -65,12 +56,12 @@ export const useCalendarNavigation = () => {
 
   const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
 
-  const [calendarBuffer, setCalendarBuffer] = useState(
-    createInitialCalendarBuffer,
+  const [calendarBuffer, setCalendarBuffer] = useState(() =>
+    createScrollWindowBuffer("calendar", "days"),
   );
 
   const [timelineUnitBuffer, setTimelineUnitBuffer] = useState(() =>
-    createInitialTimelineUnitBuffer("days"),
+    createScrollWindowBuffer("timeline", "days"),
   );
 
   const [viewportWidth, setViewportWidth] = useState(0);
@@ -80,38 +71,46 @@ export const useCalendarNavigation = () => {
   }, []);
 
   const resetTimelinePosition = useCallback((viewMode: CalendarViewMode) => {
-    setCalendarBuffer(createInitialCalendarBuffer());
-    setTimelineUnitBuffer(createInitialTimelineUnitBuffer(viewMode));
+    setCalendarBuffer(createScrollWindowBuffer("calendar", viewMode));
+    setTimelineUnitBuffer(createScrollWindowBuffer("timeline", viewMode));
     setCalendarScrollToken((n) => n + 1);
   }, []);
 
   const extendCalendarBufferLeft = useCallback(() => {
     setCalendarBuffer((prev) => ({
       ...prev,
-      before: prev.before + C.CALENDAR_EXTEND_DAYS,
+      before:
+        prev.before +
+        getScrollWindowExtendUnits("calendar", selectedViewMode),
     }));
-  }, []);
+  }, [selectedViewMode]);
 
   const extendCalendarBufferRight = useCallback(() => {
     setCalendarBuffer((prev) => ({
       ...prev,
-      after: prev.after + C.CALENDAR_EXTEND_DAYS,
+      after:
+        prev.after +
+        getScrollWindowExtendUnits("calendar", selectedViewMode),
     }));
-  }, []);
+  }, [selectedViewMode]);
 
   const extendTimelineUnitBufferLeft = useCallback(() => {
     setTimelineUnitBuffer((prev) => ({
       ...prev,
-      before: prev.before + C.CALENDAR_EXTEND_DAYS,
+      before:
+        prev.before +
+        getScrollWindowExtendUnits("timeline", selectedViewMode),
     }));
-  }, []);
+  }, [selectedViewMode]);
 
   const extendTimelineUnitBufferRight = useCallback(() => {
     setTimelineUnitBuffer((prev) => ({
       ...prev,
-      after: prev.after + C.CALENDAR_EXTEND_DAYS,
+      after:
+        prev.after +
+        getScrollWindowExtendUnits("timeline", selectedViewMode),
     }));
-  }, []);
+  }, [selectedViewMode]);
 
   const handleTimelineVisibleDateChange = useCallback((date: Date) => {
     setTimelineTitleDate((prev) =>
@@ -138,7 +137,7 @@ export const useCalendarNavigation = () => {
     (next: CalendarViewMode) => {
       setSelectedViewMode(next);
 
-      // timelineä¸­ã¯ç´¢æŒˆã€cã‚Œä»¥å¤–ã¯calendarã¹
+      // timeline中はtimeline、それ以外はcalendarへ
       setActiveMode((current) =>
         current === "timeline" ? "timeline" : "calendar",
       );
