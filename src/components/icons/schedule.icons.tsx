@@ -415,7 +415,7 @@ export const GalleryIcon = ({
 
 
 //Animated navigation bar
-export const TimeIcon = ({
+export const ClockIcon = ({
   className,
   label: _label,
   size: _size,
@@ -423,7 +423,7 @@ export const TimeIcon = ({
   ...props
 }: IconProps) => (
   <svg
-    viewBox="0 0 22 22"
+    viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
@@ -431,7 +431,14 @@ export const TimeIcon = ({
     {...props}
   >
     <path
-      d="M10.75 20.75C16.273 20.75 20.75 16.273 20.75 10.75C20.75 5.227 16.273 0.75 10.75 0.75C5.227 0.75 0.75 5.227 0.75 10.75C0.75 16.273 5.227 20.75 10.75 20.75Z"
+      d="M12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12.0081 10.508C11.6102 10.508 11.2287 10.666 10.9474 10.9473C10.6661 11.2286 10.5081 11.6102 10.5081 12.008C10.5081 12.4058 10.6661 12.7874 10.9474 13.0687C11.2287 13.35 11.6102 13.508 12.0081 13.508C12.4059 13.508 12.7874 13.35 13.0687 13.0687C13.35 12.7874 13.5081 12.4058 13.5081 12.008C13.5081 11.6102 13.35 11.2286 13.0687 10.9473C12.7874 10.666 12.4059 10.508 12.0081 10.508ZM12.0081 10.508V7M15.0151 15.02L13.0661 13.072"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
