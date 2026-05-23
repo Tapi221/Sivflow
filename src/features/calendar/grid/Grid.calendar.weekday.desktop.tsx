@@ -219,16 +219,14 @@ export const CalendarWeekDayGrid = ({
                 className="relative bg-white"
                 style={{ height: "var(--calendar-hour-row-height)" }}
               >
-                {hour > 0 && (
-                  <span
-                    className={cn(
-                      "absolute bottom-0 right-1 z-10 flex h-6 translate-y-1/2 select-none items-center justify-end rounded-md bg-white px-1 text-[12px] font-semibold tabular-nums",
-                      "text-[#b3b3b3]",
-                    )}
-                  >
-                    {createHourLabel(hour)}
-                  </span>
-                )}
+                <span
+                  className={cn(
+                    "absolute bottom-0 right-1 z-10 flex h-6 translate-y-1/2 select-none items-center justify-end rounded-md bg-white px-1 text-[12px] font-semibold tabular-nums",
+                    "text-[#b3b3b3]",
+                  )}
+                >
+                  {createHourLabel(hour)}
+                </span>
               </div>
             ))}
           </div>
