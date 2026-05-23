@@ -2,11 +2,11 @@ import { DndContext, DragOverlay, useDroppable } from "@dnd-kit/core";
 import { useCallback, type CSSProperties, type WheelEvent } from "react";
 import { createPortal } from "react-dom";
 
-import { TASK_COLUMNS } from "./task.types";
-import type { Task, TaskStatus } from "./task.types";
-import { useTaskBoardDnd } from "./hooks/useTaskBoardDnd";
-import { TaskCard } from "./TaskCard";
-import { TaskColumn } from "./TaskColumn";
+import { TASK_COLUMNS } from "../task/task.types";
+import type { Task, TaskStatus } from "../task/task.types";
+import { useTaskBoardDnd } from "../../dnd/task/useTaskBoardDnd";
+import { TaskCard } from "../task/TaskCard";
+import { TaskColumn } from "../task/TaskColumn";
 
 type TaskBoardViewProps = {
   tasksByStatus: Record<TaskStatus, Task[]>;
