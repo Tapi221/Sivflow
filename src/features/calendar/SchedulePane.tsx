@@ -14,14 +14,9 @@ import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
 import { useTaskCalendarEvents } from "./task/hooks/useTaskCalendarEvents";
+import { CalendarPanel } from "./panel/CalendarPanel";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
-
-const CALENDAR_PANEL_SHADOW_CLASS =
-  "shadow-[0_18px_48px_rgba(15,23,42,0.10),0_1px_0_rgba(255,255,255,0.85)_inset]";
-
-const IOS_CALENDAR_PANEL_CLASS =
-  "border-[#eeeeee] bg-white backdrop-blur-xl";
 
 const IOS_CALENDAR_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
@@ -224,26 +219,11 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           )}
         >
           {activeMode === "task" ? (
-            <div
-              className={cn(
-                "flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[28px] rounded-tr-none border border-r-0 border-b-0",
-                IOS_CALENDAR_PANEL_CLASS,
-                CALENDAR_PANEL_SHADOW_CLASS,
-              )}
-            >
+            <CalendarPanel>
               <TaskView googleAccounts={googleAccounts} />
-            </div>
+            </CalendarPanel>
           ) : isMonthCalendarView ? (
-            <div
-              className={cn(
-                "flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0",
-                IOS_CALENDAR_PANEL_CLASS,
-                CALENDAR_PANEL_SHADOW_CLASS,
-                isDayDetailPanelCollapsed
-                  ? "rounded-tl-[28px] rounded-tr-none border-r-0"
-                  : "rounded-t-[28px]",
-              )}
-            >
+            <CalendarPanel edge={isDayDetailPanelCollapsed ? "trailing" : "top"}>
               {renderViewHeader(
                 "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
               )}
@@ -266,15 +246,9 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                   onVisibleMonthChange={handleVisibleMonthChange}
                 />
               </div>
-            </div>
+            </CalendarPanel>
           ) : (
-            <div
-              className={cn(
-                "flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[28px] rounded-tr-none border border-r-0 border-b-0",
-                IOS_CALENDAR_PANEL_CLASS,
-                CALENDAR_PANEL_SHADOW_CLASS,
-              )}
-            >
+            <CalendarPanel>
               {renderViewHeader(
                 "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
               )}
@@ -313,7 +287,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                   />
                 )}
               </div>
-            </div>
+            </CalendarPanel>
           )}
         </div>
 
