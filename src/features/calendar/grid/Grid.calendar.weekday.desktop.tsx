@@ -149,7 +149,7 @@ export const CalendarWeekDayGrid = ({
       {/* ── ヘッダー ── */}
       <div className="flex shrink-0 border-b border-[#eeeeee] bg-white">
         <div
-          className="shrink-0 border-r border-[#eeeeee] bg-[#fafafa]"
+          className="shrink-0 border-r border-[#eeeeee] bg-white"
           style={{ width: C.TIME_COLUMN_WIDTH }}
         />
 
@@ -212,17 +212,17 @@ export const CalendarWeekDayGrid = ({
       >
         <div className="grid bg-white" style={timelineGridStyle}>
           {/* 時刻列 */}
-          <div className="sticky left-0 z-20 border-r border-[#eeeeee] bg-[#fafafa] shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]">
+          <div className="sticky left-0 z-20 border-r border-[#eeeeee] bg-white shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]">
             {HOURS.map((hour) => (
               <div
                 key={hour}
-                className="relative bg-[#fafafa]"
+                className="relative bg-white"
                 style={{ height: "var(--calendar-hour-row-height)" }}
               >
                 {hour > 0 && (
                   <span
                     className={cn(
-                      "absolute bottom-0 right-1 z-10 flex h-6 translate-y-1/2 select-none items-center justify-end rounded-md bg-[#fafafa] px-1 text-[12px] font-semibold tabular-nums",
+                      "absolute bottom-0 right-1 z-10 flex h-6 translate-y-1/2 select-none items-center justify-end rounded-md bg-white px-1 text-[12px] font-semibold tabular-nums",
                       "text-[#b3b3b3]",
                     )}
                   >
