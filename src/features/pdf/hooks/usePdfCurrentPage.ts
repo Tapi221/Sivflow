@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useRef, useState } from "react";
 
 import type { PdfScrollDiagnostics } from "@/features/pdf/pdfViewer.types";
 
@@ -19,6 +19,7 @@ interface UsePdfCurrentPageResult {
   scrollContainerEl: HTMLDivElement | null;
   scrollViewport: ScrollViewportState;
   currentPage: number;
+  isScrolling: boolean;
   handleScroll: () => void;
   notifyLayoutChanged: () => void;
   resetNavigation: () => void;
@@ -29,6 +30,7 @@ interface UsePdfCurrentPageResult {
 
 const VIEWPORT_PAGE_ANCHOR_RATIO = 0.35;
 const PROGRAMMATIC_NAVIGATION_LOCK_MS = 260;
+const SCROLL_IDLE_RESET_MS = 140;
 const MIN_SCROLL_VIEWPORT_SYNC_DISTANCE_PX = 48;
 const MAX_SCROLL_VIEWPORT_SYNC_DISTANCE_PX = 160;
 const SCROLL_VIEWPORT_SYNC_HEIGHT_RATIO = 0.15;
@@ -145,12 +147,14 @@ export const usePdfCurrentPage = ({
   const pageChangeRafRef = useRef<number | null>(null);
   const stateSyncRafRef = useRef<number | null>(null);
   const viewportSyncRafRef = useRef<number | null>(null);
+  const scrollIdleTimerRef = useRef<number | null>(null);
   const viewportSyncForceRef = useRef(false);
   const pendingPageForCallbackRef = useRef<number | null>(null);
   const programmaticNavigationPageRef = useRef<number | null>(null);
   const programmaticNavigationUnlockTimerRef = useRef<number | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [isScrolling, setIsScrolling] = useState(false);
   const [scrollViewport, setScrollViewport] = useState<ScrollViewportState>({
     scrollTop: 0,
     clientHeight: 0,
@@ -200,7 +204,25 @@ export const usePdfCurrentPage = ({
       viewportSyncRafRef.current = null;
     }
 
+    if (scrollIdleTimerRef.current !== null) {
+      window.clearTimeout(scrollIdleTimerRef.current);
+      scrollIdleTimerRef.current = null;
+    }
+
     viewportSyncForceRef.current = false;
+  }, []);
+
+  const markScrollActivity = useCallback(() => {
+    setIsScrolling((previous) => (previous ? previous : true));
+
+    if (scrollIdleTimerRef.current !== null) {
+      window.clearTimeout(scrollIdleTimerRef.current);
+    }
+
+    scrollIdleTimerRef.current = window.setTimeout(() => {
+      scrollIdleTimerRef.current = null;
+      setIsScrolling(false);
+    }, SCROLL_IDLE_RESET_MS);
   }, []);
 
   const scheduleOnPageChange = useCallback((page: number) => {
@@ -229,7 +251,9 @@ export const usePdfCurrentPage = ({
 
     stateSyncRafRef.current = requestAnimationFrame(() => {
       stateSyncRafRef.current = null;
-      setCurrentPage(page);
+      startTransition(() => {
+        setCurrentPage(page);
+      });
     });
   }, []);
 
@@ -238,11 +262,13 @@ export const usePdfCurrentPage = ({
       const force = options?.force ?? false;
       const container = scrollContainerRef.current;
       if (!container) {
-        setScrollViewport((previous) => {
-          const nextViewport = { scrollTop: 0, clientHeight: 0 };
-          return !force && areScrollViewportStatesEqual(previous, nextViewport)
-            ? previous
-            : nextViewport;
+        startTransition(() => {
+          setScrollViewport((previous) => {
+            const nextViewport = { scrollTop: 0, clientHeight: 0 };
+            return !force && areScrollViewportStatesEqual(previous, nextViewport)
+              ? previous
+              : nextViewport;
+          });
         });
         return;
       }
@@ -252,11 +278,13 @@ export const usePdfCurrentPage = ({
         clientHeight: container.clientHeight,
       };
 
-      setScrollViewport((previous) =>
-        !force && areScrollViewportStatesEqual(previous, nextViewport)
-          ? previous
-          : nextViewport,
-      );
+      startTransition(() => {
+        setScrollViewport((previous) =>
+          !force && areScrollViewportStatesEqual(previous, nextViewport)
+            ? previous
+            : nextViewport,
+        );
+      });
     },
     [],
   );
@@ -320,6 +348,8 @@ export const usePdfCurrentPage = ({
   }, [commitCurrentPage, numPages]);
 
   const handleScroll = useCallback(() => {
+    markScrollActivity();
+
     if (scrollRafRef.current !== null) {
       return;
     }
@@ -329,7 +359,7 @@ export const usePdfCurrentPage = ({
       syncScrollViewportState();
       estimateCurrentPageFromScroll();
     });
-  }, [estimateCurrentPageFromScroll, syncScrollViewportState]);
+  }, [estimateCurrentPageFromScroll, markScrollActivity, syncScrollViewportState]);
 
   const notifyLayoutChanged = useCallback(() => {
     scheduleScrollViewportSync({ force: true });
@@ -341,6 +371,7 @@ export const usePdfCurrentPage = ({
     clearProgrammaticNavigationLock();
     pendingPageForCallbackRef.current = null;
     currentPageRef.current = 1;
+    setIsScrolling(false);
     scheduleCurrentPageStateSync(1);
     scheduleOnPageChange(1);
 
@@ -570,6 +601,7 @@ export const usePdfCurrentPage = ({
     scrollContainerEl,
     scrollViewport,
     currentPage,
+    isScrolling,
     handleScroll,
     notifyLayoutChanged,
     resetNavigation,
