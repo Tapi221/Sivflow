@@ -77,6 +77,7 @@ export type GoogleCalendarApiListResponse = {
     primary?: boolean;
     selected?: boolean;
   }>;
+  nextPageToken?: string;
 };
 
 export type GoogleTasksApiTaskListsResponse = {
