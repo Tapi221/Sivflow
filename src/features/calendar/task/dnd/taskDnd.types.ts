@@ -1,7 +1,7 @@
 import type {
-  type CollisionDetection,
-  type DragEndEvent,
-  type DragOverEvent,
+  CollisionDetection,
+  DragEndEvent,
+  DragOverEvent,
 } from "@dnd-kit/core";
 
 import type { TaskStatus } from "../task.types";
