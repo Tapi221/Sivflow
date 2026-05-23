@@ -134,7 +134,10 @@
   -webkit-app-region: drag;
 }
 
-.app-layout--sidebar-closed .workspace-shell__tabs,
+.app-layout--sidebar-closed .workspace-shell__tabs {
+  padding-left: var(--app-sidebar-rail-width, 48px);
+}
+
 .app-layout--sidebar-closed .calendar-workspace-toolbar {
   padding-left: 0;
 }
