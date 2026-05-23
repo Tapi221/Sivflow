@@ -114,6 +114,7 @@
   }
 
   .calendar-month-view {
+    --calendar-month-grid-line-size: 1px;
     --calendar-month-row-height: 112px;
     overflow-anchor: none;
     background: #f2f2f7;
@@ -125,9 +126,8 @@
   }
 
   .calendar-month-weekday-header {
-    column-gap: 1px;
     border-color: #e5e5ea !important;
-    background: #e5e5ea !important;
+    background: #f9f9fb !important;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     box-shadow: none;
@@ -152,11 +152,10 @@
   }
 
   .calendar-month-week-row {
-    column-gap: 1px;
     contain: layout style;
     content-visibility: visible !important;
     contain-intrinsic-size: none !important;
-    background: #e5e5ea;
+    background: #ffffff;
   }
 
   .calendar-month-week-row::after {
@@ -166,9 +165,20 @@
     bottom: 0;
     left: 0;
     z-index: 3;
-    height: 1px;
+    height: var(--calendar-month-grid-line-size);
     pointer-events: none;
     background: #e5e5ea;
+  }
+
+  .calendar-month-column-separator {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 3;
+    width: var(--calendar-month-grid-line-size);
+    pointer-events: none;
+    background: #e5e5ea;
+    transform: translateX(-50%);
   }
 
   .calendar-month-day-cell {
