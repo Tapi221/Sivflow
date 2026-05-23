@@ -73,7 +73,7 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
 
   return (
     <div
-      className="flex"
+      className="flex bg-transparent"
       style={{
         fontFamily:
           "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif",
@@ -84,6 +84,7 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
         className={`
           ${GD.DAY_DETAIL_TIME_LABEL_WIDTH_CLASS}
           shrink-0
+          bg-transparent
         `}
         style={{
           height: gridHeight,
@@ -94,7 +95,7 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
         {HOURS.map((hour) => (
           <div
             key={hour}
-            className="relative bg-white"
+            className="relative bg-transparent"
             style={{
               height: HOUR_ROW_HEIGHT,
             }}
@@ -111,7 +112,7 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
                 items-center
                 justify-end
                 rounded-md
-                bg-white
+                bg-transparent
                 px-1
                 text-[12px]
                 font-semibold
