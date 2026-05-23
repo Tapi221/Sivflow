@@ -147,12 +147,10 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                         <span>{column.bottomLabel}</span>
                       </span>
                     ) : (
-                      <>
-                        <span className="font-semibold text-[#25272d]">
-                          {column.topLabel}
-                        </span>
+                      <span className="inline-flex items-baseline whitespace-nowrap font-semibold text-[#25272d]">
+                        <span>{column.topLabel}</span>
                         <span>{column.bottomLabel}</span>
-                      </>
+                      </span>
                     )}
                   </button>
                 );
