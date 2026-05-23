@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { mapSearchParamsToExplorerRouteState } from "@/features/explorer/mappers/mapSearchParamsToExplorerRouteState";
@@ -42,7 +42,6 @@ const toLibraryAwareSearchParams = (
 export const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { pathname } = useLocation();
-  const navigate = useNavigate();
 
   const presentationTarget = usePresentationTarget();
   const isDesktop = presentationTarget === "desktop";
@@ -63,14 +62,9 @@ export const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
 
   const writeRouteState = useCallback(
     (next: URLSearchParams) => {
-      if (next.get("view") === "section-list") {
-        navigate("/library", { replace: true });
-        return;
-      }
-
       setSearchParams(next, { replace: true });
     },
-    [navigate, setSearchParams],
+    [setSearchParams],
   );
 
   const persistLastFolder = useCallback((folderId: string | null) => {
