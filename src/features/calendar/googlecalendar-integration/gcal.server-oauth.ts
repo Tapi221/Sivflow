@@ -51,10 +51,13 @@ const waitForCallableAuth = async (): Promise<void> => {
 };
 
 export const isServerStoredGoogleOAuthEnabled = (): boolean => {
-  return (
-    import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true" &&
-    !isDesktopLikeRuntime()
-  );
+  if (isDesktopLikeRuntime()) {
+    return false;
+  }
+
+  // Web / 非 Desktop では refresh token を localStorage に保存しない。
+  // そのため、明示的に false が指定されていない限り Cloud Functions 側に保存する。
+  return import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS !== "false";
 };
 
 export const exchangeGoogleCalendarCode = async (
