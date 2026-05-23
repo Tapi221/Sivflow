@@ -2,8 +2,9 @@ import { memo, useMemo } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 
-import * as T from "@/features/calendar/calendar.text";
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
+import { getEventDateKeys } from "@/features/calendar/calendarEventRange";
+import * as T from "@/features/calendar/calendar.text";
 import { CalendarEventChipMonth } from "@/features/calendar/eventchip/EventChip.schedule.month";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { MonthRowResizeBar } from "@/features/calendar/grid/height/MonthRowResizeBar.month.desktop";
@@ -350,36 +351,22 @@ export const GridCalendarMonthDesktop = ({
     const groupedEvents = new Map<string, GoogleCalendarEvent[]>();
 
     for (const event of visibleEvents) {
-      const startsAt =
-        event.startsAt instanceof Date
-          ? event.startsAt
-          : new Date(event.startsAt);
+      for (const dayKey of getEventDateKeys(event)) {
+        const dayEvents = groupedEvents.get(dayKey);
 
-      if (!Number.isFinite(startsAt.getTime())) continue;
-
-      const eventWithDate =
-        startsAt === event.startsAt
-          ? event
-          : {
-            ...event,
-            startsAt,
-          };
-
-      const dayKey = getDayKey(startsAt);
-      const dayEvents = groupedEvents.get(dayKey);
-
-      if (dayEvents) {
-        dayEvents.push(eventWithDate);
-      } else {
-        groupedEvents.set(dayKey, [eventWithDate]);
+        if (dayEvents) {
+          dayEvents.push(event);
+        } else {
+          groupedEvents.set(dayKey, [event]);
+        }
       }
     }
 
     for (const dayEvents of groupedEvents.values()) {
       dayEvents.sort(
         (a, b) =>
-          a.startsAt.getTime() -
-          b.startsAt.getTime(),
+          new Date(a.startsAt).getTime() -
+          new Date(b.startsAt).getTime(),
       );
     }
 

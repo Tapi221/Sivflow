@@ -1,13 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
+import * as C from "@/features/calendar/calendar.constants.desktop";
+import {
+  clipEventToDay,
+  eventOverlapsDay,
+} from "@/features/calendar/calendarEventRange";
+import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
+import { computeEventLayout, toLayoutEvent } from "@/features/calendar/eventchip/EventChip.layout.weekday.desktop";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
-import type { CalendarWeekDayGridProps } from "@/features/calendar/schedulePane.types";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
-import { computeEventLayout,toLayoutEvent } from "@/features/calendar/eventchip/EventChip.layout.weekday.desktop";
+import type { CalendarWeekDayGridProps } from "@/features/calendar/schedulePane.types";
+import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
+
 import { CalendarEventChipWeekday } from "../eventchip/EventChip.schedule.weekday";
 import { cn } from "@/lib/utils";
 // ==============================================
@@ -19,6 +26,7 @@ type CalendarEventPositionStyle = React.CSSProperties & {
 
 const HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, index) => index);
 const MIN_LAYOUT_MINUTES = C.MIN_LAYOUT_MINUTES;
+const MAX_ALL_DAY_VISIBLE_CHIPS = 3;
 
 const createHourLabel = (hour: number) =>
   `${String(hour).padStart(2, "0")}:00`;
@@ -45,6 +53,20 @@ const calculateEventPositionStyle = (
     top: `calc(var(${GRID.WEEKDAY_CSS_VAR_EVENT_START_HOUR}) * var(--calendar-hour-row-height))`,
     height: `calc(var(${GRID.WEEKDAY_CSS_VAR_EVENT_DURATION_HOURS}) * var(--calendar-hour-row-height) - 2px)`,
   } as CalendarEventPositionStyle;
+};
+
+const AllDayEventChip = ({ event }: { event: GoogleCalendarEvent }) => {
+  const tokens = generateColorTokens(event.accentColor);
+
+  return (
+    <div
+      className={cn(eventChipAllDayClass, "truncate")}
+      style={{ background: tokens.bg, color: tokens.text }}
+      title={event.title || "Untitled"}
+    >
+      {event.title || "Untitled"}
+    </div>
+  );
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -144,6 +166,17 @@ export const CalendarWeekDayGrid = ({
   const isTodayVisible = visibleDays.some((d) => isSameDay(d, today));
   const todayColumnIndex = visibleDays.findIndex((d) => isSameDay(d, today));
 
+  const allDayEventsByDay = useMemo(() => {
+    return new Map(
+      visibleDays.map((day) => [
+        day.toISOString(),
+        visibleEvents.filter(
+          (event) => event.isAllDay && eventOverlapsDay(event, day),
+        ),
+      ]),
+    );
+  }, [visibleDays, visibleEvents]);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
       {/* ── ヘッダー ── */}
@@ -204,6 +237,50 @@ export const CalendarWeekDayGrid = ({
         </div>
       </div>
 
+      <div className="flex shrink-0 border-b border-[#eeeeee] bg-white">
+        <div
+          className="flex shrink-0 justify-end border-r border-[#eeeeee] bg-white pr-2 pt-1 text-[10px] font-medium text-[rgba(60,60,67,0.45)]"
+          style={{ width: C.TIME_COLUMN_WIDTH }}
+        >
+          終日
+        </div>
+
+        <div className="flex-1 overflow-hidden bg-white">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${visibleDays.length}, ${calendarDayColumnWidth}px)`,
+              minWidth: `${visibleDays.length * calendarDayColumnWidth}px`,
+            }}
+          >
+            {visibleDays.map((day) => {
+              const events = allDayEventsByDay.get(day.toISOString()) ?? [];
+              const visibleChips = events.slice(0, MAX_ALL_DAY_VISIBLE_CHIPS);
+              const overflowCount = events.length - visibleChips.length;
+
+              return (
+                <div
+                  key={day.toISOString()}
+                  className="min-h-7 border-r border-[#eeeeee] px-1 py-1 last:border-r-0"
+                >
+                  <div className="flex flex-col gap-1">
+                    {visibleChips.map((event) => (
+                      <AllDayEventChip key={event.id} event={event} />
+                    ))}
+
+                    {overflowCount > 0 ? (
+                      <div className="text-[11px] font-medium text-[#8f929c]">
+                        +{overflowCount}件
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       {/* ── 本体 ── */}
       <div
         ref={scrollContainerRef}
@@ -235,10 +312,12 @@ export const CalendarWeekDayGrid = ({
           {visibleDays.map((day) => {
             const isDayToday = isSameDay(day, today);
 
-            const eventsForDay = visibleEvents.filter(
-              (event) =>
-                !event.isAllDay && isSameDay(new Date(event.startsAt), day),
-            );
+            const eventsForDay = visibleEvents
+              .filter(
+                (event) => !event.isAllDay && eventOverlapsDay(event, day),
+              )
+              .map((event) => clipEventToDay(event, day))
+              .filter((event): event is GoogleCalendarEvent => Boolean(event));
 
             const layout = computeEventLayout(
               eventsForDay.map((event) =>

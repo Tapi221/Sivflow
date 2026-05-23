@@ -24,9 +24,9 @@ import {
   isServerStoredGoogleOAuthEnabled,
 } from "./gcal.server-oauth";
 import type {
-  GCalSyncState,
   GCalConnectionStatus,
   GCalForceSyncOptions,
+  GCalSyncState,
   GoogleCalendarEvent,
   GoogleCalendarListItem,
 } from "./gcalSync.types";
@@ -297,7 +297,12 @@ const resolveSelectedCalendarIds = (
   storedIds: string[],
   calendars: GoogleCalendarListItem[],
 ): string[] => {
-  return storedIds.length > 0 ? storedIds : getDefaultCalendarIds(calendars);
+  const availableIds = new Set(calendars.map((calendar) => calendar.id));
+  const availableStoredIds = storedIds.filter((id) => availableIds.has(id));
+
+  return availableStoredIds.length > 0
+    ? availableStoredIds
+    : getDefaultCalendarIds(calendars);
 };
 
 const getErrorStatus = (error: unknown): number | undefined => {
@@ -508,11 +513,19 @@ export const useMultiAccountGoogleCalendar = () => {
               return true;
             }
 
+            const ids = resolveSelectedCalendarIds(
+              Array.from(account.selectedCalendarIds),
+              list,
+            );
+
+            updateStoredAccountCalendarIds(accountId, ids);
+
             accountsRef.current = accountsRef.current.map((current) =>
               current.id === accountId
                 ? {
                   ...current,
                   calendars: list,
+                  selectedCalendarIds: new Set(ids),
                   error: null,
                 }
                 : current,
@@ -522,6 +535,12 @@ export const useMultiAccountGoogleCalendar = () => {
               type: "SET_CALENDARS",
               id: accountId,
               calendars: list,
+            });
+
+            dispatchAccounts({
+              type: "SET_CALENDAR_IDS",
+              id: accountId,
+              ids,
             });
 
             dispatchAccounts({
@@ -843,12 +862,17 @@ export const useMultiAccountGoogleCalendar = () => {
         selectedCalendarIds: defaultIds,
         cachedCalendars: toCachedCalendars(list),
       });
-    } catch {
+    } catch (error) {
       if (replaceAccountId) {
         dispatchAccounts({
           type: "SET_CONNECTING",
           id: replaceAccountId,
           value: false,
+        });
+        dispatchAccounts({
+          type: "SET_ERROR",
+          id: replaceAccountId,
+          error: toErrorMessage(error),
         });
       } else {
         dispatchAccounts({ type: "REMOVE", id: tempId });

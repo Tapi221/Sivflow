@@ -1,6 +1,7 @@
 import { useMemo, useRef } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
+import { eventOverlapsRange } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { GridCalendarMonthDesktop } from "@/features/calendar/grid/Grid.calendar.month.desktop";
 
@@ -11,6 +12,7 @@ const CHIP_HEIGHT_PX = 21;
 const CHIPS_TOP_OFFSET_PX = 60;
 const CHIPS_BOTTOM_MARGIN_PX = 4;
 const MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS = 7;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const getMaxVisibleChips = (rowHeight: number) =>
   Math.max(
@@ -30,16 +32,16 @@ type CalendarMonthViewProps = {
   onVisibleMonthChange?: (date: Date) => void;
 };
 
-const getDayStartTime = (date: Date): number => {
+const getDayStart = (date: Date): Date => {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
-  return d.getTime();
+  return d;
 };
 
-const getDayEndTime = (date: Date): number => {
+const getDayEnd = (date: Date): Date => {
   const d = new Date(date);
   d.setHours(23, 59, 59, 999);
-  return d.getTime();
+  return d;
 };
 
 export const CalendarMonthView = ({
@@ -93,22 +95,18 @@ export const CalendarMonthView = ({
 
     if (!firstWeek || !lastWeek) return visibleEvents;
 
-    const rangeStart = getDayStartTime(firstWeek.days[0].date) -
-      MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS * 24 * 60 * 60 * 1000;
-    const rangeEnd = getDayEndTime(lastWeek.days[lastWeek.days.length - 1].date) +
-      MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS * 24 * 60 * 60 * 1000;
+    const rangeStart = new Date(
+      getDayStart(firstWeek.days[0].date).getTime() -
+        MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS * DAY_MS,
+    );
+    const rangeEnd = new Date(
+      getDayEnd(lastWeek.days[lastWeek.days.length - 1].date).getTime() +
+        MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS * DAY_MS,
+    );
 
-    return visibleEvents.filter((event) => {
-      const startsAt = event.startsAt instanceof Date
-        ? event.startsAt
-        : new Date(event.startsAt);
-
-      const startsAtTime = startsAt.getTime();
-
-      return Number.isFinite(startsAtTime) &&
-        startsAtTime >= rangeStart &&
-        startsAtTime <= rangeEnd;
-    });
+    return visibleEvents.filter((event) =>
+      eventOverlapsRange(event, rangeStart, rangeEnd),
+    );
   }, [scroll.monthWeeks, visibleEvents]);
 
   return (
