@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { useT } from "@/i18n/useT";
@@ -8,18 +9,56 @@ import { TaskStatusDot } from "../../../chip/icon/TaskStatusDot";
 type TaskListViewProps = {
   tasks: Task[];
   onToggleTaskDone: (taskId: string, done: boolean) => void;
+  onRenameTask: (taskId: string, title: string) => void;
 };
 
 const TABLE_HEADER_CLASS =
   "pb-2 text-left text-[12px] font-medium tracking-normal text-[#b8bcc5]";
 
-export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => {
+export const TaskListView = ({
+  tasks,
+  onToggleTaskDone,
+  onRenameTask,
+}: TaskListViewProps) => {
   const t = useT();
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
   const statusLabelMap = {
     not_started: t.taskStatusNotStarted,
     in_progress: t.taskStatusInProgress,
     review: t.taskStatusReview,
     done: t.taskStatusDone,
+  };
+
+  useEffect(() => {
+    if (!editingTaskId) {
+      return;
+    }
+
+    titleInputRef.current?.focus();
+    titleInputRef.current?.select();
+  }, [editingTaskId]);
+
+  const startEditingTaskTitle = (task: Task) => {
+    setEditingTaskId(task.id);
+    setEditingTitle(task.title);
+  };
+
+  const finishEditingTaskTitle = (task: Task) => {
+    const nextTitle = editingTitle.trim();
+
+    if (nextTitle && nextTitle !== task.title) {
+      onRenameTask(task.id, nextTitle);
+    }
+
+    setEditingTaskId(null);
+    setEditingTitle("");
+  };
+
+  const cancelEditingTaskTitle = () => {
+    setEditingTaskId(null);
+    setEditingTitle("");
   };
 
   return (
@@ -43,6 +82,7 @@ export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => 
             const col = TASK_COLUMNS.find((c) => c.id === task.status);
             const isDone = task.status === "done";
             const checkboxColor = isDone ? "#007aff" : "#9ca3af";
+            const isEditingTitle = editingTaskId === task.id;
 
             return (
               <tr
@@ -61,7 +101,38 @@ export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => 
                 </td>
 
                 <td className="py-2.5 pr-4 font-medium leading-[18px] text-[#24262d]">
-                  {task.title}
+                  {isEditingTitle ? (
+                    <input
+                      ref={titleInputRef}
+                      value={editingTitle}
+                      aria-label="Task title"
+                      className="-my-1 w-full rounded-md border border-[#d1d5db] bg-white px-2 py-1 text-[13px] font-medium leading-[18px] text-[#24262d] outline-none transition-[border-color,box-shadow] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/15"
+                      onChange={(event) => setEditingTitle(event.target.value)}
+                      onBlur={() => finishEditingTaskTitle(task)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          finishEditingTaskTitle(task);
+                          return;
+                        }
+
+                        if (event.key === "Escape") {
+                          event.preventDefault();
+                          cancelEditingTaskTitle();
+                        }
+                      }}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      className="-ml-1 block w-full truncate rounded px-1 text-left font-medium leading-[18px] text-[#24262d] transition-colors hover:bg-[#eef6ff] focus-visible:bg-[#eef6ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
+                      aria-label={`Rename ${task.title}`}
+                      title="Click to rename"
+                      onClick={() => startEditingTaskTitle(task)}
+                    >
+                      {task.title}
+                    </button>
+                  )}
                 </td>
 
                 <td className="py-2.5 pr-4">
