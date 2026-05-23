@@ -40,9 +40,6 @@ const WORKSPACE_TAB_MOTION_TRANSITION: Transition = {
   ease: [0.22, 1, 0.36, 1],
 };
 
-const toolbarIconClassName =
-  "h-[17px] w-[17px] shrink-0 text-current transition-transform duration-200 ease-out group-hover/action:scale-[1.06] group-focus-visible/action:scale-[1.06] motion-reduce:transition-none";
-
 const toolbarTooltipClassName =
   "pointer-events-none absolute left-1/2 top-[calc(100%+8px)] z-20 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-full border border-[#d1d1d6]/70 bg-white/95 px-2.5 py-1 text-[11px] font-medium leading-none tracking-[-0.01em] text-[#3c3c43]/72 opacity-0 shadow-[0_8px_18px_rgba(60,60,67,0.12)] backdrop-blur-xl transition-all duration-150 ease-out group-hover/action:translate-y-0 group-hover/action:opacity-100 group-focus-visible/action:translate-y-0 group-focus-visible/action:opacity-100 motion-reduce:transition-none";
 
@@ -50,6 +47,21 @@ const segmentedTabTooltipClassName =
   "rounded-lg border border-[#eeeeee] bg-white px-2.5 py-[5px] text-[12px] font-medium text-[#8c8c8c] shadow-[0_8px_18px_rgba(0,0,0,0.08)]";
 const segmentedTabTooltipArrowClassName =
   "border-b border-r border-[#eeeeee] bg-white";
+
+const segmentedActionGroupClassName =
+  "relative z-10 inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5";
+
+const segmentedActionButtonClassName = cn(
+  "group/action relative z-10 flex h-7 w-11 min-w-0 items-center justify-center rounded-lg p-0",
+  "appearance-none select-none text-[#b3b3b3]",
+  "outline-none ring-0 transition-[background-color,color,box-shadow] duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+  "hover:bg-white hover:text-[#8c8c8c] hover:shadow-[0_1px_2px_rgba(0,0,0,0.06)]",
+  "active:bg-white active:text-[#8c8c8c]",
+  "focus:outline-none focus:ring-0 focus-visible:bg-white focus-visible:text-[#8c8c8c] focus-visible:outline-none",
+);
+
+const segmentedActionIconClassName =
+  "block h-4 w-4 shrink-0 text-current transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none";
 
 export const WorkspaceHeaderToolbar = ({
   activeValue,
@@ -118,6 +130,33 @@ export const WorkspaceHeaderToolbar = ({
                 />
               </button>
             </HoverTooltip>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderSegmentedActions = (
+    toolbarActions: readonly WorkspaceHeaderToolbarAction[],
+    className?: string,
+  ) => {
+    return (
+      <div className={cn(segmentedActionGroupClassName, className)}>
+        {toolbarActions.map((action) => {
+          const Icon = action.icon;
+          const label = action.ariaLabel ?? action.label;
+
+          return (
+            <button
+              key={label}
+              type="button"
+              aria-label={label}
+              className={segmentedActionButtonClassName}
+              onClick={action.onClick}
+            >
+              <Icon aria-hidden="true" className={segmentedActionIconClassName} />
+              <span className={toolbarTooltipClassName}>{label}</span>
+            </button>
           );
         })}
       </div>
@@ -216,55 +255,15 @@ export const WorkspaceHeaderToolbar = ({
           )
         ) : null}
 
-        {hasLeadingActions ? (
-          <div
-            className={cn(
-              "relative z-10 flex h-10 shrink-0 items-center gap-1 rounded-full bg-[#f2f2f7]/80 p-1 shadow-[inset_0_0_0_0.5px_rgba(60,60,67,0.12)] backdrop-blur-xl",
+        {hasLeadingActions
+          ? renderSegmentedActions(
+              leadingActions ?? [],
               hasLeadingContentBeforeActions ? "ml-2" : "ml-0",
-            )}
-          >
-            {leadingActions?.map((action) => {
-              const Icon = action.icon;
-
-              return (
-                <button
-                  key={action.ariaLabel ?? action.label}
-                  type="button"
-                  aria-label={action.ariaLabel ?? action.label}
-                  className="group/action relative inline-flex h-8 w-8 items-center justify-center rounded-full text-[#3c3c43]/60 transition-[background-color,color,box-shadow] duration-150 ease-out hover:bg-white/95 hover:text-[#007aff] hover:shadow-[0_1px_4px_rgba(0,0,0,0.1)] active:bg-white active:text-[#0066d6] motion-reduce:transition-none focus-visible:bg-white focus-visible:text-[#007aff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
-                  onClick={action.onClick}
-                >
-                  <Icon className={toolbarIconClassName} />
-                  <span className={toolbarTooltipClassName}>
-                    {action.ariaLabel ?? action.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        ) : null}
+            )
+          : null}
       </div>
 
-      {actions && actions.length > 0 ? (
-        <div className="relative z-10 flex h-10 shrink-0 items-center justify-end gap-1 rounded-full bg-[#f2f2f7]/80 p-1 shadow-[0_1px_2px_rgba(0,0,0,0.04),inset_0_0_0_0.5px_rgba(60,60,67,0.12)] backdrop-blur-xl">
-          {actions.map((action) => {
-            const Icon = action.icon;
-
-            return (
-              <button
-                key={action.label}
-                type="button"
-                aria-label={action.ariaLabel ?? action.label}
-                className="group/action relative flex h-8 w-8 items-center justify-center rounded-full text-[#3c3c43]/65 transition-[background-color,color,box-shadow] duration-150 ease-out hover:bg-white/95 hover:text-[#007aff] hover:shadow-[0_1px_4px_rgba(0,0,0,0.1)] active:bg-white active:text-[#0066d6] motion-reduce:transition-none focus-visible:bg-white focus-visible:text-[#007aff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
-                onClick={action.onClick}
-              >
-                <Icon className={toolbarIconClassName} />
-                <span className={toolbarTooltipClassName}>{action.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
+      {actions && actions.length > 0 ? renderSegmentedActions(actions) : null}
     </div>
   );
 };
