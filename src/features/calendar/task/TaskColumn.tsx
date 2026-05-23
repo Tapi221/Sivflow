@@ -1,11 +1,5 @@
-import {
-  defaultAnimateLayoutChanges,
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-  type AnimateLayoutChanges,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { motion } from "framer-motion";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useT } from "@/i18n/useT";
@@ -14,17 +8,13 @@ import { TASK_TYPO } from "@/styles/tokens/typography";
 
 import type { Task, TaskColumn as TaskColumnType } from "./task.types";
 import { TaskCard } from "./TaskCard";
-import {
-  TASK_DND_LAYOUT_ANIMATION_DURATION_MS,
-  TASK_DND_TABLIKE_EASING,
-} from "./dnd/taskDnd.config";
+import { TASK_DND_LAYOUT_ANIMATION_DURATION_MS } from "./dnd/taskDnd.config";
 import { TaskStatusDot } from "../../../chip/icon/TaskStatusDot";
 
 type TaskColumnProps = {
   column: TaskColumnType;
   tasks: Task[];
   activeTaskId?: string | null;
-  enableSortableTransforms?: boolean;
   accountName?: string | null;
   accountPhotoUrl?: string | null;
   onAddTask: (status: string) => void;
@@ -35,7 +25,6 @@ type TaskColumnProps = {
 type SortableTaskCardProps = {
   task: Task;
   activeTaskId?: string | null;
-  enableSortableTransforms?: boolean;
   accountName?: string | null;
   accountPhotoUrl?: string | null;
   onDeleteTask: (id: string) => void;
@@ -43,26 +32,15 @@ type SortableTaskCardProps = {
 };
 
 const taskColumnBackground = "#ffffff";
-const TASK_SORTABLE_TRANSITION = {
-  duration: TASK_DND_LAYOUT_ANIMATION_DURATION_MS,
-  easing: TASK_DND_TABLIKE_EASING,
-};
-const TASK_SORTABLE_ANIMATE_LAYOUT_CHANGES: AnimateLayoutChanges = (args) => {
-  if (args.isDragging) {
-    return false;
-  }
-
-  if (args.isSorting || args.wasDragging) {
-    return defaultAnimateLayoutChanges(args);
-  }
-
-  return false;
+const TASK_LAYOUT_MOTION_EASING = [0.16, 1, 0.3, 1] as const;
+const TASK_LAYOUT_MOTION_TRANSITION = {
+  duration: TASK_DND_LAYOUT_ANIMATION_DURATION_MS / 1000,
+  ease: TASK_LAYOUT_MOTION_EASING,
 };
 
 const SortableTaskCard = ({
   task,
   activeTaskId,
-  enableSortableTransforms = false,
   accountName,
   accountPhotoUrl,
   onDeleteTask,
@@ -73,12 +51,8 @@ const SortableTaskCard = ({
     isDragging,
     listeners,
     setNodeRef,
-    transform,
-    transition,
   } = useSortable({
     id: task.id,
-    animateLayoutChanges: TASK_SORTABLE_ANIMATE_LAYOUT_CHANGES,
-    transition: TASK_SORTABLE_TRANSITION,
     data: {
       type: "task",
       task,
@@ -86,18 +60,12 @@ const SortableTaskCard = ({
     },
   });
   const isActivePreview = activeTaskId === task.id;
-  const sortableTransform = isDragging || enableSortableTransforms ? transform : null;
 
   return (
-    <div
+    <motion.div
       ref={setNodeRef}
-      style={{
-        transform: CSS.Translate.toString(sortableTransform),
-        transition: isDragging
-          ? undefined
-          : transition ?? `transform ${TASK_DND_LAYOUT_ANIMATION_DURATION_MS}ms ${TASK_DND_TABLIKE_EASING}`,
-        willChange: sortableTransform ? "transform" : undefined,
-      }}
+      layout="position"
+      transition={TASK_LAYOUT_MOTION_TRANSITION}
       className={cn(
         "rounded-xl touch-none transform-gpu",
         "transition-[opacity,filter] duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
@@ -115,7 +83,7 @@ const SortableTaskCard = ({
         onDelete={onDeleteTask}
         onToggleDone={onToggleTaskDone}
       />
-    </div>
+    </motion.div>
   );
 };
 
@@ -123,7 +91,6 @@ export const TaskColumn = ({
   column,
   tasks,
   activeTaskId,
-  enableSortableTransforms = false,
   accountName,
   accountPhotoUrl,
   onAddTask,
@@ -192,7 +159,6 @@ export const TaskColumn = ({
                 key={task.id}
                 task={task}
                 activeTaskId={activeTaskId}
-                enableSortableTransforms={enableSortableTransforms}
                 accountName={accountName}
                 accountPhotoUrl={accountPhotoUrl}
                 onDeleteTask={onDeleteTask}
