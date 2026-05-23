@@ -46,7 +46,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "library",
     label: "Library",
-    to: "/folders?view=section-list&libraryType=pdf",
+    to: "/library",
     icon: <LibraryIcon className="sidebar-nav-icon" />,
     sectionKey: "library",
   },
@@ -72,7 +72,7 @@ export const SidebarMobile = ({
   onOpenSettings?: () => void;
 }) => {
   const navigate = useNavigate();
-  const { search } = useLocation();
+  const { pathname, search } = useLocation();
 
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
 
@@ -80,7 +80,10 @@ export const SidebarMobile = ({
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
   const openSectionTab = useWorkspaceTabsStore((s) => s.openSectionTab);
 
-  const selectedLibraryChild = new URLSearchParams(search).get("libraryType");
+  const selectedLibraryChild =
+    pathname === "/library"
+      ? "pdf"
+      : new URLSearchParams(search).get("libraryType");
 
   const handleClick = (item: SidebarNavItem) => {
     closeCalendar();
@@ -106,7 +109,7 @@ export const SidebarMobile = ({
   const openLibraryChild = (type: string) => {
     closeCalendar();
     openSectionTab("library");
-    navigate(`/folders?view=section-list&libraryType=${type}`);
+    navigate(type === "pdf" ? "/library" : `/library?libraryType=${type}`);
   };
 
   return (
