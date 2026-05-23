@@ -11,16 +11,29 @@ import type {
   CollisionDetectionArgs,
 } from "./taskDnd.types";
 
-const getActiveMiddleY = (args: CollisionDetectionArgs): number => {
-  const activeRect = args.collisionRect;
-  return activeRect.top + activeRect.height / 2;
+const getDistanceFromRange = (
+  value: number,
+  start: number,
+  end: number,
+): number => {
+  if (value < start) {
+    return start - value;
+  }
+
+  if (value > end) {
+    return value - end;
+  }
+
+  return 0;
 };
 
 const getNearestSlotCollision = (
   args: CollisionDetectionArgs,
   slotContainers: CollisionDetectionArgs["droppableContainers"],
 ): CollisionDescriptor[] => {
-  const activeMiddleY = getActiveMiddleY(args);
+  const activeRect = args.collisionRect;
+  const activeCenterX = activeRect.left + activeRect.width / 2;
+  const activeCenterY = activeRect.top + activeRect.height / 2;
 
   const slotCollisions = slotContainers
     .map((container): CollisionDescriptor | null => {
@@ -30,13 +43,22 @@ const getNearestSlotCollision = (
         return null;
       }
 
-      const centerY = rect.top + rect.height / 2;
+      const horizontalDistance = getDistanceFromRange(
+        activeCenterX,
+        rect.left,
+        rect.left + rect.width,
+      );
+      const verticalDistance = getDistanceFromRange(
+        activeCenterY,
+        rect.top,
+        rect.top + rect.height,
+      );
 
       return {
         id: container.id,
         data: {
           droppableContainer: container,
-          value: Math.abs(activeMiddleY - centerY),
+          value: verticalDistance + horizontalDistance * 2,
         },
       };
     })
