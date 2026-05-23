@@ -26,7 +26,7 @@ const buildFolderPathCrumbs = (
 
   return path.map((folder) => ({
     label: folder.folderName,
-    to: `/folders?folderId=${folder.id}`,
+    to: `/library?folderId=${folder.id}`,
     folderId: folder.id,
   }));
 };
@@ -100,7 +100,7 @@ export const buildCardViewExtraCrumbs = ({
 
     crumbs.push({
       label: selectedCardSet.name || "カードセット",
-      to: `/folders?${qs.toString()}`,
+      to: `/library?${qs.toString()}`,
       folderId: crumbFolderId,
     });
   }
