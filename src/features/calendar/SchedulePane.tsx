@@ -32,6 +32,14 @@ const IOS_CALENDAR_MONTH_SURFACE_CLASS =
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
 
+const DAY_DETAIL_PANEL_WIDTH_PX = 260;
+const CALENDAR_PANEL_OPEN_RIGHT_GUTTER_PX = 16;
+const VIEW_HEADER_CONTROLS_RIGHT_INSET_PX = 56;
+const VIEW_HEADER_CONTROLS_RESERVED_RIGHT_PX =
+  DAY_DETAIL_PANEL_WIDTH_PX +
+  CALENDAR_PANEL_OPEN_RIGHT_GUTTER_PX +
+  VIEW_HEADER_CONTROLS_RIGHT_INSET_PX;
+
 export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const pane = useSchedulePane();
   const taskCalendarEvents = useTaskCalendarEvents();
@@ -101,6 +109,10 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const isMonthCalendarView =
     activeMode === "calendar" && selectedViewMode === "month";
 
+  const viewHeaderRightPaddingPx = showDayDetailPanel
+    ? VIEW_HEADER_CONTROLS_RIGHT_INSET_PX
+    : VIEW_HEADER_CONTROLS_RESERVED_RIGHT_PX;
+
   const handleSidebarSelectDateAndOpen = useCallback(
     (date: Date) => {
       handleSidebarSelectDate(date);
@@ -129,7 +141,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
       selectedViewMode === "month" ? monthTitleDate : titleDate;
 
     return (
-      <div className={className}>
+      <div className={className} style={{ paddingRight: viewHeaderRightPaddingPx }}>
         <div className="flex min-w-0 items-center gap-3">
           <h1 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
             {format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale })}
@@ -216,7 +228,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
               )}
             >
               {renderViewHeader(
-                "mb-2 flex shrink-0 items-center justify-between px-5 pt-4 pr-14",
+                "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
               )}
 
               <div
