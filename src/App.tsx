@@ -1,5 +1,11 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 
 import { NotificationProvider } from "./components/notifications/NotificationProvider";
 import { AccountLockedScreen } from "./components/security/AccountLockedScreen";
@@ -209,6 +215,11 @@ const DefaultRedirect = () => {
   return <Navigate to="/library" replace />;
 };
 
+const LegacyFoldersRedirect = () => {
+  const { search } = useLocation();
+  return <Navigate to={`/library${search}`} replace />;
+};
+
 const AppContent = () => {
   const { currentUser, loading } = useAuthSession();
   const { syncProgress } = useSync();
@@ -296,6 +307,7 @@ const AppContent = () => {
           <Route index element={<DefaultRedirect />} />
 
           <Route path="library" element={withRouteFallback(<Folders />)} />
+          <Route path="folders" element={<LegacyFoldersRedirect />} />
 
           <Route path="tag-map" element={<Navigate to="/library" replace />} />
           <Route path="schedule" element={withRouteFallback(<Schedule />)} />
