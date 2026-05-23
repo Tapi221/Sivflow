@@ -188,8 +188,7 @@ const PdfLibraryDashboard = ({
               PDF がまだありません
             </h2>
             <p className="mt-3 max-w-xl text-[14px] leading-7 text-[#6f7b78]">
-              PDF
-              を取り込むと、この画面で概要カードと一覧テーブルをまとめて管理できます。
+              PDF を取り込むと、この画面で続きを読むカードを表示できます。
             </p>
             <button
               type="button"
