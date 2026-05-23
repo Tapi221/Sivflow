@@ -70,10 +70,10 @@ const useCurrentTimeMinutes = (): number => {
     let intervalId: number | null = null;
 
     const timeoutId = window.setTimeout(() => {
-      setMinutes(getNow());
+      setMinutes(getNow);
 
       intervalId = window.setInterval(() => {
-        setMinutes(getNow());
+        setMinutes(getNow);
       }, GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS);
     }, msUntilNextMinute);
 
@@ -145,15 +145,15 @@ export const CalendarWeekDayGrid = ({
   const todayColumnIndex = visibleDays.findIndex((d) => isSameDay(d, today));
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent">
       {/* ── ヘッダー ── */}
-      <div className="flex shrink-0 border-b border-[#e5e7eb] bg-white">
+      <div className="flex shrink-0 border-b border-[#e5e7eb] bg-transparent">
         <div
-          className="shrink-0 border-r border-[#e5e7eb]"
+          className="shrink-0 border-r border-[#e5e7eb] bg-transparent"
           style={{ width: C.TIME_COLUMN_WIDTH }}
         />
 
-        <div ref={headerScrollRef} className="flex-1 overflow-hidden">
+        <div ref={headerScrollRef} className="flex-1 overflow-hidden bg-transparent">
           <div
             style={{
               display: "grid",
@@ -207,22 +207,22 @@ export const CalendarWeekDayGrid = ({
       {/* ── 本体 ── */}
       <div
         ref={scrollContainerRef}
-        className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
+        className="min-h-0 flex-1 overflow-auto bg-transparent scrollbar-hidden"
         onScroll={onScroll}
       >
-        <div className="grid" style={timelineGridStyle}>
+        <div className="grid bg-transparent" style={timelineGridStyle}>
           {/* 時刻列 */}
-          <div className="sticky left-0 z-20 border-r border-[#e5e7eb] bg-white">
+          <div className="sticky left-0 z-20 border-r border-[#e5e7eb] bg-transparent">
             {HOURS.map((hour) => (
               <div
                 key={hour}
-                className="relative bg-white"
+                className="relative bg-transparent"
                 style={{ height: "var(--calendar-hour-row-height)" }}
               >
                 {hour > 0 && (
                   <span
                     className={cn(
-                      "absolute bottom-0 right-0 z-10 flex h-6 translate-y-1/2 select-none items-center justify-end bg-white pl-1 text-[12px] font-semibold tabular-nums",
+                      "absolute bottom-0 right-0 z-10 flex h-6 translate-y-1/2 select-none items-center justify-end bg-transparent pl-1 text-[12px] font-semibold tabular-nums",
                       "text-[#b8bcc5]",
                     )}
                   >
@@ -255,12 +255,12 @@ export const CalendarWeekDayGrid = ({
             return (
               <div
                 key={day.toISOString()}
-                className="relative border-r border-[#eef0f3] last:border-r-0"
+                className="relative border-r border-[#eef0f3] bg-transparent last:border-r-0"
               >
                 {HOURS.map((hour) => (
                   <div
                     key={`${day.toISOString()}-${hour}`}
-                    className="border-b border-[#eef0f3]"
+                    className="border-b border-[#eef0f3] bg-transparent"
                     style={{ height: "var(--calendar-hour-row-height)" }}
                   />
                 ))}
