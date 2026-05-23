@@ -147,9 +147,9 @@ export const CalendarWeekDayGrid = ({
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
       {/* ── ヘッダー ── */}
-      <div className="flex shrink-0 border-b border-[#e5e7eb] bg-white">
+      <div className="flex shrink-0 border-b border-[#eeeeee] bg-white">
         <div
-          className="shrink-0 border-r border-[#e5e7eb] bg-white"
+          className="shrink-0 border-r border-[#eeeeee] bg-[#fafafa]"
           style={{ width: C.TIME_COLUMN_WIDTH }}
         />
 
@@ -172,7 +172,7 @@ export const CalendarWeekDayGrid = ({
                   type="button"
                   onClick={() => onSelectDate?.(day)}
                   className={cn(
-                    "flex h-10 shrink-0 flex-col items-center justify-center border-r border-[#eef0f3] bg-white last:border-r-0",
+                    "flex h-10 shrink-0 flex-col items-center justify-center border-r border-[#eeeeee] bg-white last:border-r-0",
                     "transition-colors hover:bg-[#f4f5f7]",
                     "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                     isDayToday && "bg-[#f0f6ff]",
@@ -212,18 +212,18 @@ export const CalendarWeekDayGrid = ({
       >
         <div className="grid bg-white" style={timelineGridStyle}>
           {/* 時刻列 */}
-          <div className="sticky left-0 z-20 border-r border-[#e5e7eb] bg-white">
+          <div className="sticky left-0 z-20 border-r border-[#eeeeee] bg-[#fafafa] shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]">
             {HOURS.map((hour) => (
               <div
                 key={hour}
-                className="relative bg-white"
+                className="relative bg-[#fafafa]"
                 style={{ height: "var(--calendar-hour-row-height)" }}
               >
                 {hour > 0 && (
                   <span
                     className={cn(
-                      "absolute bottom-0 right-0 z-10 flex h-6 translate-y-1/2 select-none items-center justify-end bg-white pl-1 text-[12px] font-semibold tabular-nums",
-                      "text-[#b8bcc5]",
+                      "absolute bottom-0 right-1 z-10 flex h-6 translate-y-1/2 select-none items-center justify-end rounded-md bg-[#fafafa] px-1 text-[12px] font-semibold tabular-nums",
+                      "text-[#b3b3b3]",
                     )}
                   >
                     {createHourLabel(hour)}
@@ -255,12 +255,12 @@ export const CalendarWeekDayGrid = ({
             return (
               <div
                 key={day.toISOString()}
-                className="relative border-r border-[#eef0f3] bg-white last:border-r-0"
+                className="relative border-r border-[#eeeeee] bg-white last:border-r-0"
               >
                 {HOURS.map((hour) => (
                   <div
                     key={`${day.toISOString()}-${hour}`}
-                    className="border-b border-[#eef0f3] bg-white"
+                    className="border-b border-[#eeeeee] bg-white"
                     style={{ height: "var(--calendar-hour-row-height)" }}
                   />
                 ))}
