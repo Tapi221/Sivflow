@@ -1,4 +1,3 @@
-import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { motion } from "framer-motion";
 
@@ -9,6 +8,7 @@ import { TASK_TYPO } from "@/styles/tokens/typography";
 
 import type { Task, TaskColumn as TaskColumnType } from "./task.types";
 import { TaskCard } from "./TaskCard";
+import { TaskInsertionSlot } from "./TaskInsertionSlot";
 import {
   TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS,
   TASK_DND_LAYOUT_ANIMATION_DURATION_MS,
@@ -24,13 +24,6 @@ type TaskColumnProps = {
   onAddTask: (status: string) => void;
   onDeleteTask: (id: string) => void;
   onToggleTaskDone: (id: string, done: boolean) => void;
-};
-
-type TaskInsertionSlotProps = {
-  status: TaskColumnType["id"];
-  insertIndex: number;
-  overTaskId?: string | null;
-  isFirst?: boolean;
 };
 
 type SortableTaskCardProps = {
@@ -52,34 +45,6 @@ const TASK_LAYOUT_MOTION_TRANSITION = {
 const TASK_DRAG_LAYOUT_MOTION_TRANSITION = {
   duration: TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS / 1000,
   ease: TASK_LAYOUT_MOTION_EASING,
-};
-
-const TaskInsertionSlot = ({
-  status,
-  insertIndex,
-  overTaskId = null,
-  isFirst = false,
-}: TaskInsertionSlotProps) => {
-  const { setNodeRef } = useDroppable({
-    id: `task-slot:${status}:${insertIndex}`,
-    data: {
-      type: "task-slot",
-      status,
-      insertIndex,
-      overTaskId,
-    },
-  });
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={cn(
-        "relative z-0 shrink-0",
-        isFirst ? "h-4 -mb-1" : "h-6 -my-2",
-      )}
-      aria-hidden="true"
-    />
-  );
 };
 
 const SortableTaskCard = ({
