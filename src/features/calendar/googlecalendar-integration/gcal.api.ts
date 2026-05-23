@@ -137,21 +137,33 @@ export const fetchEventsForCalendar = async ({
   rangeStart: Date;
   rangeEnd: Date;
 }): Promise<GoogleCalendarEvent[]> => {
-  const params = new URLSearchParams({
-    singleEvents: "true",
-    orderBy: "startTime",
-    timeMin: rangeStart.toISOString(),
-    timeMax: rangeEnd.toISOString(),
-  });
+  const rawEvents: NonNullable<GoogleCalendarApiEventsResponse["items"]> = [];
+  let pageToken: string | undefined;
 
-  const data = await getJson<GoogleCalendarApiEventsResponse>(
-    accessToken,
-    `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(
-      calendarId,
-    )}/events?${params}`,
-  );
+  do {
+    const params = new URLSearchParams({
+      singleEvents: "true",
+      orderBy: "startTime",
+      timeMin: rangeStart.toISOString(),
+      timeMax: rangeEnd.toISOString(),
+    });
 
-  return (data.items ?? [])
+    if (pageToken) {
+      params.set("pageToken", pageToken);
+    }
+
+    const data = await getJson<GoogleCalendarApiEventsResponse>(
+      accessToken,
+      `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(
+        calendarId,
+      )}/events?${params}`,
+    );
+
+    rawEvents.push(...(data.items ?? []));
+    pageToken = data.nextPageToken;
+  } while (pageToken);
+
+  return rawEvents
     .map((event) => {
       if (!event.id) return null;
       if (event.status === "cancelled") return null;
