@@ -20,7 +20,7 @@ const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isFoldersRoute = /^\/folders(?:\/|$)/i.test(location.pathname);
+  const isLibraryRoute = /^\/library(?:\/|$)/i.test(location.pathname);
   const isScheduleRoute = /^\/(?:schedule|calendar)(?:\/|$)/i.test(
     location.pathname,
   );
@@ -43,12 +43,14 @@ const Layout = () => {
   const navigationItems = useMemo<GlobalSearchItem[]>(
     () => [
       {
-        id: "action:folders",
-        value: "action:folders",
+        id: "action:library",
+        value: "action:library",
         kind: "action",
         iconKind: "folders",
-        title: "フォルダ",
+        title: "ライブラリ",
         keywords: [
+          "ライブラリ",
+          "library",
           "フォルダ",
           "folders",
           "folder",
@@ -57,7 +59,7 @@ const Layout = () => {
         ],
         priority: 100,
         onSelect: () => {
-          void navigate("/folders");
+          void navigate("/library");
         },
       },
       {
@@ -126,7 +128,7 @@ const Layout = () => {
   useEffect(() => {
     if (typeof document === "undefined") return;
 
-    const shouldLockPageScroll = isDesktopPresentation && isFoldersRoute;
+    const shouldLockPageScroll = isDesktopPresentation && isLibraryRoute;
 
     document.documentElement.classList.toggle(
       "no-page-scroll",
@@ -137,7 +139,7 @@ const Layout = () => {
       if (!shouldLockPageScroll) return;
       document.documentElement.classList.remove("no-page-scroll");
     };
-  }, [isDesktopPresentation, isFoldersRoute]);
+  }, [isDesktopPresentation, isLibraryRoute]);
 
   return (
     <div
