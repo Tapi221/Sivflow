@@ -1,6 +1,7 @@
 import { motion, type Transition } from "framer-motion";
 import type { ComponentType, SVGProps } from "react";
 
+import { HoverCircleTooltip } from "@/components/toolchip/HoverCircleTooltip";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 
@@ -39,9 +40,6 @@ const WORKSPACE_TAB_MOTION_TRANSITION: Transition = {
   duration: 0.3,
   ease: [0.22, 1, 0.36, 1],
 };
-
-const toolbarTooltipClassName =
-  "pointer-events-none absolute left-1/2 top-[calc(100%+8px)] z-20 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-full border border-[#d1d1d6]/70 bg-white/95 px-2.5 py-1 text-[11px] font-medium leading-none tracking-[-0.01em] text-[#3c3c43]/72 opacity-0 shadow-[0_8px_18px_rgba(60,60,67,0.12)] backdrop-blur-xl transition-all duration-150 ease-out group-hover/action:translate-y-0 group-hover/action:opacity-100 group-focus-visible/action:translate-y-0 group-focus-visible/action:opacity-100 motion-reduce:transition-none";
 
 const segmentedTabTooltipClassName =
   "rounded-lg border border-[#eeeeee] bg-white px-2.5 py-[5px] text-[12px] font-medium text-[#8c8c8c] shadow-[0_8px_18px_rgba(0,0,0,0.08)]";
@@ -155,7 +153,7 @@ export const WorkspaceHeaderToolbar = ({
               onClick={action.onClick}
             >
               <Icon aria-hidden="true" className={segmentedActionIconClassName} />
-              <span className={toolbarTooltipClassName}>{label}</span>
+              <HoverCircleTooltip label={label} />
             </button>
           );
         })}
