@@ -1,5 +1,3 @@
-import type { ButtonHTMLAttributes } from "react";
-
 import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/icons.schedule";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
@@ -13,8 +11,6 @@ type TaskCardProps = {
   accountName?: string | null;
   accountPhotoUrl?: string | null;
   isDragging?: boolean;
-  reorderHandleProps?: ButtonHTMLAttributes<HTMLButtonElement>;
-  reorderHandleRef?: (element: HTMLButtonElement | null) => void;
   onDelete?: (id: string) => void;
   onToggleDone?: (id: string, done: boolean) => void;
 };
@@ -33,30 +29,11 @@ const TaskMenuIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const TaskReorderIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-  >
-    <path
-      d="M5.25 4.25h.01M10.75 4.25h.01M5.25 8h.01M10.75 8h.01M5.25 11.75h.01M10.75 11.75h.01"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
 export const TaskCard = ({
   task,
   accountName,
   accountPhotoUrl,
   isDragging = false,
-  reorderHandleProps,
-  reorderHandleRef,
   onDelete,
   onToggleDone,
 }: TaskCardProps) => {
@@ -76,13 +53,6 @@ export const TaskCard = ({
     onDelete,
     onToggleDone,
   });
-  const reorderHandleClassName = cn(
-    "-my-1 flex h-[22px] w-[18px] shrink-0 items-center justify-center rounded-md text-[#a1a1aa]",
-    "opacity-0 transition-[background-color,color,opacity,transform] duration-150 ease-[cubic-bezier(0.2,0,0,1)]",
-    "hover:bg-[#f2f2f7] hover:text-[#52525b] active:scale-95 group-hover:opacity-100 focus-visible:opacity-100",
-    isDragging ? "cursor-grabbing opacity-100 text-[#52525b]" : "cursor-grab",
-    reorderHandleProps?.className,
-  );
 
   return (
     <div
@@ -95,7 +65,7 @@ export const TaskCard = ({
         "active:scale-[0.998]",
         isDragging
           ? "cursor-grabbing scale-[1.015] border-[#dfe3ea] bg-white shadow-[0_18px_48px_rgba(15,23,42,0.16)] ring-1 ring-black/[0.04]"
-          : "cursor-default",
+          : "cursor-grab",
       )}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/90" />
@@ -117,7 +87,7 @@ export const TaskCard = ({
         </button>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-1.5">
+          <div className="flex items-center justify-between gap-2">
             <div
               className={cn(
                 "min-w-0 flex-1 truncate text-[12px] font-medium leading-none tracking-[-0.005em] text-[#1c1c1e]",
@@ -126,23 +96,6 @@ export const TaskCard = ({
             >
               {task.title}
             </div>
-
-            {reorderHandleProps ? (
-              <button
-                {...reorderHandleProps}
-                ref={reorderHandleRef}
-                type="button"
-                className={reorderHandleClassName}
-                aria-label="Reorder task"
-                title="Reorder task"
-              >
-                <TaskReorderIcon className="h-4 w-4" />
-              </button>
-            ) : (
-              <span className={reorderHandleClassName} aria-hidden="true">
-                <TaskReorderIcon className="h-4 w-4" />
-              </span>
-            )}
 
             <button
               type="button"
