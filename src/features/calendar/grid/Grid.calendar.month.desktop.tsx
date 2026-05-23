@@ -257,7 +257,6 @@ const CalendarMonthWeekRow = memo(({
         relative
         grid
         grid-cols-7
-        bg-white
         [contain-intrinsic-size:0_var(--calendar-month-row-height)]
         [content-visibility:auto]
       "
