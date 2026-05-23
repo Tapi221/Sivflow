@@ -1,11 +1,11 @@
 import { ReactNode, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+import { SettingIcon } from "../../components/icons/schedule.icons";
 import {
   CalendarIcon,
   ChevronDownIcon,
   ExploreIcon,
-  GearIcon,
   HomeIcon,
   InboxIcon,
   LibraryIcon,
@@ -145,7 +145,7 @@ export const SidebarMobile = ({
 
       <button className="sidebar-nav-link" onClick={onOpenSettings}>
         <span className="sidebar-nav-icon-slot">
-          <GearIcon className="sidebar-nav-icon" />
+          <SettingIcon className="sidebar-nav-icon" />
         </span>
         <span className="sidebar-nav-label">設定</span>
       </button>
