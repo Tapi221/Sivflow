@@ -12,6 +12,15 @@ const CHIPS_TOP_OFFSET_PX = 60;
 const CHIPS_BOTTOM_MARGIN_PX = 4;
 const MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS = 7;
 
+const getMaxVisibleChips = (rowHeight: number) =>
+  Math.max(
+    0,
+    Math.floor(
+      (rowHeight - CHIPS_TOP_OFFSET_PX - CHIPS_BOTTOM_MARGIN_PX) /
+        CHIP_HEIGHT_PX,
+    ),
+  );
+
 type CalendarMonthViewProps = {
   currentDate: Date;
   selectedDate: Date;
@@ -44,10 +53,12 @@ export const CalendarMonthView = ({
   const today = useMemo(() => new Date(), []);
 
   const isResizingRef = useRef(false);
-  const monthRowHeightRef = useRef(C.readStoredMonthRowHeight());
+  const storedRowHeight = C.readStoredMonthRowHeight();
+  const monthRowHeightRef = useRef(storedRowHeight);
+  const maxVisibleChipsRef = useRef(getMaxVisibleChips(storedRowHeight));
 
-  const [liveRowHeight, setLiveRowHeight] = useState(
-    C.readStoredMonthRowHeight,
+  const [maxVisibleChips, setMaxVisibleChips] = useState(
+    maxVisibleChipsRef.current,
   );
 
   const scroll = useMonthInfiniteScroll({
@@ -74,7 +85,12 @@ export const CalendarMonthView = ({
     onAfterCommit: scroll.syncVisibleMonth,
     onLiveResize: (height) => {
       monthRowHeightRef.current = height;
-      setLiveRowHeight(height);
+
+      const nextMaxVisibleChips = getMaxVisibleChips(height);
+      if (nextMaxVisibleChips === maxVisibleChipsRef.current) return;
+
+      maxVisibleChipsRef.current = nextMaxVisibleChips;
+      setMaxVisibleChips(nextMaxVisibleChips);
     },
   });
 
@@ -101,14 +117,6 @@ export const CalendarMonthView = ({
         startsAtTime <= rangeEnd;
     });
   }, [scroll.monthWeeks, visibleEvents]);
-
-  const maxVisibleChips = Math.max(
-    0,
-    Math.floor(
-      (liveRowHeight - CHIPS_TOP_OFFSET_PX - CHIPS_BOTTOM_MARGIN_PX) /
-        CHIP_HEIGHT_PX,
-    ),
-  );
 
   return (
     <div
