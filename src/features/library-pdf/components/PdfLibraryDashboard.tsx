@@ -17,6 +17,7 @@ type PdfLibraryDashboardProps = {
   documents: DocumentItem[];
   folders: Folder[];
   onOpenDocument: (documentId: string) => void;
+  showToolbar?: boolean;
 };
 
 const cardClassName =
@@ -99,6 +100,7 @@ const PdfLibraryDashboard = ({
   documents,
   folders,
   onOpenDocument,
+  showToolbar = true,
 }: PdfLibraryDashboardProps) => {
   const { tagById } = useTags();
   const [, setExpandedFolders] = useState<Set<string>>(() => new Set());
@@ -152,8 +154,7 @@ const PdfLibraryDashboard = ({
       .sort((left, right) => {
         const rightTime =
           right.lastViewedAt?.getTime() ?? right.updatedAt?.getTime() ?? 0;
-        const leftTime =
-          left.lastViewedAt?.getTime() ?? left.updatedAt?.getTime() ?? 0;
+        const leftTime = left.lastViewedAt?.getTime() ?? left.updatedAt?.getTime() ?? 0;
 
         if (rightTime !== leftTime) {
           return rightTime - leftTime;
@@ -167,10 +168,12 @@ const PdfLibraryDashboard = ({
   if (rows.length === 0) {
     return (
       <div className="flex h-full min-h-0 w-full flex-col bg-[#FFFFFF]">
-        <PdfLibraryWorkspaceToolbar
-          activeSection="pdf"
-          onSelectSection={() => undefined}
-        />
+        {showToolbar ? (
+          <PdfLibraryWorkspaceToolbar
+            activeSection="pdf"
+            onSelectSection={() => undefined}
+          />
+        ) : null}
         <input
           ref={fileInputRef}
           type="file"
@@ -205,10 +208,12 @@ const PdfLibraryDashboard = ({
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-[#FFFFFF]">
-      <PdfLibraryWorkspaceToolbar
-        activeSection="pdf"
-        onSelectSection={() => undefined}
-      />
+      {showToolbar ? (
+        <PdfLibraryWorkspaceToolbar
+          activeSection="pdf"
+          onSelectSection={() => undefined}
+        />
+      ) : null}
       <input
         ref={fileInputRef}
         type="file"
