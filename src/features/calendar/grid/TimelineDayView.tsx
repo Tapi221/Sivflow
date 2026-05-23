@@ -2,9 +2,12 @@ import type { CSSProperties, RefObject, UIEvent } from "react";
 import { Fragment, memo, useMemo } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import { cn } from "@/lib/utils";
 
+import {
+  CalendarDateHeaderButton,
+  CalendarDateHeaderDayContent,
+} from "./CalendarDateHeaderButton";
 import type {
   TimelineUnitBuffer,
   TimelineViewMode,
@@ -113,31 +116,21 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                   selectedTime <= column.end.getTime();
 
                 return (
-                  <button
+                  <CalendarDateHeaderButton
                     key={column.id}
-                    type="button"
+                    isToday={column.isToday}
+                    isSelected={isSelected}
                     onClick={() => onSelectDate?.(column.start)}
-                    className={cn(
-                      "flex h-10 select-none flex-col items-center justify-center bg-white text-[12px] font-medium text-[#4c5361]",
-                      "appearance-none border-0 p-0 transition-colors hover:bg-[#f4f5f7]",
-                      "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
-                      column.isToday && "bg-[#f0f6ff]",
-                      !column.isToday && isSelected && "bg-[#f4f5f7]",
-                    )}
-                    aria-pressed={isSelected}
+                    className="text-[12px] font-medium text-[#4c5361]"
                   >
                     {column.kind === "day" ? (
-                      <>
-                        <CalendarDayNumberCircle
-                          isToday={column.isToday}
-                          isSelected={isSelected}
-                        >
-                          {column.topLabel}
-                        </CalendarDayNumberCircle>
-                        <span className="mt-0.5 text-[11px] font-medium leading-none text-[#8f929c]">
-                          {column.bottomLabel}
-                        </span>
-                      </>
+                      <CalendarDateHeaderDayContent
+                        dateLabel={column.topLabel}
+                        weekdayLabel={column.bottomLabel}
+                        isToday={column.isToday}
+                        isSelected={isSelected}
+                        layout="date-weekday"
+                      />
                     ) : column.kind === "week" ? (
                       <span className="inline-flex items-center gap-1 whitespace-nowrap font-semibold text-[#25272d]">
                         <span>{column.topLabel}</span>
@@ -150,7 +143,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                         <span>{column.bottomLabel}</span>
                       </span>
                     )}
-                  </button>
+                  </CalendarDateHeaderButton>
                 );
               })}
             </div>
