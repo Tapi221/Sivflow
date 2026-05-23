@@ -16,7 +16,7 @@ import { resolveCardTabTitle, resolveDocumentTabTitle } from "@/features/tab/res
 import type { WorkspaceEntityTab, WorkspaceTab } from "@/features/tab/Tab";
 import { WorkspaceTabPanel } from "@/features/tab/TabPanel";
 
-import { CarvePanel, CarvePanelViewport } from "@/components/panel/CarvePanel.desktop";
+import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 
 import { useCardsRead } from "@/hooks/card/useCardsRead";
@@ -354,8 +354,8 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   }
 
   return (
-    <CarvePanelViewport>
+    <CarvePanelShell reserveToolbar reserveLeadingPanel>
       <CarvePanel>{workspaceFrame}</CarvePanel>
-    </CarvePanelViewport>
+    </CarvePanelShell>
   );
 };
