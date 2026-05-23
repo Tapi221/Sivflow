@@ -51,28 +51,43 @@ const parseEventDate = (value?: {
 export const fetchCalendarList = async (
   accessToken: string,
 ): Promise<GoogleCalendarListItem[]> => {
-  const params = new URLSearchParams({
-    minAccessRole: "reader",
-    showDeleted: "false",
-    showHidden: "false",
-  });
+  const calendars: GoogleCalendarListItem[] = [];
+  let pageToken: string | undefined;
 
-  const data = await getJson<GoogleCalendarApiListResponse>(
-    accessToken,
-    `${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList?${params}`,
-  );
+  do {
+    const params = new URLSearchParams({
+      minAccessRole: "reader",
+      showDeleted: "false",
+      showHidden: "false",
+    });
 
-  return (data.items ?? [])
-    .filter((i) => i.id && i.summary)
-    .map((i) => ({
-      id: i.id!,
-      summary: i.summary!,
-      description: i.description,
-      backgroundColor: i.backgroundColor ?? "#4f7cff",
-      foregroundColor: i.foregroundColor,
-      primary: i.primary ?? false,
-      selected: i.selected ?? true,
-    }));
+    if (pageToken) {
+      params.set("pageToken", pageToken);
+    }
+
+    const data = await getJson<GoogleCalendarApiListResponse>(
+      accessToken,
+      `${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList?${params}`,
+    );
+
+    calendars.push(
+      ...(data.items ?? [])
+        .filter((i) => i.id && i.summary)
+        .map((i) => ({
+          id: i.id!,
+          summary: i.summary!,
+          description: i.description,
+          backgroundColor: i.backgroundColor ?? "#4f7cff",
+          foregroundColor: i.foregroundColor,
+          primary: i.primary ?? false,
+          selected: i.selected ?? true,
+        })),
+    );
+
+    pageToken = data.nextPageToken;
+  } while (pageToken);
+
+  return calendars;
 };
 
 export const fetchGoogleTaskLists = async (
