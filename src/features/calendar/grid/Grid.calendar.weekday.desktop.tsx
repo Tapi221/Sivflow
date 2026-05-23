@@ -159,7 +159,6 @@ export const CalendarWeekDayGrid = ({
   timelineGridStyle,
   onScroll,
   selectedDate,
-  onSelectDate,
 }: CalendarWeekDayGridProps) => {
   const today = new Date();
   const currentMinutes = useCurrentTimeMinutes();
@@ -221,14 +220,10 @@ export const CalendarWeekDayGrid = ({
                 !!selectedDate && isSameDay(day, selectedDate);
 
               return (
-                <button
+                <div
                   key={day.toISOString()}
-                  type="button"
-                  onClick={() => onSelectDate?.(day)}
                   className={cn(
-                    "flex h-10 shrink-0 flex-col items-center justify-center bg-white",
-                    "transition-colors hover:bg-[#f4f5f7]",
-                    "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                    "flex h-10 shrink-0 select-none flex-col items-center justify-center bg-white",
                     isDayToday && "bg-[#f0f6ff]",
                     !isDayToday && isDaySelected && "bg-[#f4f5f7]",
                   )}
@@ -251,7 +246,7 @@ export const CalendarWeekDayGrid = ({
                   >
                     {format(day, GRID.WEEKDAY_DATE_FORMAT)}
                   </CalendarDayNumberCircle>
-                </button>
+                </div>
               );
             })}
           </div>
