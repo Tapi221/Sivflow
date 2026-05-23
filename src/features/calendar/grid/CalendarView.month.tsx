@@ -5,7 +5,7 @@ import { eventOverlapsRange } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { GridCalendarMonthDesktop } from "@/features/calendar/grid/Grid.calendar.month.desktop";
 
-import { useMonthInfiniteScroll } from "../scroll/useInfiniteScroll.month.desktop";
+import { useMonthInfiniteScroll } from "../../scroll/schedule/useInfiniteScroll.month.desktop";
 import { useMonthRowResize } from "./height/useRowResize.month.desktop";
 
 const CHIP_HEIGHT_PX = 21;

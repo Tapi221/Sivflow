@@ -15,7 +15,7 @@ import type {
 
 import { useCalendarLayout } from "./layout/calendar/useCalendarLayout.desktop";
 import { useCalendarNavigation } from "./useCalendarNavigation";
-import { useCalendarScrollController } from "./scroll/hooks/useCalendarScrollController";
+import { useCalendarScrollController } from "../scroll/schedule/hooks/useCalendarScrollController";
 import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 import { useTimelineGrid } from "./grid/useTimelineGrid";

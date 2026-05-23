@@ -1,7 +1,7 @@
 import { memo, useMemo } from "react";
 import { format } from "date-fns";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
-import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
+import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import { cn } from "@/lib/utils";
 
