@@ -1,6 +1,6 @@
 import { type MouseEvent, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { SidebarOpenIcon } from "@/components/icons/schedule.icons";
+import { SidebarPanelIcon as SidebarOpenIcon } from "@/components/icons/schedule.icons";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { useSchedulePaneStore } from "@/features/calendar/header/useSchedulePaneStore";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
