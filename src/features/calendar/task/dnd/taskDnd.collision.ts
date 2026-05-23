@@ -11,18 +11,16 @@ import type {
   CollisionDetectionArgs,
 } from "./taskDnd.types";
 
+const getActiveMiddleY = (args: CollisionDetectionArgs): number => {
+  const activeRect = args.collisionRect;
+  return activeRect.top + activeRect.height / 2;
+};
+
 const getPointerTaskCollisions = (
   args: CollisionDetectionArgs,
   taskContainers: CollisionDetectionArgs["droppableContainers"],
 ): CollisionDescriptor[] => {
-  const { pointerCoordinates } = args;
-
-  if (!pointerCoordinates) {
-    return closestCorners({
-      ...args,
-      droppableContainers: taskContainers,
-    });
-  }
+  const activeMiddleY = getActiveMiddleY(args);
 
   const orderedTaskRects = taskContainers
     .map((container) => {
@@ -41,7 +39,7 @@ const getPointerTaskCollisions = (
 
   const targetEntry =
     orderedTaskRects.find(
-      ({ rect }) => pointerCoordinates.y < rect.top + rect.height / 2,
+      ({ rect }) => activeMiddleY < rect.top + rect.height / 2,
     ) ?? orderedTaskRects.at(-1);
 
   if (!targetEntry) {
@@ -49,7 +47,7 @@ const getPointerTaskCollisions = (
   }
 
   const centerY = targetEntry.rect.top + targetEntry.rect.height / 2;
-  const value = Math.abs(pointerCoordinates.y - centerY);
+  const value = Math.abs(activeMiddleY - centerY);
 
   return [
     {
