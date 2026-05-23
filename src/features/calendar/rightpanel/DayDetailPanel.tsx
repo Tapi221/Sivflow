@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import { format } from "date-fns";
 import { DayDetailCreateButton } from "@/chip/button/AddScheduleButton.daydetail";
 import { eventOverlapsDay } from "@/features/calendar/calendarEventRange";
-import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
+import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";

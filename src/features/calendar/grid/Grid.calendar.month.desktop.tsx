@@ -5,7 +5,7 @@ import { ja } from "date-fns/locale";
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import { getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as T from "@/features/calendar/calendar.text";
-import { CalendarEventChipMonth } from "@/features/calendar/eventchip/EventChip.schedule.month";
+import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.schedule.month";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { MonthRowResizeBar } from "@/features/calendar/grid/height/MonthRowResizeBar.month.desktop";
 import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";

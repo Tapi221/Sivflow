@@ -17,7 +17,7 @@ import type {
 import {
   createCalendarScrollBuffer,
   getCalendarScrollBufferExtendUnits,
-} from "./scroll/calendarScrollBuffer";
+} from "../scroll/schedule/calendarScrollBuffer";
 
 const getNextDate = (current: Date, viewMode: CalendarViewMode) => {
   if (viewMode === "month") return addMonths(current, 1);

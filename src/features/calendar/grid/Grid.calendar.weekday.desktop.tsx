@@ -7,15 +7,15 @@ import {
   clipEventToDay,
   eventOverlapsDay,
 } from "@/features/calendar/calendarEventRange";
-import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
-import { computeEventLayout, toLayoutEvent } from "@/features/calendar/eventchip/EventChip.layout.weekday.desktop";
+import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
+import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.layout.weekday.desktop";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import type { CalendarWeekDayGridProps } from "@/features/calendar/schedulePane.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 
-import { CalendarEventChipWeekday } from "../eventchip/EventChip.schedule.weekday";
+import { CalendarEventChipWeekday } from "../../../chip/eventchip/EventChip.schedule.weekday";
 import { cn } from "@/lib/utils";
 
 type CalendarEventPositionStyle = React.CSSProperties & {
