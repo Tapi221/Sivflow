@@ -299,7 +299,7 @@ export const CalendarSidebar = ({
                   isSelected={day.isSelected}
                   isCurrentMonth={day.isCurrentMonth}
                   className={cn(
-                    !day.isCurrentMonth && !isActive && "text-[#b3b3b3]",
+                    !day.isCurrentMonth && !isActive && "text-[#b7b7b7]",
                   )}
                 >
                   {day.dayNumber}
