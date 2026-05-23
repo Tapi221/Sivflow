@@ -7,7 +7,7 @@ export const FilterChip = ({ onClick }: FilterChipProps) => {
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-1.5 rounded-full border border-[#e9eaed] bg-white px-2.5 py-1 text-[12px] font-medium text-[#8f929c] transition-colors hover:bg-[#f7f8fa] hover:text-[#25272d]"
+      className="flex items-center gap-1.5 rounded-full border border-[#eeeeee] bg-[#fafafa] px-2.5 py-1 text-[12px] font-medium text-[#8f929c] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset] transition-colors hover:bg-white hover:text-[#4c5361]"
     >
       <svg viewBox="0 0 14 14" fill="none" className="h-3 w-3">
         <path
