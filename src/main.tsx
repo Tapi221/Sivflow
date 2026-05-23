@@ -1,3 +1,5 @@
+import "./bootstrap/installProductionConsoleFilter";
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
