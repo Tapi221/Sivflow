@@ -75,7 +75,7 @@ const TASK_DND_MEASURING_CONFIG = {
   },
 };
 const TASK_DND_DROP_ANIMATION: DropAnimation = {
-  duration: 210,
+  duration: 110,
   easing: "cubic-bezier(0.2, 0, 0, 1)",
   sideEffects: defaultDropAnimationSideEffects({
     styles: {
