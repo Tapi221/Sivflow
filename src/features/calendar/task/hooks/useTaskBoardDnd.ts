@@ -8,7 +8,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import type { Task, TaskStatus } from "../task.types";
 import {
@@ -51,11 +51,6 @@ export const useTaskBoardDnd = ({
     Task[]
   > | null>(null);
   const latestDropTargetRef = useRef<TaskDropTarget | null>(null);
-  const previewFrameRef = useRef<number | null>(null);
-  const pendingPreviewRef = useRef<{
-    activeId: string;
-    target: TaskDropTarget;
-  } | null>(null);
   const visibleTasksByStatus = previewTasksByStatus ?? tasksByStatus;
   const isPreviewingTaskReorder = previewTasksByStatus !== null;
   const sensors = useSensors(
@@ -77,19 +72,11 @@ export const useTaskBoardDnd = ({
     return findTask(visibleTasksByStatus, activeTaskId);
   }, [activeTaskId, visibleTasksByStatus]);
 
-  const flushPreviewUpdate = () => {
-    previewFrameRef.current = null;
-    const pendingPreview = pendingPreviewRef.current;
-    pendingPreviewRef.current = null;
-
-    if (!pendingPreview) {
-      return;
-    }
-
+  const updatePreview = (activeId: string, target: TaskDropTarget) => {
     const nextTasksByStatus = createTaskDragPreview(
       tasksByStatus,
-      pendingPreview.activeId,
-      pendingPreview.target,
+      activeId,
+      target,
     );
 
     setPreviewTasksByStatus(
@@ -99,27 +86,7 @@ export const useTaskBoardDnd = ({
     );
   };
 
-  const schedulePreviewUpdate = (activeId: string, target: TaskDropTarget) => {
-    pendingPreviewRef.current = { activeId, target };
-
-    if (previewFrameRef.current !== null) {
-      return;
-    }
-
-    previewFrameRef.current = window.requestAnimationFrame(flushPreviewUpdate);
-  };
-
-  const cancelPendingPreviewUpdate = () => {
-    if (previewFrameRef.current !== null) {
-      window.cancelAnimationFrame(previewFrameRef.current);
-      previewFrameRef.current = null;
-    }
-
-    pendingPreviewRef.current = null;
-  };
-
   const resetDragState = () => {
-    cancelPendingPreviewUpdate();
     setActiveTaskId(null);
     setActiveTaskWidth(null);
     setActiveTaskHeight(null);
@@ -128,7 +95,6 @@ export const useTaskBoardDnd = ({
   };
 
   const handleDragStart = (event: DragStartEvent) => {
-    cancelPendingPreviewUpdate();
     setActiveTaskId(String(event.active.id));
     setActiveTaskWidth(event.active.rect.current.initial?.width ?? null);
     setActiveTaskHeight(event.active.rect.current.initial?.height ?? null);
@@ -159,7 +125,7 @@ export const useTaskBoardDnd = ({
     }
 
     latestDropTargetRef.current = target;
-    schedulePreviewUpdate(activeId, target);
+    updatePreview(activeId, target);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -185,12 +151,6 @@ export const useTaskBoardDnd = ({
 
     onReorderTask(activeId, target.status, target.overTaskId, target.position);
   };
-
-  useEffect(() => {
-    return () => {
-      cancelPendingPreviewUpdate();
-    };
-  }, []);
 
   return {
     activeTask,
