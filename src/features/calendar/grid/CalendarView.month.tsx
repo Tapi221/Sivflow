@@ -70,6 +70,7 @@ export const CalendarMonthView = ({
     weekRowRefsMap: scroll.weekRowRefsMap,
     monthWeeks: scroll.monthWeeks,
     isResizingRef,
+    onResizeStart: scroll.cancelVisibleMonthSync,
     onAfterCommit: scroll.syncVisibleMonth,
     onLiveResize: (height) => {
       monthRowHeightRef.current = height;
