@@ -39,6 +39,8 @@ const VIEW_HEADER_CONTROLS_RESERVED_RIGHT_PX =
   DAY_DETAIL_PANEL_WIDTH_PX +
   CALENDAR_PANEL_OPEN_RIGHT_GUTTER_PX +
   VIEW_HEADER_CONTROLS_RIGHT_INSET_PX;
+const DAY_DETAIL_TOGGLE_TOP_OFFSET =
+  "calc((var(--ds-semantic-breadcrumb-height) + 2rem) / -2)";
 
 export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const pane = useSchedulePane();
@@ -316,7 +318,8 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             aria-label={showDayDetailPanel ? "日付詳細を閉じる" : "日付詳細を開く"}
             title={showDayDetailPanel ? "日付詳細を閉じる" : "日付詳細を開く"}
             onClick={handleToggleDayDetailPanel}
-            className="absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center bg-transparent text-[#8f96a3] hover:text-[#6f7784]"
+            className="absolute right-4 z-20 flex h-8 w-8 items-center justify-center bg-transparent text-[#8f96a3] hover:text-[#6f7784]"
+            style={{ top: DAY_DETAIL_TOGGLE_TOP_OFFSET }}
           >
             <SidebarPanelIcon
               className={cn("h-3.5 w-3.5", showDayDetailPanel && "-scale-x-100")}
