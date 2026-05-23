@@ -5,10 +5,9 @@ import { useSchedulePaneStore } from "@/features/calendar/header/useSchedulePane
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
-import { SettingIcon } from "../../components/icons/schedule.icons";
+import { GalleryIcon, SettingIcon } from "../../components/icons/schedule.icons";
 import {
   CalendarIcon,
-  ExploreIcon,
   HomeIcon,
   InboxIcon,
   LibraryIcon,
@@ -77,7 +76,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "explore",
     label: "探す",
-    icon: <ExploreIcon className="app-sidebar__nav-icon" />,
+    icon: <GalleryIcon className="app-sidebar__nav-icon" />,
   },
 ];
 
