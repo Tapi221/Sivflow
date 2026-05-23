@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
+import { CardSetLibraryDashboard } from "@/features/library-cardset/components/CardSetLibraryDashboard";
 import { PdfLibraryDashboard } from "@/features/library-pdf/components/PdfLibraryDashboard";
 
 import { SectionListBlankPane } from "@/components/folder/components/SectionListBlankPane";
@@ -253,6 +254,7 @@ const SectionListColumnPane = ({
   const [searchParams] = useSearchParams();
   const libraryType = searchParams.get("libraryType");
   const isPdfLibraryView = libraryType === "pdf";
+  const isFlashcardLibraryView = libraryType === "flashcards";
 
   const folderById = useMemo(() => {
     const map = new Map<string, FolderLike>();
@@ -459,6 +461,13 @@ const SectionListColumnPane = ({
     [onItemSelect],
   );
 
+  const handleOpenCardSet = useCallback(
+    (cardSetId: string) => {
+      onItemSelect({ type: "cardSet", id: cardSetId });
+    },
+    [onItemSelect],
+  );
+
   return (
     <SectionListBlankPane
       className={cn(className)}
@@ -472,6 +481,14 @@ const SectionListColumnPane = ({
           folders={folders}
           documents={documents}
           onOpenDocument={handleOpenDocument}
+        />
+      ) : null}
+      {isFlashcardLibraryView ? (
+        <CardSetLibraryDashboard
+          folders={folders}
+          cards={cards}
+          cardSets={cardSets}
+          onOpenCardSet={handleOpenCardSet}
         />
       ) : null}
     </SectionListBlankPane>
