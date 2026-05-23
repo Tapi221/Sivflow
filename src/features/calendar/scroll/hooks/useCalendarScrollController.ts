@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, type UIEvent } from "react";
 
+import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarViewMode } from "../../schedulePane.types";
 
 import { useScrollEdgeDetector } from "./useScrollEdgeDetector";
@@ -11,13 +12,17 @@ type CalendarBuffer = {
   after: number;
 };
 
+type TimelineColumn = {
+  start: Date;
+};
+
 type Props = {
   activeMode: "timeline" | "calendar" | string;
   selectedViewMode: CalendarViewMode;
 
   visibleDays: Date[];
 
-  timelineColumns: unknown[];
+  timelineColumns: TimelineColumn[];
   timelineColumnWidth: number;
   timelineAnchorColumnIndex: number;
 
@@ -33,6 +38,8 @@ type Props = {
 
   /** 右端スクロール時に呼ばれるコールバック */
   onExtendRight: () => void;
+
+  onTimelineVisibleDateChange?: (date: Date) => void;
 
   /** 外部から初期スクロールを強制トリガーするトークン */
   scrollTargetToken?: number;
@@ -50,6 +57,7 @@ export const useCalendarScrollController = ({
   calendarDayColumnWidth,
   onExtendLeft,
   onExtendRight,
+  onTimelineVisibleDateChange,
   scrollTargetToken,
 }: Props) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -108,12 +116,35 @@ export const useCalendarScrollController = ({
     });
   }, []);
 
+  const handleTimelineVisibleDate = useCallback((scroller: HTMLDivElement) => {
+    if (!onTimelineVisibleDateChange || timelineColumns.length === 0) return;
+
+    const visibleX = Math.max(
+      0,
+      scroller.scrollLeft + scroller.clientWidth / 2 - C.TIMELINE_LANE_LABEL_WIDTH,
+    );
+    const visibleIndex = Math.min(
+      timelineColumns.length - 1,
+      Math.max(0, Math.floor(visibleX / timelineColumnWidth)),
+    );
+    const visibleColumn = timelineColumns[visibleIndex];
+
+    if (visibleColumn) {
+      onTimelineVisibleDateChange(visibleColumn.start);
+    }
+  }, [onTimelineVisibleDateChange, timelineColumnWidth, timelineColumns]);
+
   const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
     const scroller = event.currentTarget;
 
     handleEdgeScroll(scroller);
+
+    if (activeMode === "timeline") {
+      handleTimelineVisibleDate(scroller);
+    }
+
     syncFixedRowScroll(scroller.scrollLeft);
-  }, [handleEdgeScroll, syncFixedRowScroll]);
+  }, [activeMode, handleEdgeScroll, handleTimelineVisibleDate, syncFixedRowScroll]);
 
   useEffect(() => {
     return () => {
