@@ -125,8 +125,9 @@
   }
 
   .calendar-month-weekday-header {
+    column-gap: 1px;
     border-color: #e5e5ea !important;
-    background: #f9f9fb !important;
+    background: #e5e5ea !important;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     box-shadow: none;
@@ -134,6 +135,7 @@
 
   .calendar-month-weekday-cell {
     border-right: 0 !important;
+    background: #f9f9fb !important;
     color: #8e8e93 !important;
     font-family:
       -apple-system,
@@ -150,10 +152,23 @@
   }
 
   .calendar-month-week-row {
+    column-gap: 1px;
     contain: layout style;
     content-visibility: visible !important;
     contain-intrinsic-size: none !important;
-    background: #ffffff;
+    background: #e5e5ea;
+  }
+
+  .calendar-month-week-row::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 3;
+    height: 1px;
+    pointer-events: none;
+    background: #e5e5ea;
   }
 
   .calendar-month-day-cell {
@@ -167,17 +182,7 @@
   }
 
   .calendar-month-day-cell::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    pointer-events: none;
-    border-right: 1px solid #e5e5ea;
-    border-bottom: 1px solid #e5e5ea;
-  }
-
-  .calendar-month-day-cell:nth-child(7n)::after {
-    border-right-width: 0;
+    content: none;
   }
 
   .calendar-month-day-cell > button {
