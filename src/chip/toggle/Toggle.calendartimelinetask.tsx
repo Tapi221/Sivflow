@@ -1,11 +1,8 @@
 import { motion, type Transition } from "framer-motion";
 
+import { CalendarIcon } from "@/components/icons/sidebar.icons";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
-import {
-  CalendarIcon,
-  TaskIcon,
-  TimelineToolbarIcon,
-} from "@/components/icons/schedule.icons";
+import { TaskIcon, TimelineToolbarIcon } from "@/components/icons/schedule.icons";
 import { cn } from "@/lib/utils";
 
 import type { CalendarWorkspaceToolbarProps } from "../../features/calendar/schedulePane.types";
