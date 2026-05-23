@@ -1,3 +1,4 @@
+import { generateTextLocally } from "./localTextGenerator";
 import {
   DEFAULT_OPEN_AI_SETTINGS,
   loadOpenAiSettings,
@@ -51,6 +52,13 @@ export const generateTextWithOpenAi = async ({
   systemPrompt,
   settings = loadOpenAiSettings(),
 }: GenerateTextOptions): Promise<GenerateTextResult> => {
+  if (settings.providerMode === "local-template") {
+    return {
+      text: generateTextLocally({ prompt, systemPrompt }),
+      model: "local-template",
+    };
+  }
+
   const apiKey = settings.apiKey.trim();
 
   if (!apiKey) {
@@ -105,6 +113,13 @@ export const generateTextWithOpenAi = async ({
 };
 
 export const testOpenAiConnection = async (settings = loadOpenAiSettings()) => {
+  if (settings.providerMode === "local-template") {
+    return {
+      text: generateTextLocally({ prompt: "接続テスト" }),
+      model: "local-template",
+    };
+  }
+
   return generateTextWithOpenAi({
     prompt: "Reply with exactly: OK",
     settings: {
