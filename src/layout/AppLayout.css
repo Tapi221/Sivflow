@@ -138,6 +138,10 @@
   padding-left: 24px;
 }
 
+.app-layout--sidebar-closed .calendar-workspace-toolbar {
+  padding-left: 54px;
+}
+
 .workspace-shell__main,
 .app-layout__main {
   display: flex;
@@ -308,7 +312,8 @@
     grid-column: 1;
   }
 
-  .app-layout--sidebar-closed .workspace-shell__tabs {
+  .app-layout--sidebar-closed .workspace-shell__tabs,
+  .app-layout--sidebar-closed .calendar-workspace-toolbar {
     padding-left: 0;
   }
 }
