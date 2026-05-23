@@ -101,9 +101,12 @@ export const useCalendarScrollController = ({
   const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
     const scroller = event.currentTarget;
 
-    handleEdgeScroll(scroller);
+    if (activeMode !== "timeline") {
+      handleEdgeScroll(scroller);
+    }
+
     syncHeaderScroll(scroller.scrollLeft);
-  }, [handleEdgeScroll, syncHeaderScroll]);
+  }, [activeMode, handleEdgeScroll, syncHeaderScroll]);
 
   useEffect(() => {
     return () => {
