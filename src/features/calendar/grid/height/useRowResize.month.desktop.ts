@@ -13,10 +13,19 @@ import type { CalendarMonthWeek } from "@/features/calendar/model/calendarMonth.
 
 const MONTH_ROW_RESIZING_CLASS = "is-month-row-resizing";
 
-type MonthRowResizeAnchor = {
+type MonthScrollAnchor = {
+  kind: "scroll";
   scrollTop: number;
   rowHeight: number;
 };
+
+type MonthBoundaryAnchor = {
+  kind: "boundary";
+  weekIndex: number;
+  pointerOffsetTop: number;
+};
+
+type MonthRowResizeAnchor = MonthScrollAnchor | MonthBoundaryAnchor;
 
 type MonthRowResizeState = {
   startY: number;
@@ -33,9 +42,9 @@ export type MonthViewStyle = CSSProperties & {
 type UseMonthRowResizeOptions = {
   /** スクロールコンテナ（anchor 計算に使用） */
   scrollContainerRef: RefObject<HTMLDivElement | null>;
-  /** 週行 DOM の Map（旧 anchor 計算との互換のため保持） */
+  /** 週行 DOM の Map（互換のため受け取るが、リサイズ中の DOM 計測には使わない） */
   weekRowRefsMap: RefObject<Map<string, HTMLElement>>;
-  /** 現在描画中の週一覧（旧 anchor 計算との互換のため保持） */
+  /** 現在描画中の週一覧（handle の行 index 計算に使用） */
   monthWeeks: CalendarMonthWeek[];
   /** リサイズ中フラグ（スクロール抑制のため外部と共有） */
   isResizingRef: RefObject<boolean>;
@@ -60,6 +69,7 @@ export type UseMonthRowResizeReturn = {
 
 export const useMonthRowResize = ({
   scrollContainerRef,
+  monthWeeks,
   isResizingRef,
   onResizeStart,
   onAfterCommit,
@@ -115,7 +125,7 @@ export const useMonthRowResize = ({
 
   // ── anchor 計算
 
-  const getAnchorFromScroller = useCallback((): MonthRowResizeAnchor | null => {
+  const getScrollAnchor = useCallback((): MonthScrollAnchor | null => {
     const scroller = scrollContainerRef.current;
     const rowHeight = monthRowHeightRef.current;
 
@@ -128,19 +138,59 @@ export const useMonthRowResize = ({
     }
 
     return {
+      kind: "scroll",
       scrollTop: scroller.scrollTop,
       rowHeight,
     };
   }, [scrollContainerRef]);
+
+  const getBoundaryAnchor = useCallback(
+    (
+      element: HTMLElement,
+      clientY: number,
+    ): MonthBoundaryAnchor | null => {
+      const scroller = scrollContainerRef.current;
+      const row = element.closest(
+        "[data-calendar-week-key]",
+      ) as HTMLElement | null;
+      const weekKey = row?.dataset.calendarWeekKey;
+
+      if (!scroller || !weekKey) return null;
+
+      const weekIndex = monthWeeks.findIndex((week) => week.key === weekKey);
+      if (weekIndex === -1) return null;
+
+      const scrollerRect = scroller.getBoundingClientRect();
+
+      return {
+        kind: "boundary",
+        weekIndex,
+        pointerOffsetTop: clientY - scrollerRect.top,
+      };
+    },
+    [monthWeeks, scrollContainerRef],
+  );
 
   const preserveAnchor = useCallback(
     (anchor: MonthRowResizeAnchor | null, nextHeight: number) => {
       if (!anchor) return;
 
       const scroller = scrollContainerRef.current;
-      if (!scroller || anchor.rowHeight <= 0) return;
+      if (!scroller) return;
 
       const firstWeekTop = C.CALENDAR_WEEKDAY_HEADER_HEIGHT;
+
+      if (anchor.kind === "boundary") {
+        const boundaryTop =
+          firstWeekTop + (anchor.weekIndex + 1) * nextHeight;
+        scroller.scrollTop = Math.max(
+          0,
+          Math.round(boundaryTop - anchor.pointerOffsetTop),
+        );
+        return;
+      }
+
+      if (anchor.rowHeight <= 0) return;
 
       if (anchor.scrollTop <= firstWeekTop) {
         scroller.scrollTop = anchor.scrollTop;
@@ -191,7 +241,7 @@ export const useMonthRowResize = ({
       C.clampMonthRowHeight(height),
     );
     const scrollAnchor = anchor === undefined
-      ? getAnchorFromScroller()
+      ? getScrollAnchor()
       : (anchor ?? null);
 
     if (rafRef.current !== null) {
@@ -212,7 +262,7 @@ export const useMonthRowResize = ({
   }, [
     acquireResizeLock,
     applyVariable,
-    getAnchorFromScroller,
+    getScrollAnchor,
     onAfterCommit,
     releaseResizeLockAfterLayout,
   ]);
@@ -245,12 +295,19 @@ export const useMonthRowResize = ({
 
       activePointerCleanupRef.current?.();
 
+      const handleElement = event.currentTarget;
+      try {
+        handleElement.setPointerCapture(event.pointerId);
+      } catch {
+        // setPointerCapture は一部環境で失敗することがあるため無視する。
+      }
+
       const resizeSessionId = acquireResizeLock();
       const startHeight = monthRowHeightRef.current;
       resizeStateRef.current = {
         startY: event.clientY,
         startHeight,
-        anchor: null,
+        anchor: getBoundaryAnchor(handleElement, event.clientY),
       };
       pendingMonthRowHeightRef.current = startHeight;
 
@@ -278,6 +335,13 @@ export const useMonthRowResize = ({
         resizeStateRef.current = null;
         document.body.style.cursor = prevCursor;
         document.body.style.userSelect = prevSelect;
+        try {
+          if (handleElement.hasPointerCapture(event.pointerId)) {
+            handleElement.releasePointerCapture(event.pointerId);
+          }
+        } catch {
+          // releasePointerCapture は一部環境で失敗することがあるため無視する。
+        }
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
         window.removeEventListener("pointercancel", onUp);
@@ -293,7 +357,12 @@ export const useMonthRowResize = ({
       window.addEventListener("pointerup", onUp);
       window.addEventListener("pointercancel", onUp);
     },
-    [acquireResizeLock, commitHeight, scheduleVariable],
+    [
+      acquireResizeLock,
+      commitHeight,
+      getBoundaryAnchor,
+      scheduleVariable,
+    ],
   );
 
   const handleResizeKeyDown = useCallback(
