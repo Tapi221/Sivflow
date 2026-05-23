@@ -8,7 +8,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { Task, TaskStatus } from "../task.types";
 import {
@@ -50,6 +50,11 @@ export const useTaskBoardDnd = ({
     Task[]
   > | null>(null);
   const latestDropTargetRef = useRef<TaskDropTarget | null>(null);
+  const previewFrameRef = useRef<number | null>(null);
+  const pendingPreviewRef = useRef<{
+    activeId: string;
+    target: TaskDropTarget;
+  } | null>(null);
   const visibleTasksByStatus = previewTasksByStatus ?? tasksByStatus;
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -70,7 +75,52 @@ export const useTaskBoardDnd = ({
     return findTask(visibleTasksByStatus, activeTaskId);
   }, [activeTaskId, visibleTasksByStatus]);
 
+  const flushPreviewUpdate = () => {
+    previewFrameRef.current = null;
+    const pendingPreview = pendingPreviewRef.current;
+    pendingPreviewRef.current = null;
+
+    if (!pendingPreview) {
+      return;
+    }
+
+    setPreviewTasksByStatus((currentTasksByStatus) => {
+      const baseTasksByStatus = currentTasksByStatus ?? tasksByStatus;
+      const nextTasksByStatus = createTaskDragPreview(
+        baseTasksByStatus,
+        pendingPreview.activeId,
+        pendingPreview.target,
+      );
+
+      if (areTaskBoardsEqual(baseTasksByStatus, nextTasksByStatus)) {
+        return currentTasksByStatus;
+      }
+
+      return nextTasksByStatus;
+    });
+  };
+
+  const schedulePreviewUpdate = (activeId: string, target: TaskDropTarget) => {
+    pendingPreviewRef.current = { activeId, target };
+
+    if (previewFrameRef.current !== null) {
+      return;
+    }
+
+    previewFrameRef.current = window.requestAnimationFrame(flushPreviewUpdate);
+  };
+
+  const cancelPendingPreviewUpdate = () => {
+    if (previewFrameRef.current !== null) {
+      window.cancelAnimationFrame(previewFrameRef.current);
+      previewFrameRef.current = null;
+    }
+
+    pendingPreviewRef.current = null;
+  };
+
   const resetDragState = () => {
+    cancelPendingPreviewUpdate();
     setActiveTaskId(null);
     setActiveTaskWidth(null);
     setPreviewTasksByStatus(null);
@@ -78,6 +128,7 @@ export const useTaskBoardDnd = ({
   };
 
   const handleDragStart = (event: DragStartEvent) => {
+    cancelPendingPreviewUpdate();
     setActiveTaskId(String(event.active.id));
     setActiveTaskWidth(event.active.rect.current.initial?.width ?? null);
     setPreviewTasksByStatus(null);
@@ -107,21 +158,7 @@ export const useTaskBoardDnd = ({
     }
 
     latestDropTargetRef.current = target;
-
-    setPreviewTasksByStatus((currentTasksByStatus) => {
-      const baseTasksByStatus = currentTasksByStatus ?? tasksByStatus;
-      const nextTasksByStatus = createTaskDragPreview(
-        baseTasksByStatus,
-        activeId,
-        target,
-      );
-
-      if (areTaskBoardsEqual(baseTasksByStatus, nextTasksByStatus)) {
-        return currentTasksByStatus;
-      }
-
-      return nextTasksByStatus;
-    });
+    schedulePreviewUpdate(activeId, target);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -147,6 +184,12 @@ export const useTaskBoardDnd = ({
 
     onReorderTask(activeId, target.status, target.overTaskId, target.position);
   };
+
+  useEffect(() => {
+    return () => {
+      cancelPendingPreviewUpdate();
+    };
+  }, []);
 
   return {
     activeTask,
