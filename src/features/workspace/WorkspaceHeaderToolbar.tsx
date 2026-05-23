@@ -60,19 +60,6 @@ const segmentedActionButtonClassName = cn(
 const segmentedActionIconClassName =
   "block h-4 w-4 shrink-0 text-current transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none";
 
-const floatingActionButtonClassName = cn(
-  "group/action relative flex h-11 w-11 items-center justify-center rounded-full p-0",
-  "appearance-none select-none text-[#8e8e93]",
-  "border border-white/70 bg-[rgba(255,255,255,0.68)] shadow-[0_10px_30px_rgba(60,60,67,0.14),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-2xl",
-  "outline-none ring-0 transition-[background-color,color,box-shadow,transform,border-color] duration-200 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
-  "hover:-translate-y-0.5 hover:border-white/85 hover:bg-[rgba(255,255,255,0.82)] hover:text-[#007AFF] hover:shadow-[0_14px_34px_rgba(60,60,67,0.18),inset_0_1px_0_rgba(255,255,255,0.95)]",
-  "active:translate-y-0 active:scale-[0.94] active:bg-[rgba(242,242,247,0.86)] active:text-[#007AFF]",
-  "focus:outline-none focus:ring-0 focus-visible:text-[#007AFF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#007AFF]/18",
-);
-
-const floatingActionIconClassName =
-  "block h-[19px] w-[19px] shrink-0 text-current drop-shadow-[0_1px_0_rgba(255,255,255,0.65)] transition-colors duration-200 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none";
-
 export const WorkspaceHeaderToolbar = ({
   activeValue,
   tabs,
@@ -173,43 +160,17 @@ export const WorkspaceHeaderToolbar = ({
     );
   };
 
-  const renderFloatingActions = (
-    toolbarActions: readonly WorkspaceHeaderToolbarAction[],
-    className?: string,
-  ) => {
-    return (
-      <div className={cn("pointer-events-auto flex items-center gap-2.5", className)}>
-        {toolbarActions.map((action) => {
-          const Icon = action.icon;
-          const label = action.ariaLabel ?? action.label;
-
-          return (
-            <button
-              key={label}
-              type="button"
-              aria-label={label}
-              className={floatingActionButtonClassName}
-              onClick={action.onClick}
-            >
-              <Icon aria-hidden="true" className={floatingActionIconClassName} />
-            </button>
-          );
-        })}
-      </div>
-    );
-  };
-
   if (isFloating) {
     return (
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-16 items-start justify-between px-4 pt-3.5">
-        <div className="flex min-w-0 items-center gap-2.5">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-start justify-between px-4 pt-3">
+        <div className="flex min-w-0 items-center gap-2">
           {hasLeadingActions
-            ? renderFloatingActions(leadingActions ?? [])
+            ? renderSegmentedActions(leadingActions ?? [], "pointer-events-auto")
             : null}
         </div>
 
         {actions && actions.length > 0
-          ? renderFloatingActions(actions, "justify-end")
+          ? renderSegmentedActions(actions, "pointer-events-auto justify-end")
           : null}
       </div>
     );
