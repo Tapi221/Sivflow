@@ -23,7 +23,7 @@ export const TaskListView = ({ tasks, onToggleTaskDone }: TaskListViewProps) => 
   };
 
   return (
-    <div className="min-h-0 flex-1 overflow-auto p-4">
+    <div className="explorer-chrome-font min-h-0 flex-1 overflow-auto p-4">
       <table className="w-full border-collapse text-[13px]">
         <thead>
           <tr className="border-b border-[#e9eaed]">
