@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 
-import { PDF_GESTURE_WHEEL_ZOOM_INTENSITY } from "@/features/pdf";
+import { ZOOM_STEP } from "@/features/pdf";
 import type { PdfScaleChangeSource } from "@/features/pdf/pdfViewer.types";
 
 import {
@@ -13,6 +13,7 @@ interface UsePdfZoomOptions {
   gestureScale: number;
   minGestureScale: number;
   maxGestureScale: number;
+  zoomStep?: number;
   onGestureScaleChange?: (
     nextGestureScale: number,
     source: PdfScaleChangeSource,
@@ -39,6 +40,10 @@ const PDF_ZOOM_INPUT_IGNORE_SELECTOR = [
 const PDF_ZOOM_COMMIT_IDLE_MS = 120;
 const PDF_ZOOM_PREVIEW_CLEAR_FRAME_COUNT = 2;
 const PDF_ZOOM_SCALE_EPSILON = 0.0005;
+const PDF_ZOOM_WHEEL_DELTA_PER_STEP = 100;
+const PDF_ZOOM_WHEEL_LINE_DELTA_PX = 16;
+const PDF_ZOOM_WHEEL_DELTA_MODE_LINE = 1;
+const PDF_ZOOM_WHEEL_DELTA_MODE_PAGE = 2;
 
 const clampGestureScale = (
   value: number,
@@ -63,11 +68,87 @@ const clampViewportCoordinate = (value: number, maxValue: number) => {
   return Math.min(Math.max(value, 0), Math.max(0, maxValue));
 };
 
+const normalizeWheelDeltaY = (
+  event: WheelEvent,
+  container: HTMLElement,
+) => {
+  if (!Number.isFinite(event.deltaY)) {
+    return 0;
+  }
+
+  if (event.deltaMode === PDF_ZOOM_WHEEL_DELTA_MODE_LINE) {
+    return event.deltaY * PDF_ZOOM_WHEEL_LINE_DELTA_PX;
+  }
+
+  if (event.deltaMode === PDF_ZOOM_WHEEL_DELTA_MODE_PAGE) {
+    return event.deltaY * Math.max(1, container.clientHeight);
+  }
+
+  return event.deltaY;
+};
+
+const resolveNextWheelGestureScale = ({
+  currentScale,
+  deltaY,
+  zoomStep,
+  minGestureScale,
+  maxGestureScale,
+}: {
+  currentScale: number;
+  deltaY: number;
+  zoomStep: number;
+  minGestureScale: number;
+  maxGestureScale: number;
+}) => {
+  if (
+    !Number.isFinite(currentScale) ||
+    currentScale <= 0 ||
+    !Number.isFinite(deltaY) ||
+    deltaY === 0
+  ) {
+    return null;
+  }
+
+  const safeZoomStep = Math.max(
+    0.001,
+    Number.isFinite(zoomStep) ? Math.abs(zoomStep) : ZOOM_STEP,
+  );
+  const stepDelta = (deltaY / PDF_ZOOM_WHEEL_DELTA_PER_STEP) * safeZoomStep;
+
+  return clampGestureScale(
+    currentScale - stepDelta,
+    minGestureScale,
+    maxGestureScale,
+  );
+};
+
+const getEventViewportAnchor = (
+  event: Event,
+): Pick<MouseEvent, "clientX" | "clientY"> | undefined => {
+  const pointerEvent = event as Event & {
+    clientX?: unknown;
+    clientY?: unknown;
+  };
+
+  if (
+    typeof pointerEvent.clientX !== "number" ||
+    typeof pointerEvent.clientY !== "number"
+  ) {
+    return undefined;
+  }
+
+  return {
+    clientX: pointerEvent.clientX,
+    clientY: pointerEvent.clientY,
+  };
+};
+
 export const usePdfZoom = ({
   container,
   gestureScale,
   minGestureScale,
   maxGestureScale,
+  zoomStep = ZOOM_STEP,
   onGestureScaleChange,
 }: UsePdfZoomOptions) => {
   const containerRef = useRef<HTMLDivElement | null>(container);
@@ -75,9 +156,12 @@ export const usePdfZoom = ({
   const previewScaleRef = useRef(gestureScale);
   const minGestureScaleRef = useRef(minGestureScale);
   const maxGestureScaleRef = useRef(maxGestureScale);
+  const zoomStepRef = useRef(zoomStep);
   const onGestureScaleChangeRef = useRef(onGestureScaleChange);
   const gestureStartScaleRef = useRef<number | null>(null);
   const wheelDeltaRef = useRef(0);
+  const wheelAnchorEventRef =
+    useRef<Pick<MouseEvent, "clientX" | "clientY"> | null>(null);
   const wheelZoomRafRef = useRef<number | null>(null);
   const zoomCommitTimeoutRef = useRef<number | null>(null);
   const previewClearRafIdsRef = useRef<number[]>([]);
@@ -362,6 +446,10 @@ export const usePdfZoom = ({
   }, [maxGestureScale, minGestureScale]);
 
   useEffect(() => {
+    zoomStepRef.current = zoomStep;
+  }, [zoomStep]);
+
+  useEffect(() => {
     onGestureScaleChangeRef.current = onGestureScaleChange;
   }, [onGestureScaleChange]);
 
@@ -404,7 +492,9 @@ export const usePdfZoom = ({
       }
 
       stopNativeEvent(event);
-      wheelDeltaRef.current += event.deltaY;
+      wheelDeltaRef.current += normalizeWheelDeltaY(event, container);
+      wheelAnchorEventRef.current =
+        getEventViewportAnchor(event) ?? wheelAnchorEventRef.current;
 
       if (wheelZoomRafRef.current !== null) {
         return;
@@ -414,17 +504,23 @@ export const usePdfZoom = ({
         wheelZoomRafRef.current = null;
 
         const accumulatedDelta = wheelDeltaRef.current;
+        const anchorEvent = wheelAnchorEventRef.current;
         wheelDeltaRef.current = 0;
+        wheelAnchorEventRef.current = null;
 
-        if (!Number.isFinite(accumulatedDelta) || accumulatedDelta === 0) {
+        const nextGestureScale = resolveNextWheelGestureScale({
+          currentScale: previewScaleRef.current,
+          deltaY: accumulatedDelta,
+          zoomStep: zoomStepRef.current,
+          minGestureScale: minGestureScaleRef.current,
+          maxGestureScale: maxGestureScaleRef.current,
+        });
+
+        if (nextGestureScale === null) {
           return;
         }
 
-        const rawNextGestureScale =
-          previewScaleRef.current *
-          Math.exp(-accumulatedDelta * PDF_GESTURE_WHEEL_ZOOM_INTENSITY);
-
-        applyPreviewScale(rawNextGestureScale, event);
+        applyPreviewScale(nextGestureScale, anchorEvent ?? undefined);
         scheduleGestureScaleCommit("wheel");
       });
     };
@@ -466,7 +562,7 @@ export const usePdfZoom = ({
         (gestureStartScaleRef.current ?? previewScaleRef.current) *
         browserGestureScale;
 
-      applyPreviewScale(rawNextGestureScale);
+      applyPreviewScale(rawNextGestureScale, getEventViewportAnchor(event));
       scheduleGestureScaleCommit("gesture");
     };
 
@@ -520,6 +616,7 @@ export const usePdfZoom = ({
       previewScaleRef.current = gestureScaleRef.current;
       pendingCommitAdjustmentRef.current = null;
       wheelDeltaRef.current = 0;
+      wheelAnchorEventRef.current = null;
       gestureStartScaleRef.current = null;
     };
   }, [
