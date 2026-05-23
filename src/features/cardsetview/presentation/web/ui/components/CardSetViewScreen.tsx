@@ -1,13 +1,9 @@
-import { useEffect } from "react";
-
-import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
+import type { JSX } from "react";
 
 import { ExportMfCardButton } from "@/features/cardFile/presentation/web/ExportMfCardButton";
-import { dispatchCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
 import type { CardSetViewContentProps } from "@/features/cardsetview/presentation/web/ui/components/cardSetViewContentProps";
 import { CardSetViewDesktopContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewDesktopContent";
-import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMetaPanel";
 import { CardSetViewMobileContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMobileContent";
 import { CardViewCompactToolbar } from "@/features/cardsetview/presentation/web/ui/components/CardViewCompactToolbar";
 import { ExportMfDeckButton } from "@/features/deckFile/presentation/web/ExportMfDeckButton";
@@ -26,14 +22,13 @@ const CARD_SET_VIEW_CONTENT_COMPONENTS = {
   mobile: CardSetViewMobileContent,
 } satisfies Record<
   PresentationTarget,
-  (props: CardSetViewContentProps) => React.JSX.Element
+  (props: CardSetViewContentProps) => JSX.Element
 >;
 
 export const CardSetViewScreen = () => {
   const controller = useCardSetViewScreenController();
   const {
     cardSetId,
-    settings,
     data,
     state,
     paneWidth,
@@ -47,24 +42,6 @@ export const CardSetViewScreen = () => {
   const { tagById } = useTags();
 
   const presentationTarget = usePresentationTarget();
-
-  useEffect(() => {
-    if (!cardSetId) {
-      return;
-    }
-
-    dispatchCardSetViewWindowEvent(
-      CARD_SET_VIEW_EVENTS.metaOpenChange,
-      state.isMetaOpen,
-    );
-
-    return () => {
-      dispatchCardSetViewWindowEvent(
-        CARD_SET_VIEW_EVENTS.metaOpenChange,
-        false,
-      );
-    };
-  }, [cardSetId, state.isMetaOpen]);
 
   if (!cardSetId) {
     return (
@@ -109,9 +86,7 @@ export const CardSetViewScreen = () => {
   );
 
   const toolbarRight = isDesktopPresentation
-    ? state.isMetaOpen
-      ? "calc(var(--ui-panel-width) + 0.75rem)"
-      : "0.75rem"
+    ? "0.75rem"
     : "max(0.75rem, env(safe-area-inset-right))";
 
   const toolbarBottom = isDesktopPresentation
@@ -119,28 +94,26 @@ export const CardSetViewScreen = () => {
     : "max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))";
 
   const overlayChildren = (
-    <>
-      <div
-        className="pointer-events-auto absolute z-20 flex items-end gap-2"
-        style={{
-          right: toolbarRight,
-          bottom: toolbarBottom,
-        }}
-      >
-        {layoutConstraintIndicatorLabel ? (
-          <div
-            className={cn(
-              overlayGlassPillClassName,
-              "text-[11px] font-semibold text-slate-600",
-            )}
-          >
-            {layoutConstraintIndicatorLabel}
-          </div>
-        ) : null}
+    <div
+      className="pointer-events-auto absolute z-20 flex items-end gap-2"
+      style={{
+        right: toolbarRight,
+        bottom: toolbarBottom,
+      }}
+    >
+      {layoutConstraintIndicatorLabel ? (
+        <div
+          className={cn(
+            overlayGlassPillClassName,
+            "text-[11px] font-semibold text-slate-600",
+          )}
+        >
+          {layoutConstraintIndicatorLabel}
+        </div>
+      ) : null}
 
-        {compactToolbar}
-      </div>
-    </>
+      {compactToolbar}
+    </div>
   );
 
   const topLeftControl = data.selectedCardSet ? (
@@ -168,21 +141,12 @@ export const CardSetViewScreen = () => {
       topLeftControl={topLeftControl}
       overlayChildren={overlayChildren}
       overlayTopInsetPx={desktopOverlayTopInsetPx}
-      isMetaOpen={state.isMetaOpen}
+      isMetaOpen={false}
       viewportRef={paneWidth.contentViewportRef}
       viewportClassName={
         state.isGlobalEditing || isDesktopPresentation
           ? "px-0 py-0"
           : "px-4 py-0"
-      }
-      metaPanel={
-        <CardSetViewMetaPanel
-          isLoading={data.isLoading}
-          selectedCard={state.selectedCard}
-          isGlobalEditing={state.isGlobalEditing}
-          settings={settings}
-          updateCard={data.updateCard}
-        />
       }
     >
       <Content controller={controller} />
