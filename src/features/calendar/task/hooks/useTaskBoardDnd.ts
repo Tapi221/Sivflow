@@ -27,7 +27,6 @@ import {
 import type {
   TaskDropTarget,
   TaskInsertPosition,
-  VerticalDragDirection,
 } from "../dnd/taskDnd.types";
 
 type UseTaskBoardDndArgs = {
@@ -40,26 +39,13 @@ type UseTaskBoardDndArgs = {
   ) => void;
 };
 
-const resolveVerticalDragDirection = (
-  deltaY: number,
-): VerticalDragDirection | null => {
-  if (deltaY < 0) {
-    return "up";
-  }
-
-  if (deltaY > 0) {
-    return "down";
-  }
-
-  return null;
-};
-
 export const useTaskBoardDnd = ({
   tasksByStatus,
   onReorderTask,
 }: UseTaskBoardDndArgs) => {
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [activeTaskWidth, setActiveTaskWidth] = useState<number | null>(null);
+  const [activeTaskHeight, setActiveTaskHeight] = useState<number | null>(null);
   const [previewTasksByStatus, setPreviewTasksByStatus] = useState<Record<
     TaskStatus,
     Task[]
@@ -136,6 +122,7 @@ export const useTaskBoardDnd = ({
     cancelPendingPreviewUpdate();
     setActiveTaskId(null);
     setActiveTaskWidth(null);
+    setActiveTaskHeight(null);
     setPreviewTasksByStatus(null);
     latestDropTargetRef.current = null;
   };
@@ -144,6 +131,7 @@ export const useTaskBoardDnd = ({
     cancelPendingPreviewUpdate();
     setActiveTaskId(String(event.active.id));
     setActiveTaskWidth(event.active.rect.current.initial?.width ?? null);
+    setActiveTaskHeight(event.active.rect.current.initial?.height ?? null);
     setPreviewTasksByStatus(null);
     latestDropTargetRef.current = null;
   };
@@ -159,7 +147,6 @@ export const useTaskBoardDnd = ({
       visibleTasksByStatus,
       activeId,
       latestDropTargetRef.current,
-      resolveVerticalDragDirection(event.delta.y),
     );
 
     if (!target) {
@@ -182,7 +169,6 @@ export const useTaskBoardDnd = ({
       visibleTasksByStatus,
       activeId,
       latestDropTargetRef.current,
-      resolveVerticalDragDirection(event.delta.y),
     );
 
     resetDragState();
@@ -208,6 +194,7 @@ export const useTaskBoardDnd = ({
 
   return {
     activeTask,
+    activeTaskHeight,
     activeTaskId,
     activeTaskWidth,
     collisionDetection: taskBoardCollisionDetection,
