@@ -60,7 +60,6 @@ const SortableTaskCard = ({
     attributes,
     isDragging,
     listeners,
-    setActivatorNodeRef,
     setNodeRef,
     transform,
     transition,
@@ -87,19 +86,19 @@ const SortableTaskCard = ({
         willChange: transform ? "transform" : undefined,
       }}
       className={cn(
-        "rounded-lg",
+        "rounded-lg touch-none",
         "transition-[opacity,filter] duration-150 ease-[cubic-bezier(0.2,0,0,1)]",
         isActivePreview && "opacity-40 saturate-75",
         isDragging && "relative z-10 opacity-0",
       )}
+      {...attributes}
+      {...listeners}
     >
       <TaskCard
         task={task}
         accountName={accountName}
         accountPhotoUrl={accountPhotoUrl}
         isDragging={isDragging}
-        reorderHandleProps={{ ...attributes, ...listeners }}
-        reorderHandleRef={setActivatorNodeRef}
         onDelete={onDeleteTask}
         onToggleDone={onToggleTaskDone}
       />
