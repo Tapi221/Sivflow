@@ -17,7 +17,6 @@ import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 
 import { CalendarEventChipWeekday } from "../eventchip/EventChip.schedule.weekday";
 import { cn } from "@/lib/utils";
-// ==============================================
 
 type CalendarEventPositionStyle = React.CSSProperties & {
   "--calendar-event-start-hour": number;
@@ -69,10 +68,6 @@ const AllDayEventChip = ({ event }: { event: GoogleCalendarEvent }) => {
   );
 };
 
-// ─────────────────────────────────────────────────────────────
-// 現在時刻フック
-// ─────────────────────────────────────────────────────────────
-
 const useCurrentTimeMinutes = (): number => {
   const getNow = () => {
     const d = new Date();
@@ -111,10 +106,6 @@ const useCurrentTimeMinutes = (): number => {
   return minutes;
 };
 
-// ─────────────────────────────────────────────────────────────
-// 現在時刻インジケーター
-// ─────────────────────────────────────────────────────────────
-
 type CurrentTimeIndicatorProps = {
   isToday: boolean;
   currentMinutes: number;
@@ -144,10 +135,6 @@ const CurrentTimeIndicator = ({
     </div>
   );
 };
-
-// ─────────────────────────────────────────────────────────────
-// メイン
-// ─────────────────────────────────────────────────────────────
 
 export const CalendarWeekDayGrid = ({
   headerScrollRef,
@@ -186,21 +173,67 @@ export const CalendarWeekDayGrid = ({
 
     if (!scroller || !allDayScroller) return;
 
-    const syncAllDayScroll = () => {
-      allDayScroller.scrollLeft = scroller.scrollLeft;
+    let isSyncing = false;
+    let resetSyncRafId: number | null = null;
+
+    const resetSyncing = () => {
+      if (resetSyncRafId !== null) {
+        window.cancelAnimationFrame(resetSyncRafId);
+      }
+
+      resetSyncRafId = window.requestAnimationFrame(() => {
+        isSyncing = false;
+        resetSyncRafId = null;
+      });
     };
 
-    syncAllDayScroll();
-    scroller.addEventListener("scroll", syncAllDayScroll, { passive: true });
+    const syncScrollLeft = (scrollLeft: number, source: "body" | "all-day") => {
+      isSyncing = true;
+
+      if (source !== "body" && scroller.scrollLeft !== scrollLeft) {
+        scroller.scrollLeft = scrollLeft;
+      }
+
+      if (source !== "all-day" && allDayScroller.scrollLeft !== scrollLeft) {
+        allDayScroller.scrollLeft = scrollLeft;
+      }
+
+      if (
+        headerScrollRef.current &&
+        headerScrollRef.current.scrollLeft !== scrollLeft
+      ) {
+        headerScrollRef.current.scrollLeft = scrollLeft;
+      }
+
+      resetSyncing();
+    };
+
+    const syncFromBody = () => {
+      if (isSyncing) return;
+      syncScrollLeft(scroller.scrollLeft, "body");
+    };
+
+    const syncFromAllDay = () => {
+      if (isSyncing) return;
+      syncScrollLeft(allDayScroller.scrollLeft, "all-day");
+    };
+
+    syncScrollLeft(scroller.scrollLeft, "body");
+    scroller.addEventListener("scroll", syncFromBody, { passive: true });
+    allDayScroller.addEventListener("scroll", syncFromAllDay, { passive: true });
 
     return () => {
-      scroller.removeEventListener("scroll", syncAllDayScroll);
+      scroller.removeEventListener("scroll", syncFromBody);
+      allDayScroller.removeEventListener("scroll", syncFromAllDay);
+
+      if (resetSyncRafId !== null) {
+        window.cancelAnimationFrame(resetSyncRafId);
+      }
     };
-  }, [resolvedAllDayScrollRef, scrollContainerRef, visibleDays.length]);
+  }, [headerScrollRef, resolvedAllDayScrollRef, scrollContainerRef, visibleDays.length]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-      {/* ── ヘッダー ── */}
       <div className="flex shrink-0 border-b border-[#eeeeee] bg-white">
         <div
           className="shrink-0 border-r border-[#eeeeee] bg-white"
@@ -266,7 +299,10 @@ export const CalendarWeekDayGrid = ({
           終日
         </div>
 
-        <div ref={resolvedAllDayScrollRef} className="flex-1 overflow-hidden bg-white">
+        <div
+          ref={resolvedAllDayScrollRef}
+          className="flex-1 overflow-x-auto overflow-y-hidden bg-white scrollbar-hidden"
+        >
           <div
             style={{
               display: "grid",
@@ -302,14 +338,12 @@ export const CalendarWeekDayGrid = ({
         </div>
       </div>
 
-      {/* ── 本体 ── */}
       <div
         ref={scrollContainerRef}
         className="min-h-0 flex-1 overflow-auto bg-white scrollbar-hidden"
         onScroll={onScroll}
       >
         <div className="grid bg-white" style={timelineGridStyle}>
-          {/* 時刻列 */}
           <div className="sticky left-0 z-20 border-r border-[#eeeeee] bg-white shadow-[1px_0_0_rgba(255,255,255,0.88)_inset]">
             {HOURS.map((hour) => (
               <div
@@ -329,7 +363,6 @@ export const CalendarWeekDayGrid = ({
             ))}
           </div>
 
-          {/* 日別カラム */}
           {visibleDays.map((day) => {
             const isDayToday = isSameDay(day, today);
 
