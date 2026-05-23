@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, type UIEvent } from "react";
+import { useCallback, type UIEvent } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarViewMode } from "../../../calendar/schedulePane.types";
@@ -6,6 +6,8 @@ import type { CalendarViewMode } from "../../../calendar/schedulePane.types";
 import { useScrollEdgeDetector } from "./useScrollEdgeDetector";
 import { usePreserveScrollOnPrepend } from "./usePreserveScrollOnPrepend";
 import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync.fixed";
+import { useSyncedHorizontalScroll } from "./useSyncedHorizontalScroll";
+import { useRef } from "react";
 
 type CalendarBuffer = {
   before: number;
@@ -65,7 +67,6 @@ export const useCalendarScrollController = ({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);
-  const syncRafRef = useRef<number | null>(null);
   const prependTrigger =
     activeMode === "timeline" ? timelineUnitBuffer.before : calendarBuffer.before;
   const scrollExtentTrigger =
@@ -105,21 +106,10 @@ export const useCalendarScrollController = ({
     headerRefs: [headerScrollRef, allDayScrollRef],
   });
 
-  const syncFixedRowScroll = useCallback((scrollLeft: number) => {
-    if (syncRafRef.current !== null) return;
-
-    syncRafRef.current = window.requestAnimationFrame(() => {
-      syncRafRef.current = null;
-
-      if (headerScrollRef.current) {
-        headerScrollRef.current.scrollLeft = scrollLeft;
-      }
-
-      if (allDayScrollRef.current) {
-        allDayScrollRef.current.scrollLeft = scrollLeft;
-      }
-    });
-  }, []);
+  useSyncedHorizontalScroll({
+    primaryRef: scrollContainerRef,
+    syncedRefs: [headerScrollRef, allDayScrollRef],
+  });
 
   const handleTimelineVisibleDate = useCallback((scroller: HTMLDivElement) => {
     if (!onTimelineVisibleDateChange || timelineColumns.length === 0) return;
@@ -147,17 +137,7 @@ export const useCalendarScrollController = ({
     if (activeMode === "timeline") {
       handleTimelineVisibleDate(scroller);
     }
-
-    syncFixedRowScroll(scroller.scrollLeft);
-  }, [activeMode, handleEdgeScroll, handleTimelineVisibleDate, syncFixedRowScroll]);
-
-  useEffect(() => {
-    return () => {
-      if (syncRafRef.current !== null) {
-        window.cancelAnimationFrame(syncRafRef.current);
-      }
-    };
-  }, []);
+  }, [activeMode, handleEdgeScroll, handleTimelineVisibleDate]);
 
   /**
    * buffer変化などでのリセット統合
