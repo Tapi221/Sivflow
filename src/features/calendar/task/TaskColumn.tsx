@@ -87,7 +87,7 @@ const SortableTaskCard = ({
         willChange: transform ? "transform" : undefined,
       }}
       className={cn(
-        "rounded-lg touch-none",
+        "rounded-xl touch-none",
         "transition-[opacity,filter] duration-150 ease-[cubic-bezier(0.2,0,0,1)]",
         isActivePreview && "opacity-40 saturate-75",
         isDragging && "relative z-10 opacity-0",
@@ -129,9 +129,9 @@ export const TaskColumn = ({
   return (
     <div
       className={cn(
-        "flex h-full min-h-0 w-full min-w-0 flex-col rounded-xl p-3",
+        "flex h-full min-h-0 w-full min-w-0 flex-col p-3",
         "transition-[background-color,box-shadow] duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
-        isDragActive && "shadow-[inset_0_0_0_1px_rgba(17,24,39,0.04)]",
+        isDragActive && "shadow-[inset_0_0_0_1px_rgba(17,24,39,0.03)]",
       )}
       style={{ background: taskColumnBackground }}
     >
@@ -171,7 +171,7 @@ export const TaskColumn = ({
             className={cn(
               "flex min-h-8 flex-col gap-2 pr-3",
               "transition-[padding] duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
-              tasks.length === 0 && isDragActive && "rounded-xl border border-dashed border-[#dfe3ea] bg-[#f8fafc] p-2",
+              tasks.length === 0 && isDragActive && "rounded-xl border border-dashed border-[#dfe3ea] bg-[#fafafa] p-2",
             )}
           >
             {tasks.map((task) => (
