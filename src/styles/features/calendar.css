@@ -126,7 +126,7 @@
 
   .calendar-month-weekday-header {
     border-color: #e5e5ea !important;
-    background: #f9f9fb !important;
+    background: transparent !important;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     box-shadow: none;
@@ -134,7 +134,7 @@
 
   .calendar-month-weekday-cell {
     border-right: 0 !important;
-    background: #f9f9fb !important;
+    background: transparent !important;
     color: #8e8e93 !important;
     font-family:
       -apple-system,
