@@ -137,7 +137,13 @@ export const PdfPane = ({ doc, className }: PdfPaneProps) => {
   const shouldRenderThumbnailPanel = shouldRenderToolbar && isThumbnailPanelOpen;
 
   return (
-    <div className={cn("flex h-full min-h-0 min-w-0 flex-col", className)}>
+    <div
+      className={cn(
+        "flex h-full min-h-0 min-w-0 flex-col",
+        shouldRenderThumbnailPanel ? "-ml-[var(--workspace-content-gutter)]" : "",
+        className,
+      )}
+    >
       <div className="relative flex-1 min-h-0 min-w-0 w-full overflow-hidden bg-transparent">
         {sourceUnavailable ? (
           <div className="p-4 text-sm text-slate-500">
