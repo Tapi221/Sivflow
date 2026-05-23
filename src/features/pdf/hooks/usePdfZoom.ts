@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 
 import { PDF_GESTURE_WHEEL_ZOOM_INTENSITY } from "@/features/pdf";
 import type { PdfScaleChangeSource } from "@/features/pdf/pdfViewer.types";
@@ -18,6 +18,18 @@ interface UsePdfZoomOptions {
     source: PdfScaleChangeSource,
   ) => void;
 }
+
+type ZoomViewportAnchor = {
+  baseScale: number;
+  scrollLeft: number;
+  scrollTop: number;
+  viewportX: number;
+  viewportY: number;
+};
+
+type PendingZoomCommitAdjustment = ZoomViewportAnchor & {
+  targetScale: number;
+};
 
 const PDF_ZOOM_INPUT_IGNORE_SELECTOR = [
   DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR,
@@ -43,6 +55,14 @@ const clampGestureScale = (
   return Number(Math.min(Math.max(value, lowerBound), upperBound).toFixed(3));
 };
 
+const clampViewportCoordinate = (value: number, maxValue: number) => {
+  if (!Number.isFinite(value)) {
+    return Math.max(0, maxValue / 2);
+  }
+
+  return Math.min(Math.max(value, 0), Math.max(0, maxValue));
+};
+
 export const usePdfZoom = ({
   container,
   gestureScale,
@@ -62,6 +82,8 @@ export const usePdfZoom = ({
   const zoomCommitTimeoutRef = useRef<number | null>(null);
   const previewClearRafIdsRef = useRef<number[]>([]);
   const previewActiveRef = useRef(false);
+  const pendingCommitAdjustmentRef =
+    useRef<PendingZoomCommitAdjustment | null>(null);
 
   const getPreviewTarget = useCallback(() => {
     const currentContainer = containerRef.current;
@@ -74,6 +96,35 @@ export const usePdfZoom = ({
 
     return firstChild instanceof HTMLElement ? firstChild : currentContainer;
   }, []);
+
+  const getViewportAnchor = useCallback(
+    (event?: Pick<MouseEvent, "clientX" | "clientY">): ZoomViewportAnchor | null => {
+      const currentContainer = containerRef.current;
+
+      if (!currentContainer) {
+        return null;
+      }
+
+      const containerRect = currentContainer.getBoundingClientRect();
+      const rawViewportX =
+        typeof event?.clientX === "number"
+          ? event.clientX - containerRect.left
+          : containerRect.width / 2;
+      const rawViewportY =
+        typeof event?.clientY === "number"
+          ? event.clientY - containerRect.top
+          : containerRect.height / 2;
+
+      return {
+        baseScale: gestureScaleRef.current,
+        scrollLeft: currentContainer.scrollLeft,
+        scrollTop: currentContainer.scrollTop,
+        viewportX: clampViewportCoordinate(rawViewportX, containerRect.width),
+        viewportY: clampViewportCoordinate(rawViewportY, containerRect.height),
+      };
+    },
+    [],
+  );
 
   const clearPendingPreviewClear = useCallback(() => {
     previewClearRafIdsRef.current.forEach((rafId) => {
@@ -128,19 +179,64 @@ export const usePdfZoom = ({
     requestNextFrame(PDF_ZOOM_PREVIEW_CLEAR_FRAME_COUNT);
   }, [clearPendingPreviewClear, resetPreviewStyles]);
 
+  const applyCommittedZoomScrollAnchor = useCallback(
+    (committedScale: number) => {
+      const pendingAdjustment = pendingCommitAdjustmentRef.current;
+      const currentContainer = containerRef.current;
+
+      if (!pendingAdjustment || !currentContainer) {
+        return false;
+      }
+
+      if (
+        !Number.isFinite(pendingAdjustment.baseScale) ||
+        pendingAdjustment.baseScale <= 0 ||
+        !Number.isFinite(committedScale) ||
+        committedScale <= 0 ||
+        Math.abs(committedScale - pendingAdjustment.targetScale) >=
+          PDF_ZOOM_SCALE_EPSILON
+      ) {
+        pendingCommitAdjustmentRef.current = null;
+        return false;
+      }
+
+      const scaleRatio = committedScale / pendingAdjustment.baseScale;
+      const nextScrollLeft =
+        (pendingAdjustment.scrollLeft + pendingAdjustment.viewportX) *
+          scaleRatio -
+        pendingAdjustment.viewportX;
+      const nextScrollTop =
+        (pendingAdjustment.scrollTop + pendingAdjustment.viewportY) *
+          scaleRatio -
+        pendingAdjustment.viewportY;
+
+      currentContainer.scrollLeft = Math.max(0, nextScrollLeft);
+      currentContainer.scrollTop = Math.max(0, nextScrollTop);
+      pendingCommitAdjustmentRef.current = null;
+
+      return true;
+    },
+    [],
+  );
+
   const applyPreviewScale = useCallback(
-    (nextGestureScale: number) => {
+    (
+      nextGestureScale: number,
+      event?: Pick<MouseEvent, "clientX" | "clientY">,
+    ) => {
       const clampedGestureScale = clampGestureScale(
         nextGestureScale,
         minGestureScaleRef.current,
         maxGestureScaleRef.current,
       );
-      const baseGestureScale = gestureScaleRef.current;
+      const anchor = getViewportAnchor(event);
+      const baseGestureScale = anchor?.baseScale ?? gestureScaleRef.current;
 
       previewScaleRef.current = clampedGestureScale;
       clearPendingPreviewClear();
 
       if (
+        !anchor ||
         !Number.isFinite(baseGestureScale) ||
         baseGestureScale <= 0 ||
         Math.abs(clampedGestureScale - baseGestureScale) <
@@ -157,14 +253,26 @@ export const usePdfZoom = ({
         return clampedGestureScale;
       }
 
+      pendingCommitAdjustmentRef.current = {
+        ...anchor,
+        targetScale: clampedGestureScale,
+      };
+
       previewTarget.style.transform = `scale(${clampedGestureScale / baseGestureScale})`;
-      previewTarget.style.transformOrigin = "50% 0px";
+      previewTarget.style.transformOrigin = `${anchor.scrollLeft + anchor.viewportX}px ${
+        anchor.scrollTop + anchor.viewportY
+      }px`;
       previewTarget.style.willChange = "transform";
       previewActiveRef.current = true;
 
       return clampedGestureScale;
     },
-    [clearPendingPreviewClear, getPreviewTarget, resetPreviewStyles],
+    [
+      clearPendingPreviewClear,
+      getPreviewTarget,
+      getViewportAnchor,
+      resetPreviewStyles,
+    ],
   );
 
   const emitGestureScaleChange = useCallback(
@@ -188,7 +296,6 @@ export const usePdfZoom = ({
         return;
       }
 
-      gestureScaleRef.current = clampedGestureScale;
       handler(clampedGestureScale, source);
     },
     [],
@@ -220,7 +327,7 @@ export const usePdfZoom = ({
     containerRef.current = container;
   }, [container]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     gestureScaleRef.current = gestureScale;
 
     if (!previewActiveRef.current) {
@@ -231,9 +338,23 @@ export const usePdfZoom = ({
     if (
       Math.abs(gestureScale - previewScaleRef.current) < PDF_ZOOM_SCALE_EPSILON
     ) {
+      applyCommittedZoomScrollAnchor(gestureScale);
       schedulePreviewClear();
+      return;
     }
-  }, [gestureScale, schedulePreviewClear]);
+
+    pendingCommitAdjustmentRef.current = null;
+    clearPendingPreviewClear();
+    resetPreviewStyles();
+    previewActiveRef.current = false;
+    previewScaleRef.current = gestureScale;
+  }, [
+    applyCommittedZoomScrollAnchor,
+    clearPendingPreviewClear,
+    gestureScale,
+    resetPreviewStyles,
+    schedulePreviewClear,
+  ]);
 
   useEffect(() => {
     minGestureScaleRef.current = minGestureScale;
@@ -303,7 +424,7 @@ export const usePdfZoom = ({
           previewScaleRef.current *
           Math.exp(-accumulatedDelta * PDF_GESTURE_WHEEL_ZOOM_INTENSITY);
 
-        applyPreviewScale(rawNextGestureScale);
+        applyPreviewScale(rawNextGestureScale, event);
         scheduleGestureScaleCommit("wheel");
       });
     };
@@ -397,6 +518,7 @@ export const usePdfZoom = ({
       resetPreviewStyles();
       previewActiveRef.current = false;
       previewScaleRef.current = gestureScaleRef.current;
+      pendingCommitAdjustmentRef.current = null;
       wheelDeltaRef.current = 0;
       gestureStartScaleRef.current = null;
     };
