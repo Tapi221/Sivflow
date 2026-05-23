@@ -63,12 +63,12 @@ const EXPLORER_COLUMN_PATH_NAVIGATE_EVENT =
 
 const EXPLORER_HOME_CRUMB: BreadcrumbCrumb = {
   label: "ホーム",
-  to: "/folders?home=1",
+  to: "/library?home=1",
 };
 
 const EXPLORER_ROOT_CRUMB: BreadcrumbCrumb = {
   label: "エクスプローラー",
-  to: "/folders?view=section-list&libraryType=pdf",
+  to: "/library?view=section-list&libraryType=pdf",
 };
 
 const readInitialExplorerColumnPathCrumbs = (): BreadcrumbCrumb[] => {
