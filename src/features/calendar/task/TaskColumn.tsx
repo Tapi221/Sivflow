@@ -1,3 +1,4 @@
+import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { motion } from "framer-motion";
 
@@ -22,6 +23,13 @@ type TaskColumnProps = {
   onToggleTaskDone: (id: string, done: boolean) => void;
 };
 
+type TaskInsertionSlotProps = {
+  status: TaskColumnType["id"];
+  insertIndex: number;
+  overTaskId?: string | null;
+  isFirst?: boolean;
+};
+
 type SortableTaskCardProps = {
   task: Task;
   activeTaskId?: string | null;
@@ -36,6 +44,31 @@ const TASK_LAYOUT_MOTION_EASING = [0.16, 1, 0.3, 1] as const;
 const TASK_LAYOUT_MOTION_TRANSITION = {
   duration: TASK_DND_LAYOUT_ANIMATION_DURATION_MS / 1000,
   ease: TASK_LAYOUT_MOTION_EASING,
+};
+
+const TaskInsertionSlot = ({
+  status,
+  insertIndex,
+  overTaskId = null,
+  isFirst = false,
+}: TaskInsertionSlotProps) => {
+  const { setNodeRef } = useDroppable({
+    id: `task-slot:${status}:${insertIndex}`,
+    data: {
+      type: "task-slot",
+      status,
+      insertIndex,
+      overTaskId,
+    },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn("shrink-0", isFirst ? "h-1" : "h-2")}
+      aria-hidden="true"
+    />
+  );
 };
 
 const SortableTaskCard = ({
@@ -105,6 +138,7 @@ export const TaskColumn = ({
     done: t.taskStatusDone,
   };
   const isDragActive = activeTaskId !== null && activeTaskId !== undefined;
+  let insertIndex = 0;
 
   return (
     <div
@@ -149,22 +183,46 @@ export const TaskColumn = ({
         >
           <div
             className={cn(
-              "flex min-h-8 flex-col gap-2 pr-3",
+              "flex min-h-8 flex-col pr-3",
               "transition-[padding,border-color,background-color] duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
               tasks.length === 0 && isDragActive && "rounded-xl border border-dashed border-[#dfe3ea] bg-[#fafafa] p-2",
             )}
           >
-            {tasks.map((task) => (
-              <SortableTaskCard
-                key={task.id}
-                task={task}
-                activeTaskId={activeTaskId}
-                accountName={accountName}
-                accountPhotoUrl={accountPhotoUrl}
-                onDeleteTask={onDeleteTask}
-                onToggleTaskDone={onToggleTaskDone}
-              />
-            ))}
+            <TaskInsertionSlot
+              status={column.id}
+              insertIndex={0}
+              overTaskId={tasks.find((task) => task.id !== activeTaskId)?.id ?? null}
+              isFirst
+            />
+            {tasks.map((task) => {
+              const currentInsertIndex = insertIndex;
+
+              if (task.id !== activeTaskId) {
+                insertIndex += 1;
+              }
+
+              return (
+                <div key={task.id}>
+                  <SortableTaskCard
+                    task={task}
+                    activeTaskId={activeTaskId}
+                    accountName={accountName}
+                    accountPhotoUrl={accountPhotoUrl}
+                    onDeleteTask={onDeleteTask}
+                    onToggleTaskDone={onToggleTaskDone}
+                  />
+                  <TaskInsertionSlot
+                    status={column.id}
+                    insertIndex={insertIndex}
+                    overTaskId={
+                      tasks
+                        .slice(tasks.indexOf(task) + 1)
+                        .find((nextTask) => nextTask.id !== activeTaskId)?.id ?? null
+                    }
+                  />
+                </div>
+              );
+            })}
           </div>
         </SortableContext>
       </ScrollArea>
