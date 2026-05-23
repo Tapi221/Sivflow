@@ -47,6 +47,8 @@ export interface PdfJsViewport {
   transform: number[];
 }
 
+export type PdfJsRenderTransform = [number, number, number, number, number, number];
+
 export interface PdfJsRenderTask {
   promise: Promise<void>;
   cancel?: () => void;
@@ -97,6 +99,7 @@ export interface PdfJsPage {
   render: (params: {
     canvasContext: CanvasRenderingContext2D;
     viewport: PdfJsViewport;
+    transform?: PdfJsRenderTransform;
     intent: "display";
   }) => PdfJsRenderTask;
 }
