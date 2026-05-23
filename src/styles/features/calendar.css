@@ -150,21 +150,38 @@
   }
 
   .calendar-month-week-row {
-    contain: layout paint style;
-    content-visibility: auto;
-    contain-intrinsic-size: 784px var(--calendar-month-row-height);
+    contain: layout style;
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
     background: #ffffff;
   }
 
   .calendar-month-day-cell {
     overflow: visible;
     min-height: var(--calendar-month-row-height);
-    contain: paint style;
+    contain: layout style;
     border-color: #e5e5ea !important;
+    border-right-width: 0 !important;
+    border-bottom-width: 0 !important;
     transition: background-color 120ms ease;
   }
 
+  .calendar-month-day-cell::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    border-right: 1px solid #e5e5ea;
+    border-bottom: 1px solid #e5e5ea;
+  }
+
+  .calendar-month-day-cell:nth-child(7n)::after {
+    border-right-width: 0;
+  }
+
   .calendar-month-day-cell > button {
+    z-index: 1;
     font-family:
       -apple-system,
       BlinkMacSystemFont,
