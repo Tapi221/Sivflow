@@ -20,11 +20,6 @@ const TAB_MOTION_TRANSITION: Transition = {
   ease: [0.22, 1, 0.36, 1],
 };
 
-const TAB_TOOLTIP_CLASS_NAME =
-  "rounded-lg border border-[#eeeeee] bg-white px-2.5 py-[5px] text-[12px] font-medium text-[#8c8c8c] shadow-[0_8px_18px_rgba(0,0,0,0.08)]";
-const TAB_TOOLTIP_ARROW_CLASS_NAME =
-  "border-b border-r border-[#eeeeee] bg-white";
-
 type CalendarTimelineTaskTab = {
   value: CalendarWorkspaceToolbarProps["activeMode"];
   label: string;
@@ -54,8 +49,7 @@ export const ToggleCalendarTimelineTask = ({
             side="top"
             align={isStartEdgeTab ? "start" : "center"}
             offset={6}
-            tooltipClassName={TAB_TOOLTIP_CLASS_NAME}
-            arrowClassName={TAB_TOOLTIP_ARROW_CLASS_NAME}
+            preset="segmented"
           >
             <button
               type="button"
