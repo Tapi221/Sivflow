@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 
@@ -34,6 +35,10 @@ import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { cn } from "@/lib/utils";
+import {
+  createAppDestination,
+  createPageUrl,
+} from "@/platform/web/navigation/toWebPath";
 import type { SelectedExplorerItem } from "@/types";
 
 type FoldersScreenProps = {
@@ -118,6 +123,7 @@ const areExplorerRouteStatesEqual = (
 };
 
 export const FoldersScreen = ({ route }: FoldersScreenProps) => {
+  const navigate = useNavigate();
   const [initialRouteState] = useState<ExplorerRouteState>(() =>
     route.readRouteState(),
   );
@@ -445,6 +451,15 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
         title: cardSet ? resolveCardSetTabTitle(cardSet) : "カードセット",
         folderId: cardSet?.folderId ?? null,
       });
+
+      navigate(
+        createPageUrl(
+          createAppDestination("cardSetView", {
+            cardSetId: item.id,
+            folderId: cardSet?.folderId ?? null,
+          }),
+        ),
+      );
     }
   };
 
