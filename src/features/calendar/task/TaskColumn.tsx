@@ -31,8 +31,7 @@ type SortableTaskCardProps = {
   onToggleTaskDone: (id: string, done: boolean) => void;
 };
 
-const taskColumnGradient =
-  "linear-gradient(180deg, #f7f8fa 0%, #f4f6f9 46%, #f7f8fa 100%)";
+const taskColumnBackground = "#ffffff";
 
 const SortableTaskCard = ({
   task,
@@ -104,9 +103,8 @@ export const TaskColumn = ({
   return (
     <div
       className="flex h-full min-h-0 w-full min-w-0 flex-col rounded-xl p-3"
-      style={{ background: taskColumnGradient }}
+      style={{ background: taskColumnBackground }}
     >
-      {/* カラムヘッダー */}
       <div className="mb-3 flex shrink-0 items-center gap-2">
         <TaskStatusDot color={column.dotColor} />
         <span className="text-[13px] font-medium text-[#3f4652]">
@@ -133,7 +131,6 @@ export const TaskColumn = ({
         </button>
       </div>
 
-      {/* タスクリスト */}
       <ScrollArea className="-mr-3 min-h-0 flex-1 overscroll-contain">
         <SortableContext
           id={column.id}
