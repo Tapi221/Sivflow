@@ -215,24 +215,7 @@
   }
 
   .calendar-month-row-boundary-resize-handle::after {
-    content: "";
-    position: absolute;
-    left: 16px;
-    right: 16px;
-    top: 4px;
-    height: 2px;
-    border-radius: 999px;
-    background: transparent;
-    transition:
-      background-color 120ms ease,
-      opacity 120ms ease;
-    opacity: 0;
-  }
-
-  .calendar-month-row-boundary-resize-handle:hover::after,
-  .calendar-month-row-boundary-resize-handle:focus-visible::after {
-    background: #c7c7cc;
-    opacity: 0.86;
+    content: none;
   }
 
   .calendar-month-row-boundary-resize-handle:focus-visible {
