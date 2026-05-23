@@ -4,6 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 
 import { useAuthSession } from "@/contexts/AuthContext";
 import { compareOrderableEntities } from "@/lib/orderableEntity";
+import { ensureLegacyCardsBackfilled } from "@/services/legacyCardSetMigrationBackfill";
 import { getLocalDb } from "@/services/localDB";
 import type { CardSet } from "@/types";
 import { DEFAULT_CARD_DISPLAY_MODE } from "@/types/domain/cardSet";
@@ -24,6 +25,7 @@ export const useCardSets = (
     if (!enabled) return [];
     if (!userId) return [];
     try {
+      await ensureLegacyCardsBackfilled(userId);
       const db = await getLocalDb(userId);
       return db.cardSets.where("userId").equals(userId).toArray();
     } catch (err) {
