@@ -131,6 +131,30 @@
     box-shadow: none;
   }
 
+  .calendar-month-weekday-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image:
+      linear-gradient(#e5e5ea, #e5e5ea),
+      linear-gradient(#e5e5ea, #e5e5ea),
+      linear-gradient(#e5e5ea, #e5e5ea),
+      linear-gradient(#e5e5ea, #e5e5ea),
+      linear-gradient(#e5e5ea, #e5e5ea),
+      linear-gradient(#e5e5ea, #e5e5ea);
+    background-repeat: no-repeat;
+    background-size: 1px 100%;
+    background-position:
+      14.2857142857% 0,
+      28.5714285714% 0,
+      42.8571428571% 0,
+      57.1428571429% 0,
+      71.4285714286% 0,
+      85.7142857143% 0;
+  }
+
   .calendar-month-weekday-cell {
     border-right: 0 !important;
     background: #ffffff !important;
@@ -142,10 +166,6 @@
       "Helvetica Neue",
       sans-serif;
     letter-spacing: 0.02em;
-  }
-
-  .calendar-month-weekday-cell:not(:last-child) {
-    border-right: 1px solid #e5e5ea !important;
   }
 
   .calendar-month-grid {
@@ -160,17 +180,50 @@
     background: #ffffff;
   }
 
+  .calendar-month-week-row::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    background-image:
+      linear-gradient(#e5e5ea, #e5e5ea),
+      linear-gradient(#e5e5ea, #e5e5ea),
+      linear-gradient(#e5e5ea, #e5e5ea),
+      linear-gradient(#e5e5ea, #e5e5ea),
+      linear-gradient(#e5e5ea, #e5e5ea),
+      linear-gradient(#e5e5ea, #e5e5ea);
+    background-repeat: no-repeat;
+    background-size: 1px 100%;
+    background-position:
+      14.2857142857% 0,
+      28.5714285714% 0,
+      42.8571428571% 0,
+      57.1428571429% 0,
+      71.4285714286% 0,
+      85.7142857143% 0;
+  }
+
+  .calendar-month-week-row::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4;
+    height: 1px;
+    pointer-events: none;
+    background: #e5e5ea;
+  }
+
   .calendar-month-day-cell {
     overflow: visible;
     min-height: var(--calendar-month-row-height);
     contain: layout style;
     border-color: #e5e5ea !important;
     border-right-width: 0 !important;
+    border-bottom-width: 0 !important;
     transition: background-color 120ms ease;
-  }
-
-  .calendar-month-day-cell:not(:nth-child(7n)) {
-    border-right: 1px solid #e5e5ea !important;
   }
 
   .calendar-month-day-cell::after {
