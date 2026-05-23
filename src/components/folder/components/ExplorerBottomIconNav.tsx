@@ -18,9 +18,9 @@ type BottomNavItem = {
 
 const NAV_ITEMS: BottomNavItem[] = [
   {
-    to: "/folders",
-    label: "フォルダ",
-    matcher: /^\/folders(?:\/|$)/i,
+    to: "/library",
+    label: "ライブラリ",
+    matcher: /^\/library(?:\/|$)/i,
     Icon: ExplorerFolderNavIcon,
   },
   {
