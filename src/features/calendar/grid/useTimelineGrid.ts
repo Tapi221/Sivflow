@@ -1,13 +1,14 @@
 import { useMemo } from "react";
 
 import {
-  buildTimelineColumns,
   getTimelineAnchorColumnIndex,
   getTimelineColumnWidth,
 } from "@/features/calendar/grid/TimelineDayView.shared";
 
 import type { CalendarViewMode } from "../schedulePane.types";
 import type { TimelineUnitBuffer } from "./TimelineDayView.shared";
+import { useScheduleTimelineColumns } from "./useScheduleColumns";
+
 export const useTimelineGrid = ({
   currentDate,
   selectedViewMode,
@@ -17,15 +18,11 @@ export const useTimelineGrid = ({
   selectedViewMode: CalendarViewMode;
   timelineUnitBuffer: TimelineUnitBuffer;
 }) => {
-  const timelineColumns = useMemo(
-    () =>
-      buildTimelineColumns(
-        selectedViewMode,
-        currentDate,
-        timelineUnitBuffer,
-      ),
-    [currentDate, selectedViewMode, timelineUnitBuffer],
-  );
+  const timelineColumns = useScheduleTimelineColumns({
+    anchorDate: currentDate,
+    viewMode: selectedViewMode,
+    buffer: timelineUnitBuffer,
+  });
 
   const timelineColumnWidth = useMemo(
     () => getTimelineColumnWidth(selectedViewMode, 60),
