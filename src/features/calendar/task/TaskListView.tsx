@@ -362,7 +362,7 @@ export const TaskListView = ({
         aria-orientation="vertical"
         aria-label={`${column.label} の列幅を調整`}
         title="ドラッグで列幅調整、ダブルクリックで初期幅に戻す"
-        className="group/resize absolute right-[-6px] top-0 z-20 flex h-[1em] w-3 items-center justify-center cursor-col-resize touch-none"
+        className="group/resize absolute right-[-6px] top-1/2 z-20 flex h-[1em] w-3 -translate-y-1/2 items-center justify-center cursor-col-resize touch-none"
         onDoubleClick={() => handleColumnResizeReset(column.id)}
         onPointerDown={(event) => handleColumnResizeStart(event, column.id)}
       >
