@@ -1,12 +1,14 @@
-import type { ComponentType } from "react";
+import { useMemo, type ComponentType } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { TagFilterPopover } from "@/chip/popover/TagFilterPopover";
 import {
   WorkspaceHeaderToolbar,
   type WorkspaceHeaderToolbarIconProps,
 } from "@/features/workspace/WorkspaceHeaderToolbar";
 
-import { Filter, Search } from "@/ui/icons";
+import { useTags } from "@/hooks/settings/useTags";
+import { Search } from "@/ui/icons";
 
 type PdfLibraryWorkspaceSection = "explorer" | "pdf" | "flashcard" | "notes";
 
@@ -195,13 +197,6 @@ const PDF_LIBRARY_TABS = [
   icon: ComponentType<WorkspaceHeaderToolbarIconProps>;
 }>;
 
-const PDF_LIBRARY_ACTIONS = [
-  { label: "Search", icon: Search },
-  { label: "Filter", icon: Filter },
-  { label: "Sort", icon: SortToolbarIcon },
-  { label: "Fields", icon: FieldsToolbarIcon },
-] as const;
-
 const resolveLibrarySectionRoute = (
   section: PdfLibraryWorkspaceSection,
 ): string => {
@@ -218,11 +213,40 @@ export const PdfLibraryWorkspaceToolbar = ({
   onSelectSection,
 }: PdfLibraryWorkspaceToolbarProps) => {
   const navigate = useNavigate();
+  const { tags } = useTags();
+
+  const allTags = useMemo(
+    () =>
+      tags
+        .map((tag) => tag.name)
+        .sort((left, right) => left.localeCompare(right, "ja")),
+    [tags],
+  );
 
   const handleSelectSection = (section: PdfLibraryWorkspaceSection) => {
     onSelectSection(section);
     navigate(resolveLibrarySectionRoute(section));
   };
+
+  const actions = useMemo(
+    () => [
+      { label: "Search", icon: Search },
+      {
+        label: "Filter",
+        render: ({ className, iconClassName, label }) => (
+          <TagFilterPopover
+            allTags={allTags}
+            className={className}
+            iconClassName={iconClassName}
+            ariaLabel={label}
+          />
+        ),
+      },
+      { label: "Sort", icon: SortToolbarIcon },
+      { label: "Fields", icon: FieldsToolbarIcon },
+    ],
+    [allTags],
+  );
 
   return (
     <WorkspaceHeaderToolbar
@@ -231,7 +255,7 @@ export const PdfLibraryWorkspaceToolbar = ({
         ...tab,
         onClick: () => handleSelectSection(tab.value),
       }))}
-      actions={PDF_LIBRARY_ACTIONS}
+      actions={actions}
       variant="segmented"
     />
   );
