@@ -6,6 +6,7 @@ import {
   DragOverlay,
   type DragOverEvent,
   type DragStartEvent,
+  MeasuringStrategy,
   PointerSensor,
   pointerWithin,
   rectIntersection,
@@ -63,6 +64,11 @@ const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-[#f7f8fa]";
 const TASK_CARD_OVERLAY_CLASS_NAME = "max-w-[calc(100vw-2rem)]";
 const TASK_COLUMN_DIVIDER_CLASS_NAME =
   "before:pointer-events-none before:absolute before:-left-1.5 before:top-0 before:bottom-0 before:w-[0.5px] before:bg-[#e9eaed] before:content-['']";
+const TASK_DND_MEASURING_CONFIG = {
+  droppable: {
+    strategy: MeasuringStrategy.Always,
+  },
+};
 
 const DroppableTaskColumn = ({
   column,
@@ -119,6 +125,25 @@ const findTask = (
 
 const isTaskStatus = (value: unknown): value is TaskStatus => {
   return TASK_COLUMNS.some((column) => column.id === value);
+};
+
+const areDropTargetsEqual = (
+  left: TaskDropTarget | null,
+  right: TaskDropTarget | null,
+): boolean => {
+  if (left === right) {
+    return true;
+  }
+
+  if (!left || !right) {
+    return false;
+  }
+
+  return (
+    left.status === right.status &&
+    left.overTaskId === right.overTaskId &&
+    left.position === right.position
+  );
 };
 
 const areTaskBoardsEqual = (
@@ -416,6 +441,11 @@ export const TaskBoardView = ({
       return;
     }
 
+    const previousTarget = latestDropTargetRef.current;
+    if (areDropTargetsEqual(previousTarget, target)) {
+      return;
+    }
+
     latestDropTargetRef.current = target;
 
     setPreviewTasksByStatus((currentTasksByStatus) => {
@@ -511,6 +541,7 @@ export const TaskBoardView = ({
     <DndContext
       sensors={sensors}
       collisionDetection={taskBoardCollisionDetection}
+      measuring={TASK_DND_MEASURING_CONFIG}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragCancel={handleDragCancel}
