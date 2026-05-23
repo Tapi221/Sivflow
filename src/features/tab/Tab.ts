@@ -24,12 +24,7 @@ export type WorkspaceRouteTabId =
 /**
  * タブ種別
  */
-export type WorkspaceTabKind =
-  | "route"
-  | "explorer"
-  | "document"
-  | "cardSet"
-  | "card";
+export type WorkspaceTabKind = "route" | "explorer" | "document" | "card";
 
 /**
  * 全タブ共通ベース
@@ -69,16 +64,6 @@ export type WorkspaceDocumentTab = WorkspaceTabBase & {
 };
 
 /**
- * カードセットタブ
- */
-export type WorkspaceCardSetTab = WorkspaceTabBase & {
-  id: `cardSet:${string}`;
-  kind: "cardSet";
-  cardSetId: string;
-  folderId: string | null;
-};
-
-/**
  * カードタブ
  */
 export type WorkspaceCardTab = WorkspaceTabBase & {
@@ -95,7 +80,6 @@ export type WorkspaceTab =
   | WorkspaceRouteTab
   | WorkspaceExplorerTab
   | WorkspaceDocumentTab
-  | WorkspaceCardSetTab
   | WorkspaceCardTab;
 
 /**
