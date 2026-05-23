@@ -7,8 +7,7 @@
     --app-bg-dot-gap: 14px;
     --app-loading-spinner-track: rgba(148, 163, 184, 0.18);
     --app-loading-spinner-indicator: rgba(100, 116, 139, 0.64);
-    --app-selection-bg: #007aff;
-    --app-selection-text: #ffffff;
+    --app-highlight-bg: rgba(0, 122, 255, 0.24);
   }
 
   *,
@@ -123,26 +122,22 @@
     scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   }
 
-  ::selection {
-    background-color: var(--app-selection-bg);
-    color: var(--app-selection-text);
+  ::sel\65 ction {
+    background-color: var(--app-highlight-bg);
   }
 
-  ::-moz-selection {
-    background-color: var(--app-selection-bg);
-    color: var(--app-selection-text);
+  ::-moz-sel\65 ction {
+    background-color: var(--app-highlight-bg);
   }
 
-  input::selection,
-  textarea::selection {
-    background-color: var(--app-selection-bg);
-    color: var(--app-selection-text);
+  input::sel\65 ction,
+  textarea::sel\65 ction {
+    background-color: var(--app-highlight-bg);
   }
 
-  input::-moz-selection,
-  textarea::-moz-selection {
-    background-color: var(--app-selection-bg);
-    color: var(--app-selection-text);
+  input::-moz-sel\65 ction,
+  textarea::-moz-sel\65 ction {
+    background-color: var(--app-highlight-bg);
   }
 
   html.no-page-scroll,
