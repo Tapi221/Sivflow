@@ -503,9 +503,9 @@ export const refreshCalendarAccessToken = async ({
 }: {
   refreshToken: string;
 }): Promise<GoogleCalendarAccess> => {
-  const clientId = getClientId();
-
   if (isDesktopLikeRuntime()) {
+    const clientId = getClientId();
+
     const tokens = await oauthBridge.refreshTokens({
       clientId,
       refreshToken,
@@ -523,6 +523,8 @@ export const refreshCalendarAccessToken = async ({
       ...profile,
     };
   }
+
+  const clientId = getWebClientId();
 
   const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, {
     method: "POST",
