@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
@@ -53,13 +53,7 @@ export const CalendarMonthView = ({
   const today = useMemo(() => new Date(), []);
 
   const isResizingRef = useRef(false);
-  const storedRowHeight = C.readStoredMonthRowHeight();
-  const monthRowHeightRef = useRef(storedRowHeight);
-  const maxVisibleChipsRef = useRef(getMaxVisibleChips(storedRowHeight));
-
-  const [maxVisibleChips, setMaxVisibleChips] = useState(
-    maxVisibleChipsRef.current,
-  );
+  const monthRowHeightRef = useRef(C.readStoredMonthRowHeight());
 
   const scroll = useMonthInfiniteScroll({
     currentDate,
@@ -85,14 +79,13 @@ export const CalendarMonthView = ({
     onAfterCommit: scroll.syncVisibleMonth,
     onLiveResize: (height) => {
       monthRowHeightRef.current = height;
-
-      const nextMaxVisibleChips = getMaxVisibleChips(height);
-      if (nextMaxVisibleChips === maxVisibleChipsRef.current) return;
-
-      maxVisibleChipsRef.current = nextMaxVisibleChips;
-      setMaxVisibleChips(nextMaxVisibleChips);
     },
   });
+
+  const maxVisibleChips = useMemo(
+    () => getMaxVisibleChips(monthRowHeight),
+    [monthRowHeight],
+  );
 
   const renderedEvents = useMemo(() => {
     const firstWeek = scroll.monthWeeks[0];
