@@ -36,6 +36,12 @@ export type GCalSyncState = "idle" | "syncing" | "needsReconnect" | "error";
 
 export type GCalConnectionStatus = "connected" | "needsReconnect" | "error";
 
+export type GCalSilentReconnectResult =
+  | boolean
+  | "reconnected"
+  | "needsReconnect"
+  | "retryLater";
+
 export type GCalSyncRange = {
   rangeStart: Date;
   rangeEnd: Date;
@@ -110,7 +116,7 @@ export type GCalSyncEngineOptions = {
   onError: (error: Error) => void;
   pollIntervalMs?: number;
   getAccessToken: () => string | null;
-  silentReconnect: () => Promise<boolean>;
+  silentReconnect: () => Promise<GCalSilentReconnectResult>;
   fullSyncPastDays?: number;
   fullSyncFutureDays?: number;
 };

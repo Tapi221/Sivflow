@@ -62,14 +62,41 @@ const decryptRefreshToken = (payload: string): string => {
   return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString("utf8");
 };
 
-const exchangeToken = async (params: URLSearchParams) => {
+const exchangeToken = async (
+  params: URLSearchParams,
+  context: "authorization_code" | "refresh_token",
+) => {
   const response = await fetch(GOOGLE_TOKEN_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: params,
   });
   const data = (await response.json()) as Record<string, unknown>;
-  if (!response.ok) throw new HttpsError("internal", `Google token exchange failed (${response.status}).`);
+  if (!response.ok) {
+    const googleError = typeof data.error === "string" ? data.error : "unknown";
+    const description =
+      typeof data.error_description === "string" ? data.error_description : "";
+    const message = `Google token ${context} failed (${response.status}): ${googleError}${
+      description ? ` - ${description}` : ""
+    }`;
+
+    console.error("[GoogleCalendarOAuth] token endpoint failed", {
+      context,
+      status: response.status,
+      googleError,
+      description,
+    });
+
+    if (
+      googleError === "invalid_grant" ||
+      googleError === "invalid_client" ||
+      googleError === "unauthorized_client"
+    ) {
+      throw new HttpsError("failed-precondition", message);
+    }
+
+    throw new HttpsError("internal", message);
+  }
   return data;
 };
 
@@ -113,6 +140,7 @@ export const exchangeGoogleCalendarCode = onCall(
         grant_type: "authorization_code",
         redirect_uri: redirectUri,
       }),
+      "authorization_code",
     );
 
     const accessToken = typeof token.access_token === "string" ? token.access_token : null;
@@ -120,34 +148,47 @@ export const exchangeGoogleCalendarCode = onCall(
     const expiresInSeconds = typeof token.expires_in === "number" ? token.expires_in : null;
 
     if (!accessToken) throw new HttpsError("internal", "Google token response missing access_token.");
-    if (!refreshToken) {
-      throw new HttpsError(
-        "failed-precondition",
-        "Google did not return a refresh token. Reconnect using consent/select_account and remove prior grant if needed.",
-      );
-    }
 
     const profile = await fetchUserInfo(accessToken);
     const accountId = profile.accountEmail;
+    const ref = await accountDoc(uid, accountId);
+    const existingSnap = await ref.get();
+    const existingData = existingSnap.data() as
+      | { encryptedRefreshToken?: string; createdAt?: unknown }
+      | undefined;
+
+    if (!refreshToken && !existingData?.encryptedRefreshToken) {
+      console.error("[GoogleCalendarOAuth] refresh token missing with no stored fallback", {
+        uid,
+        accountId,
+      });
+      throw new HttpsError(
+        "failed-precondition",
+        "Google did not return a refresh token and no stored refresh token exists. Reconnect using consent/select_account and remove the prior Google grant if needed.",
+      );
+    }
+
     const now = await serverTimestamp();
 
-    const payload: StoredGoogleCalendarAccount = {
+    const payload: Partial<StoredGoogleCalendarAccount> = {
       email: profile.accountEmail,
       name: profile.accountName,
       photoUrl: profile.accountPhotoUrl,
-      encryptedRefreshToken: encryptRefreshToken(refreshToken),
-      createdAt: now,
+      createdAt: existingData?.createdAt ?? now,
       updatedAt: now,
     };
 
-    const ref = await accountDoc(uid, accountId);
+    if (refreshToken) {
+      payload.encryptedRefreshToken = encryptRefreshToken(refreshToken);
+    }
+
     await ref.set(payload, { merge: true });
 
     return {
       accessToken,
       expiresInSeconds,
       ...profile,
-      refreshTokenStored: true,
+      refreshTokenStored: Boolean(refreshToken || existingData?.encryptedRefreshToken),
     };
   },
 );
@@ -179,6 +220,7 @@ export const getGoogleCalendarAccessToken = onCall(
         grant_type: "refresh_token",
         refresh_token: decryptRefreshToken(data.encryptedRefreshToken),
       }),
+      "refresh_token",
     );
 
     const accessToken = typeof token.access_token === "string" ? token.access_token : null;

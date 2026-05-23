@@ -405,10 +405,25 @@ export class GoogleCalendarSyncEngine {
         (error as Error & { status?: number }).status === 401;
 
       if (isUnauthorized) {
-        const reconnected = await this.options.silentReconnect();
+        const reconnectResult = await this.options.silentReconnect();
+        const reconnected =
+          reconnectResult === true || reconnectResult === "reconnected";
 
         if (reconnected && this.isRunning) {
           shouldRetryAfterReconnect = true;
+          return;
+        }
+
+        if (reconnectResult === "retryLater") {
+          this.setSyncState("error");
+
+          const backoffMs = this.currentBackoffMs;
+          this.currentBackoffMs = Math.min(
+            this.currentBackoffMs * 2,
+            MAX_BACKOFF_MS,
+          );
+
+          this.schedulePoll(backoffMs);
           return;
         }
 
