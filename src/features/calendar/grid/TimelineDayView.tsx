@@ -27,12 +27,6 @@ type CalendarTimelineDayViewProps = {
   onSelectDate?: (date: Date) => void;
 };
 
-const buildColumnGridBackground = (columnWidth: number) => {
-  const borderStart = Math.max(0, columnWidth - 1);
-
-  return `repeating-linear-gradient(to right, transparent 0, transparent ${borderStart}px, #eef0f3 ${borderStart}px, #eef0f3 ${columnWidth}px)`;
-};
-
 export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
   viewMode,
   anchorDate,
@@ -60,10 +54,6 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
   const selectedTime = selectedDate.getTime();
   const gridWidth = columns.length * columnWidth;
 
-  const columnGridBackground = useMemo(() => {
-    return buildColumnGridBackground(columnWidth);
-  }, [columnWidth]);
-
   const scrollSurfaceStyle = useMemo<CSSProperties>(
     () => ({
       overscrollBehaviorX: "contain",
@@ -72,16 +62,30 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
     [],
   );
 
+  const columnGridStyle = useMemo<CSSProperties>(
+    () => ({
+      gridTemplateColumns: `repeat(${columns.length}, ${columnWidth}px)`,
+      width: `${gridWidth}px`,
+    }),
+    [columnWidth, columns.length, gridWidth],
+  );
+
+  const timelineHeaderStyle = useMemo<CSSProperties>(
+    () => ({
+      ...columnGridStyle,
+      height: `${C.TIMELINE_HEADER_HEIGHT}px`,
+    }),
+    [columnGridStyle],
+  );
+
   const timelineRowStyle = useMemo<CSSProperties>(
     () => ({
-      backgroundImage: columnGridBackground,
-      backgroundSize: `${columnWidth}px 100%`,
+      ...columnGridStyle,
       contain: "layout paint",
       height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px`,
       transform: "translateZ(0)",
-      width: `${gridWidth}px`,
     }),
-    [columnGridBackground, columnWidth, gridWidth],
+    [columnGridStyle],
   );
 
   return (
@@ -102,14 +106,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
           <div className="sticky left-0 top-0 z-20 border-b border-r border-[#e5e7eb] bg-white" />
 
           <div className="sticky top-0 z-10 border-b border-[#e5e7eb] bg-white">
-            <div
-              className="grid"
-              style={{
-                gridTemplateColumns: `repeat(${columns.length}, ${columnWidth}px)`,
-                width: `${gridWidth}px`,
-                height: `${C.TIMELINE_HEADER_HEIGHT}px`,
-              }}
-            >
+            <div className="grid" style={timelineHeaderStyle}>
               {columns.map((column) => {
                 const isSelected =
                   selectedTime >= column.start.getTime() &&
@@ -166,9 +163,16 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
               />
 
               <div
-                className="relative border-b border-[#e5e7eb] bg-white"
+                className="grid border-b border-[#e5e7eb] bg-white"
                 style={timelineRowStyle}
-              />
+              >
+                {columns.map((column) => (
+                  <div
+                    key={column.id}
+                    className="border-r border-[#e5e7eb] last:border-r-0"
+                  />
+                ))}
+              </div>
             </Fragment>
           ))}
         </div>
