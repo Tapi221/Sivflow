@@ -67,6 +67,7 @@ export type UseSchedulePaneReturn = {
   handleSidebarPreviousMonth: () => void;
   handleSidebarNextMonth: () => void;
   handleSidebarSelectDate: (date: Date) => void;
+  handleTimelineSelectDate: (date: Date) => void;
   handleVisibleMonthChange: (date: Date) => void;
   handleMonthCellSelectDate: (date: Date) => void;
 
@@ -207,6 +208,7 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     handleSidebarPreviousMonth: navigation.handleSidebarPreviousMonth,
     handleSidebarNextMonth: navigation.handleSidebarNextMonth,
     handleSidebarSelectDate: navigation.handleSidebarSelectDate,
+    handleTimelineSelectDate: navigation.handleTimelineSelectDate,
     handleVisibleMonthChange: navigation.handleVisibleMonthChange,
     handleMonthCellSelectDate: navigation.handleMonthCellSelectDate,
 
