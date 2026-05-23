@@ -2,7 +2,14 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GoogleCalendarSyncEngine } from "../../../../src/features/calendar/googlecalendar-sync/GoogleCalendarSyncEngine";
-import type { GCalSyncEngineOptions, GCalSyncStartContext, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "../../../../src/features/calendar/googlecalendar-integration/gcalSync.types";
+import type {
+  GCalSilentReconnectResult,
+  GCalSyncEngineOptions,
+  GCalSyncStartContext,
+  GCalSyncState,
+  GoogleCalendarEvent,
+  GoogleCalendarListItem,
+} from "../../../../src/features/calendar/googlecalendar-integration/gcalSync.types";
 
 const CALENDAR_ID = "primary";
 const ACCENT_COLOR = "#4285f4";
@@ -64,7 +71,9 @@ describe("GoogleCalendarSyncEngine", () => {
   let onSyncStateChange: ReturnType<typeof vi.fn<(state: GCalSyncState) => void>>;
   let onLastSyncedAtChange: ReturnType<typeof vi.fn<(at: Date) => void>>;
   let onError: ReturnType<typeof vi.fn<(error: Error) => void>>;
-  let silentReconnect: ReturnType<typeof vi.fn<() => Promise<boolean>>>;
+  let silentReconnect: ReturnType<
+    typeof vi.fn<() => Promise<GCalSilentReconnectResult>>
+  >;
   let getAccessToken: ReturnType<typeof vi.fn<() => string | null>>;
   let engine: GoogleCalendarSyncEngine;
 
@@ -94,7 +103,9 @@ describe("GoogleCalendarSyncEngine", () => {
     onSyncStateChange = vi.fn<(state: GCalSyncState) => void>();
     onLastSyncedAtChange = vi.fn<(at: Date) => void>();
     onError = vi.fn<(error: Error) => void>();
-    silentReconnect = vi.fn<() => Promise<boolean>>().mockResolvedValue(true);
+    silentReconnect = vi
+      .fn<() => Promise<GCalSilentReconnectResult>>()
+      .mockResolvedValue(true);
     getAccessToken = vi.fn<() => string | null>().mockReturnValue(ACCESS_TOKEN);
 
     engine = buildEngine();
@@ -158,11 +169,12 @@ describe("GoogleCalendarSyncEngine", () => {
       engine.start(testContext);
 
       await vi.waitFor(() => {
-        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(onEventsRangeReplaced).toHaveBeenCalledTimes(1);
       });
 
       engine.stop();
 
+      expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(onEventsRangeReplaced).toHaveBeenCalledTimes(1);
       expect(onEventsRangeReplaced.mock.calls[0][0].events).toEqual([]);
       expect(onEventAdded).not.toHaveBeenCalled();
@@ -321,6 +333,27 @@ describe("GoogleCalendarSyncEngine", () => {
       await vi.waitFor(() => {
         expect(onSyncStateChange).toHaveBeenCalledWith("needsReconnect");
       });
+
+      engine.stop();
+    });
+
+    it("一時的な再接続失敗は needsReconnect にしない", async () => {
+      silentReconnect.mockResolvedValue("retryLater");
+
+      vi.spyOn(globalThis, "fetch").mockReturnValueOnce(mock401Response());
+
+      engine.start(testContext);
+
+      await vi.waitFor(() => {
+        expect(onSyncStateChange).toHaveBeenCalledWith("error");
+      });
+
+      expect(onSyncStateChange).not.toHaveBeenCalledWith("needsReconnect");
+      expect(onError).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Google Calendar の再連携が必要です",
+        }),
+      );
 
       engine.stop();
     });
