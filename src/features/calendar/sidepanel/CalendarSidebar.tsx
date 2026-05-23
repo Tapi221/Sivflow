@@ -21,6 +21,7 @@ import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
 import type {
+  CalendarSelectionRange,
   CalendarSidebarProps,
   GoogleAccountDisplay,
 } from "../schedulePane.types";
@@ -68,23 +69,46 @@ const IconChevronRight = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const normalizeSelectionRange = (range?: CalendarSelectionRange | null) => {
+  if (!range) return null;
+
+  const start = startOfDay(range.start);
+  const end = startOfDay(range.end);
+
+  return start.getTime() <= end.getTime()
+    ? { start, end }
+    : { start: end, end: start };
+};
+
 const buildMiniCalendarDays = (
   monthDate: Date,
   selectedDate: Date,
+  selectedRange?: CalendarSelectionRange | null,
 ): MiniCalendarDay[] => {
   const monthStart = startOfMonth(monthDate);
   const gridStart = startOfWeek(monthStart, { weekStartsOn: 0 });
   const today = startOfDay(new Date());
+  const range = normalizeSelectionRange(selectedRange);
 
   return Array.from({ length: C.MINI_CALENDAR_CELL_COUNT }, (_, index) => {
     const date = addDays(gridStart, index);
+    const dayStart = startOfDay(date);
+    const dayTime = dayStart.getTime();
+    const isRangeStart = range ? isSameDay(dayStart, range.start) : false;
+    const isRangeEnd = range ? isSameDay(dayStart, range.end) : false;
+    const isInSelectedRange = range
+      ? dayTime >= range.start.getTime() && dayTime <= range.end.getTime()
+      : false;
 
     return {
       date,
       dayNumber: format(date, "d"),
       isCurrentMonth: date.getMonth() === monthStart.getMonth(),
-      isSelected: isSameDay(date, selectedDate),
+      isSelected: range ? isRangeStart || isRangeEnd : isSameDay(date, selectedDate),
       isToday: isSameDay(date, today),
+      isRangeStart,
+      isRangeEnd,
+      isInSelectedRange,
     };
   });
 };
@@ -213,6 +237,7 @@ const GoogleAccountSection = ({
 export const CalendarSidebar = ({
   monthDate,
   selectedDate,
+  selectedRange,
   activeMode,
   googleAccounts,
   isAnyCalendarConnecting,
@@ -227,8 +252,8 @@ export const CalendarSidebar = ({
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
   const miniCalendarDays = useMemo(
-    () => buildMiniCalendarDays(monthDate, selectedDate),
-    [monthDate, selectedDate],
+    () => buildMiniCalendarDays(monthDate, selectedDate, selectedRange),
+    [monthDate, selectedDate, selectedRange],
   );
 
   const hasGoogleAccounts = googleAccounts.length > 0;
@@ -281,6 +306,8 @@ export const CalendarSidebar = ({
         <div className="grid grid-cols-7 gap-y-0.5 px-0.5">
           {miniCalendarDays.map((day) => {
             const isActive = day.isToday || day.isSelected;
+            const isRangeMiddle =
+              day.isInSelectedRange && !day.isRangeStart && !day.isRangeEnd;
 
             return (
               <button
@@ -288,16 +315,23 @@ export const CalendarSidebar = ({
                 type="button"
                 onClick={() => onSelectDate(day.date)}
                 className={cn(
-                  "flex h-7 w-full items-center justify-center rounded-full transition-all duration-150 active:scale-[0.92]",
-                  !isActive && "hover:bg-[#f7f7f7]",
+                  "flex h-7 w-full items-center justify-center transition-all duration-150 active:scale-[0.92]",
+                  day.isInSelectedRange ? "bg-[#e9eef7]" : "rounded-full",
+                  day.isRangeStart && "rounded-l-full",
+                  day.isRangeEnd && "rounded-r-full",
+                  day.isRangeStart && day.isRangeEnd && "rounded-full",
+                  !day.isInSelectedRange && !isActive && "hover:bg-[#f7f7f7]",
+                  isRangeMiddle && "text-[#334155]",
                 )}
               >
                 <CalendarDayNumberCircle
-                  isToday={day.isToday}
+                  isToday={day.isToday && !day.isInSelectedRange}
                   isSelected={day.isSelected}
                   isCurrentMonth={day.isCurrentMonth}
                   className={cn(
-                    !day.isCurrentMonth && !isActive && "text-[#b7b7b7]",
+                    isRangeMiddle && "bg-transparent text-[#334155] shadow-none",
+                    day.isToday && day.isInSelectedRange && "ring-1 ring-[#007aff]",
+                    !day.isCurrentMonth && !isActive && !day.isInSelectedRange && "text-[#b7b7b7]",
                   )}
                 >
                   {day.dayNumber}
