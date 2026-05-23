@@ -4,7 +4,7 @@ import { Fragment, memo, useMemo } from "react";
 import {
   CalendarDateButton,
   CalendarDateContent,
-} from "@/chip/button/CalendarDateButton";
+} from "@/chip/button/GridHeader.scheduletimeline";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { cn } from "@/lib/utils";
 
