@@ -147,9 +147,9 @@ export const CalendarWeekDayGrid = ({
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
       {/* ── ヘッダー ── */}
-      <div className="flex shrink-0 border-b border-[#e0e0e1] bg-white">
+      <div className="flex shrink-0 border-b border-[#e5e7eb] bg-white">
         <div
-          className="shrink-0 border-r border-[#e0e0e1]"
+          className="shrink-0 border-r border-[#e5e7eb]"
           style={{ width: C.TIME_COLUMN_WIDTH }}
         />
 
@@ -172,7 +172,7 @@ export const CalendarWeekDayGrid = ({
                   type="button"
                   onClick={() => onSelectDate?.(day)}
                   className={cn(
-                    "flex h-10 shrink-0 flex-col items-center justify-center border-r border-[#f0f0f0] last:border-r-0",
+                    "flex h-10 shrink-0 flex-col items-center justify-center border-r border-[#eef0f3] last:border-r-0",
                     "transition-colors hover:bg-[#f4f5f7]",
                     "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                     isDayToday && "bg-[#f0f6ff]",
@@ -212,7 +212,7 @@ export const CalendarWeekDayGrid = ({
       >
         <div className="grid" style={timelineGridStyle}>
           {/* 時刻列 */}
-          <div className="sticky left-0 z-20 border-r border-[#e0e0e1] bg-white">
+          <div className="sticky left-0 z-20 border-r border-[#e5e7eb] bg-white">
             {HOURS.map((hour) => (
               <div
                 key={hour}
@@ -255,12 +255,12 @@ export const CalendarWeekDayGrid = ({
             return (
               <div
                 key={day.toISOString()}
-                className="relative border-r border-[#f0f0f0] last:border-r-0"
+                className="relative border-r border-[#eef0f3] last:border-r-0"
               >
                 {HOURS.map((hour) => (
                   <div
                     key={`${day.toISOString()}-${hour}`}
-                    className="border-b border-[#f0f0f0]"
+                    className="border-b border-[#eef0f3]"
                     style={{ height: "var(--calendar-hour-row-height)" }}
                   />
                 ))}
