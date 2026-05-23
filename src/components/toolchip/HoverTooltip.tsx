@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
+import {
+  TOOLTIP_SIZE_CLASS_NAMES,
+  type TooltipSize,
+} from "@/components/toolchip/tooltip.size";
 
 type TooltipSide = "top" | "right" | "bottom" | "left";
 type TooltipAlign = "center" | "start" | "end";
@@ -19,6 +23,7 @@ type HoverTooltipProps = {
   className?: string;
   tooltipClassName?: string;
   arrowClassName?: string;
+  size?: TooltipSize;
   disabled?: boolean;
 };
 
@@ -154,12 +159,14 @@ export const HoverTooltip = ({
   className,
   tooltipClassName,
   arrowClassName,
+  size = "default",
   disabled = false,
 }: HoverTooltipProps) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
   const [position, setPosition] = useState<TooltipPosition | null>(null);
 
   const tooltipLabel = label?.trim();
+  const sizeClassNames = TOOLTIP_SIZE_CLASS_NAMES[size];
 
   const showTooltip = () => {
     if (disabled || !tooltipLabel || !anchorRef.current) return;
@@ -217,7 +224,8 @@ export const HoverTooltip = ({
           >
             <div
               className={cn(
-                "relative inline-flex min-h-[26px] items-center overflow-visible whitespace-nowrap rounded-[9px] px-2.5 py-1 text-[12px] font-medium leading-[1.2] tracking-[-0.01em] text-white shadow-[0_8px_20px_rgba(0,0,0,0.2)]",
+                "relative inline-flex items-center overflow-visible whitespace-nowrap font-medium tracking-[-0.01em] text-white",
+                sizeClassNames.tooltip,
                 tooltipSurfaceClassName,
                 tooltipClassName,
               )}
@@ -228,7 +236,8 @@ export const HoverTooltip = ({
 
               <span
                 className={cn(
-                  "absolute h-2 w-2 rotate-45",
+                  "absolute rotate-45",
+                  sizeClassNames.arrow,
                   tooltipSurfaceClassName,
                   getArrowClassName(side, align),
                   arrowClassName,
