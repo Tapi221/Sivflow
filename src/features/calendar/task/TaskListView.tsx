@@ -149,6 +149,14 @@ const buildTaskGridMinWidth = (columns: TaskColumn[]): number => {
   return columns.reduce((sum, column) => sum + column.width, 0);
 };
 
+const getColumnStartPaddingClass = (columnId: TaskColumnId): string => {
+  if (columnId === "done" || columnId === "title") {
+    return "";
+  }
+
+  return "pl-4";
+};
+
 const DetailIcon = () => (
   <svg viewBox="0 0 18 18" fill="none" className="h-4 w-4" aria-hidden="true">
     <path
@@ -354,11 +362,11 @@ export const TaskListView = ({
         aria-orientation="vertical"
         aria-label={`${column.label} の列幅を調整`}
         title="ドラッグで列幅調整、ダブルクリックで初期幅に戻す"
-        className="group/resize absolute inset-y-0 right-[-8px] z-10 flex w-4 items-center justify-center cursor-col-resize touch-none"
+        className="group/resize absolute inset-y-0 right-[-6px] z-20 flex w-3 items-center justify-center cursor-col-resize touch-none"
         onDoubleClick={() => handleColumnResizeReset(column.id)}
         onPointerDown={(event) => handleColumnResizeStart(event, column.id)}
       >
-        <div className="h-[1em] w-[1px] bg-[#e5e7eb] transition-colors group-hover/resize:bg-[#9ca3af]" />
+        <div className="h-5 w-[2px] rounded-full bg-[#d1d5db] transition-colors group-hover/resize:bg-[#9ca3af]" />
       </div>
     );
   };
@@ -449,7 +457,10 @@ export const TaskListView = ({
 
       case "status":
         return (
-          <div className="min-w-0 overflow-hidden py-2.5 pr-4 align-top" role="cell">
+          <div
+            className="min-w-0 overflow-hidden py-2.5 pl-4 pr-4 align-top"
+            role="cell"
+          >
             <span className="flex min-w-0 items-center gap-1.5 text-[#4c5361]">
               <TaskStatusDot color={col?.dotColor} />
               <span className="truncate">{statusLabelMap[task.status]}</span>
@@ -460,7 +471,7 @@ export const TaskListView = ({
       case "priority":
         return (
           <div
-            className="truncate py-2.5 pr-4 align-top capitalize text-[#4c5361]"
+            className="truncate py-2.5 pl-4 pr-4 align-top capitalize text-[#4c5361]"
             role="cell"
           >
             {task.priority}
@@ -470,7 +481,7 @@ export const TaskListView = ({
       case "category":
         return (
           <div
-            className="truncate py-2.5 pr-4 align-top text-[#4c5361]"
+            className="truncate py-2.5 pl-4 pr-4 align-top text-[#4c5361]"
             role="cell"
           >
             {task.category}
@@ -479,7 +490,10 @@ export const TaskListView = ({
 
       case "dueDate":
         return (
-          <div className="truncate py-2.5 align-top text-[#8f929c]" role="cell">
+          <div
+            className="truncate py-2.5 pl-4 pr-4 align-top text-[#8f929c]"
+            role="cell"
+          >
             {task.dueDate ? format(new Date(task.dueDate), "MMM d") : "—"}
           </div>
         );
@@ -511,7 +525,9 @@ export const TaskListView = ({
             return (
               <div
                 key={column.id}
-                className={`${TABLE_HEADER_CLASS} relative min-w-0 pr-4`}
+                className={`${TABLE_HEADER_CLASS} ${getColumnStartPaddingClass(
+                  column.id,
+                )} relative min-w-0 pr-4`}
                 role="columnheader"
               >
                 <span className="block truncate pr-2">{column.label}</span>
