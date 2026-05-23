@@ -151,6 +151,7 @@ const CurrentTimeIndicator = ({
 
 export const CalendarWeekDayGrid = ({
   headerScrollRef,
+  allDayScrollRef,
   scrollContainerRef,
   visibleDays,
   visibleEvents,
@@ -162,6 +163,8 @@ export const CalendarWeekDayGrid = ({
 }: CalendarWeekDayGridProps) => {
   const today = new Date();
   const currentMinutes = useCurrentTimeMinutes();
+  const fallbackAllDayScrollRef = React.useRef<HTMLDivElement | null>(null);
+  const resolvedAllDayScrollRef = allDayScrollRef ?? fallbackAllDayScrollRef;
 
   const isTodayVisible = visibleDays.some((d) => isSameDay(d, today));
   const todayColumnIndex = visibleDays.findIndex((d) => isSameDay(d, today));
@@ -176,6 +179,24 @@ export const CalendarWeekDayGrid = ({
       ]),
     );
   }, [visibleDays, visibleEvents]);
+
+  useEffect(() => {
+    const scroller = scrollContainerRef.current;
+    const allDayScroller = resolvedAllDayScrollRef.current;
+
+    if (!scroller || !allDayScroller) return;
+
+    const syncAllDayScroll = () => {
+      allDayScroller.scrollLeft = scroller.scrollLeft;
+    };
+
+    syncAllDayScroll();
+    scroller.addEventListener("scroll", syncAllDayScroll, { passive: true });
+
+    return () => {
+      scroller.removeEventListener("scroll", syncAllDayScroll);
+    };
+  }, [resolvedAllDayScrollRef, scrollContainerRef, visibleDays.length]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
@@ -245,7 +266,7 @@ export const CalendarWeekDayGrid = ({
           終日
         </div>
 
-        <div className="flex-1 overflow-hidden bg-white">
+        <div ref={resolvedAllDayScrollRef} className="flex-1 overflow-hidden bg-white">
           <div
             style={{
               display: "grid",
