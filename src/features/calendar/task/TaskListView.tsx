@@ -88,7 +88,7 @@ const DEFAULT_TASK_COLUMNS: TaskColumn[] = [
 ];
 
 const TABLE_HEADER_CLASS =
-  "pb-2 text-left text-[12px] font-medium tracking-normal text-[#b8bcc5]";
+  "pb-2 text-left text-[13px] font-medium leading-none tracking-[-0.005em] text-[#3f4652]";
 
 const clampTaskColumnWidth = (
   width: number,
@@ -395,7 +395,7 @@ export const TaskListView = ({
       case "title":
         return (
           <div
-            className="min-w-0 overflow-hidden py-2.5 pr-4 font-medium leading-[18px] text-[#24262d]"
+            className="min-w-0 overflow-hidden py-2.5 pr-4 font-medium leading-[18px] tracking-[-0.005em] text-[#1c1c1e]"
             role="cell"
           >
             {isEditingTitle ? (
@@ -405,7 +405,7 @@ export const TaskListView = ({
                   type="text"
                   value={editingTitle}
                   aria-label="Task title"
-                  className="h-[18px] w-full border-0 bg-transparent p-0 text-[13px] font-medium leading-[18px] text-[#24262d] outline-none placeholder:text-[#9ca3af]"
+                  className="h-[18px] w-full border-0 bg-transparent p-0 text-[12px] font-medium leading-[18px] tracking-[-0.005em] text-[#1c1c1e] outline-none placeholder:text-[#9ca3af]"
                   onChange={(event) => setEditingTitle(event.target.value)}
                   onBlur={() => finishEditingTaskTitle(task)}
                   onKeyDown={(event) => {
@@ -424,19 +424,19 @@ export const TaskListView = ({
 
                 <button
                   type="button"
-                  className="mt-2 flex items-center gap-1.5 text-[13px] font-medium leading-[18px] text-[#6b7280] transition-colors hover:text-[#24262d]"
+                  className="mt-2 flex items-center gap-1.5 text-[12px] font-medium leading-[18px] text-[#6b7280] transition-colors hover:text-[#1c1c1e]"
                 >
                   <DetailIcon />
                   <span>詳細</span>
                 </button>
 
-                <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[12px] font-medium leading-none text-[#4c5361]">
+                <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] font-medium leading-none text-[#4c5361]">
                   {task.dueDate && (
-                    <span className="inline-flex h-6 items-center rounded-full border border-[#eeeeee] px-2 text-[#8f929c]">
+                    <span className="inline-flex h-5 items-center rounded-full border border-white/70 bg-[#f2f2f7] px-1.5 tabular-nums text-[#8e8e93]">
                       {format(new Date(task.dueDate), "MMM d")}
                     </span>
                   )}
-                  <span className="inline-flex h-6 items-center rounded-full border border-[#eeeeee] px-2 capitalize">
+                  <span className="inline-flex h-5 items-center rounded-full border border-white/70 bg-[#f2f2f7] px-2 font-semibold capitalize text-[#4c5361]">
                     {task.category}
                   </span>
                 </div>
@@ -444,7 +444,7 @@ export const TaskListView = ({
             ) : (
               <button
                 type="button"
-                className="block w-full truncate rounded text-left font-medium leading-[18px] text-[#24262d] transition-colors hover:bg-[#f4f5f7] focus-visible:bg-[#f4f5f7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eeeeee]"
+                className="block w-full truncate rounded text-left font-medium leading-[18px] tracking-[-0.005em] text-[#1c1c1e] transition-colors hover:bg-[#f4f5f7] focus-visible:bg-[#f4f5f7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eeeeee]"
                 aria-label={`Rename ${task.title}`}
                 title="Click to rename"
                 onClick={() => startEditingTaskTitle(task)}
@@ -491,7 +491,7 @@ export const TaskListView = ({
       case "dueDate":
         return (
           <div
-            className="truncate py-2.5 pl-4 pr-4 align-top text-[#8f929c]"
+            className="truncate py-2.5 pl-4 pr-4 align-top tabular-nums text-[#8f929c]"
             role="cell"
           >
             {task.dueDate ? format(new Date(task.dueDate), "MMM d") : "—"}
@@ -504,7 +504,7 @@ export const TaskListView = ({
     <div className="explorer-chrome-font min-h-0 flex-1 overflow-auto p-4">
       <div className="min-w-max" role="table" aria-label="タスク一覧">
         <div
-          className="grid border-b border-[#eeeeee] text-[13px]"
+          className="grid border-b border-[#eeeeee]"
           role="row"
           style={gridStyle}
         >
@@ -541,7 +541,7 @@ export const TaskListView = ({
           {tasks.map((task) => (
             <div
               key={task.id}
-              className="grid border-b border-[#eeeeee] text-[13px] hover:bg-[#fafafa]"
+              className="grid border-b border-[#eeeeee] text-[12px] font-medium leading-[18px] hover:bg-[#fafafa]"
               role="row"
               style={gridStyle}
             >
