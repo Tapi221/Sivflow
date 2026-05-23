@@ -33,7 +33,7 @@ export default defineConfig([
       // ----------------------------
       // stylistic（現実運用寄りに緩和）
       // ----------------------------
-      "@stylistic/indent": ["error", 2],
+      "@stylistic/indent": ["warn", 2],
       "@stylistic/quotes": ["error", "double"],
       "@stylistic/semi": ["error", "always"],
 
