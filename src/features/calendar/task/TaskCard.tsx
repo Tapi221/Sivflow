@@ -33,6 +33,7 @@ export const TaskCard = ({
   task,
   accountName,
   accountPhotoUrl,
+  isDragging = false,
   onDelete,
   onToggleDone,
 }: TaskCardProps) => {
@@ -58,9 +59,13 @@ export const TaskCard = ({
       className={cn(
         "group relative overflow-hidden rounded-xl border border-[#eeeeee] bg-white/95 px-3 pt-3 pb-2",
         "backdrop-blur-xl",
-        "transition-[transform,background-color,border-color] duration-200 ease-out",
-        "hover:border-[#e5e5e5] hover:bg-white",
+        "shadow-[0_1px_2px_rgba(16,24,40,0.04)]",
+        "transition-[transform,background-color,border-color,box-shadow,filter] duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
+        "hover:border-[#e5e5e5] hover:bg-white hover:shadow-[0_10px_26px_rgba(17,24,39,0.08)]",
         "active:scale-[0.998]",
+        isDragging
+          ? "cursor-grabbing scale-[1.015] border-[#dfe3ea] bg-white shadow-[0_18px_48px_rgba(15,23,42,0.16)] ring-1 ring-black/[0.04]"
+          : "cursor-grab",
       )}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/90" />
