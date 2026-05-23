@@ -2,8 +2,11 @@ import { useLayoutEffect, useRef } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 
+import type { CalendarViewMode } from "../../schedulePane.types";
+
 type Params = {
   activeMode: "timeline" | "calendar" | string;
+  selectedViewMode: CalendarViewMode;
 
   calendarBufferBefore: number;
   calendarDayColumnWidth: number;
@@ -22,6 +25,7 @@ type Params = {
 
 export const useCalendarScrollPositionSync = ({
   activeMode,
+  selectedViewMode,
   calendarBufferBefore,
   calendarDayColumnWidth,
   viewportWidth,
@@ -61,11 +65,16 @@ export const useCalendarScrollPositionSync = ({
       nextScrollLeft = timelineAnchorColumnIndex * timelineColumnWidth;
     } else {
       const anchorOffset = calendarBufferBefore * calendarDayColumnWidth;
-      const availableWidth = Math.max(0, viewportWidth - C.TIME_COLUMN_WIDTH);
-      const centerOffset = Math.max(
+      const viewportInlineInset =
+        selectedViewMode === "month" ? 0 : C.WEEKDAY_SURFACE_LEFT_INSET_PX;
+      const availableWidth = Math.max(
         0,
-        (availableWidth - calendarDayColumnWidth) / 2,
+        viewportWidth - viewportInlineInset - C.TIME_COLUMN_WIDTH,
       );
+      const centerOffset =
+        selectedViewMode === "days"
+          ? 0
+          : Math.max(0, (availableWidth - calendarDayColumnWidth) / 2);
 
       nextScrollLeft = Math.max(0, anchorOffset - centerOffset);
     }
@@ -86,6 +95,7 @@ export const useCalendarScrollPositionSync = ({
     };
   }, [
     activeMode,
+    selectedViewMode,
     calendarBufferBefore,
     calendarDayColumnWidth,
     viewportWidth,
