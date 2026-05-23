@@ -16,11 +16,15 @@ import { cn } from "@/lib/utils";
 interface TagFilterPopoverProps {
   allTags: string[];
   className?: string;
+  iconClassName?: string;
+  ariaLabel?: string;
 }
 
 export const TagFilterPopover = ({
   allTags,
   className,
+  iconClassName,
+  ariaLabel = "タグフィルターを開く",
 }: TagFilterPopoverProps) => {
   const {
     tagFilter,
@@ -44,14 +48,14 @@ export const TagFilterPopover = ({
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label="タグフィルターを開く"
+          aria-label={ariaLabel}
           className={cn(
             "ds-filter-toggle flex items-center justify-center px-2 py-1 text-xs font-medium whitespace-nowrap",
             isFilterActive && "ds-filter-toggle--active",
             className,
           )}
         >
-          <Filter className="h-4 w-4" />
+          <Filter className={cn("h-4 w-4", iconClassName)} />
         </button>
       </PopoverTrigger>
 
