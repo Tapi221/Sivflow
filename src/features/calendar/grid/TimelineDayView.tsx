@@ -64,9 +64,9 @@ export const CalendarTimelineDayView = ({
             minWidth: `${laneLabelWidth + gridWidth}px`,
           }}
         >
-          <div className="sticky left-0 top-0 z-20 border-b border-r border-[#b7b7b7] bg-white" />
+          <div className="sticky left-0 top-0 z-20 border-b border-r border-[#e5e7eb] bg-white" />
 
-          <div className="sticky top-0 z-10 border-b border-[#b7b7b7] bg-white">
+          <div className="sticky top-0 z-10 border-b border-[#e5e7eb] bg-white">
             <div
               className="grid"
               style={{
@@ -85,7 +85,7 @@ export const CalendarTimelineDayView = ({
                     key={column.id}
                     type="button"
                     className={cn(
-                      "flex h-10 flex-col items-center justify-center border-r border-[#b7b7b7] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
+                      "flex h-10 flex-col items-center justify-center border-r border-[#e5e7eb] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
                       "transition-colors hover:bg-[#f4f5f7]",
                       "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                       column.isToday && "bg-[#f0f6ff]",
@@ -122,12 +122,12 @@ export const CalendarTimelineDayView = ({
           {Array.from({ length: rowCount }, (_, index) => (
             <Fragment key={index}>
               <div
-                className="sticky left-0 z-10 border-b border-r border-[#b7b7b7] bg-white"
+                className="sticky left-0 z-10 border-b border-r border-[#e5e7eb] bg-white"
                 style={{ height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px` }}
               />
 
               <div
-                className="relative border-b border-[#b7b7b7] bg-white"
+                className="relative border-b border-[#e5e7eb] bg-white"
                 style={{
                   height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px`,
                   width: `${gridWidth}px`,
@@ -142,7 +142,7 @@ export const CalendarTimelineDayView = ({
                   {columns.map((column) => (
                     <div
                       key={`${index}-${column.id}`}
-                      className="relative border-r border-[#b7b7b7] last:border-r-0"
+                      className="relative border-r border-[#eef0f3] last:border-r-0"
                     />
                   ))}
                 </div>
