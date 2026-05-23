@@ -21,6 +21,7 @@ export type UseSchedulePaneReturn = {
   contentViewportRef: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   headerScrollRef: RefObject<HTMLDivElement | null>;
+  allDayScrollRef: RefObject<HTMLDivElement | null>;
   handleCalendarScroll: (event: UIEvent<HTMLDivElement>) => void;
 
   currentDate: Date;
@@ -144,6 +145,7 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     contentViewportRef: navigation.contentViewportRef,
     scrollContainerRef: scroll.scrollContainerRef,
     headerScrollRef: scroll.headerScrollRef,
+    allDayScrollRef: scroll.allDayScrollRef,
     handleCalendarScroll: scroll.handleScroll,
 
     currentDate: navigation.currentDate,
