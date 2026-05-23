@@ -10,6 +10,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
+import { TASK_TYPO } from "@/styles/tokens/typography";
 
 import type { Task, TaskColumn as TaskColumnType } from "./task.types";
 import { TaskCard } from "./TaskCard";
@@ -136,10 +137,10 @@ export const TaskColumn = ({
     >
       <div className="mb-3 flex shrink-0 items-center gap-2">
         <TaskStatusDot color={column.dotColor} />
-        <span className="text-[13px] font-medium text-[#3f4652]">
+        <span className={TASK_TYPO.columnTitle}>
           {statusLabelMap[column.id]}
         </span>
-        <span className="ml-0.5 flex h-4 min-w-4 items-center justify-center rounded px-1 text-[10px] font-semibold text-[#8f929c]">
+        <span className={cn("ml-0.5 flex h-4 min-w-4 items-center justify-center rounded px-1", TASK_TYPO.count)}>
           {tasks.length}
         </span>
         <button
