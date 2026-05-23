@@ -8,6 +8,7 @@ import type { TaskStatus } from "../task.types";
 
 export type TaskInsertPosition = "before" | "after";
 export type VerticalDropPosition = "before" | "after";
+export type VerticalDragDirection = "up" | "down";
 
 export type CollisionDetectionArgs = Parameters<CollisionDetection>[0];
 export type CollisionDescriptor = ReturnType<CollisionDetection>[number];
