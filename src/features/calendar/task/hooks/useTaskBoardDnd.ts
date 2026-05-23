@@ -85,20 +85,17 @@ export const useTaskBoardDnd = ({
       return;
     }
 
-    setPreviewTasksByStatus((currentTasksByStatus) => {
-      const baseTasksByStatus = currentTasksByStatus ?? tasksByStatus;
-      const nextTasksByStatus = createTaskDragPreview(
-        baseTasksByStatus,
-        pendingPreview.activeId,
-        pendingPreview.target,
-      );
+    const nextTasksByStatus = createTaskDragPreview(
+      tasksByStatus,
+      pendingPreview.activeId,
+      pendingPreview.target,
+    );
 
-      if (areTaskBoardsEqual(baseTasksByStatus, nextTasksByStatus)) {
-        return currentTasksByStatus;
-      }
-
-      return nextTasksByStatus;
-    });
+    setPreviewTasksByStatus(
+      areTaskBoardsEqual(tasksByStatus, nextTasksByStatus)
+        ? null
+        : nextTasksByStatus,
+    );
   };
 
   const schedulePreviewUpdate = (activeId: string, target: TaskDropTarget) => {
