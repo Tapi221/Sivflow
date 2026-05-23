@@ -17,7 +17,7 @@ import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import {
   CalendarDateButton,
   CalendarDateContent,
-} from "@/chip/button/CalendarDateButton";
+} from "@/chip/button/GridHeader.scheduletimeline";
 import { CalendarEventChipWeekday } from "../../../chip/eventchip/EventChip.schedule.weekday";
 import { cn } from "@/lib/utils";
 
