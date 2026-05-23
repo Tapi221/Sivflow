@@ -17,32 +17,13 @@ const getActiveVerticalRect = (event: TaskDragEvent): VerticalRect => {
   };
 };
 
-const getPointerY = (event: TaskDragEvent): number | null => {
-  const { activatorEvent } = event;
-
-  if (
-    "clientY" in activatorEvent &&
-    typeof activatorEvent.clientY === "number"
-  ) {
-    return activatorEvent.clientY + event.delta.y;
-  }
-
-  return null;
-};
-
 const getDropPosition = (
   event: TaskDragEvent,
   overRect: VerticalRect,
 ): VerticalDropPosition => {
-  const pointerY = getPointerY(event);
-  const overMiddleY = overRect.top + overRect.height / 2;
-
-  if (pointerY !== null) {
-    return pointerY >= overMiddleY ? "after" : "before";
-  }
-
   const activeRect = getActiveVerticalRect(event);
   const activeMiddleY = activeRect.top + activeRect.height / 2;
+  const overMiddleY = overRect.top + overRect.height / 2;
 
   return activeMiddleY >= overMiddleY ? "after" : "before";
 };
