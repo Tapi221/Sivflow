@@ -117,7 +117,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                     key={column.id}
                     type="button"
                     className={cn(
-                      "flex h-10 flex-col items-center justify-center border-r border-[#e5e7eb] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
+                      "flex h-10 flex-col items-center justify-center bg-white text-[12px] font-medium text-[#4c5361]",
                       "transition-colors hover:bg-[#f4f5f7]",
                       "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                       column.isToday && "bg-[#f0f6ff]",
