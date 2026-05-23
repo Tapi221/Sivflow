@@ -10,7 +10,6 @@ import type {
   GoogleCalendarListItem,
   GoogleTaskListItem,
 } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
-import type { GoogleTaskListAccountState } from "@/features/calendar/googlecalendar-integration/useGoogleTaskLists";
 
 export type { CalendarToolbarMode, CalendarViewMode };
 
@@ -57,15 +56,9 @@ export type GoogleAccountDisplay = {
   calendars: GoogleCalendarListItem[];
   taskLists: GoogleTaskListItem[];
   isTaskListsLoading: boolean;
-  taskListsError: string | null;
   selectedCalendarIds: Set<string>;
-  syncState: "idle" | "syncing" | "needsReconnect" | "error";
   connectionStatus: GCalConnectionStatus;
-  lastSyncedAt: Date | null;
-  error: string | null;
 };
-
-export type GoogleTaskListsByAccount = Record<string, GoogleTaskListAccountState>;
 
 export type CalendarSidebarProps = {
   monthDate: Date;
@@ -81,8 +74,6 @@ export type CalendarSidebarProps = {
   onNextMonth: () => void;
   onAddCalendar: () => void;
   onReconnectAccount: (accountId: string) => void;
-  onRetryAccount: (accountId: string) => void;
-  onRemoveAccount: (accountId: string) => void;
   onToggleCalendar: (accountId: string, calendarId: string) => void;
 };
 
