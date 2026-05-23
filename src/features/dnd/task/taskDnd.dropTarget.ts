@@ -1,4 +1,4 @@
-import type { Task, TaskStatus } from "../task.types";
+import type { Task, TaskStatus } from "../../calendar/task/task.types";
 import { isTaskStatus } from "./taskDnd.preview";
 import type { TaskDragEvent, TaskDropTarget } from "./taskDnd.types";
 

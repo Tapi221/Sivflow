@@ -10,20 +10,20 @@ import {
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useMemo, useRef, useState } from "react";
 
-import type { Task, TaskStatus } from "../task.types";
+import type { Task, TaskStatus } from "../../calendar/task/task.types";
 import {
   TASK_DND_DROP_ANIMATION,
   TASK_DND_MEASURING_CONFIG,
   TASK_DND_POINTER_ACTIVATION_DISTANCE,
-} from "../dnd/taskDnd.config";
-import { taskBoardCollisionDetection } from "../dnd/taskDnd.collision";
-import { resolveDropTarget } from "../dnd/taskDnd.dropTarget";
+} from "./taskDnd.config";
+import { taskBoardCollisionDetection } from "./taskDnd.collision";
+import { resolveDropTarget } from "./taskDnd.dropTarget";
 import {
   areDropTargetsEqual,
   areTaskBoardsEqual,
   createTaskDragPreview,
   findTask,
-} from "../dnd/taskDnd.preview";
+} from "./taskDnd.preview";
 import type {
   TaskDropTarget,
   TaskInsertPosition,

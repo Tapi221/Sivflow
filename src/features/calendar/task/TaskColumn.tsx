@@ -13,7 +13,7 @@ import { TaskInsertionSlot } from "./TaskInsertionSlot";
 import {
   TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS,
   TASK_DND_LAYOUT_ANIMATION_DURATION_MS,
-} from "./dnd/taskDnd.config";
+} from "../../dnd/task/taskDnd.config";
 
 type TaskColumnProps = {
   column: TaskColumnType;

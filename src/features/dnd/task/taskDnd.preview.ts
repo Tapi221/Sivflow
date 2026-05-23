@@ -1,5 +1,5 @@
-import { TASK_COLUMNS } from "../task.types";
-import type { Task, TaskStatus } from "../task.types";
+import { TASK_COLUMNS } from "../../calendar/task/task.types";
+import type { Task, TaskStatus } from "../../calendar/task/task.types";
 import type { TaskDropTarget } from "./taskDnd.types";
 
 export const findTask = (
