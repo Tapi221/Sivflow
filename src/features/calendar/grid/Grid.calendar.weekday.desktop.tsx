@@ -70,10 +70,10 @@ const useCurrentTimeMinutes = (): number => {
     let intervalId: number | null = null;
 
     const timeoutId = window.setTimeout(() => {
-      setMinutes(getNow);
+      setMinutes(getNow());
 
       intervalId = window.setInterval(() => {
-        setMinutes(getNow);
+        setMinutes(getNow());
       }, GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS);
     }, msUntilNextMinute);
 
