@@ -7,7 +7,7 @@ type DateFilterChipProps = {
 
 export const DateFilterChip = ({ label, onClear }: DateFilterChipProps) => {
   return (
-    <span className="flex items-center gap-1.5 rounded-full border border-[#eeeeee] bg-[#fafafa] px-2.5 py-1 text-[12px] font-medium text-[#3a3a3c] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
+    <span className="flex items-center gap-1.5 rounded-full border border-[#eeeeee] bg-white px-2.5 py-1 text-[12px] font-medium text-[#3a3a3c]">
       <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-[#9aa0aa]" />
 
       {label}
@@ -15,7 +15,7 @@ export const DateFilterChip = ({ label, onClear }: DateFilterChipProps) => {
       <button
         type="button"
         onClick={onClear}
-        className="ml-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[#9aa0aa] transition-colors hover:bg-[#f2f2f7] hover:text-[#4c5361]"
+        className="ml-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[#9aa0aa] transition-colors hover:text-[#4c5361]"
         aria-label="日付フィルターを解除"
       >
         <svg viewBox="0 0 10 10" fill="none" className="h-2.5 w-2.5">
