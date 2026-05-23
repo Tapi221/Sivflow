@@ -217,7 +217,6 @@ const Sidebar = ({
           className="app-sidebar__toggle"
           onClick={onToggleClosed}
           aria-label={sidebarToggleLabel}
-          title={sidebarToggleLabel}
         >
           <SidebarOpenIcon className="app-sidebar__toggle-icon" />
         </button>
