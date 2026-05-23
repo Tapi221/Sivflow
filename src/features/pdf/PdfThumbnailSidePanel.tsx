@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { PdfDocumentController } from "@/features/pdf/hooks/usePdfDocument";
 import { PdfPage } from "@/features/pdf/PdfPage";
@@ -17,10 +17,24 @@ interface PdfThumbnailSidePanelProps {
   onClose?: () => void;
 }
 
+interface PdfThumbnailPageButtonProps {
+  documentController: PdfDocumentController;
+  pdfDocument: NonNullable<PdfDocumentController["doc"]>;
+  pageNumber: number;
+  thumbnailScale: number;
+  fallbackPageSize: { width: number; height: number } | null;
+  isActive: boolean;
+  opaqueCanvas: boolean;
+  scrollToPage: (pageNumber: number) => void;
+}
+
 const PDF_THUMBNAIL_TARGET_WIDTH = 96;
 const PDF_THUMBNAIL_FALLBACK_SCALE = 0.16;
 const PDF_THUMBNAIL_MIN_SCALE = 0.08;
 const PDF_THUMBNAIL_MAX_SCALE = 0.22;
+const PDF_THUMBNAIL_PRELOAD_MARGIN_PX = 360;
+const PDF_THUMBNAIL_FALLBACK_WIDTH = 96;
+const PDF_THUMBNAIL_FALLBACK_HEIGHT = 128;
 
 const resolvePdfThumbnailScale = (pageWidth: number | null | undefined) => {
   if (!pageWidth || !Number.isFinite(pageWidth) || pageWidth <= 0) {
@@ -32,6 +46,144 @@ const resolvePdfThumbnailScale = (pageWidth: number | null | undefined) => {
   return Math.min(
     PDF_THUMBNAIL_MAX_SCALE,
     Math.max(PDF_THUMBNAIL_MIN_SCALE, nextScale),
+  );
+};
+
+const resolveThumbnailPlaceholderSize = ({
+  pageSize,
+  fallbackPageSize,
+  thumbnailScale,
+}: {
+  pageSize: { width: number; height: number } | undefined;
+  fallbackPageSize: { width: number; height: number } | null;
+  thumbnailScale: number;
+}) => {
+  const resolvedPageSize = pageSize ?? fallbackPageSize;
+
+  if (
+    resolvedPageSize &&
+    Number.isFinite(resolvedPageSize.width) &&
+    Number.isFinite(resolvedPageSize.height) &&
+    resolvedPageSize.width > 0 &&
+    resolvedPageSize.height > 0
+  ) {
+    return {
+      width: Math.max(1, Math.floor(resolvedPageSize.width * thumbnailScale)),
+      height: Math.max(1, Math.floor(resolvedPageSize.height * thumbnailScale)),
+    };
+  }
+
+  return {
+    width: PDF_THUMBNAIL_FALLBACK_WIDTH,
+    height: PDF_THUMBNAIL_FALLBACK_HEIGHT,
+  };
+};
+
+const PdfThumbnailPageButton = ({
+  documentController,
+  pdfDocument,
+  pageNumber,
+  thumbnailScale,
+  fallbackPageSize,
+  isActive,
+  opaqueCanvas,
+  scrollToPage,
+}: PdfThumbnailPageButtonProps) => {
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const [shouldRenderThumbnail, setShouldRenderThumbnail] = useState(isActive);
+  const placeholderSize = resolveThumbnailPlaceholderSize({
+    pageSize: documentController.pageSizes[pageNumber],
+    fallbackPageSize,
+    thumbnailScale,
+  });
+
+  useEffect(() => {
+    if (isActive) {
+      setShouldRenderThumbnail(true);
+    }
+  }, [isActive]);
+
+  useEffect(() => {
+    const element = buttonRef.current;
+    if (!element || shouldRenderThumbnail) {
+      return;
+    }
+
+    if (typeof IntersectionObserver === "undefined") {
+      setShouldRenderThumbnail(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry?.isIntersecting) {
+          setShouldRenderThumbnail(true);
+          observer.disconnect();
+        }
+      },
+      {
+        root: null,
+        rootMargin: `${PDF_THUMBNAIL_PRELOAD_MARGIN_PX}px 0px`,
+        threshold: 0,
+      },
+    );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [shouldRenderThumbnail]);
+
+  return (
+    <button
+      ref={buttonRef}
+      type="button"
+      aria-current={isActive ? "page" : undefined}
+      aria-label={`${pageNumber}ページへ移動`}
+      className={cn(
+        "group flex w-full flex-col items-center rounded-xl border px-2 py-2 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a8a49a]",
+        isActive
+          ? "border-[#b8b4a9] bg-white shadow-[0_8px_18px_rgba(15,23,42,0.08)]"
+          : "border-transparent bg-transparent hover:border-[#e2e1dc] hover:bg-white",
+      )}
+      onClick={() => scrollToPage(pageNumber)}
+    >
+      <div className="pointer-events-none max-w-full overflow-hidden rounded-lg bg-white">
+        {shouldRenderThumbnail ? (
+          <PdfPage
+            documentKey={`${documentController.documentKey}-thumbnail`}
+            pdf={pdfDocument}
+            pageNumber={pageNumber}
+            scale={thumbnailScale}
+            baseSize={documentController.pageSizes[pageNumber]}
+            opaqueCanvas={opaqueCanvas}
+            renderTextLayer={false}
+            acquirePage={documentController.acquirePage}
+            getPageTextContent={documentController.getPageTextContent}
+            onPageSize={documentController.setPageSize}
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="rounded-lg border border-[#eeede8] bg-[#f1f0ec]"
+            style={{
+              width: `${placeholderSize.width}px`,
+              height: `${placeholderSize.height}px`,
+            }}
+          />
+        )}
+      </div>
+      <span
+        className={cn(
+          "mt-2 text-[11px] font-medium",
+          isActive ? "text-[#2f2e2a]" : "text-[#8b8a84]",
+        )}
+      >
+        {pageNumber}
+      </span>
+    </button>
   );
 };
 
@@ -85,42 +237,17 @@ export const PdfThumbnailSidePanel = ({
             pageNumber === currentPage || pageNumber === alignedCurrentPage;
 
           return (
-            <button
+            <PdfThumbnailPageButton
               key={`pdf-thumbnail-${documentController.documentKey}-${pageNumber}`}
-              type="button"
-              aria-current={isActive ? "page" : undefined}
-              aria-label={`${pageNumber}ページへ移動`}
-              className={cn(
-                "group flex w-full flex-col items-center rounded-xl border px-2 py-2 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a8a49a]",
-                isActive
-                  ? "border-[#b8b4a9] bg-white shadow-[0_8px_18px_rgba(15,23,42,0.08)]"
-                  : "border-transparent bg-transparent hover:border-[#e2e1dc] hover:bg-white",
-              )}
-              onClick={() => scrollToPage(pageNumber)}
-            >
-              <div className="pointer-events-none max-w-full overflow-hidden rounded-lg bg-white">
-                <PdfPage
-                  documentKey={`${documentController.documentKey}-thumbnail`}
-                  pdf={pdfDocument}
-                  pageNumber={pageNumber}
-                  scale={thumbnailScale}
-                  baseSize={documentController.pageSizes[pageNumber]}
-                  opaqueCanvas={opaqueCanvas}
-                  renderTextLayer={false}
-                  acquirePage={documentController.acquirePage}
-                  getPageTextContent={documentController.getPageTextContent}
-                  onPageSize={documentController.setPageSize}
-                />
-              </div>
-              <span
-                className={cn(
-                  "mt-2 text-[11px] font-medium",
-                  isActive ? "text-[#2f2e2a]" : "text-[#8b8a84]",
-                )}
-              >
-                {pageNumber}
-              </span>
-            </button>
+              documentController={documentController}
+              pdfDocument={pdfDocument}
+              pageNumber={pageNumber}
+              thumbnailScale={thumbnailScale}
+              fallbackPageSize={firstPageSize}
+              isActive={isActive}
+              opaqueCanvas={opaqueCanvas}
+              scrollToPage={scrollToPage}
+            />
           );
         })}
       </div>
