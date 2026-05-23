@@ -5,7 +5,7 @@ import { useSchedulePaneStore } from "@/features/calendar/header/useSchedulePane
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
-import { GalleryIcon, SettingIcon } from "../../components/icons/schedule.icons";
+import { GalleryIcon, SettingIcon } from "@/components/icons/schedule.icons";
 import {
   CalendarIcon,
   HomeIcon,
