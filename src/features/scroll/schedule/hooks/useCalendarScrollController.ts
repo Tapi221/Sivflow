@@ -1,4 +1,4 @@
-import { useCallback, type UIEvent } from "react";
+import { useCallback, useRef, type UIEvent } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarViewMode } from "../../../calendar/schedulePane.types";
@@ -7,7 +7,6 @@ import { useScrollEdgeDetector } from "./useScrollEdgeDetector";
 import { usePreserveScrollOnPrepend } from "./usePreserveScrollOnPrepend";
 import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync.fixed";
 import { useSyncedHorizontalScroll } from "./useSyncedHorizontalScroll";
-import { useRef } from "react";
 
 type CalendarBuffer = {
   before: number;
