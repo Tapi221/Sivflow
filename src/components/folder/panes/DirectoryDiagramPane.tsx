@@ -9,7 +9,7 @@ import {
 import { getTagColorKey, type TagColorKey } from "@/features/tag/tagColor";
 
 import { Flashcard } from "@/components/card/frame/Flashcard";
-import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
+import { TagFilterPopover } from "@/chip/popover/TagFilterPopover";
 import { TagBadge } from "@/components/tag/TagBadge";
 import {
   Dialog,
