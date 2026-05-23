@@ -56,6 +56,7 @@ export const useTaskBoardDnd = ({
     target: TaskDropTarget;
   } | null>(null);
   const visibleTasksByStatus = previewTasksByStatus ?? tasksByStatus;
+  const isPreviewingTaskReorder = previewTasksByStatus !== null;
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -201,6 +202,7 @@ export const useTaskBoardDnd = ({
     handleDragEnd,
     handleDragOver,
     handleDragStart,
+    isPreviewingTaskReorder,
     measuring: TASK_DND_MEASURING_CONFIG,
     sensors,
     visibleTasksByStatus,
