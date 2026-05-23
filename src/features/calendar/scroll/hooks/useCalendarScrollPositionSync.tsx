@@ -17,6 +17,7 @@ type Params = {
 
   scrollRef: React.RefObject<HTMLDivElement | null>;
   headerRef?: React.RefObject<HTMLDivElement | null>;
+  headerRefs?: React.RefObject<HTMLDivElement | null>[];
 };
 
 export const useCalendarScrollPositionSync = ({
@@ -29,6 +30,7 @@ export const useCalendarScrollPositionSync = ({
   scrollTargetToken,
   scrollRef,
   headerRef,
+  headerRefs,
 }: Params) => {
   const lastRef = useRef<{
     token: number | null;
@@ -70,9 +72,13 @@ export const useCalendarScrollPositionSync = ({
 
     scroller.scrollLeft = nextScrollLeft;
 
-    if (headerRef?.current) {
-      headerRef.current.scrollLeft = nextScrollLeft;
-    }
+    const fixedRowRefs = headerRefs ?? (headerRef ? [headerRef] : []);
+
+    fixedRowRefs.forEach((fixedRowRef) => {
+      if (fixedRowRef.current) {
+        fixedRowRef.current.scrollLeft = nextScrollLeft;
+      }
+    });
 
     lastRef.current = {
       token: currentToken,
@@ -88,5 +94,6 @@ export const useCalendarScrollPositionSync = ({
     scrollTargetToken,
     scrollRef,
     headerRef,
+    headerRefs,
   ]);
 };

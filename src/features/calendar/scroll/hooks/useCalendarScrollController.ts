@@ -52,6 +52,7 @@ export const useCalendarScrollController = ({
 }: Props) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
+  const allDayScrollRef = useRef<HTMLDivElement | null>(null);
   const syncRafRef = useRef<number | null>(null);
 
   /**
@@ -83,10 +84,10 @@ export const useCalendarScrollController = ({
     timelineColumnWidth,
     scrollTargetToken,
     scrollRef: scrollContainerRef,
-    headerRef: headerScrollRef,
+    headerRefs: [headerScrollRef, allDayScrollRef],
   });
 
-  const syncHeaderScroll = useCallback((scrollLeft: number) => {
+  const syncFixedRowScroll = useCallback((scrollLeft: number) => {
     if (syncRafRef.current !== null) return;
 
     syncRafRef.current = window.requestAnimationFrame(() => {
@@ -94,6 +95,10 @@ export const useCalendarScrollController = ({
 
       if (headerScrollRef.current) {
         headerScrollRef.current.scrollLeft = scrollLeft;
+      }
+
+      if (allDayScrollRef.current) {
+        allDayScrollRef.current.scrollLeft = scrollLeft;
       }
     });
   }, []);
@@ -105,8 +110,8 @@ export const useCalendarScrollController = ({
       handleEdgeScroll(scroller);
     }
 
-    syncHeaderScroll(scroller.scrollLeft);
-  }, [activeMode, handleEdgeScroll, syncHeaderScroll]);
+    syncFixedRowScroll(scroller.scrollLeft);
+  }, [activeMode, handleEdgeScroll, syncFixedRowScroll]);
 
   useEffect(() => {
     return () => {
@@ -127,6 +132,7 @@ export const useCalendarScrollController = ({
   return {
     scrollContainerRef,
     headerScrollRef,
+    allDayScrollRef,
     handleScroll,
     resetAll,
   };
