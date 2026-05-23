@@ -322,6 +322,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             style={{ top: DAY_DETAIL_TOGGLE_TOP_OFFSET }}
           >
             <SidebarOpenIcon
+              viewBox="2 3 20 18"
               className={cn("h-3.5 w-3.5", showDayDetailPanel && "-scale-x-100")}
             />
           </button>
