@@ -17,7 +17,6 @@ import type { UserSettings } from "@/types";
 interface UseCardSetViewPaneWidthOptions {
   isGlobalEditing: boolean;
   isDesktop: boolean;
-  isMetaOpen: boolean;
   settings: UserSettings | undefined;
   cardSetId?: string | null;
 }
@@ -46,7 +45,6 @@ const measureViewportWidth = (element: HTMLDivElement) =>
 export const useCardSetViewPaneWidth = ({
   isGlobalEditing,
   isDesktop,
-  isMetaOpen,
   settings,
   cardSetId,
 }: UseCardSetViewPaneWidthOptions) => {
@@ -96,7 +94,7 @@ export const useCardSetViewPaneWidth = ({
       edit: CARD_PANE_VIEW_MIN_WIDTH_PX,
     },
     measureViewportWidth,
-    viewportObserverDeps: [isDesktop, isGlobalEditing, isMetaOpen],
+    viewportObserverDeps: [isDesktop, isGlobalEditing],
     reservedViewportInsetPx: reservedScrollbarGutterWidthPx,
     allowStoredWidthBeyondViewport: false,
     previewBehavior: "both",
