@@ -1,10 +1,10 @@
 import { mapExplorerSelectionToSearchParams } from "@/features/explorer/mappers/mapExplorerSelectionToSearchParams";
 import type { WorkspaceTab } from "@/features/tab/Tab";
 
-const buildFoldersPath = (searchParams: URLSearchParams) => {
+const buildLibraryPath = (searchParams: URLSearchParams) => {
   const query = searchParams.toString();
 
-  return query ? `/folders?${query}` : "/folders";
+  return query ? `/library?${query}` : "/library";
 };
 
 export const resolveWorkspaceTabRoute = (tab: WorkspaceTab): string => {
@@ -20,23 +20,23 @@ export const resolveWorkspaceTabRoute = (tab: WorkspaceTab): string => {
       selectedItem: tab.explorerState.selectedItem,
     });
 
-    return buildFoldersPath(searchParams);
+    return buildLibraryPath(searchParams);
   }
 
   if (tab.kind === "document") {
     const searchParams = new URLSearchParams();
     searchParams.set("docId", tab.documentId);
-    return buildFoldersPath(searchParams);
+    return buildLibraryPath(searchParams);
   }
 
   if (tab.kind === "cardSet") {
     const searchParams = new URLSearchParams();
     searchParams.set("cardSetId", tab.cardSetId);
-    return buildFoldersPath(searchParams);
+    return buildLibraryPath(searchParams);
   }
 
   const searchParams = new URLSearchParams();
   searchParams.set("cardId", tab.cardId);
 
-  return buildFoldersPath(searchParams);
+  return buildLibraryPath(searchParams);
 };
