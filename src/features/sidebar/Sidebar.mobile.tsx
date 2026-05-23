@@ -1,11 +1,10 @@
 import { ReactNode, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { SettingIcon } from "../../components/icons/schedule.icons";
+import { GalleryIcon, SettingIcon } from "../../components/icons/schedule.icons";
 import {
   CalendarIcon,
   ChevronDownIcon,
-  ExploreIcon,
   HomeIcon,
   InboxIcon,
   LibraryIcon,
@@ -60,7 +59,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "explore",
     label: "探す",
-    icon: <ExploreIcon className="sidebar-nav-icon" />,
+    icon: <GalleryIcon className="sidebar-nav-icon" />,
   },
 ];
 
