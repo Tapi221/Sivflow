@@ -1,36 +1,10 @@
 import type { Task, TaskStatus } from "../task.types";
-import { findTask, isTaskStatus } from "./taskDnd.preview";
-import type {
-  TaskDragEvent,
-  TaskDropTarget,
-  VerticalDropPosition,
-  VerticalRect,
-} from "./taskDnd.types";
-
-const getActiveVerticalRect = (event: TaskDragEvent): VerticalRect => {
-  const initialRect = event.active.rect.current.initial;
-  const translatedRect = event.active.rect.current.translated;
-
-  return {
-    top: translatedRect?.top ?? initialRect.top + event.delta.y,
-    height: translatedRect?.height ?? initialRect.height,
-  };
-};
-
-const getDropPosition = (
-  event: TaskDragEvent,
-  overRect: VerticalRect,
-): VerticalDropPosition => {
-  const activeRect = getActiveVerticalRect(event);
-  const activeMiddleY = activeRect.top + activeRect.height / 2;
-  const overMiddleY = overRect.top + overRect.height / 2;
-
-  return activeMiddleY >= overMiddleY ? "after" : "before";
-};
+import { isTaskStatus } from "./taskDnd.preview";
+import type { TaskDragEvent, TaskDropTarget } from "./taskDnd.types";
 
 export const resolveDropTarget = (
   event: TaskDragEvent,
-  tasksByStatus: Record<TaskStatus, Task[]>,
+  _tasksByStatus: Record<TaskStatus, Task[]>,
   activeTaskId: string,
   fallbackTarget: TaskDropTarget | null = null,
 ): TaskDropTarget | null => {
@@ -59,21 +33,9 @@ export const resolveDropTarget = (
     };
   }
 
-  const overTaskId = String(over.id);
-
-  if (overTaskId === activeTaskId) {
+  if (String(over.id) === activeTaskId) {
     return fallbackTarget;
   }
 
-  const overTask = findTask(tasksByStatus, overTaskId);
-
-  if (!overTask) {
-    return null;
-  }
-
-  return {
-    status: overTask.status,
-    overTaskId,
-    position: getDropPosition(event, over.rect),
-  };
+  return fallbackTarget;
 };
