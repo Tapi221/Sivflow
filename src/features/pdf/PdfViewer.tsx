@@ -95,10 +95,17 @@ type PageLayoutMetrics = {
   visualPageTopOffsets: number[];
   visualPageBottomOffsets: number[];
   pageScrollTopsByPageNumber: Record<number, number>;
+  pageRowIndexesByPageNumber: Record<number, number>;
   rowTopOffsets: number[];
+  rowBottomOffsets: number[];
   rowHeights: number[];
   rowPageNumbers: number[][];
   totalContentHeight: number;
+};
+
+type PageIndexWindow = {
+  startIndex: number;
+  endIndex: number;
 };
 
 interface PdfViewerInnerProps extends PdfViewerCommonProps {
@@ -218,7 +225,9 @@ const buildPageLayoutMetrics = ({
   const visualPageTopOffsets: number[] = [];
   const visualPageBottomOffsets: number[] = [];
   const pageScrollTopsByPageNumber: Record<number, number> = {};
+  const pageRowIndexesByPageNumber: Record<number, number> = {};
   const rowTopOffsets: number[] = [];
+  const rowBottomOffsets: number[] = [];
   const rowHeights: number[] = [];
   const rowPageNumbers = buildPageRows({
     orderedPageNumbers,
@@ -243,6 +252,7 @@ const buildPageLayoutMetrics = ({
     const rowAnchorPageNumber = currentRowPageNumbers[0] ?? 1;
 
     rowTopOffsets.push(runningTop);
+    rowBottomOffsets.push(runningTop + rowHeight);
     rowHeights.push(rowHeight);
 
     currentRowPageNumbers.forEach((pageNumber) => {
@@ -251,6 +261,7 @@ const buildPageLayoutMetrics = ({
       visualPageTopOffsets.push(runningTop);
       visualPageBottomOffsets.push(runningTop + rowHeight);
       pageScrollTopsByPageNumber[pageNumber] = runningTop;
+      pageRowIndexesByPageNumber[pageNumber] = rowIndex;
     });
 
     runningTop += rowHeight;
@@ -266,7 +277,9 @@ const buildPageLayoutMetrics = ({
     visualPageTopOffsets,
     visualPageBottomOffsets,
     pageScrollTopsByPageNumber,
+    pageRowIndexesByPageNumber,
     rowTopOffsets,
+    rowBottomOffsets,
     rowHeights,
     rowPageNumbers,
     totalContentHeight: Math.max(runningTop, 1),
@@ -367,25 +380,19 @@ const findLastIntersectingPageIndex = (
   return answer;
 };
 
-const buildPageNumbersInWindow = ({
+const getPageIndexWindow = ({
   pageTopOffsets,
   pageBottomOffsets,
-  visualPageNumbers,
   windowTop,
   windowBottom,
 }: {
   pageTopOffsets: number[];
   pageBottomOffsets: number[];
-  visualPageNumbers: number[];
   windowTop: number;
   windowBottom: number;
-}) => {
-  if (
-    pageTopOffsets.length === 0 ||
-    pageBottomOffsets.length === 0 ||
-    visualPageNumbers.length === 0
-  ) {
-    return [];
+}): PageIndexWindow | null => {
+  if (pageTopOffsets.length === 0 || pageBottomOffsets.length === 0) {
+    return null;
   }
 
   const clampedWindowTop = Math.max(0, windowTop);
@@ -405,19 +412,44 @@ const buildPageNumbersInWindow = ({
     endIndex < 0 ||
     startIndex > endIndex
   ) {
+    return null;
+  }
+
+  return { startIndex, endIndex };
+};
+
+const buildPageNumbersInWindow = ({
+  pageTopOffsets,
+  pageBottomOffsets,
+  visualPageNumbers,
+  windowTop,
+  windowBottom,
+}: {
+  pageTopOffsets: number[];
+  pageBottomOffsets: number[];
+  visualPageNumbers: number[];
+  windowTop: number;
+  windowBottom: number;
+}) => {
+  if (visualPageNumbers.length === 0) {
     return [];
   }
 
-  const pageNumbers: number[] = [];
+  const pageIndexWindow = getPageIndexWindow({
+    pageTopOffsets,
+    pageBottomOffsets,
+    windowTop,
+    windowBottom,
+  });
 
-  for (let index = startIndex; index <= endIndex; index += 1) {
-    const pageNumber = visualPageNumbers[index];
-    if (typeof pageNumber === "number") {
-      pageNumbers.push(pageNumber);
-    }
+  if (!pageIndexWindow) {
+    return [];
   }
 
-  return pageNumbers;
+  return visualPageNumbers.slice(
+    pageIndexWindow.startIndex,
+    pageIndexWindow.endIndex + 1,
+  );
 };
 
 const buildRenderedPageNumbers = ({
@@ -539,7 +571,7 @@ const buildPrefetchPageNumbers = ({
     return [];
   }
 
-  if (viewportHeight <= 0) {
+  if (viewportHeight <= 0 || visualPageNumbers.length === 0) {
     return buildFallbackPageNumbers({
       currentPage,
       activeMatchPageNumber,
@@ -548,15 +580,14 @@ const buildPrefetchPageNumbers = ({
   }
 
   const overscanPx = viewportHeight * PDF_PAGE_PREFETCH_OVERSCAN_VIEWPORTS;
-  const windowPages = buildPageNumbersInWindow({
+  const pageIndexWindow = getPageIndexWindow({
     pageTopOffsets,
     pageBottomOffsets,
-    visualPageNumbers,
     windowTop: scrollTop - overscanPx,
     windowBottom: scrollTop + viewportHeight + overscanPx,
   });
 
-  if (windowPages.length === 0) {
+  if (!pageIndexWindow) {
     return buildFallbackPageNumbers({
       currentPage,
       activeMatchPageNumber,
@@ -564,21 +595,15 @@ const buildPrefetchPageNumbers = ({
     });
   }
 
-  const windowPageSet = new Set(windowPages);
-  const sortedWindowPages = visualPageNumbers.filter((pageNumber) =>
-    windowPageSet.has(pageNumber),
+  const windowPages = visualPageNumbers.slice(
+    pageIndexWindow.startIndex,
+    pageIndexWindow.endIndex + 1,
   );
-  const firstPage = sortedWindowPages[0] ?? currentPage;
-  const lastPage =
-    sortedWindowPages[sortedWindowPages.length - 1] ?? currentPage;
-  const firstVisualIndex = visualPageNumbers.indexOf(firstPage);
-  const lastVisualIndex = visualPageNumbers.indexOf(lastPage);
-
   const expandedPages = visualPageNumbers.slice(
-    Math.max(0, firstVisualIndex - PDF_PAGE_PREFETCH_EXTRA_PAGES),
+    Math.max(0, pageIndexWindow.startIndex - PDF_PAGE_PREFETCH_EXTRA_PAGES),
     Math.min(
       visualPageNumbers.length,
-      lastVisualIndex + PDF_PAGE_PREFETCH_EXTRA_PAGES + 1,
+      pageIndexWindow.endIndex + PDF_PAGE_PREFETCH_EXTRA_PAGES + 1,
     ),
   );
 
@@ -821,19 +846,27 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
     );
 
     const renderedRows = useMemo(() => {
-      const renderedPageNumberSet = new Set(renderedPageNumbers);
+      const renderedRowIndexSet = new Set<number>();
 
-      return pageLayoutMetrics.rowPageNumbers
-        .map((rowPageNumbers, rowIndex) => ({
+      renderedPageNumbers.forEach((pageNumber) => {
+        const rowIndex = pageLayoutMetrics.pageRowIndexesByPageNumber[pageNumber];
+        if (typeof rowIndex === "number") {
+          renderedRowIndexSet.add(rowIndex);
+        }
+      });
+
+      return Array.from(renderedRowIndexSet)
+        .sort((left, right) => left - right)
+        .map((rowIndex) => ({
           rowIndex,
-          rowPageNumbers,
+          rowPageNumbers: pageLayoutMetrics.rowPageNumbers[rowIndex] ?? [],
         }))
-        .filter(({ rowPageNumbers }) =>
-          rowPageNumbers.some((pageNumber) =>
-            renderedPageNumberSet.has(pageNumber),
-          ),
-        );
-    }, [pageLayoutMetrics.rowPageNumbers, renderedPageNumbers]);
+        .filter(({ rowPageNumbers }) => rowPageNumbers.length > 0);
+    }, [
+      pageLayoutMetrics.pageRowIndexesByPageNumber,
+      pageLayoutMetrics.rowPageNumbers,
+      renderedPageNumbers,
+    ]);
 
     useEffect(() => {
       if (!doc || prefetchPageNumbers.length === 0) {
