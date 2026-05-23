@@ -1,8 +1,8 @@
 import { type CSSProperties, type KeyboardEvent, useMemo, useState } from "react";
 
 import { PdfLibraryWorkspaceToolbar } from "@/features/library-pdf/components/PdfLibraryWorkspaceToolbar";
-import { PdfLibraryTableSection } from "@/features/library-pdf/components/sections/PdfLibraryTableSection";
-import { usePdfLibraryDashboardState } from "@/features/library-pdf/hooks/usePdfLibraryDashboardState";
+import { CardSetLibraryTableSection } from "@/features/library-cardset/components/sections/CardSetLibraryTableSection";
+import { useCardSetLibraryDashboardState } from "@/features/library-cardset/hooks/useCardSetLibraryDashboardState";
 import {
   buildCardSetDashboardRows,
   type CardSetDashboardRow,
@@ -216,7 +216,7 @@ const CardSetLibraryDashboard = ({
     setSelectedDocumentId: setSelectedCardSetId,
     handleColumnResizeReset,
     handleColumnResizeStart,
-  } = usePdfLibraryDashboardState({
+  } = useCardSetLibraryDashboardState({
     rows,
     defaultColumns: DEFAULT_COLUMNS,
     columnStorageKey: COLUMN_STORAGE_KEY,
@@ -274,7 +274,7 @@ const CardSetLibraryDashboard = ({
 
       <div className="grid min-h-0 w-full grid-cols-1 gap-4 pt-4">
         <div className="flex min-h-0 min-w-0 flex-col gap-4">
-          <PdfLibraryTableSection>
+          <CardSetLibraryTableSection>
             <div className="overflow-x-auto overflow-y-hidden">
               <div
                 className="min-w-max"
@@ -489,7 +489,7 @@ const CardSetLibraryDashboard = ({
                 {visibleStart}–{visibleEnd} / {rows.length} 件
               </div>
             </div>
-          </PdfLibraryTableSection>
+          </CardSetLibraryTableSection>
         </div>
       </div>
     </div>
