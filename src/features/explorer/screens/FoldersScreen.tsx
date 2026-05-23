@@ -144,9 +144,20 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   });
 
   const { folders = [], loading: foldersLoading } = useFoldersRead();
-  const { cards = [], loading: cardsLoading } = useCardsRead();
-  const { documents = [], loading: documentsLoading } = useDocumentsRead();
-  const { cardSets = [], loading: cardSetsLoading } = useCardSets();
+  const shouldReadWorkspaceData =
+    !controller.state.isSectionListMode || controller.state.selectedItem !== null;
+  const { cards = [], loading: cardsLoading } = useCardsRead(
+    undefined,
+    undefined,
+    { enabled: shouldReadWorkspaceData },
+  );
+  const { documents = [], loading: documentsLoading } = useDocumentsRead(
+    undefined,
+    { enabled: shouldReadWorkspaceData },
+  );
+  const { cardSets = [], loading: cardSetsLoading } = useCardSets(undefined, {
+    enabled: shouldReadWorkspaceData,
+  });
 
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
