@@ -11,7 +11,7 @@ import type { CardSet } from "@/types/domain/cardSet";
 type FolderLike = Pick<Folder, "id" | "folderName" | "parentFolderId">;
 
 const PAGE_LABELS: Record<string, string> = {
-  folders: "フォルダ一覧",
+  library: "ライブラリ",
   calendar: "カレンダー",
   gallery: "ギャラリー",
   trash: "ゴミ箱",
@@ -23,8 +23,8 @@ const PAGE_LABELS: Record<string, string> = {
   questions: "疑問集",
 };
 
-const HOME_ROUTE = "/folders?home=1";
-const FOLDER_LIST_ROUTE = "/folders?view=section-list";
+const HOME_ROUTE = "/library?home=1";
+const FOLDER_LIST_ROUTE = "/library?view=section-list";
 
 const buildFolderRoute = (folderId: string | null | undefined): string => {
   if (!folderId) {
@@ -34,7 +34,7 @@ const buildFolderRoute = (folderId: string | null | undefined): string => {
   const searchParams = new URLSearchParams();
   searchParams.set("folderId", folderId);
 
-  return `/folders?${searchParams.toString()}`;
+  return `/library?${searchParams.toString()}`;
 };
 
 const resolveTitleBarFolderListRoute = (
@@ -73,7 +73,7 @@ export const buildRouteBreadcrumbs = ({
 }): BreadcrumbCrumb[] => {
   const searchParams = new URLSearchParams(search);
   const isHomeOnlyMode =
-    pathname.toLowerCase() === "/folders" && searchParams.get("home") === "1";
+    pathname.toLowerCase() === "/library" && searchParams.get("home") === "1";
 
   if (isHomeOnlyMode) {
     return [{ label: "ホーム", to: undefined }];
@@ -113,9 +113,9 @@ export const mergeTitleBarBreadcrumbs = ({
 
   const normalizedPathname = pathname.toLowerCase();
   const isCardSetViewPath = normalizedPathname.startsWith("/cardsetview");
-  const isFoldersPath = normalizedPathname.startsWith("/folders");
-  const shouldUseFolderListRoute = isCardSetViewPath || isFoldersPath;
-  const folderListRoute = isFoldersPath
+  const isLibraryPath = normalizedPathname.startsWith("/library");
+  const shouldUseFolderListRoute = isCardSetViewPath || isLibraryPath;
+  const folderListRoute = isLibraryPath
     ? FOLDER_LIST_ROUTE
     : isCardSetViewPath
       ? resolveTitleBarFolderListRoute(extraCrumbs)
@@ -166,7 +166,7 @@ export const buildFolderPathCrumbs = ({
 
   return path.map((folder) => ({
     label: folder.folderName,
-    to: `/folders?folderId=${folder.id}`,
+    to: `/library?folderId=${folder.id}`,
     folderId: folder.id,
   }));
 };
@@ -247,7 +247,7 @@ export const buildCardSetViewBreadcrumbs = ({
 
     crumbs.push({
       label: selectedCardSet.name || "カードセット",
-      to: `/folders?${searchParams.toString()}`,
+      to: `/library?${searchParams.toString()}`,
       folderId: crumbFolderId,
     });
   }
