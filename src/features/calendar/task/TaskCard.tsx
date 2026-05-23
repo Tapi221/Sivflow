@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 
-import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/schedule.icons";
+import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/sidebar.icons";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { cn } from "@/lib/utils";
