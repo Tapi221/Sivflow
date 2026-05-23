@@ -50,9 +50,7 @@ export type UseSchedulePaneReturn = {
   isAnyCalendarConnecting: boolean;
 
   addGoogleCalendar: () => Promise<void>;
-  removeGoogleAccount: (accountId: string) => void;
   reconnectGoogleAccount: (accountId: string) => Promise<void>;
-  retryGoogleAccountSync: (accountId: string) => Promise<void>;
   toggleGoogleCalendar: (accountId: string, calendarId: string) => void;
 
   handleSelectViewMode: (viewMode: CalendarViewMode) => void;
@@ -136,12 +134,8 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
         calendars: account.calendars,
         taskLists: taskListState?.taskLists ?? [],
         isTaskListsLoading: taskListState?.isLoading ?? false,
-        taskListsError: taskListState?.error ?? null,
         selectedCalendarIds: account.selectedCalendarIds,
-        syncState: account.syncState,
         connectionStatus: account.connectionStatus,
-        lastSyncedAt: account.lastSyncedAt,
-        error: account.error,
       };
     },
   );
@@ -179,9 +173,7 @@ export const useSchedulePane = (): UseSchedulePaneReturn => {
     isAnyCalendarConnecting: google.isAnyConnecting,
 
     addGoogleCalendar: google.addAccount,
-    removeGoogleAccount: google.removeAccount,
     reconnectGoogleAccount: google.reconnectAccount,
-    retryGoogleAccountSync: google.retrySync,
     toggleGoogleCalendar: google.toggleCalendar,
 
     handleSelectViewMode: navigation.handleSelectViewMode,
