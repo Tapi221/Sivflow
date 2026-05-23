@@ -2,12 +2,11 @@ import { memo, useMemo } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 
-import * as C from "@/features/calendar/calendar.constants.desktop";
 import * as T from "@/features/calendar/calendar.text";
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
-import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { CalendarEventChipMonth } from "@/features/calendar/eventchip/EventChip.schedule.month";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import { MonthRowResizeBar } from "@/features/calendar/grid/height/MonthRowResizeBar.month.desktop";
 import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
 
 import { cn } from "@/lib/utils";
@@ -293,30 +292,12 @@ const CalendarMonthWeekRow = memo(({
         />
       ))}
 
-      {/* リサイズ */}
-      <HoverTooltip
-        label={T.MONTH_ROW_RESIZE_TITLE}
-        side="top"
-        offset={8}
-        className="calendar-month-row-boundary-resize-handle !absolute"
-      >
-        <div
-          role="separator"
-          aria-label={T.MONTH_ROW_RESIZE_ARIA_LABEL}
-          aria-orientation="horizontal"
-          aria-valuemin={C.MIN_MONTH_ROW_HEIGHT}
-          aria-valuemax={C.MAX_MONTH_ROW_HEIGHT}
-          aria-valuenow={Number(monthRowHeight)}
-          tabIndex={0}
-          className="h-full w-full"
-          onClick={(e) =>
-            e.stopPropagation()
-          }
-          onDoubleClick={handleResizeReset}
-          onKeyDown={handleResizeKeyDown}
-          onPointerDown={handleResizePointerDown}
-        />
-      </HoverTooltip>
+      <MonthRowResizeBar
+        monthRowHeight={monthRowHeight}
+        onResizeReset={handleResizeReset}
+        onResizeKeyDown={handleResizeKeyDown}
+        onResizePointerDown={handleResizePointerDown}
+      />
     </div>
   );
 }, (previous, next) => {
