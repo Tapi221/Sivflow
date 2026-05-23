@@ -11,6 +11,7 @@ type CardSetLibraryDashboardProps = {
   cardSets: CardSet[];
   folders: Folder[];
   onOpenCardSet: (cardSetId: string) => void;
+  showToolbar?: boolean;
 };
 
 const CardSetLibraryDashboard = ({
@@ -18,6 +19,7 @@ const CardSetLibraryDashboard = ({
   cardSets,
   folders,
   onOpenCardSet,
+  showToolbar = true,
 }: CardSetLibraryDashboardProps) => {
   const { tagById } = useTags();
 
@@ -35,10 +37,12 @@ const CardSetLibraryDashboard = ({
   if (rows.length === 0) {
     return (
       <div className="flex h-full min-h-0 w-full flex-col bg-[#FFFFFF]">
-        <PdfLibraryWorkspaceToolbar
-          activeSection="flashcard"
-          onSelectSection={() => undefined}
-        />
+        {showToolbar ? (
+          <PdfLibraryWorkspaceToolbar
+            activeSection="flashcard"
+            onSelectSection={() => undefined}
+          />
+        ) : null}
         <div className="flex flex-1 items-center justify-center p-8">
           <div className="w-full max-w-2xl rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-8">
             <div className="inline-flex rounded-[999px] bg-[#f3f4f6] px-3 py-1 text-[12px] font-semibold text-[#4b5563]">
@@ -58,10 +62,12 @@ const CardSetLibraryDashboard = ({
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-[#FFFFFF]">
-      <PdfLibraryWorkspaceToolbar
-        activeSection="flashcard"
-        onSelectSection={() => undefined}
-      />
+      {showToolbar ? (
+        <PdfLibraryWorkspaceToolbar
+          activeSection="flashcard"
+          onSelectSection={() => undefined}
+        />
+      ) : null}
       <div className="min-h-0 flex-1" />
     </div>
   );
