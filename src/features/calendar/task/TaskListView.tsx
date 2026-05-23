@@ -9,6 +9,8 @@ import {
 import { format } from "date-fns";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { useT } from "@/i18n/useT";
+import { TASK_TYPO } from "@/styles/tokens/typography";
+import { cn } from "@/lib/utils";
 import { TASK_COLUMNS } from "./task.types";
 import type { Task } from "./task.types";
 import { TaskStatusDot } from "../../../chip/icon/TaskStatusDot";
@@ -87,8 +89,7 @@ const DEFAULT_TASK_COLUMNS: TaskColumn[] = [
   },
 ];
 
-const TABLE_HEADER_CLASS =
-  "pb-2 text-left text-[13px] font-medium leading-none tracking-[-0.005em] text-[#3f4652]";
+const TABLE_HEADER_CLASS = `pb-2 text-left ${TASK_TYPO.listHeader}`;
 
 const clampTaskColumnWidth = (
   width: number,
@@ -395,7 +396,7 @@ export const TaskListView = ({
       case "title":
         return (
           <div
-            className="min-w-0 overflow-hidden py-2.5 pr-4 font-medium leading-[18px] tracking-[-0.005em] text-[#1c1c1e]"
+            className={cn("min-w-0 overflow-hidden py-2.5 pr-4", TASK_TYPO.listTitle)}
             role="cell"
           >
             {isEditingTitle ? (
@@ -405,7 +406,7 @@ export const TaskListView = ({
                   type="text"
                   value={editingTitle}
                   aria-label="Task title"
-                  className="h-[18px] w-full border-0 bg-transparent p-0 text-[12px] font-medium leading-[18px] tracking-[-0.005em] text-[#1c1c1e] outline-none placeholder:text-[#9ca3af]"
+                  className={cn("h-[18px] w-full border-0 bg-transparent p-0 outline-none placeholder:text-[#9ca3af]", TASK_TYPO.listTitleInput)}
                   onChange={(event) => setEditingTitle(event.target.value)}
                   onBlur={() => finishEditingTaskTitle(task)}
                   onKeyDown={(event) => {
@@ -424,15 +425,15 @@ export const TaskListView = ({
 
                 <button
                   type="button"
-                  className="mt-2 flex items-center gap-1.5 text-[12px] font-medium leading-[18px] text-[#6b7280] transition-colors hover:text-[#1c1c1e]"
+                  className={cn("mt-2 flex items-center gap-1.5 transition-colors hover:text-[#1c1c1e]", TASK_TYPO.detailAction)}
                 >
                   <DetailIcon />
                   <span>詳細</span>
                 </button>
 
-                <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] font-medium leading-none text-[#4c5361]">
+                <div className={cn("mt-2 flex flex-wrap items-center gap-1.5", TASK_TYPO.metaCluster)}>
                   {task.dueDate && (
-                    <span className="inline-flex h-5 items-center rounded-full border border-white/70 bg-[#f2f2f7] px-1.5 tabular-nums text-[#8e8e93]">
+                    <span className={cn("inline-flex h-5 items-center rounded-full border border-white/70 bg-[#f2f2f7] px-1.5 tabular-nums", TASK_TYPO.metaChip)}>
                       {format(new Date(task.dueDate), "MMM d")}
                     </span>
                   )}
@@ -444,7 +445,7 @@ export const TaskListView = ({
             ) : (
               <button
                 type="button"
-                className="block w-full truncate rounded text-left font-medium leading-[18px] tracking-[-0.005em] text-[#1c1c1e] transition-colors hover:bg-[#f4f5f7] focus-visible:bg-[#f4f5f7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eeeeee]"
+                className={cn("block w-full truncate rounded text-left transition-colors hover:bg-[#f4f5f7] focus-visible:bg-[#f4f5f7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#eeeeee]", TASK_TYPO.listTitle)}
                 aria-label={`Rename ${task.title}`}
                 title="Click to rename"
                 onClick={() => startEditingTaskTitle(task)}
@@ -541,7 +542,7 @@ export const TaskListView = ({
           {tasks.map((task) => (
             <div
               key={task.id}
-              className="grid border-b border-[#eeeeee] text-[12px] font-medium leading-[18px] hover:bg-[#fafafa]"
+              className={cn("grid border-b border-[#eeeeee] hover:bg-[#fafafa]", TASK_TYPO.listRow)}
               role="row"
               style={gridStyle}
             >
