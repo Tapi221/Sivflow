@@ -38,7 +38,7 @@ const SECTION_LABELS: Record<WorkspaceSidebarSection, string> = {
 };
 
 const LIBRARY_TYPE_LABELS: Record<string, string> = {
-  pdf: "PDF",
+  pdf: "/library",
   flashcards: "フラッシュカード",
   notes: "ノート",
 };
