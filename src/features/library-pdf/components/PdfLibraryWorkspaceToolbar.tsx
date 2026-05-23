@@ -206,11 +206,11 @@ const resolveLibrarySectionRoute = (
   section: PdfLibraryWorkspaceSection,
 ): string => {
   if (section === "explorer") {
-    return "/folders?view=section-list";
+    return "/library?view=section-list";
   }
 
   const libraryType = section === "flashcard" ? "flashcards" : section;
-  return `/folders?view=section-list&libraryType=${libraryType}`;
+  return `/library?view=section-list&libraryType=${libraryType}`;
 };
 
 export const PdfLibraryWorkspaceToolbar = ({
