@@ -1,11 +1,22 @@
 import { motion, type Transition } from "framer-motion";
-import type { ComponentType, SVGProps } from "react";
+import {
+  Fragment,
+  type ComponentType,
+  type ReactNode,
+  type SVGProps,
+} from "react";
 
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 
 export type WorkspaceHeaderToolbarIconProps = SVGProps<SVGSVGElement> & {
   className?: string;
+};
+
+export type WorkspaceHeaderToolbarActionRenderProps = {
+  className: string;
+  iconClassName: string;
+  label: string;
 };
 
 type WorkspaceHeaderToolbarItem = {
@@ -17,9 +28,10 @@ type WorkspaceHeaderToolbarItem = {
 
 type WorkspaceHeaderToolbarAction = {
   label: string;
-  icon: ComponentType<WorkspaceHeaderToolbarIconProps>;
+  icon?: ComponentType<WorkspaceHeaderToolbarIconProps>;
   onClick?: () => void;
   ariaLabel?: string;
+  render?: (props: WorkspaceHeaderToolbarActionRenderProps) => ReactNode;
 };
 
 type WorkspaceHeaderToolbarVariant = "underline" | "segmented" | "floating";
@@ -141,8 +153,22 @@ export const WorkspaceHeaderToolbar = ({
     return (
       <div className={cn(segmentedActionGroupClassName, className)}>
         {toolbarActions.map((action) => {
-          const Icon = action.icon;
           const label = action.ariaLabel ?? action.label;
+
+          if (action.render) {
+            return (
+              <Fragment key={label}>
+                {action.render({
+                  className: segmentedActionButtonClassName,
+                  iconClassName: segmentedActionIconClassName,
+                  label,
+                })}
+              </Fragment>
+            );
+          }
+
+          const Icon = action.icon;
+          if (!Icon) return null;
 
           return (
             <button
