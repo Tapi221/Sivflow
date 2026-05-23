@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { format } from "date-fns";
-import { DayDetailCreateButton } from "@/features/calendar/chip/button/AddScheduleButton.daydetail";
+import { DayDetailCreateButton } from "@/chip/button/AddScheduleButton.daydetail";
 import { eventOverlapsDay } from "@/features/calendar/calendarEventRange";
 import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
 import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";

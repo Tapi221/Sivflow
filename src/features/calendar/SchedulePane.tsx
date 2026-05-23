@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { format } from "date-fns";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { TodayBar } from "@/chip/bar/TodayBar";
-import { ViewModeDropdown } from "@/features/calendar/chip/dropdownchip/ViewModeDropdownChip";
+import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
 import type { SchedulePaneProps } from "./schedulePane.types";
 import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
