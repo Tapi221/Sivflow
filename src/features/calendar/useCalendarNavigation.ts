@@ -250,6 +250,12 @@ export const useCalendarNavigation = () => {
     [selectedViewMode, requestMonthScrollTarget, resetTimelinePosition],
   );
 
+  const handleTimelineSelectDate = useCallback((date: Date) => {
+    setSelectedDate(date);
+    setTimelineTitleDate(date);
+    setMonthTitleDate(startOfMonth(date));
+  }, []);
+
   const handleVisibleMonthChange = useCallback((date: Date) => {
     setMonthTitleDate(startOfMonth(date));
   }, []);
@@ -290,6 +296,7 @@ export const useCalendarNavigation = () => {
     handleSidebarPreviousMonth,
     handleSidebarNextMonth,
     handleSidebarSelectDate,
+    handleTimelineSelectDate,
     handleVisibleMonthChange,
     handleMonthCellSelectDate,
     handleTimelineVisibleDateChange,
