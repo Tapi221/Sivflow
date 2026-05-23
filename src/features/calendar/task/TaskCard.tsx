@@ -56,10 +56,10 @@ export const TaskCard = ({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded border border-[#e6e6e6] bg-white/90 px-3 pt-3 pb-2",
+        "group relative overflow-hidden rounded border border-[#eeeeee] bg-white/95 px-3 pt-3 pb-2",
         "backdrop-blur-xl",
         "transition-[transform,background-color,border-color] duration-200 ease-out",
-        "hover:border-[#dcdcdc] hover:bg-white",
+        "hover:border-[#e5e5e5] hover:bg-white",
         "active:scale-[0.998]",
       )}
     >
