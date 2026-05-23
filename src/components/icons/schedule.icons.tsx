@@ -382,7 +382,7 @@ export const GalleryIcon = ({
 );
 
 //IOS
-export const SidebarListIcon = ({
+export const SidebarOpenIcon = ({
   className,
   label: _label,
   size: _size,
