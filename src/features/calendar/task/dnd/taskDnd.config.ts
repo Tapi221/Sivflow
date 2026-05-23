@@ -8,7 +8,7 @@ export const TASK_DND_MEASURING_CONFIG = {
 
 export const TASK_DND_TABLIKE_EASING = "cubic-bezier(.16, 1, .3, 1)";
 export const TASK_DND_LAYOUT_ANIMATION_DURATION_MS = 300;
-export const TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS = 70;
+export const TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS = 0;
 
 export const TASK_DND_DROP_ANIMATION: DropAnimation | null = null;
 
