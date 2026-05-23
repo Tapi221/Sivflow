@@ -88,7 +88,7 @@ export type CalendarWorkspaceToolbarProps = {
 
 export type CalendarWeekDayGridProps = {
   headerScrollRef: RefObject<HTMLDivElement | null>;
-  allDayScrollRef: RefObject<HTMLDivElement | null>;
+  allDayScrollRef?: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   visibleDays: Date[];
   visibleEvents: GoogleCalendarEvent[];
