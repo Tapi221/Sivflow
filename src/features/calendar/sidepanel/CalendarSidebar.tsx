@@ -94,7 +94,6 @@ type GoogleAccountSectionProps = {
   mode: "calendar" | "task";
   onToggleCalendar: (calendarId: string) => void;
   onReconnect: () => void;
-  onRetry: () => void;
 };
 
 const GoogleAccountSection = ({
@@ -102,7 +101,6 @@ const GoogleAccountSection = ({
   mode,
   onToggleCalendar,
   onReconnect,
-  onRetry,
 }: GoogleAccountSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
   const accountName = account.name ?? account.email ?? "Google";
@@ -204,49 +202,11 @@ const GoogleAccountSection = ({
               </span>
             </div>
           ))}
-
-          {account.taskListsError && (
-            <div
-              className={cn(
-                "mt-1 rounded-[12px] bg-[#f7f7f7] py-1.5",
-                GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
-              )}
-            >
-              <p className="text-[11px] leading-relaxed text-[#8c8c8c]">
-                {account.taskListsError}
-              </p>
-              <button
-                type="button"
-                className="mt-1 rounded-full border border-[#eeeeee] bg-white px-2.5 py-0.5 text-[11px] font-semibold text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#f7f7f7]"
-                onClick={onReconnect}
-              >
-                再連携
-              </button>
-            </div>
-          )}
         </div>
       )}
 
       {account.connectionStatus === "needsReconnect" && (
         <GcalRelinkPanel onReconnect={onReconnect} />
-      )}
-
-      {account.error && (
-        <p className="mt-1 rounded-[12px] bg-[#f7f7f7] px-3 py-1.5 text-[11px] leading-relaxed text-[#8c8c8c]">
-          {account.error}
-        </p>
-      )}
-
-      {account.connectionStatus === "error" && (
-        <div className="mt-1 px-3 pb-1">
-          <button
-            type="button"
-            className="rounded-full border border-[#eeeeee] bg-white px-2.5 py-0.5 text-[11px] font-semibold text-[#8c8c8c] transition-colors hover:bg-[#f7f7f7]"
-            onClick={onRetry}
-          >
-            再試行
-          </button>
-        </div>
       )}
     </div>
   );
@@ -263,7 +223,6 @@ export const CalendarSidebar = ({
   onNextMonth,
   onAddCalendar,
   onReconnectAccount,
-  onRetryAccount,
   onToggleCalendar,
 }: CalendarSidebarProps) => {
   const t = useT();
@@ -374,7 +333,6 @@ export const CalendarSidebar = ({
               onToggleCalendar(account.accountId, calendarId)
             }
             onReconnect={() => onReconnectAccount(account.accountId)}
-            onRetry={() => onRetryAccount(account.accountId)}
           />
         ))}
       </nav>
