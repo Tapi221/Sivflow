@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import { FoldersScreen } from "@/features/explorer";
 import { useFoldersRouteAdapter } from "@/features/explorer/adapters/web/useFoldersRouteAdapter";
@@ -7,7 +7,6 @@ import { useFoldersRouteAdapter } from "@/features/explorer/adapters/web/useFold
 const Folders = () => {
   const route = useFoldersRouteAdapter();
   const location = useLocation();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -16,9 +15,9 @@ const Folders = () => {
       location.pathname === "/folders" &&
       searchParams.get("view") === "section-list"
     ) {
-      navigate("/library", { replace: true });
+      window.history.replaceState(window.history.state, "", "/library");
     }
-  }, [location.pathname, location.search, navigate]);
+  }, [location.pathname, location.search]);
 
   return <FoldersScreen route={route} />;
 };
