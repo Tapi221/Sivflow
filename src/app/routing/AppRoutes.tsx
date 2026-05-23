@@ -5,7 +5,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "@/Layout";
 import { BlockNoteSandboxPage } from "@/sandbox/blocknote";
 
-import { DevRoutes } from "./DevRoutes";
+import { getDevRouteElements } from "./DevRoutes";
 import { ProtectedRoute } from "./ProtectedRoute";
 
 const Folders = lazy(() => import("@/routes/Folders"));
@@ -56,7 +56,7 @@ export const AppRoutes = () => {
         <Route path="trash" element={<Navigate to="/library" replace />} />
         <Route path="directory" element={withRouteFallback(<Directory />)} />
 
-        <DevRoutes />
+        {getDevRouteElements()}
       </Route>
 
       <Route path="*" element={<Navigate to="/library" replace />} />
