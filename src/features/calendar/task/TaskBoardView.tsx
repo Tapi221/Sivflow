@@ -42,6 +42,8 @@ type DroppableTaskColumnProps = Omit<TaskBoardViewProps, "tasksByStatus" | "onRe
   showDivider?: boolean;
 };
 
+type CollisionDetectionArgs = Parameters<CollisionDetection>[0];
+type CollisionDescriptor = ReturnType<CollisionDetection>[number];
 type VerticalDropPosition = "before" | "after";
 
 type VerticalRect = {
@@ -183,6 +185,51 @@ const createTaskDragPreview = (
   return nextTasksByStatus;
 };
 
+const getPointerTaskCollisions = (
+  args: CollisionDetectionArgs,
+  taskContainers: CollisionDetectionArgs["droppableContainers"],
+): CollisionDescriptor[] => {
+  const { pointerCoordinates } = args;
+
+  if (!pointerCoordinates) {
+    return closestCorners({
+      ...args,
+      droppableContainers: taskContainers,
+    });
+  }
+
+  return taskContainers
+    .map((container): CollisionDescriptor | null => {
+      const rect = args.droppableRects.get(container.id);
+
+      if (!rect) {
+        return null;
+      }
+
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const outsideTop = Math.max(0, rect.top - pointerCoordinates.y);
+      const outsideBottom = Math.max(
+        0,
+        pointerCoordinates.y - (rect.top + rect.height),
+      );
+      const verticalDistance = Math.abs(pointerCoordinates.y - centerY);
+      const horizontalDistance = Math.abs(pointerCoordinates.x - centerX);
+      const value =
+        (outsideTop + outsideBottom) * 4 + verticalDistance + horizontalDistance * 0.01;
+
+      return {
+        id: container.id,
+        data: {
+          droppableContainer: container,
+          value,
+        },
+      };
+    })
+    .filter((collision): collision is CollisionDescriptor => collision !== null)
+    .sort((left, right) => left.data.value - right.data.value);
+};
+
 const taskBoardCollisionDetection: CollisionDetection = (args) => {
   const activeId = args.active.id;
   const columnContainers = args.droppableContainers.filter(
@@ -216,19 +263,13 @@ const taskBoardCollisionDetection: CollisionDetection = (args) => {
     );
 
     if (targetColumnTasks.length > 0) {
-      return closestCorners({
-        ...args,
-        droppableContainers: targetColumnTasks,
-      });
+      return getPointerTaskCollisions(args, targetColumnTasks);
     }
 
     return columnCollisions;
   }
 
-  const taskCollisions = closestCorners({
-    ...args,
-    droppableContainers: taskContainers,
-  });
+  const taskCollisions = getPointerTaskCollisions(args, taskContainers);
 
   return taskCollisions.length > 0 ? taskCollisions : closestCorners(args);
 };
@@ -243,13 +284,32 @@ const getActiveVerticalRect = (event: TaskDragEvent): VerticalRect => {
   };
 };
 
+const getPointerY = (event: TaskDragEvent): number | null => {
+  const { activatorEvent } = event;
+
+  if (
+    "clientY" in activatorEvent &&
+    typeof activatorEvent.clientY === "number"
+  ) {
+    return activatorEvent.clientY + event.delta.y;
+  }
+
+  return null;
+};
+
 const getDropPosition = (
   event: TaskDragEvent,
   overRect: VerticalRect,
 ): VerticalDropPosition => {
+  const pointerY = getPointerY(event);
+  const overMiddleY = overRect.top + overRect.height / 2;
+
+  if (pointerY !== null) {
+    return pointerY >= overMiddleY ? "after" : "before";
+  }
+
   const activeRect = getActiveVerticalRect(event);
   const activeMiddleY = activeRect.top + activeRect.height / 2;
-  const overMiddleY = overRect.top + overRect.height / 2;
 
   return activeMiddleY >= overMiddleY ? "after" : "before";
 };
