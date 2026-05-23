@@ -1,7 +1,7 @@
-export type OpenAiBillingMode = "user-api-key";
+export type AiProviderMode = "local-template" | "openai-user-api-key";
 
 export type OpenAiSettings = {
-  billingMode: OpenAiBillingMode;
+  providerMode: AiProviderMode;
   apiKey: string;
   model: string;
   maxOutputTokens: number;
@@ -10,21 +10,25 @@ export type OpenAiSettings = {
 const STORAGE_KEY = "flashcard-master.openai.settings.v1";
 
 export const DEFAULT_OPEN_AI_SETTINGS: OpenAiSettings = {
-  billingMode: "user-api-key",
+  providerMode: "local-template",
   apiKey: "",
   model: "gpt-5.4-mini",
   maxOutputTokens: 700,
 };
+
+const isAiProviderMode = (value: unknown): value is AiProviderMode =>
+  value === "local-template" || value === "openai-user-api-key";
 
 const isOpenAiSettings = (value: unknown): value is OpenAiSettings => {
   if (typeof value !== "object" || value === null) {
     return false;
   }
 
-  const candidate = value as Partial<OpenAiSettings>;
+  const candidate = value as Partial<OpenAiSettings> & { billingMode?: unknown };
+  const providerMode = candidate.providerMode ?? candidate.billingMode;
 
   return (
-    candidate.billingMode === "user-api-key" &&
+    isAiProviderMode(providerMode) &&
     typeof candidate.apiKey === "string" &&
     typeof candidate.model === "string" &&
     Number.isFinite(candidate.maxOutputTokens)
@@ -49,10 +53,13 @@ export const loadOpenAiSettings = (): OpenAiSettings => {
       return DEFAULT_OPEN_AI_SETTINGS;
     }
 
+    const migrated = parsed as OpenAiSettings & { billingMode?: AiProviderMode };
+
     return {
       ...DEFAULT_OPEN_AI_SETTINGS,
-      ...parsed,
-      maxOutputTokens: Math.max(1, Math.floor(parsed.maxOutputTokens)),
+      ...migrated,
+      providerMode: migrated.providerMode ?? migrated.billingMode ?? "local-template",
+      maxOutputTokens: Math.max(1, Math.floor(migrated.maxOutputTokens)),
     };
   } catch {
     return DEFAULT_OPEN_AI_SETTINGS;
@@ -65,7 +72,7 @@ export const saveOpenAiSettings = (settings: OpenAiSettings) => {
   }
 
   const normalized: OpenAiSettings = {
-    billingMode: "user-api-key",
+    providerMode: settings.providerMode,
     apiKey: settings.apiKey.trim(),
     model: settings.model.trim() || DEFAULT_OPEN_AI_SETTINGS.model,
     maxOutputTokens: Math.max(1, Math.floor(settings.maxOutputTokens)),
