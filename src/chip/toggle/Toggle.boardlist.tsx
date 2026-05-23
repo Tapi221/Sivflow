@@ -17,11 +17,11 @@ const TOGGLE_MOTION_TRANSITION: Transition = {
   ease: [0.22, 1, 0.36, 1],
 };
 const TOGGLE_TOOLTIP_CLASS_NAME =
-  "rounded-lg border border-[#e4eaf1] bg-white px-2.5 py-[5px] text-[12px] font-semibold text-[#193a5c] shadow-[0_8px_18px_rgba(25,58,92,0.12)]";
+  "rounded-lg border border-[#eeeeee] bg-white px-2.5 py-[5px] text-[12px] font-medium text-[#8c8c8c] shadow-[0_8px_18px_rgba(0,0,0,0.08)]";
 const TOGGLE_TOOLTIP_ARROW_CLASS_NAME =
-  "border-b border-r border-[#e4eaf1] bg-white";
-const TOGGLE_ACTIVE_ICON_CLASS_NAME = "text-[#193a5c]";
-const TOGGLE_INACTIVE_ICON_CLASS_NAME = "text-[#9aa3b1]";
+  "border-b border-r border-[#eeeeee] bg-white";
+const TOGGLE_ACTIVE_ICON_CLASS_NAME = "text-[#8c8c8c]";
+const TOGGLE_INACTIVE_ICON_CLASS_NAME = "text-[#b7b7b7]";
 
 const toggleItems = [
   {
@@ -81,7 +81,7 @@ export const BoardListToggleButton = ({
   onChange,
 }: BoardListToggleButtonProps) => {
   return (
-    <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f6f8fb] p-0.5">
+    <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5">
       {toggleItems.map((item) => {
         const isActive = viewMode === item.value;
         const iconClassName = isActive
@@ -106,15 +106,13 @@ export const BoardListToggleButton = ({
                 "appearance-none select-none",
                 "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
                 "focus:outline-none focus:ring-0 focus-visible:outline-none",
-                isActive
-                  ? "text-[#193a5c]"
-                  : "text-[#8f929c] hover:text-[#193a5c]",
+                isActive ? "text-[#8c8c8c]" : "text-[#b3b3b3] hover:text-[#8c8c8c]",
               )}
             >
               {isActive && (
                 <motion.span
                   layoutId={TOGGLE_INDICATOR_ID}
-                  className="absolute inset-0 -z-10 rounded-lg border border-[#e4eaf1] bg-white"
+                  className="absolute inset-0 -z-10 rounded-lg border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
                   transition={TOGGLE_MOTION_TRANSITION}
                 />
               )}
