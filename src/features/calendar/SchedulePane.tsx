@@ -21,7 +21,7 @@ const CALENDAR_PANEL_SHADOW_CLASS =
   "shadow-[0_18px_48px_rgba(15,23,42,0.10),0_1px_0_rgba(255,255,255,0.85)_inset]";
 
 const IOS_CALENDAR_PANEL_CLASS =
-  "border-[#d8dbe2] bg-white backdrop-blur-xl";
+  "border-[#eeeeee] bg-white backdrop-blur-xl";
 
 const IOS_CALENDAR_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
