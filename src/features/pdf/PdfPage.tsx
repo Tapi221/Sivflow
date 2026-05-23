@@ -889,7 +889,7 @@ const PdfPageComponent = ({
           : undefined
       }
     >
-      <div className="relative inline-block rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="relative inline-block rounded-lg border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         {activeCanvasRenderState.error && !activeCanvasRenderState.rendered && (
           <div className="px-3 py-2 text-xs text-rose-500">
             {activeCanvasRenderState.error}
