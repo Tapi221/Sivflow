@@ -1,6 +1,7 @@
 import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/icons.schedule";
-import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
+import { TaskPriorityBadge } from "@/chip/budge/TaskPriorityBadge";
+import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { cn } from "@/lib/utils";
 import type { Task } from "./task.types";
 import { useTaskCard } from "./hooks/useTaskCard";
@@ -37,7 +38,6 @@ export const TaskCard = ({
   onToggleDone,
 }: TaskCardProps) => {
   const {
-    priority,
     category,
     formattedDate,
     isDone,
@@ -122,12 +122,7 @@ export const TaskCard = ({
               {category.label}
             </span>
 
-            <span
-              className="inline-flex h-[18px] items-center rounded px-1.5 text-[11px] font-medium"
-              style={{ backgroundColor: priority.bg, color: priority.text }}
-            >
-              {priority.label}
-            </span>
+            <TaskPriorityBadge priority={task.priority} />
           </div>
         </div>
       </div>

@@ -7,10 +7,11 @@ import {
   useState,
 } from "react";
 import { format } from "date-fns";
+import { TaskPriorityBadge } from "@/chip/budge/TaskPriorityBadge";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { TaskStatusDot } from "@/chip/icon/TaskStatusDot";
 import { cn } from "@/lib/utils";
-import { TASK_COLUMNS, CATEGORY_CONFIG, PRIORITY_CONFIG } from "./task.types";
+import { TASK_COLUMNS, CATEGORY_CONFIG } from "./task.types";
 import type { Task, TaskStatus } from "./task.types";
 
 type TaskListViewProps = {
@@ -182,7 +183,6 @@ const Row = ({
 }: RowProps) => {
   const isDone = task.status === "done";
   const category = CATEGORY_CONFIG[task.category] ?? { label: task.category, bg: "#f3f4f6", text: "#6b7280" };
-  const priority = PRIORITY_CONFIG[task.priority];
   const dueLabel = task.dueDate ? format(new Date(task.dueDate), "MMM d") : null;
 
   const gridStyle: CSSProperties = {
@@ -253,12 +253,7 @@ const Row = ({
 
       {/* priority */}
       <div className="flex items-center py-[9px] pr-3">
-        <span
-          className="inline-flex items-center h-5 rounded-full px-2 text-[11px] font-medium"
-          style={{ backgroundColor: priority.bg, color: priority.text }}
-        >
-          {priority.label}
-        </span>
+        <TaskPriorityBadge priority={task.priority} />
       </div>
 
       {/* category */}
