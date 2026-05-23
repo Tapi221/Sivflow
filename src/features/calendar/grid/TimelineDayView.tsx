@@ -120,7 +120,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                     key={column.id}
                     type="button"
                     className={cn(
-                      "flex h-10 flex-col items-center justify-center border-r border-[#e5e7eb] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
+                      "flex h-8 flex-col items-center justify-center border-r border-[#e5e7eb] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
                       "transition-colors hover:bg-[#f4f5f7]",
                       "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                       column.isToday && "bg-[#f0f6ff]",
@@ -133,10 +133,11 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                         <CalendarDayNumberCircle
                           isToday={column.isToday}
                           isSelected={isSelected}
+                          className="h-[22px] w-[22px] text-[11px]"
                         >
                           {column.topLabel}
                         </CalendarDayNumberCircle>
-                        <span className="mt-0.5 text-[11px] font-medium leading-none text-[#8f929c]">
+                        <span className="mt-0.5 text-[10px] font-medium leading-none text-[#8f929c]">
                           {column.bottomLabel}
                         </span>
                       </>
