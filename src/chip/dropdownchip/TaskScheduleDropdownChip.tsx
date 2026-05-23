@@ -144,10 +144,10 @@ export const MultiSelectDropdown = ({
                     transition
 
                     ${
-                      isSelected
-                        ? "bg-[#25272d] border-[#25272d]"
-                        : "bg-white"
-                    }
+              isSelected
+                ? "bg-[#25272d] border-[#25272d]"
+                : "bg-white"
+              }
                   `}
                 />
               </button>

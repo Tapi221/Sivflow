@@ -270,9 +270,9 @@ export const WorkspaceHeaderToolbar = ({
 
         {hasLeadingActions
           ? renderSegmentedActions(
-              leadingActions ?? [],
-              hasLeadingContentBeforeActions ? "ml-2" : "ml-0",
-            )
+            leadingActions ?? [],
+            hasLeadingContentBeforeActions ? "ml-2" : "ml-0",
+          )
           : null}
       </div>
 
