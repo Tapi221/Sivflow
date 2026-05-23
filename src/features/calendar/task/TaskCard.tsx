@@ -1,12 +1,10 @@
-import { format } from "date-fns";
-
-import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/sidebar.icons";
+import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/schedule.icons";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { cn } from "@/lib/utils";
 
-import { CATEGORY_CONFIG, PRIORITY_CONFIG } from "./task.types";
 import type { Task } from "./task.types";
+import { useTaskCard } from "./hooks/useTaskCard";
 
 type TaskCardProps = {
   task: Task;
@@ -38,32 +36,22 @@ export const TaskCard = ({
   onDelete,
   onToggleDone,
 }: TaskCardProps) => {
-  const priority = PRIORITY_CONFIG[task.priority];
-
-  let category = CATEGORY_CONFIG[task.category];
-  if (!category) {
-    category = { bg: "#f3f4f6", text: "#6b7280" };
-  }
-
-  let formattedDate: string | null = null;
-  if (task.dueDate) {
-    formattedDate = format(new Date(task.dueDate), "MMM d");
-  }
-
-  const isDone = task.status === "done";
-  const checkboxColor = isDone ? "#007aff" : "#aeb4bf";
-  const checkboxLabel = isDone ? "Mark task as not done" : "Complete task";
-  const chipName = accountName ?? task.assignee ?? "Google account";
-
-  let dateContent = <span />;
-  if (formattedDate) {
-    dateContent = (
-      <span className="inline-flex items-center gap-1 rounded-full border border-white/70 bg-[#f2f2f7] px-1.5 text-[11px] font-medium tabular-nums text-[#8e8e93]">
-        <ScheduleCalendarIcon className="h-4 w-4 shrink-0 text-[#9da3af]" />
-        {formattedDate}
-      </span>
-    );
-  }
+  const {
+    priority,
+    category,
+    formattedDate,
+    isDone,
+    checkboxColor,
+    checkboxLabel,
+    chipName,
+    handleToggleDone,
+    handleDelete,
+  } = useTaskCard({
+    task,
+    accountName,
+    onDelete,
+    onToggleDone,
+  });
 
   return (
     <div
@@ -84,11 +72,7 @@ export const TaskCard = ({
           className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform active:scale-90"
           aria-label={checkboxLabel}
           title={checkboxLabel}
-          onClick={() => {
-            if (onToggleDone) {
-              onToggleDone(task.id, !isDone);
-            }
-          }}
+          onClick={handleToggleDone}
         >
           <AnimatedSquareCheckbox
             checked={isDone}
@@ -112,11 +96,7 @@ export const TaskCard = ({
               type="button"
               className="-mr-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full text-[#8e8e93] opacity-0 transition-[background-color,color,opacity,transform] hover:bg-[#f2f2f7] hover:text-[#3a3a3c] active:scale-90 group-hover:opacity-100 focus-visible:opacity-100"
               aria-label="Task menu"
-              onClick={() => {
-                if (onDelete) {
-                  onDelete(task.id);
-                }
-              }}
+              onClick={handleDelete}
             >
               <TaskMenuIcon className="h-4 w-4" />
             </button>
@@ -129,7 +109,12 @@ export const TaskCard = ({
                 task.assignee && "pr-7",
               )}
             >
-              {dateContent}
+              {formattedDate && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-white/70 bg-[#f2f2f7] px-1.5 text-[11px] font-medium tabular-nums text-[#8e8e93]">
+                  <ScheduleCalendarIcon className="h-4 w-4 shrink-0 text-[#9da3af]" />
+                  {formattedDate}
+                </span>
+              )}
 
               <span
                 className="inline-flex h-5 items-center rounded-full border border-white/70 px-2 text-[11px] font-semibold"
@@ -151,10 +136,7 @@ export const TaskCard = ({
 
       {task.assignee && (
         <div className="pointer-events-none absolute right-3 bottom-2 rounded-full ring-1 ring-white">
-          <GoogleAccountChip
-            name={chipName}
-            photoUrl={accountPhotoUrl}
-          />
+          <GoogleAccountChip name={chipName} photoUrl={accountPhotoUrl} />
         </div>
       )}
     </div>
