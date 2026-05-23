@@ -1,4 +1,16 @@
 /** @type {import('tailwindcss').Config} */
+const iosSystemFontStack = [
+  "-apple-system",
+  "BlinkMacSystemFont",
+  '"SF Pro Text"',
+  '"SF Pro Display"',
+  '"Hiragino Sans"',
+  '"Hiragino Kaku Gothic ProN"',
+  '"Helvetica Neue"',
+  "Arial",
+  "sans-serif",
+];
+
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   darkMode: "class",
@@ -85,15 +97,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: [
-          '"Zen Kaku Gothic New"',
-          '"Noto Sans JP"',
-          "-apple-system",
-          "BlinkMacSystemFont",
-          '"Segoe UI"',
-          "Roboto",
-          "sans-serif",
-        ],
+        sans: iosSystemFontStack,
         serif: ["var(--ds-semantic-typography-content)"],
         mono: ["var(--ds-semantic-typography-code)"],
       },
