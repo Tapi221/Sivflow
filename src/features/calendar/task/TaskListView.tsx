@@ -42,9 +42,9 @@ const DEFAULT_TASK_COLUMNS: TaskColumn[] = [
   {
     id: "done",
     label: "完了",
-    width: 34,
-    minWidth: 30,
-    maxWidth: 42,
+    width: 28,
+    minWidth: 28,
+    maxWidth: 28,
     resizable: false,
   },
   {
@@ -183,7 +183,6 @@ export const TaskListView = ({
     return {
       minWidth: `${tableMinWidth}px`,
       tableLayout: "fixed",
-      width: `max(100%, ${tableMinWidth}px)`,
     };
   }, [tableMinWidth]);
 
@@ -357,7 +356,7 @@ export const TaskListView = ({
 
   return (
     <div className="explorer-chrome-font min-h-0 flex-1 overflow-auto p-4">
-      <table className="border-collapse text-[13px]" style={tableStyle}>
+      <table className="w-full border-collapse text-[13px]" style={tableStyle}>
         <colgroup>
           {columns.map((column) => (
             <col key={column.id} style={{ width: `${column.width}px` }} />
@@ -369,7 +368,10 @@ export const TaskListView = ({
             {columns.map((column) => {
               if (column.id === "done") {
                 return (
-                  <th key={column.id} className="relative pb-2 pr-2 text-left">
+                  <th
+                    key={column.id}
+                    className="relative w-7 pb-2 pr-2 text-left"
+                  >
                     <span className="sr-only">完了</span>
                     {renderColumnResizeHandle(column)}
                   </th>
@@ -398,7 +400,7 @@ export const TaskListView = ({
                 key={task.id}
                 className="border-b border-[#eeeeee] hover:bg-[#fafafa]"
               >
-                <td className="py-2.5 pr-2 align-top">
+                <td className="w-7 py-2.5 pr-2 align-top">
                   <button
                     type="button"
                     className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center"
