@@ -39,15 +39,15 @@
 
 .app-sidebar--closed {
   position: fixed;
-  top: 40px;
-  left: 10px;
+  top: 0;
+  left: 0;
   z-index: 1000;
-  width: 42px;
-  height: var(--ds-semantic-breadcrumb-height, 52px);
+  width: var(--app-sidebar-rail-width, 48px);
+  height: 40px;
   overflow: visible;
-  padding: 10px 0;
+  padding: 4px;
   pointer-events: none;
-  background: transparent !important;
+  background: var(--app-sidebar-bg) !important;
 }
 
 .app-right-sidebar {
@@ -66,7 +66,7 @@
   flex-direction: column;
   width: 100%;
   min-width: 0;
-  gap: 20px;
+  gap: 8px;
 }
 
 .app-sidebar__bottom {
@@ -89,7 +89,7 @@
   height: 32px;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
   color: var(--app-sidebar-icon);
   outline: none;
@@ -111,45 +111,29 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+  color: currentColor;
 }
 
 .app-sidebar--closed .app-sidebar__toggle {
   position: relative;
   z-index: 1;
-  width: 42px;
+  width: 40px;
   height: 32px;
-  padding: 2px;
+  padding: 0;
   pointer-events: auto;
-  border-radius: 12px;
-  background: var(--ds-color-neutral-150, #f7f7f8);
-  color: var(--ds-color-neutral-600, #6e6e80);
-}
-
-.app-sidebar--closed .app-sidebar__toggle::before {
-  content: "";
-  position: absolute;
-  inset: 2px;
-  z-index: 0;
-  border: 1px solid var(--ds-semantic-color-border-floating, rgba(226, 232, 240, 0.8));
-  border-radius: 8px;
-  background: var(--ds-color-neutral-0, #ffffff);
-  box-shadow: var(--ds-elevation-shadow-convex, 0 1px 2px rgba(86, 72, 74, 0.16));
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--app-sidebar-icon);
 }
 
 .app-sidebar--closed .app-sidebar__toggle:hover {
-  background: var(--ds-color-neutral-150, #f7f7f8);
-  color: var(--ds-semantic-color-action-primary, #45679d);
-}
-
-.app-sidebar--closed .app-sidebar__toggle:hover::before {
-  border-color: var(--ds-semantic-color-border-strong, #cfd9e8);
-  box-shadow: var(--ds-elevation-shadow-floating, 0 8px 24px rgba(15, 23, 42, 0.08));
+  background: var(--app-sidebar-hover-bg);
+  color: var(--app-sidebar-text-hover);
 }
 
 .app-sidebar--closed .app-sidebar__toggle-icon {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   color: currentColor;
 }
 
