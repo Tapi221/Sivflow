@@ -470,7 +470,7 @@ export const WorkspaceTabsBar = ({
           title="新しいエクスプローラータブ"
           onClick={() => {
             createExplorerTab();
-            navigate("/folders?view=section-list");
+            navigate("/library?view=section-list&libraryType=pdf");
           }}
         >
           <PlusLineIcon className="h-4 w-4" />
