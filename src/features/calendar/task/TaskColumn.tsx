@@ -3,6 +3,7 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useT } from "@/i18n/useT";
@@ -45,6 +46,7 @@ const SortableTaskCard = ({
     isDragging,
     listeners,
     setNodeRef,
+    transform,
     transition,
   } = useSortable({
     id: task.id,
@@ -59,7 +61,9 @@ const SortableTaskCard = ({
     <div
       ref={setNodeRef}
       style={{
-        transition,
+        transform: CSS.Transform.toString(transform),
+        transition: isDragging ? undefined : transition,
+        willChange: transform ? "transform" : undefined,
       }}
       className={cn(
         "touch-none",
