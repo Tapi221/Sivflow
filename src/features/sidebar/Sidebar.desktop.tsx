@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 import {
   GalleryIcon,
   SettingIcon as ScheduleSettingIcon,
+  TimeIcon,
 } from "@/components/icons/schedule.icons";
 import {
-  CalendarIcon,
   HomeIcon,
   InboxIcon,
   LibraryIcon,
@@ -72,7 +72,7 @@ const mainNavItems: SidebarNavItem[] = [
     id: "calendar",
     label: "Schedule",
     to: "/schedule",
-    icon: <CalendarIcon className="app-sidebar__nav-icon" />,
+    icon: <TimeIcon className="app-sidebar__nav-icon" />,
     sectionKey: "schedule",
     exactPath: true,
   },
