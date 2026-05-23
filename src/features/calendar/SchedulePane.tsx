@@ -26,6 +26,9 @@ const IOS_CALENDAR_PANEL_CLASS =
 const IOS_CALENDAR_SURFACE_CLASS =
   "border-[#e5e5ea] bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 
+const IOS_CALENDAR_MONTH_SURFACE_CLASS =
+  "border-transparent bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
+
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
   "border-transparent bg-transparent shadow-none";
 
@@ -219,7 +222,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
               <div
                 className={cn(
                   "ml-4 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0",
-                  IOS_CALENDAR_SURFACE_CLASS,
+                  IOS_CALENDAR_MONTH_SURFACE_CLASS,
                   isDayDetailPanelCollapsed
                     ? "mr-0 rounded-tl-[22px] rounded-tr-none border-r-0"
                     : "mr-4 rounded-t-[22px]",
