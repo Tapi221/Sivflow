@@ -19,8 +19,7 @@ export const sanitizeCardStorageImageRef = (imageValue: unknown) => {
   return {
     id: readCardStorageStringField(imageValue, "id") ?? assetId,
     assetId,
-    localFileId:
-      readCardStorageStringField(imageValue, "localFileId") ?? assetId,
+    localFileId: readCardStorageStringField(imageValue, "localFileId"),
     remoteUrl: normalizedRemoteUrl,
     storagePath: readCardStorageStringField(imageValue, "storagePath"),
     status:
