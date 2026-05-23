@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { format } from "date-fns";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { useT } from "@/i18n/useT";
@@ -12,8 +19,131 @@ type TaskListViewProps = {
   onRenameTask: (taskId: string, title: string) => void;
 };
 
+type TaskColumnId =
+  | "done"
+  | "title"
+  | "status"
+  | "priority"
+  | "category"
+  | "dueDate";
+
+type TaskColumn = {
+  id: TaskColumnId;
+  label: string;
+  width: number;
+  minWidth: number;
+  maxWidth?: number;
+  resizable: boolean;
+};
+
+const TASK_COLUMN_STORAGE_KEY = "task-list-view:column-widths:v1";
+
+const DEFAULT_TASK_COLUMNS: TaskColumn[] = [
+  {
+    id: "done",
+    label: "完了",
+    width: 34,
+    minWidth: 30,
+    maxWidth: 42,
+    resizable: false,
+  },
+  {
+    id: "title",
+    label: "タイトル",
+    width: 520,
+    minWidth: 160,
+    resizable: true,
+  },
+  {
+    id: "status",
+    label: "ステータス",
+    width: 220,
+    minWidth: 116,
+    maxWidth: 320,
+    resizable: true,
+  },
+  {
+    id: "priority",
+    label: "優先度",
+    width: 200,
+    minWidth: 96,
+    maxWidth: 260,
+    resizable: true,
+  },
+  {
+    id: "category",
+    label: "カテゴリ",
+    width: 260,
+    minWidth: 116,
+    resizable: true,
+  },
+  {
+    id: "dueDate",
+    label: "期日",
+    width: 150,
+    minWidth: 82,
+    maxWidth: 220,
+    resizable: true,
+  },
+];
+
 const TABLE_HEADER_CLASS =
   "pb-2 text-left text-[12px] font-medium tracking-normal text-[#b8bcc5]";
+
+const clampTaskColumnWidth = (
+  width: number,
+  minWidth: number,
+  maxWidth?: number,
+): number => {
+  if (!Number.isFinite(width)) {
+    return minWidth;
+  }
+
+  if (typeof maxWidth === "number") {
+    return Math.min(Math.max(width, minWidth), maxWidth);
+  }
+
+  return Math.max(width, minWidth);
+};
+
+const loadStoredTaskColumns = (): TaskColumn[] => {
+  if (typeof window === "undefined") {
+    return DEFAULT_TASK_COLUMNS;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(TASK_COLUMN_STORAGE_KEY);
+
+    if (!raw) {
+      return DEFAULT_TASK_COLUMNS;
+    }
+
+    const parsed = JSON.parse(raw) as Partial<Record<TaskColumnId, number>>;
+
+    return DEFAULT_TASK_COLUMNS.map((column) => {
+      const storedWidth = parsed[column.id];
+
+      if (typeof storedWidth !== "number") {
+        return column;
+      }
+
+      return {
+        ...column,
+        width: clampTaskColumnWidth(
+          storedWidth,
+          column.minWidth,
+          column.maxWidth,
+        ),
+      };
+    });
+  } catch {
+    return DEFAULT_TASK_COLUMNS;
+  }
+};
+
+const buildTaskTableMinWidth = (columns: TaskColumn[]): number => {
+  return columns.reduce((sum, column) => sum + column.width, 0);
+};
 
 const DetailIcon = () => (
   <svg viewBox="0 0 18 18" fill="none" className="h-4 w-4" aria-hidden="true">
@@ -33,14 +163,68 @@ export const TaskListView = ({
 }: TaskListViewProps) => {
   const t = useT();
   const titleInputRef = useRef<HTMLInputElement | null>(null);
+  const resizeCleanupRef = useRef<(() => void) | null>(null);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
+  const [columns, setColumns] = useState<TaskColumn[]>(loadStoredTaskColumns);
+  const [isColumnResizing, setIsColumnResizing] = useState(false);
   const statusLabelMap = {
     not_started: t.taskStatusNotStarted,
     in_progress: t.taskStatusInProgress,
     review: t.taskStatusReview,
     done: t.taskStatusDone,
   };
+
+  const tableMinWidth = useMemo(() => {
+    return buildTaskTableMinWidth(columns);
+  }, [columns]);
+
+  const tableStyle = useMemo<CSSProperties>(() => {
+    return {
+      minWidth: `${tableMinWidth}px`,
+      tableLayout: "fixed",
+      width: `max(100%, ${tableMinWidth}px)`,
+    };
+  }, [tableMinWidth]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const widthMap = Object.fromEntries(
+      columns.map((column) => [column.id, column.width]),
+    );
+
+    window.localStorage.setItem(
+      TASK_COLUMN_STORAGE_KEY,
+      JSON.stringify(widthMap),
+    );
+  }, [columns]);
+
+  useEffect(() => {
+    return () => {
+      resizeCleanupRef.current?.();
+      resizeCleanupRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isColumnResizing) {
+      return;
+    }
+
+    const previousCursor = document.body.style.cursor;
+    const previousUserSelect = document.body.style.userSelect;
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    return () => {
+      document.body.style.cursor = previousCursor;
+      document.body.style.userSelect = previousUserSelect;
+    };
+  }, [isColumnResizing]);
 
   useEffect(() => {
     if (!editingTaskId) {
@@ -72,19 +256,133 @@ export const TaskListView = ({
     setEditingTitle("");
   };
 
+  const handleColumnResizeReset = (columnId: TaskColumnId) => {
+    setColumns((currentColumns) =>
+      currentColumns.map((column) => {
+        if (column.id !== columnId) {
+          return column;
+        }
+
+        const defaultColumn = DEFAULT_TASK_COLUMNS.find(
+          (candidate) => candidate.id === columnId,
+        );
+
+        if (!defaultColumn) {
+          return column;
+        }
+
+        return {
+          ...column,
+          width: defaultColumn.width,
+        };
+      }),
+    );
+  };
+
+  const handleColumnResizeStart = (
+    event: ReactPointerEvent<HTMLDivElement>,
+    columnId: TaskColumnId,
+  ) => {
+    const targetColumn = columns.find((column) => column.id === columnId);
+
+    if (!targetColumn || !targetColumn.resizable) {
+      return;
+    }
+
+    resizeCleanupRef.current?.();
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const startX = event.clientX;
+    const startWidth = targetColumn.width;
+    setIsColumnResizing(true);
+
+    const handlePointerMove = (moveEvent: PointerEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+
+      setColumns((currentColumns) =>
+        currentColumns.map((column) => {
+          if (column.id !== columnId) {
+            return column;
+          }
+
+          return {
+            ...column,
+            width: clampTaskColumnWidth(
+              startWidth + deltaX,
+              column.minWidth,
+              column.maxWidth,
+            ),
+          };
+        }),
+      );
+    };
+
+    const cleanup = () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      setIsColumnResizing(false);
+      resizeCleanupRef.current = null;
+    };
+
+    const handlePointerUp = () => {
+      cleanup();
+    };
+
+    resizeCleanupRef.current = cleanup;
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp, { once: true });
+  };
+
+  const renderColumnResizeHandle = (column: TaskColumn) => {
+    if (!column.resizable) {
+      return null;
+    }
+
+    return (
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label={`${column.label} の列幅を調整`}
+        title="ドラッグで列幅調整、ダブルクリックで初期幅に戻す"
+        className="group/resize absolute inset-y-0 right-[-8px] z-10 flex w-4 items-center justify-center cursor-col-resize touch-none"
+        onDoubleClick={() => handleColumnResizeReset(column.id)}
+        onPointerDown={(event) => handleColumnResizeStart(event, column.id)}
+      >
+        <div className="h-[1em] w-[1px] bg-[#e5e7eb] transition-colors group-hover/resize:bg-[#9ca3af]" />
+      </div>
+    );
+  };
+
   return (
     <div className="explorer-chrome-font min-h-0 flex-1 overflow-auto p-4">
-      <table className="w-full border-collapse text-[13px]">
+      <table className="border-collapse text-[13px]" style={tableStyle}>
+        <colgroup>
+          {columns.map((column) => (
+            <col key={column.id} style={{ width: `${column.width}px` }} />
+          ))}
+        </colgroup>
+
         <thead>
           <tr className="border-b border-[#eeeeee]">
-            <th className="w-7 pb-2 pr-2 text-left">
-              <span className="sr-only">完了</span>
-            </th>
-            <th className={TABLE_HEADER_CLASS}>タイトル</th>
-            <th className={TABLE_HEADER_CLASS}>ステータス</th>
-            <th className={TABLE_HEADER_CLASS}>優先度</th>
-            <th className={TABLE_HEADER_CLASS}>カテゴリ</th>
-            <th className={TABLE_HEADER_CLASS}>期日</th>
+            {columns.map((column) => {
+              if (column.id === "done") {
+                return (
+                  <th key={column.id} className="relative pb-2 pr-2 text-left">
+                    <span className="sr-only">完了</span>
+                    {renderColumnResizeHandle(column)}
+                  </th>
+                );
+              }
+
+              return (
+                <th key={column.id} className={`${TABLE_HEADER_CLASS} relative pr-4`}>
+                  <span className="block truncate pr-2">{column.label}</span>
+                  {renderColumnResizeHandle(column)}
+                </th>
+              );
+            })}
           </tr>
         </thead>
 
@@ -100,7 +398,7 @@ export const TaskListView = ({
                 key={task.id}
                 className="border-b border-[#eeeeee] hover:bg-[#fafafa]"
               >
-                <td className="w-7 py-2.5 pr-2 align-top">
+                <td className="py-2.5 pr-2 align-top">
                   <button
                     type="button"
                     className="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center"
@@ -111,7 +409,7 @@ export const TaskListView = ({
                   </button>
                 </td>
 
-                <td className="py-2.5 pr-4 font-medium leading-[18px] text-[#24262d]">
+                <td className="overflow-hidden py-2.5 pr-4 font-medium leading-[18px] text-[#24262d]">
                   {isEditingTitle ? (
                     <div className="min-w-0">
                       <input
@@ -168,22 +466,22 @@ export const TaskListView = ({
                   )}
                 </td>
 
-                <td className="py-2.5 pr-4 align-top">
-                  <span className="flex items-center gap-1.5 text-[#4c5361]">
+                <td className="overflow-hidden py-2.5 pr-4 align-top">
+                  <span className="flex min-w-0 items-center gap-1.5 text-[#4c5361]">
                     <TaskStatusDot color={col?.dotColor} />
-                    {statusLabelMap[task.status]}
+                    <span className="truncate">{statusLabelMap[task.status]}</span>
                   </span>
                 </td>
 
-                <td className="py-2.5 pr-4 align-top capitalize text-[#4c5361]">
+                <td className="truncate py-2.5 pr-4 align-top capitalize text-[#4c5361]">
                   {task.priority}
                 </td>
 
-                <td className="py-2.5 pr-4 align-top text-[#4c5361]">
+                <td className="truncate py-2.5 pr-4 align-top text-[#4c5361]">
                   {task.category}
                 </td>
 
-                <td className="py-2.5 align-top text-[#8f929c]">
+                <td className="truncate py-2.5 align-top text-[#8f929c]">
                   {task.dueDate ? format(new Date(task.dueDate), "MMM d") : "—"}
                 </td>
               </tr>
