@@ -138,6 +138,7 @@ const PdfScrollTest = () => {
           <PdfViewer
             ref={viewerRef}
             source={{ data: null, url: pdfBlobUrl }}
+            scale={1}
             onNumPages={setNumPages}
             onPageChange={setCurrentPage}
             className="h-full w-full"
