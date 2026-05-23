@@ -206,7 +206,7 @@ const LoginPage = () => {
 };
 
 const DefaultRedirect = () => {
-  return <Navigate to="/folders" replace />;
+  return <Navigate to="/library" replace />;
 };
 
 const AppContent = () => {
@@ -295,9 +295,9 @@ const AppContent = () => {
         >
           <Route index element={<DefaultRedirect />} />
 
-          <Route path="folders" element={withRouteFallback(<Folders />)} />
+          <Route path="library" element={withRouteFallback(<Folders />)} />
 
-          <Route path="tag-map" element={<Navigate to="/folders" replace />} />
+          <Route path="tag-map" element={<Navigate to="/library" replace />} />
           <Route path="schedule" element={withRouteFallback(<Schedule />)} />
           <Route path="calendar" element={<Navigate to="/schedule" replace />} />
           <Route path="tasks" element={withRouteFallback(<Tasks />)} />
@@ -314,7 +314,7 @@ const AppContent = () => {
           <Route path="study" element={withRouteFallback(<StudyMode />)} />
           <Route path="sandbox/blocknote" element={<BlockNoteSandboxPage />} />
 
-          <Route path="trash" element={<Navigate to="/folders" replace />} />
+          <Route path="trash" element={<Navigate to="/library" replace />} />
           <Route path="directory" element={withRouteFallback(<Directory />)} />
 
           {PdfScrollTest ? (
@@ -351,7 +351,7 @@ const AppContent = () => {
           ) : null}
         </Route>
 
-        <Route path="*" element={<Navigate to="/folders" replace />} />
+        <Route path="*" element={<Navigate to="/library" replace />} />
       </Routes>
 
       {syncProgress ? (
