@@ -27,6 +27,7 @@ type DroppableTaskColumnProps = Omit<TaskBoardViewProps, "tasksByStatus" | "onRe
   column: (typeof TASK_COLUMNS)[number];
   tasks: Task[];
   activeTaskId?: string | null;
+  enableSortableTransforms?: boolean;
   showDivider?: boolean;
 };
 
@@ -38,6 +39,7 @@ const DroppableTaskColumn = ({
   column,
   tasks,
   activeTaskId,
+  enableSortableTransforms = false,
   showDivider = false,
   accountName,
   accountPhotoUrl,
@@ -64,6 +66,7 @@ const DroppableTaskColumn = ({
         column={column}
         tasks={tasks}
         activeTaskId={activeTaskId}
+        enableSortableTransforms={enableSortableTransforms}
         accountName={accountName}
         accountPhotoUrl={accountPhotoUrl}
         onAddTask={onAddTask}
@@ -93,6 +96,7 @@ export const TaskBoardView = ({
     handleDragEnd,
     handleDragOver,
     handleDragStart,
+    isPreviewingTaskReorder,
     measuring,
     sensors,
     visibleTasksByStatus,
@@ -172,6 +176,7 @@ export const TaskBoardView = ({
               column={col}
               tasks={visibleTasksByStatus[col.id] ?? []}
               activeTaskId={activeTaskId}
+              enableSortableTransforms={isPreviewingTaskReorder}
               showDivider={index > 0}
               accountName={accountName}
               accountPhotoUrl={accountPhotoUrl}
