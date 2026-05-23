@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { format } from "date-fns";
+import { SidebarOpenIcon } from "@/components/icons/icons.sidebar";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
@@ -32,15 +33,9 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
 
 const DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS =
-  "absolute right-5 top-4 z-30 flex h-8 w-8 items-center justify-center rounded-xl border outline-none ring-0 transition-[transform,background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-px hover:bg-[#f7fbff] hover:text-[#2563eb] focus:outline-none focus:ring-0 focus-visible:ring-2 focus-visible:ring-[#93c5fd] focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transition-none motion-reduce:hover:translate-y-0";
+  "absolute right-4 top-4 z-40 flex h-8 w-8 items-center justify-center rounded-xl border outline-none ring-0 transition-[transform,background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-px hover:bg-[#f7fbff] hover:text-[#2563eb] focus:outline-none focus:ring-0 focus-visible:ring-2 focus-visible:ring-[#93c5fd] focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transition-none motion-reduce:hover:translate-y-0";
 
-const DAY_DETAIL_PANEL_WIDTH_PX = 260;
-const CALENDAR_PANEL_OPEN_RIGHT_GUTTER_PX = 16;
 const VIEW_HEADER_CONTROLS_RIGHT_INSET_PX = 56;
-const VIEW_HEADER_CONTROLS_RESERVED_RIGHT_PX =
-  DAY_DETAIL_PANEL_WIDTH_PX +
-  CALENDAR_PANEL_OPEN_RIGHT_GUTTER_PX +
-  VIEW_HEADER_CONTROLS_RIGHT_INSET_PX;
 
 export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const pane = useSchedulePane();
@@ -112,9 +107,9 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const isMonthCalendarView =
     activeMode === "calendar" && selectedViewMode === "month";
 
-  const viewHeaderRightPaddingPx = showDayDetailPanel
+  const viewHeaderRightPaddingPx = canShowDayDetailPanel
     ? VIEW_HEADER_CONTROLS_RIGHT_INSET_PX
-    : VIEW_HEADER_CONTROLS_RESERVED_RIGHT_PX;
+    : 0;
 
   const dayDetailToggleLabel = showDayDetailPanel
     ? "日詳細パネルを閉じる"
@@ -150,10 +145,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
       selectedViewMode === "month" ? monthTitleDate : titleDate;
 
     return (
-      <div
-        className={cn(className, canShowDayDetailPanel && "relative")}
-        style={{ paddingRight: viewHeaderRightPaddingPx }}
-      >
+      <div className={className} style={{ paddingRight: viewHeaderRightPaddingPx }}>
         <div className="flex min-w-0 items-center gap-3">
           <h1 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
             {format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale })}
@@ -173,37 +165,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             onToday={handleToday}
           />
         </div>
-
-        {canShowDayDetailPanel ? (
-          <button
-            type="button"
-            className={cn(
-              DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS,
-              showDayDetailPanel
-                ? "border-[#cfe2ff] bg-[#eef6ff] text-[#2563eb] shadow-[0_4px_12px_rgba(37,99,235,0.14)]"
-                : "border-[#e5e7eb] bg-white/90 text-[#8f96a3] shadow-[0_2px_8px_rgba(15,23,42,0.08)]",
-            )}
-            onClick={handleToggleDayDetailPanel}
-            aria-label={dayDetailToggleLabel}
-            aria-pressed={showDayDetailPanel}
-            aria-expanded={showDayDetailPanel}
-            title={dayDetailToggleLabel}
-          >
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              className="h-[18px] w-[18px]"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="5" y="3.5" width="14" height="17" rx="2.8" />
-              <path d="M9.5 4v16" />
-            </svg>
-          </button>
-        ) : null}
       </div>
     );
   };
@@ -349,6 +310,25 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             events={calendarEvents}
             isOpen={showDayDetailPanel}
           />
+        ) : null}
+
+        {canShowDayDetailPanel ? (
+          <button
+            type="button"
+            className={cn(
+              DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS,
+              showDayDetailPanel
+                ? "border-[#d6e4ff] bg-white/90 text-[#6f7f99] shadow-[0_4px_14px_rgba(15,23,42,0.10)]"
+                : "border-[#e5e7eb] bg-white/90 text-[#8f96a3] shadow-[0_2px_8px_rgba(15,23,42,0.08)]",
+            )}
+            onClick={handleToggleDayDetailPanel}
+            aria-label={dayDetailToggleLabel}
+            aria-pressed={showDayDetailPanel}
+            aria-expanded={showDayDetailPanel}
+            title={dayDetailToggleLabel}
+          >
+            <SidebarOpenIcon className="h-[19px] w-[19px]" />
+          </button>
         ) : null}
       </div>
     </div>
