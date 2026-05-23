@@ -323,10 +323,14 @@ export const CalendarSidebar = ({
                   <span
                     aria-hidden="true"
                     className={cn(
-                      "pointer-events-none absolute inset-x-0 top-1/2 h-[18px] -translate-y-1/2 bg-[#f1f2f4]",
-                      day.isRangeStart && "rounded-l-full",
-                      day.isRangeEnd && "rounded-r-full",
-                      day.isRangeStart && day.isRangeEnd && "rounded-full",
+                      "pointer-events-none absolute top-1/2 h-[21px] -translate-y-1/2 bg-[#e8eaee] shadow-[0_1px_3px_rgba(15,23,42,0.05)_inset]",
+                      day.isRangeStart && day.isRangeEnd
+                        ? "inset-x-[3px] rounded-full"
+                        : day.isRangeStart
+                          ? "left-1/2 right-[-2px] rounded-l-full rounded-r-[9px]"
+                          : day.isRangeEnd
+                            ? "left-[-2px] right-1/2 rounded-l-[9px] rounded-r-full"
+                            : "left-[-2px] right-[-2px] rounded-[10px]",
                     )}
                   />
                 ) : null}
@@ -338,7 +342,7 @@ export const CalendarSidebar = ({
                   className={cn(
                     "relative z-10",
                     isRangeMiddle && "bg-transparent text-[#4f5663] shadow-none",
-                    day.isToday && day.isInSelectedRange && "ring-1 ring-[#c3c7cf]",
+                    day.isToday && day.isInSelectedRange && "ring-1 ring-[#b8bdc7]",
                     !day.isCurrentMonth && !isActive && !day.isInSelectedRange && "text-[#b7b7b7]",
                   )}
                 >
