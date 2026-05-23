@@ -11,7 +11,7 @@ import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
 import type { WorkspaceTab } from "@/features/tab/Tab";
 import { Calendar, FileText, FolderIcon, Layers, X } from "@/ui/icons";
-import { PlusLineIcon } from "@/components/icons/schedule.icons";
+import { PlusLineIcon } from "@/components/icons/icons.schedule";
 import { cn } from "@/lib/utils";
 
 type WorkspaceTabsBarVariant = "workspace" | "titlebar";

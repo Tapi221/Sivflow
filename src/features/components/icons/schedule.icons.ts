@@ -1,1 +1,1 @@
-export * from "@/components/icons/schedule.icons";
+export * from "@/components/icons/icons.schedule";

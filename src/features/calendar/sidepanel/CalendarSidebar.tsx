@@ -13,7 +13,7 @@ import { AddGoogleCalendarButton } from "@/chip/button/AddGoogleCalendarButton";
 import { AnimatedCircleCheckbox } from "@/chip/checkbox/AnimatedCircleCheckbox";
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import { GcalRelinkPanel } from "@/chip/minipanel/GcalRelinkPanel";
-import { CalendarIcon, TaskIcon } from "@/components/icons/schedule.icons";
+import { CalendarIcon, TaskIcon } from "@/components/icons/icons.schedule";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
