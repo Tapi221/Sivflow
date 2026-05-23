@@ -90,7 +90,7 @@ export const useWorkspaceTabsRouteSync = () => {
       return;
     }
 
-    if (pathname !== "/folders") {
+    if (pathname !== "/library") {
       return;
     }
 
