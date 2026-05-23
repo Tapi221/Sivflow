@@ -262,6 +262,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                     rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
                     scrollContainerRef={scrollContainerRef}
                     onScroll={handleCalendarScroll}
+                    onSelectDate={handleSidebarSelectDate}
                   />
                 ) : (
                   <CalendarWeekDayGrid
