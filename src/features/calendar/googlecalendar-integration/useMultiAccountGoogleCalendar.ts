@@ -323,30 +323,38 @@ const requestSilentAccessToken = async () => {
   return requestCalendarAccessToken(auth, true);
 };
 
-const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => ({
-  id: stored.id,
-  email: stored.email,
-  name: stored.name ?? null,
-  photoUrl: stored.photoUrl ?? null,
-  accessToken: isStoredTokenValid(stored) ? stored.accessToken : null,
-  refreshToken: stored.refreshToken,
-  calendars: stored.cachedCalendars ?? [],
-  selectedCalendarIds: new Set(stored.selectedCalendarIds),
-  syncState:
-    isStoredTokenValid(stored) || stored.refreshToken || useServerStoredTokens
-      ? "idle"
-      : "needsReconnect",
-  connectionStatus:
-    isStoredTokenValid(stored) || stored.refreshToken || useServerStoredTokens
-      ? "connected"
-      : "needsReconnect",
-  lastSyncedAt: null,
-  isConnecting: false,
-  error:
-    isStoredTokenValid(stored) || stored.refreshToken || useServerStoredTokens
-      ? null
-      : "Google Calendar の再連携が必要です",
-});
+const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => {
+  const calendars = stored.cachedCalendars ?? [];
+  const selectedCalendarIds = resolveSelectedCalendarIds(
+    stored.selectedCalendarIds,
+    calendars,
+  );
+
+  return {
+    id: stored.id,
+    email: stored.email,
+    name: stored.name ?? null,
+    photoUrl: stored.photoUrl ?? null,
+    accessToken: isStoredTokenValid(stored) ? stored.accessToken : null,
+    refreshToken: stored.refreshToken,
+    calendars,
+    selectedCalendarIds: new Set(selectedCalendarIds),
+    syncState:
+      isStoredTokenValid(stored) || stored.refreshToken || useServerStoredTokens
+        ? "idle"
+        : "needsReconnect",
+    connectionStatus:
+      isStoredTokenValid(stored) || stored.refreshToken || useServerStoredTokens
+        ? "connected"
+        : "needsReconnect",
+    lastSyncedAt: null,
+    isConnecting: false,
+    error:
+      isStoredTokenValid(stored) || stored.refreshToken || useServerStoredTokens
+        ? null
+        : "Google Calendar の再連携が必要です",
+  };
+};
 
 export const useMultiAccountGoogleCalendar = () => {
   const [accounts, dispatchAccounts] = useReducer(
