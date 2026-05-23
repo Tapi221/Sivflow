@@ -24,6 +24,10 @@ const PDF_ZOOM_INPUT_IGNORE_SELECTOR = [
   "[data-pdf-zoom-input-ignore='true']",
 ].join(",");
 
+const PDF_ZOOM_COMMIT_IDLE_MS = 120;
+const PDF_ZOOM_PREVIEW_CLEAR_FRAME_COUNT = 2;
+const PDF_ZOOM_SCALE_EPSILON = 0.0005;
+
 const clampGestureScale = (
   value: number,
   minGestureScale: number,
@@ -46,26 +50,122 @@ export const usePdfZoom = ({
   maxGestureScale,
   onGestureScaleChange,
 }: UsePdfZoomOptions) => {
+  const containerRef = useRef<HTMLDivElement | null>(container);
   const gestureScaleRef = useRef(gestureScale);
+  const previewScaleRef = useRef(gestureScale);
   const minGestureScaleRef = useRef(minGestureScale);
   const maxGestureScaleRef = useRef(maxGestureScale);
   const onGestureScaleChangeRef = useRef(onGestureScaleChange);
   const gestureStartScaleRef = useRef<number | null>(null);
   const wheelDeltaRef = useRef(0);
   const wheelZoomRafRef = useRef<number | null>(null);
+  const zoomCommitTimeoutRef = useRef<number | null>(null);
+  const previewClearRafIdsRef = useRef<number[]>([]);
+  const previewActiveRef = useRef(false);
 
-  useEffect(() => {
-    gestureScaleRef.current = gestureScale;
-  }, [gestureScale]);
+  const getPreviewTarget = useCallback(() => {
+    const currentContainer = containerRef.current;
 
-  useEffect(() => {
-    minGestureScaleRef.current = minGestureScale;
-    maxGestureScaleRef.current = maxGestureScale;
-  }, [maxGestureScale, minGestureScale]);
+    if (!currentContainer) {
+      return null;
+    }
 
-  useEffect(() => {
-    onGestureScaleChangeRef.current = onGestureScaleChange;
-  }, [onGestureScaleChange]);
+    const firstChild = currentContainer.firstElementChild;
+
+    return firstChild instanceof HTMLElement ? firstChild : currentContainer;
+  }, []);
+
+  const clearPendingPreviewClear = useCallback(() => {
+    previewClearRafIdsRef.current.forEach((rafId) => {
+      window.cancelAnimationFrame(rafId);
+    });
+    previewClearRafIdsRef.current = [];
+  }, []);
+
+  const clearPendingGestureScaleCommit = useCallback(() => {
+    if (zoomCommitTimeoutRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(zoomCommitTimeoutRef.current);
+    zoomCommitTimeoutRef.current = null;
+  }, []);
+
+  const resetPreviewStyles = useCallback(() => {
+    const previewTarget = getPreviewTarget();
+
+    if (!previewTarget) {
+      return;
+    }
+
+    previewTarget.style.transform = "";
+    previewTarget.style.transformOrigin = "";
+    previewTarget.style.willChange = "";
+  }, [getPreviewTarget]);
+
+  const schedulePreviewClear = useCallback(() => {
+    clearPendingPreviewClear();
+
+    const requestNextFrame = (remainingFrameCount: number) => {
+      const rafId = window.requestAnimationFrame(() => {
+        previewClearRafIdsRef.current = previewClearRafIdsRef.current.filter(
+          (currentRafId) => currentRafId !== rafId,
+        );
+
+        if (remainingFrameCount > 1) {
+          requestNextFrame(remainingFrameCount - 1);
+          return;
+        }
+
+        resetPreviewStyles();
+        previewActiveRef.current = false;
+        previewScaleRef.current = gestureScaleRef.current;
+      });
+
+      previewClearRafIdsRef.current.push(rafId);
+    };
+
+    requestNextFrame(PDF_ZOOM_PREVIEW_CLEAR_FRAME_COUNT);
+  }, [clearPendingPreviewClear, resetPreviewStyles]);
+
+  const applyPreviewScale = useCallback(
+    (nextGestureScale: number) => {
+      const clampedGestureScale = clampGestureScale(
+        nextGestureScale,
+        minGestureScaleRef.current,
+        maxGestureScaleRef.current,
+      );
+      const baseGestureScale = gestureScaleRef.current;
+
+      previewScaleRef.current = clampedGestureScale;
+      clearPendingPreviewClear();
+
+      if (
+        !Number.isFinite(baseGestureScale) ||
+        baseGestureScale <= 0 ||
+        Math.abs(clampedGestureScale - baseGestureScale) <
+          PDF_ZOOM_SCALE_EPSILON
+      ) {
+        resetPreviewStyles();
+        previewActiveRef.current = false;
+        return clampedGestureScale;
+      }
+
+      const previewTarget = getPreviewTarget();
+
+      if (!previewTarget) {
+        return clampedGestureScale;
+      }
+
+      previewTarget.style.transform = `scale(${clampedGestureScale / baseGestureScale})`;
+      previewTarget.style.transformOrigin = "50% 0px";
+      previewTarget.style.willChange = "transform";
+      previewActiveRef.current = true;
+
+      return clampedGestureScale;
+    },
+    [clearPendingPreviewClear, getPreviewTarget, resetPreviewStyles],
+  );
 
   const emitGestureScaleChange = useCallback(
     (nextGestureScale: number, source: PdfScaleChangeSource) => {
@@ -81,7 +181,10 @@ export const usePdfZoom = ({
         maxGestureScaleRef.current,
       );
 
-      if (Math.abs(clampedGestureScale - gestureScaleRef.current) < 0.0005) {
+      if (
+        Math.abs(clampedGestureScale - gestureScaleRef.current) <
+        PDF_ZOOM_SCALE_EPSILON
+      ) {
         return;
       }
 
@@ -90,6 +193,56 @@ export const usePdfZoom = ({
     },
     [],
   );
+
+  const scheduleGestureScaleCommit = useCallback(
+    (source: PdfScaleChangeSource, delayMs = PDF_ZOOM_COMMIT_IDLE_MS) => {
+      clearPendingGestureScaleCommit();
+
+      const commitGestureScale = () => {
+        zoomCommitTimeoutRef.current = null;
+        emitGestureScaleChange(previewScaleRef.current, source);
+      };
+
+      if (delayMs <= 0) {
+        commitGestureScale();
+        return;
+      }
+
+      zoomCommitTimeoutRef.current = window.setTimeout(
+        commitGestureScale,
+        delayMs,
+      );
+    },
+    [clearPendingGestureScaleCommit, emitGestureScaleChange],
+  );
+
+  useEffect(() => {
+    containerRef.current = container;
+  }, [container]);
+
+  useEffect(() => {
+    gestureScaleRef.current = gestureScale;
+
+    if (!previewActiveRef.current) {
+      previewScaleRef.current = gestureScale;
+      return;
+    }
+
+    if (
+      Math.abs(gestureScale - previewScaleRef.current) < PDF_ZOOM_SCALE_EPSILON
+    ) {
+      schedulePreviewClear();
+    }
+  }, [gestureScale, schedulePreviewClear]);
+
+  useEffect(() => {
+    minGestureScaleRef.current = minGestureScale;
+    maxGestureScaleRef.current = maxGestureScale;
+  }, [maxGestureScale, minGestureScale]);
+
+  useEffect(() => {
+    onGestureScaleChangeRef.current = onGestureScaleChange;
+  }, [onGestureScaleChange]);
 
   useEffect(() => {
     if (!container) {
@@ -147,10 +300,11 @@ export const usePdfZoom = ({
         }
 
         const rawNextGestureScale =
-          gestureScaleRef.current *
+          previewScaleRef.current *
           Math.exp(-accumulatedDelta * PDF_GESTURE_WHEEL_ZOOM_INTENSITY);
 
-        emitGestureScaleChange(rawNextGestureScale, "wheel");
+        applyPreviewScale(rawNextGestureScale);
+        scheduleGestureScaleCommit("wheel");
       });
     };
 
@@ -163,7 +317,8 @@ export const usePdfZoom = ({
       }
 
       stopNativeEvent(event);
-      gestureStartScaleRef.current = gestureScaleRef.current;
+      clearPendingGestureScaleCommit();
+      gestureStartScaleRef.current = previewScaleRef.current;
     };
 
     const handleGestureChange = (event: Event) => {
@@ -187,10 +342,11 @@ export const usePdfZoom = ({
       }
 
       const rawNextGestureScale =
-        (gestureStartScaleRef.current ?? gestureScaleRef.current) *
+        (gestureStartScaleRef.current ?? previewScaleRef.current) *
         browserGestureScale;
 
-      emitGestureScaleChange(rawNextGestureScale, "gesture");
+      applyPreviewScale(rawNextGestureScale);
+      scheduleGestureScaleCommit("gesture");
     };
 
     const handleGestureEnd = (event: Event) => {
@@ -203,6 +359,7 @@ export const usePdfZoom = ({
 
       stopNativeEvent(event);
       gestureStartScaleRef.current = null;
+      scheduleGestureScaleCommit("gesture", 0);
     };
 
     const supportsGestureEvents = "ongesturestart" in window;
@@ -235,8 +392,20 @@ export const usePdfZoom = ({
         wheelZoomRafRef.current = null;
       }
 
+      clearPendingGestureScaleCommit();
+      clearPendingPreviewClear();
+      resetPreviewStyles();
+      previewActiveRef.current = false;
+      previewScaleRef.current = gestureScaleRef.current;
       wheelDeltaRef.current = 0;
       gestureStartScaleRef.current = null;
     };
-  }, [container, emitGestureScaleChange]);
+  }, [
+    applyPreviewScale,
+    clearPendingGestureScaleCommit,
+    clearPendingPreviewClear,
+    container,
+    resetPreviewStyles,
+    scheduleGestureScaleCommit,
+  ]);
 };
