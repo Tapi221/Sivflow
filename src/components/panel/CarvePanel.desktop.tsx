@@ -1,4 +1,4 @@
-import { forwardRef, type ReactNode } from "react";
+import { forwardRef, type ReactNode, type Ref } from "react";
 import { cn } from "@/lib/utils";
 
 type CarvePanelProps = {
@@ -12,6 +12,25 @@ type CarvePanelViewportProps = {
   hasTrailingPanel?: boolean;
   className?: string;
 };
+
+type CarvePanelShellProps = {
+  children: ReactNode;
+  toolbar?: ReactNode;
+  overlay?: ReactNode;
+  leadingPanel?: ReactNode;
+  trailingPanel?: ReactNode;
+  hasTrailingPanel?: boolean;
+  viewportRef?: Ref<HTMLDivElement>;
+  className?: string;
+  bodyClassName?: string;
+  viewportClassName?: string;
+};
+
+const CARVE_PANEL_SHELL_CLASS =
+  "relative flex h-full min-h-0 w-full flex-col bg-transparent";
+
+const CARVE_PANEL_BODY_CLASS =
+  "relative flex min-h-0 flex-1 bg-transparent";
 
 const CARVE_PANEL_VIEWPORT_BASE_CLASS =
   "flex min-h-0 min-w-0 flex-1 flex-col bg-white";
@@ -65,6 +84,40 @@ export const CarvePanel = ({
       )}
     >
       {children}
+    </div>
+  );
+};
+
+export const CarvePanelShell = ({
+  children,
+  toolbar = null,
+  overlay = null,
+  leadingPanel = null,
+  trailingPanel = null,
+  hasTrailingPanel = false,
+  viewportRef,
+  className,
+  bodyClassName,
+  viewportClassName,
+}: CarvePanelShellProps) => {
+  return (
+    <div className={cn(CARVE_PANEL_SHELL_CLASS, className)}>
+      {toolbar}
+      {overlay}
+
+      <div className={cn(CARVE_PANEL_BODY_CLASS, bodyClassName)}>
+        {leadingPanel}
+
+        <CarvePanelViewport
+          ref={viewportRef}
+          hasTrailingPanel={hasTrailingPanel}
+          className={viewportClassName}
+        >
+          {children}
+        </CarvePanelViewport>
+
+        {trailingPanel}
+      </div>
     </div>
   );
 };
