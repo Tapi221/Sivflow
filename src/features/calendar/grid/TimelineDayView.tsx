@@ -27,6 +27,8 @@ type CalendarTimelineDayViewProps = {
   onSelectDate?: (date: Date) => void;
 };
 
+const TIMELINE_HEADER_BORDER_COLOR = "#b7b7b7";
+
 const buildColumnGridBackground = (columnWidth: number) => {
   const borderStart = Math.max(0, columnWidth - 1);
 
@@ -99,9 +101,12 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
             minWidth: `${laneLabelWidth + gridWidth}px`,
           }}
         >
-          <div className="sticky left-0 top-0 z-20 border-b border-r border-[#e5e7eb] bg-white" />
+          <div
+            className="sticky left-0 top-0 z-20 border-b border-r border-[#e5e7eb] bg-white"
+            style={{ borderBottomColor: TIMELINE_HEADER_BORDER_COLOR }}
+          />
 
-          <div className="sticky top-0 z-10 border-b border-[#e5e7eb] bg-white">
+          <div className="sticky top-0 z-10 border-b border-[#b7b7b7] bg-white">
             <div
               className="grid"
               style={{
@@ -120,12 +125,13 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                     key={column.id}
                     type="button"
                     className={cn(
-                      "flex h-8 flex-col items-center justify-center border-r border-[#e5e7eb] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
+                      "flex h-8 flex-col items-center justify-center border-b border-r border-[#e5e7eb] bg-white text-[12px] font-medium text-[#4c5361] last:border-r-0",
                       "transition-colors hover:bg-[#f4f5f7]",
                       "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                       column.isToday && "bg-[#f0f6ff]",
                       !column.isToday && isSelected && "bg-[#f4f5f7]",
                     )}
+                    style={{ borderBottomColor: TIMELINE_HEADER_BORDER_COLOR }}
                     onClick={() => onSelectDate?.(column.start)}
                   >
                     {column.kind === "day" ? (
