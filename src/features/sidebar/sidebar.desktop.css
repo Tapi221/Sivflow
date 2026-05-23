@@ -191,6 +191,11 @@
   color: var(--app-sidebar-icon-active);
 }
 
+.app-sidebar__nav-link:hover .app-sidebar__nav-icon,
+.app-sidebar__nav-link:hover .app-sidebar__nav-chevron {
+  color: var(--app-sidebar-text-hover);
+}
+
 .app-sidebar__nav-link--disabled,
 .app-sidebar__nav-link:disabled {
   cursor: default;
@@ -230,6 +235,7 @@
   height: 20px;
   flex-shrink: 0;
   color: var(--app-sidebar-icon);
+  transition: color 160ms ease;
 }
 
 .app-sidebar__nav-trailing,
@@ -243,7 +249,7 @@
   width: 16px;
   height: 16px;
   color: var(--app-sidebar-icon);
-  transition: transform 160ms ease;
+  transition: color 160ms ease, transform 160ms ease;
 }
 
 .app-sidebar__nav-chevron.is-open {
