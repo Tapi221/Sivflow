@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   WorkspaceHeaderToolbar,
@@ -201,16 +202,34 @@ const PDF_LIBRARY_ACTIONS = [
   { label: "Fields", icon: FieldsToolbarIcon },
 ] as const;
 
+const resolveLibrarySectionRoute = (
+  section: PdfLibraryWorkspaceSection,
+): string => {
+  if (section === "explorer") {
+    return "/folders?view=section-list";
+  }
+
+  const libraryType = section === "flashcard" ? "flashcards" : section;
+  return `/folders?view=section-list&libraryType=${libraryType}`;
+};
+
 export const PdfLibraryWorkspaceToolbar = ({
   activeSection,
   onSelectSection,
 }: PdfLibraryWorkspaceToolbarProps) => {
+  const navigate = useNavigate();
+
+  const handleSelectSection = (section: PdfLibraryWorkspaceSection) => {
+    onSelectSection(section);
+    navigate(resolveLibrarySectionRoute(section));
+  };
+
   return (
     <WorkspaceHeaderToolbar
       activeValue={activeSection}
       tabs={PDF_LIBRARY_TABS.map((tab) => ({
         ...tab,
-        onClick: () => onSelectSection(tab.value),
+        onClick: () => handleSelectSection(tab.value),
       }))}
       actions={PDF_LIBRARY_ACTIONS}
       variant="segmented"
