@@ -1,123 +1,16 @@
-import {
-  addDays,
-  addMonths,
-  endOfMonth,
-  endOfWeek,
-  format,
-  isSameDay,
-  isSameMonth,
-  startOfDay,
-  startOfMonth,
-  startOfWeek,
-} from "date-fns";
-import { ja } from "date-fns/locale";
-
-const WEEK_STARTS_ON_MONDAY = 1;
+import type {
+  ScheduleColumn,
+  ScheduleColumnBuffer,
+} from "./ScheduleColumn.shared";
+import { buildScheduleTimelineColumns } from "./ScheduleColumn.shared";
 
 export type TimelineViewMode = "month" | "week" | "days";
 
-export type TimelineUnitBuffer = {
-  before: number;
-  after: number;
-};
+export type TimelineUnitBuffer = ScheduleColumnBuffer;
 
-export type TimelineColumn = {
-  id: string;
-  start: Date;
-  end: Date;
-  topLabel: string;
-  bottomLabel: string;
-  isToday: boolean;
-  kind: "month" | "week" | "day";
-};
+export type TimelineColumn = ScheduleColumn;
 
-const buildMonthColumns = (anchorDate: Date, buffer: TimelineUnitBuffer) => {
-  const columns: TimelineColumn[] = [];
-  const anchorStart = startOfMonth(anchorDate);
-  const today = new Date();
-
-  for (let offset = -buffer.before; offset <= buffer.after; offset += 1) {
-    const start = addMonths(anchorStart, offset);
-    const end = endOfMonth(start);
-
-    columns.push({
-      id: `month-${start.toISOString()}`,
-      start,
-      end,
-      topLabel: format(start, "M", { locale: ja }),
-      bottomLabel: "月",
-      isToday: isSameMonth(start, today),
-      kind: "month",
-    });
-  }
-
-  return columns;
-};
-
-const buildWeekColumns = (anchorDate: Date, buffer: TimelineUnitBuffer) => {
-  const columns: TimelineColumn[] = [];
-  const anchorStart = startOfWeek(anchorDate, {
-    weekStartsOn: WEEK_STARTS_ON_MONDAY,
-  });
-  const today = new Date();
-
-  for (let offset = -buffer.before; offset <= buffer.after; offset += 1) {
-    const start = addDays(anchorStart, offset * 7);
-    const end = endOfWeek(start, {
-      weekStartsOn: WEEK_STARTS_ON_MONDAY,
-    });
-
-    columns.push({
-      id: `week-${start.toISOString()}`,
-      start,
-      end,
-      topLabel: format(start, "M/d", { locale: ja }),
-      bottomLabel: format(end, "M/d", { locale: ja }),
-      isToday: today >= start && today <= end,
-      kind: "week",
-    });
-  }
-
-  return columns;
-};
-
-const buildDayColumns = (anchorDate: Date, buffer: TimelineUnitBuffer) => {
-  const columns: TimelineColumn[] = [];
-  const anchorStart = startOfDay(anchorDate);
-  const today = new Date();
-
-  for (let offset = -buffer.before; offset <= buffer.after; offset += 1) {
-    const start = addDays(anchorStart, offset);
-
-    columns.push({
-      id: `day-${start.toISOString()}`,
-      start,
-      end: start,
-      topLabel: format(start, "d", { locale: ja }),
-      bottomLabel: format(start, "E", { locale: ja }),
-      isToday: isSameDay(start, today),
-      kind: "day",
-    });
-  }
-
-  return columns;
-};
-
-export const buildTimelineColumns = (
-  viewMode: TimelineViewMode,
-  anchorDate: Date,
-  buffer: TimelineUnitBuffer,
-) => {
-  if (viewMode === "month") {
-    return buildMonthColumns(anchorDate, buffer);
-  }
-
-  if (viewMode === "week") {
-    return buildWeekColumns(anchorDate, buffer);
-  }
-
-  return buildDayColumns(anchorDate, buffer);
-};
+export const buildTimelineColumns = buildScheduleTimelineColumns;
 
 export const getTimelineColumnWidth = (
   viewMode: TimelineViewMode,
