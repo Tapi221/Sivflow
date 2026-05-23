@@ -6,14 +6,12 @@ import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSe
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
 import {
-  GalleryIcon,
-  SettingIcon as ScheduleSettingIcon,
   ClockIcon,
-} from "@/components/icons/schedule.icons";
-import {
+  GalleryIcon,
   HomeIcon,
   InboxIcon,
   LibraryIcon,
+  SettingIcon,
   SidebarToggleIcon,
 } from "../../components/icons/sidebar.icons";
 
@@ -200,7 +198,7 @@ const Sidebar = ({
     {
       id: "settings",
       label: "設定",
-      icon: <ScheduleSettingIcon className="app-sidebar__nav-icon" />,
+      icon: <SettingIcon className="app-sidebar__nav-icon" />,
       onClick: onOpenSettings,
     },
   ];
