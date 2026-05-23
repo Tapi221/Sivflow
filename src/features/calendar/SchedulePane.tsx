@@ -71,6 +71,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
     setActiveMode,
     handleSelectViewMode,
     handleSidebarSelectDate,
+    handleTimelineSelectDate,
     handleSidebarPreviousMonth,
     handleSidebarNextMonth,
     handleVisibleMonthChange,
@@ -256,13 +257,13 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
                     viewMode={selectedViewMode}
                     anchorDate={currentDate}
                     timelineUnitBuffer={timelineUnitBuffer}
-                    selectedDate={currentDate}
+                    selectedDate={selectedDate}
                     dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
                     laneLabelWidth={C.TIMELINE_LANE_LABEL_WIDTH}
                     rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
                     scrollContainerRef={scrollContainerRef}
                     onScroll={handleCalendarScroll}
-                    onSelectDate={handleSidebarSelectDate}
+                    onSelectDate={handleTimelineSelectDate}
                   />
                 ) : (
                   <CalendarWeekDayGrid
