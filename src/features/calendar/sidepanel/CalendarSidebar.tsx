@@ -315,22 +315,30 @@ export const CalendarSidebar = ({
                 type="button"
                 onClick={() => onSelectDate(day.date)}
                 className={cn(
-                  "flex h-7 w-full items-center justify-center transition-all duration-150 active:scale-[0.92]",
-                  day.isInSelectedRange ? "bg-[#e9eef7]" : "rounded-full",
-                  day.isRangeStart && "rounded-l-full",
-                  day.isRangeEnd && "rounded-r-full",
-                  day.isRangeStart && day.isRangeEnd && "rounded-full",
-                  !day.isInSelectedRange && !isActive && "hover:bg-[#f7f7f7]",
-                  isRangeMiddle && "text-[#334155]",
+                  "relative flex h-7 w-full items-center justify-center transition-all duration-150 active:scale-[0.92]",
+                  !day.isInSelectedRange && !isActive && "rounded-full hover:bg-[#f7f7f7]",
                 )}
               >
+                {day.isInSelectedRange ? (
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "pointer-events-none absolute inset-x-0 top-1/2 h-[18px] -translate-y-1/2 bg-[#f1f2f4]",
+                      day.isRangeStart && "rounded-l-full",
+                      day.isRangeEnd && "rounded-r-full",
+                      day.isRangeStart && day.isRangeEnd && "rounded-full",
+                    )}
+                  />
+                ) : null}
+
                 <CalendarDayNumberCircle
                   isToday={day.isToday && !day.isInSelectedRange}
                   isSelected={day.isSelected}
                   isCurrentMonth={day.isCurrentMonth}
                   className={cn(
-                    isRangeMiddle && "bg-transparent text-[#334155] shadow-none",
-                    day.isToday && day.isInSelectedRange && "ring-1 ring-[#007aff]",
+                    "relative z-10",
+                    isRangeMiddle && "bg-transparent text-[#4f5663] shadow-none",
+                    day.isToday && day.isInSelectedRange && "ring-1 ring-[#c3c7cf]",
                     !day.isCurrentMonth && !isActive && !day.isInSelectedRange && "text-[#b7b7b7]",
                   )}
                 >
