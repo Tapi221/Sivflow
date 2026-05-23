@@ -33,7 +33,7 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
 
 const DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS =
-  "absolute right-4 top-2 z-50 flex h-8 w-8 items-center justify-center rounded-xl border outline-none ring-0 transition-[transform,background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-px hover:bg-[#f7fbff] hover:text-[#2563eb] focus:outline-none focus:ring-0 focus-visible:ring-2 focus-visible:ring-[#93c5fd] focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transition-none motion-reduce:hover:translate-y-0";
+  "absolute right-4 top-2 z-50 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg border border-[#eeeeee] bg-white p-0 text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.06)] appearance-none select-none outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:text-[#8c8c8c] focus:outline-none focus:ring-0 focus-visible:outline-none motion-reduce:transition-none";
 
 const VIEW_HEADER_CONTROLS_RIGHT_INSET_PX = 56;
 
@@ -183,18 +183,13 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
       {canShowDayDetailPanel ? (
         <button
           type="button"
-          className={cn(
-            DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS,
-            showDayDetailPanel
-              ? "border-[#d6e4ff] bg-white/90 text-[#6f7f99] shadow-[0_4px_14px_rgba(15,23,42,0.10)]"
-              : "border-[#e5e7eb] bg-white/90 text-[#8f96a3] shadow-[0_2px_8px_rgba(15,23,42,0.08)]",
-          )}
+          className={DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS}
           onClick={handleToggleDayDetailPanel}
           aria-label={dayDetailToggleLabel}
           aria-pressed={showDayDetailPanel}
           aria-expanded={showDayDetailPanel}
         >
-          <SidebarOpenIcon className="h-[19px] w-[19px] scale-x-[-1]" />
+          <SidebarOpenIcon className="h-4 w-4 scale-x-[-1] text-[#8c8c8c]" />
         </button>
       ) : null}
 
