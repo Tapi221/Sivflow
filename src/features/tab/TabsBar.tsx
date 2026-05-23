@@ -1,4 +1,10 @@
-import { useRef, type ComponentType, type CSSProperties } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ComponentType,
+  type CSSProperties,
+} from "react";
 import { Reorder } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
@@ -49,6 +55,8 @@ const ACTIVE_TAB_RIGHT_CURVE_STYLE: CSSProperties = {
     "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
   mask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
 };
+
+const TAB_OPEN_ANIMATION_MS = 280;
 
 const TAB_OPEN_ANIMATION_STYLE = `
 @keyframes workspace-tab-open {
@@ -139,6 +147,15 @@ const resolveNextTabOnClose = (
   return nextTabs[fallbackIndex] ?? null;
 };
 
+const areTabOrdersEqual = (
+  leftTabs: WorkspaceTab[],
+  rightTabs: WorkspaceTab[],
+): boolean => {
+  if (leftTabs.length !== rightTabs.length) return false;
+
+  return leftTabs.every((tab, index) => tab.id === rightTabs[index]?.id);
+};
+
 const resolveTabSlotLayoutStyle = (
   tab: WorkspaceTab,
   interactiveStyle: AppRegionStyle,
@@ -203,12 +220,55 @@ export const WorkspaceTabsBar = ({
 
   const tabsListRef = useRef<HTMLDivElement | null>(null);
   const suppressTabClickRef = useRef(false);
+  const isDraggingTabsRef = useRef(false);
+  const orderedTabsRef = useRef<WorkspaceTab[]>(tabs);
+  const [orderedTabs, setOrderedTabs] = useState<WorkspaceTab[]>(tabs);
+  const [openingTabId, setOpeningTabId] = useState<WorkspaceTab["id"] | null>(
+    lastOpenedTabId,
+  );
   const isTitlebar = variant === "titlebar";
-  const canReorderTabs = tabs.length > 1;
+  const canReorderTabs = orderedTabs.length > 1;
   const interactiveStyle = noDragStyle ?? TABS_NO_DRAG_STYLE;
   const tabsSurfaceStyle = resolveTabsSurfaceStyle(isTitlebar);
   const closeButtonClassName = resolveCloseButtonClassName(isTitlebar);
   const addButtonClassName = resolveAddButtonClassName(isTitlebar);
+
+  useEffect(() => {
+    if (isDraggingTabsRef.current) return;
+
+    orderedTabsRef.current = tabs;
+    setOrderedTabs(tabs);
+  }, [tabs]);
+
+  useEffect(() => {
+    if (!lastOpenedTabId) {
+      setOpeningTabId(null);
+      return;
+    }
+
+    setOpeningTabId(lastOpenedTabId);
+
+    const timeoutId = window.setTimeout(() => {
+      setOpeningTabId((currentTabId) =>
+        currentTabId === lastOpenedTabId ? null : currentTabId,
+      );
+    }, TAB_OPEN_ANIMATION_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [lastOpenedTabId]);
+
+  const commitReorderedTabs = () => {
+    const currentTabs = useWorkspaceTabsStore.getState().tabs;
+    const nextTabs = orderedTabsRef.current;
+
+    if (!areTabOrdersEqual(currentTabs, nextTabs)) {
+      reorderTabs(nextTabs);
+    }
+
+    const committedTabs = useWorkspaceTabsStore.getState().tabs;
+    orderedTabsRef.current = committedTabs;
+    setOrderedTabs(committedTabs);
+  };
 
   return (
     <>
@@ -231,16 +291,18 @@ export const WorkspaceTabsBar = ({
           ref={tabsListRef}
           as="div"
           axis="x"
-          values={tabs}
+          values={orderedTabs}
           onReorder={(nextTabs) => {
             if (!canReorderTabs) return;
-            reorderTabs(nextTabs);
+
+            orderedTabsRef.current = nextTabs;
+            setOrderedTabs(nextTabs);
           }}
           className="explorer-tab-list explorer-workspace-tabs-list relative flex min-w-0 items-end gap-0 overflow-visible"
         >
-          {tabs.map((tab) => {
+          {orderedTabs.map((tab) => {
             const selected = tab.id === activeTabId;
-            const isOpening = tab.id === lastOpenedTabId;
+            const isOpening = tab.id === openingTabId;
             const Icon = resolveTabIcon(tab);
             const inactiveTextClassName =
               resolveInactiveTabTextClassName(isTitlebar);
@@ -273,9 +335,13 @@ export const WorkspaceTabsBar = ({
                 dragElastic={canReorderTabs ? 0.08 : 0}
                 dragMomentum={false}
                 onDragStart={() => {
+                  isDraggingTabsRef.current = true;
                   suppressTabClickRef.current = true;
                 }}
                 onDragEnd={() => {
+                  isDraggingTabsRef.current = false;
+                  commitReorderedTabs();
+
                   window.setTimeout(() => {
                     suppressTabClickRef.current = false;
                   }, 0);
@@ -377,7 +443,7 @@ export const WorkspaceTabsBar = ({
                         event.stopPropagation();
 
                         const nextTab = selected
-                          ? resolveNextTabOnClose(tabs, tab.id)
+                          ? resolveNextTabOnClose(orderedTabs, tab.id)
                           : null;
 
                         closeTab(tab.id);
