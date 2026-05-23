@@ -14,11 +14,11 @@ import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-int
 import type { CalendarWeekDayGridProps } from "@/features/calendar/schedulePane.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 
-import { CalendarEventChipWeekday } from "../../../chip/eventchip/EventChip.schedule.weekday";
 import {
-  CalendarDateHeaderButton,
-  CalendarDateHeaderDayContent,
-} from "../../../chip/button/CalendarDateHeaderButton";
+  CalendarDateButton,
+  CalendarDateContent,
+} from "@/chip/button/CalendarDateButton";
+import { CalendarEventChipWeekday } from "../../../chip/eventchip/EventChip.schedule.weekday";
 import { cn } from "@/lib/utils";
 
 type CalendarEventPositionStyle = React.CSSProperties & {
@@ -192,13 +192,13 @@ export const CalendarWeekDayGrid = ({
                 !!selectedDate && isSameDay(day, selectedDate);
 
               return (
-                <CalendarDateHeaderButton
+                <CalendarDateButton
                   key={day.toISOString()}
                   isToday={isDayToday}
                   isSelected={isDaySelected}
                   onClick={() => onSelectDate?.(day)}
                 >
-                  <CalendarDateHeaderDayContent
+                  <CalendarDateContent
                     dateLabel={format(day, GRID.WEEKDAY_DATE_FORMAT)}
                     weekdayLabel={format(day, GRID.WEEKDAY_DAY_FORMAT, {
                       locale: ja,
@@ -207,7 +207,7 @@ export const CalendarWeekDayGrid = ({
                     isSelected={isDaySelected}
                     layout="weekday-date"
                   />
-                </CalendarDateHeaderButton>
+                </CalendarDateButton>
               );
             })}
           </div>
