@@ -12,4 +12,4 @@ export const TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS = 0;
 
 export const TASK_DND_DROP_ANIMATION: DropAnimation | null = null;
 
-export const TASK_DND_POINTER_ACTIVATION_DISTANCE = 6;
+export const TASK_DND_POINTER_ACTIVATION_DISTANCE = 1;
