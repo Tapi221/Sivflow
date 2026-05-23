@@ -27,6 +27,8 @@ import type {
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 const DEFAULT_TASK_LIST_COLOR = "#7c8cf8";
 const SIDEBAR_DIVIDER_CLASS = "h-px w-full shrink-0 bg-[#eeeeee]";
+const MINI_CALENDAR_NAV_BUTTON_CLASS_NAME =
+  "flex h-7 w-7 items-center justify-center rounded-full text-[#b7b7b7] transition-all hover:bg-[#f7f7f7] hover:text-[#8c8c8c] active:scale-[0.94] active:bg-[#f1f1f1]";
 const GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME =
   "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-5 text-left";
 const GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME = "px-5";
@@ -297,7 +299,7 @@ export const CalendarSidebar = ({
             <HoverTooltip label={t.previousMonthLabel} side="top">
               <button
                 type="button"
-                className="flex h-7 w-7 items-center justify-center rounded-full text-[#b3b3b3] transition-all hover:bg-[#f7f7f7] hover:text-[#8c8c8c] active:scale-[0.94] active:bg-[#f1f1f1]"
+                className={MINI_CALENDAR_NAV_BUTTON_CLASS_NAME}
                 onClick={onPreviousMonth}
                 aria-label={t.previousMonthLabel}
               >
@@ -308,7 +310,7 @@ export const CalendarSidebar = ({
             <HoverTooltip label={t.nextMonthLabel} side="top">
               <button
                 type="button"
-                className="flex h-7 w-7 items-center justify-center rounded-full text-[#b3b3b3] transition-all hover:bg-[#f7f7f7] hover:text-[#8c8c8c] active:scale-[0.94] active:bg-[#f1f1f1]"
+                className={MINI_CALENDAR_NAV_BUTTON_CLASS_NAME}
                 onClick={onNextMonth}
                 aria-label={t.nextMonthLabel}
               >
