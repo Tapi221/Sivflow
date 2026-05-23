@@ -150,20 +150,6 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   });
 
   const { folders = [], loading: foldersLoading } = useFoldersRead();
-  const shouldReadWorkspaceData =
-    !controller.state.isSectionListMode || controller.state.selectedItem !== null;
-  const { cards = [], loading: cardsLoading } = useCardsRead(
-    undefined,
-    undefined,
-    { enabled: shouldReadWorkspaceData },
-  );
-  const { documents = [], loading: documentsLoading } = useDocumentsRead(
-    undefined,
-    { enabled: shouldReadWorkspaceData },
-  );
-  const { cardSets = [], loading: cardSetsLoading } = useCardSets(undefined, {
-    enabled: shouldReadWorkspaceData,
-  });
 
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
@@ -181,6 +167,28 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     () => resolveActiveTab(tabs, activeTabId),
     [activeTabId, tabs],
   );
+
+  const isEntityTabActive =
+    activeTab?.kind === "document" ||
+    activeTab?.kind === "card" ||
+    activeTab?.kind === "cardSet";
+  const shouldReadWorkspaceData =
+    isEntityTabActive ||
+    !controller.state.isSectionListMode ||
+    controller.state.selectedItem !== null;
+
+  const { cards = [], loading: cardsLoading } = useCardsRead(
+    undefined,
+    undefined,
+    { enabled: shouldReadWorkspaceData },
+  );
+  const { documents = [], loading: documentsLoading } = useDocumentsRead(
+    undefined,
+    { enabled: shouldReadWorkspaceData },
+  );
+  const { cardSets = [], loading: cardSetsLoading } = useCardSets(undefined, {
+    enabled: shouldReadWorkspaceData,
+  });
 
   const activeExplorerTabId =
     activeTab?.kind === "explorer" ? activeTab.id : null;
