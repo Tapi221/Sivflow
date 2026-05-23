@@ -313,8 +313,30 @@ const getErrorStatus = (error: unknown): number | undefined => {
 const isUnauthorizedError = (error: unknown): boolean =>
   getErrorStatus(error) === 401;
 
+const getErrorCode = (error: unknown): string | undefined => {
+  if (!(error instanceof Error)) return undefined;
+  return (error as Error & { code?: string }).code;
+};
+
+const normalizeErrorCode = (code: string | undefined): string | undefined =>
+  code?.replace(/^functions\//, "");
+
+const isReconnectRequiredError = (error: unknown): boolean => {
+  const code = normalizeErrorCode(getErrorCode(error));
+
+  return (
+    code === "not-found" ||
+    code === "failed-precondition" ||
+    code === "permission-denied" ||
+    code === "unauthenticated"
+  );
+};
+
 const toErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
+
+const toGoogleCalendarAuthErrorMessage = (error: unknown): string =>
+  `Google Calendar token refresh failed: ${toErrorMessage(error)}`;
 
 const useServerStoredTokens = isServerStoredGoogleOAuthEnabled();
 
@@ -452,9 +474,27 @@ export const useMultiAccountGoogleCalendar = () => {
                     refreshToken: account.refreshToken,
                   })
                   : await requestSilentAccessToken();
-            } catch {
-              dispatchAccounts({ type: "NEEDS_RECONNECT", id: accountId });
-              return false;
+            } catch (error) {
+              console.warn(
+                "[GoogleCalendar] silent token refresh failed",
+                error,
+              );
+
+              if (isReconnectRequiredError(error)) {
+                dispatchAccounts({
+                  type: "NEEDS_RECONNECT",
+                  id: accountId,
+                  error: toGoogleCalendarAuthErrorMessage(error),
+                });
+                return "needsReconnect";
+              }
+
+              dispatchAccounts({
+                type: "SET_ERROR",
+                id: accountId,
+                error: toGoogleCalendarAuthErrorMessage(error),
+              });
+              return "retryLater";
             }
 
             const refreshToken = useServerStoredTokens
@@ -557,7 +597,7 @@ export const useMultiAccountGoogleCalendar = () => {
               error: null,
             });
 
-            return true;
+            return "reconnected";
           },
         }),
     });
@@ -641,10 +681,24 @@ export const useMultiAccountGoogleCalendar = () => {
               })
               : await requestSilentAccessToken();
         } catch (error) {
+          console.warn(
+            "[GoogleCalendar] stored account token refresh failed",
+            error,
+          );
+
+          if (isReconnectRequiredError(error)) {
+            dispatchAccounts({
+              type: "NEEDS_RECONNECT",
+              id: accountId,
+              error: toGoogleCalendarAuthErrorMessage(error),
+            });
+            return;
+          }
+
           dispatchAccounts({
-            type: "NEEDS_RECONNECT",
+            type: "SET_ERROR",
             id: accountId,
-            error: toErrorMessage(error),
+            error: toGoogleCalendarAuthErrorMessage(error),
           });
           return;
         }
