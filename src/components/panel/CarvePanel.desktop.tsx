@@ -19,6 +19,8 @@ type CarvePanelShellProps = {
   overlay?: ReactNode;
   leadingPanel?: ReactNode;
   trailingPanel?: ReactNode;
+  reserveToolbar?: boolean;
+  reserveLeadingPanel?: boolean;
   hasTrailingPanel?: boolean;
   viewportRef?: Ref<HTMLDivElement>;
   className?: string;
@@ -31,6 +33,11 @@ const CARVE_PANEL_SHELL_CLASS =
 
 const CARVE_PANEL_BODY_CLASS =
   "relative flex min-h-0 flex-1 bg-transparent";
+
+const CARVE_PANEL_TOOLBAR_SPACER_CLASS =
+  "h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 bg-white";
+
+const CARVE_PANEL_LEADING_SPACER_CLASS = "w-[220px] shrink-0";
 
 const CARVE_PANEL_VIEWPORT_BASE_CLASS =
   "flex min-h-0 min-w-0 flex-1 flex-col bg-white";
@@ -94,19 +101,29 @@ export const CarvePanelShell = ({
   overlay = null,
   leadingPanel = null,
   trailingPanel = null,
+  reserveToolbar = false,
+  reserveLeadingPanel = false,
   hasTrailingPanel = false,
   viewportRef,
   className,
   bodyClassName,
   viewportClassName,
 }: CarvePanelShellProps) => {
+  const toolbarNode = toolbar ?? (
+    reserveToolbar ? <div aria-hidden="true" className={CARVE_PANEL_TOOLBAR_SPACER_CLASS} /> : null
+  );
+
+  const leadingPanelNode = leadingPanel ?? (
+    reserveLeadingPanel ? <div aria-hidden="true" className={CARVE_PANEL_LEADING_SPACER_CLASS} /> : null
+  );
+
   return (
     <div className={cn(CARVE_PANEL_SHELL_CLASS, className)}>
-      {toolbar}
+      {toolbarNode}
       {overlay}
 
       <div className={cn(CARVE_PANEL_BODY_CLASS, bodyClassName)}>
-        {leadingPanel}
+        {leadingPanelNode}
 
         <CarvePanelViewport
           ref={viewportRef}
