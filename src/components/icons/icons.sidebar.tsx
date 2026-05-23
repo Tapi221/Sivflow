@@ -1,4 +1,5 @@
 import type { ReactNode, SVGProps } from "react";
+import type { IconProps } from "@/ui/icons";
 
 type SidebarIconProps = SVGProps<SVGSVGElement>;
 
@@ -94,53 +95,6 @@ export const SettingIcon = ({ className, ...props }: SidebarIconProps) => (
       strokeLinejoin="round"
     />
   </IconShell>
-);
-
-export const SidebarToggleIcon = ({ className, ...props }: SidebarIconProps) => (
-  <IconShell className={className} {...props}>
-    <rect
-      x="4"
-      y="4"
-      width="16"
-      height="16"
-      rx="4"
-      stroke="currentColor"
-      strokeWidth="1.7"
-    />
-    <path
-      d="M9.5 4.5V19.5"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-    />
-  </IconShell>
-);
-
-export const SidebarPanelIcon = ({ className, ...props }: SidebarIconProps) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <rect
-      x="2"
-      y="2.75"
-      width="12"
-      height="10.5"
-      rx="2"
-      stroke="currentColor"
-      strokeWidth="1.25"
-    />
-    <path
-      d="M6 3V13"
-      stroke="currentColor"
-      strokeWidth="1.25"
-      strokeLinecap="round"
-    />
-  </svg>
 );
 
 export const HomeIcon = ({ className, ...props }: SidebarIconProps) => (
