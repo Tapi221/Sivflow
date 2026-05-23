@@ -1,11 +1,13 @@
 import {
   closestCorners,
   type CollisionDetection,
+  defaultDropAnimationSideEffects,
   DndContext,
   type DragEndEvent,
   DragOverlay,
   type DragOverEvent,
   type DragStartEvent,
+  type DropAnimation,
   MeasuringStrategy,
   PointerSensor,
   pointerWithin,
@@ -40,6 +42,7 @@ type TaskBoardViewProps = {
 type DroppableTaskColumnProps = Omit<TaskBoardViewProps, "tasksByStatus" | "onReorderTask"> & {
   column: (typeof TASK_COLUMNS)[number];
   tasks: Task[];
+  activeTaskId?: string | null;
   showDivider?: boolean;
 };
 
@@ -61,7 +64,7 @@ type TaskDropTarget = {
 };
 
 const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-white";
-const TASK_CARD_OVERLAY_CLASS_NAME = "max-w-[calc(100vw-2rem)]";
+const TASK_CARD_OVERLAY_CLASS_NAME = "max-w-[calc(100vw-2rem)] will-change-transform";
 const TASK_COLUMN_DIVIDER_CLASS_NAME =
   "before:pointer-events-none before:absolute before:-left-1.5 before:top-0 before:bottom-0 before:w-[0.5px] before:bg-[#eeeeee] before:content-['']";
 const TASK_DND_MEASURING_CONFIG = {
@@ -69,10 +72,22 @@ const TASK_DND_MEASURING_CONFIG = {
     strategy: MeasuringStrategy.Always,
   },
 };
+const TASK_DND_DROP_ANIMATION: DropAnimation = {
+  duration: 210,
+  easing: "cubic-bezier(0.2, 0, 0, 1)",
+  sideEffects: defaultDropAnimationSideEffects({
+    styles: {
+      active: {
+        opacity: "0",
+      },
+    },
+  }),
+};
 
 const DroppableTaskColumn = ({
   column,
   tasks,
+  activeTaskId,
   showDivider = false,
   accountName,
   accountPhotoUrl,
@@ -80,7 +95,7 @@ const DroppableTaskColumn = ({
   onDeleteTask,
   onToggleTaskDone,
 }: DroppableTaskColumnProps) => {
-  const { setNodeRef } = useDroppable({
+  const { isOver, setNodeRef } = useDroppable({
     id: column.id,
     data: {
       type: "column",
@@ -91,13 +106,14 @@ const DroppableTaskColumn = ({
   return (
     <div
       ref={setNodeRef}
-      className={`relative flex h-full min-h-0 min-w-0 ${
+      className={`relative flex h-full min-h-0 min-w-0 transition-[background-color] duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
         showDivider ? TASK_COLUMN_DIVIDER_CLASS_NAME : ""
-      }`}
+      } ${isOver ? "bg-[#f8fafc]" : "bg-transparent"}`}
     >
       <TaskColumn
         column={column}
         tasks={tasks}
+        activeTaskId={activeTaskId}
         accountName={accountName}
         accountPhotoUrl={accountPhotoUrl}
         onAddTask={onAddTask}
@@ -397,7 +413,7 @@ export const TaskBoardView = ({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 4,
       },
     }),
   );
@@ -520,7 +536,7 @@ export const TaskBoardView = ({
   };
 
   const dragOverlay = (
-    <DragOverlay adjustScale={false} dropAnimation={null}>
+    <DragOverlay adjustScale={false} dropAnimation={TASK_DND_DROP_ANIMATION}>
       {activeTask ? (
         <div
           className={TASK_CARD_OVERLAY_CLASS_NAME}
@@ -557,6 +573,7 @@ export const TaskBoardView = ({
               key={col.id}
               column={col}
               tasks={visibleTasksByStatus[col.id] ?? []}
+              activeTaskId={activeTaskId}
               showDivider={index > 0}
               accountName={accountName}
               accountPhotoUrl={accountPhotoUrl}
