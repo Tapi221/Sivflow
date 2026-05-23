@@ -250,7 +250,7 @@ export const useMonthRowResize = ({
       resizeStateRef.current = {
         startY: event.clientY,
         startHeight,
-        anchor: getAnchorFromScroller(),
+        anchor: null,
       };
       pendingMonthRowHeightRef.current = startHeight;
 
@@ -293,7 +293,7 @@ export const useMonthRowResize = ({
       window.addEventListener("pointerup", onUp);
       window.addEventListener("pointercancel", onUp);
     },
-    [acquireResizeLock, commitHeight, getAnchorFromScroller, scheduleVariable],
+    [acquireResizeLock, commitHeight, scheduleVariable],
   );
 
   const handleResizeKeyDown = useCallback(
