@@ -15,6 +15,25 @@ type TaskListViewProps = {
 const TABLE_HEADER_CLASS =
   "pb-2 text-left text-[12px] font-medium tracking-normal text-[#b8bcc5]";
 
+const DetailIcon = () => (
+  <svg viewBox="0 0 18 18" fill="none" className="h-4 w-4" aria-hidden="true">
+    <path
+      d="M4 5.25h10M4 9h10M4 12.75h6"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const TaskMoreIcon = () => (
+  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden="true">
+    <circle cx="8" cy="4" r="1.15" fill="currentColor" />
+    <circle cx="8" cy="8" r="1.15" fill="currentColor" />
+    <circle cx="8" cy="12" r="1.15" fill="currentColor" />
+  </svg>
+);
+
 export const TaskListView = ({
   tasks,
   onToggleTaskDone,
@@ -84,6 +103,85 @@ export const TaskListView = ({
             const checkboxColor = isDone ? "#007aff" : "#9ca3af";
             const isEditingTitle = editingTaskId === task.id;
 
+            if (isEditingTitle) {
+              return (
+                <tr key={task.id} className="border-b border-[#f3f4f6]">
+                  <td colSpan={6} className="py-2">
+                    <div className="rounded-[18px] border border-[#d7dbe3] bg-white px-4 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+                      <div className="flex items-start gap-3">
+                        <button
+                          type="button"
+                          className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center transition-transform active:scale-90"
+                          aria-label={isDone ? "Mark task as not done" : "Complete task"}
+                          onClick={() => onToggleTaskDone(task.id, !isDone)}
+                        >
+                          <AnimatedSquareCheckbox
+                            checked={isDone}
+                            color={checkboxColor}
+                            className="h-5 w-5"
+                          />
+                        </button>
+
+                        <div className="min-w-0 flex-1">
+                          <input
+                            ref={titleInputRef}
+                            type="text"
+                            value={editingTitle}
+                            aria-label="Task title"
+                            className="h-7 w-full border-0 bg-transparent p-0 text-[16px] font-medium leading-7 text-[#24262d] outline-none placeholder:text-[#9ca3af]"
+                            onChange={(event) => setEditingTitle(event.target.value)}
+                            onBlur={() => finishEditingTaskTitle(task)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter") {
+                                event.preventDefault();
+                                finishEditingTaskTitle(task);
+                                return;
+                              }
+
+                              if (event.key === "Escape") {
+                                event.preventDefault();
+                                cancelEditingTaskTitle();
+                              }
+                            }}
+                          />
+
+                          <div className="mt-1 flex items-center gap-2 text-[13px] font-medium text-[#6b7280]">
+                            <DetailIcon />
+                            <span>詳細</span>
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            {task.dueDate && (
+                              <span className="inline-flex h-8 items-center rounded-full border border-[#d7dbe3] px-3 text-[13px] font-medium text-[#24262d]">
+                                {format(new Date(task.dueDate), "MMM d")}
+                              </span>
+                            )}
+
+                            <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[#d7dbe3] px-3 text-[13px] font-medium text-[#24262d]">
+                              <TaskStatusDot color={col?.dotColor} />
+                              {statusLabelMap[task.status]}
+                            </span>
+
+                            <span className="inline-flex h-8 items-center rounded-full border border-[#d7dbe3] px-3 text-[13px] font-medium capitalize text-[#24262d]">
+                              {task.priority}
+                            </span>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#6b7280] transition-colors hover:bg-[#f3f4f6] hover:text-[#24262d]"
+                          aria-label="Task menu"
+                        >
+                          <TaskMoreIcon />
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              );
+            }
+
             return (
               <tr
                 key={task.id}
@@ -100,45 +198,16 @@ export const TaskListView = ({
                   </button>
                 </td>
 
-                <td className="py-2.5 pr-4 font-medium text-[#24262d]">
-                  <div className="relative h-[18px] min-w-0 leading-[18px]">
-                    {isEditingTitle ? (
-                      <>
-                        <div className="pointer-events-none absolute -inset-x-2 top-1/2 h-8 -translate-y-1/2 rounded-md border border-[#007aff] bg-white shadow-[0_0_0_2px_rgba(0,122,255,0.15)]" />
-                        <input
-                          ref={titleInputRef}
-                          type="text"
-                          value={editingTitle}
-                          aria-label="Task title"
-                          className="absolute inset-0 z-10 h-[18px] w-full border-0 bg-transparent p-0 text-[13px] font-medium leading-[18px] text-[#24262d] outline-none"
-                          onChange={(event) => setEditingTitle(event.target.value)}
-                          onBlur={() => finishEditingTaskTitle(task)}
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter") {
-                              event.preventDefault();
-                              finishEditingTaskTitle(task);
-                              return;
-                            }
-
-                            if (event.key === "Escape") {
-                              event.preventDefault();
-                              cancelEditingTaskTitle();
-                            }
-                          }}
-                        />
-                      </>
-                    ) : (
-                      <button
-                        type="button"
-                        className="block h-[18px] w-full truncate rounded p-0 text-left font-medium leading-[18px] text-[#24262d] transition-colors hover:bg-[#eef6ff] focus-visible:bg-[#eef6ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
-                        aria-label={`Rename ${task.title}`}
-                        title="Click to rename"
-                        onClick={() => startEditingTaskTitle(task)}
-                      >
-                        {task.title}
-                      </button>
-                    )}
-                  </div>
+                <td className="py-2.5 pr-4 font-medium leading-[18px] text-[#24262d]">
+                  <button
+                    type="button"
+                    className="block w-full truncate rounded text-left font-medium leading-[18px] text-[#24262d] transition-colors hover:bg-[#eef6ff] focus-visible:bg-[#eef6ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]/25"
+                    aria-label={`Rename ${task.title}`}
+                    title="Click to rename"
+                    onClick={() => startEditingTaskTitle(task)}
+                  >
+                    {task.title}
+                  </button>
                 </td>
 
                 <td className="py-2.5 pr-4">
