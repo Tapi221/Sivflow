@@ -128,6 +128,17 @@ const arePageSizesEqual = (
   return left.width === right.width && left.height === right.height;
 };
 
+const areSearchMatchesEqual = (
+  left: PdfPageProps["searchMatches"],
+  right: PdfPageProps["searchMatches"],
+) => {
+  if (left === right) {
+    return true;
+  }
+
+  return (left?.length ?? 0) === 0 && (right?.length ?? 0) === 0;
+};
+
 const renderSearchHighlights = ({
   textLayerEl,
   overlayEl,
@@ -139,11 +150,14 @@ const renderSearchHighlights = ({
   matches: PdfPageSearchMatch[];
   activeSearchMatchIndex: number | undefined;
 }) => {
-  overlayEl.replaceChildren();
-
   if (matches.length === 0) {
+    if (overlayEl.childElementCount > 0) {
+      overlayEl.replaceChildren();
+    }
     return;
   }
+
+  overlayEl.replaceChildren();
 
   const explicitTextSpans = Array.from(
     textLayerEl.querySelectorAll<HTMLSpanElement>("span[role='presentation']"),
@@ -914,7 +928,7 @@ const arePdfPagePropsEqual = (left: PdfPageProps, right: PdfPageProps) =>
   left.renderTextLayer === right.renderTextLayer &&
   left.className === right.className &&
   arePageSizesEqual(left.baseSize, right.baseSize) &&
-  left.searchMatches === right.searchMatches &&
+  areSearchMatchesEqual(left.searchMatches, right.searchMatches) &&
   left.activeSearchMatchIndex === right.activeSearchMatchIndex &&
   left.acquirePage === right.acquirePage &&
   left.getPageTextContent === right.getPageTextContent &&
