@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Slider } from "@/components/ui/slider";
+import { ScrollBar } from "@/chip/bar/ScrollBar";
 import { Minus, Plus } from "@/ui/icons";
 
 import { OverlayToolbarButton } from "./OverlayToolbarButton";
@@ -98,21 +98,20 @@ export const OverlayToolbarZoomControl = (
         </OverlayToolbarButton>
       ) : null}
 
-      <div className={cn("w-14 px-0.5 sm:w-16", sliderWrapperClassName)}>
-        <Slider
-          min={min}
-          max={max}
-          step={resolvedStep}
-          value={sliderValue}
-          onValueChange={handleSliderChange}
-          onValueCommit={handleSliderChange}
-          aria-label={label}
-          disabled={disabled}
-          trackClassName={trackClassName}
-          rangeClassName={rangeClassName}
-          thumbClassName={thumbClassName}
-        />
-      </div>
+      <ScrollBar
+        value={sliderValue}
+        min={min}
+        max={max}
+        step={resolvedStep}
+        onValueChange={handleSliderChange}
+        onValueCommit={handleSliderChange}
+        ariaLabel={label}
+        disabled={disabled}
+        className={sliderWrapperClassName}
+        trackClassName={trackClassName}
+        rangeClassName={rangeClassName}
+        thumbClassName={thumbClassName}
+      />
 
       <div
         className={cn(
