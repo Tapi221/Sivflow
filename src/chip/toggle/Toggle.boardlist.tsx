@@ -16,10 +16,6 @@ const TOGGLE_MOTION_TRANSITION: Transition = {
   duration: 0.3,
   ease: [0.22, 1, 0.36, 1],
 };
-const TOGGLE_TOOLTIP_CLASS_NAME =
-  "rounded-lg border border-[#eeeeee] bg-white px-2.5 py-[5px] text-[12px] font-medium text-[#8c8c8c] shadow-[0_8px_18px_rgba(0,0,0,0.08)]";
-const TOGGLE_TOOLTIP_ARROW_CLASS_NAME =
-  "border-b border-r border-[#eeeeee] bg-white";
 const TOGGLE_ACTIVE_ICON_CLASS_NAME = "text-[#8c8c8c]";
 const TOGGLE_INACTIVE_ICON_CLASS_NAME = "text-[#b7b7b7]";
 
@@ -94,8 +90,7 @@ export const BoardListToggleButton = ({
             label={item.label}
             side="top"
             offset={6}
-            tooltipClassName={TOGGLE_TOOLTIP_CLASS_NAME}
-            arrowClassName={TOGGLE_TOOLTIP_ARROW_CLASS_NAME}
+            preset="segmented"
           >
             <button
               type="button"
