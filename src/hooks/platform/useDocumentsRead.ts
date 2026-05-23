@@ -10,14 +10,24 @@ type DocumentWithLegacyDelete = DocumentItem & {
   is_deleted?: boolean;
 };
 
-export const useDocumentsRead = (folderId?: string) => {
+type UseDocumentsReadOptions = {
+  enabled?: boolean;
+};
+
+export const useDocumentsRead = (
+  folderId?: string,
+  options?: UseDocumentsReadOptions,
+) => {
   const { currentUser } = useAuthSession();
+  const userId = currentUser?.uid ?? null;
   const [error, setError] = useState<string | null>(null);
+  const enabled = options?.enabled ?? true;
 
   const rawDocuments = useLiveQuery(async () => {
     try {
-      if (!currentUser) return [];
-      const db = await getLocalDb(currentUser.uid);
+      if (!enabled) return [];
+      if (!userId) return [];
+      const db = await getLocalDb(userId);
       const allDocuments = await db.documents.toArray();
       return allDocuments;
     } catch (err: unknown) {
@@ -26,7 +36,7 @@ export const useDocumentsRead = (folderId?: string) => {
       setError(message);
       return [];
     }
-  }, [currentUser]);
+  }, [enabled, userId]);
 
   const documents = useMemo(() => {
     if (!rawDocuments) return [];
@@ -48,7 +58,7 @@ export const useDocumentsRead = (folderId?: string) => {
 
   return {
     documents,
-    loading: rawDocuments === undefined,
+    loading: enabled && rawDocuments === undefined,
     error,
   };
 };
