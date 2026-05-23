@@ -1,7 +1,6 @@
 import { useCardSetViewCardLayoutMode } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewCardLayoutMode";
 import { useCardSetViewDisplayMode } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewDisplayMode";
 import { useCardSetViewEditingBridge } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewEditingBridge";
-import { useCardSetViewMetaPanelState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewMetaPanelState";
 import { useCardSetViewSelectionState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewSelectionState";
 
 import type { Card } from "@/types";
@@ -35,8 +34,6 @@ export const useCardSetViewViewState = ({
     cardIndexById,
   });
 
-  const metaPanelState = useCardSetViewMetaPanelState();
-
   const displayModeState = useCardSetViewDisplayMode({
     cardSetId,
     defaultDisplayMode: selectedCardSet?.defaultDisplayMode,
@@ -55,7 +52,6 @@ export const useCardSetViewViewState = ({
 
   return {
     ...selectionState,
-    ...metaPanelState,
     ...displayModeState,
     ...cardLayoutModeState,
   };
