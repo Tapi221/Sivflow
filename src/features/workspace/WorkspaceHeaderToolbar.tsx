@@ -1,7 +1,6 @@
 import { motion, type Transition } from "framer-motion";
 import type { ComponentType, SVGProps } from "react";
 
-import { HoverCircleTooltip } from "@/components/toolchip/HoverCircleTooltip";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 
@@ -167,7 +166,6 @@ export const WorkspaceHeaderToolbar = ({
               onClick={action.onClick}
             >
               <Icon aria-hidden="true" className={segmentedActionIconClassName} />
-              <HoverCircleTooltip label={label} />
             </button>
           );
         })}
@@ -194,7 +192,6 @@ export const WorkspaceHeaderToolbar = ({
               onClick={action.onClick}
             >
               <Icon aria-hidden="true" className={floatingActionIconClassName} />
-              <HoverCircleTooltip label={label} />
             </button>
           );
         })}
