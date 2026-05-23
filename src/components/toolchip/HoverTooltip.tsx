@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import {
-  TOOLTIP_SIZE_CLASS_NAMES,
+  TOOLTIP_PRESET_CLASS_NAMES,
+  type TooltipPreset,
   type TooltipSize,
 } from "@/components/toolchip/tooltip.size";
 
@@ -24,10 +25,9 @@ type HoverTooltipProps = {
   tooltipClassName?: string;
   arrowClassName?: string;
   size?: TooltipSize;
+  preset?: TooltipPreset;
   disabled?: boolean;
 };
-
-const tooltipSurfaceClassName = "bg-[#1c1c1e]/95 backdrop-blur-md";
 
 const getTransform = (side: TooltipSide, align: TooltipAlign) => {
   if (side === "top") {
@@ -159,14 +159,16 @@ export const HoverTooltip = ({
   className,
   tooltipClassName,
   arrowClassName,
-  size = "default",
+  size,
+  preset,
   disabled = false,
 }: HoverTooltipProps) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
   const [position, setPosition] = useState<TooltipPosition | null>(null);
 
   const tooltipLabel = label?.trim();
-  const sizeClassNames = TOOLTIP_SIZE_CLASS_NAMES[size];
+  const visualPreset = preset ?? size ?? "default";
+  const presetClassNames = TOOLTIP_PRESET_CLASS_NAMES[visualPreset];
 
   const showTooltip = () => {
     if (disabled || !tooltipLabel || !anchorRef.current) return;
@@ -224,9 +226,8 @@ export const HoverTooltip = ({
           >
             <div
               className={cn(
-                "relative inline-flex items-center overflow-visible whitespace-nowrap font-medium tracking-[-0.01em] text-white",
-                sizeClassNames.tooltip,
-                tooltipSurfaceClassName,
+                "relative inline-flex items-center overflow-visible whitespace-nowrap font-medium tracking-[-0.01em]",
+                presetClassNames.tooltip,
                 tooltipClassName,
               )}
             >
@@ -237,8 +238,7 @@ export const HoverTooltip = ({
               <span
                 className={cn(
                   "absolute rotate-45",
-                  sizeClassNames.arrow,
-                  tooltipSurfaceClassName,
+                  presetClassNames.arrow,
                   getArrowClassName(side, align),
                   arrowClassName,
                 )}
