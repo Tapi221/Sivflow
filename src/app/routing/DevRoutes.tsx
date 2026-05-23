@@ -40,7 +40,7 @@ export const getDevStandaloneRouteElement = (
   return null;
 };
 
-export const DevRoutes = () => {
+export const getDevRouteElements = () => {
   return (
     <>
       {PdfScrollTest ? (
