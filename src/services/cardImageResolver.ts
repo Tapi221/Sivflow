@@ -159,9 +159,11 @@ export const resolveCardImageUrl = async (
     | AssetRecord
     | UploadedImage
     | undefined;
-  const status = getResolvedStatusFromRecord(record);
+  const imageRecord = image as ImageRecordLike;
+  const status = getResolvedStatusFromRecord(record ?? imageRecord);
 
-  const localBlobId = getLocalBlobIdFromRecord(record);
+  const localBlobId =
+    getLocalBlobIdFromRecord(record) ?? getLocalBlobIdFromRecord(imageRecord);
   if (localBlobId) {
     const blobUrl = await getOrCreateImageBlobUrl(localBlobId, {
       userId: userId ?? undefined,
@@ -178,7 +180,8 @@ export const resolveCardImageUrl = async (
     }
   }
 
-  const remoteUrl = getRemoteUrlFromRecord(record);
+  const remoteUrl =
+    getRemoteUrlFromRecord(record) ?? getRemoteUrlFromRecord(imageRecord);
   if (remoteUrl) {
     setCachedRemoteUrl(assetId, remoteUrl);
     return {
@@ -190,23 +193,34 @@ export const resolveCardImageUrl = async (
     };
   }
 
-  const remoteKey = getRemoteKeyFromRecord(record);
+  const remoteKey =
+    getRemoteKeyFromRecord(record) ?? getRemoteKeyFromRecord(imageRecord);
   if (remoteKey && status !== "failed") {
-    const downloadUrl = await getDownloadURL(storageRef(storage, remoteKey));
-    setCachedRemoteUrl(assetId, downloadUrl);
+    try {
+      const downloadUrl = await getDownloadURL(storageRef(storage, remoteKey));
+      setCachedRemoteUrl(assetId, downloadUrl);
 
-    void db.images.update(assetId, {
-      remoteUrlCache: downloadUrl,
-      updatedAt: new Date(),
-    });
+      void db.images.update(assetId, {
+        remoteUrlCache: downloadUrl,
+        updatedAt: new Date(),
+      });
 
-    return {
-      ...image,
-      assetId,
-      url: downloadUrl,
-      source: "storage",
-      status: "ready",
-    };
+      return {
+        ...image,
+        assetId,
+        url: downloadUrl,
+        source: "storage",
+        status: "ready",
+      };
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.warn("[cardImageResolver] Failed to resolve storage image", {
+          assetId,
+          remoteKey,
+          error,
+        });
+      }
+    }
   }
 
   return {
