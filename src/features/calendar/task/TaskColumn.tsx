@@ -83,16 +83,17 @@ const SortableTaskCard = ({
     },
   });
   const isActivePreview = activeTaskId === task.id;
+  const sortableTransform = isDragging ? transform : null;
 
   return (
     <div
       ref={setNodeRef}
       style={{
-        transform: CSS.Translate.toString(transform),
+        transform: CSS.Translate.toString(sortableTransform),
         transition: isDragging
           ? undefined
           : transition ?? `transform ${TASK_DND_LAYOUT_ANIMATION_DURATION_MS}ms ${TASK_DND_TABLIKE_EASING}`,
-        willChange: transform ? "transform" : undefined,
+        willChange: sortableTransform ? "transform" : undefined,
       }}
       className={cn(
         "rounded-xl touch-none transform-gpu",
