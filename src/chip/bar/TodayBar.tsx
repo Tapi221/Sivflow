@@ -4,6 +4,12 @@ import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { useDateFnsLocale, useT } from "@/i18n/useT";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
+const TODAY_NAV_BUTTON_CLASS_NAME =
+  "relative z-10 flex h-7 w-8 items-center justify-center rounded-lg p-0 appearance-none select-none text-[#b3b3b3] outline-none ring-0 transition-[background-color,color,box-shadow] duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:bg-white/80 hover:text-[#8c8c8c] hover:shadow-[0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-0 focus-visible:outline-none motion-reduce:transition-none";
+
+const TODAY_BUTTON_CLASS_NAME =
+  "relative z-10 flex h-7 min-w-[56px] items-center justify-center rounded-lg border border-[#eeeeee] bg-white px-3 text-[12px] font-semibold leading-none tracking-[-0.01em] text-[#8c8c8c] shadow-[0_1px_2px_rgba(0,0,0,0.06)] outline-none ring-0 transition-[background-color,color,box-shadow] duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:text-[#6f6f6f] hover:shadow-[0_1px_4px_rgba(0,0,0,0.08)] focus:outline-none focus:ring-0 focus-visible:outline-none motion-reduce:transition-none";
+
 type Props = {
   onPrevious: () => void;
   onNext: () => void;
@@ -18,26 +24,11 @@ export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
   });
 
   return (
-    <div
-      className="
-        inline-flex items-center
-        rounded-full
-        border border-[#e2e4e9]
-        bg-transparent
-        shadow-none
-        overflow-hidden
-      "
-    >
+    <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5">
       <button
         type="button"
         onClick={onPrevious}
-        className="
-          flex h-7 w-7 items-center justify-center
-          text-[#8f929c]
-          transition-colors
-          hover:bg-[#eef0f3]
-          hover:text-[#20242c]
-        "
+        className={TODAY_NAV_BUTTON_CLASS_NAME}
         aria-label={t.previousLabel}
         title={t.previousLabel}
       >
@@ -48,15 +39,7 @@ export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
         <button
           type="button"
           onClick={onToday}
-          className="
-            px-2.5 py-1
-            text-[11px] font-medium
-            leading-none
-            text-[#20242c]
-            whitespace-nowrap
-            transition-colors
-            hover:bg-[#eef0f3]
-          "
+          className={TODAY_BUTTON_CLASS_NAME}
           aria-label={todayTooltipLabel}
         >
           {t.todayButton}
@@ -66,13 +49,7 @@ export const TodayBar = ({ onPrevious, onNext, onToday }: Props) => {
       <button
         type="button"
         onClick={onNext}
-        className="
-          flex h-7 w-7 items-center justify-center
-          text-[#8f929c]
-          transition-colors
-          hover:bg-[#eef0f3]
-          hover:text-[#20242c]
-        "
+        className={TODAY_NAV_BUTTON_CLASS_NAME}
         aria-label={t.nextLabel}
         title={t.nextLabel}
       >
