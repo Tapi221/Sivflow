@@ -91,6 +91,7 @@ export type GoogleTasksApiTaskListsResponse = {
 
 export type GoogleCalendarApiEventsResponse = {
   items?: GCalRawIncrementalEvent[];
+  nextPageToken?: string;
 };
 
 export type GCalSyncEngineOptions = {
