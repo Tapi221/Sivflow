@@ -96,7 +96,6 @@ export const TaskBoardView = ({
     handleDragEnd,
     handleDragOver,
     handleDragStart,
-    isPreviewingTaskReorder,
     measuring,
     sensors,
     visibleTasksByStatus,
@@ -104,6 +103,7 @@ export const TaskBoardView = ({
     tasksByStatus,
     onReorderTask,
   });
+  const isDragActive = activeTaskId !== null && activeTaskId !== undefined;
 
   const handleBoardWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
     const horizontalDelta = event.shiftKey ? event.deltaY : event.deltaX;
@@ -176,7 +176,7 @@ export const TaskBoardView = ({
               column={col}
               tasks={visibleTasksByStatus[col.id] ?? []}
               activeTaskId={activeTaskId}
-              enableSortableTransforms={isPreviewingTaskReorder}
+              enableSortableTransforms={isDragActive}
               showDivider={index > 0}
               accountName={accountName}
               accountPhotoUrl={accountPhotoUrl}
