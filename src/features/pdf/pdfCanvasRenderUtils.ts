@@ -1,11 +1,13 @@
 import type { PdfPageBitmap } from "./pdfPageBitmapCache";
 import type { PdfRenderBackingStore } from "./pdfRenderQuality";
-import type { PdfJsViewport } from "./pdfViewer.types";
+import type { PdfJsRenderTransform, PdfJsViewport } from "./pdfViewer.types";
 
 export interface PdfDetachedCanvasSurface {
   readonly canvas: HTMLCanvasElement;
   readonly context: CanvasRenderingContext2D;
 }
+
+const PDF_RENDER_TRANSFORM_EPSILON = 0.0001;
 
 const getCanvas2dContext = ({
   canvas,
@@ -88,15 +90,19 @@ export const prepareDetachedPdfCanvasSurfaceForRender = ({
     context: surface.context,
     opaqueCanvas,
   });
+};
 
-  surface.context.setTransform(
-    renderBackingStore.scaleX,
-    0,
-    0,
-    renderBackingStore.scaleY,
-    0,
-    0,
-  );
+export const resolvePdfRenderTransform = (
+  renderBackingStore: PdfRenderBackingStore,
+): PdfJsRenderTransform | undefined => {
+  if (
+    Math.abs(renderBackingStore.scaleX - 1) < PDF_RENDER_TRANSFORM_EPSILON &&
+    Math.abs(renderBackingStore.scaleY - 1) < PDF_RENDER_TRANSFORM_EPSILON
+  ) {
+    return undefined;
+  }
+
+  return [renderBackingStore.scaleX, 0, 0, renderBackingStore.scaleY, 0, 0];
 };
 
 export const commitPdfBitmapToCanvas = ({
