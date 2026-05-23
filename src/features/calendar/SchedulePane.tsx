@@ -14,7 +14,7 @@ import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
 import { useTaskCalendarEvents } from "./task/hooks/useTaskCalendarEvents";
-import { CarvePanel } from "../../components/panel/CarvePanel.desktop";
+import { CarvePanel, CarvePanelViewport } from "../../components/panel/CarvePanel.desktop";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
@@ -101,6 +101,8 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
 
   const isMonthCalendarView =
     activeMode === "calendar" && selectedViewMode === "month";
+
+  const hasTrailingPanel = isMonthCalendarView && !isDayDetailPanelCollapsed;
 
   const viewHeaderRightPaddingPx = canShowDayDetailPanel
     ? VIEW_HEADER_CONTROLS_RIGHT_INSET_PX
@@ -205,25 +207,13 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
           onToggleCalendar={toggleGoogleCalendar}
         />
 
-        <div
-          ref={contentViewportRef}
-          className={cn(
-            "flex min-h-0 min-w-0 flex-1 flex-col bg-white",
-            activeMode === "task"
-              ? "pl-4 pr-0 pt-0 pb-0"
-              : isMonthCalendarView
-                ? isDayDetailPanelCollapsed
-                  ? "pl-4 pr-0 pt-0 pb-0"
-                  : "px-4 pt-0 pb-0"
-                : "pl-4 pr-0 pt-0 pb-0",
-          )}
-        >
+        <CarvePanelViewport ref={contentViewportRef} hasTrailingPanel={hasTrailingPanel}>
           {activeMode === "task" ? (
             <CarvePanel>
               <TaskView googleAccounts={googleAccounts} />
             </CarvePanel>
           ) : isMonthCalendarView ? (
-            <CarvePanel edge={isDayDetailPanelCollapsed ? "trailing" : "top"}>
+            <CarvePanel hasTrailingPanel={hasTrailingPanel}>
               {renderViewHeader(
                 "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
               )}
@@ -289,7 +279,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
               </div>
             </CarvePanel>
           )}
-        </div>
+        </CarvePanelViewport>
 
         {canShowDayDetailPanel ? (
           <DayDetailPanel
