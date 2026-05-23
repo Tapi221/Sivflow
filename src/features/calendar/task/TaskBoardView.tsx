@@ -4,6 +4,7 @@ import {
   DndContext,
   type DragEndEvent,
   DragOverlay,
+  type DragOverEvent,
   type DragStartEvent,
   PointerSensor,
   pointerWithin,
@@ -12,7 +13,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useCallback, useMemo, useState, type WheelEvent } from "react";
+import { useCallback, useMemo, useRef, useState, type WheelEvent } from "react";
 import { createPortal } from "react-dom";
 
 import { TASK_COLUMNS } from "./task.types";
@@ -46,6 +47,14 @@ type VerticalDropPosition = "before" | "after";
 type VerticalRect = {
   top: number;
   height: number;
+};
+
+type TaskDragEvent = DragEndEvent | DragOverEvent;
+
+type TaskDropTarget = {
+  status: TaskStatus;
+  overTaskId?: string | null;
+  position?: VerticalDropPosition;
 };
 
 const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-[#f7f8fa]";
@@ -110,6 +119,70 @@ const isTaskStatus = (value: unknown): value is TaskStatus => {
   return TASK_COLUMNS.some((column) => column.id === value);
 };
 
+const areTaskBoardsEqual = (
+  left: Record<TaskStatus, Task[]>,
+  right: Record<TaskStatus, Task[]>,
+): boolean => {
+  return TASK_COLUMNS.every((column) => {
+    const leftTasks = left[column.id] ?? [];
+    const rightTasks = right[column.id] ?? [];
+
+    if (leftTasks.length !== rightTasks.length) {
+      return false;
+    }
+
+    return leftTasks.every((task, index) => {
+      const rightTask = rightTasks[index];
+      return rightTask?.id === task.id && rightTask.status === task.status;
+    });
+  });
+};
+
+const createTaskDragPreview = (
+  tasksByStatus: Record<TaskStatus, Task[]>,
+  activeTaskId: string,
+  target: TaskDropTarget,
+): Record<TaskStatus, Task[]> => {
+  const activeTask = findTask(tasksByStatus, activeTaskId);
+
+  if (!activeTask) {
+    return tasksByStatus;
+  }
+
+  const nextTasksByStatus = TASK_COLUMNS.reduce(
+    (acc, column) => {
+      acc[column.id] = (tasksByStatus[column.id] ?? []).filter(
+        (task) => task.id !== activeTaskId,
+      );
+      return acc;
+    },
+    {} as Record<TaskStatus, Task[]>,
+  );
+  const targetTasks = nextTasksByStatus[target.status] ?? [];
+  let insertIndex = targetTasks.length;
+
+  if (target.overTaskId) {
+    const overIndex = targetTasks.findIndex((task) => task.id === target.overTaskId);
+
+    if (overIndex >= 0) {
+      insertIndex = target.position === "after" ? overIndex + 1 : overIndex;
+    }
+  }
+
+  const previewTask =
+    activeTask.status === target.status
+      ? activeTask
+      : { ...activeTask, status: target.status };
+
+  nextTasksByStatus[target.status] = [
+    ...targetTasks.slice(0, insertIndex),
+    previewTask,
+    ...targetTasks.slice(insertIndex),
+  ];
+
+  return nextTasksByStatus;
+};
+
 const taskBoardCollisionDetection: CollisionDetection = (args) => {
   const activeId = args.active.id;
   const columnContainers = args.droppableContainers.filter(
@@ -160,7 +233,7 @@ const taskBoardCollisionDetection: CollisionDetection = (args) => {
   return taskCollisions.length > 0 ? taskCollisions : closestCorners(args);
 };
 
-const getActiveVerticalRect = (event: DragEndEvent): VerticalRect => {
+const getActiveVerticalRect = (event: TaskDragEvent): VerticalRect => {
   const initialRect = event.active.rect.current.initial;
   const translatedRect = event.active.rect.current.translated;
 
@@ -171,7 +244,7 @@ const getActiveVerticalRect = (event: DragEndEvent): VerticalRect => {
 };
 
 const getDropPosition = (
-  event: DragEndEvent,
+  event: TaskDragEvent,
   overRect: VerticalRect,
 ): VerticalDropPosition => {
   const activeRect = getActiveVerticalRect(event);
@@ -179,6 +252,44 @@ const getDropPosition = (
   const overMiddleY = overRect.top + overRect.height / 2;
 
   return activeMiddleY >= overMiddleY ? "after" : "before";
+};
+
+const resolveDropTarget = (
+  event: TaskDragEvent,
+  tasksByStatus: Record<TaskStatus, Task[]>,
+  activeTaskId: string,
+  fallbackTarget: TaskDropTarget | null = null,
+): TaskDropTarget | null => {
+  const over = event.over;
+
+  if (!over) {
+    return null;
+  }
+
+  const overType = over.data.current?.type;
+  const overStatus = over.data.current?.status;
+
+  if (overType === "column" && isTaskStatus(overStatus)) {
+    return { status: overStatus };
+  }
+
+  const overTaskId = String(over.id);
+
+  if (overTaskId === activeTaskId) {
+    return fallbackTarget;
+  }
+
+  const overTask = findTask(tasksByStatus, overTaskId);
+
+  if (!overTask) {
+    return null;
+  }
+
+  return {
+    status: overTask.status,
+    overTaskId,
+    position: getDropPosition(event, over.rect),
+  };
 };
 
 export const TaskBoardView = ({
@@ -192,6 +303,12 @@ export const TaskBoardView = ({
 }: TaskBoardViewProps) => {
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [activeTaskWidth, setActiveTaskWidth] = useState<number | null>(null);
+  const [previewTasksByStatus, setPreviewTasksByStatus] = useState<Record<
+    TaskStatus,
+    Task[]
+  > | null>(null);
+  const latestDropTargetRef = useRef<TaskDropTarget | null>(null);
+  const visibleTasksByStatus = previewTasksByStatus ?? tasksByStatus;
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -205,17 +322,56 @@ export const TaskBoardView = ({
       return null;
     }
 
-    return findTask(tasksByStatus, activeTaskId);
-  }, [activeTaskId, tasksByStatus]);
+    return findTask(visibleTasksByStatus, activeTaskId);
+  }, [activeTaskId, visibleTasksByStatus]);
+
+  const resetDragState = () => {
+    setActiveTaskId(null);
+    setActiveTaskWidth(null);
+    setPreviewTasksByStatus(null);
+    latestDropTargetRef.current = null;
+  };
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveTaskId(String(event.active.id));
     setActiveTaskWidth(event.active.rect.current.initial?.width ?? null);
+    setPreviewTasksByStatus(null);
+    latestDropTargetRef.current = null;
   };
 
   const handleDragCancel = () => {
-    setActiveTaskId(null);
-    setActiveTaskWidth(null);
+    resetDragState();
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const activeId = String(event.active.id);
+    const target = resolveDropTarget(
+      event,
+      visibleTasksByStatus,
+      activeId,
+      latestDropTargetRef.current,
+    );
+
+    if (!target) {
+      return;
+    }
+
+    latestDropTargetRef.current = target;
+
+    setPreviewTasksByStatus((currentTasksByStatus) => {
+      const baseTasksByStatus = currentTasksByStatus ?? tasksByStatus;
+      const nextTasksByStatus = createTaskDragPreview(
+        baseTasksByStatus,
+        activeId,
+        target,
+      );
+
+      if (areTaskBoardsEqual(baseTasksByStatus, nextTasksByStatus)) {
+        return currentTasksByStatus;
+      }
+
+      return nextTasksByStatus;
+    });
   };
 
   const handleBoardWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
@@ -250,13 +406,17 @@ export const TaskBoardView = ({
   }, []);
 
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveTaskId(null);
-    setActiveTaskWidth(null);
-
     const activeId = String(event.active.id);
-    const over = event.over;
+    const target = resolveDropTarget(
+      event,
+      visibleTasksByStatus,
+      activeId,
+      latestDropTargetRef.current,
+    );
 
-    if (!over) {
+    resetDragState();
+
+    if (!target) {
       return;
     }
 
@@ -266,24 +426,7 @@ export const TaskBoardView = ({
       return;
     }
 
-    const overType = over.data.current?.type;
-    const overStatus = over.data.current?.status;
-
-    if (overType === "column" && isTaskStatus(overStatus)) {
-      onReorderTask(activeId, overStatus);
-      return;
-    }
-
-    const overId = String(over.id);
-    const overTask = findTask(tasksByStatus, overId);
-
-    if (!overTask || overId === activeId) {
-      return;
-    }
-
-    const position = getDropPosition(event, over.rect);
-
-    onReorderTask(activeId, overTask.status, overId, position);
+    onReorderTask(activeId, target.status, target.overTaskId, target.position);
   };
 
   const dragOverlay = (
@@ -309,6 +452,7 @@ export const TaskBoardView = ({
       sensors={sensors}
       collisionDetection={taskBoardCollisionDetection}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragCancel={handleDragCancel}
       onDragEnd={handleDragEnd}
     >
@@ -321,7 +465,7 @@ export const TaskBoardView = ({
             <DroppableTaskColumn
               key={col.id}
               column={col}
-              tasks={tasksByStatus[col.id] ?? []}
+              tasks={visibleTasksByStatus[col.id] ?? []}
               showDivider={index > 0}
               accountName={accountName}
               accountPhotoUrl={accountPhotoUrl}
