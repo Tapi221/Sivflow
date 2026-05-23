@@ -34,7 +34,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "home",
     label: "Home",
-    to: "/folders?home=1",
+    to: "/library?home=1",
     icon: <HomeIcon className="sidebar-nav-icon" />,
     sectionKey: "home",
   },
@@ -46,7 +46,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "library",
     label: "Library",
-    to: "/folders?view=section-list&libraryType=pdf",
+    to: "/library?view=section-list&libraryType=pdf",
     icon: <LibraryIcon className="sidebar-nav-icon" />,
     sectionKey: "library",
   },
@@ -109,7 +109,7 @@ export const SidebarMobile = ({
   const openLibraryChild = (type: string) => {
     closeCalendar();
     openSectionTab("library");
-    navigate(`/folders?view=section-list&libraryType=${type}`);
+    navigate(`/library?view=section-list&libraryType=${type}`);
   };
 
   return (
