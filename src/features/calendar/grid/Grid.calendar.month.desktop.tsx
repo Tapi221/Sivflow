@@ -73,7 +73,6 @@ type GridCalendarMonthDesktopProps = {
 type CalendarMonthDayCellProps = {
   day: CalendarMonthGridDay;
   events: GoogleCalendarEvent[];
-  isLastColumn: boolean;
   isToday: boolean;
   selected: boolean;
   maxVisibleChips: number;
@@ -83,7 +82,6 @@ type CalendarMonthDayCellProps = {
 const CalendarMonthDayCell = memo(({
   day,
   events,
-  isLastColumn,
   isToday,
   selected,
   maxVisibleChips,
@@ -107,8 +105,7 @@ const CalendarMonthDayCell = memo(({
   return (
     <div
       className={cn(
-        "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#eeeeee] bg-white text-left",
-        !isLastColumn && "border-r",
+        "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible bg-white text-left",
         isToday && "bg-[#f7fbff]",
         selected && !isToday && "bg-[#f7f7f8]",
         !selected &&
@@ -261,17 +258,15 @@ const CalendarMonthWeekRow = memo(({
         [content-visibility:auto]
       "
     >
-      {week.days.map((day, index) => {
+      {week.days.map((day) => {
         const selected = day.key === selectedDayKey;
         const isToday = day.key === todayDayKey;
-        const isLastColumn = index % 7 === 6;
 
         return (
           <CalendarMonthDayCell
             key={day.key}
             day={day}
             events={eventsByDay.get(day.key) ?? EMPTY_EVENTS}
-            isLastColumn={isLastColumn}
             isToday={isToday}
             selected={selected}
             maxVisibleChips={maxVisibleChips}
