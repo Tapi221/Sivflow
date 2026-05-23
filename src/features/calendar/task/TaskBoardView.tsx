@@ -60,7 +60,7 @@ type TaskDropTarget = {
   position?: VerticalDropPosition;
 };
 
-const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-[#f7f8fa]";
+const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-white";
 const TASK_CARD_OVERLAY_CLASS_NAME = "max-w-[calc(100vw-2rem)]";
 const TASK_COLUMN_DIVIDER_CLASS_NAME =
   "before:pointer-events-none before:absolute before:-left-1.5 before:top-0 before:bottom-0 before:w-[0.5px] before:bg-[#e9eaed] before:content-['']";
