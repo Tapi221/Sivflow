@@ -1,3 +1,4 @@
+import { clipEventToDay } from "@/features/calendar/calendarEventRange";
 import { EventChipDayDetail } from "@/features/calendar/eventchip/EventChip.schedule.daydetail";
 import {
   computeEventLayout,
@@ -29,6 +30,7 @@ const IOS_LABEL = "#b3b3b3";
 // ==============================================
 
 type Props = {
+  date: Date;
   events: GoogleCalendarEvent[];
 };
 
@@ -57,12 +59,15 @@ const getEventHeight = (durationMinutes: number): number =>
 
 // ==============================================
 
-export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
+export const GridCalendarDayDetailDesktop = ({ date, events }: Props) => {
   const timelineHeight = HOURS.length * HOUR_ROW_HEIGHT;
   const gridHeight = timelineHeight + TIMELINE_TOP_PADDING_PX;
+  const clippedEvents = events
+    .map((event) => clipEventToDay(event, date))
+    .filter((event): event is GoogleCalendarEvent => Boolean(event));
 
   const layout = computeEventLayout(
-    events.map((event) =>
+    clippedEvents.map((event) =>
       toLayoutEvent(
         event.id,
         new Date(event.startsAt),
@@ -179,7 +184,7 @@ export const GridCalendarDayDetailDesktop = ({ events }: Props) => {
         </div>
 
         {/* Events */}
-        {events.map((ev) => {
+        {clippedEvents.map((ev) => {
           const durationMinutes = getDurationMinutes(ev);
           const height = getEventHeight(durationMinutes);
           const eventHeight = Math.max(18, height - EVENT_VERTICAL_INSET_PX * 2);
