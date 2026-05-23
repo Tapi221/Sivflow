@@ -59,12 +59,12 @@ export const TaskCard = ({
       className={cn(
         "group relative w-full min-w-0 overflow-hidden rounded-lg border border-[#eeeeee] bg-white/95 px-3 pt-3 pb-2",
         "backdrop-blur-xl",
-        "shadow-[0_1px_2px_rgba(16,24,40,0.04)]",
-        "transition-[transform,background-color,border-color,box-shadow,filter] duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
-        "hover:border-[#e5e5e5] hover:bg-white hover:shadow-[0_10px_26px_rgba(17,24,39,0.08)]",
-        "active:scale-[0.998]",
+        "shadow-[0_1px_2px_rgba(16,24,40,0.035)]",
+        "transition-[transform,background-color,border-color,box-shadow,filter] duration-150 ease-[cubic-bezier(0.2,0,0,1)]",
+        "hover:border-[#e9e9e9] hover:bg-white hover:shadow-[0_2px_8px_rgba(17,24,39,0.045)]",
+        "active:scale-[0.999]",
         isDragging
-          ? "cursor-grabbing scale-[1.015] border-[#dfe3ea] bg-white shadow-[0_18px_48px_rgba(15,23,42,0.16)] ring-1 ring-black/[0.04]"
+          ? "cursor-grabbing scale-[1.01] border-[#dfe3ea] bg-white shadow-[0_12px_32px_rgba(15,23,42,0.12)] ring-1 ring-black/[0.035]"
           : "cursor-grab",
       )}
     >
@@ -99,7 +99,7 @@ export const TaskCard = ({
 
             <button
               type="button"
-              className="-mr-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full text-[#8e8e93] opacity-0 transition-[background-color,color,opacity,transform] hover:bg-[#f2f2f7] hover:text-[#3a3a3c] active:scale-90 group-hover:opacity-100 focus-visible:opacity-100"
+              className="-mr-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full text-[#8e8e93] opacity-0 transition-[background-color,color,opacity,transform] duration-150 hover:bg-[#f5f5f7] hover:text-[#4a4a4d] active:scale-95 group-hover:opacity-80 focus-visible:opacity-100"
               aria-label="Task menu"
               onClick={handleDelete}
             >
