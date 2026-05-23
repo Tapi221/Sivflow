@@ -172,7 +172,7 @@ export const CalendarWeekDayGrid = ({
                   type="button"
                   onClick={() => onSelectDate?.(day)}
                   className={cn(
-                    "flex h-10 shrink-0 flex-col items-center justify-center border-r border-[#eeeeee] bg-white last:border-r-0",
+                    "flex h-10 shrink-0 flex-col items-center justify-center bg-white",
                     "transition-colors hover:bg-[#f4f5f7]",
                     "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                     isDayToday && "bg-[#f0f6ff]",
