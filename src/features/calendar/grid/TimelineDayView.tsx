@@ -24,6 +24,7 @@ type CalendarTimelineDayViewProps = {
   rowCount?: number;
   scrollContainerRef?: RefObject<HTMLDivElement | null>;
   onScroll?: (event: UIEvent<HTMLDivElement>) => void;
+  onSelectDate?: (date: Date) => void;
 };
 
 export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
@@ -36,6 +37,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
   rowCount = C.TIMELINE_DEFAULT_ROW_COUNT,
   scrollContainerRef,
   onScroll,
+  onSelectDate,
 }: CalendarTimelineDayViewProps) {
   const columns = useMemo(() => {
     return buildTimelineColumns(viewMode, anchorDate, timelineUnitBuffer);
@@ -111,13 +113,18 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                   selectedTime <= column.end.getTime();
 
                 return (
-                  <div
+                  <button
                     key={column.id}
+                    type="button"
+                    onClick={() => onSelectDate?.(column.start)}
                     className={cn(
                       "flex h-10 select-none flex-col items-center justify-center bg-white text-[12px] font-medium text-[#4c5361]",
+                      "appearance-none border-0 p-0 transition-colors hover:bg-[#f4f5f7]",
+                      "outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                       column.isToday && "bg-[#f0f6ff]",
                       !column.isToday && isSelected && "bg-[#f4f5f7]",
                     )}
+                    aria-pressed={isSelected}
                   >
                     {column.kind === "day" ? (
                       <>
@@ -143,7 +150,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                         <span>{column.bottomLabel}</span>
                       </span>
                     )}
-                  </div>
+                  </button>
                 );
               })}
             </div>
