@@ -75,7 +75,7 @@ const shouldWaitForImage = (image: UploadedImage): boolean => {
     return true;
   }
 
-  return image.status !== "ready" && !hasRemotePersistence(image);
+  return !hasRemotePersistence(image);
 };
 
 const collectBlockImages = (blocks: CardBlock[]): UploadedImage[] => {
