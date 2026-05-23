@@ -56,7 +56,7 @@ export const SettingIcon = ({ className, ...props }: SidebarIconProps) => (
   </IconShell>
 );
 
-export const SidebarOpenIcon = ({ className, ...props }: SidebarIconProps) => (
+export const SidebarToggleIcon = ({ className, ...props }: SidebarIconProps) => (
   <IconShell className={className} {...props}>
     <rect
       x="4"

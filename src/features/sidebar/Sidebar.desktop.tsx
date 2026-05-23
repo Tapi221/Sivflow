@@ -1,6 +1,5 @@
 import { type MouseEvent, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { SidebarPanelIcon as SidebarOpenIcon } from "@/components/icons/schedule.icons";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { useSchedulePaneStore } from "@/features/calendar/header/useSchedulePaneStore";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
@@ -13,6 +12,7 @@ import {
   InboxIcon,
   LibraryIcon,
   SettingIcon,
+  SidebarToggleIcon,
 } from "../../components/icons/sidebar.icons";
 
 import "./sidebar.desktop.css";
@@ -217,7 +217,7 @@ const Sidebar = ({
           aria-label={isClosed ? "サイドバーを開く" : "サイドバーを閉じる"}
           aria-pressed={!isClosed}
         >
-          <SidebarOpenIcon className="app-sidebar__toggle-icon app-sidebar__nav-icon" />
+          <SidebarToggleIcon className="app-sidebar__toggle-icon app-sidebar__nav-icon" />
         </button>
 
         <nav className="app-sidebar__nav" aria-label="メインナビゲーション">
