@@ -257,8 +257,7 @@ export const WorkspaceTabsBar = ({
             if (selected) {
               tabStateClassName =
                 "z-[3] text-[var(--app-titlebar-bg,var(--app-sidebar-bg))] shadow-none";
-              iconStateClassName =
-                "text-[var(--app-titlebar-bg,var(--app-sidebar-bg))]";
+              iconStateClassName = "text-[#8c8c8c]";
               closeButtonStateClassName =
                 "opacity-100 !text-[#6f7681] hover:!bg-black/5 hover:!text-[#2f3640]";
             }
