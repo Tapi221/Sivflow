@@ -9,40 +9,40 @@ import {
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 
-export type WorkspaceHeaderToolbarIconProps = SVGProps<SVGSVGElement> & {
+export type LibraryHeaderToolbarIconProps = SVGProps<SVGSVGElement> & {
   className?: string;
 };
 
-export type WorkspaceHeaderToolbarActionRenderProps = {
+export type LibraryHeaderToolbarActionRenderProps = {
   className: string;
   iconClassName: string;
   label: string;
 };
 
-type WorkspaceHeaderToolbarItem = {
+type LibraryHeaderToolbarItem = {
   value: string;
   label: string;
-  icon: ComponentType<WorkspaceHeaderToolbarIconProps>;
+  icon: ComponentType<LibraryHeaderToolbarIconProps>;
   onClick: () => void;
 };
 
-type WorkspaceHeaderToolbarAction = {
+type LibraryHeaderToolbarAction = {
   label: string;
-  icon?: ComponentType<WorkspaceHeaderToolbarIconProps>;
+  icon?: ComponentType<LibraryHeaderToolbarIconProps>;
   onClick?: () => void;
   ariaLabel?: string;
-  render?: (props: WorkspaceHeaderToolbarActionRenderProps) => ReactNode;
+  render?: (props: LibraryHeaderToolbarActionRenderProps) => ReactNode;
 };
 
-type WorkspaceHeaderToolbarVariant = "underline" | "segmented" | "floating";
+type LibraryHeaderToolbarVariant = "underline" | "segmented" | "floating";
 
-type WorkspaceHeaderToolbarProps = {
+type LibraryHeaderToolbarProps = {
   activeValue: string;
-  tabs: readonly WorkspaceHeaderToolbarItem[];
-  secondaryTabs?: readonly WorkspaceHeaderToolbarItem[];
-  leadingActions?: readonly WorkspaceHeaderToolbarAction[];
-  actions?: readonly WorkspaceHeaderToolbarAction[];
-  variant?: WorkspaceHeaderToolbarVariant;
+  tabs: readonly LibraryHeaderToolbarItem[];
+  secondaryTabs?: readonly LibraryHeaderToolbarItem[];
+  leadingActions?: readonly LibraryHeaderToolbarAction[];
+  actions?: readonly LibraryHeaderToolbarAction[];
+  variant?: LibraryHeaderToolbarVariant;
 };
 
 const WORKSPACE_TAB_INDICATOR_ID = "workspace-header-toolbar-tab-indicator";
@@ -67,14 +67,14 @@ const segmentedActionButtonClassName = cn(
 const segmentedActionIconClassName =
   "block h-4 w-4 shrink-0 text-current transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none";
 
-export const WorkspaceHeaderToolbar = ({
+export const LibraryHeaderToolbar = ({
   activeValue,
   tabs,
   secondaryTabs,
   leadingActions,
   actions,
   variant = "underline",
-}: WorkspaceHeaderToolbarProps) => {
+}: LibraryHeaderToolbarProps) => {
   const hasTabs = tabs.length > 0;
   const hasSecondaryTabs = Boolean(secondaryTabs && secondaryTabs.length > 0);
   const hasLeadingActions = Boolean(
@@ -85,7 +85,7 @@ export const WorkspaceHeaderToolbar = ({
   const isFloating = variant === "floating";
 
   const renderSegmentedTabs = (
-    segmentedTabs: readonly WorkspaceHeaderToolbarItem[],
+    segmentedTabs: readonly LibraryHeaderToolbarItem[],
     indicatorId: string,
   ) => {
     return (
@@ -141,7 +141,7 @@ export const WorkspaceHeaderToolbar = ({
   };
 
   const renderSegmentedActions = (
-    toolbarActions: readonly WorkspaceHeaderToolbarAction[],
+    toolbarActions: readonly LibraryHeaderToolbarAction[],
     className?: string,
   ) => {
     return (
