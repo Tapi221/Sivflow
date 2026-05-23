@@ -366,7 +366,7 @@ export const TaskListView = ({
         onDoubleClick={() => handleColumnResizeReset(column.id)}
         onPointerDown={(event) => handleColumnResizeStart(event, column.id)}
       >
-        <div className="h-full w-px bg-[#eeeeee]" />
+        <div className="h-full bg-[#eeeeee]" style={{ width: "0.5px" }} />
       </div>
     );
   };
