@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { format } from "date-fns";
+import { endOfWeek, format, startOfWeek } from "date-fns";
 import { SidebarOpenIcon } from "@/components/icons/icons.sidebar";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { TodayBar } from "@/chip/bar/TodayBar";
@@ -90,6 +90,15 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
 
   const sidebarMonthDate =
     selectedViewMode === "month" ? monthTitleDate : titleDate;
+
+  const sidebarSelectedRange = useMemo(() => {
+    if (activeMode !== "timeline" || selectedViewMode !== "week") return null;
+
+    return {
+      start: startOfWeek(selectedDate, { weekStartsOn: C.WEEK_STARTS_ON_MONDAY }),
+      end: endOfWeek(selectedDate, { weekStartsOn: C.WEEK_STARTS_ON_MONDAY }),
+    };
+  }, [activeMode, selectedDate, selectedViewMode]);
 
   const canShowDayDetailPanel =
     activeMode === "calendar" && selectedViewMode === "month";
@@ -197,6 +206,7 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
         <CalendarSidebar
           monthDate={sidebarMonthDate}
           selectedDate={selectedDate}
+          selectedRange={sidebarSelectedRange}
           activeMode={activeMode}
           googleAccounts={googleAccounts}
           isAnyCalendarConnecting={isAnyCalendarConnecting}
