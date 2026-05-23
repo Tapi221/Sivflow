@@ -25,6 +25,7 @@ type Props = {
   timelineColumns: TimelineColumn[];
   timelineColumnWidth: number;
   timelineAnchorColumnIndex: number;
+  timelineUnitBuffer: CalendarBuffer;
 
   calendarBuffer: CalendarBuffer;
 
@@ -52,6 +53,7 @@ export const useCalendarScrollController = ({
   timelineColumns,
   timelineColumnWidth,
   timelineAnchorColumnIndex,
+  timelineUnitBuffer,
   calendarBuffer,
   viewportWidth,
   calendarDayColumnWidth,
@@ -65,6 +67,8 @@ export const useCalendarScrollController = ({
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);
   const syncRafRef = useRef<number | null>(null);
   const prependTrigger =
+    activeMode === "timeline" ? timelineUnitBuffer.before : calendarBuffer.before;
+  const scrollExtentTrigger =
     activeMode === "timeline" ? timelineColumns.length : visibleDays.length;
 
   /**
@@ -81,7 +85,8 @@ export const useCalendarScrollController = ({
    */
   const { reset: resetPrepend } = usePreserveScrollOnPrepend({
     scrollerRef: scrollContainerRef,
-    trigger: prependTrigger,
+    trigger: scrollExtentTrigger,
+    prependTrigger,
   });
 
   /**
