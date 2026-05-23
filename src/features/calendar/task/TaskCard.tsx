@@ -58,20 +58,16 @@ export const TaskCard = ({
   return (
     <div
       className={cn(
-        "group relative w-full min-w-0 overflow-hidden rounded-lg border border-[#eeeeee] bg-white/95 px-3 pt-3 pb-2",
-        "backdrop-blur-xl",
-        "shadow-[0_1px_2px_rgba(16,24,40,0.035)]",
-        "transition-[transform,background-color,border-color,box-shadow,filter] duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
-        "hover:border-[#e9e9e9] hover:bg-white hover:shadow-[0_2px_8px_rgba(17,24,39,0.045)]",
+        "group relative w-full min-w-0 overflow-hidden rounded-xl border border-[#e6e8ec] bg-white px-3 py-2.5",
+        "shadow-none",
+        "transition-[transform,background-color,border-color,box-shadow,filter] duration-[180ms] ease-[cubic-bezier(.22,1,.36,1)]",
+        "hover:border-[#dfe3ea] hover:shadow-[0_1px_4px_rgba(15,23,42,0.05)]",
         "active:scale-[0.999]",
         isDragging
-          ? "cursor-grabbing scale-[1.01] border-[#dfe3ea] bg-white shadow-[0_12px_32px_rgba(15,23,42,0.12)] ring-1 ring-black/[0.035]"
+          ? "cursor-grabbing scale-[1.01] border-[#dfe3ea] bg-white shadow-[0_10px_28px_rgba(15,23,42,0.12)] ring-1 ring-black/[0.035]"
           : "cursor-grab",
       )}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/90" />
-      <div className="pointer-events-none absolute inset-x-3 top-0 h-6 rounded-full bg-white/30 blur-xl" />
-
       <div className="relative flex min-w-0 items-start gap-3">
         <button
           type="button"
@@ -109,7 +105,7 @@ export const TaskCard = ({
             </button>
           </div>
 
-          <div className="mt-3 min-h-5">
+          <div className="mt-2.5 min-h-5">
             <div
               className={cn(
                 "-ml-[26px] flex w-[calc(100%+26px)] min-w-0 flex-wrap items-center gap-1",
@@ -117,21 +113,21 @@ export const TaskCard = ({
               )}
             >
               {formattedDate && (
-                <span className={cn("inline-flex items-center gap-1 rounded-full border border-white/70 bg-[#f2f2f7] px-1.5 tabular-nums", TASK_TYPO.metaChip)}>
+                <span className={cn("inline-flex items-center gap-1 rounded-full border border-[#eceef1] bg-[#f7f8fa] px-1.5 tabular-nums", TASK_TYPO.metaChip)}>
                   <ScheduleCalendarIcon className="h-4 w-4 shrink-0 text-[#9da3af]" />
                   {formattedDate}
                 </span>
               )}
 
               <span
-                className={cn("inline-flex h-5 items-center rounded-full border border-white/70 px-2", TASK_TYPO.metaPill)}
+                className={cn("inline-flex h-5 items-center rounded-full border border-transparent px-2", TASK_TYPO.metaPill)}
                 style={{ backgroundColor: category.bg, color: category.text }}
               >
-                {task.category}
+                {category.label}
               </span>
 
               <span
-                className={cn("inline-flex h-5 items-center rounded-full border border-white/70 px-2", TASK_TYPO.metaPill)}
+                className={cn("inline-flex h-5 items-center rounded-full border border-transparent px-2", TASK_TYPO.metaPill)}
                 style={{ backgroundColor: priority.bg, color: priority.text }}
               >
                 {priority.label}
