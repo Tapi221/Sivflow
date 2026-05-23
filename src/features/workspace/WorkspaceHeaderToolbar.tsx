@@ -23,7 +23,7 @@ type WorkspaceHeaderToolbarAction = {
   ariaLabel?: string;
 };
 
-type WorkspaceHeaderToolbarVariant = "underline" | "segmented";
+type WorkspaceHeaderToolbarVariant = "underline" | "segmented" | "floating";
 
 type WorkspaceHeaderToolbarProps = {
   activeValue: string;
@@ -61,6 +61,18 @@ const segmentedActionButtonClassName = cn(
 const segmentedActionIconClassName =
   "block h-4 w-4 shrink-0 text-current transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none";
 
+const floatingActionButtonClassName = cn(
+  "group/action relative flex h-8 w-8 items-center justify-center rounded-full p-0",
+  "appearance-none select-none text-[#a7a7a7]",
+  "outline-none ring-0 transition-[background-color,color,box-shadow,transform] duration-200 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+  "hover:bg-white/70 hover:text-[#767676] hover:shadow-[0_3px_10px_rgba(0,0,0,0.08)]",
+  "active:scale-95 active:bg-white/85 active:text-[#606060]",
+  "focus:outline-none focus:ring-0 focus-visible:bg-white/80 focus-visible:text-[#606060] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF]/20",
+);
+
+const floatingActionIconClassName =
+  "block h-4 w-4 shrink-0 text-current transition-colors duration-200 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none";
+
 export const WorkspaceHeaderToolbar = ({
   activeValue,
   tabs,
@@ -76,6 +88,7 @@ export const WorkspaceHeaderToolbar = ({
   );
   const hasLeadingContentBeforeActions = hasTabs || hasSecondaryTabs;
   const isSegmented = variant === "segmented";
+  const isFloating = variant === "floating";
 
   const renderSegmentedTabs = (
     segmentedTabs: readonly WorkspaceHeaderToolbarItem[],
@@ -160,6 +173,49 @@ export const WorkspaceHeaderToolbar = ({
       </div>
     );
   };
+
+  const renderFloatingActions = (
+    toolbarActions: readonly WorkspaceHeaderToolbarAction[],
+    className?: string,
+  ) => {
+    return (
+      <div className={cn("pointer-events-auto flex items-center gap-2", className)}>
+        {toolbarActions.map((action) => {
+          const Icon = action.icon;
+          const label = action.ariaLabel ?? action.label;
+
+          return (
+            <button
+              key={label}
+              type="button"
+              aria-label={label}
+              className={floatingActionButtonClassName}
+              onClick={action.onClick}
+            >
+              <Icon aria-hidden="true" className={floatingActionIconClassName} />
+              <HoverCircleTooltip label={label} />
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
+  if (isFloating) {
+    return (
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-start justify-between px-4 pt-3">
+        <div className="flex min-w-0 items-center gap-2">
+          {hasLeadingActions
+            ? renderFloatingActions(leadingActions ?? [])
+            : null}
+        </div>
+
+        {actions && actions.length > 0
+          ? renderFloatingActions(actions, "justify-end")
+          : null}
+      </div>
+    );
+  }
 
   return (
     <div
