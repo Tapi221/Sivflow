@@ -28,13 +28,13 @@ interface PdfThumbnailPageButtonProps {
   scrollToPage: (pageNumber: number) => void;
 }
 
-const PDF_THUMBNAIL_TARGET_WIDTH = 96;
-const PDF_THUMBNAIL_FALLBACK_SCALE = 0.16;
+const PDF_THUMBNAIL_TARGET_WIDTH = 78;
+const PDF_THUMBNAIL_FALLBACK_SCALE = 0.13;
 const PDF_THUMBNAIL_MIN_SCALE = 0.08;
-const PDF_THUMBNAIL_MAX_SCALE = 0.22;
+const PDF_THUMBNAIL_MAX_SCALE = 0.18;
 const PDF_THUMBNAIL_PRELOAD_MARGIN_PX = 360;
-const PDF_THUMBNAIL_FALLBACK_WIDTH = 96;
-const PDF_THUMBNAIL_FALLBACK_HEIGHT = 128;
+const PDF_THUMBNAIL_FALLBACK_WIDTH = 78;
+const PDF_THUMBNAIL_FALLBACK_HEIGHT = 104;
 
 const resolvePdfThumbnailScale = (pageWidth: number | null | undefined) => {
   if (!pageWidth || !Number.isFinite(pageWidth) || pageWidth <= 0) {
@@ -231,7 +231,7 @@ export const PdfThumbnailSidePanel = ({
     }
 
     return (
-      <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-2 items-start gap-x-3 gap-y-4">
         {pageNumbers.map((pageNumber) => {
           const isActive =
             pageNumber === currentPage || pageNumber === alignedCurrentPage;
@@ -255,7 +255,7 @@ export const PdfThumbnailSidePanel = ({
   };
 
   return (
-    <aside className="flex h-full w-[168px] shrink-0 flex-col border-r border-[#e5e4df] bg-[#f8f8f6]">
+    <aside className="flex h-full w-[248px] shrink-0 flex-col border-r border-[#e5e4df] bg-[#f8f8f6]">
       <div className="flex h-11 shrink-0 items-center justify-between border-b border-[#e5e4df] px-3">
         <div className="min-w-0 truncate text-[12px] font-semibold text-[#2f2e2a]">
           サムネイル
