@@ -5,7 +5,7 @@ import type { CalendarViewMode } from "../../schedulePane.types";
 
 import { useScrollEdgeDetector } from "./useScrollEdgeDetector";
 import { usePreserveScrollOnPrepend } from "./usePreserveScrollOnPrepend";
-import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync";
+import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync.fixed";
 
 type CalendarBuffer = {
   before: number;
