@@ -108,7 +108,7 @@ const CalendarMonthDayCell = memo(({
   return (
     <div
       className={cn(
-        "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#e5e5ea] bg-white text-left",
+        "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible border-b border-[#b7b7b7] bg-white text-left",
         !isLastColumn && "border-r",
         isToday && "bg-[#f7fbff]",
         selected && !isToday && "bg-[#f7f7f8]",
@@ -285,7 +285,7 @@ const CalendarMonthWeekRow = memo(({
         <div
           key={columnIndex}
           aria-hidden="true"
-          className="calendar-month-column-separator"
+          className="calendar-month-column-separator bg-[#b7b7b7]"
           style={{
             left: `${(columnIndex / 7) * 100}%`,
           }}
@@ -420,7 +420,7 @@ export const GridCalendarMonthDesktop = ({
       {/* 曜日ヘッダー */}
       <div
         className={cn(
-          "calendar-month-weekday-header sticky top-0 z-20 grid grid-cols-7 border-b",
+          "calendar-month-weekday-header sticky top-0 z-20 grid grid-cols-7 border-b border-[#b7b7b7]",
           GD.MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS,
         )}
       >
