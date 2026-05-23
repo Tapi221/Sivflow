@@ -13,6 +13,7 @@
 @import "../presentation/react/theme/tag-and-status.css";
 @import "./tokens/tokens.css";
 @import "./base/base.css";
+@import "./tokens/system-font.css";
 @import "./components/index.css";
 @import "./base/utilities.css";
 
