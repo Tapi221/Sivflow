@@ -11,7 +11,7 @@ export type CalendarDayNumberCircleProps = {
 };
 
 export const CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME =
-  "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[12px] font-semibold tabular-nums transition-all duration-150";
+  "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[12px] font-medium tabular-nums transition-all duration-150";
 
 export const getCalendarDayNumberCircleClassName = ({
   isToday = false,
@@ -24,10 +24,10 @@ export const getCalendarDayNumberCircleClassName = ({
     isToday
       ? "bg-[#007aff] text-white shadow-[0_5px_12px_rgba(0,122,255,0.28)]"
       : isSelected
-        ? "bg-[#1f2937] text-white shadow-[0_4px_10px_rgba(15,23,42,0.2)]"
+        ? "bg-[#334155] text-white shadow-[0_4px_10px_rgba(51,65,85,0.16)]"
         : isCurrentMonth
-          ? "text-[#111827]"
-          : "text-[#c2c7d0]",
+          ? "text-[#4f5663]"
+          : "text-[#b8bec8]",
     className,
   );
 
