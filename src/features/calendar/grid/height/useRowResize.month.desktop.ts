@@ -12,6 +12,7 @@ import type { CalendarMonthWeek } from "@/features/calendar/model/calendarMonth.
 // ── 内部型
 
 const MONTH_ROW_RESIZING_CLASS = "is-month-row-resizing";
+const MONTH_ROW_RESIZE_ACTIVE_CLASS = "is-month-row-resize-active";
 
 type MonthScrollAnchor = {
   kind: "scroll";
@@ -296,6 +297,9 @@ export const useMonthRowResize = ({
       activePointerCleanupRef.current?.();
 
       const handleElement = event.currentTarget;
+      const resizeHandle = handleElement.parentElement;
+      resizeHandle?.classList.add(MONTH_ROW_RESIZE_ACTIVE_CLASS);
+
       try {
         handleElement.setPointerCapture(event.pointerId);
       } catch {
@@ -333,6 +337,7 @@ export const useMonthRowResize = ({
 
       const cleanup = () => {
         resizeStateRef.current = null;
+        resizeHandle?.classList.remove(MONTH_ROW_RESIZE_ACTIVE_CLASS);
         document.body.style.cursor = prevCursor;
         document.body.style.userSelect = prevSelect;
         try {
