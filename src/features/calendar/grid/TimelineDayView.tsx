@@ -1,13 +1,13 @@
 import type { CSSProperties, RefObject, UIEvent } from "react";
 import { Fragment, memo, useMemo } from "react";
 
+import {
+  CalendarDateButton,
+  CalendarDateContent,
+} from "@/chip/button/CalendarDateButton";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { cn } from "@/lib/utils";
 
-import {
-  CalendarDateHeaderButton,
-  CalendarDateHeaderDayContent,
-} from "../../../chip/button/CalendarDateHeaderButton";
 import type {
   TimelineUnitBuffer,
   TimelineViewMode,
@@ -116,7 +116,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                   selectedTime <= column.end.getTime();
 
                 return (
-                  <CalendarDateHeaderButton
+                  <CalendarDateButton
                     key={column.id}
                     isToday={column.isToday}
                     isSelected={isSelected}
@@ -124,7 +124,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                     className="text-[12px] font-medium text-[#4c5361]"
                   >
                     {column.kind === "day" ? (
-                      <CalendarDateHeaderDayContent
+                      <CalendarDateContent
                         dateLabel={column.topLabel}
                         weekdayLabel={column.bottomLabel}
                         isToday={column.isToday}
@@ -143,7 +143,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
                         <span>{column.bottomLabel}</span>
                       </span>
                     )}
-                  </CalendarDateHeaderButton>
+                  </CalendarDateButton>
                 );
               })}
             </div>
