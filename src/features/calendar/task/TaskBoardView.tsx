@@ -32,8 +32,7 @@ type DroppableTaskColumnProps = Omit<TaskBoardViewProps, "tasksByStatus" | "onRe
 
 const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-white";
 const TASK_CARD_OVERLAY_CLASS_NAME = "max-w-[calc(100vw-2rem)] will-change-transform";
-const TASK_COLUMN_DIVIDER_CLASS_NAME =
-  "before:pointer-events-none before:absolute before:-left-1.5 before:top-0 before:bottom-0 before:w-[0.5px] before:bg-[#eeeeee] before:content-['']";
+const TASK_COLUMN_DIVIDER_CLASS_NAME = "border-l border-[#eeeeee]";
 
 const DroppableTaskColumn = ({
   column,
@@ -59,7 +58,7 @@ const DroppableTaskColumn = ({
       ref={setNodeRef}
       className={`relative flex h-full min-h-0 min-w-0 transition-[background-color] duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
         showDivider ? TASK_COLUMN_DIVIDER_CLASS_NAME : ""
-      } ${isOver ? "bg-[#f8fafc]" : "bg-transparent"}`}
+      } ${isOver ? "bg-[#fafafa]" : "bg-transparent"}`}
     >
       <TaskColumn
         column={column}
@@ -166,7 +165,7 @@ export const TaskBoardView = ({
         className={`min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 pt-4 pb-0 ${CALENDAR_PANEL_BACKGROUND_CLASS_NAME}`}
         onWheelCapture={handleBoardWheel}
       >
-        <div className="grid h-full min-h-0 min-w-full grid-flow-col auto-cols-[260px] gap-3">
+        <div className="grid h-full min-h-0 w-full min-w-[960px] grid-cols-4 gap-0">
           {TASK_COLUMNS.map((col, index) => (
             <DroppableTaskColumn
               key={col.id}
