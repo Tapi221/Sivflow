@@ -1,6 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
 import { format, isSameDay } from "date-fns";
-import { ja } from "date-fns/locale";
 import { DayDetailCreateButton } from "@/features/calendar/chip/button/AddScheduleButton.daydetail";
 import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
 import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
@@ -63,14 +62,6 @@ export const DayDetailPanel = ({
 
   return (
     <aside className="flex w-[260px] shrink-0 flex-col overflow-hidden bg-transparent">
-      <div className="px-4 pb-3 pt-2">
-        <div className="flex h-6 items-center px-1">
-          <span className="text-[12px] font-semibold tracking-[-0.01em] text-[#3d4049]">
-            {format(selectedDate, "yyyy年M月d日(E)", { locale: ja })}
-          </span>
-        </div>
-      </div>
-
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         <div className="flex border-b border-[#f5f5f5]">
           <div className="flex w-16 shrink-0 justify-end pr-4 pt-[8px]">
