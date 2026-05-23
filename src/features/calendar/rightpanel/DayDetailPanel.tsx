@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
-import { format, isSameDay } from "date-fns";
+import { format } from "date-fns";
 import { DayDetailCreateButton } from "@/features/calendar/chip/button/AddScheduleButton.daydetail";
+import { eventOverlapsDay } from "@/features/calendar/calendarEventRange";
 import { eventChipAllDayClass } from "@/features/calendar/eventchip/eventchip.allday.styles";
 import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
@@ -49,11 +50,11 @@ export const DayDetailPanel = ({
   }, [dateKey]);
 
   const allDayEvents = events.filter(
-    (e) => e.isAllDay && isSameDay(new Date(e.startsAt), selectedDate),
+    (e) => e.isAllDay && eventOverlapsDay(e, selectedDate),
   );
 
   const timedEvents = events.filter(
-    (e) => !e.isAllDay && isSameDay(new Date(e.startsAt), selectedDate),
+    (e) => !e.isAllDay && eventOverlapsDay(e, selectedDate),
   );
 
   if (!isOpen) {
@@ -77,7 +78,10 @@ export const DayDetailPanel = ({
           </div>
         </div>
 
-        <GridCalendarDayDetailDesktop events={timedEvents} />
+        <GridCalendarDayDetailDesktop
+          date={selectedDate}
+          events={timedEvents}
+        />
       </div>
 
       <div className="flex justify-center border-t border-[#f5f5f5] px-4 py-4">
