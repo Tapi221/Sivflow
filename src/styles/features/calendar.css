@@ -124,7 +124,7 @@
   }
 
   .calendar-month-weekday-header {
-    border-color: #e5e5ea !important;
+    border-color: #eeeeee !important;
     background: #ffffff !important;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -138,12 +138,12 @@
     z-index: 1;
     pointer-events: none;
     background-image:
-      linear-gradient(#e5e5ea, #e5e5ea),
-      linear-gradient(#e5e5ea, #e5e5ea),
-      linear-gradient(#e5e5ea, #e5e5ea),
-      linear-gradient(#e5e5ea, #e5e5ea),
-      linear-gradient(#e5e5ea, #e5e5ea),
-      linear-gradient(#e5e5ea, #e5e5ea);
+      linear-gradient(#eeeeee, #eeeeee),
+      linear-gradient(#eeeeee, #eeeeee),
+      linear-gradient(#eeeeee, #eeeeee),
+      linear-gradient(#eeeeee, #eeeeee),
+      linear-gradient(#eeeeee, #eeeeee),
+      linear-gradient(#eeeeee, #eeeeee);
     background-repeat: no-repeat;
     background-size: 1px 100%;
     background-position:
@@ -187,12 +187,12 @@
     z-index: 4;
     pointer-events: none;
     background-image:
-      linear-gradient(#e5e5ea, #e5e5ea),
-      linear-gradient(#e5e5ea, #e5e5ea),
-      linear-gradient(#e5e5ea, #e5e5ea),
-      linear-gradient(#e5e5ea, #e5e5ea),
-      linear-gradient(#e5e5ea, #e5e5ea),
-      linear-gradient(#e5e5ea, #e5e5ea);
+      linear-gradient(#eeeeee, #eeeeee),
+      linear-gradient(#eeeeee, #eeeeee),
+      linear-gradient(#eeeeee, #eeeeee),
+      linear-gradient(#eeeeee, #eeeeee),
+      linear-gradient(#eeeeee, #eeeeee),
+      linear-gradient(#eeeeee, #eeeeee);
     background-repeat: no-repeat;
     background-size: 1px 100%;
     background-position:
@@ -213,14 +213,14 @@
     z-index: 4;
     height: 1px;
     pointer-events: none;
-    background: #e5e5ea;
+    background: #eeeeee;
   }
 
   .calendar-month-day-cell {
     overflow: visible;
     min-height: var(--calendar-month-row-height);
     contain: layout style;
-    border-color: #e5e5ea !important;
+    border-color: #eeeeee !important;
     border-right-width: 0 !important;
     border-bottom-width: 0 !important;
     transition: background-color 120ms ease;
