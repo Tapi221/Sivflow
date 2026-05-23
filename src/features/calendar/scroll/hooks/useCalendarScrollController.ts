@@ -42,6 +42,7 @@ export const useCalendarScrollController = ({
   activeMode,
   selectedViewMode,
   visibleDays,
+  timelineColumns,
   timelineColumnWidth,
   timelineAnchorColumnIndex,
   calendarBuffer,
@@ -55,6 +56,8 @@ export const useCalendarScrollController = ({
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);
   const syncRafRef = useRef<number | null>(null);
+  const prependTrigger =
+    activeMode === "timeline" ? timelineColumns.length : visibleDays.length;
 
   /**
    * ① エッジ検知（無限スクロールトリガー）
@@ -70,7 +73,7 @@ export const useCalendarScrollController = ({
    */
   const { reset: resetPrepend } = usePreserveScrollOnPrepend({
     scrollerRef: scrollContainerRef,
-    trigger: visibleDays.length,
+    trigger: prependTrigger,
   });
 
   /**
@@ -108,12 +111,9 @@ export const useCalendarScrollController = ({
   const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
     const scroller = event.currentTarget;
 
-    if (activeMode !== "timeline") {
-      handleEdgeScroll(scroller);
-    }
-
+    handleEdgeScroll(scroller);
     syncFixedRowScroll(scroller.scrollLeft);
-  }, [activeMode, handleEdgeScroll, syncFixedRowScroll]);
+  }, [handleEdgeScroll, syncFixedRowScroll]);
 
   useEffect(() => {
     return () => {

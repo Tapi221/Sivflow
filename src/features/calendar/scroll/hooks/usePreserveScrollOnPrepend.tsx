@@ -11,31 +11,43 @@ export const usePreserveScrollOnPrepend = ({
   trigger,
   enabled = true,
 }: Params) => {
-  const prevWidthRef = useRef<number | null>(null);
+  const prevSnapshotRef = useRef<{
+    scrollWidth: number;
+    scrollLeft: number;
+  } | null>(null);
 
   useLayoutEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      prevSnapshotRef.current = null;
+      return;
+    }
 
     const scroller = scrollerRef.current;
     if (!scroller) return;
 
-    const prevWidth = prevWidthRef.current;
-    if (prevWidth === null) {
-      prevWidthRef.current = scroller.scrollWidth;
+    const prevSnapshot = prevSnapshotRef.current;
+    if (prevSnapshot === null) {
+      prevSnapshotRef.current = {
+        scrollWidth: scroller.scrollWidth,
+        scrollLeft: scroller.scrollLeft,
+      };
       return;
     }
 
-    const diff = scroller.scrollWidth - prevWidth;
+    const diff = scroller.scrollWidth - prevSnapshot.scrollWidth;
 
-    if (diff > 0) {
+    if (diff > 0 && prevSnapshot.scrollLeft < scroller.scrollLeft) {
       scroller.scrollLeft += diff;
     }
 
-    prevWidthRef.current = scroller.scrollWidth;
+    prevSnapshotRef.current = {
+      scrollWidth: scroller.scrollWidth,
+      scrollLeft: scroller.scrollLeft,
+    };
   }, [trigger, scrollerRef, enabled]);
 
   const reset = () => {
-    prevWidthRef.current = null;
+    prevSnapshotRef.current = null;
   };
 
   return { reset };
