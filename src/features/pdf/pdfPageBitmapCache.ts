@@ -7,8 +7,8 @@ type PdfPageBitmapCacheEntry = {
   lastUsedAt: number;
 };
 
-const MAX_CACHE_ENTRIES = 6;
-const MAX_CACHE_PIXELS = 12_000_000;
+const MAX_CACHE_ENTRIES = 12;
+const MAX_CACHE_PIXELS = 36_000_000;
 
 const cache = new Map<string, PdfPageBitmapCacheEntry>();
 
