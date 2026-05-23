@@ -1,4 +1,4 @@
-import { CalendarIcon } from "@/components/icons/schedule.icons";
+import { CalendarIcon } from "@/components/icons/sidebar.icons";
 
 type DateFilterChipProps = {
   label: string;
