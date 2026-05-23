@@ -16,9 +16,7 @@ import {
   applyEditingDraftPatch,
   buildCardsById,
   createMetaPanelActions,
-  readStoredMetaPanelOpen,
   resolveSelectedCardSnapshot,
-  writeStoredMetaPanelOpen,
 } from "@/components/folder/panes/cardEditorPaneControllerCore";
 
 import { useToast } from "@/contexts/ToastContext";
@@ -68,6 +66,8 @@ export const useCardEditorPaneController = ({
   }) as unknown as UseCardsResult;
 
   const cards = cardsOverride ?? cardsFromHook;
+  const isMetaOpen = false;
+  const toggleMetaOpen: (() => void) | undefined = undefined;
 
   const cardsById = React.useMemo(() => buildCardsById(cards), [cards]);
 
@@ -93,14 +93,6 @@ export const useCardEditorPaneController = ({
     },
     [createCard],
   );
-
-  const [isMetaOpen, setIsMetaOpen] = React.useState<boolean>(() =>
-    readStoredMetaPanelOpen(),
-  );
-
-  React.useEffect(() => {
-    writeStoredMetaPanelOpen(isMetaOpen);
-  }, [isMetaOpen]);
 
   const resetDialogsRef = React.useRef<() => void>(() => {});
 
@@ -178,10 +170,6 @@ export const useCardEditorPaneController = ({
     resetDialogsRef,
   });
 
-  const toggleMetaOpen = React.useCallback(() => {
-    setIsMetaOpen((prev) => !prev);
-  }, []);
-
   const metaPanelActions = React.useMemo(
     () =>
       createMetaPanelActions({
@@ -213,7 +201,7 @@ export const useCardEditorPaneController = ({
       toggleMetaOpen,
       metaPanel: metaPanelActions,
     }),
-    [metaPanelActions, toggleMetaOpen],
+    [metaPanelActions],
   );
 
   return {
