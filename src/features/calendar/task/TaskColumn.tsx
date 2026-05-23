@@ -14,6 +14,10 @@ import { TASK_TYPO } from "@/styles/tokens/typography";
 
 import type { Task, TaskColumn as TaskColumnType } from "./task.types";
 import { TaskCard } from "./TaskCard";
+import {
+  TASK_DND_LAYOUT_ANIMATION_DURATION_MS,
+  TASK_DND_TABLIKE_EASING,
+} from "./dnd/taskDnd.config";
 import { TaskStatusDot } from "../../../chip/icon/TaskStatusDot";
 
 type TaskColumnProps = {
@@ -38,8 +42,8 @@ type SortableTaskCardProps = {
 
 const taskColumnBackground = "#ffffff";
 const TASK_SORTABLE_TRANSITION = {
-  duration: 150,
-  easing: "cubic-bezier(0.2, 0, 0, 1)",
+  duration: TASK_DND_LAYOUT_ANIMATION_DURATION_MS,
+  easing: TASK_DND_TABLIKE_EASING,
 };
 const TASK_SORTABLE_ANIMATE_LAYOUT_CHANGES: AnimateLayoutChanges = (args) => {
   if (args.isDragging) {
@@ -87,12 +91,12 @@ const SortableTaskCard = ({
         transform: CSS.Translate.toString(transform),
         transition: isDragging
           ? undefined
-          : transition ?? "transform 150ms cubic-bezier(0.2, 0, 0, 1)",
+          : transition ?? `transform ${TASK_DND_LAYOUT_ANIMATION_DURATION_MS}ms ${TASK_DND_TABLIKE_EASING}`,
         willChange: transform ? "transform" : undefined,
       }}
       className={cn(
         "rounded-xl touch-none transform-gpu",
-        "transition-[opacity,filter] duration-150 ease-[cubic-bezier(0.2,0,0,1)]",
+        "transition-[opacity,filter] duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
         isActivePreview && "opacity-40 saturate-75",
         isDragging && "relative z-10 opacity-0",
       )}
@@ -174,7 +178,7 @@ export const TaskColumn = ({
           <div
             className={cn(
               "flex min-h-8 flex-col gap-2 pr-3",
-              "transition-[padding] duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
+              "transition-[padding,border-color,background-color] duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
               tasks.length === 0 && isDragActive && "rounded-xl border border-dashed border-[#dfe3ea] bg-[#fafafa] p-2",
             )}
           >
