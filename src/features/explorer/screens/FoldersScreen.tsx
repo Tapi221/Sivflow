@@ -1,10 +1,4 @@
-import {
-  type CSSProperties,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
@@ -20,11 +14,7 @@ import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups
 import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
 import { ExplorerWorkspaceFrame } from "@/features/tab/ExplorerWorkspaceFrame";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
-import {
-  resolveCardSetTabTitle,
-  resolveCardTabTitle,
-  resolveDocumentTabTitle,
-} from "@/features/tab/resolveTabTitle";
+import { resolveCardTabTitle, resolveDocumentTabTitle } from "@/features/tab/resolveTabTitle";
 import type { WorkspaceEntityTab, WorkspaceTab } from "@/features/tab/Tab";
 import { WorkspaceTabPanel } from "@/features/tab/TabPanel";
 
@@ -35,10 +25,7 @@ import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";
 import { useDocumentsRead } from "@/hooks/platform/useDocumentsRead";
 import { cn } from "@/lib/utils";
-import {
-  createAppDestination,
-  createPageUrl,
-} from "@/platform/web/navigation/toWebPath";
+import { createAppDestination, createPageUrl } from "@/platform/web/navigation/toWebPath";
 import type { SelectedExplorerItem } from "@/types";
 
 type FoldersScreenProps = {
@@ -50,22 +37,6 @@ const FOLDERS_SCREEN_FILL_STYLE = {
   maxWidth: "none",
 } satisfies CSSProperties;
 
-const resolveSelectedCardId = (selectedItem: SelectedExplorerItem) => {
-  if (selectedItem?.type !== "card") {
-    return null;
-  }
-
-  return selectedItem.id;
-};
-
-const resolveSelectedDocumentId = (selectedItem: SelectedExplorerItem) => {
-  if (selectedItem?.type !== "document") {
-    return null;
-  }
-
-  return selectedItem.id;
-};
-
 const buildMapById = <TEntity extends { id: string }>(entities: TEntity[]) => {
   return new Map(entities.map((entity) => [entity.id, entity]));
 };
@@ -74,18 +45,12 @@ const resolveActiveTab = (
   tabs: WorkspaceTab[],
   activeTabId: WorkspaceTab["id"] | null,
 ): WorkspaceTab | null => {
-  if (activeTabId === null) {
-    return null;
-  }
-
+  if (activeTabId === null) return null;
   return tabs.find((tab) => tab.id === activeTabId) ?? null;
 };
 
 const resolveSelectedExplorerItemId = (item: SelectedExplorerItem) => {
-  if (!item || !("id" in item)) {
-    return null;
-  }
-
+  if (!item || !("id" in item)) return null;
   return item.id;
 };
 
@@ -93,21 +58,10 @@ const areSelectedExplorerItemsEqual = (
   left: SelectedExplorerItem,
   right: SelectedExplorerItem,
 ) => {
-  if (left === right) {
-    return true;
-  }
-
-  if (!left || !right) {
-    return false;
-  }
-
-  if (left.type !== right.type) {
-    return false;
-  }
-
-  return (
-    resolveSelectedExplorerItemId(left) === resolveSelectedExplorerItemId(right)
-  );
+  if (left === right) return true;
+  if (!left || !right) return false;
+  if (left.type !== right.type) return false;
+  return resolveSelectedExplorerItemId(left) === resolveSelectedExplorerItemId(right);
 };
 
 const areExplorerRouteStatesEqual = (
@@ -122,16 +76,18 @@ const areExplorerRouteStatesEqual = (
   );
 };
 
+const resolveSelectedCardId = (selectedItem: SelectedExplorerItem) => {
+  return selectedItem?.type === "card" ? selectedItem.id : null;
+};
+
+const resolveSelectedDocumentId = (selectedItem: SelectedExplorerItem) => {
+  return selectedItem?.type === "document" ? selectedItem.id : null;
+};
+
 export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   const navigate = useNavigate();
-  const [initialRouteState] = useState<ExplorerRouteState>(() =>
-    route.readRouteState(),
-  );
-
-  const controller = useExplorerController({
-    initialRouteState,
-  });
-
+  const [initialRouteState] = useState<ExplorerRouteState>(() => route.readRouteState());
+  const controller = useExplorerController({ initialRouteState });
   const {
     applyRouteState,
     navigateToSectionList,
@@ -140,81 +96,42 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     setBreadcrumbContext,
   } = controller.actions;
 
-  const previousActiveExplorerTabIdRef = useRef<WorkspaceTab["id"] | null>(
-    null,
-  );
+  const previousActiveExplorerTabIdRef = useRef<WorkspaceTab["id"] | null>(null);
   const restoringExplorerTabIdRef = useRef<WorkspaceTab["id"] | null>(null);
-
-  const { resetExplorerPaneScroll } = useWorkspaceScrollController({
-    isDesktop: route.isDesktop,
-  });
-
+  const { resetExplorerPaneScroll } = useWorkspaceScrollController({ isDesktop: route.isDesktop });
   const { folders = [], loading: foldersLoading } = useFoldersRead();
 
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
-  const openDocumentTab = useWorkspaceTabsStore(
-    (state) => state.openDocumentTab,
-  );
+  const openDocumentTab = useWorkspaceTabsStore((state) => state.openDocumentTab);
   const openCardTab = useWorkspaceTabsStore((state) => state.openCardTab);
-  const openCardSetTab = useWorkspaceTabsStore((state) => state.openCardSetTab);
-  const updateExplorerTabState = useWorkspaceTabsStore(
-    (state) => state.updateExplorerTabState,
-  );
+  const updateExplorerTabState = useWorkspaceTabsStore((state) => state.updateExplorerTabState);
   const updateTabTitle = useWorkspaceTabsStore((state) => state.updateTabTitle);
 
-  const activeTab = useMemo(
-    () => resolveActiveTab(tabs, activeTabId),
-    [activeTabId, tabs],
-  );
-
-  const isEntityTabActive =
-    activeTab?.kind === "document" ||
-    activeTab?.kind === "card" ||
-    activeTab?.kind === "cardSet";
+  const activeTab = useMemo(() => resolveActiveTab(tabs, activeTabId), [activeTabId, tabs]);
+  const isEntityTabActive = activeTab?.kind === "document" || activeTab?.kind === "card";
   const shouldReadWorkspaceData =
-    isEntityTabActive ||
-    !controller.state.isSectionListMode ||
-    controller.state.selectedItem !== null;
+    isEntityTabActive || !controller.state.isSectionListMode || controller.state.selectedItem !== null;
 
-  const { cards = [], loading: cardsLoading } = useCardsRead(
-    undefined,
-    undefined,
-    { enabled: shouldReadWorkspaceData },
-  );
-  const { documents = [], loading: documentsLoading } = useDocumentsRead(
-    undefined,
-    { enabled: shouldReadWorkspaceData },
-  );
-  const { cardSets = [], loading: cardSetsLoading } = useCardSets(undefined, {
+  const { cards = [], loading: cardsLoading } = useCardsRead(undefined, undefined, {
     enabled: shouldReadWorkspaceData,
   });
+  const { documents = [], loading: documentsLoading } = useDocumentsRead(undefined, {
+    enabled: shouldReadWorkspaceData,
+  });
+  const { cardSets = [] } = useCardSets(undefined, { enabled: shouldReadWorkspaceData });
 
-  const activeExplorerTabId =
-    activeTab?.kind === "explorer" ? activeTab.id : null;
-  const activeExplorerState =
-    activeTab?.kind === "explorer" ? activeTab.explorerState : null;
-
+  const activeExplorerTabId = activeTab?.kind === "explorer" ? activeTab.id : null;
+  const activeExplorerState = activeTab?.kind === "explorer" ? activeTab.explorerState : null;
   const cardById = useMemo(() => buildMapById(cards), [cards]);
   const cardSetById = useMemo(() => buildMapById(cardSets), [cardSets]);
   const documentById = useMemo(() => buildMapById(documents), [documents]);
 
   const selectedCardId = resolveSelectedCardId(controller.state.selectedItem);
-  const selectedDocumentId = resolveSelectedDocumentId(
-    controller.state.selectedItem,
-  );
-
-  const selectedCard = selectedCardId
-    ? (cardById.get(selectedCardId) ?? null)
-    : null;
-  const selectedDocument = selectedDocumentId
-    ? (documentById.get(selectedDocumentId) ?? null)
-    : null;
-
-  const breadcrumbCards = useMemo(
-    () => (selectedCard ? [selectedCard] : []),
-    [selectedCard],
-  );
+  const selectedDocumentId = resolveSelectedDocumentId(controller.state.selectedItem);
+  const selectedCard = selectedCardId ? (cardById.get(selectedCardId) ?? null) : null;
+  const selectedDocument = selectedDocumentId ? (documentById.get(selectedDocumentId) ?? null) : null;
+  const breadcrumbCards = useMemo(() => (selectedCard ? [selectedCard] : []), [selectedCard]);
   const breadcrumbDocuments = useMemo(
     () => (selectedDocument ? [selectedDocument] : []),
     [selectedDocument],
@@ -227,27 +144,21 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     selectedItem: controller.state.selectedItem,
   });
 
-  const currentExplorerRouteState = useMemo<ExplorerRouteState>(
-    () => ({
-      isHomeOnlyMode: controller.state.isHomeOnlyMode,
-      isSectionListMode: controller.state.isSectionListMode,
-      selectedFolderId: controller.state.selectedFolderId,
-      selectedItem: controller.state.selectedItem,
-    }),
-    [
-      controller.state.isHomeOnlyMode,
-      controller.state.isSectionListMode,
-      controller.state.selectedFolderId,
-      controller.state.selectedItem,
-    ],
-  );
+  const currentExplorerRouteState = useMemo<ExplorerRouteState>(() => ({
+    isHomeOnlyMode: controller.state.isHomeOnlyMode,
+    isSectionListMode: controller.state.isSectionListMode,
+    selectedFolderId: controller.state.selectedFolderId,
+    selectedItem: controller.state.selectedItem,
+  }), [
+    controller.state.isHomeOnlyMode,
+    controller.state.isSectionListMode,
+    controller.state.selectedFolderId,
+    controller.state.selectedItem,
+  ]);
 
   const fallbackEntityTab = useMemo<WorkspaceEntityTab | null>(() => {
     const selectedItem = controller.state.selectedItem;
-
-    if (!selectedItem) {
-      return null;
-    }
+    if (!selectedItem) return null;
 
     if (selectedItem.type === "document") {
       const document = documentById.get(selectedItem.id);
@@ -267,44 +178,19 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
       return {
         id: `card:${selectedItem.id}`,
         kind: "card",
-        title: card ? resolveCardTabTitle(card) : "カード",
+        title: card ? resolveCardTabTitle(card) : "Card",
         cardId: selectedItem.id,
-        folderId: card
-          ? resolveCardFolderId(card, cardSetById)
-          : controller.state.selectedFolderId,
-        isClosable: true,
-        sectionKey: "library",
-      };
-    }
-
-    if (selectedItem.type === "cardSet") {
-      const cardSet = cardSetById.get(selectedItem.id);
-      return {
-        id: `cardSet:${selectedItem.id}`,
-        kind: "cardSet",
-        title: cardSet ? resolveCardSetTabTitle(cardSet) : "カードセット",
-        cardSetId: selectedItem.id,
-        folderId: cardSet?.folderId ?? controller.state.selectedFolderId,
+        folderId: card ? resolveCardFolderId(card, cardSetById) : controller.state.selectedFolderId,
         isClosable: true,
         sectionKey: "library",
       };
     }
 
     return null;
-  }, [
-    cardById,
-    cardSetById,
-    controller.state.selectedFolderId,
-    controller.state.selectedItem,
-    documentById,
-  ]);
+  }, [cardById, cardSetById, controller.state.selectedFolderId, controller.state.selectedItem, documentById]);
 
   const resolvedEntityTab =
-    activeTab?.kind === "document" ||
-    activeTab?.kind === "card" ||
-    activeTab?.kind === "cardSet"
-      ? activeTab
-      : fallbackEntityTab;
+    activeTab?.kind === "document" || activeTab?.kind === "card" ? activeTab : fallbackEntityTab;
 
   useExplorerRouteSync({
     route,
@@ -330,66 +216,27 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
       restoringExplorerTabIdRef.current = null;
       return;
     }
-
-    if (previousActiveExplorerTabIdRef.current === activeExplorerTabId) {
-      return;
-    }
-
+    if (previousActiveExplorerTabIdRef.current === activeExplorerTabId) return;
     previousActiveExplorerTabIdRef.current = activeExplorerTabId;
-
-    if (
-      areExplorerRouteStatesEqual(
-        currentExplorerRouteState,
-        activeExplorerState,
-      )
-    ) {
+    if (areExplorerRouteStatesEqual(currentExplorerRouteState, activeExplorerState)) {
       restoringExplorerTabIdRef.current = null;
       return;
     }
-
     restoringExplorerTabIdRef.current = activeExplorerTabId;
     applyRouteState(activeExplorerState);
-  }, [
-    activeExplorerState,
-    activeExplorerTabId,
-    applyRouteState,
-    currentExplorerRouteState,
-  ]);
+  }, [activeExplorerState, activeExplorerTabId, applyRouteState, currentExplorerRouteState]);
 
   useEffect(() => {
-    if (!activeExplorerTabId || !activeExplorerState) {
-      return;
-    }
-
+    if (!activeExplorerTabId || !activeExplorerState) return;
     if (restoringExplorerTabIdRef.current === activeExplorerTabId) {
-      if (
-        areExplorerRouteStatesEqual(
-          currentExplorerRouteState,
-          activeExplorerState,
-        )
-      ) {
+      if (areExplorerRouteStatesEqual(currentExplorerRouteState, activeExplorerState)) {
         restoringExplorerTabIdRef.current = null;
       }
-
       return;
     }
-
-    if (
-      areExplorerRouteStatesEqual(
-        currentExplorerRouteState,
-        activeExplorerState,
-      )
-    ) {
-      return;
-    }
-
+    if (areExplorerRouteStatesEqual(currentExplorerRouteState, activeExplorerState)) return;
     updateExplorerTabState(activeExplorerTabId, currentExplorerRouteState);
-  }, [
-    activeExplorerState,
-    activeExplorerTabId,
-    currentExplorerRouteState,
-    updateExplorerTabState,
-  ]);
+  }, [activeExplorerState, activeExplorerTabId, currentExplorerRouteState, updateExplorerTabState]);
 
   useEffect(() => {
     tabs.forEach((tab) => {
@@ -398,19 +245,12 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
         if (document) updateTabTitle(tab.id, resolveDocumentTabTitle(document));
         return;
       }
-
       if (tab.kind === "card") {
         const card = cardById.get(tab.cardId);
         if (card) updateTabTitle(tab.id, resolveCardTabTitle(card));
-        return;
-      }
-
-      if (tab.kind === "cardSet") {
-        const cardSet = cardSetById.get(tab.cardSetId);
-        if (cardSet) updateTabTitle(tab.id, resolveCardSetTabTitle(cardSet));
       }
     });
-  }, [cardById, cardSetById, documentById, tabs, updateTabTitle]);
+  }, [cardById, documentById, tabs, updateTabTitle]);
 
   useEffect(() => {
     return subscribeSectionListNavigation(() => {
@@ -432,28 +272,14 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   const handleItemSelect = (item: SelectedExplorerItem) => {
     if (item?.type === "cardSet") {
       const cardSet = cardSetById.get(item.id);
-      const cardSetViewUrl = createPageUrl(
-        createAppDestination("cardSetView", {
-          cardSetId: item.id,
-          folderId: cardSet?.folderId ?? null,
-        }),
+      navigate(
+        createPageUrl(
+          createAppDestination("cardSetView", {
+            cardSetId: item.id,
+            folderId: cardSet?.folderId ?? null,
+          }),
+        ),
       );
-      const activateCardSetTab = () => {
-        openCardSetTab({
-          cardSetId: item.id,
-          title: cardSet ? resolveCardSetTabTitle(cardSet) : "カードセット",
-          folderId: cardSet?.folderId ?? null,
-        });
-      };
-
-      navigate(cardSetViewUrl);
-
-      if (typeof window === "undefined") {
-        activateCardSetTab();
-      } else {
-        window.setTimeout(activateCardSetTab, 0);
-      }
-
       return;
     }
 
@@ -473,20 +299,16 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
       const card = cardById.get(item.id);
       openCardTab({
         cardId: item.id,
-        title: card ? resolveCardTabTitle(card) : "カード",
+        title: card ? resolveCardTabTitle(card) : "Card",
         folderId: card ? resolveCardFolderId(card, cardSetById) : null,
       });
-      return;
     }
   };
 
   if (controller.state.isHomeOnlyMode) {
     return <div className="flex min-h-0 h-full w-full bg-transparent" />;
   }
-
-  if (foldersLoading) {
-    return null;
-  }
+  if (foldersLoading) return null;
 
   const explorerContent = (
     <TreeViewLayout
@@ -498,9 +320,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
       selectedDocumentId={lookups.selectedDocumentId}
       onFolderSelect={handleFolderSelect}
       onItemSelect={handleItemSelect}
-      onCardUpdated={() => {
-        // カード更新後の処理は既存実装へ委譲
-      }}
+      onCardUpdated={() => undefined}
       onBreadcrumbContextChange={setBreadcrumbContext}
       navigateToSectionListToken={controller.state.navigateToSectionListToken}
       folderSelectionNonce={controller.state.folderSelectionNonce}
@@ -511,14 +331,10 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     <WorkspaceTabPanel
       activeTab={resolvedEntityTab}
       cards={cards}
-      cardSets={cardSets}
       documents={documents}
       cardsLoading={cardsLoading}
-      cardSetsLoading={cardSetsLoading}
       documentsLoading={documentsLoading}
-      onCardUpdated={() => {
-        // カード更新後の処理は既存実装へ委譲
-      }}
+      onCardUpdated={() => undefined}
     />
   ) : (
     explorerContent
