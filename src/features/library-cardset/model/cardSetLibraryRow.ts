@@ -23,6 +23,22 @@ type BuildCardSetDashboardRowsParams = {
   tagById: ReadonlyMap<string, { name: string }>;
 };
 
+type CardWithLegacyCardSetId = Card & {
+  card_set_id?: string | null;
+};
+
+const resolveCardSetId = (card: Card): string | null => {
+  const normalizedCard = card as CardWithLegacyCardSetId;
+  const cardSetId = normalizedCard.cardSetId ?? normalizedCard.card_set_id ?? null;
+
+  if (typeof cardSetId !== "string") {
+    return null;
+  }
+
+  const trimmed = cardSetId.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
 const resolveFolderName = (folder: Folder | undefined): string => {
   return folder?.folderName?.trim() || "未分類";
 };
@@ -83,11 +99,13 @@ export const buildCardSetDashboardRows = ({
 
   cards.forEach((card) => {
     if (card.isDeleted) return;
-    if (!card.cardSetId) return;
+
+    const cardSetId = resolveCardSetId(card);
+    if (!cardSetId) return;
 
     cardCountByCardSetId.set(
-      card.cardSetId,
-      (cardCountByCardSetId.get(card.cardSetId) ?? 0) + 1,
+      cardSetId,
+      (cardCountByCardSetId.get(cardSetId) ?? 0) + 1,
     );
   });
 
