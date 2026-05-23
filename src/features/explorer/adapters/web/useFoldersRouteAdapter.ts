@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { mapSearchParamsToExplorerRouteState } from "@/features/explorer/mappers/mapSearchParamsToExplorerRouteState";
@@ -23,26 +23,54 @@ export type FoldersRouteAdapter = {
   getBaseSearchParams: () => URLSearchParams;
 };
 
+const isLibraryPath = (pathname: string): boolean =>
+  pathname.toLowerCase() === "/library";
+
+const toLibraryAwareSearchParams = (
+  pathname: string,
+  searchParams: URLSearchParams,
+): URLSearchParams => {
+  const next = new URLSearchParams(searchParams.toString());
+
+  if (isLibraryPath(pathname)) {
+    next.set("view", "section-list");
+  }
+
+  return next;
+};
+
 export const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   const presentationTarget = usePresentationTarget();
   const isDesktop = presentationTarget === "desktop";
 
+  const effectiveSearchParams = useMemo(
+    () => toLibraryAwareSearchParams(pathname, searchParams),
+    [pathname, searchParams],
+  );
+
   const readRouteState = useCallback(
     () =>
       mapSearchParamsToExplorerRouteState({
-        searchParams,
+        searchParams: effectiveSearchParams,
         fallbackFolderId: getLastSelectedFolderId(),
       }),
-    [searchParams],
+    [effectiveSearchParams],
   );
 
   const writeRouteState = useCallback(
     (next: URLSearchParams) => {
+      if (next.get("view") === "section-list") {
+        navigate("/library", { replace: true });
+        return;
+      }
+
       setSearchParams(next, { replace: true });
     },
-    [setSearchParams],
+    [navigate, setSearchParams],
   );
 
   const persistLastFolder = useCallback((folderId: string | null) => {
@@ -50,13 +78,13 @@ export const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
   }, []);
 
   const getBaseSearchParams = useCallback(
-    () => new URLSearchParams(searchParams.toString()),
-    [searchParams],
+    () => new URLSearchParams(effectiveSearchParams.toString()),
+    [effectiveSearchParams],
   );
 
   return useMemo(
     () => ({
-      routeKey: searchParams.toString(),
+      routeKey: `${pathname}?${effectiveSearchParams.toString()}`,
       isDesktop,
       readRouteState,
       writeRouteState,
@@ -65,12 +93,12 @@ export const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
       getBaseSearchParams,
     }),
     [
+      effectiveSearchParams,
       getBaseSearchParams,
       isDesktop,
-
+      pathname,
       persistLastFolder,
       readRouteState,
-      searchParams,
       writeRouteState,
     ],
   );
