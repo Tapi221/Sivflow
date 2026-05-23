@@ -13,7 +13,6 @@ import { DayDetailPanel } from "./rightpanel/DayDetailPanel";
 import { CalendarSidebar } from "./sidepanel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
 import { useTaskCalendarEvents } from "./task/hooks/useTaskCalendarEvents";
-import * as ScheduleIcons from "@/components/icons/schedule.icons";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
@@ -39,8 +38,6 @@ const VIEW_HEADER_CONTROLS_RESERVED_RIGHT_PX =
   DAY_DETAIL_PANEL_WIDTH_PX +
   CALENDAR_PANEL_OPEN_RIGHT_GUTTER_PX +
   VIEW_HEADER_CONTROLS_RIGHT_INSET_PX;
-const DAY_DETAIL_TOGGLE_TOP_OFFSET =
-  "calc((var(--ds-semantic-breadcrumb-height) + 2rem) / -2)";
 
 export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
   const pane = useSchedulePane();
@@ -133,10 +130,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
     },
     [handleMonthCellSelectDate],
   );
-
-  const handleToggleDayDetailPanel = useCallback(() => {
-    setIsDayDetailPanelOpen((isOpen) => !isOpen);
-  }, []);
 
   const renderViewHeader = (className: string) => {
     const headerTitleDate =
@@ -310,21 +303,6 @@ export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
             events={calendarEvents}
             isOpen={showDayDetailPanel}
           />
-        ) : null}
-
-        {canShowDayDetailPanel ? (
-          <button
-            type="button"
-            aria-label={showDayDetailPanel ? "日付詳細を閉じる" : "日付詳細を開く"}
-            title={showDayDetailPanel ? "日付詳細を閉じる" : "日付詳細を開く"}
-            onClick={handleToggleDayDetailPanel}
-            className="absolute right-4 z-20 flex h-8 w-8 items-center justify-center bg-transparent text-[#8f96a3] hover:text-[#6f7784]"
-            style={{ top: DAY_DETAIL_TOGGLE_TOP_OFFSET }}
-          >
-            <ScheduleIcons.SidebarPanelIcon
-              className={cn("h-3.5 w-3.5", showDayDetailPanel && "-scale-x-100")}
-            />
-          </button>
         ) : null}
       </div>
     </div>
