@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/popover";
 import { Filter } from "@/ui/icons";
 
-import { TagFilterPanel } from "./TagFilterPanel";
+import { TagFilterPanel } from "../../components/explorer/TagFilterPanel";
 
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
