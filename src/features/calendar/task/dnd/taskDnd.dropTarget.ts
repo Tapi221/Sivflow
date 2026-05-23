@@ -47,6 +47,18 @@ export const resolveDropTarget = (
     return { status: overStatus };
   }
 
+  if (overType === "task-slot" && isTaskStatus(overStatus)) {
+    const insertIndex = over.data.current?.insertIndex;
+    const overTaskId = over.data.current?.overTaskId;
+
+    return {
+      status: overStatus,
+      overTaskId: typeof overTaskId === "string" ? overTaskId : null,
+      position: "before",
+      insertIndex: typeof insertIndex === "number" ? insertIndex : undefined,
+    };
+  }
+
   const overTaskId = String(over.id);
 
   if (overTaskId === activeTaskId) {
