@@ -5,7 +5,6 @@ import {
   createDefaultExplorerRouteState,
   resolveRouteTabBySection,
   WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
-  type WorkspaceCardSetTab,
   type WorkspaceCardTab,
   type WorkspaceDocumentTab,
   type WorkspaceExplorerTab,
@@ -23,12 +22,6 @@ type OpenExplorerTabParams = {
 
 type OpenDocumentTabParams = {
   documentId: string;
-  title: string;
-  folderId: string | null;
-};
-
-type OpenCardSetTabParams = {
-  cardSetId: string;
   title: string;
   folderId: string | null;
 };
@@ -52,7 +45,6 @@ type WorkspaceTabsState = {
   openDocumentTab: (
     params: OpenDocumentTabParams,
   ) => WorkspaceDocumentTab["id"];
-  openCardSetTab: (params: OpenCardSetTabParams) => WorkspaceCardSetTab["id"];
   openCardTab: (params: OpenCardTabParams) => WorkspaceCardTab["id"];
   openSectionTab: (sectionKey: WorkspaceSidebarSection) => WorkspaceTab["id"];
   selectTab: (tabId: WorkspaceTab["id"]) => void;
@@ -66,15 +58,6 @@ type WorkspaceTabsState = {
 };
 
 const EXPLORER_TAB_TITLE = "Library";
-
-const createRootExplorerTab = (): WorkspaceExplorerTab => ({
-  id: WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
-  kind: "explorer",
-  title: EXPLORER_TAB_TITLE,
-  explorerState: createDefaultExplorerRouteState(),
-  isClosable: true,
-  sectionKey: "library",
-});
 
 const createRandomIdSegment = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -238,34 +221,6 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>((set, get) => ({
       kind: "document",
       title,
       documentId,
-      folderId,
-      isClosable: true,
-      sectionKey: "library",
-    };
-
-    set((state) => ({
-      tabs: [...state.tabs, nextTab],
-      activeTabId: nextTab.id,
-      lastOpenedTabId: nextTab.id,
-    }));
-
-    return id;
-  },
-
-  openCardSetTab: ({ cardSetId, title, folderId }) => {
-    const id = `cardSet:${cardSetId}` as const;
-    const existing = get().tabs.find((tab) => tab.id === id);
-
-    if (existing) {
-      set({ activeTabId: id });
-      return id;
-    }
-
-    const nextTab: WorkspaceCardSetTab = {
-      id,
-      kind: "cardSet",
-      title,
-      cardSetId,
       folderId,
       isClosable: true,
       sectionKey: "library",
