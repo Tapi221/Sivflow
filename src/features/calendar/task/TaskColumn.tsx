@@ -24,6 +24,7 @@ type TaskColumnProps = {
   column: TaskColumnType;
   tasks: Task[];
   activeTaskId?: string | null;
+  enableSortableTransforms?: boolean;
   accountName?: string | null;
   accountPhotoUrl?: string | null;
   onAddTask: (status: string) => void;
@@ -34,6 +35,7 @@ type TaskColumnProps = {
 type SortableTaskCardProps = {
   task: Task;
   activeTaskId?: string | null;
+  enableSortableTransforms?: boolean;
   accountName?: string | null;
   accountPhotoUrl?: string | null;
   onDeleteTask: (id: string) => void;
@@ -60,6 +62,7 @@ const TASK_SORTABLE_ANIMATE_LAYOUT_CHANGES: AnimateLayoutChanges = (args) => {
 const SortableTaskCard = ({
   task,
   activeTaskId,
+  enableSortableTransforms = false,
   accountName,
   accountPhotoUrl,
   onDeleteTask,
@@ -83,7 +86,7 @@ const SortableTaskCard = ({
     },
   });
   const isActivePreview = activeTaskId === task.id;
-  const sortableTransform = isDragging ? transform : null;
+  const sortableTransform = isDragging || enableSortableTransforms ? transform : null;
 
   return (
     <div
@@ -120,6 +123,7 @@ export const TaskColumn = ({
   column,
   tasks,
   activeTaskId,
+  enableSortableTransforms = false,
   accountName,
   accountPhotoUrl,
   onAddTask,
@@ -188,6 +192,7 @@ export const TaskColumn = ({
                 key={task.id}
                 task={task}
                 activeTaskId={activeTaskId}
+                enableSortableTransforms={enableSortableTransforms}
                 accountName={accountName}
                 accountPhotoUrl={accountPhotoUrl}
                 onDeleteTask={onDeleteTask}
