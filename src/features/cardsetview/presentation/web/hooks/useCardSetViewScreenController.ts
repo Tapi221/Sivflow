@@ -70,7 +70,6 @@ export const useCardSetViewScreenController = () => {
   const paneWidth = useCardSetViewPaneWidth({
     isGlobalEditing: state.isGlobalEditing,
     isDesktop,
-    isMetaOpen: state.isMetaOpen,
     settings,
     cardSetId,
   });
@@ -118,7 +117,6 @@ export const useCardSetViewScreenController = () => {
 
   useCardSetViewWindowEvents({
     handleToggleViewMode: state.handleToggleViewMode,
-    handleToggleMetaPanel: () => state.setIsMetaOpen((prev) => !prev),
     createAndFocusCard: state.createAndFocusCard,
   });
 
