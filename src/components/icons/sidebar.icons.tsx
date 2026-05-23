@@ -1,5 +1,71 @@
 import type { ReactNode } from "react";
 
+//Animated navigation bar
+export const ClockIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      d="M12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12.0081 10.508C11.6102 10.508 11.2287 10.666 10.9474 10.9473C10.6661 11.2286 10.5081 11.6102 10.5081 12.008C10.5081 12.4058 10.6661 12.7874 10.9474 13.0687C11.2287 13.35 11.6102 13.508 12.0081 13.508C12.4059 13.508 12.7874 13.35 13.0687 13.0687C13.35 12.7874 13.5081 12.4058 13.5081 12.008C13.5081 11.6102 13.35 11.2286 13.0687 10.9473C12.7874 10.666 12.4059 10.508 12.0081 10.508ZM12.0081 10.508V7M15.0151 15.02L13.0661 13.072"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+//Animated navigation bar
+export const SettingIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      d="M12 15.5C13.933 15.5 15.5 13.933 15.5 12C15.5 10.067 13.933 8.5 12 8.5C10.067 8.5 8.5 10.067 8.5 12C8.5 13.933 10.067 15.5 12 15.5Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M19.43 12.98C19.47 12.66 19.5 12.34 19.5 12C19.5 11.66 19.48 11.33 19.43 11.02L21.54 9.37C21.73 9.22 21.78 8.95 21.66 8.73L19.66 5.27C19.54 5.05 19.28 4.96 19.05 5.05L16.56 6.05C16.04 5.65 15.48 5.32 14.86 5.07L14.5 2.42C14.46 2.18 14.25 2 14 2H10C9.75 2 9.54 2.18 9.5 2.42L9.14 5.07C8.52 5.32 7.96 5.66 7.44 6.05L4.95 5.05C4.72 4.96 4.46 5.05 4.34 5.27L2.34 8.73C2.21 8.95 2.27 9.22 2.46 9.37L4.57 11.02C4.52 11.34 4.5 11.67 4.5 12C4.5 12.33 4.52 12.66 4.57 12.98L2.46 14.63C2.27 14.78 2.22 15.05 2.34 15.27L4.34 18.73C4.46 18.95 4.72 19.04 4.95 18.95L7.44 17.95C7.96 18.35 8.52 18.68 9.14 18.93L9.5 21.58C9.54 21.82 9.75 22 10 22H14C14.25 22 14.46 21.82 14.5 21.58L14.86 18.93C15.48 18.68 16.04 18.34 16.56 17.95L19.05 18.95C19.28 19.04 19.54 18.95 19.66 18.73L21.66 15.27C21.78 15.05 21.73 14.78 21.54 14.63L19.43 12.98Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 type SidebarIconProps = {
   className?: string;
 };
