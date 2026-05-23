@@ -58,13 +58,13 @@ export const TaskCard = ({
   return (
     <div
       className={cn(
-        "group relative w-full min-w-0 overflow-hidden rounded-xl border border-[#e6e8ec] bg-white px-3 py-2.5",
-        "shadow-none",
+        "group relative w-full min-w-0 overflow-hidden rounded-xl border border-[rgba(15,23,42,0.08)] bg-white px-3 py-2.5",
+        "shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_2px_6px_rgba(15,23,42,0.07),0_0.5px_1px_rgba(15,23,42,0.06)]",
         "transition-[transform,background-color,border-color,box-shadow,filter] duration-[180ms] ease-[cubic-bezier(.22,1,.36,1)]",
-        "hover:border-[#dfe3ea] hover:shadow-[0_1px_4px_rgba(15,23,42,0.05)]",
+        "hover:border-[rgba(15,23,42,0.12)] hover:shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_4px_12px_rgba(15,23,42,0.10),0_1px_2px_rgba(15,23,42,0.08)]",
         "active:scale-[0.999]",
         isDragging
-          ? "cursor-grabbing scale-[1.01] border-[#dfe3ea] bg-white shadow-[0_10px_28px_rgba(15,23,42,0.12)] ring-1 ring-black/[0.035]"
+          ? "cursor-grabbing scale-[1.01] border-[rgba(15,23,42,0.10)] bg-white shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_10px_28px_rgba(15,23,42,0.14),0_2px_6px_rgba(15,23,42,0.08)] ring-1 ring-black/[0.035]"
           : "cursor-grab",
       )}
     >
