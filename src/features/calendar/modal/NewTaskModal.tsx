@@ -293,9 +293,9 @@ export const NewTaskModal = ({
                 id="category"
                 title="カテゴリ"
                 value={category}
-                options={Object.keys(CATEGORY_CONFIG).map((cat) => ({
-                  value: cat,
-                  label: cat,
+                options={Object.entries(CATEGORY_CONFIG).map(([key, val]) => ({
+                  value: key,
+                  label: val.label,
                 }))}
                 isOpen={openPicker === "category"}
                 onOpen={setOpenPicker}
