@@ -24,10 +24,12 @@ const buildMapById = <TEntity extends { id: string }>(entities: TEntity[]) => {
   return new Map(entities.map((entity) => [entity.id, entity]));
 };
 
+const workspaceTabPanelTextClassName = "text-[18px] leading-6";
+
 const WorkspacePanelStatus = ({ title }: { title: string }) => {
   return (
     <div className="flex h-full min-h-0 w-full items-center justify-center bg-[#fbfbfa] p-6">
-      <div className="rounded-xl border border-[#e2e1dc] bg-white px-5 py-4 text-sm text-[#2f2e2a] shadow-[0_12px_28px_rgba(15,23,42,0.06)]">
+      <div className={`rounded-xl border border-[#e2e1dc] bg-white px-5 py-4 ${workspaceTabPanelTextClassName} text-[#2f2e2a] shadow-[0_12px_28px_rgba(15,23,42,0.06)]`}>
         {title}
       </div>
     </div>
@@ -63,7 +65,7 @@ export const WorkspaceTabPanel = ({
 
     return (
       <PdfWorkspaceProvider key={document.id} doc={document} onDocumentUpdate={handleDocumentUpdate}>
-        <div className="relative h-full min-h-0 w-full overflow-hidden bg-white">
+        <div className={`relative h-full min-h-0 w-full overflow-hidden bg-white ${workspaceTabPanelTextClassName}`}>
           <PdfPane doc={document} className="h-full min-h-0" onDocumentUpdate={handleDocumentUpdate} />
         </div>
       </PdfWorkspaceProvider>
@@ -77,7 +79,11 @@ export const WorkspaceTabPanel = ({
       return <WorkspacePanelStatus title={cardsLoading ? "カードを読み込んでいます" : "カードが見つかりません"} />;
     }
 
-    return <CardPane selectedCardId={card.id} onCardUpdated={onCardUpdated} />;
+    return (
+      <div className={`h-full min-h-0 w-full ${workspaceTabPanelTextClassName}`}>
+        <CardPane selectedCardId={card.id} onCardUpdated={onCardUpdated} />
+      </div>
+    );
   }
 
   return null;
