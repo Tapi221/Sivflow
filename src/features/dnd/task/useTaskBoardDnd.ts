@@ -118,15 +118,31 @@ export const useTaskBoardDnd = ({
     resetDragState();
 
     if (!target) {
+      console.warn("Task DND drop ignored: no drop target was resolved.", {
+        activeId,
+        overId: event.over ? String(event.over.id) : null,
+        overType: event.over?.data.current?.type ?? null,
+      });
       return;
     }
 
     const activeTask = findTask(tasksByColumn, activeId);
 
     if (!activeTask) {
+      console.warn("Task DND drop ignored: active task was not found in tasksByColumn.", {
+        activeId,
+        columnIds: Object.keys(tasksByColumn),
+        target,
+      });
       return;
     }
 
+    console.info("Task DND drop resolved.", {
+      activeId,
+      activeTaskCategory: activeTask.category,
+      activeTaskStatus: activeTask.status,
+      target,
+    });
     onReorderTask(activeId, target.columnId, target.overTaskId, target.position);
   };
 
