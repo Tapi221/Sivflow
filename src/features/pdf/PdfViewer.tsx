@@ -3,7 +3,6 @@ import React, {
   useEffect,
   useImperativeHandle,
   useMemo,
-  useRef,
   useState,
 } from "react";
 
@@ -23,7 +22,6 @@ import { usePdfZoom } from "./hooks/usePdfZoom";
 import { PdfPage } from "./PdfPage";
 import type {
   PageSize,
-  PdfPageSearchMatch,
   PdfScaleChangeSource,
   PdfViewerHandle,
   PdfViewerOptions,
@@ -108,7 +106,6 @@ interface PdfViewerInnerProps extends PdfViewerCommonProps {
 }
 
 const EMPTY_PAGE_NUMBERS: number[] = [];
-const EMPTY_SEARCH_MATCHES: PdfPageSearchMatch[] = [];
 
 const normalizePageOrder = (
   pageOrder: number[] | undefined,
