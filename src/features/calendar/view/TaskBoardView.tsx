@@ -5,8 +5,7 @@ import { createPortal } from "react-dom";
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "../task/task.types";
 import type { Task, TaskGroupMode, TaskStatus } from "../task/task.types";
 import { useTaskBoardDnd } from "../../dnd/task/useTaskBoardDnd";
-import type {TaskDropTarget,
-  TaskInsertPosition,} from "../../dnd/task/taskDnd.types";
+import type { TaskDropTarget, TaskInsertPosition } from "../../dnd/task/taskDnd.types";
 import { TaskCard } from "../task/TaskCard";
 import { TaskColumn } from "../task/TaskColumn";
 
@@ -24,6 +23,7 @@ type TaskBoardViewProps = {
     status: TaskStatus,
     overTaskId?: string | null,
     position?: "before" | "after",
+    destinationCategory?: string | null,
   ) => void;
 };
 
@@ -163,7 +163,7 @@ export const TaskBoardView = ({
       const task = tasks.find((item) => item.id === taskId);
 
       if (task) {
-        onReorderTask(taskId, task.status, overTaskId, position);
+        onReorderTask(taskId, task.status, overTaskId, position, columnId);
       }
       return;
     }
