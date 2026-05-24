@@ -23,7 +23,7 @@ type SidebarNavItem = {
   label: string;
   to?: string;
   icon: ReactNode;
-  sectionKey?: "home" | "review" | "library" | "schedule";
+  sectionKey?: "home" | "review" | "library" | "schedule" | "settings";
   onClick?: () => void;
 };
 
@@ -110,6 +110,12 @@ export const SidebarMobile = ({
     navigate(type === "flashcards" ? "/library/flashcard" : "/library/pdf");
   };
 
+  const openSettings = () => {
+    onOpenSettings?.();
+    openSectionTab("settings");
+    navigate("/settings");
+  };
+
   return (
     <aside className="sidebar sidebar--mobile">
       <nav className="sidebar-nav">
@@ -144,7 +150,7 @@ export const SidebarMobile = ({
         ))}
       </nav>
 
-      <button className="sidebar-nav-link" onClick={onOpenSettings}>
+      <button className="sidebar-nav-link" onClick={openSettings}>
         <span className="sidebar-nav-icon-slot">
           <SettingIcon className="sidebar-nav-icon" />
         </span>
