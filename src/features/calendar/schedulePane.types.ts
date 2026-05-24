@@ -55,6 +55,7 @@ export type GoogleAccountDisplay = {
   photoUrl: string | null;
   calendars: GoogleCalendarListItem[];
   taskLists: GoogleTaskListItem[];
+  taskListsError: string | null;
   isTaskListsLoading: boolean;
   selectedCalendarIds: Set<string>;
   connectionStatus: GCalConnectionStatus;
