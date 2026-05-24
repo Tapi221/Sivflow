@@ -124,7 +124,7 @@ export const TaskColumn = ({
   return (
     <div
       className={cn(
-        "flex h-full min-h-0 w-full min-w-0 flex-col p-3",
+        "flex h-full min-h-0 w-full min-w-0 flex-col px-3 pt-3 pb-0",
         "transition-[background-color,box-shadow] duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
         isDragActive && "shadow-[inset_0_0_0_1px_rgba(17,24,39,0.03)]",
       )}
@@ -179,6 +179,7 @@ export const TaskColumn = ({
               const insertIndex = isActiveTask
                 ? -1
                 : nonActiveTasks.findIndex((nonActiveTask) => nonActiveTask.id === task.id) + 1;
+              const isLastTask = insertIndex === nonActiveTasks.length;
 
               return (
                 <div key={task.id}>
@@ -196,6 +197,7 @@ export const TaskColumn = ({
                       status={column.id}
                       insertIndex={insertIndex}
                       overTaskId={nonActiveTasks[insertIndex]?.id ?? null}
+                      isLast={isLastTask}
                     />
                   )}
                 </div>
