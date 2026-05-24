@@ -29,7 +29,7 @@ export interface TableLike<T extends object> {
 }
 
 export interface DbLike {
-  table<T extends object, TKey = string>(name: string): TableLike<T>;
+  table<T extends object, _TKey = string>(name: string): TableLike<T>;
   name?: string;
 }
 
