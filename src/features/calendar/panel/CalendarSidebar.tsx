@@ -24,7 +24,7 @@ import type {
   CalendarSelectionRange,
   CalendarSidebarProps,
   GoogleAccountDisplay,
-} from "../schedulePane.types";
+} from "../scheduleScreen.types";
 
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 const DEFAULT_TASK_LIST_COLOR = "#7c8cf8";
@@ -167,14 +167,18 @@ const buildMiniCalendarDays = (
 type GoogleAccountSectionProps = {
   account: GoogleAccountDisplay;
   mode: "calendar" | "task";
+  selectedTaskListId?: string | null;
   onToggleCalendar: (calendarId: string) => void;
+  onSelectTaskList?: (taskListId: string | null) => void;
   onReconnect: () => void;
 };
 
 const GoogleAccountSection = ({
   account,
   mode,
+  selectedTaskListId = null,
   onToggleCalendar,
+  onSelectTaskList,
   onReconnect,
 }: GoogleAccountSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
@@ -283,21 +287,32 @@ const GoogleAccountSection = ({
             </p>
           )}
 
-          {!hasTaskListsError && account.taskLists.map((taskList) => (
-            <div
-              key={taskList.id}
-              className={GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME}
-            >
-              <AnimatedCircleCheckbox
-                checked
-                color={resolveTaskListColor(account, taskList.title)}
-              />
+          {!hasTaskListsError && account.taskLists.map((taskList) => {
+            const checked = selectedTaskListId === taskList.id;
 
-              <span className="truncate text-[12px] font-medium text-[#2f2f2f]">
-                {taskList.title}
-              </span>
-            </div>
-          ))}
+            return (
+              <button
+                key={taskList.id}
+                type="button"
+                className={cn(
+                  GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME,
+                  "transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1]",
+                  checked && "bg-[#f2f4ff]",
+                )}
+                onClick={() => onSelectTaskList?.(taskList.id)}
+                aria-pressed={checked}
+              >
+                <AnimatedCircleCheckbox
+                  checked={checked}
+                  color={resolveTaskListColor(account, taskList.title)}
+                />
+
+                <span className="truncate text-[12px] font-medium text-[#2f2f2f]">
+                  {taskList.title}
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -315,12 +330,14 @@ export const CalendarSidebar = ({
   activeMode,
   googleAccounts,
   isAnyCalendarConnecting,
+  selectedTaskListId = null,
   onSelectDate,
   onPreviousMonth,
   onNextMonth,
   onAddCalendar,
   onReconnectAccount,
   onToggleCalendar,
+  onSelectTaskList,
 }: CalendarSidebarProps) => {
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
@@ -332,6 +349,7 @@ export const CalendarSidebar = ({
 
   const hasGoogleAccounts = googleAccounts.length > 0;
   const isTaskMode = activeMode === "task";
+  const hasAnyTaskList = googleAccounts.some((account) => account.taskLists.length > 0);
 
   return (
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-5 pl-0 pr-3 pt-2 text-[#2f2f2f]">
@@ -439,14 +457,37 @@ export const CalendarSidebar = ({
           </span>
         </div>
 
+        {isTaskMode && hasAnyTaskList && (
+          <button
+            type="button"
+            className={cn(
+              GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME,
+              "pl-2 transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1]",
+              selectedTaskListId === null && "bg-[#f2f4ff]",
+            )}
+            onClick={() => onSelectTaskList?.(null)}
+            aria-pressed={selectedTaskListId === null}
+          >
+            <AnimatedCircleCheckbox
+              checked={selectedTaskListId === null}
+              color={DEFAULT_TASK_LIST_COLOR}
+            />
+            <span className="truncate text-[12px] font-medium text-[#2f2f2f]">
+              すべての ToDo リスト
+            </span>
+          </button>
+        )}
+
         {googleAccounts.map((account) => (
           <GoogleAccountSection
             key={account.accountId}
             account={account}
             mode={isTaskMode ? "task" : "calendar"}
+            selectedTaskListId={selectedTaskListId}
             onToggleCalendar={(calendarId) =>
               onToggleCalendar(account.accountId, calendarId)
             }
+            onSelectTaskList={onSelectTaskList}
             onReconnect={() => onReconnectAccount(account.accountId)}
           />
         ))}
