@@ -1,24 +1,16 @@
-/**
- * Flashcard の Ink overlay（InkLayer / InkToolbar）と
- * extraHeaderRight / extraFooter の overlay を担うコンポーネント。
- *
- * Flashcard.tsx から overlay 部分を分離している。
- */
 import React from "react";
 
+import { InkLayer, InkToolbar } from "@/components/ink/InkLayer";
+import type { InkDocument, InkEditTool } from "@/components/ink/inkTypes";
 import type {
   InkHistoryState,
   InkLayerHandle,
-} from "@/components/ink/InkLayer";
-import { InkLayer, InkToolbar } from "@/components/ink/InkLayer";
-import type { InkDocument, InkEditTool } from "@/components/ink/inkTypes";
+} from "@/components/ink/types";
 
 interface FlashcardInkOverlayProps {
-  // extraHeader / footer
   extraHeaderRight?: React.ReactNode;
   extraFooter?: React.ReactNode;
   previewMode: boolean;
-  // ink
   showInkLayer: boolean;
   inkEditingEnabled: boolean;
   cardId: string | null;
