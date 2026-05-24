@@ -2,7 +2,6 @@ import {
   useEffect,
   useRef,
   useState,
-  type CSSProperties,
   type FormEvent,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
@@ -12,17 +11,17 @@ import { createPortal } from "react-dom";
 import { TagChip } from "@/components/tag/TagChip";
 import {
   TAG_COLOR_CONTEXT_MENU_HEIGHT,
-  TAG_COLOR_CONTEXT_MENU_MARGIN,
   TAG_COLOR_CONTEXT_MENU_WIDTH,
   TagColorRightClickPanel,
 } from "@/chip/rightclickpanel/TagColorRightClickPanel";
+import {
+  RIGHT_CLICK_PANEL_NO_DRAG_STYLE,
+  clampRightClickPanelPosition,
+  useRightClickPanelDismiss,
+} from "@/chip/rightclickpanel/rightClickPanelCommon";
 import { getTagColorKey, type TagColorKey } from "@/features/tag/tagColor";
 import { useTags } from "@/hooks/settings/useTags";
 import { Plus, X } from "@/ui/icons";
-
-type AppRegionStyle = CSSProperties & {
-  WebkitAppRegion?: "drag" | "no-drag";
-};
 
 type TagContextMenuState = {
   tagId: string;
@@ -33,33 +32,6 @@ type TagContextMenuState = {
 type TagContextMenuTriggerEvent =
   | ReactMouseEvent<HTMLElement>
   | ReactPointerEvent<HTMLElement>;
-
-const TAG_CONTEXT_MENU_NO_DRAG_STYLE: AppRegionStyle = {
-  WebkitAppRegion: "no-drag",
-};
-
-const clampTagContextMenuPosition = (
-  clientX: number,
-  clientY: number,
-): { x: number; y: number } => {
-  const maxX = Math.max(
-    TAG_COLOR_CONTEXT_MENU_MARGIN,
-    window.innerWidth -
-      TAG_COLOR_CONTEXT_MENU_WIDTH -
-      TAG_COLOR_CONTEXT_MENU_MARGIN,
-  );
-  const maxY = Math.max(
-    TAG_COLOR_CONTEXT_MENU_MARGIN,
-    window.innerHeight -
-      TAG_COLOR_CONTEXT_MENU_HEIGHT -
-      TAG_COLOR_CONTEXT_MENU_MARGIN,
-  );
-
-  return {
-    x: Math.min(Math.max(clientX, TAG_COLOR_CONTEXT_MENU_MARGIN), maxX),
-    y: Math.min(Math.max(clientY, TAG_COLOR_CONTEXT_MENU_MARGIN), maxY),
-  };
-};
 
 export const TaskTagStrip = () => {
   const { addTag, availableColors, tags, updateTagColor } = useTags();
@@ -77,35 +49,11 @@ export const TaskTagStrip = () => {
     inputRef.current?.focus();
   }, [isCreating]);
 
-  useEffect(() => {
-    if (!contextMenu) return;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (contextMenuRef.current?.contains(event.target as Node)) return;
-      setContextMenu(null);
-    };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setContextMenu(null);
-      }
-    };
-    const closeMenu = () => setContextMenu(null);
-
-    window.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("resize", closeMenu, { once: true });
-    window.addEventListener("scroll", closeMenu, {
-      capture: true,
-      once: true,
-    });
-
-    return () => {
-      window.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("resize", closeMenu);
-      window.removeEventListener("scroll", closeMenu, { capture: true });
-    };
-  }, [contextMenu]);
+  useRightClickPanelDismiss(
+    contextMenu !== null,
+    contextMenuRef,
+    () => setContextMenu(null),
+  );
 
   const handleCancelCreate = () => {
     setIsCreating(false);
@@ -143,7 +91,10 @@ export const TaskTagStrip = () => {
     event.preventDefault();
     event.stopPropagation();
 
-    const { x, y } = clampTagContextMenuPosition(event.clientX, event.clientY);
+    const { x, y } = clampRightClickPanelPosition(event.clientX, event.clientY, {
+      width: TAG_COLOR_CONTEXT_MENU_WIDTH,
+      height: TAG_COLOR_CONTEXT_MENU_HEIGHT,
+    });
     setContextMenu({ tagId, x, y });
   };
 
@@ -163,7 +114,7 @@ export const TaskTagStrip = () => {
         currentColorKey={contextMenuTagColorKey}
         tagName={contextMenuTag.name}
         menuRef={contextMenuRef}
-        noDragStyle={TAG_CONTEXT_MENU_NO_DRAG_STYLE}
+        noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE}
         onSelectColor={(colorKey) => {
           void handleUpdateTagColor(contextMenuTag.id, colorKey);
         }}
