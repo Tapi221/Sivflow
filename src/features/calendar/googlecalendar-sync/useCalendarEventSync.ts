@@ -28,11 +28,17 @@ type GoogleCalendarSlice = {
   }) => Promise<void> | void;
 };
 
+export type CalendarEventSyncRange = {
+  rangeStart: Date;
+  rangeEnd: Date;
+};
+
 export type UseCalendarEventSyncOptions = {
   activeMode: CalendarToolbarMode;
   selectedViewMode: CalendarViewMode;
   visibleDays: Date[];
   monthTitleDate: Date;
+  monthVisibleRange?: CalendarEventSyncRange | null;
   googleCalendar: GoogleCalendarSlice;
 };
 
@@ -40,6 +46,7 @@ export const useCalendarEventSync = ({
   selectedViewMode,
   visibleDays,
   monthTitleDate,
+  monthVisibleRange,
   googleCalendar,
 }: UseCalendarEventSyncOptions): void => {
   const { selectedCalendarIds, forceSyncRange } = googleCalendar;
@@ -55,9 +62,31 @@ export const useCalendarEventSync = ({
   const fallbackDayTime = monthTitleDate.getTime();
   const firstVisibleDayTime = visibleDays[0]?.getTime() ?? fallbackDayTime;
   const lastVisibleDayTime = visibleDays.at(-1)?.getTime() ?? fallbackDayTime;
+  const monthVisibleRangeStartTime = monthVisibleRange?.rangeStart.getTime() ?? null;
+  const monthVisibleRangeEndTime = monthVisibleRange?.rangeEnd.getTime() ?? null;
 
   const syncRange = useMemo(() => {
     if (selectedViewMode === "month") {
+      if (
+        monthVisibleRangeStartTime !== null &&
+        monthVisibleRangeEndTime !== null
+      ) {
+        return {
+          rangeStart: startOfDay(
+            subDays(
+              new Date(monthVisibleRangeStartTime),
+              C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS,
+            ),
+          ),
+          rangeEnd: endOfDay(
+            addDays(
+              new Date(monthVisibleRangeEndTime),
+              C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS,
+            ),
+          ),
+        };
+      }
+
       const gridStart = startOfWeek(startOfMonth(monthTitleDate), {
         weekStartsOn: C.WEEK_STARTS_ON_MONDAY,
       });
@@ -66,8 +95,12 @@ export const useCalendarEventSync = ({
       });
 
       return {
-        rangeStart: startOfDay(subDays(gridStart, 7)),
-        rangeEnd: endOfDay(addDays(gridEnd, 7)),
+        rangeStart: startOfDay(
+          subDays(gridStart, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS),
+        ),
+        rangeEnd: endOfDay(
+          addDays(gridEnd, C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS),
+        ),
       };
     }
 
@@ -83,6 +116,8 @@ export const useCalendarEventSync = ({
     firstVisibleDayTime,
     lastVisibleDayTime,
     monthTitleDate,
+    monthVisibleRangeEndTime,
+    monthVisibleRangeStartTime,
     selectedViewMode,
   ]);
 
