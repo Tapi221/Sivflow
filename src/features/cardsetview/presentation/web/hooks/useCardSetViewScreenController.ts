@@ -177,12 +177,16 @@ export const useCardSetViewScreenController = () => {
   ]);
 
   const {
+    cardsForPager,
     currentCardLayoutMode,
     currentDisplayMode,
     isFlipped,
     setCurrentCardFace,
     setCurrentCardLayoutMode,
+    setCurrentIndex,
   } = state;
+
+  const totalCardsForPager = cardsForPager.length;
 
   const handleSaveCurrentDisplayMode = useCallback(async () => {
     if (!cardSetId) {
@@ -210,20 +214,19 @@ export const useCardSetViewScreenController = () => {
 
   const handleJumpToCard = useCallback(
     (nextOneBasedIndex: number) => {
-      const totalCards = state.cardsForPager.length;
-      if (totalCards <= 0) {
+      if (totalCardsForPager <= 0) {
         return;
       }
 
       const nextZeroBasedIndex = clampCardIndex(
         nextOneBasedIndex - 1,
-        totalCards,
+        totalCardsForPager,
       );
 
-      state.setCurrentIndex(nextZeroBasedIndex);
+      setCurrentIndex(nextZeroBasedIndex);
       setScrollToActiveIndexRequestKey((currentKey) => currentKey + 1);
     },
-    [state.cardsForPager.length, state.setCurrentIndex],
+    [setCurrentIndex, totalCardsForPager],
   );
 
   const handleChangeCardLayoutMode = useCallback(
