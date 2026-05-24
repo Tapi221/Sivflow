@@ -24,7 +24,7 @@ type SidebarNavItem = {
   to?: string;
   icon: ReactNode;
   exactPath?: boolean;
-  sectionKey?: "home" | "review" | "library" | "schedule";
+  sectionKey?: "home" | "review" | "library" | "schedule" | "settings";
   onClick?: () => void;
   disabled?: boolean;
   match?: (pathname: string, searchParams: URLSearchParams) => boolean;
@@ -196,7 +196,10 @@ const Sidebar = ({
     {
       id: "settings",
       label: "設定",
+      to: "/settings",
       icon: <SettingIcon className="app-sidebar__nav-icon" />,
+      sectionKey: "settings",
+      exactPath: true,
       onClick: onOpenSettings,
     },
   ];
