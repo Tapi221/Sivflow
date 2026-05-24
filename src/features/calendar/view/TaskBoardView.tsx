@@ -53,9 +53,19 @@ type SectionGroup = {
   tasks: Task[];
 };
 
+type BoardColumnItem = {
+  column: TaskBoardColumn;
+  tasks: Task[];
+  showDivider: boolean;
+  canAddTask: boolean;
+  translateStatusLabel: boolean;
+};
+
 const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-white";
 const TASK_CARD_OVERLAY_CLASS_NAME = "max-w-[calc(100vw-2rem)] will-change-transform";
 const TASK_COLUMN_DIVIDER_CLASS_NAME = "border-l border-[#eeeeee]";
+const TASK_BOARD_SCROLL_CLASS_NAME = `min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 pt-4 pb-0 ${CALENDAR_PANEL_BACKGROUND_CLASS_NAME}`;
+const TASK_BOARD_GRID_BASE_CLASS_NAME = "grid h-full min-h-0 w-full min-w-[960px] gap-0";
 
 const getCategoryConfig = (category: string) => {
   return (
@@ -205,6 +215,46 @@ export const TaskBoardView = ({
     getPreviewTask,
   });
 
+  const boardColumns = useMemo<BoardColumnItem[]>(() => {
+    if (groupMode === "section") {
+      if (sectionGroups.length === 0) {
+        return [{
+          column: { id: "empty", label: "セクション", dotColor: "#8f929c" },
+          tasks: [],
+          showDivider: false,
+          canAddTask: false,
+          translateStatusLabel: false,
+        }];
+      }
+
+      return sectionGroups.map((group, index) => ({
+        column: { id: group.id, label: group.label, dotColor: group.color },
+        tasks: visibleTasksByColumn[group.id] ?? group.tasks,
+        showDivider: index > 0,
+        canAddTask: false,
+        translateStatusLabel: false,
+      }));
+    }
+
+    return TASK_COLUMNS.map((column, index) => ({
+      column: { id: column.id, label: column.label, dotColor: column.dotColor },
+      tasks: visibleTasksByColumn[column.id] ?? [],
+      showDivider: index > 0,
+      canAddTask: true,
+      translateStatusLabel: true,
+    }));
+  }, [groupMode, sectionGroups, visibleTasksByColumn]);
+
+  const boardGridStyle = useMemo<CSSProperties | undefined>(() => {
+    if (groupMode !== "section") {
+      return undefined;
+    }
+
+    return {
+      gridTemplateColumns: `repeat(${Math.max(sectionGroups.length, 1)}, minmax(240px, 25%))`,
+    };
+  }, [groupMode, sectionGroups.length]);
+
   const handleBoardWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
     const horizontalDelta = event.shiftKey ? event.deltaY : event.deltaX;
 
@@ -255,66 +305,29 @@ export const TaskBoardView = ({
     </DragOverlay>
   );
 
-  const boardContent = groupMode === "section" ? (
+  const boardContent = (
     <div
-      className={`min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 pt-4 pb-0 ${CALENDAR_PANEL_BACKGROUND_CLASS_NAME}`}
+      className={TASK_BOARD_SCROLL_CLASS_NAME}
       onWheelCapture={handleBoardWheel}
     >
       <div
-        className="grid h-full min-h-0 w-full min-w-[960px] gap-0"
-        style={{
-          gridTemplateColumns: `repeat(${Math.max(sectionGroups.length, 1)}, minmax(240px, 25%))`,
-        }}
+        className={groupMode === "section" ? TASK_BOARD_GRID_BASE_CLASS_NAME : `${TASK_BOARD_GRID_BASE_CLASS_NAME} grid-cols-4`}
+        style={boardGridStyle}
       >
-        {sectionGroups.length === 0 ? (
+        {boardColumns.map((boardColumn) => (
           <DroppableTaskColumn
-            column={{ id: "empty", label: "セクション", dotColor: "#8f929c" }}
-            tasks={[]}
+            key={boardColumn.column.id}
+            column={boardColumn.column}
+            tasks={boardColumn.tasks}
             activeDropTarget={activeDropTarget}
             activeTaskId={activeTaskId}
+            showDivider={boardColumn.showDivider}
             accountName={accountName}
             accountPhotoUrl={accountPhotoUrl}
+            onAddTask={boardColumn.canAddTask ? onAddTask : undefined}
             onDeleteTask={onDeleteTask}
             onToggleTaskDone={onToggleTaskDone}
-          />
-        ) : (
-          sectionGroups.map((group, index) => (
-            <DroppableTaskColumn
-              key={group.id}
-              column={{ id: group.id, label: group.label, dotColor: group.color }}
-              tasks={visibleTasksByColumn[group.id] ?? group.tasks}
-              activeDropTarget={activeDropTarget}
-              activeTaskId={activeTaskId}
-              showDivider={index > 0}
-              accountName={accountName}
-              accountPhotoUrl={accountPhotoUrl}
-              onDeleteTask={onDeleteTask}
-              onToggleTaskDone={onToggleTaskDone}
-            />
-          ))
-        )}
-      </div>
-    </div>
-  ) : (
-    <div
-      className={`min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 pt-4 pb-0 ${CALENDAR_PANEL_BACKGROUND_CLASS_NAME}`}
-      onWheelCapture={handleBoardWheel}
-    >
-      <div className="grid h-full min-h-0 w-full min-w-[960px] grid-cols-4 gap-0">
-        {TASK_COLUMNS.map((col, index) => (
-          <DroppableTaskColumn
-            key={col.id}
-            column={{ id: col.id, label: col.label, dotColor: col.dotColor }}
-            tasks={visibleTasksByColumn[col.id] ?? []}
-            activeDropTarget={activeDropTarget}
-            activeTaskId={activeTaskId}
-            showDivider={index > 0}
-            accountName={accountName}
-            accountPhotoUrl={accountPhotoUrl}
-            onAddTask={onAddTask}
-            onDeleteTask={onDeleteTask}
-            onToggleTaskDone={onToggleTaskDone}
-            translateStatusLabel
+            translateStatusLabel={boardColumn.translateStatusLabel}
           />
         ))}
       </div>
