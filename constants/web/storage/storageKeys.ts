@@ -6,6 +6,7 @@ export const WEB_STORAGE_KEYS = {
   expandedFolders: "folder_expandedFolders",
   sidebarWidth: "ui.sidebarWidth",
   sidebarOpen: "ui.sidebarOpen",
+  workspaceTabs: "workspace.tabs",
   autoBackups: "app:autoBackups",
   lastBackupAt: "app:lastBackupAt",
 } as const;
