@@ -18,7 +18,7 @@ const MONTH_EVENT_CHIP_HEIGHT_PX = 18.3;
 const MONTH_EVENT_CHIP_GAP_PX = 3;
 const MONTH_EVENT_OVERFLOW_TEXT_HEIGHT_PX = 11;
 const MONTH_EVENT_BOTTOM_PADDING_PX = 0;
-const MONTH_EVENT_CONTENT_TOP_PX = 56;
+const MONTH_EVENT_CONTENT_TOP_PX = 32;
 
 const getMonthEventChipCount = (contentHeight: number) => {
   if (contentHeight <= 0) return 0;
@@ -32,7 +32,7 @@ const getMonthEventChipCount = (contentHeight: number) => {
   );
 };
 
-const getVisibleChipCount = (
+export const getVisibleMonthEventChipCount = (
   eventCount: number,
   monthRowHeight: number,
 ) => {
@@ -129,7 +129,7 @@ const CalendarMonthDayCell = memo(({
 }: CalendarMonthDayCellProps) => {
   const monthAnnotation = getMonthAnnotation(day.date);
 
-  const visibleChipCount = getVisibleChipCount(
+  const visibleChipCount = getVisibleMonthEventChipCount(
     events.length,
     monthRowHeight,
   );
