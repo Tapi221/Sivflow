@@ -11,8 +11,6 @@ import { resolveInkDocument } from "@/components/ink/inkStorage";
 
 import { resolveSideBlocks } from "./flashcardBlocks";
 import {
-  type FlashcardCardLike,
-  type FlashcardMediaLike,
   resolveAnswerAttachmentAudios,
   resolveAnswerAttachmentImages,
   resolveAnswerAttachmentReferences,
@@ -32,22 +30,13 @@ import {
   resolveQuestionCode,
   resolveQuestionText,
 } from "./flashcardDerived";
+import type {
+  FlashcardCardLike,
+  FlashcardDerived,
+  FlashcardMediaLike,
+} from "./types";
 
 import type { CardBlock } from "@/types/domain/card";
-
-export interface FlashcardDerived {
-  cardId: string | null;
-  hasUncertainty: boolean;
-  isBookmarked: boolean;
-  layoutRows: number;
-  activeSide: "question" | "answer";
-  activeImageItems: FlashcardMediaLike[];
-  activeImages: string[];
-  activeAudioUrls: string[];
-  activeReferences: ReturnType<typeof resolveQuestionAttachmentReferences>;
-  activeBlocks: ReturnType<typeof resolveSideBlocks>;
-  activeInkDocument: ReturnType<typeof resolveInkDocument>;
-}
 
 const EMPTY_MEDIA_ITEMS: FlashcardMediaLike[] = [];
 const EMPTY_IMAGE_URLS: string[] = [];
@@ -59,7 +48,7 @@ const EMPTY_BLOCKS: ReturnType<typeof resolveSideBlocks> = [];
 export const useFlashcardDerived = (
   cardData: FlashcardCardLike | null | undefined,
   effectiveIsFlipped: boolean,
-) => {
+): FlashcardDerived => {
   const cardId = cardData ? resolveCardId(cardData) : null;
 
   const hasUncertainty = cardData ? resolveHasUncertainty(cardData) : false;
