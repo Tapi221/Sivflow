@@ -451,18 +451,6 @@ export const TaskListView = ({ tasks, onToggleTaskDone, onRenameTask }: TaskList
                   onDelete={() => {}}
                 />
               ))}
-
-              {isOpen && groupTasks.length === 0 && (
-                <div
-                  className="grid border-b border-[#f5f5f5]"
-                  style={{ gridTemplateColumns: cols.map((c) => `${c.width}px`).join(" ") }}
-                >
-                  <div />
-                  <div className="py-2 pr-3 text-[12px] text-[#c7c7cc] italic">
-                    タスクなし
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}
