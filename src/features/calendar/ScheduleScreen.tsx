@@ -39,7 +39,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
   const [isDayDetailPanelOpen, setIsDayDetailPanelOpen] = useState(true);
-  const [selectedTaskListId, setSelectedTaskListId] = useState<string | null>(null);
+  const [selectedTaskListIds, setSelectedTaskListIds] = useState<string[]>([]);
 
   const viewOptions = useMemo(
     () => [
@@ -90,6 +90,20 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     updateGoogleTask,
     deleteGoogleTask,
   } = pane;
+
+  const handleSelectAllTaskLists = useCallback(() => {
+    setSelectedTaskListIds([]);
+  }, []);
+
+  const handleToggleTaskList = useCallback((taskListId: string) => {
+    setSelectedTaskListIds((ids) => {
+      if (ids.includes(taskListId)) {
+        return ids.filter((id) => id !== taskListId);
+      }
+
+      return [...ids, taskListId];
+    });
+  }, []);
 
   const calendarEvents = useMemo(() => {
     return [...googleCalendarEvents, ...taskCalendarEvents];
@@ -228,7 +242,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
           activeMode={activeMode}
           googleAccounts={googleAccounts}
           isAnyCalendarConnecting={isAnyCalendarConnecting}
-          selectedTaskListId={selectedTaskListId}
+          selectedTaskListIds={selectedTaskListIds}
           onSelectDate={handleSidebarSelectDateAndOpen}
           onPreviousMonth={handleSidebarPreviousMonth}
           onNextMonth={handleSidebarNextMonth}
@@ -237,7 +251,8 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
             void reconnectGoogleAccount(accountId);
           }}
           onToggleCalendar={toggleGoogleCalendar}
-          onSelectTaskList={setSelectedTaskListId}
+          onSelectAllTaskLists={handleSelectAllTaskLists}
+          onToggleTaskList={handleToggleTaskList}
         />
       )}
       trailingPanel={
@@ -256,8 +271,8 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
         <CarvePanel>
           <TaskView
             googleAccounts={googleAccounts}
-            selectedTaskListId={selectedTaskListId}
-            onSelectTaskList={setSelectedTaskListId}
+            selectedTaskListIds={selectedTaskListIds}
+            onSelectAllTaskLists={handleSelectAllTaskLists}
             onRefreshGoogleTasks={refreshGoogleTasks}
             onCreateGoogleTask={createGoogleTask}
             onUpdateGoogleTask={updateGoogleTask}
