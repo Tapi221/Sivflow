@@ -10,6 +10,7 @@ import {
   buildTypographyStyle,
   mergeStyles,
 } from "@/components/card/common/cardSetViewZoom";
+import { TYPOGRAPHY_FONT_SIZE_PX } from "@/styles/tokens/typography";
 
 import { cn } from "@/lib/utils";
 
@@ -57,7 +58,7 @@ export const MarkdownBlockDisplay = ({
 
   const emptyStyle = mergeStyles(
     buildTypographyStyle({
-      fontSizePx: 16,
+      fontSizePx: TYPOGRAPHY_FONT_SIZE_PX.md,
       lineHeightPx: 24,
       zoom,
     }),
