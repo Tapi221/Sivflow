@@ -7,10 +7,10 @@
  */
 import React, { useCallback,useEffect, useRef, useState } from "react";
 
-import {
-  type InkHistoryState,
-  type InkLayerHandle,
-} from "@/components/ink/InkLayer";
+import type {
+  InkHistoryState,
+  InkLayerHandle,
+} from "@/components/ink/types";
 import {
   INK_DOCUMENT_VERSION,
   type InkDocument,
