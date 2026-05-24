@@ -47,7 +47,7 @@ export const TaskTagStrip = () => {
               key={tag.id}
               label={tag.name}
               colorKey={getTagColorKey(tag.color)}
-              className="shrink-0 max-w-[180px]"
+              className="shrink-0 max-w-[180px] text-[11px] font-semibold leading-[1.3] tabular-nums"
             />
           ))}
 
