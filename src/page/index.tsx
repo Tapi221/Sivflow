@@ -6,7 +6,7 @@ const Breadcrumb = () => {
   return (
     <nav
       aria-label="パンくず"
-      className="text-[14px] font-medium leading-[22px] text-[#8e919c]"
+      className="text-[var(--ds-typography-font-size-sm)] font-medium leading-[22px] text-[#8e919c]"
     >
       <span>ホーム</span>
       <span className="mx-2">/</span>
@@ -18,7 +18,7 @@ const Breadcrumb = () => {
 const CalendarSection = () => {
   return (
     <section className="w-full rounded-[8px] bg-[#f5f5f5] px-6 py-6">
-      <h1 className="text-[20px] font-bold leading-[32px] text-[#25272d]">
+      <h1 className="text-[var(--ds-typography-font-size-lg)] font-bold leading-[32px] text-[#25272d]">
         カレンダー
       </h1>
       <div className="mt-4 min-h-[220px]" />
