@@ -1,6 +1,6 @@
-const MARKDOWN_TAB_SIZE_OPTIONS = [2, 4, 8] as const;
+const MARKDOWN_TAB_SIZE_VALUES = [2, 4, 8] as const;
 
-export type MarkdownTabSize = (typeof MARKDOWN_TAB_SIZE_OPTIONS)[number];
+export type MarkdownTabSize = 2 | 4 | 8;
 
 type MarkdownWhitespaceLineKind = "eligible" | "excluded";
 
@@ -108,10 +108,10 @@ const createScannerState = (): MarkdownScannerState => {
 };
 
 export const clampMarkdownTabSize = (input: unknown): MarkdownTabSize => {
-  if (typeof input !== "number" || !Number.isFinite(input)) return 2;
-  if (input <= 2) return 2;
-  if (input <= 4) return 4;
-  return 8;
+  if (typeof input !== "number" || !Number.isFinite(input)) return MARKDOWN_TAB_SIZE_VALUES[0];
+  if (input <= 2) return MARKDOWN_TAB_SIZE_VALUES[0];
+  if (input <= 4) return MARKDOWN_TAB_SIZE_VALUES[1];
+  return MARKDOWN_TAB_SIZE_VALUES[2];
 };
 
 export const normalizeMarkdownLineEndings = (input: string): string => {
