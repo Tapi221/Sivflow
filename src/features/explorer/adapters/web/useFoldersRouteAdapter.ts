@@ -24,7 +24,9 @@ export type FoldersRouteAdapter = {
 };
 
 const isLibraryPath = (pathname: string): boolean =>
-  pathname.toLowerCase() === "/library";
+  pathname.toLowerCase() === "/library" ||
+  pathname.toLowerCase() === "/library/pdf" ||
+  pathname.toLowerCase() === "/library/flashcard";
 
 const toLibraryAwareSearchParams = (
   pathname: string,
@@ -34,6 +36,12 @@ const toLibraryAwareSearchParams = (
 
   if (isLibraryPath(pathname)) {
     next.set("view", "section-list");
+    if (pathname.toLowerCase() === "/library/pdf") {
+      next.set("libraryType", "pdf");
+    }
+    if (pathname.toLowerCase() === "/library/flashcard") {
+      next.set("libraryType", "flashcards");
+    }
   }
 
   return next;
