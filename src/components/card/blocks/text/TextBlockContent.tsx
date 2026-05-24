@@ -8,6 +8,7 @@ import {
   scaleTypographyNumberPx,
 } from "@/components/card/common/cardSetViewZoom";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
+import { TYPOGRAPHY_FONT_SIZE_PX } from "@/styles/tokens/typography";
 
 const normalizeTextBlockContent = (content: string) =>
   String(content ?? "").replace(/\r\n/g, "\n");
@@ -29,7 +30,7 @@ type TextBlockContentProps =
 
 const buildTextBlockPresentation = (zoom?: number) => ({
   textStyle: buildTypographyStyle({
-    fontSizePx: 16,
+    fontSizePx: TYPOGRAPHY_FONT_SIZE_PX.md,
     lineHeightPx: TEXT_BLOCK_LINE_HEIGHT_PX,
     zoom,
   }),
