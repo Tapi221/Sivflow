@@ -112,6 +112,7 @@ export const useCalendarScrollController = ({
   useSyncedHorizontalScroll({
     primaryRef: scrollContainerRef,
     syncedRefs: fixedRowScrollRefs,
+    syncKey: `${activeMode}:${selectedViewMode}`,
   });
 
   const handleTimelineVisibleDate = useCallback((scroller: HTMLDivElement) => {
