@@ -119,9 +119,9 @@ export const GridCalendarDayDetailDesktop = ({ date, events }: Props) => {
                 rounded-md
                 bg-transparent
                 px-1
-                text-[12px]
-                font-semibold
-                leading-none
+                text-[11px]
+                font-medium
+                leading-[1.3]
                 tracking-[-0.01em]
                 tabular-nums
               "
