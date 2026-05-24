@@ -2,7 +2,6 @@ import { Suspense, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import { useHotKeyDesktop } from "@/features/hotkey/useHotKey.desktop";
-import { SettingDialog } from "@/features/settings/SettingDialog.desktop";
 import { Sidebar } from "@/features/sidebar/Sidebar.desktop";
 import { useWorkspaceTabsRouteSync } from "@/features/tab/hooks/useTabsRouteSync";
 
@@ -18,7 +17,6 @@ export const AppLayout = () => {
 
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const mainRef = useRef<HTMLElement | null>(null);
 
@@ -43,22 +41,17 @@ export const AppLayout = () => {
     .join(" ");
 
   return (
-    <>
-      <div className={className}>
-        <Sidebar
-          isClosed={isSidebarClosed}
-          onToggleClosed={() => setIsSidebarClosed((current) => !current)}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-        />
+    <div className={className}>
+      <Sidebar
+        isClosed={isSidebarClosed}
+        onToggleClosed={() => setIsSidebarClosed((current) => !current)}
+      />
 
-        <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
-          <Suspense fallback={null}>
-            <Outlet />
-          </Suspense>
-        </WorkspaceShell>
-      </div>
-
-      <SettingDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
-    </>
+      <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
+        <Suspense fallback={null}>
+          <Outlet />
+        </Suspense>
+      </WorkspaceShell>
+    </div>
   );
 };
