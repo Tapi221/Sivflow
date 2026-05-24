@@ -45,24 +45,24 @@ export type TaskVisualConfig = {
 
 export const TASK_COLUMNS: TaskColumn[] = [
   { id: "not_started", label: "未着手", color: "#8f929c", dotColor: "#d1d5db" },
-  { id: "in_progress", label: "進行中", color: "#185FA5", dotColor: "#185FA5" },
-  { id: "review", label: "レビュー", color: "#d97706", dotColor: "#f59e0b" },
-  { id: "done", label: "完了", color: "#16a34a", dotColor: "#22c55e" },
+  { id: "in_progress", label: "進行中", color: "#4f7ea6", dotColor: "#8fb6d8" },
+  { id: "review", label: "レビュー", color: "#b7793c", dotColor: "#e8b878" },
+  { id: "done", label: "完了", color: "#5f9b73", dotColor: "#a8d7b2" },
 ];
 
 export const PRIORITY_CONFIG: Record<TaskPriority, TaskVisualConfig> = {
-  high: { label: "高", bg: "#fef2f2", text: "#dc2626" },
-  medium: { label: "中", bg: "#fff7ed", text: "#d97706" },
-  low: { label: "低", bg: "#f0f9ff", text: "#0284c7" },
+  high: { label: "高", bg: "#fff5f5", text: "#b77979" },
+  medium: { label: "中", bg: "#fff8f0", text: "#b88955" },
+  low: { label: "低", bg: "#f3f9fd", text: "#5d8fb3" },
 };
 
 export const CATEGORY_CONFIG: Record<string, TaskVisualConfig> = {
-  Programming: { label: "プログラミング", bg: "#f0fdf4", text: "#16a34a" },
-  English: { label: "英語", bg: "#eff6ff", text: "#2563eb" },
-  Math: { label: "数学", bg: "#faf5ff", text: "#7c3aed" },
-  Enjoyment: { label: "趣味", bg: "#fff7ed", text: "#d97706" },
-  Test: { label: "テスト", bg: "#fef2f2", text: "#dc2626" },
-  Manifolia: { label: "Manifolia", bg: "#f0fdf4", text: "#059669" },
-  Sleep: { label: "睡眠", bg: "#f8fafc", text: "#64748b" },
-  ごみ: { label: "ごみ", bg: "#fafaf9", text: "#78716c" },
+  Programming: { label: "プログラミング", bg: "#f3faf5", text: "#4f9a68" },
+  English: { label: "英語", bg: "#f5f8ff", text: "#5f7fba" },
+  Math: { label: "数学", bg: "#faf7ff", text: "#8a72b8" },
+  Enjoyment: { label: "趣味", bg: "#fff8f2", text: "#b88955" },
+  Test: { label: "テスト", bg: "#fff5f5", text: "#b77979" },
+  Manifolia: { label: "Manifolia", bg: "#f3faf7", text: "#4f967f" },
+  Sleep: { label: "睡眠", bg: "#f8fafc", text: "#7a8694" },
+  ごみ: { label: "ごみ", bg: "#fafaf9", text: "#8a8580" },
 };
