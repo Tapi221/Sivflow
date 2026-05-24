@@ -41,7 +41,7 @@ export const ExportMfDeckButton = ({
         deckName: cardSet.name || "manifolia-deck",
       });
 
-      toast.success("MFDeck exported.");
+      toast.success("MFDeck \u3092\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u3057\u307e\u3057\u305f\u3002");
     } catch (error) {
       console.error("[ExportMfDeckButton] export failed", error);
 
@@ -50,7 +50,7 @@ export const ExportMfDeckButton = ({
         return;
       }
 
-      toast.error("MFDeck export failed.");
+      toast.error("MFDeck \u306e\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002");
     } finally {
       setIsExporting(false);
     }
@@ -65,7 +65,7 @@ export const ExportMfDeckButton = ({
       disabled={disabled || isExporting}
       className="rounded-full bg-white/85 shadow-sm backdrop-blur"
     >
-      {isExporting ? "Exporting..." : ".mfdeck export"}
+      {isExporting ? "\u66f8\u304d\u51fa\u3057\u4e2d..." : ".mfdeck \u66f8\u304d\u51fa\u3057"}
     </Button>
   );
 };
