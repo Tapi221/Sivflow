@@ -152,7 +152,7 @@
       42.8571428571% 0,
       57.1428571429% 0,
       71.4285714286% 0,
-      85.7142857143% 0;
+      85.7142857% 0;
   }
 
   .calendar-month-weekday-cell {
@@ -196,7 +196,7 @@
       42.8571428571% 0,
       57.1428571429% 0,
       71.4285714286% 0,
-      85.7142857143% 0;
+      85.7142857% 0;
   }
 
   .calendar-month-week-row::after {
@@ -273,5 +273,23 @@
 
   .calendar-month-row-boundary-resize-handle:focus-visible {
     outline: none;
+  }
+
+  .task-chip-compact-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--app-font-family-numeric), var(--app-font-family-ui);
+    font-feature-settings:
+      "palt" 1,
+      "halt" 1,
+      "kern" 1;
+    font-variant-east-asian: proportional-width;
+  }
+
+  @supports (text-overflow: "...") {
+    .task-chip-compact-ellipsis {
+      text-overflow: "...";
+    }
   }
 }
