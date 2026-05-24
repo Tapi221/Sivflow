@@ -590,6 +590,7 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
 
         <div
           ref={containerRef}
+          data-testid="pdf-scroll-container"
           className="min-h-0 flex-1 overflow-auto overscroll-contain"
           onScroll={handleScroll}
         >
