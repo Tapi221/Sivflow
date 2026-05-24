@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { eventOverlapsRange } from "@/features/calendar/calendarEventRange";
@@ -13,6 +13,7 @@ const CHIPS_TOP_OFFSET_PX = 60;
 const CHIPS_BOTTOM_MARGIN_PX = 4;
 const MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
+const MONTH_WEEKDAY_COUNT = 7;
 
 const getMaxVisibleChips = (rowHeight: number) =>
   Math.max(
@@ -56,6 +57,9 @@ export const CalendarMonthView = ({
 
   const isResizingRef = useRef(false);
   const monthRowHeightRef = useRef(C.readStoredMonthRowHeight());
+  const pointerPositionRef = useRef<{ x: number; y: number } | null>(null);
+  const scrollHoverRafRef = useRef<number | null>(null);
+  const [scrollHoverDayKey, setScrollHoverDayKey] = useState<string | null>(null);
 
   const scroll = useMonthInfiniteScroll({
     currentDate,
@@ -83,6 +87,80 @@ export const CalendarMonthView = ({
       monthRowHeightRef.current = height;
     },
   });
+
+  const updateScrollHoverDay = useCallback(() => {
+    scrollHoverRafRef.current = null;
+
+    const pointerPosition = pointerPositionRef.current;
+    const scroller = scroll.scrollContainerRef.current;
+
+    if (!pointerPosition || !scroller || monthRowHeight <= 0) {
+      setScrollHoverDayKey(null);
+      return;
+    }
+
+    const scrollerRect = scroller.getBoundingClientRect();
+    const isPointerInsideScroller =
+      pointerPosition.x >= scrollerRect.left &&
+      pointerPosition.x <= scrollerRect.right &&
+      pointerPosition.y >= scrollerRect.top &&
+      pointerPosition.y <= scrollerRect.bottom;
+
+    if (!isPointerInsideScroller) {
+      setScrollHoverDayKey(null);
+      return;
+    }
+
+    const gridX = pointerPosition.x - scrollerRect.left;
+    const gridY =
+      pointerPosition.y -
+      scrollerRect.top -
+      C.CALENDAR_WEEKDAY_HEADER_HEIGHT +
+      scroller.scrollTop;
+
+    const columnIndex = Math.floor(
+      (gridX / scrollerRect.width) * MONTH_WEEKDAY_COUNT,
+    );
+    const weekIndex = Math.floor(gridY / monthRowHeight);
+
+    const hoveredDayKey =
+      gridY >= 0 &&
+      columnIndex >= 0 &&
+      columnIndex < MONTH_WEEKDAY_COUNT
+        ? scroll.monthWeeks[weekIndex]?.days[columnIndex]?.key ?? null
+        : null;
+
+    setScrollHoverDayKey(hoveredDayKey);
+  }, [monthRowHeight, scroll.monthWeeks, scroll.scrollContainerRef]);
+
+  const requestScrollHoverUpdate = useCallback(() => {
+    if (scrollHoverRafRef.current !== null) return;
+
+    scrollHoverRafRef.current = requestAnimationFrame(updateScrollHoverDay);
+  }, [updateScrollHoverDay]);
+
+  const handlePointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    pointerPositionRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+    requestScrollHoverUpdate();
+  }, [requestScrollHoverUpdate]);
+
+  const handlePointerLeave = useCallback(() => {
+    pointerPositionRef.current = null;
+
+    if (scrollHoverRafRef.current !== null) {
+      cancelAnimationFrame(scrollHoverRafRef.current);
+      scrollHoverRafRef.current = null;
+    }
+
+    setScrollHoverDayKey(null);
+  }, []);
+
+  const handleMonthScroll = useCallback(() => {
+    requestScrollHoverUpdate();
+  }, [requestScrollHoverUpdate]);
 
   const maxVisibleChips = useMemo(
     () => getMaxVisibleChips(monthRowHeight),
@@ -118,6 +196,9 @@ export const CalendarMonthView = ({
       <div
         ref={scroll.scrollContainerRef}
         className="calendar-month-scroll min-h-0 flex-1 overflow-y-auto bg-white"
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
+        onScroll={handleMonthScroll}
       >
         <GridCalendarMonthDesktop
           today={today}
@@ -126,6 +207,7 @@ export const CalendarMonthView = ({
           monthWeeks={scroll.monthWeeks}
           maxVisibleChips={maxVisibleChips}
           monthRowHeight={monthRowHeight}
+          scrollHoverDayKey={scrollHoverDayKey}
           setWeekRowRef={scroll.setWeekRowRef}
           onSelectDate={onSelectDate}
           handleResizeReset={handleResizeReset}
