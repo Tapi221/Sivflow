@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     VitePWA({
@@ -71,6 +71,12 @@ export default defineConfig({
       "Cross-Origin-Embedder-Policy": "unsafe-none",
     },
   },
+  esbuild:
+    command === "build"
+      ? {
+          drop: ["console", "debugger"],
+        }
+      : undefined,
   build: {
     sourcemap: true,
     chunkSizeWarningLimit: 1000,
@@ -81,4 +87,4 @@ export default defineConfig({
   define: {
     "process.env.FORCE_COLOR": true,
   },
-});
+}));
