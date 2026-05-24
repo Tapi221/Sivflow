@@ -1,10 +1,17 @@
-import type { Task, TaskStatus } from "../../calendar/task/task.types";
-import { isTaskStatus } from "./taskDnd.preview";
+import type { Task } from "../../calendar/task/task.types";
 import type { TaskDragEvent, TaskDropTarget } from "./taskDnd.types";
+
+const toColumnId = (value: unknown): string | null => {
+  return typeof value === "string" && value.length > 0 ? value : null;
+};
+
+const getColumnId = (data: Record<string, unknown> | undefined): string | null => {
+  return toColumnId(data?.columnId ?? data?.status);
+};
 
 export const resolveDropTarget = (
   event: TaskDragEvent,
-  _tasksByStatus: Record<TaskStatus, Task[]>,
+  _tasksByColumn: Record<string, Task[]>,
   activeTaskId: string,
   fallbackTarget: TaskDropTarget | null = null,
 ): TaskDropTarget | null => {
@@ -15,18 +22,18 @@ export const resolveDropTarget = (
   }
 
   const overType = over.data.current?.type;
-  const overStatus = over.data.current?.status;
+  const overColumnId = getColumnId(over.data.current);
 
-  if (overType === "column" && isTaskStatus(overStatus)) {
-    return { status: overStatus };
+  if (overType === "column" && overColumnId) {
+    return { columnId: overColumnId };
   }
 
-  if (overType === "task-slot" && isTaskStatus(overStatus)) {
+  if (overType === "task-slot" && overColumnId) {
     const insertIndex = over.data.current?.insertIndex;
     const overTaskId = over.data.current?.overTaskId;
 
     return {
-      status: overStatus,
+      columnId: overColumnId,
       overTaskId: typeof overTaskId === "string" ? overTaskId : null,
       position: "before",
       insertIndex: typeof insertIndex === "number" ? insertIndex : undefined,
