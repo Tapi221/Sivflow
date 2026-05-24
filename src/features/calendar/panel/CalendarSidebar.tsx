@@ -24,7 +24,7 @@ import type {
   CalendarSelectionRange,
   CalendarSidebarProps,
   GoogleAccountDisplay,
-} from "../scheduleScreen.types";
+} from "../schedulePane.types";
 
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 const DEFAULT_TASK_LIST_COLOR = "#7c8cf8";
@@ -129,8 +129,9 @@ const GoogleAccountSection = ({
   const [isOpen, setIsOpen] = useState(true);
   const accountName = account.name ?? account.email ?? "Google";
   const isTaskMode = mode === "task";
+  const hasTaskListsError = Boolean(account.taskListsError);
   const hasNoTaskLists =
-    !account.isTaskListsLoading && account.taskLists.length === 0;
+    !hasTaskListsError && !account.isTaskListsLoading && account.taskLists.length === 0;
 
   return (
     <div className="mt-2">
@@ -201,6 +202,25 @@ const GoogleAccountSection = ({
             </p>
           )}
 
+          {hasTaskListsError && (
+            <div
+              className={cn(
+                GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
+                "py-1 text-[11px] text-[#c25f5f]",
+              )}
+            >
+              <p>Google ToDo リストを取得できませんでした。</p>
+              <p className="mt-0.5 text-[#9a9a9a]">{account.taskListsError}</p>
+              <button
+                type="button"
+                className="mt-1 rounded-full bg-[#f4f4f4] px-2 py-0.5 text-[11px] font-semibold text-[#5f6574] transition hover:bg-[#ececec] active:scale-[0.97]"
+                onClick={onReconnect}
+              >
+                Google を再連携
+              </button>
+            </div>
+          )}
+
           {hasNoTaskLists && (
             <p
               className={cn(
@@ -212,7 +232,7 @@ const GoogleAccountSection = ({
             </p>
           )}
 
-          {account.taskLists.map((taskList) => (
+          {!hasTaskListsError && account.taskLists.map((taskList) => (
             <div
               key={taskList.id}
               className={GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME}
