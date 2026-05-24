@@ -151,6 +151,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
         photoUrl: account.photoUrl,
         calendars: account.calendars,
         taskLists: taskListState?.taskLists ?? [],
+        taskListsError: taskListState?.error ?? null,
         isTaskListsLoading: taskListState?.isLoading ?? false,
         selectedCalendarIds: account.selectedCalendarIds,
         connectionStatus: account.connectionStatus,
