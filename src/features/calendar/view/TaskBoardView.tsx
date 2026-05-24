@@ -171,6 +171,20 @@ export const TaskBoardView = ({
     onReorderTask(taskId, columnId as TaskStatus, overTaskId, position);
   }, [groupMode, onReorderTask, tasks]);
 
+  const getPreviewTask = useCallback((task: Task, targetColumnId: string) => {
+    if (groupMode === "section") {
+      return {
+        ...task,
+        category: targetColumnId,
+      };
+    }
+
+    return {
+      ...task,
+      status: targetColumnId as TaskStatus,
+    };
+  }, [groupMode]);
+
   const {
     activeDropTarget,
     activeTask,
@@ -188,6 +202,7 @@ export const TaskBoardView = ({
   } = useTaskBoardDnd({
     tasksByColumn: tasksByDndColumn,
     onReorderTask: handleDndReorderTask,
+    getPreviewTask,
   });
 
   const handleBoardWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
