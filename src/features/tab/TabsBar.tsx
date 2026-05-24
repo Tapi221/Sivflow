@@ -465,7 +465,6 @@ export const WorkspaceTabsBar = ({
         <WorkspaceTabDndList
           tabsListRef={tabsListRef}
           orderedTabs={orderedTabs}
-          canReorderTabs={canReorderTabs}
           onReorderTabs={handleReorderTabs}
           className="explorer-tab-list explorer-workspace-tabs-list relative flex min-w-0 items-end gap-0 overflow-visible"
         >
