@@ -6,6 +6,7 @@ import {
   BoardListToggleButton,
   type BoardListViewMode,
 } from "../../../chip/toggle/Toggle.boardlist";
+import type { TaskGroupMode } from "../task/task.types";
 
 type TaskListOption = {
   id: string;
@@ -15,22 +16,31 @@ type TaskListOption = {
 type TaskToolbarProps = {
   filterDate: string | null;
   viewMode: BoardListViewMode;
+  groupMode: TaskGroupMode;
   taskListOptions?: TaskListOption[];
   selectedTaskListIds?: string[];
   onClearFilterDate: () => void;
   onChangeViewMode: (viewMode: BoardListViewMode) => void;
+  onChangeGroupMode: (groupMode: TaskGroupMode) => void;
   onOpenNewTaskModal: () => void;
   onOpenFilter?: () => void;
   onOpenMoreMenu?: () => void;
 };
 
+const GROUP_MODE_LABEL: Record<TaskGroupMode, string> = {
+  status: "状態",
+  section: "セクション",
+};
+
 export const TaskToolbar = ({
   filterDate,
   viewMode,
+  groupMode,
   taskListOptions = [],
   selectedTaskListIds = [],
   onClearFilterDate,
   onChangeViewMode,
+  onChangeGroupMode,
   onOpenNewTaskModal,
   onOpenFilter,
   onOpenMoreMenu,
@@ -50,6 +60,32 @@ export const TaskToolbar = ({
           )}
 
           <FilterChip onClick={onOpenFilter} />
+
+          <div
+            className="inline-flex rounded-lg bg-[#f4f5f7] p-0.5"
+            role="group"
+            aria-label="タスクの表示分類"
+          >
+            {(["status", "section"] as const).map((mode) => {
+              const active = groupMode === mode;
+
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => onChangeGroupMode(mode)}
+                  className={`h-7 rounded-md px-3 text-[12px] font-semibold transition-colors ${
+                    active
+                      ? "bg-white text-[#1c1c1e] shadow-sm"
+                      : "text-[#8f929c] hover:text-[#4b5563]"
+                  }`}
+                >
+                  {GROUP_MODE_LABEL[mode]}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* 右：ビュー切替 + New Task */}
