@@ -69,6 +69,7 @@ export type LocalDBTableMap = {
 };
 
 export type SyncableEntityTable = keyof LocalDBTableMap;
+export type QueryableKeyPath = string | readonly string[];
 
 export interface QueryableCollection<T extends object, TKey = string> {
   and(predicate: (item: T) => boolean): QueryableCollection<T, TKey>;
@@ -110,18 +111,26 @@ export interface QueryableWhereClause<T extends object, TKey = string> {
 export interface QueryableTable<T extends object, TKey = string> {
   count(): Promise<number>;
   get(key: unknown): Promise<T | undefined>;
-  put(record: T): PromiseLike<unknown> | Promise<unknown>;
-  add(record: T): PromiseLike<unknown> | Promise<unknown>;
-  update(key: unknown, changes: unknown): PromiseLike<number> | Promise<number>;
-  delete(key: unknown): PromiseLike<void> | Promise<void>;
-  clear(): PromiseLike<void> | Promise<void>;
+  put(record: T): Promise<unknown>;
+  add(record: T): Promise<unknown>;
+  update(
+    key: unknown,
+    changes:
+      | Partial<T>
+      | Record<string, unknown>
+      | ((item: T, ctx?: { value: T; primKey: TKey }) => boolean | void),
+  ): Promise<number>;
+  delete(key: unknown): Promise<void>;
+  clear(): Promise<void>;
   toArray(): Promise<T[]>;
-  where(index: string | string[]): QueryableWhereClause<T, TKey>;
+  where(index: QueryableKeyPath): QueryableWhereClause<T, TKey>;
   where(criteria: { [key: string]: unknown }): QueryableCollection<T, TKey>;
   filter(predicate: (item: T) => boolean): QueryableCollection<T, TKey>;
-  orderBy(index: string | string[]): QueryableCollection<T, TKey>;
-  bulkDelete?(keys: readonly unknown[]): PromiseLike<void> | Promise<void>;
-  bulkPut?(items: readonly T[]): PromiseLike<unknown> | Promise<unknown>;
+  orderBy(index: QueryableKeyPath): QueryableCollection<T, TKey>;
+  toCollection(): QueryableCollection<T, TKey>;
+  bulkDelete(keys: readonly unknown[]): Promise<void>;
+  bulkPut(items: readonly T[]): Promise<unknown>;
+  bulkGet(keys: readonly unknown[]): Promise<Array<T | undefined>>;
 }
 
 export interface LocalDBSyncApi {
@@ -220,7 +229,22 @@ export interface LocalDBSyncStore extends LocalDBSyncApi {
   transaction<T>(mode: string, ...args: unknown[]): Promise<T>;
   isOpen(): boolean;
   close(): void;
+  delete(): Promise<void>;
 
+  addItem(table: string, item: unknown, skipSync?: boolean): Promise<string>;
+  updateItem(
+    table: string,
+    id: string,
+    changes: Record<string, unknown>,
+    skipSync?: boolean,
+  ): Promise<number>;
+  deleteItem(table: string, id: string): Promise<void>;
+  softDelete(table: string, id: string): Promise<number>;
+  restore(table: string, id: string): Promise<number>;
+  bulkUpsert(table: string, items: unknown[], skipSync?: boolean): Promise<void>;
+
+  getAllCards(): Promise<Card[]>;
+  getAllFolders(): Promise<Folder[]>;
   listCardsByUser(userId: string): Promise<Card[]>;
   listFoldersByUser(userId: string): Promise<Folder[]>;
   listCardSetsByUser(userId: string): Promise<CardSet[]>;
@@ -232,6 +256,10 @@ export interface LocalDBSyncStore extends LocalDBSyncApi {
     table: TTable,
     data: LocalDBTableMap[TTable],
   ): Promise<void>;
+
+  cleanupSyncHistory(): Promise<void>;
+  cleanupSyncErrors(): Promise<void>;
+  setSyncTrigger(callback: () => void): void;
 }
 
 export type LocalDBLike = LocalDBSyncStore;
