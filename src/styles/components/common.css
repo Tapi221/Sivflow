@@ -1,8 +1,6 @@
 @layer components {
   .card-editor-right-pane-font {
-    --font-serif:
-      "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro",
-      "Noto Serif JP", "MS PMincho", serif;
+    --font-serif: var(--app-font-family-content);
   }
 
   button,
