@@ -7,7 +7,8 @@ import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { TASK_TYPO } from "@/styles/tokens/typography";
 
-import type { Task, TaskColumn as TaskColumnType } from "./task.types";
+import { TASK_COLUMNS } from "./task.types";
+import type { Task, TaskStatus } from "./task.types";
 import { TaskCard } from "./TaskCard";
 import { TaskInsertionSlot } from "./TaskInsertionSlot";
 import {
@@ -16,20 +17,28 @@ import {
 } from "../../dnd/task/taskDnd.config";
 import type { TaskDropTarget } from "../../dnd/task/taskDnd.types";
 
+type TaskColumnView = {
+  id: string;
+  label: string;
+  dotColor: string;
+};
+
 type TaskColumnProps = {
-  column: TaskColumnType;
+  column: TaskColumnView;
   tasks: Task[];
   activeDropTarget?: TaskDropTarget | null;
   activeTaskId?: string | null;
   accountName?: string | null;
   accountPhotoUrl?: string | null;
-  onAddTask: (status: string) => void;
+  onAddTask?: (columnId: string) => void;
   onDeleteTask: (id: string) => void;
   onToggleTaskDone: (id: string, done: boolean) => void;
+  translateStatusLabel?: boolean;
 };
 
 type SortableTaskCardProps = {
   task: Task;
+  columnId: string;
   activeTaskId?: string | null;
   isDragActive?: boolean;
   accountName?: string | null;
@@ -49,8 +58,13 @@ const TASK_DRAG_LAYOUT_MOTION_TRANSITION = {
   ease: TASK_LAYOUT_MOTION_EASING,
 };
 
+const isTaskStatus = (value: string): value is TaskStatus => {
+  return TASK_COLUMNS.some((column) => column.id === value);
+};
+
 const SortableTaskCard = ({
   task,
+  columnId,
   activeTaskId,
   isDragActive = false,
   accountName,
@@ -68,6 +82,7 @@ const SortableTaskCard = ({
     data: {
       type: "task",
       task,
+      columnId,
       status: task.status,
     },
   });
@@ -113,6 +128,7 @@ export const TaskColumn = ({
   onAddTask,
   onDeleteTask,
   onToggleTaskDone,
+  translateStatusLabel = false,
 }: TaskColumnProps) => {
   const t = useT();
   const statusLabelMap = {
@@ -121,10 +137,14 @@ export const TaskColumn = ({
     review: t.taskStatusReview,
     done: t.taskStatusDone,
   };
+  const columnLabel =
+    translateStatusLabel && isTaskStatus(column.id)
+      ? statusLabelMap[column.id]
+      : column.label;
   const isDragActive = activeTaskId !== null && activeTaskId !== undefined;
   const nonActiveTasks = tasks.filter((task) => task.id !== activeTaskId);
   const activeInsertIndex =
-    activeDropTarget?.status === column.id ? activeDropTarget.insertIndex : null;
+    activeDropTarget?.columnId === column.id ? activeDropTarget.insertIndex : null;
 
   return (
     <div
@@ -138,27 +158,29 @@ export const TaskColumn = ({
       <div className="mb-3 flex shrink-0 items-center gap-2">
         <TaskStatusDot color={column.dotColor} />
         <span className={TASK_TYPO.columnTitle}>
-          {statusLabelMap[column.id]}
+          {columnLabel}
         </span>
         <span className={cn("ml-0.5 flex h-4 min-w-4 items-center justify-center rounded px-1", TASK_TYPO.count)}>
           {tasks.length}
         </span>
-        <button
-          type="button"
-          className="ml-auto flex h-6 w-6 items-center justify-center rounded-md text-[#9aa3b1] transition-colors hover:bg-[#eceef1] hover:text-[#193a5c]"
-          onClick={() => onAddTask(column.id)}
-          aria-label={t.addTask}
-          title={t.addTask}
-        >
-          <svg viewBox="0 0 14 14" fill="none" className="h-3.5 w-3.5">
-            <path
-              d="M7 2.5v9M2.5 7h9"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
+        {onAddTask ? (
+          <button
+            type="button"
+            className="ml-auto flex h-6 w-6 items-center justify-center rounded-md text-[#9aa3b1] transition-colors hover:bg-[#eceef1] hover:text-[#193a5c]"
+            onClick={() => onAddTask(column.id)}
+            aria-label={t.addTask}
+            title={t.addTask}
+          >
+            <svg viewBox="0 0 14 14" fill="none" className="h-3.5 w-3.5">
+              <path
+                d="M7 2.5v9M2.5 7h9"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        ) : null}
       </div>
 
       <ScrollArea className="-mr-3 min-h-0 flex-1 overscroll-contain">
@@ -174,7 +196,7 @@ export const TaskColumn = ({
             )}
           >
             <TaskInsertionSlot
-              status={column.id}
+              columnId={column.id}
               insertIndex={0}
               overTaskId={nonActiveTasks[0]?.id ?? null}
               isActive={activeInsertIndex === 0}
@@ -191,6 +213,7 @@ export const TaskColumn = ({
                 <div key={task.id}>
                   <SortableTaskCard
                     task={task}
+                    columnId={column.id}
                     activeTaskId={activeTaskId}
                     isDragActive={isDragActive}
                     accountName={accountName}
@@ -200,7 +223,7 @@ export const TaskColumn = ({
                   />
                   {!isActiveTask && (
                     <TaskInsertionSlot
-                      status={column.id}
+                      columnId={column.id}
                       insertIndex={insertIndex}
                       overTaskId={nonActiveTasks[insertIndex]?.id ?? null}
                       isActive={activeInsertIndex === insertIndex}
