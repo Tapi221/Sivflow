@@ -1,13 +1,12 @@
-import { TASK_COLUMNS } from "../../calendar/task/task.types";
-import type { Task, TaskStatus } from "../../calendar/task/task.types";
+import type { Task } from "../../calendar/task/task.types";
 import type { TaskDropTarget } from "./taskDnd.types";
 
 export const findTask = (
-  tasksByStatus: Record<TaskStatus, Task[]>,
+  tasksByColumn: Record<string, Task[]>,
   taskId: string,
 ): Task | null => {
-  for (const column of TASK_COLUMNS) {
-    const task = tasksByStatus[column.id]?.find((item) => item.id === taskId);
+  for (const tasks of Object.values(tasksByColumn)) {
+    const task = tasks.find((item) => item.id === taskId);
 
     if (task) {
       return task;
@@ -15,10 +14,6 @@ export const findTask = (
   }
 
   return null;
-};
-
-export const isTaskStatus = (value: unknown): value is TaskStatus => {
-  return TASK_COLUMNS.some((column) => column.id === value);
 };
 
 export const areDropTargetsEqual = (
@@ -34,7 +29,7 @@ export const areDropTargetsEqual = (
   }
 
   return (
-    left.status === right.status &&
+    left.columnId === right.columnId &&
     left.overTaskId === right.overTaskId &&
     left.position === right.position &&
     left.insertIndex === right.insertIndex
@@ -42,45 +37,55 @@ export const areDropTargetsEqual = (
 };
 
 export const areTaskBoardsEqual = (
-  left: Record<TaskStatus, Task[]>,
-  right: Record<TaskStatus, Task[]>,
+  left: Record<string, Task[]>,
+  right: Record<string, Task[]>,
 ): boolean => {
-  return TASK_COLUMNS.every((column) => {
-    const leftTasks = left[column.id] ?? [];
-    const rightTasks = right[column.id] ?? [];
+  const columnIds = new Set([...Object.keys(left), ...Object.keys(right)]);
+
+  for (const columnId of columnIds) {
+    const leftTasks = left[columnId] ?? [];
+    const rightTasks = right[columnId] ?? [];
 
     if (leftTasks.length !== rightTasks.length) {
       return false;
     }
 
-    return leftTasks.every((task, index) => {
+    const isSameColumn = leftTasks.every((task, index) => {
       const rightTask = rightTasks[index];
-      return rightTask?.id === task.id && rightTask.status === task.status;
+      return (
+        rightTask?.id === task.id &&
+        rightTask.status === task.status &&
+        rightTask.category === task.category
+      );
     });
-  });
+
+    if (!isSameColumn) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 export const createTaskDragPreview = (
-  tasksByStatus: Record<TaskStatus, Task[]>,
+  tasksByColumn: Record<string, Task[]>,
   activeTaskId: string,
   target: TaskDropTarget,
-): Record<TaskStatus, Task[]> => {
-  const activeTask = findTask(tasksByStatus, activeTaskId);
+  getPreviewTask: (task: Task, targetColumnId: string) => Task = (task) => task,
+): Record<string, Task[]> => {
+  const activeTask = findTask(tasksByColumn, activeTaskId);
 
   if (!activeTask) {
-    return tasksByStatus;
+    return tasksByColumn;
   }
 
-  const nextTasksByStatus = TASK_COLUMNS.reduce(
-    (acc, column) => {
-      acc[column.id] = (tasksByStatus[column.id] ?? []).filter(
-        (task) => task.id !== activeTaskId,
-      );
-      return acc;
-    },
-    {} as Record<TaskStatus, Task[]>,
-  );
-  const targetTasks = nextTasksByStatus[target.status] ?? [];
+  const nextTasksByColumn = Object.fromEntries(
+    Object.entries(tasksByColumn).map(([columnId, tasks]) => [
+      columnId,
+      tasks.filter((task) => task.id !== activeTaskId),
+    ]),
+  ) as Record<string, Task[]>;
+  const targetTasks = nextTasksByColumn[target.columnId] ?? [];
   let insertIndex = Math.max(
     0,
     Math.min(target.insertIndex ?? targetTasks.length, targetTasks.length),
@@ -94,16 +99,13 @@ export const createTaskDragPreview = (
     }
   }
 
-  const previewTask =
-    activeTask.status === target.status
-      ? activeTask
-      : { ...activeTask, status: target.status };
+  const previewTask = getPreviewTask(activeTask, target.columnId);
 
-  nextTasksByStatus[target.status] = [
+  nextTasksByColumn[target.columnId] = [
     ...targetTasks.slice(0, insertIndex),
     previewTask,
     ...targetTasks.slice(insertIndex),
   ];
 
-  return nextTasksByStatus;
+  return nextTasksByColumn;
 };
