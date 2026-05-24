@@ -1,36 +1,14 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ComponentType,
-  type CSSProperties,
-  type MouseEvent as ReactMouseEvent,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
+import { useEffect, useRef, useState, type ComponentType, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { PlusLineIcon } from "@/components/icons/icons.schedule";
-import {
-  ClockIcon,
-  HomeIcon,
-  InboxIcon,
-  LibraryIcon,
-  SettingIcon,
-} from "@/components/icons/icons.sidebar";
-import {
-  WorkspaceTabDndItem,
-  WorkspaceTabDndList,
-} from "@/features/dnd/tab/WorkspaceTabDnd";
+import { ClockIcon, HomeIcon, InboxIcon, LibraryIcon, SettingIcon } from "@/components/icons/icons.sidebar";
+import { WorkspaceTabDndItem, WorkspaceTabDndList } from "@/features/dnd/tab/WorkspaceTabDnd";
 import { useWorkspaceTabDnd } from "@/features/dnd/tab/useWorkspaceTabDnd";
 import type { WorkspaceSidebarSection, WorkspaceTab } from "@/features/tab/Tab";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
-import {
-  WORKSPACE_TAB_CONTEXT_MENU_HEIGHT,
-  WORKSPACE_TAB_CONTEXT_MENU_MARGIN,
-  WORKSPACE_TAB_CONTEXT_MENU_WIDTH,
-  WorkspaceTabContextMenu,
-} from "@/features/tab/TabContextMenu";
+import { WORKSPACE_TAB_CONTEXT_MENU_HEIGHT, WORKSPACE_TAB_CONTEXT_MENU_MARGIN, WORKSPACE_TAB_CONTEXT_MENU_WIDTH, WorkspaceTabContextMenu } from "@/chip/rightclickpanel/TabContextMenu";
 import { cn } from "@/lib/utils";
 import { FileText, Layers, X } from "@/ui/icons";
 
