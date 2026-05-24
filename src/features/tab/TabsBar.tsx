@@ -279,17 +279,31 @@ export const WorkspaceTabsBar = ({
   useEffect(() => {
     if (isDraggingTabsRef.current) return;
 
+    let cancelled = false;
     orderedTabsRef.current = tabs;
-    setOrderedTabs(tabs);
+    queueMicrotask(() => {
+      if (cancelled || isDraggingTabsRef.current) return;
+      setOrderedTabs(tabs);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [tabs]);
 
   useEffect(() => {
-    if (!lastOpenedTabId) {
-      setOpeningTabId(null);
-      return;
-    }
+    let cancelled = false;
 
-    setOpeningTabId(lastOpenedTabId);
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setOpeningTabId(lastOpenedTabId ?? null);
+    });
+
+    if (!lastOpenedTabId) {
+      return () => {
+        cancelled = true;
+      };
+    }
 
     const timeoutId = window.setTimeout(() => {
       setOpeningTabId((currentTabId) =>
@@ -297,7 +311,10 @@ export const WorkspaceTabsBar = ({
       );
     }, TAB_OPEN_ANIMATION_MS);
 
-    return () => window.clearTimeout(timeoutId);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
   }, [lastOpenedTabId]);
 
   useEffect(() => {
@@ -378,73 +395,73 @@ export const WorkspaceTabsBar = ({
 
   const contextMenuActions = contextMenuTab
     ? [
-        {
-          id: "close-current",
-          label: "閉じる",
-          disabled: !contextMenuTab.isClosable,
-          onSelect: () => {
-            setContextMenu(null);
+      {
+        id: "close-current",
+        label: "閉じる",
+        disabled: !contextMenuTab.isClosable,
+        onSelect: () => {
+          setContextMenu(null);
 
-            const nextTab =
-              contextMenuTab.id === activeTabId
-                ? resolveNextTabOnClose(orderedTabs, contextMenuTab.id)
-                : null;
+          const nextTab =
+            contextMenuTab.id === activeTabId
+              ? resolveNextTabOnClose(orderedTabs, contextMenuTab.id)
+              : null;
 
-            closeTab(contextMenuTab.id);
+          closeTab(contextMenuTab.id);
 
-            if (nextTab) {
-              navigate(resolveWorkspaceTabRoute(nextTab));
-            }
-          },
+          if (nextTab) {
+            navigate(resolveWorkspaceTabRoute(nextTab));
+          }
         },
-        {
-          id: "close-others",
-          label: "他を閉じる",
-          disabled:
+      },
+      {
+        id: "close-others",
+        label: "他を閉じる",
+        disabled:
+          orderedTabs.filter(
+            (tab) => tab.id !== contextMenuTab.id && tab.isClosable,
+          ).length === 0,
+        onSelect: () => {
+          setContextMenu(null);
+          selectTab(contextMenuTab.id);
+          closeWorkspaceTabs(
             orderedTabs.filter(
               (tab) => tab.id !== contextMenuTab.id && tab.isClosable,
-            ).length === 0,
-          onSelect: () => {
-            setContextMenu(null);
-            selectTab(contextMenuTab.id);
-            closeWorkspaceTabs(
-              orderedTabs.filter(
-                (tab) => tab.id !== contextMenuTab.id && tab.isClosable,
-              ),
-            );
-            navigate(resolveWorkspaceTabRoute(contextMenuTab));
-          },
+            ),
+          );
+          navigate(resolveWorkspaceTabRoute(contextMenuTab));
         },
-        {
-          id: "close-after",
-          label: "このタブ以降を閉じる",
-          disabled:
-            orderedTabs
-              .slice(
-                orderedTabs.findIndex((tab) => tab.id === contextMenuTab.id),
-              )
-              .filter((tab) => tab.isClosable).length === 0,
-          onSelect: () => {
-            setContextMenu(null);
-            const contextMenuTabIndex = orderedTabs.findIndex(
-              (tab) => tab.id === contextMenuTab.id,
-            );
-            const tabsToClose = orderedTabs
-              .slice(Math.max(0, contextMenuTabIndex))
-              .filter((tab) => tab.isClosable);
-            closeWorkspaceTabs(tabsToClose);
-          },
+      },
+      {
+        id: "close-after",
+        label: "このタブ以降を閉じる",
+        disabled:
+          orderedTabs
+            .slice(
+              orderedTabs.findIndex((tab) => tab.id === contextMenuTab.id),
+            )
+            .filter((tab) => tab.isClosable).length === 0,
+        onSelect: () => {
+          setContextMenu(null);
+          const contextMenuTabIndex = orderedTabs.findIndex(
+            (tab) => tab.id === contextMenuTab.id,
+          );
+          const tabsToClose = orderedTabs
+            .slice(Math.max(0, contextMenuTabIndex))
+            .filter((tab) => tab.isClosable);
+          closeWorkspaceTabs(tabsToClose);
         },
-        {
-          id: "close-all",
-          label: "すべてを閉じる",
-          disabled: orderedTabs.every((tab) => !tab.isClosable),
-          onSelect: () => {
-            setContextMenu(null);
-            closeWorkspaceTabs(orderedTabs.filter((tab) => tab.isClosable));
-          },
+      },
+      {
+        id: "close-all",
+        label: "すべてを閉じる",
+        disabled: orderedTabs.every((tab) => !tab.isClosable),
+        onSelect: () => {
+          setContextMenu(null);
+          closeWorkspaceTabs(orderedTabs.filter((tab) => tab.isClosable));
         },
-      ]
+      },
+    ]
     : [];
 
   const contextMenuElement = contextMenu ? (
