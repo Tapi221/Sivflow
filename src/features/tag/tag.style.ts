@@ -19,7 +19,7 @@ export const getTagColorSwatchStyle = (input?: string): CSSProperties => {
   const palette = getPalette(input);
 
   return {
-    backgroundColor: palette.swatch,
+    backgroundColor: `color-mix(in srgb, ${palette.swatch} 42%, ${palette.bg})`,
     borderColor: palette.border,
     color: palette.fg,
   };
