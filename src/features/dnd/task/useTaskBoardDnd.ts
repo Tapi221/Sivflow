@@ -108,14 +108,16 @@ export const useTaskBoardDnd = ({
   const handleDragEnd = (event: DragEndEvent) => {
     const activeId = String(event.active.id);
     const latestDropTarget = latestDropTargetRef.current;
-    const target = event.over
-      ? latestDropTarget ?? resolveDropTarget(
+    let target: TaskDropTarget | null = null;
+
+    if (event.over) {
+      target = latestDropTarget ?? resolveDropTarget(
         event,
         tasksByStatus,
         activeId,
         latestDropTarget,
-      )
-      : null;
+      );
+    }
 
     resetDragState();
 
