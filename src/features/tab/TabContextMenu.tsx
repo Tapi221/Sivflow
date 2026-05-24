@@ -31,6 +31,11 @@ const WORKSPACE_TAB_CONTEXT_MENU_DROPDOWN_STYLE: CSSProperties = {
   width: "max-content",
   maxWidth: 220,
   padding: 4,
+  overflow: "hidden",
+  background: "#ffffff",
+  border: "1px solid rgba(0, 0, 0, 0.1)",
+  borderRadius: 8,
+  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.16)",
   fontFamily: WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY,
 };
 
@@ -49,6 +54,7 @@ const WORKSPACE_TAB_CONTEXT_MENU_ITEM_STYLE: CSSProperties = {
   minHeight: 44,
   paddingBlock: 0,
   paddingInline: 18,
+  borderRadius: 4,
   whiteSpace: "nowrap",
 };
 
@@ -66,12 +72,24 @@ export const WorkspaceTabContextMenu = ({
         style={noDragStyle}
         className="bn-container bn-mantine fixed left-0 top-0 z-[1000]"
       >
+        <style>{`
+          .workspace-tab-context-menu-item:hover:not([data-disabled]),
+          .workspace-tab-context-menu-item[data-hovered]:not([data-disabled]) {
+            background: #eeeeee;
+          }
+
+          .workspace-tab-context-menu-item[data-disabled],
+          .workspace-tab-context-menu-item[data-disabled] .workspace-tab-context-menu-label {
+            color: #b8b8b8;
+            opacity: 1;
+          }
+        `}</style>
         <Menu
           opened
           withinPortal={false}
           position="bottom-start"
           offset={0}
-          shadow="md"
+          shadow="none"
           styles={{
             dropdown: WORKSPACE_TAB_CONTEXT_MENU_DROPDOWN_STYLE,
             item: WORKSPACE_TAB_CONTEXT_MENU_ITEM_STYLE,
@@ -99,10 +117,14 @@ export const WorkspaceTabContextMenu = ({
             />
           </Menu.Target>
 
-          <Menu.Dropdown style={noDragStyle}>
+          <Menu.Dropdown
+            className="workspace-tab-context-menu-dropdown"
+            style={noDragStyle}
+          >
             {actions.map((action) => (
               <Menu.Item
                 key={action.id}
+                className="workspace-tab-context-menu-item"
                 disabled={action.disabled}
                 style={WORKSPACE_TAB_CONTEXT_MENU_ITEM_STYLE}
                 onClick={(event) => {
@@ -111,7 +133,10 @@ export const WorkspaceTabContextMenu = ({
                   action.onSelect();
                 }}
               >
-                <span style={WORKSPACE_TAB_CONTEXT_MENU_TEXT_STYLE}>
+                <span
+                  className="workspace-tab-context-menu-label"
+                  style={WORKSPACE_TAB_CONTEXT_MENU_TEXT_STYLE}
+                >
                   {action.label}
                 </span>
               </Menu.Item>
