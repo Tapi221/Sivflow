@@ -57,7 +57,7 @@ export const PdfLibraryWorkspaceToolbar = ({
   };
 
   return (
-    <div className="library-workspace-toolbar flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center justify-between overflow-visible bg-white pr-[var(--workspace-content-gutter)]">
+    <div className="library-workspace-toolbar relative z-30 flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center justify-between overflow-visible bg-white pr-[var(--workspace-content-gutter)]">
       <div className="flex items-center gap-3">
         <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5">
           {LIBRARY_TYPE_TABS.map((tab, index) => {
