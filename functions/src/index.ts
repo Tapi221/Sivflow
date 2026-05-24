@@ -52,14 +52,23 @@ const encryptRefreshToken = (refreshToken: string): string => {
 };
 
 const decryptRefreshToken = (payload: string): string => {
-  const raw = Buffer.from(payload, "base64");
-  if (raw.length < 29) throw new HttpsError("internal", "Invalid encrypted refresh token.");
-  const iv = raw.subarray(0, 12);
-  const authTag = raw.subarray(12, 28);
-  const encrypted = raw.subarray(28);
-  const decipher = crypto.createDecipheriv("aes-256-gcm", getKey(), iv);
-  decipher.setAuthTag(authTag);
-  return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString("utf8");
+  try {
+    const raw = Buffer.from(payload, "base64");
+    if (raw.length < 29) {
+      throw new HttpsError("failed-precondition", "Invalid encrypted refresh token. Reconnect Google Calendar.");
+    }
+    const iv = raw.subarray(0, 12);
+    const authTag = raw.subarray(12, 28);
+    const encrypted = raw.subarray(28);
+    const decipher = crypto.createDecipheriv("aes-256-gcm", getKey(), iv);
+    decipher.setAuthTag(authTag);
+    return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString("utf8");
+  } catch (error) {
+    if (error instanceof HttpsError) throw error;
+
+    console.error("[GoogleCalendarOAuth] stored refresh token decrypt failed", { error });
+    throw new HttpsError("failed-precondition", "Stored refresh token decrypt failed. Reconnect Google Calendar.");
+  }
 };
 
 const exchangeToken = async (
