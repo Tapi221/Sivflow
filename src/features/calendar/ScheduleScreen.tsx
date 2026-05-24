@@ -88,6 +88,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     refreshGoogleTasks,
     createGoogleTask,
     updateGoogleTask,
+    deleteGoogleTask,
   } = pane;
 
   const calendarEvents = useMemo(() => {
@@ -260,6 +261,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
             onRefreshGoogleTasks={refreshGoogleTasks}
             onCreateGoogleTask={createGoogleTask}
             onUpdateGoogleTask={updateGoogleTask}
+            onDeleteGoogleTask={deleteGoogleTask}
           />
         </CarvePanel>
       ) : isMonthCalendarView ? (
