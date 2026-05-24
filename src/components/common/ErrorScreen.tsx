@@ -10,15 +10,13 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  error: Error | null;
 }
 
 interface ErrorScreenProps {
-  error: Error | null;
   onReset: () => void;
 }
 
-export const ErrorScreen = ({ error, onReset }: ErrorScreenProps) => {
+export const ErrorScreen = ({ onReset }: ErrorScreenProps) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <Card className="max-w-md w-full rounded-[32px] border-none shadow-xl overflow-hidden">
@@ -31,17 +29,10 @@ export const ErrorScreen = ({ error, onReset }: ErrorScreenProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-8 pt-6">
-          <p className="text-sm text-slate-600 text-center mb-6 leading-relaxed">
+          <p className="text-sm text-slate-600 text-center mb-8 leading-relaxed">
             アプリケーションの実行中に予期せぬエラーが発生しました。
-            データの不整合またはメモリ不足の可能性があります。
+            詳細は開発者コンソールに出力されています。
           </p>
-
-          <div className="bg-slate-50 p-4 rounded-2xl mb-8 overflow-auto max-h-32">
-            <pre className="text-[10px] text-slate-500 font-serif">
-              {error?.message || "Unknown error"}
-              {error?.stack && `\n\n${error.stack}`}
-            </pre>
-          </div>
 
           <div className="space-y-3">
             <Button
@@ -68,11 +59,10 @@ export const ErrorScreen = ({ error, onReset }: ErrorScreenProps) => {
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
-    error: null,
   };
 
-  public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+  public static getDerivedStateFromError(): State {
+    return { hasError: true };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -85,12 +75,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
-      return (
-        <ErrorScreen
-          error={this.state.error}
-          onReset={this.handleReset}
-        />
-      );
+      return <ErrorScreen onReset={this.handleReset} />;
     }
 
     return this.props.children;
