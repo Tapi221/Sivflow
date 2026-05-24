@@ -201,7 +201,7 @@ export const useCardEditorPaneController = ({
       toggleMetaOpen,
       metaPanel: metaPanelActions,
     }),
-    [metaPanelActions],
+    [metaPanelActions, toggleMetaOpen],
   );
 
   return {
