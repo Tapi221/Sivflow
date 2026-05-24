@@ -81,6 +81,11 @@ type EventsAction =
     rangeEnd: Date;
     events: GoogleCalendarEvent[];
   }
+  | {
+    type: "APPLY_CALENDAR_COLORS";
+    accountId: string;
+    calendars: GoogleCalendarListItem[];
+  }
   | { type: "CLEAR_ACCOUNT"; accountId: string };
 
 const overlapsRange = (
@@ -265,6 +270,40 @@ const reduceEvents = (
       return next;
     }
 
+    case "APPLY_CALENDAR_COLORS": {
+      const bucket = state.get(action.accountId);
+      if (!bucket) return state;
+
+      const colorByCalendarId = new Map(
+        action.calendars
+          .filter((calendar) => Boolean(calendar.backgroundColor))
+          .map((calendar) => [calendar.id, calendar.backgroundColor!]),
+      );
+
+      if (colorByCalendarId.size === 0) return state;
+
+      const newBucket = new Map<string, GoogleCalendarEvent>();
+      let hasChanged = false;
+
+      for (const [eventId, event] of bucket) {
+        const color = colorByCalendarId.get(event.calendarId);
+
+        if (color && color !== event.accentColor) {
+          newBucket.set(eventId, { ...event, accentColor: color });
+          hasChanged = true;
+          continue;
+        }
+
+        newBucket.set(eventId, event);
+      }
+
+      if (!hasChanged) return state;
+
+      const next = new Map(state);
+      next.set(action.accountId, newBucket);
+      return next;
+    }
+
     case "CLEAR_ACCOUNT": {
       const next = new Map(state);
 
@@ -279,9 +318,10 @@ const reduceEvents = (
 };
 
 const toCachedCalendars = (calendars: GoogleCalendarListItem[]) =>
-  calendars.map(({ id, summary, backgroundColor }) => ({
+  calendars.map(({ id, summary, summaryOverride, backgroundColor }) => ({
     id,
     summary,
+    summaryOverride,
     backgroundColor,
   }));
 
@@ -363,6 +403,7 @@ const logGoogleCalendarConnectionError = (
 };
 
 const useServerStoredTokens = isServerStoredGoogleOAuthEnabled();
+const CALENDAR_LIST_REFRESH_INTERVAL_MS = 30_000;
 
 const requestSilentAccessToken = async () => {
   const { auth } = await import("@/services/firebase");
@@ -415,12 +456,158 @@ export const useMultiAccountGoogleCalendar = () => {
   );
 
   const managerRef = useRef<GoogleCalendarEngineManager | null>(null);
-
   const accountsRef = useRef(accounts);
+  const refreshingCalendarListIdsRef = useRef(new Set<string>());
 
   useEffect(() => {
     accountsRef.current = accounts;
   }, [accounts]);
+
+  const refreshAccountCalendarList = useCallback(async (accountId: string) => {
+    if (refreshingCalendarListIdsRef.current.has(accountId)) return;
+
+    const account = accountsRef.current.find((x) => x.id === accountId);
+
+    if (!account || account.connectionStatus !== "connected") return;
+
+    refreshingCalendarListIdsRef.current.add(accountId);
+
+    const applyTokenResult = (
+      result: Awaited<ReturnType<typeof requestCalendarAccessToken>>,
+    ) => {
+      const refreshToken = useServerStoredTokens
+        ? null
+        : result.refreshToken ?? account.refreshToken ?? null;
+
+      updateStoredAccountToken(
+        accountId,
+        result.accessToken,
+        refreshToken,
+        {
+          name: result.accountName,
+          photoUrl: result.accountPhotoUrl,
+        },
+        result.expiresInSeconds,
+      );
+
+      accountsRef.current = accountsRef.current.map((current) =>
+        current.id === accountId
+          ? {
+            ...current,
+            accessToken: result.accessToken,
+            refreshToken,
+            name: result.accountName ?? current.name,
+            photoUrl: result.accountPhotoUrl ?? current.photoUrl,
+            connectionStatus: "connected",
+            syncState:
+                current.syncState === "needsReconnect" ? "idle" : current.syncState,
+            error: null,
+          }
+          : current,
+      );
+
+      dispatchAccounts({
+        type: "SET_TOKEN",
+        id: accountId,
+        accessToken: result.accessToken,
+        refreshToken,
+        accountName: result.accountName,
+        accountPhotoUrl: result.accountPhotoUrl,
+      });
+
+      return result.accessToken;
+    };
+
+    const recoverAccessToken = async (): Promise<string> => {
+      const latestAccount = accountsRef.current.find((x) => x.id === accountId) ?? account;
+      const result = useServerStoredTokens
+        ? await getServerStoredGoogleCalendarAccessToken({ accountId })
+        : latestAccount.refreshToken
+          ? await refreshCalendarAccessToken({
+            refreshToken: latestAccount.refreshToken,
+          })
+          : await requestSilentAccessToken();
+
+      return applyTokenResult(result);
+    };
+
+    try {
+      let accessToken = account.accessToken;
+      let list: GoogleCalendarListItem[];
+
+      if (!accessToken) {
+        accessToken = await recoverAccessToken();
+        list = await fetchCalendarList(accessToken);
+      } else {
+        try {
+          list = await fetchCalendarList(accessToken);
+        } catch (error) {
+          if (!isReconnectRequiredError(error)) throw error;
+          accessToken = await recoverAccessToken();
+          list = await fetchCalendarList(accessToken);
+        }
+      }
+
+      const latestAccount = accountsRef.current.find((x) => x.id === accountId) ?? account;
+      const ids = resolveSelectedCalendarIds(
+        Array.from(latestAccount.selectedCalendarIds),
+        list,
+      );
+      const stored = readStoredAccounts().find((storedAccount) => storedAccount.id === accountId);
+
+      if (stored) {
+        upsertStoredAccount({
+          ...stored,
+          accessToken,
+          refreshToken: latestAccount.refreshToken,
+          selectedCalendarIds: ids,
+          cachedCalendars: toCachedCalendars(list),
+        });
+      }
+
+      accountsRef.current = accountsRef.current.map((current) =>
+        current.id === accountId
+          ? {
+            ...current,
+            accessToken,
+            calendars: list,
+            selectedCalendarIds: new Set(ids),
+            error: null,
+          }
+          : current,
+      );
+
+      dispatchAccounts({
+        type: "SET_CALENDARS",
+        id: accountId,
+        calendars: list,
+      });
+
+      dispatchAccounts({
+        type: "SET_CALENDAR_IDS",
+        id: accountId,
+        ids,
+      });
+
+      dispatchAccounts({
+        type: "SET_ERROR",
+        id: accountId,
+        error: null,
+      });
+    } catch (error) {
+      console.warn("[GoogleCalendar] calendar list refresh failed", error);
+
+      if (isReconnectRequiredError(error)) {
+        dispatchAccounts({
+          type: "NEEDS_RECONNECT",
+          id: accountId,
+          error: toErrorMessage(error),
+        });
+      }
+    } finally {
+      refreshingCalendarListIdsRef.current.delete(accountId);
+    }
+  }, []);
 
   useEffect(() => {
     if (managerRef.current) return;
@@ -782,6 +969,12 @@ export const useMultiAccountGoogleCalendar = () => {
 
   useEffect(() => {
     for (const account of accounts) {
+      dispatchEvents({
+        type: "APPLY_CALENDAR_COLORS",
+        accountId: account.id,
+        calendars: account.calendars,
+      });
+
       if (!account.accessToken || account.selectedCalendarIds.size === 0) {
         managerRef.current?.stop(account.id);
         continue;
@@ -794,6 +987,65 @@ export const useMultiAccountGoogleCalendar = () => {
       });
     }
   }, [accounts]);
+
+  const refreshableAccountKey = useMemo(
+    () =>
+      accounts
+        .map((account) =>
+          [
+            account.id,
+            account.accessToken ?? "",
+            account.refreshToken ?? "",
+            account.connectionStatus,
+          ].join("\t"),
+        )
+        .join("\n"),
+    [accounts],
+  );
+
+  const refreshableAccountIds = useMemo(
+    () =>
+      accounts
+        .filter((account) => account.connectionStatus === "connected")
+        .map((account) => account.id),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [refreshableAccountKey],
+  );
+
+  useEffect(() => {
+    if (refreshableAccountIds.length === 0) return;
+    if (typeof window === "undefined" || typeof document === "undefined") return;
+
+    const refreshAllCalendarLists = () => {
+      if (document.visibilityState !== "visible") return;
+
+      for (const accountId of refreshableAccountIds) {
+        void refreshAccountCalendarList(accountId);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refreshAllCalendarLists();
+      }
+    };
+
+    const intervalId = window.setInterval(
+      refreshAllCalendarLists,
+      CALENDAR_LIST_REFRESH_INTERVAL_MS,
+    );
+
+    window.addEventListener("focus", refreshAllCalendarLists);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    refreshAllCalendarLists();
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", refreshAllCalendarLists);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [refreshAccountCalendarList, refreshableAccountIds]);
 
   useEffect(() => {
     return () => managerRef.current?.stopAll();
