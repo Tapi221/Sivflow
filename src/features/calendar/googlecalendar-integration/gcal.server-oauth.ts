@@ -33,6 +33,12 @@ type RequestCalendarAccessToken = (
   silent?: boolean,
 ) => Promise<GoogleCalendarAccess>;
 
+type GoogleOAuthReconnectDiagnosis = {
+  cause: string;
+  reconnectRequired: boolean;
+  action: string;
+};
+
 const exchangeGoogleCalendarCodeCallable = httpsCallable<
   ExchangeGoogleCalendarCodeInput,
   ServerGoogleCalendarAccess
@@ -62,6 +68,133 @@ const normalizeCallableErrorCode = (error: unknown): string | undefined => {
   }
 
   return undefined;
+};
+
+const toErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  return String(error);
+};
+
+const maskAccountId = (accountId?: string): string | undefined => {
+  if (!accountId) return undefined;
+
+  const [localPart, domain] = accountId.split("@", 2);
+  if (!domain) return accountId;
+
+  return `${localPart.slice(0, 2)}***@${domain}`;
+};
+
+const diagnoseGoogleOAuthReconnectCause = (
+  error: unknown,
+): GoogleOAuthReconnectDiagnosis => {
+  const code = normalizeCallableErrorCode(error);
+  const message = toErrorMessage(error);
+  const normalizedMessage = message.toLowerCase();
+
+  if (code === "unauthenticated" || normalizedMessage.includes("firebase authentication")) {
+    return {
+      cause: "Firebase 未認証のため Cloud Functions で refresh token を取得できません。",
+      reconnectRequired: true,
+      action: "Firebase Auth のログイン状態を復旧してから Google 連携を再試行してください。",
+    };
+  }
+
+  if (code === "not-found") {
+    return {
+      cause: "Firestore に保存済み Google OAuth アカウントが見つかりません。",
+      reconnectRequired: true,
+      action: "users/{uid}/googleCalendarAccounts/{accountId} の存在を確認し、無ければ明示再連携してください。",
+    };
+  }
+
+  if (
+    normalizedMessage.includes("stored refresh token is missing") ||
+    normalizedMessage.includes("refresh token missing") ||
+    normalizedMessage.includes("no stored refresh token")
+  ) {
+    return {
+      cause: "保存済み refresh token が欠落しています。",
+      reconnectRequired: true,
+      action: "Firestore の encryptedRefreshToken を確認し、無ければ明示再連携してください。",
+    };
+  }
+
+  if (normalizedMessage.includes("invalid_grant")) {
+    return {
+      cause: "Google 側で refresh token が無効化されています。権限取り消し、期限切れ、または認可コードの再利用が考えられます。",
+      reconnectRequired: true,
+      action: "Google アカウント側のアクセス許可を確認し、明示再連携してください。",
+    };
+  }
+
+  if (
+    normalizedMessage.includes("invalid_client") ||
+    normalizedMessage.includes("unauthorized_client")
+  ) {
+    return {
+      cause: "OAuth client ID / client secret が一致していません。",
+      reconnectRequired: true,
+      action: "Firebase Functions secrets と Google Cloud Console の OAuth Web client 設定を確認してください。",
+    };
+  }
+
+  if (
+    normalizedMessage.includes("encryption") ||
+    normalizedMessage.includes("decrypt") ||
+    normalizedMessage.includes("invalid encrypted refresh token") ||
+    normalizedMessage.includes("unable to authenticate data") ||
+    normalizedMessage.includes("google_oauth_token_encryption_key")
+  ) {
+    return {
+      cause: "暗号化キー不一致、または保存済み refresh token の暗号化データ破損が疑われます。",
+      reconnectRequired: true,
+      action: "GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY と Firestore の encryptedRefreshToken を確認し、復旧できなければ明示再連携してください。",
+    };
+  }
+
+  if (code === "permission-denied") {
+    return {
+      cause: "Cloud Functions / Firestore の権限不足で refresh token を取得できません。",
+      reconnectRequired: true,
+      action: "Firebase Auth、Functions、Firestore ルール/権限を確認してください。",
+    };
+  }
+
+  if (isServerInfrastructureError(error)) {
+    return {
+      cause: "Cloud Functions の一時障害または制限により refresh token 更新に失敗しました。",
+      reconnectRequired: false,
+      action: "一時的な silent token fallback または後続リトライで復旧できる可能性があります。",
+    };
+  }
+
+  return {
+    cause: "Google OAuth refresh token 更新に失敗しました。原因は未分類です。",
+    reconnectRequired: true,
+    action: "コンソールの元エラー、Functions logs、Firestore の保存状態を確認してください。",
+  };
+};
+
+const logGoogleOAuthReconnectCause = ({
+  context,
+  error,
+  accountId,
+}: {
+  context: string;
+  error: unknown;
+  accountId?: string;
+}): void => {
+  const diagnosis = diagnoseGoogleOAuthReconnectCause(error);
+
+  console.warn("[GoogleCalendarOAuth] reconnect diagnosis", {
+    context,
+    accountId: maskAccountId(accountId),
+    code: normalizeCallableErrorCode(error),
+    cause: diagnosis.cause,
+    reconnectRequired: diagnosis.reconnectRequired,
+    action: diagnosis.action,
+    error,
+  });
 };
 
 const isServerInfrastructureError = (error: unknown): boolean => {
@@ -120,23 +253,37 @@ export const isServerStoredGoogleOAuthEnabled = (): boolean => {
 export const exchangeGoogleCalendarCode = async (
   input: ExchangeGoogleCalendarCodeInput,
 ): Promise<ServerGoogleCalendarAccess> => {
-  await waitForCallableAuth();
+  try {
+    await waitForCallableAuth();
 
-  // 初回接続/明示再接続では必ずサーバーに refresh token を保存させる。
-  // ここで access token だけにフォールバックすると、期限切れ後に再連携が必要になる。
-  const result = await exchangeGoogleCalendarCodeCallable(input);
-  return result.data;
+    // 初回接続/明示再接続では必ずサーバーに refresh token を保存させる。
+    // ここで access token だけにフォールバックすると、期限切れ後に再連携が必要になる。
+    const result = await exchangeGoogleCalendarCodeCallable(input);
+    return result.data;
+  } catch (error) {
+    logGoogleOAuthReconnectCause({
+      context: "exchangeGoogleCalendarCode",
+      error,
+    });
+    throw error;
+  }
 };
 
 export const getServerStoredGoogleCalendarAccessToken = async (
   input: GetGoogleCalendarAccessTokenInput,
 ): Promise<ServerGoogleCalendarAccess> => {
-  await waitForCallableAuth();
-
   try {
+    await waitForCallableAuth();
+
     const result = await getGoogleCalendarAccessTokenCallable(input);
     return result.data;
   } catch (error) {
+    logGoogleOAuthReconnectCause({
+      context: "getServerStoredGoogleCalendarAccessToken",
+      error,
+      accountId: input.accountId,
+    });
+
     if (!shouldFallbackToSilentBrowserToken(error)) {
       throw error;
     }
@@ -154,6 +301,11 @@ export const getServerStoredGoogleCalendarAccessToken = async (
         refreshTokenStored: false,
       };
     } catch (fallbackError) {
+      logGoogleOAuthReconnectCause({
+        context: "silentBrowserTokenFallback",
+        error: fallbackError,
+        accountId: input.accountId,
+      });
       console.warn(
         "[GoogleCalendarOAuth] silent browser token fallback failed",
         fallbackError,
