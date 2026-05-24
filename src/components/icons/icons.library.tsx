@@ -1,5 +1,5 @@
 //Vuesax-Icons
-export const FlagIcon = ({
+export const FolderIcon = ({
   className,
   label: _label,
   size: _size,
@@ -15,14 +15,22 @@ export const FlagIcon = ({
     {...props}
   >
     <path
-      d="M6.5 22V2"
+      d="M3 11.5V7.25C3 4.25 4.25 3 7.25 3H8.53C9.74 3 10.12 3.39 10.6 4.03L11.88 5.73C12.2 6.15 12.28 6.25 12.95 6.25H16.75C19.75 6.25 21 7.5 21 10.5V11.5"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
-      d="M6.5 17L15.4 12.6C17.2 11.7 18.1 10.5 18 10C17.9 9.2 17.1 8.5 15.4 7.8L6.5 4"
+      d="M5.31 11.5H18.69C19.8 11.5 20.85 11.99 21.56 12.84L21.73 13.07C22.27 13.81 22.51 14.71 22.42 15.62L22.02 20.61C21.87 22.13 21.69 24 18.29 24H5.71C2.31 24 2.13 22.13 1.98 20.62L1.58 15.61C1.49 14.64 1.77 13.67 2.39 12.89C3.13 11.99 4.18 11.5 5.31 11.5Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      transform="translate(0 -1.25)"
+    />
+    <path
+      d="M9.43 17H14.57"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
@@ -32,7 +40,7 @@ export const FlagIcon = ({
 );
 
 //Vuesax-Icons
-export const TrashIcon = ({
+export const FlashCardIcon = ({
   className,
   label: _label,
   size: _size,
@@ -48,35 +56,21 @@ export const TrashIcon = ({
     {...props}
   >
     <path
-      d="M3 6H21"
+      d="M13.05 19.42C12.51 19.42 11.94 19.37 11.32 19.27L6.63 18.53C3.13 17.98 1.97 16.25 2.52 12.75L3.26 8.06C3.81 4.56 5.54 3.4 9.04 3.95L13.73 4.69C17.23 5.24 18.39 6.97 17.84 10.47L17.1 15.16C16.65 18.04 15.37 19.42 13.05 19.42Z"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
-      d="M8 6V4C8 2.9 8.9 2 10 2H14C15.1 2 16 2.9 16 4V6"
+      d="M6.1 18.45L11.76 20.33C15.08 21.43 16.93 20.46 18.03 17.14L19.53 12.63C20.22 10.54 20.14 9.09 19.18 8.13"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
-      d="M19 9L18.35 19.2C18.25 20.75 18.17 22 15.42 22H8.58C5.83 22 5.75 20.75 5.65 19.2L5 9"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M10.33 16.5H13.66"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M9.5 12.5H14.5"
+      d="M8.24 9.72C9.62 9.72 10.73 8.61 10.73 7.23C10.73 5.85 9.62 4.74 8.24 4.74C6.86 4.74 5.75 5.85 5.75 7.23C5.75 8.61 6.86 9.72 8.24 9.72Z"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
@@ -86,7 +80,7 @@ export const TrashIcon = ({
 );
 
 //Vuesax-Icons
-export const StarIcon = ({
+export const PDFIcon = ({
   className,
   label: _label,
   size: _size,
@@ -102,7 +96,28 @@ export const StarIcon = ({
     {...props}
   >
     <path
-      d="M12 2.5L14.85 8.27L21.22 9.2L16.61 13.69L17.7 20.03L12 17.03L6.3 20.03L7.39 13.69L2.78 9.2L9.15 8.27L12 2.5Z"
+      d="M12 20.75C12 20.75 9.9 19.6 7.3 19.25C6.15 19.1 4.97 19.1 3.86 19.24C3.02 19.34 2.25 18.68 2.25 17.83V5.1C2.25 4.15 3.03 3.38 3.98 3.42C6.06 3.58 9.14 4.6 10.85 5.65L11.09 5.79C11.62 6.12 12.4 6.12 12.93 5.79L13.17 5.65C14.88 4.6 17.96 3.58 20.02 3.42C20.98 3.35 21.75 4.13 21.75 5.09V17.83C21.75 18.68 20.98 19.34 20.14 19.24C19.03 19.1 17.85 19.1 16.7 19.25C14.1 19.6 12 20.75 12 20.75Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12 5.5V20.25"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M5.5 8.5H7.75"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M5.5 11.5H8.5"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
@@ -110,72 +125,3 @@ export const StarIcon = ({
     />
   </svg>
 );
-
-//Vuesax-Icons
-export const HelpMessageIcon = ({
-  className,
-  label: _label,
-  size: _size,
-  title: _title,
-  ...props
-}: IconProps) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <path
-      d="M7 18.5H6.5C3.5 18.5 2 17 2 14V7.5C2 4.5 3.5 3 6.5 3H17.5C20.5 3 22 4.5 22 7.5V14C22 17 20.5 18.5 17.5 18.5H13.5L8.8 21.6C8.1 22.05 7 21.55 7 20.7V18.5Z"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M10 8.75C10 7.65 10.9 6.75 12 6.75C13.1 6.75 14 7.65 14 8.75C14 9.45 13.65 9.9 13.1 10.25C12.55 10.6 12 11.05 12 12"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M12 14.25H12.01"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-//Vuesax-Icons
-export const RoundedSquareIcon = ({
-  className,
-  label: _label,
-  size: _size,
-  title: _title,
-  ...props
-}: IconProps) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <rect
-      x="2.75"
-      y="2.75"
-      width="18.5"
-      height="18.5"
-      rx="6"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    />
-  </svg>
-);
-
