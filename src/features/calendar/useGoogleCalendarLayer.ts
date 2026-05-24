@@ -18,11 +18,16 @@ export const useGoogleCalendarLayer = () => {
     forceSyncRange,
     retrySync,
     reconnectAccount,
+    updateAccountToken,
     isAnyConnecting,
   } = useMultiAccountGoogleCalendar();
 
-  const taskListsByAccount = useGoogleTaskLists(accounts);
-  const googleTasks = useGoogleTasks(accounts, taskListsByAccount);
+  const taskListsByAccount = useGoogleTaskLists(accounts, updateAccountToken);
+  const googleTasks = useGoogleTasks(
+    accounts,
+    taskListsByAccount,
+    updateAccountToken,
+  );
 
   const connectionStatus: GCalConnectionStatus | "disconnected" = (() => {
     const hasConnectedAccount = accounts.some(
