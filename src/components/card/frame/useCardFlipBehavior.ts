@@ -98,21 +98,6 @@ export const useCardFlipBehavior = ({
     ],
   );
 
-  const finishPointerGesture = React.useCallback(
-    (pointerId: number | null) => {
-      const state = pointerGestureRef.current;
-      if (state.pointerId == null) return;
-      if (pointerId != null && state.pointerId !== pointerId) return;
-
-      if (state.moved) {
-        suppressNextFlipRef.current = true;
-      }
-
-      resetPointerGesture();
-    },
-    [resetPointerGesture],
-  );
-
   const handleFlip = React.useCallback(
     (event?: React.MouseEvent<HTMLDivElement>) => {
       if (!shouldHandleFlip) return;
