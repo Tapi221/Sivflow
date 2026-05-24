@@ -3,6 +3,7 @@ import { useEffect, type RefObject } from "react";
 type Params = {
   primaryRef: RefObject<HTMLElement | null>;
   syncedRefs: Array<RefObject<HTMLElement | null> | undefined | null>;
+  syncKey?: string | number;
 };
 
 const getUniqueElements = (
@@ -25,6 +26,7 @@ const getUniqueElements = (
 export const useSyncedHorizontalScroll = ({
   primaryRef,
   syncedRefs,
+  syncKey,
 }: Params) => {
   useEffect(() => {
     const primary = primaryRef.current;
@@ -86,5 +88,5 @@ export const useSyncedHorizontalScroll = ({
         window.cancelAnimationFrame(resetRafId);
       }
     };
-  }, [primaryRef, syncedRefs]);
+  }, [primaryRef, syncedRefs, syncKey]);
 };
