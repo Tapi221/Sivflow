@@ -3,7 +3,7 @@ import { useState } from "react";
 import { exportMfCardBytes } from "@/features/cardFile/application/exportMfCard";
 import { MfCardExportError } from "@/features/cardFile/domain/mfCardTypes";
 import { downloadBytesAsMfCard } from "@/features/cardFile/infra/web/downloadMfCard";
-import type { MfDeckTagLookup } from "@/features/deckFile/application/mapCardToMfDeck";
+import type { MfDeckTagLookup } from "@/features/deckFile/application/types";
 
 import { Button } from "@/components/ui/button";
 

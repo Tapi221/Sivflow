@@ -1,7 +1,14 @@
 import { useState, type CSSProperties, type RefObject } from "react";
-import {getTagColorSwatchStyle,
-  type TagColorKey,} from "@/features/tag/tagColor";
+import {
+  getTagColorSwatchStyle,
+  type TagColorKey,
+} from "@/features/tag/tagColor";
 import { cn } from "@/lib/utils";
+import {
+  RIGHT_CLICK_PANEL_MARGIN,
+  RIGHT_CLICK_PANEL_WIDTH,
+  RightClickPanelSurface,
+} from "./rightClickPanelCommon";
 
 const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   gray: "グレー",
@@ -16,61 +23,11 @@ const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   sky: "スカイ",
 };
 
-export const TAG_COLOR_CONTEXT_MENU_WIDTH = 176;
+export const TAG_COLOR_CONTEXT_MENU_WIDTH = RIGHT_CLICK_PANEL_WIDTH;
 export const TAG_COLOR_CONTEXT_MENU_HEIGHT = 92;
-export const TAG_COLOR_CONTEXT_MENU_MARGIN = 8;
+export const TAG_COLOR_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
-const TAG_COLOR_CONTEXT_MENU_FONT_FAMILY =
-  "var(--explorer-chrome-font-family, \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, BlinkMacSystemFont, \"Yu Gothic UI\", \"Hiragino Sans\", sans-serif)";
-
-const TAG_COLOR_CONTEXT_MENU_STYLE = `
-.tag-color-context-menu {
-  box-sizing: border-box;
-  contain: layout paint style;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  width: ${TAG_COLOR_CONTEXT_MENU_WIDTH}px;
-  min-width: ${TAG_COLOR_CONTEXT_MENU_WIDTH}px;
-  max-width: ${TAG_COLOR_CONTEXT_MENU_WIDTH}px;
-  padding: 3px;
-  overflow: hidden;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14), 0 1px 6px rgba(0, 0, 0, 0.08);
-  font-family: ${TAG_COLOR_CONTEXT_MENU_FONT_FAMILY};
-  font-variant-east-asian: proportional-width;
-  font-feature-settings: "palt" 1;
-  animation: none;
-  transition: none;
-  transform: none;
-}
-
-.tag-color-context-menu,
-.tag-color-context-menu * {
-  box-sizing: border-box;
-}
-
-.tag-color-context-menu-title {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-width: 0;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 4px;
-  color: #4a4a4a;
-  font-family: ${TAG_COLOR_CONTEXT_MENU_FONT_FAMILY};
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 15px;
-  letter-spacing: 0;
-  text-align: left;
-  white-space: nowrap;
-  -webkit-font-smoothing: antialiased;
-}
-
+const TAG_COLOR_GRID_STYLE = `
 .tag-color-context-menu-grid {
   display: grid;
   grid-template-columns: repeat(5, 16px);
@@ -101,31 +58,18 @@ export const TagColorRightClickPanel = ({
   noDragStyle,
   onSelectColor,
 }: TagColorRightClickPanelProps) => {
-  const [position] = useState(() => ({ x, y }));
-
   return (
     <>
-      <style>{TAG_COLOR_CONTEXT_MENU_STYLE}</style>
-      <div
-        ref={menuRef}
-        style={{
-          ...noDragStyle,
-          position: "fixed",
-          left: position.x,
-          top: position.y,
-          zIndex: 1000,
-          width: TAG_COLOR_CONTEXT_MENU_WIDTH,
-          minWidth: TAG_COLOR_CONTEXT_MENU_WIDTH,
-          maxWidth: TAG_COLOR_CONTEXT_MENU_WIDTH,
-          animation: "none",
-          transition: "none",
-          transform: "none",
-        }}
-        className="tag-color-context-menu"
-        role="menu"
-        aria-label={`${tagName} tag color menu`}
+      <style>{TAG_COLOR_GRID_STYLE}</style>
+      <RightClickPanelSurface
+        x={x}
+        y={y}
+        width={TAG_COLOR_CONTEXT_MENU_WIDTH}
+        panelRef={menuRef}
+        noDragStyle={noDragStyle}
+        ariaLabel={`${tagName} tag color menu`}
       >
-        <div className="tag-color-context-menu-title">タグの色</div>
+        <div className="right-click-panel-title">タグの色</div>
         <div className="tag-color-context-menu-grid">
           {availableColors.map((colorKey) => {
             const isSelected = colorKey === currentColorKey;
@@ -157,7 +101,7 @@ export const TagColorRightClickPanel = ({
             );
           })}
         </div>
-      </div>
+      </RightClickPanelSurface>
     </>
   );
 };
