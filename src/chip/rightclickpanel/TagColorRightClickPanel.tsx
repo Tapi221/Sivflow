@@ -1,7 +1,8 @@
 import { type CSSProperties, type RefObject } from "react";
 import { getTagColorSwatchStyle, type TagColorKey } from "@/features/tag/tagColor";
 import { cn } from "@/lib/utils";
-import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, RightClickPanelSurface, resolveRightClickPanelTextWidth } from "./rightClickPanelCommon";
+import { RightClickPanelSurface } from "./rightClickPanelCommon";
+import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, resolveRightClickPanelTextWidth } from "./rightClickPanelUtils";
 
 const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   gray: "グレー",
