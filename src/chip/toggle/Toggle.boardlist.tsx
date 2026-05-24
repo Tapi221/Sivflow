@@ -18,6 +18,7 @@ const TOGGLE_MOTION_TRANSITION: Transition = {
 };
 const TOGGLE_ACTIVE_ICON_CLASS_NAME = "text-[#8c8c8c]";
 const TOGGLE_INACTIVE_ICON_CLASS_NAME = "text-[#b7b7b7]";
+const TOGGLE_ICON_STROKE_WIDTH = 1.5;
 
 const toggleItems = [
   {
@@ -37,7 +38,7 @@ const toggleItems = [
           height="12"
           rx="1"
           stroke="currentColor"
-          strokeWidth="1.5"
+          strokeWidth={TOGGLE_ICON_STROKE_WIDTH}
         />
         <rect
           x="8"
@@ -46,7 +47,7 @@ const toggleItems = [
           height="12"
           rx="1"
           stroke="currentColor"
-          strokeWidth="1.5"
+          strokeWidth={TOGGLE_ICON_STROKE_WIDTH}
         />
       </svg>
     ),
@@ -64,7 +65,7 @@ const toggleItems = [
         <path
           d="M1.5 3.5h11M1.5 7h11M1.5 10.5h11"
           stroke="currentColor"
-          strokeWidth="1.5"
+          strokeWidth={TOGGLE_ICON_STROKE_WIDTH}
           strokeLinecap="round"
         />
       </svg>
