@@ -41,6 +41,11 @@ type TaskViewProps = {
     taskId: string,
     patch: GoogleTaskPatchInput,
   ) => Promise<unknown>;
+  onMoveGoogleTaskList?: (
+    taskListId: string,
+    taskId: string,
+    destinationTaskListId: string,
+  ) => Promise<unknown>;
   onDeleteGoogleTask?: (taskListId: string, taskId: string) => Promise<void>;
 };
 
@@ -213,6 +218,7 @@ export const TaskView = ({
   onRefreshGoogleTasks,
   onCreateGoogleTask,
   onUpdateGoogleTask,
+  onMoveGoogleTaskList,
   onDeleteGoogleTask,
 }: TaskViewProps) => {
   const { currentUser } = useAuthSession();
@@ -323,6 +329,20 @@ export const TaskView = ({
         .map((id) => taskListMetaById.get(id)?.category)
         .filter((category): category is string => Boolean(category)),
     );
+  }, [selectedTaskListIdArray, taskListMetaById]);
+
+  const taskListIdByCategory = useMemo(() => {
+    const map = new Map<string, string>();
+
+    selectedTaskListIdArray.forEach((taskListId) => {
+      const category = taskListMetaById.get(taskListId)?.category;
+
+      if (category && !map.has(category)) {
+        map.set(category, taskListId);
+      }
+    });
+
+    return map;
   }, [selectedTaskListIdArray, taskListMetaById]);
 
   const selectedTaskListIdForCreate = selectedTaskListIds.size === 1
@@ -513,10 +533,27 @@ export const TaskView = ({
     status: TaskStatus,
     overTaskId?: string | null,
     position?: "before" | "after",
+    destinationCategory?: string | null,
   ) => {
     const googleTaskId = parseGoogleTaskId(taskId);
+    const destinationTaskListId = destinationCategory
+      ? taskListIdByCategory.get(destinationCategory) ?? null
+      : null;
 
     if (googleTaskId) {
+      if (
+        destinationTaskListId &&
+        destinationTaskListId !== googleTaskId.taskListId
+      ) {
+        clearGoogleTaskStatusOverride(taskId);
+        void onMoveGoogleTaskList?.(
+          googleTaskId.taskListId,
+          googleTaskId.taskId,
+          destinationTaskListId,
+        ).then(() => onRefreshGoogleTasks?.());
+        return;
+      }
+
       setGoogleTaskStatusOverride(taskId, status);
       void onUpdateGoogleTask?.(
         googleTaskId.taskListId,
@@ -524,6 +561,10 @@ export const TaskView = ({
         toGoogleTaskStatusPatch(status),
       ).then(() => onRefreshGoogleTasks?.());
       return;
+    }
+
+    if (destinationCategory) {
+      updateTask(taskId, { category: destinationCategory });
     }
 
     reorderTask(taskId, status, overTaskId, position);
