@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type {
   PdfSearchWorkerRequest,
@@ -21,14 +21,18 @@ type SearchState = {
 };
 
 type UsePdfSearchOptions = {
-  doc: PdfJsDocument | null;
+  doc?: PdfJsDocument | null;
   numPages: number;
-  currentPage: number;
-  renderedPageNumbers: number[];
-  searchQuery: string;
-  searchNavToken: number;
-  searchNavDirection: "next" | "prev";
+  currentPage?: number;
+  renderedPageNumbers?: number[];
+  searchQuery?: string;
+  searchNavToken?: number;
+  searchNavDirection?: "next" | "prev";
   getPageTextContent: (pageNumber: number) => Promise<PdfJsTextContent>;
+  /** @deprecated use searchQuery */
+  query?: string;
+  /** @deprecated use renderedPageNumbers */
+  prioritizedPageNumbers?: number[];
 };
 
 const INITIAL_SEARCH_STATE: SearchState = {
@@ -187,29 +191,35 @@ type WorkerRequestResolver = {
 };
 
 export const usePdfSearch = ({
-  doc,
+  doc = null,
   numPages,
-  currentPage,
+  currentPage = 1,
   renderedPageNumbers,
   searchQuery,
-  searchNavToken,
-  searchNavDirection,
+  searchNavToken = 0,
+  searchNavDirection = "next",
   getPageTextContent,
+  query,
+  prioritizedPageNumbers,
 }: UsePdfSearchOptions) => {
   const [searchState, setSearchState] =
     useState<SearchState>(INITIAL_SEARCH_STATE);
 
-  const normalizedSearchQuery = searchQuery.trim();
+  const normalizedSearchQuery = (searchQuery ?? query ?? "").trim();
+  const effectiveRenderedPageNumbers = useMemo(
+    () => renderedPageNumbers ?? prioritizedPageNumbers ?? [],
+    [prioritizedPageNumbers, renderedPageNumbers],
+  );
   const orderedPageNumbers = useMemo(
     () =>
       normalizedSearchQuery
         ? buildPrioritizedPageNumbers({
           numPages,
           currentPage,
-          renderedPageNumbers,
+          renderedPageNumbers: effectiveRenderedPageNumbers,
         })
         : [],
-    [currentPage, numPages, normalizedSearchQuery, renderedPageNumbers],
+    [currentPage, effectiveRenderedPageNumbers, numPages, normalizedSearchQuery],
   );
 
   const activeRunIdRef = useRef(0);
@@ -314,7 +324,7 @@ export const usePdfSearch = ({
 
   const searchPage = async ({
     pageNumber,
-    query,
+    query: pageQuery,
   }: {
     pageNumber: number;
     query: string;
@@ -326,7 +336,7 @@ export const usePdfSearch = ({
         type: "search-page",
         requestId: createRequestId(),
         pageNumber,
-        query,
+        query: pageQuery,
       };
 
       const response = await postWorkerRequest(searchRequest);
@@ -339,9 +349,40 @@ export const usePdfSearch = ({
     return buildFallbackMatchesForPage({
       pageNumber,
       content,
-      query,
+      query: pageQuery,
     });
   };
+
+  const navigateMatches = useCallback((direction: "next" | "prev") => {
+    setSearchState((previousState) => {
+      if (previousState.flattenedMatches.length === 0) {
+        return previousState;
+      }
+
+      const baseIndex =
+        previousState.activeMatchIndex < 0 ? 0 : previousState.activeMatchIndex;
+      const delta = direction === "prev" ? -1 : 1;
+      const nextIndex =
+        (baseIndex + delta + previousState.flattenedMatches.length) %
+        previousState.flattenedMatches.length;
+
+      if (nextIndex === previousState.activeMatchIndex) {
+        return previousState;
+      }
+
+      return {
+        ...previousState,
+        activeMatchIndex: nextIndex,
+      };
+    });
+  }, []);
+
+  const handleSearchNavToken = useCallback(
+    (_token: number, direction: "next" | "prev" = "next") => {
+      navigateMatches(direction);
+    },
+    [navigateMatches],
+  );
 
   useEffect(() => {
     activeRunIdRef.current += 1;
@@ -349,13 +390,13 @@ export const usePdfSearch = ({
     pendingResolversRef.current.clear();
     void postWorkerRequest({ type: "reset" });
     setSearchState(INITIAL_SEARCH_STATE);
-  }, [doc]);
+  }, [doc, numPages]);
 
   useEffect(() => {
     activeRunIdRef.current += 1;
     const runId = activeRunIdRef.current;
 
-    if (!doc || !normalizedSearchQuery || orderedPageNumbers.length === 0) {
+    if (!normalizedSearchQuery || orderedPageNumbers.length === 0) {
       setSearchState(INITIAL_SEARCH_STATE);
       return;
     }
@@ -439,7 +480,7 @@ export const usePdfSearch = ({
         cancelIdle(idleHandle);
       }
     };
-  }, [doc, getPageTextContent, normalizedSearchQuery, orderedPageNumbers]);
+  }, [getPageTextContent, normalizedSearchQuery, orderedPageNumbers]);
 
   useEffect(() => {
     if (searchNavToken === lastSearchNavTokenRef.current) {
@@ -447,33 +488,21 @@ export const usePdfSearch = ({
     }
 
     lastSearchNavTokenRef.current = searchNavToken;
+    navigateMatches(searchNavDirection);
+  }, [navigateMatches, searchNavDirection, searchNavToken]);
 
-    setSearchState((previousState) => {
-      if (previousState.flattenedMatches.length === 0) {
-        return previousState;
-      }
-
-      const baseIndex =
-        previousState.activeMatchIndex < 0 ? 0 : previousState.activeMatchIndex;
-      const delta = searchNavDirection === "prev" ? -1 : 1;
-      const nextIndex =
-        (baseIndex + delta + previousState.flattenedMatches.length) %
-        previousState.flattenedMatches.length;
-
-      if (nextIndex === previousState.activeMatchIndex) {
-        return previousState;
-      }
-
-      return {
-        ...previousState,
-        activeMatchIndex: nextIndex,
-      };
-    });
-  }, [searchNavDirection, searchNavToken]);
+  const activeMatch =
+    searchState.activeMatchIndex >= 0
+      ? searchState.flattenedMatches[searchState.activeMatchIndex] ?? null
+      : null;
 
   return {
     pageMatches: searchState.pageMatches,
     flattenedMatches: searchState.flattenedMatches,
     activeMatchIndex: searchState.activeMatchIndex,
+    matches: searchState.flattenedMatches,
+    activeMatchPage: activeMatch?.pageNumber ?? null,
+    activeMatchPageNumber: activeMatch?.pageNumber ?? null,
+    handleSearchNavToken,
   };
 };
