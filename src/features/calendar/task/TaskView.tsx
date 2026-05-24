@@ -540,18 +540,49 @@ export const TaskView = ({
       ? taskListIdByCategory.get(destinationCategory) ?? null
       : null;
 
+    console.info("Task reorder routed.", {
+      destinationCategory,
+      destinationTaskListId,
+      googleTaskId,
+      overTaskId,
+      position,
+      selectedTaskListIds: selectedTaskListIdArray,
+      status,
+      taskId,
+      taskListIdByCategory: Array.from(taskListIdByCategory.entries()),
+    });
+
     if (googleTaskId) {
       if (
         destinationTaskListId &&
         destinationTaskListId !== googleTaskId.taskListId
       ) {
         clearGoogleTaskStatusOverride(taskId);
+        console.info("Task reorder will move Google task list.", {
+          destinationCategory,
+          destinationTaskListId,
+          sourceTaskListId: googleTaskId.taskListId,
+          taskId: googleTaskId.taskId,
+        });
         void onMoveGoogleTaskList?.(
           googleTaskId.taskListId,
           googleTaskId.taskId,
           destinationTaskListId,
         ).then(() => onRefreshGoogleTasks?.());
         return;
+      }
+
+      if (destinationCategory && !destinationTaskListId) {
+        console.warn("Task reorder skipped Google task list move: destination category is not mapped to a task list.", {
+          destinationCategory,
+          taskListIdByCategory: Array.from(taskListIdByCategory.entries()),
+        });
+      } else if (destinationTaskListId === googleTaskId.taskListId) {
+        console.info("Task reorder kept Google task in the same task list; only status will be patched.", {
+          destinationCategory,
+          destinationTaskListId,
+          sourceTaskListId: googleTaskId.taskListId,
+        });
       }
 
       setGoogleTaskStatusOverride(taskId, status);
