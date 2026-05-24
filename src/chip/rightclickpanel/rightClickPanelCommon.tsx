@@ -20,7 +20,6 @@ type RightClickPanelOpenEventDetail = {
   panelId: RightClickPanelId;
 };
 
-export const RIGHT_CLICK_PANEL_WIDTH = 176;
 export const RIGHT_CLICK_PANEL_MARGIN = 8;
 export const RIGHT_CLICK_PANEL_OPEN_EVENT = "manifolia:right-click-panel-open";
 
@@ -180,7 +179,7 @@ export const useRightClickPanelDismiss = (
 type RightClickPanelSurfaceProps = {
   x: number;
   y: number;
-  width?: number;
+  width: number;
   panelRef: RefObject<HTMLDivElement | null>;
   noDragStyle?: CSSProperties;
   className?: string;
@@ -192,7 +191,7 @@ type RightClickPanelSurfaceProps = {
 export const RightClickPanelSurface = ({
   x,
   y,
-  width = RIGHT_CLICK_PANEL_WIDTH,
+  width,
   panelRef,
   noDragStyle,
   className,
