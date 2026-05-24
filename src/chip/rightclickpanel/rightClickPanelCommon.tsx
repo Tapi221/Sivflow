@@ -180,7 +180,6 @@ export const useRightClickPanelDismiss = (
     if (!isOpen) return;
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (event.defaultPrevented) return;
       if (panelRef.current?.contains(event.target as Node)) return;
       onClose();
     };
