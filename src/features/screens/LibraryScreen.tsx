@@ -1,5 +1,5 @@
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { subscribeSectionListNavigation } from "@/features/explorer/adapters/web/explorerSectionListNavigation";
 import { notifySelectedFolderChanged } from "@/features/explorer/adapters/web/explorerSelectionNotifier";
@@ -10,6 +10,7 @@ import { useExplorerController } from "@/features/explorer/controller/useExplore
 import { useExplorerBreadcrumbSync } from "@/features/explorer/hooks/useExplorerBreadcrumbSync";
 import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups";
 import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
+import { PdfLibraryWorkspaceToolbar, type PdfLibraryWorkspaceSection } from "@/features/library-pdf/components/PdfLibraryWorkspaceToolbar";
 import { ExplorerWorkspaceFrame } from "@/features/tab/ExplorerWorkspaceFrame";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { resolveCardTabTitle, resolveDocumentTabTitle } from "@/features/tab/resolveTabTitle";
@@ -85,6 +86,9 @@ const resolveSelectedDocumentId = (selectedItem: SelectedExplorerItem) => {
 
 export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const activeLibrarySection: PdfLibraryWorkspaceSection =
+    searchParams.get("libraryType") === "flashcards" ? "flashcard" : "pdf";
   const [initialRouteState] = useState<ExplorerRouteState>(() => route.readRouteState());
   const controller = useExplorerController({ initialRouteState });
   const {
@@ -190,6 +194,9 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
 
   const resolvedEntityTab =
     activeTab?.kind === "document" || activeTab?.kind === "card" ? activeTab : fallbackEntityTab;
+
+  const shouldShowLibraryToolbar =
+    route.isDesktop && controller.state.isSectionListMode && !resolvedEntityTab;
 
   useExplorerRouteSync({
     route,
@@ -354,8 +361,24 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   }
 
   return (
-    <CarvePanelShell reserveLeadingPanel>
-      <CarvePanel className="relative before:absolute before:inset-x-0 before:top-0 before:z-20 before:h-[var(--ds-semantic-breadcrumb-height)] before:bg-white before:content-['']">
+    <CarvePanelShell
+      reserveLeadingPanel
+      toolbar={
+        shouldShowLibraryToolbar ? (
+          <PdfLibraryWorkspaceToolbar
+            activeSection={activeLibrarySection}
+            onSelectSection={() => undefined}
+          />
+        ) : null
+      }
+    >
+      <CarvePanel
+        className={cn(
+          "relative",
+          !shouldShowLibraryToolbar &&
+            "before:absolute before:inset-x-0 before:top-0 before:z-20 before:h-[var(--ds-semantic-breadcrumb-height)] before:bg-white before:content-['']",
+        )}
+      >
         {workspaceFrame}
       </CarvePanel>
     </CarvePanelShell>
