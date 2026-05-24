@@ -136,7 +136,6 @@ const PdfLibraryDashboard = ({
 
   const {
     fileInputRef,
-    handleToolbarAddDocument,
     currentFileAccept,
     handleToolbarFileInputChange,
   } = useFolderDocumentUpload({
@@ -164,47 +163,6 @@ const PdfLibraryDashboard = ({
       })
       .slice(0, 3);
   }, [rows]);
-
-  if (rows.length === 0) {
-    return (
-      <div className="flex h-full min-h-0 w-full flex-col bg-[#FFFFFF]">
-        {showToolbar ? (
-          <PdfLibraryWorkspaceToolbar
-            activeSection="pdf"
-            onSelectSection={() => undefined}
-          />
-        ) : null}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={currentFileAccept}
-          multiple
-          className="hidden"
-          onChange={handleToolbarFileInputChange}
-        />
-        <div className="flex flex-1 items-center justify-center p-8">
-          <div className="w-full max-w-2xl rounded-[10px] border border-[#e5e7eb] bg-[#FFFFFF] p-8">
-            <div className="inline-flex rounded-[999px] bg-[#f3f4f6] px-3 py-1 text-[12px] font-semibold text-[#4b5563]">
-              PDF ライブラリ
-            </div>
-            <h2 className="mt-5 text-[30px] font-semibold tracking-[-0.03em] text-[#20262a]">
-              PDF がまだありません
-            </h2>
-            <p className="mt-3 max-w-xl text-[var(--ds-typography-font-size-sm)] leading-7 text-[#6f7b78]">
-              PDF を取り込むと、この画面で続きを読むカードを表示できます。
-            </p>
-            <button
-              type="button"
-              className="mt-8 inline-flex h-11 items-center justify-center rounded-[16px] border border-[#d1d5db] bg-[#FFFFFF] px-5 text-[var(--ds-typography-font-size-sm)] font-semibold text-[#111827] hover:bg-[#f9fafb]"
-              onClick={handleToolbarAddDocument}
-            >
-              PDF をインポート
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-[#FFFFFF]">
