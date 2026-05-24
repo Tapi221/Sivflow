@@ -1,10 +1,8 @@
 import type { RefObject, UIEvent } from "react";
 import { useCallback, useState } from "react";
 
-import {
-  useCalendarEventSync,
-  type CalendarEventSyncRange,
-} from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
+import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
+import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type {
   CalendarToolbarMode,
   CalendarViewMode,
@@ -74,22 +72,22 @@ export type UseScheduleScreenReturn = {
   handleTimelineSelectDate: (date: Date) => void;
   handleVisibleMonthChange: (date: Date) => void;
   handleMonthCellSelectDate: (date: Date) => void;
-  handleMonthEventSyncRangeChange: (range: CalendarEventSyncRange) => void;
+  handleMonthRenderedRangeChange: (range: CalendarDateRange) => void;
 
   setMonthTitleDate: (date: Date) => void;
 };
 
 export const useScheduleScreen = (): UseScheduleScreenReturn => {
   const navigation = useCalendarNavigation();
-  const [monthVisibleRange, setMonthVisibleRange] =
-    useState<CalendarEventSyncRange | null>(null);
+  const [monthRenderedRange, setMonthRenderedRange] =
+    useState<CalendarDateRange | null>(null);
 
-  const handleMonthEventSyncRangeChange = useCallback(
-    (range: CalendarEventSyncRange) => {
-      setMonthVisibleRange((prev) => {
+  const handleMonthRenderedRangeChange = useCallback(
+    (range: CalendarDateRange) => {
+      setMonthRenderedRange((prev) => {
         if (
-          prev?.rangeStart.getTime() === range.rangeStart.getTime() &&
-          prev.rangeEnd.getTime() === range.rangeEnd.getTime()
+          prev?.start.getTime() === range.start.getTime() &&
+          prev.end.getTime() === range.end.getTime()
         ) {
           return prev;
         }
@@ -157,7 +155,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     selectedViewMode: navigation.selectedViewMode,
     visibleDays,
     monthTitleDate: navigation.monthTitleDate,
-    monthVisibleRange,
+    monthRenderedRange,
     googleCalendar: {
       selectedCalendarIds: google.selectedCalendarIds,
       forceSyncRange: google.forceSyncRange,
@@ -241,7 +239,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     handleTimelineSelectDate: navigation.handleTimelineSelectDate,
     handleVisibleMonthChange: navigation.handleVisibleMonthChange,
     handleMonthCellSelectDate: navigation.handleMonthCellSelectDate,
-    handleMonthEventSyncRangeChange,
+    handleMonthRenderedRangeChange,
 
     setMonthTitleDate: navigation.setMonthTitleDate,
   };
