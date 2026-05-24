@@ -1,14 +1,14 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { eventOverlapsRange } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
+import type { CalendarEventSyncRange } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
 import { GridCalendarMonthDesktop } from "@/features/calendar/grid/Grid.calendar.month.desktop";
 
 import { useMonthInfiniteScroll } from "../../scroll/schedule/useInfiniteScroll.month.desktop";
 import { useMonthRowResize } from "./height/useRowResize.month.desktop";
 
-const MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MONTH_WEEKDAY_COUNT = 7;
 
@@ -19,6 +19,7 @@ type CalendarMonthViewProps = {
   visibleEvents?: GoogleCalendarEvent[];
   onSelectDate: (date: Date) => void;
   onVisibleMonthChange?: (date: Date) => void;
+  onEventSyncRangeChange?: (range: CalendarEventSyncRange) => void;
 };
 
 const getDayStart = (date: Date): Date => {
@@ -40,6 +41,7 @@ export const CalendarMonthView = ({
   visibleEvents = [],
   onSelectDate,
   onVisibleMonthChange,
+  onEventSyncRangeChange,
 }: CalendarMonthViewProps) => {
   const today = useMemo(() => new Date(), []);
 
@@ -150,25 +152,40 @@ export const CalendarMonthView = ({
     requestScrollHoverUpdate();
   }, [requestScrollHoverUpdate]);
 
-  const renderedEvents = useMemo(() => {
+  const visibleEventRange = useMemo<CalendarEventSyncRange | null>(() => {
     const firstWeek = scroll.monthWeeks[0];
     const lastWeek = scroll.monthWeeks[scroll.monthWeeks.length - 1];
 
-    if (!firstWeek || !lastWeek) return visibleEvents;
+    if (!firstWeek || !lastWeek) return null;
+
+    return {
+      rangeStart: getDayStart(firstWeek.days[0].date),
+      rangeEnd: getDayEnd(lastWeek.days[lastWeek.days.length - 1].date),
+    };
+  }, [scroll.monthWeeks]);
+
+  useEffect(() => {
+    if (!visibleEventRange) return;
+
+    onEventSyncRangeChange?.(visibleEventRange);
+  }, [onEventSyncRangeChange, visibleEventRange]);
+
+  const renderedEvents = useMemo(() => {
+    if (!visibleEventRange) return visibleEvents;
 
     const rangeStart = new Date(
-      getDayStart(firstWeek.days[0].date).getTime() -
-        MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS * DAY_MS,
+      visibleEventRange.rangeStart.getTime() -
+        C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS * DAY_MS,
     );
     const rangeEnd = new Date(
-      getDayEnd(lastWeek.days[lastWeek.days.length - 1].date).getTime() +
-        MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS * DAY_MS,
+      visibleEventRange.rangeEnd.getTime() +
+        C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS * DAY_MS,
     );
 
     return visibleEvents.filter((event) =>
       eventOverlapsRange(event, rangeStart, rangeEnd),
     );
-  }, [scroll.monthWeeks, visibleEvents]);
+  }, [visibleEventRange, visibleEvents]);
 
   return (
     <div
