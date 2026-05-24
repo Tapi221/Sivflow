@@ -84,6 +84,8 @@ export const EventChipDayDetail = ({
       "H:mm",
     )}`;
 
+  const titleLabel = event.title || "Untitled";
+
   const height = event.isAllDay
     ? undefined
     : calculatedHeight;
@@ -122,23 +124,23 @@ export const EventChipDayDetail = ({
           : `3px solid ${tokens.border}`,
         color: tokens.text,
       }}
-      title={`${event.title || "Untitled"} ${timeLabel}`}
+      title={`${titleLabel} ${timeLabel}`}
     >
+      <span className="truncate">
+        {titleLabel}
+      </span>
+
       {!compact && (
-        <span className="truncate">
-          {event.title || "Untitled"}
+        <span
+          className="
+            truncate
+            tabular-nums
+            opacity-80
+          "
+        >
+          {timeLabel}
         </span>
       )}
-
-      <span
-        className="
-          truncate
-          tabular-nums
-          opacity-80
-        "
-      >
-        {timeLabel}
-      </span>
     </div>
   );
 };
