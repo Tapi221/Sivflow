@@ -3,7 +3,7 @@ import { AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { TASK_COLUMNS } from "./task.types";
 import type { TaskStatus } from "./task.types";
-import type { GoogleAccountDisplay } from "../schedulePane.types";
+import type { GoogleAccountDisplay } from "../scheduleScreen.types";
 import { useTaskStore } from "./hooks/useTaskStore";
 import { NewTaskModal } from "../modal/NewTaskModal";
 import { type BoardListViewMode } from "../../../chip/toggle/Toggle.boardlist";

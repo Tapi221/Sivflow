@@ -11,7 +11,7 @@ import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.la
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
-import type { CalendarWeekDayGridProps } from "@/features/calendar/schedulePane.types";
+import type { CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 
 import {

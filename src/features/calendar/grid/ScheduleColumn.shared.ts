@@ -17,7 +17,7 @@ import { ja } from "date-fns/locale";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 
-import type { CalendarViewMode } from "../schedulePane.types";
+import type { CalendarViewMode } from "../scheduleScreen.types";
 
 export type ScheduleColumnBuffer = {
   before: number;

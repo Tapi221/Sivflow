@@ -1,13 +1,13 @@
 import { create } from "zustand";
 
-type SchedulePaneState = {
+type ScheduleScreenState = {
   isOpen: boolean;
   open: () => void;
   close: () => void;
   toggle: () => void;
 };
 
-export const useSchedulePaneStore = create<SchedulePaneState>(
+export const useScheduleScreenStore = create<ScheduleScreenState>(
   (set) => ({
     isOpen: false,
     open: () => set({ isOpen: true }),

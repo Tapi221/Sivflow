@@ -6,7 +6,7 @@ import type {
   CalendarViewMode,
   GoogleAccountDisplay,
   TimelineGridStyle,
-} from "./schedulePane.types";
+} from "./scheduleScreen.types";
 import type { GoogleCalendarEvent } from "./googlecalendar-integration/gcalSync.types";
 import type {
   buildTimelineColumns,
@@ -20,7 +20,7 @@ import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 import { useTimelineGrid } from "./grid/useTimelineGrid";
 
-export type UseSchedulePaneReturn = {
+export type UseScheduleScreenReturn = {
   contentViewportRef: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   headerScrollRef: RefObject<HTMLDivElement | null>;
@@ -74,7 +74,7 @@ export type UseSchedulePaneReturn = {
   setMonthTitleDate: (date: Date) => void;
 };
 
-export const useSchedulePane = (): UseSchedulePaneReturn => {
+export const useScheduleScreen = (): UseScheduleScreenReturn => {
   const navigation = useCalendarNavigation();
 
   const visibleRange = useCalendarVisibleRange({
