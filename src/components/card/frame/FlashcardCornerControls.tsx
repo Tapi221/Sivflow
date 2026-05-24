@@ -7,7 +7,7 @@ import {CARD_ACTION_BG_CLASS,
 import { Image as ImageIcon, Link, Volume2 } from "@/ui/icons";
 
 import { CardCornerActions } from "./CardCornerActions";
-import type { FlashcardCardLike, FlashcardMediaLike } from "./types";
+import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcard.types";
 
 import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
