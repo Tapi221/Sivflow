@@ -43,12 +43,12 @@ export const TaskCard = ({
   return (
     <div
       className={cn(
-        // ─ 紙っぽい柔らかさ: 暖かいオフホワイト・薄い影 ─
-        "group relative w-full min-w-0 overflow-hidden rounded-md border-[1.5px] border-[#eee7db] bg-[#fbfaf7] px-3 py-2 shadow-[0_3px_10px_rgba(99,85,61,0.06)]",
+        // ─ ほんの少し紙っぽい: ほぼ白の柔らかい色・控えめな影 ─
+        "group relative w-full min-w-0 overflow-hidden rounded-md border-[1.5px] border-[#e8e6e2] bg-[#fbfbfa] px-3 py-2 shadow-[0_2px_8px_rgba(15,23,42,0.04)]",
         "transition-[background-color,border-color,box-shadow] duration-100",
-        "hover:bg-[#f8f4ed] hover:border-[#e8ddcc] hover:shadow-[0_6px_16px_rgba(99,85,61,0.08)]",
+        "hover:bg-[#f8f8f6] hover:border-[#e1dfda] hover:shadow-[0_4px_12px_rgba(15,23,42,0.06)]",
         isDragging
-          ? "cursor-grabbing bg-[#fbfaf7] shadow-[0_10px_28px_rgba(99,85,61,0.14)] border-[#dfd2bf]"
+          ? "cursor-grabbing bg-[#fbfbfa] shadow-[0_8px_24px_rgba(15,23,42,0.10)] border-[#d8d5cf]"
           : "cursor-grab",
       )}
     >
