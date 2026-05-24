@@ -8,6 +8,7 @@ import type {
   GCalConnectionStatus,
   GoogleCalendarEvent,
   GoogleCalendarListItem,
+  GoogleTaskItem,
   GoogleTaskListItem,
 } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 
@@ -57,6 +58,9 @@ export type GoogleAccountDisplay = {
   taskLists: GoogleTaskListItem[];
   taskListsError: string | null;
   isTaskListsLoading: boolean;
+  googleTasks: GoogleTaskItem[];
+  googleTasksError: string | null;
+  isGoogleTasksLoading: boolean;
   selectedCalendarIds: Set<string>;
   connectionStatus: GCalConnectionStatus;
   error: string | null;
