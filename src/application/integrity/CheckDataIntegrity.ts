@@ -38,6 +38,12 @@ const toRecord = (value: unknown): Record<string, unknown> => {
     : {};
 };
 
+const toNonEmptyString = (value: unknown): string | null => {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
 export const createCheckDataIntegrityUseCase = () => {
   const execute = async (): Promise<IntegrityReport> => {
     const issues: IntegrityIssue[] = [];
@@ -45,22 +51,37 @@ export const createCheckDataIntegrityUseCase = () => {
     try {
       const db = await getLocalDb();
 
-      const [allCards, allFolders] = await Promise.all([
+      const [allCards, allFolders, allCardSets] = await Promise.all([
         db.getAllItems("cards"),
         db.getAllItems("folders"),
+        db.getAllItems("cardSets"),
       ]);
 
       const cards: Card[] = allCards.map((card) => normalizeCard(card));
       const folders: Folder[] = allFolders.map((folder) =>
         normalizeFolder(folder),
       );
+      const cardSetRecords = allCardSets.map(toRecord);
 
-      const folderIds = new Set(folders.map((folder) => folder.id));
+      const activeFolderIds = new Set(
+        folders
+          .filter((folder) => !folder.isDeleted)
+          .map((folder) => folder.id),
+      );
+      const activeCardSetIds = new Set(
+        cardSetRecords
+          .filter((cardSet) => !readDeletedState(cardSet))
+          .map((cardSet) => toNonEmptyString(cardSet.id))
+          .filter((id): id is string => id !== null),
+      );
 
       for (const card of cards) {
         const candidate = toRecord(card);
         const deletedAtExists = candidate.deletedAt != null;
         const isDeleted = readDeletedState(candidate);
+        const cardSetId = toNonEmptyString(
+          candidate.cardSetId ?? candidate.card_set_id,
+        );
 
         if (deletedAtExists !== isDeleted) {
           issues.push({
@@ -93,21 +114,32 @@ export const createCheckDataIntegrityUseCase = () => {
           }
         }
 
-        if (!isDeleted && isMissingFolderId(candidate.folderId)) {
+        if (!isDeleted && !cardSetId) {
           issues.push({
-            code: "MISSING_FOLDER",
+            code: "MISSING_CARD_SET",
+            entityType: "card",
+            entityId: String(candidate.id ?? "unknown"),
+            severity: "warning",
+            fixed: false,
+            details: { cardSetId: candidate.cardSetId ?? null },
+          });
+        }
+
+        if (!isDeleted && cardSetId && !activeCardSetIds.has(cardSetId)) {
+          issues.push({
+            code: "INVALID_CARD_SET_REF",
             entityType: "card",
             entityId: String(candidate.id ?? "unknown"),
             severity: "error",
             fixed: false,
-            details: { folderId: candidate.folderId ?? null },
+            details: { cardSetId },
           });
         }
 
         if (
           !isDeleted &&
           !isMissingFolderId(candidate.folderId) &&
-          !folderIds.has(String(candidate.folderId))
+          !activeFolderIds.has(String(candidate.folderId))
         ) {
           issues.push({
             code: "INVALID_FOLDER_REF",
