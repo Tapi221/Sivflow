@@ -24,6 +24,9 @@ const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   sky: "スカイ",
 };
 
+const TAG_COLOR_POPOVER_FONT_FAMILY =
+  'var(--explorer-chrome-font-family, "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Yu Gothic UI", "Hiragino Sans", sans-serif)';
+
 export const TaskTagStrip = () => {
   const { addTag, availableColors, tags, updateTagColor } = useTags();
   const [isCreating, setIsCreating] = useState(false);
@@ -96,12 +99,17 @@ export const TaskTagStrip = () => {
                 <PopoverContent
                   align="start"
                   sideOffset={6}
-                  className="w-auto min-w-[128px] p-2"
+                  className="w-auto min-w-[128px] overflow-hidden rounded-[8px] border border-black/[0.12] bg-white p-[3px] shadow-[0_6px_20px_rgba(0,0,0,0.14),0_1px_6px_rgba(0,0,0,0.08)]"
+                  style={{
+                    fontFamily: TAG_COLOR_POPOVER_FONT_FAMILY,
+                    fontFeatureSettings: '"palt" 1',
+                    fontVariantEastAsian: "proportional-width",
+                  }}
                 >
-                  <div className="mb-1.5 px-1 text-[11px] font-semibold text-[#5f656d]">
+                  <div className="flex min-h-7 items-center rounded px-2.5 text-[13px] font-normal leading-[15px] text-[#4a4a4a] antialiased">
                     タグの色
                   </div>
-                  <div className="grid grid-cols-5 gap-1.5">
+                  <div className="grid grid-cols-5 gap-1.5 p-2 pt-1">
                     {availableColors.map((colorKey) => {
                       const isSelected = colorKey === tagColorKey;
                       const colorLabel = TAG_COLOR_LABELS[colorKey] ?? colorKey;
