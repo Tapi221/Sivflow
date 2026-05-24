@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "./task.types";
-import type { Task, TaskStatus } from "./task.types";
+import type { Task, TaskCreateInput, TaskStatus } from "./task.types";
 import type { GoogleAccountDisplay } from "../scheduleScreen.types";
 import { useTaskStore } from "./hooks/useTaskStore";
 import { NewTaskModal } from "../modal/NewTaskModal";
@@ -11,12 +11,35 @@ import { TaskToolbar } from "../toolbar/TaskToolbar";
 import { TaskBoardView } from "../view/TaskBoardView";
 import { TaskListView } from "./TaskListView";
 
-// ==============================================
+type GoogleTaskCreateInput = {
+  title: string;
+  notes?: string | null;
+  due?: string | null;
+  status?: "needsAction" | "completed";
+};
+
+type GoogleTaskPatchInput = {
+  title?: string;
+  notes?: string | null;
+  due?: string | null;
+  status?: "needsAction" | "completed";
+  completed?: string | null;
+};
 
 type TaskViewProps = {
   googleAccounts?: GoogleAccountDisplay[];
   selectedTaskListId?: string | null;
   onSelectTaskList?: (taskListId: string | null) => void;
+  onRefreshGoogleTasks?: () => Promise<void>;
+  onCreateGoogleTask?: (
+    taskListId: string,
+    input: GoogleTaskCreateInput,
+  ) => Promise<unknown>;
+  onUpdateGoogleTask?: (
+    taskListId: string,
+    taskId: string,
+    patch: GoogleTaskPatchInput,
+  ) => Promise<unknown>;
 };
 
 type TaskCategoryOption = {
@@ -29,6 +52,13 @@ type GoogleTaskListMeta = {
   label: string;
   category: string;
 };
+
+type ParsedGoogleTaskId = {
+  taskListId: string;
+  taskId: string;
+};
+
+const GOOGLE_TASK_ID_PREFIX = "google-task:";
 
 const normalizeTaskListLabel = (value: string): string =>
   value.trim().toLowerCase().replace(/[\s\-_]+/g, "");
@@ -51,6 +81,11 @@ const toDateOnly = (value?: string): string | null => {
   return match?.[1] ?? null;
 };
 
+const toGoogleDueDate = (value: string | null): string | null => {
+  if (!value) return null;
+  return `${value}T00:00:00.000Z`;
+};
+
 const toGoogleTaskCreatedAt = (value?: string, fallback = 0): number => {
   if (!value) return fallback;
 
@@ -58,10 +93,40 @@ const toGoogleTaskCreatedAt = (value?: string, fallback = 0): number => {
   return Number.isNaN(time) ? fallback : time;
 };
 
+const toGoogleTaskStatusPatch = (status: TaskStatus): GoogleTaskPatchInput => {
+  if (status === "done") {
+    return {
+      status: "completed",
+      completed: new Date().toISOString(),
+    };
+  }
+
+  return {
+    status: "needsAction",
+    completed: null,
+  };
+};
+
+const parseGoogleTaskId = (taskId: string): ParsedGoogleTaskId | null => {
+  if (!taskId.startsWith(GOOGLE_TASK_ID_PREFIX)) return null;
+
+  const [, , taskListId, googleTaskId] = taskId.split(":");
+
+  if (!taskListId || !googleTaskId) return null;
+
+  return {
+    taskListId,
+    taskId: googleTaskId,
+  };
+};
+
 export const TaskView = ({
   googleAccounts = [],
   selectedTaskListId = null,
   onSelectTaskList,
+  onRefreshGoogleTasks,
+  onCreateGoogleTask,
+  onUpdateGoogleTask,
 }: TaskViewProps) => {
   const { tasks, addTask, deleteTask, moveTask, reorderTask, updateTask } =
     useTaskStore();
@@ -119,7 +184,7 @@ export const TaskView = ({
           const category = taskListMeta?.category ?? googleTask.taskListId;
 
           return {
-            id: `google-task:${account.accountId}:${googleTask.taskListId}:${googleTask.id}`,
+            id: `${GOOGLE_TASK_ID_PREFIX}${account.accountId}:${googleTask.taskListId}:${googleTask.id}`,
             title: googleTask.title,
             status: googleTask.status === "completed" ? "done" : "not_started",
             priority: "medium",
@@ -181,26 +246,73 @@ export const TaskView = ({
     setShowModal(true);
   };
 
-  const handleToggleTaskDone = (taskId: string, done: boolean) => {
-    if (taskId.startsWith("google-task:")) return;
-
-    let nextStatus: TaskStatus = "not_started";
-
-    if (done) {
-      nextStatus = "done";
+  const handleSaveTask = async (data: TaskCreateInput) => {
+    if (selectedTaskListId && onCreateGoogleTask) {
+      await onCreateGoogleTask(selectedTaskListId, {
+        title: data.title,
+        due: toGoogleDueDate(data.dueDate),
+        status: data.status === "done" ? "completed" : "needsAction",
+      });
+      await onRefreshGoogleTasks?.();
+      return;
     }
 
-    moveTask(taskId, nextStatus);
+    addTask(data);
+  };
+
+  const handleToggleTaskDone = (taskId: string, done: boolean) => {
+    const googleTaskId = parseGoogleTaskId(taskId);
+
+    if (googleTaskId) {
+      void onUpdateGoogleTask?.(
+        googleTaskId.taskListId,
+        googleTaskId.taskId,
+        done
+          ? { status: "completed", completed: new Date().toISOString() }
+          : { status: "needsAction", completed: null },
+      ).then(() => onRefreshGoogleTasks?.());
+      return;
+    }
+
+    moveTask(taskId, done ? "done" : "not_started");
   };
 
   const handleRenameTask = (taskId: string, title: string) => {
-    if (taskId.startsWith("google-task:")) return;
+    const googleTaskId = parseGoogleTaskId(taskId);
+
+    if (googleTaskId) {
+      void onUpdateGoogleTask?.(googleTaskId.taskListId, googleTaskId.taskId, {
+        title,
+      }).then(() => onRefreshGoogleTasks?.());
+      return;
+    }
+
     updateTask(taskId, { title });
   };
 
   const handleDeleteTask = (taskId: string) => {
-    if (taskId.startsWith("google-task:")) return;
+    if (parseGoogleTaskId(taskId)) return;
     deleteTask(taskId);
+  };
+
+  const handleReorderTask = (
+    taskId: string,
+    status: TaskStatus,
+    overTaskId?: string | null,
+    position?: "before" | "after",
+  ) => {
+    const googleTaskId = parseGoogleTaskId(taskId);
+
+    if (googleTaskId) {
+      void onUpdateGoogleTask?.(
+        googleTaskId.taskListId,
+        googleTaskId.taskId,
+        toGoogleTaskStatusPatch(status),
+      ).then(() => onRefreshGoogleTasks?.());
+      return;
+    }
+
+    reorderTask(taskId, status, overTaskId, position);
   };
 
   return (
@@ -224,7 +336,7 @@ export const TaskView = ({
           onAddTask={handleAddTask}
           onDeleteTask={handleDeleteTask}
           onToggleTaskDone={handleToggleTaskDone}
-          onReorderTask={reorderTask}
+          onReorderTask={handleReorderTask}
         />
       ) : (
         <TaskListView
@@ -243,7 +355,7 @@ export const TaskView = ({
             defaultCategory={defaultNewTaskCategory}
             categoryOptions={categoryOptions}
             onClose={() => setShowModal(false)}
-            onSave={addTask}
+            onSave={handleSaveTask}
           />
         )}
       </AnimatePresence>
