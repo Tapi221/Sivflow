@@ -1,23 +1,13 @@
-import {type DragEndEvent,
-  type DragOverEvent,
-  type DragStartEvent,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,} from "@dnd-kit/core";
+import { type DragEndEvent, type DragOverEvent, type DragStartEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useMemo, useRef, useState } from "react";
 
 import type { Task } from "../../calendar/task/task.types";
-import {TASK_DND_DROP_ANIMATION,
-  TASK_DND_MEASURING_CONFIG,
-  TASK_DND_POINTER_ACTIVATION_DISTANCE,} from "./taskDnd.config";
+import { TASK_DND_DROP_ANIMATION, TASK_DND_MEASURING_CONFIG, TASK_DND_POINTER_ACTIVATION_DISTANCE } from "./taskDnd.config";
 import { taskBoardCollisionDetection } from "./taskDnd.collision";
 import { resolveDropTarget } from "./taskDnd.dropTarget";
-import {areDropTargetsEqual,
-  findTask,} from "./taskDnd.preview";
-import type {TaskDropTarget,
-  TaskInsertPosition,} from "./taskDnd.types";
+import { areDropTargetsEqual, createTaskDragPreview, findTask } from "./taskDnd.preview";
+import type { TaskDropTarget, TaskInsertPosition } from "./taskDnd.types";
 
 type UseTaskBoardDndArgs = {
   tasksByColumn: Record<string, Task[]>;
@@ -38,8 +28,17 @@ export const useTaskBoardDnd = ({
   const [activeTaskHeight, setActiveTaskHeight] = useState<number | null>(null);
   const [activeDropTarget, setActiveDropTarget] = useState<TaskDropTarget | null>(null);
   const latestDropTargetRef = useRef<TaskDropTarget | null>(null);
-  const visibleTasksByColumn = tasksByColumn;
-  const isPreviewingTaskReorder = false;
+  const visibleTasksByColumn = useMemo(() => {
+    if (!activeTaskId || !activeDropTarget) {
+      return tasksByColumn;
+    }
+
+    return createTaskDragPreview(tasksByColumn, activeTaskId, activeDropTarget, (task, targetColumnId) => ({
+      ...task,
+      category: targetColumnId,
+    }));
+  }, [activeDropTarget, activeTaskId, tasksByColumn]);
+  const isPreviewingTaskReorder = activeTaskId !== null && activeDropTarget !== null;
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
