@@ -35,7 +35,7 @@ export const useScheduleDays = ({
         end: interactionDays[interactionDays.length - 1],
       },
     };
-  }, [anchorDate, buffer.after, buffer.before, viewMode]);
+  }, [anchorDate, buffer, viewMode]);
 };
 
 type UseScheduleTimelineColumnsParams = {
@@ -51,6 +51,6 @@ export const useScheduleTimelineColumns = ({
 }: UseScheduleTimelineColumnsParams) => {
   return useMemo(
     () => buildScheduleTimelineColumns(viewMode, anchorDate, buffer),
-    [anchorDate, buffer.after, buffer.before, viewMode],
+    [anchorDate, buffer, viewMode],
   );
 };
