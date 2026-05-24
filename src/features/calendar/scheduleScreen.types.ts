@@ -59,6 +59,7 @@ export type GoogleAccountDisplay = {
   isTaskListsLoading: boolean;
   selectedCalendarIds: Set<string>;
   connectionStatus: GCalConnectionStatus;
+  error: string | null;
 };
 
 export type CalendarSelectionRange = {

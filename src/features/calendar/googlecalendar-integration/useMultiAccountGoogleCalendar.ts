@@ -313,6 +313,21 @@ const getErrorStatus = (error: unknown): number | undefined => {
 const isUnauthorizedError = (error: unknown): boolean =>
   getErrorStatus(error) === 401;
 
+const getGoogleReason = (error: unknown): string | undefined => {
+  if (!(error instanceof Error)) return undefined;
+  return (error as Error & { googleReason?: string }).googleReason;
+};
+
+const isGooglePermissionError = (error: unknown): boolean => {
+  const status = getErrorStatus(error);
+  const reason = getGoogleReason(error);
+
+  return (
+    status === 403 &&
+    (reason === "authError" || reason === "insufficientPermissions")
+  );
+};
+
 const getErrorCode = (error: unknown): string | undefined => {
   if (!(error instanceof Error)) return undefined;
   return (error as Error & { code?: string }).code;
@@ -325,6 +340,8 @@ const isReconnectRequiredError = (error: unknown): boolean => {
   const code = normalizeErrorCode(getErrorCode(error));
 
   return (
+    isUnauthorizedError(error) ||
+    isGooglePermissionError(error) ||
     code === "not-found" ||
     code === "failed-precondition" ||
     code === "permission-denied" ||
@@ -544,7 +561,7 @@ export const useMultiAccountGoogleCalendar = () => {
             try {
               list = await fetchCalendarList(result.accessToken);
             } catch (error) {
-              if (isUnauthorizedError(error)) {
+              if (isReconnectRequiredError(error)) {
                 dispatchAccounts({
                   type: "NEEDS_RECONNECT",
                   id: accountId,
@@ -712,7 +729,7 @@ export const useMultiAccountGoogleCalendar = () => {
             result.accountPhotoUrl,
           );
         } catch (error) {
-          if (isUnauthorizedError(error)) {
+          if (isReconnectRequiredError(error)) {
             dispatchAccounts({
               type: "NEEDS_RECONNECT",
               id: accountId,
@@ -737,7 +754,7 @@ export const useMultiAccountGoogleCalendar = () => {
           stored.name,
           stored.photoUrl,
         ).catch((error) => {
-          if (isUnauthorizedError(error)) {
+          if (isReconnectRequiredError(error)) {
             void refreshStoredAccount();
             return;
           }
