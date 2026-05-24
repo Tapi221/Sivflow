@@ -80,10 +80,10 @@ export const TaskEventChip = memo(({
       }}
       title={titleLabel}
     >
-      <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-1">
+      <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-0.5">
         <button
           type="button"
-          className="flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform active:scale-90"
+          className="flex h-3 w-3 shrink-0 items-center justify-center transition-transform active:scale-90"
           aria-label={checkboxLabel}
           title={checkboxLabel}
           onPointerDown={(event) => event.stopPropagation()}
@@ -95,7 +95,7 @@ export const TaskEventChip = memo(({
           <AnimatedSquareCheckbox
             checked={isDone}
             color={checkboxColor}
-            className="h-3.5 w-3.5"
+            className="h-3 w-3"
           />
         </button>
 
