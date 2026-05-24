@@ -10,7 +10,6 @@ import React, {
 import {
   PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT,
   PDF_PAGE_PREFETCH_EXTRA_PAGES,
-  PDF_PAGE_PREFETCH_OVERSCAN_VIEWPORTS,
   PDF_PAGE_RENDER_OVERSCAN_VIEWPORTS,
 } from "@/features/pdf";
 
@@ -104,39 +103,12 @@ type PageLayoutMetrics = {
   totalContentHeight: number;
 };
 
-type PageIndexWindow = {
-  startIndex: number;
-  endIndex: number;
-};
-
 interface PdfViewerInnerProps extends PdfViewerCommonProps {
   documentController: PdfDocumentController;
 }
 
 const EMPTY_PAGE_NUMBERS: number[] = [];
 const EMPTY_SEARCH_MATCHES: PdfPageSearchMatch[] = [];
-
-const areNumberArraysEqual = (left: number[], right: number[]) => {
-  if (left === right) {
-    return true;
-  }
-
-  if (left.length !== right.length) {
-    return false;
-  }
-
-  return left.every((value, index) => value === right[index]);
-};
-
-const useStableNumberArray = (values: number[]) => {
-  const stableRef = useRef(values);
-
-  if (!areNumberArraysEqual(stableRef.current, values)) {
-    stableRef.current = values;
-  }
-
-  return stableRef.current;
-};
 
 const normalizePageOrder = (
   pageOrder: number[] | undefined,
@@ -330,43 +302,6 @@ const buildPrefetchPageNumbers = ({
   return Array.from(pages).sort((left, right) => left - right);
 };
 
-const getVisibleRowRange = ({
-  rowTopOffsets,
-  rowBottomOffsets,
-  scrollTop,
-  viewportHeight,
-}: {
-  rowTopOffsets: number[];
-  rowBottomOffsets: number[];
-  scrollTop: number;
-  viewportHeight: number;
-}): PageIndexWindow => {
-  if (rowTopOffsets.length === 0) {
-    return { startIndex: 0, endIndex: -1 };
-  }
-
-  const minTop = scrollTop - viewportHeight * PDF_PAGE_PREFETCH_OVERSCAN_VIEWPORTS;
-  const maxBottom = scrollTop + viewportHeight * (1 + PDF_PAGE_PREFETCH_OVERSCAN_VIEWPORTS);
-  let startIndex = 0;
-  let endIndex = rowTopOffsets.length - 1;
-
-  for (let index = 0; index < rowBottomOffsets.length; index += 1) {
-    if ((rowBottomOffsets[index] ?? 0) >= minTop) {
-      startIndex = index;
-      break;
-    }
-  }
-
-  for (let index = rowTopOffsets.length - 1; index >= 0; index -= 1) {
-    if ((rowTopOffsets[index] ?? 0) <= maxBottom) {
-      endIndex = index;
-      break;
-    }
-  }
-
-  return { startIndex, endIndex };
-};
-
 const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
   (
     {
@@ -386,7 +321,6 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
       className,
       pageGap = 16,
       spreadGap = 16,
-      navigationIdentity = null,
       opaqueCanvas = false,
     },
     ref,
@@ -404,13 +338,9 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
       prefetchPageResources,
     } = documentController;
 
-    const stablePageOrder = useStableNumberArray(
-      normalizePageOrder(pageOrder, numPages),
-    );
-
     const orderedPageNumbers = useMemo(
-      () => normalizePageOrder(stablePageOrder, numPages),
-      [numPages, stablePageOrder],
+      () => normalizePageOrder(pageOrder, numPages),
+      [numPages, pageOrder],
     );
 
     const pageLayoutMetrics = useMemo(
