@@ -3,8 +3,15 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
+type PracticeSummaryState = {
+  roundNumber: number;
+  filterRating: string;
+  doneCount: number;
+  remaining: unknown[];
+};
+
 type Props = {
-  practiceState: unknown;
+  practiceState: PracticeSummaryState;
   handlePracticeContinueRound: () => void;
   handlePracticeExit: (reason?: string) => void;
   ratingLabels: Record<string, string>;
@@ -25,7 +32,7 @@ export const PracticeSummary = ({
             ラウンド {practiceState.roundNumber} 終了
           </h2>
           <p className="text-sm text-[#64748b] mb-8">
-            {ratingLabels[practiceState.filterRating]}だけを追い復習中
+            {ratingLabels[practiceState.filterRating] ?? practiceState.filterRating}だけを追い復習中
           </p>
           <div className="mx-auto max-w-sm rounded-2xl border border-slate-200 bg-white/95 px-6 py-5 mb-8">
             <p className="text-xl font-bold text-slate-700">
