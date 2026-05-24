@@ -11,7 +11,14 @@ import { createPortal } from "react-dom";
 import { Reorder } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { PlusLineIcon } from "@/components/icons/icons.schedule";
-import type { WorkspaceTab } from "@/features/tab/Tab";
+import {
+  ClockIcon,
+  HomeIcon,
+  InboxIcon,
+  LibraryIcon,
+  SettingIcon,
+} from "@/components/icons/icons.sidebar";
+import type { WorkspaceSidebarSection, WorkspaceTab } from "@/features/tab/Tab";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
 import {
@@ -21,7 +28,7 @@ import {
   WorkspaceTabContextMenu,
 } from "@/features/tab/TabContextMenu";
 import { cn } from "@/lib/utils";
-import { Calendar, FileText, FolderIcon, Layers, X } from "@/ui/icons";
+import { FileText, Layers, X } from "@/ui/icons";
 
 type WorkspaceTabsBarVariant = "workspace" | "titlebar";
 
@@ -212,31 +219,19 @@ const clampContextMenuPosition = (
   };
 };
 
-const HomeIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M4 10.5 12 4l8 6.5V20h-5v-5H9v5H4z" fill="currentColor" />
-  </svg>
-);
-
-const ReviewIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path
-      d="M5 7h14l1.5 10H15l-1.3 2h-3.4L9 17H3.5z"
-      stroke="currentColor"
-      strokeLinejoin="round"
-      strokeWidth="1.8"
-    />
-  </svg>
-);
+const SIDEBAR_ROUTE_TAB_ICONS = {
+  home: HomeIcon,
+  review: InboxIcon,
+  schedule: ClockIcon,
+  settings: SettingIcon,
+} satisfies Partial<Record<WorkspaceSidebarSection, TabIconComponent>>;
 
 const resolveTabIcon = (tab: WorkspaceTab): TabIconComponent => {
   if (tab.kind === "route") {
-    if (tab.sectionKey === "home") return HomeIcon;
-    if (tab.sectionKey === "review") return ReviewIcon;
-    if (tab.sectionKey === "schedule") return Calendar;
+    return SIDEBAR_ROUTE_TAB_ICONS[tab.sectionKey] ?? FileText;
   }
 
-  if (tab.kind === "explorer") return FolderIcon;
+  if (tab.kind === "explorer") return LibraryIcon;
   if (tab.kind === "card") return Layers;
 
   return FileText;
