@@ -15,29 +15,28 @@ export const NewTaskButton = ({ onClick }: NewTaskButtonProps) => {
       className="
         group
         flex
-        h-[40px]
+        h-8
         items-center
         justify-center
-        gap-2
-        rounded-[14px]
+        gap-1.5
+        rounded-lg
         border
-        border-[#dfe3eb]
-        bg-white/95
-        px-4
-        text-[13px]
-        font-semibold
-        text-[#007aff]
-        shadow-[0_1px_2px_rgba(15,23,42,0.06),0_8px_24px_rgba(15,23,42,0.06)]
-        transition-all
-        duration-150
-        hover:border-[#cfd6e2]
-        hover:bg-white
-        hover:shadow-[0_2px_4px_rgba(15,23,42,0.08),0_10px_28px_rgba(15,23,42,0.08)]
-        active:scale-[0.985]
-        active:bg-[#f7f8fb]
+        border-[#e9eaed]
+        bg-white
+        px-2.5
+        text-[12px]
+        font-medium
+        text-[#8f929c]
+        transition-colors
+        hover:bg-[#f7f8fa]
+        hover:text-[#4c5361]
+        active:bg-[#eef1f5]
       "
     >
-      <CreateActionPlusIcon />
+      <CreateActionPlusIcon
+        className="h-4 w-4 bg-transparent text-[#8f929c] shadow-none group-hover:scale-100 group-hover:text-[#4c5361]"
+        iconClassName="h-3.5 w-3.5"
+      />
 
       <span>{t.addTask}</span>
     </button>
