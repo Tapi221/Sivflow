@@ -51,7 +51,7 @@ const CardSetLibraryDashboard = ({
             <h2 className="mt-5 text-[30px] font-semibold tracking-[-0.03em] text-[#20262a]">
               カードセットがまだありません
             </h2>
-            <p className="mt-3 max-w-xl text-[14px] leading-7 text-[#6f7b78]">
+            <p className="mt-3 max-w-xl text-[var(--ds-typography-font-size-sm)] leading-7 text-[#6f7b78]">
               カードセットを作成すると、この画面で管理できます。
             </p>
           </div>
