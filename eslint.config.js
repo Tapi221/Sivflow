@@ -81,8 +81,9 @@ export default defineConfig([
       ],
 
       // ----------------------------
-      // react hooks（warning化で崩壊防止）
+      // react / react hooks
       // ----------------------------
+      "react-refresh/only-export-components": "off",
       "react-hooks/exhaustive-deps": "off",
       "react-hooks/preserve-manual-memoization": "off",
       "react-hooks/refs": "off",
