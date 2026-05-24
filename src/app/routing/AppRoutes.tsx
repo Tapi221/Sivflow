@@ -38,6 +38,8 @@ export const AppRoutes = () => {
         <Route index element={<DefaultRedirect />} />
 
         <Route path="library" element={withRouteFallback(<Folders />)} />
+        <Route path="library/pdf" element={withRouteFallback(<Folders />)} />
+        <Route path="library/flashcard" element={withRouteFallback(<Folders />)} />
 
         <Route path="tag-map" element={<Navigate to="/library" replace />} />
         <Route path="schedule" element={withRouteFallback(<Schedule />)} />
