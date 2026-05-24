@@ -311,10 +311,6 @@ export const TaskView = ({
     return meta;
   }, [googleAccounts]);
 
-  const taskListOptions = useMemo<TaskCategoryOption[]>(() => {
-    return Array.from(taskListMetaById.values(), ({ id, label }) => ({ id, label }));
-  }, [taskListMetaById]);
-
   const selectedTaskListIdArray = useMemo(
     () => Array.from(selectedTaskListIds),
     [selectedTaskListIds],
@@ -533,8 +529,6 @@ export const TaskView = ({
       <TaskToolbar
         filterDate={filterDate}
         viewMode={viewMode}
-        taskListOptions={taskListOptions}
-        selectedTaskListIds={selectedTaskListIdArray}
         onClearFilterDate={() => setFilterDate(null)}
         onChangeViewMode={setViewMode}
         onOpenNewTaskModal={handleOpenNewTaskModal}
