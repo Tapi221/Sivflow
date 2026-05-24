@@ -43,7 +43,7 @@ export const TaskInsertionSlot = ({
         className={cn(
           "pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2 rounded-full transition-[height,opacity,transform,box-shadow] duration-[160ms] ease-[cubic-bezier(.22,1,.36,1)]",
           isActive
-            ? "h-[3px] scale-x-100 bg-[#007aff] opacity-100 shadow-[0_0_0_3px_rgba(0,122,255,0.12)]"
+            ? "h-[3px] scale-x-100 bg-[#5f8f83] opacity-100 shadow-[0_0_0_3px_rgba(95,143,131,0.16)]"
             : "h-px scale-x-95 bg-transparent opacity-0",
         )}
       />
