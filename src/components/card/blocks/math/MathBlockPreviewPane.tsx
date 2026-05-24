@@ -2,6 +2,7 @@ import {
   buildTypographyStyle,
   mergeStyles,
 } from "@/components/card/common/cardSetViewZoom";
+import { TYPOGRAPHY_FONT_SIZE_PX } from "@/styles/tokens/typography";
 
 import { MathRenderer } from "./MathBlockContent";
 
@@ -29,7 +30,7 @@ export const MathBlockPreviewPane = ({
   zoom,
 }: MathBlockPreviewPaneProps) => {
   const typographyStyle = buildTypographyStyle({
-    fontSizePx: 16,
+    fontSizePx: TYPOGRAPHY_FONT_SIZE_PX.md,
     lineHeightPx: 24,
     zoom,
   });
