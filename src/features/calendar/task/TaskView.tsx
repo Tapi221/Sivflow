@@ -479,6 +479,19 @@ export const TaskView = ({
     updateTask(taskId, { title });
   };
 
+  const handleChangeTaskDueDate = (taskId: string, dueDate: string | null) => {
+    const googleTaskId = parseGoogleTaskId(taskId);
+
+    if (googleTaskId) {
+      void onUpdateGoogleTask?.(googleTaskId.taskListId, googleTaskId.taskId, {
+        due: toGoogleDueDate(dueDate),
+      }).then(() => onRefreshGoogleTasks?.());
+      return;
+    }
+
+    updateTask(taskId, { dueDate });
+  };
+
   const handleDeleteTask = (taskId: string) => {
     const googleTaskId = parseGoogleTaskId(taskId);
 
@@ -542,6 +555,7 @@ export const TaskView = ({
           tasks={visibleTasks}
           onToggleTaskDone={handleToggleTaskDone}
           onRenameTask={handleRenameTask}
+          onChangeTaskDueDate={handleChangeTaskDueDate}
           onDeleteTask={handleDeleteTask}
         />
       )}
