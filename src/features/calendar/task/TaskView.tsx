@@ -568,7 +568,15 @@ export const TaskView = ({
           googleTaskId.taskListId,
           googleTaskId.taskId,
           destinationTaskListId,
-        ).then(() => onRefreshGoogleTasks?.());
+        ).catch((error) => {
+          console.error("Task reorder failed while moving Google task list.", {
+            destinationCategory,
+            destinationTaskListId,
+            error,
+            sourceTaskListId: googleTaskId.taskListId,
+            taskId: googleTaskId.taskId,
+          });
+        });
         return;
       }
 
