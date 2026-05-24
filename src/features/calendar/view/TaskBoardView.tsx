@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { TASK_COLUMNS } from "../task/task.types";
 import type { Task, TaskStatus } from "../task/task.types";
 import { useTaskBoardDnd } from "../../dnd/task/useTaskBoardDnd";
+import type { TaskDropTarget } from "../../dnd/task/taskDnd.types";
 import { TaskCard } from "../task/TaskCard";
 import { TaskColumn } from "../task/TaskColumn";
 
@@ -26,6 +27,7 @@ type TaskBoardViewProps = {
 type DroppableTaskColumnProps = Omit<TaskBoardViewProps, "tasksByStatus" | "onReorderTask"> & {
   column: (typeof TASK_COLUMNS)[number];
   tasks: Task[];
+  activeDropTarget?: TaskDropTarget | null;
   activeTaskId?: string | null;
   showDivider?: boolean;
 };
@@ -37,6 +39,7 @@ const TASK_COLUMN_DIVIDER_CLASS_NAME = "border-l border-[#eeeeee]";
 const DroppableTaskColumn = ({
   column,
   tasks,
+  activeDropTarget,
   activeTaskId,
   showDivider = false,
   accountName,
@@ -63,6 +66,7 @@ const DroppableTaskColumn = ({
       <TaskColumn
         column={column}
         tasks={tasks}
+        activeDropTarget={activeDropTarget}
         activeTaskId={activeTaskId}
         accountName={accountName}
         accountPhotoUrl={accountPhotoUrl}
@@ -84,6 +88,7 @@ export const TaskBoardView = ({
   onReorderTask,
 }: TaskBoardViewProps) => {
   const {
+    activeDropTarget,
     activeTask,
     activeTaskId,
     activeTaskWidth,
@@ -171,6 +176,7 @@ export const TaskBoardView = ({
               key={col.id}
               column={col}
               tasks={visibleTasksByStatus[col.id] ?? []}
+              activeDropTarget={activeDropTarget}
               activeTaskId={activeTaskId}
               showDivider={index > 0}
               accountName={accountName}
