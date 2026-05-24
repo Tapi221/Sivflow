@@ -45,7 +45,7 @@ type IOSPickerProps<T extends string> = {
 };
 
 const CheckIcon = () => (
-  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden="true">
+  <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
     <path
       d="M3.5 8.3l2.8 2.8 6.2-6.2"
       stroke="currentColor"
@@ -60,7 +60,7 @@ const ChevronDownIcon = ({ isOpen }: { isOpen: boolean }) => (
   <svg
     viewBox="0 0 16 16"
     fill="none"
-    className={`h-3.5 w-3.5 text-[#6e6e73] transition-transform ${
+    className={`h-3 w-3 text-[#6e6e73] transition-transform ${
       isOpen ? "rotate-180" : ""
     }`}
     aria-hidden="true"
@@ -76,11 +76,11 @@ const ChevronDownIcon = ({ isOpen }: { isOpen: boolean }) => (
 );
 
 const CircleIcon = () => (
-  <span className="h-3.5 w-3.5 rounded-full border-2 border-[#8e8e93]" aria-hidden="true" />
+  <span className="h-3 w-3 rounded-full border-2 border-[#8e8e93]" aria-hidden="true" />
 );
 
 const CalendarIcon = () => (
-  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden="true">
+  <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
     <path
       d="M4.2 2.5v2M11.8 2.5v2M3 6.4h10M4 3.7h8a1.4 1.4 0 0 1 1.4 1.4v7A1.4 1.4 0 0 1 12 13.5H4A1.4 1.4 0 0 1 2.6 12V5.1A1.4 1.4 0 0 1 4 3.7Z"
       stroke="currentColor"
@@ -109,7 +109,7 @@ const IOSPicker = <T extends string,>({
       <button
         type="button"
         onClick={() => onOpen(isOpen ? "" : id)}
-        className="inline-flex h-9 items-center gap-2 rounded-full border border-[#dedee3] bg-white px-3 text-[13px] font-medium text-[#5f6368] shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-colors hover:bg-[#f8f8fb] focus:border-[#7c83e6]"
+        className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[#dedee3] bg-white px-2.5 text-[12px] font-medium text-[#5f6368] shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-colors hover:bg-[#f8f8fb] focus:border-[#7c83e6]"
       >
         {icon}
         <span>{selectedLabel}</span>
@@ -117,8 +117,8 @@ const IOSPicker = <T extends string,>({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-[calc(100%+8px)] z-40 min-w-[220px] rounded-[12px] bg-white p-1.5 shadow-[0_14px_34px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.08]">
-          <div className="px-2.5 pb-1.5 pt-1 text-[11px] font-semibold tracking-wide text-[#8e8e93]">
+        <div className="absolute left-0 top-[calc(100%+8px)] z-40 min-w-[200px] rounded-[12px] bg-white p-1.5 shadow-[0_14px_34px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.08]">
+          <div className="px-2.5 pb-1 pt-0.5 text-[10px] font-semibold tracking-wide text-[#8e8e93]">
             {title}
           </div>
 
@@ -130,11 +130,11 @@ const IOSPicker = <T extends string,>({
                 key={option.value}
                 type="button"
                 onClick={() => onChange(option.value)}
-                className="flex w-full items-center justify-between rounded-[8px] px-2.5 py-2 text-left text-[13px] text-[#1f2328] transition-colors hover:bg-[#f2f2f7]"
+                className="flex w-full items-center justify-between rounded-[8px] px-2.5 py-1.5 text-left text-[12px] text-[#1f2328] transition-colors hover:bg-[#f2f2f7]"
               >
                 <span>{option.label}</span>
 
-                <span className="flex h-4 w-4 items-center justify-center text-[#6571dc]">
+                <span className="flex h-3.5 w-3.5 items-center justify-center text-[#6571dc]">
                   {selected && <CheckIcon />}
                 </span>
               </button>
@@ -219,7 +219,7 @@ export const NewTaskModal = ({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
-        className="w-full max-w-[860px] overflow-visible rounded-[18px] bg-white shadow-[0_22px_56px_rgba(0,0,0,0.24)] ring-1 ring-black/[0.08]"
+        className="w-full max-w-[820px] overflow-visible rounded-[18px] bg-white shadow-[0_22px_56px_rgba(0,0,0,0.24)] ring-1 ring-black/[0.08]"
         initial={{
           opacity: 0,
           y: 10,
@@ -241,9 +241,9 @@ export const NewTaskModal = ({
         }}
       >
         <div className="flex items-center justify-between px-5 pb-3 pt-4">
-          <div className="flex items-center gap-2 text-[14px] font-medium text-[#2f3337]">
-            <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[#e5e5ea] bg-white px-2.5 text-[#6a6d72] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#dff8ef] text-[10px] text-[#3cbf93]">
+          <div className="flex items-center gap-2 text-[13px] font-medium text-[#2f3337]">
+            <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-[#e5e5ea] bg-white px-2.5 text-[#6a6d72] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+              <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#dff8ef] text-[9px] text-[#3cbf93]">
                 ✓
               </span>
               Task
@@ -256,9 +256,9 @@ export const NewTaskModal = ({
             type="button"
             onClick={onClose}
             aria-label="閉じる"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-[#5f6368] transition-colors hover:bg-[#f2f2f7]"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-transparent text-[#5f6368] transition-colors hover:bg-[#f2f2f7]"
           >
-            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
+            <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
               <path
                 d="M4 4l8 8M12 4l-8 8"
                 stroke="currentColor"
@@ -278,10 +278,10 @@ export const NewTaskModal = ({
             onKeyDown={handleKeyDown}
             placeholder="タスクタイトル"
             aria-label="タスクタイトル"
-            className="w-full border-0 bg-transparent px-0 text-[26px] font-semibold leading-tight tracking-[-0.04em] text-[#1f2328] outline-none placeholder:text-[#a1a1aa]"
+            className="w-full border-0 bg-transparent px-0 text-[22px] font-semibold leading-tight tracking-[-0.035em] text-[#1f2328] outline-none placeholder:text-[#a1a1aa]"
           />
 
-          <div className="mt-8 flex flex-wrap items-center gap-2">
+          <div className="mt-7 flex flex-wrap items-center gap-2">
             <IOSPicker
               id="status"
               title="ステータス"
@@ -325,7 +325,7 @@ export const NewTaskModal = ({
                 label: option.label,
               }))}
               icon={
-                <span className="flex h-4 w-4 items-center justify-center rounded-[4px] border border-[#8e8e93] text-[10px] text-[#6e6e73]">
+                <span className="flex h-3.5 w-3.5 items-center justify-center rounded-[4px] border border-[#8e8e93] text-[9px] text-[#6e6e73]">
                   □
                 </span>
               }
@@ -337,7 +337,7 @@ export const NewTaskModal = ({
               }}
             />
 
-            <label className="relative inline-flex h-9 cursor-pointer items-center gap-2 rounded-full border border-[#dedee3] bg-white px-3 text-[13px] font-medium text-[#5f6368] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#f8f8fb]">
+            <label className="relative inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-[#dedee3] bg-white px-2.5 text-[12px] font-medium text-[#5f6368] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#f8f8fb]">
               <span className="text-[#6e6e73]">
                 <CalendarIcon />
               </span>
@@ -352,7 +352,7 @@ export const NewTaskModal = ({
             </label>
           </div>
 
-          <div className="mt-3 text-[12px] text-[#8e8e93]">
+          <div className="mt-3 text-[11px] text-[#8e8e93]">
             {selectedCategoryLabel} に作成されます
           </div>
         </div>
@@ -360,10 +360,10 @@ export const NewTaskModal = ({
         <div className="flex items-center justify-between border-t border-[#ededf0] px-5 py-4">
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[#dedee3] bg-white text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#f8f8fb]"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#dedee3] bg-white text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#f8f8fb]"
             aria-label="添付"
           >
-            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
+            <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
               <path
                 d="M5.2 8.4 8.6 5a2.1 2.1 0 0 1 3 3L7.3 12.3a3.2 3.2 0 0 1-4.5-4.5l4.7-4.7a4 4 0 0 1 5.7 5.7L8.6 13.4"
                 stroke="currentColor"
@@ -378,7 +378,7 @@ export const NewTaskModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full px-4 py-2 text-[13px] font-medium text-[#5f6368] transition-colors hover:bg-[#f2f2f7]"
+              className="rounded-full px-3.5 py-1.5 text-[12px] font-medium text-[#5f6368] transition-colors hover:bg-[#f2f2f7]"
             >
               キャンセル
             </button>
@@ -387,7 +387,7 @@ export const NewTaskModal = ({
               type="button"
               onClick={handleSave}
               disabled={!title.trim()}
-              className="rounded-full bg-[#6571dc] px-5 py-2 text-[13px] font-semibold text-white shadow-[0_8px_18px_rgba(101,113,220,0.28)] transition-colors hover:bg-[#5864ce] disabled:bg-[#c7c7cc] disabled:shadow-none"
+              className="rounded-full bg-[#6571dc] px-4 py-1.5 text-[12px] font-semibold text-white shadow-[0_8px_18px_rgba(101,113,220,0.28)] transition-colors hover:bg-[#5864ce] disabled:bg-[#c7c7cc] disabled:shadow-none"
             >
               作成
             </button>
