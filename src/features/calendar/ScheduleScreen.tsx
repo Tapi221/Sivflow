@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns";
 import { SidebarOpenIcon } from "@/components/icons/icons.sidebar";
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -40,6 +40,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const monthLabelFormat = useMonthLabelFormat();
   const [isDayDetailPanelOpen, setIsDayDetailPanelOpen] = useState(true);
   const [selectedTaskListIds, setSelectedTaskListIds] = useState<string[]>([]);
+  const selectedTaskListInitializedRef = useRef(false);
 
   const viewOptions = useMemo(
     () => [
@@ -91,9 +92,37 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     deleteGoogleTask,
   } = pane;
 
-  const handleSelectAllTaskLists = useCallback(() => {
-    setSelectedTaskListIds([]);
-  }, []);
+  const allTaskListIds = useMemo(
+    () => googleAccounts.flatMap((account) => account.taskLists.map((taskList) => taskList.id)),
+    [googleAccounts],
+  );
+  const allTaskListIdsKey = allTaskListIds.join("\t");
+
+  useEffect(() => {
+    setSelectedTaskListIds((ids) => {
+      if (allTaskListIds.length === 0) {
+        selectedTaskListInitializedRef.current = false;
+        return ids.length === 0 ? ids : [];
+      }
+
+      if (!selectedTaskListInitializedRef.current) {
+        selectedTaskListInitializedRef.current = true;
+        return allTaskListIds;
+      }
+
+      const availableTaskListIds = new Set(allTaskListIds);
+      const nextIds = ids.filter((id) => availableTaskListIds.has(id));
+
+      if (
+        nextIds.length === ids.length &&
+        nextIds.every((id, index) => id === ids[index])
+      ) {
+        return ids;
+      }
+
+      return nextIds;
+    });
+  }, [allTaskListIds, allTaskListIdsKey]);
 
   const handleToggleTaskList = useCallback((taskListId: string) => {
     setSelectedTaskListIds((ids) => {
@@ -251,7 +280,6 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
             void reconnectGoogleAccount(accountId);
           }}
           onToggleCalendar={toggleGoogleCalendar}
-          onSelectAllTaskLists={handleSelectAllTaskLists}
           onToggleTaskList={handleToggleTaskList}
         />
       )}
@@ -272,7 +300,6 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
           <TaskView
             googleAccounts={googleAccounts}
             selectedTaskListIds={selectedTaskListIds}
-            onSelectAllTaskLists={handleSelectAllTaskLists}
             onRefreshGoogleTasks={refreshGoogleTasks}
             onCreateGoogleTask={createGoogleTask}
             onUpdateGoogleTask={updateGoogleTask}
