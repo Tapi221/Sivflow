@@ -2,7 +2,7 @@ import type { TagColorKey, TagColorPalette } from "./tag.types";
 
 export const TAG_COLOR_PALETTE: Record<TagColorKey, TagColorPalette> = {
   gray: {
-    bg: "var(--ds-color-tag-gray-bg)",
+    bg: "var(--ds-semantic-color-background-app)",
     fg: "var(--ds-color-tag-gray-fg)",
     border: "var(--ds-color-tag-gray-border)",
     swatch: "var(--ds-color-tag-gray-fg)",
