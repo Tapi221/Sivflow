@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "./task.types";
@@ -59,6 +59,61 @@ type ParsedGoogleTaskId = {
 };
 
 const GOOGLE_TASK_ID_PREFIX = "google-task:";
+const GOOGLE_TASK_STATUS_OVERRIDES_STORAGE_KEY =
+  "flashcard-master.google-task-status-overrides.v1";
+
+type GoogleTaskStatusOverrides = Partial<Record<string, TaskStatus>>;
+
+const isTaskStatus = (value: unknown): value is TaskStatus => {
+  return TASK_COLUMNS.some((column) => column.id === value);
+};
+
+const loadGoogleTaskStatusOverrides = (): GoogleTaskStatusOverrides => {
+  if (typeof window === "undefined") {
+    return {};
+  }
+
+  try {
+    const raw = window.localStorage.getItem(
+      GOOGLE_TASK_STATUS_OVERRIDES_STORAGE_KEY,
+    );
+
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw) as unknown;
+
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(parsed as Record<string, unknown>).filter(([, value]) =>
+        isTaskStatus(value),
+      ),
+    ) as GoogleTaskStatusOverrides;
+  } catch {
+    return {};
+  }
+};
+
+const persistGoogleTaskStatusOverrides = (
+  overrides: GoogleTaskStatusOverrides,
+) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(
+      GOOGLE_TASK_STATUS_OVERRIDES_STORAGE_KEY,
+      JSON.stringify(overrides),
+    );
+  } catch {
+    // localStorage が使えない環境では UI 上の状態だけで扱う
+  }
+};
 
 const normalizeTaskListLabel = (value: string): string =>
   value.trim().toLowerCase().replace(/[\s\-_]+/g, "");
@@ -137,6 +192,12 @@ export const TaskView = ({
   const [filterDate, setFilterDate] = useState<string | null>(
     format(new Date(), "MMM d"),
   );
+  const [googleTaskStatusOverrides, setGoogleTaskStatusOverrides] =
+    useState<GoogleTaskStatusOverrides>(loadGoogleTaskStatusOverrides);
+
+  useEffect(() => {
+    persistGoogleTaskStatusOverrides(googleTaskStatusOverrides);
+  }, [googleTaskStatusOverrides]);
 
   const taskAccount = useMemo(() => {
     return (
@@ -194,11 +255,16 @@ export const TaskView = ({
         .map((googleTask, index) => {
           const taskListMeta = taskListMetaById.get(googleTask.taskListId);
           const category = taskListMeta?.category ?? googleTask.taskListId;
+          const taskId = `${GOOGLE_TASK_ID_PREFIX}${account.accountId}:${googleTask.taskListId}:${googleTask.id}`;
+          const overriddenStatus = googleTaskStatusOverrides[taskId];
+          const status =
+            overriddenStatus ??
+            (googleTask.status === "completed" ? "done" : "not_started");
 
           return {
-            id: `${GOOGLE_TASK_ID_PREFIX}${account.accountId}:${googleTask.taskListId}:${googleTask.id}`,
+            id: taskId,
             title: googleTask.title,
-            status: googleTask.status === "completed" ? "done" : "not_started",
+            status,
             priority: "medium",
             category,
             dueDate: toDateOnly(googleTask.due),
@@ -211,7 +277,7 @@ export const TaskView = ({
           } satisfies Task;
         }),
     );
-  }, [googleAccounts, selectedTaskListIds, taskListMetaById]);
+  }, [googleAccounts, googleTaskStatusOverrides, selectedTaskListIds, taskListMetaById]);
 
   const visibleLocalTasks = useMemo(() => {
     if (selectedTaskCategories.size === 0) return [];
@@ -246,6 +312,28 @@ export const TaskView = ({
     return Array.from(options, ([id, label]) => ({ id, label }));
   }, [taskListMetaById]);
 
+  const setGoogleTaskStatusOverride = (taskId: string, status: TaskStatus) => {
+    setGoogleTaskStatusOverrides((prev) => {
+      if (prev[taskId] === status) {
+        return prev;
+      }
+
+      return { ...prev, [taskId]: status };
+    });
+  };
+
+  const clearGoogleTaskStatusOverride = (taskId: string) => {
+    setGoogleTaskStatusOverrides((prev) => {
+      if (!(taskId in prev)) {
+        return prev;
+      }
+
+      const next = { ...prev };
+      delete next[taskId];
+      return next;
+    });
+  };
+
   const handleAddTask = (status: string) => {
     setNewTaskStatus(status as TaskStatus);
     setShowModal(true);
@@ -274,6 +362,7 @@ export const TaskView = ({
     const googleTaskId = parseGoogleTaskId(taskId);
 
     if (googleTaskId) {
+      setGoogleTaskStatusOverride(taskId, done ? "done" : "not_started");
       void onUpdateGoogleTask?.(
         googleTaskId.taskListId,
         googleTaskId.taskId,
@@ -304,6 +393,7 @@ export const TaskView = ({
     const googleTaskId = parseGoogleTaskId(taskId);
 
     if (googleTaskId) {
+      clearGoogleTaskStatusOverride(taskId);
       void onDeleteGoogleTask?.(
         googleTaskId.taskListId,
         googleTaskId.taskId,
@@ -323,6 +413,7 @@ export const TaskView = ({
     const googleTaskId = parseGoogleTaskId(taskId);
 
     if (googleTaskId) {
+      setGoogleTaskStatusOverride(taskId, status);
       void onUpdateGoogleTask?.(
         googleTaskId.taskListId,
         googleTaskId.taskId,
