@@ -3,6 +3,8 @@ import { type CSSProperties,useEffect, useState } from "react";
 import { windowControls } from "@/platform/capabilities/windowControls";
 import { hasDesktopBridge } from "@/platform/runtime";
 
+import "./DesktopWindowControls.css";
+
 type AppRegionStyle = CSSProperties & {
   WebkitAppRegion?: "no-drag";
 };
