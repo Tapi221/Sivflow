@@ -1,10 +1,11 @@
+import type { Auth } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { httpsCallable } from "firebase/functions";
 
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { auth, functionsClient } from "@/services/firebase";
 
-import { requestCalendarAccessToken, type GoogleCalendarAccess } from "./gcal.oauth";
+import type { GoogleCalendarAccess } from "./gcal.oauth";
 
 type ServerGoogleCalendarAccess = GoogleCalendarAccess & {
   accessToken: string;
@@ -28,6 +29,11 @@ type DisconnectGoogleCalendarAccountInput = {
   accountId: string;
 };
 
+type RequestCalendarAccessToken = (
+  auth: Auth,
+  silent?: boolean,
+) => Promise<GoogleCalendarAccess>;
+
 const exchangeGoogleCalendarCodeCallable = httpsCallable<
   ExchangeGoogleCalendarCodeInput,
   ServerGoogleCalendarAccess
@@ -42,6 +48,20 @@ const disconnectGoogleCalendarAccountCallable = httpsCallable<
   DisconnectGoogleCalendarAccountInput,
   { ok: boolean }
 >(functionsClient, "disconnectGoogleCalendarAccount");
+
+const requestBrowserCalendarAccessToken = async (
+  silent: boolean,
+): Promise<GoogleCalendarAccess> => {
+  const oauthModule = await import("./gcal.oauth") as {
+    requestCalendarAccessToken?: RequestCalendarAccessToken;
+  };
+
+  if (typeof oauthModule.requestCalendarAccessToken !== "function") {
+    throw new Error("Google Calendar browser OAuth fallback is unavailable");
+  }
+
+  return oauthModule.requestCalendarAccessToken(auth, silent);
+};
 
 const waitForCallableAuth = async (): Promise<void> => {
   await auth.authStateReady();
@@ -108,7 +128,7 @@ export const exchangeGoogleCalendarCode = async (
       error,
     );
 
-    const access = await requestCalendarAccessToken(auth, false);
+    const access = await requestBrowserCalendarAccessToken(false);
     return {
       ...access,
       refreshTokenStored: false,
@@ -134,7 +154,7 @@ export const getServerStoredGoogleCalendarAccessToken = async (
       error,
     );
 
-    const access = await requestCalendarAccessToken(auth, true);
+    const access = await requestBrowserCalendarAccessToken(true);
     return {
       ...access,
       accountEmail: access.accountEmail ?? input.accountId,
