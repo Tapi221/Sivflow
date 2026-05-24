@@ -96,6 +96,7 @@ export const fetchCalendarList = async (
         .map((i) => ({
           id: i.id!,
           summary: i.summary!,
+          summaryOverride: i.summaryOverride,
           description: i.description,
           backgroundColor: i.backgroundColor ?? "#4f7cff",
           foregroundColor: i.foregroundColor,
