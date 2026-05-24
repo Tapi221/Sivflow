@@ -15,6 +15,7 @@ import type {
   CalendarToolbarMode,
   CalendarViewMode,
 } from "@/features/calendar/calendar.types";
+import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 
 import { useGoogleCalendarPushSync } from "./useGoogleCalendarPushSync";
 import { auth } from "@/services/firebase";
@@ -28,17 +29,12 @@ type GoogleCalendarSlice = {
   }) => Promise<void> | void;
 };
 
-export type CalendarEventSyncRange = {
-  rangeStart: Date;
-  rangeEnd: Date;
-};
-
 export type UseCalendarEventSyncOptions = {
   activeMode: CalendarToolbarMode;
   selectedViewMode: CalendarViewMode;
   visibleDays: Date[];
   monthTitleDate: Date;
-  monthVisibleRange?: CalendarEventSyncRange | null;
+  monthRenderedRange?: CalendarDateRange | null;
   googleCalendar: GoogleCalendarSlice;
 };
 
@@ -46,7 +42,7 @@ export const useCalendarEventSync = ({
   selectedViewMode,
   visibleDays,
   monthTitleDate,
-  monthVisibleRange,
+  monthRenderedRange,
   googleCalendar,
 }: UseCalendarEventSyncOptions): void => {
   const { selectedCalendarIds, forceSyncRange } = googleCalendar;
@@ -62,25 +58,25 @@ export const useCalendarEventSync = ({
   const fallbackDayTime = monthTitleDate.getTime();
   const firstVisibleDayTime = visibleDays[0]?.getTime() ?? fallbackDayTime;
   const lastVisibleDayTime = visibleDays.at(-1)?.getTime() ?? fallbackDayTime;
-  const monthVisibleRangeStartTime = monthVisibleRange?.rangeStart.getTime() ?? null;
-  const monthVisibleRangeEndTime = monthVisibleRange?.rangeEnd.getTime() ?? null;
+  const monthRenderedRangeStartTime = monthRenderedRange?.start.getTime() ?? null;
+  const monthRenderedRangeEndTime = monthRenderedRange?.end.getTime() ?? null;
 
   const syncRange = useMemo(() => {
     if (selectedViewMode === "month") {
       if (
-        monthVisibleRangeStartTime !== null &&
-        monthVisibleRangeEndTime !== null
+        monthRenderedRangeStartTime !== null &&
+        monthRenderedRangeEndTime !== null
       ) {
         return {
           rangeStart: startOfDay(
             subDays(
-              new Date(monthVisibleRangeStartTime),
+              new Date(monthRenderedRangeStartTime),
               C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS,
             ),
           ),
           rangeEnd: endOfDay(
             addDays(
-              new Date(monthVisibleRangeEndTime),
+              new Date(monthRenderedRangeEndTime),
               C.MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS,
             ),
           ),
@@ -115,9 +111,9 @@ export const useCalendarEventSync = ({
   }, [
     firstVisibleDayTime,
     lastVisibleDayTime,
+    monthRenderedRangeEndTime,
+    monthRenderedRangeStartTime,
     monthTitleDate,
-    monthVisibleRangeEndTime,
-    monthVisibleRangeStartTime,
     selectedViewMode,
   ]);
 
