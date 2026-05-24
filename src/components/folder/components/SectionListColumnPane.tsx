@@ -31,6 +31,7 @@ interface SectionListColumnPaneProps {
   selectedCardSetId?: string | null;
   isFiltering?: boolean;
   resetToken?: number;
+  showLibraryToolbar?: boolean;
   onFolderSelect?: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
   onMoveFolder?: (
@@ -229,6 +230,7 @@ const SectionListColumnPane = ({
   selectedCardSetId = null,
   isFiltering = false,
   resetToken = 0,
+  showLibraryToolbar = true,
   onFolderSelect,
   onItemSelect,
   onMoveFolder,
@@ -481,6 +483,7 @@ const SectionListColumnPane = ({
           folders={folders}
           documents={documents}
           onOpenDocument={handleOpenDocument}
+          showToolbar={showLibraryToolbar}
         />
       ) : null}
       {isFlashcardLibraryView ? (
@@ -489,6 +492,7 @@ const SectionListColumnPane = ({
           cards={cards}
           cardSets={cardSets}
           onOpenCardSet={handleOpenCardSet}
+          showToolbar={showLibraryToolbar}
         />
       ) : null}
     </SectionListBlankPane>

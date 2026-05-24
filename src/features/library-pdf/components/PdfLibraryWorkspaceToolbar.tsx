@@ -1,141 +1,48 @@
-import { useMemo, type ComponentType } from "react";
+import { type ComponentType } from "react";
+import { motion, type Transition } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-import { TagFilterPopover } from "@/chip/popover/TagFilterPopover";
 import { FlashCardIcon, PDFIcon } from "@/components/icons/icons.library";
-import {
-  LibraryHeaderToolbar,
-  type LibraryHeaderToolbarIconProps,
-} from "@/features/toolbar/LibraryHeaderToolbar";
+import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
+import { cn } from "@/lib/utils";
+import type { IconProps } from "@/ui/icons";
 
-import { useTags } from "@/hooks/settings/useTags";
-import { Search } from "@/ui/icons";
-
-type PdfLibraryWorkspaceSection = "explorer" | "pdf" | "flashcard" | "notes";
+export type PdfLibraryWorkspaceSection = "flashcard" | "pdf";
 
 type PdfLibraryWorkspaceToolbarProps = {
   activeSection: PdfLibraryWorkspaceSection;
-  onSelectSection: (section: PdfLibraryWorkspaceSection) => void;
+  onSelectSection?: (section: PdfLibraryWorkspaceSection) => void;
 };
 
-const ExplorerTabIcon = ({
-  className,
-  ...props
-}: LibraryHeaderToolbarIconProps) => (
-  <svg
-    viewBox="0 0 18 18"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <path
-      d="M2.75 5.25C2.75 4.42157 3.42157 3.75 4.25 3.75H7.18C7.53503 3.75 7.87552 3.89104 8.12656 4.14208L8.60792 4.62344C8.85896 4.87448 9.19945 5.01552 9.55448 5.01552H13.75C14.5784 5.01552 15.25 5.68709 15.25 6.51552V12.25C15.25 13.0784 14.5784 13.75 13.75 13.75H4.25C3.42157 13.75 2.75 13.0784 2.75 12.25V5.25Z"
-      stroke="currentColor"
-      strokeWidth="1.45"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M3.25 7.25H14.75"
-      stroke="currentColor"
-      strokeWidth="1.45"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
-const NotesTabIcon = ({
-  className,
-  ...props
-}: LibraryHeaderToolbarIconProps) => (
-  <svg
-    viewBox="0 0 18 18"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <path
-      d="M5.25 2.75H12.75C13.5784 2.75 14.25 3.42157 14.25 4.25V13.75C14.25 14.5784 13.5784 15.25 12.75 15.25H5.25C4.42157 15.25 3.75 14.5784 3.75 13.75V4.25C3.75 3.42157 4.42157 2.75 5.25 2.75Z"
-      stroke="currentColor"
-      strokeWidth="1.45"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M6.4 6.25H11.6M6.4 9H11.6M6.4 11.75H9.8"
-      stroke="currentColor"
-      strokeWidth="1.45"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
-const SortToolbarIcon = ({
-  className,
-  ...props
-}: LibraryHeaderToolbarIconProps) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M11.9337 5.49595L8.00095 2.125L4.06817 5.49595C3.78932 5.73497 3.75703 6.15478 3.99604 6.43363C4.23506 6.71248 4.65487 6.74478 4.93373 6.50576L8.00095 3.87671L11.0682 6.50576C11.347 6.74478 11.7668 6.71248 12.0059 6.43363C12.2449 6.15478 12.2126 5.73497 11.9337 5.49595ZM4.06823 10.506L8.001 13.877L11.9338 10.506C12.2126 10.267 12.2449 9.84717 12.0059 9.56832C11.7669 9.28947 11.3471 9.25717 11.0682 9.49619L8.001 12.1252L4.93378 9.49619C4.65493 9.25717 4.23511 9.28947 3.9961 9.56832C3.75708 9.84717 3.78938 10.267 4.06823 10.506Z"
-      fill="currentColor"
-    />
-  </svg>
-);
-
-const FieldsToolbarIcon = ({
-  className,
-  ...props
-}: LibraryHeaderToolbarIconProps) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M2.00094 3.33594C1.63367 3.33594 1.33594 3.63367 1.33594 4.00094C1.33594 4.36821 1.63367 4.66594 2.00094 4.66594H2.0076C2.37487 4.66594 2.6726 4.36821 2.6726 4.00094C2.6726 3.63367 2.37487 3.33594 2.0076 3.33594H2.00094ZM5.33443 3.33594C4.96716 3.33594 4.66943 3.63367 4.66943 4.00094C4.66943 4.36821 4.96716 4.66594 5.33443 4.66594H14.0011C14.3684 4.66594 14.6661 4.36821 14.6661 4.00094C14.6661 3.63367 14.3684 3.33594 14.0011 3.33594H5.33443ZM5.33443 7.33594C4.96716 7.33594 4.66943 7.63367 4.66943 8.00094C4.66943 8.36821 4.96716 8.66594 5.33443 8.66594H14.0011C14.3684 8.66594 14.6661 8.36821 14.6661 8.00094C14.6661 7.63367 14.3684 7.33594 14.0011 7.33594H5.33443ZM4.66943 12.0009C4.66943 11.6337 4.96716 11.3359 5.33443 11.3359H14.0011C14.3684 11.3359 14.6661 11.6337 14.6661 12.0009C14.6661 12.3682 14.3684 12.6659 14.0011 12.6659H5.33443C4.96716 12.6659 4.66943 12.3682 4.66943 12.0009ZM1.33594 8.00094C1.33594 7.63367 1.63367 7.33594 2.00094 7.33594H2.0076C2.37487 7.33594 2.6726 7.63367 2.6726 8.00094C2.6726 8.36821 2.37487 8.66594 2.0076 8.66594H2.00094C1.63367 8.66594 1.33594 8.36821 1.33594 8.00094ZM2.00094 11.3359C1.63367 11.3359 1.33594 11.6337 1.33594 12.0009C1.33594 12.3682 1.63367 12.6659 2.00094 12.6659H2.0076C2.37487 12.6659 2.6726 12.3682 2.6726 12.0009C2.6726 11.6337 2.37487 11.3359 2.0076 11.3359H2.00094Z"
-      fill="currentColor"
-    />
-  </svg>
-);
-
-const PDF_LIBRARY_TABS = [
-  { value: "explorer", label: "Explorer", icon: ExplorerTabIcon },
-  { value: "pdf", label: "PDF", icon: PDFIcon },
-  { value: "flashcard", label: "Flashcard", icon: FlashCardIcon },
-  { value: "notes", label: "Notes", icon: NotesTabIcon },
-] as const satisfies ReadonlyArray<{
+type LibraryTypeToolbarTab = {
   value: PdfLibraryWorkspaceSection;
   label: string;
-  icon: ComponentType<LibraryHeaderToolbarIconProps>;
-}>;
+  icon: ComponentType<IconProps>;
+};
+
+const LIBRARY_TYPE_TABS = [
+  { value: "flashcard", label: "Flashcard", icon: FlashCardIcon },
+  { value: "pdf", label: "PDF", icon: PDFIcon },
+] as const satisfies readonly LibraryTypeToolbarTab[];
+
+const TAB_INDICATOR_ID = "library-type-tab-indicator";
+const TAB_MOTION_TRANSITION: Transition = {
+  type: "tween",
+  duration: 0.3,
+  ease: [0.22, 1, 0.36, 1],
+};
 
 const resolveLibrarySectionRoute = (
   section: PdfLibraryWorkspaceSection,
 ): string => {
-  if (section === "explorer") {
-    return "/library?view=section-list";
-  }
+  const searchParams = new URLSearchParams();
+  searchParams.set("view", "section-list");
+  searchParams.set(
+    "libraryType",
+    section === "flashcard" ? "flashcards" : "pdf",
+  );
 
-  const libraryType = section === "flashcard" ? "flashcards" : section;
-  return `/library?view=section-list&libraryType=${libraryType}`;
+  return `/library?${searchParams.toString()}`;
 };
 
 export const PdfLibraryWorkspaceToolbar = ({
@@ -143,50 +50,66 @@ export const PdfLibraryWorkspaceToolbar = ({
   onSelectSection,
 }: PdfLibraryWorkspaceToolbarProps) => {
   const navigate = useNavigate();
-  const { tags } = useTags();
-
-  const allTags = useMemo(
-    () =>
-      tags
-        .map((tag) => tag.name)
-        .sort((left, right) => left.localeCompare(right, "ja")),
-    [tags],
-  );
 
   const handleSelectSection = (section: PdfLibraryWorkspaceSection) => {
-    onSelectSection(section);
+    onSelectSection?.(section);
     navigate(resolveLibrarySectionRoute(section));
   };
 
-  const actions = useMemo(
-    () => [
-      { label: "Search", icon: Search },
-      {
-        label: "Filter",
-        render: ({ className, iconClassName, label }) => (
-          <TagFilterPopover
-            allTags={allTags}
-            className={className}
-            iconClassName={iconClassName}
-            ariaLabel={label}
-          />
-        ),
-      },
-      { label: "Sort", icon: SortToolbarIcon },
-      { label: "Fields", icon: FieldsToolbarIcon },
-    ],
-    [allTags],
-  );
-
   return (
-    <LibraryHeaderToolbar
-      activeValue={activeSection}
-      tabs={PDF_LIBRARY_TABS.map((tab) => ({
-        ...tab,
-        onClick: () => handleSelectSection(tab.value),
-      }))}
-      actions={actions}
-      variant="segmented"
-    />
+    <div className="library-workspace-toolbar flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center justify-between overflow-visible bg-white pr-[var(--workspace-content-gutter)]">
+      <div className="flex items-center gap-3">
+        <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5">
+          {LIBRARY_TYPE_TABS.map((tab, index) => {
+            const Icon = tab.icon;
+            const isActive = activeSection === tab.value;
+            const isStartEdgeTab = index === 0;
+
+            return (
+              <HoverTooltip
+                key={tab.value}
+                label={tab.label}
+                side="top"
+                align={isStartEdgeTab ? "start" : "center"}
+                offset={6}
+                preset="segmented"
+              >
+                <button
+                  type="button"
+                  onClick={() => handleSelectSection(tab.value)}
+                  aria-label={tab.label}
+                  aria-pressed={isActive}
+                  className={cn(
+                    "relative z-10 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg p-0",
+                    "appearance-none select-none",
+                    "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+                    "focus:outline-none focus:ring-0 focus-visible:outline-none",
+                    isActive
+                      ? "text-[#8c8c8c]"
+                      : "text-[#b3b3b3] hover:text-[#8c8c8c]",
+                  )}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId={TAB_INDICATOR_ID}
+                      className="absolute inset-0 -z-10 rounded-lg border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+                      transition={TAB_MOTION_TRANSITION}
+                    />
+                  )}
+
+                  <Icon
+                    aria-hidden="true"
+                    className={cn(
+                      "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+                      isActive ? "text-[#8c8c8c]" : "text-[#b7b7b7]",
+                    )}
+                  />
+                </button>
+              </HoverTooltip>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 };
