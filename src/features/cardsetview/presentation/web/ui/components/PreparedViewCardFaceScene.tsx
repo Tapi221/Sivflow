@@ -9,7 +9,7 @@ import { FlashcardMediaDialogs } from "@/components/card/frame/FlashcardMediaDia
 import type {
   FlashcardSharedDerivedSnapshot,
   FlashcardSideDerivedSnapshot,
-} from "@/components/card/frame/types";
+} from "@/components/card/frame/flashcard.types";
 import { useCardFlipBehavior } from "@/components/card/frame/useCardFlipBehavior";
 import { useFlashcardInk } from "@/components/card/frame/useFlashcardInk";
 import { useFlashcardMediaState } from "@/components/card/frame/useFlashcardMediaState";
