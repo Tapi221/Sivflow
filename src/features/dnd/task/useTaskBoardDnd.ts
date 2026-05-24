@@ -10,7 +10,7 @@ import {
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useMemo, useRef, useState } from "react";
 
-import type { Task, TaskStatus } from "../../calendar/task/task.types";
+import type { Task } from "../../calendar/task/task.types";
 import {
   TASK_DND_DROP_ANIMATION,
   TASK_DND_MEASURING_CONFIG,
@@ -28,17 +28,17 @@ import type {
 } from "./taskDnd.types";
 
 type UseTaskBoardDndArgs = {
-  tasksByStatus: Record<TaskStatus, Task[]>;
+  tasksByColumn: Record<string, Task[]>;
   onReorderTask: (
     taskId: string,
-    status: TaskStatus,
+    columnId: string,
     overTaskId?: string | null,
     position?: TaskInsertPosition,
   ) => void;
 };
 
 export const useTaskBoardDnd = ({
-  tasksByStatus,
+  tasksByColumn,
   onReorderTask,
 }: UseTaskBoardDndArgs) => {
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export const useTaskBoardDnd = ({
   const [activeTaskHeight, setActiveTaskHeight] = useState<number | null>(null);
   const [activeDropTarget, setActiveDropTarget] = useState<TaskDropTarget | null>(null);
   const latestDropTargetRef = useRef<TaskDropTarget | null>(null);
-  const visibleTasksByStatus = tasksByStatus;
+  const visibleTasksByColumn = tasksByColumn;
   const isPreviewingTaskReorder = false;
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -64,8 +64,8 @@ export const useTaskBoardDnd = ({
       return null;
     }
 
-    return findTask(tasksByStatus, activeTaskId);
-  }, [activeTaskId, tasksByStatus]);
+    return findTask(tasksByColumn, activeTaskId);
+  }, [activeTaskId, tasksByColumn]);
 
   const resetDragState = () => {
     setActiveTaskId(null);
@@ -91,7 +91,7 @@ export const useTaskBoardDnd = ({
     const activeId = String(event.active.id);
     const target = resolveDropTarget(
       event,
-      tasksByStatus,
+      tasksByColumn,
       activeId,
       latestDropTargetRef.current,
     );
@@ -121,7 +121,7 @@ export const useTaskBoardDnd = ({
     if (event.over) {
       target = latestDropTarget ?? resolveDropTarget(
         event,
-        tasksByStatus,
+        tasksByColumn,
         activeId,
         latestDropTarget,
       );
@@ -133,13 +133,13 @@ export const useTaskBoardDnd = ({
       return;
     }
 
-    const activeTask = findTask(tasksByStatus, activeId);
+    const activeTask = findTask(tasksByColumn, activeId);
 
     if (!activeTask) {
       return;
     }
 
-    onReorderTask(activeId, target.status, target.overTaskId, target.position);
+    onReorderTask(activeId, target.columnId, target.overTaskId, target.position);
   };
 
   return {
@@ -157,6 +157,6 @@ export const useTaskBoardDnd = ({
     isPreviewingTaskReorder,
     measuring: TASK_DND_MEASURING_CONFIG,
     sensors,
-    visibleTasksByStatus,
+    visibleTasksByColumn,
   };
 };
