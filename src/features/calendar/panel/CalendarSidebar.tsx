@@ -337,7 +337,6 @@ export const CalendarSidebar = ({
   onAddCalendar,
   onReconnectAccount,
   onToggleCalendar,
-  onSelectAllTaskLists,
   onToggleTaskList,
 }: CalendarSidebarProps) => {
   const t = useT();
@@ -350,7 +349,6 @@ export const CalendarSidebar = ({
 
   const hasGoogleAccounts = googleAccounts.length > 0;
   const isTaskMode = activeMode === "task";
-  const hasAnyTaskList = googleAccounts.some((account) => account.taskLists.length > 0);
 
   return (
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-5 pl-0 pr-3 pt-2 text-[#2f2f2f]">
@@ -457,27 +455,6 @@ export const CalendarSidebar = ({
             {isTaskMode ? "MY TODO LISTS" : t.myProjects}
           </span>
         </div>
-
-        {isTaskMode && hasAnyTaskList && (
-          <button
-            type="button"
-            className={cn(
-              GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME,
-              "pl-2 transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1]",
-              selectedTaskListIds.length === 0 && "bg-[#f2f4ff]",
-            )}
-            onClick={onSelectAllTaskLists}
-            aria-pressed={selectedTaskListIds.length === 0}
-          >
-            <AnimatedCircleCheckbox
-              checked={selectedTaskListIds.length === 0}
-              color={DEFAULT_TASK_LIST_COLOR}
-            />
-            <span className="truncate text-[12px] font-medium text-[#2f2f2f]">
-              すべての ToDo リスト
-            </span>
-          </button>
-        )}
 
         {googleAccounts.map((account) => (
           <GoogleAccountSection
