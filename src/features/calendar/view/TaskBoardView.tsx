@@ -45,7 +45,7 @@ const DroppableTaskColumn = ({
   onDeleteTask,
   onToggleTaskDone,
 }: DroppableTaskColumnProps) => {
-  const { isOver, setNodeRef } = useDroppable({
+  const { setNodeRef } = useDroppable({
     id: column.id,
     data: {
       type: "column",
@@ -56,9 +56,9 @@ const DroppableTaskColumn = ({
   return (
     <div
       ref={setNodeRef}
-      className={`relative flex h-full min-h-0 min-w-0 transition-[background-color] duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
+      className={`relative flex h-full min-h-0 min-w-0 bg-transparent ${
         showDivider ? TASK_COLUMN_DIVIDER_CLASS_NAME : ""
-      } ${isOver ? "bg-[#fafafa]" : "bg-transparent"}`}
+      }`}
     >
       <TaskColumn
         column={column}
