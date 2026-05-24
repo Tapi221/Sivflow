@@ -25,7 +25,7 @@ import {
 import type {
   TaskDropTarget,
   TaskInsertPosition,
-} from "../dnd/taskDnd.types";
+} from "./taskDnd.types";
 
 type UseTaskBoardDndArgs = {
   tasksByStatus: Record<TaskStatus, Task[]>;
