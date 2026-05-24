@@ -327,9 +327,12 @@ export const TaskView = ({
   const selectedTaskListIdForCreate = selectedTaskListIds.size === 1
     ? selectedTaskListIdArray[0]
     : null;
+  const firstSelectedTaskCategory = selectedTaskListIdArray
+    .map((id) => taskListMetaById.get(id)?.category)
+    .find((category): category is string => Boolean(category));
   const defaultNewTaskCategory = selectedTaskListIdForCreate
-    ? taskListMetaById.get(selectedTaskListIdForCreate)?.category ?? "Programming"
-    : "Programming";
+    ? taskListMetaById.get(selectedTaskListIdForCreate)?.category ?? firstSelectedTaskCategory ?? "Programming"
+    : firstSelectedTaskCategory ?? "Programming";
 
   const taskAccountName = taskAccount?.name ?? taskAccount?.email ?? null;
   const taskAccountPhotoUrl = taskAccount?.photoUrl ?? null;
@@ -366,9 +369,10 @@ export const TaskView = ({
   }, [googleAccounts, googleTaskStatusOverrides, selectedTaskListIds, taskListMetaById]);
 
   const visibleLocalTasks = useMemo(() => {
+    if (taskListMetaById.size === 0) return tasks;
     if (selectedTaskCategories.size === 0) return [];
     return tasks.filter((task) => selectedTaskCategories.has(task.category));
-  }, [selectedTaskCategories, tasks]);
+  }, [selectedTaskCategories, taskListMetaById, tasks]);
 
   const visibleTasks = useMemo(() => {
     return [...visibleLocalTasks, ...googleTasks];
