@@ -7,12 +7,18 @@ import {
 } from "react";
 import { Reorder } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { PlusLineIcon } from "@/components/icons/icons.schedule";
+import type { WorkspaceTab } from "@/features/tab/Tab";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
-import type { WorkspaceTab } from "@/features/tab/Tab";
-import { Calendar, FileText, FolderIcon, Layers, Settings2, X } from "@/ui/icons";
-import { PlusLineIcon } from "@/components/icons/icons.schedule";
+import {
+  WORKSPACE_TAB_CONTEXT_MENU_HEIGHT,
+  WORKSPACE_TAB_CONTEXT_MENU_MARGIN,
+  WORKSPACE_TAB_CONTEXT_MENU_WIDTH,
+  WorkspaceTabContextMenu,
+} from "@/features/tab/TabContextMenu";
 import { cn } from "@/lib/utils";
+import { Calendar, FileText, FolderIcon, Layers, X } from "@/ui/icons";
 
 type WorkspaceTabsBarVariant = "workspace" | "titlebar";
 
@@ -27,6 +33,12 @@ type AppRegionStyle = CSSProperties & {
 };
 
 type TabIconComponent = ComponentType<{ className?: string }>;
+
+type TabContextMenuState = {
+  tabId: WorkspaceTab["id"];
+  x: number;
+  y: number;
+};
 
 const TABS_NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
@@ -170,6 +182,29 @@ const resolveTabSlotLayoutStyle = (
   return style;
 };
 
+const clampContextMenuPosition = (
+  clientX: number,
+  clientY: number,
+): { x: number; y: number } => {
+  const maxX = Math.max(
+    WORKSPACE_TAB_CONTEXT_MENU_MARGIN,
+    window.innerWidth -
+      WORKSPACE_TAB_CONTEXT_MENU_WIDTH -
+      WORKSPACE_TAB_CONTEXT_MENU_MARGIN,
+  );
+  const maxY = Math.max(
+    WORKSPACE_TAB_CONTEXT_MENU_MARGIN,
+    window.innerHeight -
+      WORKSPACE_TAB_CONTEXT_MENU_HEIGHT -
+      WORKSPACE_TAB_CONTEXT_MENU_MARGIN,
+  );
+
+  return {
+    x: Math.min(Math.max(clientX, WORKSPACE_TAB_CONTEXT_MENU_MARGIN), maxX),
+    y: Math.min(Math.max(clientY, WORKSPACE_TAB_CONTEXT_MENU_MARGIN), maxY),
+  };
+};
+
 const HomeIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path d="M4 10.5 12 4l8 6.5V20h-5v-5H9v5H4z" fill="currentColor" />
@@ -192,11 +227,10 @@ const resolveTabIcon = (tab: WorkspaceTab): TabIconComponent => {
     if (tab.sectionKey === "home") return HomeIcon;
     if (tab.sectionKey === "review") return ReviewIcon;
     if (tab.sectionKey === "schedule") return Calendar;
-    if (tab.sectionKey === "settings") return Settings2;
   }
 
   if (tab.kind === "explorer") return FolderIcon;
-  if (tab.kind === "cardSet") return Layers;
+  if (tab.kind === "card") return Layers;
 
   return FileText;
 };
@@ -220,6 +254,7 @@ export const WorkspaceTabsBar = ({
   );
 
   const tabsListRef = useRef<HTMLDivElement | null>(null);
+  const contextMenuRef = useRef<HTMLDivElement | null>(null);
   const suppressTabClickRef = useRef(false);
   const isDraggingTabsRef = useRef(false);
   const orderedTabsRef = useRef<WorkspaceTab[]>(tabs);
@@ -227,12 +262,17 @@ export const WorkspaceTabsBar = ({
   const [openingTabId, setOpeningTabId] = useState<WorkspaceTab["id"] | null>(
     lastOpenedTabId,
   );
+  const [contextMenu, setContextMenu] =
+    useState<TabContextMenuState | null>(null);
   const isTitlebar = variant === "titlebar";
   const canReorderTabs = orderedTabs.length > 1;
   const interactiveStyle = noDragStyle ?? TABS_NO_DRAG_STYLE;
   const tabsSurfaceStyle = resolveTabsSurfaceStyle(isTitlebar);
   const closeButtonClassName = resolveCloseButtonClassName(isTitlebar);
   const addButtonClassName = resolveAddButtonClassName(isTitlebar);
+  const contextMenuTab = contextMenu
+    ? orderedTabs.find((tab) => tab.id === contextMenu.tabId)
+    : undefined;
 
   useEffect(() => {
     if (isDraggingTabsRef.current) return;
@@ -258,6 +298,53 @@ export const WorkspaceTabsBar = ({
     return () => window.clearTimeout(timeoutId);
   }, [lastOpenedTabId]);
 
+  useEffect(() => {
+    if (!contextMenu) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (contextMenuRef.current?.contains(event.target as Node)) return;
+      setContextMenu(null);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setContextMenu(null);
+      }
+    };
+    const closeMenu = () => setContextMenu(null);
+
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("resize", closeMenu, { once: true });
+    window.addEventListener("scroll", closeMenu, {
+      capture: true,
+      once: true,
+    });
+
+    return () => {
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("resize", closeMenu);
+      window.removeEventListener("scroll", closeMenu, { capture: true });
+    };
+  }, [contextMenu]);
+
+  const navigateToCurrentActiveTab = () => {
+    const currentTabs = useWorkspaceTabsStore.getState().tabs;
+    const currentActiveTabId = useWorkspaceTabsStore.getState().activeTabId;
+    const currentActiveTab = currentTabs.find(
+      (tab) => tab.id === currentActiveTabId,
+    );
+
+    if (currentActiveTab) {
+      navigate(resolveWorkspaceTabRoute(currentActiveTab));
+    }
+  };
+
+  const closeWorkspaceTabs = (tabsToClose: WorkspaceTab[]) => {
+    tabsToClose.forEach((tab) => closeTab(tab.id));
+    navigateToCurrentActiveTab();
+  };
+
   const commitReorderedTabs = () => {
     const currentTabs = useWorkspaceTabsStore.getState().tabs;
     const nextTabs = orderedTabsRef.current;
@@ -270,6 +357,93 @@ export const WorkspaceTabsBar = ({
     orderedTabsRef.current = committedTabs;
     setOrderedTabs(committedTabs);
   };
+
+  const openTabContextMenu = (
+    event: React.MouseEvent,
+    tab: WorkspaceTab,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    suppressTabClickRef.current = true;
+
+    const { x, y } = clampContextMenuPosition(event.clientX, event.clientY);
+    setContextMenu({ tabId: tab.id, x, y });
+
+    window.setTimeout(() => {
+      suppressTabClickRef.current = false;
+    }, 0);
+  };
+
+  const contextMenuActions = contextMenuTab
+    ? [
+        {
+          id: "close-current",
+          label: "閉じる",
+          disabled: !contextMenuTab.isClosable,
+          onSelect: () => {
+            setContextMenu(null);
+
+            const nextTab =
+              contextMenuTab.id === activeTabId
+                ? resolveNextTabOnClose(orderedTabs, contextMenuTab.id)
+                : null;
+
+            closeTab(contextMenuTab.id);
+
+            if (nextTab) {
+              navigate(resolveWorkspaceTabRoute(nextTab));
+            }
+          },
+        },
+        {
+          id: "close-others",
+          label: "他を閉じる",
+          disabled:
+            orderedTabs.filter(
+              (tab) => tab.id !== contextMenuTab.id && tab.isClosable,
+            ).length === 0,
+          onSelect: () => {
+            setContextMenu(null);
+            selectTab(contextMenuTab.id);
+            closeWorkspaceTabs(
+              orderedTabs.filter(
+                (tab) => tab.id !== contextMenuTab.id && tab.isClosable,
+              ),
+            );
+            navigate(resolveWorkspaceTabRoute(contextMenuTab));
+          },
+        },
+        {
+          id: "close-after",
+          label: "このタブ以降を閉じる",
+          disabled:
+            orderedTabs
+              .slice(
+                orderedTabs.findIndex((tab) => tab.id === contextMenuTab.id),
+              )
+              .filter((tab) => tab.isClosable).length === 0,
+          onSelect: () => {
+            setContextMenu(null);
+            const contextMenuTabIndex = orderedTabs.findIndex(
+              (tab) => tab.id === contextMenuTab.id,
+            );
+            const tabsToClose = orderedTabs
+              .slice(Math.max(0, contextMenuTabIndex))
+              .filter((tab) => tab.isClosable);
+            closeWorkspaceTabs(tabsToClose);
+          },
+        },
+        {
+          id: "close-all",
+          label: "すべてを閉じる",
+          disabled: orderedTabs.every((tab) => !tab.isClosable),
+          onSelect: () => {
+            setContextMenu(null);
+            closeWorkspaceTabs(orderedTabs.filter((tab) => tab.isClosable));
+          },
+        },
+      ]
+    : [];
 
   return (
     <>
@@ -338,6 +512,7 @@ export const WorkspaceTabsBar = ({
                 onDragStart={() => {
                   isDraggingTabsRef.current = true;
                   suppressTabClickRef.current = true;
+                  setContextMenu(null);
                 }}
                 onDragEnd={() => {
                   isDraggingTabsRef.current = false;
@@ -357,6 +532,7 @@ export const WorkspaceTabsBar = ({
                 )}
                 data-workspace-tab-kind={tab.kind}
                 data-workspace-tab-slot-active={selected ? "true" : undefined}
+                onContextMenu={(event) => openTabContextMenu(event, tab)}
               >
                 <div
                   style={{
@@ -414,6 +590,7 @@ export const WorkspaceTabsBar = ({
                         return;
                       }
 
+                      setContextMenu(null);
                       selectTab(tab.id);
                       navigate(resolveWorkspaceTabRoute(tab));
                     }}
@@ -442,6 +619,7 @@ export const WorkspaceTabsBar = ({
                       onClick={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
+                        setContextMenu(null);
 
                         const nextTab = selected
                           ? resolveNextTabOnClose(orderedTabs, tab.id)
@@ -470,6 +648,7 @@ export const WorkspaceTabsBar = ({
           aria-label="新しいエクスプローラータブを開く"
           title="新しいエクスプローラータブ"
           onClick={() => {
+            setContextMenu(null);
             createExplorerTab();
             navigate("/library?view=section-list&libraryType=pdf");
           }}
@@ -479,6 +658,16 @@ export const WorkspaceTabsBar = ({
 
         <div className="h-full min-w-0 flex-1" />
       </div>
+
+      {contextMenu ? (
+        <WorkspaceTabContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          actions={contextMenuActions}
+          menuRef={contextMenuRef}
+          noDragStyle={interactiveStyle}
+        />
+      ) : null}
     </>
   );
 };
