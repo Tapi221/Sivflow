@@ -29,6 +29,8 @@ export const CalendarEventChipMonth = memo(({
         eventChipAllDayClass,
         `
           flex
+          w-full
+          min-w-0
           items-center
           gap-1
           truncate
@@ -53,7 +55,7 @@ export const CalendarEventChipMonth = memo(({
         {timeLabel}
       </span>
 
-      <span className="truncate">
+      <span className="min-w-0 flex-1 truncate">
         {event.title}
       </span>
     </div>
