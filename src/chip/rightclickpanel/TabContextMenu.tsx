@@ -1,5 +1,5 @@
 import { type CSSProperties, type RefObject } from "react";
-import { RIGHT_CLICK_PANEL_MARGIN, RightClickPanelSurface } from "./rightClickPanelCommon";
+import { RIGHT_CLICK_PANEL_MARGIN, RightClickPanelSurface, resolveRightClickPanelTextWidth } from "./rightClickPanelCommon";
 
 type TabContextMenuAction = {
   id: string;
@@ -16,7 +16,14 @@ type TabContextMenuProps = {
   noDragStyle: CSSProperties;
 };
 
-export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 176;
+const WORKSPACE_TAB_CONTEXT_MENU_LABELS = [
+  "閉じる",
+  "他を閉じる",
+  "このタブ以降を閉じる",
+  "すべてを閉じる",
+];
+
+export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = resolveRightClickPanelTextWidth(WORKSPACE_TAB_CONTEXT_MENU_LABELS);
 export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 120;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
