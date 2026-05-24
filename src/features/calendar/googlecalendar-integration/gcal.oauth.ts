@@ -10,7 +10,7 @@ import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/electron/app";
 import { readEmail } from "./gcal.storage";
 
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
-import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
+import { getRuntimeKind, isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 const GOOGLE_CALENDAR_SCOPE =
   "https://www.googleapis.com/auth/calendar.readonly";
@@ -197,6 +197,32 @@ const getRedirectUri = (): string => {
   return DESKTOP_GOOGLE_OAUTH_REDIRECT_URI;
 };
 
+const maskClientId = (clientId: string): string => {
+  const [prefix, domain] = clientId.split(".", 2);
+  const visiblePrefix = prefix.length <= 10
+    ? prefix
+    : `${prefix.slice(0, 10)}...${prefix.slice(-6)}`;
+
+  return domain ? `${visiblePrefix}.${domain}` : visiblePrefix;
+};
+
+const logOAuthConfig = (
+  flow: "desktop-code" | "web-code" | "web-token",
+  input: {
+    clientId: string;
+    origin?: string;
+    redirectUri?: string;
+  },
+): void => {
+  console.info("[GoogleCalendar] OAuth config", {
+    flow,
+    runtime: getRuntimeKind(),
+    clientId: maskClientId(input.clientId),
+    origin: input.origin,
+    redirectUri: input.redirectUri,
+  });
+};
+
 const buildAuthorizeUrl = ({
   clientId,
   redirectUri,
@@ -281,6 +307,11 @@ const requestDesktopToken = async (silent: boolean) => {
   const clientId = getClientId();
 
   const redirectUri = getRedirectUri();
+
+  logOAuthConfig("desktop-code", {
+    clientId,
+    redirectUri,
+  });
 
   const state = randomBase64Url(16);
 
@@ -402,10 +433,15 @@ export const requestGoogleCalendarServerCode = async (
 
   const clientId = getWebClientId();
   const hint = auth.currentUser?.email ?? readEmail() ?? undefined;
+  const redirectUri = window.location.origin;
+
+  logOAuthConfig("web-code", {
+    clientId,
+    origin: window.location.origin,
+    redirectUri,
+  });
 
   const response = await new Promise<GoogleCodeResponse>((resolve, reject) => {
-    const redirectUri = window.location.origin;
-
     const client = window.google!.accounts!.oauth2!.initCodeClient({
       callback: resolve,
       client_id: clientId,
@@ -439,7 +475,7 @@ export const requestGoogleCalendarServerCode = async (
 
   return {
     code: response.code,
-    redirectUri: window.location.origin,
+    redirectUri,
   };
 };
 
@@ -452,6 +488,11 @@ const requestWebGisToken = async (
   const clientId = getWebClientId();
   const loginHint = auth.currentUser?.email ?? readEmail() ?? undefined;
   const prompt = silent ? "none" : "consent select_account";
+
+  logOAuthConfig("web-token", {
+    clientId,
+    origin: window.location.origin,
+  });
 
   const tokenResponse = await new Promise<GoogleTokenResponse>((resolve, reject) => {
     const client = window.google!.accounts!.oauth2!.initTokenClient({
