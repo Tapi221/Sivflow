@@ -119,7 +119,7 @@ const CalendarMonthDayCell = memo(({
         isScrollHovered &&
           !selected &&
           !isToday &&
-          "calendar-month-day-cell-scroll-hovered",
+          "calendar-month-day-cell-scroll-hovered bg-[#fafafa]",
       )}
     >
       <button
