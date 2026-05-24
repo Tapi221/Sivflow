@@ -1,4 +1,4 @@
-import { ScheduleScreen } from "@/features/calendar/ScheduleScreen";
+import { ScheduleScreen } from "@/screens/ScheduleScreen";
 
 const Calendar = () => {
   return (
