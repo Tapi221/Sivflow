@@ -27,12 +27,6 @@ type TaskBoardViewProps = {
     overTaskId?: string | null,
     position?: "before" | "after",
   ) => void;
-  onReorderSectionTask: (
-    taskId: string,
-    category: string,
-    overTaskId?: string | null,
-    position?: "before" | "after",
-  ) => void;
 };
 
 type TaskBoardColumn = {
@@ -129,7 +123,6 @@ export const TaskBoardView = ({
   onDeleteTask,
   onToggleTaskDone,
   onReorderTask,
-  onReorderSectionTask,
 }: TaskBoardViewProps) => {
   const sectionGroups = useMemo<SectionGroup[]>(() => {
     const groups = new Map<string, SectionGroup>();
@@ -169,12 +162,16 @@ export const TaskBoardView = ({
     position?: TaskInsertPosition,
   ) => {
     if (groupMode === "section") {
-      onReorderSectionTask(taskId, columnId, overTaskId, position);
+      const task = tasks.find((item) => item.id === taskId);
+
+      if (task) {
+        onReorderTask(taskId, task.status, overTaskId, position);
+      }
       return;
     }
 
     onReorderTask(taskId, columnId as TaskStatus, overTaskId, position);
-  }, [groupMode, onReorderSectionTask, onReorderTask]);
+  }, [groupMode, onReorderTask, tasks]);
 
   const {
     activeDropTarget,
