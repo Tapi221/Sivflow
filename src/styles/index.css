@@ -76,3 +76,14 @@
   width: 0;
   height: 0;
 }
+
+[role="radiogroup"][aria-label="優先度"]::before {
+  content: "優先度";
+  align-self: center;
+  padding: 0 0.375rem 0 0.5rem;
+  color: #5f6368;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
