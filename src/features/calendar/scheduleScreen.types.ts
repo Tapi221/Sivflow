@@ -77,6 +77,9 @@ export type CalendarSidebarProps = {
   selectedRange?: CalendarSelectionRange | null;
   activeMode: CalendarToolbarMode;
 
+  // アプリ内プロジェクト
+  appProjects: AppCalendarItem[];
+
   // マルチアカウント
   googleAccounts: GoogleAccountDisplay[];
   isAnyCalendarConnecting: boolean;
@@ -87,6 +90,8 @@ export type CalendarSidebarProps = {
   onPreviousMonth: () => void;
   onNextMonth: () => void;
   onAddCalendar: () => void;
+  onAddProject: (projectName: string) => void;
+  onToggleProject: (projectId: string) => void;
   onReconnectAccount: (accountId: string) => void;
   onToggleCalendar: (accountId: string, calendarId: string) => void;
   onToggleTaskList?: (taskListId: string) => void;
