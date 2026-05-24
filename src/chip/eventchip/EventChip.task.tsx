@@ -51,19 +51,20 @@ export const TaskEventChip = memo(({
           group
           relative
           box-border
-          flex
+          grid
           w-full
           max-w-full
           min-w-0
-          flex-col
-          gap-1
+          grid-cols-[minmax(0,1fr)_auto]
+          grid-rows-[auto_auto]
+          gap-x-1
+          gap-y-1
           overflow-hidden
           rounded-md
           px-1.5
           py-1
           text-left
         `,
-        showAssignee && "pr-6",
         "text-[11px] font-medium leading-[1.3]",
         "transition-[filter,box-shadow,opacity] duration-100",
         "hover:brightness-[0.98] hover:shadow-[0_1px_4px_rgba(15,23,42,0.08)]",
@@ -79,7 +80,7 @@ export const TaskEventChip = memo(({
       }}
       title={titleLabel}
     >
-      <div className="flex min-w-0 items-center gap-1">
+      <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-1">
         <button
           type="button"
           className="flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform active:scale-90"
@@ -124,7 +125,7 @@ export const TaskEventChip = memo(({
         )}
       </div>
 
-      <div className="flex min-w-0 items-center gap-1 truncate text-[11px] font-semibold tabular-nums opacity-80">
+      <div className="col-start-1 row-start-2 flex min-w-0 items-center gap-1 overflow-hidden truncate text-[11px] font-semibold tabular-nums opacity-80">
         {formattedDate && (
           <span className="inline-flex min-w-0 max-w-[4.85rem] shrink-0 items-center gap-[3px] overflow-hidden truncate">
             <ScheduleCalendarIcon className="h-3 w-3 shrink-0" />
@@ -144,7 +145,7 @@ export const TaskEventChip = memo(({
       </div>
 
       {showAssignee && (
-        <span className="pointer-events-none absolute right-1.5 bottom-1 rounded-full ring-1 ring-white/80">
+        <span className="col-start-2 row-start-2 self-end justify-self-end rounded-full ring-1 ring-white/80">
           <GoogleAccountChip name={chipName} photoUrl={accountPhotoUrl} />
         </span>
       )}
