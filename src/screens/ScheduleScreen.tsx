@@ -2,7 +2,7 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
-import { SidebarOpenIcon } from "@/components/icons/icons.sidebar";
+import { SidebarPanelIcon } from "@/components/icons/icons.schedule";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
@@ -28,9 +28,7 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
 
 const DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS =
-  "absolute right-4 top-2 z-50 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg border border-transparent bg-transparent p-0 text-[#8c8c8c] shadow-none appearance-none select-none outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:text-[#8c8c8c] focus:outline-none focus:ring-0 focus-visible:outline-none motion-reduce:transition-none";
-
-const VIEW_HEADER_CONTROLS_RIGHT_INSET_PX = 56;
+  "flex h-7 w-8 min-w-0 shrink-0 items-center justify-center rounded-lg border border-transparent bg-transparent p-0 text-[#8c8c8c] shadow-none appearance-none select-none outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:bg-[#f7f7f7] hover:text-[#6e6e73] focus:outline-none focus:ring-0 focus-visible:outline-none motion-reduce:transition-none";
 
 export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const pane = useScheduleScreen();
@@ -184,10 +182,6 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
 
   const hasTrailingPanel = isMonthCalendarView && !isDayDetailPanelCollapsed;
 
-  const viewHeaderRightPaddingPx = canShowDayDetailPanel
-    ? VIEW_HEADER_CONTROLS_RIGHT_INSET_PX
-    : 0;
-
   const dayDetailToggleLabel = showDayDetailPanel
     ? "日詳細パネルを閉じる"
     : "日詳細パネルを開く";
@@ -222,7 +216,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
       selectedViewMode === "month" ? monthTitleDate : titleDate;
 
     return (
-      <div className={className} style={{ paddingRight: viewHeaderRightPaddingPx }}>
+      <div className={className}>
         <div className="flex min-w-0 items-center gap-3">
           <h1 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
             {format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale })}
@@ -241,6 +235,19 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
             onNext={handleNext}
             onToday={handleToday}
           />
+
+          {canShowDayDetailPanel ? (
+            <button
+              type="button"
+              className={DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS}
+              onClick={handleToggleDayDetailPanel}
+              aria-label={dayDetailToggleLabel}
+              aria-pressed={showDayDetailPanel}
+              aria-expanded={showDayDetailPanel}
+            >
+              <SidebarPanelIcon className="h-4 w-4 -scale-x-100" />
+            </button>
+          ) : null}
         </div>
       </div>
     );
@@ -258,20 +265,6 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
           onSelectViewMode={handleSelectViewMode}
         />
       )}
-      overlay={
-        canShowDayDetailPanel ? (
-          <button
-            type="button"
-            className={DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS}
-            onClick={handleToggleDayDetailPanel}
-            aria-label={dayDetailToggleLabel}
-            aria-pressed={showDayDetailPanel}
-            aria-expanded={showDayDetailPanel}
-          >
-            <SidebarOpenIcon className="h-4 w-4 scale-x-[-1] text-[#8c8c8c]" />
-          </button>
-        ) : null
-      }
       leadingPanel={(
         <CalendarSidebar
           monthDate={sidebarMonthDate}
