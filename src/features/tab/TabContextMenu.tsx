@@ -20,13 +20,27 @@ type TabContextMenuProps = {
   noDragStyle: CSSProperties;
 };
 
-export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 220;
-export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 152;
+export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 180;
+export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 184;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = 8;
+
+const WORKSPACE_TAB_CONTEXT_MENU_DROPDOWN_STYLE: CSSProperties = {
+  minWidth: 148,
+  width: "max-content",
+  maxWidth: 220,
+  padding: 4,
+};
 
 const WORKSPACE_TAB_CONTEXT_MENU_TEXT_STYLE: CSSProperties = {
   fontSize: 14,
   lineHeight: "20px",
+};
+
+const WORKSPACE_TAB_CONTEXT_MENU_ITEM_STYLE: CSSProperties = {
+  ...WORKSPACE_TAB_CONTEXT_MENU_TEXT_STYLE,
+  minHeight: 44,
+  paddingInline: 18,
+  whiteSpace: "nowrap",
 };
 
 export const WorkspaceTabContextMenu = ({
@@ -50,7 +64,8 @@ export const WorkspaceTabContextMenu = ({
           offset={0}
           shadow="md"
           styles={{
-            item: WORKSPACE_TAB_CONTEXT_MENU_TEXT_STYLE,
+            dropdown: WORKSPACE_TAB_CONTEXT_MENU_DROPDOWN_STYLE,
+            item: WORKSPACE_TAB_CONTEXT_MENU_ITEM_STYLE,
             itemLabel: WORKSPACE_TAB_CONTEXT_MENU_TEXT_STYLE,
           }}
         >
