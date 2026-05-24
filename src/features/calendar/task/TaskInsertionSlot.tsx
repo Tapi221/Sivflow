@@ -9,6 +9,7 @@ type TaskInsertionSlotProps = {
   insertIndex: number;
   overTaskId?: string | null;
   isFirst?: boolean;
+  isLast?: boolean;
 };
 
 export const TaskInsertionSlot = ({
@@ -16,6 +17,7 @@ export const TaskInsertionSlot = ({
   insertIndex,
   overTaskId = null,
   isFirst = false,
+  isLast = false,
 }: TaskInsertionSlotProps) => {
   const { setNodeRef } = useDroppable({
     id: `task-slot:${status}:${insertIndex}`,
@@ -32,7 +34,7 @@ export const TaskInsertionSlot = ({
       ref={setNodeRef}
       className={cn(
         "relative z-0 shrink-0",
-        isFirst ? "h-4 -mb-1" : "h-6 -my-2",
+        isFirst ? "h-4 -mb-1" : isLast ? "h-4 -mt-2 -mb-2" : "h-6 -my-2",
       )}
       aria-hidden="true"
     />
