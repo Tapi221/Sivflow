@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const surfaceButtonVariants = cva(
-  "ds-surface-button inline-flex items-center justify-center disabled:pointer-events-none disabled:opacity-50",
+  "ds-surface-button inline-flex min-w-0 items-center justify-center overflow-hidden whitespace-nowrap disabled:pointer-events-none disabled:opacity-50 [&_svg]:shrink-0",
   {
     variants: {
       surface: {
@@ -34,13 +34,25 @@ export interface SurfaceButtonProps
 export const SurfaceButton = React.forwardRef<
   HTMLButtonElement,
   SurfaceButtonProps
->(({ className, surface, size, type, ...props }, ref) => (
-  <button
-    ref={ref}
-    type={type ?? "button"}
-    className={cn(surfaceButtonVariants({ surface, size }), className)}
-    {...props}
-  />
-));
+>(({ className, surface, size, type, children, title, ...props }, ref) => {
+  const resolvedTitle =
+    typeof title === "string"
+      ? title
+      : typeof children === "string"
+        ? children
+        : undefined;
+
+  return (
+    <button
+      ref={ref}
+      type={type ?? "button"}
+      title={resolvedTitle}
+      className={cn(surfaceButtonVariants({ surface, size }), className)}
+      {...props}
+    >
+      <span className="min-w-0 truncate whitespace-nowrap">{children}</span>
+    </button>
+  );
+});
 
 SurfaceButton.displayName = "SurfaceButton";
