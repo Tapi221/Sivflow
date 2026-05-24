@@ -5,6 +5,7 @@ export const CONTENT_TYPO = "font-serif";
 export const NUMERIC_TYPO = "tabular-nums";
 
 export const TYPOGRAPHY_FONT_SIZE_PX = designTokens.typography.fontSize;
+export const TYPOGRAPHY_LINE_HEIGHT = designTokens.typography.lineHeight;
 
 export const TYPOGRAPHY_TEXT_SIZE_CLASS = {
   xs: "text-[var(--ds-typography-font-size-xs)]",
@@ -16,13 +17,19 @@ export const TYPOGRAPHY_TEXT_SIZE_CLASS = {
   "2xl": "text-[var(--ds-typography-font-size-2xl)]",
 } as const;
 
+export const TYPOGRAPHY_LINE_HEIGHT_CLASS = {
+  tight: "leading-[var(--ds-typography-line-height-tight)]",
+  body: "leading-[var(--ds-typography-line-height-body)]",
+  comfortable: "leading-[var(--ds-typography-line-height-comfortable)]",
+} as const;
+
 // Product chrome typography is anchored to the completed calendar month view.
 // Keep app UI compact: 12px is the default, 11px is metadata, 13px is table/section structure.
 export const TYPO = {
   screenTitle: "text-[17px] font-semibold tracking-[-0.01em]",
   sectionTitle: "text-[13px] font-semibold tracking-[-0.01em]",
   tableHeader: "text-[13px] font-medium leading-none tracking-[-0.005em]",
-  tableRow: "text-[12px] font-medium leading-[18px]",
+  tableRow: `text-[12px] font-medium ${TYPOGRAPHY_LINE_HEIGHT_CLASS.body}`,
   control: "text-[12px] font-semibold leading-none tracking-[-0.01em]",
   smallBody: "text-[12px] font-medium",
   meta: "text-[11px] font-medium leading-[1.3]",
@@ -41,7 +48,7 @@ export const TASK_TYPO = {
   listRow: TYPO.tableRow,
   listTitle: "font-medium leading-[18px] tracking-[-0.005em] text-[#1c1c1e]",
   listTitleInput: `${TYPO.tableRow} tracking-[-0.005em] text-[#1c1c1e]`,
-  detailAction: "text-[12px] font-medium leading-[18px] text-[#6b7280]",
+  detailAction: `text-[12px] font-medium ${TYPOGRAPHY_LINE_HEIGHT_CLASS.body} text-[#6b7280]`,
   cardTitle: "text-[12px] font-medium leading-none tracking-[-0.005em] text-[#1c1c1e]",
   metaCluster: `${TYPO.metaCompact} text-[#4c5361]`,
   metaChip: `${TYPO.metaCompact} text-[#8e8e93]`,
