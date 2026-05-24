@@ -19,7 +19,7 @@ export const CalendarToolbar = ({
     <div className="calendar-workspace-toolbar flex h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 items-center justify-between overflow-visible bg-white pr-[var(--workspace-content-gutter)]">
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <ToggleCalendarTimelineTask activeMode={activeMode} tabs={tabs} />
-        {activeMode === "task" && <TaskTagStrip />}
+        <TaskTagStrip />
       </div>
     </div>
   );
