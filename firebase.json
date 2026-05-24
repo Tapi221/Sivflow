@@ -28,6 +28,15 @@
     ],
     "headers": [
       {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Cross-Origin-Opener-Policy",
+            "value": "same-origin-allow-popups"
+          }
+        ]
+      },
+      {
         "source": "**/*.@(js|css|jpg|jpeg|png|gif|webp|svg|ico)",
         "headers": [
           {
@@ -60,31 +69,12 @@
     "rules": "storage.rules"
   },
   "emulators": {
-    "auth": {
-      "port": 9099,
-      "host": "localhost"
-    },
-    "firestore": {
-      "port": 8080,
-      "host": "localhost"
-    },
-    "hosting": {
-      "port": 5000,
-      "host": "localhost"
-    },
-    "storage": {
-      "port": 9199,
-      "host": "localhost"
-    },
-    "ui": {
-      "enabled": true,
-      "port": 4000,
-      "host": "localhost"
-    },
+    "auth": { "port": 9099, "host": "localhost" },
+    "firestore": { "port": 8080, "host": "localhost" },
+    "hosting": { "port": 5000, "host": "localhost" },
+    "storage": { "port": 9199, "host": "localhost" },
+    "ui": { "enabled": true, "port": 4000, "host": "localhost" },
     "singleProjectMode": true,
-    "functions": {
-      "port": 5001,
-      "host": "localhost"
-    }
+    "functions": { "port": 5001, "host": "localhost" }
   }
 }
