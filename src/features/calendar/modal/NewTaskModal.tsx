@@ -334,13 +334,16 @@ export const NewTaskModal = ({
               }}
             />
 
-            <PriorityToggle
-              value={priority}
-              onChange={(value) => {
-                setPriority(value);
-                setOpenPicker("");
-              }}
-            />
+            <div className="inline-flex items-center gap-1.5">
+              <span className="text-[11px] font-medium text-[#a1a1aa]">優先度</span>
+              <PriorityToggle
+                value={priority}
+                onChange={(value) => {
+                  setPriority(value);
+                  setOpenPicker("");
+                }}
+              />
+            </div>
 
             <IOSPicker
               id="category"
