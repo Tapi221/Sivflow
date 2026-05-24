@@ -14,6 +14,43 @@ import { cn } from "@/lib/utils";
 
 const EMPTY_EVENTS: GoogleCalendarEvent[] = [];
 
+const MONTH_EVENT_CHIP_HEIGHT_PX = 18.3;
+const MONTH_EVENT_CHIP_GAP_PX = 3;
+const MONTH_EVENT_OVERFLOW_TEXT_HEIGHT_PX = 12;
+const MONTH_EVENT_BOTTOM_PADDING_PX = 6;
+const MONTH_EVENT_CONTENT_TOP_PX = 56;
+
+const getMonthEventRowCount = (contentHeight: number) => {
+  if (contentHeight <= 0) return 0;
+
+  return Math.max(
+    0,
+    Math.floor(
+      (contentHeight + MONTH_EVENT_CHIP_GAP_PX) /
+        (MONTH_EVENT_CHIP_HEIGHT_PX + MONTH_EVENT_CHIP_GAP_PX),
+    ),
+  );
+};
+
+const getVisibleChipCount = (
+  eventCount: number,
+  monthRowHeight: number,
+) => {
+  const contentHeight =
+    monthRowHeight -
+    MONTH_EVENT_CONTENT_TOP_PX -
+    MONTH_EVENT_BOTTOM_PADDING_PX;
+
+  const maxRows = getMonthEventRowCount(contentHeight);
+
+  if (eventCount <= maxRows) return eventCount;
+
+  const overflowReservedHeight =
+    MONTH_EVENT_OVERFLOW_TEXT_HEIGHT_PX + MONTH_EVENT_CHIP_GAP_PX;
+
+  return getMonthEventRowCount(contentHeight - overflowReservedHeight);
+};
+
 const getDayKey = (date: Date): string => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -53,7 +90,6 @@ type GridCalendarMonthDesktopProps = {
   selectedDate: Date;
   visibleEvents: GoogleCalendarEvent[];
   monthWeeks: CalendarMonthGridWeek[];
-  maxVisibleChips: number;
   monthRowHeight: number;
   scrollHoverDayKey: string | null;
   setWeekRowRef: (
@@ -78,7 +114,7 @@ type CalendarMonthDayCellProps = {
   isToday: boolean;
   selected: boolean;
   isScrollHovered: boolean;
-  maxVisibleChips: number;
+  monthRowHeight: number;
   onSelectDate: (date: Date) => void;
 };
 
@@ -88,15 +124,15 @@ const CalendarMonthDayCell = memo(({
   isToday,
   selected,
   isScrollHovered,
-  maxVisibleChips,
+  monthRowHeight,
   onSelectDate,
 }: CalendarMonthDayCellProps) => {
   const monthAnnotation = getMonthAnnotation(day.date);
 
-  const shouldShowOverflow = events.length > maxVisibleChips;
-  const visibleChipCount = shouldShowOverflow
-    ? Math.max(0, maxVisibleChips - 1)
-    : maxVisibleChips;
+  const visibleChipCount = getVisibleChipCount(
+    events.length,
+    monthRowHeight,
+  );
 
   const visibleChips = events.slice(
     0,
@@ -205,7 +241,6 @@ type CalendarMonthWeekRowProps = {
   selectedDayKey: string;
   todayDayKey: string;
   scrollHoverDayKey: string | null;
-  maxVisibleChips: number;
   monthRowHeight: number;
   setWeekRowRef: (
     key: string,
@@ -248,7 +283,6 @@ const CalendarMonthWeekRow = memo(({
   selectedDayKey,
   todayDayKey,
   scrollHoverDayKey,
-  maxVisibleChips,
   monthRowHeight,
   setWeekRowRef,
   onSelectDate,
@@ -284,7 +318,7 @@ const CalendarMonthWeekRow = memo(({
             isToday={isToday}
             selected={selected}
             isScrollHovered={isScrollHovered}
-            maxVisibleChips={maxVisibleChips}
+            monthRowHeight={monthRowHeight}
             onSelectDate={onSelectDate}
           />
         );
@@ -302,7 +336,6 @@ const CalendarMonthWeekRow = memo(({
   if (
     previous.week !== next.week ||
     previous.eventsByDay !== next.eventsByDay ||
-    previous.maxVisibleChips !== next.maxVisibleChips ||
     previous.monthRowHeight !== next.monthRowHeight ||
     previous.setWeekRowRef !== next.setWeekRowRef ||
     previous.onSelectDate !== next.onSelectDate ||
@@ -353,7 +386,6 @@ export const GridCalendarMonthDesktop = ({
   selectedDate,
   visibleEvents,
   monthWeeks,
-  maxVisibleChips,
   monthRowHeight,
   scrollHoverDayKey,
   setWeekRowRef,
@@ -439,7 +471,6 @@ export const GridCalendarMonthDesktop = ({
             selectedDayKey={selectedDayKey}
             todayDayKey={todayDayKey}
             scrollHoverDayKey={scrollHoverDayKey}
-            maxVisibleChips={maxVisibleChips}
             monthRowHeight={monthRowHeight}
             setWeekRowRef={setWeekRowRef}
             onSelectDate={onSelectDate}
