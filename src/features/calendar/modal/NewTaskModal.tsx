@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from "react";
+import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import type { TaskPriority, TaskStatus } from "../task/task.types";
@@ -39,9 +39,57 @@ type IOSPickerProps<T extends string> = {
   value: T;
   options: PickerOption<T>[];
   isOpen: boolean;
+  icon?: ReactNode;
   onOpen: (id: string) => void;
   onChange: (value: T) => void;
 };
+
+const CheckIcon = () => (
+  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden="true">
+    <path
+      d="M3.5 8.3l2.8 2.8 6.2-6.2"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const ChevronDownIcon = ({ isOpen }: { isOpen: boolean }) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    className={`h-3.5 w-3.5 text-[#6e6e73] transition-transform ${
+      isOpen ? "rotate-180" : ""
+    }`}
+    aria-hidden="true"
+  >
+    <path
+      d="M4 6l4 4 4-4"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const CircleIcon = () => (
+  <span className="h-3.5 w-3.5 rounded-full border-2 border-[#8e8e93]" aria-hidden="true" />
+);
+
+const CalendarIcon = () => (
+  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden="true">
+    <path
+      d="M4.2 2.5v2M11.8 2.5v2M3 6.4h10M4 3.7h8a1.4 1.4 0 0 1 1.4 1.4v7A1.4 1.4 0 0 1 12 13.5H4A1.4 1.4 0 0 1 2.6 12V5.1A1.4 1.4 0 0 1 4 3.7Z"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 const IOSPicker = <T extends string,>({
   id,
@@ -49,6 +97,7 @@ const IOSPicker = <T extends string,>({
   value,
   options,
   isOpen,
+  icon,
   onOpen,
   onChange,
 }: IOSPickerProps<T>) => {
@@ -56,78 +105,41 @@ const IOSPicker = <T extends string,>({
     options.find((option) => option.value === value)?.label ?? value;
 
   return (
-    <div className={`relative ${isOpen ? "z-30" : "z-0"}`}>
+    <div className={`relative ${isOpen ? "z-40" : "z-0"}`}>
       <button
         type="button"
         onClick={() => onOpen(isOpen ? "" : id)}
-        className="flex w-full items-center justify-between rounded-lg border border-[#e5e5ea] bg-white px-3 py-2 text-left text-[13px] text-[#1c1c1e] outline-none transition-colors hover:bg-[#fbfbfd] focus:border-[#007aff] focus:bg-white"
+        className="inline-flex h-9 items-center gap-2 rounded-full border border-[#dedee3] bg-white px-3 text-[13px] font-medium text-[#5f6368] shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-colors hover:bg-[#f8f8fb] focus:border-[#7c83e6]"
       >
+        {icon}
         <span>{selectedLabel}</span>
-
-        <svg
-          viewBox="0 0 16 16"
-          fill="none"
-          className={`h-4 w-4 text-[#1c1c1e] transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
-          aria-hidden="true"
-        >
-          <path
-            d="M4 6l4 4 4-4"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <ChevronDownIcon isOpen={isOpen} />
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-30 rounded-[12px] bg-white px-2 py-2 shadow-[0_12px_28px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.08]">
-          <span
-            className="absolute -top-1 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 rounded-[2px] bg-white ring-1 ring-black/[0.05]"
-            aria-hidden="true"
-          />
-
-          <div className="relative mb-1 px-2 text-[11px] font-semibold tracking-wide text-[#8e8e93]">
+        <div className="absolute left-0 top-[calc(100%+8px)] z-40 min-w-[220px] rounded-[12px] bg-white p-1.5 shadow-[0_14px_34px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.08]">
+          <div className="px-2.5 pb-1.5 pt-1 text-[11px] font-semibold tracking-wide text-[#8e8e93]">
             {title}
           </div>
 
-          <div className="relative">
-            {options.map((option) => {
-              const selected = option.value === value;
+          {options.map((option) => {
+            const selected = option.value === value;
 
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => onChange(option.value)}
-                  className="flex w-full items-center justify-between rounded-[8px] px-2 py-2 text-left text-[13px] text-[#1c1c1e] transition-colors hover:bg-[#f2f2f7]"
-                >
-                  <span>{option.label}</span>
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => onChange(option.value)}
+                className="flex w-full items-center justify-between rounded-[8px] px-2.5 py-2 text-left text-[13px] text-[#1f2328] transition-colors hover:bg-[#f2f2f7]"
+              >
+                <span>{option.label}</span>
 
-                  <span className="flex h-4 w-4 items-center justify-center text-[#007aff]">
-                    {selected && (
-                      <svg
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        className="h-4 w-4"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M3.5 8.3l2.8 2.8 6.2-6.2"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    )}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                <span className="flex h-4 w-4 items-center justify-center text-[#6571dc]">
+                  {selected && <CheckIcon />}
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
@@ -160,6 +172,11 @@ export const NewTaskModal = ({
   const [dueDate, setDueDate] = useState("");
   const [openPicker, setOpenPicker] = useState("");
 
+  const selectedCategoryLabel =
+    resolvedCategoryOptions.find((option) => option.id === category)?.label ??
+    CATEGORY_CONFIG[category]?.label ??
+    category;
+
   const handleSave = () => {
     if (!title.trim()) return;
 
@@ -191,7 +208,7 @@ export const NewTaskModal = ({
 
   return createPortal(
     <motion.div
-      className="fixed inset-0 z-[1000] grid place-items-center bg-black/10 p-4"
+      className="fixed inset-0 z-[1000] grid place-items-center bg-black/20 p-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -202,35 +219,44 @@ export const NewTaskModal = ({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
-        className="w-full max-w-[480px] rounded-[14px] bg-white shadow-[0_18px_42px_rgba(0,0,0,0.20)] ring-1 ring-black/[0.08]"
+        className="w-full max-w-[860px] overflow-visible rounded-[18px] bg-white shadow-[0_22px_56px_rgba(0,0,0,0.24)] ring-1 ring-black/[0.08]"
         initial={{
           opacity: 0,
-          scale: 0.94,
+          y: 10,
+          scale: 0.98,
         }}
         animate={{
           opacity: 1,
+          y: 0,
           scale: 1,
         }}
         exit={{
           opacity: 0,
-          scale: 0.96,
+          y: 8,
+          scale: 0.98,
         }}
         transition={{
-          duration: 0.18,
+          duration: 0.2,
           ease: [0.16, 1, 0.3, 1],
         }}
       >
-        {/* ヘッダー */}
-        <div className="flex items-center justify-between border-b border-[#ededf0] px-5 py-4">
-          <h2 className="text-[var(--ds-typography-font-size-sm)] font-semibold tracking-[-0.02em] text-[#1c1c1e]">
-            新しいタスク
-          </h2>
+        <div className="flex items-center justify-between px-5 pb-3 pt-4">
+          <div className="flex items-center gap-2 text-[14px] font-medium text-[#2f3337]">
+            <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[#e5e5ea] bg-white px-2.5 text-[#6a6d72] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#dff8ef] text-[10px] text-[#3cbf93]">
+                ✓
+              </span>
+              Task
+            </span>
+            <span className="text-[#9a9aa0]">›</span>
+            <span>New task</span>
+          </div>
 
           <button
             type="button"
             onClick={onClose}
             aria-label="閉じる"
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-transparent text-[#6e6e73] transition-colors hover:bg-[#f2f2f7]"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-[#5f6368] transition-colors hover:bg-[#f2f2f7]"
           >
             <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
               <path
@@ -243,129 +269,129 @@ export const NewTaskModal = ({
           </button>
         </div>
 
-        {/* フォーム */}
-        <div className="flex flex-col gap-4 p-5">
-          {/* タイトル */}
-          <div>
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#8e8e93]">
-              タイトル
-            </label>
+        <div className="px-7 pb-8 pt-3">
+          <input
+            autoFocus
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="タスクタイトル"
+            aria-label="タスクタイトル"
+            className="w-full border-0 bg-transparent px-0 text-[26px] font-semibold leading-tight tracking-[-0.04em] text-[#1f2328] outline-none placeholder:text-[#a1a1aa]"
+          />
 
-            <input
-              autoFocus
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="タスク名を入力..."
-              className="w-full rounded-lg border border-[#e5e5ea] bg-white px-3 py-2 text-[13px] text-[#1c1c1e] outline-none placeholder:text-[#c7c7cc] transition-colors focus:border-[#007aff] focus:bg-white"
+          <div className="mt-8 flex flex-wrap items-center gap-2">
+            <IOSPicker
+              id="status"
+              title="ステータス"
+              value={status}
+              options={TASK_COLUMNS.map((col) => ({
+                value: col.id,
+                label: col.label,
+              }))}
+              icon={<CircleIcon />}
+              isOpen={openPicker === "status"}
+              onOpen={setOpenPicker}
+              onChange={(value) => {
+                setStatus(value);
+                setOpenPicker("");
+              }}
             />
-          </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {/* ステータス */}
-            <div>
-              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#8e8e93]">
-                ステータス
-              </label>
+            <IOSPicker
+              id="priority"
+              title="優先度"
+              value={priority}
+              options={Object.entries(PRIORITY_CONFIG).map(([key, val]) => ({
+                value: key as TaskPriority,
+                label: val.label,
+              }))}
+              icon={<span className="text-[#6e6e73]">---</span>}
+              isOpen={openPicker === "priority"}
+              onOpen={setOpenPicker}
+              onChange={(value) => {
+                setPriority(value);
+                setOpenPicker("");
+              }}
+            />
 
-              <IOSPicker
-                id="status"
-                title="ステータス"
-                value={status}
-                options={TASK_COLUMNS.map((col) => ({
-                  value: col.id,
-                  label: col.label,
-                }))}
-                isOpen={openPicker === "status"}
-                onOpen={setOpenPicker}
-                onChange={(value) => {
-                  setStatus(value);
-                  setOpenPicker("");
-                }}
-              />
-            </div>
+            <IOSPicker
+              id="category"
+              title="カテゴリ"
+              value={category}
+              options={resolvedCategoryOptions.map((option) => ({
+                value: option.id,
+                label: option.label,
+              }))}
+              icon={
+                <span className="flex h-4 w-4 items-center justify-center rounded-[4px] border border-[#8e8e93] text-[10px] text-[#6e6e73]">
+                  □
+                </span>
+              }
+              isOpen={openPicker === "category"}
+              onOpen={setOpenPicker}
+              onChange={(value) => {
+                setCategory(value);
+                setOpenPicker("");
+              }}
+            />
 
-            {/* 優先度 */}
-            <div>
-              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#8e8e93]">
-                優先度
-              </label>
-
-              <IOSPicker
-                id="priority"
-                title="優先度"
-                value={priority}
-                options={Object.entries(PRIORITY_CONFIG).map(([key, val]) => ({
-                  value: key as TaskPriority,
-                  label: val.label,
-                }))}
-                isOpen={openPicker === "priority"}
-                onOpen={setOpenPicker}
-                onChange={(value) => {
-                  setPriority(value);
-                  setOpenPicker("");
-                }}
-              />
-            </div>
-
-            {/* カテゴリ */}
-            <div>
-              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#8e8e93]">
-                カテゴリ
-              </label>
-
-              <IOSPicker
-                id="category"
-                title="カテゴリ"
-                value={category}
-                options={resolvedCategoryOptions.map((option) => ({
-                  value: option.id,
-                  label: option.label,
-                }))}
-                isOpen={openPicker === "category"}
-                onOpen={setOpenPicker}
-                onChange={(value) => {
-                  setCategory(value);
-                  setOpenPicker("");
-                }}
-              />
-            </div>
-
-            {/* 期日 */}
-            <div>
-              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#8e8e93]">
-                期日
-              </label>
-
+            <label className="relative inline-flex h-9 cursor-pointer items-center gap-2 rounded-full border border-[#dedee3] bg-white px-3 text-[13px] font-medium text-[#5f6368] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#f8f8fb]">
+              <span className="text-[#6e6e73]">
+                <CalendarIcon />
+              </span>
+              <span>{dueDate || "期日"}</span>
               <input
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full rounded-lg border border-[#e5e5ea] bg-white px-3 py-2 text-[13px] text-[#1c1c1e] outline-none transition-colors focus:border-[#007aff] focus:bg-white"
+                className="absolute inset-0 cursor-pointer opacity-0"
+                aria-label="期日"
               />
-            </div>
+            </label>
+          </div>
+
+          <div className="mt-3 text-[12px] text-[#8e8e93]">
+            {selectedCategoryLabel} に作成されます
           </div>
         </div>
 
-        {/* フッター */}
-        <div className="flex justify-end gap-2 border-t border-[#ededf0] px-5 py-3">
+        <div className="flex items-center justify-between border-t border-[#ededf0] px-5 py-4">
           <button
             type="button"
-            onClick={onClose}
-            className="rounded-lg px-4 py-1.5 text-[13px] font-medium text-[#007aff] transition-colors hover:bg-[#f2f2f7]"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-[#dedee3] bg-white text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#f8f8fb]"
+            aria-label="添付"
           >
-            キャンセル
+            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
+              <path
+                d="M5.2 8.4 8.6 5a2.1 2.1 0 0 1 3 3L7.3 12.3a3.2 3.2 0 0 1-4.5-4.5l4.7-4.7a4 4 0 0 1 5.7 5.7L8.6 13.4"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
 
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!title.trim()}
-            className="rounded-lg bg-[#007aff] px-4 py-1.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#0a84ff] disabled:bg-[#c7c7cc]"
-          >
-            作成
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full px-4 py-2 text-[13px] font-medium text-[#5f6368] transition-colors hover:bg-[#f2f2f7]"
+            >
+              キャンセル
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={!title.trim()}
+              className="rounded-full bg-[#6571dc] px-5 py-2 text-[13px] font-semibold text-white shadow-[0_8px_18px_rgba(101,113,220,0.28)] transition-colors hover:bg-[#5864ce] disabled:bg-[#c7c7cc] disabled:shadow-none"
+            >
+              作成
+            </button>
+          </div>
         </div>
       </motion.div>
     </motion.div>,
