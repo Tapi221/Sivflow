@@ -8,21 +8,9 @@ import { GridCalendarMonthDesktop } from "@/features/calendar/grid/Grid.calendar
 import { useMonthInfiniteScroll } from "../../scroll/schedule/useInfiniteScroll.month.desktop";
 import { useMonthRowResize } from "./height/useRowResize.month.desktop";
 
-const CHIP_HEIGHT_PX = 21;
-const CHIPS_TOP_OFFSET_PX = 60;
-const CHIPS_BOTTOM_MARGIN_PX = 4;
 const MONTH_VIEW_EVENT_RANGE_BUFFER_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MONTH_WEEKDAY_COUNT = 7;
-
-const getMaxVisibleChips = (rowHeight: number) =>
-  Math.max(
-    0,
-    Math.floor(
-      (rowHeight - CHIPS_TOP_OFFSET_PX - CHIPS_BOTTOM_MARGIN_PX) /
-        CHIP_HEIGHT_PX,
-    ),
-  );
 
 type CalendarMonthViewProps = {
   currentDate: Date;
@@ -162,11 +150,6 @@ export const CalendarMonthView = ({
     requestScrollHoverUpdate();
   }, [requestScrollHoverUpdate]);
 
-  const maxVisibleChips = useMemo(
-    () => getMaxVisibleChips(monthRowHeight),
-    [monthRowHeight],
-  );
-
   const renderedEvents = useMemo(() => {
     const firstWeek = scroll.monthWeeks[0];
     const lastWeek = scroll.monthWeeks[scroll.monthWeeks.length - 1];
@@ -205,7 +188,6 @@ export const CalendarMonthView = ({
           selectedDate={selectedDate}
           visibleEvents={renderedEvents}
           monthWeeks={scroll.monthWeeks}
-          maxVisibleChips={maxVisibleChips}
           monthRowHeight={monthRowHeight}
           scrollHoverDayKey={scrollHoverDayKey}
           setWeekRowRef={scroll.setWeekRowRef}
