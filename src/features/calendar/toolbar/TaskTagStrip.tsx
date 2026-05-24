@@ -1,30 +1,8 @@
-import {useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-  type MouseEvent as ReactMouseEvent,
-  type PointerEvent as ReactPointerEvent,} from "react";
+import { useEffect, useRef, useState, type FormEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
-
 import { TagChip } from "@/components/tag/TagChip";
-<<<<<<< HEAD
-import {TAG_COLOR_CONTEXT_MENU_HEIGHT,
-  TAG_COLOR_CONTEXT_MENU_MARGIN,
-  TAG_COLOR_CONTEXT_MENU_WIDTH,
-  TagColorRightClickPanel,} from "@/chip/rightclickpanel/TagColorRightClickPanel";
-=======
-import {
-  TAG_COLOR_CONTEXT_MENU_HEIGHT,
-  TAG_COLOR_CONTEXT_MENU_WIDTH,
-  TagColorRightClickPanel,
-} from "@/chip/rightclickpanel/TagColorRightClickPanel";
-import {
-  RIGHT_CLICK_PANEL_NO_DRAG_STYLE,
-  announceRightClickPanelOpen,
-  clampRightClickPanelPosition,
-  useRightClickPanelDismiss,
-} from "@/chip/rightclickpanel/rightClickPanelCommon";
->>>>>>> a328ee5733c6c49e75cda3e08a26ff0b7d035df2
+import { TAG_COLOR_CONTEXT_MENU_HEIGHT, TAG_COLOR_CONTEXT_MENU_WIDTH, TagColorRightClickPanel } from "@/chip/rightclickpanel/TagColorRightClickPanel";
+import { RIGHT_CLICK_PANEL_NO_DRAG_STYLE, announceRightClickPanelOpen, clampRightClickPanelPosition, useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPanelCommon";
 import { getTagColorKey, type TagColorKey } from "@/features/tag/tagColor";
 import { useTags } from "@/hooks/settings/useTags";
 import { Plus, X } from "@/ui/icons";
