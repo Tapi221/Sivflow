@@ -26,7 +26,7 @@ import {
   WORKSPACE_TAB_CONTEXT_MENU_MARGIN,
   WORKSPACE_TAB_CONTEXT_MENU_WIDTH,
   WorkspaceTabContextMenu,
-} from "@/features/tab/TabContextMenu";
+} from "@/chip/rightclickpanel/TabContextMenu";
 import { cn } from "@/lib/utils";
 import { FileText, Layers, X } from "@/ui/icons";
 
