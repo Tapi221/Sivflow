@@ -45,7 +45,7 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "library",
     label: "Library",
-    to: "/library?view=section-list&libraryType=pdf",
+    to: "/library/pdf",
     icon: <LibraryIcon className="sidebar-nav-icon" />,
     sectionKey: "library",
   },
@@ -79,9 +79,11 @@ export const SidebarMobile = ({
   const openSectionTab = useWorkspaceTabsStore((s) => s.openSectionTab);
 
   const selectedLibraryChild =
-    pathname === "/library"
-      ? "pdf"
-      : new URLSearchParams(search).get("libraryType");
+    pathname === "/library/flashcard"
+      ? "flashcards"
+      : pathname === "/library/pdf" || pathname === "/library"
+        ? "pdf"
+        : new URLSearchParams(search).get("libraryType");
 
   const handleClick = (item: SidebarNavItem) => {
     item.onClick?.();
@@ -105,7 +107,7 @@ export const SidebarMobile = ({
 
   const openLibraryChild = (type: string) => {
     openSectionTab("library");
-    navigate(`/library?view=section-list&libraryType=${type}`);
+    navigate(type === "flashcards" ? "/library/flashcard" : "/library/pdf");
   };
 
   return (
