@@ -33,7 +33,7 @@ export default defineConfig([
       // ----------------------------
       // stylistic（現実運用寄りに緩和）
       // ----------------------------
-      "@stylistic/indent": "off",
+      "@stylistic/indent": ["warn", 2],
       "@stylistic/quotes": ["error", "double"],
       "@stylistic/semi": ["error", "always"],
 
@@ -81,13 +81,11 @@ export default defineConfig([
       ],
 
       // ----------------------------
-      // react / react hooks
+      // react hooks（warning化で崩壊防止）
       // ----------------------------
-      "react-refresh/only-export-components": "off",
-      "react-hooks/exhaustive-deps": "off",
-      "react-hooks/preserve-manual-memoization": "off",
-      "react-hooks/refs": "off",
-      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/preserve-manual-memoization": "warn",
+      "react-hooks/refs": "warn",
+      "react-hooks/set-state-in-effect": "warn",
 
       // ----------------------------
       // unused imports
@@ -96,7 +94,15 @@ export default defineConfig([
       "@typescript-eslint/no-unused-vars": "off",
 
       "unused-imports/no-unused-imports": "error",
-      "unused-imports/no-unused-vars": "off",
+      "unused-imports/no-unused-vars": [
+        "warn",
+        {
+          vars: "all",
+          varsIgnorePattern: "^_",
+          args: "after-used",
+          argsIgnorePattern: "^_",
+        },
+      ],
 
       // ----------------------------
       // import sort
@@ -198,7 +204,15 @@ export default defineConfig([
       "@typescript-eslint/no-unused-vars": "off",
 
       "unused-imports/no-unused-imports": "error",
-      "unused-imports/no-unused-vars": "off",
+      "unused-imports/no-unused-vars": [
+        "warn",
+        {
+          vars: "all",
+          varsIgnorePattern: "^_",
+          args: "after-used",
+          argsIgnorePattern: "^_",
+        },
+      ],
 
       "simple-import-sort/imports": "off",
       "simple-import-sort/exports": "off",
