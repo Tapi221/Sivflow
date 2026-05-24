@@ -1,13 +1,37 @@
-import { useEffect, type RefObject } from "react";
-import { RIGHT_CLICK_PANEL_ITEM_HORIZONTAL_PADDING, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_OPEN_EVENT, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_TEXT_FONT_SIZE, type RightClickPanelDimensions, type RightClickPanelId, type RightClickPanelNoDragStyle, type RightClickPanelPosition } from "./rightClickPanelCommon";
+import { useEffect, type CSSProperties, type RefObject } from "react";
+
+export type RightClickPanelPosition = {
+  x: number;
+  y: number;
+};
+
+export type RightClickPanelNoDragStyle = CSSProperties & {
+  WebkitAppRegion?: "drag" | "no-drag";
+};
+
+export type RightClickPanelDimensions = {
+  width: number;
+  height: number;
+};
+
+export type RightClickPanelId = string;
 
 type RightClickPanelOpenEventDetail = {
   panelId: RightClickPanelId;
 };
 
+export const RIGHT_CLICK_PANEL_MARGIN = 8;
+export const RIGHT_CLICK_PANEL_SURFACE_PADDING = 3;
+export const RIGHT_CLICK_PANEL_ITEM_HORIZONTAL_PADDING = 10;
+export const RIGHT_CLICK_PANEL_TEXT_FONT_SIZE = 13;
+export const RIGHT_CLICK_PANEL_OPEN_EVENT = "manifolia:right-click-panel-open";
+
 export const RIGHT_CLICK_PANEL_NO_DRAG_STYLE: RightClickPanelNoDragStyle = {
   WebkitAppRegion: "no-drag",
 };
+
+export const RIGHT_CLICK_PANEL_FONT_FAMILY =
+  "var(--explorer-chrome-font-family, \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, BlinkMacSystemFont, \"Yu Gothic UI\", \"Hiragino Sans\", sans-serif)";
 
 const RIGHT_CLICK_PANEL_MEASURE_FONT_FAMILY =
   "\"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, BlinkMacSystemFont, \"Yu Gothic UI\", \"Hiragino Sans\", sans-serif";
@@ -15,6 +39,79 @@ const RIGHT_CLICK_PANEL_MEASURE_FONT_FAMILY =
 const RIGHT_CLICK_PANEL_MEASURE_FONT = `400 ${RIGHT_CLICK_PANEL_TEXT_FONT_SIZE}px ${RIGHT_CLICK_PANEL_MEASURE_FONT_FAMILY}`;
 
 let rightClickPanelMeasureCanvas: HTMLCanvasElement | null = null;
+
+export const RIGHT_CLICK_PANEL_STYLE = `
+.right-click-panel {
+  box-sizing: border-box;
+  contain: layout paint style;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: ${RIGHT_CLICK_PANEL_SURFACE_PADDING}px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14), 0 1px 6px rgba(0, 0, 0, 0.08);
+  font-family: ${RIGHT_CLICK_PANEL_FONT_FAMILY};
+  font-variant-east-asian: proportional-width;
+  font-feature-settings: "palt" 1;
+  animation: none;
+  transition: none;
+  transform: none;
+}
+
+.right-click-panel,
+.right-click-panel * {
+  box-sizing: border-box;
+}
+
+.right-click-panel-item,
+.right-click-panel-title {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 28px;
+  padding: 0 ${RIGHT_CLICK_PANEL_ITEM_HORIZONTAL_PADDING}px;
+  border: 0;
+  border-radius: 4px;
+  color: #4a4a4a;
+  font-family: ${RIGHT_CLICK_PANEL_FONT_FAMILY};
+  font-size: ${RIGHT_CLICK_PANEL_TEXT_FONT_SIZE}px;
+  font-weight: 400;
+  line-height: 15px;
+  letter-spacing: 0;
+  text-align: left;
+  white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
+  animation: none;
+}
+
+.right-click-panel-item {
+  background: transparent;
+  transition: background-color 80ms linear;
+}
+
+.right-click-panel-item:not(:disabled) {
+  cursor: default;
+}
+
+.right-click-panel-item:not(:disabled):hover,
+.right-click-panel-item:not(:disabled):focus-visible {
+  background: #eeeeee;
+  outline: none;
+}
+
+.right-click-panel-item:disabled {
+  color: #b8b8b8;
+  cursor: default;
+}
+
+.right-click-panel-title {
+  background: transparent;
+}
+`;
 
 export const announceRightClickPanelOpen = (panelId: RightClickPanelId) => {
   window.dispatchEvent(
