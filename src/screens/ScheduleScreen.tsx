@@ -278,6 +278,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
           selectedDate={selectedDate}
           selectedRange={sidebarSelectedRange}
           activeMode={activeMode}
+          appProjects={[]}
           googleAccounts={googleAccounts}
           isAnyCalendarConnecting={isAnyCalendarConnecting}
           selectedTaskListIds={selectedTaskListIds}
@@ -285,6 +286,8 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
           onPreviousMonth={handleSidebarPreviousMonth}
           onNextMonth={handleSidebarNextMonth}
           onAddCalendar={addGoogleCalendar}
+          onAddProject={() => undefined}
+          onToggleProject={() => undefined}
           onReconnectAccount={(accountId) => {
             void reconnectGoogleAccount(accountId);
           }}
