@@ -56,7 +56,6 @@ export const AppRoutes = () => {
         <Route path="study" element={withRouteFallback(<StudyMode />)} />
         <Route path="sandbox/blocknote" element={<BlockNoteSandboxPage />} />
 
-        <Route path="trash" element={<Navigate to="/library" replace />} />
         <Route path="directory" element={withRouteFallback(<Directory />)} />
 
         {getDevRouteElements()}
