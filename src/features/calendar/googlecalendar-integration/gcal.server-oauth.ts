@@ -37,6 +37,8 @@ const exchangeGoogleCalendarCodeCallable = httpsCallable<ExchangeGoogleCalendarC
 const getGoogleCalendarAccessTokenCallable = httpsCallable<GetGoogleCalendarAccessTokenInput, ServerGoogleCalendarAccess>(functionsClient, "getGoogleCalendarAccessToken");
 const disconnectGoogleCalendarAccountCallable = httpsCallable<DisconnectGoogleCalendarAccountInput, { ok: boolean }>(functionsClient, "disconnectGoogleCalendarAccount");
 
+const AUTO_RECOVERY_PENDING_ERROR_CODE = "auto-recovery-pending";
+const AUTO_RECOVERY_PENDING_MESSAGE = "Google Calendar の自動復旧を待機中です。しばらくしてからもう一度同期します。";
 const SERVER_TOKEN_RETRY_DELAYS_MS = [500, 1_500] as const;
 
 const waitForCallableAuth = async (): Promise<void> => {
@@ -198,8 +200,10 @@ const isServerInfrastructureError = (error: unknown): boolean => {
   );
 };
 
-const toUserTransparentAutoRecoveryError = (error: unknown): Error => {
-  return new Error(`Google Calendar token auto recovery is pending: ${toErrorMessage(error)}`);
+const toUserTransparentAutoRecoveryError = (_error: unknown): Error => {
+  const error = new Error(AUTO_RECOVERY_PENDING_MESSAGE);
+  (error as Error & { code?: string }).code = AUTO_RECOVERY_PENDING_ERROR_CODE;
+  return error;
 };
 
 const getGoogleCalendarAccessTokenWithRetry = async (
