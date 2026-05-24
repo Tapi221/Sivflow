@@ -1,15 +1,10 @@
 import { useCallback, useEffect, useMemo, useReducer } from "react";
 
 import { refreshCalendarAccessToken } from "./gcal.oauth";
-import {getServerStoredGoogleCalendarAccessToken,
-  isServerStoredGoogleOAuthEnabled,} from "./gcal.server-oauth";
-import {createGoogleTask,
-  deleteGoogleTask,
-  fetchGoogleTasks,
-  patchGoogleTask,} from "./gcal.tasks-api";
+import { getServerStoredGoogleCalendarAccessToken, isServerStoredGoogleOAuthEnabled } from "./gcal.server-oauth";
+import { createGoogleTask, deleteGoogleTask, fetchGoogleTasks, moveGoogleTask, patchGoogleTask } from "./gcal.tasks-api";
 import type { GoogleTaskItem, GoogleTaskListItem } from "./gcalSync.types";
-import type {GoogleAccountEntry,
-  GoogleAccountTokenUpdate,} from "./useMultiAccountGoogleCalendar";
+import type { GoogleAccountEntry, GoogleAccountTokenUpdate } from "./useMultiAccountGoogleCalendar";
 import type { GoogleTaskListAccountState } from "./useGoogleTaskLists";
 
 export type GoogleTasksAccountState = {
@@ -41,6 +36,7 @@ type GoogleTasksAction =
   | { type: "ERROR"; accountId: string; error: string }
   | { type: "UPSERT_TASK"; accountId: string; task: GoogleTaskItem }
   | { type: "DELETE_TASK"; accountId: string; taskListId: string; taskId: string }
+  | { type: "MOVE_TASK"; accountId: string; sourceTaskListId: string; task: GoogleTaskItem }
   | { type: "REMOVE_MISSING_ACCOUNTS"; accountIds: string[] };
 
 type AccountTokenSnapshot = {
@@ -229,6 +225,34 @@ const reduceGoogleTasks = (
       };
     }
 
+    case "MOVE_TASK": {
+      const accountState = state[action.accountId] ?? EMPTY_ACCOUNT_STATE;
+      const tasksWithoutSource = accountState.tasks.filter(
+        (task) =>
+          !(task.id === action.task.id && task.taskListId === action.sourceTaskListId),
+      );
+      const tasks = tasksWithoutSource.some(
+        (task) =>
+          task.id === action.task.id && task.taskListId === action.task.taskListId,
+      )
+        ? tasksWithoutSource.map((task) =>
+          task.id === action.task.id && task.taskListId === action.task.taskListId
+            ? action.task
+            : task,
+        )
+        : [...tasksWithoutSource, action.task];
+
+      return {
+        ...state,
+        [action.accountId]: {
+          ...accountState,
+          tasks,
+          isLoading: false,
+          error: null,
+        },
+      };
+    }
+
     case "DELETE_TASK": {
       const accountState = state[action.accountId] ?? EMPTY_ACCOUNT_STATE;
 
@@ -388,6 +412,30 @@ export const useGoogleTasks = (
     [findAccountForTaskList, onAccessTokenRecovered],
   );
 
+  const moveTaskList = useCallback(
+    async (taskListId: string, taskId: string, destinationTaskListId: string) => {
+      const account = findAccountForTaskList(taskListId);
+
+      if (!account) throw new Error("Google ToDo リストが見つかりません");
+
+      if (taskListId === destinationTaskListId) {
+        return state[account.accountId]?.tasks.find(
+          (task) => task.id === taskId && task.taskListId === taskListId,
+        ) ?? null;
+      }
+
+      const task = await withRecoveredToken(
+        account,
+        (accessToken) => moveGoogleTask({ accessToken, taskListId, taskId, destinationTaskListId }),
+        onAccessTokenRecovered,
+      );
+
+      dispatch({ type: "MOVE_TASK", accountId: account.accountId, sourceTaskListId: taskListId, task });
+      return task;
+    },
+    [findAccountForTaskList, onAccessTokenRecovered, state],
+  );
+
   const removeTask = useCallback(
     async (taskListId: string, taskId: string) => {
       const account = findAccountForTaskList(taskListId);
@@ -456,6 +504,7 @@ export const useGoogleTasks = (
     refreshAll,
     createTask,
     updateTask,
+    moveTaskList,
     removeTask,
   };
 };
