@@ -24,8 +24,7 @@ export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 180;
 export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 184;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = 8;
 
-const WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY =
-  'var(--bn-font-family, var(--mantine-font-family, Inter, "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif))';
+const WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY = "var(--app-font-family-ui)";
 
 const WORKSPACE_TAB_CONTEXT_MENU_DROPDOWN_STYLE: CSSProperties = {
   minWidth: 148,
@@ -41,6 +40,8 @@ const WORKSPACE_TAB_CONTEXT_MENU_TEXT_STYLE: CSSProperties = {
   fontWeight: 400,
   lineHeight: "18px",
   letterSpacing: 0,
+  color: "#3f3f3f",
+  WebkitFontSmoothing: "antialiased",
 };
 
 const WORKSPACE_TAB_CONTEXT_MENU_ITEM_STYLE: CSSProperties = {
