@@ -23,6 +23,7 @@ export const ExportMfCardButton = ({
 }: ExportMfCardButtonProps) => {
   const toast = useToast();
   const [isExporting, setIsExporting] = useState(false);
+  const label = isExporting ? "書き出し中..." : ".mfcard 書き出し";
 
   const handleExport = async () => {
     if (!card) {
@@ -65,9 +66,11 @@ export const ExportMfCardButton = ({
       size="sm"
       onClick={handleExport}
       disabled={disabled || isExporting || !card}
-      className="rounded-full bg-white/85 shadow-sm backdrop-blur"
+      title={label}
+      aria-label={label}
+      className="min-w-0 max-w-[150px] overflow-hidden rounded-full bg-white/85 shadow-sm backdrop-blur"
     >
-      {isExporting ? "書き出し中..." : ".mfcard 書き出し"}
+      <span className="min-w-0 truncate whitespace-nowrap">{label}</span>
     </Button>
   );
 };
