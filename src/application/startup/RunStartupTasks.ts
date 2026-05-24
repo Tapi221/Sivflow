@@ -17,6 +17,33 @@ const performAutoBackupUseCase = createPerformAutoBackupUseCase({
 
 const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
 
+const logIntegrityReport = (report: Awaited<ReturnType<typeof checkDataIntegrityUseCase.execute>>) => {
+  if (!report.isHealthy) {
+    const issueSummary = report.issues.reduce<Record<string, number>>(
+      (accumulator, issue) => {
+        accumulator[issue.code] = (accumulator[issue.code] || 0) + 1;
+        return accumulator;
+      },
+      {},
+    );
+
+    console.error(
+      "[Critical] Data integrity issues found:",
+      report.issues.length,
+      sanitizeForLog(issueSummary),
+    );
+    return;
+  }
+
+  console.log(
+    "[Safe] Data integrity check passed (0 errors). Healthy items:",
+    report.totalCards,
+    "cards,",
+    report.totalFolders,
+    "folders.",
+  );
+};
+
 /**
  * Sync V2 移行完了後の startup reset。
  * 起動時の追加タスクを実行する。
@@ -57,36 +84,6 @@ export const runStartupTasks = async ({
       console.log("Auto backup completed on startup");
     }
 
-    const report = await checkDataIntegrityUseCase.execute();
-
-    if (isDisposed()) {
-      return;
-    }
-
-    if (!report.isHealthy) {
-      const issueSummary = report.issues.reduce<Record<string, number>>(
-        (accumulator, issue) => {
-          accumulator[issue.code] = (accumulator[issue.code] || 0) + 1;
-          return accumulator;
-        },
-        {},
-      );
-
-      console.error(
-        "[Critical] Data integrity issues found:",
-        report.issues.length,
-        sanitizeForLog(issueSummary),
-      );
-    } else {
-      console.log(
-        "[Safe] Data integrity check passed (0 errors). Healthy items:",
-        report.totalCards,
-        "cards,",
-        report.totalFolders,
-        "folders.",
-      );
-    }
-
     const syncService = await SyncServiceFactory.getInstance(userId);
 
     if (isDisposed()) {
@@ -95,6 +92,18 @@ export const runStartupTasks = async ({
 
     console.log("[Sync] Startup sync initiated");
     await syncService.performStartupSync();
+
+    if (isDisposed()) {
+      return;
+    }
+
+    const report = await checkDataIntegrityUseCase.execute();
+
+    if (isDisposed()) {
+      return;
+    }
+
+    logIntegrityReport(report);
   } catch (error) {
     console.error("[Critical] Startup tasks failed:", sanitizeForLog(error));
   }
