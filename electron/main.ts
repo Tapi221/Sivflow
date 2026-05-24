@@ -327,19 +327,12 @@ const ensureOauthLoopbackRedirect = (authorizeUrl: string): void => {
   }
 };
 
-const getDesktopOauthClientSecret = (): string => {
+const getDesktopOauthClientSecret = (): string | null => {
   const secret =
-    process.env.GOOGLE_OAUTH_WEB_CLIENT_SECRET?.trim() ||
     process.env.GOOGLE_OAUTH_CLIENT_SECRET?.trim() ||
     process.env.DESKTOP_GOOGLE_OAUTH_CLIENT_SECRET?.trim();
 
-  if (!secret) {
-    throw new Error(
-      "GOOGLE_OAUTH_WEB_CLIENT_SECRET is not configured in main process environment",
-    );
-  }
-
-  return secret;
+  return secret || null;
 };
 
 const exchangeGoogleOauthTokens = async (
@@ -348,20 +341,23 @@ const exchangeGoogleOauthTokens = async (
   const clientSecret = getDesktopOauthClientSecret();
   const requestBody = new URLSearchParams({
     client_id: input.clientId,
-    client_secret: clientSecret,
     code: input.code,
     code_verifier: input.codeVerifier,
     grant_type: "authorization_code",
     redirect_uri: input.redirectUri,
   });
 
+  if (clientSecret) {
+    requestBody.set("client_secret", clientSecret);
+  }
+
   console.info("[electron][oauth] token request", {
     client_id: input.clientId,
     redirect_uri: input.redirectUri,
     grant_type: "authorization_code",
     code_verifier_length: input.codeVerifier.length,
-    client_secret_present: clientSecret.length > 0,
-    client_secret_length: clientSecret.length,
+    client_secret_present: Boolean(clientSecret),
+    client_secret_length: clientSecret?.length ?? 0,
   });
 
   const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, {
@@ -431,14 +427,17 @@ const refreshGoogleOauthAccessToken = async ({
   const clientSecret = getDesktopOauthClientSecret();
   const requestBody = new URLSearchParams({
     client_id: clientId,
-    client_secret: clientSecret,
     grant_type: "refresh_token",
     refresh_token: refreshToken,
   });
 
+  if (clientSecret) {
+    requestBody.set("client_secret", clientSecret);
+  }
+
   console.info("[electron][oauth] refresh_token request", {
     client_id: clientId,
-    client_secret_present: clientSecret.length > 0,
+    client_secret_present: Boolean(clientSecret),
   });
 
   const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, {
