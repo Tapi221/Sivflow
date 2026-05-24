@@ -27,7 +27,6 @@ export const TaskCard = ({
     category,
     formattedDate,
     isDone,
-    checkboxColor,
     checkboxLabel,
     chipName,
     handleToggleDone,
@@ -51,7 +50,7 @@ export const TaskCard = ({
       priorityLabel={priority.label}
       formattedDate={formattedDate}
       isDone={isDone}
-      checkboxColor={checkboxColor}
+      checkboxColor={tokens.border}
       checkboxLabel={checkboxLabel}
       chipName={chipName}
       accountPhotoUrl={accountPhotoUrl}
