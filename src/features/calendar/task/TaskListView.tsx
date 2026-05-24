@@ -3,17 +3,16 @@ import { TaskPriorityBadge } from "@/chip/budge/TaskPriorityBadge";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { TrashIcon } from "@/components/icons/icons.card";
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "./task.types";
-import type { Task, TaskStatus } from "./task.types";
+import type { Task, TaskGroupMode, TaskStatus } from "./task.types";
 
 type TaskListViewProps = {
   tasks: Task[];
+  groupMode: TaskGroupMode;
   onToggleTaskDone: (taskId: string, done: boolean) => void;
   onRenameTask: (taskId: string, title: string) => void;
   onChangeTaskDueDate?: (taskId: string, dueDate: string | null) => void;
   onDeleteTask: (taskId: string) => void;
 };
-
-type TaskGroupMode = "status" | "section";
 
 type TaskGroup = {
   id: string;
@@ -29,11 +28,6 @@ const STATUS_LABEL: Record<TaskStatus, string> = {
   done: "完了",
 };
 
-const GROUP_MODE_LABEL: Record<TaskGroupMode, string> = {
-  status: "状態",
-  section: "セクション",
-};
-
 const getCategoryConfig = (category: string) => {
   return (
     CATEGORY_CONFIG[category] ?? {
@@ -46,6 +40,7 @@ const getCategoryConfig = (category: string) => {
 
 export const TaskListView = ({
   tasks,
+  groupMode,
   onToggleTaskDone,
   onRenameTask,
   onChangeTaskDueDate,
@@ -53,7 +48,6 @@ export const TaskListView = ({
 }: TaskListViewProps) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
-  const [groupMode, setGroupMode] = useState<TaskGroupMode>("status");
 
   const grouped = useMemo<TaskGroup[]>(() => {
     if (groupMode === "status") {
@@ -103,44 +97,13 @@ export const TaskListView = ({
 
   return (
     <div className="min-h-0 flex-1 overflow-auto bg-white">
-      <div className="sticky top-0 z-20 min-w-[900px] border-b border-[#eeeeee] bg-white">
-        <div className="flex h-10 items-center justify-between border-b border-[#f4f4f5] px-4">
-          <div className="text-[12px] font-semibold text-[#8f929c]">タスクの分類</div>
-          <div
-            className="inline-flex rounded-lg bg-[#f4f5f7] p-0.5"
-            role="group"
-            aria-label="タスクの表示分類"
-          >
-            {(["status", "section"] as const).map((mode) => {
-              const active = groupMode === mode;
-
-              return (
-                <button
-                  key={mode}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => setGroupMode(mode)}
-                  className={`h-7 rounded-md px-3 text-[12px] font-semibold transition-colors ${
-                    active
-                      ? "bg-white text-[#1c1c1e] shadow-sm"
-                      : "text-[#8f929c] hover:text-[#4b5563]"
-                  }`}
-                >
-                  {GROUP_MODE_LABEL[mode]}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-[32px_minmax(260px,1fr)_96px_160px_150px_40px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[#8f929c]">
-          <div className="h-8" />
-          <div className="flex h-8 items-center pr-3">タイトル</div>
-          <div className="flex h-8 items-center pr-3">優先度</div>
-          <div className="flex h-8 items-center pr-3">カテゴリ</div>
-          <div className="flex h-8 items-center pr-3">期日</div>
-          <div className="h-8" />
-        </div>
+      <div className="sticky top-0 z-20 grid min-w-[900px] grid-cols-[32px_minmax(260px,1fr)_96px_160px_150px_40px] border-b border-[#eeeeee] bg-white text-[11px] font-semibold uppercase tracking-[0.04em] text-[#8f929c]">
+        <div className="h-8" />
+        <div className="flex h-8 items-center pr-3">タイトル</div>
+        <div className="flex h-8 items-center pr-3">優先度</div>
+        <div className="flex h-8 items-center pr-3">カテゴリ</div>
+        <div className="flex h-8 items-center pr-3">期日</div>
+        <div className="h-8" />
       </div>
 
       <div className="min-w-[900px]">
