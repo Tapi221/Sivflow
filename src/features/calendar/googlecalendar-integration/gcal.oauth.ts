@@ -32,6 +32,17 @@ const GOOGLE_SCOPE_PARAM = `openid email profile ${GOOGLE_SCOPES.join(" ")}`;
 export const GOOGLE_SERVER_CODE_REDIRECT_URI =
   typeof window === "undefined" ? "postmessage" : window.location.origin;
 
+const GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE = "failed-precondition";
+
+const createGoogleCalendarReconnectRequiredError = (): Error => {
+  const error = new Error("Google Calendar の再連携が必要です");
+
+  (error as Error & { code?: string }).code =
+    GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE;
+
+  return error;
+};
+
 type GoogleTokenResponse = {
   access_token?: string;
   error?: string;
@@ -228,13 +239,11 @@ const buildAuthorizeUrl = ({
   redirectUri,
   codeChallenge,
   state,
-  silent,
 }: {
   clientId: string;
   redirectUri: string;
   codeChallenge: string;
   state: string;
-  silent: boolean;
 }) => {
   const params = new URLSearchParams({
     client_id: clientId,
@@ -246,11 +255,7 @@ const buildAuthorizeUrl = ({
     code_challenge: codeChallenge,
     code_challenge_method: "S256",
     access_type: "offline",
-    ...(silent
-      ? {}
-      : {
-        prompt: "consent select_account",
-      }),
+    prompt: "consent select_account",
   });
 
   return `${GOOGLE_OAUTH_AUTHORIZE_ENDPOINT}?${params.toString()}`;
@@ -303,7 +308,7 @@ const waitForDesktopCode = (state: string, redirectUri: string) => {
   });
 };
 
-const requestDesktopToken = async (silent: boolean) => {
+const requestDesktopToken = async () => {
   const clientId = getClientId();
 
   const redirectUri = getRedirectUri();
@@ -324,7 +329,6 @@ const requestDesktopToken = async (silent: boolean) => {
     redirectUri,
     codeChallenge: challenge,
     state,
-    silent,
   });
 
   const codePromise = waitForDesktopCode(state, redirectUri);
@@ -613,6 +617,10 @@ export const refreshCalendarAccessToken = async ({
 };
 
 const requestWebTokenWithFirebase = async (auth: Auth, silent: boolean) => {
+  if (silent) {
+    throw createGoogleCalendarReconnectRequiredError();
+  }
+
   const provider = new GoogleAuthProvider();
 
   for (const scope of GOOGLE_SCOPES) {
@@ -621,16 +629,10 @@ const requestWebTokenWithFirebase = async (auth: Auth, silent: boolean) => {
 
   provider.setCustomParameters({
     include_granted_scopes: "true",
-    ...(silent ? {} : { prompt: "consent" }),
+    prompt: "consent",
   });
 
-  if (silent && !auth.currentUser) {
-    throw new Error("No current user for silent reauthentication");
-  }
-
-  const result = silent
-    ? await reauthenticateWithPopup(auth.currentUser!, provider)
-    : await signInWithPopup(auth, provider);
+  const result = await signInWithPopup(auth, provider);
 
   const cred = GoogleAuthProvider.credentialFromResult(result);
 
@@ -662,7 +664,11 @@ export const requestCalendarAccessToken = async (
   silent = false,
 ): Promise<GoogleCalendarAccess> => {
   if (isDesktopLikeRuntime()) {
-    return requestDesktopToken(silent);
+    if (silent) {
+      throw createGoogleCalendarReconnectRequiredError();
+    }
+
+    return requestDesktopToken();
   }
 
   return requestWebToken(auth, silent);
