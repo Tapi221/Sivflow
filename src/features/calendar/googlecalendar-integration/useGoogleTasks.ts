@@ -1,11 +1,16 @@
-import { useEffect, useMemo, useReducer } from "react";
+import { useCallback, useEffect, useMemo, useReducer } from "react";
 
 import { refreshCalendarAccessToken } from "./gcal.oauth";
 import {
   getServerStoredGoogleCalendarAccessToken,
   isServerStoredGoogleOAuthEnabled,
 } from "./gcal.server-oauth";
-import { fetchGoogleTasks } from "./gcal.tasks-api";
+import {
+  createGoogleTask,
+  deleteGoogleTask,
+  fetchGoogleTasks,
+  patchGoogleTask,
+} from "./gcal.tasks-api";
 import type { GoogleTaskItem, GoogleTaskListItem } from "./gcalSync.types";
 import type { GoogleAccountEntry } from "./useMultiAccountGoogleCalendar";
 import type { GoogleTaskListAccountState } from "./useGoogleTaskLists";
@@ -16,12 +21,29 @@ export type GoogleTasksAccountState = {
   error: string | null;
 };
 
+export type GoogleTaskCreateInput = {
+  title: string;
+  notes?: string | null;
+  due?: string | null;
+  status?: GoogleTaskItem["status"];
+};
+
+export type GoogleTaskPatchInput = {
+  title?: string;
+  notes?: string | null;
+  due?: string | null;
+  status?: GoogleTaskItem["status"];
+  completed?: string | null;
+};
+
 type GoogleTasksState = Record<string, GoogleTasksAccountState>;
 
 type GoogleTasksAction =
   | { type: "START"; accountId: string }
   | { type: "SUCCESS"; accountId: string; tasks: GoogleTaskItem[] }
   | { type: "ERROR"; accountId: string; error: string }
+  | { type: "UPSERT_TASK"; accountId: string; task: GoogleTaskItem }
+  | { type: "DELETE_TASK"; accountId: string; taskListId: string; taskId: string }
   | { type: "REMOVE_MISSING_ACCOUNTS"; accountIds: string[] };
 
 type AccountTokenSnapshot = {
@@ -37,6 +59,8 @@ const EMPTY_ACCOUNT_STATE: GoogleTasksAccountState = {
   isLoading: false,
   error: null,
 };
+
+const DEFAULT_POLL_INTERVAL_MS = 60_000;
 
 const toErrorMessage = (error: unknown) => {
   if (!(error instanceof Error)) return String(error);
@@ -77,29 +101,25 @@ const getRecoverableAccessToken = async (
   return result.accessToken;
 };
 
-const fetchGoogleTasksWithRecovery = async (
+const getAccessTokenWithRecovery = async (
   account: AccountTokenSnapshot,
-): Promise<GoogleTaskItem[]> => {
-  const fetchAll = async (accessToken: string) => {
-    const results = await Promise.all(
-      account.taskLists.map((taskList) =>
-        fetchGoogleTasks({ accessToken, taskListId: taskList.id }),
-      ),
-    );
+): Promise<string | null> => {
+  if (account.accessToken) return account.accessToken;
+  return getRecoverableAccessToken(account);
+};
 
-    return results.flat();
-  };
+const withRecoveredToken = async <T,>(
+  account: AccountTokenSnapshot,
+  action: (accessToken: string) => Promise<T>,
+): Promise<T> => {
+  const accessToken = await getAccessTokenWithRecovery(account);
 
-  if (!account.accessToken) {
-    const recoveredToken = await getRecoverableAccessToken(account);
-
-    if (!recoveredToken) return [];
-
-    return fetchAll(recoveredToken);
+  if (!accessToken) {
+    throw new Error("Google Tasks access token is missing");
   }
 
   try {
-    return await fetchAll(account.accessToken);
+    return await action(accessToken);
   } catch (error) {
     if (!isUnauthorizedError(error)) throw error;
 
@@ -107,8 +127,22 @@ const fetchGoogleTasksWithRecovery = async (
 
     if (!recoveredToken) throw error;
 
-    return fetchAll(recoveredToken);
+    return action(recoveredToken);
   }
+};
+
+const fetchGoogleTasksWithRecovery = async (
+  account: AccountTokenSnapshot,
+): Promise<GoogleTaskItem[]> => {
+  return withRecoveredToken(account, async (accessToken) => {
+    const results = await Promise.all(
+      account.taskLists.map((taskList) =>
+        fetchGoogleTasks({ accessToken, taskListId: taskList.id }),
+      ),
+    );
+
+    return results.flat();
+  });
 };
 
 const reduceGoogleTasks = (
@@ -145,6 +179,49 @@ const reduceGoogleTasks = (
           error: action.error,
         },
       };
+
+    case "UPSERT_TASK": {
+      const accountState = state[action.accountId] ?? EMPTY_ACCOUNT_STATE;
+      const tasks = accountState.tasks.some(
+        (task) =>
+          task.id === action.task.id && task.taskListId === action.task.taskListId,
+      )
+        ? accountState.tasks.map((task) =>
+          task.id === action.task.id && task.taskListId === action.task.taskListId
+            ? action.task
+            : task,
+        )
+        : [...accountState.tasks, action.task];
+
+      return {
+        ...state,
+        [action.accountId]: {
+          ...accountState,
+          tasks,
+          isLoading: false,
+          error: null,
+        },
+      };
+    }
+
+    case "DELETE_TASK": {
+      const accountState = state[action.accountId] ?? EMPTY_ACCOUNT_STATE;
+
+      return {
+        ...state,
+        [action.accountId]: {
+          ...accountState,
+          tasks: accountState.tasks.filter(
+            (task) =>
+              !(
+                task.id === action.taskId && task.taskListId === action.taskListId
+              ),
+          ),
+          isLoading: false,
+          error: null,
+        },
+      };
+    }
 
     case "REMOVE_MISSING_ACCOUNTS": {
       const ids = new Set(action.accountIds);
@@ -209,43 +286,141 @@ export const useGoogleTasks = (
     [accountTokenKey],
   );
 
+  const refreshAccount = useCallback(
+    async (account: AccountTokenSnapshot) => {
+      if (account.connectionStatus !== "connected") return;
+
+      if (account.taskLists.length === 0) {
+        dispatch({ type: "SUCCESS", accountId: account.accountId, tasks: [] });
+        return;
+      }
+
+      dispatch({ type: "START", accountId: account.accountId });
+
+      try {
+        const tasks = await fetchGoogleTasksWithRecovery(account);
+        dispatch({ type: "SUCCESS", accountId: account.accountId, tasks });
+      } catch (error) {
+        dispatch({
+          type: "ERROR",
+          accountId: account.accountId,
+          error: toErrorMessage(error),
+        });
+      }
+    },
+    [],
+  );
+
+  const refreshAll = useCallback(async () => {
+    await Promise.all(accountTokens.map((account) => refreshAccount(account)));
+  }, [accountTokens, refreshAccount]);
+
+  const findAccountForTaskList = useCallback(
+    (taskListId: string) =>
+      accountTokens.find((account) =>
+        account.taskLists.some((taskList) => taskList.id === taskListId),
+      ) ?? null,
+    [accountTokens],
+  );
+
+  const createTask = useCallback(
+    async (taskListId: string, input: GoogleTaskCreateInput) => {
+      const account = findAccountForTaskList(taskListId);
+
+      if (!account) throw new Error("Google ToDo リストが見つかりません");
+
+      const task = await withRecoveredToken(account, (accessToken) =>
+        createGoogleTask({ accessToken, taskListId, input }),
+      );
+
+      dispatch({ type: "UPSERT_TASK", accountId: account.accountId, task });
+      return task;
+    },
+    [findAccountForTaskList],
+  );
+
+  const updateTask = useCallback(
+    async (taskListId: string, taskId: string, patch: GoogleTaskPatchInput) => {
+      const account = findAccountForTaskList(taskListId);
+
+      if (!account) throw new Error("Google ToDo リストが見つかりません");
+
+      const task = await withRecoveredToken(account, (accessToken) =>
+        patchGoogleTask({ accessToken, taskListId, taskId, patch }),
+      );
+
+      dispatch({ type: "UPSERT_TASK", accountId: account.accountId, task });
+      return task;
+    },
+    [findAccountForTaskList],
+  );
+
+  const removeTask = useCallback(
+    async (taskListId: string, taskId: string) => {
+      const account = findAccountForTaskList(taskListId);
+
+      if (!account) throw new Error("Google ToDo リストが見つかりません");
+
+      await withRecoveredToken(account, (accessToken) =>
+        deleteGoogleTask({ accessToken, taskListId, taskId }),
+      );
+
+      dispatch({
+        type: "DELETE_TASK",
+        accountId: account.accountId,
+        taskListId,
+        taskId,
+      });
+    },
+    [findAccountForTaskList],
+  );
+
   useEffect(() => {
     dispatch({
       type: "REMOVE_MISSING_ACCOUNTS",
       accountIds: accountTokens.map((account) => account.accountId),
     });
 
-    const abortController = new AbortController();
+    let isCancelled = false;
 
     for (const account of accountTokens) {
-      if (account.connectionStatus !== "connected") {
-        continue;
-      }
-
-      if (account.taskLists.length === 0) {
-        dispatch({ type: "SUCCESS", accountId: account.accountId, tasks: [] });
-        continue;
-      }
-
-      dispatch({ type: "START", accountId: account.accountId });
-
-      void fetchGoogleTasksWithRecovery(account)
-        .then((tasks) => {
-          if (abortController.signal.aborted) return;
-          dispatch({ type: "SUCCESS", accountId: account.accountId, tasks });
-        })
-        .catch((error: unknown) => {
-          if (abortController.signal.aborted) return;
-          dispatch({
-            type: "ERROR",
-            accountId: account.accountId,
-            error: toErrorMessage(error),
-          });
-        });
+      if (isCancelled) break;
+      void refreshAccount(account);
     }
 
-    return () => abortController.abort();
-  }, [accountTokens]);
+    return () => {
+      isCancelled = true;
+    };
+  }, [accountTokens, refreshAccount]);
 
-  return state;
+  useEffect(() => {
+    if (accountTokens.length === 0) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void refreshAll();
+      }
+    };
+
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void refreshAll();
+      }
+    }, DEFAULT_POLL_INTERVAL_MS);
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [accountTokens.length, refreshAll]);
+
+  return {
+    byAccount: state,
+    refreshAll,
+    createTask,
+    updateTask,
+    removeTask,
+  };
 };
