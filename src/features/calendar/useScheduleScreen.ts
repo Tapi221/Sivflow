@@ -1,6 +1,10 @@
 import type { RefObject, UIEvent } from "react";
+import { useCallback, useState } from "react";
 
-import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
+import {
+  useCalendarEventSync,
+  type CalendarEventSyncRange,
+} from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
 import type {
   CalendarToolbarMode,
   CalendarViewMode,
@@ -70,12 +74,31 @@ export type UseScheduleScreenReturn = {
   handleTimelineSelectDate: (date: Date) => void;
   handleVisibleMonthChange: (date: Date) => void;
   handleMonthCellSelectDate: (date: Date) => void;
+  handleMonthEventSyncRangeChange: (range: CalendarEventSyncRange) => void;
 
   setMonthTitleDate: (date: Date) => void;
 };
 
 export const useScheduleScreen = (): UseScheduleScreenReturn => {
   const navigation = useCalendarNavigation();
+  const [monthVisibleRange, setMonthVisibleRange] =
+    useState<CalendarEventSyncRange | null>(null);
+
+  const handleMonthEventSyncRangeChange = useCallback(
+    (range: CalendarEventSyncRange) => {
+      setMonthVisibleRange((prev) => {
+        if (
+          prev?.rangeStart.getTime() === range.rangeStart.getTime() &&
+          prev.rangeEnd.getTime() === range.rangeEnd.getTime()
+        ) {
+          return prev;
+        }
+
+        return range;
+      });
+    },
+    [],
+  );
 
   const visibleRange = useCalendarVisibleRange({
     currentDate: navigation.currentDate,
@@ -134,6 +157,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     selectedViewMode: navigation.selectedViewMode,
     visibleDays,
     monthTitleDate: navigation.monthTitleDate,
+    monthVisibleRange,
     googleCalendar: {
       selectedCalendarIds: google.selectedCalendarIds,
       forceSyncRange: google.forceSyncRange,
@@ -213,6 +237,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     handleTimelineSelectDate: navigation.handleTimelineSelectDate,
     handleVisibleMonthChange: navigation.handleVisibleMonthChange,
     handleMonthCellSelectDate: navigation.handleMonthCellSelectDate,
+    handleMonthEventSyncRangeChange,
 
     setMonthTitleDate: navigation.setMonthTitleDate,
   };
