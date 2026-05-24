@@ -1,15 +1,35 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { TagChip } from "@/components/tag/TagChip";
-import { getTagColorKey } from "@/features/tag/tagColor";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  getTagColorKey,
+  getTagColorSwatchStyle,
+  type TagColorKey,
+} from "@/features/tag/tagColor";
 import { useTags } from "@/hooks/settings/useTags";
+import { cn } from "@/lib/utils";
 import { Plus, X } from "@/ui/icons";
 
+const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
+  gray: "グレー",
+  purple: "パープル",
+  teal: "ティール",
+  pink: "ピンク",
+  amber: "アンバー",
+  blue: "ブルー",
+  green: "グリーン",
+  red: "レッド",
+  coral: "コーラル",
+  sky: "スカイ",
+};
+
 export const TaskTagStrip = () => {
-  const { addTag, tags } = useTags();
+  const { addTag, availableColors, tags, updateTagColor } = useTags();
   const [isCreating, setIsCreating] = useState(false);
   const [tagName, setTagName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [openTagId, setOpenTagId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -38,18 +58,77 @@ export const TaskTagStrip = () => {
     }
   };
 
+  const handleUpdateTagColor = async (
+    tagId: string,
+    colorKey: TagColorKey,
+  ) => {
+    await updateTagColor(tagId, colorKey);
+    setOpenTagId(null);
+  };
+
   return (
     <div className="flex h-8 min-w-0 flex-1 items-center rounded-xl bg-[#f7f7f7] p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <div className="flex w-max items-center gap-2 px-1">
-          {tags.map((tag) => (
-            <TagChip
-              key={tag.id}
-              label={tag.name}
-              colorKey={getTagColorKey(tag.color)}
-              className="shrink-0 max-w-[180px] text-[11px] font-semibold leading-[1.3] tabular-nums"
-            />
-          ))}
+          {tags.map((tag) => {
+            const tagColorKey = getTagColorKey(tag.color);
+
+            return (
+              <Popover
+                key={tag.id}
+                open={openTagId === tag.id}
+                onOpenChange={(open) => setOpenTagId(open ? tag.id : null)}
+              >
+                <PopoverTrigger asChild>
+                  <TagChip
+                    label={tag.name}
+                    colorKey={tagColorKey}
+                    className="shrink-0 max-w-[180px] text-[11px] font-semibold leading-[1.3] tabular-nums transition-transform hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
+                    onClick={() => undefined}
+                  />
+                </PopoverTrigger>
+
+                <PopoverContent
+                  align="start"
+                  sideOffset={6}
+                  className="w-auto min-w-[156px] p-2"
+                >
+                  <div className="mb-2 px-1 text-[11px] font-semibold text-[#5f656d]">
+                    タグの色
+                  </div>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {availableColors.map((colorKey) => {
+                      const isSelected = colorKey === tagColorKey;
+                      const colorLabel = TAG_COLOR_LABELS[colorKey] ?? colorKey;
+
+                      return (
+                        <button
+                          key={colorKey}
+                          type="button"
+                          aria-label={`${tag.name}の色を${colorLabel}に変更`}
+                          aria-pressed={isSelected}
+                          title={colorLabel}
+                          className={cn(
+                            "grid h-6 w-6 place-items-center rounded-full border transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35",
+                            isSelected &&
+                              "ring-2 ring-primary-500/35 ring-offset-1 ring-offset-white",
+                          )}
+                          style={getTagColorSwatchStyle(colorKey)}
+                          onClick={() => {
+                            void handleUpdateTagColor(tag.id, colorKey);
+                          }}
+                        >
+                          {isSelected && (
+                            <span className="h-2 w-2 rounded-full bg-current" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            );
+          })}
 
           {isCreating ? (
             <form
