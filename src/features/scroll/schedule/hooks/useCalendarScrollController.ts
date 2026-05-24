@@ -1,4 +1,4 @@
-import { useCallback, useRef, type UIEvent } from "react";
+import { useCallback, useMemo, useRef, type UIEvent } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarViewMode } from "../../../calendar/scheduleScreen.types";
@@ -66,6 +66,10 @@ export const useCalendarScrollController = ({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);
+  const fixedRowScrollRefs = useMemo(
+    () => [headerScrollRef, allDayScrollRef],
+    [],
+  );
   const prependTrigger =
     activeMode === "timeline" ? timelineUnitBuffer.before : calendarBuffer.before;
   const scrollExtentTrigger =
@@ -102,12 +106,12 @@ export const useCalendarScrollController = ({
     timelineColumnWidth,
     scrollTargetToken,
     scrollRef: scrollContainerRef,
-    headerRefs: [headerScrollRef, allDayScrollRef],
+    headerRefs: fixedRowScrollRefs,
   });
 
   useSyncedHorizontalScroll({
     primaryRef: scrollContainerRef,
-    syncedRefs: [headerScrollRef, allDayScrollRef],
+    syncedRefs: fixedRowScrollRefs,
   });
 
   const handleTimelineVisibleDate = useCallback((scroller: HTMLDivElement) => {
