@@ -3,13 +3,9 @@ import { useCallback, useState } from "react";
 
 import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
-import type {CalendarToolbarMode,
-  CalendarViewMode,
-  GoogleAccountDisplay,
-  TimelineGridStyle,} from "./scheduleScreen.types";
+import type { CalendarToolbarMode, CalendarViewMode, GoogleAccountDisplay, TimelineGridStyle } from "./scheduleScreen.types";
 import type { GoogleCalendarEvent } from "./googlecalendar-integration/gcalSync.types";
-import type {buildTimelineColumns,
-  TimelineUnitBuffer,} from "./grid/TimelineDayView.shared";
+import type { buildTimelineColumns, TimelineUnitBuffer } from "./grid/TimelineDayView.shared";
 
 import { useCalendarLayout } from "./layout/calendar/useCalendarLayout.desktop";
 import { useCalendarNavigation } from "./useCalendarNavigation";
@@ -71,6 +67,7 @@ export type UseScheduleScreenReturn = {
     status?: "needsAction" | "completed";
     completed?: string | null;
   }) => Promise<unknown>;
+  moveGoogleTaskList: (taskListId: string, taskId: string, destinationTaskListId: string) => Promise<unknown>;
   deleteGoogleTask: (taskListId: string, taskId: string) => Promise<void>;
 
   handleSelectViewMode: (viewMode: CalendarViewMode) => void;
@@ -242,6 +239,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     refreshGoogleTasks: google.refreshGoogleTasks,
     createGoogleTask: google.createGoogleTask,
     updateGoogleTask: google.updateGoogleTask,
+    moveGoogleTaskList: google.moveGoogleTaskList,
     deleteGoogleTask: google.deleteGoogleTask,
 
     handleSelectViewMode: navigation.handleSelectViewMode,
