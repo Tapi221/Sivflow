@@ -1,6 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
 import { format } from "date-fns";
-import { DayDetailCreateButton } from "@/chip/button/AddScheduleButton.daydetail";
 import { eventOverlapsDay } from "@/features/calendar/calendarEventRange";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { GridCalendarDayDetailDesktop, HOUR_ROW_HEIGHT } from "@/features/calendar/grid/Grid.calendar.daydetail.desktop";
@@ -82,10 +81,6 @@ export const DayDetailPanel = ({
           date={selectedDate}
           events={timedEvents}
         />
-      </div>
-
-      <div className="flex justify-center border-t border-[#f5f5f5] px-4 py-4">
-        <DayDetailCreateButton />
       </div>
     </aside>
   );
