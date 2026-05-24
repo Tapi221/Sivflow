@@ -5,12 +5,25 @@ import { mapExplorerSelectionToSearchParams } from "@/features/explorer/mappers/
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import type { WorkspaceExplorerTab } from "@/features/tab/Tab";
 
+const SETTINGS_ROUTE_TAB_ID = "route:settings" as const;
+
 const normalizeQuery = (search: string) => {
   const params = new URLSearchParams(
     search.startsWith("?") ? search.slice(1) : search,
   );
 
   return params.toString();
+};
+
+const closeSettingsTabIfNeeded = (pathname: string) => {
+  if (pathname === "/settings") return;
+
+  const { tabs, closeTab } = useWorkspaceTabsStore.getState();
+  const hasSettingsTab = tabs.some((tab) => tab.id === SETTINGS_ROUTE_TAB_ID);
+
+  if (hasSettingsTab) {
+    closeTab(SETTINGS_ROUTE_TAB_ID);
+  }
 };
 
 const resolveExplorerTabIdBySearch = (
@@ -45,6 +58,8 @@ export const useWorkspaceTabsRouteSync = () => {
     const pathname = location.pathname.toLowerCase();
     const searchParams = new URLSearchParams(location.search);
     const normalizedSearch = normalizeQuery(location.search);
+
+    closeSettingsTabIfNeeded(pathname);
 
     const {
       activeTabId,
