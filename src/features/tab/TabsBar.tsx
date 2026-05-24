@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
 import type { WorkspaceTab } from "@/features/tab/Tab";
-import { Calendar, FileText, FolderIcon, Layers, X } from "@/ui/icons";
+import { Calendar, FileText, FolderIcon, Layers, Settings2, X } from "@/ui/icons";
 import { PlusLineIcon } from "@/components/icons/icons.schedule";
 import { cn } from "@/lib/utils";
 
@@ -192,6 +192,7 @@ const resolveTabIcon = (tab: WorkspaceTab): TabIconComponent => {
     if (tab.sectionKey === "home") return HomeIcon;
     if (tab.sectionKey === "review") return ReviewIcon;
     if (tab.sectionKey === "schedule") return Calendar;
+    if (tab.sectionKey === "settings") return Settings2;
   }
 
   if (tab.kind === "explorer") return FolderIcon;
