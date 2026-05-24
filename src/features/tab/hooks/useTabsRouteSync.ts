@@ -110,10 +110,6 @@ export const useWorkspaceTabsRouteSync = () => {
       return;
     }
 
-    if (pathname === "/tag-map") {
-      return;
-    }
-
     if (pathname !== "/library") {
       return;
     }
