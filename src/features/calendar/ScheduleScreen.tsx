@@ -85,6 +85,9 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     addGoogleCalendar,
     reconnectGoogleAccount,
     toggleGoogleCalendar,
+    refreshGoogleTasks,
+    createGoogleTask,
+    updateGoogleTask,
   } = pane;
 
   const calendarEvents = useMemo(() => {
@@ -254,6 +257,9 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
             googleAccounts={googleAccounts}
             selectedTaskListId={selectedTaskListId}
             onSelectTaskList={setSelectedTaskListId}
+            onRefreshGoogleTasks={refreshGoogleTasks}
+            onCreateGoogleTask={createGoogleTask}
+            onUpdateGoogleTask={updateGoogleTask}
           />
         </CarvePanel>
       ) : isMonthCalendarView ? (
