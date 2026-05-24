@@ -5,7 +5,12 @@ import {MF_CARD_FORMAT,
 import { encodeMfCardFile } from "@/features/cardFile/infra/web/mfCardJsonCodec";
 import {collectMfDeckExportIssues,
   mapCardToMfDeckCard,
+<<<<<<< HEAD
   type MfDeckTagLookup,} from "@/features/deckFile/application/mapCardToMfDeck";
+=======
+} from "@/features/deckFile/application/mapCardToMfDeck";
+import type { MfDeckTagLookup } from "@/features/deckFile/application/types";
+>>>>>>> 975fc9541e4df6ab846d079dcee64139ad5505be
 
 import type { Card } from "@/types";
 

@@ -20,6 +20,7 @@ import {
 } from "@/chip/rightclickpanel/TagColorRightClickPanel";
 import {
   RIGHT_CLICK_PANEL_NO_DRAG_STYLE,
+  announceRightClickPanelOpen,
   clampRightClickPanelPosition,
   useRightClickPanelDismiss,
 } from "@/chip/rightclickpanel/rightClickPanelCommon";
@@ -38,6 +39,8 @@ type TagContextMenuTriggerEvent =
   | ReactMouseEvent<HTMLElement>
   | ReactPointerEvent<HTMLElement>;
 
+const TAG_COLOR_CONTEXT_PANEL_ID = "tag-color-context-menu";
+
 export const TaskTagStrip = () => {
   const { addTag, availableColors, tags, updateTagColor } = useTags();
   const [isCreating, setIsCreating] = useState(false);
@@ -55,6 +58,7 @@ export const TaskTagStrip = () => {
   }, [isCreating]);
 
   useRightClickPanelDismiss(
+    TAG_COLOR_CONTEXT_PANEL_ID,
     contextMenu !== null,
     contextMenuRef,
     () => setContextMenu(null),
@@ -100,6 +104,7 @@ export const TaskTagStrip = () => {
       width: TAG_COLOR_CONTEXT_MENU_WIDTH,
       height: TAG_COLOR_CONTEXT_MENU_HEIGHT,
     });
+    announceRightClickPanelOpen(TAG_COLOR_CONTEXT_PANEL_ID);
     setContextMenu({ tagId, x, y });
   };
 
