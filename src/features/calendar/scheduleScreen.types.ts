@@ -77,12 +77,15 @@ export type CalendarSidebarProps = {
   googleAccounts: GoogleAccountDisplay[];
   isAnyCalendarConnecting: boolean;
 
+  selectedTaskListId?: string | null;
+
   onSelectDate: (date: Date) => void;
   onPreviousMonth: () => void;
   onNextMonth: () => void;
   onAddCalendar: () => void;
   onReconnectAccount: (accountId: string) => void;
   onToggleCalendar: (accountId: string, calendarId: string) => void;
+  onSelectTaskList?: (taskListId: string | null) => void;
 };
 
 export type CalendarWorkspaceToolbarProps = {
