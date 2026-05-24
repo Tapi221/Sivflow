@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type MouseEvent as ReactMo
 import { createPortal } from "react-dom";
 import { TagChip } from "@/components/tag/TagChip";
 import { TAG_COLOR_CONTEXT_MENU_HEIGHT, TAG_COLOR_CONTEXT_MENU_WIDTH, TagColorRightClickPanel } from "@/chip/rightclickpanel/TagColorRightClickPanel";
-import { RIGHT_CLICK_PANEL_NO_DRAG_STYLE, announceRightClickPanelOpen, clampRightClickPanelPosition, useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPanelCommon";
+import { RIGHT_CLICK_PANEL_NO_DRAG_STYLE, announceRightClickPanelOpen, clampRightClickPanelPosition, useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPanelUtils";
 import { getTagColorKey, type TagColorKey } from "@/features/tag/tagColor";
 import { useTags } from "@/hooks/settings/useTags";
 import { Plus, X } from "@/ui/icons";
