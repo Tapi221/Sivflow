@@ -6,6 +6,8 @@ type Params = {
   trigger: number;
   /** 左側に追加された量。これが増えた時だけ scrollLeft を補正する */
   prependTrigger?: number;
+  /** scrollerRef と横スクロール位置を揃える固定行 */
+  syncedRefs?: Array<RefObject<HTMLElement | null> | undefined | null>;
   enabled?: boolean;
 };
 
@@ -13,6 +15,7 @@ export const usePreserveScrollOnPrepend = ({
   scrollerRef,
   trigger,
   prependTrigger = trigger,
+  syncedRefs = [],
   enabled = true,
 }: Params) => {
   const prevSnapshotRef = useRef<{
@@ -43,13 +46,23 @@ export const usePreserveScrollOnPrepend = ({
 
     if (didPrepend && widthDiff > 0) {
       scroller.scrollLeft += widthDiff;
+
+      const nextScrollLeft = scroller.scrollLeft;
+
+      syncedRefs.forEach((ref) => {
+        const syncedScroller = ref?.current;
+
+        if (syncedScroller && syncedScroller.scrollLeft !== nextScrollLeft) {
+          syncedScroller.scrollLeft = nextScrollLeft;
+        }
+      });
     }
 
     prevSnapshotRef.current = {
       scrollWidth: scroller.scrollWidth,
       prependTrigger,
     };
-  }, [trigger, prependTrigger, scrollerRef, enabled]);
+  }, [trigger, prependTrigger, scrollerRef, syncedRefs, enabled]);
 
   const reset = () => {
     prevSnapshotRef.current = null;
