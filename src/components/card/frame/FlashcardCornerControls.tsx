@@ -9,7 +9,7 @@ import {
 import { Image as ImageIcon, Link, Volume2 } from "@/ui/icons";
 
 import { CardCornerActions } from "./CardCornerActions";
-import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcardDerived";
+import type { FlashcardCardLike, FlashcardMediaLike } from "./types";
 
 import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
