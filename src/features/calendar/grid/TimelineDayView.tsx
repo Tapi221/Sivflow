@@ -6,7 +6,6 @@ import {
   CalendarDateContent,
 } from "@/chip/button/GridHeader.scheduletimeline";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import { cn } from "@/lib/utils";
 
 import type {
   TimelineUnitBuffer,
