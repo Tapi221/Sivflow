@@ -86,6 +86,16 @@ export const useWorkspaceTabsRouteSync = () => {
       return;
     }
 
+    if (pathname === "/settings") {
+      const nextTabId = openSectionTab("settings");
+
+      if (activeTabId !== nextTabId) {
+        selectTab(nextTabId);
+      }
+
+      return;
+    }
+
     if (pathname === "/tag-map") {
       return;
     }
