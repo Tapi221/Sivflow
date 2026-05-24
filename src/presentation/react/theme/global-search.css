@@ -117,7 +117,7 @@
     border: none;
     background: transparent;
     color: rgb(55, 53, 47);
-    font-size: 14px;
+    font-size: var(--ds-typography-font-size-sm);
     font-weight: 400;
     line-height: 1.4;
     outline: none;
@@ -252,7 +252,7 @@
 
   .gs-empty__title {
     color: rgb(55, 53, 47);
-    font-size: 14px;
+    font-size: var(--ds-typography-font-size-sm);
     font-weight: 500;
     line-height: 1.4;
   }
