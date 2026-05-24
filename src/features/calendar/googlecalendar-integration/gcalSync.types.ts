@@ -15,6 +15,7 @@ export type GoogleCalendarEvent = {
 export type GoogleCalendarListItem = {
   id: string;
   summary: string;
+  summaryOverride?: string;
   description?: string;
   backgroundColor?: string;
   foregroundColor?: string;
@@ -77,6 +78,7 @@ export type GoogleCalendarApiListResponse = {
   items?: Array<{
     id?: string;
     summary?: string;
+    summaryOverride?: string;
     description?: string;
     backgroundColor?: string;
     foregroundColor?: string;
