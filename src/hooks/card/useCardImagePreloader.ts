@@ -131,10 +131,35 @@ const preloadCard = async (
 
 type IdleHandle = ReturnType<typeof setTimeout>;
 
+type RequestIdleCallback = (
+  cb: () => void,
+  opts?: { timeout: number },
+) => IdleHandle;
+
+type CancelIdleCallback = (id: IdleHandle) => void;
+
 type CardCatalogEntry = {
   id: string;
   signature: string;
   hasImages: boolean;
+};
+
+const getRequestIdleCallback = (): RequestIdleCallback | null => {
+  if (typeof window === "undefined" || !("requestIdleCallback" in window)) {
+    return null;
+  }
+
+  return (window as unknown as { requestIdleCallback: RequestIdleCallback })
+    .requestIdleCallback;
+};
+
+const getCancelIdleCallback = (): CancelIdleCallback | null => {
+  if (typeof window === "undefined" || !("cancelIdleCallback" in window)) {
+    return null;
+  }
+
+  return (window as unknown as { cancelIdleCallback: CancelIdleCallback })
+    .cancelIdleCallback;
 };
 
 const buildCardCatalog = (cards: Card[]): CardCatalogEntry[] => {
@@ -209,11 +234,6 @@ export const useCardImagePreloader = (
   const flushReadyRafRef = useRef<number | null>(null);
 
   const cardCatalog = useMemo(() => buildCardCatalog(cards), [cards]);
-
-  const cardCatalogSignature = useMemo(
-    () => buildCatalogSignature(cardCatalog),
-    [cardCatalog],
-  );
 
   const preloadPlanSignature = useMemo(() => {
     if (cardCatalog.length === 0) {
@@ -314,14 +334,14 @@ export const useCardImagePreloader = (
         const stats = getPreloadCacheStats();
         console.debug("[preloader] cards changed", {
           readySetSize: next.size,
-          totalCards: cards.length,
+          totalCards: cardCatalog.length,
           ...stats,
         });
       }
 
       return changed ? next : prev;
     });
-  }, [cardCatalogSignature, cards.length]);
+  }, [cardCatalog]);
 
   useEffect(() => {
     return () => {
@@ -427,27 +447,8 @@ export const useCardImagePreloader = (
 
     runNextEager();
 
-    const ric =
-      typeof window !== "undefined" && "requestIdleCallback" in window
-        ? (
-          window as unknown as {
-            requestIdleCallback: (
-              cb: () => void,
-              opts?: { timeout: number },
-            ) => IdleHandle;
-          }
-        ).requestIdleCallback
-        : null;
-
-    const cic =
-      typeof window !== "undefined" && "cancelIdleCallback" in window
-        ? (
-          window as unknown as {
-            cancelIdleCallback: (id: IdleHandle) => void;
-          }
-        ).cancelIdleCallback
-        : null;
-
+    const ric = getRequestIdleCallback();
+    const cic = getCancelIdleCallback();
     const idleHandles: IdleHandle[] = [];
 
     for (let index = idleStart; index <= idleEnd; index += 1) {
@@ -482,8 +483,10 @@ export const useCardImagePreloader = (
     };
   }, [
     activeIndex,
+    cards,
     flushPendingReadyIds,
     preloadPlanSignature,
+    renderRange,
     scheduleReadyCommit,
     userId,
   ]);
