@@ -283,7 +283,7 @@ export const CalendarSidebar = ({
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-5 pl-0 pr-3 pt-2 text-[#2f2f2f]">
       <section className="flex w-full shrink-0 flex-col pb-2.5 pl-0 pr-2.5 pt-2.5">
         <div className="flex w-full items-center justify-between px-0.5">
-          <span className="ml-3 text-[13px] font-extrabold tracking-[-0.01em] text-[#2f2f2f]">
+          <span className="ml-3 text-[13px] font-extrabold tracking-[-0.01em] text-[#3f4652]">
             {format(monthDate, monthLabelFormat, { locale: dateFnsLocale })}
           </span>
 
@@ -357,7 +357,8 @@ export const CalendarSidebar = ({
                   isCurrentMonth={day.isCurrentMonth}
                   className={cn(
                     "relative z-10 font-semibold",
-                    isRangeMiddle && "bg-transparent text-[#4f5663] shadow-none",
+                    day.isCurrentMonth && !isActive && !day.isInSelectedRange && "text-[#5f6673]",
+                    isRangeMiddle && "bg-transparent text-[#5f6673] shadow-none",
                     day.isToday && day.isInSelectedRange && "ring-1 ring-[#b8bdc7]",
                     !day.isCurrentMonth && !isActive && !day.isInSelectedRange && "text-[#b7b7b7]",
                   )}
