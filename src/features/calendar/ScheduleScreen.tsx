@@ -4,7 +4,7 @@ import { SidebarOpenIcon } from "@/components/icons/icons.sidebar";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
-import type { ScheduleScreenProps } from "./ScheduleScreen.types";
+import type { ScheduleScreenProps } from "./scheduleScreen.types";
 import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
 import { TaskView } from "./task/TaskView";
@@ -39,6 +39,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
   const [isDayDetailPanelOpen, setIsDayDetailPanelOpen] = useState(true);
+  const [selectedTaskListId, setSelectedTaskListId] = useState<string | null>(null);
 
   const viewOptions = useMemo(
     () => [
@@ -223,6 +224,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
           activeMode={activeMode}
           googleAccounts={googleAccounts}
           isAnyCalendarConnecting={isAnyCalendarConnecting}
+          selectedTaskListId={selectedTaskListId}
           onSelectDate={handleSidebarSelectDateAndOpen}
           onPreviousMonth={handleSidebarPreviousMonth}
           onNextMonth={handleSidebarNextMonth}
@@ -231,6 +233,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
             void reconnectGoogleAccount(accountId);
           }}
           onToggleCalendar={toggleGoogleCalendar}
+          onSelectTaskList={setSelectedTaskListId}
         />
       )}
       trailingPanel={
@@ -247,7 +250,11 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     >
       {activeMode === "task" ? (
         <CarvePanel>
-          <TaskView googleAccounts={googleAccounts} />
+          <TaskView
+            googleAccounts={googleAccounts}
+            selectedTaskListId={selectedTaskListId}
+            onSelectTaskList={setSelectedTaskListId}
+          />
         </CarvePanel>
       ) : isMonthCalendarView ? (
         <CarvePanel hasTrailingPanel={hasTrailingPanel}>
