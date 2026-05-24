@@ -26,7 +26,6 @@ export const CardSetViewScreen = () => {
   const controller = useCardSetViewScreenController();
   const {
     cardSetId,
-    data,
     state,
     paneWidth,
     topLeftZoomControl,
