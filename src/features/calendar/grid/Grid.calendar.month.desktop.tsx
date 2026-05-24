@@ -14,20 +14,24 @@ import { cn } from "@/lib/utils";
 
 const EMPTY_EVENTS: GoogleCalendarEvent[] = [];
 
-const MONTH_EVENT_CHIP_HEIGHT_PX = 18.3;
+const MONTH_EVENT_ROW_HEIGHT_PX = 21;
 const MONTH_EVENT_CHIP_GAP_PX = 3;
-const MONTH_EVENT_OVERFLOW_TEXT_HEIGHT_PX = 12;
-const MONTH_EVENT_BOTTOM_PADDING_PX = 6;
+const MONTH_EVENT_BOTTOM_PADDING_PX = 2;
 const MONTH_EVENT_CONTENT_TOP_PX = 56;
 
-const getMonthEventRowCount = (contentHeight: number) => {
+const getMaxMonthEventRows = (monthRowHeight: number) => {
+  const contentHeight =
+    monthRowHeight -
+    MONTH_EVENT_CONTENT_TOP_PX -
+    MONTH_EVENT_BOTTOM_PADDING_PX;
+
   if (contentHeight <= 0) return 0;
 
   return Math.max(
     0,
     Math.floor(
       (contentHeight + MONTH_EVENT_CHIP_GAP_PX) /
-        (MONTH_EVENT_CHIP_HEIGHT_PX + MONTH_EVENT_CHIP_GAP_PX),
+        MONTH_EVENT_ROW_HEIGHT_PX,
     ),
   );
 };
@@ -36,19 +40,11 @@ const getVisibleChipCount = (
   eventCount: number,
   monthRowHeight: number,
 ) => {
-  const contentHeight =
-    monthRowHeight -
-    MONTH_EVENT_CONTENT_TOP_PX -
-    MONTH_EVENT_BOTTOM_PADDING_PX;
-
-  const maxRows = getMonthEventRowCount(contentHeight);
+  const maxRows = getMaxMonthEventRows(monthRowHeight);
 
   if (eventCount <= maxRows) return eventCount;
 
-  const overflowReservedHeight =
-    MONTH_EVENT_OVERFLOW_TEXT_HEIGHT_PX + MONTH_EVENT_CHIP_GAP_PX;
-
-  return getMonthEventRowCount(contentHeight - overflowReservedHeight);
+  return Math.max(0, maxRows - 1);
 };
 
 const getDayKey = (date: Date): string => {
@@ -219,7 +215,7 @@ const CalendarMonthDayCell = memo(({
             {overflowCount > 0 && (
               <div
                 className={cn(
-                  "font-medium text-[#8f929c]",
+                  "shrink-0 font-medium text-[#8f929c]",
                   GD.MONTH_GRID_OVERFLOW_TEXT_CLASS,
                 )}
               >
