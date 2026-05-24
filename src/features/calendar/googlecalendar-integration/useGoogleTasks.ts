@@ -445,6 +445,14 @@ export const useGoogleTasks = (
         dispatch({ type: "MOVE_TASK", accountId: account.accountId, sourceTaskListId: taskListId, task });
         return task;
       } catch (error) {
+        console.error("Google task move failed. Rolling back optimistic task list move.", {
+          accountId: account.accountId,
+          destinationTaskListId,
+          error,
+          taskId,
+          taskListId,
+        });
+
         if (existingTask) {
           dispatch({
             type: "MOVE_TASK",
