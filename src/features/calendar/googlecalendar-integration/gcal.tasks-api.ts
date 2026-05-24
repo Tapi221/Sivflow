@@ -1,6 +1,4 @@
-import type {GoogleTaskItem,
-  GoogleTaskStatus,
-  GoogleTasksApiTasksResponse,} from "./gcalSync.types";
+import type { GoogleTaskItem, GoogleTaskStatus, GoogleTasksApiTasksResponse } from "./gcalSync.types";
 
 const GOOGLE_TASKS_API_BASE = "https://tasks.googleapis.com/tasks/v1";
 
@@ -215,6 +213,34 @@ export const patchGoogleTask = async ({
     toApiTaskBody(patch),
   );
   const task = toGoogleTaskItem(data, taskListId);
+
+  if (!task) {
+    throw new Error("Google Tasks API returned an invalid task");
+  }
+
+  return task;
+};
+
+export const moveGoogleTask = async ({
+  accessToken,
+  taskListId,
+  taskId,
+  destinationTaskListId,
+}: {
+  accessToken: string;
+  taskListId: string;
+  taskId: string;
+  destinationTaskListId: string;
+}): Promise<GoogleTaskItem> => {
+  const params = new URLSearchParams({
+    destinationTasklist: destinationTaskListId,
+  });
+  const data = await sendJson<RawGoogleTask>(
+    accessToken,
+    `${GOOGLE_TASKS_API_BASE}/lists/${encodeURIComponent(taskListId)}/tasks/${encodeURIComponent(taskId)}/move?${params}`,
+    "POST",
+  );
+  const task = toGoogleTaskItem(data, destinationTaskListId);
 
   if (!task) {
     throw new Error("Google Tasks API returned an invalid task");
