@@ -38,6 +38,10 @@ export const resolveDropTarget = (
   const overType = over.data.current?.type;
   const overColumnId = getColumnId(over.data.current);
 
+  if (String(over.id) === activeTaskId) {
+    return fallbackTarget;
+  }
+
   if (overType === "column" && overColumnId) {
     return { columnId: overColumnId };
   }
@@ -60,10 +64,6 @@ export const resolveDropTarget = (
       overTaskId: String(over.id),
       position: getTaskDropPosition(event),
     };
-  }
-
-  if (String(over.id) === activeTaskId) {
-    return fallbackTarget;
   }
 
   return fallbackTarget;
