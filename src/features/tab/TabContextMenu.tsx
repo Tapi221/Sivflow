@@ -1,6 +1,7 @@
-import { Menu } from "@mantine/core";
+import { MantineProvider, Menu } from "@mantine/core";
 import type { CSSProperties, RefObject } from "react";
 
+import "@mantine/core/styles.css";
 import "@blocknote/react/style.css";
 import "@blocknote/mantine/style.css";
 
@@ -31,55 +32,57 @@ export const WorkspaceTabContextMenu = ({
   noDragStyle,
 }: TabContextMenuProps) => {
   return (
-    <div
-      ref={menuRef}
-      style={noDragStyle}
-      className="bn-container bn-mantine fixed left-0 top-0 z-[1000]"
-    >
-      <Menu
-        opened
-        withinPortal={false}
-        position="bottom-start"
-        offset={0}
-        shadow="md"
+    <MantineProvider defaultColorScheme="light">
+      <div
+        ref={menuRef}
+        style={noDragStyle}
+        className="bn-container bn-mantine fixed left-0 top-0 z-[1000]"
       >
-        <Menu.Target>
-          <button
-            type="button"
-            aria-label="tab menu anchor"
-            tabIndex={-1}
-            style={{
-              ...noDragStyle,
-              position: "fixed",
-              left: x,
-              top: y,
-              width: 0,
-              height: 0,
-              margin: 0,
-              padding: 0,
-              border: 0,
-              background: "transparent",
-              pointerEvents: "none",
-            }}
-          />
-        </Menu.Target>
-
-        <Menu.Dropdown style={noDragStyle}>
-          {actions.map((action) => (
-            <Menu.Item
-              key={action.id}
-              disabled={action.disabled}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                action.onSelect();
+        <Menu
+          opened
+          withinPortal={false}
+          position="bottom-start"
+          offset={0}
+          shadow="md"
+        >
+          <Menu.Target>
+            <button
+              type="button"
+              aria-label="tab menu anchor"
+              tabIndex={-1}
+              style={{
+                ...noDragStyle,
+                position: "fixed",
+                left: x,
+                top: y,
+                width: 0,
+                height: 0,
+                margin: 0,
+                padding: 0,
+                border: 0,
+                background: "transparent",
+                pointerEvents: "none",
               }}
-            >
-              {action.label}
-            </Menu.Item>
-          ))}
-        </Menu.Dropdown>
-      </Menu>
-    </div>
+            />
+          </Menu.Target>
+
+          <Menu.Dropdown style={noDragStyle}>
+            {actions.map((action) => (
+              <Menu.Item
+                key={action.id}
+                disabled={action.disabled}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  action.onSelect();
+                }}
+              >
+                {action.label}
+              </Menu.Item>
+            ))}
+          </Menu.Dropdown>
+        </Menu>
+      </div>
+    </MantineProvider>
   );
 };
