@@ -6,9 +6,11 @@ import type { FlashcardCardLike } from "@/components/card/frame/Flashcard";
 import { useFlashcardCornerControls } from "@/components/card/frame/FlashcardCornerControls";
 import { FlashcardInkOverlay } from "@/components/card/frame/FlashcardInkOverlay";
 import { FlashcardMediaDialogs } from "@/components/card/frame/FlashcardMediaDialogs";
+import type {
+  FlashcardSharedDerivedSnapshot,
+  FlashcardSideDerivedSnapshot,
+} from "@/components/card/frame/types";
 import { useCardFlipBehavior } from "@/components/card/frame/useCardFlipBehavior";
-import type {FlashcardSharedDerivedSnapshot,
-  FlashcardSideDerivedSnapshot,} from "@/components/card/frame/useFlashcardDualDerived";
 import { useFlashcardInk } from "@/components/card/frame/useFlashcardInk";
 import { useFlashcardMediaState } from "@/components/card/frame/useFlashcardMediaState";
 
