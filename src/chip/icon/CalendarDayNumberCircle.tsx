@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -11,10 +10,10 @@ export type CalendarDayNumberCircleProps = {
   className?: string;
 };
 
-export const CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME =
+const CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME =
   "flex h-[25px] w-[25px] items-center justify-center rounded-full text-[12px] font-medium tabular-nums transition-all duration-150";
 
-export const getCalendarDayNumberCircleClassName = ({
+const getCalendarDayNumberCircleClassName = ({
   isToday = false,
   isSelected = false,
   isCurrentMonth = true,
