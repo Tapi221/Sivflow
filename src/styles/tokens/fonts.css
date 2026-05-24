@@ -1,4 +1,0 @@
-/*
- * UI fonts intentionally use the platform system stack.
- * Avoid importing remote web fonts so the app keeps the native iOS/SF look.
- */
