@@ -40,11 +40,6 @@ export const useCalendarEventSync = ({
     return Array.from(selectedCalendarIds).slice().sort().join("|");
   }, [selectedCalendarIds]);
 
-  const firstVisibleDayTime = visibleDays[0]?.getTime() ?? null;
-  const lastVisibleDayTime = visibleDays.at(-1)?.getTime() ?? null;
-  const monthRenderedRangeStartTime = monthRenderedRange?.start.getTime() ?? null;
-  const monthRenderedRangeEndTime = monthRenderedRange?.end.getTime() ?? null;
-
   const syncRange = useMemo(
     () =>
       buildCalendarEventSyncRange({
@@ -53,15 +48,7 @@ export const useCalendarEventSync = ({
         monthTitleDate,
         monthRenderedRange,
       }),
-    [
-      firstVisibleDayTime,
-      lastVisibleDayTime,
-      monthRenderedRangeEndTime,
-      monthRenderedRangeStartTime,
-      monthTitleDate,
-      selectedViewMode,
-      visibleDays,
-    ],
+    [monthRenderedRange, monthTitleDate, selectedViewMode, visibleDays],
   );
 
   const syncRangeKey = useMemo(
