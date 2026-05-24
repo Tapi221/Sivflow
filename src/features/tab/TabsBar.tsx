@@ -8,7 +8,6 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { createPortal } from "react-dom";
-import { Reorder } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { PlusLineIcon } from "@/components/icons/icons.schedule";
 import {
@@ -18,6 +17,11 @@ import {
   LibraryIcon,
   SettingIcon,
 } from "@/components/icons/icons.sidebar";
+import {
+  WorkspaceTabDndItem,
+  WorkspaceTabDndList,
+} from "@/features/dnd/tab/WorkspaceTabDnd";
+import { useWorkspaceTabDnd } from "@/features/dnd/tab/useWorkspaceTabDnd";
 import type { WorkspaceSidebarSection, WorkspaceTab } from "@/features/tab/Tab";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
@@ -26,7 +30,7 @@ import {
   WORKSPACE_TAB_CONTEXT_MENU_MARGIN,
   WORKSPACE_TAB_CONTEXT_MENU_WIDTH,
   WorkspaceTabContextMenu,
-} from "@/chip/rightclickpanel/TabContextMenu";
+} from "@/features/tab/TabContextMenu";
 import { cn } from "@/lib/utils";
 import { FileText, Layers, X } from "@/ui/icons";
 
@@ -173,15 +177,6 @@ const resolveNextTabOnClose = (
   return nextTabs[fallbackIndex] ?? null;
 };
 
-const areTabOrdersEqual = (
-  leftTabs: WorkspaceTab[],
-  rightTabs: WorkspaceTab[],
-): boolean => {
-  if (leftTabs.length !== rightTabs.length) return false;
-
-  return leftTabs.every((tab, index) => tab.id === rightTabs[index]?.id);
-};
-
 const resolveTabSlotLayoutStyle = (
   tab: WorkspaceTab,
   interactiveStyle: AppRegionStyle,
@@ -255,41 +250,34 @@ export const WorkspaceTabsBar = ({
     (state) => state.createExplorerTab,
   );
 
-  const tabsListRef = useRef<HTMLDivElement | null>(null);
   const contextMenuRef = useRef<HTMLDivElement | null>(null);
-  const suppressTabClickRef = useRef(false);
-  const isDraggingTabsRef = useRef(false);
-  const orderedTabsRef = useRef<WorkspaceTab[]>(tabs);
-  const [orderedTabs, setOrderedTabs] = useState<WorkspaceTab[]>(tabs);
   const [openingTabId, setOpeningTabId] = useState<WorkspaceTab["id"] | null>(
     lastOpenedTabId,
   );
   const [contextMenu, setContextMenu] =
     useState<TabContextMenuState | null>(null);
   const isTitlebar = variant === "titlebar";
-  const canReorderTabs = orderedTabs.length > 1;
   const interactiveStyle = noDragStyle ?? TABS_NO_DRAG_STYLE;
   const tabsSurfaceStyle = resolveTabsSurfaceStyle(isTitlebar);
   const closeButtonClassName = resolveCloseButtonClassName(isTitlebar);
   const addButtonClassName = resolveAddButtonClassName(isTitlebar);
+  const {
+    canReorderTabs,
+    handleReorderTabs,
+    handleTabDragEnd,
+    handleTabDragStart,
+    isTabClickSuppressed,
+    orderedTabs,
+    suppressNextTabClick,
+    tabsListRef,
+  } = useWorkspaceTabDnd({
+    tabs,
+    reorderTabs,
+    onDragStart: () => setContextMenu(null),
+  });
   const contextMenuTab = contextMenu
     ? orderedTabs.find((tab) => tab.id === contextMenu.tabId)
     : undefined;
-
-  useEffect(() => {
-    if (isDraggingTabsRef.current) return;
-
-    let cancelled = false;
-    orderedTabsRef.current = tabs;
-    queueMicrotask(() => {
-      if (cancelled || isDraggingTabsRef.current) return;
-      setOrderedTabs(tabs);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [tabs]);
 
   useEffect(() => {
     let cancelled = false;
@@ -364,33 +352,16 @@ export const WorkspaceTabsBar = ({
     navigateToCurrentActiveTab();
   };
 
-  const commitReorderedTabs = () => {
-    const currentTabs = useWorkspaceTabsStore.getState().tabs;
-    const nextTabs = orderedTabsRef.current;
-
-    if (!areTabOrdersEqual(currentTabs, nextTabs)) {
-      reorderTabs(nextTabs);
-    }
-
-    const committedTabs = useWorkspaceTabsStore.getState().tabs;
-    orderedTabsRef.current = committedTabs;
-    setOrderedTabs(committedTabs);
-  };
-
   const openTabContextMenu = (
     event: TabContextMenuTriggerEvent,
     tab: WorkspaceTab,
   ) => {
     event.preventDefault();
     event.stopPropagation();
-    suppressTabClickRef.current = true;
+    suppressNextTabClick();
 
     const { x, y } = clampContextMenuPosition(event.clientX, event.clientY);
     setContextMenu({ tabId: tab.id, x, y });
-
-    window.setTimeout(() => {
-      suppressTabClickRef.current = false;
-    }, 0);
   };
 
   const contextMenuActions = contextMenuTab
@@ -491,17 +462,11 @@ export const WorkspaceTabsBar = ({
           className,
         )}
       >
-        <Reorder.Group
-          ref={tabsListRef}
-          as="div"
-          axis="x"
-          values={orderedTabs}
-          onReorder={(nextTabs) => {
-            if (!canReorderTabs) return;
-
-            orderedTabsRef.current = nextTabs;
-            setOrderedTabs(nextTabs);
-          }}
+        <WorkspaceTabDndList
+          tabsListRef={tabsListRef}
+          orderedTabs={orderedTabs}
+          canReorderTabs={canReorderTabs}
+          onReorderTabs={handleReorderTabs}
           className="explorer-tab-list explorer-workspace-tabs-list relative flex min-w-0 items-end gap-0 overflow-visible"
         >
           {orderedTabs.map((tab) => {
@@ -529,29 +494,13 @@ export const WorkspaceTabsBar = ({
             }
 
             return (
-              <Reorder.Item
+              <WorkspaceTabDndItem
                 key={tab.id}
-                as="div"
-                value={tab}
-                drag={canReorderTabs ? "x" : false}
-                dragListener={canReorderTabs}
-                dragConstraints={tabsListRef}
-                dragElastic={canReorderTabs ? 0.08 : 0}
-                dragMomentum={false}
-                onDragStart={() => {
-                  isDraggingTabsRef.current = true;
-                  suppressTabClickRef.current = true;
-                  setContextMenu(null);
-                }}
-                onDragEnd={() => {
-                  isDraggingTabsRef.current = false;
-                  commitReorderedTabs();
-
-                  window.setTimeout(() => {
-                    suppressTabClickRef.current = false;
-                  }, 0);
-                }}
-                transition={{ type: "spring", stiffness: 520, damping: 42 }}
+                tab={tab}
+                canReorderTabs={canReorderTabs}
+                tabsListRef={tabsListRef}
+                onDragStart={handleTabDragStart}
+                onDragEnd={handleTabDragEnd}
                 style={resolveTabSlotLayoutStyle(tab, interactiveStyle)}
                 className={cn(
                   "explorer-workspace-tab-slot relative flex min-w-[92px] max-w-[180px] flex-[1_1_150px] items-end overflow-visible",
@@ -559,7 +508,6 @@ export const WorkspaceTabsBar = ({
                     ? "cursor-grab active:cursor-grabbing"
                     : "cursor-default",
                 )}
-                data-workspace-tab-kind={tab.kind}
                 data-workspace-tab-slot-active={selected ? "true" : undefined}
                 onPointerDownCapture={(event) => {
                   if (event.button !== 2) return;
@@ -617,7 +565,7 @@ export const WorkspaceTabsBar = ({
                     aria-current={selected ? "page" : undefined}
                     title={tab.title}
                     onClick={(event) => {
-                      if (suppressTabClickRef.current) {
+                      if (isTabClickSuppressed()) {
                         event.preventDefault();
                         event.stopPropagation();
                         return;
@@ -669,10 +617,10 @@ export const WorkspaceTabsBar = ({
                     </button>
                   ) : null}
                 </div>
-              </Reorder.Item>
+              </WorkspaceTabDndItem>
             );
           })}
-        </Reorder.Group>
+        </WorkspaceTabDndList>
 
         <button
           type="button"
