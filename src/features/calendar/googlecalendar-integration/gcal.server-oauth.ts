@@ -1,5 +1,4 @@
 import type { Auth } from "firebase/auth";
-import { FirebaseError } from "firebase/app";
 import { httpsCallable } from "firebase/functions";
 
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
@@ -49,20 +48,6 @@ const disconnectGoogleCalendarAccountCallable = httpsCallable<
   { ok: boolean }
 >(functionsClient, "disconnectGoogleCalendarAccount");
 
-const requestBrowserCalendarAccessToken = async (
-  silent: boolean,
-): Promise<GoogleCalendarAccess> => {
-  const oauthModule = await import("./gcal.oauth") as {
-    requestCalendarAccessToken?: RequestCalendarAccessToken;
-  };
-
-  if (typeof oauthModule.requestCalendarAccessToken !== "function") {
-    throw new Error("Google Calendar browser OAuth fallback is unavailable");
-  }
-
-  return oauthModule.requestCalendarAccessToken(auth, silent);
-};
-
 const waitForCallableAuth = async (): Promise<void> => {
   await auth.authStateReady();
 
@@ -72,10 +57,10 @@ const waitForCallableAuth = async (): Promise<void> => {
 };
 
 const normalizeCallableErrorCode = (error: unknown): string | undefined => {
-  if (error instanceof FirebaseError) return error.code.replace(/^functions\//, "");
   if (error instanceof Error) {
     return (error as Error & { code?: string }).code?.replace(/^functions\//, "");
   }
+
   return undefined;
 };
 
@@ -96,8 +81,29 @@ const isRecoverableServerOAuthStateError = (error: unknown): boolean => {
   return code === "failed-precondition" || code === "not-found";
 };
 
-const shouldFallbackToBrowserToken = (error: unknown): boolean =>
-  isServerInfrastructureError(error) || isRecoverableServerOAuthStateError(error);
+const canUseSilentBrowserTokenFallback = (): boolean => {
+  return Boolean(import.meta.env.VITE_WEB_GOOGLE_OAUTH_CLIENT_ID);
+};
+
+const shouldFallbackToSilentBrowserToken = (error: unknown): boolean => {
+  if (!canUseSilentBrowserTokenFallback()) return false;
+
+  return isServerInfrastructureError(error) || isRecoverableServerOAuthStateError(error);
+};
+
+const requestSilentBrowserCalendarAccessToken = async (): Promise<GoogleCalendarAccess> => {
+  const oauthModule = await import("./gcal.oauth") as {
+    requestCalendarAccessToken?: RequestCalendarAccessToken;
+  };
+
+  if (typeof oauthModule.requestCalendarAccessToken !== "function") {
+    throw new Error("Google Calendar browser OAuth fallback is unavailable");
+  }
+
+  // VITE_WEB_GOOGLE_OAUTH_CLIENT_ID が存在する場合だけ呼ぶため、
+  // gcal.oauth.ts 側では GIS の prompt=none 経路になり、popup を開かない。
+  return oauthModule.requestCalendarAccessToken(auth, true);
+};
 
 export const isServerStoredGoogleOAuthEnabled = (): boolean => {
   if (isDesktopLikeRuntime()) {
@@ -105,8 +111,9 @@ export const isServerStoredGoogleOAuthEnabled = (): boolean => {
   }
 
   // Web / 非 Desktop では refresh token を localStorage に保存しない。
-  // ただし Functions secrets 未設定などの環境では明示的に true のときだけ
-  // Cloud Functions 保存を使い、既定は GIS access token のみにフォールバックする。
+  // VITE_GOOGLE_OAUTH_SERVER_TOKENS=true の場合は Cloud Functions 側の
+  // refresh token 保存を第一候補にする。更新に失敗した場合は、popup を使わない
+  // GIS silent access token だけを一時的なフォールバックとして使う。
   return import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true";
 };
 
@@ -115,25 +122,10 @@ export const exchangeGoogleCalendarCode = async (
 ): Promise<ServerGoogleCalendarAccess> => {
   await waitForCallableAuth();
 
-  try {
-    const result = await exchangeGoogleCalendarCodeCallable(input);
-    return result.data;
-  } catch (error) {
-    if (!shouldFallbackToBrowserToken(error)) {
-      throw error;
-    }
-
-    console.warn(
-      "[GoogleCalendarOAuth] server code exchange failed; falling back to browser token",
-      error,
-    );
-
-    const access = await requestBrowserCalendarAccessToken(false);
-    return {
-      ...access,
-      refreshTokenStored: false,
-    };
-  }
+  // 初回接続/明示再接続では必ずサーバーに refresh token を保存させる。
+  // ここで access token だけにフォールバックすると、期限切れ後に再連携が必要になる。
+  const result = await exchangeGoogleCalendarCodeCallable(input);
+  return result.data;
 };
 
 export const getServerStoredGoogleCalendarAccessToken = async (
@@ -145,21 +137,30 @@ export const getServerStoredGoogleCalendarAccessToken = async (
     const result = await getGoogleCalendarAccessTokenCallable(input);
     return result.data;
   } catch (error) {
-    if (!shouldFallbackToBrowserToken(error)) {
+    if (!shouldFallbackToSilentBrowserToken(error)) {
       throw error;
     }
 
     console.warn(
-      "[GoogleCalendarOAuth] server token refresh failed; falling back to silent browser token",
+      "[GoogleCalendarOAuth] server token refresh failed; using non-popup silent browser token fallback",
       error,
     );
 
-    const access = await requestBrowserCalendarAccessToken(true);
-    return {
-      ...access,
-      accountEmail: access.accountEmail ?? input.accountId,
-      refreshTokenStored: false,
-    };
+    try {
+      const access = await requestSilentBrowserCalendarAccessToken();
+      return {
+        ...access,
+        accountEmail: access.accountEmail ?? input.accountId,
+        refreshTokenStored: false,
+      };
+    } catch (fallbackError) {
+      console.warn(
+        "[GoogleCalendarOAuth] silent browser token fallback failed",
+        fallbackError,
+      );
+
+      throw error;
+    }
   }
 };
 

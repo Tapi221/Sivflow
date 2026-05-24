@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns";
 import { SidebarOpenIcon } from "@/components/icons/icons.sidebar";
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -40,6 +40,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const monthLabelFormat = useMonthLabelFormat();
   const [isDayDetailPanelOpen, setIsDayDetailPanelOpen] = useState(true);
   const [selectedTaskListIds, setSelectedTaskListIds] = useState<string[]>([]);
+  const deferredSelectedTaskListIds = useDeferredValue(selectedTaskListIds);
   const selectedTaskListInitializedRef = useRef(false);
 
   const viewOptions = useMemo(
@@ -122,7 +123,10 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
 
       return nextIds;
     });
-  }, [allTaskListIds, allTaskListIdsKey]);
+    // allTaskListIdsKey でリストの実質的な変化だけを検知する。
+    // 配列参照そのものを依存に入れると、チェック操作ごとに不要な再評価が走りやすい。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allTaskListIdsKey]);
 
   const handleToggleTaskList = useCallback((taskListId: string) => {
     setSelectedTaskListIds((ids) => {
@@ -299,7 +303,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
         <CarvePanel>
           <TaskView
             googleAccounts={googleAccounts}
-            selectedTaskListIds={selectedTaskListIds}
+            selectedTaskListIds={deferredSelectedTaskListIds}
             onRefreshGoogleTasks={refreshGoogleTasks}
             onCreateGoogleTask={createGoogleTask}
             onUpdateGoogleTask={updateGoogleTask}
