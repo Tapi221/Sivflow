@@ -1,3 +1,5 @@
+import type { IconProps } from "@/ui/icons";
+
 //Vuesax-Icons
 export const CrownIcon = ({
   className,
