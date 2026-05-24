@@ -4,7 +4,10 @@ import {
   useState,
   type ComponentType,
   type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
+import { createPortal } from "react-dom";
 import { Reorder } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { PlusLineIcon } from "@/components/icons/icons.schedule";
@@ -39,6 +42,10 @@ type TabContextMenuState = {
   x: number;
   y: number;
 };
+
+type TabContextMenuTriggerEvent =
+  | ReactMouseEvent<HTMLElement>
+  | ReactPointerEvent<HTMLElement>;
 
 const TABS_NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
@@ -359,7 +366,7 @@ export const WorkspaceTabsBar = ({
   };
 
   const openTabContextMenu = (
-    event: React.MouseEvent,
+    event: TabContextMenuTriggerEvent,
     tab: WorkspaceTab,
   ) => {
     event.preventDefault();
@@ -444,6 +451,16 @@ export const WorkspaceTabsBar = ({
         },
       ]
     : [];
+
+  const contextMenuElement = contextMenu ? (
+    <WorkspaceTabContextMenu
+      x={contextMenu.x}
+      y={contextMenu.y}
+      actions={contextMenuActions}
+      menuRef={contextMenuRef}
+      noDragStyle={interactiveStyle}
+    />
+  ) : null;
 
   return (
     <>
@@ -532,6 +549,10 @@ export const WorkspaceTabsBar = ({
                 )}
                 data-workspace-tab-kind={tab.kind}
                 data-workspace-tab-slot-active={selected ? "true" : undefined}
+                onPointerDownCapture={(event) => {
+                  if (event.button !== 2) return;
+                  openTabContextMenu(event, tab);
+                }}
                 onContextMenu={(event) => openTabContextMenu(event, tab)}
               >
                 <div
@@ -659,15 +680,7 @@ export const WorkspaceTabsBar = ({
         <div className="h-full min-w-0 flex-1" />
       </div>
 
-      {contextMenu ? (
-        <WorkspaceTabContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
-          actions={contextMenuActions}
-          menuRef={contextMenuRef}
-          noDragStyle={interactiveStyle}
-        />
-      ) : null}
+      {contextMenuElement ? createPortal(contextMenuElement, document.body) : null}
     </>
   );
 };
