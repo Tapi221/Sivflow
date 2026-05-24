@@ -176,6 +176,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     refreshGoogleTasks,
     createGoogleTask,
     updateGoogleTask,
+    moveGoogleTaskList,
     deleteGoogleTask,
   } = pane;
 
@@ -425,6 +426,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
             onRefreshGoogleTasks={refreshGoogleTasks}
             onCreateGoogleTask={createGoogleTask}
             onUpdateGoogleTask={updateGoogleTask}
+            onMoveGoogleTaskList={moveGoogleTaskList}
             onDeleteGoogleTask={deleteGoogleTask}
           />
         </CarvePanel>
