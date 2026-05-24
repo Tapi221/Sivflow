@@ -1,4 +1,5 @@
 import { bundleMediaInMfDeckCards } from "@/features/deckFile/application/mfDeckMediaBundler";
+import type { MfDeckTagLookup } from "@/features/deckFile/application/types";
 import {
   MF_DECK_FORMAT,
   MF_DECK_VERSION,
@@ -9,8 +10,6 @@ import {
 } from "@/features/deckFile/domain/mfDeckTypes";
 
 import type { Card, CardBlock, CardSet } from "@/types";
-
-export type MfDeckTagLookup = ReadonlyMap<string, { name: string }>;
 
 const toEpoch = (value: unknown): number => {
   if (value instanceof Date) return value.getTime();
