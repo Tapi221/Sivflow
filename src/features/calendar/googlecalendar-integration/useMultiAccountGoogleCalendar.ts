@@ -355,6 +355,9 @@ const toErrorMessage = (error: unknown): string =>
 const toGoogleCalendarAuthErrorMessage = (error: unknown): string =>
   `Google Calendar token refresh failed: ${toErrorMessage(error)}`;
 
+const createGoogleCalendarConnectErrorMessage = (error: unknown): string =>
+  `Google Calendar connection failed: ${toErrorMessage(error)}`;
+
 const useServerStoredTokens = isServerStoredGoogleOAuthEnabled();
 
 const requestSilentAccessToken = async () => {
@@ -954,7 +957,16 @@ export const useMultiAccountGoogleCalendar = () => {
           error: toErrorMessage(error),
         });
       } else {
-        dispatchAccounts({ type: "REMOVE", id: tempId });
+        dispatchAccounts({
+          type: "SET_CONNECTING",
+          id: tempId,
+          value: false,
+        });
+        dispatchAccounts({
+          type: "SET_ERROR",
+          id: tempId,
+          error: createGoogleCalendarConnectErrorMessage(error),
+        });
       }
     }
   }, []);
