@@ -29,7 +29,6 @@ export const useTaskBoardDnd = ({
 }: UseTaskBoardDndArgs) => {
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [activeTaskWidth, setActiveTaskWidth] = useState<number | null>(null);
-  const [activeTaskHeight, setActiveTaskHeight] = useState<number | null>(null);
   const [activeDropTarget, setActiveDropTarget] = useState<TaskDropTarget | null>(null);
   const latestDropTargetRef = useRef<TaskDropTarget | null>(null);
   const visibleTasksByColumn = useMemo(() => {
@@ -39,7 +38,6 @@ export const useTaskBoardDnd = ({
 
     return createTaskDragPreview(tasksByColumn, activeTaskId, activeDropTarget, getPreviewTask);
   }, [activeDropTarget, activeTaskId, getPreviewTask, tasksByColumn]);
-  const isPreviewingTaskReorder = activeTaskId !== null && activeDropTarget !== null;
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -62,7 +60,6 @@ export const useTaskBoardDnd = ({
   const resetDragState = () => {
     setActiveTaskId(null);
     setActiveTaskWidth(null);
-    setActiveTaskHeight(null);
     setActiveDropTarget(null);
     latestDropTargetRef.current = null;
   };
@@ -70,7 +67,6 @@ export const useTaskBoardDnd = ({
   const handleDragStart = (event: DragStartEvent) => {
     setActiveTaskId(String(event.active.id));
     setActiveTaskWidth(event.active.rect.current.initial?.width ?? null);
-    setActiveTaskHeight(event.active.rect.current.initial?.height ?? null);
     setActiveDropTarget(null);
     latestDropTargetRef.current = null;
   };
@@ -137,7 +133,6 @@ export const useTaskBoardDnd = ({
   return {
     activeDropTarget,
     activeTask,
-    activeTaskHeight,
     activeTaskId,
     activeTaskWidth,
     collisionDetection: taskBoardCollisionDetection,
@@ -146,7 +141,6 @@ export const useTaskBoardDnd = ({
     handleDragEnd,
     handleDragOver,
     handleDragStart,
-    isPreviewingTaskReorder,
     measuring: TASK_DND_MEASURING_CONFIG,
     sensors,
     visibleTasksByColumn,
