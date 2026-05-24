@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { exportMfDeckBytes } from "@/features/deckFile/application/exportMfDeck";
-import type { MfDeckTagLookup } from "@/features/deckFile/application/mapCardToMfDeck";
+import type { MfDeckTagLookup } from "@/features/deckFile/application/types";
 import { MfDeckExportError } from "@/features/deckFile/domain/mfDeckTypes";
 import { downloadBytesAsMfDeck } from "@/features/deckFile/infra/web/downloadMfDeck";
 
@@ -41,7 +41,7 @@ export const ExportMfDeckButton = ({
         deckName: cardSet.name || "manifolia-deck",
       });
 
-      toast.success("MFDeck をエクスポートしました。");
+      toast.success("MFDeck exported.");
     } catch (error) {
       console.error("[ExportMfDeckButton] export failed", error);
 
@@ -50,7 +50,7 @@ export const ExportMfDeckButton = ({
         return;
       }
 
-      toast.error("MFDeck のエクスポートに失敗しました。");
+      toast.error("MFDeck export failed.");
     } finally {
       setIsExporting(false);
     }
@@ -65,7 +65,7 @@ export const ExportMfDeckButton = ({
       disabled={disabled || isExporting}
       className="rounded-full bg-white/85 shadow-sm backdrop-blur"
     >
-      {isExporting ? "書き出し中..." : ".mfdeck 書き出し"}
+      {isExporting ? "Exporting..." : ".mfdeck export"}
     </Button>
   );
 };
