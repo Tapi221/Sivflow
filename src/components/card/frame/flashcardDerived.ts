@@ -11,7 +11,7 @@ import {DEFAULT_LAYOUT_ROWS,
   normalizeExtraRows,
   normalizeLayoutRows,} from "@/domain/card/extraRows";
 
-import type { FlashcardCardLike, FlashcardMediaLike } from "./types";
+import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcard.types";
 
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock } from "@/types/domain/card";
