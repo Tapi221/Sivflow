@@ -12,7 +12,10 @@ import {
   patchGoogleTask,
 } from "./gcal.tasks-api";
 import type { GoogleTaskItem, GoogleTaskListItem } from "./gcalSync.types";
-import type { GoogleAccountEntry } from "./useMultiAccountGoogleCalendar";
+import type {
+  GoogleAccountEntry,
+  GoogleAccountTokenUpdate,
+} from "./useMultiAccountGoogleCalendar";
 import type { GoogleTaskListAccountState } from "./useGoogleTaskLists";
 
 export type GoogleTasksAccountState = {
@@ -81,10 +84,20 @@ const isUnauthorizedError = (error: unknown): boolean =>
 
 const getRecoverableAccessToken = async (
   account: AccountTokenSnapshot,
+  onAccessTokenRecovered?: (update: GoogleAccountTokenUpdate) => void,
 ): Promise<string | null> => {
   if (isServerStoredGoogleOAuthEnabled()) {
     const result = await getServerStoredGoogleCalendarAccessToken({
       accountId: account.accountId,
+    });
+
+    onAccessTokenRecovered?.({
+      accountId: account.accountId,
+      accessToken: result.accessToken,
+      refreshToken: null,
+      accountName: result.accountName,
+      accountPhotoUrl: result.accountPhotoUrl,
+      expiresInSeconds: result.expiresInSeconds,
     });
 
     return result.accessToken;
@@ -98,21 +111,35 @@ const getRecoverableAccessToken = async (
     refreshToken: account.refreshToken,
   });
 
+  onAccessTokenRecovered?.({
+    accountId: account.accountId,
+    accessToken: result.accessToken,
+    refreshToken: result.refreshToken ?? account.refreshToken,
+    accountName: result.accountName,
+    accountPhotoUrl: result.accountPhotoUrl,
+    expiresInSeconds: result.expiresInSeconds,
+  });
+
   return result.accessToken;
 };
 
 const getAccessTokenWithRecovery = async (
   account: AccountTokenSnapshot,
+  onAccessTokenRecovered?: (update: GoogleAccountTokenUpdate) => void,
 ): Promise<string | null> => {
   if (account.accessToken) return account.accessToken;
-  return getRecoverableAccessToken(account);
+  return getRecoverableAccessToken(account, onAccessTokenRecovered);
 };
 
 const withRecoveredToken = async <T,>(
   account: AccountTokenSnapshot,
   action: (accessToken: string) => Promise<T>,
+  onAccessTokenRecovered?: (update: GoogleAccountTokenUpdate) => void,
 ): Promise<T> => {
-  const accessToken = await getAccessTokenWithRecovery(account);
+  const accessToken = await getAccessTokenWithRecovery(
+    account,
+    onAccessTokenRecovered,
+  );
 
   if (!accessToken) {
     throw new Error("Google Tasks access token is missing");
@@ -123,7 +150,10 @@ const withRecoveredToken = async <T,>(
   } catch (error) {
     if (!isUnauthorizedError(error)) throw error;
 
-    const recoveredToken = await getRecoverableAccessToken(account);
+    const recoveredToken = await getRecoverableAccessToken(
+      account,
+      onAccessTokenRecovered,
+    );
 
     if (!recoveredToken) throw error;
 
@@ -133,6 +163,7 @@ const withRecoveredToken = async <T,>(
 
 const fetchGoogleTasksWithRecovery = async (
   account: AccountTokenSnapshot,
+  onAccessTokenRecovered?: (update: GoogleAccountTokenUpdate) => void,
 ): Promise<GoogleTaskItem[]> => {
   return withRecoveredToken(account, async (accessToken) => {
     const results = await Promise.all(
@@ -142,7 +173,7 @@ const fetchGoogleTasksWithRecovery = async (
     );
 
     return results.flat();
-  });
+  }, onAccessTokenRecovered);
 };
 
 const reduceGoogleTasks = (
@@ -268,6 +299,7 @@ const buildAccountTokenKey = (
 export const useGoogleTasks = (
   accounts: GoogleAccountEntry[],
   taskListsByAccount: Record<string, GoogleTaskListAccountState>,
+  onAccessTokenRecovered?: (update: GoogleAccountTokenUpdate) => void,
 ) => {
   const [state, dispatch] = useReducer(reduceGoogleTasks, {});
 
@@ -298,7 +330,10 @@ export const useGoogleTasks = (
       dispatch({ type: "START", accountId: account.accountId });
 
       try {
-        const tasks = await fetchGoogleTasksWithRecovery(account);
+        const tasks = await fetchGoogleTasksWithRecovery(
+          account,
+          onAccessTokenRecovered,
+        );
         dispatch({ type: "SUCCESS", accountId: account.accountId, tasks });
       } catch (error) {
         dispatch({
@@ -308,7 +343,7 @@ export const useGoogleTasks = (
         });
       }
     },
-    [],
+    [onAccessTokenRecovered],
   );
 
   const refreshAll = useCallback(async () => {
@@ -329,14 +364,16 @@ export const useGoogleTasks = (
 
       if (!account) throw new Error("Google ToDo リストが見つかりません");
 
-      const task = await withRecoveredToken(account, (accessToken) =>
-        createGoogleTask({ accessToken, taskListId, input }),
+      const task = await withRecoveredToken(
+        account,
+        (accessToken) => createGoogleTask({ accessToken, taskListId, input }),
+        onAccessTokenRecovered,
       );
 
       dispatch({ type: "UPSERT_TASK", accountId: account.accountId, task });
       return task;
     },
-    [findAccountForTaskList],
+    [findAccountForTaskList, onAccessTokenRecovered],
   );
 
   const updateTask = useCallback(
@@ -345,14 +382,16 @@ export const useGoogleTasks = (
 
       if (!account) throw new Error("Google ToDo リストが見つかりません");
 
-      const task = await withRecoveredToken(account, (accessToken) =>
-        patchGoogleTask({ accessToken, taskListId, taskId, patch }),
+      const task = await withRecoveredToken(
+        account,
+        (accessToken) => patchGoogleTask({ accessToken, taskListId, taskId, patch }),
+        onAccessTokenRecovered,
       );
 
       dispatch({ type: "UPSERT_TASK", accountId: account.accountId, task });
       return task;
     },
-    [findAccountForTaskList],
+    [findAccountForTaskList, onAccessTokenRecovered],
   );
 
   const removeTask = useCallback(
@@ -361,8 +400,10 @@ export const useGoogleTasks = (
 
       if (!account) throw new Error("Google ToDo リストが見つかりません");
 
-      await withRecoveredToken(account, (accessToken) =>
-        deleteGoogleTask({ accessToken, taskListId, taskId }),
+      await withRecoveredToken(
+        account,
+        (accessToken) => deleteGoogleTask({ accessToken, taskListId, taskId }),
+        onAccessTokenRecovered,
       );
 
       dispatch({
@@ -372,7 +413,7 @@ export const useGoogleTasks = (
         taskId,
       });
     },
-    [findAccountForTaskList],
+    [findAccountForTaskList, onAccessTokenRecovered],
   );
 
   useEffect(() => {

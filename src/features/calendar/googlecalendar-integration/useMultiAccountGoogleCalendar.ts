@@ -49,6 +49,15 @@ export type GoogleAccountEntry = {
   error: string | null;
 };
 
+export type GoogleAccountTokenUpdate = {
+  accountId: string;
+  accessToken: string;
+  refreshToken?: string | null;
+  accountName?: string | null;
+  accountPhotoUrl?: string | null;
+  expiresInSeconds?: number | null;
+};
+
 type AccountsAction =
   | { type: "ADD"; account: GoogleAccountEntry }
   | { type: "REMOVE"; id: string }
@@ -461,14 +470,7 @@ export const useMultiAccountGoogleCalendar = () => {
     accountName,
     accountPhotoUrl,
     expiresInSeconds,
-  }: {
-    accountId: string;
-    accessToken: string;
-    refreshToken?: string | null;
-    accountName?: string | null;
-    accountPhotoUrl?: string | null;
-    expiresInSeconds?: number | null;
-  }) => {
+  }: GoogleAccountTokenUpdate) => {
     updateStoredAccountToken(
       accountId,
       accessToken,
@@ -1149,6 +1151,7 @@ export const useMultiAccountGoogleCalendar = () => {
     forceSyncRange,
     retrySync,
     reconnectAccount,
+    updateAccountToken: applyAccountToken,
     isAnyConnecting,
   };
 };
