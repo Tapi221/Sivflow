@@ -43,14 +43,13 @@ export const TaskCard = ({
   return (
     <div
       className={cn(
-        // ─ Notion風: フラット・角丸小・影なし ─
-        "group relative w-full min-w-0 overflow-hidden rounded-md border-[1.5px] border-[#e9eaed] bg-white px-3 py-2",
-        // hover は背景のみ変化（影を足さない）
-        "transition-[background-color,border-color] duration-100",
-        "hover:bg-[#f7f7f5] hover:border-[#e2e3e6]",
+        // ─ macOSのダイアログ風: 薄いグレー・少し影あり ─
+        "group relative w-full min-w-0 overflow-hidden rounded-md border-[1.5px] border-[#e4e4e8] bg-[#f8f8f8] px-3 py-2 shadow-[0_4px_12px_rgba(15,23,42,0.06)]",
+        "transition-[background-color,border-color,box-shadow] duration-100",
+        "hover:bg-[#f4f4f7] hover:border-[#dedee3] hover:shadow-[0_6px_16px_rgba(15,23,42,0.08)]",
         isDragging
-          ? "cursor-grabbing bg-white shadow-[0_4px_16px_rgba(15,23,42,0.10)] border-[#d5d6d9]"
-          : "cursor-grab shadow-none",
+          ? "cursor-grabbing bg-[#f8f8f8] shadow-[0_10px_30px_rgba(15,23,42,0.14)] border-[#d5d6d9]"
+          : "cursor-grab",
       )}
     >
       <div className="relative flex min-w-0 items-start gap-2.5">
