@@ -1,7 +1,7 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, RefObject } from "react";
 
-import { X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
+import { X } from "@/ui/icons";
 
 type TabContextMenuAction = {
   id: string;
@@ -14,7 +14,7 @@ type TabContextMenuProps = {
   x: number;
   y: number;
   actions: TabContextMenuAction[];
-  menuRef: React.RefObject<HTMLDivElement | null>;
+  menuRef: RefObject<HTMLDivElement | null>;
   noDragStyle: CSSProperties;
 };
 
