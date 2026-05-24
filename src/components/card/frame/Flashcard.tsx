@@ -13,7 +13,7 @@ import { useFlashcardCornerControls } from "./FlashcardCornerControls";
 import { FlashcardInkOverlay } from "./FlashcardInkOverlay";
 import { FlashcardMediaDialogs } from "./FlashcardMediaDialogs";
 import { FlashcardNavigation } from "./FlashcardNavigation";
-import type { FlashcardCardLike } from "./types";
+import type { FlashcardCardLike } from "./flashcard.types";
 import { useCardFlipBehavior } from "./useCardFlipBehavior";
 import { useFlashcardDerived } from "./useFlashcardDerived";
 import { useFlashcardInk } from "./useFlashcardInk";
@@ -22,7 +22,7 @@ import { useFlashcardMediaState } from "./useFlashcardMediaState";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-export type { FlashcardCardLike } from "./types";
+export type { FlashcardCardLike } from "./flashcard.types";
 
 interface FlashcardProps {
   card: FlashcardCardLike | null | undefined;
