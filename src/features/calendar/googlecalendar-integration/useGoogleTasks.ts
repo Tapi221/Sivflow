@@ -418,20 +418,44 @@ export const useGoogleTasks = (
 
       if (!account) throw new Error("Google ToDo リストが見つかりません");
 
+      const existingTask = state[account.accountId]?.tasks.find(
+        (task) => task.id === taskId && task.taskListId === taskListId,
+      ) ?? null;
+
       if (taskListId === destinationTaskListId) {
-        return state[account.accountId]?.tasks.find(
-          (task) => task.id === taskId && task.taskListId === taskListId,
-        ) ?? null;
+        return existingTask;
       }
 
-      const task = await withRecoveredToken(
-        account,
-        (accessToken) => moveGoogleTask({ accessToken, taskListId, taskId, destinationTaskListId }),
-        onAccessTokenRecovered,
-      );
+      if (existingTask) {
+        dispatch({
+          type: "MOVE_TASK",
+          accountId: account.accountId,
+          sourceTaskListId: taskListId,
+          task: { ...existingTask, taskListId: destinationTaskListId },
+        });
+      }
 
-      dispatch({ type: "MOVE_TASK", accountId: account.accountId, sourceTaskListId: taskListId, task });
-      return task;
+      try {
+        const task = await withRecoveredToken(
+          account,
+          (accessToken) => moveGoogleTask({ accessToken, taskListId, taskId, destinationTaskListId }),
+          onAccessTokenRecovered,
+        );
+
+        dispatch({ type: "MOVE_TASK", accountId: account.accountId, sourceTaskListId: taskListId, task });
+        return task;
+      } catch (error) {
+        if (existingTask) {
+          dispatch({
+            type: "MOVE_TASK",
+            accountId: account.accountId,
+            sourceTaskListId: destinationTaskListId,
+            task: existingTask,
+          });
+        }
+
+        throw error;
+      }
     },
     [findAccountForTaskList, onAccessTokenRecovered, state],
   );
