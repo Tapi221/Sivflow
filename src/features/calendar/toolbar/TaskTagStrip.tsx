@@ -96,9 +96,9 @@ export const TaskTagStrip = () => {
                 <PopoverContent
                   align="start"
                   sideOffset={6}
-                  className="w-auto min-w-[156px] p-2"
+                  className="w-auto min-w-[128px] p-2"
                 >
-                  <div className="mb-2 px-1 text-[11px] font-semibold text-[#5f656d]">
+                  <div className="mb-1.5 px-1 text-[11px] font-semibold text-[#5f656d]">
                     タグの色
                   </div>
                   <div className="grid grid-cols-5 gap-1.5">
@@ -114,7 +114,7 @@ export const TaskTagStrip = () => {
                           aria-pressed={isSelected}
                           title={colorLabel}
                           className={cn(
-                            "grid h-6 w-6 place-items-center rounded-full border transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35",
+                            "grid h-4 w-4 place-items-center rounded-full border transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35",
                             isSelected &&
                               "ring-2 ring-primary-500/35 ring-offset-1 ring-offset-white",
                           )}
@@ -124,7 +124,7 @@ export const TaskTagStrip = () => {
                           }}
                         >
                           {isSelected && (
-                            <span className="h-2 w-2 rounded-full bg-current" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-current" />
                           )}
                         </button>
                       );
