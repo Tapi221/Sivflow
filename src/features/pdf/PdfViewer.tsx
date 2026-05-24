@@ -25,6 +25,7 @@ import { PdfPage } from "./PdfPage";
 import type {
   PageSize,
   PdfPageSearchMatch,
+  PdfScaleChangeSource,
   PdfViewerHandle,
   PdfViewerOptions,
   PdfViewerSourceMeta,
@@ -46,7 +47,7 @@ interface PdfViewerCommonProps {
   searchNavDirection?: "next" | "prev";
   pageLayoutMode?: PdfPageLayoutMode;
   pageOrder?: number[];
-  onScaleChange?: (nextScale: number, source: "wheel" | "gesture") => void;
+  onScaleChange?: (nextScale: number, source: PdfScaleChangeSource) => void;
   onPageChange?: (page: number) => void;
   onSearchStateChange?: (state: {
     totalMatches: number;
@@ -140,72 +141,48 @@ const useStableNumberArray = (values: number[]) => {
 const normalizePageOrder = (
   pageOrder: number[] | undefined,
   numPages: number,
-) => {
-  const defaultOrder = Array.from(
-    { length: numPages },
-    (_, index) => index + 1,
-  );
+): number[] => {
   if (numPages <= 0) {
-    return [];
+    return EMPTY_PAGE_NUMBERS;
   }
 
-  if (!Array.isArray(pageOrder) || pageOrder.length === 0) {
-    return defaultOrder;
+  if (!pageOrder || pageOrder.length === 0) {
+    return Array.from({ length: numPages }, (_, index) => index + 1);
   }
 
   const seen = new Set<number>();
-  const orderedPages: number[] = [];
+  const normalized: number[] = [];
 
-  pageOrder.forEach((pageNumber) => {
-    if (typeof pageNumber !== "number" || !Number.isFinite(pageNumber)) {
-      return;
+  for (const value of pageOrder) {
+    if (!Number.isInteger(value) || value < 1 || value > numPages) {
+      continue;
     }
 
-    const normalizedPageNumber = Math.max(1, Math.trunc(pageNumber));
-    if (normalizedPageNumber > numPages || seen.has(normalizedPageNumber)) {
-      return;
+    if (seen.has(value)) {
+      continue;
     }
 
-    seen.add(normalizedPageNumber);
-    orderedPages.push(normalizedPageNumber);
-  });
-
-  defaultOrder.forEach((pageNumber) => {
-    if (seen.has(pageNumber)) {
-      return;
-    }
-
-    orderedPages.push(pageNumber);
-  });
-
-  return orderedPages;
-};
-
-const buildPageRows = ({
-  orderedPageNumbers,
-  pageLayoutMode,
-}: {
-  orderedPageNumbers: number[];
-  pageLayoutMode: PdfPageLayoutMode;
-}) => {
-  const rows: number[][] = [];
-
-  if (orderedPageNumbers.length === 0) {
-    return rows;
+    seen.add(value);
+    normalized.push(value);
   }
 
-  const pagesPerRow = pageLayoutMode === "double" ? 2 : 1;
-
-  for (
-    let visualIndex = 0;
-    visualIndex < orderedPageNumbers.length;
-    visualIndex += pagesPerRow
-  ) {
-    rows.push(orderedPageNumbers.slice(visualIndex, visualIndex + pagesPerRow));
+  for (let pageNumber = 1; pageNumber <= numPages; pageNumber += 1) {
+    if (!seen.has(pageNumber)) {
+      normalized.push(pageNumber);
+    }
   }
 
-  return rows;
+  return normalized;
 };
+
+const getPageSizeOrFallback = (
+  pageSizes: Record<number, PageSize>,
+  pageNumber: number,
+): PageSize =>
+  pageSizes[pageNumber] ?? {
+    width: 1,
+    height: PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT,
+  };
 
 const buildPageLayoutMetrics = ({
   orderedPageNumbers,
@@ -220,6 +197,16 @@ const buildPageLayoutMetrics = ({
   pageGap: number;
   pageLayoutMode: PdfPageLayoutMode;
 }): PageLayoutMetrics => {
+  const rows: number[][] = [];
+
+  if (pageLayoutMode === "double") {
+    for (let index = 0; index < orderedPageNumbers.length; index += 2) {
+      rows.push(orderedPageNumbers.slice(index, index + 2));
+    }
+  } else {
+    orderedPageNumbers.forEach((pageNumber) => rows.push([pageNumber]));
+  }
+
   const visualPageNumbers: number[] = [];
   const visualPageAnchorPageNumbers: number[] = [];
   const visualPageTopOffsets: number[] = [];
@@ -229,46 +216,29 @@ const buildPageLayoutMetrics = ({
   const rowTopOffsets: number[] = [];
   const rowBottomOffsets: number[] = [];
   const rowHeights: number[] = [];
-  const rowPageNumbers = buildPageRows({
-    orderedPageNumbers,
-    pageLayoutMode,
-  });
 
-  let runningTop = 0;
+  let top = 0;
 
-  rowPageNumbers.forEach((currentRowPageNumbers, rowIndex) => {
-    const measuredPageHeights = currentRowPageNumbers.map((pageNumber) => {
-      const baseSize =
-        pageSizes[pageNumber] ?? pageSizes[orderedPageNumbers[0] ?? 1];
-      return baseSize && baseSize.height > 0
-        ? Math.max(1, Math.floor(baseSize.height * scale))
-        : PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT;
-    });
+  rows.forEach((row, rowIndex) => {
+    const rowHeight = row.reduce((maxHeight, pageNumber) => {
+      const pageSize = getPageSizeOrFallback(pageSizes, pageNumber);
+      return Math.max(maxHeight, pageSize.height * scale);
+    }, 0);
 
-    const rowHeight =
-      measuredPageHeights.length > 0
-        ? Math.max(...measuredPageHeights)
-        : PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT;
-    const rowAnchorPageNumber = currentRowPageNumbers[0] ?? 1;
-
-    rowTopOffsets.push(runningTop);
-    rowBottomOffsets.push(runningTop + rowHeight);
+    rowTopOffsets.push(top);
+    rowBottomOffsets.push(top + rowHeight);
     rowHeights.push(rowHeight);
 
-    currentRowPageNumbers.forEach((pageNumber) => {
+    row.forEach((pageNumber) => {
       visualPageNumbers.push(pageNumber);
-      visualPageAnchorPageNumbers.push(rowAnchorPageNumber);
-      visualPageTopOffsets.push(runningTop);
-      visualPageBottomOffsets.push(runningTop + rowHeight);
-      pageScrollTopsByPageNumber[pageNumber] = runningTop;
+      visualPageAnchorPageNumbers.push(pageNumber);
+      visualPageTopOffsets.push(top);
+      visualPageBottomOffsets.push(top + rowHeight);
+      pageScrollTopsByPageNumber[pageNumber] = top;
       pageRowIndexesByPageNumber[pageNumber] = rowIndex;
     });
 
-    runningTop += rowHeight;
-
-    if (rowIndex < rowPageNumbers.length - 1) {
-      runningTop += pageGap;
-    }
+    top += rowHeight + pageGap;
   });
 
   return {
@@ -281,175 +251,9 @@ const buildPageLayoutMetrics = ({
     rowTopOffsets,
     rowBottomOffsets,
     rowHeights,
-    rowPageNumbers,
-    totalContentHeight: Math.max(runningTop, 1),
+    rowPageNumbers: rows,
+    totalContentHeight: Math.max(0, top - pageGap),
   };
-};
-
-const buildFallbackPageNumbers = ({
-  currentPage,
-  activeMatchPageNumber,
-  numPages,
-}: {
-  currentPage: number;
-  activeMatchPageNumber: number | null;
-  numPages: number;
-}) => {
-  if (numPages <= 0) {
-    return [];
-  }
-
-  const pageNumbers = new Set<number>();
-
-  for (let offset = -1; offset <= 1; offset += 1) {
-    const pageNumber = currentPage + offset;
-    if (pageNumber >= 1 && pageNumber <= numPages) {
-      pageNumbers.add(pageNumber);
-    }
-  }
-
-  if (typeof activeMatchPageNumber === "number") {
-    for (let offset = -1; offset <= 1; offset += 1) {
-      const pageNumber = activeMatchPageNumber + offset;
-      if (pageNumber >= 1 && pageNumber <= numPages) {
-        pageNumbers.add(pageNumber);
-      }
-    }
-  }
-
-  return Array.from(pageNumbers).sort((left, right) => left - right);
-};
-
-const mergePageNumbers = (...collections: Array<number[]>) => {
-  const pageNumberSet = new Set<number>();
-
-  collections.forEach((pageNumbers) => {
-    pageNumbers.forEach((pageNumber) => {
-      if (Number.isFinite(pageNumber) && pageNumber > 0) {
-        pageNumberSet.add(pageNumber);
-      }
-    });
-  });
-
-  return Array.from(pageNumberSet).sort((left, right) => left - right);
-};
-
-const findFirstIntersectingPageIndex = (
-  pageBottomOffsets: number[],
-  windowTop: number,
-) => {
-  let lo = 0;
-  let hi = pageBottomOffsets.length - 1;
-  let answer = pageBottomOffsets.length;
-
-  while (lo <= hi) {
-    const mid = Math.floor((lo + hi) / 2);
-    const midBottom = pageBottomOffsets[mid] ?? Number.MAX_SAFE_INTEGER;
-
-    if (midBottom >= windowTop) {
-      answer = mid;
-      hi = mid - 1;
-    } else {
-      lo = mid + 1;
-    }
-  }
-
-  return answer;
-};
-
-const findLastIntersectingPageIndex = (
-  pageTopOffsets: number[],
-  windowBottom: number,
-) => {
-  let lo = 0;
-  let hi = pageTopOffsets.length - 1;
-  let answer = -1;
-
-  while (lo <= hi) {
-    const mid = Math.floor((lo + hi) / 2);
-    const midTop = pageTopOffsets[mid] ?? Number.MAX_SAFE_INTEGER;
-
-    if (midTop <= windowBottom) {
-      answer = mid;
-      lo = mid + 1;
-    } else {
-      hi = mid - 1;
-    }
-  }
-
-  return answer;
-};
-
-const getPageIndexWindow = ({
-  pageTopOffsets,
-  pageBottomOffsets,
-  windowTop,
-  windowBottom,
-}: {
-  pageTopOffsets: number[];
-  pageBottomOffsets: number[];
-  windowTop: number;
-  windowBottom: number;
-}): PageIndexWindow | null => {
-  if (pageTopOffsets.length === 0 || pageBottomOffsets.length === 0) {
-    return null;
-  }
-
-  const clampedWindowTop = Math.max(0, windowTop);
-  const clampedWindowBottom = Math.max(clampedWindowTop, windowBottom);
-
-  const startIndex = findFirstIntersectingPageIndex(
-    pageBottomOffsets,
-    clampedWindowTop,
-  );
-  const endIndex = findLastIntersectingPageIndex(
-    pageTopOffsets,
-    clampedWindowBottom,
-  );
-
-  if (
-    startIndex >= pageTopOffsets.length ||
-    endIndex < 0 ||
-    startIndex > endIndex
-  ) {
-    return null;
-  }
-
-  return { startIndex, endIndex };
-};
-
-const buildPageNumbersInWindow = ({
-  pageTopOffsets,
-  pageBottomOffsets,
-  visualPageNumbers,
-  windowTop,
-  windowBottom,
-}: {
-  pageTopOffsets: number[];
-  pageBottomOffsets: number[];
-  visualPageNumbers: number[];
-  windowTop: number;
-  windowBottom: number;
-}) => {
-  if (visualPageNumbers.length === 0) {
-    return [];
-  }
-
-  const pageIndexWindow = getPageIndexWindow({
-    pageTopOffsets,
-    pageBottomOffsets,
-    windowTop,
-    windowBottom,
-  });
-
-  if (!pageIndexWindow) {
-    return [];
-  }
-
-  return visualPageNumbers.slice(
-    pageIndexWindow.startIndex,
-    pageIndexWindow.endIndex + 1,
-  );
 };
 
 const buildRenderedPageNumbers = ({
@@ -472,148 +276,95 @@ const buildRenderedPageNumbers = ({
   viewportHeight: number;
 }) => {
   if (numPages <= 0) {
-    return [];
+    return EMPTY_PAGE_NUMBERS;
   }
 
-  if (viewportHeight <= 0) {
-    return buildFallbackPageNumbers({
-      currentPage,
-      activeMatchPageNumber,
-      numPages,
-    });
+  const minTop = scrollTop - viewportHeight * PDF_PAGE_RENDER_OVERSCAN_VIEWPORTS;
+  const maxBottom = scrollTop + viewportHeight * (1 + PDF_PAGE_RENDER_OVERSCAN_VIEWPORTS);
+  const pages = new Set<number>([currentPage]);
+
+  if (activeMatchPageNumber !== null) {
+    pages.add(activeMatchPageNumber);
   }
 
-  const overscanPx = viewportHeight * PDF_PAGE_RENDER_OVERSCAN_VIEWPORTS;
-  const renderedWindowPages = buildPageNumbersInWindow({
-    pageTopOffsets,
-    pageBottomOffsets,
-    visualPageNumbers,
-    windowTop: scrollTop - overscanPx,
-    windowBottom: scrollTop + viewportHeight + overscanPx,
+  visualPageNumbers.forEach((pageNumber, index) => {
+    const top = pageTopOffsets[index] ?? 0;
+    const bottom = pageBottomOffsets[index] ?? top;
+
+    if (bottom >= minTop && top <= maxBottom) {
+      pages.add(pageNumber);
+    }
   });
 
-  const stickyPages = buildFallbackPageNumbers({
-    currentPage,
-    activeMatchPageNumber,
-    numPages,
-  });
-
-  return mergePageNumbers(renderedWindowPages, stickyPages);
-};
-
-const buildVisibleTextLayerPageNumbers = ({
-  currentPage,
-  activeMatchPageNumber,
-  numPages,
-  pageTopOffsets,
-  pageBottomOffsets,
-  visualPageNumbers,
-  scrollTop,
-  viewportHeight,
-}: {
-  currentPage: number;
-  activeMatchPageNumber: number | null;
-  numPages: number;
-  pageTopOffsets: number[];
-  pageBottomOffsets: number[];
-  visualPageNumbers: number[];
-  scrollTop: number;
-  viewportHeight: number;
-}) => {
-  if (numPages <= 0) {
-    return [];
-  }
-
-  if (viewportHeight <= 0) {
-    return buildFallbackPageNumbers({
-      currentPage,
-      activeMatchPageNumber,
-      numPages,
-    });
-  }
-
-  const visiblePages = buildPageNumbersInWindow({
-    pageTopOffsets,
-    pageBottomOffsets,
-    visualPageNumbers,
-    windowTop: scrollTop,
-    windowBottom: scrollTop + viewportHeight,
-  });
-
-  const stickyPages =
-    typeof activeMatchPageNumber === "number"
-      ? [activeMatchPageNumber]
-      : [currentPage];
-
-  return mergePageNumbers(visiblePages, stickyPages);
+  return Array.from(pages).filter(
+    (pageNumber) => pageNumber >= 1 && pageNumber <= numPages,
+  );
 };
 
 const buildPrefetchPageNumbers = ({
-  currentPage,
-  activeMatchPageNumber,
+  renderedPageNumbers,
   numPages,
-  pageTopOffsets,
-  pageBottomOffsets,
-  visualPageNumbers,
+}: {
+  renderedPageNumbers: number[];
+  numPages: number;
+}) => {
+  if (numPages <= 0 || renderedPageNumbers.length === 0) {
+    return EMPTY_PAGE_NUMBERS;
+  }
+
+  const pages = new Set<number>();
+
+  renderedPageNumbers.forEach((pageNumber) => {
+    for (
+      let offset = -PDF_PAGE_PREFETCH_EXTRA_PAGES;
+      offset <= PDF_PAGE_PREFETCH_EXTRA_PAGES;
+      offset += 1
+    ) {
+      const candidate = pageNumber + offset;
+      if (candidate >= 1 && candidate <= numPages) {
+        pages.add(candidate);
+      }
+    }
+  });
+
+  return Array.from(pages).sort((left, right) => left - right);
+};
+
+const getVisibleRowRange = ({
+  rowTopOffsets,
+  rowBottomOffsets,
   scrollTop,
   viewportHeight,
 }: {
-  currentPage: number;
-  activeMatchPageNumber: number | null;
-  numPages: number;
-  pageTopOffsets: number[];
-  pageBottomOffsets: number[];
-  visualPageNumbers: number[];
+  rowTopOffsets: number[];
+  rowBottomOffsets: number[];
   scrollTop: number;
   viewportHeight: number;
-}) => {
-  if (numPages <= 0) {
-    return [];
+}): PageIndexWindow => {
+  if (rowTopOffsets.length === 0) {
+    return { startIndex: 0, endIndex: -1 };
   }
 
-  if (viewportHeight <= 0 || visualPageNumbers.length === 0) {
-    return buildFallbackPageNumbers({
-      currentPage,
-      activeMatchPageNumber,
-      numPages,
-    });
+  const minTop = scrollTop - viewportHeight * PDF_PAGE_PREFETCH_OVERSCAN_VIEWPORTS;
+  const maxBottom = scrollTop + viewportHeight * (1 + PDF_PAGE_PREFETCH_OVERSCAN_VIEWPORTS);
+  let startIndex = 0;
+  let endIndex = rowTopOffsets.length - 1;
+
+  for (let index = 0; index < rowBottomOffsets.length; index += 1) {
+    if ((rowBottomOffsets[index] ?? 0) >= minTop) {
+      startIndex = index;
+      break;
+    }
   }
 
-  const overscanPx = viewportHeight * PDF_PAGE_PREFETCH_OVERSCAN_VIEWPORTS;
-  const pageIndexWindow = getPageIndexWindow({
-    pageTopOffsets,
-    pageBottomOffsets,
-    windowTop: scrollTop - overscanPx,
-    windowBottom: scrollTop + viewportHeight + overscanPx,
-  });
-
-  if (!pageIndexWindow) {
-    return buildFallbackPageNumbers({
-      currentPage,
-      activeMatchPageNumber,
-      numPages,
-    });
+  for (let index = rowTopOffsets.length - 1; index >= 0; index -= 1) {
+    if ((rowTopOffsets[index] ?? 0) <= maxBottom) {
+      endIndex = index;
+      break;
+    }
   }
 
-  const windowPages = visualPageNumbers.slice(
-    pageIndexWindow.startIndex,
-    pageIndexWindow.endIndex + 1,
-  );
-  const expandedPages = visualPageNumbers.slice(
-    Math.max(0, pageIndexWindow.startIndex - PDF_PAGE_PREFETCH_EXTRA_PAGES),
-    Math.min(
-      visualPageNumbers.length,
-      pageIndexWindow.endIndex + PDF_PAGE_PREFETCH_EXTRA_PAGES + 1,
-    ),
-  );
-
-  const stickyPages = buildFallbackPageNumbers({
-    currentPage,
-    activeMatchPageNumber,
-    numPages,
-  });
-
-  return mergePageNumbers(windowPages, expandedPages, stickyPages);
+  return { startIndex, endIndex };
 };
 
 const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
@@ -622,7 +373,8 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
       documentController,
       scale,
       minScale = 0.5,
-      maxScale = 3,
+      maxScale = 4,
+      zoomStep,
       searchQuery = "",
       searchNavToken = 0,
       searchNavDirection = "next",
@@ -634,9 +386,9 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
       className,
       pageGap = 16,
       spreadGap = 16,
-      navigationIdentity,
+      navigationIdentity = null,
       opaqueCanvas = false,
-    }: PdfViewerInnerProps,
+    },
     ref,
   ) => {
     const {
@@ -652,12 +404,13 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
       prefetchPageResources,
     } = documentController;
 
-    const normalizedSearchQuery = searchQuery.trim();
-    const hasSearchQuery = normalizedSearchQuery.length > 0;
+    const stablePageOrder = useStableNumberArray(
+      normalizePageOrder(pageOrder, numPages),
+    );
 
     const orderedPageNumbers = useMemo(
-      () => normalizePageOrder(pageOrder, numPages),
-      [numPages, pageOrder],
+      () => normalizePageOrder(stablePageOrder, numPages),
+      [numPages, stablePageOrder],
     );
 
     const pageLayoutMetrics = useMemo(
@@ -707,15 +460,15 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
       gestureScale: scale,
       minGestureScale: minScale,
       maxGestureScale: maxScale,
+      zoomStep,
       onGestureScaleChange: onScaleChange,
     });
 
-    // contentViewportEl は将来 previewTarget が UsePdfZoomOptions に追加された際に使用
     void contentViewportEl;
 
     const prioritizedSearchPageNumbers = useMemo(
       () =>
-        hasSearchQuery
+        searchQuery.trim().length > 0
           ? buildRenderedPageNumbers({
             currentPage,
             activeMatchPageNumber: null,
@@ -729,264 +482,82 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
           : EMPTY_PAGE_NUMBERS,
       [
         currentPage,
-        hasSearchQuery,
         numPages,
         pageLayoutMetrics.visualPageBottomOffsets,
-        pageLayoutMetrics.visualPageNumbers,
         pageLayoutMetrics.visualPageTopOffsets,
+        pageLayoutMetrics.visualPageNumbers,
         scrollViewport.clientHeight,
         scrollViewport.scrollTop,
+        searchQuery,
       ],
     );
-    const stablePrioritizedSearchPageNumbers = useStableNumberArray(
-      prioritizedSearchPageNumbers,
-    );
 
-    const searchState = usePdfSearch({
-      doc,
+    const {
+      matches,
+      activeMatchIndex,
+      activeMatchPage,
+      activeMatchPageNumber,
+      handleSearchNavToken,
+    } = usePdfSearch({
+      query: searchQuery,
       numPages,
-      currentPage,
-      renderedPageNumbers: stablePrioritizedSearchPageNumbers,
-      searchQuery: normalizedSearchQuery,
-      searchNavToken,
-      searchNavDirection,
       getPageTextContent,
+      prioritizedPageNumbers: prioritizedSearchPageNumbers,
     });
 
-    const activeMatchPageNumber = useMemo(() => {
-      if (
-        searchState.activeMatchIndex < 0 ||
-        searchState.activeMatchIndex >= searchState.flattenedMatches.length
-      ) {
-        return null;
-      }
-
-      return (
-        searchState.flattenedMatches[searchState.activeMatchIndex]
-          ?.pageNumber ?? null
-      );
-    }, [searchState.activeMatchIndex, searchState.flattenedMatches]);
-
-    const renderedPageNumbers = useStableNumberArray(
-      useMemo(
-        () =>
-          buildRenderedPageNumbers({
-            currentPage,
-            activeMatchPageNumber,
-            numPages,
-            pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
-            pageBottomOffsets: pageLayoutMetrics.visualPageBottomOffsets,
-            visualPageNumbers: pageLayoutMetrics.visualPageNumbers,
-            scrollTop: scrollViewport.scrollTop,
-            viewportHeight: scrollViewport.clientHeight,
-          }),
-        [
-          activeMatchPageNumber,
-          currentPage,
-          numPages,
-          pageLayoutMetrics.visualPageBottomOffsets,
-          pageLayoutMetrics.visualPageNumbers,
-          pageLayoutMetrics.visualPageTopOffsets,
-          scrollViewport.clientHeight,
-          scrollViewport.scrollTop,
-        ],
-      ),
-    );
-
-    const textLayerPageNumbers = useStableNumberArray(
-      useMemo(
-        () =>
-          buildVisibleTextLayerPageNumbers({
-            currentPage,
-            activeMatchPageNumber,
-            numPages,
-            pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
-            pageBottomOffsets: pageLayoutMetrics.visualPageBottomOffsets,
-            visualPageNumbers: pageLayoutMetrics.visualPageNumbers,
-            scrollTop: scrollViewport.scrollTop,
-            viewportHeight: scrollViewport.clientHeight,
-          }),
-        [
-          activeMatchPageNumber,
-          currentPage,
-          numPages,
-          pageLayoutMetrics.visualPageBottomOffsets,
-          pageLayoutMetrics.visualPageNumbers,
-          pageLayoutMetrics.visualPageTopOffsets,
-          scrollViewport.clientHeight,
-          scrollViewport.scrollTop,
-        ],
-      ),
-    );
-
-    const prefetchPageNumbers = useStableNumberArray(
-      useMemo(
-        () =>
-          buildPrefetchPageNumbers({
-            currentPage,
-            activeMatchPageNumber,
-            numPages,
-            pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
-            pageBottomOffsets: pageLayoutMetrics.visualPageBottomOffsets,
-            visualPageNumbers: pageLayoutMetrics.visualPageNumbers,
-            scrollTop: scrollViewport.scrollTop,
-            viewportHeight: scrollViewport.clientHeight,
-          }),
-        [
-          activeMatchPageNumber,
-          currentPage,
-          numPages,
-          pageLayoutMetrics.visualPageBottomOffsets,
-          pageLayoutMetrics.visualPageNumbers,
-          pageLayoutMetrics.visualPageTopOffsets,
-          scrollViewport.clientHeight,
-          scrollViewport.scrollTop,
-        ],
-      ),
-    );
-
-    const renderedRows = useMemo(() => {
-      const renderedRowIndexSet = new Set<number>();
-
-      renderedPageNumbers.forEach((pageNumber) => {
-        const rowIndex = pageLayoutMetrics.pageRowIndexesByPageNumber[pageNumber];
-        if (typeof rowIndex === "number") {
-          renderedRowIndexSet.add(rowIndex);
-        }
-      });
-
-      return Array.from(renderedRowIndexSet)
-        .sort((left, right) => left - right)
-        .map((rowIndex) => ({
-          rowIndex,
-          rowPageNumbers: pageLayoutMetrics.rowPageNumbers[rowIndex] ?? [],
-        }))
-        .filter(({ rowPageNumbers }) => rowPageNumbers.length > 0);
-    }, [
-      pageLayoutMetrics.pageRowIndexesByPageNumber,
-      pageLayoutMetrics.rowPageNumbers,
-      renderedPageNumbers,
-    ]);
-
     useEffect(() => {
-      if (!doc || prefetchPageNumbers.length === 0) {
-        return;
-      }
-
-      let cancelled = false;
-
-      const schedulePrefetch = () => {
-        if (cancelled) {
-          return;
-        }
-
-        prefetchPageResources(prefetchPageNumbers, {
-          includeTextContent: false,
-        });
-      };
-
-      if (
-        "requestIdleCallback" in window &&
-        typeof window.requestIdleCallback === "function"
-      ) {
-        const idleHandle = window.requestIdleCallback(schedulePrefetch, {
-          timeout: 120,
-        });
-
-        return () => {
-          cancelled = true;
-          window.cancelIdleCallback(idleHandle);
-        };
-      }
-
-      const timeoutId = window.setTimeout(schedulePrefetch, 24);
-
-      return () => {
-        cancelled = true;
-        window.clearTimeout(timeoutId);
-      };
-    }, [doc, prefetchPageNumbers, prefetchPageResources]);
-
-    useEffect(() => {
-      if (searchState.flattenedMatches.length === 0) {
-        onSearchStateChange?.({
-          totalMatches: 0,
-          activeMatchIndex: -1,
-          activeMatchPage: null,
-        });
-        return;
-      }
-
-      const clampedIndex = Math.min(
-        Math.max(searchState.activeMatchIndex, 0),
-        searchState.flattenedMatches.length - 1,
-      );
-      const activeMatch = searchState.flattenedMatches[clampedIndex] ?? null;
-
       onSearchStateChange?.({
-        totalMatches: searchState.flattenedMatches.length,
-        activeMatchIndex: clampedIndex,
-        activeMatchPage: activeMatch?.pageNumber ?? null,
+        totalMatches: matches.length,
+        activeMatchIndex,
+        activeMatchPage,
       });
-    }, [
-      onSearchStateChange,
-      searchState.activeMatchIndex,
-      searchState.flattenedMatches,
-    ]);
+    }, [activeMatchIndex, activeMatchPage, matches.length, onSearchStateChange]);
 
     useEffect(() => {
-      if (!doc) {
-        return;
-      }
+      handleSearchNavToken(searchNavToken, searchNavDirection);
+    }, [handleSearchNavToken, searchNavDirection, searchNavToken]);
 
+    useEffect(() => {
+      if (activeMatchPageNumber !== null) {
+        scrollToPage(activeMatchPageNumber, { behavior: "smooth" });
+      }
+    }, [activeMatchPageNumber, scrollToPage]);
+
+    useEffect(() => {
       notifyLayoutChanged();
+    }, [notifyLayoutChanged, pageLayoutMetrics.totalContentHeight]);
+
+    useEffect(() => {
+      resetNavigation();
+    }, [documentKey, resetNavigation]);
+
+    useEffect(() => {
+      const prefetch = buildPrefetchPageNumbers({
+        renderedPageNumbers: buildRenderedPageNumbers({
+          currentPage,
+          activeMatchPageNumber,
+          numPages,
+          pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
+          pageBottomOffsets: pageLayoutMetrics.visualPageBottomOffsets,
+          visualPageNumbers: pageLayoutMetrics.visualPageNumbers,
+          scrollTop: scrollViewport.scrollTop,
+          viewportHeight: scrollViewport.clientHeight,
+        }),
+        numPages,
+      });
+
+      prefetchPageResources(prefetch, { includeTextContent: true });
     }, [
-      doc,
-      notifyLayoutChanged,
-      orderedPageNumbers,
-      pageLayoutMetrics.visualPageAnchorPageNumbers,
+      activeMatchPageNumber,
+      currentPage,
+      numPages,
       pageLayoutMetrics.visualPageBottomOffsets,
       pageLayoutMetrics.visualPageTopOffsets,
-      pageLayoutMode,
-      scale,
+      pageLayoutMetrics.visualPageNumbers,
+      prefetchPageResources,
+      scrollViewport.clientHeight,
+      scrollViewport.scrollTop,
     ]);
-
-    useEffect(() => {
-      if (
-        searchState.activeMatchIndex < 0 ||
-        searchState.activeMatchIndex >= searchState.flattenedMatches.length
-      ) {
-        return;
-      }
-
-      const match = searchState.flattenedMatches[searchState.activeMatchIndex];
-      scrollToPage(match.pageNumber);
-    }, [
-      scrollToPage,
-      searchState.activeMatchIndex,
-      searchState.flattenedMatches,
-    ]);
-
-    const previousNavigationIdentityRef = useRef<string | null>(null);
-
-    useEffect(() => {
-      if (!navigationIdentity) {
-        return;
-      }
-
-      const previousNavigationIdentity = previousNavigationIdentityRef.current;
-      previousNavigationIdentityRef.current = navigationIdentity;
-
-      if (!previousNavigationIdentity) {
-        return;
-      }
-
-      if (previousNavigationIdentity === navigationIdentity) {
-        return;
-      }
-
-      resetNavigation();
-    }, [navigationIdentity, resetNavigation]);
 
     useImperativeHandle(
       ref,
@@ -998,93 +569,90 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
       [getScrollDiagnostics, logScrollDiagnostics, scrollToPage],
     );
 
+    const renderedPageNumbers = buildRenderedPageNumbers({
+      currentPage,
+      activeMatchPageNumber,
+      numPages,
+      pageTopOffsets: pageLayoutMetrics.visualPageTopOffsets,
+      pageBottomOffsets: pageLayoutMetrics.visualPageBottomOffsets,
+      visualPageNumbers: pageLayoutMetrics.visualPageNumbers,
+      scrollTop: scrollViewport.scrollTop,
+      viewportHeight: scrollViewport.clientHeight,
+    });
+
     return (
-      <div
-        ref={containerRef}
-        onScroll={handleScroll}
-        data-testid="pdf-scroll-container"
-        className={cn("h-full min-h-0 w-full bg-transparent", className)}
-        style={{
-          WebkitOverflowScrolling: "touch",
-          overscrollBehavior: "contain",
-          overflow: "auto",
-          overflowX: "hidden",
-          scrollPaddingBottom:
-            "calc(var(--pdf-overlay-toolbar-clearance, 0px) + env(safe-area-inset-bottom))",
-        }}
-      >
+      <div className={cn("flex h-full min-h-0 flex-col", className)}>
+        {error ? (
+          <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
+
         <div
-          className="min-w-0 px-2 pt-2"
-          style={{
-            paddingBottom:
-              "calc(var(--pdf-overlay-toolbar-clearance, 0px) + env(safe-area-inset-bottom))",
-          }}
+          ref={containerRef}
+          className="min-h-0 flex-1 overflow-auto overscroll-contain"
+          onScroll={handleScroll}
         >
-          {loading && (
-            <div className="mb-2 text-xs text-slate-400">読み込み中...</div>
-          )}
+          <div
+            ref={handleContentViewportRef}
+            className="relative mx-auto w-max min-w-full px-4 py-4"
+            style={{ minHeight: pageLayoutMetrics.totalContentHeight }}
+          >
+            {loading && !doc ? (
+              <div className="text-center text-sm text-muted-foreground">
+                PDFを読み込んでいます…
+              </div>
+            ) : null}
 
-          {error && <div className="text-sm text-rose-500">{error}</div>}
+            {pageLayoutMetrics.rowPageNumbers.map((rowPageNumbers, rowIndex) => {
+              const top = pageLayoutMetrics.rowTopOffsets[rowIndex] ?? 0;
+              const rowHeight = pageLayoutMetrics.rowHeights[rowIndex] ?? 0;
 
-          {!error && doc && (
-            <div
-              ref={handleContentViewportRef}
-              className="relative w-full"
-              style={{ height: `${pageLayoutMetrics.totalContentHeight}px` }}
-            >
-              {renderedRows.map(({ rowIndex, rowPageNumbers }) => {
-                const rowStartPageNumber = rowPageNumbers[0] ?? rowIndex + 1;
-                const rowTop = pageLayoutMetrics.rowTopOffsets[rowIndex] ?? 0;
-                const rowHeight =
-                  pageLayoutMetrics.rowHeights[rowIndex] ??
-                  PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT;
+              return (
+                <div
+                  key={`row-${rowPageNumbers.join("-")}`}
+                  className="absolute left-0 right-0 flex justify-center"
+                  style={{
+                    top,
+                    height: rowHeight,
+                    gap: spreadGap,
+                  }}
+                >
+                  {rowPageNumbers.map((pageNumber) => {
+                    const pageSize = getPageSizeOrFallback(pageSizes, pageNumber);
+                    const isRendered = renderedPageNumbers.includes(pageNumber);
+                    const pageMatches = matches.filter(
+                      (match) => match.pageNumber === pageNumber,
+                    );
+                    const activeMatch =
+                      activeMatchIndex >= 0
+                        ? matches[activeMatchIndex] ?? null
+                        : null;
 
-                return (
-                  <div
-                    key={`pdf-row-${documentKey}-${rowStartPageNumber}`}
-                    className="absolute left-0 right-0 flex items-start justify-center"
-                    style={{
-                      top: `${rowTop}px`,
-                      minHeight: `${rowHeight}px`,
-                      columnGap:
-                        pageLayoutMode === "double" ? `${spreadGap}px` : "0px",
-                    }}
-                  >
-                    {rowPageNumbers.map((pageNumber) => {
-                      const pageSearchMatches =
-                        searchState.pageMatches[pageNumber] ??
-                        EMPTY_SEARCH_MATCHES;
-                      const activeSearchMatchIndexForPage =
-                        activeMatchPageNumber === pageNumber
-                          ? searchState.activeMatchIndex
-                          : undefined;
-                      const renderTextLayer =
-                        textLayerPageNumbers.includes(pageNumber);
-
-                      return (
-                        <PdfPage
-                          key={`pdf-page-${documentKey}-${pageNumber}`}
-                          className="shrink-0"
-                          documentKey={documentKey}
-                          pdf={doc}
-                          pageNumber={pageNumber}
-                          scale={scale}
-                          baseSize={pageSizes[pageNumber]}
-                          opaqueCanvas={opaqueCanvas}
-                          renderTextLayer={renderTextLayer}
-                          searchMatches={pageSearchMatches}
-                          activeSearchMatchIndex={activeSearchMatchIndexForPage}
-                          acquirePage={acquirePage}
-                          getPageTextContent={getPageTextContent}
-                          onPageSize={setPageSize}
-                        />
-                      );
-                    })}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                    return (
+                      <PdfPage
+                        key={`${documentKey}-${pageNumber}`}
+                        documentKey={documentKey}
+                        pageNumber={pageNumber}
+                        pageSize={pageSize}
+                        scale={scale}
+                        visible={isRendered}
+                        acquirePage={acquirePage}
+                        setPageSize={setPageSize}
+                        searchMatches={pageMatches}
+                        activeSearchMatch={
+                          activeMatch?.pageNumber === pageNumber
+                            ? activeMatch
+                            : null
+                        }
+                        opaqueCanvas={opaqueCanvas}
+                      />
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
@@ -1093,80 +661,43 @@ const PdfViewerInner = React.forwardRef<PdfViewerHandle, PdfViewerInnerProps>(
 
 PdfViewerInner.displayName = "PdfViewerInner";
 
-const PdfViewerWithSource = React.forwardRef<
-  PdfViewerHandle,
-  PdfViewerSourceProps
->(
-  (
-    {
-      source,
-      onNumPages,
-      onFirstPageSize,
-      onSourceLoadError,
-      sourceMeta,
-      viewerOptions,
-      ...viewerProps
-    },
-    ref,
-  ) => {
-    const documentController = usePdfDocument({
-      source,
-      viewerOptions,
-      sourceMeta,
-      onNumPages,
-      onFirstPageSize,
-      onSourceLoadError,
+export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
+  (props, ref) => {
+    const createdController = usePdfDocument({
+      docId: "pdf-viewer",
+      source: props.source ?? {},
+      viewerOptions: props.viewerOptions,
+      sourceMeta: props.sourceMeta,
+      onNumPages: props.onNumPages ?? (() => undefined),
+      onFirstPageSize: props.onFirstPageSize,
+      onSourceLoadError: props.onSourceLoadError,
     });
 
-    const navigationIdentity = useMemo(() => {
-      const normalizedSourceUrl =
-        typeof source.url === "string" ? source.url.trim() : "";
-      const normalizedSourceMeta = [
-        sourceMeta?.localFileId ?? "",
-        sourceMeta?.url ?? "",
-        sourceMeta?.blobUrl ?? "",
-        sourceMeta?.remoteUrl ?? "",
-      ].join("::");
-      const sourceDataIdentity = source.data
-        ? `bytes:${source.data.byteLength}`
-        : "bytes:0";
-
-      return [normalizedSourceUrl, normalizedSourceMeta, sourceDataIdentity]
-        .filter((value) => value.length > 0)
-        .join("::");
-    }, [source.data, source.url, sourceMeta]);
+    const controller = props.documentController ?? createdController;
 
     return (
       <PdfViewerInner
         ref={ref}
-        {...viewerProps}
-        documentController={documentController}
-        navigationIdentity={
-          (viewerProps.navigationIdentity ?? navigationIdentity) || null
-        }
-        opaqueCanvas={
-          viewerProps.opaqueCanvas ?? viewerOptions?.opaqueCanvas ?? false
-        }
+        documentController={controller}
+        scale={props.scale}
+        minScale={props.minScale}
+        maxScale={props.maxScale}
+        zoomStep={props.zoomStep}
+        searchQuery={props.searchQuery}
+        searchNavToken={props.searchNavToken}
+        searchNavDirection={props.searchNavDirection}
+        pageLayoutMode={props.pageLayoutMode}
+        pageOrder={props.pageOrder}
+        onScaleChange={props.onScaleChange}
+        onPageChange={props.onPageChange}
+        onSearchStateChange={props.onSearchStateChange}
+        className={props.className}
+        pageGap={props.pageGap}
+        spreadGap={props.spreadGap}
+        navigationIdentity={props.navigationIdentity}
+        opaqueCanvas={props.opaqueCanvas ?? props.viewerOptions?.opaqueCanvas}
       />
     );
-  },
-);
-
-PdfViewerWithSource.displayName = "PdfViewerWithSource";
-
-const isDocumentControllerProps = (
-  props: PdfViewerProps,
-): props is PdfViewerDocumentControllerProps => {
-  return "documentController" in props;
-};
-
-export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
-  (props, ref) => {
-    if (isDocumentControllerProps(props)) {
-      return <PdfViewerInner ref={ref} {...props} />;
-    }
-
-    return <PdfViewerWithSource ref={ref} {...props} />;
   },
 );
 
