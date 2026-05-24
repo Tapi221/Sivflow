@@ -4,7 +4,7 @@ import type {
   DragOverEvent,
 } from "@dnd-kit/core";
 
-import type { TaskStatus } from "../task.types";
+import type { TaskStatus } from "../../calendar/task/task.types";
 
 export type TaskInsertPosition = "before" | "after";
 export type VerticalDropPosition = "before" | "after";
