@@ -103,23 +103,31 @@ describe("RunStartupTasks", () => {
     });
   });
 
-  it("always performs startup sync via SyncServiceFactory", async () => {
+  it("performs startup sync before the integrity check", async () => {
     await runStartupTasks({ userId: "user-1" });
 
     expect(state.getInstance).toHaveBeenCalledWith("user-1");
     expect(state.performStartupSync).toHaveBeenCalledTimes(1);
+    expect(state.checkDataIntegrityExecute).toHaveBeenCalledTimes(1);
+    expect(
+      state.performStartupSync.mock.invocationCallOrder[0],
+    ).toBeLessThan(state.checkDataIntegrityExecute.mock.invocationCallOrder[0]);
   });
 
   it("does not start sync when disposed before the startup sync step", async () => {
-    const isDisposed = vi.fn(() => true);
+    const isDisposed = vi
+      .fn()
+      .mockReturnValueOnce(false)
+      .mockReturnValueOnce(true);
 
     await runStartupTasks({
       userId: "user-2",
       isDisposed,
     });
 
-    expect(state.getInstance).toHaveBeenCalledWith("user-2");
+    expect(state.getInstance).not.toHaveBeenCalled();
     expect(state.performStartupSync).not.toHaveBeenCalled();
+    expect(state.checkDataIntegrityExecute).not.toHaveBeenCalled();
   });
 
   it("keeps resetStartupTasks as a no-op for API compatibility", async () => {
