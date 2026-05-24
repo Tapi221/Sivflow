@@ -68,7 +68,6 @@ export const useWorkspaceTabsRouteSync = () => {
       openExplorerTab,
       openDocumentTab,
       openCardTab,
-      openCardSetTab,
     } = useWorkspaceTabsStore.getState();
 
     if (pathname === "/study") {
@@ -135,22 +134,6 @@ export const useWorkspaceTabsRouteSync = () => {
       const nextTabId = openDocumentTab({
         documentId,
         title: "PDF",
-        folderId: null,
-      });
-
-      if (activeTabId !== nextTabId) {
-        selectTab(nextTabId);
-      }
-
-      return;
-    }
-
-    const cardSetId = searchParams.get("cardSetId");
-
-    if (cardSetId) {
-      const nextTabId = openCardSetTab({
-        cardSetId,
-        title: "カードセット",
         folderId: null,
       });
 
