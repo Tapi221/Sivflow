@@ -8,8 +8,8 @@ import { encodeMfCardFile } from "@/features/cardFile/infra/web/mfCardJsonCodec"
 import {
   collectMfDeckExportIssues,
   mapCardToMfDeckCard,
-  type MfDeckTagLookup,
 } from "@/features/deckFile/application/mapCardToMfDeck";
+import type { MfDeckTagLookup } from "@/features/deckFile/application/types";
 
 import type { Card } from "@/types";
 
