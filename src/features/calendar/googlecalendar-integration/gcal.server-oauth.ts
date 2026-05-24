@@ -70,11 +70,14 @@ const isServerInfrastructureError = (error: unknown): boolean => {
   );
 };
 
-const shouldFallbackExchangeToBrowserToken = (error: unknown): boolean => {
+const isRecoverableServerOAuthStateError = (error: unknown): boolean => {
   const code = normalizeCallableErrorCode(error);
 
-  return isServerInfrastructureError(error) || code === "failed-precondition";
+  return code === "failed-precondition" || code === "not-found";
 };
+
+const shouldFallbackToBrowserToken = (error: unknown): boolean =>
+  isServerInfrastructureError(error) || isRecoverableServerOAuthStateError(error);
 
 export const isServerStoredGoogleOAuthEnabled = (): boolean => {
   if (isDesktopLikeRuntime()) {
@@ -96,7 +99,7 @@ export const exchangeGoogleCalendarCode = async (
     const result = await exchangeGoogleCalendarCodeCallable(input);
     return result.data;
   } catch (error) {
-    if (!shouldFallbackExchangeToBrowserToken(error)) {
+    if (!shouldFallbackToBrowserToken(error)) {
       throw error;
     }
 
@@ -122,7 +125,7 @@ export const getServerStoredGoogleCalendarAccessToken = async (
     const result = await getGoogleCalendarAccessTokenCallable(input);
     return result.data;
   } catch (error) {
-    if (!isServerInfrastructureError(error)) {
+    if (!shouldFallbackToBrowserToken(error)) {
       throw error;
     }
 
