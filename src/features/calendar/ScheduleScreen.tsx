@@ -65,6 +65,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     calendarDayColumnWidth,
     timelineGridStyle,
     headerScrollRef,
+    allDayScrollRef,
     scrollContainerRef,
     contentViewportRef,
     handleCalendarScroll,
@@ -302,6 +303,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
             ) : (
               <CalendarWeekDayGrid
                 headerScrollRef={headerScrollRef}
+                allDayScrollRef={allDayScrollRef}
                 scrollContainerRef={scrollContainerRef}
                 visibleDays={visibleDays}
                 visibleEvents={calendarEvents}
