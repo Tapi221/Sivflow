@@ -22,7 +22,8 @@ export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 196;
 export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 136;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = 8;
 
-const WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY = "var(--app-font-family-ui)";
+const WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY =
+  "var(--explorer-chrome-font-family, \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, BlinkMacSystemFont, \"Yu Gothic UI\", \"Hiragino Sans\", sans-serif)";
 
 const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
 .workspace-tab-context-menu {
@@ -36,6 +37,8 @@ const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
   border-radius: 8px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14), 0 1px 6px rgba(0, 0, 0, 0.08);
   font-family: ${WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY};
+  font-variant-east-asian: proportional-width;
+  font-feature-settings: "palt" 1;
 }
 
 .workspace-tab-context-menu-item {
