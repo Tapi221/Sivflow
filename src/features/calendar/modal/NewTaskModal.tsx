@@ -215,7 +215,7 @@ export const NewTaskModal = ({
       >
         {/* ヘッダー */}
         <div className="flex items-center justify-between border-b border-white/60 px-5 py-4">
-          <h2 className="text-[14px] font-semibold tracking-[-0.02em] text-[#1c1c1e]">
+          <h2 className="text-[var(--ds-typography-font-size-sm)] font-semibold tracking-[-0.02em] text-[#1c1c1e]">
             新しいタスク
           </h2>
 
