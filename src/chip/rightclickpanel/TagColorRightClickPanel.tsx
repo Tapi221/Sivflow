@@ -1,14 +1,10 @@
-import { useState, type CSSProperties, type RefObject } from "react";
+import { type CSSProperties, type RefObject } from "react";
 import {
   getTagColorSwatchStyle,
   type TagColorKey,
 } from "@/features/tag/tagColor";
 import { cn } from "@/lib/utils";
-import {
-  RIGHT_CLICK_PANEL_MARGIN,
-  RIGHT_CLICK_PANEL_WIDTH,
-  RightClickPanelSurface,
-} from "./rightClickPanelCommon";
+import { RIGHT_CLICK_PANEL_MARGIN, RightClickPanelSurface } from "./rightClickPanelCommon";
 
 const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   gray: "グレー",
@@ -23,7 +19,7 @@ const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   sky: "スカイ",
 };
 
-export const TAG_COLOR_CONTEXT_MENU_WIDTH = RIGHT_CLICK_PANEL_WIDTH;
+export const TAG_COLOR_CONTEXT_MENU_WIDTH = 128;
 export const TAG_COLOR_CONTEXT_MENU_HEIGHT = 92;
 export const TAG_COLOR_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
