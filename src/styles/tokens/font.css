@@ -1,0 +1,21 @@
+@layer base {
+  :root {
+    --app-font-family-ui:
+      -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+      "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Helvetica Neue",
+      Arial, sans-serif;
+    --app-font-family-numeric:
+      -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+      "Helvetica Neue", Arial, sans-serif;
+  }
+
+  html,
+  body {
+    font-family: var(--app-font-family-ui);
+  }
+
+  body {
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+}
