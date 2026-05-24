@@ -52,12 +52,14 @@ export const TaskEventChip = memo(({
         `
           group
           relative
+          box-border
           flex
           w-full
+          max-w-full
           min-w-0
           items-center
           gap-1
-          truncate
+          overflow-hidden
           rounded-md
           px-1.5
           py-1
@@ -98,28 +100,34 @@ export const TaskEventChip = memo(({
         <span
           className="
             inline-flex
-            shrink-0
+            min-w-0
+            max-w-[4.85rem]
+            flex-[0_1_4.85rem]
             items-center
             gap-[3px]
+            overflow-hidden
+            truncate
             tabular-nums
             opacity-80
           "
         >
           <ScheduleCalendarIcon className="h-3 w-3 shrink-0" />
-          {formattedDate}
+          <span className="min-w-0 truncate">
+            {formattedDate}
+          </span>
         </span>
       )}
 
       <span
         className={cn(
-          "min-w-0 flex-1 truncate",
+          "min-w-0 flex-1 basis-0 truncate",
           isDone && "line-through opacity-60 decoration-current",
         )}
       >
         {title}
       </span>
 
-      <span className="max-w-[5.5rem] shrink-0 truncate opacity-70">
+      <span className="min-w-0 max-w-[4.75rem] flex-[0_1_4.75rem] truncate opacity-70">
         {categoryLabel}
       </span>
 
