@@ -1,10 +1,8 @@
-import {
-  useCallback,
+import {useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
-  useState,
-} from "react";
+  useState,} from "react";
 
 import { clampCardCarouselIndex } from "@/features/review/domain/cardCarouselIndexRules";
 

@@ -1,8 +1,6 @@
-import {
-  isImageFirestoreDiagnosticsEnabled,
+import {isImageFirestoreDiagnosticsEnabled,
   resolveImageFirestoreTarget,
-  saveImageToFirestore,
-} from "./imageFirestoreWriter";
+  saveImageToFirestore,} from "./imageFirestoreWriter";
 
 import type { UploadedImage } from "@/types";
 

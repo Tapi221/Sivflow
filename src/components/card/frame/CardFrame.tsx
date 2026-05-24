@@ -1,12 +1,10 @@
 import React from "react";
 
-import {
-  CARD_BASE_WIDTH,
+import {CARD_BASE_WIDTH,
   CARD_DISPLAY_SCALE,
   CARD_ROW_PX,
   CARD_RULED_OFFSET_BOTTOM_PX,
-  CARD_RULED_OFFSET_TOP_PX,
-} from "@constants/shared/flashcard";
+  CARD_RULED_OFFSET_TOP_PX,} from "@constants/shared/flashcard";
 
 import { CardShell } from "@/components/card/frame/CardShell";
 import { CardSurface } from "@/components/card/frame/CardSurface";

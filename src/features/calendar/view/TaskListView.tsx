@@ -1,11 +1,9 @@
-import {
-  type CSSProperties,
+import {type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   useEffect,
   useMemo,
   useRef,
-  useState,
-} from "react";
+  useState,} from "react";
 import { format } from "date-fns";
 import { TaskPriorityBadge } from "@/chip/budge/TaskPriorityBadge";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";

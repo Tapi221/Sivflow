@@ -1,18 +1,14 @@
 import { useCallback, useMemo, useState } from "react";
 
-import {
-  CARD_PANE_WIDTH_STEP_PX,
+import {CARD_PANE_WIDTH_STEP_PX,
   CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT,
   CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT,
-  CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT,
-} from "@constants/shared/flashcard";
+  CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT,} from "@constants/shared/flashcard";
 
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
-import {
-  CARD_LAYOUT_MODE_LABELS,
+import {CARD_LAYOUT_MODE_LABELS,
   type CardLayoutMode,
-  type CardSetInteractionMode,
-} from "@/features/cardsetview/domain/cardLayoutMode";
+  type CardSetInteractionMode,} from "@/features/cardsetview/domain/cardLayoutMode";
 import { clampCardIndex } from "@/features/cardsetview/domain/cardSetViewState";
 import { useCardSetViewData } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewData";
 import { useCardSetViewPaneWidth } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewPaneWidth";

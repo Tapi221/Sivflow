@@ -1,10 +1,8 @@
-import {
-  type ComponentProps,
+import {type ComponentProps,
   useCallback,
   useEffect,
   useRef,
-  useState,
-} from "react";
+  useState,} from "react";
 
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { Badge } from "@/components/ui/badge";

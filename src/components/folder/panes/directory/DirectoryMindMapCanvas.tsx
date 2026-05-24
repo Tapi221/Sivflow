@@ -1,15 +1,13 @@
 import { memo, useMemo } from "react";
 
-import {
-  Background,
+import {Background,
   Controls,
   Handle,
   type Node,
   type NodeProps,
   type NodeTypes,
   Position,
-  ReactFlow,
-} from "@xyflow/react";
+  ReactFlow,} from "@xyflow/react";
 
 import type { TagColorKey } from "@/features/tag/tagColor";
 
@@ -19,11 +17,9 @@ import { HelpCircle, Star } from "@/ui/icons";
 import "@xyflow/react/dist/style.css";
 
 import { buildDirectoryMindMapGraph } from "./buildDirectoryMindMapGraph";
-import type {
-  DirectoryBadgeVisibility,
+import type {DirectoryBadgeVisibility,
   DirectoryMindMapNodeData,
-  DirectoryTreeNode,
-} from "./directoryTypes";
+  DirectoryTreeNode,} from "./directoryTypes";
 
 import { cn } from "@/lib/utils";
 

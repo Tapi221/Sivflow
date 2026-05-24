@@ -1,10 +1,6 @@
-export {
-  createDeleteQueueItem,
+export {createDeleteQueueItem,
   createQueueItemFromSyncTask,
-  createUpsertQueueItem,
-} from "./syncQueueItemBuilders";
-export {
-  assertDeletePayload,
-  assertUpsertPayload,
-} from "./syncQueuePayloadGuards";
+  createUpsertQueueItem,} from "./syncQueueItemBuilders";
+export {assertDeletePayload,
+  assertUpsertPayload,} from "./syncQueuePayloadGuards";
 export { queueItemToSyncTask } from "./syncQueueTaskConversion";

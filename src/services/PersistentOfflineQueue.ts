@@ -1,15 +1,11 @@
-import {
-  type AssetUploadRequest,
+import {type AssetUploadRequest,
   createAssetQueueImage,
-  type QueueItem,
-} from "@/application/usecases/persistentOfflineQueueModels";
+  type QueueItem,} from "@/application/usecases/persistentOfflineQueueModels";
 import { processPersistentOfflineQueue } from "@/application/usecases/processPersistentOfflineQueue";
 import { IndexedDbPersistentOfflineQueueStore } from "@/infrastructure/offlineQueue/IndexedDbPersistentOfflineQueueStore";
-import {
-  handleQueuedUploadPermanentFailure,
+import {handleQueuedUploadPermanentFailure,
   handleQueuedUploadSuccess,
-  shouldSkipQueuedDocumentUpload,
-} from "@/infrastructure/offlineQueue/persistentOfflineQueueEffects";
+  shouldSkipQueuedDocumentUpload,} from "@/infrastructure/offlineQueue/persistentOfflineQueueEffects";
 import { uploadQueuedAsset } from "@/infrastructure/offlineQueue/uploadQueuedAsset";
 import type { UploadedImage } from "@/types";
 

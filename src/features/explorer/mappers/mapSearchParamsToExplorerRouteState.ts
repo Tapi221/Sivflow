@@ -1,9 +1,7 @@
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
-import {
-  createCardSelectedItem,
+import {createCardSelectedItem,
   createCardSetSelectedItem,
-  createDocumentSelectedItem,
-} from "@/features/explorer/utils/createSelectedExplorerItem";
+  createDocumentSelectedItem,} from "@/features/explorer/utils/createSelectedExplorerItem";
 
 type Params = {
   searchParams: URLSearchParams;

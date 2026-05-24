@@ -3,12 +3,10 @@ import { memo } from "react";
 
 import { LinkEditor } from "@/components/card/editor/LinkEditor";
 import MediaUploader from "@/components/card/media/MediaUploader";
-import {
-  Dialog,
+import {Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  DialogTitle,} from "@/components/ui/dialog";
 
 import type { UploadedImage } from "@/types";
 import type { ReferenceBlockData } from "@/types/domain/base";

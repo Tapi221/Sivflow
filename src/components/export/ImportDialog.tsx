@@ -1,14 +1,12 @@
 import React, { useEffect, useRef,useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
+import {Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  DialogTitle,} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertTriangle,ArrowRight, CheckCircle, Loader2 } from "@/ui/icons";
@@ -17,11 +15,9 @@ import { FileJson } from "@/ui/icons";
 
 import { toAssetRecordFromSnapshotAsset } from "@/application/snapshot/snapshotAssetManifest";
 import { useAuthSession } from "@/contexts/AuthContext";
-import {
-  getLocalDb,
+import {getLocalDb,
   getLocalDBRuntimeStatus,
-  subscribeLocalDBRuntimeStatus,
-} from "@/services/localDB";
+  subscribeLocalDBRuntimeStatus,} from "@/services/localDB";
 import { snapshotService } from "@/services/SnapshotService";
 import type { Card, Folder } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";

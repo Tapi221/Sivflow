@@ -4,12 +4,10 @@ import { useLiveQuery } from "dexie-react-hooks";
 
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
-import {
-  type CardDisplayMode,
+import {type CardDisplayMode,
   type CardSet,
   DEFAULT_CARD_DISPLAY_MODE,
-  normalizeCardDisplayMode,
-} from "@/types/domain/cardSet";
+  normalizeCardDisplayMode,} from "@/types/domain/cardSet";
 
 type RawCardSetRecord = CardSet & {
   isDeleted?: boolean;

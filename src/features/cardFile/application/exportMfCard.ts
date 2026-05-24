@@ -1,15 +1,11 @@
-import {
-  MF_CARD_FORMAT,
+import {MF_CARD_FORMAT,
   MF_CARD_VERSION,
   MfCardExportError,
-  type MfCardFileV1,
-} from "@/features/cardFile/domain/mfCardTypes";
+  type MfCardFileV1,} from "@/features/cardFile/domain/mfCardTypes";
 import { encodeMfCardFile } from "@/features/cardFile/infra/web/mfCardJsonCodec";
-import {
-  collectMfDeckExportIssues,
+import {collectMfDeckExportIssues,
   mapCardToMfDeckCard,
-  type MfDeckTagLookup,
-} from "@/features/deckFile/application/mapCardToMfDeck";
+  type MfDeckTagLookup,} from "@/features/deckFile/application/mapCardToMfDeck";
 
 import type { Card } from "@/types";
 

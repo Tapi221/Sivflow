@@ -1,14 +1,12 @@
 import type { Card, Folder } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 import type { Document } from "@/types/domain/document";
-import type {
-  AssetSyncPayload,
+import type {AssetSyncPayload,
   SyncDeletePayload,
   SyncEntity,
   SyncPayloadByEntity,
   SyncQueueItem,
-  TagSyncPayload,
-} from "@/types/domain/sync";
+  TagSyncPayload,} from "@/types/domain/sync";
 import type { UserSettings } from "@/types/domain/user";
 
 export type UpsertEntity = keyof SyncPayloadByEntity;

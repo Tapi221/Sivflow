@@ -1,35 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
 
-import {
-  type CreateCard,
+import {type CreateCard,
   type CreateCardSet,
   executeXlsxImport,
-  loadXlsxImportFile,
-} from "@/features/import/application/xlsxImportUseCases";
-import {
-  formatImportCellLabel,
+  loadXlsxImportFile,} from "@/features/import/application/xlsxImportUseCases";
+import {formatImportCellLabel,
   hasImportBlockingError,
-  type ImportParseResult,
-} from "@/features/import/domain/importTypes";
+  type ImportParseResult,} from "@/features/import/domain/importTypes";
 import { downloadXlsxImportTemplate } from "@/features/import/xlsx/downloadXlsxImportTemplate";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
+import {Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  DialogTitle,} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
+import {Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  SelectValue,} from "@/components/ui/select";
 
 import { useToast } from "@/contexts/ToastContext";
 import type { CardSet } from "@/types";

@@ -1,10 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import {
-  CANONICAL_CARD_WIDTH,
+import {CANONICAL_CARD_WIDTH,
   CARD_DISPLAY_SCALE,
-  layoutRowsToCardHeightPx,
-} from "@constants/shared/flashcard";
+  layoutRowsToCardHeightPx,} from "@constants/shared/flashcard";
 
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import type { InkDocument } from "@/components/ink/inkTypes";

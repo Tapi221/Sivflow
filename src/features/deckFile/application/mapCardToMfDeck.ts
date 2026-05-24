@@ -1,13 +1,11 @@
 import { bundleMediaInMfDeckCards } from "@/features/deckFile/application/mfDeckMediaBundler";
 import type { MfDeckTagLookup } from "@/features/deckFile/application/types";
-import {
-  MF_DECK_FORMAT,
+import {MF_DECK_FORMAT,
   MF_DECK_VERSION,
   type MfDeckArchiveV1,
   type MfDeckCardV1,
   MfDeckExportError,
-  type MfDeckIssue,
-} from "@/features/deckFile/domain/mfDeckTypes";
+  type MfDeckIssue,} from "@/features/deckFile/domain/mfDeckTypes";
 
 import type { Card, CardBlock, CardSet } from "@/types";
 

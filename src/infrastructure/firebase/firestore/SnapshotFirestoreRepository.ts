@@ -1,12 +1,10 @@
-import {
-  addDoc,
+import {addDoc,
   collection,
   deleteDoc,
   getDocs,
   limit,
   orderBy,
-  query,
-} from "firebase/firestore";
+  query,} from "firebase/firestore";
 
 import type { SnapshotRepositoryPort } from "@/application/ports/SnapshotRepositoryPort";
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";

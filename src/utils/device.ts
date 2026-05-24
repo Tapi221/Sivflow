@@ -1,9 +1,7 @@
 import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
-import {
-  DEVICE_LABELS,
+import {DEVICE_LABELS,
   DEVICE_STANDALONE_MEDIA_QUERY,
-  DEVICE_USER_AGENT_PATTERNS,
-} from "@constants/web/app";
+  DEVICE_USER_AGENT_PATTERNS,} from "@constants/web/app";
 
 const resolveDeviceOsLabel = (userAgent: string) => {
   if (DEVICE_USER_AGENT_PATTERNS.android.test(userAgent)) {

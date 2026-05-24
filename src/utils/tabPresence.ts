@@ -1,7 +1,5 @@
-import {
-  TAB_PRESENCE_STORAGE_KEYS,
-  TAB_PRESENCE_TIMINGS,
-} from "@constants/web/app";
+import {TAB_PRESENCE_STORAGE_KEYS,
+  TAB_PRESENCE_TIMINGS,} from "@constants/web/app";
 
 type PresenceMap = Record<string, number>;
 

@@ -1,18 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import type {
-  PdfSearchWorkerRequest,
-  PdfSearchWorkerResponse,
-} from "@/features/pdf/pdfSearchWorkerProtocol";
-import {
-  buildPageSearchIndex,
-  findPageSearchMatches,
-} from "@/features/pdf/pdfTextSearch";
-import type {
-  PdfJsDocument,
+import type {PdfSearchWorkerRequest,
+  PdfSearchWorkerResponse,} from "@/features/pdf/pdfSearchWorkerProtocol";
+import {buildPageSearchIndex,
+  findPageSearchMatches,} from "@/features/pdf/pdfTextSearch";
+import type {PdfJsDocument,
   PdfJsTextContent,
-  PdfPageSearchMatch,
-} from "@/features/pdf/pdfViewer.types";
+  PdfPageSearchMatch,} from "@/features/pdf/pdfViewer.types";
 
 type SearchState = {
   pageMatches: Record<number, PdfPageSearchMatch[]>;

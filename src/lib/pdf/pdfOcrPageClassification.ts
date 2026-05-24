@@ -1,10 +1,8 @@
-import {
-  getPdfTextLanguageProfile,
+import {getPdfTextLanguageProfile,
   guessPreferredOcrLanguages,
   normalizePdfExtractedText,
   scorePdfTextQuality,
-  splitPdfTextIntoLines,
-} from "@/lib/pdf/pdfTextExtraction";
+  splitPdfTextIntoLines,} from "@/lib/pdf/pdfTextExtraction";
 
 export type PdfOcrPageKind =
   | "native-rich"

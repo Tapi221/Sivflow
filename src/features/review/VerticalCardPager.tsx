@@ -1,19 +1,15 @@
-import React, {
-  useCallback,
+import React, {useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
-  useState,
-} from "react";
+  useState,} from "react";
 
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
 
-import {
-  buildVerticalCardPagerItemStyle,
+import {buildVerticalCardPagerItemStyle,
   resolveVerticalCardPagerItemWidthSpec,
-  type VerticalCardPagerItemWidthSpec,
-} from "./verticalCardPagerWidthSpec";
+  type VerticalCardPagerItemWidthSpec,} from "./verticalCardPagerWidthSpec";
 
 import { cn } from "@/lib/utils";
 import { isTypingTarget } from "@/utils/isTypingTarget";

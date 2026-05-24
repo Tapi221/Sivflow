@@ -1,12 +1,10 @@
-import {
-  createContext,
+import {createContext,
   type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useMemo,
-  useState,
-} from "react";
+  useState,} from "react";
 
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
 import type { SecurityState } from "@/services/logic/SecurityMonitor";

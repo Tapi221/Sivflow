@@ -6,33 +6,27 @@ import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
 import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
-import {
-  MarkdownBlockContent,
-  type MarkdownReplaceBlock,
-} from "@/components/card/blocks/markdown/MarkdownBlockContent";
+import {MarkdownBlockContent,
+  type MarkdownReplaceBlock,} from "@/components/card/blocks/markdown/MarkdownBlockContent";
 import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
 import { MathEditorDialog } from "@/components/card/blocks/math/MathEditorDialog";
 import { QuestionBlockContent } from "@/components/card/blocks/question/QuestionBlockContent";
 import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent";
 import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import { AudioPlayer } from "@/components/card/media/CardMedia";
-import {
-  Select,
+import {Select,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Code,
+  SelectValue,} from "@/components/ui/select";
+import {Code,
   HelpCircle,
   Link,
   NotebookPen,
   Sigma,
   Type,
-  Volume2,
-} from "@/ui/icons";
+  Volume2,} from "@/ui/icons";
 
 import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";

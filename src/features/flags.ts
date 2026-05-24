@@ -1,9 +1,7 @@
-import {
-  DEFAULT_FEATURE_FLAGS,
+import {DEFAULT_FEATURE_FLAGS,
   type FeatureFlags,
   LEGACY_FEATURE_FLAG_MAP,
-  type LegacyFlagName,
-} from "@constants/shared/app";
+  type LegacyFlagName,} from "@constants/shared/app";
 import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 
 class FeatureFlagService {

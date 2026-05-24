@@ -1,11 +1,9 @@
 import { useCallback, useMemo } from "react";
 
-import {
-  CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS,
+import {CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS,
   CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
   CARD_SET_VIEW_PAGER_PADDING_BLOCK,
-  CARD_SET_VIEW_PAGER_PADDING_INLINE,
-} from "@constants/shared/flashcard";
+  CARD_SET_VIEW_PAGER_PADDING_INLINE,} from "@constants/shared/flashcard";
 
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { DesktopCardSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopCardSurface";

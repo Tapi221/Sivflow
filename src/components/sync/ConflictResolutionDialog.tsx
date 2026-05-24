@@ -3,24 +3,20 @@ import { useCallback,useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
+import {Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  DialogTitle,} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  AlertTriangle,
+import {AlertTriangle,
   Check,
   ChevronLeft,
   ChevronRight,
   Cloud,
   HardDrive,
-  Merge,
-} from "@/ui/icons";
+  Merge,} from "@/ui/icons";
 
 import { useSyncContext } from "@/contexts/sync/SyncContext";
 import type { SyncConflict } from "@/types";

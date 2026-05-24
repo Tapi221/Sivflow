@@ -1,8 +1,6 @@
 import type { SyncResult } from "@/types/domain/sync";
-import type {
-  NetworkStatus,
-  SyncContextSource,
-} from "@/types/domain/telemetry";
+import type {NetworkStatus,
+  SyncContextSource,} from "@/types/domain/telemetry";
 
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonObject | JsonArray;

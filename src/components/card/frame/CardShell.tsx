@@ -1,17 +1,13 @@
 import React from "react";
 
-import {
-  cardHeightPxToLayoutRows,
+import {cardHeightPxToLayoutRows,
   layoutRowsToCardHeightPx,
-  snapMinCardHeightPx,
-} from "@constants/shared/flashcard";
+  snapMinCardHeightPx,} from "@constants/shared/flashcard";
 
-import {
-  DropdownMenu,
+import {DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
 
 import { cn } from "@/lib/utils";
 import type { CssVars } from "@/types/style";

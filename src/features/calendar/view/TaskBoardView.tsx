@@ -5,10 +5,8 @@ import { createPortal } from "react-dom";
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "../task/task.types";
 import type { Task, TaskGroupMode, TaskStatus } from "../task/task.types";
 import { useTaskBoardDnd } from "../../dnd/task/useTaskBoardDnd";
-import type {
-  TaskDropTarget,
-  TaskInsertPosition,
-} from "../../dnd/task/taskDnd.types";
+import type {TaskDropTarget,
+  TaskInsertPosition,} from "../../dnd/task/taskDnd.types";
 import { TaskCard } from "../task/TaskCard";
 import { TaskColumn } from "../task/TaskColumn";
 

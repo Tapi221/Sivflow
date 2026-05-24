@@ -1,3 +1,1 @@
-export {
-  CreateActionPlusIcon,
-} from "@/chip/icon/CreateActionPlusIcon";
+export {CreateActionPlusIcon,} from "@/chip/icon/CreateActionPlusIcon";

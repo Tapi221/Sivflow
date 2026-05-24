@@ -1,10 +1,8 @@
-import {
-  useEffect,
+import {useEffect,
   useState,
   type CSSProperties,
   type ReactNode,
-  type RefObject,
-} from "react";
+  type RefObject,} from "react";
 
 export type RightClickPanelPosition = {
   x: number;

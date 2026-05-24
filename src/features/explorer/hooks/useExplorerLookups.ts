@@ -1,10 +1,8 @@
 import { useMemo } from "react";
 
-import {
-  buildCardById,
+import {buildCardById,
   buildDocumentById,
-  buildFolderById,
-} from "@/features/explorer/services/buildExplorerLookups";
+  buildFolderById,} from "@/features/explorer/services/buildExplorerLookups";
 import { buildExplorerSelectedState } from "@/features/explorer/services/buildExplorerSelectedState";
 import { normalizeFolders } from "@/features/explorer/services/normalizeFolders";
 

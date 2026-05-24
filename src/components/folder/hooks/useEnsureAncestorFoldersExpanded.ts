@@ -1,16 +1,12 @@
 import React, { useEffect, useMemo } from "react";
 
-import {
-  buildCardSetById,
-  resolveCardFolderIdStrict,
-} from "@/domain/card/selectors/cardFolder";
+import {buildCardSetById,
+  resolveCardFolderIdStrict,} from "@/domain/card/selectors/cardFolder";
 
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
-import {
-  getFolderId,
+import {getFolderId,
   getParentFolderId,
-  normalizeFolderId,
-} from "@/components/folder/explorer/model/utils";
+  normalizeFolderId,} from "@/components/folder/explorer/model/utils";
 
 import type { Card, CardSet, SelectedExplorerItem } from "@/types";
 

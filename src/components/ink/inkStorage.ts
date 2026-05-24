@@ -1,10 +1,8 @@
-import {
-  cloneInkDocument,
+import {cloneInkDocument,
   createEmptyInkDocument,
   type InkDocument,
   type InkSide,
-  normalizeInkDocument,
-} from "./inkTypes";
+  normalizeInkDocument,} from "./inkTypes";
 
 const INK_STORAGE_PREFIX = "ink:";
 

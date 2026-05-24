@@ -1,11 +1,9 @@
 import { normalizeInkDocument } from "@/domain/card/inkDocument";
 
 import { restoreMfDeckMediaInBlocks } from "@/features/deckFile/application/mfDeckMediaRestorer";
-import type {
-  MfDeckArchiveV1,
+import type {MfDeckArchiveV1,
   MfDeckCardV1,
-  MfDeckIssue,
-} from "@/features/deckFile/domain/mfDeckTypes";
+  MfDeckIssue,} from "@/features/deckFile/domain/mfDeckTypes";
 
 import type { Card, CardBlock, CardSet } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";

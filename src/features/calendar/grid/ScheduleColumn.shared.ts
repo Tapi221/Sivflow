@@ -1,5 +1,4 @@
-import {
-  addDays,
+import {addDays,
   addMonths,
   endOfDay,
   endOfMonth,
@@ -11,8 +10,7 @@ import {
   startOfDay,
   startOfMonth,
   startOfWeek,
-  subDays,
-} from "date-fns";
+  subDays,} from "date-fns";
 import { ja } from "date-fns/locale";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";

@@ -3,10 +3,8 @@ import { onAuthStateChanged } from "firebase/auth";
 
 import type { CalendarToolbarMode } from "@/features/calendar/calendar.types";
 
-import {
-  buildCalendarEventSyncRange,
-  type BuildCalendarEventSyncRangeOptions,
-} from "./calendarEventSyncRange";
+import {buildCalendarEventSyncRange,
+  type BuildCalendarEventSyncRangeOptions,} from "./calendarEventSyncRange";
 import { useGoogleCalendarPushSync } from "./useGoogleCalendarPushSync";
 import { auth } from "@/services/firebase";
 

@@ -2,8 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { acquirePdfDocumentSession } from "@/features/pdf/pdfDocumentSessionRegistry";
 import { createPdfPageResourceCache } from "@/features/pdf/pdfPageResourceCache";
-import type {
-  PageSize,
+import type {PageSize,
   PdfJsDestinationReference,
   PdfJsDocument,
   PdfJsExplicitDestination,
@@ -15,20 +14,15 @@ import type {
   PdfJsTextContent,
   PdfViewerOptions,
   PdfViewerSourceMeta,
-  SourceLoadErrorKind,
-} from "@/features/pdf/pdfViewer.types";
-import {
-  getErrorMessage,
+  SourceLoadErrorKind,} from "@/features/pdf/pdfViewer.types";
+import {getErrorMessage,
   isPdfAbortError,
-  isPdfTextItem,
-} from "@/features/pdf/pdfViewer.types";
+  isPdfTextItem,} from "@/features/pdf/pdfViewer.types";
 
 import { getPdfOcrPageRecord } from "@/lib/pdf/pdfOcrStore";
-import {
-  buildPdfTextSelection,
+import {buildPdfTextSelection,
   normalizePdfExtractedText,
-  splitPdfTextIntoLines,
-} from "@/lib/pdf/pdfTextExtraction";
+  splitPdfTextIntoLines,} from "@/lib/pdf/pdfTextExtraction";
 
 interface UsePdfDocumentOptions {
   docId?: string;

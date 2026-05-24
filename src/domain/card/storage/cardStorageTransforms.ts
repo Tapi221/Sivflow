@@ -1,13 +1,9 @@
-import {
-  resolveBlocksFromCardData,
+import {resolveBlocksFromCardData,
   resolveExtraRowsFromCardData,
-  resolveInkFromCardData,
-} from "@/domain/card/normalizers/cardShape";
+  resolveInkFromCardData,} from "@/domain/card/normalizers/cardShape";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
-import {
-  cloneStorageRecord,
-  isStorageRecord,
-} from "@/domain/shared/storage/storageRecordUtils";
+import {cloneStorageRecord,
+  isStorageRecord,} from "@/domain/shared/storage/storageRecordUtils";
 
 import { cleanupLegacyCardStorageFields } from "./cardStorageFieldCleanup";
 import { sanitizeCardStorageBlockImages } from "./cardStorageImageTransforms";

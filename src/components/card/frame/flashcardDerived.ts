@@ -6,12 +6,10 @@
  * - ink document resolve は含まない（副作用のある resolveInkDocument は呼び出し側）
  */
 import { extractCardTextFromBlocks } from "@/domain/card/content";
-import {
-  DEFAULT_LAYOUT_ROWS,
+import {DEFAULT_LAYOUT_ROWS,
   LEGACY_BASE_LAYOUT_ROWS,
   normalizeExtraRows,
-  normalizeLayoutRows,
-} from "@/domain/card/extraRows";
+  normalizeLayoutRows,} from "@/domain/card/extraRows";
 
 import type { FlashcardCardLike, FlashcardMediaLike } from "./types";
 

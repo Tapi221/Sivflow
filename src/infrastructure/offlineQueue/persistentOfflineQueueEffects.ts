@@ -4,10 +4,8 @@ import { handleQueuedDocumentUploadFailure } from "./effects/handleQueuedDocumen
 import { handleQueuedDocumentUploadSuccess } from "./effects/handleQueuedDocumentUploadSuccess";
 import { shouldSkipQueuedDocumentUpload } from "./effects/shouldSkipQueuedDocumentUpload";
 
-import {
-  isDocumentQueueItem,
-  type QueueItem,
-} from "@/application/usecases/persistentOfflineQueueModels";
+import {isDocumentQueueItem,
+  type QueueItem,} from "@/application/usecases/persistentOfflineQueueModels";
 import type { UploadedImage } from "@/types";
 
 const isAssetLikeImageQueueItem = (item: QueueItem): boolean =>
@@ -38,8 +36,6 @@ const handleQueuedUploadPermanentFailure = async (
   }
 };
 
-export {
-  handleQueuedUploadPermanentFailure,
+export {handleQueuedUploadPermanentFailure,
   handleQueuedUploadSuccess,
-  shouldSkipQueuedDocumentUpload,
-};
+  shouldSkipQueuedDocumentUpload,};

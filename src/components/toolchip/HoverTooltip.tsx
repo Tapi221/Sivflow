@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
-import {
-  TOOLTIP_PRESET_CLASS_NAMES,
+import {TOOLTIP_PRESET_CLASS_NAMES,
   type TooltipPreset,
-  type TooltipSize,
-} from "@/components/toolchip/tooltip.size.desktop";
+  type TooltipSize,} from "@/components/toolchip/tooltip.size.desktop";
 
 type TooltipSide = "top" | "right" | "bottom" | "left";
 type TooltipAlign = "center" | "start" | "end";

@@ -1,18 +1,14 @@
 import { useCallback, useMemo } from "react";
 
-import {
-  buildCardSetById,
-  resolveCardFolderIdStrict,
-} from "@/domain/card/selectors/cardFolder";
+import {buildCardSetById,
+  resolveCardFolderIdStrict,} from "@/domain/card/selectors/cardFolder";
 
 import { normalizeDate } from "@/shared/codec/date";
-import {
-  type Card,
+import {type Card,
   type CardSet,
   type DocumentItem,
   type Folder,
-  type SelectedExplorerItem,
-} from "@/types";
+  type SelectedExplorerItem,} from "@/types";
 
 interface UseTreeViewDerivedStateParams {
   folders: Folder[];

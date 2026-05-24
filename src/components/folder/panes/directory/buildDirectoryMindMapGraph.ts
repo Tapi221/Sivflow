@@ -2,12 +2,10 @@ import { type Edge, type Node,Position } from "@xyflow/react";
 
 import type { TagColorKey } from "@/features/tag/tagColor";
 
-import type {
-  DirectoryBadgeVisibility,
+import type {DirectoryBadgeVisibility,
   DirectoryMindMapChip,
   DirectoryMindMapNodeData,
-  DirectoryTreeNode,
-} from "./directoryTypes";
+  DirectoryTreeNode,} from "./directoryTypes";
 
 const ROOT_ID = "directory-root";
 const ROOT_LABEL = "ディレクトリ";

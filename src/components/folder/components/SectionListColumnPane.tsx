@@ -8,13 +8,11 @@ import { PdfLibraryDashboard } from "@/features/library-pdf/components/PdfLibrar
 import { SectionListBlankPane } from "@/components/folder/components/SectionListBlankPane";
 
 import { cn } from "@/lib/utils";
-import type {
-  Card,
+import type {Card,
   CardSet,
   DocumentItem,
   Folder,
-  SelectedExplorerItem,
-} from "@/types";
+  SelectedExplorerItem,} from "@/types";
 
 interface SectionListColumnPaneProps {
   className?: string;

@@ -1,20 +1,16 @@
 import type { RefObject } from "react";
-import {
-  startTransition,
+import {startTransition,
   useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
-  useState,
-} from "react";
+  useState,} from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import {
-  buildCalendarMonthWeeks,
+import {buildCalendarMonthWeeks,
   getCalendarMonthKey,
-  getCalendarWeekKey,
-} from "@/features/calendar/model/calendarMonth.model";
+  getCalendarWeekKey,} from "@/features/calendar/model/calendarMonth.model";
 
 // ── 公開型
 

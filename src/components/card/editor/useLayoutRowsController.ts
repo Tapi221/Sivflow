@@ -1,13 +1,11 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useRef } from "react";
 
-import {
-  CARD_HEIGHT_PHASE_PX,
+import {CARD_HEIGHT_PHASE_PX,
   CARD_ROW_PX,
   cardHeightPxToLayoutRows,
   layoutRowsToCardHeightPx,
-  minCardHeightPxToLayoutRows,
-} from "@constants/shared/flashcard";
+  minCardHeightPxToLayoutRows,} from "@constants/shared/flashcard";
 
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 

@@ -4,10 +4,8 @@ import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
 
 import { CardCarousel3D } from "@/features/review/presentation/web/ui/components/CardCarousel3D";
 
-import {
-  Flashcard,
-  type FlashcardCardLike,
-} from "@/components/card/frame/Flashcard";
+import {Flashcard,
+  type FlashcardCardLike,} from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 
 import type { Card, UserSettings } from "@/types";

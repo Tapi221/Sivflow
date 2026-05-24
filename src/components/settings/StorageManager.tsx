@@ -1,27 +1,23 @@
 import React, { useEffect, useState } from "react";
 
-import {
-  collection,
+import {collection,
   deleteDoc,
   doc,
   onSnapshot,
   orderBy,
-  query,
-} from "firebase/firestore";
+  query,} from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  AlertCircle,
+import {AlertCircle,
   Database,
   FileAudio,
   FileText,
   Image as ImageIcon,
   Loader2,
-  Trash2,
-} from "@/ui/icons";
+  Trash2,} from "@/ui/icons";
 
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getFirebaseStorage, getFirestoreDb } from "@/services/firebaseGateway";

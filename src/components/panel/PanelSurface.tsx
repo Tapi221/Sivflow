@@ -1,9 +1,7 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
-import {
-  type FloatingSurfaceVariantProps,
-  floatingSurfaceVariants,
-} from "@/components/ui/floating-surface";
+import {type FloatingSurfaceVariantProps,
+  floatingSurfaceVariants,} from "@/components/ui/floating-surface";
 
 import { cn } from "@/lib/utils";
 

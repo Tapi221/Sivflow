@@ -3,14 +3,12 @@ import { getLocalDb } from "@/infrastructure/localdb/client";
 import { getImageBlob } from "@/services/imageFileStore";
 import { scrubBlobUrlsDeep } from "@/services/localdb/blobUrl";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
-import type {
-  AssetRecord,
+import type {AssetRecord,
   AssetRemoteStatus,
   Card,
   CardBlock,
   CardFace,
-  UploadedImage,
-} from "@/types";
+  UploadedImage,} from "@/types";
 
 type ImageRecordLike = Partial<AssetRecord> &
   Partial<UploadedImage> &

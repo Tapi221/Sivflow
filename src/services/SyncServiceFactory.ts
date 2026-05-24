@@ -1,9 +1,7 @@
 import type { ISyncService } from "./interfaces/ISyncService";
-import {
-  getLocalDb,
+import {getLocalDb,
   getLocalDBTelemetrySnapshot,
-  telemetryOncePerSession,
-} from "./localDB";
+  telemetryOncePerSession,} from "./localDB";
 import { CloudSyncAdapter } from "./logic/CloudSyncAdapter";
 import { DiffEngine } from "./logic/DiffEngine";
 import { NetworkMonitor } from "./logic/NetworkMonitor";

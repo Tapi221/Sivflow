@@ -1,31 +1,23 @@
-import type {
-  DocumentData,
+import type {DocumentData,
   FirestoreError,
   QueryDocumentSnapshot,
   QuerySnapshot,
-  Unsubscribe,
-} from "firebase/firestore";
-import {
-  addDoc,
+  Unsubscribe,} from "firebase/firestore";
+import {addDoc,
   collection,
   doc,
   onSnapshot,
   query,
   serverTimestamp,
   updateDoc,
-  where,
-} from "firebase/firestore";
+  where,} from "firebase/firestore";
 
-import {
-  firestoreDb,
-  requireFirestoreDb,
-} from "@/infrastructure/firebase/client";
+import {firestoreDb,
+  requireFirestoreDb,} from "@/infrastructure/firebase/client";
 import { getSecurityEventCatalogEntry } from "@/services/logic/securityEventCatalog";
-import type {
-  SecurityEventType,
+import type {SecurityEventType,
   SecurityLog,
-  SecurityMetadata,
-} from "@/types/domain/telemetry";
+  SecurityMetadata,} from "@/types/domain/telemetry";
 
 interface SecurityAlert {
   id: string;

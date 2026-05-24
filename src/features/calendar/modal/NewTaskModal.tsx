@@ -2,11 +2,9 @@ import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import type { TaskPriority, TaskStatus } from "../task/task.types";
-import {
-  CATEGORY_CONFIG,
+import {CATEGORY_CONFIG,
   PRIORITY_CONFIG,
-  TASK_COLUMNS,
-} from "../task/task.types";
+  TASK_COLUMNS,} from "../task/task.types";
 
 type TaskCategoryOption = {
   id: string;
@@ -191,9 +189,9 @@ export const NewTaskModal = ({
   const resolvedCategoryOptions = categoryOptions?.length
     ? categoryOptions
     : Object.entries(CATEGORY_CONFIG).map(([key, val]) => ({
-        id: key,
-        label: val.label,
-      }));
+      id: key,
+      label: val.label,
+    }));
   const initialCategory = resolvedCategoryOptions.some(
     (option) => option.id === defaultCategory,
   )

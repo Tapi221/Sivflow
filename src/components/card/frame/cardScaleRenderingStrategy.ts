@@ -1,10 +1,8 @@
-import {
-  detectCssZoomSupport,
+import {detectCssZoomSupport,
   resolveScaleRenderingStrategy,
   type ResolveScaleRenderingStrategyArgs,
   type ScaleRenderingMode,
-  type ScaleRenderingStrategy,
-} from "@/shared/zoom/scaleRenderingStrategy";
+  type ScaleRenderingStrategy,} from "@/shared/zoom/scaleRenderingStrategy";
 
 export type CardScaleRenderingMode = ScaleRenderingMode;
 export type ResolveCardScaleRenderingStrategyArgs =

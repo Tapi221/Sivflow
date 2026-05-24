@@ -1,11 +1,9 @@
 import * as XLSX from "xlsx";
 
-import {
-  IMPORT_SHEET_NAME,
+import {IMPORT_SHEET_NAME,
   type ImportIssue,
   type ImportParseResult,
-  type ImportSheetName,
-} from "@/features/import/domain/importTypes";
+  type ImportSheetName,} from "@/features/import/domain/importTypes";
 
 export type ReadXlsxImportRowsResult =
   | {

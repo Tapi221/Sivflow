@@ -1,13 +1,11 @@
-import {
-  addDays,
+import {addDays,
   endOfDay,
   endOfMonth,
   endOfWeek,
   startOfDay,
   startOfMonth,
   startOfWeek,
-  subDays,
-} from "date-fns";
+  subDays,} from "date-fns";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarViewMode } from "@/features/calendar/calendar.types";

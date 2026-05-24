@@ -1,33 +1,25 @@
-import React, {
-  useCallback,
+import React, {useCallback,
   useEffect,
   useImperativeHandle,
   useMemo,
-  useState,
-} from "react";
+  useState,} from "react";
 
-import {
-  PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT,
+import {PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT,
   PDF_PAGE_PREFETCH_EXTRA_PAGES,
-  PDF_PAGE_RENDER_OVERSCAN_VIEWPORTS,
-} from "@/features/pdf";
+  PDF_PAGE_RENDER_OVERSCAN_VIEWPORTS,} from "@/features/pdf";
 
 import { usePdfCurrentPage } from "./hooks/usePdfCurrentPage";
-import {
-  type PdfDocumentController,
-  usePdfDocument,
-} from "./hooks/usePdfDocument";
+import {type PdfDocumentController,
+  usePdfDocument,} from "./hooks/usePdfDocument";
 import { usePdfSearch } from "./hooks/usePdfSearch";
 import { usePdfZoom } from "./hooks/usePdfZoom";
 import { PdfPage } from "./PdfPage";
-import type {
-  PageSize,
+import type {PageSize,
   PdfScaleChangeSource,
   PdfViewerHandle,
   PdfViewerOptions,
   PdfViewerSourceMeta,
-  SourceLoadErrorKind,
-} from "./pdfViewer.types";
+  SourceLoadErrorKind,} from "./pdfViewer.types";
 
 import { cn } from "@/lib/utils";
 import type { PdfPageLayoutMode } from "@/types";

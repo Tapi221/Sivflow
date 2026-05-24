@@ -2,20 +2,16 @@ import { useCallback,useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
+import {Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  AlertCircle,
+  DialogTitle,} from "@/components/ui/dialog";
+import {AlertCircle,
   ChevronDown,
   ChevronUp,
   RefreshCw,
-  Trash2,
-} from "@/ui/icons";
+  Trash2,} from "@/ui/icons";
 
 import { useSyncContext } from "@/contexts/sync/SyncContext";
 import { getLocalDb } from "@/services/localDB";

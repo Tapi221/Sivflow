@@ -1,9 +1,7 @@
 import React from "react";
 
-import {
-  detectCssZoomSupport,
-  resolveCardScaleRenderingStrategy,
-} from "@/components/card/frame/cardScaleRenderingStrategy";
+import {detectCssZoomSupport,
+  resolveCardScaleRenderingStrategy,} from "@/components/card/frame/cardScaleRenderingStrategy";
 import { observeElementRect } from "@/components/card/frame/elementRectObserver";
 
 import { cn } from "@/lib/utils";

@@ -1,18 +1,15 @@
 import { OverlayToolbar } from "@/components/overlay-toolbar/OverlayToolbar";
 import { OverlayToolbarButton } from "@/components/overlay-toolbar/OverlayToolbarButton";
 import { OverlayToolbarDivider } from "@/components/overlay-toolbar/OverlayToolbarDivider";
-import {
-  PdfDoublePageGlyph,
+import {PdfDoublePageGlyph,
   PdfFitWidthGlyph,
   PdfNextGlyph,
   PdfPrevGlyph,
-  PdfSinglePageGlyph,
-} from "@/components/overlay-toolbar/OverlayToolbarGlyphs";
+  PdfSinglePageGlyph,} from "@/components/overlay-toolbar/OverlayToolbarGlyphs";
 import { OverlayToolbarIndexNavigator } from "@/components/overlay-toolbar/OverlayToolbarIndexNavigator";
 import { OverlayToolbarZoomControl } from "@/components/overlay-toolbar/OverlayToolbarZoomControl";
 
-import {
-  pdfOverlayToolbarButtonActiveClassName,
+import {pdfOverlayToolbarButtonActiveClassName,
   pdfOverlayToolbarButtonClassName,
   pdfOverlayToolbarDividerClassName,
   pdfOverlayToolbarNavigatorClassName,
@@ -21,8 +18,7 @@ import {
   pdfOverlayToolbarSliderRangeClassName,
   pdfOverlayToolbarSliderThumbClassName,
   pdfOverlayToolbarSliderTrackClassName,
-  pdfOverlayToolbarTotalClassName,
-} from "./pdfToolbar.classname";
+  pdfOverlayToolbarTotalClassName,} from "./pdfToolbar.classname";
 
 import { cn } from "@/lib/utils";
 import type { PdfPageLayoutMode } from "@/types";

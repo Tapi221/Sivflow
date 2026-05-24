@@ -1,10 +1,8 @@
-import {
-  type PointerEvent as ReactPointerEvent,
+import {type PointerEvent as ReactPointerEvent,
   useCallback,
   useEffect,
   useRef,
-  useState,
-} from "react";
+  useState,} from "react";
 
 import { SIDEBAR_WIDTH_LIMITS } from "@constants/web/app";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";

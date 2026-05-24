@@ -1,8 +1,6 @@
-import type {
-  GoogleTaskItem,
+import type {GoogleTaskItem,
   GoogleTaskStatus,
-  GoogleTasksApiTasksResponse,
-} from "./gcalSync.types";
+  GoogleTasksApiTasksResponse,} from "./gcalSync.types";
 
 const GOOGLE_TASKS_API_BASE = "https://tasks.googleapis.com/tasks/v1";
 
