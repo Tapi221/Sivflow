@@ -67,6 +67,8 @@ const emptyLoadedState = {
   loaded: null as LoadMfDeckFileResult | null,
 };
 
+const EMPTY_ISSUES: LoadMfDeckFileResult["issues"] = [];
+
 export const MfDeckImportDialog = ({
   open,
   onOpenChange,
@@ -92,7 +94,7 @@ export const MfDeckImportDialog = ({
   const [isImporting, setIsImporting] = useState(false);
 
   const archive = state.loaded?.archive ?? null;
-  const issues = state.loaded?.issues ?? [];
+  const issues = state.loaded?.issues ?? EMPTY_ISSUES;
 
   const issueSummary = useMemo(() => {
     return {
