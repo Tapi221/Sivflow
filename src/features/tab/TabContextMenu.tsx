@@ -18,8 +18,8 @@ type TabContextMenuProps = {
   noDragStyle: CSSProperties;
 };
 
-export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 240;
-export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 184;
+export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 208;
+export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 152;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = 8;
 
 const WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY = "var(--app-font-family-ui)";
@@ -28,13 +28,13 @@ const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
 .workspace-tab-context-menu {
   min-width: 148px;
   width: max-content;
-  max-width: 240px;
+  max-width: 208px;
   padding: 4px;
   overflow: hidden;
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 8px;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16), 0 1px 6px rgba(0, 0, 0, 0.08);
   font-family: ${WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY};
 }
 
@@ -42,16 +42,16 @@ const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 44px;
-  padding: 0 18px;
+  min-height: 36px;
+  padding: 0 14px;
   border: 0;
   border-radius: 4px;
   background: transparent;
   color: #4a4a4a;
   font-family: ${WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY};
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 400;
-  line-height: 24px;
+  line-height: 20px;
   letter-spacing: 0;
   text-align: left;
   white-space: nowrap;
