@@ -55,7 +55,7 @@ export const CalendarDateContent = ({
   const weekday = (
     <span
       className={cn(
-        "text-[11px] font-medium leading-none",
+        "font-serif text-[11px] font-medium leading-none",
         isToday || isSelected ? "text-[#24231f]" : "text-[#8f929c]",
       )}
     >
@@ -67,7 +67,7 @@ export const CalendarDateContent = ({
     <CalendarDayNumberCircle
       isToday={isToday}
       isSelected={isSelected}
-      className={layout === "weekday-date" ? "mt-0.5" : undefined}
+      className={cn("font-serif", layout === "weekday-date" && "mt-0.5")}
     >
       {dateLabel}
     </CalendarDayNumberCircle>
@@ -85,7 +85,7 @@ export const CalendarDateContent = ({
   return (
     <>
       {dayNumber}
-      <span className="mt-0.5 text-[11px] font-medium leading-none text-[#8f929c]">
+      <span className="mt-0.5 font-serif text-[11px] font-medium leading-none text-[#8f929c]">
         {weekdayLabel}
       </span>
     </>
