@@ -1,4 +1,10 @@
-import type { CSSProperties, RefObject } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefObject,
+} from "react";
 
 type TabContextMenuAction = {
   id: string;
@@ -19,6 +25,8 @@ export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 176;
 export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 120;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = 8;
 
+const IGNORE_POSITION_UPDATE_MS = 120;
+
 const WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY =
   "var(--explorer-chrome-font-family, \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, BlinkMacSystemFont, \"Yu Gothic UI\", \"Hiragino Sans\", sans-serif)";
 
@@ -26,11 +34,11 @@ const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
 .workspace-tab-context-menu {
   box-sizing: border-box;
   contain: layout paint style;
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   align-items: stretch;
-  width: fit-content;
-  min-width: 0;
+  width: ${WORKSPACE_TAB_CONTEXT_MENU_WIDTH}px;
+  min-width: ${WORKSPACE_TAB_CONTEXT_MENU_WIDTH}px;
   max-width: ${WORKSPACE_TAB_CONTEXT_MENU_WIDTH}px;
   padding: 3px;
   overflow: hidden;
@@ -41,6 +49,9 @@ const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
   font-family: ${WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY};
   font-variant-east-asian: proportional-width;
   font-feature-settings: "palt" 1;
+  animation: none;
+  transition: none;
+  transform: none;
 }
 
 .workspace-tab-context-menu,
@@ -51,8 +62,8 @@ const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
 .workspace-tab-context-menu-item {
   display: flex;
   align-items: center;
-  width: auto;
-  min-width: max-content;
+  width: 100%;
+  min-width: 0;
   min-height: 28px;
   padding: 0 10px;
   border: 0;
@@ -67,6 +78,8 @@ const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
   text-align: left;
   white-space: nowrap;
   -webkit-font-smoothing: antialiased;
+  animation: none;
+  transition: background-color 80ms linear;
 }
 
 .workspace-tab-context-menu-item:not(:disabled) {
@@ -92,40 +105,59 @@ export const WorkspaceTabContextMenu = ({
   menuRef,
   noDragStyle,
 }: TabContextMenuProps) => {
+  const openedAtRef = useRef(performance.now());
+  const [position, setPosition] = useState({ x, y });
+
+  useEffect(() => {
+    const elapsedMs = performance.now() - openedAtRef.current;
+
+    if (elapsedMs < IGNORE_POSITION_UPDATE_MS) return;
+
+    setPosition({ x, y });
+  }, [x, y]);
+
   return (
-    <div
-      ref={menuRef}
-      style={{
-        ...noDragStyle,
-        position: "fixed",
-        left: x,
-        top: y,
-        zIndex: 1000,
-      }}
-      className="workspace-tab-context-menu"
-      role="menu"
-      aria-label="tab context menu"
-    >
+    <>
       <style>{WORKSPACE_TAB_CONTEXT_MENU_STYLE}</style>
-      {actions.map((action) => (
-        <button
-          key={action.id}
-          type="button"
-          disabled={action.disabled}
-          className="workspace-tab-context-menu-item"
-          role="menuitem"
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
+      <div
+        ref={menuRef}
+        style={{
+          ...noDragStyle,
+          position: "fixed",
+          left: position.x,
+          top: position.y,
+          zIndex: 1000,
+          width: WORKSPACE_TAB_CONTEXT_MENU_WIDTH,
+          minWidth: WORKSPACE_TAB_CONTEXT_MENU_WIDTH,
+          maxWidth: WORKSPACE_TAB_CONTEXT_MENU_WIDTH,
+          animation: "none",
+          transition: "none",
+          transform: "none",
+        }}
+        className="workspace-tab-context-menu"
+        role="menu"
+        aria-label="tab context menu"
+      >
+        {actions.map((action) => (
+          <button
+            key={action.id}
+            type="button"
+            disabled={action.disabled}
+            className="workspace-tab-context-menu-item"
+            role="menuitem"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
 
-            if (action.disabled) return;
+              if (action.disabled) return;
 
-            action.onSelect();
-          }}
-        >
-          {action.label}
-        </button>
-      ))}
-    </div>
+              action.onSelect();
+            }}
+          >
+            {action.label}
+          </button>
+        ))}
+      </div>
+    </>
   );
 };
