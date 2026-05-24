@@ -20,8 +20,15 @@ export type RightClickPanelDimensions = {
   height: number;
 };
 
+export type RightClickPanelId = string;
+
+type RightClickPanelOpenEventDetail = {
+  panelId: RightClickPanelId;
+};
+
 export const RIGHT_CLICK_PANEL_WIDTH = 176;
 export const RIGHT_CLICK_PANEL_MARGIN = 8;
+export const RIGHT_CLICK_PANEL_OPEN_EVENT = "manifolia:right-click-panel-open";
 
 export const RIGHT_CLICK_PANEL_NO_DRAG_STYLE: RightClickPanelNoDragStyle = {
   WebkitAppRegion: "no-drag",
@@ -103,6 +110,14 @@ export const RIGHT_CLICK_PANEL_STYLE = `
 }
 `;
 
+export const announceRightClickPanelOpen = (panelId: RightClickPanelId) => {
+  window.dispatchEvent(
+    new CustomEvent<RightClickPanelOpenEventDetail>(RIGHT_CLICK_PANEL_OPEN_EVENT, {
+      detail: { panelId },
+    }),
+  );
+};
+
 export const clampRightClickPanelPosition = (
   clientX: number,
   clientY: number,
@@ -124,6 +139,7 @@ export const clampRightClickPanelPosition = (
 };
 
 export const useRightClickPanelDismiss = (
+  panelId: RightClickPanelId,
   isOpen: boolean,
   panelRef: RefObject<HTMLElement | null>,
   onClose: () => void,
@@ -140,9 +156,17 @@ export const useRightClickPanelDismiss = (
         onClose();
       }
     };
+    const handleOtherPanelOpen = (event: Event) => {
+      const { detail } = event as CustomEvent<RightClickPanelOpenEventDetail>;
+
+      if (detail.panelId !== panelId) {
+        onClose();
+      }
+    };
 
     window.addEventListener("pointerdown", handlePointerDown);
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener(RIGHT_CLICK_PANEL_OPEN_EVENT, handleOtherPanelOpen);
     window.addEventListener("resize", onClose, { once: true });
     window.addEventListener("scroll", onClose, {
       capture: true,
@@ -152,10 +176,11 @@ export const useRightClickPanelDismiss = (
     return () => {
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener(RIGHT_CLICK_PANEL_OPEN_EVENT, handleOtherPanelOpen);
       window.removeEventListener("resize", onClose);
       window.removeEventListener("scroll", onClose, { capture: true });
     };
-  }, [isOpen, onClose, panelRef]);
+  }, [isOpen, onClose, panelId, panelRef]);
 };
 
 type RightClickPanelSurfaceProps = {
