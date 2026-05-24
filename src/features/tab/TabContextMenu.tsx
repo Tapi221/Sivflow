@@ -24,6 +24,11 @@ export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 220;
 export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 152;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = 8;
 
+const WORKSPACE_TAB_CONTEXT_MENU_TEXT_STYLE: CSSProperties = {
+  fontSize: 14,
+  lineHeight: "20px",
+};
+
 export const WorkspaceTabContextMenu = ({
   x,
   y,
@@ -44,6 +49,10 @@ export const WorkspaceTabContextMenu = ({
           position="bottom-start"
           offset={0}
           shadow="md"
+          styles={{
+            item: WORKSPACE_TAB_CONTEXT_MENU_TEXT_STYLE,
+            itemLabel: WORKSPACE_TAB_CONTEXT_MENU_TEXT_STYLE,
+          }}
         >
           <Menu.Target>
             <button
