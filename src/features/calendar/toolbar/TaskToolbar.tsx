@@ -19,7 +19,6 @@ type TaskToolbarProps = {
   selectedTaskListIds?: string[];
   onClearFilterDate: () => void;
   onChangeViewMode: (viewMode: BoardListViewMode) => void;
-  onSelectAllTaskLists?: () => void;
   onOpenNewTaskModal: () => void;
   onOpenFilter?: () => void;
   onOpenMoreMenu?: () => void;
@@ -32,7 +31,6 @@ export const TaskToolbar = ({
   selectedTaskListIds = [],
   onClearFilterDate,
   onChangeViewMode,
-  onSelectAllTaskLists,
   onOpenNewTaskModal,
   onOpenFilter,
   onOpenMoreMenu,
@@ -40,11 +38,15 @@ export const TaskToolbar = ({
   const selectedLabels = taskListOptions
     .filter((option) => selectedTaskListIds.includes(option.id))
     .map((option) => option.label);
+  const isAllSelected =
+    taskListOptions.length > 0 && selectedTaskListIds.length === taskListOptions.length;
   const taskListLabel = selectedLabels.length === 0
-    ? "すべての ToDo リスト"
-    : selectedLabels.length <= 2
-      ? selectedLabels.join("、")
-      : `${selectedLabels.slice(0, 2).join("、")} 他${selectedLabels.length - 2}`;
+    ? "ToDo リスト未選択"
+    : isAllSelected
+      ? "すべての ToDo リスト"
+      : selectedLabels.length <= 2
+        ? selectedLabels.join("、")
+        : `${selectedLabels.slice(0, 2).join("、")} 他${selectedLabels.length - 2}`;
 
   return (
     <div className="flex shrink-0 items-center justify-between border-b border-[#e9eaed] px-4 py-2">
@@ -58,14 +60,12 @@ export const TaskToolbar = ({
         )}
 
         {taskListOptions.length > 0 && (
-          <button
-            type="button"
-            onClick={onSelectAllTaskLists}
-            className="h-9 max-w-[260px] truncate rounded-full border border-[#e5e5ea] bg-white px-3 text-[13px] font-medium text-[#4b5563] shadow-sm outline-none transition-colors hover:bg-[#f8f9fb] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10"
-            title="クリックするとすべての ToDo リスト表示に戻ります"
+          <span
+            className="inline-flex h-9 max-w-[260px] items-center truncate rounded-full border border-[#e5e5ea] bg-white px-3 text-[13px] font-medium text-[#4b5563] shadow-sm"
+            title={taskListLabel}
           >
             {taskListLabel}
-          </button>
+          </span>
         )}
 
         <FilterChip onClick={onOpenFilter} />
