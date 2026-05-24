@@ -55,6 +55,7 @@ type GridCalendarMonthDesktopProps = {
   monthWeeks: CalendarMonthGridWeek[];
   maxVisibleChips: number;
   monthRowHeight: number;
+  scrollHoverDayKey: string | null;
   setWeekRowRef: (
     key: string,
     node: HTMLDivElement | null,
@@ -76,6 +77,7 @@ type CalendarMonthDayCellProps = {
   events: GoogleCalendarEvent[];
   isToday: boolean;
   selected: boolean;
+  isScrollHovered: boolean;
   maxVisibleChips: number;
   onSelectDate: (date: Date) => void;
 };
@@ -85,6 +87,7 @@ const CalendarMonthDayCell = memo(({
   events,
   isToday,
   selected,
+  isScrollHovered,
   maxVisibleChips,
   onSelectDate,
 }: CalendarMonthDayCellProps) => {
@@ -105,6 +108,7 @@ const CalendarMonthDayCell = memo(({
 
   return (
     <div
+      data-calendar-month-day-key={day.key}
       className={cn(
         "calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible bg-white text-left",
         isToday && "bg-[#f7fbff]",
@@ -112,6 +116,10 @@ const CalendarMonthDayCell = memo(({
         !selected &&
           !isToday &&
           "calendar-month-day-cell-hoverable",
+        isScrollHovered &&
+          !selected &&
+          !isToday &&
+          "calendar-month-day-cell-scroll-hovered",
       )}
     >
       <button
@@ -196,6 +204,7 @@ type CalendarMonthWeekRowProps = {
   eventsByDay: Map<string, GoogleCalendarEvent[]>;
   selectedDayKey: string;
   todayDayKey: string;
+  scrollHoverDayKey: string | null;
   maxVisibleChips: number;
   monthRowHeight: number;
   setWeekRowRef: (
@@ -216,13 +225,15 @@ type CalendarMonthWeekRowProps = {
 
 const weekContainsDayKey = (
   week: CalendarMonthGridWeek,
-  dayKey: string,
-) => week.days.some((day) => day.key === dayKey);
+  dayKey: string | null,
+) => (
+  dayKey !== null && week.days.some((day) => day.key === dayKey)
+);
 
 const isWeekAffectedByDayKeyChange = (
   week: CalendarMonthGridWeek,
-  previousDayKey: string,
-  nextDayKey: string,
+  previousDayKey: string | null,
+  nextDayKey: string | null,
 ) => {
   return (
     previousDayKey !== nextDayKey &&
@@ -236,6 +247,7 @@ const CalendarMonthWeekRow = memo(({
   eventsByDay,
   selectedDayKey,
   todayDayKey,
+  scrollHoverDayKey,
   maxVisibleChips,
   monthRowHeight,
   setWeekRowRef,
@@ -262,6 +274,7 @@ const CalendarMonthWeekRow = memo(({
       {week.days.map((day) => {
         const selected = day.key === selectedDayKey;
         const isToday = day.key === todayDayKey;
+        const isScrollHovered = day.key === scrollHoverDayKey;
 
         return (
           <CalendarMonthDayCell
@@ -270,6 +283,7 @@ const CalendarMonthWeekRow = memo(({
             events={eventsByDay.get(day.key) ?? EMPTY_EVENTS}
             isToday={isToday}
             selected={selected}
+            isScrollHovered={isScrollHovered}
             maxVisibleChips={maxVisibleChips}
             onSelectDate={onSelectDate}
           />
@@ -319,6 +333,16 @@ const CalendarMonthWeekRow = memo(({
     return false;
   }
 
+  if (
+    isWeekAffectedByDayKeyChange(
+      previous.week,
+      previous.scrollHoverDayKey,
+      next.scrollHoverDayKey,
+    )
+  ) {
+    return false;
+  }
+
   return true;
 });
 
@@ -331,6 +355,7 @@ export const GridCalendarMonthDesktop = ({
   monthWeeks,
   maxVisibleChips,
   monthRowHeight,
+  scrollHoverDayKey,
   setWeekRowRef,
   onSelectDate,
   handleResizeReset,
@@ -413,6 +438,7 @@ export const GridCalendarMonthDesktop = ({
             eventsByDay={eventsByDay}
             selectedDayKey={selectedDayKey}
             todayDayKey={todayDayKey}
+            scrollHoverDayKey={scrollHoverDayKey}
             maxVisibleChips={maxVisibleChips}
             monthRowHeight={monthRowHeight}
             setWeekRowRef={setWeekRowRef}
