@@ -54,6 +54,8 @@ const disconnectGoogleCalendarAccountCallable = httpsCallable<
   { ok: boolean }
 >(functionsClient, "disconnectGoogleCalendarAccount");
 
+const SERVER_TOKEN_RETRY_DELAYS_MS = [500, 1_500] as const;
+
 const waitForCallableAuth = async (): Promise<void> => {
   await auth.authStateReady();
 
@@ -61,6 +63,11 @@ const waitForCallableAuth = async (): Promise<void> => {
     throw new Error("Firebase authentication is required for Google Calendar sync");
   }
 };
+
+const sleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 const normalizeCallableErrorCode = (error: unknown): string | undefined => {
   if (error instanceof Error) {
@@ -94,16 +101,16 @@ const diagnoseGoogleOAuthReconnectCause = (
   if (code === "unauthenticated" || normalizedMessage.includes("firebase authentication")) {
     return {
       cause: "Firebase 未認証のため Cloud Functions で refresh token を取得できません。",
-      reconnectRequired: true,
-      action: "Firebase Auth のログイン状態を復旧してから Google 連携を再試行してください。",
+      reconnectRequired: false,
+      action: "Firebase Auth のログイン状態が戻った後に自動リトライします。",
     };
   }
 
   if (code === "not-found") {
     return {
       cause: "Firestore に保存済み Google OAuth アカウントが見つかりません。",
-      reconnectRequired: true,
-      action: "users/{uid}/googleCalendarAccounts/{accountId} の存在を確認し、無ければ明示再連携してください。",
+      reconnectRequired: false,
+      action: "silent token fallback を使い、サーバー保存状態は次回の明示接続時に補修します。",
     };
   }
 
@@ -114,16 +121,16 @@ const diagnoseGoogleOAuthReconnectCause = (
   ) {
     return {
       cause: "保存済み refresh token が欠落しています。",
-      reconnectRequired: true,
-      action: "Firestore の encryptedRefreshToken を確認し、無ければ明示再連携してください。",
+      reconnectRequired: false,
+      action: "silent token fallback を使い、ユーザー操作なしで取得可能な access token を優先します。",
     };
   }
 
   if (normalizedMessage.includes("invalid_grant")) {
     return {
       cause: "Google 側で refresh token が無効化されています。権限取り消し、期限切れ、または認可コードの再利用が考えられます。",
-      reconnectRequired: true,
-      action: "Google アカウント側のアクセス許可を確認し、明示再連携してください。",
+      reconnectRequired: false,
+      action: "silent token fallback を試し、失敗時も再連携状態へ落とさずバックグラウンド復旧待ちにします。",
     };
   }
 
@@ -133,8 +140,8 @@ const diagnoseGoogleOAuthReconnectCause = (
   ) {
     return {
       cause: "OAuth client ID / client secret が一致していません。",
-      reconnectRequired: true,
-      action: "Firebase Functions secrets と Google Cloud Console の OAuth Web client 設定を確認してください。",
+      reconnectRequired: false,
+      action: "ユーザー操作ではなく Firebase Functions secrets と Google Cloud Console の OAuth Web client 設定を修正してください。",
     };
   }
 
@@ -147,16 +154,16 @@ const diagnoseGoogleOAuthReconnectCause = (
   ) {
     return {
       cause: "暗号化キー不一致、または保存済み refresh token の暗号化データ破損が疑われます。",
-      reconnectRequired: true,
-      action: "GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY と Firestore の encryptedRefreshToken を確認し、復旧できなければ明示再連携してください。",
+      reconnectRequired: false,
+      action: "silent token fallback を使い、サーバー側の保存状態は運用側で確認します。",
     };
   }
 
   if (code === "permission-denied") {
     return {
       cause: "Cloud Functions / Firestore の権限不足で refresh token を取得できません。",
-      reconnectRequired: true,
-      action: "Firebase Auth、Functions、Firestore ルール/権限を確認してください。",
+      reconnectRequired: false,
+      action: "ユーザー操作ではなく Firebase Auth、Functions、Firestore ルール/権限を確認してください。",
     };
   }
 
@@ -164,14 +171,14 @@ const diagnoseGoogleOAuthReconnectCause = (
     return {
       cause: "Cloud Functions の一時障害または制限により refresh token 更新に失敗しました。",
       reconnectRequired: false,
-      action: "一時的な silent token fallback または後続リトライで復旧できる可能性があります。",
+      action: "サーバーリトライ後、silent token fallback または後続リトライで復旧します。",
     };
   }
 
   return {
     cause: "Google OAuth refresh token 更新に失敗しました。原因は未分類です。",
-    reconnectRequired: true,
-    action: "コンソールの元エラー、Functions logs、Firestore の保存状態を確認してください。",
+    reconnectRequired: false,
+    action: "再連携状態へ落とさず、ログと Functions / Firestore の状態を確認してください。",
   };
 };
 
@@ -224,6 +231,10 @@ const shouldFallbackToSilentBrowserToken = (error: unknown): boolean => {
   return isServerInfrastructureError(error) || isRecoverableServerOAuthStateError(error);
 };
 
+const toUserTransparentAutoRecoveryError = (error: unknown): Error => {
+  return new Error(`Google Calendar token auto recovery is pending: ${toErrorMessage(error)}`);
+};
+
 const requestSilentBrowserCalendarAccessToken = async (): Promise<GoogleCalendarAccess> => {
   const oauthModule = await import("./gcal.oauth") as {
     requestCalendarAccessToken?: RequestCalendarAccessToken;
@@ -236,6 +247,28 @@ const requestSilentBrowserCalendarAccessToken = async (): Promise<GoogleCalendar
   // VITE_WEB_GOOGLE_OAUTH_CLIENT_ID が存在する場合だけ呼ぶため、
   // gcal.oauth.ts 側では GIS の prompt=none 経路になり、popup を開かない。
   return oauthModule.requestCalendarAccessToken(auth, true);
+};
+
+const getGoogleCalendarAccessTokenWithRetry = async (
+  input: GetGoogleCalendarAccessTokenInput,
+): Promise<ServerGoogleCalendarAccess> => {
+  for (let attempt = 0; attempt <= SERVER_TOKEN_RETRY_DELAYS_MS.length; attempt += 1) {
+    try {
+      const result = await getGoogleCalendarAccessTokenCallable(input);
+      return result.data;
+    } catch (error) {
+      if (
+        !isServerInfrastructureError(error) ||
+        attempt >= SERVER_TOKEN_RETRY_DELAYS_MS.length
+      ) {
+        throw error;
+      }
+
+      await sleep(SERVER_TOKEN_RETRY_DELAYS_MS[attempt]);
+    }
+  }
+
+  throw new Error("Google Calendar server token refresh retry loop exhausted");
 };
 
 export const isServerStoredGoogleOAuthEnabled = (): boolean => {
@@ -275,8 +308,7 @@ export const getServerStoredGoogleCalendarAccessToken = async (
   try {
     await waitForCallableAuth();
 
-    const result = await getGoogleCalendarAccessTokenCallable(input);
-    return result.data;
+    return await getGoogleCalendarAccessTokenWithRetry(input);
   } catch (error) {
     logGoogleOAuthReconnectCause({
       context: "getServerStoredGoogleCalendarAccessToken",
@@ -285,7 +317,7 @@ export const getServerStoredGoogleCalendarAccessToken = async (
     });
 
     if (!shouldFallbackToSilentBrowserToken(error)) {
-      throw error;
+      throw toUserTransparentAutoRecoveryError(error);
     }
 
     console.warn(
@@ -311,7 +343,7 @@ export const getServerStoredGoogleCalendarAccessToken = async (
         fallbackError,
       );
 
-      throw error;
+      throw toUserTransparentAutoRecoveryError(error);
     }
   }
 };
