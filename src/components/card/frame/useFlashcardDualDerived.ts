@@ -2,8 +2,6 @@ import React from "react";
 
 import { resolveSideBlocks } from "@/components/card/frame/flashcardBlocks";
 import {
-  type FlashcardCardLike,
-  type FlashcardMediaLike,
   resolveAnswerAttachmentAudios,
   resolveAnswerAttachmentImages,
   resolveAnswerAttachmentReferences,
@@ -23,29 +21,14 @@ import {
 } from "@/components/card/frame/flashcardDerived";
 import { resolveInkDocument } from "@/components/ink/inkStorage";
 
+import type {
+  FlashcardCardLike,
+  FlashcardDualDerivedSnapshot,
+  FlashcardMediaLike,
+  FlashcardSideDerivedSnapshot,
+} from "./types";
+
 import type { CardBlock } from "@/types/domain/card";
-
-export type FlashcardSideDerivedSnapshot = {
-  activeSide: "question" | "answer";
-  activeImageItems: FlashcardMediaLike[];
-  activeImages: string[];
-  activeAudioUrls: string[];
-  activeReferences: ReturnType<typeof resolveQuestionAttachmentReferences>;
-  activeBlocks: ReturnType<typeof resolveSideBlocks>;
-  activeInkDocument: ReturnType<typeof resolveInkDocument>;
-};
-
-export type FlashcardSharedDerivedSnapshot = {
-  cardId: string | null;
-  hasUncertainty: boolean;
-  isBookmarked: boolean;
-  layoutRows: number;
-};
-
-export type FlashcardDualDerivedSnapshot = FlashcardSharedDerivedSnapshot & {
-  question: FlashcardSideDerivedSnapshot;
-  answer: FlashcardSideDerivedSnapshot;
-};
 
 const EMPTY_MEDIA_ITEMS: FlashcardMediaLike[] = [];
 const EMPTY_IMAGE_URLS: string[] = [];
