@@ -1,5 +1,5 @@
 import type { Task } from "../../calendar/task/task.types";
-import type { TaskDragEvent, TaskDropTarget } from "./taskDnd.types";
+import type { TaskDragEvent, TaskDropTarget, VerticalDropPosition } from "./taskDnd.types";
 
 const toColumnId = (value: unknown): string | null => {
   return typeof value === "string" && value.length > 0 ? value : null;
@@ -7,6 +7,20 @@ const toColumnId = (value: unknown): string | null => {
 
 const getColumnId = (data: Record<string, unknown> | undefined): string | null => {
   return toColumnId(data?.columnId ?? data?.status);
+};
+
+const getTaskDropPosition = (event: TaskDragEvent): VerticalDropPosition => {
+  const activeRect = event.active.rect.current.translated ?? event.active.rect.current.initial;
+  const overRect = event.over?.rect;
+
+  if (!activeRect || !overRect) {
+    return "before";
+  }
+
+  const activeCenterY = activeRect.top + activeRect.height / 2;
+  const overCenterY = overRect.top + overRect.height / 2;
+
+  return activeCenterY > overCenterY ? "after" : "before";
 };
 
 export const resolveDropTarget = (
@@ -37,6 +51,14 @@ export const resolveDropTarget = (
       overTaskId: typeof overTaskId === "string" ? overTaskId : null,
       position: "before",
       insertIndex: typeof insertIndex === "number" ? insertIndex : undefined,
+    };
+  }
+
+  if (overType === "task" && overColumnId) {
+    return {
+      columnId: overColumnId,
+      overTaskId: String(over.id),
+      position: getTaskDropPosition(event),
     };
   }
 
