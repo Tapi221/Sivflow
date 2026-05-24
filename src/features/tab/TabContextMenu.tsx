@@ -1,8 +1,5 @@
 import type { CSSProperties, RefObject } from "react";
 
-import "@blocknote/react/style.css";
-import "@blocknote/mantine/style.css";
-
 type TabContextMenuAction = {
   id: string;
   label: string;
@@ -27,9 +24,9 @@ const WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY =
 
 const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
 .workspace-tab-context-menu {
-  min-width: 136px;
-  width: max-content;
-  max-width: 196px;
+  box-sizing: border-box;
+  contain: layout paint style;
+  width: ${WORKSPACE_TAB_CONTEXT_MENU_WIDTH}px;
   padding: 3px;
   overflow: hidden;
   background: #ffffff;
@@ -39,6 +36,11 @@ const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
   font-family: ${WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY};
   font-variant-east-asian: proportional-width;
   font-feature-settings: "palt" 1;
+}
+
+.workspace-tab-context-menu,
+.workspace-tab-context-menu * {
+  box-sizing: border-box;
 }
 
 .workspace-tab-context-menu-item {
@@ -94,7 +96,7 @@ export const WorkspaceTabContextMenu = ({
         top: y,
         zIndex: 1000,
       }}
-      className="bn-container bn-mantine workspace-tab-context-menu"
+      className="workspace-tab-context-menu"
       role="menu"
       aria-label="tab context menu"
     >
