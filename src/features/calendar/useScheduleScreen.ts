@@ -61,6 +61,22 @@ export type UseScheduleScreenReturn = {
   reconnectGoogleAccount: (accountId: string) => Promise<void>;
   toggleGoogleCalendar: (accountId: string, calendarId: string) => void;
 
+  refreshGoogleTasks: () => Promise<void>;
+  createGoogleTask: (taskListId: string, input: {
+    title: string;
+    notes?: string | null;
+    due?: string | null;
+    status?: "needsAction" | "completed";
+  }) => Promise<unknown>;
+  updateGoogleTask: (taskListId: string, taskId: string, patch: {
+    title?: string;
+    notes?: string | null;
+    due?: string | null;
+    status?: "needsAction" | "completed";
+    completed?: string | null;
+  }) => Promise<unknown>;
+  deleteGoogleTask: (taskListId: string, taskId: string) => Promise<void>;
+
   handleSelectViewMode: (viewMode: CalendarViewMode) => void;
   handleToday: () => void;
   handlePrevious: () => void;
@@ -227,6 +243,10 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
     addGoogleCalendar: google.addAccount,
     reconnectGoogleAccount: google.reconnectAccount,
     toggleGoogleCalendar: google.toggleCalendar,
+    refreshGoogleTasks: google.refreshGoogleTasks,
+    createGoogleTask: google.createGoogleTask,
+    updateGoogleTask: google.updateGoogleTask,
+    deleteGoogleTask: google.deleteGoogleTask,
 
     handleSelectViewMode: navigation.handleSelectViewMode,
     handleToday: navigation.handleToday,
