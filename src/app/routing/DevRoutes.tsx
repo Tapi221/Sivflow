@@ -4,9 +4,6 @@ import { Route } from "react-router-dom";
 
 import { DEV_MODE } from "@/utils/envGuards";
 
-const PdfScrollTest = DEV_MODE
-  ? lazy(() => import("@/routes/PdfScrollTest"))
-  : null;
 const CodeBlockVisualTest = DEV_MODE
   ? lazy(() => import("@/routes/CodeBlockVisualTest"))
   : null;
@@ -22,14 +19,6 @@ export const getDevStandaloneRouteElement = (
   isTestBypass: boolean,
 ): ReactNode | null => {
   if (
-    PdfScrollTest &&
-    isTestBypass &&
-    window.location.pathname === "/pdf-scroll-test"
-  ) {
-    return withDevRouteFallback(<PdfScrollTest />);
-  }
-
-  if (
     CodeBlockVisualTest &&
     isTestBypass &&
     window.location.pathname === "/codeblock-visual-test"
@@ -43,13 +32,6 @@ export const getDevStandaloneRouteElement = (
 export const getDevRouteElements = () => {
   return (
     <>
-      {PdfScrollTest ? (
-        <Route
-          path="pdf-scroll-test"
-          element={withDevRouteFallback(<PdfScrollTest />)}
-        />
-      ) : null}
-
       {CodeBlockVisualTest ? (
         <Route
           path="codeblock-visual-test"
