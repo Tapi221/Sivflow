@@ -1,6 +1,20 @@
+import { designTokens } from "@/presentation/react/theme/design-tokens";
+
 export const UI_TYPO = "font-sans";
 export const CONTENT_TYPO = "font-serif";
 export const NUMERIC_TYPO = "tabular-nums";
+
+export const TYPOGRAPHY_FONT_SIZE_PX = designTokens.typography.fontSize;
+
+export const TYPOGRAPHY_TEXT_SIZE_CLASS = {
+  xs: "text-[var(--ds-typography-font-size-xs)]",
+  sm: "text-[var(--ds-typography-font-size-sm)]",
+  smPlus: "text-[var(--ds-typography-font-size-sm-plus)]",
+  md: "text-[var(--ds-typography-font-size-md)]",
+  mdPlus: "text-[var(--ds-typography-font-size-md-plus)]",
+  lg: "text-[var(--ds-typography-font-size-lg)]",
+  "2xl": "text-[var(--ds-typography-font-size-2xl)]",
+} as const;
 
 // Product chrome typography is anchored to the completed calendar month view.
 // Keep app UI compact: 12px is the default, 11px is metadata, 13px is table/section structure.
@@ -16,7 +30,7 @@ export const TYPO = {
   caption: "text-[11px] font-semibold tracking-[0.03em]",
   micro: "text-[10px] font-semibold tabular-nums",
   emptyTitle: "text-[30px] font-semibold tracking-[-0.03em]",
-  emptyBody: "text-[14px] leading-7",
+  emptyBody: `${TYPOGRAPHY_TEXT_SIZE_CLASS.sm} leading-7`,
 } as const;
 
 // Task board and task list intentionally share these tokens so both views feel like one surface.
