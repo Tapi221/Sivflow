@@ -11,6 +11,7 @@ import { TaskPriorityBadge } from "@/chip/budge/TaskPriorityBadge";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { TaskStatusDot } from "@/chip/icon/TaskStatusDot";
 import { TrashIcon } from "@/components/icons/icons.card";
+import { TriangleIcon } from "@/components/icons/icons.task";
 import { cn } from "@/lib/utils";
 import { TASK_COLUMNS, CATEGORY_CONFIG } from "./task.types";
 import type { Task, TaskStatus } from "./task.types";
@@ -122,13 +123,10 @@ const SectionHeader = ({ status, count, open, onToggle, onAdd: _onAdd, cols }: S
           onClick={onToggle}
           className="flex items-center justify-center w-4 h-4 rounded text-[#b0b4be] hover:text-[#6b7280] transition-colors"
         >
-          <svg
-            viewBox="0 0 10 10"
+          <TriangleIcon
             className="w-2.5 h-2.5 transition-transform duration-150"
-            style={{ transform: open ? "rotate(90deg)" : "rotate(0deg)" }}
-          >
-            <path d="M3 2l4 3-4 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-          </svg>
+            style={{ transform: open ? "rotate(180deg)" : "rotate(90deg)" }}
+          />
         </button>
       </div>
 
