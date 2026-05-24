@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { type FormEvent, useMemo, useState } from "react";
 import {
   addDays,
   format,
@@ -20,6 +20,7 @@ import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
 import type {
+  AppCalendarItem,
   CalendarSelectionRange,
   CalendarSidebarProps,
   GoogleAccountDisplay,
@@ -118,6 +119,22 @@ const IconChevronRight = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const IconPlus = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <path
+      d="M8 3.5V12.5M3.5 8H12.5"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 const normalizeSelectionRange = (range?: CalendarSelectionRange | null) => {
   if (!range) return null;
 
@@ -160,6 +177,80 @@ const buildMiniCalendarDays = (
       isInSelectedRange,
     };
   });
+};
+
+type AppProjectsSectionProps = {
+  projects: AppCalendarItem[];
+  onAddProject: (projectName: string) => void;
+  onToggleProject: (projectId: string) => void;
+};
+
+const AppProjectsSection = ({
+  projects,
+  onAddProject,
+  onToggleProject,
+}: AppProjectsSectionProps) => {
+  const [projectName, setProjectName] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const trimmedProjectName = projectName.trim();
+    if (!trimmedProjectName) return;
+
+    onAddProject(trimmedProjectName);
+    setProjectName("");
+    setIsAdding(false);
+  };
+
+  return (
+    <div className="mt-0.5 flex flex-col gap-0.5">
+      {projects.map((project) => (
+        <SelectableGoogleSourceRow
+          key={project.id}
+          id={project.id}
+          label={project.label}
+          checked={project.checked}
+          color={project.color}
+          onToggle={onToggleProject}
+        />
+      ))}
+
+      {isAdding ? (
+        <form
+          className="mx-2 ml-5 mt-1 flex h-7 items-center gap-1.5"
+          onSubmit={handleSubmit}
+        >
+          <input
+            value={projectName}
+            onChange={(event) => setProjectName(event.target.value)}
+            autoFocus
+            placeholder="プロジェクト名"
+            className="min-w-0 flex-1 rounded-full border border-[#e6e6e6] bg-white px-3 py-1 text-[12px] font-medium text-[#2f2f2f] outline-none transition focus:border-[#d7d7d7] focus:ring-2 focus:ring-[#f2f2f2]"
+          />
+          <button
+            type="submit"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4f4f4] text-[#6d7380] transition hover:bg-[#ececec] active:scale-[0.94]"
+            aria-label="プロジェクトを追加"
+          >
+            <IconPlus className="h-3.5 w-3.5" />
+          </button>
+        </form>
+      ) : (
+        <button
+          type="button"
+          className="mx-2 ml-5 mt-1 flex h-7 items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium text-[#8c8c8c] transition hover:bg-[#f7f7f7] hover:text-[#5f6574] active:bg-[#f1f1f1]"
+          onClick={() => setIsAdding(true)}
+        >
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f4f4f4] text-[#8c8c8c]">
+            <IconPlus className="h-3.5 w-3.5" />
+          </span>
+          <span>プロジェクトを追加</span>
+        </button>
+      )}
+    </div>
+  );
 };
 
 type GoogleAccountSectionProps = {
@@ -295,6 +386,7 @@ export const CalendarSidebar = ({
   selectedDate,
   selectedRange,
   activeMode,
+  appProjects,
   googleAccounts,
   isAnyCalendarConnecting,
   selectedTaskListIds,
@@ -302,6 +394,8 @@ export const CalendarSidebar = ({
   onPreviousMonth,
   onNextMonth,
   onAddCalendar,
+  onAddProject,
+  onToggleProject,
   onReconnectAccount,
   onToggleCalendar,
   onToggleTaskList,
@@ -315,6 +409,7 @@ export const CalendarSidebar = ({
   );
 
   const hasGoogleAccounts = googleAccounts.length > 0;
+  const hasAppProjects = appProjects.length > 0;
   const isTaskMode = activeMode === "task";
 
   return (
@@ -423,6 +518,14 @@ export const CalendarSidebar = ({
           </span>
         </div>
 
+        {!isTaskMode && (
+          <AppProjectsSection
+            projects={appProjects}
+            onAddProject={onAddProject}
+            onToggleProject={onToggleProject}
+          />
+        )}
+
         {googleAccounts.map((account) => (
           <GoogleAccountSection
             key={account.accountId}
@@ -439,7 +542,7 @@ export const CalendarSidebar = ({
       </nav>
 
       <div className="mt-auto w-full shrink-0">
-        {hasGoogleAccounts && (
+        {(hasGoogleAccounts || hasAppProjects) && (
           <div className={cn("mt-2", SIDEBAR_DIVIDER_CLASS)} />
         )}
 
