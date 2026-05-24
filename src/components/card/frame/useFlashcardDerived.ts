@@ -1,10 +1,3 @@
-/**
- * Flashcard の派生データ（active-side に依存するものを含む）を集約した hook。
- *
- * - cardData の null/undefined ガードを一箇所に寄せる
- * - effectiveIsFlipped に基づく active-side 選択を一元管理
- * - useMemo の deps は既存パターンに準拠
- */
 import React from "react";
 
 import { resolveInkDocument } from "@/components/ink/inkStorage";
@@ -30,7 +23,7 @@ import {resolveAnswerAttachmentAudios,
   resolveQuestionText,} from "./flashcardDerived";
 import type {FlashcardCardLike,
   FlashcardDerived,
-  FlashcardMediaLike,} from "./types";
+  FlashcardMediaLike,} from "./flashcard.types";
 
 import type { CardBlock } from "@/types/domain/card";
 
