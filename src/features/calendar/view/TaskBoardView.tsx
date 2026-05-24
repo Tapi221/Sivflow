@@ -2,6 +2,10 @@ import { DndContext, DragOverlay, useDroppable } from "@dnd-kit/core";
 import { useCallback, useMemo, type CSSProperties, type WheelEvent } from "react";
 import { createPortal } from "react-dom";
 
+import { TaskStatusDot } from "@/chip/icon/TaskStatusDot";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import { TASK_TYPO } from "@/styles/tokens/typography";
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "../task/task.types";
 import type { Task, TaskGroupMode, TaskStatus } from "../task/task.types";
 import { useTaskBoardDnd } from "../../dnd/task/useTaskBoardDnd";
@@ -50,6 +54,8 @@ type SectionTaskColumnProps = Pick<
 const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-white";
 const TASK_CARD_OVERLAY_CLASS_NAME = "max-w-[calc(100vw-2rem)] will-change-transform";
 const TASK_COLUMN_DIVIDER_CLASS_NAME = "border-l border-[#eeeeee]";
+const TASK_COLUMN_SPACER_TRANSITION_CLASS_NAME =
+  "relative z-0 shrink-0 transition-[height,margin,opacity] duration-[160ms] ease-[cubic-bezier(.22,1,.36,1)]";
 
 const getCategoryConfig = (category: string) => {
   return (
@@ -117,38 +123,50 @@ const SectionTaskColumn = ({
     >
       <div className="flex h-full min-h-0 w-full min-w-0 flex-col px-3 pt-3 pb-0 bg-white">
         <div className="mb-3 flex shrink-0 items-center gap-2">
-          <span
-            className="h-2.5 w-2.5 shrink-0 rounded-full"
-            style={{ backgroundColor: group.color }}
-          />
-          <span className="min-w-0 truncate text-[13px] font-semibold text-[#1c1c1e]">
+          <TaskStatusDot color={group.color} />
+          <span className={TASK_TYPO.columnTitle}>
             {group.label}
           </span>
-          <span className="ml-0.5 flex h-4 min-w-4 items-center justify-center rounded px-1 text-[11px] font-semibold text-[#9aa3b1]">
+          <span className={cn("ml-0.5 flex h-4 min-w-4 items-center justify-center rounded px-1", TASK_TYPO.count)}>
             {group.tasks.length}
           </span>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto pr-3">
-          <div className="flex min-h-8 flex-col gap-2">
-            {group.tasks.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-[#e5e7eb] px-3 py-4 text-center text-[12px] text-[#c7c7cc]">
-                タスクなし
-              </div>
-            ) : (
-              group.tasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  accountName={accountName}
-                  accountPhotoUrl={accountPhotoUrl}
-                  onDelete={onDeleteTask}
-                  onToggleDone={onToggleTaskDone}
-                />
-              ))
+        <ScrollArea className="-mr-3 min-h-0 flex-1 overscroll-contain">
+          <div
+            className={cn(
+              "flex min-h-8 flex-col pr-3",
+              "transition-[padding,border-color,background-color] duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
             )}
+          >
+            <div
+              className={cn(TASK_COLUMN_SPACER_TRANSITION_CLASS_NAME, "h-4 -mb-1")}
+              aria-hidden="true"
+            />
+            {group.tasks.map((task, index) => {
+              const isLastTask = index === group.tasks.length - 1;
+
+              return (
+                <div key={task.id}>
+                  <TaskCard
+                    task={task}
+                    accountName={accountName}
+                    accountPhotoUrl={accountPhotoUrl}
+                    onDelete={onDeleteTask}
+                    onToggleDone={onToggleTaskDone}
+                  />
+                  <div
+                    className={cn(
+                      TASK_COLUMN_SPACER_TRANSITION_CLASS_NAME,
+                      isLastTask ? "h-4 -mt-2 -mb-2" : "h-6 -my-2",
+                    )}
+                    aria-hidden="true"
+                  />
+                </div>
+              );
+            })}
           </div>
-        </div>
+        </ScrollArea>
       </div>
     </div>
   );
@@ -244,10 +262,9 @@ export const TaskBoardView = ({
         onWheelCapture={handleBoardWheel}
       >
         <div
-          className="grid h-full min-h-0 w-full gap-0"
+          className="grid h-full min-h-0 w-full min-w-[960px] gap-0"
           style={{
-            gridTemplateColumns: `repeat(${Math.max(sectionGroups.length, 1)}, minmax(240px, 1fr))`,
-            minWidth: `${Math.max(sectionGroups.length, 1) * 240}px`,
+            gridTemplateColumns: `repeat(${Math.max(sectionGroups.length, 1)}, minmax(240px, 25%))`,
           }}
         >
           {sectionGroups.length === 0 ? (
