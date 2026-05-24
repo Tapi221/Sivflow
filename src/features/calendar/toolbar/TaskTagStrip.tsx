@@ -65,7 +65,7 @@ export const TaskTagStrip = () => {
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="shrink-0 max-w-[180px] rounded-full text-left transition-transform hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
+                    className="shrink-0 max-w-[180px] rounded-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
                     aria-label={`${tag.name}の色を変更`}
                   >
                     <TagChip
