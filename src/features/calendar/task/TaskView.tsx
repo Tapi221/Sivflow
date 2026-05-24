@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "./task.types";
-import type { Task, TaskCreateInput, TaskStatus } from "./task.types";
+import type { Task, TaskCreateInput, TaskGroupMode, TaskStatus } from "./task.types";
 import type { GoogleAccountDisplay } from "../scheduleScreen.types";
 import { useTaskStore } from "./hooks/useTaskStore";
 import { NewTaskModal } from "../modal/NewTaskModal";
@@ -220,6 +220,7 @@ export const TaskView = ({
   const { tasks, addTask, deleteTask, moveTask, reorderTask, updateTask } =
     useTaskStore();
   const [viewMode, setViewMode] = useState<BoardListViewMode>("board");
+  const [groupMode, setGroupMode] = useState<TaskGroupMode>("status");
   const [showModal, setShowModal] = useState(false);
   const [newTaskStatus, setNewTaskStatus] =
     useState<TaskStatus>("not_started");
@@ -533,14 +534,18 @@ export const TaskView = ({
       <TaskToolbar
         filterDate={filterDate}
         viewMode={viewMode}
+        groupMode={groupMode}
         onClearFilterDate={() => setFilterDate(null)}
         onChangeViewMode={setViewMode}
+        onChangeGroupMode={setGroupMode}
         onOpenNewTaskModal={handleOpenNewTaskModal}
       />
 
       {viewMode === "board" ? (
         <TaskBoardView
+          tasks={visibleTasks}
           tasksByStatus={tasksByStatus}
+          groupMode={groupMode}
           accountName={taskAccountName}
           accountPhotoUrl={taskAccountPhotoUrl}
           onAddTask={handleAddTask}
@@ -551,6 +556,7 @@ export const TaskView = ({
       ) : (
         <TaskListView
           tasks={visibleTasks}
+          groupMode={groupMode}
           onToggleTaskDone={handleToggleTaskDone}
           onRenameTask={handleRenameTask}
           onChangeTaskDueDate={handleChangeTaskDueDate}
