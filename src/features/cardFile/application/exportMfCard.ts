@@ -1,16 +1,7 @@
-import {MF_CARD_FORMAT,
-  MF_CARD_VERSION,
-  MfCardExportError,
-  type MfCardFileV1,} from "@/features/cardFile/domain/mfCardTypes";
+import { MF_CARD_FORMAT, MF_CARD_VERSION, MfCardExportError, type MfCardFileV1 } from "@/features/cardFile/domain/mfCardTypes";
 import { encodeMfCardFile } from "@/features/cardFile/infra/web/mfCardJsonCodec";
-import {collectMfDeckExportIssues,
-  mapCardToMfDeckCard,
-<<<<<<< HEAD
-  type MfDeckTagLookup,} from "@/features/deckFile/application/mapCardToMfDeck";
-=======
-} from "@/features/deckFile/application/mapCardToMfDeck";
-import type { MfDeckTagLookup } from "@/features/deckFile/application/types";
->>>>>>> 975fc9541e4df6ab846d079dcee64139ad5505be
+import { collectMfDeckExportIssues, mapCardToMfDeckCard } from "@/features/deckFile/application/mapCardToMfDeck";
+import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
 
 import type { Card } from "@/types";
 
