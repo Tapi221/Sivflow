@@ -1,7 +1,5 @@
-import {
-  buildMfDeckArchive,
-  type MfDeckTagLookup,
-} from "@/features/deckFile/application/mapCardToMfDeck";
+import { buildMfDeckArchive } from "@/features/deckFile/application/mapCardToMfDeck";
+import type { MfDeckTagLookup } from "@/features/deckFile/application/types";
 import { encodeMfDeckArchive } from "@/features/deckFile/infra/web/mfDeckZipCodec";
 
 import type { Card, CardSet } from "@/types";
