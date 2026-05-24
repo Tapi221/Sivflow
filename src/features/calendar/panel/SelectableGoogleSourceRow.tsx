@@ -25,7 +25,6 @@ export const SelectableGoogleSourceRow = ({
       className={cn(
         GOOGLE_SOURCE_ROW_CLASS_NAME,
         "transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1]",
-        checked && "bg-[#f2f4ff]",
       )}
       onClick={() => onToggle(id)}
       aria-pressed={checked}
