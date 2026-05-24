@@ -44,6 +44,7 @@ export const useTaskBoardDnd = ({
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [activeTaskWidth, setActiveTaskWidth] = useState<number | null>(null);
   const [activeTaskHeight, setActiveTaskHeight] = useState<number | null>(null);
+  const [activeDropTarget, setActiveDropTarget] = useState<TaskDropTarget | null>(null);
   const latestDropTargetRef = useRef<TaskDropTarget | null>(null);
   const visibleTasksByStatus = tasksByStatus;
   const isPreviewingTaskReorder = false;
@@ -70,6 +71,7 @@ export const useTaskBoardDnd = ({
     setActiveTaskId(null);
     setActiveTaskWidth(null);
     setActiveTaskHeight(null);
+    setActiveDropTarget(null);
     latestDropTargetRef.current = null;
   };
 
@@ -77,6 +79,7 @@ export const useTaskBoardDnd = ({
     setActiveTaskId(String(event.active.id));
     setActiveTaskWidth(event.active.rect.current.initial?.width ?? null);
     setActiveTaskHeight(event.active.rect.current.initial?.height ?? null);
+    setActiveDropTarget(null);
     latestDropTargetRef.current = null;
   };
 
@@ -94,6 +97,10 @@ export const useTaskBoardDnd = ({
     );
 
     if (!target) {
+      if (latestDropTargetRef.current !== null) {
+        latestDropTargetRef.current = null;
+        setActiveDropTarget(null);
+      }
       return;
     }
 
@@ -103,6 +110,7 @@ export const useTaskBoardDnd = ({
     }
 
     latestDropTargetRef.current = target;
+    setActiveDropTarget(target);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -135,6 +143,7 @@ export const useTaskBoardDnd = ({
   };
 
   return {
+    activeDropTarget,
     activeTask,
     activeTaskHeight,
     activeTaskId,
