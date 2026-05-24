@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Volume2, X } from "@/ui/icons";
 
-import type { FlashcardMediaLike } from "./flashcardDerived";
+import type { FlashcardMediaLike } from "./types";
 
 import type { ReferenceBlockData } from "@/types";
 
