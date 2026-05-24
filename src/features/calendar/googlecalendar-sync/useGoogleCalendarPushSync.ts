@@ -32,7 +32,9 @@ export const useGoogleCalendarPushSync = ({
   const onNotificationRef = useRef(onNotification);
   const listenerDisabledRef = useRef(false);
 
-  onNotificationRef.current = onNotification;
+  useEffect(() => {
+    onNotificationRef.current = onNotification;
+  }, [onNotification]);
 
   const calendarKey = useMemo(() => {
     return Array.from(selectedCalendarIds).slice().sort().join("|");
