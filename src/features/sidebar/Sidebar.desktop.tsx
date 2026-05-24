@@ -1,7 +1,6 @@
 import { type MouseEvent, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
-import { useScheduleScreenStore } from "@/features/calendar/header/useScheduleScreenStore";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
@@ -180,13 +179,11 @@ const Sidebar = ({
   onToggleClosed,
   onOpenSettings,
 }: SidebarProps) => {
-  const closeCalendar = useScheduleScreenStore((s) => s.close);
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
 
   const mainNavItemsWithActions = mainNavItems.map((item) => ({
     ...item,
     onClick: () => {
-      closeCalendar();
       item.onClick?.();
 
       if (item.id === "explore") {
