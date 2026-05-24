@@ -62,7 +62,7 @@ export const TaskToolbar = ({
           <FilterChip onClick={onOpenFilter} />
 
           <div
-            className="inline-flex rounded-lg bg-[#f4f5f7] p-0.5"
+            className="inline-flex h-8 items-center gap-1 rounded-full border border-[#eeeeee] bg-white p-0.5"
             role="group"
             aria-label="タスクの表示分類"
           >
@@ -75,10 +75,10 @@ export const TaskToolbar = ({
                   type="button"
                   aria-pressed={active}
                   onClick={() => onChangeGroupMode(mode)}
-                  className={`h-7 rounded-md px-3 text-[12px] font-semibold transition-colors ${
+                  className={`h-7 rounded-full px-3 text-[12px] font-semibold transition-colors duration-200 ${
                     active
-                      ? "bg-white text-[#1c1c1e] shadow-sm"
-                      : "text-[#8f929c] hover:text-[#4b5563]"
+                      ? "bg-[#f5f7f8] text-[#4c5361]"
+                      : "text-[#9ca1aa] hover:bg-[#fafafa] hover:text-[#6b7280]"
                   }`}
                 >
                   {GROUP_MODE_LABEL[mode]}
