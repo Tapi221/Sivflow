@@ -98,6 +98,6 @@ export const createBase64DataUrl = (url: string): Base64DataUrl => {
 /**
  * Blob URL を安全に解放
  */
-const revokeBlobUrl = (url: BlobUrl): void => {
+export const revokeBlobUrl = (url: BlobUrl): void => {
   URL.revokeObjectURL(url);
 };
