@@ -64,7 +64,7 @@ const compressAndConvertToBase64Internal = (
  * 画像を圧縮して Blob に変換（推奨）
  * Base64 を経由するが、最終的に Blob を返すため安全
  */
-const compressImageToBlob = async (
+export const compressImageToBlob = async (
   file: File,
   maxWidth: number = 1920,
   maxHeight: number = 1920,
@@ -89,6 +89,6 @@ export const compressAndConvertToBase64 = compressAndConvertToBase64Internal;
 /**
  * @deprecated uploadImageAsBase64 は非推奨。compressImageToBlob を使用すること
  */
-const uploadImageAsBase64 = async (file: File): Promise<string> => {
+export const uploadImageAsBase64 = async (file: File): Promise<string> => {
   return compressAndConvertToBase64Internal(file);
 };
