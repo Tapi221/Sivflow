@@ -14,7 +14,7 @@ import "@/services/localDB";
 import App from "./App";
 import { bootstrapApp } from "./bootstrap/bootstrapApp";
 import { queryClient } from "./bootstrap/queryClient";
-import { ErrorBoundary } from "./components/common/ErrorBoundary";
+import { ErrorBoundary } from "./components/common/ErrorScreen";
 
 bootstrapApp();
 
