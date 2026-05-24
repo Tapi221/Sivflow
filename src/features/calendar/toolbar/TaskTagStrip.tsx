@@ -65,13 +65,13 @@ export const TaskTagStrip = () => {
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="shrink-0 max-w-[180px] rounded-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
+                    className="group shrink-0 max-w-[180px] cursor-pointer rounded-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
                     aria-label={`${tag.name}の色を変更`}
                   >
                     <TagChip
                       label={tag.name}
                       colorKey={tagColorKey}
-                      className="pointer-events-none max-w-full text-[11px] font-semibold leading-[1.3] tabular-nums"
+                      className="pointer-events-none max-w-full text-[11px] font-semibold leading-[1.3] tabular-nums transition-[filter,box-shadow] duration-100 group-hover:brightness-[0.96] group-hover:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
                     />
                   </button>
                 </PopoverTrigger>
