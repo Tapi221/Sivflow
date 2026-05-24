@@ -35,6 +35,57 @@ const GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME =
   "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-5 text-left";
 const GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME = "px-5";
 
+const normalizeCalendarLabel = (value?: string | null): string =>
+  (value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s\-_]+/g, "");
+
+const getTaskCalendarCandidates = (taskListTitle: string): string[] => {
+  const normalizedTitle = normalizeCalendarLabel(taskListTitle);
+  const candidates = new Set([
+    normalizedTitle,
+    normalizeCalendarLabel(`${taskListTitle} Tasks`),
+    normalizeCalendarLabel(`${taskListTitle} ToDo`),
+    normalizeCalendarLabel(`${taskListTitle} Todo`),
+    normalizeCalendarLabel(`${taskListTitle} タスク`),
+    normalizeCalendarLabel(`${taskListTitle} ToDo リスト`),
+    normalizeCalendarLabel(`${taskListTitle} ToDoリスト`),
+  ]);
+
+  if (normalizedTitle === "mytasks" || normalizedTitle === "マイタスク") {
+    candidates.add("tasks");
+    candidates.add("todo");
+    candidates.add("todos");
+    candidates.add("googleasks");
+    candidates.add("googletasks");
+    candidates.add("task");
+    candidates.add("todoリスト");
+    candidates.add("todolist");
+  }
+
+  return Array.from(candidates).filter(Boolean);
+};
+
+const resolveTaskListColor = (
+  account: GoogleAccountDisplay,
+  taskListTitle: string,
+): string => {
+  const taskCalendarCandidates = getTaskCalendarCandidates(taskListTitle);
+  const matchingCalendar = account.calendars.find((calendar) => {
+    const labels = [
+      calendar.summary,
+      calendar.summaryOverride,
+      calendar.description,
+      calendar.id,
+    ].map(normalizeCalendarLabel);
+
+    return labels.some((label) => taskCalendarCandidates.includes(label));
+  });
+
+  return matchingCalendar?.backgroundColor ?? DEFAULT_TASK_LIST_COLOR;
+};
+
 const IconChevronLeft = ({ className }: { className?: string }) => (
   <svg
     viewBox="0 0 16 16"
@@ -237,7 +288,10 @@ const GoogleAccountSection = ({
               key={taskList.id}
               className={GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME}
             >
-              <AnimatedCircleCheckbox checked color={DEFAULT_TASK_LIST_COLOR} />
+              <AnimatedCircleCheckbox
+                checked
+                color={resolveTaskListColor(account, taskList.title)}
+              />
 
               <span className="truncate text-[12px] font-medium text-[#2f2f2f]">
                 {taskList.title}
