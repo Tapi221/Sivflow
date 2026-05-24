@@ -355,8 +355,12 @@ const toErrorMessage = (error: unknown): string =>
 const toGoogleCalendarAuthErrorMessage = (error: unknown): string =>
   `Google Calendar token refresh failed: ${toErrorMessage(error)}`;
 
-const createGoogleCalendarConnectErrorMessage = (error: unknown): string =>
-  `Google Calendar connection failed: ${toErrorMessage(error)}`;
+const logGoogleCalendarConnectionError = (
+  context: string,
+  error: unknown,
+): void => {
+  console.error(`[GoogleCalendar] ${context}`, error);
+};
 
 const useServerStoredTokens = isServerStoredGoogleOAuthEnabled();
 
@@ -873,6 +877,12 @@ export const useMultiAccountGoogleCalendar = () => {
         : await requestCalendarAccessToken(auth);
       const list = await fetchCalendarList(result.accessToken);
 
+      if (list.length === 0) {
+        console.warn("[GoogleCalendar] connected account has no visible calendars", {
+          accountEmail: result.accountEmail,
+        });
+      }
+
       const accountId =
         result.accountEmail ??
         replacingAccount?.email ??
@@ -945,6 +955,11 @@ export const useMultiAccountGoogleCalendar = () => {
         cachedCalendars: toCachedCalendars(list),
       });
     } catch (error) {
+      logGoogleCalendarConnectionError(
+        replaceAccountId ? "reconnect failed" : "connect failed",
+        error,
+      );
+
       if (replaceAccountId) {
         dispatchAccounts({
           type: "SET_CONNECTING",
@@ -957,16 +972,7 @@ export const useMultiAccountGoogleCalendar = () => {
           error: toErrorMessage(error),
         });
       } else {
-        dispatchAccounts({
-          type: "SET_CONNECTING",
-          id: tempId,
-          value: false,
-        });
-        dispatchAccounts({
-          type: "SET_ERROR",
-          id: tempId,
-          error: createGoogleCalendarConnectErrorMessage(error),
-        });
+        dispatchAccounts({ type: "REMOVE", id: tempId });
       }
     }
   }, []);

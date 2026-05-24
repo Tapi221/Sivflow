@@ -161,18 +161,6 @@ const GoogleAccountSection = ({
 
       {isOpen && !isTaskMode && (
         <div className="mt-0.5 flex flex-col gap-0.5">
-          {account.connectionStatus === "connected" &&
-            account.calendars.length === 0 && (
-            <p
-              className={cn(
-                GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
-                "py-1 text-[11px] text-[#9a9a9a]",
-              )}
-            >
-              Google カレンダーが見つかりません
-            </p>
-          )}
-
           {account.calendars.map((calendar) => {
             const checked = account.selectedCalendarIds.has(calendar.id);
 
@@ -259,17 +247,8 @@ const GoogleAccountSection = ({
         </div>
       )}
 
-      {(account.connectionStatus === "needsReconnect" ||
-        account.connectionStatus === "error") && (
-        <GcalRelinkPanel
-          message={
-            account.connectionStatus === "error"
-              ? "Google カレンダーを同期できませんでした。"
-              : undefined
-          }
-          detail={account.error}
-          onReconnect={onReconnect}
-        />
+      {account.connectionStatus === "needsReconnect" && (
+        <GcalRelinkPanel onReconnect={onReconnect} />
       )}
     </div>
   );
