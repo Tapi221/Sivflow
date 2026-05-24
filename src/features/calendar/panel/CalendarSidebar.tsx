@@ -10,7 +10,6 @@ import {
 
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { AddGoogleCalendarButton } from "@/chip/button/AddGoogleCalendarButton";
-import { AnimatedCircleCheckbox } from "@/chip/checkbox/AnimatedCircleCheckbox";
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import { GcalRelinkPanel } from "@/chip/minipanel/GcalRelinkPanel";
 import { CalendarIcon, TaskIcon } from "@/components/icons/icons.schedule";
@@ -25,14 +24,13 @@ import type {
   CalendarSidebarProps,
   GoogleAccountDisplay,
 } from "../scheduleScreen.types";
+import { SelectableGoogleSourceRow } from "./SelectableGoogleSourceRow";
 
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 const DEFAULT_TASK_LIST_COLOR = "#7c8cf8";
 const SIDEBAR_DIVIDER_CLASS = "h-px w-full shrink-0 bg-[#eeeeee]";
 const MINI_CALENDAR_NAV_BUTTON_CLASS_NAME =
   "flex h-7 w-7 items-center justify-center rounded-full text-[#b7b7b7] transition-all hover:bg-[#f7f7f7] hover:text-[#8c8c8c] active:scale-[0.94] active:bg-[#f1f1f1]";
-const GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME =
-  "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-5 text-left";
 const GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME = "px-5";
 
 const normalizeCalendarLabel = (value?: string | null): string =>
@@ -216,31 +214,16 @@ const GoogleAccountSection = ({
 
       {isOpen && !isTaskMode && (
         <div className="mt-0.5 flex flex-col gap-0.5">
-          {account.calendars.map((calendar) => {
-            const checked = account.selectedCalendarIds.has(calendar.id);
-
-            return (
-              <button
-                key={calendar.id}
-                type="button"
-                className={cn(
-                  GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME,
-                  "transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1]",
-                )}
-                onClick={() => onToggleCalendar(calendar.id)}
-                aria-pressed={checked}
-              >
-                <AnimatedCircleCheckbox
-                  checked={checked}
-                  color={calendar.backgroundColor ?? DEFAULT_CALENDAR_COLOR}
-                />
-
-                <span className="truncate text-[12px] font-medium text-[#2f2f2f]">
-                  {calendar.summary}
-                </span>
-              </button>
-            );
-          })}
+          {account.calendars.map((calendar) => (
+            <SelectableGoogleSourceRow
+              key={calendar.id}
+              id={calendar.id}
+              label={calendar.summary}
+              checked={account.selectedCalendarIds.has(calendar.id)}
+              color={calendar.backgroundColor ?? DEFAULT_CALENDAR_COLOR}
+              onToggle={onToggleCalendar}
+            />
+          ))}
         </div>
       )}
 
@@ -287,32 +270,16 @@ const GoogleAccountSection = ({
             </p>
           )}
 
-          {!hasTaskListsError && account.taskLists.map((taskList) => {
-            const checked = selectedTaskListIds?.has(taskList.id) ?? false;
-
-            return (
-              <button
-                key={taskList.id}
-                type="button"
-                className={cn(
-                  GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME,
-                  "transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1]",
-                  checked && "bg-[#f2f4ff]",
-                )}
-                onClick={() => onToggleTaskList?.(taskList.id)}
-                aria-pressed={checked}
-              >
-                <AnimatedCircleCheckbox
-                  checked={checked}
-                  color={resolveTaskListColor(account, taskList.title)}
-                />
-
-                <span className="truncate text-[12px] font-medium text-[#2f2f2f]">
-                  {taskList.title}
-                </span>
-              </button>
-            );
-          })}
+          {!hasTaskListsError && account.taskLists.map((taskList) => (
+            <SelectableGoogleSourceRow
+              key={taskList.id}
+              id={taskList.id}
+              label={taskList.title}
+              checked={selectedTaskListIds?.has(taskList.id) ?? false}
+              color={resolveTaskListColor(account, taskList.title)}
+              onToggle={(taskListId) => onToggleTaskList?.(taskListId)}
+            />
+          ))}
         </div>
       )}
 
