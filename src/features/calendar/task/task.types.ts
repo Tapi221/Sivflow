@@ -1,5 +1,6 @@
 export type TaskStatus = "not_started" | "in_progress" | "review" | "done";
 export type TaskPriority = "high" | "medium" | "low";
+export type TaskGroupMode = "status" | "section";
 
 export type Task = {
   id: string;
