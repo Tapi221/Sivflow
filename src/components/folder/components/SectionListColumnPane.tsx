@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
 import { CardSetLibraryDashboard } from "@/features/library-cardset/components/CardSetLibraryDashboard";
@@ -177,6 +177,21 @@ const buildFolderRoute = (folderId: string): string => {
   return `/library?${searchParams.toString()}`;
 };
 
+const resolveLibraryType = (pathname: string, searchParams: URLSearchParams) => {
+  const normalizedPathname = pathname.toLowerCase().replace(/\/+$/, "");
+
+  if (normalizedPathname === "/library/flashcard" || normalizedPathname === "/library/flashcards") {
+    return "flashcards";
+  }
+
+  if (normalizedPathname === "/library/pdf") {
+    return "pdf";
+  }
+
+  const queryLibraryType = searchParams.get("libraryType");
+  return queryLibraryType === "flashcard" ? "flashcards" : (queryLibraryType ?? "pdf");
+};
+
 const dispatchExplorerColumnPathChange = (crumbs: BreadcrumbCrumb[]) => {
   if (typeof window === "undefined") return;
 
@@ -254,7 +269,8 @@ const SectionListColumnPane = ({
   void onReorderCardsInCardSet;
 
   const [searchParams] = useSearchParams();
-  const libraryType = searchParams.get("libraryType") ?? "pdf";
+  const { pathname } = useLocation();
+  const libraryType = resolveLibraryType(pathname, searchParams);
   const isPdfLibraryView = libraryType === "pdf";
   const isFlashcardLibraryView = libraryType === "flashcards";
 
