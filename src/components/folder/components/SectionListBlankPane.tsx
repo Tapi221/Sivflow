@@ -56,7 +56,7 @@ export const SectionListBlankPane = ({
     <div
       style={style}
       className={cn(
-        "absolute z-0 hidden min-h-0 min-w-0 bg-transparent md:block",
+        "section-list-blank-pane absolute z-0 hidden min-h-0 min-w-0 bg-transparent md:block",
         className,
       )}
     >
