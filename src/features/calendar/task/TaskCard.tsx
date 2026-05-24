@@ -1,7 +1,8 @@
-import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/icons.schedule";
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { TaskPriorityBadge } from "@/chip/budge/TaskPriorityBadge";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
+import { TrashIcon } from "@/components/icons/icons.card";
+import { CalendarIcon as ScheduleCalendarIcon } from "@/components/icons/icons.schedule";
 import { cn } from "@/lib/utils";
 import type { Task } from "./task.types";
 import { useTaskCard } from "./hooks/useTaskCard";
@@ -14,20 +15,6 @@ type TaskCardProps = {
   onDelete?: (id: string) => void;
   onToggleDone?: (id: string, done: boolean) => void;
 };
-
-const TaskMenuIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-  >
-    <circle cx="8" cy="4" r="1.15" fill="currentColor" />
-    <circle cx="8" cy="8" r="1.15" fill="currentColor" />
-    <circle cx="8" cy="12" r="1.15" fill="currentColor" />
-  </svg>
-);
 
 export const TaskCard = ({
   task,
@@ -94,15 +81,21 @@ export const TaskCard = ({
               {task.title}
             </div>
 
-            {/* メニューボタン */}
-            <button
-              type="button"
-              className="-mr-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded text-[#a8a9ae] opacity-0 transition-[background-color,color,opacity] duration-100 hover:bg-[#ebebea] hover:text-[#4a4a4d] active:scale-95 group-hover:opacity-100 focus-visible:opacity-100"
-              aria-label="Task menu"
-              onClick={handleDelete}
-            >
-              <TaskMenuIcon className="h-3.5 w-3.5" />
-            </button>
+            {onDelete && (
+              <button
+                type="button"
+                className="-mr-1 flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded text-[#a8a9ae] opacity-0 transition-[background-color,color,opacity] duration-100 hover:bg-[#fee2e2] hover:text-[#ff3b30] active:scale-95 group-hover:opacity-100 focus-visible:opacity-100"
+                aria-label="タスクを削除"
+                title="タスクを削除"
+                onPointerDown={(event) => event.stopPropagation()}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleDelete();
+                }}
+              >
+                <TrashIcon className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
 
           {/* メタ情報行 */}

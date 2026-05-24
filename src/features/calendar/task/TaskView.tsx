@@ -8,8 +8,8 @@ import { useTaskStore } from "./hooks/useTaskStore";
 import { NewTaskModal } from "../modal/NewTaskModal";
 import { type BoardListViewMode } from "../../../chip/toggle/Toggle.boardlist";
 import { TaskToolbar } from "../toolbar/TaskToolbar";
-import { TaskBoardView } from "../view/TaskBoardView";
-import { TaskListView } from "../view/TaskListView";
+import { TaskBoardView } from "./TaskBoardView";
+import { TaskListView } from "./TaskListView";
 
 // ==============================================
 
@@ -98,6 +98,7 @@ export const TaskView = ({ googleAccounts = [] }: TaskViewProps) => {
           tasks={tasks}
           onToggleTaskDone={handleToggleTaskDone}
           onRenameTask={handleRenameTask}
+          onDeleteTask={deleteTask}
         />
       )}
 
