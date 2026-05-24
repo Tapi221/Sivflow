@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "./task.types";
-import type { TaskStatus } from "./task.types";
+import type { Task, TaskStatus } from "./task.types";
 import type { GoogleAccountDisplay } from "../scheduleScreen.types";
 import { useTaskStore } from "./hooks/useTaskStore";
 import { NewTaskModal } from "../modal/NewTaskModal";
@@ -24,6 +24,12 @@ type TaskCategoryOption = {
   label: string;
 };
 
+type GoogleTaskListMeta = {
+  id: string;
+  label: string;
+  category: string;
+};
+
 const normalizeTaskListLabel = (value: string): string =>
   value.trim().toLowerCase().replace(/[\s\-_]+/g, "");
 
@@ -36,6 +42,20 @@ const findCategoryByTaskListTitle = (taskListTitle: string): string | null => {
       return candidates.includes(normalizedTaskListTitle);
     })?.[0] ?? null
   );
+};
+
+const toDateOnly = (value?: string): string | null => {
+  if (!value) return null;
+
+  const match = /^(\d{4}-\d{2}-\d{2})/.exec(value);
+  return match?.[1] ?? null;
+};
+
+const toGoogleTaskCreatedAt = (value?: string, fallback = 0): number => {
+  if (!value) return fallback;
+
+  const time = new Date(value).getTime();
+  return Number.isNaN(time) ? fallback : time;
 };
 
 export const TaskView = ({
@@ -61,43 +81,69 @@ export const TaskView = ({
     );
   }, [googleAccounts]);
 
-  const taskListOptions = useMemo<TaskCategoryOption[]>(() => {
-    const options = new Map<string, string>();
+  const taskListMetaById = useMemo(() => {
+    const meta = new Map<string, GoogleTaskListMeta>();
 
     googleAccounts.forEach((account) => {
       account.taskLists.forEach((taskList) => {
         const category = findCategoryByTaskListTitle(taskList.title) ?? taskList.title;
         const label = CATEGORY_CONFIG[category]?.label ?? taskList.title;
-        options.set(taskList.id, label);
+        meta.set(taskList.id, { id: taskList.id, label, category });
       });
     });
 
-    return Array.from(options, ([id, label]) => ({ id, label }));
+    return meta;
   }, [googleAccounts]);
 
-  const selectedTaskList = useMemo(() => {
-    if (!selectedTaskListId) return null;
+  const taskListOptions = useMemo<TaskCategoryOption[]>(() => {
+    return Array.from(taskListMetaById.values(), ({ id, label }) => ({ id, label }));
+  }, [taskListMetaById]);
 
-    for (const account of googleAccounts) {
-      const taskList = account.taskLists.find((item) => item.id === selectedTaskListId);
-      if (taskList) return taskList;
-    }
-
-    return null;
-  }, [googleAccounts, selectedTaskListId]);
-
-  const selectedTaskCategory = useMemo(() => {
-    if (!selectedTaskList) return null;
-    return findCategoryByTaskListTitle(selectedTaskList.title) ?? selectedTaskList.title;
-  }, [selectedTaskList]);
+  const selectedTaskListMeta = selectedTaskListId
+    ? taskListMetaById.get(selectedTaskListId) ?? null
+    : null;
+  const selectedTaskCategory = selectedTaskListMeta?.category ?? null;
 
   const taskAccountName = taskAccount?.name ?? taskAccount?.email ?? null;
   const taskAccountPhotoUrl = taskAccount?.photoUrl ?? null;
 
-  const visibleTasks = useMemo(() => {
+  const googleTasks = useMemo<Task[]>(() => {
+    return googleAccounts.flatMap((account) =>
+      account.googleTasks
+        .filter((googleTask) => {
+          if (!selectedTaskListId) return true;
+          return googleTask.taskListId === selectedTaskListId;
+        })
+        .map((googleTask, index) => {
+          const taskListMeta = taskListMetaById.get(googleTask.taskListId);
+          const category = taskListMeta?.category ?? googleTask.taskListId;
+
+          return {
+            id: `google-task:${account.accountId}:${googleTask.taskListId}:${googleTask.id}`,
+            title: googleTask.title,
+            status: googleTask.status === "completed" ? "done" : "not_started",
+            priority: "medium",
+            category,
+            dueDate: toDateOnly(googleTask.due),
+            assignee: account.email ? account.email.slice(0, 1).toUpperCase() : "G",
+            createdAt: toGoogleTaskCreatedAt(googleTask.updated, index),
+            scheduledStart: null,
+            scheduledEnd: null,
+            googleCalendarId: null,
+            googleEventId: googleTask.id,
+          } satisfies Task;
+        }),
+    );
+  }, [googleAccounts, selectedTaskListId, taskListMetaById]);
+
+  const visibleLocalTasks = useMemo(() => {
     if (!selectedTaskCategory) return tasks;
     return tasks.filter((task) => task.category === selectedTaskCategory);
   }, [selectedTaskCategory, tasks]);
+
+  const visibleTasks = useMemo(() => {
+    return [...visibleLocalTasks, ...googleTasks];
+  }, [googleTasks, visibleLocalTasks]);
 
   const tasksByStatus = useMemo(() => {
     return TASK_COLUMNS.reduce(
@@ -105,7 +151,7 @@ export const TaskView = ({
         acc[col.id] = visibleTasks.filter((task) => task.status === col.id);
         return acc;
       },
-      {} as Record<TaskStatus, typeof tasks>,
+      {} as Record<TaskStatus, Task[]>,
     );
   }, [visibleTasks]);
 
@@ -114,14 +160,8 @@ export const TaskView = ({
   const categoryOptions = useMemo<TaskCategoryOption[]>(() => {
     const options = new Map<string, string>();
 
-    taskListOptions.forEach((option) => {
-      const taskList = googleAccounts
-        .flatMap((account) => account.taskLists)
-        .find((item) => item.id === option.id);
-      const category = taskList
-        ? findCategoryByTaskListTitle(taskList.title) ?? taskList.title
-        : option.label;
-      options.set(category, CATEGORY_CONFIG[category]?.label ?? option.label);
+    taskListMetaById.forEach(({ category, label }) => {
+      options.set(category, CATEGORY_CONFIG[category]?.label ?? label);
     });
 
     Object.entries(CATEGORY_CONFIG).forEach(([category, config]) => {
@@ -129,7 +169,7 @@ export const TaskView = ({
     });
 
     return Array.from(options, ([id, label]) => ({ id, label }));
-  }, [googleAccounts, taskListOptions]);
+  }, [taskListMetaById]);
 
   const handleAddTask = (status: string) => {
     setNewTaskStatus(status as TaskStatus);
@@ -142,6 +182,8 @@ export const TaskView = ({
   };
 
   const handleToggleTaskDone = (taskId: string, done: boolean) => {
+    if (taskId.startsWith("google-task:")) return;
+
     let nextStatus: TaskStatus = "not_started";
 
     if (done) {
@@ -152,7 +194,13 @@ export const TaskView = ({
   };
 
   const handleRenameTask = (taskId: string, title: string) => {
+    if (taskId.startsWith("google-task:")) return;
     updateTask(taskId, { title });
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    if (taskId.startsWith("google-task:")) return;
+    deleteTask(taskId);
   };
 
   return (
@@ -174,7 +222,7 @@ export const TaskView = ({
           accountName={taskAccountName}
           accountPhotoUrl={taskAccountPhotoUrl}
           onAddTask={handleAddTask}
-          onDeleteTask={deleteTask}
+          onDeleteTask={handleDeleteTask}
           onToggleTaskDone={handleToggleTaskDone}
           onReorderTask={reorderTask}
         />
@@ -183,7 +231,7 @@ export const TaskView = ({
           tasks={visibleTasks}
           onToggleTaskDone={handleToggleTaskDone}
           onRenameTask={handleRenameTask}
-          onDeleteTask={deleteTask}
+          onDeleteTask={handleDeleteTask}
         />
       )}
 
