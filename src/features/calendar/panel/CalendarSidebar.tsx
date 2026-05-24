@@ -167,7 +167,7 @@ const buildMiniCalendarDays = (
 type GoogleAccountSectionProps = {
   account: GoogleAccountDisplay;
   mode: "calendar" | "task";
-  selectedTaskListIds?: string[];
+  selectedTaskListIds?: Set<string>;
   onToggleCalendar: (calendarId: string) => void;
   onToggleTaskList?: (taskListId: string) => void;
   onReconnect: () => void;
@@ -176,7 +176,7 @@ type GoogleAccountSectionProps = {
 const GoogleAccountSection = ({
   account,
   mode,
-  selectedTaskListIds = [],
+  selectedTaskListIds,
   onToggleCalendar,
   onToggleTaskList,
   onReconnect,
@@ -288,7 +288,7 @@ const GoogleAccountSection = ({
           )}
 
           {!hasTaskListsError && account.taskLists.map((taskList) => {
-            const checked = selectedTaskListIds.includes(taskList.id);
+            const checked = selectedTaskListIds?.has(taskList.id) ?? false;
 
             return (
               <button
@@ -330,7 +330,7 @@ export const CalendarSidebar = ({
   activeMode,
   googleAccounts,
   isAnyCalendarConnecting,
-  selectedTaskListIds = [],
+  selectedTaskListIds,
   onSelectDate,
   onPreviousMonth,
   onNextMonth,
