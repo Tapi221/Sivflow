@@ -2,8 +2,7 @@ import { MoreMenuButton } from "../../../chip/button/MoreMenuButton";
 import { NewTaskButton } from "../../../chip/button/NewTaskButton";
 import { DateFilterChip } from "../../../chip/chip/DateFilterChip";
 import { FilterChip } from "../../../chip/chip/FilterChip";
-import {BoardListToggleButton,
-  type BoardListViewMode,} from "../../../chip/toggle/Toggle.boardlist";
+import { BoardListToggleButton, type BoardListViewMode } from "../../../chip/toggle/Toggle.boardlist";
 import type { TaskGroupMode } from "../task/task.types";
 
 type TaskListOption = {
@@ -25,10 +24,13 @@ type TaskToolbarProps = {
   onOpenMoreMenu?: () => void;
 };
 
-const GROUP_MODE_LABEL: Record<TaskGroupMode, string> = {
-  status: "状態",
-  section: "セクション",
-};
+const GROUP_MODE_OPTIONS: ReadonlyArray<{
+  mode: TaskGroupMode;
+  label: string;
+}> = [
+  { mode: "status", label: "状態" },
+  { mode: "section", label: "セクション" },
+];
 
 export const TaskToolbar = ({
   filterDate,
@@ -60,26 +62,33 @@ export const TaskToolbar = ({
           <FilterChip onClick={onOpenFilter} />
 
           <div
-            className="inline-flex h-8 items-center gap-1 rounded-full border border-[#eeeeee] bg-white p-0.5"
-            role="group"
-            aria-label="タスクの表示分類"
+            className="inline-flex h-8 items-center gap-0.5 rounded-xl bg-[#f7f7f7] p-0.5"
+            role="radiogroup"
+            aria-label="タスクの分類方法"
           >
-            {(["status", "section"] as const).map((mode) => {
+            {GROUP_MODE_OPTIONS.map(({ mode, label }) => {
               const active = groupMode === mode;
 
               return (
                 <button
                   key={mode}
                   type="button"
-                  aria-pressed={active}
+                  role="radio"
+                  aria-checked={active}
                   onClick={() => onChangeGroupMode(mode)}
-                  className={`h-7 rounded-full px-3 text-[12px] font-semibold transition-colors duration-200 ${
+                  className={`inline-flex h-7 items-center gap-1 rounded-lg px-2.5 text-[11px] font-medium leading-none transition-colors duration-200 ${
                     active
-                      ? "bg-[#f5f7f8] text-[#4c5361]"
-                      : "text-[#9ca1aa] hover:bg-[#fafafa] hover:text-[#6b7280]"
+                      ? "border border-[#eeeeee] bg-white text-[#6f7681] shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
+                      : "text-[#a8adb5] hover:text-[#7b818c]"
                   }`}
                 >
-                  {GROUP_MODE_LABEL[mode]}
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      active ? "bg-[#8d959f]" : "bg-transparent"
+                    }`}
+                    aria-hidden="true"
+                  />
+                  {label}
                 </button>
               );
             })}
