@@ -1,4 +1,3 @@
-import type { Auth } from "firebase/auth";
 import { httpsCallable } from "firebase/functions";
 
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
@@ -28,31 +27,15 @@ type DisconnectGoogleCalendarAccountInput = {
   accountId: string;
 };
 
-type RequestCalendarAccessToken = (
-  auth: Auth,
-  silent?: boolean,
-) => Promise<GoogleCalendarAccess>;
-
 type GoogleOAuthReconnectDiagnosis = {
   cause: string;
   reconnectRequired: boolean;
   action: string;
 };
 
-const exchangeGoogleCalendarCodeCallable = httpsCallable<
-  ExchangeGoogleCalendarCodeInput,
-  ServerGoogleCalendarAccess
->(functionsClient, "exchangeGoogleCalendarCode");
-
-const getGoogleCalendarAccessTokenCallable = httpsCallable<
-  GetGoogleCalendarAccessTokenInput,
-  ServerGoogleCalendarAccess
->(functionsClient, "getGoogleCalendarAccessToken");
-
-const disconnectGoogleCalendarAccountCallable = httpsCallable<
-  DisconnectGoogleCalendarAccountInput,
-  { ok: boolean }
->(functionsClient, "disconnectGoogleCalendarAccount");
+const exchangeGoogleCalendarCodeCallable = httpsCallable<ExchangeGoogleCalendarCodeInput, ServerGoogleCalendarAccess>(functionsClient, "exchangeGoogleCalendarCode");
+const getGoogleCalendarAccessTokenCallable = httpsCallable<GetGoogleCalendarAccessTokenInput, ServerGoogleCalendarAccess>(functionsClient, "getGoogleCalendarAccessToken");
+const disconnectGoogleCalendarAccountCallable = httpsCallable<DisconnectGoogleCalendarAccountInput, { ok: boolean }>(functionsClient, "disconnectGoogleCalendarAccount");
 
 const SERVER_TOKEN_RETRY_DELAYS_MS = [500, 1_500] as const;
 
@@ -110,7 +93,7 @@ const diagnoseGoogleOAuthReconnectCause = (
     return {
       cause: "Firestore に保存済み Google OAuth アカウントが見つかりません。",
       reconnectRequired: false,
-      action: "silent token fallback を使い、サーバー保存状態は次回の明示接続時に補修します。",
+      action: "ユーザーに popup を出さず、サーバー保存状態の復旧を待ちます。",
     };
   }
 
@@ -122,7 +105,7 @@ const diagnoseGoogleOAuthReconnectCause = (
     return {
       cause: "保存済み refresh token が欠落しています。",
       reconnectRequired: false,
-      action: "silent token fallback を使い、ユーザー操作なしで取得可能な access token を優先します。",
+      action: "ユーザーに popup を出さず、バックグラウンド復旧待ちにします。",
     };
   }
 
@@ -130,7 +113,7 @@ const diagnoseGoogleOAuthReconnectCause = (
     return {
       cause: "Google 側で refresh token が無効化されています。権限取り消し、期限切れ、または認可コードの再利用が考えられます。",
       reconnectRequired: false,
-      action: "silent token fallback を試し、失敗時も再連携状態へ落とさずバックグラウンド復旧待ちにします。",
+      action: "ユーザーに popup を出さず、運用側ログで原因を確認します。",
     };
   }
 
@@ -155,7 +138,7 @@ const diagnoseGoogleOAuthReconnectCause = (
     return {
       cause: "暗号化キー不一致、または保存済み refresh token の暗号化データ破損が疑われます。",
       reconnectRequired: false,
-      action: "silent token fallback を使い、サーバー側の保存状態は運用側で確認します。",
+      action: "ユーザーに popup を出さず、サーバー側の保存状態は運用側で確認します。",
     };
   }
 
@@ -171,7 +154,7 @@ const diagnoseGoogleOAuthReconnectCause = (
     return {
       cause: "Cloud Functions の一時障害または制限により refresh token 更新に失敗しました。",
       reconnectRequired: false,
-      action: "サーバーリトライ後、silent token fallback または後続リトライで復旧します。",
+      action: "サーバーリトライまたは後続リトライで復旧します。自動復旧では popup を開きません。",
     };
   }
 
@@ -215,38 +198,8 @@ const isServerInfrastructureError = (error: unknown): boolean => {
   );
 };
 
-const isRecoverableServerOAuthStateError = (error: unknown): boolean => {
-  const code = normalizeCallableErrorCode(error);
-
-  return code === "failed-precondition" || code === "not-found";
-};
-
-const canUseSilentBrowserTokenFallback = (): boolean => {
-  return Boolean(import.meta.env.VITE_WEB_GOOGLE_OAUTH_CLIENT_ID);
-};
-
-const shouldFallbackToSilentBrowserToken = (error: unknown): boolean => {
-  if (!canUseSilentBrowserTokenFallback()) return false;
-
-  return isServerInfrastructureError(error) || isRecoverableServerOAuthStateError(error);
-};
-
 const toUserTransparentAutoRecoveryError = (error: unknown): Error => {
   return new Error(`Google Calendar token auto recovery is pending: ${toErrorMessage(error)}`);
-};
-
-const requestSilentBrowserCalendarAccessToken = async (): Promise<GoogleCalendarAccess> => {
-  const oauthModule = await import("./gcal.oauth") as {
-    requestCalendarAccessToken?: RequestCalendarAccessToken;
-  };
-
-  if (typeof oauthModule.requestCalendarAccessToken !== "function") {
-    throw new Error("Google Calendar browser OAuth fallback is unavailable");
-  }
-
-  // VITE_WEB_GOOGLE_OAUTH_CLIENT_ID が存在する場合だけ呼ぶため、
-  // gcal.oauth.ts 側では GIS の prompt=none 経路になり、popup を開かない。
-  return oauthModule.requestCalendarAccessToken(auth, true);
 };
 
 const getGoogleCalendarAccessTokenWithRetry = async (
@@ -278,8 +231,8 @@ export const isServerStoredGoogleOAuthEnabled = (): boolean => {
 
   // Web / 非 Desktop では refresh token を localStorage に保存しない。
   // VITE_GOOGLE_OAUTH_SERVER_TOKENS=true の場合は Cloud Functions 側の
-  // refresh token 保存を第一候補にする。更新に失敗した場合は、popup を使わない
-  // GIS silent access token だけを一時的なフォールバックとして使う。
+  // refresh token 保存を第一候補にする。自動復旧では Google Identity Services の
+  // token client を呼ばず、ユーザーに見える popup を開かない。
   return import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true";
 };
 
@@ -316,35 +269,9 @@ export const getServerStoredGoogleCalendarAccessToken = async (
       accountId: input.accountId,
     });
 
-    if (!shouldFallbackToSilentBrowserToken(error)) {
-      throw toUserTransparentAutoRecoveryError(error);
-    }
-
-    console.warn(
-      "[GoogleCalendarOAuth] server token refresh failed; using non-popup silent browser token fallback",
-      error,
-    );
-
-    try {
-      const access = await requestSilentBrowserCalendarAccessToken();
-      return {
-        ...access,
-        accountEmail: access.accountEmail ?? input.accountId,
-        refreshTokenStored: false,
-      };
-    } catch (fallbackError) {
-      logGoogleOAuthReconnectCause({
-        context: "silentBrowserTokenFallback",
-        error: fallbackError,
-        accountId: input.accountId,
-      });
-      console.warn(
-        "[GoogleCalendarOAuth] silent browser token fallback failed",
-        fallbackError,
-      );
-
-      throw toUserTransparentAutoRecoveryError(error);
-    }
+    // Google Identity Services の token client は prompt=none でもブラウザや状態によって
+    // 一瞬 popup/window を開くことがあるため、自動復旧では呼ばない。
+    throw toUserTransparentAutoRecoveryError(error);
   }
 };
 
