@@ -1,4 +1,4 @@
-import { type CSSProperties,useEffect, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 
 import { windowControls } from "@/platform/capabilities/windowControls";
 import { hasDesktopBridge } from "@/platform/runtime";
@@ -18,15 +18,13 @@ const runWindowAction = (action: () => Promise<void>) => {
 };
 
 export const DesktopWindowControls = () => {
-  const [isDesktop, setIsDesktop] = useState(false);
+  const isDesktop = hasDesktopBridge();
   const [isMaximized, setIsMaximized] = useState(false);
 
   useEffect(() => {
-    if (!hasDesktopBridge()) {
+    if (!isDesktop) {
       return;
     }
-
-    setIsDesktop(true);
 
     let isMounted = true;
 
@@ -42,7 +40,7 @@ export const DesktopWindowControls = () => {
       isMounted = false;
       unsubscribe();
     };
-  }, []);
+  }, [isDesktop]);
 
   if (!isDesktop) {
     return null;
