@@ -155,6 +155,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
         isTaskListsLoading: taskListState?.isLoading ?? false,
         selectedCalendarIds: account.selectedCalendarIds,
         connectionStatus: account.connectionStatus,
+        error: account.error,
       };
     },
   );

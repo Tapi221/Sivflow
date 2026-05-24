@@ -75,16 +75,50 @@ const gcalGet = async <T>(accessToken: string, url: string): Promise<T> => {
   });
 
   if (!response.ok) {
+    const payload = await response.json().catch(() => null) as
+      | {
+        error?: {
+          message?: string;
+          errors?: Array<{ reason?: string }>;
+        };
+      }
+      | null;
+    const reason = payload?.error?.errors?.[0]?.reason;
+    const message = payload?.error?.message;
     const error = new Error(
-      `Google Calendar API エラー (${response.status}): ${url}`,
+      message
+        ? `Google Calendar API エラー (${response.status}): ${message}`
+        : `Google Calendar API エラー (${response.status}): ${url}`,
     );
 
-    (error as Error & { status: number }).status = response.status;
+    (
+      error as Error & {
+        googleReason?: string;
+        status: number;
+      }
+    ).status = response.status;
+    (error as Error & { googleReason?: string }).googleReason = reason;
 
     throw error;
   }
 
   return (await response.json()) as T;
+};
+
+const isRecoverableAuthError = (error: unknown): boolean => {
+  if (!(error instanceof Error)) return false;
+
+  const { googleReason, status } = error as Error & {
+    googleReason?: string;
+    status?: number;
+  };
+
+  return (
+    status === 401 ||
+    (status === 403 &&
+      (googleReason === "authError" ||
+        googleReason === "insufficientPermissions"))
+  );
 };
 
 const parseGoogleDate = (rawValue: string): Date => {
@@ -400,11 +434,7 @@ export class GoogleCalendarSyncEngine {
 
       console.error("[GCalSyncEngine] sync error:", error);
 
-      const isUnauthorized =
-        error instanceof Error &&
-        (error as Error & { status?: number }).status === 401;
-
-      if (isUnauthorized) {
+      if (isRecoverableAuthError(error)) {
         const reconnectResult = await this.options.silentReconnect();
         const reconnected =
           reconnectResult === true || reconnectResult === "reconnected";

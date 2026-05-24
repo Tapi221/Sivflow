@@ -18,9 +18,29 @@ const getJson = async <T>(accessToken: string, url: string): Promise<T> => {
   });
 
   if (!res.ok) {
-    const error = new Error(`Google API failed (${res.status})`);
+    const payload = await res.json().catch(() => null) as
+      | {
+        error?: {
+          message?: string;
+          errors?: Array<{ reason?: string }>;
+        };
+      }
+      | null;
+    const message = payload?.error?.message;
+    const reason = payload?.error?.errors?.[0]?.reason;
+    const error = new Error(
+      message
+        ? `Google API failed (${res.status}): ${message}`
+        : `Google API failed (${res.status})`,
+    );
 
-    (error as Error & { status: number }).status = res.status;
+    (
+      error as Error & {
+        googleReason?: string;
+        status: number;
+      }
+    ).status = res.status;
+    (error as Error & { googleReason?: string }).googleReason = reason;
 
     throw error;
   }

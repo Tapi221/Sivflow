@@ -247,8 +247,17 @@ const GoogleAccountSection = ({
         </div>
       )}
 
-      {account.connectionStatus === "needsReconnect" && (
-        <GcalRelinkPanel onReconnect={onReconnect} />
+      {(account.connectionStatus === "needsReconnect" ||
+        account.connectionStatus === "error") && (
+        <GcalRelinkPanel
+          message={
+            account.connectionStatus === "error"
+              ? "Google カレンダーを同期できませんでした。"
+              : undefined
+          }
+          detail={account.error}
+          onReconnect={onReconnect}
+        />
       )}
     </div>
   );

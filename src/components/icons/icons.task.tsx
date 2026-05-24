@@ -39,3 +39,29 @@ export const CrownIcon = ({
     />
   </svg>
 );
+
+//Vuesax-Icons
+export const TriangleIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      d="M14.67 18.75H9.33C7.45 18.75 6.02 18.07 5.31 16.84C4.6 15.61 4.73 14.03 5.67 12.4L8.34 7.77C9.28 6.15 10.58 5.25 12 5.25C13.42 5.25 14.72 6.15 15.66 7.78L18.33 12.41C19.27 14.04 19.4 15.62 18.69 16.85C17.98 18.07 16.55 18.75 14.67 18.75Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
