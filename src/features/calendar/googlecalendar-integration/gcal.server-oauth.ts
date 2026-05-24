@@ -59,7 +59,7 @@ const normalizeCallableErrorCode = (error: unknown): string | undefined => {
   return undefined;
 };
 
-const shouldFallbackToBrowserToken = (error: unknown): boolean => {
+const isServerInfrastructureError = (error: unknown): boolean => {
   const code = normalizeCallableErrorCode(error);
 
   return (
@@ -68,6 +68,12 @@ const shouldFallbackToBrowserToken = (error: unknown): boolean => {
     code === "deadline-exceeded" ||
     code === "resource-exhausted"
   );
+};
+
+const shouldFallbackExchangeToBrowserToken = (error: unknown): boolean => {
+  const code = normalizeCallableErrorCode(error);
+
+  return isServerInfrastructureError(error) || code === "failed-precondition";
 };
 
 export const isServerStoredGoogleOAuthEnabled = (): boolean => {
@@ -90,7 +96,7 @@ export const exchangeGoogleCalendarCode = async (
     const result = await exchangeGoogleCalendarCodeCallable(input);
     return result.data;
   } catch (error) {
-    if (!shouldFallbackToBrowserToken(error)) {
+    if (!shouldFallbackExchangeToBrowserToken(error)) {
       throw error;
     }
 
@@ -116,7 +122,7 @@ export const getServerStoredGoogleCalendarAccessToken = async (
     const result = await getGoogleCalendarAccessTokenCallable(input);
     return result.data;
   } catch (error) {
-    if (!shouldFallbackToBrowserToken(error)) {
+    if (!isServerInfrastructureError(error)) {
       throw error;
     }
 
