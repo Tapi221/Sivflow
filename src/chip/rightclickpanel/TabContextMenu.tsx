@@ -1,4 +1,9 @@
-import { useState, type CSSProperties, type RefObject } from "react";
+import { type CSSProperties, type RefObject } from "react";
+import {
+  RIGHT_CLICK_PANEL_MARGIN,
+  RIGHT_CLICK_PANEL_WIDTH,
+  RightClickPanelSurface,
+} from "./rightClickPanelCommon";
 
 type TabContextMenuAction = {
   id: string;
@@ -15,80 +20,9 @@ type TabContextMenuProps = {
   noDragStyle: CSSProperties;
 };
 
-export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 176;
+export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = RIGHT_CLICK_PANEL_WIDTH;
 export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 120;
-export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = 8;
-
-const WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY =
-  "var(--explorer-chrome-font-family, \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, BlinkMacSystemFont, \"Yu Gothic UI\", \"Hiragino Sans\", sans-serif)";
-
-const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
-.workspace-tab-context-menu {
-  box-sizing: border-box;
-  contain: layout paint style;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  width: ${WORKSPACE_TAB_CONTEXT_MENU_WIDTH}px;
-  min-width: ${WORKSPACE_TAB_CONTEXT_MENU_WIDTH}px;
-  max-width: ${WORKSPACE_TAB_CONTEXT_MENU_WIDTH}px;
-  padding: 3px;
-  overflow: hidden;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14), 0 1px 6px rgba(0, 0, 0, 0.08);
-  font-family: ${WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY};
-  font-variant-east-asian: proportional-width;
-  font-feature-settings: "palt" 1;
-  animation: none;
-  transition: none;
-  transform: none;
-}
-
-.workspace-tab-context-menu,
-.workspace-tab-context-menu * {
-  box-sizing: border-box;
-}
-
-.workspace-tab-context-menu-item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-width: 0;
-  min-height: 28px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: #4a4a4a;
-  font-family: ${WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY};
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 15px;
-  letter-spacing: 0;
-  text-align: left;
-  white-space: nowrap;
-  -webkit-font-smoothing: antialiased;
-  animation: none;
-  transition: background-color 80ms linear;
-}
-
-.workspace-tab-context-menu-item:not(:disabled) {
-  cursor: default;
-}
-
-.workspace-tab-context-menu-item:not(:disabled):hover,
-.workspace-tab-context-menu-item:not(:disabled):focus-visible {
-  background: #eeeeee;
-  outline: none;
-}
-
-.workspace-tab-context-menu-item:disabled {
-  color: #b8b8b8;
-  cursor: default;
-}
-`;
+export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
 export const WorkspaceTabContextMenu = ({
   x,
@@ -97,50 +31,34 @@ export const WorkspaceTabContextMenu = ({
   menuRef,
   noDragStyle,
 }: TabContextMenuProps) => {
-  const [position] = useState(() => ({ x, y }));
-
   return (
-    <>
-      <style>{WORKSPACE_TAB_CONTEXT_MENU_STYLE}</style>
-      <div
-        ref={menuRef}
-        style={{
-          ...noDragStyle,
-          position: "fixed",
-          left: position.x,
-          top: position.y,
-          zIndex: 1000,
-          width: WORKSPACE_TAB_CONTEXT_MENU_WIDTH,
-          minWidth: WORKSPACE_TAB_CONTEXT_MENU_WIDTH,
-          maxWidth: WORKSPACE_TAB_CONTEXT_MENU_WIDTH,
-          animation: "none",
-          transition: "none",
-          transform: "none",
-        }}
-        className="workspace-tab-context-menu"
-        role="menu"
-        aria-label="tab context menu"
-      >
-        {actions.map((action) => (
-          <button
-            key={action.id}
-            type="button"
-            disabled={action.disabled}
-            className="workspace-tab-context-menu-item"
-            role="menuitem"
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
+    <RightClickPanelSurface
+      x={x}
+      y={y}
+      width={WORKSPACE_TAB_CONTEXT_MENU_WIDTH}
+      panelRef={menuRef}
+      noDragStyle={noDragStyle}
+      ariaLabel="tab context menu"
+    >
+      {actions.map((action) => (
+        <button
+          key={action.id}
+          type="button"
+          disabled={action.disabled}
+          className="right-click-panel-item"
+          role="menuitem"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
 
-              if (action.disabled) return;
+            if (action.disabled) return;
 
-              action.onSelect();
-            }}
-          >
-            {action.label}
-          </button>
-        ))}
-      </div>
-    </>
+            action.onSelect();
+          }}
+        >
+          {action.label}
+        </button>
+      ))}
+    </RightClickPanelSurface>
   );
 };
