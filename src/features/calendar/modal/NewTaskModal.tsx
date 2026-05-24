@@ -7,8 +7,15 @@ import {
   TASK_COLUMNS,
 } from "../task/task.types";
 
+type TaskCategoryOption = {
+  id: string;
+  label: string;
+};
+
 type NewTaskModalProps = {
   defaultStatus?: TaskStatus;
+  defaultCategory?: string;
+  categoryOptions?: TaskCategoryOption[];
   onClose: () => void;
   onSave: (data: {
     title: string;
@@ -128,13 +135,25 @@ const IOSPicker = <T extends string,>({
 
 export const NewTaskModal = ({
   defaultStatus = "not_started",
+  defaultCategory = "Programming",
+  categoryOptions,
   onClose,
   onSave,
 }: NewTaskModalProps) => {
+  const resolvedCategoryOptions = categoryOptions?.length
+    ? categoryOptions
+    : Object.entries(CATEGORY_CONFIG).map(([key, val]) => ({
+      id: key,
+      label: val.label,
+    }));
+  const initialCategory = resolvedCategoryOptions.some((option) => option.id === defaultCategory)
+    ? defaultCategory
+    : resolvedCategoryOptions[0]?.id ?? "Programming";
+
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState<TaskStatus>(defaultStatus);
   const [priority, setPriority] = useState<TaskPriority>("medium");
-  const [category, setCategory] = useState("Programming");
+  const [category, setCategory] = useState(initialCategory);
   const [dueDate, setDueDate] = useState("");
   const [openPicker, setOpenPicker] = useState("");
 
@@ -293,9 +312,9 @@ export const NewTaskModal = ({
                 id="category"
                 title="カテゴリ"
                 value={category}
-                options={Object.entries(CATEGORY_CONFIG).map(([key, val]) => ({
-                  value: key,
-                  label: val.label,
+                options={resolvedCategoryOptions.map((option) => ({
+                  value: option.id,
+                  label: option.label,
                 }))}
                 isOpen={openPicker === "category"}
                 onOpen={setOpenPicker}
