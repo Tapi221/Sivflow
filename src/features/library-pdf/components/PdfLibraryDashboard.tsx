@@ -190,12 +190,12 @@ const PdfLibraryDashboard = ({
             <h2 className="mt-5 text-[30px] font-semibold tracking-[-0.03em] text-[#20262a]">
               PDF がまだありません
             </h2>
-            <p className="mt-3 max-w-xl text-[14px] leading-7 text-[#6f7b78]">
+            <p className="mt-3 max-w-xl text-[var(--ds-typography-font-size-sm)] leading-7 text-[#6f7b78]">
               PDF を取り込むと、この画面で続きを読むカードを表示できます。
             </p>
             <button
               type="button"
-              className="mt-8 inline-flex h-11 items-center justify-center rounded-[16px] border border-[#d1d5db] bg-[#FFFFFF] px-5 text-[14px] font-semibold text-[#111827] hover:bg-[#f9fafb]"
+              className="mt-8 inline-flex h-11 items-center justify-center rounded-[16px] border border-[#d1d5db] bg-[#FFFFFF] px-5 text-[var(--ds-typography-font-size-sm)] font-semibold text-[#111827] hover:bg-[#f9fafb]"
               onClick={handleToolbarAddDocument}
             >
               PDF をインポート
