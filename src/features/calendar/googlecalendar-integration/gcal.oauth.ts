@@ -1,7 +1,6 @@
 import {
   type Auth,
   GoogleAuthProvider,
-  reauthenticateWithPopup,
   signInWithPopup,
 } from "firebase/auth";
 
