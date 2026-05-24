@@ -68,9 +68,9 @@ export const generateTextWithOpenAi = async ({
   const model = settings.model.trim() || DEFAULT_OPEN_AI_SETTINGS.model;
   const input = systemPrompt
     ? [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: prompt },
-      ]
+      { role: "system", content: systemPrompt },
+      { role: "user", content: prompt },
+    ]
     : prompt;
 
   const response = await fetch(OPEN_AI_RESPONSES_API_URL, {
