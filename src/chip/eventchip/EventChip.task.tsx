@@ -63,6 +63,7 @@ export const TaskEventChip = memo(({
           py-1
           text-left
         `,
+        showAssignee && "pr-6",
         "text-[11px] font-medium leading-[1.3]",
         "transition-[filter,box-shadow,opacity] duration-100",
         "hover:brightness-[0.98] hover:shadow-[0_1px_4px_rgba(15,23,42,0.08)]",
@@ -106,12 +107,6 @@ export const TaskEventChip = memo(({
           {title}
         </span>
 
-        {showAssignee && (
-          <span className="shrink-0 rounded-full ring-1 ring-white/80">
-            <GoogleAccountChip name={chipName} photoUrl={accountPhotoUrl} />
-          </span>
-        )}
-
         {onDelete && (
           <button
             type="button"
@@ -147,6 +142,12 @@ export const TaskEventChip = memo(({
           {priorityLabel}
         </span>
       </div>
+
+      {showAssignee && (
+        <span className="pointer-events-none absolute right-1.5 bottom-1 rounded-full ring-1 ring-white/80">
+          <GoogleAccountChip name={chipName} photoUrl={accountPhotoUrl} />
+        </span>
+      )}
     </div>
   );
 });
