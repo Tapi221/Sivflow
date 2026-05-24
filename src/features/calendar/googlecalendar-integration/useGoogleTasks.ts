@@ -60,7 +60,7 @@ const EMPTY_ACCOUNT_STATE: GoogleTasksAccountState = {
   error: null,
 };
 
-const DEFAULT_POLL_INTERVAL_MS = 60_000;
+const DEFAULT_POLL_INTERVAL_MS = 10_000;
 
 const toErrorMessage = (error: unknown) => {
   if (!(error instanceof Error)) return String(error);
