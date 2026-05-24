@@ -167,18 +167,18 @@ const buildMiniCalendarDays = (
 type GoogleAccountSectionProps = {
   account: GoogleAccountDisplay;
   mode: "calendar" | "task";
-  selectedTaskListId?: string | null;
+  selectedTaskListIds?: string[];
   onToggleCalendar: (calendarId: string) => void;
-  onSelectTaskList?: (taskListId: string | null) => void;
+  onToggleTaskList?: (taskListId: string) => void;
   onReconnect: () => void;
 };
 
 const GoogleAccountSection = ({
   account,
   mode,
-  selectedTaskListId = null,
+  selectedTaskListIds = [],
   onToggleCalendar,
-  onSelectTaskList,
+  onToggleTaskList,
   onReconnect,
 }: GoogleAccountSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
@@ -288,7 +288,7 @@ const GoogleAccountSection = ({
           )}
 
           {!hasTaskListsError && account.taskLists.map((taskList) => {
-            const checked = selectedTaskListId === taskList.id;
+            const checked = selectedTaskListIds.includes(taskList.id);
 
             return (
               <button
@@ -299,7 +299,7 @@ const GoogleAccountSection = ({
                   "transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1]",
                   checked && "bg-[#f2f4ff]",
                 )}
-                onClick={() => onSelectTaskList?.(taskList.id)}
+                onClick={() => onToggleTaskList?.(taskList.id)}
                 aria-pressed={checked}
               >
                 <AnimatedCircleCheckbox
@@ -330,14 +330,15 @@ export const CalendarSidebar = ({
   activeMode,
   googleAccounts,
   isAnyCalendarConnecting,
-  selectedTaskListId = null,
+  selectedTaskListIds = [],
   onSelectDate,
   onPreviousMonth,
   onNextMonth,
   onAddCalendar,
   onReconnectAccount,
   onToggleCalendar,
-  onSelectTaskList,
+  onSelectAllTaskLists,
+  onToggleTaskList,
 }: CalendarSidebarProps) => {
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
@@ -463,13 +464,13 @@ export const CalendarSidebar = ({
             className={cn(
               GOOGLE_ACCOUNT_CHILD_ITEM_CLASS_NAME,
               "pl-2 transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1]",
-              selectedTaskListId === null && "bg-[#f2f4ff]",
+              selectedTaskListIds.length === 0 && "bg-[#f2f4ff]",
             )}
-            onClick={() => onSelectTaskList?.(null)}
-            aria-pressed={selectedTaskListId === null}
+            onClick={onSelectAllTaskLists}
+            aria-pressed={selectedTaskListIds.length === 0}
           >
             <AnimatedCircleCheckbox
-              checked={selectedTaskListId === null}
+              checked={selectedTaskListIds.length === 0}
               color={DEFAULT_TASK_LIST_COLOR}
             />
             <span className="truncate text-[12px] font-medium text-[#2f2f2f]">
@@ -483,11 +484,11 @@ export const CalendarSidebar = ({
             key={account.accountId}
             account={account}
             mode={isTaskMode ? "task" : "calendar"}
-            selectedTaskListId={selectedTaskListId}
+            selectedTaskListIds={selectedTaskListIds}
             onToggleCalendar={(calendarId) =>
               onToggleCalendar(account.accountId, calendarId)
             }
-            onSelectTaskList={onSelectTaskList}
+            onToggleTaskList={onToggleTaskList}
             onReconnect={() => onReconnectAccount(account.accountId)}
           />
         ))}
