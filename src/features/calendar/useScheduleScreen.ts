@@ -167,6 +167,7 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
   const googleAccounts: GoogleAccountDisplay[] = google.googleAccounts.map(
     (account) => {
       const taskListState = google.taskListsByAccount[account.id];
+      const googleTasksState = google.googleTasksByAccount[account.id];
 
       return {
         accountId: account.id,
@@ -177,6 +178,9 @@ export const useScheduleScreen = (): UseScheduleScreenReturn => {
         taskLists: taskListState?.taskLists ?? [],
         taskListsError: taskListState?.error ?? null,
         isTaskListsLoading: taskListState?.isLoading ?? false,
+        googleTasks: googleTasksState?.tasks ?? [],
+        googleTasksError: googleTasksState?.error ?? null,
+        isGoogleTasksLoading: googleTasksState?.isLoading ?? false,
         selectedCalendarIds: account.selectedCalendarIds,
         connectionStatus: account.connectionStatus,
         error: account.error,
