@@ -1,5 +1,5 @@
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { resolveCardFolderId } from "@/domain/card/selectors/cardFolder";
 import { subscribeSectionListNavigation } from "@/features/explorer/adapters/web/explorerSectionListNavigation";
 import { notifySelectedFolderChanged } from "@/features/explorer/adapters/web/explorerSelectionNotifier";
@@ -10,7 +10,6 @@ import { useExplorerController } from "@/features/explorer/controller/useExplore
 import { useExplorerBreadcrumbSync } from "@/features/explorer/hooks/useExplorerBreadcrumbSync";
 import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups";
 import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
-import { PdfLibraryWorkspaceToolbar } from "@/features/library-pdf/components/PdfLibraryWorkspaceToolbar";
 import { ExplorerWorkspaceFrame } from "@/features/tab/ExplorerWorkspaceFrame";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { resolveCardTabTitle, resolveDocumentTabTitle } from "@/features/tab/resolveTabTitle";
@@ -31,8 +30,6 @@ import type { SelectedExplorerItem } from "@/types";
 type FoldersScreenProps = {
   route: FoldersRouteAdapter;
 };
-
-type LibraryToolbarSection = "explorer" | "pdf" | "flashcard" | "notes";
 
 const FOLDERS_SCREEN_FILL_STYLE = {
   width: "100%",
@@ -88,7 +85,6 @@ const resolveSelectedDocumentId = (selectedItem: SelectedExplorerItem) => {
 
 export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [initialRouteState] = useState<ExplorerRouteState>(() => route.readRouteState());
   const controller = useExplorerController({ initialRouteState });
   const {
@@ -129,15 +125,6 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   const cardById = useMemo(() => buildMapById(cards), [cards]);
   const cardSetById = useMemo(() => buildMapById(cardSets), [cardSets]);
   const documentById = useMemo(() => buildMapById(documents), [documents]);
-
-  const activeLibrarySection = useMemo<LibraryToolbarSection>(() => {
-    const libraryType = searchParams.get("libraryType") ?? "pdf";
-
-    if (libraryType === "flashcards") return "flashcard";
-    if (libraryType === "notes") return "notes";
-    if (libraryType === "explorer") return "explorer";
-    return "pdf";
-  }, [searchParams]);
 
   const selectedCardId = resolveSelectedCardId(controller.state.selectedItem);
   const selectedDocumentId = resolveSelectedDocumentId(controller.state.selectedItem);
@@ -367,15 +354,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
   }
 
   return (
-    <CarvePanelShell
-      toolbar={(
-        <PdfLibraryWorkspaceToolbar
-          activeSection={activeLibrarySection}
-          onSelectSection={() => undefined}
-        />
-      )}
-      reserveLeadingPanel
-    >
+    <CarvePanelShell reserveLeadingPanel>
       <CarvePanel className="relative before:absolute before:inset-x-0 before:top-0 before:z-20 before:h-[var(--ds-semantic-breadcrumb-height)] before:bg-white before:content-['']">
         {workspaceFrame}
       </CarvePanel>
