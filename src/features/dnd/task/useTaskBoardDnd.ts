@@ -25,7 +25,7 @@ import {
 import type {
   TaskDropTarget,
   TaskInsertPosition,
-} from "../dnd/taskDnd.types";
+} from "./taskDnd.types";
 
 type UseTaskBoardDndArgs = {
   tasksByStatus: Record<TaskStatus, Task[]>;
@@ -107,12 +107,15 @@ export const useTaskBoardDnd = ({
 
   const handleDragEnd = (event: DragEndEvent) => {
     const activeId = String(event.active.id);
-    const target = resolveDropTarget(
-      event,
-      tasksByStatus,
-      activeId,
-      latestDropTargetRef.current,
-    );
+    const latestDropTarget = latestDropTargetRef.current;
+    const target = event.over
+      ? latestDropTarget ?? resolveDropTarget(
+        event,
+        tasksByStatus,
+        activeId,
+        latestDropTarget,
+      )
+      : null;
 
     resetDragState();
 
