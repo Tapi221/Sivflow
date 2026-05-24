@@ -670,6 +670,7 @@ const TreeViewLayout = ({
           selectedCardSetId={activeSelectedCardSetId}
           isFiltering={isFiltering}
           resetToken={navigateToSectionListToken + folderSelectionNonce}
+          showLibraryToolbar={false}
           onFolderSelect={handleSidebarFolderSelect}
           onItemSelect={handleItemSelect}
           onMoveFolder={handleMoveFolderFromColumnPane}
