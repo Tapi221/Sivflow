@@ -1,7 +1,5 @@
 import { type CSSProperties, type RefObject } from "react";
-import {RIGHT_CLICK_PANEL_MARGIN,
-  RIGHT_CLICK_PANEL_WIDTH,
-  RightClickPanelSurface,} from "./rightClickPanelCommon";
+import { RIGHT_CLICK_PANEL_MARGIN, RightClickPanelSurface } from "./rightClickPanelCommon";
 
 type TabContextMenuAction = {
   id: string;
@@ -18,7 +16,7 @@ type TabContextMenuProps = {
   noDragStyle: CSSProperties;
 };
 
-export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = RIGHT_CLICK_PANEL_WIDTH;
+export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 176;
 export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 120;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
