@@ -8,7 +8,7 @@ import { useTaskStore } from "./hooks/useTaskStore";
 import { NewTaskModal } from "../modal/NewTaskModal";
 import { type BoardListViewMode } from "../../../chip/toggle/Toggle.boardlist";
 import { TaskToolbar } from "../toolbar/TaskToolbar";
-import { TaskBoardView } from "./TaskBoardView";
+import { TaskBoardView } from "../view/TaskBoardView";
 import { TaskListView } from "./TaskListView";
 
 // ==============================================
