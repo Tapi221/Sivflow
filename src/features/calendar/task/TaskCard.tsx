@@ -44,7 +44,7 @@ export const TaskCard = ({
     <div
       className={cn(
         // ─ Notion風: フラット・角丸小・影なし ─
-        "group relative w-full min-w-0 overflow-hidden rounded-md border border-[#e9eaed] bg-white px-3 py-2",
+        "group relative w-full min-w-0 overflow-hidden rounded-md border-[1.5px] border-[#e9eaed] bg-white px-3 py-2",
         // hover は背景のみ変化（影を足さない）
         "transition-[background-color,border-color] duration-100",
         "hover:bg-[#f7f7f5] hover:border-[#e2e3e6]",
