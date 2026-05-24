@@ -1,10 +1,7 @@
 import { type CSSProperties, type RefObject } from "react";
-import {
-  getTagColorSwatchStyle,
-  type TagColorKey,
-} from "@/features/tag/tagColor";
+import { getTagColorSwatchStyle, type TagColorKey } from "@/features/tag/tagColor";
 import { cn } from "@/lib/utils";
-import { RIGHT_CLICK_PANEL_MARGIN, RightClickPanelSurface } from "./rightClickPanelCommon";
+import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, RightClickPanelSurface, resolveRightClickPanelTextWidth } from "./rightClickPanelCommon";
 
 const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   gray: "グレー",
@@ -19,17 +16,34 @@ const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   sky: "スカイ",
 };
 
-export const TAG_COLOR_CONTEXT_MENU_WIDTH = 128;
+const TAG_COLOR_CONTEXT_MENU_TITLE = "タグの色";
+const TAG_COLOR_GRID_COLUMNS = 5;
+const TAG_COLOR_SWATCH_SIZE = 16;
+const TAG_COLOR_GRID_GAP = 6;
+const TAG_COLOR_GRID_HORIZONTAL_PADDING = 8;
+const TAG_COLOR_GRID_TOP_PADDING = 4;
+const TAG_COLOR_GRID_BOTTOM_PADDING = 8;
+const TAG_COLOR_GRID_WIDTH =
+  TAG_COLOR_GRID_COLUMNS * TAG_COLOR_SWATCH_SIZE +
+  (TAG_COLOR_GRID_COLUMNS - 1) * TAG_COLOR_GRID_GAP +
+  TAG_COLOR_GRID_HORIZONTAL_PADDING * 2;
+
+export const TAG_COLOR_CONTEXT_MENU_WIDTH = Math.ceil(
+  Math.max(
+    resolveRightClickPanelTextWidth([TAG_COLOR_CONTEXT_MENU_TITLE]),
+    TAG_COLOR_GRID_WIDTH + RIGHT_CLICK_PANEL_SURFACE_PADDING * 2,
+  ),
+);
 export const TAG_COLOR_CONTEXT_MENU_HEIGHT = 92;
 export const TAG_COLOR_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 
 const TAG_COLOR_GRID_STYLE = `
 .tag-color-context-menu-grid {
   display: grid;
-  grid-template-columns: repeat(5, 16px);
+  grid-template-columns: repeat(${TAG_COLOR_GRID_COLUMNS}, ${TAG_COLOR_SWATCH_SIZE}px);
   justify-content: start;
-  gap: 6px;
-  padding: 4px 8px 8px;
+  gap: ${TAG_COLOR_GRID_GAP}px;
+  padding: ${TAG_COLOR_GRID_TOP_PADDING}px ${TAG_COLOR_GRID_HORIZONTAL_PADDING}px ${TAG_COLOR_GRID_BOTTOM_PADDING}px;
 }
 `;
 
@@ -65,7 +79,7 @@ export const TagColorRightClickPanel = ({
         noDragStyle={noDragStyle}
         ariaLabel={`${tagName} tag color menu`}
       >
-        <div className="right-click-panel-title">タグの色</div>
+        <div className="right-click-panel-title">{TAG_COLOR_CONTEXT_MENU_TITLE}</div>
         <div className="tag-color-context-menu-grid">
           {availableColors.map((colorKey) => {
             const isSelected = colorKey === currentColorKey;
