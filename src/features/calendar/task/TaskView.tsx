@@ -28,7 +28,7 @@ type GoogleTaskPatchInput = {
 
 type TaskViewProps = {
   googleAccounts?: GoogleAccountDisplay[];
-  selectedTaskListIds?: string[];
+  selectedTaskListIds?: Set<string>;
   onRefreshGoogleTasks?: () => Promise<void>;
   onCreateGoogleTask?: (
     taskListId: string,
@@ -122,7 +122,7 @@ const parseGoogleTaskId = (taskId: string): ParsedGoogleTaskId | null => {
 
 export const TaskView = ({
   googleAccounts = [],
-  selectedTaskListIds = [],
+  selectedTaskListIds = new Set(),
   onRefreshGoogleTasks,
   onCreateGoogleTask,
   onUpdateGoogleTask,
@@ -164,21 +164,21 @@ export const TaskView = ({
     return Array.from(taskListMetaById.values(), ({ id, label }) => ({ id, label }));
   }, [taskListMetaById]);
 
-  const selectedTaskListIdSet = useMemo(
-    () => new Set(selectedTaskListIds),
+  const selectedTaskListIdArray = useMemo(
+    () => Array.from(selectedTaskListIds),
     [selectedTaskListIds],
   );
 
   const selectedTaskCategories = useMemo(() => {
     return new Set(
-      selectedTaskListIds
+      selectedTaskListIdArray
         .map((id) => taskListMetaById.get(id)?.category)
         .filter((category): category is string => Boolean(category)),
     );
-  }, [selectedTaskListIds, taskListMetaById]);
+  }, [selectedTaskListIdArray, taskListMetaById]);
 
-  const selectedTaskListIdForCreate = selectedTaskListIds.length === 1
-    ? selectedTaskListIds[0]
+  const selectedTaskListIdForCreate = selectedTaskListIds.size === 1
+    ? selectedTaskListIdArray[0]
     : null;
   const defaultNewTaskCategory = selectedTaskListIdForCreate
     ? taskListMetaById.get(selectedTaskListIdForCreate)?.category ?? "Programming"
@@ -190,7 +190,7 @@ export const TaskView = ({
   const googleTasks = useMemo<Task[]>(() => {
     return googleAccounts.flatMap((account) =>
       account.googleTasks
-        .filter((googleTask) => selectedTaskListIdSet.has(googleTask.taskListId))
+        .filter((googleTask) => selectedTaskListIds.has(googleTask.taskListId))
         .map((googleTask, index) => {
           const taskListMeta = taskListMetaById.get(googleTask.taskListId);
           const category = taskListMeta?.category ?? googleTask.taskListId;
@@ -211,7 +211,7 @@ export const TaskView = ({
           } satisfies Task;
         }),
     );
-  }, [googleAccounts, selectedTaskListIdSet, taskListMetaById]);
+  }, [googleAccounts, selectedTaskListIds, taskListMetaById]);
 
   const visibleLocalTasks = useMemo(() => {
     if (selectedTaskCategories.size === 0) return [];
@@ -340,7 +340,7 @@ export const TaskView = ({
         filterDate={filterDate}
         viewMode={viewMode}
         taskListOptions={taskListOptions}
-        selectedTaskListIds={selectedTaskListIds}
+        selectedTaskListIds={selectedTaskListIdArray}
         onClearFilterDate={() => setFilterDate(null)}
         onChangeViewMode={setViewMode}
         onOpenNewTaskModal={handleOpenNewTaskModal}
