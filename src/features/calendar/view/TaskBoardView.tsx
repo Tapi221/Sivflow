@@ -2,13 +2,13 @@ import { DndContext, DragOverlay, useDroppable } from "@dnd-kit/core";
 import { useCallback, useMemo, type CSSProperties, type WheelEvent } from "react";
 import { createPortal } from "react-dom";
 
-import { TaskStatusDot } from "@/chip/icon/TaskStatusDot";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
-import { TASK_TYPO } from "@/styles/tokens/typography";
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "../task/task.types";
 import type { Task, TaskGroupMode, TaskStatus } from "../task/task.types";
 import { useTaskBoardDnd } from "../../dnd/task/useTaskBoardDnd";
+import type {
+  TaskDropTarget,
+  TaskInsertPosition,
+} from "../../dnd/task/taskDnd.types";
 import { TaskCard } from "../task/TaskCard";
 import { TaskColumn } from "../task/TaskColumn";
 
@@ -27,13 +27,31 @@ type TaskBoardViewProps = {
     overTaskId?: string | null,
     position?: "before" | "after",
   ) => void;
+  onReorderSectionTask: (
+    taskId: string,
+    category: string,
+    overTaskId?: string | null,
+    position?: "before" | "after",
+  ) => void;
 };
 
-type DroppableTaskColumnProps = Omit<TaskBoardViewProps, "tasks" | "tasksByStatus" | "groupMode" | "onReorderTask"> & {
-  column: (typeof TASK_COLUMNS)[number];
+type TaskBoardColumn = {
+  id: string;
+  label: string;
+  dotColor: string;
+};
+
+type DroppableTaskColumnProps = Pick<
+  TaskBoardViewProps,
+  "accountName" | "accountPhotoUrl" | "onDeleteTask" | "onToggleTaskDone"
+> & {
+  column: TaskBoardColumn;
   tasks: Task[];
+  activeDropTarget?: TaskDropTarget | null;
   activeTaskId?: string | null;
   showDivider?: boolean;
+  onAddTask?: (columnId: string) => void;
+  translateStatusLabel?: boolean;
 };
 
 type SectionGroup = {
@@ -43,19 +61,9 @@ type SectionGroup = {
   tasks: Task[];
 };
 
-type SectionTaskColumnProps = Pick<
-  TaskBoardViewProps,
-  "accountName" | "accountPhotoUrl" | "onDeleteTask" | "onToggleTaskDone"
-> & {
-  group: SectionGroup;
-  showDivider?: boolean;
-};
-
 const CALENDAR_PANEL_BACKGROUND_CLASS_NAME = "bg-white";
 const TASK_CARD_OVERLAY_CLASS_NAME = "max-w-[calc(100vw-2rem)] will-change-transform";
 const TASK_COLUMN_DIVIDER_CLASS_NAME = "border-l border-[#eeeeee]";
-const TASK_COLUMN_SPACER_TRANSITION_CLASS_NAME =
-  "relative z-0 shrink-0 transition-[height,margin,opacity] duration-[160ms] ease-[cubic-bezier(.22,1,.36,1)]";
 
 const getCategoryConfig = (category: string) => {
   return (
@@ -70,6 +78,7 @@ const getCategoryConfig = (category: string) => {
 const DroppableTaskColumn = ({
   column,
   tasks,
+  activeDropTarget,
   activeTaskId,
   showDivider = false,
   accountName,
@@ -77,12 +86,13 @@ const DroppableTaskColumn = ({
   onAddTask,
   onDeleteTask,
   onToggleTaskDone,
+  translateStatusLabel = false,
 }: DroppableTaskColumnProps) => {
   const { setNodeRef } = useDroppable({
     id: column.id,
     data: {
       type: "column",
-      status: column.id,
+      columnId: column.id,
     },
   });
 
@@ -96,78 +106,15 @@ const DroppableTaskColumn = ({
       <TaskColumn
         column={column}
         tasks={tasks}
+        activeDropTarget={activeDropTarget}
         activeTaskId={activeTaskId}
         accountName={accountName}
         accountPhotoUrl={accountPhotoUrl}
         onAddTask={onAddTask}
         onDeleteTask={onDeleteTask}
         onToggleTaskDone={onToggleTaskDone}
+        translateStatusLabel={translateStatusLabel}
       />
-    </div>
-  );
-};
-
-const SectionTaskColumn = ({
-  group,
-  showDivider = false,
-  accountName,
-  accountPhotoUrl,
-  onDeleteTask,
-  onToggleTaskDone,
-}: SectionTaskColumnProps) => {
-  return (
-    <div
-      className={`relative flex h-full min-h-0 min-w-0 bg-transparent ${
-        showDivider ? TASK_COLUMN_DIVIDER_CLASS_NAME : ""
-      }`}
-    >
-      <div className="flex h-full min-h-0 w-full min-w-0 flex-col px-3 pt-3 pb-0 bg-white">
-        <div className="mb-3 flex shrink-0 items-center gap-2">
-          <TaskStatusDot color={group.color} />
-          <span className={TASK_TYPO.columnTitle}>
-            {group.label}
-          </span>
-          <span className={cn("ml-0.5 flex h-4 min-w-4 items-center justify-center rounded px-1", TASK_TYPO.count)}>
-            {group.tasks.length}
-          </span>
-        </div>
-
-        <ScrollArea className="-mr-3 min-h-0 flex-1 overscroll-contain">
-          <div
-            className={cn(
-              "flex min-h-8 flex-col pr-3",
-              "transition-[padding,border-color,background-color] duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
-            )}
-          >
-            <div
-              className={cn(TASK_COLUMN_SPACER_TRANSITION_CLASS_NAME, "h-4 -mb-1")}
-              aria-hidden="true"
-            />
-            {group.tasks.map((task, index) => {
-              const isLastTask = index === group.tasks.length - 1;
-
-              return (
-                <div key={task.id}>
-                  <TaskCard
-                    task={task}
-                    accountName={accountName}
-                    accountPhotoUrl={accountPhotoUrl}
-                    onDelete={onDeleteTask}
-                    onToggleDone={onToggleTaskDone}
-                  />
-                  <div
-                    className={cn(
-                      TASK_COLUMN_SPACER_TRANSITION_CLASS_NAME,
-                      isLastTask ? "h-4 -mt-2 -mb-2" : "h-6 -my-2",
-                    )}
-                    aria-hidden="true"
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </ScrollArea>
-      </div>
     </div>
   );
 };
@@ -182,25 +129,8 @@ export const TaskBoardView = ({
   onDeleteTask,
   onToggleTaskDone,
   onReorderTask,
+  onReorderSectionTask,
 }: TaskBoardViewProps) => {
-  const {
-    activeTask,
-    activeTaskId,
-    activeTaskWidth,
-    collisionDetection,
-    dropAnimation,
-    handleDragCancel,
-    handleDragEnd,
-    handleDragOver,
-    handleDragStart,
-    measuring,
-    sensors,
-    visibleTasksByStatus,
-  } = useTaskBoardDnd({
-    tasksByStatus,
-    onReorderTask,
-  });
-
   const sectionGroups = useMemo<SectionGroup[]>(() => {
     const groups = new Map<string, SectionGroup>();
 
@@ -223,6 +153,47 @@ export const TaskBoardView = ({
 
     return Array.from(groups.values());
   }, [tasks]);
+
+  const tasksBySection = useMemo<Record<string, Task[]>>(() => {
+    return Object.fromEntries(
+      sectionGroups.map((group) => [group.id, group.tasks]),
+    );
+  }, [sectionGroups]);
+
+  const tasksByDndColumn = groupMode === "section" ? tasksBySection : tasksByStatus;
+
+  const handleDndReorderTask = useCallback((
+    taskId: string,
+    columnId: string,
+    overTaskId?: string | null,
+    position?: TaskInsertPosition,
+  ) => {
+    if (groupMode === "section") {
+      onReorderSectionTask(taskId, columnId, overTaskId, position);
+      return;
+    }
+
+    onReorderTask(taskId, columnId as TaskStatus, overTaskId, position);
+  }, [groupMode, onReorderSectionTask, onReorderTask]);
+
+  const {
+    activeDropTarget,
+    activeTask,
+    activeTaskId,
+    activeTaskWidth,
+    collisionDetection,
+    dropAnimation,
+    handleDragCancel,
+    handleDragEnd,
+    handleDragOver,
+    handleDragStart,
+    measuring,
+    sensors,
+    visibleTasksByColumn,
+  } = useTaskBoardDnd({
+    tasksByColumn: tasksByDndColumn,
+    onReorderTask: handleDndReorderTask,
+  });
 
   const handleBoardWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
     const horizontalDelta = event.shiftKey ? event.deltaY : event.deltaX;
@@ -255,44 +226,6 @@ export const TaskBoardView = ({
     container.scrollLeft = nextScrollLeft;
   }, []);
 
-  if (groupMode === "section") {
-    return (
-      <div
-        className={`min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 pt-4 pb-0 ${CALENDAR_PANEL_BACKGROUND_CLASS_NAME}`}
-        onWheelCapture={handleBoardWheel}
-      >
-        <div
-          className="grid h-full min-h-0 w-full min-w-[960px] gap-0"
-          style={{
-            gridTemplateColumns: `repeat(${Math.max(sectionGroups.length, 1)}, minmax(240px, 25%))`,
-          }}
-        >
-          {sectionGroups.length === 0 ? (
-            <SectionTaskColumn
-              group={{ id: "empty", label: "セクション", color: "#8f929c", tasks: [] }}
-              accountName={accountName}
-              accountPhotoUrl={accountPhotoUrl}
-              onDeleteTask={onDeleteTask}
-              onToggleTaskDone={onToggleTaskDone}
-            />
-          ) : (
-            sectionGroups.map((group, index) => (
-              <SectionTaskColumn
-                key={group.id}
-                group={group}
-                showDivider={index > 0}
-                accountName={accountName}
-                accountPhotoUrl={accountPhotoUrl}
-                onDeleteTask={onDeleteTask}
-                onToggleTaskDone={onToggleTaskDone}
-              />
-            ))
-          )}
-        </div>
-      </div>
-    );
-  }
-
   const overlayStyle: CSSProperties | undefined = activeTaskWidth
     ? { width: activeTaskWidth }
     : undefined;
@@ -312,6 +245,72 @@ export const TaskBoardView = ({
     </DragOverlay>
   );
 
+  const boardContent = groupMode === "section" ? (
+    <div
+      className={`min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 pt-4 pb-0 ${CALENDAR_PANEL_BACKGROUND_CLASS_NAME}`}
+      onWheelCapture={handleBoardWheel}
+    >
+      <div
+        className="grid h-full min-h-0 w-full min-w-[960px] gap-0"
+        style={{
+          gridTemplateColumns: `repeat(${Math.max(sectionGroups.length, 1)}, minmax(240px, 25%))`,
+        }}
+      >
+        {sectionGroups.length === 0 ? (
+          <DroppableTaskColumn
+            column={{ id: "empty", label: "セクション", dotColor: "#8f929c" }}
+            tasks={[]}
+            activeDropTarget={activeDropTarget}
+            activeTaskId={activeTaskId}
+            accountName={accountName}
+            accountPhotoUrl={accountPhotoUrl}
+            onDeleteTask={onDeleteTask}
+            onToggleTaskDone={onToggleTaskDone}
+          />
+        ) : (
+          sectionGroups.map((group, index) => (
+            <DroppableTaskColumn
+              key={group.id}
+              column={{ id: group.id, label: group.label, dotColor: group.color }}
+              tasks={visibleTasksByColumn[group.id] ?? group.tasks}
+              activeDropTarget={activeDropTarget}
+              activeTaskId={activeTaskId}
+              showDivider={index > 0}
+              accountName={accountName}
+              accountPhotoUrl={accountPhotoUrl}
+              onDeleteTask={onDeleteTask}
+              onToggleTaskDone={onToggleTaskDone}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  ) : (
+    <div
+      className={`min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 pt-4 pb-0 ${CALENDAR_PANEL_BACKGROUND_CLASS_NAME}`}
+      onWheelCapture={handleBoardWheel}
+    >
+      <div className="grid h-full min-h-0 w-full min-w-[960px] grid-cols-4 gap-0">
+        {TASK_COLUMNS.map((col, index) => (
+          <DroppableTaskColumn
+            key={col.id}
+            column={{ id: col.id, label: col.label, dotColor: col.dotColor }}
+            tasks={visibleTasksByColumn[col.id] ?? []}
+            activeDropTarget={activeDropTarget}
+            activeTaskId={activeTaskId}
+            showDivider={index > 0}
+            accountName={accountName}
+            accountPhotoUrl={accountPhotoUrl}
+            onAddTask={onAddTask}
+            onDeleteTask={onDeleteTask}
+            onToggleTaskDone={onToggleTaskDone}
+            translateStatusLabel
+          />
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <DndContext
       sensors={sensors}
@@ -322,27 +321,7 @@ export const TaskBoardView = ({
       onDragCancel={handleDragCancel}
       onDragEnd={handleDragEnd}
     >
-      <div
-        className={`min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 pt-4 pb-0 ${CALENDAR_PANEL_BACKGROUND_CLASS_NAME}`}
-        onWheelCapture={handleBoardWheel}
-      >
-        <div className="grid h-full min-h-0 w-full min-w-[960px] grid-cols-4 gap-0">
-          {TASK_COLUMNS.map((col, index) => (
-            <DroppableTaskColumn
-              key={col.id}
-              column={col}
-              tasks={visibleTasksByStatus[col.id] ?? []}
-              activeTaskId={activeTaskId}
-              showDivider={index > 0}
-              accountName={accountName}
-              accountPhotoUrl={accountPhotoUrl}
-              onAddTask={onAddTask}
-              onDeleteTask={onDeleteTask}
-              onToggleTaskDone={onToggleTaskDone}
-            />
-          ))}
-        </div>
-      </div>
+      {boardContent}
 
       {typeof document === "undefined"
         ? dragOverlay
