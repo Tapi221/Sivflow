@@ -11,7 +11,6 @@ import {
   SettingIcon,
 } from "../../components/icons/icons.sidebar";
 
-import { useScheduleScreenStore } from "@/features/calendar/header/useScheduleScreenStore";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 
@@ -76,7 +75,6 @@ export const SidebarMobile = ({
 
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
 
-  const closeCalendar = useScheduleScreenStore((s) => s.close);
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
   const openSectionTab = useWorkspaceTabsStore((s) => s.openSectionTab);
 
@@ -86,7 +84,6 @@ export const SidebarMobile = ({
       : new URLSearchParams(search).get("libraryType");
 
   const handleClick = (item: SidebarNavItem) => {
-    closeCalendar();
     item.onClick?.();
 
     if (item.id === "library") {
@@ -107,7 +104,6 @@ export const SidebarMobile = ({
   };
 
   const openLibraryChild = (type: string) => {
-    closeCalendar();
     openSectionTab("library");
     navigate(`/library?view=section-list&libraryType=${type}`);
   };
