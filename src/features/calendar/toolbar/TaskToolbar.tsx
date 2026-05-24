@@ -49,9 +49,9 @@ export const TaskToolbar = ({
 
   return (
     <div className="flex shrink-0 flex-col border-b border-[#e9eaed] bg-white">
-      <div className="flex items-center justify-between px-4 py-2">
+      <div className="grid grid-cols-1 items-center gap-2 px-3 py-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:px-4">
         {/* 左：フィルター群 */}
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           {filterDate && (
             <DateFilterChip
               label={filterDate}
@@ -62,7 +62,7 @@ export const TaskToolbar = ({
           <FilterChip onClick={onOpenFilter} />
 
           <div
-            className="inline-flex h-8 items-center gap-0.5 rounded-xl bg-[#f7f7f7] p-0.5"
+            className="inline-flex h-8 shrink-0 items-center gap-0.5 rounded-xl bg-[#f7f7f7] p-0.5"
             role="radiogroup"
             aria-label="タスクの分類方法"
           >
@@ -76,14 +76,14 @@ export const TaskToolbar = ({
                   role="radio"
                   aria-checked={active}
                   onClick={() => onChangeGroupMode(mode)}
-                  className={`inline-flex h-7 items-center gap-1 rounded-lg px-2.5 text-[11px] font-medium leading-none transition-colors duration-200 ${
+                  className={`inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-lg px-2.5 text-[11px] font-medium leading-none transition-colors duration-200 ${
                     active
                       ? "border border-[#eeeeee] bg-white text-[#6f7681] shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
                       : "text-[#a8adb5] hover:text-[#7b818c]"
                   }`}
                 >
                   <span
-                    className={`h-1.5 w-1.5 rounded-full ${
+                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${
                       active ? "bg-[#8d959f]" : "bg-transparent"
                     }`}
                     aria-hidden="true"
@@ -96,7 +96,7 @@ export const TaskToolbar = ({
         </div>
 
         {/* 右：ビュー切替 + New Task */}
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2 justify-self-start sm:justify-self-end">
           <BoardListToggleButton
             viewMode={viewMode}
             onChange={onChangeViewMode}
