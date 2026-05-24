@@ -58,6 +58,7 @@ export const useGoogleCalendarLayer = () => {
     refreshGoogleTasks: googleTasks.refreshAll,
     createGoogleTask: googleTasks.createTask,
     updateGoogleTask: googleTasks.updateTask,
+    moveGoogleTaskList: googleTasks.moveTaskList,
     deleteGoogleTask: googleTasks.removeTask,
     events,
     selectedCalendarIds,
