@@ -5,7 +5,6 @@ import {
   rectIntersection,
 } from "@dnd-kit/core";
 
-import { isTaskStatus } from "./taskDnd.preview";
 import type {
   CollisionDescriptor,
   CollisionDetectionArgs,
@@ -25,6 +24,13 @@ const getDistanceFromRange = (
   }
 
   return 0;
+};
+
+const getDroppableColumnId = (
+  container: CollisionDetectionArgs["droppableContainers"][number],
+): string | null => {
+  const columnId = container.data.current?.columnId ?? container.data.current?.status;
+  return typeof columnId === "string" && columnId.length > 0 ? columnId : null;
 };
 
 const getNearestSlotCollision = (
@@ -91,11 +97,11 @@ export const taskBoardCollisionDetection: CollisionDetection = (args) => {
   const overColumn = columnContainers.find(
     (container) => container.id === columnCollisions[0]?.id,
   );
-  const overStatus = overColumn?.data.current?.status;
+  const overColumnId = overColumn ? getDroppableColumnId(overColumn) : null;
 
-  if (isTaskStatus(overStatus)) {
+  if (overColumnId) {
     const targetColumnSlots = slotContainers.filter(
-      (container) => container.data.current?.status === overStatus,
+      (container) => getDroppableColumnId(container) === overColumnId,
     );
 
     if (targetColumnSlots.length > 0) {
