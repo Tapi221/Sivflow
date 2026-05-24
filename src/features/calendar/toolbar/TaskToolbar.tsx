@@ -7,9 +7,16 @@ import {
   type BoardListViewMode,
 } from "../../../chip/toggle/Toggle.boardlist";
 
+type TaskListOption = {
+  id: string;
+  label: string;
+};
+
 type TaskToolbarProps = {
   filterDate: string | null;
   viewMode: BoardListViewMode;
+  taskListOptions?: TaskListOption[];
+  selectedTaskListIds?: string[];
   onClearFilterDate: () => void;
   onChangeViewMode: (viewMode: BoardListViewMode) => void;
   onOpenNewTaskModal: () => void;
