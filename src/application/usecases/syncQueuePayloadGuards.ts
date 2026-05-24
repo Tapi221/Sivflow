@@ -1,12 +1,7 @@
 import type { Card, Folder } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 import type { Document } from "@/types/domain/document";
-import type {AssetSyncPayload,
-  SyncDeletePayload,
-  SyncEntity,
-  SyncPayloadByEntity,
-  SyncQueueItem,
-  TagSyncPayload,} from "@/types/domain/sync";
+import type { AssetSyncPayload, SyncDeletePayload, SyncEntity, SyncPayloadByEntity, SyncQueueItem, TagSyncPayload } from "@/types/domain/sync";
 import type { UserSettings } from "@/types/domain/user";
 
 export type UpsertEntity = keyof SyncPayloadByEntity;
@@ -67,6 +62,52 @@ const isDateLike = (value: unknown): value is DateLike =>
   value instanceof Date ||
   (isRecord(value) && typeof value.toDate === "function");
 
+const toRequiredString = (value: unknown): string | null =>
+  typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+
+const toOptionalString = (value: unknown): string | undefined =>
+  typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
+
+const toDateOrNull = (value: unknown): Date | null => {
+  if (value instanceof Date && Number.isFinite(value.getTime())) return value;
+  if (isRecord(value) && typeof value.toDate === "function") {
+    const converted = value.toDate();
+    return converted instanceof Date && Number.isFinite(converted.getTime()) ? converted : null;
+  }
+  if (typeof value === "number" || typeof value === "string") {
+    const converted = new Date(value);
+    return Number.isFinite(converted.getTime()) ? converted : null;
+  }
+  return null;
+};
+
+const normalizeTagPayload = (value: unknown): TagSyncPayload | null => {
+  if (!isRecord(value)) return null;
+  const id = toRequiredString(value.id);
+  const userId = toRequiredString(value.userId);
+  const name = toRequiredString(value.name);
+  if (!id || !userId || !name) return null;
+
+  const now = new Date();
+  const updatedAt = toDateOrNull(value.updatedAt) ?? now;
+  const deletedAt = value.deletedAt === undefined || value.deletedAt === null ? null : (toDateOrNull(value.deletedAt) ?? updatedAt);
+  const tagPayload: TagSyncPayload = {
+    id,
+    userId,
+    name,
+    nameLower: toRequiredString(value.nameLower) ?? name.toLowerCase(),
+    color: typeof value.color === "string" ? value.color : "",
+    updatedAt,
+    createdAt: toDateOrNull(value.createdAt) ?? updatedAt,
+    deviceId: toOptionalString(value.deviceId),
+    isDeleted: typeof value.isDeleted === "boolean" ? value.isDeleted : false,
+    deletedAt,
+    categoryId: toOptionalString(value.categoryId),
+    parentId: toOptionalString(value.parentId),
+  };
+  return tagPayload;
+};
+
 const hasBaseEntityShape = (value: unknown): value is Record<string, unknown> =>
   isRecord(value) &&
   hasString(value, "id") &&
@@ -116,27 +157,6 @@ const isDocumentPayload = (value: unknown): value is Document => {
   );
 };
 
-const isTagPayload = (value: unknown): value is TagSyncPayload => {
-  if (!isRecord(value)) return false;
-
-  return (
-    hasString(value, "id") &&
-    hasString(value, "userId") &&
-    hasString(value, "name") &&
-    hasString(value, "nameLower") &&
-    typeof value.color === "string" &&
-    isDateLike(value.updatedAt) &&
-    (value.createdAt === undefined || isDateLike(value.createdAt)) &&
-    (value.deviceId === undefined || typeof value.deviceId === "string") &&
-    (value.isDeleted === undefined || typeof value.isDeleted === "boolean") &&
-    (value.deletedAt === undefined ||
-      value.deletedAt === null ||
-      isDateLike(value.deletedAt)) &&
-    (value.categoryId === undefined || typeof value.categoryId === "string") &&
-    (value.parentId === undefined || typeof value.parentId === "string")
-  );
-};
-
 const isUserSettingPayload = (value: unknown): value is UserSettings =>
   hasBaseEntityShape(value);
 
@@ -164,9 +184,11 @@ export const assertUpsertPayload = <TEntity extends UpsertEntity>(
       if (isDocumentPayload(payload))
         return payload as SyncPayloadByEntity[TEntity];
       break;
-    case "tag":
-      if (isTagPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
+    case "tag": {
+      const tagPayload = normalizeTagPayload(payload);
+      if (tagPayload) return tagPayload as SyncPayloadByEntity[TEntity];
       break;
+    }
     case "userSetting":
       if (isUserSettingPayload(payload))
         return payload as SyncPayloadByEntity[TEntity];
