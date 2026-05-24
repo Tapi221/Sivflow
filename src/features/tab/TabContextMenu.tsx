@@ -1,7 +1,8 @@
+import { Menu } from "@mantine/core";
 import type { CSSProperties, RefObject } from "react";
 
-import { cn } from "@/lib/utils";
-import { X } from "@/ui/icons";
+import "@blocknote/react/style.css";
+import "@blocknote/mantine/style.css";
 
 type TabContextMenuAction = {
   id: string;
@@ -18,8 +19,8 @@ type TabContextMenuProps = {
   noDragStyle: CSSProperties;
 };
 
-export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 228;
-export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 156;
+export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 220;
+export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 152;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = 8;
 
 export const WorkspaceTabContextMenu = ({
@@ -32,42 +33,53 @@ export const WorkspaceTabContextMenu = ({
   return (
     <div
       ref={menuRef}
-      role="menu"
-      aria-label="tab menu"
-      style={{ ...noDragStyle, left: x, top: y }}
-      className={cn(
-        "fixed z-[1000] w-max min-w-[148px] max-w-[228px] rounded-[9px] border border-black/[0.06] bg-white p-1.5",
-        "font-sans text-[15px] font-normal leading-[20px] text-[#2c2c2c]",
-        "shadow-[0_8px_20px_rgba(15,23,42,0.12),0_2px_6px_rgba(15,23,42,0.08)]",
-      )}
+      style={noDragStyle}
+      className="bn-container bn-mantine fixed left-0 top-0 z-[1000]"
     >
-      {actions.map((action) => (
-        <button
-          key={action.id}
-          type="button"
-          role="menuitem"
-          disabled={action.disabled}
-          className={cn(
-            "flex h-9 w-full items-center gap-2.5 rounded-[6px] px-2.5 text-left outline-none",
-            "transition-[background-color,color] duration-100 ease-out",
-            "hover:bg-[#f3f3f3] focus-visible:bg-[#f3f3f3]",
-            "disabled:pointer-events-none disabled:text-[#a7a7a7]",
-          )}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            action.onSelect();
-          }}
-        >
-          <X
-            className={cn(
-              "h-[15px] w-[15px] shrink-0 text-[#6f6f6f]",
-              action.disabled && "text-[#c7c7c7]",
-            )}
+      <Menu
+        opened
+        withinPortal={false}
+        position="bottom-start"
+        offset={0}
+        shadow="md"
+      >
+        <Menu.Target>
+          <button
+            type="button"
+            aria-label="tab menu anchor"
+            tabIndex={-1}
+            style={{
+              ...noDragStyle,
+              position: "fixed",
+              left: x,
+              top: y,
+              width: 0,
+              height: 0,
+              margin: 0,
+              padding: 0,
+              border: 0,
+              background: "transparent",
+              pointerEvents: "none",
+            }}
           />
-          <span className="truncate">{action.label}</span>
-        </button>
-      ))}
+        </Menu.Target>
+
+        <Menu.Dropdown style={noDragStyle}>
+          {actions.map((action) => (
+            <Menu.Item
+              key={action.id}
+              disabled={action.disabled}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                action.onSelect();
+              }}
+            >
+              {action.label}
+            </Menu.Item>
+          ))}
+        </Menu.Dropdown>
+      </Menu>
     </div>
   );
 };
