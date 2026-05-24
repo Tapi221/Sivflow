@@ -335,7 +335,7 @@ export const NewTaskModal = ({
             />
 
             <div className="inline-flex flex-col items-start gap-1">
-              <span className="px-1 text-[10px] font-semibold tracking-wide text-[#7a7d85]">優先度</span>
+              <span className="px-1 text-[10px] font-medium text-[#b3b3bb]">優先度</span>
               <PriorityToggle
                 value={priority}
                 onChange={(value) => {
