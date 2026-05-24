@@ -66,9 +66,13 @@ export const useCalendarScrollPositionSync = ({
   const lastRef = useRef<{
     token: number | null;
     viewportWidth: number;
+    activeMode: string | null;
+    selectedViewMode: CalendarViewMode | null;
   }>({
     token: null,
     viewportWidth: 0,
+    activeMode: null,
+    selectedViewMode: null,
   });
 
   useLayoutEffect(() => {
@@ -77,11 +81,20 @@ export const useCalendarScrollPositionSync = ({
     if (viewportWidth <= 0) return;
 
     const currentToken = scrollTargetToken ?? 0;
-    const { token, viewportWidth: prevWidth } = lastRef.current;
+    const {
+      token,
+      viewportWidth: prevWidth,
+      activeMode: prevActiveMode,
+      selectedViewMode: prevSelectedViewMode,
+    } = lastRef.current;
     const tokenChanged = token !== currentToken;
     const viewportChanged = token === currentToken && prevWidth !== viewportWidth;
+    const modeChanged = prevActiveMode !== activeMode;
+    const viewModeChanged = prevSelectedViewMode !== selectedViewMode;
 
-    if (!tokenChanged && !viewportChanged) return;
+    if (!tokenChanged && !viewportChanged && !modeChanged && !viewModeChanged) {
+      return;
+    }
 
     const nextScrollLeft =
       activeMode === "timeline"
@@ -106,6 +119,8 @@ export const useCalendarScrollPositionSync = ({
     lastRef.current = {
       token: currentToken,
       viewportWidth,
+      activeMode,
+      selectedViewMode,
     };
   }, [
     activeMode,
