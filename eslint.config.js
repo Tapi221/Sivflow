@@ -48,6 +48,15 @@ export default defineConfig([
         },
       ],
 
+      // import / export の {} 内は1行推奨
+      "@stylistic/object-curly-newline": [
+        "warn",
+        {
+          ImportDeclaration: "never",
+          ExportDeclaration: "never",
+        },
+      ],
+
       // ----------------------------
       // import制約
       // ----------------------------
