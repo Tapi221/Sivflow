@@ -147,7 +147,7 @@ const CalendarMonthDayCell = memo(({
           isToday={isToday}
           isSelected={selected}
           isCurrentMonth={day.isCurrentMonth}
-          className={cn("absolute font-serif", GD.MONTH_GRID_DAY_NUMBER_POSITION_CLASS)}
+          className={cn("absolute", GD.MONTH_GRID_DAY_NUMBER_POSITION_CLASS)}
         >
           {day.dayOfMonth}
         </CalendarDayNumberCircle>
@@ -156,7 +156,7 @@ const CalendarMonthDayCell = memo(({
         {monthAnnotation && (
           <span
             className={cn(
-              "absolute font-serif text-[12px] font-semibold text-[#8e8e93]",
+              "absolute text-[12px] font-semibold text-[#8e8e93]",
               GD.MONTH_GRID_MONTH_ANNOTATION_POSITION_CLASS,
             )}
           >
@@ -403,7 +403,7 @@ export const GridCalendarMonthDesktop = ({
       {/* 曜日ヘッダー */}
       <div
         className={cn(
-          "calendar-month-weekday-header sticky top-0 z-20 grid grid-cols-7 border-b border-[#eeeeee] font-serif",
+          "calendar-month-weekday-header sticky top-0 z-20 grid grid-cols-7 border-b border-[#eeeeee]",
           GD.MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS,
         )}
       >
