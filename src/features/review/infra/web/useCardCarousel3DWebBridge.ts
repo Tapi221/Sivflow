@@ -31,8 +31,15 @@ export const useCardCarousel3DWebBridge = ({
   const [isScrolling, setIsScrolling] = useState(false);
 
   const isScrollingRef = useRef(false);
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
+
+  const clearDebounceTimer = useCallback(() => {
+    if (debounceTimerRef.current !== null) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+  }, []);
 
   const getScrollLeftForIndex = useCallback(
     (index: number) => {
@@ -96,9 +103,10 @@ export const useCardCarousel3DWebBridge = ({
 
     setIsScrolling((previous) => (previous ? previous : true));
     isScrollingRef.current = true;
-    clearTimeout(debounceTimerRef.current);
+    clearDebounceTimer();
 
     debounceTimerRef.current = setTimeout(() => {
+      debounceTimerRef.current = null;
       isScrollingRef.current = false;
       setIsScrolling(false);
 
@@ -115,6 +123,7 @@ export const useCardCarousel3DWebBridge = ({
       updateStageHeight(clampedIndex);
     }, scrollDebounceMs);
   }, [
+    clearDebounceTimer,
     itemCount,
     itemSpan,
     onSettledIndexChange,
@@ -124,10 +133,10 @@ export const useCardCarousel3DWebBridge = ({
 
   useEffect(() => {
     return () => {
-      clearTimeout(debounceTimerRef.current);
+      clearDebounceTimer();
       resizeObserverRef.current?.disconnect();
     };
-  }, []);
+  }, [clearDebounceTimer]);
 
   return {
     handleScroll,
