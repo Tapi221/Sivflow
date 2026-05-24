@@ -17,11 +17,15 @@ type UseTaskBoardDndArgs = {
     overTaskId?: string | null,
     position?: TaskInsertPosition,
   ) => void;
+  getPreviewTask?: (task: Task, targetColumnId: string) => Task;
 };
+
+const defaultGetPreviewTask = (task: Task) => task;
 
 export const useTaskBoardDnd = ({
   tasksByColumn,
   onReorderTask,
+  getPreviewTask = defaultGetPreviewTask,
 }: UseTaskBoardDndArgs) => {
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [activeTaskWidth, setActiveTaskWidth] = useState<number | null>(null);
@@ -33,11 +37,8 @@ export const useTaskBoardDnd = ({
       return tasksByColumn;
     }
 
-    return createTaskDragPreview(tasksByColumn, activeTaskId, activeDropTarget, (task, targetColumnId) => ({
-      ...task,
-      category: targetColumnId,
-    }));
-  }, [activeDropTarget, activeTaskId, tasksByColumn]);
+    return createTaskDragPreview(tasksByColumn, activeTaskId, activeDropTarget, getPreviewTask);
+  }, [activeDropTarget, activeTaskId, getPreviewTask, tasksByColumn]);
   const isPreviewingTaskReorder = activeTaskId !== null && activeDropTarget !== null;
   const sensors = useSensors(
     useSensor(PointerSensor, {
