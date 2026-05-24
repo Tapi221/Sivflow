@@ -39,7 +39,9 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
   const [isDayDetailPanelOpen, setIsDayDetailPanelOpen] = useState(true);
-  const [selectedTaskListIds, setSelectedTaskListIds] = useState<string[]>([]);
+  const [selectedTaskListIds, setSelectedTaskListIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   const deferredSelectedTaskListIds = useDeferredValue(selectedTaskListIds);
   const selectedTaskListInitializedRef = useRef(false);
 
@@ -103,25 +105,24 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     setSelectedTaskListIds((ids) => {
       if (allTaskListIds.length === 0) {
         selectedTaskListInitializedRef.current = false;
-        return ids.length === 0 ? ids : [];
+        return ids.size === 0 ? ids : new Set();
       }
 
       if (!selectedTaskListInitializedRef.current) {
         selectedTaskListInitializedRef.current = true;
-        return allTaskListIds;
+        return new Set(allTaskListIds);
       }
 
       const availableTaskListIds = new Set(allTaskListIds);
-      const nextIds = ids.filter((id) => availableTaskListIds.has(id));
+      const nextIds = new Set<string>();
 
-      if (
-        nextIds.length === ids.length &&
-        nextIds.every((id, index) => id === ids[index])
-      ) {
-        return ids;
+      for (const id of ids) {
+        if (availableTaskListIds.has(id)) {
+          nextIds.add(id);
+        }
       }
 
-      return nextIds;
+      return nextIds.size === ids.size ? ids : nextIds;
     });
     // allTaskListIdsKey でリストの実質的な変化だけを検知する。
     // 配列参照そのものを依存に入れると、チェック操作ごとに不要な再評価が走りやすい。
@@ -130,11 +131,15 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
 
   const handleToggleTaskList = useCallback((taskListId: string) => {
     setSelectedTaskListIds((ids) => {
-      if (ids.includes(taskListId)) {
-        return ids.filter((id) => id !== taskListId);
+      const nextIds = new Set(ids);
+
+      if (nextIds.has(taskListId)) {
+        nextIds.delete(taskListId);
+        return nextIds;
       }
 
-      return [...ids, taskListId];
+      nextIds.add(taskListId);
+      return nextIds;
     });
   }, []);
 
