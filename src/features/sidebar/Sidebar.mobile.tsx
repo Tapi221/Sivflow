@@ -11,7 +11,7 @@ import {
   SettingIcon,
 } from "../../components/icons/icons.sidebar";
 
-import { useSchedulePaneStore } from "@/features/calendar/header/useSchedulePaneStore";
+import { useScheduleScreenStore } from "@/features/calendar/header/useScheduleScreenStore";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 
@@ -76,7 +76,7 @@ export const SidebarMobile = ({
 
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
 
-  const closeCalendar = useSchedulePaneStore((s) => s.close);
+  const closeCalendar = useScheduleScreenStore((s) => s.close);
   const openGlobalSearch = useGlobalSearchStore((s) => s.open);
   const openSectionTab = useWorkspaceTabsStore((s) => s.openSectionTab);
 

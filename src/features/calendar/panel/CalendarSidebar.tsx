@@ -24,7 +24,7 @@ import type {
   CalendarSelectionRange,
   CalendarSidebarProps,
   GoogleAccountDisplay,
-} from "../schedulePane.types";
+} from "../scheduleScreen.types";
 
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 const DEFAULT_TASK_LIST_COLOR = "#7c8cf8";

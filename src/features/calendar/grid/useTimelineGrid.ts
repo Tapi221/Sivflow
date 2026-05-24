@@ -5,7 +5,7 @@ import {
   getTimelineColumnWidth,
 } from "@/features/calendar/grid/TimelineDayView.shared";
 
-import type { CalendarViewMode } from "../schedulePane.types";
+import type { CalendarViewMode } from "../scheduleScreen.types";
 import type { TimelineUnitBuffer } from "./TimelineDayView.shared";
 import { useScheduleTimelineColumns } from "./useScheduleColumns";
 

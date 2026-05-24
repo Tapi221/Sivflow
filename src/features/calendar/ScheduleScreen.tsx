@@ -4,12 +4,12 @@ import { SidebarOpenIcon } from "@/components/icons/icons.sidebar";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
-import type { SchedulePaneProps } from "./schedulePane.types";
+import type { ScheduleScreenProps } from "./ScheduleScreen.types";
 import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
 import { TaskView } from "./task/TaskView";
 import { CalendarTimelineDayView } from "./grid/TimelineDayView";
-import { useSchedulePane } from "./useSchedulePane";
+import { useScheduleScreen } from "./useScheduleScreen";
 import { DayDetailPanel } from "./panel/DayDetailPanel";
 import { CalendarSidebar } from "./panel/CalendarSidebar";
 import { CalendarWorkspaceToolbar } from "./toolbar/ScheduleToolbar";
@@ -32,8 +32,8 @@ const DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS =
 
 const VIEW_HEADER_CONTROLS_RIGHT_INSET_PX = 56;
 
-export const SchedulePane = ({ onClose: _onClose }: SchedulePaneProps) => {
-  const pane = useSchedulePane();
+export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
+  const pane = useScheduleScreen();
   const taskCalendarEvents = useTaskCalendarEvents();
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();

@@ -1,4 +1,4 @@
-import type { CalendarWorkspaceToolbarProps } from "../schedulePane.types";
+import type { CalendarWorkspaceToolbarProps } from "../scheduleScreen.types";
 import { ToggleCalendarTimelineTask } from "../../../chip/toggle/Toggle.calendartimelinetask";
 import { useCalendarToolbar } from "./hooks/useScheduleToolbar";
 

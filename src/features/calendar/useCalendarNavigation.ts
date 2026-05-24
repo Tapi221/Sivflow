@@ -13,7 +13,7 @@ import {
 import type {
   CalendarToolbarMode,
   CalendarViewMode,
-} from "./schedulePane.types";
+} from "./scheduleScreen.types";
 import {
   createCalendarScrollBuffer,
   getCalendarScrollBufferExtendUnits,
