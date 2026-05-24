@@ -1,15 +1,10 @@
 /** @type {import('tailwindcss').Config} */
-const iosSystemFontStack = [
-  "-apple-system",
-  "BlinkMacSystemFont",
-  '"SF Pro Text"',
-  '"SF Pro Display"',
-  '"Hiragino Sans"',
-  '"Hiragino Kaku Gothic ProN"',
-  '"Helvetica Neue"',
-  "Arial",
-  "sans-serif",
-];
+const appFontFamily = {
+  ui: ["var(--app-font-family-ui)"],
+  content: ["var(--app-font-family-content)"],
+  numeric: ["var(--app-font-family-numeric)"],
+  code: ["var(--app-font-family-code)"],
+};
 
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
@@ -97,9 +92,10 @@ export default {
         },
       },
       fontFamily: {
-        sans: iosSystemFontStack,
-        serif: ["var(--ds-semantic-typography-content)"],
-        mono: ["var(--ds-semantic-typography-code)"],
+        sans: appFontFamily.ui,
+        serif: appFontFamily.content,
+        mono: appFontFamily.code,
+        numeric: appFontFamily.numeric,
       },
       backgroundImage: {
         "gradient-primary":
