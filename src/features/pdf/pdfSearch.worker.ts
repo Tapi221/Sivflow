@@ -1,14 +1,10 @@
 /// <reference lib="webworker" />
 
-import type {
-  PdfSearchWorkerRequest,
-  PdfSearchWorkerResponse,
-} from "./pdfSearchWorkerProtocol";
-import type {
-  PdfJsTextContent,
+import type {PdfSearchWorkerRequest,
+  PdfSearchWorkerResponse,} from "./pdfSearchWorkerProtocol";
+import type {PdfJsTextContent,
   PdfJsTextItem,
-  PdfPageSearchMatch,
-} from "./pdfViewer.types";
+  PdfPageSearchMatch,} from "./pdfViewer.types";
 
 type SearchSegment = {
   itemIndex: number;

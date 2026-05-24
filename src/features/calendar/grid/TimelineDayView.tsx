@@ -1,20 +1,14 @@
 import type { CSSProperties, RefObject, UIEvent } from "react";
 import { Fragment, memo, useMemo } from "react";
 
-import {
-  CalendarDateButton,
-  CalendarDateContent,
-} from "@/chip/button/GridHeader.scheduletimeline";
+import {CalendarDateButton,
+  CalendarDateContent,} from "@/chip/button/GridHeader.scheduletimeline";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 
-import type {
-  TimelineUnitBuffer,
-  TimelineViewMode,
-} from "./TimelineDayView.shared";
-import {
-  buildTimelineColumns,
-  getTimelineColumnWidth,
-} from "./TimelineDayView.shared";
+import type {TimelineUnitBuffer,
+  TimelineViewMode,} from "./TimelineDayView.shared";
+import {buildTimelineColumns,
+  getTimelineColumnWidth,} from "./TimelineDayView.shared";
 
 type CalendarTimelineDayViewProps = {
   viewMode: TimelineViewMode;

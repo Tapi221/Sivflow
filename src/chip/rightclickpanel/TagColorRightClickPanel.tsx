@@ -1,8 +1,6 @@
 import { useState, type CSSProperties, type RefObject } from "react";
-import {
-  getTagColorSwatchStyle,
-  type TagColorKey,
-} from "@/features/tag/tagColor";
+import {getTagColorSwatchStyle,
+  type TagColorKey,} from "@/features/tag/tagColor";
 import { cn } from "@/lib/utils";
 
 const TAG_COLOR_LABELS: Record<TagColorKey, string> = {

@@ -1,9 +1,7 @@
-import type {
-  CSSProperties,
+import type {CSSProperties,
   KeyboardEvent,
   PointerEvent as ReactPointerEvent,
-  RefObject,
-} from "react";
+  RefObject,} from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import * as C from "@/features/calendar/calendar.constants.desktop";

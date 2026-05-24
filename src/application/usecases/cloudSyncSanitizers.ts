@@ -1,5 +1,3 @@
-export {
-  sanitizeSyncDataForCloud,
-  sanitizeSyncDataFromCloud,
-} from "./cloudSyncDataSanitizers";
+export {sanitizeSyncDataForCloud,
+  sanitizeSyncDataFromCloud,} from "./cloudSyncDataSanitizers";
 export { deepStripUndefined } from "./cloudSyncValueCleaning";

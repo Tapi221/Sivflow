@@ -4,11 +4,9 @@ import { CacheableResponsePlugin } from "workbox-cacheable-response";
 import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";
 import type { PrecacheEntry } from "workbox-precaching";
-import {
-  cleanupOutdatedCaches,
+import {cleanupOutdatedCaches,
   matchPrecache,
-  precacheAndRoute,
-} from "workbox-precaching";
+  precacheAndRoute,} from "workbox-precaching";
 import { registerRoute, setCatchHandler } from "workbox-routing";
 import { CacheFirst, NetworkFirst } from "workbox-strategies";
 

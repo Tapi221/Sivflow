@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  isCloudStorageStatsOutdated,
+import {isCloudStorageStatsOutdated,
   rebuildCloudStorageStats,
-  subscribeToCloudStorageStats,
-} from "@/services/cloudStorageStatsService";
+  subscribeToCloudStorageStats,} from "@/services/cloudStorageStatsService";
 import type { CloudStorageStats } from "@/types";
 
 type UseCloudStorageStatsResult = {

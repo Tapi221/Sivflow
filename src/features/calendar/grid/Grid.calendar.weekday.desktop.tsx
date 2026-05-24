@@ -2,10 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import * as C from "@/features/calendar/calendar.constants.desktop";
-import {
-  clipEventToDay,
-  eventOverlapsDay,
-} from "@/features/calendar/calendarEventRange";
+import {clipEventToDay,
+  eventOverlapsDay,} from "@/features/calendar/calendarEventRange";
 import { eventChipAllDayClass } from "@/chip/eventchip/eventchip.allday.styles";
 import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.layout.weekday.desktop";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
@@ -14,10 +12,8 @@ import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-int
 import type { CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 
-import {
-  CalendarDateButton,
-  CalendarDateContent,
-} from "@/chip/button/GridHeader.scheduletimeline";
+import {CalendarDateButton,
+  CalendarDateContent,} from "@/chip/button/GridHeader.scheduletimeline";
 import { CalendarEventChipWeekday } from "../../../chip/eventchip/EventChip.schedule.weekday";
 import { cn } from "@/lib/utils";
 

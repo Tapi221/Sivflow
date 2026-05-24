@@ -2,10 +2,8 @@ import * as React from "react";
 
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 
-import {
-  type FloatingSurfaceVariantProps,
-  floatingSurfaceVariants,
-} from "@/components/ui/floating-surface";
+import {type FloatingSurfaceVariantProps,
+  floatingSurfaceVariants,} from "@/components/ui/floating-surface";
 
 import { cn } from "@/lib/utils";
 

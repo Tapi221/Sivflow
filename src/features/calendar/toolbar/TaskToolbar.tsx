@@ -2,10 +2,8 @@ import { MoreMenuButton } from "../../../chip/button/MoreMenuButton";
 import { NewTaskButton } from "../../../chip/button/NewTaskButton";
 import { DateFilterChip } from "../../../chip/chip/DateFilterChip";
 import { FilterChip } from "../../../chip/chip/FilterChip";
-import {
-  BoardListToggleButton,
-  type BoardListViewMode,
-} from "../../../chip/toggle/Toggle.boardlist";
+import {BoardListToggleButton,
+  type BoardListViewMode,} from "../../../chip/toggle/Toggle.boardlist";
 import type { TaskGroupMode } from "../task/task.types";
 
 type TaskListOption = {

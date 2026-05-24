@@ -3,14 +3,12 @@ import { Timestamp } from "firebase/firestore";
 import type { InkDocument } from "@/components/ink/inkTypes";
 
 import type { UploadedImage } from "./assets";
-import type {
-  BaseEntity,
+import type {BaseEntity,
   CardState,
   MathBlockData,
   ReferenceBlockData,
   ReviewLog,
-  SubjectiveScoreValue,
-} from "./base";
+  SubjectiveScoreValue,} from "./base";
 
 import type { CodeBlockData } from "@/types/core/code-block";
 

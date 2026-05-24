@@ -1,12 +1,10 @@
-import {
-  createContext,
+import {createContext,
   type ReactNode,
   useContext,
   useEffect,
   useMemo,
   useRef,
-  useState,
-} from "react";
+  useState,} from "react";
 
 import { onAuthStateChanged,type User as FirebaseUser } from "firebase/auth";
 

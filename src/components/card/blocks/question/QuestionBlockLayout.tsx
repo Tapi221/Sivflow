@@ -1,11 +1,9 @@
 import React from "react";
 
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
-import {
-  buildTypographyStyle,
+import {buildTypographyStyle,
   mergeStyles,
-  normalizeCardSetViewZoom,
-} from "@/components/card/common/cardSetViewZoom";
+  normalizeCardSetViewZoom,} from "@/components/card/common/cardSetViewZoom";
 
 import { cn } from "@/lib/utils";
 

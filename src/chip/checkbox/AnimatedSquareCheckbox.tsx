@@ -1,7 +1,5 @@
-import {
-  AnimatedCheckboxBase,
-  type AnimatedCheckboxBaseProps,
-} from "./AnimatedCheckboxBase";
+import {AnimatedCheckboxBase,
+  type AnimatedCheckboxBaseProps,} from "./AnimatedCheckboxBase";
 
 type AnimatedSquareCheckboxProps = Omit<
   AnimatedCheckboxBaseProps,

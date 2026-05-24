@@ -1,7 +1,6 @@
 import { addDays, subDays } from "date-fns";
 
-import type {
-  GCalEventsListResponse,
+import type {GCalEventsListResponse,
   GCalForceSyncOptions,
   GCalRawIncrementalEvent,
   GCalSyncEngineOptions,
@@ -9,8 +8,7 @@ import type {
   GCalSyncStartContext,
   GCalSyncState,
   GCalSyncTokenMap,
-  GoogleCalendarEvent,
-} from "../googlecalendar-integration/gcalSync.types";
+  GoogleCalendarEvent,} from "../googlecalendar-integration/gcalSync.types";
 
 const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
 const SYNC_TOKENS_STORAGE_KEY = "flashcard-master.gcal.sync_tokens";

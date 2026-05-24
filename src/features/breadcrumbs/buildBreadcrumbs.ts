@@ -1,9 +1,7 @@
 import { getCardText } from "@/domain/card/content";
 
-import type {
-  BreadcrumbCrumb,
-  ExplorerBreadcrumbContext,
-} from "@/features/breadcrumbs/breadcrumbs.types";
+import type {BreadcrumbCrumb,
+  ExplorerBreadcrumbContext,} from "@/features/breadcrumbs/breadcrumbs.types";
 
 import type { Card, DocumentItem, Folder } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";

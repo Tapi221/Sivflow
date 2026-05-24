@@ -1,5 +1,4 @@
-import {
-  addDays,
+import {addDays,
   endOfMonth,
   endOfWeek,
   format,
@@ -7,16 +6,12 @@ import {
   isSameMonth,
   isToday,
   startOfMonth,
-  startOfWeek,
-} from "date-fns";
+  startOfWeek,} from "date-fns";
 
-import {
-  buildCardSetById,
-  resolveCardFolderIdStrict,
-} from "@/domain/card/selectors/cardFolder";
+import {buildCardSetById,
+  resolveCardFolderIdStrict,} from "@/domain/card/selectors/cardFolder";
 
-import type {
-  CalendarCardLike,
+import type {CalendarCardLike,
   CalendarCardsByDate,
   CalendarCardSetLike,
   CalendarDayCell,
@@ -26,17 +21,14 @@ import type {
   CalendarScreenViewModel,
   CalendarStudyLogLike,
   CalendarSummaryViewModel,
-  CalendarWeekStartDay,
-} from "@/features/calendar/calendar.types";
-import {
-  getCalendarIntensity,
+  CalendarWeekStartDay,} from "@/features/calendar/calendar.types";
+import {getCalendarIntensity,
   getStreakFromLogs,
   getTodayDescription,
   getWeekDays,
   normalizeDateOnly,
   toDate,
-  toDateKey,
-} from "@/features/calendar/calendar.utils";
+  toDateKey,} from "@/features/calendar/calendar.utils";
 
 const isDeletedCard = (card: CalendarCardLike) => {
   return Boolean(

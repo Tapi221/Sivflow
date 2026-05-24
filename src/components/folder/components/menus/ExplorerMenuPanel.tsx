@@ -1,12 +1,10 @@
 import React from "react";
 
-import {
-  DropdownMenuContent,
+import {DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuItemIcon,
   DropdownMenuItemLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuSeparator,} from "@/components/ui/dropdown-menu";
 import { floatingPanelPresets } from "@/components/ui/menu-styles";
 
 import type { MenuAction } from "./menuActions";

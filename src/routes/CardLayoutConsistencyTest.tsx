@@ -1,9 +1,7 @@
 import React from "react";
 
-import {
-  CANONICAL_CARD_WIDTH,
-  CARD_SAFE_PADDING_PX,
-} from "@constants/shared/flashcard";
+import {CANONICAL_CARD_WIDTH,
+  CARD_SAFE_PADDING_PX,} from "@constants/shared/flashcard";
 import { DragDropContext } from "@hello-pangea/dnd";
 
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";

@@ -1,7 +1,5 @@
-import type {
-  ImportBlock,
-  ImportPayload,
-} from "@/features/import/domain/importTypes";
+import type {ImportBlock,
+  ImportPayload,} from "@/features/import/domain/importTypes";
 
 import type { Card, CardBlock, CardSet } from "@/types";
 

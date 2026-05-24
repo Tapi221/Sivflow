@@ -5,11 +5,9 @@ import type { MenuAction } from "@/components/folder/components/menus/menuAction
 
 import { ExplorerRow } from "./ExplorerRow";
 import { ExplorerRowContent } from "./ExplorerRowContent";
-import {
-  EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS,
+import {EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS,
   EXPLORER_ENTITY_ROW_INTERACTIVE_CLASS,
-  EXPLORER_ENTITY_ROW_SHELL_BASE_CLASS,
-} from "./shared";
+  EXPLORER_ENTITY_ROW_SHELL_BASE_CLASS,} from "./shared";
 import { SidebarTreeRow } from "./SidebarTreeRow";
 
 import { cn } from "@/lib/utils";

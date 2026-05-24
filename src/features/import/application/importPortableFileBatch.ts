@@ -1,20 +1,16 @@
 import { importMfCardFile } from "@/features/cardFile/application/importMfCard";
 import { readMfCardFile } from "@/features/cardFile/infra/web/readMfCardFile";
-import {
-  type CreateMfDeckCard,
+import {type CreateMfDeckCard,
   type CreateMfDeckCardSet,
   type EnsureMfDeckTagByName,
   importMfDeckArchive,
   type ImportMfDeckArchiveResult,
-  type UpdateMfDeckCardSet,
-} from "@/features/deckFile/application/importMfDeck";
+  type UpdateMfDeckCardSet,} from "@/features/deckFile/application/importMfDeck";
 import { readMfDeckFile } from "@/features/deckFile/infra/web/readMfDeckFile";
-import {
-  detectImportFileKind,
+import {detectImportFileKind,
   IMPORT_FILE_LABELS,
   isPortableImportFileKind,
-  type PortableImportFileKind,
-} from "@/features/import/domain/importFileKind";
+  type PortableImportFileKind,} from "@/features/import/domain/importFileKind";
 
 export type PortableImportBatchItemStatus =
   | "queued"

@@ -1,12 +1,10 @@
 import { type FormEvent, useMemo, useState } from "react";
-import {
-  addDays,
+import {addDays,
   format,
   isSameDay,
   startOfDay,
   startOfMonth,
-  startOfWeek,
-} from "date-fns";
+  startOfWeek,} from "date-fns";
 
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { AddGoogleCalendarButton } from "@/chip/button/AddGoogleCalendarButton";
@@ -19,12 +17,10 @@ import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
-import type {
-  AppCalendarItem,
+import type {AppCalendarItem,
   CalendarSelectionRange,
   CalendarSidebarProps,
-  GoogleAccountDisplay,
-} from "../scheduleScreen.types";
+  GoogleAccountDisplay,} from "../scheduleScreen.types";
 import { SelectableGoogleSourceRow } from "./SelectableGoogleSourceRow";
 
 const DEFAULT_CALENDAR_COLOR = "#74798b";

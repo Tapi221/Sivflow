@@ -1,9 +1,7 @@
 import type { FloatingSurfaceVariantProps } from "@/components/ui/floating-surface";
 
-import {
-  FilterPanelShell,
-  type FilterPanelShellProps,
-} from "./FilterPanelShell";
+import {FilterPanelShell,
+  type FilterPanelShellProps,} from "./FilterPanelShell";
 import { PanelSurface } from "./PanelSurface";
 
 import { cn } from "@/lib/utils";

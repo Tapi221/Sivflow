@@ -1,26 +1,20 @@
 // Public API entry point for localdb module
 
 export { isBackingStoreOpenError } from "./errors";
-export {
-  getLocalDb,
+export {getLocalDb,
   getLocalDbSync,
   initializeDB,
-  resetLocalDBForLogout,
-} from "./instanceManager";
+  resetLocalDBForLogout,} from "./instanceManager";
 export { LocalDB } from "./LocalDB";
-export type {
-  CardRelation,
+export type {CardRelation,
   LocalDBInstance,
   LocalDBLike,
-  ProjectMap,
-} from "./types";
-export {
-  clearLocalDBResetFailureReason,
+  ProjectMap,} from "./types";
+export {clearLocalDBResetFailureReason,
   getLocalDBRuntimeStatus,
   getLocalDBTelemetrySnapshot,
   subscribeLocalDBRuntimeStatus,
-  telemetryOncePerSession,
-} from "@/services/localDBRuntimeState";
+  telemetryOncePerSession,} from "@/services/localDBRuntimeState";
 export { LOCALDB_RECOVERY_GUIDE_URL } from "@constants/shared/storage";
 
 if (import.meta.env.DEV) {

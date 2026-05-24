@@ -1,11 +1,9 @@
 import React from "react";
 
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
-import {
-  MarkdownBlockContent,
+import {MarkdownBlockContent,
   type MarkdownReplaceBlock,
-  type MarkdownReplaceFocus,
-} from "@/components/card/blocks/markdown/MarkdownBlockContent";
+  type MarkdownReplaceFocus,} from "@/components/card/blocks/markdown/MarkdownBlockContent";
 import { NotebookPen } from "@/ui/icons";
 
 import { cn } from "@/lib/utils";

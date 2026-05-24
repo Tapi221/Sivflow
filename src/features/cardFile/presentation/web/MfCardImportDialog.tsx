@@ -1,41 +1,31 @@
-import {
-  type ChangeEvent,
+import {type ChangeEvent,
   useCallback,
   useEffect,
   useMemo,
-  useState,
-} from "react";
+  useState,} from "react";
 
 import { importMfCardFile } from "@/features/cardFile/application/importMfCard";
 import { MF_CARD_MIME_TYPE } from "@/features/cardFile/domain/mfCardTypes";
-import {
-  type LoadMfCardFileResult,
-  readMfCardFile,
-} from "@/features/cardFile/infra/web/readMfCardFile";
-import type {
-  CreateMfDeckCard,
+import {type LoadMfCardFileResult,
+  readMfCardFile,} from "@/features/cardFile/infra/web/readMfCardFile";
+import type {CreateMfDeckCard,
   CreateMfDeckCardSet,
   EnsureMfDeckTagByName,
-  UpdateMfDeckCardSet,
-} from "@/features/deckFile/application/importMfDeck";
+  UpdateMfDeckCardSet,} from "@/features/deckFile/application/importMfDeck";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
+import {Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  DialogTitle,} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
+import {Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  SelectValue,} from "@/components/ui/select";
 
 import { useToast } from "@/contexts/ToastContext";
 import type { CardSet } from "@/types";

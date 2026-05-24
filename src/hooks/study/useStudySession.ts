@@ -2,26 +2,20 @@ import { useCallback, useMemo, useState } from "react";
 
 import { Timestamp } from "firebase/firestore";
 
-import {
-  buildCardSetById,
-  resolveCardFolderIdStrict,
-} from "@/domain/card/selectors/cardFolder";
+import {buildCardSetById,
+  resolveCardFolderIdStrict,} from "@/domain/card/selectors/cardFolder";
 
 import type { PracticeFilterRating } from "./usePracticeMode";
 
 import { getLocalDb } from "@/services/localDB";
-import {
-  computeNextReview,
-  createReviewLogEntry,
-} from "@/services/reviewAlgorithm";
+import {computeNextReview,
+  createReviewLogEntry,} from "@/services/reviewAlgorithm";
 import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
-import type {
-  Card,
+import type {Card,
   CardPatch,
   CardSet,
   SubjectiveScoreValue,
-  UserSettings,
-} from "@/types";
+  UserSettings,} from "@/types";
 import { normalizeMemoryStability } from "@/utils/reviewUtils";
 
 export type StudySessionRating = PracticeFilterRating;

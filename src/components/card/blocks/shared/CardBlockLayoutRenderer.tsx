@@ -1,6 +1,4 @@
-export {
-  CardBlockSceneRenderer as CardBlockLayoutRenderer,
+export {CardBlockSceneRenderer as CardBlockLayoutRenderer,
   type CardBlockLayoutReplaceBlock,
   type EditorProps,
-  type ViewerProps,
-} from "@/components/card/blocks/shared/CardBlockSceneRenderer";
+  type ViewerProps,} from "@/components/card/blocks/shared/CardBlockSceneRenderer";

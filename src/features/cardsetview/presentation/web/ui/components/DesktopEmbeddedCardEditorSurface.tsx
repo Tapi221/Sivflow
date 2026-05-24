@@ -1,16 +1,12 @@
-import React, {
-  useCallback,
+import React, {useCallback,
   useEffect,
   useMemo,
   useRef,
-  useState,
-} from "react";
+  useState,} from "react";
 
-import {
-  CANONICAL_CARD_WIDTH,
+import {CANONICAL_CARD_WIDTH,
   CARD_ROW_PX,
-  layoutRowsToCardHeightPx,
-} from "@constants/shared/flashcard";
+  layoutRowsToCardHeightPx,} from "@constants/shared/flashcard";
 
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import { resolveEditorCardFitScale } from "@/domain/card/resolveEditorCardFitScale";

@@ -1,12 +1,10 @@
-import {
-  type ButtonHTMLAttributes,
+import {type ButtonHTMLAttributes,
   forwardRef,
   Fragment,
   type ReactNode,
   useEffect,
   useMemo,
-  useState,
-} from "react";
+  useState,} from "react";
 import { useNavigate } from "react-router-dom";
 
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
@@ -15,11 +13,9 @@ import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSe
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { TagFilterPopover } from "@/chip/popover/TagFilterPopover";
 import { floatingPanelPresets } from "@/components/ui/menu-styles";
-import {
-  Popover,
+import {Popover,
   PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  PopoverTrigger,} from "@/components/ui/popover";
 
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 import { useTags } from "@/hooks/settings/useTags";

@@ -4,22 +4,15 @@ import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
 
 import { CURRENT_TAG_STORE } from "./localdb/tagStoreNames";
-import type {
-  LocalDBTableMap,
+import type {LocalDBTableMap,
   SyncableEntityTable,
-  TagRecord,
-} from "./localdb/types";
+  TagRecord,} from "./localdb/types";
 
-import {
-  createDeleteQueueItem,
-  createUpsertQueueItem,
-} from "@/application/usecases/syncQueueItemFactory";
-import type {
-  DeleteEntity,
-  UpsertEntity,
-} from "@/application/usecases/syncQueuePayloadGuards";
-import type {
-  AssetRecord,
+import {createDeleteQueueItem,
+  createUpsertQueueItem,} from "@/application/usecases/syncQueueItemFactory";
+import type {DeleteEntity,
+  UpsertEntity,} from "@/application/usecases/syncQueuePayloadGuards";
+import type {AssetRecord,
   Card,
   CardSet,
   DocumentItem,
@@ -32,8 +25,7 @@ import type {
   SyncSettings,
   UploadedImage,
   UserSettings,
-  UserStats,
-} from "@/types";
+  UserStats,} from "@/types";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 import { toDateOrNull, toMillis } from "@/utils/toMillis";

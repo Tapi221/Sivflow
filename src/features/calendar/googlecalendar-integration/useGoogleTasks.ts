@@ -1,21 +1,15 @@
 import { useCallback, useEffect, useMemo, useReducer } from "react";
 
 import { refreshCalendarAccessToken } from "./gcal.oauth";
-import {
-  getServerStoredGoogleCalendarAccessToken,
-  isServerStoredGoogleOAuthEnabled,
-} from "./gcal.server-oauth";
-import {
-  createGoogleTask,
+import {getServerStoredGoogleCalendarAccessToken,
+  isServerStoredGoogleOAuthEnabled,} from "./gcal.server-oauth";
+import {createGoogleTask,
   deleteGoogleTask,
   fetchGoogleTasks,
-  patchGoogleTask,
-} from "./gcal.tasks-api";
+  patchGoogleTask,} from "./gcal.tasks-api";
 import type { GoogleTaskItem, GoogleTaskListItem } from "./gcalSync.types";
-import type {
-  GoogleAccountEntry,
-  GoogleAccountTokenUpdate,
-} from "./useMultiAccountGoogleCalendar";
+import type {GoogleAccountEntry,
+  GoogleAccountTokenUpdate,} from "./useMultiAccountGoogleCalendar";
 import type { GoogleTaskListAccountState } from "./useGoogleTaskLists";
 
 export type GoogleTasksAccountState = {

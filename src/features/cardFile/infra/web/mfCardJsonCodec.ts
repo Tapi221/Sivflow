@@ -1,8 +1,6 @@
 import { validateMfCardFile } from "@/features/cardFile/domain/mfCardGuards";
-import {
-  type MfCardFileV1,
-  MfCardValidationError,
-} from "@/features/cardFile/domain/mfCardTypes";
+import {type MfCardFileV1,
+  MfCardValidationError,} from "@/features/cardFile/domain/mfCardTypes";
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();

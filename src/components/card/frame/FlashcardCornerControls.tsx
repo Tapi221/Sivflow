@@ -1,10 +1,8 @@
 import React from "react";
 
-import {
-  CARD_ACTION_BG_CLASS,
+import {CARD_ACTION_BG_CLASS,
   CARD_ACTION_COLOR_IDLE_CLASS,
-  CARD_ACTION_ICON_CLASS,
-} from "@constants/shared/flashcard";
+  CARD_ACTION_ICON_CLASS,} from "@constants/shared/flashcard";
 
 import { Image as ImageIcon, Link, Volume2 } from "@/ui/icons";
 

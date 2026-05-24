@@ -4,8 +4,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
 
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
-import {
-  createDefaultExplorerRouteState,
+import {createDefaultExplorerRouteState,
   resolveRouteTabBySection,
   WORKSPACE_DEFAULT_EXPLORER_TAB_ID,
   type WorkspaceCardTab,
@@ -13,8 +12,7 @@ import {
   type WorkspaceExplorerTab,
   type WorkspaceRouteTab,
   type WorkspaceSidebarSection,
-  type WorkspaceTab,
-} from "@/features/tab/Tab";
+  type WorkspaceTab,} from "@/features/tab/Tab";
 
 type OpenExplorerTabParams = {
   id?: WorkspaceExplorerTab["id"];

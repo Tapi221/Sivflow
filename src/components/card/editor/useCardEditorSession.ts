@@ -1,15 +1,12 @@
-import {
-  type SetStateAction,
+import {type SetStateAction,
   useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
-  useState,
-} from "react";
+  useState,} from "react";
 
-import {
-  AUTOSAVE_DELAY_MS,
+import {AUTOSAVE_DELAY_MS,
   buildCardPatchForToggle,
   buildDraftFromCard,
   buildSavePayload,
@@ -21,14 +18,11 @@ import {
   type PersistOperation,
   type PersistResult,
   snapshotDraft,
-  toDateOrNull,
-} from "@/components/card/editor/cardEditorSessionCore";
-import {
-  type EditorDraft,
+  toDateOrNull,} from "@/components/card/editor/cardEditorSessionCore";
+import {type EditorDraft,
   makeNewDraft,
   normalizeSelectedCardId,
-  shouldAutoOpenEditorForCard,
-} from "@/components/card/editor/cardEditorUtils";
+  shouldAutoOpenEditorForCard,} from "@/components/card/editor/cardEditorUtils";
 
 import { useCardEntity } from "@/hooks/card/useCardEntity";
 import type { Card, CardPatch } from "@/types/domain/card";

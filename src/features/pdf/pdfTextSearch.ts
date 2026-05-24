@@ -1,8 +1,6 @@
-import type {
-  PdfJsTextContent,
+import type {PdfJsTextContent,
   PdfJsTextItem,
-  PdfPageSearchMatch,
-} from "@/features/pdf/pdfViewer.types";
+  PdfPageSearchMatch,} from "@/features/pdf/pdfViewer.types";
 import { isPdfTextItem } from "@/features/pdf/pdfViewer.types";
 
 type SearchSegment = {

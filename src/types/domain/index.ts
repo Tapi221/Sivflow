@@ -17,8 +17,6 @@ export type { UserSettings, UserStats } from "./user";
  * snapshot.ts の重複名は別名でのみ公開する
  * 必要になったら直接 "@/types/domain/snapshot" から import する
  */
-export type {
-  ReviewLog as SnapshotReviewLog,
-  UserSettings as SnapshotUserSettings,
-} from "./snapshot";
+export type {ReviewLog as SnapshotReviewLog,
+  UserSettings as SnapshotUserSettings,} from "./snapshot";
 export { CURRENT_SCHEMA_VERSION as SNAPSHOT_SCHEMA_VERSION } from "./snapshot";

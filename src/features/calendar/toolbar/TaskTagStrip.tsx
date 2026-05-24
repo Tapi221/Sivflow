@@ -1,21 +1,17 @@
-import {
-  useEffect,
+import {useEffect,
   useRef,
   useState,
   type CSSProperties,
   type FormEvent,
   type MouseEvent as ReactMouseEvent,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
+  type PointerEvent as ReactPointerEvent,} from "react";
 import { createPortal } from "react-dom";
 
 import { TagChip } from "@/components/tag/TagChip";
-import {
-  TAG_COLOR_CONTEXT_MENU_HEIGHT,
+import {TAG_COLOR_CONTEXT_MENU_HEIGHT,
   TAG_COLOR_CONTEXT_MENU_MARGIN,
   TAG_COLOR_CONTEXT_MENU_WIDTH,
-  TagColorRightClickPanel,
-} from "@/chip/rightclickpanel/TagColorRightClickPanel";
+  TagColorRightClickPanel,} from "@/chip/rightclickpanel/TagColorRightClickPanel";
 import { getTagColorKey, type TagColorKey } from "@/features/tag/tagColor";
 import { useTags } from "@/hooks/settings/useTags";
 import { Plus, X } from "@/ui/icons";

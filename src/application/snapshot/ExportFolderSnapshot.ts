@@ -1,7 +1,5 @@
-import {
-  buildCardSetById,
-  filterCardsByFolderId,
-} from "@/domain/card/selectors/cardFolder";
+import {buildCardSetById,
+  filterCardsByFolderId,} from "@/domain/card/selectors/cardFolder";
 
 import { createCreateSnapshotUseCase } from "./CreateSnapshot";
 

@@ -1,5 +1,4 @@
-import {
-  addDays,
+import {addDays,
   addMonths,
   addWeeks,
   differenceInCalendarDays,
@@ -8,8 +7,7 @@ import {
   format,
   isSameMonth,
   startOfMonth,
-  startOfWeek,
-} from "date-fns";
+  startOfWeek,} from "date-fns";
 import { ja } from "date-fns/locale";
 
 export type CalendarMonthGridDay = {

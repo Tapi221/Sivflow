@@ -1,8 +1,6 @@
-import {
-  type Auth,
+import {type Auth,
   GoogleAuthProvider,
-  signInWithPopup,
-} from "firebase/auth";
+  signInWithPopup,} from "firebase/auth";
 
 import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/electron/app";
 

@@ -4,10 +4,8 @@ import * as React from "react";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 
-import {
-  type FloatingSurfaceVariantProps,
-  floatingSurfaceVariants,
-} from "@/components/ui/floating-surface";
+import {type FloatingSurfaceVariantProps,
+  floatingSurfaceVariants,} from "@/components/ui/floating-surface";
 import { X } from "@/ui/icons";
 
 import { cn } from "@/lib/utils";
@@ -167,13 +165,11 @@ const DialogDescription = React.forwardRef<
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
-export {
-  Dialog,
+export {Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogOverlay,
   DialogPortal,
-  DialogTitle,
-};
+  DialogTitle,};

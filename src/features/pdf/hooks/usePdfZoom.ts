@@ -3,10 +3,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { ZOOM_STEP } from "@/features/pdf";
 import type { PdfScaleChangeSource } from "@/features/pdf/pdfViewer.types";
 
-import {
-  DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR,
-  shouldHandleZoomInputTarget,
-} from "@/shared/zoom/zoomInputTarget";
+import {DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR,
+  shouldHandleZoomInputTarget,} from "@/shared/zoom/zoomInputTarget";
 
 interface UsePdfZoomOptions {
   container: HTMLDivElement | null;

@@ -1,7 +1,5 @@
-import type {
-  MfDeckCardV1,
-  MfDeckIssue,
-} from "@/features/deckFile/domain/mfDeckTypes";
+import type {MfDeckCardV1,
+  MfDeckIssue,} from "@/features/deckFile/domain/mfDeckTypes";
 
 export const MF_CARD_FORMAT = "manifolia.card" as const;
 export const MF_CARD_VERSION = 1 as const;

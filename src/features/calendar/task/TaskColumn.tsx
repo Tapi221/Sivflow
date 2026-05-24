@@ -11,10 +11,8 @@ import { TASK_COLUMNS } from "./task.types";
 import type { Task, TaskStatus } from "./task.types";
 import { TaskCard } from "./TaskCard";
 import { TaskInsertionSlot } from "./TaskInsertionSlot";
-import {
-  TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS,
-  TASK_DND_LAYOUT_ANIMATION_DURATION_MS,
-} from "../../dnd/task/taskDnd.config";
+import {TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS,
+  TASK_DND_LAYOUT_ANIMATION_DURATION_MS,} from "../../dnd/task/taskDnd.config";
 import type { TaskDropTarget } from "../../dnd/task/taskDnd.types";
 
 type TaskColumnView = {

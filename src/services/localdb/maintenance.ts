@@ -1,8 +1,6 @@
-export {
-  createDeleteQueueItem,
+export {createDeleteQueueItem,
   createUpsertQueueItem,
-  queueItemToSyncTask,
-} from "@/application/usecases/syncQueueItemFactory";
+  queueItemToSyncTask,} from "@/application/usecases/syncQueueItemFactory";
 
 type MaintenanceDb = {
   tables: Array<{

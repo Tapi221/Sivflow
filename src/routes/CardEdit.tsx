@@ -5,10 +5,8 @@ import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "@/ui/icons";
 
-import {
-  createAppDestination,
-  createPageUrl,
-} from "@/platform/web/navigation/toWebPath";
+import {createAppDestination,
+  createPageUrl,} from "@/platform/web/navigation/toWebPath";
 
 const CARD_EDIT_FOLDER_ID_KEY = "card-edit:folder-id";
 const TITLEBAR_HEIGHT_PX = 36;

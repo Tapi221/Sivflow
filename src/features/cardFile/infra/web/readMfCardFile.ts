@@ -1,9 +1,7 @@
-import {
-  MF_CARD_FILE_EXTENSION,
+import {MF_CARD_FILE_EXTENSION,
   type MfCardFileV1,
   type MfCardIssue,
-  MfCardValidationError,
-} from "@/features/cardFile/domain/mfCardTypes";
+  MfCardValidationError,} from "@/features/cardFile/domain/mfCardTypes";
 import { decodeMfCardFile } from "@/features/cardFile/infra/web/mfCardJsonCodec";
 
 const MAX_MF_CARD_FILE_BYTES = 4 * 1024 * 1024;

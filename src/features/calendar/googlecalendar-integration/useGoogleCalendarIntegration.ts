@@ -2,12 +2,9 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import { GoogleCalendarSyncEngine } from "../googlecalendar-sync/GoogleCalendarSyncEngine";
 import { fetchCalendarList } from "./gcal.api";
-import {
-  refreshCalendarAccessToken,
-  requestCalendarAccessToken,
-} from "./gcal.oauth";
-import {
-  readCalendarIds,
+import {refreshCalendarAccessToken,
+  requestCalendarAccessToken,} from "./gcal.oauth";
+import {readCalendarIds,
   readEmail,
   readRefreshToken,
   readToken,
@@ -16,15 +13,12 @@ import {
   writeEmail,
   writeRefreshToken,
   writeToken,
-  writeWasConnected,
-} from "./gcal.storage";
-import type {
-  GCalForceSyncOptions,
+  writeWasConnected,} from "./gcal.storage";
+import type {GCalForceSyncOptions,
   GCalSyncState,
   GoogleCalendarEvent,
   GoogleCalendarListItem,
-  UseGoogleCalendarIntegrationOptions,
-} from "./gcalSync.types";
+  UseGoogleCalendarIntegrationOptions,} from "./gcalSync.types";
 
 import { auth } from "@/services/firebase";
 

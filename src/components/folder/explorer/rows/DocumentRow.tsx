@@ -5,15 +5,13 @@ import { buildRenameDeleteMenuActions } from "@/components/folder/components/men
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
 import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
 
-import {
-  EXPLORER_ROW_CONTENT_CLASS,
+import {EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
   EXPLORER_ROW_INPUT_CLASS,
   EXPLORER_ROW_LEADING_SLOT_CLASS,
   EXPLORER_ROW_TITLE_SLOT_CLASS,
   FOLDER_ROW_ICON_SIZE_CLASS,
-  FOLDER_ROW_TITLE_CLASS,
-} from "./shared";
+  FOLDER_ROW_TITLE_CLASS,} from "./shared";
 import { SidebarEntityRow } from "./SidebarEntityRow";
 
 import { cn } from "@/lib/utils";

@@ -1,11 +1,9 @@
 import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
-import {
-  ExplorerDictionaryNavIcon,
+import {ExplorerDictionaryNavIcon,
   ExplorerFolderNavIcon,
-  ExplorerQuestionNavIcon,
-} from "@/components/explorer/ExplorerNavIcons";
+  ExplorerQuestionNavIcon,} from "@/components/explorer/ExplorerNavIcons";
 
 import { cn } from "@/lib/utils";
 

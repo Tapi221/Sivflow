@@ -1,13 +1,11 @@
 import React from "react";
 
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
-import {
-  Dialog,
+import {Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  DialogTitle,} from "@/components/ui/dialog";
 
 import { cn } from "@/lib/utils";
 

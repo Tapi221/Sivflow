@@ -2,35 +2,27 @@ import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 
 import { GoogleCalendarSyncEngine } from "../googlecalendar-sync/GoogleCalendarSyncEngine";
 import { fetchCalendarList } from "./gcal.api";
-import {
-  buildTokenExpiry,
+import {buildTokenExpiry,
   isStoredTokenValid,
   readStoredAccounts,
   removeStoredAccount,
   type StoredGoogleAccount,
   updateStoredAccountCalendarIds,
   updateStoredAccountToken,
-  upsertStoredAccount,
-} from "./gcal.multi-storage";
-import {
-  refreshCalendarAccessToken,
+  upsertStoredAccount,} from "./gcal.multi-storage";
+import {refreshCalendarAccessToken,
   requestCalendarAccessToken,
-  requestGoogleCalendarServerCode,
-} from "./gcal.oauth";
-import {
-  disconnectServerStoredGoogleCalendarAccount,
+  requestGoogleCalendarServerCode,} from "./gcal.oauth";
+import {disconnectServerStoredGoogleCalendarAccount,
   exchangeGoogleCalendarCode,
   getServerStoredGoogleCalendarAccessToken,
-  isServerStoredGoogleOAuthEnabled,
-} from "./gcal.server-oauth";
-import type {
-  GCalConnectionStatus,
+  isServerStoredGoogleOAuthEnabled,} from "./gcal.server-oauth";
+import type {GCalConnectionStatus,
   GCalForceSyncOptions,
   GCalSilentReconnectResult,
   GCalSyncState,
   GoogleCalendarEvent,
-  GoogleCalendarListItem,
-} from "./gcalSync.types";
+  GoogleCalendarListItem,} from "./gcalSync.types";
 import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
 
 export type GoogleAccountEntry = {

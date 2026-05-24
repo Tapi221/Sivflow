@@ -4,12 +4,10 @@ import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/Markdown
 import { MarkdownEditorDialog } from "@/components/card/blocks/markdown/MarkdownEditorDialog";
 
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import {
-  clampMarkdownTabSize,
+import {clampMarkdownTabSize,
   normalizeMarkdownEditorValue,
   normalizeMarkdownInsertionText,
-  resolveMarkdownTabKeyText,
-} from "@/utils/markdownWhitespace";
+  resolveMarkdownTabKeyText,} from "@/utils/markdownWhitespace";
 
 export type MarkdownReplaceBlock =
   | { type: "markdown"; markdown: string }

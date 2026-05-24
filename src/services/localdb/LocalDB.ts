@@ -12,32 +12,25 @@ import * as crud from "./crud";
 import { getDatabaseNameForUser as _getDatabaseNameForUser } from "./generation";
 import { attachHooks } from "./hooks";
 // NOTE: creates a circular dependency with instanceManager.ts; safe in ESM (all usages inside function bodies)
-import {
-  clearInstance as clearInstanceImpl,
+import {clearInstance as clearInstanceImpl,
   getInstance as getInstanceImpl,
   getInstanceUserId as getInstanceUserIdImpl,
   getLocalDb,
   getLocalDbSync,
   initializeDB,
   resetForLogout as resetForLogoutImpl,
-  resetLocalDBForLogout,
-} from "./instanceManager";
+  resetLocalDBForLogout,} from "./instanceManager";
 import * as maintenance from "./maintenance";
 import * as queries from "./queries";
 import { defineSchema } from "./schema";
 import { CURRENT_TAG_STORE } from "./tagStoreNames";
 import type { LocalDBTableMap, SyncableEntityTable, TagRecord } from "./types";
 
-import {
-  createDeleteQueueItem,
-  createUpsertQueueItem,
-} from "@/application/usecases/syncQueueItemFactory";
-import type {
-  DeleteEntity,
-  UpsertEntity,
-} from "@/application/usecases/syncQueuePayloadGuards";
-import type {
-  AssetRecord,
+import {createDeleteQueueItem,
+  createUpsertQueueItem,} from "@/application/usecases/syncQueueItemFactory";
+import type {DeleteEntity,
+  UpsertEntity,} from "@/application/usecases/syncQueuePayloadGuards";
+import type {AssetRecord,
   Card,
   CardSet,
   Document,
@@ -51,19 +44,16 @@ import type {
   UploadedImage,
   User,
   UserSettings,
-  UserStats,
-} from "@/types";
+  UserStats,} from "@/types";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 
-export type {
-  CardRelation,
+export type {CardRelation,
   LocalDBInstance,
   LocalDBLike,
   LocalDBTableMap,
   ProjectMap,
   SyncableEntityTable,
-  TagRecord,
-} from "./types";
+  TagRecord,} from "./types";
 
 declare global {
   interface GlobalThis {

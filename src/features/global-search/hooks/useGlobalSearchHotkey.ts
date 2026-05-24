@@ -2,10 +2,8 @@ import { useEffect } from "react";
 
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 
-import {
-  hasOpenModalDialog,
-  isTextInputTarget,
-} from "@/components/folder/explorer/model/utils";
+import {hasOpenModalDialog,
+  isTextInputTarget,} from "@/components/folder/explorer/model/utils";
 
 export const useGlobalSearchHotkey = () => {
   const isOpen = useGlobalSearchStore((state) => state.isOpen);

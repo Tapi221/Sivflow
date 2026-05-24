@@ -4,27 +4,22 @@ import { Command as CommandPrimitive } from "cmdk";
 
 import { useGlobalSearchHotkey } from "@/features/global-search/hooks/useGlobalSearchHotkey";
 import { rankGlobalSearchResults } from "@/features/global-search/lib/rankGlobalSearchResults";
-import type {
-  GlobalSearchIconKind,
-  GlobalSearchItem,
-} from "@/features/global-search/model/globalSearchTypes";
+import type {GlobalSearchIconKind,
+  GlobalSearchItem,} from "@/features/global-search/model/globalSearchTypes";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
-import {
-  EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS,
+import {EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS,
   EXPLORER_ENTITY_ROW_INTERACTIVE_CLASS,
   EXPLORER_ENTITY_ROW_SHELL_BASE_CLASS,
   EXPLORER_ROW_BASE_CLASS_NAME,
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
   FOLDER_ROW_ICON_SIZE_CLASS,
-  FOLDER_ROW_TITLE_CLASS,
-} from "@/components/folder/explorer/rows/shared";
+  FOLDER_ROW_TITLE_CLASS,} from "@/components/folder/explorer/rows/shared";
 import { Command, CommandItem, CommandList } from "@/components/ui/command";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import {
-  Calendar,
+import {Calendar,
   FileText,
   Folder,
   Image,
@@ -36,8 +31,7 @@ import {
   Settings2,
   Tag,
   Trash2,
-  X,
-} from "@/ui/icons";
+  X,} from "@/ui/icons";
 
 import { cn } from "@/lib/utils";
 import { toMillis } from "@/utils/toMillis";

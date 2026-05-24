@@ -10,8 +10,7 @@ import React from "react";
 import { resolveInkDocument } from "@/components/ink/inkStorage";
 
 import { resolveSideBlocks } from "./flashcardBlocks";
-import {
-  resolveAnswerAttachmentAudios,
+import {resolveAnswerAttachmentAudios,
   resolveAnswerAttachmentImages,
   resolveAnswerAttachmentReferences,
   resolveAnswerAudios,
@@ -28,13 +27,10 @@ import {
   resolveQuestionAttachmentReferences,
   resolveQuestionAudios,
   resolveQuestionCode,
-  resolveQuestionText,
-} from "./flashcardDerived";
-import type {
-  FlashcardCardLike,
+  resolveQuestionText,} from "./flashcardDerived";
+import type {FlashcardCardLike,
   FlashcardDerived,
-  FlashcardMediaLike,
-} from "./types";
+  FlashcardMediaLike,} from "./types";
 
 import type { CardBlock } from "@/types/domain/card";
 

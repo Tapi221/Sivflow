@@ -2,10 +2,8 @@ import type { ReactNode } from "react";
 
 import { FilterPanelSurface } from "@/components/panel/FilterPanelSurface";
 
-import {
-  RootFolderPanelList,
-  type RootFolderPanelListProps,
-} from "./RootFolderPanelList";
+import {RootFolderPanelList,
+  type RootFolderPanelListProps,} from "./RootFolderPanelList";
 
 import { cn } from "@/lib/utils";
 

@@ -1,40 +1,30 @@
-import {
-  type RefObject,
+import {type RefObject,
   useCallback,
   useEffect,
   useMemo,
   useRef,
-  useState,
-} from "react";
+  useState,} from "react";
 
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
 import { CARD_SET_VIEW_LAYOUT_CONSTRAINT_INDICATOR_DURATION_MS } from "@constants/shared/flashcard";
-import {
-  CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
-  CARD_VIEW_ZOOM_BUTTON_STEP_PERCENT,
-} from "@constants/shared/flashcard";
+import {CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
+  CARD_VIEW_ZOOM_BUTTON_STEP_PERCENT,} from "@constants/shared/flashcard";
 
-import type {
-  CardLayoutMode,
+import type {CardLayoutMode,
   CardSetInteractionMode,
-  SplitFallbackCardLayoutMode,
-} from "@/features/cardsetview/domain/cardLayoutMode";
-import {
-  clampZoomPercent as clampZoomPercentRange,
+  SplitFallbackCardLayoutMode,} from "@/features/cardsetview/domain/cardLayoutMode";
+import {clampZoomPercent as clampZoomPercentRange,
   resolveCanUseSplitLayout,
   resolvePresentationMaxWidthPx,
   resolvePresentationWidthPx,
   resolveUsablePresentationWidthPx,
   resolveZoomDefaultPercent,
-  resolveZoomScaleFromPresentationWidthPx,
-} from "@/features/cardsetview/domain/cardSetViewPresentationPolicy";
+  resolveZoomScaleFromPresentationWidthPx,} from "@/features/cardsetview/domain/cardSetViewPresentationPolicy";
 
-import {
-  buildCardSetViewZoomPreferenceScopeKey,
+import {buildCardSetViewZoomPreferenceScopeKey,
   type CardSetViewZoomPreferenceScope,
   getCardSetViewZoomPreference,
-  setCardSetViewZoomPreference,
-} from "@/services/cardSetViewZoomPreferences";
+  setCardSetViewZoomPreference,} from "@/services/cardSetViewZoomPreferences";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 interface UseCardSetViewZoomOptions {

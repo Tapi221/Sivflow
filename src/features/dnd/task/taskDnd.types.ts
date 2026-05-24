@@ -1,8 +1,6 @@
-import type {
-  CollisionDetection,
+import type {CollisionDetection,
   DragEndEvent,
-  DragOverEvent,
-} from "@dnd-kit/core";
+  DragOverEvent,} from "@dnd-kit/core";
 
 export type TaskInsertPosition = "before" | "after";
 export type VerticalDropPosition = "before" | "after";

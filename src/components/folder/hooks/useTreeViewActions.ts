@@ -1,9 +1,7 @@
 import { useCallback } from "react";
 
-import {
-  createAppDestination,
-  createPageUrl,
-} from "@/platform/web/navigation/toWebPath";
+import {createAppDestination,
+  createPageUrl,} from "@/platform/web/navigation/toWebPath";
 
 interface UseTreeViewActionsParams {
   navigate: (to: string) => void;

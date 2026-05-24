@@ -4,10 +4,8 @@ import { useLiveQuery } from "dexie-react-hooks";
 
 import { normalizeCardFolderId } from "@/domain/card/normalizers/cardShape";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
-import {
-  buildCardSetById,
-  filterCardsByFolderId,
-} from "@/domain/card/selectors/cardFolder";
+import {buildCardSetById,
+  filterCardsByFolderId,} from "@/domain/card/selectors/cardFolder";
 
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";

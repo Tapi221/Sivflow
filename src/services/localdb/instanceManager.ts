@@ -1,15 +1,11 @@
 import { Dexie } from "dexie";
 
-import {
-  classifyFallbackReasonCode,
+import {classifyFallbackReasonCode,
   isBackingStoreOpenError,
-  safeStringifyError,
-} from "./errors";
-import {
-  bumpGenerationForUser as _bumpGenerationForUser,
+  safeStringifyError,} from "./errors";
+import {bumpGenerationForUser as _bumpGenerationForUser,
   deleteUserPersistentDatabases,
-  getFallbackDatabaseNameForUser,
-} from "./generation";
+  getFallbackDatabaseNameForUser,} from "./generation";
 import type { LocalDB } from "./LocalDB";
 import { createLocalDBInternal } from "./LocalDB";
 import type { LocalDBInstance } from "./types";
@@ -18,13 +14,11 @@ import { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
 // NOTE: createLocalDBInternal import creates a circular dependency with LocalDB.ts.
 // This is safe in ESM because both modules only use each other inside function bodies,
 // never at module initialization time.
-import {
-  getStoredLocalDBResetFailureReason,
+import {getStoredLocalDBResetFailureReason,
   markLocalDBGenerationBumped,
   saveLocalDBResetFailureReason,
   updateLocalDBRuntimeStatus,
-  warnOncePerSession,
-} from "@/services/localDBRuntimeState";
+  warnOncePerSession,} from "@/services/localDBRuntimeState";
 
 // --- シングルトン状態 ---
 let instance: LocalDBInstance | null = null;

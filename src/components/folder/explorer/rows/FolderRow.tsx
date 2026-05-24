@@ -3,16 +3,13 @@ import React from "react";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { buildFolderMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
-import {
-  type FolderTreeNode,
+import {type FolderTreeNode,
   getParentFolderId,
   normalizeFolderId,
-  ROOT_FOLDER_ID,
-} from "@/components/folder/explorer/model/utils";
+  ROOT_FOLDER_ID,} from "@/components/folder/explorer/model/utils";
 import { ChevronDown, ChevronRight } from "@/ui/icons";
 
-import {
-  EXPLORER_ROW_CONTENT_CLASS,
+import {EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
   EXPLORER_ROW_INPUT_CLASS,
   EXPLORER_ROW_LEADING_SLOT_CLASS,
@@ -21,8 +18,7 @@ import {
   FOLDER_ROW_ICON_ACTIVE_CLASS,
   FOLDER_ROW_ICON_MUTED_CLASS,
   FOLDER_ROW_ICON_SIZE_CLASS,
-  FOLDER_ROW_TITLE_CLASS,
-} from "./shared";
+  FOLDER_ROW_TITLE_CLASS,} from "./shared";
 import { SidebarEntityRow } from "./SidebarEntityRow";
 
 import { cn } from "@/lib/utils";

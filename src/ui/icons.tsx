@@ -1,8 +1,7 @@
 import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from "react";
 import { forwardRef } from "react";
 
-import {
-  StratisAlertCircleIcon,
+import {StratisAlertCircleIcon,
   StratisAlertTriangleIcon,
   StratisArrowLeftSquareContainedIcon,
   StratisArrowRefresh01Icon,
@@ -37,8 +36,7 @@ import {
   StratisType03Icon,
   StratisWrenchIcon,
   StratisX01Icon,
-  StratisXCircleContainedIcon,
-} from "./icons/stratis";
+  StratisXCircleContainedIcon,} from "./icons/stratis";
 import { UiIcon } from "./UiIcon";
 
 export type IconProps = SVGProps<SVGSVGElement> & {

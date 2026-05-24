@@ -1,9 +1,7 @@
-import {
-  LOCALDB_GENERATION_KEY_PREFIX,
+import {LOCALDB_GENERATION_KEY_PREFIX,
   LOCALDB_GENERATION_MAX,
   LOCALDB_NAME_PREFIX,
-  LOCALDB_SCHEMA_VERSION_FOR_NAME,
-} from "@constants/shared/storage";
+  LOCALDB_SCHEMA_VERSION_FOR_NAME,} from "@constants/shared/storage";
 import { Dexie } from "dexie";
 
 import { safeStringifyError } from "./errors";

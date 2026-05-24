@@ -4,10 +4,8 @@ import { CARD_ROW_PX } from "@constants/shared/flashcard";
 
 import type { CardBlock } from "@/types/domain/card";
 
-export {
-  getNormalizedGridOffsetRows,
-  isGridOffsetType,
-} from "@/domain/card/blockOffset";
+export {getNormalizedGridOffsetRows,
+  isGridOffsetType,} from "@/domain/card/blockOffset";
 
 const ROW_OFFSET_MIN = -999;
 const ROW_OFFSET_MAX = 999;

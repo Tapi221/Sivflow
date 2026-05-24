@@ -1,6 +1,4 @@
-export {
-  createDeleteQueueItem,
+export {createDeleteQueueItem,
   createQueueItemFromSyncTask,
   createUpsertQueueItem,
-  queueItemToSyncTask,
-} from "@/application/usecases/syncQueueItemFactory";
+  queueItemToSyncTask,} from "@/application/usecases/syncQueueItemFactory";

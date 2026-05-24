@@ -4,20 +4,16 @@ import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
 
 import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 
-import {
-  type CardSetViewEditingDraftPatch,
-  subscribeCardSetViewWindowEvent,
-} from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
+import {type CardSetViewEditingDraftPatch,
+  subscribeCardSetViewWindowEvent,} from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 
 import { useCardEditorContentController } from "@/components/card/editor/useCardEditorContentController";
 import { useCardEditorSession } from "@/components/card/editor/useCardEditorSession";
 import { useLayoutRowsController } from "@/components/card/editor/useLayoutRowsController";
-import {
-  applyEditingDraftPatch,
+import {applyEditingDraftPatch,
   buildCardsById,
   createMetaPanelActions,
-  resolveSelectedCardSnapshot,
-} from "@/components/folder/panes/cardEditorPaneControllerCore";
+  resolveSelectedCardSnapshot,} from "@/components/folder/panes/cardEditorPaneControllerCore";
 
 import { useToast } from "@/contexts/ToastContext";
 import { useCards } from "@/hooks/card/useCards";

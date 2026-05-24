@@ -1,17 +1,13 @@
-import {
-  buildCardSetById,
-  resolveCardFolderId,
-} from "@/domain/card/selectors/cardFolder";
+import {buildCardSetById,
+  resolveCardFolderId,} from "@/domain/card/selectors/cardFolder";
 
 import type { GlobalSearchItem } from "@/features/global-search/model/globalSearchTypes";
 
-import type {
-  Card,
+import type {Card,
   CardSet,
   DocumentItem,
   Folder,
-  SelectedExplorerItem,
-} from "@/types";
+  SelectedExplorerItem,} from "@/types";
 
 type BuildExplorerSearchItemsParams = {
   folders: Folder[];

@@ -2,10 +2,8 @@ import { getDownloadURL, ref as storageRef } from "firebase/storage";
 
 import { storage } from "@/services/firebase";
 import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
-import {
-  getCachedRemoteUrl,
-  setCachedRemoteUrl,
-} from "@/services/imagePreloadCache";
+import {getCachedRemoteUrl,
+  setCachedRemoteUrl,} from "@/services/imagePreloadCache";
 import { getLocalDb } from "@/services/localDB";
 import type { AssetRecord, ResolvableImageRef, UploadedImage } from "@/types";
 

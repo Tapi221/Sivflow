@@ -2,10 +2,8 @@ import * as React from "react";
 
 import * as SwitchPrimitives from "@radix-ui/react-switch";
 
-import {
-  SurfaceButton,
-  type SurfaceButtonProps,
-} from "@/components/ui/surface-button";
+import {SurfaceButton,
+  type SurfaceButtonProps,} from "@/components/ui/surface-button";
 
 import { cn } from "@/lib/utils";
 

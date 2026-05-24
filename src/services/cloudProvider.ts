@@ -1,5 +1,4 @@
-import {
-  collection,
+import {collection,
   type CollectionReference,
   doc,
   type DocumentData,
@@ -12,15 +11,12 @@ import {
   setDoc,
   startAfter,
   Timestamp,
-  where,
-} from "firebase/firestore";
+  where,} from "firebase/firestore";
 
-import {
-  cardDocPathSegments,
+import {cardDocPathSegments,
   cardsPathSegments,
   folderDocPathSegments,
-  foldersPathSegments,
-} from "./firestorePaths";
+  foldersPathSegments,} from "./firestorePaths";
 
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import type { Card, Folder } from "@/types";

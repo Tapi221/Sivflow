@@ -1,10 +1,8 @@
 import { Reorder } from "framer-motion";
-import type {
-  CSSProperties,
+import type {CSSProperties,
   HTMLAttributes,
   ReactNode,
-  RefObject,
-} from "react";
+  RefObject,} from "react";
 
 import type { WorkspaceTab } from "@/features/tab/Tab";
 

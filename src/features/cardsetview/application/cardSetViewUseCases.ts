@@ -1,9 +1,7 @@
 import type { Card } from "@/types";
-import {
-  type CardDisplayMode,
+import {type CardDisplayMode,
   type CardSet,
-  normalizeCardDisplayMode,
-} from "@/types/domain/cardSet";
+  normalizeCardDisplayMode,} from "@/types/domain/cardSet";
 
 type UpdateCardSetInput = Partial<
   Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode">

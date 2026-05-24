@@ -1,5 +1,4 @@
-import {
-  collection,
+import {collection,
   type CollectionReference,
   doc,
   type DocumentData,
@@ -7,14 +6,11 @@ import {
   type Firestore,
   type Query,
   query,
-  where,
-} from "firebase/firestore";
+  where,} from "firebase/firestore";
 
-import {
-  type CloudEntityType,
+import {type CloudEntityType,
   COLLECTION_BY_TYPE,
-  type PullableEntityType,
-} from "@/application/usecases/cloudSyncShared";
+  type PullableEntityType,} from "@/application/usecases/cloudSyncShared";
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 
 export const requireCloudSyncFirestore = (): Firestore => requireFirestoreDb();
