@@ -111,7 +111,7 @@ export const TaskTagStrip = () => {
 
   return (
     <>
-      <div className="flex h-8 min-w-0 flex-1 items-center rounded-xl bg-[#f7f7f7] p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="flex h-8 min-w-0 flex-1 items-center rounded-xl bg-white p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex w-max items-center gap-2 px-1">
             {tags.map((tag) => {
