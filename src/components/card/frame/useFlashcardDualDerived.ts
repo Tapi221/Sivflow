@@ -22,7 +22,7 @@ import { resolveInkDocument } from "@/components/ink/inkStorage";
 import type {FlashcardCardLike,
   FlashcardDualDerivedSnapshot,
   FlashcardMediaLike,
-  FlashcardSideDerivedSnapshot,} from "./types";
+  FlashcardSideDerivedSnapshot,} from "./flashcard.types";
 
 import type { CardBlock } from "@/types/domain/card";
 
