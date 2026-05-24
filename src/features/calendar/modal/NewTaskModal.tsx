@@ -44,6 +44,11 @@ type IOSPickerProps<T extends string> = {
   onChange: (value: T) => void;
 };
 
+type PriorityToggleProps = {
+  value: TaskPriority;
+  onChange: (value: TaskPriority) => void;
+};
+
 const CheckIcon = () => (
   <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
     <path
@@ -89,6 +94,36 @@ const CalendarIcon = () => (
       strokeLinejoin="round"
     />
   </svg>
+);
+
+const PriorityToggle = ({ value, onChange }: PriorityToggleProps) => (
+  <div
+    role="radiogroup"
+    aria-label="優先度"
+    className="inline-flex h-8 items-center gap-0.5 rounded-[10px] bg-[#f3f3f5] p-0.5 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]"
+  >
+    {Object.entries(PRIORITY_CONFIG).map(([key, config]) => {
+      const priorityValue = key as TaskPriority;
+      const selected = priorityValue === value;
+
+      return (
+        <button
+          key={priorityValue}
+          type="button"
+          role="radio"
+          aria-checked={selected}
+          onClick={() => onChange(priorityValue)}
+          className={`flex h-7 min-w-[48px] items-center justify-center rounded-[8px] px-3 text-[12px] font-medium transition-all ${
+            selected
+              ? "bg-white text-[#1f2328] shadow-[0_1px_3px_rgba(0,0,0,0.13)] ring-1 ring-black/[0.08]"
+              : "text-[#6e6e73] hover:text-[#3f4247]"
+          }`}
+        >
+          {config.label}
+        </button>
+      );
+    })}
+  </div>
 );
 
 const IOSPicker = <T extends string,>({
@@ -299,17 +334,8 @@ export const NewTaskModal = ({
               }}
             />
 
-            <IOSPicker
-              id="priority"
-              title="優先度"
+            <PriorityToggle
               value={priority}
-              options={Object.entries(PRIORITY_CONFIG).map(([key, val]) => ({
-                value: key as TaskPriority,
-                label: val.label,
-              }))}
-              icon={<span className="text-[#6e6e73]">---</span>}
-              isOpen={openPicker === "priority"}
-              onOpen={setOpenPicker}
               onChange={(value) => {
                 setPriority(value);
                 setOpenPicker("");
