@@ -21,6 +21,9 @@ type RightClickPanelOpenEventDetail = {
 };
 
 export const RIGHT_CLICK_PANEL_MARGIN = 8;
+export const RIGHT_CLICK_PANEL_SURFACE_PADDING = 3;
+export const RIGHT_CLICK_PANEL_ITEM_HORIZONTAL_PADDING = 10;
+export const RIGHT_CLICK_PANEL_TEXT_FONT_SIZE = 13;
 export const RIGHT_CLICK_PANEL_OPEN_EVENT = "manifolia:right-click-panel-open";
 
 export const RIGHT_CLICK_PANEL_NO_DRAG_STYLE: RightClickPanelNoDragStyle = {
@@ -30,6 +33,13 @@ export const RIGHT_CLICK_PANEL_NO_DRAG_STYLE: RightClickPanelNoDragStyle = {
 export const RIGHT_CLICK_PANEL_FONT_FAMILY =
   "var(--explorer-chrome-font-family, \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, BlinkMacSystemFont, \"Yu Gothic UI\", \"Hiragino Sans\", sans-serif)";
 
+const RIGHT_CLICK_PANEL_MEASURE_FONT_FAMILY =
+  "\"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, BlinkMacSystemFont, \"Yu Gothic UI\", \"Hiragino Sans\", sans-serif";
+
+const RIGHT_CLICK_PANEL_MEASURE_FONT = `400 ${RIGHT_CLICK_PANEL_TEXT_FONT_SIZE}px ${RIGHT_CLICK_PANEL_MEASURE_FONT_FAMILY}`;
+
+let rightClickPanelMeasureCanvas: HTMLCanvasElement | null = null;
+
 export const RIGHT_CLICK_PANEL_STYLE = `
 .right-click-panel {
   box-sizing: border-box;
@@ -37,7 +47,7 @@ export const RIGHT_CLICK_PANEL_STYLE = `
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: 3px;
+  padding: ${RIGHT_CLICK_PANEL_SURFACE_PADDING}px;
   overflow: hidden;
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
@@ -63,12 +73,12 @@ export const RIGHT_CLICK_PANEL_STYLE = `
   width: 100%;
   min-width: 0;
   min-height: 28px;
-  padding: 0 10px;
+  padding: 0 ${RIGHT_CLICK_PANEL_ITEM_HORIZONTAL_PADDING}px;
   border: 0;
   border-radius: 4px;
   color: #4a4a4a;
   font-family: ${RIGHT_CLICK_PANEL_FONT_FAMILY};
-  font-size: 13px;
+  font-size: ${RIGHT_CLICK_PANEL_TEXT_FONT_SIZE}px;
   font-weight: 400;
   line-height: 15px;
   letter-spacing: 0;
@@ -108,6 +118,35 @@ export const announceRightClickPanelOpen = (panelId: RightClickPanelId) => {
     new CustomEvent<RightClickPanelOpenEventDetail>(RIGHT_CLICK_PANEL_OPEN_EVENT, {
       detail: { panelId },
     }),
+  );
+};
+
+export const measureRightClickPanelTextWidth = (text: string): number => {
+  if (typeof document === "undefined") {
+    return [...text].length * RIGHT_CLICK_PANEL_TEXT_FONT_SIZE;
+  }
+
+  rightClickPanelMeasureCanvas ??= document.createElement("canvas");
+  const context = rightClickPanelMeasureCanvas.getContext("2d");
+
+  if (!context) {
+    return [...text].length * RIGHT_CLICK_PANEL_TEXT_FONT_SIZE;
+  }
+
+  context.font = RIGHT_CLICK_PANEL_MEASURE_FONT;
+  return context.measureText(text).width;
+};
+
+export const resolveRightClickPanelTextWidth = (texts: string[], minWidth = 0): number => {
+  const maxTextWidth = Math.max(0, ...texts.map((text) => measureRightClickPanelTextWidth(text)));
+
+  return Math.ceil(
+    Math.max(
+      minWidth,
+      maxTextWidth +
+        RIGHT_CLICK_PANEL_ITEM_HORIZONTAL_PADDING * 2 +
+        RIGHT_CLICK_PANEL_SURFACE_PADDING * 2,
+    ),
   );
 };
 
