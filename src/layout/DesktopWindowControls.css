@@ -9,6 +9,12 @@
   width: 138px;
   height: 38px;
   pointer-events: auto;
+  -webkit-app-region: no-drag;
+}
+
+.desktop-window-controls,
+.desktop-window-controls * {
+  -webkit-app-region: no-drag;
 }
 
 .desktop-window-controls__button {
@@ -24,6 +30,9 @@
   background: transparent;
   color: rgba(235, 241, 252, 0.72);
   outline: none;
+  cursor: default;
+  pointer-events: auto;
+  user-select: none;
 }
 
 .desktop-window-controls__button:hover,
