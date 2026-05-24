@@ -15,7 +15,7 @@ type TabContextMenuProps = {
   noDragStyle: CSSProperties;
 };
 
-export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 196;
+export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 176;
 export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 120;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = 8;
 
@@ -26,7 +26,12 @@ const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
 .workspace-tab-context-menu {
   box-sizing: border-box;
   contain: layout paint style;
-  width: ${WORKSPACE_TAB_CONTEXT_MENU_WIDTH}px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: fit-content;
+  min-width: 0;
+  max-width: ${WORKSPACE_TAB_CONTEXT_MENU_WIDTH}px;
   padding: 3px;
   overflow: hidden;
   background: #ffffff;
@@ -46,9 +51,10 @@ const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
 .workspace-tab-context-menu-item {
   display: flex;
   align-items: center;
-  width: 100%;
+  width: auto;
+  min-width: max-content;
   min-height: 28px;
-  padding: 0 12px;
+  padding: 0 10px;
   border: 0;
   border-radius: 4px;
   background: transparent;
