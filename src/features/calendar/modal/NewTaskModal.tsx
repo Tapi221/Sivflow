@@ -1,4 +1,5 @@
 import { useState, type KeyboardEvent } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import type { TaskPriority, TaskStatus } from "../task/task.types";
 import {
@@ -59,7 +60,7 @@ const IOSPicker = <T extends string,>({
       <button
         type="button"
         onClick={() => onOpen(isOpen ? "" : id)}
-        className="flex w-full items-center justify-between rounded-lg border border-[#e5e5ea] bg-white/95 px-3 py-2 text-left text-[13px] text-[#1c1c1e] outline-none transition-colors hover:bg-white focus:border-[#007aff] focus:bg-white"
+        className="flex w-full items-center justify-between rounded-lg border border-[#e5e5ea] bg-white px-3 py-2 text-left text-[13px] text-[#1c1c1e] outline-none transition-colors hover:bg-[#fbfbfd] focus:border-[#007aff] focus:bg-white"
       >
         <span>{selectedLabel}</span>
 
@@ -82,13 +83,13 @@ const IOSPicker = <T extends string,>({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-30 rounded-[18px] bg-white/95 px-3 py-3 shadow-[0_18px_44px_rgba(0,0,0,0.14)] ring-1 ring-black/[0.04] backdrop-blur-xl">
+        <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-30 rounded-[12px] bg-white px-2 py-2 shadow-[0_12px_28px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.08]">
           <span
-            className="absolute -top-1 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 rounded-[2px] bg-white/95 ring-1 ring-black/[0.03]"
+            className="absolute -top-1 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 rounded-[2px] bg-white ring-1 ring-black/[0.05]"
             aria-hidden="true"
           />
 
-          <div className="relative mb-1 px-1 text-[11px] font-semibold tracking-wide text-[#8e8e93]">
+          <div className="relative mb-1 px-2 text-[11px] font-semibold tracking-wide text-[#8e8e93]">
             {title}
           </div>
 
@@ -101,7 +102,7 @@ const IOSPicker = <T extends string,>({
                   key={option.value}
                   type="button"
                   onClick={() => onChange(option.value)}
-                  className="flex w-full items-center justify-between rounded-[10px] px-1 py-2 text-left text-[13px] text-[#1c1c1e] transition-colors hover:bg-[#f2f2f7]"
+                  className="flex w-full items-center justify-between rounded-[8px] px-2 py-2 text-left text-[13px] text-[#1c1c1e] transition-colors hover:bg-[#f2f2f7]"
                 >
                   <span>{option.label}</span>
 
@@ -143,10 +144,12 @@ export const NewTaskModal = ({
   const resolvedCategoryOptions = categoryOptions?.length
     ? categoryOptions
     : Object.entries(CATEGORY_CONFIG).map(([key, val]) => ({
-      id: key,
-      label: val.label,
-    }));
-  const initialCategory = resolvedCategoryOptions.some((option) => option.id === defaultCategory)
+        id: key,
+        label: val.label,
+      }));
+  const initialCategory = resolvedCategoryOptions.some(
+    (option) => option.id === defaultCategory,
+  )
     ? defaultCategory
     : resolvedCategoryOptions[0]?.id ?? "Programming";
 
@@ -182,9 +185,13 @@ export const NewTaskModal = ({
     }
   };
 
-  return (
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal(
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#1d1d1f]/22 backdrop-blur-[5px]"
+      className="fixed inset-0 z-[1000] grid place-items-center bg-black/10 p-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -195,10 +202,10 @@ export const NewTaskModal = ({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
-        className="w-[480px] rounded-2xl border border-white/70 bg-[#f2f2f7]/95 shadow-[0_20px_60px_rgba(0,0,0,0.18)] backdrop-blur-2xl"
+        className="w-full max-w-[480px] rounded-[14px] bg-white shadow-[0_18px_42px_rgba(0,0,0,0.20)] ring-1 ring-black/[0.08]"
         initial={{
           opacity: 0,
-          scale: 0.86,
+          scale: 0.94,
         }}
         animate={{
           opacity: 1,
@@ -206,15 +213,15 @@ export const NewTaskModal = ({
         }}
         exit={{
           opacity: 0,
-          scale: 0.92,
+          scale: 0.96,
         }}
         transition={{
-          duration: 0.22,
+          duration: 0.18,
           ease: [0.16, 1, 0.3, 1],
         }}
       >
         {/* ヘッダー */}
-        <div className="flex items-center justify-between border-b border-white/60 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-[#ededf0] px-5 py-4">
           <h2 className="text-[var(--ds-typography-font-size-sm)] font-semibold tracking-[-0.02em] text-[#1c1c1e]">
             新しいタスク
           </h2>
@@ -223,7 +230,7 @@ export const NewTaskModal = ({
             type="button"
             onClick={onClose}
             aria-label="閉じる"
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-[#e5e5ea] text-[#8e8e93] transition-colors hover:bg-[#d8d8de]"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-transparent text-[#6e6e73] transition-colors hover:bg-[#f2f2f7]"
           >
             <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
               <path
@@ -251,7 +258,7 @@ export const NewTaskModal = ({
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="タスク名を入力..."
-              className="w-full rounded-lg border border-[#e5e5ea] bg-white/95 px-3 py-2 text-[13px] text-[#1c1c1e] outline-none placeholder:text-[#c7c7cc] transition-colors focus:border-[#007aff] focus:bg-white"
+              className="w-full rounded-lg border border-[#e5e5ea] bg-white px-3 py-2 text-[13px] text-[#1c1c1e] outline-none placeholder:text-[#c7c7cc] transition-colors focus:border-[#007aff] focus:bg-white"
             />
           </div>
 
@@ -335,18 +342,18 @@ export const NewTaskModal = ({
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full rounded-lg border border-[#e5e5ea] bg-white/95 px-3 py-2 text-[13px] text-[#1c1c1e] outline-none transition-colors focus:border-[#007aff] focus:bg-white"
+                className="w-full rounded-lg border border-[#e5e5ea] bg-white px-3 py-2 text-[13px] text-[#1c1c1e] outline-none transition-colors focus:border-[#007aff] focus:bg-white"
               />
             </div>
           </div>
         </div>
 
         {/* フッター */}
-        <div className="flex justify-end gap-2 border-t border-white/60 px-5 py-3">
+        <div className="flex justify-end gap-2 border-t border-[#ededf0] px-5 py-3">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg px-4 py-1.5 text-[13px] font-medium text-[#007aff] transition-colors hover:bg-white/70"
+            className="rounded-lg px-4 py-1.5 text-[13px] font-medium text-[#007aff] transition-colors hover:bg-[#f2f2f7]"
           >
             キャンセル
           </button>
@@ -361,6 +368,7 @@ export const NewTaskModal = ({
           </button>
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body,
   );
 };
