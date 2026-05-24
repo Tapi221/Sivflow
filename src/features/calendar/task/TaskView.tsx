@@ -10,6 +10,8 @@ import { type BoardListViewMode } from "../../../chip/toggle/Toggle.boardlist";
 import { TaskToolbar } from "../toolbar/TaskToolbar";
 import { TaskBoardView } from "../view/TaskBoardView";
 import { TaskListView } from "./TaskListView";
+import { useAuthSession } from "@/contexts/AuthContext";
+import { getLocalDb } from "@/services/localDB";
 
 type GoogleTaskCreateInput = {
   title: string;
@@ -59,7 +61,9 @@ type ParsedGoogleTaskId = {
 };
 
 const GOOGLE_TASK_ID_PREFIX = "google-task:";
-const GOOGLE_TASK_STATUS_OVERRIDES_STORAGE_KEY =
+const GOOGLE_TASK_STATUS_OVERRIDES_METADATA_KEY =
+  "google-task-status-overrides:v1";
+const LEGACY_GOOGLE_TASK_STATUS_OVERRIDES_STORAGE_KEY =
   "flashcard-master.google-task-status-overrides.v1";
 
 type GoogleTaskStatusOverrides = Partial<Record<string, TaskStatus>>;
@@ -68,51 +72,79 @@ const isTaskStatus = (value: unknown): value is TaskStatus => {
   return TASK_COLUMNS.some((column) => column.id === value);
 };
 
-const loadGoogleTaskStatusOverrides = (): GoogleTaskStatusOverrides => {
+const toGoogleTaskStatusOverrides = (
+  value: unknown,
+): GoogleTaskStatusOverrides => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).filter(([, status]) =>
+      isTaskStatus(status),
+    ),
+  ) as GoogleTaskStatusOverrides;
+};
+
+const loadLegacyGoogleTaskStatusOverrides = (): GoogleTaskStatusOverrides => {
   if (typeof window === "undefined") {
     return {};
   }
 
   try {
     const raw = window.localStorage.getItem(
-      GOOGLE_TASK_STATUS_OVERRIDES_STORAGE_KEY,
+      LEGACY_GOOGLE_TASK_STATUS_OVERRIDES_STORAGE_KEY,
     );
 
     if (!raw) {
       return {};
     }
 
-    const parsed = JSON.parse(raw) as unknown;
-
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      return {};
-    }
-
-    return Object.fromEntries(
-      Object.entries(parsed as Record<string, unknown>).filter(([, value]) =>
-        isTaskStatus(value),
-      ),
-    ) as GoogleTaskStatusOverrides;
+    return toGoogleTaskStatusOverrides(JSON.parse(raw) as unknown);
   } catch {
     return {};
   }
 };
 
-const persistGoogleTaskStatusOverrides = (
-  overrides: GoogleTaskStatusOverrides,
-) => {
+const clearLegacyGoogleTaskStatusOverrides = () => {
   if (typeof window === "undefined") {
     return;
   }
 
   try {
-    window.localStorage.setItem(
-      GOOGLE_TASK_STATUS_OVERRIDES_STORAGE_KEY,
-      JSON.stringify(overrides),
+    window.localStorage.removeItem(
+      LEGACY_GOOGLE_TASK_STATUS_OVERRIDES_STORAGE_KEY,
     );
   } catch {
-    // localStorage が使えない環境では UI 上の状態だけで扱う
+    // localStorage が使えない環境では何もしない
   }
+};
+
+const loadGoogleTaskStatusOverridesFromDb = async (
+  userId: string,
+): Promise<GoogleTaskStatusOverrides> => {
+  const db = await getLocalDb(userId);
+  const row = await db.metadata.get(GOOGLE_TASK_STATUS_OVERRIDES_METADATA_KEY);
+
+  if (!row || typeof row !== "object") {
+    return {};
+  }
+
+  return toGoogleTaskStatusOverrides(
+    (row as { overrides?: unknown }).overrides,
+  );
+};
+
+const persistGoogleTaskStatusOverridesToDb = async (
+  userId: string,
+  overrides: GoogleTaskStatusOverrides,
+): Promise<void> => {
+  const db = await getLocalDb(userId);
+  await db.metadata.put({
+    key: GOOGLE_TASK_STATUS_OVERRIDES_METADATA_KEY,
+    overrides,
+    updatedAt: new Date(),
+  });
 };
 
 const normalizeTaskListLabel = (value: string): string =>
@@ -183,6 +215,8 @@ export const TaskView = ({
   onUpdateGoogleTask,
   onDeleteGoogleTask,
 }: TaskViewProps) => {
+  const { currentUser } = useAuthSession();
+  const localDbUserId = currentUser?.uid ?? "anonymous";
   const { tasks, addTask, deleteTask, moveTask, reorderTask, updateTask } =
     useTaskStore();
   const [viewMode, setViewMode] = useState<BoardListViewMode>("board");
@@ -193,11 +227,67 @@ export const TaskView = ({
     format(new Date(), "MMM d"),
   );
   const [googleTaskStatusOverrides, setGoogleTaskStatusOverrides] =
-    useState<GoogleTaskStatusOverrides>(loadGoogleTaskStatusOverrides);
+    useState<GoogleTaskStatusOverrides>({});
+  const [hasLoadedGoogleTaskStatusOverrides, setHasLoadedGoogleTaskStatusOverrides] =
+    useState(false);
 
   useEffect(() => {
-    persistGoogleTaskStatusOverrides(googleTaskStatusOverrides);
-  }, [googleTaskStatusOverrides]);
+    let cancelled = false;
+
+    setHasLoadedGoogleTaskStatusOverrides(false);
+    setGoogleTaskStatusOverrides({});
+
+    const loadOverrides = async () => {
+      const [dbOverrides, legacyOverrides] = await Promise.all([
+        loadGoogleTaskStatusOverridesFromDb(localDbUserId),
+        Promise.resolve(loadLegacyGoogleTaskStatusOverrides()),
+      ]);
+      const mergedOverrides = { ...legacyOverrides, ...dbOverrides };
+
+      if (cancelled) {
+        return;
+      }
+
+      setGoogleTaskStatusOverrides((current) => ({
+        ...mergedOverrides,
+        ...current,
+      }));
+      setHasLoadedGoogleTaskStatusOverrides(true);
+
+      if (Object.keys(legacyOverrides).length > 0) {
+        await persistGoogleTaskStatusOverridesToDb(
+          localDbUserId,
+          mergedOverrides,
+        );
+        clearLegacyGoogleTaskStatusOverrides();
+      }
+    };
+
+    void loadOverrides().catch(() => {
+      if (!cancelled) {
+        setHasLoadedGoogleTaskStatusOverrides(true);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [localDbUserId]);
+
+  useEffect(() => {
+    if (!hasLoadedGoogleTaskStatusOverrides) {
+      return;
+    }
+
+    void persistGoogleTaskStatusOverridesToDb(
+      localDbUserId,
+      googleTaskStatusOverrides,
+    );
+  }, [
+    googleTaskStatusOverrides,
+    hasLoadedGoogleTaskStatusOverrides,
+    localDbUserId,
+  ]);
 
   const taskAccount = useMemo(() => {
     return (
