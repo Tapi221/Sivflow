@@ -31,7 +31,7 @@
   background: var(--app-sidebar-bg) !important;
   background-clip: padding-box;
   color: var(--app-sidebar-text);
-  font-family: Inter, var(--explorer-chrome-font-family), sans-serif;
+  font-family: var(--app-font-family-sidebar);
   font-feature-settings: "palt" 1, "lnum" 1, "tnum" 1;
   user-select: none;
   transition: width 180ms ease, padding 180ms ease;
