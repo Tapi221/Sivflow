@@ -5,6 +5,8 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 
+import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@constants/electron/app";
+
 import { readEmail } from "./gcal.storage";
 
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
@@ -180,13 +182,19 @@ const getWebClientId = (): string => {
 };
 
 const getRedirectUri = (): string => {
-  const uri = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_REDIRECT_URI;
+  const uri = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_REDIRECT_URI?.trim();
 
-  if (!uri) {
-    throw new Error("Missing redirect uri");
+  if (uri && uri !== DESKTOP_GOOGLE_OAUTH_REDIRECT_URI) {
+    console.warn(
+      "[GoogleCalendar] Ignoring mismatched desktop OAuth redirect URI from env",
+      {
+        expected: DESKTOP_GOOGLE_OAUTH_REDIRECT_URI,
+        actual: uri,
+      },
+    );
   }
 
-  return uri;
+  return DESKTOP_GOOGLE_OAUTH_REDIRECT_URI;
 };
 
 const buildAuthorizeUrl = ({
