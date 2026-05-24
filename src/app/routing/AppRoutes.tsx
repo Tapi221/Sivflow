@@ -42,7 +42,6 @@ export const AppRoutes = () => {
         <Route path="library/pdf" element={withRouteFallback(<Folders />)} />
         <Route path="library/flashcard" element={withRouteFallback(<Folders />)} />
 
-        <Route path="tag-map" element={<Navigate to="/library" replace />} />
         <Route path="schedule" element={withRouteFallback(<Schedule />)} />
         <Route path="calendar" element={<Navigate to="/schedule" replace />} />
         <Route path="tasks" element={withRouteFallback(<Tasks />)} />
