@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties, type RefObject } from "react";
+import { useState, type CSSProperties, type RefObject } from "react";
 
 type TabContextMenuAction = {
   id: string;
@@ -97,8 +97,7 @@ export const WorkspaceTabContextMenu = ({
   menuRef,
   noDragStyle,
 }: TabContextMenuProps) => {
-  const initialPositionRef = useRef({ x, y });
-  const position = initialPositionRef.current;
+  const [position] = useState(() => ({ x, y }));
 
   return (
     <>
