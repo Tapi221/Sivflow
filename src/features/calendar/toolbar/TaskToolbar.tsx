@@ -16,10 +16,10 @@ type TaskToolbarProps = {
   filterDate: string | null;
   viewMode: BoardListViewMode;
   taskListOptions?: TaskListOption[];
-  selectedTaskListId?: string | null;
+  selectedTaskListIds?: string[];
   onClearFilterDate: () => void;
   onChangeViewMode: (viewMode: BoardListViewMode) => void;
-  onSelectTaskList?: (taskListId: string | null) => void;
+  onSelectAllTaskLists?: () => void;
   onOpenNewTaskModal: () => void;
   onOpenFilter?: () => void;
   onOpenMoreMenu?: () => void;
@@ -29,15 +29,22 @@ export const TaskToolbar = ({
   filterDate,
   viewMode,
   taskListOptions = [],
-  selectedTaskListId = null,
+  selectedTaskListIds = [],
   onClearFilterDate,
   onChangeViewMode,
-  onSelectTaskList,
+  onSelectAllTaskLists,
   onOpenNewTaskModal,
   onOpenFilter,
   onOpenMoreMenu,
 }: TaskToolbarProps) => {
-  const canSwitchTaskList = taskListOptions.length > 0 && onSelectTaskList;
+  const selectedLabels = taskListOptions
+    .filter((option) => selectedTaskListIds.includes(option.id))
+    .map((option) => option.label);
+  const taskListLabel = selectedLabels.length === 0
+    ? "すべての ToDo リスト"
+    : selectedLabels.length <= 2
+      ? selectedLabels.join("、")
+      : `${selectedLabels.slice(0, 2).join("、")} 他${selectedLabels.length - 2}`;
 
   return (
     <div className="flex shrink-0 items-center justify-between border-b border-[#e9eaed] px-4 py-2">
@@ -50,22 +57,15 @@ export const TaskToolbar = ({
           />
         )}
 
-        {canSwitchTaskList && (
-          <select
-            value={selectedTaskListId ?? ""}
-            onChange={(event) => {
-              onSelectTaskList(event.target.value || null);
-            }}
-            aria-label="Google ToDo リストで表示を切り替え"
-            className="h-9 rounded-full border border-[#e5e5ea] bg-white px-3 text-[13px] font-medium text-[#4b5563] shadow-sm outline-none transition-colors hover:bg-[#f8f9fb] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10"
+        {taskListOptions.length > 0 && (
+          <button
+            type="button"
+            onClick={onSelectAllTaskLists}
+            className="h-9 max-w-[260px] truncate rounded-full border border-[#e5e5ea] bg-white px-3 text-[13px] font-medium text-[#4b5563] shadow-sm outline-none transition-colors hover:bg-[#f8f9fb] focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/10"
+            title="クリックするとすべての ToDo リスト表示に戻ります"
           >
-            <option value="">すべての ToDo リスト</option>
-            {taskListOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            {taskListLabel}
+          </button>
         )}
 
         <FilterChip onClick={onOpenFilter} />
