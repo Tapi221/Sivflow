@@ -14,10 +14,12 @@ import {
   TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS,
   TASK_DND_LAYOUT_ANIMATION_DURATION_MS,
 } from "../../dnd/task/taskDnd.config";
+import type { TaskDropTarget } from "../../dnd/task/taskDnd.types";
 
 type TaskColumnProps = {
   column: TaskColumnType;
   tasks: Task[];
+  activeDropTarget?: TaskDropTarget | null;
   activeTaskId?: string | null;
   accountName?: string | null;
   accountPhotoUrl?: string | null;
@@ -104,6 +106,7 @@ const SortableTaskCard = ({
 export const TaskColumn = ({
   column,
   tasks,
+  activeDropTarget,
   activeTaskId,
   accountName,
   accountPhotoUrl,
@@ -120,6 +123,8 @@ export const TaskColumn = ({
   };
   const isDragActive = activeTaskId !== null && activeTaskId !== undefined;
   const nonActiveTasks = tasks.filter((task) => task.id !== activeTaskId);
+  const activeInsertIndex =
+    activeDropTarget?.status === column.id ? activeDropTarget.insertIndex : null;
 
   return (
     <div
@@ -172,6 +177,7 @@ export const TaskColumn = ({
               status={column.id}
               insertIndex={0}
               overTaskId={nonActiveTasks[0]?.id ?? null}
+              isActive={activeInsertIndex === 0}
               isFirst
             />
             {tasks.map((task) => {
@@ -197,6 +203,7 @@ export const TaskColumn = ({
                       status={column.id}
                       insertIndex={insertIndex}
                       overTaskId={nonActiveTasks[insertIndex]?.id ?? null}
+                      isActive={activeInsertIndex === insertIndex}
                       isLast={isLastTask}
                     />
                   )}
