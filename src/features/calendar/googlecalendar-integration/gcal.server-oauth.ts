@@ -1,9 +1,10 @@
+import { FirebaseError } from "firebase/app";
 import { httpsCallable } from "firebase/functions";
 
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { auth, functionsClient } from "@/services/firebase";
 
-import type { GoogleCalendarAccess } from "./gcal.oauth";
+import { requestCalendarAccessToken, type GoogleCalendarAccess } from "./gcal.oauth";
 
 type ServerGoogleCalendarAccess = GoogleCalendarAccess & {
   accessToken: string;
@@ -50,30 +51,87 @@ const waitForCallableAuth = async (): Promise<void> => {
   }
 };
 
+const normalizeCallableErrorCode = (error: unknown): string | undefined => {
+  if (error instanceof FirebaseError) return error.code.replace(/^functions\//, "");
+  if (error instanceof Error) {
+    return (error as Error & { code?: string }).code?.replace(/^functions\//, "");
+  }
+  return undefined;
+};
+
+const shouldFallbackToBrowserToken = (error: unknown): boolean => {
+  const code = normalizeCallableErrorCode(error);
+
+  return (
+    code === "internal" ||
+    code === "unavailable" ||
+    code === "deadline-exceeded" ||
+    code === "resource-exhausted"
+  );
+};
+
 export const isServerStoredGoogleOAuthEnabled = (): boolean => {
   if (isDesktopLikeRuntime()) {
     return false;
   }
 
   // Web / 非 Desktop では refresh token を localStorage に保存しない。
-  // そのため、明示的に false が指定されていない限り Cloud Functions 側に保存する。
-  return import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS !== "false";
+  // ただし Functions secrets 未設定などの環境では明示的に true のときだけ
+  // Cloud Functions 保存を使い、既定は GIS access token のみにフォールバックする。
+  return import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true";
 };
 
 export const exchangeGoogleCalendarCode = async (
   input: ExchangeGoogleCalendarCodeInput,
 ): Promise<ServerGoogleCalendarAccess> => {
   await waitForCallableAuth();
-  const result = await exchangeGoogleCalendarCodeCallable(input);
-  return result.data;
+
+  try {
+    const result = await exchangeGoogleCalendarCodeCallable(input);
+    return result.data;
+  } catch (error) {
+    if (!shouldFallbackToBrowserToken(error)) {
+      throw error;
+    }
+
+    console.warn(
+      "[GoogleCalendarOAuth] server code exchange failed; falling back to browser token",
+      error,
+    );
+
+    const access = await requestCalendarAccessToken(auth, false);
+    return {
+      ...access,
+      refreshTokenStored: false,
+    };
+  }
 };
 
 export const getServerStoredGoogleCalendarAccessToken = async (
   input: GetGoogleCalendarAccessTokenInput,
 ): Promise<ServerGoogleCalendarAccess> => {
   await waitForCallableAuth();
-  const result = await getGoogleCalendarAccessTokenCallable(input);
-  return result.data;
+
+  try {
+    const result = await getGoogleCalendarAccessTokenCallable(input);
+    return result.data;
+  } catch (error) {
+    if (!shouldFallbackToBrowserToken(error)) {
+      throw error;
+    }
+
+    console.warn(
+      "[GoogleCalendarOAuth] server token refresh failed; falling back to silent browser token",
+      error,
+    );
+
+    const access = await requestCalendarAccessToken(auth, true);
+    return {
+      ...access,
+      accountEmail: access.accountEmail ?? input.accountId,
+      refreshTokenStored: false,
+    };
+  }
 };
 
 export const disconnectServerStoredGoogleCalendarAccount = async (
