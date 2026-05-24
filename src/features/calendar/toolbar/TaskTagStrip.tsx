@@ -96,6 +96,7 @@ export const TaskTagStrip = () => {
   const contextMenuElement =
     contextMenu && contextMenuTag && contextMenuTagColorKey ? (
       <TagColorRightClickPanel
+        key={contextMenu.tagId}
         x={contextMenu.x}
         y={contextMenu.y}
         availableColors={availableColors}
