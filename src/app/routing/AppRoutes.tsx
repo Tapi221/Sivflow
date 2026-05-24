@@ -15,6 +15,7 @@ const StudyMode = lazy(() => import("@/routes/StudyMode"));
 const Directory = lazy(() => import("@/routes/Directory"));
 const Schedule = lazy(() => import("@/routes/Schedule"));
 const Tasks = lazy(() => import("@/routes/Tasks"));
+const Settings = lazy(() => import("@/routes/Settings"));
 
 const withRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
@@ -45,6 +46,7 @@ export const AppRoutes = () => {
         <Route path="schedule" element={withRouteFallback(<Schedule />)} />
         <Route path="calendar" element={<Navigate to="/schedule" replace />} />
         <Route path="tasks" element={withRouteFallback(<Tasks />)} />
+        <Route path="settings" element={withRouteFallback(<Settings />)} />
 
         <Route path="CardEdit" element={withRouteFallback(<CardEdit />)} />
         <Route
