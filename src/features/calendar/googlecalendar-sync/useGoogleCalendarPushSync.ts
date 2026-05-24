@@ -15,12 +15,22 @@ type UseGoogleCalendarPushSyncOptions = {
   onNotification: (calendarId: string) => void;
 };
 
+const isPermissionDeniedError = (error: unknown): boolean => {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "permission-denied"
+  );
+};
+
 export const useGoogleCalendarPushSync = ({
   userId,
   selectedCalendarIds,
   onNotification,
 }: UseGoogleCalendarPushSyncOptions): void => {
   const onNotificationRef = useRef(onNotification);
+  const listenerDisabledRef = useRef(false);
 
   onNotificationRef.current = onNotification;
 
@@ -29,7 +39,16 @@ export const useGoogleCalendarPushSync = ({
   }, [selectedCalendarIds]);
 
   useEffect(() => {
-    if (!userId || selectedCalendarIds.size === 0 || !firestoreDb) {
+    listenerDisabledRef.current = false;
+  }, [userId]);
+
+  useEffect(() => {
+    if (
+      !userId ||
+      selectedCalendarIds.size === 0 ||
+      !firestoreDb ||
+      listenerDisabledRef.current
+    ) {
       return;
     }
 
@@ -69,6 +88,15 @@ export const useGoogleCalendarPushSync = ({
       },
 
       (error) => {
+        if (isPermissionDeniedError(error)) {
+          listenerDisabledRef.current = true;
+          console.info(
+            "[PushSync] Firestore listener disabled because the current user cannot read gcal_notifications.",
+          );
+          unsubscribe();
+          return;
+        }
+
         console.warn("[PushSync] Firestoreリスナーエラー:", error);
       },
     );
