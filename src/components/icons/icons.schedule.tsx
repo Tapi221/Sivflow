@@ -381,3 +381,68 @@ export const GalleryIcon = ({
   </svg>
 );
 
+//Vuesax-Icons
+export const ArchiveIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      d="M5 10H19C21 10 22 9 22 7V5C22 3 21 2 19 2H5C3 2 2 3 2 5V7C2 9 3 10 5 10Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M4.5 10V18.5C4.5 20.75 5.25 22 8 22H16C18.75 22 19.5 20.75 19.5 18.5V10"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M10 14H14"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+//Vuesax-Icons
+export const ProgressIcon = ({
+  className,
+  label: _label,
+  size: _size,
+  title: _title,
+  ...props
+}: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    <path
+      d="M4.25 20.75H14.5C15.3 20.75 16.28 20.26 16.76 19.62L21.95 12.72C22.44 12.07 22.48 10.98 22.04 10.28L17.86 3.6C17.39 2.84 16.37 2.25 15.48 2.25H4.25C2.04 2.25 1.11 3.79 2.17 5.49L4.94 9.92C5.3 10.5 5.3 11.5 4.94 12.08L2.17 16.51C1.11 18.21 2.04 19.75 4.25 20.75Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
