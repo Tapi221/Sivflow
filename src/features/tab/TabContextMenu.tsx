@@ -24,21 +24,29 @@ export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 180;
 export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 184;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = 8;
 
+const WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY =
+  'var(--bn-font-family, var(--mantine-font-family, Inter, "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif))';
+
 const WORKSPACE_TAB_CONTEXT_MENU_DROPDOWN_STYLE: CSSProperties = {
   minWidth: 148,
   width: "max-content",
   maxWidth: 220,
   padding: 4,
+  fontFamily: WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY,
 };
 
 const WORKSPACE_TAB_CONTEXT_MENU_TEXT_STYLE: CSSProperties = {
-  fontSize: 14,
-  lineHeight: "20px",
+  fontFamily: WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY,
+  fontSize: 13,
+  fontWeight: 400,
+  lineHeight: "18px",
+  letterSpacing: 0,
 };
 
 const WORKSPACE_TAB_CONTEXT_MENU_ITEM_STYLE: CSSProperties = {
   ...WORKSPACE_TAB_CONTEXT_MENU_TEXT_STYLE,
   minHeight: 44,
+  paddingBlock: 0,
   paddingInline: 18,
   whiteSpace: "nowrap",
 };
@@ -95,13 +103,16 @@ export const WorkspaceTabContextMenu = ({
               <Menu.Item
                 key={action.id}
                 disabled={action.disabled}
+                style={WORKSPACE_TAB_CONTEXT_MENU_ITEM_STYLE}
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
                   action.onSelect();
                 }}
               >
-                {action.label}
+                <span style={WORKSPACE_TAB_CONTEXT_MENU_TEXT_STYLE}>
+                  {action.label}
+                </span>
               </Menu.Item>
             ))}
           </Menu.Dropdown>
