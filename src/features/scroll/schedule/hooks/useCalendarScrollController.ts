@@ -91,6 +91,7 @@ export const useCalendarScrollController = ({
     scrollerRef: scrollContainerRef,
     trigger: scrollExtentTrigger,
     prependTrigger,
+    syncedRefs: fixedRowScrollRefs,
   });
 
   /**
