@@ -81,7 +81,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     handleNext,
     handleToday,
     handleMonthCellSelectDate,
-    handleMonthEventSyncRangeChange,
+    handleMonthRenderedRangeChange,
     addGoogleCalendar,
     reconnectGoogleAccount,
     toggleGoogleCalendar,
@@ -278,7 +278,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
               visibleEvents={calendarEvents}
               onSelectDate={handleMonthCellSelectDateAndOpen}
               onVisibleMonthChange={handleVisibleMonthChange}
-              onEventSyncRangeChange={handleMonthEventSyncRangeChange}
+              onRenderedRangeChange={handleMonthRenderedRangeChange}
             />
           </div>
         </CarvePanel>
