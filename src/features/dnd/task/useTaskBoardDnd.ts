@@ -20,8 +20,6 @@ import { taskBoardCollisionDetection } from "./taskDnd.collision";
 import { resolveDropTarget } from "./taskDnd.dropTarget";
 import {
   areDropTargetsEqual,
-  areTaskBoardsEqual,
-  createTaskDragPreview,
   findTask,
 } from "./taskDnd.preview";
 import type {
@@ -46,13 +44,9 @@ export const useTaskBoardDnd = ({
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [activeTaskWidth, setActiveTaskWidth] = useState<number | null>(null);
   const [activeTaskHeight, setActiveTaskHeight] = useState<number | null>(null);
-  const [previewTasksByStatus, setPreviewTasksByStatus] = useState<Record<
-    TaskStatus,
-    Task[]
-  > | null>(null);
   const latestDropTargetRef = useRef<TaskDropTarget | null>(null);
-  const visibleTasksByStatus = previewTasksByStatus ?? tasksByStatus;
-  const isPreviewingTaskReorder = previewTasksByStatus !== null;
+  const visibleTasksByStatus = tasksByStatus;
+  const isPreviewingTaskReorder = false;
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -69,28 +63,13 @@ export const useTaskBoardDnd = ({
       return null;
     }
 
-    return findTask(visibleTasksByStatus, activeTaskId);
-  }, [activeTaskId, visibleTasksByStatus]);
-
-  const updatePreview = (activeId: string, target: TaskDropTarget) => {
-    const nextTasksByStatus = createTaskDragPreview(
-      tasksByStatus,
-      activeId,
-      target,
-    );
-
-    setPreviewTasksByStatus(
-      areTaskBoardsEqual(tasksByStatus, nextTasksByStatus)
-        ? null
-        : nextTasksByStatus,
-    );
-  };
+    return findTask(tasksByStatus, activeTaskId);
+  }, [activeTaskId, tasksByStatus]);
 
   const resetDragState = () => {
     setActiveTaskId(null);
     setActiveTaskWidth(null);
     setActiveTaskHeight(null);
-    setPreviewTasksByStatus(null);
     latestDropTargetRef.current = null;
   };
 
@@ -98,7 +77,6 @@ export const useTaskBoardDnd = ({
     setActiveTaskId(String(event.active.id));
     setActiveTaskWidth(event.active.rect.current.initial?.width ?? null);
     setActiveTaskHeight(event.active.rect.current.initial?.height ?? null);
-    setPreviewTasksByStatus(null);
     latestDropTargetRef.current = null;
   };
 
@@ -110,7 +88,7 @@ export const useTaskBoardDnd = ({
     const activeId = String(event.active.id);
     const target = resolveDropTarget(
       event,
-      visibleTasksByStatus,
+      tasksByStatus,
       activeId,
       latestDropTargetRef.current,
     );
@@ -125,14 +103,13 @@ export const useTaskBoardDnd = ({
     }
 
     latestDropTargetRef.current = target;
-    updatePreview(activeId, target);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const activeId = String(event.active.id);
     const target = resolveDropTarget(
       event,
-      visibleTasksByStatus,
+      tasksByStatus,
       activeId,
       latestDropTargetRef.current,
     );
