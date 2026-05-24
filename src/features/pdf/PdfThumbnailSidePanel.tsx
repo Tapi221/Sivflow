@@ -264,7 +264,7 @@ export const PdfThumbnailSidePanel = ({
           <button
             type="button"
             aria-label="サムネイルを閉じる"
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[16px] leading-none text-[#8b8a84] transition-colors hover:bg-white hover:text-[#2f2e2a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a8a49a]"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[var(--ds-typography-font-size-md)] leading-none text-[#8b8a84] transition-colors hover:bg-white hover:text-[#2f2e2a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a8a49a]"
             onClick={onClose}
           >
             ×
