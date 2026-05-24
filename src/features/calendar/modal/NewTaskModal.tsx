@@ -316,7 +316,7 @@ export const NewTaskModal = ({
             className="w-full border-0 bg-transparent px-0 text-[22px] font-semibold leading-tight tracking-[-0.035em] text-[#1f2328] outline-none placeholder:text-[#a1a1aa]"
           />
 
-          <div className="mt-7 flex flex-wrap items-center gap-2">
+          <div className="mt-7 flex flex-wrap items-end gap-2">
             <IOSPicker
               id="status"
               title="ステータス"
@@ -334,8 +334,8 @@ export const NewTaskModal = ({
               }}
             />
 
-            <div className="inline-flex items-center gap-1.5">
-              <span className="text-[11px] font-medium text-[#a1a1aa]">優先度</span>
+            <div className="inline-flex flex-col items-start gap-1">
+              <span className="px-1 text-[10px] font-semibold tracking-wide text-[#7a7d85]">優先度</span>
               <PriorityToggle
                 value={priority}
                 onChange={(value) => {
