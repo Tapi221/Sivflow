@@ -26,6 +26,8 @@ export const CalendarEventChipWeekday = ({
     ? "終日"
     : `${format(startsAt, "H:mm")} ~ ${format(endsAt, "H:mm")}`;
 
+  const titleLabel = event.title || "Untitled";
+
   return (
     <div
       className={[
@@ -37,20 +39,17 @@ export const CalendarEventChipWeekday = ({
         borderLeft: `3px solid ${tokens.border}`,
         color: tokens.text,
       }}
-      title={`${timeLabel} ${event.title}`}
+      title={`${titleLabel} ${timeLabel}`}
     >
-      <span
-        className={[
-          "truncate font-semibold tabular-nums opacity-80",
-          compact ? "text-[10px]" : "text-[11px]",
-        ].join(" ")}
-      >
-        {timeLabel}
+      <span className="truncate text-[12px] font-medium leading-snug">
+        {titleLabel}
       </span>
 
       {!compact && (
-        <span className="truncate text-[12px] font-medium leading-snug">
-          {event.title || "Untitled"}
+        <span
+          className="truncate text-[11px] font-semibold tabular-nums opacity-80"
+        >
+          {timeLabel}
         </span>
       )}
     </div>
