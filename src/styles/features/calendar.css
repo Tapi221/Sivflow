@@ -159,12 +159,7 @@
     border-right: 0 !important;
     background: #ffffff !important;
     color: #8e8e93 !important;
-    font-family:
-      -apple-system,
-      BlinkMacSystemFont,
-      "SF Pro Text",
-      "Helvetica Neue",
-      sans-serif;
+    font-family: var(--app-font-family-calendar);
     letter-spacing: 0.02em;
   }
 
@@ -232,12 +227,7 @@
 
   .calendar-month-day-cell > button {
     z-index: 1;
-    font-family:
-      -apple-system,
-      BlinkMacSystemFont,
-      "SF Pro Text",
-      "Helvetica Neue",
-      sans-serif;
+    font-family: var(--app-font-family-calendar);
   }
 
   .calendar-month-day-cell-hoverable:hover {
