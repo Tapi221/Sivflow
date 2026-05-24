@@ -81,16 +81,22 @@ export interface PdfJsReference {
   gen: number;
 }
 
+export type PdfJsDestinationReference = PdfJsReference;
+
 export type PdfJsOutlineDestination =
   | string
   | [PdfJsReference | number | null, ...unknown[]]
   | null;
+
+export type PdfJsExplicitDestination = Exclude<PdfJsOutlineDestination, string | null>;
 
 export interface PdfJsOutlineItem {
   title: string;
   dest?: PdfJsOutlineDestination;
   items?: PdfJsOutlineItem[];
 }
+
+export type PdfJsOutlineNode = PdfJsOutlineItem;
 
 export interface PdfJsPage {
   getViewport: (params: { scale: number }) => PdfJsViewport;
