@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type RefObject,
-} from "react";
+import { useRef, type CSSProperties, type RefObject } from "react";
 
 type TabContextMenuAction = {
   id: string;
@@ -24,8 +18,6 @@ type TabContextMenuProps = {
 export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 176;
 export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 120;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = 8;
-
-const IGNORE_POSITION_UPDATE_MS = 120;
 
 const WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY =
   "var(--explorer-chrome-font-family, \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, BlinkMacSystemFont, \"Yu Gothic UI\", \"Hiragino Sans\", sans-serif)";
@@ -105,16 +97,8 @@ export const WorkspaceTabContextMenu = ({
   menuRef,
   noDragStyle,
 }: TabContextMenuProps) => {
-  const openedAtRef = useRef(performance.now());
-  const [position, setPosition] = useState({ x, y });
-
-  useEffect(() => {
-    const elapsedMs = performance.now() - openedAtRef.current;
-
-    if (elapsedMs < IGNORE_POSITION_UPDATE_MS) return;
-
-    setPosition({ x, y });
-  }, [x, y]);
+  const initialPositionRef = useRef({ x, y });
+  const position = initialPositionRef.current;
 
   return (
     <>
