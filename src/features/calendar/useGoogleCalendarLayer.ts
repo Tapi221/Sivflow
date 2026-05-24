@@ -22,7 +22,7 @@ export const useGoogleCalendarLayer = () => {
   } = useMultiAccountGoogleCalendar();
 
   const taskListsByAccount = useGoogleTaskLists(accounts);
-  const googleTasksByAccount = useGoogleTasks(accounts, taskListsByAccount);
+  const googleTasks = useGoogleTasks(accounts, taskListsByAccount);
 
   const connectionStatus: GCalConnectionStatus | "disconnected" = (() => {
     const hasConnectedAccount = accounts.some(
@@ -49,7 +49,11 @@ export const useGoogleCalendarLayer = () => {
   return {
     googleAccounts: accounts,
     taskListsByAccount,
-    googleTasksByAccount,
+    googleTasksByAccount: googleTasks.byAccount,
+    refreshGoogleTasks: googleTasks.refreshAll,
+    createGoogleTask: googleTasks.createTask,
+    updateGoogleTask: googleTasks.updateTask,
+    deleteGoogleTask: googleTasks.removeTask,
     events,
     selectedCalendarIds,
     addAccount,
