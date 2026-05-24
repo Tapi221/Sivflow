@@ -27,27 +27,12 @@ type TaskToolbarProps = {
 export const TaskToolbar = ({
   filterDate,
   viewMode,
-  taskListOptions = [],
-  selectedTaskListIds = [],
   onClearFilterDate,
   onChangeViewMode,
   onOpenNewTaskModal,
   onOpenFilter,
   onOpenMoreMenu,
 }: TaskToolbarProps) => {
-  const selectedLabels = taskListOptions
-    .filter((option) => selectedTaskListIds.includes(option.id))
-    .map((option) => option.label);
-  const isAllSelected =
-    taskListOptions.length > 0 && selectedTaskListIds.length === taskListOptions.length;
-  const taskListLabel = selectedLabels.length === 0
-    ? "ToDo リスト未選択"
-    : isAllSelected
-      ? "すべての ToDo リスト"
-      : selectedLabels.length <= 2
-        ? selectedLabels.join("、")
-        : `${selectedLabels.slice(0, 2).join("、")} 他${selectedLabels.length - 2}`;
-
   return (
     <div className="flex shrink-0 items-center justify-between border-b border-[#e9eaed] px-4 py-2">
       {/* 左：フィルター群 */}
@@ -57,15 +42,6 @@ export const TaskToolbar = ({
             label={filterDate}
             onClear={onClearFilterDate}
           />
-        )}
-
-        {taskListOptions.length > 0 && (
-          <span
-            className="inline-flex h-9 max-w-[260px] items-center truncate rounded-full border border-[#e5e5ea] bg-white px-3 text-[13px] font-medium text-[#4b5563] shadow-sm"
-            title={taskListLabel}
-          >
-            {taskListLabel}
-          </span>
         )}
 
         <FilterChip onClick={onOpenFilter} />
