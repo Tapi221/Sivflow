@@ -8,7 +8,7 @@
  */
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
 
-import type { FlashcardMediaLike } from "./types";
+import type { FlashcardMediaLike } from "./flashcard.types";
 
 import type { CardBlock } from "@/types/domain/card";
 
