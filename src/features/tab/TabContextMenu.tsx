@@ -19,7 +19,7 @@ type TabContextMenuProps = {
 };
 
 export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = 196;
-export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 136;
+export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = 128;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = 8;
 
 const WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY =
@@ -45,7 +45,7 @@ const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 32px;
+  min-height: 30px;
   padding: 0 12px;
   border: 0;
   border-radius: 4px;
@@ -54,7 +54,7 @@ const WORKSPACE_TAB_CONTEXT_MENU_STYLE = `
   font-family: ${WORKSPACE_TAB_CONTEXT_MENU_FONT_FAMILY};
   font-size: 13px;
   font-weight: 400;
-  line-height: 18px;
+  line-height: 16px;
   letter-spacing: 0;
   text-align: left;
   white-space: nowrap;
