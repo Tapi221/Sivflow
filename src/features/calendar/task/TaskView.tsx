@@ -40,6 +40,7 @@ type TaskViewProps = {
     taskId: string,
     patch: GoogleTaskPatchInput,
   ) => Promise<unknown>;
+  onDeleteGoogleTask?: (taskListId: string, taskId: string) => Promise<void>;
 };
 
 type TaskCategoryOption = {
@@ -127,6 +128,7 @@ export const TaskView = ({
   onRefreshGoogleTasks,
   onCreateGoogleTask,
   onUpdateGoogleTask,
+  onDeleteGoogleTask,
 }: TaskViewProps) => {
   const { tasks, addTask, deleteTask, moveTask, reorderTask, updateTask } =
     useTaskStore();
@@ -291,7 +293,16 @@ export const TaskView = ({
   };
 
   const handleDeleteTask = (taskId: string) => {
-    if (parseGoogleTaskId(taskId)) return;
+    const googleTaskId = parseGoogleTaskId(taskId);
+
+    if (googleTaskId) {
+      void onDeleteGoogleTask?.(
+        googleTaskId.taskListId,
+        googleTaskId.taskId,
+      ).then(() => onRefreshGoogleTasks?.());
+      return;
+    }
+
     deleteTask(taskId);
   };
 
