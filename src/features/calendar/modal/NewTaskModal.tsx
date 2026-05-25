@@ -456,7 +456,7 @@ export const NewTaskModal = ({
             </label>
           </div>
 
-          <div className="mt-6 overflow-hidden rounded-[18px] bg-[#f7f7f8] ring-1 ring-black/[0.05]">
+          <div className="mt-6 overflow-hidden rounded-[18px] bg-white ring-1 ring-black/[0.07]">
             <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(260px,0.72fr)]">
               <section className="p-4 md:p-5">
                 <div className="flex items-center gap-2 text-[11px] font-semibold text-[#7c7f87]">
@@ -503,7 +503,7 @@ export const NewTaskModal = ({
                   {subtasks.map((subtask) => (
                     <div
                       key={subtask.id}
-                      className="group flex items-center gap-2 rounded-[10px] px-2 py-1.5 transition-colors hover:bg-white/90"
+                      className="group flex items-center gap-2 rounded-[10px] px-2 py-1.5 transition-opacity hover:opacity-80"
                     >
                       <span className="h-3.5 w-3.5 shrink-0 rounded-[4px] border border-[#b8bbc4] bg-white" />
                       <input
@@ -518,14 +518,14 @@ export const NewTaskModal = ({
                         type="button"
                         onClick={() => removeSubtask(subtask.id)}
                         aria-label="サブタスクを削除"
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[#8e8e93] opacity-0 transition-all hover:bg-[#ececf1] hover:text-[#4f5359] group-hover:opacity-100"
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[#8e8e93] opacity-0 transition-all hover:text-[#4f5359] group-hover:opacity-100"
                       >
                         <XIcon />
                       </button>
                     </div>
                   ))}
 
-                  <div className="group flex items-center gap-2 rounded-[10px] px-2 py-1.5 transition-colors hover:bg-white/90 focus-within:bg-white/90">
+                  <div className="group flex items-center gap-2 rounded-[10px] px-2 py-1.5 transition-opacity hover:opacity-80 focus-within:opacity-100">
                     <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-dashed border-[#b8bbc4] text-[#8e8e93]">
                       <PlusIcon />
                     </span>
@@ -561,7 +561,7 @@ export const NewTaskModal = ({
             </div>
           </div>
 
-          <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f8] px-2.5 py-1 text-[11px] text-[#8e8e93] ring-1 ring-black/[0.04]">
+          <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] text-[#8e8e93] ring-1 ring-black/[0.04]">
             <span className="h-1.5 w-1.5 rounded-full bg-[#6571dc]" />
             <span>
               <span className="font-medium text-[#5f6368]">{selectedCategoryLabel}</span> に作成されます
