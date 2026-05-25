@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { type CreateCard, type CreateCardSet, executeXlsxImport, loadXlsxImportFile } from "@/features/import/application/xlsxImportUseCases";
-import { formatImportCellLabel, hasImportBlockingError, type ImportParseResult } from "@/features/import/domain/importTypes";
+import { formatImportCellLabel, hasImportBlockingError, type ImportParseResult } from "@/features/import/domain/import.types";
 import { downloadXlsxImportTemplate } from "@/features/import/xlsx/downloadXlsxImportTemplate";
 
 import { Button } from "@/components/ui/button";
