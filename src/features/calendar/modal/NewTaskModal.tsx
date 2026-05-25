@@ -2,7 +2,9 @@ import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import type { TaskCreateInput, TaskPriority, TaskStatus, TaskSubtask } from "../task/task.types";
-import { CATEGORY_CONFIG, PRIORITY_CONFIG, TASK_COLUMNS } from "../task/task.types";
+import {CATEGORY_CONFIG,
+  PRIORITY_CONFIG,
+  TASK_COLUMNS,} from "../task/task.types";
 
 type TaskCategoryOption = {
   id: string;
@@ -362,8 +364,9 @@ export const NewTaskModal = ({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={handleKeyDown}
+            placeholder="タスクタイトル"
             aria-label="タスクタイトル"
-            className="w-full border-0 bg-transparent px-0 text-[22px] font-semibold leading-tight tracking-[-0.035em] text-[#1f2328] outline-none"
+            className="w-full border-0 bg-transparent px-0 text-[22px] font-semibold leading-tight tracking-[-0.035em] text-[#1f2328] outline-none placeholder:text-[#a1a1aa]"
           />
 
           <div className="mt-7 flex flex-wrap items-end gap-2">
@@ -440,9 +443,10 @@ export const NewTaskModal = ({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onKeyDown={handleKeyDown}
+                placeholder="メモ、背景、完了条件など"
                 aria-label="タスク詳細"
                 rows={5}
-                className="min-h-[118px] w-full resize-none rounded-[12px] border border-[#e3e3e8] bg-[#fbfbfd] px-3 py-2.5 text-[13px] leading-5 text-[#2f3337] outline-none transition-colors focus:border-[#7c83e6] focus:bg-white"
+                className="min-h-[118px] w-full resize-none rounded-[12px] border border-[#e3e3e8] bg-[#fbfbfd] px-3 py-2.5 text-[13px] leading-5 text-[#2f3337] outline-none transition-colors placeholder:text-[#b3b3bb] focus:border-[#7c83e6] focus:bg-white"
               />
             </label>
 
@@ -472,7 +476,7 @@ export const NewTaskModal = ({
                         onChange={(e) => updateSubtaskTitle(subtask.id, e.target.value)}
                         onKeyDown={handleKeyDown}
                         aria-label="サブタスク名"
-                        className="min-w-0 flex-1 border-0 bg-transparent text-[12px] text-[#2f3337] outline-none"
+                        className="min-w-0 flex-1 border-0 bg-transparent text-[12px] text-[#2f3337] outline-none placeholder:text-[#b3b3bb]"
                       />
                       <button
                         type="button"
@@ -500,8 +504,9 @@ export const NewTaskModal = ({
 
                       handleKeyDown(e);
                     }}
+                    placeholder="サブタスクを追加"
                     aria-label="追加するサブタスク"
-                    className="h-8 min-w-0 flex-1 rounded-[9px] border border-[#e3e3e8] bg-white px-2.5 text-[12px] text-[#2f3337] outline-none transition-colors focus:border-[#7c83e6]"
+                    className="h-8 min-w-0 flex-1 rounded-[9px] border border-[#e3e3e8] bg-white px-2.5 text-[12px] text-[#2f3337] outline-none transition-colors placeholder:text-[#b3b3bb] focus:border-[#7c83e6]"
                   />
                   <button
                     type="button"
