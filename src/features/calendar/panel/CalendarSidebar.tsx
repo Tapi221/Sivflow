@@ -382,14 +382,21 @@ const GoogleAccountSection = ({
           )}
 
           {hasNoTaskLists && (
-            <p
+            <div
               className={cn(
                 GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME,
                 "py-1 text-[11px] text-[#9a9a9a]",
               )}
             >
-              Google ToDo リストはありません
-            </p>
+              <p>Google ToDo リストはありません。</p>
+              <button
+                type="button"
+                className="mt-1 rounded-full bg-[#f4f4f4] px-2 py-0.5 text-[11px] font-semibold text-[#5f6574] transition hover:bg-[#ececec] active:scale-[0.97]"
+                onClick={onReconnect}
+              >
+                再連携
+              </button>
+            </div>
           )}
 
           {!hasTaskListsError && account.taskLists.map((taskList) => (
