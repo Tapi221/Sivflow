@@ -131,13 +131,13 @@
     content: "";
     position: absolute;
     left: 0;
-    top: 6px;
+    top: 8px;
     z-index: 0;
     width: 1px;
-    height: 22px;
+    height: 18px;
     border-radius: 999px;
-    background: var(--app-sidebar-icon, rgba(235, 241, 252, 0.58));
-    opacity: 1;
+    background: var(--app-titlebar-icon, #8a8a8a);
+    opacity: 0.28;
     pointer-events: none;
   }
 
