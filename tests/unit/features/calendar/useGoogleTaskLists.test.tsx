@@ -81,7 +81,6 @@ describe("useGoogleTaskLists", () => {
       {
         id: "tasks-1",
         title: "My Tasks",
-        updated: null,
       },
     ]);
 
@@ -96,7 +95,6 @@ describe("useGoogleTaskLists", () => {
         {
           id: "tasks-1",
           title: "My Tasks",
-          updated: null,
         },
       ]);
     });
