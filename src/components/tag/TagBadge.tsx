@@ -14,6 +14,23 @@ interface TagBadgeProps {
   removeAriaLabel?: string;
 }
 
+const TagHashIcon = ({ className }: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 12 12"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    className={className}
+  >
+    <path d="M4.4 2.2 3.6 9.8" />
+    <path d="M8.4 2.2 7.6 9.8" />
+    <path d="M2.4 4.6h7.2" />
+    <path d="M2 7.4h7.2" />
+  </svg>
+);
+
 export const TagBadge = ({
   label,
   colorKey,
@@ -26,11 +43,13 @@ export const TagBadge = ({
 }: TagBadgeProps) => {
   const resolvedColorStyle = getTagColorStyle(colorKey);
 
-  const displayLabel = label.startsWith("#") ? label : `#${label}`;
+  const textLabel = label.startsWith("#") ? label.slice(1) : label;
+  const displayLabel = `#${textLabel}`;
 
   const content = (
     <>
-      <span className={cn("min-w-0 truncate", textClassName)}>{displayLabel}</span>
+      <TagHashIcon className="h-[0.82em] w-[0.82em] shrink-0 opacity-70" />
+      <span className={cn("min-w-0 truncate", textClassName)}>{textLabel}</span>
       {onRemove && (
         <button
           type="button"
