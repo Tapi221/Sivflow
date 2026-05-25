@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type MouseEvent as ReactMouseEvent } from "react";
 
 import { TaskEventChip } from "@/chip/eventchip/EventChip.task";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
@@ -12,6 +12,7 @@ type TaskCardProps = {
   isDragging?: boolean;
   onDelete?: (id: string) => void;
   onToggleDone?: (id: string, done: boolean) => void;
+  onContextMenu?: (event: ReactMouseEvent<HTMLDivElement>, task: Task) => void;
 };
 
 export const TaskCard = ({
@@ -21,6 +22,7 @@ export const TaskCard = ({
   isDragging = false,
   onDelete,
   onToggleDone,
+  onContextMenu,
 }: TaskCardProps) => {
   const {
     priority,
@@ -59,6 +61,7 @@ export const TaskCard = ({
       isDragging={isDragging}
       onDelete={onDelete ? handleDelete : undefined}
       onToggleDone={handleToggleDone}
+      onContextMenu={onContextMenu ? (event) => onContextMenu(event, task) : undefined}
     />
   );
 };
