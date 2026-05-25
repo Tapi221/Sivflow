@@ -104,6 +104,11 @@
       transform var(--ds-semantic-motion-interactive);
   }
 
+  .ds-tag-badge > svg,
+  .ds-tag-badge > span {
+    transform: translateY(0.08em);
+  }
+
   .ds-tag-badge[data-selected="true"] {
     box-shadow: 0 0 0 2px
       color-mix(
