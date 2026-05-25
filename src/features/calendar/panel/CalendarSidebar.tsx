@@ -1,4 +1,4 @@
-import { type FormEvent, type KeyboardEvent, useRef, useState } from "react";
+import { type FormEvent, type KeyboardEvent, useCallback, useRef, useState } from "react";
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { AddGoogleCalendarButton } from "@/chip/button/AddGoogleCalendarButton";
 import { CalendarIcon, TaskIcon } from "@/components/icons/icons.schedule";
@@ -368,15 +368,34 @@ export const CalendarSidebar = ({
   const hasGoogleAccounts = googleAccounts.length > 0;
   const hasAppProjects = appProjects.length > 0;
   const isTaskMode = activeMode === "task";
+  const selectDateRef = useRef(onSelectDate);
+  const previousMonthRef = useRef(onPreviousMonth);
+  const nextMonthRef = useRef(onNextMonth);
+
+  selectDateRef.current = onSelectDate;
+  previousMonthRef.current = onPreviousMonth;
+  nextMonthRef.current = onNextMonth;
+
+  const handleMiniCalendarSelectDate = useCallback((date: Date) => {
+    selectDateRef.current(date);
+  }, []);
+
+  const handleMiniCalendarPreviousMonth = useCallback(() => {
+    previousMonthRef.current();
+  }, []);
+
+  const handleMiniCalendarNextMonth = useCallback(() => {
+    nextMonthRef.current();
+  }, []);
 
   return (
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-5 pl-0 pr-3 pt-2 text-[#2f2f2f]">
       <MiniCalendarSection
         monthDate={monthDate}
         selectedDate={selectedDate}
-        onSelectDate={onSelectDate}
-        onPreviousMonth={onPreviousMonth}
-        onNextMonth={onNextMonth}
+        onSelectDate={handleMiniCalendarSelectDate}
+        onPreviousMonth={handleMiniCalendarPreviousMonth}
+        onNextMonth={handleMiniCalendarNextMonth}
       />
 
       <div className={cn("mt-2", SIDEBAR_DIVIDER_CLASS)} />
