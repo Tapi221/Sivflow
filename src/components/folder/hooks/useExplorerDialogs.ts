@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export const useExplorerDialogs = () => {
   // rename
@@ -7,6 +7,14 @@ export const useExplorerDialogs = () => {
   const editingIdRef = useRef<string | null>(null);
   const editingNameRef = useRef("");
   const renameCancelledRef = useRef(false);
+
+  useEffect(() => {
+    editingIdRef.current = editingId;
+  }, [editingId]);
+
+  useEffect(() => {
+    editingNameRef.current = editingName;
+  }, [editingName]);
 
   const closeRename = useCallback(() => {
     setEditingId(null);
