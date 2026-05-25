@@ -52,6 +52,7 @@ export type UseScheduleScreenReturn = {
   toggleGoogleCalendar: (accountId: string, calendarId: string) => void;
 
   refreshGoogleTasks: () => Promise<void>;
+  retryGoogleTaskLists: () => void;
   createGoogleTask: (taskListId: string, input: {
     title: string;
     notes?: string | null;
@@ -242,6 +243,7 @@ export const useScheduleScreen = ({
     reconnectGoogleAccount: google.reconnectAccount,
     toggleGoogleCalendar: google.toggleCalendar,
     refreshGoogleTasks: google.refreshGoogleTasks,
+    retryGoogleTaskLists: google.retryGoogleTaskLists,
     createGoogleTask: google.createGoogleTask,
     updateGoogleTask: google.updateGoogleTask,
     moveGoogleTaskList: google.moveGoogleTaskList,
