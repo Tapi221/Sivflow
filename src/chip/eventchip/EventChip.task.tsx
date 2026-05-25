@@ -56,12 +56,12 @@ export const TaskEventChip = memo(({
           min-w-0
           grid-cols-[minmax(0,1fr)_auto]
           grid-rows-[auto_auto]
-          gap-x-1
-          gap-y-1
+          gap-x-2
+          gap-y-1.5
           overflow-hidden
           rounded-md
-          px-1.5
-          py-1
+          px-2.5
+          py-1.5
           text-left
         `,
         "text-[11px] font-medium leading-[1.3]",
@@ -79,7 +79,7 @@ export const TaskEventChip = memo(({
       }}
       title={titleLabel}
     >
-      <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-0.5">
+      <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-1">
         <button
           type="button"
           className="flex h-3 w-3 shrink-0 items-center justify-center transition-transform active:scale-90"
