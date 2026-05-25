@@ -12,13 +12,18 @@ export const NewTaskButton = ({ onClick }: NewTaskButtonProps) => {
     <button
       type="button"
       onClick={onClick}
+      title={t.addTask}
+      aria-label={t.addTask}
       className="
         group
         flex
         h-8
+        min-w-0
+        max-w-[116px]
         items-center
         justify-center
         gap-1.5
+        overflow-hidden
         rounded-lg
         border
         border-[#e9eaed]
@@ -34,11 +39,11 @@ export const NewTaskButton = ({ onClick }: NewTaskButtonProps) => {
       "
     >
       <CreateActionPlusIcon
-        className="h-4 w-4 bg-transparent text-[#8f929c] shadow-none group-hover:scale-100 group-hover:text-[#4c5361]"
+        className="h-4 w-4 shrink-0 bg-transparent text-[#8f929c] shadow-none group-hover:scale-100 group-hover:text-[#4c5361]"
         iconClassName="h-3.5 w-3.5"
       />
 
-      <span>{t.addTask}</span>
+      <span className="min-w-0 truncate whitespace-nowrap">{t.addTask}</span>
     </button>
   );
 };

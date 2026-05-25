@@ -2,6 +2,8 @@ type AddTaskButtonProps = {
   onClick?: () => void;
 };
 
+const ADD_TASK_BUTTON_LABEL = "新しいタスクを作成";
+
 export const AddTaskButton = ({
   onClick,
 }: AddTaskButtonProps) => {
@@ -9,15 +11,20 @@ export const AddTaskButton = ({
     <button
       type="button"
       onClick={onClick}
+      title={ADD_TASK_BUTTON_LABEL}
+      aria-label={ADD_TASK_BUTTON_LABEL}
       className="
         flex
         h-[36px]
         w-full
+        min-w-0
         items-center
         justify-center
         gap-1.5
+        overflow-hidden
         rounded-md
         bg-[#f5f6fa]
+        px-2
         text-[12px]
         font-medium
         text-[#8b8fa3]
@@ -28,7 +35,7 @@ export const AddTaskButton = ({
       <svg
         viewBox="0 0 16 16"
         fill="none"
-        className="h-4 w-4"
+        className="h-4 w-4 shrink-0"
       >
         <path
           d="M8 3V13M3 8H13"
@@ -38,8 +45,8 @@ export const AddTaskButton = ({
         />
       </svg>
 
-      <span>
-        新しいタスクを作成
+      <span className="min-w-0 truncate whitespace-nowrap">
+        {ADD_TASK_BUTTON_LABEL}
       </span>
     </button>
   );
