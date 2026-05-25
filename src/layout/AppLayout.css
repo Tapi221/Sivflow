@@ -6,32 +6,32 @@
 
   --app-titlebar-bg: linear-gradient(
     90deg,
-    #f8fafc 0%,
-    #eef3f8 48%,
-    #f6f8fb 100%
+    #f5f5f5 0%,
+    #f2f2f2 48%,
+    #f7f7f7 100%
   );
-  --app-titlebar-text: #475569;
-  --app-titlebar-text-strong: #0f172a;
-  --app-titlebar-icon: #64748b;
-  --app-titlebar-surface: rgba(15, 23, 42, 0.05);
-  --app-titlebar-surface-hover: rgba(15, 23, 42, 0.08);
+  --app-titlebar-text: #606060;
+  --app-titlebar-text-strong: #2f2f2f;
+  --app-titlebar-icon: #8a8a8a;
+  --app-titlebar-surface: rgba(0, 0, 0, 0.04);
+  --app-titlebar-surface-hover: rgba(0, 0, 0, 0.07);
 
   --app-active-tab-bg: #ffffff;
   --app-sidebar-bg: linear-gradient(
     180deg,
-    #f8fafc 0%,
-    #eef2f7 52%,
-    #f8fafc 100%
+    #f5f5f5 0%,
+    #eeeeee 52%,
+    #f6f6f6 100%
   );
-  --app-sidebar-hover-bg: rgba(15, 23, 42, 0.06);
-  --app-sidebar-active-bg: rgba(37, 99, 235, 0.12);
-  --app-sidebar-text: #475569;
-  --app-sidebar-text-strong: #0f172a;
-  --app-sidebar-text-muted: #94a3b8;
-  --app-sidebar-text-hover: #0f172a;
-  --app-sidebar-icon: #64748b;
-  --app-sidebar-icon-active: #2563eb;
-  --app-sidebar-focus-ring: rgba(37, 99, 235, 0.18);
+  --app-sidebar-hover-bg: rgba(0, 0, 0, 0.05);
+  --app-sidebar-active-bg: rgba(0, 0, 0, 0.07);
+  --app-sidebar-text: #606060;
+  --app-sidebar-text-strong: #2f2f2f;
+  --app-sidebar-text-muted: #9a9a9a;
+  --app-sidebar-text-hover: #2f2f2f;
+  --app-sidebar-icon: #8a8a8a;
+  --app-sidebar-icon-active: #707070;
+  --app-sidebar-focus-ring: rgba(0, 0, 0, 0.16);
 
   display: grid;
 
