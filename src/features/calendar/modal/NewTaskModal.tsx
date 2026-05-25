@@ -356,20 +356,15 @@ export const NewTaskModal = ({
         </div>
 
         <div className="px-7 pb-8 pt-3">
-          <label className="block">
-            <span className="mb-1.5 block px-1 text-[11px] font-semibold text-[#8e8e93]">
-              タイトル
-            </span>
-            <input
-              autoFocus
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={handleKeyDown}
-              aria-label="タスクタイトル"
-              className="w-full rounded-[12px] border border-[#e3e3e8] bg-[#fbfbfd] px-3 py-2 text-[22px] font-semibold leading-tight tracking-[-0.035em] text-[#1f2328] outline-none transition-colors focus:border-[#7c83e6] focus:bg-white"
-            />
-          </label>
+          <input
+            autoFocus
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={handleKeyDown}
+            aria-label="タスクタイトル"
+            className="w-full border-0 bg-transparent px-0 text-[22px] font-semibold leading-tight tracking-[-0.035em] text-[#1f2328] outline-none"
+          />
 
           <div className="mt-7 flex flex-wrap items-end gap-2">
             <IOSPicker
@@ -492,9 +487,6 @@ export const NewTaskModal = ({
                 </div>
 
                 <div className={subtasks.length > 0 ? "mt-2 flex items-center gap-2" : "flex items-center gap-2"}>
-                  <span className="shrink-0 pl-1 text-[11px] font-medium text-[#8e8e93]">
-                    追加
-                  </span>
                   <input
                     type="text"
                     value={subtaskDraft}
