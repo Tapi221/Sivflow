@@ -1,6 +1,6 @@
 import { type CSSProperties, type RefObject } from "react";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
-import { RIGHT_CLICK_PANEL_MARGIN, resolveRightClickPanelTextWidth } from "./rightClickPanelUtils";
+import { RIGHT_CLICK_PANEL_MARGIN, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanelUtils";
 
 type TabContextMenuAction = {
   id: string;
@@ -15,6 +15,7 @@ type TabContextMenuProps = {
   actions: TabContextMenuAction[];
   menuRef: RefObject<HTMLDivElement | null>;
   noDragStyle: CSSProperties;
+  panelId?: RightClickPanelId;
 };
 
 const WORKSPACE_TAB_CONTEXT_MENU_LABELS = [
@@ -34,6 +35,7 @@ export const WorkspaceTabContextMenu = ({
   actions,
   menuRef,
   noDragStyle,
+  panelId,
 }: TabContextMenuProps) => {
   return (
     <RightClickPanelSurface
@@ -43,6 +45,7 @@ export const WorkspaceTabContextMenu = ({
       panelRef={menuRef}
       noDragStyle={noDragStyle}
       ariaLabel="tab context menu"
+      panelId={panelId}
     >
       {actions.map((action) => (
         <button
