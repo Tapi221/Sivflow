@@ -1,7 +1,6 @@
 import { type DragEndEvent, type DragOverEvent, type DragStartEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useMemo, useRef, useState } from "react";
-import { flushSync } from "react-dom";
 
 import type { Task } from "../../calendar/task/task.types";
 import { TASK_DND_DROP_ANIMATION, TASK_DND_MEASURING_CONFIG, TASK_DND_POINTER_ACTIVATION_DISTANCE } from "./taskDnd.config";
@@ -23,10 +22,6 @@ type UseTaskBoardDndArgs = {
 
 const defaultGetPreviewTask = (task: Task) => task;
 const TASK_DND_ADJACENT_SLOT_SWITCH_THRESHOLD_PX = 12;
-
-const flushDragStateUpdate = (update: () => void) => {
-  flushSync(update);
-};
 
 const shouldKeepPreviousAdjacentSlot = (
   previousTarget: TaskDropTarget | null,
@@ -102,11 +97,9 @@ export const useTaskBoardDnd = ({
   };
 
   const handleDragStart = (event: DragStartEvent) => {
-    flushDragStateUpdate(() => {
-      setActiveTaskId(String(event.active.id));
-      setActiveTaskWidth(event.active.rect.current.initial?.width ?? null);
-      setActiveDropTarget(null);
-    });
+    setActiveTaskId(String(event.active.id));
+    setActiveTaskWidth(event.active.rect.current.initial?.width ?? null);
+    setActiveDropTarget(null);
     latestDropTargetRef.current = null;
     latestDropTargetDeltaYRef.current = 0;
   };
@@ -128,9 +121,7 @@ export const useTaskBoardDnd = ({
       if (latestDropTargetRef.current !== null) {
         latestDropTargetRef.current = null;
         latestDropTargetDeltaYRef.current = event.delta.y;
-        flushDragStateUpdate(() => {
-          setActiveDropTarget(null);
-        });
+        setActiveDropTarget(null);
       }
       return;
     }
@@ -153,9 +144,7 @@ export const useTaskBoardDnd = ({
 
     latestDropTargetRef.current = target;
     latestDropTargetDeltaYRef.current = event.delta.y;
-    flushDragStateUpdate(() => {
-      setActiveDropTarget(target);
-    });
+    setActiveDropTarget(target);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
