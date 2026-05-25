@@ -105,7 +105,7 @@ const MiniCalendarSectionBase = ({
     <>
       <section className="flex w-full shrink-0 flex-col pb-2.5 pl-0 pr-2.5 pt-2.5">
         <div className="flex w-full items-center justify-between px-0.5">
-          <span className="ml-3 text-[13px] font-extrabold tracking-[-0.01em] text-[#3f4652]">
+          <span className="ml-3 text-[13px] font-extrabold tracking-[-0.01em] text-[#4a4a4a]">
             {format(monthDate, monthLabelFormat, { locale: dateFnsLocale })}
           </span>
 
