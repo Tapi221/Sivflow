@@ -243,7 +243,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
             minWidth: `${laneLabelWidth + gridWidth}px`,
           }}
         >
-          <div className="sticky left-0 top-0 z-30 border-b border-r border-[#eeeeee] bg-[#fbfbfc]" />
+          <div className="sticky left-0 top-0 z-30 border-b border-r border-[#eeeeee] bg-white" />
 
           <div className="sticky top-0 z-20 border-b border-[#eeeeee] bg-white">
             <div className="grid" style={timelineHeaderStyle}>
@@ -289,7 +289,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
 
             return (
               <Fragment key={lane.id}>
-                <div className="sticky left-0 z-20 flex items-center gap-2 border-b border-r border-[#eeeeee] bg-[#fbfbfc] px-4" style={{ height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px` }}>
+                <div className="sticky left-0 z-20 flex items-center gap-2 border-b border-r border-[#eeeeee] bg-white px-4" style={{ height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px` }}>
                   {lane.label ? (
                     <>
                       <span className="h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_0_2px_rgba(255,255,255,0.95)]" style={{ backgroundColor: lane.color }} />
