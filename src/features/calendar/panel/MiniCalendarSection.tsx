@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 const MINI_CALENDAR_NAV_BUTTON_CLASS_NAME =
   "flex h-7 w-7 items-center justify-center rounded-full text-[#b7b7b7] transition-all hover:bg-[#f7f7f7] hover:text-[#8c8c8c] active:scale-[0.94] active:bg-[#f1f1f1]";
 
+const MINI_CALENDAR_DIVIDER_CLASS_NAME = "mt-2 h-px w-full shrink-0 bg-[#eeeeee]";
+
 const IconChevronLeft = ({ className }: { className?: string }) => (
   <svg
     viewBox="0 0 16 16"
@@ -100,79 +102,83 @@ const MiniCalendarSectionBase = ({
   );
 
   return (
-    <section className="flex w-full shrink-0 flex-col pb-2.5 pl-0 pr-2.5 pt-2.5">
-      <div className="flex w-full items-center justify-between px-0.5">
-        <span className="ml-3 text-[13px] font-extrabold tracking-[-0.01em] text-[#3f4652]">
-          {format(monthDate, monthLabelFormat, { locale: dateFnsLocale })}
-        </span>
-
-        <div className="flex items-center gap-1">
-          <HoverTooltip label={t.previousMonthLabel} side="top">
-            <button
-              type="button"
-              className={MINI_CALENDAR_NAV_BUTTON_CLASS_NAME}
-              onClick={onPreviousMonth}
-              aria-label={t.previousMonthLabel}
-            >
-              <IconChevronLeft className="h-4 w-4" />
-            </button>
-          </HoverTooltip>
-
-          <HoverTooltip label={t.nextMonthLabel} side="top">
-            <button
-              type="button"
-              className={MINI_CALENDAR_NAV_BUTTON_CLASS_NAME}
-              onClick={onNextMonth}
-              aria-label={t.nextMonthLabel}
-            >
-              <IconChevronRight className="h-4 w-4" />
-            </button>
-          </HoverTooltip>
-        </div>
-      </div>
-
-      <div className="mt-2 grid grid-cols-7 px-0.5">
-        {t.miniCalendarWeekdays.map((weekday, index) => (
-          <span
-            key={`${weekday}-${index}`}
-            className="flex h-6 items-center justify-center text-[11px] font-extrabold uppercase text-[#8c8c8c]"
-          >
-            {weekday}
+    <>
+      <section className="flex w-full shrink-0 flex-col pb-2.5 pl-0 pr-2.5 pt-2.5">
+        <div className="flex w-full items-center justify-between px-0.5">
+          <span className="ml-3 text-[13px] font-extrabold tracking-[-0.01em] text-[#3f4652]">
+            {format(monthDate, monthLabelFormat, { locale: dateFnsLocale })}
           </span>
-        ))}
-      </div>
 
-      <div className="grid grid-cols-7 gap-y-0.5 px-0.5">
-        {miniCalendarDays.map((day) => {
-          const isActive = day.isToday || day.isSelected;
+          <div className="flex items-center gap-1">
+            <HoverTooltip label={t.previousMonthLabel} side="top">
+              <button
+                type="button"
+                className={MINI_CALENDAR_NAV_BUTTON_CLASS_NAME}
+                onClick={onPreviousMonth}
+                aria-label={t.previousMonthLabel}
+              >
+                <IconChevronLeft className="h-4 w-4" />
+              </button>
+            </HoverTooltip>
 
-          return (
-            <button
-              key={day.date.toISOString()}
-              type="button"
-              onClick={() => onSelectDate(day.date)}
-              className={cn(
-                "relative flex h-7 w-full items-center justify-center transition-all duration-150 active:scale-[0.92]",
-                !isActive && "rounded-full hover:bg-[#f7f7f7]",
-              )}
+            <HoverTooltip label={t.nextMonthLabel} side="top">
+              <button
+                type="button"
+                className={MINI_CALENDAR_NAV_BUTTON_CLASS_NAME}
+                onClick={onNextMonth}
+                aria-label={t.nextMonthLabel}
+              >
+                <IconChevronRight className="h-4 w-4" />
+              </button>
+            </HoverTooltip>
+          </div>
+        </div>
+
+        <div className="mt-2 grid grid-cols-7 px-0.5">
+          {t.miniCalendarWeekdays.map((weekday, index) => (
+            <span
+              key={`${weekday}-${index}`}
+              className="flex h-6 items-center justify-center text-[11px] font-extrabold uppercase text-[#8c8c8c]"
             >
-              <CalendarDayNumberCircle
-                isToday={day.isToday}
-                isSelected={day.isSelected}
-                isCurrentMonth={day.isCurrentMonth}
+              {weekday}
+            </span>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7 gap-y-0.5 px-0.5">
+          {miniCalendarDays.map((day) => {
+            const isActive = day.isToday || day.isSelected;
+
+            return (
+              <button
+                key={day.date.toISOString()}
+                type="button"
+                onClick={() => onSelectDate(day.date)}
                 className={cn(
-                  "relative z-10 font-semibold",
-                  day.isCurrentMonth && !isActive && "text-[#5f6673]",
-                  !day.isCurrentMonth && !isActive && "text-[#b7b7b7]",
+                  "relative flex h-7 w-full items-center justify-center transition-all duration-150 active:scale-[0.92]",
+                  !isActive && "rounded-full hover:bg-[#f7f7f7]",
                 )}
               >
-                {day.dayNumber}
-              </CalendarDayNumberCircle>
-            </button>
-          );
-        })}
-      </div>
-    </section>
+                <CalendarDayNumberCircle
+                  isToday={day.isToday}
+                  isSelected={day.isSelected}
+                  isCurrentMonth={day.isCurrentMonth}
+                  className={cn(
+                    "relative z-10 font-semibold",
+                    day.isCurrentMonth && !isActive && "text-[#5f6673]",
+                    !day.isCurrentMonth && !isActive && "text-[#b7b7b7]",
+                  )}
+                >
+                  {day.dayNumber}
+                </CalendarDayNumberCircle>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <div className={MINI_CALENDAR_DIVIDER_CLASS_NAME} />
+    </>
   );
 };
 
