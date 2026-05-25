@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type MouseEvent as ReactMo
 import { createPortal } from "react-dom";
 import { TagChip } from "@/components/tag/TagChip";
 import { TAG_COLOR_CONTEXT_MENU_HEIGHT, TAG_COLOR_CONTEXT_MENU_WIDTH, TagColorRightClickPanel } from "@/chip/rightclickpanel/TagColorRightClickPanel";
-import { RIGHT_CLICK_PANEL_NO_DRAG_STYLE, announceRightClickPanelOpen, clampRightClickPanelPosition, useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPanelUtils";
+import { RIGHT_CLICK_PANEL_NO_DRAG_STYLE, clampRightClickPanelPosition, useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPanelUtils";
 import { getTagColorKey, type TagColorKey } from "@/features/tag/tagColor";
 import { useTags } from "@/hooks/settings/useTags";
 import { Plus, X } from "@/ui/icons";
@@ -82,7 +82,6 @@ export const TaskTagStrip = () => {
       width: TAG_COLOR_CONTEXT_MENU_WIDTH,
       height: TAG_COLOR_CONTEXT_MENU_HEIGHT,
     });
-    announceRightClickPanelOpen(TAG_COLOR_CONTEXT_PANEL_ID);
     setContextMenu({ tagId, x, y });
   };
 
@@ -96,7 +95,7 @@ export const TaskTagStrip = () => {
   const contextMenuElement =
     contextMenu && contextMenuTag && contextMenuTagColorKey ? (
       <TagColorRightClickPanel
-        key={contextMenu.tagId}
+        key={`${contextMenu.tagId}:${contextMenu.x}:${contextMenu.y}`}
         x={contextMenu.x}
         y={contextMenu.y}
         availableColors={availableColors}
@@ -104,6 +103,7 @@ export const TaskTagStrip = () => {
         tagName={contextMenuTag.name}
         menuRef={contextMenuRef}
         noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE}
+        panelId={TAG_COLOR_CONTEXT_PANEL_ID}
         onSelectColor={(colorKey) => {
           void handleUpdateTagColor(contextMenuTag.id, colorKey);
         }}
