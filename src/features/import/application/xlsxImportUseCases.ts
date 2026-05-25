@@ -1,8 +1,5 @@
-import {buildImportCardSetName,
-  importCardsFromPayload,
-  type ImportDestination,} from "@/features/import/application/importCards";
-import {hasImportBlockingError,
-  type ImportParseResult,} from "@/features/import/domain/importTypes";
+import { buildImportCardSetName, importCardsFromPayload, type ImportDestination } from "@/features/import/application/importCards";
+import { hasImportBlockingError, type ImportParseResult } from "@/features/import/domain/import.types";
 import { parseXlsxImport } from "@/features/import/infra/web/parseXlsxImport";
 
 import type { Card, CardSet } from "@/types";
