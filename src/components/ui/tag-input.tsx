@@ -214,7 +214,7 @@ export const TagInput = ({
                         key={colorKey}
                         aria-label={`${colorKey}を選択`}
                         className={cn(
-                          "w-8 h-8 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all",
+                          "w-7 h-7 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all",
                           selectedColor === colorKey ||
                               (!selectedColor &&
                                 colorKey === availableColors[0])
