@@ -1,5 +1,5 @@
 import { parseImportRows } from "@/features/import/application/parseImportRows";
-import type { ImportParseResult } from "@/features/import/domain/importTypes";
+import type { ImportParseResult } from "@/features/import/domain/import.types";
 import { readXlsxImportRows } from "@/features/import/infra/xlsx/readXlsxImportRows";
 
 export const parseXlsxImport = async (
