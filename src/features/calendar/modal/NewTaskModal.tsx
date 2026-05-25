@@ -1,7 +1,7 @@
 import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import type { TaskPriority, TaskStatus } from "../task/task.types";
+import type { TaskCreateInput, TaskPriority, TaskStatus, TaskSubtask } from "../task/task.types";
 import {CATEGORY_CONFIG,
   PRIORITY_CONFIG,
   TASK_COLUMNS,} from "../task/task.types";
@@ -16,14 +16,7 @@ type NewTaskModalProps = {
   defaultCategory?: string;
   categoryOptions?: TaskCategoryOption[];
   onClose: () => void;
-  onSave: (data: {
-    title: string;
-    status: TaskStatus;
-    priority: TaskPriority;
-    category: string;
-    dueDate: string | null;
-    assignee: string | null;
-  }) => void;
+  onSave: (data: TaskCreateInput) => void;
 };
 
 type PickerOption<T extends string> = {
@@ -90,6 +83,28 @@ const CalendarIcon = () => (
       strokeWidth="1.3"
       strokeLinecap="round"
       strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const PlusIcon = () => (
+  <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
+    <path
+      d="M8 3.2v9.6M3.2 8h9.6"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const XIcon = () => (
+  <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
+    <path
+      d="M4.5 4.5 11.5 11.5M11.5 4.5 4.5 11.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
     />
   </svg>
 );
@@ -203,6 +218,9 @@ export const NewTaskModal = ({
   const [priority, setPriority] = useState<TaskPriority>("medium");
   const [category, setCategory] = useState(initialCategory);
   const [dueDate, setDueDate] = useState("");
+  const [description, setDescription] = useState("");
+  const [subtaskDraft, setSubtaskDraft] = useState("");
+  const [subtasks, setSubtasks] = useState<TaskSubtask[]>([]);
   const [openPicker, setOpenPicker] = useState("");
 
   const selectedCategoryLabel =
@@ -213,8 +231,17 @@ export const NewTaskModal = ({
   const handleSave = () => {
     if (!title.trim()) return;
 
+    const normalizedSubtasks = subtasks
+      .map((subtask) => ({
+        ...subtask,
+        title: subtask.title.trim(),
+      }))
+      .filter((subtask) => subtask.title.length > 0);
+
     onSave({
       title: title.trim(),
+      description: description.trim(),
+      subtasks: normalizedSubtasks,
       status,
       priority,
       category,
@@ -225,7 +252,35 @@ export const NewTaskModal = ({
     onClose();
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  const addSubtask = () => {
+    const trimmedTitle = subtaskDraft.trim();
+
+    if (!trimmedTitle) return;
+
+    setSubtasks((current) => [
+      ...current,
+      {
+        id: `subtask-${Date.now()}-${current.length}`,
+        title: trimmedTitle,
+        done: false,
+      },
+    ]);
+    setSubtaskDraft("");
+  };
+
+  const removeSubtask = (id: string) => {
+    setSubtasks((current) => current.filter((subtask) => subtask.id !== id));
+  };
+
+  const updateSubtaskTitle = (id: string, value: string) => {
+    setSubtasks((current) =>
+      current.map((subtask) =>
+        subtask.id === id ? { ...subtask, title: value } : subtask,
+      ),
+    );
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
       handleSave();
     }
@@ -377,6 +432,94 @@ export const NewTaskModal = ({
                 aria-label="期日"
               />
             </label>
+          </div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(260px,0.72fr)]">
+            <label className="block">
+              <span className="mb-1.5 block px-1 text-[11px] font-semibold text-[#8e8e93]">
+                詳細
+              </span>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="メモ、背景、完了条件など"
+                aria-label="タスク詳細"
+                rows={5}
+                className="min-h-[118px] w-full resize-none rounded-[12px] border border-[#e3e3e8] bg-[#fbfbfd] px-3 py-2.5 text-[13px] leading-5 text-[#2f3337] outline-none transition-colors placeholder:text-[#b3b3bb] focus:border-[#7c83e6] focus:bg-white"
+              />
+            </label>
+
+            <div>
+              <div className="mb-1.5 flex items-center justify-between px-1">
+                <span className="text-[11px] font-semibold text-[#8e8e93]">
+                  サブタスク
+                </span>
+                {subtasks.length > 0 && (
+                  <span className="text-[10px] font-medium text-[#b3b3bb]">
+                    {subtasks.length} 件
+                  </span>
+                )}
+              </div>
+
+              <div className="rounded-[12px] border border-[#e3e3e8] bg-[#fbfbfd] p-2">
+                <div className="space-y-1.5">
+                  {subtasks.map((subtask) => (
+                    <div
+                      key={subtask.id}
+                      className="flex items-center gap-2 rounded-[9px] bg-white px-2 py-1.5 ring-1 ring-black/[0.04]"
+                    >
+                      <span className="h-3.5 w-3.5 shrink-0 rounded-[4px] border border-[#b8bbc4]" />
+                      <input
+                        type="text"
+                        value={subtask.title}
+                        onChange={(e) => updateSubtaskTitle(subtask.id, e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        aria-label="サブタスク名"
+                        className="min-w-0 flex-1 border-0 bg-transparent text-[12px] text-[#2f3337] outline-none placeholder:text-[#b3b3bb]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeSubtask(subtask.id)}
+                        aria-label="サブタスクを削除"
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[#8e8e93] transition-colors hover:bg-[#f2f2f7] hover:text-[#4f5359]"
+                      >
+                        <XIcon />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className={subtasks.length > 0 ? "mt-2 flex items-center gap-2" : "flex items-center gap-2"}>
+                  <input
+                    type="text"
+                    value={subtaskDraft}
+                    onChange={(e) => setSubtaskDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.metaKey && !e.ctrlKey) {
+                        e.preventDefault();
+                        addSubtask();
+                        return;
+                      }
+
+                      handleKeyDown(e);
+                    }}
+                    placeholder="サブタスクを追加"
+                    aria-label="追加するサブタスク"
+                    className="h-8 min-w-0 flex-1 rounded-[9px] border border-[#e3e3e8] bg-white px-2.5 text-[12px] text-[#2f3337] outline-none transition-colors placeholder:text-[#b3b3bb] focus:border-[#7c83e6]"
+                  />
+                  <button
+                    type="button"
+                    onClick={addSubtask}
+                    disabled={!subtaskDraft.trim()}
+                    aria-label="サブタスクを追加"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#6571dc] text-white shadow-[0_6px_14px_rgba(101,113,220,0.24)] transition-colors hover:bg-[#5864ce] disabled:bg-[#c7c7cc] disabled:shadow-none"
+                  >
+                    <PlusIcon />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="mt-3 text-[11px] text-[#8e8e93]">

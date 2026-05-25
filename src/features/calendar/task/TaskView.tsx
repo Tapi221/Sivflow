@@ -393,6 +393,8 @@ export const TaskView = ({
           return {
             id: taskId,
             title: googleTask.title,
+            description: googleTask.notes ?? "",
+            subtasks: [],
             status,
             priority: "medium",
             category,
@@ -495,6 +497,7 @@ export const TaskView = ({
     if (selectedTaskListIdForCreate && onCreateGoogleTask) {
       await onCreateGoogleTask(selectedTaskListIdForCreate, {
         title: data.title,
+        notes: data.description || null,
         due: toGoogleDueDate(data.dueDate),
         status: data.status === "done" ? "completed" : "needsAction",
       });
