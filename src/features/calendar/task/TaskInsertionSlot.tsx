@@ -1,10 +1,12 @@
 import { useDroppable } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
+import type { TaskInsertPosition } from "../../dnd/task/taskDnd.types";
 
 type TaskInsertionSlotProps = {
   columnId: string;
   insertIndex: number;
   overTaskId?: string | null;
+  position?: TaskInsertPosition;
   isFirst?: boolean;
   isLast?: boolean;
   isActive?: boolean;
@@ -15,6 +17,7 @@ export const TaskInsertionSlot = ({
   columnId,
   insertIndex,
   overTaskId = null,
+  position = "before",
   isFirst = false,
   isLast = false,
   isActive = false,
@@ -27,6 +30,7 @@ export const TaskInsertionSlot = ({
       columnId,
       insertIndex,
       overTaskId,
+      position,
     },
   });
 
