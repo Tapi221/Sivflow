@@ -310,4 +310,14 @@
   .app-layout--sidebar-closed .calendar-workspace-toolbar {
     padding-left: 0;
   }
+
+  .app-layout-route--schedule header {
+    height: 0;
+    min-height: 0;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
 }
