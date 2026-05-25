@@ -30,7 +30,13 @@ const normalizeWeek = (date: Date) => startOfWeek(date, { weekStartsOn: 1 });
 const isSameTimelineTitleDate = (a: Date, b: Date) =>
   startOfDay(a).getTime() === startOfDay(b).getTime();
 
-export const useCalendarNavigation = () => {
+type UseCalendarNavigationOptions = {
+  initialActiveMode?: CalendarToolbarMode;
+};
+
+export const useCalendarNavigation = ({
+  initialActiveMode = "timeline",
+}: UseCalendarNavigationOptions = {}) => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
@@ -48,7 +54,8 @@ export const useCalendarNavigation = () => {
   const [selectedViewMode, setSelectedViewMode] =
     useState<CalendarViewMode>("days");
 
-  const [activeMode, setActiveMode] = useState<CalendarToolbarMode>("timeline");
+  const [activeMode, setActiveMode] =
+    useState<CalendarToolbarMode>(initialActiveMode);
 
   const [calendarBuffer, setCalendarBuffer] = useState(() =>
     createCalendarScrollBuffer("calendar", "days"),

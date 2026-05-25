@@ -30,8 +30,11 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
 const DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS =
   "flex h-7 w-8 min-w-0 shrink-0 items-center justify-center rounded-lg border border-transparent bg-transparent p-0 text-[#8c8c8c] shadow-none appearance-none select-none outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:bg-[#f7f7f7] hover:text-[#6e6e73] focus:outline-none focus:ring-0 focus-visible:outline-none motion-reduce:transition-none";
 
-export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
-  const pane = useScheduleScreen();
+export const ScheduleScreen = ({
+  initialActiveMode,
+  onClose: _onClose,
+}: ScheduleScreenProps) => {
+  const pane = useScheduleScreen({ initialActiveMode });
   const taskCalendarEvents = useTaskCalendarEvents();
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
@@ -90,6 +93,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
     refreshGoogleTasks,
     createGoogleTask,
     updateGoogleTask,
+    moveGoogleTaskList,
     deleteGoogleTask,
   } = pane;
 
@@ -308,6 +312,7 @@ export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
             onRefreshGoogleTasks={refreshGoogleTasks}
             onCreateGoogleTask={createGoogleTask}
             onUpdateGoogleTask={updateGoogleTask}
+            onMoveGoogleTaskList={moveGoogleTaskList}
             onDeleteGoogleTask={deleteGoogleTask}
           />
         </CarvePanel>

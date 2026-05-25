@@ -1,17 +1,9 @@
-import { CalendarWorkspaceToolbar } from "@/features/calendar/toolbar/ScheduleToolbar";
+import { ScheduleScreen } from "@/screens/ScheduleScreen";
 
 const Tasks = () => {
   return (
-    <div className="flex h-full min-h-0 w-full flex-col bg-white text-[#25272d]">
-      <CalendarWorkspaceToolbar
-        activeMode="task"
-        onSelectCalendar={() => undefined}
-        onSelectTimeline={() => undefined}
-        onSelectTask={() => undefined}
-      />
-      <div className="px-5 py-6 text-[13px] font-medium leading-[17px] text-[#8f929c]">
-        タスク
-      </div>
+    <div className="h-full min-h-0 w-full">
+      <ScheduleScreen initialActiveMode="task" />
     </div>
   );
 };

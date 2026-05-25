@@ -114,8 +114,11 @@ const equalSet = (a: Set<string>, b: Set<string>): boolean => {
   return true;
 };
 
-export const ScheduleScreen = ({ onClose: _onClose }: ScheduleScreenProps) => {
-  const pane = useScheduleScreen();
+export const ScheduleScreen = ({
+  initialActiveMode,
+  onClose: _onClose,
+}: ScheduleScreenProps) => {
+  const pane = useScheduleScreen({ initialActiveMode });
   const taskCalendarEvents = useTaskCalendarEvents();
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
