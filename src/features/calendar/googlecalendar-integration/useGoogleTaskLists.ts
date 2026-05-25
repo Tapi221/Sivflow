@@ -19,7 +19,7 @@ type GoogleTaskListsState = Record<string, GoogleTaskListAccountState>;
 type GoogleTaskListsAction =
   | { type: "START"; accountId: string }
   | { type: "SUCCESS"; accountId: string; taskLists: GoogleTaskListItem[] }
-  | { type: "ERROR"; accountId: string; error: string }
+  | { type: "ERROR"; accountId: string; error: string | null }
   | { type: "REMOVE_MISSING_ACCOUNTS"; accountIds: string[] };
 
 type AccountTokenSnapshot = {
@@ -35,15 +35,18 @@ const EMPTY_ACCOUNT_STATE: GoogleTaskListAccountState = {
   error: null,
 };
 
-const toErrorMessage = (error: unknown) => {
-  if (!(error instanceof Error)) return String(error);
+const shouldHideAuthRecoveryError = (error: unknown): boolean => {
+  if (!(error instanceof Error)) return false;
 
   const status = (error as Error & { status?: number }).status;
+  const code = (error as Error & { code?: string }).code;
 
-  if (status === 401 || status === 403) {
-    return "Google ToDo リストを自動復旧中です。";
-  }
+  return status === 401 || status === 403 || code === "auto-recovery-pending";
+};
 
+const toErrorMessage = (error: unknown) => {
+  if (shouldHideAuthRecoveryError(error)) return null;
+  if (!(error instanceof Error)) return String(error);
   return error.message;
 };
 
