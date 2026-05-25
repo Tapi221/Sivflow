@@ -18,6 +18,7 @@ type TabContextMenuProps = {
   panelId?: RightClickPanelId;
 };
 
+const WORKSPACE_TAB_CONTEXT_PANEL_ID = "workspace-tab-context-menu";
 const WORKSPACE_TAB_CONTEXT_MENU_LABELS = [
   "閉じる",
   "他を閉じる",
@@ -35,7 +36,7 @@ export const WorkspaceTabContextMenu = ({
   actions,
   menuRef,
   noDragStyle,
-  panelId,
+  panelId = WORKSPACE_TAB_CONTEXT_PANEL_ID,
 }: TabContextMenuProps) => {
   return (
     <RightClickPanelSurface
