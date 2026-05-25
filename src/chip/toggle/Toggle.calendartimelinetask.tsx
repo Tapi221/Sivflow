@@ -1,6 +1,5 @@
 import { motion, type Transition } from "framer-motion";
 import { CalendarIcon } from "@/components/icons/icons.sidebar";
-import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { TaskIcon, TimelineToolbarIcon } from "@/components/icons/icons.schedule";
 import { cn } from "@/lib/utils";
 import type { CalendarWorkspaceToolbarProps } from "@/features/calendar/scheduleScreen.types";
@@ -35,50 +34,41 @@ export const ToggleCalendarTimelineTask = ({
 }: ToggleCalendarTimelineTaskProps) => {
   return (
     <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5">
-      {tabs.map((tab, index) => {
+      {tabs.map((tab) => {
         const Icon = TAB_ICON_MAP[tab.value];
         const isActive = activeMode === tab.value;
-        const isStartEdgeTab = index === 0;
 
         return (
-          <HoverTooltip
+          <button
             key={tab.value}
-            label={tab.label}
-            side="top"
-            align={isStartEdgeTab ? "start" : "center"}
-            offset={6}
-            preset="segmented"
+            type="button"
+            onClick={tab.onClick}
+            aria-label={tab.label}
+            className={cn(
+              "relative z-10 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg p-0",
+              "appearance-none select-none",
+              "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+              "focus:outline-none focus:ring-0 focus-visible:outline-none",
+              isActive ? "text-[#8c8c8c]" : "text-[#b3b3b3] hover:text-[#8c8c8c]",
+            )}
           >
-            <button
-              type="button"
-              onClick={tab.onClick}
-              aria-label={tab.label}
-              className={cn(
-                "relative z-10 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg p-0",
-                "appearance-none select-none",
-                "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
-                "focus:outline-none focus:ring-0 focus-visible:outline-none",
-                isActive ? "text-[#8c8c8c]" : "text-[#b3b3b3] hover:text-[#8c8c8c]",
-              )}
-            >
-              {isActive && (
-                <motion.span
-                  layoutId={TAB_INDICATOR_ID}
-                  className="absolute inset-0 -z-10 rounded-lg border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
-                  transition={TAB_MOTION_TRANSITION}
-                />
-              )}
-
-              <Icon
-                aria-hidden="true"
-                className={cn(
-                  "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
-                  isActive ? "text-[#8c8c8c]" : "text-[#b7b7b7]",
-                  tab.value === "timeline" ? "[&>path]:fill-current" : null,
-                )}
+            {isActive && (
+              <motion.span
+                layoutId={TAB_INDICATOR_ID}
+                className="absolute inset-0 -z-10 rounded-lg border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+                transition={TAB_MOTION_TRANSITION}
               />
-            </button>
-          </HoverTooltip>
+            )}
+
+            <Icon
+              aria-hidden="true"
+              className={cn(
+                "block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+                isActive ? "text-[#8c8c8c]" : "text-[#b7b7b7]",
+                tab.value === "timeline" ? "[&>path]:fill-current" : null,
+              )}
+            />
+          </button>
         );
       })}
     </div>
