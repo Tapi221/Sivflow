@@ -6,7 +6,6 @@ import { BlockNoteSandboxPage } from "@/sandbox/blocknote";
 import { getDevRouteElements } from "./DevRoutes";
 import { ProtectedRoute } from "./ProtectedRoute";
 
-const Folders = lazy(() => import("@/routes/Folders"));
 const CardEdit = lazy(() => import("@/routes/CardEdit"));
 const CardSetView = lazy(() => import("@/routes/CardSetView"));
 const StudyMode = lazy(() => import("@/routes/StudyMode"));
@@ -20,7 +19,7 @@ const withRouteFallback = (element: ReactNode) => {
 };
 
 const DefaultRedirect = () => {
-  return <Navigate to="/library" replace />;
+  return <Navigate to="/schedule" replace />;
 };
 
 export const AppRoutes = () => {
@@ -35,10 +34,6 @@ export const AppRoutes = () => {
         }
       >
         <Route index element={<DefaultRedirect />} />
-
-        <Route path="library" element={withRouteFallback(<Folders />)} />
-        <Route path="library/pdf" element={withRouteFallback(<Folders />)} />
-        <Route path="library/flashcard" element={withRouteFallback(<Folders />)} />
 
         <Route path="schedule" element={withRouteFallback(<Schedule />)} />
         <Route path="calendar" element={<Navigate to="/schedule" replace />} />
@@ -59,7 +54,7 @@ export const AppRoutes = () => {
         {getDevRouteElements()}
       </Route>
 
-      <Route path="*" element={<Navigate to="/library" replace />} />
+      <Route path="*" element={<Navigate to="/schedule" replace />} />
     </Routes>
   );
 };
