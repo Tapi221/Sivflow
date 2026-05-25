@@ -10,7 +10,7 @@ import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.week
 import { CalendarTimelineDayView } from "@/features/calendar/grid/TimelineDayView";
 import { CalendarSidebar } from "@/features/calendar/panel/CalendarSidebar";
 import { DayDetailPanel } from "@/features/calendar/panel/DayDetailPanel";
-import type { ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
+import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { TaskView } from "@/features/calendar/task/TaskView";
 import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCalendarEvents";
 import { CalendarWorkspaceToolbar } from "@/features/calendar/toolbar/ScheduleToolbar";
@@ -30,6 +30,71 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
 const DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS =
   "flex h-7 w-8 min-w-0 shrink-0 items-center justify-center rounded-lg border border-transparent bg-transparent p-0 text-[#8c8c8c] shadow-none appearance-none select-none outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:bg-[#f7f7f7] hover:text-[#6e6e73] focus:outline-none focus:ring-0 focus-visible:outline-none motion-reduce:transition-none";
 
+const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
+const APP_PROJECT_COLORS = [
+  "#34c759",
+  "#ff3b30",
+  "#4f8ce7",
+  "#ffd166",
+  "#9adfe7",
+  "#66a77a",
+  "#9ca3ff",
+];
+
+type StoredAppCalendarItem = Partial<AppCalendarItem>;
+
+const createAppProjectId = (): string => {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return `app-project:${crypto.randomUUID()}`;
+  }
+
+  return `app-project:${Date.now().toString(36)}:${Math.random()
+    .toString(36)
+    .slice(2)}`;
+};
+
+const readStoredAppProjects = (): AppCalendarItem[] => {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const raw = window.localStorage.getItem(APP_PROJECTS_STORAGE_KEY);
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.flatMap((item, index): AppCalendarItem[] => {
+      const project = item as StoredAppCalendarItem;
+      const label = typeof project.label === "string" ? project.label.trim() : "";
+      if (!label) return [];
+
+      return [
+        {
+          id: typeof project.id === "string" ? project.id : createAppProjectId(),
+          label,
+          color:
+            typeof project.color === "string"
+              ? project.color
+              : APP_PROJECT_COLORS[index % APP_PROJECT_COLORS.length],
+          checked: typeof project.checked === "boolean" ? project.checked : true,
+        },
+      ];
+    });
+  } catch {
+    return [];
+  }
+};
+
+const persistAppProjects = (projects: AppCalendarItem[]) => {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(APP_PROJECTS_STORAGE_KEY, JSON.stringify(projects));
+  } catch {
+    // localStorage が利用できない環境でも、画面上の追加表示は維持する。
+  }
+};
+
 export const ScheduleScreen = ({
   initialActiveMode,
   onClose: _onClose,
@@ -40,6 +105,7 @@ export const ScheduleScreen = ({
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
   const [isDayDetailPanelOpen, setIsDayDetailPanelOpen] = useState(true);
+  const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(readStoredAppProjects);
   const [selectedTaskListIds, setSelectedTaskListIds] = useState<Set<string>>(
     () => new Set(),
   );
@@ -96,6 +162,45 @@ export const ScheduleScreen = ({
     moveGoogleTaskList,
     deleteGoogleTask,
   } = pane;
+
+  useEffect(() => {
+    persistAppProjects(appProjects);
+  }, [appProjects]);
+
+  const handleAddAppProject = useCallback((projectName: string) => {
+    const trimmedProjectName = projectName.trim();
+    if (!trimmedProjectName) return;
+
+    setAppProjects((projects) => {
+      const duplicateProject = projects.find(
+        (project) => project.label.trim().toLowerCase() === trimmedProjectName.toLowerCase(),
+      );
+
+      if (duplicateProject) {
+        return projects.map((project) =>
+          project.id === duplicateProject.id ? { ...project, checked: true } : project,
+        );
+      }
+
+      return [
+        ...projects,
+        {
+          id: createAppProjectId(),
+          label: trimmedProjectName,
+          color: APP_PROJECT_COLORS[projects.length % APP_PROJECT_COLORS.length],
+          checked: true,
+        },
+      ];
+    });
+  }, []);
+
+  const handleToggleAppProject = useCallback((projectId: string) => {
+    setAppProjects((projects) =>
+      projects.map((project) =>
+        project.id === projectId ? { ...project, checked: !project.checked } : project,
+      ),
+    );
+  }, []);
 
   const allTaskListIds = useMemo(
     () => googleAccounts.flatMap((account) => account.taskLists.map((taskList) => taskList.id)),
@@ -275,7 +380,7 @@ export const ScheduleScreen = ({
           selectedDate={selectedDate}
           selectedRange={sidebarSelectedRange}
           activeMode={activeMode}
-          appProjects={[]}
+          appProjects={appProjects}
           googleAccounts={googleAccounts}
           isAnyCalendarConnecting={isAnyCalendarConnecting}
           selectedTaskListIds={selectedTaskListIds}
@@ -283,8 +388,8 @@ export const ScheduleScreen = ({
           onPreviousMonth={handleSidebarPreviousMonth}
           onNextMonth={handleSidebarNextMonth}
           onAddCalendar={addGoogleCalendar}
-          onAddProject={() => undefined}
-          onToggleProject={() => undefined}
+          onAddProject={handleAddAppProject}
+          onToggleProject={handleToggleAppProject}
           onReconnectAccount={(accountId) => {
             void reconnectGoogleAccount(accountId);
           }}
