@@ -36,38 +36,39 @@ const getNearestSlotCollision = (
   const activeRect = args.collisionRect;
   const activeCenterX = activeRect.left + activeRect.width / 2;
   const activeCenterY = activeRect.top + activeRect.height / 2;
+  let nearestCollision: CollisionDescriptor | null = null;
 
-  const slotCollisions = slotContainers
-    .map((container): CollisionDescriptor | null => {
-      const rect = args.droppableRects.get(container.id);
+  for (const container of slotContainers) {
+    const rect = args.droppableRects.get(container.id);
 
-      if (!rect) {
-        return null;
-      }
+    if (!rect) {
+      continue;
+    }
 
-      const horizontalDistance = getDistanceFromRange(
-        activeCenterX,
-        rect.left,
-        rect.left + rect.width,
-      );
-      const verticalDistance = getDistanceFromRange(
-        activeCenterY,
-        rect.top,
-        rect.top + rect.height,
-      );
+    const horizontalDistance = getDistanceFromRange(
+      activeCenterX,
+      rect.left,
+      rect.left + rect.width,
+    );
+    const verticalDistance = getDistanceFromRange(
+      activeCenterY,
+      rect.top,
+      rect.top + rect.height,
+    );
+    const value = verticalDistance + horizontalDistance * 2;
 
-      return {
+    if (nearestCollision === null || value < nearestCollision.data.value) {
+      nearestCollision = {
         id: container.id,
         data: {
           droppableContainer: container,
-          value: verticalDistance + horizontalDistance * 2,
+          value,
         },
       };
-    })
-    .filter((collision): collision is CollisionDescriptor => collision !== null)
-    .sort((left, right) => left.data.value - right.data.value);
+    }
+  }
 
-  return slotCollisions.slice(0, 1);
+  return nearestCollision ? [nearestCollision] : [];
 };
 
 export const taskBoardCollisionDetection: CollisionDetection = (args) => {
