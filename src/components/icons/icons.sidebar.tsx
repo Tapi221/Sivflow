@@ -149,21 +149,14 @@ export const CalendarIcon = ({ className, ...props }: SidebarIconProps) => (
 export const LibraryIcon = ({ className, ...props }: SidebarIconProps) => (
   <IconShell className={className} {...props}>
     <path
-      d="M3.75 8.25C3.75 6.869 4.869 5.75 6.25 5.75H9.1C9.64 5.75 10.154 5.982 10.51 6.388L11.45 7.45C11.735 7.772 12.145 7.95 12.574 7.95H17.75C19.131 7.95 20.25 9.069 20.25 10.45V17.25C20.25 18.631 19.131 19.75 17.75 19.75H6.25C4.869 19.75 3.75 18.631 3.75 17.25V8.25Z"
+      d="M3.75 8.35C3.75 7.025 4.825 5.95 6.15 5.95H8.925C9.52 5.95 10.092 6.177 10.525 6.584L11.55 7.55C11.829 7.813 12.198 7.96 12.581 7.96H17.85C19.175 7.96 20.25 9.035 20.25 10.36V11.05"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
-      d="M4.05 10.75H19.95"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M7.25 14.25H13.25"
+      d="M3.85 10.85H20.15C20.701 10.85 21.121 11.344 21.032 11.887L19.94 18.557C19.748 19.731 18.733 20.594 17.543 20.594H6.457C5.267 20.594 4.252 19.731 4.06 18.557L2.968 11.887C2.879 11.344 3.299 10.85 3.85 10.85Z"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
