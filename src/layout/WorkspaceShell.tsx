@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode, RefObject } from "react";
-import { WorkspaceTabsBar } from "@/features/tab/TabsBar";
+import { TabsBar } from "@/features/tab/TabsBar";
 import { WorkspaceBreadcrumbBar } from "./WorkspaceBreadcrumbBar";
 
 type WorkspaceShellProps = {
@@ -20,7 +20,7 @@ export const WorkspaceShell = ({
   return (
     <div className="workspace-shell app-layout__content workspace-shell--with-tabs">
       <div className="workspace-shell__tabs" style={tabsBackgroundStyle}>
-        <WorkspaceTabsBar />
+        <TabsBar />
       </div>
       <WorkspaceBreadcrumbBar hideCrumbs />
 

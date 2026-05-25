@@ -12,10 +12,10 @@ import { WORKSPACE_TAB_CONTEXT_MENU_HEIGHT, WORKSPACE_TAB_CONTEXT_MENU_MARGIN, W
 import { cn } from "@/lib/utils";
 import { FileText, Layers, X } from "@/ui/icons";
 
-type WorkspaceTabsBarVariant = "workspace" | "titlebar";
+type TabsBarVariant = "workspace" | "titlebar";
 
-type WorkspaceTabsBarProps = {
-  variant?: WorkspaceTabsBarVariant;
+type TabsBarProps = {
+  variant?: TabsBarVariant;
   className?: string;
   noDragStyle?: CSSProperties;
 };
@@ -210,11 +210,11 @@ const resolveTabIcon = (tab: WorkspaceTab): TabIconComponent => {
   return FileText;
 };
 
-export const WorkspaceTabsBar = ({
+export const TabsBar = ({
   variant = "workspace",
   className,
   noDragStyle,
-}: WorkspaceTabsBarProps) => {
+}: TabsBarProps) => {
   const navigate = useNavigate();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
