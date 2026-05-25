@@ -114,7 +114,7 @@
 
 .workspace-shell--with-tabs {
   grid-template-rows:
-    40px
+    auto
     auto
     minmax(0, 1fr);
 }
@@ -122,8 +122,6 @@
 .workspace-shell__tabs {
   min-width: 0;
   min-height: 0;
-  height: 40px;
-  max-height: 40px;
 
   flex-shrink: 0;
 
