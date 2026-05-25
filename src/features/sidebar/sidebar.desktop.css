@@ -1,15 +1,15 @@
 .app-sidebar,
 .app-right-sidebar {
-  --app-sidebar-bg: linear-gradient(180deg, #08111f 0%, #0b1a3a 46%, #050812 100%);
-  --app-sidebar-hover-bg: rgba(255, 255, 255, 0.06);
-  --app-sidebar-active-bg: rgba(255, 255, 255, 0.1);
-  --app-sidebar-text: rgba(235, 241, 252, 0.78);
-  --app-sidebar-text-strong: #ffffff;
-  --app-sidebar-text-muted: rgba(235, 241, 252, 0.56);
-  --app-sidebar-text-hover: #ffffff;
-  --app-sidebar-icon: rgba(235, 241, 252, 0.58);
-  --app-sidebar-icon-active: #8fb4ff;
-  --app-sidebar-focus-ring: rgba(93, 127, 182, 0.3);
+  --app-sidebar-bg: linear-gradient(180deg, #f8fafc 0%, #eef2f7 52%, #f8fafc 100%);
+  --app-sidebar-hover-bg: rgba(15, 23, 42, 0.06);
+  --app-sidebar-active-bg: rgba(37, 99, 235, 0.12);
+  --app-sidebar-text: #475569;
+  --app-sidebar-text-strong: #0f172a;
+  --app-sidebar-text-muted: #94a3b8;
+  --app-sidebar-text-hover: #0f172a;
+  --app-sidebar-icon: #64748b;
+  --app-sidebar-icon-active: #2563eb;
+  --app-sidebar-focus-ring: rgba(37, 99, 235, 0.18);
 }
 
 .app-sidebar {
@@ -289,7 +289,7 @@
 }
 
 .app-sidebar__library-child.is-active {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--app-sidebar-active-bg);
   color: var(--app-sidebar-text-hover);
 }
 
@@ -304,7 +304,7 @@
   gap: 4px;
   margin-left: 28px;
   padding-left: 24px;
-  border-left: 1px solid rgba(255, 255, 255, 0.14);
+  border-left: 1px solid rgba(100, 116, 139, 0.22);
 }
 
 .app-sidebar__trial {
