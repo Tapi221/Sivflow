@@ -1,16 +1,9 @@
-<<<<<<< HEAD
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { addDays, endOfDay, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, isToday, startOfDay, startOfMonth, startOfWeek } from "date-fns";
-import { ToggleCalendarTimelineTask } from "@/chip/toggle/Toggle.calendartimelinetask";
-import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
-import type { CalendarViewMode, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
-=======
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns";
 import { useLocation, useNavigate } from "react-router-dom";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
-import { SidebarPanelIcon, TaskIcon, TimelineToolbarIcon } from "@/components/icons/icons.schedule";
+import { SidebarPanelIcon, TaskIcon } from "@/components/icons/icons.schedule";
 import { CalendarIcon, LibraryIcon, SettingIcon } from "@/components/icons/icons.sidebar";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import * as C from "@/features/calendar/calendar.constants.desktop";
@@ -19,7 +12,6 @@ import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.week
 import { CalendarTimelineDayView, type TimelineLane } from "@/features/calendar/grid/TimelineDayView";
 import { CalendarSidebar } from "@/features/calendar/panel/CalendarSidebar";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
->>>>>>> 9756b4b4c41368ef4c07b6d0a376f237dbe03dba
 import { TaskView } from "@/features/calendar/task/TaskView";
 import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCalendarEvents";
 import { CalendarWorkspaceToolbar } from "@/features/calendar/toolbar/ScheduleToolbar";
