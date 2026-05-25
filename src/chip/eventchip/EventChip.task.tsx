@@ -60,7 +60,8 @@ export const TaskEventChip = memo(({
           gap-y-1.5
           overflow-hidden
           rounded-md
-          px-2.5
+          pl-1.5
+          pr-2.5
           py-1.5
           text-left
         `,
