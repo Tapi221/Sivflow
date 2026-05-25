@@ -398,20 +398,22 @@ export const ScheduleScreen = ({
       viewportRef={contentViewportRef}
     >
       <CarvePanel hasTrailingPanel={hasTrailingPanel}>
-        <ScheduleScreenHeaderDesktop
-          titleLabel={headerTitleLabel}
-          selectedViewMode={selectedViewMode}
-          viewOptions={viewOptions}
-          canShowDayDetailPanel={canShowDayDetailPanel}
-          showDayDetailPanel={showDayDetailPanel}
-          dayDetailToggleLabel={dayDetailToggleLabel}
-          onSelectViewMode={handleSelectViewMode}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-          onToday={handleToday}
-          onToggleDayDetailPanel={handleToggleDayDetailPanel}
-          className="mb-2 flex shrink-0 items-center justify-between px-5 pt-4"
-        />
+        {activeMode !== "task" && (
+          <ScheduleScreenHeaderDesktop
+            titleLabel={headerTitleLabel}
+            selectedViewMode={selectedViewMode}
+            viewOptions={viewOptions}
+            canShowDayDetailPanel={canShowDayDetailPanel}
+            showDayDetailPanel={showDayDetailPanel}
+            dayDetailToggleLabel={dayDetailToggleLabel}
+            onSelectViewMode={handleSelectViewMode}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            onToday={handleToday}
+            onToggleDayDetailPanel={handleToggleDayDetailPanel}
+            className="mb-2 flex shrink-0 items-center justify-between px-5 pt-4"
+          />
+        )}
 
         {activeMode === "task" ? (
           <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border-0 bg-white">
