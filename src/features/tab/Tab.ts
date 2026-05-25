@@ -100,7 +100,7 @@ export const WORKSPACE_ROUTE_TABS = [
     id: "route:home",
     kind: "route",
     title: "Home",
-    routePath: "/library?home=1",
+    routePath: "/schedule",
     isClosable: true,
     sectionKey: "home",
   },
