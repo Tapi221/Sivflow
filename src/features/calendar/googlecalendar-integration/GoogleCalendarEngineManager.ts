@@ -1,7 +1,6 @@
 import { GoogleCalendarSyncEngine } from "../googlecalendar-sync/GoogleCalendarSyncEngine";
 
-import type {GCalForceSyncOptions,
-  GoogleCalendarListItem,} from "./gcalSync.types";
+import type { GCalForceSyncOptions, GoogleCalendarListItem } from "./gcalSync.types";
 
 type EngineContext = {
   accessToken: string;
@@ -19,6 +18,10 @@ export class GoogleCalendarEngineManager {
   private engines = new Map<string, GoogleCalendarSyncEngine>();
 
   private state = new Map<string, EngineState>();
+
+  private pendingForceSyncOptions: GCalForceSyncOptions | null = null;
+
+  private appliedPendingForceSyncKeys = new Map<string, string>();
 
   constructor(
     private deps: {
@@ -41,6 +44,7 @@ export class GoogleCalendarEngineManager {
       prev.calIds === calIdsKey &&
       prev.calendars === calendarsKey
     ) {
+      this.applyPendingForceSync(accountId);
       return;
     }
 
@@ -62,6 +66,8 @@ export class GoogleCalendarEngineManager {
       calIds: calIdsKey,
       calendars: calendarsKey,
     });
+
+    this.applyPendingForceSync(accountId);
   }
 
   stop(accountId: string): void {
@@ -73,6 +79,7 @@ export class GoogleCalendarEngineManager {
     }
 
     this.state.delete(accountId);
+    this.appliedPendingForceSyncKeys.delete(accountId);
   }
 
   stopAll(): void {
@@ -82,6 +89,7 @@ export class GoogleCalendarEngineManager {
 
     this.engines.clear();
     this.state.clear();
+    this.appliedPendingForceSyncKeys.clear();
   }
 
   removeAccount(accountId: string): void {
@@ -105,13 +113,21 @@ export class GoogleCalendarEngineManager {
   }
 
   async forceSyncAll(options: GCalForceSyncOptions = {}): Promise<void> {
+    this.pendingForceSyncOptions = options;
+
+    if (this.engines.size === 0) return;
+
+    const pendingKey = this.buildForceSyncKey(options);
+
     await Promise.all(
-      Array.from(this.engines.values()).map((engine) => {
+      Array.from(this.engines.entries()).map(async ([accountId, engine]) => {
         if (options.rangeStart && options.rangeEnd) {
-          return engine.forceSyncRange(options);
+          await engine.forceSyncRange(options);
+        } else {
+          await engine.forceSync();
         }
 
-        return engine.forceSync();
+        this.appliedPendingForceSyncKeys.set(accountId, pendingKey);
       }),
     );
   }
@@ -126,6 +142,32 @@ export class GoogleCalendarEngineManager {
 
   getEngine(accountId: string): GoogleCalendarSyncEngine | undefined {
     return this.engines.get(accountId);
+  }
+
+  private applyPendingForceSync(accountId: string): void {
+    const options = this.pendingForceSyncOptions;
+    const engine = this.engines.get(accountId);
+
+    if (!options || !engine) return;
+
+    const pendingKey = this.buildForceSyncKey(options);
+    if (this.appliedPendingForceSyncKeys.get(accountId) === pendingKey) return;
+
+    this.appliedPendingForceSyncKeys.set(accountId, pendingKey);
+
+    if (options.rangeStart && options.rangeEnd) {
+      void engine.forceSyncRange(options);
+      return;
+    }
+
+    void engine.forceSync();
+  }
+
+  private buildForceSyncKey(options: GCalForceSyncOptions): string {
+    return [
+      options.rangeStart?.toISOString() ?? "full",
+      options.rangeEnd?.toISOString() ?? "full",
+    ].join("|");
   }
 
   private buildCalKey(set: Set<string>): string {
