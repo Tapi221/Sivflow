@@ -333,6 +333,12 @@ export const ScheduleScreen = ({
         color: calendar.backgroundColor ?? DEFAULT_TIMELINE_CALENDAR_COLOR,
         checked: account.selectedCalendarIds.has(calendar.id),
         calendarIds: [calendar.id],
+        projectIds: [
+          calendar.id,
+          calendar.summary,
+          calendar.summaryOverride,
+          calendar.description,
+        ].filter((value): value is string => Boolean(value)),
       })),
     );
 
