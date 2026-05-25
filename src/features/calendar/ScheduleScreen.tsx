@@ -321,10 +321,10 @@ export const ScheduleScreen = ({
   }, [activeMode, selectedDate, selectedViewMode]);
 
   const canShowDayDetailPanel =
-    activeMode === "calendar" && selectedViewMode === "month" && canFitDayDetailPanel;
+    activeMode === "calendar" && selectedViewMode === "month";
 
   const showDayDetailPanel =
-    canShowDayDetailPanel && isDayDetailPanelOpen;
+    canShowDayDetailPanel && canFitDayDetailPanel && isDayDetailPanelOpen;
 
   const isDayDetailPanelCollapsed =
     canShowDayDetailPanel && !showDayDetailPanel;
@@ -332,9 +332,9 @@ export const ScheduleScreen = ({
   const isMonthCalendarView =
     activeMode === "calendar" && selectedViewMode === "month";
 
-  const hasTrailingPanel = isMonthCalendarView && !isDayDetailPanelCollapsed;
+  const hasTrailingPanel = showDayDetailPanel;
 
-  const viewHeaderRightPaddingPx = canShowDayDetailPanel
+  const viewHeaderRightPaddingPx = canShowDayDetailPanel && canFitDayDetailPanel
     ? VIEW_HEADER_CONTROLS_RIGHT_INSET_PX
     : 0;
 
@@ -343,20 +343,20 @@ export const ScheduleScreen = ({
     : "日詳細パネルを開く";
 
   const handleToggleDayDetailPanel = useCallback(() => {
-    if (!canShowDayDetailPanel) return;
+    if (!canShowDayDetailPanel || !canFitDayDetailPanel) return;
 
     setIsDayDetailPanelOpen((isOpen) => !isOpen);
-  }, [canShowDayDetailPanel]);
+  }, [canFitDayDetailPanel, canShowDayDetailPanel]);
 
   const handleSidebarSelectDateAndOpen = useCallback(
     (date: Date) => {
       handleSidebarSelectDate(date);
 
-      if (canShowDayDetailPanel) {
+      if (canShowDayDetailPanel && canFitDayDetailPanel) {
         setIsDayDetailPanelOpen(true);
       }
     },
-    [canShowDayDetailPanel, handleSidebarSelectDate],
+    [canFitDayDetailPanel, canShowDayDetailPanel, handleSidebarSelectDate],
   );
 
   const handleMonthCellSelectDateAndOpen = useCallback(
@@ -412,7 +412,7 @@ export const ScheduleScreen = ({
         />
       )}
       overlay={
-        canShowDayDetailPanel ? (
+        canShowDayDetailPanel && canFitDayDetailPanel ? (
           <button
             type="button"
             className={DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS}
