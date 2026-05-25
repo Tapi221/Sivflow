@@ -21,6 +21,8 @@ type TaskStore = {
 const createDemoTask = (
   task: Omit<
     Task,
+    | "description"
+    | "subtasks"
     | "scheduledStart"
     | "scheduledEnd"
     | "googleCalendarId"
@@ -28,6 +30,8 @@ const createDemoTask = (
   >,
 ): Task => ({
   ...task,
+  description: "",
+  subtasks: [],
   scheduledStart: null,
   scheduledEnd: null,
   googleCalendarId: null,
@@ -159,6 +163,8 @@ const DEMO_TASKS: Task[] = [
 
 const normalizeTask = (task: Task): Task => ({
   ...task,
+  description: task.description ?? "",
+  subtasks: Array.isArray(task.subtasks) ? task.subtasks : [],
   scheduledStart: task.scheduledStart ?? null,
   scheduledEnd: task.scheduledEnd ?? null,
   googleCalendarId: task.googleCalendarId ?? null,
@@ -188,6 +194,8 @@ export const useTaskStore = create<TaskStore>()(
               ...data,
               id: `task-${Date.now()}`,
               createdAt: Date.now(),
+              description: data.description ?? "",
+              subtasks: data.subtasks ?? [],
               scheduledStart: data.scheduledStart ?? null,
               scheduledEnd: data.scheduledEnd ?? null,
               googleCalendarId: data.googleCalendarId ?? null,
