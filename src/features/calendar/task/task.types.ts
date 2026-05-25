@@ -2,9 +2,17 @@ export type TaskStatus = "not_started" | "in_progress" | "review" | "done";
 export type TaskPriority = "high" | "medium" | "low";
 export type TaskGroupMode = "status" | "section";
 
+export type TaskSubtask = {
+  id: string;
+  title: string;
+  done: boolean;
+};
+
 export type Task = {
   id: string;
   title: string;
+  description: string;
+  subtasks: TaskSubtask[];
   status: TaskStatus;
   priority: TaskPriority;
   category: string;
@@ -20,6 +28,8 @@ export type Task = {
 
 export type TaskCreateInput = {
   title: string;
+  description?: string;
+  subtasks?: TaskSubtask[];
   status: TaskStatus;
   priority: TaskPriority;
   category: string;
