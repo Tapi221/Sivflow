@@ -4,7 +4,7 @@ import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.deskt
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
-import { CalendarTimelineDayView } from "@/features/calendar/grid/TimelineDayView";
+import { CalendarTimelineDayView, type TimelineLane } from "@/features/calendar/grid/TimelineDayView";
 import { CalendarSidebar } from "@/features/calendar/panel/CalendarSidebar";
 import { DayDetailPanel } from "@/features/calendar/panel/DayDetailPanel";
 import type { AppCalendarItem, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
@@ -26,6 +26,7 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
 
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
+const DEFAULT_TIMELINE_CALENDAR_COLOR = "#74798b";
 const APP_PROJECT_COLORS = [
   "#34c759",
   "#ff3b30",
@@ -248,6 +249,34 @@ export const ScheduleScreen = ({
     return [...googleCalendarEvents, ...taskCalendarEvents];
   }, [googleCalendarEvents, taskCalendarEvents]);
 
+  const timelineLanes = useMemo<TimelineLane[]>(() => {
+    const appProjectLanes = appProjects.map((project) => ({
+      id: project.id,
+      label: project.label,
+      color: project.color,
+      checked: project.checked,
+      projectIds: [project.label],
+    }));
+
+    const googleCalendarLanes = googleAccounts.flatMap((account) =>
+      account.calendars.map((calendar) => ({
+        id: `${account.accountId}:${calendar.id}`,
+        label: calendar.summaryOverride ?? calendar.summary,
+        color: calendar.backgroundColor ?? DEFAULT_TIMELINE_CALENDAR_COLOR,
+        checked: account.selectedCalendarIds.has(calendar.id),
+        calendarIds: [calendar.id],
+        projectIds: [
+          calendar.id,
+          calendar.summary,
+          calendar.summaryOverride,
+          calendar.description,
+        ].filter((value): value is string => Boolean(value)),
+      })),
+    );
+
+    return [...appProjectLanes, ...googleCalendarLanes];
+  }, [appProjects, googleAccounts]);
+
   const sidebarMonthDate =
     selectedViewMode === "month" ? monthTitleDate : titleDate;
 
@@ -434,6 +463,8 @@ export const ScheduleScreen = ({
                 dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
                 laneLabelWidth={C.TIMELINE_LANE_LABEL_WIDTH}
                 rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
+                lanes={timelineLanes}
+                visibleEvents={calendarEvents}
                 scrollContainerRef={scrollContainerRef}
                 onScroll={handleCalendarScroll}
                 onSelectDate={handleTimelineSelectDate}
