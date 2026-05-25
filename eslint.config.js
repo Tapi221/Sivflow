@@ -12,6 +12,12 @@ export default defineConfig([
   globalIgnores(["dist"]),
 
   {
+    linterOptions: {
+      reportUnusedDisableDirectives: "off",
+    },
+  },
+
+  {
     files: ["src/**/*.{ts,tsx}"],
     extends: [
       js.configs.recommended,
