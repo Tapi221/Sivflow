@@ -228,7 +228,6 @@ export const ScheduleScreen = ({
     });
     // allTaskListIdsKey でリストの実質的な変化だけを検知する。
     // 配列参照そのものを依存に入れると、チェック操作ごとに不要な再評価が走りやすい。
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allTaskListIdsKey]);
 
   const handleToggleTaskList = useCallback((taskListId: string) => {
