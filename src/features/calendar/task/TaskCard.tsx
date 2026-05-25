@@ -46,22 +46,23 @@ export const TaskCard = ({
   );
 
   return (
-    <TaskEventChip
-      title={task.title}
-      categoryLabel={category.label}
-      priorityLabel={priority.label}
-      formattedDate={formattedDate}
-      isDone={isDone}
-      checkboxColor={tokens.border}
-      checkboxLabel={checkboxLabel}
-      chipName={chipName}
-      accountPhotoUrl={accountPhotoUrl}
-      tokens={tokens}
-      showAssignee={Boolean(task.assignee)}
-      isDragging={isDragging}
-      onDelete={onDelete ? handleDelete : undefined}
-      onToggleDone={handleToggleDone}
-      onContextMenu={onContextMenu ? (event) => onContextMenu(event, task) : undefined}
-    />
+    <div onContextMenu={onContextMenu ? (event) => onContextMenu(event, task) : undefined}>
+      <TaskEventChip
+        title={task.title}
+        categoryLabel={category.label}
+        priorityLabel={priority.label}
+        formattedDate={formattedDate}
+        isDone={isDone}
+        checkboxColor={tokens.border}
+        checkboxLabel={checkboxLabel}
+        chipName={chipName}
+        accountPhotoUrl={accountPhotoUrl}
+        tokens={tokens}
+        showAssignee={Boolean(task.assignee)}
+        isDragging={isDragging}
+        onDelete={onDelete ? handleDelete : undefined}
+        onToggleDone={handleToggleDone}
+      />
+    </div>
   );
 };
