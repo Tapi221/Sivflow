@@ -21,9 +21,9 @@ const getCalendarDayNumberCircleClassName = ({
   cn(
     CALENDAR_DAY_NUMBER_CIRCLE_CLASS_NAME,
     isToday
-      ? "bg-[#007aff] !text-white shadow-[0_5px_12px_rgba(0,122,255,0.28)]"
+      ? "bg-[#4f4f4f] !text-white shadow-[0_5px_12px_rgba(0,0,0,0.16)]"
       : isSelected
-        ? "bg-[#3f3f3f] !text-white shadow-[0_4px_10px_rgba(63,63,63,0.14)]"
+        ? "bg-[#3f3f3f] !text-white shadow-[0_4px_10px_rgba(0,0,0,0.14)]"
         : isCurrentMonth
           ? "!text-[#666666]"
           : "!text-[#b8b8b8]",
