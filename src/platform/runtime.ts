@@ -1,5 +1,5 @@
-import { hasDesktopBridge } from "./detectDesktopBridge";
+import { hasDesktopBridge, hasDesktopRuntime } from "./detectDesktopBridge";
 
-export { hasDesktopBridge };
+export { hasDesktopBridge, hasDesktopRuntime };
 
-export const isDesktopRuntime = (): boolean => hasDesktopBridge();
+export const isDesktopRuntime = (): boolean => hasDesktopRuntime();
