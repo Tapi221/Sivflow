@@ -19,12 +19,43 @@ import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
 const IOS_CALENDAR_SURFACE_CLASS = "border-transparent bg-white shadow-none";
-const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.94)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
-const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-none";
+
+const IOS_CALENDAR_MONTH_SURFACE_CLASS =
+  "border-transparent bg-[rgba(255,255,255,0.94)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
+
+const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
+  "border-transparent bg-white shadow-none";
+
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const DEFAULT_TIMELINE_CALENDAR_COLOR = "#74798b";
 const MOBILE_TIMELINE_LANE_LABEL_WIDTH = 92;
-const APP_PROJECT_COLORS = ["#34c759", "#ff3b30", "#4f8ce7", "#ffd166", "#9adfe7", "#66a77a", "#9ca3ff"];
+const APP_PROJECT_COLORS = [
+  "#34c759",
+  "#ff3b30",
+  "#4f8ce7",
+  "#ffd166",
+  "#9adfe7",
+  "#66a77a",
+  "#9ca3ff",
+];
+
+const MOBILE_SOURCES_PANEL_CLASS =
+  "mx-3 mb-5 overflow-hidden rounded-[24px] border border-[#eeeeee] bg-white shadow-[0_18px_48px_rgba(15,23,42,0.08)] " +
+  "[&>aside]:h-auto [&>aside]:w-full [&>aside]:overflow-visible [&>aside]:pb-3 [&>aside]:pl-0 [&>aside]:pr-0 [&>aside]:pt-0 " +
+  "[&>aside>section:first-child]:hidden [&>aside>div:first-of-type]:hidden [&>aside>nav]:max-h-[360px] " +
+  "[&>aside>nav]:overflow-y-auto [&>aside>nav]:px-2 [&>aside>nav]:pb-3 [&>aside>nav]:pt-3";
+
+const MOBILE_SCHEDULE_STYLE = `
+  @media (max-width: 767px) {
+    .schedule-mobile-month-surface .calendar-month-view {
+      --calendar-month-row-height: 82px !important;
+    }
+
+    .schedule-mobile-month-surface .calendar-month-row-boundary-resize-handle {
+      display: none !important;
+    }
+  }
+`;
 
 type StoredAppCalendarItem = Partial<AppCalendarItem>;
 
@@ -33,7 +64,9 @@ const createAppProjectId = (): string => {
     return `app-project:${crypto.randomUUID()}`;
   }
 
-  return `app-project:${Date.now().toString(36)}:${Math.random().toString(36).slice(2)}`;
+  return `app-project:${Date.now().toString(36)}:${Math.random()
+    .toString(36)
+    .slice(2)}`;
 };
 
 const readStoredAppProjects = (): AppCalendarItem[] => {
@@ -55,7 +88,10 @@ const readStoredAppProjects = (): AppCalendarItem[] => {
         {
           id: typeof project.id === "string" ? project.id : createAppProjectId(),
           label,
-          color: typeof project.color === "string" ? project.color : APP_PROJECT_COLORS[index % APP_PROJECT_COLORS.length],
+          color:
+            typeof project.color === "string"
+              ? project.color
+              : APP_PROJECT_COLORS[index % APP_PROJECT_COLORS.length],
           checked: typeof project.checked === "boolean" ? project.checked : true,
         },
       ];
@@ -85,29 +121,22 @@ const equalSet = (a: Set<string>, b: Set<string>): boolean => {
   return true;
 };
 
-const MOBILE_SCHEDULE_STYLE = `
-  @media (max-width: 767px) {
-    .schedule-mobile-month-surface .calendar-month-view {
-      --calendar-month-row-height: 82px !important;
-    }
-
-    .schedule-mobile-month-surface .calendar-month-row-boundary-resize-handle {
-      display: none !important;
-    }
-  }
-`;
-
-const MOBILE_SOURCES_PANEL_CLASS = "mx-3 mb-5 overflow-hidden rounded-[24px] border border-[#eeeeee] bg-white shadow-[0_18px_48px_rgba(15,23,42,0.08)] [&>aside]:h-auto [&>aside]:w-full [&>aside]:overflow-visible [&>aside]:pb-3 [&>aside]:pl-0 [&>aside]:pr-0 [&>aside]:pt-0 [&>aside>section:first-child]:hidden [&>aside>div:first-of-type]:hidden [&>aside>nav]:max-h-[360px] [&>aside>nav]:overflow-y-auto [&>aside>nav]:px-2 [&>aside>nav]:pb-3 [&>aside>nav]:pt-3";
-
-export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenProps) => {
+export const ScheduleScreen = ({
+  initialActiveMode,
+  onClose,
+}: ScheduleScreenProps) => {
   const pane = useScheduleScreen({ initialActiveMode });
   const taskCalendarEvents = useTaskCalendarEvents();
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
   const selectedTaskListInitializedRef = useRef(false);
-  const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(readStoredAppProjects);
-  const [selectedTaskListIds, setSelectedTaskListIds] = useState<Set<string>>(() => new Set());
+  const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(
+    readStoredAppProjects,
+  );
+  const [selectedTaskListIds, setSelectedTaskListIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   const deferredSelectedTaskListIds = useDeferredValue(selectedTaskListIds);
 
   const {
@@ -152,11 +181,14 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
     deleteGoogleTask,
   } = pane;
 
-  const viewOptions = useMemo(() => [
-    { value: "month", label: t.viewMonth },
-    { value: "week", label: t.viewWeek },
-    { value: "days", label: t.viewDay },
-  ] as const, [t.viewDay, t.viewMonth, t.viewWeek]);
+  const viewOptions = useMemo(
+    () => [
+      { value: "month", label: t.viewMonth },
+      { value: "week", label: t.viewWeek },
+      { value: "days", label: t.viewDay },
+    ] as const,
+    [t.viewDay, t.viewMonth, t.viewWeek],
+  );
 
   useEffect(() => {
     persistAppProjects(appProjects);
@@ -167,10 +199,18 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
     if (!trimmedProjectName) return;
 
     setAppProjects((projects) => {
-      const duplicateProject = projects.find((project) => project.label.trim().toLowerCase() === trimmedProjectName.toLowerCase());
+      const duplicateProject = projects.find(
+        (project) =>
+          project.label.trim().toLowerCase() ===
+          trimmedProjectName.toLowerCase(),
+      );
 
       if (duplicateProject) {
-        return projects.map((project) => project.id === duplicateProject.id ? { ...project, checked: true } : project);
+        return projects.map((project) =>
+          project.id === duplicateProject.id
+            ? { ...project, checked: true }
+            : project,
+        );
       }
 
       return [
@@ -186,10 +226,22 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
   }, []);
 
   const handleToggleAppProject = useCallback((projectId: string) => {
-    setAppProjects((projects) => projects.map((project) => project.id === projectId ? { ...project, checked: !project.checked } : project));
+    setAppProjects((projects) =>
+      projects.map((project) =>
+        project.id === projectId
+          ? { ...project, checked: !project.checked }
+          : project,
+      ),
+    );
   }, []);
 
-  const allTaskListIds = useMemo(() => googleAccounts.flatMap((account) => account.taskLists.map((taskList) => taskList.id)), [googleAccounts]);
+  const allTaskListIds = useMemo(
+    () =>
+      googleAccounts.flatMap((account) =>
+        account.taskLists.map((taskList) => taskList.id),
+      ),
+    [googleAccounts],
+  );
   const allTaskListIdsKey = allTaskListIds.join("\t");
 
   useEffect(() => {
@@ -206,12 +258,13 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
         return availableTaskListIds;
       }
 
-      const nextIds = new Set(Array.from(ids).filter((id) => availableTaskListIds.has(id)));
+      const nextIds = new Set(
+        Array.from(ids).filter((id) => availableTaskListIds.has(id)),
+      );
       return equalSet(ids, nextIds) ? ids : nextIds;
     });
     // allTaskListIdsKey でリストの実質的な変化だけを検知する。
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allTaskListIdsKey]);
+  }, [allTaskListIds, allTaskListIdsKey]);
 
   const handleToggleTaskList = useCallback((taskListId: string) => {
     setSelectedTaskListIds((ids) => {
@@ -240,19 +293,28 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
       projectIds: [project.label],
     }));
 
-    const googleCalendarLanes = googleAccounts.flatMap((account) => account.calendars.map((calendar) => ({
-      id: `${account.accountId}:${calendar.id}`,
-      label: calendar.summaryOverride ?? calendar.summary,
-      color: calendar.backgroundColor ?? DEFAULT_TIMELINE_CALENDAR_COLOR,
-      checked: account.selectedCalendarIds.has(calendar.id),
-      calendarIds: [calendar.id],
-      projectIds: [calendar.id, calendar.summary, calendar.summaryOverride, calendar.description].filter((value): value is string => Boolean(value)),
-    })));
+    const googleCalendarLanes = googleAccounts.flatMap((account) =>
+      account.calendars.map((calendar) => ({
+        id: `${account.accountId}:${calendar.id}`,
+        label: calendar.summaryOverride ?? calendar.summary,
+        color: calendar.backgroundColor ?? DEFAULT_TIMELINE_CALENDAR_COLOR,
+        checked: account.selectedCalendarIds.has(calendar.id),
+        calendarIds: [calendar.id],
+        projectIds: [
+          calendar.id,
+          calendar.summary,
+          calendar.summaryOverride,
+          calendar.description,
+        ].filter((value): value is string => Boolean(value)),
+      })),
+    );
 
     return [...appProjectLanes, ...googleCalendarLanes];
   }, [appProjects, googleAccounts]);
 
-  const sidebarMonthDate = selectedViewMode === "month" ? monthTitleDate : titleDate;
+  const sidebarMonthDate =
+    selectedViewMode === "month" ? monthTitleDate : titleDate;
+
   const sidebarSelectedRange = useMemo(() => {
     if (activeMode !== "timeline") return null;
 
@@ -273,41 +335,70 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
     return null;
   }, [activeMode, selectedDate, selectedViewMode]);
 
-  const isMonthCalendarView = activeMode === "calendar" && selectedViewMode === "month";
-  const headerTitleDate = selectedViewMode === "month" ? monthTitleDate : titleDate;
+  const isMonthCalendarView =
+    activeMode === "calendar" && selectedViewMode === "month";
+  const headerTitleDate =
+    selectedViewMode === "month" ? monthTitleDate : titleDate;
 
-  const handleSelectDate = useCallback((date: Date) => {
-    if (activeMode === "timeline") {
-      handleTimelineSelectDate(date);
-      return;
-    }
+  const handleSelectDate = useCallback(
+    (date: Date) => {
+      if (activeMode === "timeline") {
+        handleTimelineSelectDate(date);
+        return;
+      }
 
-    if (selectedViewMode === "month") {
-      handleMonthCellSelectDate(date);
-      return;
-    }
+      if (selectedViewMode === "month") {
+        handleMonthCellSelectDate(date);
+        return;
+      }
 
-    handleSidebarSelectDate(date);
-  }, [activeMode, handleMonthCellSelectDate, handleSidebarSelectDate, handleTimelineSelectDate, selectedViewMode]);
+      handleSidebarSelectDate(date);
+    },
+    [
+      activeMode,
+      handleMonthCellSelectDate,
+      handleSidebarSelectDate,
+      handleTimelineSelectDate,
+      selectedViewMode,
+    ],
+  );
 
   const renderViewHeader = (className: string) => {
     return (
       <div className={className}>
         <div className="flex min-w-0 items-center gap-2">
-          <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]" onClick={handlePrevious} aria-label={t.previousLabel}>
+          <button
+            type="button"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]"
+            onClick={handlePrevious}
+            aria-label={t.previousLabel}
+          >
             ‹
           </button>
           <h1 className="truncate text-[19px] font-bold tracking-[-0.03em] text-[#1c1c1e]">
             {format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale })}
           </h1>
-          <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]" onClick={handleNext} aria-label={t.nextLabel}>
+          <button
+            type="button"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#b7b7b7] transition hover:bg-[#f7f7f7] hover:text-[#6e6e73]"
+            onClick={handleNext}
+            aria-label={t.nextLabel}
+          >
             ›
           </button>
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <ViewModeDropdown value={selectedViewMode} onChange={handleSelectViewMode} options={viewOptions} />
-          <TodayBar onPrevious={handlePrevious} onNext={handleNext} onToday={handleToday} />
+          <ViewModeDropdown
+            value={selectedViewMode}
+            onChange={handleSelectViewMode}
+            options={viewOptions}
+          />
+          <TodayBar
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            onToday={handleToday}
+          />
         </div>
       </div>
     );
@@ -317,7 +408,15 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
     if (activeMode === "task") {
       return (
         <CarvePanel className="mx-3 min-h-[calc(100dvh-250px)] rounded-[24px] border-[#eeeeee]">
-          <TaskView googleAccounts={googleAccounts} selectedTaskListIds={deferredSelectedTaskListIds} onRefreshGoogleTasks={refreshGoogleTasks} onCreateGoogleTask={createGoogleTask} onUpdateGoogleTask={updateGoogleTask} onMoveGoogleTaskList={moveGoogleTaskList} onDeleteGoogleTask={deleteGoogleTask} />
+          <TaskView
+            googleAccounts={googleAccounts}
+            selectedTaskListIds={deferredSelectedTaskListIds}
+            onRefreshGoogleTasks={refreshGoogleTasks}
+            onCreateGoogleTask={createGoogleTask}
+            onUpdateGoogleTask={updateGoogleTask}
+            onMoveGoogleTaskList={moveGoogleTaskList}
+            onDeleteGoogleTask={deleteGoogleTask}
+          />
         </CarvePanel>
       );
     }
@@ -326,8 +425,21 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
       return (
         <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">
           {renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}
-          <div className={cn("schedule-mobile-month-surface mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border", IOS_CALENDAR_MONTH_SURFACE_CLASS)}>
-            <CalendarMonthView currentDate={currentDate} selectedDate={selectedDate} scrollTargetToken={monthScrollTargetToken} visibleEvents={calendarEvents} onSelectDate={handleSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onRenderedRangeChange={handleMonthRenderedRangeChange} />
+          <div
+            className={cn(
+              "schedule-mobile-month-surface mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border",
+              IOS_CALENDAR_MONTH_SURFACE_CLASS,
+            )}
+          >
+            <CalendarMonthView
+              currentDate={currentDate}
+              selectedDate={selectedDate}
+              scrollTargetToken={monthScrollTargetToken}
+              visibleEvents={calendarEvents}
+              onSelectDate={handleSelectDate}
+              onVisibleMonthChange={handleVisibleMonthChange}
+              onRenderedRangeChange={handleMonthRenderedRangeChange}
+            />
           </div>
         </CarvePanel>
       );
@@ -336,11 +448,42 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
     return (
       <CarvePanel className="mx-3 min-h-0 rounded-[24px] border-[#eeeeee]">
         {renderViewHeader("flex shrink-0 flex-col gap-3 px-4 pb-3 pt-4")}
-        <div className={cn("mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border", activeMode === "timeline" ? IOS_CALENDAR_SURFACE_CLASS : IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}>
+        <div
+          className={cn(
+            "mx-0 flex h-[586px] min-h-0 flex-col overflow-hidden rounded-[20px] border",
+            activeMode === "timeline"
+              ? IOS_CALENDAR_SURFACE_CLASS
+              : IOS_CALENDAR_WEEKDAY_SURFACE_CLASS,
+          )}
+        >
           {activeMode === "timeline" ? (
-            <CalendarTimelineDayView viewMode={selectedViewMode} anchorDate={currentDate} timelineUnitBuffer={timelineUnitBuffer} selectedDate={selectedDate} dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH} laneLabelWidth={MOBILE_TIMELINE_LANE_LABEL_WIDTH} rowCount={C.TIMELINE_SKELETON_ROW_COUNT} lanes={timelineLanes} visibleEvents={calendarEvents} scrollContainerRef={scrollContainerRef} onScroll={handleCalendarScroll} onSelectDate={handleTimelineSelectDate} />
+            <CalendarTimelineDayView
+              viewMode={selectedViewMode}
+              anchorDate={currentDate}
+              timelineUnitBuffer={timelineUnitBuffer}
+              selectedDate={selectedDate}
+              dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
+              laneLabelWidth={MOBILE_TIMELINE_LANE_LABEL_WIDTH}
+              rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
+              lanes={timelineLanes}
+              visibleEvents={calendarEvents}
+              scrollContainerRef={scrollContainerRef}
+              onScroll={handleCalendarScroll}
+              onSelectDate={handleTimelineSelectDate}
+            />
           ) : (
-            <CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={calendarEvents} calendarDayColumnWidth={calendarDayColumnWidth} timelineGridStyle={timelineGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} />
+            <CalendarWeekDayGrid
+              headerScrollRef={headerScrollRef}
+              allDayScrollRef={allDayScrollRef}
+              scrollContainerRef={scrollContainerRef}
+              visibleDays={visibleDays}
+              visibleEvents={calendarEvents}
+              calendarDayColumnWidth={calendarDayColumnWidth}
+              timelineGridStyle={timelineGridStyle}
+              onScroll={handleCalendarScroll}
+              selectedDate={selectedDate}
+              onSelectDate={handleSidebarSelectDate}
+            />
           )}
         </div>
       </CarvePanel>
@@ -348,26 +491,46 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
   };
 
   return (
-    <div ref={contentViewportRef} className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]">
+    <div
+      ref={contentViewportRef}
+      className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]"
+    >
       <style>{MOBILE_SCHEDULE_STYLE}</style>
 
       <header className="shrink-0 bg-[linear-gradient(180deg,#08111f_0%,#0b1a3a_58%,#071124_100%)] px-4 pb-4 pt-[calc(env(safe-area-inset-top)+14px)] text-white shadow-[0_12px_28px_rgba(4,10,24,0.22)]">
         <div className="flex h-11 items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <button type="button" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/82 transition hover:bg-white/10" aria-label="メニュー">
+            <button
+              type="button"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/82 transition hover:bg-white/10"
+              aria-label="メニュー"
+            >
               <SidebarPanelIcon className="h-5 w-5" />
             </button>
             <CalendarIcon className="h-5 w-5 shrink-0 text-white/82" />
-            <h1 className="truncate text-[20px] font-bold tracking-[-0.03em]">スケジュール</h1>
+            <h1 className="truncate text-[20px] font-bold tracking-[-0.03em]">
+              スケジュール
+            </h1>
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
             {onClose ? (
-              <button type="button" className="rounded-full border border-white/15 px-3 py-1.5 text-[12px] font-semibold text-white/86" onClick={onClose}>
+              <button
+                type="button"
+                className="rounded-full border border-white/15 px-3 py-1.5 text-[12px] font-semibold text-white/86"
+                onClick={onClose}
+              >
                 Close
               </button>
             ) : null}
-            <button type="button" className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-[13px] font-bold text-white/86" onClick={() => { void addGoogleCalendar(); }} aria-label={t.addGoogleCalendar}>
+            <button
+              type="button"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-[13px] font-bold text-white/86"
+              onClick={() => {
+                void addGoogleCalendar();
+              }}
+              aria-label={t.addGoogleCalendar}
+            >
               A
             </button>
           </div>
@@ -375,7 +538,14 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
       </header>
 
       <div className="shrink-0 rounded-t-[22px] border-b border-[#eeeeee] bg-white px-3 py-2 shadow-[0_-1px_0_rgba(255,255,255,0.9),0_6px_18px_rgba(15,23,42,0.07)] [&_.calendar-workspace-toolbar]:h-11 [&_.calendar-workspace-toolbar]:overflow-visible [&_.calendar-workspace-toolbar]:bg-transparent [&_.calendar-workspace-toolbar]:pr-0">
-        <CalendarWorkspaceToolbar activeMode={activeMode} viewMode={selectedViewMode} onSelectCalendar={() => setActiveMode("calendar")} onSelectTimeline={() => setActiveMode("timeline")} onSelectTask={() => setActiveMode("task")} onSelectViewMode={handleSelectViewMode} />
+        <CalendarWorkspaceToolbar
+          activeMode={activeMode}
+          viewMode={selectedViewMode}
+          onSelectCalendar={() => setActiveMode("calendar")}
+          onSelectTimeline={() => setActiveMode("timeline")}
+          onSelectTask={() => setActiveMode("task")}
+          onSelectViewMode={handleSelectViewMode}
+        />
       </div>
 
       <main className="min-h-0 flex-1 overflow-y-auto bg-white pb-[calc(env(safe-area-inset-bottom)+16px)] pt-3">
@@ -383,7 +553,27 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
           {renderCalendarContent()}
 
           <section className={MOBILE_SOURCES_PANEL_CLASS}>
-            <CalendarSidebar monthDate={sidebarMonthDate} selectedDate={selectedDate} selectedRange={sidebarSelectedRange} activeMode={activeMode} appProjects={appProjects} googleAccounts={googleAccounts} isAnyCalendarConnecting={isAnyCalendarConnecting} selectedTaskListIds={selectedTaskListIds} onSelectDate={handleSelectDate} onPreviousMonth={handleSidebarPreviousMonth} onNextMonth={handleSidebarNextMonth} onAddCalendar={addGoogleCalendar} onAddProject={handleAddAppProject} onToggleProject={handleToggleAppProject} onReconnectAccount={(accountId) => { void reconnectGoogleAccount(accountId); }} onToggleCalendar={toggleGoogleCalendar} onToggleTaskList={handleToggleTaskList} />
+            <CalendarSidebar
+              monthDate={sidebarMonthDate}
+              selectedDate={selectedDate}
+              selectedRange={sidebarSelectedRange}
+              activeMode={activeMode}
+              appProjects={appProjects}
+              googleAccounts={googleAccounts}
+              isAnyCalendarConnecting={isAnyCalendarConnecting}
+              selectedTaskListIds={selectedTaskListIds}
+              onSelectDate={handleSelectDate}
+              onPreviousMonth={handleSidebarPreviousMonth}
+              onNextMonth={handleSidebarNextMonth}
+              onAddCalendar={addGoogleCalendar}
+              onAddProject={handleAddAppProject}
+              onToggleProject={handleToggleAppProject}
+              onReconnectAccount={(accountId) => {
+                void reconnectGoogleAccount(accountId);
+              }}
+              onToggleCalendar={toggleGoogleCalendar}
+              onToggleTaskList={handleToggleTaskList}
+            />
           </section>
         </div>
       </main>
