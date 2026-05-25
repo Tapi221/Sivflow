@@ -64,7 +64,7 @@ export const DayDetailPanel = ({
     <aside className="flex w-[260px] shrink-0 flex-col overflow-hidden bg-transparent">
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         <div className="flex border-b border-[#f5f5f5]">
-          <div className="flex w-16 shrink-0 justify-end pr-4 pt-[8px]">
+          <div className="flex w-12 shrink-0 justify-end pr-2 pt-[8px]">
             <span className="text-[10px] font-medium tracking-[-0.01em] text-[rgba(60,60,67,0.45)]">終日</span>
           </div>
 
