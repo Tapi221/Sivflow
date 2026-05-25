@@ -1,4 +1,4 @@
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useMemo, useRef, useState } from "react";
 import { addDays, format, isSameDay, startOfDay, startOfMonth, startOfWeek } from "date-fns";
 
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
@@ -20,6 +20,7 @@ const SIDEBAR_DIVIDER_CLASS = "h-px w-full shrink-0 bg-[#eeeeee]";
 const MINI_CALENDAR_NAV_BUTTON_CLASS_NAME =
   "flex h-7 w-7 items-center justify-center rounded-full text-[#b7b7b7] transition-all hover:bg-[#f7f7f7] hover:text-[#8c8c8c] active:scale-[0.94] active:bg-[#f1f1f1]";
 const GOOGLE_ACCOUNT_CHILD_TEXT_PADDING_CLASS_NAME = "px-5";
+const ADD_PROJECT_EMPTY_MESSAGE = "プロジェクト名を入力してください";
 
 const normalizeCalendarLabel = (value?: string | null): string =>
   (value ?? "")
@@ -177,18 +178,34 @@ const AppProjectsSection = ({
   onAddProject,
   onToggleProject,
 }: AppProjectsSectionProps) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [projectName, setProjectName] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleAddProject = () => {
     const trimmedProjectName = projectName.trim();
-    if (!trimmedProjectName) return;
+
+    if (!trimmedProjectName) {
+      setAddError(ADD_PROJECT_EMPTY_MESSAGE);
+      inputRef.current?.focus();
+      return;
+    }
 
     onAddProject(trimmedProjectName);
     setProjectName("");
+    setAddError(null);
     setIsAdding(false);
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    handleAddProject();
+  };
+
+  const handleStartAdding = () => {
+    setIsAdding(true);
+    setAddError(null);
   };
 
   return (
@@ -205,30 +222,50 @@ const AppProjectsSection = ({
       ))}
 
       {isAdding ? (
-        <form
-          className="mx-2 ml-5 mt-1 flex h-7 items-center gap-1.5"
-          onSubmit={handleSubmit}
-        >
-          <input
-            value={projectName}
-            onChange={(event) => setProjectName(event.target.value)}
-            autoFocus
-            placeholder="プロジェクト名"
-            className="min-w-0 flex-1 rounded-full border border-[#e6e6e6] bg-white px-3 py-1 text-[12px] font-medium text-[#2f2f2f] outline-none transition focus:border-[#d7d7d7] focus:ring-2 focus:ring-[#f2f2f2]"
-          />
-          <button
-            type="submit"
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4f4f4] text-[#6d7380] transition hover:bg-[#ececec] active:scale-[0.94]"
-            aria-label="プロジェクトを追加"
+        <div className="mx-2 ml-5 mt-1 flex flex-col gap-1">
+          <form
+            className="flex h-7 items-center gap-1.5"
+            onSubmit={handleSubmit}
           >
-            <IconPlus className="h-3.5 w-3.5" />
-          </button>
-        </form>
+            <input
+              ref={inputRef}
+              value={projectName}
+              onChange={(event) => {
+                setProjectName(event.target.value);
+                if (addError) setAddError(null);
+              }}
+              autoFocus
+              placeholder="プロジェクト名"
+              aria-label="プロジェクト名"
+              aria-invalid={Boolean(addError)}
+              aria-describedby={addError ? "app-project-add-error" : undefined}
+              className={cn(
+                "min-w-0 flex-1 rounded-full bg-white px-3 py-1 text-[12px] font-medium text-[#2f2f2f] outline-none transition focus:ring-2",
+                addError
+                  ? "border border-[#e08b8b] focus:border-[#e08b8b] focus:ring-[#f9e8e8]"
+                  : "border border-[#e6e6e6] focus:border-[#d7d7d7] focus:ring-[#f2f2f2]",
+              )}
+            />
+            <button
+              type="button"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4f4f4] text-[#6d7380] transition hover:bg-[#ececec] active:scale-[0.94]"
+              aria-label="プロジェクトを追加"
+              onClick={handleAddProject}
+            >
+              <IconPlus className="h-3.5 w-3.5" />
+            </button>
+          </form>
+          {addError && (
+            <p id="app-project-add-error" className="px-3 text-[10px] font-semibold text-[#c25f5f]">
+              {addError}
+            </p>
+          )}
+        </div>
       ) : (
         <button
           type="button"
           className="mx-2 ml-5 mt-1 flex h-7 items-center gap-2 rounded-[10px] px-2 text-left text-[12px] font-medium text-[#8c8c8c] transition hover:bg-[#f7f7f7] hover:text-[#5f6574] active:bg-[#f1f1f1]"
-          onClick={() => setIsAdding(true)}
+          onClick={handleStartAdding}
         >
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f4f4f4] text-[#8c8c8c]">
             <IconPlus className="h-3.5 w-3.5" />
