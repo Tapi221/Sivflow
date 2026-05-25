@@ -7,6 +7,7 @@ type WorkspaceTabDndListProps = {
   orderedTabs: WorkspaceTab[];
   onReorderTabs: (nextTabs: WorkspaceTab[]) => void;
   className?: string;
+  style?: CSSProperties;
   children: ReactNode;
 };
 
@@ -28,6 +29,7 @@ export const WorkspaceTabDndList = ({
   orderedTabs,
   onReorderTabs,
   className,
+  style,
   children,
 }: WorkspaceTabDndListProps) => {
   return (
@@ -38,6 +40,7 @@ export const WorkspaceTabDndList = ({
       values={orderedTabs}
       onReorder={onReorderTabs}
       className={className}
+      style={style}
     >
       {children}
     </Reorder.Group>
