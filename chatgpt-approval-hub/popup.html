@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChatGPT Approval Hub</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Approval Hub</h1>
+        <p>ChatGPTタブの承認待ちをまとめて表示します。</p>
+      </div>
+      <button id="refresh" type="button">更新</button>
+    </header>
+
+    <main id="list" aria-live="polite"></main>
+
+    <footer>
+      <button id="approveSelected" type="button">選択したものを承認</button>
+      <span id="status"></span>
+    </footer>
+
+    <template id="emptyTemplate">
+      <section class="empty">
+        <strong>承認待ちはありません</strong>
+        <p>ChatGPTタブで承認カードが表示されたら、更新を押してください。</p>
+      </section>
+    </template>
+
+    <template id="approvalTemplate">
+      <article class="card">
+        <label class="row">
+          <input class="select" type="checkbox" checked />
+          <div class="summary">
+            <h2 class="title"></h2>
+            <p class="meta"></p>
+          </div>
+        </label>
+        <p class="preview"></p>
+        <div class="actions">
+          <button class="openTab" type="button">タブを開く</button>
+          <button class="approve" type="button">承認</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
