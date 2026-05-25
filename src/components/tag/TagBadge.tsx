@@ -30,7 +30,7 @@ export const TagBadge = ({
 
   const content = (
     <>
-      <span className={cn("truncate", textClassName)}>{displayLabel}</span>
+      <span className={cn("min-w-0 truncate", textClassName)}>{displayLabel}</span>
       {onRemove && (
         <button
           type="button"
@@ -48,7 +48,7 @@ export const TagBadge = ({
   );
 
   const rootClassName = cn(
-    "ds-tag-badge inline-flex max-w-full items-center align-middle",
+    "ds-tag-badge inline-flex min-w-0 max-w-full items-center align-middle",
     onClick &&
       "cursor-pointer focus-visible:outline-none focus-visible:ring-[var(--ds-semantic-tag-focus-ring-width)] focus-visible:ring-primary-500/40",
     className,

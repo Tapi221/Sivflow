@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode, RefObject } from "react";
-import { TabsBar } from "@/features/tab/TabsBar";
+import { WorkspaceTabsBar } from "@/features/tab/TabsBar";
+import { isDesktopRuntime } from "@/platform/runtime";
 import { WorkspaceBreadcrumbBar } from "./WorkspaceBreadcrumbBar";
 
 type WorkspaceShellProps = {
@@ -17,11 +18,22 @@ export const WorkspaceShell = ({
   isScrollLocked,
   mainRef,
 }: WorkspaceShellProps) => {
+  const showTabs = isDesktopRuntime();
+
   return (
-    <div className="workspace-shell app-layout__content workspace-shell--with-tabs">
-      <div className="workspace-shell__tabs" style={tabsBackgroundStyle}>
-        <TabsBar />
-      </div>
+    <div
+      className={[
+        "workspace-shell app-layout__content",
+        showTabs ? "workspace-shell--with-tabs" : "workspace-shell--without-tabs",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {showTabs ? (
+        <div className="workspace-shell__tabs" style={tabsBackgroundStyle}>
+          <WorkspaceTabsBar />
+        </div>
+      ) : null}
       <WorkspaceBreadcrumbBar hideCrumbs />
 
       <main

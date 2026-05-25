@@ -6,6 +6,10 @@ import type { WorkspaceExplorerTab } from "@/features/tab/Tab";
 
 const SETTINGS_ROUTE_TAB_ID = "route:settings" as const;
 
+type UseWorkspaceTabsRouteSyncOptions = {
+  enabled?: boolean;
+};
+
 const normalizeQuery = (search: string) => {
   const params = new URLSearchParams(
     search.startsWith("?") ? search.slice(1) : search,
@@ -50,10 +54,16 @@ const resolveExplorerTabIdBySearch = (
   return null;
 };
 
-export const useWorkspaceTabsRouteSync = () => {
+export const useWorkspaceTabsRouteSync = ({
+  enabled = true,
+}: UseWorkspaceTabsRouteSyncOptions = {}) => {
   const location = useLocation();
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     const pathname = location.pathname.toLowerCase();
     const searchParams = new URLSearchParams(location.search);
     const normalizedSearch = normalizeQuery(location.search);
@@ -170,5 +180,5 @@ export const useWorkspaceTabsRouteSync = () => {
     if (activeTabId !== nextTabId) {
       selectTab(nextTabId);
     }
-  }, [location.pathname, location.search]);
+  }, [enabled, location.pathname, location.search]);
 };
