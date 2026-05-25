@@ -83,7 +83,18 @@ const isWorkspaceTab = (value: unknown): value is WorkspaceTab => {
 const normalizeTabs = (tabs: unknown): WorkspaceTab[] => {
   if (!Array.isArray(tabs)) return [];
 
-  return tabs.filter(isWorkspaceTab);
+  const normalizedTabs: WorkspaceTab[] = [];
+  const usedTabIds = new Set<WorkspaceTab["id"]>();
+
+  for (const tab of tabs) {
+    if (!isWorkspaceTab(tab)) continue;
+    if (usedTabIds.has(tab.id)) continue;
+
+    usedTabIds.add(tab.id);
+    normalizedTabs.push(tab);
+  }
+
+  return normalizedTabs;
 };
 
 const normalizeWorkspaceTabsState = (
@@ -159,15 +170,22 @@ const upsertTab = (
   tabs: WorkspaceTab[],
   nextTab: WorkspaceTab,
 ): WorkspaceTab[] => {
-  const existingIndex = tabs.findIndex((tab) => tab.id === nextTab.id);
+  let didReplace = false;
 
-  if (existingIndex === -1) {
-    return [...tabs, nextTab];
-  }
+  const nextTabs = tabs.flatMap((tab) => {
+    if (tab.id !== nextTab.id) {
+      return [tab];
+    }
 
-  const nextTabs = [...tabs];
-  nextTabs[existingIndex] = nextTab;
-  return nextTabs;
+    if (didReplace) {
+      return [];
+    }
+
+    didReplace = true;
+    return [nextTab];
+  });
+
+  return didReplace ? nextTabs : [...tabs, nextTab];
 };
 
 const reorderTabsByIds = (
@@ -205,7 +223,10 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>()(
         const existing = get().tabs.find((tab) => tab.id === id);
 
         if (existing?.kind === "explorer") {
-          set({ activeTabId: existing.id });
+          set((state) => ({
+            tabs: upsertTab(state.tabs, existing),
+            activeTabId: existing.id,
+          }));
           return existing.id;
         }
 
@@ -252,7 +273,10 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>()(
         const existing = get().tabs.find((tab) => tab.id === id);
 
         if (existing) {
-          set({ activeTabId: id });
+          set((state) => ({
+            tabs: upsertTab(state.tabs, existing),
+            activeTabId: id,
+          }));
           return id;
         }
 
@@ -280,7 +304,10 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>()(
         const existing = get().tabs.find((tab) => tab.id === id);
 
         if (existing) {
-          set({ activeTabId: id });
+          set((state) => ({
+            tabs: upsertTab(state.tabs, existing),
+            activeTabId: id,
+          }));
           return id;
         }
 
@@ -317,7 +344,10 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>()(
         const existing = get().tabs.find((tab) => tab.id === nextRouteTab.id);
 
         if (existing?.kind === "route") {
-          set({ activeTabId: existing.id });
+          set((state) => ({
+            tabs: upsertTab(state.tabs, existing),
+            activeTabId: existing.id,
+          }));
           return existing.id;
         }
 
@@ -362,7 +392,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>()(
 
       reorderTabs: (nextTabs) => {
         set((state) => {
-          const reorderedTabs = reorderTabsByIds(state.tabs, nextTabs);
+          const reorderedTabs = reorderTabsByIds(state.tabs, normalizeTabs(nextTabs));
 
           if (!reorderedTabs) return state;
 
@@ -413,7 +443,7 @@ export const useWorkspaceTabsStore = create<WorkspaceTabsState>()(
       name: WEB_STORAGE_KEYS.workspaceTabs,
       storage: createJSONStorage(() => localStorage),
       partialize: (state): WorkspaceTabsPersistedState => ({
-        tabs: state.tabs,
+        tabs: normalizeTabs(state.tabs),
         activeTabId: state.activeTabId,
         lastOpenedTabId: state.lastOpenedTabId,
       }),
