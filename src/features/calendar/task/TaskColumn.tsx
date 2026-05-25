@@ -1,6 +1,6 @@
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { motion } from "framer-motion";
-import { type MouseEvent as ReactMouseEvent } from "react";
+import { useMemo, type MouseEvent as ReactMouseEvent } from "react";
 
 import { TaskStatusDot } from "@/chip/icon/TaskStatusDot";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -145,7 +145,14 @@ export const TaskColumn = ({
       ? statusLabelMap[column.id]
       : column.label;
   const isDragActive = activeTaskId !== null && activeTaskId !== undefined;
-  const nonActiveTasks = tasks.filter((task) => task.id !== activeTaskId);
+  const taskIds = useMemo(() => tasks.map((task) => task.id), [tasks]);
+  const nonActiveTasks = useMemo(
+    () => tasks.filter((task) => task.id !== activeTaskId),
+    [activeTaskId, tasks],
+  );
+  const nonActiveTaskInsertIndexById = useMemo(() => {
+    return new Map(nonActiveTasks.map((task, index) => [task.id, index + 1]));
+  }, [nonActiveTasks]);
   const activeInsertIndex =
     activeDropTarget?.columnId === column.id ? activeDropTarget.insertIndex : null;
 
@@ -189,7 +196,7 @@ export const TaskColumn = ({
       <ScrollArea className="-mr-3 min-h-0 flex-1 overscroll-contain">
         <SortableContext
           id={column.id}
-          items={tasks.map((task) => task.id)}
+          items={taskIds}
           strategy={verticalListSortingStrategy}
         >
           <div
@@ -209,7 +216,7 @@ export const TaskColumn = ({
               const isActiveTask = task.id === activeTaskId;
               const insertIndex = isActiveTask
                 ? -1
-                : nonActiveTasks.findIndex((nonActiveTask) => nonActiveTask.id === task.id) + 1;
+                : nonActiveTaskInsertIndexById.get(task.id) ?? -1;
               const isLastTask = insertIndex === nonActiveTasks.length;
 
               return (
