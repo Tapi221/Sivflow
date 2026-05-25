@@ -967,7 +967,11 @@ export const useMultiAccountGoogleCalendar = () => {
       const result = useServerStoredTokens
         ? await (async () => {
           const { code, redirectUri } = await requestGoogleCalendarServerCode(auth);
-          return exchangeGoogleCalendarCode({ code, redirectUri });
+          return exchangeGoogleCalendarCode({
+            code,
+            forceRefreshToken: Boolean(replaceAccountId),
+            redirectUri,
+          });
         })()
         : await requestCalendarAccessToken(auth);
       const list = await fetchCalendarList(result.accessToken);
@@ -1007,9 +1011,9 @@ export const useMultiAccountGoogleCalendar = () => {
       const refreshToken = useServerStoredTokens
         ? null
         : result.refreshToken ??
-          existingAccount?.refreshToken ??
-          storedAccount?.refreshToken ??
-          null;
+          (replaceAccountId
+            ? null
+            : existingAccount?.refreshToken ?? storedAccount?.refreshToken ?? null);
       const entry: GoogleAccountEntry = {
         id: accountId,
         email: result.accountEmail ?? existingAccount?.email ?? null,

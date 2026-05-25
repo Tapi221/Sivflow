@@ -116,7 +116,7 @@ export const fetchGoogleTaskLists = async (
   let pageToken: string | undefined;
 
   do {
-    const params = new URLSearchParams({ maxResults: "100" });
+    const params = new URLSearchParams({ maxResults: "1000" });
 
     if (pageToken) {
       params.set("pageToken", pageToken);
@@ -129,10 +129,10 @@ export const fetchGoogleTaskLists = async (
 
     taskLists.push(
       ...(data.items ?? [])
-        .filter((item) => item.id && item.title)
+        .filter((item) => item.id)
         .map((item) => ({
           id: item.id!,
-          title: item.title!,
+          title: item.title?.trim() || "Google ToDo",
           updated: item.updated,
         })),
     );

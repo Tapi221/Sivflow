@@ -16,6 +16,7 @@ type ServerGoogleCalendarAccess = GoogleCalendarAccess & {
 
 type ExchangeGoogleCalendarCodeInput = {
   code: string;
+  forceRefreshToken?: boolean;
   redirectUri: string;
 };
 

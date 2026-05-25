@@ -138,7 +138,11 @@ export const exchangeGoogleCalendarCode = onCall(
   },
   async (request) => {
     const uid = requireUid(request);
-    const { code, redirectUri } = request.data as { code?: string; redirectUri?: string };
+    const { code, forceRefreshToken, redirectUri } = request.data as {
+      code?: string;
+      forceRefreshToken?: boolean;
+      redirectUri?: string;
+    };
     if (!code || !redirectUri) throw new HttpsError("invalid-argument", "code and redirectUri are required.");
 
     const token = await exchangeToken(
@@ -166,14 +170,17 @@ export const exchangeGoogleCalendarCode = onCall(
       | { encryptedRefreshToken?: string; createdAt?: unknown }
       | undefined;
 
-    if (!refreshToken && !existingData?.encryptedRefreshToken) {
+    if (!refreshToken && (forceRefreshToken || !existingData?.encryptedRefreshToken)) {
       console.error("[GoogleCalendarOAuth] refresh token missing with no stored fallback", {
+        forceRefreshToken: Boolean(forceRefreshToken),
         uid,
         accountId,
       });
       throw new HttpsError(
         "failed-precondition",
-        "Google did not return a refresh token and no stored refresh token exists.",
+        forceRefreshToken
+          ? "Google did not return a new refresh token. Revoke this app in Google Account permissions, then reconnect."
+          : "Google did not return a refresh token and no stored refresh token exists.",
       );
     }
 
