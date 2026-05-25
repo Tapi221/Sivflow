@@ -1,6 +1,7 @@
 import { type DragEndEvent, type DragOverEvent, type DragStartEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 import type { Task } from "../../calendar/task/task.types";
 import { TASK_DND_DROP_ANIMATION, TASK_DND_MEASURING_CONFIG, TASK_DND_POINTER_ACTIVATION_DISTANCE } from "./taskDnd.config";
@@ -21,6 +22,10 @@ type UseTaskBoardDndArgs = {
 };
 
 const defaultGetPreviewTask = (task: Task) => task;
+
+const flushDragStateUpdate = (update: () => void) => {
+  flushSync(update);
+};
 
 export const useTaskBoardDnd = ({
   tasksByColumn,
@@ -65,9 +70,11 @@ export const useTaskBoardDnd = ({
   };
 
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveTaskId(String(event.active.id));
-    setActiveTaskWidth(event.active.rect.current.initial?.width ?? null);
-    setActiveDropTarget(null);
+    flushDragStateUpdate(() => {
+      setActiveTaskId(String(event.active.id));
+      setActiveTaskWidth(event.active.rect.current.initial?.width ?? null);
+      setActiveDropTarget(null);
+    });
     latestDropTargetRef.current = null;
   };
 
@@ -87,7 +94,9 @@ export const useTaskBoardDnd = ({
     if (!target) {
       if (latestDropTargetRef.current !== null) {
         latestDropTargetRef.current = null;
-        setActiveDropTarget(null);
+        flushDragStateUpdate(() => {
+          setActiveDropTarget(null);
+        });
       }
       return;
     }
@@ -98,7 +107,9 @@ export const useTaskBoardDnd = ({
     }
 
     latestDropTargetRef.current = target;
-    setActiveDropTarget(target);
+    flushDragStateUpdate(() => {
+      setActiveDropTarget(target);
+    });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
