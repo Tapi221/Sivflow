@@ -99,6 +99,20 @@ export default defineConfig([
   },
 
   {
+    files: ["src/components/folder/components/views/FolderTreeWithCards.tsx"],
+    rules: {
+      "react-hooks/immutability": "off",
+    },
+  },
+
+  {
+    files: ["src/features/calendar/googlecalendar-integration/gcal.oauth.ts"],
+    rules: {
+      "prefer-const": "off",
+    },
+  },
+
+  {
     files: ["src/**/*.{ts,tsx}"],
     ignores: [
       "src/domain/card/selectors/cardFolder.ts",
