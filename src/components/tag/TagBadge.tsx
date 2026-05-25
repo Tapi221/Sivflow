@@ -49,7 +49,7 @@ export const TagBadge = ({
   const content = (
     <>
       <TagHashIcon className="h-[0.82em] w-[0.82em] shrink-0 opacity-70" />
-      <span className={cn("min-w-0 truncate", textClassName)}>{textLabel}</span>
+      <span className={cn("min-w-0 truncate opacity-70", textClassName)}>{textLabel}</span>
       {onRemove && (
         <button
           type="button"
