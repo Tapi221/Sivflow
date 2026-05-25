@@ -84,6 +84,7 @@ export type CalendarSidebarProps = {
   onAddProject: (projectName: string) => void;
   onToggleProject: (projectId: string) => void;
   onReconnectAccount: (accountId: string) => void;
+  onRetryTaskLists?: () => void;
   onToggleCalendar: (accountId: string, calendarId: string) => void;
   onToggleTaskList?: (taskListId: string) => void;
 };
