@@ -1,20 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import {overlayGlassActionButtonClassName,
-  overlayGlassPillClassName,
-  overlayGlassToolbarClassName,} from "@/components/card/shell/overlaySurfaceClassNames";
-import {DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
+import { overlayGlassActionButtonClassName, overlayGlassPillClassName, overlayGlassToolbarClassName } from "@/components/card/shell/overlaySurfaceClassNames";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { IconProps } from "@/ui/icons";
 import { Plus } from "@/ui/icons";
 
-import {type EditorBlockIconName,
-  type EditorBlockType,
-  getEditorBlockDefinition,
-  parseEditorBlockSettings,} from "@/lib/editorBlockSettings";
+import { type EditorBlockIconName, type EditorBlockType, getEditorBlockDefinition, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
 
