@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GoogleAccountEntry } from "../../../../src/features/calendar/googlecalendar-integration/useMultiAccountGoogleCalendar";
 import { useGoogleTaskLists } from "../../../../src/features/calendar/googlecalendar-integration/useGoogleTaskLists";
 import { fetchGoogleTaskLists } from "../../../../src/features/calendar/googlecalendar-integration/gcal.api";
+import { requestCalendarAccessToken } from "../../../../src/features/calendar/googlecalendar-integration/gcal.oauth";
 
 vi.mock("../../../../src/features/calendar/googlecalendar-integration/gcal.api", () => ({
   fetchGoogleTaskLists: vi.fn(),
@@ -13,11 +14,16 @@ vi.mock("../../../../src/features/calendar/googlecalendar-integration/gcal.api",
 
 vi.mock("../../../../src/features/calendar/googlecalendar-integration/gcal.oauth", () => ({
   refreshCalendarAccessToken: vi.fn(),
+  requestCalendarAccessToken: vi.fn(),
 }));
 
 vi.mock("../../../../src/features/calendar/googlecalendar-integration/gcal.server-oauth", () => ({
   getServerStoredGoogleCalendarAccessToken: vi.fn(),
   isServerStoredGoogleOAuthEnabled: vi.fn(() => false),
+}));
+
+vi.mock("../../../../src/services/firebase", () => ({
+  auth: {},
 }));
 
 const createConnectedAccount = (): GoogleAccountEntry => ({
@@ -61,5 +67,49 @@ describe("useGoogleTaskLists", () => {
 
     expect(result.current["account-1"]?.taskLists).toEqual([]);
     expect(result.current["account-1"]?.isLoading).toBe(false);
+  });
+
+  it("recovers Google Tasks list loading with a silent access token when no refresh token is stored", async () => {
+    vi.mocked(requestCalendarAccessToken).mockResolvedValue({
+      accessToken: "silent-access-token",
+      accountEmail: "akari@example.com",
+      accountName: "Akari",
+      accountPhotoUrl: null,
+      expiresInSeconds: 3600,
+    });
+    vi.mocked(fetchGoogleTaskLists).mockResolvedValue([
+      {
+        id: "tasks-1",
+        title: "My Tasks",
+        updated: null,
+      },
+    ]);
+
+    const onAccessTokenRecovered = vi.fn();
+
+    const { result } = renderHook(() =>
+      useGoogleTaskLists([createConnectedAccount()], onAccessTokenRecovered),
+    );
+
+    await waitFor(() => {
+      expect(result.current["account-1"]?.taskLists).toEqual([
+        {
+          id: "tasks-1",
+          title: "My Tasks",
+          updated: null,
+        },
+      ]);
+    });
+
+    expect(requestCalendarAccessToken).toHaveBeenCalledWith({}, true);
+    expect(fetchGoogleTaskLists).toHaveBeenCalledWith("silent-access-token");
+    expect(onAccessTokenRecovered).toHaveBeenCalledWith({
+      accountId: "account-1",
+      accessToken: "silent-access-token",
+      refreshToken: null,
+      accountName: "Akari",
+      accountPhotoUrl: null,
+      expiresInSeconds: 3600,
+    });
   });
 });
