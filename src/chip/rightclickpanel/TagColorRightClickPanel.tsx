@@ -2,7 +2,7 @@ import { type CSSProperties, type RefObject } from "react";
 import { getTagColorSwatchStyle, type TagColorKey } from "@/features/tag/tagColor";
 import { cn } from "@/lib/utils";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
-import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, resolveRightClickPanelTextWidth } from "./rightClickPanelUtils";
+import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanelUtils";
 
 const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   gray: "グレー",
@@ -56,6 +56,7 @@ type TagColorRightClickPanelProps = {
   tagName: string;
   menuRef: RefObject<HTMLDivElement | null>;
   noDragStyle: CSSProperties;
+  panelId?: RightClickPanelId;
   onSelectColor: (colorKey: TagColorKey) => void;
 };
 
@@ -67,6 +68,7 @@ export const TagColorRightClickPanel = ({
   tagName,
   menuRef,
   noDragStyle,
+  panelId,
   onSelectColor,
 }: TagColorRightClickPanelProps) => {
   return (
@@ -79,6 +81,7 @@ export const TagColorRightClickPanel = ({
         panelRef={menuRef}
         noDragStyle={noDragStyle}
         ariaLabel={`${tagName} tag color menu`}
+        panelId={panelId}
       >
         <div className="right-click-panel-title">{TAG_COLOR_CONTEXT_MENU_TITLE}</div>
         <div className="tag-color-context-menu-grid">
