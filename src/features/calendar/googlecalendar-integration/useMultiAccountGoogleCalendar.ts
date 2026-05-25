@@ -960,7 +960,6 @@ export const useMultiAccountGoogleCalendar = () => {
       window.removeEventListener("focus", refreshAllCalendarLists);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshAccountCalendarList, refreshableAccountIdsKey]);
 
   useEffect(() => {
