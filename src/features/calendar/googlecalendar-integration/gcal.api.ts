@@ -1,9 +1,10 @@
 import type { GoogleCalendarApiEventsResponse, GoogleCalendarApiListResponse, GoogleCalendarEvent, GoogleCalendarListItem, GoogleTaskListItem, GoogleTasksApiTaskListsResponse } from "./gcalSync.types";
+import { createGoogleApiError, withGoogleApiRetry } from "./googleApiRetry";
 
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
 const GOOGLE_TASKS_API_BASE = "https://tasks.googleapis.com/tasks/v1";
 
-const getJson = async <T>(accessToken: string, url: string): Promise<T> => {
+const getJsonOnce = async <T>(accessToken: string, url: string, errorPrefix = "Google API failed"): Promise<T> => {
   const res = await fetch(url, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -11,35 +12,20 @@ const getJson = async <T>(accessToken: string, url: string): Promise<T> => {
   });
 
   if (!res.ok) {
-    const payload = await res.json().catch(() => null) as
-      | {
-        error?: {
-          message?: string;
-          errors?: Array<{ reason?: string }>;
-        };
-      }
-      | null;
-    const message = payload?.error?.message;
-    const reason = payload?.error?.errors?.[0]?.reason;
-    const error = new Error(
-      message
-        ? `Google API failed (${res.status}): ${message}`
-        : `Google API failed (${res.status})`,
-    );
-
-    (
-      error as Error & {
-        googleReason?: string;
-        status: number;
-      }
-    ).status = res.status;
-    (error as Error & { googleReason?: string }).googleReason = reason;
-
-    throw error;
+    throw await createGoogleApiError(res, errorPrefix);
   }
 
   return (await res.json()) as T;
 };
+
+const getJson = async <T>(accessToken: string, url: string): Promise<T> =>
+  getJsonOnce<T>(accessToken, url);
+
+const getGoogleTasksJson = async <T>(accessToken: string, url: string, operation: string): Promise<T> =>
+  withGoogleApiRetry(
+    () => getJsonOnce<T>(accessToken, url),
+    { service: "google_tasks", operation },
+  );
 
 const parseGoogleDate = (raw: string): Date => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
@@ -117,9 +103,10 @@ export const fetchGoogleTaskLists = async (
       params.set("pageToken", pageToken);
     }
 
-    const data = await getJson<GoogleTasksApiTaskListsResponse>(
+    const data = await getGoogleTasksJson<GoogleTasksApiTaskListsResponse>(
       accessToken,
       `${GOOGLE_TASKS_API_BASE}/users/@me/lists?${params}`,
+      "fetch_task_lists",
     );
 
     taskLists.push(
