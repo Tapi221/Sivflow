@@ -6,12 +6,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { TASK_TYPO } from "@/styles/tokens/typography";
-import { TASK_COLUMNS } from "./task.types";
-import type { Task, TaskStatus } from "./task.types";
-import { TaskCard } from "./TaskCard";
-import { TaskInsertionSlot } from "./TaskInsertionSlot";
 import { TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS, TASK_DND_LAYOUT_ANIMATION_DURATION_MS } from "../../dnd/task/taskDnd.config";
 import type { TaskDropTarget } from "../../dnd/task/taskDnd.types";
+import type { Task, TaskStatus } from "./task.types";
+import { TASK_COLUMNS } from "./task.types";
+import { TaskCard } from "./TaskCard";
+import { TaskInsertionSlot } from "./TaskInsertionSlot";
 
 type TaskColumnView = {
   id: string;
@@ -234,7 +234,8 @@ export const TaskColumn = ({
                     <TaskInsertionSlot
                       columnId={column.id}
                       insertIndex={insertIndex}
-                      overTaskId={nonActiveTasks[insertIndex]?.id ?? null}
+                      overTaskId={task.id}
+                      position="after"
                       isActive={activeInsertIndex === insertIndex}
                       isLast={isLastTask}
                     />
