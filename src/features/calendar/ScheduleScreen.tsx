@@ -431,27 +431,29 @@ export const ScheduleScreen = ({
   const renderViewHeader = (className: string) => {
     const headerTitleDate =
       selectedViewMode === "month" ? monthTitleDate : titleDate;
+    const headerClassName = className.replace(
+      "justify-between",
+      "justify-start gap-3",
+    );
 
     return (
-      <div className={className} style={{ paddingRight: viewHeaderRightPaddingPx }}>
-        <div className="flex min-w-0 items-center gap-3">
-          <h1 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
-            {format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale })}
-          </h1>
+      <div className={headerClassName} style={{ paddingRight: viewHeaderRightPaddingPx }}>
+        <h1 className="shrink-0 truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
+          {format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale })}
+        </h1>
 
-          <div className="flex shrink-0 items-center gap-2">
-            <ViewModeDropdown
-              value={selectedViewMode}
-              onChange={handleSelectViewMode}
-              options={viewOptions}
-            />
+        <div className="flex shrink-0 items-center gap-2">
+          <ViewModeDropdown
+            value={selectedViewMode}
+            onChange={handleSelectViewMode}
+            options={viewOptions}
+          />
 
-            <TodayBar
-              onPrevious={handlePrevious}
-              onNext={handleNext}
-              onToday={handleToday}
-            />
-          </div>
+          <TodayBar
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            onToday={handleToday}
+          />
         </div>
       </div>
     );
@@ -533,7 +535,7 @@ export const ScheduleScreen = ({
       ) : isMonthCalendarView ? (
         <CarvePanel hasTrailingPanel={hasTrailingPanel}>
           {renderViewHeader(
-            "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
+            "mb-2 flex shrink-0 items-center justify-start gap-3 px-5 pt-4",
           )}
 
           <div
@@ -559,7 +561,7 @@ export const ScheduleScreen = ({
       ) : (
         <CarvePanel>
           {renderViewHeader(
-            "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
+            "mb-2 flex shrink-0 items-center justify-start gap-3 px-5 pt-4",
           )}
 
           <div
