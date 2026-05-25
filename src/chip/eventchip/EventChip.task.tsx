@@ -47,43 +47,21 @@ export const TaskEventChip = memo(({
   return (
     <div
       className={cn(
-        `
-          group
-          relative
-          box-border
-          grid
-          w-full
-          max-w-full
-          min-w-0
-          grid-cols-[minmax(0,1fr)_auto]
-          grid-rows-[auto_auto]
-          gap-x-1
-          gap-y-1
-          overflow-hidden
-          rounded-md
-          px-1.5
-          py-1
-          text-left
-        `,
-        "text-[11px] font-medium leading-[1.3]",
-        "transition-[filter,box-shadow,opacity] duration-100",
-        "hover:brightness-[0.98] hover:shadow-[0_1px_4px_rgba(15,23,42,0.08)]",
-        isDone && "opacity-65",
+        "group relative box-border flex w-full max-w-full min-w-0 flex-col overflow-hidden rounded-[16px] border border-l-[4px] border-[#e6e8ee] bg-white p-3 text-left shadow-[0_1px_2px_rgba(15,23,42,0.06)]",
+        "transition-[border-color,box-shadow,opacity,transform,filter] duration-150 ease-[cubic-bezier(.22,1,.36,1)]",
+        "hover:-translate-y-px hover:border-[#d8dce5] hover:shadow-[0_10px_24px_rgba(15,23,42,0.10)]",
+        isDone && "opacity-70 saturate-75",
         isDragging
-          ? "cursor-grabbing shadow-[0_8px_20px_rgba(15,23,42,0.12)]"
+          ? "cursor-grabbing shadow-[0_16px_36px_rgba(15,23,42,0.16)] ring-1 ring-black/5"
           : "cursor-grab",
       )}
-      style={{
-        background: tokens.bg,
-        borderLeft: `3px solid ${tokens.border}`,
-        color: tokens.text,
-      }}
+      style={{ borderLeftColor: tokens.border }}
       title={titleLabel}
     >
-      <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-0.5">
+      <div className="flex min-w-0 items-start gap-2">
         <button
           type="button"
-          className="flex h-3 w-3 shrink-0 items-center justify-center transition-transform active:scale-90"
+          className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center transition-transform active:scale-90"
           aria-label={checkboxLabel}
           title={checkboxLabel}
           onPointerDown={(event) => event.stopPropagation()}
@@ -95,14 +73,14 @@ export const TaskEventChip = memo(({
           <AnimatedSquareCheckbox
             checked={isDone}
             color={checkboxColor}
-            className="h-3 w-3"
+            className="h-4 w-4"
           />
         </button>
 
         <span
           className={cn(
-            "task-chip-compact-ellipsis min-w-0 flex-1 text-[12px] font-medium leading-snug",
-            isDone && "line-through opacity-60 decoration-current",
+            "min-w-0 flex-1 break-words text-[13px] font-semibold leading-[18px] tracking-[-0.01em] text-[#1c1c1e]",
+            isDone && "line-through opacity-60 decoration-current decoration-1",
           )}
         >
           {title}
@@ -111,7 +89,7 @@ export const TaskEventChip = memo(({
         {onDelete && (
           <button
             type="button"
-            className="-mr-0.5 flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded text-current opacity-0 transition-[background-color,opacity] duration-100 hover:bg-white/55 active:scale-95 group-hover:opacity-70 focus-visible:opacity-70"
+            className="-mr-1 -mt-1 flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#9aa0aa] opacity-0 transition-[background-color,color,opacity,transform] duration-150 hover:bg-[#f1f3f6] hover:text-[#5f6673] active:scale-95 group-hover:opacity-100 focus-visible:opacity-100"
             aria-label="タスクを削除"
             title="タスクを削除"
             onPointerDown={(event) => event.stopPropagation()}
@@ -125,9 +103,9 @@ export const TaskEventChip = memo(({
         )}
       </div>
 
-      <div className="col-start-1 row-start-2 flex min-w-0 items-center gap-1 overflow-hidden text-[11px] font-semibold tabular-nums opacity-80">
+      <div className="mt-3 flex min-w-0 items-center gap-1.5 text-[11px] font-semibold leading-none tracking-[-0.005em]">
         {formattedDate && (
-          <span className="inline-flex min-w-0 max-w-[4.85rem] shrink-0 items-center gap-[3px] overflow-hidden">
+          <span className="inline-flex h-5 max-w-[5.6rem] shrink-0 items-center gap-1 overflow-hidden rounded-full bg-[#f5f6f8] px-1.5 text-[#7a8290]">
             <ScheduleCalendarIcon className="h-3 w-3 shrink-0" />
             <span className="task-chip-compact-ellipsis min-w-0">
               {formattedDate}
@@ -135,20 +113,23 @@ export const TaskEventChip = memo(({
           </span>
         )}
 
-        <span className="task-chip-compact-ellipsis min-w-0 flex-1">
+        <span
+          className="task-chip-compact-ellipsis inline-flex h-5 min-w-0 flex-1 items-center rounded-full px-2"
+          style={{ background: tokens.bg, color: tokens.text }}
+        >
           {categoryLabel}
         </span>
 
-        <span className="shrink-0 opacity-80">
+        <span className="inline-flex h-5 shrink-0 items-center rounded-full bg-[#f5f6f8] px-2 text-[#7a8290]">
           {priorityLabel}
         </span>
-      </div>
 
-      {showAssignee && (
-        <span className="col-start-2 row-start-2 self-end justify-self-end rounded-full ring-1 ring-white/80">
-          <GoogleAccountChip name={chipName} photoUrl={accountPhotoUrl} />
-        </span>
-      )}
+        {showAssignee && (
+          <span className="ml-auto shrink-0 rounded-full ring-2 ring-white">
+            <GoogleAccountChip name={chipName} photoUrl={accountPhotoUrl} />
+          </span>
+        )}
+      </div>
     </div>
   );
 });
