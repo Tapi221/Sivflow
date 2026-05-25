@@ -26,6 +26,13 @@ const MAX_ALL_DAY_VISIBLE_CHIPS = 3;
 const createHourLabel = (hour: number) =>
   `${String(hour).padStart(2, "0")}:00`;
 
+const createMinuteLabel = (totalMinutes: number) => {
+  const hour = Math.floor(totalMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR);
+  const minutes = totalMinutes % GRID.WEEKDAY_MINUTES_PER_HOUR;
+
+  return `${String(hour).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+};
+
 const getEventDurationMinutes = (event: GoogleCalendarEvent): number => {
   const start = new Date(event.startsAt).getTime();
   const end = new Date(event.endsAt).getTime();
@@ -100,6 +107,24 @@ const useCurrentTimeMinutes = (): number => {
   }, []);
 
   return minutes;
+};
+
+type CurrentTimeLabelProps = {
+  currentMinutes: number;
+};
+
+const CurrentTimeLabel = ({ currentMinutes }: CurrentTimeLabelProps) => {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute right-1 z-30 flex -translate-y-1/2 select-none items-center rounded-md bg-white px-1 text-[12px] font-semibold tabular-nums text-[#3f7fc5]"
+      style={{
+        top: `calc(${currentMinutes / GRID.WEEKDAY_MINUTES_PER_HOUR} * var(--calendar-hour-row-height))`,
+      }}
+    >
+      {createMinuteLabel(currentMinutes)}
+    </div>
+  );
 };
 
 type CurrentTimeIndicatorProps = {
@@ -277,6 +302,8 @@ export const CalendarWeekDayGrid = ({
                 </span>
               </div>
             ))}
+
+            <CurrentTimeLabel currentMinutes={currentMinutes} />
           </div>
 
           {visibleDays.map((day) => {
