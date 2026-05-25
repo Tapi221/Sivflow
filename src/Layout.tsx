@@ -18,7 +18,7 @@ const Layout = () => {
   const navigate = useNavigate();
 
   const isLibraryRoute = /^\/library(?:\/|$)/i.test(location.pathname);
-  const isScheduleRoute = /^\/(?:schedule|calendar)(?:\/|$)/i.test(
+  const isScheduleRoute = /^\/(?:schedule|calendar|tasks)(?:\/|$)/i.test(
     location.pathname,
   );
   const presentationTarget = usePresentationTarget();
@@ -125,7 +125,8 @@ const Layout = () => {
   useEffect(() => {
     if (typeof document === "undefined") return;
 
-    const shouldLockPageScroll = isDesktopPresentation && isLibraryRoute;
+    const shouldLockPageScroll =
+      isDesktopPresentation && (isLibraryRoute || isScheduleRoute);
 
     document.documentElement.classList.toggle(
       "no-page-scroll",
@@ -136,7 +137,7 @@ const Layout = () => {
       if (!shouldLockPageScroll) return;
       document.documentElement.classList.remove("no-page-scroll");
     };
-  }, [isDesktopPresentation, isLibraryRoute]);
+  }, [isDesktopPresentation, isLibraryRoute, isScheduleRoute]);
 
   return (
     <div
