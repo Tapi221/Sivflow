@@ -1,5 +1,11 @@
+const ELECTRON_USER_AGENT_PATTERN = /\bElectron\/\d+(?:\.\d+){0,2}\b/;
+
 export const hasWindowDesktopBridge = (): boolean =>
   typeof window !== "undefined" && typeof window.desktop !== "undefined";
+
+export const hasElectronUserAgent = (): boolean =>
+  typeof navigator !== "undefined" &&
+  ELECTRON_USER_AGENT_PATTERN.test(navigator.userAgent);
 
 const hasMethod = (value: unknown): value is (...args: unknown[]) => unknown =>
   typeof value === "function";
@@ -28,3 +34,6 @@ export const hasDesktopBridge = (): boolean => {
     hasMethod(bridge.window?.onMaximizedStateChange),
   );
 };
+
+export const hasDesktopRuntime = (): boolean =>
+  hasDesktopBridge() || hasElectronUserAgent();
