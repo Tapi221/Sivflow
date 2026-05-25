@@ -57,7 +57,10 @@ const getNearestSlotCollision = (
     );
     const value = verticalDistance + horizontalDistance * 2;
 
-    if (nearestCollision === null || value < nearestCollision.data.value) {
+    if (
+      nearestCollision === null ||
+      value < (nearestCollision.data?.value ?? Number.POSITIVE_INFINITY)
+    ) {
       nearestCollision = {
         id: container.id,
         data: {
