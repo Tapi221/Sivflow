@@ -1,15 +1,10 @@
 import { useCallback, useState } from "react";
-
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-
 import { useAuthSession } from "@/contexts/AuthContext";
 import { auth, storage } from "@/services/firebase";
 import { imageDB } from "@/services/ImageDatabaseWriter";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
-import type {UploadedImage,
-  UploadFallbackReason,
-  UploadMetadata,
-  UploadSource,} from "@/types";
+import type { UploadedImage, UploadFallbackReason, UploadMetadata, UploadSource } from "@/types";
 import { generateSafeStoragePath } from "@/utils/fileUtils";
 
 interface UploadResult {

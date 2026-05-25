@@ -1,29 +1,8 @@
 import React from "react";
-
 import { resolveSideBlocks } from "@/components/card/frame/flashcardBlocks";
-import {resolveAnswerAttachmentAudios,
-  resolveAnswerAttachmentImages,
-  resolveAnswerAttachmentReferences,
-  resolveAnswerCode,
-  resolveAnswerText,
-  resolveAudioUrls,
-  resolveCardId,
-  resolveHasUncertainty,
-  resolveImageUrls,
-  resolveIsBookmarked,
-  resolveLayoutRows,
-  resolveQuestionAttachmentAudios,
-  resolveQuestionAttachmentImages,
-  resolveQuestionAttachmentReferences,
-  resolveQuestionCode,
-  resolveQuestionText,} from "@/components/card/frame/flashcardDerived";
+import { resolveAnswerAttachmentAudios, resolveAnswerAttachmentImages, resolveAnswerAttachmentReferences, resolveAnswerCode, resolveAnswerText, resolveAudioUrls, resolveCardId, resolveHasUncertainty, resolveImageUrls, resolveIsBookmarked, resolveLayoutRows, resolveQuestionAttachmentAudios, resolveQuestionAttachmentImages, resolveQuestionAttachmentReferences, resolveQuestionCode, resolveQuestionText } from "@/components/card/frame/flashcardDerived";
 import { resolveInkDocument } from "@/components/ink/inkStorage";
-
-import type {FlashcardCardLike,
-  FlashcardDualDerivedSnapshot,
-  FlashcardMediaLike,
-  FlashcardSideDerivedSnapshot,} from "./flashcard.types";
-
+import type { FlashcardCardLike, FlashcardDualDerivedSnapshot, FlashcardMediaLike, FlashcardSideDerivedSnapshot } from "./flashcard.types";
 import type { CardBlock } from "@/types/domain/card";
 
 const EMPTY_MEDIA_ITEMS: FlashcardMediaLike[] = [];

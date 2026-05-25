@@ -1,14 +1,7 @@
 import React from "react";
-
-import {DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuItemIcon,
-  DropdownMenuItemLabel,
-  DropdownMenuSeparator,} from "@/components/ui/dropdown-menu";
+import { DropdownMenuContent, DropdownMenuItem, DropdownMenuItemIcon, DropdownMenuItemLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { floatingPanelPresets } from "@/components/ui/menu-styles";
-
 import type { MenuAction } from "./menuActions";
-
 import { cn } from "@/lib/utils";
 
 export type ExplorerMenuPanelVariant = "default" | "create" | "folderContext";

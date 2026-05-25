@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-
 import { normalizeDate } from "@/shared/codec/date";
 
 describe("normalizeDate", () => {

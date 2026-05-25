@@ -1,8 +1,6 @@
 import { useState } from "react";
-
 import { CodeBlockEditor } from "@/components/card/blocks/code/CodeBlockEditor";
 import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
-
 import type { CodeBlockData } from "@/types/core/code-block";
 
 const SAMPLE_CODE = `function fibonacci(n: number): number {

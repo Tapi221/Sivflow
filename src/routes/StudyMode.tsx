@@ -1,21 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
 import { useMutation } from "@tanstack/react-query";
 import confetti from "canvas-confetti";
 import { addDoc, collection } from "firebase/firestore";
-
 import { getCardText } from "@/domain/card/content";
-
 import { flags } from "@/features/flags";
 import { PracticeCards } from "@/features/study/PracticeCards";
 import { PracticeSummary } from "@/features/study/PracticeSummary";
 import { StudyComplete } from "@/features/study/StudyComplete";
 import { StudyEmpty } from "@/features/study/StudyEmpty";
 import { StudyReview } from "@/features/study/StudyReview";
-
 import { ArrowLeft } from "@/ui/icons";
-
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";

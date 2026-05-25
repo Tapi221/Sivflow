@@ -1,7 +1,6 @@
 import { type ComponentType } from "react";
 import { motion, type Transition } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-
 import { FlashCardIcon, PDFIcon } from "@/components/icons/icons.library";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";

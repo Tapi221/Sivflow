@@ -1,6 +1,5 @@
 import type { Firestore } from "firebase/firestore";
 import { doc, setDoc, writeBatch } from "firebase/firestore";
-
 import { auth, requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { imageDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
 import type { UploadedImage } from "@/types";

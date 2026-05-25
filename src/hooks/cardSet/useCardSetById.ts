@@ -1,7 +1,5 @@
 import { useCallback } from "react";
-
 import { useLiveQuery } from "dexie-react-hooks";
-
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
 import { type CardDisplayMode, type CardSet, DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode } from "@/types/domain/cardSet";

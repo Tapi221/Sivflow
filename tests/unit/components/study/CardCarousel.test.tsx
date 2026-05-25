@@ -3,7 +3,6 @@ import React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
 import type { Card } from "@/types";
 
 vi.mock("framer-motion", () => ({

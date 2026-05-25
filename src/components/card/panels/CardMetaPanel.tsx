@@ -1,5 +1,4 @@
 import { memo } from "react";
-
 import type { Card, ReviewLog } from "@/types";
 
 type CardMetaSyncStatus = {

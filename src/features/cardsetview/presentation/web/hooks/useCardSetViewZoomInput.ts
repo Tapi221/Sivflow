@@ -1,12 +1,7 @@
-import { type RefObject,useCallback, useEffect, useRef } from "react";
-
-import {CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT,
-  CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT,} from "@constants/shared/flashcard";
-
+import { type RefObject, useCallback, useEffect, useRef } from "react";
+import { CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT, CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT } from "@constants/shared/flashcard";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import {computeNextCardSetViewZoomPercentFromGesture,
-  computeNextCardSetViewZoomPercentFromWheel,
-  shouldHandleCardSetViewZoomInputTarget,} from "@/features/cardsetview/presentation/web/hooks/cardSetViewZoomInputUtils";
+import { computeNextCardSetViewZoomPercentFromGesture, computeNextCardSetViewZoomPercentFromWheel, shouldHandleCardSetViewZoomInputTarget } from "@/features/cardsetview/presentation/web/hooks/cardSetViewZoomInputUtils";
 
 interface UseCardSetViewZoomInputOptions {
   containerRef: RefObject<HTMLDivElement | null>;

@@ -2,7 +2,6 @@ import { useCardSetViewCardLayoutMode } from "@/features/cardsetview/presentatio
 import { useCardSetViewDisplayMode } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewDisplayMode";
 import { useCardSetViewEditingBridge } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewEditingBridge";
 import { useCardSetViewSelectionState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewSelectionState";
-
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 

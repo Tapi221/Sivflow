@@ -3,11 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { useLayoutEffect } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
-
-import {
-  BreadcrumbProvider,
-  useSetBreadcrumbCrumbs,
-} from "@/contexts/BreadcrumbContext";
+import { BreadcrumbProvider, useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
 import { TitleBar } from "@/layout/TitleBar";
 

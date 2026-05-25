@@ -1,9 +1,6 @@
 import type { Firestore } from "firebase/firestore";
 import { setDoc } from "firebase/firestore";
-
-import {createImageDocRef,
-  isImageFirestoreDiagnosticsEnabled,} from "./imageFirestoreWriter";
-
+import { createImageDocRef, isImageFirestoreDiagnosticsEnabled } from "./imageFirestoreWriter";
 import type { UploadedImage } from "@/types";
 
 export const touchMigrateLegacyImageToUserScope = async ({

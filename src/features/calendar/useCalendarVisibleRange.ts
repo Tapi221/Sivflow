@@ -1,5 +1,4 @@
-import type {CalendarViewMode,
-  TimelineBufferDays,} from "../calendar/scheduleScreen.types";
+import type { CalendarViewMode, TimelineBufferDays } from "../calendar/scheduleScreen.types";
 import { useScheduleDays } from "./grid/useScheduleColumns";
 
 export const useCalendarVisibleRange = ({

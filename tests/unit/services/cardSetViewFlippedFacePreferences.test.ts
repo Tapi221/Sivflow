@@ -1,12 +1,7 @@
 // @vitest-environment jsdom
 import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
 import { beforeEach, describe, expect, it } from "vitest";
-
-import {
-  buildCardSetViewFlippedFaceScopeKey,
-  getCardSetViewFlippedCardIds,
-  setCardSetViewFlippedCardIds,
-} from "@/services/cardSetViewFlippedFacePreferences";
+import { buildCardSetViewFlippedFaceScopeKey, getCardSetViewFlippedCardIds, setCardSetViewFlippedCardIds } from "@/services/cardSetViewFlippedFacePreferences";
 
 describe("cardSetViewFlippedFacePreferences", () => {
   beforeEach(() => {

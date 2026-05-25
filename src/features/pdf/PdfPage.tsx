@@ -1,24 +1,9 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-
-import {applyPdfOverlayViewportStyles,
-  applyPdfTextLayerViewportStyles,
-  commitPdfBitmapToCanvas,
-  createDetachedPdfCanvasSurface,
-  prepareDetachedPdfCanvasSurfaceForRender,
-  resolvePdfRenderTransform,} from "@/features/pdf/pdfCanvasRenderUtils";
-import {getCachedPdfPageBitmap,
-  setCachedPdfPageBitmap,} from "@/features/pdf/pdfPageBitmapCache";
+import { applyPdfOverlayViewportStyles, applyPdfTextLayerViewportStyles, commitPdfBitmapToCanvas, createDetachedPdfCanvasSurface, prepareDetachedPdfCanvasSurfaceForRender, resolvePdfRenderTransform } from "@/features/pdf/pdfCanvasRenderUtils";
+import { getCachedPdfPageBitmap, setCachedPdfPageBitmap } from "@/features/pdf/pdfPageBitmapCache";
 import { resolvePdfRenderBackingStore } from "@/features/pdf/pdfRenderQuality";
-import type {PageSize,
-  PdfJsDocument,
-  PdfJsPage,
-  PdfJsRenderTask,
-  PdfJsTextContent,
-  PdfPageSearchMatch,} from "@/features/pdf/pdfViewer.types";
-import {getPdfErrorDetails,
-  isPdfAbortError,
-  isPdfTextItem,} from "@/features/pdf/pdfViewer.types";
-
+import type { PageSize, PdfJsDocument, PdfJsPage, PdfJsRenderTask, PdfJsTextContent, PdfPageSearchMatch } from "@/features/pdf/pdfViewer.types";
+import { getPdfErrorDetails, isPdfAbortError, isPdfTextItem } from "@/features/pdf/pdfViewer.types";
 import { pdfjsLib } from "@/lib/pdfjs";
 import { cn } from "@/lib/utils";
 

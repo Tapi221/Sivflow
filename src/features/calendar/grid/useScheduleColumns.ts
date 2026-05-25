@@ -1,10 +1,7 @@
 import { useMemo } from "react";
-
 import type { CalendarViewMode } from "../scheduleScreen.types";
 import type { ScheduleColumnBuffer } from "./ScheduleColumn.shared";
-import {buildScheduleDisplayDays,
-  buildScheduleInteractionDays,
-  buildScheduleTimelineColumns,} from "./ScheduleColumn.shared";
+import { buildScheduleDisplayDays, buildScheduleInteractionDays, buildScheduleTimelineColumns } from "./ScheduleColumn.shared";
 
 type UseScheduleDaysParams = {
   anchorDate: Date;

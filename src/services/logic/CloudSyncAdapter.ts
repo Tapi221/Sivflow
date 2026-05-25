@@ -1,8 +1,5 @@
-import {pullCloudSyncDiff,
-  pullCloudSyncFull,
-  pushCloudSyncBatch,} from "@/infrastructure/sync/cloudSyncFirestoreAdapter";
-import type {ICloudSyncAdapter,
-  SyncChange,} from "@/services/interfaces/ISyncService";
+import { pullCloudSyncDiff, pullCloudSyncFull, pushCloudSyncBatch } from "@/infrastructure/sync/cloudSyncFirestoreAdapter";
+import type { ICloudSyncAdapter, SyncChange } from "@/services/interfaces/ISyncService";
 
 export class CloudSyncAdapter implements ICloudSyncAdapter {
   private readonly userId: string;

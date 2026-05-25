@@ -1,8 +1,5 @@
 import { SHARED_STORAGE_KEYS } from "@constants/shared/storage";
-
-import {DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE,
-  normalizeSplitFallbackCardLayoutMode,
-  type SplitFallbackCardLayoutMode,} from "@/features/cardsetview/domain/cardLayoutMode";
+import { DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE, normalizeSplitFallbackCardLayoutMode, type SplitFallbackCardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 
 interface SplitFallbackPreferencesStore {
   version: 1;

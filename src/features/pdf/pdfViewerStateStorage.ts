@@ -3,7 +3,6 @@
  * キーは docId 単位で分離しているため、複数 PDF を跨いで状態が混ざらない。
  */
 import * as C from "@/features/pdf/pdf.constants.desktop";
-
 import type { PdfViewerState } from "@/types";
 
 //  ドキュメント切替保護：呼び出し側で docId を指定する

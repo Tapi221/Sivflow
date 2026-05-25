@@ -1,7 +1,5 @@
 import React from "react";
-
 import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagramPane";
-
 import { useCards } from "@/hooks/card/useCards";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";

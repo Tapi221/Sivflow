@@ -1,5 +1,4 @@
 import { useDroppable } from "@dnd-kit/core";
-
 import { cn } from "@/lib/utils";
 
 type TaskInsertionSlotProps = {

@@ -1,7 +1,4 @@
-import {isImageFirestoreDiagnosticsEnabled,
-  resolveImageFirestoreTarget,
-  saveImageToFirestore,} from "./imageFirestoreWriter";
-
+import { isImageFirestoreDiagnosticsEnabled, resolveImageFirestoreTarget, saveImageToFirestore } from "./imageFirestoreWriter";
 import type { UploadedImage } from "@/types";
 
 export const writeQueuedImageToFirestore = async (

@@ -1,5 +1,4 @@
 import type { RefObject, UIEvent } from "react";
-
 import { GridTaskDayDesktop } from "../grid/Grid.task.day.desktop";
 
 type CalendarTaskViewProps = {

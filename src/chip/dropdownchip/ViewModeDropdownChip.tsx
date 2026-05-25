@@ -1,5 +1,4 @@
 import { motion, type Transition } from "framer-motion";
-
 import type { CalendarViewMode } from "@/features/calendar/calendar.types";
 import { cn } from "@/lib/utils";
 

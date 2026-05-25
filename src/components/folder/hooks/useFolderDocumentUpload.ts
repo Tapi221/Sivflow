@@ -1,9 +1,5 @@
 import React, { useCallback, useRef } from "react";
-
-import {buildStoragePath,
-  createDocumentId,
-  extractPdfFiles,} from "@/components/folder/explorer/model/utils";
-
+import { buildStoragePath, createDocumentId, extractPdfFiles } from "@/components/folder/explorer/model/utils";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { useReliableFileUpload } from "@/hooks/platform/useReliableFileUpload";

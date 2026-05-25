@@ -1,7 +1,5 @@
 import React from "react";
-
 import { EXPLORER_ROW_BASE_CLASS_NAME, getExplorerRowStyle } from "./shared";
-
 import { cn } from "@/lib/utils";
 
 interface ExplorerRowProps extends React.HTMLAttributes<HTMLDivElement> {

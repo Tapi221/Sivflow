@@ -1,17 +1,9 @@
 import type { ComponentProps } from "react";
-
-import {CARD_BASE_WIDTH,
-  CARD_DISPLAY_SCALE,
-  CARD_SAFE_PADDING_PX,} from "@constants/shared/flashcard";
-
+import { CARD_BASE_WIDTH, CARD_DISPLAY_SCALE, CARD_SAFE_PADDING_PX } from "@constants/shared/flashcard";
 import { CardCarousel3D } from "@/features/review/presentation/web/ui/components/CardCarousel3D";
-
-import {Flashcard,
-  type FlashcardCardLike,} from "@/components/card/frame/Flashcard";
+import { Flashcard, type FlashcardCardLike } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
-
 import StudyCard from "./StudyCard";
-
 import type { Card } from "@/types";
 
 type StudyCardProps = ComponentProps<typeof StudyCard>;

@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-
 import { isBlobUrl, sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
 
 type SanitizedSample = {

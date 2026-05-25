@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { VerticalCardPager } from "@/features/review/VerticalCardPager";
 import type { StudyReviewProps } from "@/features/study/presentation/shared/studyReviewProps";
 import StudyCard from "@/features/study/StudyCard";

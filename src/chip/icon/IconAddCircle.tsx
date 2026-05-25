@@ -1,5 +1,4 @@
 import type { SVGProps } from "react";
-
 import { cn } from "@/lib/utils";
 
 type IconAddCircleProps = SVGProps<SVGSVGElement>;

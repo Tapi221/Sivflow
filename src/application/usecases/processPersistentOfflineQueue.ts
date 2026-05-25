@@ -1,5 +1,4 @@
 import type { QueueItem } from "./persistentOfflineQueueModels";
-
 import type { UploadedImage } from "@/types";
 import { assertImageInvariant } from "@/utils/imageAssertions";
 

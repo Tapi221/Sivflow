@@ -1,6 +1,4 @@
-import {makeAssetRecord,
-  type QueueItem,
-  toAssetLikeRecord,} from "@/application/usecases/persistentOfflineQueueModels";
+import { makeAssetRecord, type QueueItem, toAssetLikeRecord } from "@/application/usecases/persistentOfflineQueueModels";
 import { auth } from "@/infrastructure/firebase/client";
 import { getLocalDb } from "@/infrastructure/localdb/client";
 

@@ -1,6 +1,4 @@
-import {CANONICAL_CARD_WIDTH,
-  CARD_PANE_AUTO_MAX_SCALE,} from "@constants/shared/flashcard";
-
+import { CANONICAL_CARD_WIDTH, CARD_PANE_AUTO_MAX_SCALE } from "@constants/shared/flashcard";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 
 type ResolveEditorCardFitScaleArgs = Readonly<{

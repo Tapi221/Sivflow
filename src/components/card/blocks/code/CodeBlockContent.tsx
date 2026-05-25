@@ -1,21 +1,11 @@
-import {useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,} from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Editor from "react-simple-code-editor";
-
 import type { RenderProps } from "prism-react-renderer";
 import { Highlight } from "prism-react-renderer";
 import Prism from "prismjs";
-
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
-import {buildTypographyStyle,
-  mergeStyles,
-  scaleTypographyNumberPx,} from "@/components/card/common/cardSetViewZoom";
+import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
 import { Check, Copy } from "@/ui/icons";
-
 import "prismjs/components/prism-bash";
 import "prismjs/components/prism-c";
 import "prismjs/components/prism-clike";
@@ -32,12 +22,8 @@ import "prismjs/components/prism-python";
 import "prismjs/components/prism-rust";
 import "prismjs/components/prism-sql";
 import "prismjs/components/prism-typescript";
-
 import { CodeBlockFrame } from "./CodeBlockFrame";
-import {getViewerLanguageLabels,
-  normalizeEditorLanguage,
-  normalizeViewerLanguage,} from "./codeBlockLanguage";
-
+import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "./codeBlockLanguage";
 import { cn } from "@/lib/utils";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { codeTheme } from "@/theme/codeTheme";

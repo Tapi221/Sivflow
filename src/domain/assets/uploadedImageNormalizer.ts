@@ -1,5 +1,4 @@
 import { generateUploadedImageId } from "@/domain/assets/uploadedImageFactory";
-
 import type { UploadFallbackReason, UploadSource } from "@/types";
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 

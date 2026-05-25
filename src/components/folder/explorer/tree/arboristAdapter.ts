@@ -1,11 +1,5 @@
-import {toVirtualMfCardDisplayName,
-  toVirtualMfDeckDisplayName,} from "@/features/fileDisplay/virtualFileExtensions";
-
-import type {Card,
-  CardSet,
-  DocumentItem,
-  ExplorerItem,
-  SelectedExplorerItem,} from "@/types";
+import { toVirtualMfCardDisplayName, toVirtualMfDeckDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
+import type { Card, CardSet, DocumentItem, ExplorerItem, SelectedExplorerItem } from "@/types";
 
 export type ExplorerTreeNodeType = "folder" | "cardSet" | "card" | "document";
 

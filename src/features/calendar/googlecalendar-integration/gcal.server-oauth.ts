@@ -1,8 +1,6 @@
 import { httpsCallable } from "firebase/functions";
-
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { auth, functionsClient } from "@/services/firebase";
-
 import type { GoogleCalendarAccess } from "./gcal.oauth";
 
 type ServerGoogleCalendarAccess = GoogleCalendarAccess & {

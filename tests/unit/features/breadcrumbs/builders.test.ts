@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-
 import { mergeTitleBarBreadcrumbs } from "@/features/breadcrumbs/builders";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
 

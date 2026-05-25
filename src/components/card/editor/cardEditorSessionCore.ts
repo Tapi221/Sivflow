@@ -1,10 +1,8 @@
 import { getCardBlocks } from "@/domain/card/content";
 import { LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from "@/domain/card/extraRows";
-
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
 import { waitForDraftImageUploads } from "@/components/card/editor/cardImageUploadSaveBarrier";
 import { type EditorDraft, makeEmptyCardFaceAttachments, normalizeOrderIndex, sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
-
 import { resolveCardTagNames } from "@/hooks/settings/useTags";
 export { toDateOrNull } from "@/utils/toMillis";
 import type { UploadedImage } from "@/types/domain/assets";

@@ -1,7 +1,5 @@
 import { type DocumentData, type Firestore, getDoc, getDocs } from "firebase/firestore";
-
 import { getUserSettingsRef, queryEntityById } from "./cloudSyncFirestoreRefs";
-
 import { type CloudEntityType, COLLECTION_BY_TYPE, type PullableEntityType, sanitizeSyncDataFromCloud } from "@/application/usecases/cloudSyncShared";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
 

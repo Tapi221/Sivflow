@@ -1,8 +1,4 @@
-import type {ITelemetryService,
-  LogContext,
-  LogLevel,
-  SyncLogEntry,
-  TelemetryEventName,} from "@/types/domain/telemetry";
+import type { ITelemetryService, LogContext, LogLevel, SyncLogEntry, TelemetryEventName } from "@/types/domain/telemetry";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
 /**

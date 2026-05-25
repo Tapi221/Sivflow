@@ -1,9 +1,6 @@
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
-
 import type { CardSetViewEditingDraftPatch } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
-
-import {createLatestReviewLogPatch,
-  createReviewPatchFromRating,} from "@/services/reviewAlgorithm";
+import { createLatestReviewLogPatch, createReviewPatchFromRating } from "@/services/reviewAlgorithm";
 import type { Card, UserSettings } from "@/types";
 
 export const META_PANEL_OPEN_STORAGE_KEY =

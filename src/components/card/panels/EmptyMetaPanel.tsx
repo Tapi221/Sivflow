@@ -1,5 +1,4 @@
 import type { CSSProperties, ReactNode } from "react";
-
 import { MetaPanelShell } from "@/components/card/panels/MetaPanelShell";
 
 type EmptyMetaPanelProps = {

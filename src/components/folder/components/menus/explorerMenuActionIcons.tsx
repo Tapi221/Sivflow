@@ -1,7 +1,4 @@
-import {ExplorerChromeCardIcon,
-  ExplorerChromeCardSetIcon,
-  ExplorerChromeFolderIcon,
-  ExplorerChromePdfIcon,} from "@/components/explorer/icons";
+import { ExplorerChromeCardIcon, ExplorerChromeCardSetIcon, ExplorerChromeFolderIcon, ExplorerChromePdfIcon } from "@/components/explorer/icons";
 
 const createMenuIconClassName = "h-3.5 w-3.5 shrink-0";
 const folderContextMenuIconClassName = "h-3.5 w-3.5 shrink-0";

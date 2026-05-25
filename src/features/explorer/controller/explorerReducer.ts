@@ -1,10 +1,8 @@
 import { areExplorerBreadcrumbContextsEqual } from "@/features/explorer/contracts/explorerBreadcrumbContext";
 import type { ExplorerControllerState } from "@/features/explorer/contracts/explorerControllerState";
 import { isSameSelectedExplorerItem } from "@/features/explorer/utils/isSameSelectedExplorerItem";
-
 import type { ExplorerAction } from "./explorerActionTypes";
 import { resetBreadcrumbContext } from "./explorerState";
-
 import type { SelectedExplorerItem } from "@/types";
 
 const shouldClearSelectionFolder = (item: SelectedExplorerItem) =>

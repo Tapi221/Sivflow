@@ -1,15 +1,8 @@
 import type { HTMLAttributes, ReactNode, Ref } from "react";
-
 import { CARD_ROW_PX } from "@constants/shared/flashcard";
-
 import { shouldRenderInterBlockSeparator } from "@/components/card/blocks/core/blockDisplayPolicy";
 import { BlockSeparator } from "@/components/card/blocks/core/BlockSeparator";
-import {getNormalizedGridOffsetRows,
-  getNormalizedRowOffset,
-  getRowOffsetStyle,
-  isGridOffsetType,
-  isRowPositionableType,} from "@/components/card/frame/rowOffset";
-
+import { getNormalizedGridOffsetRows, getNormalizedRowOffset, getRowOffsetStyle, isGridOffsetType, isRowPositionableType } from "@/components/card/frame/rowOffset";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
 

@@ -2,7 +2,6 @@
 import { cleanup, render } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
-
 import { MarkdownBlockContent } from "@/components/card/blocks/markdown/MarkdownBlockContent";
 
 afterEach(() => {

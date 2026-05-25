@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-
 import { ErrorDialog } from "./ErrorDialog";
 import { InfoToast } from "./InfoToast";
 import { WarningDialog } from "./WarningDialog";
-
 import { notificationService } from "@/services/NotificationService";
 import type { Notification } from "@/types/domain/notification";
 

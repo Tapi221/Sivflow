@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, FileText,Loader2, X } from "@/ui/icons";
-
+import { CheckCircle2, FileText, Loader2, X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 
 export interface UploadProgressProps {

@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
-
 import * as C from "@/features/pdf/pdf.constants.desktop";
-
 import { usePdfWorkspace } from "./hooks/usePdfWorkspace";
 import { PdfOverlayToolbar } from "./PdfToolbar";
 import { PdfThumbnailSidePanel } from "./PdfThumbnailSidePanel";
 import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
-
 import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
 import type { BlobUrl } from "@/types/core/branded";

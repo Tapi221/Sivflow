@@ -2,12 +2,7 @@ import { FIREBASE_EMULATORS } from "@constants/shared/firebase";
 import { initializeApp } from "firebase/app";
 import { connectAuthEmulator, getAuth } from "firebase/auth";
 import type { Firestore } from "firebase/firestore";
-import {collection,
-  connectFirestoreEmulator,
-  getFirestore,
-  initializeFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,} from "firebase/firestore";
+import { collection, connectFirestoreEmulator, getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
 

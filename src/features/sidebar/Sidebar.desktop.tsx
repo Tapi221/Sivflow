@@ -4,14 +4,7 @@ import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
-import {ClockIcon,
-  GalleryIcon,
-  HomeIcon,
-  InboxIcon,
-  LibraryIcon,
-  SettingIcon,
-  SidebarOpenIcon,} from "../../components/icons/icons.sidebar";
-
+import { ClockIcon, GalleryIcon, HomeIcon, InboxIcon, LibraryIcon, SettingIcon, SidebarOpenIcon } from "../../components/icons/icons.sidebar";
 import "./sidebar.desktop.css";
 
 // ── 型定義 ───────────────────────────────────────────────────

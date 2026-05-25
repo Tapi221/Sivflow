@@ -1,5 +1,4 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
-
 import { getDb, serverTimestamp } from "../firebaseAdmin.js";
 
 export const renewExpiredWatchChannels = onSchedule(

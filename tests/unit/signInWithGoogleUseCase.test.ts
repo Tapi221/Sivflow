@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import { createSignInWithGoogleUseCase } from "@/application/auth/SignInWithGoogle";
 
 const defineNavigatorUserAgent = (userAgent: string) => {

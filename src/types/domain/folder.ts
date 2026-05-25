@@ -1,5 +1,4 @@
 import { Timestamp } from "firebase/firestore";
-
 import type { UploadedFile } from "./assets";
 import type { BaseEntity } from "./base";
 

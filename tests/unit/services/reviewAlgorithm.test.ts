@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-
-import {
-  computeNextReview,
-  createReviewLogEntry,
-  ratingToSubjectiveScore,
-} from "@/services/reviewAlgorithm";
+import { computeNextReview, createReviewLogEntry, ratingToSubjectiveScore } from "@/services/reviewAlgorithm";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 
 describe("reviewAlgorithm initial resistance", () => {

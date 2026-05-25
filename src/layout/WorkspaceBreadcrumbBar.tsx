@@ -10,10 +10,8 @@
  */
 
 import { Fragment } from "react";
-
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
 import { useBreadcrumbs } from "@/features/breadcrumbs/useBreadcrumbs";
-
 import { cn } from "@/lib/utils";
 
 export const WorkspaceBreadcrumbBar = ({

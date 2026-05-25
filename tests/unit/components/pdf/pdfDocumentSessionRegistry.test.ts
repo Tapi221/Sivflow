@@ -1,21 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-import {
-  acquirePdfDocumentSession,
-  PDF_DOCUMENT_SESSION_RELEASE_GRACE_MS,
-  resetPdfDocumentSessionRegistryForTests,
-} from "@/components/pdf/pdfDocumentSessionRegistry";
+import { acquirePdfDocumentSession, PDF_DOCUMENT_SESSION_RELEASE_GRACE_MS, resetPdfDocumentSessionRegistryForTests } from "@/components/pdf/pdfDocumentSessionRegistry";
 import { clearPdfPageBitmapCacheForDocument } from "@/components/pdf/pdfPageBitmapCache";
-import type {
-  PdfJsDocument,
-  PdfJsGetDocumentParams,
-  PdfJsLoadingTask,
-} from "@/components/pdf/pdfViewerTypes";
-import {
-  destroyPdfResource,
-  disposePdfDocumentResource,
-  getPdfDocument,
-} from "@/components/pdf/pdfViewerTypes";
+import type { PdfJsDocument, PdfJsGetDocumentParams, PdfJsLoadingTask } from "@/components/pdf/pdfViewerTypes";
+import { destroyPdfResource, disposePdfDocumentResource, getPdfDocument } from "@/components/pdf/pdfViewerTypes";
 
 vi.mock("@/components/pdf/pdfPageBitmapCache", () => ({
   clearPdfPageBitmapCacheForDocument: vi.fn(),

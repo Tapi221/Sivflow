@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-
-import {
-  detectImportFileKind,
-  isSupportedImportFileKind,
-} from "@/features/import/domain/importFileKind";
+import { detectImportFileKind, isSupportedImportFileKind } from "@/features/import/domain/importFileKind";
 
 const makeFileLike = (name: string, type = "") => {
   return { name, type } as File;

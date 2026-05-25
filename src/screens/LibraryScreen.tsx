@@ -16,10 +16,8 @@ import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { resolveCardTabTitle, resolveDocumentTabTitle } from "@/features/tab/resolveTabTitle";
 import type { WorkspaceEntityTab, WorkspaceTab } from "@/features/tab/Tab";
 import { WorkspaceTabPanel } from "@/features/tab/TabPanel";
-
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
-
 import { useCardsRead } from "@/hooks/card/useCardsRead";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFoldersRead } from "@/hooks/folder/useFoldersRead";

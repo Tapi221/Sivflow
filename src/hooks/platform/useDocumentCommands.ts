@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
 import { normalizeDate } from "@/shared/codec/date";

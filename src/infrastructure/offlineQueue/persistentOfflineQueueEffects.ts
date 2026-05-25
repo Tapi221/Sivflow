@@ -3,9 +3,7 @@ import { handleQueuedAssetUploadSuccess } from "./effects/handleQueuedAssetUploa
 import { handleQueuedDocumentUploadFailure } from "./effects/handleQueuedDocumentUploadFailure";
 import { handleQueuedDocumentUploadSuccess } from "./effects/handleQueuedDocumentUploadSuccess";
 import { shouldSkipQueuedDocumentUpload } from "./effects/shouldSkipQueuedDocumentUpload";
-
-import {isDocumentQueueItem,
-  type QueueItem,} from "@/application/usecases/persistentOfflineQueueModels";
+import { isDocumentQueueItem, type QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
 import type { UploadedImage } from "@/types";
 
 const isAssetLikeImageQueueItem = (item: QueueItem): boolean =>

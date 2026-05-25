@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-
-import {
-  buildCardSurfaceMetrics,
-  buildSharedCardSurfaceMetrics,
-} from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
+import { buildCardSurfaceMetrics, buildSharedCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 
 describe("cardSurfacePresentation", () => {
   it("keeps geometry identical between view and edit for fixed split", () => {

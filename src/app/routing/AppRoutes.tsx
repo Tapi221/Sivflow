@@ -1,10 +1,8 @@
 import { lazy, Suspense } from "react";
 import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-
 import Layout from "@/Layout";
 import { BlockNoteSandboxPage } from "@/sandbox/blocknote";
-
 import { getDevRouteElements } from "./DevRoutes";
 import { ProtectedRoute } from "./ProtectedRoute";
 

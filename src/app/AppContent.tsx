@@ -4,7 +4,6 @@ import { LoadingFallback } from "@/components/common/LoadingFallback";
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { useStartupTasks } from "@/application/startup/useStartupTasks";
-
 import { AppRoutes } from "./routing/AppRoutes";
 import { getDevStandaloneRouteElement } from "./routing/DevRoutes";
 import { isTestBypassEnabled } from "./routing/testBypass";

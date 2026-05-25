@@ -1,9 +1,7 @@
 import React from "react";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trophy } from "@/ui/icons";
-
 import { createPageUrl } from "@/platform/web/navigation/toWebPath";
 
 type Props = {

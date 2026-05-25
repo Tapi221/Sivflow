@@ -2,7 +2,6 @@
 
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import type { GoogleAccountEntry } from "../../../../src/features/calendar/googlecalendar-integration/useMultiAccountGoogleCalendar";
 import { useGoogleTaskLists } from "../../../../src/features/calendar/googlecalendar-integration/useGoogleTaskLists";
 import { fetchGoogleTaskLists } from "../../../../src/features/calendar/googlecalendar-integration/gcal.api";

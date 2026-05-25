@@ -1,5 +1,4 @@
 import { useLiveQuery } from "dexie-react-hooks";
-
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
 

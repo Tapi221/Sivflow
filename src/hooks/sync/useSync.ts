@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-
 import { useAuthSession } from "@/contexts/AuthContext";
 import type { ISyncService } from "@/services/interfaces/ISyncService";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";

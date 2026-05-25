@@ -1,14 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
-
-import {CARD_PANE_WIDTH_STEP_PX,
-  CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT,
-  CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT,
-  CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT,} from "@constants/shared/flashcard";
-
+import { CARD_PANE_WIDTH_STEP_PX, CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT, CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT, CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT } from "@constants/shared/flashcard";
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
-import {CARD_LAYOUT_MODE_LABELS,
-  type CardLayoutMode,
-  type CardSetInteractionMode,} from "@/features/cardsetview/domain/cardLayoutMode";
+import { CARD_LAYOUT_MODE_LABELS, type CardLayoutMode, type CardSetInteractionMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { clampCardIndex } from "@/features/cardsetview/domain/cardSetViewState";
 import { useCardSetViewData } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewData";
 import { useCardSetViewPaneWidth } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewPaneWidth";
@@ -19,7 +12,6 @@ import { useCardSetViewZoomInput } from "@/features/cardsetview/presentation/web
 import { useCardSetViewBreadcrumbs } from "@/features/cardsetview/presentation/web/infra/useCardSetViewBreadcrumbs";
 import { useCardSetViewParams } from "@/features/cardsetview/presentation/web/infra/useCardSetViewParams";
 import { buildWidthControl } from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
-
 import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import { useToast } from "@/contexts/ToastContext";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";

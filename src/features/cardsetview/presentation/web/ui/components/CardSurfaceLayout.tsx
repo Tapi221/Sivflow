@@ -1,8 +1,6 @@
 import type { CSSProperties } from "react";
 import React from "react";
-
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-
 import { cn } from "@/lib/utils";
 
 export type CardSurfaceLayoutProps = {

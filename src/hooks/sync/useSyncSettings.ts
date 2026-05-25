@@ -1,5 +1,4 @@
-import { useCallback,useEffect, useState } from "react";
-
+import { useCallback, useEffect, useState } from "react";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";

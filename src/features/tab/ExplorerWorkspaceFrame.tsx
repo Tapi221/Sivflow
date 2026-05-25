@@ -1,5 +1,4 @@
 import type { CSSProperties, ReactNode } from "react";
-
 import { cn } from "@/lib/utils";
 type ExplorerWorkspaceFrameProps = {
   children: ReactNode;

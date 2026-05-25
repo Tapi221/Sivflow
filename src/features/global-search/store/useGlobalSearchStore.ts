@@ -1,5 +1,4 @@
 import { create } from "zustand";
-
 import type { GlobalSearchSource } from "@/features/global-search/model/globalSearchTypes";
 
 type GlobalSearchState = {

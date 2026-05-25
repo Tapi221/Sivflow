@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest";
-
-import {
-  clampScale,
-  computeNextScaleFromGesture,
-  computeNextScaleFromWheel,
-  normalizeScale,
-} from "@/components/pdf/pdfZoomUtils";
+import { clampScale, computeNextScaleFromGesture, computeNextScaleFromWheel, normalizeScale } from "@/components/pdf/pdfZoomUtils";
 
 describe("pdfZoomUtils", () => {
   describe("normalizeScale", () => {

@@ -1,10 +1,8 @@
 import { motion, type Transition } from "framer-motion";
-
 import { CalendarIcon } from "@/components/icons/icons.sidebar";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { TaskIcon, TimelineToolbarIcon } from "@/components/icons/icons.schedule";
 import { cn } from "@/lib/utils";
-
 import type { CalendarWorkspaceToolbarProps } from "@/features/calendar/scheduleScreen.types";
 
 const TAB_ICON_MAP = {

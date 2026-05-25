@@ -1,23 +1,5 @@
-import {collection,
-  type CollectionReference,
-  doc,
-  type DocumentData,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  type QueryConstraint,
-  type QueryDocumentSnapshot,
-  setDoc,
-  startAfter,
-  Timestamp,
-  where,} from "firebase/firestore";
-
-import {cardDocPathSegments,
-  cardsPathSegments,
-  folderDocPathSegments,
-  foldersPathSegments,} from "./firestorePaths";
-
+import { collection, type CollectionReference, doc, type DocumentData, getDocs, limit, orderBy, query, type QueryConstraint, type QueryDocumentSnapshot, setDoc, startAfter, Timestamp, where } from "firebase/firestore";
+import { cardDocPathSegments, cardsPathSegments, folderDocPathSegments, foldersPathSegments } from "./firestorePaths";
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import type { Card, Folder } from "@/types";
 

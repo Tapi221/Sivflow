@@ -1,9 +1,6 @@
 import type { Firestore } from "firebase/firestore";
 import type { FirebaseStorage } from "firebase/storage";
-
-import {firestoreDb,
-  requireFirestoreDb,
-  storage,} from "@/infrastructure/firebase/client";
+import { firestoreDb, requireFirestoreDb, storage } from "@/infrastructure/firebase/client";
 
 export const getFirestoreDb = (): Firestore | null => firestoreDb;
 

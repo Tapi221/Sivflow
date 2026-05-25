@@ -1,6 +1,5 @@
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
-
 import "@blocknote/react/style.css";
 
 export const BlockNotePlayground = () => {

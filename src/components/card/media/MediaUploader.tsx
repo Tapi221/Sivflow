@@ -1,25 +1,13 @@
-import React, {useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,} from "react";
-
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
-
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Check, RotateCcw, Upload, X } from "@/ui/icons";
-
 import { useAuthSession } from "@/contexts/AuthContext";
-import {resolveCardImageUrl,
-  type ResolvedCardImage,} from "@/services/cardImageResolver";
-import {getOrCreateImageBlobUrl,
-  removeImageBlobUrl,} from "@/services/imageBlobUrlSessionCache";
-import {deleteImageBlob,
-  getImageBlob,
-  putImageBlob,} from "@/services/imageFileStore";
+import { resolveCardImageUrl, type ResolvedCardImage } from "@/services/cardImageResolver";
+import { getOrCreateImageBlobUrl, removeImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
+import { deleteImageBlob, getImageBlob, putImageBlob } from "@/services/imageFileStore";
 import { getLocalDb } from "@/services/localDB";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import type { AssetRecord, UploadedImage } from "@/types";

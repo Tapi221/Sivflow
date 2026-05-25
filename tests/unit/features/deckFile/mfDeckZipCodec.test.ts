@@ -1,16 +1,6 @@
 import { describe, expect, it } from "vitest";
-
-import {
-  MF_DECK_FORMAT,
-  MF_DECK_MEDIA_URI_PREFIX,
-  MF_DECK_VERSION,
-  type MfDeckArchiveV1,
-  MfDeckValidationError,
-} from "@/features/deckFile/domain/mfDeckTypes";
-import {
-  decodeMfDeckArchive,
-  encodeMfDeckArchive,
-} from "@/features/deckFile/infra/web/mfDeckZipCodec";
+import { MF_DECK_FORMAT, MF_DECK_MEDIA_URI_PREFIX, MF_DECK_VERSION, type MfDeckArchiveV1, MfDeckValidationError } from "@/features/deckFile/domain/mfDeckTypes";
+import { decodeMfDeckArchive, encodeMfDeckArchive } from "@/features/deckFile/infra/web/mfDeckZipCodec";
 
 const createArchive = (): MfDeckArchiveV1 => ({
   manifest: {

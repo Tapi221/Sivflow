@@ -1,7 +1,6 @@
 import { memo, useMemo } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
 import { getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import * as T from "@/features/calendar/calendar.text";
@@ -10,7 +9,6 @@ import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-int
 import { MonthRowResizeBar } from "@/features/calendar/grid/height/MonthRowResizeBar.month.desktop";
 import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
 import { getVisibleMonthEventChipCount } from "@/features/calendar/grid/monthEventChipCount";
-
 import { cn } from "@/lib/utils";
 
 const EMPTY_EVENTS: GoogleCalendarEvent[] = [];

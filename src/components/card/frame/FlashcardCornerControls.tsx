@@ -1,14 +1,8 @@
 import React from "react";
-
-import {CARD_ACTION_BG_CLASS,
-  CARD_ACTION_COLOR_IDLE_CLASS,
-  CARD_ACTION_ICON_CLASS,} from "@constants/shared/flashcard";
-
+import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "@constants/shared/flashcard";
 import { Image as ImageIcon, Link, Volume2 } from "@/ui/icons";
-
 import { CardCornerActions } from "./CardCornerActions";
 import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcard.types";
-
 import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
 

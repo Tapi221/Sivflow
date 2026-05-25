@@ -1,5 +1,4 @@
 import type { ComponentType } from "react";
-
 import type { PdfDashboardRow } from "@/features/library-pdf/model/pdfLibraryRow";
 
 type IconBadgeTone = "slate" | "green" | "violet" | "blue" | "rose";

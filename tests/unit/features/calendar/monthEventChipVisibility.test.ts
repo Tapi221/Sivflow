@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-
 import { DEFAULT_MONTH_ROW_HEIGHT } from "@/features/calendar/calendar.constants.desktop";
 import { getVisibleMonthEventChipCount } from "@/features/calendar/grid/Grid.calendar.month.desktop";
 

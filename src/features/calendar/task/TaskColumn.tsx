@@ -1,13 +1,11 @@
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { motion } from "framer-motion";
 import { useMemo, type MouseEvent as ReactMouseEvent } from "react";
-
 import { TaskStatusDot } from "@/chip/icon/TaskStatusDot";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 import { TASK_TYPO } from "@/styles/tokens/typography";
-
 import { TASK_COLUMNS } from "./task.types";
 import type { Task, TaskStatus } from "./task.types";
 import { TaskCard } from "./TaskCard";

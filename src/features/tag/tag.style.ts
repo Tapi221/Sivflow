@@ -1,5 +1,4 @@
 import type { CSSProperties } from "react";
-
 import { TAG_COLOR_PALETTE } from "./tag.palette";
 import { getTagColorKey } from "./tag.parser";
 

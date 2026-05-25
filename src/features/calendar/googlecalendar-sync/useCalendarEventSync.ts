@@ -1,10 +1,8 @@
 import { endOfDay, startOfDay } from "date-fns";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useMemo, useState } from "react";
-
 import type { CalendarToolbarMode } from "@/features/calendar/calendar.types";
 import { auth } from "@/services/firebase";
-
 import { buildCalendarEventSyncRange, type BuildCalendarEventSyncRangeOptions } from "./calendarEventSyncRange";
 import { useGoogleCalendarPushSync } from "./useGoogleCalendarPushSync";
 

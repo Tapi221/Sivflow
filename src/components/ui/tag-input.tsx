@@ -1,25 +1,13 @@
 import * as React from "react";
-
 import type { DropResult } from "@hello-pangea/dnd";
-import { DragDropContext, Draggable,Droppable } from "@hello-pangea/dnd";
-
-import {getTagColorKey,
-  getTagColorSwatchStyle,
-  type TagColorKey,} from "@/features/tag/tagColor";
-
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import { getTagColorKey, getTagColorSwatchStyle, type TagColorKey } from "@/features/tag/tagColor";
 import { TagBadge } from "@/components/tag/TagBadge";
 import { TagChip } from "@/components/tag/TagChip";
-import {Command,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,} from "@/components/ui/command";
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { PlaceholderText } from "@/components/ui/placeholder-text";
-import {Popover,
-  PopoverContent,
-  PopoverTrigger,} from "@/components/ui/popover";
-import { Check, Palette,Plus, Tag as TagIcon } from "@/ui/icons";
-
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Check, Palette, Plus, Tag as TagIcon } from "@/ui/icons";
 import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 

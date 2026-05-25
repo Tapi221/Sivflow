@@ -5,11 +5,9 @@
  * - debounce 保存（side を ref で保持し flip 時の保存先ミスを防ぐ）
  * - unmount 時 flush
  */
-import React, { useCallback,useEffect, useRef, useState } from "react";
-
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.types";
 import { INK_DOCUMENT_VERSION, type InkDocument, type InkEditTool } from "@/components/ink/ink.types";
-
 import { useCards } from "@/hooks/card/useCards";
 
 interface UseFlashcardInkOptions {

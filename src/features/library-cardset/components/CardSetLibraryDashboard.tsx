@@ -1,5 +1,4 @@
 import { PdfLibraryWorkspaceToolbar } from "@/features/library-pdf/components/PdfLibraryWorkspaceToolbar";
-
 import type { Card, CardSet, Folder } from "@/types";
 
 type CardSetLibraryDashboardProps = {

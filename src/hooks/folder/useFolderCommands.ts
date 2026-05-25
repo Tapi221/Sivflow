@@ -1,7 +1,5 @@
 import { nanoid } from "nanoid";
-
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
-
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
 import type { Folder } from "@/types";

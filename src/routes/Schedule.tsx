@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { ScheduleScreen as DesktopScheduleScreen } from "@/screens/ScheduleScreen.desktop";
 import { ScheduleScreen as MobileScheduleScreen } from "@/screens/ScheduleScreen.mobile";
 

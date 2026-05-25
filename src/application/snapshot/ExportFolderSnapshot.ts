@@ -1,8 +1,5 @@
-import {buildCardSetById,
-  filterCardsByFolderId,} from "@/domain/card/selectors/cardFolder";
-
+import { buildCardSetById, filterCardsByFolderId } from "@/domain/card/selectors/cardFolder";
 import { createCreateSnapshotUseCase } from "./CreateSnapshot";
-
 import type { JsonFileExportPort } from "@/application/ports/JsonFileExportPort";
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
 import type { Card } from "@/types";

@@ -1,12 +1,6 @@
-import {CALENDAR_ARROW_DIFF_MAP,
-  CALENDAR_WEEK_DAYS_MONDAY,
-  CALENDAR_WEEK_DAYS_SUNDAY,} from "@constants/shared/calendar";
+import { CALENDAR_ARROW_DIFF_MAP, CALENDAR_WEEK_DAYS_MONDAY, CALENDAR_WEEK_DAYS_SUNDAY } from "@constants/shared/calendar";
 import { format } from "date-fns";
-
-import type {CalendarStudyLogLike,
-  CalendarTimestampLike,
-  CalendarWeekStartDay,} from "./calendar.types";
-
+import type { CalendarStudyLogLike, CalendarTimestampLike, CalendarWeekStartDay } from "./calendar.types";
 import type { Translations } from "@/i18n/translations";
 import { normalizeDate } from "@/shared/codec/date";
 

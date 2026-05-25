@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-
-import {
-  createLatestReviewLogPatch,
-  createReviewPatchFromRating,
-} from "@/services/reviewAlgorithm";
+import { createLatestReviewLogPatch, createReviewPatchFromRating } from "@/services/reviewAlgorithm";
 
 const createdAt = new Date("2026-03-20T03:00:00.000Z");
 const firstReviewedAt = new Date("2026-03-21T09:15:00.000Z");

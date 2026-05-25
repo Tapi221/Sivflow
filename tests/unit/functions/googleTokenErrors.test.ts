@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-
 import { classifyGoogleTokenEndpointFailure } from "../../../functions/src/gcal/tokenErrors";
 
 describe("classifyGoogleTokenEndpointFailure", () => {
