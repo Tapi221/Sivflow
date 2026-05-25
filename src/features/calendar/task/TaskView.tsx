@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "./task.types";
@@ -10,6 +11,8 @@ import { type BoardListViewMode } from "../../../chip/toggle/Toggle.boardlist";
 import { TaskToolbar } from "../toolbar/TaskToolbar";
 import { TaskBoardView } from "../view/TaskBoardView";
 import { TaskListView } from "./TaskListView";
+import { TaskContextMenu, TASK_CONTEXT_MENU_HEIGHT, TASK_CONTEXT_MENU_MARGIN, TASK_CONTEXT_MENU_PANEL_ID, TASK_CONTEXT_MENU_WIDTH, type TaskContextMenuUpdatePatch } from "@/chip/rightclickpanel/TaskContextMenu";
+import { RIGHT_CLICK_PANEL_NO_DRAG_STYLE, clampRightClickPanelPosition, useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPanelUtils";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
 
@@ -63,6 +66,12 @@ type GoogleTaskListMeta = {
 type ParsedGoogleTaskId = {
   taskListId: string;
   taskId: string;
+};
+
+type TaskContextMenuState = {
+  taskId: string;
+  x: number;
+  y: number;
 };
 
 const GOOGLE_TASK_ID_PREFIX = "google-task:";
@@ -225,6 +234,7 @@ export const TaskView = ({
   const localDbUserId = currentUser?.uid ?? "anonymous";
   const { tasks, addTask, deleteTask, moveTask, reorderTask, updateTask } =
     useTaskStore();
+  const taskContextMenuRef = useRef<HTMLDivElement | null>(null);
   const [viewMode, setViewMode] = useState<BoardListViewMode>("board");
   const [groupMode, setGroupMode] = useState<TaskGroupMode>("status");
   const [showModal, setShowModal] = useState(false);
@@ -237,6 +247,15 @@ export const TaskView = ({
     useState<GoogleTaskStatusOverrides>({});
   const [hasLoadedGoogleTaskStatusOverrides, setHasLoadedGoogleTaskStatusOverrides] =
     useState(false);
+  const [taskContextMenu, setTaskContextMenu] =
+    useState<TaskContextMenuState | null>(null);
+
+  useRightClickPanelDismiss(
+    TASK_CONTEXT_MENU_PANEL_ID,
+    Boolean(taskContextMenu),
+    taskContextMenuRef,
+    () => setTaskContextMenu(null),
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -399,6 +418,11 @@ export const TaskView = ({
     return [...visibleLocalTasks, ...googleTasks];
   }, [googleTasks, visibleLocalTasks]);
 
+  const taskContextMenuTask = useMemo(() => {
+    if (!taskContextMenu) return null;
+    return visibleTasks.find((task) => task.id === taskContextMenu.taskId) ?? null;
+  }, [taskContextMenu, visibleTasks]);
+
   const tasksByStatus = useMemo(() => {
     return TASK_COLUMNS.reduce(
       (acc, col) => {
@@ -453,6 +477,18 @@ export const TaskView = ({
   const handleOpenNewTaskModal = () => {
     setNewTaskStatus("not_started");
     setShowModal(true);
+  };
+
+  const handleOpenTaskContextMenu = (event: ReactMouseEvent<HTMLDivElement>, task: Task) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const { x, y } = clampRightClickPanelPosition(event.clientX, event.clientY, {
+      width: TASK_CONTEXT_MENU_WIDTH,
+      height: TASK_CONTEXT_MENU_HEIGHT,
+    });
+
+    setTaskContextMenu({ taskId: task.id, x, y });
   };
 
   const handleSaveTask = async (data: TaskCreateInput) => {
@@ -511,6 +547,44 @@ export const TaskView = ({
     }
 
     updateTask(taskId, { dueDate });
+  };
+
+  const handleUpdateTaskFromContextMenu = (taskId: string, patch: TaskContextMenuUpdatePatch) => {
+    const googleTaskId = parseGoogleTaskId(taskId);
+
+    if (googleTaskId) {
+      if (patch.status) {
+        setGoogleTaskStatusOverride(taskId, patch.status);
+        void onUpdateGoogleTask?.(
+          googleTaskId.taskListId,
+          googleTaskId.taskId,
+          toGoogleTaskStatusPatch(patch.status),
+        ).then(() => onRefreshGoogleTasks?.());
+      }
+
+      if (Object.prototype.hasOwnProperty.call(patch, "dueDate")) {
+        void onUpdateGoogleTask?.(googleTaskId.taskListId, googleTaskId.taskId, {
+          due: toGoogleDueDate(patch.dueDate ?? null),
+        }).then(() => onRefreshGoogleTasks?.());
+      }
+
+      if (patch.category) {
+        const destinationTaskListId = taskListIdByCategory.get(patch.category) ?? null;
+
+        if (destinationTaskListId && destinationTaskListId !== googleTaskId.taskListId) {
+          clearGoogleTaskStatusOverride(taskId);
+          void onMoveGoogleTaskList?.(
+            googleTaskId.taskListId,
+            googleTaskId.taskId,
+            destinationTaskListId,
+          ).then(() => onRefreshGoogleTasks?.());
+        }
+      }
+
+      return;
+    }
+
+    updateTask(taskId, patch);
   };
 
   const handleDeleteTask = (taskId: string) => {
@@ -609,6 +683,20 @@ export const TaskView = ({
     reorderTask(taskId, status, overTaskId, position);
   };
 
+  const taskContextMenuElement = taskContextMenu && taskContextMenuTask ? (
+    <TaskContextMenu
+      x={taskContextMenu.x}
+      y={taskContextMenu.y}
+      task={taskContextMenuTask}
+      categoryOptions={categoryOptions}
+      menuRef={taskContextMenuRef}
+      noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE}
+      onClose={() => setTaskContextMenu(null)}
+      onUpdateTask={handleUpdateTaskFromContextMenu}
+      onDeleteTask={handleDeleteTask}
+    />
+  ) : null;
+
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
       <TaskToolbar
@@ -631,6 +719,7 @@ export const TaskView = ({
           onAddTask={handleAddTask}
           onDeleteTask={handleDeleteTask}
           onToggleTaskDone={handleToggleTaskDone}
+          onTaskContextMenu={handleOpenTaskContextMenu}
           onReorderTask={handleReorderTask}
         />
       ) : (
@@ -641,8 +730,13 @@ export const TaskView = ({
           onRenameTask={handleRenameTask}
           onChangeTaskDueDate={handleChangeTaskDueDate}
           onDeleteTask={handleDeleteTask}
+          onTaskContextMenu={handleOpenTaskContextMenu}
         />
       )}
+
+      {typeof document === "undefined"
+        ? taskContextMenuElement
+        : createPortal(taskContextMenuElement, document.body)}
 
       <AnimatePresence>
         {showModal && (
