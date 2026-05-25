@@ -5,6 +5,8 @@ export const useLayoutRouteStateDesktop = () => {
 
   const isLibraryRoute = /^\/library(?:\/|$)/i.test(pathname);
 
+  const isFoldersRoute = /^\/folders(?:\/|$)/i.test(pathname);
+
   const isScheduleRoute = /^\/(?:schedule|calendar|tasks)(?:\/|$)/i.test(
     pathname,
   );
@@ -26,7 +28,7 @@ export const useLayoutRouteStateDesktop = () => {
 
   return {
     pathname,
-    isFoldersRoute: isLibraryRoute,
+    isFoldersRoute,
     isLibraryRoute,
     isScheduleRoute,
     isCardSetViewRoute,
