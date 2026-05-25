@@ -1,9 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export type ImportFormat = "xlsx" | "mfdeck" | "mfcard";
 
