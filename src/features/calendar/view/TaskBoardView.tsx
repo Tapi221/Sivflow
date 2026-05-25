@@ -1,5 +1,5 @@
 import { DndContext, DragOverlay, useDroppable } from "@dnd-kit/core";
-import { useCallback, useMemo, type CSSProperties, type WheelEvent } from "react";
+import { useCallback, useMemo, type CSSProperties, type MouseEvent as ReactMouseEvent, type WheelEvent } from "react";
 import { createPortal } from "react-dom";
 
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "../task/task.types";
@@ -18,6 +18,7 @@ type TaskBoardViewProps = {
   onAddTask: (status: string) => void;
   onDeleteTask: (taskId: string) => void;
   onToggleTaskDone: (taskId: string, done: boolean) => void;
+  onTaskContextMenu?: (event: ReactMouseEvent<HTMLDivElement>, task: Task) => void;
   onReorderTask: (
     taskId: string,
     status: TaskStatus,
@@ -35,7 +36,7 @@ type TaskBoardColumn = {
 
 type DroppableTaskColumnProps = Pick<
   TaskBoardViewProps,
-  "accountName" | "accountPhotoUrl" | "onDeleteTask" | "onToggleTaskDone"
+  "accountName" | "accountPhotoUrl" | "onDeleteTask" | "onToggleTaskDone" | "onTaskContextMenu"
 > & {
   column: TaskBoardColumn;
   tasks: Task[];
@@ -88,6 +89,7 @@ const DroppableTaskColumn = ({
   onAddTask,
   onDeleteTask,
   onToggleTaskDone,
+  onTaskContextMenu,
   translateStatusLabel = false,
 }: DroppableTaskColumnProps) => {
   const { setNodeRef } = useDroppable({
@@ -115,6 +117,7 @@ const DroppableTaskColumn = ({
         onAddTask={onAddTask}
         onDeleteTask={onDeleteTask}
         onToggleTaskDone={onToggleTaskDone}
+        onTaskContextMenu={onTaskContextMenu}
         translateStatusLabel={translateStatusLabel}
       />
     </div>
@@ -130,6 +133,7 @@ export const TaskBoardView = ({
   onAddTask,
   onDeleteTask,
   onToggleTaskDone,
+  onTaskContextMenu,
   onReorderTask,
 }: TaskBoardViewProps) => {
   const sectionGroups = useMemo<SectionGroup[]>(() => {
@@ -327,6 +331,7 @@ export const TaskBoardView = ({
             onAddTask={boardColumn.canAddTask ? onAddTask : undefined}
             onDeleteTask={onDeleteTask}
             onToggleTaskDone={onToggleTaskDone}
+            onTaskContextMenu={onTaskContextMenu}
             translateStatusLabel={boardColumn.translateStatusLabel}
           />
         ))}
