@@ -168,7 +168,11 @@ const isReconnectRequiredError = (error: unknown): boolean => {
 };
 
 const toErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
+  error instanceof Error
+    ? error.message.includes("Google did not return a new refresh token")
+      ? "Google が新しい連携トークンを返しませんでした。Google アカウントの「サードパーティ製アプリとサービス」からこのアプリのアクセス権を削除してから、もう一度再連携してください。"
+      : error.message
+    : String(error);
 
 const toGoogleCalendarAuthErrorMessage = (error: unknown): string =>
   `Google Calendar token refresh failed: ${toErrorMessage(error)}`;
