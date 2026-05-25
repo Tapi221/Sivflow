@@ -25,10 +25,10 @@ export const useGoogleCalendarLayer = () => {
     isAnyConnecting,
   } = useMultiAccountGoogleCalendar();
 
-  const taskListsByAccount = useGoogleTaskLists(accounts, updateAccountToken);
+  const taskLists = useGoogleTaskLists(accounts, updateAccountToken);
   const googleTasks = useGoogleTasks(
     accounts,
-    taskListsByAccount,
+    taskLists.byAccount,
     updateAccountToken,
   );
 
@@ -56,9 +56,10 @@ export const useGoogleCalendarLayer = () => {
 
   return {
     googleAccounts: accounts,
-    taskListsByAccount,
+    taskListsByAccount: taskLists.byAccount,
     googleTasksByAccount: googleTasks.byAccount,
     refreshGoogleTasks: googleTasks.refreshAll,
+    retryGoogleTaskLists: taskLists.retryAll,
     createGoogleTask: googleTasks.createTask,
     updateGoogleTask: googleTasks.updateTask,
     moveGoogleTaskList: googleTasks.moveTaskList,
