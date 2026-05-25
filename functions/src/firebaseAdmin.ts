@@ -6,13 +6,13 @@ let firestoreModulePromise: Promise<typeof import("firebase-admin/firestore")> |
 
 export const ensureFirebaseAdmin = async (): Promise<App> => {
   adminAppPromise ??= (async () => {
-    const { getApp, getApps, initializeApp } = await import("firebase-admin/app");
+    const { getApp, initializeApp } = await import("firebase-admin/app");
 
-    if (getApps().length === 0) {
+    try {
+      return getApp();
+    } catch {
       return initializeApp();
     }
-
-    return getApp();
   })();
 
   return await adminAppPromise;
