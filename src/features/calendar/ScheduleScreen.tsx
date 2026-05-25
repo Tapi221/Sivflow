@@ -438,20 +438,20 @@ export const ScheduleScreen = ({
           <h1 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
             {format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale })}
           </h1>
-        </div>
 
-        <div className="mr-10 flex items-center gap-2">
-          <ViewModeDropdown
-            value={selectedViewMode}
-            onChange={handleSelectViewMode}
-            options={viewOptions}
-          />
+          <div className="flex shrink-0 items-center gap-2">
+            <ViewModeDropdown
+              value={selectedViewMode}
+              onChange={handleSelectViewMode}
+              options={viewOptions}
+            />
 
-          <TodayBar
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            onToday={handleToday}
-          />
+            <TodayBar
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              onToday={handleToday}
+            />
+          </div>
         </div>
       </div>
     );
