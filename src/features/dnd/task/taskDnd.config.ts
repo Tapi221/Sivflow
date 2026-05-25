@@ -1,8 +1,9 @@
-import { type DropAnimation, MeasuringStrategy } from "@dnd-kit/core";
+import { type DropAnimation, MeasuringFrequency, MeasuringStrategy } from "@dnd-kit/core";
 
 export const TASK_DND_MEASURING_CONFIG = {
   droppable: {
     strategy: MeasuringStrategy.WhileDragging,
+    frequency: MeasuringFrequency.Optimized,
   },
 };
 
