@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps -- large legacy explorer handlers intentionally stabilized to avoid interaction regressions. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { NodeApi } from "react-arborist";
 import { toVirtualMfCardDisplayName, toVirtualMfDeckDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
