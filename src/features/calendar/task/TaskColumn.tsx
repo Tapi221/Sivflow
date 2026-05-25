@@ -157,7 +157,7 @@ export const TaskColumn = ({
   return (
     <div
       className={cn(
-        "flex h-full min-h-0 w-full min-w-0 flex-col px-3 pt-3 pb-0",
+        "flex h-full min-h-0 w-full min-w-0 flex-col px-3 pt-1.5 pb-0",
         "transition-[background-color,box-shadow] duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
         isDragActive && "shadow-[inset_0_0_0_1px_rgba(17,24,39,0.03)]",
       )}
