@@ -17,7 +17,7 @@ const TOGGLE_MOTION_TRANSITION: Transition = {
 };
 const TOGGLE_ACTIVE_ICON_CLASS_NAME = "text-[#8c8c8c]";
 const TOGGLE_INACTIVE_ICON_CLASS_NAME = "text-[#b7b7b7]";
-const TOGGLE_ICON_STROKE_WIDTH = 1.5;
+const TOGGLE_ICON_STROKE_WIDTH = 1.65;
 
 const toggleItems = [
   {
@@ -25,28 +25,39 @@ const toggleItems = [
     label: "Board",
     icon: (
       <svg
-        viewBox="0 0 14 14"
+        viewBox="0 0 18 18"
         fill="none"
-        className="block h-4 w-4"
+        className="block h-[17px] w-[17px]"
         aria-hidden="true"
       >
         <rect
-          x="1"
-          y="1"
+          x="3"
+          y="3.25"
           width="5"
-          height="12"
-          rx="1"
+          height="11.5"
+          rx="1.75"
+          fill="currentColor"
+          fillOpacity="0.08"
           stroke="currentColor"
           strokeWidth={TOGGLE_ICON_STROKE_WIDTH}
         />
         <rect
-          x="8"
-          y="1"
+          x="10"
+          y="3.25"
           width="5"
-          height="12"
-          rx="1"
+          height="11.5"
+          rx="1.75"
+          fill="currentColor"
+          fillOpacity="0.08"
           stroke="currentColor"
           strokeWidth={TOGGLE_ICON_STROKE_WIDTH}
+        />
+        <path
+          d="M5.05 5.45h.9M12.05 5.45h.9"
+          stroke="currentColor"
+          strokeWidth={1.35}
+          strokeLinecap="round"
+          opacity="0.58"
         />
       </svg>
     ),
@@ -56,15 +67,21 @@ const toggleItems = [
     label: "List",
     icon: (
       <svg
-        viewBox="0 0 14 14"
+        viewBox="0 0 18 18"
         fill="none"
-        className="block h-4 w-4"
+        className="block h-[17px] w-[17px]"
         aria-hidden="true"
       >
         <path
-          d="M1.5 3.5h11M1.5 7h11M1.5 10.5h11"
+          d="M7.1 5h7.4M7.1 9h7.4M7.1 13h7.4"
           stroke="currentColor"
           strokeWidth={TOGGLE_ICON_STROKE_WIDTH}
+          strokeLinecap="round"
+        />
+        <path
+          d="M3.75 5h.01M3.75 9h.01M3.75 13h.01"
+          stroke="currentColor"
+          strokeWidth={2.4}
           strokeLinecap="round"
         />
       </svg>
