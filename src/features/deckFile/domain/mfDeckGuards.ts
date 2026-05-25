@@ -1,16 +1,5 @@
 import { isMfDeckMediaPath } from "@/features/deckFile/domain/mfDeckMedia";
-import {MF_DECK_FORMAT,
-  MF_DECK_MAX_BLOCKS_PER_FACE,
-  MF_DECK_MAX_CARDS,
-  MF_DECK_MAX_MEDIA_ENTRIES,
-  MF_DECK_MEDIA_MANIFEST_PATH,
-  MF_DECK_VERSION,
-  type MfDeckArchiveV1,
-  type MfDeckCardsJsonV1,
-  type MfDeckIssue,
-  type MfDeckManifestV1,
-  type MfDeckMediaManifestV1,
-  type MfDeckValidationResult,} from "@/features/deckFile/domain/mfDeckTypes";
+import { MF_DECK_FORMAT, MF_DECK_MAX_BLOCKS_PER_FACE, MF_DECK_MAX_CARDS, MF_DECK_MAX_MEDIA_ENTRIES, MF_DECK_MEDIA_MANIFEST_PATH, MF_DECK_VERSION, type MfDeckArchiveV1, type MfDeckCardsJsonV1, type MfDeckIssue, type MfDeckManifestV1, type MfDeckMediaManifestV1, type MfDeckValidationResult } from "@/features/deckFile/domain/mfDeck.types";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
