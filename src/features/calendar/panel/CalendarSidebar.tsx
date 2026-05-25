@@ -341,7 +341,7 @@ const GoogleAccountSection = ({
                 className="mt-1 rounded-full bg-[#f4f4f4] px-2 py-0.5 text-[11px] font-semibold text-[#5f6574] transition hover:bg-[#ececec] active:scale-[0.97]"
                 onClick={onReconnect}
               >
-                Google を再連携
+                再試行
               </button>
             </div>
           )}
