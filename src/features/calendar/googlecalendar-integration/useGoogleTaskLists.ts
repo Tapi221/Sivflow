@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer } from "react";
 import { fetchGoogleTaskLists } from "./gcal.api";
 import { refreshCalendarAccessToken, requestCalendarAccessToken } from "./gcal.oauth";
 import { getServerStoredGoogleCalendarAccessToken, isServerStoredGoogleOAuthEnabled } from "./gcal.server-oauth";
@@ -24,11 +24,6 @@ type AccountTokenSnapshot = {
   accessToken: string | null;
   refreshToken: string | null;
   connectionStatus: GoogleAccountEntry["connectionStatus"];
-};
-
-export type UseGoogleTaskListsResult = {
-  byAccount: GoogleTaskListsState;
-  retryAll: () => void;
 };
 
 const EMPTY_ACCOUNT_STATE: GoogleTaskListAccountState = {
@@ -234,9 +229,9 @@ const buildAccountTokenKey = (accounts: GoogleAccountEntry[]) =>
 export const useGoogleTaskLists = (
   accounts: GoogleAccountEntry[],
   onAccessTokenRecovered?: (update: GoogleAccountTokenUpdate) => void,
-): UseGoogleTaskListsResult => {
+  retryNonce = 0,
+): GoogleTaskListsState => {
   const [state, dispatch] = useReducer(reduceGoogleTaskLists, {});
-  const [retryNonce, setRetryNonce] = useState(0);
 
   const accountTokenKey = buildAccountTokenKey(accounts);
 
@@ -250,10 +245,6 @@ export const useGoogleTaskLists = (
       })),
     [accounts, accountTokenKey],
   );
-
-  const retryAll = useCallback(() => {
-    setRetryNonce((value) => value + 1);
-  }, []);
 
   useEffect(() => {
     dispatch({
@@ -288,8 +279,5 @@ export const useGoogleTaskLists = (
     return () => abortController.abort();
   }, [accountTokens, onAccessTokenRecovered, retryNonce]);
 
-  return {
-    byAccount: state,
-    retryAll,
-  };
+  return state;
 };
