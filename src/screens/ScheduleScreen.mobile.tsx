@@ -1,6 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, endOfDay, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, isToday, startOfDay, startOfMonth, startOfWeek } from "date-fns";
-
 import { ToggleCalendarTimelineTask } from "@/chip/toggle/Toggle.calendartimelinetask";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import type { CalendarViewMode, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
