@@ -1,5 +1,4 @@
 import { type MouseEvent, type ReactNode } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
@@ -12,13 +11,10 @@ import "./sidebar.desktop.css";
 type SidebarNavItem = {
   id: string;
   label: string;
-  to?: string;
   icon: ReactNode;
-  exactPath?: boolean;
   sectionKey?: "home" | "review" | "library" | "schedule" | "settings";
   onClick?: () => void;
   disabled?: boolean;
-  match?: (pathname: string, searchParams: URLSearchParams) => boolean;
 };
 
 type SidebarProps = {
@@ -33,29 +29,20 @@ const mainNavItems: SidebarNavItem[] = [
   {
     id: "home",
     label: "Home",
-    to: "/folders?home=1",
     icon: <HomeIcon className="app-sidebar__nav-icon" />,
     sectionKey: "home",
-    match: (pathname, searchParams) =>
-      pathname === "/folders" && searchParams.get("home") === "1",
   },
   {
     id: "library",
     label: "Library",
-    to: "/library",
     icon: <LibraryIcon className="app-sidebar__nav-icon" />,
     sectionKey: "library",
-    match: (pathname, searchParams) =>
-      pathname === "/library" ||
-      (pathname === "/folders" && searchParams.get("home") !== "1"),
   },
   {
     id: "calendar",
     label: "Schedule",
-    to: "/schedule",
     icon: <ClockIcon className="app-sidebar__nav-icon" />,
     sectionKey: "schedule",
-    exactPath: true,
   },
   {
     id: "explore",
@@ -63,29 +50,6 @@ const mainNavItems: SidebarNavItem[] = [
     icon: <GalleryIcon className="app-sidebar__nav-icon" />,
   },
 ];
-
-// ── アクティブ状態の判定 ─────────────────────────────────────
-
-const isNavItemActiveByLocation = (
-  item: SidebarNavItem,
-  pathname: string,
-  search: string,
-) => {
-  const normalizedPathname = pathname.toLowerCase();
-  const searchParams = new URLSearchParams(search);
-
-  if (item.match) return item.match(normalizedPathname, searchParams);
-  if (!item.to) return false;
-
-  const targetPath = item.to.split("?")[0]?.toLowerCase() ?? item.to;
-
-  if (item.exactPath) return normalizedPathname === targetPath;
-
-  return (
-    normalizedPathname === targetPath ||
-    normalizedPathname.startsWith(`${targetPath}/`)
-  );
-};
 
 // ── ナビリンク（レール: アイコン＋aria-label） ───────────────
 
@@ -96,9 +60,6 @@ const SidebarNavLink = ({
   item: SidebarNavItem;
   disabled?: boolean;
 }) => {
-  const navigate = useNavigate();
-  const { pathname, search } = useLocation();
-
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const openSectionTab = useWorkspaceTabsStore((state) => state.openSectionTab);
@@ -109,13 +70,7 @@ const SidebarNavLink = ({
       : (tabs.find((tab) => tab.id === activeTabId) ?? null);
 
   const isDisabled = disabled ?? item.disabled ?? false;
-
-  const isActive =
-    (item.sectionKey !== undefined &&
-    activeTab?.sectionKey === item.sectionKey &&
-    pathname !== "/folders"
-      ? true
-      : false) || isNavItemActiveByLocation(item, pathname, search);
+  const isActive = item.sectionKey !== undefined && activeTab?.sectionKey === item.sectionKey;
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -126,10 +81,6 @@ const SidebarNavLink = ({
 
     if (item.sectionKey) {
       openSectionTab(item.sectionKey);
-    }
-
-    if (item.to) {
-      navigate(item.to);
     }
   };
 
@@ -179,10 +130,8 @@ const Sidebar = ({
     {
       id: "settings",
       label: "設定",
-      to: "/settings",
       icon: <SettingIcon className="app-sidebar__nav-icon" />,
       sectionKey: "settings",
-      exactPath: true,
       onClick: onOpenSettings,
     },
   ];
