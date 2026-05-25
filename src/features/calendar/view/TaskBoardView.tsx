@@ -78,6 +78,17 @@ const getCategoryConfig = (category: string) => {
   );
 };
 
+const isSameBoardColumn = (
+  left: TaskBoardColumn,
+  right: TaskBoardColumn,
+) => {
+  return (
+    left.id === right.id &&
+    left.label === right.label &&
+    left.dotColor === right.dotColor
+  );
+};
+
 const isSameDropTarget = (
   left?: TaskDropTarget | null,
   right?: TaskDropTarget | null,
@@ -144,7 +155,7 @@ const DroppableTaskColumn = memo(({
   );
 }, (previous, next) => {
   return (
-    previous.column === next.column &&
+    isSameBoardColumn(previous.column, next.column) &&
     previous.tasks === next.tasks &&
     isSameDropTarget(previous.activeDropTarget, next.activeDropTarget) &&
     previous.activeTaskId === next.activeTaskId &&
