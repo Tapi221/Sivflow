@@ -148,7 +148,7 @@ export const TaskTagStrip = () => {
           </button>
 
           <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex w-max items-center gap-2 px-1">
+            <div className="flex w-max items-center gap-2 px-1 py-0.5">
               {tags.map((tag) => {
                 const tagColorKey = getTagColorKey(tag.color);
 
@@ -156,7 +156,7 @@ export const TaskTagStrip = () => {
                   <button
                     key={tag.id}
                     type="button"
-                    className="group shrink-0 max-w-[180px] cursor-context-menu rounded-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
+                    className="group flex min-w-0 max-w-[180px] shrink-0 cursor-context-menu rounded-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
                     aria-label={`${tag.name}の色を変更`}
                     onClick={() => setContextMenu(null)}
                     onPointerDownCapture={(event) => {
@@ -168,7 +168,7 @@ export const TaskTagStrip = () => {
                     <TagChip
                       label={tag.name}
                       colorKey={tagColorKey}
-                      className="pointer-events-none max-w-full text-[11px] font-semibold leading-[1.3] tabular-nums transition-[filter,box-shadow] duration-100 group-hover:brightness-[0.96] group-hover:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
+                      className="pointer-events-none h-6 min-w-0 max-w-full px-3 text-[11px] font-semibold leading-[1.35] tabular-nums transition-[filter,box-shadow] duration-100 group-hover:brightness-[0.96] group-hover:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
                     />
                   </button>
                 );
