@@ -1,8 +1,9 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, endOfDay, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, isToday, startOfDay, startOfMonth, startOfWeek } from "date-fns";
 
+import { ToggleCalendarTimelineTask } from "@/chip/toggle/Toggle.calendartimelinetask";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
-import type { CalendarToolbarMode, CalendarViewMode, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarViewMode, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
 import { TaskView } from "@/features/calendar/task/TaskView";
 import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCalendarEvents";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
@@ -11,11 +12,6 @@ import { cn } from "@/lib/utils";
 
 const WEEK_STARTS_ON_MONDAY = 1;
 const MAX_AGENDA_EVENTS = 12;
-
-type MobileModeOption = {
-  value: CalendarToolbarMode;
-  label: string;
-};
 
 type MobileViewOption = {
   value: CalendarViewMode;
@@ -95,11 +91,11 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
     deleteGoogleTask,
   } = pane;
 
-  const modeOptions = useMemo<MobileModeOption[]>(() => [
-    { value: "calendar", label: t.calendarTab },
-    { value: "timeline", label: t.timelineTab },
-    { value: "task", label: t.taskTab },
-  ], [t.calendarTab, t.taskTab, t.timelineTab]);
+  const modeTabs = useMemo(() => [
+    { value: "calendar" as const, label: t.calendarTab, onClick: () => setActiveMode("calendar") },
+    { value: "timeline" as const, label: t.timelineTab, onClick: () => setActiveMode("timeline") },
+    { value: "task" as const, label: t.taskTab, onClick: () => setActiveMode("task") },
+  ], [setActiveMode, t.calendarTab, t.taskTab, t.timelineTab]);
 
   const viewOptions = useMemo<MobileViewOption[]>(() => [
     { value: "month", label: t.viewMonth },
@@ -217,6 +213,7 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
+            <ToggleCalendarTimelineTask activeMode={activeMode} tabs={modeTabs} />
             <button type="button" className="flex h-9 min-w-9 items-center justify-center rounded-full border border-[#e5e5ea] bg-white px-3 text-[13px] font-semibold text-[#1f6feb] shadow-[0_1px_2px_rgba(15,23,42,0.08)]" onClick={handleToday}>
               {t.todayButton}
             </button>
@@ -230,14 +227,6 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
               </button>
             )}
           </div>
-        </div>
-
-        <div className="mt-4 grid grid-cols-3 rounded-[18px] bg-[#f2f2f7] p-1">
-          {modeOptions.map((option) => (
-            <button key={option.value} type="button" className={cn("h-9 rounded-[14px] text-[13px] font-semibold transition", activeMode === option.value ? "bg-white text-[#1c1c1e] shadow-[0_1px_3px_rgba(15,23,42,0.14)]" : "text-[#6e6e73]")} onClick={() => setActiveMode(option.value)} aria-pressed={activeMode === option.value}>
-              {option.label}
-            </button>
-          ))}
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-3">
