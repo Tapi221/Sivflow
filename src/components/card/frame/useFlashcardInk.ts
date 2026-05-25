@@ -7,11 +7,8 @@
  */
 import React, { useCallback,useEffect, useRef, useState } from "react";
 
-import type {InkHistoryState,
-  InkLayerHandle,} from "@/components/ink/types";
-import {INK_DOCUMENT_VERSION,
-  type InkDocument,
-  type InkEditTool,} from "@/components/ink/inkTypes";
+import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.types";
+import { INK_DOCUMENT_VERSION, type InkDocument, type InkEditTool } from "@/components/ink/ink.types";
 
 import { useCards } from "@/hooks/card/useCards";
 
