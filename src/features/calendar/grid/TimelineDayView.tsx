@@ -108,7 +108,7 @@ const TimelineEventChip = ({ event }: { event: GoogleCalendarEvent }) => {
 
   return (
     <div
-      className="flex h-full items-center gap-1 overflow-hidden rounded-md border-l-[3px] px-1.5 text-[11px] font-semibold leading-none shadow-[0_1px_2px_rgba(15,23,42,0.08)]"
+      className="flex h-full items-center gap-1 overflow-hidden rounded-md border-l-[3px] px-1.5 text-[11px] font-semibold leading-none"
       style={{ background: tokens.bg, borderLeftColor: tokens.border, color: tokens.text }}
       title={event.title || "Untitled"}
     >
