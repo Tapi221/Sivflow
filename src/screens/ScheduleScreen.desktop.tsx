@@ -1,8 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns";
-import { TodayBar } from "@/chip/bar/TodayBar";
-import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
-import { SidebarPanelIcon } from "@/components/icons/icons.schedule";
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
@@ -15,6 +12,7 @@ import { TaskView } from "@/features/calendar/task/TaskView";
 import { useTaskCalendarEvents } from "@/features/calendar/task/hooks/useTaskCalendarEvents";
 import { CalendarWorkspaceToolbar } from "@/features/calendar/toolbar/ScheduleToolbar";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
+import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
 
@@ -26,9 +24,6 @@ const IOS_CALENDAR_MONTH_SURFACE_CLASS =
 
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
   "border-transparent bg-white shadow-none";
-
-const DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS =
-  "flex h-7 w-8 min-w-0 shrink-0 items-center justify-center rounded-lg border border-transparent bg-transparent p-0 text-[#8c8c8c] shadow-none appearance-none select-none outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:bg-[#f7f7f7] hover:text-[#6e6e73] focus:outline-none focus:ring-0 focus-visible:outline-none motion-reduce:transition-none";
 
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const APP_PROJECT_COLORS = [
@@ -295,6 +290,13 @@ export const ScheduleScreen = ({
     ? "日詳細パネルを閉じる"
     : "日詳細パネルを開く";
 
+  const headerTitleDate =
+    selectedViewMode === "month" ? monthTitleDate : titleDate;
+
+  const headerTitleLabel = format(headerTitleDate, monthLabelFormat, {
+    locale: dateFnsLocale,
+  });
+
   const handleToggleDayDetailPanel = useCallback(() => {
     if (!canShowDayDetailPanel) return;
 
@@ -319,48 +321,6 @@ export const ScheduleScreen = ({
     },
     [handleMonthCellSelectDate],
   );
-
-  const renderViewHeader = (className: string) => {
-    const headerTitleDate =
-      selectedViewMode === "month" ? monthTitleDate : titleDate;
-
-    return (
-      <div className={className}>
-        <div className="flex min-w-0 items-center gap-3">
-          <h1 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
-            {format(headerTitleDate, monthLabelFormat, { locale: dateFnsLocale })}
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <ViewModeDropdown
-            value={selectedViewMode}
-            onChange={handleSelectViewMode}
-            options={viewOptions}
-          />
-
-          <TodayBar
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            onToday={handleToday}
-          />
-
-          {canShowDayDetailPanel ? (
-            <button
-              type="button"
-              className={DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS}
-              onClick={handleToggleDayDetailPanel}
-              aria-label={dayDetailToggleLabel}
-              aria-pressed={showDayDetailPanel}
-              aria-expanded={showDayDetailPanel}
-            >
-              <SidebarPanelIcon className="h-4 w-4 -scale-x-100" />
-            </button>
-          ) : null}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <CarvePanelShell
@@ -410,9 +370,20 @@ export const ScheduleScreen = ({
       viewportRef={contentViewportRef}
     >
       <CarvePanel hasTrailingPanel={hasTrailingPanel}>
-        {renderViewHeader(
-          "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
-        )}
+        <ScheduleScreenHeaderDesktop
+          titleLabel={headerTitleLabel}
+          selectedViewMode={selectedViewMode}
+          viewOptions={viewOptions}
+          canShowDayDetailPanel={canShowDayDetailPanel}
+          showDayDetailPanel={showDayDetailPanel}
+          dayDetailToggleLabel={dayDetailToggleLabel}
+          onSelectViewMode={handleSelectViewMode}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          onToday={handleToday}
+          onToggleDayDetailPanel={handleToggleDayDetailPanel}
+          className="mb-2 flex shrink-0 items-center justify-between px-5 pt-4"
+        />
 
         {activeMode === "task" ? (
           <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border-0 bg-white">
