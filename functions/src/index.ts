@@ -55,7 +55,7 @@ const decryptRefreshToken = (payload: string): string => {
   try {
     const raw = Buffer.from(payload, "base64");
     if (raw.length < 29) {
-      throw new HttpsError("failed-precondition", "Invalid encrypted refresh token. Reconnect Google Calendar.");
+      throw new HttpsError("failed-precondition", "Stored refresh token payload is invalid.");
     }
     const iv = raw.subarray(0, 12);
     const authTag = raw.subarray(12, 28);
@@ -67,7 +67,7 @@ const decryptRefreshToken = (payload: string): string => {
     if (error instanceof HttpsError) throw error;
 
     console.error("[GoogleCalendarOAuth] stored refresh token decrypt failed", { error });
-    throw new HttpsError("failed-precondition", "Stored refresh token decrypt failed. Reconnect Google Calendar.");
+    throw new HttpsError("failed-precondition", "Stored refresh token is not readable by the current server key.");
   }
 };
 
@@ -173,7 +173,7 @@ export const exchangeGoogleCalendarCode = onCall(
       });
       throw new HttpsError(
         "failed-precondition",
-        "Google did not return a refresh token and no stored refresh token exists. Reconnect using consent/select_account and remove the prior Google grant if needed.",
+        "Google did not return a refresh token and no stored refresh token exists.",
       );
     }
 

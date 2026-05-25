@@ -25,6 +25,7 @@ export const ExportMfDeckButton = ({
 }: ExportMfDeckButtonProps) => {
   const toast = useToast();
   const [isExporting, setIsExporting] = useState(false);
+  const label = isExporting ? "書き出し中..." : ".mfdeck 書き出し";
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -41,7 +42,7 @@ export const ExportMfDeckButton = ({
         deckName: cardSet.name || "manifolia-deck",
       });
 
-      toast.success("MFDeck \u3092\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u3057\u307e\u3057\u305f\u3002");
+      toast.success("MFDeck をエクスポートしました。");
     } catch (error) {
       console.error("[ExportMfDeckButton] export failed", error);
 
@@ -50,7 +51,7 @@ export const ExportMfDeckButton = ({
         return;
       }
 
-      toast.error("MFDeck \u306e\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002");
+      toast.error("MFDeck のエクスポートに失敗しました。");
     } finally {
       setIsExporting(false);
     }
@@ -63,9 +64,11 @@ export const ExportMfDeckButton = ({
       size="sm"
       onClick={handleExport}
       disabled={disabled || isExporting}
-      className="rounded-full bg-white/85 shadow-sm backdrop-blur"
+      title={label}
+      aria-label={label}
+      className="min-w-0 max-w-[150px] overflow-hidden rounded-full bg-white/85 shadow-sm backdrop-blur"
     >
-      {isExporting ? "\u66f8\u304d\u51fa\u3057\u4e2d..." : ".mfdeck \u66f8\u304d\u51fa\u3057"}
+      <span className="min-w-0 truncate whitespace-nowrap">{label}</span>
     </Button>
   );
 };
