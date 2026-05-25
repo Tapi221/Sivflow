@@ -8,12 +8,12 @@ export const MONTH_GRID_OVERFLOW_TEXT_CLASS = "bottom-2 right-3 text-[11px] lead
 
 //Daydetail
 export const DAY_DETAIL_HEADER_HEIGHT_CLASS = "h-8";
-export const DAY_DETAIL_TIME_LABEL_WIDTH_CLASS = "w-16";
+export const DAY_DETAIL_TIME_LABEL_WIDTH_CLASS = "w-12";
 export const DAY_DETAIL_EVENT_PADDING_CLASS = "px-2 py-1";
 export const DAY_DETAIL_EVENT_RADIUS_CLASS = "rounded-md";
 export const DAY_DETAIL_EVENT_TEXT_CLASS = "text-[12px]";
 export const DAY_DETAIL_SCROLL_AREA_CLASS = "overflow-y-auto";
-export const DAY_DETAIL_CURRENT_TIME_LINE_CLASS = "left-16 right-0 h-px";
+export const DAY_DETAIL_CURRENT_TIME_LINE_CLASS = "left-12 right-0 h-px";
 export const DAY_DETAIL_CURRENT_TIME_LABEL_CLASS = "-translate-y-1/2 text-[10px]";
 
 // WeekDay
