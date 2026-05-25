@@ -30,7 +30,8 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS =
 const DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS =
   "absolute right-4 top-2 z-50 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg border border-transparent bg-transparent p-0 text-[#8c8c8c] shadow-none appearance-none select-none outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] hover:text-[#8c8c8c] focus:outline-none focus:ring-0 focus-visible:outline-none motion-reduce:transition-none";
 
-const DAY_DETAIL_PANEL_AUTO_OPEN_MIN_WIDTH_PX = 1180;
+const DAY_DETAIL_PANEL_WIDTH_PX = 260;
+const DAY_DETAIL_PANEL_MIN_CALENDAR_WIDTH_PX = 720;
 const VIEW_HEADER_CONTROLS_RIGHT_INSET_PX = 56;
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const APP_PROJECT_COLORS = [
@@ -45,10 +46,11 @@ const APP_PROJECT_COLORS = [
 
 type StoredAppCalendarItem = Partial<AppCalendarItem>;
 
-const getCanFitDayDetailPanel = (): boolean => {
+const getInitialCanFitDayDetailPanel = (): boolean => {
   if (typeof window === "undefined") return true;
 
-  return window.innerWidth >= DAY_DETAIL_PANEL_AUTO_OPEN_MIN_WIDTH_PX;
+  return window.innerWidth >=
+    DAY_DETAIL_PANEL_WIDTH_PX + DAY_DETAIL_PANEL_MIN_CALENDAR_WIDTH_PX;
 };
 
 const createAppProjectId = (): string => {
@@ -130,11 +132,12 @@ export const ScheduleScreen = ({
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
+  const [calendarViewportWidth, setCalendarViewportWidth] = useState(0);
   const [canFitDayDetailPanel, setCanFitDayDetailPanel] = useState(
-    getCanFitDayDetailPanel,
+    getInitialCanFitDayDetailPanel,
   );
   const [isDayDetailPanelOpen, setIsDayDetailPanelOpen] = useState(
-    getCanFitDayDetailPanel,
+    getInitialCanFitDayDetailPanel,
   );
   const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(
     readStoredAppProjects,
@@ -196,28 +199,24 @@ export const ScheduleScreen = ({
   } = pane;
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const el = contentViewportRef.current;
+    if (!el) return;
 
-    const mediaQuery = window.matchMedia(
-      `(min-width: ${DAY_DETAIL_PANEL_AUTO_OPEN_MIN_WIDTH_PX}px)`,
-    );
-
-    const syncDayDetailPanelAvailability = (matches: boolean) => {
-      setCanFitDayDetailPanel(matches);
-      setIsDayDetailPanelOpen(matches);
+    const updateCalendarViewportWidth = (width: number) => {
+      setCalendarViewportWidth(width);
     };
 
-    const handleMediaQueryChange = (event: MediaQueryListEvent) => {
-      syncDayDetailPanelAvailability(event.matches);
-    };
+    const resizeObserver = new ResizeObserver((entries) => {
+      updateCalendarViewportWidth(entries[0]?.contentRect.width ?? 0);
+    });
 
-    syncDayDetailPanelAvailability(mediaQuery.matches);
-    mediaQuery.addEventListener("change", handleMediaQueryChange);
+    resizeObserver.observe(el);
+    updateCalendarViewportWidth(el.getBoundingClientRect().width);
 
     return () => {
-      mediaQuery.removeEventListener("change", handleMediaQueryChange);
+      resizeObserver.disconnect();
     };
-  }, []);
+  }, [contentViewportRef]);
 
   useEffect(() => {
     persistAppProjects(appProjects);
@@ -325,6 +324,21 @@ export const ScheduleScreen = ({
 
   const showDayDetailPanel =
     canShowDayDetailPanel && canFitDayDetailPanel && isDayDetailPanelOpen;
+
+  const availableMonthPaneWidth =
+    calendarViewportWidth + (showDayDetailPanel ? DAY_DETAIL_PANEL_WIDTH_PX : 0);
+
+  const measuredCanFitDayDetailPanel =
+    calendarViewportWidth === 0 ||
+    availableMonthPaneWidth >=
+      DAY_DETAIL_PANEL_WIDTH_PX + DAY_DETAIL_PANEL_MIN_CALENDAR_WIDTH_PX;
+
+  useEffect(() => {
+    if (!canShowDayDetailPanel || calendarViewportWidth === 0) return;
+
+    setCanFitDayDetailPanel(measuredCanFitDayDetailPanel);
+    setIsDayDetailPanelOpen(measuredCanFitDayDetailPanel);
+  }, [calendarViewportWidth, canShowDayDetailPanel, measuredCanFitDayDetailPanel]);
 
   const isDayDetailPanelCollapsed =
     canShowDayDetailPanel && !showDayDetailPanel;
