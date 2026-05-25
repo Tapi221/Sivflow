@@ -1,5 +1,4 @@
-import type {ImportIssue,
-  ParsedImportRow,} from "@/features/import/domain/importTypes";
+import type { ImportIssue, ParsedImportRow } from "@/features/import/domain/import.types";
 
 const buildIssue = ({
   level,
