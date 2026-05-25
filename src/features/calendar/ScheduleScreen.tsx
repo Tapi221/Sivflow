@@ -8,7 +8,7 @@ import type { AppCalendarItem, ScheduleScreenProps } from "./scheduleScreen.type
 import { CalendarMonthView } from "./grid/CalendarView.month";
 import { CalendarWeekDayGrid } from "./grid/Grid.calendar.weekday.desktop";
 import { TaskView } from "./task/TaskView";
-import { CalendarTimelineDayView } from "./grid/TimelineDayView";
+import { CalendarTimelineDayView, type TimelineLane } from "./grid/TimelineDayView";
 import { useScheduleScreen } from "./useScheduleScreen";
 import { DayDetailPanel } from "./panel/DayDetailPanel";
 import { CalendarSidebar } from "./panel/CalendarSidebar";
@@ -36,6 +36,7 @@ const DAY_DETAIL_PANEL_AUTO_OPEN_MIN_BODY_WIDTH_PX =
   DAY_DETAIL_PANEL_WIDTH_PX + DAY_DETAIL_PANEL_MIN_CALENDAR_WIDTH_PX;
 const VIEW_HEADER_CONTROLS_RIGHT_INSET_PX = 56;
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
+const DEFAULT_TIMELINE_CALENDAR_COLOR = "#74798b";
 const APP_PROJECT_COLORS = [
   "#34c759",
   "#ff3b30",
@@ -316,6 +317,28 @@ export const ScheduleScreen = ({
     return [...googleCalendarEvents, ...taskCalendarEvents];
   }, [googleCalendarEvents, taskCalendarEvents]);
 
+  const timelineLanes = useMemo<TimelineLane[]>(() => {
+    const appProjectLanes = appProjects.map((project) => ({
+      id: project.id,
+      label: project.label,
+      color: project.color,
+      checked: project.checked,
+      projectIds: [project.label],
+    }));
+
+    const googleCalendarLanes = googleAccounts.flatMap((account) =>
+      account.calendars.map((calendar) => ({
+        id: `${account.accountId}:${calendar.id}`,
+        label: calendar.summaryOverride ?? calendar.summary,
+        color: calendar.backgroundColor ?? DEFAULT_TIMELINE_CALENDAR_COLOR,
+        checked: account.selectedCalendarIds.has(calendar.id),
+        calendarIds: [calendar.id],
+      })),
+    );
+
+    return [...appProjectLanes, ...googleCalendarLanes];
+  }, [appProjects, googleAccounts]);
+
   const sidebarMonthDate =
     selectedViewMode === "month" ? monthTitleDate : titleDate;
 
@@ -551,6 +574,8 @@ export const ScheduleScreen = ({
                 dayColumnWidth={C.TIMELINE_DAY_COLUMN_WIDTH}
                 laneLabelWidth={C.TIMELINE_LANE_LABEL_WIDTH}
                 rowCount={C.TIMELINE_SKELETON_ROW_COUNT}
+                lanes={timelineLanes}
+                visibleEvents={calendarEvents}
                 scrollContainerRef={scrollContainerRef}
                 onScroll={handleCalendarScroll}
                 onSelectDate={handleTimelineSelectDate}
