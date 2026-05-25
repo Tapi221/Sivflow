@@ -398,8 +398,6 @@ export const CalendarSidebar = ({
         onNextMonth={handleMiniCalendarNextMonth}
       />
 
-      <div className={cn("mt-2", SIDEBAR_DIVIDER_CLASS)} />
-
       <nav className="mt-2 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto pb-2">
         <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
           {isTaskMode ? (
