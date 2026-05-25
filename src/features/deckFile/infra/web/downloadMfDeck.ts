@@ -1,5 +1,4 @@
-import {MF_DECK_FILE_EXTENSION,
-  MF_DECK_MIME_TYPE,} from "@/features/deckFile/domain/mfDeckTypes";
+import { MF_DECK_FILE_EXTENSION, MF_DECK_MIME_TYPE } from "@/features/deckFile/domain/mfDeck.types";
 
 const INVALID_FILENAME_CHARS_PATTERN = /[\\/:*?"<>|]/g;
 
