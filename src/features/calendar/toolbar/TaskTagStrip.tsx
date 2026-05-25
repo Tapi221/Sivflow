@@ -168,7 +168,7 @@ export const TaskTagStrip = () => {
                     <TagChip
                       label={tag.name}
                       colorKey={tagColorKey}
-                      className="pointer-events-none h-6 min-w-0 max-w-full px-3 text-[11px] font-semibold leading-[1.35] tabular-nums transition-[filter,box-shadow] duration-100 group-hover:brightness-[0.96] group-hover:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
+                      className="pointer-events-none h-6 min-w-0 max-w-full px-3 text-[11px] font-medium leading-[1.35] transition-[filter,box-shadow] duration-100 group-hover:brightness-[0.96] group-hover:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]"
                     />
                   </button>
                 );
