@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { CalendarIcon, ChevronDownIcon, GalleryIcon, HomeIcon, InboxIcon, LibraryIcon, SettingIcon } from "../../components/icons/icons.sidebar";
+import { CalendarIcon, ChevronDownIcon, GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "../../components/icons/icons.sidebar";
 import { useGlobalSearchStore } from "@/features/global-search/store/useGlobalSearchStore";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
@@ -25,11 +25,6 @@ const mainNavItems: SidebarNavItem[] = [
     to: "/library?home=1",
     icon: <HomeIcon className="sidebar-nav-icon" />,
     sectionKey: "home",
-  },
-  {
-    id: "review",
-    label: "Review",
-    icon: <InboxIcon className="sidebar-nav-icon" />,
   },
   {
     id: "library",
