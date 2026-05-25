@@ -1,4 +1,5 @@
 import type { GoogleTaskItem, GoogleTaskStatus, GoogleTasksApiTasksResponse } from "./gcalSync.types";
+import { createGoogleApiError, withGoogleApiRetry } from "./googleApiRetry";
 
 const GOOGLE_TASKS_API_BASE = "https://tasks.googleapis.com/tasks/v1";
 
@@ -33,7 +34,7 @@ const toApiTaskBody = (input: GoogleTaskPatch | GoogleTaskCreateInput) => {
   return body;
 };
 
-const getJson = async <T>(accessToken: string, url: string): Promise<T> => {
+const getJsonOnce = async <T>(accessToken: string, url: string): Promise<T> => {
   const res = await fetch(url, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -41,32 +42,19 @@ const getJson = async <T>(accessToken: string, url: string): Promise<T> => {
   });
 
   if (!res.ok) {
-    const payload = await res.json().catch(() => null) as
-      | {
-        error?: {
-          message?: string;
-          errors?: Array<{ reason?: string }>;
-        };
-      }
-      | null;
-    const message = payload?.error?.message;
-    const reason = payload?.error?.errors?.[0]?.reason;
-    const error = new Error(
-      message
-        ? `Google API failed (${res.status}): ${message}`
-        : `Google API failed (${res.status})`,
-    );
-
-    (error as Error & { googleReason?: string; status: number }).status = res.status;
-    (error as Error & { googleReason?: string }).googleReason = reason;
-
-    throw error;
+    throw await createGoogleApiError(res, "Google API failed");
   }
 
   return (await res.json()) as T;
 };
 
-const sendJson = async <T>(
+const getJson = async <T>(accessToken: string, url: string, operation: string): Promise<T> =>
+  withGoogleApiRetry(
+    () => getJsonOnce<T>(accessToken, url),
+    { service: "google_tasks", operation },
+  );
+
+const sendJsonOnce = async <T>(
   accessToken: string,
   url: string,
   method: "POST" | "PATCH" | "DELETE",
@@ -82,26 +70,7 @@ const sendJson = async <T>(
   });
 
   if (!res.ok) {
-    const payload = await res.json().catch(() => null) as
-      | {
-        error?: {
-          message?: string;
-          errors?: Array<{ reason?: string }>;
-        };
-      }
-      | null;
-    const message = payload?.error?.message;
-    const reason = payload?.error?.errors?.[0]?.reason;
-    const error = new Error(
-      message
-        ? `Google Tasks API failed (${res.status}): ${message}`
-        : `Google Tasks API failed (${res.status})`,
-    );
-
-    (error as Error & { googleReason?: string; status: number }).status = res.status;
-    (error as Error & { googleReason?: string }).googleReason = reason;
-
-    throw error;
+    throw await createGoogleApiError(res, "Google Tasks API failed");
   }
 
   if (method === "DELETE") {
@@ -110,6 +79,18 @@ const sendJson = async <T>(
 
   return (await res.json()) as T;
 };
+
+const sendJson = async <T>(
+  accessToken: string,
+  url: string,
+  method: "POST" | "PATCH" | "DELETE",
+  body: unknown,
+  operation: string,
+): Promise<T> =>
+  withGoogleApiRetry(
+    () => sendJsonOnce<T>(accessToken, url, method, body),
+    { service: "google_tasks", operation },
+  );
 
 const toGoogleTaskItem = (
   item: RawGoogleTask,
@@ -156,6 +137,7 @@ export const fetchGoogleTasks = async ({
     const data = await getJson<GoogleTasksApiTasksResponse>(
       accessToken,
       `${GOOGLE_TASKS_API_BASE}/lists/${encodeURIComponent(taskListId)}/tasks?${params}`,
+      "fetch_tasks",
     );
 
     tasks.push(
@@ -185,6 +167,7 @@ export const createGoogleTask = async ({
     `${GOOGLE_TASKS_API_BASE}/lists/${encodeURIComponent(taskListId)}/tasks?${params}`,
     "POST",
     toApiTaskBody(input),
+    "create_task",
   );
   const task = toGoogleTaskItem(data, taskListId);
 
@@ -211,6 +194,7 @@ export const patchGoogleTask = async ({
     `${GOOGLE_TASKS_API_BASE}/lists/${encodeURIComponent(taskListId)}/tasks/${encodeURIComponent(taskId)}`,
     "PATCH",
     toApiTaskBody(patch),
+    "patch_task",
   );
   const task = toGoogleTaskItem(data, taskListId);
 
@@ -239,6 +223,8 @@ export const moveGoogleTask = async ({
     accessToken,
     `${GOOGLE_TASKS_API_BASE}/lists/${encodeURIComponent(taskListId)}/tasks/${encodeURIComponent(taskId)}/move?${params}`,
     "POST",
+    undefined,
+    "move_task",
   );
   const task = toGoogleTaskItem(data, destinationTaskListId);
 
@@ -262,5 +248,7 @@ export const deleteGoogleTask = async ({
     accessToken,
     `${GOOGLE_TASKS_API_BASE}/lists/${encodeURIComponent(taskListId)}/tasks/${encodeURIComponent(taskId)}`,
     "DELETE",
+    undefined,
+    "delete_task",
   );
 };
