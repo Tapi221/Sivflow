@@ -1,15 +1,10 @@
-import {type KeyboardEvent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,} from "react";
+import { type KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { getTagColorKey, type TagColorKey } from "@/features/tag/tagColor";
 
 import { FilterPanelShell } from "@/components/panel/FilterPanelShell";
 import { PanelEmptyState } from "@/components/panel/PanelEmptyState";
-import {SegmentedControlGroup,
-  type SegmentedOption,} from "@/components/panel/SegmentedControlGroup";
+import { SegmentedControlGroup, type SegmentedOption } from "@/components/panel/SegmentedControlGroup";
 import { TagBadge } from "@/components/tag/TagBadge";
 import { SurfaceButton } from "@/components/ui/surface-button";
 import { Switch } from "@/components/ui/switch";
