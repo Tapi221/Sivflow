@@ -61,7 +61,7 @@ export const DayDetailPanel = ({
   }
 
   return (
-    <aside className="-ml-4 flex w-[276px] shrink-0 flex-col overflow-hidden bg-transparent">
+    <aside className="-ml-3 flex w-[272px] shrink-0 flex-col overflow-hidden bg-transparent">
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         <div className="flex border-b border-[#f5f5f5]">
           <div className="flex w-12 shrink-0 justify-end pr-2 pt-[8px]">
