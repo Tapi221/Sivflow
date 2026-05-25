@@ -409,24 +409,24 @@ export const ScheduleScreen = ({
       hasTrailingPanel={hasTrailingPanel}
       viewportRef={contentViewportRef}
     >
-      {activeMode === "task" ? (
-        <CarvePanel>
-          <TaskView
-            googleAccounts={googleAccounts}
-            selectedTaskListIds={deferredSelectedTaskListIds}
-            onRefreshGoogleTasks={refreshGoogleTasks}
-            onCreateGoogleTask={createGoogleTask}
-            onUpdateGoogleTask={updateGoogleTask}
-            onMoveGoogleTaskList={moveGoogleTaskList}
-            onDeleteGoogleTask={deleteGoogleTask}
-          />
-        </CarvePanel>
-      ) : isMonthCalendarView ? (
-        <CarvePanel hasTrailingPanel={hasTrailingPanel}>
-          {renderViewHeader(
-            "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
-          )}
+      <CarvePanel hasTrailingPanel={hasTrailingPanel}>
+        {renderViewHeader(
+          "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
+        )}
 
+        {activeMode === "task" ? (
+          <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border-0 bg-white">
+            <TaskView
+              googleAccounts={googleAccounts}
+              selectedTaskListIds={deferredSelectedTaskListIds}
+              onRefreshGoogleTasks={refreshGoogleTasks}
+              onCreateGoogleTask={createGoogleTask}
+              onUpdateGoogleTask={updateGoogleTask}
+              onMoveGoogleTaskList={moveGoogleTaskList}
+              onDeleteGoogleTask={deleteGoogleTask}
+            />
+          </div>
+        ) : isMonthCalendarView ? (
           <div
             className={cn(
               "ml-4 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0",
@@ -446,13 +446,7 @@ export const ScheduleScreen = ({
               onRenderedRangeChange={handleMonthRenderedRangeChange}
             />
           </div>
-        </CarvePanel>
-      ) : (
-        <CarvePanel>
-          {renderViewHeader(
-            "mb-2 flex shrink-0 items-center justify-between px-5 pt-4",
-          )}
-
+        ) : (
           <div
             className={cn(
               "ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-tl-[22px] rounded-tr-none border-0",
@@ -489,8 +483,8 @@ export const ScheduleScreen = ({
               />
             )}
           </div>
-        </CarvePanel>
-      )}
+        )}
+      </CarvePanel>
     </CarvePanelShell>
   );
 };
