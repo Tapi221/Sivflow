@@ -1,26 +1,11 @@
 import { memo, useMemo } from "react";
-
-import {Background,
-  Controls,
-  Handle,
-  type Node,
-  type NodeProps,
-  type NodeTypes,
-  Position,
-  ReactFlow,} from "@xyflow/react";
-
+import { Background, Controls, Handle, type Node, type NodeProps, type NodeTypes, Position, ReactFlow } from "@xyflow/react";
 import type { TagColorKey } from "@/features/tag/tagColor";
-
 import { TagBadge } from "@/components/tag/TagBadge";
 import { HelpCircle, Star } from "@/ui/icons";
-
 import "@xyflow/react/dist/style.css";
-
 import { buildDirectoryMindMapGraph } from "./buildDirectoryMindMapGraph";
-import type {DirectoryBadgeVisibility,
-  DirectoryMindMapNodeData,
-  DirectoryTreeNode,} from "./directoryTypes";
-
+import type { DirectoryBadgeVisibility, DirectoryMindMapNodeData, DirectoryTreeNode } from "./directoryTypes";
 import { cn } from "@/lib/utils";
 
 const HANDLE_CLASS_NAME = "!h-2 !w-2 !border-0 !bg-transparent";

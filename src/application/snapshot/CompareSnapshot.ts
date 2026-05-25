@@ -1,5 +1,4 @@
 import { createCreateSnapshotUseCase } from "./CreateSnapshot";
-
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
 import type { AppSnapshot, SnapshotComparison } from "@/types/domain/snapshot";
 

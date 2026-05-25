@@ -1,5 +1,4 @@
-import type {ScheduleColumn,
-  ScheduleColumnBuffer,} from "./ScheduleColumn.shared";
+import type { ScheduleColumn, ScheduleColumnBuffer } from "./ScheduleColumn.shared";
 import { buildScheduleTimelineColumns } from "./ScheduleColumn.shared";
 
 export type TimelineViewMode = "month" | "week" | "days";

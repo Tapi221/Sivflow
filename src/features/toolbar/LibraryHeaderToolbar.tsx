@@ -1,9 +1,5 @@
 import { motion, type Transition } from "framer-motion";
-import {Fragment,
-  type ComponentType,
-  type ReactNode,
-  type SVGProps,} from "react";
-
+import { Fragment, type ComponentType, type ReactNode, type SVGProps } from "react";
 import { HoverTooltip } from "@/components/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 

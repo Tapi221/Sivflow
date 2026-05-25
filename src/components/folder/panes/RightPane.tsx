@@ -1,9 +1,7 @@
 import { PdfPane } from "@/features/pdf/PdfPane";
-
 import { FolderDashboard } from "@/components/folder/components/views/FolderDashboard";
 import { CardPane } from "@/components/folder/panes/CardPane";
 import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagramPane";
-
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 type PdfPaneUpdateHandler = NonNullable<

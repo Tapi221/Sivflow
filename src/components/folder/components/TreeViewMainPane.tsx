@@ -1,5 +1,4 @@
 import { RightPane } from "@/components/folder/panes/RightPane";
-
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 

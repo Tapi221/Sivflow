@@ -1,11 +1,6 @@
 import { clearPdfPageBitmapCacheForDocument } from "@/features/pdf/pdfPageBitmapCache";
-import type {PdfJsDocument,
-  PdfJsGetDocumentParams,
-  PdfJsLoadingTask,
-  PdfViewerSourceMeta,} from "@/features/pdf/pdfViewer.types";
-import {destroyPdfResource,
-  disposePdfDocumentResource,
-  getPdfDocument,} from "@/features/pdf/pdfViewer.types";
+import type { PdfJsDocument, PdfJsGetDocumentParams, PdfJsLoadingTask, PdfViewerSourceMeta } from "@/features/pdf/pdfViewer.types";
+import { destroyPdfResource, disposePdfDocumentResource, getPdfDocument } from "@/features/pdf/pdfViewer.types";
 
 export const PDF_DOCUMENT_SESSION_RELEASE_GRACE_MS = 5_000;
 

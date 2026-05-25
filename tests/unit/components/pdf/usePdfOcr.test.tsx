@@ -1,16 +1,10 @@
 // @vitest-environment jsdom
 import "fake-indexeddb/auto";
-
 import { cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
 import type { PdfDocumentController } from "@/components/pdf/hooks/usePdfDocument";
 import { usePdfOcr } from "@/components/pdf/hooks/usePdfOcr";
-import {
-  getPdfOcrPageRecord,
-  listPdfOcrPageRecords,
-  putPdfOcrPageRecord,
-} from "@/lib/pdf/pdfOcrStore";
+import { getPdfOcrPageRecord, listPdfOcrPageRecords, putPdfOcrPageRecord } from "@/lib/pdf/pdfOcrStore";
 
 const recognizeMock = vi.fn(async () => ({
   data: { text: "" },

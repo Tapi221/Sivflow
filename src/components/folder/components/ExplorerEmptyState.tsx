@@ -1,5 +1,4 @@
 import React from "react";
-
 import { Folder as FolderIcon } from "@/ui/icons";
 
 export const ExplorerEmptyState = () => {

@@ -1,14 +1,8 @@
-import {DEFAULT_LAYOUT_ROWS,
-  normalizeLayoutRows,} from "@/domain/card/extraRows";
-import {normalizeCardFolderId,
-  resolveBlocksFromCardData,
-  resolveExtraRowsFromCardData,
-  resolveInkFromCardData,} from "@/domain/card/normalizers/cardShape";
+import { DEFAULT_LAYOUT_ROWS, normalizeLayoutRows } from "@/domain/card/extraRows";
+import { normalizeCardFolderId, resolveBlocksFromCardData, resolveExtraRowsFromCardData, resolveInkFromCardData } from "@/domain/card/normalizers/cardShape";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
-
 import { useAuthSession } from "@/contexts/AuthContext";
-import {DEFAULT_SETTINGS,
-  useUserSettings,} from "@/hooks/settings/useUserSettings";
+import { DEFAULT_SETTINGS, useUserSettings } from "@/hooks/settings/useUserSettings";
 import { getLocalDb } from "@/services/localDB";
 import type { Card, CardPatch } from "@/types";
 

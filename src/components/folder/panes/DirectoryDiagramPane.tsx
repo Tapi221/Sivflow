@@ -1,27 +1,15 @@
-﻿import { useMemo, useState } from "react";
-
+import { useMemo, useState } from "react";
 import { getCardText } from "@/domain/card/content";
-import {buildCardSetById,
-  resolveCardFolderIdStrict,} from "@/domain/card/selectors/cardFolder";
-
+import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
 import { getTagColorKey, type TagColorKey } from "@/features/tag/tagColor";
-
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { TagFilterPopover } from "@/chip/popover/TagFilterPopover";
 import { TagBadge } from "@/components/tag/TagBadge";
-import {Dialog,
-  DialogContent,
-  DialogOverlay,
-  DialogPortal,} from "@/components/ui/dialog";
-import {Popover,
-  PopoverContent,
-  PopoverTrigger,} from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HelpCircle, Settings2, Star, Tag as TagIcon } from "@/ui/icons";
-
 import { DirectoryMindMapCanvas } from "./directory/DirectoryMindMapCanvas";
-import type {DirectoryBadgeVisibility,
-  DirectoryTreeNode,} from "./directory/directoryTypes";
-
+import type { DirectoryBadgeVisibility, DirectoryTreeNode } from "./directory/directoryTypes";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";

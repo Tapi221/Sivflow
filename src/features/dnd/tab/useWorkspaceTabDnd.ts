@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-
 import type { WorkspaceTab } from "@/features/tab/Tab";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
 

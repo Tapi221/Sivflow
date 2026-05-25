@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-
-import {
-  buildVerticalCardPagerItemStyle,
-  resolveVerticalCardPagerItemWidthSpec,
-} from "@/features/review/verticalCardPagerWidthSpec";
+import { buildVerticalCardPagerItemStyle, resolveVerticalCardPagerItemWidthSpec } from "@/features/review/verticalCardPagerWidthSpec";
 
 describe("resolveVerticalCardPagerItemWidthSpec", () => {
   it("falls back to fixed width when no width strategy is provided", () => {

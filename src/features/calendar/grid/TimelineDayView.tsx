@@ -1,13 +1,11 @@
 import type { CSSProperties, RefObject, UIEvent } from "react";
 import { Fragment, memo, useMemo } from "react";
-
 import { CalendarDateButton, CalendarDateContent } from "@/chip/button/GridHeader.scheduletimeline";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { eventOverlapsRange } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import { cn } from "@/lib/utils";
-
 import type { TimelineColumn, TimelineUnitBuffer, TimelineViewMode } from "./TimelineDayView.shared";
 import { buildTimelineColumns, getTimelineColumnWidth } from "./TimelineDayView.shared";
 

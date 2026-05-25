@@ -1,12 +1,6 @@
 import React, { useCallback } from "react";
-
-import {CARD_ACTION_BG_CLASS,
-  CARD_ACTION_COLOR_ACTIVE_CLASS,
-  CARD_ACTION_COLOR_IDLE_CLASS,
-  CARD_ACTION_ICON_CLASS,} from "@constants/shared/flashcard";
-
-import { CircleHelp,Star } from "@/ui/icons";
-
+import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_ACTIVE_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "@constants/shared/flashcard";
+import { CircleHelp, Star } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 
 interface CardCornerActionsProps {

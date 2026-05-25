@@ -1,27 +1,16 @@
-import React, {useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,} from "react";
-
-import {CANONICAL_CARD_WIDTH,
-  CARD_ROW_PX,
-  layoutRowsToCardHeightPx,} from "@constants/shared/flashcard";
-
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CANONICAL_CARD_WIDTH, CARD_ROW_PX, layoutRowsToCardHeightPx } from "@constants/shared/flashcard";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import { resolveEditorCardFitScale } from "@/domain/card/resolveEditorCardFitScale";
-
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
 import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
-
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";
 import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
 import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
 import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
-
 import type { Card, UserSettings } from "@/types";
 import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";

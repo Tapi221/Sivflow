@@ -1,5 +1,4 @@
 import type { Timestamp } from "firebase/firestore";
-
 import type { AssetRecord } from "./assets";
 import type { Card } from "./card";
 import type { CardSet } from "./cardSet";

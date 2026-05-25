@@ -1,7 +1,5 @@
 import type { CardPaneMode } from "@constants/shared/flashcard";
-import {DISPLAY_MODE_LABELS,
-  DISPLAY_MODE_TRIGGER_LABELS,} from "@constants/shared/flashcard";
-
+import { DISPLAY_MODE_LABELS, DISPLAY_MODE_TRIGGER_LABELS } from "@constants/shared/flashcard";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 export type WidthControlViewModel = {

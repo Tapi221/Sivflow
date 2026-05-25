@@ -1,5 +1,4 @@
 import * as XLSX from "xlsx";
-
 import { IMPORT_SHEET_NAME, type ImportIssue, type ImportParseResult, type ImportSheetName } from "@/features/import/domain/import.types";
 
 export type ReadXlsxImportRowsResult =

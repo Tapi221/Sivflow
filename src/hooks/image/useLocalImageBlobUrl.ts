@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-
-import {getOrCreateImageBlobUrl,
-  pinImageBlobUrl,
-  unpinImageBlobUrl,} from "@/services/imageBlobUrlSessionCache";
+import { getOrCreateImageBlobUrl, pinImageBlobUrl, unpinImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 
 export interface LocalImageBlobUrlResult {
   url: string | null;

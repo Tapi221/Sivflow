@@ -1,8 +1,6 @@
 import crypto from "node:crypto";
-
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-
 import { getDb, serverTimestamp } from "./firebaseAdmin.js";
 import { renewExpiredWatchChannels } from "./gcal/renewWatchChannels.js";
 import { classifyGoogleTokenEndpointFailure, type GoogleOAuthServerErrorReason } from "./gcal/tokenErrors.js";

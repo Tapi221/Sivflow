@@ -1,9 +1,6 @@
 import React from "react";
-
 import { getTagColorStyle, type TagColorKey } from "@/features/tag/tagColor";
-
 import { X } from "@/ui/icons";
-
 import { cn } from "@/lib/utils";
 
 interface TagBadgeProps {

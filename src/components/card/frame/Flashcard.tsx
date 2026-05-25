@@ -1,10 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-
 import { CANONICAL_CARD_WIDTH, CARD_DISPLAY_SCALE, layoutRowsToCardHeightPx } from "@constants/shared/flashcard";
-
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import type { InkDocument } from "@/components/ink/ink.types";
-
 import { CardFrame } from "./CardFrame";
 import { CARD_SHELL_COMMON_CLASS_NAME } from "./cardShellClassNames";
 import { useFlashcardCornerControls } from "./FlashcardCornerControls";
@@ -16,7 +13,6 @@ import { useCardFlipBehavior } from "./useCardFlipBehavior";
 import { useFlashcardDerived } from "./useFlashcardDerived";
 import { useFlashcardInk } from "./useFlashcardInk";
 import { useFlashcardMediaState } from "./useFlashcardMediaState";
-
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 

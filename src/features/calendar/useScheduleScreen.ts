@@ -1,12 +1,10 @@
 import type { RefObject, UIEvent } from "react";
 import { useCallback, useState } from "react";
-
 import { useCalendarEventSync } from "@/features/calendar/googlecalendar-sync/useCalendarEventSync";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type { CalendarToolbarMode, CalendarViewMode, GoogleAccountDisplay, TimelineGridStyle } from "./scheduleScreen.types";
 import type { GoogleCalendarEvent } from "./googlecalendar-integration/gcalSync.types";
 import type { buildTimelineColumns, TimelineUnitBuffer } from "./grid/TimelineDayView.shared";
-
 import { useCalendarLayout } from "./layout/calendar/useCalendarLayout.desktop";
 import { useCalendarNavigation } from "./useCalendarNavigation";
 import { useCalendarScrollController } from "../scroll/schedule/hooks/useCalendarScrollController";

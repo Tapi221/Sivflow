@@ -1,5 +1,4 @@
 import { CARD_SHELL_COMMON_CLASS_NAME } from "@/components/card/frame/cardShellClassNames";
-
 import { cn } from "@/lib/utils";
 
 export type CardPresentationContext = {

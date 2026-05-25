@@ -1,7 +1,5 @@
 import React from "react";
-
 import { AlertTriangle, X } from "@/ui/icons";
-
 import { useAuth } from "@/contexts/AuthContext";
 
 export const SecurityAlertBanner: React.FC = () => {

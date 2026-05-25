@@ -1,8 +1,6 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import { useCallback, useEffect, useMemo } from "react";
-
 import { useCardMediaDialogs } from "@/components/card/editor/useCardMediaDialogs";
-
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 type DraftShape = {
   frontBlocks: CardBlock[];

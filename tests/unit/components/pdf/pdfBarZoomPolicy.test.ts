@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-
-import {
-  clampPdfBarZoomPercent,
-  resolvePdfBarRenderScale,
-  resolvePdfBarZoomPercentFromRenderScale,
-} from "@/components/pdf/pdfBarZoomPolicy";
+import { clampPdfBarZoomPercent, resolvePdfBarRenderScale, resolvePdfBarZoomPercentFromRenderScale } from "@/components/pdf/pdfBarZoomPolicy";
 
 describe("pdfBarZoomPolicy", () => {
   it("0-100% の UI 値を安全に clamp する", () => {

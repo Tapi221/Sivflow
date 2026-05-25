@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import type { Card, CardSet } from "@/types";

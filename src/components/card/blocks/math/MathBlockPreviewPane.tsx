@@ -1,9 +1,6 @@
-import {buildTypographyStyle,
-  mergeStyles,} from "@/components/card/common/cardSetViewZoom";
+import { buildTypographyStyle, mergeStyles } from "@/components/card/common/cardSetViewZoom";
 import { TYPOGRAPHY_FONT_SIZE_PX } from "@/styles/tokens/typography";
-
 import { MathRenderer } from "./MathBlockContent";
-
 import { cn } from "@/lib/utils";
 
 type MathBlockPreviewPaneProps = {

@@ -1,16 +1,7 @@
 import { describe, expect, it } from "vitest";
-
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import {
-  clampNormalizedZoomPercent,
-  resolvePresentationWidthPx,
-  resolveZoomPercentForPresentationWidthPx,
-} from "@/features/cardsetview/domain/cardSetViewPresentationPolicy";
-import {
-  computeNextCardSetViewZoomPercentFromGesture,
-  computeNextCardSetViewZoomPercentFromWheel,
-  shouldHandleCardSetViewZoomInputTarget,
-} from "@/features/cardsetview/presentation/web/hooks/cardSetViewZoomInputUtils";
+import { clampNormalizedZoomPercent, resolvePresentationWidthPx, resolveZoomPercentForPresentationWidthPx } from "@/features/cardsetview/domain/cardSetViewPresentationPolicy";
+import { computeNextCardSetViewZoomPercentFromGesture, computeNextCardSetViewZoomPercentFromWheel, shouldHandleCardSetViewZoomInputTarget } from "@/features/cardsetview/presentation/web/hooks/cardSetViewZoomInputUtils";
 
 describe("cardSetViewZoomInputUtils", () => {
   describe("computeNextCardSetViewZoomPercentFromWheel", () => {

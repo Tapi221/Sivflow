@@ -1,35 +1,12 @@
-import {collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  Timestamp,
-  updateDoc,
-  where,} from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, query, Timestamp, updateDoc, where } from "firebase/firestore";
 import { nanoid } from "nanoid";
-
-import type {ICloudSyncAdapter,
-  IDiffEngine,
-  INetworkMonitor,
-  IQueueManager,
-  ISyncService,
-  SecurityAlert,
-  SecurityState,
-  SyncChange,
-  SyncConflict,
-  SyncProcessingError,
-  SyncStats,
-  SyncTask,
-  UserSettingsSnapshot,} from "./interfaces/ISyncService";
+import type { ICloudSyncAdapter, IDiffEngine, INetworkMonitor, IQueueManager, ISyncService, SecurityAlert, SecurityState, SyncChange, SyncConflict, SyncProcessingError, SyncStats, SyncTask, UserSettingsSnapshot } from "./interfaces/ISyncService";
 import type { LocalDBLike } from "./localDB";
 import { SecurityMonitor } from "./logic/SecurityMonitor";
 import { TelemetryService } from "./logic/TelemetryService";
-
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import type { Card, CardSet, Folder } from "@/types";
-import type {SyncConflict as StoredSyncConflict,
-  SyncResult,} from "@/types/domain/sync";
+import type { SyncConflict as StoredSyncConflict, SyncResult } from "@/types/domain/sync";
 import type { SyncContextSource } from "@/types/domain/telemetry";
 
 const SYNC_TABLE_BY_TYPE = {

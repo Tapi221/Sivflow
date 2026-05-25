@@ -1,7 +1,5 @@
 import { useMemo } from "react";
-
 import { useLiveQuery } from "dexie-react-hooks";
-
 import { useAuthSession } from "@/contexts/AuthContext";
 import { compareOrderableEntities } from "@/lib/orderableEntity";
 import { ensureLegacyCardsBackfilled } from "@/services/legacyCardSetMigrationBackfill";

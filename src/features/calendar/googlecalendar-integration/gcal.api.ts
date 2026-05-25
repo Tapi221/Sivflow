@@ -1,9 +1,4 @@
-import type {GoogleCalendarApiEventsResponse,
-  GoogleCalendarApiListResponse,
-  GoogleCalendarEvent,
-  GoogleCalendarListItem,
-  GoogleTaskListItem,
-  GoogleTasksApiTaskListsResponse,} from "./gcalSync.types";
+import type { GoogleCalendarApiEventsResponse, GoogleCalendarApiListResponse, GoogleCalendarEvent, GoogleCalendarListItem, GoogleTaskListItem, GoogleTasksApiTaskListsResponse } from "./gcalSync.types";
 
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
 const GOOGLE_TASKS_API_BASE = "https://tasks.googleapis.com/tasks/v1";

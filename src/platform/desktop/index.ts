@@ -1,5 +1,4 @@
 import { getDesktopBridge } from "./bridge";
-
 import type { PlatformApi } from "@/types/externals/desktop-api";
 
 const canUseDesktopShell = (url: string): boolean =>

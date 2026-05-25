@@ -1,13 +1,5 @@
-import {createContext,
-  type ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,} from "react";
-
-import { onAuthStateChanged,type User as FirebaseUser } from "firebase/auth";
-
+import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
 import { bootstrapUser } from "@/hooks/bootstrap/useUserBootstrap";
 import { auth } from "@/services/firebase";
 import { initializeDB, resetLocalDBForLogout } from "@/services/localDB";

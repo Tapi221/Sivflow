@@ -1,10 +1,8 @@
 import { type ComponentProps, useCallback, useEffect, useRef, useState } from "react";
-
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Volume2 } from "@/ui/icons";
-
 import type { Card } from "@/types";
 import { toIsoStringOrNull } from "@/utils/toMillis";
 

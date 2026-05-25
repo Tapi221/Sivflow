@@ -1,28 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-
 import { acquirePdfDocumentSession } from "@/features/pdf/pdfDocumentSessionRegistry";
 import { createPdfPageResourceCache } from "@/features/pdf/pdfPageResourceCache";
-import type {PageSize,
-  PdfJsDestinationReference,
-  PdfJsDocument,
-  PdfJsExplicitDestination,
-  PdfJsGetDocumentParams,
-  PdfJsOutlineDestination,
-  PdfJsOutlineNode,
-  PdfJsPage,
-  PdfJsPageLease,
-  PdfJsTextContent,
-  PdfViewerOptions,
-  PdfViewerSourceMeta,
-  SourceLoadErrorKind,} from "@/features/pdf/pdfViewer.types";
-import {getErrorMessage,
-  isPdfAbortError,
-  isPdfTextItem,} from "@/features/pdf/pdfViewer.types";
-
+import type { PageSize, PdfJsDestinationReference, PdfJsDocument, PdfJsExplicitDestination, PdfJsGetDocumentParams, PdfJsOutlineDestination, PdfJsOutlineNode, PdfJsPage, PdfJsPageLease, PdfJsTextContent, PdfViewerOptions, PdfViewerSourceMeta, SourceLoadErrorKind } from "@/features/pdf/pdfViewer.types";
+import { getErrorMessage, isPdfAbortError, isPdfTextItem } from "@/features/pdf/pdfViewer.types";
 import { getPdfOcrPageRecord } from "@/lib/pdf/pdfOcrStore";
-import {buildPdfTextSelection,
-  normalizePdfExtractedText,
-  splitPdfTextIntoLines,} from "@/lib/pdf/pdfTextExtraction";
+import { buildPdfTextSelection, normalizePdfExtractedText, splitPdfTextIntoLines } from "@/lib/pdf/pdfTextExtraction";
 
 interface UsePdfDocumentOptions {
   docId?: string;

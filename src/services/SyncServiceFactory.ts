@@ -6,7 +6,6 @@ import { NetworkMonitor } from "./logic/NetworkMonitor";
 import { QueueManager } from "./logic/QueueManager";
 import { TelemetryService } from "./logic/TelemetryService";
 import { SyncServiceV2 } from "./SyncServiceV2";
-
 import type { SyncContextSource } from "@/types/domain/telemetry";
 
 class ResilientSyncService extends SyncServiceV2 {

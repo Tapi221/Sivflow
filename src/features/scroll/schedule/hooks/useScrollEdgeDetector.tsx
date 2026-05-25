@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react";
-
 import * as C from "@/features/calendar/calendar.constants.desktop";
 
 type Params = {

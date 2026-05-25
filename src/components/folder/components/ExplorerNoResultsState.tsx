@@ -1,5 +1,4 @@
 import React from "react";
-
 import { SearchX } from "@/ui/icons";
 
 export const ExplorerNoResultsState = () => {

@@ -1,9 +1,6 @@
 import React from "react";
-
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
-
 import { RootFolderPanelRow } from "./RootFolderPanelRow";
-
 import { cn } from "@/lib/utils";
 import type { SelectedExplorerItem } from "@/types";
 

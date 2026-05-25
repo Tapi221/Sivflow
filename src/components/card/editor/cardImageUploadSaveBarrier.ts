@@ -2,7 +2,6 @@ import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import { getLocalDb } from "@/services/localDB";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
-
 import type { EditorDraft } from "./cardEditorUtils";
 
 const IMAGE_UPLOAD_SAVE_TIMEOUT_MS = 30_000;

@@ -1,7 +1,6 @@
 import { initGlobalChunkRecovery } from "./initGlobalChunkRecovery";
 import { initManifestDebug } from "./initManifestDebug";
 import { initServiceWorkerLifecycle } from "./initServiceWorkerLifecycle";
-
 import { startTabPresence } from "@/utils/tabPresence";
 
 let started = false;

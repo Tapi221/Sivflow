@@ -2,7 +2,6 @@ import { MF_CARD_FORMAT, MF_CARD_VERSION, MfCardExportError, type MfCardFileV1 }
 import { encodeMfCardFile } from "@/features/cardFile/infra/web/mfCardJsonCodec";
 import { collectMfDeckExportIssues, mapCardToMfDeckCard } from "@/features/deckFile/application/mapCardToMfDeck";
 import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
-
 import type { Card } from "@/types";
 
 export const buildMfCardFile = ({

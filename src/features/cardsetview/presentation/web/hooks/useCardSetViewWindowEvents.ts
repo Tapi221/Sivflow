@@ -1,7 +1,5 @@
 import { useEffect } from "react";
-
 import { CARD_SET_VIEW_EVENTS } from "@constants/shared/flashcard";
-
 import { subscribeCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 
 interface UseCardSetViewWindowEventsOptions {

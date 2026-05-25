@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-
-import {
-  buildPdfTextSelection,
-  guessPreferredOcrLanguages,
-  scorePdfTextQuality,
-} from "@/lib/pdf/pdfTextExtraction";
+import { buildPdfTextSelection, guessPreferredOcrLanguages, scorePdfTextQuality } from "@/lib/pdf/pdfTextExtraction";
 
 describe("pdfTextExtraction", () => {
   it("prefers OCR when native text quality is much lower", () => {

@@ -1,11 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-
 import { importMfCardFile } from "@/features/cardFile/application/importMfCard";
-import {
-  MF_CARD_FORMAT,
-  MF_CARD_VERSION,
-  type MfCardFileV1,
-} from "@/features/cardFile/domain/mfCardTypes";
+import { MF_CARD_FORMAT, MF_CARD_VERSION, type MfCardFileV1 } from "@/features/cardFile/domain/mfCardTypes";
 import type { Card, CardSet } from "@/types";
 
 const createCardFile = (): MfCardFileV1 => ({

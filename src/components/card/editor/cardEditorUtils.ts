@@ -1,5 +1,4 @@
 import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
-
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 

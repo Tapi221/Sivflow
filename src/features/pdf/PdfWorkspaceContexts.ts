@@ -1,8 +1,6 @@
 import { createContext, type RefObject } from "react";
-
 import type { PdfDocumentController } from "@/features/pdf/hooks/usePdfDocument";
 import type { PdfViewerHandle } from "@/features/pdf/PdfViewer";
-
 import type { DocumentItem, PdfPageLayoutMode } from "@/types";
 
 export interface PdfWorkspaceDocumentContextValue {

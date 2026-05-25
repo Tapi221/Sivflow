@@ -1,13 +1,7 @@
 import type { ComponentProps } from "react";
-
 import { FolderTreeWithCards } from "@/components/folder/components/views/FolderTreeWithCards";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
-
-import type {Card,
-  CardSet,
-  DocumentItem,
-  Folder,
-  SelectedExplorerItem,} from "@/types";
+import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 type FolderTreeWithCardsProps = ComponentProps<typeof FolderTreeWithCards>;
 

@@ -1,11 +1,8 @@
 import React from "react";
-
 import { CARD_CONTENT_TOP_PX } from "@constants/shared/flashcard";
-
 import type { SharedCardContentProps } from "./SharedCardContent.types";
 import { SharedCardEditScene } from "./SharedCardEditScene";
 import { SharedCardViewScene } from "./SharedCardViewScene";
-
 import { cn } from "@/lib/utils";
 import { CONTENT_TYPO } from "@/styles/tokens/typography";
 

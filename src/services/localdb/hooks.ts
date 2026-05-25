@@ -1,5 +1,4 @@
-import {assertNoBlobUrlInCardPayload,
-  buildCardCandidateFromMods,} from "./blobUrl";
+import { assertNoBlobUrlInCardPayload, buildCardCandidateFromMods } from "./blobUrl";
 import type { LocalDB } from "./LocalDB";
 
 const getEntityId = (obj: unknown): string | undefined => {

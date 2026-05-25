@@ -1,15 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-
-import {EPSILON,
-  VIEWER_STATE_DEBOUNCE_MS,
-  ZOOM_STEP,} from "@/features/pdf/pdf.constants.desktop";
-import {clampScale,
-  getViewerStateFromSession,
-  saveViewerStateToSession,} from "@/features/pdf/pdfViewerStateStorage";
-
-import type {PdfPageLayoutMode,
-  PdfSidePanelTab,
-  PdfViewerState,} from "@/types";
+import { EPSILON, VIEWER_STATE_DEBOUNCE_MS, ZOOM_STEP } from "@/features/pdf/pdf.constants.desktop";
+import { clampScale, getViewerStateFromSession, saveViewerStateToSession } from "@/features/pdf/pdfViewerStateStorage";
+import type { PdfPageLayoutMode, PdfSidePanelTab, PdfViewerState } from "@/types";
 
 interface UsePdfViewerPersistenceOptions {
   docId: string;

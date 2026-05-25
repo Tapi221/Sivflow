@@ -1,12 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
-
-import {buildCardLayoutPreferenceScopeKey,
-  type CardLayoutMode,
-  type CardSetInteractionMode,
-  resolveDefaultCardLayoutMode,} from "@/features/cardsetview/domain/cardLayoutMode";
-
-import {resolveCardLayoutModePreference,
-  setCardLayoutModePreference,} from "@/services/cardLayoutModePreferences";
+import { buildCardLayoutPreferenceScopeKey, type CardLayoutMode, type CardSetInteractionMode, resolveDefaultCardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+import { resolveCardLayoutModePreference, setCardLayoutModePreference } from "@/services/cardLayoutModePreferences";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 interface UseCardSetViewCardLayoutModeOptions {

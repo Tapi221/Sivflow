@@ -1,10 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-
-import {
-  disposePdfDocumentResource,
-  getPdfErrorDetails,
-  isPdfAbortError,
-} from "@/components/pdf/pdfViewerTypes";
+import { disposePdfDocumentResource, getPdfErrorDetails, isPdfAbortError } from "@/components/pdf/pdfViewerTypes";
 
 const flushMicrotasks = async () => {
   await Promise.resolve();

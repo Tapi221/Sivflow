@@ -1,26 +1,11 @@
 import React from "react";
-
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { buildFolderMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
-import {type FolderTreeNode,
-  getParentFolderId,
-  normalizeFolderId,
-  ROOT_FOLDER_ID,} from "@/components/folder/explorer/model/utils";
+import { type FolderTreeNode, getParentFolderId, normalizeFolderId, ROOT_FOLDER_ID } from "@/components/folder/explorer/model/utils";
 import { ChevronDown, ChevronRight } from "@/ui/icons";
-
-import {EXPLORER_ROW_CONTENT_CLASS,
-  EXPLORER_ROW_ICON_SLOT_CLASS,
-  EXPLORER_ROW_INPUT_CLASS,
-  EXPLORER_ROW_LEADING_SLOT_CLASS,
-  EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS,
-  EXPLORER_ROW_TITLE_SLOT_CLASS,
-  FOLDER_ROW_ICON_ACTIVE_CLASS,
-  FOLDER_ROW_ICON_MUTED_CLASS,
-  FOLDER_ROW_ICON_SIZE_CLASS,
-  FOLDER_ROW_TITLE_CLASS,} from "./shared";
+import { EXPLORER_ROW_CONTENT_CLASS, EXPLORER_ROW_ICON_SLOT_CLASS, EXPLORER_ROW_INPUT_CLASS, EXPLORER_ROW_LEADING_SLOT_CLASS, EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS, EXPLORER_ROW_TITLE_SLOT_CLASS, FOLDER_ROW_ICON_ACTIVE_CLASS, FOLDER_ROW_ICON_MUTED_CLASS, FOLDER_ROW_ICON_SIZE_CLASS, FOLDER_ROW_TITLE_CLASS } from "./shared";
 import { SidebarEntityRow } from "./SidebarEntityRow";
-
 import { cn } from "@/lib/utils";
 
 type FolderRowFolder = FolderTreeNode & {

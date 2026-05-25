@@ -1,10 +1,6 @@
 import React from "react";
-
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
-import {buildTypographyStyle,
-  mergeStyles,
-  normalizeCardSetViewZoom,} from "@/components/card/common/cardSetViewZoom";
-
+import { buildTypographyStyle, mergeStyles, normalizeCardSetViewZoom } from "@/components/card/common/cardSetViewZoom";
 import { cn } from "@/lib/utils";
 
 type DivDataAttributes = {

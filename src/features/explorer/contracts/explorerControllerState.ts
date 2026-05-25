@@ -1,5 +1,4 @@
 import type { ExplorerBreadcrumbContext } from "./explorerBreadcrumbContext";
-
 import type { SelectedExplorerItem } from "@/types";
 
 export type ExplorerControllerState = {

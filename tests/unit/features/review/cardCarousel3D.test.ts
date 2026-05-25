@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
-
-import {
-  canGoToNextCardCarouselItem,
-  canGoToPreviousCardCarouselItem,
-  clampCardCarouselIndex,
-  isNearCardCarouselItem,
-  shouldNotifyCardCarouselIndexChange,
-} from "@/features/review/domain/cardCarouselIndexRules";
+import { canGoToNextCardCarouselItem, canGoToPreviousCardCarouselItem, clampCardCarouselIndex, isNearCardCarouselItem, shouldNotifyCardCarouselIndexChange } from "@/features/review/domain/cardCarouselIndexRules";
 
 describe("cardCarousel3D shared logic", () => {
   it("index を 0..count-1 に clamp する", () => {

@@ -1,7 +1,5 @@
 import { WEB_STORAGE_KEYS } from "@constants/web/storage";
-
-import type {AutoBackupRecord,
-  BackupStorePort,} from "@/application/ports/BackupStorePort";
+import type { AutoBackupRecord, BackupStorePort } from "@/application/ports/BackupStorePort";
 
 const isStorageAvailable = (): boolean => {
   if (typeof window === "undefined") {

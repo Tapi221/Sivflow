@@ -1,15 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-
-import {
-  buildCardSetById,
-  didUseLegacyFolderFallback,
-  filterCardsByFolderId,
-  getLegacyFolderFallbackUsage,
-  isCardInFolder,
-  resetLegacyFolderFallbackUsage,
-  resolveCardFolderId,
-  resolveCardFolderIdStrict,
-} from "@/domain/card/selectors/cardFolder";
+import { buildCardSetById, didUseLegacyFolderFallback, filterCardsByFolderId, getLegacyFolderFallbackUsage, isCardInFolder, resetLegacyFolderFallbackUsage, resolveCardFolderId, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
 import type { Card, CardSet } from "@/types";
 
 type CardLike = Pick<Card, "id" | "cardSetId" | "folderId">;

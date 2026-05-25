@@ -1,5 +1,4 @@
-import type {FolderLike,
-  IDiffEngine,} from "@/services/interfaces/ISyncService";
+import type { FolderLike, IDiffEngine } from "@/services/interfaces/ISyncService";
 import { toMillis } from "@/utils/toMillis";
 
 type PlainObject = Record<string, unknown>;

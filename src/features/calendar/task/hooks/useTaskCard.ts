@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from "react";
 import { format } from "date-fns";
-
 import { CATEGORY_CONFIG, PRIORITY_CONFIG } from "../task.types";
 import type { Task } from "../task.types";
 

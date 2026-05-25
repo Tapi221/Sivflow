@@ -1,18 +1,7 @@
-import {
-  CARD_VIEW_DEFAULT_ZOOM_PERCENT,
-  CARD_VIEW_MIN_ZOOM_PERCENT,
-  CARD_VIEW_ZOOM_STEP_PERCENT,
-} from "@constants/shared/cardSetView";
+import { CARD_VIEW_DEFAULT_ZOOM_PERCENT, CARD_VIEW_MIN_ZOOM_PERCENT, CARD_VIEW_ZOOM_STEP_PERCENT } from "@constants/shared/cardSetView";
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
 import { describe, expect, it } from "vitest";
-
-import {
-  clampZoomPercent,
-  computeDynamicMaxZoomPercent,
-  normalizeZoomPercent,
-  zoomPercentToFactor,
-  zoomPercentToFixedCardWidthPx,
-} from "@/features/cardsetview/cardSetViewZoom";
+import { clampZoomPercent, computeDynamicMaxZoomPercent, normalizeZoomPercent, zoomPercentToFactor, zoomPercentToFixedCardWidthPx } from "@/features/cardsetview/cardSetViewZoom";
 
 describe("cardSetViewZoom", () => {
   describe("default/min constants", () => {

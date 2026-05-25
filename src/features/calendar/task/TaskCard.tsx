@@ -1,5 +1,4 @@
 import { useMemo, type MouseEvent as ReactMouseEvent } from "react";
-
 import { TaskEventChip } from "@/chip/eventchip/EventChip.task";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { Task } from "./task.types";

@@ -2,7 +2,6 @@ import type { RefObject, UIEvent } from "react";
 import { Fragment, useMemo } from "react";
 import { addDays, format, startOfDay } from "date-fns";
 import { ja } from "date-fns/locale";
-
 import * as C from "@/features/calendar/calendar.constants.desktop";
 
 type Column = {

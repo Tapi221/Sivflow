@@ -1,7 +1,5 @@
 import type { CSSProperties, ReactNode, Ref } from "react";
-
 import { CardPaneWidthAdjuster } from "@/features/cardsetview/hooks/components/CardPaneWidthAdjuster";
-
 import { cn } from "@/lib/utils";
 
 export type CardWorkspaceSurfaceVariant = "plain" | "dotted";

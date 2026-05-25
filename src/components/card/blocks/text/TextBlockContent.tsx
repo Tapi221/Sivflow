@@ -1,8 +1,6 @@
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
-import {TEXT_BLOCK_CONTENT_CLASS,
-  TEXT_BLOCK_LINE_HEIGHT_PX,} from "@/components/card/blocks/text/textBlockStyles";
-import {buildTypographyStyle,
-  scaleTypographyNumberPx,} from "@/components/card/common/cardSetViewZoom";
+import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from "@/components/card/blocks/text/textBlockStyles";
+import { buildTypographyStyle, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { TYPOGRAPHY_FONT_SIZE_PX } from "@/styles/tokens/typography";
 

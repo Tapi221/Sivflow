@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
-
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
-import {
-  createAppDestination,
-  resolveAppDestination,
-} from "@/navigation/core/destination";
+import { createAppDestination, resolveAppDestination } from "@/navigation/core/destination";
 import { createPageUrl, toWebPath } from "@/platform/web/navigation/toWebPath";
 
 describe("navigation adapters", () => {

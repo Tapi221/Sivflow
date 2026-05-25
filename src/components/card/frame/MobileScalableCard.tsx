@@ -1,8 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-
-import {CARD_BASE_WIDTH,
-  CARD_DISPLAY_SCALE,} from "@constants/shared/flashcard";
-
+import { CARD_BASE_WIDTH, CARD_DISPLAY_SCALE } from "@constants/shared/flashcard";
 import { cn } from "@/lib/utils";
 
 const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);

@@ -1,10 +1,7 @@
 import React from "react";
-
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { Code } from "@/ui/icons";
-
 import { CodeBlockEditor } from "./CodeBlockEditor";
-
 import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
 

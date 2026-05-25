@@ -1,10 +1,5 @@
-import {buildCardRenderSpec,
-  type CardInteractionMode,
-  type CardRenderSpec,
-  resolveCardContentZoom,
-  resolveCardSurfaceScale,} from "@/features/cardrender/domain/cardRenderSpec";
+import { buildCardRenderSpec, type CardInteractionMode, type CardRenderSpec, resolveCardContentZoom, resolveCardSurfaceScale } from "@/features/cardrender/domain/cardRenderSpec";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 export type SharedCardSurfaceMetrics = {

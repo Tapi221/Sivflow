@@ -1,5 +1,4 @@
 import { Timestamp } from "firebase/firestore";
-
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 
 export type UploadedImageStatus = "pending" | "uploading" | "ready" | "failed";

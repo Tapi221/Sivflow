@@ -1,18 +1,11 @@
 import { normalizeUploadedImages } from "@/domain/assets/uploadedImageNormalizer";
 import { isGridOffsetType } from "@/domain/card/blockOffset";
-import {LEGACY_BASE_LAYOUT_ROWS,
-  normalizeExtraRows,
-  normalizeLayoutRows,} from "@/domain/card/extraRows";
+import { LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from "@/domain/card/extraRows";
 import { normalizeInkDocument } from "@/domain/card/inkDocument";
 import { normalizeMemoryStability } from "@/domain/card/review/stability";
-
 import { normalizeReviewLogs } from "./reviewLogs";
-
 import { normalizeDate } from "@/shared/codec/date";
-import {toArrayOr,
-  toBoolOr,
-  toFiniteNumber,
-  toStringOr,} from "@/shared/codec/primitives";
+import { toArrayOr, toBoolOr, toFiniteNumber, toStringOr } from "@/shared/codec/primitives";
 import { makeFallbackId } from "@/shared/lib/fallbackId";
 import { asRecord, pick, type UnknownRecord } from "@/shared/lib/records";
 import type { Card, CardBlock } from "@/types/domain/card";

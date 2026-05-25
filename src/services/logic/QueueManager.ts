@@ -1,8 +1,5 @@
-import {createQueueItemFromSyncTask,
-  queueItemToSyncTask,} from "@/application/usecases/syncQueueItemFactory";
-import type {BatchConstraint,
-  IQueueManager,
-  SyncTask,} from "@/services/interfaces/ISyncService";
+import { createQueueItemFromSyncTask, queueItemToSyncTask } from "@/application/usecases/syncQueueItemFactory";
+import type { BatchConstraint, IQueueManager, SyncTask } from "@/services/interfaces/ISyncService";
 import type { LocalDBLike } from "@/services/localDB";
 import type { SyncQueueItem } from "@/types/domain/sync";
 

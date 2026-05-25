@@ -1,6 +1,5 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-
 import { FIREBASE_EMULATORS } from "@constants/shared/firebase";
 import { describe, expect, it } from "vitest";
 

@@ -1,16 +1,6 @@
 import { describe, expect, it } from "vitest";
-
-import {
-  isSupportedSecurityEventType,
-  SECURITY_EVENT_TYPES,
-} from "../../../functions/src/security/contract";
-import {
-  applyRiskDecay,
-  calculateNextRiskScore,
-  getRiskLevel,
-  resolveDetectionOutcome,
-  RISK_SCORE_THRESHOLDS,
-} from "../../../functions/src/security/policy";
+import { isSupportedSecurityEventType, SECURITY_EVENT_TYPES } from "../../../functions/src/security/contract";
+import { applyRiskDecay, calculateNextRiskScore, getRiskLevel, resolveDetectionOutcome, RISK_SCORE_THRESHOLDS } from "../../../functions/src/security/policy";
 
 describe("security policy", () => {
   it("exposes a single authoritative set of security event types", () => {

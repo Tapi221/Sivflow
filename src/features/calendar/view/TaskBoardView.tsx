@@ -1,7 +1,6 @@
 import { DndContext, DragOverlay, useDroppable } from "@dnd-kit/core";
 import { memo, useCallback, useMemo, type CSSProperties, type MouseEvent as ReactMouseEvent, type WheelEvent } from "react";
 import { createPortal } from "react-dom";
-
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "../task/task.types";
 import type { Task, TaskGroupMode, TaskStatus } from "../task/task.types";
 import { useTaskBoardDnd } from "../../dnd/task/useTaskBoardDnd";

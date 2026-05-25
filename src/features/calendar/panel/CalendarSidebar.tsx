@@ -1,6 +1,5 @@
 import { type FormEvent, type KeyboardEvent, useMemo, useRef, useState } from "react";
 import { addDays, format, isSameDay, startOfDay, startOfMonth, startOfWeek } from "date-fns";
-
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { AddGoogleCalendarButton } from "@/chip/button/AddGoogleCalendarButton";
 import { CalendarDayNumberCircle } from "@/chip/icon/CalendarDayNumberCircle";
@@ -10,7 +9,6 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { MiniCalendarDay } from "@/features/calendar/calendar.types";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@/i18n/useT";
 import { cn } from "@/lib/utils";
-
 import type { AppCalendarItem, CalendarSelectionRange, CalendarSidebarProps, GoogleAccountDisplay } from "../scheduleScreen.types";
 import { SelectableGoogleSourceRow } from "./SelectableGoogleSourceRow";
 

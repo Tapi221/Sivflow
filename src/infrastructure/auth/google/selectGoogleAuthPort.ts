@@ -1,5 +1,4 @@
 import type { RuntimeKind } from "@constants/shared/app";
-
 import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
 
 const isElectronRendererRuntime = (userAgent: string): boolean =>

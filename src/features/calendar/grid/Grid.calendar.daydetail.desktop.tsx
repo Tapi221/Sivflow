@@ -1,10 +1,7 @@
 import { clipEventToDay } from "@/features/calendar/calendarEventRange";
 import { EventChipDayDetail } from "@/chip/eventchip/EventChip.schedule.daydetail";
-import {computeEventLayout,
-  toLayoutEvent,} from "@/chip/eventchip/EventChip.layout.weekday.desktop";
-
+import { computeEventLayout, toLayoutEvent } from "@/chip/eventchip/EventChip.layout.weekday.desktop";
 import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-integration/gcalSync.types";
-
 import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
 
 // ==============================================

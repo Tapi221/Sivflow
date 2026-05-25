@@ -1,10 +1,5 @@
-import {closestCorners,
-  type CollisionDetection,
-  pointerWithin,
-  rectIntersection,} from "@dnd-kit/core";
-
-import type {CollisionDescriptor,
-  CollisionDetectionArgs,} from "./taskDnd.types";
+import { closestCorners, type CollisionDetection, pointerWithin, rectIntersection } from "@dnd-kit/core";
+import type { CollisionDescriptor, CollisionDetectionArgs } from "./taskDnd.types";
 
 const getDistanceFromRange = (
   value: number,

@@ -1,14 +1,11 @@
 import type { JSX } from "react";
-
 import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
 import type { CardSetViewContentProps } from "@/features/cardsetview/presentation/web/ui/components/cardSetViewContentProps";
 import { CardSetViewDesktopContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewDesktopContent";
 import { CardSetViewMobileContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMobileContent";
 import { CardViewCompactToolbar } from "@/features/cardsetview/presentation/web/ui/components/CardViewCompactToolbar";
-
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
-
 import { cn } from "@/lib/utils";
 import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";

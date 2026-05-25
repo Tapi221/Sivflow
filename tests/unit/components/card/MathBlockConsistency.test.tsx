@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-
 import { MathBlockContent } from "@/components/card/blocks/math/MathBlockContent";
 import { BlockRenderer } from "@/components/card/blocks/render/BlockRenderer";
 import type { CardBlock } from "@/types/domain/card";

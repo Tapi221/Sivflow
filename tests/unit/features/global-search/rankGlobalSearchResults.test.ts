@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-
 import { rankGlobalSearchResults } from "@/features/global-search/lib/rankGlobalSearchResults";
 import type { GlobalSearchItem } from "@/features/global-search/model/globalSearchTypes";
 

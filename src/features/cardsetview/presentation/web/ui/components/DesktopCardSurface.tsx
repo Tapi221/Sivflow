@@ -1,15 +1,11 @@
 import React from "react";
-
 import { layoutRowsToCardHeightPx } from "@constants/shared/flashcard";
-
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
 import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 import { DesktopEmbeddedCardEditorSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopEmbeddedCardEditorSurface";
 import { PreparedViewCardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/PreparedViewCardFaceScene";
-
 import { useFlashcardDualDerived } from "@/components/card/frame/useFlashcardDualDerived";
-
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 

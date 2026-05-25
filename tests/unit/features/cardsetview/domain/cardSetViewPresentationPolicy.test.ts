@@ -1,12 +1,6 @@
 import { CANONICAL_CARD_WIDTH } from "@constants/shared/flashcard";
 import { describe, expect, it } from "vitest";
-
-import {
-  resolvePresentationWidthPx,
-  resolveSplitMinimumRequiredWidthPx,
-  resolveZoomDefaultPercent,
-  resolveZoomMinBaseWidthPx,
-} from "@/features/cardsetview/domain/cardSetViewPresentationPolicy";
+import { resolvePresentationWidthPx, resolveSplitMinimumRequiredWidthPx, resolveZoomDefaultPercent, resolveZoomMinBaseWidthPx } from "@/features/cardsetview/domain/cardSetViewPresentationPolicy";
 
 describe("cardSetViewPresentationPolicy", () => {
   it("uses a shared single-column zoom floor across card layouts", () => {

@@ -1,14 +1,7 @@
 import React, { useEffect, useRef } from "react";
-
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
-import {getFolderId,
-  hasOpenModalDialog,
-  isTextInputTarget,} from "@/components/folder/explorer/model/utils";
-
-import type {CardSet,
-  DocumentItem,
-  ExplorerItem,
-  SelectedExplorerItem,} from "@/types";
+import { getFolderId, hasOpenModalDialog, isTextInputTarget } from "@/components/folder/explorer/model/utils";
+import type { CardSet, DocumentItem, ExplorerItem, SelectedExplorerItem } from "@/types";
 
 interface UseExplorerKeyboardNavigationParams {
   selectedFolderId: string | null;

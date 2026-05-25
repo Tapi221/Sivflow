@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import { signInWithGoogle } from "@/services/auth/googleSignIn";
 
 const isAuthPopupClosedByUserError = (error: unknown): boolean =>

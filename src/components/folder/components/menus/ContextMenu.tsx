@@ -1,10 +1,6 @@
-import { type ReactNode,useMemo, useRef } from "react";
-
-import {DropdownMenu,
-  DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
-
-import {ExplorerMenuPanel,
-  type ExplorerMenuPanelVariant,} from "./ExplorerMenuPanel";
+import { type ReactNode, useMemo, useRef } from "react";
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ExplorerMenuPanel, type ExplorerMenuPanelVariant } from "./ExplorerMenuPanel";
 import type { MenuAction } from "./menuActions";
 
 interface ContextMenuProps {

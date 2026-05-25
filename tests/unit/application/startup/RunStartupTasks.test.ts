@@ -71,10 +71,7 @@ vi.mock("@/utils/logSanitizer", () => ({
   sanitizeForLog: <T>(value: T): T => value,
 }));
 
-import {
-  resetStartupTasks,
-  runStartupTasks,
-} from "@/application/startup/RunStartupTasks";
+import { resetStartupTasks, runStartupTasks } from "@/application/startup/RunStartupTasks";
 
 describe("RunStartupTasks", () => {
   beforeEach(() => {

@@ -1,7 +1,5 @@
 import React from "react";
-
 import { RuledLayer } from "@/components/card/frame/RuledLayer";
-
 import { cn } from "@/lib/utils";
 
 type CSSVarStyle = React.CSSProperties &

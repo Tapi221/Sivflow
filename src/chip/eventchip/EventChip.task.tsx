@@ -1,5 +1,4 @@
 import { memo } from "react";
-
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
 import { AnimatedSquareCheckbox } from "@/chip/checkbox/AnimatedSquareCheckbox";
 import { TrashIcon } from "@/components/icons/icons.card";

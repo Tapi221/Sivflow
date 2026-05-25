@@ -1,5 +1,4 @@
 import { BOOTSTRAP_RELOAD_KEYS } from "@constants/shared/app";
-
 import { toErrorText } from "./errorUtils";
 import { logBootstrapFault } from "./logBootstrapFault";
 import { hardReloadOnce } from "./reloadGuard";

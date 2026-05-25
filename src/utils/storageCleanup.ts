@@ -1,6 +1,5 @@
 import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
-
 import { firestoreDb, storage } from "@/infrastructure/firebase/client";
 import { normalizeDate } from "@/shared/codec/date";
 import type { UploadMetadata } from "@/types";

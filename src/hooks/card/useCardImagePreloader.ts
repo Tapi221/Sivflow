@@ -5,21 +5,13 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-import {CARD_IMAGE_PRELOAD,
-  CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY,} from "@constants/web/app";
+import { CARD_IMAGE_PRELOAD, CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY } from "@constants/web/app";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
-
 import { getCardImages } from "@/domain/card/content";
-
 import { storage } from "@/services/firebase";
 import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 import { getBlobCacheStats } from "@/services/imageBlobUrlSessionCache";
-import {getCachedRemoteUrl,
-  getPreloadCacheStats,
-  isUrlDecoded,
-  markUrlDecoded,
-  setCachedRemoteUrl,} from "@/services/imagePreloadCache";
+import { getCachedRemoteUrl, getPreloadCacheStats, isUrlDecoded, markUrlDecoded, setCachedRemoteUrl } from "@/services/imagePreloadCache";
 import { getLocalDb } from "@/services/localDB";
 import type { Card, UploadedImage } from "@/types/domain/card";
 

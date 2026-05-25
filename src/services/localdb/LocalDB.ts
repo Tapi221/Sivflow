@@ -7,44 +7,19 @@ if (import.meta.env.DEV && typeof window !== "undefined") {
 
 import { Dexie } from "dexie";
 import { nanoid } from "nanoid";
-
 import * as crud from "./crud";
 import { getDatabaseNameForUser as _getDatabaseNameForUser } from "./generation";
 import { attachHooks } from "./hooks";
 // NOTE: creates a circular dependency with instanceManager.ts; safe in ESM (all usages inside function bodies)
-import {clearInstance as clearInstanceImpl,
-  getInstance as getInstanceImpl,
-  getInstanceUserId as getInstanceUserIdImpl,
-  getLocalDb,
-  getLocalDbSync,
-  initializeDB,
-  resetForLogout as resetForLogoutImpl,
-  resetLocalDBForLogout,} from "./instanceManager";
+import { clearInstance as clearInstanceImpl, getInstance as getInstanceImpl, getInstanceUserId as getInstanceUserIdImpl, getLocalDb, getLocalDbSync, initializeDB, resetForLogout as resetForLogoutImpl, resetLocalDBForLogout } from "./instanceManager";
 import * as maintenance from "./maintenance";
 import * as queries from "./queries";
 import { defineSchema } from "./schema";
 import { CURRENT_TAG_STORE } from "./tagStoreNames";
 import type { LocalDBTableMap, SyncableEntityTable, TagRecord } from "./types";
-
-import {createDeleteQueueItem,
-  createUpsertQueueItem,} from "@/application/usecases/syncQueueItemFactory";
-import type {DeleteEntity,
-  UpsertEntity,} from "@/application/usecases/syncQueuePayloadGuards";
-import type {AssetRecord,
-  Card,
-  CardSet,
-  Document,
-  Folder,
-  SyncConflict,
-  SyncError,
-  SyncHistory,
-  SyncMetadata,
-  SyncQueueItem,
-  SyncSettings,
-  UploadedImage,
-  User,
-  UserSettings,
-  UserStats,} from "@/types";
+import { createDeleteQueueItem, createUpsertQueueItem } from "@/application/usecases/syncQueueItemFactory";
+import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
+import type { AssetRecord, Card, CardSet, Document, Folder, SyncConflict, SyncError, SyncHistory, SyncMetadata, SyncQueueItem, SyncSettings, UploadedImage, User, UserSettings, UserStats } from "@/types";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 
 export type {CardRelation,

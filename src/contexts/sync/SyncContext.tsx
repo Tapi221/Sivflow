@@ -1,12 +1,4 @@
-import {createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,} from "react";
-
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
 import type { ISyncService } from "@/services/interfaces/ISyncService";
 import { getLocalDb } from "@/services/localDB";

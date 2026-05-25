@@ -1,5 +1,4 @@
 import { collection, type CollectionReference, doc, type DocumentData, type DocumentReference, type Firestore, type Query, query, where } from "firebase/firestore";
-
 import { type CloudEntityType, COLLECTION_BY_TYPE, type PullableEntityType } from "@/application/usecases/cloudSyncShared";
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 

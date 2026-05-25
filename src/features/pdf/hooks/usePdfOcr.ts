@@ -1,31 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
 import { createWorker, type Worker as TesseractWorker } from "tesseract.js";
-
 import type { PdfDocumentController } from "./usePdfDocument";
-
-import {formatPdfOcrBenchmarkSummary,
-  type PdfOcrBenchmarkSample,
-  type PdfOcrBenchmarkSummary,
-  summarizePdfOcrBenchmark,} from "@/lib/pdf/pdfOcrBenchmark";
-import {classifyPdfOcrPage,
-  type PdfOcrPageClassification,} from "@/lib/pdf/pdfOcrPageClassification";
+import { formatPdfOcrBenchmarkSummary, type PdfOcrBenchmarkSample, type PdfOcrBenchmarkSummary, summarizePdfOcrBenchmark } from "@/lib/pdf/pdfOcrBenchmark";
+import { classifyPdfOcrPage, type PdfOcrPageClassification } from "@/lib/pdf/pdfOcrPageClassification";
 import { segmentCanvasIntoTextRegions } from "@/lib/pdf/pdfOcrRegionDetection";
-import {clearPdfOcrRecords,
-  getPdfOcrPageRecord,
-  listPdfOcrPageRecords,
-  type PdfOcrAttemptRecord,
-  type PdfOcrPageRecord,
-  putPdfOcrPageRecord,
-  trimPdfOcrRecordsForDoc,} from "@/lib/pdf/pdfOcrStore";
-import {buildPdfTextSelection,
-  guessPreferredOcrLanguages,
-  mergePdfTextSelections,
-  normalizePdfExtractedText,
-  scorePdfTextQuality,
-  selectBestPdfTextSelection,} from "@/lib/pdf/pdfTextExtraction";
-import {type PdfOcrRenderProfile,
-  renderPdfPageForOcr,} from "@/lib/pdf/renderPdfPageForOcr";
+import { clearPdfOcrRecords, getPdfOcrPageRecord, listPdfOcrPageRecords, type PdfOcrAttemptRecord, type PdfOcrPageRecord, putPdfOcrPageRecord, trimPdfOcrRecordsForDoc } from "@/lib/pdf/pdfOcrStore";
+import { buildPdfTextSelection, guessPreferredOcrLanguages, mergePdfTextSelections, normalizePdfExtractedText, scorePdfTextQuality, selectBestPdfTextSelection } from "@/lib/pdf/pdfTextExtraction";
+import { type PdfOcrRenderProfile, renderPdfPageForOcr } from "@/lib/pdf/renderPdfPageForOcr";
 
 const OCR_DEFAULT_LANGUAGE = "jpn+eng";
 const OCR_NATIVE_TEXT_SKIP_THRESHOLD = 32;

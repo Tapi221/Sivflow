@@ -1,7 +1,5 @@
 import type { CSSProperties } from "react";
-
 import { CARD_ROW_PX } from "@constants/shared/flashcard";
-
 import type { CardBlock } from "@/types/domain/card";
 
 export {getNormalizedGridOffsetRows,

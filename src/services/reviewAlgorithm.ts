@@ -1,5 +1,4 @@
 import type { Timestamp } from "firebase/firestore";
-
 import { normalizeDate as toDate } from "@/shared/codec/date";
 import type { ReviewLog } from "@/types/domain/base";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";

@@ -1,9 +1,6 @@
 import { addDays, endOfDay, startOfDay, subDays } from "date-fns";
 import { describe, expect, it } from "vitest";
-
-import {
-  buildCalendarEventSyncRange,
-} from "../../../../src/features/calendar/googlecalendar-sync/calendarEventSyncRange";
+import { buildCalendarEventSyncRange } from "../../../../src/features/calendar/googlecalendar-sync/calendarEventSyncRange";
 import * as C from "../../../../src/features/calendar/calendar.constants.desktop";
 import type { CalendarDateRange } from "../../../../src/features/calendar/calendarRange.types";
 

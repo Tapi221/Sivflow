@@ -1,9 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-
-import {
-  requestSectionListNavigation,
-  subscribeSectionListNavigation,
-} from "@/features/explorer/adapters/web/explorerSectionListNavigation";
+import { requestSectionListNavigation, subscribeSectionListNavigation } from "@/features/explorer/adapters/web/explorerSectionListNavigation";
 
 describe("explorerSectionListNavigation", () => {
   it("dispatches section-list navigation requests to subscribers", () => {

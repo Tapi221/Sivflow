@@ -1,5 +1,4 @@
 import React from "react";
-
 import { CardEditorPane } from "./CardEditorPane";
 
 interface CardPaneProps {

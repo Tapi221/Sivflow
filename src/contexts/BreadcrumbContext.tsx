@@ -1,10 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, {createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,} from "react";
-
+import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
 import { areBreadcrumbCrumbsEqual } from "@/features/breadcrumbs/builders";
 

@@ -1,8 +1,6 @@
 import React from "react";
-
 import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import { AudioPlayer } from "@/components/card/media/CardMedia";
-
 import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardFaceAttachments } from "@/types/domain/card";
