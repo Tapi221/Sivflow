@@ -1,5 +1,6 @@
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
+import { hydrateServerStoredGoogleCalendarAccounts } from "@/features/calendar/googlecalendar-integration/gcal.server-account-list";
 import { bootstrapUser } from "@/hooks/bootstrap/useUserBootstrap";
 import { auth } from "@/services/firebase";
 import { initializeDB, resetLocalDBForLogout } from "@/services/localDB";
@@ -42,6 +43,16 @@ export const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
 
         try {
           await bootstrapUser(user.uid);
+
+          try {
+            const hydratedGoogleAccountCount = await hydrateServerStoredGoogleCalendarAccounts();
+            if (hydratedGoogleAccountCount > 0) {
+              window.location.reload();
+              return;
+            }
+          } catch (error) {
+            console.warn("[Auth] Google Calendar account hydration failed (non-fatal):", error);
+          }
         } catch (error) {
           console.error("[Auth] Fatal setup error:", error);
         } finally {
