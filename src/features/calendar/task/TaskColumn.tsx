@@ -1,5 +1,6 @@
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { motion } from "framer-motion";
+import { type MouseEvent as ReactMouseEvent } from "react";
 
 import { TaskStatusDot } from "@/chip/icon/TaskStatusDot";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,8 +12,7 @@ import { TASK_COLUMNS } from "./task.types";
 import type { Task, TaskStatus } from "./task.types";
 import { TaskCard } from "./TaskCard";
 import { TaskInsertionSlot } from "./TaskInsertionSlot";
-import {TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS,
-  TASK_DND_LAYOUT_ANIMATION_DURATION_MS,} from "../../dnd/task/taskDnd.config";
+import { TASK_DND_DRAG_LAYOUT_ANIMATION_DURATION_MS, TASK_DND_LAYOUT_ANIMATION_DURATION_MS } from "../../dnd/task/taskDnd.config";
 import type { TaskDropTarget } from "../../dnd/task/taskDnd.types";
 
 type TaskColumnView = {
@@ -31,6 +31,7 @@ type TaskColumnProps = {
   onAddTask?: (columnId: string) => void;
   onDeleteTask: (id: string) => void;
   onToggleTaskDone: (id: string, done: boolean) => void;
+  onTaskContextMenu?: (event: ReactMouseEvent<HTMLDivElement>, task: Task) => void;
   translateStatusLabel?: boolean;
 };
 
@@ -43,6 +44,7 @@ type SortableTaskCardProps = {
   accountPhotoUrl?: string | null;
   onDeleteTask: (id: string) => void;
   onToggleTaskDone: (id: string, done: boolean) => void;
+  onTaskContextMenu?: (event: ReactMouseEvent<HTMLDivElement>, task: Task) => void;
 };
 
 const taskColumnBackground = "#ffffff";
@@ -69,6 +71,7 @@ const SortableTaskCard = ({
   accountPhotoUrl,
   onDeleteTask,
   onToggleTaskDone,
+  onTaskContextMenu,
 }: SortableTaskCardProps) => {
   const {
     attributes,
@@ -111,6 +114,7 @@ const SortableTaskCard = ({
         isDragging={isDragging}
         onDelete={onDeleteTask}
         onToggleDone={onToggleTaskDone}
+        onContextMenu={onTaskContextMenu}
       />
     </motion.div>
   );
@@ -126,6 +130,7 @@ export const TaskColumn = ({
   onAddTask,
   onDeleteTask,
   onToggleTaskDone,
+  onTaskContextMenu,
   translateStatusLabel = false,
 }: TaskColumnProps) => {
   const t = useT();
@@ -218,6 +223,7 @@ export const TaskColumn = ({
                     accountPhotoUrl={accountPhotoUrl}
                     onDeleteTask={onDeleteTask}
                     onToggleTaskDone={onToggleTaskDone}
+                    onTaskContextMenu={onTaskContextMenu}
                   />
                   {!isActiveTask && (
                     <TaskInsertionSlot
