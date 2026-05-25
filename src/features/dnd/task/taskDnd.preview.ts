@@ -73,18 +73,28 @@ export const createTaskDragPreview = (
   target: TaskDropTarget,
   getPreviewTask: (task: Task, targetColumnId: string) => Task = (task) => task,
 ): Record<string, Task[]> => {
-  const activeTask = findTask(tasksByColumn, activeTaskId);
+  let activeTask: Task | null = null;
+  let activeColumnId: string | null = null;
+  const nextTasksByColumn: Record<string, Task[]> = { ...tasksByColumn };
 
-  if (!activeTask) {
+  for (const [columnId, tasks] of Object.entries(tasksByColumn)) {
+    const activeTaskIndex = tasks.findIndex((task) => task.id === activeTaskId);
+
+    if (activeTaskIndex >= 0) {
+      activeTask = tasks[activeTaskIndex];
+      activeColumnId = columnId;
+      nextTasksByColumn[columnId] = [
+        ...tasks.slice(0, activeTaskIndex),
+        ...tasks.slice(activeTaskIndex + 1),
+      ];
+      break;
+    }
+  }
+
+  if (!activeTask || !activeColumnId) {
     return tasksByColumn;
   }
 
-  const nextTasksByColumn = Object.fromEntries(
-    Object.entries(tasksByColumn).map(([columnId, tasks]) => [
-      columnId,
-      tasks.filter((task) => task.id !== activeTaskId),
-    ]),
-  ) as Record<string, Task[]>;
   const targetTasks = nextTasksByColumn[target.columnId] ?? [];
   let insertIndex = Math.max(
     0,
