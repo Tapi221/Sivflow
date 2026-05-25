@@ -34,6 +34,21 @@ type GoogleOAuthReconnectDiagnosis = {
   action: string;
 };
 
+export type GoogleOAuthCallableErrorReason =
+  | "invalid_grant"
+  | "server_oauth_configuration"
+  | "token_encryption_key_invalid"
+  | "stored_refresh_token_decrypt_failed"
+  | "stored_refresh_token_missing"
+  | "token_endpoint_failed";
+
+type CallableErrorDetails = {
+  reason?: GoogleOAuthCallableErrorReason;
+  reconnectRequired?: boolean;
+  userAction?: string;
+  adminAction?: string;
+};
+
 const exchangeGoogleCalendarCodeCallable = httpsCallable<ExchangeGoogleCalendarCodeInput, ServerGoogleCalendarAccess>(functionsClient, "exchangeGoogleCalendarCode");
 const getGoogleCalendarAccessTokenCallable = httpsCallable<GetGoogleCalendarAccessTokenInput, ServerGoogleCalendarAccess>(functionsClient, "getGoogleCalendarAccessToken");
 const disconnectGoogleCalendarAccountCallable = httpsCallable<DisconnectGoogleCalendarAccountInput, { ok: boolean }>(functionsClient, "disconnectGoogleCalendarAccount");
@@ -44,6 +59,8 @@ const SERVER_OAUTH_CONFIGURATION_ERROR_CODE = "server-oauth-configuration-error"
 const SERVER_OAUTH_CONFIGURATION_ERROR_MESSAGE = "Google OAuth のサーバー設定に問題があります。管理者は Firebase Functions secrets の GOOGLE_OAUTH_WEB_CLIENT_ID / GOOGLE_OAUTH_WEB_CLIENT_SECRET を、Google Cloud Console に存在する有効なウェブアプリ OAuth クライアントの値に更新して、Functions を再デプロイしてください。";
 const INVALID_REFRESH_TOKEN_ERROR_CODE = "google-refresh-token-invalid";
 const INVALID_REFRESH_TOKEN_MESSAGE = "Google 連携トークンが無効です。Google アカウントのサードパーティ連携からこのアプリを削除してから、アプリで再連携してください。";
+const SERVER_TOKEN_DECRYPT_ERROR_CODE = "server-stored-token-decrypt-error";
+const SERVER_TOKEN_DECRYPT_ERROR_MESSAGE = "保存済み Google 連携トークンを復号できません。管理者が暗号化キーと保存データを確認してください。";
 const SERVER_TOKEN_RETRY_DELAYS_MS = [500, 1_500] as const;
 
 const waitForCallableAuth = async (): Promise<void> => {
@@ -66,6 +83,29 @@ const normalizeCallableErrorCode = (error: unknown): string | undefined => {
 
   return undefined;
 };
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+export const readGoogleOAuthCallableErrorDetails = (error: unknown): CallableErrorDetails => {
+  if (!isRecord(error)) return {};
+  const details = error.details;
+  if (!isRecord(details)) return {};
+
+  return {
+    reason: typeof details.reason === "string"
+      ? details.reason as GoogleOAuthCallableErrorReason
+      : undefined,
+    reconnectRequired: typeof details.reconnectRequired === "boolean"
+      ? details.reconnectRequired
+      : undefined,
+    userAction: typeof details.userAction === "string" ? details.userAction : undefined,
+    adminAction: typeof details.adminAction === "string" ? details.adminAction : undefined,
+  };
+};
+
+export const getGoogleOAuthCallableErrorReason = (error: unknown): GoogleOAuthCallableErrorReason | undefined =>
+  readGoogleOAuthCallableErrorDetails(error).reason;
 
 const toErrorMessage = (error: unknown): string => {
   if (error instanceof Error) return error.message;
@@ -98,12 +138,46 @@ const isInvalidRefreshTokenError = (error: unknown): boolean => {
   return normalizedMessage.includes("invalid_grant");
 };
 
-const diagnoseGoogleOAuthReconnectCause = (
+export const diagnoseGoogleOAuthReconnectCause = (
   error: unknown,
 ): GoogleOAuthReconnectDiagnosis => {
   const code = normalizeCallableErrorCode(error);
+  const details = readGoogleOAuthCallableErrorDetails(error);
+  const reason = details.reason;
   const message = toErrorMessage(error);
   const normalizedMessage = message.toLowerCase();
+
+  if (reason === "invalid_grant") {
+    return {
+      cause: "Google 側で refresh token または認可コードが無効化されています。権限取り消し、期限切れ、または認可コードの再利用が考えられます。",
+      reconnectRequired: true,
+      action: "Google アカウントのサードパーティ連携からこのアプリを削除してから、アプリで再連携してください。",
+    };
+  }
+
+  if (reason === "stored_refresh_token_missing") {
+    return {
+      cause: "保存済み refresh token が欠落しています。",
+      reconnectRequired: true,
+      action: "Google アカウントのサードパーティ連携からこのアプリを削除してから、アプリで再連携してください。",
+    };
+  }
+
+  if (reason === "server_oauth_configuration") {
+    return {
+      cause: "Cloud Functions の OAuth Web Client ID / Client Secret が Google Cloud Console の有効なウェブアプリ OAuth クライアントと一致していません。",
+      reconnectRequired: false,
+      action: details.adminAction ?? "ユーザー操作では直りません。Firebase Functions secrets の GOOGLE_OAUTH_WEB_CLIENT_ID / GOOGLE_OAUTH_WEB_CLIENT_SECRET を正しい値に更新し、Functions を再デプロイしてください。",
+    };
+  }
+
+  if (reason === "token_encryption_key_invalid" || reason === "stored_refresh_token_decrypt_failed") {
+    return {
+      cause: "暗号化キー不一致、または保存済み refresh token の暗号化データ破損が疑われます。",
+      reconnectRequired: false,
+      action: "ユーザー操作では直りません。GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY と Firestore の保存済み refresh token を確認してください。",
+    };
+  }
 
   if (code === "unauthenticated" || normalizedMessage.includes("firebase authentication")) {
     return {
@@ -219,22 +293,47 @@ const isServerInfrastructureError = (error: unknown): boolean => {
   );
 };
 
-const toUserTransparentAutoRecoveryError = (sourceError: unknown): Error => {
-  if (isOAuthClientConfigurationError(sourceError)) {
+export const isGoogleOAuthDeterministicErrorReason = (reason: string | undefined): boolean =>
+  reason === "invalid_grant" ||
+  reason === "stored_refresh_token_missing" ||
+  reason === "server_oauth_configuration" ||
+  reason === "token_encryption_key_invalid" ||
+  reason === "stored_refresh_token_decrypt_failed";
+
+const attachGoogleOAuthReason = <T extends Error>(
+  error: T,
+  reason: GoogleOAuthCallableErrorReason | undefined,
+): T => {
+  if (reason) {
+    (error as T & { googleOAuthReason?: GoogleOAuthCallableErrorReason }).googleOAuthReason = reason;
+  }
+  return error;
+};
+
+export const toUserTransparentAutoRecoveryError = (sourceError: unknown): Error => {
+  const reason = getGoogleOAuthCallableErrorReason(sourceError);
+
+  if (reason === "server_oauth_configuration" || isOAuthClientConfigurationError(sourceError)) {
     const error = new Error(SERVER_OAUTH_CONFIGURATION_ERROR_MESSAGE);
     (error as Error & { code?: string }).code = SERVER_OAUTH_CONFIGURATION_ERROR_CODE;
-    return error;
+    return attachGoogleOAuthReason(error, reason ?? "server_oauth_configuration");
   }
 
-  if (isInvalidRefreshTokenError(sourceError)) {
+  if (reason === "token_encryption_key_invalid" || reason === "stored_refresh_token_decrypt_failed") {
+    const error = new Error(SERVER_TOKEN_DECRYPT_ERROR_MESSAGE);
+    (error as Error & { code?: string }).code = SERVER_TOKEN_DECRYPT_ERROR_CODE;
+    return attachGoogleOAuthReason(error, reason);
+  }
+
+  if (reason === "invalid_grant" || reason === "stored_refresh_token_missing" || isInvalidRefreshTokenError(sourceError)) {
     const error = new Error(INVALID_REFRESH_TOKEN_MESSAGE);
     (error as Error & { code?: string }).code = INVALID_REFRESH_TOKEN_ERROR_CODE;
-    return error;
+    return attachGoogleOAuthReason(error, reason ?? "invalid_grant");
   }
 
   const error = new Error(AUTO_RECOVERY_PENDING_MESSAGE);
   (error as Error & { code?: string }).code = AUTO_RECOVERY_PENDING_ERROR_CODE;
-  return error;
+  return attachGoogleOAuthReason(error, reason);
 };
 
 const getGoogleCalendarAccessTokenWithRetry = async (
