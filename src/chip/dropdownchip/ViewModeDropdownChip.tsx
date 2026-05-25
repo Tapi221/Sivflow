@@ -32,7 +32,7 @@ export const ViewModeDropdown = ({
       role="group"
       aria-label="表示形式"
       className={cn(
-        "relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5",
+        "relative inline-grid h-7 w-max grid-flow-col items-center gap-1 rounded-[10px] bg-[#f7f7f7] p-0.5",
         className,
       )}
     >
@@ -46,8 +46,8 @@ export const ViewModeDropdown = ({
             aria-pressed={isActive}
             onClick={() => onChange(option.value)}
             className={cn(
-              "relative z-10 flex h-7 min-w-8 items-center justify-center rounded-lg px-2",
-              "appearance-none select-none text-[12px] font-semibold leading-none tracking-[-0.01em]",
+              "relative z-10 flex h-6 min-w-7 items-center justify-center rounded-[8px] px-1.5",
+              "appearance-none select-none text-[11px] font-semibold leading-none tracking-[-0.01em]",
               "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
               "focus:outline-none focus:ring-0 focus-visible:outline-none",
               isActive ? "text-[#8c8c8c]" : "text-[#b3b3b3] hover:text-[#8c8c8c]",
@@ -56,7 +56,7 @@ export const ViewModeDropdown = ({
             {isActive && (
               <motion.span
                 layoutId={VIEW_MODE_INDICATOR_ID}
-                className="absolute inset-0 -z-10 rounded-lg border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+                className="absolute inset-0 -z-10 rounded-[8px] border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
                 transition={VIEW_MODE_MOTION_TRANSITION}
               />
             )}
