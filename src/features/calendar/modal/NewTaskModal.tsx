@@ -2,9 +2,7 @@ import { useState, type KeyboardEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import type { TaskCreateInput, TaskPriority, TaskStatus, TaskSubtask } from "../task/task.types";
-import {CATEGORY_CONFIG,
-  PRIORITY_CONFIG,
-  TASK_COLUMNS,} from "../task/task.types";
+import { CATEGORY_CONFIG, PRIORITY_CONFIG, TASK_COLUMNS } from "../task/task.types";
 
 type TaskCategoryOption = {
   id: string;
@@ -105,6 +103,30 @@ const XIcon = () => (
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
+    />
+  </svg>
+);
+
+const NoteIcon = () => (
+  <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
+    <path
+      d="M4.1 3.2h7.8M4.1 6h7.8M4.1 8.8h5.1M3.2 1.8h9.6c.8 0 1.4.6 1.4 1.4v9.6c0 .8-.6 1.4-1.4 1.4H3.2c-.8 0-1.4-.6-1.4-1.4V3.2c0-.8.6-1.4 1.4-1.4Z"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const ChecklistIcon = () => (
+  <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
+    <path
+      d="m2.8 4.1 1.1 1.1 2-2.2M7.2 4.1h6M2.8 8l1.1 1.1 2-2.2M7.2 8h6M2.8 11.9 3.9 13l2-2.2M7.2 11.9h6"
+      stroke="currentColor"
+      strokeWidth="1.35"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -434,96 +456,116 @@ export const NewTaskModal = ({
             </label>
           </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(260px,0.72fr)]">
-            <label className="block">
-              <span className="mb-1.5 block px-1 text-[11px] font-semibold text-[#8e8e93]">
-                詳細
-              </span>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="メモ、背景、完了条件など"
-                aria-label="タスク詳細"
-                rows={5}
-                className="min-h-[118px] w-full resize-none rounded-[12px] border border-[#e3e3e8] bg-[#fbfbfd] px-3 py-2.5 text-[13px] leading-5 text-[#2f3337] outline-none transition-colors placeholder:text-[#b3b3bb] focus:border-[#7c83e6] focus:bg-white"
-              />
-            </label>
-
-            <div>
-              <div className="mb-1.5 flex items-center justify-between px-1">
-                <span className="text-[11px] font-semibold text-[#8e8e93]">
-                  サブタスク
-                </span>
-                {subtasks.length > 0 && (
-                  <span className="text-[10px] font-medium text-[#b3b3bb]">
-                    {subtasks.length} 件
+          <div className="mt-6 overflow-hidden rounded-[18px] bg-[#f7f7f8] ring-1 ring-black/[0.05]">
+            <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(260px,0.72fr)]">
+              <section className="p-4 md:p-5">
+                <div className="flex items-center gap-2 text-[11px] font-semibold text-[#7c7f87]">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-white text-[#8e8e93] shadow-[0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.04]">
+                    <NoteIcon />
                   </span>
-                )}
-              </div>
+                  詳細
+                </div>
 
-              <div className="rounded-[12px] border border-[#e3e3e8] bg-[#fbfbfd] p-2">
-                <div className="space-y-1.5">
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="メモ、背景、完了条件など"
+                  aria-label="タスク詳細"
+                  rows={5}
+                  className="mt-3 min-h-[132px] w-full resize-none border-0 bg-transparent p-0 text-[13px] leading-6 text-[#2f3337] outline-none placeholder:text-[#aeb0b8]"
+                />
+              </section>
+
+              <section className="border-t border-[#e6e6eb] p-4 md:border-l md:border-t-0 md:p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold text-[#7c7f87]">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-white text-[#8e8e93] shadow-[0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.04]">
+                      <ChecklistIcon />
+                    </span>
+                    サブタスク
+                  </div>
+
+                  {subtasks.length > 0 && (
+                    <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-[#8e8e93] ring-1 ring-black/[0.04]">
+                      {subtasks.length} 件
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-3 space-y-1">
+                  {subtasks.length === 0 && (
+                    <div className="rounded-[10px] px-2 py-2.5 text-[12px] leading-5 text-[#a7a9b0]">
+                      チェックリストをここに並べられます
+                    </div>
+                  )}
+
                   {subtasks.map((subtask) => (
                     <div
                       key={subtask.id}
-                      className="flex items-center gap-2 rounded-[9px] bg-white px-2 py-1.5 ring-1 ring-black/[0.04]"
+                      className="group flex items-center gap-2 rounded-[10px] px-2 py-1.5 transition-colors hover:bg-white/90"
                     >
-                      <span className="h-3.5 w-3.5 shrink-0 rounded-[4px] border border-[#b8bbc4]" />
+                      <span className="h-3.5 w-3.5 shrink-0 rounded-[4px] border border-[#b8bbc4] bg-white" />
                       <input
                         type="text"
                         value={subtask.title}
                         onChange={(e) => updateSubtaskTitle(subtask.id, e.target.value)}
                         onKeyDown={handleKeyDown}
                         aria-label="サブタスク名"
-                        className="min-w-0 flex-1 border-0 bg-transparent text-[12px] text-[#2f3337] outline-none placeholder:text-[#b3b3bb]"
+                        className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[12px] text-[#2f3337] outline-none placeholder:text-[#b3b3bb]"
                       />
                       <button
                         type="button"
                         onClick={() => removeSubtask(subtask.id)}
                         aria-label="サブタスクを削除"
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[#8e8e93] transition-colors hover:bg-[#f2f2f7] hover:text-[#4f5359]"
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[#8e8e93] opacity-0 transition-all hover:bg-[#ececf1] hover:text-[#4f5359] group-hover:opacity-100"
                       >
                         <XIcon />
                       </button>
                     </div>
                   ))}
-                </div>
 
-                <div className={subtasks.length > 0 ? "mt-2 flex items-center gap-2" : "flex items-center gap-2"}>
-                  <input
-                    type="text"
-                    value={subtaskDraft}
-                    onChange={(e) => setSubtaskDraft(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.metaKey && !e.ctrlKey) {
-                        e.preventDefault();
-                        addSubtask();
-                        return;
-                      }
+                  <div className="group flex items-center gap-2 rounded-[10px] px-2 py-1.5 transition-colors hover:bg-white/90 focus-within:bg-white/90">
+                    <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-dashed border-[#b8bbc4] text-[#8e8e93]">
+                      <PlusIcon />
+                    </span>
+                    <input
+                      type="text"
+                      value={subtaskDraft}
+                      onChange={(e) => setSubtaskDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.metaKey && !e.ctrlKey) {
+                          e.preventDefault();
+                          addSubtask();
+                          return;
+                        }
 
-                      handleKeyDown(e);
-                    }}
-                    placeholder="サブタスクを追加"
-                    aria-label="追加するサブタスク"
-                    className="h-8 min-w-0 flex-1 rounded-[9px] border border-[#e3e3e8] bg-white px-2.5 text-[12px] text-[#2f3337] outline-none transition-colors placeholder:text-[#b3b3bb] focus:border-[#7c83e6]"
-                  />
-                  <button
-                    type="button"
-                    onClick={addSubtask}
-                    disabled={!subtaskDraft.trim()}
-                    aria-label="サブタスクを追加"
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#6571dc] text-white shadow-[0_6px_14px_rgba(101,113,220,0.24)] transition-colors hover:bg-[#5864ce] disabled:bg-[#c7c7cc] disabled:shadow-none"
-                  >
-                    <PlusIcon />
-                  </button>
+                        handleKeyDown(e);
+                      }}
+                      placeholder="サブタスクを追加"
+                      aria-label="追加するサブタスク"
+                      className="h-7 min-w-0 flex-1 border-0 bg-transparent p-0 text-[12px] text-[#2f3337] outline-none placeholder:text-[#aeb0b8]"
+                    />
+                    {Boolean(subtaskDraft.trim()) && (
+                      <button
+                        type="button"
+                        onClick={addSubtask}
+                        className="rounded-full bg-[#1f2328] px-2 py-1 text-[10px] font-semibold text-white shadow-[0_6px_14px_rgba(31,35,40,0.18)] transition-colors hover:bg-[#343942]"
+                      >
+                        追加
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
+              </section>
             </div>
           </div>
 
-          <div className="mt-3 text-[11px] text-[#8e8e93]">
-            {selectedCategoryLabel} に作成されます
+          <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f8] px-2.5 py-1 text-[11px] text-[#8e8e93] ring-1 ring-black/[0.04]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#6571dc]" />
+            <span>
+              <span className="font-medium text-[#5f6368]">{selectedCategoryLabel}</span> に作成されます
+            </span>
           </div>
         </div>
 
