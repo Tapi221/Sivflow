@@ -1,4 +1,4 @@
-import { type FormEvent, useMemo, useRef, useState } from "react";
+import { type FormEvent, type KeyboardEvent, useMemo, useRef, useState } from "react";
 import { addDays, format, isSameDay, startOfDay, startOfMonth, startOfWeek } from "date-fns";
 
 import { GoogleAccountChip } from "@/chip/budge/GoogleAccountChip";
@@ -203,6 +203,13 @@ const AppProjectsSection = ({
     handleAddProject();
   };
 
+  const handleProjectNameKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+
+    event.preventDefault();
+    handleAddProject();
+  };
+
   const handleStartAdding = () => {
     setIsAdding(true);
     setAddError(null);
@@ -234,6 +241,7 @@ const AppProjectsSection = ({
                 setProjectName(event.target.value);
                 if (addError) setAddError(null);
               }}
+              onKeyDown={handleProjectNameKeyDown}
               autoFocus
               placeholder="プロジェクト名"
               aria-label="プロジェクト名"
@@ -247,10 +255,9 @@ const AppProjectsSection = ({
               )}
             />
             <button
-              type="button"
+              type="submit"
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4f4f4] text-[#6d7380] transition hover:bg-[#ececec] active:scale-[0.94]"
               aria-label="プロジェクトを追加"
-              onClick={handleAddProject}
             >
               <IconPlus className="h-3.5 w-3.5" />
             </button>
