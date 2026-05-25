@@ -26,18 +26,17 @@ export const RightClickPanelSurface = ({
   panelId,
   children,
 }: RightClickPanelSurfaceProps) => {
-  const [isDismissed, setIsDismissed] = useState(false);
+  const panelInstanceKey = panelId ? `${panelId}:${x}:${y}` : null;
+  const [dismissedPanelInstanceKey, setDismissedPanelInstanceKey] = useState<string | null>(null);
 
   useLayoutEffect(() => {
-    if (!panelId) return;
-
-    setIsDismissed(false);
+    if (!panelId || !panelInstanceKey) return;
 
     const handleOtherPanelOpen = (event: Event) => {
       const { detail } = event as CustomEvent<{ panelId?: RightClickPanelId }>;
 
       if (detail?.panelId !== panelId) {
-        setIsDismissed(true);
+        setDismissedPanelInstanceKey(panelInstanceKey);
       }
     };
 
@@ -47,9 +46,9 @@ export const RightClickPanelSurface = ({
     return () => {
       window.removeEventListener(RIGHT_CLICK_PANEL_OPEN_EVENT, handleOtherPanelOpen);
     };
-  }, [panelId, x, y]);
+  }, [panelId, panelInstanceKey]);
 
-  if (isDismissed) return null;
+  if (panelInstanceKey && dismissedPanelInstanceKey === panelInstanceKey) return null;
 
   return (
     <>
