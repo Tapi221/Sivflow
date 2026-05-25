@@ -32,6 +32,8 @@ const DAY_DETAIL_PANEL_TOGGLE_BUTTON_CLASS =
 
 const DAY_DETAIL_PANEL_WIDTH_PX = 260;
 const DAY_DETAIL_PANEL_MIN_CALENDAR_WIDTH_PX = 720;
+const DAY_DETAIL_PANEL_AUTO_OPEN_MIN_BODY_WIDTH_PX =
+  DAY_DETAIL_PANEL_WIDTH_PX + DAY_DETAIL_PANEL_MIN_CALENDAR_WIDTH_PX;
 const VIEW_HEADER_CONTROLS_RIGHT_INSET_PX = 56;
 const APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const APP_PROJECT_COLORS = [
@@ -49,8 +51,7 @@ type StoredAppCalendarItem = Partial<AppCalendarItem>;
 const getInitialCanFitDayDetailPanel = (): boolean => {
   if (typeof window === "undefined") return true;
 
-  return window.innerWidth >=
-    DAY_DETAIL_PANEL_WIDTH_PX + DAY_DETAIL_PANEL_MIN_CALENDAR_WIDTH_PX;
+  return window.innerWidth >= DAY_DETAIL_PANEL_AUTO_OPEN_MIN_BODY_WIDTH_PX;
 };
 
 const createAppProjectId = (): string => {
@@ -132,7 +133,7 @@ export const ScheduleScreen = ({
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
-  const [calendarViewportWidth, setCalendarViewportWidth] = useState(0);
+  const [availableCalendarBodyWidth, setAvailableCalendarBodyWidth] = useState(0);
   const [canFitDayDetailPanel, setCanFitDayDetailPanel] = useState(
     getInitialCanFitDayDetailPanel,
   );
@@ -199,22 +200,41 @@ export const ScheduleScreen = ({
   } = pane;
 
   useEffect(() => {
-    const el = contentViewportRef.current;
-    if (!el) return;
+    const viewportEl = contentViewportRef.current;
+    const bodyEl = viewportEl?.parentElement ?? null;
+    if (!viewportEl || !bodyEl) return;
 
-    const updateCalendarViewportWidth = (width: number) => {
-      setCalendarViewportWidth(width);
+    const getLeadingPanelWidth = () => {
+      const leadingPanelEl = viewportEl.previousElementSibling;
+
+      return leadingPanelEl instanceof HTMLElement
+        ? leadingPanelEl.getBoundingClientRect().width
+        : 0;
     };
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      updateCalendarViewportWidth(entries[0]?.contentRect.width ?? 0);
-    });
+    const updateAvailableCalendarBodyWidth = () => {
+      const bodyWidth = bodyEl.getBoundingClientRect().width;
+      const leadingPanelWidth = getLeadingPanelWidth();
 
-    resizeObserver.observe(el);
-    updateCalendarViewportWidth(el.getBoundingClientRect().width);
+      setAvailableCalendarBodyWidth(
+        Math.max(0, bodyWidth - leadingPanelWidth),
+      );
+    };
+
+    const resizeObserver = new ResizeObserver(updateAvailableCalendarBodyWidth);
+    const leadingPanelEl = viewportEl.previousElementSibling;
+
+    resizeObserver.observe(bodyEl);
+    if (leadingPanelEl instanceof Element) {
+      resizeObserver.observe(leadingPanelEl);
+    }
+
+    updateAvailableCalendarBodyWidth();
+    window.addEventListener("resize", updateAvailableCalendarBodyWidth);
 
     return () => {
       resizeObserver.disconnect();
+      window.removeEventListener("resize", updateAvailableCalendarBodyWidth);
     };
   }, [contentViewportRef]);
 
@@ -322,23 +342,19 @@ export const ScheduleScreen = ({
   const canShowDayDetailPanel =
     activeMode === "calendar" && selectedViewMode === "month";
 
-  const showDayDetailPanel =
-    canShowDayDetailPanel && canFitDayDetailPanel && isDayDetailPanelOpen;
-
-  const availableMonthPaneWidth =
-    calendarViewportWidth + (showDayDetailPanel ? DAY_DETAIL_PANEL_WIDTH_PX : 0);
-
   const measuredCanFitDayDetailPanel =
-    calendarViewportWidth === 0 ||
-    availableMonthPaneWidth >=
-      DAY_DETAIL_PANEL_WIDTH_PX + DAY_DETAIL_PANEL_MIN_CALENDAR_WIDTH_PX;
+    availableCalendarBodyWidth === 0 ||
+    availableCalendarBodyWidth >= DAY_DETAIL_PANEL_AUTO_OPEN_MIN_BODY_WIDTH_PX;
 
   useEffect(() => {
-    if (!canShowDayDetailPanel || calendarViewportWidth === 0) return;
+    if (!canShowDayDetailPanel || availableCalendarBodyWidth === 0) return;
 
     setCanFitDayDetailPanel(measuredCanFitDayDetailPanel);
     setIsDayDetailPanelOpen(measuredCanFitDayDetailPanel);
-  }, [calendarViewportWidth, canShowDayDetailPanel, measuredCanFitDayDetailPanel]);
+  }, [availableCalendarBodyWidth, canShowDayDetailPanel, measuredCanFitDayDetailPanel]);
+
+  const showDayDetailPanel =
+    canShowDayDetailPanel && canFitDayDetailPanel && isDayDetailPanelOpen;
 
   const isDayDetailPanelCollapsed =
     canShowDayDetailPanel && !showDayDetailPanel;
@@ -463,11 +479,11 @@ export const ScheduleScreen = ({
         />
       )}
       trailingPanel={
-        canShowDayDetailPanel ? (
+        showDayDetailPanel ? (
           <DayDetailPanel
             selectedDate={selectedDate}
             events={calendarEvents}
-            isOpen={showDayDetailPanel}
+            isOpen
           />
         ) : null
       }
