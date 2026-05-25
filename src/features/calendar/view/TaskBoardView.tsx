@@ -1,5 +1,5 @@
 import { DndContext, DragOverlay, useDroppable } from "@dnd-kit/core";
-import { useCallback, useMemo, type CSSProperties, type MouseEvent as ReactMouseEvent, type WheelEvent } from "react";
+import { memo, useCallback, useMemo, type CSSProperties, type MouseEvent as ReactMouseEvent, type WheelEvent } from "react";
 import { createPortal } from "react-dom";
 
 import { CATEGORY_CONFIG, TASK_COLUMNS } from "../task/task.types";
@@ -78,7 +78,27 @@ const getCategoryConfig = (category: string) => {
   );
 };
 
-const DroppableTaskColumn = ({
+const isSameDropTarget = (
+  left?: TaskDropTarget | null,
+  right?: TaskDropTarget | null,
+) => {
+  if (left === right) {
+    return true;
+  }
+
+  if (!left || !right) {
+    return false;
+  }
+
+  return (
+    left.columnId === right.columnId &&
+    left.overTaskId === right.overTaskId &&
+    left.position === right.position &&
+    left.insertIndex === right.insertIndex
+  );
+};
+
+const DroppableTaskColumn = memo(({
   column,
   tasks,
   activeDropTarget,
@@ -122,7 +142,24 @@ const DroppableTaskColumn = ({
       />
     </div>
   );
-};
+}, (previous, next) => {
+  return (
+    previous.column === next.column &&
+    previous.tasks === next.tasks &&
+    isSameDropTarget(previous.activeDropTarget, next.activeDropTarget) &&
+    previous.activeTaskId === next.activeTaskId &&
+    previous.showDivider === next.showDivider &&
+    previous.accountName === next.accountName &&
+    previous.accountPhotoUrl === next.accountPhotoUrl &&
+    previous.onAddTask === next.onAddTask &&
+    previous.onDeleteTask === next.onDeleteTask &&
+    previous.onToggleTaskDone === next.onToggleTaskDone &&
+    previous.onTaskContextMenu === next.onTaskContextMenu &&
+    previous.translateStatusLabel === next.translateStatusLabel
+  );
+});
+
+DroppableTaskColumn.displayName = "DroppableTaskColumn";
 
 export const TaskBoardView = ({
   tasks,
@@ -318,23 +355,32 @@ export const TaskBoardView = ({
         className={groupMode === "section" ? TASK_BOARD_GRID_BASE_CLASS_NAME : `${TASK_BOARD_GRID_BASE_CLASS_NAME} grid-cols-4`}
         style={boardGridStyle}
       >
-        {boardColumns.map((boardColumn) => (
-          <DroppableTaskColumn
-            key={boardColumn.column.id}
-            column={boardColumn.column}
-            tasks={boardColumn.tasks}
-            activeDropTarget={activeDropTarget}
-            activeTaskId={activeTaskId}
-            showDivider={boardColumn.showDivider}
-            accountName={accountName}
-            accountPhotoUrl={accountPhotoUrl}
-            onAddTask={boardColumn.canAddTask ? onAddTask : undefined}
-            onDeleteTask={onDeleteTask}
-            onToggleTaskDone={onToggleTaskDone}
-            onTaskContextMenu={onTaskContextMenu}
-            translateStatusLabel={boardColumn.translateStatusLabel}
-          />
-        ))}
+        {boardColumns.map((boardColumn) => {
+          const columnActiveTaskId = activeTaskId && boardColumn.tasks.some((task) => task.id === activeTaskId)
+            ? activeTaskId
+            : null;
+          const columnDropTarget = activeDropTarget?.columnId === boardColumn.column.id
+            ? activeDropTarget
+            : null;
+
+          return (
+            <DroppableTaskColumn
+              key={boardColumn.column.id}
+              column={boardColumn.column}
+              tasks={boardColumn.tasks}
+              activeDropTarget={columnDropTarget}
+              activeTaskId={columnActiveTaskId}
+              showDivider={boardColumn.showDivider}
+              accountName={accountName}
+              accountPhotoUrl={accountPhotoUrl}
+              onAddTask={boardColumn.canAddTask ? onAddTask : undefined}
+              onDeleteTask={onDeleteTask}
+              onToggleTaskDone={onToggleTaskDone}
+              onTaskContextMenu={onTaskContextMenu}
+              translateStatusLabel={boardColumn.translateStatusLabel}
+            />
+          );
+        })}
       </div>
     </div>
   );
