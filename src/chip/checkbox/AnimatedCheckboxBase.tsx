@@ -38,7 +38,7 @@ export const AnimatedCheckboxBase = ({
   let fillColor = color;
   if (variant === "soft") fillColor = "color-mix(in srgb, var(--checkbox-color) 16%, transparent)";
 
-  const rootStyle = { "--checkbox-color": color } as CSSProperties;
+  const rootStyle = { "--checkbox-color": color, filter: "saturate(0.72)" } as CSSProperties;
 
   return (
     <span className={cn("relative h-3.5 w-3.5 shrink-0", className)} style={rootStyle}>
