@@ -145,24 +145,24 @@ const TaskTagStripBase = () => {
             key="task-tag-strip-collapsed"
             type="button"
             onClick={handleExpand}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -8 }}
+            initial={{ x: -8 }}
+            animate={{ x: 0 }}
+            exit={{ x: -8 }}
             transition={TAG_PANEL_MOTION_TRANSITION}
             className="flex h-8 shrink-0 items-center gap-1.5 rounded-xl border border-[#eeeeee] bg-white px-2.5 text-[#6d747f] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#fafafa] hover:text-[#3f4652] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
             aria-label="タグ一覧を開く"
             aria-expanded={false}
             title="タグ一覧を開く"
           >
-            <Tag className="h-4 w-4" />
-            <ChevronRight className="h-3.5 w-3.5" />
+            <Tag className="h-4 w-4 shrink-0" />
+            <ChevronRight className="h-3.5 w-3.5 shrink-0" />
           </motion.button>
         ) : (
           <motion.div
             key="task-tag-strip-expanded"
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -8 }}
+            initial={{ x: -8 }}
+            animate={{ x: 0 }}
+            exit={{ x: -8 }}
             transition={TAG_PANEL_MOTION_TRANSITION}
             className="flex h-8 min-w-0 flex-1 items-center rounded-xl bg-white p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
           >
@@ -174,8 +174,8 @@ const TaskTagStripBase = () => {
               aria-expanded={true}
               title="タグ一覧を閉じる"
             >
-              <Tag className="h-4 w-4" />
-              <ChevronLeft className="h-3.5 w-3.5" />
+              <Tag className="h-4 w-4 shrink-0" />
+              <ChevronLeft className="h-3.5 w-3.5 shrink-0" />
             </button>
 
             <motion.div
