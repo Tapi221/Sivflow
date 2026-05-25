@@ -66,14 +66,14 @@ const DialogContent = React.forwardRef<
       {!nonModal && <DialogOverlay className={overlayClassName} />}
       <div
         className={cn(
-          "fixed inset-0 z-[100] flex items-center justify-center p-4 pointer-events-none",
+          "fixed inset-0 z-[100] flex items-center justify-center pointer-events-none",
           contentWrapperClassName,
         )}
       >
         <DialogPrimitive.Content
           ref={ref}
           className={cn(
-            "ds-dialog__content pointer-events-auto grid max-h-[calc(100vh-2rem)] w-full max-w-lg gap-4 overflow-y-auto p-6 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+            "ds-dialog__content pointer-events-auto grid w-full max-w-lg gap-4 p-6 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
             surface && surface !== "plain" && "ds-dialog__content--elevated",
             floatingSurfaceVariants({ surface }),
             className,
