@@ -1,19 +1,9 @@
-import {type SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,} from "react";
+import { type SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import {clampCardIndex,
-  createCardSetViewSourceKey,
-  resolveCardIndexById,
-  resolveCardsForPager,
-  toggleFlippedCardId,} from "@/features/cardsetview/domain/cardSetViewState";
+import { clampCardIndex, createCardSetViewSourceKey, resolveCardIndexById, resolveCardsForPager, toggleFlippedCardId } from "@/features/cardsetview/domain/cardSetViewState";
 
 import { useCardEntity } from "@/hooks/card/useCardEntity";
-import {getCardSetViewFlippedCardIds,
-  setCardSetViewFlippedCardIds,} from "@/services/cardSetViewFlippedFacePreferences";
+import { getCardSetViewFlippedCardIds, setCardSetViewFlippedCardIds } from "@/services/cardSetViewFlippedFacePreferences";
 import type { Card } from "@/types";
 
 type KeyedNumberState = {
