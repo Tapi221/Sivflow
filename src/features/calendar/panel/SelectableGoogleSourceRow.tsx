@@ -31,7 +31,7 @@ export const SelectableGoogleSourceRow = ({
     >
       <AnimatedCircleCheckbox checked={checked} color={color} />
 
-      <span className="truncate text-[12px] font-medium text-[#2f2f2f]">
+      <span className="truncate text-[12px] font-medium text-[#6f6f6f]">
         {label}
       </span>
     </button>
