@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState, type ComponentType, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
 import { PlusLineIcon } from "@/components/icons/icons.schedule";
 import { ClockIcon, HomeIcon, InboxIcon, LibraryIcon, SettingIcon } from "@/components/icons/icons.sidebar";
 import { WorkspaceTabDndItem, WorkspaceTabDndList } from "@/features/dnd/tab/WorkspaceTabDnd";
 import { useWorkspaceTabDnd } from "@/features/dnd/tab/useWorkspaceTabDnd";
 import type { WorkspaceSidebarSection, WorkspaceTab } from "@/features/tab/Tab";
 import { useWorkspaceTabsStore } from "@/features/tab/hooks/useTabsStore";
-import { resolveWorkspaceTabRoute } from "@/features/tab/resolveTabRoute";
 import { WORKSPACE_TAB_CONTEXT_MENU_HEIGHT, WORKSPACE_TAB_CONTEXT_MENU_MARGIN, WORKSPACE_TAB_CONTEXT_MENU_WIDTH, WorkspaceTabContextMenu } from "@/chip/rightclickpanel/TabContextMenu";
 import { cn } from "@/lib/utils";
 import { FileText, Layers, X } from "@/ui/icons";
@@ -136,25 +134,6 @@ const resolveAddButtonClassName = (isTitlebar: boolean): string => {
   );
 };
 
-const resolveNextTabOnClose = (
-  tabs: WorkspaceTab[],
-  closingTabId: WorkspaceTab["id"],
-): WorkspaceTab | null => {
-  const closingIndex = tabs.findIndex((tab) => tab.id === closingTabId);
-  const nextTabs = tabs.filter((tab) => tab.id !== closingTabId);
-
-  if (nextTabs.length === 0) {
-    return null;
-  }
-
-  const fallbackIndex = Math.max(
-    0,
-    Math.min(closingIndex, nextTabs.length - 1),
-  );
-
-  return nextTabs[fallbackIndex] ?? null;
-};
-
 const resolveTabSlotLayoutStyle = (
   tab: WorkspaceTab,
   interactiveStyle: AppRegionStyle,
@@ -215,7 +194,6 @@ export const TabsBar = ({
   className,
   noDragStyle,
 }: TabsBarProps) => {
-  const navigate = useNavigate();
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
   const activeTabId = useWorkspaceTabsStore((state) => state.activeTabId);
   const lastOpenedTabId = useWorkspaceTabsStore(
@@ -313,21 +291,8 @@ export const TabsBar = ({
     };
   }, [contextMenu]);
 
-  const navigateToCurrentActiveTab = () => {
-    const currentTabs = useWorkspaceTabsStore.getState().tabs;
-    const currentActiveTabId = useWorkspaceTabsStore.getState().activeTabId;
-    const currentActiveTab = currentTabs.find(
-      (tab) => tab.id === currentActiveTabId,
-    );
-
-    if (currentActiveTab) {
-      navigate(resolveWorkspaceTabRoute(currentActiveTab));
-    }
-  };
-
   const closeWorkspaceTabs = (tabsToClose: WorkspaceTab[]) => {
     tabsToClose.forEach((tab) => closeTab(tab.id));
-    navigateToCurrentActiveTab();
   };
 
   const openTabContextMenu = (
@@ -350,17 +315,7 @@ export const TabsBar = ({
         disabled: !contextMenuTab.isClosable,
         onSelect: () => {
           setContextMenu(null);
-
-          const nextTab =
-            contextMenuTab.id === activeTabId
-              ? resolveNextTabOnClose(orderedTabs, contextMenuTab.id)
-              : null;
-
           closeTab(contextMenuTab.id);
-
-          if (nextTab) {
-            navigate(resolveWorkspaceTabRoute(nextTab));
-          }
         },
       },
       {
@@ -378,7 +333,6 @@ export const TabsBar = ({
               (tab) => tab.id !== contextMenuTab.id && tab.isClosable,
             ),
           );
-          navigate(resolveWorkspaceTabRoute(contextMenuTab));
         },
       },
       {
@@ -550,7 +504,6 @@ export const TabsBar = ({
 
                       setContextMenu(null);
                       selectTab(tab.id);
-                      navigate(resolveWorkspaceTabRoute(tab));
                     }}
                   >
                     <Icon
@@ -578,16 +531,7 @@ export const TabsBar = ({
                         event.preventDefault();
                         event.stopPropagation();
                         setContextMenu(null);
-
-                        const nextTab = selected
-                          ? resolveNextTabOnClose(orderedTabs, tab.id)
-                          : null;
-
                         closeTab(tab.id);
-
-                        if (nextTab) {
-                          navigate(resolveWorkspaceTabRoute(nextTab));
-                        }
                       }}
                     >
                       <X className="h-2.5 w-2.5" />
@@ -608,7 +552,6 @@ export const TabsBar = ({
           onClick={() => {
             setContextMenu(null);
             createExplorerTab();
-            navigate("/library?view=section-list&libraryType=pdf");
           }}
         >
           <PlusLineIcon className="h-4 w-4" />
