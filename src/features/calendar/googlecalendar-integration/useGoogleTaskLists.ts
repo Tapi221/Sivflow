@@ -39,10 +39,26 @@ const shouldHideAuthRecoveryError = (error: unknown): boolean => {
   const status = (error as Error & { status?: number }).status;
   const code = (error as Error & { code?: string }).code;
 
-  return status === 401 || status === 403 || code === "auto-recovery-pending";
+  return status === 401 || code === "auto-recovery-pending";
+};
+
+const isGooglePermissionError = (error: unknown): boolean => {
+  if (!(error instanceof Error)) return false;
+
+  const status = (error as Error & { status?: number }).status;
+  const reason = (error as Error & { googleReason?: string }).googleReason;
+
+  return (
+    status === 403 &&
+    (reason === "authError" || reason === "insufficientPermissions")
+  );
 };
 
 const toErrorMessage = (error: unknown) => {
+  if (isGooglePermissionError(error)) {
+    return "Google ToDo の権限が不足しています。再連携してください。";
+  }
+
   if (shouldHideAuthRecoveryError(error)) return null;
   if (!(error instanceof Error)) return String(error);
   return error.message;
