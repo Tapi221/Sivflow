@@ -1,10 +1,9 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns";
-import { useLocation, useNavigate } from "react-router-dom";
 import { TodayBar } from "@/chip/bar/TodayBar";
 import { ViewModeDropdown } from "@/chip/dropdownchip/ViewModeDropdownChip";
-import { SidebarPanelIcon, TaskIcon } from "@/components/icons/icons.schedule";
-import { CalendarIcon, LibraryIcon, SettingIcon } from "@/components/icons/icons.sidebar";
+import { SidebarPanelIcon } from "@/components/icons/icons.schedule";
+import { CalendarIcon } from "@/components/icons/icons.sidebar";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
@@ -86,13 +85,6 @@ const equalSet = (a: Set<string>, b: Set<string>): boolean => {
   return true;
 };
 
-const DirectoryIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
-    <path d="M4 7.5C4 5.567 5.567 4 7.5 4H9.4C10.079 4 10.724 4.296 11.167 4.811L12.19 6H16.5C18.433 6 20 7.567 20 9.5V16.5C20 18.433 18.433 20 16.5 20H7.5C5.567 20 4 18.433 4 16.5V7.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M8 12H16M8 15H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-  </svg>
-);
-
 const MOBILE_SCHEDULE_STYLE = `
   @media (max-width: 767px) {
     .schedule-mobile-month-surface .calendar-month-view {
@@ -113,8 +105,6 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
   const monthLabelFormat = useMonthLabelFormat();
-  const navigate = useNavigate();
-  const location = useLocation();
   const selectedTaskListInitializedRef = useRef(false);
   const [appProjects, setAppProjects] = useState<AppCalendarItem[]>(readStoredAppProjects);
   const [selectedTaskListIds, setSelectedTaskListIds] = useState<Set<string>>(() => new Set());
@@ -300,14 +290,6 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
     handleSidebarSelectDate(date);
   }, [activeMode, handleMonthCellSelectDate, handleSidebarSelectDate, handleTimelineSelectDate, selectedViewMode]);
 
-  const mobileNavItems = useMemo(() => [
-    { key: "schedule", label: "スケジュール", path: "/schedule", icon: CalendarIcon },
-    { key: "library", label: "ライブラリ", path: "/library", icon: LibraryIcon },
-    { key: "tasks", label: "タスク", path: "/tasks", icon: TaskIcon },
-    { key: "directory", label: "一覧", path: "/directory", icon: DirectoryIcon },
-    { key: "settings", label: "設定", path: "/settings", icon: SettingIcon },
-  ], []);
-
   const renderViewHeader = (className: string) => {
     return (
       <div className={className}>
@@ -396,7 +378,7 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
         <CalendarWorkspaceToolbar activeMode={activeMode} viewMode={selectedViewMode} onSelectCalendar={() => setActiveMode("calendar")} onSelectTimeline={() => setActiveMode("timeline")} onSelectTask={() => setActiveMode("task")} onSelectViewMode={handleSelectViewMode} />
       </div>
 
-      <main className="min-h-0 flex-1 overflow-y-auto bg-white pb-[calc(env(safe-area-inset-bottom)+92px)] pt-3">
+      <main className="min-h-0 flex-1 overflow-y-auto bg-white pb-[calc(env(safe-area-inset-bottom)+16px)] pt-3">
         <div className="flex flex-col gap-4">
           {renderCalendarContent()}
 
@@ -405,22 +387,6 @@ export const ScheduleScreen = ({ initialActiveMode, onClose }: ScheduleScreenPro
           </section>
         </div>
       </main>
-
-      <nav className="absolute inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[linear-gradient(180deg,#08111f_0%,#0b1a3a_58%,#050812_100%)] px-2 pb-[calc(env(safe-area-inset-bottom)+6px)] pt-2 shadow-[0_-14px_34px_rgba(4,10,24,0.25)]" aria-label="モバイルナビゲーション">
-        <div className="grid grid-cols-5 gap-1">
-          {mobileNavItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
-
-            return (
-              <button key={item.key} type="button" className={cn("flex min-w-0 flex-col items-center gap-1 rounded-[14px] px-1 py-2 text-[10px] font-semibold transition", isActive ? "bg-white/10 text-white" : "text-white/62 hover:bg-white/8 hover:text-white/86")} onClick={() => { void navigate(item.path); }} aria-current={isActive ? "page" : undefined}>
-                <Icon className={cn("h-5 w-5 shrink-0", isActive ? "text-[#8fb4ff]" : "text-current")} />
-                <span className="truncate">{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
     </div>
   );
 };
