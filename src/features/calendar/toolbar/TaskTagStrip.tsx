@@ -19,7 +19,6 @@ type TagContextMenuTriggerEvent =
   | ReactPointerEvent<HTMLElement>;
 
 const TAG_COLOR_CONTEXT_PANEL_ID = "tag-color-context-menu";
-const TAG_PANEL_LAYOUT_ID = "task-tag-strip-panel";
 const TAG_PANEL_MOTION_EASING = [0.16, 1, 0.3, 1] as const;
 const TAG_PANEL_MOTION_TRANSITION = {
   duration: 0.18,
@@ -140,17 +139,15 @@ const TaskTagStripBase = () => {
 
   return (
     <>
-      <AnimatePresence initial={false} mode="popLayout">
+      <AnimatePresence initial={false}>
         {isCollapsed ? (
           <motion.button
             key="task-tag-strip-collapsed"
-            layout
-            layoutId={TAG_PANEL_LAYOUT_ID}
             type="button"
             onClick={handleExpand}
-            initial={{ opacity: 0, scale: 0.92, x: -10 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            exit={{ opacity: 0, scale: 0.92, x: -10 }}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -8 }}
             transition={TAG_PANEL_MOTION_TRANSITION}
             className="flex h-8 shrink-0 items-center gap-1.5 rounded-xl border border-[#eeeeee] bg-white px-2.5 text-[#6d747f] shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[#fafafa] hover:text-[#3f4652] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
             aria-label="タグ一覧を開く"
@@ -163,13 +160,10 @@ const TaskTagStripBase = () => {
         ) : (
           <motion.div
             key="task-tag-strip-expanded"
-            layout
-            layoutId={TAG_PANEL_LAYOUT_ID}
-            initial={{ opacity: 0, scaleX: 0.94, x: -12 }}
-            animate={{ opacity: 1, scaleX: 1, x: 0 }}
-            exit={{ opacity: 0, scaleX: 0.94, x: -12 }}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -8 }}
             transition={TAG_PANEL_MOTION_TRANSITION}
-            style={{ transformOrigin: "left center" }}
             className="flex h-8 min-w-0 flex-1 items-center rounded-xl bg-white p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
           >
             <button
