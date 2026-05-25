@@ -93,9 +93,11 @@
     border-style: solid;
     border-width: var(--ds-semantic-tag-border-width);
     border-radius: var(--ds-semantic-tag-radius);
+    font-family: ui-rounded, "Hiragino Maru Gothic ProN", "Yu Gothic Rounded", "M PLUS Rounded 1c", "Zen Maru Gothic", var(--ds-semantic-typography-ui);
     font-size: var(--ds-semantic-tag-font-size);
     font-weight: var(--ds-semantic-tag-font-weight);
     line-height: var(--ds-semantic-tag-line-height);
+    letter-spacing: 0.01em;
     box-shadow: none;
     transition:
       opacity var(--ds-semantic-motion-interactive),
