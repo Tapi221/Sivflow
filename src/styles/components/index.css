@@ -24,4 +24,13 @@
     font-weight: 400;
     letter-spacing: 0.005em;
   }
+
+  .explorer-workspace-tab-close svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .explorer-workspace-tab-close svg path {
+    stroke-width: 2.4 !important;
+  }
 }
