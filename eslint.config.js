@@ -12,12 +12,6 @@ export default defineConfig([
   globalIgnores(["dist"]),
 
   {
-    linterOptions: {
-      reportUnusedDisableDirectives: "off",
-    },
-  },
-
-  {
     files: ["src/**/*.{ts,tsx}"],
     extends: [
       js.configs.recommended,
@@ -36,15 +30,19 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
-      // ----------------------------
-      // stylistic（現実運用寄りに緩和）
-      // ----------------------------
       "@stylistic/indent": ["warn", 2],
       "@stylistic/quotes": ["error", "double"],
       "@stylistic/semi": ["error", "always"],
-      "@stylistic/max-len": "off",
-
-      // import / export の {} 内は1行推奨
+      "@stylistic/max-len": [
+        "warn",
+        {
+          code: 160,
+          ignoreUrls: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
+          ignoreComments: true,
+        },
+      ],
       "@stylistic/object-curly-newline": [
         "warn",
         {
@@ -52,10 +50,6 @@ export default defineConfig([
           ExportDeclaration: "never",
         },
       ],
-
-      // ----------------------------
-      // import制約
-      // ----------------------------
       "no-restricted-imports": [
         "error",
         {
@@ -66,8 +60,7 @@ export default defineConfig([
             },
             {
               name: "@/utils",
-              message:
-                "Do not add new imports from '@/utils'. Use domain/shared modules instead.",
+              message: "Do not add new imports from '@/utils'. Use domain/shared modules instead.",
             },
           ],
           patterns: [
@@ -84,21 +77,12 @@ export default defineConfig([
           ],
         },
       ],
-
-      // ----------------------------
-      // react hooks
-      // ----------------------------
       "react-hooks/exhaustive-deps": "off",
       "react-hooks/preserve-manual-memoization": "warn",
       "react-hooks/refs": "off",
       "react-hooks/set-state-in-effect": "off",
-
-      // ----------------------------
-      // unused imports
-      // ----------------------------
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "off",
-
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [
         "warn",
@@ -109,10 +93,6 @@ export default defineConfig([
           argsIgnorePattern: "^_",
         },
       ],
-
-      // ----------------------------
-      // import sort
-      // ----------------------------
       "simple-import-sort/imports": "off",
       "simple-import-sort/exports": "off",
     },
@@ -208,7 +188,6 @@ export default defineConfig([
     rules: {
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "off",
-
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [
         "warn",
@@ -219,7 +198,6 @@ export default defineConfig([
           argsIgnorePattern: "^_",
         },
       ],
-
       "simple-import-sort/imports": "off",
       "simple-import-sort/exports": "off",
     },
