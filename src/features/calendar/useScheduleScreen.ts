@@ -86,8 +86,14 @@ export type UseScheduleScreenReturn = {
   setMonthTitleDate: (date: Date) => void;
 };
 
-export const useScheduleScreen = (): UseScheduleScreenReturn => {
-  const navigation = useCalendarNavigation();
+type UseScheduleScreenOptions = {
+  initialActiveMode?: CalendarToolbarMode;
+};
+
+export const useScheduleScreen = ({
+  initialActiveMode,
+}: UseScheduleScreenOptions = {}): UseScheduleScreenReturn => {
+  const navigation = useCalendarNavigation({ initialActiveMode });
   const [monthRenderedRange, setMonthRenderedRange] =
     useState<CalendarDateRange | null>(null);
 

@@ -31,6 +31,7 @@ export type CalendarEventLabelStyle = CSSProperties & {
 
 export type ScheduleScreenProps = {
   onClose?: () => void;
+  initialActiveMode?: CalendarToolbarMode;
 };
 
 export type AppCalendarItem = {
