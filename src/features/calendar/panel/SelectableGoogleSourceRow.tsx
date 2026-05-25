@@ -21,13 +21,7 @@ const parseHexRgb = (color: string): RgbColor | null => {
   const hex = color.trim().replace(/^#/, "");
   if (!/^[0-9a-f]{3}([0-9a-f]{3})?$/i.test(hex)) return null;
 
-  const normalizedHex =
-    hex.length === 3
-      ? hex
-          .split("")
-          .map((channel) => `${channel}${channel}`)
-          .join("")
-      : hex;
+  const normalizedHex = hex.length === 3 ? hex.split("").map((channel) => `${channel}${channel}`).join("") : hex;
 
   return {
     r: parseInt(normalizedHex.slice(0, 2), 16),
