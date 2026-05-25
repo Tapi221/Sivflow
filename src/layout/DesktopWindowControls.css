@@ -28,7 +28,7 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: rgba(235, 241, 252, 0.72);
+  color: var(--app-titlebar-icon, #64748b);
   outline: none;
   cursor: default;
   pointer-events: auto;
@@ -37,8 +37,8 @@
 
 .desktop-window-controls__button:hover,
 .desktop-window-controls__button:focus-visible {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background: var(--app-titlebar-surface-hover, rgba(15, 23, 42, 0.08));
+  color: var(--app-titlebar-text-strong, #0f172a);
 }
 
 .desktop-window-controls__button--close:hover,
@@ -92,7 +92,7 @@
 .desktop-window-controls__restore::after {
   left: 1px;
   bottom: 1px;
-  background: var(--app-titlebar-bg, #08111f);
+  background: var(--app-titlebar-bg, #f8fafc);
 }
 
 .desktop-window-controls__close::before,
