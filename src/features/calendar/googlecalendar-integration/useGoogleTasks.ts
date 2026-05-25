@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useReducer } from "react";
 
-import { refreshCalendarAccessToken } from "./gcal.oauth";
+import {
+  refreshCalendarAccessToken,
+  requestCalendarAccessToken,
+} from "./gcal.oauth";
 import { getServerStoredGoogleCalendarAccessToken, isServerStoredGoogleOAuthEnabled } from "./gcal.server-oauth";
 import { createGoogleTask, deleteGoogleTask, fetchGoogleTasks, moveGoogleTask, patchGoogleTask } from "./gcal.tasks-api";
 import type { GoogleTaskItem, GoogleTaskListItem } from "./gcalSync.types";
@@ -76,6 +79,19 @@ const getRecoverableAccessToken = async (
   account: AccountTokenSnapshot,
   onAccessTokenRecovered?: (update: GoogleAccountTokenUpdate) => void,
 ): Promise<string | null> => {
+  const applyRecoveredToken = (result: Awaited<ReturnType<typeof requestCalendarAccessToken>>) => {
+    onAccessTokenRecovered?.({
+      accountId: account.accountId,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken ?? account.refreshToken ?? null,
+      accountName: result.accountName,
+      accountPhotoUrl: result.accountPhotoUrl,
+      expiresInSeconds: result.expiresInSeconds,
+    });
+
+    return result.accessToken;
+  };
+
   if (isServerStoredGoogleOAuthEnabled()) {
     const result = await getServerStoredGoogleCalendarAccessToken({
       accountId: account.accountId,
@@ -94,7 +110,9 @@ const getRecoverableAccessToken = async (
   }
 
   if (!account.refreshToken) {
-    return null;
+    const { auth } = await import("@/services/firebase");
+    const result = await requestCalendarAccessToken(auth, true);
+    return applyRecoveredToken(result);
   }
 
   const result = await refreshCalendarAccessToken({
