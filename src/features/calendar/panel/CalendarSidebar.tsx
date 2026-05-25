@@ -222,6 +222,7 @@ type GoogleAccountSectionProps = {
   onToggleCalendar: (calendarId: string) => void;
   onToggleTaskList?: (taskListId: string) => void;
   onReconnect: () => void;
+  onRetryTaskLists?: () => void;
 };
 
 const GoogleAccountSection = ({
@@ -231,6 +232,7 @@ const GoogleAccountSection = ({
   onToggleCalendar,
   onToggleTaskList,
   onReconnect,
+  onRetryTaskLists,
 }: GoogleAccountSectionProps) => {
   const [isOpen, setIsOpen] = useState(true);
   const accountName = account.name ?? account.email ?? "Google";
@@ -302,13 +304,24 @@ const GoogleAccountSection = ({
             >
               <p>Google ToDo リストを取得できませんでした。</p>
               <p className="mt-0.5 text-[#9a9a9a]">{account.taskListsError}</p>
-              <button
-                type="button"
-                className="mt-1 rounded-full bg-[#f4f4f4] px-2 py-0.5 text-[11px] font-semibold text-[#5f6574] transition hover:bg-[#ececec] active:scale-[0.97]"
-                onClick={onReconnect}
-              >
-                再連携
-              </button>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {onRetryTaskLists && (
+                  <button
+                    type="button"
+                    className="rounded-full bg-[#f4f4f4] px-2 py-0.5 text-[11px] font-semibold text-[#5f6574] transition hover:bg-[#ececec] active:scale-[0.97]"
+                    onClick={onRetryTaskLists}
+                  >
+                    再試行
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="rounded-full bg-[#f4f4f4] px-2 py-0.5 text-[11px] font-semibold text-[#5f6574] transition hover:bg-[#ececec] active:scale-[0.97]"
+                  onClick={onReconnect}
+                >
+                  再連携
+                </button>
+              </div>
             </div>
           )}
 
@@ -323,9 +336,9 @@ const GoogleAccountSection = ({
               <button
                 type="button"
                 className="mt-1 rounded-full bg-[#f4f4f4] px-2 py-0.5 text-[11px] font-semibold text-[#5f6574] transition hover:bg-[#ececec] active:scale-[0.97]"
-                onClick={onReconnect}
+                onClick={onRetryTaskLists ?? onReconnect}
               >
-                再連携
+                {onRetryTaskLists ? "再読み込み" : "再連携"}
               </button>
             </div>
           )}
@@ -361,6 +374,7 @@ export const CalendarSidebar = ({
   onAddProject,
   onToggleProject,
   onReconnectAccount,
+  onRetryTaskLists,
   onToggleCalendar,
   onToggleTaskList,
 }: CalendarSidebarProps) => {
@@ -390,13 +404,15 @@ export const CalendarSidebar = ({
 
   return (
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-hidden bg-transparent pb-5 pl-0 pr-3 pt-2 text-[#2f2f2f]">
-      <MiniCalendarSection
-        monthDate={monthDate}
-        selectedDate={selectedDate}
-        onSelectDate={handleMiniCalendarSelectDate}
-        onPreviousMonth={handleMiniCalendarPreviousMonth}
-        onNextMonth={handleMiniCalendarNextMonth}
-      />
+      {!isTaskMode && (
+        <MiniCalendarSection
+          monthDate={monthDate}
+          selectedDate={selectedDate}
+          onSelectDate={handleMiniCalendarSelectDate}
+          onPreviousMonth={handleMiniCalendarPreviousMonth}
+          onNextMonth={handleMiniCalendarNextMonth}
+        />
+      )}
 
       <nav className="mt-2 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto pb-2">
         <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
@@ -429,6 +445,7 @@ export const CalendarSidebar = ({
             }
             onToggleTaskList={onToggleTaskList}
             onReconnect={() => onReconnectAccount(account.accountId)}
+            onRetryTaskLists={onRetryTaskLists}
           />
         ))}
       </nav>
