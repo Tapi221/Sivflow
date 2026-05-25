@@ -1,6 +1,5 @@
 import { memo, useEffect, useRef, useState, type FormEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
 import { TagChip } from "@/components/tag/TagChip";
 import { TAG_COLOR_CONTEXT_MENU_HEIGHT, TAG_COLOR_CONTEXT_MENU_WIDTH, TagColorRightClickPanel } from "@/chip/rightclickpanel/TagColorRightClickPanel";
 import { RIGHT_CLICK_PANEL_NO_DRAG_STYLE, clampRightClickPanelPosition, useRightClickPanelDismiss } from "@/chip/rightclickpanel/rightClickPanelUtils";
@@ -19,11 +18,6 @@ type TagContextMenuTriggerEvent =
   | ReactPointerEvent<HTMLElement>;
 
 const TAG_COLOR_CONTEXT_PANEL_ID = "tag-color-context-menu";
-const TAG_PANEL_LAYOUT_TRANSITION = {
-  type: "spring",
-  stiffness: 520,
-  damping: 42,
-} as const;
 
 /**
  * Render contract:
@@ -135,9 +129,7 @@ const TaskTagStripBase = () => {
 
   return (
     <>
-      <motion.div
-        layout="size"
-        transition={TAG_PANEL_LAYOUT_TRANSITION}
+      <div
         className={
           isCollapsed
             ? "flex h-8 w-[58px] min-w-0 shrink-0 items-center overflow-hidden rounded-xl border border-[#eeeeee] bg-white p-0.5 text-[#6d747f] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
@@ -258,7 +250,7 @@ const TaskTagStripBase = () => {
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {contextMenuElement ? createPortal(contextMenuElement, document.body) : null}
     </>
