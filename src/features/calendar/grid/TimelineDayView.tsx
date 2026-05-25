@@ -8,7 +8,7 @@ import type { GoogleCalendarEvent } from "@/features/calendar/googlecalendar-int
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import { cn } from "@/lib/utils";
 
-import type { TimelineUnitBuffer, TimelineViewMode } from "./TimelineDayView.shared";
+import type { TimelineColumn, TimelineUnitBuffer, TimelineViewMode } from "./TimelineDayView.shared";
 import { buildTimelineColumns, getTimelineColumnWidth } from "./TimelineDayView.shared";
 
 const FALLBACK_LANE_COLOR = "#8f929c";
@@ -16,7 +16,7 @@ const EVENT_TOP_INSET_PX = 8;
 const EVENT_HEIGHT_PX = 24;
 const EVENT_GAP_PX = 4;
 const EVENT_SIDE_INSET_PX = 6;
-const MIN_EVENT_WIDTH_PX = 16;
+const MIN_EVENT_WIDTH_PX = 32;
 
 type CalendarTimelineDayViewProps = {
   viewMode: TimelineViewMode;
@@ -45,31 +45,47 @@ export type TimelineLane = {
 type TimelineEventPlacement = {
   event: GoogleCalendarEvent;
   laneId: string;
-  laneIndex: number;
   left: number;
   width: number;
   stackIndex: number;
 };
 
-const clamp = (value: number, min: number, max: number): number => {
-  return Math.max(min, Math.min(max, value));
-};
+const normalizeProjectKey = (value: string): string =>
+  value.trim().toLowerCase().replace(/[\s\-_]+/g, "");
 
 const getLaneMatchesEvent = (lane: TimelineLane, event: GoogleCalendarEvent): boolean => {
   const calendarIds = lane.calendarIds ?? [];
   const projectIds = lane.projectIds ?? [];
+  const matchesCalendar = calendarIds.some((calendarId) =>
+    event.calendarId === calendarId ||
+    event.calendarId.endsWith(`:${calendarId}`) ||
+    lane.id.endsWith(`:${event.calendarId}`),
+  );
 
-  return calendarIds.includes(event.calendarId) || Boolean(event.projectId && projectIds.includes(event.projectId));
+  if (matchesCalendar) return true;
+  if (!event.projectId) return false;
+
+  const eventProjectKey = normalizeProjectKey(event.projectId);
+  const projectCandidates = [lane.id, lane.label, ...projectIds].map(normalizeProjectKey);
+
+  return projectCandidates.includes(eventProjectKey);
 };
 
-const getRangeClippedEventPosition = (event: GoogleCalendarEvent, rangeStart: number, rangeEnd: number, gridWidth: number) => {
-  const eventStart = new Date(event.startsAt).getTime();
-  const eventEnd = new Date(event.endsAt).getTime();
-  const duration = Math.max(1, rangeEnd - rangeStart);
-  const clippedStart = clamp(eventStart, rangeStart, rangeEnd);
-  const clippedEnd = clamp(Math.max(eventEnd, eventStart + 1), rangeStart, rangeEnd);
-  const left = (clippedStart - rangeStart) / duration * gridWidth;
-  const width = Math.max(MIN_EVENT_WIDTH_PX, (clippedEnd - clippedStart) / duration * gridWidth);
+const getColumnClippedEventPosition = (event: GoogleCalendarEvent, columns: TimelineColumn[], columnWidth: number) => {
+  const firstColumnIndex = columns.findIndex((column) => eventOverlapsRange(event, column.start, column.end));
+
+  if (firstColumnIndex < 0) return null;
+
+  let lastColumnIndex = firstColumnIndex;
+
+  for (let index = firstColumnIndex + 1; index < columns.length; index += 1) {
+    if (eventOverlapsRange(event, columns[index].start, columns[index].end)) {
+      lastColumnIndex = index;
+    }
+  }
+
+  const left = firstColumnIndex * columnWidth;
+  const width = Math.max(MIN_EVENT_WIDTH_PX, (lastColumnIndex - firstColumnIndex + 1) * columnWidth);
 
   return {
     left,
@@ -169,35 +185,32 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
   const timelineEventPlacements = useMemo(() => {
     if (columns.length === 0 || gridWidth <= 0) return [];
 
-    const laneById = new Map(displayLanes.map((lane, index) => [lane.id, { lane, index }]));
     const laneStackEnds = new Map<string, number[]>();
 
     return visibleEvents
       .filter((event) => eventOverlapsRange(event, new Date(rangeStart), new Date(rangeEnd)))
+      .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime())
       .flatMap((event): TimelineEventPlacement[] => {
         const matchedLane = displayLanes.find((lane) => lane.checked && getLaneMatchesEvent(lane, event));
         if (!matchedLane) return [];
-
-        const laneEntry = laneById.get(matchedLane.id);
-        if (!laneEntry) return [];
 
         const start = new Date(event.startsAt).getTime();
         const end = Math.max(new Date(event.endsAt).getTime(), start + 1);
         const stackEnds = laneStackEnds.get(matchedLane.id) ?? [];
         const stackIndex = findStackIndex(stackEnds, start, end);
         laneStackEnds.set(matchedLane.id, stackEnds);
-        const position = getRangeClippedEventPosition(event, rangeStart, rangeEnd, gridWidth);
+        const position = getColumnClippedEventPosition(event, columns, columnWidth);
+        if (!position) return [];
 
         return [{
           event,
           laneId: matchedLane.id,
-          laneIndex: laneEntry.index,
           left: position.left,
           width: position.width,
           stackIndex,
         }];
       });
-  }, [columns.length, displayLanes, gridWidth, rangeEnd, rangeStart, visibleEvents]);
+  }, [columnWidth, columns, displayLanes, gridWidth, rangeEnd, rangeStart, visibleEvents]);
 
   const eventsByLaneId = useMemo(() => {
     const groupedEvents = new Map<string, TimelineEventPlacement[]>();
@@ -230,7 +243,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
             minWidth: `${laneLabelWidth + gridWidth}px`,
           }}
         >
-          <div className="sticky left-0 top-0 z-30 border-b border-r border-[#eeeeee] bg-white" />
+          <div className="sticky left-0 top-0 z-30 border-b border-r border-[#eeeeee] bg-[#fbfbfc]" />
 
           <div className="sticky top-0 z-20 border-b border-[#eeeeee] bg-white">
             <div className="grid" style={timelineHeaderStyle}>
@@ -271,16 +284,16 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
             </div>
           </div>
 
-          {displayLanes.map((lane, laneIndex) => {
+          {displayLanes.map((lane) => {
             const laneEvents = eventsByLaneId.get(lane.id) ?? [];
 
             return (
               <Fragment key={lane.id}>
-                <div className="sticky left-0 z-10 flex items-start gap-2 border-b border-r border-[#eeeeee] bg-white px-3 py-3" style={{ height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px` }}>
+                <div className="sticky left-0 z-20 flex items-center gap-2 border-b border-r border-[#eeeeee] bg-[#fbfbfc] px-4" style={{ height: `${C.TIMELINE_DEFAULT_ROW_HEIGHT}px` }}>
                   {lane.label ? (
                     <>
-                      <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: lane.color }} />
-                      <span className={cn("min-w-0 truncate text-[12px] font-semibold", lane.checked ? "text-[#4c5361]" : "text-[#b3b3b3]")}>{lane.label}</span>
+                      <span className="h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_0_2px_rgba(255,255,255,0.95)]" style={{ backgroundColor: lane.color }} />
+                      <span className={cn("min-w-0 truncate text-[13px] font-semibold", lane.checked ? "text-[#3f4652]" : "text-[#b3b3b3]")}>{lane.label}</span>
                     </>
                   ) : null}
                 </div>
@@ -292,7 +305,7 @@ export const CalendarTimelineDayView = memo(function CalendarTimelineDayView({
 
                   {laneEvents.map((placement) => (
                     <div
-                      key={`${placement.event.id}-${laneIndex}`}
+                      key={`${placement.event.id}-${placement.laneId}`}
                       className="absolute z-10"
                       style={{
                         left: placement.left + EVENT_SIDE_INSET_PX,
