@@ -42,17 +42,7 @@ export default defineConfig([
       "@stylistic/indent": ["warn", 2],
       "@stylistic/quotes": ["error", "double"],
       "@stylistic/semi": ["error", "always"],
-
-      "@stylistic/max-len": [
-        "warn",
-        {
-          code: 160,
-          ignoreUrls: true,
-          ignoreStrings: true,
-          ignoreTemplateLiterals: true,
-          ignoreComments: true,
-        },
-      ],
+      "@stylistic/max-len": "off",
 
       // import / export の {} 内は1行推奨
       "@stylistic/object-curly-newline": [
