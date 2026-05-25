@@ -171,6 +171,7 @@ export const useScheduleScreen = ({
     visibleDays,
     monthTitleDate: navigation.monthTitleDate,
     monthRenderedRange,
+    timelineColumns: timeline.timelineColumns,
     googleCalendar: {
       selectedCalendarIds: google.selectedCalendarIds,
       forceSyncRange: google.forceSyncRange,
