@@ -1,13 +1,48 @@
 import type { ISyncService } from "./interfaces/ISyncService";
-import {getLocalDb,
-  getLocalDBTelemetrySnapshot,
-  telemetryOncePerSession,} from "./localDB";
+import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from "./localDB";
 import { CloudSyncAdapter } from "./logic/CloudSyncAdapter";
 import { DiffEngine } from "./logic/DiffEngine";
 import { NetworkMonitor } from "./logic/NetworkMonitor";
 import { QueueManager } from "./logic/QueueManager";
 import { TelemetryService } from "./logic/TelemetryService";
 import { SyncServiceV2 } from "./SyncServiceV2";
+
+import type { SyncContextSource } from "@/types/domain/telemetry";
+
+class ResilientSyncService extends SyncServiceV2 {
+  private isSyncRunActive = false;
+  private shouldRunAgain = false;
+
+  public override async sync(source: SyncContextSource): Promise<void> {
+    if (this.isSyncRunActive) {
+      this.shouldRunAgain = true;
+      return;
+    }
+
+    this.isSyncRunActive = true;
+    let nextSource: SyncContextSource = source;
+
+    try {
+      do {
+        this.shouldRunAgain = false;
+        const before = await this.getQueueStatus().catch(() => null);
+
+        await super.sync(nextSource);
+
+        const after = await this.getQueueStatus().catch(() => null);
+        const madeProgress = Boolean(before && after && before.pending > after.pending);
+        const hasMoreQueuedWork = Boolean(after && after.pending > 0);
+
+        nextSource = "background";
+        if (hasMoreQueuedWork && madeProgress) {
+          this.shouldRunAgain = true;
+        }
+      } while (this.shouldRunAgain);
+    } finally {
+      this.isSyncRunActive = false;
+    }
+  }
+}
 
 export class SyncServiceFactory {
   private static instances = new Map<string, ISyncService>();
@@ -65,7 +100,7 @@ export class SyncServiceFactory {
       });
     }
 
-    return new SyncServiceV2(
+    return new ResilientSyncService(
       userId,
       db,
       queueManager,
