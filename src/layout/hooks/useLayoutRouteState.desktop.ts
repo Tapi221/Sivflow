@@ -5,6 +5,10 @@ export const useLayoutRouteStateDesktop = () => {
 
   const isLibraryRoute = /^\/library(?:\/|$)/i.test(pathname);
 
+  const isScheduleRoute = /^\/(?:schedule|calendar|tasks)(?:\/|$)/i.test(
+    pathname,
+  );
+
   const isCardSetViewRoute = /^\/(?:cardsetview|cardview)(?:\/|$)/i.test(
     pathname,
   );
@@ -14,12 +18,17 @@ export const useLayoutRouteStateDesktop = () => {
   const isStudyRoute = /^\/study(?:\/|$)/i.test(pathname);
 
   const isScrollLocked =
-    isLibraryRoute || isCardEditRoute || isCardSetViewRoute || isStudyRoute;
+    isLibraryRoute ||
+    isScheduleRoute ||
+    isCardEditRoute ||
+    isCardSetViewRoute ||
+    isStudyRoute;
 
   return {
     pathname,
     isFoldersRoute: isLibraryRoute,
     isLibraryRoute,
+    isScheduleRoute,
     isCardSetViewRoute,
     isCardEditRoute,
     isStudyRoute,
