@@ -81,11 +81,12 @@ const getCategoryConfig = (category: string) => {
 
 type ResizeHandleProps = {
   colId: ColId;
+  isActive: boolean;
   onStart: (event: ReactPointerEvent<HTMLDivElement>, colId: ColId) => void;
   onReset: (colId: ColId) => void;
 };
 
-const ResizeHandle = ({ colId, onStart, onReset }: ResizeHandleProps) => (
+const ResizeHandle = ({ colId, isActive, onStart, onReset }: ResizeHandleProps) => (
   <div
     role="separator"
     aria-orientation="vertical"
@@ -93,7 +94,7 @@ const ResizeHandle = ({ colId, onStart, onReset }: ResizeHandleProps) => (
     onDoubleClick={() => onReset(colId)}
     onPointerDown={(event) => onStart(event, colId)}
   >
-    <div className="h-4 w-px bg-[#e5e7eb] transition-colors group-hover/resize-handle:bg-[#b8bcc6]" />
+    <div className={`h-4 w-px transition-all group-hover/header-cell:opacity-100 group-hover/resize-handle:bg-[#b8bcc6] ${isActive ? "bg-[#b8bcc6] opacity-100" : "bg-[#e5e7eb] opacity-0"}`} />
   </div>
 );
 
@@ -108,9 +109,10 @@ export const TaskListView = ({
 }: TaskListViewProps) => {
   const resizeCleanupRef = useRef<(() => void) | null>(null);
   const [cols, setCols] = useState<ColDef[]>(loadCols);
-  const [isResizing, setIsResizing] = useState(false);
+  const [resizingColId, setResizingColId] = useState<ColId | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
+  const isResizing = resizingColId !== null;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -183,7 +185,7 @@ export const TaskListView = ({
 
     const startX = event.clientX;
     const startWidth = target.width;
-    setIsResizing(true);
+    setResizingColId(colId);
 
     const onMove = (pointerEvent: PointerEvent) => {
       setCols((currentCols) => currentCols.map((col) => {
@@ -195,7 +197,7 @@ export const TaskListView = ({
     const cleanup = () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
-      setIsResizing(false);
+      setResizingColId(null);
       resizeCleanupRef.current = null;
     };
 
@@ -235,9 +237,9 @@ export const TaskListView = ({
         style={{ ...gridStyle, minWidth: `${gridMinWidth}px` }}
       >
         {cols.map((col) => (
-          <div key={col.id} className="relative flex h-8 items-center pr-3">
+          <div key={col.id} className="group/header-cell relative flex h-8 items-center pr-3">
             {col.label}
-            {col.resizable && <ResizeHandle colId={col.id} onStart={handleResizeStart} onReset={handleResizeReset} />}
+            {col.resizable && <ResizeHandle colId={col.id} isActive={resizingColId === col.id} onStart={handleResizeStart} onReset={handleResizeReset} />}
           </div>
         ))}
       </div>
